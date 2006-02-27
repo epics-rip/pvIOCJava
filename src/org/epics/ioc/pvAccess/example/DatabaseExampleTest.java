@@ -28,7 +28,7 @@ public class DatabaseExampleTest extends TestCase {
         intArray = new int[] {0,1,2};
         longArray = new long[] {0,1,2};
         floatArray = new float[] {0.0F,1.0F,2.0F};
-        doubleArray = new doubDatabaseExampleTest.javale[] {0.0,1.0,2.0};
+        doubleArray = new double[] {0.0,1.0,2.0};
     }
 
     public static void testByte() {
