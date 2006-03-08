@@ -1,30 +1,6 @@
 package org.epics.ioc.pvAccess;
 
 class ConvertByte {
-     static byte to(PVData pv) {
-        Field field = pv.getField();
-        PVType type = field.getPVType();
-        switch(type) {
-            case pvByte :
-                {PVByte value = (PVByte)pv; return (byte)value.get();}
-            case pvShort :
-                {PVShort value = (PVShort)pv; return (byte)value.get();}
-            case pvInt :
-                {PVInt value = (PVInt)pv; return (byte)value.get();}
-            case pvLong :
-                {PVLong value = (PVLong)pv; return (byte)value.get();}
-            case pvFloat :
-                {PVFloat value = (PVFloat)pv; return (byte)value.get();}
-            case pvDouble :
-                {PVDouble value = (PVDouble)pv; return (byte)value.get();}
-            default:
-                throw new Error(
-                  "Illegal PVType. Must be numeric but it is "
-                  + type.toString()
-                );
-        }
-    }
-
     static void from(PVData pv, byte data) {
         Field field = pv.getField();
         PVType type = field.getPVType();
@@ -48,25 +24,23 @@ class ConvertByte {
                 );
         }
     }
-}
 
-class ConvertShort {
-     static short to(PVData pv) {
+    static byte to(PVData pv) {
         Field field = pv.getField();
         PVType type = field.getPVType();
         switch(type) {
             case pvByte :
-                {PVByte value = (PVByte)pv; return (short)value.get();}
+                {PVByte value = (PVByte)pv; return (byte)value.get();}
             case pvShort :
-                {PVShort value = (PVShort)pv; return (short)value.get();}
+                {PVShort value = (PVShort)pv; return (byte)value.get();}
             case pvInt :
-                {PVInt value = (PVInt)pv; return (short)value.get();}
+                {PVInt value = (PVInt)pv; return (byte)value.get();}
             case pvLong :
-                {PVLong value = (PVLong)pv; return (short)value.get();}
+                {PVLong value = (PVLong)pv; return (byte)value.get();}
             case pvFloat :
-                {PVFloat value = (PVFloat)pv; return (short)value.get();}
+                {PVFloat value = (PVFloat)pv; return (byte)value.get();}
             case pvDouble :
-                {PVDouble value = (PVDouble)pv; return (short)value.get();}
+                {PVDouble value = (PVDouble)pv; return (byte)value.get();}
             default:
                 throw new Error(
                   "Illegal PVType. Must be numeric but it is "
@@ -74,7 +48,9 @@ class ConvertShort {
                 );
         }
     }
+}
 
+class ConvertShort {
     static void from(PVData pv, short data) {
         Field field = pv.getField();
         PVType type = field.getPVType();
@@ -98,25 +74,23 @@ class ConvertShort {
                 );
         }
     }
-}
 
-class ConvertInt {
-     static int to(PVData pv) {
+    static short to(PVData pv) {
         Field field = pv.getField();
         PVType type = field.getPVType();
         switch(type) {
             case pvByte :
-                {PVByte value = (PVByte)pv; return (int)value.get();}
+                {PVByte value = (PVByte)pv; return (short)value.get();}
             case pvShort :
-                {PVShort value = (PVShort)pv; return (int)value.get();}
+                {PVShort value = (PVShort)pv; return (short)value.get();}
             case pvInt :
-                {PVInt value = (PVInt)pv; return (int)value.get();}
+                {PVInt value = (PVInt)pv; return (short)value.get();}
             case pvLong :
-                {PVLong value = (PVLong)pv; return (int)value.get();}
+                {PVLong value = (PVLong)pv; return (short)value.get();}
             case pvFloat :
-                {PVFloat value = (PVFloat)pv; return (int)value.get();}
+                {PVFloat value = (PVFloat)pv; return (short)value.get();}
             case pvDouble :
-                {PVDouble value = (PVDouble)pv; return (int)value.get();}
+                {PVDouble value = (PVDouble)pv; return (short)value.get();}
             default:
                 throw new Error(
                   "Illegal PVType. Must be numeric but it is "
@@ -124,7 +98,9 @@ class ConvertInt {
                 );
         }
     }
+}
 
+class ConvertInt {
     static void from(PVData pv, int data) {
         Field field = pv.getField();
         PVType type = field.getPVType();
@@ -148,25 +124,23 @@ class ConvertInt {
                 );
         }
     }
-}
 
-class ConvertLong {
-     static long to(PVData pv) {
+    static int to(PVData pv) {
         Field field = pv.getField();
         PVType type = field.getPVType();
         switch(type) {
             case pvByte :
-                {PVByte value = (PVByte)pv; return (long)value.get();}
+                {PVByte value = (PVByte)pv; return (int)value.get();}
             case pvShort :
-                {PVShort value = (PVShort)pv; return (long)value.get();}
+                {PVShort value = (PVShort)pv; return (int)value.get();}
             case pvInt :
-                {PVInt value = (PVInt)pv; return (long)value.get();}
+                {PVInt value = (PVInt)pv; return (int)value.get();}
             case pvLong :
-                {PVLong value = (PVLong)pv; return (long)value.get();}
+                {PVLong value = (PVLong)pv; return (int)value.get();}
             case pvFloat :
-                {PVFloat value = (PVFloat)pv; return (long)value.get();}
+                {PVFloat value = (PVFloat)pv; return (int)value.get();}
             case pvDouble :
-                {PVDouble value = (PVDouble)pv; return (long)value.get();}
+                {PVDouble value = (PVDouble)pv; return (int)value.get();}
             default:
                 throw new Error(
                   "Illegal PVType. Must be numeric but it is "
@@ -174,7 +148,9 @@ class ConvertLong {
                 );
         }
     }
+}
 
+class ConvertLong {
     static void from(PVData pv, long data) {
         Field field = pv.getField();
         PVType type = field.getPVType();
@@ -198,25 +174,23 @@ class ConvertLong {
                 );
         }
     }
-}
 
-class ConvertFloat {
-     static float to(PVData pv) {
+    static long to(PVData pv) {
         Field field = pv.getField();
         PVType type = field.getPVType();
         switch(type) {
             case pvByte :
-                {PVByte value = (PVByte)pv; return (float)value.get();}
+                {PVByte value = (PVByte)pv; return (long)value.get();}
             case pvShort :
-                {PVShort value = (PVShort)pv; return (float)value.get();}
+                {PVShort value = (PVShort)pv; return (long)value.get();}
             case pvInt :
-                {PVInt value = (PVInt)pv; return (float)value.get();}
+                {PVInt value = (PVInt)pv; return (long)value.get();}
             case pvLong :
-                {PVLong value = (PVLong)pv; return (float)value.get();}
+                {PVLong value = (PVLong)pv; return (long)value.get();}
             case pvFloat :
-                {PVFloat value = (PVFloat)pv; return (float)value.get();}
+                {PVFloat value = (PVFloat)pv; return (long)value.get();}
             case pvDouble :
-                {PVDouble value = (PVDouble)pv; return (float)value.get();}
+                {PVDouble value = (PVDouble)pv; return (long)value.get();}
             default:
                 throw new Error(
                   "Illegal PVType. Must be numeric but it is "
@@ -224,7 +198,9 @@ class ConvertFloat {
                 );
         }
     }
+}
 
+class ConvertFloat {
     static void from(PVData pv, float data) {
         Field field = pv.getField();
         PVType type = field.getPVType();
@@ -248,25 +224,23 @@ class ConvertFloat {
                 );
         }
     }
-}
 
-class ConvertDouble {
-     static double to(PVData pv) {
+    static float to(PVData pv) {
         Field field = pv.getField();
         PVType type = field.getPVType();
         switch(type) {
             case pvByte :
-                {PVByte value = (PVByte)pv; return (double)value.get();}
+                {PVByte value = (PVByte)pv; return (float)value.get();}
             case pvShort :
-                {PVShort value = (PVShort)pv; return (double)value.get();}
+                {PVShort value = (PVShort)pv; return (float)value.get();}
             case pvInt :
-                {PVInt value = (PVInt)pv; return (double)value.get();}
+                {PVInt value = (PVInt)pv; return (float)value.get();}
             case pvLong :
-                {PVLong value = (PVLong)pv; return (double)value.get();}
+                {PVLong value = (PVLong)pv; return (float)value.get();}
             case pvFloat :
-                {PVFloat value = (PVFloat)pv; return (double)value.get();}
+                {PVFloat value = (PVFloat)pv; return (float)value.get();}
             case pvDouble :
-                {PVDouble value = (PVDouble)pv; return (double)value.get();}
+                {PVDouble value = (PVDouble)pv; return (float)value.get();}
             default:
                 throw new Error(
                   "Illegal PVType. Must be numeric but it is "
@@ -274,7 +248,9 @@ class ConvertDouble {
                 );
         }
     }
+}
 
+class ConvertDouble {
     static void from(PVData pv, double data) {
         Field field = pv.getField();
         PVType type = field.getPVType();
@@ -298,6 +274,30 @@ class ConvertDouble {
                 );
         }
     }
+
+    static double to(PVData pv) {
+        Field field = pv.getField();
+        PVType type = field.getPVType();
+        switch(type) {
+            case pvByte :
+                {PVByte value = (PVByte)pv; return (double)value.get();}
+            case pvShort :
+                {PVShort value = (PVShort)pv; return (double)value.get();}
+            case pvInt :
+                {PVInt value = (PVInt)pv; return (double)value.get();}
+            case pvLong :
+                {PVLong value = (PVLong)pv; return (double)value.get();}
+            case pvFloat :
+                {PVFloat value = (PVFloat)pv; return (double)value.get();}
+            case pvDouble :
+                {PVDouble value = (PVDouble)pv; return (double)value.get();}
+            default:
+                throw new Error(
+                  "Illegal PVType. Must be numeric but it is "
+                  + type.toString()
+                );
+        }
+    }
 }
 
 class ConvertByteArray {
@@ -311,61 +311,61 @@ class ConvertByteArray {
         int ntransfered = 0;
         switch(elemType) {
             case pvByte : {
-                PVByteArray fromArray = (PVByteArray)pv;
+                PVByteArray pvdata = (PVByteArray)pv;
                 byte[] data = new byte[1];
                 while(len>0) {
                     data[0] = (byte)from[fromOffset];
-                    if(fromArray.put(offset,1,data,0)==0) return ntransfered;
+                    if(pvdata.put(offset,1,data,0)==0) return ntransfered;
                     --len; ++ntransfered; ++offset; ++fromOffset;
                 }
                 return ntransfered;
             } 
             case pvShort : {
-                PVShortArray fromArray = (PVShortArray)pv;
+                PVShortArray pvdata = (PVShortArray)pv;
                 short[] data = new short[1];
                 while(len>0) {
                     data[0] = (short)from[fromOffset];
-                    if(fromArray.put(offset,1,data,0)==0) return ntransfered;
+                    if(pvdata.put(offset,1,data,0)==0) return ntransfered;
                     --len; ++ntransfered; ++offset; ++fromOffset;
                 }
                 return ntransfered;
             } 
             case pvInt : {
-                PVIntArray fromArray = (PVIntArray)pv;
+                PVIntArray pvdata = (PVIntArray)pv;
                 int[] data = new int[1];
                 while(len>0) {
                     data[0] = (int)from[fromOffset];
-                    if(fromArray.put(offset,1,data,0)==0) return ntransfered;
+                    if(pvdata.put(offset,1,data,0)==0) return ntransfered;
                     --len; ++ntransfered; ++offset; ++fromOffset;
                 }
                 return ntransfered;
             } 
             case pvLong : {
-                PVLongArray fromArray = (PVLongArray)pv;
+                PVLongArray pvdata = (PVLongArray)pv;
                 long[] data = new long[1];
                 while(len>0) {
                     data[0] = (long)from[fromOffset];
-                    if(fromArray.put(offset,1,data,0)==0) return ntransfered;
+                    if(pvdata.put(offset,1,data,0)==0) return ntransfered;
                     --len; ++ntransfered; ++offset; ++fromOffset;
                 }
                 return ntransfered;
             } 
             case pvFloat : {
-                PVFloatArray fromArray = (PVFloatArray)pv;
+                PVFloatArray pvdata = (PVFloatArray)pv;
                 float[] data = new float[1];
                 while(len>0) {
                     data[0] = (float)from[fromOffset];
-                    if(fromArray.put(offset,1,data,0)==0) return ntransfered;
+                    if(pvdata.put(offset,1,data,0)==0) return ntransfered;
                     --len; ++ntransfered; ++offset; ++fromOffset;
                 }
                 return ntransfered;
             } 
             case pvDouble : {
-                PVDoubleArray fromArray = (PVDoubleArray)pv;
+                PVDoubleArray pvdata = (PVDoubleArray)pv;
                 double[] data = new double[1];
                 while(len>0) {
                     data[0] = (double)from[fromOffset];
-                    if(fromArray.put(offset,1,data,0)==0) return ntransfered;
+                    if(pvdata.put(offset,1,data,0)==0) return ntransfered;
                     --len; ++ntransfered; ++offset; ++fromOffset;
                 }
                 return ntransfered;
@@ -388,60 +388,60 @@ class ConvertByteArray {
         int ntransfered = 0;
         switch(elemType) {
             case pvByte : {
-                PVByteArray toArray = (PVByteArray)pv;
+                PVByteArray pvdata = (PVByteArray)pv;
                 byte[] data = new byte[1];
                 while(len>0) {
-                    if(toArray.get(offset,1,data,0)==0) return ntransfered;
+                    if(pvdata.get(offset,1,data,0)==0) return ntransfered;
                     to[toOffset] = (byte)data[0];
                     --len; ++ntransfered; ++offset; ++toOffset;
                 }
                 return ntransfered;
             } 
             case pvShort : {
-                PVShortArray toArray = (PVShortArray)pv;
+                PVShortArray pvdata = (PVShortArray)pv;
                 short[] data = new short[1];
                 while(len>0) {
-                    if(toArray.get(offset,1,data,0)==0) return ntransfered;
+                    if(pvdata.get(offset,1,data,0)==0) return ntransfered;
                     to[toOffset] = (byte)data[0];
                     --len; ++ntransfered; ++offset; ++toOffset;
                 }
                 return ntransfered;
             } 
             case pvInt : {
-                PVIntArray toArray = (PVIntArray)pv;
+                PVIntArray pvdata = (PVIntArray)pv;
                 int[] data = new int[1];
                 while(len>0) {
-                    if(toArray.get(offset,1,data,0)==0) return ntransfered;
+                    if(pvdata.get(offset,1,data,0)==0) return ntransfered;
                     to[toOffset] = (byte)data[0];
                     --len; ++ntransfered; ++offset; ++toOffset;
                 }
                 return ntransfered;
             } 
             case pvLong : {
-                PVLongArray toArray = (PVLongArray)pv;
+                PVLongArray pvdata = (PVLongArray)pv;
                 long[] data = new long[1];
                 while(len>0) {
-                    if(toArray.get(offset,1,data,0)==0) return ntransfered;
+                    if(pvdata.get(offset,1,data,0)==0) return ntransfered;
                     to[toOffset] = (byte)data[0];
                     --len; ++ntransfered; ++offset; ++toOffset;
                 }
                 return ntransfered;
             } 
             case pvFloat : {
-                PVFloatArray toArray = (PVFloatArray)pv;
+                PVFloatArray pvdata = (PVFloatArray)pv;
                 float[] data = new float[1];
                 while(len>0) {
-                    if(toArray.get(offset,1,data,0)==0) return ntransfered;
+                    if(pvdata.get(offset,1,data,0)==0) return ntransfered;
                     to[toOffset] = (byte)data[0];
                     --len; ++ntransfered; ++offset; ++toOffset;
                 }
                 return ntransfered;
             } 
             case pvDouble : {
-                PVDoubleArray toArray = (PVDoubleArray)pv;
+                PVDoubleArray pvdata = (PVDoubleArray)pv;
                 double[] data = new double[1];
                 while(len>0) {
-                    if(toArray.get(offset,1,data,0)==0) return ntransfered;
+                    if(pvdata.get(offset,1,data,0)==0) return ntransfered;
                     to[toOffset] = (byte)data[0];
                     --len; ++ntransfered; ++offset; ++toOffset;
                 }
@@ -457,43 +457,783 @@ class ConvertByteArray {
 }
 
 class ConvertShortArray {
-     static int to(PVData pv, int offset, int len, short[]to, int toOffset) {
-     return 0;}
+     static int from(PVData pv, int offset, int len, short[]from, int fromOffset) {
+        Field field = pv.getField();
+        PVType type = field.getPVType();
+        if(type!=PVType.pvArray) throw new Error(
+            "Illegal PVType. Must be array but it is " + type.toString());
+        Array array = (Array)field;
+        PVType elemType = array.getElementType();
+        int ntransfered = 0;
+        switch(elemType) {
+            case pvByte : {
+                PVByteArray pvdata = (PVByteArray)pv;
+                byte[] data = new byte[1];
+                while(len>0) {
+                    data[0] = (byte)from[fromOffset];
+                    if(pvdata.put(offset,1,data,0)==0) return ntransfered;
+                    --len; ++ntransfered; ++offset; ++fromOffset;
+                }
+                return ntransfered;
+            } 
+            case pvShort : {
+                PVShortArray pvdata = (PVShortArray)pv;
+                short[] data = new short[1];
+                while(len>0) {
+                    data[0] = (short)from[fromOffset];
+                    if(pvdata.put(offset,1,data,0)==0) return ntransfered;
+                    --len; ++ntransfered; ++offset; ++fromOffset;
+                }
+                return ntransfered;
+            } 
+            case pvInt : {
+                PVIntArray pvdata = (PVIntArray)pv;
+                int[] data = new int[1];
+                while(len>0) {
+                    data[0] = (int)from[fromOffset];
+                    if(pvdata.put(offset,1,data,0)==0) return ntransfered;
+                    --len; ++ntransfered; ++offset; ++fromOffset;
+                }
+                return ntransfered;
+            } 
+            case pvLong : {
+                PVLongArray pvdata = (PVLongArray)pv;
+                long[] data = new long[1];
+                while(len>0) {
+                    data[0] = (long)from[fromOffset];
+                    if(pvdata.put(offset,1,data,0)==0) return ntransfered;
+                    --len; ++ntransfered; ++offset; ++fromOffset;
+                }
+                return ntransfered;
+            } 
+            case pvFloat : {
+                PVFloatArray pvdata = (PVFloatArray)pv;
+                float[] data = new float[1];
+                while(len>0) {
+                    data[0] = (float)from[fromOffset];
+                    if(pvdata.put(offset,1,data,0)==0) return ntransfered;
+                    --len; ++ntransfered; ++offset; ++fromOffset;
+                }
+                return ntransfered;
+            } 
+            case pvDouble : {
+                PVDoubleArray pvdata = (PVDoubleArray)pv;
+                double[] data = new double[1];
+                while(len>0) {
+                    data[0] = (double)from[fromOffset];
+                    if(pvdata.put(offset,1,data,0)==0) return ntransfered;
+                    --len; ++ntransfered; ++offset; ++fromOffset;
+                }
+                return ntransfered;
+            } 
+            default:
+                throw new Error(
+                  "Illegal PVType. Must be numeric but it is "
+                  + type.toString()
+                );
+        }
+    }
 
-    static int from(PVData pv, int offset, int len, short[]from, int fromOffset) {
-    return 0;}
+    static int to(PVData pv, int offset, int len, short[]to, int toOffset) {
+        Field field = pv.getField();
+        PVType type = field.getPVType();
+        if(type!=PVType.pvArray) throw new Error(
+            "Illegal PVType. Must be array but it is " + type.toString());
+        Array array = (Array)field;
+        PVType elemType = array.getElementType();
+        int ntransfered = 0;
+        switch(elemType) {
+            case pvByte : {
+                PVByteArray pvdata = (PVByteArray)pv;
+                byte[] data = new byte[1];
+                while(len>0) {
+                    if(pvdata.get(offset,1,data,0)==0) return ntransfered;
+                    to[toOffset] = (byte)data[0];
+                    --len; ++ntransfered; ++offset; ++toOffset;
+                }
+                return ntransfered;
+            } 
+            case pvShort : {
+                PVShortArray pvdata = (PVShortArray)pv;
+                short[] data = new short[1];
+                while(len>0) {
+                    if(pvdata.get(offset,1,data,0)==0) return ntransfered;
+                    to[toOffset] = (byte)data[0];
+                    --len; ++ntransfered; ++offset; ++toOffset;
+                }
+                return ntransfered;
+            } 
+            case pvInt : {
+                PVIntArray pvdata = (PVIntArray)pv;
+                int[] data = new int[1];
+                while(len>0) {
+                    if(pvdata.get(offset,1,data,0)==0) return ntransfered;
+                    to[toOffset] = (byte)data[0];
+                    --len; ++ntransfered; ++offset; ++toOffset;
+                }
+                return ntransfered;
+            } 
+            case pvLong : {
+                PVLongArray pvdata = (PVLongArray)pv;
+                long[] data = new long[1];
+                while(len>0) {
+                    if(pvdata.get(offset,1,data,0)==0) return ntransfered;
+                    to[toOffset] = (byte)data[0];
+                    --len; ++ntransfered; ++offset; ++toOffset;
+                }
+                return ntransfered;
+            } 
+            case pvFloat : {
+                PVFloatArray pvdata = (PVFloatArray)pv;
+                float[] data = new float[1];
+                while(len>0) {
+                    if(pvdata.get(offset,1,data,0)==0) return ntransfered;
+                    to[toOffset] = (byte)data[0];
+                    --len; ++ntransfered; ++offset; ++toOffset;
+                }
+                return ntransfered;
+            } 
+            case pvDouble : {
+                PVDoubleArray pvdata = (PVDoubleArray)pv;
+                double[] data = new double[1];
+                while(len>0) {
+                    if(pvdata.get(offset,1,data,0)==0) return ntransfered;
+                    to[toOffset] = (byte)data[0];
+                    --len; ++ntransfered; ++offset; ++toOffset;
+                }
+                return ntransfered;
+            } 
+            default:
+                throw new Error(
+                  "Illegal PVType. Must be numeric but it is "
+                  + type.toString()
+                );
+        }
+    }
 }
 
 class ConvertIntArray {
-     static int to(PVData pv, int offset, int len, int[]to, int toOffset) {
-     return 0;}
+     static int from(PVData pv, int offset, int len, int[]from, int fromOffset) {
+        Field field = pv.getField();
+        PVType type = field.getPVType();
+        if(type!=PVType.pvArray) throw new Error(
+            "Illegal PVType. Must be array but it is " + type.toString());
+        Array array = (Array)field;
+        PVType elemType = array.getElementType();
+        int ntransfered = 0;
+        switch(elemType) {
+            case pvByte : {
+                PVByteArray pvdata = (PVByteArray)pv;
+                byte[] data = new byte[1];
+                while(len>0) {
+                    data[0] = (byte)from[fromOffset];
+                    if(pvdata.put(offset,1,data,0)==0) return ntransfered;
+                    --len; ++ntransfered; ++offset; ++fromOffset;
+                }
+                return ntransfered;
+            } 
+            case pvShort : {
+                PVShortArray pvdata = (PVShortArray)pv;
+                short[] data = new short[1];
+                while(len>0) {
+                    data[0] = (short)from[fromOffset];
+                    if(pvdata.put(offset,1,data,0)==0) return ntransfered;
+                    --len; ++ntransfered; ++offset; ++fromOffset;
+                }
+                return ntransfered;
+            } 
+            case pvInt : {
+                PVIntArray pvdata = (PVIntArray)pv;
+                int[] data = new int[1];
+                while(len>0) {
+                    data[0] = (int)from[fromOffset];
+                    if(pvdata.put(offset,1,data,0)==0) return ntransfered;
+                    --len; ++ntransfered; ++offset; ++fromOffset;
+                }
+                return ntransfered;
+            } 
+            case pvLong : {
+                PVLongArray pvdata = (PVLongArray)pv;
+                long[] data = new long[1];
+                while(len>0) {
+                    data[0] = (long)from[fromOffset];
+                    if(pvdata.put(offset,1,data,0)==0) return ntransfered;
+                    --len; ++ntransfered; ++offset; ++fromOffset;
+                }
+                return ntransfered;
+            } 
+            case pvFloat : {
+                PVFloatArray pvdata = (PVFloatArray)pv;
+                float[] data = new float[1];
+                while(len>0) {
+                    data[0] = (float)from[fromOffset];
+                    if(pvdata.put(offset,1,data,0)==0) return ntransfered;
+                    --len; ++ntransfered; ++offset; ++fromOffset;
+                }
+                return ntransfered;
+            } 
+            case pvDouble : {
+                PVDoubleArray pvdata = (PVDoubleArray)pv;
+                double[] data = new double[1];
+                while(len>0) {
+                    data[0] = (double)from[fromOffset];
+                    if(pvdata.put(offset,1,data,0)==0) return ntransfered;
+                    --len; ++ntransfered; ++offset; ++fromOffset;
+                }
+                return ntransfered;
+            } 
+            default:
+                throw new Error(
+                  "Illegal PVType. Must be numeric but it is "
+                  + type.toString()
+                );
+        }
+    }
 
-    static int from(PVData pv, int offset, int len, int[]from, int fromOffset) {
-    return 0;}
+    static int to(PVData pv, int offset, int len, int[]to, int toOffset) {
+        Field field = pv.getField();
+        PVType type = field.getPVType();
+        if(type!=PVType.pvArray) throw new Error(
+            "Illegal PVType. Must be array but it is " + type.toString());
+        Array array = (Array)field;
+        PVType elemType = array.getElementType();
+        int ntransfered = 0;
+        switch(elemType) {
+            case pvByte : {
+                PVByteArray pvdata = (PVByteArray)pv;
+                byte[] data = new byte[1];
+                while(len>0) {
+                    if(pvdata.get(offset,1,data,0)==0) return ntransfered;
+                    to[toOffset] = (byte)data[0];
+                    --len; ++ntransfered; ++offset; ++toOffset;
+                }
+                return ntransfered;
+            } 
+            case pvShort : {
+                PVShortArray pvdata = (PVShortArray)pv;
+                short[] data = new short[1];
+                while(len>0) {
+                    if(pvdata.get(offset,1,data,0)==0) return ntransfered;
+                    to[toOffset] = (byte)data[0];
+                    --len; ++ntransfered; ++offset; ++toOffset;
+                }
+                return ntransfered;
+            } 
+            case pvInt : {
+                PVIntArray pvdata = (PVIntArray)pv;
+                int[] data = new int[1];
+                while(len>0) {
+                    if(pvdata.get(offset,1,data,0)==0) return ntransfered;
+                    to[toOffset] = (byte)data[0];
+                    --len; ++ntransfered; ++offset; ++toOffset;
+                }
+                return ntransfered;
+            } 
+            case pvLong : {
+                PVLongArray pvdata = (PVLongArray)pv;
+                long[] data = new long[1];
+                while(len>0) {
+                    if(pvdata.get(offset,1,data,0)==0) return ntransfered;
+                    to[toOffset] = (byte)data[0];
+                    --len; ++ntransfered; ++offset; ++toOffset;
+                }
+                return ntransfered;
+            } 
+            case pvFloat : {
+                PVFloatArray pvdata = (PVFloatArray)pv;
+                float[] data = new float[1];
+                while(len>0) {
+                    if(pvdata.get(offset,1,data,0)==0) return ntransfered;
+                    to[toOffset] = (byte)data[0];
+                    --len; ++ntransfered; ++offset; ++toOffset;
+                }
+                return ntransfered;
+            } 
+            case pvDouble : {
+                PVDoubleArray pvdata = (PVDoubleArray)pv;
+                double[] data = new double[1];
+                while(len>0) {
+                    if(pvdata.get(offset,1,data,0)==0) return ntransfered;
+                    to[toOffset] = (byte)data[0];
+                    --len; ++ntransfered; ++offset; ++toOffset;
+                }
+                return ntransfered;
+            } 
+            default:
+                throw new Error(
+                  "Illegal PVType. Must be numeric but it is "
+                  + type.toString()
+                );
+        }
+    }
 }
 
 class ConvertLongArray {
-     static int to(PVData pv, int offset, int len, long[]to, int toOffset) {
-     return 0;}
+     static int from(PVData pv, int offset, int len, long[]from, int fromOffset) {
+        Field field = pv.getField();
+        PVType type = field.getPVType();
+        if(type!=PVType.pvArray) throw new Error(
+            "Illegal PVType. Must be array but it is " + type.toString());
+        Array array = (Array)field;
+        PVType elemType = array.getElementType();
+        int ntransfered = 0;
+        switch(elemType) {
+            case pvByte : {
+                PVByteArray pvdata = (PVByteArray)pv;
+                byte[] data = new byte[1];
+                while(len>0) {
+                    data[0] = (byte)from[fromOffset];
+                    if(pvdata.put(offset,1,data,0)==0) return ntransfered;
+                    --len; ++ntransfered; ++offset; ++fromOffset;
+                }
+                return ntransfered;
+            } 
+            case pvShort : {
+                PVShortArray pvdata = (PVShortArray)pv;
+                short[] data = new short[1];
+                while(len>0) {
+                    data[0] = (short)from[fromOffset];
+                    if(pvdata.put(offset,1,data,0)==0) return ntransfered;
+                    --len; ++ntransfered; ++offset; ++fromOffset;
+                }
+                return ntransfered;
+            } 
+            case pvInt : {
+                PVIntArray pvdata = (PVIntArray)pv;
+                int[] data = new int[1];
+                while(len>0) {
+                    data[0] = (int)from[fromOffset];
+                    if(pvdata.put(offset,1,data,0)==0) return ntransfered;
+                    --len; ++ntransfered; ++offset; ++fromOffset;
+                }
+                return ntransfered;
+            } 
+            case pvLong : {
+                PVLongArray pvdata = (PVLongArray)pv;
+                long[] data = new long[1];
+                while(len>0) {
+                    data[0] = (long)from[fromOffset];
+                    if(pvdata.put(offset,1,data,0)==0) return ntransfered;
+                    --len; ++ntransfered; ++offset; ++fromOffset;
+                }
+                return ntransfered;
+            } 
+            case pvFloat : {
+                PVFloatArray pvdata = (PVFloatArray)pv;
+                float[] data = new float[1];
+                while(len>0) {
+                    data[0] = (float)from[fromOffset];
+                    if(pvdata.put(offset,1,data,0)==0) return ntransfered;
+                    --len; ++ntransfered; ++offset; ++fromOffset;
+                }
+                return ntransfered;
+            } 
+            case pvDouble : {
+                PVDoubleArray pvdata = (PVDoubleArray)pv;
+                double[] data = new double[1];
+                while(len>0) {
+                    data[0] = (double)from[fromOffset];
+                    if(pvdata.put(offset,1,data,0)==0) return ntransfered;
+                    --len; ++ntransfered; ++offset; ++fromOffset;
+                }
+                return ntransfered;
+            } 
+            default:
+                throw new Error(
+                  "Illegal PVType. Must be numeric but it is "
+                  + type.toString()
+                );
+        }
+    }
 
-    static int from(PVData pv, int offset, int len, long[]from, int fromOffset) {
-    return 0;}
+    static int to(PVData pv, int offset, int len, long[]to, int toOffset) {
+        Field field = pv.getField();
+        PVType type = field.getPVType();
+        if(type!=PVType.pvArray) throw new Error(
+            "Illegal PVType. Must be array but it is " + type.toString());
+        Array array = (Array)field;
+        PVType elemType = array.getElementType();
+        int ntransfered = 0;
+        switch(elemType) {
+            case pvByte : {
+                PVByteArray pvdata = (PVByteArray)pv;
+                byte[] data = new byte[1];
+                while(len>0) {
+                    if(pvdata.get(offset,1,data,0)==0) return ntransfered;
+                    to[toOffset] = (byte)data[0];
+                    --len; ++ntransfered; ++offset; ++toOffset;
+                }
+                return ntransfered;
+            } 
+            case pvShort : {
+                PVShortArray pvdata = (PVShortArray)pv;
+                short[] data = new short[1];
+                while(len>0) {
+                    if(pvdata.get(offset,1,data,0)==0) return ntransfered;
+                    to[toOffset] = (byte)data[0];
+                    --len; ++ntransfered; ++offset; ++toOffset;
+                }
+                return ntransfered;
+            } 
+            case pvInt : {
+                PVIntArray pvdata = (PVIntArray)pv;
+                int[] data = new int[1];
+                while(len>0) {
+                    if(pvdata.get(offset,1,data,0)==0) return ntransfered;
+                    to[toOffset] = (byte)data[0];
+                    --len; ++ntransfered; ++offset; ++toOffset;
+                }
+                return ntransfered;
+            } 
+            case pvLong : {
+                PVLongArray pvdata = (PVLongArray)pv;
+                long[] data = new long[1];
+                while(len>0) {
+                    if(pvdata.get(offset,1,data,0)==0) return ntransfered;
+                    to[toOffset] = (byte)data[0];
+                    --len; ++ntransfered; ++offset; ++toOffset;
+                }
+                return ntransfered;
+            } 
+            case pvFloat : {
+                PVFloatArray pvdata = (PVFloatArray)pv;
+                float[] data = new float[1];
+                while(len>0) {
+                    if(pvdata.get(offset,1,data,0)==0) return ntransfered;
+                    to[toOffset] = (byte)data[0];
+                    --len; ++ntransfered; ++offset; ++toOffset;
+                }
+                return ntransfered;
+            } 
+            case pvDouble : {
+                PVDoubleArray pvdata = (PVDoubleArray)pv;
+                double[] data = new double[1];
+                while(len>0) {
+                    if(pvdata.get(offset,1,data,0)==0) return ntransfered;
+                    to[toOffset] = (byte)data[0];
+                    --len; ++ntransfered; ++offset; ++toOffset;
+                }
+                return ntransfered;
+            } 
+            default:
+                throw new Error(
+                  "Illegal PVType. Must be numeric but it is "
+                  + type.toString()
+                );
+        }
+    }
 }
 
 class ConvertFloatArray {
-     static int to(PVData pv, int offset, int len, float[]to, int toOffset) {
-     return 0;}
+     static int from(PVData pv, int offset, int len, float[]from, int fromOffset) {
+        Field field = pv.getField();
+        PVType type = field.getPVType();
+        if(type!=PVType.pvArray) throw new Error(
+            "Illegal PVType. Must be array but it is " + type.toString());
+        Array array = (Array)field;
+        PVType elemType = array.getElementType();
+        int ntransfered = 0;
+        switch(elemType) {
+            case pvByte : {
+                PVByteArray pvdata = (PVByteArray)pv;
+                byte[] data = new byte[1];
+                while(len>0) {
+                    data[0] = (byte)from[fromOffset];
+                    if(pvdata.put(offset,1,data,0)==0) return ntransfered;
+                    --len; ++ntransfered; ++offset; ++fromOffset;
+                }
+                return ntransfered;
+            } 
+            case pvShort : {
+                PVShortArray pvdata = (PVShortArray)pv;
+                short[] data = new short[1];
+                while(len>0) {
+                    data[0] = (short)from[fromOffset];
+                    if(pvdata.put(offset,1,data,0)==0) return ntransfered;
+                    --len; ++ntransfered; ++offset; ++fromOffset;
+                }
+                return ntransfered;
+            } 
+            case pvInt : {
+                PVIntArray pvdata = (PVIntArray)pv;
+                int[] data = new int[1];
+                while(len>0) {
+                    data[0] = (int)from[fromOffset];
+                    if(pvdata.put(offset,1,data,0)==0) return ntransfered;
+                    --len; ++ntransfered; ++offset; ++fromOffset;
+                }
+                return ntransfered;
+            } 
+            case pvLong : {
+                PVLongArray pvdata = (PVLongArray)pv;
+                long[] data = new long[1];
+                while(len>0) {
+                    data[0] = (long)from[fromOffset];
+                    if(pvdata.put(offset,1,data,0)==0) return ntransfered;
+                    --len; ++ntransfered; ++offset; ++fromOffset;
+                }
+                return ntransfered;
+            } 
+            case pvFloat : {
+                PVFloatArray pvdata = (PVFloatArray)pv;
+                float[] data = new float[1];
+                while(len>0) {
+                    data[0] = (float)from[fromOffset];
+                    if(pvdata.put(offset,1,data,0)==0) return ntransfered;
+                    --len; ++ntransfered; ++offset; ++fromOffset;
+                }
+                return ntransfered;
+            } 
+            case pvDouble : {
+                PVDoubleArray pvdata = (PVDoubleArray)pv;
+                double[] data = new double[1];
+                while(len>0) {
+                    data[0] = (double)from[fromOffset];
+                    if(pvdata.put(offset,1,data,0)==0) return ntransfered;
+                    --len; ++ntransfered; ++offset; ++fromOffset;
+                }
+                return ntransfered;
+            } 
+            default:
+                throw new Error(
+                  "Illegal PVType. Must be numeric but it is "
+                  + type.toString()
+                );
+        }
+    }
 
-    static int from(PVData pv, int offset, int len, float[]from, int fromOffset) {
-    return 0;}
+    static int to(PVData pv, int offset, int len, float[]to, int toOffset) {
+        Field field = pv.getField();
+        PVType type = field.getPVType();
+        if(type!=PVType.pvArray) throw new Error(
+            "Illegal PVType. Must be array but it is " + type.toString());
+        Array array = (Array)field;
+        PVType elemType = array.getElementType();
+        int ntransfered = 0;
+        switch(elemType) {
+            case pvByte : {
+                PVByteArray pvdata = (PVByteArray)pv;
+                byte[] data = new byte[1];
+                while(len>0) {
+                    if(pvdata.get(offset,1,data,0)==0) return ntransfered;
+                    to[toOffset] = (byte)data[0];
+                    --len; ++ntransfered; ++offset; ++toOffset;
+                }
+                return ntransfered;
+            } 
+            case pvShort : {
+                PVShortArray pvdata = (PVShortArray)pv;
+                short[] data = new short[1];
+                while(len>0) {
+                    if(pvdata.get(offset,1,data,0)==0) return ntransfered;
+                    to[toOffset] = (byte)data[0];
+                    --len; ++ntransfered; ++offset; ++toOffset;
+                }
+                return ntransfered;
+            } 
+            case pvInt : {
+                PVIntArray pvdata = (PVIntArray)pv;
+                int[] data = new int[1];
+                while(len>0) {
+                    if(pvdata.get(offset,1,data,0)==0) return ntransfered;
+                    to[toOffset] = (byte)data[0];
+                    --len; ++ntransfered; ++offset; ++toOffset;
+                }
+                return ntransfered;
+            } 
+            case pvLong : {
+                PVLongArray pvdata = (PVLongArray)pv;
+                long[] data = new long[1];
+                while(len>0) {
+                    if(pvdata.get(offset,1,data,0)==0) return ntransfered;
+                    to[toOffset] = (byte)data[0];
+                    --len; ++ntransfered; ++offset; ++toOffset;
+                }
+                return ntransfered;
+            } 
+            case pvFloat : {
+                PVFloatArray pvdata = (PVFloatArray)pv;
+                float[] data = new float[1];
+                while(len>0) {
+                    if(pvdata.get(offset,1,data,0)==0) return ntransfered;
+                    to[toOffset] = (byte)data[0];
+                    --len; ++ntransfered; ++offset; ++toOffset;
+                }
+                return ntransfered;
+            } 
+            case pvDouble : {
+                PVDoubleArray pvdata = (PVDoubleArray)pv;
+                double[] data = new double[1];
+                while(len>0) {
+                    if(pvdata.get(offset,1,data,0)==0) return ntransfered;
+                    to[toOffset] = (byte)data[0];
+                    --len; ++ntransfered; ++offset; ++toOffset;
+                }
+                return ntransfered;
+            } 
+            default:
+                throw new Error(
+                  "Illegal PVType. Must be numeric but it is "
+                  + type.toString()
+                );
+        }
+    }
 }
 
 class ConvertDoubleArray {
-     static int to(PVData pv, int offset, int len, double[]to, int toOffset) {
-     return 0;}
+     static int from(PVData pv, int offset, int len, double[]from, int fromOffset) {
+        Field field = pv.getField();
+        PVType type = field.getPVType();
+        if(type!=PVType.pvArray) throw new Error(
+            "Illegal PVType. Must be array but it is " + type.toString());
+        Array array = (Array)field;
+        PVType elemType = array.getElementType();
+        int ntransfered = 0;
+        switch(elemType) {
+            case pvByte : {
+                PVByteArray pvdata = (PVByteArray)pv;
+                byte[] data = new byte[1];
+                while(len>0) {
+                    data[0] = (byte)from[fromOffset];
+                    if(pvdata.put(offset,1,data,0)==0) return ntransfered;
+                    --len; ++ntransfered; ++offset; ++fromOffset;
+                }
+                return ntransfered;
+            } 
+            case pvShort : {
+                PVShortArray pvdata = (PVShortArray)pv;
+                short[] data = new short[1];
+                while(len>0) {
+                    data[0] = (short)from[fromOffset];
+                    if(pvdata.put(offset,1,data,0)==0) return ntransfered;
+                    --len; ++ntransfered; ++offset; ++fromOffset;
+                }
+                return ntransfered;
+            } 
+            case pvInt : {
+                PVIntArray pvdata = (PVIntArray)pv;
+                int[] data = new int[1];
+                while(len>0) {
+                    data[0] = (int)from[fromOffset];
+                    if(pvdata.put(offset,1,data,0)==0) return ntransfered;
+                    --len; ++ntransfered; ++offset; ++fromOffset;
+                }
+                return ntransfered;
+            } 
+            case pvLong : {
+                PVLongArray pvdata = (PVLongArray)pv;
+                long[] data = new long[1];
+                while(len>0) {
+                    data[0] = (long)from[fromOffset];
+                    if(pvdata.put(offset,1,data,0)==0) return ntransfered;
+                    --len; ++ntransfered; ++offset; ++fromOffset;
+                }
+                return ntransfered;
+            } 
+            case pvFloat : {
+                PVFloatArray pvdata = (PVFloatArray)pv;
+                float[] data = new float[1];
+                while(len>0) {
+                    data[0] = (float)from[fromOffset];
+                    if(pvdata.put(offset,1,data,0)==0) return ntransfered;
+                    --len; ++ntransfered; ++offset; ++fromOffset;
+                }
+                return ntransfered;
+            } 
+            case pvDouble : {
+                PVDoubleArray pvdata = (PVDoubleArray)pv;
+                double[] data = new double[1];
+                while(len>0) {
+                    data[0] = (double)from[fromOffset];
+                    if(pvdata.put(offset,1,data,0)==0) return ntransfered;
+                    --len; ++ntransfered; ++offset; ++fromOffset;
+                }
+                return ntransfered;
+            } 
+            default:
+                throw new Error(
+                  "Illegal PVType. Must be numeric but it is "
+                  + type.toString()
+                );
+        }
+    }
 
-    static int from(PVData pv, int offset, int len, double[]from, int fromOffset) {
-    return 0;}
+    static int to(PVData pv, int offset, int len, double[]to, int toOffset) {
+        Field field = pv.getField();
+        PVType type = field.getPVType();
+        if(type!=PVType.pvArray) throw new Error(
+            "Illegal PVType. Must be array but it is " + type.toString());
+        Array array = (Array)field;
+        PVType elemType = array.getElementType();
+        int ntransfered = 0;
+        switch(elemType) {
+            case pvByte : {
+                PVByteArray pvdata = (PVByteArray)pv;
+                byte[] data = new byte[1];
+                while(len>0) {
+                    if(pvdata.get(offset,1,data,0)==0) return ntransfered;
+                    to[toOffset] = (byte)data[0];
+                    --len; ++ntransfered; ++offset; ++toOffset;
+                }
+                return ntransfered;
+            } 
+            case pvShort : {
+                PVShortArray pvdata = (PVShortArray)pv;
+                short[] data = new short[1];
+                while(len>0) {
+                    if(pvdata.get(offset,1,data,0)==0) return ntransfered;
+                    to[toOffset] = (byte)data[0];
+                    --len; ++ntransfered; ++offset; ++toOffset;
+                }
+                return ntransfered;
+            } 
+            case pvInt : {
+                PVIntArray pvdata = (PVIntArray)pv;
+                int[] data = new int[1];
+                while(len>0) {
+                    if(pvdata.get(offset,1,data,0)==0) return ntransfered;
+                    to[toOffset] = (byte)data[0];
+                    --len; ++ntransfered; ++offset; ++toOffset;
+                }
+                return ntransfered;
+            } 
+            case pvLong : {
+                PVLongArray pvdata = (PVLongArray)pv;
+                long[] data = new long[1];
+                while(len>0) {
+                    if(pvdata.get(offset,1,data,0)==0) return ntransfered;
+                    to[toOffset] = (byte)data[0];
+                    --len; ++ntransfered; ++offset; ++toOffset;
+                }
+                return ntransfered;
+            } 
+            case pvFloat : {
+                PVFloatArray pvdata = (PVFloatArray)pv;
+                float[] data = new float[1];
+                while(len>0) {
+                    if(pvdata.get(offset,1,data,0)==0) return ntransfered;
+                    to[toOffset] = (byte)data[0];
+                    --len; ++ntransfered; ++offset; ++toOffset;
+                }
+                return ntransfered;
+            } 
+            case pvDouble : {
+                PVDoubleArray pvdata = (PVDoubleArray)pv;
+                double[] data = new double[1];
+                while(len>0) {
+                    if(pvdata.get(offset,1,data,0)==0) return ntransfered;
+                    to[toOffset] = (byte)data[0];
+                    --len; ++ntransfered; ++offset; ++toOffset;
+                }
+                return ntransfered;
+            } 
+            default:
+                throw new Error(
+                  "Illegal PVType. Must be numeric but it is "
+                  + type.toString()
+                );
+        }
+    }
 }
 
 public class Convert implements PVConvert{
