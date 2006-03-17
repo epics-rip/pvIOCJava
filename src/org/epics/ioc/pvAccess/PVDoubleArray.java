@@ -4,7 +4,7 @@
 package org.epics.ioc.pvAccess;
 
 /**
- * get/put a double array
+ * get/put a double array.
  * The caller must be prepared to get/put the array in chunks.
  * The return argument is always the number of elements that were transfered.
  * It may be less than the number requested.
@@ -13,6 +13,7 @@ package org.epics.ioc.pvAccess;
  */
 public interface PVDoubleArray extends PVArray{
     /**
+     * put the <i>double</i> value into the PV
      * @param offset The offset to the first element to get.
      * @param len The maximum number of elements to transfer.
      * @param to The array into which the data is transfered.
@@ -23,6 +24,7 @@ public interface PVDoubleArray extends PVArray{
      */
     int get(int offset, int len, double[]to, int toOffset);
     /**
+     * put values into a <i>PVByteArray</i> from <i>byte[]to</i>
      * @param offset The offset to the first element to put.
      * @param len The maximum number of elements to transfer.
      * @param from The array from which the data is taken.

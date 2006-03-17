@@ -10,10 +10,12 @@ package org.epics.ioc.pvAccess;
  */
 public interface PVByte extends PVData{
 	/**
+     * get the <i>byte</i> value stored in the PV
 	 * @return byte value of field
 	 */
 	byte get();
     /**
+     * put the <i>byte</i> value into the PV
      * @param value new byte value for field
      */
     void put(byte value);

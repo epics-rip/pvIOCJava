@@ -4,19 +4,22 @@
 package org.epics.ioc.pvAccess;
 
 /**
- * A field of a process variable(PV) can have associated properties,
- *  where a property has a name and data.
- *  The data for the property is described by another field of the PV.
+ * Introspection for a field property
+ * A property has a name.
+ * The data for the property is described by another field of the PV.
  * @author mrk
  *
  */
 public interface Property {
     /**
-     * @return Returns the property name
+     * Get the property name
+     * @return The property name
      */
     String getName();
     /**
-     * @return Returns a Field interface mthat bdescribes the data
+     * Get the <i>Field</i> that has the property value
+     * @return A <i>Field</i> that describes the data associated
+     * with the property
      */
     Field getField();
 }

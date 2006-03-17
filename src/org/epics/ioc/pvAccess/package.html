@@ -1,0 +1,486 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+       "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta http-equiv="content-type" content="text/html; charset=iso-8859-1" />
+  <title>EPICS V4: pvAccess</title>
+</head>
+
+<body>
+<h1 style="text-align: center">EPICS V4 Java IOC<br />
+package: org/epics/ioc/pvAccess<br />
+2006.03.17</h1>
+
+<p><a href="#Overview">Overview</a></p>
+<ul>
+  <li><a href="#PVDescription">Process Variable</a></li>
+  <li><a href="#PVDataTypes">Process Variable Data Types</a></li>
+  <li><a href="#PVIntrospection">Process Variable Introspection</a></li>
+</ul>
+<a href="#Type">Type</a><br />
+<a href="#Introspection">Introspection</a><br />
+<a href="#DataAccess">Data Access</a>
+<ul>
+  <li><a href="#PrimitiveAccess">Primitive Types</a></li>
+  <li><a href="#StringAccess">String</a></li>
+  <li><a href="#EnumAccess">Enum</a></li>
+  <li><a href="#StructAccess">Structure</a></li>
+  <li><a href="#ArrayAccess">Array</a></li>
+</ul>
+<a href="#Convert">Convert</a><br />
+<a href="#FieldFactory">Field Factory</a>
+<hr />
+
+<h1 style="text-align: center"><a id="Overview"></a>Overview</h1>
+<hr />
+
+<p>Process Variable (PV) Data supports any data consisting of the following
+types:</p>
+<ul>
+  <li>primitive
+    <p>All Java primitive types except char, i.e. boolean, byte, short, int,
+    float, and double.</p>
+  </li>
+  <li>string
+    <p>A Java String.</p>
+  </li>
+  <li>enum
+    <p>A enum is a string array of choices and an index that selects a
+    choice.</p>
+  </li>
+  <li>structure
+    <p>A structure has a name and contains an arbitrary number of fields of
+    an supported type</p>
+  </li>
+  <li>array
+    <p>A one dimensional array. The element type is any of the supported
+    types</p>
+  </li>
+</ul>
+
+<p>In addition to the Java IOC, PV data is intended for use by 1) Channel
+Access client, 2) interface from client to network, e.g. ICE, 3) interface
+from network to Channel Access server, 4) interface from server to IOC
+database. Since it is the interface to data, it could also be used by other
+systems, e.g. TANGO, TINI, DOOCS, etc.</p>
+
+<p>This package provides the following:</p>
+<ul>
+  <li>Type
+    <p>This is an enum that describes the valid types</p>
+  </li>
+  <li>Introspection Interfaces
+    <p>These are interfaces that describe a PV. They are designed so that
+    characteristics of a PV can be discovered without requiring access to the
+    data associated with it.</p>
+  </li>
+  <li>Data Interfaces
+    <p>These are interfaces for accessing the data associated with a PV</p>
+  </li>
+  <li>Conversion Facility
+    <p>Conversion of the data from any PV to a string is provided.</p>
+    <p>Conversion between a PV and numeric primitive types is supported. The
+    PV must contain scalar numeric type.</p>
+    <p>Conversion between a PV and an array of numeric primitive types is
+    supported. The PV must contain an array of a numeric type.</p>
+  </li>
+  <li>Field Factory
+    <p>This is an object factory that creates objects implementing the
+    introspection interfaces.</p>
+  </li>
+</ul>
+
+<p>This package does not provide any facilities to create objects that
+implement the Data Interfaces. This is the responsibility of a particular
+implementation. There is an associated package (example) that provides an
+example database that supports creation of all of the supported data
+types.</p>
+
+<h2><a id="PVDescription"></a>Process Variable</h2>
+
+<p>Definitions</p>
+<ul>
+  <li>Processs Variable (PV) - The name used to specify the type of data this
+    package supports.</li>
+  <li>Field - A Field has a name and a type that is any of the supported
+    types. It can also have properties.</li>
+  <li>Property - A property has a name and an associated field within the PV
+    for the data. The field will NOT have any properties.</li>
+</ul>
+
+<p>Examples of fields are: value, rawValue. Examples of properties are:
+status, timeStamp, alarmSeverity, displayLimits, controlLimits,
+alarmLimits</p>
+
+<p>As an example a particular PV could define properties for value and
+rawValue as follows:</p>
+<dl>
+  <dt>value</dt>
+    <dd>status timeStamp and alarmSeverity</dd>
+  <dt>rawValue</dt>
+    <dd>status, timeStamp, alarmSeverity, displayLimits, controlLimits, and
+      alarmLimits.</dd>
+</dl>
+
+<h2><a id="PVDataTypes"></a>Process Variable Data Types</h2>
+
+<p>The following types are supported:</p>
+<ul>
+  <li>unknown - type is not known</li>
+  <li>primitive
+    <ul>
+      <li>byte - An 8 bit byte</li>
+      <li>boolean - true or false</li>
+      <li>short - 16 bit signed integer</li>
+      <li>int- 32 bit signed integer</li>
+      <li>long - 64 bit signed integer</li>
+      <li>float - 32 bit IEEE float</li>
+      <li>double - 64 bit IEEE float</li>
+    </ul>
+  </li>
+  <li>string - A Java String</li>
+  <li>structure - A struture with fields of type primitive, string,
+    structure, or array</li>
+  <li>array - a one dimensional array of type primitive, string, structure,
+    or array</li>
+  <li>enum - a String[] of choices and an index selecting a choice.</li>
+</ul>
+
+<h2><a id="PVIntrospection"></a>Process Variable Introspection</h2>
+
+<p>Given a PV it is possible to discover its fields and the field properties.
+The introspection interface does not provide access to data. Other
+interfaces, e.g. Channel Access provide access to the data. The reason is
+that the data may not be available. For example when a client connects to a
+PV, the client library can obtain the introspection information without
+obtaining any data. Only when a client issues an I/O request will data be
+available. This separation is especially important for arrays and
+structures.</p>
+<hr />
+
+<h1 style="text-align: center"><a id="Type"></a>Type</h1>
+<hr />
+
+<p>The types are defined by:</p>
+<pre>    enum Type {
+        pvUnknown,
+        pvBoolean,
+        pvByte, pvShort, pvInt, pvLong,
+        pvFloat,pvDouble,
+        pvString,
+        pvEnum,
+        pvStructure,
+        pvArray;
+
+        //Convenience methods
+        boolean isNumeric();
+        boolean isPrimitive();
+        boolean isScalar();
+    }</pre>
+<hr />
+
+<h1 style="text-align: center"><a id="Introspection"></a>Introspection</h1>
+<hr />
+
+<p>The following provide introspection.</p>
+<pre>    interface Property {
+        String getName(); // Property name
+        Field getField(); // Field will normally have no properties
+    }
+
+    interface Field{
+        String getName(); // Field name
+        Type getType();
+        boolean isConstant();
+        void setConstant();
+        Property getProperty(String propertyName);
+        Property[] getProperties();
+    } 
+
+    interface Structure extends Field{
+        String getStructureName();
+        String[] getFieldNames();
+        Field getField(String fieldName);
+        Field[] getFields();
+    }
+
+    interface Array extends Field{
+        PVType getElementType();
+    }
+
+    interface Enum extends Field{
+        boolean isChoicesMutable();
+    }</pre>
+
+<p>The above definitions support the following:</p>
+<ul>
+  <li>PV - What every implements the PVData interfaces must define something
+    that provides access to the Introspection interface.</li>
+  <li>Field
+    <ul>
+      <li>A field has a name</li>
+      <li>A field has a Type</li>
+      <li>A field can have an arbitrary number of associated properties
+        including none.</li>
+    </ul>
+  </li>
+  <li>Property
+    <ul>
+      <li>A property has a name</li>
+      <li>A property has a an associated field that holds the data.</li>
+    </ul>
+  </li>
+  <li>Structure
+    <ul>
+      <li>Has a name and fields</li>
+      <li>Both a field and a property can be a structure.</li>
+    </ul>
+  </li>
+  <li>Array - The array has elements of one of the supported types</li>
+  <li>Enum - The choices can be immutable.Type.java</li>
+</ul>
+<hr />
+
+<h1 style="text-align: center"><a id="DataAccess"></a>DataAccess</h1>
+<hr />
+
+<p>The following is the base interface for accessing data.</p>
+<pre>    interface PVData {
+        Field getField();
+    }
+ </pre>
+
+<h2><a id="PrimitiveAccess"></a>Primitive Types</h2>
+
+<p>The interfaces for primitive data types are:</p>
+<pre>    interface PVBoolean extends PVData {
+        boolean get();
+        void put(boolean value);
+    }
+
+    interface PVByte extends PVData {
+        byte get();
+        void put(byte value);
+    }
+
+    interface PVShort extends PVData {
+        short get();
+        void put(short value);
+    }
+
+    interface PVInt extends PVData {
+        int get();
+        void put(int value);
+    }
+
+    interface PVLong extends PVData {
+        long get();
+        void put(long value);
+    }
+
+    interface PVFloat extends PVData {
+        float get();
+        void put(float value);
+    }
+
+    interface PVDouble extends PVData {
+        double get();
+        void put(double value);
+    }</pre>
+
+<h2><a id="StringAccess"></a>String</h2>
+
+<p>The interface for string is:</p>
+<pre>    interface PVString extends PVData {
+        String get();
+        void put(String value);
+    }</pre>
+
+<h2><a id="EnumAccess"></a>Enum</h2>
+
+<p>The interface for enum is:</p>
+<pre>    interface PVEnum extends PVData{
+        int getIndex();
+        void setIndex(int index);
+        String[] getChoices();
+        boolean setChoices(String[] choice);
+    }</pre>
+
+<h2><a id="StructAccess"></a>Structure</h2>
+
+<p>The interface for structure is:</p>
+<pre>    interface PVStructure extends PVData {
+        PVData[] getFieldPVData();
+    }</pre>
+
+<h2><a id="ArrayAccess"></a>Array</h2>
+
+<p>The interfaces for array are:</p>
+<pre>    interface PVArray extends PVData {
+        int getLength();
+        void setLength(int len);
+        int getCapacity();
+        void setCapacity(int len);
+    }
+
+    interface PVBooleanArray extends PVArray {
+        int get(int offset, int len, boolean[]to, int toOffset);
+        int put(int offset, int len, boolean[]from, int fromOffset);
+    }
+
+    interface PVByteArray extends PVArray {
+        int get(int offset, int len, byte[]to, int toOffset);
+        int put(int offset, int len, byte[]from, int fromOffset);
+    }
+
+    interface PVShortArray extends PVArray {
+        int get(int offset, int len, short[]to, int toOffset);
+        int put(int offset, int len, short[]from, int fromOffset);
+    }
+
+    interface PVIntArray extends PVArray {
+        int get(int offset, int len, int[]to, int toOffset);
+        int put(int offset, int len, int[]from, int fromOffset);
+    }
+
+    interface PVLongArray extends PVArray {
+        int get(int offset, int len, long[]to, int toOffset);
+        int put(int offset, int len, long[]from, int fromOffset);
+    }
+
+    interface PVFloatArray extends PVArray {
+        int get(int offset, int len, float[]to, int toOffset);
+        int put(int offset, int len, float[]from, int fromOffset);
+    }
+
+    interface PVDoubleArray extends PVArray {
+        int get(int offset, int len, double[]to, int toOffset);
+        int put(int offset, int len, double[]from, int fromOffset);
+    }
+
+    interface PVStringArray extends PVArray {
+        int get(int offset, int len, String[]to, int toOffset);
+        int put(int offset, int len, String[]from, int fromOffset);
+    }
+
+    interface PVEnumArray extends PVArray {
+        int get(int offset, int len, Enum[]to, int toOffset);
+        int put(int offset, int len, Enum[]from, int fromOffset);
+    }
+
+    interface PVArrayArray extends PVArray {
+        int get(int offset, int len, Array[]to, int toOffset);
+        int put(int offset, int len, Array[]from, int fromOffset);
+    }
+
+    interface PVStructureArray extends PVArray {
+        int get(int offset, int len, Structure[]to, int toOffset);
+        int put(int offset, int len, Structure[]from, int fromOffset);
+    }</pre>
+
+<p>The interface for each array type has the same form except for the type.
+For example PVDoubleArray is:</p>
+<pre>    interface PVDoubleArray extends PVArray {
+        int get(int offset, int len, double[]to, int toOffset);
+        int put(int offset, int len, double[]from, int fromOffset);
+    }</pre>
+Both get and put return the number of elements actually transfered. The
+arguments are:
+<dl>
+  <dt><span style="font-family: courier">offset</span></dt>
+    <dd>The offset in the array</dd>
+  <dt><span style="font-family: courier">len</span></dt>
+    <dd>The maximum number of elements to transfer. The number actually
+      transfered will be less than or equal to this value.</dd>
+  <dt><span style="font-family: courier">to</span></dt>
+    <dd>The array into which the data should be copied. This array is
+      supplied by the caller</dd>
+  <dt><span style="font-family: courier">toOffset</span></dt>
+    <dd>The offset into the to array</dd>
+  <dt><span style="font-family: courier">from</span></dt>
+    <dd>The array from which the data is taken. This array is supplied by the
+      caller</dd>
+  <dt><span style="font-family: courier">fromOffset</span></dt>
+    <dd>The offset into the from array</dd>
+</dl>
+
+<p>The caller must be prepared to make multiple calls to retrieve or put an
+entire array. A caller can always accept or put partial arrays. For example
+the following reads an entire array:</p>
+<pre>    double[] getArray(PVDoubleArray data)
+    {
+        int len = data.getLength();
+        double[] storage = new double[len];
+        int offset = 0;
+        while(offset &lt; len) {
+            int num = data.get(offset,(len-offset),storage,offset);
+            offset = offset+num;
+        }
+        return storage;
+    } </pre>
+<hr />
+
+<h1 style="text-align: center"><a id="Convert"></a>Convert</h1>
+<hr />
+
+<p>This section describes the supported conversions between data types.</p>
+<ul>
+  <li>All supported types can be converted to a string. If you ask for a 100
+    megabyte array to be converted to a string expect a lot of output.</li>
+  <li>Conversions between numeric types and arrays of numeric type are
+    supported.</li>
+</ul>
+<pre>    interface PVConvert {
+        String getString(PVData pv); // PV can be any supported type
+        // For the following //PVData must be PVByte, ...., PVDouble
+        byte toByte(PVData pv);
+        short toShort(PVData pv);
+        int   toInt(PVData pv);
+        long  toLong(PVData pv);
+        float toFloat(PVData pv);
+        double toDouble(PVData pv);
+        void fromByte(PVData pv, byte from);
+        void  fromShort(PVData pv, short from);
+        void  fromInt(PVData pv, int from);
+        void  fromLong(PVData pv, long from);
+        void  fromFloat(PVData pv, float from);
+        void  fromDouble(PVData pv, double from);
+        // For the following element type must be PVByte, ...., PVDouble
+        int toByteArray(PVData pv, int offset, int len, byte[]to, int toOffset);
+        int toShortArray(PVData pv, int offset, int len, short[]to, int toOffset);
+        int toIntArray(PVData pv, int offset, int len, int[]to, int toOffset);
+        int toLongArray(PVData pv, int offset, int len, long[]to, int toOffset);
+        int toFloatArray(PVData pv, int offset, int len, float[]to, int toOffset);
+        int toDoubleArray(PVData pv, int offset, int len, double[]to, int toOffset);
+        int fromByteArray(PVData pv, int offset, int len, byte[]from, fromOffset);
+        int fromShortArray(PVData pv, int offset, int len, short[]from, fromOffset);
+        int fromIntArray(PVData pv, int offset, int len, int[]from, fromOffset);
+        int fromLongArray(PVData pv, int offset, int len, long[]from, fromOffset);
+        int fromFloatArray(PVData pv, int offset, int len, float[]from, fromOffset);
+        int fromDoubleArray(PVData pv, int offset, int len, double[]from, fromOffset);
+    }</pre>
+<hr />
+
+<h1 style="text-align: center"><a id="FieldFactory"></a>Field Factory</h1>
+<hr />
+
+<p>The field factory creates objects for each on the interspection
+interfaces. It has the following public methods:</p>
+<pre>public final class FieldFactory {
+    public static Array createArrayField(String name,
+        Type elementType,Property[] property) {...}
+
+    public static Enum createEnumField(String name,
+        boolean choicesMutable,Property[] property) { ... }
+
+    public static Field createField(String name,
+        Type type,Property[] property) { ... }
+    
+    public static Property createProperty(String name, Field field) { ... }
+ 
+    public static Structure createStructureField(String name,
+        String structureName, Field[] field,Property[] property) { ... }
+}</pre>
+</body>
+</html>
