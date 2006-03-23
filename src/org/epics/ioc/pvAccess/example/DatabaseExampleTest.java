@@ -15,12 +15,11 @@ public class DatabaseExampleTest extends TestCase {
         Field field = booleanData.getField();
         assertEquals(field.getName(),"boolean");
         assertEquals(field.getType(),Type.pvBoolean);
-        System.out.printf("%s type %s value %b %s\n",
-            	field.getName(),
-            	field.getType().toString(),
+        System.out.printf("%s    value %b %s\n",
+            	field.toString(),
             	booleanData.get(),
                 booleanData.toString());
-        assertNull(field.getPropertys());
+        assertEquals(field.getPropertys().length,0);
     }
         
     public static void testByte() {
@@ -34,9 +33,8 @@ public class DatabaseExampleTest extends TestCase {
         Field field = byteData.getField();
         assertEquals(field.getName(),"byte");
         assertEquals(field.getType(),Type.pvByte);
-        System.out.printf("%s type %s value %d %s\n",
-            	field.getName(),
-            	field.getType().toString(),
+        System.out.printf("%s    value %d %s\n",
+            	field.toString(),
             	byteData.get(),
                 byteData.toString());
         assertEquals(byteValue,convert.toByte(byteData));
@@ -50,7 +48,7 @@ public class DatabaseExampleTest extends TestCase {
         assertEquals(floatValue,convert.toFloat(byteData));
         double doubleValue = byteValue;
         assertEquals(doubleValue,convert.toDouble(byteData));
-        assertNull(field.getPropertys());
+        assertEquals(field.getPropertys().length,0);
     }
 
     public static void testShort() {
@@ -64,9 +62,8 @@ public class DatabaseExampleTest extends TestCase {
         Field field = shortData.getField();
         assertEquals(field.getName(),"short");
         assertEquals(field.getType(),Type.pvShort);
-        System.out.printf("%s type %s value %d %s\n",
-            	field.getName(),
-            	field.getType().toString(),
+        System.out.printf("%s    value %d %s\n",
+            	field.toString(),
             	shortData.get(),
                 shortData.toString());
         byte byteValue = (byte)shortValue;
@@ -80,7 +77,7 @@ public class DatabaseExampleTest extends TestCase {
         assertEquals(floatValue,convert.toFloat(shortData));
         double doubleValue = shortValue;
         assertEquals(doubleValue,convert.toDouble(shortData));
-        assertNull(field.getPropertys());
+        assertEquals(field.getPropertys().length,0);
     }
 
     public static void testInt() {
@@ -94,9 +91,8 @@ public class DatabaseExampleTest extends TestCase {
         Field field = intData.getField();
         assertEquals(field.getName(),"int");
         assertEquals(field.getType(),Type.pvInt);
-        System.out.printf("%s type %s value %d %s\n",
-            	field.getName(),
-            	field.getType().toString(),
+        System.out.printf("%s    value %d %s\n",
+            	field.toString(),
             	intData.get(),
                 intData.toString());
         byte byteValue = (byte)intValue;
@@ -110,7 +106,7 @@ public class DatabaseExampleTest extends TestCase {
         assertEquals(floatValue,convert.toFloat(intData));
         double doubleValue = intValue;
         assertEquals(doubleValue,convert.toDouble(intData));
-        assertNull(field.getPropertys());
+        assertEquals(field.getPropertys().length,0);
     }
 
     public static void testLong() {
@@ -124,9 +120,8 @@ public class DatabaseExampleTest extends TestCase {
         Field field = longData.getField();
         assertEquals(field.getName(),"long");
         assertEquals(field.getType(),Type.pvLong);
-        System.out.printf("%s type %s value %d %s\n",
-            	field.getName(),
-            	field.getType().toString(),
+        System.out.printf("%s    value %d %s\n",
+            	field.toString(),
             	longData.get(),
                 longData.toString());
         byte byteValue = (byte)longValue;
@@ -140,7 +135,7 @@ public class DatabaseExampleTest extends TestCase {
         assertEquals(floatValue,convert.toFloat(longData));
         double doubleValue = longValue;
         assertEquals(doubleValue,convert.toDouble(longData));
-        assertNull(field.getPropertys());
+        assertEquals(field.getPropertys().length,0);
     }
 
     public static void testFloat() {
@@ -154,9 +149,8 @@ public class DatabaseExampleTest extends TestCase {
         Field field = floatData.getField();
         assertEquals(field.getName(),"float");
         assertEquals(field.getType(),Type.pvFloat);
-        System.out.printf("%s type %s value %f %s\n",
-            	field.getName(),
-            	field.getType().toString(),
+        System.out.printf("%s    value %f %s\n",
+            	field.toString(),
             	floatData.get(),
                 floatData.toString());
         byte byteValue = (byte)floatValue;
@@ -170,7 +164,7 @@ public class DatabaseExampleTest extends TestCase {
         assertEquals(floatValue,convert.toFloat(floatData));
         double doubleValue = floatValue;
         assertEquals(doubleValue,convert.toDouble(floatData));
-        assertNull(field.getPropertys());
+        assertEquals(field.getPropertys().length,0);
     }
 
     public static void testDouble() {
@@ -184,9 +178,8 @@ public class DatabaseExampleTest extends TestCase {
         Field field = doubleData.getField();
         assertEquals(field.getName(),"double");
         assertEquals(field.getType(),Type.pvDouble);
-        System.out.printf("%s type %s value %f %s\n",
-            	field.getName(),
-            	field.getType().toString(),
+        System.out.printf("%s    value %f %s\n",
+            	field.toString(),
             	doubleData.get(),
                 doubleData.toString());
         byte byteValue = (byte)doubleValue;
@@ -200,7 +193,7 @@ public class DatabaseExampleTest extends TestCase {
         float floatValue = (float)doubleValue;
         assertEquals(floatValue,convert.toFloat(doubleData));
         assertEquals(doubleValue,convert.toDouble(doubleData));
-        assertNull(field.getPropertys());
+        assertEquals(field.getPropertys().length,0);
     }
 
     public static void testString() {
@@ -213,12 +206,11 @@ public class DatabaseExampleTest extends TestCase {
         Field field = stringData.getField();
         assertEquals(field.getName(),"string");
         assertEquals(field.getType(),Type.pvString);
-        System.out.printf("%s type %s value %s %s\n",
-            	field.getName(),
-            	field.getType().toString(),
+        System.out.printf("%s    value %s %s\n",
+            	field.toString(),
             	stringData.get(),
                 stringData.toString());
-        assertNull(field.getPropertys());
+        assertEquals(field.getPropertys().length,0);
     }
 
     public static void testEnum() {
@@ -234,9 +226,8 @@ public class DatabaseExampleTest extends TestCase {
         assertEquals(readback[1],choice[1]);
         enumData.setIndex(1);
         assertEquals(1,enumData.getIndex());
-        System.out.printf("%s type %s %s\n",
-            	field.getName(),
-            	field.getType().toString(),
+        System.out.printf("%s    value %s\n",
+            	field.toString(),
                 enumData.toString());
     }
 
@@ -254,12 +245,12 @@ public class DatabaseExampleTest extends TestCase {
         low = null; high = null; structFieldData = null;
         Property[] property = new Property[1];
         property[0] = FieldFactory.createProperty("displayLimit",
-                    displayLimit.getField());
+            "displayLimit");
         PVDouble valueData = (PVDouble)database.createData(
             "value",Type.pvDouble,property);
         // discard data now obtained via valueData
         property = null;
-        structFieldData = displayLimit.getFieldPVData();
+        structFieldData = displayLimit.getFieldPVDatas();
         // set displayLimits
         assert(structFieldData.length==2);
         double value = 0.0;
@@ -272,21 +263,12 @@ public class DatabaseExampleTest extends TestCase {
         }
 
         Field valueField = valueData.getField();
-        property = valueField.getPropertys();
-        System.out.printf("\n%s type %s properties {",
-             valueField.getName(),
-             valueField.getType().toString());
-        for(Property prop: property) {
-            Field propField = prop.getField();
-            System.out.printf("{name = %s fieldName = %s} ",
-                prop.getName(), propField.getName());
-        }
-        System.out.printf(" }\n");
+        System.out.printf("\n%s    value %s\n",
+             valueField.toString(),
+             valueData.toString());
         Structure structure = (Structure)displayLimit.getField();
-        System.out.printf("%s type %s structure name %s\n%s\n\n",
-             structure.getName(),
-             structure.getType().toString(),
-             structure.getStructureName(),
+        System.out.printf("%s    value %s\n\n",
+             structure.toString(),
              displayLimit.toString());
     }
 
@@ -306,12 +288,10 @@ public class DatabaseExampleTest extends TestCase {
         assertEquals(field.getType(),Type.pvArray);
         Array array = (Array)field;
         assertEquals(array.getElementType(),Type.pvBoolean);
-        System.out.printf("%s type %s element type %s %s\n",
-            	field.getName(),
-            	field.getType().toString(),
-                array.getElementType().toString(),
+        System.out.printf("\n%s\nvalue %s\n",
+            	array.toString(),
                 booleanArrayData.toString());
-        assertNull(field.getPropertys());
+        assertEquals(field.getPropertys().length,0);
     }
 
     public static void testByteArray() {
@@ -337,12 +317,10 @@ public class DatabaseExampleTest extends TestCase {
             assertEquals(arrayValue[i],readback[i]);
         }
         assertEquals(array.getElementType(),Type.pvByte);
-        System.out.printf("%s type %s element type %s %s\n",
-            	field.getName(),
-            	field.getType().toString(),
-                array.getElementType().toString(),
+        System.out.printf("\n%s\nvalue %s\n",
+                array.toString(),
                 byteArrayData.toString());
-        assertNull(field.getPropertys());
+        assertEquals(field.getPropertys().length,0);
 
         arrayValue[0] = 0; arrayValue[1] = 1; arrayValue[2] = 2;
         convert.fromByteArray(byteArrayData,0,len,arrayValue,0);
@@ -408,12 +386,10 @@ public class DatabaseExampleTest extends TestCase {
         assertEquals(field.getType(),Type.pvArray);
         Array array = (Array)field;
         assertEquals(array.getElementType(),Type.pvShort);
-        System.out.printf("%s type %s element type %s %s\n",
-            	field.getName(),
-            	field.getType().toString(),
-                array.getElementType().toString(),
+        System.out.printf("\n%s\nvalue %s\n",
+                array.toString(),
                 shortArrayData.toString());
-        assertNull(field.getPropertys());
+        assertEquals(field.getPropertys().length,0);
 
         PVByteArray byteArrayData = (PVByteArray)
             database.createArrayData("byteArray",Type.pvByte,null);
@@ -479,12 +455,10 @@ public class DatabaseExampleTest extends TestCase {
         assertEquals(field.getType(),Type.pvArray);
         Array array = (Array)field;
         assertEquals(array.getElementType(),Type.pvInt);
-        System.out.printf("%s type %s element type %s %s\n",
-            	field.getName(),
-            	field.getType().toString(),
-                array.getElementType().toString(),
+        System.out.printf("\n%s\nvalue %s\n",
+                array.toString(),
                 intArrayData.toString());
-        assertNull(field.getPropertys());
+        assertEquals(field.getPropertys().length,0);
 
         PVByteArray byteArrayData = (PVByteArray)
             database.createArrayData("byteArray",Type.pvByte,null);
@@ -550,12 +524,10 @@ public class DatabaseExampleTest extends TestCase {
         assertEquals(field.getType(),Type.pvArray);
         Array array = (Array)field;
         assertEquals(array.getElementType(),Type.pvLong);
-        System.out.printf("%s type %s element type %s %s\n",
-            	field.getName(),
-            	field.getType().toString(),
-                array.getElementType().toString(),
+        System.out.printf("\n%s\nvalue %s\n",
+                array.toString(),
                 longArrayData.toString());
-        assertNull(field.getPropertys());
+        assertEquals(field.getPropertys().length,0);
 
         PVByteArray byteArrayData = (PVByteArray)
             database.createArrayData("byteArray",Type.pvByte,null);
@@ -621,12 +593,10 @@ public class DatabaseExampleTest extends TestCase {
         assertEquals(field.getType(),Type.pvArray);
         Array array = (Array)field;
         assertEquals(array.getElementType(),Type.pvFloat);
-        System.out.printf("%s type %s element type %s %s\n",
-            	field.getName(),
-            	field.getType().toString(),
-                array.getElementType().toString(),
+        System.out.printf("\n%s\nvalue %s\n",
+                array.toString(),
                 floatArrayData.toString());
-        assertNull(field.getPropertys());
+        assertEquals(field.getPropertys().length,0);
 
         PVByteArray byteArrayData = (PVByteArray)
             database.createArrayData("byteArray",Type.pvByte,null);
@@ -692,12 +662,10 @@ public class DatabaseExampleTest extends TestCase {
         assertEquals(field.getType(),Type.pvArray);
         Array array = (Array)field;
         assertEquals(array.getElementType(),Type.pvDouble);
-        System.out.printf("%s type %s element type %s %s\n",
-            	field.getName(),
-            	field.getType().toString(),
-                array.getElementType().toString(),
+        System.out.printf("\n%s\nvalue %s\n",
+                array.toString(),
                 doubleArrayData.toString());
-        assertNull(field.getPropertys());
+        assertEquals(field.getPropertys().length,0);
 
         PVByteArray byteArrayData = (PVByteArray)
             database.createArrayData("byteArray",Type.pvByte,null);
@@ -768,12 +736,10 @@ public class DatabaseExampleTest extends TestCase {
         assertEquals(readback[0],arrayValue[0]);
         assertEquals(readback[1],arrayValue[1]);
         assertEquals(readback[2],arrayValue[2]);
-        System.out.printf("%s type %s element type %s %s\n",
-            	field.getName(),
-            	field.getType().toString(),
-                array.getElementType().toString(),
+        System.out.printf("\n%s\nvalue %s\n",
+                array.toString(),
                 stringArrayData.toString());
-        assertNull(field.getPropertys());
+        assertEquals(field.getPropertys().length,0);
     }
 
     public static void testEnumArray() {
@@ -798,12 +764,10 @@ public class DatabaseExampleTest extends TestCase {
         assertEquals(field.getType(),Type.pvArray);
         Array array = (Array)field;
         assertEquals(array.getElementType(),Type.pvEnum);
-        System.out.printf("\n%s type %s element type %s\n%s\n",
-            	field.getName(),
-            	field.getType().toString(),
-                array.getElementType().toString(),
+        System.out.printf("\n%s\nvalue %s\n",
+                array.toString(),
                 enumArrayData.toString());
-        assertNull(field.getPropertys());
+        assertEquals(field.getPropertys().length,0);
     }
 
     public static void testStructureArray() {
@@ -833,12 +797,10 @@ public class DatabaseExampleTest extends TestCase {
         assertEquals(field.getType(),Type.pvArray);
         Array array = (Array)field;
         assertEquals(array.getElementType(),Type.pvStructure);
-        System.out.printf("\n%s type %s element type %s\n%s\n",
-            	field.getName(),
-            	field.getType().toString(),
-                array.getElementType().toString(),
+        System.out.printf("\n%s\nvalue %s\n",
+                array.toString(),
                 structureArrayData.toString());
-        assertNull(field.getPropertys());
+        assertEquals(field.getPropertys().length,0);
     }
 
     public static void testArrayArray() {
@@ -864,12 +826,10 @@ public class DatabaseExampleTest extends TestCase {
         assertEquals(field.getType(),Type.pvArray);
         Array array = (Array)field;
         assertEquals(array.getElementType(),Type.pvArray);
-        System.out.printf("\n%s type %s element type %s\n%s\n",
-            	field.getName(),
-            	field.getType().toString(),
-                array.getElementType().toString(),
+        System.out.printf("\n%s\nvalue %s\n",
+                array.toString(),
                 arrayArrayData.toString());
-        assertNull(field.getPropertys());
+        assertEquals(field.getPropertys().length,0);
     }
 }
 

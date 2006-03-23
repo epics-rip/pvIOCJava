@@ -270,7 +270,7 @@ public class DatabaseExample {
         private Structure structure;
         private PVData[] pvData;
 
-        public PVData[] getFieldPVData() {
+        public PVData[] getFieldPVDatas() {
             return pvData;
         }
 
