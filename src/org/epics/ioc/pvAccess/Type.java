@@ -64,7 +64,7 @@ public enum Type {
      * @return Returns true if the type is a Java numeric type.
      * The numeric types are byte, int, long, float, and double.
      */
-    boolean isNumeric() {
+    public boolean isNumeric() {
         if(ordinal() < 2) return false; // less than byte
         if(ordinal() > 7) return false; // greater than double
         return true;
@@ -74,7 +74,7 @@ public enum Type {
      * @return Returns true if the type is a Java primitive type.
      * This is the numeric types and boolean.
      */
-    boolean isPrimitive() {
+    public boolean isPrimitive() {
         if(ordinal() < 1) return false; // less than boolean
         if(ordinal() > 7) return false; // greater than double
         return true;
@@ -83,7 +83,7 @@ public enum Type {
      * is this wither a Java primitive or a <i>string</i>
      * @return Returns true if the type is a Java primitive or a String
      */
-    boolean isScalar() {
+    public boolean isScalar() {
         if(ordinal() < 1) return false; // less than boolean
         if(ordinal() > 8) return false; // greater than string
         return true;

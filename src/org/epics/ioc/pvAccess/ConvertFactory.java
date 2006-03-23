@@ -1387,46 +1387,46 @@ public final class ConvertFactory {
     
         private String convertEnum(PVData pv) {
             PVEnum data = (PVEnum)pv;
-            StringBuilder buffer = new StringBuilder(200);
+            StringBuilder builder = new StringBuilder();
             int index = data.getIndex();
             String[] choices = data.getChoices();
-            buffer.append(String.format(
+            builder.append(String.format(
                 "{index = %d choices = {",index));
             if(choices!=null) for(String choice : choices) {
-                 buffer.append("\"");
-                 if(choice!=null) buffer.append(choice);
-                 buffer.append("\" ");
+                 builder.append("\"");
+                 if(choice!=null) builder.append(choice);
+                 builder.append("\" ");
             }
-            buffer.append("}}");
-            return new String(buffer);
+            builder.append("}}");
+            return builder.toString();
         }
     
         private String convertStructure(PVData pv) {
             PVStructure data = (PVStructure)pv;
             Structure structure = (Structure)pv.getField();
-            StringBuilder buffer = new StringBuilder(500);
-            buffer.append(String.format("%s{",
+            StringBuilder builder = new StringBuilder();
+            builder.append(String.format("%s{",
                 structure.getStructureName()));
-            PVData[] fieldsData = data.getFieldPVData();
+            PVData[] fieldsData = data.getFieldPVDatas();
             for(PVData fieldData : fieldsData) {
                 Field fieldnow = fieldData.getField();
-                buffer.append(String.format("%s = ",
+                builder.append(String.format("%s = ",
                     fieldnow.getName()));
-                buffer.append(ConvertToString(fieldData));
-                buffer.append(" ");
+                builder.append(ConvertToString(fieldData));
+                builder.append(" ");
             }
-            buffer.append("}");
-            return new String(buffer);
+            builder.append("}");
+            return builder.toString();
         }
     
         private String convertArray(PVData pv) {
             Array array = (Array)pv.getField();
             Type type = array.getElementType();
-            StringBuilder buffer = new StringBuilder(500);
-            buffer.append("{");
+            StringBuilder builder = new StringBuilder();
+            builder.append("{");
             switch(type) {
             case pvUnknown:{
-                    buffer.append( "unknown type");
+                    builder.append( "unknown type");
                     break;
                 }
             case pvBoolean: {
@@ -1436,12 +1436,12 @@ public final class ConvertFactory {
                         int num = data.get(i,1,value,0);
                         if(num==1) {
                              if(value[0]) {
-                                 buffer.append("true ");
+                                 builder.append("true ");
                              } else {
-                                 buffer.append("false ");
+                                 builder.append("false ");
                              }
                         } else {
-                             buffer.append("???? ");
+                             builder.append("???? ");
                         }
                     }
                     break;
@@ -1452,9 +1452,9 @@ public final class ConvertFactory {
                     for(int i=0; i < data.getLength(); i++) {
                         int num = data.get(i,1,value,0);
                         if(num==1) {
-                             buffer.append(String.format("%d ",value[0]));
+                             builder.append(String.format("%d ",value[0]));
                         } else {
-                             buffer.append("???? ");
+                             builder.append("???? ");
                         }
                     }
                     break;
@@ -1465,9 +1465,9 @@ public final class ConvertFactory {
                     for(int i=0; i < data.getLength(); i++) {
                         int num = data.get(i,1,value,0);
                         if(num==1) {
-                             buffer.append(String.format("%d ",value[0]));
+                             builder.append(String.format("%d ",value[0]));
                         } else {
-                             buffer.append("???? ");
+                             builder.append("???? ");
                         }
                     }
                     break;
@@ -1478,9 +1478,9 @@ public final class ConvertFactory {
                     for(int i=0; i < data.getLength(); i++) {
                         int num = data.get(i,1,value,0);
                         if(num==1) {
-                             buffer.append(String.format("%d ",value[0]));
+                             builder.append(String.format("%d ",value[0]));
                         } else {
-                             buffer.append("???? ");
+                             builder.append("???? ");
                         }
                     }
                     break;
@@ -1491,9 +1491,9 @@ public final class ConvertFactory {
                     for(int i=0; i < data.getLength(); i++) {
                         int num = data.get(i,1,value,0);
                         if(num==1) {
-                             buffer.append(String.format("%d ",value[0]));
+                             builder.append(String.format("%d ",value[0]));
                         } else {
-                             buffer.append("???? ");
+                             builder.append("???? ");
                         }
                     }
                     break;
@@ -1504,9 +1504,9 @@ public final class ConvertFactory {
                     for(int i=0; i < data.getLength(); i++) {
                         int num = data.get(i,1,value,0);
                         if(num==1) {
-                             buffer.append(String.format("%f ",value[0]));
+                             builder.append(String.format("%f ",value[0]));
                         } else {
-                             buffer.append("???? ");
+                             builder.append("???? ");
                         }
                     }
                     break;
@@ -1517,9 +1517,9 @@ public final class ConvertFactory {
                     for(int i=0; i < data.getLength(); i++) {
                         int num = data.get(i,1,value,0);
                         if(num==1) {
-                             buffer.append(String.format("%f ",value[0]));
+                             builder.append(String.format("%f ",value[0]));
                         } else {
-                             buffer.append("???? ");
+                             builder.append("???? ");
                         }
                     }
                     break;
@@ -1530,11 +1530,11 @@ public final class ConvertFactory {
                     for(int i=0; i < data.getLength(); i++) {
                         value[0] = null; data.get(i,1,value,0);
                         if(value[0]!=null) {
-                            buffer.append("\"");
-                            buffer.append(value[0]);
-                            buffer.append("\" ");
+                            builder.append("\"");
+                            builder.append(value[0]);
+                            builder.append("\" ");
                         } else {
-                             buffer.append("null ");
+                             builder.append("null ");
                         }
                     }
                     break;
@@ -1545,10 +1545,10 @@ public final class ConvertFactory {
                     for(int i=0; i < data.getLength(); i++) {
                         value[0] = null; data.get(i,1,value,0);
                         if(value[0]!=null) {
-                            buffer.append(convertEnum(value[0]));
-                            buffer.append(" ");
+                            builder.append(convertEnum(value[0]));
+                            builder.append(" ");
                         } else {
-                             buffer.append("{} ");
+                             builder.append("{} ");
                         }
                     }
                     break;
@@ -1559,9 +1559,9 @@ public final class ConvertFactory {
                     for(int i=0; i < data.getLength(); i++) {
                         value[0] = null; data.get(i,1,value,0);
                         if(value[0]!=null) {
-                            buffer.append(convertStructure(value[0]));
+                            builder.append(convertStructure(value[0]));
                         } else {
-                             buffer.append("null ");
+                             builder.append("null ");
                         }
                     }
                     break;
@@ -1572,18 +1572,18 @@ public final class ConvertFactory {
                     for(int i=0; i < data.getLength(); i++) {
                         value[0] = null; data.get(i,1,value,0);
                         if(value[0]!=null) {
-                            buffer.append(convertArray(value[0]));
+                            builder.append(convertArray(value[0]));
                         } else {
-                             buffer.append("{} ");
+                             builder.append("{} ");
                         }
                     }
                     break;
                 }
             default:
-                buffer.append(" array element is unknown PVType");
+                builder.append(" array element is unknown PVType");
             }
-            buffer.append("}");
-            return new String(buffer);
+            builder.append("}");
+            return builder.toString();
         }
     }
 }

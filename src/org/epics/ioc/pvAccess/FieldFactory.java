@@ -71,11 +71,11 @@ public final class FieldFactory {
     /**
      * Create a <i>Property</i>
      * @param name the property name
-     * @param field name of the associated field
+     * @param fieldName the associated field
      * @return a <i>Property<i/> interface for the newly created object.
      */
-    public static Property createProperty(String name, Field field) {
-        return new PropertyInstance(name,field);
+    public static Property createProperty(String name, String fieldName) {
+        return new PropertyInstance(name,fieldName);
     } 
 
     /**
@@ -105,6 +105,13 @@ public final class FieldFactory {
         public Type getElementType() {
             return elementType;
         }
+
+        public String toString() {
+            StringBuilder builder = new StringBuilder();
+            builder.append(super.toString());
+            builder.append(String.format("elementType %s ",elementType.toString()));
+            return builder.toString();
+        }
     }
     
     static private class EnumInstance extends FieldInstance implements Enum{
@@ -117,6 +124,13 @@ public final class FieldFactory {
         public boolean isChoicesMutable() {
             return choicesMutable;
         }
+
+        public String toString() {
+            StringBuilder builder = new StringBuilder();
+            builder.append(super.toString());
+            builder.append(String.format("choicesMutable %b ",choicesMutable));
+            return builder.toString();
+        }
     }
     
     static private class FieldInstance implements Field {
@@ -128,6 +142,7 @@ public final class FieldFactory {
         FieldInstance(String name, Type type,Property[] property) {
             this.name = name;
             this.type = type;
+            if(property==null) property = new Property[0];
             this.property = property;
             isConstant = false;
         }
@@ -159,18 +174,39 @@ public final class FieldFactory {
             isConstant = value;
             
         }
+
+        public String toString() {
+            StringBuilder builder = new StringBuilder();
+            builder.append(String.format("field %s type %s isConstant %b ",
+                    name,type.toString(),isConstant));
+            if(property.length>0) {
+                builder.append("property{");
+               for(Property prop : property) {
+                   builder.append(String.format("%s",prop.toString()));
+               }
+               builder.append("}");
+            }
+            return builder.toString();
+        }
     }
     
     static private class PropertyInstance implements Property {
-        private Field field;
+        private String fieldName;
         private String name;
     
-        PropertyInstance(String name, Field field) {
+        PropertyInstance(String name, String fieldName) {
             this.name = name;
-            this.field = field;
+            this.fieldName = fieldName;
+        }
+        
+        public String toString() {
+            StringBuilder builder = new StringBuilder();
+            builder.append(String.format("{name %s field %s}",
+                    name,fieldName));
+            return builder.toString();
         }
     
-        public Field getField() { return field;}
+        public String getFieldName() { return fieldName;}
         public String getName() { return name;}
     }
     
@@ -180,7 +216,7 @@ public final class FieldFactory {
         Field[] field;
         String[] fieldName;
         String structureName;
-    
+        
         StructureInstance(String name, String structureName,
             Field[] field, Property[] property)
         {
@@ -215,6 +251,16 @@ public final class FieldFactory {
         public String getStructureName() {
             return structureName;
         }
+        
+        public String toString() {
+            StringBuilder builder = new StringBuilder();
+            builder.append(super.toString());
+            builder.append(String.format("\nstructure %s\n{\n",structureName));
+            for(int i=0, n= field.length; i < n; i++) {
+                builder.append(String.format("    %s\n",field[i].toString()));
+            }
+            builder.append("}");
+            return builder.toString();
+        }
     }
-
 }

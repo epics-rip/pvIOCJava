@@ -17,9 +17,8 @@ public interface Property {
      */
     String getName();
     /**
-     * Get the <i>Field</i> that has the property value
-     * @return A <i>Field</i> that describes the data associated
-     * with the property
+     * Get the name of the field that has the property value
+     * @return the field name
      */
-    Field getField();
+    String getFieldName();
 }

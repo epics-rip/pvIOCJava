@@ -10,7 +10,7 @@
 <body>
 <h1 style="text-align: center">EPICS V4 Java IOC<br />
 package: org/epics/ioc/pvAccess<br />
-2006.03.17</h1>
+2006.03.23</h1>
 
 <p><a href="#Overview">Overview</a></p>
 <ul>
@@ -117,10 +117,10 @@ alarmLimits</p>
 rawValue as follows:</p>
 <dl>
   <dt>value</dt>
-    <dd>status timeStamp and alarmSeverity</dd>
-  <dt>rawValue</dt>
     <dd>status, timeStamp, alarmSeverity, displayLimits, controlLimits, and
       alarmLimits.</dd>
+  <dt>rawValue</dt>
+    <dd>status, timeStamp, and alarmSeverity.</dd>
 </dl>
 
 <h2><a id="PVDataTypes"></a>Process Variable Data Types</h2>
@@ -140,11 +140,11 @@ rawValue as follows:</p>
     </ul>
   </li>
   <li>string - A Java String</li>
+  <li>enum - a String array of choices and an index selecting a choice.</li>
   <li>structure - A struture with fields of type primitive, string,
     structure, or array</li>
   <li>array - a one dimensional array of type primitive, string, structure,
     or array</li>
-  <li>enum - a String[] of choices and an index selecting a choice.</li>
 </ul>
 
 <h2><a id="PVIntrospection"></a>Process Variable Introspection</h2>
@@ -186,16 +186,16 @@ structures.</p>
 <p>The following provide introspection.</p>
 <pre>    interface Property {
         String getName(); // Property name
-        Field getField(); // Field will normally have no properties
+        String getFieldName(); // name of the field that has the property data
     }
 
     interface Field{
-        String getName(); // Field name
+        String getName();
+        Property[] getProperties();
+        Property getProperty(String propertyName);
         Type getType();
         boolean isConstant();
         void setConstant();
-        Property getProperty(String propertyName);
-        Property[] getProperties();
     } 
 
     interface Structure extends Field{
@@ -208,21 +208,17 @@ structures.</p>
     interface Array extends Field{
         PVType getElementType();
     }
-
-    interface Enum extends Field{
-        boolean isChoicesMutable();
-    }</pre>
+</pre>
 
 <p>The above definitions support the following:</p>
 <ul>
-  <li>PV - What every implements the PVData interfaces must define something
-    that provides access to the Introspection interface.</li>
   <li>Field
     <ul>
       <li>A field has a name</li>
       <li>A field has a Type</li>
       <li>A field can have an arbitrary number of associated properties
         including none.</li>
+      <li>A field can </li>
     </ul>
   </li>
   <li>Property
@@ -238,7 +234,6 @@ structures.</p>
     </ul>
   </li>
   <li>Array - The array has elements of one of the supported types</li>
-  <li>Enum - The choices can be immutable.Type.java</li>
 </ul>
 <hr />
 
@@ -311,7 +306,7 @@ structures.</p>
 
 <p>The interface for structure is:</p>
 <pre>    interface PVStructure extends PVData {
-        PVData[] getFieldPVData();
+        PVData[] getFieldPVDatas();
     }</pre>
 
 <h2><a id="ArrayAccess"></a>Array</h2>
@@ -389,7 +384,7 @@ Both get and put return the number of elements actually transfered. The
 arguments are:
 <dl>
   <dt><span style="font-family: courier">offset</span></dt>
-    <dd>The offset in the array</dd>
+    <dd>The offset in the PV array.</dd>
   <dt><span style="font-family: courier">len</span></dt>
     <dd>The maximum number of elements to transfer. The number actually
       transfered will be less than or equal to this value.</dd>
@@ -397,12 +392,12 @@ arguments are:
     <dd>The array into which the data should be copied. This array is
       supplied by the caller</dd>
   <dt><span style="font-family: courier">toOffset</span></dt>
-    <dd>The offset into the to array</dd>
+    <dd>The offset in <span style="font-family: courier;">to</span> </dd>
   <dt><span style="font-family: courier">from</span></dt>
     <dd>The array from which the data is taken. This array is supplied by the
       caller</dd>
   <dt><span style="font-family: courier">fromOffset</span></dt>
-    <dd>The offset into the from array</dd>
+    <dd>The offset in <span style="font-family: courier;">from</span></dd>
 </dl>
 
 <p>The caller must be prepared to make multiple calls to retrieve or put an
@@ -459,7 +454,10 @@ the following reads an entire array:</p>
         int fromLongArray(PVData pv, int offset, int len, long[]from, fromOffset);
         int fromFloatArray(PVData pv, int offset, int len, float[]from, fromOffset);
         int fromDoubleArray(PVData pv, int offset, int len, double[]from, fromOffset);
-    }</pre>
+    }
+
+
+The array methods all return the number of elements conveted. This can be less than <span style="font-family: courier;">len</span> if the PVData array contains less than j elements. </pre>
 <hr />
 
 <h1 style="text-align: center"><a id="FieldFactory"></a>Field Factory</h1>
@@ -467,17 +465,18 @@ the following reads an entire array:</p>
 
 <p>The field factory creates objects for each on the interspection
 interfaces. It has the following public methods:</p>
-<pre>public final class FieldFactory {
-    public static Array createArrayField(String name,
-        Type elementType,Property[] property) {...}
+<pre>
+public final class FieldFactory {
+    public static Property createProperty(String name, Field field) { ... }
+
+    public static Field createField(String name,
+        Type type,Property[] property) { ... }
 
     public static Enum createEnumField(String name,
         boolean choicesMutable,Property[] property) { ... }
 
-    public static Field createField(String name,
-        Type type,Property[] property) { ... }
-    
-    public static Property createProperty(String name, Field field) { ... }
+    public static Array createArrayField(String name,
+        Type elementType,Property[] property) {...}
  
     public static Structure createStructureField(String name,
         String structureName, Field[] field,Property[] property) { ... }
