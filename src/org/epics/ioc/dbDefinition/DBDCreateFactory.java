@@ -121,9 +121,15 @@ public final class  DBDCreateFactory {
         return new LinkSupportInstance(supportName,configStructName);
     }
 
+   static private void newLine(StringBuilder builder, int indentLevel) {
+        builder.append("\n");
+        for (int i=0; i <indentLevel; i++) builder.append(indentString);
+    }
+    static private String indentString = "    ";
+
     static private class MenuInstance implements DBDMenu
     {
-         public String[] getChoices() {
+        public String[] getChoices() {
             return choices;
         }
 
@@ -131,13 +137,20 @@ public final class  DBDCreateFactory {
             return menuName;
         }
         
-        public String toString() {
+        public String toString() { return getString(0);}
+
+        public String toString(int indentLevel) {
+            return getString(indentLevel);
+        }
+
+        private String getString(int indentLevel) {
             StringBuilder builder = new StringBuilder();
-            builder.append(String.format("menu %s {    ",menuName));
+            newLine(builder,indentLevel);
+            builder.append(String.format("menu %s { ",menuName));
             for(String value: choices) {
                 builder.append(String.format("\"%s\" ",value));
             }
-            builder.append("}\n");
+            builder.append("}");
             return builder.toString();
         }
 
@@ -220,20 +233,31 @@ public final class  DBDCreateFactory {
             return field.getType();
         }
 
-        public boolean isConstant() {
-            return field.isConstant();
+        public boolean isMutable() {
+            return field.isMutable();
         }
 
-        public void setConstant(boolean value) {
-            field.setConstant(value);
+        public void setMutable(boolean value) {
+            field.setMutable(value);
         }
         
-        public String toString() {
+        
+        public String toString() { return getString(0);}
+
+        public String toString(int indentLevel) {
+            return getString(indentLevel);
+        }
+
+        private String getString(int indentLevel) {
             StringBuilder builder = new StringBuilder();
-            builder.append(field.toString());
-            builder.append(String.format(" DBType %s ",dbType.toString()));
-            if(defaultValue!=null) builder.append(String.format("default \"%s\"",defaultValue));
-            builder.append(String.format(" asl %d design %b link %b readOnly %b",
+            builder.append(field.toString(indentLevel));
+            newLine(builder,indentLevel);
+            builder.append(String.format("DBType %s ",dbType.toString()));
+            if(defaultValue!=null) {
+                builder.append(String.format("default \"%s\"",defaultValue));
+            }
+            builder.append(String.format(
+                    " asl %d design %b link %b readOnly %b",
                     asl,isDesign,isLink,isReadOnly));
             return builder.toString();
         }
@@ -259,7 +283,8 @@ public final class  DBDCreateFactory {
         }
 
         // Use this for dbArray
-        FieldInstance(String fieldName,Type pvType,DBType dbType,Property[]property)
+        FieldInstance(String fieldName,
+            Type pvType,DBType dbType,Property[]property)
         {
             assert(dbType==DBType.dbArray);
             field = FieldFactory.createArrayField(fieldName,pvType,property);
@@ -268,7 +293,8 @@ public final class  DBDCreateFactory {
         }
         
         // Use this for dbStructure and for dbLink
-        FieldInstance(String fieldName, String structureName, DBDField[] dbdField, Property[]property)
+        FieldInstance(String fieldName, String structureName,
+            DBDField[] dbdField, Property[]property)
         {
             this.field = (Field)FieldFactory.createStructureField(
                     fieldName,structureName,dbdField,property);
@@ -303,11 +329,15 @@ public final class  DBDCreateFactory {
             return dbdMenu;
         }
         
-        public String toString() {
-            StringBuilder builder = new StringBuilder();
-            builder.append(super.toString());
-            builder.append(String.format("choicesMutable false "));
-            return builder.toString();
+        
+        public String toString() { return getString(0);}
+
+        public String toString(int indentLevel) {
+            return getString(indentLevel);
+        }
+
+        private String getString(int indentLevel) {
+            return super.toString(indentLevel);
         }
 
         MenuFieldInstance(String fieldName, DBDMenu dbdMenu, Property[]property)
@@ -346,11 +376,15 @@ public final class  DBDCreateFactory {
             return dbdStructure;
         }
         
-        public String toString() {
-            StringBuilder builder = new StringBuilder();
-            builder.append(super.toString());
-            builder.append(dbdStructure.toString());
-            return builder.toString();
+        
+        public String toString() { return getString(0);}
+
+        public String toString(int indentLevel) {
+            return getString(indentLevel);
+        }
+
+        private String getString(int indentLevel) {
+            return super.toString(indentLevel);
         }
 
         StructureFieldInstance(String fieldName,
@@ -376,10 +410,19 @@ public final class  DBDCreateFactory {
             return elementType;
         }
         
-        public String toString() {
+        
+        public String toString() { return getString(0);}
+
+        public String toString(int indentLevel) {
+            return getString(indentLevel);
+        }
+
+        private String getString(int indentLevel) {
             StringBuilder builder = new StringBuilder();
-            builder.append(super.toString());
-            builder.append(String.format("elementType %s ",elementType.toString()));
+            builder.append(super.toString(indentLevel));
+            newLine(builder,indentLevel);
+            builder.append(String.format("elementType %s ",
+                elementType.toString()));
             return builder.toString();
         }
 
@@ -432,31 +475,31 @@ public final class  DBDCreateFactory {
             return structure.getType();
         }
 
-        public boolean isConstant() {
-            return structure.isConstant();
+        public boolean isMutable() {
+            return structure.isMutable();
         }
 
-        public void setConstant(boolean value) {
-            structure.setConstant(value);
+        public void setMutable(boolean value) {
+            structure.setMutable(value);
         }
 
         StructureInstance(String name,
             DBDField[] dbdField,Property[] property)
         {
-            structure = FieldFactory.createStructureField(name,name,dbdField,property);
+            structure = FieldFactory.createStructureField(
+                name,name,dbdField,property);
             this.dbdField = dbdField;
         }
                 
-        public String toString() {
-            StringBuilder builder = new StringBuilder();
-            builder.append(String.format("\nas Structure\n%s",structure.toString()));
-            builder.append(String.format("\nas DBDStructure\n{\n"));
-            for(int i=0, n=dbdField.length; i < n; i++) {
-                DBDField field = dbdField[i];
-                builder.append(String.format("    {name %s  type  %s}\n",field.getName(),field.getDBType().toString()));;
-            }
-            builder.append(String.format("}\n"));
-            return builder.toString();
+        
+        public String toString() { return getString(0);}
+
+        public String toString(int indentLevel) {
+            return getString(indentLevel);
+        }
+
+        private String getString(int indentLevel) {
+            return structure.toString(indentLevel);
         }
 
         private Structure structure;
@@ -482,10 +525,18 @@ public final class  DBDCreateFactory {
             this.linkSupportName = supportName;
         }
         
-        public String toString() {
+        
+        public String toString() { return getString(0);}
+
+        public String toString(int indentLevel) {
+            return getString(indentLevel);
+        }
+
+        private String getString(int indentLevel) {
             StringBuilder builder = new StringBuilder();
+            newLine(builder,indentLevel);
             builder.append(String.format(
-                    "linkSupportName %s configStructName %s\n",
+                    "linkSupportName %s configStructName %s",
                     linkSupportName,configStructName));
             return builder.toString();
         }
