@@ -1,0 +1,407 @@
+<?xml version="1.0" encoding=""?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+       "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html>
+<head>
+  <meta http-equiv="content-type" content="" />
+  <title>EPICS JavaIoc: Database Access</title>
+</head>
+
+<body>
+<hr />
+
+<h1 style="text-align: center">EPICS JavaIoc: Database Access <br />
+2006.03.30</h1>
+<hr />
+<a href="#Overview">Overview</a> <br />
+<a href="#Instance">Record Instance Syntax</a>
+<ul>
+  <li><a href="#FieldAssignment">Field Assignmant</a>
+    <ul>
+      <li><a href="#FieldPrimitive">Primitive Types</a></li>
+      <li><a href="#FieldString">string</a></li>
+      <li><a href="#FieldStructure">structure</a></li>
+      <li><a href="#FieldArray">array</a></li>
+      <li><a href="#FieldMenu">menu</a></li>
+      <li><a href="#FieldEnumerated">enumerated</a></li>
+      <li><a href="#FieldLink">link</a></li>
+    </ul>
+  </li>
+</ul>
+<a href="#DBDataAccess">Record Instance Access</a><br />
+
+<ul>
+  <li><a href="#DBData">Base Interface for accesssing data</a></li>
+  <li><a href="#DBPVData">Scalar and String Data</a></li>
+  <li><a href="#EnumData">Enumerated Data</a></li>
+  <li><a href="#MenuData">Menu Data</a></li>
+  <li><a href="#StructureData">Structure Data</a></li>
+  <li><a href="#LinkData">Link Data</a></li>
+  <li><a href="#ArrayData">Array Data</a></li>
+</ul>
+<br />
+
+<hr />
+
+<h1 style="text-align: center"><a id="Overview"></a>Overview</h1>
+<hr />
+
+<p>An EPICS IOC contains a memory resident real time database. The real time
+database has a set of "smart" records. Each record is an instance on a record
+of a particular type. This package describes support for record instances.
+The following is discussed:</p>
+<ol>
+  <li>Record Instance Syntax
+    <p>The XML syntax for defining record instances.<br />
+    NOTE:</p>
+    <ul>
+      <li>A SAX parser will be written to create a runtime database from the
+        html files.</li>
+      <li>An XML Schema or DTD or something else should be created that
+        describes the syntax.</li>
+    </ul>
+  </li>
+  <li>Java Support for accessing fields of a record instance.</li>
+</ol>
+<hr />
+
+<h1 style="text-align: center"><a id="Instance"></a>Record Instance
+Syntax</h1>
+<hr />
+
+<p>The syntax for a record instance is:</p>
+<pre>&lt;record type = "recordType" name = "recordName"&gt;
+    fieldAssignment
+&lt;/record&gt;</pre>
+
+<p><span style="font-family: courier;">recordName</span> is a string with a
+combination of the following characters:</p>
+<ul>
+  <li><span style="font-family: courier">0-9 A-Z a-z _ - : ; &lt; &gt; [
+    ]</span></li>
+  <li>Any Unicode/UTF-8 character outside of the Basic Latin set</li>
+</ul>
+
+<p><span style="font-family: courier;">fieldAssignment</span> is described
+next.</p>
+
+<h2 style="text-align: center">Field Assignment</h2>
+
+<p>A <span style="font-family: courier">fieldAssignment</span> has the
+format:</p>
+<pre>    &lt;fieldName&gt;
+        &lt;!-- initializer --&gt;
+    &lt;/fieldName&gt;</pre>
+
+<p><span style="font-family: courier;">fieldName</span> must be a name
+definied in the record type definition.</p>
+
+<p>The syntax for the <span style="font-family: courier">initializer</span>
+depends on the field type.</p>
+
+<h3><a id="FieldPrimitive"></a>Primitive Types</h3>
+
+<p>For primitive types the initializer has the same format as the the Java
+constants for the type. For example if the type for field value is double:</p>
+<pre>    &lt;value&gt;.98&lt;/value&gt;</pre>
+
+<h3><a id="FieldString"></a>string</h3>
+
+<p>For string types the initializer is a valid Java string constant. For
+example:</p>
+<pre>    &lt;units&gt;voltage&lt;/units&gt;</pre>
+
+<h3><a id="FieldStructure"></a>structure</h3>
+
+<p>Structure fields are initialized via a recursive definition of field.</p>
+<pre>    &lt;structure name = "DisplayLimit"&gt;
+        &lt;field name = "low"&gt;&lt;double/&gt;&lt;/field&gt;
+        &lt;field name = "high"&gt;&lt;double /&gt;&lt;/field&gt;
+   &lt;/structure&gt;
+   ...
+   &lt;recordType name = "ai"&gt;
+   ...
+       &lt;field name = "displayLimit&gt;
+            &lt;structure name = "DisplayLimit" /&gt;
+       &lt;field/&gt;
+   ...</pre>
+
+<p>The following shows how to initialize field displayLimit.</p>
+<pre>    &lt;displayLimit&gt;
+         &lt;low&gt;0.0&lt;/low&gt;
+         &lt;high&gt;10.0&lt;/high&gt;
+    &lt;/displayLimit&gt;</pre>
+
+<h3><a id="FieldArray"></a>array</h3>
+The syntax for an array initializer is:
+<pre>    &lt;fieldName&gt;
+        &lt;capacity&gt;capacity&lt;/capacity&gt;
+        &lt;offset&gt;offset&lt;/offset&gt;
+        &lt;value&gt;value&lt;/value&gt;
+        &lt;value&gt;valueList&lt;/value&gt;
+        ...
+    &lt;/fieldName&gt;</pre>
+
+<p>where</p>
+<dl>
+  <dt style="font-family: courier;">capacity</dt>
+    <dd>The amount of storage to allocate for the array. If given this must
+      be the first element defined. If the recordType definition did not
+      specify a capacity this must be defined.</dd>
+  <dt style="font-family: courier;">offset</dt>
+    <dd>This can be specified multiple times. Each time it is given it sets
+      the offset for the next value.</dd>
+  <dt style="font-family: courier;">value</dt>
+    <dd>assigns a value to the array. If the array is an array of structures
+      then the value is actually a set of field definitions. If the array is
+      an array of array the value is another array initialixation.</dd>
+  <dt style="font-family: courier;">valueList</dt>
+    <dd>A list of values, which is a comma separated set of values. This is
+      only supported for primitive and string types.</dd>
+</dl>
+
+<p>Assume the following record definitions:</p>
+<pre>    &lt;field name = "intArray"&gt;
+        &lt;array&gt;
+            &lt;type&gt;&lt;int /&gt;&lt;/type&gt;
+        &lt;/array&gt;
+    &lt;/field&gt;
+    &lt;field name = "structArray"&gt;
+        &lt;type&gt;
+            &lt;array&gt;
+                &lt;structure name = "DisplayLimit /&gt;
+            &lt;/array&gt;
+        &lt;/type&gt;
+    &lt;/field&gt;</pre>
+
+<p>Then the following all perform the same initialization:</p>
+<pre>    &lt;intArray&gt;
+        &lt;capacity&gt;3&lt;/capacity&gt;
+        &lt;value&gt;0.0, 1.0, 2.0&lt;/value&gt;
+    &lt;/intArray&gt;
+    &lt;intArray&gt;
+        &lt;capacity&gt;3&lt;/capacity&gt;
+        &lt;offset&gt;1&lt;/offset&gt;
+        &lt;value&gt;1.0, 2.0&lt;/value&gt;
+    &lt;/intArray&gt;
+    &lt;intArray&gt;
+        &lt;capacity&gt;3&lt;/capacity&gt;
+        &lt;offset&gt;0&lt;/offset&gt;
+        &lt;value&gt;0.0&lt;/value&gt;
+        &lt;offset&gt;1&lt;/offset&gt;
+        &lt;value&gt;1.0&lt;/value&gt;
+        &lt;offset&gt;2&lt;/offset&gt;
+        &lt;value&gt;2.0&lt;/value&gt;
+    &lt;/intArray&gt;
+         </pre>
+
+<p>The following initializes a <span
+style="font-family: courier;">structArray</span></p>
+<pre>    &lt;structArray&gt;
+        &lt;capacity&gt;2&lt;/capacity&gt;
+        &lt;value&gt;
+            &lt;low&gt;0.0&lt;/low&gt;
+            &lt;high&gt;10.0&lt;/high&gt;
+        &lt;/value&gt;
+        &lt;value&gt;
+            &lt;low&gt;-10.0&lt;/low&gt;
+            &lt;high&gt;10.0&lt;/high&gt;
+        &lt;/value&gt;
+    &lt;/structArray&gt;</pre>
+
+<h3><a id="FieldMenu"></a>menu</h3>
+
+<p>A menu field is initialized as follows:</p>
+<pre>    &lt;fieldName&gt;stringValue&lt;/fieldName&gt;</pre>
+where stringValue is one of the allowed values for the menu.
+
+<p>For example:</p>
+<pre>    &lt;scan&gt;periodic&lt;/scan&gt;</pre>
+
+<h3><a id="FieldEnumerated"></a>enumerated</h3>
+
+<p>An enumerated field is initialized as follows:</p>
+<pre>    &lt;fieldName&gt;
+        &lt;index&gt;index&lt;/index&gt;
+        &lt;choice&gt;choice&lt;/choice&gt;
+        ...
+    &lt;/fieldName&gt;</pre>
+
+<p>where</p>
+<dl>
+  <dt style="font-family: courier;">index</dt>
+    <dd>The initial index which must be an integer.</dd>
+  <dt style="font-family: courier;">choice</dt>
+    <dd>A choice string. One of these must be specified for each choice.</dd>
+</dl>
+
+<p>For example:</p>
+<pre>    &lt;enumExample&gt;
+         &lt;index&gt;0&lt;/index&gt;
+         &lt;choice&gt;zeroState&lt;/choice&gt;
+         &lt;choics&gt;oneState&lt;/choice&gt;
+    &lt;/enumExample&gt;</pre>
+
+<h3><a id="FieldLink"></a>link</h3>
+A link field is initialized as follows:
+<pre>    &lt;fieldName&gt;
+        &lt;support name = "supportName" /&gt;
+        &lt;structure name = "supportStructureName"&gt;
+            &lt;fieldName&gt;fieldValue&lt;/fieldName&gt;
+            ...
+        &lt;/structure&gt;
+    &lt;/fieldName&gt;</pre>
+
+<p></p>
+
+<p>where</p>
+<dl>
+  <dt style="font-family: courier;">supportName</dt>
+    <dd>The name of one of the <span
+      style="font-family: courier;">linkSupport</span> definitions</dd>
+  <dt style="font-family: courier;">supportStructureName</dt>
+    <dd>The name of the support structure given with the support
+    definition</dd>
+  <dt style="font-family: courier;">fieldValue</dt>
+    <dd>The value for the structure field.</dd>
+</dl>
+
+<h1 style="text-align: center"><a id="DBDataAccess"></a>Record Instance
+Access</h1>
+<hr />
+
+<p>This section describes interfaces for acessing fields of record instances.
+These interfaces are of interest to the database, record support, link
+support, Channel Access, etc.</p>;
+<h2><a id="DBData"></a>Base Interface for accessing data</h2>
+<p>The following is the base interface for
+accessing a field of a record instance.</p>
+
+<pre>
+    public interface DBData extends PVData {
+        DBDField getDBDField();
+    }
+</pre>
+<p>Since it extends PVData it has the methods:</p>
+<pre>
+        Field getField();
+        String toString(int indentLevel);
+</pre>
+Field is the introspection interface for pvAccess Types.
+<h2><a id="DBPVData"></a>Scalar and String Data</h2>
+The following are the data interfaces for fields that have a pvAccess Type.
+<pre>
+    public interface DBBoolean extends DBData, PVBoolean{}
+    public interface DBByte extends DBData, PVByte {}
+    public interface DBShort extends DBData, PVShort{}
+    public interface DBInt extends DBData, PVInt{}
+    public interface DBLong extends DBData, PVLong{}
+    public interface DBFloat extends DBData, PVFloat{}
+    public interface DBDouble extends DBData, PVDouble{}
+    public interface DBString extends DBData{}
+</pre>
+Since each interface implements a PV data interface it has get/put
+methods to get and puit data values.
+<p>The following example shows how a double field can be read.</p>
+<pre>     double getValue(DBData db) {
+        DBField field = db.getDBField();
+        if(field.getDBType != dbPVType) throw new IllegalType;
+        if(field.getPVType() != pvDouble) throw new IllegalType;
+        PVDouble data = (PVDouble)db;
+        return data.get();
+    }</pre>
+
+<p>the following accomplishes the same but an exception will be thrown if the
+DBData is not a PVDouble:</p>
+<pre>     double getValue(DBData db) {
+        PVDouble data = (PVDouble)db; // exception may be thrown
+        return data.get();
+    }</pre>
+
+<h2><a id="EnumData"></a>Enumerated Data</h2>
+An enumerated field is accessed via the interface
+<pre>
+    public interface DBEnum extends DBData, PVEnum{}
+</pre>
+
+
+<h2><a id="MenuData"></a>Menu Data</h2>
+A menu field is accessed via the interface:
+<pre>
+    public interface DBMenu extends DBData, DBEnum {
+        String getMenuName();
+    }
+</pre>
+
+<p>The following shows how to access a menu field:</p>
+<pre>    void dumpMenuField(DBData db) {
+        DBField field = db.getDBField();
+        if(field.getDBType != dbMenu) throw new IllegalType;
+        // struct is for reflection
+        Structure struct = (Structure)db.getField();
+        // menu accesses data
+        Enumerated menu = (Enumerated)db;
+        int choice = menu.getIndex();
+        printf("field %s is menu %s. Value is %d %s\n",
+            field.getName(),struct.getStructureName(),
+            choice,menu.getChoice(choice));
+    }</pre>
+<h2><a id="StructureData"></a>Structure  Data</h2>
+<pre>
+
+    public interface DBStructure extends DBData, PVStructure {
+         DBData[] getFieldDBDatas();
+    }
+
+</pre>
+
+<h2><a id="LinkData"></a>Link Data</h2>
+<pre>
+    public interface DBLink extends DBStructure {
+        String getConfigStructureFieldName();
+        void putConfigStructureFieldName(DBD dbd,String name);
+        String getLinkSupportName();
+        void putLinkSupportName(String name);
+        DBStructure getConfigStructure();
+    }
+</pre>
+
+<h2><a id="ArrayData"></a>Array  Data</h2>
+The base interface for array fields is:
+<pre>
+    public interface DBArray extends DBData, PVArray {
+        DBDArrayField getDBDArrayField();
+    }
+</pre>
+The following are the interfaces for each of the array types:
+<pre>
+    public interface DBBooleanArray extends DBArray, PVBooleanArray{}
+    public interface DBByteArray extends DBArray, PVByteArray{}
+    public interface DBShortArray extends DBArray, PVShortArray{}
+    public interface DBIntArray extends DBArray, PVIntArray{}
+    public interface DBLongArray extends DBArray, PVLongArray{}
+    public interface DBFloatArray extends DBArray, PVFloatArray{}
+    public interface DBDoubleArray extends DBArray, PVDoubleArray{}
+    public interface DBStringArray extends DBArray, PVStringArray{}
+    public interface DBEnumArray extends DBArray, PVEnumArray{}
+    public interface DBMenuArray extends DBArray{
+        int get(int offset, int len, DBMenu[]to, int toOffset);
+        int put(int offset, int len, DBMenu[]from, int fromOffset);
+    }
+    public interface DBStructureArray extends DBArray{
+        int get(int offset, int len, DBStructure[]to, int toOffset);
+        int put(int offset, int len, DBStructure[]from, int fromOffset);
+    }
+    public interface DBArrayArray extends DBArray{
+        int get(int offset, int len, DBArray[]to, int toOffset);
+        int put(int offset, int len, DBArray[]from, int fromOffset);
+    }
+    public interface DBLinkArray extends DBArray{
+        int get(int offset, int len, DBLink[]to, int toOffset);
+        int put(int offset, int len, DBLink[]from, int fromOffset);
+    }
+</pre>
+
+
+</body>
+</html>
