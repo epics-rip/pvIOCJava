@@ -126,7 +126,7 @@ public class DatabaseExample {
     }
 
     private String name;
-    static Convert convert = ConvertFactory.getPVConvert();
+    private static Convert convert = ConvertFactory.getPVConvert();
 
     private static class BooleanData implements PVBoolean {
         boolean value;
@@ -138,6 +138,10 @@ public class DatabaseExample {
     
         public String toString() {
             return DatabaseExample.convert.getString(this);
+        }
+        
+        public String toString(int indentLevel) {
+            return DatabaseExample.convert.getString(this,indentLevel);
         }
     }
 
@@ -152,6 +156,10 @@ public class DatabaseExample {
         public String toString() {
             return DatabaseExample.convert.getString(this);
         }
+        
+        public String toString(int indentLevel) {
+            return DatabaseExample.convert.getString(this,indentLevel);
+        }
     }
     
     private static class ShortData implements PVShort {
@@ -164,6 +172,10 @@ public class DatabaseExample {
     
         public String toString() {
             return DatabaseExample.convert.getString(this);
+        }
+        
+        public String toString(int indentLevel) {
+            return DatabaseExample.convert.getString(this,indentLevel);
         }
     }
     
@@ -178,6 +190,10 @@ public class DatabaseExample {
         public String toString() {
             return DatabaseExample.convert.getString(this);
         }
+        
+        public String toString(int indentLevel) {
+            return DatabaseExample.convert.getString(this,indentLevel);
+        }
     }
     
     private static class LongData implements PVLong {
@@ -190,6 +206,10 @@ public class DatabaseExample {
     
         public String toString() {
             return DatabaseExample.convert.getString(this);
+        }
+        
+        public String toString(int indentLevel) {
+            return DatabaseExample.convert.getString(this,indentLevel);
         }
     }
     
@@ -204,6 +224,10 @@ public class DatabaseExample {
         public String toString() {
             return DatabaseExample.convert.getString(this);
         }
+        
+        public String toString(int indentLevel) {
+            return DatabaseExample.convert.getString(this,indentLevel);
+        }
     }
     
     private static class DoubleData implements PVDouble {
@@ -217,6 +241,10 @@ public class DatabaseExample {
         public String toString() {
             return DatabaseExample.convert.getString(this);
         }
+        
+        public String toString(int indentLevel) {
+            return DatabaseExample.convert.getString(this,indentLevel);
+        }
     }
     
     private static class StringData implements PVString {
@@ -229,6 +257,10 @@ public class DatabaseExample {
     
         public String toString() {
             return value;
+        }
+        
+        public String toString(int indentLevel) {
+            return DatabaseExample.convert.getString(this,indentLevel);
         }
     }
 
@@ -264,6 +296,10 @@ public class DatabaseExample {
         public String toString() {
             return DatabaseExample.convert.getString(this);
         }
+        
+        public String toString(int indentLevel) {
+            return DatabaseExample.convert.getString(this,indentLevel);
+        }
     }
 
     private static class StructureData implements PVStructure {
@@ -286,6 +322,10 @@ public class DatabaseExample {
     
         public String toString() {
             return DatabaseExample.convert.getString(this);
+        }
+        
+        public String toString(int indentLevel) {
+            return DatabaseExample.convert.getString(this,indentLevel);
         }
     }
     
@@ -329,6 +369,14 @@ public class DatabaseExample {
         public String toString() {
             return DatabaseExample.convert.getString(this);
         }
+        
+        public String toString(int indentLevel) {
+            return DatabaseExample.convert.getString(this,indentLevel);
+        }
+        
+        public boolean isCapacityMutable() {
+            return true;
+        }
     }
     
     private static class ByteArrayData implements PVByteArray {
@@ -370,6 +418,14 @@ public class DatabaseExample {
     
         public String toString() {
             return DatabaseExample.convert.getString(this);
+        }
+        
+        public String toString(int indentLevel) {
+            return DatabaseExample.convert.getString(this,indentLevel);
+        }
+        
+        public boolean isCapacityMutable() {
+            return true;
         }
     }
     
@@ -413,6 +469,14 @@ public class DatabaseExample {
         public String toString() {
             return DatabaseExample.convert.getString(this);
         }
+        
+        public String toString(int indentLevel) {
+            return DatabaseExample.convert.getString(this,indentLevel);
+        }
+        
+        public boolean isCapacityMutable() {
+            return true;
+        }
     }
     
     private static class IntArrayData implements PVIntArray {
@@ -454,6 +518,14 @@ public class DatabaseExample {
     
         public String toString() {
             return DatabaseExample.convert.getString(this);
+        }
+        
+        public String toString(int indentLevel) {
+            return DatabaseExample.convert.getString(this,indentLevel);
+        }
+        
+        public boolean isCapacityMutable() {
+            return true;
         }
     }
     
@@ -497,6 +569,14 @@ public class DatabaseExample {
         public String toString() {
             return DatabaseExample.convert.getString(this);
         }
+        
+        public String toString(int indentLevel) {
+            return DatabaseExample.convert.getString(this,indentLevel);
+        }
+        
+        public boolean isCapacityMutable() {
+            return true;
+        }
     }
     
     private static class FloatArrayData implements PVFloatArray {
@@ -538,6 +618,14 @@ public class DatabaseExample {
     
         public String toString() {
             return DatabaseExample.convert.getString(this);
+        }
+        
+        public String toString(int indentLevel) {
+            return DatabaseExample.convert.getString(this,indentLevel);
+        }
+        
+        public boolean isCapacityMutable() {
+            return true;
         }
     }
     
@@ -581,6 +669,14 @@ public class DatabaseExample {
         public String toString() {
             return DatabaseExample.convert.getString(this);
         }
+        
+        public String toString(int indentLevel) {
+            return DatabaseExample.convert.getString(this,indentLevel);
+        }
+        
+        public boolean isCapacityMutable() {
+            return true;
+        }
     }
     
     private static class StringArrayData implements PVStringArray {
@@ -622,6 +718,14 @@ public class DatabaseExample {
     
         public String toString() {
             return DatabaseExample.convert.getString(this);
+        }
+        
+        public String toString(int indentLevel) {
+            return DatabaseExample.convert.getString(this,indentLevel);
+        }
+        
+        public boolean isCapacityMutable() {
+            return true;
         }
 
     }
@@ -666,6 +770,14 @@ public class DatabaseExample {
         public String toString() {
             return DatabaseExample.convert.getString(this);
         }
+        
+        public String toString(int indentLevel) {
+            return DatabaseExample.convert.getString(this,indentLevel);
+        }
+        
+        public boolean isCapacityMutable() {
+            return true;
+        }
     }
     
     private static class StructureArrayData implements PVStructureArray {
@@ -708,6 +820,14 @@ public class DatabaseExample {
         public String toString() {
             return DatabaseExample.convert.getString(this);
         }
+        
+        public String toString(int indentLevel) {
+            return DatabaseExample.convert.getString(this,indentLevel);
+        }
+        
+        public boolean isCapacityMutable() {
+            return true;
+        }
     }
     
     private static class ArrayArrayData implements PVArrayArray {
@@ -749,6 +869,14 @@ public class DatabaseExample {
     
         public String toString() {
             return DatabaseExample.convert.getString(this);
+        }
+        
+        public String toString(int indentLevel) {
+            return DatabaseExample.convert.getString(this,indentLevel);
+        }
+        
+        public boolean isCapacityMutable() {
+            return true;
         }
     }
 }
