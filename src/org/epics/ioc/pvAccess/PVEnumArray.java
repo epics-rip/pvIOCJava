@@ -32,6 +32,7 @@ public interface PVEnumArray extends PVArray{
      * @return The number of elements transfered.
      * This is always less than or equal to len.
      * If the value is less then put should be called again.
+     * @throws IllegalStateException if the field is not mutable
      */
     int put(int offset, int len, PVEnum[]from, int fromOffset);
 }

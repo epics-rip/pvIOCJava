@@ -33,17 +33,19 @@ public interface Field {
      */
     Type getType();
     /**
-     * Is the field a constant
-     * @return returns true if the field is a constant.
-     * Being constant means that the data associated with the field
-     * can not be modified via the PVData interfaces.
+     * can the data for the field be modified?
+     * @return if it can be modified
      */
-    boolean isConstant();
+    boolean isMutable();
     /**
-     * Set the field to be a constant
-     * @param value should field be constant?
-     * Being constant means that the data associated with the field
-     * can not be modified via the PVData interfaces.
+     * specify if the data for the field can be modified
+     * @param value (false,true) if the data (can not, can) be modified
      */
-    void setConstant(boolean value);
+    void setMutable(boolean value);
+    /**
+     * convert to a string
+     * @param indentLevel indentation level
+     * @return the field as a string
+     */
+    String toString(int indentLevel);
 }

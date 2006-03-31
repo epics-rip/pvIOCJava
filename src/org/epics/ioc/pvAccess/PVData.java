@@ -11,8 +11,9 @@ package org.epics.ioc.pvAccess;
  */
 public interface PVData {
 	/**
-     * get the <i>Field</i> that describes the PV
+     * get the <i>Field</i> that describes the field
 	 * @return Field, which is the introspection interface
 	 */
 	Field getField();
+    String toString(int indentLevel);
 }

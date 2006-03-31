@@ -10,13 +10,14 @@ package org.epics.ioc.pvAccess;
  */
 public interface PVShort extends PVData{
 	/**
-     * get the <i>short</i> value stored in the PV
+     * get the <i>short</i> value stored in the field
 	 * @return short value of field
 	 */
 	short get();
     /**
-     * put the <i>short</i> value into the PV
+     * put the <i>short</i> value into the field
      * @param value new short value for field
+     * @throws IllegalStateException if the field is not mutable
      */
     void put(short value);
 }

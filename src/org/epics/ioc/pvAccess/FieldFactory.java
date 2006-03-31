@@ -52,13 +52,13 @@ public final class FieldFactory {
      * This must only be called for scalar types, i.e. <i>pvBoolean</i>, ... , <i>pvString</i>
      * For <i>pvEnum</i>, <i>pvArray</i>, and <i>pvStructure</i>
      * the appropriate create method must be called.
-     * An <i>IllegalArgumentException</i> is thrown if an illegal type is specified.
      * @param name field name
      * @param type field type 
      * @param property the field properties.
      * The properties must be created before calling this method.
      * <i>null</i> means that the field has no properties.
      * @return a <i>Field</i> interface for the newly created object.
+     * @throws <i>IllegalArgumentException</i> if an illegal type is specified.
      */
     public static Field createField(String name,
     Type type,Property[] property)
@@ -94,7 +94,13 @@ public final class FieldFactory {
         return new StructureInstance(name,structureName,field,property);
     } 
 
-    static private class ArrayInstance extends FieldInstance implements Array {
+    private static void newLine(StringBuilder builder, int indentLevel) {
+        builder.append("\n");
+        for (int i=0; i <indentLevel; i++) builder.append(indentString);
+    }
+    private static String indentString = "    ";
+
+    private static class ArrayInstance extends FieldInstance implements Array {
         Type elementType;
     
         ArrayInstance(String name, Type elementType, Property[] property) {
@@ -106,15 +112,25 @@ public final class FieldFactory {
             return elementType;
         }
 
-        public String toString() {
+
+        public String toString() { return getString(0);}
+
+        public String toString(int indentLevel) {
+            return getString(indentLevel);
+        }
+
+        private String getString(int indentLevel) {
             StringBuilder builder = new StringBuilder();
-            builder.append(super.toString());
-            builder.append(String.format("elementType %s ",elementType.toString()));
+            builder.append(super.toString(indentLevel));
+            newLine(builder,indentLevel);
+            builder.append(String.format("elementType %s ",
+                elementType.toString()));
             return builder.toString();
         }
+
     }
     
-    static private class EnumInstance extends FieldInstance implements Enum{
+    private static class EnumInstance extends FieldInstance implements Enum{
     
         private boolean choicesMutable;
         EnumInstance(String name, boolean choicesMutable, Property[] property) {
@@ -125,16 +141,26 @@ public final class FieldFactory {
             return choicesMutable;
         }
 
-        public String toString() {
+
+
+        public String toString() { return getString(0);}
+
+        public String toString(int indentLevel) {
+            return getString(indentLevel);
+        }
+
+        private String getString(int indentLevel) {
             StringBuilder builder = new StringBuilder();
-            builder.append(super.toString());
-            builder.append(String.format("choicesMutable %b ",choicesMutable));
+            builder.append(super.toString(indentLevel));
+            newLine(builder,indentLevel);
+            builder.append(String.format("choicesMutable %b ",
+                 choicesMutable));
             return builder.toString();
         }
     }
     
-    static private class FieldInstance implements Field {
-        protected boolean isConstant;
+    private static class FieldInstance implements Field {
+        protected boolean isMutable;
         protected String name;
         protected Property[] property;
         protected Type type;
@@ -144,7 +170,7 @@ public final class FieldFactory {
             this.type = type;
             if(property==null) property = new Property[0];
             this.property = property;
-            isConstant = false;
+            isMutable = true;
         }
     
         public String getName() {
@@ -166,31 +192,40 @@ public final class FieldFactory {
             return type;
         }
     
-        public boolean isConstant() {
-            return(isConstant);
+        public boolean isMutable() {
+            return(isMutable);
         }
     
-        public void setConstant(boolean value) {
-            isConstant = value;
+        public void setMutable(boolean value) {
+            isMutable = value;
             
         }
 
-        public String toString() {
+        public String toString() { return getString(0);}
+
+        public String toString(int indentLevel) {
+            return getString(indentLevel);
+        }
+
+        private String getString(int indentLevel) {
             StringBuilder builder = new StringBuilder();
-            builder.append(String.format("field %s type %s isConstant %b ",
-                    name,type.toString(),isConstant));
+            newLine(builder,indentLevel);
+            builder.append(String.format("field %s type %s isMutable %b ",
+                    name,type.toString(),isMutable));
             if(property.length>0) {
+                newLine(builder,indentLevel);
                 builder.append("property{");
-               for(Property prop : property) {
-                   builder.append(String.format("%s",prop.toString()));
-               }
-               builder.append("}");
+                for(Property prop : property) {
+                    builder.append(prop.toString(indentLevel + 1));
+                }
+                newLine(builder,indentLevel);
+                builder.append("}");
             }
             return builder.toString();
         }
     }
     
-    static private class PropertyInstance implements Property {
+    private static class PropertyInstance implements Property {
         private String fieldName;
         private String name;
     
@@ -198,10 +233,17 @@ public final class FieldFactory {
             this.name = name;
             this.fieldName = fieldName;
         }
-        
-        public String toString() {
+
+        public String toString() { return getString(0);}
+
+        public String toString(int indentLevel) {
+            return getString(indentLevel);
+        }
+
+        private String getString(int indentLevel) {
             StringBuilder builder = new StringBuilder();
-            builder.append(String.format("{name %s field %s}",
+            newLine(builder,indentLevel);
+            builder.append(String.format("{name = %s field = %s}",
                     name,fieldName));
             return builder.toString();
         }
@@ -210,7 +252,7 @@ public final class FieldFactory {
         public String getName() { return name;}
     }
     
-    static private class StructureInstance extends FieldInstance
+    private static class StructureInstance extends FieldInstance
         implements Structure
     {
         Field[] field;
@@ -251,14 +293,23 @@ public final class FieldFactory {
         public String getStructureName() {
             return structureName;
         }
-        
-        public String toString() {
+
+        public String toString() { return getString(0);}
+
+        public String toString(int indentLevel) {
+            return getString(indentLevel);
+        }
+
+        private String getString(int indentLevel) {
             StringBuilder builder = new StringBuilder();
-            builder.append(super.toString());
-            builder.append(String.format("\nstructure %s\n{\n",structureName));
+            builder.append(super.toString(indentLevel));
+            newLine(builder,indentLevel);
+            builder.append(String.format("structure %s {",
+                structureName));
             for(int i=0, n= field.length; i < n; i++) {
-                builder.append(String.format("    %s\n",field[i].toString()));
+                builder.append(field[i].toString(indentLevel + 1));
             }
+            newLine(builder,indentLevel);
             builder.append("}");
             return builder.toString();
         }

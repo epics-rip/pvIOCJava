@@ -208,7 +208,11 @@ public final class ConvertFactory {
         }
     
         public String getString(PVData pv) {
-            return ConvertToString(pv);
+            return ConvertToString(pv,0);
+        }
+    
+        public String getString(PVData pv,int indentLevel) {
+            return ConvertToString(pv,indentLevel);
         }
     
         public byte toByte(PVData pv) {
@@ -1334,7 +1338,13 @@ public final class ConvertFactory {
             }
         }
     
-        private String ConvertToString(PVData pv) {
+        private static void newLine(StringBuilder builder, int indentLevel) {
+            builder.append("\n");
+            for (int i=0; i <indentLevel; i++) builder.append(indentString);
+        }
+        private static String indentString = "    ";
+
+        private String ConvertToString(PVData pv,int indentLevel) {
             Field field = pv.getField();
             switch(field.getType()) {
             case pvUnknown:{
@@ -1378,8 +1388,8 @@ public final class ConvertFactory {
                     return data.get();
                 }
             case pvEnum: return convertEnum(pv);
-            case pvStructure: return convertStructure(pv);
-            case pvArray: return convertArray(pv);
+            case pvStructure: return convertStructure(pv,indentLevel);
+            case pvArray: return convertArray(pv,indentLevel);
             default:
                 return "unknown PVType";
             }
@@ -1397,33 +1407,33 @@ public final class ConvertFactory {
                  if(choice!=null) builder.append(choice);
                  builder.append("\" ");
             }
-            builder.append("}}");
+            builder.append( "}}");
             return builder.toString();
         }
     
-        private String convertStructure(PVData pv) {
+        private String convertStructure(PVData pv,int indentLevel) {
             PVStructure data = (PVStructure)pv;
             Structure structure = (Structure)pv.getField();
             StringBuilder builder = new StringBuilder();
-            builder.append(String.format("%s{",
+            newLine(builder,indentLevel);
+            builder.append(String.format("structure %s{",
                 structure.getStructureName()));
             PVData[] fieldsData = data.getFieldPVDatas();
             for(PVData fieldData : fieldsData) {
                 Field fieldnow = fieldData.getField();
-                builder.append(String.format("%s = ",
-                    fieldnow.getName()));
-                builder.append(ConvertToString(fieldData));
-                builder.append(" ");
+                newLine(builder,indentLevel+1);
+                builder.append(String.format("%s = ", fieldnow.getName()));
+                builder.append(ConvertToString(fieldData,indentLevel+1));
             }
+            newLine(builder,indentLevel);
             builder.append("}");
             return builder.toString();
         }
     
-        private String convertArray(PVData pv) {
+        private String convertArray(PVData pv,int indentLevel) {
             Array array = (Array)pv.getField();
             Type type = array.getElementType();
             StringBuilder builder = new StringBuilder();
-            builder.append("{");
             switch(type) {
             case pvUnknown:{
                     builder.append( "unknown type");
@@ -1432,6 +1442,7 @@ public final class ConvertFactory {
             case pvBoolean: {
                     PVBooleanArray data = (PVBooleanArray)pv;
                     boolean[] value = new boolean[1];
+                    builder.append("{");
                     for(int i=0; i < data.getLength(); i++) {
                         int num = data.get(i,1,value,0);
                         if(num==1) {
@@ -1444,11 +1455,13 @@ public final class ConvertFactory {
                              builder.append("???? ");
                         }
                     }
+                    builder.append("}");
                     break;
                 }
             case pvByte: {
                     PVByteArray data = (PVByteArray)pv;
                     byte[] value = new byte[1];
+                    builder.append("{");
                     for(int i=0; i < data.getLength(); i++) {
                         int num = data.get(i,1,value,0);
                         if(num==1) {
@@ -1457,11 +1470,13 @@ public final class ConvertFactory {
                              builder.append("???? ");
                         }
                     }
+                    builder.append("}");
                     break;
                 }
             case pvShort: {
                     PVShortArray data = (PVShortArray)pv;
                     short[] value = new short[1];
+                    builder.append("{");
                     for(int i=0; i < data.getLength(); i++) {
                         int num = data.get(i,1,value,0);
                         if(num==1) {
@@ -1470,11 +1485,13 @@ public final class ConvertFactory {
                              builder.append("???? ");
                         }
                     }
+                    builder.append("}");
                     break;
                 }
             case pvInt: {
                     PVIntArray data = (PVIntArray)pv;
                     int[] value = new int[1];
+                    builder.append("{");
                     for(int i=0; i < data.getLength(); i++) {
                         int num = data.get(i,1,value,0);
                         if(num==1) {
@@ -1483,11 +1500,13 @@ public final class ConvertFactory {
                              builder.append("???? ");
                         }
                     }
+                    builder.append("}");
                     break;
                 }
             case pvLong: {
                     PVLongArray data = (PVLongArray)pv;
                     long[] value = new long[1];
+                    builder.append("{");
                     for(int i=0; i < data.getLength(); i++) {
                         int num = data.get(i,1,value,0);
                         if(num==1) {
@@ -1496,24 +1515,28 @@ public final class ConvertFactory {
                              builder.append("???? ");
                         }
                     }
+                    builder.append("}");
                     break;
                 }
             case pvFloat: {
                     PVFloatArray data = (PVFloatArray)pv;
                     float[] value = new float[1];
+                    builder.append("{");
                     for(int i=0; i < data.getLength(); i++) {
                         int num = data.get(i,1,value,0);
                         if(num==1) {
                              builder.append(String.format("%f ",value[0]));
                         } else {
-                             builder.append("???? ");
+                             builder.append(indentString + "???? ");
                         }
                     }
+                    builder.append("}");
                     break;
                 }
             case pvDouble: {
                     PVDoubleArray data = (PVDoubleArray)pv;
                     double[] value = new double[1];
+                    builder.append("{");
                     for(int i=0; i < data.getLength(); i++) {
                         int num = data.get(i,1,value,0);
                         if(num==1) {
@@ -1522,11 +1545,13 @@ public final class ConvertFactory {
                              builder.append("???? ");
                         }
                     }
+                    builder.append("}");
                     break;
                 }
             case pvString: {
                     PVStringArray data = (PVStringArray)pv;
                     String[] value = new String[1]; 
+                    builder.append("{");
                     for(int i=0; i < data.getLength(); i++) {
                         value[0] = null; data.get(i,1,value,0);
                         if(value[0]!=null) {
@@ -1537,52 +1562,68 @@ public final class ConvertFactory {
                              builder.append("null ");
                         }
                     }
+                    builder.append("}");
                     break;
                 }
             case pvEnum: {
                     PVEnumArray data = (PVEnumArray)pv;
                     PVEnum[] value = new PVEnum[1]; 
+                    newLine(builder,indentLevel);
+                    builder.append("{");
                     for(int i=0; i < data.getLength(); i++) {
+                        newLine(builder,indentLevel);
+                        builder.append(indentString);
                         value[0] = null; data.get(i,1,value,0);
                         if(value[0]!=null) {
                             builder.append(convertEnum(value[0]));
-                            builder.append(" ");
                         } else {
                              builder.append("{} ");
                         }
                     }
+                    newLine(builder,indentLevel);
+                    builder.append("}");
                     break;
                 }
             case pvStructure: {
                     PVStructureArray data = (PVStructureArray)pv;
                     PVStructure[] value = new PVStructure[1]; 
+                    newLine(builder,indentLevel);
+                    builder.append("{");
                     for(int i=0; i < data.getLength(); i++) {
                         value[0] = null; data.get(i,1,value,0);
                         if(value[0]!=null) {
-                            builder.append(convertStructure(value[0]));
+                            builder.append(convertStructure(value[0],indentLevel + 1));
                         } else {
+                             newLine(builder,indentLevel + 1);
                              builder.append("null ");
                         }
                     }
+                    newLine(builder,indentLevel);
+                    builder.append("}");
                     break;
                 }
             case pvArray: {
                     PVArrayArray data = (PVArrayArray)pv;
                     PVArray[] value = new PVArray[1]; 
+                    newLine(builder,indentLevel);
+                    builder.append("{");
                     for(int i=0; i < data.getLength(); i++) {
+                        newLine(builder,indentLevel);
+                        builder.append(indentString);
                         value[0] = null; data.get(i,1,value,0);
                         if(value[0]!=null) {
-                            builder.append(convertArray(value[0]));
+                            builder.append(convertArray(value[0],indentLevel + 1));
                         } else {
-                             builder.append("{} ");
+                             builder.append("{}");
                         }
                     }
+                    newLine(builder,indentLevel);
+                    builder.append("}");
                     break;
                 }
             default:
                 builder.append(" array element is unknown PVType");
             }
-            builder.append("}");
             return builder.toString();
         }
     }

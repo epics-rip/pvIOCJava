@@ -21,4 +21,10 @@ public interface Property {
      * @return the field name
      */
     String getFieldName();
+    /**
+     * convert to a string
+     * @param indentLevel indentation level
+     * @return the property as a string
+     */
+    String toString(int indentLevel);
 }

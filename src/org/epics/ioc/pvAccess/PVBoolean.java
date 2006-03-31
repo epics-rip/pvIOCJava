@@ -10,13 +10,14 @@ package org.epics.ioc.pvAccess;
  */
 public interface PVBoolean extends PVData{
 	/**
-     * get the <i>booolean</i> value stored in the PV.
+     * get the <i>booolean</i> value stored in the field.
 	 * @return boolean value of field
 	 */
 	boolean get();
     /**
-     * put the PV from a <i>boolean</i> value
+     * put the field from a <i>boolean</i> value
      * @param value new boolean value for field
+     * @throws IllegalStateException if the field is not mutable
      */
     void put(boolean value);
 }

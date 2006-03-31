@@ -18,6 +18,7 @@ public interface PVArray extends PVData{
     /**
      * Set the length of the array
      * @param len Set the length. Is this needed?
+     * @throws IllegalStateException if the field is not mutable
      */
     void setLength(int len);
     /**
@@ -30,4 +31,10 @@ public interface PVArray extends PVData{
      * @param len The new capacity for the array
      */
     void setCapacity(int len);
+    /**
+     * Can the capacity be changed?
+     * @return if it can be modified
+     * @throws IllegalStateException if the capacity can't be changed
+     */
+    boolean isCapacityMutable();
 }
