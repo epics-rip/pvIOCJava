@@ -269,7 +269,13 @@ public class DatabaseExample {
         private String[] choice;
         private Enum field;
 
-        EnumData(Enum field) {this.field = field; index = 0; choice = null;}
+        private final static String[] EMPTY_STRING_ARRAY = new String[0];
+
+        EnumData(Enum field) {
+            this.field = field;
+            index = 0;
+            choice = EMPTY_STRING_ARRAY;
+        }
 
         public String[] getChoices() {
             return choice;
@@ -334,8 +340,13 @@ public class DatabaseExample {
         private int capacity = 0;
         boolean[] value;
         Array array;
+
+        private final static boolean[] EMPTY_BOOLEAN_ARRAY = new boolean[0];
     
-        BooleanArrayData(Array array) {this.array = array; value = null;}
+        BooleanArrayData(Array array) {
+            this.array = array;
+            value = EMPTY_BOOLEAN_ARRAY;
+        }
         public Field getField() { return array;}
         public int getLength(){ return length;}
         public int getCapacity(){ return capacity;}
@@ -384,8 +395,13 @@ public class DatabaseExample {
         private int capacity = 0;
         byte[] value;
         Array array;
+
+        private final static byte[] EMPTY_BYTE_ARRAY = new byte[0];
     
-        ByteArrayData(Array array) {this.array = array; value = null;}
+        ByteArrayData(Array array) {
+            this.array = array;
+            value = EMPTY_BYTE_ARRAY;
+        }
         public Field getField() { return array;}
         public int getLength(){ return length;}
         public int getCapacity(){ return capacity;}
@@ -434,8 +450,13 @@ public class DatabaseExample {
         private int capacity = 0;
         short[] value;
         Array array;
+
+        private final static short[] EMPTY_SHORT_ARRAY = new short[0];
     
-        ShortArrayData(Array array) {this.array = array; value = null;}
+        ShortArrayData(Array array) {
+            this.array = array;
+            value = EMPTY_SHORT_ARRAY;
+        }
         public Field getField() { return array;}
         public int getLength(){ return length;}
         public int getCapacity(){ return capacity;}
@@ -484,8 +505,13 @@ public class DatabaseExample {
         private int capacity = 0;
         int[] value;
         Array array;
+
+        private final static int[] EMPTY_INT_ARRAY = new int[0];
     
-        IntArrayData(Array array) {this.array = array; value = null;}
+        IntArrayData(Array array) {
+            this.array = array;
+            value = EMPTY_INT_ARRAY;
+        }
         public Field getField() { return array;}
         public int getLength(){ return length;}
         public int getCapacity(){ return capacity;}
@@ -534,8 +560,13 @@ public class DatabaseExample {
         private int capacity = 0;
         long[] value;
         Array array;
+
+        private final static long[] EMPTY_LONG_ARRAY = new long[0];
     
-        LongArrayData(Array array) {this.array = array; value = null;}
+        LongArrayData(Array array) {
+            this.array = array;
+            value = EMPTY_LONG_ARRAY;
+        }
         public Field getField() { return array;}
         public int getLength(){ return length;}
         public int getCapacity(){ return capacity;}
@@ -584,8 +615,13 @@ public class DatabaseExample {
         private int capacity = 0;
         float[] value;
         Array array;
+
+        private final static float[] EMPTY_FLOAT_ARRAY = new float[0];
     
-        FloatArrayData(Array array) {this.array = array; value = null;}
+        FloatArrayData(Array array) {
+            this.array = array;
+            value = EMPTY_FLOAT_ARRAY;
+        }
         public Field getField() { return array;}
         public int getLength(){ return length;}
         public int getCapacity(){ return capacity;}
@@ -634,8 +670,13 @@ public class DatabaseExample {
         private int capacity = 0;
         double[] value;
         Array array;
+
+        private final static double[] EMPTY_DOUBLE_ARRAY = new double[0];
     
-        DoubleArrayData(Array array) {this.array = array; value = null;}
+        DoubleArrayData(Array array) {
+            this.array = array;
+            value = EMPTY_DOUBLE_ARRAY;
+        }
         public Field getField() { return array;}
         public int getLength(){ return length;}
         public int getCapacity(){ return capacity;}
@@ -684,8 +725,13 @@ public class DatabaseExample {
         private int capacity = 0;
         String[] value;
         Array array;
+
+        private final static String[] EMPTY_STRING_ARRAY = new String[0];
     
-        StringArrayData(Array array) {this.array = array; value = null;}
+        StringArrayData(Array array) {
+            this.array = array;
+            value = EMPTY_STRING_ARRAY;
+        }
         public Field getField() { return array;}
         public int getLength(){ return length;}
         public int getCapacity(){ return capacity;}
@@ -735,8 +781,13 @@ public class DatabaseExample {
         private int capacity = 0;
         PVEnum[] value;
         Array array;
+
+        private final static PVEnum[] EMPTY_PVENUM_ARRAY = new PVEnum[0];
     
-        EnumArrayData(Array array) {this.array = array; value = null;}
+        EnumArrayData(Array array) {
+            this.array = array;
+            value = EMPTY_PVENUM_ARRAY;
+        }
         public Field getField() { return array;}
         public int getLength(){ return length;}
         public int getCapacity(){ return capacity;}
@@ -785,8 +836,13 @@ public class DatabaseExample {
         private int capacity = 0;
         PVStructure[] value;
         Array array;
+
+        private final static PVStructure[] EMPTY_PVS_ARRAY = new PVStructure[0];
     
-        StructureArrayData(Array array) {this.array = array; value = null;}
+        StructureArrayData(Array array) {
+            this.array = array;
+            value = EMPTY_PVS_ARRAY;
+        }
         public Field getField() { return array;}
         public int getLength(){ return length;}
         public int getCapacity(){ return capacity;}
@@ -835,8 +891,13 @@ public class DatabaseExample {
         private int capacity = 0;
         PVArray[] value;
         Array array;
+
+        private final static PVArray[] EMPTY_PVA_ARRAY = new PVArray[0];
     
-        ArrayArrayData(Array array) {this.array = array; value = null;}
+        ArrayArrayData(Array array) {
+            this.array = array;
+            value = EMPTY_PVA_ARRAY;
+        }
         public Field getField() { return array;}
         public int getLength(){ return length;}
         public int getCapacity(){ return capacity;}

@@ -73,14 +73,15 @@ public class DBDTest extends TestCase {
         assertNotNull(rawValue);
         DBDArrayField doubleArray = DBDCreateFactory.createDBDArrayField(
             "doubleArray",Type.pvDouble,DBType.dbPvType,null);
-        DBDStructureField input = DBDCreateFactory.createDBDStructureField(
-            "input",inputLink,null);
-        assertNotNull(input);
+        DBDStructureField inputLinkField = DBDCreateFactory.createDBDStructureField(
+            "inputLink",inputLink,null);
+        assertNotNull(inputLink);
         DBDArrayField processField = DBDCreateFactory.createDBDArrayField(
             "process",Type.pvStructure,DBType.dbLink,null);
         assertNotNull(processField);
+        DBDLinkField input = DBDCreateFactory.createDBDLinkField("input",null);
         fields = new DBDField[] {
-            scan,display,value,rawValue,doubleArray,input,processField};
+            scan,display,value,rawValue,doubleArray,inputLinkField,processField,input};
         DBDStructure recordType = DBDCreateFactory.createDBDStructure(
                 "ai",fields,null);
         assertNotNull(recordType);

@@ -46,8 +46,7 @@ public abstract class AbstractDBArray implements DBArray{
      * @return the DBType
      */
     public DBType getElementDBType() {
-        dbdArrayField.getElementDBType();
-        return null;
+        return dbdArrayField.getElementDBType();
     }
 
     /* (non-Javadoc)

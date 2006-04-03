@@ -2,7 +2,6 @@
  * 
  */
 package org.epics.ioc.dbDefinition;
-import org.epics.ioc.dbAccess.*;
 import org.epics.ioc.pvAccess.*;
 
 /**

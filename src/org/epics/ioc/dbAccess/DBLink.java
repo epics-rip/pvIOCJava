@@ -3,6 +3,7 @@
  */
 package org.epics.ioc.dbAccess;
 import org.epics.ioc.dbDefinition.*;
+import org.epics.ioc.pvAccess.*;
 
 /**
  * Interface for accessing the link field of a record instance.
@@ -16,11 +17,10 @@ public interface DBLink extends DBStructure {
      */
     String getConfigStructureFieldName();
     /**
-     * specvify the DBD that defines the structure and the name of the field that has the structure.
-     * @param dbd the DBD that has the structure description
+     * specify the name of the field that has the configuration information.
      * @param name the name of the field that has the configuration sytructure
      */
-    void putConfigStructureFieldName(DBD dbd,String name);
+    void putConfigStructureFieldName(String name);
     /**
      * get the name of the link support
      * @return the support name
@@ -28,14 +28,7 @@ public interface DBLink extends DBStructure {
     String getLinkSupportName();
     /**
      * specify the link support name.
-     * This will also determine the configuration support structure
      * @param name the support name
      */
     void putLinkSupportName(String name);
-    /**
-     * get the configuration structure.
-     * IS THIS NEEDED?
-     * @return the DBStructure
-     */
-    DBStructure getConfigStructure();
 }

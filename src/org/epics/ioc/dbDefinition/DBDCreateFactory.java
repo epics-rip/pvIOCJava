@@ -3,7 +3,6 @@
  */
 package org.epics.ioc.dbDefinition;
 import org.epics.ioc.pvAccess.*;
-import org.epics.ioc.dbAccess.*;
 import org.epics.ioc.pvAccess.Enum;
 
 /**
@@ -68,6 +67,33 @@ public final class  DBDCreateFactory {
     }
 
     /**
+     * creates a DBDLinkField
+     * This must only be used for link fields
+     * @param fieldName name of the field
+     * @param property an array of properties for the field
+     * @return interface for the newly created field
+     */
+    public static DBDLinkField createDBDLinkField(String fieldName,
+        Property[]property)
+    {
+        if(linkDbdStructure==null) createLinkDbdStructure();
+        return new LinkFieldInstance(fieldName,linkDbdStructure,property);
+    }
+    private static DBDStructure linkDbdStructure = null;
+
+    private static void createLinkDbdStructure()
+    {
+        DBDField dbdConfigStructName = DBDCreateFactory.createDBDField(
+            "configStructName",Type.pvString,DBType.dbPvType,null);
+        DBDField dbdLinkSupportName = DBDCreateFactory.createDBDField(
+            "linkSupportName",Type.pvString,DBType.dbPvType,null);
+        DBDField[] dbdField = new DBDField[]{
+            dbdConfigStructName,dbdLinkSupportName};
+        linkDbdStructure = DBDCreateFactory.createDBDStructure(
+            "link",dbdField,null);
+    }
+
+    /**
      * creates a DBDArrayField
      * This must only be used for array fields
      * @param fieldName name of the field
@@ -82,18 +108,6 @@ public final class  DBDCreateFactory {
         return new ArrayFieldInstance(fieldName,pvType,dbType,property);
     }
     
-    /**
-     * creates a DBDField that describes a link field.
-     * This must only be used for a link field.
-     * The Type will be pvUnknown and the DBType will be dbLink.
-     * @param fieldName name of the field
-     * @param property an array of properties for the field
-     * @return interface for the newly created field
-     */
-    public static DBDField createDBDLinkField(String fieldName,Property[]property)
-    {
-        return new FieldInstance(fieldName,Type.pvUnknown,DBType.dbLink,property);
-    }
 
     /**
      * create a DBDStructure.
@@ -293,12 +307,12 @@ public final class  DBDCreateFactory {
         }
         
         // Use this for dbStructure and for dbLink
-        FieldInstance(String fieldName, String structureName,
+        FieldInstance(String fieldName, DBType dbType,String structureName,
             DBDField[] dbdField, Property[]property)
         {
             this.field = (Field)FieldFactory.createStructureField(
                     fieldName,structureName,dbdField,property);
-            this.dbType = DBType.dbStructure;
+            this.dbType = dbType;
             initAttribute();
         }
         
@@ -390,12 +404,29 @@ public final class  DBDCreateFactory {
         StructureFieldInstance(String fieldName,
             DBDStructure dbdStructure, Property[]property)
         {
-            super(fieldName,dbdStructure.getStructureName(),
+            this(fieldName,DBType.dbStructure,dbdStructure,property);
+        }
+        
+        StructureFieldInstance(String fieldName,
+            DBType dbType,DBDStructure dbdStructure, Property[]property)
+        {
+            super(fieldName,dbType,dbdStructure.getStructureName(),
                     dbdStructure.getDBDFields(),property);
             this.dbdStructure = dbdStructure;
         }
         
         private DBDStructure dbdStructure;
+    }
+ 
+    static private class LinkFieldInstance extends StructureFieldInstance
+        implements DBDLinkField
+    {
+
+        LinkFieldInstance(String fieldName,
+            DBDStructure dbdStructure,Property[]property)
+        {
+            super(fieldName,DBType.dbLink,dbdStructure,property);
+        }
     }
 
     static private class ArrayFieldInstance extends FieldInstance
@@ -407,7 +438,7 @@ public final class  DBDCreateFactory {
         }
 
         public DBType getElementDBType() {
-            return elementType;
+            return elementDBType;
         }
         
         
@@ -421,19 +452,19 @@ public final class  DBDCreateFactory {
             StringBuilder builder = new StringBuilder();
             builder.append(super.toString(indentLevel));
             newLine(builder,indentLevel);
-            builder.append(String.format("elementType %s ",
-                elementType.toString()));
+            builder.append(String.format("elementDBType %s ",
+                elementDBType.toString()));
             return builder.toString();
         }
 
         ArrayFieldInstance(String fieldName,Type pvType,
             DBType dbType, Property[]property)
         {
-            super(fieldName,pvType,DBType.dbStructure,property);
-            elementType = dbType;
+            super(fieldName,pvType,dbType,property);
+            elementDBType = dbType;
         }
         
-        private DBType elementType;
+        private DBType elementDBType;
     }
 
     static private class StructureInstance implements DBDStructure

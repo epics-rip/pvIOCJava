@@ -68,15 +68,23 @@ public class DBTest extends TestCase {
         DBDField rawValue = DBDCreateFactory.createDBDField(
             "rawValue",Type.pvInt,DBType.dbPvType,null);
         assertNotNull(rawValue);
-        DBDStructureField input = DBDCreateFactory.createDBDStructureField(
-            "input",inputLink,null);
+        DBDArrayField doubleArray = DBDCreateFactory.createDBDArrayField(
+            "doubleArray",Type.pvDouble,DBType.dbPvType,null);
+        DBDLinkField input = DBDCreateFactory.createDBDLinkField("input",
+            null);
         assertNotNull(input);
         DBDArrayField processField = DBDCreateFactory.createDBDArrayField(
             "process",Type.pvStructure,DBType.dbLink,null);
         assertNotNull(processField);
-        fields = new DBDField[] {scan,display,value,rawValue,input,processField};
-// link fields fail. Needs more work
-fields = new DBDField[] {scan,display,value,rawValue};
+        fields = new DBDField[] {
+            scan,
+            display,
+            value,
+            rawValue,
+            doubleArray,
+            input,
+            processField
+        };
         DBDStructure recordType = DBDCreateFactory.createDBDStructure(
             "ai",fields,null);
         assertNotNull(recordType);
@@ -107,6 +115,9 @@ fields = new DBDField[] {scan,display,value,rawValue};
         DBStructure displayData = null;
         DBDouble valueData = null;
         DBInt rawValueData = null; 
+        DBDoubleArray doubleArrayData = null;
+        DBLink inputData = null;
+        DBLinkArray processData = null;
         DBData[] dbData = dbRecord.getFieldDBDatas();
         for(int i=0; i< dbData.length; i++) {
             Field field = dbData[i].getField();
@@ -115,14 +126,38 @@ fields = new DBDField[] {scan,display,value,rawValue};
             if(fieldName.equals("displayLimit")) displayData = (DBStructure)dbData[i];
             if(fieldName.equals("value")) valueData = (DBDouble)dbData[i];
             if(fieldName.equals("rawValue")) rawValueData = (DBInt)dbData[i];
+            if(fieldName.equals("doubleArray")) doubleArrayData = (DBDoubleArray)dbData[i];
+            if(fieldName.equals("input")) inputData = (DBLink)dbData[i];
+            if(fieldName.equals("process")) processData = (DBLinkArray)dbData[i];
         }
         assertNotNull(scanData);
         assertNotNull(displayData);
         assertNotNull(valueData);
         assertNotNull(rawValueData);
+        assertNotNull(doubleArrayData);
+        assertNotNull(inputData);
+        assertNotNull(processData);
         scanData.setIndex(2);
         valueData.put(10.0);
         rawValueData.put(10);
+        doubleArrayData.setCapacity(2);
+        double[] dvalue = new double[] { 1.0, 10.0};
+        doubleArrayData.put(0,2,dvalue,0);
+        inputData.putConfigStructureFieldName("inputConfig");
+        inputData.putLinkSupportName("linkSupport");
+        processData.setCapacity(2);
+        DBDLinkField process0 = DBDCreateFactory.createDBDLinkField("process0",
+                null);
+        DBLink dbLink0 = FieldDataFactory.createLinkData(process0);
+        dbLink0.putConfigStructureFieldName("process0Config");
+        dbLink0.putLinkSupportName("process0LinkSuppport");
+        DBDLinkField process1 = DBDCreateFactory.createDBDLinkField("process1",
+                null);
+        DBLink dbLink1 = FieldDataFactory.createLinkData(process1);
+        dbLink1.putConfigStructureFieldName("process1Config");
+        dbLink1.putLinkSupportName("process1LinkSuppport");
+        DBLink[] dbLinks = new DBLink[] {dbLink0,dbLink1};
+        processData.put(0,2,dbLinks,0);
         System.out.print(dbRecord.toString());
     }
 

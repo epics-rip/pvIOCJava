@@ -77,21 +77,9 @@ public class FieldDataFactory {
      * @param dbdField the reflection interface for the field
      * @return the DBLink implementation
      */
-    public static DBLink createLinkData(DBDField dbdField)
+    public static DBLink createLinkData( DBDLinkField dbdLinkField)
     {
-        DBDStructureField dbdStructureField = DBDCreateFactory.createDBDStructureField(
-                dbdField.getName(),dbdLinkStructure,dbdField.getPropertys());
-        return new LinkData(dbdStructureField);
-    }
-    
-    private static DBDStructure dbdLinkStructure;
-    {
-        DBDField dbdConfigStructName = DBDCreateFactory.createDBDField(
-                "configStructName",Type.pvString,DBType.dbPvType,null);
-        DBDField dbdLinkSupportName = DBDCreateFactory.createDBDField(
-                "linkSupportName",Type.pvString,DBType.dbPvType,null);
-        DBDField[] dbdField = new DBDField[]{dbdConfigStructName,dbdLinkSupportName};
-        dbdLinkStructure = DBDCreateFactory.createDBDStructure("link",dbdField,null);
+        return new LinkData(dbdLinkField);
     }
 
     /**
@@ -104,8 +92,8 @@ public class FieldDataFactory {
     public static DBArray createArrayData(
             DBDArrayField dbdArrayField,int capacity,boolean capacityMutable)
     {
-        DBType dbType= dbdArrayField.getDBType();
-        switch(dbType) {
+        DBType elementDbType= dbdArrayField.getElementDBType();
+        switch(elementDbType) {
         case dbPvType: {
                 Type elementType = dbdArrayField.getElementType();
                 switch(elementType) {
@@ -397,294 +385,35 @@ public class FieldDataFactory {
 
     }
 
-    private static class EnumData extends AbstractDBData implements DBEnum {
+    private static class EnumData extends AbstractDBEnum {
 
-        public String[] getChoices() {
-            return choice;
-        }
-        
-        public int getIndex() {
-            return index;
-        }
-        public boolean setChoices(String[] choice) {
-            if(super.getField().isMutable()) {
-                this.choice = choice;
-                return true;
-            }
-            return false;
-        }
-        
-        public void setIndex(int index) {
-            if(super.getField().isMutable()) {
-                this.index = index;
-                return;
-            }
-            throw new IllegalStateException("PVData.isMutable is false");
-        }
-        
-        public String toString() {
-            return convert.getString(this);
-        }
-        
-        public String toString(int indentLevel) {
-            return convert.getString(this, indentLevel);
-        }
         
         EnumData(DBDField dbdField, String[]choice) {
-            super(dbdField);
-            index = 0;
-            if(choice==null) choice = new String[0];
-            this.choice = choice;
+            super(dbdField,choice);
         }
-        
-        private int index;
-        private String[]choice;
-
     }
 
-    private static class MenuData extends AbstractDBData implements DBMenu
-    {
+    private static class MenuData extends AbstractDBMenu {
 
-        public String getMenuName() {
-            return menuName;
-        }
-
-        public String[] getChoices() {
-            return choice;
-        }
-        
-        public int getIndex() {
-            return index;
-        }
-        public boolean setChoices(String[] choice) {
-            throw new UnsupportedOperationException(
-                "Menu choices can not be modified");
-        }
-        
-        public void setIndex(int index) {
-            if(super.getField().isMutable()) { this.index = index; return; }
-            throw new IllegalStateException("PVData.isMutable is false");
-        }
-        
-        public String toString() { return getString(0);}
-        
-        public String toString(int indentLevel) {
-            return getString(indentLevel);
-        }
-
-        private String getString(int indentLevel) {
-            StringBuilder builder = new StringBuilder();
-            builder.append(convert.getString(this,indentLevel));
-            newLine(builder,indentLevel + 1);
-            builder.append(String.format("DBType %s ",
-                    this.getDBType().toString()));
-            return builder.toString();
-        }
-        
         MenuData(DBDMenuField dbdMenuField) {
             super(dbdMenuField);
-            index = 0;
-            DBDMenu dbdMenu = dbdMenuField.getDBDMenu();
-            this.choice = dbdMenu.getChoices();
-            this.menuName = dbdMenu.getName();
         }
         
-        private int index;
-        private String[]choice;
-        private String menuName;
-
     }
 
-    private static class StructureData extends AbstractDBData
-        implements DBStructure
+    private static class StructureData extends AbstractDBStructure
     {
-
-        public PVData[] getFieldPVDatas() {
-            return pvData;
-        }
-
-        public DBData[] getFieldDBDatas() {
-            return dbData;
-        }
-
-        public String toString() { return getString(0);}
-
-        public String toString(int indentLevel) {
-            return getString(indentLevel);
-        }
-
-        private String getString(int indentLevel) {
-            StringBuilder builder = new StringBuilder();
-            newLine(builder,indentLevel);
-            Structure structure = (Structure)this.getField();
-            builder.append("structure " + structure.getStructureName() + "{");
-            for(int i=0, n= dbData.length; i < n; i++) {
-                newLine(builder,indentLevel + 1);
-                Field field = pvData[i].getField();
-                builder.append(field.getName() + " = ");
-                DBDField dbdField = dbData[i].getDBDField();
-                switch(dbdField.getDBType()) {
-                case dbPvType:
-                    builder.append(convert.getString(
-                        dbData[i],indentLevel + 1));
-                    break;
-                case dbMenu:
-                    builder.append(((MenuData)dbData[i]).toString(
-                        indentLevel + 1));
-                    break;
-                case dbStructure:
-                    builder.append(((StructureData)dbData[i]).toString(
-                        indentLevel + 1));
-                    break;
-                case dbArray:
-                    builder.append(((AbstractDBArray)dbData[i]).toString(
-                        indentLevel + 1));
-                    break;
-                case dbLink:builder.append(((LinkData)dbData[i]).toString(
-                        indentLevel + 1));
-                     break;
-                }
-                
-            }
-            newLine(builder,indentLevel);
-            builder.append("}");
-            return builder.toString();
-        }
-
-        private DBData constructPv(DBDField dbdField) {
-           Type type =  dbdField.getType();
-           if(type!=Type.pvEnum) return createScalarData(dbdField);
-           String[] choice = new String[0];
-           return createEnumData(dbdField,choice);
-        }
-        
         StructureData(DBDStructureField dbdStructureField) {
             super(dbdStructureField);
-            DBDStructure dbdStructure = dbdStructureField.getDBDStructure();
-            DBDField[] dbdField = dbdStructure.getDBDFields();
-            dbData = new DBData[dbdField.length];
-            pvData = new PVData[dbData.length];
-            for(int i=0; i < dbData.length; i++) {
-                DBDField field = dbdField[i];
-                switch(field.getDBType()) {
-                case dbPvType:
-                    dbData[i] = constructPv(field);
-                    break;
-                case dbMenu:
-                    dbData[i] = createMenuData((DBDMenuField)field);
-                    break;
-                case dbStructure:
-                    dbData[i] = createStructureData((DBDStructureField)field);
-                    break;
-                case dbArray:
-                    dbData[i] = createArrayData((DBDArrayField)field,0,true);
-                case dbLink:
-                    dbData[i] = createLinkData(field);
-                    break;
-                default:
-                }
-                pvData[i] = dbData[i];
-            }
-            
         }
-        private PVData[] pvData;
-        private DBData[] dbData;
-        
     }
 
-    private static class LinkData extends StructureData implements DBLink
+    private static class LinkData extends AbstractDBLink
     {
-        
-        public String getConfigStructureFieldName() {
-            return configStructFieldName;
-        }
-
-        public void putConfigStructureFieldName(DBD dbd, String name) {
-            this.dbd = dbd;
-            configStructFieldName = name;
-        }
-
-        public DBData[] getFieldDBDatas() {
-            if(dbConfigStructure==null) return null;
-            return(dbConfigStructure.getFieldDBDatas());
-        }
-
-        public PVData[] getFieldPVDatas() {
-            if(dbConfigStructure==null) return null;
-            return(dbConfigStructure.getFieldPVDatas());
-        }
-
-        public String toString() {
-            return super.toString();
-        }
-
-        public String toString(int indentLevel) {
-            return super.toString(indentLevel);
-        }
-
-        public DBStructure getConfigStructure() {
-            return dbConfigStructure;
-        }
-
-        public String getLinkSupportName() {
-            return dbLink.get();
-        }
-
-        public void putLinkSupportName(String name) {
-            if(dbd==null)
-                throw new IllegalStateException("DBD not specified");
-            DBDLinkSupport dbdLinkSupport = dbd.getLinkSupport(name);
-            if(dbdLinkSupport==null) 
-                throw new IllegalArgumentException("no link support");
-            String linkSupportName = dbdLinkSupport.getLinkSupportName();
-            dbLink.put(linkSupportName);
-            String configStructName = dbdLinkSupport.getConfigStructName();
-            if(configStructName!= null && configStructName.length()>0) {
-                if(configStructFieldName==null)
-                    throw new IllegalStateException(
-                    "configStructFieldName not specified");
-                DBDStructure dbdConfig = dbd.getDBDStructure(
-                   configStructFieldName);
-                if(dbdConfig==null)
-                    throw new IllegalArgumentException(
-                        "configStruct" + configStructName + "does not exist");
-                DBDStructureField dbdConfigField = DBDCreateFactory.
-                    createDBDStructureField(configStructFieldName,dbdConfig,null);
-                dbConfigStructure = new StructureData(dbdConfigField);
-                dbConfig.put(configStructName);
-            } else {
-                dbConfigStructure = null;
-                dbConfig.put("");
-            }
-        }
-
-        LinkData(DBDStructureField dbdStructureField)
+        LinkData(DBDLinkField dbdLinkField)
         {
-            super(dbdStructureField);
-            dbd = null;
-            configStructFieldName = null;
-            PVData[] pvData = super.getFieldPVDatas();
-            dbConfig = null;
-            dbLink = null;
-            for(PVData data : pvData) {
-                Field field = data.getField();
-                if(field.getName().equals("configStructName"))
-                    dbConfig = (PVString)data;
-                if(field.getName().equals("linkSupportName"))
-                    dbConfig = (PVString)data;
-            }
-            if(dbConfig==null)
-                throw new IllegalStateException("Logic error configStructName");
-            if(dbLink==null)
-                throw new IllegalStateException("Logic error linkSupportName");
-            dbConfigStructure = null;
+            super(dbdLinkField);
         }
-
-        private DBD dbd;
-        private String configStructFieldName;
-        private PVString dbConfig;
-        private PVString dbLink;
-        private DBStructure dbConfigStructure;
     }
 
     private static class ArrayBooleanData
@@ -1372,9 +1101,10 @@ public class FieldDataFactory {
                 if(value[i]==null) {
                     builder.append("{}");
                 } else {
-                    value[i].toString(indentLevel);
+                    builder.append(value[i].toString(indentLevel));
                 }
             }
+            builder.append("}");
             return builder.toString();
         }
 
@@ -1461,9 +1191,10 @@ public class FieldDataFactory {
                     newLine(builder,indentLevel + 1);
                     builder.append("{}");
                 } else {
-                    value[i].toString(indentLevel);
+                    builder.append(value[i].toString(indentLevel));
                 }
             }
+            builder.append("}");
             return builder.toString();
         }
 
@@ -1550,9 +1281,10 @@ public class FieldDataFactory {
                     newLine(builder,indentLevel + 1);
                     builder.append("{}");
                 } else {
-                    value[i].toString(indentLevel);
+                    builder.append(value[i].toString(indentLevel));
                 }
             }
+            builder.append("}");
             return builder.toString();
         }
 
@@ -1639,9 +1371,10 @@ public class FieldDataFactory {
                     newLine(builder,indentLevel + 1);
                     builder.append("{}");
                 } else {
-                    value[i].toString(indentLevel);
+                    builder.append(value[i].toString(indentLevel));
                 }
             }
+            builder.append("}");
             return builder.toString();
         }
 
