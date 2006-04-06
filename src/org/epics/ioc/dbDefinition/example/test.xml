@@ -1,0 +1,137 @@
+<?xml version="1.0" ?>
+<DBDefinition>
+<menu name = "menuPriority">
+    <choice>   low   </choice>
+    <choice>medium</choice>
+    <choice>high</choice>
+</menu>
+<menu name = "menuScan">
+    <choice>passive</choice>
+    <choice>event</choice>
+    <choice>interrupt</choice>
+    <choice>periodic</choice>
+</menu>
+<menu name = "menuAlarmSevr">
+    <choice>none</choice>
+    <choice>minor</choice>
+    <choice>major</choice>
+    <choice>invalid</choice>
+</menu>
+
+<structure name = "TimeStamp">
+    <field name = "secondsPastEpoch" type = "long" />
+    <field name = "nanoSeconds" type = "int" />
+</structure>
+
+<structure name = "Scan">
+    <field name = "scan" type = "menu" menuName = "menuScan" />
+    <field name = "rate" type = "double" />
+    <field name = "phase" type = "int" />
+</structure>
+<structure name = "Event">
+    <field name = "eventNumber" type = "short" />
+    <field name = "timeStampEvent" type = "int" />
+    <field name = "timeStampLink" type = "link" />
+</structure>
+
+<structure name = "DisableLink">
+    <field name = "disabled" type = "boolean" />
+    <field name = "value" type = "short" default = "1" />
+    <field name = "input" type = "short" />
+    <field name = "link" type = "link" />
+    <field name = "disableAlarmSeverity"
+           type = "menu" menuName = "menuAlarmSevr" />
+</structure>
+<structure name = "ProcessLink">
+    <field name = "pvname" type = "string" link = "true" />
+    <field name = "wait" type = "boolean" />
+    <field name = "timeout" type = "double" />
+    <field name = "forceLocal" type = "boolean">
+        <!-- if true pvname must be in local IOC -->
+    </field>
+</structure>
+
+<structure name = "MonitorLink">
+    <field name = "pvname" type = "string" link = "true" />
+    <field name = "process" type = "boolean">
+        <!-- process this record when monitor occurs -->
+    </field>
+    <field name = "monitorOnly" type = "boolean">
+        <!-- monitor only or data also -->
+    </field>
+    <field name = "inheritSeverity" type = "boolean" />
+    <field name = "forceLocal" type = "boolean">
+        <!-- if true pvname must be in local IOC -->
+    </field>
+</structure>
+
+<structure name = "InputLink">
+    <field name = "pvname" type = "string" link = "true" />
+    <field name = "process" type = "boolean" />
+    <field name = "wait" type = "boolean" />
+    <field name = "timeout" type = "double" />
+    <field name = "inheritSeverity" type = "boolean" />
+    <field name = "forceLocal" type = "boolean" >
+        <!-- if true pvname must be in local IOC -->
+    </field>
+</structure>
+
+<structure name = "OutputLink">
+    <field name = "pvname" type = "string" link = "true" />
+    <field name = "process" type = "boolean" />
+    <field name = "wait" type = "boolean" />
+    <field name = "timeout" type = "double" />
+    <field name = "forceLocal" type = "boolean" >
+        <!-- if true pvname must be in local IOC -->
+        <boolean />
+    </field>
+</structure>
+<linkSupport name = "processLink" configuration = "ProcessLink" />
+<linkSupport name = "monitorLink" configuration = "MonitorLink" />
+<linkSupport name = "inputLink" configuration = "InputLink" />
+<linkSupport name = "outputLink" configuration = "OutputLink" />
+
+<recordType name = "ai">
+    <field name = "value" type = "double">
+        <property name = "status" associatedField = "status" />
+        <property name = "severity" associatedField = "severity" />
+        <property name = "timeStamp" associatedField = "timeStamp" />
+        <property name = "units" associatedField = "units" />
+        <property name = "displayLimit" associatedField = "displayLimit" />
+    </field>
+    <field name = "units" type = "string" />
+    <field name = "displayLimit"
+         type = "structure" structureName = "DisplayLimit" />
+    <field name = "input" type = "link" />
+    <field name = "rawValue" type = "int" />
+    <field name = "linearConvert"
+        type = "structure" structureName = "LinearConvert" />
+</recordType>
+
+<recordType name = "allTypes">
+    <field name = "boolean" type = "boolean" />
+    <field name = "byte" type = "byte" />
+    <field name = "short" type = "short" />
+    <field name = "int" type = "int" />
+    <field name = "long" type = "long" />
+    <field name = "float" type = "float" />
+    <field name = "double" type = "double" />
+    <field name = "string" type = "string" />
+    <field name = "link" type = "link" />
+    <field name = "displayLimit"
+         type = "structure" structureName = "DisplayLimit" />
+    <field name = "booleanArray" type = "array" elementType = "boolean" />
+    <field name = "byteArray" type = "array" elementType = "byte" />
+    <field name = "shortArray" type = "array" elementType = "short" />
+    <field name = "intArray" type = "array" elementType = "int" />
+    <field name = "longArray" type = "array" elementType = "long" />
+    <field name = "floatArray" type = "array" elementType = "float" />
+    <field name = "doubleArray" type = "array" elementType = "double" />
+    <field name = "stringArray" type = "array" elementType = "string" />
+    <field name = "linkArray" type = "array" elementType = "link" />
+    <field name = "structArray" type = "array" elementType = "structure" />
+</recordType>
+    
+
+
+</DBDefinition>
