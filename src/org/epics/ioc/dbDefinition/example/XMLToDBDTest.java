@@ -13,7 +13,7 @@ public class XMLToDBDTest extends TestCase {
     public static void testXML() {
         DBD dbd = DBDFactory.create("test");
         try {
-            XMLToDBD.convert(dbd,"/home/mrk/workspace/javaIOC"
+            XMLToDBDFactory.convert(dbd,"/home/mrk/workspace/javaIOC"
                  + "/src/org/epics/ioc/dbDefinition/example/test.xml");
         } catch (Exception e) {
             System.out.println("Exception: " + e);
@@ -29,6 +29,12 @@ public class XMLToDBDTest extends TestCase {
         Iterator<DBDStructure> structureIter = structureList.iterator();
         while(structureIter.hasNext()) {
             System.out.print("\n" + structureIter.next().toString());
+        }
+        System.out.printf("\n\nlinkSupport");
+        Collection<DBDLinkSupport> linkSupportList = dbd.getLinkSupportList();
+        Iterator<DBDLinkSupport> linkSupportIter = linkSupportList.iterator();
+        while(linkSupportIter.hasNext()) {
+            System.out.print("\n" + linkSupportIter.next().toString());
         }
         System.out.printf("\n\nrecordTypes");
         Collection<DBDStructure> recordTypeList = dbd.getDBDRecordTypeList();

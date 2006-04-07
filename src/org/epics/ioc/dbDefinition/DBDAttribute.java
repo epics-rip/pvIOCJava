@@ -1,5 +1,7 @@
 package org.epics.ioc.dbDefinition;
 
+import org.epics.ioc.pvAccess.*;
+
 /**
  * Accesses Field Attributes
  * @author mrk
@@ -7,53 +9,74 @@ package org.epics.ioc.dbDefinition;
  */
 public interface DBDAttribute {
     /**
-     * get the defauly value for the field as a String
+     * get the field name.
+     * @return the name
+     */
+    String getName();
+    /**
+     * get the DBType of the field
+     * @return the DBType
+     */
+    DBType getDBType();
+    /**
+     * Get the Type of the field
+     * @return the type
+     */
+    Type getType();
+    /**
+     * get the default value for the field as a String
      * @return the default
      */
     String getDefault();
     /**
-     * specify the default value
-     * @param value the default
-     */
-    void setDefault(String value);
-    /**
      * is the field readonly 
      * @return (false,true) if it (is not, is) readonly
      */
-    boolean isReadonly();
-    /**
-     * specify if the field is readonly
-     * @param value (false,true) if it (is not, is) readonly
-     */
-    void setReadOnly(boolean value);
+    boolean isReadOnly();
     /**
      * can this field be configurable by Database Configuration Tools
      * @return (false,true) if it (can't, can) be configured
      */
     boolean isDesign();
     /**
-     * specify if this field be configurable by Database Configuration Tools
-     * @param value (false,true) if it (can't, can) be configured
-     */
-    void setDesign(boolean value);
-    /**
      * Is this field is a link to another record
      * @return (false,true) if it (is not, is) a link to another record
      */
     boolean isLink();
-    /**
-     *  specify if this field is a link to another record
-     * @param value (false,true) if it (is not, is) a link to another record
-     */
-    void setLink(boolean value);
     /**
      * get the Access Security Level for this field
      * @return the level
      */
     int getAsl();
     /**
-     * set the Access Security Level for this field
-     * @param value the level
+     * Get the DBDMenu of a menu field.
+     * If the field is not a menu null is returned
+     * @return the DBDMenu or null if field is not a menu
      */
-    void setAsl(int value);
+    DBDMenu getDBDMenu();
+    /**
+     * Get the DBDStructure of a structure field.
+     * If the field is not a structure null is returned
+     * @return the DBDStructure of null if the field is not a structure
+     */
+    DBDStructure getDBDStructure();
+    /**
+     * Get the element DBType of an array field.
+     * dbPvType is returned if the field is not an array. The Type will be pvUnknown.
+     * @return the DBtype
+     */
+    DBType getElementDBType();
+    /**
+     * Get the element Type.
+     * If the file is not an array pvUnknown is returned
+     * @return the Typ
+     */
+    Type getElementType();
+    /**
+     * create a string describing the properties
+     * @param indentLevel indent level. Ecah level is four spaces
+     * @return the string describing the properties
+     */
+    String toString(int indentLevel);
+    
 }

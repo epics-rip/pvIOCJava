@@ -11,6 +11,7 @@
     <choice>interrupt</choice>
     <choice>periodic</choice>
 </menu>
+
 <menu name = "menuAlarmSevr">
     <choice>none</choice>
     <choice>minor</choice>
@@ -18,23 +19,31 @@
     <choice>invalid</choice>
 </menu>
 
-<structure name = "TimeStamp">
+<!-- test for duplicate menu -->
+<menu name = "menuAlarmSevr">
+    <choice>none</choice>
+    <choice>minor</choice>
+    <choice>major</choice>
+    <choice>invalid</choice>
+</menu>
+
+<structure name = "timeStamp">
     <field name = "secondsPastEpoch" type = "long" />
     <field name = "nanoSeconds" type = "int" />
 </structure>
 
-<structure name = "Scan">
+<structure name = "scan">
     <field name = "scan" type = "menu" menuName = "menuScan" />
     <field name = "rate" type = "double" />
     <field name = "phase" type = "int" />
 </structure>
-<structure name = "Event">
+<structure name = "event">
     <field name = "eventNumber" type = "short" />
     <field name = "timeStampEvent" type = "int" />
     <field name = "timeStampLink" type = "link" />
 </structure>
 
-<structure name = "DisableLink">
+<structure name = "disableLink">
     <field name = "disabled" type = "boolean" />
     <field name = "value" type = "short" default = "1" />
     <field name = "input" type = "short" />
@@ -42,7 +51,7 @@
     <field name = "disableAlarmSeverity"
            type = "menu" menuName = "menuAlarmSevr" />
 </structure>
-<structure name = "ProcessLink">
+<structure name = "processLink">
     <field name = "pvname" type = "string" link = "true" />
     <field name = "wait" type = "boolean" />
     <field name = "timeout" type = "double" />
@@ -51,7 +60,7 @@
     </field>
 </structure>
 
-<structure name = "MonitorLink">
+<structure name = "monitorLink">
     <field name = "pvname" type = "string" link = "true" />
     <field name = "process" type = "boolean">
         <!-- process this record when monitor occurs -->
@@ -65,7 +74,7 @@
     </field>
 </structure>
 
-<structure name = "InputLink">
+<structure name = "inputLink">
     <field name = "pvname" type = "string" link = "true" />
     <field name = "process" type = "boolean" />
     <field name = "wait" type = "boolean" />
@@ -76,7 +85,7 @@
     </field>
 </structure>
 
-<structure name = "OutputLink">
+<structure name = "outputLink">
     <field name = "pvname" type = "string" link = "true" />
     <field name = "process" type = "boolean" />
     <field name = "wait" type = "boolean" />
@@ -86,12 +95,39 @@
         <boolean />
     </field>
 </structure>
-<linkSupport name = "processLink" configuration = "ProcessLink" />
-<linkSupport name = "monitorLink" configuration = "MonitorLink" />
-<linkSupport name = "inputLink" configuration = "InputLink" />
-<linkSupport name = "outputLink" configuration = "OutputLink" />
+
+<structure name = "displayLimit">
+    <field name = "low" type = "double" />
+    <field name = "high" type = "double" />
+</structure>
+
+<!-- test for duplicate structure -->
+<structure name = "displayLimit">
+    <field name = "low" type = "double" />
+    <field name = "high" type = "double" />
+</structure>
+
+<structure name = "linearConvert">
+    <field name = "engUnitsLow" type = "double" />
+    <field name = "engUnitsHigh" type = "double" />
+    <field name = "slope" type = "double" />
+    <field name = "interceptengUnitsLow" type = "double" />
+</structure>
+
+<linkSupport name = "processLink" configuration = "processLink" />
+<linkSupport name = "monitorLink" configuration = "monitorLink" />
+<linkSupport name = "inputLink" configuration = "inputLink" />
+<linkSupport name = "outputLink" configuration = "outputLink" />
+
+<linkSupport name = "outputLink" configuration = "outputLink" />
 
 <recordType name = "ai">
+    <property name = "value" associatedField = "value" />
+    <property name = "status" associatedField = "status" />
+    <property name = "severity" associatedField = "severity" />
+    <property name = "timeStamp" associatedField = "timeStamp" />
+    <property name = "units" associatedField = "units" />
+    <property name = "displayLimit" associatedField = "displayLimit" />
     <field name = "value" type = "double">
         <property name = "status" associatedField = "status" />
         <property name = "severity" associatedField = "severity" />
@@ -101,11 +137,11 @@
     </field>
     <field name = "units" type = "string" />
     <field name = "displayLimit"
-         type = "structure" structureName = "DisplayLimit" />
+         type = "structure" structureName = "displayLimit" />
     <field name = "input" type = "link" />
     <field name = "rawValue" type = "int" />
     <field name = "linearConvert"
-        type = "structure" structureName = "LinearConvert" />
+        type = "structure" structureName = "linearConvert" />
 </recordType>
 
 <recordType name = "allTypes">
@@ -119,7 +155,7 @@
     <field name = "string" type = "string" />
     <field name = "link" type = "link" />
     <field name = "displayLimit"
-         type = "structure" structureName = "DisplayLimit" />
+         type = "structure" structureName = "displayLimit" />
     <field name = "booleanArray" type = "array" elementType = "boolean" />
     <field name = "byteArray" type = "array" elementType = "byte" />
     <field name = "shortArray" type = "array" elementType = "short" />
@@ -130,6 +166,24 @@
     <field name = "stringArray" type = "array" elementType = "string" />
     <field name = "linkArray" type = "array" elementType = "link" />
     <field name = "structArray" type = "array" elementType = "structure" />
+</recordType>
+
+<!-- test for duplicate recordType -->
+<recordType name = "ai">
+    <field name = "value" type = "double">
+        <property name = "status" associatedField = "status" />
+        <property name = "severity" associatedField = "severity" />
+        <property name = "timeStamp" associatedField = "timeStamp" />
+        <property name = "units" associatedField = "units" />
+        <property name = "displayLimit" associatedField = "displayLimit" />
+    </field>
+    <field name = "units" type = "string" />
+    <field name = "displayLimit"
+         type = "structure" structureName = "displayLimit" />
+    <field name = "input" type = "link" />
+    <field name = "rawValue" type = "int" />
+    <field name = "linearConvert"
+        type = "structure" structureName = "linearConvert" />
 </recordType>
     
 

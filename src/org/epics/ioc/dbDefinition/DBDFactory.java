@@ -25,6 +25,7 @@ public class DBDFactory {
     public static DBD create(String name) {
         if(find(name)!=null) return null;
         DBD dbd = new DBDInstance(name);
+        DBDCreateFactory.createLinkDBDStructure(dbd);
         dbdList.addLast(dbd);
         return dbd;
     }
@@ -79,7 +80,8 @@ public class DBDFactory {
                     return true;
                 }
             }
-            return false;
+            linkSupportList.add(linkSupport);
+            return true;
         }
         
         public boolean addMenu(DBDMenu menuNew) {

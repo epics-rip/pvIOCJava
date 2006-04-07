@@ -12,9 +12,23 @@ import org.epics.ioc.pvAccess.*;
 
 import java.util.*;
 
-public class XMLToDBD {
+/**
+ * Factory to convert an xml file to a Database Definition and put it in a database.
+ * The only public method is convert.
+ * @author mrk
+ *
+ */
+public class XMLToDBDFactory {
+    /**
+     * Convert an xml file to Database definitions and put the definitions in a database.
+     * @param dbd
+     * @param fileName
+     * @throws MalformedURLException if SAX throws it.
+     * @throws IllegalStateException if any errors were detected.
+     * @return (true,false) if all xml statements (were, were not) succesfully converted.
+     */
     public static void convert(DBD dbd, String fileName)
-        throws MalformedURLException
+        throws MalformedURLException,IllegalStateException
     {
         String uri = new File(fileName).toURL().toString();
         XMLReader reader;
@@ -26,40 +40,45 @@ public class XMLToDBD {
             reader.setErrorHandler(handler);
             reader.parse(uri);
         } catch (SAXException e) {
-            System.err.println(
-                "XMLToDBD.convert terminating with SAXException "
+            throw new IllegalStateException(
+                "\n   XMLToDBDFactory.convert terminating with SAXException\n   "
                 + e.getMessage());
-            return;
         } catch (IOException e) {
-            System.err.println (
-                "XMLToDBD.convert terminating with IOException "
+            throw new IllegalStateException (
+                "\n   XMLToDBDFactory.convert terminating with IOException\n   "
                 + e.getMessage());
-            return;
+        } catch (IllegalStateException e) {
+            throw new IllegalStateException(
+                "\n   XMLToDBDFactory.convert terminating with IllegalStateException\n   "
+                + e.getMessage());
         } catch (Exception e) {
-            System.err.println (
-                "XMLToDBD.convert terminating with Exception "
+            throw new IllegalStateException(
+                "\n   XMLToDBDFactory.convert terminating with Exception\n   "
                 + e.getMessage());
-            return;
         }
     }
 
     private static class Handler  implements ContentHandler, ErrorHandler {
-
+        
         public void warning(SAXParseException e) throws SAXException {
-            System.out.printf("warning %s\n",printSAXParseExceptionMessage(e));
+            System.err.printf("warning %s\n",printSAXParseExceptionMessage(e));
+            nWarning++;
         }
         public void error(SAXParseException e) throws SAXException {
-            System.out.printf("error %s\n",printSAXParseExceptionMessage(e));
+            System.err.printf("error %s\n",printSAXParseExceptionMessage(e));
+            nError++;
         }
         
         public void fatalError(SAXParseException e) throws SAXException {
-            System.out.printf("fatal error %s\n",printSAXParseExceptionMessage(e));
+            System.err.printf("fatal error %s\n",printSAXParseExceptionMessage(e));
+            nFatal++;
         }
         
         public void setDocumentLocator(Locator locator) {
             this.locator = locator;
             menuHandler = new DBDXMLMenuHandler(dbd,this,locator);
             structureHandler = new DBDXMLStructureHandler(dbd,this,locator);
+            linkSupportHandler = new DBDXMLLinkSupportHandler(dbd,this,locator);
         }
         
         public void startDocument() throws SAXException {
@@ -68,7 +87,11 @@ public class XMLToDBD {
         
         
         public void endDocument() throws SAXException {
-            // nothing to do.
+            if(nWarning>0 || nError>0 || nFatal>0) {
+                throw new IllegalStateException(
+                    String.format("endDocument: warning %d severe %d fatal %d\n",
+                    nWarning,nError,nFatal));
+            }
         }       
 
         public void startElement(String uri, String localName, String qName,
@@ -88,11 +111,12 @@ public class XMLToDBD {
                 } else if(qName.equals("recordType")) {
                     state = State.structure;
                     structureHandler.start(qName,attributes);
-                } else if(qName.equals("linkSupport")){
+                } else if(qName.equals("linkSupport")) {
                     state = State.linkSupport;
+                    linkSupportHandler.start(qName,attributes);
                 } else {
-                    throw new SAXParseException(
-                        "expected menu or structure or recordType",locator);
+                    System.err.printf("startElement element %s not understood\n",qName);
+                    nError++;
                 }
                 break;
             case menu: 
@@ -104,6 +128,7 @@ public class XMLToDBD {
                 structureHandler.startElement(qName,attributes);
                 break;
             case linkSupport:
+                linkSupportHandler.startElement(qName,attributes);
                 break;
             }
         }
@@ -118,8 +143,8 @@ public class XMLToDBD {
                 if(qName.equals("DBDefinition")) {
                     state = State.startDocument;
                 } else {
-                    throw new SAXParseException(
-                        "endElement: Logic error state idle",locator);
+                    System.err.printf("startElement element %s not understood\n",qName);
+                    nError++;
                 }
                 break;
             case menu: 
@@ -142,7 +167,10 @@ public class XMLToDBD {
                 break;
             case linkSupport:
                 if(qName.equals("linkSupport")) {
+                    linkSupportHandler.end(qName);
                     state = State.idle;
+                } else {
+                    linkSupportHandler.endElement(qName);
                 }
             }
         }
@@ -163,45 +191,44 @@ public class XMLToDBD {
                 structureHandler.characters(ch,start,length);
                 break;
             case linkSupport:
+                linkSupportHandler.characters(ch,start,length);
                 break;
             }
         }
- 
-        
-        Handler(DBD dbd)  throws MalformedURLException {
-            this.dbd = dbd;
-            
-        }
         
         public void endPrefixMapping(String prefix) throws SAXException {
-            // TODO Auto-generated method stub
+            // nothing to do
             
         }
 
         public void ignorableWhitespace(char[] ch, int start, int length)
         throws SAXException
         {
-            // TODO Auto-generated method stub
+            // nothing to do
             
         }
 
         public void processingInstruction(String target, String data)
         throws SAXException
         {
-            // TODO Auto-generated method stub
+            // nothing to do
             
         }
 
         public void skippedEntity(String name) throws SAXException {
-            // TODO Auto-generated method stub
+            // nothing to do
             
         }
 
         public void startPrefixMapping(String prefix, String uri)
         throws SAXException
         {
-            // TODO Auto-generated method stub
+            // nothing to do
             
+        }
+
+        Handler(DBD dbd)  throws MalformedURLException {
+            this.dbd = dbd;    
         }
         
         private enum State {
@@ -215,6 +242,9 @@ public class XMLToDBD {
         private DBD dbd;
         private Locator locator = null;
         private State state = State.startDocument;
+        private int nWarning = 0;
+        private int nError = 0;
+        private int nFatal = 0;
         
         private String printSAXParseExceptionMessage(SAXParseException e)
         {
@@ -226,6 +256,7 @@ public class XMLToDBD {
 
         DBDXMLHandler menuHandler;
         DBDXMLHandler structureHandler;
+        DBDXMLHandler linkSupportHandler;
     }
 
 
@@ -359,8 +390,26 @@ public class XMLToDBD {
     
     }
 
-    private static class DBDXMLStructureHandler extends DBDXMLHandler{
+    private static class DBDXMLStructureHandler
+    extends DBDXMLHandler implements DBDAttributeValues
+    {
     
+        public int getLength() {
+            return attributes.getLength();
+        }
+
+        public String getName(int index) {
+            return attributes.getQName(index);
+        }
+
+        public String getValue(int index) {
+            return attributes.getValue(index);
+        }
+
+        public String getValue(String name) {
+            return attributes.getValue(name);
+        }
+
         void start(String qName, Attributes attributes)
         throws SAXException {
             if(state!=State.idle) {
@@ -373,7 +422,7 @@ public class XMLToDBD {
             structureName = attributes.getValue("name");
             if(structureName==null || structureName.length() == 0) {
                 errorHandler.error(new SAXParseException(
-                    "attribute name not specified",locator));
+                    "name not specified",locator));
                 state = State.idle;
                 return;
             }
@@ -434,9 +483,19 @@ public class XMLToDBD {
             DBDStructure dbdStructure = DBDCreateFactory.createDBDStructure(
                 structureName,dbdField,property);
             if(isRecordType) {
-                dbd.addRecordType(dbdStructure);
+                boolean result = dbd.addRecordType(dbdStructure);
+                if(!result) {
+                    errorHandler.warning(new SAXParseException(
+                            "recordType " + structureName + " already exists",
+                            locator));
+                }
             } else {
-                dbd.addStructure(dbdStructure);
+                boolean result = dbd.addStructure(dbdStructure);
+                if(!result) {
+                    errorHandler.warning(new SAXParseException(
+                            "structure " + structureName + " already exists",
+                            locator));
+                }
             }
             structurePropertyList = null;
             dbdFieldList = null;
@@ -448,52 +507,29 @@ public class XMLToDBD {
             if(state==State.idle) return;
             if(qName.equals("field")) {
                 assert(state==State.structure);
-                getCommonAttributes(attributes);
-                fieldPropertyList = new LinkedList<Property>();
-                state = State.field;
-                gettingProperties = true;
-                if(fieldType==Type.pvUnknown) {
-                    errorHandler.error(new SAXParseException(
-                            "DBDXMLStructureHandler.startElement"
-                            + " illegal type ",locator));
-                    state = State.idle;
-                } else if(fieldDbType==DBType.dbMenu) {
-                    String menuName = attributes.getValue("menuName");
-                    dbdMenu = dbd.getMenu(menuName);
-                    if(dbdMenu==null){
-                        errorHandler.error(new SAXParseException(
-                                "menu " + menuName + " was not found",locator));
-                        state = State.idle;
-                        return;
-                    }
-                } else if(fieldDbType==DBType.dbStructure) {
-                    String structName = attributes.getValue("structureName");
-                    dbdStructure = dbd.getDBDStructure(structName);
-                    if(dbdStructure==null) {
-                        errorHandler.error(new SAXParseException(
-                            " structureName not given",locator));
-                        state = State.idle;
-                        return;
-                    }
-                } else if(fieldDbType==DBType.dbArray) {
-                    String elementType = attributes.getValue("elementType");
-                    if(elementType==null || elementType.length()==0) {
-                        errorHandler.error(new SAXParseException(
-                            " elementType not given",locator));
-                        state = State.idle;
-                        return;
-                    }
-                    arrayFieldElementDBType = getDBType(elementType);
-                    arrayFieldElementType = getType(elementType);
-                    if(arrayFieldElementType==Type.pvUnknown) {
-                        errorHandler.error(new SAXParseException(
-                            " elementType is unknown",locator));
-                        state = State.idle;
-                        return;
-                    }
+                this.attributes = attributes;
+                try {
+                    dbdAttribute = DBDAttributeFactory.create(dbd,this);
                 }
+                catch(Exception e) {
+                    errorHandler.error(new SAXParseException(
+                            e.getMessage() ,locator));
+                    state = State.idle;
+                    return;
+                }
+                finally {
+                    this.attributes = null;
+                }
+                Type type = dbdAttribute.getType();
+                if(type==Type.pvUnknown ) {
+                    errorHandler.error(new SAXParseException(
+                            "type not specified correctly",locator));
+                    state= State.idle;
+                    return;
+                }
+                fieldPropertyList =  new  LinkedList<Property>();
+                state = State.field;
             } else if(qName.equals("property")) {
-                if(!gettingProperties) return;
                 String propertyName = attributes.getValue("name");
                 String associatedName = attributes.getValue("associatedField");
                 if(propertyName==null || propertyName.length()==0) {
@@ -527,38 +563,12 @@ public class XMLToDBD {
             Property[] property = new Property[fieldPropertyList.size()];
             ListIterator<Property> iter = fieldPropertyList.listIterator();
             for(int i=0; i<property.length; i++) {
-                property[i] = iter.next();
-            }
-            switch(fieldDbType) {
-            case dbPvType:
-                DBDField dbdField = DBDCreateFactory.createDBDField(fieldName,
-                    fieldType,fieldDbType,property);
-                dbdFieldList.add(dbdField);
-                break;
-            case dbMenu:
-                DBDMenuField dbdMenuField = 
-                    DBDCreateFactory.createDBDMenuField(
-                    fieldName,dbdMenu,property);
-                dbdFieldList.add(dbdMenuField);
-                break;
-            case dbStructure:
-                DBDStructureField dbdStructureField = 
-                    DBDCreateFactory.createDBDStructureField(fieldName,
-                    dbdStructure,property);
-                dbdFieldList.add(dbdStructureField);
-                break;
-            case dbArray:
-                DBDArrayField dbdArrayField = 
-                    DBDCreateFactory.createDBDArrayField(fieldName,
-                    arrayFieldElementType,arrayFieldElementDBType,property);
-                dbdFieldList.add(dbdArrayField);
-                break;
-            case dbLink:
-                DBDLinkField dbdLinkField =
-                    DBDCreateFactory.createDBDLinkField(fieldName,property);
-                dbdFieldList.add(dbdLinkField);
-                break;
-            }
+                 property[i] = iter.next();
+            } 
+            DBDField dbdField = DBDCreateFactory.createDBDField(dbdAttribute,property);
+            dbdFieldList.add(dbdField);
+            dbdAttribute = null;
+            fieldPropertyList = null;
             return;
         }
     
@@ -575,49 +585,7 @@ public class XMLToDBD {
             this.errorHandler = errorHandler;
             this.locator = locator;
         }
-        
-        private void getCommonAttributes(Attributes attributes) {
-            String value;
-            value = attributes.getValue("name");
-            if(value==null) {
-                fieldName = null;
-            } else {
-                fieldName = value;
-            }
-            value = attributes.getValue("type");
-            if(value==null) {
-                type = null;
-            } else {
-                type = value;
-            }
-            value = attributes.getValue("default");
-            if(value==null) {
-                defaultValue = null;
-            } else {
-                defaultValue = value;
-            }
-            value = attributes.getValue("asl");
-            if(value==null) {
-                asl = 1;
-            } else {
-                asl = Integer.parseInt(value);
-            }
-            value = attributes.getValue("link");
-            if(value==null) {
-                isLink = true;
-            } else {
-                isLink = Boolean.getBoolean(value);
-            }
-            value = attributes.getValue("readonly");
-            if(value==null) {
-                isReadOnly = true;
-            } else {
-                isReadOnly = Boolean.getBoolean(value);
-            }
-            fieldDbType = getDBType(type);
-            fieldType = getType(type);
-        }
-        
+            
         private enum State {idle, structure, field}
         
         private DBD dbd;
@@ -629,57 +597,73 @@ public class XMLToDBD {
         private LinkedList<Property> structurePropertyList;
         private LinkedList<DBDField> dbdFieldList;
         // remaining are for field elements
-        private boolean gettingProperties;
-        private String fieldName;
-        private String type;
-        private DBType fieldDbType;
-        private Type fieldType;
-        private DBDMenu dbdMenu;
-        private DBDStructure dbdStructure;
-        private DBType arrayFieldElementDBType;
-        private Type arrayFieldElementType;
-        private int asl;
-        private String defaultValue;
-        private boolean isDesign;
-        private boolean isLink;
-        private boolean isReadOnly;
+        private Attributes attributes;
+        private DBDAttribute dbdAttribute;
         private LinkedList<Property> fieldPropertyList;
     }
-    
-    static Type getType(String type) {
-        if(type==null) return Type.pvUnknown;
-        if(type.equals("boolean")) return Type.pvBoolean;
-        if(type.equals("byte")) return Type.pvByte;
-        if(type.equals("short")) return Type.pvShort;
-        if(type.equals("int")) return Type.pvInt;
-        if(type.equals("long")) return Type.pvLong;
-        if(type.equals("float")) return Type.pvFloat;
-        if(type.equals("double")) return Type.pvDouble;
-        if(type.equals("string")) return Type.pvString;
-        if(type.equals("enum")) return Type.pvEnum;
-        if(type.equals("structure")) return Type.pvStructure;
-        if(type.equals("array")) return Type.pvArray;
-        if(type.equals("menu")) return Type.pvEnum;
-        if(type.equals("link")) return Type.pvStructure;
-        return Type.pvUnknown;
-    }
-    
-    static DBType getDBType (String type) {
-        if(type==null) return DBType.dbPvType;
-        if(type.equals("boolean")) return DBType.dbPvType;
-        if(type.equals("byte")) return DBType.dbPvType;
-        if(type.equals("short")) return DBType.dbPvType;
-        if(type.equals("int")) return DBType.dbPvType;
-        if(type.equals("long")) return DBType.dbPvType;
-        if(type.equals("float")) return DBType.dbPvType;
-        if(type.equals("double")) return DBType.dbPvType;
-        if(type.equals("string")) return DBType.dbPvType;
-        if(type.equals("enum")) return DBType.dbPvType;
-        if(type.equals("structure")) return DBType.dbStructure;
-        if(type.equals("array")) return DBType.dbArray;
-        if(type.equals("menu")) return DBType.dbMenu;
-        if(type.equals("link")) return DBType.dbLink;
-        return DBType.dbPvType;
+    private static class DBDXMLLinkSupportHandler extends DBDXMLHandler{
         
+        void start(String qName, Attributes attributes)
+        throws SAXException {
+            DBDLinkSupport linkSupport = dbd.getLinkSupport(qName);
+            if(linkSupport!=null) {
+                errorHandler.error(new SAXParseException(
+                    "link support " + qName  + " already exists",locator));
+                    return;
+            }
+            String name = attributes.getValue("name");
+            String configuration = attributes.getValue("configuration");
+            if(name==null||name.length()==0) {
+                errorHandler.error(new SAXParseException(
+                    "name was not specified correctly",locator));
+                return;
+            }
+            if(configuration==null|| configuration.length()==0) {
+                errorHandler.error(new SAXParseException(
+                    "configuration was not specified correctly",locator));
+                return;
+            }
+            linkSupport = DBDCreateFactory.createDBDLinkSupport(name,configuration);
+            if(linkSupport==null) {
+                errorHandler.error(new SAXParseException(
+                    "failed to create link support " + qName,locator));
+                    return;
+            }
+            if(!dbd.addLinkSupport(linkSupport)) {
+                errorHandler.error(new SAXParseException(
+                        "failed to add link support " + qName + " to list",locator));
+                        return;
+            }
+        }
+    
+        void end(String qName) throws SAXException {
+            // nothing to do
+        }
+    
+        void startElement(String qName, Attributes attributes)
+        throws SAXException {
+            // nothing to do
+        }
+    
+        void endElement(String qName) throws SAXException {
+            // nothing to do
+        }
+    
+        void characters(char[] ch, int start, int length)
+        throws SAXException {
+            // nothing to do
+        }
+        
+        DBDXMLLinkSupportHandler(DBD dbd, ErrorHandler errorHandler, Locator locator) {
+            super();
+            this.dbd = dbd;
+            this.errorHandler = errorHandler;
+            this.locator = locator;
+        }
+        
+        private DBD dbd;
+        ErrorHandler errorHandler;
+        Locator locator;
     }
+    
 }

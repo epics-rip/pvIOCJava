@@ -302,12 +302,28 @@ public final class FieldFactory {
 
         private String getString(int indentLevel) {
             StringBuilder builder = new StringBuilder();
-            builder.append(super.toString(indentLevel));
+            if(indentLevel!=0) {
+                builder.append(super.toString(indentLevel));
+            } else {
+                newLine(builder,indentLevel);
+                builder.append(String.format("%s isMutable %b",
+                    name,isMutable));
+                if(property.length>0) {
+                    newLine(builder,indentLevel);
+                    builder.append("property{");
+                    for(Property prop : property) {
+                        builder.append(prop.toString(indentLevel + 1));
+                    }
+                    newLine(builder,indentLevel);
+                    builder.append("}");
+                }
+            }
             newLine(builder,indentLevel);
             builder.append(String.format("structure %s {",
                 structureName));
             for(int i=0, n= field.length; i < n; i++) {
                 builder.append(field[i].toString(indentLevel + 1));
+                if(i<n-1) newLine(builder,indentLevel + 1);
             }
             newLine(builder,indentLevel);
             builder.append("}");

@@ -3,7 +3,6 @@
  */
 package org.epics.ioc.dbDefinition;
 import org.epics.ioc.pvAccess.*;
-import org.epics.ioc.pvAccess.Enum;
 
 /**
  * Creates an implementation of the various DBD interfaces
@@ -25,87 +24,13 @@ public final class  DBDCreateFactory {
 
     /**
      * creates a DBDField.
-     * This must only be used for fields that are of type DBType.dbPvType.
-     * @param fieldName name of the field
-     * @param pvType the Type
-     * @param dbType the DBType
+     * @param attribute the SBDAttribute interface for the field
      * @param property an array of properties for the field
      * @return interface for the newly created field
      */
-    public static DBDField createDBDField(String fieldName, Type pvType, 
-        DBType dbType, Property[]property)
+    public static DBDField createDBDField(DBDAttribute attribute, Property[]property)
     {
-        return new FieldInstance(fieldName,pvType,property);
-    }
-
-    /**
-     * creates a DBDMenuField
-     * This must only be used for menu fields
-     * @param fieldName name of the field
-     * @param dbdMenu the DBDMenu for the field
-     * @param property an array of properties for the field
-     * @return interface for the newly created field
-     */
-    public static DBDMenuField createDBDMenuField(String fieldName,
-        DBDMenu dbdMenu, Property[]property)
-    {
-        return new MenuFieldInstance(fieldName,dbdMenu,property);
-    }
-
-    /**
-     * creates a DBDStructureField
-     * This must only be used for structure fields
-     * @param fieldName name of the field
-     * @param dbdStructure the DBDStructure that describes the field
-     * @param property an array of properties for the field
-     * @return interface for the newly created field
-     */
-    public static DBDStructureField createDBDStructureField(String fieldName,
-        DBDStructure dbdStructure, Property[]property)
-    {
-        return new StructureFieldInstance(fieldName,dbdStructure,property);
-    }
-
-    /**
-     * creates a DBDLinkField
-     * This must only be used for link fields
-     * @param fieldName name of the field
-     * @param property an array of properties for the field
-     * @return interface for the newly created field
-     */
-    public static DBDLinkField createDBDLinkField(String fieldName,
-        Property[]property)
-    {
-        if(linkDbdStructure==null) createLinkDbdStructure();
-        return new LinkFieldInstance(fieldName,linkDbdStructure,property);
-    }
-    private static DBDStructure linkDbdStructure = null;
-
-    private static void createLinkDbdStructure()
-    {
-        DBDField dbdConfigStructName = DBDCreateFactory.createDBDField(
-            "configStructName",Type.pvString,DBType.dbPvType,null);
-        DBDField dbdLinkSupportName = DBDCreateFactory.createDBDField(
-            "linkSupportName",Type.pvString,DBType.dbPvType,null);
-        DBDField[] dbdField = new DBDField[]{
-            dbdConfigStructName,dbdLinkSupportName};
-        linkDbdStructure = DBDCreateFactory.createDBDStructure(
-            "link",dbdField,null);
-    }
-
-    /**
-     * creates a DBDArrayField
-     * This must only be used for array fields
-     * @param fieldName name of the field
-     * @param pvType the Type for the field elements
-     * @param dbType the DBType for the field elements
-     * @param property an array of properties for the field
-     * @return interface for the newly created field
-     */
-    public static DBDArrayField createDBDArrayField(String fieldName,
-        Type pvType, DBType dbType, Property[]property)
-    {
-        return new ArrayFieldInstance(fieldName,pvType,dbType,property);
+        return new FieldInstance(attribute,property);
     }
     
 
@@ -134,6 +59,54 @@ public final class  DBDCreateFactory {
     {
         return new LinkSupportInstance(supportName,configStructName);
     }
+    
+    /**
+     * Create a DBDStructure for link.
+     * This is called by DBDFactory
+     * @param dbd the DBD that will have the DBDStructure for link
+     */
+    public static void createLinkDBDStructure(DBD dbd) {
+        DBDAttributeValues configValues = new StringValues("configStructName");
+        DBDAttribute configAttribute = DBDAttributeFactory.create(
+            dbd,configValues);
+        DBDAttributeValues linkSupportValues = new StringValues(
+            "linkSupportName");
+        DBDAttribute linkSupportAttribute = DBDAttributeFactory.create(
+            dbd,linkSupportValues);
+        DBDField config = createDBDField(configAttribute,null);
+        DBDField linkSupport = createDBDField(linkSupportAttribute,null);
+        DBDField[] dbdField = new DBDField[]{config,linkSupport};
+        DBDStructure link = createDBDStructure("link",dbdField,null);
+        dbd.addStructure(link);
+    
+    }
+
+    private static class StringValues implements DBDAttributeValues {
+      
+        public int getLength() {
+            return name.length;
+        }
+        public String getName(int index) {
+            return name[index];
+        }
+        public String getValue(int index) {
+            return value[index];
+        }
+        public String getValue(String attributeName) {
+            for(int i=0; i< name.length; i++) {
+                if(attributeName.equals(name[i])) return value[i];
+            }
+            return null;
+        }
+        StringValues(String fieldName) {
+            name = new String[]{"name","type"};
+            value = new String[]{fieldName,"string"};
+        }
+        String fieldName;
+        String[] name = null;
+        String[] value = null;
+    }
+
 
    static private void newLine(StringBuilder builder, int indentLevel) {
         builder.append("\n");
@@ -180,55 +153,15 @@ public final class  DBDCreateFactory {
 
     }
 
-    static private class FieldInstance implements DBDField, DBDAttribute
+    static private class FieldInstance implements DBDField
     {
 
-        public int getAsl() {
-            return asl;
-        }
-
-        public String getDefault() {
-            return defaultValue;
-        }
-
-        public boolean isDesign() {
-            return isDesign;
-        }
-
-        public boolean isLink() {
-            return isLink;
-        }
-
-        public boolean isReadonly() {
-            return isReadOnly;
-        }
-
-        public void setAsl(int value) {
-            asl = value;
-        }
-
-        public void setDefault(String value) {
-            defaultValue = value;
-        }
-
-        public void setDesign(boolean value) {
-            isDesign = value;
-        }
-
-        public void setLink(boolean value) {
-            isLink = value;
-        }
-
-        public void setReadOnly(boolean value) {
-            isReadOnly = value;
-        }
-
         public DBDAttribute getDBDAttribute() {
-            return this;
+            return attribute;
         }
 
         public DBType getDBType() {
-            return dbType;
+            return attribute.getDBType();
         }
 
         public String getName() {
@@ -265,208 +198,53 @@ public final class  DBDCreateFactory {
         private String getString(int indentLevel) {
             StringBuilder builder = new StringBuilder();
             builder.append(field.toString(indentLevel));
-            newLine(builder,indentLevel);
-            builder.append(String.format("DBType %s ",dbType.toString()));
-            if(defaultValue!=null) {
-                builder.append(String.format("default \"%s\"",defaultValue));
-            }
-            builder.append(String.format(
-                    " asl %d design %b link %b readOnly %b",
-                    asl,isDesign,isLink,isReadOnly));
+            builder.append(attribute.toString(indentLevel));
             return builder.toString();
         }
 
-        // Use this for dbPvType
-        FieldInstance(String fieldName,Type pvType,Property[]property)
+        FieldInstance(DBDAttribute attribute,Property[]property)
         {
-            if(pvType==Type.pvEnum) {
-                field = FieldFactory.createEnumField(fieldName,true,property);
-            } else {
-                field = FieldFactory.createField(fieldName,pvType,property);
+            this.attribute = attribute;
+            DBType dbType = attribute.getDBType();
+            Type type = attribute.getType();
+            String fieldName = attribute.getName();
+            switch(dbType) {
+            case dbPvType:
+                if(type==Type.pvEnum) {
+                    field = FieldFactory.createEnumField(fieldName,true,property); 
+                } else {
+                    field = FieldFactory.createField(fieldName,type,property);
+                }
+                break;
+            case dbMenu:
+                field = FieldFactory.createEnumField(fieldName,false,property);
+                break;
+            case dbStructure:
+            case dbLink: {
+                DBDStructure dbdStructure = attribute.getDBDStructure();
+                assert(dbdStructure!=null);
+                DBDField[] dbdField = dbdStructure.getDBDFields();
+                assert(dbdField!=null);
+                field = FieldFactory.createStructureField(fieldName,
+                    dbdStructure.getName(),dbdField,property);
+                break;
             }
-            this.dbType = DBType.dbPvType;
-            initAttribute();
+            case dbArray:
+                field = FieldFactory.createArrayField(fieldName,
+                    attribute.getElementType(),property);
+               break;
+            }
         }
-        
-        // Use this for dbMenu
-        FieldInstance(String fieldName,Property[]property)
-        {
-            field = FieldFactory.createEnumField(fieldName,false,property);
-            dbType = DBType.dbMenu;
-            initAttribute();
-        }
-
-        // Use this for dbArray
-        FieldInstance(String fieldName,
-            Type pvType,DBType dbType,Property[]property)
-        {
-            assert(dbType==DBType.dbArray);
-            field = FieldFactory.createArrayField(fieldName,pvType,property);
-            this.dbType = DBType.dbArray;
-            initAttribute();
-        }
-        
-        // Use this for dbStructure and for dbLink
-        FieldInstance(String fieldName, DBType dbType,String structureName,
-            DBDField[] dbdField, Property[]property)
-        {
-            this.field = (Field)FieldFactory.createStructureField(
-                    fieldName,structureName,dbdField,property);
-            this.dbType = dbType;
-            initAttribute();
-        }
-        
-        private void initAttribute() {
-            asl = 1;
-            defaultValue = null;
-            isDesign = true;
-            isLink = false;
-            isReadOnly = false;
-        }
-        protected Field field;
-        protected DBType dbType;
-        private int asl;
-        private String defaultValue;
-        private boolean isDesign;
-        private boolean isLink;
-        private boolean isReadOnly;
+            
+        private Field field;
+        private DBDAttribute attribute;
     }
 
-    static private class MenuFieldInstance extends FieldInstance
-        implements DBDMenuField, Enum
-    {
-        public boolean isChoicesMutable() {
-            return false;
-        }
-
-        public DBDMenu getDBDMenu() {
-            return dbdMenu;
-        }
-        
-        
-        public String toString() { return getString(0);}
-
-        public String toString(int indentLevel) {
-            return getString(indentLevel);
-        }
-
-        private String getString(int indentLevel) {
-            return super.toString(indentLevel);
-        }
-
-        MenuFieldInstance(String fieldName, DBDMenu dbdMenu, Property[]property)
-        {
-            super(fieldName,property);
-            this.dbdMenu = dbdMenu;
-        }
-        
-        private DBDMenu dbdMenu;
-    }
+    
  
-    static private class StructureFieldInstance extends FieldInstance
-        implements DBDStructureField, Structure
-    {
-        public Field getField(String fieldName) {
-            Structure structure = (Structure)super.field;
-            return structure.getField(fieldName);
-        }
-
-        public String[] getFieldNames() {
-            Structure structure = (Structure)super.field;
-            return structure.getFieldNames();
-        }
-
-        public Field[] getFields() {
-            Structure structure = (Structure)super.field;
-            return structure.getFields();
-        }
-
-        public String getStructureName() {
-            Structure structure = (Structure)super.field;
-            return structure.getStructureName();
-        }
-
-        public DBDStructure getDBDStructure() {
-            return dbdStructure;
-        }
-        
-        
-        public String toString() { return getString(0);}
-
-        public String toString(int indentLevel) {
-            return getString(indentLevel);
-        }
-
-        private String getString(int indentLevel) {
-            return super.toString(indentLevel);
-        }
-
-        StructureFieldInstance(String fieldName,
-            DBDStructure dbdStructure, Property[]property)
-        {
-            this(fieldName,DBType.dbStructure,dbdStructure,property);
-        }
-        
-        StructureFieldInstance(String fieldName,
-            DBType dbType,DBDStructure dbdStructure, Property[]property)
-        {
-            super(fieldName,dbType,dbdStructure.getStructureName(),
-                    dbdStructure.getDBDFields(),property);
-            this.dbdStructure = dbdStructure;
-        }
-        
-        private DBDStructure dbdStructure;
-    }
+    
  
-    static private class LinkFieldInstance extends StructureFieldInstance
-        implements DBDLinkField
-    {
-
-        LinkFieldInstance(String fieldName,
-            DBDStructure dbdStructure,Property[]property)
-        {
-            super(fieldName,DBType.dbLink,dbdStructure,property);
-        }
-    }
-
-    static private class ArrayFieldInstance extends FieldInstance
-        implements DBDArrayField, Array
-    {
-        public Type getElementType() {
-            Array array = (Array)super.field;
-            return array.getElementType();
-        }
-
-        public DBType getElementDBType() {
-            return elementDBType;
-        }
-        
-        
-        public String toString() { return getString(0);}
-
-        public String toString(int indentLevel) {
-            return getString(indentLevel);
-        }
-
-        private String getString(int indentLevel) {
-            StringBuilder builder = new StringBuilder();
-            builder.append(super.toString(indentLevel));
-            newLine(builder,indentLevel);
-            builder.append(String.format("elementDBType %s ",
-                elementDBType.toString()));
-            return builder.toString();
-        }
-
-        ArrayFieldInstance(String fieldName,Type pvType,
-            DBType dbType, Property[]property)
-        {
-            super(fieldName,pvType,dbType,property);
-            elementDBType = dbType;
-        }
-        
-        private DBType elementDBType;
-    }
-
+    
     static private class StructureInstance implements DBDStructure
     {
 
