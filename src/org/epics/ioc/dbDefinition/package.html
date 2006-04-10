@@ -11,7 +11,7 @@
 <hr />
 
 <h1 style="text-align: center">EPICS JavaIoc: Database Definition <br />
-2006.03.30</h1>
+2006.04.10</h1>
 <hr />
 <a href="#Overview">Overview</a> <br />
 <a href="#Syntax">Database Definition Syntax</a>
@@ -37,7 +37,8 @@
           <li><a href="#SyntaxLink">link</a></li>
         </ul>
       </li>
-      <li><a href="#SyntaxFieldAttribute">Field Attribute</a></li>
+      <li><a href="#SyntaxFieldAttribute">Field Attributes</a></li>
+      <li><a href="#SyntaxProperties">Properties</a></li>
     </ul>
   </li>
   <li><a href="#SyntaxSupport">Link Support</a></li>
@@ -52,16 +53,10 @@ Definition</a><br />
   <li><a href="#Structure">Structure and RecordType</a></li>
   <li><a href="#LinkSupport">Link Support</a></li>
 </ul>
-<a href="#DBDFields">Database Fields</a><br />
-
-<ul>
-  <li><a href="#DBDField">DBDField</a></li>
-  <li><a href="#DBDMenuField">DBDMenuField</a></li>
-  <li><a href="#DBDArrayField">DBDArrayField</a></li>
-  <li><a href="#DBDStructureField">DBDStructureField</a></li>
-</ul>
+<br />
 <a href="#DBDCreate">Creation of Database Definition Components</a><br />
 <a href="#DBDAccess">Accessing Database Definitions</a><br />
+<a href="#DBDXML">XML to DBD Converter</a><br />
 
 <hr />
 
@@ -74,17 +69,16 @@ of a particular type. This package describes support for defining menus,
 structures, record types, and linkSupport. The following is discussed:</p>
 <ol>
   <li>Database Definition Syntax
-    <p>The XML syntax for defining menus, structures, records, and
+    <p>The XML syntax for defining menus, structures, record types, and
     linkSupport.<br />
-    NOTE:</p>
-    <ul>
-      <li>A SAX parser will be written to create a DBD (database definition)
-        from the html files.</li>
-      <li>An XML Schema or DTD or something else should be created that
-        describes the syntax.</li>
-    </ul>
+    </p>
   </li>
   <li>Java Support for Database Definitions</li>
+  <li>SAX parser support
+    <p>This reads an xml file containing menu, structure, record types, and
+    link support and adds them to a database definition file.</p>
+    <p>THIS DOES NOT CURRENTLY SUPPORT include statements.</p>
+  </li>
 </ol>
 <hr />
 
@@ -96,12 +90,9 @@ Syntax</h1>
 Statements</h2>
 
 <h3><a id="SyntaxNamespace"></a>namespace</h3>
-Database Definitions belong to the following name space:
+At this time namespaces are not used.
 
-<p></p>
-<pre>&lt;html xmlns = "ioc.epics.org/databaseDefinition" /&gt; </pre>
-
-<h3><a id="SyntaxInclude"></a>Include</h3>
+<h3>Include</h3>
 <pre>    
 &lt;include filename = "filename" /&gt;</pre>
 
@@ -118,6 +109,8 @@ at the top level, or inside the braces of a <span
 style="font-family: courier;">menu</span>, <span
 style="font-family: courier;">structure</span> or <span
 style="font-family: courier;">record</span> definition.</p>
+
+<p></p>
 
 <h3>Menu</h3>
 A menu is an enumerated type, defined below, where the choice strings are
@@ -145,26 +138,25 @@ structure can't be instanciated except as a field of a record.
 <h3><a id="SyntaxStructure"></a>structure and recordType</h3>
 A structure is defined as follows:
 <pre>&lt;structure name = "structureName" &gt;
-     &lt;field name = "fieldName"&gt;
-         &lt;!-- fieldType - See below --&gt;
-         &lt;attribute&gt;
-             &lt;!-- fieldAttribute - See below --&gt;
-             ...
-         &lt;/attribute&gt;
-     &lt;/field&gt;
+     &lt;property name = "propertyName" associatedField = "fieldName" /&gt;
+     ...
+     &lt;field name = "fieldName" type = "fieldType" ... &gt;
+         &lt;property name = "propertyName" associatedField = "fieldName" /&gt;
+         ...
+
+    &lt;/field&gt;
      ...
 &lt;/structure&gt;</pre>
 
 <p>A record type is defined as follows:</p>
 <pre>&lt;include filename = "common.dbd" /&gt;
 &lt;recordType name = "recordtypeName"&gt;
+    &lt;property name = "propertyName" associatedField = "fieldName" /&gt;
+    ...
     &lt;include filename = "base.dbd" /&gt;
-     &lt;field name = "fieldName"&gt;
-         &lt;!-- fieldType - See below --&gt;
-         &lt;attribute&gt;
-             &lt;!-- fieldAttribute - See below
-             ...
-         &lt;/attribute&gt;
+     &lt;field name = "fieldName" type = "fieldType" ... &gt;
+         &lt;property name = "propertyName" associatedField = "fieldName" /&gt;
+         ...
      &lt;/field&gt;
      ...
 &lt;/recordType&gt;</pre>
@@ -179,7 +171,8 @@ where
       the context of this particular structure.</dd>
   <dt><span style="font-family: courier">fieldType</span></dt>
     <dd>See fieldType below.</dd>
-  <dt><span style="font-family: courier">fieldAttribute</span></dt>
+  <dt><span style="font-family: courier">propertyName and
+  associatedField</span></dt>
     <dd>See fieldAttribute below.</dd>
 </dl>
 
@@ -199,29 +192,21 @@ style="font-family: courier">double</span>. Primitive field types are just
 defined as <span style="font-family: courier;">&lt;type /&gt;</span> For
 example
 <pre>     
-    &lt;field name = "value"&gt;
-         &lt;double /&gt;
-    &lt;/field&gt;
-    &lt;field name = "rawValue"&gt;
-         &lt;int /&gt;
-    &lt;/field&gt;</pre>
+    &lt;field name = "value", type = "double" /&gt;
+    &lt;field name = "rawValue" type = "int" /&gt;</pre>
 
 <h4><a id="SyntaxString"></a>string</h4>
 A <span style="font-family: courier">string</span> is a Java <span
 style="font-family: courier;">String</span>. A <span
 style="font-family: courier;">string</span> field type is just defined as
 <span style="font-family: courier;">&lt;string /&gt;</span>. For example:
-<pre>     &lt;field name = "description"&gt;
-         &lt;string /&gt;
-     &lt;/field&gt;</pre>
+<pre>     &lt;field name = "description" type = "string" /&gt;</pre>
 
 <h4><a id="SyntaxEnumerated"></a>enumerated</h4>
 
 <p>An enumerated field is defined as <span
 style="font-family: courier;">&lt;enum /&gt;</span>. For example:</p>
-<pre>    &lt;field name = "value"&gt;
-         &lt;enum/&gt;
-     &lt;/field&gt;</pre>
+<pre>    &lt;field name = "value" type = "enum" /&gt;</pre>
 
 <h4><a id="SyntaxStructure"></a>structure</h4>
 A structure field is declared as
@@ -229,13 +214,13 @@ A structure field is declared as
 <span style="font-family: courier;">structureName</span> is the name of a
 structure which must have been previously defined. Example:
 <pre>   &lt;structure name = "Point"&gt;
-       &lt;field name = "x"&gt; &lt;double /&gt; &lt;/field&gt;
-       &lt;field name = "y"&gt; &lt;double /&gt; &lt;/field&gt;
+       &lt;field name = "x" type = "double" /&gt;
+       &lt;field name = "y"&gt; type = "double" /&gt;
    &lt;/structure&gt;
    ...
    &lt;recordType name = "haspoint"&gt;
        ...
-       &lt;field name = "point"&gt; &lt;structure name = "Point" /&gt; &lt;/field&gt;
+       &lt;field name = "point" type = "structure" structureName = "Point" /&gt;
        ...</pre>
 
 <h4><a id="SyntaxArray"></a>array</h4>
@@ -245,37 +230,22 @@ are supported via a <span style="font-family: courier;">structure</span>
 definition with fields describing the number of dimensions and the attributes
 of each dimension.</p>
 An array is defined as follows:
-<pre>    &lt;array capacity = "capacity"&gt;
-         &lt;!-- arrayType - just like fieldType --&gt;
-    &lt;/array&gt;</pre>
+<pre>    &lt;array elementType = "type" capacity = "capacity" /&gt;</pre>
 where
 <dl>
-  <dt style="font-family: courier;">arrayType</dt>
+  <dt style="font-family: courier;">elementType</dt>
     <dd>The type must be a valid type, i.e. boolean, byte, short, int, long,
-      float, double, string, structure, or array. This must be specified.</dd>
+      float, double, string,enum, structure, array or link. This must be
+      specified. If the elementType is structure than each element can be a
+      different type of structure.</dd>
   <dt style="font-family: courier;">capacity</dt>
     <dd>The number of array elements. If not specified the capacity is
       determined at record initialization</dd>
 </dl>
 Examples:
-<pre>     &lt;field name = "point"&gt;
-         &lt;!-- array of double with three elements --&gt;
-         &lt;array capacity = "3"&gt;
-             &lt;double /&gt;
-         &lt;/array&gt;
-     &lt;/field&gt;
-     &lt;field name = "value"&gt;
-         &lt;!-- array of double with arbitrary capacity --&gt;
-         &lt;array&gt;
-             &lt;double /&gt;
-         &lt;/array&gt;
-     &lt;/field&gt;
-     &lt;field name = "rectangle"&gt;
-         &lt;!-- array of two Points --&gt;
-         &lt;array capacity = "2"&gt;
-             &lt;structure name = "Point" /&gt;
-         &lt;/array&gt;
-     &lt;/field&gt;</pre>
+<pre>     &lt;field name type = "array" elementType = "double" capacity = "3" /&gt;
+     &lt;field name = "value" elementType = "double" /&gt;
+     &lt;field name = "rectangle" type = "structure" capacity = "2" /&gt;</pre>
 
 <h4><a id="SyntaxMenu"></a>menu</h4>
 A menu field is defined as:
@@ -283,9 +253,7 @@ A menu field is defined as:
 where <span style="font-family: courierfont-family: courier;">menuName</span>
 is the name of the menu. <br />
 Example:
-<pre>    &lt;field name = "scan"&gt;
-        &lt;menu name = "menuScan" /&gt;
-    &lt;/field&gt;</pre>
+<pre>    &lt;field name = "scan" type = "menu" menuName = "menuScan" /&gt;</pre>
 
 <p>To the database, a menu field is presented just like an enumerated field
 with constant choices. The choices are taken from the menu definition.</p>
@@ -299,20 +267,24 @@ style="font-family: courier;">linkSupport</span> definitions which are
 defined below. A <span style="font-family: courier;">link</span> can be a
 link to another database record, to hardware device support, or something
 else. The syntax is:
-<pre>     &lt;link /&gt;</pre>
+<pre>     &lt;field name = "name" type = "link" /&gt;</pre>
 Examples:
-<pre>     &lt;field name = "disableLink"&gt; &lt;link /&gt; &lt;/field&gt;
-     &lt;field name = "input"&gt; &lt;link /&gt; &lt;/field&gt;</pre>
+<pre>     &lt;field name = "disableLink" type = "link" /&gt;
+     &lt;field name = "input" type = "link" /&gt;</pre>
 
-<h3><a id="SyntaxFieldAttribute"></a>Field Attribute</h3>
-Each field definition can have associated attributes, the supported
-attributes are:
-<pre>     &lt;default value = "stringValue" /&gt;
-     &lt;readonly value = "booleanValue" /&gt;
-     &lt;design value = "booleanValue" /&gt;
-     &lt;link value = "booleanValue" /&gt;
-     &lt;asl value = "intValue" /&gt;
-     &lt;property name = "propertyName" associatedField = "associatedFieldName" /&gt;</pre>
+<h3><a id="SyntaxFieldAttribute"></a>Field Attributes</h3>
+
+<p>A field can have attributesThe attributes are specified via xml
+attributes. The following are the supported attributes and thye defailt fpor
+each if it is not specified.</p>
+
+<p>Each field definition can have associated attributes, the supported
+attributes are:</p>
+<pre>     default = "stringValue"
+     readonly = "booleanValue"
+     design = "booleanValue"
+     link = "booleanValue"
+     asl = "intValue"</pre>
 
 <p>The attribute parameter values have the following meanings:</p>
 <dl>
@@ -336,41 +308,15 @@ attributes are:
   <dt><span style="font-family: courier">asl</span></dt>
     <dd>Channel Access security level for this field, 0 or 1. Takes the value
       1 if not specified.</dd>
-  <dt><span style="font-family: courier">property</span></dt>
-    <dd>Multiple properties can be defined for a field. A property has the
-      following:
-      <ul>
-        <li>name - The property name.</li>
-        <li>associatedField - The name of a field in the same record that has
-          the property value.</li>
-      </ul>
-    </dd>
 </dl>
 The following examples show how attributes are defined:
 <pre>    &lt;recordType name = "example"&gt;
         ...
-        &lt;field name = "status"&gt;
-            &lt;string /&gt;
-            &lt;attribute&gt;
-                &lt;readonly value = "true" /&gt;
-            &lt;/attribute&gt;
-        &lt;/field&gt;
-        &lt;field name = "displayLimit"&gt;
-            &lt;structure name = "DisplayLimit" /&gt;
-            &lt;attribute&gt;
-                &lt;readonly value = "true" /&gt;
-            &lt;/attribute&gt;
-        &lt;/field&gt;
+        &lt;field name = "status" type = "string" readonly "true" /&gt;
+        &lt;field name = "displayLimit" type = "structure"
+                structureName = "displayLimit" readonly = "true" /&gt;
         ...
-        &lt;field name = "value" &gt;
-            &lt;double /&gt;
-            &lt;attribute&gt;
-                &lt;asl value = "0" /&gt;
-                &lt;property name = "status" associatedField = "status" /&gt;
-                &lt;property name = "display" associatedField = "displayLimit" /&gt;
-                ...
-            &lt;/attribute&gt;
-        &lt;/field&gt;
+        &lt;field name = "value" type = "double" asl value = "0" /&gt;
        ...
     &lt;/recordType&gt;</pre>
 <br />
@@ -383,6 +329,25 @@ NOTE: The following V3 attributes are no longer present
   <li><span style="font-family: courier;">group</span> - A DCT should allow
     the user to define groups or use it's own xml syntax.</li>
 </ul>
+
+<h3><a id="SyntaxProperties"></a>Properties</h3>
+Structures, record types, and fields can all have properties. A property is
+defined as:
+<pre>    &lt;property name = "name" associatedField = "field name" /&gt;</pre>
+where
+<dl>
+  <dt>name</dt>
+    <dd>The name of the property</dd>
+  <dt>associatedField</dt>
+    <dd>The name of a field in the record type that has the value for the
+      property</dd>
+</dl>
+Multiple properties can be defined for a field. For example: &lt;field name =
+"value" type = "double"&gt; &lt;property name = "status" associatedField =
+"status" /&gt; &lt;property name = "severity" associatedField = "severity"
+/&gt; &lt;property name = "timeStamp" associatedField = "timeStamp" /&gt;
+&lt;property name = "units" associatedField = "units" /&gt; &lt;property name
+= "displayLimit" associatedField = "displayLimit" /&gt; &lt;/field&gt;
 
 <h2 style="text-align: center"><a id="SyntaxSupport"></a> Link Support</h2>
 link support is attached to a link field. Two forms of link support can be
@@ -443,7 +408,7 @@ org.epics.ioc.dbAccess, which adds support for menus and links.</p>
 <h1 style="text-align: center"><a id="DBDataTypes"></a>Database Types</h1>
 <hr />
 
-<p>The types defined in package org.epics.ioc.dbAccess are defined by:</p>
+<p>The types are:</p>
 <pre>    enum DBType {
         dbPVType, // It is a plain PVType
         dbMenu,
@@ -457,35 +422,46 @@ org.epics.ioc.dbAccess, which adds support for menus and links.</p>
   <dt style="font-family: courier;">dbMenu</dt>
     <dd>An Enumeration. The choice names will be read only</dd>
   <dt>dbStructure</dt>
-    <dd>A Structure - A dbStructure can have any DBType.</dd>
+    <dd>A Structure - A dbStructure contains fields that can be have any
+      DBType.</dd>
   <dt>dbArray</dt>
-    <dd>An Array - The field type can be any DBType</dd>
+    <dd>An Array - The array element type can be any DBType</dd>
   <dt style="font-family: courier;">dbLink</dt>
-    <dd>In a record type the type is unknown. In a record instance it is a
-      structure which depends on the link support attached to a link
-    field.</dd>
+    <dd>A link appears as a structure field that has a structure with the
+      definition:
+      <pre>&lt;structure name = "link &gt;
+    &lt;field name = "linkSupportName" type = "string" /&gt;
+    &lt;field name = "configStructFieldName" type = "string" /&gt;
+&lt;/structure&gt;
+      </pre>
+    </dd>
 </dl>
 
 <p>The following provides access to the description of a field of a structure
 or recordType</p>
 <pre>    interface DBDAttribute {
+        String getName();
+        DBType getDBType();
+        Type getType();        
         String getDefault();
-        void setDefault(String value);
         boolean isReadonly();
-        void setReadOnly(boolean value);
         boolean isDesign();
         void setDesign(boolean value);
         boolean isLink();
-        void setLink(boolean value);
         int getAsl();
-        void setAsl(int value);
+        DBDMenu getDBDMenu();
+        DBDStructure getDBDStructure();
+        DBType getElementDBType();
+        Type getElementType();
+        String toString();
+        String toString(int indent Level);
     }
-
 
     interface DBDField extends Field {
         DBType getDBType();
         DBDAttribute getDBDAttribute();
-    }</pre>
+    }
+    </pre>
 
 <p>Since DBField extends Field it has the following methods: getName,
 getPVType, isMutable, getPropertyNames, getProperty, getProperties, and
@@ -522,7 +498,7 @@ the database itself.</p>
 
 <p>The interface is:</p>
 <pre>    interface DBDStructure extends Structure{
-        DBDField getDBDField(String fieldName);
+        DBDField getDBDFields(String fieldName);
     }</pre>
 
 <p>For example the following dumps a structure</p>
@@ -546,31 +522,6 @@ the database itself.</p>
     }</pre>
 <hr />
 
-<h1 style="text-align: center"><a id="DBDFields"></a>Database Fields</h1>
-<hr />
-
-<h2><a id="DBDField"></a>DBDField</h2>
-<pre>public interface DBDField extends Field {
-    DBType getDBType();
-    DBDAttribute getDBDAttribute();
-}</pre>
-
-<h2><a id="DBDMenuField"></a>DBDMenuField</h2>
-<pre>public interface DBDMenuField extends DBDField {
-    DBDMenu getDBDMenu();
-}</pre>
-
-<h2><a id="DBDArrayField"></a>DBDArrayField</h2>
-<pre>public interface DBDArrayField extends DBDField {
-    DBType getElementDBType();
-}</pre>
-
-<h2><a id="DBDStructureField"></a>DBDStructureField</h2>
-<pre>public interface DBDStructureField extends DBDField {
-    DBDStructure getDBDStructure();
-}</pre>
-<hr />
-
 <h1 style="text-align: center"><a id="DBDCreate"></a> Creation of Database
 Definition Components</h1>
 <hr />
@@ -579,9 +530,7 @@ Definition Components</h1>
 Definition.</p>
 <pre>public final class  DBDCreateFactory {
     public static DBDMenu createDBDMenu(String menuName, String[] choices);
-    public static DBDField createDBDField(String fieldName, Type pvType,
-        DBType dbType, Property[]property);
-    public static DBDMenuField createDBDMenuField(String fieldName,
+    public static DBDField createDBDField(DBDAttribute attribute, Property[]property);public static DBDMenuField createDBDMenuField(String fieldName,
         DBDMenu dbdMenu, Property[]property);
     public static DBDStructureField createDBDStructureField(String fieldName,
         DBDStructure dbdStructure, Property[]property);
@@ -628,5 +577,13 @@ Components. It also provides methods to insert components.</p>
 
 <p>NOTE: The current implementation uses LinkList to implement the lists.
 This should be changed to use a more efficient mechanism such as Tree.</p>
+<hr />
+
+<h1 style="text-align: center"><a id="DBDXML"></a> XML to DBD Converter</h1>
+<hr />
+The following reads an xml file containing menu, structure, record type, and
+link support definitions and adds the definitions to a database definition
+database.
+<pre>    public static void convert(DBD dbd, String fileName);</pre>
 </body>
 </html>

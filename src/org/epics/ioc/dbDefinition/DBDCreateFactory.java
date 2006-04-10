@@ -66,16 +66,17 @@ public final class  DBDCreateFactory {
      * @param dbd the DBD that will have the DBDStructure for link
      */
     public static void createLinkDBDStructure(DBD dbd) {
-        DBDAttributeValues configValues = new StringValues("configStructName");
-        DBDAttribute configAttribute = DBDAttributeFactory.create(
-            dbd,configValues);
         DBDAttributeValues linkSupportValues = new StringValues(
             "linkSupportName");
         DBDAttribute linkSupportAttribute = DBDAttributeFactory.create(
             dbd,linkSupportValues);
-        DBDField config = createDBDField(configAttribute,null);
         DBDField linkSupport = createDBDField(linkSupportAttribute,null);
-        DBDField[] dbdField = new DBDField[]{config,linkSupport};
+        DBDAttributeValues configValues = new StringValues(
+            "configStructFieldName");
+        DBDAttribute configAttribute = DBDAttributeFactory.create(
+            dbd,configValues);
+        DBDField config = createDBDField(configAttribute,null);
+        DBDField[] dbdField = new DBDField[]{linkSupport,config};
         DBDStructure link = createDBDStructure("link",dbdField,null);
         dbd.addStructure(link);
     
