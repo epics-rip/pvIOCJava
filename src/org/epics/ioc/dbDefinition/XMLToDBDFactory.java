@@ -254,9 +254,9 @@ public class XMLToDBDFactory {
                 e.toString());
         }
 
-        DBDXMLHandler menuHandler;
-        DBDXMLHandler structureHandler;
-        DBDXMLHandler linkSupportHandler;
+        private DBDXMLHandler menuHandler;
+        private DBDXMLHandler structureHandler;
+        private DBDXMLHandler linkSupportHandler;
     }
 
 
@@ -379,12 +379,12 @@ public class XMLToDBDFactory {
         }
         
         private DBD dbd;
-        ErrorHandler errorHandler;
-        Locator locator;
-        State state = State.idle;
-        String menuName;
-        LinkedList<String> choiceList;
-        StringBuilder choiceBuilder;
+        private ErrorHandler errorHandler;
+        private Locator locator;
+        private State state = State.idle;
+        private String menuName;
+        private LinkedList<String> choiceList;
+        private StringBuilder choiceBuilder;
         
         private enum State {idle, nextChoice, getChoice}
     
@@ -480,16 +480,18 @@ public class XMLToDBDFactory {
             for(int i=0; i<dbdField.length; i++) {
                 dbdField[i] = iter1.next();
             }
-            DBDStructure dbdStructure = DBDCreateFactory.createDBDStructure(
-                structureName,dbdField,property);
             if(isRecordType) {
-                boolean result = dbd.addRecordType(dbdStructure);
+                DBDRecordType dbdRecordType = DBDCreateFactory.createDBDRecordType(
+                        structureName,dbdField,property);
+                boolean result = dbd.addRecordType(dbdRecordType);
                 if(!result) {
                     errorHandler.warning(new SAXParseException(
                             "recordType " + structureName + " already exists",
                             locator));
                 }
             } else {
+                DBDStructure dbdStructure = DBDCreateFactory.createDBDStructure(
+                        structureName,dbdField,property);
                 boolean result = dbd.addStructure(dbdStructure);
                 if(!result) {
                     errorHandler.warning(new SAXParseException(
@@ -662,8 +664,8 @@ public class XMLToDBDFactory {
         }
         
         private DBD dbd;
-        ErrorHandler errorHandler;
-        Locator locator;
+        private ErrorHandler errorHandler;
+        private Locator locator;
     }
     
 }

@@ -67,21 +67,16 @@ public abstract class AbstractDBMenu extends AbstractDBData implements DBMenu
      * @return
      */
     private String getString(int indentLevel) {
-        StringBuilder builder = new StringBuilder();
-        builder.append(convert.getString(this,indentLevel));
-        newLine(builder,indentLevel + 1);
-        builder.append(String.format("DBType %s ",
-                this.getDBType().toString()));
-        return builder.toString();
+        return convert.getString(this,indentLevel);
     }
     
     /**
      * @param dbdMenuField
      */
-    AbstractDBMenu(DBDMenuField dbdMenuField) {
-        super(dbdMenuField);
+    AbstractDBMenu(DBDField dbdField) {
+        super(dbdField);
         index = 0;
-        DBDMenu dbdMenu = dbdMenuField.getDBDMenu();
+        DBDMenu dbdMenu = dbdField.getDBDAttribute().getDBDMenu();
         this.choice = dbdMenu.getChoices();
         this.menuName = dbdMenu.getName();
     }

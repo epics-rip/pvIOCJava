@@ -6,13 +6,11 @@ import org.epics.ioc.pvAccess.*;
 
 /**
  * The interface for DBD fields.
- * It is used for all scalar fields and is the base for other type fields.
- * Thus it is used for pvBoolean, ..., pvString.
- * It is the base for pvEnum, pvArray, and pvStructure.
+ * It is used for all DBType.dbPvType fields and is the base for all other DBTypes
  * @author mrk
  *
  */
-public interface DBDField extends Field {
+public interface DBDArrayField extends Array {
     /**
      * retrieve the DBType
      * @return DBType

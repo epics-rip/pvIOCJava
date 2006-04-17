@@ -57,18 +57,18 @@ public interface DBD {
      * @param recordTypeName get the description of a recordType
      * @return the description
      */
-    DBDStructure getDBDRecordType(String recordTypeName);
+    DBDRecordType getDBDRecordType(String recordTypeName);
     /**
      * @param recordType the DBDStructure that describes the recordType
      * @return  (true,false) if the recordType (was not, was) added.
      * It is not added if it is already present
      */
-    boolean addRecordType(DBDStructure recordType);
+    boolean addRecordType(DBDRecordType recordType);
     /**
      * get a collection of all the recordTypes
      * @return the Collection
      */
-    Collection<DBDStructure> getDBDRecordTypeList();
+    Collection<DBDRecordType> getDBDRecordTypeList();
     /**
      * @param linkSupportName the name of the link support desired
      * @return the DBDLink Support

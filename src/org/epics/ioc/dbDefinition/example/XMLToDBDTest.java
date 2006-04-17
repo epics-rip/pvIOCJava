@@ -37,8 +37,8 @@ public class XMLToDBDTest extends TestCase {
             System.out.print("\n" + linkSupportIter.next().toString());
         }
         System.out.printf("\n\nrecordTypes");
-        Collection<DBDStructure> recordTypeList = dbd.getDBDRecordTypeList();
-        Iterator<DBDStructure> recordTypeIter = recordTypeList.iterator();
+        Collection<DBDRecordType> recordTypeList = dbd.getDBDRecordTypeList();
+        Iterator<DBDRecordType> recordTypeIter = recordTypeList.iterator();
         while(recordTypeIter.hasNext()) {
             System.out.print("\n" + recordTypeIter.next().toString());
         }

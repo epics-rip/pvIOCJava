@@ -10,35 +10,23 @@ import org.epics.ioc.dbDefinition.*;
  * @author mrk
  *
  */
-public abstract class AbstractDBArray implements DBArray{
+public abstract class AbstractDBArray extends AbstractDBData implements DBArray{
 
-    /* (non-Javadoc)
-     * @see org.epics.ioc.dbAccess.DBArray#getDBDArrayField()
-     */
-    public DBDArrayField getDBDArrayField() {
-        return dbdArrayField;
-    }
 
     /* (non-Javadoc)
      * @see org.epics.ioc.pvAccess.PVArray#isCapacityMutable()
      */
     public boolean isCapacityMutable() {
-        return dbdArrayField.isMutable();
+        return dbdField.isMutable();
     }
 
-    /* (non-Javadoc)
-     * @see org.epics.ioc.dbAccess.DBData#getDBDField()
-     */
-    public DBDField getDBDField() {
-        return dbdArrayField;
-    }
 
     /**
      * get the element Type
      * @return the Type
      */
     public Type getElementType() {
-        return dbdArrayField.getElementType();
+        return dbdField.getDBDAttribute().getElementType();
     }
 
     /**
@@ -46,7 +34,7 @@ public abstract class AbstractDBArray implements DBArray{
      * @return the DBType
      */
     public DBType getElementDBType() {
-        return dbdArrayField.getElementDBType();
+        return dbdField.getDBDAttribute().getElementDBType();
     }
 
     /* (non-Javadoc)
@@ -69,32 +57,13 @@ public abstract class AbstractDBArray implements DBArray{
      */
     abstract public void setLength(int len);
 
-    /* (non-Javadoc)
-     * @see org.epics.ioc.pvAccess.PVData#getField()
-     */
-    public Field getField() {
-        return dbdArrayField;
-    }
-
-    /**
-     * get the DBType
-     * @return the DBType
-     */
-    public DBType getDBType() {
-        return dbdArrayField.getDBType();
-    }
     
     /**
      * constructer that derived classes must call
-     * @param dbdArrayField the DBDArrayField which describes the fields
+     * @param dbdField the DBDField which describes the fields
      */
-    protected AbstractDBArray(DBDArrayField dbdArrayField) {
-        this.dbdArrayField = dbdArrayField;
+    protected AbstractDBArray(DBDField dbdField) {
+        super(dbdField);
     }
-    
-    /**
-     * 
-     */
-    protected DBDArrayField dbdArrayField;
     
 }

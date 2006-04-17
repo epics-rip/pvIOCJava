@@ -65,8 +65,8 @@ public enum Type {
      * The numeric types are byte, int, long, float, and double.
      */
     public boolean isNumeric() {
-        if(ordinal() < 2) return false; // less than byte
-        if(ordinal() > 7) return false; // greater than double
+        if(ordinal() < Type.pvByte.ordinal()) return false;
+        if(ordinal() > Type.pvDouble.ordinal()) return false;
         return true;
     }
     /**
@@ -75,8 +75,8 @@ public enum Type {
      * This is the numeric types and boolean.
      */
     public boolean isPrimitive() {
-        if(ordinal() < 1) return false; // less than boolean
-        if(ordinal() > 7) return false; // greater than double
+        if(ordinal() < Type.pvBoolean.ordinal()) return false;
+        if(ordinal() > Type.pvDouble.ordinal()) return false;
         return true;
     }
     /**
@@ -84,8 +84,8 @@ public enum Type {
      * @return Returns true if the type is a Java primitive or a String
      */
     public boolean isScalar() {
-        if(ordinal() < 1) return false; // less than boolean
-        if(ordinal() > 8) return false; // greater than string
+        if(ordinal() < Type.pvBoolean.ordinal()) return false;
+        if(ordinal() > Type.pvString.ordinal()) return false;
         return true;
     }
 }

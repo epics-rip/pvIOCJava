@@ -56,19 +56,19 @@ public abstract class AbstractDBStructure extends AbstractDBData
                     dbData[i],indentLevel + 1));
                 break;
             case dbMenu:
-                builder.append(((DBMenu)dbData[i]).toString(
+                builder.append(dbData[i].toString(
                     indentLevel + 1));
                 break;
             case dbStructure:
-                builder.append(((DBStructure)dbData[i]).toString(
+                builder.append(dbData[i].toString(
                     indentLevel + 1));
                 break;
             case dbArray:
-                builder.append(((DBArray)dbData[i]).toString(
+                builder.append(dbData[i].toString(
                     indentLevel + 1));
                 break;
             case dbLink:
-                builder.append(((DBLink)dbData[i]).toString(
+                builder.append(dbData[i].toString(
                     indentLevel + 1));
                  break;
             }
@@ -79,44 +79,28 @@ public abstract class AbstractDBStructure extends AbstractDBData
         return builder.toString();
     }
     
-    private DBData constructPv(DBDField dbdField) {
-       Type type =  dbdField.getType();
-       if(type!=Type.pvEnum) return FieldDataFactory.createScalarData(dbdField);
-       String[] choice = new String[0];
-       return FieldDataFactory.createEnumData(dbdField,choice);
-    }
-    
     /**
      * @param dbdStructureField
      */
-    AbstractDBStructure(DBDStructureField dbdStructureField) {
-        super(dbdStructureField);
-        DBDStructure dbdStructure = dbdStructureField.getDBDStructure();
-        DBDField[] dbdField = dbdStructure.getDBDFields();
-        dbData = new DBData[dbdField.length];
+    AbstractDBStructure(DBDField dbdField) {
+        super(dbdField);
+        DBDStructure dbdStructure = dbdField.getDBDAttribute().getDBDStructure();
+        DBDField[] dbdFields = dbdStructure.getDBDFields();
+        dbData = new DBData[dbdFields.length];
         pvData = new PVData[dbData.length];
         for(int i=0; i < dbData.length; i++) {
-            DBDField field = dbdField[i];
-            switch(field.getDBType()) {
-            case dbPvType:
-                dbData[i] = constructPv(field);
-                break;
-            case dbMenu:
-                dbData[i] = FieldDataFactory.createMenuData((DBDMenuField)field);
-                break;
-            case dbStructure:
-                dbData[i] = FieldDataFactory.createStructureData(
-                    (DBDStructureField)field);
-                break;
-            case dbArray:
-                dbData[i] = FieldDataFactory.createArrayData(
-                    (DBDArrayField)field,0,true);
-                break;
-            case dbLink:
-                dbData[i] = FieldDataFactory.createLinkData((DBDLinkField)field);
-                break;
-            default:
-            }
+            dbData[i] = FieldDataFactory.createData(dbdFields[i]);
+            pvData[i] = dbData[i];
+        }
+        
+    }
+    
+    AbstractDBStructure(DBDField dbdField, DBDField[] dbdFields) {
+        super(dbdField);
+        dbData = new DBData[dbdFields.length];
+        pvData = new PVData[dbData.length];
+        for(int i=0; i < dbData.length; i++) {
+            dbData[i] = FieldDataFactory.createData(dbdFields[i]);
             pvData[i] = dbData[i];
         }
         

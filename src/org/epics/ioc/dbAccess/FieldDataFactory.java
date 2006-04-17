@@ -18,23 +18,28 @@ public class FieldDataFactory {
      * @param dbdField the reflection interface for the field
      * @return the DBData implementation
      */
-    public static DBData createScalarData(DBDField dbdField)
+    public static DBData createData(DBDField dbdField)
     {
         DBType dbType = dbdField.getDBType();
-        if(dbType!=DBType.dbPvType) 
-            throw new IllegalArgumentException("DBType must be dbPvType");
-        Type type = dbdField.getType();
-        switch(type) {
-        case pvUnknown: return new UnknownData(dbdField);
-        case pvBoolean: return new BooleanData(dbdField);
-        case pvByte:    return new ByteData(dbdField);
-        case pvShort:   return new ShortData(dbdField);
-        case pvInt:     return new IntData(dbdField);
-        case pvLong:    return new LongData(dbdField);
-        case pvFloat:   return new FloatData(dbdField);
-        case pvDouble:  return new DoubleData(dbdField);
-        case pvString:  return new StringData(dbdField);
-        case pvEnum:    break; // illegal
+        switch(dbType) {
+        case dbPvType:
+            Type type = dbdField.getType();
+            switch(type) {
+            case pvUnknown: return new UnknownData(dbdField);
+            case pvBoolean: return new BooleanData(dbdField);
+            case pvByte:    return new ByteData(dbdField);
+            case pvShort:   return new ShortData(dbdField);
+            case pvInt:     return new IntData(dbdField);
+            case pvLong:    return new LongData(dbdField);
+            case pvFloat:   return new FloatData(dbdField);
+            case pvDouble:  return new DoubleData(dbdField);
+            case pvString:  return new StringData(dbdField);
+            case pvEnum:    return createEnumData(dbdField,null);
+            }
+        case dbMenu: return new MenuData(dbdField);
+        case dbStructure: return new StructureData(dbdField);
+        case dbArray: return createArrayData(dbdField,0,true);
+        case dbLink: return new LinkData(dbdField);
         }
         throw new IllegalArgumentException(
             "Illegal Type. Must be pvUnknown,...,pvString");
@@ -52,37 +57,6 @@ public class FieldDataFactory {
     }
 
     /**
-     * create an implementation for a menu field
-     * @param dbdMenuField the reflection interface for the field
-     * @return the DBMenu implementation
-     */
-    public static DBMenu createMenuData(DBDMenuField dbdMenuField)
-    {
-        return new MenuData(dbdMenuField);
-    }
-
-    /**
-     * create an implementation for a structure field
-     * @param dbdStructureField the reflection interface for the field
-     * @return the DBStructure implementation
-     */
-    public static DBStructure createStructureData(
-        DBDStructureField dbdStructureField)
-    {
-        return new StructureData(dbdStructureField);
-    }
-
-    /**
-     * create an implementation for a link field
-     * @param dbdField the reflection interface for the field
-     * @return the DBLink implementation
-     */
-    public static DBLink createLinkData( DBDLinkField dbdLinkField)
-    {
-        return new LinkData(dbdLinkField);
-    }
-
-    /**
      * create an implementation for an array field
      * @param dbdArrayField the reflection interface for the field
      * @param capacity the default capacity for the field
@@ -90,49 +64,53 @@ public class FieldDataFactory {
      * @return the DBArray implementation
      */
     public static DBArray createArrayData(
-            DBDArrayField dbdArrayField,int capacity,boolean capacityMutable)
+            DBDField dbdField,int capacity,boolean capacityMutable)
     {
-        DBType elementDbType= dbdArrayField.getElementDBType();
+        DBType elementDbType= dbdField.getDBDAttribute().getElementDBType();
         switch(elementDbType) {
         case dbPvType: {
-                Type elementType = dbdArrayField.getElementType();
+                Type elementType = dbdField.getDBDAttribute().getElementType();
                 switch(elementType) {
                 case pvBoolean: return new ArrayBooleanData(
-                    dbdArrayField, capacity, capacityMutable);
+                    dbdField, capacity, capacityMutable);
                 case pvByte:    return new ArrayByteData(
-                    dbdArrayField, capacity, capacityMutable);
+                    dbdField, capacity, capacityMutable);
                 case pvShort:   return new ArrayShortData(
-                    dbdArrayField, capacity, capacityMutable);
+                    dbdField, capacity, capacityMutable);
                 case pvInt:     return new ArrayIntData(
-                    dbdArrayField, capacity, capacityMutable);
+                    dbdField, capacity, capacityMutable);
                 case pvLong:    return new ArrayLongData(
-                    dbdArrayField, capacity, capacityMutable);
+                    dbdField, capacity, capacityMutable);
                 case pvFloat:   return new ArrayFloatData(
-                    dbdArrayField, capacity, capacityMutable);
+                    dbdField, capacity, capacityMutable);
                 case pvDouble:  return new ArrayDoubleData(
-                    dbdArrayField, capacity, capacityMutable);
+                    dbdField, capacity, capacityMutable);
                 case pvString:  return new ArrayStringData(
-                    dbdArrayField, capacity, capacityMutable);
+                    dbdField, capacity, capacityMutable);
                 case pvEnum:    return new ArrayEnumData(
-                    dbdArrayField, capacity, capacityMutable);
+                    dbdField, capacity, capacityMutable);
                 }
                 throw new IllegalArgumentException(
                     "Illegal Type. Logic error");
             }
         case dbMenu:
             return new ArrayMenuData(
-                 dbdArrayField, capacity, capacityMutable);
+                 dbdField, capacity, capacityMutable);
         case dbStructure:
             return new ArrayStructureData(
-                 dbdArrayField, capacity, capacityMutable);
+                 dbdField, capacity, capacityMutable);
         case dbArray:
             return new ArrayArrayData(
-                 dbdArrayField, capacity, capacityMutable);
+                 dbdField, capacity, capacityMutable);
         case dbLink:
             return new ArrayLinkData(
-                 dbdArrayField, capacity, capacityMutable);
+                 dbdField, capacity, capacityMutable);
         }
         throw new IllegalArgumentException("Illegal Type. Logic error");
+    }
+    
+    public static DBRecord createRecord(String recordName, DBDRecordType dbdRecordType) {
+        return new RecordData(recordName,dbdRecordType);
     }
     
     private static Convert convert = ConvertFactory.getPVConvert();
@@ -395,24 +373,31 @@ public class FieldDataFactory {
 
     private static class MenuData extends AbstractDBMenu {
 
-        MenuData(DBDMenuField dbdMenuField) {
-            super(dbdMenuField);
+        MenuData(DBDField dbdField) {
+            super(dbdField);
         }
         
     }
 
     private static class StructureData extends AbstractDBStructure
     {
-        StructureData(DBDStructureField dbdStructureField) {
-            super(dbdStructureField);
+        StructureData(DBDField dbdField) {
+            super(dbdField);
+        }
+    }
+    
+    private static class RecordData extends AbstractDBRecord
+    {
+        RecordData(String recordName,DBDRecordType dbdRecordType) {
+            super(recordName,dbdRecordType);
         }
     }
 
     private static class LinkData extends AbstractDBLink
     {
-        LinkData(DBDLinkField dbdLinkField)
+        LinkData(DBDField dbdField)
         {
-            super(dbdLinkField);
+            super(dbdField);
         }
     }
 
@@ -475,10 +460,10 @@ public class FieldDataFactory {
             length = len;
         }
 
-        ArrayBooleanData(DBDArrayField dbdArrayField,
+        ArrayBooleanData(DBDField dbdField,
             int capacity,boolean capacityMutable)
         {
-            super(dbdArrayField);
+            super(dbdField);
             this.capacity = capacity;
             this.capacityMutable = capacityMutable;
             value = new boolean[capacity];
@@ -549,10 +534,10 @@ public class FieldDataFactory {
             length = len;
         }
 
-        ArrayByteData(DBDArrayField dbdArrayField,
+        ArrayByteData(DBDField dbdField,
             int capacity,boolean capacityMutable)
         {
-            super(dbdArrayField);
+            super(dbdField);
             this.capacity = capacity;
             this.capacityMutable = capacityMutable;
             value = new byte[capacity];
@@ -623,10 +608,10 @@ public class FieldDataFactory {
             length = len;
         }
 
-        ArrayShortData(DBDArrayField dbdArrayField,
+        ArrayShortData(DBDField dbdField,
             int capacity,boolean capacityMutable)
         {
-            super(dbdArrayField);
+            super(dbdField);
             this.capacity = capacity;
             this.capacityMutable = capacityMutable;
             value = new short[capacity];
@@ -697,10 +682,10 @@ public class FieldDataFactory {
             length = len;
         }
 
-        ArrayIntData(DBDArrayField dbdArrayField,
+        ArrayIntData(DBDField dbdField,
             int capacity,boolean capacityMutable)
         {
-            super(dbdArrayField);
+            super(dbdField);
             this.capacity = capacity;
             this.capacityMutable = capacityMutable;
             value = new int[capacity];
@@ -771,10 +756,10 @@ public class FieldDataFactory {
             length = len;
         }
 
-        ArrayLongData(DBDArrayField dbdArrayField,
+        ArrayLongData(DBDField dbdField,
             int capacity,boolean capacityMutable)
         {
-            super(dbdArrayField);
+            super(dbdField);
             this.capacity = capacity;
             this.capacityMutable = capacityMutable;
             value = new long[capacity];
@@ -845,10 +830,10 @@ public class FieldDataFactory {
             length = len;
         }
 
-        ArrayFloatData(DBDArrayField dbdArrayField,
+        ArrayFloatData(DBDField dbdField,
             int capacity,boolean capacityMutable)
         {
-            super(dbdArrayField);
+            super(dbdField);
             this.capacity = capacity;
             this.capacityMutable = capacityMutable;
             value = new float[capacity];
@@ -919,10 +904,10 @@ public class FieldDataFactory {
             length = len;
         }
 
-        ArrayDoubleData(DBDArrayField dbdArrayField,
+        ArrayDoubleData(DBDField dbdField,
             int capacity,boolean capacityMutable)
         {
-            super(dbdArrayField);
+            super(dbdField);
             this.capacity = capacity;
             this.capacityMutable = capacityMutable;
             value = new double[capacity];
@@ -993,10 +978,10 @@ public class FieldDataFactory {
             length = len;
         }
 
-        ArrayStringData(DBDArrayField dbdArrayField,
+        ArrayStringData(DBDField dbdField,
             int capacity,boolean capacityMutable)
         {
-            super(dbdArrayField);
+            super(dbdField);
             this.capacity = capacity;
             this.capacityMutable = capacityMutable;
             value = new String[capacity];
@@ -1067,10 +1052,10 @@ public class FieldDataFactory {
             length = len;
         }
 
-        ArrayEnumData(DBDArrayField dbdArrayField,
+        ArrayEnumData(DBDField dbdField,
             int capacity,boolean capacityMutable)
         {
-            super(dbdArrayField);
+            super(dbdField);
             this.capacity = capacity;
             this.capacityMutable = capacityMutable;
             value = new DBEnum[capacity];
@@ -1156,10 +1141,10 @@ public class FieldDataFactory {
             length = len;
         }
 
-        ArrayMenuData(DBDArrayField dbdArrayField,
+        ArrayMenuData(DBDField dbdField,
             int capacity,boolean capacityMutable)
         {
-            super(dbdArrayField);
+            super(dbdField);
             this.capacity = capacity;
             this.capacityMutable = capacityMutable;
             value = new DBMenu[capacity];
@@ -1174,6 +1159,25 @@ public class FieldDataFactory {
     private static class ArrayStructureData
         extends AbstractDBArray implements DBStructureArray
     {
+        public int get(int offset, int len, PVStructure[] to, int toOffset) {
+            int n = len;
+            if(offset+len > length) n = length;
+            if(n>0) System.arraycopy(value,offset,to,toOffset,n);
+            return n;
+        }
+
+        public int put(int offset, int len, PVStructure[] from, int fromOffset) {
+            if(!super.getField().isMutable())
+                throw new IllegalStateException("PVData.isMutable is false");
+            if(offset+len > length) {
+                int newlength = offset + len;
+                if(newlength>capacity) setCapacity(newlength);
+                length = newlength;
+           }
+           System.arraycopy(from,fromOffset,value,offset,len);
+           return len;
+        }
+
         public String toString() {
             return getString(0);
         }
@@ -1184,8 +1188,7 @@ public class FieldDataFactory {
 
         private String getString(int indentLevel) {
             StringBuilder builder = new StringBuilder();
-            Structure structure = (Structure)this.getField();
-            builder.append("structure " + structure.getStructureName() + "{");
+            builder.append("{");
             for(int i=0; i < length; i++) {
                 if(value[i]==null) {
                     newLine(builder,indentLevel + 1);
@@ -1246,10 +1249,10 @@ public class FieldDataFactory {
             length = len;
         }
 
-        ArrayStructureData(DBDArrayField dbdArrayField,
+        ArrayStructureData(DBDField dbdField,
             int capacity,boolean capacityMutable)
         {
-            super(dbdArrayField);
+            super(dbdField);
             this.capacity = capacity;
             this.capacityMutable = capacityMutable;
             value = new DBStructure[capacity];
@@ -1265,6 +1268,25 @@ public class FieldDataFactory {
         extends AbstractDBArray implements DBArrayArray
     {
  
+        public int get(int offset, int len, PVArray[] to, int toOffset) {
+            int n = len;
+            if(offset+len > length) n = length;
+            if(n>0) System.arraycopy(value,offset,to,toOffset,n);
+            return n;
+        }
+
+        public int put(int offset, int len, PVArray[] from, int fromOffset) {
+            if(!super.getField().isMutable())
+                throw new IllegalStateException("PVData.isMutable is false");
+            if(offset+len > length) {
+                int newlength = offset + len;
+                if(newlength>capacity) setCapacity(newlength);
+                length = newlength;
+           }
+           System.arraycopy(from,fromOffset,value,offset,len);
+           return len;
+        }
+
         public String toString() {
             return getString(0);
         }
@@ -1336,10 +1358,10 @@ public class FieldDataFactory {
             length = len;
         }
 
-        ArrayArrayData(DBDArrayField dbdArrayField,
+        ArrayArrayData(DBDField dbdField,
             int capacity,boolean capacityMutable)
         {
-            super(dbdArrayField);
+            super(dbdField);
             this.capacity = capacity;
             this.capacityMutable = capacityMutable;
             value = new DBArray[capacity];
@@ -1355,6 +1377,25 @@ public class FieldDataFactory {
         extends AbstractDBArray implements DBLinkArray
     {
  
+        public int get(int offset, int len, PVStructure[] to, int toOffset) {
+            int n = len;
+            if(offset+len > length) n = length;
+            if(n>0) System.arraycopy(value,offset,to,toOffset,n);
+            return n;
+        }
+
+        public int put(int offset, int len, PVStructure[] from, int fromOffset) {
+            if(!super.getField().isMutable())
+                throw new IllegalStateException("PVData.isMutable is false");
+            if(offset+len > length) {
+                int newlength = offset + len;
+                if(newlength>capacity) setCapacity(newlength);
+                length = newlength;
+           }
+           System.arraycopy(from,fromOffset,value,offset,len);
+           return len;
+        }
+
         public String toString() {
             return getString(0);
         }
@@ -1426,10 +1467,10 @@ public class FieldDataFactory {
             length = len;
         }
 
-        ArrayLinkData(DBDArrayField dbdArrayField,
+        ArrayLinkData(DBDField dbdField,
             int capacity,boolean capacityMutable)
         {
-            super(dbdArrayField);
+            super(dbdField);
             this.capacity = capacity;
             this.capacityMutable = capacityMutable;
             value = new DBLink[capacity];

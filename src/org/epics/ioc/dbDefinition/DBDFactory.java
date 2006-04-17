@@ -66,7 +66,7 @@ public class DBDFactory {
     }
 
     private static class DBDInstance implements DBD {
-        
+
         public boolean addLinkSupport(DBDLinkSupport linkSupport) {
             ListIterator<DBDLinkSupport> iter = linkSupportList.listIterator();
             while(iter.hasNext()) {
@@ -101,10 +101,10 @@ public class DBDFactory {
             return true;
         }
 
-        public boolean addRecordType(DBDStructure recordType) {
-            ListIterator<DBDStructure> iter = recordTypeList.listIterator();
+        public boolean addRecordType(DBDRecordType recordType) {
+            ListIterator<DBDRecordType> iter = recordTypeList.listIterator();
             while(iter.hasNext()) {
-                DBDStructure struct = iter.next();
+                DBDRecordType struct = iter.next();
                 int compare = struct.getStructureName().compareTo(
                         recordType.getStructureName());
                 if(compare==0) return false;
@@ -134,14 +134,14 @@ public class DBDFactory {
             structureList.add(structure);
             return true;
         }
-        public DBDStructure getDBDRecordType(String recordTypeName) {
-            for(DBDStructure recordType : recordTypeList) {
+        public DBDRecordType getDBDRecordType(String recordTypeName) {
+            for(DBDRecordType recordType : recordTypeList) {
                 if(recordType.getStructureName().equals(recordTypeName))
                     return recordType;
             }
             return null;
         }
-        public Collection<DBDStructure> getDBDRecordTypeList() {
+        public Collection<DBDRecordType> getDBDRecordTypeList() {
             return recordTypeList;
         }
         public DBDStructure getDBDStructure(String structureName) {
@@ -178,14 +178,14 @@ public class DBDFactory {
             this.name = name;
             menuList = new LinkedList<DBDMenu>();
             structureList = new LinkedList<DBDStructure>();
-            recordTypeList = new LinkedList<DBDStructure>();
+            recordTypeList = new LinkedList<DBDRecordType>();
             linkSupportList = new LinkedList<DBDLinkSupport>();
         }
         
         private String name;
         private LinkedList<DBDMenu> menuList;
         private LinkedList<DBDStructure> structureList;
-        private LinkedList<DBDStructure> recordTypeList;
+        private LinkedList<DBDRecordType> recordTypeList;
         private LinkedList<DBDLinkSupport> linkSupportList;
     }
 

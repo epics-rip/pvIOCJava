@@ -46,9 +46,9 @@ public abstract class AbstractDBLink extends AbstractDBStructure implements DBLi
      * Constructor
      * @param dbdLinkField
      */
-    AbstractDBLink(DBDLinkField dbdLinkField)
+    AbstractDBLink(DBDField dbdField)
     {
-        super(dbdLinkField);
+        super(dbdField);
         assert(super.pvData.length==2);
         PVData config = super.pvData[0];
         Field field = config.getField();

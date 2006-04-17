@@ -3,6 +3,8 @@
  */
 package org.epics.ioc.dbAccess;
 
+import org.epics.ioc.pvAccess.*;
+
 /**
  * get/put a DBArray array.
  * The caller must be prepared to get/put the array in chunks.
@@ -11,7 +13,7 @@ package org.epics.ioc.dbAccess;
  * @author mrk
  *
  */
-public interface DBArrayArray extends DBArray{
+public interface DBArrayArray extends DBArray, PVArrayArray {
     /**
      * get values from the <i>DBArrayArray</i> and put them in <i>DBArray[]to</i>
      * @param offset The offset to the first element to get.

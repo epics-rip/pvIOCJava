@@ -1,6 +1,6 @@
 package org.epics.ioc.dbAccess;
 
-import org.epics.ioc.pvAccess.Field;
+import org.epics.ioc.pvAccess.*;
 import org.epics.ioc.dbDefinition.*;
 
 /**

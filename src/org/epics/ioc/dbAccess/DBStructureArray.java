@@ -3,6 +3,8 @@
  */
 package org.epics.ioc.dbAccess;
 
+import org.epics.ioc.pvAccess.*;
+
 /**
  * get/put a DBStructure  array.
  * The caller must be prepared to get/put the array in chunks.
@@ -11,7 +13,7 @@ package org.epics.ioc.dbAccess;
  * @author mrk
  *
  */
-public interface DBStructureArray extends DBArray{
+public interface DBStructureArray extends DBArray, PVStructureArray{
     /**
      * get values from a <i>DBStructureArray</i> and put them into <i>DBStructure[]to</i>
      * @param offset The offset to the first element to get.
