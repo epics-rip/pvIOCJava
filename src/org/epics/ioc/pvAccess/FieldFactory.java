@@ -281,6 +281,13 @@ public final class FieldFactory {
             }
             return null;
         }
+
+        public int getFieldIndex(String name) {
+            for(int i=0; i< fieldName.length; i++) {
+                if(name.equals(fieldName[i])) return i;
+            }
+            return -1;
+        }
     
         public String[] getFieldNames() {
             return fieldName;
@@ -329,5 +336,6 @@ public final class FieldFactory {
             builder.append("}");
             return builder.toString();
         }
+
     }
 }

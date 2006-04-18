@@ -119,6 +119,14 @@ public interface Convert {
      */
     void  fromDouble(PVData pv, double from);
     /**
+     * Convert the PV from a <i>String</i>
+     * @param pv the PV
+     * @param from a String value to convert and put into the PV
+     * @throws IllegalArgumentException if the Type is not a scalar
+     * @throws NumberFormatException if the String does not have a valid value.
+     */
+    void fromString(PVData pv,String from);
+    /**
      * Convert the PV array to a <i>byte</i> array.
      * @param pv the PV
      * @param offset starting element in the PV
@@ -250,4 +258,16 @@ public interface Convert {
      * @throws IllegalArgumentException if the Type is not a numeric array
      */
     int fromDoubleArray(PVData pv, int offset, int len, double[]from, int fromOffset);
+    /**
+     * Convert the PV array from a <i>String</i> array.
+     * @param pv the PV
+     * @param offset starting element in the PV
+     * @param len number of elements to transfer
+     * @param from source for data to put into PV
+     * @param fromOffset starting element in the source array
+     * @return number of elements converted
+     * @throws IllegalArgumentException if the Type is not a scalar
+     * @throws NumberFormatException if the String does not have a valid value.
+     */
+    int fromStringArray(PVData pv, int offset, int len, String[]from, int fromOffset);
 }

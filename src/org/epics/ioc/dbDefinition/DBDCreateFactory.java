@@ -190,6 +190,14 @@ public final class  DBDCreateFactory {
     static private class StructureInstance implements DBDStructure
     {
 
+        public int getDBDFieldIndex(String fieldName) {
+            return structure.getFieldIndex(fieldName);
+        }
+
+        public int getFieldIndex(String fieldName) {
+            return structure.getFieldIndex(fieldName);
+        }
+
         public DBDField[] getDBDFields() {
             return dbdField;
         }
@@ -260,6 +268,14 @@ public final class  DBDCreateFactory {
 
     static private class RecordTypeInstance implements DBDRecordType
     {
+
+        public int getDBDFieldIndex(String fieldName) {
+            return structure.getFieldIndex(fieldName);
+        }
+
+        public int getFieldIndex(String fieldName) {
+            return structure.getFieldIndex(fieldName);
+        }
 
         public DBDAttribute getDBDAttribute() {
             return null; // record types have no attributes
@@ -420,6 +436,10 @@ public final class  DBDCreateFactory {
     static private class StructureFieldInstance extends AbstractDBDField
         implements DBDStructureField
     {
+
+        public int getFieldIndex(String fieldName) {
+            return structure.getFieldIndex(fieldName);
+        }
 
         public Field getField(String fieldName) {
             return structure.getField(fieldName);

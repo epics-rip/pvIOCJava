@@ -134,8 +134,7 @@ example:</p>
 
 <h3><a id="FieldArray"></a>array</h3>
 The syntax for an array initializer is:
-<pre>    &lt;fieldName&gt;
-        &lt;capacity&gt;capacity&lt;/capacity&gt;
+<pre>    &lt;fieldName capacity = "capacity" &gt;
         &lt;offset&gt;offset&lt;/offset&gt;
         &lt;value&gt;value&lt;/value&gt;
         &lt;value&gt;valueList&lt;/value&gt;
@@ -145,9 +144,8 @@ The syntax for an array initializer is:
 <p>where</p>
 <dl>
   <dt style="font-family: courier;">capacity</dt>
-    <dd>The amount of storage to allocate for the array. If given this must
-      be the first element defined. If the recordType definition did not
-      specify a capacity this must be defined.</dd>
+    <dd>The amount of storage to allocate for the array. If the recordType
+      definition did not specify a capacity this must be defined.</dd>
   <dt style="font-family: courier;">offset</dt>
     <dd>This can be specified multiple times. Each time it is given it sets
       the offset for the next value.</dd>
@@ -175,17 +173,14 @@ The syntax for an array initializer is:
     &lt;/field&gt;</pre>
 
 <p>Then the following all perform the same initialization:</p>
-<pre>    &lt;intArray&gt;
-        &lt;capacity&gt;3&lt;/capacity&gt;
+<pre>    &lt;intArray capacity = "3" &gt;
         &lt;value&gt;0.0, 1.0, 2.0&lt;/value&gt;
     &lt;/intArray&gt;
-    &lt;intArray&gt;
-        &lt;capacity&gt;3&lt;/capacity&gt;
+    &lt;intArray capacity = "3"&gt;
         &lt;offset&gt;1&lt;/offset&gt;
         &lt;value&gt;1.0, 2.0&lt;/value&gt;
     &lt;/intArray&gt;
-    &lt;intArray&gt;
-        &lt;capacity&gt;3&lt;/capacity&gt;
+    &lt;intArray capacity = "3"&gt;
         &lt;offset&gt;0&lt;/offset&gt;
         &lt;value&gt;0.0&lt;/value&gt;
         &lt;offset&gt;1&lt;/offset&gt;
@@ -197,8 +192,7 @@ The syntax for an array initializer is:
 
 <p>The following initializes a <span
 style="font-family: courier;">structArray</span></p>
-<pre>    &lt;structArray&gt;
-        &lt;capacity&gt;2&lt;/capacity&gt;
+<pre>    &lt;structArray capacity = "2"&gt;
         &lt;value&gt;
             &lt;low&gt;0.0&lt;/low&gt;
             &lt;high&gt;10.0&lt;/high&gt;
@@ -222,22 +216,18 @@ where stringValue is one of the allowed values for the menu.
 
 <p>An enumerated field is initialized as follows:</p>
 <pre>    &lt;fieldName&gt;
-        &lt;index&gt;index&lt;/index&gt;
         &lt;choice&gt;choice&lt;/choice&gt;
         ...
     &lt;/fieldName&gt;</pre>
 
 <p>where</p>
 <dl>
-  <dt style="font-family: courier;">index</dt>
-    <dd>The initial index which must be an integer.</dd>
   <dt style="font-family: courier;">choice</dt>
     <dd>A choice string. One of these must be specified for each choice.</dd>
 </dl>
 
 <p>For example:</p>
 <pre>    &lt;enumExample&gt;
-         &lt;index&gt;0&lt;/index&gt;
          &lt;choice&gt;zeroState&lt;/choice&gt;
          &lt;choics&gt;oneState&lt;/choice&gt;
     &lt;/enumExample&gt;</pre>
@@ -272,36 +262,35 @@ Access</h1>
 
 <p>This section describes interfaces for acessing fields of record instances.
 These interfaces are of interest to the database, record support, link
-support, Channel Access, etc.</p>;
-<h2><a id="DBData"></a>Base Interface for accessing data</h2>
-<p>The following is the base interface for
-accessing a field of a record instance.</p>
+support, Channel Access, etc.</p>
+;
 
-<pre>
-    public interface DBData extends PVData {
+<h2><a id="DBData"></a>Base Interface for accessing data</h2>
+
+<p>The following is the base interface for accessing a field of a record
+instance.</p>
+<pre>    public interface DBData extends PVData {
         DBDField getDBDField();
-    }
-</pre>
+    }</pre>
+
 <p>Since it extends PVData it has the methods:</p>
-<pre>
-        Field getField();
-        String toString(int indentLevel);
-</pre>
+<pre>        Field getField();
+        String toString(int indentLevel);</pre>
 Field is the introspection interface for pvAccess Types.
+
 <h2><a id="DBPVData"></a>Scalar and String Data</h2>
 The following are the data interfaces for fields that have a pvAccess Type.
-<pre>
-    public interface DBBoolean extends DBData, PVBoolean{}
+<pre>    public interface DBBoolean extends DBData, PVBoolean{}
     public interface DBByte extends DBData, PVByte {}
     public interface DBShort extends DBData, PVShort{}
     public interface DBInt extends DBData, PVInt{}
     public interface DBLong extends DBData, PVLong{}
     public interface DBFloat extends DBData, PVFloat{}
     public interface DBDouble extends DBData, PVDouble{}
-    public interface DBString extends DBData{}
-</pre>
-Since each interface implements a PV data interface it has get/put
-methods to get and puit data values.
+    public interface DBString extends DBData{}</pre>
+Since each interface implements a PV data interface it has get/put methods to
+get and puit data values.
+
 <p>The following example shows how a double field can be read.</p>
 <pre>     double getValue(DBData db) {
         DBField field = db.getDBField();
@@ -320,18 +309,13 @@ DBData is not a PVDouble:</p>
 
 <h2><a id="EnumData"></a>Enumerated Data</h2>
 An enumerated field is accessed via the interface
-<pre>
-    public interface DBEnum extends DBData, PVEnum{}
-</pre>
-
+<pre>    public interface DBEnum extends DBData, PVEnum{}</pre>
 
 <h2><a id="MenuData"></a>Menu Data</h2>
 A menu field is accessed via the interface:
-<pre>
-    public interface DBMenu extends DBData, DBEnum {
+<pre>    public interface DBMenu extends DBData, DBEnum {
         String getMenuName();
-    }
-</pre>
+    }</pre>
 
 <p>The following shows how to access a menu field:</p>
 <pre>    void dumpMenuField(DBData db) {
@@ -346,36 +330,29 @@ A menu field is accessed via the interface:
             field.getName(),struct.getStructureName(),
             choice,menu.getChoice(choice));
     }</pre>
-<h2><a id="StructureData"></a>Structure  Data</h2>
-<pre>
 
+<h2><a id="StructureData"></a>Structure Data</h2>
+<pre>
     public interface DBStructure extends DBData, PVStructure {
          DBData[] getFieldDBDatas();
-    }
-
-</pre>
+    }</pre>
 
 <h2><a id="LinkData"></a>Link Data</h2>
-<pre>
-    public interface DBLink extends DBStructure {
+<pre>    public interface DBLink extends DBStructure {
         String getConfigStructureFieldName();
         void putConfigStructureFieldName(DBD dbd,String name);
         String getLinkSupportName();
         void putLinkSupportName(String name);
         DBStructure getConfigStructure();
-    }
-</pre>
+    }</pre>
 
-<h2><a id="ArrayData"></a>Array  Data</h2>
+<h2><a id="ArrayData"></a>Array Data</h2>
 The base interface for array fields is:
-<pre>
-    public interface DBArray extends DBData, PVArray {
+<pre>    public interface DBArray extends DBData, PVArray {
         DBDArrayField getDBDArrayField();
-    }
-</pre>
+    }</pre>
 The following are the interfaces for each of the array types:
-<pre>
-    public interface DBBooleanArray extends DBArray, PVBooleanArray{}
+<pre>    public interface DBBooleanArray extends DBArray, PVBooleanArray{}
     public interface DBByteArray extends DBArray, PVByteArray{}
     public interface DBShortArray extends DBArray, PVShortArray{}
     public interface DBIntArray extends DBArray, PVIntArray{}
@@ -399,9 +376,6 @@ The following are the interfaces for each of the array types:
     public interface DBLinkArray extends DBArray{
         int get(int offset, int len, DBLink[]to, int toOffset);
         int put(int offset, int len, DBLink[]from, int fromOffset);
-    }
-</pre>
-
-
+    }</pre>
 </body>
 </html>

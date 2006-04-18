@@ -27,6 +27,7 @@ public class XMLToDataBaseTest extends TestCase {
         } catch (MalformedURLException e) {
             System.out.println("Exception: " + e);
         }
+        
 
         System.out.printf("\nrecords\n");
         Collection<DBRecord> recordList = iocdb.getRecordList();

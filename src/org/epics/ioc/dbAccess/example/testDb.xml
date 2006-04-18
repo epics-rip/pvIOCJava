@@ -11,9 +11,41 @@
         <pvname>xxxxxx</pvname>
         <process>true</process>
     </input>
+    <linearConvert>
+        <engUnitsLow>0.0</engUnitsLow>
+        <engUnitsHigh>10.0</engUnitsHigh>
+    </linearConvert>
 </record>
 
 <record name = "allTypes" type = "allTypes">
+  <booleanArray capacity = "3">
+    <value>false true false</value>
+  </booleanArray>
+  <byteArray capacity = "3">
+    <value>false true false</value>
+  </byteArray>
+  <byteArray capacity = "3">
+    <value>1</value>
+    <value>2</value>
+    <value>0x3</value>
+  </byteArray>
+  <shortArray capacity = "4">
+    <offset>2</offset>
+    <value>3 4</value>
+  </shortArray>
+  <longArray capacity = "2">
+     <value>0xff 0xffffff</value>
+  </longArray>
+  <floatArray capacity = "3">
+    <value>1.0,2e10 -3.55e20</value>
+  </floatArray>
+  <stringArray>
+    <value>string1</value>
+    <value>string 2</value>
+    <value>   string 3   </value>
+  </stringArray>
+
+
 </record>
 
 </IOCDatabase>

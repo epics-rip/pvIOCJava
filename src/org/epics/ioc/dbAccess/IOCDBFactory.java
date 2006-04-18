@@ -56,7 +56,7 @@ public class IOCDBFactory {
             ListIterator<DBRecord> iter = recordList.listIterator();
             while(iter.hasNext()) {
                 DBRecord record = iter.next();
-                if(recordName.equals(record.getField().getName())) return record;
+                if(recordName.equals(record.getRecordName())) return record;
             }
             return null;
         }

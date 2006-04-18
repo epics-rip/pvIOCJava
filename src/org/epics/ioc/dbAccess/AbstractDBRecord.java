@@ -4,14 +4,28 @@ import org.epics.ioc.dbDefinition.*;
 import org.epics.ioc.pvAccess.Field;
 import org.epics.ioc.pvAccess.Structure;
 
+/**
+ * Abstract base class for a record instance
+ * @author mrk
+ *
+ */
 public class AbstractDBRecord extends AbstractDBStructure implements DBRecord {
 
+    /* (non-Javadoc)
+     * @see org.epics.ioc.dbAccess.DBRecord#getRecordName()
+     */
     public String getRecordName() {
         return recordName;
     }
     
+    /* (non-Javadoc)
+     * @see java.lang.Object#toString()
+     */
     public String toString() { return getString(0);}
 
+    /* (non-Javadoc)
+     * @see org.epics.ioc.pvAccess.PVData#toString(int)
+     */
     public String toString(int indentLevel) {
         return getString(indentLevel);
     }
@@ -55,6 +69,10 @@ public class AbstractDBRecord extends AbstractDBStructure implements DBRecord {
         return builder.toString();
     }
     
+    /**
+     * @param recordName
+     * @param dbdRecordType
+     */
     AbstractDBRecord(String recordName,DBDRecordType dbdRecordType)
     {
         super(dbdRecordType,dbdRecordType.getDBDFields());
@@ -62,5 +80,5 @@ public class AbstractDBRecord extends AbstractDBStructure implements DBRecord {
         
     }
 
-    String recordName;
+    private String recordName;
 }

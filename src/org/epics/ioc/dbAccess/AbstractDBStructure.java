@@ -14,6 +14,10 @@ public abstract class AbstractDBStructure extends AbstractDBData
     implements DBStructure
 {
 
+    public int getFieldDBDataIndex(String fieldName) {
+        return dbdStructure.getDBDFieldIndex(fieldName);
+    }
+
     /* (non-Javadoc)
      * @see org.epics.ioc.pvAccess.PVStructure#getFieldPVDatas()
      */
@@ -84,7 +88,7 @@ public abstract class AbstractDBStructure extends AbstractDBData
      */
     AbstractDBStructure(DBDField dbdField) {
         super(dbdField);
-        DBDStructure dbdStructure = dbdField.getDBDAttribute().getDBDStructure();
+        dbdStructure = dbdField.getDBDAttribute().getDBDStructure();
         DBDField[] dbdFields = dbdStructure.getDBDFields();
         dbData = new DBData[dbdFields.length];
         pvData = new PVData[dbData.length];
@@ -95,8 +99,9 @@ public abstract class AbstractDBStructure extends AbstractDBData
         
     }
     
-    AbstractDBStructure(DBDField dbdField, DBDField[] dbdFields) {
+    AbstractDBStructure(DBDField dbdField,DBDField[] dbdFields) {
         super(dbdField);
+        dbdStructure = (DBDStructure)dbdField;
         dbData = new DBData[dbdFields.length];
         pvData = new PVData[dbData.length];
         for(int i=0; i < dbData.length; i++) {
@@ -106,6 +111,7 @@ public abstract class AbstractDBStructure extends AbstractDBData
         
     }
     
+    protected DBDStructure dbdStructure;
     /**
      * 
      */

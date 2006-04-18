@@ -26,6 +26,12 @@ public interface Structure extends Field{
      */
     Field getField(String fieldName);
     /**
+     * Get the index of the specified field
+     * @param Field the name of the field
+     * @return the index or -1 if fieldName is not a field in the structure
+     */
+    int getFieldIndex(String fieldName);
+    /**
      * get all the <i>Field</i>s for the structure
      * @return an array of <i>Field</i> that describes each of the fields in the structure.
      */
