@@ -135,9 +135,8 @@ example:</p>
 <h3><a id="FieldArray"></a>array</h3>
 The syntax for an array initializer is:
 <pre>    &lt;fieldName capacity = "capacity" &gt;
-        &lt;offset&gt;offset&lt;/offset&gt;
-        &lt;value&gt;value&lt;/value&gt;
-        &lt;value&gt;valueList&lt;/value&gt;
+        &lt;value offset = "offset"&gt;value&lt;/value&gt;
+        &lt;value offset = "offset"&gt;valueList&lt;/value&gt;
         ...
     &lt;/fieldName&gt;</pre>
 
@@ -147,8 +146,7 @@ The syntax for an array initializer is:
     <dd>The amount of storage to allocate for the array. If the recordType
       definition did not specify a capacity this must be defined.</dd>
   <dt style="font-family: courier;">offset</dt>
-    <dd>This can be specified multiple times. Each time it is given it sets
-      the offset for the next value.</dd>
+    <dd>offset for the next value.</dd>
   <dt style="font-family: courier;">value</dt>
     <dd>assigns a value to the array. If the array is an array of structures
       then the value is actually a set of field definitions. If the array is
@@ -176,16 +174,12 @@ The syntax for an array initializer is:
 <pre>    &lt;intArray capacity = "3" &gt;
         &lt;value&gt;0.0, 1.0, 2.0&lt;/value&gt;
     &lt;/intArray&gt;
-    &lt;intArray capacity = "3"&gt;
-        &lt;offset&gt;1&lt;/offset&gt;
+    &lt;intArray capacity = "3" offset = "1"&gt;
         &lt;value&gt;1.0, 2.0&lt;/value&gt;
     &lt;/intArray&gt;
     &lt;intArray capacity = "3"&gt;
-        &lt;offset&gt;0&lt;/offset&gt;
         &lt;value&gt;0.0&lt;/value&gt;
-        &lt;offset&gt;1&lt;/offset&gt;
         &lt;value&gt;1.0&lt;/value&gt;
-        &lt;offset&gt;2&lt;/offset&gt;
         &lt;value&gt;2.0&lt;/value&gt;
     &lt;/intArray&gt;
          </pre>
@@ -217,6 +211,7 @@ where stringValue is one of the allowed values for the menu.
 <p>An enumerated field is initialized as follows:</p>
 <pre>    &lt;fieldName&gt;
         &lt;choice&gt;choice&lt;/choice&gt;
+        stringValue
         ...
     &lt;/fieldName&gt;</pre>
 
@@ -224,12 +219,15 @@ where stringValue is one of the allowed values for the menu.
 <dl>
   <dt style="font-family: courier;">choice</dt>
     <dd>A choice string. One of these must be specified for each choice.</dd>
+  <dt style="font-family: courier;">stringValue</dt>
+    <dd>one of the allowed values for the enum.</dd>
 </dl>
 
 <p>For example:</p>
 <pre>    &lt;enumExample&gt;
          &lt;choice&gt;zeroState&lt;/choice&gt;
          &lt;choics&gt;oneState&lt;/choice&gt;
+         oneState
     &lt;/enumExample&gt;</pre>
 
 <h3><a id="FieldLink"></a>link</h3>

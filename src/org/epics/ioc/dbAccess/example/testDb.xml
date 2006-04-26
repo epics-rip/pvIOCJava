@@ -18,8 +18,31 @@
 </record>
 
 <record name = "allTypes" type = "allTypes">
-  <booleanArray capacity = "3">
-    <value>false true false</value>
+  <boolean>true</boolean>
+  <byte>0x7f</byte>
+  <short>0x7fff</short>
+  <int>0x7fffffff</int>
+  <long>0x7fffffffffffffff</long>
+  <float>1.0</float>
+  <double>-1e-5</double>
+  <string>This is a string</string>
+  <enum>
+       <choice>choice0</choice>
+       <choice>choice1</choice>
+       <choice>choice2</choice>
+       choice1
+  </enum>
+  <priority>medium</priority>
+  <displayLimit>
+      <low>0.0</low>
+      <high>10.0</high>
+  </displayLimit>
+  <link linkSupport = "processLink" configStructName = "monitorLink">
+      <pvname>xxxxxx</pvname>
+      <process>true</process>
+  </link>
+  <booleanArray capacity = "3" length = "3">
+    <value>false true</value>
   </booleanArray>
   <byteArray capacity = "3">
     <value>false true false</value>
@@ -30,8 +53,7 @@
     <value>0x3</value>
   </byteArray>
   <shortArray capacity = "4">
-    <offset>2</offset>
-    <value>3 4</value>
+    <value offset = "2">3 4</value>
   </shortArray>
   <longArray capacity = "2">
      <value>0xff 0xffffff</value>
@@ -42,8 +64,16 @@
   <stringArray>
     <value>string1</value>
     <value>string 2</value>
-    <value>   string 3   </value>
+    <value>string 3,   string 4   </value>
   </stringArray>
+  <enumArray capacity = "4" length = "4">
+     <value offset = "1">
+       <choice>choice0</choice>
+       <choice>choice1</choice>
+       <choice>choice2</choice>
+       choice1
+     </value>
+  </enumArray>
 
 
 </record>

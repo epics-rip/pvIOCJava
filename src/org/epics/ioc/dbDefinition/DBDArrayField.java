@@ -5,12 +5,11 @@ package org.epics.ioc.dbDefinition;
 import org.epics.ioc.pvAccess.*;
 
 /**
- * The interface for DBD fields.
- * It is used for all DBType.dbPvType fields and is the base for all other DBTypes
+ * The interface for DBD Array fields.
  * @author mrk
  *
  */
-public interface DBDArrayField extends Array {
+public interface DBDArrayField extends DBDField, Array {
     /**
      * retrieve the DBType
      * @return DBType

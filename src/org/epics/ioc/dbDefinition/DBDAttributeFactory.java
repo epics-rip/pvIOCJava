@@ -12,7 +12,7 @@ import org.epics.ioc.pvAccess.Type;
  */
 public class DBDAttributeFactory {
     /**
-     * Create a DBDAttribute interfact
+     * Create a DBDAttribute interface
      * @param dbd The database holding any needed menus or structures.
      * @param attributes an interface that supplies the attribute information.
      * A SAX application can implement DBDAttributeValues by just calling SAX Attribute

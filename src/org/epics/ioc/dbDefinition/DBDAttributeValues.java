@@ -9,7 +9,7 @@ public interface DBDAttributeValues {
     /**
      * Get the number of attributes.
      * Once this is known the caller can iterate through all the attributes
-     * @return the numnber of attributes.
+     * @return the number of attributes.
      */
     int getLength();
     /**

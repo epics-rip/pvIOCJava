@@ -211,22 +211,46 @@ public final class ConvertFactory {
             Field field = pv.getField();
             Type type = field.getType();
             switch(type) {
-                case pvBoolean:
-                    {PVBoolean value = (PVBoolean)pv; value.put(Boolean.parseBoolean(from)); }
-                case pvByte :
-                    {PVByte value = (PVByte)pv; value.put(Byte.decode(from)); return;}
-                case pvShort :
-                    {PVShort value = (PVShort)pv; value.put(Short.decode(from)); return;}
-                case pvInt :
-                    {PVInt value = (PVInt)pv; value.put(Integer.decode(from)); return;}
-                case pvLong :
-                    {PVLong value = (PVLong)pv; value.put(Long.decode(from)); return;}
-                case pvFloat :
-                    {PVFloat value = (PVFloat)pv; value.put(Float.valueOf(from)); return;}
-                case pvDouble :
-                    {PVDouble value = (PVDouble)pv; value.put(Double.valueOf(from)); return;}
-                case pvString:
-                    {PVString value = (PVString)pv; value.put(from); return;}
+                case pvBoolean: {
+                        PVBoolean value = (PVBoolean)pv;
+                        value.put(Boolean.parseBoolean(from));
+                        return;
+                    }
+                case pvByte : {
+                        PVByte value = (PVByte)pv;
+                        value.put(Byte.decode(from));
+                        return;
+                    }
+                case pvShort : {
+                        PVShort value = (PVShort)pv;
+                        value.put(Short.decode(from));
+                        return;
+                    }
+                case pvInt : {
+                        PVInt value = (PVInt)pv;
+                        value.put(Integer.decode(from));
+                        return;
+                    }
+                case pvLong : {
+                        PVLong value = (PVLong)pv;
+                        value.put(Long.decode(from));
+                        return;
+                    }
+                case pvFloat : {
+                        PVFloat value = (PVFloat)pv;
+                        value.put(Float.valueOf(from));
+                        return;
+                    }
+                case pvDouble : {
+                        PVDouble value = (PVDouble)pv;
+                        value.put(Double.valueOf(from));
+                        return;
+                    }
+                case pvString: {
+                        PVString value = (PVString)pv;
+                        value.put(from);
+                        return;
+                    }
                 default:
                     throw new IllegalArgumentException(
                       "Illegal PVType. Must be numeric but it is "

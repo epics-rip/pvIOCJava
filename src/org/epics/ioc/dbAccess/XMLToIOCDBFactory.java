@@ -4,6 +4,7 @@
 package org.epics.ioc.dbAccess;
 
 import java.util.*;
+import java.util.regex.Pattern;
 import java.io.*;
 import java.net.*;
 import org.xml.sax.*;
@@ -29,13 +30,15 @@ public class XMLToIOCDBFactory {
      * @throws IllegalStateException if any errors were detected.
      * @return (true,false) if all xml statements (were, were not) succesfully converted.
      */
-    public static void convert(DBD dbd, IOCDB iocdb, String fileName)
+    public static void convert(DBD dbdin, IOCDB iocdbin, String fileName)
         throws MalformedURLException//,IllegalStateException
     {
         String uri = new File(fileName).toURL().toString();
         XMLReader reader;
         
-        Handler handler = new Handler(dbd,iocdb);
+        dbd = dbdin;
+        iocdb = iocdbin;
+        Handler handler = new Handler();
         try {
             reader = XMLReaderFactory.createXMLReader();
             reader.setContentHandler(handler);
@@ -55,6 +58,80 @@ public class XMLToIOCDBFactory {
                 + e.getMessage());
         }
     }
+            
+    // for use by private classes
+    private static Convert convert = ConvertFactory.getPVConvert();
+    private static Pattern primitivePattern = Pattern.compile("[, ]");
+    private static Pattern stringPattern = Pattern.compile("\\s*,\\s*");
+    private static DBD dbd;
+    private static IOCDB iocdb;
+    private static ErrorHandler errorHandler;
+    private static Locator locator;
+    private static EnumDBDAttributeValues enumDBDAttributeValues =
+        new EnumDBDAttributeValues();
+
+    private static class EnumDBDAttributeValues implements DBDAttributeValues
+    {
+
+        public int getLength() {
+            return 2;
+        }
+
+        public String getName(int index) {
+            if(index==0) return "name";
+            if(index==1) return "type";
+            return null;
+        }
+
+        public String getValue(int index) {
+            if(index==0) return "null";
+            if(index==1) return "enum";
+            return null;
+        }
+
+        public String getValue(String name) {
+            if(name.equals("name")) return "null";
+            if(name.equals("type")) return "enum";
+            return null;
+        }
+    }
+
+    private static class StructureDBDAttributeValues
+    implements DBDAttributeValues
+    {
+
+        public int getLength() {
+            return 2;
+        }
+
+        public String getName(int index) {
+            if(index==0) return "name";
+            if(index==1) return "type";
+            if(index==3) return "structureName";
+            return null;
+        }
+
+        public String getValue(int index) {
+            if(index==0) return "null";
+            if(index==1) return "structure";
+            if(index==2) return structureName;
+            return null;
+        }
+
+        public String getValue(String name) {
+            if(name.equals("name")) return "null";
+            if(name.equals("type")) return "structure";
+            if(name.equals("structureName")) return structureName;
+            return null;
+        }
+
+        public StructureDBDAttributeValues(String structureName) {
+            this.structureName = structureName;
+        }
+
+        private String structureName;
+    }
+        
 
     private static class Handler  implements ContentHandler, ErrorHandler {
         
@@ -72,9 +149,10 @@ public class XMLToIOCDBFactory {
             nFatal++;
         }
         
-        public void setDocumentLocator(Locator locator) {
-            this.locator = locator;
-            recordHandler = new RecordHandler(dbd,iocdb,this,locator);
+        public void setDocumentLocator(Locator locatorin) {
+            errorHandler = this;
+            locator = locatorin;
+            recordHandler = new RecordHandler();
         }
         
         public void startDocument() throws SAXException {
@@ -84,7 +162,8 @@ public class XMLToIOCDBFactory {
         
         public void endDocument() throws SAXException {
             if(nWarning>0 || nError>0 || nFatal>0) {
-                    System.err.printf("endDocument: warning %d severe %d fatal %d\n",
+                System.err.printf(
+                    "endDocument: warning %d severe %d fatal %d\n",
                     nWarning,nError,nFatal);
             }
         }       
@@ -101,7 +180,8 @@ public class XMLToIOCDBFactory {
                     state = State.record;
                     recordHandler.start(qName,attributes);
                 } else {
-                    System.err.printf("startElement element %s not understood\n",qName);
+                    System.err.printf(
+                        "startElement element %s not understood\n",qName);
                     nError++;
                 }
                 break;
@@ -121,7 +201,8 @@ public class XMLToIOCDBFactory {
                 if(qName.equals("IOCDatabase")) {
                     state = State.startDocument;
                 } else {
-                    System.err.printf("startElement element %s not understood\n",qName);
+                    System.err.printf(
+                        "startElement element %s not understood\n",qName);
                     nError++;
                 }
                 break;
@@ -181,9 +262,7 @@ public class XMLToIOCDBFactory {
             
         }
 
-        Handler(DBD dbd, IOCDB iocdb)  throws MalformedURLException {
-            this.dbd = dbd;    
-            this.iocdb = iocdb;
+        Handler()  throws MalformedURLException {
         }
         
         private enum State {
@@ -191,9 +270,6 @@ public class XMLToIOCDBFactory {
             idle,
             record,
         } 
-        private DBD dbd;
-        private IOCDB iocdb;
-        private Locator locator = null;
         private State state = State.startDocument;
         private int nWarning = 0;
         private int nError = 0;
@@ -211,25 +287,12 @@ public class XMLToIOCDBFactory {
     }
 
 
-    private static abstract class  DBDXMLHandler {
-        abstract void start(String qName, Attributes attributes)
-            throws SAXException;
-        abstract void end(String qName) throws SAXException;
-        abstract void startElement(String qName, Attributes attributes)
-            throws SAXException;
-        abstract void characters(char[] ch, int start, int length)
-            throws SAXException;
-        abstract void endElement(String qName) throws SAXException;
-    }
-
-    private static class RecordHandler extends DBDXMLHandler{
+    private static class RecordHandler {
     
         void start(String qName, Attributes attributes)
         throws SAXException {
-            stringBuilder.setLength(0);
-            buildString = false;
-            recordName = attributes.getValue("name");
-            recordTypeName = attributes.getValue("type");
+            String recordName = attributes.getValue("name");
+            String recordTypeName = attributes.getValue("type");
             if(recordName==null) {
                 errorHandler.error(new SAXParseException(
                     "attribute name not specified",locator));
@@ -240,14 +303,14 @@ public class XMLToIOCDBFactory {
                     "attribute type not specified",locator));
                 state = State.idle;
             }
-            dbdRecordType = dbd.getDBDRecordType(recordTypeName);
+            DBDRecordType dbdRecordType = dbd.getDBDRecordType(recordTypeName);
             if(dbdRecordType==null) {
                 errorHandler.warning(new SAXParseException(
                     "record type " + recordTypeName + " does not exist.",
                     locator));
                 state = State.idle;
             } else {
-                dbRecord = iocdb.getRecord(recordName);
+                DBRecord dbRecord = iocdb.getRecord(recordName);
                 if(dbRecord==null) {
                     boolean result = iocdb.createRecord(recordName,dbdRecordType);
                     if(!result) {
@@ -260,59 +323,232 @@ public class XMLToIOCDBFactory {
                     dbRecord = iocdb.getRecord(recordName);
                 }
                 state = State.structure;
-                dbStructure = dbRecord;
-                dbData = dbStructure.getFieldDBDatas();
-                dbStructureList.clear();
+                structureHandler = new StructureHandler(dbRecord);
             }
         }
     
         void end(String qName) throws SAXException {
             state= State.idle;
+            structureHandler = null;
         }
     
         void startElement(String qName, Attributes attributes)
         throws SAXException {
-            stringBuilder.setLength(0);
-            buildString = false;
-            switch(state) {
-            case idle: return;
-            case structure: 
-                startStructureElement(qName,attributes);
-                return;
-            case field:
-            case menu:
-                errorHandler.error(new SAXParseException(
-                    qName + " not found",
-                    locator));
-                    state = State.idle;
-            case enumerated:
-                startEnumElement(qName,attributes);
-                return;
-            case array:
-                startArrayElement(qName,attributes);
-                return;
-            case link:
-                startLinkElement(qName,attributes);
-                return;
-            }     
+            if(state==State.idle) return;
+            structureHandler.startElement(qName,attributes);
         }
  
         void endElement(String qName) throws SAXException {
+            if(state==State.idle) return;
+            structureHandler.endElement(qName);
+        }
+        
+        void characters(char[] ch, int start, int length)
+        throws SAXException {
+            if(state==State.idle) return;
+            structureHandler.characters(ch,start,length);
+        }
+        
+        private State state = State.idle;
+        StructureHandler structureHandler;
+        private enum State {idle, structure}
+    
+    }
+    
+    private static class  StructureHandler {
+        
+        void startElement(String qName, Attributes attributes)
+        throws SAXException
+        {
             switch(state) {
-            case idle: return;
-            case structure:
-                endStructureElement(qName);
-                return;
+            case idle: 
+                 startField(qName,attributes);
+                 return;
             case field: 
-                state = State.structure;
-                convert.fromString(dbData[dbDataIndex],
-                    stringBuilder.toString());
+                errorHandler.error(new SAXParseException(
+                    qName + " illegal element",
+                    locator));
+                return;
+            case structure:
+                structureHandler.startElement(qName,attributes);
                 return;
             case enumerated:
-                endEnumElement(qName);
+                enumHandler.startElement(qName);
                 return;
-            case menu:
+            case array:
+                arrayHandler.startElement(qName,attributes);
+                return;
+            case link:
+                linkHandler.startElement(qName,attributes);
+                return;
+            }
+        }
+
+        void characters(char[] ch, int start, int length) throws SAXException
+        {
+            if(state==State.field) {
+                if(!buildString) return;
+                while(start<ch.length && length>0
+                && Character.isWhitespace(ch[start])) {
+                    start++; length--;
+                }
+                while(length>0 && Character.isWhitespace(ch[start+ length-1])) {
+                    length--;
+                }
+                if(length<=0) return;
+                stringBuilder.append(ch,start,length);
+            }
+            switch(state) {
+            case idle: 
+                 return;
+            case field: 
+                 break;
+            case structure:
+                structureHandler.characters(ch,start,length);
+                return;
+            case enumerated:
+                enumHandler.characters(ch,start,length);
+                return;
+            case array:
+                arrayHandler.characters(ch,start,length);
+                return;
+            case link:
+                linkHandler.characters(ch,start,length);
+                return;
+            } 
+        }
+
+        void endElement(String qName) throws SAXException
+        {
+            switch(state) {
+            case idle: return;
+            case field: 
+                endField();
+                state = State.idle;
+                return;
+            case structure:
+                if(qName.equals(handlerFieldName)) {
+                    state = State.idle;
+                    structureHandler = null;
+                    return;
+                }
+                structureHandler.endElement(qName);
+                return;
+            case enumerated:
+                if(qName.equals(handlerFieldName)) {
+                    enumHandler.end();
+                    state = State.idle;
+                    enumHandler  = null;
+                    return;
+                }
+                enumHandler.endElement(qName);
+                return;
+            case array:
+                if(qName.equals(handlerFieldName)) {
+                    state = State.idle;
+                    arrayHandler = null;
+                    return;
+                }
+                arrayHandler.endElement(qName);
+                return;
+            case link:
+                if(qName.equals(handlerFieldName)) {
+                    state = State.idle;
+                    linkHandler = null;
+                    return;
+                }
+                linkHandler.endElement(qName);
+                return;
+            }
+        }
+
+        private void startField(String qName, Attributes attributes)
+            throws SAXException
+        {
+            dbDataIndex = dbStructure.getFieldDBDataIndex(qName);
+            if(dbDataIndex<0) {
+                errorHandler.error(new SAXParseException(
+                    "fieldName " + qName + " not found",
+                     locator));
+                state = State.idle;
+                return;
+            }
+            data = dbData[dbDataIndex];
+            dbdField = data.getDBDField();
+            dbType = dbdField.getDBType();
+            switch(dbType) {
+            case dbPvType: {
+                Type type= dbdField.getType();
+                if(type.isScalar()) {
+                    state = State.field;
+                    buildString = true;
+                    stringBuilder.setLength(0);
+                    return;
+                }
+                if(type!=Type.pvEnum) {
+                    errorHandler.error(new SAXParseException(
+                            "fieldName " + qName + " illegal type ???",
+                             locator));
+                    state = State.idle;
+                    return;
+                }
+                state = State.enumerated;
+                enumHandler = new EnumHandler((DBEnum)data);
+                handlerFieldName = qName;
+                return;
+            }
+            case dbMenu:
+                state = State.field;
+                stringBuilder.setLength(0);
+                buildString = true;
+                return;
+            case dbStructure:
                 state = State.structure;
+                structureHandler = new StructureHandler((DBStructure)data);
+                handlerFieldName = qName;
+                return;
+            case dbArray:
+                state = State.array;
+                handlerFieldName = qName;
+                arrayHandler = new ArrayHandler((DBArray)data);
+                arrayHandler.start(attributes);
+                return;
+            case dbLink:
+                state = State.link;
+                handlerFieldName = qName;
+                linkHandler = new LinkHandler((DBLink)data);
+                return;
+            }
+        }
+
+        private void endField() throws SAXException {
+           if(dbType==DBType.dbPvType) {
+                Type type= dbdField.getType();
+                if(type.isScalar()) {
+                    String value = stringBuilder.toString();
+                    if(value!=null) {
+                        convert.fromString(data, stringBuilder.toString());
+                        try {
+                            convert.fromString(data, stringBuilder.toString());
+                        } catch (NumberFormatException e) {
+                            errorHandler.warning(new SAXParseException(
+                                e.toString(),locator));
+                        }
+
+                    }
+                    return;
+                }
+                if(type!=Type.pvEnum) {
+                    errorHandler.error(new SAXParseException(
+                            " Logic Error endField illegal type ???",
+                             locator));
+                    state = State.idle;
+                    return;
+                }
+                enumHandler.end();
+                return;
+            }
+            if(dbType==DBType.dbMenu) {
                 String value = stringBuilder.toString();
                 DBMenu menu = (DBMenu)dbData[dbDataIndex];
                 String[] choice = menu.getChoices();
@@ -326,268 +562,447 @@ public class XMLToIOCDBFactory {
                     "menu value " + value + " is not a valid choice",
                     locator));
                 return;
-            case array:
-                endArrayElement(qName);
-                return;
-            case link:
-                endLinkElement(qName);
-                return;
-            }
-        }
-  
-        private void startStructureElement(String qName, Attributes attributes)
-        throws SAXException
-        {
-            dbDataIndex = dbStructure.getFieldDBDataIndex(qName);
-            if(dbDataIndex<0) {
-                errorHandler.error(new SAXParseException(
-                    "fieldName " + qName + " not found",
-                     locator));
-                state = State.idle;
-                return;
-            }
-            DBData data = dbData[dbDataIndex];
-            DBDField dbdField = data.getDBDField();
-            DBType dbType = dbdField.getDBType();
-            switch(dbType) {
-            case dbPvType: {
-                Type type= dbdField.getType();
-                if(type.isScalar()) {
-                    state = State.field;
-                    buildString = true;
-                    return;
-                }
-                if(type!=Type.pvEnum) {
-                    errorHandler.error(new SAXParseException(
-                            "fieldName " + qName + " illegal type ???",
-                             locator));
-                    state = State.idle;
-                    return;
-                }
-                state = State.enumerated;
-                enumChoiceList.clear();
-                return;
-            }
-            case dbMenu:
-                state = State.menu;
-                buildString = true;
-                return;
-            case dbStructure:
-                dbStructureList.add(dbStructure);
-                dbStructure = (DBStructure)data;
-                dbData = dbStructure.getFieldDBDatas();
-                state = State.structure;
-                return;
-            case dbArray:
-                state = State.array;
-                arrayState = ArrayState.array;
-                arrayOffset = 0;
-                dbArray = (DBArray)data;
-                String capacity = attributes.getValue("capacity");
-                if(capacity!=null) {
-                    dbArray.setCapacity(Integer.parseInt(capacity));
-                }
-                DBDArrayField dbdArrayField = (DBDArrayField)dbdField;
-                arrayElementType = dbdArrayField.getElementType();
-                arrayElementDBType = dbdArrayField.getDBType();
-                return;
-            case dbLink:
-                startLinkField(qName,attributes);
-                return;
-            }
-        }
-        
-        void endStructureElement(String qName) throws SAXException {
-            if(dbStructureList.size()>0) {
-                dbStructure = dbStructureList.getFirst();
-                dbData = dbStructure.getFieldDBDatas();
-                state = State.structure;
-                return;
             }
             errorHandler.error(new SAXParseException(
-                qName + " Logic error. Why in  endStructureList?",
+                "Logic error in endField",
                 locator));
-            state = State.idle;
-        }
-         
-        private void startEnumElement(String qName, Attributes attributes)
-        throws SAXException
-        {
-            if(!qName.equals("choice")) {
-                errorHandler.error(new SAXParseException(
-                    qName + " not choice ",
-                    locator));
-                    state = State.idle;
-                    return;
-            }
-            state = State.enumerated;
-            buildString = true;
-        }
-        
-        void endEnumElement(String qName) throws SAXException {
-            buildString = false;
-            switch(enumState) {
-            case enumerated:
-                String[] choices = new String[enumChoiceList.size()];
-                for(int i=0; i< choices.length; i++) {
-                    choices[i] = enumChoiceList.removeFirst();
-                }
-                state = State.structure;
-                return;
-            case choice:
-                String choice = stringBuilder.toString();
-                enumChoiceList.add(choice);
-                return;
-            }
         }
 
-        
-        private void startArrayElement(String qName, Attributes attributes)
-        throws SAXException
+        StructureHandler(DBStructure dbStructure)
         {
-            if(arrayState!=ArrayState.array) {
-                errorHandler.error(new SAXParseException(
-                    qName + " Logic error. Why in startArrayElement ",
-                    locator));
-                state = State.idle;
-                return;
-            }
-            if(qName.equals("offset")) {
-                arrayState = ArrayState.offset;
-                buildString = true;
-                return;
-            }
-            if(qName.equals("value")) {
-                arrayState = ArrayState.value;
-                buildString = true;
-                return;
-            }
-            errorHandler.error(new SAXParseException(
-                    qName + " is illegal. Must be offset or value. ",
-                    locator));
+            this.dbStructure = dbStructure;
+            dbData = dbStructure.getFieldDBDatas();
             state = State.idle;
-            return;
-        }
-
-        void endArrayElement(String qName) throws SAXException {
-            String value = stringBuilder.toString();
-            String[] values = value.split("[, ]");
-            
-            buildString = false;
-            switch(arrayState) {
-            case offset:
-                arrayOffset = Integer.valueOf(value);
-                arrayState = ArrayState.array;
-                return;
-            case value:
-                // TODO must implement other types
-                if(arrayElementType.isScalar()) {
-                    try {
-                        int num = convert.fromStringArray(
-                           dbData[dbDataIndex],arrayOffset,values.length,values,0);
-                        arrayOffset += values.length;
-                        if(values.length!=num) {
-                            errorHandler.warning(new SAXParseException(
-                                "not all values were written",
-                                locator));
-                        }
-                    } catch (NumberFormatException e) {
-                        errorHandler.warning(new SAXParseException(
-                            e.toString(),locator));
-                    }
-                }
-                arrayState = ArrayState.array;
-                return;
-            case array:
-                state = State.structure;
-                return;
-            }
-        }
-        
-        private void startLinkField(String qName, Attributes attributes)
-        throws SAXException {
-            linkFieldName = qName;
-            String linkSupport = attributes.getValue("linkSupport");
-            String configStructName = attributes.getValue("configStructName");
-            DBLink dbLink = (DBLink)dbData[dbDataIndex];
-            dbLink.putConfigStructureFieldName(configStructName);
-            dbLink.putLinkSupportName(linkSupport);
-            state = State.link;
-        }
-        
-        private void startLinkElement(String qName, Attributes attributes)
-        throws SAXException {
-            // TODO
-        }
-        
-        void endLinkElement(String qName) throws SAXException {
-            //MORE TODO
-            if(linkFieldName.equals(qName)) {
-                state = State.structure;
-            }
-        }
-        
-        void characters(char[] ch, int start, int length)
-        throws SAXException {
-            if(!buildString) return;
-            while(start<ch.length && length>0 && ch[start]==' ') {
-                start++; length--;
-            }
-            while(length>0 && ch[start+ length-1]==' ') length--;
-            if(length<=0) return;
-            stringBuilder.append(ch,start,length);            
-        }
-        
-        RecordHandler(DBD dbd, IOCDB iocdb,
-            ErrorHandler errorHandler, Locator locator)
-        {
-            super();
-            this.dbd = dbd;
-            this.iocdb = iocdb;
-            this.errorHandler = errorHandler;
-            this.locator = locator;
-            dbStructureList = new LinkedList<DBStructure>();
             stringBuilder = new StringBuilder();
-            enumChoiceList = new LinkedList<String>();
         }
-            
-        private static Convert convert = ConvertFactory.getPVConvert();
-        
-        private DBD dbd;
-        private IOCDB iocdb;
-        private ErrorHandler errorHandler;
-        private Locator locator;
-        private String recordTypeName;
-        private DBDRecordType dbdRecordType;
-        private String recordName;
-        private DBRecord dbRecord;
-        private State state = State.idle;
-        
-        private LinkedList<DBStructure> dbStructureList;
         
         private DBStructure dbStructure;
         private DBData[] dbData;
         private int dbDataIndex;
+        private State state;
+        
+        // following are for State.field
+        private boolean buildString;
+        private StringBuilder stringBuilder;
+        private DBData data;
+        private DBDField dbdField;
+        private DBType dbType;
+        
+        private String handlerFieldName = null;
+        private EnumHandler enumHandler;
+        private StructureHandler structureHandler;
+        private ArrayHandler arrayHandler;
+        private LinkHandler linkHandler;
+        private enum State {idle, field, enumerated, structure, array, link}
+
+    }
+    
+    private static class  EnumHandler {
+
+        void end() throws SAXException
+        {
+            if(state==State.idle) return;
+            if(enumChoiceList.size()==0) return;
+            String[] choice = new String[enumChoiceList.size()];
+            for(int i=0; i< choice.length; i++) {
+                choice[i] = enumChoiceList.removeFirst();
+            }
+            dbEnum.setChoices(choice);
+            if(stringBuilder.length()>0) {
+                value = value + stringBuilder.toString();
+                stringBuilder.setLength(0);
+            }
+            if(value==null) return;
+            for(int i=0; i< choice.length; i++) {
+                if(value.equals(choice[i])) {
+                    dbEnum.setIndex(i);
+                    return;
+                }
+            }
+            if(value!=null) {
+                errorHandler.warning(new SAXParseException(
+                    value + " is not a valid choice",locator));
+            }
+            return;
+        }
+         
+        void startElement(String qName)
+        throws SAXException
+        {
+            if(!qName.equals("choice")) {
+                errorHandler.error(new SAXParseException(
+                    qName + " illegal. Only choice is valid.",
+                    locator));
+                    state = State.idle;
+                    return;
+            }
+            if(stringBuilder.length()>0) {
+                value = value + stringBuilder.toString();
+                stringBuilder.setLength(0);
+            }
+            state = State.choice;
+        }
+        
+        void characters(char[] ch, int start, int length)
+        throws SAXException {
+            if(state==State.idle) return;
+            while(start<ch.length && length>0
+            && Character.isWhitespace(ch[start])) {
+                start++; length--;
+            }
+            while(length>0 && Character.isWhitespace(ch[start+ length-1])) {
+                length--;
+            }
+            if(length<=0) return;
+            stringBuilder.append(ch,start,length);
+        }
+        
+        void endElement(String qName) throws SAXException {
+            if(state!=State.choice) return;
+            enumChoiceList.add(stringBuilder.toString());
+            stringBuilder.setLength(0);
+            state = State.enumerated;
+        }
+
+        EnumHandler(DBEnum dbEnum)
+        {
+            super();
+            this.dbEnum = dbEnum;
+            stringBuilder = new StringBuilder();
+            enumChoiceList = new LinkedList<String>();
+            state = State.enumerated;
+        }
+        
+        private DBEnum dbEnum;
+        private enum State {idle,enumerated,choice}
+        private StringBuilder stringBuilder;
+        private LinkedList<String> enumChoiceList;
+        private State state;
+        private String value = "";
+    }
+
+
+    private static class  ArrayHandler {
+        
+        void start(Attributes attributes) {
+            String value = attributes.getValue("capacity");
+            if(value!=null)
+                dbArray.setCapacity(Integer.parseInt(value));
+            value = attributes.getValue("length");
+            if(value!=null)
+                dbArray.setLength(Integer.parseInt(value));
+        }
+
+        void startElement(String qName, Attributes attributes)
+            throws SAXException
+        { 
+            if(state==State.idle) return;
+            if(qName.equals("value")) {
+                valueLevel++;
+                if(valueLevel==1) {
+                    startField(qName,attributes);
+                    if(state==State.idle) return;
+                }
+            }
+            switch(handlerType) {
+            case none: 
+                 buildString = true;
+                 stringBuilder.setLength(0);
+                 return;
+            case structure:
+                if(structureHandler==null) {
+                    errorHandler.error(new SAXParseException(
+                        qName + " illegal element",locator));
+                    state = State.idle;
+                    return;
+                }
+                structureHandler.startElement(qName,attributes);
+                return;
+            case enumerated:
+                if(enumHandler==null) {
+                    errorHandler.error(new SAXParseException(
+                        qName + " illegal element",locator));
+                    state = State.idle;
+                    return;
+                }
+                enumHandler.startElement(qName);
+                return;
+            case array:
+                if(arrayHandler==null) {
+                    errorHandler.error(new SAXParseException(
+                        qName + " illegal element",locator));
+                    state = State.idle;
+                    return;
+                }
+                arrayHandler.startElement(qName,attributes);
+                return;
+            case link:
+                if(linkHandler==null) {
+                    errorHandler.error(new SAXParseException(
+                        qName + " illegal element",locator));
+                    state = State.idle;
+                    return;
+                }
+                linkHandler.startElement(qName,attributes);
+                return;
+            }
+        }
+
+        void characters(char[] ch, int start, int length) throws SAXException
+        {
+            if(handlerType==HandlerType.none) {
+                if(!buildString) return;
+                while(start<ch.length && length>0
+                && Character.isWhitespace(ch[start])) {
+                    start++; length--;
+                }
+                while(length>0 && Character.isWhitespace(ch[start+ length-1])) {
+                    length--;
+                }
+                if(length<=0) return;
+                stringBuilder.append(ch,start,length);
+                return;
+            }
+            switch(handlerType) {
+            case none: return;
+            case structure:
+                if(structureHandler!=null)
+                    structureHandler.characters(ch,start,length);
+                return;
+            case enumerated:
+                if(enumHandler!=null)
+                    enumHandler.characters(ch,start,length);
+                return;
+            case array:
+                if(arrayHandler!=null)
+                    arrayHandler.characters(ch,start,length);
+                return;
+            case link:
+                if(linkHandler!=null)
+                    linkHandler.characters(ch,start,length);
+                return;
+            }
+        }
+
+        void endElement(String qName) throws SAXException
+        {
+            if(state==State.idle) return;
+            if(qName.equals("value")) {
+                valueLevel--;
+                if(valueLevel==0) {
+                    switch(handlerType) {
+                    case none:
+                        endField();
+                        return;
+                    case structure:
+                        return;
+                    case enumerated:
+                        enumHandler.end();
+                        return;
+                    case array:
+                        return;
+                    case link:
+                        return;
+                    }
+                    return;
+                }
+            }
+            switch(handlerType) {
+            case none: return;
+            case structure:
+                structureHandler.endElement(qName);
+                return;
+            case enumerated:
+                enumHandler.endElement(qName);
+                return;
+            case array:
+                arrayHandler.endElement(qName);
+                return;
+            case link:
+                linkHandler.endElement(qName);
+                return;
+            }
+        }
+
+        private void startField(String qName, Attributes attributes)
+            throws SAXException
+        {
+            String offsetString = attributes.getValue("offset");
+            if(offsetString!=null) {
+                arrayOffset = Integer.parseInt(offsetString);
+            }
+            DBDAttribute dbdAttribute;
+            DBDField dbdField;
+            switch(handlerType) {
+            case none: return;
+            case structure:
+                String structureName = attributes.getValue("structureName");
+                if(structureName==null) {
+                    errorHandler.warning(new SAXParseException(
+                            "structureName not given",
+                            locator));
+                    state = State.idle;
+                }
+                DBDAttributeValues dbdAttributeValues =
+                    new StructureDBDAttributeValues(structureName);
+                dbdAttribute = DBDAttributeFactory.create(
+                    dbd,dbdAttributeValues);
+                dbdField = DBDCreateFactory.createDBDField(dbdAttribute,null);
+                structureData[0] = (DBStructure)FieldDataFactory.
+                    createData(dbdField);
+                dbStructureArray.put(arrayOffset,1,structureData,0);
+                structureHandler = new StructureHandler(structureData[0]);
+                return;
+            case enumerated:
+                dbdAttribute = DBDAttributeFactory.create(
+                     dbd,enumDBDAttributeValues);
+                dbdField = DBDCreateFactory.createDBDField(dbdAttribute,null);
+                enumData[0] = (DBEnum)FieldDataFactory.createEnumData(
+                    dbdField,null);
+                dbEnumArray.put(arrayOffset,1,enumData,0);
+                enumHandler = new EnumHandler(enumData[0]);
+                return;
+            case array:
+                state = State.idle;
+                return;
+            case link:
+                state = State.idle;
+                return;
+            }
+        }
+
+        private void endField() throws SAXException {
+            String value = stringBuilder.toString();
+            buildString = false;
+            String[] values = null;
+            if(arrayElementType.isPrimitive()) {
+                values = primitivePattern.split(value);
+            } else if(arrayElementType==Type.pvString) {
+                // ignore blanks , is separator
+                values = stringPattern.split(value);
+            } else {
+                errorHandler.warning(new SAXParseException(
+                    "illegal array element type "
+                    + arrayElementType.toString(),
+                    locator));
+                return;
+            }
+            try {
+                int num = convert.fromStringArray(
+                    dbArray,arrayOffset,values.length,values,0);
+                arrayOffset += values.length;
+                if(values.length!=num) {
+                    errorHandler.warning(new SAXParseException(
+                        "not all values were written",
+                        locator));
+                }
+            } catch (NumberFormatException e) {
+                errorHandler.warning(new SAXParseException(
+                    e.toString(),locator));
+            }
+
+        }
+
+        ArrayHandler(DBArray dbArray) throws SAXException
+        {
+            this.dbArray = dbArray;
+            DBDAttribute dbdAttribute = dbArray.getDBDField().getDBDAttribute();
+            arrayElementType = dbdAttribute.getElementType();
+            arrayElementDBType = dbdAttribute.getElementDBType();
+            switch(arrayElementDBType) {
+            case dbPvType:
+                if(arrayElementType.isScalar()) {
+                    handlerType = HandlerType.none;
+                } else if(arrayElementType==Type.pvEnum) {
+                    handlerType = HandlerType.enumerated;
+                    enumData = new DBEnum[1];
+                    dbEnumArray = (DBEnumArray)dbArray;
+                } else {
+                    errorHandler.error(new SAXParseException(
+                        " Logic error ArrayHandler",
+                        locator));
+                }
+                break;
+            case dbMenu:
+                handlerType = HandlerType.none;
+                break;
+            case dbStructure:
+                handlerType = HandlerType.structure;
+                break;
+            case dbArray:
+                handlerType = HandlerType.array;
+                dbdStructure = dbdAttribute.getDBDStructure();
+                structureData = new DBStructure[1];
+                dbStructureArray = (DBStructureArray)dbArray;
+                break;
+            case dbLink:
+                handlerType = HandlerType.link;
+                break;
+            }
+            state = State.processing;
+            arrayOffset = 0;
+            valueLevel = 0;
+            stringBuilder = new StringBuilder();
+        }
+        
+        private DBArray dbArray;
+        private Type arrayElementType;
+        private DBType arrayElementDBType;
+        private int arrayOffset;
+        private int valueLevel;
+
+        private HandlerType handlerType;
+        private State state;
         
         private boolean buildString;
         private StringBuilder stringBuilder;
         
-        private LinkedList<String> enumChoiceList;
-        private EnumState enumState;
-        
-        private ArrayState arrayState;
-        private DBArray dbArray;
-        private int arrayOffset;
-        private Type arrayElementType;
-        private DBType arrayElementDBType;
-        
-        private String linkFieldName;
-        
-        
-        private enum State {idle, structure, field, enumerated, menu, array, link}
-        private enum EnumState {enumerated,choice}
-        private enum ArrayState {array,offset,value}
+        private EnumHandler enumHandler;
+        private DBEnum[] enumData;
+        private DBEnumArray dbEnumArray;
+
+        private StructureHandler structureHandler;
+        private DBDStructure dbdStructure;
+        private DBStructure[] structureData;
+        private DBStructureArray dbStructureArray;
+
+        private ArrayHandler arrayHandler;
+        private LinkHandler linkHandler;
+        private enum HandlerType {none,enumerated, structure, array, link}
+        private enum State {idle, processing}
+
+    }
     
+    private static class  LinkHandler {
+        void start(String qName, Attributes attributes) throws SAXException
+        {
+        }
+
+        void end(String qName) throws SAXException
+        {
+        }
+
+        void startElement(String qName, Attributes attributes)
+            throws SAXException
+        {
+        }
+
+        void characters(char[] ch, int start, int length) throws SAXException
+        {
+        }
+
+        void endElement(String qName) throws SAXException
+        {
+        }
+
+        LinkHandler(DBLink dbLink)
+        {
+            super();
+            this.dbLink = dbLink;
+        }
+        
+        private DBLink dbLink;
+
     }
     
 }
