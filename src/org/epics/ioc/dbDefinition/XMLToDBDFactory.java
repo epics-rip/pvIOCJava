@@ -614,18 +614,20 @@ public class XMLToDBDFactory {
                     return;
             }
             String name = attributes.getValue("name");
-            String configuration = attributes.getValue("configuration");
+            String configStructureName =
+                attributes.getValue("configStructureName");
             if(name==null||name.length()==0) {
                 errorHandler.error(new SAXParseException(
                     "name was not specified correctly",locator));
                 return;
             }
-            if(configuration==null|| configuration.length()==0) {
+            if(configStructureName==null|| configStructureName.length()==0) {
                 errorHandler.error(new SAXParseException(
-                    "configuration was not specified correctly",locator));
+                    "configStructureName was not specified correctly",locator));
                 return;
             }
-            linkSupport = DBDCreateFactory.createDBDLinkSupport(name,configuration);
+            linkSupport = DBDCreateFactory.createDBDLinkSupport(
+                name,configStructureName);
             if(linkSupport==null) {
                 errorHandler.error(new SAXParseException(
                     "failed to create link support " + qName,locator));
@@ -633,8 +635,9 @@ public class XMLToDBDFactory {
             }
             if(!dbd.addLinkSupport(linkSupport)) {
                 errorHandler.error(new SAXParseException(
-                        "failed to add link support " + qName + " to list",locator));
-                        return;
+                    "failed to add link support " + qName + " to list",
+                    locator));
+                return;
             }
         }
     

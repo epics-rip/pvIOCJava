@@ -13,19 +13,32 @@ import org.epics.ioc.pvAccess.*;
  */
 public abstract class AbstractDBLink extends AbstractDBStructure implements DBLink
 {
+    /* (non-Javadoc)
+     * @see org.epics.ioc.dbAccess.DBLink#getConfigDBStructure()
+     */
+    public DBStructure getConfigDBStructure() {
+        return configDBStructure;
+    }
+
+    /* (non-Javadoc)
+     * @see org.epics.ioc.dbAccess.DBLink#putConfigDBStructure(org.epics.ioc.dbAccess.DBStructure)
+     */
+    public void putConfigDBStructure(DBStructure dbStructure) {
+        configDBStructure = dbStructure;
+    }
 
     /* (non-Javadoc)
      * @see org.epics.ioc.dbAccess.DBLink#getConfigStructureFieldName()
      */
-    public String getConfigStructureFieldName() {
-        return pvConfigStructFieldName.get();
+    public String getConfigStructureName() {
+        return pvConfigStructName.get();
     }
 
     /* (non-Javadoc)
      * @see org.epics.ioc.dbAccess.DBLink#putConfigStructureFieldName(java.lang.String)
      */
-    public void putConfigStructureFieldName(String name) {
-        pvConfigStructFieldName.put(name);
+    public void putConfigStructureName(String name) {
+        pvConfigStructName.put(name);
     }
 
     /* (non-Javadoc)
@@ -41,6 +54,27 @@ public abstract class AbstractDBLink extends AbstractDBStructure implements DBLi
     public void putLinkSupportName(String name) {
         pvLinkSupportName.put(name);
     }
+    
+    /* (non-Javadoc)
+     * @see java.lang.Object#toString()
+     */
+    public String toString() { return getString(0);}
+
+    /* (non-Javadoc)
+     * @see org.epics.ioc.pvAccess.PVData#toString(int)
+     */
+    public String toString(int indentLevel) {
+        return getString(indentLevel);
+    }
+
+    private String getString(int indentLevel) {
+        StringBuilder builder = new StringBuilder();
+        builder.append(super.toString(indentLevel));
+        if(configDBStructure!=null) {
+            builder.append(configDBStructure.toString(indentLevel));
+        }
+        return builder.toString();
+    }
 
     /**
      * Constructor
@@ -50,24 +84,19 @@ public abstract class AbstractDBLink extends AbstractDBStructure implements DBLi
     {
         super(dbdField);
         assert(super.pvData.length==2);
-        PVData config = super.pvData[0];
-        Field field = config.getField();
-        assert(field.getType()==Type.pvString);
-        assert(field.getName().equals("configStructFieldName"));
-        pvConfigStructFieldName = (PVString)config;
-        PVData linkSupport = super.pvData[1];
-        field = linkSupport.getField();
+        PVData linkSupport = super.pvData[0];
+        Field field = linkSupport.getField();
         assert(field.getType()==Type.pvString);
         assert(field.getName().equals("linkSupportName"));
         pvLinkSupportName = (PVString)linkSupport;
+        PVData config = super.pvData[1];
+        field = config.getField();
+        assert(field.getType()==Type.pvString);
+        assert(field.getName().equals("configStructureName"));
+        pvConfigStructName = (PVString)config;
     }
 
-    /**
-     * PVString for the field name that has the configuration information
-     */
-    protected PVString pvConfigStructFieldName;
-    /**
-     * PVString for the link support name
-     */
-    protected PVString pvLinkSupportName;
+    private PVString pvConfigStructName;
+    private PVString pvLinkSupportName;
+    private DBStructure configDBStructure = null;
 }

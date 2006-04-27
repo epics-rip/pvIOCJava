@@ -114,12 +114,12 @@
     <field name = "interceptengUnitsLow" type = "double" />
 </structure>
 
-<linkSupport name = "processLink" configuration = "processLink" />
-<linkSupport name = "monitorLink" configuration = "monitorLink" />
-<linkSupport name = "inputLink" configuration = "inputLink" />
-<linkSupport name = "outputLink" configuration = "outputLink" />
+<linkSupport name = "processLink" configStructureName = "processLink" />
+<linkSupport name = "monitorLink" configStructureName = "monitorLink" />
+<linkSupport name = "inputLink" configStructureName = "inputLink" />
+<linkSupport name = "outputLink" configStructureName = "outputLink" />
 
-<linkSupport name = "outputLink" configuration = "outputLink" />
+<linkSupport name = "outputLink" configStructureName = "outputLink" />
 
 <recordType name = "ai">
     <property name = "value" associatedField = "value" />

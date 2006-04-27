@@ -53,13 +53,13 @@ public final class  DBDCreateFactory {
     /**
      * create a DBDLinkSupport
      * @param supportName name of the link support
-     * @param configStructName name of the configuration structure
+     * @param configStructureName name of the configuration structure
      * @return the DBDLinkSupport or null if it already existed
      */
     public static DBDLinkSupport createDBDLinkSupport(String supportName,
-        String configStructName)
+        String configStructureName)
     {
-        return new LinkSupportInstance(supportName,configStructName);
+        return new LinkSupportInstance(supportName,configStructureName);
     }
     
     /**
@@ -104,7 +104,7 @@ public final class  DBDCreateFactory {
             dbd,linkSupportValues);
         DBDField linkSupport = createDBDField(linkSupportAttribute,null);
         DBDAttributeValues configValues = new StringValues(
-            "configStructFieldName");
+            "configStructureName");
         DBDAttribute configAttribute = DBDAttributeFactory.create(
             dbd,configValues);
         DBDField config = createDBDField(configAttribute,null);
@@ -355,8 +355,8 @@ public final class  DBDCreateFactory {
     static private class LinkSupportInstance implements DBDLinkSupport
     {
 
-        public String getConfigStructName() {
-            return configStructName;
+        public String getConfigStructureName() {
+            return configStructureName;
         }
 
         public String getLinkSupportName() {
@@ -364,9 +364,9 @@ public final class  DBDCreateFactory {
         }
 
         LinkSupportInstance(String supportName,
-            String configStructName)
+            String configStructureName)
         {
-            this.configStructName = configStructName;
+            this.configStructureName = configStructureName;
             this.linkSupportName = supportName;
         }
         
@@ -381,12 +381,12 @@ public final class  DBDCreateFactory {
             StringBuilder builder = new StringBuilder();
             newLine(builder,indentLevel);
             builder.append(String.format(
-                    "linkSupportName %s configStructName %s",
-                    linkSupportName,configStructName));
+                    "linkSupportName %s configStructureName %s",
+                    linkSupportName,configStructureName));
             return builder.toString();
         }
 
-        private String configStructName;
+        private String configStructureName;
         private String linkSupportName;
     }
 

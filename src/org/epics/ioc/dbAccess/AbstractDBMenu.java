@@ -67,7 +67,14 @@ public abstract class AbstractDBMenu extends AbstractDBData implements DBMenu
      * @return
      */
     private String getString(int indentLevel) {
-        return convert.getString(this,indentLevel);
+        StringBuilder builder = new StringBuilder();
+        newLine(builder,indentLevel);
+        builder.append("menu(" + menuName + ")" + " {");
+        newLine(builder,indentLevel+1);
+        builder.append(convert.getString(this,indentLevel+2));
+        newLine(builder,indentLevel);
+        builder.append("}");
+        return builder.toString();
     }
     
     /**

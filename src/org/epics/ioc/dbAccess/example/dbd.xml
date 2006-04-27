@@ -100,10 +100,10 @@
     <field name = "intercept" type = "double" />
 </structure>
 
-<linkSupport name = "processLink" configuration = "processLink" />
-<linkSupport name = "monitorLink" configuration = "monitorLink" />
-<linkSupport name = "inputLink" configuration = "inputLink" />
-<linkSupport name = "outputLink" configuration = "outputLink" />
+<linkSupport name = "processLink" configStructureName = "processLink" />
+<linkSupport name = "monitorLink" configStructureName = "monitorLink" />
+<linkSupport name = "inputLink" configStructureName = "inputLink" />
+<linkSupport name = "outputLink" configStructureName = "outputLink" />
 
 <recordType name = "ai">
     <property name = "value" associatedField = "value" />
@@ -129,7 +129,7 @@
         type = "structure" structureName = "linearConvert" />
 </recordType>
 
-<recordType name = "allTypes">
+<structure name = "structureAllTypes">
     <field name = "boolean" type = "boolean" />
     <field name = "byte" type = "byte" />
     <field name = "short" type = "short" />
@@ -139,7 +139,7 @@
     <field name = "double" type = "double" />
     <field name = "string" type = "string" />
     <field name = "enum" type = "enum" />
-    <field name = "priority" type = "menu" menuName = "menuPriority" />
+    <field name = "menu" type = "menu" menuName = "menuPriority" />
     <field name = "displayLimit"
          type = "structure" structureName = "displayLimit" />
     <field name = "link" type = "link" />
@@ -156,6 +156,37 @@
     <field name = "linkArray" type = "array" elementType = "link" />
     <field name = "structArray" type = "array" elementType = "structure" />
     <field name = "arrayArray" type = "array" elementType = "array" />
+</structure>
+
+<recordType name = "allTypes">
+    <field name = "boolean" type = "boolean" />
+    <field name = "byte" type = "byte" />
+    <field name = "short" type = "short" />
+    <field name = "int" type = "int" />
+    <field name = "long" type = "long" />
+    <field name = "float" type = "float" />
+    <field name = "double" type = "double" />
+    <field name = "string" type = "string" />
+    <field name = "enum" type = "enum" />
+    <field name = "menu" type = "menu" menuName = "menuPriority" />
+    <field name = "displayLimit"
+         type = "structure" structureName = "displayLimit" />
+    <field name = "link" type = "link" />
+    <field name = "booleanArray" type = "array" elementType = "boolean" />
+    <field name = "byteArray" type = "array" elementType = "byte" />
+    <field name = "shortArray" type = "array" elementType = "short" />
+    <field name = "intArray" type = "array" elementType = "int" />
+    <field name = "longArray" type = "array" elementType = "long" />
+    <field name = "floatArray" type = "array" elementType = "float" />
+    <field name = "doubleArray" type = "array" elementType = "double" />
+    <field name = "stringArray" type = "array" elementType = "string" />
+    <field name = "enumArray" type = "array" elementType = "enum" />
+    <field name = "menuArray" type = "array" elementType = "menu" />
+    <field name = "linkArray" type = "array" elementType = "link" />
+    <field name = "structArray" type = "array" elementType = "structure" />
+    <field name = "arrayArray" type = "array" elementType = "array" />
+    <field name = "allTypes"
+         type = "structure" structureName = "structureAllTypes" />
 </recordType>
 
 </DBDefinition>

@@ -18,5 +18,5 @@ public interface DBDLinkSupport {
      * get the name of the link support configuration structure
      * @return the name
      */
-    String getConfigStructName();
+    String getConfigStructureName();
 }

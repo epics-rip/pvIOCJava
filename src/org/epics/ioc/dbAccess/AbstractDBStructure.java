@@ -57,23 +57,23 @@ public abstract class AbstractDBStructure extends AbstractDBData
             switch(dbdField.getDBType()) {
             case dbPvType:
                 builder.append(convert.getString(
-                    dbData[i],indentLevel + 1));
+                    dbData[i],indentLevel + 2));
                 break;
             case dbMenu:
                 builder.append(dbData[i].toString(
-                    indentLevel + 1));
+                    indentLevel + 2));
                 break;
             case dbStructure:
                 builder.append(dbData[i].toString(
-                    indentLevel + 1));
+                    indentLevel + 2));
                 break;
             case dbArray:
                 builder.append(dbData[i].toString(
-                    indentLevel + 1));
+                    indentLevel + 2));
                 break;
             case dbLink:
                 builder.append(dbData[i].toString(
-                    indentLevel + 1));
+                    indentLevel + 2));
                  break;
             }
             

@@ -12,15 +12,15 @@ import org.epics.ioc.pvAccess.*;
  */
 public interface DBLink extends DBStructure {
     /**
-     * get the name of the field that has the configuration structure
+     * get the name of the configuration structure
      * @return the field name
      */
-    String getConfigStructureFieldName();
+    String getConfigStructureName();
     /**
-     * specify the name of the field that has the configuration information.
-     * @param name the name of the field that has the configuration sytructure
+     * specify the name of configuration structure.
+     * @param name the name of the configuration sytructure
      */
-    void putConfigStructureFieldName(String name);
+    void putConfigStructureName(String name);
     /**
      * get the name of the link support
      * @return the support name
@@ -31,4 +31,14 @@ public interface DBLink extends DBStructure {
      * @param name the support name
      */
     void putLinkSupportName(String name);
+    /**
+     * get the structure that has the configration information
+     * @return the DBStructure
+     */
+    DBStructure getConfigDBStructure();
+    /**
+     * specify the configuration structure
+     * @param dbStructure the structure for the configuration information
+     */
+    void putConfigDBStructure(DBStructure dbStructure);
 }

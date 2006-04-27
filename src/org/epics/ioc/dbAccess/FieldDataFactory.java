@@ -1080,15 +1080,17 @@ public class FieldDataFactory {
 
         private String getString(int indentLevel) {
             StringBuilder builder = new StringBuilder();
+            newLine(builder,indentLevel);
             builder.append("{");
             for(int i=0; i < length; i++) {
-                newLine(builder,indentLevel + 1);
                 if(value[i]==null) {
+                    newLine(builder,indentLevel+1);
                     builder.append("{}");
                 } else {
-                    builder.append(value[i].toString(indentLevel));
+                    builder.append(value[i].toString(indentLevel+1));
                 }
             }
+            newLine(builder,indentLevel);
             builder.append("}");
             return builder.toString();
         }
@@ -1188,15 +1190,16 @@ public class FieldDataFactory {
 
         private String getString(int indentLevel) {
             StringBuilder builder = new StringBuilder();
+            newLine(builder,indentLevel);
             builder.append("{");
             for(int i=0; i < length; i++) {
                 if(value[i]==null) {
-                    newLine(builder,indentLevel + 1);
                     builder.append("{}");
                 } else {
-                    builder.append(value[i].toString(indentLevel));
+                    builder.append(value[i].toString(indentLevel+1));
                 }
             }
+            newLine(builder,indentLevel);
             builder.append("}");
             return builder.toString();
         }
@@ -1297,15 +1300,17 @@ public class FieldDataFactory {
 
         private String getString(int indentLevel) {
             StringBuilder builder = new StringBuilder();
+            newLine(builder,indentLevel);
             builder.append("{");
             for(int i=0; i < length; i++) {
+                newLine(builder,indentLevel + 1);
                 if(value[i]==null) {
-                    newLine(builder,indentLevel + 1);
                     builder.append("{}");
                 } else {
-                    builder.append(value[i].toString(indentLevel));
+                    builder.append(value[i].toString(indentLevel+1));
                 }
             }
+            newLine(builder,indentLevel);
             builder.append("}");
             return builder.toString();
         }
@@ -1406,15 +1411,18 @@ public class FieldDataFactory {
 
         private String getString(int indentLevel) {
             StringBuilder builder = new StringBuilder();
+            newLine(builder,indentLevel);
             builder.append("{");
             for(int i=0; i < length; i++) {
                 if(value[i]==null) {
-                    newLine(builder,indentLevel + 1);
+                    
                     builder.append("{}");
                 } else {
-                    builder.append(value[i].toString(indentLevel));
+                    builder.append(value[i].toString(indentLevel+1));
                 }
+                if(i<length-1) newLine(builder,indentLevel + 1);
             }
+            newLine(builder,indentLevel);
             builder.append("}");
             return builder.toString();
         }
