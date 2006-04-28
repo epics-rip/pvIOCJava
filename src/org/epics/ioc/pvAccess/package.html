@@ -4,13 +4,13 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
   <meta http-equiv="content-type" content="text/html; charset=iso-8859-1" />
-  <title>EPICS V4: pvAccess</title>
+  <title>EPICS JavaIOC: pvAccess</title>
 </head>
 
 <body>
-<h1 style="text-align: center">EPICS V4 Java IOC<br />
+<h1 style="text-align: center">EPICS JavaIOC<br />
 package: org/epics/ioc/pvAccess<br />
-2006.03.23</h1>
+2006.04.27</h1>
 
 <p><a href="#Overview">Overview</a></p>
 <ul>
@@ -29,7 +29,9 @@ package: org/epics/ioc/pvAccess<br />
   <li><a href="#ArrayAccess">Array</a></li>
 </ul>
 <a href="#Convert">Convert</a><br />
-<a href="#FieldFactory">Field Factory</a>
+<a href="#FieldFactory">Field Factory</a><br />
+<a href="#ConvertFactory">Convert Factory</a><br />
+
 <hr />
 
 <h1 style="text-align: center"><a id="Overview"></a>Overview</h1>
@@ -46,8 +48,7 @@ types:</p>
     <p>A Java String.</p>
   </li>
   <li>enum
-    <p>A enum is a string array of choices and an index that selects a
-    choice.</p>
+    <p>A enum is an array of choices and an index that selects a choice.</p>
   </li>
   <li>structure
     <p>A structure has a name and contains an arbitrary number of fields of
@@ -68,7 +69,7 @@ systems, e.g. TANGO, TINI, DOOCS, etc.</p>
 <p>This package provides the following:</p>
 <ul>
   <li>Type
-    <p>This is an enum that describes the valid types</p>
+    <p>This is an enum that describes the valid types.</p>
   </li>
   <li>Introspection Interfaces
     <p>These are interfaces that describe a PV. They are designed so that
@@ -76,7 +77,7 @@ systems, e.g. TANGO, TINI, DOOCS, etc.</p>
     data associated with it.</p>
   </li>
   <li>Data Interfaces
-    <p>These are interfaces for accessing the data associated with a PV</p>
+    <p>These are interfaces for accessing the data associated with a PV.</p>
   </li>
   <li>Conversion Facility
     <p>Conversion of the data from any PV to a string is provided.</p>
@@ -89,13 +90,15 @@ systems, e.g. TANGO, TINI, DOOCS, etc.</p>
     <p>This is an object factory that creates objects implementing the
     introspection interfaces.</p>
   </li>
+  <li>Convert Factory
+    <p>An object factory that provides an implementation of the conversion
+    facility.</p>
+  </li>
 </ul>
 
 <p>This package does not provide any facilities to create objects that
 implement the Data Interfaces. This is the responsibility of a particular
-implementation. There is an associated package (example) that provides an
-example database that supports creation of all of the supported data
-types.</p>
+implementation. For a javaIOC, dbAccess provides an implementation.</p>
 
 <h2><a id="PVDescription"></a>Process Variable</h2>
 
@@ -106,15 +109,15 @@ types.</p>
   <li>Field - A Field has a name and a type that is any of the supported
     types. It can also have properties.</li>
   <li>Property - A property has a name and an associated field within the PV
-    for the data. The field will NOT have any properties.</li>
+    for the data.</li>
 </ul>
 
 <p>Examples of fields are: value, rawValue. Examples of properties are:
 status, timeStamp, alarmSeverity, displayLimits, controlLimits,
 alarmLimits</p>
 
-<p>As an example a particular PV could define properties for value and
-rawValue as follows:</p>
+<p>For example a PV could define properties for value and rawValue as
+follows:</p>
 <dl>
   <dt>value</dt>
     <dd>status, timeStamp, alarmSeverity, displayLimits, controlLimits, and
@@ -141,22 +144,21 @@ rawValue as follows:</p>
   </li>
   <li>string - A Java String</li>
   <li>enum - a String array of choices and an index selecting a choice.</li>
-  <li>structure - A struture with fields of type primitive, string,
+  <li>structure - A struture with fields of type primitive, string,enum,
     structure, or array</li>
-  <li>array - a one dimensional array of type primitive, string, structure,
-    or array</li>
+  <li>array - a one dimensional array of type primitive, string,enum,
+    structure, or array</li>
 </ul>
 
 <h2><a id="PVIntrospection"></a>Process Variable Introspection</h2>
 
-<p>Given a PV it is possible to discover its fields and the field properties.
-The introspection interface does not provide access to data. Other
-interfaces, e.g. Channel Access provide access to the data. The reason is
-that the data may not be available. For example when a client connects to a
-PV, the client library can obtain the introspection information without
-obtaining any data. Only when a client issues an I/O request will data be
-available. This separation is especially important for arrays and
-structures.</p>
+<p>Given a PV it is possible to introspect its fields. The introspection
+interface does not provide access to data. Other interfaces, e.g. Channel
+Access provide access to the data. The reason is that the data may not be
+available. For example when a client connects to a PV, the client library can
+obtain the introspection information without obtaining any data. Only when a
+client issues an I/O request will data be available. This separation is
+especially important for arrays and structures.</p>
 <hr />
 
 <h1 style="text-align: center"><a id="Type"></a>Type</h1>
@@ -187,53 +189,63 @@ structures.</p>
 <pre>    interface Property {
         String getName(); // Property name
         String getFieldName(); // name of the field that has the property data
+        String toString();
+        String toString(int indentLevel);
     }
 
     interface Field{
         String getName();
-        Property[] getProperties();
+        Property[] getPropertys();
         Property getProperty(String propertyName);
         Type getType();
-        boolean isConstant();
-        void setConstant();
+        boolean isMutable();
+        void setMutable();
+        String toString();
+        String toString(int indentLevel);
     } 
+
+    interface Enum extends Field {
+        boolean isChoicesMutable();
+    }
 
     interface Structure extends Field{
         String getStructureName();
         String[] getFieldNames();
         Field getField(String fieldName);
+        int getFieldIndex(String fieldName);
         Field[] getFields();
     }
 
     interface Array extends Field{
-        PVType getElementType();
-    }
-</pre>
+        Type getElementType();
+    }</pre>
 
 <p>The above definitions support the following:</p>
 <ul>
   <li>Field
     <ul>
-      <li>A field has a name</li>
-      <li>A field has a Type</li>
+      <li>A field has a name.</li>
+      <li>A field has a Type.</li>
       <li>A field can have an arbitrary number of associated properties
         including none.</li>
-      <li>A field can </li>
+      <li>A field can be made immutable.</li>
+      <li>A field can be converted to a string.</li>
     </ul>
   </li>
   <li>Property
     <ul>
-      <li>A property has a name</li>
+      <li>A property has a name.</li>
       <li>A property has a an associated field that holds the data.</li>
+      <li>A property can be converted to a string.</li>
     </ul>
   </li>
   <li>Structure
     <ul>
-      <li>Has a name and fields</li>
-      <li>Both a field and a property can be a structure.</li>
+      <li>Has a name.</li>
+      <li>Has fields that can be any of the supported types.</li>
     </ul>
   </li>
-  <li>Array - The array has elements of one of the supported types</li>
+  <li>Array - The array has elements of any of the supported types.</li>
 </ul>
 <hr />
 
@@ -243,8 +255,19 @@ structures.</p>
 <p>The following is the base interface for accessing data.</p>
 <pre>    interface PVData {
         Field getField();
-    }
- </pre>
+        String toString();
+        String toString(int indentLevel);
+    }</pre>
+
+<p>This above support:</p>
+<ul>
+  <li>getField
+    <p>Returns the introspection interface for the data</p>
+  </li>
+  <li>toString
+    <p>Converts the field data to a string.</p>
+  </li>
+</ul>
 
 <h2><a id="PrimitiveAccess"></a>Primitive Types</h2>
 
@@ -392,7 +415,7 @@ arguments are:
     <dd>The array into which the data should be copied. This array is
       supplied by the caller</dd>
   <dt><span style="font-family: courier">toOffset</span></dt>
-    <dd>The offset in <span style="font-family: courier;">to</span> </dd>
+    <dd>The offset in <span style="font-family: courier;">to</span></dd>
   <dt><span style="font-family: courier">from</span></dt>
     <dd>The array from which the data is taken. This array is supplied by the
       caller</dd>
@@ -423,12 +446,19 @@ the following reads an entire array:</p>
 <ul>
   <li>All supported types can be converted to a string. If you ask for a 100
     megabyte array to be converted to a string expect a lot of output.</li>
+  <li>Conversion from a string to a scalar type is supported.</li>
+  <li>Conversion from an array of strings to an array of scalar types is
+    supported.</li>
   <li>Conversions between numeric types and arrays of numeric type are
     supported.</li>
 </ul>
 <pre>    interface PVConvert {
-        String getString(PVData pv); // PV can be any supported type
-        // For the following //PVData must be PVByte, ...., PVDouble
+        String getString(PVData pv, int indentLevel);
+        String getString(PVData pv);
+        void fromString(PVData pv,String from);
+        int fromStringArray(PVData pv,
+             int offset, int len, String[]from, int fromOffset);
+        // For the following th pv Type must be PVByte, ...., PVDouble
         byte toByte(PVData pv);
         short toShort(PVData pv);
         int   toInt(PVData pv);
@@ -441,23 +471,35 @@ the following reads an entire array:</p>
         void  fromLong(PVData pv, long from);
         void  fromFloat(PVData pv, float from);
         void  fromDouble(PVData pv, double from);
-        // For the following element type must be PVByte, ...., PVDouble
-        int toByteArray(PVData pv, int offset, int len, byte[]to, int toOffset);
-        int toShortArray(PVData pv, int offset, int len, short[]to, int toOffset);
-        int toIntArray(PVData pv, int offset, int len, int[]to, int toOffset);
-        int toLongArray(PVData pv, int offset, int len, long[]to, int toOffset);
-        int toFloatArray(PVData pv, int offset, int len, float[]to, int toOffset);
-        int toDoubleArray(PVData pv, int offset, int len, double[]to, int toOffset);
-        int fromByteArray(PVData pv, int offset, int len, byte[]from, fromOffset);
-        int fromShortArray(PVData pv, int offset, int len, short[]from, fromOffset);
-        int fromIntArray(PVData pv, int offset, int len, int[]from, fromOffset);
-        int fromLongArray(PVData pv, int offset, int len, long[]from, fromOffset);
-        int fromFloatArray(PVData pv, int offset, int len, float[]from, fromOffset);
-        int fromDoubleArray(PVData pv, int offset, int len, double[]from, fromOffset);
-    }
-
-
-The array methods all return the number of elements conveted. This can be less than <span style="font-family: courier;">len</span> if the PVData array contains less than j elements. </pre>
+        // For the following the element type must be PVByte, ...., PVDouble
+        int toByteArray(PVData pv,
+            int offset, int len, byte[]to, int toOffset);
+        int toShortArray(PVData pv,
+            int offset, int len, short[]to, int toOffset);
+        int toIntArray(PVData pv,
+            int offset, int len, int[]to, int toOffset);
+        int toLongArray(PVData pv,
+            int offset, int len, long[]to, int toOffset);
+        int toFloatArray(PVData pv,
+            int offset, int len, float[]to, int toOffset);
+        int toDoubleArray(PVData pv,
+            int offset, int len, double[]to, int toOffset);
+        int fromByteArray(PVData pv,
+            int offset, int len, byte[]from, fromOffset);
+        int fromShortArray(PVData pv,
+            int offset, int len, short[]from, fromOffset);
+        int fromIntArray(PVData pv,
+            int offset, int len, int[]from, fromOffset);
+        int fromLongArray(PVData pv,
+            int offset, int len, long[]from, fromOffset);
+        int fromFloatArray(PVData pv,
+            int offset, int len, float[]from, fromOffset);
+        int fromDoubleArray(PVData pv,
+            int offset, int len, double[]from, fromOffset);
+    }</pre>
+The array methods all return the number of elements conveted. This can be
+less than <span style="font-family: courier;">len</span> if the PVData array
+contains less than len elements.
 <hr />
 
 <h1 style="text-align: center"><a id="FieldFactory"></a>Field Factory</h1>
@@ -465,21 +507,34 @@ The array methods all return the number of elements conveted. This can be less t
 
 <p>The field factory creates objects for each on the interspection
 interfaces. It has the following public methods:</p>
-<pre>
-public final class FieldFactory {
-    public static Property createProperty(String name, Field field) { ... }
+<pre>public final class FieldFactory {
+    public static Property createProperty(String name, Field field);
 
     public static Field createField(String name,
-        Type type,Property[] property) { ... }
+        Type type,Property[] property);
 
     public static Enum createEnumField(String name,
-        boolean choicesMutable,Property[] property) { ... }
+        boolean choicesMutable,Property[] property);
 
     public static Array createArrayField(String name,
-        Type elementType,Property[] property) {...}
+        Type elementType,Property[] property);
  
     public static Structure createStructureField(String name,
-        String structureName, Field[] field,Property[] property) { ... }
+        String structureName, Field[] field,Property[] property);
 }</pre>
+<hr />
+
+<h1 style="text-align: center"><a id="ConvertFactory"></a>Convert Factory</h1>
+<hr />
+
+<p>The convert factory provides an implementation of the <span
+style="font-family: courier;">Convert</span> interface.</p>
+<pre>    public final class ConvertFactory {
+        public static Convert getConvert();
+    }
+</pre>
+
+<p>It provides a single implementation no matter how many times getConvert is
+called.</p>
 </body>
 </html>

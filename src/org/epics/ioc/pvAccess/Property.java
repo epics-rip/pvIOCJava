@@ -4,7 +4,7 @@
 package org.epics.ioc.pvAccess;
 
 /**
- * Introspection for a field property
+ * Introspection for a field property.
  * A property has a name.
  * The data for the property is described by another field of the PV.
  * @author mrk
@@ -21,6 +21,11 @@ public interface Property {
      * @return the field name
      */
     String getFieldName();
+    /**
+     * convert to a string
+     * @return the property as a string
+     */
+    String toString();
     /**
      * convert to a string
      * @param indentLevel indentation level

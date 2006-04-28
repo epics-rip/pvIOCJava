@@ -126,7 +126,7 @@ public class DatabaseExample {
     }
 
     private String name;
-    private static Convert convert = ConvertFactory.getPVConvert();
+    private static Convert convert = ConvertFactory.getConvert();
 
     private static class BooleanData implements PVBoolean {
         boolean value;

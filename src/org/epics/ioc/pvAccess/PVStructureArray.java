@@ -13,7 +13,8 @@ package org.epics.ioc.pvAccess;
  */
 public interface PVStructureArray extends PVArray{
     /**
-     * get values from a <i>PVStructureArray</i> and put them into <i>PVStructure[]to</i>
+     * get values from a <i>PVStructureArray</i>
+     * and put them into <i>PVStructure[]to</i>.
      * @param offset The offset to the first element to get.
      * @param len The maximum number of elements to transfer.
      * @param to The array into which the data is transfered.
@@ -24,7 +25,7 @@ public interface PVStructureArray extends PVArray{
      */
     int get(int offset, int len, PVStructure[]to, int toOffset);
     /**
-     * put values into a <i>PVStructureArray</i> from <i>PVStructure[]to</i>
+     * put values into a <i>PVStructureArray</i> from <i>PVStructure[]to</i>.
      * @param offset The offset to the first element to put.
      * @param len The maximum number of elements to transfer.
      * @param from The array from which the data is taken.
@@ -32,7 +33,7 @@ public interface PVStructureArray extends PVArray{
      * @return The number of elements transfered.
      * This is always less than or equal to len.
      * If the value is less then put should be called again.
-     * @throws IllegalStateException if the field is not mutable
+     * @throws IllegalStateException if the field is not mutable.
      */
     int put(int offset, int len, PVStructure[]from, int fromOffset);
 }

@@ -13,7 +13,8 @@ package org.epics.ioc.pvAccess;
  */
 public interface PVBooleanArray extends PVArray{
     /**
-     * get values from a <i>PVBooleanArray</i> and put them into <i>boolean[]to</i>
+     * get values from a <i>PVBooleanArray</i>
+     * and put them into <i>boolean[]to</i>.
      * @param offset The offset to the first element to get.
      * @param len The maximum number of elements to transfer.
      * @param to The array into which the data is transfered.
@@ -24,7 +25,7 @@ public interface PVBooleanArray extends PVArray{
      */
     int get(int offset, int len, boolean[]to, int toOffset);
     /**
-     * put values into a <i>PVBooleanArray</i> from <i>boolean[]to</i>
+     * put values into a <i>PVBooleanArray</i> from <i>boolean[]to</i>.
      * @param offset The offset to the first element to put.
      * @param len The maximum number of elements to transfer.
      * @param from The array from which the data is taken.
@@ -32,7 +33,7 @@ public interface PVBooleanArray extends PVArray{
      * @return The number of elements transfered.
      * This is always less than or equal to len.
      * If the value is less then put should be called again.
-     * @throws IllegalStateException if the field is not mutable
+     * @throws IllegalStateException if the field is not mutable.
      */
     int put(int offset, int len, boolean[]from, int fromOffset);
 }

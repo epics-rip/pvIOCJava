@@ -24,7 +24,7 @@ public class DatabaseExampleTest extends TestCase {
         
     public static void testByte() {
         DatabaseExample database = new DatabaseExample("test");
-        Convert convert = ConvertFactory.getPVConvert();
+        Convert convert = ConvertFactory.getConvert();
         PVByte byteData = (PVByte)
             database.createData("byte",Type.pvByte,null);
         byte byteValue = -128;
@@ -53,7 +53,7 @@ public class DatabaseExampleTest extends TestCase {
 
     public static void testShort() {
         DatabaseExample database = new DatabaseExample("test");
-        Convert convert = ConvertFactory.getPVConvert();
+        Convert convert = ConvertFactory.getConvert();
         PVShort shortData = (PVShort)
             database.createData("short",Type.pvShort,null);
         short shortValue = 127;
@@ -82,7 +82,7 @@ public class DatabaseExampleTest extends TestCase {
 
     public static void testInt() {
         DatabaseExample database = new DatabaseExample("test");
-        Convert convert = ConvertFactory.getPVConvert();
+        Convert convert = ConvertFactory.getConvert();
         PVInt intData = (PVInt)
             database.createData("int",Type.pvInt,null);
         int intValue = 64;
@@ -111,7 +111,7 @@ public class DatabaseExampleTest extends TestCase {
 
     public static void testLong() {
         DatabaseExample database = new DatabaseExample("test");
-        Convert convert = ConvertFactory.getPVConvert();
+        Convert convert = ConvertFactory.getConvert();
         PVLong longData = (PVLong)
             database.createData("long",Type.pvLong,null);
         long longValue = -64;
@@ -140,7 +140,7 @@ public class DatabaseExampleTest extends TestCase {
 
     public static void testFloat() {
         DatabaseExample database = new DatabaseExample("test");
-        Convert convert = ConvertFactory.getPVConvert();
+        Convert convert = ConvertFactory.getConvert();
         PVFloat floatData = (PVFloat)
             database.createData("float",Type.pvFloat,null);
         float floatValue = 32.0F;
@@ -169,7 +169,7 @@ public class DatabaseExampleTest extends TestCase {
 
     public static void testDouble() {
         DatabaseExample database = new DatabaseExample("test");
-        Convert convert = ConvertFactory.getPVConvert();
+        Convert convert = ConvertFactory.getConvert();
         PVDouble doubleData = (PVDouble)
             database.createData("double",Type.pvDouble,null);
         double doubleValue = 32.0;
@@ -297,7 +297,7 @@ public class DatabaseExampleTest extends TestCase {
 
     public static void testByteArray() {
         DatabaseExample database = new DatabaseExample("test");
-        Convert convert = ConvertFactory.getPVConvert();
+        Convert convert = ConvertFactory.getConvert();
         PVByteArray byteArrayData = (PVByteArray)
             database.createArrayData("byteArray",Type.pvByte,null);
         int len;
@@ -372,7 +372,7 @@ public class DatabaseExampleTest extends TestCase {
 
     public static void testShortArray() {
         DatabaseExample database = new DatabaseExample("test");
-        Convert convert = ConvertFactory.getPVConvert();
+        Convert convert = ConvertFactory.getConvert();
         PVShortArray shortArrayData = (PVShortArray)
             database.createArrayData("shortArray",Type.pvShort,null);
         int len;
@@ -441,7 +441,7 @@ public class DatabaseExampleTest extends TestCase {
 
     public static void testIntArray() {
         DatabaseExample database = new DatabaseExample("test");
-        Convert convert = ConvertFactory.getPVConvert();
+        Convert convert = ConvertFactory.getConvert();
         PVIntArray intArrayData = (PVIntArray)
             database.createArrayData("intArray",Type.pvInt,null);
         int len;
@@ -510,7 +510,7 @@ public class DatabaseExampleTest extends TestCase {
 
     public static void testLongArray() {
         DatabaseExample database = new DatabaseExample("test");
-        Convert convert = ConvertFactory.getPVConvert();
+        Convert convert = ConvertFactory.getConvert();
         PVLongArray longArrayData = (PVLongArray)
             database.createArrayData("longArray",Type.pvLong,null);
         int len;
@@ -579,7 +579,7 @@ public class DatabaseExampleTest extends TestCase {
 
     public static void testFloatArray() {
         DatabaseExample database = new DatabaseExample("test");
-        Convert convert = ConvertFactory.getPVConvert();
+        Convert convert = ConvertFactory.getConvert();
         PVFloatArray floatArrayData = (PVFloatArray)
             database.createArrayData("floatArray",Type.pvFloat,null);
         int len;
@@ -648,7 +648,7 @@ public class DatabaseExampleTest extends TestCase {
 
     public static void testDoubleArray() {
         DatabaseExample database = new DatabaseExample("test");
-        Convert convert = ConvertFactory.getPVConvert();
+        Convert convert = ConvertFactory.getConvert();
         PVDoubleArray doubleArrayData = (PVDoubleArray)
             database.createArrayData("doubleArray",Type.pvDouble,null);
         int len;

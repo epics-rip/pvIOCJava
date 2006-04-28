@@ -13,7 +13,8 @@ package org.epics.ioc.pvAccess;
  */
 public interface PVFloatArray extends PVArray{
     /**
-     * get values from a <i>PVFloatArray</i> and put them into <i>float[]to</i>
+     * get values from a <i>PVFloatArray</i>
+     * and put them into <i>float[]to</i>.
      * @param offset The offset to the first element to get.
      * @param len The maximum number of elements to transfer.
      * @param to The array into which the data is transfered.
@@ -24,7 +25,7 @@ public interface PVFloatArray extends PVArray{
      */
     int get(int offset, int len, float[]to, int toOffset);
     /**
-     * put values into a <i>PVFloatArray</i> from <i>float[]to</i>
+     * put values into a <i>PVFloatArray</i> from <i>float[]to</i>.
      * @param offset The offset to the first element to put.
      * @param len The maximum number of elements to transfer.
      * @param from The array from which the data is taken.

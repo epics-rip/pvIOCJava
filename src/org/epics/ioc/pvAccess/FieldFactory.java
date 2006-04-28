@@ -3,6 +3,8 @@
  */
 package org.epics.ioc.pvAccess;
 
+import java.util.*;
+
 /**
  * FieldFactory creates Field instances.
  * This is a complete factory for the PV introspection.
@@ -35,8 +37,8 @@ public final class FieldFactory {
      * @param name field name
      * @param choicesMutable Can the choices be modified?
      * If no then <i>Enum.isChoicesMutable</i> will return <i>false</i>
-     * and any implementation of <i>PVEnum</i> must never allow a caller to modify the
-     * choices. 
+     * and an implementation of <i>PVEnum</i> must
+     * not allow a caller to modify the choices. 
      * @param property the field properties.
      * The properties must be created before calling this method.
      * <i>null</i> means that the field has no properties.
@@ -49,7 +51,8 @@ public final class FieldFactory {
 
     /**
      * Create a <i>Field</i>.
-     * This must only be called for scalar types, i.e. <i>pvBoolean</i>, ... , <i>pvString</i>
+     * This must only be called for scalar types,
+     * i.e. <i>pvBoolean</i>, ... , <i>pvString</i>
      * For <i>pvEnum</i>, <i>pvArray</i>, and <i>pvStructure</i>
      * the appropriate create method must be called.
      * @param name field name
@@ -82,7 +85,7 @@ public final class FieldFactory {
      * Create a <i>Structure</i>
      * @param name The field name
      * @param structureName The structure name
-     * @param field The array of <i>Field</i> that the structure contains.   
+     * @param field The array of <i>Field</i> for the structure.
      * @param property the field properties.
      * The properties must be created before calling this method.
      * <i>null</i> means that the field has no properties.
@@ -258,6 +261,8 @@ public final class FieldFactory {
         Field[] field;
         String[] fieldName;
         String structureName;
+        List<String> sortedFieldNameList;
+        int[] fieldIndex;
         
         StructureInstance(String name, String structureName,
             Field[] field, Property[] property)
@@ -266,8 +271,20 @@ public final class FieldFactory {
             this.field = field;
             this.structureName = structureName;
             fieldName = new String[field.length];
+            sortedFieldNameList = new ArrayList<String>();
             for(int i = 0; i <field.length; i++) {
                 fieldName[i] = field[i].getName();
+                sortedFieldNameList.add(fieldName[i]);
+            }
+            Collections.sort(sortedFieldNameList);
+            fieldIndex = new int[field.length];
+            for(int i=0; i<field.length; i++) {
+                String value = sortedFieldNameList.get(i);
+                for(int j=0; j<field.length; j++) {
+                    if(value.equals(fieldName[j])) {
+                        fieldIndex[i] = j;
+                    }
+                }
             }
        }
     
@@ -276,16 +293,16 @@ public final class FieldFactory {
         }
     
         public Field getField(String name) {
-            for(int i=0; i< fieldName.length; i++) {
-                if(name.equals(fieldName[i])) return field[i];
+            int i = Collections.binarySearch(sortedFieldNameList,name);
+            if(i>=0) {
+                return field[fieldIndex[i]];
             }
             return null;
         }
 
         public int getFieldIndex(String name) {
-            for(int i=0; i< fieldName.length; i++) {
-                if(name.equals(fieldName[i])) return i;
-            }
+            int i = Collections.binarySearch(sortedFieldNameList,name);
+            if(i>=0) return fieldIndex[i];
             return -1;
         }
     

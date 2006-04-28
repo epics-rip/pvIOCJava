@@ -13,7 +13,8 @@ package org.epics.ioc.pvAccess;
  */
 public interface PVDoubleArray extends PVArray{
     /**
-     * get values from a <i>PVDoubleArray</i> and put them into <i>double[]to</i>
+     * get values from a <i>PVDoubleArray</i>
+     * and put them into <i>double[]to</i>
      * @param offset The offset to the first element to get.
      * @param len The maximum number of elements to transfer.
      * @param to The array into which the data is transfered.
@@ -32,7 +33,7 @@ public interface PVDoubleArray extends PVArray{
      * @return The number of elements transfered.
      * This is always less than or equal to len.
      * If the value is less then put should be called again.
-     * @throws IllegalStateException if the field is not mutable
+     * @throws IllegalStateException if the field is not mutable.
      */
     int put(int offset, int len, double[]from, int fromOffset);
 }

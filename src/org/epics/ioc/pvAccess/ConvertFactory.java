@@ -10,11 +10,11 @@ package org.epics.ioc.pvAccess;
  */
 public final class ConvertFactory {
     /**
-     * Obtain the implementation of <i>Convert</i>.
+     * Implements <i>Convert</i>.
      * The implementation ensures that a single instance is created.
      * @return the implementation of <i>Convert</i>
      */
-    public static Convert getPVConvert()
+    public static Convert getConvert()
     {
     	return ImplementConvert.getConvert();
     }

@@ -44,6 +44,11 @@ public interface Field {
     void setMutable(boolean value);
     /**
      * convert to a string
+     * @return the field as a string
+     */
+    String toString();
+    /**
+     * convert to a string
      * @param indentLevel indentation level
      * @return the field as a string
      */

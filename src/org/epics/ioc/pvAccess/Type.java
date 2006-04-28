@@ -4,53 +4,54 @@
 package org.epics.ioc.pvAccess;
 
 /**
- * Defines the types for Process Variable data
+ * Defines the Process Variable data types.
  * @author mrk
  *
  */
 public enum Type {
     /**
-     * type is unknown
+     * type is unknown.
      */
     pvUnknown,
     /**
-     * value has type <i>boolean</i>
+     * value has type <i>boolean</i>.
      */
     pvBoolean,
     /**
-     * value has type <i>byte</i>
+     * value has type <i>byte</i>.
      */
     pvByte,
     /**
-     * value has type <i>short</i>
+     * value has type <i>short</i>.
      */
     pvShort,
     /**
-     * value has type <i>int</i>
+     * value has type <i>int</i>.
      */
     pvInt,
     /**
-     * value has type <i>long</i>
+     * value has type <i>long</i>.
      */
     pvLong,
     /**
-     * value has type <i>float</i>
+     * value has type <i>float</i>.
      */
     pvFloat,
     /**
-     * value has type <i>double</i>
+     * value has type <i>double</i>.
      */
     pvDouble,
     /**
-     * value has type <i>String</i>
+     * value has type <i>String</i>.
      */
     pvString,
     /**
-     * value has a <i>String[]</i> of choices and an index that selects a choice.
+     * value has a <i>String[]</i> of choices and an index
+     * that selects a choice.
      */
     pvEnum,
     /**
-     * value provides access to structure
+     * value provides access to structure.
      */
     pvStructure,
     /**
@@ -60,7 +61,7 @@ public enum Type {
     pvArray;
 
     /**
-     * is this a Java numeric type
+     * is this a Java numeric type?
      * @return Returns true if the type is a Java numeric type.
      * The numeric types are byte, int, long, float, and double.
      */
@@ -70,7 +71,7 @@ public enum Type {
         return true;
     }
     /**
-     * is this a Java primitive type
+     * is this a Java primitive type?
      * @return Returns true if the type is a Java primitive type.
      * This is the numeric types and boolean.
      */
@@ -80,7 +81,7 @@ public enum Type {
         return true;
     }
     /**
-     * is this wither a Java primitive or a <i>string</i>
+     * is this either a Java primitive or a <i>string</i>?
      * @return Returns true if the type is a Java primitive or a String
      */
     public boolean isScalar() {
