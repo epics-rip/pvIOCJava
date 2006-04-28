@@ -7,7 +7,7 @@ import org.epics.ioc.pvAccess.*;
 
 
 /**
- * get/put boolean data
+ * get/put boolean data.
  * @link org.epics.ioc.pvAccess.PVBoolean.java
  * @author mrk
  *

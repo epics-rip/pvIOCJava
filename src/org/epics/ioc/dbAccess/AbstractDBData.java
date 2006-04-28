@@ -18,14 +18,6 @@ public abstract class AbstractDBData implements DBData{
         return dbdField;
     }
 
-    /**
-     * get the DBType
-     * @return the DBType
-     */
-    public DBType getDBType() {
-        return dbdField.getDBType();
-    }
-
     /* (non-Javadoc)
      * @see org.epics.ioc.pvAccess.PVData#getField()
      */
@@ -35,7 +27,7 @@ public abstract class AbstractDBData implements DBData{
     
     /**
      * constructor which must be called by classes that derive from this class
-     * @param dbdField the DBDField that describes the field
+     * @param dbdField the reflection interface for the DBData data.
      */
     protected AbstractDBData(DBDField dbdField) {
         this.dbdField = dbdField;

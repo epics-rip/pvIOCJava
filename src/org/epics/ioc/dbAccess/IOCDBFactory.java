@@ -2,13 +2,23 @@
 package org.epics.ioc.dbAccess;
 
 import org.epics.ioc.dbDefinition.*;
-import org.epics.ioc.pvAccess.*;
 
 import java.util.*;
 
 
+/**
+ * factory for creating an IOCDB.
+ * @author mrk
+ *
+ */
 public class IOCDBFactory {
 
+    /**
+     * create an IOCDB.
+     * @param dbd the reflection database.
+     * @param name the name for the IOCDB.
+     * @return the newly created IOCDB.
+     */
     public static IOCDB create(DBD dbd, String name) {
         if(find(name)!=null) return null;
         IOCDB iocdb = new IOCDBInstance(dbd,name);
@@ -16,6 +26,11 @@ public class IOCDBFactory {
         return iocdb;
     }
     
+    /**
+     * find an IOCDB.
+     * @param name the IOCDB name.
+     * @return the IOCDB.
+     */
     public static IOCDB find(String name) {
         ListIterator<IOCDB> iter = iocdbList.listIterator();
         while(iter.hasNext()) {
@@ -25,10 +40,18 @@ public class IOCDBFactory {
         return null;
     }
     
+    /**
+     * get the complete collection of IOCDBs.
+     * @return the collection.
+     */
     public static Collection<IOCDB> getDBDList() {
         return iocdbList;
     }
 
+    /**
+     * remove an IOCDB from the collection.
+     * @param iocdb
+     */
     public static void remove(IOCDB iocdb) {
         iocdbList.remove(iocdb);
     }

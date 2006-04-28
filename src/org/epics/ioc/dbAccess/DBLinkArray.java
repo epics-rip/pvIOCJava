@@ -15,7 +15,7 @@ import org.epics.ioc.pvAccess.*;
  */
 public interface DBLinkArray extends DBArray, PVStructureArray{
     /**
-     * get values from a <i>DBLinkArray</i> and put them into <i>DBLink[]to</i>
+     * get values from a <i>DBLinkArray</i> and put them into <i>DBLink[]to</i>.
      * @param offset The offset to the first element to get.
      * @param len The maximum number of elements to transfer.
      * @param to The array into which the data is transfered.
@@ -26,7 +26,7 @@ public interface DBLinkArray extends DBArray, PVStructureArray{
      */
     int get(int offset, int len, DBLink[]to, int toOffset);
     /**
-     * put values into a <i>DBLinkArray</i> from <i>DBLink[]to</i>
+     * put values into a <i>DBLinkArray</i> from <i>DBLink[]to</i>.
      * @param offset The offset to the first element to put.
      * @param len The maximum number of elements to transfer.
      * @param from The array from which the data is taken.

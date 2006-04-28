@@ -7,9 +7,9 @@ import java.util.*;
 
 /**
  * FieldFactory creates Field instances.
- * This is a complete factory for the PV introspection.
+ * This is a complete factory for the PV reflection.
  * Most PV database implementations should find this sufficient for
- * creating all PV introspection objects.
+ * PV reflection.
  * @author mrk
  *
  */

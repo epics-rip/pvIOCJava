@@ -12,8 +12,8 @@ import org.epics.ioc.dbDefinition.*;
  */
 public interface DBData extends PVData {
     /**
-     * get the reflection interface for the field
-     * @return the DBDField that describes the field
+     * get the reflection interface for the field.
+     * @return the DBDField that describes the field.
      */
     DBDField getDBDField();
 }

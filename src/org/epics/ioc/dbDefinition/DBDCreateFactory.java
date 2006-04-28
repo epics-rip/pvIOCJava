@@ -39,7 +39,6 @@ public final class  DBDCreateFactory {
     
     /**
      * create a DBDRecordType.
-     * This can either be a structure or a recordType.
      * @param name the recordType name.
      * @param dbdField an array of DBDField for the fields of the structure.
      * @param property an array of properties for the structure.
@@ -82,13 +81,13 @@ public final class  DBDCreateFactory {
                 return new FieldInstance(attribute,property);
             }
         case dbMenu:
-            return new EnumFieldInstance(attribute,property);
+            return new MenuFieldInstance(attribute,property);
         case dbArray:
             return new ArrayFieldInstance(attribute,property);
         case dbStructure:
             return new StructureFieldInstance(attribute,property);
         case dbLink:
-            return new StructureFieldInstance(attribute,property);
+            return new LinkFieldInstance(attribute,property);
         }
         throw new IllegalStateException("Illegal DBType. Logic error");
     }
@@ -190,6 +189,14 @@ public final class  DBDCreateFactory {
 
     static private class StructureInstance implements DBDStructure
     {
+
+        public DBDAttribute getDBDAttribute() {
+            return null; // structures have no attributes
+        }
+
+        public DBType getDBType() {
+            return DBType.dbStructure;
+        }
 
         public int getDBDFieldIndex(String fieldName) {
             return structure.getFieldIndex(fieldName);
@@ -416,6 +423,22 @@ public final class  DBDCreateFactory {
         private Enum enumField;
     }
     
+    static private class MenuFieldInstance extends AbstractDBDField
+    implements DBDMenuField
+    {
+        public boolean isChoicesMutable() {
+            return enumField.isChoicesMutable();
+        }
+
+        MenuFieldInstance(DBDAttribute attribute,Property[]property)
+        {
+            super(attribute,property);
+            enumField = (Enum)field;
+        }
+    
+        private Enum enumField;
+    }
+    
     static private class ArrayFieldInstance extends AbstractDBDField
         implements DBDArrayField
     {
@@ -435,7 +458,7 @@ public final class  DBDCreateFactory {
     }
     
     static private class StructureFieldInstance extends AbstractDBDField
-        implements DBDStructureField
+    implements DBDStructureField
     {
 
         public int getFieldIndex(String fieldName) {
@@ -463,8 +486,42 @@ public final class  DBDCreateFactory {
             super(attribute,property);
             structure = (Structure)field;
         }
+        private Structure structure;
+    }
+    
+    
+    static private class LinkFieldInstance extends AbstractDBDField
+        implements DBDLinkField
+    {
+
+        public int getFieldIndex(String fieldName) {
+            return structure.getFieldIndex(fieldName);
+        }
+
+        public Field getField(String fieldName) {
+            return structure.getField(fieldName);
+        }
+
+        public String[] getFieldNames() {
+            return structure.getFieldNames();
+        }
+
+        public Field[] getFields() {
+            return structure.getFields();
+        }
+
+        public String getStructureName() {
+            return structure.getStructureName();
+        }
+
+        LinkFieldInstance(DBDAttribute attribute,Property[]property)
+        {
+            super(attribute,property);
+            structure = (Structure)field;
+        }
         
         private Structure structure;
         
     }
+    
 }

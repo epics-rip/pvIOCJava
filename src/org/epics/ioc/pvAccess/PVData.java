@@ -12,7 +12,7 @@ package org.epics.ioc.pvAccess;
 public interface PVData {
     /**
      * get the <i>Field</i> that describes the field.
-     * @return Field, which is the introspection interface.
+     * @return Field, which is the reflection interface.
      */
     Field getField();
     String toString();

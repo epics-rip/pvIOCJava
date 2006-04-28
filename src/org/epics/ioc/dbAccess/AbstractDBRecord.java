@@ -70,8 +70,9 @@ public class AbstractDBRecord extends AbstractDBStructure implements DBRecord {
     }
     
     /**
-     * @param recordName
-     * @param dbdRecordType
+     * constructor that derived clases must call.
+     * @param recordName the name of the record
+     * @param dbdRecordType the introspection interface for the record
      */
     AbstractDBRecord(String recordName,DBDRecordType dbdRecordType)
     {

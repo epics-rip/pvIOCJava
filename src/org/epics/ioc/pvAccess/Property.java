@@ -4,7 +4,7 @@
 package org.epics.ioc.pvAccess;
 
 /**
- * Introspection for a field property.
+ * interfacve for field property reflection.
  * A property has a name.
  * The data for the property is described by another field of the PV.
  * @author mrk

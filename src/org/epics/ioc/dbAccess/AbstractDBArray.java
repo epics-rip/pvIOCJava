@@ -20,23 +20,6 @@ public abstract class AbstractDBArray extends AbstractDBData implements DBArray{
         return dbdField.isMutable();
     }
 
-
-    /**
-     * get the element Type
-     * @return the Type
-     */
-    public Type getElementType() {
-        return dbdField.getDBDAttribute().getElementType();
-    }
-
-    /**
-     * get the element DBType
-     * @return the DBType
-     */
-    public DBType getElementDBType() {
-        return dbdField.getDBDAttribute().getElementDBType();
-    }
-
     /* (non-Javadoc)
      * @see org.epics.ioc.pvAccess.PVArray#getCapacity()
      */
@@ -60,10 +43,10 @@ public abstract class AbstractDBArray extends AbstractDBData implements DBArray{
     
     /**
      * constructer that derived classes must call
-     * @param dbdField the DBDField which describes the fields
+     * @param dbdArrayField the reflection interface for the DBArray data.
      */
-    protected AbstractDBArray(DBDField dbdField) {
-        super(dbdField);
+    protected AbstractDBArray(DBDArrayField dbdArrayField) {
+        super(dbdArrayField);
     }
     
 }

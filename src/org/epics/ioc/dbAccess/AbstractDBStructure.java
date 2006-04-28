@@ -84,10 +84,11 @@ public abstract class AbstractDBStructure extends AbstractDBData
     }
     
     /**
-     * @param dbdStructureField
+     * constructor that derived classes must call.
+     * @param dbdStructureField the reflection interface for the DBStructure data.
      */
-    AbstractDBStructure(DBDField dbdField) {
-        super(dbdField);
+    AbstractDBStructure(DBDStructureField dbdStructureField) {
+        super(dbdStructureField);
         dbdStructure = dbdField.getDBDAttribute().getDBDStructure();
         DBDField[] dbdFields = dbdStructure.getDBDFields();
         dbData = new DBData[dbdFields.length];
@@ -99,6 +100,11 @@ public abstract class AbstractDBStructure extends AbstractDBData
         
     }
     
+    /**
+     * constructor for record instance classes.
+     * @param dbdField the reflection interface for the record type.
+     * @param dbdFields array of reflection interfaces for the fields of the record type.
+     */
     AbstractDBStructure(DBDField dbdField,DBDField[] dbdFields) {
         super(dbdField);
         dbdStructure = (DBDStructure)dbdField;
@@ -111,30 +117,31 @@ public abstract class AbstractDBStructure extends AbstractDBData
         
     }
     
+    /**
+     * reflection interface.
+     */
     protected DBDStructure dbdStructure;
     /**
-     * 
+     * array of pvData interfaces for the fields.
      */
     protected PVData[] pvData;
     /**
-     * 
+     * array of DBData interfaces for the fields.
      */
     protected DBData[] dbData;
     /**
-     * 
+     * reference to the implementation of Convert.
      */
     protected static Convert convert = ConvertFactory.getConvert();
     /**
-     * @param builder
-     * @param indentLevel
+     * for use in implementing toString.
+     * @param builder the StringBuilder.
+     * @param indentLevel indention level.
      */
     protected static void newLine(StringBuilder builder, int indentLevel) {
         builder.append("\n");
         for (int i=0; i <indentLevel; i++) builder.append(indentString);
     }
-    /**
-     * 
-     */
-    protected static String indentString = "    ";
+    private static String indentString = "    ";
     
 }

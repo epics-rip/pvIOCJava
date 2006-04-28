@@ -4,7 +4,7 @@
 package org.epics.ioc.pvAccess;
 
 /**
- * Base interface for introspection of an array field
+ * Base interface for array field reflection
  * @author mrk
  *
  */

@@ -13,7 +13,7 @@ package org.epics.ioc.dbAccess;
  */
 public interface DBMenuArray extends DBArray{
     /**
-     * get values from a <i>DBMenuArray</i> and put them into <i>DBMenu[]to</i>
+     * get values from a <i>DBMenuArray</i> and put them into <i>DBMenu[]to</i>.
      * @param offset The offset to the first element to get.
      * @param len The maximum number of elements to transfer.
      * @param to The array into which the data is transfered.
@@ -24,7 +24,7 @@ public interface DBMenuArray extends DBArray{
      */
     int get(int offset, int len, DBMenu[]to, int toOffset);
     /**
-     * put values into a <i>DBMenuArray</i> from <i>DBMenu[]to</i>
+     * put values into a <i>DBMenuArray</i> from <i>DBMenu[]to</i>.
      * @param offset The offset to the first element to put.
      * @param len The maximum number of elements to transfer.
      * @param from The array from which the data is taken.

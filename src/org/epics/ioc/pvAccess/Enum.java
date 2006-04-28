@@ -5,7 +5,8 @@
 package org.epics.ioc.pvAccess;
 
 /**
- * Introspection for an enum field. An enum is a field that has an array of
+ * Interface for enum field reflection.
+ * An enum is a field that has an array of
  * choices and an index specifying the current choice.
  * 
  * @author mrk

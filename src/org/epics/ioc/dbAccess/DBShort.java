@@ -7,7 +7,7 @@ import org.epics.ioc.pvAccess.*;
 
 
 /**
- * get/put short data
+ * get/put short data.
  * @author mrk
  *
  */

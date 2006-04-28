@@ -2,12 +2,10 @@
  * 
  */
 package org.epics.ioc.dbAccess;
-
 import org.epics.ioc.pvAccess.*;
 
-
 /**
- * get/put double data
+ * get/put double data.
  * @author mrk
  *
  */

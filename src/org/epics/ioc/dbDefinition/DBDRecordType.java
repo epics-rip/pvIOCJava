@@ -5,4 +5,4 @@ package org.epics.ioc.dbDefinition;
  * @author mrk
  *
  */
-public interface DBDRecordType extends DBDStructure, DBDField {}
+public interface DBDRecordType extends DBDStructure {}

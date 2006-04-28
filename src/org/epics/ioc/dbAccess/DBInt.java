@@ -6,7 +6,7 @@ package org.epics.ioc.dbAccess;
 import org.epics.ioc.pvAccess.*;
 
 /**
- * get/put int data
+ * get/put int data.
  * @author mrk
  *
  */

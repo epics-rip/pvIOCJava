@@ -6,7 +6,7 @@ package org.epics.ioc.dbAccess;
 import org.epics.ioc.pvAccess.*;
 
 /**
- * Base interface for database array data
+ * Base interface for database array data.
  * @author mrk
  *
  */

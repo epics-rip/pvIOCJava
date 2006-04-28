@@ -7,7 +7,7 @@ import org.epics.ioc.pvAccess.*;
 
 
 /**
- * get/put byte data
+ * get/put byte data.
  * @link org.epics.ioc.pvAccess.PVByte.java
  * @author mrk
  *

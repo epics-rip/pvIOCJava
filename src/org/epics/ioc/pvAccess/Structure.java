@@ -4,7 +4,7 @@
 package org.epics.ioc.pvAccess;
 
 /**
- * Introspection for a structure field.
+ * Interface for  structure field reflection.
  * @author mrk
  *
  */

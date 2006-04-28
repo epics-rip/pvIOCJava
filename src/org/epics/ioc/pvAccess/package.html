@@ -16,10 +16,10 @@ package: org/epics/ioc/pvAccess<br />
 <ul>
   <li><a href="#PVDescription">Process Variable</a></li>
   <li><a href="#PVDataTypes">Process Variable Data Types</a></li>
-  <li><a href="#PVIntrospection">Process Variable Introspection</a></li>
+  <li><a href="#PVReflection">Process Variable Reflection</a></li>
 </ul>
 <a href="#Type">Type</a><br />
-<a href="#Introspection">Introspection</a><br />
+<a href="#Reflection">Reflection</a><br />
 <a href="#DataAccess">Data Access</a>
 <ul>
   <li><a href="#PrimitiveAccess">Primitive Types</a></li>
@@ -71,7 +71,7 @@ systems, e.g. TANGO, TINI, DOOCS, etc.</p>
   <li>Type
     <p>This is an enum that describes the valid types.</p>
   </li>
-  <li>Introspection Interfaces
+  <li>Reflection Interfaces
     <p>These are interfaces that describe a PV. They are designed so that
     characteristics of a PV can be discovered without requiring access to the
     data associated with it.</p>
@@ -88,7 +88,7 @@ systems, e.g. TANGO, TINI, DOOCS, etc.</p>
   </li>
   <li>Field Factory
     <p>This is an object factory that creates objects implementing the
-    introspection interfaces.</p>
+    reflection interfaces.</p>
   </li>
   <li>Convert Factory
     <p>An object factory that provides an implementation of the conversion
@@ -150,13 +150,13 @@ follows:</p>
     structure, or array</li>
 </ul>
 
-<h2><a id="PVIntrospection"></a>Process Variable Introspection</h2>
+<h2><a id="PVReflection"></a>Process Variable Reflection</h2>
 
-<p>Given a PV it is possible to introspect its fields. The introspection
+<p>Given a PV it is possible to introspect its fields. The reflection
 interface does not provide access to data. Other interfaces, e.g. Channel
 Access provide access to the data. The reason is that the data may not be
 available. For example when a client connects to a PV, the client library can
-obtain the introspection information without obtaining any data. Only when a
+obtain the reflection information without obtaining any data. Only when a
 client issues an I/O request will data be available. This separation is
 especially important for arrays and structures.</p>
 <hr />
@@ -182,10 +182,10 @@ especially important for arrays and structures.</p>
     }</pre>
 <hr />
 
-<h1 style="text-align: center"><a id="Introspection"></a>Introspection</h1>
+<h1 style="text-align: center"><a id="Reflection"></a>Reflection</h1>
 <hr />
 
-<p>The following provide introspection.</p>
+<p>The following provide reflection.</p>
 <pre>    interface Property {
         String getName(); // Property name
         String getFieldName(); // name of the field that has the property data
@@ -262,7 +262,7 @@ especially important for arrays and structures.</p>
 <p>This above support:</p>
 <ul>
   <li>getField
-    <p>Returns the introspection interface for the data</p>
+    <p>Returns the reflection interface for the data</p>
   </li>
   <li>toString
     <p>Converts the field data to a string.</p>

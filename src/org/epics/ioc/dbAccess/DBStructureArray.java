@@ -15,7 +15,7 @@ import org.epics.ioc.pvAccess.*;
  */
 public interface DBStructureArray extends DBArray, PVStructureArray{
     /**
-     * get values from a <i>DBStructureArray</i> and put them into <i>DBStructure[]to</i>
+     * get values from a <i>DBStructureArray</i> and put them into <i>DBStructure[]to</i>.
      * @param offset The offset to the first element to get.
      * @param len The maximum number of elements to transfer.
      * @param to The array into which the data is transfered.
@@ -26,7 +26,7 @@ public interface DBStructureArray extends DBArray, PVStructureArray{
      */
     int get(int offset, int len, DBStructure[]to, int toOffset);
     /**
-     * put values into a <i>DBStructureArray</i> from <i>DBStructure[]to</i>
+     * put values into a <i>DBStructureArray</i> from <i>DBStructure[]to</i>.
      * @param offset The offset to the first element to put.
      * @param len The maximum number of elements to transfer.
      * @param from The array from which the data is taken.

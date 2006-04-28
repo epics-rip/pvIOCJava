@@ -15,7 +15,7 @@ import org.epics.ioc.pvAccess.*;
 
 
 /**
- * Factory to convert an xml file to an IOCDatabase and put it in the database
+ * Factory to convert an xml file to an IOCDatabase and put it in the database.
  * The only public method is convert.
  * @author mrk
  *
@@ -23,9 +23,9 @@ import org.epics.ioc.pvAccess.*;
 public class XMLToIOCDBFactory {
     /**
      * Convert an xml file to IOCDatabase definitions and put the definitions in a database.
-     * @param dbd Database Definition
-     * @param iocdbd IOC Database
-     * @param fileName filename containing xml record instance definitions
+     * @param dbdin reflection database.
+     * @param iocdbin IOC database.
+     * @param fileName filename containing xml record instance definitions.
      * @throws MalformedURLException if SAX throws it.
      * @throws IllegalStateException if any errors were detected.
      * @return (true,false) if all xml statements (were, were not) succesfully converted.
