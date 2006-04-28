@@ -6,17 +6,18 @@ import org.epics.ioc.pvAccess.*;
 import org.epics.ioc.pvAccess.Enum;
 
 /**
- * Creates an implementation of the various DBD interfaces
+ * Factory that creates an implementation of the various
+ * Database Definition interfaces.
  * @author mrk
  *
  */
 public final class  DBDCreateFactory {
 
     /**
-     * creates a DBDMenu
-     * @param menuName name of the menu
-     * @param choices for the menu
-     * @return the menu or null if it already existed
+     * creates a DBDMenu.
+     * @param menuName name of the menu.
+     * @param choices for the menu.
+     * @return the menu or null if it already existed.
      */
     public static DBDMenu createDBDMenu(String menuName, String[] choices)
     {
@@ -25,10 +26,10 @@ public final class  DBDCreateFactory {
 
     /**
      * create a DBDStructure.
-     * @param name name of the structure
-     * @param dbdField an array of DBDField for the fields of the structure
-     * @param property an array of properties for the structure
-     * @return interface for the newly created structure
+     * @param name name of the structure.
+     * @param dbdField an array of DBDField for the fields of the structure.
+     * @param property an array of properties for the structure.
+     * @return interface for the newly created structure.
      */
     public static DBDStructure createDBDStructure(String name,
         DBDField[] dbdField,Property[] property)
@@ -38,11 +39,11 @@ public final class  DBDCreateFactory {
     
     /**
      * create a DBDRecordType.
-     * This can either be a structure or a recordType
-     * @param name the recordType name
-     * @param dbdField an array of DBDField for the fields of the structure
-     * @param property an array of properties for the structure
-     * @return interface for the newly created structure
+     * This can either be a structure or a recordType.
+     * @param name the recordType name.
+     * @param dbdField an array of DBDField for the fields of the structure.
+     * @param property an array of properties for the structure.
+     * @return interface for the newly created structure.
      */
     public static DBDRecordType createDBDRecordType(String name,
         DBDField[] dbdField,Property[] property)
@@ -52,9 +53,9 @@ public final class  DBDCreateFactory {
 
     /**
      * create a DBDLinkSupport
-     * @param supportName name of the link support
-     * @param configStructureName name of the configuration structure
-     * @return the DBDLinkSupport or null if it already existed
+     * @param supportName name of the link support.
+     * @param configStructureName name of the configuration structure.
+     * @return the DBDLinkSupport or null if it already existed.
      */
     public static DBDLinkSupport createDBDLinkSupport(String supportName,
         String configStructureName)
@@ -65,9 +66,9 @@ public final class  DBDCreateFactory {
     /**
      * creates a DBDField.
      * This is used for all DBTypes.
-     * @param attribute the DBDAttribute interface for the field
-     * @param property an array of properties for the field
-     * @return interface for the newly created field
+     * @param attribute the DBDAttribute interface for the field.
+     * @param property an array of properties for the field.
+     * @return interface for the newly created field.
      */
     public static DBDField createDBDField(DBDAttribute attribute, Property[]property)
     {
@@ -94,8 +95,8 @@ public final class  DBDCreateFactory {
     
     /**
      * Create a DBDStructure for link.
-     * This is called by DBDFactory
-     * @param dbd the DBD that will have the DBDStructure for link
+     * This is called by DBDFactory.
+     * @param dbd the DBD that will have the DBDStructure for link.
      */
     public static void createLinkDBDStructure(DBD dbd) {
         DBDAttributeValues linkSupportValues = new StringValues(

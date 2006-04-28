@@ -83,6 +83,6 @@ public abstract class AbstractDBEnum extends AbstractDBData implements DBEnum {
     protected String[]choice;
 
     private final static String[] EMPTY_STRING_ARRAY = new String[0];
-    private static Convert convert = ConvertFactory.getPVConvert();
+    private static Convert convert = ConvertFactory.getConvert();
 
 }

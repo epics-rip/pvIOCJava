@@ -5,7 +5,7 @@ package org.epics.ioc.dbDefinition;
 
 
 /**
- * defines a link
+ * reflection interface for a link field.
  * @author mrk
  *
  */

@@ -103,7 +103,7 @@ public abstract class AbstractDBMenu extends AbstractDBData implements DBMenu
     /**
      * 
      */
-    protected static Convert convert = ConvertFactory.getPVConvert();
+    protected static Convert convert = ConvertFactory.getConvert();
     /**
      * @param builder
      * @param indentLevel

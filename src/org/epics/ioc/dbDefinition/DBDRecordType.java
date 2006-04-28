@@ -1,7 +1,7 @@
 package org.epics.ioc.dbDefinition;
 
 /**
- * interface for a recordType definition
+ * reflection interface for a recordType.
  * @author mrk
  *
  */

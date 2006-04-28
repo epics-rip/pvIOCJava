@@ -1,14 +1,14 @@
 package org.epics.ioc.dbDefinition;
 
 /**
- * Interface that provides values for field attributes.
+ * interface that provides values for field attributes.
  * @author mrk
  *
  */
 public interface DBDAttributeValues {
     /**
      * Get the number of attributes.
-     * Once this is known the caller can iterate through all the attributes
+     * Once this is known the caller can iterate through all the attributes.
      * @return the number of attributes.
      */
     int getLength();
@@ -28,7 +28,7 @@ public interface DBDAttributeValues {
     /**
      * Get the value for the specified attribute.
      * @param index the name or null if index is out of bounds.
-     * @return the name or null if index is out of bounds
+     * @return the name or null if index is out of bounds.
      */
     String getValue(int index);
 }

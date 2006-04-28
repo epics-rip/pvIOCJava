@@ -15,19 +15,23 @@ public class DBDAttributeFactory {
      * Create a DBDAttribute interface
      * @param dbd The database holding any needed menus or structures.
      * @param attributes an interface that supplies the attribute information.
-     * A SAX application can implement DBDAttributeValues by just calling SAX Attribute
-     * methods.
+     * A SAX application can implement DBDAttributeValues by just calling
+     * SAX Attribute methods.
      * @return a DBDAttribute interface.
      * @throws <i>IllegalArgumentException</i> if a required attribute is missing.
      * The attributes are supplied by the DBDAttributeValues interface.
      * <i>name</i> and <i>type</i> must be available.
-     * <i>type</i> must be one of: <i>boolean byte short int long float double enum
+     * <i>type</i> must be one of:
+     * <i>boolean byte short int long float double enum
      * menu array structure link</i>.
      * If <i>type</i> is <i>menu</i> then <i>MenuName</i> must be defined.
-     * If <i>type</i> is <i>structure</i> then <i>structureName</i> must be defined and
-     * that structure must exist in the <i>dbd</i> database.
-     * If <i>type</i> is <i>array</i> then <i>elementType</i> must be defined as a valid type.
-     * If <i>type</i> is <link> then structure named link must exist in the <i>dbd</i> database.
+     * If <i>type</i> is <i>structure</i> then <i>structureName</i>
+     * must be defined and that structure must exist
+     * in the <i>dbd</i> database.
+     * If <i>type</i> is <i>array</i> then <i>elementType</i>
+     * must be defined as a valid type.
+     * If <i>type</i> is <link> then structure named link must
+     * exist in the <i>dbd</i> database.
      */
     static public DBDAttribute create(DBD dbd, DBDAttributeValues attributes) {
         return new Attribute(dbd, attributes);

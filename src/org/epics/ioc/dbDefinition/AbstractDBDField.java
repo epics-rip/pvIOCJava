@@ -2,42 +2,77 @@ package org.epics.ioc.dbDefinition;
 
 import org.epics.ioc.pvAccess.*;
 
+/**
+ * abstract class for implementing a DBDField interface or extension.
+ * @author mrk
+ *
+ */
 public abstract class AbstractDBDField implements DBDField {
+    /* (non-Javadoc)
+     * @see org.epics.ioc.dbDefinition.DBDField#getDBDAttribute()
+     */
     public DBDAttribute getDBDAttribute() {
         return attribute;
     }
 
+    /* (non-Javadoc)
+     * @see org.epics.ioc.dbDefinition.DBDField#getDBType()
+     */
     public DBType getDBType() {
         return attribute.getDBType();
     }
 
+    /* (non-Javadoc)
+     * @see org.epics.ioc.pvAccess.Field#getName()
+     */
     public String getName() {
         return field.getName();
     }
 
+    /* (non-Javadoc)
+     * @see org.epics.ioc.pvAccess.Field#getProperty(java.lang.String)
+     */
     public Property getProperty(String propertyName) {
         return field.getProperty(propertyName);
     }
 
+    /* (non-Javadoc)
+     * @see org.epics.ioc.pvAccess.Field#getPropertys()
+     */
     public Property[] getPropertys() {
         return field.getPropertys();
     }
 
+    /* (non-Javadoc)
+     * @see org.epics.ioc.pvAccess.Field#getType()
+     */
     public Type getType() {
         return field.getType();
     }
 
+    /* (non-Javadoc)
+     * @see org.epics.ioc.pvAccess.Field#isMutable()
+     */
     public boolean isMutable() {
         return field.isMutable();
     }
 
+    /* (non-Javadoc)
+     * @see org.epics.ioc.pvAccess.Field#setMutable(boolean)
+     */
     public void setMutable(boolean value) {
         field.setMutable(value);
     }
     
     
+    /* (non-Javadoc)
+     * @see java.lang.Object#toString()
+     */
     public String toString() { return getString(0);}
 
+    /* (non-Javadoc)
+     * @see org.epics.ioc.pvAccess.Field#toString(int)
+     */
     public String toString(int indentLevel) {
         return getString(indentLevel);
     }
@@ -49,7 +84,12 @@ public abstract class AbstractDBDField implements DBDField {
         return builder.toString();
     }
 
-    AbstractDBDField(DBDAttribute attribute,Property[]property)
+    /**
+     * AbstractDBDField constructor
+     * @param attribute attribute for field. This must be created first.
+     * @param property property array. It can be null.
+     */
+    public AbstractDBDField(DBDAttribute attribute,Property[]property)
     {
         this.attribute = attribute;
         DBType dbType = attribute.getDBType();

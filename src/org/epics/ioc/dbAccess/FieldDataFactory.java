@@ -113,7 +113,7 @@ public class FieldDataFactory {
         return new RecordData(recordName,dbdRecordType);
     }
     
-    private static Convert convert = ConvertFactory.getPVConvert();
+    private static Convert convert = ConvertFactory.getConvert();
 
     private static void newLine(StringBuilder builder, int indentLevel) {
         builder.append("\n");

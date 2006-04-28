@@ -123,7 +123,7 @@ public abstract class AbstractDBStructure extends AbstractDBData
     /**
      * 
      */
-    protected static Convert convert = ConvertFactory.getPVConvert();
+    protected static Convert convert = ConvertFactory.getConvert();
     /**
      * @param builder
      * @param indentLevel

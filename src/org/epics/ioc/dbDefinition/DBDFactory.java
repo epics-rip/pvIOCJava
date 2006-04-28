@@ -9,7 +9,7 @@ import java.util.*;
 /**
  * DBDFactory creates, finds and removes a DBD.
  * A DBD contains the description of Database Definitions:
- *  menu, structure, recordType, and link support
+ *  menu, structure, recordType, and link support.
  * 
  * @author mrk
  * 
@@ -18,9 +18,10 @@ public class DBDFactory {
 
     /**
      * creates and returns a DBD.
-     * If a DBD with the specified name already exists the request fails and null is returned.
-     * @param name the name for the new DBD
-     * @return the new DBD or null if a DBD with this name already exists
+     * If a DBD with the specified name already exists
+     * the request fails and null is returned.
+     * @param name the name for the new DBD.
+     * @return the new DBD or null if a DBD with this name already exists.
      */
     public static DBD create(String name) {
         if(find(name)!=null) return null;
@@ -31,8 +32,8 @@ public class DBDFactory {
     }
     
     /**
-     * find a DBD with the specified name
-     * @param name of the DBD
+     * find a DBD with the specified name.
+     * @param name of the DBD.
      * @return the DBD or null if ir does not exist.
      */
     public static DBD find(String name) {
@@ -45,16 +46,16 @@ public class DBDFactory {
     }
     
     /**
-     * get the complete list of DBDs
-     * @return the Collection
+     * get the complete list of DBDs.
+     * @return the Collection.
      */
     public static Collection<DBD> getDBDList() {
         return dbdList;
     }
 
     /**
-     * remove the DBD from the list
-     * @param dbd the BBD to remove
+     * remove the DBD from the list.
+     * @param dbd the BBD to remove.
      */
     public static void remove(DBD dbd) {
         dbdList.remove(dbd);

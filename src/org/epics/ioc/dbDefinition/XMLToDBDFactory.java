@@ -20,12 +20,14 @@ import java.util.*;
  */
 public class XMLToDBDFactory {
     /**
-     * Convert an xml file to Database definitions and put the definitions in a database.
-     * @param dbd
-     * @param fileName
+     * Convert an xml file to Database definitions and put
+     * the definitions in a database.
+     * @param dbd.
+     * @param fileName.
      * @throws MalformedURLException if SAX throws it.
      * @throws IllegalStateException if any errors were detected.
-     * @return (true,false) if all xml statements (were, were not) succesfully converted.
+     * @return (true,false) if all xml statements (were, were not)
+     * succesfully converted.
      */
     public static void convert(DBD dbd, String fileName)
         throws MalformedURLException,IllegalStateException

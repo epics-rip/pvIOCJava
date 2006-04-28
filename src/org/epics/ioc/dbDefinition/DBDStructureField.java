@@ -5,7 +5,7 @@ package org.epics.ioc.dbDefinition;
 import org.epics.ioc.pvAccess.*;
 
 /**
- * The interface for DBD structure fields.
+ * reflection interface for a structure field.
  * @author mrk
  *
  */

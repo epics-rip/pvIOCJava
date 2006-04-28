@@ -60,7 +60,7 @@ public class XMLToIOCDBFactory {
     }
             
     // for use by private classes
-    private static Convert convert = ConvertFactory.getPVConvert();
+    private static Convert convert = ConvertFactory.getConvert();
     private static Pattern primitivePattern = Pattern.compile("[, ]");
     private static Pattern stringPattern = Pattern.compile("\\s*,\\s*");
     private static DBD dbd;
