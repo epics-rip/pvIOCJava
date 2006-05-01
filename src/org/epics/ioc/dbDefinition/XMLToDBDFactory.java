@@ -22,12 +22,10 @@ public class XMLToDBDFactory {
     /**
      * Convert an xml file to Database definitions and put
      * the definitions in a database.
-     * @param dbd.
-     * @param fileName.
+     * @param dbd a Database Definition Database
+     * @param fileName the name of the xml file.
      * @throws MalformedURLException if SAX throws it.
      * @throws IllegalStateException if any errors were detected.
-     * @return (true,false) if all xml statements (were, were not)
-     * succesfully converted.
      */
     public static void convert(DBD dbd, String fileName)
         throws MalformedURLException,IllegalStateException
@@ -314,7 +312,7 @@ public class XMLToDBDFactory {
                     choice[i] = iter.next();
                 }
                 choiceList = null;
-                DBDMenu dbdMenu = DBDCreateFactory.createDBDMenu(
+                DBDMenu dbdMenu = DBDCreateFactory.createMenu(
                     menuName,choice);
                 dbd.addMenu(dbdMenu);
             }
@@ -429,7 +427,7 @@ public class XMLToDBDFactory {
                 return;
             }
             if(qName.equals("recordType")) {
-                if(dbd.getDBDRecordType(structureName)!=null) {
+                if(dbd.getRecordType(structureName)!=null) {
                     errorHandler.warning(new SAXParseException(
                         "recordType " + structureName + " already exists",
                         locator));
@@ -438,7 +436,7 @@ public class XMLToDBDFactory {
                 }
                 isRecordType = true;
             } else if(qName.equals("structure")){
-                if(dbd.getDBDStructure(structureName)!=null) {
+                if(dbd.getStructure(structureName)!=null) {
                     errorHandler.warning(new SAXParseException(
                         "structure " + structureName + " already exists",
                         locator));
@@ -483,7 +481,7 @@ public class XMLToDBDFactory {
                 dbdField[i] = iter1.next();
             }
             if(isRecordType) {
-                DBDRecordType dbdRecordType = DBDCreateFactory.createDBDRecordType(
+                DBDRecordType dbdRecordType = DBDCreateFactory.createRecordType(
                         structureName,dbdField,property);
                 boolean result = dbd.addRecordType(dbdRecordType);
                 if(!result) {
@@ -492,7 +490,7 @@ public class XMLToDBDFactory {
                             locator));
                 }
             } else {
-                DBDStructure dbdStructure = DBDCreateFactory.createDBDStructure(
+                DBDStructure dbdStructure = DBDCreateFactory.createStructure(
                         structureName,dbdField,property);
                 boolean result = dbd.addStructure(dbdStructure);
                 if(!result) {
@@ -569,7 +567,7 @@ public class XMLToDBDFactory {
             for(int i=0; i<property.length; i++) {
                  property[i] = iter.next();
             } 
-            DBDField dbdField = DBDCreateFactory.createDBDField(dbdAttribute,property);
+            DBDField dbdField = DBDCreateFactory.createField(dbdAttribute,property);
             dbdFieldList.add(dbdField);
             dbdAttribute = null;
             fieldPropertyList = null;
@@ -628,7 +626,7 @@ public class XMLToDBDFactory {
                     "configStructureName was not specified correctly",locator));
                 return;
             }
-            linkSupport = DBDCreateFactory.createDBDLinkSupport(
+            linkSupport = DBDCreateFactory.createLinkSupport(
                 name,configStructureName);
             if(linkSupport==null) {
                 errorHandler.error(new SAXParseException(

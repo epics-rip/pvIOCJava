@@ -33,10 +33,10 @@ public interface DBLink extends DBStructure {
      * get the structure that has the configration information,
      * @return the DBStructure.
      */
-    DBStructure getConfigDBStructure();
+    DBStructure getConfigStructure();
     /**
      * specify the configuration structure.
      * @param dbStructure the structure for the configuration information.
      */
-    void putConfigDBStructure(DBStructure dbStructure);
+    void putConfigStructure(DBStructure dbStructure);
 }

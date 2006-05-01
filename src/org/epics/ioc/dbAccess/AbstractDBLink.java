@@ -16,14 +16,14 @@ public abstract class AbstractDBLink extends AbstractDBStructure implements DBLi
     /* (non-Javadoc)
      * @see org.epics.ioc.dbAccess.DBLink#getConfigDBStructure()
      */
-    public DBStructure getConfigDBStructure() {
+    public DBStructure getConfigStructure() {
         return configDBStructure;
     }
 
     /* (non-Javadoc)
      * @see org.epics.ioc.dbAccess.DBLink#putConfigDBStructure(org.epics.ioc.dbAccess.DBStructure)
      */
-    public void putConfigDBStructure(DBStructure dbStructure) {
+    public void putConfigStructure(DBStructure dbStructure) {
         configDBStructure = dbStructure;
     }
 

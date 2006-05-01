@@ -11,7 +11,8 @@
 <hr />
 
 <h1 style="text-align: center">EPICS JavaIoc: Database Access <br />
-2006.03.30</h1>
+package: org/epics/ioc/dbAcess <br />
+2006.05.01</h1>
 <hr />
 <a href="#Overview">Overview</a> <br />
 <a href="#Instance">Record Instance Syntax</a>
@@ -28,19 +29,29 @@
     </ul>
   </li>
 </ul>
-<a href="#DBDataAccess">Record Instance Access</a><br />
-
+<a href="#XMLToDB">XML to Database Converter</a><br />
+<a href="#DBDataAccess">Record Instance Access</a>
 <ul>
   <li><a href="#DBData">Base Interface for accesssing data</a></li>
   <li><a href="#DBPVData">Scalar and String Data</a></li>
   <li><a href="#EnumData">Enumerated Data</a></li>
   <li><a href="#MenuData">Menu Data</a></li>
   <li><a href="#StructureData">Structure Data</a></li>
+  <li><a href="#RecordData">Record Data</a></li>
   <li><a href="#LinkData">Link Data</a></li>
   <li><a href="#ArrayData">Array Data</a></li>
 </ul>
-<br />
-
+<a href="#FieldDataFactory">Factory for creating Data Fields</a><br />
+<a href="#AbstractClasses">Abstract Classes</a>
+<ul>
+  <li><a href="#AbstractDBData">AbstractDBData</a></li>
+  <li><a href="#AbstractDBEnum">AbstractDBEnum</a></li>
+  <li><a href="#AbstractDBMenu">AbstractDBMenu</a></li>
+  <li><a href="#AbstractDBStructure">AbstractDBStructure</a></li>
+  <li><a href="#AbstractDBRecord">AbstractDBRecord</a></li>
+  <li><a href="#AbstractDBLink">AbstractDBLink</a></li>
+  <li><a href="#AbstractDBArray">AbstractDBArray</a></li>
+</ul>
 <hr />
 
 <h1 style="text-align: center"><a id="Overview"></a>Overview</h1>
@@ -48,20 +59,26 @@
 
 <p>An EPICS IOC contains a memory resident real time database. The real time
 database has a set of "smart" records. Each record is an instance on a record
-of a particular type. This package describes support for record instances.
-The following is discussed:</p>
+of a particular type. This package describes the database that holds record
+instances. The following is discussed:</p>
 <ol>
   <li>Record Instance Syntax
-    <p>The XML syntax for defining record instances.<br />
-    NOTE:</p>
-    <ul>
-      <li>A SAX parser will be written to create a runtime database from the
-        html files.</li>
-      <li>An XML Schema or DTD or something else should be created that
-        describes the syntax.</li>
-    </ul>
+    <p>The XML syntax for defining record instances.</p>
+  </li>
+  <li>An XML to database converter.
+    <p>This takes as input two files: 1) Database Definitions ( menu,
+    structure, recordType, linkSupport) and 2) record instance definitions.
+    The files are converted from xml and the results places in an IOC
+    database.</p>
+    <p>In addition a comman line utility is orovided that calls the XML to
+    database convertter and dumps the resulting record instance
+    definitions.</p>
+  </li>
+  <li>A factory for creating supporty for database fields.<br />
   </li>
   <li>Java Support for accessing fields of a record instance.</li>
+  <li>A set of abstract classes for implementing ths support for database
+    fields.</li>
 </ol>
 <hr />
 
@@ -114,6 +131,8 @@ example:</p>
 <h3><a id="FieldStructure"></a>structure</h3>
 
 <p>Structure fields are initialized via a recursive definition of field.</p>
+
+<p>Assume the following structure and recordType definitions:</p>
 <pre>    &lt;structure name = "DisplayLimit"&gt;
         &lt;field name = "low"&gt;&lt;double/&gt;&lt;/field&gt;
         &lt;field name = "high"&gt;&lt;double /&gt;&lt;/field&gt;
@@ -126,7 +145,7 @@ example:</p>
        &lt;field/&gt;
    ...</pre>
 
-<p>The following shows how to initialize field displayLimit.</p>
+<p>displayLimit is initilized as follows:.</p>
 <pre>    &lt;displayLimit&gt;
          &lt;low&gt;0.0&lt;/low&gt;
          &lt;high&gt;10.0&lt;/high&gt;
@@ -143,20 +162,21 @@ The syntax for an array initializer is:
 <p>where</p>
 <dl>
   <dt style="font-family: courier;">capacity</dt>
-    <dd>The amount of storage to allocate for the array. If the recordType
-      definition did not specify a capacity this must be defined.</dd>
+    <dd>The amount of storage to allocate for the array. This is optional and
+      the capacity will be equal to the number of elements initialized.</dd>
   <dt style="font-family: courier;">offset</dt>
-    <dd>offset for the next value.</dd>
+    <dd>offset for the next value. If not specified it starts at 0 and is
+      incremented by one as each new value is defined.</dd>
   <dt style="font-family: courier;">value</dt>
     <dd>assigns a value to the array. If the array is an array of structures
       then the value is actually a set of field definitions. If the array is
-      an array of array the value is another array initialixation.</dd>
+      an array of array the value is another array initialization.</dd>
   <dt style="font-family: courier;">valueList</dt>
     <dd>A list of values, which is a comma separated set of values. This is
       only supported for primitive and string types.</dd>
 </dl>
 
-<p>Assume the following record definitions:</p>
+<p>Assume the following are part of a recordType definition:</p>
 <pre>    &lt;field name = "intArray"&gt;
         &lt;array&gt;
             &lt;type&gt;&lt;int /&gt;&lt;/type&gt;
@@ -177,7 +197,7 @@ The syntax for an array initializer is:
     &lt;intArray capacity = "3" offset = "1"&gt;
         &lt;value&gt;1.0, 2.0&lt;/value&gt;
     &lt;/intArray&gt;
-    &lt;intArray capacity = "3"&gt;
+    &lt;intArray&gt;
         &lt;value&gt;0.0&lt;/value&gt;
         &lt;value&gt;1.0&lt;/value&gt;
         &lt;value&gt;2.0&lt;/value&gt;
@@ -251,8 +271,25 @@ A link field is initialized as follows:
     <dd>The name of the support structure given with the support
     definition</dd>
   <dt style="font-family: courier;">fieldValue</dt>
-    <dd>The value for the structure field.</dd>
+    <dd>The value for the structure field.<br />
+    </dd>
 </dl>
+<hr />
+
+<h1 style="text-align: center"><a id="XMLToDB"></a>XML to Database
+Converter</h1>
+<hr />
+
+<p>The following reads an xml file containing record instance definitions and
+puts them into an IOCDB.</p>
+<pre>    public class XMLToIOCDBFactory {
+        public static void convert(DBD dbdin, IOCDB iocdbin, String fileName);
+    }</pre>
+
+<p>A java application that reads and dumps a record instance file can be
+invoked from a shell via the command:</p>
+<pre>     java XMLToDB dbdFile dbInstanceFile</pre>
+<hr />
 
 <h1 style="text-align: center"><a id="DBDataAccess"></a>Record Instance
 Access</h1>
@@ -261,7 +298,6 @@ Access</h1>
 <p>This section describes interfaces for acessing fields of record instances.
 These interfaces are of interest to the database, record support, link
 support, Channel Access, etc.</p>
-;
 
 <h2><a id="DBData"></a>Base Interface for accessing data</h2>
 
@@ -274,26 +310,27 @@ instance.</p>
 <p>Since it extends PVData it has the methods:</p>
 <pre>        Field getField();
         String toString(int indentLevel);</pre>
-Field is the introspection interface for pvAccess Types.
+Field is the introspection interface for pvAccess Types. DBDField is the
+introspection interface for DBTypes.
 
 <h2><a id="DBPVData"></a>Scalar and String Data</h2>
 The following are the data interfaces for fields that have a pvAccess Type.
 <pre>    public interface DBBoolean extends DBData, PVBoolean{}
-    public interface DBByte extends DBData, PVByte {}
+    public interface DBByte extends DBData, PVByte{}
     public interface DBShort extends DBData, PVShort{}
     public interface DBInt extends DBData, PVInt{}
     public interface DBLong extends DBData, PVLong{}
     public interface DBFloat extends DBData, PVFloat{}
     public interface DBDouble extends DBData, PVDouble{}
-    public interface DBString extends DBData{}</pre>
+    public interface DBString extends DBData, PVString{}</pre>
 Since each interface implements a PV data interface it has get/put methods to
-get and puit data values.
+get and put data values.
 
 <p>The following example shows how a double field can be read.</p>
 <pre>     double getValue(DBData db) {
         DBField field = db.getDBField();
-        if(field.getDBType != dbPVType) throw new IllegalType;
-        if(field.getPVType() != pvDouble) throw new IllegalType;
+        if(field.getDBType != dbPVType) throw new IllegalStateException("not double");
+        if(field.getPVType() != pvDouble) throw new IllegaStateException("not double");
         PVDouble data = (PVDouble)db;
         return data.get();
     }</pre>
@@ -316,40 +353,44 @@ A menu field is accessed via the interface:
     }</pre>
 
 <p>The following shows how to access a menu field:</p>
-<pre>    void dumpMenuField(DBData db) {
-        DBField field = db.getDBField();
-        if(field.getDBType != dbMenu) throw new IllegalType;
-        // struct is for reflection
-        Structure struct = (Structure)db.getField();
-        // menu accesses data
-        Enumerated menu = (Enumerated)db;
-        int choice = menu.getIndex();
+<pre>    void dumpMenuField(DBMenu menu) {
+        String[] choice = menu.getChoices();
+        int index = menu.getIndex();
         printf("field %s is menu %s. Value is %d %s\n",
-            field.getName(),struct.getStructureName(),
-            choice,menu.getChoice(choice));
+            menu.getField().getName(),menu.getMenuName(),
+            menu.getIndex(),choice[index]);
     }</pre>
 
 <h2><a id="StructureData"></a>Structure Data</h2>
-<pre>
-    public interface DBStructure extends DBData, PVStructure {
+<pre>    public interface DBStructure extends DBData, PVStructure {
          DBData[] getFieldDBDatas();
+         int getFieldDBDataIndex(String fieldName);
+    }</pre>
+
+<h2><a id="RecordData"></a>RecordData</h2>
+<pre>    public interface DBRecord extends DBStructure {
+        String getRecordName();
     }</pre>
 
 <h2><a id="LinkData"></a>Link Data</h2>
 <pre>    public interface DBLink extends DBStructure {
         String getConfigStructureFieldName();
-        void putConfigStructureFieldName(DBD dbd,String name);
+        void putConfigStructureFieldName(String name);
         String getLinkSupportName();
         void putLinkSupportName(String name);
         DBStructure getConfigStructure();
+        void putConfigStructure(DBStructure dbStructure);
+        void putConfigStructure(DBStructure dbStructure);
     }</pre>
 
 <h2><a id="ArrayData"></a>Array Data</h2>
-The base interface for array fields is:
-<pre>    public interface DBArray extends DBData, PVArray {
-        DBDArrayField getDBDArrayField();
-    }</pre>
-The following are the interfaces for each of the array types:
+
+<p>The base interface for array fields is:</p>
+<pre>    public interface DBArray extends DBData, PVArray {}</pre>
+
+<p></p>
+
+<p>The following are the interfaces for each of the array types:</p>
 <pre>    public interface DBBooleanArray extends DBArray, PVBooleanArray{}
     public interface DBByteArray extends DBArray, PVByteArray{}
     public interface DBShortArray extends DBArray, PVShortArray{}
@@ -374,6 +415,223 @@ The following are the interfaces for each of the array types:
     public interface DBLinkArray extends DBArray{
         int get(int offset, int len, DBLink[]to, int toOffset);
         int put(int offset, int len, DBLink[]from, int fromOffset);
+    }</pre>
+<hr />
+
+<h1 style="text-align: center"><a id="FieldDataFactory"></a>Factory for
+creating Data Fields</h1>
+<hr />
+
+<p>A factory is available that implements the interfaces for record instance
+fields.</p>
+<pre>    public class FieldDataFactory {
+        public static DBData createData(DBDField dbdField);
+        public static DBData createEnumData(DBDField dbdField, String[] choice);
+        public static DBArray createArrayData(DBDField dbdField,
+            int capacity,boolean capacityMutable);
+        public static DBRecord createRecord(String recordName,
+             DBDRecordType dbdRecordType);
+    }</pre>
+<hr />
+
+<h1 style="text-align: center"><a id="AbstractClasses"></a>Abstract
+Classes</h1>
+<hr />
+
+<p>This section describes abstract classes for implementing the data
+interface for database fields. These classes are used by FieldDataFactory and
+can also be used by code that wants to provide special implementations of
+database fields.</p>
+
+<h2><a id="AbstractDBData"></a>AbstractDBData</h2>
+
+<p>Abstract base class for a scalar field.</p>
+<pre>    public abstract class AbstractDBData implements DBData{
+        public DBDField getDBDField();
+        public Field getField();
+        protected AbstractDBData(DBDField dbdField);
+    }</pre>
+
+<h2><a id="AbstractDBEnum"></a>AbstractDBEnum</h2>
+
+<p>Abstract base class for an enumerated field.</p>
+<pre>    public abstract class AbstractDBEnum extends AbstractDBData
+    implements DBEnum {
+        public String[] getChoices();
+        public int getIndex();
+        public boolean setChoices(String[] choice);
+        public void setIndex(int index);
+        public String toString();
+        public String toString(int indentLevel);
+        AbstractDBEnum(DBDEnumField dbdEnumField, String[]choice);
+        protected int index;
+        protected String[]choice;
+    }</pre>
+
+<h2><a id="AbstractDBMenu"></a>AbstractDBMenu</h2>
+
+<p>Abstract base class for a menu field.</p>
+<pre>    public abstract class AbstractDBMenu extends AbstractDBData
+    implements DBMenu
+    {
+        public String getMenuName();
+        public String[] getChoices();
+        public int getIndex();
+        public boolean setChoices(String[] choice);
+        public void setIndex(int index);
+        public String toString() { return getString(0);} ;
+        public String toString(int indentLevel);
+        private String getString(int indentLevel);
+        public AbstractDBMenu(DBDMenuField dbdMenuField);
+        protected int index;
+        protected String[]choice;
+        protected String menuName;
+        protected static Convert convert;
+        protected static void newLine(StringBuilder builder, int indentLevel);
+    }</pre>
+
+<h2><a id="AbstractDBStructure"></a>AbstractDBStructure</h2>
+
+<p>Abstract base class for a structure field.</p>
+<pre>    public abstract class AbstractDBStructure extends AbstractDBData
+    implements DBStructure
+    {
+        public int getFieldDBDataIndex(String fieldName);
+        public PVData[] getFieldPVDatas();
+        public DBData[] getFieldDBDatas();
+        public String toString();
+        public String toString(int indentLevel);
+        // constructor for structure fields
+        AbstractDBStructure(DBDStructureField dbdStructureField);
+        // constructor for record instances
+        AbstractDBStructure(DBDField dbdField,DBDField[] dbdFields);
+        protected DBDStructure dbdStructure;
+        protected PVData[] pvData;
+        protected DBData[] dbData;
+        protected static Convert convert;
+        protected static void newLine(StringBuilder builder, int indentLevel);
+    }</pre>
+
+<h2><a id="AbstractDBRecord"></a>AbstractDBRecord</h2>
+
+<p>Abstract base class for a record instance.</p>
+<pre>    public class AbstractDBRecord extends AbstractDBStructure
+    implements DBRecord {
+        public String getRecordName();
+        public String toString();
+        public String toString(int indentLevel);
+        AbstractDBRecord(String recordName,DBDRecordType dbdRecordType);
+    }</pre>
+
+<h2><a id="AbstractDBLink"></a>AbstractDBLink</h2>
+
+<p>Abstract base class for a link field.</p>
+<pre>    public abstract class AbstractDBLink
+    extends AbstractDBStructure implements DBLink
+    {
+        public DBStructure getConfigStructure();
+        public void putConfigStructure(DBStructure dbStructure);
+        public String getConfigStructureName();
+        public void putConfigStructureName(String name);
+        public String getLinkSupportName();
+        public void putLinkSupportName(String name);
+        public String toString();
+        public String toString(int indentLevel);
+        AbstractDBLink(DBDLinkField dbdLinkField);
+    }</pre>
+
+<h2><a id="AbstractDBArray"></a>AbstractDBArray</h2>
+
+<p>Abstract base class for an array field.</p>
+<pre>    public abstract class AbstractDBArray
+    extends AbstractDBData implements DBArray
+    {
+        public boolean isCapacityMutable();
+        abstract public int getCapacity();
+        abstract public int getLength();
+        abstract public void setCapacity(int len);
+        abstract public void setLength(int len);
+        protected AbstractDBArray(DBDArrayField dbdArrayField);
+    }</pre>
+
+<p>This is probably the most usefull abstract class. For example it can be
+used to implement a circular buffer as follows:</p>
+<pre>    public class CircularBuffer extends AbstractDBArray implements DBDoubleArray {
+        public String toString() {
+            return convert.getString(this);
+        }
+
+        public String toString(int indentLevel) {
+            return convert.getString(this, indentLevel);
+        }
+
+        public boolean isCapacityMutable() {
+            return false;
+        }
+
+        public int get(int offset, int len, double[] to, int toOffset) {
+            if(length==0) return 0;
+            if(offset&gt;capacity) throw new IllegalStateException("offset &gt; capacity");
+            if(len&gt;length) len = length;
+            int start = position + offset;
+            if(start&gt;=capacity) start = start - capacity;
+            int num;
+            if(len+position&lt;=capacity) {
+                num = len;
+            } else {
+                num = capacity - position;
+            }
+            System.arraycopy(value,start,to,toOffset,num);
+            return num;
+        }
+
+        public int put(int offset, int len, double[] from, int fromOffset) {
+            if(offset!=0) throw new IllegalStateException("offset must be 0");
+            int total = 0;
+            int num;
+            while(len&gt;0) {
+                if(position==capacity) position = 0;
+                if(len+position&lt;=capacity) {
+                    num = len;
+                } else {
+                    num = capacity - position;
+                }
+                System.arraycopy(from,fromOffset,value,position,num);
+                length += num;
+                if(length&gt;capacity) length = capacity;
+                position += num; fromOffset += num; len -= num; total += num;
+                
+           }
+           return total;
+        }
+
+        public int getCapacity() {
+            return capacity;
+        }
+
+        public int getLength() {
+            return length;
+        }
+
+        public void setCapacity(int len) {
+            throw new IllegalStateException("capacity is immutable");
+        }
+
+        public void setLength(int len) {
+            throw new IllegalStateException("length only set via put");
+        }
+
+        CircularBuffer(DBDArrayField dbdArrayField,int capacity)
+        {
+            super(dbdArrayField);
+            this.capacity = capacity;
+            value = new double[capacity];
+        }
+
+        private double[] value;
+        int length = 0;
+        int position = 0;
+        int capacity;
     }</pre>
 </body>
 </html>

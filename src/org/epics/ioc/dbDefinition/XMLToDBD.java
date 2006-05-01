@@ -1,20 +1,20 @@
-/**
- * 
- */
-package org.epics.ioc.dbDefinition.example;
-
+package org.epics.ioc.dbDefinition;
 import junit.framework.TestCase;
 import org.epics.ioc.dbDefinition.*;
 import java.util.*;
-public class XMLToDBDTest extends TestCase {
-        
-    public static void testXML() {
+
+public class XMLToDBD {
+
+    /**
+     * read a database definition file and dump result.
+     * @param args the databade definition file.
+     */
+    public static void main(String[] args) {
         DBD dbd = DBDFactory.create("test");
         try {
-            XMLToDBDFactory.convert(dbd,"/home/mrk/workspace/javaIOC"
-                 + "/src/org/epics/ioc/dbDefinition/example/test.xml");
+            XMLToDBDFactory.convert(dbd,args[0]);
         } catch (Exception e) {
-            System.out.println("Exception: " + e);
+            System.err.println("Exception: " + e);
         }
         System.out.printf("\nmenus");
         Map<String,DBDMenu> menuMap = dbd.getMenuMap();
@@ -44,6 +44,7 @@ public class XMLToDBDTest extends TestCase {
             DBDRecordType dbdRecordType = recordTypeMap.get(key);
             System.out.print(dbdRecordType.toString());
         }
+
     }
 
 }

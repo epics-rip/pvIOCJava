@@ -28,7 +28,6 @@ public class XMLToIOCDBFactory {
      * @param fileName filename containing xml record instance definitions.
      * @throws MalformedURLException if SAX throws it.
      * @throws IllegalStateException if any errors were detected.
-     * @return (true,false) if all xml statements (were, were not) succesfully converted.
      */
     public static void convert(DBD dbdin, IOCDB iocdbin, String fileName)
         throws MalformedURLException//,IllegalStateException
@@ -382,7 +381,7 @@ public class XMLToIOCDBFactory {
                     "attribute type not specified",locator));
                 state = State.idle;
             }
-            DBDRecordType dbdRecordType = dbd.getDBDRecordType(recordTypeName);
+            DBDRecordType dbdRecordType = dbd.getRecordType(recordTypeName);
             if(dbdRecordType==null) {
                 errorHandler.warning(new SAXParseException(
                     "record type " + recordTypeName + " does not exist.",
@@ -938,7 +937,7 @@ public class XMLToIOCDBFactory {
             case enumerated:
                 dbdAttribute = DBDAttributeFactory.create(
                      dbd,enumDBDAttributeValues);
-                dbdField = DBDCreateFactory.createDBDField(dbdAttribute,null);
+                dbdField = DBDCreateFactory.createField(dbdAttribute,null);
                 enumData[0] = (DBEnum)FieldDataFactory.createEnumData(
                     dbdField,null);
                 dbEnumArray.put(arrayOffset,1,enumData,0);
@@ -956,7 +955,7 @@ public class XMLToIOCDBFactory {
                     new MenuDBDAttributeValues(menuName);
                 dbdAttribute = DBDAttributeFactory.create(
                     dbd,dbdAttributeValues);
-                dbdField = DBDCreateFactory.createDBDField(dbdAttribute,null);
+                dbdField = DBDCreateFactory.createField(dbdAttribute,null);
                 menuData[0] = (DBMenu)FieldDataFactory.
                     createData(dbdField);
                 dbMenuArray.put(arrayOffset,1,menuData,0);
@@ -976,7 +975,7 @@ public class XMLToIOCDBFactory {
                     new StructureDBDAttributeValues(structureName);
                 dbdAttribute = DBDAttributeFactory.create(
                     dbd,dbdAttributeValues);
-                dbdField = DBDCreateFactory.createDBDField(dbdAttribute,null);
+                dbdField = DBDCreateFactory.createField(dbdAttribute,null);
                 structureData[0] = (DBStructure)FieldDataFactory.createData(dbdField);
                 dbStructureArray.put(arrayOffset,1,structureData,0);
                 structureHandler = new StructureHandler(structureData[0]);
@@ -993,7 +992,7 @@ public class XMLToIOCDBFactory {
                 DBDAttributeValues dbdAttributeValues =
                     new ArrayDBDAttributeValues(elementType);
                 dbdAttribute = DBDAttributeFactory.create(dbd,dbdAttributeValues);
-                dbdField = DBDCreateFactory.createDBDField(dbdAttribute,null);
+                dbdField = DBDCreateFactory.createField(dbdAttribute,null);
                 arrayData[0] = (DBArray)FieldDataFactory.createData(dbdField);
                 dbArrayArray.put(arrayOffset,1,arrayData,0);
                 arrayHandler = new ArrayHandler(arrayData[0]);
@@ -1003,7 +1002,7 @@ public class XMLToIOCDBFactory {
             case link:
                 dbdAttribute = DBDAttributeFactory.create(
                         dbd,linkDBDAttributeValues);
-                dbdField = DBDCreateFactory.createDBDField(dbdAttribute,null);
+                dbdField = DBDCreateFactory.createField(dbdAttribute,null);
                 linkData[0] = (DBLink)FieldDataFactory.createData(dbdField);
                 dbLinkArray.put(arrayOffset,1,linkData,0);
                 linkHandler = new LinkHandler(linkData[0]);
@@ -1047,7 +1046,7 @@ public class XMLToIOCDBFactory {
         ArrayHandler(DBArray dbArray) throws SAXException
         {
             this.dbArray = dbArray;
-            DBDAttribute dbdAttribute = dbArray.getDBDField().getDBDAttribute();
+            DBDAttribute dbdAttribute = dbArray.getDBDField().getAttribute();
             arrayElementType = dbdAttribute.getElementType();
             arrayElementDBType = dbdAttribute.getElementDBType();
             switch(arrayElementDBType) {
@@ -1158,7 +1157,7 @@ public class XMLToIOCDBFactory {
                         locator));
                 return;
             }
-            DBDStructure dbdStructure = dbd.getDBDStructure(configStructureName);
+            DBDStructure dbdStructure = dbd.getStructure(configStructureName);
             if(dbdStructure==null) {
                 errorHandler.warning(new SAXParseException(
                         "configuration structure does not exist",
@@ -1171,9 +1170,9 @@ public class XMLToIOCDBFactory {
                 new StructureDBDAttributeValues(configStructureName);
             DBDAttribute dbdAttribute = DBDAttributeFactory.create(
                 dbd,dbdAttributeValues);
-            DBDField dbdField = DBDCreateFactory.createDBDField(dbdAttribute,null);
+            DBDField dbdField = DBDCreateFactory.createField(dbdAttribute,null);
             configDBStructure = (DBStructure)FieldDataFactory.createData(dbdField);
-            dbLink.putConfigDBStructure(configDBStructure);
+            dbLink.putConfigStructure(configDBStructure);
             structureHandler = new StructureHandler(configDBStructure);
             state = State.structure;
         }

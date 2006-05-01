@@ -52,13 +52,13 @@ public interface DBDAttribute {
      * If the field is not a menu null is returned.
      * @return the DBDMenu or null if field is not a menu.
      */
-    DBDMenu getDBDMenu();
+    DBDMenu getMenu();
     /**
      * Get the DBDStructure of a structure field.
      * If the field is not a structure null is returned.
      * @return the DBDStructure of null if the field is not a structure.
      */
-    DBDStructure getDBDStructure();
+    DBDStructure getStructure();
     /**
      * Get the element DBType of an array field.
      * dbPvType is returned if the field is not an array. The Type will be pvUnknown.

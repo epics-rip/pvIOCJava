@@ -22,5 +22,5 @@ public interface DBDField extends Field {
      * get the attribute interface for the field.
      * @return the DBDAttribute.
      */
-    DBDAttribute getDBDAttribute();
+    DBDAttribute getAttribute();
 }

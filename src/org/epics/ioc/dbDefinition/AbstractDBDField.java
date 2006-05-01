@@ -11,7 +11,7 @@ public abstract class AbstractDBDField implements DBDField {
     /* (non-Javadoc)
      * @see org.epics.ioc.dbDefinition.DBDField#getDBDAttribute()
      */
-    public DBDAttribute getDBDAttribute() {
+    public DBDAttribute getAttribute() {
         return attribute;
     }
 
@@ -108,7 +108,7 @@ public abstract class AbstractDBDField implements DBDField {
             break;
         case dbStructure:
         case dbLink: {
-            DBDStructure dbdStructure = attribute.getDBDStructure();
+            DBDStructure dbdStructure = attribute.getStructure();
             assert(dbdStructure!=null);
             DBDField[] dbdField = dbdStructure.getDBDFields();
             assert(dbdField!=null);

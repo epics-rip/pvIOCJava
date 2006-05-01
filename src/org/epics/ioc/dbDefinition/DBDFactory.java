@@ -69,125 +69,72 @@ public class DBDFactory {
     private static class DBDInstance implements DBD {
 
         public boolean addLinkSupport(DBDLinkSupport linkSupport) {
-            ListIterator<DBDLinkSupport> iter = linkSupportList.listIterator();
-            while(iter.hasNext()) {
-                DBDLinkSupport support = iter.next();
-                int compare = support.getLinkSupportName().compareTo(
-                        linkSupport.getLinkSupportName());
-                if(compare==0) return false;
-                if(compare>0) {
-                    iter.previous();
-                    iter.add(linkSupport);
-                    return true;
-                }
-            }
-            linkSupportList.add(linkSupport);
+            String key = linkSupport.getLinkSupportName();
+            if(linkSupportMap.containsKey(key)) return false;
+            linkSupportMap.put(key,linkSupport);
             return true;
         }
         
         public boolean addMenu(DBDMenu menuNew) {
-            ListIterator<DBDMenu> iter = menuList.listIterator();
-            while(iter.hasNext()) {
-                DBDMenu menu = iter.next();
-                int compare = menu.getName().compareTo(
-                        menuNew.getName());
-                if(compare==0) return false;
-                if(compare>0) {
-                    iter.previous();
-                    iter.add(menuNew);
-                    return true;
-                }
-            }
-            menuList.add(menuNew);
+            String key = menuNew.getName();
+            if(menuMap.containsKey(key)) return false;
+            menuMap.put(key,menuNew);
             return true;
         }
 
         public boolean addRecordType(DBDRecordType recordType) {
-            ListIterator<DBDRecordType> iter = recordTypeList.listIterator();
-            while(iter.hasNext()) {
-                DBDRecordType struct = iter.next();
-                int compare = struct.getStructureName().compareTo(
-                        recordType.getStructureName());
-                if(compare==0) return false;
-                if(compare>0) {
-                    iter.previous();
-                    iter.add(recordType);
-                    return true;
-                }
-            }
-            recordTypeList.add(recordType);
+            String key = recordType.getStructureName();
+            if(recordTypeMap.containsKey(key)) return false;
+            recordTypeMap.put(key,recordType);
             return true;
         }
 
         public boolean addStructure(DBDStructure structure) {
-            ListIterator<DBDStructure> iter = structureList.listIterator();
-            while(iter.hasNext()) {
-                DBDStructure struct = iter.next();
-                int compare = struct.getStructureName().compareTo(
-                        structure.getStructureName());
-                if(compare==0) return false;
-                if(compare>0) {
-                    iter.previous();
-                    iter.add(structure);
-                    return true;
-                }
-            }
-            structureList.add(structure);
+            String key = structure.getStructureName();
+            if(structureMap.containsKey(key)) return false;
+            structureMap.put(key,structure);
             return true;
         }
-        public DBDRecordType getDBDRecordType(String recordTypeName) {
-            for(DBDRecordType recordType : recordTypeList) {
-                if(recordType.getStructureName().equals(recordTypeName))
-                    return recordType;
-            }
-            return null;
+        public DBDRecordType getRecordType(String recordTypeName) {
+            return recordTypeMap.get(recordTypeName);
         }
-        public Collection<DBDRecordType> getDBDRecordTypeList() {
-            return recordTypeList;
+        public Map<String,DBDRecordType> getRecordTypeMap() {
+            return recordTypeMap;
         }
-        public DBDStructure getDBDStructure(String structureName) {
-            for(DBDStructure structure : structureList) {
-                if(structure.getStructureName().equals(structureName)) return structure;
-            }
-            return null;
+        public DBDStructure getStructure(String structureName) {
+            return structureMap.get(structureName);
         }
-        public Collection<DBDStructure> getDBDStructureList() {
-            return structureList;
+        public Map<String,DBDStructure> getStructureMap() {
+            return structureMap;
         }
         public DBDLinkSupport getLinkSupport(String linkSupportName) {
-            for(DBDLinkSupport support : linkSupportList) {
-                if(support.getLinkSupportName().equals(linkSupportName)) return support;
-            }
-            return null;
+            return linkSupportMap.get(linkSupportName);
         }
-        public Collection<DBDLinkSupport> getLinkSupportList() {
-            return linkSupportList;
+        public Map<String,DBDLinkSupport> getLinkSupportMap() {
+            return linkSupportMap;
         }
         public DBDMenu getMenu(String menuName) {
-            for(DBDMenu menu : menuList) {
-                if(menu.getName().equals(menuName)) return menu;
-            }
-            return null;
+            return menuMap.get(menuName);
          }
-        public Collection<DBDMenu> getMenuList() {
-            return menuList;
+        public Map<String, DBDMenu> getMenuMap() {
+            return menuMap;
         }
         public String getName() {
             return name;
         }
         DBDInstance(String name) {
             this.name = name;
-            menuList = new LinkedList<DBDMenu>();
-            structureList = new LinkedList<DBDStructure>();
-            recordTypeList = new LinkedList<DBDRecordType>();
-            linkSupportList = new LinkedList<DBDLinkSupport>();
+            menuMap = new TreeMap<String,DBDMenu>();
+            structureMap = new TreeMap<String,DBDStructure>();
+            recordTypeMap = new TreeMap<String,DBDRecordType>();
+            linkSupportMap = new TreeMap<String,DBDLinkSupport>();
         }
         
         private String name;
-        private LinkedList<DBDMenu> menuList;
-        private LinkedList<DBDStructure> structureList;
-        private LinkedList<DBDRecordType> recordTypeList;
-        private LinkedList<DBDLinkSupport> linkSupportList;
+        private Map<String,DBDMenu> menuMap;
+        private Map<String,DBDStructure> structureMap;
+        private Map<String,DBDRecordType> recordTypeMap;
+        private Map<String,DBDLinkSupport> linkSupportMap;
     }
 
 }

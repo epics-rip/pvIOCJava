@@ -47,11 +47,11 @@ public class DBDAttributeFactory {
             return asl;
         }
         
-        public DBDMenu getDBDMenu() {
+        public DBDMenu getMenu() {
             return dbdMenu;
         }
 
-        public DBDStructure getDBDStructure() {
+        public DBDStructure getStructure() {
             return dbdStructure;
         }
 
@@ -136,7 +136,7 @@ public class DBDAttributeFactory {
                             "not a valid type");
                     dbType = types.dbType;
                     if(dbType==DBType.dbLink) {
-                        dbdStructure = dbd.getDBDStructure("link");
+                        dbdStructure = dbd.getStructure("link");
                         if(dbdStructure==null)
                             throw new IllegalStateException(
                                     "structure link not in database");
@@ -168,7 +168,7 @@ public class DBDAttributeFactory {
                     continue;
                 }
                 if(name.equals("structureName")) {
-                    dbdStructure = dbd.getDBDStructure(value);
+                    dbdStructure = dbd.getStructure(value);
                     continue;
                 }
                 if(name.equals("elementType")) {

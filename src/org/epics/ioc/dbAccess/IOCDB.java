@@ -34,7 +34,7 @@ public interface IOCDB {
      * create a new record instance.
      * @param recordName the instance name.
      * @param dbdRecordType the reflection interface for the instance record type.
-     * @return
+     * @return true if the record was created.
      */
     boolean createRecord(String recordName, DBDRecordType dbdRecordType);
     /**

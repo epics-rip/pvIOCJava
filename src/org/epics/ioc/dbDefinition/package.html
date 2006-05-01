@@ -12,7 +12,7 @@
 
 <h1 style="text-align: center">EPICS JavaIoc: Database Definition <br />
 package: org/epics/ioc/dbDefinition<br />
-2006.04.28</h1>
+2006.05.01</h1>
 <hr />
 <a href="#Overview">Overview</a> <br />
 <a href="#Syntax">Database Definition Syntax</a>
@@ -479,15 +479,15 @@ recordType</p>
         boolean isDesign();
         boolean isLink();
         int getAsl();
-        DBDMenu getDBDMenu();
-        DBDStructure getDBDStructure();
+        DBDMenu getMenu();
+        DBDStructure getStructure();
         DBType getElementDBType();
         Type getElementType();
     }
 
     interface DBDField extends Field {
         DBType getDBType();
-        DBDAttribute getDBDAttribute();
+        DBDAttribute getAttribute();
     }
     </pre>
 
@@ -501,12 +501,12 @@ recordType</p>
     String toString();
     String toString(int indent Level);</pre>
 
-<p>getDBDMenu returns null if the field DBType is not dbMenu.</p>
+<p>getMenu returns null if the field DBType is not dbMenu.</p>
 
-<p>getDBDStructure returns null if the field DBType is not dbStructure.</p>
+<p>getStructure returns null if the field DBType is not dbStructure.</p>
 
 <p>getElementType returns DBType dvPvType and getElementType returns
-pcUnknown if the field DBType is not dbArray.elementDBType</p>
+pcUnknown if the field DBType is not dbArray.</p>
 <hr />
 
 <h1 style="text-align: center"><a id="DBDataDefinition"></a>Database
@@ -530,9 +530,9 @@ interest to the database itself.</p>
 <p>For example the following dumps a menu</p>
 <pre>    void dumpMenu(DBDMenu menu) {
         String[] choices = menu.getChoices();
-        printf("menu %s {\n",menu.getName();
-        for(choice: choices) printf("    %s\n",choice);
-        printf("}\n");
+        System.out.printf("menu %s {\n",menu.getName();
+        for(choice: choices) System.out.printf("    %s\n",choice);
+        System.out.printf("}\n");
     }</pre>
 
 <h2><a id="Structure"></a>Structure and RecordType</h2>
@@ -548,11 +548,11 @@ interest to the database itself.</p>
 <p>For example the following dumps a structure</p>
 <pre>    void dumpStructure(DBDStructure structure) {
         DBDField[] fields = structure.getDBDFields();
-        printf("structure %s {\n",structure.getStructureName();
+        System.out.printf("structure %s {\n",structure.getStructureName();
         for(DBDField field : fields) {
             DBType type = field.getDBType();
             Type pvtype = field.getType();
-            printf("field %s dbtype %s pvtype %s",
+            System.out.printf("field %s dbtype %s pvtype %s",
                 field.getName(),type.toString(),pvtype.toString());
         }
     }</pre>
@@ -574,7 +574,7 @@ interest to the database itself.</p>
 
     interface DBDField extends Field {
         DBType getDBType();
-        DBDAttribute getDBDAttribute();
+        DBDAttribute getAttribute();
         String toString();
         String toString(int indentLevel);
     }
@@ -585,7 +585,11 @@ interest to the database itself.</p>
 
     interface DBDStructureField extends DBDField,Structure { }
 
-    interface DBDArrayField extends DBDField, Array {}</pre>
+    interface DBDArrayField extends DBDField, Array {}
+    
+    interface DBDLinkField extends DBDStructureField { }
+
+</pre>
 
 <p>In addition an abstract class is available for creating implementations of
 the field reflection interfaces. This class is used by DBDCreateFactory and
@@ -599,14 +603,14 @@ Definition Components</h1>
 <p>The following class provides methods to create components for a Database
 Definition.</p>
 <pre>public final class  DBDCreateFactory {
-    public static DBDMenu createDBDMenu(String menuName, String[] choices);  
-    public static DBDStructure createDBDStructure(String name,
+    public static DBDMenu createMenu(String menuName, String[] choices);  
+    public static DBDStructure createStructure(String name,
         DBDField[] dbdField,Property[] property);
-    public static DBDRecordType createDBDRecordType(String name,
+    public static DBDRecordType createRecordType(String name,
         DBDField[] dbdField,Property[] property);
-    public static DBDLinkSupport createDBDLinkSupport(String supportName,
+    public static DBDLinkSupport createLinkSupport(String supportName,
         String configStructName);
-    public static DBDField createDBDField(DBDAttribute attribute, Property[]property);
+    public static DBDField createField(DBDAttribute attribute, Property[]property);
     public static void createLinkDBDStructure(DBD dbd);
 }</pre>
 <hr />
@@ -621,16 +625,16 @@ Components. It also provides methods to insert components.</p>
     String getName();
     DBDMenu getMenu(String menuName);
     boolean addMenu(DBDMenu menu);
-    Collection&lt;DBDMenu&gt; getMenuList();
-    DBDStructure getDBDStructure(String structureName);
+    Map&lt;String,DBDMenu&gt; getMenuMap();
+    DBDStructure getStructure(String structureName);
     boolean addStructure(DBDStructure structure);
-    Collection&lt;DBDStructure&gt; getDBDStructureList();
-    DBDStructure getDBDRecordType(String recordTypeName);
+    Map&lt;String,DBDStructure&gt; getStructureMap();
+    DBDStructure getRecordType(String recordTypeName);
     boolean addRecordType(DBDStructure recordType);
-    Collection&lt;DBDStructure&gt; getDBDRecordTypeList();
+    Map&lt;String,DBDStructure&gt; getRecordTypeMap();
     DBDLinkSupport getLinkSupport(String linkSupportName);
     boolean addLinkSupport(DBDLinkSupport linkSupport);
-    Collection&lt;DBDLinkSupport&gt; getLinkSupportList();
+    Map&lt;String,DBDLinkSupport&gt; getLinkSupportMap();
 }</pre>
 
 <p>The following class is a factory to create DBDs</p>
@@ -651,5 +655,9 @@ definition database.</p>
 <pre>    public class XMLToDBDFactory {
         public static void convert(DBD dbd, String fileName);
     }</pre>
+
+<p>A java application that reads and dumps a database definition file can be
+invoked from a shell via the command:</p>
+<pre>     java XMLToDBD dbdFileName</pre>
 </body>
 </html>

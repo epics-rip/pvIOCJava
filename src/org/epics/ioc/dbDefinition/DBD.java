@@ -31,16 +31,16 @@ public interface DBD {
      */
     boolean addMenu(DBDMenu menu);
     /**
-     * get a Collection of all menus.
-     * @return the Collection.
+     * get a Map of all menus.
+     * @return the Map.
      */
-    Collection<DBDMenu> getMenuList();
+    Map<String, DBDMenu> getMenuMap();
     /**
      * get the DBDStructure for the specified name.
      * @param structureName the structure to retrieve.
      * @return the DBDStructure or null if the structure does not exist.
      */
-    DBDStructure getDBDStructure(String structureName);
+    DBDStructure getStructure(String structureName);
     /**
      * @param structure the DBDStructure to add.
      * @return  (true,false) if the structure (was not, was) added.
@@ -48,16 +48,16 @@ public interface DBD {
      */
     boolean addStructure(DBDStructure structure);
     /**
-     * get a Collection of all the structures.
-     * @return the Collection.
+     * get a Map of all the structures.
+     * @return the Map.
      */
-    Collection<DBDStructure> getDBDStructureList();
+    Map<String,DBDStructure> getStructureMap();
     /**
      * get a DBDStructure that describes the recordType.
      * @param recordTypeName get the description of a recordType.
      * @return the description.
      */
-    DBDRecordType getDBDRecordType(String recordTypeName);
+    DBDRecordType getRecordType(String recordTypeName);
     /**
      * @param recordType the DBDStructure that describes the recordType.
      * @return  (true,false) if the recordType (was not, was) added.
@@ -65,24 +65,26 @@ public interface DBD {
      */
     boolean addRecordType(DBDRecordType recordType);
     /**
-     * get a collection of all the recordTypes.
-     * @return the Collection
+     * get a Map of all the recordTypes.
+     * @return the Map
      */
-    Collection<DBDRecordType> getDBDRecordTypeList();
+    Map<String,DBDRecordType> getRecordTypeMap();
     /**
+     * get a linkSupport
      * @param linkSupportName the name of the link support desired.
      * @return the DBDLink Support.
      */
     DBDLinkSupport getLinkSupport(String linkSupportName);
     /**
-     * @param linkSupport.
+     * add a linkSupport
+     * @param linkSupport support to add.
      * @return  (true,false) if the link support (was not, was) added.
      * It is not added if it is already present.
      */
     boolean addLinkSupport(DBDLinkSupport linkSupport);
     /**
-     * get a collection of all the link supports.
-     * @return the collection.
+     * get a Map of all the link supports.
+     * @return the Map.
      */
-    Collection<DBDLinkSupport> getLinkSupportList();
+    Map<String,DBDLinkSupport> getLinkSupportMap();
 }

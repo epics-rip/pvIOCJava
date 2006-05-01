@@ -19,7 +19,7 @@ public final class  DBDCreateFactory {
      * @param choices for the menu.
      * @return the menu or null if it already existed.
      */
-    public static DBDMenu createDBDMenu(String menuName, String[] choices)
+    public static DBDMenu createMenu(String menuName, String[] choices)
     {
         return new MenuInstance(menuName,choices);
     }
@@ -31,7 +31,7 @@ public final class  DBDCreateFactory {
      * @param property an array of properties for the structure.
      * @return interface for the newly created structure.
      */
-    public static DBDStructure createDBDStructure(String name,
+    public static DBDStructure createStructure(String name,
         DBDField[] dbdField,Property[] property)
     {
         return new StructureInstance(name,dbdField,property);
@@ -44,7 +44,7 @@ public final class  DBDCreateFactory {
      * @param property an array of properties for the structure.
      * @return interface for the newly created structure.
      */
-    public static DBDRecordType createDBDRecordType(String name,
+    public static DBDRecordType createRecordType(String name,
         DBDField[] dbdField,Property[] property)
     {
         return new RecordTypeInstance(name,dbdField,property);
@@ -56,7 +56,7 @@ public final class  DBDCreateFactory {
      * @param configStructureName name of the configuration structure.
      * @return the DBDLinkSupport or null if it already existed.
      */
-    public static DBDLinkSupport createDBDLinkSupport(String supportName,
+    public static DBDLinkSupport createLinkSupport(String supportName,
         String configStructureName)
     {
         return new LinkSupportInstance(supportName,configStructureName);
@@ -69,7 +69,7 @@ public final class  DBDCreateFactory {
      * @param property an array of properties for the field.
      * @return interface for the newly created field.
      */
-    public static DBDField createDBDField(DBDAttribute attribute, Property[]property)
+    public static DBDField createField(DBDAttribute attribute, Property[]property)
     {
         DBType dbType = attribute.getDBType();
         Type type = attribute.getType();
@@ -102,14 +102,14 @@ public final class  DBDCreateFactory {
             "linkSupportName");
         DBDAttribute linkSupportAttribute = DBDAttributeFactory.create(
             dbd,linkSupportValues);
-        DBDField linkSupport = createDBDField(linkSupportAttribute,null);
+        DBDField linkSupport = createField(linkSupportAttribute,null);
         DBDAttributeValues configValues = new StringValues(
             "configStructureName");
         DBDAttribute configAttribute = DBDAttributeFactory.create(
             dbd,configValues);
-        DBDField config = createDBDField(configAttribute,null);
+        DBDField config = createField(configAttribute,null);
         DBDField[] dbdField = new DBDField[]{linkSupport,config};
-        DBDStructure link = createDBDStructure("link",dbdField,null);
+        DBDStructure link = createStructure("link",dbdField,null);
         dbd.addStructure(link);
     
     }
@@ -190,7 +190,7 @@ public final class  DBDCreateFactory {
     static private class StructureInstance implements DBDStructure
     {
 
-        public DBDAttribute getDBDAttribute() {
+        public DBDAttribute getAttribute() {
             return null; // structures have no attributes
         }
 
@@ -285,7 +285,7 @@ public final class  DBDCreateFactory {
             return structure.getFieldIndex(fieldName);
         }
 
-        public DBDAttribute getDBDAttribute() {
+        public DBDAttribute getAttribute() {
             return null; // record types have no attributes
         }
 

@@ -66,10 +66,10 @@ public class FieldDataFactory {
     public static DBArray createArrayData(
             DBDField dbdField,int capacity,boolean capacityMutable)
     {
-        DBType elementDbType= dbdField.getDBDAttribute().getElementDBType();
+        DBType elementDbType= dbdField.getAttribute().getElementDBType();
         switch(elementDbType) {
         case dbPvType: {
-                Type elementType = dbdField.getDBDAttribute().getElementType();
+                Type elementType = dbdField.getAttribute().getElementType();
                 switch(elementType) {
                 case pvBoolean: return new ArrayBooleanData(
                     (DBDArrayField)dbdField, capacity, capacityMutable);

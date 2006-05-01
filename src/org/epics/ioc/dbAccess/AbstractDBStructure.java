@@ -89,7 +89,7 @@ public abstract class AbstractDBStructure extends AbstractDBData
      */
     AbstractDBStructure(DBDStructureField dbdStructureField) {
         super(dbdStructureField);
-        dbdStructure = dbdField.getDBDAttribute().getDBDStructure();
+        dbdStructure = dbdField.getAttribute().getStructure();
         DBDField[] dbdFields = dbdStructure.getDBDFields();
         dbData = new DBData[dbdFields.length];
         pvData = new PVData[dbData.length];

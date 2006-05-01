@@ -80,7 +80,7 @@ public abstract class AbstractDBMenu extends AbstractDBData implements DBMenu
     public AbstractDBMenu(DBDMenuField dbdMenuField) {
         super(dbdMenuField);
         index = 0;
-        DBDMenu dbdMenu = dbdField.getDBDAttribute().getDBDMenu();
+        DBDMenu dbdMenu = dbdField.getAttribute().getMenu();
         this.choice = dbdMenu.getChoices();
         this.menuName = dbdMenu.getName();
     }
