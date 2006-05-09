@@ -1,6 +1,4 @@
 package org.epics.ioc.dbDefinition;
-import junit.framework.TestCase;
-import org.epics.ioc.dbDefinition.*;
 import java.util.*;
 
 public class XMLToDBD {

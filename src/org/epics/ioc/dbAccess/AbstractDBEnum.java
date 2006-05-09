@@ -64,24 +64,19 @@ public abstract class AbstractDBEnum extends AbstractDBData implements DBEnum {
     
     /**
      * constructor that derived classes must call.
+     * @param the parent interface.
      * @param dbdEnumField the reflection interface for the DBEnum data.
      * @param choice the choices for the enum.
      */
-    AbstractDBEnum(DBDEnumField dbdEnumField, String[]choice) {
-        super(dbdEnumField);
+    protected AbstractDBEnum(DBStructure parent,DBDEnumField dbdEnumField, String[]choice) {
+        super(parent,dbdEnumField);
         index = 0;
         if(choice==null) choice = EMPTY_STRING_ARRAY;
         this.choice = choice;
     }
-    
-    /**
-     * index of current choice
-     */
-    protected int index;
-    /**
-     * array of choices
-     */
-    protected String[]choice;
+
+    private int index;
+    private String[]choice;
 
     private final static String[] EMPTY_STRING_ARRAY = new String[0];
     private static Convert convert = ConvertFactory.getConvert();

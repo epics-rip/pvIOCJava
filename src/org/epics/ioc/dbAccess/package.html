@@ -29,8 +29,7 @@ package: org/epics/ioc/dbAcess <br />
     </ul>
   </li>
 </ul>
-<a href="#XMLToDB">XML to Database Converter</a><br />
-<a href="#DBDataAccess">Record Instance Access</a>
+<a href="#RecordInstanceAccess">Record Instance Access</a>
 <ul>
   <li><a href="#DBData">Base Interface for accesssing data</a></li>
   <li><a href="#DBPVData">Scalar and String Data</a></li>
@@ -52,6 +51,9 @@ package: org/epics/ioc/dbAcess <br />
   <li><a href="#AbstractDBLink">AbstractDBLink</a></li>
   <li><a href="#AbstractDBArray">AbstractDBArray</a></li>
 </ul>
+<a href="#IOCDB">IOCDB: IOC Database</a><br />
+<a href="#XMLToDB">XML to Database Converter</a><br />
+<a href="#DatabaseAccess">IOC Database Access</a><br />
 <hr />
 
 <h1 style="text-align: center"><a id="Overview"></a>Overview</h1>
@@ -276,22 +278,7 @@ A link field is initialized as follows:
 </dl>
 <hr />
 
-<h1 style="text-align: center"><a id="XMLToDB"></a>XML to Database
-Converter</h1>
-<hr />
-
-<p>The following reads an xml file containing record instance definitions and
-puts them into an IOCDB.</p>
-<pre>    public class XMLToIOCDBFactory {
-        public static void convert(DBD dbdin, IOCDB iocdbin, String fileName);
-    }</pre>
-
-<p>A java application that reads and dumps a record instance file can be
-invoked from a shell via the command:</p>
-<pre>     java XMLToDB dbdFile dbInstanceFile</pre>
-<hr />
-
-<h1 style="text-align: center"><a id="DBDataAccess"></a>Record Instance
+<h1 style="text-align: center"><a id="RecordInstanceAccess"></a>Record Instance
 Access</h1>
 <hr />
 
@@ -305,6 +292,8 @@ support, Channel Access, etc.</p>
 instance.</p>
 <pre>    public interface DBData extends PVData {
         DBDField getDBDField();
+        DBStructure getParent();
+        DBRecord getRecord();
     }</pre>
 
 <p>Since it extends PVData it has the methods:</p>
@@ -365,6 +354,7 @@ A menu field is accessed via the interface:
 <pre>    public interface DBStructure extends DBData, PVStructure {
          DBData[] getFieldDBDatas();
          int getFieldDBDataIndex(String fieldName);
+         DBStructure getParent();
     }</pre>
 
 <h2><a id="RecordData"></a>RecordData</h2>
@@ -379,7 +369,6 @@ A menu field is accessed via the interface:
         String getLinkSupportName();
         void putLinkSupportName(String name);
         DBStructure getConfigStructure();
-        void putConfigStructure(DBStructure dbStructure);
         void putConfigStructure(DBStructure dbStructure);
     }</pre>
 
@@ -425,10 +414,12 @@ creating Data Fields</h1>
 <p>A factory is available that implements the interfaces for record instance
 fields.</p>
 <pre>    public class FieldDataFactory {
-        public static DBData createData(DBDField dbdField);
-        public static DBData createEnumData(DBDField dbdField, String[] choice);
-        public static DBArray createArrayData(DBDField dbdField,
-            int capacity,boolean capacityMutable);
+        public static DBData createData(DBStructure parent,
+            DDBDField dbdField);
+        public static DBData createEnumData(DBStructure parent,
+            DDBDField dbdField, String[] choice);
+        public static DBArray createArrayData(DBStructure parent,
+            DDBDField dbdField, int capacity,boolean capacityMutable);
         public static DBRecord createRecord(String recordName,
              DBDRecordType dbdRecordType);
     }</pre>
@@ -447,9 +438,13 @@ database fields.</p>
 
 <p>Abstract base class for a scalar field.</p>
 <pre>    public abstract class AbstractDBData implements DBData{
+        public DBRecord getRecord();
         public DBDField getDBDField();
         public Field getField();
-        protected AbstractDBData(DBDField dbdField);
+        public DBStructure getParent();
+        public static void newLine(StringBuilder builder, int indentLevel);
+        protected void setRecord(DBRecord record);
+        protected AbstractDBData(DBStructure parent, DBDField dbdField);
     }</pre>
 
 <h2><a id="AbstractDBEnum"></a>AbstractDBEnum</h2>
@@ -463,7 +458,8 @@ database fields.</p>
         public void setIndex(int index);
         public String toString();
         public String toString(int indentLevel);
-        AbstractDBEnum(DBDEnumField dbdEnumField, String[]choice);
+        protected AbstractDBEnum(DBStructure parent,
+            DBDEnumField dbdEnumField, String[]choice);
         protected int index;
         protected String[]choice;
     }</pre>
@@ -482,7 +478,8 @@ database fields.</p>
         public String toString() { return getString(0);} ;
         public String toString(int indentLevel);
         private String getString(int indentLevel);
-        public AbstractDBMenu(DBDMenuField dbdMenuField);
+        protected AbstractDBMenu(DBStructure parent,
+            DBDMenuField dbdMenuField);
         protected int index;
         protected String[]choice;
         protected String menuName;
@@ -502,14 +499,11 @@ database fields.</p>
         public String toString();
         public String toString(int indentLevel);
         // constructor for structure fields
-        AbstractDBStructure(DBDStructureField dbdStructureField);
+        protected AbstractDBStructure(DBStructure parent,
+           DBDStructureField dbdStructureField);
         // constructor for record instances
-        AbstractDBStructure(DBDField dbdField,DBDField[] dbdFields);
-        protected DBDStructure dbdStructure;
-        protected PVData[] pvData;
-        protected DBData[] dbData;
-        protected static Convert convert;
-        protected static void newLine(StringBuilder builder, int indentLevel);
+        protected AbstractDBStructure(DBDRecordType dbdRecordType));
+        protected void createFields(DBRecord record);
     }</pre>
 
 <h2><a id="AbstractDBRecord"></a>AbstractDBRecord</h2>
@@ -520,7 +514,8 @@ database fields.</p>
         public String getRecordName();
         public String toString();
         public String toString(int indentLevel);
-        AbstractDBRecord(String recordName,DBDRecordType dbdRecordType);
+        protected AbstractDBRecord(String recordName,
+            DBDRecordType dbdRecordType);
     }</pre>
 
 <h2><a id="AbstractDBLink"></a>AbstractDBLink</h2>
@@ -537,7 +532,8 @@ database fields.</p>
         public void putLinkSupportName(String name);
         public String toString();
         public String toString(int indentLevel);
-        AbstractDBLink(DBDLinkField dbdLinkField);
+        protected AbstractDBLink(DBStructure parent,
+            DBDStructureField dbdLinkField);
     }</pre>
 
 <h2><a id="AbstractDBArray"></a>AbstractDBArray</h2>
@@ -633,5 +629,58 @@ used to implement a circular buffer as follows:</p>
         int position = 0;
         int capacity;
     }</pre>
+<hr />
+
+<h1 style="text-align: center"><a id="IOCDB"></a>
+IOCDB: IOC Database</h1>
+<hr />
+<p>An IOCDB is a database for a java IOC.</p>
+<pre>
+    public interface IOCDB {
+        String getName();
+        DBD getDBD();
+        DBRecord findRecord(String recordName);
+        DBAccess createAccess(String recordName);
+        boolean createRecord(String recordName, DBDRecordType dbdRecordType);
+        Map<String,DBRecord> getRecordMap();
+    }
+    
+    public class IOCDBFactory {
+        public static IOCDB create(DBD dbd, String name);
+        public static IOCDB find(String name);
+        public static Collection<IOCDB> getIOCDBList();
+        public static void remove(IOCDB iocdb);
+    }
+</pre<
+<hr />
+
+<h1 style="text-align: center"><a id="XMLToDB"></a>XML to Database
+Converter</h1>
+<hr />
+
+<p>The following reads an xml file containing record instance definitions and
+puts them into an IOCDB.</p>
+<pre>    public class XMLToIOCDBFactory {
+        public static void convert(DBD dbdin, IOCDB iocdbin, String fileName);
+    }</pre>
+
+<p>A java application that reads and dumps a record instance file can be
+invoked from a shell via the command:</p>
+<pre>     java XMLToDB dbdFile dbInstanceFile</pre>
+<hr />
+
+<h1 style="text-align: center"><a id="DatabaseAccess"></a>IOC Database Access
+</h1>
+<hr />
+<p>
+<pre>
+    public interface DBAccess {
+        DBRecord getDbRecord();
+        boolean setField(String name);
+        void setField(DBData dbData);
+        DBData getField();
+        DBData getPropertyField(Property property);
+    }
+</pre>
 </body>
 </html>

@@ -16,4 +16,14 @@ public interface DBData extends PVData {
      * @return the DBDField that describes the field.
      */
     DBDField getDBDField();
+    /**
+     * get the parent of this field.
+     * @return the parent interface.
+     */
+    DBStructure getParent();
+    /**
+     * get the record instance that contains this field.
+     * @return the record interface.
+     */
+    DBRecord getRecord();
 }

@@ -85,63 +85,48 @@ public abstract class AbstractDBStructure extends AbstractDBData
     
     /**
      * constructor that derived classes must call.
+     * @param parent the DBStructure of the parent.
      * @param dbdStructureField the reflection interface for the DBStructure data.
      */
-    AbstractDBStructure(DBDStructureField dbdStructureField) {
-        super(dbdStructureField);
-        dbdStructure = dbdField.getAttribute().getStructure();
+    protected AbstractDBStructure(DBStructure parent, DBDStructureField dbdStructureField) {
+        super(parent,dbdStructureField);
+        dbdStructure = super.getDBDField().getAttribute().getStructure();
         DBDField[] dbdFields = dbdStructure.getDBDFields();
         dbData = new DBData[dbdFields.length];
         pvData = new PVData[dbData.length];
         for(int i=0; i < dbData.length; i++) {
-            dbData[i] = FieldDataFactory.createData(dbdFields[i]);
+            dbData[i] = FieldDataFactory.createData(this,dbdFields[i]);
             pvData[i] = dbData[i];
         }
-        
     }
     
     /**
      * constructor for record instance classes.
-     * @param dbdField the reflection interface for the record type.
-     * @param dbdFields array of reflection interfaces for the fields of the record type.
+     * @param dbdRecordType the reflection interface for the record type.
      */
-    AbstractDBStructure(DBDField dbdField,DBDField[] dbdFields) {
-        super(dbdField);
-        dbdStructure = (DBDStructure)dbdField;
-        dbData = new DBData[dbdFields.length];
-        pvData = new PVData[dbData.length];
+    protected AbstractDBStructure(DBDRecordType dbdRecordType) {
+        super(null,dbdRecordType);
+        int numberFields = dbdRecordType.getDBDFields().length;
+        dbdStructure = dbdRecordType;;
+        dbData = new DBData[numberFields];
+        pvData = new PVData[numberFields];
+    }
+    /**
+     * create the fields for the record.
+     * This is only called by whatever called the record instance constructor.
+     * @param record the record instance.
+     */
+    protected void createFields(DBRecord record) {
+        DBDRecordType dbdRecordType = (DBDRecordType)dbdStructure;
+        DBDField[] dbdField = dbdRecordType.getDBDFields();
         for(int i=0; i < dbData.length; i++) {
-            dbData[i] = FieldDataFactory.createData(dbdFields[i]);
+            dbData[i] = FieldDataFactory.createData(record,dbdField[i]);
             pvData[i] = dbData[i];
         }
-        
     }
-    
-    /**
-     * reflection interface.
-     */
-    protected DBDStructure dbdStructure;
-    /**
-     * array of pvData interfaces for the fields.
-     */
-    protected PVData[] pvData;
-    /**
-     * array of DBData interfaces for the fields.
-     */
-    protected DBData[] dbData;
-    /**
-     * reference to the implementation of Convert.
-     */
-    protected static Convert convert = ConvertFactory.getConvert();
-    /**
-     * for use in implementing toString.
-     * @param builder the StringBuilder.
-     * @param indentLevel indention level.
-     */
-    protected static void newLine(StringBuilder builder, int indentLevel) {
-        builder.append("\n");
-        for (int i=0; i <indentLevel; i++) builder.append(indentString);
-    }
-    private static String indentString = "    ";
-    
+
+    private DBDStructure dbdStructure;
+    private PVData[] pvData;
+    private DBData[] dbData;
+    private static Convert convert = ConvertFactory.getConvert();
 }

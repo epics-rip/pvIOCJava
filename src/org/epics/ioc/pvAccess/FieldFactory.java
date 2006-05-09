@@ -268,6 +268,15 @@ public final class FieldFactory {
             Field[] field, Property[] property)
         {
             super(name, Type.pvStructure,property);
+            if(property!=null) for(Property prop : property) {
+                for(Field fieldNow : field) {
+                    if(fieldNow.getName().equals(prop.getName())) {
+                        throw new IllegalArgumentException(
+                            "propertyName " + prop.getName()
+                            + " is the same as a field name");
+                    }
+                }
+            }
             this.field = field;
             this.structureName = structureName;
             fieldName = new String[field.length];

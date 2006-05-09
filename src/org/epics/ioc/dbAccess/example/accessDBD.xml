@@ -1,0 +1,177 @@
+<?xml version="1.0" ?>
+<DBDefinition>
+<menu name = "menuPriority">
+    <choice>low</choice>
+    <choice>medium</choice>
+    <choice>high</choice>
+</menu>
+<menu name = "menuScan">
+    <choice>passive</choice>
+    <choice>event</choice>
+    <choice>interrupt</choice>
+    <choice>periodic</choice>
+</menu>
+
+<menu name = "menuAlarmSevr">
+    <choice>none</choice>
+    <choice>minor</choice>
+    <choice>major</choice>
+    <choice>invalid</choice>
+</menu>
+
+<structure name = "timeStamp">
+    <field name = "secondsPastEpoch" type = "long" />
+    <field name = "nanoSeconds" type = "int" />
+</structure>
+
+<structure name = "scan">
+    <field name = "scan" type = "menu" menuName = "menuScan" />
+    <field name = "rate" type = "double" />
+    <field name = "phase" type = "int" />
+</structure>
+<structure name = "processLink">
+    <field name = "pvname" type = "string" link = "true" />
+    <field name = "wait" type = "boolean" />
+    <field name = "timeout" type = "double" />
+    <field name = "forceLocal" type = "boolean">
+        <!-- if true pvname must be in local IOC -->
+    </field>
+</structure>
+
+<structure name = "monitorLink">
+    <field name = "pvname" type = "string" link = "true" />
+    <field name = "process" type = "boolean">
+        <!-- process this record when monitor occurs -->
+    </field>
+    <field name = "monitorOnly" type = "boolean">
+        <!-- monitor only or data also -->
+    </field>
+    <field name = "inheritSeverity" type = "boolean" />
+    <field name = "forceLocal" type = "boolean">
+        <!-- if true pvname must be in local IOC -->
+    </field>
+</structure>
+
+<structure name = "inputLink">
+    <field name = "pvname" type = "string" link = "true" />
+    <field name = "process" type = "boolean" />
+    <field name = "wait" type = "boolean" />
+    <field name = "timeout" type = "double" />
+    <field name = "inheritSeverity" type = "boolean" />
+    <field name = "forceLocal" type = "boolean" >
+        <!-- if true pvname must be in local IOC -->
+    </field>
+</structure>
+
+<structure name = "outputLink">
+    <field name = "pvname" type = "string" link = "true" />
+    <field name = "process" type = "boolean" />
+    <field name = "wait" type = "boolean" />
+    <field name = "timeout" type = "double" />
+    <field name = "forceLocal" type = "boolean" >
+        <!-- if true pvname must be in local IOC -->
+        <boolean />
+    </field>
+</structure>
+
+<structure name = "displayLimit">
+    <field name = "low" type = "double" />
+    <field name = "high" type = "double" />
+</structure>
+
+<structure name = "linearConvert">
+    <field name = "engUnitsLow" type = "double" />
+    <field name = "engUnitsHigh" type = "double" />
+    <field name = "slope" type = "double" />
+    <field name = "intercept" type = "double" />
+</structure>
+
+<linkSupport name = "processLink" configStructureName = "processLink" />
+<linkSupport name = "monitorLink" configStructureName = "monitorLink" />
+<linkSupport name = "inputLink" configStructureName = "inputLink" />
+<linkSupport name = "outputLink" configStructureName = "outputLink" />
+
+<structure name = "aiRaw">
+    <field name = "value" type = "int" >
+        <property name = "status" associatedField = "status" />
+        <property name = "severity" associatedField = "severity" />
+        <property name = "timeStamp" associatedField = ".." />
+    </field>
+    <field name = "status" type = "string" />
+    <field name = "severity" type = "menu" menuName = "menuAlarmSevr" />
+    <field name = "input" type = "link" />
+</structure>
+
+<structure name = "aiLinear">
+    <property name = "rawValue" associatedField = "aiRaw.value" />
+    <field name = "value" type = "double" >
+        <property name = "status" associatedField = "status" />
+        <property name = "severity" associatedField = "severity" />
+        <property name = "units" associatedField = "units" />
+        <property name = "displayLimit" associatedField = "displayLimit" />
+        <property name = "timeStamp" associatedField = ".." />
+    </field>
+    <field name = "status" type = "string" />
+    <field name = "severity" type = "menu" menuName = "menuAlarmSevr" />
+    <field name = "units" type = "string" />
+    <field name = "displayLimit"
+         type = "structure" structureName = "displayLimit" />
+    <field name = "aiRaw" type = "structure" structureName = "aiRaw"/>
+    <field name = "linearConvert"
+        type = "structure" structureName = "linearConvert" />
+</structure>
+
+<recordType name = "aiLinearRecord">
+    <property name = "value" associatedField = "aiLinear.value" />
+    <property name = "rawValue" associatedField = "aiLinear.rawValue" />
+    <property name = "status" associatedField = "aiLinear.status" />
+    <property name = "severity" associatedField = "aiLinear.severity" />
+    <field name = "aiLinear" type = "structure" structureName = "aiLinear" />
+    <field name = "priority" type = "menu" menuName = "menuPriority" />
+    <field name = "timeStamp" type = "structure" structureName = "timeStamp"/>
+    <field name = "scan" type = "structure" structureName = "scan"/>
+</recordType>
+
+<structure name = "powerSupply">
+    <property name = "current" associatedField = "currentInput.value" />
+    <property name = "voltage" associatedField = "voltageInput.value" />
+    <field name = "power" type = "double" >
+        <property name = "status" associatedField = "status" />
+        <property name = "severity" associatedField = "severity" />
+        <property name = "units" associatedField = "units" />
+        <property name = "displayLimit" associatedField = "displayLimit" />
+        <property name = "timeStamp" associatedField = ".." />
+    </field>
+    <field name = "currentInput" type = "structure" structureName = "aiLinear" />
+    <field name = "voltageInput" type = "structure" structureName = "aiLinear" />
+    <field name = "status" type = "string" />
+    <field name = "severity" type = "menu" menuName = "menuAlarmSevr" />
+    <field name = "units" type = "string" />
+    <field name = "displayLimit"
+         type = "structure" structureName = "displayLimit" />
+</structure>
+
+<recordType name = "powerSupplyRecord">
+    <property name = "power" associatedField = "powerSupply.power" />
+    <property name = "current" associatedField = "powerSupply.current" />
+    <property name = "voltage" associatedField = "powerSupply.voltage" />
+    <field name = "powerSupply"
+         type = "structure" structureName = "powerSupply" />
+    <field name = "status" type = "string" />
+    <field name = "severity" type = "menu" menuName = "menuAlarmSevr" />
+    <field name = "timeStamp" type = "structure" structureName = "timeStamp"/>
+    <field name = "priority" type = "menu" menuName = "menuPriority" />
+    <field name = "scan" type = "structure" structureName = "scan"/>
+</recordType>
+
+<recordType name = "powerSupplyArrayRecord">
+    <field name = "powerSupply" type = "array" elementType = "structure" />
+    <field name = "status" type = "string" />
+    <field name = "severity" type = "menu" menuName = "menuAlarmSevr" />
+    <field name = "timeStamp" type = "structure" structureName = "timeStamp"/>
+    <field name = "priority" type = "menu" menuName = "menuPriority" />
+    <field name = "scan" type = "structure" structureName = "scan"/>
+</recordType>
+
+
+</DBDefinition>

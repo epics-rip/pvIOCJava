@@ -3,14 +3,14 @@ package org.epics.ioc.dbAccess;
 import org.epics.ioc.dbDefinition.*;
 import org.epics.ioc.pvAccess.Field;
 import org.epics.ioc.pvAccess.Structure;
+import org.epics.ioc.pvAccess.*;
 
 /**
- * Abstract base class for a record instance
+ * Abstract base class for a record instance.
  * @author mrk
  *
  */
 public class AbstractDBRecord extends AbstractDBStructure implements DBRecord {
-
     /* (non-Javadoc)
      * @see org.epics.ioc.dbAccess.DBRecord#getRecordName()
      */
@@ -34,6 +34,8 @@ public class AbstractDBRecord extends AbstractDBStructure implements DBRecord {
         StringBuilder builder = new StringBuilder();
         newLine(builder,indentLevel);
         Structure structure = (Structure)this.getField();
+        DBData[] dbData = super.getFieldDBDatas();
+        PVData[] pvData = super.getFieldPVDatas();
         builder.append("record " + recordName + " recordType " + structure.getStructureName() + "{");
         for(int i=0, n= dbData.length; i < n; i++) {
             newLine(builder,indentLevel + 1);
@@ -71,15 +73,17 @@ public class AbstractDBRecord extends AbstractDBStructure implements DBRecord {
     
     /**
      * constructor that derived clases must call.
-     * @param recordName the name of the record
-     * @param dbdRecordType the introspection interface for the record
+     * @param recordName the name of the record.
+     * @param dbdRecordType the introspection interface for the record.
      */
-    AbstractDBRecord(String recordName,DBDRecordType dbdRecordType)
+    protected AbstractDBRecord(String recordName,DBDRecordType dbdRecordType)
     {
-        super(dbdRecordType,dbdRecordType.getDBDFields());
+        super(dbdRecordType);
         this.recordName = recordName;
-        
+        super.setRecord(this);
+        super.createFields(this);
     }
 
     private String recordName;
+    private static Convert convert = ConvertFactory.getConvert();
 }

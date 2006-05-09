@@ -7,7 +7,7 @@ import org.epics.ioc.dbDefinition.*;
 import org.epics.ioc.pvAccess.*;
 
 /**
- * Abstract base class for DBLink
+ * Abstract base class for DBLink.
  * @author mrk
  *
  */
@@ -80,16 +80,17 @@ public abstract class AbstractDBLink extends AbstractDBStructure implements DBLi
      * constructor that derived classes must call.
      * @param dbdLinkField the reflection interface for the DBLink data.
      */
-    AbstractDBLink(DBDLinkField dbdLinkField)
+    protected AbstractDBLink(DBStructure parent,DBDStructureField dbdLinkField)
     {
-        super(dbdLinkField);
-        assert(super.pvData.length==2);
-        PVData linkSupport = super.pvData[0];
+        super(parent,dbdLinkField);
+        PVData[] pvData = super.getFieldPVDatas();
+        assert(pvData.length==2);
+        PVData linkSupport = pvData[0];
         Field field = linkSupport.getField();
         assert(field.getType()==Type.pvString);
         assert(field.getName().equals("linkSupportName"));
         pvLinkSupportName = (PVString)linkSupport;
-        PVData config = super.pvData[1];
+        PVData config = pvData[1];
         field = config.getField();
         assert(field.getType()==Type.pvString);
         assert(field.getName().equals("configStructureName"));

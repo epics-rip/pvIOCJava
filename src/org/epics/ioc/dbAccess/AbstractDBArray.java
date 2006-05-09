@@ -1,12 +1,11 @@
 package org.epics.ioc.dbAccess;
 
-import org.epics.ioc.pvAccess.*;
 import org.epics.ioc.dbDefinition.*;
 
 
 /**
  * Abstract class for implementing support for Array data.
- * Most implementation of array fields can derive from this class.
+ * Implementations of array fields should derive from this class.
  * @author mrk
  *
  */
@@ -17,7 +16,7 @@ public abstract class AbstractDBArray extends AbstractDBData implements DBArray{
      * @see org.epics.ioc.pvAccess.PVArray#isCapacityMutable()
      */
     public boolean isCapacityMutable() {
-        return dbdField.isMutable();
+        return super.getDBDField().isMutable();
     }
 
     /* (non-Javadoc)
@@ -42,11 +41,12 @@ public abstract class AbstractDBArray extends AbstractDBData implements DBArray{
 
     
     /**
-     * constructer that derived classes must call
+     * constructer that derived classes must call.
+     * @param parent the parent interface.
      * @param dbdArrayField the reflection interface for the DBArray data.
      */
-    protected AbstractDBArray(DBDArrayField dbdArrayField) {
-        super(dbdArrayField);
+    protected AbstractDBArray(DBStructure parent,DBDArrayField dbdArrayField) {
+        super(parent,dbdArrayField);
     }
     
 }

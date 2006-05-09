@@ -7,7 +7,7 @@ import org.epics.ioc.dbDefinition.*;
 import org.epics.ioc.pvAccess.*;
 
 /**
- * Abstract base class for DBMenu
+ * Abstract base class for DBMenu.
  * @author mrk
  *
  */
@@ -75,43 +75,19 @@ public abstract class AbstractDBMenu extends AbstractDBData implements DBMenu
     
     /**
      * constructor that derived classes must call.
+     * @param parent the parent interface.
      * @param dbdMenuField the reflection interface for the DBMenu data. 
      */
-    public AbstractDBMenu(DBDMenuField dbdMenuField) {
-        super(dbdMenuField);
+    protected AbstractDBMenu(DBStructure parent,DBDMenuField dbdMenuField) {
+        super(parent,dbdMenuField);
         index = 0;
-        DBDMenu dbdMenu = dbdField.getAttribute().getMenu();
+        DBDMenu dbdMenu = super.getDBDField().getAttribute().getMenu();
         this.choice = dbdMenu.getChoices();
         this.menuName = dbdMenu.getName();
     }
     
-    /**
-     * 
-     */
-    protected int index;
-    /**
-     * 
-     */
-    protected String[]choice;
-    /**
-     * 
-     */
-    protected String menuName;
-    /**
-     * 
-     */
-    protected static Convert convert = ConvertFactory.getConvert();
-    /**
-     * @param builder
-     * @param indentLevel
-     */
-    protected static void newLine(StringBuilder builder, int indentLevel) {
-        builder.append("\n");
-        for (int i=0; i <indentLevel; i++) builder.append(indentString);
-    }
-    /**
-     * 
-     */
-    protected static String indentString = "    ";
-
+    private int index;
+    private String[]choice;
+    private String menuName;
+    private static Convert convert = ConvertFactory.getConvert();
 }

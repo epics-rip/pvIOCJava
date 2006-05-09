@@ -25,11 +25,17 @@ public interface IOCDB {
      */
     DBD getDBD();
     /**
-     * get the interface for a record instance.
+     * find the interface for a record instance.
      * @param recordName the instance name.
-     * @return the interface.
+     * @return the interface on null if the record is not located.
      */
-    DBRecord getRecord(String recordName);
+    DBRecord findRecord(String recordName);
+    /**
+     * Provide access to a record and it's fields.
+     * @param recordName the record instance name.
+     * @return the access interface.
+     */
+    DBAccess createAccess(String recordName);
     /**
      * create a new record instance.
      * @param recordName the instance name.
@@ -41,5 +47,5 @@ public interface IOCDB {
      * get the complete set of record instances.
      * @return the collection.
      */
-    Collection<DBRecord> getRecordList();
+    Map<String,DBRecord> getRecordMap();
 }

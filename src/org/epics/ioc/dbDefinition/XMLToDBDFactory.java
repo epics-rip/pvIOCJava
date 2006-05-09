@@ -44,14 +44,22 @@ public class XMLToDBDFactory {
                 "\n   XMLToDBDFactory.convert terminating with SAXException\n   "
                 + e.getMessage());
         } catch (IOException e) {
+            handler.error("IOException " + e.getMessage());
             throw new IllegalStateException (
                 "\n   XMLToDBDFactory.convert terminating with IOException\n   "
                 + e.getMessage());
         } catch (IllegalStateException e) {
+            handler.error("IllegalStateException " + e.getMessage());
             throw new IllegalStateException(
                 "\n   XMLToDBDFactory.convert terminating with IllegalStateException\n   "
                 + e.getMessage());
+        } catch (IllegalArgumentException e) {
+            handler.error("IllegalArgumentException " + e.getMessage());
+            throw new IllegalStateException(
+                "\n   XMLToDBDFactory.convert terminating with IllegalArgumentException\n   "
+                + e.getMessage());
         } catch (Exception e) {
+            handler.error("Exception " + e.getMessage());
             throw new IllegalStateException(
                 "\n   XMLToDBDFactory.convert terminating with Exception\n   "
                 + e.getMessage());
@@ -60,6 +68,13 @@ public class XMLToDBDFactory {
 
     private static class Handler  implements ContentHandler, ErrorHandler {
         
+        public void error(String message) {
+            System.err.printf("line %d column %d\nreason %s\n",
+                locator.getLineNumber(),
+                locator.getColumnNumber(),
+                message);
+            nError++;
+        }
         public void warning(SAXParseException e) throws SAXException {
             System.err.printf("warning %s\n",printSAXParseExceptionMessage(e));
             nWarning++;
@@ -88,9 +103,8 @@ public class XMLToDBDFactory {
         
         public void endDocument() throws SAXException {
             if(nWarning>0 || nError>0 || nFatal>0) {
-                throw new IllegalStateException(
-                    String.format("endDocument: warning %d severe %d fatal %d\n",
-                    nWarning,nError,nFatal));
+                System.err.printf("endDocument: warning %d severe %d fatal %d\n",
+                    nWarning,nError,nFatal);
             }
         }       
 
@@ -567,6 +581,13 @@ public class XMLToDBDFactory {
             for(int i=0; i<property.length; i++) {
                  property[i] = iter.next();
             } 
+            if(property.length==0) {
+                if(dbdAttribute.getType()==Type.pvStructure) {
+                    DBDStructure fieldStructure = dbdAttribute.getStructure();
+                    property = fieldStructure.getPropertys();
+                    
+                }
+            }
             DBDField dbdField = DBDCreateFactory.createField(dbdAttribute,property);
             dbdFieldList.add(dbdField);
             dbdAttribute = null;
