@@ -26,4 +26,18 @@ public interface DBData extends PVData {
      * @return the record interface.
      */
     DBRecord getRecord();
+    /**
+     * add a listener for modifications.
+     * @param listener
+     */
+    void addListener(DBListener listener);
+    /**
+     * the data was modified.
+     */
+    void postPut();
+    /**
+     * the data was modified.
+     * @param dbData the data that was modified.
+     */
+    void postPut(DBData dbData);
 }

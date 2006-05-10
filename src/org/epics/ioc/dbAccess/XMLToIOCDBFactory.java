@@ -148,7 +148,9 @@ public class XMLToIOCDBFactory {
             return null;
         }
 
-        public StructureDBDAttributeValues(String structureName,String fieldName) {
+        public StructureDBDAttributeValues(String structureName,
+            String fieldName)
+        {
             this.structureName = structureName;
             this.fieldName = fieldName;
         }
@@ -238,16 +240,19 @@ public class XMLToIOCDBFactory {
                 nError++;
         }
         public void warning(SAXParseException e) throws SAXException {
-            System.err.printf("warning %s\n",printSAXParseExceptionMessage(e));
+            System.err.printf("warning %s\n",
+                printSAXParseExceptionMessage(e));
             nWarning++;
         }
         public void error(SAXParseException e) throws SAXException {
-            System.err.printf("error %s\n",printSAXParseExceptionMessage(e));
+            System.err.printf("error %s\n",
+                printSAXParseExceptionMessage(e));
             nError++;
         }
         
         public void fatalError(SAXParseException e) throws SAXException {
-            System.err.printf("fatal error %s\n",printSAXParseExceptionMessage(e));
+            System.err.printf("fatal error %s\n",
+                printSAXParseExceptionMessage(e));
             nFatal++;
         }
         

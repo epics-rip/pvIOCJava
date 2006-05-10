@@ -150,7 +150,11 @@ public class FieldDataFactory {
         }
 
         public void put(boolean value) {
-            if(super.getField().isMutable()) { this.value = value; return ;}
+            if(getField().isMutable()) {
+                this.value = value;
+                postPut();
+                return ;
+            }
             throw new IllegalStateException("PVData.isMutable is false");
         }
         
@@ -178,7 +182,11 @@ public class FieldDataFactory {
         }
 
         public void put(byte value) {
-            if(super.getField().isMutable()) { this.value = value; return; }
+            if(getField().isMutable()) {
+                this.value = value;
+                postPut();
+                return ;
+            }
             throw new IllegalStateException("PVData.isMutable is false");
         }
         
@@ -206,7 +214,11 @@ public class FieldDataFactory {
         }
 
         public void put(short value) {
-            if(super.getField().isMutable()) { this.value = value; return; }
+            if(getField().isMutable()) {
+                this.value = value;
+                postPut();
+                return ;
+            }
             throw new IllegalStateException("PVData.isMutable is false");
         }
         
@@ -234,7 +246,11 @@ public class FieldDataFactory {
         }
 
         public void put(int value) {
-            if(super.getField().isMutable()) { this.value = value; return; }
+            if(getField().isMutable()) {
+                this.value = value;
+                postPut();
+                return ;
+            }
             throw new IllegalStateException("PVData.isMutable is false");
         }
         
@@ -262,7 +278,11 @@ public class FieldDataFactory {
         }
 
         public void put(long value) {
-            if(super.getField().isMutable()) { this.value = value; return; }
+            if(getField().isMutable()) {
+                this.value = value;
+                postPut();
+                return ;
+            }
             throw new IllegalStateException("PVData.isMutable is false");
         }
         
@@ -290,7 +310,11 @@ public class FieldDataFactory {
         }
 
         public void put(float value) {
-            if(super.getField().isMutable()) { this.value = value; return; }
+            if(getField().isMutable()) {
+                this.value = value;
+                postPut();
+                return ;
+            }
             throw new IllegalStateException("PVData.isMutable is false");
         }
         
@@ -318,7 +342,11 @@ public class FieldDataFactory {
         }
 
         public void put(double value) {
-            if(super.getField().isMutable()) { this.value = value; return; }
+            if(getField().isMutable()) {
+                this.value = value;
+                postPut();
+                return ;
+            }
             throw new IllegalStateException("PVData.isMutable is false");
         }
         
@@ -346,7 +374,11 @@ public class FieldDataFactory {
         }
 
         public void put(String value) {
-            if(super.getField().isMutable()) { this.value = value; return; }
+            if(getField().isMutable()) {
+                this.value = value;
+                postPut();
+                return ;
+            }
             throw new IllegalStateException("PVData.isMutable is false");
         }
         
@@ -436,6 +468,7 @@ public class FieldDataFactory {
                 length = newlength;
            }
            System.arraycopy(from,fromOffset,value,offset,len);
+           postPut();
            return len;
         }
         
@@ -510,6 +543,7 @@ public class FieldDataFactory {
                 length = newlength;
            }
            System.arraycopy(from,fromOffset,value,offset,len);
+           postPut();
            return len;
         }
         
@@ -584,6 +618,7 @@ public class FieldDataFactory {
                 length = newlength;
            }
            System.arraycopy(from,fromOffset,value,offset,len);
+           postPut();
            return len;
         }
         
@@ -658,6 +693,7 @@ public class FieldDataFactory {
                 length = newlength;
            }
            System.arraycopy(from,fromOffset,value,offset,len);
+           postPut();
            return len;
         }
         
@@ -732,6 +768,7 @@ public class FieldDataFactory {
                 length = newlength;
            }
            System.arraycopy(from,fromOffset,value,offset,len);
+           postPut();
            return len;
         }
         
@@ -806,6 +843,7 @@ public class FieldDataFactory {
                 length = newlength;
            }
            System.arraycopy(from,fromOffset,value,offset,len);
+           postPut();
            return len;
         }
         
@@ -880,6 +918,7 @@ public class FieldDataFactory {
                 length = newlength;
            }
            System.arraycopy(from,fromOffset,value,offset,len);
+           postPut();
            return len;
         }
         
@@ -954,6 +993,7 @@ public class FieldDataFactory {
                 length = newlength;
            }
            System.arraycopy(from,fromOffset,value,offset,len);
+           postPut();
            return len;
         }
         
@@ -1028,6 +1068,7 @@ public class FieldDataFactory {
                 length = newlength;
            }
            System.arraycopy(from,fromOffset,value,offset,len);
+           postPut();
            return len;
         }
         
@@ -1119,6 +1160,7 @@ public class FieldDataFactory {
                 length = newlength;
            }
            System.arraycopy(from,fromOffset,value,offset,len);
+           postPut();
            return len;
         }
         
@@ -1181,6 +1223,7 @@ public class FieldDataFactory {
                 length = newlength;
            }
            System.arraycopy(from,fromOffset,value,offset,len);
+           postPut();
            return len;
         }
 
@@ -1228,6 +1271,7 @@ public class FieldDataFactory {
                 length = newlength;
            }
            System.arraycopy(from,fromOffset,value,offset,len);
+           postPut();
            return len;
         }
         
@@ -1291,6 +1335,7 @@ public class FieldDataFactory {
                 length = newlength;
            }
            System.arraycopy(from,fromOffset,value,offset,len);
+           postPut();
            return len;
         }
 
@@ -1339,6 +1384,7 @@ public class FieldDataFactory {
                 length = newlength;
            }
            System.arraycopy(from,fromOffset,value,offset,len);
+           postPut();
            return len;
         }
         
@@ -1402,6 +1448,7 @@ public class FieldDataFactory {
                 length = newlength;
            }
            System.arraycopy(from,fromOffset,value,offset,len);
+           postPut();
            return len;
         }
 
@@ -1451,6 +1498,7 @@ public class FieldDataFactory {
                 length = newlength;
            }
            System.arraycopy(from,fromOffset,value,offset,len);
+           postPut();
            return len;
         }
         

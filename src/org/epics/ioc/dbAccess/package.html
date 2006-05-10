@@ -12,7 +12,7 @@
 
 <h1 style="text-align: center">EPICS JavaIoc: Database Access <br />
 package: org/epics/ioc/dbAcess <br />
-2006.05.01</h1>
+2006.05.10</h1>
 <hr />
 <a href="#Overview">Overview</a> <br />
 <a href="#Instance">Record Instance Syntax</a>
@@ -31,6 +31,7 @@ package: org/epics/ioc/dbAcess <br />
 </ul>
 <a href="#RecordInstanceAccess">Record Instance Access</a>
 <ul>
+  <li><a href="#DBListener">Listener Interface</a></li>
   <li><a href="#DBData">Base Interface for accesssing data</a></li>
   <li><a href="#DBPVData">Scalar and String Data</a></li>
   <li><a href="#EnumData">Enumerated Data</a></li>
@@ -54,6 +55,7 @@ package: org/epics/ioc/dbAcess <br />
 <a href="#IOCDB">IOCDB: IOC Database</a><br />
 <a href="#XMLToDB">XML to Database Converter</a><br />
 <a href="#DatabaseAccess">IOC Database Access</a><br />
+
 <hr />
 
 <h1 style="text-align: center"><a id="Overview"></a>Overview</h1>
@@ -278,13 +280,21 @@ A link field is initialized as follows:
 </dl>
 <hr />
 
-<h1 style="text-align: center"><a id="RecordInstanceAccess"></a>Record Instance
-Access</h1>
+<h1 style="text-align: center"><a id="RecordInstanceAccess"></a>Record
+Instance Access</h1>
 <hr />
 
 <p>This section describes interfaces for acessing fields of record instances.
 These interfaces are of interest to the database, record support, link
 support, Channel Access, etc.</p>
+
+<h2><a id="DBListener"></a>Listener Interface</h2>
+
+<p>DBListener is an interace that must be implemented by code that calls
+PVdata.addListener.</p>
+<pre>    public interface DBListener {
+        void newData(DBData dbData);
+    }</pre>
 
 <h2><a id="DBData"></a>Base Interface for accessing data</h2>
 
@@ -294,6 +304,9 @@ instance.</p>
         DBDField getDBDField();
         DBStructure getParent();
         DBRecord getRecord();
+        void addListener(DBListener listener);
+        void postPut();
+        void postPut(DBData dbData);
     }</pre>
 
 <p>Since it extends PVData it has the methods:</p>
@@ -442,6 +455,9 @@ database fields.</p>
         public DBDField getDBDField();
         public Field getField();
         public DBStructure getParent();
+        public final void addListener(DBListener listener);
+        public final void postPut();
+        public final void postPut(DBData dbData);
         public static void newLine(StringBuilder builder, int indentLevel);
         protected void setRecord(DBRecord record);
         protected AbstractDBData(DBStructure parent, DBDField dbdField);
@@ -631,27 +647,25 @@ used to implement a circular buffer as follows:</p>
     }</pre>
 <hr />
 
-<h1 style="text-align: center"><a id="IOCDB"></a>
-IOCDB: IOC Database</h1>
+<h1 style="text-align: center"><a id="IOCDB"></a> IOCDB: IOC Database</h1>
 <hr />
+
 <p>An IOCDB is a database for a java IOC.</p>
-<pre>
-    public interface IOCDB {
+<pre>    public interface IOCDB {
         String getName();
         DBD getDBD();
         DBRecord findRecord(String recordName);
         DBAccess createAccess(String recordName);
         boolean createRecord(String recordName, DBDRecordType dbdRecordType);
-        Map<String,DBRecord> getRecordMap();
+        Map&lt;String,DBRecord&gt; getRecordMap();
     }
     
     public class IOCDBFactory {
         public static IOCDB create(DBD dbd, String name);
         public static IOCDB find(String name);
-        public static Collection<IOCDB> getIOCDBList();
+        public static Collection&lt;IOCDB&gt; getIOCDBList();
         public static void remove(IOCDB iocdb);
-    }
-</pre<
+    }</pre>
 <hr />
 
 <h1 style="text-align: center"><a id="XMLToDB"></a>XML to Database
@@ -669,18 +683,15 @@ invoked from a shell via the command:</p>
 <pre>     java XMLToDB dbdFile dbInstanceFile</pre>
 <hr />
 
-<h1 style="text-align: center"><a id="DatabaseAccess"></a>IOC Database Access
-</h1>
+<h1 style="text-align: center"><a id="DatabaseAccess"></a>IOC Database
+Access</h1>
 <hr />
-<p>
-<pre>
-    public interface DBAccess {
+<pre>    public interface DBAccess {
         DBRecord getDbRecord();
         boolean setField(String name);
         void setField(DBData dbData);
         DBData getField();
         DBData getPropertyField(Property property);
-    }
-</pre>
+    }</pre>
 </body>
 </html>

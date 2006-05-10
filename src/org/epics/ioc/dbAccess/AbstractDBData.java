@@ -2,6 +2,7 @@ package org.epics.ioc.dbAccess;
 
 import org.epics.ioc.pvAccess.*;
 import org.epics.ioc.dbDefinition.*;
+import java.util.*;
 
 /**
  * Abstract class for implementing Scalar DB fields.
@@ -10,6 +11,32 @@ import org.epics.ioc.dbDefinition.*;
  *
  */
 public abstract class AbstractDBData implements DBData{
+    /* (non-Javadoc)
+     * @see org.epics.ioc.dbAccess.DBData#addListener(org.epics.ioc.dbAccess.DBListener)
+     */
+    public final void addListener(DBListener listener) {
+        listenerList.add(listener);
+        
+    }
+    /* (non-Javadoc)
+     * @see org.epics.ioc.dbAccess.DBData#postPut()
+     */
+    public final void postPut() {
+        postPut(this);
+    }
+    /* (non-Javadoc)
+     * @see org.epics.ioc.dbAccess.DBData#postPut()
+     */
+    public final void postPut(DBData dbData) {
+        ListIterator<DBListener> iter = listenerList.listIterator();
+        while(iter.hasNext()) iter.next().newData(dbData);
+        if(parent==null) return;
+        if(parent==this) {
+            System.out.printf("postPut parent = this Why???\n");
+        } else {
+            parent.postPut(dbData);
+        }
+    }
     /* (non-Javadoc)
      * @see org.epics.ioc.dbAccess.DBData#getRecord()
      */
@@ -70,10 +97,12 @@ public abstract class AbstractDBData implements DBData{
         } else {
             record = null;
         }
+        listenerList = new LinkedList<DBListener>();
     }
     
     private DBDField dbdField;
     private DBStructure parent;
     private DBRecord record;
+    private LinkedList<DBListener> listenerList;
 
 }
