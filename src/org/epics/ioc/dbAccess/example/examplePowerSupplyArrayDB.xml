@@ -1,0 +1,96 @@
+<?xml version="1.0" ?>
+<IOCDatabase>
+
+<record name = "examplePowerSupplyArray" type = "powerSupplyArrayRecord">
+    <powerSupply capacity = "2">
+        <value     structureName = "powerSupply">
+            <units>watts</units>
+            <displayLimit>
+                <low>0.0</low>
+                <high>100.0</high>
+            </displayLimit>
+            <currentInput>
+                <aiRaw>
+                    <input linkSupportName = "inputLink"
+                    configStructureName = "inputLink">
+                        <pvname>xxxxxx</pvname>
+                        <wait>true</wait>
+                    </input>
+                </aiRaw>
+                <units>amps</units>
+                <displayLimit>
+                    <low>0.0</low>
+                    <high>10.0</high>
+                </displayLimit>
+                <linearConvert>
+                    <engUnitsLow>0.0</engUnitsLow>
+                    <engUnitsHigh>10.0</engUnitsHigh>
+                </linearConvert>
+            </currentInput>
+            <voltageInput>
+                <aiRaw>
+                    <input linkSupportName = "inputLink"
+                    configStructureName = "inputLink">
+                        <pvname>xxxxxx</pvname>
+                        <wait>true</wait>
+                    </input>
+                </aiRaw>
+                <units>volts</units>
+                <displayLimit>
+                    <low>0.0</low>
+                    <high>2.0</high>
+                </displayLimit>
+                <linearConvert>
+                    <engUnitsLow>0.0</engUnitsLow>
+                    <engUnitsHigh>2.0</engUnitsHigh>
+                </linearConvert>
+            </voltageInput>
+        </value>
+        <value     structureName = "powerSupply">
+            <units>watts</units>
+            <displayLimit>
+                <low>0.0</low>
+                <high>1000.0</high>
+            </displayLimit>
+            <currentInput>
+                <aiRaw>
+                    <input linkSupportName = "inputLink"
+                    configStructureName = "inputLink">
+                        <pvname>xxxxxx</pvname>
+                        <wait>true</wait>
+                    </input>
+                </aiRaw>
+                <units>amps</units>
+                <displayLimit>
+                    <low>0.0</low>
+                    <high>10.0</high>
+                </displayLimit>
+                <linearConvert>
+                    <engUnitsLow>0.0</engUnitsLow>
+                    <engUnitsHigh>10.0</engUnitsHigh>
+                </linearConvert>
+            </currentInput>
+            <voltageInput>
+                <aiRaw>
+                    <input linkSupportName = "inputLink"
+                    configStructureName = "inputLink">
+                        <pvname>xxxxxx</pvname>
+                        <wait>true</wait>
+                    </input>
+                </aiRaw>
+                <units>volts</units>
+                <displayLimit>
+                    <low>0.0</low>
+                    <high>100.0</high>
+                </displayLimit>
+                <linearConvert>
+                    <engUnitsLow>0.0</engUnitsLow>
+                    <engUnitsHigh>100.0</engUnitsHigh>
+                </linearConvert>
+            </voltageInput>
+        </value>
+    </powerSupply>
+    <priority>low</priority>
+</record>
+
+</IOCDatabase>

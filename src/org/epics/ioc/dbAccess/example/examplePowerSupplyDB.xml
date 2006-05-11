@@ -1,0 +1,51 @@
+<?xml version="1.0" ?>
+<IOCDatabase>
+
+<record name = "examplePowerSupply" type = "powerSupplyRecord">
+    <powerSupply>
+        <units>watts</units>
+        <displayLimit>
+            <low>0.0</low>
+            <high>100.0</high>
+        </displayLimit>
+        <currentInput>
+            <aiRaw>
+                <input linkSupportName = "inputLink"
+                configStructureName = "inputLink">
+                    <pvname>xxxxxx</pvname>
+                    <wait>true</wait>
+                </input>
+            </aiRaw>
+            <units>amps</units>
+            <displayLimit>
+                <low>0.0</low>
+                <high>10.0</high>
+            </displayLimit>
+            <linearConvert>
+                <engUnitsLow>0.0</engUnitsLow>
+                <engUnitsHigh>10.0</engUnitsHigh>
+            </linearConvert>
+        </currentInput>
+        <voltageInput>
+            <aiRaw>
+                <input linkSupportName = "inputLink"
+                configStructureName = "inputLink">
+                    <pvname>yyyyyyy</pvname>
+                    <wait>true</wait>
+                </input>
+            </aiRaw>
+            <units>volts</units>
+            <displayLimit>
+                <low>0.0</low>
+                <high>2.0</high>
+            </displayLimit>
+            <linearConvert>
+                <engUnitsLow>0.0</engUnitsLow>
+                <engUnitsHigh>2.0</engUnitsHigh>
+            </linearConvert>
+        </voltageInput>
+    </powerSupply>
+    <priority>medium</priority>
+</record>
+
+</IOCDatabase>

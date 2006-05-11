@@ -41,27 +41,26 @@ public class XMLToDBDFactory {
             reader.parse(uri);
         } catch (SAXException e) {
             throw new IllegalStateException(
-                "\n   XMLToDBDFactory.convert terminating with SAXException\n   "
+                "\nXMLToDBDFactory.convert terminating with SAXException\n"
                 + e.getMessage());
         } catch (IOException e) {
-            handler.error("IOException " + e.getMessage());
-            throw new IllegalStateException (
-                "\n   XMLToDBDFactory.convert terminating with IOException\n   "
+            throw new IllegalStateException(
+                "\nXMLToDBDFactory.convert terminating with IOException\n"
                 + e.getMessage());
         } catch (IllegalStateException e) {
             handler.error("IllegalStateException " + e.getMessage());
             throw new IllegalStateException(
-                "\n   XMLToDBDFactory.convert terminating with IllegalStateException\n   "
+                "\nXMLToDBDFactory.convert terminating with IllegalStateException\n"
                 + e.getMessage());
         } catch (IllegalArgumentException e) {
             handler.error("IllegalArgumentException " + e.getMessage());
             throw new IllegalStateException(
-                "\n   XMLToDBDFactory.convert terminating with IllegalArgumentException\n   "
+                "\nXMLToDBDFactory.convert terminating with IllegalArgumentException\n"
                 + e.getMessage());
         } catch (Exception e) {
             handler.error("Exception " + e.getMessage());
             throw new IllegalStateException(
-                "\n   XMLToDBDFactory.convert terminating with Exception\n   "
+                "\nXMLToDBDFactory.convert terminating with Exception\n"
                 + e.getMessage());
         }
     }
@@ -655,8 +654,8 @@ public class XMLToDBDFactory {
                     return;
             }
             if(!dbd.addLinkSupport(linkSupport)) {
-                errorHandler.error(new SAXParseException(
-                    "failed to add link support " + qName + " to list",
+                errorHandler.warning(new SAXParseException(
+                    "link support " + qName + " already exists",
                     locator));
                 return;
             }

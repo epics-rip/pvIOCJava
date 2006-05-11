@@ -48,7 +48,7 @@ public interface DBAccess {
      */
     DBData getField();
     /**
-     * get the field interface for the specified property name.
+     * get the field data interface for the specified property name.
      * @param property the property.
      * It must be a property associated with the field related to the last setField.
      * If setField was not called or was a reset call then the property name must be a property
@@ -56,4 +56,10 @@ public interface DBAccess {
      * @return the field interface or null if the property or field does not exist.
      */
     DBData getPropertyField(Property property);
+    /**
+     * replace the data implementation for a field.
+     * @param oldField the interface for the old implementation.
+     * @param newField the new implementation.
+     */
+    void replaceField(DBData oldField, DBData newField);
 }

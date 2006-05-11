@@ -1,0 +1,20 @@
+<?xml version="1.0" ?>
+<IOCDatabase>
+<record name = "exampleAnalog" type = "analog">
+    <value>10.0</value>
+    <units>volts</units>
+    <displayLimit>
+        <low>0.0</low>
+        <high>10.0</high>
+    </displayLimit>
+    <input linkSupportName = "processLink" configStructureName = "processLink">
+        <pvname>xxxxxx</pvname>
+        <wait>true</wait>
+    </input>
+    <linearConvert>
+        <engUnitsLow>0.0</engUnitsLow>
+        <engUnitsHigh>10.0</engUnitsHigh>
+    </linearConvert>
+</record>
+
+</IOCDatabase>

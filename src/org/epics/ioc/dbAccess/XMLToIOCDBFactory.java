@@ -45,31 +45,30 @@ public class XMLToIOCDBFactory {
             reader.parse(uri);
         } catch(MalformedURLException e) {
             throw new MalformedURLException (
-            "\n   XMLToIOCDBFactory.convert terminating with MalformedURLException\n   "
+            "\nXMLToIOCDBFactory.convert terminating with MalformedURLException\n"
             + e.getMessage());
         } catch (SAXException e) {
             throw new IllegalStateException(
-                "\n   XMLToIOCDBFactory.convert terminating with SAXException\n   "
+                "\nXMLToIOCDBFactory.convert terminating with SAXException\n"
                 + e.getMessage());
         } catch (IOException e) {
-            handler.error("IOException " + e.getMessage());
             throw new IllegalStateException (
-                "\n   XMLToIOCDBFactory.convert terminating with IOException\n   "
+                "\nXMLToIOCDBFactory.convert terminating with IOException\n"
                 + e.getMessage());
         } catch (IllegalStateException e) {
             handler.error("IllegalStateException " + e.getMessage());
             throw new IllegalStateException(
-                "\n   XMLToDBDFactory.convert terminating with IllegalStateException\n   "
+                "\nXMLToDBDFactory.convert terminating with IllegalStateException\n"
                 + e.getMessage());
         } catch (IllegalArgumentException e) {
             handler.error("IllegalArgumentException " + e.getMessage());
             throw new IllegalStateException(
-                "\n   XMLToDBDFactory.convert terminating with IllegalArgumentException\n   "
+                "\nXMLToDBDFactory.convert terminating with IllegalArgumentException\n"
                 + e.getMessage());
         } catch (Exception e) {
             handler.error("Exception " + e.getMessage());
             throw new IllegalStateException(
-                "\n   XMLToDBDFactory.convert terminating with Exception\n   "
+                "\nXMLToDBDFactory.convert terminating with Exception\n"
                 + e.getMessage());
         }
     }

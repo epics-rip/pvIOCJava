@@ -64,6 +64,24 @@ public class IOCDBFactory {
     }
     
     private static class DBAccessInstance implements DBAccess {
+        public void replaceField(DBData oldField, DBData newField) {
+            if(oldField.getField().getType()!=newField.getField().getType()) {
+                throw new IllegalArgumentException("newField is not same type as oldField");
+            }
+            if(oldField.getDBDField().getDBType()!=newField.getDBDField().getDBType()) {
+                throw new IllegalArgumentException("newField is not same DBtype as oldField");
+            }
+            DBStructure parent = oldField.getParent();
+            if(parent==null) throw new IllegalArgumentException("no parent");
+            DBData[] fields = parent.getFieldDBDatas();
+            for(int i=0; i<fields.length; i++) {
+                if(fields[i]==oldField) {
+                    fields[i] = newField;
+                    return;
+                }
+            }
+            throw new IllegalArgumentException("oldField not found in parent");
+        }
         public DBRecord getDbRecord() {
             return dbRecord;
         }

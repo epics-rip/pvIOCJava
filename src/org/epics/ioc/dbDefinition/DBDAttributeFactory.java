@@ -133,7 +133,7 @@ public class DBDAttributeFactory {
                     this.type = types.type;
                     if(type==Type.pvUnknown)
                         throw new IllegalStateException(
-                            "not a valid type");
+                            value + " not a valid type");
                     dbType = types.dbType;
                     if(dbType==DBType.dbLink) {
                         dbdStructure = dbd.getStructure("link");
@@ -165,10 +165,16 @@ public class DBDAttributeFactory {
                 }
                 if(name.equals("menuName")) {
                     dbdMenu = dbd.getMenu(value);
+                    if(dbdMenu==null)
+                        throw new IllegalStateException(
+                            "menuName " + value + " not in database");
                     continue;
                 }
                 if(name.equals("structureName")) {
                     dbdStructure = dbd.getStructure(value);
+                    if(dbdStructure==null)
+                        throw new IllegalStateException(
+                            "structureName " + value + " not in database");
                     continue;
                 }
                 if(name.equals("elementType")) {
@@ -189,13 +195,19 @@ public class DBDAttributeFactory {
                     "type incorrectly specified");
             if(dbType==DBType.dbMenu && dbdMenu==null)
                 throw new IllegalStateException(
-                    "menuName not specified or not in database");
+                    "menuName not specified");
             if(dbType==DBType.dbStructure && dbdStructure==null)
                 throw new IllegalStateException(
-                    "structureName not specified or not in database");
+                    "structureName not specified");
             if(dbType==DBType.dbArray && elementType==Type.pvUnknown)
                 throw new IllegalStateException(
                     "elementType not specified");
+            if(defaultValue!=null) {
+                if(!(type.isScalar()||(type==Type.pvArray && elementType.isScalar()))) {
+                    throw new IllegalStateException(
+                    "default value is only legal for scalar or array with scalar elements");
+                }
+            }
         }
         
         private int asl = 1;

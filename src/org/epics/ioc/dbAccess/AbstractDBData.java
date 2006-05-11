@@ -11,12 +11,14 @@ import java.util.*;
  *
  */
 public abstract class AbstractDBData implements DBData{
+    public void removeListener(DBListener listener) {
+        listenerList.remove(listener);
+    }
     /* (non-Javadoc)
      * @see org.epics.ioc.dbAccess.DBData#addListener(org.epics.ioc.dbAccess.DBListener)
      */
     public final void addListener(DBListener listener) {
         listenerList.add(listener);
-        
     }
     /* (non-Javadoc)
      * @see org.epics.ioc.dbAccess.DBData#postPut()

@@ -1,0 +1,25 @@
+<?xml version="1.0" ?>
+<IOCDatabase>
+<record name = "exampleAiLinear" type = "aiLinearRecord">
+    <aiLinear>
+        <aiRaw>
+            <input linkSupportName = "inputLink" configStructureName = "inputLink">
+                <pvname>xxxxxx</pvname>
+                <wait>true</wait>
+            </input>
+        </aiRaw>
+        <units>volts</units>
+        <displayLimit>
+            <low>0.0</low>
+            <high>10.0</high>
+        </displayLimit>
+        <linearConvert>
+            <engUnitsLow>0.0</engUnitsLow>
+            <engUnitsHigh>10.0</engUnitsHigh>
+        </linearConvert>
+    </aiLinear>
+    <priority>medium</priority>
+</record>
+
+
+</IOCDatabase>
