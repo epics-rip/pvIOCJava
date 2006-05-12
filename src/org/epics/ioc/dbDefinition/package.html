@@ -12,7 +12,7 @@
 
 <h1 style="text-align: center">EPICS JavaIoc: Database Definition <br />
 package: org/epics/ioc/dbDefinition<br />
-2006.05.01</h1>
+2006.05.12</h1>
 <hr />
 <a href="#Overview">Overview</a> <br />
 <a href="#Syntax">Database Definition Syntax</a>
@@ -338,12 +338,29 @@ where
   <dt>name</dt>
     <dd>The name of the property</dd>
   <dt>associatedField</dt>
-    <dd>The name of a field that has the value for the property. If a
-      recordType defines a property, the associatedField must appear in that
-      recordType. If a structure defines a property, the associatedField must
-      appear in that structure. If a property is defined in a field, the
-      associatedField must appear in the structure or recordType that holds
-      the field.</dd>
+    <dd>The name of a field that has the value for the property. It can have
+      one of the following forms:
+      <dl>
+        <dt>..</dt>
+          <dd>A search is made up the structure hierarchy for a field name
+            that is the same as the property name. If the property is
+            attached to a field then the search starts with the parent of the
+            structure containing the structure. If the property is attached
+            to a structure, the search starts with the parent of the
+            structure itself. This is not valid for a property attached to a
+            recordType.</dd>
+        <dt>name</dt>
+          <dd>If attached to a structure or recordType the associated field
+            must be a field in that structure or recordType. If attached to a
+            field it must be a field or a property in the structure that
+            holds the field.</dd>
+        <dt>name1.name2</dt>
+          <dd>Only valid for a property attached to a structure or
+            recordType. name1 must be the name of a structure field in the
+            structure to which the property is attached. name2 must be a
+            property of field in the structure field.</dd>
+      </dl>
+    </dd>
 </dl>
 
 <p>For example:</p>
@@ -587,9 +604,7 @@ interest to the database itself.</p>
 
     interface DBDArrayField extends DBDField, Array {}
     
-    interface DBDLinkField extends DBDStructureField { }
-
-</pre>
+    interface DBDLinkField extends DBDStructureField { }</pre>
 
 <p>In addition an abstract class is available for creating implementations of
 the field reflection interfaces. This class is used by DBDCreateFactory and

@@ -4,6 +4,7 @@
 package org.epics.ioc.dbAccess.example;
 
 import junit.framework.TestCase;
+
 import org.epics.ioc.dbDefinition.*;
 import org.epics.ioc.dbAccess.*;
 

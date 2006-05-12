@@ -1,6 +1,19 @@
-package org.epics.ioc.dbDefinition;
+package org.epics.ioc;
 import java.util.*;
 
+import org.epics.ioc.dbDefinition.DBD;
+import org.epics.ioc.dbDefinition.DBDFactory;
+import org.epics.ioc.dbDefinition.DBDLinkSupport;
+import org.epics.ioc.dbDefinition.DBDMenu;
+import org.epics.ioc.dbDefinition.DBDRecordType;
+import org.epics.ioc.dbDefinition.DBDStructure;
+import org.epics.ioc.dbDefinition.XMLToDBDFactory;
+
+/**
+ * read a database definition file and dump result.
+ * @author mrk
+ *
+ */
 public class XMLToDBD {
 
     /**

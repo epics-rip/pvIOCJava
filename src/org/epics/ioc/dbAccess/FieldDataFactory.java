@@ -5,6 +5,7 @@ package org.epics.ioc.dbAccess;
 
 import org.epics.ioc.dbDefinition.*;
 import org.epics.ioc.pvAccess.*;
+import java.util.regex.Pattern;
 
 /**
  * Factory to create default implementations for field data
@@ -124,6 +125,8 @@ public class FieldDataFactory {
     }
     
     private static Convert convert = ConvertFactory.getConvert();
+    private static Pattern primitivePattern = Pattern.compile("[, ]");
+
 
     private static class UnknownData extends AbstractDBData {
 
@@ -169,6 +172,10 @@ public class FieldDataFactory {
         BooleanData(DBStructure parent,DBDField dbdField) {
             super(parent,dbdField);
             value = false;
+            String defaultValue = dbdField.getAttribute().getDefault();
+            if(defaultValue!=null && defaultValue.length()>0) {
+                value = Boolean.parseBoolean(defaultValue);
+            }
         }
         
         private boolean value;
@@ -201,6 +208,10 @@ public class FieldDataFactory {
         ByteData(DBStructure parent,DBDField dbdField) {
             super(parent,dbdField);
             value = 0;
+            String defaultValue = dbdField.getAttribute().getDefault();
+            if(defaultValue!=null && defaultValue.length()>0) {
+                value = Byte.decode(defaultValue);
+            }
         }
         
         private byte value;
@@ -233,6 +244,10 @@ public class FieldDataFactory {
         ShortData(DBStructure parent,DBDField dbdField) {
             super(parent,dbdField);
             value = 0;
+            String defaultValue = dbdField.getAttribute().getDefault();
+            if(defaultValue!=null && defaultValue.length()>0) {
+                value = Short.decode(defaultValue);
+            }
         }
         
         private short value;
@@ -265,6 +280,10 @@ public class FieldDataFactory {
         IntData(DBStructure parent,DBDField dbdField) {
             super(parent,dbdField);
             value = 0;
+            String defaultValue = dbdField.getAttribute().getDefault();
+            if(defaultValue!=null && defaultValue.length()>0) {
+                value = Integer.decode(defaultValue);
+            }
         }
         
         private int value;
@@ -297,6 +316,10 @@ public class FieldDataFactory {
         LongData(DBStructure parent,DBDField dbdField) {
             super(parent,dbdField);
             value = 0;
+            String defaultValue = dbdField.getAttribute().getDefault();
+            if(defaultValue!=null && defaultValue.length()>0) {
+                value = Long.decode(defaultValue);
+            }
         }
         
         private long value;
@@ -329,6 +352,10 @@ public class FieldDataFactory {
         FloatData(DBStructure parent,DBDField dbdField) {
             super(parent,dbdField);
             value = 0;
+            String defaultValue = dbdField.getAttribute().getDefault();
+            if(defaultValue!=null && defaultValue.length()>0) {
+                value = Float.valueOf(defaultValue);
+            }
         }
         
         private float value;
@@ -361,6 +388,10 @@ public class FieldDataFactory {
         DoubleData(DBStructure parent,DBDField dbdField) {
             super(parent,dbdField);
             value = 0;
+            String defaultValue = dbdField.getAttribute().getDefault();
+            if(defaultValue!=null && defaultValue.length()>0) {
+                value = Float.valueOf(defaultValue);
+            }
         }
         
         private double value;
@@ -393,6 +424,10 @@ public class FieldDataFactory {
         StringData(DBStructure parent,DBDField dbdField) {
             super(parent,dbdField);
             value = null;
+            String defaultValue = dbdField.getAttribute().getDefault();
+            if(defaultValue!=null && defaultValue.length()>0) {
+                value = defaultValue;
+            }
         }
         
         private String value;
@@ -504,6 +539,14 @@ public class FieldDataFactory {
             this.capacity = capacity;
             this.capacityMutable = capacityMutable;
             value = new boolean[capacity];
+            String defaultValue = dbdArrayField.getAttribute().getDefault();
+            if(defaultValue!=null && defaultValue.length()>0) {
+                String[] values = primitivePattern.split(defaultValue);
+                try {
+                    convert.fromStringArray(this,0,values.length,values,0);
+                } catch (NumberFormatException e) {
+                }
+            }
         }
         
         private boolean[] value;
@@ -579,8 +622,16 @@ public class FieldDataFactory {
             this.capacity = capacity;
             this.capacityMutable = capacityMutable;
             value = new byte[capacity];
+            String defaultValue = dbdArrayField.getAttribute().getDefault();
+            if(defaultValue!=null && defaultValue.length()>0) {
+                String[] values = primitivePattern.split(defaultValue);
+                try {
+                    convert.fromStringArray(this,0,values.length,values,0);
+                } catch (NumberFormatException e) {
+                }
+            }
         }
-        
+     
         private byte[] value;
         int length = 0;
         int capacity;
@@ -654,6 +705,14 @@ public class FieldDataFactory {
             this.capacity = capacity;
             this.capacityMutable = capacityMutable;
             value = new short[capacity];
+            String defaultValue = dbdArrayField.getAttribute().getDefault();
+            if(defaultValue!=null && defaultValue.length()>0) {
+                String[] values = primitivePattern.split(defaultValue);
+                try {
+                    convert.fromStringArray(this,0,values.length,values,0);
+                } catch (NumberFormatException e) {
+                }
+            }
         }
         
         private short[] value;
@@ -729,6 +788,14 @@ public class FieldDataFactory {
             this.capacity = capacity;
             this.capacityMutable = capacityMutable;
             value = new int[capacity];
+            String defaultValue = dbdArrayField.getAttribute().getDefault();
+            if(defaultValue!=null && defaultValue.length()>0) {
+                String[] values = primitivePattern.split(defaultValue);
+                try {
+                    convert.fromStringArray(this,0,values.length,values,0);
+                } catch (NumberFormatException e) {
+                }
+            }
         }
         
         private int[] value;
@@ -804,6 +871,14 @@ public class FieldDataFactory {
             this.capacity = capacity;
             this.capacityMutable = capacityMutable;
             value = new long[capacity];
+            String defaultValue = dbdArrayField.getAttribute().getDefault();
+            if(defaultValue!=null && defaultValue.length()>0) {
+                String[] values = primitivePattern.split(defaultValue);
+                try {
+                    convert.fromStringArray(this,0,values.length,values,0);
+                } catch (NumberFormatException e) {
+                }
+            }
         }
         
         private long[] value;
@@ -879,6 +954,14 @@ public class FieldDataFactory {
             this.capacity = capacity;
             this.capacityMutable = capacityMutable;
             value = new float[capacity];
+            String defaultValue = dbdArrayField.getAttribute().getDefault();
+            if(defaultValue!=null && defaultValue.length()>0) {
+                String[] values = primitivePattern.split(defaultValue);
+                try {
+                    convert.fromStringArray(this,0,values.length,values,0);
+                } catch (NumberFormatException e) {
+                }
+            }
         }
         
         private float[] value;
@@ -954,6 +1037,14 @@ public class FieldDataFactory {
             this.capacity = capacity;
             this.capacityMutable = capacityMutable;
             value = new double[capacity];
+            String defaultValue = dbdArrayField.getAttribute().getDefault();
+            if(defaultValue!=null && defaultValue.length()>0) {
+                String[] values = primitivePattern.split(defaultValue);
+                try {
+                    convert.fromStringArray(this,0,values.length,values,0);
+                } catch (NumberFormatException e) {
+                }
+            }
         }
         
         private double[] value;
@@ -1029,6 +1120,14 @@ public class FieldDataFactory {
             this.capacity = capacity;
             this.capacityMutable = capacityMutable;
             value = new String[capacity];
+            String defaultValue = dbdArrayField.getAttribute().getDefault();
+            if(defaultValue!=null && defaultValue.length()>0) {
+                String[] values = primitivePattern.split(defaultValue);
+                try {
+                    convert.fromStringArray(this,0,values.length,values,0);
+                } catch (NumberFormatException e) {
+                }
+            }
         }
         
         private String[] value;

@@ -1,0 +1,313 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+       "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html>
+<head>
+  <meta http-equiv="content-type" content="text/html; charset=iso-8859-1" />
+  <title>EPICS JavaIOC: Java Input/Output Controller</title>
+</head>
+
+<body>
+<h1 style="text-align: center">EPICS JavaIOC: Java Input/Output Controller<br
+/>
+2006.09.12</h1>
+<hr />
+
+<h2 style="text-align: center"><a name="Overview"></a>Overview</h2>
+<hr />
+
+<p><a href="http://www.anl.gov/epics">EPICS</a> is a set of Open Source
+software tools, libraries and applications developed collaboratively and used
+worldwide to create distributed soft real-time control systems for scientific
+instruments such as a particle accelerators, telescopes and other large
+scientific experiments. An IOC (Input/Output Controller) is a network node
+that controls and/or monitors a collection of devices. An IOC contains a
+memory resident real time database. The real time database has a set of
+"smart" records. Each record is an instance on a record of a particular
+type.</p>
+
+<p>JavaIOC is a JAVA implementation of an EPICS IOC. It has many similarities
+to a Version 3 ( the 3.13 and 3.14 releases of EPICS base) but extends the
+data types to support structures and arrays. This document assumes that the
+reader is familiar with EPICS Version 3.</p>
+
+<p>The overview documentation is made available as part of the javaDOC for
+the javaIOC project. Each package of the javaIOC project has an overview as
+follows:</p>
+<ul>
+  <li>org.epics.ioc<br />
+    This package.</li>
+  <li>org.epics.ioc.pvAccess<br />
+    A description of the basic data types. The basic data types are the only
+    types for data that is passed in or out of record instances, i.e. these
+    are the data types used by channel access. The basic data types are:
+    <ul>
+      <li>All Java primitive types except char<br />
+        boolean, byte, short, int, long, float, double.</li>
+      <li>structure<br />
+        A structure can contain fields with any of the supported types
+        including structure and array fields.</li>
+      <li>array<br />
+        The array element type can be any of the supported types including
+        structure and array.</li>
+      <li>enum<br />
+        A enum is a set of choices and an index that selects a choice.</li>
+    </ul>
+    pcAccess implements the reflection interfaces for these types.</li>
+  <li>org.epics.ioc.dbDefinition<br />
+    dbDefinition provides the following:
+    <ul>
+      <li>Adds the following types to the basic types.
+        <ul>
+          <li>menu<br />
+            A menu is an enum with immutable choices.</li>
+          <li>structure<br />
+            The basic structure is extended to allow fields that have an
+            extended type.</li>
+          <li>array<br />
+            The basic arry is extended to allow fields that have an extended
+            type.</li>
+          <li>link<br />
+            A link is a special kind of structure.</li>
+        </ul>
+      </li>
+      <li>Implements the reflection interfaces for the extended types.</li>
+      <li>Provides an xml to database converter for database definitions,
+        i.e. definitions of the following:
+        <ul>
+          <li>menu</li>
+          <li>structure</li>
+          <li>recordType</li>
+          <li>linkSupport</li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+  <li>org.epics.ioc.dbAccess<br />
+    dbAccess provides the following:
+    <ul>
+      <li>Provides an xml to database converter for record instancess</li>
+      <li>Provides a factory that implements the data interfaces for a field
+        of any of the supported types.</li>
+      <li>Implements one or more IOCDBs ( IOC DataBase).</li>
+      <li>Implements DBAccess, which is an interface for accessing an
+      IOCDB.</li>
+    </ul>
+  </li>
+</ul>
+<hr />
+
+<p>The database syntax is based on xml. Two xml parsers are are provided: one
+parses database definitions and the other parses record instance definitions.
+This package provides a program that exercises each parser.</p>
+<ul>
+  <li>XMLToDBD<br />
+    XML to Database Definition. This parses a file containing database
+    definitions.</li>
+  <li>XMLToDB<br />
+    CML to Database. This parses a file containing record instance
+    definitions.</li>
+</ul>
+
+<p>This package provides utilities that invoke each parser and dumps the
+result.</p>
+<hr />
+
+<h2 style="text-align: center"><a name="DatabaseDefinitionSyntax"></a>
+Database Definition Syntax</h2>
+<hr />
+
+<p>This section provides a brief description of database definitions. See
+package org.epics.ioc.dbDefinition for complete details.</p>
+
+<p>Database definitions consist of the following definition types: menu,
+structure, linkSupport, and recordType.</p>
+
+<p>An example menu definition is:</p>
+<pre>    &lt;menu name = "menuAlarmSevr"&gt;
+        &lt;choice&gt;none&lt;/choice&gt;
+        &lt;choice&gt;minor&lt;/choice&gt;
+        &lt;choice&gt;major&lt;/choice&gt;
+        &lt;choice&gt;invalid&lt;/choice&gt;
+    &lt;/menu&gt;</pre>
+
+<p>A menu definition consists of a name and a set of choices.</p>
+
+<p>An example structure definition is:</p>
+<pre>    &lt;structure name = "displayLimit"&gt;
+        &lt;field name = "low" type = "double" /&gt;
+        &lt;field name = "high" type = "double" /&gt;
+    &lt;/structure&gt;</pre>
+
+<p>A structure definition consists of a name and a set of field definitions.
+More details about field definitions are provided below.</p>
+
+<p>An example link definition is:</p>
+<pre>    &lt;linkSupport name = "monitorLink" configStructureName = "monitorLink" /&gt;</pre>
+
+<p>A linkSupport definition consists of a name and the name of a structure
+for configuration information.</p>
+
+<p>An example recordType definition is:</p>
+<pre>&lt;recordType name = "example"/&gt;
+    &lt;field name = "value" type = "double"&gt;
+    &lt;field name = "priority" type = "menu" menuName = "menuPriority" /&gt;
+    &lt;field name = "units" type = "string" /&gt;
+    &lt;field name = "status" type = "string" /&gt;
+    &lt;field name = "severity" type = "menu" menuName = "menuAlarmSevr" /&gt;
+    &lt;field name = "timeStamp" type = "structure" structureName = "timeStamp" /&gt;
+    &lt;field name = "displayLimit"
+         type = "structure" structureName = "displayLimit" /&gt;
+&lt;/recordType&gt;</pre>
+
+<p>A recordtype definition consists of a name and a set of field definitions.
+It is very similar to a structure definition.</p>
+
+<h3>field definition</h3>
+
+<p>Both structure and recordType definitions define a set of field
+definitions. A field definition has the format:</p>
+<pre>    &lt;field name = "value" type = "double ... "&gt;</pre>
+where "..." represents other attributes. The complete set of attributes are:
+<dl>
+  <dt style="font-family: courier;">name</dt>
+    <dd>the field name which must be given</dd>
+  <dt style="font-family: courier;">type</dt>
+    <dd>The field type which must be one of:<br />
+      boolean byte short int long float double string enum menu array
+      structure link</dd>
+  <dt style="font-family: courier;">menuName</dt>
+    <dd>must be given if the type is menu</dd>
+  <dt style="font-family: courier;">structureName</dt>
+    <dd>must be given if the type is structure</dd>
+  <dt style="font-family: courier;">elementType</dt>
+    <dd>must be specified if the type is array. It can be any of the
+      supported types</dd>
+  <dt><span style="font-family: courier">default</span></dt>
+    <dd>Default value for an instance of this field, using the Record
+      Instance Syntax. A default can only be specified if the field type is
+      primitive or string. If a default is not specified, the field will
+      initialize to all zero bits.</dd>
+  <dt><span style="font-family: courier">readonly</span></dt>
+    <dd>Can this field be modified via channel access? If not the fields is
+      not modifable at run time or is handled by database access. Takes the
+      value false if not specified.</dd>
+  <dt><span style="font-family: courier">design</span></dt>
+    <dd>Should a Database Configuration Tool allow the field to be configured
+      at design time? Takes the value true if not specified.</dd>
+  <dt><span style="font-family: courier">link</span></dt>
+    <dd>This is only valid for string fields. If true the field is the name
+      of a channel, i.e. a link to record. This is for use by Database
+      Configuration Tools. Takes the value false if not specified.</dd>
+  <dt><span style="font-family: courier">asl</span></dt>
+    <dd>Channel Access security level for this field, 0 or 1. Takes the value
+      1 if not specified.</dd>
+</dl>
+
+<h3>property</h3>
+A structure, recordType, and field can have propertys. A property is defined
+as:
+<pre>    &lt;property name = "name" associatedField = "field name" /&gt;</pre>
+where
+<dl>
+  <dt>name</dt>
+    <dd>The name of the property</dd>
+  <dt>associatedField</dt>
+    <dd>The name of a field that has the value for the property. It can have
+      one of the following forms:
+      <dl>
+        <dt>..</dt>
+          <dd>A search is made up the structure hierarchy for a field name
+            that is the same as the property name. If the property is
+            attached to a field then the search starts with the parent of the
+            structure containing the structure. If the property is attached
+            to a structure, the search starts with the parent of the
+            structure itself. This is not valid for a property attached to a
+            recordType.</dd>
+        <dt>name</dt>
+          <dd>If attached to a structure or recordType the associated field
+            must be a field in that structure or recordType. If attached to a
+            field it must be a field or a property in the structure that
+            holds the field.</dd>
+        <dt>name1.name2</dt>
+          <dd>Only valid for a property attached to a structure or
+            recordType. name1 must be the name of a structure field in the
+            structure to which the property is attached. name2 must be a
+            property of field in the structure field.</dd>
+      </dl>
+    </dd>
+</dl>
+
+<p>For example:</p>
+<pre>    &lt;field name = "value" type = "double"&gt;
+        &lt;property name = "status" associatedField = "status" /&gt;
+        &lt;property name = "severity" associatedField = "severity" /&gt;
+        &lt;property name = "timeStamp" associatedField = "timeStamp" /&gt;
+        &lt;property name = "units" associatedField = "units" /&gt;
+        &lt;property name = "displayLimit" associatedField = "displayLimit" /&gt;
+    &lt;/field&gt;</pre>
+<hr />
+
+<h2 style="text-align: center"><a name="RecordInstanceSyntax"></a> Record
+Instance Syntax</h2>
+<hr />
+
+<h2 style="text-align: center"><a name="AnalogInputExample"></a> Example:
+Analog Input</h2>
+
+<p>The following is one way of defining an analog input record:</p>
+<pre>&lt;structure name = "aiRaw"&gt;
+    &lt;field name = "value" type = "int" &gt;
+        &lt;property name = "status" associatedField = "status" /&gt;
+        &lt;property name = "severity" associatedField = "severity" /&gt;
+        &lt;property name = "timeStamp" associatedField = ".." /&gt;
+    &lt;/field&gt;
+    &lt;field name = "status" type = "string" /&gt;
+    &lt;field name = "severity" type = "menu" menuName = "menuAlarmSevr" /&gt;
+    &lt;field name = "input" type = "link" /&gt;
+&lt;/structure&gt;</pre>
+This defines a structure appropriate for holding the raw value obtained from
+an ADC. Device support for an ADC can be attached to the input field. Not
+that value field has three propertys. The status and severity reside in the
+structure itself. The timeStamp will be obtained from a parent structure or
+record type.
+
+<p>Now define a structure that holds converted values.</p>
+<pre>&lt;structure name = "aiLinear"&gt;
+    &lt;property name = "rawValue" associatedField = "aiRaw.value" /&gt;
+    &lt;field name = "value" type = "double" &gt;
+        &lt;property name = "status" associatedField = "status" /&gt;
+        &lt;property name = "severity" associatedField = "severity" /&gt;
+        &lt;property name = "units" associatedField = "units" /&gt;
+        &lt;property name = "displayLimit" associatedField = "displayLimit" /&gt;
+        &lt;property name = "timeStamp" associatedField = ".." /&gt;
+    &lt;/field&gt;
+    &lt;field name = "status" type = "string" /&gt;
+    &lt;field name = "severity" type = "menu" menuName = "menuAlarmSevr" /&gt;
+    &lt;field name = "units" type = "string" /&gt;
+    &lt;field name = "displayLimit"
+         type = "structure" structureName = "displayLimit" /&gt;
+    &lt;field name = "aiRaw" type = "structure" structureName = "aiRaw"/&gt;
+    &lt;field name = "linearConvert"
+        type = "structure" structureName = "linearConvert" /&gt;
+&lt;/structure&gt;</pre>
+
+<p>This defines a structure appropriate for holding a value that is obtained
+by performing a linear conversion on a raw value obtained from other support.
+Note that a similar structure could be defined for break point
+conversions.</p>
+
+<p>Finally define a record type</p>
+<pre>&lt;recordType name = "aiLinearRecord"&gt;
+    &lt;property name = "value" associatedField = "aiLinear.value" /&gt;
+    &lt;property name = "rawValue" associatedField = "aiLinear.rawValue" /&gt;
+    &lt;property name = "status" associatedField = "aiLinear.status" /&gt;
+    &lt;property name = "severity" associatedField = "aiLinear.severity" /&gt;
+    &lt;field name = "aiLinear" type = "structure" structureName = "aiLinear" /&gt;
+    &lt;field name = "priority" type = "menu" menuName = "menuPriority" /&gt;
+    &lt;field name = "timeStamp" type = "structure" structureName = "timeStamp"/&gt;
+    &lt;field name = "scan" type = "structure" structureName = "scan"/&gt;
+&lt;/recordType&gt;</pre>
+<hr />
+</body>
+</html>
