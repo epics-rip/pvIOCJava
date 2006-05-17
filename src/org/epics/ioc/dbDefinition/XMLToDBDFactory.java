@@ -580,13 +580,6 @@ public class XMLToDBDFactory {
             for(int i=0; i<property.length; i++) {
                  property[i] = iter.next();
             } 
-            if(property.length==0) {
-                if(dbdAttribute.getType()==Type.pvStructure) {
-                    DBDStructure fieldStructure = dbdAttribute.getStructure();
-                    property = fieldStructure.getPropertys();
-                    
-                }
-            }
             DBDField dbdField = DBDCreateFactory.createField(dbdAttribute,property);
             dbdFieldList.add(dbdField);
             dbdAttribute = null;

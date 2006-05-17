@@ -160,12 +160,12 @@ public class IOCDBFactory {
             DBData newField = getField(dbData,name);
             if(newField!=null) return newField;
             Property property = getProperty(dbData,name);
-            if(property!=null) newField = findPropertyField(dbData,property);
-            return newField;
+            return findPropertyField(dbData,property);
             
         }
         
         static private DBData  findPropertyField(DBData dbData,Property property) {
+            if(property==null) return null;
             String propertyName = property.getName();
             String propertyFieldName = property.getFieldName();
             if(propertyFieldName.equals("..")) {
@@ -178,18 +178,17 @@ public class IOCDBFactory {
                             ((Structure)dbData.getField()).getStructureName());
                     return null;
                 }
-                dbData = dbTemp;
-                if(property!=null) {
-                    dbData = findPropertyFieldParent(dbData,propertyName);
-                }
+                dbData = findPropertyFieldParent(dbTemp,propertyName);
             } else {
                 dbData = findPropertyFieldChild(dbData,propertyFieldName);
             }
             return dbData;            
         }
         
-        static private DBData findPropertyFieldParent(DBData dbData,String propertyName) {
-            if(dbData==null) return dbData;
+        static private DBData findPropertyFieldParent(DBData dbData,
+            String propertyName)
+        {
+            if(dbData==null) return null;
             DBStructure structure = (DBStructure)dbData;
             DBData[] datas = structure.getFieldDBDatas();
             int ind =  structure.getFieldDBDataIndex(propertyName);
@@ -197,21 +196,33 @@ public class IOCDBFactory {
             return findPropertyFieldParent(dbData.getParent(),propertyName);
         }
         
-        static private DBData findPropertyFieldChild(DBData dbData,String propertyName) {   
-            String[] names = periodPattern.split(propertyName,0);
+        static private DBData findPropertyFieldChild(DBData dbData,
+            String propertyFieldName)
+        {   
+            String[] names = periodPattern.split(propertyFieldName,0);
             int length = names.length;
             if(length<1 || length>2) {
                 DBRecord dbRecord = dbData.getRecord();
                 System.err.printf(
-                    "somewhere in recordType %s " +
-                    "property has bad field %s\n",
+                    "somewhere in recordType %s field %s " +
+                    "has bad property fieldName %s\n",
                     ((Structure)dbRecord.getField()).getStructureName(),
-                    propertyName,dbData.getField().getName());
+                    dbData.getField().getName(),propertyFieldName);
                 return null;
             }
-            dbData = getField(dbData,names[0]);
+            DBData newField = getField(dbData,names[0]);
+            if(newField==dbData) {
+                DBRecord dbRecord = dbData.getRecord();
+                System.err.printf(
+                    "somewhere in recordType %s field %s " +
+                    "has recursive property fieldName %s\n",
+                    ((Structure)dbRecord.getField()).getStructureName(),
+                    dbData.getField().getName(),propertyFieldName);
+                return null;
+            }
+            dbData = newField;
             if(dbData!=null && length==2) {
-                DBData newField = getField(dbData,names[1]);
+                newField = getField(dbData,names[1]);
                 if(newField!=null) {
                     dbData = newField;
                 } else {
@@ -219,7 +230,8 @@ public class IOCDBFactory {
                     if(property==null) {
                         dbData = null;
                     } else {
-                        dbData = findPropertyFieldChild(dbData,property.getFieldName());
+                        dbData = findPropertyFieldChild(dbData,
+                            property.getFieldName());
                     }
                 }
             }
@@ -250,23 +262,22 @@ public class IOCDBFactory {
         }
         static private Property getProperty(DBData dbData,String name) {
             Property property = null;
-            Property[]propertys = dbData.getField().getPropertys();
-            for(int i = 0; i < propertys.length; i++) {
-                if(propertys[i].getName().equals(name)) {
-                    property = propertys[i];
-                    return property;
-                }
+            // Look first for field property
+            property = dbData.getField().getProperty(name);
+            if(property!=null) return property;
+            // if structure look for structure property
+            DBDField dbdField = dbData.getDBDField();
+            DBType dbType = dbdField.getDBType();
+            if(dbType==DBType.dbStructure) {
+                DBDStructureField structureField = (DBDStructureField)dbdField;
+                DBDStructure structure = structureField.getDBDStructure();
+                property = structure.getProperty(name);
+                if(property!=null) return property;
             }
+            // look for parent property
             DBData parent = dbData.getParent();
-            if(parent!=null) {
-                propertys = parent.getField().getPropertys();
-                for(int i = 0; i < propertys.length; i++) {
-                    if(propertys[i].getName().equals(name)) {
-                        property = propertys[i];
-                            break;
-                    }
-                }
-            }
+            if(parent==null) return null;
+            property = parent.getField().getProperty(name);
             return property;                
         }
     }

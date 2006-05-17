@@ -121,13 +121,9 @@
 
 <linkSupport name = "outputLink" configStructureName = "outputLink" />
 
-<recordType name = "ai">
-    <property name = "value" associatedField = "value" />
-    <property name = "status" associatedField = "status" />
-    <property name = "severity" associatedField = "severity" />
-    <property name = "timeStamp" associatedField = "timeStamp" />
-    <property name = "units" associatedField = "units" />
-    <property name = "displayLimit" associatedField = "displayLimit" />
+
+
+<recordType name = "analog">
     <field name = "value" type = "double">
         <property name = "status" associatedField = "status" />
         <property name = "severity" associatedField = "severity" />
@@ -135,13 +131,61 @@
         <property name = "units" associatedField = "units" />
         <property name = "displayLimit" associatedField = "displayLimit" />
     </field>
+    <field name = "priority" type = "menu" menuName = "menuPriority" />
     <field name = "units" type = "string" />
+    <field name = "status" type = "string" />
+    <field name = "severity" type = "menu" menuName = "menuAlarmSevr" />
+    <field name = "timeStamp" type = "structure" structureName = "timeStamp" />
     <field name = "displayLimit"
          type = "structure" structureName = "displayLimit" />
     <field name = "input" type = "link" />
     <field name = "rawValue" type = "int" />
     <field name = "linearConvert"
         type = "structure" structureName = "linearConvert" />
+</recordType>
+
+
+<structure name = "aiRaw">
+    <field name = "value" type = "int" >
+        <property name = "status" associatedField = "status" />
+        <property name = "severity" associatedField = "severity" />
+        <property name = "timeStamp" associatedField = ".." />
+    </field>
+    <field name = "status" type = "string" />
+    <field name = "severity" type = "menu" menuName = "menuAlarmSevr" />
+    <field name = "input" type = "link" />
+</structure>
+
+<structure name = "aiLinear">
+    <property name = "rawValue" associatedField = "aiRaw.value" />
+    <field name = "value" type = "double" >
+        <property name = "status" associatedField = "status" />
+        <property name = "severity" associatedField = "severity" />
+        <property name = "units" associatedField = "units" />
+        <property name = "displayLimit" associatedField = "displayLimit" />
+        <property name = "timeStamp" associatedField = ".." />
+    </field>
+    <field name = "status" type = "string" />
+    <field name = "severity" type = "menu" menuName = "menuAlarmSevr" />
+    <field name = "units" type = "string" />
+    <field name = "displayLimit"
+         type = "structure" structureName = "displayLimit" />
+    <field name = "aiRaw" type = "structure" structureName = "aiRaw"/>
+    <field name = "linearConvert"
+        type = "structure" structureName = "linearConvert" />
+</structure>
+
+<recordType name = "aiLinearRecord">
+    <property name = "value" associatedField = "aiLinear.value" />
+    <property name = "rawValue" associatedField = "aiLinear.rawValue" />
+    <property name = "status" associatedField = "aiLinear.status" />
+    <property name = "severity" associatedField = "aiLinear.severity" />
+    <field name = "aiLinear" type = "structure" structureName = "aiLinear" >
+        <property name = "timeStamp" associatedField = "timeStamp" />
+    </field>
+    <field name = "priority" type = "menu" menuName = "menuPriority" />
+    <field name = "timeStamp" type = "structure" structureName = "timeStamp"/>
+    <field name = "scan" type = "structure" structureName = "scan"/>
 </recordType>
 
 <recordType name = "allTypes">
@@ -169,22 +213,17 @@
 </recordType>
 
 <!-- test for duplicate recordType -->
-<recordType name = "ai">
-    <field name = "value" type = "double">
+
+<structure name = "aiRaw">
+    <field name = "value" type = "int" >
         <property name = "status" associatedField = "status" />
         <property name = "severity" associatedField = "severity" />
-        <property name = "timeStamp" associatedField = "timeStamp" />
-        <property name = "units" associatedField = "units" />
-        <property name = "displayLimit" associatedField = "displayLimit" />
+        <property name = "timeStamp" associatedField = ".." />
     </field>
-    <field name = "units" type = "string" />
-    <field name = "displayLimit"
-         type = "structure" structureName = "displayLimit" />
+    <field name = "status" type = "string" />
+    <field name = "severity" type = "menu" menuName = "menuAlarmSevr" />
     <field name = "input" type = "link" />
-    <field name = "rawValue" type = "int" />
-    <field name = "linearConvert"
-        type = "structure" structureName = "linearConvert" />
-</recordType>
+</structure>
     
 
 

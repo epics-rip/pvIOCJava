@@ -10,10 +10,70 @@
 <body>
 <h1 style="text-align: center">EPICS JavaIOC: Java Input/Output Controller<br
 />
-2006.09.12</h1>
+2006.09.16</h1>
+
+<div class="toc">
+<ul>
+  <li><a href="#License">License Agreement</a></li>
+  <li><a href="#Overview">Overview</a></li>
+  <li><a href="#Database">Database Definition Syntax</a>
+    <ul>
+      <li><a href="#Database1">Database Definition Types</a></li>
+      <li><a href="#field">field definition</a></li>
+      <li><a href="#property">property</a></li>
+    </ul>
+  </li>
+  <li><a href="#Database2">Database Definition Examples</a>
+    <ul>
+      <li><a href="#Analog">Analog Input</a></li>
+      <li><a href="#Power">Power Supply</a></li>
+      <li><a href="#Power1">Power Supply Array</a></li>
+    </ul>
+  </li>
+  <li><a href="#Record">Record Instance Syntax</a></li>
+  <li><a href="#Record1">Record Instance Examples</a>
+    <ul>
+      <li><a href="#Analog1">Analog Input Record Instance</a></li>
+      <li><a href="#Power2">Power Supply Record Instance</a></li>
+      <li><a href="#Power3">Power Supply Array Instance</a></li>
+    </ul>
+  </li>
+  <li><a href="#Field1">Field Access and Property Definitions</a></li>
+  <li><a href="#Database5">Database Interface Definitions</a>
+    <ul>
+      <li><a href="#Field">Field Types</a></li>
+      <li><a href="#Data">Data Access Interfaces</a></li>
+    </ul>
+  </li>
+  <li><a href="#Database3">Database Reflection</a>
+    <ul>
+      <li><a href="#pvAccess">pvAccess reflection</a></li>
+      <li><a href="#dbAccess">dbAccess reflection</a></li>
+    </ul>
+  </li>
+  <li><a href="#Example">Example: Database Access via Reflection</a></li>
+  <li><a href="#Database4">Database Access</a>
+    <ul>
+      <li><a href="#Interface">Interface DBAccess</a></li>
+    </ul>
+  </li>
+  <li><a href="#Examples">Examples: Locate and Access Fields via DBAccess</a>
+    <ul>
+      <li><a href="#exampleAiL">exampleAiLinear</a></li>
+      <li><a href="#exampleAiL1">examplePowerSupply</a></li>
+    </ul>
+  </li>
+  <li><a href="#License1">License Agreement</a></li>
+</ul>
+</div>
+
+<h2 style="text-align: center" id="License">License Agreement</h2>
+
+<p>This product is available via the <a href="#LicenseAgreement">open source
+license</a> described at the end of this document.</p>
 <hr />
 
-<h2 style="text-align: center"><a name="Overview"></a>Overview</h2>
+<h2 style="text-align: center" id="Overview">Overview</h2>
 <hr />
 
 <p><a href="http://www.anl.gov/epics">EPICS</a> is a set of Open Source
@@ -31,19 +91,32 @@ to a Version 3 ( the 3.13 and 3.14 releases of EPICS base) but extends the
 data types to support structures and arrays. This document assumes that the
 reader is familiar with EPICS Version 3.</p>
 
-<p>The overview documentation is made available as part of the javaDOC for
-the javaIOC project. Each package of the javaIOC project has an overview as
-follows:</p>
+<p>Documentation is provided via javaDOC. Each package of the javaIOC project
+has a package.html overview document. The packages that currently exists
+are:</p>
 <ul>
   <li>org.epics.ioc<br />
-    This package.</li>
+    This package contains the overview you are now reading. In addition to
+    this overview it provides two utility programs: one parses database
+    definitions and the other parses record instance definitions.
+    <ul>
+      <li>XMLToDBD<br />
+        XML to Database Definition. This parses a file containing database
+        definitions and dumps the definitions.</li>
+      <li>XMLToDB<br />
+        XML to Database. This parses a file containing record instance
+        definitions and dumps the record instances.</li>
+    </ul>
+  </li>
   <li>org.epics.ioc.pvAccess<br />
-    A description of the basic data types. The basic data types are the only
-    types for data that is passed in or out of record instances, i.e. these
-    are the data types used by channel access. The basic data types are:
+    A description of the basic data types. The basic data types are for data
+    that is passed in or out of record instances, i.e. these are the data
+    types used by channel access:
     <ul>
       <li>All Java primitive types except char<br />
         boolean, byte, short, int, long, float, double.</li>
+      <li>string<br />
+        A Java String.</li>
       <li>structure<br />
         A structure can contain fields with any of the supported types
         including structure and array fields.</li>
@@ -53,7 +126,9 @@ follows:</p>
       <li>enum<br />
         A enum is a set of choices and an index that selects a choice.</li>
     </ul>
-    pcAccess implements the reflection interfaces for these types.</li>
+    pvAccess implements the reflection interfaces and defines the data
+    interfaces for these types.<br />
+  </li>
   <li>org.epics.ioc.dbDefinition<br />
     dbDefinition provides the following:
     <ul>
@@ -62,11 +137,10 @@ follows:</p>
           <li>menu<br />
             A menu is an enum with immutable choices.</li>
           <li>structure<br />
-            The basic structure is extended to allow fields that have an
-            extended type.</li>
+            sructure is extended to allow fields that have an extended
+          type.</li>
           <li>array<br />
-            The basic arry is extended to allow fields that have an extended
-            type.</li>
+            array is extended to allow fields that have an extended type.</li>
           <li>link<br />
             A link is a special kind of structure.</li>
         </ul>
@@ -81,6 +155,8 @@ follows:</p>
           <li>linkSupport</li>
         </ul>
       </li>
+      <li>Implements one or more DBDs which provides access to database
+        definitions.</li>
     </ul>
   </li>
   <li>org.epics.ioc.dbAccess<br />
@@ -95,30 +171,72 @@ follows:</p>
     </ul>
   </li>
 </ul>
-<hr />
 
-<p>The database syntax is based on xml. Two xml parsers are are provided: one
-parses database definitions and the other parses record instance definitions.
-This package provides a program that exercises each parser.</p>
+<p>The remainder of this document gives an overview of what is currently
+implemented:</p>
 <ul>
-  <li>XMLToDBD<br />
-    XML to Database Definition. This parses a file containing database
-    definitions.</li>
-  <li>XMLToDB<br />
-    CML to Database. This parses a file containing record instance
-    definitions.</li>
+  <li>The xml syntax for database definitions</li>
+  <li>The xml syntax for record instances.</li>
+  <li>The syntax for accessing fields of a record instance.</li>
+  <li>A brief overview of what each package provides.</li>
 </ul>
 
-<p>This package provides utilities that invoke each parser and dumps the
-result.</p>
+<p>Before a beta release of JavaIOC can be announced the following must also
+be defined and implemented:</p>
+<ul>
+  <li>Channel Access<br />
+    This will be based on the ideas described in the EPICS core developer
+    wikis. The following varieties of CA are required.
+    <ul>
+      <li>Local Access - Links between record instances.</li>
+      <li>Remote Access</li>
+      <li>Gateway to V3 Channel Access
+        <ul>
+          <li>Client - database links to V3 IOCs</li>
+          <li>Server - V3 client access to a JavaIOC</li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+  <li>Record Processing<br />
+    This will be based on the record processing semantics described in the
+    EPICS core developer wikis.</li>
+  <li>include and macro substitution for xml files.</li>
+  <li>A shell - Jython?</li>
+  <li>iocInit<br />
+    This will be designed so that on-line add is available.</li>
+  <li>Design and implement a core set of:
+    <ul>
+      <li>menu, structure, and recordType database definitions</li>
+      <li>record/structure support modules</li>
+      <li>link support modules for channel access links</li>
+    </ul>
+  </li>
+  <li>Design and implement hardware device support based on asynDriver.</li>
+</ul>
+
+<p>When these are ready a JavaIOC is a viable product. However several other
+things are desirable:</p>
+<ul>
+  <li>VDCT - A Visual Database Configuration Tool.</li>
+  <li>Access Security - Based on V3 Access Security.</li>
+  <li>Remore Error Logging.</li>
+  <li>Monitoring of database modification from outside IOC</li>
+  <li>Channel Access Clients that implement the JavaIOC Channel Access
+    Semantics.</li>
+  <li>...</li>
+</ul>
+
+<p>Thus lots of work remains.</p>
 <hr />
 
-<h2 style="text-align: center"><a name="DatabaseDefinitionSyntax"></a>
-Database Definition Syntax</h2>
+<h2 style="text-align: center" id="Database">Database Definition Syntax</h2>
 <hr />
 
 <p>This section provides a brief description of database definitions. See
 package org.epics.ioc.dbDefinition for complete details.</p>
+
+<h3 id="Database1">Database Definition Types</h3>
 
 <p>Database definitions consist of the following definition types: menu,
 structure, linkSupport, and recordType.</p>
@@ -142,7 +260,7 @@ structure, linkSupport, and recordType.</p>
 <p>A structure definition consists of a name and a set of field definitions.
 More details about field definitions are provided below.</p>
 
-<p>An example link definition is:</p>
+<p>An example linkSupport definition is:</p>
 <pre>    &lt;linkSupport name = "monitorLink" configStructureName = "monitorLink" /&gt;</pre>
 
 <p>A linkSupport definition consists of a name and the name of a structure
@@ -161,9 +279,9 @@ for configuration information.</p>
 &lt;/recordType&gt;</pre>
 
 <p>A recordtype definition consists of a name and a set of field definitions.
-It is very similar to a structure definition.</p>
+A recordType is imlemented so that it extends a structure definition.</p>
 
-<h3>field definition</h3>
+<h3 id="field">field definition</h3>
 
 <p>Both structure and recordType definitions define a set of field
 definitions. A field definition has the format:</p>
@@ -171,7 +289,7 @@ definitions. A field definition has the format:</p>
 where "..." represents other attributes. The complete set of attributes are:
 <dl>
   <dt style="font-family: courier;">name</dt>
-    <dd>the field name which must be given</dd>
+    <dd>the field name.</dd>
   <dt style="font-family: courier;">type</dt>
     <dd>The field type which must be one of:<br />
       boolean byte short int long float double string enum menu array
@@ -189,7 +307,7 @@ where "..." represents other attributes. The complete set of attributes are:
       primitive or string. If a default is not specified, the field will
       initialize to all zero bits.</dd>
   <dt><span style="font-family: courier">readonly</span></dt>
-    <dd>Can this field be modified via channel access? If not the fields is
+    <dd>Can this field be modified via channel access? If not the field is
       not modifable at run time or is handled by database access. Takes the
       value false if not specified.</dd>
   <dt><span style="font-family: courier">design</span></dt>
@@ -204,8 +322,8 @@ where "..." represents other attributes. The complete set of attributes are:
       1 if not specified.</dd>
 </dl>
 
-<h3>property</h3>
-A structure, recordType, and field can have propertys. A property is defined
+<h3 id="property">property</h3>
+A structure, recordType, and field can have properties. A property is defined
 as:
 <pre>    &lt;property name = "name" associatedField = "field name" /&gt;</pre>
 where
@@ -218,22 +336,13 @@ where
       <dl>
         <dt>..</dt>
           <dd>A search is made up the structure hierarchy for a field name
-            that is the same as the property name. If the property is
-            attached to a field then the search starts with the parent of the
-            structure containing the structure. If the property is attached
-            to a structure, the search starts with the parent of the
-            structure itself. This is not valid for a property attached to a
-            recordType.</dd>
+            that is the same as the property name.</dd>
         <dt>name</dt>
-          <dd>If attached to a structure or recordType the associated field
-            must be a field in that structure or recordType. If attached to a
-            field it must be a field or a property in the structure that
-            holds the field.</dd>
+          <dd>The name of a structure field. See below for more details.</dd>
         <dt>name1.name2</dt>
-          <dd>Only valid for a property attached to a structure or
-            recordType. name1 must be the name of a structure field in the
-            structure to which the property is attached. name2 must be a
-            property of field in the structure field.</dd>
+          <dd>name1 must be the name of a structure field. name2 must be a
+            property of field in the structure field. See below for mre
+            details.</dd>
       </dl>
     </dd>
 </dl>
@@ -242,20 +351,23 @@ where
 <pre>    &lt;field name = "value" type = "double"&gt;
         &lt;property name = "status" associatedField = "status" /&gt;
         &lt;property name = "severity" associatedField = "severity" /&gt;
-        &lt;property name = "timeStamp" associatedField = "timeStamp" /&gt;
+        &lt;property name = "timeStamp" associatedField = ".." /&gt;
         &lt;property name = "units" associatedField = "units" /&gt;
         &lt;property name = "displayLimit" associatedField = "displayLimit" /&gt;
     &lt;/field&gt;</pre>
 <hr />
 
-<h2 style="text-align: center"><a name="RecordInstanceSyntax"></a> Record
-Instance Syntax</h2>
+<h2 id="Database2">Database Definition Examples</h2>
 <hr />
 
-<h2 style="text-align: center"><a name="AnalogInputExample"></a> Example:
-Analog Input</h2>
+<p>This section provides some examples of structure and record type
+definitions.</p>
+
+<h3 id="Analog">Analog Input</h3>
 
 <p>The following is one way of defining an analog input record:</p>
+
+<p>First define a structure for raw input.</p>
 <pre>&lt;structure name = "aiRaw"&gt;
     &lt;field name = "value" type = "int" &gt;
         &lt;property name = "status" associatedField = "status" /&gt;
@@ -267,12 +379,12 @@ Analog Input</h2>
     &lt;field name = "input" type = "link" /&gt;
 &lt;/structure&gt;</pre>
 This defines a structure appropriate for holding the raw value obtained from
-an ADC. Device support for an ADC can be attached to the input field. Not
-that value field has three propertys. The status and severity reside in the
+an ADC. Device support for an ADC can be attached to the input field. The
+value field has three propertys. The status and severity reside in the
 structure itself. The timeStamp will be obtained from a parent structure or
 record type.
 
-<p>Now define a structure that holds converted values.</p>
+<p>Next define:</p>
 <pre>&lt;structure name = "aiLinear"&gt;
     &lt;property name = "rawValue" associatedField = "aiRaw.value" /&gt;
     &lt;field name = "value" type = "double" &gt;
@@ -294,8 +406,8 @@ record type.
 
 <p>This defines a structure appropriate for holding a value that is obtained
 by performing a linear conversion on a raw value obtained from other support.
-Note that a similar structure could be defined for break point
-conversions.</p>
+Similar structures could be defined for other types of conversion, e.g.
+breakpoint conversions.</p>
 
 <p>Finally define a record type</p>
 <pre>&lt;recordType name = "aiLinearRecord"&gt;
@@ -308,6 +420,886 @@ conversions.</p>
     &lt;field name = "timeStamp" type = "structure" structureName = "timeStamp"/&gt;
     &lt;field name = "scan" type = "structure" structureName = "scan"/&gt;
 &lt;/recordType&gt;</pre>
+
+<h3 id="Power">Power Supply</h3>
+
+<p>The following is one way of defining a simple power supply. To make the
+example simple the power supply provides access only to power, current, and
+voltage. The current and voltage will be read via some hardware device such
+as an ADC. The power is just current*voltage.</p>
+
+<p>First define:</p>
+<pre>&lt;structure name = "powerSupply"&gt;
+    &lt;property name = "current" associatedField = "currentInput.value" /&gt;
+    &lt;property name = "voltage" associatedField = "voltageInput.value" /&gt;
+    &lt;field name = "power" type = "double" &gt;
+        &lt;property name = "status" associatedField = "status" /&gt;
+        &lt;property name = "severity" associatedField = "severity" /&gt;
+        &lt;property name = "units" associatedField = "units" /&gt;
+        &lt;property name = "displayLimit" associatedField = "displayLimit" /&gt;
+        &lt;property name = "timeStamp" associatedField = ".." /&gt;
+    &lt;/field&gt;
+    &lt;field name = "currentInput" type = "structure" structureName = "aiLinear" /&gt;
+    &lt;field name = "voltageInput" type = "structure" structureName = "aiLinear" /&gt;
+    &lt;field name = "status" type = "string" /&gt;
+    &lt;field name = "severity" type = "menu" menuName = "menuAlarmSevr" /&gt;
+    &lt;field name = "units" type = "string" /&gt;
+    &lt;field name = "displayLimit"
+         type = "structure" structureName = "displayLimit" /&gt;
+&lt;/structure&gt;</pre>
+
+<p>This defines a single power supply. The power is a field of the power
+supply structure. The current and voltage are defined via an aiLinear
+structure, which was defined in the previous example. Any support available
+via the aiLinear structure will also work with the powerSupply.</p>
+
+<p>Next define:</p>
+<pre>&lt;recordType name = "powerSupplyRecord"&gt;
+    &lt;property name = "power" associatedField = "powerSupply.power" /&gt;
+    &lt;property name = "current" associatedField = "powerSupply.current" /&gt;
+    &lt;property name = "voltage" associatedField = "powerSupply.voltage" /&gt;
+    &lt;field name = "powerSupply"
+         type = "structure" structureName = "powerSupply" /&gt;
+    &lt;field name = "status" type = "string" /&gt;
+    &lt;field name = "severity" type = "menu" menuName = "menuAlarmSevr" /&gt;
+    &lt;field name = "timeStamp" type = "structure" structureName = "timeStamp"/&gt;
+    &lt;field name = "priority" type = "menu" menuName = "menuPriority" /&gt;
+    &lt;field name = "scan" type = "structure" structureName = "scan"/&gt;
+&lt;/recordType&gt;</pre>
+
+<h3 id="Power1">Power Supply Array</h3>
+
+<p>An array of power supplies could be defined as follows:</p>
+<pre>&lt;recordType name = "powerSupplyArrayRecord"&gt;
+    &lt;field name = "powerSupply" type = "array" elementType = "structure" /&gt;
+    &lt;field name = "status" type = "string" /&gt;
+    &lt;field name = "severity" type = "menu" menuName = "menuAlarmSevr" /&gt;
+    &lt;field name = "timeStamp" type = "structure" structureName = "timeStamp"/&gt;
+    &lt;field name = "priority" type = "menu" menuName = "menuPriority" /&gt;
+    &lt;field name = "scan" type = "structure" structureName = "scan"/&gt;
+&lt;/recordType&gt;</pre>
+
+<p>Note that the powerSupply structure has now been reused for a record type
+other than powerSupplyRecord.</p>
 <hr />
+
+<h2 style="text-align: center" id="Record">Record Instance Syntax</h2>
+<hr />
+
+<p>The syntax for a record instance is:</p>
+<pre>&lt;record type = "recordType" name = "recordName"&gt;
+    fieldAssignment
+&lt;/record&gt;</pre>
+
+<p>A <span style="font-family: courier">fieldAssignment</span> has the
+format:</p>
+<pre>    &lt;fieldName&gt;
+        &lt;!-- initializer --&gt;
+    &lt;/fieldName&gt;</pre>
+<hr />
+
+<h2 id="Record1">Record Instance Examples</h2>
+<hr />
+
+<h3 id="Analog1">Analog Input Record Instance</h3>
+<pre>&lt;record name = "exampleAiLinear" type = "aiLinearRecord"&gt;
+    &lt;aiLinear&gt;
+        &lt;aiRaw&gt;
+            &lt;input linkSupportName = "asynInt" configStructureName = "asynLink"&gt;
+                &lt;portName&gt;somePort&lt;/portName&gt;
+                &lt;addr&gt;1&lt;/addr&gt;
+            &lt;/input&gt;
+        &lt;/aiRaw&gt;
+        &lt;units&gt;volts&lt;/units&gt;
+        &lt;displayLimit&gt;
+            &lt;low&gt;0.0&lt;/low&gt;
+            &lt;high&gt;10.0&lt;/high&gt;
+        &lt;/displayLimit&gt;
+        &lt;linearConvert&gt;
+            &lt;engUnitsLow&gt;0.0&lt;/engUnitsLow&gt;
+            &lt;engUnitsHigh&gt;10.0&lt;/engUnitsHigh&gt;
+        &lt;/linearConvert&gt;
+    &lt;/aiLinear&gt;
+    &lt;priority&gt;medium&lt;/priority&gt;
+&lt;/record&gt;</pre>
+
+<h3 id="Power2">Power Supply Record Instance</h3>
+<pre>&lt;record name = "examplePowerSupply" type = "powerSupplyRecord"&gt;
+    &lt;powerSupply&gt;
+        &lt;units&gt;watts&lt;/units&gt;
+        &lt;displayLimit&gt;
+            &lt;low&gt;0.0&lt;/low&gt;
+            &lt;high&gt;100.0&lt;/high&gt;
+        &lt;/displayLimit&gt;
+        &lt;currentInput&gt;
+            &lt;aiRaw&gt;
+                &lt;input linkSupportName = "asynInt"
+                configStructureName = "asynLink"&gt;
+                    &lt;portName&gt;somePort&lt;/portNname&gt;
+                    &lt;addr&gt;2&lt;/addr&gt;
+                &lt;/input&gt;
+            &lt;/aiRaw&gt;
+            &lt;units&gt;amps&lt;/units&gt;
+            &lt;displayLimit&gt;
+                &lt;low&gt;0.0&lt;/low&gt;
+                &lt;high&gt;10.0&lt;/high&gt;
+            &lt;/displayLimit&gt;
+            &lt;linearConvert&gt;
+                &lt;engUnitsLow&gt;0.0&lt;/engUnitsLow&gt;
+                &lt;engUnitsHigh&gt;10.0&lt;/engUnitsHigh&gt;
+            &lt;/linearConvert&gt;
+        &lt;/currentInput&gt;
+        &lt;voltageInput&gt;
+            &lt;aiRaw&gt;
+                &lt;input linkSupportName = "asynInt"
+                configStructureName = "asynLink"&gt;
+                    &lt;portName&gt;somePort&lt;/portName&gt;
+                    &lt;addr&gt;2&lt;/addr&gt;
+                &lt;/input&gt;
+            &lt;/aiRaw&gt;
+            &lt;units&gt;volts&lt;/units&gt;
+            &lt;displayLimit&gt;
+                &lt;low&gt;0.0&lt;/low&gt;
+                &lt;high&gt;2.0&lt;/high&gt;
+            &lt;/displayLimit&gt;
+            &lt;linearConvert&gt;
+                &lt;engUnitsLow&gt;0.0&lt;/engUnitsLow&gt;
+                &lt;engUnitsHigh&gt;2.0&lt;/engUnitsHigh&gt;
+            &lt;/linearConvert&gt;
+        &lt;/voltageInput&gt;
+    &lt;/powerSupply&gt;
+    &lt;priority&gt;medium&lt;/priority&gt;
+&lt;/record&gt;</pre>
+
+<h3 id="Power3">Power Supply Array Instance</h3>
+<pre>&lt;record name = "examplePowerSupplyArray" type = "powerSupplyArrayRecord"&gt;
+    &lt;powerSupply capacity = "2"&gt;
+        &lt;value     structureName = "powerSupply"&gt;
+            &lt;units&gt;watts&lt;/units&gt;
+            &lt;displayLimit&gt;
+                &lt;low&gt;0.0&lt;/low&gt;
+                &lt;high&gt;100.0&lt;/high&gt;
+            &lt;/displayLimit&gt;
+            &lt;currentInput&gt;
+                &lt;aiRaw&gt;
+                    &lt;input linkSupportName = "asynLink"
+                    configStructureName = "asynLink"&gt;
+                        &lt;pvname&gt;somePort&lt;/pvname&gt;
+                        &lt;addr&gt;4&lt;/addr&gt;
+                    &lt;/input&gt;
+                &lt;/aiRaw&gt;
+                &lt;units&gt;amps&lt;/units&gt;
+                &lt;displayLimit&gt;
+                    &lt;low&gt;0.0&lt;/low&gt;
+                    &lt;high&gt;10.0&lt;/high&gt;
+                &lt;/displayLimit&gt;
+                &lt;linearConvert&gt;
+                    &lt;engUnitsLow&gt;0.0&lt;/engUnitsLow&gt;
+                    &lt;engUnitsHigh&gt;10.0&lt;/engUnitsHigh&gt;
+                &lt;/linearConvert&gt;
+            &lt;/currentInput&gt;
+            &lt;voltageInput&gt;
+                &lt;aiRaw&gt;
+                    &lt;input linkSupportName = "asynLink"
+                    configStructureName = "asynLink"&gt;
+                        &lt;pvname&gt;somePort&lt;/pvname&gt;
+                        &lt;addr&gt;5&lt;/addr&gt;
+                    &lt;/input&gt;
+                &lt;/aiRaw&gt;
+                &lt;units&gt;volts&lt;/units&gt;
+                &lt;displayLimit&gt;
+                    &lt;low&gt;0.0&lt;/low&gt;
+                    &lt;high&gt;2.0&lt;/high&gt;
+                &lt;/displayLimit&gt;
+                &lt;linearConvert&gt;
+                    &lt;engUnitsLow&gt;0.0&lt;/engUnitsLow&gt;
+                    &lt;engUnitsHigh&gt;2.0&lt;/engUnitsHigh&gt;
+                &lt;/linearConvert&gt;
+            &lt;/voltageInput&gt;
+        &lt;/value&gt;
+        &lt;value     structureName = "powerSupply"&gt;
+            &lt;units&gt;watts&lt;/units&gt;
+            &lt;displayLimit&gt;
+                &lt;low&gt;0.0&lt;/low&gt;
+                &lt;high&gt;1000.0&lt;/high&gt;
+            &lt;/displayLimit&gt;
+            &lt;currentInput&gt;
+                &lt;aiRaw&gt;
+                    &lt;input linkSupportName = "asynLink"
+                    configStructureName = "asynLink"&gt;
+                        &lt;pvname&gt;somePort&lt;/pvname&gt;
+                        &lt;addr&gt;6&lt;/addr&gt;
+                    &lt;/input&gt;
+                &lt;/aiRaw&gt;
+                &lt;units&gt;amps&lt;/units&gt;
+                &lt;displayLimit&gt;
+                    &lt;low&gt;0.0&lt;/low&gt;
+                    &lt;high&gt;10.0&lt;/high&gt;
+                &lt;/displayLimit&gt;
+                &lt;linearConvert&gt;
+                    &lt;engUnitsLow&gt;0.0&lt;/engUnitsLow&gt;
+                    &lt;engUnitsHigh&gt;10.0&lt;/engUnitsHigh&gt;
+                &lt;/linearConvert&gt;
+            &lt;/currentInput&gt;
+            &lt;voltageInput&gt;
+                &lt;aiRaw&gt;
+                    &lt;input linkSupportName = "asynLink"
+                    configStructureName = "asynLink"&gt;
+                        &lt;pvname&gt;somePort&lt;/pvname&gt;
+                        &lt;addr&gt;7&lt;/addr&gt;
+                    &lt;/input&gt;
+                &lt;/aiRaw&gt;
+                &lt;units&gt;volts&lt;/units&gt;
+                &lt;displayLimit&gt;
+                    &lt;low&gt;0.0&lt;/low&gt;
+                    &lt;high&gt;100.0&lt;/high&gt;
+                &lt;/displayLimit&gt;
+                &lt;linearConvert&gt;
+                    &lt;engUnitsLow&gt;0.0&lt;/engUnitsLow&gt;
+                    &lt;engUnitsHigh&gt;100.0&lt;/engUnitsHigh&gt;
+                &lt;/linearConvert&gt;
+            &lt;/voltageInput&gt;
+        &lt;/value&gt;
+    &lt;/powerSupply&gt;
+    &lt;priority&gt;low&lt;/priority&gt;
+&lt;/record&gt;</pre>
+<hr />
+
+<h2 style="text-align: center" id="Field1">Field Access and Property
+Definitions</h2>
+<hr />
+
+<p>Because a JavaIOC allows structures, there has to be a way to refer to
+each field of each structure. A field is specified via a string that has the
+form: <pre>    &lt;recordName&gt;.name.name ...</pre>
+The first "." ends the record name and each "." locates a field. For the
+following examples the recordName and first "." will be assumed. Thus when
+the example gives a field name as "powerSupply.power" it actually means
+"&lt;recordName&gt;.powerSupply.power"</p>
+
+<p>Properties can be assigned to a field, a structure, and a recordType.
+Properties provide two features: <ol>
+  <li>related fields<br />
+    When given for a field a property specifies a field that has information
+    associated with the field. For example a value field can have properties
+    defined for display limits, control limits, units, etc.</li>
+  <li>look elsewhere<br />
+    When assigned to a structure it is a way of saying look elsewhere for a
+    field that holds the desired data. Since a recordType is also a structure
+    properties can also be assigned to a recordType.</li>
+</ol>
+</p>
+
+<p>Lets discuss the first case. The aiRaw structure includes the definitions: <pre>&lt;structure name = "aiRaw"&gt;
+    &lt;field name = "value" type = "int" &gt;
+        &lt;property name = "status" associatedField = "status" /&gt;
+        &lt;property name = "severity" associatedField = "severity" /&gt;
+        &lt;property name = "timeStamp" associatedField = ".." /&gt;
+    &lt;/field&gt;
+    &lt;field name = "status" type = "string" /&gt;
+    &lt;field name = "severity" type = "menu" menuName = "menuAlarmSevr" /&gt;
+&lt;/structure&gt;</pre>
+These defininitions state that value has the following properties: <dl>
+  <dt>status</dt>
+    <dd>The associatedField is the status field of the aiRaw structure.</dd>
+  <dt>severity</dt>
+    <dd>The associatedField is the severity field of the aiRaw structure.</dd>
+  <dt>timeStamp</dt>
+    <dd>The associatedField ".." says to look higher in the structure
+      hierarchy for a field that has the name "timeStamp"</dd>
+</dl>
+When a client has access to aiRaw.value then the client can ask for any of
+the properties status, severity, and timeStamp and will get an interface that
+allows access to the appropriate field.</p>
+
+<p>Now lets consider properties assigned to a structure or record type. The
+aiLinear structure includes the definitions: <pre>&lt;structure name = "aiLinear"&gt;
+    &lt;property name = "rawValue" associatedField = "aiRaw.value" /&gt;
+    &lt;field name = "aiRaw" type = "structure" structureName = "aiRaw"/&gt;
+&lt;/structure&gt;</pre>
+This property definition says that to find rawValue look at the aiRaw field
+of structure aiLinear and then look for value. In this example value is a
+field of structure aiRaw so it is the actual field. In more complecated
+examples like the powerSupply, value could be a property rather than a field
+and a further search is required.</p>
+
+<p>Now consider the powerSupply example.</p>
+
+<p>The power supply record has the structure: <pre>    powerSupplyRecord
+        powerSupply
+            power
+            currentInput
+                value
+                status
+                severity
+                units
+                displayLimit
+                aiRaw
+                    value
+                    status
+                    severity
+                    input
+                linearConvert
+            voltageInput
+                value
+                status
+                severity
+                units
+                displayLimit
+                aiRaw
+                    value
+                    status
+                    severity
+                    input
+                linearConvert
+            status
+            severity
+            units
+            displayLimit
+        status
+        severity
+        timeStamp
+        priority
+        scan</pre>
+where the detail of many of the structure fields is not shown.</p>
+
+<p>Without properties the only way to get the power, current, and voltage it
+to specify the fields as: <pre>    powerSupply.power
+    powerSupply.currentInput.value
+    powerSupply.voltageInput.value</pre>
+</p>
+
+<p>But with the way the properties are defined they can be specified as: <pre>    power
+    current
+    voltage</pre>
+</p>
+
+<p>Lets consider power first. The powerSupplyRecord has the definitions: <pre>&lt;recordType name = "powerSupplyRecord"&gt;
+    &lt;property name = "power" associatedField = "powerSupply.power" /&gt;
+    &lt;field name = "powerSupply"
+         type = "structure" structureName = "powerSupply" /&gt;
+&lt;/recordType&gt;</pre>
+</p>
+
+<p>The powerSupply has the definitions: <pre>&lt;structure name = "powerSupply"&gt;
+    &lt;field name = "power" type = "double" &gt;
+&lt;/structure&gt;</pre>
+</p>
+
+<p>Thus field "power" results in the following: <ol>
+  <li>In powerSupplyRecord property power is found.</li>
+  <li>Field powerSupply is located in the powerSupplyRecord.</li>
+  <li>field power is located in the powerSupply structure.</li>
+  <li>Thus the actual field is powerSupplyRecord.powerSupply.power.</li>
+</ol>
+</p>
+
+<p>Now for current. The powerSupplyRecord has the definitions: <pre>&lt;recordType name = "powerSupplyRecord"&gt;
+    &lt;property name = "current" associatedField = "powerSupply.current" /&gt;
+    &lt;field name = "powerSupply"
+         type = "structure" structureName = "powerSupply" /&gt;
+&lt;/recordType&gt;</pre>
+</p>
+
+<p>The powerSupply has the definitions: <pre>&lt;structure name = "powerSupply"&gt;
+    &lt;property name = "current" associatedField = "currentInput.value" /&gt;
+    &lt;field name = "currentInput" type = "structure" structureName = "aiLinear" /&gt;
+&lt;/structure&gt;</pre>
+</p>
+
+<p>Structure aiLinear has the definitions: <pre>&lt;structure name = "aiLinear"&gt;
+    &lt;field name = "value" type = "double" &gt;
+&lt;/structure&gt;</pre>
+</p>
+
+<p>Thus field "current" results in the following: <ol>
+  <li>In powerSupplyRecord property current is found.</li>
+  <li>Field powerSupply is located in the powerSupplyRecord.</li>
+  <li>The powerSupply structure has property current</li>
+  <li>Field currentInput is located in the powerSupply structure.</li>
+  <li>field value is located in the aiLinear strccture of field
+  currentInput.</li>
+  <li>Thus the actual field is
+  powerSupplyRecord.powerSupply.aiLinear.value</li>
+</ol>
+</p>
+
+<p>Now consider "current.status" and "current.timeStamp" The
+powerSupplyRecord has the definitions: <pre>&lt;recordType name = "powerSupplyRecord"&gt;
+    &lt;property name = "current" associatedField = "powerSupply.current" /&gt;
+    &lt;field name = "powerSupply"
+         type = "structure" structureName = "powerSupply" /&gt;
+    &lt;field name = "timeStamp" type = "structure" structureName = "timeStamp"/&gt;
+
+&lt;/recordType&gt;</pre>
+</p>
+
+<p>The powerSupply has the definitions: <pre>&lt;structure name = "powerSupply"&gt;
+    &lt;property name = "current" associatedField = "currentInput.value" /&gt;
+    &lt;field name = "currentInput" type = "structure" structureName = "aiLinear" /&gt;
+&lt;/structure&gt;</pre>
+</p>
+
+<p>Structure aiLinear has the definitions: <pre>&lt;structure name = "aiLinear"&gt;
+    &lt;field name = "value" type = "double" &gt;
+      &lt;property name = "status" associatedField = "status" /&gt;
+      &lt;property name = "timeStamp" associatedField = ".." /&gt;
+    &lt;/field&gt;
+    &lt;field name = "status" type = "string" /&gt;
+&lt;/structure&gt;</pre>
+</p>
+
+<p>"current.status" results in the following: <ol>
+  <li>In powerSupplyRecord property current is found.</li>
+  <li>Field powerSupply is located in the powerSupplyRecord.</li>
+  <li>The powerSupply structure has property current</li>
+  <li>Field currentInput is located in the powerSupply structure.</li>
+  <li>field value is located in the aiLinear structure of field
+  currentInput.</li>
+  <li>Field value of structure aiLinear has property status.</li>
+  <li>The aiLinear structure has a field status.</li>
+  <li>Thus the actual field is
+  powerSupplyRecord.powerSupply.aiLinear.status</li>
+</ol>
+"current.timeStamp" results in the following: <ol>
+  <li>In powerSupplyRecord property current is found.</li>
+  <li>Field powerSupply is located in the powerSupplyRecord.</li>
+  <li>The powerSupply structure has property current</li>
+  <li>Field currentInput is located in the powerSupply structure.</li>
+  <li>field value is located in the aiLinear structure of field
+  currentInput.</li>
+  <li>Field value of structure aiLinear has property timeStamp.</li>
+  <li>The associatedField for timeStamp is "..". This results searching up
+    the structure hierarchy looking for a field named "timeStamp". It is
+    found in powerSupplyRecord.</li>
+  <li>Thus the actual field is powerSupplyRecord.timeStamp</li>
+</ol>
+</p>
+
+<p>Thus for the powerSupply: <ol>
+  <li>power is powerSupplyRecord.powerSupply.power</li>
+  <li>power.status is powerSupplyRecord.powerSupply.status</li>
+  <li>power.timeStamp is powerSupplyRecord.timeStamp</li>
+  <li>current is powerSupplyRecord.powerSupply.aiLinear.value</li>
+  <li>current.status is powerSupplyRecord.powerSupply.aiLinear.status</li>
+  <li>current.timeStamp is powerSupplyRecord.timeStamp</li>
+  <li>current.rawValue is
+  powerSupplyRecord.powerSupply.aiLinear.aiRaw.value</li>
+  <li>current.rawValue.status is
+    powerSupplyRecord.powerSupply.aiLinear.aiRaw.status</li>
+  <li>current.rawValue.timeStamp is powerSupplyRecord.timeStamp</li>
+</ol>
+</p>
+<hr />
+
+<h2 style="text-align: center" id="Database5">Database Interface
+Definitions</h2>
+<hr />
+
+<p>A JavaIOC implements interfaces for accessing fields of database records.
+The interfaces are a combination of reflection ( what is a field) and data
+(what does a field contain) interfaces.</p>
+
+<h3 id="Field">Field Types</h3>
+
+<p>Two interfaces define the supported types.</p>
+
+<p>The first interface is:</p>
+<pre>    public enum Type {
+        pvUnknown,
+        pvBoolean,
+        pvByte,
+        pvShort,
+        pvInt,
+        pvLong,
+        pvFloat,
+        pvDouble,
+        pvString,
+        pvEnum,
+        pvStructure,
+        pvArray;
+    }</pre>
+
+<p>Access to database fields from outside a record, i.e. Channel Access,
+always uses only the pv types.</p>
+
+<p>The IOC database adds the types:</p>
+<pre>    public enum DBType {
+        dbPvType,
+        dbMenu,
+        dbStructure,
+        dbArray,
+        dbLink;
+    }
+    </pre>
+
+<h3 id="Data">Data Access Interfaces</h3>
+
+<p>The following describe the interfaces for accessing the data a field
+contains.</p>
+
+<p>The data interfaces for accessing Type data are:</p>
+<pre>    interface PVData {
+         Field getField(); // get the reflection interface
+         ...
+    }
+    interface PVBoolean extends PVData{
+        boolean get();
+        void put(boolean value);
+    }
+    //   ... for other primitve types
+    interface PVString extends PVData{
+        String get();
+        void put(String value);
+    }
+    interface PVEnum extends PVData{
+        int getIndex();
+        void setIndex(int index);
+        String[] getChoices();
+        boolean setChoices(String[] choice);
+    }
+    interface PVStructure extends PVData {
+        PVData[] getFieldPVDatas();
+    }
+    interface PVArray extends PVData{
+        int getLength();
+        void setLength(int len);
+        int getCapacity();
+        void setCapacity(int len);
+    }
+    interface PVBooleanArray extends PVArray{
+        int get(int offset, int len, boolean[]to, int toOffset);
+        int put(int offset, int len, boolean[]from, int fromOffset);
+    }
+    // ... for arrays of other pv Types</pre>
+
+<p>The following interfaces extend the PVData interfaces for DBType data:</p>
+<pre>    interface DBData extends PVData {
+        DBDField getDBDField(); // get the reflection interface
+        DBStructure getParent();
+        DBRecord getRecord();
+        void addListener(DBListener listener);
+        void removeListener(DBListener listener);
+        void postPut();
+        void postPut(DBData dbData);
+    }
+    interface DBBoolean extends DBData, PVBoolean{}
+    // ... similar interfaces for all other PVData interfaces
+    interface DBStructure extends DBData, PVStructure {
+        DBData[] getFieldDBDatas();
+        int getFieldDBDataIndex(String fieldName);
+        DBStructure getParent();
+    }
+    interface DBLink extends DBStructure {
+        String getConfigStructureName();
+        void putConfigStructureName(String name);
+        String getLinkSupportName();
+        void putLinkSupportName(String name);
+        DBStructure getConfigStructure();
+        void putConfigStructure(DBStructure dbStructure);
+    }
+    interface DBRecord extends DBStructure {
+        String getRecordName();
+    }</pre>
+<hr />
+
+<h2 style="text-align: center" id="Database3">Database Reflection</h2>
+<hr />
+
+<p>The previous section described the interfaces for accessing data. The
+interfaces also provided methods (PVData.getField and DBData.get DBDField)
+which provide access to the reflection interfaces described in this section.
+The reflection interfaces provide access to the type, attributes, and
+properties of each field of each record instance.</p>
+
+<h3 id="pvAccess">pvAccess reflection</h3>
+
+<p>The reflection interfaces for pvAccess data are:</p>
+<pre>    interface Property {
+        String getName();
+        String getFieldName();
+    }
+    interface Field {
+        String getName();
+        Property[] getPropertys();
+        Property getProperty(String propertyName);
+        Type getType();
+    }
+    interface Enum extends Field {
+        boolean isChoicesMutable();
+    }
+    interface Array extends Field{
+        Type getElementType();
+    }
+    interface Structure extends Field{
+        String getStructureName();
+        String[] getFieldNames();
+        Field getField(String fieldName);
+        int getFieldIndex(String fieldName);
+        Field[] getFields();
+    }</pre>
+
+<h3 id="dbAccess">dbAccess reflection</h3>
+
+<p>For DBType reflection the following are added:</p>
+<pre>interface DBDAttribute {
+    String getName();
+    DBType getDBType();
+    Type getType();
+    String getDefault();
+    boolean isReadOnly();
+    boolean isDesign();
+    boolean isLink();
+    int getAsl();
+    DBDMenu getMenu();
+    DBDStructure getStructure();
+    DBType getElementDBType();
+    Type getElementType();
+}
+interface DBDField extends Field {
+    DBType getDBType();
+    DBDAttribute getAttribute();
+}
+public interface DBDArrayField extends DBDField, Array {}
+public interface DBDEnumField extends DBDField, Enum { }
+public interface DBDLinkField extends DBDStructureField { }
+public interface DBDMenuField extends DBDField, Enum { }
+public interface DBDStructureField extends DBDField,Structure { }</pre>
+<hr />
+
+<h2 id="Example">Example: Database Access via Reflection</h2>
+<hr />
+An interface IOCDB, not described in this overview, provides a method that
+locates the interface for a record instance. For example, to locate the
+aiAnalogExample record the call is:
+<pre>    DBRecord dbRecord = iocdb.findRecord("exampleAiLinear");</pre>
+
+<p>Starting with this the data in the value field can be read as follows:</p>
+<pre>    DBData[] dbData = dbRecord.getFieldDBDatas();
+    int index = dbRecord.getFieldDBDataIndex("value");
+    assert(dbData[index].getField().getType==Type.dbDouble);
+    DBDouble valueData= (DBDouble)dbData[index];
+    double value = valueData.get();</pre>
+
+<p>The data for exampleAiLinear.aiLinear.aiRaw.value can also be located and
+read via reflection as follows:</p>
+<pre>    DBData[] dbData = dbRecord.getFieldDBDatas();
+    int index = dbRecord.getFieldDBDataIndex("aiLinear");
+    assert(dbData[index].getField().getType()==Type.pvStructure);
+    DBStructure dbStructure = (DBStructure)dbData[index];
+    index = dbStructure.getFieldDBDataIndex("aiRaw");
+    dbData = dbStructure.getFieldDBDatas();
+    assert(dbData[index].getField().getType()==Type.pvStructure);
+    dbStructure = (DBStructure)dbData[index];
+    index = dbStructure.getFieldDBDataIndex("value");
+    dbData = dbStructure.getFieldDBDatas();
+    assert(dbData[index].getField().getType==Type.dbInt);
+    DBInt valueData = (DBInt)dbData[index];
+    int value = valueData.get();</pre>
+
+<p>Obviously this is not a very plesent way to access an IOC database. The
+next section provides a much easier way to find the data interfaces for a
+field.</p>
+<hr />
+
+<h2 style="text-align: center" id="Database4">Database Access</h2>
+<hr />
+
+<h3 id="Interface">Interface DBAccess</h3>
+
+<p>DBAccess is the interface for accessing a record instance. A DBAccess can
+be created via:</p>
+<pre>    DBAccess dbAccess = IOCDB.createAccess(instanceName);</pre>
+Where instanceName is a Java String. For example:
+<pre>    DBAccess dbAccess = iocdb.createAccess("exampleAiLinear");</pre>
+
+<p>DBAccess provides the following methods:</p>
+<pre>    interface DBAccess {
+        DBRecord getDbRecord();
+        boolean setField(String name);
+        void setField(DBData dbData);
+        DBData getField();
+        DBData getPropertyField(Property property);
+    }</pre>
+where
+<dl>
+  <dt>getDBRecord</dt>
+    <dd>Returns the interface for the record instance.</dd>
+  <dt>setField</dt>
+    <dd>locates a field within the record instance. Calls to getField and
+      getPropertyField return interfaces for this field. (false,true) is
+      returned if the requested field (is not, is) found.</dd>
+  <dt>getField</dt>
+    <dd>Returns the interface for the field located via the call to
+    setField</dd>
+  <dt>getPropertyField</dt>
+    <dd>Returns the interface for the property field associated with the
+      field located via the call to setField.</dd>
+</dl>
+
+<p>The argument to setField has the form:</p>
+<pre>    name.name...</pre>
+Each <span style="font-family: courier;">name</span> is the name of a
+property or a field. For example:
+<pre>    DBAccess dbAccess = IOCDB.createAccess("exampleAiLinear");
+    boolean found = dbAccess.setField("aiLinear.aiRaw.value");</pre>
+
+<p>Locates the value field of the aiRaw structure of the aiLinear structure
+in the aiLinearRecord.</p>
+
+<p>But the same field can be located via the call:</p>
+<pre>      found = dbAccess.setField("rawValue");</pre>
+<hr />
+
+<h2 id="Examples">Examples: Locate and Access Fields via DBAccess</h2>
+<hr />
+
+<h3 id="exampleAiL">exampleAiLinear</h3>
+<pre>    DBAccess dbAccess = IOCDB.createAccess("exampleAiLinear");
+
+    // get the value field and make sure its type is double
+    assert(dbAccess.setField("value"); // make sure value exists
+    DBData valueData = dbAccess.getField();
+    Field field = valueData.getField();
+    assert(field.getType()==Type.pvDouble);
+    double value = ((DBDouble)valueData).get();
+
+    // now get the status for field value
+    Property statusProperty = field.getProperty("status");
+    assert(statusProperty!=null);
+    DBData valueStatusData = dbAccess.getPropertyField(statusProperty);
+    assert(field.getType()==Type.pvString);
+    String status = ((DBString)valueStatusData).get();
+
+    // now get rawData and rawData status
+    assert(dbAccess.setField("rawData");
+    DBData rawValueData = dbAccess.getField();
+    Field field = rawValueData.getField();
+    assert(field.getType()==Type.pvInt);
+    int rawValue = ((DBInt)rawValueData).get();
+    statusProperty = field.getProperty("status");
+    assert(statusProperty!=null);
+    DBData rawValueStatusData = dbAccess.getPropertyField(statusProperty);
+    assert(field.getType()==Type.pvString);
+    String status = ((DBString)valueStatusData).get();</pre>
+
+<h3 id="exampleAiL1">examplePowerSupply</h3>
+
+<p>For the power supply the following is skeleton code for accessing the
+fields</p>
+<pre>    DBAccess dbAccess = IOCDB.createAccess("examplePowerSupply");
+    boolean foundIt;
+    // access the power
+    foundIt = dbAccess.setField("power");
+    ...
+    // access the current
+    foundit = dbAccess.setField("current");
+    ...
+    // access the voltage
+    foundit = dbAccess.setField("voltage");
+    ...</pre>
+
+<h2 style="text-align: center;text-align: center;" id="License1"><a
+name="LicenseAgreement"></a>License Agreement</h2>
+<pre>Copyright (c) 1991-2006 University of Chicago and The Regents of the
+University of California. All rights reserved.
+
+EPICS JavaIOC is distributed subject to the following license conditions:
+
+ SOFTWARE LICENSE AGREEMENT
+ Software: EPICS JavaIOC
+ Versions: All
+
+ 1. The "Software", below, refers to EPICS JavaIOC (in either source code, or
+    binary form and accompanying documentation). Each licensee is
+    addressed as "you" or "Licensee."
+
+ 2. The copyright holders shown above and their third-party licensors
+    hereby grant Licensee a royalty-free nonexclusive license, subject to
+    the limitations stated herein and U.S. Government license rights.
+
+ 3. You may modify and make a copy or copies of the Software for use
+    within your organization, if you meet the following conditions:
+      a. Copies in source code must include the copyright notice and this
+         Software License Agreement.
+      b. Copies in binary form must include the copyright notice and this
+         Software License Agreement in the documentation and/or other
+         materials provided with the copy.
+
+ 4. You may modify a copy or copies of the Software or any portion of it,
+    thus forming a work based on the Software, and distribute copies of
+    such work outside your organization, if you meet all of the following
+    conditions:
+      a. Copies in source code must include the copyright notice and this
+         Software License Agreement;
+      b. Copies in binary form must include the copyright notice and this
+         Software License Agreement in the documentation and/or other
+         materials provided with the copy;
+      c. Modified copies and works based on the Software must carry
+         prominent notices stating that you changed specified portions of
+         the Software.
+
+ 5. Portions of the Software resulted from work developed under a U.S.
+    Government contract and are subject to the following license: the
+    Government is granted for itself and others acting on its behalf a
+    paid-up, nonexclusive, irrevocable worldwide license in this computer
+    software to reproduce, prepare derivative works, and perform publicly
+    and display publicly.
+
+ 6. WARRANTY DISCLAIMER. THE SOFTWARE IS SUPPLIED "AS IS" WITHOUT WARRANTY
+    OF ANY KIND. THE COPYRIGHT HOLDERS, THEIR THIRD PARTY LICENSORS, THE
+    UNITED STATES, THE UNITED STATES DEPARTMENT OF ENERGY, AND THEIR
+    EMPLOYEES: (1) DISCLAIM ANY WARRANTIES, EXPRESS OR IMPLIED, INCLUDING
+    BUT NOT LIMITED TO ANY IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS
+    FOR A PARTICULAR PURPOSE, TITLE OR NON-INFRINGEMENT, (2) DO NOT ASSUME
+    ANY LEGAL LIABILITY OR RESPONSIBILITY FOR THE ACCURACY, COMPLETENESS,
+    OR USEFULNESS OF THE SOFTWARE, (3) DO NOT REPRESENT THAT USE OF THE
+    SOFTWARE WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS, (4) DO NOT WARRANT
+    THAT THE SOFTWARE WILL FUNCTION UNINTERRUPTED, THAT IT IS ERROR-FREE
+    OR THAT ANY ERRORS WILL BE CORRECTED.
+
+ 7. LIMITATION OF LIABILITY. IN NO EVENT WILL THE COPYRIGHT HOLDERS, THEIR
+    THIRD PARTY LICENSORS, THE UNITED STATES, THE UNITED STATES DEPARTMENT
+    OF ENERGY, OR THEIR EMPLOYEES: BE LIABLE FOR ANY INDIRECT, INCIDENTAL,
+    CONSEQUENTIAL, SPECIAL OR PUNITIVE DAMAGES OF ANY KIND OR NATURE,
+    INCLUDING BUT NOT LIMITED TO LOSS OF PROFITS OR LOSS OF DATA, FOR ANY
+    REASON WHATSOEVER, WHETHER SUCH LIABILITY IS ASSERTED ON THE BASIS OF
+    CONTRACT, TORT (INCLUDING NEGLIGENCE OR STRICT LIABILITY), OR
+    OTHERWISE, EVEN IF ANY OF SAID PARTIES HAS BEEN WARNED OF THE
+    POSSIBILITY OF SUCH LOSS OR DAMAGES.
+
+________________________________________________________________________
+
+This software is in part copyrighted by the BERLINER SPEICHERRING
+GESELLSCHAFT FUER SYNCHROTRONSTRAHLUNG M.B.H. (BESSY), BERLIN, GERMANY.
+
+In no event shall BESSY be liable to any party for direct, indirect,
+special, incidental, or consequential damages arising out of the use of
+this software, its documentation, or any derivatives thereof, even if
+BESSY has been advised of the possibility of such damage.
+
+BESSY specifically disclaims any warranties, including, but not limited
+to, the implied warranties of merchantability, fitness for a particular
+purpose, and non-infringement.  This software is provided on an "as is"
+basis, and BESSY has no obligation to provide maintenance, support,
+updates, enhancements, or modifications.
+________________________________________________________________________
+
+________________________________________________________________________
+
+This software is in part copyrighted by the Deutsches Elektronen-Synchroton,
+    Member of the Helmholtz Association, (DESY), HAMBURG, GERMANY.
+
+In no event shall DESY be liable to any party for direct, indirect,
+special, incidental, or consequential damages arising out of the use of
+this software, its documentation, or any derivatives thereof, even if
+DESY has been advised of the possibility of such damage.
+
+DESY specifically disclaims any warranties, including, but not limited
+to, the implied warranties of merchantability, fitness for a particular
+purpose, and non-infringement.  This software is provided on an "as is"
+basis, and DESY has no obligation to provide maintenance, support,
+updates, enhancements, or modifications.
+________________________________________________________________________</pre>
 </body>
 </html>

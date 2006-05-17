@@ -461,6 +461,10 @@ public final class  DBDCreateFactory {
     implements DBDStructureField
     {
 
+        public DBDStructure getDBDStructure() {
+            return dbdStructure;
+        }
+
         public int getFieldIndex(String fieldName) {
             return structure.getFieldIndex(fieldName);
         }
@@ -480,19 +484,49 @@ public final class  DBDCreateFactory {
         public String getStructureName() {
             return structure.getStructureName();
         }
+        
+        public String toString() { return getString(0);}
+
+        public String toString(int indentLevel) {
+            return getString(indentLevel);
+        }
+
+        private String getString(int indentLevel) {
+            Property[] structureProperty = dbdStructure.getPropertys();
+            if(structureProperty.length<=0) return super.toString(indentLevel);
+            StringBuilder builder = new StringBuilder();
+            newLine(builder,indentLevel);
+            builder.append(String.format("field %s is structure with property {",
+                    field.getName()));
+            for(Property property : structureProperty) {
+                newLine(builder,indentLevel+1);
+                builder.append(String.format("{name = %s field = %s}",
+                    property.getName(),property.getFieldName()));
+            }
+            newLine(builder,indentLevel);
+            builder.append("}");
+            builder.append(super.toString(indentLevel));
+            return builder.toString();
+        }
 
         StructureFieldInstance(DBDAttribute attribute,Property[]property)
         {
             super(attribute,property);
             structure = (Structure)field;
+            dbdStructure = attribute.getStructure();
         }
         private Structure structure;
+        private DBDStructure dbdStructure;
     }
     
     
     static private class LinkFieldInstance extends AbstractDBDField
         implements DBDLinkField
     {
+
+        public DBDStructure getDBDStructure() {
+            return dbdStructure;
+        }
 
         public int getFieldIndex(String fieldName) {
             return structure.getFieldIndex(fieldName);
@@ -518,9 +552,11 @@ public final class  DBDCreateFactory {
         {
             super(attribute,property);
             structure = (Structure)field;
+            dbdStructure = attribute.getStructure();
         }
         
         private Structure structure;
+        private DBDStructure dbdStructure;
         
     }
     

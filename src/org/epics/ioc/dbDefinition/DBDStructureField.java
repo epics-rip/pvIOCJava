@@ -9,4 +9,6 @@ import org.epics.ioc.pvAccess.*;
  * @author mrk
  *
  */
-public interface DBDStructureField extends DBDField,Structure { }
+public interface DBDStructureField extends DBDField,Structure {
+    DBDStructure getDBDStructure();
+}

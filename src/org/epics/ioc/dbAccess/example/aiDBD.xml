@@ -36,7 +36,9 @@
     <property name = "rawValue" associatedField = "aiLinear.rawValue" />
     <property name = "status" associatedField = "aiLinear.status" />
     <property name = "severity" associatedField = "aiLinear.severity" />
-    <field name = "aiLinear" type = "structure" structureName = "aiLinear" />
+    <field name = "aiLinear" type = "structure" structureName = "aiLinear" >
+        <property name = "timeStamp" associatedField = "timeStamp" />
+    </field>
     <field name = "priority" type = "menu" menuName = "menuPriority" />
     <field name = "timeStamp" type = "structure" structureName = "timeStamp"/>
     <field name = "scan" type = "structure" structureName = "scan"/>

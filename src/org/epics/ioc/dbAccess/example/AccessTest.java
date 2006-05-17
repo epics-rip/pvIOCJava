@@ -8,6 +8,7 @@ import junit.framework.TestCase;
 import org.epics.ioc.dbDefinition.*;
 import org.epics.ioc.dbAccess.*;
 import org.epics.ioc.pvAccess.*;
+import java.util.*;
 
 public class AccessTest extends TestCase {
         
@@ -43,20 +44,20 @@ public class AccessTest extends TestCase {
         } catch (Exception e) {
             System.out.println("Exception: " + e);
         }
-        //System.out.printf("\n\nstructures");
-        //Map<String,DBDStructure> structureMap = dbd.getStructureMap();
-        //Set<String> keys = structureMap.keySet();
-        //for(String key: keys) {
-        //DBDStructure dbdStructure = structureMap.get(key);
-        //System.out.print(dbdStructure.toString());
-        //}
-        //System.out.printf("\n\nrecordTypes");
-        //Map<String,DBDRecordType> recordTypeMap = dbd.getRecordTypeMap();
-        //keys = recordTypeMap.keySet();
-        //for(String key: keys) {
-        //DBDRecordType dbdRecordType = recordTypeMap.get(key);
-        //System.out.print(dbdRecordType.toString());
-        //}
+//        System.out.printf("\n\nstructures");
+//        Map<String,DBDStructure> structureMap = dbd.getStructureMap();
+//        Set<String> keys = structureMap.keySet();
+//        for(String key: keys) {
+//            DBDStructure dbdStructure = structureMap.get(key);
+//            System.out.print(dbdStructure.toString());
+//        }
+//        System.out.printf("\n\nrecordTypes");
+//        Map<String,DBDRecordType> recordTypeMap = dbd.getRecordTypeMap();
+//        keys = recordTypeMap.keySet();
+//        for(String key: keys) {
+//            DBDRecordType dbdRecordType = recordTypeMap.get(key);
+//            System.out.print(dbdRecordType.toString());
+//        }
         System.out.printf("reading exampleAiLinearDB\n");
         try {
             XMLToIOCDBFactory.convert(dbd,iocdb,
@@ -92,8 +93,8 @@ public class AccessTest extends TestCase {
         
 //        System.out.printf("\nrecords\n");
 //        Map<String,DBRecord> recordMap = iocdb.getRecordMap();
-//        Set<String> keys = recordMap.keySet();
-//        for(String key: keys) {
+//        Set<String> recordKey = recordMap.keySet();
+//        for(String key: recordKey) {
 //            DBRecord record = recordMap.get(key);
 //            System.out.print(record.toString());
 //        }
@@ -104,9 +105,15 @@ public class AccessTest extends TestCase {
         testAccess(iocdb,"exampleAiLinear","aiLinear.aiRaw.value");
         testAccess(iocdb,"exampleAiLinear","aiLinear.aiRaw.status");
         testAccess(iocdb,"exampleAiLinear","aiLinear.aiRaw.input");
+        testAccess(iocdb,"exampleAiLinear","aiLinear.timeStamp");
+        testAccess(iocdb,"exampleAiLinear","aiLinear.rawValue");
         System.out.printf("\n");
         testAccess(iocdb,"examplePowerSupply","power");
+        testAccess(iocdb,"examplePowerSupply","power.status");
+        testAccess(iocdb,"examplePowerSupply","power.timeStamp");
         testAccess(iocdb,"examplePowerSupply","current");
+        testAccess(iocdb,"examplePowerSupply","current.status");
+        testAccess(iocdb,"examplePowerSupply","current.timeStamp");
         testAccess(iocdb,"examplePowerSupply","voltage");
         System.out.printf("\n");
         testAccess(iocdb,"examplePowerSupplyArray","status");
