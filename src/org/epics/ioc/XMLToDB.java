@@ -17,7 +17,7 @@ public class XMLToDB {
 
     /**
      * read and dump a database instance file.
-     * @param args database definition and database instance files.
+     * @param args database definition and database instance file.
      * The first argument must be a database definition file.
      * The second file must be a database instance file.
      */

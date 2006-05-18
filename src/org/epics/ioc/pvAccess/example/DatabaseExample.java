@@ -6,19 +6,36 @@ import org.epics.ioc.pvAccess.*;
 import org.epics.ioc.pvAccess.Enum;
 
 /**
+ * Creates a test database.
+ * It provides methods to create fields that contain data with any of the supported types.
  * @author mrk
  *
  */
 
 public class DatabaseExample {
+    /**
+     * Constructor.
+     * @param name the name for the database.
+     */
     public DatabaseExample(String name) {
         this.name = name;
     }
     
+    /**
+     * get the database name.
+     * @return the name.
+     */
     public String getName() {
         return name;
     }
 
+    /**
+     * create a scalar field.
+     * @param name the field name.
+     * @param type the type which can be a primitive type or pvString.
+     * @param property a propery array. This can be null.
+     * @return the PVData interface for the newly created field.
+     */
     public PVData createData(String name,Type type, Property[] property) {
     	switch(type) {
     	case pvBoolean : {
@@ -57,6 +74,13 @@ public class DatabaseExample {
     	}
     }
 
+    /**
+     * create an enum field.
+     * @param name the field name.
+     * @param choicesMutable are the choices mutable?
+     * @param property a propery array. This can be null.
+     * @return the PVEnum interface for the newly created field.
+     */
     public PVEnum createEnumData(String name,
     boolean choicesMutable, Property[] property)
     {
@@ -64,6 +88,15 @@ public class DatabaseExample {
         return new EnumData(field);
     }
 
+    /**
+     * create a structure field.
+     * @param name the field name.
+     * @param structureName the structure name.
+     * @param pvData the PVData interfaces for the fields of the structure.
+     * These must have already been created.
+     * @param property a propery array. This can be null.
+     * @return the PVStructure interface for the newly created field.
+     */
     public PVStructure createStructureData(String name, String structureName,
             PVData[] pvData, Property[] property)
     {
@@ -75,6 +108,13 @@ public class DatabaseExample {
         return new StructureData(structure,pvData);
     }
 
+    /**
+     * create an array field.
+     * @param name the field name.
+     * @param type the element type.
+     * @param property a propery array. This can be null.
+     * @return the PVArray interface for the newly created array field.
+     */
     public PVArray createArrayData(String name,Type type, Property[] property) {
     	switch(type) {
     	case pvBoolean : {

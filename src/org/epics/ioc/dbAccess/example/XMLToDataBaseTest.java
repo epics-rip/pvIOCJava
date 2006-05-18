@@ -9,8 +9,21 @@ import org.epics.ioc.dbDefinition.*;
 import org.epics.ioc.dbAccess.*;
 
 import java.util.*;
+/**
+ * JUnit test for XMLToIOCDB.
+ * This also is a test for pvAccess, dbDefinition, and dbAccess because XMLToDBD
+ * is called, which makes extensive use of dbDefinition and pvAccess, and
+ * XMLToIOCDB is called, which makes extensive use of dbAccess.
+ * It also provides an example of parsing database definitions.
+ * The output is a dump of all the record instance files it reads.
+ * @author mrk
+ *
+ */
 public class XMLToDataBaseTest extends TestCase {
         
+    /**
+     * test XMLToIOCDB.
+     */
     public static void testXML() {
         DBD dbd = DBDFactory.create("test");
         System.out.printf("reading menuStructureSupport\n");

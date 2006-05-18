@@ -9,9 +9,17 @@ import org.epics.ioc.dbDefinition.*;
 import org.epics.ioc.dbAccess.*;
 
 import java.util.*;
+/**
+ * test default values for fields.
+ * @author mrk
+ *
+ */
 public class DefaultTest extends TestCase {
         
-    public static void testXML() {
+    /**
+     * test default.
+     */
+    public static void testDefault() {
         DBD dbd = DBDFactory.create("test");
         System.out.printf("reading menuStructureSupport\n");
         try {

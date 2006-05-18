@@ -8,9 +8,18 @@ import junit.framework.TestCase;
 import org.epics.ioc.dbDefinition.*;
 import org.epics.ioc.dbAccess.*;
 
+/**
+ * JUnit test for parent.
+ * It shows the parent for each field.
+ * @author mrk
+ *
+ */
 public class ParentTest extends TestCase {
         
-    public static void testXML() {
+    /**
+     * show the parent of various fields.
+     */
+    public static void testParent() {
         DBD dbd = DBDFactory.create("test"); 
         IOCDB iocdb = IOCDBFactory.create(dbd,"testIOCDatabase");
         System.out.printf("reading menuStructureSupport\n");

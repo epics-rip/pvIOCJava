@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+       "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta http-equiv="content-type" content="text/html; charset=iso-8859-1" />
+  <title>EPICS JavaIOC: dbAccess example</title>
+</head>
+
+<body>
+<h1 style="text-align: center">EPICS JavaIOC dbAccess example<br />
+package: org.epics.ioc.dbAccess.example<br />
+2006.05.18</h1>
+
+<h2>Introduction</h2>
+
+<p>This package is an eclipse JUnit test for org.epics.ioc.dbAccess. It
+contains The following JUnit tests:</p>
+<ul>
+  <li>XMLToDataBaseTest<br />
+    Reads a set of database definition files and a set of record instance
+    files. It dumps the record instances.</li>
+  <li>DefaultTest<br />
+    Reads a set of database definition files that have defaults for all
+    fields that are allowed to have defualts. Creates an instance definition
+    which does not set any field values. It dumps the resultig instance.</li>
+  <li>ParentTest<br />
+    Reads a set of database definitions and record instances. Show the parent
+    and record for specified fields.</li>
+  <li>AccessTest<br />
+    Tests DBAccess.</li>
+  <li>ListenerTest<br />
+    Tests DBListener.</li>
+  <li>ReplaceTest<br />
+    Test repacing the default implementation of all the field types.</li>
+</ul>
+
+<p>The following database definition files are available:</p>
+<ul>
+  <li>menuStructureSupportDBD.xml<br />
+    A set of menu, structure, and linkSupport definitions. These are used by
+    all the tests.</li>
+  <li>analogDBD.xml<br />
+    A simple recordType definition.</li>
+  <li>aiDBD.xml<br />
+    aiRaw, aiLinear, aiLinearRecord</li>
+  <li>powerSupplyDBD.xml<br />
+    A simple power supply for power, current, and voltage.</li>
+  <li>allTypesDBD.xml<br />
+    A structure and recordType that has fields of every supported type.</li>
+  <li>defaultDBD.xml<br />
+    Like allTypesDBD.xml but assigns defaults to all fields that are allowed
+    to have defaults.</li>
+</ul>
+
+<p>The following record instance files are available.</p>
+<ul>
+  <li>exampleAnalogDB.xml<br />
+    An analogRecord.</li>
+  <li>exampleAiLinearDB.xml<br />
+    An aiLinearRecord.</li>
+  <li>examplePowerSupplyDB.xml<br />
+    A powerSupplyRecord.</li>
+  <li>examplePowerSupplyArrayDB.xml<br />
+    A powerSupplyArrayRecord.</li>
+  <li>exampleAllTypeDB.xml<br />
+    An allTypesRecord.</li>
+  <li>defaultDB.xml<br />
+    An allTypesRecord with defualt values.</li>
+</ul>
+
+<p>These database files and tests are good examples of the kinds of data a
+JavaIOC can hold.</p>
+</body>
+</html>

@@ -10,7 +10,7 @@
 <body>
 <h1 style="text-align: center">EPICS JavaIOC: Java Input/Output Controller<br
 />
-2006.09.16</h1>
+2006.05.18</h1>
 
 <div class="toc">
 <ul>
@@ -163,6 +163,7 @@ are:</p>
     dbAccess provides the following:
     <ul>
       <li>Provides an xml to database converter for record instancess</li>
+      <li>Defines interfaces for data types defined by dbDefinition.</li>
       <li>Provides a factory that implements the data interfaces for a field
         of any of the supported types.</li>
       <li>Implements one or more IOCDBs ( IOC DataBase).</li>
@@ -207,7 +208,8 @@ be defined and implemented:</p>
     This will be designed so that on-line add is available.</li>
   <li>Design and implement a core set of:
     <ul>
-      <li>menu, structure, and recordType database definitions</li>
+      <li>menu, structure, linkSupport, and recordType database
+      definitions</li>
       <li>record/structure support modules</li>
       <li>link support modules for channel access links</li>
     </ul>
@@ -295,12 +297,12 @@ where "..." represents other attributes. The complete set of attributes are:
       boolean byte short int long float double string enum menu array
       structure link</dd>
   <dt style="font-family: courier;">menuName</dt>
-    <dd>must be given if the type is menu</dd>
+    <dd>must be given if the type is menu.</dd>
   <dt style="font-family: courier;">structureName</dt>
-    <dd>must be given if the type is structure</dd>
+    <dd>must be given if the type is structure.</dd>
   <dt style="font-family: courier;">elementType</dt>
     <dd>must be specified if the type is array. It can be any of the
-      supported types</dd>
+      supported types.</dd>
   <dt><span style="font-family: courier">default</span></dt>
     <dd>Default value for an instance of this field, using the Record
       Instance Syntax. A default can only be specified if the field type is
@@ -331,18 +333,18 @@ where
   <dt>name</dt>
     <dd>The name of the property</dd>
   <dt>associatedField</dt>
-    <dd>The name of a field that has the value for the property. It can have
-      one of the following forms:
+    <dd>The name of a field that has the value for the property. Examples are
+      given later in this document. An associatedField must be one of the
+      following:
       <dl>
         <dt>..</dt>
           <dd>A search is made up the structure hierarchy for a field name
             that is the same as the property name.</dd>
         <dt>name</dt>
-          <dd>The name of a structure field. See below for more details.</dd>
+          <dd>The name of a structure field..</dd>
         <dt>name1.name2</dt>
           <dd>name1 must be the name of a structure field. name2 must be a
-            property of field in the structure field. See below for mre
-            details.</dd>
+            property of field in the structure field.</dd>
       </dl>
     </dd>
 </dl>
@@ -478,9 +480,6 @@ via the aiLinear structure will also work with the powerSupply.</p>
     &lt;field name = "priority" type = "menu" menuName = "menuPriority" /&gt;
     &lt;field name = "scan" type = "structure" structureName = "scan"/&gt;
 &lt;/recordType&gt;</pre>
-
-<p>Note that the powerSupply structure has now been reused for a record type
-other than powerSupplyRecord.</p>
 <hr />
 
 <h2 style="text-align: center" id="Record">Record Instance Syntax</h2>
@@ -533,8 +532,7 @@ format:</p>
         &lt;/displayLimit&gt;
         &lt;currentInput&gt;
             &lt;aiRaw&gt;
-                &lt;input linkSupportName = "asynInt"
-                configStructureName = "asynLink"&gt;
+                &lt;input linkSupportName = "asynInt" configStructureName = "asynLink"&gt;
                     &lt;portName&gt;somePort&lt;/portNname&gt;
                     &lt;addr&gt;2&lt;/addr&gt;
                 &lt;/input&gt;
@@ -551,8 +549,7 @@ format:</p>
         &lt;/currentInput&gt;
         &lt;voltageInput&gt;
             &lt;aiRaw&gt;
-                &lt;input linkSupportName = "asynInt"
-                configStructureName = "asynLink"&gt;
+                &lt;input linkSupportName = "asynInt" configStructureName = "asynLink"&gt;
                     &lt;portName&gt;somePort&lt;/portName&gt;
                     &lt;addr&gt;2&lt;/addr&gt;
                 &lt;/input&gt;
@@ -582,8 +579,7 @@ format:</p>
             &lt;/displayLimit&gt;
             &lt;currentInput&gt;
                 &lt;aiRaw&gt;
-                    &lt;input linkSupportName = "asynLink"
-                    configStructureName = "asynLink"&gt;
+                    &lt;input linkSupportName = "asynLink" configStructureName = "asynLink"&gt;
                         &lt;pvname&gt;somePort&lt;/pvname&gt;
                         &lt;addr&gt;4&lt;/addr&gt;
                     &lt;/input&gt;
@@ -600,8 +596,7 @@ format:</p>
             &lt;/currentInput&gt;
             &lt;voltageInput&gt;
                 &lt;aiRaw&gt;
-                    &lt;input linkSupportName = "asynLink"
-                    configStructureName = "asynLink"&gt;
+                    &lt;input linkSupportName = "asynLink" configStructureName = "asynLink"&gt;
                         &lt;pvname&gt;somePort&lt;/pvname&gt;
                         &lt;addr&gt;5&lt;/addr&gt;
                     &lt;/input&gt;
@@ -625,8 +620,7 @@ format:</p>
             &lt;/displayLimit&gt;
             &lt;currentInput&gt;
                 &lt;aiRaw&gt;
-                    &lt;input linkSupportName = "asynLink"
-                    configStructureName = "asynLink"&gt;
+                    &lt;input linkSupportName = "asynLink" configStructureName = "asynLink"&gt;
                         &lt;pvname&gt;somePort&lt;/pvname&gt;
                         &lt;addr&gt;6&lt;/addr&gt;
                     &lt;/input&gt;
@@ -643,8 +637,7 @@ format:</p>
             &lt;/currentInput&gt;
             &lt;voltageInput&gt;
                 &lt;aiRaw&gt;
-                    &lt;input linkSupportName = "asynLink"
-                    configStructureName = "asynLink"&gt;
+                    &lt;input linkSupportName = "asynLink" configStructureName = "asynLink"&gt;
                         &lt;pvname&gt;somePort&lt;/pvname&gt;
                         &lt;addr&gt;7&lt;/addr&gt;
                     &lt;/input&gt;
@@ -719,7 +712,7 @@ aiLinear structure includes the definitions: <pre>&lt;structure name = "aiLinear
 &lt;/structure&gt;</pre>
 This property definition says that to find rawValue look at the aiRaw field
 of structure aiLinear and then look for value. In this example value is a
-field of structure aiRaw so it is the actual field. In more complecated
+field of structure aiRaw so it is the actual field. In more complicated
 examples like the powerSupply, value could be a property rather than a field
 and a further search is required.</p>
 
@@ -776,8 +769,7 @@ to specify the fields as: <pre>    powerSupply.power
 
 <p>Lets consider power first. The powerSupplyRecord has the definitions: <pre>&lt;recordType name = "powerSupplyRecord"&gt;
     &lt;property name = "power" associatedField = "powerSupply.power" /&gt;
-    &lt;field name = "powerSupply"
-         type = "structure" structureName = "powerSupply" /&gt;
+    &lt;field name = "powerSupply" type = "structure" structureName = "powerSupply" /&gt;
 &lt;/recordType&gt;</pre>
 </p>
 
@@ -796,8 +788,7 @@ to specify the fields as: <pre>    powerSupply.power
 
 <p>Now for current. The powerSupplyRecord has the definitions: <pre>&lt;recordType name = "powerSupplyRecord"&gt;
     &lt;property name = "current" associatedField = "powerSupply.current" /&gt;
-    &lt;field name = "powerSupply"
-         type = "structure" structureName = "powerSupply" /&gt;
+    &lt;field name = "powerSupply" type = "structure" structureName = "powerSupply" /&gt;
 &lt;/recordType&gt;</pre>
 </p>
 
@@ -817,7 +808,7 @@ to specify the fields as: <pre>    powerSupply.power
   <li>Field powerSupply is located in the powerSupplyRecord.</li>
   <li>The powerSupply structure has property current</li>
   <li>Field currentInput is located in the powerSupply structure.</li>
-  <li>field value is located in the aiLinear strccture of field
+  <li>field value is located in the aiLinear structure of field
   currentInput.</li>
   <li>Thus the actual field is
   powerSupplyRecord.powerSupply.aiLinear.value</li>
@@ -902,9 +893,9 @@ The interfaces are a combination of reflection ( what is a field) and data
 
 <h3 id="Field">Field Types</h3>
 
-<p>Two interfaces define the supported types.</p>
+<p>Two Java enums define the supported types.</p>
 
-<p>The first interface is:</p>
+<p>The first enum is:</p>
 <pre>    public enum Type {
         pvUnknown,
         pvBoolean,
@@ -941,13 +932,14 @@ contains.</p>
 <p>The data interfaces for accessing Type data are:</p>
 <pre>    interface PVData {
          Field getField(); // get the reflection interface
-         ...
+         String toString();
+         String toString(int indentLevel);
     }
     interface PVBoolean extends PVData{
         boolean get();
         void put(boolean value);
     }
-    //   ... for other primitve types
+    //   similar interfaces for other primitve types
     interface PVString extends PVData{
         String get();
         void put(String value);
@@ -1006,7 +998,7 @@ contains.</p>
 <h2 style="text-align: center" id="Database3">Database Reflection</h2>
 <hr />
 
-<p>The previous section described the interfaces for accessing data. The
+<p>The previous section listed the interfaces for accessing data. The
 interfaces also provided methods (PVData.getField and DBData.get DBDField)
 which provide access to the reflection interfaces described in this section.
 The reflection interfaces provide access to the type, attributes, and
@@ -1109,7 +1101,7 @@ field.</p>
 
 <p>DBAccess is the interface for accessing a record instance. A DBAccess can
 be created via:</p>
-<pre>    DBAccess dbAccess = IOCDB.createAccess(instanceName);</pre>
+<pre>    DBAccess dbAccess = iocdb.createAccess(instanceName);</pre>
 Where instanceName is a Java String. For example:
 <pre>    DBAccess dbAccess = iocdb.createAccess("exampleAiLinear");</pre>
 
@@ -1120,6 +1112,7 @@ Where instanceName is a Java String. For example:
         void setField(DBData dbData);
         DBData getField();
         DBData getPropertyField(Property property);
+        DBData getProperrtyField(String propertyName);
     }</pre>
 where
 <dl>
@@ -1147,7 +1140,8 @@ property or a field. For example:
 <p>Locates the value field of the aiRaw structure of the aiLinear structure
 in the aiLinearRecord.</p>
 
-<p>But the same field can be located via the call:</p>
+<p>But because the way propertys are defined, the same field can be located
+via the call:</p>
 <pre>      found = dbAccess.setField("rawValue");</pre>
 <hr />
 
@@ -1158,28 +1152,26 @@ in the aiLinearRecord.</p>
 <pre>    DBAccess dbAccess = IOCDB.createAccess("exampleAiLinear");
 
     // get the value field and make sure its type is double
-    assert(dbAccess.setField("value"); // make sure value exists
+    assert(dbAccess.setField("value")); // make sure value exists
     DBData valueData = dbAccess.getField();
     Field field = valueData.getField();
     assert(field.getType()==Type.pvDouble);
     double value = ((DBDouble)valueData).get();
 
     // now get the status for field value
-    Property statusProperty = field.getProperty("status");
-    assert(statusProperty!=null);
-    DBData valueStatusData = dbAccess.getPropertyField(statusProperty);
+    DBData valueStatusData = dbAccess.getPropertyField("status");
+    assert(valueStatusData!=null);
     assert(field.getType()==Type.pvString);
     String status = ((DBString)valueStatusData).get();
 
     // now get rawData and rawData status
-    assert(dbAccess.setField("rawData");
+    assert(dbAccess.setField("rawData"));
     DBData rawValueData = dbAccess.getField();
     Field field = rawValueData.getField();
     assert(field.getType()==Type.pvInt);
     int rawValue = ((DBInt)rawValueData).get();
-    statusProperty = field.getProperty("status");
-    assert(statusProperty!=null);
-    DBData rawValueStatusData = dbAccess.getPropertyField(statusProperty);
+    DBData rawValueStatusData = dbAccess.getPropertyField("status");
+    assert(rawValueStatusData!=null);
     assert(field.getType()==Type.pvString);
     String status = ((DBString)valueStatusData).get();</pre>
 

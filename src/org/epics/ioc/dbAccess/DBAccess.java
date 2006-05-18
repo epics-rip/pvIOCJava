@@ -48,14 +48,23 @@ public interface DBAccess {
      */
     DBData getField();
     /**
-     * get the field data interface for the specified property name.
+     * get the field data interface for the specified property.
      * @param property the property.
      * It must be a property associated with the field related to the last setField.
-     * If setField was not called or was a reset call then the property name must be a property
+     * If setField was not called or was a reset call then the property must be a property
      * of the record itself.
      * @return the field interface or null if the property or field does not exist.
      */
     DBData getPropertyField(Property property);
+    /**
+     * get the field data interface for the specified propertyName.
+     * @param propertyName the property name.
+     * It must be the name of a property associated with the field related to the last setField.
+     * If setField was not called or was a reset call then the property must be a property
+     * of the record itself.
+     * @return the field interface or null if the property or field does not exist.
+     */
+    DBData getPropertyField(String propertyName);
     /**
      * replace the data implementation for a field.
      * @param oldField the interface for the old implementation.

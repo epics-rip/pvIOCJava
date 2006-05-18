@@ -3,8 +3,17 @@ package org.epics.ioc.pvAccess.example;
 import junit.framework.TestCase;
 import org.epics.ioc.pvAccess.*;
 
+/**
+ * JUnit test for pvAccess.
+ * It also provides examples of how to use the pvAccess interfaces.
+ * @author mrk
+ *
+ */
 public class DatabaseExampleTest extends TestCase {
         
+    /**
+     * test boolean.
+     */
     public static void testBoolean() {
         DatabaseExample database = new DatabaseExample("test");
         PVBoolean booleanData = (PVBoolean)
@@ -22,6 +31,9 @@ public class DatabaseExampleTest extends TestCase {
         assertEquals(field.getPropertys().length,0);
     }
         
+    /**
+     * test byte.
+     */
     public static void testByte() {
         DatabaseExample database = new DatabaseExample("test");
         Convert convert = ConvertFactory.getConvert();
@@ -51,6 +63,9 @@ public class DatabaseExampleTest extends TestCase {
         assertEquals(field.getPropertys().length,0);
     }
 
+    /**
+     * test short.
+     */
     public static void testShort() {
         DatabaseExample database = new DatabaseExample("test");
         Convert convert = ConvertFactory.getConvert();
@@ -80,6 +95,9 @@ public class DatabaseExampleTest extends TestCase {
         assertEquals(field.getPropertys().length,0);
     }
 
+    /**
+     * test int.
+     */
     public static void testInt() {
         DatabaseExample database = new DatabaseExample("test");
         Convert convert = ConvertFactory.getConvert();
@@ -109,6 +127,9 @@ public class DatabaseExampleTest extends TestCase {
         assertEquals(field.getPropertys().length,0);
     }
 
+    /**
+     * test long.
+     */
     public static void testLong() {
         DatabaseExample database = new DatabaseExample("test");
         Convert convert = ConvertFactory.getConvert();
@@ -138,6 +159,9 @@ public class DatabaseExampleTest extends TestCase {
         assertEquals(field.getPropertys().length,0);
     }
 
+    /**
+     * test float.
+     */
     public static void testFloat() {
         DatabaseExample database = new DatabaseExample("test");
         Convert convert = ConvertFactory.getConvert();
@@ -167,6 +191,9 @@ public class DatabaseExampleTest extends TestCase {
         assertEquals(field.getPropertys().length,0);
     }
 
+    /**
+     * test double.
+     */
     public static void testDouble() {
         DatabaseExample database = new DatabaseExample("test");
         Convert convert = ConvertFactory.getConvert();
@@ -196,6 +223,9 @@ public class DatabaseExampleTest extends TestCase {
         assertEquals(field.getPropertys().length,0);
     }
 
+    /**
+     * test string.
+     */
     public static void testString() {
         DatabaseExample database = new DatabaseExample("test");
         PVString stringData = (PVString)
@@ -213,6 +243,9 @@ public class DatabaseExampleTest extends TestCase {
         assertEquals(field.getPropertys().length,0);
     }
 
+    /**
+     * test enum.
+     */
     public static void testEnum() {
         DatabaseExample database = new DatabaseExample("test");
         PVEnum enumData = database.createEnumData("enum",true,null);
@@ -231,6 +264,9 @@ public class DatabaseExampleTest extends TestCase {
                 enumData.toString());
     }
 
+    /**
+     * test structure and property.
+     */
     public static void testStructureAndProperty() {
         DatabaseExample database = new DatabaseExample("test");
         // value has property displayLimit
@@ -273,6 +309,9 @@ public class DatabaseExampleTest extends TestCase {
              displayLimit.toString());
     }
 
+    /**
+     * test array of boolean.
+     */
     public static void testBooleanArray() {
         DatabaseExample database = new DatabaseExample("test");
         PVBooleanArray booleanArrayData = (PVBooleanArray)
@@ -295,6 +334,9 @@ public class DatabaseExampleTest extends TestCase {
         assertEquals(field.getPropertys().length,0);
     }
 
+    /**
+     * test array of byte.
+     */
     public static void testByteArray() {
         DatabaseExample database = new DatabaseExample("test");
         Convert convert = ConvertFactory.getConvert();
@@ -370,6 +412,9 @@ public class DatabaseExampleTest extends TestCase {
         assertTrue(arrayValue[0]==0 && arrayValue[1]==1 && arrayValue[2]==2);
     }
 
+    /**
+     * test array of short.
+     */
     public static void testShortArray() {
         DatabaseExample database = new DatabaseExample("test");
         Convert convert = ConvertFactory.getConvert();
@@ -439,6 +484,9 @@ public class DatabaseExampleTest extends TestCase {
         assertTrue(arrayValue[0]==0 && arrayValue[1]==1 && arrayValue[2]==2);
     }
 
+    /**
+     * test array of int.
+     */
     public static void testIntArray() {
         DatabaseExample database = new DatabaseExample("test");
         Convert convert = ConvertFactory.getConvert();
@@ -508,6 +556,9 @@ public class DatabaseExampleTest extends TestCase {
         assertTrue(arrayValue[0]==0 && arrayValue[1]==1 && arrayValue[2]==2);
     }
 
+    /**
+     * test array of long.
+     */
     public static void testLongArray() {
         DatabaseExample database = new DatabaseExample("test");
         Convert convert = ConvertFactory.getConvert();
@@ -577,6 +628,9 @@ public class DatabaseExampleTest extends TestCase {
         assertTrue(arrayValue[0]==0 && arrayValue[1]==1 && arrayValue[2]==2);
     }
 
+    /**
+     * test array of float.
+     */
     public static void testFloatArray() {
         DatabaseExample database = new DatabaseExample("test");
         Convert convert = ConvertFactory.getConvert();
@@ -646,6 +700,9 @@ public class DatabaseExampleTest extends TestCase {
         assertTrue(arrayValue[0]==0.0F && arrayValue[1]==1.0F && arrayValue[2]==2.0F);
     }
 
+    /**
+     * test array of double.
+     */
     public static void testDoubleArray() {
         DatabaseExample database = new DatabaseExample("test");
         Convert convert = ConvertFactory.getConvert();
@@ -715,6 +772,9 @@ public class DatabaseExampleTest extends TestCase {
         assertTrue(arrayValue[0]==0.0 && arrayValue[1]==1.0 && arrayValue[2]==2.0);
     }
 
+    /**
+     * test array of string.
+     */
     public static void testStringArray() {
         DatabaseExample database = new DatabaseExample("test");
         PVStringArray stringArrayData = (PVStringArray)
@@ -743,6 +803,9 @@ public class DatabaseExampleTest extends TestCase {
         assertEquals(field.getPropertys().length,0);
     }
 
+    /**
+     * test array of enum.
+     */
     public static void testEnumArray() {
         DatabaseExample database = new DatabaseExample("test");
         PVEnumArray enumArrayData = (PVEnumArray)
@@ -771,6 +834,9 @@ public class DatabaseExampleTest extends TestCase {
         assertEquals(field.getPropertys().length,0);
     }
 
+    /**
+     * test array of structure.
+     */
     public static void testStructureArray() {
         DatabaseExample database = new DatabaseExample("test");
         PVStructureArray structureArrayData = (PVStructureArray)
@@ -804,6 +870,9 @@ public class DatabaseExampleTest extends TestCase {
         assertEquals(field.getPropertys().length,0);
     }
 
+    /**
+     * test array of array.
+     */
     public static void testArrayArray() {
         DatabaseExample database = new DatabaseExample("test");
         PVArrayArray arrayArrayData = (PVArrayArray)

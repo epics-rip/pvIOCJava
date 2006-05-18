@@ -11,8 +11,8 @@
 <hr />
 
 <h1 style="text-align: center">EPICS JavaIoc: Database Definition <br />
-package: org/epics/ioc/dbDefinition<br />
-2006.05.12</h1>
+package: org.epics.ioc.dbDefinition<br />
+2006.05.18</h1>
 <hr />
 <a href="#Overview">Overview</a> <br />
 <a href="#Syntax">Database Definition Syntax</a>
@@ -122,6 +122,8 @@ style="font-family: courier;">menu</span>, <span
 style="font-family: courier;">structure</span> or <span
 style="font-family: courier;">record</span>Type or linkSupport element.</p>
 
+<p>NOT CURRENTLY IMPLEMENTED.</p>
+
 <h2 style="text-align: center"><a id="SyntaxMenu"></a>Menu</h2>
 A menu is an enumerated type, defined below, where the choice strings are
 defined once for each IOC. The syntax is:
@@ -159,8 +161,7 @@ A structure is defined as follows:
 &lt;/structure&gt;</pre>
 
 <p>A record type is defined as follows:</p>
-<pre>&lt;include filename = "common.dbd" /&gt;
-&lt;recordType name = "recordtypeName"&gt;
+<pre>&lt;recordType name = "recordtypeName"&gt;
     &lt;property name = "propertyName" associatedField = "fieldName" /&gt;
     ...
     &lt;include filename = "base.dbd" /&gt;
@@ -170,7 +171,10 @@ A structure is defined as follows:
      &lt;/field&gt;
      ...
 &lt;/recordType&gt;</pre>
-where
+
+<p></p>
+
+<p>where</p>
 <dl>
   <dt><span style="font-family: courier">structureName</span></dt>
   <dt><span style="font-family: courier">recordtypeName</span></dt>
@@ -211,13 +215,12 @@ example
 A <span style="font-family: courier">string</span> is a Java <span
 style="font-family: courier;">String</span>. A <span
 style="font-family: courier;">string</span> field type is just defined as
-<span style="font-family: courier;">&lt;string /&gt;</span>. For example:
+<span style="font-family: courier;">string</span>. For example:
 <pre>     &lt;field name = "description" type = "string" /&gt;</pre>
 
 <h4><a id="SyntaxEnumerated"></a>enumerated</h4>
 
-<p>An enumerated field is defined as <span
-style="font-family: courier;">&lt;enum /&gt;</span>. For example:</p>
+<p>An enumerated field type is just bspecified as enum For example:</p>
 <pre>    &lt;field name = "value" type = "enum" /&gt;</pre>
 
 <h4><a id="SyntaxStructure"></a>structure</h4>
@@ -238,7 +241,7 @@ structure which must have been previously defined. Example:
 <h4><a id="SyntaxArray"></a>array</h4>
 
 <p>NOTE: One dimensional arrays are a supported type. Multidimensional arrays
-are supported via a <span style="font-family: courier;">structure</span>
+can be supported via a <span style="font-family: courier;">structure</span>
 definition with fields describing the number of dimensions and the attributes
 of each dimension.</p>
 An array is defined as follows:
@@ -261,7 +264,7 @@ Examples:
 
 <h4><a id="SyntaxMenuField"></a>menu</h4>
 A menu field is defined as:
-<pre>     &lt;menu name = "menuName" /&gt;</pre>
+<pre>     &lt;field name = "name" type = "menu" nameName = "menuName" /&gt;</pre>
 where <span style="font-family: courierfont-family: courier;">menuName</span>
 is the name of the menu. <br />
 Example:
@@ -286,8 +289,8 @@ Examples:
 
 <h3><a id="SyntaxFieldAttribute"></a>field attribute</h3>
 
-<p>A field can have attributesThe attributes are specified via xml
-attributes. The supported attributes are:</p>
+<p>A field can have additional attributes which are specified via xml
+attributes. The additional attributes are:</p>
 <pre>     default = "stringValue"
      readonly = "booleanValue"
      design = "booleanValue"
@@ -587,8 +590,7 @@ interest to the database itself.</p>
 <hr />
 
 <p>The following are the reflection interfaces for database fields:</p>
-<pre>xxxxx
-
+<pre>
     interface DBDField extends Field {
         DBType getDBType();
         DBDAttribute getAttribute();
@@ -670,9 +672,5 @@ definition database.</p>
 <pre>    public class XMLToDBDFactory {
         public static void convert(DBD dbd, String fileName);
     }</pre>
-
-<p>A java application that reads and dumps a database definition file can be
-invoked from a shell via the command:</p>
-<pre>     java XMLToDBD dbdFileName</pre>
 </body>
 </html>

@@ -9,10 +9,17 @@ import org.epics.ioc.dbDefinition.*;
 import org.epics.ioc.dbAccess.*;
 import org.epics.ioc.pvAccess.*;
 
-import java.net.*;
+/**
+ * JUnit test for DBListener.
+ * @author mrk
+ *
+ */
 public class ListenerTest extends TestCase {
         
-    public static void testXML() {
+    /**
+     * test DBListener.
+     */
+    public static void testListener() {
         DBD dbd = DBDFactory.create("test"); 
         IOCDB iocdb = IOCDBFactory.create(dbd,"testIOCDatabase");
         System.out.printf("reading menuStructureSupport\n");

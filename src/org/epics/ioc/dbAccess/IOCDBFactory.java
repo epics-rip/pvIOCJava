@@ -64,6 +64,7 @@ public class IOCDBFactory {
     }
     
     private static class DBAccessInstance implements DBAccess {
+        
         public void replaceField(DBData oldField, DBData newField) {
             if(oldField.getField().getType()!=newField.getField().getType()) {
                 throw new IllegalArgumentException("newField is not same type as oldField");
@@ -146,6 +147,13 @@ public class IOCDBFactory {
             return findPropertyField(currentData,property);
         }
 
+        public DBData getPropertyField(String propertyName) {
+            DBData currentData = dbDataSetField;
+            if(currentData==null) currentData = dbRecord;
+            Property property = currentData.getField().getProperty(propertyName);
+            if(property==null) return null;
+            return findPropertyField(currentData,property);
+        }
         
         DBAccessInstance(DBRecord dbRecord) {
             this.dbRecord = dbRecord;

@@ -6,8 +6,23 @@ package org.epics.ioc.dbDefinition.example;
 import junit.framework.TestCase;
 import org.epics.ioc.dbDefinition.*;
 import java.util.*;
+/**
+ * JUnit test for DMLToDBD.
+ * This also is a test for dbDefinition and pvAccess because XMLToDBD makes
+ * extensive use of dbDefinition and pvAccess.
+ * It also provides an example of parsing database definitions.
+ * When run it produces four warning messages. These demonstrate what happens
+ * when an xml file has errors.
+ * The output is a dump of all the dsatabase definitions defined by test.xml.
+ * @author mrk
+ *
+ */
 public class XMLToDBDTest extends TestCase {
         
+    /**
+     * the test.
+     * This is the only public method.
+     */
     public static void testXML() {
         DBD dbd = DBDFactory.create("test");
         try {

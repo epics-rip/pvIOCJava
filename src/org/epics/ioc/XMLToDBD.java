@@ -18,7 +18,7 @@ public class XMLToDBD {
 
     /**
      * read a database definition file and dump result.
-     * @param args the databade definition file.
+     * @param args the database definition file.
      */
     public static void main(String[] args) {
         DBD dbd = DBDFactory.create("test");

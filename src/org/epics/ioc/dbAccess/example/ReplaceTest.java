@@ -9,9 +9,17 @@ import org.epics.ioc.dbDefinition.*;
 import org.epics.ioc.dbAccess.*;
 import org.epics.ioc.pvAccess.*;
 
+/**
+ * JUnit test for replacing the default data implementration for a field.
+ * @author mrk
+ *
+ */
 public class ReplaceTest extends TestCase {
         
-    public static void testXML() {
+    /**
+     * test replacing the default data implementration for a field.
+     */
+    public static void testReplaceField() {
         DBD dbd = DBDFactory.create("test"); 
         IOCDB iocdb = IOCDBFactory.create(dbd,"testIOCDatabase");
         System.out.printf("reading menuStructureSupport\n");

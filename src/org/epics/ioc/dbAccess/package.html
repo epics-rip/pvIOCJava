@@ -11,8 +11,8 @@
 <hr />
 
 <h1 style="text-align: center">EPICS JavaIoc: Database Access <br />
-package: org/epics/ioc/dbAcess <br />
-2006.05.10</h1>
+package: org.epics.ioc.dbAcess <br />
+2006.05.18</h1>
 <hr />
 <a href="#Overview">Overview</a> <br />
 <a href="#Instance">Record Instance Syntax</a>
@@ -124,7 +124,14 @@ depends on the field type.</p>
 
 <p>For primitive types the initializer has the same format as the the Java
 constants for the type. For example if the type for field value is double:</p>
-<pre>    &lt;value&gt;.98&lt;/value&gt;</pre>
+<pre>    &lt;value&gt;.98&lt;/value&gt;
+</pre>
+
+<p>NOTE: Byte.decode, Short.decode, Integer.decide, and Long.decode are used
+to convert a string to an integer data type. Thus hex values are allowed but
+the sign bit MUST not be set. This for byte data 0xff is not allowed but
+-0x01 is allowed. Note for example that the byte value -128 can not be
+specified in hex.</p>
 
 <h3><a id="FieldString"></a>string</h3>
 
@@ -367,7 +374,6 @@ A menu field is accessed via the interface:
 <pre>    public interface DBStructure extends DBData, PVStructure {
          DBData[] getFieldDBDatas();
          int getFieldDBDataIndex(String fieldName);
-         DBStructure getParent();
     }</pre>
 
 <h2><a id="RecordData"></a>RecordData</h2>
@@ -566,85 +572,7 @@ database fields.</p>
         protected AbstractDBArray(DBDArrayField dbdArrayField);
     }</pre>
 
-<p>This is probably the most usefull abstract class. For example it can be
-used to implement a circular buffer as follows:</p>
-<pre>    public class CircularBuffer extends AbstractDBArray implements DBDoubleArray {
-        public String toString() {
-            return convert.getString(this);
-        }
-
-        public String toString(int indentLevel) {
-            return convert.getString(this, indentLevel);
-        }
-
-        public boolean isCapacityMutable() {
-            return false;
-        }
-
-        public int get(int offset, int len, double[] to, int toOffset) {
-            if(length==0) return 0;
-            if(offset&gt;capacity) throw new IllegalStateException("offset &gt; capacity");
-            if(len&gt;length) len = length;
-            int start = position + offset;
-            if(start&gt;=capacity) start = start - capacity;
-            int num;
-            if(len+position&lt;=capacity) {
-                num = len;
-            } else {
-                num = capacity - position;
-            }
-            System.arraycopy(value,start,to,toOffset,num);
-            return num;
-        }
-
-        public int put(int offset, int len, double[] from, int fromOffset) {
-            if(offset!=0) throw new IllegalStateException("offset must be 0");
-            int total = 0;
-            int num;
-            while(len&gt;0) {
-                if(position==capacity) position = 0;
-                if(len+position&lt;=capacity) {
-                    num = len;
-                } else {
-                    num = capacity - position;
-                }
-                System.arraycopy(from,fromOffset,value,position,num);
-                length += num;
-                if(length&gt;capacity) length = capacity;
-                position += num; fromOffset += num; len -= num; total += num;
-                
-           }
-           return total;
-        }
-
-        public int getCapacity() {
-            return capacity;
-        }
-
-        public int getLength() {
-            return length;
-        }
-
-        public void setCapacity(int len) {
-            throw new IllegalStateException("capacity is immutable");
-        }
-
-        public void setLength(int len) {
-            throw new IllegalStateException("length only set via put");
-        }
-
-        CircularBuffer(DBDArrayField dbdArrayField,int capacity)
-        {
-            super(dbdArrayField);
-            this.capacity = capacity;
-            value = new double[capacity];
-        }
-
-        private double[] value;
-        int length = 0;
-        int position = 0;
-        int capacity;
-    }</pre>
+<p>This is probably the most usefull abstract class.</p>
 <hr />
 
 <h1 style="text-align: center"><a id="IOCDB"></a> IOCDB: IOC Database</h1>
@@ -692,6 +620,7 @@ Access</h1>
         void setField(DBData dbData);
         DBData getField();
         DBData getPropertyField(Property property);
+        DBData getPropertyField(String propertyName);
     }</pre>
 </body>
 </html>

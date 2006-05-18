@@ -22,9 +22,4 @@ public interface DBStructure extends DBData, PVStructure {
      * @return the index or -1 if the field does not exist.
      */
     int getFieldDBDataIndex(String fieldName);
-    /**
-     * get the parent of the structure.
-     * @return the parent interface.
-     */
-    DBStructure getParent();
 }

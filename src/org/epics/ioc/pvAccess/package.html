@@ -8,9 +8,9 @@
 </head>
 
 <body>
-<h1 style="text-align: center">EPICS JavaIOC<br />
-package: org/epics/ioc/pvAccess<br />
-2006.04.27</h1>
+<h1 style="text-align: center">EPICS JavaIOC: pvAccess<br />
+package: org.epics.ioc.pvAccess<br />
+2006.05.18</h1>
 
 <p><a href="#Overview">Overview</a></p>
 <ul>
@@ -69,7 +69,7 @@ systems, e.g. TANGO, TINI, DOOCS, etc.</p>
 <p>This package provides the following:</p>
 <ul>
   <li>Type
-    <p>This is an enum that describes the valid types.</p>
+    <p>An enum that describes the valid types.</p>
   </li>
   <li>Reflection Interfaces
     <p>These are interfaces that describe a PV. They are designed so that
@@ -81,6 +81,8 @@ systems, e.g. TANGO, TINI, DOOCS, etc.</p>
   </li>
   <li>Conversion Facility
     <p>Conversion of the data from any PV to a string is provided.</p>
+    <p>Conversion from a string to any scalar or array of srings to an array
+    of scaler types is supported.</p>
     <p>Conversion between a PV and numeric primitive types is supported. The
     PV must contain scalar numeric type.</p>
     <p>Conversion between a PV and an array of numeric primitive types is
@@ -133,7 +135,7 @@ follows:</p>
   <li>unknown - type is not known</li>
   <li>primitive
     <ul>
-      <li>byte - An 8 bit byte</li>
+      <li>byte - An 8 bit signed byte</li>
       <li>boolean - true or false</li>
       <li>short - 16 bit signed integer</li>
       <li>int- 32 bit signed integer</li>
@@ -265,7 +267,8 @@ especially important for arrays and structures.</p>
     <p>Returns the reflection interface for the data</p>
   </li>
   <li>toString
-    <p>Converts the field data to a string.</p>
+    <p>Converts the field data to a string. This is mostly for debugging
+    purposes.</p>
   </li>
 </ul>
 
@@ -458,7 +461,7 @@ the following reads an entire array:</p>
         void fromString(PVData pv,String from);
         int fromStringArray(PVData pv,
              int offset, int len, String[]from, int fromOffset);
-        // For the following th pv Type must be PVByte, ...., PVDouble
+        // For the following the pv Type must be PVByte, ...., PVDouble
         byte toByte(PVData pv);
         short toShort(PVData pv);
         int   toInt(PVData pv);
@@ -531,8 +534,7 @@ interfaces. It has the following public methods:</p>
 style="font-family: courier;">Convert</span> interface.</p>
 <pre>    public final class ConvertFactory {
         public static Convert getConvert();
-    }
-</pre>
+    }</pre>
 
 <p>It provides a single implementation no matter how many times getConvert is
 called.</p>
