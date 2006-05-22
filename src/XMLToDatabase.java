@@ -28,6 +28,11 @@ public class XMLToDatabase {
      * 
      */
     public static void main(String[] args) {
+        if(args.length==0 || args[0].equals("?")) {
+            System.out.printf("-dbd DatabaseDefinitionList"
+                    + " -db InstanceList -dumpDBD -dumpDB  ...\n");
+            return;
+        }
         DBD dbd = DBDFactory.create("test");
         IOCDB iocdb = IOCDBFactory.create(dbd,"testIOCDatabase");
         int nextArg = 0;
