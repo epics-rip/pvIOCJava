@@ -302,6 +302,7 @@ public class IOCDBFactory {
             return null;
         }
         public boolean createRecord(String recordName, DBDRecordType dbdRecordType) {
+            if(recordMap.containsKey(recordName)) return false;
             DBRecord record = FieldDataFactory.createRecord(recordName,dbdRecordType);
             recordMap.put(recordName,record);
             return true;

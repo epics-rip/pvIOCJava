@@ -16,27 +16,51 @@ import java.util.*;
  *
  */
 public abstract class AbstractDBData implements DBData{
-    public void removeListener(DBListener listener) {
-        listenerList.remove(listener);
-    }
     /* (non-Javadoc)
      * @see org.epics.ioc.dbAccess.DBData#addListener(org.epics.ioc.dbAccess.DBListener)
      */
-    public final void addListener(DBListener listener) {
-        listenerList.add(listener);
+    public void addListener(DBListener listener) {
+        DBListenerPvt newListener = new DBListenerPvt();
+        newListener.isSynchronous = false;
+        newListener.sentSynchronous = false;
+        newListener.listener = listener;
+        listenerList.add(newListener);
+        record.addListener(newListener);
+    }
+    /* (non-Javadoc)
+     * @see org.epics.ioc.dbAccess.DBData#removeListener(org.epics.ioc.dbAccess.DBListener)
+     */
+    public void removeListener(DBListener dbListener) {
+        ListIterator<DBListenerPvt> iterator = listenerList.listIterator();
+        while(iterator.hasNext()) {
+            DBListenerPvt listener = iterator.next();
+            if(listener.listener==dbListener) {
+                record.removeListener(listener);
+                listenerList.remove(listener);
+                break;
+            }
+        }
     }
     /* (non-Javadoc)
      * @see org.epics.ioc.dbAccess.DBData#postPut()
      */
     public final void postPut() {
-        postPut(this);
+        if(!record.postMaster(this)) postPut(this);
     }
     /* (non-Javadoc)
      * @see org.epics.ioc.dbAccess.DBData#postPut()
      */
     public final void postPut(DBData dbData) {
-        ListIterator<DBListener> iter = listenerList.listIterator();
-        while(iter.hasNext()) iter.next().newData(dbData);
+        Iterator<DBListenerPvt> iter = listenerList.iterator();
+        while(iter.hasNext()) {
+            DBListenerPvt listener = iter.next();
+            DBListener dbListener = listener.listener;
+            if(listener.isSynchronous && !listener.sentSynchronous) {
+                listener.sentSynchronous = true;
+                dbListener.startSynchronous();
+            }
+            dbListener.newData(dbData);
+        }
         if(parent==null) return;
         if(parent==this) {
             System.out.printf("postPut parent = this Why???\n");
@@ -104,12 +128,11 @@ public abstract class AbstractDBData implements DBData{
         } else {
             record = null;
         }
-        listenerList = new LinkedList<DBListener>();
+        listenerList = new LinkedList<DBListenerPvt>();
     }
     
     private DBDField dbdField;
     private DBStructure parent;
     private DBRecord record;
-    private LinkedList<DBListener> listenerList;
-
+    private LinkedList<DBListenerPvt> listenerList;
 }

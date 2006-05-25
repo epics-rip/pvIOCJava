@@ -10,20 +10,10 @@ package org.epics.ioc.dbAccess;
  * @author mrk
  *
  */
-public interface DBListener {
+public interface DBMasterListener {
     /**
      * called when data has been modified.
      * @param dbData the interface for the modified data.
      */
     void newData(DBData dbData);
-    /**
-     * start of synchronous data.
-     * From start until end of synchronous data,
-     * each newData returns part of the synchronous data.
-     */
-    void startSynchronous();
-    /**
-     * end of synchronous data.
-     */
-    void endSynchronous();
 }

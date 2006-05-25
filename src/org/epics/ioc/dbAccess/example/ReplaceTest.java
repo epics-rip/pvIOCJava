@@ -259,8 +259,18 @@ public class ReplaceTest extends TestCase {
     }
     
     private static class TestListener implements DBListener{
+
+        public void startSynchronous() {
+            synchronousData = true;
+        }
+        
+        public void endSynchronous() {
+            synchronousData = false;
+        }
+
         public void newData(DBData dbData) {
-            System.out.printf("\n    TestListener recordName %s",recordName);
+            System.out.printf("\n    TestListener recordName %s  is Synchronous %b",
+                recordName,synchronousData);
             if(fieldName!=null) {
                 System.out.printf(" fieldName %s",fieldName);
             }
@@ -297,6 +307,7 @@ public class ReplaceTest extends TestCase {
         }
         private String recordName;
         private String fieldName;
+        private boolean synchronousData = false;
     }
 
     static void testPut(IOCDB iocdb,String recordName,

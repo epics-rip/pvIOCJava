@@ -7,6 +7,7 @@ package org.epics.ioc.dbAccess;
 import org.epics.ioc.pvAccess.*;
 import org.epics.ioc.dbDefinition.*;
 
+
 /**
  * The base interface for accessing a field of a record instance.
  * @author mrk
@@ -40,10 +41,12 @@ public interface DBData extends PVData {
     void removeListener(DBListener listener);
     /**
      * the data was modified.
+     * This is the version of postPut that must be called by the code that implements a put method. 
      */
     void postPut();
     /**
      * the data was modified.
+     * This version is called by the AbstractDBData to actually notify the listeners.
      * @param dbData the data that was modified.
      */
     void postPut(DBData dbData);

@@ -10,6 +10,7 @@ import junit.framework.TestCase;
 import org.epics.ioc.dbDefinition.*;
 import org.epics.ioc.dbAccess.*;
 import org.epics.ioc.pvAccess.*;
+import java.util.concurrent.*;
 
 /**
  * JUnit test for DBListener.
@@ -107,23 +108,25 @@ public class ListenerTest extends TestCase {
 //            DBRecord record = recordMap.get(key);
 //            System.out.print(record.toString());
 //        }
-        System.out.printf("\n");
+        System.out.printf("\ntest put and listen exampleAiLinear");
         new TestListener(iocdb,"exampleAiLinear","value");
         new TestListener(iocdb,"exampleAiLinear","aiLinear");
         new TestListener(iocdb,"exampleAiLinear",null);
-        testPut(iocdb,"exampleAiLinear","rawValue",2.0);
-        testPut(iocdb,"exampleAiLinear","value",5.0);
-        testPut(iocdb,"exampleAiLinear","timeStamp",100.0);
+//        testPut(iocdb,"exampleAiLinear","rawValue",2.0);
+//        testPut(iocdb,"exampleAiLinear","value",5.0);
+//        testPut(iocdb,"exampleAiLinear","timeStamp",100.0);
         System.out.printf("\ntest put and listen examplePowerSupply\n");
         new TestListener(iocdb,"examplePowerSupply","power");
         new TestListener(iocdb,"examplePowerSupply","current");
         new TestListener(iocdb,"examplePowerSupply","voltage");
         new TestListener(iocdb,"examplePowerSupply","powerSupply");
         new TestListener(iocdb,"examplePowerSupply",null);
-        testPut(iocdb,"examplePowerSupply","current",25.0);
-        testPut(iocdb,"examplePowerSupply","voltage",2.0);
-        testPut(iocdb,"examplePowerSupply","power",50.0);
-        testPut(iocdb,"examplePowerSupply","timeStamp",100.0);
+//        testPut(iocdb,"examplePowerSupply","current",25.0);
+//        testPut(iocdb,"examplePowerSupply","voltage",2.0);
+//        testPut(iocdb,"examplePowerSupply","power",50.0);
+//        testPut(iocdb,"examplePowerSupply","timeStamp",100.0);
+        System.out.printf("\ntest masterListener examplePowerSupply\n");
+        testPut(iocdb,"examplePowerSupply","powerSupply",0.5);
         System.out.printf("\ntest put and listen examplePowerSupplyArray\n");
         new TestListener(iocdb,"examplePowerSupplyArray","powerSupply[0].power");
         new TestListener(iocdb,"examplePowerSupplyArray","powerSupply[0].current");
@@ -134,13 +137,13 @@ public class ListenerTest extends TestCase {
         new TestListener(iocdb,"examplePowerSupplyArray","powerSupply[1].voltage");
         new TestListener(iocdb,"examplePowerSupplyArray","powerSupply[1]");
         new TestListener(iocdb,"examplePowerSupplyArray",null);
-        testPut(iocdb,"examplePowerSupplyArray","powerSupply[0].current",25.0);
-        testPut(iocdb,"examplePowerSupplyArray","powerSupply[0].voltage",2.0);
-        testPut(iocdb,"examplePowerSupplyArray","powerSupply[0].power",50.0);
-        testPut(iocdb,"examplePowerSupplyArray","powerSupply[1].current",2.50);
-        testPut(iocdb,"examplePowerSupplyArray","powerSupply[1].voltage",1.00);
-        testPut(iocdb,"examplePowerSupplyArray","powerSupply[1].power",2.50);
-        testPut(iocdb,"examplePowerSupplyArray","timeStamp",100.0);
+//        testPut(iocdb,"examplePowerSupplyArray","powerSupply[0].current",25.0);
+//        testPut(iocdb,"examplePowerSupplyArray","powerSupply[0].voltage",2.0);
+//        testPut(iocdb,"examplePowerSupplyArray","powerSupply[0].power",50.0);
+//        testPut(iocdb,"examplePowerSupplyArray","powerSupply[1].current",2.50);
+//        testPut(iocdb,"examplePowerSupplyArray","powerSupply[1].voltage",1.00);
+//        testPut(iocdb,"examplePowerSupplyArray","powerSupply[1].power",2.50);
+//        testPut(iocdb,"examplePowerSupplyArray","timeStamp",100.0);
     }
     
     static void showParent(IOCDB iocdb,String recordName,String fieldName) {
@@ -167,9 +170,22 @@ public class ListenerTest extends TestCase {
         
     }
     
-    private static class TestListener implements DBListener{
+    private static class TestListener implements DBListener{ 
+        
+        public void startSynchronous() {
+            System.out.printf("TestListener start synchronous data fieldName %s\n",fieldName);
+            synchronousData = true;
+        }
+        
+        public void endSynchronous() {
+          System.out.printf("TestListener end synchronous data fieldName %s\n",fieldName);
+          synchronousData = false;
+      }
+
+
         public void newData(DBData dbData) {
-            System.out.printf("TestListener recordName %s",recordName);
+            System.out.printf("TestListener recordName %s is Synchronous %b",
+                recordName,synchronousData);
             if(fieldName!=null) {
                 System.out.printf(" fieldName %s",fieldName);
             }
@@ -205,6 +221,7 @@ public class ListenerTest extends TestCase {
         }
         private String recordName;
         private String fieldName;
+        private boolean synchronousData = false;
     }
     
     static void testPut(IOCDB iocdb,String recordName,String fieldName,double value) {
@@ -231,14 +248,55 @@ public class ListenerTest extends TestCase {
             return;
         }
         DBStructure structure = (DBStructure)dbData;
-        DBData[] fields = structure.getFieldDBDatas();
-        for(DBData field : fields) {
-            if(field.getField().getType().isNumeric()) {
-                System.out.printf("testPut recordName %s fieldName %s value %f\n",
-                        recordName,field.getField().getName(),value);
-                    convert.fromDouble(field,value);
+        TestPutStructure testPutStructure = new TestPutStructure(structure);
+        testPutStructure.putFields(value);
+    }
+    
+    static private class TestPutStructure implements DBMasterListener {
+        
+        void putFields(double value) {
+            String recordName = dbRecord.getRecordName();
+            dbRecord.insertMasterListener(this);
+            isMaster = true;
+            DBData[] fields = dbStructure.getFieldDBDatas();
+            for(DBData field : fields) {
+                Type type = field.getField().getType();
+                if(type.isNumeric()) {
+                    System.out.printf("testPut recordName %s fieldName %s value %f\n",
+                            recordName,field.getField().getName(),value);
+                        convert.fromDouble(field,value);
+                } else if (type==Type.pvString) {
+                    String valueString = Double.toString(value);
+                    System.out.printf("testPut recordName %s fieldName %s value %s\n",
+                            recordName,field.getField().getName(),valueString);
+                    DBString dbString = (DBString)field;
+                    dbString.put(valueString);
+                }
+                
             }
+            dbRecord.startSynchronous();
+            for(DBData dbData : dataList) dbRecord.postForMaster(dbData);
+            dbRecord.stopSynchronous();
+            isMaster = false;
+            dbRecord.removeMasterListener(this);
         }
+
+        public void newData(DBData dbData) {
+            if(!isMaster) return;
+            dataList.add(dbData);
+        }
+
+        
+        TestPutStructure(DBStructure structure) {
+            dbStructure = structure;
+            dbRecord = dbStructure.getRecord();
+            dataList = new ConcurrentLinkedQueue<DBData>();
+        }
+        
+        private DBStructure dbStructure;
+        private DBRecord dbRecord;
+        private ConcurrentLinkedQueue<DBData> dataList;
+        private boolean isMaster = false;
     }
     
     private static Convert convert = ConvertFactory.getConvert();

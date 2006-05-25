@@ -12,7 +12,7 @@
 
 <h1 style="text-align: center">EPICS JavaIoc: Database Access <br />
 package: org.epics.ioc.dbAcess <br />
-2006.05.18</h1>
+2006.05.25</h1>
 <hr />
 <a href="#Overview">Overview</a> <br />
 <a href="#Instance">Record Instance Syntax</a>
@@ -32,6 +32,7 @@ package: org.epics.ioc.dbAcess <br />
 <a href="#RecordInstanceAccess">Record Instance Access</a>
 <ul>
   <li><a href="#DBListener">Listener Interface</a></li>
+  <li><a href="#DBMasterListener">Master Listener Interface</a></li>
   <li><a href="#DBData">Base Interface for accesssing data</a></li>
   <li><a href="#DBPVData">Scalar and String Data</a></li>
   <li><a href="#EnumData">Enumerated Data</a></li>
@@ -297,9 +298,20 @@ support, Channel Access, etc.</p>
 
 <h2><a id="DBListener"></a>Listener Interface</h2>
 
-<p>DBListener is an interace that must be implemented by code that calls
+<p>DBListener is an interface that must be implemented by code that calls
 PVdata.addListener.</p>
 <pre>    public interface DBListener {
+        void newData(DBData dbData);
+        void startSynchronous();
+        void endSynchronous();
+    }</pre>
+
+<h2><a id="DBMasterListener"></a>Master Listener Interface</h2>
+
+<p>DBMasterListener is an interface that must be implemented by code
+that wants to perform synchronous puts. For example RecordProcess
+does synchronous puts.</p>
+<pre>    public interface DBMasterListener {
         void newData(DBData dbData);
     }</pre>
 
@@ -379,6 +391,18 @@ A menu field is accessed via the interface:
 <h2><a id="RecordData"></a>RecordData</h2>
 <pre>    public interface DBRecord extends DBStructure {
         String getRecordName();
+        void readLock();
+        void readUnlock();
+        void writeLock();
+        void writeUnlock();
+        boolean insertMasterListener(DBMasterListener listener);
+        void removeMasterListener(DBMasterListener listener);
+        boolean postMaster(DBData dbData);
+        void startSynchronous();
+        void stopSynchronous();
+        void postForMaster(DBData dbData);
+        void addListener(DBListenerPvt listener);
+        void removeListener(DBListenerPvt listener);
     }</pre>
 
 <h2><a id="LinkData"></a>Link Data</h2>
@@ -457,13 +481,6 @@ database fields.</p>
 
 <p>Abstract base class for a scalar field.</p>
 <pre>    public abstract class AbstractDBData implements DBData{
-        public DBRecord getRecord();
-        public DBDField getDBDField();
-        public Field getField();
-        public DBStructure getParent();
-        public final void addListener(DBListener listener);
-        public final void postPut();
-        public final void postPut(DBData dbData);
         public static void newLine(StringBuilder builder, int indentLevel);
         protected void setRecord(DBRecord record);
         protected AbstractDBData(DBStructure parent, DBDField dbdField);
@@ -474,12 +491,6 @@ database fields.</p>
 <p>Abstract base class for an enumerated field.</p>
 <pre>    public abstract class AbstractDBEnum extends AbstractDBData
     implements DBEnum {
-        public String[] getChoices();
-        public int getIndex();
-        public boolean setChoices(String[] choice);
-        public void setIndex(int index);
-        public String toString();
-        public String toString(int indentLevel);
         protected AbstractDBEnum(DBStructure parent,
             DBDEnumField dbdEnumField, String[]choice);
         protected int index;
@@ -492,14 +503,6 @@ database fields.</p>
 <pre>    public abstract class AbstractDBMenu extends AbstractDBData
     implements DBMenu
     {
-        public String getMenuName();
-        public String[] getChoices();
-        public int getIndex();
-        public boolean setChoices(String[] choice);
-        public void setIndex(int index);
-        public String toString() { return getString(0);} ;
-        public String toString(int indentLevel);
-        private String getString(int indentLevel);
         protected AbstractDBMenu(DBStructure parent,
             DBDMenuField dbdMenuField);
         protected int index;
@@ -515,11 +518,6 @@ database fields.</p>
 <pre>    public abstract class AbstractDBStructure extends AbstractDBData
     implements DBStructure
     {
-        public int getFieldDBDataIndex(String fieldName);
-        public PVData[] getFieldPVDatas();
-        public DBData[] getFieldDBDatas();
-        public String toString();
-        public String toString(int indentLevel);
         // constructor for structure fields
         protected AbstractDBStructure(DBStructure parent,
            DBDStructureField dbdStructureField);
@@ -533,9 +531,6 @@ database fields.</p>
 <p>Abstract base class for a record instance.</p>
 <pre>    public class AbstractDBRecord extends AbstractDBStructure
     implements DBRecord {
-        public String getRecordName();
-        public String toString();
-        public String toString(int indentLevel);
         protected AbstractDBRecord(String recordName,
             DBDRecordType dbdRecordType);
     }</pre>
@@ -546,14 +541,6 @@ database fields.</p>
 <pre>    public abstract class AbstractDBLink
     extends AbstractDBStructure implements DBLink
     {
-        public DBStructure getConfigStructure();
-        public void putConfigStructure(DBStructure dbStructure);
-        public String getConfigStructureName();
-        public void putConfigStructureName(String name);
-        public String getLinkSupportName();
-        public void putLinkSupportName(String name);
-        public String toString();
-        public String toString(int indentLevel);
         protected AbstractDBLink(DBStructure parent,
             DBDStructureField dbdLinkField);
     }</pre>
@@ -564,7 +551,6 @@ database fields.</p>
 <pre>    public abstract class AbstractDBArray
     extends AbstractDBData implements DBArray
     {
-        public boolean isCapacityMutable();
         abstract public int getCapacity();
         abstract public int getLength();
         abstract public void setCapacity(int len);

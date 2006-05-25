@@ -25,6 +25,7 @@ public interface PVEnum extends PVData{
     /**
      * get the choice values.
      * @return String[] specifying the choices.
+     * @throws IllegalStateException if the field is not mutable.
      */
     String[] getChoices();
     /**
@@ -32,7 +33,7 @@ public interface PVEnum extends PVData{
      * @param choice a String[] specifying the choices.
      * @return (true,false) if the choices were modified.
      * A value of false normally means the choice strings were readonly.
-     * @throws IllegalStateException if the choices are not mutable.
+     * @throws UnsupportedOperationException if the choices are not mutable.
      */
     boolean setChoices(String[] choice);
 }
