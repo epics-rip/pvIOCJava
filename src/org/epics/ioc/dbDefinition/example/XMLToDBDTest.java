@@ -28,8 +28,8 @@ public class XMLToDBDTest extends TestCase {
     public static void testXML() {
         DBD dbd = DBDFactory.create("test");
         try {
-            XMLToDBDFactory.convert(dbd,"/home/mrk/workspace/javaIOC"
-                 + "/src/org/epics/ioc/dbDefinition/example/test.xml");
+            XMLToDBDFactory.convert(dbd,
+                 "src/org/epics/ioc/dbDefinition/example/test.xml");
         } catch (Exception e) {
             System.out.println("Exception: " + e);
         }
