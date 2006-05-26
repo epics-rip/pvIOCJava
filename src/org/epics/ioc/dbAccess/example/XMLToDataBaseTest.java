@@ -30,36 +30,36 @@ public class XMLToDataBaseTest extends TestCase {
         DBD dbd = DBDFactory.create("test");
         System.out.printf("reading menuStructureSupport\n");
         try {
-            XMLToDBDFactory.convert(dbd,"/home/mrk/workspace/javaIOC"
-                 + "/src/org/epics/ioc/dbAccess/example/menuStructureSupportDBD.xml");
+            XMLToDBDFactory.convert(dbd,
+                 "src/org/epics/ioc/dbAccess/example/menuStructureSupportDBD.xml");
         } catch (Exception e) {
             System.out.println("Exception: " + e);
         }
         System.out.printf("reading analogDBD\n");
         try {
-            XMLToDBDFactory.convert(dbd,"/home/mrk/workspace/javaIOC"
-                 + "/src/org/epics/ioc/dbAccess/example/analogDBD.xml");
+            XMLToDBDFactory.convert(dbd,
+                 "src/org/epics/ioc/dbAccess/example/analogDBD.xml");
         } catch (Exception e) {
             System.out.println("Exception: " + e);
         }
         System.out.printf("reading aiDBD\n");
         try {
-            XMLToDBDFactory.convert(dbd,"/home/mrk/workspace/javaIOC"
-                 + "/src/org/epics/ioc/dbAccess/example/aiDBD.xml");
+            XMLToDBDFactory.convert(dbd,
+                 "src/org/epics/ioc/dbAccess/example/aiDBD.xml");
         } catch (Exception e) {
             System.out.println("Exception: " + e);
         }
         System.out.printf("reading powerSupplyDBD\n");
         try {
-            XMLToDBDFactory.convert(dbd,"/home/mrk/workspace/javaIOC"
-                 + "/src/org/epics/ioc/dbAccess/example/powerSupplyDBD.xml");
+            XMLToDBDFactory.convert(dbd,
+                 "src/org/epics/ioc/dbAccess/example/powerSupplyDBD.xml");
         } catch (Exception e) {
             System.out.println("Exception: " + e);
         }
         System.out.printf("reading allTypesDBD\n");
         try {
-            XMLToDBDFactory.convert(dbd,"/home/mrk/workspace/javaIOC"
-                 + "/src/org/epics/ioc/dbAccess/example/allTypesDBD.xml");
+            XMLToDBDFactory.convert(dbd,
+                 "src/org/epics/ioc/dbAccess/example/allTypesDBD.xml");
         } catch (Exception e) {
             System.out.println("Exception: " + e);
         }
@@ -68,40 +68,35 @@ public class XMLToDataBaseTest extends TestCase {
         System.out.printf("reading exampleAnalogDB\n");
         try {
             XMLToIOCDBFactory.convert(dbd,iocdb,
-                "/home/mrk/workspace/javaIOC"
-                 + "/src/org/epics/ioc/dbAccess/example/exampleAnalogDB.xml");
+                 "src/org/epics/ioc/dbAccess/example/exampleAnalogDB.xml");
         } catch (Exception e) {
             System.out.println("Exception: " + e);
         }
         System.out.printf("reading exampleAiLinearDB\n");
         try {
             XMLToIOCDBFactory.convert(dbd,iocdb,
-                "/home/mrk/workspace/javaIOC"
-                 + "/src/org/epics/ioc/dbAccess/example/exampleAiLinearDB.xml");
+                 "src/org/epics/ioc/dbAccess/example/exampleAiLinearDB.xml");
         } catch (Exception e) {
             System.out.println("Exception: " + e);
         }
         System.out.printf("reading examplePowerSupplyDB\n");
         try {
             XMLToIOCDBFactory.convert(dbd,iocdb,
-                "/home/mrk/workspace/javaIOC"
-                 + "/src/org/epics/ioc/dbAccess/example/examplePowerSupplyDB.xml");
+                 "src/org/epics/ioc/dbAccess/example/examplePowerSupplyDB.xml");
         } catch (Exception e) {
             System.out.println("Exception: " + e);
         }
         System.out.printf("reading examplePowerSupplyArrayDB\n");
         try {
             XMLToIOCDBFactory.convert(dbd,iocdb,
-                "/home/mrk/workspace/javaIOC"
-                 + "/src/org/epics/ioc/dbAccess/example/examplePowerSupplyArrayDB.xml");
+                 "src/org/epics/ioc/dbAccess/example/examplePowerSupplyArrayDB.xml");
         } catch (Exception e) {
             System.out.println("Exception: " + e);
         }
         System.out.printf("reading exampleAllTypeDB\n");
         try {
             XMLToIOCDBFactory.convert(dbd,iocdb,
-                "/home/mrk/workspace/javaIOC"
-                 + "/src/org/epics/ioc/dbAccess/example/exampleAllTypeDB.xml");
+                 "src/org/epics/ioc/dbAccess/example/exampleAllTypeDB.xml");
         } catch (Exception e) {
             System.out.println("Exception: " + e);
         }

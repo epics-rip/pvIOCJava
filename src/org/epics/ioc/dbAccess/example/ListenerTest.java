@@ -27,30 +27,30 @@ public class ListenerTest extends TestCase {
         IOCDB iocdb = IOCDBFactory.create(dbd,"testIOCDatabase");
         System.out.printf("reading menuStructureSupport\n");
         try {
-            XMLToDBDFactory.convert(dbd,"/home/mrk/workspace/javaIOC"
-                 + "/src/org/epics/ioc/dbAccess/example/menuStructureSupportDBD.xml");
+            XMLToDBDFactory.convert(dbd,
+                 "src/org/epics/ioc/dbAccess/example/menuStructureSupportDBD.xml");
         } catch (Exception e) {
             System.out.println("Exception: " + e);
         }
         
         System.out.printf("reading aiDBD\n");
         try {
-            XMLToDBDFactory.convert(dbd,"/home/mrk/workspace/javaIOC"
-                 + "/src/org/epics/ioc/dbAccess/example/aiDBD.xml");
+            XMLToDBDFactory.convert(dbd,
+                 "src/org/epics/ioc/dbAccess/example/aiDBD.xml");
         } catch (Exception e) {
             System.out.println("Exception: " + e);
         }
         System.out.printf("reading powerSupplyDBD\n");
         try {
-            XMLToDBDFactory.convert(dbd,"/home/mrk/workspace/javaIOC"
-                 + "/src/org/epics/ioc/dbAccess/example/powerSupplyDBD.xml");
+            XMLToDBDFactory.convert(dbd,
+                 "src/org/epics/ioc/dbAccess/example/powerSupplyDBD.xml");
         } catch (Exception e) {
             System.out.println("Exception: " + e);
         }
         System.out.printf("reading allTypesDBD\n");
         try {
-            XMLToDBDFactory.convert(dbd,"/home/mrk/workspace/javaIOC"
-                 + "/src/org/epics/ioc/dbAccess/example/allTypesDBD.xml");
+            XMLToDBDFactory.convert(dbd,
+                 "src/org/epics/ioc/dbAccess/example/allTypesDBD.xml");
         } catch (Exception e) {
             System.out.println("Exception: " + e);
         }
@@ -71,32 +71,28 @@ public class ListenerTest extends TestCase {
         System.out.printf("reading exampleAiLinearDB\n");
         try {
             XMLToIOCDBFactory.convert(dbd,iocdb,
-                "/home/mrk/workspace/javaIOC"
-                 + "/src/org/epics/ioc/dbAccess/example/exampleAiLinearDB.xml");
+                 "src/org/epics/ioc/dbAccess/example/exampleAiLinearDB.xml");
         } catch (Exception e) {
             System.out.println("Exception: " + e);
         }
         System.out.printf("reading examplePowerSupplyDB\n");
         try {
             XMLToIOCDBFactory.convert(dbd,iocdb,
-                "/home/mrk/workspace/javaIOC"
-                 + "/src/org/epics/ioc/dbAccess/example/examplePowerSupplyDB.xml");
+                 "src/org/epics/ioc/dbAccess/example/examplePowerSupplyDB.xml");
         } catch (Exception e) {
             System.out.println("Exception: " + e);
         }
         System.out.printf("reading examplePowerSupplyArrayDB\n");
         try {
             XMLToIOCDBFactory.convert(dbd,iocdb,
-                "/home/mrk/workspace/javaIOC"
-                 + "/src/org/epics/ioc/dbAccess/example/examplePowerSupplyArrayDB.xml");
+                 "src/org/epics/ioc/dbAccess/example/examplePowerSupplyArrayDB.xml");
         } catch (Exception e) {
             System.out.println("Exception: " + e);
         }
         System.out.printf("reading exampleAllTypeDB\n");
         try {
             XMLToIOCDBFactory.convert(dbd,iocdb,
-                "/home/mrk/workspace/javaIOC"
-                 + "/src/org/epics/ioc/dbAccess/example/exampleAllTypeDB.xml");
+                 "src/org/epics/ioc/dbAccess/example/exampleAllTypeDB.xml");
         } catch (Exception e) {
             System.out.println("Exception: " + e);
         }
@@ -172,7 +168,7 @@ public class ListenerTest extends TestCase {
     
     private static class TestListener implements DBListener{ 
         
-        public void startSynchronous() {
+        public void beginSynchronous() {
             System.out.printf("TestListener start synchronous data fieldName %s\n",fieldName);
             synchronousData = true;
         }
@@ -274,7 +270,7 @@ public class ListenerTest extends TestCase {
                 }
                 
             }
-            dbRecord.startSynchronous();
+            dbRecord.beginSynchronous();
             for(DBData dbData : dataList) dbRecord.postForMaster(dbData);
             dbRecord.stopSynchronous();
             isMaster = false;

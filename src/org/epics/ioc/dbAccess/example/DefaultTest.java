@@ -25,15 +25,15 @@ public class DefaultTest extends TestCase {
         DBD dbd = DBDFactory.create("test");
         System.out.printf("reading menuStructureSupport\n");
         try {
-            XMLToDBDFactory.convert(dbd,"/home/mrk/workspace/javaIOC"
-                 + "/src/org/epics/ioc/dbAccess/example/menuStructureSupportDBD.xml");
+            XMLToDBDFactory.convert(dbd,
+                 "src/org/epics/ioc/dbAccess/example/menuStructureSupportDBD.xml");
         } catch (Exception e) {
             System.out.println("Exception: " + e);
         }
         System.out.printf("reading defaultDBD\n");
         try {
-            XMLToDBDFactory.convert(dbd,"/home/mrk/workspace/javaIOC"
-                 + "/src/org/epics/ioc/dbAccess/example/defaultDBD.xml");
+            XMLToDBDFactory.convert(dbd,
+                 "src/org/epics/ioc/dbAccess/example/defaultDBD.xml");
         } catch (Exception e) {
             System.out.println("Exception: " + e);
         }
@@ -42,8 +42,7 @@ public class DefaultTest extends TestCase {
         System.out.printf("reading defaultDB\n");
         try {
             XMLToIOCDBFactory.convert(dbd,iocdb,
-                "/home/mrk/workspace/javaIOC"
-                 + "/src/org/epics/ioc/dbAccess/example/defaultDB.xml");
+                 "src/org/epics/ioc/dbAccess/example/defaultDB.xml");
         } catch (Exception e) {
             System.out.println("Exception: " + e);
         }
