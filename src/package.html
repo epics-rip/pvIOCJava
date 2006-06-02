@@ -132,7 +132,9 @@ The arguments can be any combination of:
 
 <p>Will read two database definition files, one record instance file, dump
 the database definitions and dump the record instance. The output will be
-written to file temp.</p>
+written to file temp. This example will actually work if you have unziped the
+javaIOC distribution file. Just cd to directory
+src.org/epics/dbAccess/example and execute the above command.</p>
 
 <p>The remainder of this document gives an overview of what is currently
 implemented:</p>
@@ -353,7 +355,7 @@ for the property must be a displayLimit structure field.</p>
     &lt;field name = "intercept" type = "double" /&gt;
 &lt;/structure&gt;</pre>
 
-<p>This is for use by records taht perform linear conversions.</p>
+<p>This is for use by records that perform linear conversions.</p>
 <pre>&lt;structure name = "timeStamp"&gt;
     &lt;field name = "secondsPastEpoch" type = "long" /&gt;
     &lt;field name = "nanoSeconds" type = "int" /&gt;
@@ -591,7 +593,10 @@ existing record support can be used by the new record type.</p>
 <h3>Power Supply Linked</h3>
 
 <p>The following shows how a simple power supply record type can be created
-via links to other record types.</p>
+via links to other record types. To make the example simple the power supply
+provides access only to power, current, and voltage. The current and voltage
+will be read via some hardware device such as an ADC. The power is just
+current*voltage.</p>
 <pre>&lt;recordType name = "powerSupplyLinkedRecord"&gt;
     &lt;property name = "current" associatedField = "currentInput.value" /&gt;
     &lt;property name = "voltage" associatedField = "voltageInput.value" /&gt;
@@ -615,10 +620,8 @@ via links to other record types.</p>
 
 <h3>Power Supply Embeded</h3>
 
-<p>The following is one way of defining a simple power supply. To make the
-example simple the power supply provides access only to power, current, and
-voltage. The current and voltage will be read via some hardware device such
-as an ADC. The power is just current*voltage.</p>
+<p>The following is one way of creating the simple power supply using embeded
+structures.</p>
 
 <p>First define:</p>
 <pre>&lt;structure name = "powerSupply"&gt;
@@ -730,7 +733,7 @@ format:</p>
     &lt;priority&gt;medium&lt;/priority&gt;
 &lt;/record&gt;</pre>
 
-<h3>powerSupplyRecord Instance</h3>
+<h3>powerSupplyLinkedRecord Instance</h3>
 <pre>&lt;record name = "current" type = "aiRecord"&gt;
     &lt;input linkSupportName = "asynInt" configStructureName = "asynLink"&gt;
         &lt;portName&gt;somePort&lt;/portName&gt;
@@ -781,8 +784,7 @@ format:</p>
          &lt;process&gt;true&lt;/process&gt;
          &lt;wait&gt;true&lt;/wait&gt;
     &lt;/voltageInput&gt;
-&lt;/record&gt;
-</pre>
+&lt;/record&gt;</pre>
 
 <h3>powerSupplyEmbededRecord Instance</h3>
 <pre>&lt;record name = "examplePowerSupply" type = "powerSupplyEmbededRecord"&gt;
@@ -940,7 +942,8 @@ Properties provide two features: <ol>
   <li>look elsewhere<br />
     When assigned to a structure it is a way of saying look elsewhere for a
     field that holds the desired data. Since a recordType is also a structure
-    properties can also be assigned to a recordType.</li>
+    properties can also be assigned to a recordType. Elsewhere can be a field
+    in the same record or a field in another record.</li>
 </ol>
 </p>
 
@@ -977,9 +980,15 @@ field of structure aiRaw so it is the actual field. In more complicated
 examples like the powerSupply, value could be a property rather than a field
 and a further search is required.</p>
 
-<p>Now consider the powerSupply example.</p>
+<p>This use of property is especially usefull for "device" oriented records,
+e.g. the powerSupply. A client that understands what a power supply is just
+wants to ask for power, current, and voltage. The client should not be
+responsible for knowing exactly where the current is located but can just ask
+for the current and be told where it is located.</p>
 
-<p>The power supply record has the structure: <pre>    powerSupplyRecord
+<p>Now consider the powerSupplyEmbeded example.</p>
+
+<p>The power supply record has the structure: <pre>    powerSupplyEmbededRecord
         powerSupply
             power
             currentInput
@@ -1028,7 +1037,7 @@ to specify the fields as: <pre>    powerSupply.power
     voltage</pre>
 </p>
 
-<p>Lets consider power first. The powerSupplyRecord has the definitions: <pre>&lt;recordType name = "powerSupplyRecord"&gt;
+<p>Lets consider power first. The powerSupplyRecord has the definitions: <pre>&lt;recordType name = "powerSupplyEmbededRecord"&gt;
     &lt;property name = "power" associatedField = "powerSupply.power" /&gt;
     &lt;field name = "powerSupply" type = "structure" structureName = "powerSupply" /&gt;
 &lt;/recordType&gt;</pre>
@@ -1095,7 +1104,7 @@ powerSupplyRecord has the definitions: <pre>&lt;recordType name = "powerSupplyRe
 <p>Structure aiLinear has the definitions: <pre>&lt;structure name = "aiLinear"&gt;
     &lt;field name = "value" type = "double" &gt;
       &lt;property name = "status" associatedField = "status" /&gt;
-      &lt;property name = "timeStamp" associatedField = ".." /&gt;
+      &lt;property name = "timeStamp" associatedField = "/timeStamp" /&gt;
     &lt;/field&gt;
     &lt;field name = "status" type = "string" /&gt;
 &lt;/structure&gt;</pre>
@@ -1121,9 +1130,9 @@ powerSupplyRecord has the definitions: <pre>&lt;recordType name = "powerSupplyRe
   <li>field value is located in the aiLinear structure of field
   currentInput.</li>
   <li>Field value of structure aiLinear has property timeStamp.</li>
-  <li>The associatedField for timeStamp is "..". This results searching up
-    the structure hierarchy looking for a field named "timeStamp". It is
-    found in powerSupplyRecord.</li>
+  <li>The associatedField for timeStamp is "/timeStamp". This results in
+    searching from the top of the record looking for a field named
+    "timeStamp". It is found in powerSupplyRecord.</li>
   <li>Thus the actual field is powerSupplyRecord.timeStamp</li>
 </ol>
 </p>
@@ -1142,6 +1151,47 @@ powerSupplyRecord has the definitions: <pre>&lt;recordType name = "powerSupplyRe
   <li>current.rawValue.timeStamp is powerSupplyRecord.timeStamp</li>
 </ol>
 </p>
+
+<p>Properties for structures can also be used for "device" records that are
+implemented via links. For example the powerSupplyLinkedRecord has the
+definitions:</p>
+<pre>&lt;recordType name = "powerSupplyLinkedRecord"&gt;
+    &lt;property name = "current" associatedField = "currentInput.value" /&gt;
+    &lt;field name = "currentInput" type = "link" /&gt;</pre>
+
+<p>And the example record instance defined:</p>
+<pre>&lt;record name = "examplePowerSupplyLinked" type = "powerSupplyLinkedRecord"&gt;
+    &lt;currentInput linkSupportName = "inputLink" configStructureName = "inputLink"&gt;
+         &lt;pvname&gt;current.value&lt;/pvname&gt;
+         &lt;process&gt;true&lt;/process&gt;
+         &lt;wait&gt;true&lt;/wait&gt;
+    &lt;/currentInput&gt;
+ </pre>
+
+<p>NOTE: current in <span
+style="font-family: courier;">&lt;pvname&gt;current.value&lt;/pvname&gt;</span>
+is the name of the record that has the current.</p>
+
+<p>When a request is made for field current the following happens.</p>
+<ol>
+  <li>The property current is located in record examplePowerSupplyLinked.</li>
+  <li>The field currentInput is located in examplePowerSupplyLinked.</li>
+  <li>The fact that the field is a link indicates that the current is located
+    in another record. The remainder of the associatedField is saved. Call
+    this the remoteField which in this example has the value "value"</li>
+  <li>The data structure that holds the inputLink information is located.</li>
+  <li>The inputLink fields are searched for the first field that has the
+    attribute "link".</li>
+  <li>This field must be a string. The beginning of the string up to the
+    first "." is the name of the remote record. Call this remoteRecord. In
+    this example it has the value "current".</li>
+  <li>The requester is told the the current can be located by asking for
+    remoteRecord.remoteField which is this case has the value
+  "current.value".</li>
+  <li>The requester must make a separate request to get the current
+    information.</li>
+</ol>
+<pre></pre>
 <hr />
 
 <h2 style="text-align: center">Database Interface Definitions</h2>
@@ -1400,12 +1450,16 @@ where
           <dd>The field was not found.</dd>
       </dl>
       findField returns (false,true) if the field (was, was not) found.</dd>
-  <dt>setField</dt>
+  <dt>setField(String name)</dt>
     <dd>locates a field within the record instance. Calls to getField and
       getPropertyField return interfaces for this field. (false,true) is
       returned if the requested field (is not, is) found. This method only
       works for local fields, i.e. if the requested field is located in
-      another record, it just returns false.</dd>
+      another record, it just returns false. If it finds a local field it
+      calls setField(dbData).</dd>
+  <dt>setField(DBData dbData)</dt>
+    <dd>sets the field that will be used as the base for future calls to
+      findField and all of the get methods.</dd>
   <dt>getField</dt>
     <dd>Returns the interface for the field located via the call to
     setField</dd>
@@ -1414,7 +1468,7 @@ where
       field located via the call to setField.</dd>
 </dl>
 
-<p>The argument to setField has the form:</p>
+<p>The argument to findField or setField(name) has the form:</p>
 <pre>    name.name...</pre>
 Each <span style="font-family: courier;">name</span> is the name of a
 property or a field. For example:
@@ -1429,11 +1483,16 @@ via the call:</p>
 <pre>      found = dbAccess.setField("rawValue");</pre>
 <hr />
 
-<h2>Examples: Locate and Access Fields via DBAccess</h2>
+<h2>Examples of Accessing Fields via DBAccess</h2>
 <hr />
 
-<h3>exampleAiLinear</h3>
-<pre>    DBAccess dbAccess = IOCDB.createAccess("exampleAiLinear");
+<p>DBAccess is an interface that allows "device"oriented access. DBAccess
+uses the structure property definitions that are designed fot this purpose.
+It also is usefull for obtaining the properties associated with a field
+without using the reflection interfaces.</p>
+
+<h3>exampleAiEmbeded</h3>
+<pre>    DBAccess dbAccess = IOCDB.createAccess("exampleAiEmbeded");
 
     // get the value field and make sure its type is double
     assert(dbAccess.setField("value")); // make sure value exists
@@ -1459,7 +1518,12 @@ via the call:</p>
     assert(field.getType()==Type.pvString);
     String status = ((DBString)valueStatusData).get();</pre>
 
-<h3>examplePowerSupply</h3>
+<h3>exampleAiEmbeded</h3>
+
+<p>Accessing exampleAi is exactly the same as for exampleAiEmbeded except
+that the record name is different.</p>
+
+<h3>examplePowerSupplyEmbeded</h3>
 
 <p>For the power supply the following is skeleton code for accessing the
 fields</p>
@@ -1467,13 +1531,125 @@ fields</p>
     boolean foundIt;
     // access the power
     foundIt = dbAccess.setField("power");
-    ...
+      // can now get all the properties for power
     // access the current
     foundit = dbAccess.setField("current");
-    ...
+      // can now get all the properties for current
+      // can also do a foundIt = dbAccess.setField("current.rawValue");
     // access the voltage
     foundit = dbAccess.setField("voltage");
-    ...</pre>
+      // can now get all the properties for voltage
+      // can also do a foundIt = dbAccess.setField("voltage.rawValue");</pre>
+
+<h3>examplePowerSupplyLinked</h3>
+
+<p>The linked power supply example is more compilicated because the current
+and voltage are in linked records. The following is an example of code to
+access the power, current, and voltage.</p>
+
+<p></p>
+
+<p>First create a class to help find fields:</p>
+<pre>class MyFind implements DBAccessFind {
+    private DBAccess dbAccess;
+    private boolean isLocal = false;
+    private DBData localData;
+    private boolean isRemote = false;
+    private String remoteName;
+
+    public MyFind(DBAccess dbAccess) {
+        this.dbAccess = dbAccess;
+    }
+
+    public boolean find(String name) {
+       isLocal = false;
+       localData = null;
+       isRemote = false;
+       remoteName = null;
+       return dbAccess.findField(name,this);
+    }
+
+    public boolean isLocal() { return isLocal;}
+
+    public DBData getLocal() { return localData;}
+
+    public String getRemote() { return remoteName;}
+
+    // start of DBAccessFind methods
+    public void local(DBData dbData) {
+        isLocal = true;
+        localData = dbData;
+    }
+
+    public void notFound() {} // nothing to do
+
+    public void remote(String name) {
+        isRemote = true;
+        remoteName = name;
+    }
+
+}</pre>
+
+<p>The power, current, and voltage can now be located as follows:</p>
+<pre>    static private Pattern periodPattern = Pattern.compile("[.]");
+    DBAccess powerSupply = IOCDB.createAccess("examplePowerSupplyLinked")
+    MyFind myFind = new MyFind(powerSupply);
+    DBAccess currentAccess;
+    DBAcess voltageAccess;
+    DBData power;
+    DBData current;
+    DBData voltage;
+    boolean found;
+
+    found = myFind.find("power");
+    if(!found) throw new Exception("power not found");
+    if(myFind.isLocal) {
+        power = myFind.getLocal();
+    } else {
+        String[] names = periodPattern.split(myFind.getRemote(),2);
+        DBAccess access = IOCDB.createAccess(names[0]);
+        found = access.setField(names[1]);
+        if(!found) throw new Exception("power not found");
+        power = access.getField();
+    }
+
+    found = myFind.find("current");
+    if(!found) throw new Exception("current not found");
+    if(myFind.isLocal) {
+        power = myFind.getLocal();
+    } else {
+        String[] names = periodPattern.split(myFind.getRemote(),2);
+        DBAccess access = IOCDB.createAccess(names[0]);
+        found = access.setField(names[1]);
+        if(!found) throw new Exception("current not found");
+        power = access.getField();
+    }
+
+    found = myFind.find("voltage");
+    if(!found) throw new Exception("voltage not found");
+    if(myFind.isLocal) {
+        power = myFind.getLocal();
+    } else {
+        String[] names = periodPattern.split(myFind.getRemote(),2);
+        DBAccess access = IOCDB.createAccess(names[0]);
+        found = access.setField(names[1]);
+        if(!found) throw new Exception("voltage not found");
+        power = access.getField();
+    }
+
+    // can now get data as well as properties for power, current, voltage</pre>
+
+<p>NOTE: The example is not correct because the current are voltage are
+accessed by calling</p>
+<pre>    DBAccess access = IOCDB.createAccess(names[0]);</pre>
+
+<p>This assumes the records are located in the same IOC as record
+examplePowerSupplyLinked. In a real example channel access, not database
+access, must be used to connect to current and voltage. However channel
+access is not yet defined.</p>
+
+<p>This example shows that device oriented access is more complicated for
+"device" records that are constructed via linked record.</p>
 
 <h2 style="text-align: center;text-align: center;"><a
 name="LicenseAgreement"></a>License Agreement</h2>
