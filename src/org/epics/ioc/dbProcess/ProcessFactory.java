@@ -257,7 +257,7 @@ public class ProcessFactory {
         private void callDbDataListeners()
         {
             if(dbDataListenerList.isEmpty()) return;
-            dbRecord.startSynchronous();
+            dbRecord.beginSynchronous();
             Iterator<DBData> iter = dbDataListenerList.iterator();
             while(iter.hasNext()) {
                 DBData dbData =iter.next();
@@ -269,7 +269,7 @@ public class ProcessFactory {
         private void removeAndCallDbDataListeners()
         {
             if(dbDataListenerList.isEmpty()) return;
-            dbRecord.startSynchronous();
+            dbRecord.beginSynchronous();
             DBData dbData;
             while((dbData = dbDataListenerList.poll())!=null) {
                 dbData.postPut(dbData);

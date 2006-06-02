@@ -154,15 +154,15 @@ public class DBDAttributeFactory {
                     continue;
                 }
                 if(name.equals("design")) {
-                    isDesign = Boolean.getBoolean(value);
+                    isDesign = Boolean.parseBoolean(value);
                     continue;
                 }
                 if(name.equals("readonly")) {
-                    isReadOnly = Boolean.getBoolean(value);
+                    isReadOnly = Boolean.parseBoolean(value);
                     continue;
                 }
                 if(name.equals("link")) {
-                    isLink = Boolean.getBoolean(value);
+                    isLink = Boolean.parseBoolean(value);
                     continue;
                 }
                 if(name.equals("menuName")) {

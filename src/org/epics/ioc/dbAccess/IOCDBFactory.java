@@ -67,14 +67,73 @@ public class IOCDBFactory {
         iocdbList = new LinkedList<IOCDB>();
     }
     
-    private static class DBAccessInstance implements DBAccess {
+    private static class IOCDBInstance implements IOCDB
+    {
+        public DBAccess createAccess(String recordName) {
+            DBRecord dbRecord = findRecord(recordName);
+            if(dbRecord!=null) return new Access(dbRecord);
+            return null;
+        }
+        public boolean createRecord(String recordName,
+            DBDRecordType dbdRecordType)
+        {
+            if(recordMap.containsKey(recordName)) return false;
+            DBRecord record = FieldDataFactory.createRecord(
+                recordName,dbdRecordType);
+            recordMap.put(recordName,record);
+            return true;
+        }
+        public DBD getDBD() {
+            return dbd;
+        }
+        public String getName() {
+            return name;
+        }
+        
+        public DBRecord findRecord(String recordName) {
+            return recordMap.get(recordName);
+        }
+
+        public Map<String,DBRecord> getRecordMap() {
+            return recordMap;
+        }
+        IOCDBInstance(DBD dbd, String name) {
+            this.dbd = dbd;
+            this.name = name;
+        }
+        
+        private DBD dbd;
+        private String name;
+        private static Map<String,DBRecord> recordMap;
+        static {
+            recordMap = new HashMap<String,DBRecord>();
+        }
+    }
+
+    private static class Access implements DBAccess,DBAccessFind {
+        private DBRecord dbRecord;
+        private DBData dbDataSetField;
+        static private Pattern periodPattern = Pattern.compile("[.]");
+        //following are for setName(String name)
+        private boolean isLocal = false;
+        private DBData localData;
+
+        
+        Access(DBRecord dbRecord) {
+            this.dbRecord = dbRecord;
+            dbDataSetField = null;
+        }
+        
         
         public void replaceField(DBData oldField, DBData newField) {
             if(oldField.getField().getType()!=newField.getField().getType()) {
-                throw new IllegalArgumentException("newField is not same type as oldField");
+                throw new IllegalArgumentException(
+                    "newField is not same type as oldField");
             }
-            if(oldField.getDBDField().getDBType()!=newField.getDBDField().getDBType()) {
-                throw new IllegalArgumentException("newField is not same DBtype as oldField");
+            if(oldField.getDBDField().getDBType()
+            !=newField.getDBDField().getDBType()) {
+                throw new IllegalArgumentException(
+                    "newField is not same DBtype as oldField");
             }
             DBStructure parent = oldField.getParent();
             if(parent==null) throw new IllegalArgumentException("no parent");
@@ -93,19 +152,23 @@ public class IOCDBFactory {
         public DBData getField() {
             return dbDataSetField;
         }
-        public boolean setField(String fieldName) {
+        
+        
+        public boolean findField(String fieldName,DBAccessFind dbAccessFind) {
             if(fieldName==null || fieldName.length()==0) {
-                dbDataSetField = null;
+                dbAccessFind.notFound();
                 return false;
             }
-            String[] names = periodPattern.split(fieldName,0);
-            if(names.length<=0) return false;
+            String[] names = periodPattern.split(fieldName,2);
+            if(names.length<=0) {
+                dbAccessFind.notFound();
+                return false;
+            }
             DBData currentData = dbDataSetField;
             if(currentData==null) currentData = dbRecord;
-            DBData newData = null;
-            int nameIndex = 0;
-            while(nameIndex < names.length) {
-                String name = names[nameIndex];
+            if(lookForRemote(currentData,names,dbAccessFind)) return true;
+            while(true) {
+                String name = names[0];
                 int arrayIndex = -1;
                 int startBracket = name.indexOf('[');
                 if(startBracket>=0) {
@@ -116,32 +179,71 @@ public class IOCDBFactory {
                     arrayIndexString = arrayIndexString.substring(0,endBracket);
                     arrayIndex = Integer.parseInt(arrayIndexString);
                 }
-                newData = findField(currentData,name);
-                if(newData==null) break;
+                DBData newData = findField(currentData,name);
+                currentData = newData;
+                if(currentData==null) break;
                 if(arrayIndex>=0) {
-                    Field field = newData.getField();
+                    Field field = currentData.getField();
                     if(field.getType()!=Type.pvArray) break;
                     Array array = (Array)field;
                     if(array.getElementType()!=Type.pvStructure) break;
-                    DBStructureArray dbStructureArray = (DBStructureArray)newData;
+                    DBStructureArray dbStructureArray =
+                        (DBStructureArray)currentData;
                     if(arrayIndex>=dbStructureArray.getLength()) break;
                     DBStructure[] structureArray = new DBStructure[1];
                     int n = dbStructureArray.get(arrayIndex,1,structureArray,0);
-                    if(n<1 || structureArray[0]==null) break;
-                    newData = structureArray[0];
+                    if(n<1 || structureArray[0]==null) {
+                        currentData = null;
+                        break;
+                    }
+                    currentData = structureArray[0];
                 }
-                currentData = newData;
-                nameIndex++;
+                if(currentData==null) break;
+                if(names.length<=1) break;
+                names = periodPattern.split(names[1],2);
             }
-            if(nameIndex<names.length) return false;
-            dbDataSetField = currentData;
+            if(currentData==null) {
+                dbAccessFind.notFound();
+                return false;
+            }
+            dbAccessFind.local(currentData);
             return true;
         }
         
         public void setField(DBData dbData) {
+            if(dbData==null) {
+                dbDataSetField = dbRecord;
+                return;
+            }
             if(dbData.getRecord()!=dbRecord) 
-                throw new IllegalArgumentException ("field is not in this record instance");
+                throw new IllegalArgumentException (
+                    "field is not in this record instance");
             dbDataSetField = dbData;
+        }
+        
+        public void local(DBData dbData) {
+            isLocal = true;
+            localData = dbData;
+        }
+
+
+        public void notFound() {
+            // nothing to do
+        }
+
+
+        public void remote(String name) {
+            // nothing to do
+        }
+
+
+        public boolean setField(String fieldName) {
+            isLocal = false;
+            localData = null;
+            if(!findField(fieldName,this)) return false;
+            if(!isLocal) return false;
+            setField(localData);
+            return true;
         }
         
         public DBData getPropertyField(Property property) {
@@ -159,14 +261,42 @@ public class IOCDBFactory {
             return findPropertyField(currentData,property);
         }
         
-        DBAccessInstance(DBRecord dbRecord) {
-            this.dbRecord = dbRecord;
-            dbDataSetField = null;
+        private boolean lookForRemote(DBData dbData,String[] names,DBAccessFind dbAccessFind)
+        {
+            while(names.length>0) {
+                DBData nextField = getField(dbData,names[0]);
+                if(nextField==null) break;
+                dbData = nextField;
+                if(names.length==1) break;
+                names = periodPattern.split(names[1],2);
+            }
+            if(names.length==0) return false;
+            Property property = dbData.getField().getProperty(names[0]);
+            if(property==null) return false;
+            String[] fieldNames = periodPattern.split(property.getFieldName(),2);
+            dbData = findField(dbData,fieldNames[0]);
+            if(dbData==null) return false;
+            if(dbData.getDBDField().getDBType()!=DBType.dbLink) return false;
+            DBLink dbLink = (DBLink)dbData;
+            DBStructure config = dbLink.getConfigStructure();
+            DBString pvname = null;
+            if(config!=null) for(DBData data: config.getFieldDBDatas()) {
+                DBDAttribute attribute = data.getDBDField().getAttribute();
+                if(attribute.isLink()) {
+                    if(data.getField().getType()==Type.pvString) {
+                        pvname = (DBString)data;
+                        break;
+                    }
+                }
+            }
+            if(pvname==null) return false;
+            String[] subfields = periodPattern.split(pvname.get(),2);
+            String fullName = subfields[0];
+            if(fieldNames.length>1) fullName += "." + fieldNames[1];
+            if(names.length>1) fullName = fullName + "." + names[1];
+            dbAccessFind.remote(fullName);
+            return true;
         }
-        
-        private DBRecord dbRecord;
-        private DBData dbDataSetField;
-        static private Pattern periodPattern = Pattern.compile("[.]");
         
         static private DBData findField(DBData dbData,String name) {
             DBData newField = getField(dbData,name);
@@ -176,41 +306,15 @@ public class IOCDBFactory {
             
         }
         
-        static private DBData  findPropertyField(DBData dbData,Property property) {
-            if(property==null) return null;
-            String propertyName = property.getName();
-            String propertyFieldName = property.getFieldName();
-            if(propertyFieldName.equals("..")) {
-                if(dbData.getField().getType()!=Type.pvStructure) {
-                    dbData = dbData.getParent();
-                }
-                DBData dbTemp = dbData.getParent();
-                if(dbTemp==null) {
-                    System.err.printf("record type %s has a property with fieldName ..",
-                            ((Structure)dbData.getField()).getStructureName());
-                    return null;
-                }
-                dbData = findPropertyFieldParent(dbTemp,propertyName);
-            } else {
-                dbData = findPropertyFieldChild(dbData,propertyFieldName);
-            }
-            return dbData;            
-        }
-        
-        static private DBData findPropertyFieldParent(DBData dbData,
-            String propertyName)
+        static private DBData  findPropertyField(DBData dbData,
+            Property property)
         {
-            if(dbData==null) return null;
-            DBStructure structure = (DBStructure)dbData;
-            DBData[] datas = structure.getFieldDBDatas();
-            int ind =  structure.getFieldDBDataIndex(propertyName);
-            if(ind>=0) return datas[ind];
-            return findPropertyFieldParent(dbData.getParent(),propertyName);
-        }
-        
-        static private DBData findPropertyFieldChild(DBData dbData,
-            String propertyFieldName)
-        {   
+            if(property==null) return null;
+            String propertyFieldName = property.getFieldName();
+            if(propertyFieldName.charAt(0)=='/') {
+                propertyFieldName = propertyFieldName.substring(1);
+                dbData = dbData.getRecord();
+            }
             String[] names = periodPattern.split(propertyFieldName,0);
             int length = names.length;
             if(length<1 || length>2) {
@@ -233,17 +337,15 @@ public class IOCDBFactory {
                 return null;
             }
             dbData = newField;
-            if(dbData!=null && length==2) {
+            if(dbData!=null && length==2
+            && dbData.getDBDField().getDBType()!=DBType.dbLink) {
                 newField = getField(dbData,names[1]);
                 if(newField!=null) {
                     dbData = newField;
                 } else {
-                    Property property = getProperty(dbData,names[1]);
-                    if(property==null) {
-                        dbData = null;
-                    } else {
-                        dbData = findPropertyFieldChild(dbData,
-                            property.getFieldName());
+                    property = getProperty(dbData,names[1]);
+                    if(property!=null) {
+                        dbData = findPropertyField(dbData,property);
                     }
                 }
             }
@@ -292,45 +394,6 @@ public class IOCDBFactory {
             property = parent.getField().getProperty(name);
             return property;                
         }
-    }
 
-    private static class IOCDBInstance implements IOCDB
-    {
-        public DBAccess createAccess(String recordName) {
-            DBRecord dbRecord = findRecord(recordName);
-            if(dbRecord!=null) return new DBAccessInstance(dbRecord);
-            return null;
-        }
-        public boolean createRecord(String recordName, DBDRecordType dbdRecordType) {
-            if(recordMap.containsKey(recordName)) return false;
-            DBRecord record = FieldDataFactory.createRecord(recordName,dbdRecordType);
-            recordMap.put(recordName,record);
-            return true;
-        }
-        public DBD getDBD() {
-            return dbd;
-        }
-        public String getName() {
-            return name;
-        }
-        
-        public DBRecord findRecord(String recordName) {
-            return recordMap.get(recordName);
-        }
-
-        public Map<String,DBRecord> getRecordMap() {
-            return recordMap;
-        }
-        IOCDBInstance(DBD dbd, String name) {
-            this.dbd = dbd;
-            this.name = name;
-        }
-        
-        private DBD dbd;
-        private String name;
-        private static Map<String,DBRecord> recordMap;
-        static {
-            recordMap = new HashMap<String,DBRecord>();
-        }
     }
 }

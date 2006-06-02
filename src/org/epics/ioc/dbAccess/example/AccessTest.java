@@ -5,6 +5,8 @@
  */
 package org.epics.ioc.dbAccess.example;
 
+import java.util.regex.Pattern;
+
 import junit.framework.TestCase;
 
 import org.epics.ioc.dbDefinition.*;
@@ -53,6 +55,20 @@ public class AccessTest extends TestCase {
         } catch (Exception e) {
             System.out.println("Exception: " + e);
         }
+        System.out.printf("reading aiLinkedDBD\n");
+        try {
+            XMLToDBDFactory.convert(dbd,
+                 "src/org/epics/ioc/dbAccess/example/aiLinkedDBD.xml");
+        } catch (Exception e) {
+            System.out.println("Exception: " + e);
+        }
+        System.out.printf("reading powerSupplyLinkedDBD\n");
+        try {
+            XMLToDBDFactory.convert(dbd,
+                 "src/org/epics/ioc/dbAccess/example/powerSupplyLinkedDBD.xml");
+        } catch (Exception e) {
+            System.out.println("Exception: " + e);
+        }
 //        System.out.printf("\n\nstructures");
 //        Map<String,DBDStructure> structureMap = dbd.getStructureMap();
 //        Set<String> keys = structureMap.keySet();
@@ -95,6 +111,13 @@ public class AccessTest extends TestCase {
         } catch (Exception e) {
             System.out.println("Exception: " + e);
         }
+        System.out.printf("reading examplePowerSupplyLinkedDB\n");
+        try {
+            XMLToIOCDBFactory.convert(dbd,iocdb,
+                 "src/org/epics/ioc/dbAccess/example/examplePowerSupplyLinkedDB.xml");
+        } catch (Exception e) {
+            System.out.println("Exception: " + e);
+        }
         
 //        System.out.printf("\nrecords\n");
 //        Map<String,DBRecord> recordMap = iocdb.getRecordMap();
@@ -120,6 +143,16 @@ public class AccessTest extends TestCase {
         testAccess(iocdb,"examplePowerSupply","current.status");
         testAccess(iocdb,"examplePowerSupply","current.timeStamp");
         testAccess(iocdb,"examplePowerSupply","voltage");
+        System.out.printf("\n");
+        testAccess(iocdb,"examplePowerSupplyLinked","power");
+        testAccess(iocdb,"examplePowerSupplyLinked","power.status");
+        testAccess(iocdb,"examplePowerSupplyLinked","power.timeStamp");
+        testAccess(iocdb,"examplePowerSupplyLinked","current");
+        testAccess(iocdb,"examplePowerSupplyLinked","current.status");
+        testAccess(iocdb,"examplePowerSupplyLinked","current.timeStamp");
+        testAccess(iocdb,"examplePowerSupplyLinked","current.rawValue");
+        testAccess(iocdb,"examplePowerSupplyLinked","current.rawValue.status");
+        testAccess(iocdb,"examplePowerSupplyLinked","voltage");
         System.out.printf("\n");
         testAccess(iocdb,"examplePowerSupplyArray","status");
         testAccess(iocdb,"examplePowerSupplyArray","powerSupply[0].power");
@@ -174,51 +207,94 @@ public class AccessTest extends TestCase {
         testAccess(iocdb,"allTypes","allTypes.arrayArray");
     }
     
-    static void testAccess(IOCDB iocdb,String recordName,String fieldName) {
-        DBAccess dbAccess = iocdb.createAccess(recordName);
-        if(dbAccess==null) {
-            System.out.printf("record %s not found\n",recordName);
-            return;
+    static private class TestIt implements DBAccessFind {
+        IOCDB iocdb;
+        String recordName;
+        String fieldName;
+        boolean notFound = false;
+        boolean isLocal = false;
+        DBData localData;
+        boolean isRemote = false;
+        String remoteName;
+        static private Pattern periodPattern = Pattern.compile("[.]");
+        
+        public TestIt(IOCDB iocdb, String recordName, String fieldName) {
+            super();
+            this.iocdb = iocdb;
+            this.recordName = recordName;
+            this.fieldName = fieldName;
         }
-        if(!dbAccess.setField(fieldName)){
-            System.out.printf("field %s of record %s not found\n",fieldName,recordName);
-            return;
+        
+        public void local(DBData dbData) {
+            isLocal = true;
+            localData = dbData;
         }
-        DBData dbData = dbAccess.getField();
-        DBStructure parent = dbData.getParent();
-        DBRecord record = dbData.getRecord();
-        String parentName = "none";
-        Field field = dbData.getField();
-        if(parent!=null) parentName = ((Structure)parent.getField()).getStructureName();
-        System.out.printf("record %s fieldRequested %s fieldActual %s parent %s\n",
-                record.getRecordName(),
-                fieldName,field.getName(),
-                parentName);
-        System.out.printf("    value %s\n",dbData.toString(1));
-        Property[] property = field.getPropertys();
-        if(property.length>0) {
-            System.out.printf("property {\n");
-            for(Property prop : property) {
-                System.out.printf("    name %s field %s\n",prop.getName(),prop.getFieldName());
+
+        public void notFound() {
+            notFound = true;
+            
+        }
+
+        public void remote(String name) {
+            isRemote = true;
+            remoteName = name;
+        }
+        
+        void testAccess() {
+            DBAccess dbAccess = iocdb.createAccess(recordName);
+            if(dbAccess==null) {
+                System.out.printf("record %s not found\n",recordName);
+                return;
             }
-            System.out.printf("}\n");
-            for(Property prop : property) {
-                System.out.printf("for propertyName %s propertyFieldName %s\n",
-                        prop.getName(),prop.getFieldName());
-                dbData = dbAccess.getPropertyField(prop);
-                if(dbData==null) {
-                    System.out.printf("    field not found\n");
-                    continue;
+            DBData dbData;
+            if(!dbAccess.findField(fieldName,this)) {
+                System.out.printf("field %s of record %s not found\n",fieldName,recordName);
+                return;
+            }
+            if(isRemote) {
+                System.out.printf("field %s is remote with name %s\n",fieldName,remoteName);
+                String[]names = periodPattern.split(remoteName,2);
+                String fld = null;
+                if(names.length==2) fld = names[1];
+                TestIt remote = new TestIt(iocdb,names[0],fld);
+                remote.testAccess();
+                return;
+            }
+            dbAccess.setField(localData);
+            dbData = dbAccess.getField();
+            if(dbData==null) {
+                System.out.printf("field %s of record %s not found\n",fieldName,recordName);
+                return;
+            }
+            DBStructure parent = dbData.getParent();
+            DBRecord record = dbData.getRecord();
+            String parentName = "none";
+            Field field = dbData.getField();
+            if(parent!=null) parentName = ((Structure)parent.getField()).getStructureName();
+            System.out.printf("record %s fieldRequested %s fieldActual %s parent %s\n",
+                    record.getRecordName(),
+                    fieldName,field.getName(),
+                    parentName);
+            System.out.printf("    value %s\n",dbData.toString(1));
+            Property[] property = field.getPropertys();
+            if(property.length>0) {
+                System.out.printf("    property {\n");
+                for(Property prop : property) {
+                    System.out.printf("        name %s field %s\n",prop.getName(),prop.getFieldName());
+                    DBData propData = dbAccess.getPropertyField(prop);
+                    if(propData!=null) {
+                        System.out.printf("            value %s\n",propData.toString(3));
+                    } else {
+                        System.out.printf("            value not found\n");
+                    }
                 }
-                parent = dbData.getParent();
-                record = dbData.getRecord();
-                parentName = "none";
-                field = dbData.getField();
-                if(parent!=null) parentName = ((Structure)parent.getField()).getStructureName();
-                System.out.printf("    fieldActual %s parent %s\n",
-                        field.getName(),parentName);
-                System.out.printf("    value %s\n",dbData.toString(1));
+                System.out.printf("        }\n");
             }
         }
+    }
+    
+    static void testAccess(IOCDB iocdb,String recordName,String fieldName) {
+        TestIt test = new TestIt(iocdb,recordName,fieldName);
+        test.testAccess();
     }
 }

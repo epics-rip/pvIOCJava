@@ -34,18 +34,27 @@ public interface DBAccess {
      *  </ol>
      * A subfield can access a structure element of an array of structures by following the
      * subfield name with [index].
-     * If the associatedField is ".." then a search up the structure hierarchy is made to locate
-     * the propertyName.
+     * If the associatedField starts with "/" then the search for
+     * the propertyName starts at the record itself.
      * @return (false,true) if the field (is not,is) found.
      * If it is not found the then access is set to the record itself.
+     * Also if it is not found getRemoteField make provide the name of another record that has the data.
      */
-    boolean setField(String name);
+    boolean findField(String name, DBAccessFind dbAccessFind);
     /**
      * set field.
      * @param dbData a field of the record instance.
+     * If dbData is null then the field is set to the record instance itself.
      * @throws IllegalArgumentException if the dbField is not in the record instance.
      */
     void setField(DBData dbData);
+    /**
+     * find and set the field.
+     * This only works for local fields.
+     * @param fieldName the field name.
+     * @return
+     */
+    boolean setField(String fieldName);
     /**
      * get the interface for the current field.
      * @return the interface for the field.

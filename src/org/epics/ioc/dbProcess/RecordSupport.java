@@ -13,13 +13,20 @@ package org.epics.ioc.dbProcess;
 public interface RecordSupport {
     /**
      * initialize.
-     * two passes (0 and 1) are made.
-     * During pass 0 the record/link support can initialize the record instance itself but
-     * can not try to link to other records.
-     * during pass 1 it can comnplete initialization.
-     * @param pass 0 or 1
+     * Note that 'other' records that are for example referenced by
+     * input or forward links are available but might still be
+     * uninitialized.
      */
-    void initialize(int pass);
+    void initialize();
+    /**
+     * invoked by the database when it is safe to link to I/O and/or other records.
+     * typically, start() will start input links etc.
+     */
+    void start();
+    /**
+     * dcisconnect all links.
+     */
+    void stop();
     /**
      * clean up any internal state
      */

@@ -8,7 +8,7 @@
         <property name = "severity" associatedField = "severity" />
         <property name = "units" associatedField = "units" />
         <property name = "displayLimit" associatedField = "displayLimit" />
-        <property name = "timeStamp" associatedField = ".." />
+        <property name = "timeStamp" associatedField = "/timeStamp" />
     </field>
     <field name = "currentInput" type = "structure" structureName = "aiLinear" />
     <field name = "voltageInput" type = "structure" structureName = "aiLinear" />

@@ -56,10 +56,10 @@ public interface DBRecord extends DBStructure {
      */
     boolean postMaster(DBData dbData);
     /**
-     * master is starting a set of synchronous puts.
+     * master is beginning a set of synchronous puts.
      * @throws IllegalStateException if the caller is not the master.
      */
-    void startSynchronous();
+    void beginSynchronous();
     /**
      * end of synchronous puts from the master.
      * @throws IllegalStateException if the caller is not the master.

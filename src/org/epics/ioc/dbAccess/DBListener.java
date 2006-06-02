@@ -17,11 +17,11 @@ public interface DBListener {
      */
     void newData(DBData dbData);
     /**
-     * start of synchronous data.
-     * From start until end of synchronous data,
+     * begin synchronous data.
+     * From begin until end of synchronous data,
      * each newData returns part of the synchronous data.
      */
-    void startSynchronous();
+    void beginSynchronous();
     /**
      * end of synchronous data.
      */

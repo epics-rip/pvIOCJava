@@ -1,48 +1,38 @@
 <?xml version="1.0" ?>
 <DBDefinition>
 
-<structure name = "aiRaw">
+<recordType name = "aiRawRecord">
     <field name = "value" type = "int" >
         <property name = "status" associatedField = "status" />
         <property name = "severity" associatedField = "severity" />
-        <property name = "timeStamp" associatedField = "/timeStamp" />
+        <property name = "timeStamp" associatedField = "timeStamp" />
     </field>
     <field name = "status" type = "string" />
     <field name = "severity" type = "menu" menuName = "menuAlarmSevr" />
+    <field name = "timeStamp" type = "structure" structureName = "timeStamp"/>
     <field name = "input" type = "link" />
-</structure>
+</recordType>
 
-<structure name = "aiLinear">
-    <property name = "rawValue" associatedField = "aiRaw.value" />
+<recordType name = "aiLinearLinkedRecord">
     <field name = "value" type = "double" >
+        <property name = "rawValue" associatedField = "aiRaw.value" />
         <property name = "status" associatedField = "status" />
         <property name = "severity" associatedField = "severity" />
         <property name = "units" associatedField = "units" />
         <property name = "displayLimit" associatedField = "displayLimit" />
-        <property name = "timeStamp" associatedField = "/timeStamp" />
+        <property name = "timeStamp" associatedField = "timeStamp" />
     </field>
     <field name = "status" type = "string" />
     <field name = "severity" type = "menu" menuName = "menuAlarmSevr" />
     <field name = "units" type = "string" />
     <field name = "displayLimit"
          type = "structure" structureName = "displayLimit" />
-    <field name = "aiRaw" type = "structure" structureName = "aiRaw"/>
+    <field name = "aiRaw" type = "link" />
     <field name = "linearConvert"
         type = "structure" structureName = "linearConvert" />
-</structure>
-
-<recordType name = "aiLinearRecord">
-    <property name = "value" associatedField = "aiLinear.value" />
-    <property name = "rawValue" associatedField = "aiLinear.rawValue" />
-    <property name = "status" associatedField = "aiLinear.status" />
-    <property name = "severity" associatedField = "aiLinear.severity" />
-    <field name = "aiLinear" type = "structure" structureName = "aiLinear" >
-        <property name = "timeStamp" associatedField = "timeStamp" />
-    </field>
     <field name = "priority" type = "menu" menuName = "menuPriority" />
     <field name = "timeStamp" type = "structure" structureName = "timeStamp"/>
     <field name = "scan" type = "structure" structureName = "scan"/>
 </recordType>
-
 
 </DBDefinition>

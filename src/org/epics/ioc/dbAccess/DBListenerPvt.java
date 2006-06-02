@@ -18,16 +18,16 @@ class DBListenerPvt {
     DBListener listener;
     /**
      * are synchronous puts active?
-     * DBRecord sets this true when startSynchronous is called
+     * DBRecord sets this true when beginSynchronous is called
      * and false when stopSynchronous is called.
      * If sentSynchronous is true when stopSynchronous is called,
-     * then DBRecord calls listener.stopSynchronous.
+     * DBRecord calls listener.stopSynchronous.
      */
     boolean isSynchronous;
     /**
-     * has a the dbListener been sent a startSynchronous message?
-     * When DBData.postData(dbData) is called it call listener.startSynchronous()
-     * it isSynchronous is true and sentSynchronous is false.
+     * has a the dbListener been sent a beginSynchronous message?
+     * When DBData.postData(dbData) is called it calls listener.beginSynchronous()
+     * if isSynchronous is true and sentSynchronous is false.
      */
     boolean sentSynchronous;
 }

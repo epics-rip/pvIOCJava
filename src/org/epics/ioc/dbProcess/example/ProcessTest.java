@@ -26,16 +26,16 @@ public class ProcessTest extends TestCase {
         IOCDB iocdb = IOCDBFactory.create(dbd,"testIOCDatabase");
         System.out.printf("reading menuStructureSupport\n");
         try {
-            XMLToDBDFactory.convert(dbd,"/home/mrk/workspace/javaIOC"
-                 + "/src/org/epics/ioc/dbAccess/example/menuStructureSupportDBD.xml");
+            XMLToDBDFactory.convert(dbd,
+                 "src/org/epics/ioc/dbAccess/example/menuStructureSupportDBD.xml");
         } catch (Exception e) {
             System.out.println("Exception: " + e);
         }
         
         System.out.printf("reading aiDBD\n");
         try {
-            XMLToDBDFactory.convert(dbd,"/home/mrk/workspace/javaIOC"
-                 + "/src/org/epics/ioc/dbAccess/example/aiDBD.xml");
+            XMLToDBDFactory.convert(dbd,
+                 "src/org/epics/ioc/dbAccess/example/aiDBD.xml");
         } catch (Exception e) {
             System.out.println("Exception: " + e);
         }
@@ -57,8 +57,7 @@ public class ProcessTest extends TestCase {
         System.out.printf("reading exampleDB\n");
         try {
             XMLToIOCDBFactory.convert(dbd,iocdb,
-                "/home/mrk/workspace/javaIOC"
-                 + "/src/org/epics/ioc/dbProcess/example/exampleDB.xml");
+                 "src/org/epics/ioc/dbProcess/example/exampleDB.xml");
         } catch (Exception e) {
             System.out.println("Exception: " + e);
         }
@@ -82,7 +81,7 @@ public class ProcessTest extends TestCase {
             dbRecord = iocdb.findRecord(recordName);
             assertNotNull(dbRecord);
             recordSupport = new TestRecordSupport(processDB,dbRecord,iocdb.findRecord(nextRecord));
-            recordSupport.initialize(0);
+            recordSupport.initialize();
             recordProcess = ProcessFactory.createRecordProcess(dbRecord);
             recordProcess.setRecordSupport(recordSupport);
             processDB.addRecordProcess(recordProcess);
@@ -90,7 +89,7 @@ public class ProcessTest extends TestCase {
         for(String recordName : recordNames) {
             recordProcess = processDB.findRecordProcess(recordName);
             recordSupport = recordProcess.getRecordSupport();
-            recordSupport.initialize(1);
+            recordSupport.start();
         }
         for(String recordName : recordNames) {
             System.out.printf("\nprocess %s\n",recordName);
@@ -129,13 +128,19 @@ public class ProcessTest extends TestCase {
             linkedRecordProcess = null;
         }
 
-        public void initialize(int pass) {
-            if(pass==1) {
-                if(linkedRecord!=null) {
-                    linkedRecordProcess = processDB.findRecordProcess(
-                        linkedRecord.getRecordName());
-                }
+        public void initialize() {
+            
+        }
+        
+        public void start() {
+            if(linkedRecord!=null) {
+                linkedRecordProcess = processDB.findRecordProcess(
+                    linkedRecord.getRecordName());
             }
+        }
+        
+        public void stop() {
+            linkedRecordProcess = null;
         }
 
         public ProcessReturn process(RecordProcess recordProcess) {

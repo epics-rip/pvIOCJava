@@ -83,6 +83,12 @@
            type = "menu" menuName = "menuAlarmSevr" />
 </structure>
 
+<structure name = "asynLink">
+    <field name = "portName" type = "string" />
+    <field name = "addr" type = "int" />
+    <field name = "timeout" type = "double" />
+</structure>
+
 <structure name = "displayLimit">
     <field name = "low" type = "double" />
     <field name = "high" type = "double" />
@@ -105,5 +111,6 @@
 <linkSupport name = "monitorLink" configStructureName = "monitorLink" />
 <linkSupport name = "inputLink" configStructureName = "inputLink" />
 <linkSupport name = "outputLink" configStructureName = "outputLink" />
+<linkSupport name = "asynLink" configStructureName = "asynLink" />
 
 </DBDefinition>

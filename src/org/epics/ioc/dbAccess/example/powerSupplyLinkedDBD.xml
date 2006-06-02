@@ -1,0 +1,24 @@
+<?xml version="1.0" ?>
+<DBDefinition>
+<recordType name = "powerSupplyLinkedRecord">
+    <property name = "current" associatedField = "currentInput.value" />
+    <property name = "voltage" associatedField = "voltageInput.value" />
+    <field name = "power" type = "double" >
+        <property name = "status" associatedField = "status" />
+        <property name = "severity" associatedField = "severity" />
+        <property name = "units" associatedField = "units" />
+        <property name = "displayLimit" associatedField = "displayLimit" />
+        <property name = "timeStamp" associatedField = "/timeStamp" />
+    </field>
+
+    <field name = "currentInput" type = "link" />
+    <field name = "voltageInput" type = "link" />
+    <field name = "status" type = "string" />
+    <field name = "severity" type = "menu" menuName = "menuAlarmSevr" />
+    <field name = "timeStamp" type = "structure" structureName = "timeStamp"/>
+    <field name = "units" type = "string" />
+    <field name = "displayLimit"
+         type = "structure" structureName = "displayLimit" />
+</recordType>
+
+</DBDefinition>

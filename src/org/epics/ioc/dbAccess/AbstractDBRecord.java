@@ -89,9 +89,9 @@ public class AbstractDBRecord extends AbstractDBStructure implements DBRecord {
         return true;
     }
     /* (non-Javadoc)
-     * @see org.epics.ioc.dbAccess.DBRecord#startSynchronous()
+     * @see org.epics.ioc.dbAccess.DBRecord#beginSynchronous()
      */
-    public void startSynchronous() {
+    public void beginSynchronous() {
         if(masterListener.get()==null) {
             throw new IllegalStateException(
                 "DBRecord.postForMaster but not masterListener");

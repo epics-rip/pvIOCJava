@@ -57,7 +57,7 @@ public abstract class AbstractDBData implements DBData{
             DBListener dbListener = listener.listener;
             if(listener.isSynchronous && !listener.sentSynchronous) {
                 listener.sentSynchronous = true;
-                dbListener.startSynchronous();
+                dbListener.beginSynchronous();
             }
             dbListener.newData(dbData);
         }
