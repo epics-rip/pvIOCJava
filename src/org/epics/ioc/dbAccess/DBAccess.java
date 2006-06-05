@@ -52,7 +52,7 @@ public interface DBAccess {
     String getOtherRecord();
     /**
      * if setField returned AccessSetResult.otherRecord return the name of the field in the other record.
-     * @return
+     * @return the field within the other record.
      */
     String getOtherField();
     /**
