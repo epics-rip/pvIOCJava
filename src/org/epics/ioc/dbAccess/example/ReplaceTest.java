@@ -286,14 +286,13 @@ public class ReplaceTest extends TestCase {
             if(fieldName==null || fieldName.length()==0) {
                 dbData = dbAccess.getDbRecord();
                 this.fieldName = null;
-            } else {
-                if(!dbAccess.setField(fieldName)){
-                    System.out.printf("field %s of record %s not found\n",
-                        fieldName,recordName);
-                    return;
-                }
-                dbData = dbAccess.getField();
             }
+            if(dbAccess.setField(fieldName)!=AccessSetResult.thisRecord){
+                System.out.printf("field %s not in record %s\n",
+                    fieldName,recordName);
+                return;
+            }
+            dbData = dbAccess.getField();
             dbData.addListener(this);
             Property[] property = dbData.getField().getPropertys();
             for(Property prop : property) {
@@ -314,8 +313,8 @@ public class ReplaceTest extends TestCase {
             System.out.printf("record %s not found\n",recordName);
             return;
         }
-        if(!dbAccess.setField(fieldName)){
-            System.out.printf("field %s of record %s not found\n",
+        if(dbAccess.setField(fieldName)!=AccessSetResult.thisRecord){
+            System.out.printf("field %s not in record %s\n",
                 fieldName,recordName);
             return;
         }
@@ -351,8 +350,8 @@ public class ReplaceTest extends TestCase {
             System.out.printf("record %s not found\n",recordName);
             return;
         }
-        if(!dbAccess.setField(fieldName)){
-            System.out.printf("field %s of record %s not found\n",
+        if(dbAccess.setField(fieldName)!=AccessSetResult.thisRecord){
+            System.out.printf("field %s not in record %s\n",
                 fieldName,recordName);
             return;
         }
@@ -365,9 +364,6 @@ public class ReplaceTest extends TestCase {
         }
         DBArray dataArray = (DBArray)dbData;
         Type elementType = ((Array)dataArray.getField()).getElementType();
-System.out.printf("elementType %s\n",elementType.toString());
-Class c = dbData.getClass();
-System.out.printf("%s\n",c.toString());
         if(elementType.isNumeric()) {
             System.out.printf("\ntestPut recordName %s fieldName %s values %f %f %f",
                 recordName,fieldName,value1,value2,value3);
@@ -389,8 +385,8 @@ System.out.printf("%s\n",c.toString());
             System.out.printf("record %s not found\n",recordName);
             return;
         }
-        if(!dbAccess.setField(fieldName)){
-            System.out.printf("field %s of record %s not found\n",
+        if(dbAccess.setField(fieldName)!=AccessSetResult.thisRecord){
+            System.out.printf("field %s not in record %s\n",
                 fieldName,recordName);
             return;
         }
@@ -413,8 +409,8 @@ System.out.printf("%s\n",c.toString());
             System.out.printf("record %s not found\n",recordName);
             return;
         }
-        if(!dbAccess.setField(fieldName)){
-            System.out.printf("field %s of record %s not found\n",
+        if(dbAccess.setField(fieldName)!=AccessSetResult.thisRecord){
+            System.out.printf("field %s not in record %s\n",
                 fieldName,recordName);
             return;
         }
@@ -437,8 +433,8 @@ System.out.printf("%s\n",c.toString());
             System.out.printf("record %s not found\n",recordName);
             return;
         }
-        if(!dbAccess.setField(fieldName)){
-            System.out.printf("field %s of record %s not found\n",
+        if(dbAccess.setField(fieldName)!=AccessSetResult.thisRecord){
+            System.out.printf("field %s not in record %s\n",
                 fieldName,recordName);
             return;
         }

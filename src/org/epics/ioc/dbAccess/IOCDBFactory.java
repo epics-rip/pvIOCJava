@@ -110,13 +110,13 @@ public class IOCDBFactory {
         }
     }
 
-    private static class Access implements DBAccess,DBAccessFind {
+    private static class Access implements DBAccess {
         private DBRecord dbRecord;
         private DBData dbDataSetField;
         static private Pattern periodPattern = Pattern.compile("[.]");
         //following are for setName(String name)
-        private boolean isLocal = false;
-        private DBData localData;
+        private String otherRecord = null;
+        private String otherField = null;
 
         
         Access(DBRecord dbRecord) {
@@ -154,19 +154,18 @@ public class IOCDBFactory {
         }
         
         
-        public boolean findField(String fieldName,DBAccessFind dbAccessFind) {
+        public AccessSetResult setField(String fieldName) {
             if(fieldName==null || fieldName.length()==0) {
-                dbAccessFind.notFound();
-                return false;
+                dbDataSetField = dbRecord;
+                return AccessSetResult.thisRecord;
             }
             String[] names = periodPattern.split(fieldName,2);
             if(names.length<=0) {
-                dbAccessFind.notFound();
-                return false;
+                return AccessSetResult.notFound;
             }
             DBData currentData = dbDataSetField;
             if(currentData==null) currentData = dbRecord;
-            if(lookForRemote(currentData,names,dbAccessFind)) return true;
+            if(lookForRemote(currentData,fieldName)) return AccessSetResult.otherRecord;
             while(true) {
                 String name = names[0];
                 int arrayIndex = -1;
@@ -202,12 +201,9 @@ public class IOCDBFactory {
                 if(names.length<=1) break;
                 names = periodPattern.split(names[1],2);
             }
-            if(currentData==null) {
-                dbAccessFind.notFound();
-                return false;
-            }
-            dbAccessFind.local(currentData);
-            return true;
+            if(currentData==null) return AccessSetResult.notFound;
+            dbDataSetField = currentData;
+            return AccessSetResult.thisRecord;
         }
         
         public void setField(DBData dbData) {
@@ -221,30 +217,15 @@ public class IOCDBFactory {
             dbDataSetField = dbData;
         }
         
-        public void local(DBData dbData) {
-            isLocal = true;
-            localData = dbData;
+        public String getOtherField() {
+            return otherField;
         }
 
 
-        public void notFound() {
-            // nothing to do
+        public String getOtherRecord() {
+            return otherRecord;
         }
 
-
-        public void remote(String name) {
-            // nothing to do
-        }
-
-
-        public boolean setField(String fieldName) {
-            isLocal = false;
-            localData = null;
-            if(!findField(fieldName,this)) return false;
-            if(!isLocal) return false;
-            setField(localData);
-            return true;
-        }
         
         public DBData getPropertyField(Property property) {
             if(property==null) return null;
@@ -261,8 +242,9 @@ public class IOCDBFactory {
             return findPropertyField(currentData,property);
         }
         
-        private boolean lookForRemote(DBData dbData,String[] names,DBAccessFind dbAccessFind)
+        private boolean lookForRemote(DBData dbData,String fieldName)
         {
+            String[]names = periodPattern.split(fieldName,2);
             while(names.length>0) {
                 DBData nextField = getField(dbData,names[0]);
                 if(nextField==null) break;
@@ -290,11 +272,14 @@ public class IOCDBFactory {
                 }
             }
             if(pvname==null) return false;
-            String[] subfields = periodPattern.split(pvname.get(),2);
-            String fullName = subfields[0];
-            if(fieldNames.length>1) fullName += "." + fieldNames[1];
-            if(names.length>1) fullName = fullName + "." + names[1];
-            dbAccessFind.remote(fullName);
+            String[] subFields = periodPattern.split(pvname.get(),2);
+            otherRecord = subFields[0];
+            if(fieldNames.length>1) {
+                otherField = fieldNames[1];
+            } else {
+                otherField = null;
+            }
+            if(names.length>1) otherField += "." + names[1];
             return true;
         }
         
@@ -394,6 +379,6 @@ public class IOCDBFactory {
             property = parent.getField().getProperty(name);
             return property;                
         }
-
+  
     }
 }

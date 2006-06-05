@@ -6,24 +6,23 @@
 package org.epics.ioc.dbAccess;
 
 /**
- * The interface that must be supplied in the call to DBAccess.findField.
+ * The result returned by DBAccess.findField.
  * @author mrk
  *
  */
-public interface DBAccessFind {
+public enum AccessSetResult {
     /**
      * the requested field is located in another record.
-     * @param name the pvname for accessing the field.
+     * calls to getRemoteRecord and getRemote Field can be used to connect to the field.
      */
-    void remote(String name);
+    otherRecord,
     /**
      * the requested field is in this record.
-     * @param dbData the interface for the data.
-     * This can be passed to DBAccess.setField.
+     * getField can be called to retrieve the DBData interface.
      */
-    void local(DBData dbData);
+    thisRecord,
     /**
      * the field could not be found.
      */
-    void notFound();
+    notFound
 }

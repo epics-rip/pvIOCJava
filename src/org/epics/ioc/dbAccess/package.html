@@ -600,16 +600,18 @@ invoked from a shell via the command:</p>
 Access</h1>
 <hr />
 <pre>
-    interface DBAccessFind
-        void remote(String name);
-        void local(DBData dbData);
-        void notFound();
+    public enum AccessSetResult {
+        otherRecord,
+        thisRecord,
+        notFound
     }
+
     public interface DBAccess {
         DBRecord getDbRecord();
-        boolean findField(String name, DBAccessFind dbAccessFind);
+        AccessSetResult setField(String name);
+        String getOtherRecord();
+        String getOtherField();
         void setField(DBData dbData);
-        boolean setField(String fieldName);
         DBData getField();
         DBData getPropertyField(Property property);
         DBData getPropertyField(String propertyName);

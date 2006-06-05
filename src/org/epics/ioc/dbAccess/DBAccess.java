@@ -20,8 +20,10 @@ public interface DBAccess {
     DBRecord getDbRecord();
     /**
      * specify a field to access.
+     * The search is relative to the current field as specified
+     * by the last call to setField that returned AccessSetResult.local.
      * @param name the field name.
-     * A null or empty string resets to no field being accessed.
+     * A null or empty string resets to the record itself being accessed.
      * A '.' separates the name into subfields.
      * Each subfield is found as follows: The first search that succeeds is used.
      * <ol>
@@ -40,7 +42,19 @@ public interface DBAccess {
      * If it is not found the then access is set to the record itself.
      * Also if it is not found getRemoteField make provide the name of another record that has the data.
      */
-    boolean findField(String name, DBAccessFind dbAccessFind);
+    AccessSetResult setField(String name);
+    /**
+     * if setField returned AccessSetResult.otherRecord return the name of the other record.
+     * @return the name of the other record.
+     * The record may be located in a different IOC.
+     * Thu Channel Access not DBAccess should be used to connect to the other record.
+     */
+    String getOtherRecord();
+    /**
+     * if setField returned AccessSetResult.otherRecord return the name of the field in the other record.
+     * @return
+     */
+    String getOtherField();
     /**
      * set field.
      * @param dbData a field of the record instance.
@@ -48,13 +62,7 @@ public interface DBAccess {
      * @throws IllegalArgumentException if the dbField is not in the record instance.
      */
     void setField(DBData dbData);
-    /**
-     * find and set the field.
-     * This only works for local fields.
-     * @param fieldName the field name.
-     * @return
-     */
-    boolean setField(String fieldName);
+    
     /**
      * get the interface for the current field.
      * @return the interface for the field.

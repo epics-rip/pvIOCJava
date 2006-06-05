@@ -104,23 +104,23 @@ public class ListenerTest extends TestCase {
 //            DBRecord record = recordMap.get(key);
 //            System.out.print(record.toString());
 //        }
-        System.out.printf("\ntest put and listen exampleAiLinear");
+        System.out.printf("\ntest put and listen exampleAiLinear\n");
         new TestListener(iocdb,"exampleAiLinear","value");
         new TestListener(iocdb,"exampleAiLinear","aiLinear");
         new TestListener(iocdb,"exampleAiLinear",null);
-//        testPut(iocdb,"exampleAiLinear","rawValue",2.0);
-//        testPut(iocdb,"exampleAiLinear","value",5.0);
-//        testPut(iocdb,"exampleAiLinear","timeStamp",100.0);
+        testPut(iocdb,"exampleAiLinear","rawValue",2.0);
+        testPut(iocdb,"exampleAiLinear","value",5.0);
+        testPut(iocdb,"exampleAiLinear","timeStamp",100.0);
         System.out.printf("\ntest put and listen examplePowerSupply\n");
         new TestListener(iocdb,"examplePowerSupply","power");
         new TestListener(iocdb,"examplePowerSupply","current");
         new TestListener(iocdb,"examplePowerSupply","voltage");
         new TestListener(iocdb,"examplePowerSupply","powerSupply");
         new TestListener(iocdb,"examplePowerSupply",null);
-//        testPut(iocdb,"examplePowerSupply","current",25.0);
-//        testPut(iocdb,"examplePowerSupply","voltage",2.0);
-//        testPut(iocdb,"examplePowerSupply","power",50.0);
-//        testPut(iocdb,"examplePowerSupply","timeStamp",100.0);
+        testPut(iocdb,"examplePowerSupply","current",25.0);
+        testPut(iocdb,"examplePowerSupply","voltage",2.0);
+        testPut(iocdb,"examplePowerSupply","power",50.0);
+        testPut(iocdb,"examplePowerSupply","timeStamp",100.0);
         System.out.printf("\ntest masterListener examplePowerSupply\n");
         testPut(iocdb,"examplePowerSupply","powerSupply",0.5);
         System.out.printf("\ntest put and listen examplePowerSupplyArray\n");
@@ -133,13 +133,13 @@ public class ListenerTest extends TestCase {
         new TestListener(iocdb,"examplePowerSupplyArray","powerSupply[1].voltage");
         new TestListener(iocdb,"examplePowerSupplyArray","powerSupply[1]");
         new TestListener(iocdb,"examplePowerSupplyArray",null);
-//        testPut(iocdb,"examplePowerSupplyArray","powerSupply[0].current",25.0);
-//        testPut(iocdb,"examplePowerSupplyArray","powerSupply[0].voltage",2.0);
-//        testPut(iocdb,"examplePowerSupplyArray","powerSupply[0].power",50.0);
-//        testPut(iocdb,"examplePowerSupplyArray","powerSupply[1].current",2.50);
-//        testPut(iocdb,"examplePowerSupplyArray","powerSupply[1].voltage",1.00);
-//        testPut(iocdb,"examplePowerSupplyArray","powerSupply[1].power",2.50);
-//        testPut(iocdb,"examplePowerSupplyArray","timeStamp",100.0);
+        testPut(iocdb,"examplePowerSupplyArray","powerSupply[0].current",25.0);
+        testPut(iocdb,"examplePowerSupplyArray","powerSupply[0].voltage",2.0);
+        testPut(iocdb,"examplePowerSupplyArray","powerSupply[0].power",50.0);
+        testPut(iocdb,"examplePowerSupplyArray","powerSupply[1].current",2.50);
+        testPut(iocdb,"examplePowerSupplyArray","powerSupply[1].voltage",1.00);
+        testPut(iocdb,"examplePowerSupplyArray","powerSupply[1].power",2.50);
+        testPut(iocdb,"examplePowerSupplyArray","timeStamp",100.0);
     }
     
     static void showParent(IOCDB iocdb,String recordName,String fieldName) {
@@ -148,8 +148,8 @@ public class ListenerTest extends TestCase {
             System.out.printf("record %s not found\n",recordName);
             return;
         }
-        if(!dbAccess.setField(fieldName)){
-            System.out.printf("field %s of record %s not found\n",fieldName,recordName);
+        if(dbAccess.setField(fieldName)!=AccessSetResult.thisRecord){
+            System.out.printf("field %s not in record %s\n",fieldName,recordName);
             return;
         }
         DBData dbData = dbAccess.getField();
@@ -202,8 +202,8 @@ public class ListenerTest extends TestCase {
                 dbData = dbAccess.getDbRecord();
                 this.fieldName = null;
             } else {
-                if(!dbAccess.setField(fieldName)){
-                    System.out.printf("field %s of record %s not found\n",fieldName,recordName);
+                if(dbAccess.setField(fieldName)!=AccessSetResult.thisRecord){
+                    System.out.printf("field %s not in record %s\n",fieldName,recordName);
                     return;
                 }
                 dbData = dbAccess.getField();
@@ -226,8 +226,8 @@ public class ListenerTest extends TestCase {
             System.out.printf("record %s not found\n",recordName);
             return;
         }
-        if(!dbAccess.setField(fieldName)){
-            System.out.printf("field %s of record %s not found\n",fieldName,recordName);
+        if(dbAccess.setField(fieldName)!=AccessSetResult.thisRecord){
+            System.out.printf("field %s not in record %s\n",fieldName,recordName);
             return;
         }
         DBData dbData = dbAccess.getField();

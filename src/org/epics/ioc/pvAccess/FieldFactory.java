@@ -288,6 +288,14 @@ public final class FieldFactory {
                 sortedFieldNameList.add(fieldName[i]);
             }
             Collections.sort(sortedFieldNameList);
+            // look for duplicates
+            for(int i=0; i<field.length-1; i++) {
+                if(sortedFieldNameList.get(i).equals(sortedFieldNameList.get(i+1))) {
+                    throw new IllegalArgumentException(
+                            "fieldName " + sortedFieldNameList.get(i)
+                            + " appears more than once");
+                }
+            }
             fieldIndex = new int[field.length];
             for(int i=0; i<field.length; i++) {
                 String value = sortedFieldNameList.get(i);

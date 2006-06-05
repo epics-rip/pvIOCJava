@@ -177,8 +177,8 @@ public class ParentTest extends TestCase {
             System.out.printf("record %s not found\n",recordName);
             return;
         }
-        if(!dbAccess.setField(fieldName)){
-            System.out.printf("field %s of record %s not found\n",fieldName,recordName);
+        if(dbAccess.setField(fieldName)!=AccessSetResult.thisRecord){
+            System.out.printf("field %s not in record %s\n",fieldName,recordName);
             return;
         }
         DBData dbData = dbAccess.getField();

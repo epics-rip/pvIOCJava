@@ -47,7 +47,6 @@
     <field name = "float" type = "float"  default = "10.0" />
     <field name = "double" type = "double"  default = "20.0" />
     <field name = "string" type = "string"  default = "test string also" />
-    <field name = "boolean" type = "boolean" />
     <field name = "enum" type = "enum" />
     <field name = "menu" type = "menu" menuName = "menuPriority" />
     <field name = "displayLimit"
