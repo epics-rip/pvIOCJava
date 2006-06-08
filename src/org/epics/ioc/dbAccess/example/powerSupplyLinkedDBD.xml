@@ -1,6 +1,7 @@
 <?xml version="1.0" ?>
 <DBDefinition>
-<recordType name = "powerSupplyLinkedRecord">
+<recordType name = "powerSupplyLinkedRecord" recordSupportName =
+        "org.epics.ioc.support.PowerSupplyLinked">
     <property name = "current" associatedField = "currentInput.value" />
     <property name = "voltage" associatedField = "voltageInput.value" />
     <field name = "power" type = "double" >

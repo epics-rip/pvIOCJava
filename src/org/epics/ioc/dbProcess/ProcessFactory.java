@@ -37,6 +37,21 @@ public class ProcessFactory {
     }
     
     static private class ProcessDatabase implements ProcessDB{
+        
+        private IOCDB iocdb;
+        private static Map<String,RecordProcess> recordProcessMap;
+        static {
+            recordProcessMap = new HashMap<String,RecordProcess>();
+        }
+        
+        /**
+         * Constructor for ProcessDatabase.
+         * @param iocdb the IOCDB for which RecordProcess will be created.
+         */
+        ProcessDatabase(IOCDB iocdb) {
+            this.iocdb = iocdb;
+        }
+        
         public boolean addRecordProcess(RecordProcess recordProcess) {
             String recordName = recordProcess.getRecord().getRecordName();
             if(recordProcessMap.get(recordName)!=null) return false;
@@ -66,22 +81,35 @@ public class ProcessFactory {
             return recordProcessMap;
         }
 
-        /**
-         * Constructor for ProcessDatabase.
-         * @param iocdb the IOCDB for which RecordProcess will be created.
-         */
-        ProcessDatabase(IOCDB iocdb) {
-            this.iocdb = iocdb;
-        }
         
-        private IOCDB iocdb;
-        private static Map<String,RecordProcess> recordProcessMap;
-        static {
-            recordProcessMap = new HashMap<String,RecordProcess>();
-        }
     }
     
     static private class Process implements RecordProcess, DBMasterListener {
+        
+        private AtomicBoolean disabled = new AtomicBoolean(false);
+        private AtomicBoolean active = new AtomicBoolean(false);
+        private AtomicReference<RecordSupport> recordSupport = 
+            new AtomicReference<RecordSupport>(null);
+        private DBRecord dbRecord = null;
+        private ConcurrentLinkedQueue<ProcessComplete> completionListener =
+            new ConcurrentLinkedQueue<ProcessComplete>();
+        private ReentrantReadWriteLock readWriteLock;
+        private ReentrantReadWriteLock.ReadLock readLock;
+        private ReentrantReadWriteLock.WriteLock writeLock;
+        private ConcurrentLinkedQueue<ProcessComplete> linkedListener =
+            new ConcurrentLinkedQueue<ProcessComplete>();
+        private ConcurrentLinkedQueue<Process> linkedProcess =
+            new ConcurrentLinkedQueue<Process>();
+        private ConcurrentLinkedQueue<DBData> dbDataListenerList =
+            new ConcurrentLinkedQueue<DBData>();
+        
+        Process(DBRecord dbRecord) {
+            this.dbRecord = dbRecord;
+            readWriteLock = new ReentrantReadWriteLock();
+            readLock = readWriteLock.readLock();
+            writeLock = readWriteLock.writeLock();
+        }
+        
 
         public void newData(DBData dbData) {
             dbDataListenerList.add(dbData);
@@ -189,36 +217,11 @@ public class ProcessFactory {
             }
         }
 
-        
-        Process(DBRecord dbRecord) {
-            this.dbRecord = dbRecord;
-            readWriteLock = new ReentrantReadWriteLock();
-            readLock = readWriteLock.readLock();
-            writeLock = readWriteLock.writeLock();
-        }
-        
-        private AtomicBoolean disabled = new AtomicBoolean(false);
-        private AtomicBoolean active = new AtomicBoolean(false);
-        private AtomicReference<RecordSupport> recordSupport = 
-            new AtomicReference<RecordSupport>(null);
-        private DBRecord dbRecord = null;
-        private ConcurrentLinkedQueue<ProcessComplete> completionListener =
-            new ConcurrentLinkedQueue<ProcessComplete>();
-        private ReentrantReadWriteLock readWriteLock;
-        private ReentrantReadWriteLock.ReadLock readLock;
-        private ReentrantReadWriteLock.WriteLock writeLock;
-        private ConcurrentLinkedQueue<ProcessComplete> linkedListener =
-            new ConcurrentLinkedQueue<ProcessComplete>();
-        private ConcurrentLinkedQueue<Process> linkedProcess =
-            new ConcurrentLinkedQueue<Process>();
-        private ConcurrentLinkedQueue<DBData> dbDataListenerList =
-            new ConcurrentLinkedQueue<DBData>();
-        
         private boolean reserveDelayedProcess() {
             if(!active.compareAndSet(false,true)) return false;
             return true;
         }
-        
+     
         private ProcessReturn delayedRequestProcess(ProcessComplete listener) {
             if(!active.get()) return ProcessReturn.abort;
             RecordSupport support = recordSupport.get();

@@ -14,6 +14,6 @@ import org.epics.ioc.pvAccess.*;
 public interface ChannelDataPut {
     void beginSynchronous();
     void endSynchronous();
-    void setPutOptions(ChannelOptions[] options);
+    void setPutOptions(ChannelOption[] options);
     PVData getPutPVData(Field field);
 }

@@ -5,12 +5,19 @@
  */
 package org.epics.ioc.dbProcess;
 
+import org.epics.ioc.dbAccess.*;
+
 /**
  * interface that must be implemented by record support.
  * @author mrk
  *
  */
 public interface RecordSupport {
+    /**
+     * get the record support name.
+     * @return the name of the record support.
+     */
+    String getName();
     /**
      * initialize.
      * Note that 'other' records that are for example referenced by
@@ -24,11 +31,11 @@ public interface RecordSupport {
      */
     void start();
     /**
-     * dcisconnect all links.
+     * disconnect all links to I/O and/or other records.
      */
     void stop();
     /**
-     * clean up any internal state
+     * clean up any internal state.
      */
     void destroy();
     /**

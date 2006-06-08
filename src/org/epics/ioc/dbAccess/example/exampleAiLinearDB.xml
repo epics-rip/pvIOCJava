@@ -3,7 +3,8 @@
 <record name = "exampleAiLinear" type = "aiLinearRecord">
     <aiLinear>
         <aiRaw>
-            <input linkSupportName = "inputLink" configStructureName = "inputLink">
+            <input linkSupportName = "org.epics.ioc.support.InputLink"
+                      configStructureName = "inputLink">
                 <pvname>xxxxxx</pvname>
                 <wait>true</wait>
             </input>

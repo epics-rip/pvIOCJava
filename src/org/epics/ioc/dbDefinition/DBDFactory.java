@@ -69,61 +69,13 @@ public class DBDFactory {
     }
 
     private static class DBDInstance implements DBD {
-
-        public boolean addLinkSupport(DBDLinkSupport linkSupport) {
-            String key = linkSupport.getLinkSupportName();
-            if(linkSupportMap.containsKey(key)) return false;
-            linkSupportMap.put(key,linkSupport);
-            return true;
-        }
         
-        public boolean addMenu(DBDMenu menuNew) {
-            String key = menuNew.getName();
-            if(menuMap.containsKey(key)) return false;
-            menuMap.put(key,menuNew);
-            return true;
-        }
-
-        public boolean addRecordType(DBDRecordType recordType) {
-            String key = recordType.getStructureName();
-            if(recordTypeMap.containsKey(key)) return false;
-            recordTypeMap.put(key,recordType);
-            return true;
-        }
-
-        public boolean addStructure(DBDStructure structure) {
-            String key = structure.getStructureName();
-            if(structureMap.containsKey(key)) return false;
-            structureMap.put(key,structure);
-            return true;
-        }
-        public DBDRecordType getRecordType(String recordTypeName) {
-            return recordTypeMap.get(recordTypeName);
-        }
-        public Map<String,DBDRecordType> getRecordTypeMap() {
-            return recordTypeMap;
-        }
-        public DBDStructure getStructure(String structureName) {
-            return structureMap.get(structureName);
-        }
-        public Map<String,DBDStructure> getStructureMap() {
-            return structureMap;
-        }
-        public DBDLinkSupport getLinkSupport(String linkSupportName) {
-            return linkSupportMap.get(linkSupportName);
-        }
-        public Map<String,DBDLinkSupport> getLinkSupportMap() {
-            return linkSupportMap;
-        }
-        public DBDMenu getMenu(String menuName) {
-            return menuMap.get(menuName);
-         }
-        public Map<String, DBDMenu> getMenuMap() {
-            return menuMap;
-        }
-        public String getName() {
-            return name;
-        }
+        private String name;
+        private Map<String,DBDMenu> menuMap;
+        private Map<String,DBDStructure> structureMap;
+        private Map<String,DBDRecordType> recordTypeMap;
+        private Map<String,DBDLinkSupport> linkSupportMap;
+        
         DBDInstance(String name) {
             this.name = name;
             menuMap = new TreeMap<String,DBDMenu>();
@@ -132,11 +84,63 @@ public class DBDFactory {
             linkSupportMap = new TreeMap<String,DBDLinkSupport>();
         }
         
-        private String name;
-        private Map<String,DBDMenu> menuMap;
-        private Map<String,DBDStructure> structureMap;
-        private Map<String,DBDRecordType> recordTypeMap;
-        private Map<String,DBDLinkSupport> linkSupportMap;
+        public String getName() {
+            return name;
+        }
+        
+        public boolean addMenu(DBDMenu menuNew) {
+            String key = menuNew.getName();
+            if(menuMap.containsKey(key)) return false;
+            menuMap.put(key,menuNew);
+            return true;
+        }
+        public DBDMenu getMenu(String menuName) {
+            return menuMap.get(menuName);
+         }
+        public Map<String, DBDMenu> getMenuMap() {
+            return menuMap;
+        }
+        
+        public boolean addStructure(DBDStructure structure) {
+            String key = structure.getStructureName();
+            if(structureMap.containsKey(key)) return false;
+            structureMap.put(key,structure);
+            return true;
+        }
+        public DBDStructure getStructure(String structureName) {
+            return structureMap.get(structureName);
+        }
+        public Map<String,DBDStructure> getStructureMap() {
+            return structureMap;
+        }
+        
+        public boolean addRecordType(DBDRecordType recordType) {
+            String key = recordType.getStructureName();
+            if(recordTypeMap.containsKey(key)) return false;
+            recordTypeMap.put(key,recordType);
+            return true;
+        }
+
+        public DBDRecordType getRecordType(String recordTypeName) {
+            return recordTypeMap.get(recordTypeName);
+        }
+        public Map<String,DBDRecordType> getRecordTypeMap() {
+            return recordTypeMap;
+        }
+        
+        public DBDLinkSupport getLinkSupport(String linkSupportName) {
+            return linkSupportMap.get(linkSupportName);
+        }
+        public boolean addLinkSupport(DBDLinkSupport linkSupport) {
+            String key = linkSupport.getLinkSupportName();
+            if(linkSupportMap.containsKey(key)) return false;
+            linkSupportMap.put(key,linkSupport);
+            return true;
+        }
+        public Map<String,DBDLinkSupport> getLinkSupportMap() {
+            return linkSupportMap;
+        }
+        
     }
 
 }

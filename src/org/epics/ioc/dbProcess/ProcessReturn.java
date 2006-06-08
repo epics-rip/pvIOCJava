@@ -20,7 +20,7 @@ public enum ProcessReturn {
      */
     done,
     /**
-     * failure. do not attemp any further processing.
+     * failure. do not attempt any further processing.
      */
     abort,
     /**

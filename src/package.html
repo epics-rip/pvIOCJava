@@ -10,7 +10,7 @@
 <body>
 <h1 style="text-align: center">EPICS JavaIOC: Java Input/Output Controller<br
 />
-2006.06.05</h1>
+2006.06.08</h1>
 
 <p>This product is available via the <a href="#LicenseAgreement">open source
 license</a> described at the end of this document.</p>
@@ -33,14 +33,14 @@ license</a> described at the end of this document.</p>
       <li><a href="#Analog1">Analog Imput Embeded Record</a></li>
       <li><a href="#Power">Power Supply Linked</a></li>
       <li><a href="#Power1">Power Supply Embeded</a></li>
-      <li><a href="#Power2">Power Supply Array Embeded</a></li>
+      <li><a href="#Power2">Power Supply Array</a></li>
     </ul>
   </li>
   <li><a href="#Record">Record Instance Syntax</a></li>
   <li><a href="#Record1">Record Instance Examples</a>
     <ul>
-      <li><a href="#aiRecord">aiRecord Instance</a></li>
-      <li><a href="#aiEmbededR">aiEmbededRecord Instance</a></li>
+      <li><a href="#aiRecord">analogInputRecord Instance</a></li>
+      <li><a href="#aiEmbededR">aiRecord Instance</a></li>
       <li><a href="#powerSuppl">powerSupplyLinkedRecord Instance</a></li>
       <li><a href="#powerSuppl1">powerSupplyEmbededRecord Instance</a></li>
       <li><a href="#Power3">Power Supply Array Instance</a></li>
@@ -166,6 +166,13 @@ are:</p>
       IOCDB.</li>
     </ul>
   </li>
+  <li>org.epics.ioc.channelAccess<br />
+    Work on this package is just beginning.</li>
+  <li>org.epics.ioc.dbProcess<br />
+    Work on this package is just beginning.</li>
+  <li>org.epics.ioc.support<br />
+    Work on this package is just beginning. It will contain the record,
+    structure, and link support provided by the javaIOC.</li>
 </ul>
 
 <p>In package default there is a Java main program that reads Database
@@ -186,6 +193,10 @@ The arguments can be any combination of:
     the following filenames are record instance files</li>
   <li>fileName <br />
     a database definition or record instance file</li>
+  <li>-dumpDBD<br />
+    dump all that database definitions read so far</li>
+  <li>-dumpDB<br />
+    dump all the record instances read so far</li>
 </ul>
 
 <p>For example:</p>
@@ -285,16 +296,23 @@ structure, linkSupport, and recordType.</p>
     &lt;/structure&gt;</pre>
 
 <p>A structure definition consists of a name and a set of field definitions.
-More details about field definitions are provided below.</p>
+More details about field definitions are provided below. A structure
+definitions can also optionally define associated support as follows:</p>
+<pre>    &lt;struucture name = "name" structureSupportName = "supportName" &gt;
+       ...
+    &lt;/structure&gt;</pre>
+
+<p>The supportName must be the name of a Java Class. For example
+"org.epics.ioc.support.SomeSupport"</p>
 
 <p>An example linkSupport definition is:</p>
-<pre>    &lt;linkSupport name = "monitorLink" configStructureName = "monitorLink" /&gt;</pre>
+<pre>    &lt;linkSupport name = "org.epics.ioc.support.MonitorLink" configStructureName = "monitorLink" /&gt;</pre>
 
-<p>A linkSupport definition consists of a name and the name of a structure
-for configuration information.</p>
+<p>A linkSupport definition consists of a name, which must be the name of a
+Java Class, and the name of a structure for configuration information.</p>
 
 <p>An example recordType definition is:</p>
-<pre>&lt;recordType name = "example"/&gt;
+<pre>&lt;recordType name = "example" recordSupportName = "supportName" /&gt;
     &lt;field name = "value" type = "double"&gt;
     &lt;field name = "priority" type = "menu" menuName = "menuPriority" /&gt;
     &lt;field name = "units" type = "string" /&gt;
@@ -305,8 +323,10 @@ for configuration information.</p>
          type = "structure" structureName = "displayLimit" /&gt;
 &lt;/recordType&gt;</pre>
 
-<p>A recordtype definition consists of a name and a set of field definitions.
-A recordType is imlemented so that it extends a structure definition.</p>
+<p>A recordtype definition consists of a name, optional default record
+support, and a set of field definitions. A recordType is imlemented so that
+it extends a structure definition. The supportName must be the name of a Java
+Class. For example "org.epics.ioc.support.SomeSupport"</p>
 
 <h3 id="field">field definition</h3>
 
@@ -440,7 +460,7 @@ to see if another way is desired.</p>
 
 <p>This is similar to V3 except, instead of having predefined scan rates
 defined in menuScan, the rate is specfied via a separate field.</p>
-<pre>&lt;structure name = "processLink"&gt;
+<pre>&lt;structure name = "processLink" structureSupportName = "org.epics.ioc.support.ProcessLink" &gt;
     &lt;field name = "pvname" type = "string" link = "true" /&gt;
     &lt;field name = "wait" type = "boolean" /&gt;
     &lt;field name = "timeout" type = "double" /&gt;
@@ -453,7 +473,7 @@ i.e. a request to process a linked record.
 A new feature is that the record making the request will wait, which
 actually means to go asynchronous, until the linked record completes
 its processing.
-&lt;structure name = "monitorLink"&gt;
+&lt;structure name = "monitorLink" structureSupportName = "org.epics.ioc.support.MonitorLink"&gt;
     &lt;field name = "pvname" type = "string" link = "true" /&gt;
     &lt;field name = "process" type = "boolean"&gt;
         &lt;!-- process this record when monitor occurs --&gt;
@@ -468,7 +488,7 @@ its processing.
 &lt;/structure&gt;
 This is a replacement for the V3 CP/CPP input links,
 this is a request to set a monitor on the linked field.
-&lt;structure name = "inputLink"&gt;
+&lt;structure name = "inputLink" structureSupportName = "org.epics.ioc.support.InputLink"&gt;
     &lt;field name = "pvname" type = "string" link = "true" /&gt;
     &lt;field name = "process" type = "boolean" /&gt;
     &lt;field name = "wait" type = "boolean" /&gt;
@@ -482,7 +502,7 @@ This is a replacement for V3 input links.
 New features are that if a request is made to process the linked
 record the record making the request can wait until the linked
 record completes processing before getting the input data.
-&lt;structure name = "outputLink"&gt;
+&lt;structure name = "outputLink" structureSupportName = "org.epics.ioc.support.OutputLink"&gt;
     &lt;field name = "pvname" type = "string" link = "true" /&gt;
     &lt;field name = "process" type = "boolean" /&gt;
     &lt;field name = "wait" type = "boolean" /&gt;
@@ -503,7 +523,7 @@ processing, it implements putCallback.</p>
 
 <p>These define the "soft" link support that will be implemented for the
 javaIOC, i.e. the support for links to other records.</p>
-<pre>&lt;structure name = "disableLink"&gt;
+<pre>&lt;structure name = "disableLink" structureSupportName = "org.epics.ioc.support.DisableLink"&gt;
     &lt;field name = "disabled" type = "boolean" /&gt;
     &lt;field name = "value" type = "short" default = "1" /&gt;
     &lt;field name = "input" type = "short" /&gt;
@@ -513,7 +533,7 @@ javaIOC, i.e. the support for links to other records.</p>
 &lt;/structure&gt;</pre>
 
 <p>These describe the equivalent or the disable fields in V3 dbCommon.</p>
-<pre>&lt;structure name = "asynLink"&gt;
+<pre>&lt;structure name = "asynLink" structureSupportName = "org.epics.ioc.support.AsynLink"&gt;
     &lt;field name = "portName" type = "string" /&gt;
     &lt;field name = "addr" type = "int" /&gt;
     &lt;field name = "timeout" type = "double" /&gt;
@@ -532,10 +552,10 @@ as well as the soft link support interfaces.</p>
 examples demonstrate that record types can be designed in several ways. The
 examples are:</p>
 <dl>
-  <dt>aiRecord</dt>
+  <dt>analogInputRecord</dt>
     <dd>This is a record type that is similar to the V3 aiRecord but will
       only allow linear or no conversion.</dd>
-  <dt>aiEmbededRecord</dt>
+  <dt>aiRecord</dt>
     <dd>This is a record type that has the same capabilities as
       analogInputRecord but is created by using embeded components which can
       also be reused for other record types.</dd>
@@ -545,7 +565,7 @@ examples are:</p>
   <dt>powerSupplyEmbededRecord</dt>
     <dd>This is an example that has the same capability as the
       powerSupplyLinkedRecord but is created by using embeded components.</dd>
-  <dt>powerSupplyArray</dt>
+  <dt>powerSupplyArrayRecord</dt>
     <dd>This is an example that shows how arrays of other "devices" can be
       supported.</dd>
   <dt>The examples are chosen to demonstrate the capabilities of the javaIOC
@@ -555,7 +575,8 @@ examples are:</p>
 <h3 id="Analog">Analog Input Record</h3>
 
 <p>The following is one way of defining an analog input record:</p>
-<pre>&lt;recordType name = "aiRecord"&gt;
+<pre>&lt;recordType name = "analogInputRecord" 
+         recordSupportName = "org.epics.ioc.support.AnalogInputSupport" &gt;
     &lt;field name = "value" type = "double"&gt;
         &lt;property name = "status" associatedField = "status" /&gt;
         &lt;property name = "severity" associatedField = "severity" /&gt;
@@ -594,7 +615,7 @@ linked records has to be defined.</p>
 components.</p>
 
 <p>First define a structure for raw input.</p>
-<pre>&lt;structure name = "aiRaw"&gt;
+<pre>&lt;structure name = "aiRaw" structureSupportName = "org.epics.ioc.support.AiRaw" &gt;
     &lt;field name = "value" type = "int" &gt;
         &lt;property name = "status" associatedField = "status" /&gt;
         &lt;property name = "severity" associatedField = "severity" /&gt;
@@ -608,10 +629,10 @@ This defines a structure appropriate for holding the raw value obtained from
 an ADC. Device support for an ADC can be attached to the input field. The
 value field has three propertys. The status and severity reside in the
 structure itself. The timeStamp will be obtained from a parent structure or
-record type.
+record type. Note that the structure also has associated support.
 
 <p>Next define:</p>
-<pre>&lt;structure name = "aiLinear"&gt;
+<pre>&lt;structure name = "aiLinear" structureSupportName = "org.epics.ioc.support.AiLinear" &gt;
     &lt;property name = "rawValue" associatedField = "aiRaw.value" /&gt;
     &lt;field name = "value" type = "double" &gt;
         &lt;property name = "status" associatedField = "status" /&gt;
@@ -636,7 +657,7 @@ Similar structures could be defined for other types of conversion, e.g.
 breakpoint conversions.</p>
 
 <p>Finally define a record type</p>
-<pre>&lt;recordType name = "aiEmbededRecord"&gt;
+<pre>&lt;recordType name = "aiRecord" recordSupportName = "org.epics.ioc.support.Ai" &gt;
     &lt;property name = "value" associatedField = "aiLinear.value" /&gt;
     &lt;property name = "rawValue" associatedField = "aiLinear.rawValue" /&gt;
     &lt;property name = "status" associatedField = "aiLinear.status" /&gt;
@@ -659,7 +680,8 @@ via links to other record types. To make the example simple the power supply
 provides access only to power, current, and voltage. The current and voltage
 will be read via some hardware device such as an ADC. The power is just
 current*voltage.</p>
-<pre>&lt;recordType name = "powerSupplyLinkedRecord"&gt;
+<pre>&lt;recordType name = "powerSupplyLinkedRecord"
+         recordSupportName = "org.epics.ioc.support.PowerSupplyLinked"&gt;
     &lt;property name = "current" associatedField = "currentInput.value" /&gt;
     &lt;property name = "voltage" associatedField = "voltageInput.value" /&gt;
     &lt;field name = "power" type = "double" &gt;
@@ -686,7 +708,7 @@ current*voltage.</p>
 structures.</p>
 
 <p>First define:</p>
-<pre>&lt;structure name = "powerSupply"&gt;
+<pre>&lt;structure name = "powerSupply" structureSupportName = "org.epics.ioc.support.PowerSupply" &gt;
     &lt;property name = "current" associatedField = "currentInput.value" /&gt;
     &lt;property name = "voltage" associatedField = "voltageInput.value" /&gt;
     &lt;field name = "power" type = "double" &gt;
@@ -707,11 +729,12 @@ structures.</p>
 
 <p>This defines a single power supply. The power is a field of the power
 supply structure. The current and voltage are defined via an aiLinear
-structure, which was defined in the previous example. Any support available
+structure, which was defined in the previous example. The support available
 via the aiLinear structure will also work with the powerSupply.</p>
 
 <p>Next define:</p>
-<pre>&lt;recordType name = "powerSupplyEmbededRecord"&gt;
+<pre>&lt;recordType name = "powerSupplyEmbededRecord"
+        recordSupportName = "org.epics.ioc.support.PowerSupply"&gt;
     &lt;property name = "power" associatedField = "powerSupply.power" /&gt;
     &lt;property name = "current" associatedField = "powerSupply.current" /&gt;
     &lt;property name = "voltage" associatedField = "powerSupply.voltage" /&gt;
@@ -724,10 +747,11 @@ via the aiLinear structure will also work with the powerSupply.</p>
     &lt;field name = "scan" type = "structure" structureName = "scan"/&gt;
 &lt;/recordType&gt;</pre>
 
-<h3 id="Power2">Power Supply Array Embeded</h3>
+<h3 id="Power2">Power Supply Array</h3>
 
 <p>An array of power supplies could be defined as follows:</p>
-<pre>&lt;recordType name = "powerSupplyArrayEmbededRecord"&gt;
+<pre>&lt;recordType name = "powerSupplyArrayRecord"
+        recordSupportName = "org.epics.ioc.support.PowerSupplyArray" &gt;
     &lt;field name = "powerSupply" type = "array" elementType = "structure" /&gt;
     &lt;field name = "status" type = "string" /&gt;
     &lt;field name = "severity" type = "menu" menuName = "menuAlarmSevr" /&gt;
@@ -741,9 +765,12 @@ via the aiLinear structure will also work with the powerSupply.</p>
 <hr />
 
 <p>The syntax for a record instance is:</p>
-<pre>&lt;record type = "recordType" name = "recordName"&gt;
+<pre>&lt;record type = "recordType" name = "recordName" recordSupportName = "supportName"&gt;
     fieldAssignment
 &lt;/record&gt;</pre>
+
+<p>If the recordSupport name is not specified then the record support
+specified in the recordType definition is used.</p>
 
 <p>A <span style="font-family: courier">fieldAssignment</span> has the
 format:</p>
@@ -755,9 +782,9 @@ format:</p>
 <h2 id="Record1">Record Instance Examples</h2>
 <hr />
 
-<h3 id="aiRecord">aiRecord Instance</h3>
-<pre>&lt;record name = "exampleAi" type = "aiRecord"&gt;
-    &lt;input linkSupportName = "asynInt" configStructureName = "asynLink"&gt;
+<h3 id="aiRecord">analogInputRecord Instance</h3>
+<pre>&lt;record name = "exampleAnalogInput" type = "analogInputRecord"&gt;
+    &lt;input linkSupportName = "opg.epics.ioc.support.AsynInt" configStructureName = "asynLink"&gt;
         &lt;portName&gt;somePort&lt;/portName&gt;
         &lt;addr&gt;1&lt;/addr&gt;
     &lt;/input&gt;
@@ -773,11 +800,12 @@ format:</p>
     &lt;priority&gt;medium&lt;/priority&gt;
 &lt;/record&gt;</pre>
 
-<h3 id="aiEmbededR">aiEmbededRecord Instance</h3>
-<pre>&lt;record name = "exampleAiEmbeded" type = "aiEmbededRecord"&gt;
+<h3 id="aiEmbededR">aiRecord Instance</h3>
+<pre>&lt;record name = "exampleAi" type = "aiRecord"&gt;
     &lt;aiLinear&gt;
         &lt;aiRaw&gt;
-            &lt;input linkSupportName = "asynInt" configStructureName = "asynLink"&gt;
+            &lt;input linkSupportName = "org.epics.ioc.support.AsynInt"
+                     configStructureName = "asynLink"&gt;
                 &lt;portName&gt;somePort&lt;/portName&gt;
                 &lt;addr&gt;1&lt;/addr&gt;
             &lt;/input&gt;
@@ -797,7 +825,8 @@ format:</p>
 
 <h3 id="powerSuppl">powerSupplyLinkedRecord Instance</h3>
 <pre>&lt;record name = "current" type = "aiRecord"&gt;
-    &lt;input linkSupportName = "asynInt" configStructureName = "asynLink"&gt;
+    &lt;input linkSupportName = "org.epics.ioc.support.AsynInt"
+             configStructureName = "asynLink"&gt;
         &lt;portName&gt;somePort&lt;/portName&gt;
         &lt;addr&gt;1&lt;/addr&gt;
     &lt;/input&gt;
@@ -814,7 +843,8 @@ format:</p>
 &lt;/record&gt;
 
 &lt;record name = "voltage" type = "aiRecord"&gt;
-    &lt;input linkSupportName = "asynInt" configStructureName = "asynLink"&gt;
+    &lt;input linkSupportName = "org.epics.ioc.support.AsynInt"
+            configStructureName = "asynLink"&gt;
         &lt;portName&gt;somePort&lt;/portName&gt;
         &lt;addr&gt;1&lt;/addr&gt;
     &lt;/input&gt;
@@ -836,12 +866,14 @@ format:</p>
         &lt;low&gt;0.0&lt;/low&gt;
         &lt;high&gt;100.0&lt;/high&gt;
     &lt;/displayLimit&gt;
-    &lt;currentInput linkSupportName = "inputLink" configStructureName = "inputLink"&gt;
+    &lt;currentInput linkSupportName = "org.epics.ioc.support.InputLink"
+            configStructureName = "inputLink"&gt;
          &lt;pvname&gt;current.value&lt;/pvname&gt;
          &lt;process&gt;true&lt;/process&gt;
          &lt;wait&gt;true&lt;/wait&gt;
     &lt;/currentInput&gt;
-    &lt;voltageInput linkSupportName = "inputLink" configStructureName = "inputLink"&gt;
+    &lt;voltageInput linkSupportName = "org.epics.ioc.support.AsynInt"
+              configStructureName = "inputLink"&gt;
          &lt;pvname&gt;voltage.value&lt;/pvname&gt;
          &lt;process&gt;true&lt;/process&gt;
          &lt;wait&gt;true&lt;/wait&gt;
@@ -858,7 +890,8 @@ format:</p>
         &lt;/displayLimit&gt;
         &lt;currentInput&gt;
             &lt;aiRaw&gt;
-                &lt;input linkSupportName = "asynInt" configStructureName = "asynLink"&gt;
+                &lt;input linkSupportName = "org.epics.ioc.support.AsynInt"
+                         configStructureName = "asynLink"&gt;
                     &lt;portName&gt;somePort&lt;/portNname&gt;
                     &lt;addr&gt;2&lt;/addr&gt;
                 &lt;/input&gt;
@@ -875,7 +908,8 @@ format:</p>
         &lt;/currentInput&gt;
         &lt;voltageInput&gt;
             &lt;aiRaw&gt;
-                &lt;input linkSupportName = "asynInt" configStructureName = "asynLink"&gt;
+                &lt;input linkSupportName = "org.epics.ioc.support.AsynInt"
+                         configStructureName = "asynLink"&gt;
                     &lt;portName&gt;somePort&lt;/portName&gt;
                     &lt;addr&gt;2&lt;/addr&gt;
                 &lt;/input&gt;
@@ -905,7 +939,8 @@ format:</p>
             &lt;/displayLimit&gt;
             &lt;currentInput&gt;
                 &lt;aiRaw&gt;
-                    &lt;input linkSupportName = "asynLink" configStructureName = "asynLink"&gt;
+                    &lt;input linkSupportName = "org.epics.ioc.support.AsynInt"
+                            configStructureName = "asynLink"&gt;
                         &lt;pvname&gt;somePort&lt;/pvname&gt;
                         &lt;addr&gt;4&lt;/addr&gt;
                     &lt;/input&gt;
@@ -922,7 +957,8 @@ format:</p>
             &lt;/currentInput&gt;
             &lt;voltageInput&gt;
                 &lt;aiRaw&gt;
-                    &lt;input linkSupportName = "asynLink" configStructureName = "asynLink"&gt;
+                    &lt;input linkSupportName = "org.epics.ioc.support.AsynInt"
+                            configStructureName = "asynLink"&gt;
                         &lt;pvname&gt;somePort&lt;/pvname&gt;
                         &lt;addr&gt;5&lt;/addr&gt;
                     &lt;/input&gt;
@@ -946,7 +982,8 @@ format:</p>
             &lt;/displayLimit&gt;
             &lt;currentInput&gt;
                 &lt;aiRaw&gt;
-                    &lt;input linkSupportName = "asynLink" configStructureName = "asynLink"&gt;
+                    &lt;input linkSupportName = "org.epics.ioc.support.AsynInt"
+                            configStructureName = "asynLink"&gt;
                         &lt;pvname&gt;somePort&lt;/pvname&gt;
                         &lt;addr&gt;6&lt;/addr&gt;
                     &lt;/input&gt;
@@ -963,7 +1000,8 @@ format:</p>
             &lt;/currentInput&gt;
             &lt;voltageInput&gt;
                 &lt;aiRaw&gt;
-                    &lt;input linkSupportName = "asynLink" configStructureName = "asynLink"&gt;
+                    &lt;input linkSupportName = "org.epics.ioc.support.AsynInt"
+                            configStructureName = "asynLink"&gt;
                         &lt;pvname&gt;somePort&lt;/pvname&gt;
                         &lt;addr&gt;7&lt;/addr&gt;
                     &lt;/input&gt;
@@ -1642,8 +1680,7 @@ to access the power, current, and voltage.</p>
     }
     voltage = voltage.getField();
 
-    // can now get data as well as properties for power, current, voltage
-</pre>
+    // can now get data as well as properties for power, current, voltage</pre>
 
 <p>NOTE: The example is not correct because of calls like</p>
 <pre>    DBAccess access = IOCDB.createAccess(powerSupply.getOtherRecord());</pre>

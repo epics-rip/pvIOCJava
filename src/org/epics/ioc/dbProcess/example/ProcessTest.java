@@ -99,7 +99,62 @@ public class ProcessTest extends TestCase {
     }
     
     static private class TestRecordSupport implements RecordSupport, ProcessComplete {
+        
+        private ProcessDB processDB;
+        private DBRecord dbRecord;
+        private DBRecord linkedRecord;
+        private RecordProcess recordProcess = null;
+        private RecordProcess linkedRecordProcess = null;
+        private ProcessReturn result = ProcessReturn.noop;
+        
+        TestRecordSupport(ProcessDB processDB,DBRecord dbRecord,DBRecord linkedRecord) {
+            this.processDB = processDB;
+            this.dbRecord = dbRecord;
+            this.linkedRecord = linkedRecord;
+        }
+        
+        public void initialize() {
+            
+        }
+        
+        public void start() {
+            if(linkedRecord!=null) {
+                linkedRecordProcess = processDB.findRecordProcess(
+                    linkedRecord.getRecordName());
+            }
+        }
+        
+        public void stop() {
+            linkedRecordProcess = null;
+        }
+        
+        public void destroy() {
+            processDB = null;
+            dbRecord = null;
+            linkedRecord = null;
+            recordProcess = null;
+            linkedRecordProcess = null;
+        }
 
+
+        public ProcessReturn process(RecordProcess recordProcess) {
+            System.out.printf("%s TestRecordSupport.process",
+                dbRecord.getRecordName());
+            if(linkedRecordProcess==null) {
+                result = ProcessReturn.noop;
+            } else {
+                if(recordProcess.requestProcess(linkedRecordProcess,this)) {
+                    result = ProcessReturn.active;
+                    this.recordProcess =  recordProcess;
+                } else {
+                    System.out.printf(" requestProcess returned false");
+                    result = ProcessReturn.done;
+                }
+            }
+            System.out.printf(" returning %s\n",result.toString());
+            return result;
+        }
+        
         public void complete(ProcessReturn linkedResult) {
             assertNotNull(recordProcess);
             switch(linkedResult) {
@@ -120,58 +175,9 @@ public class ProcessTest extends TestCase {
             recordProcess = null;
         }
 
-        public void destroy() {
-            processDB = null;
-            dbRecord = null;
-            linkedRecord = null;
-            recordProcess = null;
-            linkedRecordProcess = null;
+        public String getName() {
+            // TODO Auto-generated method stub
+            return null;
         }
-
-        public void initialize() {
-            
-        }
-        
-        public void start() {
-            if(linkedRecord!=null) {
-                linkedRecordProcess = processDB.findRecordProcess(
-                    linkedRecord.getRecordName());
-            }
-        }
-        
-        public void stop() {
-            linkedRecordProcess = null;
-        }
-
-        public ProcessReturn process(RecordProcess recordProcess) {
-            System.out.printf("%s TestRecordSupport.process",
-                dbRecord.getRecordName());
-            if(linkedRecordProcess==null) {
-                result = ProcessReturn.noop;
-            } else {
-                if(recordProcess.requestProcess(linkedRecordProcess,this)) {
-                    result = ProcessReturn.active;
-                    this.recordProcess =  recordProcess;
-                } else {
-                    System.out.printf(" requestProcess returned false");
-                    result = ProcessReturn.done;
-                }
-            }
-            System.out.printf(" returning %s\n",result.toString());
-            return result;
-        }
-        
-        TestRecordSupport(ProcessDB processDB,DBRecord dbRecord,DBRecord linkedRecord) {
-            this.processDB = processDB;
-            this.dbRecord = dbRecord;
-            this.linkedRecord = linkedRecord;
-        }
-        
-        private ProcessDB processDB;
-        private DBRecord dbRecord;
-        private DBRecord linkedRecord;
-        private RecordProcess recordProcess = null;
-        private RecordProcess linkedRecordProcess = null;
-        private ProcessReturn result = ProcessReturn.noop;
     }
 }

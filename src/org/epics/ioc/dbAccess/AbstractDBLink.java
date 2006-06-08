@@ -5,7 +5,10 @@
  */
 package org.epics.ioc.dbAccess;
 
+import java.util.concurrent.atomic.AtomicReference;
+
 import org.epics.ioc.dbDefinition.*;
+import org.epics.ioc.dbProcess.LinkSupport;
 import org.epics.ioc.pvAccess.*;
 
 /**
@@ -15,6 +18,31 @@ import org.epics.ioc.pvAccess.*;
  */
 public abstract class AbstractDBLink extends AbstractDBStructure implements DBLink
 {
+    private PVString pvConfigStructName;
+    private PVString pvLinkSupportName;
+    private DBStructure configDBStructure = null;
+    private AtomicReference<LinkSupport> linkSupport = 
+        new AtomicReference<LinkSupport>();
+    /**
+     * constructor that derived classes must call.
+     * @param dbdLinkField the reflection interface for the DBLink data.
+     */
+    protected AbstractDBLink(DBStructure parent,DBDStructureField dbdLinkField)
+    {
+        super(parent,dbdLinkField);
+        PVData[] pvData = super.getFieldPVDatas();
+        assert(pvData.length==2);
+        PVData linkSupport = pvData[0];
+        Field field = linkSupport.getField();
+        assert(field.getType()==Type.pvString);
+        assert(field.getName().equals("linkSupportName"));
+        pvLinkSupportName = (PVString)linkSupport;
+        PVData config = pvData[1];
+        field = config.getField();
+        assert(field.getType()==Type.pvString);
+        assert(field.getName().equals("configStructureName"));
+        pvConfigStructName = (PVString)config;
+    }
     /* (non-Javadoc)
      * @see org.epics.ioc.dbAccess.DBLink#getConfigDBStructure()
      */
@@ -42,21 +70,30 @@ public abstract class AbstractDBLink extends AbstractDBStructure implements DBLi
     public void putConfigStructureName(String name) {
         pvConfigStructName.put(name);
     }
-
     /* (non-Javadoc)
      * @see org.epics.ioc.dbAccess.DBLink#getLinkSupportName()
      */
     public String getLinkSupportName() {
         return pvLinkSupportName.get();
     }
-
     /* (non-Javadoc)
      * @see org.epics.ioc.dbAccess.DBLink#putLinkSupportName(java.lang.String)
      */
     public void putLinkSupportName(String name) {
         pvLinkSupportName.put(name);
     }
-    
+    /* (non-Javadoc)
+     * @see org.epics.ioc.dbAccess.DBLink#getLinkSupport()
+     */
+    public LinkSupport getLinkSupport() {
+        return linkSupport.get();
+    }
+    /* (non-Javadoc)
+     * @see org.epics.ioc.dbAccess.DBLink#setLinkSupport(org.epics.ioc.dbProcess.LinkSupport)
+     */
+    public boolean setLinkSupport(LinkSupport support) {
+        return linkSupport.compareAndSet(null,support);
+    }
     /* (non-Javadoc)
      * @see java.lang.Object#toString()
      */
@@ -72,34 +109,14 @@ public abstract class AbstractDBLink extends AbstractDBStructure implements DBLi
     private String getString(int indentLevel) {
         StringBuilder builder = new StringBuilder();
         builder.append(super.toString(indentLevel));
+        LinkSupport linkSupport = this.getLinkSupport();
+        if(linkSupport!=null) {
+            String supportName = linkSupport.getName();
+            builder.append(" support " + supportName);
+        }
         if(configDBStructure!=null) {
             builder.append(configDBStructure.toString(indentLevel));
         }
         return builder.toString();
     }
-
-    /**
-     * constructor that derived classes must call.
-     * @param dbdLinkField the reflection interface for the DBLink data.
-     */
-    protected AbstractDBLink(DBStructure parent,DBDStructureField dbdLinkField)
-    {
-        super(parent,dbdLinkField);
-        PVData[] pvData = super.getFieldPVDatas();
-        assert(pvData.length==2);
-        PVData linkSupport = pvData[0];
-        Field field = linkSupport.getField();
-        assert(field.getType()==Type.pvString);
-        assert(field.getName().equals("linkSupportName"));
-        pvLinkSupportName = (PVString)linkSupport;
-        PVData config = pvData[1];
-        field = config.getField();
-        assert(field.getType()==Type.pvString);
-        assert(field.getName().equals("configStructureName"));
-        pvConfigStructName = (PVString)config;
-    }
-
-    private PVString pvConfigStructName;
-    private PVString pvLinkSupportName;
-    private DBStructure configDBStructure = null;
 }

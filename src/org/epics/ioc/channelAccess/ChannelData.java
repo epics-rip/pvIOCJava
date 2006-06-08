@@ -12,5 +12,6 @@ import org.epics.ioc.pvAccess.*;
  *
  */
 public interface ChannelData {
+    Channel getChannel();
     PVData getPVData();
 }

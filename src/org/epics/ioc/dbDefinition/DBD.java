@@ -74,7 +74,7 @@ public interface DBD {
     /**
      * get a linkSupport
      * @param linkSupportName the name of the link support desired.
-     * @return the DBDLink Support.
+     * @return the DBDLinkSupport.
      */
     DBDLinkSupport getLinkSupport(String linkSupportName);
     /**

@@ -1,7 +1,8 @@
 <?xml version="1.0" ?>
 <DBDefinition>
 
-<recordType name = "analog">
+<recordType name = "analog"
+        recordSupportName = "org.epics.ioc.support.ExampleRecordSupport">
     <field name = "value" type = "double">
         <property name = "status" associatedField = "status" />
         <property name = "severity" associatedField = "severity" />

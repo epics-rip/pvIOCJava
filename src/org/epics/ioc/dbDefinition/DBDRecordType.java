@@ -10,4 +10,16 @@ package org.epics.ioc.dbDefinition;
  * @author mrk
  *
  */
-public interface DBDRecordType extends DBDStructure {}
+public interface DBDRecordType extends DBDStructure {
+    /**
+     * get the name of the record support.
+     * @return the name or null if the support was never created.
+     */
+    String getRecordSupportName();
+    /**
+     * set the record support name.
+     * @param supportName the name of the support.
+     * @return true if the name was set and false if a name was previously set. 
+     */
+    boolean setRecordSupportName(String supportName);
+}

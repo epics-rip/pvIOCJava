@@ -20,7 +20,8 @@
         <low>0.0</low>
         <high>10.0</high>
     </displayLimit>
-    <link linkSupportName = "processLink" configStructureName = "processLink">
+    <link linkSupportName = "org.epics.ioc.support.ProcessLink"
+             configStructureName = "processLink">
         <pvname>xxxxxx</pvname>
         <wait>true</wait>
     </link>
@@ -67,11 +68,13 @@
         <value menuName = "menuScan">interrupt</value>
     </menuArray>
     <linkArray>
-        <value linkSupportName = "processLink" configStructureName = "processLink">
+        <value linkSupportName = "org.epics.ioc.support.ProcessLink"
+             configStructureName = "processLink">
             <pvname>xxxxxx</pvname>
             <wait>true</wait>
         </value>
-        <value linkSupportName = "inputLink" configStructureName = "inputLink">
+        <value linkSupportName = "org.epics.ioc.support.InputLink"
+             configStructureName = "inputLink">
             <pvname>xxxxxx</pvname>
             <process>true</process>
         </value>
@@ -114,7 +117,8 @@
             <low>0.0</low>
             <high>10.0</high>
         </displayLimit>
-        <link linkSupportName = "processLink" configStructureName = "processLink">
+        <link linkSupportName = "org.epics.ioc.support.ProcessLink"
+             configStructureName = "processLink">
             <pvname>xxxxxx</pvname>
             <wait>true</wait>
         </link>
@@ -161,11 +165,13 @@
             <value menuName = "menuScan">interrupt</value>
         </menuArray>
         <linkArray>
-            <value linkSupportName = "processLink" configStructureName = "processLink">
+            <value linkSupportName = "org.epics.ioc.support.ProcessLink"
+             configStructureName = "processLink">
                 <pvname>xxxxxx</pvname>
                 <wait>true</wait>
             </value>
-            <value linkSupportName = "inputLink" configStructureName = "inputLink">
+            <value linkSupportName = "org.epics.ioc.support.InputLink"
+             configStructureName = "inputLink">
                 <pvname>xxxxxx</pvname>
                 <process>true</process>
             </value>

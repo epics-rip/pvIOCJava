@@ -5,6 +5,8 @@
  */
 package org.epics.ioc.dbAccess;
 
+import org.epics.ioc.dbProcess.*;
+
 
 /**
  * interface for a record instance.
@@ -17,6 +19,17 @@ public interface DBRecord extends DBStructure {
      * @return the name.
      */
     String getRecordName();
+    /**
+     * get the record support for this record instance.
+     * @return the RecordSupport or null if no support has been set.
+     */
+    RecordSupport getRecordSupport();
+    /**
+     * set the record support.
+     * @param support the support.
+     * @return true if the support was set and false if the support already was set.
+     */
+    boolean setRecordSupport(RecordSupport support);
     /**
      * lock record for reading.
      */

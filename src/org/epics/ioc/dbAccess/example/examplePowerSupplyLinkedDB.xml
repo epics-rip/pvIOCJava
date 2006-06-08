@@ -2,21 +2,24 @@
 <IOCDatabase>
 
 <record name = "currentRaw" type = "aiRawRecord">
-    <input linkSupportName = "asynLink" configStructureName = "asynLink">
+    <input linkSupportName = "org.epics.ioc.support.AsynLink"
+             configStructureName = "asynLink">
          <portName>port</portName>
          <addr>0</addr>
     </input>
 </record>
 
 <record name = "voltageRaw" type = "aiRawRecord">
-    <input linkSupportName = "asynLink" configStructureName = "asynLink">
+    <input linkSupportName = "org.epics.ioc.support.AsynLink"
+             configStructureName = "asynLink">
          <portName>port</portName>
          <addr>1</addr>
     </input>
 </record>
 
 <record name = "current" type = "aiLinearLinkedRecord">
-    <aiRaw linkSupportName = "inputLink" configStructureName = "inputLink">
+    <aiRaw linkSupportName = "org.epics.ioc.support.InputLink"
+             configStructureName = "inputLink">
          <pvname>currentRaw.value</pvname>
          <process>true</process>
          <wait>true</wait>
@@ -24,7 +27,8 @@
 </record>
 
 <record name = "voltage" type = "aiLinearLinkedRecord">
-    <aiRaw linkSupportName = "inputLink" configStructureName = "inputLink">
+    <aiRaw linkSupportName = "org.epics.ioc.support.InputLink"
+             configStructureName = "inputLink">
          <pvname>voltageRaw.value</pvname>
          <process>true</process>
          <wait>true</wait>
@@ -39,12 +43,14 @@
         <low>0.0</low>
         <high>100.0</high>
     </displayLimit>
-    <currentInput linkSupportName = "inputLink" configStructureName = "inputLink">
+    <currentInput linkSupportName = "org.epics.ioc.support.InputLink"
+             configStructureName = "inputLink">
          <pvname>current.value</pvname>
          <process>true</process>
          <wait>true</wait>
     </currentInput>
-    <voltageInput linkSupportName = "inputLink" configStructureName = "inputLink">
+    <voltageInput linkSupportName = "org.epics.ioc.support.InputLink"
+             configStructureName = "inputLink">
          <pvname>voltage.value</pvname>
          <process>true</process>
          <wait>true</wait>

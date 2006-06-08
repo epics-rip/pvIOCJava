@@ -12,7 +12,7 @@
 
 <h1 style="text-align: center">EPICS JavaIoc: Database Definition <br />
 package: org.epics.ioc.dbDefinition<br />
-2006.05.18</h1>
+2006.06.08</h1>
 <hr />
 <a href="#Overview">Overview</a> <br />
 <a href="#Syntax">Database Definition Syntax</a>
@@ -149,7 +149,7 @@ structure can't be instanciated except as a field of a record.
 
 <h3><a id="SyntaxStructure"></a>structure and recordType</h3>
 A structure is defined as follows:
-<pre>&lt;structure name = "structureName" &gt;
+<pre>&lt;structure name = "structureName" structureSupportName = "supportName" &gt;
      &lt;property name = "propertyName" associatedField = "fieldName" /&gt;
      ...
      &lt;field name = "fieldName" type = "fieldType" ... &gt;
@@ -161,7 +161,7 @@ A structure is defined as follows:
 &lt;/structure&gt;</pre>
 
 <p>A record type is defined as follows:</p>
-<pre>&lt;recordType name = "recordtypeName"&gt;
+<pre>&lt;recordType name = "recordtypeName" recordSupportName = "recordSupportName" &gt;
     &lt;property name = "propertyName" associatedField = "fieldName" /&gt;
     ...
     &lt;include filename = "base.dbd" /&gt;
@@ -180,6 +180,13 @@ A structure is defined as follows:
   <dt><span style="font-family: courier">recordtypeName</span></dt>
     <dd>The structure or record type name should have the same syntax as a
       Java identifier.</dd>
+  <dt>supportName</dt>
+    <dd>The name of the class that implements the support. If the class is
+      implemented in a package (except the defaut package), the package must
+      preceed the class name. For example
+      "org.epics.ioc.support.ExampleSupport". If given this provides the
+      default implementation. When record instances are defined, the default
+      can be overridden.</dd>
   <dt><span style="font-family: courier">fieldName</span></dt>
     <dd>Should also have the same syntax as a Java identifier, unique within
       the context of this particular structure.</dd>
@@ -545,6 +552,7 @@ interest to the database itself.</p>
 <pre>    interface DBDMenu{
         String getName();
         String[] getChoices();
+        String toString(int indentLevel);
     }</pre>
 
 <p>For example the following dumps a menu</p>
@@ -561,9 +569,14 @@ interest to the database itself.</p>
 <pre>    interface DBDStructure extends DBDField, Structure{
         DBDField getDBDFields(String fieldName);
         int getDBDFieldIndex(String fieldName);
+        String getStructureSupportName();
+        boolean setStructureSupportName(String supportName);
     }
 
-    interface DBDRecordType extends DBDStructure {}</pre>
+    interface DBDRecordType extends DBDStructure {
+        String getRecordSupportName();
+        boolean setRecordSupportName(String supportName);
+    }</pre>
 
 <p>For example the following dumps a structure</p>
 <pre>    void dumpStructure(DBDStructure structure) {
@@ -590,8 +603,7 @@ interest to the database itself.</p>
 <hr />
 
 <p>The following are the reflection interfaces for database fields:</p>
-<pre>
-    interface DBDField extends Field {
+<pre>    interface DBDField extends Field {
         DBType getDBType();
         DBDAttribute getAttribute();
         String toString();
@@ -648,7 +660,7 @@ Components. It also provides methods to insert components.</p>
     Map&lt;String,DBDStructure&gt; getStructureMap();
     DBDStructure getRecordType(String recordTypeName);
     boolean addRecordType(DBDStructure recordType);
-    Map&lt;String,DBDStructure&gt; getRecordTypeMap();
+    Map&lt;String,DBDRecordType&gt; getRecordTypeMap();
     DBDLinkSupport getLinkSupport(String linkSupportName);
     boolean addLinkSupport(DBDLinkSupport linkSupport);
     Map&lt;String,DBDLinkSupport&gt; getLinkSupportMap();

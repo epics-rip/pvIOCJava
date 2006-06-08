@@ -10,7 +10,7 @@
         </displayLimit>
         <currentInput>
             <aiRaw>
-                <input linkSupportName = "inputLink"
+                <input linkSupportName = "org.epics.ioc.support.InputLink"
                 configStructureName = "inputLink">
                     <pvname>xxxxxx</pvname>
                     <wait>true</wait>
@@ -28,7 +28,7 @@
         </currentInput>
         <voltageInput>
             <aiRaw>
-                <input linkSupportName = "inputLink"
+                <input linkSupportName = "org.epics.ioc.support.InputLink"
                 configStructureName = "inputLink">
                     <pvname>yyyyyyy</pvname>
                     <wait>true</wait>

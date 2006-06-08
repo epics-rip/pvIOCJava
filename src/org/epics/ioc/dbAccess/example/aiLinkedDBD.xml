@@ -1,7 +1,8 @@
 <?xml version="1.0" ?>
 <DBDefinition>
 
-<recordType name = "aiRawRecord">
+<recordType name = "aiRawRecord" recordSupportName =
+         "org.epics.ioc.support.AiRawRecord">
     <field name = "value" type = "int" >
         <property name = "status" associatedField = "status" />
         <property name = "severity" associatedField = "severity" />
@@ -13,7 +14,8 @@
     <field name = "input" type = "link" />
 </recordType>
 
-<recordType name = "aiLinearLinkedRecord">
+<recordType name = "aiLinearLinkedRecord" recordSupportName =
+         "org.epics.ioc.support.AiLinearLinkedRecord">
     <field name = "value" type = "double" >
         <property name = "rawValue" associatedField = "aiRaw.value" />
         <property name = "status" associatedField = "status" />

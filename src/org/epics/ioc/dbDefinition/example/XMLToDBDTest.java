@@ -7,6 +7,7 @@ package org.epics.ioc.dbDefinition.example;
 
 import junit.framework.TestCase;
 import org.epics.ioc.dbDefinition.*;
+import org.epics.ioc.pvAccess.*;
 import java.util.*;
 /**
  * JUnit test for DMLToDBD.
@@ -38,29 +39,30 @@ public class XMLToDBDTest extends TestCase {
         Set<String> keys = menuMap.keySet();
         for(String key: keys) {
             DBDMenu dbdMenu = menuMap.get(key);
-            System.out.print(dbdMenu.toString());
+            System.out.printf("\n%s",dbdMenu.toString());
         }
         System.out.printf("\n\nstructures");
         Map<String,DBDStructure> structureMap = dbd.getStructureMap();
         keys = structureMap.keySet();
         for(String key: keys) {
             DBDStructure dbdStructure = structureMap.get(key);
-            System.out.print(dbdStructure.toString());
+            System.out.printf("\n%s",dbdStructure.toString());
         }
         System.out.printf("\n\nlinkSupport");
         Map<String,DBDLinkSupport> linkSupportMap = dbd.getLinkSupportMap();
         keys = linkSupportMap.keySet();
         for(String key: keys) {
             DBDLinkSupport dbdLinkSupport = linkSupportMap.get(key);
-            System.out.print(dbdLinkSupport.toString());
+            System.out.printf("\n%s",dbdLinkSupport.toString());
         }
         System.out.printf("\n\nrecordTypes");
         Map<String,DBDRecordType> recordTypeMap = dbd.getRecordTypeMap();
         keys = recordTypeMap.keySet();
         for(String key: keys) {
             DBDRecordType dbdRecordType = recordTypeMap.get(key);
-            System.out.print(dbdRecordType.toString());
+            System.out.printf("\n%s",dbdRecordType.toString());
         }
+        
     }
 
 }

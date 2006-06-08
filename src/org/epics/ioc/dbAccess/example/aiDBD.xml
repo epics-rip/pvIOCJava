@@ -1,7 +1,8 @@
 <?xml version="1.0" ?>
 <DBDefinition>
 
-<structure name = "aiRaw">
+<structure name = "aiRaw" structureSupportName =
+           "org.epics.ioc.support.AiRaw" >
     <field name = "value" type = "int" >
         <property name = "status" associatedField = "status" />
         <property name = "severity" associatedField = "severity" />
@@ -12,7 +13,8 @@
     <field name = "input" type = "link" />
 </structure>
 
-<structure name = "aiLinear">
+<structure name = "aiLinear" structureSupportName =
+           "org.epics.ioc.support.AiLinear" >
     <property name = "rawValue" associatedField = "aiRaw.value" />
     <field name = "value" type = "double" >
         <property name = "status" associatedField = "status" />
@@ -31,7 +33,8 @@
         type = "structure" structureName = "linearConvert" />
 </structure>
 
-<recordType name = "aiLinearRecord">
+<recordType name = "aiLinearRecord" recordSupportName =
+           "org.epics.ioc.support.AiLinear">
     <property name = "value" associatedField = "aiLinear.value" />
     <property name = "rawValue" associatedField = "aiLinear.rawValue" />
     <property name = "status" associatedField = "aiLinear.status" />

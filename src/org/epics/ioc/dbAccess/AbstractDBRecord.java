@@ -11,6 +11,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import org.epics.ioc.dbDefinition.*;
+import org.epics.ioc.dbProcess.RecordSupport;
 import org.epics.ioc.pvAccess.*;
 
 /**
@@ -19,13 +20,53 @@ import org.epics.ioc.pvAccess.*;
  *
  */
 public class AbstractDBRecord extends AbstractDBStructure implements DBRecord {
+    
+    private String recordName;
+    private ReentrantReadWriteLock readWriteLock;
+    private ReentrantReadWriteLock.ReadLock readLock;
+    private ReentrantReadWriteLock.WriteLock writeLock;
+    private AtomicReference<DBMasterListener> masterListener = 
+        new AtomicReference<DBMasterListener>();
+    private AtomicReference<RecordSupport> recordSupport = 
+        new AtomicReference<RecordSupport>();
+    private static Convert convert = ConvertFactory.getConvert();
+    private ConcurrentLinkedQueue<DBListenerPvt> listenerList;
+    
+    /**
+     * constructor that derived clases must call.
+     * @param recordName the name of the record.
+     * @param dbdRecordType the introspection interface for the record.
+     */
+    protected AbstractDBRecord(String recordName,DBDRecordType dbdRecordType)
+    {
+        super(dbdRecordType);
+        this.recordName = recordName;
+        readWriteLock = new ReentrantReadWriteLock();
+        readLock = readWriteLock.readLock();
+        writeLock = readWriteLock.writeLock();
+        listenerList = new ConcurrentLinkedQueue<DBListenerPvt>();
+        super.setRecord(this);
+        super.createFields(this);
+    }
     /* (non-Javadoc)
      * @see org.epics.ioc.dbAccess.DBRecord#getRecordName()
      */
     public String getRecordName() {
         return recordName;
     }
-    
+    /* (non-Javadoc)
+     * @see org.epics.ioc.dbAccess.DBRecord#getRecordSupport()
+     */
+    public RecordSupport getRecordSupport() {
+        return recordSupport.get();
+    }
+
+    /* (non-Javadoc)
+     * @see org.epics.ioc.dbAccess.DBRecord#setRecordSupport(org.epics.ioc.dbProcess.RecordSupport)
+     */
+    public boolean setRecordSupport(RecordSupport support) {
+        return recordSupport.compareAndSet(null,support);
+    }
     /* (non-Javadoc)
      * @see org.epics.ioc.dbAccess.DBRecord#readLock()
      */
@@ -151,7 +192,15 @@ public class AbstractDBRecord extends AbstractDBStructure implements DBRecord {
         Structure structure = (Structure)this.getField();
         DBData[] dbData = super.getFieldDBDatas();
         PVData[] pvData = super.getFieldPVDatas();
-        builder.append("record " + recordName + " recordType " + structure.getStructureName() + "{");
+        RecordSupport recordSupport = this.getRecordSupport();
+        String supportName = null;
+        if(recordSupport!=null) {
+            supportName = recordSupport.getName();
+        } else {
+            supportName = "none";
+        }
+        builder.append("record " + recordName + " recordType " + structure.getStructureName()
+                + " support " + supportName + "{");
         for(int i=0, n= dbData.length; i < n; i++) {
             newLine(builder,indentLevel + 1);
             Field field = pvData[i].getField();
@@ -185,31 +234,4 @@ public class AbstractDBRecord extends AbstractDBStructure implements DBRecord {
         builder.append("}");
         return builder.toString();
     }
-    
-    /**
-     * constructor that derived clases must call.
-     * @param recordName the name of the record.
-     * @param dbdRecordType the introspection interface for the record.
-     */
-    protected AbstractDBRecord(String recordName,DBDRecordType dbdRecordType)
-    {
-        super(dbdRecordType);
-        this.recordName = recordName;
-        readWriteLock = new ReentrantReadWriteLock();
-        readLock = readWriteLock.readLock();
-        writeLock = readWriteLock.writeLock();
-        listenerList = new ConcurrentLinkedQueue<DBListenerPvt>();
-        super.setRecord(this);
-        super.createFields(this);
-    }
-
-    private String recordName;
-    private ReentrantReadWriteLock readWriteLock;
-    private ReentrantReadWriteLock.ReadLock readLock;
-    private ReentrantReadWriteLock.WriteLock writeLock;
-    AtomicReference<DBMasterListener> masterListener = 
-        new AtomicReference<DBMasterListener>(null);
-    private static Convert convert = ConvertFactory.getConvert();
-    private ConcurrentLinkedQueue<DBListenerPvt> listenerList;
-    
 }

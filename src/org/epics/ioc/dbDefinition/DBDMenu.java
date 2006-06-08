@@ -21,4 +21,10 @@ public interface DBDMenu {
      * @return array of choices.
      */
     String[] getChoices();
+    /**
+     * convert to a string
+     * @param indentLevel indentation level
+     * @return the field as a string
+     */
+    String toString(int indentLevel);
 }

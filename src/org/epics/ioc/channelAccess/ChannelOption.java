@@ -9,7 +9,7 @@ package org.epics.ioc.channelAccess;
  * @author mrk
  *
  */
-public enum ChannelOptions {
+public enum ChannelOption {
     process,
     wait
 }

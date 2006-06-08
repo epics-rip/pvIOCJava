@@ -17,13 +17,15 @@ public interface Channel {
     boolean isConnected();
     void addListener(ChannelStateListener listener);
     void removeListener(ChannelStateListener listener);
-    boolean setField(String name);
+    ChannelSetResult setField(String name);
+    String getOtherChannel();
+    String getOtherField();
     ChannelData getField();
-    boolean getPropertyField(Property property);
-    boolean getPropertyField(String name);
+    ChannelData getPropertyField(Property property);
+    ChannelData getPropertyField(String name);
     AccessRights getAccessRights();
     void subscribe(ChannelNotifyListener listener,Event why);
     void subscribe(ChannelDataListener listener,Event why);
-    void get(ChannelDataListener callback,ChannelOptions[] options);
+    ChannelGetReturn get(ChannelDataGet callback,ChannelOption[] options);
     ChannelDataPut getChannelDataPut();
 }

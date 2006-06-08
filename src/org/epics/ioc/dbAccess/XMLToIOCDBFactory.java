@@ -9,11 +9,14 @@ import java.util.*;
 import java.util.regex.Pattern;
 import java.io.*;
 import java.net.*;
+import java.lang.reflect.*;
 import org.xml.sax.*;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.helpers.XMLReaderFactory;
 import org.epics.ioc.dbDefinition.*;
 import org.epics.ioc.pvAccess.*;
+import org.epics.ioc.pvAccess.Type;
+import org.epics.ioc.dbProcess.*;
 
 
 /**
@@ -90,6 +93,13 @@ public class XMLToIOCDBFactory {
 
     private static class TypeDBDAttributeValues implements DBDAttributeValues
     {
+           
+        private String type;
+        
+        
+        TypeDBDAttributeValues(String type) {
+            this.type= type;
+        }
 
         public int getLength() {
             return 2;
@@ -112,17 +122,21 @@ public class XMLToIOCDBFactory {
             if(name.equals("type")) return type;
             return null;
         }
-        
-        TypeDBDAttributeValues(String type) {
-            this.type= type;
-        }
-        
-        private String type;
+ 
     }
 
     private static class StructureDBDAttributeValues
     implements DBDAttributeValues
     {
+        private String structureName;
+        private String fieldName;
+
+        public StructureDBDAttributeValues(String structureName,
+            String fieldName)
+        {
+            this.structureName = structureName;
+            this.fieldName = fieldName;
+        }
 
         public int getLength() {
             return 3;
@@ -148,22 +162,17 @@ public class XMLToIOCDBFactory {
             if(name.equals("structureName")) return structureName;
             return null;
         }
-
-        public StructureDBDAttributeValues(String structureName,
-            String fieldName)
-        {
-            this.structureName = structureName;
-            this.fieldName = fieldName;
-        }
-
-        private String structureName;
-        private String fieldName;
     }
     
     private static class ArrayDBDAttributeValues
     implements DBDAttributeValues
     {
-
+        private String elementType;
+        
+        public ArrayDBDAttributeValues(String elementType) {
+            this.elementType = elementType;
+        }
+        
         public int getLength() {
             return 3;
         }
@@ -189,17 +198,17 @@ public class XMLToIOCDBFactory {
             return null;
         }
 
-        public ArrayDBDAttributeValues(String elementType) {
-            this.elementType = elementType;
-        }
-
-        private String elementType;
     }
     
     private static class MenuDBDAttributeValues
     implements DBDAttributeValues
     {
+        private String menuName;
 
+        public MenuDBDAttributeValues(String menuName) {
+            this.menuName = menuName;
+        }
+        
         public int getLength() {
             return 3;
         }
@@ -225,14 +234,32 @@ public class XMLToIOCDBFactory {
             return null;
         }
 
-        public MenuDBDAttributeValues(String menuName) {
-            this.menuName = menuName;
-        }
-
-        private String menuName;
     }
         
-    private static class Handler  implements ContentHandler, ErrorHandler {
+    private static class Handler  implements ContentHandler, ErrorHandler
+    {
+        private enum State {
+            startDocument,
+            idle,
+            record,
+        } 
+        private State state = State.startDocument;
+        private int nWarning = 0;
+        private int nError = 0;
+        private int nFatal = 0;
+
+        Handler()  throws MalformedURLException {
+        }
+        
+        private String printSAXParseExceptionMessage(SAXParseException e)
+        {
+            return String.format("line %d column %d\nreason %s\n",
+                locator.getLineNumber(),
+                locator.getColumnNumber(),
+                e.toString());
+        }
+
+        RecordHandler  recordHandler;
         public void error(String message) {
             System.err.printf("line %d column %d\nreason %s\n",
                     locator.getLineNumber(),
@@ -370,35 +397,18 @@ public class XMLToIOCDBFactory {
             
         }
 
-        Handler()  throws MalformedURLException {
-        }
-        
-        private enum State {
-            startDocument,
-            idle,
-            record,
-        } 
-        private State state = State.startDocument;
-        private int nWarning = 0;
-        private int nError = 0;
-        private int nFatal = 0;
-        
-        private String printSAXParseExceptionMessage(SAXParseException e)
-        {
-            return String.format("line %d column %d\nreason %s\n",
-                locator.getLineNumber(),
-                locator.getColumnNumber(),
-                e.toString());
-        }
-
-        RecordHandler  recordHandler;
     }
 
 
-    private static class RecordHandler {
+    private static class RecordHandler
+    {
+        private State state = State.idle;
+        StructureHandler structureHandler;
+        private enum State {idle, structure}
     
         void start(String qName, Attributes attributes)
         throws SAXException {
+            DBRecord dbRecord = null;
             String recordName = attributes.getValue("name");
             String recordTypeName = attributes.getValue("type");
             if(recordName==null) {
@@ -418,7 +428,7 @@ public class XMLToIOCDBFactory {
                     locator));
                 state = State.idle;
             } else {
-                DBRecord dbRecord = iocdb.findRecord(recordName);
+                dbRecord = iocdb.findRecord(recordName);
                 if(dbRecord==null) {
                     boolean result = iocdb.createRecord(recordName,dbdRecordType);
                     if(!result) {
@@ -433,8 +443,58 @@ public class XMLToIOCDBFactory {
                 state = State.structure;
                 structureHandler = new StructureHandler(dbRecord);
             }
+            String supportName = attributes.getValue("recordSupport");
+            if(supportName==null) {
+                supportName = dbdRecordType.getRecordSupportName();
+            }
+            if(supportName==null) {
+                errorHandler.warning(new SAXParseException(
+                        "record  " + recordName + " has no record support",
+                        locator));
+                return;
+            }
+            Class supportClass;
+            RecordSupport recordSupport = null;
+            Class[] argClass = null;
+            Object[] args = null;
+            Constructor constructor = null;
+            try {
+                supportClass = Class.forName(supportName);
+            }catch (ClassNotFoundException e) {
+                errorHandler.warning(new SAXParseException(
+                        "recordSupport " + supportName + " does not exist",
+                        locator));
+                return;
+            }
+            try {
+                argClass = new Class[] {Class.forName("org.epics.ioc.dbAccess.DBRecord")};
+            }catch (ClassNotFoundException e) {
+                errorHandler.warning(new SAXParseException(
+                        "class DBRecord " + " does not exist??? Why??",
+                        locator));
+                return;
+            }
+            try {
+                args = new Object[] {dbRecord};
+                constructor = supportClass.getConstructor(argClass);
+            } catch (NoSuchMethodException e) {
+                errorHandler.warning(new SAXParseException(
+                        "recordSupport " + supportName + " does not have a valid constructor",
+                        locator));
+                return;
+            }
+            try {
+                recordSupport = (RecordSupport)constructor.newInstance(args);
+            } catch(Exception e) {
+                errorHandler.warning(new SAXParseException(
+                        "recordSupport " + supportName + " not found",
+                        locator));
+                return;
+            }
+            dbRecord.setRecordSupport(recordSupport);
+            
         }
-    
+        
         void end(String qName) throws SAXException {
             state= State.idle;
             structureHandler = null;
@@ -456,14 +516,38 @@ public class XMLToIOCDBFactory {
             if(state==State.idle) return;
             structureHandler.characters(ch,start,length);
         }
-        
-        private State state = State.idle;
-        StructureHandler structureHandler;
-        private enum State {idle, structure}
-    
+ 
     }
     
-    private static class  StructureHandler {
+    private static class  StructureHandler
+    {        
+        private DBStructure dbStructure;
+        private DBData[] dbData;
+        private int dbDataIndex;
+        private State state;
+        
+        // following are for State.field
+        private boolean buildString;
+        private StringBuilder stringBuilder;
+        private DBData data;
+        private DBDField dbdField;
+        private DBType dbType;
+        
+        private String handlerFieldName = null;
+        private int handlerFieldNameLevel = 0;
+        private EnumHandler enumHandler;
+        private StructureHandler structureHandler;
+        private ArrayHandler arrayHandler;
+        private LinkHandler linkHandler;
+        private enum State {idle, field, enumerated, structure, array, link}
+
+        StructureHandler(DBStructure dbStructure)
+        {
+            this.dbStructure = dbStructure;
+            dbData = dbStructure.getFieldDBDatas();
+            state = State.idle;
+            stringBuilder = new StringBuilder();
+        }
         
         void startElement(String qName, Attributes attributes)
         throws SAXException
@@ -632,6 +716,7 @@ public class XMLToIOCDBFactory {
             case dbStructure:
                 state = State.structure;
                 structureHandler = new StructureHandler((DBStructure)data);
+                structureHandler.lookForSupport(attributes);
                 handlerFieldName = qName;
                 return;
             case dbArray:
@@ -696,38 +781,76 @@ public class XMLToIOCDBFactory {
                 locator));
         }
 
-        StructureHandler(DBStructure dbStructure)
+        private void lookForSupport(Attributes attributes) throws SAXException
         {
-            this.dbStructure = dbStructure;
-            dbData = dbStructure.getFieldDBDatas();
-            state = State.idle;
-            stringBuilder = new StringBuilder();
-        }
-        
-        private DBStructure dbStructure;
-        private DBData[] dbData;
-        private int dbDataIndex;
-        private State state;
-        
-        // following are for State.field
-        private boolean buildString;
-        private StringBuilder stringBuilder;
-        private DBData data;
-        private DBDField dbdField;
-        private DBType dbType;
-        
-        private String handlerFieldName = null;
-        private int handlerFieldNameLevel = 0;
-        private EnumHandler enumHandler;
-        private StructureHandler structureHandler;
-        private ArrayHandler arrayHandler;
-        private LinkHandler linkHandler;
-        private enum State {idle, field, enumerated, structure, array, link}
+            String supportName = attributes.getValue("structureSupport");
 
+            if(supportName==null) {
+                DBDStructureField dbdStructureField = (DBDStructureField)dbStructure.getDBDField();
+                DBDStructure dbdStructure = dbdStructureField.getDBDStructure();
+                supportName = dbdStructure.getStructureSupportName();
+            }
+            if(supportName==null) return;
+            Class supportClass;
+            RecordSupport recordSupport = null;
+            Class[] argClass = null;
+            Object[] args = null;
+            Constructor constructor = null;
+            try {
+                supportClass = Class.forName(supportName);
+            }catch (ClassNotFoundException e) {
+                errorHandler.warning(new SAXParseException(
+                        "structureSupport " + supportName + " does not exist",
+                        locator));
+                return;
+            }
+            try {
+                argClass = new Class[] {Class.forName("org.epics.ioc.dbAccess.DBStructure")};
+            }catch (ClassNotFoundException e) {
+                errorHandler.warning(new SAXParseException(
+                        "class DBStructure " + " does not exist??? Why??",
+                        locator));
+                return;
+            }
+            try {
+                args = new Object[] {dbStructure};
+                constructor = supportClass.getConstructor(argClass);
+            } catch (NoSuchMethodException e) {
+                errorHandler.warning(new SAXParseException(
+                        "structureSupport " + supportName + " does not have a valid constructor",
+                        locator));
+                return;
+            }
+            try {
+                recordSupport = (RecordSupport)constructor.newInstance(args);
+            } catch(Exception e) {
+                errorHandler.warning(new SAXParseException(
+                        "structureSupport " + supportName + " not found",
+                        locator));
+                return;
+            }
+            dbStructure.setStructureSupport(recordSupport);
+        }
     }
     
-    private static class  EnumHandler {
-
+    private static class  EnumHandler
+    {
+        private DBEnum dbEnum;
+        private enum State {idle,enumerated,choice}
+        private StringBuilder stringBuilder;
+        private LinkedList<String> enumChoiceList;
+        private State state;
+        private String value = "";
+        
+        EnumHandler(DBEnum dbEnum)
+        {
+            super();
+            this.dbEnum = dbEnum;
+            stringBuilder = new StringBuilder();
+            enumChoiceList = new LinkedList<String>();
+            state = State.enumerated;
+        }
+        
         void end() throws SAXException
         {
             if(state==State.idle) return;
@@ -792,26 +915,92 @@ public class XMLToIOCDBFactory {
             stringBuilder.setLength(0);
             state = State.enumerated;
         }
-
-        EnumHandler(DBEnum dbEnum)
-        {
-            super();
-            this.dbEnum = dbEnum;
-            stringBuilder = new StringBuilder();
-            enumChoiceList = new LinkedList<String>();
-            state = State.enumerated;
-        }
-        
-        private DBEnum dbEnum;
-        private enum State {idle,enumerated,choice}
-        private StringBuilder stringBuilder;
-        private LinkedList<String> enumChoiceList;
-        private State state;
-        private String value = "";
     }
 
+    private static class  ArrayHandler
+    {
+        private DBStructure parent;
+        private DBArray dbArray;
+        private Type arrayElementType;
+        private DBType arrayElementDBType;
+        private int arrayOffset;
+        private int valueLevel;
 
-    private static class  ArrayHandler {
+        private HandlerType handlerType;
+        private State state;
+        
+        private boolean buildString;
+        private StringBuilder stringBuilder;
+        
+        private EnumHandler enumHandler;
+        private DBEnum[] enumData;
+        private DBEnumArray dbEnumArray;
+        
+        private DBMenu[] menuData;
+        private DBMenuArray dbMenuArray;
+
+        private StructureHandler structureHandler;
+        private DBStructure[] structureData;
+        private DBStructureArray dbStructureArray;
+
+        private ArrayHandler arrayHandler;
+        private DBArray[] arrayData;
+        private DBArrayArray dbArrayArray;
+
+        private LinkHandler linkHandler;
+        private DBLink[] linkData;
+        private DBLinkArray dbLinkArray;
+
+        private enum HandlerType {none,enumerated,menu, structure, array, link}
+        private enum State {idle, processing}
+        
+        ArrayHandler(DBStructure parent,DBArray dbArray) throws SAXException
+        {
+            this.parent = parent;
+            this.dbArray = dbArray;
+            DBDAttribute dbdAttribute = dbArray.getDBDField().getAttribute();
+            arrayElementType = dbdAttribute.getElementType();
+            arrayElementDBType = dbdAttribute.getElementDBType();
+            switch(arrayElementDBType) {
+            case dbPvType:
+                if(arrayElementType.isScalar()) {
+                    handlerType = HandlerType.none;
+                } else if(arrayElementType==Type.pvEnum) {
+                    handlerType = HandlerType.enumerated;
+                    enumData = new DBEnum[1];
+                    dbEnumArray = (DBEnumArray)dbArray;
+                } else {
+                    errorHandler.error(new SAXParseException(
+                        " Logic error ArrayHandler",
+                        locator));
+                }
+                break;
+            case dbMenu:
+                handlerType = HandlerType.menu;
+                menuData = new DBMenu[1];
+                dbMenuArray = (DBMenuArray)dbArray;
+                break;
+            case dbStructure:
+                handlerType = HandlerType.structure;
+                structureData = new DBStructure[1];
+                dbStructureArray = (DBStructureArray)dbArray;
+                break;
+            case dbArray:
+                handlerType = HandlerType.array;
+                arrayData = new DBArray[1];
+                dbArrayArray = (DBArrayArray)dbArray;
+                break;
+            case dbLink:
+                handlerType = HandlerType.link;
+                linkData = new DBLink[1];
+                dbLinkArray = (DBLinkArray)dbArray;
+                break;
+            }
+            state = State.processing;
+            arrayOffset = 0;
+            valueLevel = 0;
+            stringBuilder = new StringBuilder();
+        }
         
         void start(Attributes attributes) {
             String value = attributes.getValue("capacity");
@@ -1041,6 +1230,7 @@ public class XMLToIOCDBFactory {
                 structureData[0] = (DBStructure)FieldDataFactory.createData(parent,dbdField);
                 dbStructureArray.put(arrayOffset,1,structureData,0);
                 structureHandler = new StructureHandler(structureData[0]);
+                structureHandler.lookForSupport(attributes);
                 return;
             }
             case array: {
@@ -1104,93 +1294,26 @@ public class XMLToIOCDBFactory {
             }
 
         }
-
-        ArrayHandler(DBStructure parent,DBArray dbArray) throws SAXException
-        {
-            this.parent = parent;
-            this.dbArray = dbArray;
-            DBDAttribute dbdAttribute = dbArray.getDBDField().getAttribute();
-            arrayElementType = dbdAttribute.getElementType();
-            arrayElementDBType = dbdAttribute.getElementDBType();
-            switch(arrayElementDBType) {
-            case dbPvType:
-                if(arrayElementType.isScalar()) {
-                    handlerType = HandlerType.none;
-                } else if(arrayElementType==Type.pvEnum) {
-                    handlerType = HandlerType.enumerated;
-                    enumData = new DBEnum[1];
-                    dbEnumArray = (DBEnumArray)dbArray;
-                } else {
-                    errorHandler.error(new SAXParseException(
-                        " Logic error ArrayHandler",
-                        locator));
-                }
-                break;
-            case dbMenu:
-                handlerType = HandlerType.menu;
-                menuData = new DBMenu[1];
-                dbMenuArray = (DBMenuArray)dbArray;
-                break;
-            case dbStructure:
-                handlerType = HandlerType.structure;
-                structureData = new DBStructure[1];
-                dbStructureArray = (DBStructureArray)dbArray;
-                break;
-            case dbArray:
-                handlerType = HandlerType.array;
-                arrayData = new DBArray[1];
-                dbArrayArray = (DBArrayArray)dbArray;
-                break;
-            case dbLink:
-                handlerType = HandlerType.link;
-                linkData = new DBLink[1];
-                dbLinkArray = (DBLinkArray)dbArray;
-                break;
-            }
-            state = State.processing;
-            arrayOffset = 0;
-            valueLevel = 0;
-            stringBuilder = new StringBuilder();
-        }
-        
-        private DBStructure parent;
-        private DBArray dbArray;
-        private Type arrayElementType;
-        private DBType arrayElementDBType;
-        private int arrayOffset;
-        private int valueLevel;
-
-        private HandlerType handlerType;
-        private State state;
-        
-        private boolean buildString;
-        private StringBuilder stringBuilder;
-        
-        private EnumHandler enumHandler;
-        private DBEnum[] enumData;
-        private DBEnumArray dbEnumArray;
-        
-        private DBMenu[] menuData;
-        private DBMenuArray dbMenuArray;
-
-        private StructureHandler structureHandler;
-        private DBStructure[] structureData;
-        private DBStructureArray dbStructureArray;
-
-        private ArrayHandler arrayHandler;
-        private DBArray[] arrayData;
-        private DBArrayArray dbArrayArray;
-
-        private LinkHandler linkHandler;
-        private DBLink[] linkData;
-        private DBLinkArray dbLinkArray;
-
-        private enum HandlerType {none,enumerated,menu, structure, array, link}
-        private enum State {idle, processing}
-
     }
     
-    private static class  LinkHandler {
+    private static class  LinkHandler
+    {
+
+        private DBStructure parent;
+        private DBLink dbLink;
+        private DBStructure configDBStructure = null;
+        private StructureHandler structureHandler = null;
+        private State state;
+        private enum State {idle, structure}
+        
+        LinkHandler(DBStructure parent,DBLink dbLink)
+        {
+            super();
+            this.parent = parent;
+            this.dbLink = dbLink;
+            state = State.idle;
+        }
+        
         void start(Attributes attributes) throws SAXException
         {
             String linkSupportName = attributes.getValue("linkSupportName");
@@ -1240,6 +1363,45 @@ public class XMLToIOCDBFactory {
             dbLink.putConfigStructure(configDBStructure);
             structureHandler = new StructureHandler(configDBStructure);
             state = State.structure;
+            Class supportClass;
+            LinkSupport linkSupport = null;
+            Class[] argClass = null;
+            Object[] args = null;
+            Constructor constructor = null;
+            try {
+                supportClass = Class.forName(linkSupportName);
+            }catch (ClassNotFoundException e) {
+                errorHandler.warning(new SAXParseException(
+                        "linkSupport " + linkSupportName + " does not exist",
+                        locator));
+                return;
+            }
+            try {
+                argClass = new Class[] {Class.forName("org.epics.ioc.dbAccess.DBLink")};
+            }catch (ClassNotFoundException e) {
+                errorHandler.warning(new SAXParseException(
+                        "class DBLink " + " does not exist??? Why??",
+                        locator));
+                return;
+            }
+            try {
+                args = new Object[] {dbLink};
+                constructor = supportClass.getConstructor(argClass);
+            } catch (NoSuchMethodException e) {
+                errorHandler.warning(new SAXParseException(
+                        "recordSupport " + linkSupportName + " does not have a valid constructor",
+                        locator));
+                return;
+            }
+            try {
+                linkSupport = (LinkSupport)constructor.newInstance(args);
+            } catch(Exception e) {
+                errorHandler.warning(new SAXParseException(
+                        "linkSupport " + linkSupportName + " not found",
+                        locator));
+                return;
+            }
+            dbLink.setLinkSupport(linkSupport);
         }
 
         void startElement(String qName, Attributes attributes)
@@ -1260,21 +1422,6 @@ public class XMLToIOCDBFactory {
             if(state!=State.structure) return;
             structureHandler.endElement(qName);
         }
-
-        LinkHandler(DBStructure parent,DBLink dbLink)
-        {
-            super();
-            this.parent = parent;
-            this.dbLink = dbLink;
-            state = State.idle;
-        }
-        private DBStructure parent;
-        private DBLink dbLink;
-        private DBStructure configDBStructure = null;
-        private StructureHandler structureHandler = null;
-        private State state;
-        private enum State {idle, structure}
-
     }
     
 }

@@ -5,6 +5,7 @@
         <aiRaw>
             <input linkSupportName = "inputLink" configStructureName = "inputLink">
                 <pvname>ai2</pvname>
+                <wait>process</wait>
                 <wait>true</wait>
             </input>
         </aiRaw>
@@ -25,6 +26,7 @@
         <aiRaw>
             <input linkSupportName = "inputLink" configStructureName = "inputLink">
                 <pvname>ai1</pvname>
+                <wait>process</wait>
                 <wait>true</wait>
             </input>
         </aiRaw>

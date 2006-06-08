@@ -94,7 +94,8 @@
     <field name = "high" type = "double" />
 </structure>
 
-<structure name = "linearConvert">
+<structure name = "linearConvert"
+        structureSupportName = "org.epics.ioc.support.LinearConvert">
     <field name = "engUnitsLow" type = "double" />
     <field name = "engUnitsHigh" type = "double" />
     <field name = "slope" type = "double" />
@@ -107,10 +108,15 @@
 </structure>
 
 
-<linkSupport name = "processLink" configStructureName = "processLink" />
-<linkSupport name = "monitorLink" configStructureName = "monitorLink" />
-<linkSupport name = "inputLink" configStructureName = "inputLink" />
-<linkSupport name = "outputLink" configStructureName = "outputLink" />
-<linkSupport name = "asynLink" configStructureName = "asynLink" />
+<linkSupport name = "org.epics.ioc.support.ProcessLink"
+    configStructureName = "processLink" />
+<linkSupport name = "org.epics.ioc.support.MonitorLink"
+    configStructureName = "monitorLink" />
+<linkSupport name = "org.epics.ioc.support.InputLink"
+    configStructureName = "inputLink" />
+<linkSupport name = "org.epics.ioc.support.OutputLink"
+    configStructureName = "outputLink" />
+<linkSupport name = "org.epics.ioc.support.AsynLink"
+    configStructureName = "asynLink" />
 
 </DBDefinition>

@@ -13,7 +13,7 @@ package org.epics.ioc.dbAccess;
 public enum AccessSetResult {
     /**
      * the requested field is located in another record.
-     * calls to getRemoteRecord and getRemote Field can be used to connect to the field.
+     * calls to getRemoteRecord and getRemoteField can be used to connect to the field.
      */
     otherRecord,
     /**

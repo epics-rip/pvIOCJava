@@ -12,7 +12,7 @@
 
 <h1 style="text-align: center">EPICS JavaIoc: Database Access <br />
 package: org.epics.ioc.dbAcess <br />
-2006.06.02</h1>
+2006.06.08</h1>
 <hr />
 <a href="#Overview">Overview</a> <br />
 <a href="#Instance">Record Instance Syntax</a>
@@ -92,7 +92,7 @@ Syntax</h1>
 <hr />
 
 <p>The syntax for a record instance is:</p>
-<pre>&lt;record type = "recordType" name = "recordName"&gt;
+<pre>&lt;record type = "recordType" name = "recordName" recordSupportName = "supportName"&gt;
     fieldAssignment
 &lt;/record&gt;</pre>
 
@@ -103,6 +103,23 @@ combination of the following characters:</p>
     ]</span></li>
   <li>Any Unicode/UTF-8 character outside of the Basic Latin set</li>
 </ul>
+
+<p>supportName is the name of the class that implements the support. If the
+class is implemented in a package (except the default package), the package
+must preceed the class name. For example
+"org.epics.ioc.support.ExampleSupport".</p>
+
+<p>When a record instance is being loaded into an ioc, an attempt is made to
+create record support for each record instance. If support can not be created
+a warning message is generated. The record support is created as follows: If
+the record instance defines a recordSupportName this name provides the
+supportName. Otherwise the recordType definition is consulted to see if it
+defins support. If no support is found than an warnimng message is issued.
+Record support is created via Java reflection, The supportName must be the
+name of a Java Class that has an appropriate constructor which is called to
+create the support. Any failure is reported via a warning message.</p>
+
+<p></p>
 
 <p><span style="font-family: courier;">fieldAssignment</span> is described
 next.</p>
@@ -161,6 +178,26 @@ example:</p>
          &lt;low&gt;0.0&lt;/low&gt;
          &lt;high&gt;10.0&lt;/high&gt;
     &lt;/displayLimit&gt;</pre>
+
+<p>If a structure field has associated support it can be specified as
+follows:</p>
+<pre>    &lt;fieldName structureSupportName = "supportName" &gt;</pre>
+
+<p>supportName is the name of the class that implements the support. If the
+class is implemented in a package (except the default package), the package
+must preceed the class name. For example
+"org.epics.ioc.support.ProcessSupport".</p>
+
+<p>When a record instance is being loaded into an ioc, an attempt is made to
+create structure support for each structure field instance. If no support is
+found then the field has no support. The structure support is created as
+follows: If the structure field instance defines a structureSupportName this
+name provides the supportName, otherwise the structure definition is
+consulted to see if it defines support. If no support is found than nothing
+more is done. Record support for the structure field is created via Java
+reflection, The supportName must be the name of a Java Class that has an
+appropriate constructor which is called to create the support. Any failure is
+reported via a warning message.</p>
 
 <h3><a id="FieldArray"></a>array</h3>
 The syntax for an array initializer is:
@@ -271,8 +308,6 @@ A link field is initialized as follows:
         &lt;/structure&gt;
     &lt;/fieldName&gt;</pre>
 
-<p></p>
-
 <p>where</p>
 <dl>
   <dt style="font-family: courier;">supportName</dt>
@@ -285,6 +320,18 @@ A link field is initialized as follows:
     <dd>The value for the structure field.<br />
     </dd>
 </dl>
+
+<p>supportName is the name of the class that implements the support. If the
+class is implemented in a package (except the default package), the package
+must preceed the class name. For example
+"org.epics.ioc.support.ProcessSupport".</p>
+
+<p>When a record instance is being loaded into an ioc, an attempt is made to
+create link support for each link instance. If support can not be created a
+warning message is generated. The link support is created via Java
+reflection. The supportName must be the name of a Java Class that has an
+appropriate constructor which is called to create the support. Any failure is
+reported via a warning message.</p>
 <hr />
 
 <h1 style="text-align: center"><a id="RecordInstanceAccess"></a>Record
@@ -390,6 +437,8 @@ A menu field is accessed via the interface:
 <h2><a id="RecordData"></a>RecordData</h2>
 <pre>    public interface DBRecord extends DBStructure {
         String getRecordName();
+        RecordSupport getRecordSupport();
+        boolean setRecordSupport(RecordSupport support);
         void readLock();
         void readUnlock();
         void writeLock();
@@ -412,6 +461,8 @@ A menu field is accessed via the interface:
         void putLinkSupportName(String name);
         DBStructure getConfigStructure();
         void putConfigStructure(DBStructure dbStructure);
+        LinkSupport getLinkSupport();
+        boolean setLinkSupport(LinkSupport support);
     }</pre>
 
 <h2><a id="ArrayData"></a>Array Data</h2>
@@ -599,8 +650,7 @@ invoked from a shell via the command:</p>
 <h1 style="text-align: center"><a id="DatabaseAccess"></a>IOC Database
 Access</h1>
 <hr />
-<pre>
-    public enum AccessSetResult {
+<pre>    public enum AccessSetResult {
         otherRecord,
         thisRecord,
         notFound
@@ -616,7 +666,6 @@ Access</h1>
         DBData getPropertyField(Property property);
         DBData getPropertyField(String propertyName);
         void replaceField(DBData oldField, DBData newField);
-    }
-</pre>
+    }</pre>
 </body>
 </html>

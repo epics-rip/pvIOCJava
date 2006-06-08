@@ -30,7 +30,8 @@
     <field name = "arrayArray" type = "array" elementType = "array" />
 </structure>
 
-<recordType name = "allTypes">
+<recordType name = "allTypes" recordSupportName = 
+           "org.epics.ioc.support.ExampleRecordSupport">
     <field name = "boolean" type = "boolean" />
     <field name = "byte" type = "byte" />
     <field name = "short" type = "short" />
