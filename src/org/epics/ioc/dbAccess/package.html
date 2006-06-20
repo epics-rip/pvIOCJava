@@ -12,7 +12,7 @@
 
 <h1 style="text-align: center">EPICS JavaIoc: Database Access <br />
 package: org.epics.ioc.dbAcess <br />
-2006.06.08</h1>
+2006.06.20</h1>
 <hr />
 <a href="#Overview">Overview</a> <br />
 <a href="#Instance">Record Instance Syntax</a>
@@ -198,6 +198,11 @@ more is done. Record support for the structure field is created via Java
 reflection, The supportName must be the name of a Java Class that has an
 appropriate constructor which is called to create the support. Any failure is
 reported via a warning message.</p>
+
+<p>It is permissible to define a field to be a structure without providing a
+structure name. In this case the structureName must be provided whe nthe
+field is being created. The syntax is:</p>
+<pre>    &lt;fieldName structureName = "structureName" &gt;</pre>
 
 <h3><a id="FieldArray"></a>array</h3>
 The syntax for an array initializer is:
@@ -430,9 +435,33 @@ A menu field is accessed via the interface:
 
 <h2><a id="StructureData"></a>Structure Data</h2>
 <pre>    public interface DBStructure extends DBData, PVStructure {
+         DBDStructure getDBDStructure();
+         boolean createFields(DBDStructure dbdStructure);
          DBData[] getFieldDBDatas();
          int getFieldDBDataIndex(String fieldName);
-    }</pre>
+    }
+
+</pre>
+
+<p>where</p>
+<dl>
+  <dt>getDBDStructure</dt>
+    <dd>This returns the DBDStructure for the field. If the database
+      definition for the field did not specify a structure name then this is
+      the only way to introspect the structure information.</dd>
+  <dt>createFields</dt>
+    <dd>If the database definition for the field did not specify a
+      structureName than when a field is being created this must be called to
+      associate a structure with the field.</dd>
+  <dt>getFieldDBDatas</dt>
+    <dd>Get the array of interfaces for the fields of the structure
+    instance.</dd>
+  <dt>getFieldDBDataIndex</dt>
+    <dd>Get the index into DBData for the specified field.</dd>
+</dl>
+
+<p>
+</p>
 
 <h2><a id="RecordData"></a>RecordData</h2>
 <pre>    public interface DBRecord extends DBStructure {

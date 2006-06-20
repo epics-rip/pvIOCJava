@@ -10,7 +10,7 @@
 <body>
 <h1 style="text-align: center">EPICS JavaIOC: Java Input/Output Controller<br
 />
-2006.06.08</h1>
+2006.06.20</h1>
 
 <p>This product is available via the <a href="#LicenseAgreement">open source
 license</a> described at the end of this document.</p>
@@ -344,7 +344,8 @@ where "..." represents other attributes. The complete set of attributes are:
   <dt style="font-family: courier;">menuName</dt>
     <dd>must be given if the type is menu.</dd>
   <dt style="font-family: courier;">structureName</dt>
-    <dd>must be given if the type is structure.</dd>
+    <dd>can be given if the type is structure. If not given the structure
+      must be specified when a field instance is created.</dd>
   <dt style="font-family: courier;">elementType</dt>
     <dd>must be specified if the type is array. It can be any of the
       supported types.</dd>

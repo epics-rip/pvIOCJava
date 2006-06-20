@@ -12,7 +12,7 @@
 
 <h1 style="text-align: center">EPICS JavaIoc: Database Definition <br />
 package: org.epics.ioc.dbDefinition<br />
-2006.06.08</h1>
+2006.06.20</h1>
 <hr />
 <a href="#Overview">Overview</a> <br />
 <a href="#Syntax">Database Definition Syntax</a>
@@ -243,7 +243,11 @@ structure which must have been previously defined. Example:
    &lt;recordType name = "haspoint"&gt;
        ...
        &lt;field name = "point" type = "structure" structureName = "point" /&gt;
-       ...</pre>
+       ...
+</pre>
+
+<p>NOTE: The structureName does not have to be given. In this case the field
+instance must define the structureName.</p>
 
 <h4><a id="SyntaxArray"></a>array</h4>
 
@@ -610,11 +614,13 @@ interest to the database itself.</p>
         String toString(int indentLevel);
     }
 
-    interface DBDEnumField extends DBDField, Enum { }
+    interface DBDEnumField extends DBDField, Enum {}
 
-    interface DBDMenuField extends DBDField, Enum { }
+    interface DBDMenuField extends DBDField, Enum {}
 
-    interface DBDStructureField extends DBDField,Structure { }
+    interface DBDStructureField extends DBDField,Structure {
+         DBDStructure getDBDStructure();
+    }
 
     interface DBDArrayField extends DBDField, Array {}
     
@@ -623,6 +629,9 @@ interest to the database itself.</p>
 <p>In addition an abstract class is available for creating implementations of
 the field reflection interfaces. This class is used by DBDCreateFactory and
 is probably not needed by other code.</p>
+
+<p>NOTE: If the structureName is not specified for a DBDStructureField then
+getDBDStructure will return null.</p>
 <hr />
 
 <h1 style="text-align: center"><a id="DBDCreate"></a> Creation of Database

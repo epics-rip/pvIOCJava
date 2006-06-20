@@ -10,7 +10,7 @@
 <body>
 <h1 style="text-align: center">EPICS JavaIOC: pvAccess<br />
 package: org.epics.ioc.pvAccess<br />
-2006.05.18</h1>
+2006.06.20</h1>
 
 <p><a href="#Overview">Overview</a></p>
 <ul>
@@ -246,6 +246,13 @@ especially important for arrays and structures.</p>
       <li>Has a name.</li>
       <li>Has fields that can be any of the supported types.</li>
     </ul>
+    <p>NOTE: An implementation may defer the definition of a structure until
+    a field instance is being created. </p>
+    <ol>
+      <li>getStructureName, and getField both returns null</li>
+      <li>getFieldNames and getFields return a 0 length array</li>
+      <li>getFieldIndex returns a value less than 0.</li>
+    </ol>
   </li>
   <li>Array - The array has elements of any of the supported types.</li>
 </ul>
