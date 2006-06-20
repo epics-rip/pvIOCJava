@@ -7,6 +7,7 @@ package org.epics.ioc.dbAccess;
 
 import org.epics.ioc.dbProcess.RecordSupport;
 import org.epics.ioc.pvAccess.*;
+import org.epics.ioc.dbDefinition.*;
 
 /**
  * Data Interface for field that is a structure.
@@ -14,6 +15,20 @@ import org.epics.ioc.pvAccess.*;
  *
  */
 public interface DBStructure extends DBData, PVStructure {
+    /**
+     * get the DBDStructure definition for this field.
+     * If the DBD field definition did not specify a structure but the instance definition did then
+     * this will return the DBDStructure.
+     * @return the DBDStructure or null if a structure was not defined.
+     */
+    DBDStructure getDBDStructure();
+    /**
+     * create fields of structure.
+     * @param dbdStructure the structure that describes the fields.
+     * @return true if the fields were created.
+     * The request fails if the fields were already created.
+     */
+    boolean createFields(DBDStructure dbdStructure);
     /**
      * get the reflection interfaces for the fields.
      * @return an array of <i>DBField</i> that describes each of the fields in the structure.

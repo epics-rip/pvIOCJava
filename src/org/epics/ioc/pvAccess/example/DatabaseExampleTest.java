@@ -312,6 +312,24 @@ public class DatabaseExampleTest extends TestCase {
         System.out.printf("%s\nvalue %s\n",
              structure.toString(),
              displayLimit.toString());
+        
+        // now create a structure with names and fields specified later
+        PVStructure displayLimitDelay = database.createStructureData(
+                "displayLimitDelay",null,null,null);
+        structure = (Structure)displayLimitDelay.getField();
+        Field field = structure.getField("junk");
+        assertNull(field);
+        int index = structure.getFieldIndex("junk");
+        assertTrue(index<0);
+        Field[] fields = structure.getFields();
+        assertTrue(fields.length==0);
+        String[] names = structure.getFieldNames();
+        assertTrue(names.length==0);
+        String structureName = structure.getStructureName();
+        assertNull(structureName);
+        System.out.printf("\n%s\nvalue %s\n",
+             structure.toString(),
+             displayLimitDelay.toString());
     }
 
     /**

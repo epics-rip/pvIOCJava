@@ -33,6 +33,11 @@ public abstract class AbstractDBStructure extends AbstractDBData
     protected AbstractDBStructure(DBStructure parent, DBDStructureField dbdStructureField) {
         super(parent,dbdStructureField);
         dbdStructure = super.getDBDField().getAttribute().getStructure();
+        if(dbdStructure==null) {
+            pvData = new PVData[0];
+            dbData = new DBData[0];
+            return;
+        }
         DBDField[] dbdFields = dbdStructure.getDBDFields();
         dbData = new DBData[dbdFields.length];
         pvData = new PVData[dbData.length];
@@ -42,6 +47,22 @@ public abstract class AbstractDBStructure extends AbstractDBData
         }
     }
     
+    public boolean createFields(DBDStructure dbdStructure) {
+        if(this.dbdStructure!=null) return false;
+        this.dbdStructure = dbdStructure;
+        DBDField[] dbdFields = dbdStructure.getDBDFields();
+        dbData = new DBData[dbdFields.length];
+        pvData = new PVData[dbData.length];
+        for(int i=0; i < dbData.length; i++) {
+            dbData[i] = FieldDataFactory.createData(this,dbdFields[i]);
+            pvData[i] = dbData[i];
+        }
+        return true;
+    }
+    
+    public DBDStructure getDBDStructure() {
+        return dbdStructure;
+    }
     /**
      * constructor for record instance classes.
      * @param dbdRecordType the reflection interface for the record type.
@@ -49,7 +70,7 @@ public abstract class AbstractDBStructure extends AbstractDBData
     protected AbstractDBStructure(DBDRecordType dbdRecordType) {
         super(null,dbdRecordType);
         int numberFields = dbdRecordType.getDBDFields().length;
-        dbdStructure = dbdRecordType;;
+        dbdStructure = dbdRecordType;
         dbData = new DBData[numberFields];
         pvData = new PVData[numberFields];
     }
@@ -119,7 +140,7 @@ public abstract class AbstractDBStructure extends AbstractDBData
     private String getString(int indentLevel) {
         StringBuilder builder = new StringBuilder();
         newLine(builder,indentLevel);
-        Structure structure = (Structure)this.getField();
+        Structure structure = (Structure)dbdStructure;
         builder.append("structure " + structure.getStructureName());
         RecordSupport recordSupport = this.getStructureSupport();
         if(recordSupport!=null) {

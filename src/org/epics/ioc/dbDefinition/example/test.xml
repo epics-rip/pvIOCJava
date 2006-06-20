@@ -187,6 +187,16 @@
     <field name = "scan" type = "structure" structureName = "scan"/>
 </recordType>
 
+<recordType name = "aiRecord" recordSupportName = "AnalogSupport">
+    <property name = "value" associatedField = "aiLinear.value" />
+    <property name = "status" associatedField = "aiLinear.status" />
+    <property name = "severity" associatedField = "aiLinear.severity" />
+    <field name = "aiInput" type = "structure" />
+    <field name = "priority" type = "menu" menuName = "menuPriority" />
+    <field name = "timeStamp" type = "structure" structureName = "timeStamp"/>
+    <field name = "scan" type = "structure" structureName = "scan"/>
+</recordType>
+
 <recordType name = "allTypes">
     <field name = "boolean" type = "boolean" />
     <field name = "byte" type = "byte" />

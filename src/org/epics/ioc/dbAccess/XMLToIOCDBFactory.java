@@ -247,6 +247,7 @@ public class XMLToIOCDBFactory {
         private int nWarning = 0;
         private int nError = 0;
         private int nFatal = 0;
+        private RecordHandler  recordHandler;
 
         Handler()  throws MalformedURLException {
         }
@@ -258,8 +259,7 @@ public class XMLToIOCDBFactory {
                 locator.getColumnNumber(),
                 e.toString());
         }
-
-        RecordHandler  recordHandler;
+ 
         public void error(String message) {
             System.err.printf("line %d column %d\nreason %s\n",
                     locator.getLineNumber(),
@@ -522,7 +522,6 @@ public class XMLToIOCDBFactory {
     private static class  StructureHandler
     {        
         private DBStructure dbStructure;
-        private DBData[] dbData;
         private int dbDataIndex;
         private State state;
         
@@ -544,7 +543,6 @@ public class XMLToIOCDBFactory {
         StructureHandler(DBStructure dbStructure)
         {
             this.dbStructure = dbStructure;
-            dbData = dbStructure.getFieldDBDatas();
             state = State.idle;
             stringBuilder = new StringBuilder();
         }
@@ -684,7 +682,7 @@ public class XMLToIOCDBFactory {
                 state = State.idle;
                 return;
             }
-            data = dbData[dbDataIndex];
+            data = dbStructure.getFieldDBDatas()[dbDataIndex];
             dbdField = data.getDBDField();
             dbType = dbdField.getDBType();
             switch(dbType) {
@@ -713,11 +711,30 @@ public class XMLToIOCDBFactory {
                 stringBuilder.setLength(0);
                 buildString = true;
                 return;
-            case dbStructure:
-                state = State.structure;
-                structureHandler = new StructureHandler((DBStructure)data);
-                structureHandler.lookForSupport(attributes);
-                handlerFieldName = qName;
+            case dbStructure: {
+                    state = State.structure;
+                    DBStructure dbStructure = (DBStructure)data;
+                    structureHandler = new StructureHandler(dbStructure);                  
+                    String structureName = attributes.getValue("structureName");
+                    if(structureName!=null) {
+                        DBDStructure dbdStructure = dbd.getStructure(structureName);
+                        if(dbdStructure==null) {
+                            errorHandler.error(new SAXParseException(
+                                    "structureName " + structureName + " not defined",
+                                     locator));
+                            state = State.idle;
+                            return;
+                        }
+                        if(!dbStructure.createFields(dbdStructure)) {
+                            errorHandler.warning(new SAXParseException(
+                                "structureName " + structureName
+                                + " not used because a structure was already defined",
+                                locator));
+                        }
+                    }
+                    structureHandler.lookForSupport(attributes);
+                    handlerFieldName = qName;
+                }
                 return;
             case dbArray:
                 state = State.array;
@@ -763,7 +780,7 @@ public class XMLToIOCDBFactory {
             }
             if(dbType==DBType.dbMenu) {
                 String value = stringBuilder.toString();
-                DBMenu menu = (DBMenu)dbData[dbDataIndex];
+                DBMenu menu = (DBMenu)dbStructure.getFieldDBDatas()[dbDataIndex];
                 String[] choice = menu.getChoices();
                 for(int i=0; i<choice.length; i++) {
                     if(value.equals(choice[i])) {
@@ -784,10 +801,8 @@ public class XMLToIOCDBFactory {
         private void lookForSupport(Attributes attributes) throws SAXException
         {
             String supportName = attributes.getValue("structureSupport");
-
             if(supportName==null) {
-                DBDStructureField dbdStructureField = (DBDStructureField)dbStructure.getDBDField();
-                DBDStructure dbdStructure = dbdStructureField.getDBDStructure();
+                DBDStructure dbdStructure = dbStructure.getDBDStructure();
                 supportName = dbdStructure.getStructureSupportName();
             }
             if(supportName==null) return;

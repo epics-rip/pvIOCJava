@@ -571,22 +571,25 @@ public final class  DBDCreateFactory {
         }
 
         private String getString(int indentLevel) {
-            Property[] structureProperty = dbdStructure.getPropertys();
+            String supportName = null;
             StringBuilder builder = new StringBuilder();
-            if(structureProperty.length>0) {
-                newLine(builder,indentLevel);
-                builder.append(String.format("field %s is structure with property {",
-                        field.getName()));
-                for(Property property : structureProperty) {
-                    newLine(builder,indentLevel+1);
-                    builder.append(String.format("{name = %s field = %s}",
-                        property.getName(),property.getFieldName()));
+            if(dbdStructure != null) {
+                Property[] structureProperty = dbdStructure.getPropertys();
+                if(structureProperty.length>0) {
+                    newLine(builder,indentLevel);
+                    builder.append(String.format("field %s is structure with property {",
+                            field.getName()));
+                    for(Property property : structureProperty) {
+                        newLine(builder,indentLevel+1);
+                        builder.append(String.format("{name = %s field = %s}",
+                            property.getName(),property.getFieldName()));
+                    }
+                    newLine(builder,indentLevel);
+                    builder.append("}");
                 }
-                newLine(builder,indentLevel);
-                builder.append("}");
+                supportName = dbdStructure.getStructureSupportName();
             }
             builder.append(super.toString(indentLevel));
-            String supportName = dbdStructure.getStructureSupportName();
             if(supportName!=null) {
                 newLine(builder,indentLevel);
                 builder.append("structureSupportName " + supportName);

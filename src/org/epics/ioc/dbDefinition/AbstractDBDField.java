@@ -114,11 +114,16 @@ public abstract class AbstractDBDField implements DBDField {
         case dbStructure:
         case dbLink: {
             DBDStructure dbdStructure = attribute.getStructure();
-            assert(dbdStructure!=null);
-            DBDField[] dbdField = dbdStructure.getDBDFields();
-            assert(dbdField!=null);
+            DBDField[] dbdField = null;
+            String structureName = null;
+            if(dbdStructure!=null) {
+                dbdField = dbdStructure.getDBDFields();
+                structureName = dbdStructure.getName();
+            } else {
+                dbdField = new DBDField[0];
+            }
             field = FieldFactory.createStructureField(fieldName,
-                dbdStructure.getName(),dbdField,property);
+                structureName,dbdField,property);
             break;
         }
         case dbArray:

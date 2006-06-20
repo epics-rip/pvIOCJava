@@ -79,6 +79,13 @@ public class XMLToDataBaseTest extends TestCase {
         } catch (Exception e) {
             System.out.println("Exception: " + e);
         }
+        System.out.printf("reading exampleAiDB\n");
+        try {
+            XMLToIOCDBFactory.convert(dbd,iocdb,
+                 "src/org/epics/ioc/dbAccess/example/exampleAiDB.xml");
+        } catch (Exception e) {
+            System.out.println("Exception: " + e);
+        }
         System.out.printf("reading examplePowerSupplyDB\n");
         try {
             XMLToIOCDBFactory.convert(dbd,iocdb,

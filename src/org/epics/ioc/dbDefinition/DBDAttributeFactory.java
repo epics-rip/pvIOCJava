@@ -198,9 +198,6 @@ public class DBDAttributeFactory {
             if(dbType==DBType.dbMenu && dbdMenu==null)
                 throw new IllegalStateException(
                     "menuName not specified");
-            if(dbType==DBType.dbStructure && dbdStructure==null)
-                throw new IllegalStateException(
-                    "structureName not specified");
             if(dbType==DBType.dbArray && elementType==Type.pvUnknown)
                 throw new IllegalStateException(
                     "elementType not specified");

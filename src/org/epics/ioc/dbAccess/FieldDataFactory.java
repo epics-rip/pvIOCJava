@@ -123,7 +123,8 @@ public class FieldDataFactory {
      * @return the interface for accessing the record instance.
      */
     public static DBRecord createRecord(String recordName, DBDRecordType dbdRecordType) {
-        return new RecordData(recordName,dbdRecordType);
+        DBRecord dbRecord = new RecordData(recordName,dbdRecordType);
+        return dbRecord;
     }
     
     private static Convert convert = ConvertFactory.getConvert();

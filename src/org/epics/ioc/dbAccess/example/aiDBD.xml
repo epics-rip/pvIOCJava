@@ -47,5 +47,18 @@
     <field name = "scan" type = "structure" structureName = "scan"/>
 </recordType>
 
+<recordType name = "aiRecord" recordSupportName =
+           "org.epics.ioc.support.Ai">
+    <property name = "value" associatedField = "aiInput.value" />
+    <property name = "status" associatedField = "aiInput.status" />
+    <property name = "severity" associatedField = "aiInput.severity" />
+    <field name = "aiInput" type = "structure" >
+        <property name = "timeStamp" associatedField = "timeStamp" />
+    </field>
+    <field name = "priority" type = "menu" menuName = "menuPriority" />
+    <field name = "timeStamp" type = "structure" structureName = "timeStamp"/>
+    <field name = "scan" type = "structure" structureName = "scan"/>
+</recordType>
+
 
 </DBDefinition>

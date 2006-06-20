@@ -102,13 +102,24 @@ public class DatabaseExample {
     public PVStructure createStructureData(String name, String structureName,
             PVData[] pvData, Property[] property)
     {
-        int length = pvData.length;
+        int length = 0;
+        if(pvData!=null) length = pvData.length;
         Field[] field = new Field[length];
         for(int i =0; i < length; i++)  field[i] = pvData[i].getField();
         Structure structure = FieldFactory.createStructureField(
             name,structureName,field,property);
         return new StructureData(structure,pvData);
     }
+    
+    public PVStructure createStructureData(String name, Property[] property)
+    {
+        Field[] field = new Field[0];
+        PVData[] pvData = new PVData[0];
+        Structure structure = FieldFactory.createStructureField(
+            name,null,field,property);
+        return new StructureData(structure,pvData);
+    }
+    
 
     /**
      * create an array field.
