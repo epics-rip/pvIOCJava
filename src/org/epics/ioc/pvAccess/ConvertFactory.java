@@ -1577,7 +1577,7 @@ public final class ConvertFactory {
             builder.append(String.format("structure %s{",
                 structure.getStructureName()));
             PVData[] fieldsData = data.getFieldPVDatas();
-            for(PVData fieldData : fieldsData) {
+            if(fieldsData!=null) for(PVData fieldData : fieldsData) {
                 Field fieldnow = fieldData.getField();
                 newLine(builder,indentLevel+1);
                 builder.append(String.format("%s = ", fieldnow.getName()));
