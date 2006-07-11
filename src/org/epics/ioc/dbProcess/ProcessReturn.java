@@ -26,9 +26,5 @@ public enum ProcessReturn {
     /**
      * support is still active.
      */
-    active,
-    /**
-     * the record was already active when a process request was made.
-     */
-    alreadyActive
+    active
 }

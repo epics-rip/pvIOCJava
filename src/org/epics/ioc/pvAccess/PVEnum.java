@@ -13,23 +13,23 @@ package org.epics.ioc.pvAccess;
  */
 public interface PVEnum extends PVData{
     /**
-     * get the index of the current selected choice.
+     * Get the index of the current selected choice.
      * @return index of current choice.
      */
     int getIndex();
     /**
-     * set the choice.
+     * Set the choice.
      * @param index for choice.
      */
     void setIndex(int index);
     /**
-     * get the choice values.
+     * Get the choice values.
      * @return String[] specifying the choices.
      * @throws IllegalStateException if the field is not mutable.
      */
     String[] getChoices();
     /**
-     * set the choice values. 
+     * Set the choice values. 
      * @param choice a String[] specifying the choices.
      * @return (true,false) if the choices were modified.
      * A value of false normally means the choice strings were readonly.

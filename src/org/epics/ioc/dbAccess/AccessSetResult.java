@@ -12,17 +12,17 @@ package org.epics.ioc.dbAccess;
  */
 public enum AccessSetResult {
     /**
-     * the requested field is located in another record.
-     * calls to getRemoteRecord and getRemoteField can be used to connect to the field.
+     * The requested field is located in another record.
+     * Calls to getRemoteRecord and getRemoteField can be used to connect to the field.
      */
     otherRecord,
     /**
-     * the requested field is in this record.
+     * The requested field is in this record.
      * getField can be called to retrieve the DBData interface.
      */
     thisRecord,
     /**
-     * the field could not be found.
+     * The field could not be found.
      */
     notFound
 }

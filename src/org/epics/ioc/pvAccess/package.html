@@ -10,7 +10,7 @@
 <body>
 <h1 style="text-align: center">EPICS JavaIOC: pvAccess<br />
 package: org.epics.ioc.pvAccess<br />
-2006.06.20</h1>
+2006.07.11</h1>
 
 <p><a href="#Overview">Overview</a></p>
 <ul>
@@ -247,7 +247,7 @@ especially important for arrays and structures.</p>
       <li>Has fields that can be any of the supported types.</li>
     </ul>
     <p>NOTE: An implementation may defer the definition of a structure until
-    a field instance is being created. </p>
+    a field instance is being created.</p>
     <ol>
       <li>getStructureName, and getField both returns null</li>
       <li>getFieldNames and getFields return a 0 length array</li>
@@ -352,80 +352,133 @@ especially important for arrays and structures.</p>
         void setCapacity(int len);
     }
 
+    public class BooleanArrayData {
+        public boolean[] data;
+        public int offset;
+    }
     interface PVBooleanArray extends PVArray {
-        int get(int offset, int len, boolean[]to, int toOffset);
+        int get(int offset, int len, BooleanArrayData data);
         int put(int offset, int len, boolean[]from, int fromOffset);
     }
 
+    public class ByteArrayData {
+        public byte[] data;
+        public int offset;
+    }
     interface PVByteArray extends PVArray {
-        int get(int offset, int len, byte[]to, int toOffset);
+        int get(int offset, int len, ByteArrayData data);
         int put(int offset, int len, byte[]from, int fromOffset);
     }
 
+    public class ShortArrayData {
+        public short[] data;
+        public int offset;
+    }
     interface PVShortArray extends PVArray {
-        int get(int offset, int len, short[]to, int toOffset);
+        int get(int offset, int len, ShortArrayData data);
         int put(int offset, int len, short[]from, int fromOffset);
     }
 
+    public class IntArrayData {
+        public int[] data;
+        public int offset;
+    }
     interface PVIntArray extends PVArray {
-        int get(int offset, int len, int[]to, int toOffset);
+        int get(int offset, int len, IntArrayData data);
         int put(int offset, int len, int[]from, int fromOffset);
     }
 
+    public class LongArrayData {
+        public long[] data;
+        public int offset;
+    }
     interface PVLongArray extends PVArray {
-        int get(int offset, int len, long[]to, int toOffset);
+        int get(int offset, int len, LongArrayData data);
         int put(int offset, int len, long[]from, int fromOffset);
     }
 
+    public class FloatArrayData {
+        public float[] data;
+        public int offset;
+    }
     interface PVFloatArray extends PVArray {
-        int get(int offset, int len, float[]to, int toOffset);
+        int get(int offset, int len, FloatArrayData data);
         int put(int offset, int len, float[]from, int fromOffset);
     }
 
+    public class DoubleArrayData {
+        public double[] data;
+        public int offset;
+    }
     interface PVDoubleArray extends PVArray {
-        int get(int offset, int len, double[]to, int toOffset);
+        int get(int offset, int len, DoubleArrayData data);
         int put(int offset, int len, double[]from, int fromOffset);
     }
 
+    public class StringArrayData {
+        public String[] data;
+        public int offset;
+    }
     interface PVStringArray extends PVArray {
-        int get(int offset, int len, String[]to, int toOffset);
+        int get(int offset, int len, StringArrayData data);
         int put(int offset, int len, String[]from, int fromOffset);
     }
 
+    public class EnumArrayData {
+        public PVEnum[] data;
+        public int offset;
+    }
     interface PVEnumArray extends PVArray {
-        int get(int offset, int len, Enum[]to, int toOffset);
-        int put(int offset, int len, Enum[]from, int fromOffset);
+        int get(int offset, int len, EnumArrayData data);
+        int put(int offset, int len, PVEnum[]from, int fromOffset);
     }
 
+    public class ArrayArrayData {
+        public PVArray[] data;
+        public int offset;
+    }
     interface PVArrayArray extends PVArray {
-        int get(int offset, int len, Array[]to, int toOffset);
-        int put(int offset, int len, Array[]from, int fromOffset);
+        int get(int offset, int len, ArrayArrayData data);
+        int put(int offset, int len, PVArray[]from, int fromOffset);
     }
 
+    public class StructureArrayData {
+        public PVStructure[] data;
+        public int offset;
+    }
     interface PVStructureArray extends PVArray {
-        int get(int offset, int len, Structure[]to, int toOffset);
-        int put(int offset, int len, Structure[]from, int fromOffset);
+        int get(int offset, int len, StructureArrayData data);
+        int put(int offset, int len, PVStructure[]from, int fromOffset);
     }</pre>
 
 <p>The interface for each array type has the same form except for the type.
 For example PVDoubleArray is:</p>
-<pre>    interface PVDoubleArray extends PVArray {
-        int get(int offset, int len, double[]to, int toOffset);
+<pre>    public class DoubleArrayData {
+        public double[] data;
+        public int offset;
+    }
+    interface PVDoubleArray extends PVArray {
+        int get(int offset, int len, DoubleArrayData data);
         int put(int offset, int len, double[]from, int fromOffset);
     }</pre>
-Both get and put return the number of elements actually transfered. The
-arguments are:
+
+<p>Get "exposes" it's internal array by setting data.data and data.offset.
+The caller is responsible for copying the array elements. This is done so
+that copying from one PVArray to another can be accomplished via a call to
+System.arraycopy without requiring an intermediate array.</p>
+
+<p>Both get and put return the number of elements actually transfered. The
+arguments are:</p>
 <dl>
   <dt><span style="font-family: courier">offset</span></dt>
     <dd>The offset in the PV array.</dd>
   <dt><span style="font-family: courier">len</span></dt>
     <dd>The maximum number of elements to transfer. The number actually
       transfered will be less than or equal to this value.</dd>
-  <dt><span style="font-family: courier">to</span></dt>
-    <dd>The array into which the data should be copied. This array is
-      supplied by the caller</dd>
-  <dt><span style="font-family: courier">toOffset</span></dt>
-    <dd>The offset in <span style="font-family: courier;">to</span></dd>
+  <dt style="font-family: courier;">data</dt>
+    <dd>Get sets data.data to it's internal array and data.offset to the
+      offset into the array. The caller is responsible for the actual data
+      transfer.</dd>
   <dt><span style="font-family: courier">from</span></dt>
     <dd>The array from which the data is taken. This array is supplied by the
       caller</dd>
@@ -436,14 +489,16 @@ arguments are:
 <p>The caller must be prepared to make multiple calls to retrieve or put an
 entire array. A caller can always accept or put partial arrays. For example
 the following reads an entire array:</p>
-<pre>    double[] getArray(PVDoubleArray data)
+<pre>    double[] getArray(PVDoubleArray pv)
     {
-        int len = data.getLength();
+        int len = pv.getLength();
         double[] storage = new double[len];
+        DoubleArrayData data = new DoubleArrayData();
         int offset = 0;
         while(offset &lt; len) {
-            int num = data.get(offset,(len-offset),storage,offset);
-            offset = offset+num;
+            int num = pv.get(offset,(len-offset),data);
+            System.arraycopy(data.data,data.offset,storage,offset,num);
+            offset += num;
         }
         return storage;
     } </pre>
@@ -462,12 +517,20 @@ the following reads an entire array:</p>
   <li>Conversions between numeric types and arrays of numeric type are
     supported.</li>
 </ul>
-<pre>    interface PVConvert {
+<pre>    interface Convert {
         String getString(PVData pv, int indentLevel);
         String getString(PVData pv);
         void fromString(PVData pv,String from);
         int fromStringArray(PVData pv,
              int offset, int len, String[]from, int fromOffset);
+        int toStringArray(PVArray pv,
+             int offset, int len, String[]to, int toOffset);
+        boolean isCopyScalarCompatible(Field from, Field to);
+        void copyScalar(PVData from, PVData to);
+        boolean isCopyArrayCompatible(Array from, Array to);
+        int copyArray(PVArray from, int offset, int len, PVArray to, int toOffset);
+        boolean isCopyStructureCompatible(Structure from, Structure to);
+        void copyStructure(PVStructure from, PVStructure to);
         // For the following the pv Type must be PVByte, ...., PVDouble
         byte toByte(PVData pv);
         short toShort(PVData pv);
@@ -507,7 +570,7 @@ the following reads an entire array:</p>
         int fromDoubleArray(PVData pv,
             int offset, int len, double[]from, fromOffset);
     }</pre>
-The array methods all return the number of elements conveted. This can be
+The array methods all return the number of elements converted. This can be
 less than <span style="font-family: courier;">len</span> if the PVData array
 contains less than len elements.
 <hr />

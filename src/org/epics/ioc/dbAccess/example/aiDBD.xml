@@ -9,7 +9,7 @@
         <property name = "timeStamp" associatedField = "/timeStamp" />
     </field>
     <field name = "status" type = "string" />
-    <field name = "severity" type = "menu" menuName = "menuAlarmSevr" />
+    <field name = "severity" type = "menu" menuName = "menuAlarmSeverity" />
     <field name = "input" type = "link" />
 </structure>
 
@@ -24,7 +24,7 @@
         <property name = "timeStamp" associatedField = "/timeStamp" />
     </field>
     <field name = "status" type = "string" />
-    <field name = "severity" type = "menu" menuName = "menuAlarmSevr" />
+    <field name = "severity" type = "menu" menuName = "menuAlarmSeverity" />
     <field name = "units" type = "string" />
     <field name = "displayLimit"
          type = "structure" structureName = "displayLimit" />

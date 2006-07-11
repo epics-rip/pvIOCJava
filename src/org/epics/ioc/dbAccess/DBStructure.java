@@ -16,38 +16,39 @@ import org.epics.ioc.dbDefinition.*;
  */
 public interface DBStructure extends DBData, PVStructure {
     /**
-     * get the DBDStructure definition for this field.
-     * If the DBD field definition did not specify a structure but the instance definition did then
-     * this will return the DBDStructure.
-     * @return the DBDStructure or null if a structure was not defined.
-     */
-    DBDStructure getDBDStructure();
-    /**
-     * create fields of structure.
+     * Create fields of the structure.
+     * Needed if dbdStructure is not known when a structure field is created.
      * @param dbdStructure the structure that describes the fields.
      * @return true if the fields were created.
      * The request fails if the fields were already created.
      */
     boolean createFields(DBDStructure dbdStructure);
     /**
-     * get the reflection interfaces for the fields.
-     * @return an array of <i>DBField</i> that describes each of the fields in the structure.
+     * Get the DBDStructure definition for this field.
+     * If the DBD field definition did not specify a structure but the instance definition did then
+     * this will return the DBDStructure.
+     * @return The DBDStructure or null if a structure was not defined.
+     */
+    DBDStructure getDBDStructure();
+    /**
+     * Get the reflection interfaces for the fields.
+     * @return An array of <i>DBField</i> that describes each of the fields in the structure.
      */
     DBData[] getFieldDBDatas();
     /**
      * Get the index of the DBData for the specified field.
-     * @param fieldName the name of the field.
-     * @return the index or -1 if the field does not exist.
+     * @param fieldName The name of the field.
+     * @return The index or -1 if the field does not exist.
      */
     int getFieldDBDataIndex(String fieldName);
     /**
-     * get the structure support for this structure instance.
-     * @return the RecordSupport or null if no support has been set.
+     * Get the structure support for this structure instance.
+     * @return The RecordSupport or null if no support has been set.
      */
     RecordSupport getStructureSupport();
     /**
-     * set the structure support.
-     * @param support the support.
+     * Set the structure support.
+     * @param support The support.
      * @return true if the support was set and false if the support already was set.
      */
     boolean setStructureSupport(RecordSupport support);

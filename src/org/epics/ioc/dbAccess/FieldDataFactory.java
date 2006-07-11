@@ -7,6 +7,7 @@ package org.epics.ioc.dbAccess;
 
 import org.epics.ioc.dbDefinition.*;
 import org.epics.ioc.pvAccess.*;
+
 import java.util.regex.Pattern;
 
 /**
@@ -17,10 +18,10 @@ import java.util.regex.Pattern;
 public class FieldDataFactory {
    
     /**
-     * create implementation for all non-array fields except enum.
-     * @param parent the parent interface.
-     * @param dbdField the reflection interface for the field
-     * @return the DBData implementation
+     * Create implementation for all non-array fields except enum.
+     * @param parent The parent interface.
+     * @param dbdField The reflection interface for the field
+     * @return The DBData implementation
      */
     public static DBData createData(DBStructure parent,DBDField dbdField)
     {
@@ -51,10 +52,10 @@ public class FieldDataFactory {
     }
 
     /**
-     * create an implementation for an enumerated field.
-     * @param dbdField the reflection interface for the field.
-     * @param choice the enum choices.
-     * @return the DBData implementation.
+     * Create an implementation for an enumerated field.
+     * @param dbdField The reflection interface for the field.
+     * @param choice The enum choices.
+     * @return The DBData implementation.
      */
     public static DBData createEnumData(DBStructure parent,DBDField dbdField, String[] choice)
     {
@@ -63,11 +64,11 @@ public class FieldDataFactory {
     }
 
     /**
-     * create an implementation for an array field.
-     * @param dbdField the reflection interface for the field.
-     * @param capacity the default capacity for the field.
-     * @param capacityMutable can the capacity be changed after initialization.
-     * @return the DBArray implementation.
+     * Create an implementation for an array field.
+     * @param dbdField The reflection interface for the field.
+     * @param capacity The default capacity for the field.
+     * @param capacityMutable Can the capacity be changed after initialization?
+     * @return The DBArray implementation.
      */
     public static DBArray createArrayData(DBStructure parent,
             DBDField dbdField,int capacity,boolean capacityMutable)
@@ -78,49 +79,49 @@ public class FieldDataFactory {
         case dbPvType: {
                 Type elementType = dbdField.getAttribute().getElementType();
                 switch(elementType) {
-                case pvBoolean: return new ArrayBooleanData(parent,
+                case pvBoolean: return new BooleanArray(parent,
                     (DBDArrayField)dbdField, capacity, capacityMutable);
-                case pvByte:    return new ArrayByteData(parent,
+                case pvByte:    return new ByteArray(parent,
                     (DBDArrayField)dbdField, capacity, capacityMutable);
-                case pvShort:   return new ArrayShortData(parent,
+                case pvShort:   return new ShortArray(parent,
                     (DBDArrayField)dbdField, capacity, capacityMutable);
-                case pvInt:     return new ArrayIntData(parent,
+                case pvInt:     return new IntArray(parent,
                     (DBDArrayField)dbdField, capacity, capacityMutable);
-                case pvLong:    return new ArrayLongData(parent,
+                case pvLong:    return new LongArray(parent,
                     (DBDArrayField)dbdField, capacity, capacityMutable);
-                case pvFloat:   return new ArrayFloatData(parent,
+                case pvFloat:   return new FloatArray(parent,
                     (DBDArrayField)dbdField, capacity, capacityMutable);
-                case pvDouble:  return new ArrayDoubleData(parent,
+                case pvDouble:  return new DoubleArray(parent,
                     (DBDArrayField)dbdField, capacity, capacityMutable);
-                case pvString:  return new ArrayStringData(parent,
+                case pvString:  return new StringArray(parent,
                     (DBDArrayField)dbdField, capacity, capacityMutable);
-                case pvEnum:    return new ArrayEnumData(parent,
+                case pvEnum:    return new EnumArray(parent,
                     (DBDArrayField)dbdField, capacity, capacityMutable);
                 }
                 throw new IllegalArgumentException(
                     "Illegal Type. Logic error");
             }
         case dbMenu:
-            return new ArrayMenuData(parent,
+            return new MenuArray(parent,
                 (DBDArrayField)dbdField, capacity, capacityMutable);
         case dbStructure:
-            return new ArrayStructureData(parent,
+            return new StructureArray(parent,
                 (DBDArrayField)dbdField, capacity, capacityMutable);
         case dbArray:
-            return new ArrayArrayData(parent,
+            return new ArrayArray(parent,
                 (DBDArrayField)dbdField, capacity, capacityMutable);
         case dbLink:
-            return new ArrayLinkData(parent,
+            return new LinkArray(parent,
                 (DBDArrayField)dbdField, capacity, capacityMutable);
         }
         throw new IllegalArgumentException("Illegal Type. Logic error");
     }
     
     /**
-     * create a record instance.
-     * @param recordName the instance name.
-     * @param dbdRecordType the reflection interface for the record type.
-     * @return the interface for accessing the record instance.
+     * Create a record instance.
+     * @param recordName The instance name.
+     * @param dbdRecordType The reflection interface for the record type.
+     * @return The interface for accessing the record instance.
      */
     public static DBRecord createRecord(String recordName, DBDRecordType dbdRecordType) {
         DBRecord dbRecord = new RecordData(recordName,dbdRecordType);
@@ -475,7 +476,7 @@ public class FieldDataFactory {
         }
     }
 
-    private static class ArrayBooleanData
+    private static class BooleanArray
         extends AbstractDBArray implements DBBooleanArray
     {
         public String toString() {
@@ -490,26 +491,22 @@ public class FieldDataFactory {
             return capacityMutable;
         }
 
-        public int get(int offset, int len, boolean[] to, int toOffset) {
+        public int get(int offset, int len, BooleanArrayData data) {
             int n = len;
             if(offset+len > length) n = length;
-            if(n>0) System.arraycopy(value,offset,to,toOffset,n);
+            data.data = value;
+            data.offset = offset;
             return n;
         }
-
-        public int put(int offset, int len, boolean[] from, int fromOffset) {
-            if(!super.getField().isMutable())
-                throw new IllegalStateException("PVData.isMutable is false");
+        public int put(int offset, int len, boolean[]from, int fromOffset) {
             if(offset+len > length) {
-                int newlength = offset + len;
-                if(newlength>capacity) setCapacity(newlength);
-                length = newlength;
-           }
-           System.arraycopy(from,fromOffset,value,offset,len);
-           postPut();
-           return len;
+                 int newlength = offset + len;
+                 if(newlength>capacity) setCapacity(newlength);
+                 length = newlength;
+            }
+            System.arraycopy(from,fromOffset,value,offset,len);
+            return len;
         }
-        
         public int getCapacity() {
             return capacity;
         }
@@ -535,7 +532,7 @@ public class FieldDataFactory {
             length = len;
         }
 
-        ArrayBooleanData(DBStructure parent,DBDArrayField dbdArrayField,
+        BooleanArray(DBStructure parent,DBDArrayField dbdArrayField,
             int capacity,boolean capacityMutable)
         {
             super(parent,dbdArrayField);
@@ -558,7 +555,7 @@ public class FieldDataFactory {
         boolean capacityMutable;
     }
 
-    private static class ArrayByteData
+    private static class ByteArray
         extends AbstractDBArray implements DBByteArray
     {
         public String toString() {
@@ -572,27 +569,22 @@ public class FieldDataFactory {
         public boolean isCapacityMutable() {
             return capacityMutable;
         }
-
-        public int get(int offset, int len, byte[] to, int toOffset) {
+        public int get(int offset, int len, ByteArrayData data) {
             int n = len;
             if(offset+len > length) n = length;
-            if(n>0) System.arraycopy(value,offset,to,toOffset,n);
+            data.data = value;
+            data.offset = offset;
             return n;
         }
-
-        public int put(int offset, int len, byte[] from, int fromOffset) {
-            if(!super.getField().isMutable())
-                throw new IllegalStateException("PVData.isMutable is false");
+        public int put(int offset, int len, byte[]from, int fromOffset) {
             if(offset+len > length) {
-                int newlength = offset + len;
-                if(newlength>capacity) setCapacity(newlength);
-                length = newlength;
-           }
-           System.arraycopy(from,fromOffset,value,offset,len);
-           postPut();
-           return len;
+                 int newlength = offset + len;
+                 if(newlength>capacity) setCapacity(newlength);
+                 length = newlength;
+            }
+            System.arraycopy(from,fromOffset,value,offset,len);
+            return len;
         }
-        
         public int getCapacity() {
             return capacity;
         }
@@ -618,7 +610,7 @@ public class FieldDataFactory {
             length = len;
         }
 
-        ArrayByteData(DBStructure parent,DBDArrayField dbdArrayField,
+        ByteArray(DBStructure parent,DBDArrayField dbdArrayField,
             int capacity,boolean capacityMutable)
         {
             super(parent,dbdArrayField);
@@ -641,7 +633,7 @@ public class FieldDataFactory {
         boolean capacityMutable;
     }
 
-    private static class ArrayShortData
+    private static class ShortArray
         extends AbstractDBArray implements DBShortArray
     {
         public String toString() {
@@ -656,26 +648,22 @@ public class FieldDataFactory {
             return capacityMutable;
         }
 
-        public int get(int offset, int len, short[] to, int toOffset) {
+        public int get(int offset, int len, ShortArrayData data) {
             int n = len;
             if(offset+len > length) n = length;
-            if(n>0) System.arraycopy(value,offset,to,toOffset,n);
+            data.data = value;
+            data.offset = offset;
             return n;
         }
-
-        public int put(int offset, int len, short[] from, int fromOffset) {
-            if(!super.getField().isMutable())
-                throw new IllegalStateException("PVData.isMutable is false");
+        public int put(int offset, int len, short[]from, int fromOffset) {
             if(offset+len > length) {
-                int newlength = offset + len;
-                if(newlength>capacity) setCapacity(newlength);
-                length = newlength;
-           }
-           System.arraycopy(from,fromOffset,value,offset,len);
-           postPut();
-           return len;
+                 int newlength = offset + len;
+                 if(newlength>capacity) setCapacity(newlength);
+                 length = newlength;
+            }
+            System.arraycopy(from,fromOffset,value,offset,len);
+            return len;
         }
-        
         public int getCapacity() {
             return capacity;
         }
@@ -701,7 +689,7 @@ public class FieldDataFactory {
             length = len;
         }
 
-        ArrayShortData(DBStructure parent,DBDArrayField dbdArrayField,
+        ShortArray(DBStructure parent,DBDArrayField dbdArrayField,
             int capacity,boolean capacityMutable)
         {
             super(parent,dbdArrayField);
@@ -724,7 +712,7 @@ public class FieldDataFactory {
         boolean capacityMutable;
     }
 
-    private static class ArrayIntData
+    private static class IntArray
         extends AbstractDBArray implements DBIntArray
     {
         public String toString() {
@@ -739,26 +727,22 @@ public class FieldDataFactory {
             return capacityMutable;
         }
 
-        public int get(int offset, int len, int[] to, int toOffset) {
+        public int get(int offset, int len, IntArrayData data) {
             int n = len;
             if(offset+len > length) n = length;
-            if(n>0) System.arraycopy(value,offset,to,toOffset,n);
+            data.data = value;
+            data.offset = offset;
             return n;
         }
-
-        public int put(int offset, int len, int[] from, int fromOffset) {
-            if(!super.getField().isMutable())
-                throw new IllegalStateException("PVData.isMutable is false");
+        public int put(int offset, int len, int[]from, int fromOffset) {
             if(offset+len > length) {
-                int newlength = offset + len;
-                if(newlength>capacity) setCapacity(newlength);
-                length = newlength;
-           }
-           System.arraycopy(from,fromOffset,value,offset,len);
-           postPut();
-           return len;
+                 int newlength = offset + len;
+                 if(newlength>capacity) setCapacity(newlength);
+                 length = newlength;
+            }
+            System.arraycopy(from,fromOffset,value,offset,len);
+            return len;
         }
-        
         public int getCapacity() {
             return capacity;
         }
@@ -784,7 +768,7 @@ public class FieldDataFactory {
             length = len;
         }
 
-        ArrayIntData(DBStructure parent,DBDArrayField dbdArrayField,
+        IntArray(DBStructure parent,DBDArrayField dbdArrayField,
             int capacity,boolean capacityMutable)
         {
             super(parent,dbdArrayField);
@@ -807,7 +791,7 @@ public class FieldDataFactory {
         boolean capacityMutable;
     }
 
-    private static class ArrayLongData
+    private static class LongArray
         extends AbstractDBArray implements DBLongArray
     {
         public String toString() {
@@ -821,27 +805,22 @@ public class FieldDataFactory {
         public boolean isCapacityMutable() {
             return capacityMutable;
         }
-
-        public int get(int offset, int len, long[] to, int toOffset) {
+        public int get(int offset, int len, LongArrayData data) {
             int n = len;
             if(offset+len > length) n = length;
-            if(n>0) System.arraycopy(value,offset,to,toOffset,n);
+            data.data = value;
+            data.offset = offset;
             return n;
         }
-
-        public int put(int offset, int len, long[] from, int fromOffset) {
-            if(!super.getField().isMutable())
-                throw new IllegalStateException("PVData.isMutable is false");
+        public int put(int offset, int len, long[]from, int fromOffset) {
             if(offset+len > length) {
-                int newlength = offset + len;
-                if(newlength>capacity) setCapacity(newlength);
-                length = newlength;
-           }
-           System.arraycopy(from,fromOffset,value,offset,len);
-           postPut();
-           return len;
+                 int newlength = offset + len;
+                 if(newlength>capacity) setCapacity(newlength);
+                 length = newlength;
+            }
+            System.arraycopy(from,fromOffset,value,offset,len);
+            return len;
         }
-        
         public int getCapacity() {
             return capacity;
         }
@@ -867,7 +846,7 @@ public class FieldDataFactory {
             length = len;
         }
 
-        ArrayLongData(DBStructure parent,DBDArrayField dbdArrayField,
+        LongArray(DBStructure parent,DBDArrayField dbdArrayField,
             int capacity,boolean capacityMutable)
         {
             super(parent,dbdArrayField);
@@ -890,7 +869,7 @@ public class FieldDataFactory {
         boolean capacityMutable;
     }
 
-    private static class ArrayFloatData
+    private static class FloatArray
         extends AbstractDBArray implements DBFloatArray
     {
         public String toString() {
@@ -904,27 +883,22 @@ public class FieldDataFactory {
         public boolean isCapacityMutable() {
             return capacityMutable;
         }
-
-        public int get(int offset, int len, float[] to, int toOffset) {
+        public int get(int offset, int len, FloatArrayData data) {
             int n = len;
             if(offset+len > length) n = length;
-            if(n>0) System.arraycopy(value,offset,to,toOffset,n);
+            data.data = value;
+            data.offset = offset;
             return n;
         }
-
-        public int put(int offset, int len, float[] from, int fromOffset) {
-            if(!super.getField().isMutable())
-                throw new IllegalStateException("PVData.isMutable is false");
+        public int put(int offset, int len, float[]from, int fromOffset) {
             if(offset+len > length) {
-                int newlength = offset + len;
-                if(newlength>capacity) setCapacity(newlength);
-                length = newlength;
-           }
-           System.arraycopy(from,fromOffset,value,offset,len);
-           postPut();
-           return len;
+                 int newlength = offset + len;
+                 if(newlength>capacity) setCapacity(newlength);
+                 length = newlength;
+            }
+            System.arraycopy(from,fromOffset,value,offset,len);
+            return len;
         }
-        
         public int getCapacity() {
             return capacity;
         }
@@ -950,7 +924,7 @@ public class FieldDataFactory {
             length = len;
         }
 
-        ArrayFloatData(DBStructure parent,DBDArrayField dbdArrayField,
+        FloatArray(DBStructure parent,DBDArrayField dbdArrayField,
             int capacity,boolean capacityMutable)
         {
             super(parent,dbdArrayField);
@@ -973,9 +947,10 @@ public class FieldDataFactory {
         boolean capacityMutable;
     }
 
-    private static class ArrayDoubleData
+    private static class DoubleArray
         extends AbstractDBArray implements DBDoubleArray
     {
+
         public String toString() {
             return convert.getString(this);
         }
@@ -987,27 +962,22 @@ public class FieldDataFactory {
         public boolean isCapacityMutable() {
             return capacityMutable;
         }
-
-        public int get(int offset, int len, double[] to, int toOffset) {
+        public int get(int offset, int len, DoubleArrayData data) {
             int n = len;
             if(offset+len > length) n = length;
-            if(n>0) System.arraycopy(value,offset,to,toOffset,n);
+            data.data = value;
+            data.offset = offset;
             return n;
         }
-
-        public int put(int offset, int len, double[] from, int fromOffset) {
-            if(!super.getField().isMutable())
-                throw new IllegalStateException("PVData.isMutable is false");
+        public int put(int offset, int len, double[]from, int fromOffset) {
             if(offset+len > length) {
-                int newlength = offset + len;
-                if(newlength>capacity) setCapacity(newlength);
-                length = newlength;
-           }
-           System.arraycopy(from,fromOffset,value,offset,len);
-           postPut();
-           return len;
+                 int newlength = offset + len;
+                 if(newlength>capacity) setCapacity(newlength);
+                 length = newlength;
+            }
+            System.arraycopy(from,fromOffset,value,offset,len);
+            return len;
         }
-        
         public int getCapacity() {
             return capacity;
         }
@@ -1033,7 +1003,7 @@ public class FieldDataFactory {
             length = len;
         }
 
-        ArrayDoubleData(DBStructure parent,DBDArrayField dbdArrayField,
+        DoubleArray(DBStructure parent,DBDArrayField dbdArrayField,
             int capacity,boolean capacityMutable)
         {
             super(parent,dbdArrayField);
@@ -1056,7 +1026,7 @@ public class FieldDataFactory {
         boolean capacityMutable;
     }
 
-    private static class ArrayStringData
+    private static class StringArray
         extends AbstractDBArray implements DBStringArray
     {
         public String toString() {
@@ -1070,27 +1040,22 @@ public class FieldDataFactory {
         public boolean isCapacityMutable() {
             return capacityMutable;
         }
-
-        public int get(int offset, int len, String[] to, int toOffset) {
+        public int get(int offset, int len, StringArrayData data) {
             int n = len;
             if(offset+len > length) n = length;
-            if(n>0) System.arraycopy(value,offset,to,toOffset,n);
+            data.data = value;
+            data.offset = offset;
             return n;
         }
-
-        public int put(int offset, int len, String[] from, int fromOffset) {
-            if(!super.getField().isMutable())
-                throw new IllegalStateException("PVData.isMutable is false");
+        public int put(int offset, int len, String[]from, int fromOffset) {
             if(offset+len > length) {
-                int newlength = offset + len;
-                if(newlength>capacity) setCapacity(newlength);
-                length = newlength;
-           }
-           System.arraycopy(from,fromOffset,value,offset,len);
-           postPut();
-           return len;
+                 int newlength = offset + len;
+                 if(newlength>capacity) setCapacity(newlength);
+                 length = newlength;
+            }
+            System.arraycopy(from,fromOffset,value,offset,len);
+            return len;
         }
-        
         public int getCapacity() {
             return capacity;
         }
@@ -1116,7 +1081,7 @@ public class FieldDataFactory {
             length = len;
         }
 
-        ArrayStringData(DBStructure parent,DBDArrayField dbdArrayField,
+        StringArray(DBStructure parent,DBDArrayField dbdArrayField,
             int capacity,boolean capacityMutable)
         {
             super(parent,dbdArrayField);
@@ -1139,7 +1104,7 @@ public class FieldDataFactory {
         boolean capacityMutable;
     }
 
-    private static class ArrayEnumData
+    private static class EnumArray
         extends AbstractDBArray implements DBEnumArray
     {
         public String toString() {
@@ -1153,27 +1118,22 @@ public class FieldDataFactory {
         public boolean isCapacityMutable() {
             return capacityMutable;
         }
-
-        public int get(int offset, int len, PVEnum[] to, int toOffset) {
+        public int get(int offset, int len, EnumArrayData data) {
             int n = len;
             if(offset+len > length) n = length;
-            if(n>0) System.arraycopy(value,offset,to,toOffset,n);
+            data.data = value;
+            data.offset = offset;
             return n;
         }
-
-        public int put(int offset, int len, PVEnum[] from, int fromOffset) {
-            if(!super.getField().isMutable())
-                throw new IllegalStateException("PVData.isMutable is false");
+        public int put(int offset, int len, PVEnum[]from, int fromOffset) {
             if(offset+len > length) {
-                int newlength = offset + len;
-                if(newlength>capacity) setCapacity(newlength);
-                length = newlength;
-           }
-           System.arraycopy(from,fromOffset,value,offset,len);
-           postPut();
-           return len;
+                 int newlength = offset + len;
+                 if(newlength>capacity) setCapacity(newlength);
+                 length = newlength;
+            }
+            System.arraycopy(from,fromOffset,value,offset,len);
+            return len;
         }
-        
         public int getCapacity() {
             return capacity;
         }
@@ -1199,7 +1159,7 @@ public class FieldDataFactory {
             length = len;
         }
 
-        ArrayEnumData(DBStructure parent,DBDArrayField dbdArrayField,
+        EnumArray(DBStructure parent,DBDArrayField dbdArrayField,
             int capacity,boolean capacityMutable)
         {
             super(parent,dbdArrayField);
@@ -1214,7 +1174,7 @@ public class FieldDataFactory {
         boolean capacityMutable;
     }
 
-    private static class ArrayMenuData
+    private static class MenuArray
         extends AbstractDBArray implements DBMenuArray
     {
         public String toString() {
@@ -1245,27 +1205,22 @@ public class FieldDataFactory {
         public boolean isCapacityMutable() {
             return capacityMutable;
         }
-
-        public int get(int offset, int len, DBMenu[] to, int toOffset) {
+        public int get(int offset, int len, MenuArrayData data) {
             int n = len;
             if(offset+len > length) n = length;
-            if(n>0) System.arraycopy(value,offset,to,toOffset,n);
+            data.data = value;
+            data.offset = offset;
             return n;
         }
-
-        public int put(int offset, int len, DBMenu[] from, int fromOffset) {
-            if(!super.getField().isMutable())
-                throw new IllegalStateException("PVData.isMutable is false");
+        public int put(int offset, int len, DBMenu[]from, int fromOffset) {
             if(offset+len > length) {
-                int newlength = offset + len;
-                if(newlength>capacity) setCapacity(newlength);
-                length = newlength;
-           }
-           System.arraycopy(from,fromOffset,value,offset,len);
-           postPut();
-           return len;
+                 int newlength = offset + len;
+                 if(newlength>capacity) setCapacity(newlength);
+                 length = newlength;
+            }
+            System.arraycopy(from,fromOffset,value,offset,len);
+            return len;
         }
-        
         public int getCapacity() {
             return capacity;
         }
@@ -1291,7 +1246,7 @@ public class FieldDataFactory {
             length = len;
         }
 
-        ArrayMenuData(DBStructure parent,DBDArrayField dbdArrayField,
+        MenuArray(DBStructure parent,DBDArrayField dbdArrayField,
             int capacity,boolean capacityMutable)
         {
             super(parent,dbdArrayField);
@@ -1306,29 +1261,9 @@ public class FieldDataFactory {
         boolean capacityMutable;
     }
 
-    private static class ArrayStructureData
+    private static class StructureArray
         extends AbstractDBArray implements DBStructureArray
     {
-        public int get(int offset, int len, PVStructure[] to, int toOffset) {
-            int n = len;
-            if(offset+len > length) n = length;
-            if(n>0) System.arraycopy(value,offset,to,toOffset,n);
-            return n;
-        }
-
-        public int put(int offset, int len, PVStructure[] from, int fromOffset) {
-            if(!super.getField().isMutable())
-                throw new IllegalStateException("PVData.isMutable is false");
-            if(offset+len > length) {
-                int newlength = offset + len;
-                if(newlength>capacity) setCapacity(newlength);
-                length = newlength;
-           }
-           System.arraycopy(from,fromOffset,value,offset,len);
-           postPut();
-           return len;
-        }
-
         public String toString() {
             return getString(0);
         }
@@ -1356,26 +1291,6 @@ public class FieldDataFactory {
         public boolean isCapacityMutable() {
             return capacityMutable;
         }
-
-        public int get(int offset, int len, DBStructure[] to, int toOffset) {
-            int n = len;
-            if(offset+len > length) n = length;
-            if(n>0) System.arraycopy(value,offset,to,toOffset,n);
-            return n;
-        }
-
-        public int put(int offset, int len, DBStructure[] from, int fromOffset) {
-            if(!super.getField().isMutable())
-                throw new IllegalStateException("PVData.isMutable is false");
-            if(offset+len > length) {
-                int newlength = offset + len;
-                if(newlength>capacity) setCapacity(newlength);
-                length = newlength;
-           }
-           System.arraycopy(from,fromOffset,value,offset,len);
-           postPut();
-           return len;
-        }
         
         public int getCapacity() {
             return capacity;
@@ -1401,8 +1316,40 @@ public class FieldDataFactory {
             if(len>capacity) setCapacity(len);
             length = len;
         }
+        public int get(int offset, int len, StructureArrayData data) {
+            int n = len;
+            if(offset+len > length) n = length;
+            data.data = value;
+            data.offset = offset;
+            return n;
+        }
+        public int put(int offset, int len, PVStructure[]from, int fromOffset) {
+            if(offset+len > length) {
+                 int newlength = offset + len;
+                 if(newlength>capacity) setCapacity(newlength);
+                 length = newlength;
+            }
+            System.arraycopy(from,fromOffset,value,offset,len);
+            return len;
+        }
+        public int get(int offset, int len, DBStructureArrayData data) {
+            int n = len;
+            if(offset+len > length) n = length;
+            data.data = value;
+            data.offset = offset;
+            return n;
+        }
+        public int put(int offset, int len, DBStructure[]from, int fromOffset) {
+            if(offset+len > length) {
+                 int newlength = offset + len;
+                 if(newlength>capacity) setCapacity(newlength);
+                 length = newlength;
+            }
+            System.arraycopy(from,fromOffset,value,offset,len);
+            return len;
+        }
 
-        ArrayStructureData(DBStructure parent,DBDArrayField dbdArrayField,
+        StructureArray(DBStructure parent,DBDArrayField dbdArrayField,
             int capacity,boolean capacityMutable)
         {
             super(parent,dbdArrayField);
@@ -1417,29 +1364,10 @@ public class FieldDataFactory {
         boolean capacityMutable;
     }
 
-    private static class ArrayArrayData
+    private static class ArrayArray
         extends AbstractDBArray implements DBArrayArray
     {
  
-        public int get(int offset, int len, PVArray[] to, int toOffset) {
-            int n = len;
-            if(offset+len > length) n = length;
-            if(n>0) System.arraycopy(value,offset,to,toOffset,n);
-            return n;
-        }
-
-        public int put(int offset, int len, PVArray[] from, int fromOffset) {
-            if(!super.getField().isMutable())
-                throw new IllegalStateException("PVData.isMutable is false");
-            if(offset+len > length) {
-                int newlength = offset + len;
-                if(newlength>capacity) setCapacity(newlength);
-                length = newlength;
-           }
-           System.arraycopy(from,fromOffset,value,offset,len);
-           postPut();
-           return len;
-        }
 
         public String toString() {
             return getString(0);
@@ -1469,27 +1397,6 @@ public class FieldDataFactory {
         public boolean isCapacityMutable() {
             return capacityMutable;
         }
-
-        public int get(int offset, int len, DBArray[] to, int toOffset) {
-            int n = len;
-            if(offset+len > length) n = length;
-            if(n>0) System.arraycopy(value,offset,to,toOffset,n);
-            return n;
-        }
-
-        public int put(int offset, int len, DBArray[] from, int fromOffset) {
-            if(!super.getField().isMutable())
-                throw new IllegalStateException("PVData.isMutable is false");
-            if(offset+len > length) {
-                int newlength = offset + len;
-                if(newlength>capacity) setCapacity(newlength);
-                length = newlength;
-           }
-           System.arraycopy(from,fromOffset,value,offset,len);
-           postPut();
-           return len;
-        }
-        
         public int getCapacity() {
             return capacity;
         }
@@ -1514,8 +1421,40 @@ public class FieldDataFactory {
             if(len>capacity) setCapacity(len);
             length = len;
         }
+        public int get(int offset, int len, ArrayArrayData data) {
+            int n = len;
+            if(offset+len > length) n = length;
+            data.data = value;
+            data.offset = offset;
+            return n;
+        }
+        public int put(int offset, int len, PVArray[]from, int fromOffset) {
+            if(offset+len > length) {
+                 int newlength = offset + len;
+                 if(newlength>capacity) setCapacity(newlength);
+                 length = newlength;
+            }
+            System.arraycopy(from,fromOffset,value,offset,len);
+            return len;
+        }
+        public int get(int offset, int len, DBArrayArrayData data) {
+            int n = len;
+            if(offset+len > length) n = length;
+            data.data = value;
+            data.offset = offset;
+            return n;
+        }
+        public int put(int offset, int len, DBArray[]from, int fromOffset) {
+            if(offset+len > length) {
+                 int newlength = offset + len;
+                 if(newlength>capacity) setCapacity(newlength);
+                 length = newlength;
+            }
+            System.arraycopy(from,fromOffset,value,offset,len);
+            return len;
+        }
 
-        ArrayArrayData(DBStructure parent,DBDArrayField dbdArrayField,
+        ArrayArray(DBStructure parent,DBDArrayField dbdArrayField,
             int capacity,boolean capacityMutable)
         {
             super(parent,dbdArrayField);
@@ -1530,30 +1469,9 @@ public class FieldDataFactory {
         boolean capacityMutable;
     }
 
-    private static class ArrayLinkData
+    private static class LinkArray
         extends AbstractDBArray implements DBLinkArray
     {
- 
-        public int get(int offset, int len, PVStructure[] to, int toOffset) {
-            int n = len;
-            if(offset+len > length) n = length;
-            if(n>0) System.arraycopy(value,offset,to,toOffset,n);
-            return n;
-        }
-
-        public int put(int offset, int len, PVStructure[] from, int fromOffset) {
-            if(!super.getField().isMutable())
-                throw new IllegalStateException("PVData.isMutable is false");
-            if(offset+len > length) {
-                int newlength = offset + len;
-                if(newlength>capacity) setCapacity(newlength);
-                length = newlength;
-           }
-           System.arraycopy(from,fromOffset,value,offset,len);
-           postPut();
-           return len;
-        }
-
         public String toString() {
             return getString(0);
         }
@@ -1583,27 +1501,6 @@ public class FieldDataFactory {
         public boolean isCapacityMutable() {
             return capacityMutable;
         }
-
-        public int get(int offset, int len, DBLink[] to, int toOffset) {
-            int n = len;
-            if(offset+len > length) n = length;
-            if(n>0) System.arraycopy(value,offset,to,toOffset,n);
-            return n;
-        }
-
-        public int put(int offset, int len, DBLink[] from, int fromOffset) {
-            if(!super.getField().isMutable())
-                throw new IllegalStateException("PVData.isMutable is false");
-            if(offset+len > length) {
-                int newlength = offset + len;
-                if(newlength>capacity) setCapacity(newlength);
-                length = newlength;
-           }
-           System.arraycopy(from,fromOffset,value,offset,len);
-           postPut();
-           return len;
-        }
-        
         public int getCapacity() {
             return capacity;
         }
@@ -1628,8 +1525,40 @@ public class FieldDataFactory {
             if(len>capacity) setCapacity(len);
             length = len;
         }
+        public int get(int offset, int len, StructureArrayData data) {
+            int n = len;
+            if(offset+len > length) n = length;
+            data.data = value;
+            data.offset = offset;
+            return n;
+        }
+        public int put(int offset, int len, PVStructure[]from, int fromOffset) {
+            if(offset+len > length) {
+                 int newlength = offset + len;
+                 if(newlength>capacity) setCapacity(newlength);
+                 length = newlength;
+            }
+            System.arraycopy(from,fromOffset,value,offset,len);
+            return len;
+        }
+        public int get(int offset, int len, LinkArrayData data) {
+            int n = len;
+            if(offset+len > length) n = length;
+            data.data = value;
+            data.offset = offset;
+            return n;
+        }
+        public int put(int offset, int len, DBLink[]from, int fromOffset) {
+            if(offset+len > length) {
+                 int newlength = offset + len;
+                 if(newlength>capacity) setCapacity(newlength);
+                 length = newlength;
+            }
+            System.arraycopy(from,fromOffset,value,offset,len);
+            return len;
+        }
 
-        ArrayLinkData(DBStructure parent,DBDArrayField dbdArrayField,
+        LinkArray(DBStructure parent,DBDArrayField dbdArrayField,
             int capacity,boolean capacityMutable)
         {
             super(parent,dbdArrayField);

@@ -12,8 +12,8 @@ package org.epics.ioc.pvAccess;
  */
 public interface Array extends Field{
     /**
-     * get the element type for the array
-     * @return the array element <i>Type</i>.
+     * Get the element type for the array.
+     * @return The array element <i>Type</i>.
      */
     Type getElementType();
 }

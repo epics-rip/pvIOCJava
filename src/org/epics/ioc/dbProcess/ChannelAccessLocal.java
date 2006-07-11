@@ -29,13 +29,13 @@ public class ChannelAccessLocal implements ChannelAccess {
         }
     }
     
-    public Channel createChannel(String name) {
+    public ChannelIOC createChannel(String name) {
         DBRecord dbRecord = iocdb.findRecord(name);
         if(dbRecord==null) return null;
         return new LocalChannel(iocdb,dbRecord);
     }
     
-    private static class LocalChannel implements Channel {
+    private static class LocalChannel implements ChannelLocal {
         private IOCDB iocdb;
         private DBAccess dbAccess;
         private ChannelDataLocal recordData;
@@ -115,11 +115,11 @@ public class ChannelAccessLocal implements ChannelAccess {
             return otherField;
         }
         
-        public ChannelData getField() {
-            return currentData;
+        public Field getField() {
+            return currentData.getPVData().getField();
         }
 
-        public ChannelData getPropertyField(Property property) {
+        public Field getPropertyField(Property property) {
             if(property==null) return null;
             DBData dbData = dbAccess.getPropertyField(property);
             if(dbData==null) return null;
@@ -128,15 +128,15 @@ public class ChannelAccessLocal implements ChannelAccess {
                 ChannelDataLocal local = iter.next();
                 if(local.dbData==dbData) {
                     currentData = local;
-                    return currentData;
+                    return currentData.getPVData().getField();
                 }
             }
             currentData = new ChannelDataLocal(this,dbData);
             dataList.add(currentData);
-            return currentData;
+            return currentData.getPVData().getField();
         }
 
-        public ChannelData getPropertyField(String name) {
+        public Field getPropertyField(String name) {
             DBData dbData = dbAccess.getPropertyField(name);
             Property property = dbData.getField().getProperty(name);
             return getPropertyField(property);
@@ -170,6 +170,30 @@ public class ChannelAccessLocal implements ChannelAccess {
         public ChannelDataPut getChannelDataPut() {
             // TODO Auto-generated method stub
             return null;
+        }
+
+        public boolean isLocal() {
+            return true;
+        }
+
+        public void setLinkSupport(LinkSupport linkSupport) {
+            // TODO Auto-generated method stub
+            
+        }
+
+        public void setRecordProcess(RecordProcess recordProcess) {
+            // TODO Auto-generated method stub
+            
+        }
+
+        public void setRecordSupport(RecordSupport recordSupport) {
+            // TODO Auto-generated method stub
+            
+        }
+
+        public void setTimeout(double timeout) {
+            // TODO Auto-generated method stub
+            
         } 
 
     }

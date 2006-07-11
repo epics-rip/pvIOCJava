@@ -15,39 +15,39 @@ import org.epics.ioc.dbDefinition.*;
  */
 public interface DBData extends PVData {
     /**
-     * get the reflection interface for the field.
-     * @return the DBDField that describes the field.
+     * Get the reflection interface for the field.
+     * @return The DBDField that describes the field.
      */
     DBDField getDBDField();
     /**
-     * get the parent of this field.
-     * @return the parent interface.
+     * Get the parent of this field.
+     * @return The parent interface.
      */
     DBStructure getParent();
     /**
-     * get the record instance that contains this field.
-     * @return the record interface.
+     * Get the record instance that contains this field.
+     * @return The record interface.
      */
     DBRecord getRecord();
     /**
-     * add a listener for puts.
-     * @param listener the listener.
+     * Add a listener for puts.
+     * @param listener The listener.
      */
-    void addListener(DBListener listener);
+    void addListener(Listener listener);
     /**
-     * remove a listener.
-     * @param listener the listener.
+     * Remove a listener.
+     * @param listener The listener.
      */
-    void removeListener(DBListener listener);
+    void removeListener(Listener listener);
     /**
-     * the data was modified.
+     * The data was modified.
      * This is the version of postPut that must be called by the code that implements a put method. 
      */
     void postPut();
     /**
-     * the data was modified.
-     * This version is called by the AbstractDBData to actually notify the listeners.
-     * @param dbData the data that was modified.
+     * The data was modified.
+     * This version is called by postPut() of fields of a structure.
+     * @param dbData The data that was modified.
      */
     void postPut(DBData dbData);
 }

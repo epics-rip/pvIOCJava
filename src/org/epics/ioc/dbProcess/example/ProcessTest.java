@@ -94,7 +94,7 @@ public class ProcessTest extends TestCase {
         for(String recordName : recordNames) {
             System.out.printf("\nprocess %s\n",recordName);
             recordProcess = processDB.findRecordProcess(recordName);
-            recordProcess.requestProcess(null);
+            recordProcess.process(null);
         }
     }
     

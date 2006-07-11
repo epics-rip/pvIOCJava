@@ -315,7 +315,7 @@ public class DatabaseExampleTest extends TestCase {
         
         // now create a structure with names and fields specified later
         PVStructure displayLimitDelay = database.createStructureData(
-                "displayLimitDelay",null,null,null);
+                "displayLimitDelay",null);
         structure = (Structure)displayLimitDelay.getField();
         Field field = structure.getField("junk");
         assertNull(field);
@@ -376,8 +376,10 @@ public class DatabaseExampleTest extends TestCase {
         assertEquals(field.getName(),"byteArray");
         assertEquals(field.getType(),Type.pvArray);
         Array array = (Array)field;
-        byte[]readback = new byte[arrayValue.length];
-        int numback = byteArrayData.get(0,arrayValue.length,readback,0);
+        ByteArrayData data = new ByteArrayData();
+        int numback = byteArrayData.get(0,arrayValue.length,data);
+        byte[] readback = data.data;
+        assertEquals(data.offset,0);
         assertEquals(numback,readback.length);
         for(int i=0; i < readback.length; i++) {
             assertEquals(arrayValue[i],readback[i]);
@@ -814,8 +816,10 @@ public class DatabaseExampleTest extends TestCase {
         assertEquals(field.getType(),Type.pvArray);
         Array array = (Array)field;
         assertEquals(array.getElementType(),Type.pvString);
-        String[]readback = new String[arrayValue.length];
-        int retLength = stringArrayData.get(0,arrayValue.length,readback,0);
+        StringArrayData data = new StringArrayData();
+        int retLength = stringArrayData.get(0,arrayValue.length,data);
+        String[]readback = data.data;
+        assertEquals(data.offset,0);
         assertEquals(retLength,readback.length);
         assertEquals(readback[0],arrayValue[0]);
         assertEquals(readback[1],arrayValue[1]);
@@ -923,6 +927,435 @@ public class DatabaseExampleTest extends TestCase {
                 array.toString(),
                 arrayArrayData.toString());
         assertEquals(field.getPropertys().length,0);
+    }
+    
+    /**
+     * Test structure copy.
+     */
+    public static void testStructureCopy() {
+        Convert convert = ConvertFactory.getConvert();
+        DatabaseExample database = new DatabaseExample("test");
+        // value has property displayLimit
+        PVDouble low = (PVDouble)database.createData(
+            "low",Type.pvDouble,null);
+        low.put(-10.0);
+        PVDouble high = (PVDouble)database.createData(
+            "high",Type.pvDouble,null);
+        high.put(10.0);
+        PVData[] structFieldData = new PVData[] {low,high};
+        PVStructure displayLimit = database.createStructureData(
+            "displayLimit","DisplayLimit",structFieldData,null);
+        Structure structure = (Structure)displayLimit.getField();
+        low = (PVDouble)database.createData("low",Type.pvDouble,null);
+        high = (PVDouble)database.createData("high",Type.pvDouble,null);
+        structFieldData = new PVData[] {low,high};
+        PVStructure displayLimit1 = database.createStructureData(
+                "displayLimit1",structure,structFieldData,null);
+        convert.copyStructure(displayLimit,displayLimit1);
+        System.out.printf("\ntestStructureCopy %s%s\n",
+                displayLimit.toString(),displayLimit1.toString());
+    }
+    
+    /**
+     * Test BooleanArray copy.
+     */
+    public static void testBooleanArrayCopy() {
+        Convert convert = ConvertFactory.getConvert();
+        DatabaseExample database = new DatabaseExample("test");
+        PVBooleanArray sourceArray = (PVBooleanArray)
+            database.createArrayData("sourceArray",Type.pvBoolean,null);
+        boolean[] arrayValue = new boolean[] {true,false,true};
+        int nput = sourceArray.put(0,arrayValue.length,arrayValue,0);
+        System.out.printf("\ntestBooleanArrayCopy nput %d sourceArray %s\n",
+            nput,sourceArray.toString());
+        
+        PVBooleanArray booleanArray = (PVBooleanArray)
+            database.createArrayData("booleanArray",Type.pvBoolean,null);
+        int ncopy = convert.copyArray(sourceArray,0,booleanArray,0,nput);
+        System.out.printf("booleanArray ncopy %d %s\n",ncopy,booleanArray.toString());
+    }
+    
+    /**
+     * Test ByteArray copy.
+     */
+    public static void testByteArrayCopy() {
+        Convert convert = ConvertFactory.getConvert();
+        DatabaseExample database = new DatabaseExample("test");
+        PVByteArray sourceArray = (PVByteArray)
+            database.createArrayData("sourceArray",Type.pvByte,null);
+        byte[] arrayValue = new byte[] {-127,0,127};
+        int nput = sourceArray.put(0,arrayValue.length,arrayValue,0);
+        System.out.printf("\ntestByteArrayCopy nput %d sourceArray %s\n",
+            nput,sourceArray.toString());
+        
+        PVByteArray byteArray = (PVByteArray)
+            database.createArrayData("byteArray",Type.pvByte,null);
+        int ncopy = convert.copyArray(sourceArray,0,byteArray,0,nput);
+        System.out.printf("byteArray ncopy %d %s\n",ncopy,byteArray.toString());
+    
+        PVShortArray shortArray = (PVShortArray)
+            database.createArrayData("shortArray",Type.pvShort,null);
+        ncopy = convert.copyArray(sourceArray,0,shortArray,0,nput);
+        System.out.printf("shortArray ncopy %d %s\n",ncopy, shortArray.toString());
+
+        PVIntArray intArray = (PVIntArray)
+        database.createArrayData("intArray",Type.pvInt,null);
+        ncopy = convert.copyArray(sourceArray,0,intArray,0,nput);
+        System.out.printf("intArray ncopy %d %s\n",ncopy,intArray.toString()); 
+        
+        PVLongArray longArray = (PVLongArray)
+        database.createArrayData("longArray",Type.pvLong,null);
+        ncopy = convert.copyArray(sourceArray,0,longArray,0,nput);
+        System.out.printf("longArray ncopy %d %s\n",ncopy,longArray.toString());
+        
+        PVFloatArray floatArray = (PVFloatArray)
+        database.createArrayData("floatArray",Type.pvFloat,null);
+        ncopy = convert.copyArray(sourceArray,0,floatArray,0,nput);
+        System.out.printf("floatArray ncopy %d %s\n",ncopy,floatArray.toString());
+        
+        PVDoubleArray doubleArray = (PVDoubleArray)
+        database.createArrayData("doubleArray",Type.pvDouble,null);
+        ncopy = convert.copyArray(sourceArray,0,doubleArray,0,nput);
+        System.out.printf("doubleArray ncopy %d %s\n",ncopy,doubleArray.toString());        
+    }
+    
+    /**
+     * Test ShortArray copy.
+     */
+    public static void testShortArrayCopy() {
+        Convert convert = ConvertFactory.getConvert();
+        DatabaseExample database = new DatabaseExample("test");
+        PVShortArray sourceArray = (PVShortArray)
+            database.createArrayData("sourceArray",Type.pvShort,null);
+        short[] arrayValue = new short[] {-32767,0,32767};
+        int nput = sourceArray.put(0,arrayValue.length,arrayValue,0);
+        System.out.printf("\ntestShortArrayCopy nput %d sourceArray %s\n",
+            nput,sourceArray.toString());
+        
+        PVByteArray byteArray = (PVByteArray)
+            database.createArrayData("byteArray",Type.pvByte,null);
+        int ncopy = convert.copyArray(sourceArray,0,byteArray,0,nput);
+        System.out.printf("byteArray ncopy %d %s\n",ncopy,byteArray.toString());
+    
+        PVShortArray shortArray = (PVShortArray)
+            database.createArrayData("shortArray",Type.pvShort,null);
+        ncopy = convert.copyArray(sourceArray,0,shortArray,0,nput);
+        System.out.printf("shortArray ncopy %d %s\n",ncopy, shortArray.toString());
+
+        PVIntArray intArray = (PVIntArray)
+        database.createArrayData("intArray",Type.pvInt,null);
+        ncopy = convert.copyArray(sourceArray,0,intArray,0,nput);
+        System.out.printf("intArray ncopy %d %s\n",ncopy,intArray.toString()); 
+        
+        PVLongArray longArray = (PVLongArray)
+        database.createArrayData("longArray",Type.pvLong,null);
+        ncopy = convert.copyArray(sourceArray,0,longArray,0,nput);
+        System.out.printf("longArray ncopy %d %s\n",ncopy,longArray.toString());
+        
+        PVFloatArray floatArray = (PVFloatArray)
+        database.createArrayData("floatArray",Type.pvFloat,null);
+        ncopy = convert.copyArray(sourceArray,0,floatArray,0,nput);
+        System.out.printf("floatArray ncopy %d %s\n",ncopy,floatArray.toString());
+        
+        PVDoubleArray doubleArray = (PVDoubleArray)
+        database.createArrayData("doubleArray",Type.pvDouble,null);
+        ncopy = convert.copyArray(sourceArray,0,doubleArray,0,nput);
+        System.out.printf("doubleArray ncopy %d %s\n",ncopy,doubleArray.toString());        
+    }
+    
+    /**
+     * Test IntArray Copy.
+     */
+    public static void testIntArrayCopy() {
+        Convert convert = ConvertFactory.getConvert();
+        DatabaseExample database = new DatabaseExample("test");
+        PVIntArray sourceArray = (PVIntArray)
+            database.createArrayData("sourceArray",Type.pvInt,null);
+        int[] arrayValue = new int[] {-100000,0,100000};
+        int nput = sourceArray.put(0,arrayValue.length,arrayValue,0);
+        System.out.printf("\ntestIntArrayCopy nput %d sourceArray %s\n",
+            nput,sourceArray.toString());
+        
+        PVByteArray byteArray = (PVByteArray)
+            database.createArrayData("byteArray",Type.pvByte,null);
+        int ncopy = convert.copyArray(sourceArray,0,byteArray,0,nput);
+        System.out.printf("byteArray ncopy %d %s\n",ncopy,byteArray.toString());
+    
+        PVShortArray shortArray = (PVShortArray)
+            database.createArrayData("shortArray",Type.pvShort,null);
+        ncopy = convert.copyArray(sourceArray,0,shortArray,0,nput);
+        System.out.printf("shortArray ncopy %d %s\n",ncopy, shortArray.toString());
+
+        PVIntArray intArray = (PVIntArray)
+        database.createArrayData("intArray",Type.pvInt,null);
+        ncopy = convert.copyArray(sourceArray,0,intArray,0,nput);
+        System.out.printf("intArray ncopy %d %s\n",ncopy,intArray.toString()); 
+        
+        PVLongArray longArray = (PVLongArray)
+        database.createArrayData("longArray",Type.pvLong,null);
+        ncopy = convert.copyArray(sourceArray,0,longArray,0,nput);
+        System.out.printf("longArray ncopy %d %s\n",ncopy,longArray.toString());
+        
+        PVFloatArray floatArray = (PVFloatArray)
+        database.createArrayData("floatArray",Type.pvFloat,null);
+        ncopy = convert.copyArray(sourceArray,0,floatArray,0,nput);
+        System.out.printf("floatArray ncopy %d %s\n",ncopy,floatArray.toString());
+        
+        PVDoubleArray doubleArray = (PVDoubleArray)
+        database.createArrayData("doubleArray",Type.pvDouble,null);
+        ncopy = convert.copyArray(sourceArray,0,doubleArray,0,nput);
+        System.out.printf("doubleArray ncopy %d %s\n",ncopy,doubleArray.toString());        
+    }
+    
+    /**
+     * Test LongArray copy.
+     */
+    public static void testLongArrayCopy() {
+        Convert convert = ConvertFactory.getConvert();
+        DatabaseExample database = new DatabaseExample("test");
+        PVLongArray sourceArray = (PVLongArray)
+            database.createArrayData("sourceArray",Type.pvLong,null);
+        long[] arrayValue = new long[] {-100,0,100};
+        int nput = sourceArray.put(0,arrayValue.length,arrayValue,0);
+        System.out.printf("\ntestLongArrayCopy nput %d sourceArray %s\n",
+            nput,sourceArray.toString());
+        
+        PVByteArray byteArray = (PVByteArray)
+            database.createArrayData("byteArray",Type.pvByte,null);
+        int ncopy = convert.copyArray(sourceArray,0,byteArray,0,nput);
+        System.out.printf("byteArray ncopy %d %s\n",ncopy,byteArray.toString());
+    
+        PVShortArray shortArray = (PVShortArray)
+            database.createArrayData("shortArray",Type.pvShort,null);
+        ncopy = convert.copyArray(sourceArray,0,shortArray,0,nput);
+        System.out.printf("shortArray ncopy %d %s\n",ncopy, shortArray.toString());
+
+        PVIntArray intArray = (PVIntArray)
+        database.createArrayData("intArray",Type.pvInt,null);
+        ncopy = convert.copyArray(sourceArray,0,intArray,0,nput);
+        System.out.printf("intArray ncopy %d %s\n",ncopy,intArray.toString()); 
+        
+        PVLongArray longArray = (PVLongArray)
+        database.createArrayData("longArray",Type.pvLong,null);
+        ncopy = convert.copyArray(sourceArray,0,longArray,0,nput);
+        System.out.printf("longArray ncopy %d %s\n",ncopy,longArray.toString());
+        
+        PVFloatArray floatArray = (PVFloatArray)
+        database.createArrayData("floatArray",Type.pvFloat,null);
+        ncopy = convert.copyArray(sourceArray,0,floatArray,0,nput);
+        System.out.printf("floatArray ncopy %d %s\n",ncopy,floatArray.toString());
+        
+        PVDoubleArray doubleArray = (PVDoubleArray)
+        database.createArrayData("doubleArray",Type.pvDouble,null);
+        ncopy = convert.copyArray(sourceArray,0,doubleArray,0,nput);
+        System.out.printf("doubleArray ncopy %d %s\n",ncopy,doubleArray.toString());        
+    }
+    
+    /**
+     * Test FloatArray copy.
+     */
+    public static void testFloatArrayCopy() {
+        Convert convert = ConvertFactory.getConvert();
+        DatabaseExample database = new DatabaseExample("test");
+        PVFloatArray sourceArray = (PVFloatArray)
+            database.createArrayData("sourceArray",Type.pvFloat,null);
+        float[] arrayValue = new float[] {-127,0,127};
+        int nput = sourceArray.put(0,arrayValue.length,arrayValue,0);
+        System.out.printf("\ntestFloatArrayCopy nput %d sourceArray %s\n",
+            nput,sourceArray.toString());
+        
+        PVByteArray byteArray = (PVByteArray)
+            database.createArrayData("byteArray",Type.pvByte,null);
+        int ncopy = convert.copyArray(sourceArray,0,byteArray,0,nput);
+        System.out.printf("byteArray ncopy %d %s\n",ncopy,byteArray.toString());
+    
+        PVShortArray shortArray = (PVShortArray)
+            database.createArrayData("shortArray",Type.pvShort,null);
+        ncopy = convert.copyArray(sourceArray,0,shortArray,0,nput);
+        System.out.printf("shortArray ncopy %d %s\n",ncopy, shortArray.toString());
+
+        PVIntArray intArray = (PVIntArray)
+        database.createArrayData("intArray",Type.pvInt,null);
+        ncopy = convert.copyArray(sourceArray,0,intArray,0,nput);
+        System.out.printf("intArray ncopy %d %s\n",ncopy,intArray.toString()); 
+        
+        PVLongArray longArray = (PVLongArray)
+        database.createArrayData("longArray",Type.pvLong,null);
+        ncopy = convert.copyArray(sourceArray,0,longArray,0,nput);
+        System.out.printf("longArray ncopy %d %s\n",ncopy,longArray.toString());
+        
+        PVFloatArray floatArray = (PVFloatArray)
+        database.createArrayData("floatArray",Type.pvFloat,null);
+        ncopy = convert.copyArray(sourceArray,0,floatArray,0,nput);
+        System.out.printf("floatArray ncopy %d %s\n",ncopy,floatArray.toString());
+        
+        PVDoubleArray doubleArray = (PVDoubleArray)
+        database.createArrayData("doubleArray",Type.pvDouble,null);
+        ncopy = convert.copyArray(sourceArray,0,doubleArray,0,nput);
+        System.out.printf("doubleArray ncopy %d %s\n",ncopy,doubleArray.toString());        
+    }
+    
+    /**
+     * Test DoubleArray copy.
+     */
+    public static void testDoubleArrayCopy() {
+        Convert convert = ConvertFactory.getConvert();
+        DatabaseExample database = new DatabaseExample("test");
+        PVDoubleArray sourceArray = (PVDoubleArray)
+            database.createArrayData("sourceArray",Type.pvDouble,null);
+        double[] arrayValue = new double[] {-127,0,127};
+        int nput = sourceArray.put(0,arrayValue.length,arrayValue,0);
+        System.out.printf("\ntestDoubleArrayCopy nput %d sourceArray %s\n",
+            nput,sourceArray.toString());
+        
+        PVByteArray byteArray = (PVByteArray)
+            database.createArrayData("byteArray",Type.pvByte,null);
+        int ncopy = convert.copyArray(sourceArray,0,byteArray,0,nput);
+        System.out.printf("byteArray ncopy %d %s\n",ncopy,byteArray.toString());
+    
+        PVShortArray shortArray = (PVShortArray)
+            database.createArrayData("shortArray",Type.pvShort,null);
+        ncopy = convert.copyArray(sourceArray,0,shortArray,0,nput);
+        System.out.printf("shortArray ncopy %d %s\n",ncopy, shortArray.toString());
+
+        PVIntArray intArray = (PVIntArray)
+        database.createArrayData("intArray",Type.pvInt,null);
+        ncopy = convert.copyArray(sourceArray,0,intArray,0,nput);
+        System.out.printf("intArray ncopy %d %s\n",ncopy,intArray.toString()); 
+        
+        PVLongArray longArray = (PVLongArray)
+        database.createArrayData("longArray",Type.pvLong,null);
+        ncopy = convert.copyArray(sourceArray,0,longArray,0,nput);
+        System.out.printf("longArray ncopy %d %s\n",ncopy,longArray.toString());
+        
+        PVFloatArray floatArray = (PVFloatArray)
+        database.createArrayData("floatArray",Type.pvFloat,null);
+        ncopy = convert.copyArray(sourceArray,0,floatArray,0,nput);
+        System.out.printf("floatArray ncopy %d %s\n",ncopy,floatArray.toString());
+        
+        PVDoubleArray doubleArray = (PVDoubleArray)
+        database.createArrayData("doubleArray",Type.pvDouble,null);
+        ncopy = convert.copyArray(sourceArray,0,doubleArray,0,nput);
+        System.out.printf("doubleArray ncopy %d %s\n",ncopy,doubleArray.toString());        
+    }
+    
+    /**
+     * Test StringArray copy.
+     */
+    public static void testStringArrayCopy() {
+        Convert convert = ConvertFactory.getConvert();
+        DatabaseExample database = new DatabaseExample("test");
+        PVStringArray sourceArray = (PVStringArray)
+            database.createArrayData("sourceArray",Type.pvString,null);
+        String[] arrayValue = new String[] {"-127","0","127"};
+        int nput = sourceArray.put(0,arrayValue.length,arrayValue,0);
+        System.out.printf("\ntestStringArrayCopy nput %d sourceArray %s\n",
+            nput,sourceArray.toString());
+        
+        PVStringArray stringArray = (PVStringArray)
+        database.createArrayData("stringArray",Type.pvString,null);
+        
+        PVByteArray byteArray = (PVByteArray)
+            database.createArrayData("byteArray",Type.pvByte,null);
+        int ncopy = convert.copyArray(sourceArray,0,byteArray,0,nput);
+        System.out.printf("byteArray ncopy %d %s\n",ncopy,byteArray.toString());
+        ncopy = convert.copyArray(byteArray,0,stringArray,0,nput);
+        System.out.printf("stringArray ncopy %d %s\n",ncopy,stringArray.toString());
+    
+        PVShortArray shortArray = (PVShortArray)
+            database.createArrayData("shortArray",Type.pvShort,null);
+        ncopy = convert.copyArray(sourceArray,0,shortArray,0,nput);
+        System.out.printf("shortArray ncopy %d %s\n",ncopy, shortArray.toString());
+        ncopy = convert.copyArray(shortArray,0,stringArray,0,nput);
+        System.out.printf("stringArray ncopy %d %s\n",ncopy,stringArray.toString());
+
+        PVIntArray intArray = (PVIntArray)
+        database.createArrayData("intArray",Type.pvInt,null);
+        ncopy = convert.copyArray(sourceArray,0,intArray,0,nput);
+        System.out.printf("intArray ncopy %d %s\n",ncopy,intArray.toString()); 
+        ncopy = convert.copyArray(intArray,0,stringArray,0,nput);
+        System.out.printf("stringArray ncopy %d %s\n",ncopy,stringArray.toString());
+        
+        PVLongArray longArray = (PVLongArray)
+        database.createArrayData("longArray",Type.pvLong,null);
+        ncopy = convert.copyArray(sourceArray,0,longArray,0,nput);
+        System.out.printf("longArray ncopy %d %s\n",ncopy,longArray.toString());
+        ncopy = convert.copyArray(longArray,0,stringArray,0,nput);
+        System.out.printf("stringArray ncopy %d %s\n",ncopy,stringArray.toString());
+        
+        PVFloatArray floatArray = (PVFloatArray)
+        database.createArrayData("floatArray",Type.pvFloat,null);
+        ncopy = convert.copyArray(sourceArray,0,floatArray,0,nput);
+        System.out.printf("floatArray ncopy %d %s\n",ncopy,floatArray.toString());
+        ncopy = convert.copyArray(floatArray,0,stringArray,0,nput);
+        System.out.printf("stringArray ncopy %d %s\n",ncopy,stringArray.toString());
+        
+        PVDoubleArray doubleArray = (PVDoubleArray)
+        database.createArrayData("doubleArray",Type.pvDouble,null);
+        ncopy = convert.copyArray(sourceArray,0,doubleArray,0,nput);
+        System.out.printf("doubleArray ncopy %d %s\n",ncopy,doubleArray.toString());  
+        ncopy = convert.copyArray(doubleArray,0,stringArray,0,nput);
+        System.out.printf("stringArray ncopy %d %s\n",ncopy,stringArray.toString());
+    }
+    /**
+     * Test StructureArray copy.
+     */
+    public static void testStructureArrayCopy() {
+        Convert convert = ConvertFactory.getConvert();
+        DatabaseExample database = new DatabaseExample("test");
+        PVStructureArray structureArray = (PVStructureArray)
+            database.createArrayData("structureArray",Type.pvStructure,null);
+        PVStructure[] arrayValue = new PVStructure[3];
+        for(int i = 0; i < arrayValue.length; i+=2) {
+            PVDouble low = (PVDouble)database.createData(
+                "low",Type.pvDouble,null);
+            low.put(-10.0 * (i+1));
+            PVDouble high = (PVDouble)database.createData(
+                "high",Type.pvDouble,null);
+            high.put(10.0 * (i+1));
+            PVData[] structFieldData = new PVData[] {low,high};
+            arrayValue[i] = database.createStructureData(
+                "displayLimit","DisplayLimit",structFieldData,null);
+        }
+        int nput = structureArray.put(0,arrayValue.length,arrayValue,0);
+        PVStructureArray structureArray1 = (PVStructureArray)
+            database.createArrayData("structureArray1",Type.pvStructure,null);
+        int ncopy = convert.copyArray(structureArray,0,structureArray1,0,nput);
+        System.out.printf("\ntestStructureArrayCopy ncopy %d %s%s\n",
+            ncopy,structureArray.toString(),structureArray1.toString());
+        PVStringArray stringArray = (PVStringArray) database.createArrayData(
+             "stringArray",Type.pvString,null);
+        ncopy = convert.copyArray(structureArray,0,stringArray,0,nput);
+        System.out.printf("stringArray ncopy %d\n%s\n",ncopy,stringArray.toString());
+        
+    }
+    /**
+     * Test ArrayArray copy.
+     */
+    public static void testArrayArrayCopy() {
+        Convert convert = ConvertFactory.getConvert();
+        DatabaseExample database = new DatabaseExample("test");
+        PVArrayArray arrayArray = (PVArrayArray)
+            database.createArrayData("arrayArray",Type.pvArray,null);
+        PVArray[] arrayValue = new PVArray[3];
+        for(int i = 0; i < arrayValue.length; i+=2) {
+            PVDoubleArray doubleArrayData = (PVDoubleArray)
+                database.createArrayData("doubleArray",Type.pvDouble,null);
+            double[] value = new double[] {1.0*(i+1),2.0*(i+1),3.0*(i+1)};
+            doubleArrayData.put(0,arrayValue.length,value,0);
+            arrayValue[i] = doubleArrayData;
+        }
+        int nput = arrayArray.put(0,arrayValue.length,arrayValue,0);
+        PVArrayArray arrayArray1 = (PVArrayArray)
+        database.createArrayData("arrayArray1",Type.pvArray,null);
+        int ncopy = convert.copyArray(arrayArray,0,arrayArray1,0,nput);
+        System.out.printf("\ntestArrayArrayCopy ncopy %d %s%s\n",
+                ncopy,arrayArray.toString(),arrayArray1.toString());
+        PVStringArray stringArray = (PVStringArray) database.createArrayData(
+             "stringArray",Type.pvString,null);
+        ncopy = convert.copyArray(arrayArray,0,stringArray,0,nput);
+        System.out.printf("stringArray ncopy %d\n%s\n",ncopy,stringArray.toString());
+        
     }
 }
 

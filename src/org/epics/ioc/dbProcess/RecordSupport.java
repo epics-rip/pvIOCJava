@@ -5,43 +5,23 @@
  */
 package org.epics.ioc.dbProcess;
 
-import org.epics.ioc.dbAccess.*;
-
 /**
  * interface that must be implemented by record support.
  * @author mrk
  *
  */
-public interface RecordSupport {
+public interface RecordSupport extends Support {
     /**
-     * get the record support name.
-     * @return the name of the record support.
-     */
-    String getName();
-    /**
-     * initialize.
-     * Note that 'other' records that are for example referenced by
-     * input or forward links are available but might still be
-     * uninitialized.
-     */
-    void initialize();
-    /**
-     * invoked by the database when it is safe to link to I/O and/or other records.
-     * typically, start() will start input links etc.
-     */
-    void start();
-    /**
-     * disconnect all links to I/O and/or other records.
-     */
-    void stop();
-    /**
-     * clean up any internal state.
-     */
-    void destroy();
-    /**
-     * perform record processing.
+     * perform link processing.
      * @param recordProcess the RecordProcess that called process.
-     * @return the result of processing.
+     * @return the result of link processing.
      */
     ProcessReturn process(RecordProcess recordProcess);
+    /**
+     * called by link support to signify completion.
+     * If the link support returns active than the listener must expect additional calls.
+     * @param result the reason for calling. A value of active is permissible.
+     * In this case link support will again call linkSupportDone.
+     */
+    void linkSupportDone(LinkReturn result);
 }

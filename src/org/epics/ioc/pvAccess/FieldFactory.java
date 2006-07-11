@@ -113,13 +113,22 @@ public final class FieldFactory {
             this.elementType = elementType;
         }
     
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pvAccess.Array#getElementType()
+         */
         public Type getElementType() {
             return elementType;
         }
 
 
+        /* (non-Javadoc)
+         * @see java.lang.Object#toString()
+         */
         public String toString() { return getString(0);}
 
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pvAccess.Field#toString(int)
+         */
         public String toString(int indentLevel) {
             return getString(indentLevel);
         }
@@ -142,14 +151,23 @@ public final class FieldFactory {
             super(name, Type.pvEnum, property);
             this.choicesMutable = choicesMutable;
         }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pvAccess.Enum#isChoicesMutable()
+         */
         public boolean isChoicesMutable() {
             return choicesMutable;
         }
 
 
 
+        /* (non-Javadoc)
+         * @see java.lang.Object#toString()
+         */
         public String toString() { return getString(0);}
 
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pvAccess.Field#toString(int)
+         */
         public String toString(int indentLevel) {
             return getString(indentLevel);
         }
@@ -178,14 +196,23 @@ public final class FieldFactory {
             isMutable = true;
         }
     
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pvAccess.Field#getName()
+         */
         public String getName() {
             return(name);
         }
     
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pvAccess.Field#getPropertys()
+         */
         public Property[] getPropertys() {
             return property;
         }
     
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pvAccess.Field#getProperty(java.lang.String)
+         */
         public Property getProperty(String propertyName) {
             for(int i=0; i<property.length; i++) {
                 if(property[i].getName().equals(propertyName)) return property[i];
@@ -193,21 +220,36 @@ public final class FieldFactory {
             return null;
         }
     
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pvAccess.Field#getType()
+         */
         public Type getType() {
             return type;
         }
     
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pvAccess.Field#isMutable()
+         */
         public boolean isMutable() {
             return(isMutable);
         }
     
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pvAccess.Field#setMutable(boolean)
+         */
         public void setMutable(boolean value) {
             isMutable = value;
             
         }
 
+        /* (non-Javadoc)
+         * @see java.lang.Object#toString()
+         */
         public String toString() { return getString(0);}
 
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pvAccess.Field#toString(int)
+         */
         public String toString(int indentLevel) {
             return getString(indentLevel);
         }
@@ -239,8 +281,14 @@ public final class FieldFactory {
             this.fieldName = fieldName;
         }
 
+        /* (non-Javadoc)
+         * @see java.lang.Object#toString()
+         */
         public String toString() { return getString(0);}
 
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pvAccess.Property#toString(int)
+         */
         public String toString(int indentLevel) {
             return getString(indentLevel);
         }
@@ -253,7 +301,13 @@ public final class FieldFactory {
             return builder.toString();
         }
     
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pvAccess.Property#getFieldName()
+         */
         public String getFieldName() { return fieldName;}
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pvAccess.Property#getName()
+         */
         public String getName() { return name;}
     }
     
@@ -307,10 +361,17 @@ public final class FieldFactory {
             }
        }
     
+        /**
+         * Get the Field definition.
+         * @return The Field.
+         */
         public Field[] getField() {
             return field;
         }
     
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pvAccess.Structure#getField(java.lang.String)
+         */
         public Field getField(String name) {
             int i = Collections.binarySearch(sortedFieldNameList,name);
             if(i>=0) {
@@ -319,26 +380,44 @@ public final class FieldFactory {
             return null;
         }
 
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pvAccess.Structure#getFieldIndex(java.lang.String)
+         */
         public int getFieldIndex(String name) {
             int i = Collections.binarySearch(sortedFieldNameList,name);
             if(i>=0) return fieldIndex[i];
             return -1;
         }
     
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pvAccess.Structure#getFieldNames()
+         */
         public String[] getFieldNames() {
             return fieldName;
         }
     
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pvAccess.Structure#getFields()
+         */
         public Field[] getFields() {
             return field;
         }
 
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pvAccess.Structure#getStructureName()
+         */
         public String getStructureName() {
             return structureName;
         }
 
+        /* (non-Javadoc)
+         * @see java.lang.Object#toString()
+         */
         public String toString() { return getString(0);}
 
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pvAccess.Field#toString(int)
+         */
         public String toString(int indentLevel) {
             return getString(indentLevel);
         }

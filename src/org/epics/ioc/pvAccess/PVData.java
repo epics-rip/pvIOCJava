@@ -13,10 +13,20 @@ package org.epics.ioc.pvAccess;
  */
 public interface PVData {
     /**
-     * get the <i>Field</i> that describes the field.
+     * Get the <i>Field</i> that describes the field.
      * @return Field, which is the reflection interface.
      */
     Field getField();
+    /**
+     * Convert the data to a string.
+     * @return The string.
+     */
     String toString();
+    /**
+     * Convert the data to a string.
+     * Each line is indented.
+     * @param indentLevel The indentation level.
+     * @return The string.
+     */
     String toString(int indentLevel);
 }

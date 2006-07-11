@@ -15,23 +15,23 @@ package org.epics.ioc.pvAccess;
 public interface Property {
     /**
      * Get the property name.
-     * @return the property name.
+     * @return The property name.
      */
     String getName();
     /**
-     * get the name of the field that has the property value.
-     * @return the field name.
+     * Get the name of the field that has the property value.
+     * @return The field name.
      */
     String getFieldName();
     /**
-     * convert to a string.
-     * @return the property as a string.
+     * Convert to a string.
+     * @return The property as a string.
      */
     String toString();
     /**
-     * convert to a string.
-     * @param indentLevel indentation level.
-     * @return the property as a string.
+     * Convert to a string.
+     * @param indentLevel Indentation level.
+     * @return The property as a string.
      */
     String toString(int indentLevel);
 }

@@ -5,7 +5,10 @@
  */
 package org.epics.ioc.dbAccess;
 
+import java.util.concurrent.locks.*;
+
 import org.epics.ioc.dbProcess.*;
+
 
 
 /**
@@ -15,85 +18,71 @@ import org.epics.ioc.dbProcess.*;
  */
 public interface DBRecord extends DBStructure {
     /**
-     * get the record instance name.
-     * @return the name.
+     * Get the record instance name.
+     * @return The name.
      */
     String getRecordName();
     /**
-     * get the record support for this record instance.
-     * @return the RecordSupport or null if no support has been set.
+     * Get the RecordProcess for this record instance.
+     * @return The RecordProcess or null if  has been set.
+     */
+    RecordProcess getRecordProcess();
+    /**
+     * Set the RecordProcess.
+     * @param recordProcess The RecordProcess for this record instance.
+     * @return true if the support was set and false if the support already was set.
+     */
+    boolean setRecordProcess(RecordProcess recordProcess);
+    /**
+     * Get the record support for this record instance.
+     * @return The RecordSupport or null if no support has been set.
      */
     RecordSupport getRecordSupport();
     /**
-     * set the record support.
-     * @param support the support.
+     * Set the record support.
+     * @param support The support.
      * @return true if the support was set and false if the support already was set.
      */
     boolean setRecordSupport(RecordSupport support);
     /**
-     * lock record for reading.
+     * Get the lock for the record instance.
+     * @return A reentrant lock.
      */
-    void readLock();
+    ReentrantLock getLock();
     /**
-     * unlock record for reading.
+     * While holding lock on this record lock another record.
+     * If the other record is already locked than this record may be unlocked.
+     * @param otherRecord the other record.
+     * @return TODO
      */
-    void readUnlock();
+    ReentrantLock lockOtherRecord(DBRecord otherRecord);
     /**
-     * lock record for writing.
+     * Get the id for this record instance.
+     * Each instance is assigned a unique integer id.
+     * @return The id.
      */
-    void writeLock();
+    int getRecordID();
     /**
-     * unlock record for writing.
-     */
-    void writeUnlock();
-    /**
-     * insert a master listener.
-     * When a master listener is active postPut() calls only the master listener.
-     * The masterListener calls postPut(dbData) or postPut(iterator)to call the other listeners.
-     * @param listener the listener.
-     * @return true if that caller is now the master listener and false if a master listener is
-     * already active.
-     */
-    boolean insertMasterListener(DBMasterListener listener);
-    /**
-     * remove the master listener.
-     * @param listener the listener.
-     * @throws IllegalStateException if the caller is not the master.
-     */
-    void removeMasterListener(DBMasterListener listener);
-    /**
-     * called by putPost() to see if only the master listener should be called.
-     * @param dbData the actual DBData object to be posted.
-     * @return true if a master exists and was called.
-     * If false is returned than the caller should call putPost(this).
-     */
-    boolean postMaster(DBData dbData);
-    /**
-     * master is beginning a set of synchronous puts.
-     * @throws IllegalStateException if the caller is not the master.
+     * Begin a set of synchronous puts.
      */
     void beginSynchronous();
     /**
-     * end of synchronous puts from the master.
-     * @throws IllegalStateException if the caller is not the master.
+     * End of synchronous puts.
      */
-    void stopSynchronous();
+    void endSynchronous();
     /**
-     * post puts for the master.
-     * @param dbData the data to post.
-     * @throws IllegalStateException if the caller is not the master.
+     * create a Listener.
+     * This must be called by a client that wants to call DBData.addListener for one or more
+     * fields of this record instance.
+     * @param listener the DBListener interface.
+     * @return a Listener interface.
      */
-    void postForMaster(DBData dbData);
+    Listener createListener(DBListener listener);
     /**
-     * ONLY for use by DBData.
-     * This is called by DBData when its addListener is called.
-     * @param listener the listener.
+     * destroy a Listener interface.
+     * Before calling this the client must call DBData.removeListener for each
+     * DBData.addListener it has called.
+     * @param listener the Listen interface returned by the call to createListener.
      */
-    void addListener(DBListenerPvt listener);
-    /**
-     * ONLY for use by DBData.
-     * This is called by DBData when its removeListener is called.
-     * @param listener the listener.
-     */
-    void removeListener(DBListenerPvt listener);
+    void destroyListener(Listener listener);
 }

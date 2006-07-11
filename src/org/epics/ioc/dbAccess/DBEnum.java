@@ -9,7 +9,7 @@ import org.epics.ioc.pvAccess.*;
 
 
 /**
- * provides access to a an array of String choices
+ * Provides access to a an array of String choices
  * and an index specifying the current choice.
  * @author mrk
  *

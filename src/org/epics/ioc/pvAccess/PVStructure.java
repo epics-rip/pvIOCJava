@@ -12,7 +12,7 @@ package org.epics.ioc.pvAccess;
  */
 public interface PVStructure extends PVData {	
     /**
-     * get the <i>PVData</i> array for the fields of the structure.
+     * Get the <i>PVData</i> array for the fields of the structure.
      * @return array of PVData. One for each field.
      */
     PVData[] getFieldPVDatas();

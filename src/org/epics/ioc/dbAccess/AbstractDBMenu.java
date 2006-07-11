@@ -15,7 +15,23 @@ import org.epics.ioc.pvAccess.*;
  */
 public abstract class AbstractDBMenu extends AbstractDBData implements DBMenu
 {
-
+    private int index;
+    private String[]choice;
+    private String menuName;
+    private static Convert convert = ConvertFactory.getConvert();
+    /**
+     * constructor that derived classes must call.
+     * @param parent the parent interface.
+     * @param dbdMenuField the reflection interface for the DBMenu data. 
+     */
+    protected AbstractDBMenu(DBStructure parent,DBDMenuField dbdMenuField) {
+        super(parent,dbdMenuField);
+        index = 0;
+        DBDMenu dbdMenu = super.getDBDField().getAttribute().getMenu();
+        this.choice = dbdMenu.getChoices();
+        this.menuName = dbdMenu.getName();
+    }
+    
     /* (non-Javadoc)
      * @see org.epics.ioc.dbAccess.DBMenu#getMenuName()
      */
@@ -74,22 +90,4 @@ public abstract class AbstractDBMenu extends AbstractDBData implements DBMenu
         builder.append("}");
         return builder.toString();
     }
-    
-    /**
-     * constructor that derived classes must call.
-     * @param parent the parent interface.
-     * @param dbdMenuField the reflection interface for the DBMenu data. 
-     */
-    protected AbstractDBMenu(DBStructure parent,DBDMenuField dbdMenuField) {
-        super(parent,dbdMenuField);
-        index = 0;
-        DBDMenu dbdMenu = super.getDBDField().getAttribute().getMenu();
-        this.choice = dbdMenu.getChoices();
-        this.menuName = dbdMenu.getName();
-    }
-    
-    private int index;
-    private String[]choice;
-    private String menuName;
-    private static Convert convert = ConvertFactory.getConvert();
 }

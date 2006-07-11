@@ -7,6 +7,7 @@ package org.epics.ioc.support;
 
 import org.epics.ioc.dbAccess.*;
 import org.epics.ioc.dbProcess.*;
+import org.epics.ioc.pvAccess.*;
 
 /**
  * @author mrk
@@ -34,7 +35,7 @@ public class AsynLink implements LinkSupport {
         
     }
 
-    public void start() {
+    public void start(PVData field) {
         // TODO Auto-generated method stub
         
     }
@@ -42,6 +43,11 @@ public class AsynLink implements LinkSupport {
     public void stop() {
         // TODO Auto-generated method stub
         
+    }
+
+    public ProcessReturn process(RecordProcess recordProcess) {
+        // TODO Auto-generated method stub
+        return null;
     }
 
 }

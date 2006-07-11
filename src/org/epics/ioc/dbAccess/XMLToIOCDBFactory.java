@@ -28,14 +28,14 @@ import org.epics.ioc.dbProcess.*;
 public class XMLToIOCDBFactory {
     /**
      * Convert an xml file to IOCDatabase definitions and put the definitions in a database.
-     * @param dbdin reflection database.
+     * @param dbdin the reflection database.
      * @param iocdbin IOC database.
-     * @param fileName filename containing xml record instance definitions.
-     * @throws MalformedURLException if SAX throws it.
-     * @throws IllegalStateException if any errors were detected.
+     * @param fileName The name of the file containing xml record instance definitions.
+     * @throws MalformedURLException If SAX throws it.
+     * @throws IllegalStateException If any errors were detected.
      */
     public static void convert(DBD dbdin, IOCDB iocdbin, String fileName)
-        throws MalformedURLException//,IllegalStateException
+        throws MalformedURLException
     {
         String uri = new File(fileName).toURL().toString();
         XMLReader reader;

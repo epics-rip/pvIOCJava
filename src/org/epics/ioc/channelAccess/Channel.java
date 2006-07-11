@@ -5,7 +5,6 @@
  */
 package org.epics.ioc.channelAccess;
 
-import org.epics.ioc.dbAccess.DBData;
 import org.epics.ioc.pvAccess.*;
 
 /**
@@ -20,12 +19,15 @@ public interface Channel {
     ChannelSetResult setField(String name);
     String getOtherChannel();
     String getOtherField();
-    ChannelData getField();
-    ChannelData getPropertyField(Property property);
-    ChannelData getPropertyField(String name);
+    Field getField();
+    Field getPropertyField(Property property);
+    Field getPropertyField(String name);
     AccessRights getAccessRights();
-    void subscribe(ChannelNotifyListener listener,Event why);
-    void subscribe(ChannelDataListener listener,Event why);
-    ChannelGetReturn get(ChannelDataGet callback,ChannelOption[] options);
-    ChannelDataPut getChannelDataPut();
+    ChannelFieldGroup createFieldGroup();
+    void setTimeout(double timeout);
+    boolean get(ChannelFieldGroup fieldGroup,ChannelDataGet callback,ChannelOption[] options);
+    ChannelDataPut getChannelDataPut(ChannelFieldGroup fieldGroup);
+    void subscribe(ChannelFieldGroup fieldGroup,ChannelNotifyListener listener,Event why);
+    void subscribe(ChannelFieldGroup fieldGroup,ChannelDataListener listener,Event why);
+    
 }

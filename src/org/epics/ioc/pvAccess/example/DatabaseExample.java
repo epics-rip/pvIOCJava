@@ -92,12 +92,12 @@ public class DatabaseExample {
 
     /**
      * create a structure field.
-     * @param name the field name.
+     * @param name The field name.
      * @param structureName the structure name.
      * @param pvData the PVData interfaces for the fields of the structure.
      * These must have already been created.
-     * @param property a propery array. This can be null.
-     * @return the PVStructure interface for the newly created field.
+     * @param property A propery array. This can be null.
+     * @return The PVStructure interface for the newly created field.
      */
     public PVStructure createStructureData(String name, String structureName,
             PVData[] pvData, Property[] property)
@@ -111,6 +111,25 @@ public class DatabaseExample {
         return new StructureData(structure,pvData);
     }
     
+    /**
+     * create a structure field.
+     * @param name The field name.
+     * @param structure The Structure that describes the PV.
+     * @param pvData The array of PVData for the fields of the structure.
+     * @param property A propery array. This can be null.
+     * @return The PVStructure interface for the newly created field.
+     */
+    public PVStructure createStructureData(String name, Structure structure,
+            PVData[] pvData, Property[] property)
+    {
+        return new StructureData(structure,pvData);
+    }
+    /**
+     * create a structure field.
+     * @param name The field name.
+     * @param property A propery array. This can be null.
+     * @return The PVStructure interface for the newly created field.
+     */
     public PVStructure createStructureData(String name, Property[] property)
     {
         Field[] field = new Field[0];
@@ -132,47 +151,47 @@ public class DatabaseExample {
     	switch(type) {
     	case pvBoolean : {
             Array array = FieldFactory.createArrayField(name,type,property);
-            return new BooleanArrayData(array);
+            return new BooleanArray(array);
         }
     	case pvByte : {
             Array array = FieldFactory.createArrayField(name,type,property);
-            return new ByteArrayData(array);
+            return new ByteArray(array);
         }
     	case pvShort : {
             Array array = FieldFactory.createArrayField(name,type,property);
-            return new ShortArrayData(array);
+            return new ShortArray(array);
         }
     	case pvInt : {
             Array array = FieldFactory.createArrayField(name,type,property);
-            return new IntArrayData(array);
+            return new IntArray(array);
         }
     	case pvLong : {
             Array array = FieldFactory.createArrayField(name,type,property);
-            return new LongArrayData(array);
+            return new LongArray(array);
         }
     	case pvFloat : {
             Array array = FieldFactory.createArrayField(name,type,property);
-            return new FloatArrayData(array);
+            return new FloatArray(array);
         }
     	case pvDouble : {
             Array array = FieldFactory.createArrayField(name,type,property);
-            return new DoubleArrayData(array);
+            return new DoubleArray(array);
         }
         case pvString : {
             Array array = FieldFactory.createArrayField(name,type,property);
-            return new StringArrayData(array);
+            return new StringArray(array);
         }
         case pvEnum : {
             Array array = FieldFactory.createArrayField(name,type,property);
-            return new EnumArrayData(array);
+            return new EnumArray(array);
         }
         case pvStructure : {
             Array array = FieldFactory.createArrayField(name,type,property);
-            return new StructureArrayData(array);
+            return new StructureArray(array);
         }
         case pvArray : {
             Array array = FieldFactory.createArrayField(name,type,property);
-            return new ArrayArrayData(array);
+            return new ArrayArray(array);
         }
     	default: {throw new Error ("type not implemented");}
     	}
@@ -185,14 +204,29 @@ public class DatabaseExample {
         boolean value;
         Field field;
         BooleanData(Field field) {this.field = field; value = false;}
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pvAccess.PVBoolean#get()
+         */
         public boolean get() { return value; }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pvAccess.PVBoolean#put(boolean)
+         */
         public void put(boolean value) { this.value = value;}
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pvAccess.PVData#getField()
+         */
         public Field getField() { return field;}
     
+        /* (non-Javadoc)
+         * @see java.lang.Object#toString()
+         */
         public String toString() {
             return DatabaseExample.convert.getString(this);
         }
         
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pvAccess.PVData#toString(int)
+         */
         public String toString(int indentLevel) {
             return DatabaseExample.convert.getString(this,indentLevel);
         }
@@ -202,14 +236,29 @@ public class DatabaseExample {
         byte value;
         Field field;
         ByteData(Field field) {this.field = field; value = 0;}
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pvAccess.PVByte#get()
+         */
         public byte get() { return value; }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pvAccess.PVByte#put(byte)
+         */
         public void put(byte value) { this.value = value;}
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pvAccess.PVData#getField()
+         */
         public Field getField() { return field;}
     
+        /* (non-Javadoc)
+         * @see java.lang.Object#toString()
+         */
         public String toString() {
             return DatabaseExample.convert.getString(this);
         }
         
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pvAccess.PVData#toString(int)
+         */
         public String toString(int indentLevel) {
             return DatabaseExample.convert.getString(this,indentLevel);
         }
@@ -219,14 +268,29 @@ public class DatabaseExample {
         short value;
         Field field;
         ShortData(Field field) {this.field = field; value = 0;}
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pvAccess.PVShort#get()
+         */
         public short get() { return value; }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pvAccess.PVShort#put(short)
+         */
         public void put(short value) { this.value = value;}
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pvAccess.PVData#getField()
+         */
         public Field getField() { return field;}
     
+        /* (non-Javadoc)
+         * @see java.lang.Object#toString()
+         */
         public String toString() {
             return DatabaseExample.convert.getString(this);
         }
         
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pvAccess.PVData#toString(int)
+         */
         public String toString(int indentLevel) {
             return DatabaseExample.convert.getString(this,indentLevel);
         }
@@ -236,14 +300,29 @@ public class DatabaseExample {
         int value;
         Field field;
         IntData(Field field) {this.field = field; value = 0;}
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pvAccess.PVInt#get()
+         */
         public int get() { return value; }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pvAccess.PVInt#put(int)
+         */
         public void put(int value) { this.value = value;}
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pvAccess.PVData#getField()
+         */
         public Field getField() { return field;}
     
+        /* (non-Javadoc)
+         * @see java.lang.Object#toString()
+         */
         public String toString() {
             return DatabaseExample.convert.getString(this);
         }
         
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pvAccess.PVData#toString(int)
+         */
         public String toString(int indentLevel) {
             return DatabaseExample.convert.getString(this,indentLevel);
         }
@@ -253,14 +332,29 @@ public class DatabaseExample {
         long value;
         Field field;
         LongData(Field field) {this.field = field; value = 0;}
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pvAccess.PVLong#get()
+         */
         public long get() { return value; }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pvAccess.PVLong#put(long)
+         */
         public void put(long value) { this.value = value;}
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pvAccess.PVData#getField()
+         */
         public Field getField() { return field;}
     
+        /* (non-Javadoc)
+         * @see java.lang.Object#toString()
+         */
         public String toString() {
             return DatabaseExample.convert.getString(this);
         }
         
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pvAccess.PVData#toString(int)
+         */
         public String toString(int indentLevel) {
             return DatabaseExample.convert.getString(this,indentLevel);
         }
@@ -270,14 +364,29 @@ public class DatabaseExample {
         float value;
         Field field;
         FloatData(Field field) {this.field = field; value = 0;}
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pvAccess.PVFloat#get()
+         */
         public float get() { return value; }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pvAccess.PVFloat#put(float)
+         */
         public void put(float value) { this.value = value;}
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pvAccess.PVData#getField()
+         */
         public Field getField() { return field;}
     
+        /* (non-Javadoc)
+         * @see java.lang.Object#toString()
+         */
         public String toString() {
             return DatabaseExample.convert.getString(this);
         }
         
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pvAccess.PVData#toString(int)
+         */
         public String toString(int indentLevel) {
             return DatabaseExample.convert.getString(this,indentLevel);
         }
@@ -287,14 +396,29 @@ public class DatabaseExample {
         double value;
         Field field;
         DoubleData(Field field) {this.field = field; value = 0;}
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pvAccess.PVDouble#get()
+         */
         public double get() { return value; }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pvAccess.PVDouble#put(double)
+         */
         public void put(double value) { this.value = value;}
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pvAccess.PVData#getField()
+         */
         public Field getField() { return field;}
     
+        /* (non-Javadoc)
+         * @see java.lang.Object#toString()
+         */
         public String toString() {
             return DatabaseExample.convert.getString(this);
         }
         
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pvAccess.PVData#toString(int)
+         */
         public String toString(int indentLevel) {
             return DatabaseExample.convert.getString(this,indentLevel);
         }
@@ -304,14 +428,29 @@ public class DatabaseExample {
         String value;
         Field field;
         StringData(Field field) {this.field = field; value = null;}
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pvAccess.PVString#get()
+         */
         public String get() { return value; }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pvAccess.PVString#put(java.lang.String)
+         */
         public void put(String value) { this.value = value;}
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pvAccess.PVData#getField()
+         */
         public Field getField() { return field;}
     
+        /* (non-Javadoc)
+         * @see java.lang.Object#toString()
+         */
         public String toString() {
             return value;
         }
         
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pvAccess.PVData#toString(int)
+         */
         public String toString(int indentLevel) {
             return DatabaseExample.convert.getString(this,indentLevel);
         }
@@ -330,32 +469,53 @@ public class DatabaseExample {
             choice = EMPTY_STRING_ARRAY;
         }
 
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pvAccess.PVEnum#getChoices()
+         */
         public String[] getChoices() {
             return choice;
         }
 
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pvAccess.PVEnum#getIndex()
+         */
         public int getIndex() {
             return index;
         }
 
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pvAccess.PVEnum#setChoices(java.lang.String[])
+         */
         public boolean setChoices(String[] choice) {
             if(!field.isChoicesMutable()) return false;
             this.choice = choice;
             return true;
         }
 
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pvAccess.PVEnum#setIndex(int)
+         */
         public void setIndex(int index) {
             this.index = index;
         }
 
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pvAccess.PVData#getField()
+         */
         public Field getField() {
             return field;
         }
     
+        /* (non-Javadoc)
+         * @see java.lang.Object#toString()
+         */
         public String toString() {
             return DatabaseExample.convert.getString(this);
         }
         
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pvAccess.PVData#toString(int)
+         */
         public String toString(int indentLevel) {
             return DatabaseExample.convert.getString(this,indentLevel);
         }
@@ -365,30 +525,42 @@ public class DatabaseExample {
         private Structure structure;
         private PVData[] pvData;
 
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pvAccess.PVStructure#getFieldPVDatas()
+         */
         public PVData[] getFieldPVDatas() {
             return pvData;
         }
 
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pvAccess.PVData#getField()
+         */
         public Field getField() {
             return structure;
         }
 
-        public StructureData(Structure structure, PVData[] pvData) {
+        StructureData(Structure structure, PVData[] pvData) {
             super();
             this.structure = structure;
             this.pvData = pvData;
         }
     
+        /* (non-Javadoc)
+         * @see java.lang.Object#toString()
+         */
         public String toString() {
             return DatabaseExample.convert.getString(this);
         }
         
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pvAccess.PVData#toString(int)
+         */
         public String toString(int indentLevel) {
             return DatabaseExample.convert.getString(this,indentLevel);
         }
     }
     
-    private static class BooleanArrayData implements PVBooleanArray {
+    private static class BooleanArray implements PVBooleanArray {
         private int length = 0;
         private int capacity = 0;
         boolean[] value;
@@ -396,17 +568,32 @@ public class DatabaseExample {
 
         private final static boolean[] EMPTY_BOOLEAN_ARRAY = new boolean[0];
     
-        BooleanArrayData(Array array) {
+        BooleanArray(Array array) {
             this.array = array;
             value = EMPTY_BOOLEAN_ARRAY;
         }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pvAccess.PVData#getField()
+         */
         public Field getField() { return array;}
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pvAccess.PVArray#getLength()
+         */
         public int getLength(){ return length;}
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pvAccess.PVArray#getCapacity()
+         */
         public int getCapacity(){ return capacity;}
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pvAccess.PVArray#setLength(int)
+         */
         public void setLength(int len) {
             if(len>capacity) setCapacity(len);
             length = len;
         }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pvAccess.PVArray#setCapacity(int)
+         */
         public void setCapacity(int len) {
             if(len<=capacity) return;
             boolean[] newarray = new boolean[len];
@@ -414,12 +601,19 @@ public class DatabaseExample {
             value = newarray;
             capacity = len;
         }
-        public int get(int offset, int len, boolean[]to, int toOffset) {
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pvAccess.PVBooleanArray#get(int, int, org.epics.ioc.pvAccess.BooleanArrayData)
+         */
+        public int get(int offset, int len, BooleanArrayData data) {
             int n = len;
             if(offset+len > length) n = length;
-            System.arraycopy(value,offset,to,toOffset,n);
+            data.data = value;
+            data.offset = offset;
             return n;
         }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pvAccess.PVBooleanArray#put(int, int, org.epics.ioc.pvAccess.BooleanArrayData)
+         */
         public int put(int offset, int len, boolean[]from, int fromOffset) {
             if(offset+len > length) {
                  int newlength = offset + len;
@@ -430,20 +624,29 @@ public class DatabaseExample {
             return len;
         }
     
+        /* (non-Javadoc)
+         * @see java.lang.Object#toString()
+         */
         public String toString() {
             return DatabaseExample.convert.getString(this);
         }
         
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pvAccess.PVData#toString(int)
+         */
         public String toString(int indentLevel) {
             return DatabaseExample.convert.getString(this,indentLevel);
         }
         
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pvAccess.PVArray#isCapacityMutable()
+         */
         public boolean isCapacityMutable() {
             return true;
         }
     }
     
-    private static class ByteArrayData implements PVByteArray {
+    private static class ByteArray implements PVByteArray {
         private int length = 0;
         private int capacity = 0;
         byte[] value;
@@ -451,17 +654,32 @@ public class DatabaseExample {
 
         private final static byte[] EMPTY_BYTE_ARRAY = new byte[0];
     
-        ByteArrayData(Array array) {
+        ByteArray(Array array) {
             this.array = array;
             value = EMPTY_BYTE_ARRAY;
         }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pvAccess.PVData#getField()
+         */
         public Field getField() { return array;}
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pvAccess.PVArray#getLength()
+         */
         public int getLength(){ return length;}
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pvAccess.PVArray#getCapacity()
+         */
         public int getCapacity(){ return capacity;}
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pvAccess.PVArray#setLength(int)
+         */
         public void setLength(int len) {
             if(len>capacity) setCapacity(len);
             length = len;
         }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pvAccess.PVArray#setCapacity(int)
+         */
         public void setCapacity(int len) {
             if(len<=capacity) return;
             byte[] newarray = new byte[len];
@@ -469,12 +687,19 @@ public class DatabaseExample {
             value = newarray;
             capacity = len;
         }
-        public int get(int offset, int len, byte[]to, int toOffset) {
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pvAccess.PVByteArray#get(int, int, org.epics.ioc.pvAccess.ByteArrayData)
+         */
+        public int get(int offset, int len, ByteArrayData data) {
             int n = len;
             if(offset+len > length) n = length;
-            System.arraycopy(value,offset,to,toOffset,n);
+            data.data = value;
+            data.offset = offset;
             return n;
         }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pvAccess.PVByteArray#put(int, int, org.epics.ioc.pvAccess.ByteArrayData)
+         */
         public int put(int offset, int len, byte[]from, int fromOffset) {
             if(offset+len > length) {
                  int newlength = offset + len;
@@ -485,20 +710,29 @@ public class DatabaseExample {
             return len;
         }
     
+        /* (non-Javadoc)
+         * @see java.lang.Object#toString()
+         */
         public String toString() {
             return DatabaseExample.convert.getString(this);
         }
         
-        public String toString(int indentLevel) {
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pvAccess.PVData#toString(int)
+         */
+        public String toString(int indentLevel){
             return DatabaseExample.convert.getString(this,indentLevel);
         }
         
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pvAccess.PVArray#isCapacityMutable()
+         */
         public boolean isCapacityMutable() {
             return true;
         }
     }
     
-    private static class ShortArrayData implements PVShortArray {
+    private static class ShortArray implements PVShortArray {
         private int length = 0;
         private int capacity = 0;
         short[] value;
@@ -506,17 +740,32 @@ public class DatabaseExample {
 
         private final static short[] EMPTY_SHORT_ARRAY = new short[0];
     
-        ShortArrayData(Array array) {
+        ShortArray(Array array) {
             this.array = array;
             value = EMPTY_SHORT_ARRAY;
         }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pvAccess.PVData#getField()
+         */
         public Field getField() { return array;}
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pvAccess.PVArray#getLength()
+         */
         public int getLength(){ return length;}
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pvAccess.PVArray#getCapacity()
+         */
         public int getCapacity(){ return capacity;}
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pvAccess.PVArray#setLength(int)
+         */
         public void setLength(int len) {
             if(len>capacity) setCapacity(len);
             length = len;
         }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pvAccess.PVArray#setCapacity(int)
+         */
         public void setCapacity(int len) {
             if(len<=capacity) return;
             short[] newarray = new short[len];
@@ -524,12 +773,19 @@ public class DatabaseExample {
             value = newarray;
             capacity = len;
         }
-        public int get(int offset, int len, short[]to, int toOffset) {
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pvAccess.PVShortArray#get(int, int, org.epics.ioc.pvAccess.ShortArrayData)
+         */
+        public int get(int offset, int len, ShortArrayData data) {
             int n = len;
             if(offset+len > length) n = length;
-            System.arraycopy(value,offset,to,toOffset,n);
+            data.data = value;
+            data.offset = offset;
             return n;
         }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pvAccess.PVShortArray#put(int, int, org.epics.ioc.pvAccess.ShortArrayData)
+         */
         public int put(int offset, int len, short[]from, int fromOffset) {
             if(offset+len > length) {
                  int newlength = offset + len;
@@ -540,20 +796,29 @@ public class DatabaseExample {
             return len;
         }
     
+        /* (non-Javadoc)
+         * @see java.lang.Object#toString()
+         */
         public String toString() {
             return DatabaseExample.convert.getString(this);
         }
         
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pvAccess.PVData#toString(int)
+         */
         public String toString(int indentLevel) {
             return DatabaseExample.convert.getString(this,indentLevel);
         }
         
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pvAccess.PVArray#isCapacityMutable()
+         */
         public boolean isCapacityMutable() {
             return true;
         }
     }
     
-    private static class IntArrayData implements PVIntArray {
+    private static class IntArray implements PVIntArray {
         private int length = 0;
         private int capacity = 0;
         int[] value;
@@ -561,17 +826,32 @@ public class DatabaseExample {
 
         private final static int[] EMPTY_INT_ARRAY = new int[0];
     
-        IntArrayData(Array array) {
+        IntArray(Array array) {
             this.array = array;
             value = EMPTY_INT_ARRAY;
         }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pvAccess.PVData#getField()
+         */
         public Field getField() { return array;}
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pvAccess.PVArray#getLength()
+         */
         public int getLength(){ return length;}
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pvAccess.PVArray#getCapacity()
+         */
         public int getCapacity(){ return capacity;}
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pvAccess.PVArray#setLength(int)
+         */
         public void setLength(int len) {
             if(len>capacity) setCapacity(len);
             length = len;
         }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pvAccess.PVArray#setCapacity(int)
+         */
         public void setCapacity(int len) {
             if(len<=capacity) return;
             int[] newarray = new int[len];
@@ -579,12 +859,19 @@ public class DatabaseExample {
             value = newarray;
             capacity = len;
         }
-        public int get(int offset, int len, int[]to, int toOffset) {
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pvAccess.PVIntArray#get(int, int, org.epics.ioc.pvAccess.IntArrayData)
+         */
+        public int get(int offset, int len, IntArrayData data) {
             int n = len;
             if(offset+len > length) n = length;
-            System.arraycopy(value,offset,to,toOffset,n);
+            data.data = value;
+            data.offset = offset;
             return n;
         }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pvAccess.PVIntArray#put(int, int, org.epics.ioc.pvAccess.IntArrayData)
+         */
         public int put(int offset, int len, int[]from, int fromOffset) {
             if(offset+len > length) {
                  int newlength = offset + len;
@@ -595,20 +882,29 @@ public class DatabaseExample {
             return len;
         }
     
+        /* (non-Javadoc)
+         * @see java.lang.Object#toString()
+         */
         public String toString() {
             return DatabaseExample.convert.getString(this);
         }
         
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pvAccess.PVData#toString(int)
+         */
         public String toString(int indentLevel) {
             return DatabaseExample.convert.getString(this,indentLevel);
         }
         
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pvAccess.PVArray#isCapacityMutable()
+         */
         public boolean isCapacityMutable() {
             return true;
         }
     }
     
-    private static class LongArrayData implements PVLongArray {
+    private static class LongArray implements PVLongArray {
         private int length = 0;
         private int capacity = 0;
         long[] value;
@@ -616,17 +912,32 @@ public class DatabaseExample {
 
         private final static long[] EMPTY_LONG_ARRAY = new long[0];
     
-        LongArrayData(Array array) {
+        LongArray(Array array) {
             this.array = array;
             value = EMPTY_LONG_ARRAY;
         }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pvAccess.PVData#getField()
+         */
         public Field getField() { return array;}
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pvAccess.PVArray#getLength()
+         */
         public int getLength(){ return length;}
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pvAccess.PVArray#getCapacity()
+         */
         public int getCapacity(){ return capacity;}
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pvAccess.PVArray#setLength(int)
+         */
         public void setLength(int len) {
             if(len>capacity) setCapacity(len);
             length = len;
         }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pvAccess.PVArray#setCapacity(int)
+         */
         public void setCapacity(int len) {
             if(len<=capacity) return;
             long[] newarray = new long[len];
@@ -634,12 +945,19 @@ public class DatabaseExample {
             value = newarray;
             capacity = len;
         }
-        public int get(int offset, int len, long[]to, int toOffset) {
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pvAccess.PVLongArray#get(int, int, org.epics.ioc.pvAccess.LongArrayData)
+         */
+        public int get(int offset, int len, LongArrayData data) {
             int n = len;
             if(offset+len > length) n = length;
-            System.arraycopy(value,offset,to,toOffset,n);
+            data.data = value;
+            data.offset = offset;
             return n;
         }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pvAccess.PVLongArray#put(int, int, org.epics.ioc.pvAccess.LongArrayData)
+         */
         public int put(int offset, int len, long[]from, int fromOffset) {
             if(offset+len > length) {
                  int newlength = offset + len;
@@ -650,20 +968,29 @@ public class DatabaseExample {
             return len;
         }
     
+        /* (non-Javadoc)
+         * @see java.lang.Object#toString()
+         */
         public String toString() {
             return DatabaseExample.convert.getString(this);
         }
         
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pvAccess.PVData#toString(int)
+         */
         public String toString(int indentLevel) {
             return DatabaseExample.convert.getString(this,indentLevel);
         }
         
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pvAccess.PVArray#isCapacityMutable()
+         */
         public boolean isCapacityMutable() {
             return true;
         }
     }
     
-    private static class FloatArrayData implements PVFloatArray {
+    private static class FloatArray implements PVFloatArray {
         private int length = 0;
         private int capacity = 0;
         float[] value;
@@ -671,17 +998,32 @@ public class DatabaseExample {
 
         private final static float[] EMPTY_FLOAT_ARRAY = new float[0];
     
-        FloatArrayData(Array array) {
+        FloatArray(Array array) {
             this.array = array;
             value = EMPTY_FLOAT_ARRAY;
         }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pvAccess.PVData#getField()
+         */
         public Field getField() { return array;}
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pvAccess.PVArray#getLength()
+         */
         public int getLength(){ return length;}
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pvAccess.PVArray#getCapacity()
+         */
         public int getCapacity(){ return capacity;}
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pvAccess.PVArray#setLength(int)
+         */
         public void setLength(int len) {
             if(len>capacity) setCapacity(len);
             length = len;
         }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pvAccess.PVArray#setCapacity(int)
+         */
         public void setCapacity(int len) {
             if(len<=capacity) return;
             float[] newarray = new float[len];
@@ -689,12 +1031,19 @@ public class DatabaseExample {
             value = newarray;
             capacity = len;
         }
-        public int get(int offset, int len, float[]to, int toOffset) {
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pvAccess.PVFloatArray#get(int, int, org.epics.ioc.pvAccess.FloatArrayData)
+         */
+        public int get(int offset, int len, FloatArrayData data) {
             int n = len;
             if(offset+len > length) n = length;
-            System.arraycopy(value,offset,to,toOffset,n);
+            data.data = value;
+            data.offset = offset;
             return n;
         }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pvAccess.PVFloatArray#put(int, int, org.epics.ioc.pvAccess.FloatArrayData)
+         */
         public int put(int offset, int len, float[]from, int fromOffset) {
             if(offset+len > length) {
                  int newlength = offset + len;
@@ -705,20 +1054,29 @@ public class DatabaseExample {
             return len;
         }
     
+        /* (non-Javadoc)
+         * @see java.lang.Object#toString()
+         */
         public String toString() {
             return DatabaseExample.convert.getString(this);
         }
         
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pvAccess.PVData#toString(int)
+         */
         public String toString(int indentLevel) {
             return DatabaseExample.convert.getString(this,indentLevel);
         }
         
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pvAccess.PVArray#isCapacityMutable()
+         */
         public boolean isCapacityMutable() {
             return true;
         }
     }
     
-    private static class DoubleArrayData implements PVDoubleArray {
+    private static class DoubleArray implements PVDoubleArray {
         private int length = 0;
         private int capacity = 0;
         double[] value;
@@ -726,17 +1084,32 @@ public class DatabaseExample {
 
         private final static double[] EMPTY_DOUBLE_ARRAY = new double[0];
     
-        DoubleArrayData(Array array) {
+        DoubleArray(Array array) {
             this.array = array;
             value = EMPTY_DOUBLE_ARRAY;
         }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pvAccess.PVData#getField()
+         */
         public Field getField() { return array;}
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pvAccess.PVArray#getLength()
+         */
         public int getLength(){ return length;}
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pvAccess.PVArray#getCapacity()
+         */
         public int getCapacity(){ return capacity;}
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pvAccess.PVArray#setLength(int)
+         */
         public void setLength(int len) {
             if(len>capacity) setCapacity(len);
             length = len;
         }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pvAccess.PVArray#setCapacity(int)
+         */
         public void setCapacity(int len) {
             if(len<=capacity) return;
             double[] newarray = new double[len];
@@ -744,36 +1117,55 @@ public class DatabaseExample {
             value = newarray;
             capacity = len;
         }
-        public int get(int offset, int len, double[]to, int toOffset) {
-            int n = len;
-            if(offset+len > length) n = length;
-            System.arraycopy(value,offset,to,toOffset,n);
-            return n;
-        }
-        public int put(int offset, int len, double[]from, int fromOffset) {
-            if(offset+len > length) {
-                 int newlength = offset + len;
-                 if(newlength>capacity) setCapacity(newlength);
-                 length = newlength;
+        
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pvAccess.PVDoubleArray#get(int, int, org.epics.ioc.pvAccess.DoubleArrayData)
+         */
+        public int get(int offset, int len, DoubleArrayData data) {
+            data.data = value;
+            data.offset = offset;
+            if(offset+len>length) {
+                len = length - offset;
+                if(len<0) len =0;
             }
-            System.arraycopy(from,fromOffset,value,offset,len);
             return len;
         }
-    
+        
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pvAccess.PVDoubleArray#put(int, int, org.epics.ioc.pvAccess.DoubleArrayData)
+         */
+        public int put(int offset, int len, double[] from, int fromOffset) {
+            if(offset+len > length) {
+                int newlength = offset + len;
+                if(newlength>capacity) setCapacity(newlength);
+                length = newlength;
+           }
+           System.arraycopy(from,fromOffset,value,offset,len);
+           return len;
+        }
+        /* (non-Javadoc)
+         * @see java.lang.Object#toString()
+         */
         public String toString() {
             return DatabaseExample.convert.getString(this);
         }
         
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pvAccess.PVData#toString(int)
+         */
         public String toString(int indentLevel) {
             return DatabaseExample.convert.getString(this,indentLevel);
         }
         
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pvAccess.PVArray#isCapacityMutable()
+         */
         public boolean isCapacityMutable() {
             return true;
         }
     }
     
-    private static class StringArrayData implements PVStringArray {
+    private static class StringArray implements PVStringArray {
         private int length = 0;
         private int capacity = 0;
         String[] value;
@@ -781,17 +1173,32 @@ public class DatabaseExample {
 
         private final static String[] EMPTY_STRING_ARRAY = new String[0];
     
-        StringArrayData(Array array) {
+        StringArray(Array array) {
             this.array = array;
             value = EMPTY_STRING_ARRAY;
         }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pvAccess.PVData#getField()
+         */
         public Field getField() { return array;}
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pvAccess.PVArray#getLength()
+         */
         public int getLength(){ return length;}
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pvAccess.PVArray#getCapacity()
+         */
         public int getCapacity(){ return capacity;}
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pvAccess.PVArray#setLength(int)
+         */
         public void setLength(int len) {
             if(len>capacity) setCapacity(len);
             length = len;
         }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pvAccess.PVArray#setCapacity(int)
+         */
         public void setCapacity(int len) {
             if(len<=capacity) return;
             String[] newarray = new String[len];
@@ -799,12 +1206,19 @@ public class DatabaseExample {
             value = newarray;
             capacity = len;
         }
-        public int get(int offset, int len, String[] to, int toOffset) {
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pvAccess.PVStringArray#get(int, int, org.epics.ioc.pvAccess.StringArrayData)
+         */
+        public int get(int offset, int len, StringArrayData data) {
             int n = len;
             if(offset+len > length) n = length;
-            System.arraycopy(value,offset,to,toOffset,n);
+            data.data = value;
+            data.offset = offset;
             return n;
         }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pvAccess.PVStringArray#put(int, int, org.epics.ioc.pvAccess.StringArrayData)
+         */
         public int put(int offset, int len, String[] from, int fromOffset) {
             if(offset+len > length) {
                  int newlength = offset + len;
@@ -815,21 +1229,30 @@ public class DatabaseExample {
             return len;
         }
     
+        /* (non-Javadoc)
+         * @see java.lang.Object#toString()
+         */
         public String toString() {
             return DatabaseExample.convert.getString(this);
         }
         
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pvAccess.PVData#toString(int)
+         */
         public String toString(int indentLevel) {
             return DatabaseExample.convert.getString(this,indentLevel);
         }
         
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pvAccess.PVArray#isCapacityMutable()
+         */
         public boolean isCapacityMutable() {
             return true;
         }
 
     }
     
-    private static class EnumArrayData implements PVEnumArray {
+    private static class EnumArray implements PVEnumArray {
         private int length = 0;
         private int capacity = 0;
         PVEnum[] value;
@@ -837,17 +1260,32 @@ public class DatabaseExample {
 
         private final static PVEnum[] EMPTY_PVENUM_ARRAY = new PVEnum[0];
     
-        EnumArrayData(Array array) {
+        EnumArray(Array array) {
             this.array = array;
             value = EMPTY_PVENUM_ARRAY;
         }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pvAccess.PVData#getField()
+         */
         public Field getField() { return array;}
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pvAccess.PVArray#getLength()
+         */
         public int getLength(){ return length;}
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pvAccess.PVArray#getCapacity()
+         */
         public int getCapacity(){ return capacity;}
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pvAccess.PVArray#setLength(int)
+         */
         public void setLength(int len) {
             if(len>capacity) setCapacity(len);
             length = len;
         }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pvAccess.PVArray#setCapacity(int)
+         */
         public void setCapacity(int len) {
             if(len<=capacity) return;
             PVEnum[] newarray = new PVEnum[len];
@@ -855,12 +1293,19 @@ public class DatabaseExample {
             value = newarray;
             capacity = len;
         }
-        public int get(int offset, int len, PVEnum[] to, int toOffset) {
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pvAccess.PVEnumArray#get(int, int, org.epics.ioc.pvAccess.EnumArrayData)
+         */
+        public int get(int offset, int len, EnumArrayData data) {
             int n = len;
             if(offset+len > length) n = length;
-            System.arraycopy(value,offset,to,toOffset,n);
+            data.data = value;
+            data.offset = offset;
             return n;
         }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pvAccess.PVEnumArray#put(int, int, org.epics.ioc.pvAccess.EnumArrayData)
+         */
         public int put(int offset, int len, PVEnum[] from, int fromOffset) {
             if(offset+len > length) {
                  int newlength = offset + len;
@@ -871,20 +1316,29 @@ public class DatabaseExample {
             return len;
         }
 
+        /* (non-Javadoc)
+         * @see java.lang.Object#toString()
+         */
         public String toString() {
             return DatabaseExample.convert.getString(this);
         }
         
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pvAccess.PVData#toString(int)
+         */
         public String toString(int indentLevel) {
             return DatabaseExample.convert.getString(this,indentLevel);
         }
         
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pvAccess.PVArray#isCapacityMutable()
+         */
         public boolean isCapacityMutable() {
             return true;
         }
     }
     
-    private static class StructureArrayData implements PVStructureArray {
+    private static class StructureArray implements PVStructureArray {
         private int length = 0;
         private int capacity = 0;
         PVStructure[] value;
@@ -892,17 +1346,32 @@ public class DatabaseExample {
 
         private final static PVStructure[] EMPTY_PVS_ARRAY = new PVStructure[0];
     
-        StructureArrayData(Array array) {
+        StructureArray(Array array) {
             this.array = array;
             value = EMPTY_PVS_ARRAY;
         }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pvAccess.PVData#getField()
+         */
         public Field getField() { return array;}
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pvAccess.PVArray#getLength()
+         */
         public int getLength(){ return length;}
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pvAccess.PVArray#getCapacity()
+         */
         public int getCapacity(){ return capacity;}
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pvAccess.PVArray#setLength(int)
+         */
         public void setLength(int len) {
             if(len>capacity) setCapacity(len);
             length = len;
         }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pvAccess.PVArray#setCapacity(int)
+         */
         public void setCapacity(int len) {
             if(len<=capacity) return;
             PVStructure[] newarray = new PVStructure[len];
@@ -910,13 +1379,20 @@ public class DatabaseExample {
             value = newarray;
             capacity = len;
         }
-        public int get(int offset, int len, PVStructure[] to, int toOffset) {
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pvAccess.PVStructureArray#get(int, int, org.epics.ioc.pvAccess.StructureArrayData)
+         */
+        public int get(int offset, int len, StructureArrayData data) {
             int n = len;
             if(offset+len > length) n = length;
-            System.arraycopy(value,offset,to,toOffset,n);
+            data.data = value;
+            data.offset = offset;
             return n;
         }
-        public int put(int offset, int len, PVStructure[] from, int fromOffset) {
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pvAccess.PVStructureArray#put(int, int, org.epics.ioc.pvAccess.StructureArrayData)
+         */
+        public int put(int offset, int len,PVStructure[] from,int fromOffset) {
             if(offset+len > length) {
                  int newlength = offset + len;
                  if(newlength>capacity) setCapacity(newlength);
@@ -926,20 +1402,29 @@ public class DatabaseExample {
             return len;
         }
     
+        /* (non-Javadoc)
+         * @see java.lang.Object#toString()
+         */
         public String toString() {
             return DatabaseExample.convert.getString(this);
         }
         
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pvAccess.PVData#toString(int)
+         */
         public String toString(int indentLevel) {
             return DatabaseExample.convert.getString(this,indentLevel);
         }
         
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pvAccess.PVArray#isCapacityMutable()
+         */
         public boolean isCapacityMutable() {
             return true;
         }
     }
     
-    private static class ArrayArrayData implements PVArrayArray {
+    private static class ArrayArray implements PVArrayArray {
         private int length = 0;
         private int capacity = 0;
         PVArray[] value;
@@ -947,17 +1432,32 @@ public class DatabaseExample {
 
         private final static PVArray[] EMPTY_PVA_ARRAY = new PVArray[0];
     
-        ArrayArrayData(Array array) {
+        ArrayArray(Array array) {
             this.array = array;
             value = EMPTY_PVA_ARRAY;
         }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pvAccess.PVData#getField()
+         */
         public Field getField() { return array;}
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pvAccess.PVArray#getLength()
+         */
         public int getLength(){ return length;}
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pvAccess.PVArray#getCapacity()
+         */
         public int getCapacity(){ return capacity;}
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pvAccess.PVArray#setLength(int)
+         */
         public void setLength(int len) {
             if(len>capacity) setCapacity(len);
             length = len;
         }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pvAccess.PVArray#setCapacity(int)
+         */
         public void setCapacity(int len) {
             if(len<=capacity) return;
             PVArray[] newarray = new PVArray[len];
@@ -965,12 +1465,19 @@ public class DatabaseExample {
             value = newarray;
             capacity = len;
         }
-        public int get(int offset, int len, PVArray[] to, int toOffset) {
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pvAccess.PVArrayArray#get(int, int, org.epics.ioc.pvAccess.ArrayArrayData)
+         */
+        public int get(int offset, int len, ArrayArrayData data) {
             int n = len;
             if(offset+len > length) n = length;
-            System.arraycopy(value,offset,to,toOffset,n);
+            data.data = value;
+            data.offset = offset;
             return n;
         }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pvAccess.PVArrayArray#put(int, int, org.epics.ioc.pvAccess.ArrayArrayData)
+         */
         public int put(int offset, int len, PVArray[] from, int fromOffset) {
             if(offset+len > length) {
                  int newlength = offset + len;
@@ -981,14 +1488,23 @@ public class DatabaseExample {
             return len;
         }
     
+        /* (non-Javadoc)
+         * @see java.lang.Object#toString()
+         */
         public String toString() {
             return DatabaseExample.convert.getString(this);
         }
         
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pvAccess.PVData#toString(int)
+         */
         public String toString(int indentLevel) {
             return DatabaseExample.convert.getString(this,indentLevel);
         }
         
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pvAccess.PVArray#isCapacityMutable()
+         */
         public boolean isCapacityMutable() {
             return true;
         }

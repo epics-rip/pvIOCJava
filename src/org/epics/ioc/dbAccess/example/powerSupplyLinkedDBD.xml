@@ -15,7 +15,7 @@
     <field name = "currentInput" type = "link" />
     <field name = "voltageInput" type = "link" />
     <field name = "status" type = "string" />
-    <field name = "severity" type = "menu" menuName = "menuAlarmSevr" />
+    <field name = "severity" type = "menu" menuName = "menuAlarmSeverity" />
     <field name = "timeStamp" type = "structure" structureName = "timeStamp"/>
     <field name = "units" type = "string" />
     <field name = "displayLimit"

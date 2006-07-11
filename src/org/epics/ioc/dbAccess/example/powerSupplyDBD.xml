@@ -14,7 +14,7 @@
     <field name = "currentInput" type = "structure" structureName = "aiLinear" />
     <field name = "voltageInput" type = "structure" structureName = "aiLinear" />
     <field name = "status" type = "string" />
-    <field name = "severity" type = "menu" menuName = "menuAlarmSevr" />
+    <field name = "severity" type = "menu" menuName = "menuAlarmSeverity" />
     <field name = "units" type = "string" />
     <field name = "displayLimit"
          type = "structure" structureName = "displayLimit" />
@@ -28,7 +28,7 @@
     <field name = "powerSupply"
          type = "structure" structureName = "powerSupply" />
     <field name = "status" type = "string" />
-    <field name = "severity" type = "menu" menuName = "menuAlarmSevr" />
+    <field name = "severity" type = "menu" menuName = "menuAlarmSeverity" />
     <field name = "timeStamp" type = "structure" structureName = "timeStamp"/>
     <field name = "priority" type = "menu" menuName = "menuPriority" />
     <field name = "scan" type = "structure" structureName = "scan"/>
@@ -38,7 +38,7 @@
          "org.epics.ioc.support.PowerSupplyArray">
     <field name = "powerSupply" type = "array" elementType = "structure" />
     <field name = "status" type = "string" />
-    <field name = "severity" type = "menu" menuName = "menuAlarmSevr" />
+    <field name = "severity" type = "menu" menuName = "menuAlarmSeverity" />
     <field name = "timeStamp" type = "structure" structureName = "timeStamp"/>
     <field name = "priority" type = "menu" menuName = "menuPriority" />
     <field name = "scan" type = "structure" structureName = "scan"/>

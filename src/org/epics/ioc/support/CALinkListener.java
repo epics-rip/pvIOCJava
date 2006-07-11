@@ -3,14 +3,13 @@
  * EPICS JavaIOC is distributed subject to a Software License Agreement found
  * in file LICENSE that is included with this distribution.
  */
-package org.epics.ioc.channelAccess;
-
-import org.epics.ioc.pvAccess.*;
+package org.epics.ioc.support;
 
 /**
  * @author mrk
  *
  */
-public interface ChannelDataNotify extends ChannelNotify {
-    PVData getData();
+public interface CALinkListener {
+    String connect();
+    void disconnect();
 }

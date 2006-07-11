@@ -20,10 +20,10 @@ import java.util.regex.*;
 public class IOCDBFactory {
 
     /**
-     * create an IOCDB.
-     * @param dbd the reflection database.
-     * @param name the name for the IOCDB.
-     * @return the newly created IOCDB.
+     * Create an IOCDB.
+     * @param dbd The reflection database.
+     * @param name The name for the IOCDB.
+     * @return The newly created IOCDB.
      */
     public static IOCDB create(DBD dbd, String name) {
         if(find(name)!=null) return null;
@@ -33,9 +33,9 @@ public class IOCDBFactory {
     }
     
     /**
-     * find an IOCDB.
-     * @param name the IOCDB name.
-     * @return the IOCDB.
+     * Find an IOCDB.
+     * @param name The IOCDB name.
+     * @return The IOCDB.
      */
     public static IOCDB find(String name) {
         ListIterator<IOCDB> iter = iocdbList.listIterator();
@@ -47,16 +47,16 @@ public class IOCDBFactory {
     }
     
     /**
-     * get the complete collection of IOCDBs.
-     * @return the collection.
+     * Get the complete collection of IOCDBs.
+     * @return The collection.
      */
     public static Collection<IOCDB> getIOCDBList() {
         return iocdbList;
     }
 
     /**
-     * remove an IOCDB from the collection.
-     * @param iocdb
+     * Remove an IOCDB from the collection.
+     * @param iocdb The iocdb to remove;
      */
     public static void remove(IOCDB iocdb) {
         iocdbList.remove(iocdb);
@@ -189,13 +189,15 @@ public class IOCDBFactory {
                     DBStructureArray dbStructureArray =
                         (DBStructureArray)currentData;
                     if(arrayIndex>=dbStructureArray.getLength()) break;
-                    DBStructure[] structureArray = new DBStructure[1];
-                    int n = dbStructureArray.get(arrayIndex,1,structureArray,0);
-                    if(n<1 || structureArray[0]==null) {
+                    DBStructureArrayData data = new DBStructureArrayData();
+                    int n = dbStructureArray.get(arrayIndex,1,data);
+                    DBStructure[] structureArray = data.data;
+                    int offset = data.offset;
+                    if(n<1 || structureArray[offset]==null) {
                         currentData = null;
                         break;
                     }
-                    currentData = structureArray[0];
+                    currentData = structureArray[offset];
                 }
                 if(currentData==null) break;
                 if(names.length<=1) break;

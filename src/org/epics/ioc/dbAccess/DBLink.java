@@ -14,43 +14,43 @@ import org.epics.ioc.dbProcess.LinkSupport;
  */
 public interface DBLink extends DBStructure {
     /**
-     * get the name of the configuration structure.
-     * @return the field name.
+     * Get the name of the configuration structure.
+     * @return The field name.
      */
     String getConfigStructureName();
     /**
-     * specify the name of configuration structure.
-     * @param name the name of the configuration sytructure.
+     * Specify the name of configuration structure.
+     * @param name The name of the configuration sytructure.
      */
     void putConfigStructureName(String name);
     /**
-     * get the name of the link support.
-     * @return the support name.
+     * Get the name of the link support.
+     * @return The support name.
      */
     String getLinkSupportName();
     /**
-     * specify the link support name.
-     * @param name the support name.
+     * Specify the link support name.
+     * @param name The support name.
      */
     void putLinkSupportName(String name);
     /**
-     * get the structure that has the configration information,
-     * @return the DBStructure.
+     * Get the structure that has the configration information,
+     * @return The DBStructure.
      */
     DBStructure getConfigStructure();
     /**
-     * specify the configuration structure.
-     * @param dbStructure the structure for the configuration information.
+     * Specify the configuration structure.
+     * @param dbStructure The structure for the configuration information.
      */
     void putConfigStructure(DBStructure dbStructure);
     /**
-     * get the link support for this link instance.
-     * @return the LinkSupport or null if no support has been set.
+     * Get the link support for this link instance.
+     * @return The LinkSupport or null if no support has been set.
      */
     LinkSupport getLinkSupport();
     /**
-     * set the link support.
-     * @param support the support.
+     * Set the link support.
+     * @param support The support.
      * @return true if the support was set and false if the support already was set.
      */
     boolean setLinkSupport(LinkSupport support);

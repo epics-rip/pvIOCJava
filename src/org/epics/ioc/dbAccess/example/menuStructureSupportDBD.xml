@@ -12,7 +12,7 @@
     <choice>periodic</choice>
 </menu>
 
-<menu name = "menuAlarmSevr">
+<menu name = "menuAlarmSeverity">
     <choice>none</choice>
     <choice>minor</choice>
     <choice>major</choice>
@@ -80,7 +80,7 @@
     <field name = "input" type = "short" />
     <field name = "link" type = "link" />
     <field name = "disableAlarmSeverity"
-           type = "menu" menuName = "menuAlarmSevr" />
+           type = "menu" menuName = "menuAlarmSeverity" />
 </structure>
 
 <structure name = "asynLink">

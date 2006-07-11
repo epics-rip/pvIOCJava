@@ -14,26 +14,6 @@ import org.epics.ioc.dbAccess.*;
  */
 public interface RecordProcess {
     /**
-     * lock for reading.
-     * Rules are not yet decided.
-     */
-    void readLock();
-    /**
-     * unlock for reading.
-     * Rules are not yet decided.
-     */
-    void readUnlock();
-    /**
-     * lock for writing,
-     * Rules are not yet decided.
-     */
-    void writeLock();
-    /**
-     * unlock for writing.
-     * Rules are not yet decided.
-     */
-    void writeUnlock();
-    /**
      * is the record disabled.
      * A process request while a record is disabled returns a noop.
      * @return (false,true) if the record (is not, is) disabled
@@ -68,25 +48,40 @@ public interface RecordProcess {
      */
     boolean setRecordSupport(RecordSupport support);
     /**
-     * add a listener for record completion.
-     * @param listener the listener.
-     * @return (false,true) if the listener (was not, was) added to listener list.
-     * A value of false means the listener was already in the list.
+     * request for permission to call process.
+     * @param listener a listenr to call if the record is already active.
+     * @return the result of the request.
      */
-    boolean addCompletionListener(ProcessComplete listener);
+    RequestProcessReturn requestProcess(ProcessComplete listener);
+    /**
+     * Process the record instance.
+     * The caller must be the owner as a result of requestProcess returning RequestProcessReturn.success.
+     * @param listener if the return value is active
+     * this is the listener that will be called when the record completes processing.
+     * @return the result of the process request.
+     */
+    ProcessReturn process(ProcessComplete listener);
     /**
      * remove a completion listener.
      * @param listener the listener.
      */
     void removeCompletionListener(ProcessComplete listener);
-    
     /**
-     * request record processing.
-     * @param listener if the return value is active this is the luistener that will be
-     * called when the record completes processing.
-     * @return the result of the process request.
+     * Request to process a linked record.
+     * This is called by record or link support while processing a record.
+     * The linked record will not be processed synchronously.
+     * Instead RecordProcess will process the record after record support returns.
+     * @param record The linked record.
+     * @param listener The listener that will be called when the linked record completes processing.
+     * A null value is permissible.
+     * @return the result of the request.
      */
-    ProcessReturn requestProcess(ProcessComplete listener);
+    RequestProcessReturn requestProcessLinkedRecord(DBRecord record,ProcessComplete listener);
+    /**
+     * remove a completion listener for a linked record.
+     * @param listener the listener.
+     */
+    void removeLinkedCompletionListener(ProcessComplete listener);
     /**
      * called by record support to signify completion.
      * If the record support returns active than the listener must expect additional calls.
@@ -95,13 +90,14 @@ public interface RecordProcess {
      */
     void recordSupportDone(ProcessReturn result);
     /**
-     * called by record/link support to request that a linked record be processed.
-     * If the call succeeds the record is marked active but not processed.
-     * The process request will be made when then record/link support returns.
-     * @param linkedRecord the record to process.
-     * @param listener the listener that is passed to the process request for the linked record.
-     * @return (false,true> if the request is successfull. A return value of false means the record was already active.
+     * set the status and severity for the record.
+     * the algorithm is to maxamize the severity, i.e. if the requested severity is greater than the current
+     * severity than the status and severity are set to the requested values. When a recvord starts processing the
+     * status is set to null and the alarmSeverity is set the "not defined". This the first call with a severity of
+     * none will set the status and severity.
+     * @param status the status
+     * @param alarmSeverity the severity
+     * @return (false, true) if the status and severity (were not, were) set the requested values.
      */
-    boolean requestProcess(
-        RecordProcess linkedRecord, ProcessComplete listener);
+    boolean setStatusSeverity(String status, AlarmSeverity alarmSeverity);
 }

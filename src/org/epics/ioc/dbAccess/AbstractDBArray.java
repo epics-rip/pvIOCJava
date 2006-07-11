@@ -6,6 +6,7 @@
 package org.epics.ioc.dbAccess;
 
 import org.epics.ioc.dbDefinition.*;
+import org.epics.ioc.pvAccess.*;
 
 
 /**
@@ -15,13 +16,20 @@ import org.epics.ioc.dbDefinition.*;
  *
  */
 public abstract class AbstractDBArray extends AbstractDBData implements DBArray{
-
-
+    /**
+     * constructer that derived classes must call.
+     * @param parent the parent interface.
+     * @param dbdArrayField the reflection interface for the DBArray data.
+     */
+    protected AbstractDBArray(DBStructure parent,DBDArrayField dbdArrayField) {
+        super(parent,dbdArrayField);
+    }
     /* (non-Javadoc)
      * @see org.epics.ioc.pvAccess.PVArray#isCapacityMutable()
      */
     public boolean isCapacityMutable() {
-        return super.getDBDField().isMutable();
+        PVArray array = (PVArray)this;
+        return array.isCapacityMutable();
     }
 
     /* (non-Javadoc)
@@ -44,14 +52,4 @@ public abstract class AbstractDBArray extends AbstractDBData implements DBArray{
      */
     abstract public void setLength(int len);
 
-    
-    /**
-     * constructer that derived classes must call.
-     * @param parent the parent interface.
-     * @param dbdArrayField the reflection interface for the DBArray data.
-     */
-    protected AbstractDBArray(DBStructure parent,DBDArrayField dbdArrayField) {
-        super(parent,dbdArrayField);
-    }
-    
 }

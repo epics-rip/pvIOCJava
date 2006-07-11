@@ -61,7 +61,64 @@ public interface Convert {
      * @throws IllegalArgumentException if the element Type is not a scalar
      * @throws NumberFormatException if the String does not have a valid value.
      */
-    int fromStringArray(PVData pv, int offset, int len, String[]from, int fromOffset);
+    int fromStringArray(PVArray pv, int offset, int len, String[]from, int fromOffset);
+    /**
+     * Convert a PV array to a <i>String</i> array.
+     * @param pv a PV
+     * @param offset starting element in a PV
+     * param len number of elements to transfer
+     * @param to where to put the PV data
+     * @param toOffset starting element in the array
+     * @return number of elements converted
+     */
+    int toStringArray(PVArray pv, int offset, int len, String[]to, int toOffset);
+    /**
+     * are from and to valid arguments to copyScalar.
+     * @param from from field.
+     * @param to field.
+     * @return (false,true) if the arguments (are not, are) compatible.
+     */
+    boolean isCopyScalarCompatible(Field from, Field to);
+    /**
+     * copy from a scalar pv to another scalar pv.
+     * @param from the source.
+     * @param to the destination.
+     * @throws IllegalArgumentException if the arguments are not compatible.
+     */
+    void copyScalar(PVData from, PVData to);
+    /**
+     * are from and to valid arguments to copyArray.
+     * @param from from array.
+     * @param to array.
+     * @return (false,true) if the arguments (are not, are) compatible.
+     */
+    boolean isCopyArrayCompatible(Array from, Array to);
+    /**
+     * Convert from a source PV array to a destination PV array.
+     * @param from the source array.
+     * @param offset starting element in the source.
+     * @param to the destination array.
+     * @param toOffset starting element in the array.
+     * @param len number of elements to transfer.
+     * @return number of elements converted.
+     * @throws IllegalArgumentException if the arguments are not compatible.
+     */
+    int copyArray(PVArray from, int offset, PVArray to, int toOffset, int len);
+    /**
+     * Are from and to valid arguments for copyStructure.
+     * They are only compatible if they have the same Structure description.
+     * @param from from structure.
+     * @param to structure.
+     * @return (false,true) If the arguments (are not, are) compatible.
+     */
+    boolean isCopyStructureCompatible(Structure from, Structure to);
+    /**
+     * Copy from a structure pv to another structure pv.
+     * @param from The source.
+     * @param to The destination.
+     * @throws IllegalArgumentException if the arguments are not compatible.
+     */
+    void copyStructure(PVStructure from, PVStructure to);
     /**
      * Convert a PV to a <byte>.
      * @param pv a PV

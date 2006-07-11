@@ -6,36 +6,26 @@
 package org.epics.ioc.dbProcess;
 
 import org.epics.ioc.dbAccess.*;
+import org.epics.ioc.pvAccess.*;
 
 /**
  * interface that must be implemented by link support.
  * @author mrk
  *
  */
-public interface LinkSupport {
+public interface LinkSupport extends Support {
     /**
-     * get the link support name.
-     * @return the name of the link support.
+     * set the field for which the link support should get/put data.
+     * @param field the field.
+     * @return true if the support can access the field
+     * and false if the support does not know how to access the field.
      */
-    String getName();
+    boolean setField(PVData field);
     /**
-     * initialize.
-     * Note that 'other' records that are for example referenced by
-     * input or forward links are available but might still be
-     * uninitialized.
+     * perform record processing.
+     * @param recordProcess the RecordProcess that called RecordSupport.process.
+     * @param recordSupport the RecordSupport that call LinkSupport.process.
+     * @return the result of processing.
      */
-    void initialize();
-    /**
-     * invoked by the database when it is safe to link to I/O and/or other records.
-     * typically, start() will start input links etc.
-     */
-    void start();
-    /**
-     * disconnect all links to I/O and/or other records.
-     */
-    void stop();
-    /**
-     * clean up any internal state.
-     */
-    void destroy();
+    LinkReturn process(RecordProcess recordProcess,RecordSupport recordSupport);
 }

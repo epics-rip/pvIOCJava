@@ -1,5 +1,5 @@
 /**
- * Copyright - See the COPYRIGHT that is included with this disctibution.
+ * Copyright - See the COPYRIGHT that is included with this distibution.
  * EPICS JavaIOC is distributed subject to a Software License Agreement found
  * in file LICENSE that is included with this distribution.
  */
@@ -7,10 +7,10 @@ package org.epics.ioc.dbProcess;
 
 import java.util.*;
 import java.util.concurrent.*;
-import java.util.concurrent.atomic.*;
 import java.util.concurrent.locks.*;
 
 import org.epics.ioc.dbAccess.*;
+import org.epics.ioc.pvAccess.*;
 
 /**
  * A factory for creating RecordProcess support for record instances.
@@ -84,159 +84,245 @@ public class ProcessFactory {
         
     }
     
-    static private class Process implements RecordProcess, DBMasterListener {
+    static private class Process implements RecordProcess {
+        private DBRecord dbRecord;
+        ReentrantLock lock;
+        private boolean disabled = false;
+        private RecordSupport recordSupport = null;
         
-        private AtomicBoolean disabled = new AtomicBoolean(false);
-        private AtomicBoolean active = new AtomicBoolean(false);
-        private AtomicReference<RecordSupport> recordSupport = 
-            new AtomicReference<RecordSupport>(null);
-        private DBRecord dbRecord = null;
+        private boolean active = false;
         private ConcurrentLinkedQueue<ProcessComplete> completionListener =
             new ConcurrentLinkedQueue<ProcessComplete>();
-        private ReentrantReadWriteLock readWriteLock;
-        private ReentrantReadWriteLock.ReadLock readLock;
-        private ReentrantReadWriteLock.WriteLock writeLock;
-        private ConcurrentLinkedQueue<ProcessComplete> linkedListener =
-            new ConcurrentLinkedQueue<ProcessComplete>();
-        private ConcurrentLinkedQueue<Process> linkedProcess =
-            new ConcurrentLinkedQueue<Process>();
-        private ConcurrentLinkedQueue<DBData> dbDataListenerList =
-            new ConcurrentLinkedQueue<DBData>();
         
-        Process(DBRecord dbRecord) {
-            this.dbRecord = dbRecord;
-            readWriteLock = new ReentrantReadWriteLock();
-            readLock = readWriteLock.readLock();
-            writeLock = readWriteLock.writeLock();
-        }
+        private PVString status = null;
+        private PVEnum severity = null;
         
-
-        public void newData(DBData dbData) {
-            dbDataListenerList.add(dbData);
-        }
-
-        public void readLock() {
-            readLock.lock();
-        }
-
-        public void readUnlock() {
-            readLock.unlock();
+        private String startStatus;
+        private String newStatus;
+        private int startSeverity;
+        private int newSeverity;
+        
+        private List<RecordProcess> linkedRecordList = new ArrayList<RecordProcess>();
+        private List<ProcessComplete> linkedProcessCompleteList = new ArrayList<ProcessComplete>();
+        
+        Process(DBRecord record) {
+            dbRecord = record;
+            lock = record.getLock();
+            PVData[] pvData = dbRecord.getFieldPVDatas();
+            PVData data;
+            data = pvData[record.getFieldDBDataIndex("status")];
+            assert(data.getField().getType()==Type.pvString);
+            status = (PVString)data;
+            data = pvData[record.getFieldDBDataIndex("alarmSeverity")];
+            assert(data.getField().getType()==Type.pvEnum);
+            severity = (PVEnum)data;
         }
         
-        public void writeLock() {
-            writeLock.lock();
-        }
-
-        public void writeUnlock() {
-            writeLock.unlock();
-        }
-
+        // Record Process
+        /* (non-Javadoc)
+         * @see org.epics.ioc.dbProcess.RecordProcess#isDisabled()
+         */
         public boolean isDisabled() {
-            return disabled.get();
+            lock.lock();
+            try {
+                boolean result = disabled;
+                return result;
+            } finally {
+                lock.unlock();
+            }
         }
         
+        /* (non-Javadoc)
+         * @see org.epics.ioc.dbProcess.RecordProcess#setDisabled(boolean)
+         */
         public boolean setDisabled(boolean value) {
-            return disabled.getAndSet(value); 
+            lock.lock();
+            try {
+                boolean oldValue = disabled;
+                disabled = value;
+                return (oldValue==value) ? false : true;
+            } finally {
+                lock.unlock();
+            }
         }
         
+        /* (non-Javadoc)
+         * @see org.epics.ioc.dbProcess.RecordProcess#isActive()
+         */
         public boolean isActive() {
-            return active.get();
+            lock.lock();
+            try {
+                boolean result = active;
+                return result;
+            } finally {
+                lock.unlock();
+            }
         }
         
+        /* (non-Javadoc)
+         * @see org.epics.ioc.dbProcess.RecordProcess#getRecord()
+         */
         public DBRecord getRecord() {
-            return dbRecord;
+            lock.lock();
+            try {
+                DBRecord result = dbRecord;
+                return result;
+            } finally {
+                lock.unlock();
+            }
         }
 
         public RecordSupport getRecordSupport() {
-            return recordSupport.get();
+            lock.lock();
+            try {
+                RecordSupport result = recordSupport;
+                return result;
+            } finally {
+                lock.unlock();
+            }
         }
 
         public boolean setRecordSupport(RecordSupport support) {
-            return recordSupport.compareAndSet(null,support);
-        }
-        
-        public boolean addCompletionListener(ProcessComplete listener) {
-            if(!active.get()) return false;
-            return completionListener.add(listener);
+            lock.lock();
+            try {
+                if(recordSupport!=null) return false;
+                recordSupport = support;
+                return true;
+            } finally {
+                lock.unlock();
+            }
         }
 
+        public RequestProcessReturn requestProcess(ProcessComplete listener) {
+            lock.lock();
+            try {
+                if(active) {
+                    if(listener!=null) {
+                        if(completionListener.add(listener)) {
+                            return RequestProcessReturn.listenerAdded;
+                        } else {
+                            return RequestProcessReturn.failure;
+                        }
+                    }
+                    return RequestProcessReturn.alreadyActive;
+                }
+                active = true;
+                return RequestProcessReturn.success;
+            } finally {
+                lock.unlock();
+            }
+        }
+
+        public ProcessReturn process(ProcessComplete listener) {
+            ProcessReturn result = ProcessReturn.abort;
+            int numberLinkedRecords = 0;
+            lock.lock();
+            try {
+                if(isDisabled()) {
+                    active = false;
+                    return ProcessReturn.abort;
+                }
+                if(recordSupport==null) {
+                    active = false;
+                    return ProcessReturn.noop;
+                }
+                dbRecord.beginSynchronous();
+                startStatus = status.get();
+                startSeverity = severity.getIndex();
+                newStatus = null;
+                newSeverity = -1;
+                result = recordSupport.process(this);
+                numberLinkedRecords = linkedRecordList.size();
+                recordSupportDone(result);
+                if(result==ProcessReturn.active) {
+                    if(listener!=null) completionListener.add(listener);
+                } else if(numberLinkedRecords>0) {
+                    active = false;
+                }
+                dbRecord.endSynchronous();
+            } finally {
+                lock.unlock();
+            }
+            if(numberLinkedRecords>0) {
+                for(int i=0; i < numberLinkedRecords; i++) {
+                    RecordProcess linkedRecord = linkedRecordList.get(i);
+                    ProcessComplete linkedListener = linkedProcessCompleteList.get(i);
+                    ProcessReturn linkedResult = linkedRecord.process(linkedListener);
+                    if(linkedResult!=ProcessReturn.active) {
+                        linkedListener.complete(linkedResult);
+                    }
+                }
+                linkedRecordList.clear();
+                linkedProcessCompleteList.clear();
+                if(result!=ProcessReturn.active) {
+                    lock.lock();
+                    active = false;
+                    lock.unlock();
+                }
+            }
+            return result;
+        }
+        
         public void removeCompletionListener(ProcessComplete listener) {
             completionListener.remove(listener);
         }
 
-        public ProcessReturn requestProcess(ProcessComplete listener) {
-            if(!active.compareAndSet(false,true)) {
-                return ProcessReturn.alreadyActive;
-            }
-            RecordSupport support = recordSupport.get();
-            if(support==null) {
-                active.set(false);
-                return ProcessReturn.noop;
-            }
-            if(!dbRecord.insertMasterListener(this)) {
-                throw new UnsupportedOperationException(
-                    "RecordProcess.requestProcess"
-                    + " dbRecord.insertMasterListener failed");
-            }
-            ProcessReturn result = support.process(this);
-            Process process;
-            while((process = linkedProcess.poll())!=null) {
-                ProcessComplete processComplete = linkedListener.poll();
-                ProcessReturn linkedResult = process.delayedRequestProcess(
-                    processComplete);
-                if(linkedResult!=ProcessReturn.active) {
-                    processComplete.complete(linkedResult);
+        public RequestProcessReturn requestProcessLinkedRecord(DBRecord record, ProcessComplete listener) {
+            RecordProcess linkedRecordProcess = record.getRecordProcess();
+            ReentrantLock otherLock = record.getLock();
+            dbRecord.lockOtherRecord(record);
+            try {
+                RequestProcessReturn result = linkedRecordProcess.requestProcess(listener);
+                if(result==RequestProcessReturn.success) {
+                    linkedRecordList.add(record.getRecordProcess());
+                    linkedProcessCompleteList.add(listener);
                 }
+                return result;
+            } finally {
+                otherLock.unlock();
             }
-            recordSupportDone(result);
-            if(result==ProcessReturn.active && listener!=null) {
-                completionListener.add(listener);
+        }
+
+        public void removeLinkedCompletionListener(ProcessComplete listener) {
+            lock.lock();
+            try {
+                int index = linkedProcessCompleteList.indexOf(listener);
+                linkedRecordList.remove(index);
+                linkedProcessCompleteList.remove(index);
+            } finally {
+                lock.unlock();
             }
-            return result;
+            
         }
-        
- 
-        public boolean requestProcess(RecordProcess linkedRecord, ProcessComplete listener) {
-            Process process = (Process)linkedRecord;
-            if(!process.reserveDelayedProcess()) return false;
-            linkedProcess.add(process);
-            linkedListener.add(listener);
-            return true;
-        }
-        
 
         public void recordSupportDone(ProcessReturn result) {
+            if(newSeverity!=startSeverity) {
+                if(newSeverity<0) newSeverity = 0;
+                severity.setIndex(newSeverity);
+            }
+            if(newStatus!=startStatus) {
+                status.put(newStatus);
+            }
             if(result==ProcessReturn.active) {
+                startSeverity = newSeverity;
+                startStatus = newStatus;
+                newStatus = null;
+                newSeverity = -1;
                 callLinkedProcessListeners(result);
-                callDbDataListeners();
             } else {
                 removeAndCallLinkedProcessListeners(result);
-                removeAndCallDbDataListeners();
-                dbRecord.removeMasterListener(this);
-                active.set(false);
+                active = false;
             }
         }
+        
 
-        private boolean reserveDelayedProcess() {
-            if(!active.compareAndSet(false,true)) return false;
-            return true;
-        }
-     
-        private ProcessReturn delayedRequestProcess(ProcessComplete listener) {
-            if(!active.get()) return ProcessReturn.abort;
-            RecordSupport support = recordSupport.get();
-            if(support==null) {
-                active.set(false);
-                return ProcessReturn.noop;
+        public boolean setStatusSeverity(String status, AlarmSeverity alarmSeverity) {
+            if(newSeverity<0 || alarmSeverity.ordinal()>newSeverity) {  
+                newStatus = status;
+                newSeverity = alarmSeverity.ordinal();
+                return true;
             }
-            ProcessReturn result = support.process(this);
-            if(result==ProcessReturn.active) {
-                if(listener!=null) completionListener.add(listener);
-                return result;
-            }
-            callLinkedProcessListeners(result);
-            active.set(false);
-            return result;
+            return false;
         }
 
         private void callLinkedProcessListeners(ProcessReturn result)
@@ -257,27 +343,5 @@ public class ProcessFactory {
             }
         }
         
-        private void callDbDataListeners()
-        {
-            if(dbDataListenerList.isEmpty()) return;
-            dbRecord.beginSynchronous();
-            Iterator<DBData> iter = dbDataListenerList.iterator();
-            while(iter.hasNext()) {
-                DBData dbData =iter.next();
-                dbData.postPut(dbData);
-            }
-            dbRecord.stopSynchronous();
-        }
-    
-        private void removeAndCallDbDataListeners()
-        {
-            if(dbDataListenerList.isEmpty()) return;
-            dbRecord.beginSynchronous();
-            DBData dbData;
-            while((dbData = dbDataListenerList.poll())!=null) {
-                dbData.postPut(dbData);
-            }
-            dbRecord.stopSynchronous();
-        }
     }
 }

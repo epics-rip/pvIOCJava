@@ -12,18 +12,18 @@ package org.epics.ioc.dbAccess;
  */
 public interface DBListener {
     /**
-     * called when data has been modified.
-     * @param dbData the interface for the modified data.
+     * Called when data has been modified.
+     * @param dbData The interface for the modified data.
      */
     void newData(DBData dbData);
     /**
-     * begin synchronous data.
+     * Begin synchronous data.
      * From begin until end of synchronous data,
      * each newData returns part of the synchronous data.
      */
     void beginSynchronous();
     /**
-     * end of synchronous data.
+     * End of synchronous data.
      */
     void endSynchronous();
 }

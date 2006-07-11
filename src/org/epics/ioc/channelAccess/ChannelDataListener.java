@@ -5,6 +5,8 @@
  */
 package org.epics.ioc.channelAccess;
 
+import org.epics.ioc.pvAccess.*;
+
 /**
  * @author mrk
  *
@@ -12,5 +14,7 @@ package org.epics.ioc.channelAccess;
 public interface ChannelDataListener {
     void beginSynchronous();
     void endSynchronous();
-    void newData(ChannelData data,Event reason);
+    void reason(Event reason);
+    void newData(PVData data);
+    void failure(String reason);
 }

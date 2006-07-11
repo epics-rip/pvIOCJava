@@ -10,7 +10,6 @@ import junit.framework.TestCase;
 import org.epics.ioc.dbDefinition.*;
 import org.epics.ioc.dbAccess.*;
 import org.epics.ioc.pvAccess.*;
-import java.util.concurrent.*;
 
 /**
  * JUnit test for DBListener.
@@ -18,7 +17,7 @@ import java.util.concurrent.*;
  *
  */
 public class ListenerTest extends TestCase {
-        
+    private static Convert convert = ConvertFactory.getConvert();
     /**
      * test DBListener.
      */
@@ -142,82 +141,80 @@ public class ListenerTest extends TestCase {
         testPut(iocdb,"examplePowerSupplyArray","timeStamp",100.0);
     }
     
-    static void showParent(IOCDB iocdb,String recordName,String fieldName) {
-        DBAccess dbAccess = iocdb.createAccess(recordName);
-        if(dbAccess==null) {
-            System.out.printf("record %s not found\n",recordName);
-            return;
-        }
-        if(dbAccess.setField(fieldName)!=AccessSetResult.thisRecord){
-            System.out.printf("field %s not in record %s\n",fieldName,recordName);
-            return;
-        }
-        DBData dbData = dbAccess.getField();
-        DBRecord record = dbData.getRecord();
-        System.out.printf("dbData %s record %s\n",
-            dbData.getField().getName(),record.getRecordName());
-        DBStructure parent = dbData.getParent();
-        while(parent!=null) {
-            record = parent.getRecord();
-            System.out.printf("     parent %s record %s\n",
-                    parent.getField().getName(),record.getRecordName());
-            parent = parent.getParent();
-        }
-        
-    }
-    
     private static class TestListener implements DBListener{ 
+        private Listener listener;
+        private String recordName;
+        private String pvName = null;
+        private String actualFieldName = null;
+        private boolean synchronousData = false;
         
-        public void beginSynchronous() {
-            System.out.printf("TestListener start synchronous data fieldName %s\n",fieldName);
-            synchronousData = true;
-        }
-        
-        public void endSynchronous() {
-          System.out.printf("TestListener end synchronous data fieldName %s\n",fieldName);
-          synchronousData = false;
-      }
-
-
-        public void newData(DBData dbData) {
-            System.out.printf("TestListener recordName %s is Synchronous %b",
-                recordName,synchronousData);
-            if(fieldName!=null) {
-                System.out.printf(" fieldName %s",fieldName);
-            }
-            System.out.printf(" actualField %s value %s\n",
-                dbData.getField().getName(), dbData.toString());
-        }
-
-        TestListener(IOCDB iocdb,String recordName,String fieldName) {
+        TestListener(IOCDB iocdb,String recordName,String pvName) {
             this.recordName = recordName;
-            this.fieldName = fieldName;
+            this.pvName = pvName;
             DBAccess dbAccess = iocdb.createAccess(recordName);
             if(dbAccess==null) {
                 System.out.printf("record %s not found\n",recordName);
                 return;
             }
             DBData dbData;
-            if(fieldName==null || fieldName.length()==0) {
+            if(pvName==null || pvName.length()==0) {
                 dbData = dbAccess.getDbRecord();
-                this.fieldName = null;
             } else {
-                if(dbAccess.setField(fieldName)!=AccessSetResult.thisRecord){
-                    System.out.printf("field %s not in record %s\n",fieldName,recordName);
+                if(dbAccess.setField(pvName)!=AccessSetResult.thisRecord){
+                    System.out.printf("name %s not in record %s\n",pvName,recordName);
                     return;
                 }
                 dbData = dbAccess.getField();
+                actualFieldName = dbData.getField().getName();
             }
-            dbData.addListener(this);
-            Property[] property = dbData.getField().getPropertys();
-            for(Property prop : property) {
-                dbData = dbAccess.getPropertyField(prop);
-                dbData.addListener(this);
+            listener = dbData.getRecord().createListener(this);
+            dbData.addListener(listener);
+            if(dbData.getField().getType()!=Type.pvStructure) {
+                Property[] property = dbData.getField().getPropertys();
+                for(Property prop : property) {
+                    dbData = dbAccess.getPropertyField(prop);
+                    dbData.addListener(listener);
+                }
             }
         }
-        private String recordName;
-        private String fieldName;
-        private boolean synchronousData = false;
+        
+        /* (non-Javadoc)
+         * @see org.epics.ioc.dbAccess.DBListener#beginSynchronous()
+         */
+        public void beginSynchronous() {
+            System.out.printf("TestListener start synchronous data pvName %s\n",pvName);
+            synchronousData = true;
+        }
+        
+        /* (non-Javadoc)
+         * @see org.epics.ioc.dbAccess.DBListener#endSynchronous()
+         */
+        public void endSynchronous() {
+          System.out.printf("TestListener end synchronous data pvName %s\n",pvName);
+          synchronousData = false;
+      }
+
+
+        /* (non-Javadoc)
+         * @see org.epics.ioc.dbAccess.DBListener#newData(org.epics.ioc.dbAccess.DBData)
+         */
+        public void newData(DBData dbData) {
+            System.out.printf("TestListener recordName %s is Synchronous %b"
+                    + " pvName %s actualFieldName %s\n",
+                recordName,
+                synchronousData,
+                pvName,
+                actualFieldName);
+            String dbDataName = dbData.getField().getName();
+            DBData parent = dbData.getParent();
+            while(parent!=dbData.getRecord()) {
+                dbDataName = parent.getField().getName() + "." + dbDataName;
+                parent = parent.getParent();
+            }
+            System.out.printf("    dbDataName %s value %s\n",
+                dbDataName,dbData.toString());    
+        }
+        
     }
     
     static void testPut(IOCDB iocdb,String recordName,String fieldName,double value) {
@@ -244,56 +241,24 @@ public class ListenerTest extends TestCase {
             return;
         }
         DBStructure structure = (DBStructure)dbData;
-        TestPutStructure testPutStructure = new TestPutStructure(structure);
-        testPutStructure.putFields(value);
-    }
-    
-    static private class TestPutStructure implements DBMasterListener {
-        
-        void putFields(double value) {
-            String recordName = dbRecord.getRecordName();
-            dbRecord.insertMasterListener(this);
-            isMaster = true;
-            DBData[] fields = dbStructure.getFieldDBDatas();
-            for(DBData field : fields) {
-                Type type = field.getField().getType();
-                if(type.isNumeric()) {
-                    System.out.printf("testPut recordName %s fieldName %s value %f\n",
-                            recordName,field.getField().getName(),value);
-                        convert.fromDouble(field,value);
-                } else if (type==Type.pvString) {
-                    String valueString = Double.toString(value);
-                    System.out.printf("testPut recordName %s fieldName %s value %s\n",
-                            recordName,field.getField().getName(),valueString);
-                    DBString dbString = (DBString)field;
-                    dbString.put(valueString);
-                }
-                
+        DBRecord dbRecord = structure.getRecord();
+        DBData[] fields = structure.getFieldDBDatas();
+        dbRecord.beginSynchronous();
+        for(DBData field : fields) {
+            Type fieldType = field.getField().getType();
+            if(fieldType.isNumeric()) {
+                System.out.printf("testPut recordName %s fieldName %s value %f\n",
+                        recordName,field.getField().getName(),value);
+                    convert.fromDouble(field,value);
+            } else if (fieldType==Type.pvString) {
+                String valueString = Double.toString(value);
+                System.out.printf("testPut recordName %s fieldName %s value %s\n",
+                        recordName,field.getField().getName(),valueString);
+                DBString dbString = (DBString)field;
+                dbString.put(valueString);
             }
-            dbRecord.beginSynchronous();
-            for(DBData dbData : dataList) dbRecord.postForMaster(dbData);
-            dbRecord.stopSynchronous();
-            isMaster = false;
-            dbRecord.removeMasterListener(this);
+            
         }
-
-        public void newData(DBData dbData) {
-            if(!isMaster) return;
-            dataList.add(dbData);
-        }
-
-        
-        TestPutStructure(DBStructure structure) {
-            dbStructure = structure;
-            dbRecord = dbStructure.getRecord();
-            dataList = new ConcurrentLinkedQueue<DBData>();
-        }
-        
-        private DBStructure dbStructure;
-        private DBRecord dbRecord;
-        private ConcurrentLinkedQueue<DBData> dataList;
-        private boolean isMaster = false;
+        dbRecord.endSynchronous();
     }
-    
-    private static Convert convert = ConvertFactory.getConvert();
 }
