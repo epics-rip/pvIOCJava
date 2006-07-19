@@ -42,6 +42,17 @@ public interface DBStructure extends DBData, PVStructure {
      */
     int getFieldDBDataIndex(String fieldName);
     /**
+     * Get the structure support name for this structure instance.
+     * @return The support name or null if no name has been set.
+     */
+    String getStructureSupportName();
+    /**
+     * Set the structure support name.
+     * @param name The name.
+     * @return true if the name was set and false if the name already was set.
+     */
+    boolean setStructureSupportName(String name);
+    /**
      * Get the structure support for this structure instance.
      * @return The RecordSupport or null if no support has been set.
      */

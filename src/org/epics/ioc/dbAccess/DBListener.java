@@ -26,4 +26,8 @@ public interface DBListener {
      * End of synchronous data.
      */
     void endSynchronous();
+    /**
+     * Connection to record is being terminated and the RecordListener is no longer valid.
+     */
+    void unlisten(RecordListener listener);
 }

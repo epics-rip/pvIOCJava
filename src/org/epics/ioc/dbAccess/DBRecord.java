@@ -5,8 +5,6 @@
  */
 package org.epics.ioc.dbAccess;
 
-import java.util.concurrent.locks.*;
-
 import org.epics.ioc.dbProcess.*;
 
 
@@ -23,6 +21,42 @@ public interface DBRecord extends DBStructure {
      */
     String getRecordName();
     /**
+     * Get the recordState.
+     * @return The state.
+     */
+    RecordState getRecordState();
+    /**
+     * Set the recordState.
+     * @param state The new state.
+     */
+    void setRecordState(RecordState state);
+    /**
+     * Add a RecordState listener that will be called whenever the record state changes.
+     * @param listener The listener.
+     */
+    void addRecordStateListener(RecordStateListener listener);
+    /**
+     * Remove a RecordState listener.
+     * @param listener The listener.
+     */
+    void removeRecordStateListener(RecordStateListener listener);
+    /**
+     * Lock the record instance.
+     * This must be called before accessing anything contained in the record.
+     */
+    void lock();
+    /**
+     * Unlock the record.
+     */
+    void unlock();
+    /**
+     * While holding lock on this record lock another record.
+     * If the other record is already locked than this record may be unlocked.
+     * The caller must call the unlock method of the other record when done with it.
+     * @param otherRecord the other record.
+     */
+    void lockOtherRecord(DBRecord otherRecord);
+    /**
      * Get the RecordProcess for this record instance.
      * @return The RecordProcess or null if  has been set.
      */
@@ -34,6 +68,17 @@ public interface DBRecord extends DBStructure {
      */
     boolean setRecordProcess(RecordProcess recordProcess);
     /**
+     * Get the record support name for this structure instance.
+     * @return The support name or null if no name has been set.
+     */
+    String getRecordSupportName();
+    /**
+     * Set the record support name.
+     * @param name The name.
+     * @return true if the name was set and false if the name already was set.
+     */
+    boolean setRecordSupportName(String name);
+    /**
      * Get the record support for this record instance.
      * @return The RecordSupport or null if no support has been set.
      */
@@ -44,18 +89,6 @@ public interface DBRecord extends DBStructure {
      * @return true if the support was set and false if the support already was set.
      */
     boolean setRecordSupport(RecordSupport support);
-    /**
-     * Get the lock for the record instance.
-     * @return A reentrant lock.
-     */
-    ReentrantLock getLock();
-    /**
-     * While holding lock on this record lock another record.
-     * If the other record is already locked than this record may be unlocked.
-     * @param otherRecord the other record.
-     * @return TODO
-     */
-    ReentrantLock lockOtherRecord(DBRecord otherRecord);
     /**
      * Get the id for this record instance.
      * Each instance is assigned a unique integer id.
@@ -71,18 +104,28 @@ public interface DBRecord extends DBStructure {
      */
     void endSynchronous();
     /**
-     * create a Listener.
+     * Create a RecordListener.
      * This must be called by a client that wants to call DBData.addListener for one or more
      * fields of this record instance.
-     * @param listener the DBListener interface.
-     * @return a Listener interface.
+     * @param listener The DBListener interface.
+     * @return A RecordListener interface.
      */
-    Listener createListener(DBListener listener);
+    RecordListener createListener(DBListener listener);
     /**
-     * destroy a Listener interface.
-     * Before calling this the client must call DBData.removeListener for each
-     * DBData.addListener it has called.
-     * @param listener the Listen interface returned by the call to createListener.
+     * Remove a RecordListener interface.
+     * This also removes all calls to DBData.addListener; 
+     * @param listener The Listen interface returned by the call to createListener.
      */
-    void destroyListener(Listener listener);
+    void removeListener(RecordListener listener);
+    /**
+     * Remove all listeners.
+     * Any code that modifies the structure of a record must call this before making modifications.
+     */
+    void removeListeners();
+    /**
+     * Used for communication between AbstractDBRecord and AbstractDBData.
+     * AbstractDBData calls this the first time DBData.addListener is called.
+     * @param dbData The AbstractDBData instance.
+     */
+    void addListenerSource(AbstractDBData dbData);
 }

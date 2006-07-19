@@ -6,12 +6,11 @@
 package org.epics.ioc.dbProcess;
 
 import java.util.*;
-import java.util.concurrent.*;
 import org.epics.ioc.dbAccess.*;
 import org.epics.ioc.pvAccess.Field;
 import org.epics.ioc.pvAccess.PVData;
-import org.epics.ioc.pvAccess.Property;
 import org.epics.ioc.channelAccess.*;
+import org.epics.ioc.util.*;
 
 /**
  * @author mrk
@@ -29,56 +28,31 @@ public class ChannelAccessLocal implements ChannelAccess {
         }
     }
     
-    public ChannelIOC createChannel(String name) {
+    public ChannelIOC createChannel(String name,ChannelStateListener listener) {
         DBRecord dbRecord = iocdb.findRecord(name);
         if(dbRecord==null) return null;
-        return new LocalChannel(iocdb,dbRecord);
+        return new LocalChannel(iocdb,dbRecord,listener);
     }
     
-    private static class LocalChannel implements ChannelLocal {
-        private IOCDB iocdb;
+    private static class LocalChannel implements ChannelIOC {
         private DBAccess dbAccess;
-        private ChannelDataLocal recordData;
-        private ChannelDataLocal currentData;
-        private TreeSet<ChannelDataLocal> dataList = 
-            new TreeSet<ChannelDataLocal>();
-        private ConcurrentLinkedQueue<ChannelStateListener> stateListenerList = 
-            new ConcurrentLinkedQueue<ChannelStateListener>();
+        private DBData currentData = null;
+        private ChannelStateListener stateListener = null;
         private String otherRecord = null;
         private String otherField = null;
+        private double timeOut = 0.0;
         
-        LocalChannel(IOCDB iocdb,DBRecord record) {
-            this.iocdb = iocdb;
+        LocalChannel(IOCDB iocdb,DBRecord record,ChannelStateListener listener) {
+            stateListener = listener;
             dbAccess = iocdb.createAccess(record.getRecordName());
-            DBData dbData = dbAccess.getField();
-            recordData = new ChannelDataLocal(this,dbData);
-            dataList.add(recordData);
-            currentData = recordData;
         }
         
         public void destroy() {
-            iocdb = null;
-            dbAccess = null;
-            recordData = null;
-            currentData = null;
-            dataList = null;
-            ChannelStateListener listener;
-            while((listener= stateListenerList.poll())!=null) {
-                listener.notify();
-            }
+            stateListener.disconnect(this);
         }
         
         public boolean isConnected() {
-            if(iocdb!=null) return true;
-            return false;
-        }
-        
-        public void addListener(ChannelStateListener listener) {
-            stateListenerList.add(listener);
-        }
-        
-        public void removeListener(ChannelStateListener listener) {
-            stateListenerList.remove(listener);
+            return true;
         }
         
         public ChannelSetResult setField(String name) {
@@ -90,20 +64,7 @@ public class ChannelAccessLocal implements ChannelAccess {
                 return ChannelSetResult.otherChannel;
             }
             DBData dbData = dbAccess.getField();
-            if(dbData==null)  {
-                throw new IllegalStateException(
-                    "LocalChannel.setField dbData is null. Logic error");
-            }
-            Iterator<ChannelDataLocal> iter = dataList.iterator();
-            while(iter.hasNext()) {
-                ChannelDataLocal local = iter.next();
-                if(local.dbData==dbData) {
-                    currentData = local;
-                    return ChannelSetResult.thisChannel;
-                }
-            }
-            currentData = new ChannelDataLocal(this,dbData);
-            dataList.add(currentData);
+            currentData = dbData;
             return ChannelSetResult.thisChannel;
         }
 
@@ -115,194 +76,389 @@ public class ChannelAccessLocal implements ChannelAccess {
             return otherField;
         }
         
-        public Field getField() {
-            return currentData.getPVData().getField();
-        }
-
-        public Field getPropertyField(Property property) {
-            if(property==null) return null;
-            DBData dbData = dbAccess.getPropertyField(property);
-            if(dbData==null) return null;
-            Iterator<ChannelDataLocal> iter = dataList.iterator();
-            while(iter.hasNext()) {
-                ChannelDataLocal local = iter.next();
-                if(local.dbData==dbData) {
-                    currentData = local;
-                    return currentData.getPVData().getField();
-                }
-            }
-            currentData = new ChannelDataLocal(this,dbData);
-            dataList.add(currentData);
-            return currentData.getPVData().getField();
-        }
-
-        public Field getPropertyField(String name) {
-            DBData dbData = dbAccess.getPropertyField(name);
-            Property property = dbData.getField().getProperty(name);
-            return getPropertyField(property);
+        public ChannelField getChannelField() {
+            return new ChannelFieldInstance(currentData);
         }
         
-        public AccessRights getAccessRights() {
-            // OK until access security is implemented
-            if(dbAccess.getField().getField().isMutable()) {
-                return AccessRights.readWrite;
-            } else {
-                return AccessRights.read;
-            }
+        public ChannelFieldGroup createFieldGroup(ChannelFieldGroupListener listener) {
+            return new FieldGroup(listener);
+        }
+
+        public void setTimeout(double timeout) {
+            this.timeOut = timeOut;
+        } 
+        
+        public ChannelDataProcess createChannelDataProcess() {
+            return new DataProcess(dbAccess.getDbRecord());
+        }
+        public ChannelDataGet createChannelDataGet() {
+            return new DataGet(dbAccess.getDbRecord());
+        }
+
+        public ChannelDataPut createChannelDataPut() {
+            return new DataPut(dbAccess.getDbRecord());
         }
         
-        public void subscribe(ChannelDataListener listener, Event why) {
-            // TODO Auto-generated method stub
-            
+        public ChannelDataPutGet createChannelDataPutGet() {
+            return new DataPutGet(dbAccess.getDbRecord());
         }
 
-        public void subscribe(ChannelNotifyListener listener, Event why) {
-            // TODO Auto-generated method stub
-            
-        }
-
-        public ChannelGetReturn get(ChannelDataGet callback, ChannelOption[] options) {
-            // TODO Auto-generated method stub
-            return null;
-        }
-
-        
-        public ChannelDataPut getChannelDataPut() {
-            // TODO Auto-generated method stub
-            return null;
+        public ChannelSubscribe createSubscribe() {
+            return new Subscribe(dbAccess.getDbRecord());
         }
 
         public boolean isLocal() {
             return true;
         }
-
-        public void setLinkSupport(LinkSupport linkSupport) {
-            // TODO Auto-generated method stub
-            
+        
+        public DBRecord getLocalRecord() {
+            return dbAccess.getDbRecord();
         }
-
-        public void setRecordProcess(RecordProcess recordProcess) {
-            // TODO Auto-generated method stub
-            
-        }
-
-        public void setRecordSupport(RecordSupport recordSupport) {
-            // TODO Auto-generated method stub
-            
-        }
-
-        public void setTimeout(double timeout) {
-            // TODO Auto-generated method stub
-            
-        } 
-
     }
     
-    private static class DataGet implements ProcessComplete {
+    private static class ChannelFieldInstance implements ChannelField {
+
+        private DBData dbData;
         
+        ChannelFieldInstance(DBData dbData) {
+            this.dbData = dbData;
+        }
+        
+        public AccessRights getAccessRights() {
+            // OK until access security is implemented
+            if(dbData.getField().isMutable()) {
+                return AccessRights.readWrite;
+            } else {
+                return AccessRights.read;
+            }
+        }
+
+        public Field getField() {
+            return dbData.getField();
+        }
+        
+        DBData getDBData() {
+            return dbData;
+        }
+        
+    }
+    
+    private static class FieldGroup implements ChannelFieldGroup {
+        private ChannelFieldGroupListener accessRightsListener;
+        private LinkedList<ChannelFieldInstance> fieldList = 
+            new LinkedList<ChannelFieldInstance>();
+
+        FieldGroup(ChannelFieldGroupListener listener) {
+            accessRightsListener = listener;
+        }
+        public void destroy() {
+            accessRightsListener = null;
+            fieldList.clear();
+        }
+
+        List<ChannelFieldInstance> getList() {
+            return fieldList;
+        }
+
+        public void addChannelField(ChannelField channelField) {
+            fieldList.add((ChannelFieldInstance)channelField);
+        }
+
+        public void removeChannelField(ChannelField channelField) {
+            fieldList.remove(channelField);
+        }
+    }
+    private static class DataProcess implements ChannelDataProcess, ProcessComplete {
         private RecordProcess recordProcess;
-        private ChannelDataLocal channelData;
-        private ChannelDataGet callback = null;
+        private FieldGroup fieldGroup = null;
+        private ChannelDataProcessListener listener = null;
         
-        DataGet(RecordProcess recordProcess,ChannelDataLocal channelData) {
-            this.recordProcess = recordProcess;
-            this.channelData = channelData;
+        
+        DataProcess(DBRecord dbRecord) {
+            recordProcess = dbRecord.getRecordProcess();
+        }
+        public void destroy() {
+            // nothing to do
+        }
+        public void process(ChannelFieldGroup fieldGroup, ChannelDataProcessListener callback, boolean wait) {
+            
+            this.fieldGroup = (FieldGroup)fieldGroup;
+            this.listener = callback;
+            
+            RequestProcessReturn requestReturn;
+            requestReturn = recordProcess.requestProcess((wait ? this : null));
+            switch(requestReturn) {
+            case success: complete(ProcessReturn.done); break;
+            case listenerAdded: break;
+            case failure: complete(ProcessReturn.abort); break;
+            case alreadyActive:
+                if(!wait) {
+                    complete(ProcessReturn.done); break;
+                }
+                throw new IllegalStateException("ChannelAccessLocal logic error");
+            }
+        }
+        
+        public void cancelProcess() {
+            recordProcess.removeCompletionListener(this);
         }
 
-        ChannelGetReturn get(ChannelDataGet callback, ChannelOption[] options) {
-            this.callback = callback;
-            boolean process = false;
-            boolean wait = false;
-            for(ChannelOption option : options) {
-                switch(option) {
-                case process: process = true; break;
-                case wait: wait = true; break;
-                }
-            }
-            ProcessReturn processReturn = ProcessReturn.done;
-            if(process) {
-                processReturn = recordProcess.requestProcess(this);
-            }
-            return null;
-        }
         public void complete(ProcessReturn result) {
-            // TODO Auto-generated method stub
+            listener.processDone(result,
+                recordProcess.getAlarmSeverity(),
+                recordProcess.getStatus());
+        }
+        
+    }
+    private static class DataGet implements ChannelDataGet, ProcessComplete {
+        private RecordProcess recordProcess;
+        private FieldGroup fieldGroup = null;
+        private ChannelDataGetListener listener = null;
+        
+        DataGet(DBRecord dbRecord) {
+            recordProcess = dbRecord.getRecordProcess();
+        }
+        public void destroy() {
+            // nothing to do
+        }
+
+        public void get(ChannelFieldGroup fieldGroup,
+        ChannelDataGetListener callback, boolean process, boolean wait) {
+            this.fieldGroup = (FieldGroup)fieldGroup;
+            this.listener = callback;
             
+            RequestProcessReturn requestReturn = RequestProcessReturn.success;
+            if(process) {
+                requestReturn = recordProcess.requestProcess((wait ? this : null));
+            }
+            switch(requestReturn) {
+            case success: complete(ProcessReturn.done); break;
+            case listenerAdded: break;
+            case failure: complete(ProcessReturn.abort); break;
+            case alreadyActive:
+                if(!wait) {
+                    complete(ProcessReturn.done); break;
+                }
+                throw new IllegalStateException("ChannelAccessLocal logic error");
+            }
+        }
+        
+        public void cancelGet() {
+            recordProcess.removeCompletionListener(this);
+        }
+
+        public void complete(ProcessReturn result) {
+            if(result!=ProcessReturn.done && result!=ProcessReturn.noop) {
+                listener.failure("process returned " +  result.toString());
+            }
+            listener.beginSynchronous();
+            List<ChannelFieldInstance> list = fieldGroup.getList();
+            Iterator<ChannelFieldInstance> iter = list.iterator();
+            while(iter.hasNext()) {
+                ChannelFieldInstance field = iter.next();
+                listener.newData(field,field.dbData);
+            }
+            listener.endSynchronous();
         }
         
     }
     
-    private static class SubscriptionNotify implements DBListener, ChannelNotify{
-        
-        private ChannelDataLocal channelData;
-        private ChannelNotifyListener listener;
-        private Event event;
-        private DBData dbData = null;
-        
-        SubscriptionNotify(ChannelDataLocal channelData,
-            ChannelNotifyListener listener, Event why)
-        {
-            this.channelData = channelData;
-            this.listener = listener;
-            this.event = event;
-            dbData = channelData.getDBData();
-            dbData.addListener(this);
-        }
+    private static class DataPut implements ChannelDataPut, ProcessComplete {
+        RecordProcess recordProcess = null;
+        private ChannelDataPutListener listener = null;
 
+        DataPut(DBRecord dbRecord) {
+            recordProcess = dbRecord.getRecordProcess();
+        }
+        public void destroy() {
+            // nothing to do
+        }
         public void beginSynchronous() {
             // nothing to do
         }
 
-        public void endSynchronous() {
-            // nothing to do
+        public PVData getPutPVData(ChannelField field) {
+            ChannelFieldInstance instance = (ChannelFieldInstance)field;
+            return instance.getDBData();
+        }
+        
+        public void endSynchronous(boolean process,boolean wait,ChannelDataPutListener listener) {
+            this.listener = listener;
+            RequestProcessReturn requestReturn = RequestProcessReturn.success;
+            if(process) {
+                requestReturn = recordProcess.requestProcess((wait ? this : null));
+            }
+            switch(requestReturn) {
+            case success: complete(ProcessReturn.done); break;
+            case listenerAdded: break;
+            case failure: complete(ProcessReturn.abort); break;
+            case alreadyActive:
+                if(!wait) {
+                    complete(ProcessReturn.done); break;
+                }
+                throw new IllegalStateException("ChannelAccessLocal logic error");
+            }
         }
 
-        public void newData(DBData dbData) {
-            listener.newModification(this,event);
+        public void complete(ProcessReturn result) {
+            if(listener!=null) listener.processComplete();
         }
-
-        public Channel getChannel() {
-            return channelData.getChannel();
-        }
-
-        public Field getField() {
-            return channelData.getPVData().getField();
+        
+        public void cancelPut() {
+            recordProcess.removeCompletionListener(this);
         }
         
     }
     
-    private static class ChannelDataLocal implements ChannelData, Comparable {
-        
-        private Channel channel;
-        private DBData dbData;
-        private long thisInstance;
-        private static long numberInstances = 0;
-        
-        ChannelDataLocal(Channel channel,DBData dbData) {
-        this .channel = channel;
-            this.dbData = dbData;
-            thisInstance = numberInstances++;
+    private static class DataPutGet implements ChannelDataPutGet, ProcessComplete {
+        private RecordProcess recordProcess;
+        private FieldGroup fieldGroup = null;
+        private ChannelDataGetListener listener = null;
+       
+        DataPutGet(DBRecord dbRecord) {
+            recordProcess = dbRecord.getRecordProcess();
         }
         
-        public DBData getDBData() {
-            return dbData;
+        public void destroy() {
+            // nothing to do   
+        }
+        public void beginSynchronous(ChannelFieldGroup inputFieldGroup, ChannelDataGetListener callback) {
+            fieldGroup = (FieldGroup)inputFieldGroup;
+            listener = callback;
         }
 
-        public PVData getPVData() {
-            return dbData;
+        public void endSynchronous(boolean process, boolean wait) {
+            RequestProcessReturn requestReturn = RequestProcessReturn.success;
+            if(process) {
+                requestReturn = recordProcess.requestProcess((wait ? this : null));
+            }
+            switch(requestReturn) {
+            case success: complete(ProcessReturn.done); break;
+            case listenerAdded: break;
+            case failure: complete(ProcessReturn.abort); break;
+            case alreadyActive:
+                if(!wait) {
+                    complete(ProcessReturn.done); break;
+                }
+                throw new IllegalStateException("ChannelAccessLocal logic error");
+            }
         }
 
-        public int compareTo(Object o) {
-            ChannelDataLocal other = (ChannelDataLocal)o;
-            long diff = thisInstance - other.thisInstance;
-            if(diff<0) return -1;
-            if(diff>0) return 1;
-            return 0;
+        public PVData getPutPVData(ChannelField field) {
+            ChannelFieldInstance instance = (ChannelFieldInstance)field;
+            return instance.getDBData();
         }
 
-        public Channel getChannel() {
-            return channel;
+        public void complete(ProcessReturn result) {
+            if(result!=ProcessReturn.done && result!=ProcessReturn.noop) {
+                listener.failure("process returned " +  result.toString());
+            }
+            listener.beginSynchronous();
+            List<ChannelFieldInstance> list = fieldGroup.getList();
+            Iterator<ChannelFieldInstance> iter = list.iterator();
+            while(iter.hasNext()) {
+                ChannelFieldInstance field = iter.next();
+                listener.newData(field,field.dbData);
+            }
+            listener.endSynchronous();
+        }
+        public void cancelGetPut() {
+            recordProcess.removeCompletionListener(this);
         }
         
+    }
+    
+    private static class Subscribe implements ChannelSubscribe, DBListener {
+        private RecordListener listener = null;
+        private FieldGroup fieldGroup = null;
+        private ChannelNotifyListener notifyListener = null;
+        private ChannelDataListener dataListener = null;
+        private Event event = null;
+        
+        Subscribe(DBRecord dbRecord)
+        {
+            listener = dbRecord.createListener(this);
+        }
+        
+        public void destroy() {
+            if(fieldGroup!=null) stop();
+            listener = null;
+        }
+        public void start(ChannelFieldGroup fieldGroup, ChannelDataListener listener, Event why) {
+            dataListener = listener;
+            startCommon(fieldGroup,why);
+        }
+        public void start(ChannelFieldGroup fieldGroup, ChannelNotifyListener listener, Event why) {
+            notifyListener = listener;
+            startCommon(fieldGroup,why);
+        }
+        private void startCommon(ChannelFieldGroup channelFieldGroup, Event why) {
+            if(fieldGroup!=null) throw new IllegalStateException("Channel already started");
+            fieldGroup = (FieldGroup)channelFieldGroup;
+            event = why;
+            List<ChannelFieldInstance> list = fieldGroup.getList();
+            Iterator<ChannelFieldInstance> iter = list.iterator();
+            while(iter.hasNext()) {
+                ChannelFieldInstance field = iter.next();
+                DBData dbData = field.getDBData();
+                dbData.addListener(this.listener);
+            }
+        }
+        public void stop() {
+            List<ChannelFieldInstance> list = fieldGroup.getList();
+            Iterator<ChannelFieldInstance> iter = list.iterator();
+            while(iter.hasNext()) {
+                ChannelFieldInstance field = iter.next();
+                DBData dbData = field.getDBData();
+                dbData.removeListener(this.listener);
+            }
+            event = null;
+            fieldGroup = null;
+            dataListener = null;
+            notifyListener = null;
+        }
+        
+        
+        public void beginSynchronous() {
+            if(dataListener!=null) {
+                dataListener.beginSynchronous();
+            }
+            if(notifyListener!=null) {
+                notifyListener.beginSynchronous();
+            }
+        }
+        public void endSynchronous() {
+            if(dataListener!=null) {
+                dataListener.endSynchronous();
+            }
+            if(notifyListener!=null) {
+                notifyListener.endSynchronous();
+            }
+        }
+        public void newData(DBData dbData) {
+            // must be expanded to support Event
+            ChannelFieldInstance field = null;
+            List<ChannelFieldInstance> list = fieldGroup.getList();
+            Iterator<ChannelFieldInstance> iter = list.iterator();
+            while(iter.hasNext()) {
+                ChannelFieldInstance fieldNow = iter.next();
+                if(dbData==fieldNow.getDBData()) {
+                    field = fieldNow;
+                    break;
+                }
+            }
+            if(field==null) {
+                throw new IllegalStateException("ChannelAccessLocal logic error");
+            }
+            if(dataListener!=null) {
+                dataListener.newData(field,dbData);
+            } else {
+                notifyListener.newData(field);
+            }
+        }
+        public void unlisten(RecordListener listener) {
+            if(fieldGroup!=null) stop();
+        }
+
     }
 }

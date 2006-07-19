@@ -14,20 +14,15 @@ import org.epics.ioc.pvAccess.*;
 public interface Channel {
     void destroy();
     boolean isConnected();
-    void addListener(ChannelStateListener listener);
-    void removeListener(ChannelStateListener listener);
     ChannelSetResult setField(String name);
     String getOtherChannel();
     String getOtherField();
-    Field getField();
-    Field getPropertyField(Property property);
-    Field getPropertyField(String name);
-    AccessRights getAccessRights();
-    ChannelFieldGroup createFieldGroup();
+    ChannelField getChannelField();
+    ChannelFieldGroup createFieldGroup(ChannelFieldGroupListener listener);
     void setTimeout(double timeout);
-    boolean get(ChannelFieldGroup fieldGroup,ChannelDataGet callback,ChannelOption[] options);
-    ChannelDataPut getChannelDataPut(ChannelFieldGroup fieldGroup);
-    void subscribe(ChannelFieldGroup fieldGroup,ChannelNotifyListener listener,Event why);
-    void subscribe(ChannelFieldGroup fieldGroup,ChannelDataListener listener,Event why);
-    
+    ChannelDataProcess createChannelDataProcess();
+    ChannelDataGet createChannelDataGet();
+    ChannelDataPut createChannelDataPut( );
+    ChannelDataPutGet createChannelDataPutGet();
+    ChannelSubscribe createSubscribe();
 }

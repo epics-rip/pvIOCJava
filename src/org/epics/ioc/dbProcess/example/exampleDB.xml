@@ -1,45 +1,49 @@
 <?xml version="1.0" ?>
 <IOCDatabase>
-<record name = "ai1" type = "aiLinearRecord">
-    <aiLinear>
-        <aiRaw>
-            <input linkSupportName = "inputLink" configStructureName = "inputLink">
-                <pvname>ai2</pvname>
-                <wait>process</wait>
-                <wait>true</wait>
-            </input>
-        </aiRaw>
-        <units>volts</units>
-        <displayLimit>
-            <low>0.0</low>
-            <high>10.0</high>
-        </displayLimit>
-        <linearConvert>
-            <engUnitsLow>0.0</engUnitsLow>
-            <engUnitsHigh>10.0</engUnitsHigh>
-        </linearConvert>
-    </aiLinear>
+<record name = "counter" type = "counterRecord">
+    <min>0.0</min>
+    <max>10.0</max>
+    <inc>1.0</inc>
+    <priority>medium</priority>
+    <process>
+        <value structureName = "processLink"
+                structureSupportName = "org.epics.ioc.support.ProcessLink">
+            <pvname>double01</pvname>
+            <wait>true</wait>
+        </value>
+        <value structureName = "processLink"
+                structureSupportName = "org.epics.ioc.support.ProcessLink">
+            <pvname>double02</pvname>
+            <wait>true</wait>
+        </value>
+    </process>
+</record>
+<record name = "double01" type = "doubleRecord">
+    <input linkSupportName = "org.epics.ioc.support.InputLink"
+             configStructureName = "inputLink">
+        <pvname>counter</pvname>
+        <process>false</process>
+        <wait>false</wait>
+    </input>
+    <units>volts</units>
+    <displayLimit>
+        <low>0.0</low>
+        <high>10.0</high>
+    </displayLimit>
     <priority>medium</priority>
 </record>
-<record name = "ai2" type = "aiLinearRecord">
-    <aiLinear>
-        <aiRaw>
-            <input linkSupportName = "inputLink" configStructureName = "inputLink">
-                <pvname>ai1</pvname>
-                <wait>process</wait>
-                <wait>true</wait>
-            </input>
-        </aiRaw>
-        <units>volts</units>
-        <displayLimit>
-            <low>0.0</low>
-            <high>10.0</high>
-        </displayLimit>
-        <linearConvert>
-            <engUnitsLow>0.0</engUnitsLow>
-            <engUnitsHigh>10.0</engUnitsHigh>
-        </linearConvert>
-    </aiLinear>
+<record name = "double02" type = "doubleRecord">
+    <input linkSupportName = "org.epics.ioc.support.InputLink"
+             configStructureName = "inputLink">
+        <pvname>counter</pvname>
+        <process>false</process>
+        <wait>false</wait>
+    </input>
+    <units>volts</units>
+    <displayLimit>
+        <low>0.0</low>
+        <high>10.0</high>
+    </displayLimit>
     <priority>medium</priority>
 </record>
 

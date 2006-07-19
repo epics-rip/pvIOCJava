@@ -5,13 +5,14 @@
  */
 package org.epics.ioc.channelAccess;
 
+import org.epics.ioc.dbProcess.*;
+import org.epics.ioc.util.*;
 
 /**
  * @author mrk
  *
  */
-public interface ChannelFieldGroup {
-    void destroy();
-    void addChannelField(ChannelField channelField);
-    void removeChannelField(ChannelField channelField);
+public interface ChannelDataProcessListener {
+    void processDone(ProcessReturn result,AlarmSeverity alarmSeverity,String status);
+    void failure(String reason);
 }

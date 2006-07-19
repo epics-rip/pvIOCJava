@@ -12,10 +12,11 @@ package org.epics.ioc.channelAccess;
  */
 public interface ChannelAccess {
     /**
-     * create a channel.
+     * Create a channel.
      * 
-     * @param name the channel name.
-     * @return a Channel or null if the channel can not be created.
+     * @param name The channel name.
+     * @param listener A state listener.
+     * @return A Channel or null if the channel can not be created.
      */
-    Channel createChannel(String name);
+    Channel createChannel(String name,ChannelStateListener listener);
 }

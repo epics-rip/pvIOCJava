@@ -20,11 +20,16 @@ public enum RequestProcessReturn {
      */
     listenerAdded,
     /**
-     * The record is already active and the caller did not suppoly a listened.
+     * The record is already active and the caller did not supply a listener.
      */
     alreadyActive,
     /**
      * The call failed.
      */
-    failure
+    failure,
+    /**
+     * The support is going away.
+     * Remove any reference to the support.
+     */
+    zombie
 }

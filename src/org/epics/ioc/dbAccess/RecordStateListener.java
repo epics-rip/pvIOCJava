@@ -3,16 +3,12 @@
  * EPICS JavaIOC is distributed subject to a Software License Agreement found
  * in file LICENSE that is included with this distribution.
  */
-package org.epics.ioc.dbProcess;
-
-import org.epics.ioc.channelAccess.*;
-import org.epics.ioc.dbAccess.*;
+package org.epics.ioc.dbAccess;
 
 /**
  * @author mrk
  *
  */
-public interface ChannelIOC extends Channel{
-    boolean isLocal();
-    DBRecord getLocalRecord();
+public interface RecordStateListener {
+    void newState(RecordState newState);
 }

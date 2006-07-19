@@ -4,9 +4,6 @@
  * in file LICENSE that is included with this distribution.
  */
 package org.epics.ioc.dbAccess;
-
-import java.util.concurrent.atomic.AtomicReference;
-
 import org.epics.ioc.dbDefinition.*;
 import org.epics.ioc.dbProcess.LinkSupport;
 import org.epics.ioc.pvAccess.*;
@@ -21,8 +18,7 @@ public abstract class AbstractDBLink extends AbstractDBStructure implements DBLi
     private PVString pvConfigStructName;
     private PVString pvLinkSupportName;
     private DBStructure configDBStructure = null;
-    private AtomicReference<LinkSupport> linkSupport = 
-        new AtomicReference<LinkSupport>();
+    private LinkSupport linkSupport = null;
     /**
      * constructor that derived classes must call.
      * @param dbdLinkField the reflection interface for the DBLink data.
@@ -86,13 +82,15 @@ public abstract class AbstractDBLink extends AbstractDBStructure implements DBLi
      * @see org.epics.ioc.dbAccess.DBLink#getLinkSupport()
      */
     public LinkSupport getLinkSupport() {
-        return linkSupport.get();
+        return linkSupport;
     }
     /* (non-Javadoc)
      * @see org.epics.ioc.dbAccess.DBLink#setLinkSupport(org.epics.ioc.dbProcess.LinkSupport)
      */
     public boolean setLinkSupport(LinkSupport support) {
-        return linkSupport.compareAndSet(null,support);
+        if(linkSupport!=null) return false;
+        linkSupport = support;
+        return true;
     }
     /* (non-Javadoc)
      * @see java.lang.Object#toString()

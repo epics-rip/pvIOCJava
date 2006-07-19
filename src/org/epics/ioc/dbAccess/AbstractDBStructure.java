@@ -23,8 +23,8 @@ public abstract class AbstractDBStructure extends AbstractDBData
     private PVData[] pvData;
     private DBData[] dbData;
     private static Convert convert = ConvertFactory.getConvert();
-    private AtomicReference<RecordSupport> structureSupport = 
-        new AtomicReference<RecordSupport>();
+    private RecordSupport structureSupport = null;
+    private String structureSupportName = null;
     /**
      * constructor that derived classes must call.
      * @param parent the DBStructure of the parent.
@@ -98,37 +98,46 @@ public abstract class AbstractDBStructure extends AbstractDBData
     public PVData[] getFieldPVDatas() {
         return pvData;
     }
-    
     /* (non-Javadoc)
      * @see org.epics.ioc.dbAccess.DBStructure#getFieldDBDataIndex(java.lang.String)
      */
     public int getFieldDBDataIndex(String fieldName) {
         return dbdStructure.getDBDFieldIndex(fieldName);
     }
-
     /* (non-Javadoc)
      * @see org.epics.ioc.dbAccess.DBStructure#getFieldDBDatas()
      */
     public DBData[] getFieldDBDatas() {
         return dbData;
     }
-    
+    /* (non-Javadoc)
+     * @see org.epics.ioc.dbAccess.DBStructure#getStructureSupportName()
+     */
+    public String getStructureSupportName() {
+        return structureSupportName;
+    }
+    /* (non-Javadoc)
+     * @see org.epics.ioc.dbAccess.DBStructure#setStructureSupportName(java.lang.String)
+     */
+    public boolean setStructureSupportName(String name) {
+        if(structureSupportName!=null) return false;
+        structureSupportName = name;
+        return true;
+    }
     /* (non-Javadoc)
      * @see org.epics.ioc.dbAccess.DBStructure#getStructureSupport()
      */
     public RecordSupport getStructureSupport() {
-        return structureSupport.get();
+        return structureSupport;
     }
-
-    
     /* (non-Javadoc)
      * @see org.epics.ioc.dbAccess.DBStructure#setStructureSupport(org.epics.ioc.dbProcess.RecordSupport)
      */
     public boolean setStructureSupport(RecordSupport support) {
-        return structureSupport.compareAndSet(null,support);
+        if(structureSupport!=null) return false;
+        structureSupport = support;
+        return true;
     }
-   
-
     /* (non-Javadoc)
      * @see java.lang.Object#toString()
      */

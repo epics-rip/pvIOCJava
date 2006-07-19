@@ -6,10 +6,12 @@
 package org.epics.ioc.dbAccess;
 
 /**
+ * This is an interface used for communication between AbstractDBRecord and AbstractDBData.
+ * It is created via a call to DBRecord.createListener.
  * @author mrk
  *
  */
-public interface Listener {
+public interface RecordListener {
     /**
      * New data is available.
      * This is called by DBData.postData.

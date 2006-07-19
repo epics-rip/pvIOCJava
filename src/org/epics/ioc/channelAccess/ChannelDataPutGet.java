@@ -5,13 +5,16 @@
  */
 package org.epics.ioc.channelAccess;
 
+import org.epics.ioc.pvAccess.PVData;
 
 /**
  * @author mrk
  *
  */
-public interface ChannelFieldGroup {
+public interface ChannelDataPutGet {
     void destroy();
-    void addChannelField(ChannelField channelField);
-    void removeChannelField(ChannelField channelField);
+    void beginSynchronous(ChannelFieldGroup inputFieldGroup,ChannelDataGetListener callback);
+    PVData getPutPVData(ChannelField field);
+    void endSynchronous(boolean process,boolean wait);
+    void cancelGetPut();
 }

@@ -6,13 +6,13 @@
 package org.epics.ioc.dbProcess;
 
 /**
- * interface that must be implemented by record support.
+ * interface that must be implemented by record or structure support.
  * @author mrk
  *
  */
 public interface RecordSupport extends Support {
     /**
-     * perform link processing.
+     * perform record or structure processing.
      * @param recordProcess the RecordProcess that called process.
      * @return the result of link processing.
      */

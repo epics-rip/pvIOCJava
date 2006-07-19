@@ -33,12 +33,12 @@ public interface DBData extends PVData {
      * Add a listener for puts.
      * @param listener The listener.
      */
-    void addListener(Listener listener);
+    void addListener(RecordListener listener);
     /**
      * Remove a listener.
      * @param listener The listener.
      */
-    void removeListener(Listener listener);
+    void removeListener(RecordListener listener);
     /**
      * The data was modified.
      * This is the version of postPut that must be called by the code that implements a put method. 

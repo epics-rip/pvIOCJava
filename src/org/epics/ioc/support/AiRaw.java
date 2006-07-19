@@ -13,8 +13,12 @@ import org.epics.ioc.dbAccess.*;
  */
 public class AiRaw implements RecordSupport {
     private static String supportName = "AiRaw";
+    private DBRecord dbRecord = null;
     private DBStructure dbStructure = null;
     
+    public AiRaw(DBRecord dbRecord) {
+        this.dbRecord = dbRecord;
+    }
     public AiRaw(DBStructure dbStructure) {
         this.dbStructure = dbStructure;
     }
@@ -43,6 +47,10 @@ public class AiRaw implements RecordSupport {
     public ProcessReturn process(RecordProcess recordProcess) {
         System.out.printf("%s.process entered\n",supportName);
         return ProcessReturn.noop;
+    }
+    public void linkSupportDone(LinkReturn result) {
+        // TODO Auto-generated method stub
+        
     }
 
 }

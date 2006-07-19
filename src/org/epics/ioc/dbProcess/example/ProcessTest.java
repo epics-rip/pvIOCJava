@@ -7,9 +7,10 @@ package org.epics.ioc.dbProcess.example;
 
 import junit.framework.TestCase;
 
+import java.util.*;
+import java.util.concurrent.locks.*;
 import org.epics.ioc.dbDefinition.*;
 import org.epics.ioc.dbAccess.*;
-import org.epics.ioc.pvAccess.*;
 import org.epics.ioc.dbProcess.*;
 
 /**
@@ -27,15 +28,15 @@ public class ProcessTest extends TestCase {
         System.out.printf("reading menuStructureSupport\n");
         try {
             XMLToDBDFactory.convert(dbd,
-                 "src/org/epics/ioc/dbAccess/example/menuStructureSupportDBD.xml");
+                 "src/org/epics/ioc/dbProcess/example/menuStructureSupportDBD.xml");
         } catch (Exception e) {
             System.out.println("Exception: " + e);
         }
         
-        System.out.printf("reading aiDBD\n");
+        System.out.printf("reading exampleDBD\n");
         try {
             XMLToDBDFactory.convert(dbd,
-                 "src/org/epics/ioc/dbAccess/example/aiDBD.xml");
+                 "src/org/epics/ioc/dbProcess/example/exampleDBD.xml");
         } catch (Exception e) {
             System.out.println("Exception: " + e);
         }
@@ -61,123 +62,102 @@ public class ProcessTest extends TestCase {
         } catch (Exception e) {
             System.out.println("Exception: " + e);
         }
-//      System.out.printf("\nrecords\n");
-//      Map<String,DBRecord> recordMap = iocdb.getRecordMap();
-//      Set<String> recordKey = recordMap.keySet();
-//      for(String key: recordKey) {
-//          DBRecord record = recordMap.get(key);
-//          System.out.print(record.toString());
-//      }
+        
+        Map<String,DBRecord> recordMap = iocdb.getRecordMap();
+        Set<String> recordKey = recordMap.keySet();
         ProcessDB processDB = ProcessFactory.createProcessDB(iocdb);
-        String[] recordNames = {"ai1","ai2"};
+        boolean gotSupport = processDB.createSupport();
+//        System.out.printf("\nrecords\n");
+//        for(String key: recordKey) {
+//            DBRecord record = recordMap.get(key);
+//            System.out.print(record.toString());
+//        }
+        if(!gotSupport) {
+            System.out.printf("Did not find all support\n");
+            System.out.printf("\nrecords\n");
+            recordMap = iocdb.getRecordMap();
+            recordKey = recordMap.keySet();
+            for(String key: recordKey) {
+                DBRecord record = recordMap.get(key);
+                System.out.print(record.toString());
+            }
+            return;
+        }
         DBRecord dbRecord = null;
-        RecordSupport recordSupport = null;
-        RecordProcess recordProcess = null;
-        for(int i=0; i<recordNames.length; i++) {
-            String recordName = recordNames[i];
-            int indNext = i +1;
-            if(indNext>=recordNames.length) indNext = 0;
-            String nextRecord = recordNames[indNext];
-            dbRecord = iocdb.findRecord(recordName);
-            assertNotNull(dbRecord);
-            recordSupport = new TestRecordSupport(processDB,dbRecord,iocdb.findRecord(nextRecord));
-            recordSupport.initialize();
-            recordProcess = ProcessFactory.createRecordProcess(dbRecord);
-            recordProcess.setRecordSupport(recordSupport);
-            processDB.addRecordProcess(recordProcess);
-        }
-        for(String recordName : recordNames) {
-            recordProcess = processDB.findRecordProcess(recordName);
-            recordSupport = recordProcess.getRecordSupport();
-            recordSupport.start();
-        }
-        for(String recordName : recordNames) {
-            System.out.printf("\nprocess %s\n",recordName);
-            recordProcess = processDB.findRecordProcess(recordName);
-            recordProcess.process(null);
-        }
+        dbRecord = iocdb.findRecord("counter");
+        assertNotNull(dbRecord);
+        TestProcess testProcess = new TestProcess(dbRecord);
+        testProcess.test();
+        testProcess.testPerform();
     }
     
-    static private class TestRecordSupport implements RecordSupport, ProcessComplete {
-        
-        private ProcessDB processDB;
-        private DBRecord dbRecord;
-        private DBRecord linkedRecord;
+    private static class TestProcess implements ProcessComplete {
         private RecordProcess recordProcess = null;
-        private RecordProcess linkedRecordProcess = null;
-        private ProcessReturn result = ProcessReturn.noop;
+        private Lock lock = new ReentrantLock();
+        private Condition waitDone = lock.newCondition();
         
-        TestRecordSupport(ProcessDB processDB,DBRecord dbRecord,DBRecord linkedRecord) {
-            this.processDB = processDB;
-            this.dbRecord = dbRecord;
-            this.linkedRecord = linkedRecord;
+        TestProcess(DBRecord record) {
+            recordProcess = record.getRecordProcess();
+            assertNotNull(recordProcess);
         }
         
-        public void initialize() {
-            
-        }
-        
-        public void start() {
-            if(linkedRecord!=null) {
-                linkedRecordProcess = processDB.findRecordProcess(
-                    linkedRecord.getRecordName());
+        void test() {
+            RequestProcessReturn requestReturn;
+            ProcessReturn processReturn = ProcessReturn.noop;
+            requestReturn = recordProcess.requestProcess(this);
+            if(requestReturn==RequestProcessReturn.success) {
+                processReturn = recordProcess.process(this);
             }
-        }
-        
-        public void stop() {
-            linkedRecordProcess = null;
-        }
-        
-        public void destroy() {
-            processDB = null;
-            dbRecord = null;
-            linkedRecord = null;
-            recordProcess = null;
-            linkedRecordProcess = null;
-        }
-
-
-        public ProcessReturn process(RecordProcess recordProcess) {
-            System.out.printf("%s TestRecordSupport.process",
-                dbRecord.getRecordName());
-            if(linkedRecordProcess==null) {
-                result = ProcessReturn.noop;
-            } else {
-                if(recordProcess.requestProcess(linkedRecordProcess,this)) {
-                    result = ProcessReturn.active;
-                    this.recordProcess =  recordProcess;
-                } else {
-                    System.out.printf(" requestProcess returned false");
-                    result = ProcessReturn.done;
+            if(requestReturn==RequestProcessReturn.listenerAdded
+            ||processReturn==ProcessReturn.active) {
+                lock.lock();
+                try {
+                    waitDone.await();
+                } catch (InterruptedException ie) {
+                    return;
                 }
             }
-            System.out.printf(" returning %s\n",result.toString());
-            return result;
+            System.out.printf("requestReturn %s processReturn %s\n",
+                    requestReturn.toString(),processReturn.toString());
         }
         
-        public void complete(ProcessReturn linkedResult) {
-            assertNotNull(recordProcess);
-            switch(linkedResult) {
-                case noop:          result = ProcessReturn.noop; break;
-                case done:          result = ProcessReturn.done; break;
-                case abort:         result = ProcessReturn.abort; break;
-                case active:        result = ProcessReturn.done; break;
-                case alreadyActive: result = ProcessReturn.done; break;
+        void testPerform() {
+            RequestProcessReturn requestReturn;
+            ProcessReturn processReturn = ProcessReturn.noop;
+            long startTime,endTime;
+            int ntimes = 1000000;
+            double microseconds;
+            double processPerSecond;
+            startTime = System.nanoTime();
+            for(int i=0; i<ntimes; i++) {
+                processReturn = ProcessReturn.noop;
+                requestReturn = recordProcess.requestProcess(this);
+                if(requestReturn==RequestProcessReturn.success) {
+                    processReturn = recordProcess.process(this);
+                }
+//                System.out.printf("requestReturn %s processReturn %s\n",
+//                    requestReturn.toString(),processReturn.toString());
+                if(requestReturn==RequestProcessReturn.listenerAdded
+                ||processReturn==ProcessReturn.active) {
+                    lock.lock();
+                    try {
+                        waitDone.await();
+                    } catch (InterruptedException ie) {
+                        return;
+                    }
+                }
             }
-            result = ProcessReturn.done;
-            System.out.printf("%s TestRecordSupport.complete linkedResult %s"
-                    + " will return %s\n",
-                    dbRecord.getRecordName(),
-                    linkedResult.toString(),
-                    result.toString());
-            recordProcess.recordSupportDone(result);
-            result = ProcessReturn.noop;
-            recordProcess = null;
+            endTime = System.nanoTime();
+            microseconds = (double)(endTime - startTime)/(double)ntimes/1000.0;
+            processPerSecond = 1e6/microseconds;
+            System.out.printf("time per process %f microseconds processPerSecond %f\n",
+                microseconds,processPerSecond);
         }
 
-        public String getName() {
-            // TODO Auto-generated method stub
-            return null;
+        public void complete(ProcessReturn result) {
+            if(result==ProcessReturn.done) {
+                waitDone.signal();
+            }
         }
     }
 }

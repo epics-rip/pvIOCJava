@@ -7,7 +7,12 @@ package org.epics.ioc.dbAccess;
 
 import org.epics.ioc.dbDefinition.*;
 import org.epics.ioc.pvAccess.*;
+import org.epics.ioc.pvAccess.Array;
+import org.epics.ioc.pvAccess.Type;
+import org.epics.ioc.pvAccess.Field;
+import org.epics.ioc.dbProcess.*;
 
+import java.lang.reflect.Constructor;
 import java.util.*;
 import java.util.regex.*;
 
@@ -69,34 +74,6 @@ public class IOCDBFactory {
     
     private static class IOCDBInstance implements IOCDB
     {
-        public DBAccess createAccess(String recordName) {
-            DBRecord dbRecord = findRecord(recordName);
-            if(dbRecord!=null) return new Access(dbRecord);
-            return null;
-        }
-        public boolean createRecord(String recordName,
-            DBDRecordType dbdRecordType)
-        {
-            if(recordMap.containsKey(recordName)) return false;
-            DBRecord record = FieldDataFactory.createRecord(
-                recordName,dbdRecordType);
-            recordMap.put(recordName,record);
-            return true;
-        }
-        public DBD getDBD() {
-            return dbd;
-        }
-        public String getName() {
-            return name;
-        }
-        
-        public DBRecord findRecord(String recordName) {
-            return recordMap.get(recordName);
-        }
-
-        public Map<String,DBRecord> getRecordMap() {
-            return recordMap;
-        }
         IOCDBInstance(DBD dbd, String name) {
             this.dbd = dbd;
             this.name = name;
@@ -107,6 +84,52 @@ public class IOCDBFactory {
         private static Map<String,DBRecord> recordMap;
         static {
             recordMap = new HashMap<String,DBRecord>();
+        }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.dbAccess.IOCDB#createAccess(java.lang.String)
+         */
+        public DBAccess createAccess(String recordName) {
+            DBRecord dbRecord = findRecord(recordName);
+            if(dbRecord!=null) return new Access(dbRecord);
+            return null;
+        }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.dbAccess.IOCDB#createRecord(java.lang.String, org.epics.ioc.dbDefinition.DBDRecordType)
+         */
+        public boolean createRecord(String recordName,
+            DBDRecordType dbdRecordType)
+        {
+            if(recordMap.containsKey(recordName)) return false;
+            DBRecord record = FieldDataFactory.createRecord(
+                recordName,dbdRecordType);
+            recordMap.put(recordName,record);
+            return true;
+        }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.dbAccess.IOCDB#getDBD()
+         */
+        public DBD getDBD() {
+            return dbd;
+        }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.dbAccess.IOCDB#getName()
+         */
+        public String getName() {
+            return name;
+        }
+        
+        /* (non-Javadoc)
+         * @see org.epics.ioc.dbAccess.IOCDB#findRecord(java.lang.String)
+         */
+        public DBRecord findRecord(String recordName) {
+            return recordMap.get(recordName);
+        }
+        
+        /* (non-Javadoc)
+         * @see org.epics.ioc.dbAccess.IOCDB#getRecordMap()
+         */
+        public Map<String,DBRecord> getRecordMap() {
+            return recordMap;
         }
     }
 
@@ -125,6 +148,9 @@ public class IOCDBFactory {
         }
         
         
+        /* (non-Javadoc)
+         * @see org.epics.ioc.dbAccess.DBAccess#replaceField(org.epics.ioc.dbAccess.DBData, org.epics.ioc.dbAccess.DBData)
+         */
         public void replaceField(DBData oldField, DBData newField) {
             if(oldField.getField().getType()!=newField.getField().getType()) {
                 throw new IllegalArgumentException(
@@ -146,14 +172,23 @@ public class IOCDBFactory {
             }
             throw new IllegalArgumentException("oldField not found in parent");
         }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.dbAccess.DBAccess#getDbRecord()
+         */
         public DBRecord getDbRecord() {
             return dbRecord;
         }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.dbAccess.DBAccess#getField()
+         */
         public DBData getField() {
             return dbDataSetField;
         }
         
         
+        /* (non-Javadoc)
+         * @see org.epics.ioc.dbAccess.DBAccess#setField(java.lang.String)
+         */
         public AccessSetResult setField(String fieldName) {
             if(fieldName==null || fieldName.length()==0) {
                 dbDataSetField = dbRecord;
@@ -208,6 +243,9 @@ public class IOCDBFactory {
             return AccessSetResult.thisRecord;
         }
         
+        /* (non-Javadoc)
+         * @see org.epics.ioc.dbAccess.DBAccess#setField(org.epics.ioc.dbAccess.DBData)
+         */
         public void setField(DBData dbData) {
             if(dbData==null) {
                 dbDataSetField = dbRecord;
@@ -219,16 +257,25 @@ public class IOCDBFactory {
             dbDataSetField = dbData;
         }
         
+        /* (non-Javadoc)
+         * @see org.epics.ioc.dbAccess.DBAccess#getOtherField()
+         */
         public String getOtherField() {
             return otherField;
         }
 
 
+        /* (non-Javadoc)
+         * @see org.epics.ioc.dbAccess.DBAccess#getOtherRecord()
+         */
         public String getOtherRecord() {
             return otherRecord;
         }
 
         
+        /* (non-Javadoc)
+         * @see org.epics.ioc.dbAccess.DBAccess#getPropertyField(org.epics.ioc.pvAccess.Property)
+         */
         public DBData getPropertyField(Property property) {
             if(property==null) return null;
             DBData currentData = dbDataSetField;
@@ -236,6 +283,9 @@ public class IOCDBFactory {
             return findPropertyField(currentData,property);
         }
 
+        /* (non-Javadoc)
+         * @see org.epics.ioc.dbAccess.DBAccess#getPropertyField(java.lang.String)
+         */
         public DBData getPropertyField(String propertyName) {
             DBData currentData = dbDataSetField;
             if(currentData==null) currentData = dbRecord;

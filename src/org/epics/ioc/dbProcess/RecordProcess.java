@@ -6,6 +6,7 @@
 package org.epics.ioc.dbProcess;
 
 import org.epics.ioc.dbAccess.*;
+import org.epics.ioc.util.*;
 
 /**
  * Record processing support.
@@ -14,56 +15,54 @@ import org.epics.ioc.dbAccess.*;
  */
 public interface RecordProcess {
     /**
-     * is the record disabled.
+     * Is the record disabled.
      * A process request while a record is disabled returns a noop.
      * @return (false,true) if the record (is not, is) disabled
      */
     boolean isDisabled();
     /**
-     * set the disabled state to the requested value.
+     * Set the disabled state to the requested value.
      * @param value true or false.
      * @return (false,true) if the state (was not, was) changed.
      */
     boolean setDisabled(boolean value);
     /**
-     * is the record active.
+     * Is the record active.
      * @return (false,true) if the record (is not, is) active.
      */
     boolean isActive();
     /**
-     * get the record this RecordProcess processes.
-     * @return the DBRecord interface.
+     * Get the record this RecordProcess processes.
+     * @return The DBRecord interface.
      */
     DBRecord getRecord();
     /**
-     * get the record support for this record instance.
-     * @return rge record support.
+     * Get the record support for this record instance.
+     * @return The record support.
      */
     RecordSupport getRecordSupport();
     /**
-     * set the record support for this record instance.
-     * @param support the support,
-     * @return (false,true) if the support (was not, was) set.
-     * A false return means a record support module was already registered,
+     * Set the record support for this record instance.
+     * @param support The support.
      */
-    boolean setRecordSupport(RecordSupport support);
+    void setRecordSupport(RecordSupport support);
     /**
-     * request for permission to call process.
-     * @param listener a listenr to call if the record is already active.
-     * @return the result of the request.
+     * Request for permission to call process.
+     * @param listener A listener to call if the record is already active.
+     * @return The result of the request.
      */
     RequestProcessReturn requestProcess(ProcessComplete listener);
     /**
      * Process the record instance.
      * The caller must be the owner as a result of requestProcess returning RequestProcessReturn.success.
-     * @param listener if the return value is active
+     * @param listener If the return value is active
      * this is the listener that will be called when the record completes processing.
-     * @return the result of the process request.
+     * @return The result of the process request.
      */
     ProcessReturn process(ProcessComplete listener);
     /**
-     * remove a completion listener.
-     * @param listener the listener.
+     * Remove a completion listener.
+     * @param listener The listener.
      */
     void removeCompletionListener(ProcessComplete listener);
     /**
@@ -78,26 +77,46 @@ public interface RecordProcess {
      */
     RequestProcessReturn requestProcessLinkedRecord(DBRecord record,ProcessComplete listener);
     /**
-     * remove a completion listener for a linked record.
-     * @param listener the listener.
+     * Remove a completion listener for a linked record.
+     * @param listener The listener.
      */
     void removeLinkedCompletionListener(ProcessComplete listener);
     /**
-     * called by record support to signify completion.
+     * Called by record support to signify completion.
      * If the record support returns active than the listener must expect additional calls.
      * @param result the reason for calling. A value of active is permissible.
      * In this case record support will again call recordSupportDone.
      */
     void recordSupportDone(ProcessReturn result);
     /**
-     * set the status and severity for the record.
-     * the algorithm is to maxamize the severity, i.e. if the requested severity is greater than the current
+     * Set the status and severity for the record.
+     * The algorithm is to maxamize the severity, i.e. if the requested severity is greater than the current
      * severity than the status and severity are set to the requested values. When a recvord starts processing the
      * status is set to null and the alarmSeverity is set the "not defined". This the first call with a severity of
      * none will set the status and severity.
-     * @param status the status
-     * @param alarmSeverity the severity
+     * @param status The status
+     * @param alarmSeverity The severity
      * @return (false, true) if the status and severity (were not, were) set the requested values.
      */
     boolean setStatusSeverity(String status, AlarmSeverity alarmSeverity);
+    /**
+     * Get the current status.
+     * @return The status.
+     */
+    String getStatus();
+    /**
+     * Get the current alarm severity.
+     * @return The severity.
+     */
+    AlarmSeverity getAlarmSeverity();
+    /**
+     * Set the timeStamp for the record.
+     * @param timeStamp The timeStamp.
+     */
+    void setTimeStamp(TimeStamp timeStamp);
+    /**
+     * Get the current timeStamp.
+     * @param timeStamp The current timeStamp.
+     */
+    void getTimeStamp(TimeStamp timeStamp);
 }

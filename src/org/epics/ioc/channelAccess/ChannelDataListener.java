@@ -15,6 +15,6 @@ public interface ChannelDataListener {
     void beginSynchronous();
     void endSynchronous();
     void reason(Event reason);
-    void newData(PVData data);
+    void newData(ChannelField field,PVData data);
     void failure(String reason);
 }

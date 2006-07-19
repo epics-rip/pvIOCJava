@@ -10,7 +10,7 @@ import java.util.Map;
 import org.epics.ioc.dbAccess.*;
 
 /**
- * Database for ror the RecordProcess for each record instance.
+ * Database for the RecordProcess for each record instance.
  * @author mrk
  *
  */
@@ -25,13 +25,29 @@ public interface ProcessDB {
      * @param recordName the instance name.
      * @return the interface or null if the record is not located.
      */
-    RecordProcess findRecordProcess(String recordName);
+    RecordProcess getRecordProcess(String recordName);
     /**
-     * add a RecordProcess to the processDB.
-     * @param recordProcess the RecordProcess.
+     * Create and add a RecordProcess to the processDB.
+     * @param recordName The name of the record instance.
      * @return true if it was added and false if it was already in database.
      */
-    boolean addRecordProcess(RecordProcess recordProcess);
+    boolean createRecordProcess(String recordName);
+    /**
+     * Remove the RecordProcess from the database.
+     * @param recordName
+     */
+    void removeRecordProcess(String recordName);
+    /**
+     * Find record and link support for a record instance.
+     * @param recordName The name of the record.
+     * @return (false,true) if all necessary support (was not, was) found.
+     */
+    boolean createSupport(String recordName);
+    /**
+     * Find record and link support.
+     * @return (false,true) if all necessary support (was not, was) found.
+     */
+    boolean createSupport();
     /**
      * get the complete set of RecordProcess instances.
      * @return the collection.

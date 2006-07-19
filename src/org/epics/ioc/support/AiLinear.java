@@ -49,5 +49,9 @@ public class AiLinear implements RecordSupport {
         System.out.printf("%s.process entered\n",supportName);
         return ProcessReturn.noop;
     }
+    public void linkSupportDone(LinkReturn result) {
+        // TODO Auto-generated method stub
+        
+    }
 
 }

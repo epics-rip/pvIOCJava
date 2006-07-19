@@ -8,7 +8,6 @@ package org.epics.ioc.dbAccess;
 import org.epics.ioc.pvAccess.*;
 import org.epics.ioc.dbDefinition.*;
 import java.util.*;
-import java.util.concurrent.ConcurrentLinkedQueue;
 
 /**
  * Abstract class for implementing scalar DB fields.
@@ -21,8 +20,8 @@ public abstract class AbstractDBData implements DBData{
     private DBDField dbdField;
     private DBStructure parent;
     private DBRecord record;
-    private ConcurrentLinkedQueue<Listener> listenerList
-        = new ConcurrentLinkedQueue<Listener>();
+    private LinkedList<RecordListener> listenerList
+        = new LinkedList<RecordListener>();
     private static String indentString = "    ";    
     /**
      * constructor which must be called by classes that derive from this class.
@@ -58,13 +57,14 @@ public abstract class AbstractDBData implements DBData{
     /* (non-Javadoc)
      * @see org.epics.ioc.dbAccess.DBData#addListener(org.epics.ioc.dbAccess.DBListener)
      */
-    public void addListener(Listener listener) {
+    public void addListener(RecordListener listener) {
+        if(listenerList.isEmpty()) record.addListenerSource(this);
         listenerList.add(listener);
     }
     /* (non-Javadoc)
      * @see org.epics.ioc.dbAccess.DBData#removeListener(org.epics.ioc.dbAccess.DBListener)
      */
-    public void removeListener(Listener listener) {
+    public void removeListener(RecordListener listener) {
         listenerList.remove(listener);
     }
     /* (non-Javadoc)
@@ -77,9 +77,9 @@ public abstract class AbstractDBData implements DBData{
      * @see org.epics.ioc.dbAccess.DBData#postPut()
      */
     public final void postPut(DBData dbData) {
-        Iterator<Listener> iter = listenerList.iterator();
+        Iterator<RecordListener> iter = listenerList.iterator();
         while(iter.hasNext()) {
-            Listener listener = iter.next();
+            RecordListener listener = iter.next();
             listener.newData(dbData);
         }
         if(parent==null) return;
@@ -124,5 +124,12 @@ public abstract class AbstractDBData implements DBData{
     protected static void newLine(StringBuilder builder, int indentLevel) {
         builder.append("\n");
         for (int i=0; i <indentLevel; i++) builder.append(indentString);
+    }
+    
+    /**
+     * Called by AbstractDBRecord when DBRecord.removeListener or DBrecord.removeListeners are called.
+     */
+    protected void removeListeners(){
+        listenerList.clear();
     }
 }

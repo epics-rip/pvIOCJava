@@ -10,5 +10,6 @@ package org.epics.ioc.channelAccess;
  *
  */
 public interface ChannelStateListener {
-    void newState(Channel c);
+    void channelStateChange(Channel c);
+    void disconnect(Channel c);
 }

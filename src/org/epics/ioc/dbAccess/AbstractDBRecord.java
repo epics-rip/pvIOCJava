@@ -5,9 +5,7 @@
  */
 package org.epics.ioc.dbAccess;
 
-import java.util.Iterator;
-import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.atomic.*;
+import java.util.*;
 import java.util.concurrent.locks.*;
 
 import org.epics.ioc.dbDefinition.*;
@@ -21,18 +19,21 @@ import org.epics.ioc.pvAccess.*;
  *
  */
 public class AbstractDBRecord extends AbstractDBStructure implements DBRecord {
-    private static AtomicInteger numberRecords = new AtomicInteger();
-    private int id = numberRecords.addAndGet(1);
+    private static int numberRecords = 0;
+    private int id = numberRecords++;
     private String recordName;
+    private RecordState recordState;
     private ReentrantLock lock = new ReentrantLock();
-    private AtomicReference<RecordSupport> recordSupport = 
-        new AtomicReference<RecordSupport>();
-    private AtomicReference<RecordProcess> recordProcess = 
-        new AtomicReference<RecordProcess>();
+    private String recordSupportName = null;
+    private RecordSupport recordSupport = null;
+    private RecordProcess recordProcess = null;
     private static Convert convert = ConvertFactory.getConvert();
-    private ConcurrentLinkedQueue<ListenerPvt> listenerList
-        = new ConcurrentLinkedQueue<ListenerPvt>();
-    
+    private LinkedList<RecordStateListener> recordStateListenerList
+        = new LinkedList<RecordStateListener>();
+    private LinkedList<ListenerPvt> listenerList
+        = new LinkedList<ListenerPvt>();
+    private LinkedList<AbstractDBData> listenerSourceList
+          = new LinkedList<AbstractDBData>();
     /**
      * constructor that derived clases must call.
      * @param recordName the name of the record.
@@ -42,6 +43,7 @@ public class AbstractDBRecord extends AbstractDBStructure implements DBRecord {
     {
         super(dbdRecordType);
         this.recordName = recordName;
+        recordState = RecordState.constructed;
         super.setRecord(this);
         super.createFields(this);
     }
@@ -52,52 +54,105 @@ public class AbstractDBRecord extends AbstractDBStructure implements DBRecord {
         return recordName;
     }
     /* (non-Javadoc)
+     * @see org.epics.ioc.dbAccess.DBRecord#getRecordState()
+     */
+    public RecordState getRecordState() {
+        return recordState;
+    }
+    /* (non-Javadoc)
+     * @see org.epics.ioc.dbAccess.DBRecord#setRecordState(org.epics.ioc.dbAccess.RecordState)
+     */
+    public void setRecordState(RecordState state) {
+        recordState = state;
+        Iterator<RecordStateListener> iter = recordStateListenerList.iterator();
+        while(iter.hasNext()) {
+            RecordStateListener listener = iter.next();
+            listener.newState(state);
+        }
+        if(state==RecordState.zombie) {
+            recordSupport = null;
+            recordProcess = null;
+        }
+    }
+    /* (non-Javadoc)
+     * @see org.epics.ioc.dbAccess.DBRecord#addRecordStateListener(org.epics.ioc.dbAccess.RecordStateListener)
+     */
+    public void addRecordStateListener(RecordStateListener listener) {
+        recordStateListenerList.add(listener);
+    }
+    /* (non-Javadoc)
+     * @see org.epics.ioc.dbAccess.DBRecord#removeRecordStateListener(org.epics.ioc.dbAccess.RecordStateListener)
+     */
+    public void removeRecordStateListener(RecordStateListener listener) {
+        recordStateListenerList.remove(listener);
+    }
+    /* (non-Javadoc)
+     * @see org.epics.ioc.dbAccess.DBRecord#lock()
+     */
+    public void lock() {
+        lock.lock();
+    }
+    /* (non-Javadoc)
+     * @see org.epics.ioc.dbAccess.DBRecord#unlock()
+     */
+    public void unlock() {
+        lock.unlock();
+    }
+    /* (non-Javadoc)
+     * @see org.epics.ioc.dbAccess.DBRecord#lockOtherRecord(org.epics.ioc.dbAccess.DBRecord)
+     */
+    public void lockOtherRecord(DBRecord otherRecord) {
+        int otherId = otherRecord.getRecordID();
+        if(id<=otherId) {
+            otherRecord.lock();
+            return;
+        }
+        int count = lock.getHoldCount();
+        for(int i=0; i<count; i++) lock.unlock();
+        otherRecord.lock();
+        for(int i=0; i<count; i++) lock.lock();
+    }
+    /* (non-Javadoc)
+     * @see org.epics.ioc.dbAccess.DBRecord#getRecordSupportName()
+     */
+    public String getRecordSupportName() {
+        return recordSupportName;
+    }
+    /* (non-Javadoc)
+     * @see org.epics.ioc.dbAccess.DBRecord#setRecordSupportName(java.lang.String)
+     */
+    public boolean setRecordSupportName(String name) {
+        if(recordSupportName!=null) return false;
+        recordSupportName = name;
+        return true;
+    }
+    /* (non-Javadoc)
      * @see org.epics.ioc.dbAccess.DBRecord#getRecordSupport()
      */
     public RecordSupport getRecordSupport() {
-        return recordSupport.get();
+        return recordSupport;
     }
     /* (non-Javadoc)
      * @see org.epics.ioc.dbAccess.DBRecord#setRecordSupport(org.epics.ioc.dbProcess.RecordSupport)
      */
     public boolean setRecordSupport(RecordSupport support) {
-        return recordSupport.compareAndSet(null,support);
+        if(recordSupport!=null) return false;
+        recordSupport = support;
+        return true;
     }
     /* (non-Javadoc)
      * @see org.epics.ioc.dbAccess.DBRecord#getRecordProcess()
      */
     public RecordProcess getRecordProcess() {
-        return recordProcess.get();
+        return recordProcess;
     }
     /* (non-Javadoc)
      * @see org.epics.ioc.dbAccess.DBRecord#setRecordProcess(org.epics.ioc.dbProcess.RecordProcess)
      */
     public boolean setRecordProcess(RecordProcess process) {
-        return recordProcess.compareAndSet(null,process);
-    }
-    
-    /* (non-Javadoc)
-     * @see org.epics.ioc.dbAccess.DBRecord#getLock()
-     */
-    public ReentrantLock getLock() {
-        return lock;
-    }
-    /* (non-Javadoc)
-     * @see org.epics.ioc.dbAccess.DBRecord#lockOther(java.util.concurrent.locks.ReentrantLock)
-     */
-    public ReentrantLock lockOtherRecord(DBRecord otherRecord) {
-        ReentrantLock lockOther = otherRecord.getLock();
-        if(lockOther.tryLock()) return lockOther;
-        int otherId = otherRecord.getRecordID();
-        if(id<=otherId) {
-            lockOther.lock();
-            return lockOther;
-        }
-        lock.unlock();
-        lockOther.lock();
-        lock.lock();
-        return lockOther;
-        
+        if(recordProcess!=null) return false;
+        recordProcess = process;
+        return true;
     }
     /* (non-Javadoc)
      * @see org.epics.ioc.dbAccess.DBRecord#getRecordID()
@@ -128,16 +183,43 @@ public class AbstractDBRecord extends AbstractDBStructure implements DBRecord {
     /* (non-Javadoc)
      * @see org.epics.ioc.dbAccess.DBRecord#createListener(org.epics.ioc.dbAccess.DBListener)
      */
-    public Listener createListener(DBListener listener) {
+    public RecordListener createListener(DBListener listener) {
         ListenerPvt listenerPvt = new ListenerPvt(listener);
         listenerList.add(listenerPvt);
         return listenerPvt;
     }
     /* (non-Javadoc)
-     * @see org.epics.ioc.dbAccess.DBRecord#destroyListener(org.epics.ioc.dbAccess.Listener)
+     * @see org.epics.ioc.dbAccess.DBRecord#destroyListener(org.epics.ioc.dbAccess.RecordListener)
      */
-    public void destroyListener(Listener listener) {
+    public void removeListener(RecordListener listener) {
+        Iterator<AbstractDBData> iter = listenerSourceList.iterator();
+        while(iter.hasNext()) {
+            AbstractDBData dbData = iter.next();
+            dbData.removeListener(listener);
+        }
         listenerList.remove(listener);
+    }
+    /* (non-Javadoc)
+     * @see org.epics.ioc.dbAccess.AbstractDBData#removeListeners()
+     */
+    public void removeListeners() {
+        while(true) {
+            ListenerPvt listener = listenerList.remove();
+            if(listener==null) break;
+            listener.unlisten();
+            Iterator<AbstractDBData> iter = listenerSourceList.iterator();
+            while(iter.hasNext()) {
+                AbstractDBData dbData = iter.next();
+                dbData.removeListener(listener);
+            }
+        }
+        listenerSourceList.clear();
+    }
+    /* (non-Javadoc)
+     * @see org.epics.ioc.dbAccess.DBRecord#addListenerSource(org.epics.ioc.dbAccess.AbstractDBData)
+     */
+    public void addListenerSource(AbstractDBData dbData) {
+        listenerSourceList.add(dbData);
     }
     /* (non-Javadoc)
      * @see java.lang.Object#toString()
@@ -199,15 +281,18 @@ public class AbstractDBRecord extends AbstractDBStructure implements DBRecord {
         builder.append("}");
         return builder.toString();
     }
-    private static class ListenerPvt implements Listener {
+    private static class ListenerPvt implements RecordListener {
         private DBListener dbListener;
         private boolean isSynchronous = false;
         private boolean sentWhileSynchronous = false;
         
+        void unlisten() {
+            dbListener.unlisten(this);
+        }
+
         ListenerPvt(DBListener listener) {
             dbListener = listener;
         }
-
         public void newData(DBData data) {
             if(isSynchronous && !sentWhileSynchronous) {
                 dbListener.beginSynchronous();

@@ -5,7 +5,6 @@
  */
 package org.epics.ioc.dbProcess;
 
-import org.epics.ioc.channelAccess.*;
 
 /**
  * @author mrk

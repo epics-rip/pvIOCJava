@@ -8,17 +8,20 @@ package org.epics.ioc.support;
 import org.epics.ioc.dbAccess.*;
 import org.epics.ioc.dbProcess.*;
 import org.epics.ioc.pvAccess.*;
+import org.epics.ioc.util.AlarmSeverity;
 import org.epics.ioc.channelAccess.*;
 
 /**
  * @author mrk
  *
  */
-public class InputLink implements LinkSupport, CALinkListener, ChannelDataGet {
+public class InputLink implements LinkSupport,
+CALinkListener, ChannelDataGetListener, ChannelFieldGroupListener,ChannelStateListener {
     private static String supportName = "InputLink";
     private static Convert convert = ConvertFactory.getConvert();
     
     private DBLink dbLink = null;
+    private DBRecord dbRecord = null;
     private DBStructure configStructure = null;
     private PVString pvnameAccess = null;
     private PVBoolean processAccess = null;
@@ -27,29 +30,34 @@ public class InputLink implements LinkSupport, CALinkListener, ChannelDataGet {
     private PVBoolean inheritSeverityAccess = null;
     private PVBoolean forceLocalAccess = null;
     
-    private ChannelOption[] channelOption = null;
-    
-    private Field severityField = null;
     private PVData recordData = null;
     
     private CALink caLink = null;
-    private ChannelIOC channel = null;
+    private boolean process = false;
+    private boolean wait = false;
     
-    private Field linkField = null;
+    private ChannelIOC channel = null;
+    private DBRecord channelRecord = null;
+    private ChannelDataGet dataGet = null;
+    private ChannelField linkField = null;
+    private ChannelField severityField = null;
     private ChannelFieldGroup fieldGroup = null;
+    private boolean isSynchronous = false;
+    private boolean isAsynchronous = false;
+    private LinkReturn linkReturn = LinkReturn.noop;
     
     private RecordProcess recordProcess = null;
     private RecordSupport recordSupport = null;
     
     public InputLink(DBLink dbLink) {
         this.dbLink = dbLink;
-    }
-
-    public String getName() {
-        return supportName;
+        dbRecord = dbLink.getRecord();
     }
     
     // Support
+    public String getName() {
+        return supportName;
+    }
     public void initialize() {
         configStructure = dbLink.getConfigStructure();
         Structure structure = (Structure)configStructure.getField();
@@ -68,45 +76,26 @@ public class InputLink implements LinkSupport, CALinkListener, ChannelDataGet {
         inheritSeverityAccess = getBoolean("inheritSeverity");
         forceLocalAccess = getBoolean("forceLocal");
     }
-    
     public void destroy() {
         stop();
-        recordData = null;
-        forceLocalAccess = null;
-        inheritSeverityAccess = null;
-        timeoutAccess = null;
-        waitAccess = null;
-        processAccess = null;
-        pvnameAccess = null;
-        configStructure = null;
-        dbLink = null;
     }
-
     public void start() {
-        boolean process = processAccess.get();
-        boolean wait = waitAccess.get();
+        if(recordData==null) {
+            throw new IllegalStateException(
+                "Logic Error: InputLink.start called before setField");
+        }
+        process = processAccess.get();
+        wait = waitAccess.get();
         caLink = CALinkFactory.create(this,pvnameAccess.get());
-        int nOptions = 0;
-        if(process) nOptions++;
-        if(process && wait) nOptions++;
-        channelOption = new ChannelOption[nOptions];
-        if(process) channelOption[0] = ChannelOption.process;
-        if(wait) channelOption[1] = ChannelOption.wait;
-        
     }
-
     public void stop() {
-        channelOption = null;
-        channel.destroy();
-        channel = null;
-        caLink.destroy();
+        disconnect();
+        wait = false;
+        process = false;
+        if(caLink!=null) caLink.destroy();
         caLink = null;
-        linkField = null;
-        fieldGroup.destroy();
-        fieldGroup = null;
     }
-
-    // LinkSupport
+//  LinkSupport
     public boolean setField(PVData data) {
         recordData = data;
         return true;
@@ -114,80 +103,108 @@ public class InputLink implements LinkSupport, CALinkListener, ChannelDataGet {
     
     public LinkReturn process(RecordProcess recordProcess,RecordSupport recordSupport) {
         if(channel==null) return LinkReturn.failure;
-        if(channel.isLocal()) {
-            ChannelLocal channelLocal = (ChannelLocal)channel;
-            channelLocal.setLinkSupport(this);
-            channelLocal.setRecordProcess(recordProcess);
-            channelLocal.setRecordSupport(recordSupport);
-        }
         this.recordProcess = recordProcess;
         this.recordSupport = recordSupport;
-        if(!channel.get(fieldGroup,this,channelOption)) return LinkReturn.failure;
-        return LinkReturn.active;
+        isSynchronous = true;
+        linkReturn = LinkReturn.active;
+        dataGet.get(fieldGroup,this,process,wait);
+        isSynchronous = false;
+        return linkReturn;
     }
-        
-    
-    // CALinkListener
+//  CALinkListener
     public String connect() {
-        if(recordData==null) {
-            throw new IllegalStateException(
-                "Logic Error: InputLink.connect called before setField");
+        dbRecord.lock();
+        try {
+            ChannelIOC channel = caLink.getChannel();
+            String errorMessage = null;
+            if(forceLocalAccess.get() && !channel.isLocal()) {
+                errorMessage = String.format(
+                    "%s.%s pvname %s is not local",
+                    dbLink.getRecord().getRecordName(),
+                    dbLink.getDBDField().getName(),
+                    pvnameAccess.get());
+                return errorMessage;
+            }
+            ChannelSetResult result = channel.setField(pvnameAccess.get());
+            if(result!=ChannelSetResult.thisChannel) {
+                throw new IllegalStateException(
+                "Logic Error: InputLink.connect bad return from setField");
+            }
+            linkField = channel.getChannelField();
+            errorMessage = checkCompatibility();
+            if(errorMessage!=null) return errorMessage;
+            fieldGroup = channel.createFieldGroup(this);
+            fieldGroup.addChannelField(linkField);
+            if(inheritSeverityAccess.get()) {
+                result = channel.setField("severity");
+                if(result==ChannelSetResult.thisChannel) {
+                    severityField = channel.getChannelField();
+                } else {
+                    severityField = null;
+                }
+            }
+            channel.setTimeout(timeoutAccess.get());
+            channelRecord = channel.getLocalRecord();
+            this.channel = channel;
+        } finally {
+            dbRecord.unlock();
         }
-        ChannelIOC channel = caLink.getChannel();
-        String errorMessage = null;
-        if(forceLocalAccess.get() && !channel.isLocal()) {
-            errorMessage = String.format(
-                "%s.%s pvname %s is not local",
-                dbLink.getRecord().getRecordName(),
-                dbLink.getDBDField().getName(),
-                pvnameAccess.get());
-            return errorMessage;
-        }
-        linkField = channel.getField();
-        errorMessage = checkCompatibility();
-        if(errorMessage!=null) return errorMessage;
-        fieldGroup = channel.createFieldGroup();
-        fieldGroup.addField(linkField);
-        if(inheritSeverityAccess.get()) {
-            severityField = channel.getPropertyField("severity");
-            if(severityField!=null) fieldGroup.addField(severityField);
-        }
-        channel.setTimeout(timeoutAccess.get());
-        this.channel = channel;
         return null;
     }
-
     public void disconnect() {
-        channel = null;
-        fieldGroup.destroy();
-        fieldGroup = null;
-        linkField = null;
+        dbRecord.lock();
+        try {
+            severityField = null;
+            linkField = null;
+            if(fieldGroup!=null) fieldGroup.destroy();
+            fieldGroup = null;
+            if(channel!=null) channel.destroy();
+            channel = null;
+        } finally {
+            dbRecord.unlock();
+        }
+    }
+    // ChannelDataGetListener
+    public void beginSynchronous() {
+        dbRecord.lock();
+        isAsynchronous = !isSynchronous;
+        if(isSynchronous) dbRecord.unlock();
+        if(channelRecord!=dbRecord) dbRecord.lockOtherRecord(channelRecord);
     }
 
-    // ChannelDataGet
-    public void gotData(PVData data) {
-        if(data.getField()==severityField) {
+    public void endSynchronous() {
+        linkReturn = LinkReturn.done;
+        if(channelRecord!=dbRecord) channelRecord.unlock();
+        if(isAsynchronous) {
+            recordSupport.linkSupportDone(LinkReturn.done);
+            dbRecord.unlock();
+        }
+    }
+
+    public void newData(ChannelField field,PVData data) {
+        if(field==severityField) {
             PVEnum pvEnum = (PVEnum)data;
             AlarmSeverity severity = AlarmSeverity.getSeverity(pvEnum.getIndex());
-            recordProcess.setStatusSeverity("inherit severity",severity);
+            if(severity!=AlarmSeverity.none) {
+                recordProcess.setStatusSeverity("inherit severity",severity);
+            }
             return;
         }
-        if(data.getField()!=linkField) {
+        if(field!=linkField) {
             throw new IllegalArgumentException(
                 "Logic error: InputLink.gotData received invalif data");
         }
-        Type linkType = linkField.getType();
+        Type linkType = data.getField().getType();
         Field recordField = recordData.getField();
         Type recordType = recordField.getType();
         if(recordType.isScalar() && linkType.isScalar()) {
             convert.copyScalar(data,recordData);
-            recordSupport.linkSupportDone(LinkReturn.done);
             return;
         }
         if(linkType==Type.pvArray && recordType==Type.pvArray) {
             PVArray linkArrayData = (PVArray)data;
             PVArray recordArrayData = (PVArray)recordData;
-            convert.copyArray(linkArrayData,0,linkArrayData.getLength(),recordArrayData,0);
+            convert.copyArray(linkArrayData,0,recordArrayData,0,linkArrayData.getLength());
             recordSupport.linkSupportDone(LinkReturn.done);
             return;
         }
@@ -195,14 +212,36 @@ public class InputLink implements LinkSupport, CALinkListener, ChannelDataGet {
             PVStructure linkStructureData = (PVStructure)data;
             PVStructure recordStructureData = (PVStructure)recordData;
             convert.copyStructure(linkStructureData,recordStructureData);
-            recordSupport.linkSupportDone(LinkReturn.done);
             return;
         }
         recordSupport.linkSupportDone(LinkReturn.failure);
     }
-    
+    /* (non-Javadoc)
+     * @see org.epics.ioc.channelAccess.ChannelStateListener#channelStateChange(org.epics.ioc.channelAccess.Channel)
+     */
+    public void channelStateChange(Channel c) {
+        // nothing to do
+        
+    }
+    /* (non-Javadoc)
+     * @see org.epics.ioc.channelAccess.ChannelStateListener#disconnect(org.epics.ioc.channelAccess.Channel)
+     */
+    public void disconnect(Channel c) {
+        stop();
+    }
+    /* (non-Javadoc)
+     * @see org.epics.ioc.channelAccess.ChannelFieldGroupListener#accessRightsChange(org.epics.ioc.channelAccess.ChannelField)
+     */
+    public void accessRightsChange(ChannelField channelField) {
+        // nothing to do
+    }
+
+    // private methods
     public void failure(String reason) {
-        recordSupport.linkSupportDone(LinkReturn.failure);
+        linkReturn = LinkReturn.failure;
+        if(isAsynchronous) {
+            recordSupport.linkSupportDone(LinkReturn.failure);
+        }
     }
     
     private PVString getString(String fieldName) {
@@ -254,11 +293,11 @@ public class InputLink implements LinkSupport, CALinkListener, ChannelDataGet {
     }
     
     private String checkCompatibility() {
-        Type linkType = linkField.getType();
+        Type linkType = linkField.getField().getType();
         Field recordField = recordData.getField();
         Type recordType = recordField.getType();
         if(recordType.isScalar() && linkType.isScalar()) {
-            if(convert.isCopyScalarCompatible(linkField,recordField)) return null;
+            if(convert.isCopyScalarCompatible(linkField.getField(),recordField)) return null;
         } else if(linkType==Type.pvArray && recordType==Type.pvArray) {
             Array linkArray = (Array)linkField;
             Array recordArray = (Array)recordField;

@@ -25,7 +25,6 @@ public class LinearConvert implements RecordSupport {
     
     public void destroy() {
         System.out.printf("%s.destroy entered\n",supportName);
-        dbStructure = null;
     }
 
     public void start() {
@@ -43,6 +42,11 @@ public class LinearConvert implements RecordSupport {
     public ProcessReturn process(RecordProcess recordProcess) {
         System.out.printf("%s.process entered\n",supportName);
         return ProcessReturn.noop;
+    }
+
+    public void linkSupportDone(LinkReturn result) {
+        // TODO Auto-generated method stub
+        
     }
 
 }

@@ -5,13 +5,12 @@
  */
 package org.epics.ioc.channelAccess;
 
-import org.epics.ioc.pvAccess.*;
-
 /**
  * @author mrk
  *
  */
 public interface ChannelDataGet {
-    void gotData(PVData data);
-    void failure(String reason);
+    void destroy();
+    void get(ChannelFieldGroup fieldGroup,ChannelDataGetListener callback,boolean process, boolean wait);
+    void cancelGet();
 }

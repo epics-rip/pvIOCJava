@@ -5,14 +5,15 @@
  */
 package org.epics.ioc.channelAccess;
 
-import org.epics.ioc.pvAccess.*;
 
 /**
  * @author mrk
  *
  */
 public interface ChannelNotifyListener {
+    void beginSynchronous();
+    void endSynchronous();
     void reason(Event reason);
-    void newField(Field field);
+    void newData(ChannelField field);
     void failure(String reason);
 }

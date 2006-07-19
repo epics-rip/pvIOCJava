@@ -12,7 +12,7 @@ package org.epics.ioc.channelAccess;
 public enum ChannelSetResult {
     /**
      * the requested field is located via another channel.
-     * calls to getRemoteChannel and getRemoteField can be used to connect to the channel and field.
+     * calls to getOtherChannel and getOtherField can be used to connect to the channel and field.
      */
     otherChannel,
     /**

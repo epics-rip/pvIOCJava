@@ -142,7 +142,7 @@ public class ListenerTest extends TestCase {
     }
     
     private static class TestListener implements DBListener{ 
-        private Listener listener;
+        private RecordListener listener;
         private String recordName;
         private String pvName = null;
         private String actualFieldName = null;
@@ -213,6 +213,13 @@ public class ListenerTest extends TestCase {
             }
             System.out.printf("    dbDataName %s value %s\n",
                 dbDataName,dbData.toString());    
+        }
+
+        /* (non-Javadoc)
+         * @see org.epics.ioc.dbAccess.DBListener#unlisten(org.epics.ioc.dbAccess.RecordListener)
+         */
+        public void unlisten(RecordListener listener) {
+            // Nothing to do.
         }
         
     }

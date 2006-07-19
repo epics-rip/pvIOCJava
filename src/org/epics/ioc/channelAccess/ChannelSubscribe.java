@@ -5,13 +5,13 @@
  */
 package org.epics.ioc.channelAccess;
 
-
 /**
  * @author mrk
  *
  */
-public interface ChannelFieldGroup {
+public interface ChannelSubscribe {
     void destroy();
-    void addChannelField(ChannelField channelField);
-    void removeChannelField(ChannelField channelField);
+    void start(ChannelFieldGroup fieldGroup,ChannelNotifyListener listener,Event why);
+    void start(ChannelFieldGroup fieldGroup,ChannelDataListener listener,Event why);
+    void stop();
 }

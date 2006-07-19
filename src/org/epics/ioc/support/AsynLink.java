@@ -24,7 +24,7 @@ public class AsynLink implements LinkSupport {
     public String getName() {
         return supportName;
     }
-    
+
     public void destroy() {
         // TODO Auto-generated method stub
         
@@ -35,7 +35,7 @@ public class AsynLink implements LinkSupport {
         
     }
 
-    public void start(PVData field) {
+    public void start() {
         // TODO Auto-generated method stub
         
     }
@@ -44,10 +44,15 @@ public class AsynLink implements LinkSupport {
         // TODO Auto-generated method stub
         
     }
-
-    public ProcessReturn process(RecordProcess recordProcess) {
+    public LinkReturn process(RecordProcess recordProcess, RecordSupport recordSupport) {
         // TODO Auto-generated method stub
         return null;
     }
 
+    public boolean setField(PVData field) {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
+    
 }

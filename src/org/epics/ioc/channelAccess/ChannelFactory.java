@@ -16,16 +16,16 @@ public class ChannelFactory {
     private static AtomicReference<ChannelAccess> localAccess = new AtomicReference<ChannelAccess>();
     private static AtomicReference<ChannelAccess> remoteAccess = new AtomicReference<ChannelAccess>();
     
-    public static Channel createChannel(String name) {
+    public static Channel createChannel(String name,ChannelStateListener listener) {
         Channel channel = null;
         ChannelAccess access = localAccess.get();
         if(access!=null) {
-            channel = access.createChannel(name);
+            channel = access.createChannel(name,listener);
             if(channel!=null) return channel;
         }
         access = remoteAccess.get();
         if(access!=null) {
-            channel = access.createChannel(name);
+            channel = access.createChannel(name,listener);
         }
         return channel;
     }

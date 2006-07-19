@@ -1,0 +1,37 @@
+<?xml version="1.0" ?>
+<DBDefinition>
+<recordType name = "doubleRecord" recordSupportName =
+           "org.epics.ioc.dbProcess.example.DoubleRecord" >
+    <field name = "value" type = "double" >
+        <property name = "status" associatedField = "status" />
+        <property name = "severity" associatedField = "severity" />
+        <property name = "units" associatedField = "units" />
+        <property name = "displayLimit" associatedField = "displayLimit" />
+        <property name = "timeStamp" associatedField = "/timeStamp" />
+    </field>
+    <field name = "input" type = "link" />
+    <field name = "status" type = "string" />
+    <field name = "severity" type = "menu" menuName = "menuAlarmSeverity" />
+    <field name = "units" type = "string" />
+    <field name = "displayLimit"
+         type = "structure" structureName = "displayLimit" />
+    <field name = "priority" type = "menu" menuName = "menuPriority" />
+    <field name = "timeStamp" type = "structure" structureName = "timeStamp"/>
+    <field name = "scan" type = "structure" structureName = "scan"/>
+</recordType>
+
+<recordType name = "counterRecord" recordSupportName =
+           "org.epics.ioc.dbProcess.example.CounterRecord">
+    <field name = "value" type = "double"/>
+    <field name = "min" type = "double"/>
+    <field name = "max" type = "double"/>
+    <field name = "inc" type = "double"/>
+    <field name = "priority" type = "menu" menuName = "menuPriority" />
+    <field name = "status" type = "string" />
+    <field name = "severity" type = "menu" menuName = "menuAlarmSeverity" />
+    <field name = "timeStamp" type = "structure" structureName = "timeStamp"/>
+    <field name = "scan" type = "structure" structureName = "scan"/>
+    <field name = "process" type = "array" elementType = "structure" />
+</recordType>
+
+</DBDefinition>

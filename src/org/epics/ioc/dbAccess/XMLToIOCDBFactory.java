@@ -9,14 +9,12 @@ import java.util.*;
 import java.util.regex.Pattern;
 import java.io.*;
 import java.net.*;
-import java.lang.reflect.*;
 import org.xml.sax.*;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.helpers.XMLReaderFactory;
 import org.epics.ioc.dbDefinition.*;
 import org.epics.ioc.pvAccess.*;
 import org.epics.ioc.pvAccess.Type;
-import org.epics.ioc.dbProcess.*;
 
 
 /**
@@ -453,46 +451,7 @@ public class XMLToIOCDBFactory {
                         locator));
                 return;
             }
-            Class supportClass;
-            RecordSupport recordSupport = null;
-            Class[] argClass = null;
-            Object[] args = null;
-            Constructor constructor = null;
-            try {
-                supportClass = Class.forName(supportName);
-            }catch (ClassNotFoundException e) {
-                errorHandler.warning(new SAXParseException(
-                        "recordSupport " + supportName + " does not exist",
-                        locator));
-                return;
-            }
-            try {
-                argClass = new Class[] {Class.forName("org.epics.ioc.dbAccess.DBRecord")};
-            }catch (ClassNotFoundException e) {
-                errorHandler.warning(new SAXParseException(
-                        "class DBRecord " + " does not exist??? Why??",
-                        locator));
-                return;
-            }
-            try {
-                args = new Object[] {dbRecord};
-                constructor = supportClass.getConstructor(argClass);
-            } catch (NoSuchMethodException e) {
-                errorHandler.warning(new SAXParseException(
-                        "recordSupport " + supportName + " does not have a valid constructor",
-                        locator));
-                return;
-            }
-            try {
-                recordSupport = (RecordSupport)constructor.newInstance(args);
-            } catch(Exception e) {
-                errorHandler.warning(new SAXParseException(
-                        "recordSupport " + supportName + " not found",
-                        locator));
-                return;
-            }
-            dbRecord.setRecordSupport(recordSupport);
-            
+            dbRecord.setRecordSupportName(supportName);
         }
         
         void end(String qName) throws SAXException {
@@ -806,45 +765,7 @@ public class XMLToIOCDBFactory {
                 supportName = dbdStructure.getStructureSupportName();
             }
             if(supportName==null) return;
-            Class supportClass;
-            RecordSupport recordSupport = null;
-            Class[] argClass = null;
-            Object[] args = null;
-            Constructor constructor = null;
-            try {
-                supportClass = Class.forName(supportName);
-            }catch (ClassNotFoundException e) {
-                errorHandler.warning(new SAXParseException(
-                        "structureSupport " + supportName + " does not exist",
-                        locator));
-                return;
-            }
-            try {
-                argClass = new Class[] {Class.forName("org.epics.ioc.dbAccess.DBStructure")};
-            }catch (ClassNotFoundException e) {
-                errorHandler.warning(new SAXParseException(
-                        "class DBStructure " + " does not exist??? Why??",
-                        locator));
-                return;
-            }
-            try {
-                args = new Object[] {dbStructure};
-                constructor = supportClass.getConstructor(argClass);
-            } catch (NoSuchMethodException e) {
-                errorHandler.warning(new SAXParseException(
-                        "structureSupport " + supportName + " does not have a valid constructor",
-                        locator));
-                return;
-            }
-            try {
-                recordSupport = (RecordSupport)constructor.newInstance(args);
-            } catch(Exception e) {
-                errorHandler.warning(new SAXParseException(
-                        "structureSupport " + supportName + " not found",
-                        locator));
-                return;
-            }
-            dbStructure.setStructureSupport(recordSupport);
+            dbStructure.setStructureSupportName(supportName);
         }
     }
     
@@ -1378,45 +1299,6 @@ public class XMLToIOCDBFactory {
             dbLink.putConfigStructure(configDBStructure);
             structureHandler = new StructureHandler(configDBStructure);
             state = State.structure;
-            Class supportClass;
-            LinkSupport linkSupport = null;
-            Class[] argClass = null;
-            Object[] args = null;
-            Constructor constructor = null;
-            try {
-                supportClass = Class.forName(linkSupportName);
-            }catch (ClassNotFoundException e) {
-                errorHandler.warning(new SAXParseException(
-                        "linkSupport " + linkSupportName + " does not exist",
-                        locator));
-                return;
-            }
-            try {
-                argClass = new Class[] {Class.forName("org.epics.ioc.dbAccess.DBLink")};
-            }catch (ClassNotFoundException e) {
-                errorHandler.warning(new SAXParseException(
-                        "class DBLink " + " does not exist??? Why??",
-                        locator));
-                return;
-            }
-            try {
-                args = new Object[] {dbLink};
-                constructor = supportClass.getConstructor(argClass);
-            } catch (NoSuchMethodException e) {
-                errorHandler.warning(new SAXParseException(
-                        "recordSupport " + linkSupportName + " does not have a valid constructor",
-                        locator));
-                return;
-            }
-            try {
-                linkSupport = (LinkSupport)constructor.newInstance(args);
-            } catch(Exception e) {
-                errorHandler.warning(new SAXParseException(
-                        "linkSupport " + linkSupportName + " not found",
-                        locator));
-                return;
-            }
-            dbLink.setLinkSupport(linkSupport);
         }
 
         void startElement(String qName, Attributes attributes)

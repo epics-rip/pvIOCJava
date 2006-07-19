@@ -12,6 +12,11 @@ package org.epics.ioc.dbProcess;
  */
 public enum ProcessReturn {
     /**
+     * The support is going away.
+     * Remove any reference to the support.
+     */
+    zombie,
+    /**
      * the support has nothing to do. 
      */
     noop,
