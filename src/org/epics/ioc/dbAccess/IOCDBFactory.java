@@ -10,9 +10,7 @@ import org.epics.ioc.pvAccess.*;
 import org.epics.ioc.pvAccess.Array;
 import org.epics.ioc.pvAccess.Type;
 import org.epics.ioc.pvAccess.Field;
-import org.epics.ioc.dbProcess.*;
 
-import java.lang.reflect.Constructor;
 import java.util.*;
 import java.util.regex.*;
 
@@ -312,9 +310,10 @@ public class IOCDBFactory {
             if(dbData==null) return false;
             if(dbData.getDBDField().getDBType()!=DBType.dbLink) return false;
             DBLink dbLink = (DBLink)dbData;
-            DBStructure config = dbLink.getConfigStructure();
+            PVStructure config = dbLink.getConfigurationStructure();
             DBString pvname = null;
-            if(config!=null) for(DBData data: config.getFieldDBDatas()) {
+            if(config!=null) for(PVData pvdata: config.getFieldPVDatas()) {
+                DBData data = (DBData)pvdata;
                 DBDAttribute attribute = data.getDBDField().getAttribute();
                 if(attribute.isLink()) {
                     if(data.getField().getType()==Type.pvString) {

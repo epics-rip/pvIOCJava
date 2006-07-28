@@ -25,15 +25,4 @@ public interface DBDStructure extends DBDField, Structure {
      * @return the index or -1 if the field does not exist.
      */
     int getDBDFieldIndex(String fieldName);
-    /**
-     * get the name of the structure support.
-     * @return the name or null if the support was never created.
-     */
-    String getStructureSupportName();
-    /**
-     * set the structure support name.
-     * @param supportName the name of the support.
-     * @return true if the name was set and false if a name was previously set. 
-     */
-    boolean setStructureSupportName(String supportName);
 }

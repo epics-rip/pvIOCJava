@@ -3,26 +3,27 @@
  * EPICS JavaIOC is distributed subject to a Software License Agreement found
  * in file LICENSE that is included with this distribution.
  */
-package org.epics.ioc.dbAccess;
+package org.epics.ioc.pvAccess;
 
 /**
- * Class required by get/put DBArrayArray methods.
+ * /**
+ * Class required by get/put PVUnknownArray methods.
  * Get will set data and offset.
  * Put requires that the caller set data and offset.
  * @author mrk
  *
  */
-public class LinkArrayData {
+public class UnknownArrayData {
     /**
-     * The DBLink[].
-     * DBLinkArray.get sets this value.
-     * DBLinkArray.put requires that the caller set the value. 
+     * The PVData[].
+     * PVUnknownArray.get sets this value.
+     * PVUnknownArray.put requires that the caller set the value. 
      */
-    public DBLink[] data;
+    public PVData[] data;
     /**
      * The offset.
-     * DBLinkArray.get sets this value.
-     * DBLinkArray.put requires that the caller set the value. 
+     * PVUnknownArray.get sets this value.
+     * PVUnknownArray.put requires that the caller set the value. 
      */
     public int offset;
 }

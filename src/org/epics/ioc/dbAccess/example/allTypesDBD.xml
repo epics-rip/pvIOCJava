@@ -1,7 +1,18 @@
 <?xml version="1.0" ?>
 <DBDefinition>
 
-<structure name = "structureAllTypes">
+<structure name = "dummy">
+    <field name = "xxx" type = "string" />
+    <field name = "yyy" type = "int" />
+</structure>
+
+
+<support name = "exampleSupport"
+    factoryName = "junkFactoryName" />
+<support name = "dummy" configurationStructureName = "dummy" 
+    factoryName = "org.epics.ioc.support.Dummy" />
+
+<structure name = "structureAllTypes" supportName = "exampleSupport">
     <field name = "boolean" type = "boolean" />
     <field name = "byte" type = "byte" />
     <field name = "short" type = "short" />
@@ -30,8 +41,7 @@
     <field name = "arrayArray" type = "array" elementType = "array" />
 </structure>
 
-<recordType name = "allTypes" recordSupportName = 
-           "org.epics.ioc.support.ExampleRecordSupport">
+<recordType name = "allTypes" supportName = "exampleSupport">
     <field name = "boolean" type = "boolean" />
     <field name = "byte" type = "byte" />
     <field name = "short" type = "short" />

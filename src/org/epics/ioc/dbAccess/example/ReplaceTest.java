@@ -2292,40 +2292,11 @@ public class ReplaceTest extends TestCase {
     private static class LinkArray
         extends AbstractDBArray implements DBLinkArray
     {
- 
-        /* (non-Javadoc)
-         * @see org.epics.ioc.pvAccess.PVStructureArray#get(int, int, org.epics.ioc.pvAccess.StructureArrayData)
-         */
-        public int get(int offset, int len, StructureArrayData data) {
-            System.out.printf("\n    **.get**",getField().getType().toString());
-            int n = len;
-            if(offset+len > length) n = length;
-            data.data = value;
-            data.offset = offset;
-            return n;
-        }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.pvAccess.PVStructureArray#put(int, int, org.epics.ioc.pvAccess.PVStructure[], int)
-         */
-        public int put(int offset, int len, PVStructure[]from, int fromOffset) {
-            System.out.printf("\n    **.put**",getField().getType().toString());
-            if(!super.getField().isMutable())
-                throw new IllegalStateException("PVData.isMutable is false");
-            if(offset+len > length) {
-                 int newlength = offset + len;
-                 if(newlength>capacity) setCapacity(newlength);
-                 length = newlength;
-            }
-            System.arraycopy(from,fromOffset,value,offset,len);
-            postPut();
-            return len;
-        }
-
         /* (non-Javadoc)
          * @see java.lang.Object#toString()
          */
         public String toString() {
-            return getString(0);
+            return toString(0);
         }
         
         /* (non-Javadoc)
@@ -2350,7 +2321,7 @@ public class ReplaceTest extends TestCase {
             }
             newLine(builder,indentLevel);
             builder.append("}");
-            return builder.toString();
+            return builder.toString() + super.toString(indentLevel);
         }
 
         /* (non-Javadoc)

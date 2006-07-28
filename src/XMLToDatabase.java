@@ -88,13 +88,13 @@ public class XMLToDatabase {
             }
         }
         
-        Map<String,DBDLinkSupport> linkSupportMap = dbd.getLinkSupportMap();
-        keys = linkSupportMap.keySet();
+        Map<String,DBDSupport> supportMap = dbd.getSupportMap();
+        keys = supportMap.keySet();
         if(keys.size()>0) {
             System.out.printf("\n\nlinkSupport");
             for(String key: keys) {
-                DBDLinkSupport dbdLinkSupport = linkSupportMap.get(key);
-                System.out.print(dbdLinkSupport.toString());
+                DBDSupport dbdSupport = supportMap.get(key);
+                System.out.print(dbdSupport.toString());
             }
         }
         

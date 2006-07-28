@@ -72,10 +72,15 @@ public interface DBDAttribute {
     DBType getElementDBType();
     /**
      * Get the element Type.
-     * If the file is not an array pvUnknown is returned.
+     * If the field is not an array pvUnknown is returned.
      * @return the Type.
      */
     Type getElementType();
+    /**
+     * Get the name of the support for this field.
+     * @return The name of the support or null if no support is defined.
+     */
+    String getSupportName();
     /**
      * create a string describing the properties.
      * @param indentLevel indent level. Ecah level is four spaces.

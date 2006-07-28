@@ -45,7 +45,7 @@ public class FieldDataFactory {
         case dbMenu: return new MenuData(parent,(DBDMenuField)dbdField);
         case dbStructure: return new StructureData(parent,(DBDStructureField)dbdField);
         case dbArray: return createArrayData(parent,dbdField,0,true);
-        case dbLink: return new LinkData(parent,(DBDLinkField)dbdField);
+        case dbLink: return new UnknownData(parent,dbdField);
         }
         throw new IllegalArgumentException(
             "Illegal Type. Must be pvUnknown,...,pvString");
@@ -132,14 +132,15 @@ public class FieldDataFactory {
     private static Pattern primitivePattern = Pattern.compile("[, ]");
 
 
-    private static class UnknownData extends AbstractDBData {
+    private static class UnknownData extends AbstractDBData implements DBLink {
 
         public String toString() {
-            return convert.getString(this);
+            return toString(0);
         }
 
         public String toString(int indentLevel) {
-            return convert.getString(this, indentLevel);
+            return convert.getString(this, indentLevel)
+                + super.toString(indentLevel);
         }
 
         UnknownData(DBStructure parent,DBDField dbdField) {
@@ -166,11 +167,12 @@ public class FieldDataFactory {
         }
         
         public String toString() {
-            return convert.getString(this);
+            return toString(0);
         }
         
         public String toString(int indentLevel) {
-            return convert.getString(this, indentLevel);
+            return convert.getString(this, indentLevel)
+            + super.toString(indentLevel);
         }
 
         BooleanData(DBStructure parent,DBDField dbdField) {
@@ -202,11 +204,12 @@ public class FieldDataFactory {
         }
         
         public String toString() {
-            return convert.getString(this);
+            return toString(0);
         }
         
         public String toString(int indentLevel) {
-            return convert.getString(this, indentLevel);
+            return convert.getString(this, indentLevel)
+            + super.toString(indentLevel);
         }
 
         ByteData(DBStructure parent,DBDField dbdField) {
@@ -238,11 +241,12 @@ public class FieldDataFactory {
         }
         
         public String toString() {
-            return convert.getString(this);
+            return toString(0);
         }
 
         public String toString(int indentLevel) {
-            return convert.getString(this, indentLevel);
+            return convert.getString(this, indentLevel)
+            + super.toString(indentLevel);
         }
 
         ShortData(DBStructure parent,DBDField dbdField) {
@@ -274,11 +278,12 @@ public class FieldDataFactory {
         }
         
         public String toString() {
-            return convert.getString(this);
+            return toString(0);
         }
         
         public String toString(int indentLevel) {
-            return convert.getString(this, indentLevel);
+            return convert.getString(this, indentLevel)
+            + super.toString(indentLevel);
         }
 
         IntData(DBStructure parent,DBDField dbdField) {
@@ -310,11 +315,12 @@ public class FieldDataFactory {
         }
         
         public String toString() {
-            return convert.getString(this);
+            return toString(0);
         }
         
         public String toString(int indentLevel) {
-            return convert.getString(this, indentLevel);
+            return convert.getString(this, indentLevel)
+            + super.toString(indentLevel);
         }
 
         LongData(DBStructure parent,DBDField dbdField) {
@@ -346,11 +352,12 @@ public class FieldDataFactory {
         }
         
         public String toString() {
-            return convert.getString(this);
+            return toString(0);
         }
         
         public String toString(int indentLevel) {
-            return convert.getString(this, indentLevel);
+            return convert.getString(this, indentLevel)
+            + super.toString(indentLevel);
         }
 
         FloatData(DBStructure parent,DBDField dbdField) {
@@ -382,11 +389,12 @@ public class FieldDataFactory {
         }
         
         public String toString() {
-            return convert.getString(this);
+            return toString(0);
         }
         
         public String toString(int indentLevel) {
-            return convert.getString(this, indentLevel);
+            return convert.getString(this, indentLevel)
+            + super.toString(indentLevel);
         }
 
         DoubleData(DBStructure parent,DBDField dbdField) {
@@ -418,11 +426,12 @@ public class FieldDataFactory {
         }
         
         public String toString() {
-            return convert.getString(this);
+            return toString(0);
         }
         
         public String toString(int indentLevel) {
-            return convert.getString(this, indentLevel);
+            return convert.getString(this, indentLevel)
+            + super.toString(indentLevel);
         }
 
         StringData(DBStructure parent,DBDField dbdField) {
@@ -468,23 +477,16 @@ public class FieldDataFactory {
         }
     }
 
-    private static class LinkData extends AbstractDBLink
-    {
-        LinkData(DBStructure parent,DBDLinkField dbdLinkField)
-        {
-            super(parent,dbdLinkField);
-        }
-    }
-
     private static class BooleanArray
         extends AbstractDBArray implements DBBooleanArray
     {
         public String toString() {
-            return convert.getString(this);
+            return toString(0);
         }
         
         public String toString(int indentLevel) {
-            return convert.getString(this, indentLevel);
+            return convert.getString(this, indentLevel)
+            + super.toString(indentLevel);
         }
 
         public boolean isCapacityMutable() {
@@ -559,11 +561,12 @@ public class FieldDataFactory {
         extends AbstractDBArray implements DBByteArray
     {
         public String toString() {
-            return convert.getString(this);
+            return toString(0);
         }
         
         public String toString(int indentLevel) {
-            return convert.getString(this, indentLevel);
+            return convert.getString(this, indentLevel)
+            + super.toString(indentLevel);
         }
 
         public boolean isCapacityMutable() {
@@ -637,11 +640,12 @@ public class FieldDataFactory {
         extends AbstractDBArray implements DBShortArray
     {
         public String toString() {
-            return convert.getString(this);
+            return toString(0);
         }
         
         public String toString(int indentLevel) {
-            return convert.getString(this, indentLevel);
+            return convert.getString(this, indentLevel)
+            + super.toString(indentLevel);
         }
 
         public boolean isCapacityMutable() {
@@ -716,11 +720,12 @@ public class FieldDataFactory {
         extends AbstractDBArray implements DBIntArray
     {
         public String toString() {
-            return convert.getString(this);
+            return toString(0);
         }
         
         public String toString(int indentLevel) {
-            return convert.getString(this, indentLevel);
+            return convert.getString(this, indentLevel)
+            + super.toString(indentLevel);
         }
 
         public boolean isCapacityMutable() {
@@ -795,11 +800,12 @@ public class FieldDataFactory {
         extends AbstractDBArray implements DBLongArray
     {
         public String toString() {
-            return convert.getString(this);
+            return toString(0);
         }
         
         public String toString(int indentLevel) {
-            return convert.getString(this, indentLevel);
+            return convert.getString(this, indentLevel)
+            + super.toString(indentLevel);
         }
 
         public boolean isCapacityMutable() {
@@ -873,11 +879,12 @@ public class FieldDataFactory {
         extends AbstractDBArray implements DBFloatArray
     {
         public String toString() {
-            return convert.getString(this);
+            return toString(0);
         }
         
         public String toString(int indentLevel) {
-            return convert.getString(this, indentLevel);
+            return convert.getString(this, indentLevel)
+            + super.toString(indentLevel);
         }
 
         public boolean isCapacityMutable() {
@@ -952,11 +959,12 @@ public class FieldDataFactory {
     {
 
         public String toString() {
-            return convert.getString(this);
+            return toString(0);
         }
         
         public String toString(int indentLevel) {
-            return convert.getString(this, indentLevel);
+            return convert.getString(this, indentLevel)
+            + super.toString(indentLevel);
         }
 
         public boolean isCapacityMutable() {
@@ -1030,11 +1038,12 @@ public class FieldDataFactory {
         extends AbstractDBArray implements DBStringArray
     {
         public String toString() {
-            return convert.getString(this);
+            return toString(0);
         }
         
         public String toString(int indentLevel) {
-            return convert.getString(this, indentLevel);
+            return convert.getString(this, indentLevel)
+            + super.toString(indentLevel);
         }
 
         public boolean isCapacityMutable() {
@@ -1108,11 +1117,12 @@ public class FieldDataFactory {
         extends AbstractDBArray implements DBEnumArray
     {
         public String toString() {
-            return convert.getString(this);
+            return toString(0);
         }
         
         public String toString(int indentLevel) {
-            return convert.getString(this, indentLevel);
+            return convert.getString(this, indentLevel)
+            + super.toString(indentLevel);
         }
 
         public boolean isCapacityMutable() {
@@ -1178,11 +1188,12 @@ public class FieldDataFactory {
         extends AbstractDBArray implements DBMenuArray
     {
         public String toString() {
-            return getString(0);
+            return toString(0);
         }
         
         public String toString(int indentLevel) {
-            return getString(indentLevel);
+            return getString(indentLevel)
+            + super.toString(indentLevel);
         }
 
         private String getString(int indentLevel) {
@@ -1265,11 +1276,12 @@ public class FieldDataFactory {
         extends AbstractDBArray implements DBStructureArray
     {
         public String toString() {
-            return getString(0);
+            return toString(0);
         }
         
         public String toString(int indentLevel) {
-            return getString(indentLevel);
+            return getString(indentLevel)
+            + super.toString(indentLevel);
         }
 
         private String getString(int indentLevel) {
@@ -1370,11 +1382,12 @@ public class FieldDataFactory {
  
 
         public String toString() {
-            return getString(0);
+            return toString(0);
         }
         
         public String toString(int indentLevel) {
-            return getString(indentLevel);
+            return getString(indentLevel)
+            + super.toString(indentLevel);
         }
 
         private String getString(int indentLevel) {
@@ -1473,11 +1486,12 @@ public class FieldDataFactory {
         extends AbstractDBArray implements DBLinkArray
     {
         public String toString() {
-            return getString(0);
+            return toString(0);
         }
         
         public String toString(int indentLevel) {
-            return getString(indentLevel);
+            return getString(indentLevel)
+            + super.toString(indentLevel);
         }
 
         private String getString(int indentLevel) {
@@ -1524,22 +1538,6 @@ public class FieldDataFactory {
                 throw new IllegalStateException("PVData.isMutable is false");
             if(len>capacity) setCapacity(len);
             length = len;
-        }
-        public int get(int offset, int len, StructureArrayData data) {
-            int n = len;
-            if(offset+len > length) n = length;
-            data.data = value;
-            data.offset = offset;
-            return n;
-        }
-        public int put(int offset, int len, PVStructure[]from, int fromOffset) {
-            if(offset+len > length) {
-                 int newlength = offset + len;
-                 if(newlength>capacity) setCapacity(newlength);
-                 length = newlength;
-            }
-            System.arraycopy(from,fromOffset,value,offset,len);
-            return len;
         }
         public int get(int offset, int len, LinkArrayData data) {
             int n = len;

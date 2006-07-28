@@ -35,6 +35,16 @@ public interface Field {
      */
     Type getType();
     /**
+     * Get the name of support for this field.
+     * @return The name of the support.
+     */
+    String getSupportName();
+    /**
+     * Set the support name for this field.
+     * @param name The name of the support.
+     */
+    void setSupportName(String name);
+    /**
      * can the data for the field be modified?
      * @return if it can be modified
      */

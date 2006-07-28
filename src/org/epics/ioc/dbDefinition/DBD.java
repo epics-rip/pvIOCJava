@@ -15,78 +15,80 @@ import java.util.*;
  */
 public interface DBD {
     /**
-     * get the name of this DBD.
+     * Get the name of this DBD.
      * Multiple DBDs can be created via DBDCreateFactory.
-     * @return the DBD name.
+     * @return The name.
      */
     String getName();
     /**
-     * get the DBDMenu for the specified name.
-     * @param menuName the menu to retrieve.
-     * @return the DBDMenu or null if the menu does not exist.
+     * Get the DBDMenu for the specified name.
+     * @param menuName The menu to retrieve.
+     * @return The DBDMenu or null if the menu does not exist.
      */
     DBDMenu getMenu(String menuName);
     /**
-     * @param menu the DBDMenu to add.
+     * @param menu The DBDMenu to add.
      * @return (true,false) if the menu (was not, was) added.
      * If the menu is already present it is not added.
      */
     boolean addMenu(DBDMenu menu);
     /**
-     * get a Map of all menus.
-     * @return the Map.
+     * Get a Map of all menus.
+     * @return The Map.
      */
     Map<String, DBDMenu> getMenuMap();
     /**
-     * get the DBDStructure for the specified name.
-     * @param structureName the structure to retrieve.
-     * @return the DBDStructure or null if the structure does not exist.
+     * Get the DBDStructure for the specified name.
+     * @param structureName The structure to retrieve.
+     * @return The DBDStructure or null if the structure does not exist.
      */
     DBDStructure getStructure(String structureName);
     /**
-     * @param structure the DBDStructure to add.
+     * Add a DVDStructure.
+     * @param structure The DBDStructure to add.
      * @return  (true,false) if the structure (was not, was) added.
      * It is not added if it is already present.
      */
     boolean addStructure(DBDStructure structure);
     /**
-     * get a Map of all the structures.
-     * @return the Map.
+     * Get a Map of all the structures.
+     * @return The Map.
      */
     Map<String,DBDStructure> getStructureMap();
     /**
-     * get a DBDStructure that describes the recordType.
-     * @param recordTypeName get the description of a recordType.
-     * @return the description.
+     * Get a DBDRecordType that describes the recordType.
+     * @param recordTypeName The recordTypeName.
+     * @return The description.
      */
     DBDRecordType getRecordType(String recordTypeName);
     /**
-     * @param recordType the DBDStructure that describes the recordType.
+     * Add a record type description.
+     * @param recordType The DBDRecordType that describes the recordType.
      * @return  (true,false) if the recordType (was not, was) added.
      * It is not added if it is already present.
      */
     boolean addRecordType(DBDRecordType recordType);
     /**
-     * get a Map of all the recordTypes.
-     * @return the Map
+     * Get a Map of all the recordTypes.
+     * @return The Map
      */
     Map<String,DBDRecordType> getRecordTypeMap();
     /**
-     * get a linkSupport
-     * @param linkSupportName the name of the link support desired.
-     * @return the DBDLinkSupport.
+     * Get a support.
+     * @param supportName The name of the support desired.
+     * @return The DBDSupport.
      */
-    DBDLinkSupport getLinkSupport(String linkSupportName);
+    DBDSupport getSupport(String supportName);
     /**
-     * add a linkSupport
-     * @param linkSupport support to add.
-     * @return  (true,false) if the link support (was not, was) added.
+     * Add a support
+     * @param support The support to add.
+     * @return  (true,false) if the support (was not, was) added.
      * It is not added if it is already present.
      */
-    boolean addLinkSupport(DBDLinkSupport linkSupport);
+    boolean addSupport(DBDSupport support);
     /**
-     * get a Map of all the link supports.
-     * @return the Map.
+     * Get a Map of all the supports.
+     * @return The Map.
      */
-    Map<String,DBDLinkSupport> getLinkSupportMap();
+    Map<String,DBDSupport> getSupportMap();
 }

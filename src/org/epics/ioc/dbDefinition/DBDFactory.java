@@ -28,8 +28,6 @@ public class DBDFactory {
     public static DBD create(String name) {
         if(find(name)!=null) return null;
         DBD dbd = new DBDInstance(name);
-        DBDCreateFactory.createLinkDBDStructure(dbd);
-        dbdList.addLast(dbd);
         return dbd;
     }
     
@@ -57,7 +55,7 @@ public class DBDFactory {
 
     /**
      * remove the DBD from the list.
-     * @param dbd the BBD to remove.
+     * @param dbd the BBD to remove.factoryName
      */
     public static void remove(DBD dbd) {
         dbdList.remove(dbd);
@@ -74,14 +72,14 @@ public class DBDFactory {
         private Map<String,DBDMenu> menuMap;
         private Map<String,DBDStructure> structureMap;
         private Map<String,DBDRecordType> recordTypeMap;
-        private Map<String,DBDLinkSupport> linkSupportMap;
+        private Map<String,DBDSupport> supportMap;
         
         DBDInstance(String name) {
             this.name = name;
             menuMap = new TreeMap<String,DBDMenu>();
             structureMap = new TreeMap<String,DBDStructure>();
             recordTypeMap = new TreeMap<String,DBDRecordType>();
-            linkSupportMap = new TreeMap<String,DBDLinkSupport>();
+            supportMap = new TreeMap<String,DBDSupport>();
         }
         
         public String getName() {
@@ -128,17 +126,17 @@ public class DBDFactory {
             return recordTypeMap;
         }
         
-        public DBDLinkSupport getLinkSupport(String linkSupportName) {
-            return linkSupportMap.get(linkSupportName);
+        public DBDSupport getSupport(String supportName) {
+            return supportMap.get(supportName);
         }
-        public boolean addLinkSupport(DBDLinkSupport linkSupport) {
-            String key = linkSupport.getLinkSupportName();
-            if(linkSupportMap.containsKey(key)) return false;
-            linkSupportMap.put(key,linkSupport);
+        public boolean addSupport(DBDSupport support) {
+            String key = support.getSupportName();
+            if(supportMap.containsKey(key)) return false;
+            supportMap.put(key,support);
             return true;
         }
-        public Map<String,DBDLinkSupport> getLinkSupportMap() {
-            return linkSupportMap;
+        public Map<String,DBDSupport> getSupportMap() {
+            return supportMap;
         }
         
     }

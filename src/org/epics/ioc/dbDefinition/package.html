@@ -12,7 +12,7 @@
 
 <h1 style="text-align: center">EPICS JavaIoc: Database Definition <br />
 package: org.epics.ioc.dbDefinition<br />
-2006.06.20</h1>
+2006.06.28</h1>
 <hr />
 <a href="#Overview">Overview</a> <br />
 <a href="#Syntax">Database Definition Syntax</a>
@@ -52,7 +52,7 @@ Definition</a><br />
 <ul>
   <li><a href="#Menu">Menu</a></li>
   <li><a href="#Structure">Structure and RecordType</a></li>
-  <li><a href="#LinkSupport">Link Support</a></li>
+  <li><a href="#Support">Link Support</a></li>
 </ul>
 <br />
 <a href="#DBDFieldReflection">Reflection for Database Fields</a><br />
@@ -70,7 +70,7 @@ database has a set of "smart" records. Each record is an instance on a record
 of a particular type.</p>
 
 <p>This package describes support Database Definitions, i.e. support for the
-following database components: menu, structure, recordType, and linkSupport.
+following database components: menu, structure, recordType, and support.
 Included are factories for creating multiple DBD (Database Definition)
 instances. A DBD provides reflection interfaces for all database components
 it contains. In particular dbAccess, which implements a javaIOC database,
@@ -80,7 +80,7 @@ uses a DBD to implement database reflection.</p>
 <ol>
   <li>Database Definition Syntax
     <p>The XML syntax for defining menus, structures, record types, and
-    linkSupport.<br />
+    support.<br />
     </p>
   </li>
   <li>Java Support for Database Definitions</li>
@@ -120,7 +120,7 @@ At this time namespaces are not used.
 at the top level, or inside a <span
 style="font-family: courier;">menu</span>, <span
 style="font-family: courier;">structure</span> or <span
-style="font-family: courier;">record</span>Type or linkSupport element.</p>
+style="font-family: courier;">record</span>Type or support element.</p>
 
 <p>NOT CURRENTLY IMPLEMENTED.</p>
 
@@ -149,7 +149,7 @@ structure can't be instanciated except as a field of a record.
 
 <h3><a id="SyntaxStructure"></a>structure and recordType</h3>
 A structure is defined as follows:
-<pre>&lt;structure name = "structureName" structureSupportName = "supportName" &gt;
+<pre>&lt;structure name = "structureName" supportName = "supportName" &gt;
      &lt;property name = "propertyName" associatedField = "fieldName" /&gt;
      ...
      &lt;field name = "fieldName" type = "fieldType" ... &gt;
@@ -161,7 +161,7 @@ A structure is defined as follows:
 &lt;/structure&gt;</pre>
 
 <p>A record type is defined as follows:</p>
-<pre>&lt;recordType name = "recordtypeName" recordSupportName = "recordSupportName" &gt;
+<pre>&lt;recordType name = "recordtypeName" supportName = "supportName" &gt;
     &lt;property name = "propertyName" associatedField = "fieldName" /&gt;
     ...
     &lt;include filename = "base.dbd" /&gt;
@@ -243,8 +243,7 @@ structure which must have been previously defined. Example:
    &lt;recordType name = "haspoint"&gt;
        ...
        &lt;field name = "point" type = "structure" structureName = "point" /&gt;
-       ...
-</pre>
+       ...</pre>
 
 <p>NOTE: The structureName does not have to be given. In this case the field
 instance must define the structureName.</p>
@@ -289,10 +288,10 @@ This field type can get/put data from/to a location outside the record. <span
 style="font-family: courier;">link</span> replace the DBF_INLINK,
 DBF_OUTLINK, and DTYP fields from EPICS V3. When a record instance is
 created, the link choices come from <span
-style="font-family: courier;">linkSupport</span> definitions which are
-defined below. A <span style="font-family: courier;">link</span> can be a
-link to another database record, to hardware device support, or something
-else. The syntax is:
+style="font-family: courier;">support</span> definitions which are defined
+below. A <span style="font-family: courier;">link</span> can be a link to
+another database record, to hardware device support, or something else. The
+syntax is:
 <pre>     &lt;field name = "name" type = "link" /&gt;</pre>
 Examples:
 <pre>     &lt;field name = "disableLink" type = "link" /&gt;
@@ -396,19 +395,20 @@ provided
 
 <p>Link support is called by record support.</p>
 For each link support module a defnition like the following must be created:
-<pre>    &lt;structure name = "configStructureName"&gt;
+<pre>    &lt;structure name = "configurationStructureName"&gt;
         ...
     &lt;/structure&gt;
     ...
-    &lt;linkSupport name = "supportName" configStructureName = "configStructureName" /&gt;</pre>
+    &lt;support name = "supportName" configurationStructureName = "configurationStructureName" /&gt;</pre>
 where
 <dl>
-  <dt><span style="font-family: courier">linkSupport</span></dt>
+  <dt><span style="font-family: courier">support</span></dt>
     <dd>Support for a link field of a record. This support will be called by
       recordSupport not by database access.</dd>
   <dt><span style="font-family: courier">supportName</span></dt>
     <dd>string that describes the choice</dd>
-  <dt><span style="font-family: courier">configStructureName</span></dt>
+  <dt><span
+  style="font-family: courier">configurationStructureName</span></dt>
     <dd>The name of a structure containing configuration information for the
       support. Database configuration tools prompt the user to assign values
       to the structure. This is optional.</dd>
@@ -417,7 +417,7 @@ where
 <p>When a record instance is created the supportName selects the support to
 attach to a record link field.</p>
 <br />
-Examples of linkSupport:
+Examples of support:
 <pre>     &lt;structure name = "processLink"&gt;
          &lt;field name = "pvname" type = "string" link = "true" /&gt;
          &lt;field name = "wait" type = "boolean" /&gt;
@@ -441,8 +441,8 @@ Examples of linkSupport:
          &lt;/field&gt;
      &lt;/structure&gt;
 
-     &lt;linkSupport name = "processLink" configStructureName = "processLink" /&gt;
-     &lt;linkSupport name = "monitorLink" configStructureName = "monitorLink" /&gt;</pre>
+     &lt;support name = "processLink" configurationStructureName = "processLink" /&gt;
+     &lt;support name = "monitorLink" configurationStructureName = "monitorLink" /&gt;</pre>
 <hr />
 
 <h1 style="text-align: center"><a name="OverviewJavaSupport"
@@ -451,7 +451,7 @@ Definition</h1>
 <hr />
 
 <p>This following sections describes support for code that accessses Database
-Definitions: menu, structure, recordType and, linkSupport..</p>
+Definitions: menu, structure, recordType and, support..</p>
 
 <p>The interfaces support reflection for everything created from Database
 Definitions. The interfaces can be used by tools such as VDCT or on a running
@@ -492,8 +492,8 @@ pvAccess.</p>
     <dd>A link appears as a structure field that has a structure with the
       definition:
       <pre>&lt;structure name = "link &gt;
-    &lt;field name = "linkSupportName" type = "string" /&gt;
-    &lt;field name = "configStructureName" type = "string" /&gt;
+    &lt;field name = "supportName" type = "string" /&gt;
+    &lt;field name = "configurationStructureName" type = "string" /&gt;
 &lt;/structure&gt;
       </pre>
     </dd>
@@ -514,6 +514,7 @@ recordType</p>
         DBDStructure getStructure();
         DBType getElementDBType();
         Type getElementType();
+        String getSupportName();
     }
 
     interface DBDField extends Field {
@@ -545,10 +546,10 @@ Definition</h1>
 <hr />
 
 <p>This section describes interfaces for accessing menus, record types,
-linkSupport, and recordSupport, i.e. everything defined in Database
-Definition files except record instances. Access to fields of record
-instances is discussed in the next section. These definitions are mostly of
-interest to the database itself.</p>
+support, and recordSupport, i.e. everything defined in Database Definition
+files except record instances. Access to fields of record instances is
+discussed in the next section. These definitions are mostly of interest to
+the database itself.</p>
 
 <h2><a id="Menu"></a>Menu</h2>
 
@@ -573,14 +574,9 @@ interest to the database itself.</p>
 <pre>    interface DBDStructure extends DBDField, Structure{
         DBDField getDBDFields(String fieldName);
         int getDBDFieldIndex(String fieldName);
-        String getStructureSupportName();
-        boolean setStructureSupportName(String supportName);
     }
 
-    interface DBDRecordType extends DBDStructure {
-        String getRecordSupportName();
-        boolean setRecordSupportName(String supportName);
-    }</pre>
+    interface DBDRecordType extends DBDStructure {}</pre>
 
 <p>For example the following dumps a structure</p>
 <pre>    void dumpStructure(DBDStructure structure) {
@@ -594,12 +590,13 @@ interest to the database itself.</p>
         }
     }</pre>
 
-<h2><a id="LinkSupport"></a>Link Support</h2>
+<h2><a id="Support"></a>Link Support</h2>
 
 <p>The following interface is provided for accessing link support.</p>
-<pre>    interface DBDLinkSupport {
-        String getLinkSupportName();
-        String getConfigStructureName();
+<pre>    interface DBDSupport {
+        String getSupportName();
+        String getConfigurationStructureName();
+        String getFactoryName();
     }</pre>
 <hr />
 
@@ -646,10 +643,9 @@ Definition.</p>
         DBDField[] dbdField,Property[] property);
     public static DBDRecordType createRecordType(String name,
         DBDField[] dbdField,Property[] property);
-    public static DBDLinkSupport createLinkSupport(String supportName,
-        String configStructName);
+    public static DBDSupport createSupport(String supportName,
+        String configurationStructName,String factoryName);
     public static DBDField createField(DBDAttribute attribute, Property[]property);
-    public static void createLinkDBDStructure(DBD dbd);
 }</pre>
 <hr />
 
@@ -670,9 +666,9 @@ Components. It also provides methods to insert components.</p>
     DBDStructure getRecordType(String recordTypeName);
     boolean addRecordType(DBDStructure recordType);
     Map&lt;String,DBDRecordType&gt; getRecordTypeMap();
-    DBDLinkSupport getLinkSupport(String linkSupportName);
-    boolean addLinkSupport(DBDLinkSupport linkSupport);
-    Map&lt;String,DBDLinkSupport&gt; getLinkSupportMap();
+    DBDSupport getSupport(String supportName);
+    boolean addSupport(DBDSupport support);
+    Map&lt;String,DBDSupport&gt; getSupportMap();
 }</pre>
 
 <p>The following class is a factory to create DBDs</p>

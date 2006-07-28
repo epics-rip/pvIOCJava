@@ -5,10 +5,7 @@
  */
 package org.epics.ioc.dbAccess;
 
-import java.util.concurrent.atomic.AtomicReference;
-
 import org.epics.ioc.dbDefinition.*;
-import org.epics.ioc.dbProcess.RecordSupport;
 import org.epics.ioc.pvAccess.*;
 
 /**
@@ -22,9 +19,7 @@ public abstract class AbstractDBStructure extends AbstractDBData
     private DBDStructure dbdStructure;
     private PVData[] pvData;
     private DBData[] dbData;
-    private static Convert convert = ConvertFactory.getConvert();
-    private RecordSupport structureSupport = null;
-    private String structureSupportName = null;
+    
     /**
      * constructor that derived classes must call.
      * @param parent the DBStructure of the parent.
@@ -110,84 +105,35 @@ public abstract class AbstractDBStructure extends AbstractDBData
     public DBData[] getFieldDBDatas() {
         return dbData;
     }
-    /* (non-Javadoc)
-     * @see org.epics.ioc.dbAccess.DBStructure#getStructureSupportName()
-     */
-    public String getStructureSupportName() {
-        return structureSupportName;
-    }
-    /* (non-Javadoc)
-     * @see org.epics.ioc.dbAccess.DBStructure#setStructureSupportName(java.lang.String)
-     */
-    public boolean setStructureSupportName(String name) {
-        if(structureSupportName!=null) return false;
-        structureSupportName = name;
-        return true;
-    }
-    /* (non-Javadoc)
-     * @see org.epics.ioc.dbAccess.DBStructure#getStructureSupport()
-     */
-    public RecordSupport getStructureSupport() {
-        return structureSupport;
-    }
-    /* (non-Javadoc)
-     * @see org.epics.ioc.dbAccess.DBStructure#setStructureSupport(org.epics.ioc.dbProcess.RecordSupport)
-     */
-    public boolean setStructureSupport(RecordSupport support) {
-        if(structureSupport!=null) return false;
-        structureSupport = support;
-        return true;
-    }
+    
     /* (non-Javadoc)
      * @see java.lang.Object#toString()
      */
-    public String toString() { return getString(0);}
+    public String toString() { return toString(0);}
 
     /* (non-Javadoc)
      * @see org.epics.ioc.pvAccess.PVData#toString(int)
      */
     public String toString(int indentLevel) {
-        return getString(indentLevel);
+        return toString("structure",indentLevel);
     }
 
-    private String getString(int indentLevel) {
+    public String toString(String prefix,int indentLevel) {
+        return getString(prefix,indentLevel);
+    }
+    private String getString(String prefix,int indentLevel) {
         StringBuilder builder = new StringBuilder();
         newLine(builder,indentLevel);
         Structure structure = (Structure)dbdStructure;
-        builder.append("structure " + structure.getStructureName());
-        RecordSupport recordSupport = this.getStructureSupport();
-        if(recordSupport!=null) {
-            builder.append(" support " + recordSupport.getName());
-        }
-        builder.append(" {");
+        builder.append(prefix + " " + structure.getStructureName());
+        builder.append(super.toString(indentLevel));
+        newLine(builder,indentLevel);
+        builder.append("{");
         for(int i=0, n= dbData.length; i < n; i++) {
             newLine(builder,indentLevel + 1);
             Field field = pvData[i].getField();
             builder.append(field.getName() + " = ");
-            DBDField dbdField = dbData[i].getDBDField();
-            switch(dbdField.getDBType()) {
-            case dbPvType:
-                builder.append(convert.getString(
-                    dbData[i],indentLevel + 2));
-                break;
-            case dbMenu:
-                builder.append(dbData[i].toString(
-                    indentLevel + 2));
-                break;
-            case dbStructure:
-                builder.append(dbData[i].toString(
-                    indentLevel + 2));
-                break;
-            case dbArray:
-                builder.append(dbData[i].toString(
-                    indentLevel + 2));
-                break;
-            case dbLink:
-                builder.append(dbData[i].toString(
-                    indentLevel + 2));
-                 break;
-            }
-            
+            builder.append(dbData[i].toString(indentLevel + 2));            
         }
         newLine(builder,indentLevel);
         builder.append("}");

@@ -25,7 +25,8 @@ public class DatabaseExampleTest extends TestCase {
             database.createData("boolean",Type.pvBoolean,null);
         boolean booleanValue = true;
         booleanData.put(booleanValue);
-        assert(booleanData.get());
+        assertTrue(booleanData.get());
+        assertNull(booleanData.setSupportName("booleanSupport"));
         Field field = booleanData.getField();
         assertEquals(field.getName(),"boolean");
         assertEquals(field.getType(),Type.pvBoolean);
@@ -293,11 +294,11 @@ public class DatabaseExampleTest extends TestCase {
         property = null;
         structFieldData = displayLimit.getFieldPVDatas();
         // set displayLimits
-        assert(structFieldData.length==2);
+        assertTrue(structFieldData.length==2);
         double value = 0.0;
         for( PVData data : structFieldData) {
             Field field = data.getField();
-            assert(field.getType()==Type.pvDouble);
+            assertTrue(field.getType()==Type.pvDouble);
             PVDouble doubleData = (PVDouble)data;
             doubleData.put(value);
             value += 10.0;

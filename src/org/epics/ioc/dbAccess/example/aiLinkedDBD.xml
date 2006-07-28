@@ -1,8 +1,13 @@
 <?xml version="1.0" ?>
 <DBDefinition>
 
-<recordType name = "aiRawRecord" recordSupportName =
-         "org.epics.ioc.support.AiRawRecord">
+<support name = "aiRawRecord"
+    factoryName = "AiRawRecord" />
+
+<support name = "aiLinearLinkedRecord"
+    factoryName = "AiLinearLinkedRecord" />
+
+<recordType name = "aiRawRecord" supportName = "aiRawRecord">
     <field name = "value" type = "int" >
         <property name = "status" associatedField = "status" />
         <property name = "severity" associatedField = "severity" />
@@ -14,8 +19,7 @@
     <field name = "input" type = "link" />
 </recordType>
 
-<recordType name = "aiLinearLinkedRecord" recordSupportName =
-         "org.epics.ioc.support.AiLinearLinkedRecord">
+<recordType name = "aiLinearLinkedRecord" supportName = "aiLinearLinkedRecord">
     <field name = "value" type = "double" >
         <property name = "rawValue" associatedField = "aiRaw.value" />
         <property name = "status" associatedField = "status" />
@@ -31,7 +35,7 @@
          type = "structure" structureName = "displayLimit" />
     <field name = "aiRaw" type = "link" />
     <field name = "linearConvert"
-        type = "structure" structureName = "linearConvert" />
+        type = "structure" structureName = "linearConvertInput" />
     <field name = "priority" type = "menu" menuName = "menuPriority" />
     <field name = "timeStamp" type = "structure" structureName = "timeStamp"/>
     <field name = "scan" type = "structure" structureName = "scan"/>

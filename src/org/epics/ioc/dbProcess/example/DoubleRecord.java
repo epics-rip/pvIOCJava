@@ -43,12 +43,7 @@ public class DoubleRecord implements RecordSupport {
         // must disconnect from link
     }
     
-    public void linkSupportDone(LinkReturn result) {
-        // TODO Auto-generated method stub
-        
-    }
-
-    public ProcessReturn process(RecordProcess recordProcess) {
+    public ProcessReturn process(ProcessListener listener) {
 System.out.printf("DoubleRecord\n");
         return ProcessReturn.done;
     }

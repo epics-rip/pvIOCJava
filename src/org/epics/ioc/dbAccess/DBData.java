@@ -6,6 +6,7 @@
 package org.epics.ioc.dbAccess;
 import org.epics.ioc.pvAccess.*;
 import org.epics.ioc.dbDefinition.*;
+import org.epics.ioc.dbProcess.*;
 
 
 /**
@@ -50,4 +51,21 @@ public interface DBData extends PVData {
      * @param dbData The data that was modified.
      */
     void postPut(DBData dbData);
+    /**
+     * Get the configuration structure for the support.
+     * There is no method setConfigurationStructure since the implementation
+     * will define and create the configuration structure when setSupportName is called.
+     * @return The configuration structure or null if no configuration.
+     */
+    DBStructure getConfigurationStructure();
+    /**
+     * Get the Support for the field.
+     * @return The support or null if no support exists.
+     */
+    Support getSupport();
+    /**
+     * Set the support.
+     * @param support The support.
+     */
+    void setSupport(Support support);
 }

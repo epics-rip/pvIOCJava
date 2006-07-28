@@ -11,10 +11,11 @@
             </displayLimit>
             <currentInput>
                 <aiRaw>
-                    <input linkSupportName = "org.epics.ioc.support.InputLink"
-                    configStructureName = "inputLink">
-                        <pvname>xxxxxx</pvname>
-                        <wait>true</wait>
+                    <input supportName = "inputLink">
+                        <configure structureName = "inputLink">
+                            <pvname>xxxxxx</pvname>
+                            <wait>true</wait>
+                        </configure>
                     </input>
                 </aiRaw>
                 <units>amps</units>
@@ -29,10 +30,11 @@
             </currentInput>
             <voltageInput>
                 <aiRaw>
-                    <input linkSupportName = "org.epics.ioc.support.InputLink"
-                    configStructureName = "inputLink">
-                        <pvname>xxxxxx</pvname>
-                        <wait>true</wait>
+                    <input supportName = "inputLink">
+                        <configure structureName = "inputLink">
+                            <pvname>yyyyyyy</pvname>
+                            <wait>true</wait>
+                        </configure>
                     </input>
                 </aiRaw>
                 <units>volts</units>
@@ -54,10 +56,11 @@
             </displayLimit>
             <currentInput>
                 <aiRaw>
-                    <input linkSupportName = "org.epics.ioc.support.InputLink"
-                    configStructureName = "inputLink">
-                        <pvname>xxxxxx</pvname>
-                        <wait>true</wait>
+                    <input supportName = "inputLink">
+                        <configure structureName = "inputLink">
+                            <pvname>xxxxxx</pvname>
+                            <wait>true</wait>
+                        </configure>
                     </input>
                 </aiRaw>
                 <units>amps</units>
@@ -72,10 +75,11 @@
             </currentInput>
             <voltageInput>
                 <aiRaw>
-                    <input linkSupportName = "org.epics.ioc.support.InputLink"
-                    configStructureName = "inputLink">
-                        <pvname>xxxxxx</pvname>
-                        <wait>true</wait>
+                    <input supportName = "inputLink">
+                        <configure structureName = "inputLink">
+                            <pvname>yyyyyyy</pvname>
+                            <wait>true</wait>
+                        </configure>
                     </input>
                 </aiRaw>
                 <units>volts</units>

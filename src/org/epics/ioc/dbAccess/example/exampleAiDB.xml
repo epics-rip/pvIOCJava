@@ -3,10 +3,11 @@
 <record name = "exampleAi" type = "aiRecord">
     <aiInput structureName = "aiLinear" >
         <aiRaw>
-            <input linkSupportName = "org.epics.ioc.support.InputLink"
-                      configStructureName = "inputLink">
-                <pvname>xxxxxx</pvname>
-                <wait>true</wait>
+            <input supportName = "inputLink">
+                <configure structureName = "inputLink">
+                    <pvname>xxxxxx</pvname>
+                    <wait>true</wait>
+                </configure>
             </input>
         </aiRaw>
         <units>volts</units>

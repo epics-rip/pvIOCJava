@@ -218,6 +218,7 @@ public final class ConvertFactory {
             Type fromElementType = fromArray.getElementType();
             Type toElementType = toArray.getElementType();
             if(toElementType.isNumeric() && fromElementType.isNumeric()) return true;
+            if(toElementType==Type.pvUnknown && fromElementType==Type.pvUnknown) return true;
             if(toElementType==Type.pvBoolean && fromElementType==Type.pvBoolean) return true;
             if(toElementType==Type.pvString) return true;
             if(fromElementType==Type.pvString && toElementType.isScalar()) return true;
@@ -235,6 +236,22 @@ public final class ConvertFactory {
             Type toElementType = ((Array)to.getField()).getElementType();
             if(toElementType.isNumeric() && fromElementType.isNumeric())
                 return CopyNumericArray(from,offset,to,toOffset,len);
+            if(toElementType==Type.pvUnknown && fromElementType==Type.pvUnknown) {
+                PVUnknownArray pvfrom = (PVUnknownArray)from;
+                PVUnknownArray pvto = (PVUnknownArray)to;
+                UnknownArrayData data = new UnknownArrayData();
+                int ncopy = 0;
+                while(len>0) {
+                    int num = pvfrom.get(offset,len,data);
+                    if(num<=0) break;
+                    while(num>0) {
+                        int n = pvto.put(toOffset,num,data.data,data.offset);
+                        if(n<=0) break;
+                        len -= n; num -= n; ncopy+=n; offset += n; toOffset += n; 
+                    }
+                }
+                return ncopy;
+            }
             if(toElementType==Type.pvBoolean && fromElementType==Type.pvBoolean) {
                 PVBooleanArray pvfrom = (PVBooleanArray)from;
                 PVBooleanArray pvto = (PVBooleanArray)to;

@@ -67,12 +67,13 @@ public abstract class AbstractDBEnum extends AbstractDBData implements DBEnum {
      * @see java.lang.Object#toString()
      */
     public String toString() {
-        return convert.getString(this);
+        return toString(0);
     }
     /* (non-Javadoc)
      * @see org.epics.ioc.pvAccess.PVData#toString(int)
      */
     public String toString(int indentLevel) {
-        return convert.getString(this, indentLevel);
+        return convert.getString(this, indentLevel)
+            + super.toString(indentLevel);
     }
 }

@@ -12,16 +12,9 @@ package org.epics.ioc.dbProcess;
  */
 public interface RecordSupport extends Support {
     /**
-     * perform record or structure processing.
-     * @param recordProcess the RecordProcess that called process.
-     * @return the result of link processing.
+     * Perform record or structure processing.
+     * @param listener The listener to call when returning active.
+     * @return The result of processing.
      */
-    ProcessReturn process(RecordProcess recordProcess);
-    /**
-     * called by link support to signify completion.
-     * If the link support returns active than the listener must expect additional calls.
-     * @param result the reason for calling. A value of active is permissible.
-     * In this case link support will again call linkSupportDone.
-     */
-    void linkSupportDone(LinkReturn result);
+    ProcessReturn process(ProcessListener listener);
 }

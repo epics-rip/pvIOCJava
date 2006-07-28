@@ -10,7 +10,7 @@
 <body>
 <h1 style="text-align: center">EPICS JavaIOC: pvAccess<br />
 package: org.epics.ioc.pvAccess<br />
-2006.07.11</h1>
+2006.07.28</h1>
 
 <p><a href="#Overview">Overview</a></p>
 <ul>
@@ -200,6 +200,8 @@ especially important for arrays and structures.</p>
         Property[] getPropertys();
         Property getProperty(String propertyName);
         Type getType();
+        String getSupportName();
+        void setSupportName(String name);
         boolean isMutable();
         void setMutable();
         String toString();
@@ -264,6 +266,9 @@ especially important for arrays and structures.</p>
 <p>The following is the base interface for accessing data.</p>
 <pre>    interface PVData {
         Field getField();
+        String getSupportName();
+        String setSupportName(String name);
+        PVStructure getConfigurationStructure();
         String toString();
         String toString(int indentLevel);
     }</pre>
@@ -350,6 +355,15 @@ especially important for arrays and structures.</p>
         void setLength(int len);
         int getCapacity();
         void setCapacity(int len);
+    }
+
+    public class UnknownArrayData {
+        public PVData[] data;
+        public int offset;
+    }
+    interface PVUnknownArray extends PVArray {
+        int get(int offset, int len, UnknownArrayData data);
+        int put(int offset, int len, PVData[]from, int fromOffset);
     }
 
     public class BooleanArrayData {

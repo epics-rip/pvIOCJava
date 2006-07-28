@@ -7,7 +7,6 @@ package org.epics.ioc.dbDefinition.example;
 
 import junit.framework.TestCase;
 import org.epics.ioc.dbDefinition.*;
-import org.epics.ioc.pvAccess.*;
 import java.util.*;
 /**
  * JUnit test for DMLToDBD.
@@ -48,12 +47,12 @@ public class XMLToDBDTest extends TestCase {
             DBDStructure dbdStructure = structureMap.get(key);
             System.out.printf("\n%s",dbdStructure.toString());
         }
-        System.out.printf("\n\nlinkSupport");
-        Map<String,DBDLinkSupport> linkSupportMap = dbd.getLinkSupportMap();
-        keys = linkSupportMap.keySet();
+        System.out.printf("\n\nsupport");
+        Map<String,DBDSupport> supportMap = dbd.getSupportMap();
+        keys = supportMap.keySet();
         for(String key: keys) {
-            DBDLinkSupport dbdLinkSupport = linkSupportMap.get(key);
-            System.out.printf("\n%s",dbdLinkSupport.toString());
+            DBDSupport dbdSupport = supportMap.get(key);
+            System.out.printf("\n%s",dbdSupport.toString());
         }
         System.out.printf("\n\nrecordTypes");
         Map<String,DBDRecordType> recordTypeMap = dbd.getRecordTypeMap();

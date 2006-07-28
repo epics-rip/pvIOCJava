@@ -94,8 +94,8 @@
     <field name = "high" type = "double" />
 </structure>
 
-<structure name = "linearConvert"
-        structureSupportName = "org.epics.ioc.support.LinearConvert">
+<structure name = "linearConvertInput"
+        supportName = "linearConvertInputSupport">
     <field name = "engUnitsLow" type = "double" />
     <field name = "engUnitsHigh" type = "double" />
     <field name = "slope" type = "double" />
@@ -108,15 +108,15 @@
 </structure>
 
 
-<linkSupport name = "org.epics.ioc.support.ProcessLink"
-    configStructureName = "processLink" />
-<linkSupport name = "org.epics.ioc.support.MonitorLink"
-    configStructureName = "monitorLink" />
-<linkSupport name = "org.epics.ioc.support.InputLink"
-    configStructureName = "inputLink" />
-<linkSupport name = "org.epics.ioc.support.OutputLink"
-    configStructureName = "outputLink" />
-<linkSupport name = "org.epics.ioc.support.AsynLink"
-    configStructureName = "asynLink" />
+<support name = "processLink" configurationStructureName = "processLink" 
+    factoryName = "org.epics.ioc.support.LinkSupportFactory" />
+<support name = "monitorLink" configurationStructureName = "monitorLink" 
+    factoryName = "org.epics.ioc.support.LinkSupportFactory" />
+<support name = "inputLink" configurationStructureName = "inputLink" 
+    factoryName = "org.epics.ioc.support.LinkSupportFactory" />
+<support name = "outputLink" configurationStructureName = "outputLink" 
+    factoryName = "org.epics.ioc.support.LinkSupportFactory" />
+<support name = "asynLink" configurationStructureName = "asynLink" 
+    factoryName = "org.epics.ioc.support.LinkSupportFactory" />
 
 </DBDefinition>

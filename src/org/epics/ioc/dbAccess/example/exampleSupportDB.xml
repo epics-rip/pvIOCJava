@@ -1,28 +1,136 @@
 <?xml version="1.0" ?>
 <IOCDatabase>
+<record name = "noSupport" type = "noSupportRecord">
+    <value>10.0</value>
+</record>
+<record name = "noSupportOverrideNoConfig"
+     supportName = "noConfig" type = "noSupportRecord">
+    <value>10.0</value>
+</record>
+<record name = "noSupportOverrideWithConfig"
+     supportName = "withConfig" type = "noSupportRecord">
+    <configure structureName = "config">
+        <xxx>xxxxxx</xxx>
+        <yyy>5</yyy>
+    </configure>
+    <value>10.0</value>
+</record>
+
+<record name = "noConfig" type = "noConfigRecord">
+    <value>10.0</value>
+</record>
+<record name = "noConfigOverrideNoConfig"
+     supportName = "noConfig" type = "noConfigRecord">
+    <value>10.0</value>
+</record>
+<record name = "noConfigOverrideWithConfig"
+     supportName = "withConfig" type = "noConfigRecord">
+    <configure structureName = "config">
+        <xxx>xxxxxx</xxx>
+        <yyy>5</yyy>
+    </configure>
+    <value>10.0</value>
+</record>
+
+<record name = "config" type = "configRecord">
+    <configure structureName = "config">
+        <xxx>xxxxxx</xxx>
+        <yyy>5</yyy>
+    </configure>
+    <value>10.0</value>
+</record>
+<record name = "configOverrideNoConfig"
+     supportName = "noConfig" type = "configRecord">
+    <value>10.0</value>
+</record>
+<record name = "configOverrideWithConfig"
+     supportName = "withConfig" type = "configRecord">
+    <configure structureName = "config">
+        <xxx>xxxxxx</xxx>
+        <yyy>5</yyy>
+    </configure>
+    <value>10.0</value>
+</record>
+
+<record name = "structs" type = "hasStructures">
+    <noSupport>
+       <value>10.0</value>
+    </noSupport>
+    <noConfig>
+       <value>20.0</value>
+    </noConfig>
+    <config>
+        <configure structureName = "config">
+            <xxx>xxxxxx</xxx>
+            <yyy>5</yyy>
+        </configure>
+       <value>30.0</value>
+    </config>
+</record>
+
+<record name = "structsOverrideNoConfig" type = "hasStructures">
+    <noSupport supportName = "noConfig">
+       <value>10.0</value>
+    </noSupport>
+    <noConfig supportName = "noConfig">
+       <value>20.0</value>
+    </noConfig>
+    <config supportName = "noConfig">
+       <value>30.0</value>
+    </config>
+</record>
+
+<record name = "structsOverrideWithConfig" type = "hasStructures">
+    <noSupport supportName = "withConfig">
+        <configure structureName = "config">
+            <xxx>xxxxxx</xxx>
+            <yyy>5</yyy>
+        </configure>
+       <value>10.0</value>
+    </noSupport>
+    <noConfig supportName = "withConfig">
+        <configure structureName = "config">
+            <xxx>xxxxxx</xxx>
+            <yyy>5</yyy>
+        </configure>
+       <value>20.0</value>
+    </noConfig>
+    <config supportName = "withConfig">
+        <configure structureName = "config">
+            <xxx>xxxxxx</xxx>
+            <yyy>5</yyy>
+        </configure>
+       <value>30.0</value>
+    </config>
+</record>
+
+
+
+<!--
 <record name = "allTypes" type = "allTypes">
-    <boolean supportName = "dummy">
-        <configure structureName = "dummy">
+    <boolean supportName = "withConfig">
+        <configure structureName = "config">
             <xxx>xxxxxx</xxx>
             <yyy>5</yyy>
         </configure>
         true
     </boolean>
-    <byte>0x7f</byte>
-    <short>0x7fff</short>
-    <int>0x7fffffff</int>
-    <long>0x7fffffffffffffff</long>
-    <float>1.0</float>
-    <double>-1e-5</double>
-    <string supportName = "dummy">
-        <configure structureName = "dummy">
+    <double supportName = "withConfig">
+        <configure structureName = "config">
+            <xxx>xxxxxx</xxx>
+            <yyy>5</yyy>
+        </configure>
+         -1e-5
+    </double>
+    <string supportName = "withConfig">
+        <configure structureName = "config">
             <xxx>xxxxxx</xxx>
             <yyy>5</yyy>
         </configure>
         This is a string
     </string>
-    <enum supportName = "dummy">
-        <configure structureName = "dummy">
+    <enum supportName = "withConfig">
+        <configure structureName = "config">
             <xxx>xxxxxx</xxx>
             <yyy>5</yyy>
         </configure>
@@ -222,5 +330,6 @@
         </arrayArray>
     </allTypes>
 </record>
+-->
 
 </IOCDatabase>

@@ -6,6 +6,7 @@
 package org.epics.ioc.dbAccess;
 
 import org.epics.ioc.pvAccess.*;
+import org.epics.ioc.dbDefinition.*;
 
 /**
  * Base interface for database array data.
@@ -13,4 +14,9 @@ import org.epics.ioc.pvAccess.*;
  *
  */
 public interface DBArray extends DBData, PVArray {
+    /**
+     * Get the element DBType.
+     * @return The DBType.
+     */
+    DBType getElementDBType();
 }

@@ -168,7 +168,7 @@ public class ChannelAccessLocal implements ChannelAccess {
             fieldList.remove(channelField);
         }
     }
-    private static class DataProcess implements ChannelDataProcess, ProcessComplete {
+    private static class DataProcess implements ChannelDataProcess, ProcessListener {
         private RecordProcess recordProcess;
         private FieldGroup fieldGroup = null;
         private ChannelDataProcessListener listener = null;
@@ -188,12 +188,12 @@ public class ChannelAccessLocal implements ChannelAccess {
             RequestProcessReturn requestReturn;
             requestReturn = recordProcess.requestProcess((wait ? this : null));
             switch(requestReturn) {
-            case success: complete(ProcessReturn.done); break;
+            case success: processComplete(ProcessReturn.done); break;
             case listenerAdded: break;
-            case failure: complete(ProcessReturn.abort); break;
+            case failure: processComplete(ProcessReturn.abort); break;
             case alreadyActive:
                 if(!wait) {
-                    complete(ProcessReturn.done); break;
+                    processComplete(ProcessReturn.done); break;
                 }
                 throw new IllegalStateException("ChannelAccessLocal logic error");
             }
@@ -203,14 +203,14 @@ public class ChannelAccessLocal implements ChannelAccess {
             recordProcess.removeCompletionListener(this);
         }
 
-        public void complete(ProcessReturn result) {
+        public void processComplete(ProcessReturn result) {
             listener.processDone(result,
                 recordProcess.getAlarmSeverity(),
                 recordProcess.getStatus());
         }
         
     }
-    private static class DataGet implements ChannelDataGet, ProcessComplete {
+    private static class DataGet implements ChannelDataGet, ProcessListener {
         private RecordProcess recordProcess;
         private FieldGroup fieldGroup = null;
         private ChannelDataGetListener listener = null;
@@ -232,12 +232,12 @@ public class ChannelAccessLocal implements ChannelAccess {
                 requestReturn = recordProcess.requestProcess((wait ? this : null));
             }
             switch(requestReturn) {
-            case success: complete(ProcessReturn.done); break;
+            case success: processComplete(ProcessReturn.done); break;
             case listenerAdded: break;
-            case failure: complete(ProcessReturn.abort); break;
+            case failure: processComplete(ProcessReturn.abort); break;
             case alreadyActive:
                 if(!wait) {
-                    complete(ProcessReturn.done); break;
+                    processComplete(ProcessReturn.done); break;
                 }
                 throw new IllegalStateException("ChannelAccessLocal logic error");
             }
@@ -247,7 +247,7 @@ public class ChannelAccessLocal implements ChannelAccess {
             recordProcess.removeCompletionListener(this);
         }
 
-        public void complete(ProcessReturn result) {
+        public void processComplete(ProcessReturn result) {
             if(result!=ProcessReturn.done && result!=ProcessReturn.noop) {
                 listener.failure("process returned " +  result.toString());
             }
@@ -263,7 +263,7 @@ public class ChannelAccessLocal implements ChannelAccess {
         
     }
     
-    private static class DataPut implements ChannelDataPut, ProcessComplete {
+    private static class DataPut implements ChannelDataPut, ProcessListener {
         RecordProcess recordProcess = null;
         private ChannelDataPutListener listener = null;
 
@@ -289,18 +289,18 @@ public class ChannelAccessLocal implements ChannelAccess {
                 requestReturn = recordProcess.requestProcess((wait ? this : null));
             }
             switch(requestReturn) {
-            case success: complete(ProcessReturn.done); break;
+            case success: processComplete(ProcessReturn.done); break;
             case listenerAdded: break;
-            case failure: complete(ProcessReturn.abort); break;
+            case failure: processComplete(ProcessReturn.abort); break;
             case alreadyActive:
                 if(!wait) {
-                    complete(ProcessReturn.done); break;
+                    processComplete(ProcessReturn.done); break;
                 }
                 throw new IllegalStateException("ChannelAccessLocal logic error");
             }
         }
 
-        public void complete(ProcessReturn result) {
+        public void processComplete(ProcessReturn result) {
             if(listener!=null) listener.processComplete();
         }
         
@@ -310,7 +310,7 @@ public class ChannelAccessLocal implements ChannelAccess {
         
     }
     
-    private static class DataPutGet implements ChannelDataPutGet, ProcessComplete {
+    private static class DataPutGet implements ChannelDataPutGet, ProcessListener {
         private RecordProcess recordProcess;
         private FieldGroup fieldGroup = null;
         private ChannelDataGetListener listener = null;
@@ -333,12 +333,12 @@ public class ChannelAccessLocal implements ChannelAccess {
                 requestReturn = recordProcess.requestProcess((wait ? this : null));
             }
             switch(requestReturn) {
-            case success: complete(ProcessReturn.done); break;
+            case success: processComplete(ProcessReturn.done); break;
             case listenerAdded: break;
-            case failure: complete(ProcessReturn.abort); break;
+            case failure: processComplete(ProcessReturn.abort); break;
             case alreadyActive:
                 if(!wait) {
-                    complete(ProcessReturn.done); break;
+                    processComplete(ProcessReturn.done); break;
                 }
                 throw new IllegalStateException("ChannelAccessLocal logic error");
             }
@@ -349,7 +349,7 @@ public class ChannelAccessLocal implements ChannelAccess {
             return instance.getDBData();
         }
 
-        public void complete(ProcessReturn result) {
+        public void processComplete(ProcessReturn result) {
             if(result!=ProcessReturn.done && result!=ProcessReturn.noop) {
                 listener.failure("process returned " +  result.toString());
             }

@@ -8,17 +8,22 @@ package org.epics.ioc.dbProcess.example;
 import org.epics.ioc.dbProcess.*;
 import org.epics.ioc.dbAccess.*;
 import org.epics.ioc.dbDefinition.*;
+import org.epics.ioc.support.*;
 
 /**
  * @author mrk
  *
  */
-public class CounterRecord implements RecordSupport {
+public class CounterRecord implements RecordSupport, ProcessListener {
     private DBRecord dbRecord;
     private DBDouble dbMin = null;
     private DBDouble dbMax = null;
     private DBDouble dbInc = null;
     private DBDouble dbValue = null;
+    private DBArray dbProcess = null;
+    
+    private RecordSupport processLinkArray = null;
+    private ProcessListener listener = null;
     
     public CounterRecord(DBRecord record) {
         dbRecord = record;
@@ -37,9 +42,13 @@ public class CounterRecord implements RecordSupport {
         index = dbStructure.getFieldDBDataIndex("value");
         if(index<0) throw new IllegalStateException("field value does not exist");
         dbValue = (DBDouble)dbData[index];
+        index = dbStructure.getFieldDBDataIndex("process");
+        if(index<0) throw new IllegalStateException("field process does not exist");
+        dbProcess = (DBArray)dbData[index];
     }
     public void destroy() {
-        // nothing to do
+        processLinkArray.destroy();
+        processLinkArray = null;
     }
 
     public String getName() {
@@ -47,23 +56,20 @@ public class CounterRecord implements RecordSupport {
     }
 
     public void initialize() {
-        // must initialize link
+        processLinkArray = ProcessLinkArray.createSupport(dbProcess);
+        processLinkArray.initialize();
     }
 
     public void start() {
-        // must connect to link
+        processLinkArray.start();
     }
 
     public void stop() {
-        // must disconnect from link
+        processLinkArray.stop();
     }
     
-    public void linkSupportDone(LinkReturn result) {
-        // TODO Auto-generated method stub
-        
-    }
 
-    public ProcessReturn process(RecordProcess recordProcess) {
+    public ProcessReturn process(ProcessListener listener) {
         double min = dbMin.get();
         double max = dbMax.get();
         double inc = dbInc.get();
@@ -71,7 +77,13 @@ public class CounterRecord implements RecordSupport {
         value += inc;
         if(value>max) value = min;
         dbValue.put(value);
-//System.out.printf("CounterRecord new value %f\n",value);
-        return ProcessReturn.done;
+System.out.printf("CounterRecord new value %f\n",value);
+        this.listener = listener;
+        ProcessReturn processReturn = processLinkArray.process(this);
+        return processReturn;
+    }
+    public void processComplete(ProcessReturn result) {
+        if(result==ProcessReturn.active) return;
+        if(listener!=null) listener.processComplete(result);
     }
 }

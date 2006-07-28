@@ -199,8 +199,45 @@ public class DatabaseExample {
 
     private String name;
     private static Convert convert = ConvertFactory.getConvert();
+    
+    private static abstract class Data implements PVData {
+        String supportName = null;
+        PVStructure configureStructure = null;
+        
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pvAccess.PVData#getField()
+         */
+        abstract public Field getField();
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pvAccess.PVData#getSupportName()
+         */
+        public String getSupportName() {
+            return supportName;
+        }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pvAccess.PVData#setSupportName(java.lang.String)
+         */
+        public String setSupportName(String name) {
+            supportName = name;
+            return null;
+        }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pvAccess.PVData#getConfigurationStructure()
+         */
+        public PVStructure getConfigurationStructure() {
+            return configureStructure;
+        }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pvAccess.PVData#toString(int)
+         */
+        public String toString(int indentLevel) {
+            if(supportName!=null) return " supportName " + supportName;
+            return "";
+        }
+        
+    }
 
-    private static class BooleanData implements PVBoolean {
+    private static class BooleanData extends Data implements PVBoolean {
         boolean value;
         Field field;
         BooleanData(Field field) {this.field = field; value = false;}
@@ -216,23 +253,22 @@ public class DatabaseExample {
          * @see org.epics.ioc.pvAccess.PVData#getField()
          */
         public Field getField() { return field;}
-    
         /* (non-Javadoc)
          * @see java.lang.Object#toString()
          */
         public String toString() {
-            return DatabaseExample.convert.getString(this);
+            return toString(0);
         }
-        
         /* (non-Javadoc)
          * @see org.epics.ioc.pvAccess.PVData#toString(int)
          */
         public String toString(int indentLevel) {
-            return DatabaseExample.convert.getString(this,indentLevel);
+            return DatabaseExample.convert.getString(this,indentLevel)
+                + super.toString(indentLevel);
         }
     }
 
-    private static class ByteData implements PVByte {
+    private static class ByteData extends Data implements PVByte {
         byte value;
         Field field;
         ByteData(Field field) {this.field = field; value = 0;}
@@ -248,23 +284,22 @@ public class DatabaseExample {
          * @see org.epics.ioc.pvAccess.PVData#getField()
          */
         public Field getField() { return field;}
-    
         /* (non-Javadoc)
          * @see java.lang.Object#toString()
          */
         public String toString() {
-            return DatabaseExample.convert.getString(this);
+            return toString(0);
         }
-        
         /* (non-Javadoc)
          * @see org.epics.ioc.pvAccess.PVData#toString(int)
          */
         public String toString(int indentLevel) {
-            return DatabaseExample.convert.getString(this,indentLevel);
+            return DatabaseExample.convert.getString(this,indentLevel)
+                + super.toString(indentLevel);
         }
     }
     
-    private static class ShortData implements PVShort {
+    private static class ShortData extends Data implements PVShort {
         short value;
         Field field;
         ShortData(Field field) {this.field = field; value = 0;}
@@ -280,23 +315,22 @@ public class DatabaseExample {
          * @see org.epics.ioc.pvAccess.PVData#getField()
          */
         public Field getField() { return field;}
-    
         /* (non-Javadoc)
          * @see java.lang.Object#toString()
          */
         public String toString() {
-            return DatabaseExample.convert.getString(this);
+            return toString(0);
         }
-        
         /* (non-Javadoc)
          * @see org.epics.ioc.pvAccess.PVData#toString(int)
          */
         public String toString(int indentLevel) {
-            return DatabaseExample.convert.getString(this,indentLevel);
+            return DatabaseExample.convert.getString(this,indentLevel)
+                + super.toString(indentLevel);
         }
     }
     
-    private static class IntData implements PVInt {
+    private static class IntData extends Data implements PVInt {
         int value;
         Field field;
         IntData(Field field) {this.field = field; value = 0;}
@@ -312,23 +346,22 @@ public class DatabaseExample {
          * @see org.epics.ioc.pvAccess.PVData#getField()
          */
         public Field getField() { return field;}
-    
         /* (non-Javadoc)
          * @see java.lang.Object#toString()
          */
         public String toString() {
-            return DatabaseExample.convert.getString(this);
+            return toString(0);
         }
-        
         /* (non-Javadoc)
          * @see org.epics.ioc.pvAccess.PVData#toString(int)
          */
         public String toString(int indentLevel) {
-            return DatabaseExample.convert.getString(this,indentLevel);
+            return DatabaseExample.convert.getString(this,indentLevel)
+                + super.toString(indentLevel);
         }
     }
     
-    private static class LongData implements PVLong {
+    private static class LongData extends Data implements PVLong {
         long value;
         Field field;
         LongData(Field field) {this.field = field; value = 0;}
@@ -344,23 +377,22 @@ public class DatabaseExample {
          * @see org.epics.ioc.pvAccess.PVData#getField()
          */
         public Field getField() { return field;}
-    
         /* (non-Javadoc)
          * @see java.lang.Object#toString()
          */
         public String toString() {
-            return DatabaseExample.convert.getString(this);
+            return toString(0);
         }
-        
         /* (non-Javadoc)
          * @see org.epics.ioc.pvAccess.PVData#toString(int)
          */
         public String toString(int indentLevel) {
-            return DatabaseExample.convert.getString(this,indentLevel);
+            return DatabaseExample.convert.getString(this,indentLevel)
+                + super.toString(indentLevel);
         }
     }
     
-    private static class FloatData implements PVFloat {
+    private static class FloatData extends Data implements PVFloat {
         float value;
         Field field;
         FloatData(Field field) {this.field = field; value = 0;}
@@ -376,23 +408,22 @@ public class DatabaseExample {
          * @see org.epics.ioc.pvAccess.PVData#getField()
          */
         public Field getField() { return field;}
-    
         /* (non-Javadoc)
          * @see java.lang.Object#toString()
          */
         public String toString() {
-            return DatabaseExample.convert.getString(this);
+            return toString(0);
         }
-        
         /* (non-Javadoc)
          * @see org.epics.ioc.pvAccess.PVData#toString(int)
          */
         public String toString(int indentLevel) {
-            return DatabaseExample.convert.getString(this,indentLevel);
+            return DatabaseExample.convert.getString(this,indentLevel)
+                + super.toString(indentLevel);
         }
     }
     
-    private static class DoubleData implements PVDouble {
+    private static class DoubleData extends Data implements PVDouble {
         double value;
         Field field;
         DoubleData(Field field) {this.field = field; value = 0;}
@@ -408,23 +439,22 @@ public class DatabaseExample {
          * @see org.epics.ioc.pvAccess.PVData#getField()
          */
         public Field getField() { return field;}
-    
         /* (non-Javadoc)
          * @see java.lang.Object#toString()
          */
         public String toString() {
-            return DatabaseExample.convert.getString(this);
+            return toString(0);
         }
-        
         /* (non-Javadoc)
          * @see org.epics.ioc.pvAccess.PVData#toString(int)
          */
         public String toString(int indentLevel) {
-            return DatabaseExample.convert.getString(this,indentLevel);
+            return DatabaseExample.convert.getString(this,indentLevel)
+                + super.toString(indentLevel);
         }
     }
     
-    private static class StringData implements PVString {
+    private static class StringData extends Data implements PVString {
         String value;
         Field field;
         StringData(Field field) {this.field = field; value = null;}
@@ -440,23 +470,22 @@ public class DatabaseExample {
          * @see org.epics.ioc.pvAccess.PVData#getField()
          */
         public Field getField() { return field;}
-    
         /* (non-Javadoc)
          * @see java.lang.Object#toString()
          */
         public String toString() {
-            return value;
+            return toString(0);
         }
-        
         /* (non-Javadoc)
          * @see org.epics.ioc.pvAccess.PVData#toString(int)
          */
         public String toString(int indentLevel) {
-            return DatabaseExample.convert.getString(this,indentLevel);
+            return DatabaseExample.convert.getString(this,indentLevel)
+                + super.toString(indentLevel);
         }
     }
 
-    private static class EnumData implements PVEnum {
+    private static class EnumData extends Data implements PVEnum {
         private int index;
         private String[] choice;
         private Enum field;
@@ -505,23 +534,22 @@ public class DatabaseExample {
         public Field getField() {
             return field;
         }
-    
         /* (non-Javadoc)
          * @see java.lang.Object#toString()
          */
         public String toString() {
-            return DatabaseExample.convert.getString(this);
+            return toString(0);
         }
-        
         /* (non-Javadoc)
          * @see org.epics.ioc.pvAccess.PVData#toString(int)
          */
         public String toString(int indentLevel) {
-            return DatabaseExample.convert.getString(this,indentLevel);
+            return DatabaseExample.convert.getString(this,indentLevel)
+                + super.toString(indentLevel);
         }
     }
 
-    private static class StructureData implements PVStructure {
+    private static class StructureData extends Data implements PVStructure {
         private Structure structure;
         private PVData[] pvData;
 
@@ -544,23 +572,22 @@ public class DatabaseExample {
             this.structure = structure;
             this.pvData = pvData;
         }
-    
         /* (non-Javadoc)
          * @see java.lang.Object#toString()
          */
         public String toString() {
-            return DatabaseExample.convert.getString(this);
+            return toString(0);
         }
-        
         /* (non-Javadoc)
          * @see org.epics.ioc.pvAccess.PVData#toString(int)
          */
         public String toString(int indentLevel) {
-            return DatabaseExample.convert.getString(this,indentLevel);
+            return DatabaseExample.convert.getString(this,indentLevel)
+                + super.toString(indentLevel);
         }
     }
     
-    private static class BooleanArray implements PVBooleanArray {
+    private static class BooleanArray extends Data implements PVBooleanArray {
         private int length = 0;
         private int capacity = 0;
         boolean[] value;
@@ -623,30 +650,28 @@ public class DatabaseExample {
             System.arraycopy(from,fromOffset,value,offset,len);
             return len;
         }
-    
-        /* (non-Javadoc)
-         * @see java.lang.Object#toString()
-         */
-        public String toString() {
-            return DatabaseExample.convert.getString(this);
-        }
-        
-        /* (non-Javadoc)
-         * @see org.epics.ioc.pvAccess.PVData#toString(int)
-         */
-        public String toString(int indentLevel) {
-            return DatabaseExample.convert.getString(this,indentLevel);
-        }
-        
         /* (non-Javadoc)
          * @see org.epics.ioc.pvAccess.PVArray#isCapacityMutable()
          */
         public boolean isCapacityMutable() {
             return true;
         }
+        /* (non-Javadoc)
+         * @see java.lang.Object#toString()
+         */
+        public String toString() {
+            return toString(0);
+        }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pvAccess.PVData#toString(int)
+         */
+        public String toString(int indentLevel) {
+            return DatabaseExample.convert.getString(this,indentLevel)
+                + super.toString(indentLevel);
+        }
     }
     
-    private static class ByteArray implements PVByteArray {
+    private static class ByteArray extends Data implements PVByteArray {
         private int length = 0;
         private int capacity = 0;
         byte[] value;
@@ -709,30 +734,28 @@ public class DatabaseExample {
             System.arraycopy(from,fromOffset,value,offset,len);
             return len;
         }
-    
-        /* (non-Javadoc)
-         * @see java.lang.Object#toString()
-         */
-        public String toString() {
-            return DatabaseExample.convert.getString(this);
-        }
-        
-        /* (non-Javadoc)
-         * @see org.epics.ioc.pvAccess.PVData#toString(int)
-         */
-        public String toString(int indentLevel){
-            return DatabaseExample.convert.getString(this,indentLevel);
-        }
-        
         /* (non-Javadoc)
          * @see org.epics.ioc.pvAccess.PVArray#isCapacityMutable()
          */
         public boolean isCapacityMutable() {
             return true;
         }
+        /* (non-Javadoc)
+         * @see java.lang.Object#toString()
+         */
+        public String toString() {
+            return toString(0);
+        }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pvAccess.PVData#toString(int)
+         */
+        public String toString(int indentLevel) {
+            return DatabaseExample.convert.getString(this,indentLevel)
+                + super.toString(indentLevel);
+        }
     }
     
-    private static class ShortArray implements PVShortArray {
+    private static class ShortArray extends Data implements PVShortArray {
         private int length = 0;
         private int capacity = 0;
         short[] value;
@@ -795,30 +818,28 @@ public class DatabaseExample {
             System.arraycopy(from,fromOffset,value,offset,len);
             return len;
         }
-    
-        /* (non-Javadoc)
-         * @see java.lang.Object#toString()
-         */
-        public String toString() {
-            return DatabaseExample.convert.getString(this);
-        }
-        
-        /* (non-Javadoc)
-         * @see org.epics.ioc.pvAccess.PVData#toString(int)
-         */
-        public String toString(int indentLevel) {
-            return DatabaseExample.convert.getString(this,indentLevel);
-        }
-        
         /* (non-Javadoc)
          * @see org.epics.ioc.pvAccess.PVArray#isCapacityMutable()
          */
         public boolean isCapacityMutable() {
             return true;
         }
+        /* (non-Javadoc)
+         * @see java.lang.Object#toString()
+         */
+        public String toString() {
+            return toString(0);
+        }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pvAccess.PVData#toString(int)
+         */
+        public String toString(int indentLevel) {
+            return DatabaseExample.convert.getString(this,indentLevel)
+                + super.toString(indentLevel);
+        }
     }
     
-    private static class IntArray implements PVIntArray {
+    private static class IntArray extends Data implements PVIntArray {
         private int length = 0;
         private int capacity = 0;
         int[] value;
@@ -881,30 +902,28 @@ public class DatabaseExample {
             System.arraycopy(from,fromOffset,value,offset,len);
             return len;
         }
-    
-        /* (non-Javadoc)
-         * @see java.lang.Object#toString()
-         */
-        public String toString() {
-            return DatabaseExample.convert.getString(this);
-        }
-        
-        /* (non-Javadoc)
-         * @see org.epics.ioc.pvAccess.PVData#toString(int)
-         */
-        public String toString(int indentLevel) {
-            return DatabaseExample.convert.getString(this,indentLevel);
-        }
-        
         /* (non-Javadoc)
          * @see org.epics.ioc.pvAccess.PVArray#isCapacityMutable()
          */
         public boolean isCapacityMutable() {
             return true;
         }
+        /* (non-Javadoc)
+         * @see java.lang.Object#toString()
+         */
+        public String toString() {
+            return toString(0);
+        }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pvAccess.PVData#toString(int)
+         */
+        public String toString(int indentLevel) {
+            return DatabaseExample.convert.getString(this,indentLevel)
+                + super.toString(indentLevel);
+        }
     }
     
-    private static class LongArray implements PVLongArray {
+    private static class LongArray extends Data implements PVLongArray {
         private int length = 0;
         private int capacity = 0;
         long[] value;
@@ -967,30 +986,28 @@ public class DatabaseExample {
             System.arraycopy(from,fromOffset,value,offset,len);
             return len;
         }
-    
-        /* (non-Javadoc)
-         * @see java.lang.Object#toString()
-         */
-        public String toString() {
-            return DatabaseExample.convert.getString(this);
-        }
-        
-        /* (non-Javadoc)
-         * @see org.epics.ioc.pvAccess.PVData#toString(int)
-         */
-        public String toString(int indentLevel) {
-            return DatabaseExample.convert.getString(this,indentLevel);
-        }
-        
         /* (non-Javadoc)
          * @see org.epics.ioc.pvAccess.PVArray#isCapacityMutable()
          */
         public boolean isCapacityMutable() {
             return true;
         }
+        /* (non-Javadoc)
+         * @see java.lang.Object#toString()
+         */
+        public String toString() {
+            return toString(0);
+        }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pvAccess.PVData#toString(int)
+         */
+        public String toString(int indentLevel) {
+            return DatabaseExample.convert.getString(this,indentLevel)
+                + super.toString(indentLevel);
+        }
     }
     
-    private static class FloatArray implements PVFloatArray {
+    private static class FloatArray extends Data implements PVFloatArray {
         private int length = 0;
         private int capacity = 0;
         float[] value;
@@ -1053,30 +1070,28 @@ public class DatabaseExample {
             System.arraycopy(from,fromOffset,value,offset,len);
             return len;
         }
-    
-        /* (non-Javadoc)
-         * @see java.lang.Object#toString()
-         */
-        public String toString() {
-            return DatabaseExample.convert.getString(this);
-        }
-        
-        /* (non-Javadoc)
-         * @see org.epics.ioc.pvAccess.PVData#toString(int)
-         */
-        public String toString(int indentLevel) {
-            return DatabaseExample.convert.getString(this,indentLevel);
-        }
-        
         /* (non-Javadoc)
          * @see org.epics.ioc.pvAccess.PVArray#isCapacityMutable()
          */
         public boolean isCapacityMutable() {
             return true;
         }
+        /* (non-Javadoc)
+         * @see java.lang.Object#toString()
+         */
+        public String toString() {
+            return toString(0);
+        }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pvAccess.PVData#toString(int)
+         */
+        public String toString(int indentLevel) {
+            return DatabaseExample.convert.getString(this,indentLevel)
+                + super.toString(indentLevel);
+        }
     }
     
-    private static class DoubleArray implements PVDoubleArray {
+    private static class DoubleArray extends Data implements PVDoubleArray {
         private int length = 0;
         private int capacity = 0;
         double[] value;
@@ -1144,28 +1159,27 @@ public class DatabaseExample {
            return len;
         }
         /* (non-Javadoc)
-         * @see java.lang.Object#toString()
-         */
-        public String toString() {
-            return DatabaseExample.convert.getString(this);
-        }
-        
-        /* (non-Javadoc)
-         * @see org.epics.ioc.pvAccess.PVData#toString(int)
-         */
-        public String toString(int indentLevel) {
-            return DatabaseExample.convert.getString(this,indentLevel);
-        }
-        
-        /* (non-Javadoc)
          * @see org.epics.ioc.pvAccess.PVArray#isCapacityMutable()
          */
         public boolean isCapacityMutable() {
             return true;
         }
+        /* (non-Javadoc)
+         * @see java.lang.Object#toString()
+         */
+        public String toString() {
+            return toString(0);
+        }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pvAccess.PVData#toString(int)
+         */
+        public String toString(int indentLevel) {
+            return DatabaseExample.convert.getString(this,indentLevel)
+                + super.toString(indentLevel);
+        }
     }
     
-    private static class StringArray implements PVStringArray {
+    private static class StringArray extends Data implements PVStringArray {
         private int length = 0;
         private int capacity = 0;
         String[] value;
@@ -1228,31 +1242,28 @@ public class DatabaseExample {
             System.arraycopy(from,fromOffset,value,offset,len);
             return len;
         }
-    
-        /* (non-Javadoc)
-         * @see java.lang.Object#toString()
-         */
-        public String toString() {
-            return DatabaseExample.convert.getString(this);
-        }
-        
-        /* (non-Javadoc)
-         * @see org.epics.ioc.pvAccess.PVData#toString(int)
-         */
-        public String toString(int indentLevel) {
-            return DatabaseExample.convert.getString(this,indentLevel);
-        }
-        
         /* (non-Javadoc)
          * @see org.epics.ioc.pvAccess.PVArray#isCapacityMutable()
          */
         public boolean isCapacityMutable() {
             return true;
         }
-
+        /* (non-Javadoc)
+         * @see java.lang.Object#toString()
+         */
+        public String toString() {
+            return toString(0);
+        }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pvAccess.PVData#toString(int)
+         */
+        public String toString(int indentLevel) {
+            return DatabaseExample.convert.getString(this,indentLevel)
+                + super.toString(indentLevel);
+        }
     }
     
-    private static class EnumArray implements PVEnumArray {
+    private static class EnumArray extends Data implements PVEnumArray {
         private int length = 0;
         private int capacity = 0;
         PVEnum[] value;
@@ -1315,30 +1326,28 @@ public class DatabaseExample {
             System.arraycopy(from,fromOffset,value,offset,len);
             return len;
         }
-
-        /* (non-Javadoc)
-         * @see java.lang.Object#toString()
-         */
-        public String toString() {
-            return DatabaseExample.convert.getString(this);
-        }
-        
-        /* (non-Javadoc)
-         * @see org.epics.ioc.pvAccess.PVData#toString(int)
-         */
-        public String toString(int indentLevel) {
-            return DatabaseExample.convert.getString(this,indentLevel);
-        }
-        
         /* (non-Javadoc)
          * @see org.epics.ioc.pvAccess.PVArray#isCapacityMutable()
          */
         public boolean isCapacityMutable() {
             return true;
         }
+        /* (non-Javadoc)
+         * @see java.lang.Object#toString()
+         */
+        public String toString() {
+            return toString(0);
+        }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pvAccess.PVData#toString(int)
+         */
+        public String toString(int indentLevel) {
+            return DatabaseExample.convert.getString(this,indentLevel)
+                + super.toString(indentLevel);
+        }
     }
     
-    private static class StructureArray implements PVStructureArray {
+    private static class StructureArray extends Data implements PVStructureArray {
         private int length = 0;
         private int capacity = 0;
         PVStructure[] value;
@@ -1401,30 +1410,28 @@ public class DatabaseExample {
             System.arraycopy(from,fromOffset,value,offset,len);
             return len;
         }
-    
-        /* (non-Javadoc)
-         * @see java.lang.Object#toString()
-         */
-        public String toString() {
-            return DatabaseExample.convert.getString(this);
-        }
-        
-        /* (non-Javadoc)
-         * @see org.epics.ioc.pvAccess.PVData#toString(int)
-         */
-        public String toString(int indentLevel) {
-            return DatabaseExample.convert.getString(this,indentLevel);
-        }
-        
         /* (non-Javadoc)
          * @see org.epics.ioc.pvAccess.PVArray#isCapacityMutable()
          */
         public boolean isCapacityMutable() {
             return true;
         }
+        /* (non-Javadoc)
+         * @see java.lang.Object#toString()
+         */
+        public String toString() {
+            return toString(0);
+        }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pvAccess.PVData#toString(int)
+         */
+        public String toString(int indentLevel) {
+            return DatabaseExample.convert.getString(this,indentLevel)
+                + super.toString(indentLevel);
+        }
     }
     
-    private static class ArrayArray implements PVArrayArray {
+    private static class ArrayArray extends Data implements PVArrayArray {
         private int length = 0;
         private int capacity = 0;
         PVArray[] value;
@@ -1487,26 +1494,24 @@ public class DatabaseExample {
             System.arraycopy(from,fromOffset,value,offset,len);
             return len;
         }
-    
-        /* (non-Javadoc)
-         * @see java.lang.Object#toString()
-         */
-        public String toString() {
-            return DatabaseExample.convert.getString(this);
-        }
-        
-        /* (non-Javadoc)
-         * @see org.epics.ioc.pvAccess.PVData#toString(int)
-         */
-        public String toString(int indentLevel) {
-            return DatabaseExample.convert.getString(this,indentLevel);
-        }
-        
         /* (non-Javadoc)
          * @see org.epics.ioc.pvAccess.PVArray#isCapacityMutable()
          */
         public boolean isCapacityMutable() {
             return true;
+        }
+        /* (non-Javadoc)
+         * @see java.lang.Object#toString()
+         */
+        public String toString() {
+            return toString(0);
+        }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pvAccess.PVData#toString(int)
+         */
+        public String toString(int indentLevel) {
+            return DatabaseExample.convert.getString(this,indentLevel)
+                + super.toString(indentLevel);
         }
     }
 }

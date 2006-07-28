@@ -5,6 +5,7 @@
  */
 package org.epics.ioc.dbAccess;
 
+import org.epics.ioc.dbDefinition.*;
 import org.epics.ioc.dbProcess.*;
 
 
@@ -68,28 +69,6 @@ public interface DBRecord extends DBStructure {
      */
     boolean setRecordProcess(RecordProcess recordProcess);
     /**
-     * Get the record support name for this structure instance.
-     * @return The support name or null if no name has been set.
-     */
-    String getRecordSupportName();
-    /**
-     * Set the record support name.
-     * @param name The name.
-     * @return true if the name was set and false if the name already was set.
-     */
-    boolean setRecordSupportName(String name);
-    /**
-     * Get the record support for this record instance.
-     * @return The RecordSupport or null if no support has been set.
-     */
-    RecordSupport getRecordSupport();
-    /**
-     * Set the record support.
-     * @param support The support.
-     * @return true if the support was set and false if the support already was set.
-     */
-    boolean setRecordSupport(RecordSupport support);
-    /**
      * Get the id for this record instance.
      * Each instance is assigned a unique integer id.
      * @return The id.
@@ -128,4 +107,14 @@ public interface DBRecord extends DBStructure {
      * @param dbData The AbstractDBData instance.
      */
     void addListenerSource(AbstractDBData dbData);
+    /**
+     * Get the DBD that contains this record.
+     * @return The DBD or null if it bwas never set.
+     */
+    DBD getDBD();
+    /**
+     * Set the DBD that contains this record instance.
+     * @param dbd The DBD.
+     */
+    void setDBD(DBD dbd);
 }

@@ -75,7 +75,7 @@ public class XMLToDBDFactory {
             menu,
             structure,
             recordType,
-            linkSupport
+            support
         } 
         private DBD dbd;
         private Locator locator = null;
@@ -97,7 +97,7 @@ public class XMLToDBDFactory {
 
         private DBDXMLHandler menuHandler;
         private DBDXMLHandler structureHandler;
-        private DBDXMLHandler linkSupportHandler;
+        private DBDXMLHandler supportHandler;
         
         public void error(String message) {
             System.err.printf("line %d column %d\nreason %s\n",
@@ -124,7 +124,7 @@ public class XMLToDBDFactory {
             this.locator = locator;
             menuHandler = new DBDXMLMenuHandler(dbd,this,locator);
             structureHandler = new DBDXMLStructureHandler(dbd,this,locator);
-            linkSupportHandler = new DBDXMLLinkSupportHandler(dbd,this,locator);
+            supportHandler = new DBDXMLSupportHandler(dbd,this,locator);
         }
         
         public void startDocument() throws SAXException {
@@ -156,9 +156,9 @@ public class XMLToDBDFactory {
                 } else if(qName.equals("recordType")) {
                     state = State.structure;
                     structureHandler.start(qName,attributes);
-                } else if(qName.equals("linkSupport")) {
-                    state = State.linkSupport;
-                    linkSupportHandler.start(qName,attributes);
+                } else if(qName.equals("support")) {
+                    state = State.support;
+                    supportHandler.start(qName,attributes);
                 } else {
                     System.err.printf("startElement element %s not understood\n",qName);
                     nError++;
@@ -172,8 +172,8 @@ public class XMLToDBDFactory {
             case recordType:
                 structureHandler.startElement(qName,attributes);
                 break;
-            case linkSupport:
-                linkSupportHandler.startElement(qName,attributes);
+            case support:
+                supportHandler.startElement(qName,attributes);
                 break;
             }
         }
@@ -210,12 +210,12 @@ public class XMLToDBDFactory {
                     structureHandler.endElement(qName);
                 }
                 break;
-            case linkSupport:
-                if(qName.equals("linkSupport")) {
-                    linkSupportHandler.end(qName);
+            case support:
+                if(qName.equals("support")) {
+                    supportHandler.end(qName);
                     state = State.idle;
                 } else {
-                    linkSupportHandler.endElement(qName);
+                    supportHandler.endElement(qName);
                 }
                 break;
             }
@@ -236,8 +236,8 @@ public class XMLToDBDFactory {
             case recordType:
                 structureHandler.characters(ch,start,length);
                 break;
-            case linkSupport:
-                linkSupportHandler.characters(ch,start,length);
+            case support:
+                supportHandler.characters(ch,start,length);
                 break;
             }
         }
@@ -465,6 +465,7 @@ public class XMLToDBDFactory {
                 state = State.idle;
                 return;
             }
+            supportName = attributes.getValue("supportName");
             if(qName.equals("recordType")) {
                 if(dbd.getRecordType(structureName)!=null) {
                     errorHandler.warning(new SAXParseException(
@@ -474,7 +475,6 @@ public class XMLToDBDFactory {
                     return;
                 }
                 isRecordType = true;
-                supportName = attributes.getValue("recordSupportName");
             } else if(qName.equals("structure")){
                 if(dbd.getStructure(structureName)!=null) {
                     errorHandler.warning(new SAXParseException(
@@ -484,7 +484,6 @@ public class XMLToDBDFactory {
                     return;
                 }
                 isRecordType = false;
-                supportName = attributes.getValue("structureSupportName");
             } else {
                 errorHandler.error(new SAXParseException(
                         "DBDXMLStructureHandler.start logic error",locator));
@@ -531,7 +530,7 @@ public class XMLToDBDFactory {
                             locator));
                 }
                 if(supportName!=null) {
-                    dbdRecordType.setRecordSupportName(supportName);
+                    dbdRecordType.setSupportName(supportName);
                 }
             } else {
                 DBDStructure dbdStructure = DBDCreateFactory.createStructure(
@@ -543,7 +542,7 @@ public class XMLToDBDFactory {
                             locator));
                 }
                 if(supportName!=null) {
-                    dbdStructure.setStructureSupportName(supportName);
+                    dbdStructure.setSupportName(supportName);
                 }
             }
             structurePropertyList = null;
@@ -570,7 +569,8 @@ public class XMLToDBDFactory {
                     this.attributes = null;
                 }
                 Type type = dbdAttribute.getType();
-                if(type==Type.pvUnknown ) {
+                DBType dbType = dbdAttribute.getDBType();
+                if(dbType!=DBType.dbLink && type==Type.pvUnknown ) {
                     errorHandler.error(new SAXParseException(
                             "type not specified correctly",locator));
                     state= State.idle;
@@ -627,39 +627,40 @@ public class XMLToDBDFactory {
         }
     }
     
-    private static class DBDXMLLinkSupportHandler extends DBDXMLHandler{
+    private static class DBDXMLSupportHandler extends DBDXMLHandler{
         
         void start(String qName, Attributes attributes)
         throws SAXException {
-            DBDLinkSupport linkSupport = dbd.getLinkSupport(qName);
-            if(linkSupport!=null) {
-                errorHandler.error(new SAXParseException(
-                    "link support " + qName  + " already exists",locator));
-                    return;
-            }
             String name = attributes.getValue("name");
-            String configStructureName =
-                attributes.getValue("configStructureName");
+            String configurationStructureName =
+                attributes.getValue("configurationStructureName");
+            String factoryName = attributes.getValue("factoryName");
             if(name==null||name.length()==0) {
                 errorHandler.error(new SAXParseException(
                     "name was not specified correctly",locator));
                 return;
             }
-            if(configStructureName==null|| configStructureName.length()==0) {
-                errorHandler.error(new SAXParseException(
-                    "configStructureName was not specified correctly",locator));
-                return;
-            }
-            linkSupport = DBDCreateFactory.createLinkSupport(
-                name,configStructureName);
-            if(linkSupport==null) {
-                errorHandler.error(new SAXParseException(
-                    "failed to create link support " + qName,locator));
+            DBDSupport support = dbd.getSupport(name);
+            if(support!=null) {
+                errorHandler.warning(new SAXParseException(
+                    "support " + name  + " already exists",locator));
                     return;
             }
-            if(!dbd.addLinkSupport(linkSupport)) {
+            if(factoryName==null||factoryName.length()==0) {
+                errorHandler.error(new SAXParseException(
+                    "factoryName was not specified correctly",locator));
+                return;
+            }
+            support = DBDCreateFactory.createSupport(
+                name,configurationStructureName,factoryName);
+            if(support==null) {
+                errorHandler.error(new SAXParseException(
+                    "failed to create support " + qName,locator));
+                    return;
+            }
+            if(!dbd.addSupport(support)) {
                 errorHandler.warning(new SAXParseException(
-                    "link support " + qName + " already exists",
+                    "support " + qName + " already exists",
                     locator));
                 return;
             }
@@ -683,7 +684,7 @@ public class XMLToDBDFactory {
             // nothing to do
         }
         
-        DBDXMLLinkSupportHandler(DBD dbd, ErrorHandler errorHandler, Locator locator) {
+        DBDXMLSupportHandler(DBD dbd, ErrorHandler errorHandler, Locator locator) {
             super();
             this.dbd = dbd;
             this.errorHandler = errorHandler;

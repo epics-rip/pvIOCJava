@@ -339,7 +339,7 @@ public class ProcessFactory {
         }
     }
     
-    static private class Process implements RecordStateListener,RecordProcess {
+    static private class Process implements RecordStateListener,RecordProcess,ProcessListener {
         private ProcessDB processDB;
         private DBRecord dbRecord;
         private boolean constructed = true;
@@ -347,8 +347,8 @@ public class ProcessFactory {
         private RecordSupport recordSupport = null;
         
         private boolean active = false;
-        private ConcurrentLinkedQueue<ProcessComplete> completionListener =
-            new ConcurrentLinkedQueue<ProcessComplete>();
+        private ConcurrentLinkedQueue<ProcessListener> completionListener =
+            new ConcurrentLinkedQueue<ProcessListener>();
         
         private PVString status = null;
         private PVEnum severity = null;
@@ -361,7 +361,7 @@ public class ProcessFactory {
         private TimeStamp timeStamp = new TimeStamp();
         
         private List<RecordProcess> linkedRecordList = new ArrayList<RecordProcess>();
-        private List<ProcessComplete> linkedProcessCompleteList = new ArrayList<ProcessComplete>();
+        private List<ProcessListener> linkedProcessCompleteList = new ArrayList<ProcessListener>();
 
         Process(ProcessDB processDB,DBRecord record) {
             this.processDB = processDB;
@@ -483,9 +483,9 @@ public class ProcessFactory {
         }
 
         /* (non-Javadoc)
-         * @see org.epics.ioc.dbProcess.RecordProcess#requestProcess(org.epics.ioc.dbProcess.ProcessComplete)
+         * @see org.epics.ioc.dbProcess.RecordProcess#requestProcess(org.epics.ioc.dbProcess.ProcessListener)
          */
-        public RequestProcessReturn requestProcess(ProcessComplete listener) {
+        public RequestProcessReturn requestProcess(ProcessListener listener) {
             dbRecord.lock();
             try {
                 RecordState recordState = dbRecord.getRecordState();
@@ -513,9 +513,9 @@ public class ProcessFactory {
         }
 
         /* (non-Javadoc)
-         * @see org.epics.ioc.dbProcess.RecordProcess#process(org.epics.ioc.dbProcess.ProcessComplete)
+         * @see org.epics.ioc.dbProcess.RecordProcess#process(org.epics.ioc.dbProcess.ProcessListener)
          */
-        public ProcessReturn process(ProcessComplete listener) {
+        public ProcessReturn process(ProcessListener listener) {
             ProcessReturn result = ProcessReturn.abort;
             int numberLinkedRecords = 0;
             dbRecord.lock();
@@ -541,7 +541,7 @@ public class ProcessFactory {
                 newSeverity = -1;
                 result = recordSupport.process(this);
                 numberLinkedRecords = linkedRecordList.size();
-                recordSupportDone(result);
+                processComplete(result);
                 if(result==ProcessReturn.active) {
                     if(listener!=null) completionListener.add(listener);
                 } else if(numberLinkedRecords>0) {
@@ -554,10 +554,10 @@ public class ProcessFactory {
             if(numberLinkedRecords>0) {
                 for(int i=0; i < numberLinkedRecords; i++) {
                     RecordProcess linkedRecord = linkedRecordList.get(i);
-                    ProcessComplete linkedListener = linkedProcessCompleteList.get(i);
+                    ProcessListener linkedListener = linkedProcessCompleteList.get(i);
                     ProcessReturn linkedResult = linkedRecord.process(linkedListener);
                     if(linkedResult!=ProcessReturn.active) {
-                        linkedListener.complete(linkedResult);
+                        linkedListener.processComplete(linkedResult);
                     }
                 }
                 linkedRecordList.clear();
@@ -572,16 +572,16 @@ public class ProcessFactory {
         }
         
         /* (non-Javadoc)
-         * @see org.epics.ioc.dbProcess.RecordProcess#removeCompletionListener(org.epics.ioc.dbProcess.ProcessComplete)
+         * @see org.epics.ioc.dbProcess.RecordProcess#removeCompletionListener(org.epics.ioc.dbProcess.ProcessListener)
          */
-        public void removeCompletionListener(ProcessComplete listener) {
+        public void removeCompletionListener(ProcessListener listener) {
             completionListener.remove(listener);
         }
 
         /* (non-Javadoc)
-         * @see org.epics.ioc.dbProcess.RecordProcess#requestProcessLinkedRecord(org.epics.ioc.dbAccess.DBRecord, org.epics.ioc.dbProcess.ProcessComplete)
+         * @see org.epics.ioc.dbProcess.RecordProcess#requestProcessLinkedRecord(org.epics.ioc.dbAccess.DBRecord, org.epics.ioc.dbProcess.ProcessListener)
          */
-        public RequestProcessReturn requestProcessLinkedRecord(DBRecord record, ProcessComplete listener) {
+        public RequestProcessReturn requestProcessLinkedRecord(DBRecord record, ProcessListener listener) {
             RecordProcess linkedRecordProcess = record.getRecordProcess();
             dbRecord.lockOtherRecord(record);
             try {
@@ -597,9 +597,9 @@ public class ProcessFactory {
         }
 
         /* (non-Javadoc)
-         * @see org.epics.ioc.dbProcess.RecordProcess#removeLinkedCompletionListener(org.epics.ioc.dbProcess.ProcessComplete)
+         * @see org.epics.ioc.dbProcess.RecordProcess#removeLinkedCompletionListener(org.epics.ioc.dbProcess.ProcessListener)
          */
-        public void removeLinkedCompletionListener(ProcessComplete listener) {
+        public void removeLinkedCompletionListener(ProcessListener listener) {
             dbRecord.lock();
             try {
                 int index = linkedProcessCompleteList.indexOf(listener);
@@ -610,32 +610,6 @@ public class ProcessFactory {
             }
             
         }
-
-        /* (non-Javadoc)
-         * @see org.epics.ioc.dbProcess.RecordProcess#recordSupportDone(org.epics.ioc.dbProcess.ProcessReturn)
-         */
-        public void recordSupportDone(ProcessReturn result) {
-            if(newSeverity!=startSeverity) {
-                if(newSeverity<0) newSeverity = 0;
-                if(severity!=null) severity.setIndex(newSeverity);
-            }
-            if(newStatus!=startStatus) {
-                if(status!=null) status.put(newStatus);
-            }
-            if(result==ProcessReturn.active) {
-                startSeverity = newSeverity;
-                startStatus = newStatus;
-                newStatus = null;
-                newSeverity = -1;
-                if(!timeStampSet) TimeUtility.set(timeStamp,System.currentTimeMillis());
-                timeStampSet = false;
-                callLinkedProcessListeners(result);
-            } else {
-                removeAndCallLinkedProcessListeners(result);
-                active = false;
-            }
-        }
-        
 
         /* (non-Javadoc)
          * @see org.epics.ioc.dbProcess.RecordProcess#setStatusSeverity(java.lang.String, org.epics.ioc.dbProcess.AlarmSeverity)
@@ -680,21 +654,47 @@ public class ProcessFactory {
             
         }
 
+        /* (non-Javadoc)
+         * @see org.epics.ioc.dbProcess.ProcessListener#processComplete(org.epics.ioc.dbProcess.ProcessReturn)
+         */
+        public void processComplete(ProcessReturn result) {
+            if(newSeverity!=startSeverity) {
+                if(newSeverity<0) newSeverity = 0;
+                if(severity!=null) severity.setIndex(newSeverity);
+            }
+            if(newStatus!=startStatus) {
+                if(status!=null) status.put(newStatus);
+            }
+            if(result==ProcessReturn.active) {
+                startSeverity = newSeverity;
+                startStatus = newStatus;
+                newStatus = null;
+                newSeverity = -1;
+                if(!timeStampSet) TimeUtility.set(timeStamp,System.currentTimeMillis());
+                timeStampSet = false;
+                callLinkedProcessListeners(result);
+            } else {
+                removeAndCallLinkedProcessListeners(result);
+                active = false;
+            }
+        }
+        
+
         private void callLinkedProcessListeners(ProcessReturn result)
         {
             if(completionListener.isEmpty()) return;
-            Iterator<ProcessComplete> iter = completionListener.iterator();
+            Iterator<ProcessListener> iter = completionListener.iterator();
             while(iter.hasNext()) {
-                iter.next().complete(result);
+                iter.next().processComplete(result);
             }
         }
     
         private void removeAndCallLinkedProcessListeners(ProcessReturn result)
         {
             if(completionListener.isEmpty()) return;
-            ProcessComplete processComplete;
+            ProcessListener processComplete;
             while((processComplete = completionListener.poll())!=null) {
-                processComplete.complete(result);
+                processComplete.processComplete(result);
             }
         }
         

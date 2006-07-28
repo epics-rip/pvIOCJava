@@ -5,7 +5,6 @@
  */
 package org.epics.ioc.dbProcess;
 
-import org.epics.ioc.dbAccess.*;
 import org.epics.ioc.pvAccess.*;
 
 /**
@@ -22,10 +21,9 @@ public interface LinkSupport extends Support {
      */
     boolean setField(PVData field);
     /**
-     * perform record processing.
-     * @param recordProcess the RecordProcess that called RecordSupport.process.
-     * @param recordSupport the RecordSupport that call LinkSupport.process.
-     * @return the result of processing.
+     * Request processing.
+     * @param listener The listener to call when returning active.
+     * @return The result.
      */
-    LinkReturn process(RecordProcess recordProcess,RecordSupport recordSupport);
+    LinkReturn process(LinkListener listener);
 }

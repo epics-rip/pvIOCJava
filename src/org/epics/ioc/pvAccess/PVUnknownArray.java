@@ -3,19 +3,20 @@
  * EPICS JavaIOC is distributed subject to a Software License Agreement found
  * in file LICENSE that is included with this distribution.
  */
-package org.epics.ioc.dbAccess;
+package org.epics.ioc.pvAccess;
+
 
 /**
- * get/put a DBLink  array.
+ * get/put a PVArray array.
  * The caller must be prepared to get/put the array in chunks.
  * The return argument is always the number of elements that were transfered.
  * It may be less than the number requested.
  * @author mrk
  *
  */
-public interface DBLinkArray extends DBArray {
+public interface PVUnknownArray extends PVArray{
     /**
-     * get values from a <i>DBLinkArray</i> and put them into <i>DBLink[]to</i>.
+     * get values from the <i>PVUnknownArray</i> and put them in <i>PVData[]to</i>
      * @param offset The offset to the first element to get.
      * @param len The maximum number of elements to transfer.
      * @param data The class containing the data and an offset into the data.
@@ -27,9 +28,9 @@ public interface DBLinkArray extends DBArray {
      * a reference to the array and data.offset is the offset into the
      * array.
      */
-    int get(int offset, int len, LinkArrayData data);
+    int get(int offset, int len, UnknownArrayData data);
     /**
-     * put values into a <i>DBLinkArray</i> from <i>DBLink[]to</i>.
+     * put values into the <i>PVUnknownArray</i> from <i>PVData[]to</i>
      * @param offset The offset to the first element to put.
      * @param len The maximum number of elements to transfer.
      * @param from The array from which to get the data.
@@ -39,5 +40,5 @@ public interface DBLinkArray extends DBArray {
      * If the value is less then put should be called again.
      * @throws IllegalStateException if the field is not mutable.
      */
-    int put(int offset,int len, DBLink[] from, int fromOffset);
+    int put(int offset,int len, PVData[] from, int fromOffset);
 }

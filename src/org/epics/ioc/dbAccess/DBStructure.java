@@ -5,7 +5,6 @@
  */
 package org.epics.ioc.dbAccess;
 
-import org.epics.ioc.dbProcess.RecordSupport;
 import org.epics.ioc.pvAccess.*;
 import org.epics.ioc.dbDefinition.*;
 
@@ -41,26 +40,4 @@ public interface DBStructure extends DBData, PVStructure {
      * @return The index or -1 if the field does not exist.
      */
     int getFieldDBDataIndex(String fieldName);
-    /**
-     * Get the structure support name for this structure instance.
-     * @return The support name or null if no name has been set.
-     */
-    String getStructureSupportName();
-    /**
-     * Set the structure support name.
-     * @param name The name.
-     * @return true if the name was set and false if the name already was set.
-     */
-    boolean setStructureSupportName(String name);
-    /**
-     * Get the structure support for this structure instance.
-     * @return The RecordSupport or null if no support has been set.
-     */
-    RecordSupport getStructureSupport();
-    /**
-     * Set the structure support.
-     * @param support The support.
-     * @return true if the support was set and false if the support already was set.
-     */
-    boolean setStructureSupport(RecordSupport support);
 }

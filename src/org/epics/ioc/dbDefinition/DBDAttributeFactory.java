@@ -44,7 +44,9 @@ public class DBDAttributeFactory {
         public String getName() {
             return name;
         }
-
+        public String getSupportName() {
+            return supportName;
+        }
         public int getAsl() {
             return asl;
         }
@@ -105,6 +107,9 @@ public class DBDAttributeFactory {
             builder.append(String.format(
                     " asl %d design %b link %b readOnly %b",
                     asl,isDesign,isLink,isReadOnly));
+            if(supportName!=null) {
+                builder.append(String.format(" supportName %s",supportName));
+            }
             if(dbType==DBType.dbMenu) {
                 if(dbdMenu!=null)
                     builder.append(String.format(
@@ -130,19 +135,17 @@ public class DBDAttributeFactory {
                     this.name = value;
                     continue;
                 }
+                if(name.equals("supportName")) {
+                    this.supportName = value;
+                    continue;
+                }
                 if(name.equals("type")) {
                     getType(value,types);
+                    dbType = types.dbType;
                     this.type = types.type;
-                    if(type==Type.pvUnknown)
+                    if(type==Type.pvUnknown && dbType!=DBType.dbLink)
                         throw new IllegalStateException(
                             value + " not a valid type");
-                    dbType = types.dbType;
-                    if(dbType==DBType.dbLink) {
-                        dbdStructure = dbd.getStructure("link");
-                        if(dbdStructure==null)
-                            throw new IllegalStateException(
-                                    "structure link not in database");
-                    }
                     continue;
                 }
                 if(name.equals("default")) {
@@ -181,24 +184,24 @@ public class DBDAttributeFactory {
                 }
                 if(name.equals("elementType")) {
                     getType(value,types);
+                    elementDBType = types.dbType;
                     elementType = types.type;
-                    if(elementType==Type.pvUnknown)
+                    if(elementType==Type.pvUnknown && elementDBType!=DBType.dbLink)
                         throw new IllegalStateException(
                             "elementType is not a valid type");
-                    elementDBType = types.dbType;
                     continue;
                 }
             }
             if(name==null || name.length()==0)
                 throw new IllegalStateException(
                     "name not specified");
-            if(type==Type.pvUnknown)
+            if(dbType!=DBType.dbLink && type==Type.pvUnknown)
                 throw new IllegalStateException(
                     "type incorrectly specified");
             if(dbType==DBType.dbMenu && dbdMenu==null)
                 throw new IllegalStateException(
                     "menuName not specified");
-            if(dbType==DBType.dbArray && elementType==Type.pvUnknown)
+            if(dbType==DBType.dbArray && elementType==Type.pvUnknown && elementDBType!=DBType.dbLink)
                 throw new IllegalStateException(
                     "elementType not specified");
             if(defaultValue!=null) {
@@ -211,6 +214,7 @@ public class DBDAttributeFactory {
         
         private int asl = 1;
         private String name = null;
+        private String supportName = null;
         private DBDMenu dbdMenu = null;
         private DBDStructure dbdStructure = null;
         private DBType dbType = DBType.dbPvType;
@@ -293,7 +297,7 @@ public class DBDAttributeFactory {
                 return;
             }
             if(value.equals("link")) {
-                types.type = Type.pvStructure;
+                types.type = Type.pvUnknown;
                 types.dbType = DBType.dbLink;
                 return;
             }

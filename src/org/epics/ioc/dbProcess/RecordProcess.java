@@ -51,7 +51,7 @@ public interface RecordProcess {
      * @param listener A listener to call if the record is already active.
      * @return The result of the request.
      */
-    RequestProcessReturn requestProcess(ProcessComplete listener);
+    RequestProcessReturn requestProcess(ProcessListener listener);
     /**
      * Process the record instance.
      * The caller must be the owner as a result of requestProcess returning RequestProcessReturn.success.
@@ -59,12 +59,12 @@ public interface RecordProcess {
      * this is the listener that will be called when the record completes processing.
      * @return The result of the process request.
      */
-    ProcessReturn process(ProcessComplete listener);
+    ProcessReturn process(ProcessListener listener);
     /**
      * Remove a completion listener.
      * @param listener The listener.
      */
-    void removeCompletionListener(ProcessComplete listener);
+    void removeCompletionListener(ProcessListener listener);
     /**
      * Request to process a linked record.
      * This is called by record or link support while processing a record.
@@ -75,19 +75,12 @@ public interface RecordProcess {
      * A null value is permissible.
      * @return the result of the request.
      */
-    RequestProcessReturn requestProcessLinkedRecord(DBRecord record,ProcessComplete listener);
+    RequestProcessReturn requestProcessLinkedRecord(DBRecord record,ProcessListener listener);
     /**
      * Remove a completion listener for a linked record.
      * @param listener The listener.
      */
-    void removeLinkedCompletionListener(ProcessComplete listener);
-    /**
-     * Called by record support to signify completion.
-     * If the record support returns active than the listener must expect additional calls.
-     * @param result the reason for calling. A value of active is permissible.
-     * In this case record support will again call recordSupportDone.
-     */
-    void recordSupportDone(ProcessReturn result);
+    void removeLinkedCompletionListener(ProcessListener listener);
     /**
      * Set the status and severity for the record.
      * The algorithm is to maxamize the severity, i.e. if the requested severity is greater than the current

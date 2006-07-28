@@ -110,7 +110,7 @@ public class ParentTest extends TestCase {
         showParent(iocdb,"exampleAiLinear","aiLinear.aiRaw.value");
         showParent(iocdb,"exampleAiLinear","aiLinear.aiRaw.status");
         showParent(iocdb,"exampleAiLinear","aiLinear.aiRaw.input");
-        showParent(iocdb,"exampleAiLinear","aiLinear.aiRaw.input.configStructureName");
+        showParent(iocdb,"exampleAiLinear","aiLinear.aiRaw.input.configurationStructureName");
         System.out.printf("\n");
         showParent(iocdb,"examplePowerSupply","power");
         showParent(iocdb,"examplePowerSupply","current");

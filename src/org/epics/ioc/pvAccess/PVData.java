@@ -18,6 +18,24 @@ public interface PVData {
      */
     Field getField();
     /**
+     * Get the support name if it exists.
+     * @return The name of the support.
+     */
+    String getSupportName();
+    /**
+     * Set the name of the support or null to specify no support.
+     * @param name The name.
+     * @return null if the name was set or the reason why the name was not set.
+     */
+    String setSupportName(String name);
+    /**
+     * Get the configuration structure for the support.
+     * There is no method setConfigurationStructure since the implementation
+     * will define and create the configuration structure when setSupportName is called.
+     * @return The configuration structure or null if no configuration.
+     */
+    PVStructure getConfigurationStructure();
+    /**
      * Convert the data to a string.
      * @return The string.
      */

@@ -9,9 +9,7 @@ import java.util.*;
 import java.util.concurrent.locks.*;
 
 import org.epics.ioc.dbDefinition.*;
-import org.epics.ioc.dbProcess.RecordProcess;
-import org.epics.ioc.dbProcess.RecordSupport;
-import org.epics.ioc.pvAccess.*;
+import org.epics.ioc.dbProcess.*;
 
 /**
  * Abstract base class for a record instance.
@@ -24,16 +22,15 @@ public class AbstractDBRecord extends AbstractDBStructure implements DBRecord {
     private String recordName;
     private RecordState recordState;
     private ReentrantLock lock = new ReentrantLock();
-    private String recordSupportName = null;
-    private RecordSupport recordSupport = null;
     private RecordProcess recordProcess = null;
-    private static Convert convert = ConvertFactory.getConvert();
     private LinkedList<RecordStateListener> recordStateListenerList
         = new LinkedList<RecordStateListener>();
     private LinkedList<ListenerPvt> listenerList
         = new LinkedList<ListenerPvt>();
     private LinkedList<AbstractDBData> listenerSourceList
           = new LinkedList<AbstractDBData>();
+    private DBD dbd = null;
+    
     /**
      * constructor that derived clases must call.
      * @param recordName the name of the record.
@@ -70,7 +67,6 @@ public class AbstractDBRecord extends AbstractDBStructure implements DBRecord {
             listener.newState(state);
         }
         if(state==RecordState.zombie) {
-            recordSupport = null;
             recordProcess = null;
         }
     }
@@ -112,34 +108,7 @@ public class AbstractDBRecord extends AbstractDBStructure implements DBRecord {
         otherRecord.lock();
         for(int i=0; i<count; i++) lock.lock();
     }
-    /* (non-Javadoc)
-     * @see org.epics.ioc.dbAccess.DBRecord#getRecordSupportName()
-     */
-    public String getRecordSupportName() {
-        return recordSupportName;
-    }
-    /* (non-Javadoc)
-     * @see org.epics.ioc.dbAccess.DBRecord#setRecordSupportName(java.lang.String)
-     */
-    public boolean setRecordSupportName(String name) {
-        if(recordSupportName!=null) return false;
-        recordSupportName = name;
-        return true;
-    }
-    /* (non-Javadoc)
-     * @see org.epics.ioc.dbAccess.DBRecord#getRecordSupport()
-     */
-    public RecordSupport getRecordSupport() {
-        return recordSupport;
-    }
-    /* (non-Javadoc)
-     * @see org.epics.ioc.dbAccess.DBRecord#setRecordSupport(org.epics.ioc.dbProcess.RecordSupport)
-     */
-    public boolean setRecordSupport(RecordSupport support) {
-        if(recordSupport!=null) return false;
-        recordSupport = support;
-        return true;
-    }
+    
     /* (non-Javadoc)
      * @see org.epics.ioc.dbAccess.DBRecord#getRecordProcess()
      */
@@ -222,65 +191,29 @@ public class AbstractDBRecord extends AbstractDBStructure implements DBRecord {
         listenerSourceList.add(dbData);
     }
     /* (non-Javadoc)
+     * @see org.epics.ioc.dbAccess.DBRecord#getDBD()
+     */
+    public DBD getDBD() {
+        return dbd;
+    }
+    /* (non-Javadoc)
+     * @see org.epics.ioc.dbAccess.DBRecord#setDBD(org.epics.ioc.dbDefinition.DBD)
+     */
+    public void setDBD(DBD dbd) {
+        this.dbd = dbd;
+    }
+    /* (non-Javadoc)
      * @see java.lang.Object#toString()
      */
-    public String toString() { return getString(0);}
+    public String toString() { return toString(0);}
 
     /* (non-Javadoc)
      * @see org.epics.ioc.pvAccess.PVData#toString(int)
      */
     public String toString(int indentLevel) {
-        return getString(indentLevel);
+        return super.toString(recordName + " recordType",indentLevel);
     }
 
-    private String getString(int indentLevel) {
-        StringBuilder builder = new StringBuilder();
-        newLine(builder,indentLevel);
-        Structure structure = (Structure)this.getField();
-        DBData[] dbData = super.getFieldDBDatas();
-        PVData[] pvData = super.getFieldPVDatas();
-        RecordSupport recordSupport = this.getRecordSupport();
-        String supportName = null;
-        if(recordSupport!=null) {
-            supportName = recordSupport.getName();
-        } else {
-            supportName = "none";
-        }
-        builder.append("record " + recordName + " recordType " + structure.getStructureName()
-                + " support " + supportName + "{");
-        for(int i=0, n= dbData.length; i < n; i++) {
-            newLine(builder,indentLevel + 1);
-            Field field = pvData[i].getField();
-            builder.append(field.getName() + " = ");
-            DBDField dbdField = dbData[i].getDBDField();
-            switch(dbdField.getDBType()) {
-            case dbPvType:
-                builder.append(convert.getString(
-                    dbData[i],indentLevel + 2));
-                break;
-            case dbMenu:
-                builder.append(dbData[i].toString(
-                    indentLevel + 2));
-                break;
-            case dbStructure:
-                builder.append(dbData[i].toString(
-                    indentLevel + 2));
-                break;
-            case dbArray:
-                builder.append(dbData[i].toString(
-                    indentLevel + 2));
-                break;
-            case dbLink:
-                builder.append(dbData[i].toString(
-                    indentLevel + 2));
-                 break;
-            }
-            
-        }
-        newLine(builder,indentLevel);
-        builder.append("}");
-        return builder.toString();
-    }
     private static class ListenerPvt implements RecordListener {
         private DBListener dbListener;
         private boolean isSynchronous = false;
@@ -293,6 +226,9 @@ public class AbstractDBRecord extends AbstractDBStructure implements DBRecord {
         ListenerPvt(DBListener listener) {
             dbListener = listener;
         }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.dbAccess.RecordListener#newData(org.epics.ioc.dbAccess.DBData)
+         */
         public void newData(DBData data) {
             if(isSynchronous && !sentWhileSynchronous) {
                 dbListener.beginSynchronous();

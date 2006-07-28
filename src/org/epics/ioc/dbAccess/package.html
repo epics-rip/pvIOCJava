@@ -12,7 +12,7 @@
 
 <h1 style="text-align: center">EPICS JavaIoc: Database Access <br />
 package: org.epics.ioc.dbAcess <br />
-2006.07.11</h1>
+2006.07.28</h1>
 
 <div class="toc">
 <ul>
@@ -50,8 +50,7 @@ package: org.epics.ioc.dbAcess <br />
       <li><a href="#AbstractDB2">AbstractDBMenu</a></li>
       <li><a href="#AbstractDB3">AbstractDBStructure</a></li>
       <li><a href="#AbstractDB4">AbstractDBRecord</a></li>
-      <li><a href="#AbstractDB5">AbstractDBLink</a></li>
-      <li><a href="#AbstractDB6">AbstractDBArray</a></li>
+      <li><a href="#AbstractDB5">AbstractDBArray</a></li>
     </ul>
   </li>
   <li><a href="#IOCDB1"> IOCDB: IOC Database</a></li>
@@ -353,7 +352,7 @@ id="RecordInstanceAccess"></a>Record Instance Access</h2>
 These interfaces are of interest to the database, record support, link
 support, Channel Access, etc.</p>
 
-<h3 id="Listener"><a id="DBListener"></a>Listener Interface</h3>
+<h3 id="Listener">Listener Interface</h3>
 
 <p>DBListener is an interface that must be implemented by code that calls
 DBdata.addListener.</p>
@@ -361,11 +360,13 @@ DBdata.addListener.</p>
         void newData(DBData dbData);
         void beginSynchronous();
         void endSynchronous();
+        void unlisten(RecordListener listener);
     }</pre>
 
-<p>Listener is an interface that must be implemented by the code that
-implements DBRecord. DBRecord provides a method to create a Listener.</p>
-<pre>    public interface Listener {
+<p>RecordListener is an interface that must be implemented by the code that
+implements DBRecord. DBRecord provides a method to create a
+RecordListener.</p>
+<pre>    public interface RecordListener {
         void newData(DBData dbData);
     }</pre>
 
@@ -381,6 +382,9 @@ instance.</p>
         void removeListener(Listener listener);
         void postPut();
         void postPut(DBData dbData);
+        DBStructure getConfigurationStructure();
+        Support getSupport();
+        void setSupport(Support support);
     }</pre>
 
 <p>Since it extends PVData it has the methods:</p>
@@ -442,8 +446,6 @@ A menu field is accessed via the interface:
          DBDStructure getDBDStructure();
          DBData[] getFieldDBDatas();
          int getFieldDBDataIndex(String fieldName);
-         RecordSupport getStructureSupport();
-         boolean setStructureSupport(RecordSupport support);
     }</pre>
 
 <p>where</p>
@@ -461,44 +463,44 @@ A menu field is accessed via the interface:
     instance.</dd>
   <dt>getFieldDBDataIndex</dt>
     <dd>Get the index into DBData for the specified field.</dd>
-  <dt>getStructureSupport</dt>
-    <dd>Get the support for the structure.</dd>
-  <dt>setStructureSupport</dt>
-    <dd>Set the support for the structure.</dd>
 </dl>
 
 <h3 id="RecordData1"><a id="RecordData"></a>RecordData</h3>
-<pre>    public interface DBRecord extends DBStructure {
+<pre>    public interface RecordStateListener {
+        void newState(RecordState newState);
+    }
+
+    public interface DBRecord extends DBStructure {
         String getRecordName();
+        RecordState getRecordState();
+        void setRecordState(RecordState state);
+        void addRecordStateListener(RecordStateListener listener);
+        void removeRecordStateListener(RecordStateListener listener);
+        void lock();
+        void unlock();
+        void lockOtherRecord(DBRecord otherRecord);
         RecordProcess getRecordProcess();
         boolean setRecordProcess(RecordProcess recordProcess);
-        RecordSupport getRecordSupport();
-        boolean setRecordSupport(RecordSupport support);
-        ReentrantLock getLock();
-        ReentrantLock lockOtherRecord(DBRecord otherRecord);
         int getRecordID();
         void beginSynchronous();
         void endSynchronous();
-        Listener createListener(DBListener listener);
-        void destroyListener(Listener listener);
+        RecordListener createListener(DBListener listener);
+        void removeListener(RecordListener listener);
+        void removeListeners();
+        void addListenerSource(AbstractDBData dbData);
+        DBD getDBD();
+        void setDBD(DBD dbd);
     }</pre>
 
 <h3 id="Link"><a id="LinkData"></a>Link Data</h3>
-<pre>    public interface DBLink extends DBStructure {
-        String getConfigStructureName();
-        void putConfigStructureName(String name);
-        String getLinkSupportName();
-        void putLinkSupportName(String name);
-        DBStructure getConfigStructure();
-        void putConfigStructure(DBStructure dbStructure);
-        LinkSupport getLinkSupport();
-        boolean setLinkSupport(LinkSupport support);
-    }</pre>
+<pre>    public interface DBLink extends DBData {}</pre>
 
 <h3 id="Array"><a id="ArrayData"></a>Array Data</h3>
 
 <p>The base interface for array fields is:</p>
-<pre>    public interface DBArray extends DBData, PVArray {}</pre>
+<pre>    public interface DBArray extends DBData, PVArray {
+        DBType getElementDBType();
+    }</pre>
 
 <p></p>
 
@@ -581,14 +583,18 @@ database fields.</p>
 
 <p>Abstract base class for a scalar field.</p>
 <pre>    public abstract class AbstractDBData implements DBData{
-        // PVData methods
         public Field getField();
+        public String getSupportName();
+        public String setSupportName(String name);
         abstract public String toString();
         abstract public String toString(int indentLevel);
         // DBData methods
         public DBDField getDBDField();
         public DBStructure getParent();
         public DBRecord getRecord();
+        public Support getSupport();
+        public void setSupport(Support support);
+        public DBStructure getConfigurationStructure();
         public void addListener(Listener listener);
         public void removeListener(Listener listener);
         public void postPut();
@@ -647,18 +653,14 @@ database fields.</p>
         protected AbstractDBStructure(DBDRecordType dbdRecordType));
         // called by record instance constructor
         protected void createFields(DBRecord record);
-        // PVStructure methods
         public PVData[] getFieldPVDatas();
-        // DBStructure methods
         public boolean createFields(DBDStructure dbdStructure);
         public DBDStructure getDBDStructure();
         public DBData[] getFieldDBDatas();
         public int getFieldDBDataIndex(String fieldName);
-        public RecordSupport getStructureSupport();
-        public boolean setStructureSupport(RecordSupport support);
-        // DBData methods
         public String toString();
         public String toString(int indentLevel);
+        public String toString(String prefix,int indentLevel)
     }</pre>
 
 <h3 id="AbstractDB4"><a id="AbstractDBRecord"></a>AbstractDBRecord</h3>
@@ -668,43 +670,32 @@ database fields.</p>
         protected AbstractDBRecord(String recordName, DBDRecordType dbdRecordType);
         // DBRecord methods
         public String getRecordName();
+        public RecordState getRecordState();
+        public void setRecordState(RecordState state);
+        public void addRecordStateListener(RecordStateListener listener);
+        public void removeRecordStateListener(RecordStateListener listener);
+        public void lock();
+        public void unlock();
+        public void lockOtherRecord(DBRecord otherRecord);
         public RecordProcess getRecordProcess();
         public boolean setRecordProcess(RecordProcess recordProcess);
         public RecordSupport getRecordSupport();
         public boolean setRecordSupport(RecordSupport support);
-        public ReentrantLock getLock();
-        public ReentrantLock lockOtherRecord(DBRecord otherRecord);
         public int getRecordID();
         public void beginSynchronous();
-        public void stopSynchronous();
+        public void endSynchronous();
         Listener createListener(DBListener listener);
-        void destroyListener(Listener listener);
+        void removeListener(Listener listener);
+        public void removeListeners();
+        public void addListenerSource(AbstractDBData dbData);
+        public DBD getDBD();
+        public void setDBD(DBD dbd);
         // DBData methods
         public String toString();
         public String toString(int indentLevel);
     }</pre>
 
-<h3 id="AbstractDB5"><a id="AbstractDBLink"></a>AbstractDBLink</h3>
-
-<p>Abstract base class for a link field.</p>
-<pre>    public abstract class AbstractDBLink extends AbstractDBStructure implements DBLink
-    {
-        protected AbstractDBLink(DBStructure parent, DBDStructureField dbdLinkField);
-        // DBLink methods
-        public String getConfigStructureName();
-        public void putConfigStructureName(String name);
-        public String getLinkSupportName();
-        public void putLinkSupportName(String name);
-        public DBStructure getConfigStructure();
-        public void putConfigStructure(DBStructure dbStructure);
-        public LinkSupport getLinkSupport();
-        public boolean setLinkSupport(LinkSupport support);
-        // DBData methods
-        public String toString();
-        public String toString(int indentLevel);
-    }</pre>
-
-<h3 id="AbstractDB6"><a id="AbstractDBArray"></a>AbstractDBArray</h3>
+<h3 id="AbstractDB5"><a id="AbstractDBArray"></a>AbstractDBArray</h3>
 
 <p>Abstract base class for an array field.</p>
 <pre>    public abstract class AbstractDBArray
@@ -713,6 +704,7 @@ database fields.</p>
         protected AbstractDBArray(DBStructure parent,DBDArrayField dbdArrayField);
         // PVArray methods
         public boolean isCapacityMutable();
+        public DBType getElementDBType() ();
         abstract public int getCapacity();
         abstract public int getLength();
         abstract public void setCapacity(int len);
@@ -870,8 +862,7 @@ all properties of the field.</p>
             System.out.printf("    dbDataName %s value %s\n",
                 dbDataName,value);
         }
-    }
-</pre>
+    }</pre>
 
 <p>In order for the listen support to work any support that implements the
 DBRecord interface must extend AbstractDBRecord and an support that

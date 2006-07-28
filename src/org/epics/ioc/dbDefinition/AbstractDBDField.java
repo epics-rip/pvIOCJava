@@ -54,22 +54,33 @@ public abstract class AbstractDBDField implements DBDField {
     public Type getType() {
         return field.getType();
     }
+    /* (non-Javadoc)
+     * @see org.epics.ioc.pvAccess.Field#getSupportName()
+     */
+    public String getSupportName() {
+        // TODO Auto-generated method stub
+        return null;
+    }
 
+    /* (non-Javadoc)
+     * @see org.epics.ioc.pvAccess.Field#setSupportName(java.lang.String)
+     */
+    public void setSupportName(String name) {
+        // TODO Auto-generated method stub
+        
+    }
     /* (non-Javadoc)
      * @see org.epics.ioc.pvAccess.Field#isMutable()
      */
     public boolean isMutable() {
         return field.isMutable();
     }
-
     /* (non-Javadoc)
      * @see org.epics.ioc.pvAccess.Field#setMutable(boolean)
      */
     public void setMutable(boolean value) {
         field.setMutable(value);
     }
-    
-    
     /* (non-Javadoc)
      * @see java.lang.Object#toString()
      */
@@ -111,8 +122,10 @@ public abstract class AbstractDBDField implements DBDField {
         case dbMenu:
             field = FieldFactory.createEnumField(fieldName,false,property);
             break;
-        case dbStructure:
-        case dbLink: {
+        case dbLink:
+            field = FieldFactory.createField(fieldName,Type.pvUnknown,property);
+            break;
+        case dbStructure: {
             DBDStructure dbdStructure = attribute.getStructure();
             DBDField[] dbdField = null;
             String structureName = null;
@@ -135,5 +148,6 @@ public abstract class AbstractDBDField implements DBDField {
         
     protected Field field;
     protected DBDAttribute attribute;
+    protected String supportName;
 }
 

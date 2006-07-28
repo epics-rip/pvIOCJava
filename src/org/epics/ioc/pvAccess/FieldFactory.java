@@ -68,7 +68,7 @@ public final class FieldFactory {
     public static Field createField(String name,
     Type type,Property[] property)
     {
-        if(!type.isScalar()) throw new IllegalArgumentException(
+        if(!type.isScalar() && type!=Type.pvUnknown) throw new IllegalArgumentException(
                 "Illegal PVType. Must be scalar but it is " + type.toString() );
         return new FieldInstance(name,type,property);
     } 
@@ -137,8 +137,10 @@ public final class FieldFactory {
             StringBuilder builder = new StringBuilder();
             builder.append(super.toString(indentLevel));
             newLine(builder,indentLevel);
-            builder.append(String.format("elementType %s ",
-                elementType.toString()));
+            builder.append(" elementType %s " + elementType.toString());
+            if(supportName!=null) {
+                builder.append(" supportName " + supportName);
+            }
             return builder.toString();
         }
 
@@ -187,7 +189,8 @@ public final class FieldFactory {
         protected String name;
         protected Property[] property;
         protected Type type;
-    
+        protected String supportName = null;
+
         FieldInstance(String name, Type type,Property[] property) {
             this.name = name;
             this.type = type;
@@ -226,7 +229,21 @@ public final class FieldFactory {
         public Type getType() {
             return type;
         }
-    
+        
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pvAccess.Field#getSupportName()
+         */
+        public String getSupportName() {
+            return supportName;
+        }
+
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pvAccess.Field#setSupportName(java.lang.String)
+         */
+        public void setSupportName(String name) {
+            this.supportName = name;
+        }
+
         /* (non-Javadoc)
          * @see org.epics.ioc.pvAccess.Field#isMutable()
          */

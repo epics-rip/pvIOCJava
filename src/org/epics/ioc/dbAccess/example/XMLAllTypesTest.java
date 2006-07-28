@@ -22,7 +22,7 @@ import java.net.*;
  * @author mrk
  *
  */
-public class XMLToDataBaseTest extends TestCase {
+public class XMLAllTypesTest extends TestCase {
         
     /**
      * test XMLToIOCDB.
@@ -37,27 +37,6 @@ public class XMLToDataBaseTest extends TestCase {
         } catch (Exception e) {
             System.out.println("Exception: " + e);
         }
-        System.out.printf("reading analogDBD\n");
-        try {
-            XMLToDBDFactory.convert(dbd,
-                 "src/org/epics/ioc/dbAccess/example/analogDBD.xml");
-        } catch (Exception e) {
-            System.out.println("Exception: " + e);
-        }
-        System.out.printf("reading aiDBD\n");
-        try {
-            XMLToDBDFactory.convert(dbd,
-                 "src/org/epics/ioc/dbAccess/example/aiDBD.xml");
-        } catch (Exception e) {
-            System.out.println("Exception: " + e);
-        }
-        System.out.printf("reading powerSupplyDBD\n");
-        try {
-            XMLToDBDFactory.convert(dbd,
-                 "src/org/epics/ioc/dbAccess/example/powerSupplyDBD.xml");
-        } catch (Exception e) {
-            System.out.println("Exception: " + e);
-        }
         System.out.printf("reading allTypesDBD\n");
         try {
             XMLToDBDFactory.convert(dbd,
@@ -67,39 +46,11 @@ public class XMLToDataBaseTest extends TestCase {
         }
 
         IOCDB iocdb = IOCDBFactory.create(dbd,"testIOCDatabase");
-        System.out.printf("reading exampleAnalogDB\n");
+        System.out.printf("reading exampleAllTypeDB\n");
         try {
             XMLToIOCDBFactory.convert(dbd,iocdb,
-                 "src/org/epics/ioc/dbAccess/example/exampleAnalogDB.xml");
-        } catch (Exception e) {
-            System.out.println("Exception: " + e);
-        }
-        System.out.printf("reading exampleAiLinearDB\n");
-        try {
-            XMLToIOCDBFactory.convert(dbd,iocdb,
-                 "src/org/epics/ioc/dbAccess/example/exampleAiLinearDB.xml");
-        } catch (Exception e) {
-            System.out.println("Exception: " + e);
-        }
-        System.out.printf("reading exampleAiDB\n");
-        try {
-            XMLToIOCDBFactory.convert(dbd,iocdb,
-                 "src/org/epics/ioc/dbAccess/example/exampleAiDB.xml");
-        } catch (Exception e) {
-            System.out.println("Exception: " + e);
-        }
-        System.out.printf("reading examplePowerSupplyDB\n");
-        try {
-            XMLToIOCDBFactory.convert(dbd,iocdb,
-                 "src/org/epics/ioc/dbAccess/example/examplePowerSupplyDB.xml");
-        } catch (Exception e) {
-            System.out.println("Exception: " + e);
-        }
-        System.out.printf("reading examplePowerSupplyArrayDB\n");
-        try {
-            XMLToIOCDBFactory.convert(dbd,iocdb,
-                 "src/org/epics/ioc/dbAccess/example/examplePowerSupplyArrayDB.xml");
-        } catch (Exception e) {
+                 "src/org/epics/ioc/dbAccess/example/exampleAllTypeDB.xml");
+        } catch (MalformedURLException e) {
             System.out.println("Exception: " + e);
         }
         Map<String,DBRecord> recordMap = iocdb.getRecordMap();

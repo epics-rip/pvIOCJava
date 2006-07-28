@@ -88,10 +88,10 @@ public class ProcessTest extends TestCase {
         assertNotNull(dbRecord);
         TestProcess testProcess = new TestProcess(dbRecord);
         testProcess.test();
-        testProcess.testPerform();
+//        testProcess.testPerform();
     }
     
-    private static class TestProcess implements ProcessComplete {
+    private static class TestProcess implements ProcessListener {
         private RecordProcess recordProcess = null;
         private Lock lock = new ReentrantLock();
         private Condition waitDone = lock.newCondition();
@@ -154,7 +154,7 @@ public class ProcessTest extends TestCase {
                 microseconds,processPerSecond);
         }
 
-        public void complete(ProcessReturn result) {
+        public void processComplete(ProcessReturn result) {
             if(result==ProcessReturn.done) {
                 waitDone.signal();
             }

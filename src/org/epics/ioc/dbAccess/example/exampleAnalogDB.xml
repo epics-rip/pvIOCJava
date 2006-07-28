@@ -7,10 +7,11 @@
         <low>0.0</low>
         <high>10.0</high>
     </displayLimit>
-    <input linkSupportName = "org.epics.ioc.support.ProcessLink"
-             configStructureName = "processLink">
-        <pvname>xxxxxx</pvname>
-        <wait>true</wait>
+    <input supportName = "processLink">
+        <configure structureName = "processLink">
+            <pvname>xxxxxx</pvname>
+            <wait>true</wait>
+        </configure>
     </input>
     <linearConvert>
         <engUnitsLow>0.0</engUnitsLow>
