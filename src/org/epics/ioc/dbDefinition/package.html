@@ -14,6 +14,7 @@
 package: org.epics.ioc.dbDefinition<br />
 2006.06.28</h1>
 <hr />
+<p>MARTY LET DEFAULT SUPPORT BE DEFINED FOR ANY FIELD</p>
 <a href="#Overview">Overview</a> <br />
 <a href="#Syntax">Database Definition Syntax</a>
 <ul>
@@ -42,7 +43,7 @@ package: org.epics.ioc.dbDefinition<br />
       <li><a href="#SyntaxProperties">property</a></li>
     </ul>
   </li>
-  <li><a href="#SyntaxSupport">Link Support</a></li>
+  <li><a href="#SyntaxSupport">Support</a></li>
 </ul>
 <a href="#OverviewJavaSupport">Overview of Java Support For Database
 Definition</a><br />
@@ -52,7 +53,7 @@ Definition</a><br />
 <ul>
   <li><a href="#Menu">Menu</a></li>
   <li><a href="#Structure">Structure and RecordType</a></li>
-  <li><a href="#Support">Link Support</a></li>
+  <li><a href="#Support">Support</a></li>
 </ul>
 <br />
 <a href="#DBDFieldReflection">Reflection for Database Fields</a><br />
@@ -181,11 +182,9 @@ A structure is defined as follows:
     <dd>The structure or record type name should have the same syntax as a
       Java identifier.</dd>
   <dt>supportName</dt>
-    <dd>The name of the class that implements the support. If the class is
-      implemented in a package (except the defaut package), the package must
-      preceed the class name. For example
-      "org.epics.ioc.support.ExampleSupport". If given this provides the
-      default implementation. When record instances are defined, the default
+    <dd>The name of support for the structure or record type.
+    A support definition, described below, defines the support.
+      When record instances are defined, the default
       can be overridden.</dd>
   <dt><span style="font-family: courier">fieldName</span></dt>
     <dd>Should also have the same syntax as a Java identifier, unique within
@@ -385,26 +384,25 @@ where
         &lt;property name = "displayLimit" associatedField = "displayLimit" /&gt;
     &lt;/field&gt;</pre>
 
-<h2 style="text-align: center"><a id="SyntaxSupport"></a> Link Support</h2>
-link support is attached to a link field. Two forms of link support can be
-provided
-<ol>
-  <li>A link to another record either local or remote</li>
-  <li>A link to hardware support</li>
-</ol>
+<h2 style="text-align: center"><a id="SyntaxSupport"></a>Support</h2>
+<p>Support can be associated with any field of a record instance when it is created.
+See package org.epics.ioc.dbAccess for details. Record types and structures
+can have default support as shown above.</p>
+<p>Each support can optionally have an associated structure for
+configuration information. In addition a support definition must be defined.
+The syntax is:</p>
 
-<p>Link support is called by record support.</p>
-For each link support module a defnition like the following must be created:
 <pre>    &lt;structure name = "configurationStructureName"&gt;
         ...
     &lt;/structure&gt;
     ...
-    &lt;support name = "supportName" configurationStructureName = "configurationStructureName" /&gt;</pre>
+    &lt;support name = "supportName"
+         configurationStructureName = "configurationStructureName"
+         factoryName = "factoryName" /&gt;</pre>
 where
 <dl>
   <dt><span style="font-family: courier">support</span></dt>
-    <dd>Support for a link field of a record. This support will be called by
-      recordSupport not by database access.</dd>
+    <dd>Support for a link field of a record.</dd>
   <dt><span style="font-family: courier">supportName</span></dt>
     <dd>string that describes the choice</dd>
   <dt><span
@@ -412,6 +410,10 @@ where
     <dd>The name of a structure containing configuration information for the
       support. Database configuration tools prompt the user to assign values
       to the structure. This is optional.</dd>
+  <dt><span
+  style="font-family: courier">factoryName</span></dt>
+    <dd>The name of a Java factory class that creates support instances.
+    See package org.epics.ioc.dbProcess for details,</dd>
 </dl>
 
 <p>When a record instance is created the supportName selects the support to
@@ -441,8 +443,10 @@ Examples of support:
          &lt;/field&gt;
      &lt;/structure&gt;
 
-     &lt;support name = "processLink" configurationStructureName = "processLink" /&gt;
-     &lt;support name = "monitorLink" configurationStructureName = "monitorLink" /&gt;</pre>
+     &lt;support name = "processLink" configurationStructureName = "processLink"
+        factoryName = "org.epics.ioc.support.LinkSupportFactory" /&gt;
+     &lt;support name = "monitorLink" configurationStructureName = "monitorLink"
+        factoryName = "org.epics.ioc.support.LinkSupportFactory" /&gt;</pre>
 <hr />
 
 <h1 style="text-align: center"><a name="OverviewJavaSupport"
@@ -489,14 +493,7 @@ pvAccess.</p>
     <dd>An array element type can be any DBType. This is an extension of
       pvArray.</dd>
   <dt style="font-family: courier;">dbLink</dt>
-    <dd>A link appears as a structure field that has a structure with the
-      definition:
-      <pre>&lt;structure name = "link &gt;
-    &lt;field name = "supportName" type = "string" /&gt;
-    &lt;field name = "configurationStructureName" type = "string" /&gt;
-&lt;/structure&gt;
-      </pre>
-    </dd>
+    <dd>A link appears as a pvUnknown field that has associated support.</dd>
 </dl>
 
 <p>The following provides reflection for a field of a structure or
@@ -523,7 +520,16 @@ recordType</p>
     }
     </pre>
 
-<p>Since DBField extends Field it has the following methods:</p>
+<p>getMenu returns null if the field DBType is not dbMenu.</p>
+
+<p>getStructure returns null if the field DBType is not dbStructure.</p>
+
+<p>getElementType returns DBType dvPvType and getElementType returns
+pcUnknown if the field DBType is not dbArray.</p>
+
+<p>getSupportName returns null if the support name was not defined in a dbDefinition</p>
+
+<p>Since DBDField extends Field it has the following methods:</p>
 <pre>    String getName();
     Property[] getPropertys();
     Property getProperty(String propertyName);
@@ -532,13 +538,6 @@ recordType</p>
     void setMutable(boolean value);
     String toString();
     String toString(int indent Level);</pre>
-
-<p>getMenu returns null if the field DBType is not dbMenu.</p>
-
-<p>getStructure returns null if the field DBType is not dbStructure.</p>
-
-<p>getElementType returns DBType dvPvType and getElementType returns
-pcUnknown if the field DBType is not dbArray.</p>
 <hr />
 
 <h1 style="text-align: center"><a id="DBDataDefinition"></a>Database

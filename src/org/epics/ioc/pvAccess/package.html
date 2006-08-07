@@ -87,6 +87,8 @@ systems, e.g. TANGO, TINI, DOOCS, etc.</p>
     PV must contain scalar numeric type.</p>
     <p>Conversion between a PV and an array of numeric primitive types is
     supported. The PV must contain an array of a numeric type.</p>
+    <p>Copy, with conversion if the types differ, between compatible scalar PVs.</p>
+    <p>Copy, with conversion if the element types differ, between compatible arrays of PVs.</p>
   </li>
   <li>Field Factory
     <p>This is an object factory that creates objects implementing the
@@ -232,6 +234,7 @@ especially important for arrays and structures.</p>
       <li>A field has a Type.</li>
       <li>A field can have an arbitrary number of associated properties
         including none.</li>
+      <li>A field can optionally have support identified via a name.</li>
       <li>A field can be made immutable.</li>
       <li>A field can be converted to a string.</li>
     </ul>
@@ -273,15 +276,40 @@ especially important for arrays and structures.</p>
         String toString(int indentLevel);
     }</pre>
 
-<p>This above support:</p>
+where
 <ul>
   <li>getField
     <p>Returns the reflection interface for the data</p>
+  </li>
+  <li>getSupportName
+     <p>Get the name of the support for this PV.
+     </p>
+  </li>
+  <li>setSupportName
+     <p>Set the name of the support for this field.
+     </p>
+  </li>
+  <li>getConfigurationStructure
+     <p>Get the configuration interface for the support.</p>
   </li>
   <li>toString
     <p>Converts the field data to a string. This is mostly for debugging
     purposes.</p>
   </li>
+</ul>
+<p>Packages dbAccess and dbProcess allow custom support code for any field of
+any record instance of an IOC database. In order to allow the support code to
+be changed via Channel Access pvAccess provides the methods getSupportName,
+setSupportName, and getConfiguration Structure. If a client has permission to
+change the support the procedure is:
+<ul>
+  <li>Call setSupportName</li>
+  <li>Call getSupportName. If the new name is what the client specified then
+the client knows that it has successfully changed the support for the field.
+  </li>
+  <li>Call getConfigurationStructure. If a null is returned it means that the support
+does not require any configuration. If access to a configuration structure is
+returned the client can use it to provide the configuration information.</li>
 </ul>
 
 <h2><a id="PrimitiveAccess"></a>Primitive Types</h2>
@@ -477,8 +505,10 @@ For example PVDoubleArray is:</p>
     }</pre>
 
 <p>Get "exposes" it's internal array by setting data.data and data.offset.
-The caller is responsible for copying the array elements. This is done so
-that copying from one PVArray to another can be accomplished via a call to
+The caller is responsible for copying the array elements.
+This violates the principle that objects shold not expose their internal data
+but is done so that copying between arrays with identical element types
+can be implemented via a call to
 System.arraycopy without requiring an intermediate array.</p>
 
 <p>Both get and put return the number of elements actually transfered. The
@@ -525,11 +555,27 @@ the following reads an entire array:</p>
 <ul>
   <li>All supported types can be converted to a string. If you ask for a 100
     megabyte array to be converted to a string expect a lot of output.</li>
-  <li>Conversion from a string to a scalar type is supported.</li>
-  <li>Conversion from an array of strings to an array of scalar types is
-    supported.</li>
-  <li>Conversions between numeric types and arrays of numeric type are
-    supported.</li>
+  <li>Conversion from a string to a scalar type.</li>
+  <li>Conversion from an array of strings to an array of scalar types.</li>
+  <li>Copy between the following types of scalar PVs 
+    <ul>
+       <li>PVBoolean to PVBoolean or PVString</li>
+       <li>PVString to any scalar type</li>
+       <li>Numeric type to another numeric type</li>
+       <li>Other scalar types To PVString</li>
+    </ul>
+  </li>
+  <li>Copy between PVArrays with the following element types
+     <ul>
+       <li>Numeric to numeric</li>
+        <li>The types are identical including types pvUnknown,
+         pvArray, and pvStructure</li>
+        <li>Any type to pvString</li>
+        <li>pvString to any scalar type.</li>
+
+     </ul>
+  <li>Conversions between numeric scalar types.</li>`
+ <li> Conversions between arrays of numeric type.</li>
 </ul>
 <pre>    interface Convert {
         String getString(PVData pv, int indentLevel);
@@ -584,7 +630,7 @@ the following reads an entire array:</p>
         int fromDoubleArray(PVData pv,
             int offset, int len, double[]from, fromOffset);
     }</pre>
-The array methods all return the number of elements converted. This can be
+The array methods all return the number of elements copied or converted. This can be
 less than <span style="font-family: courier;">len</span> if the PVData array
 contains less than len elements.
 <hr />

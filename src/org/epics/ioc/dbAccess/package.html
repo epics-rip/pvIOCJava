@@ -19,6 +19,7 @@ package: org.epics.ioc.dbAcess <br />
   <li><a href="#Overview">Overview</a></li>
   <li><a href="#Record">Record Instance Syntax</a>
     <ul>
+      <li><a href="#Configure">configure</a></li>
       <li><a href="#Primitive">Primitive Types</a></li>
       <li><a href="#string">string</a></li>
       <li><a href="#structure">structure</a></li>
@@ -93,7 +94,7 @@ Instance Syntax</h2>
 <hr />
 
 <p>The syntax for a record instance is:</p>
-<pre>&lt;record type = "recordType" name = "recordName" recordSupportName = "supportName"&gt;
+<pre>&lt;record type = "recordType" name = "recordName" supportName = "supportName"&gt;
     fieldAssignment
 &lt;/record&gt;</pre>
 
@@ -105,44 +106,72 @@ combination of the following characters:</p>
   <li>Any Unicode/UTF-8 character outside of the Basic Latin set</li>
 </ul>
 
-<p>supportName is the name of the class that implements the support. If the
-class is implemented in a package (except the default package), the package
-must preceed the class name. For example
-"org.epics.ioc.support.ExampleSupport".</p>
-
-<p>When a record instance is being loaded into an ioc, an attempt is made to
-create record support for each record instance. If support can not be created
-a warning message is generated. The record support is created as follows: If
-the record instance defines a recordSupportName this name provides the
-supportName. Otherwise the recordType definition is consulted to see if it
-defins support. If no support is found than an warnimng message is issued.
-Record support is created via Java reflection, The supportName must be the
-name of a Java Class that has an appropriate constructor which is called to
-create the support. Any failure is reported via a warning message.</p>
+<p>supportName is the name of support. If not given the supportName
+specified in the record type definition is used. In either case a
+support definition with the supportName must exist.
+Package org.epics.ioc.dbProcess provides support that creates support
+for each record instance. See that package for details.
+If the same record instance appears multiple times then then last
+supportName is used.
+</p>
 
 <p>A <span style="font-family: courier">fieldAssignment</span> has the
 format:</p>
-<pre>    &lt;fieldName&gt;
+<pre>    &lt;fieldName supportName = "supportName" &gt;
         &lt;!-- initializer --&gt;
     &lt;/fieldName&gt;</pre>
 
 <p><span style="font-family: courier;">fieldName</span> must be a name
 definied in the record type definition.</p>
 
+<p>Any field can optionally have associated support. If a supportName is
+given with a field instance then it overides any support defined
+in the record type field definition. Thus support is only used if the
+record support for the record instance calls the support methods.
+If a field is initialized multiple times than the last supportName definition
+determines the support.
+</p>
+
+<p>If multiple field instance definitions appear then the last instance
+determines how the field is initialized.</p>
 <p>The syntax for the <span style="font-family: courier">initializer</span>
 depends on the field type.</p>
 
+<h4 id="Configure"><a id="configure"></a>Primitive Types</h4>
+<p>If a supportName is defined for a record instance of for
+a field on a record instance and the support definition specifies
+a configuration structure then a configure XML element
+can be used to initialize the fields of the configuration structure.
+This configure element MUST appear immediately after the record instance
+or field instance definition.</p>
+<p>For example assume the following Database Definitions:</p>
+<pre>
+    MARTY GET EXAMPLE
+</pre>
+<p>Then an instance of field link can be initialized as follows:</p>
+<pre>
+   MARTY GET EXAMPLE
+</pre>
+<p>This example was for a link field but similar definitions
+can be given for any field that has associated support.
+If the record support defines a configuration structure than the
+configuration must be given before any field initializations.</p>
+
 <h4 id="Primitive"><a id="FieldPrimitive"></a>Primitive Types</h4>
 
-<p>For primitive types the initializer has the same format as the the Java
+<p>For primitive types the initializer has the same format as the Java
 constants for the type. For example if the type for field value is double:</p>
-<pre>    &lt;value&gt;.98&lt;/value&gt;</pre>
+<pre>    &lt;value supportName = "supportNAme" &gt;.98&lt;/value&gt;</pre>
 
-<p>NOTE: Byte.decode, Short.decode, Integer.decide, and Long.decode are used
+Notes:
+<ul>
+<li>supportName is optional</li>
+<li>Byte.decode, Short.decode, Integer.decide, and Long.decode are used
 to convert a string to an integer data type. Thus hex values are allowed but
 the sign bit MUST not be set. This for byte data 0xff is not allowed but
 -0x01 is allowed. Note for example that the byte value -128 can not be
-specified in hex.</p>
+specified in hex.</li>
+</ul>
 
 <h4 id="string"><a id="FieldString"></a>string</h4>
 
@@ -155,7 +184,7 @@ example:</p>
 <p>Structure fields are initialized via a recursive definition of field.</p>
 
 <p>Assume the following structure and recordType definitions:</p>
-<pre>    &lt;structure name = "DisplayLimit"&gt;
+<pre>    &lt;structure name = "displayLimit"&gt;
         &lt;field name = "low"&gt;&lt;double/&gt;&lt;/field&gt;
         &lt;field name = "high"&gt;&lt;double /&gt;&lt;/field&gt;
    &lt;/structure&gt;
@@ -163,7 +192,7 @@ example:</p>
    &lt;recordType name = "ai"&gt;
    ...
        &lt;field name = "displayLimit&gt;
-            &lt;structure name = "DisplayLimit" /&gt;
+            &lt;structure name = "displayLimit" /&gt;
        &lt;field/&gt;
    ...</pre>
 
@@ -173,34 +202,16 @@ example:</p>
          &lt;high&gt;10.0&lt;/high&gt;
     &lt;/displayLimit&gt;</pre>
 
-<p>If a structure field has associated support it can be specified as
-follows:</p>
-<pre>    &lt;fieldName structureSupportName = "supportName" &gt;</pre>
-
-<p>supportName is the name of the class that implements the support. If the
-class is implemented in a package (except the default package), the package
-must preceed the class name. For example
-"org.epics.ioc.support.ProcessSupport".</p>
-
-<p>When a record instance is being loaded into an ioc, an attempt is made to
-create structure support for each structure field instance. If no support is
-found then the field has no support. The structure support is created as
-follows: If the structure field instance defines a structureSupportName this
-name provides the supportName, otherwise the structure definition is
-consulted to see if it defines support. If no support is found than nothing
-more is done. Record support for the structure field is created via Java
-reflection, The supportName must be the name of a Java Class that has an
-appropriate constructor which is called to create the support. Any failure is
-reported via a warning message.</p>
+<p>Note that supportName can optionally be defined</p>
 
 <p>It is permissible to define a field to be a structure without providing a
-structure name. In this case the structureName must be provided whe the field
+structure name. In this case the structureName must be provided when the field
 is being created. The syntax is:</p>
 <pre>    &lt;fieldName structureName = "structureName" &gt;</pre>
 
 <h4 id="array"><a id="FieldArray"></a>array</h4>
 The syntax for an array initializer is:
-<pre>    &lt;fieldName capacity = "capacity" &gt;
+<pre>    &lt;fieldName capacity = "capacity" supportName = "supportName" &gt;
         &lt;value offset = "offset"&gt;value&lt;/value&gt;
         &lt;value offset = "offset"&gt;valueList&lt;/value&gt;
         ...
@@ -208,6 +219,8 @@ The syntax for an array initializer is:
 
 <p>where</p>
 <dl>
+  <dt style="font-family: courier;">supportName</dt>
+    <dd>Optional support.</dd>
   <dt style="font-family: courier;">capacity</dt>
     <dd>The amount of storage to allocate for the array. This is optional and
       the capacity will be equal to the number of elements initialized.</dd>
@@ -267,16 +280,17 @@ style="font-family: courier;">structArray</span></p>
 <h4 id="menu"><a id="FieldMenu"></a>menu</h4>
 
 <p>A menu field is initialized as follows:</p>
-<pre>    &lt;fieldName&gt;stringValue&lt;/fieldName&gt;</pre>
+<pre>    &lt;fieldName supportName = "supportName" &gt;stringValue&lt;/fieldName&gt;</pre>
 where stringValue is one of the allowed values for the menu.
 
 <p>For example:</p>
 <pre>    &lt;scan&gt;periodic&lt;/scan&gt;</pre>
+<p>Again supportName is optional.</p>
 
 <h4 id="enumerated"><a id="FieldEnumerated"></a>enumerated</h4>
 
 <p>An enumerated field is initialized as follows:</p>
-<pre>    &lt;fieldName&gt;
+<pre>    &lt;fieldName supportName = "supportName" &gt;
         &lt;choice&gt;choice&lt;/choice&gt;
         stringValue
         ...
@@ -284,6 +298,8 @@ where stringValue is one of the allowed values for the menu.
 
 <p>where</p>
 <dl>
+  <dt style="font-family: courier;">supportName</dt>
+    <dd>Optional support</dd>
   <dt style="font-family: courier;">choice</dt>
     <dd>A choice string. One of these must be specified for each choice.</dd>
   <dt style="font-family: courier;">stringValue</dt>
@@ -299,20 +315,19 @@ where stringValue is one of the allowed values for the menu.
 
 <h4 id="link"><a id="FieldLink"></a>link</h4>
 A link field is initialized as follows:
-<pre>    &lt;fieldName&gt;
-        &lt;support name = "supportName" /&gt;
-        &lt;structure name = "supportStructureName"&gt;
+<pre>    &lt;fieldName supportName = "supportName" &gt;
+        &lt;configure structureName = "supportStructureName"&gt;
             &lt;fieldName&gt;fieldValue&lt;/fieldName&gt;
             ...
-        &lt;/structure&gt;
+        &lt;/configure&gt;
     &lt;/fieldName&gt;</pre>
 
 <p>where</p>
 <dl>
   <dt style="font-family: courier;">supportName</dt>
     <dd>The name of one of the <span
-      style="font-family: courier;">linkSupport</span> definitions</dd>
-  <dt style="font-family: courier;">supportStructureName</dt>
+      style="font-family: courier;">support</span> definitions</dd>
+  <dt style="font-family: courier;">supportName</dt>
     <dd>The name of the support structure given with the support
     definition</dd>
   <dt style="font-family: courier;">fieldValue</dt>
@@ -320,17 +335,6 @@ A link field is initialized as follows:
     </dd>
 </dl>
 
-<p>supportName is the name of the class that implements the support. If the
-class is implemented in a package (except the default package), the package
-must preceed the class name. For example
-"org.epics.ioc.support.ProcessSupport".</p>
-
-<p>When a record instance is being loaded into an ioc, an attempt is made to
-create link support for each link instance. If support can not be created a
-warning message is generated. The link support is created via Java
-reflection. The supportName must be the name of a Java Class that has an
-appropriate constructor which is called to create the support. Any failure is
-reported via a warning message.</p>
 <hr />
 
 <h2 style="text-align: center" id="Database"><a id="XMLToDB"></a>XML to
@@ -354,8 +358,14 @@ support, Channel Access, etc.</p>
 
 <h3 id="Listener">Listener Interface</h3>
 
+<h4>DBListener</h4>
 <p>DBListener is an interface that must be implemented by code that calls
-DBdata.addListener.</p>
+DBdata.addListener, which is a request to be notified whenever a field
+changes value. A request can be made for any field including structure
+fields or even a record instance. If the request is made for a structure
+field then the requester will be notified whenever any field of the structure
+changes value.</p>
+<p>DBListener has the definition:</p>
 <pre>    public interface DBListener {
         void newData(DBData dbData);
         void beginSynchronous();
@@ -363,9 +373,40 @@ DBdata.addListener.</p>
         void unlisten(RecordListener listener);
     }</pre>
 
-<p>RecordListener is an interface that must be implemented by the code that
-implements DBRecord. DBRecord provides a method to create a
-RecordListener.</p>
+where
+<dl>
+  <dt>newData</dt>
+    <dd>The new data value. This is always an elementary field, i.e. not
+    a structure.</dd>
+  <dt>beginSynchronous</dt>
+     <dd>This is called before a set of synchronous data modifications.
+         It is followed by an arbitrary number calls to newData and
+         finally a call to endSynchronous</dd>
+   <dt>endSynchronous</dt>
+      <dd>End of synchronous data</dd>
+   <dt>unlisten</dt>
+      <dd>The data source is undergoing destruction of major structural changes.
+       The DBData.addListener call is no longer valid and the user
+       should null the object reference returned by addListener.</dd>
+</dl>
+<p>Assume that a field named value has properties status and severity.
+Then when the record is processed and field value is written then the
+following calls might occur:</p>
+<ul>
+  <li>beginSynchronous</li>
+  <li>newData for value</li>
+  <li>newData for status</li>
+  <li>newData for severity</li>
+  <li>endSynchronous</li>
+</ul>
+
+<h4>RecordListener</h4>
+
+<p>RecordListener is an interface that is implemented by the code that
+implements DBRecord. This is normamally class AbstractDBRecord.
+DBRecord provides a method to create a RecordListener.
+See class FieldDataFactory and AbstractDBRecord for details.
+The definition of RecordListener is:</p>
 <pre>    public interface RecordListener {
         void newData(DBData dbData);
     }</pre>
@@ -378,8 +419,8 @@ instance.</p>
         DBDField getDBDField();
         DBStructure getParent();
         DBRecord getRecord();
-        void addListener(Listener listener);
-        void removeListener(Listener listener);
+        void addListener(RecordListener listener);
+        void removeListener(RecordListener listener);
         void postPut();
         void postPut(DBData dbData);
         DBStructure getConfigurationStructure();
@@ -387,9 +428,48 @@ instance.</p>
         void setSupport(Support support);
     }</pre>
 
-<p>Since it extends PVData it has the methods:</p>
+<p>Since it extends PVData it also has the methods:</p>
 <pre>        Field getField();
+        String getSupportNamed();
+        String setSupportName(String name);
+        PVStructure getConfigurationStructure();
+        String toString();
         String toString(int indentLevel);</pre>
+<p>AbstractDBData implements all of the DBData methods.
+The methods are:</p>
+<dl>
+  <dt>getField</dt>
+    <dd>Get the Field introspection interface.</dd>
+  <dt>getSupportName</dt>
+    <dd>Get the name of the support for the field. If no support
+    has been specified null is returned.</dd>
+  <dt>setSupportName</dt>
+    <dd>Set the support name. This is called by the XML parser.</dd>
+  <dt>getConfigurationStructure</dt>
+    <dd>Get the configuration structure interface. In no configuration
+    structure is associated with the field then null is returned.
+    The caller can ask for either a PVStructure or a DBStructure.
+  <dt>toString</dt>
+    <dd>This is for debugging. It dumps the contents of the field.
+    AbstractDBData shows the supportName of it has been defined and
+    the contents of the configuration structure if it exists.
+    Any code that extents DBData should append super.toString(level)
+    to any output it generates.</dd>
+  <dt>getDBDField</dt>
+    <dd>Get the DBDField introspection interface</dd>
+  <dt>getParent</dt>
+    <dd>Get the interface for the parent of this field</dd>
+  <dt>getRecord</dt>
+    <dd>Get the interface of the record instance that has this field.</dd>
+  <dt>addListener</dt>
+    <dd>Add a record listener. This is normally only called by MARTY WHAT</dd>
+  <dt>removelistener</dt>
+  <dt>postPut</dt>
+   <dt>getConfigurationStructure</dt>
+   <dt>getSupport</dt>
+   <dt>setSupport</dt>
+</dl>
+
 Field is the introspection interface for pvAccess Types. DBDField is the
 introspection interface for DBTypes.
 
