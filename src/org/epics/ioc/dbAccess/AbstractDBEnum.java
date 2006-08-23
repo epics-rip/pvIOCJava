@@ -25,7 +25,7 @@ public abstract class AbstractDBEnum extends AbstractDBData implements DBEnum {
      * @param dbdEnumField the reflection interface for the DBEnum data.
      * @param choice the choices for the enum.
      */
-    protected AbstractDBEnum(DBStructure parent,DBDEnumField dbdEnumField, String[]choice) {
+    protected AbstractDBEnum(DBData parent,DBDEnumField dbdEnumField, String[]choice) {
         super(parent,dbdEnumField);
         index = 0;
         if(choice==null) choice = EMPTY_STRING_ARRAY;

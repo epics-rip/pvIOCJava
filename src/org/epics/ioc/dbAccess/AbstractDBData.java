@@ -20,7 +20,7 @@ import java.util.*;
 public abstract class AbstractDBData implements DBData{
     
     private DBDField dbdField;
-    private DBStructure parent;
+    private DBData parent;
     private DBRecord record;
     private LinkedList<RecordListener> listenerList
         = new LinkedList<RecordListener>();
@@ -34,7 +34,7 @@ public abstract class AbstractDBData implements DBData{
      * @param parent the parent structure.
      * @param dbdField the reflection interface for the DBData data.
      */
-    protected AbstractDBData(DBStructure parent, DBDField dbdField) {
+    protected AbstractDBData(DBData parent, DBDField dbdField) {
         this.dbdField = dbdField;
         this.parent = parent;
         if(parent!=null) {
@@ -80,7 +80,7 @@ public abstract class AbstractDBData implements DBData{
     /* (non-Javadoc)
      * @see org.epics.ioc.dbAccess.DBData#getParent()
      */
-    public DBStructure getParent() {
+    public DBData getParent() {
         return parent;
     }
     /* (non-Javadoc)
@@ -126,7 +126,7 @@ public abstract class AbstractDBData implements DBData{
         }
         if(parent==null) return;
         if(parent==this) {
-            System.out.printf("postPut parent = this Why???\n");
+            System.out.printf("postPut parent = this Why???%n");
         } else {
             parent.postPut(dbData);
         }
@@ -154,7 +154,7 @@ public abstract class AbstractDBData implements DBData{
                 + " for support " + name
                 + " does not exist";
         }
-        DBStructure parent;
+        DBData parent;
         if(getDBDField().getDBType()==DBType.dbStructure) {
             parent = (DBStructure)this;
         } else {
@@ -194,7 +194,7 @@ public abstract class AbstractDBData implements DBData{
      * @param indentLevel indentation level.
      */
     protected static void newLine(StringBuilder builder, int indentLevel) {
-        builder.append("\n");
+        builder.append(String.format("%n"));
         for (int i=0; i <indentLevel; i++) builder.append(indentString);
     }
     protected String baseString(int indentLevel) {

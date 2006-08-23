@@ -2,6 +2,6 @@
 package org.epics.ioc.util;
 
 public class TimeStamp {
-    public long seconds;
+    public long secondsPastEpoch;
     public int nanoSeconds;
 }

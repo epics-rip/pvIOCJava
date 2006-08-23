@@ -58,16 +58,14 @@ public abstract class AbstractDBDField implements DBDField {
      * @see org.epics.ioc.pvAccess.Field#getSupportName()
      */
     public String getSupportName() {
-        // TODO Auto-generated method stub
-        return null;
+        return supportName;
     }
 
     /* (non-Javadoc)
      * @see org.epics.ioc.pvAccess.Field#setSupportName(java.lang.String)
      */
     public void setSupportName(String name) {
-        // TODO Auto-generated method stub
-        
+        supportName = name;
     }
     /* (non-Javadoc)
      * @see org.epics.ioc.pvAccess.Field#isMutable()

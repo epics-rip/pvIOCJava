@@ -48,30 +48,42 @@ public class XMLToIOCDBFactory {
             reader.parse(uri);
         } catch(MalformedURLException e) {
             throw new MalformedURLException (
-            "\nXMLToIOCDBFactory.convert terminating with MalformedURLException\n"
-            + e.getMessage());
+                String.format("%n")
+                + "XMLToIOCDBFactory.convert terminating with MalformedURLException"
+                + String.format("%n")
+                + e.getMessage());
         } catch (SAXException e) {
             throw new IllegalStateException(
-                "\nXMLToIOCDBFactory.convert terminating with SAXException\n"
+                String.format("%n")
+                + "XMLToIOCDBFactory.convert terminating with SAXException"
+                + String.format("%n")
                 + e.getMessage());
         } catch (IOException e) {
             throw new IllegalStateException (
-                "\nXMLToIOCDBFactory.convert terminating with IOException\n"
+                String.format("%n")
+                + "XMLToIOCDBFactory.convert terminating with IOException"
+                + String.format("%n")
                 + e.getMessage());
         } catch (IllegalStateException e) {
             handler.error("IllegalStateException " + e.getMessage());
             throw new IllegalStateException(
-                "\nXMLToDBDFactory.convert terminating with IllegalStateException\n"
+                String.format("%n")
+                + "XMLToDBDFactory.convert terminating with IllegalStateException"
+                + String.format("%n")
                 + e.getMessage());
         } catch (IllegalArgumentException e) {
             handler.error("IllegalArgumentException " + e.getMessage());
             throw new IllegalStateException(
-                "\nXMLToDBDFactory.convert terminating with IllegalArgumentException\n"
+                String.format("%n")
+                + "XMLToDBDFactory.convert terminating with IllegalArgumentException"
+                + String.format("%n")
                 + e.getMessage());
         } catch (Exception e) {
             handler.error("Exception " + e.getMessage());
             throw new IllegalStateException(
-                "\nXMLToDBDFactory.convert terminating with Exception\n"
+                String.format("%n")
+                + "XMLToDBDFactory.convert terminating with Exception"
+                + String.format("%n")
                 + e.getMessage());
         }
     }
@@ -98,37 +110,36 @@ public class XMLToIOCDBFactory {
         private int nFatal = 0;
         private RecordHandler  recordHandler = null;
 
-        Handler()  throws MalformedURLException {
-        }
+        Handler()  throws MalformedURLException {}
         
         private String printSAXParseExceptionMessage(SAXParseException e)
         {
-            return String.format("line %d column %d\nreason %s\n",
+            return String.format("line %d column %d%nreason %s%n",
                 locator.getLineNumber(),
                 locator.getColumnNumber(),
                 e.toString());
         }
  
         public void error(String message) {
-            System.err.printf("line %d column %d\nreason %s\n",
+            System.err.printf("line %d column %d%nreason %s%n",
                     locator.getLineNumber(),
                     locator.getColumnNumber(),
                     message);
                 nError++;
         }
         public void warning(SAXParseException e) throws SAXException {
-            System.err.printf("warning %s\n",
+            System.err.printf("warning %s%n",
                 printSAXParseExceptionMessage(e));
             nWarning++;
         }
         public void error(SAXParseException e) throws SAXException {
-            System.err.printf("error %s\n",
+            System.err.printf("error %s%n",
                 printSAXParseExceptionMessage(e));
             nError++;
         }
         
         public void fatalError(SAXParseException e) throws SAXException {
-            System.err.printf("fatal error %s\n",
+            System.err.printf("fatal error %s%n",
                 printSAXParseExceptionMessage(e));
             nFatal++;
         }
@@ -146,7 +157,7 @@ public class XMLToIOCDBFactory {
         public void endDocument() throws SAXException {
             if(nWarning>0 || nError>0 || nFatal>0) {
                 System.err.printf(
-                    "endDocument: warning %d severe %d fatal %d\n",
+                    "endDocument: warning %d severe %d fatal %d%n",
                     nWarning,nError,nFatal);
             }
         }       
@@ -163,9 +174,9 @@ public class XMLToIOCDBFactory {
                     recordHandler = new RecordHandler(qName,attributes);
                     state = State.record;
                 } else {
-                    System.err.printf(
-                        "startElement element %s not understood\n",qName);
-                    nError++;
+                    errorHandler.error(new SAXParseException(
+                        "startElement " + qName + " not understood",
+                        locator));
                 }
                 break;
             case record: 
@@ -184,9 +195,9 @@ public class XMLToIOCDBFactory {
                 if(qName.equals("IOCDatabase")) {
                     state = State.startDocument;
                 } else {
-                    System.err.printf(
-                        "startElement element %s not understood\n",qName);
-                    nError++;
+                    errorHandler.error(new SAXParseException(
+                            "endElement element " + qName + " not understood",
+                            locator));
                 }
                 break;
             case record: 
@@ -254,7 +265,7 @@ public class XMLToIOCDBFactory {
         private DBRecord dbRecord = null;
         
         private static class IdleState {
-            private State prevState;
+            private State prevState = null;
         }
         private IdleState idleState = new IdleState();
         private Stack<IdleState> idleStack = new Stack<IdleState>();
@@ -375,10 +386,10 @@ public class XMLToIOCDBFactory {
         throws SAXException {
             switch(state) {
             case idle: 
-                idleStack.push(idleState);
-                idleState = new IdleState();
                 idleState.prevState = state;
                 state = State.idle;
+                idleStack.push(idleState);
+                idleState = new IdleState();
                 break;
             case structure:
                 if(qName.equals("configure")) {
@@ -436,7 +447,6 @@ public class XMLToIOCDBFactory {
         void endElement(String qName) throws SAXException {
             switch(state) {
             case idle: 
-                idleState = idleStack.pop();
                 state = idleState.prevState;
                 if(state==State.idle) {
                     idleState = idleStack.pop();
@@ -502,7 +512,19 @@ public class XMLToIOCDBFactory {
             }
             DBData dbData = dbStructure.getFieldDBDatas()[dbDataIndex];
             String supportName = attributes.getValue("supportName");
-            if(supportName!=null) dbData.setSupportName(supportName);
+            if(supportName==null) {
+                DBDField dbdField = dbData.getDBDField();
+                supportName = dbdField.getSupportName();
+            }
+            if(supportName!=null) {
+                String error = dbData.setSupportName(supportName);
+                if(error!=null) {
+                    errorHandler.error(new SAXParseException(
+                            "fieldName " + qName + " setSupportName failed "
+                            + error,
+                             locator));
+                }
+            }
             DBDField dbdField = dbData.getDBDField();
             DBType dbType = dbdField.getDBType();
             switch(dbType) {
@@ -567,7 +589,15 @@ public class XMLToIOCDBFactory {
                 supportName = dbData.getSupportName();
                 if(supportName==null) {
                     supportName = structureState.dbStructure.getDBDStructure().getSupportName();
-                    if(supportName!=null) dbData.setSupportName(supportName);
+                    if(supportName!=null) {
+                        String error = dbData.setSupportName(supportName);
+                        if(error!=null) {
+                            errorHandler.error(new SAXParseException(
+                                    "fieldName " + qName + " setSupportName failed "
+                                    + error,
+                                     locator));
+                        }
+                    }
                 }
                 return;
             case dbArray:
@@ -790,7 +820,14 @@ public class XMLToIOCDBFactory {
             arrayState.arrayElementType = arrayElementType;
             arrayState.arrayElementDBType = arrayElementDBType;
             String supportName = attributes.getValue("supportName");
-            if(supportName!=null) dbArray.setSupportName(supportName);
+            if(supportName!=null) {
+                String error = dbArray.setSupportName(supportName);
+                if(error!=null) {
+                    errorHandler.error(new SAXParseException(
+                            error, locator));
+                }
+                
+            }
             String value = attributes.getValue("capacity");
             if(value!=null) dbArray.setCapacity(Integer.parseInt(value));
             value = attributes.getValue("length");
@@ -836,6 +873,7 @@ public class XMLToIOCDBFactory {
             int arrayOffset = arrayState.arrayOffset;
             DBArray dbArray = arrayState.dbArray;
             String fieldName = "value";
+            String actualFieldName = "[" + String.format("%d",arrayOffset) + "]";
             DBDAttribute dbdAttribute;
             DBDField dbdField;
             switch(arrayState.arrayElementDBType) {
@@ -853,16 +891,23 @@ public class XMLToIOCDBFactory {
                         state = State.idle;
                         return;
                     }
-                    dbdAttribute = DBDAttributeFactory.create(
-                         dbd,enumDBDAttributeValues);
+                    DBDAttributeValues dbdAttributeValues =
+                        new EnumDBDAttributeValues(actualFieldName);
+                    dbdAttribute = DBDAttributeFactory.create(dbd,dbdAttributeValues);
                     dbdField = DBDCreateFactory.createField(dbdAttribute,null);
                     DBEnumArray dbEnumArray = arrayState.dbEnumArray;
                     DBEnum[] enumData = arrayState.enumData;
                     enumData[0] = (DBEnum)FieldDataFactory.createEnumData(
-                        dbArray.getParent(),dbdField,null);
+                        dbArray,dbdField,null);
                     dbEnumArray.put(arrayOffset,1,enumData,0);
                     String supportName = attributes.getValue("supportName");
-                    if(supportName!=null) enumData[0].setSupportName(supportName);
+                    if(supportName!=null) {
+                        String error = enumData[0].setSupportName(supportName);
+                        if(error!=null) {
+                            errorHandler.error(new SAXParseException(
+                                    error, locator));
+                        }
+                    }
                     enumState.prevState = state;
                     enumState.dbEnum = enumData[0];
                     enumState.fieldName = fieldName;
@@ -879,16 +924,22 @@ public class XMLToIOCDBFactory {
                         state = State.idle;
                     }
                     DBDAttributeValues dbdAttributeValues =
-                        new MenuDBDAttributeValues(menuName);
+                        new MenuDBDAttributeValues(menuName,actualFieldName);
                     dbdAttribute = DBDAttributeFactory.create(
                         dbd,dbdAttributeValues);
                     dbdField = DBDCreateFactory.createField(dbdAttribute,null);
                     DBMenuArray dbMenuArray = arrayState.dbMenuArray;
                     DBMenu[] menuData = arrayState.menuData;
-                    menuData[0] = (DBMenu)FieldDataFactory.createData(dbArray.getParent(),dbdField);
+                    menuData[0] = (DBMenu)FieldDataFactory.createData(dbArray,dbdField);
                     dbMenuArray.put(arrayOffset,1,menuData,0);
                     String supportName = attributes.getValue("supportName");
-                    if(supportName!=null) menuData[0].setSupportName(supportName);
+                    if(supportName!=null) {
+                        String error = menuData[0].setSupportName(supportName);
+                        if(error!=null) {
+                            errorHandler.error(new SAXParseException(
+                                    error, locator));
+                        }
+                    }
                     fieldState.prevState = state;
                     fieldState.dbData = menuData[0];
                     state = State.field;
@@ -913,17 +964,23 @@ public class XMLToIOCDBFactory {
                         state = State.idle;
                     }
                     DBDAttributeValues dbdAttributeValues =
-                        new StructureDBDAttributeValues(structureName,fieldName.toString());
+                        new StructureDBDAttributeValues(structureName,actualFieldName);
                     dbdAttribute = DBDAttributeFactory.create(
                         dbd,dbdAttributeValues);
                     Property[] property = structure.getPropertys();
                     dbdField = DBDCreateFactory.createField(dbdAttribute,property);
                     DBStructureArray dbStructureArray = arrayState.dbStructureArray;
                     DBStructure[] structureData = arrayState.structureData;
-                    structureData[0] = (DBStructure)FieldDataFactory.createData(dbArray.getParent(),dbdField);
+                    structureData[0] = (DBStructure)FieldDataFactory.createData(dbArray,dbdField);
                     dbStructureArray.put(arrayOffset,1,structureData,0);
                     String supportName = attributes.getValue("supportName");
-                    if(supportName!=null) structureData[0].setSupportName(supportName);
+                    if(supportName!=null) {
+                        String error = structureData[0].setSupportName(supportName);
+                        if(error!=null) {
+                            errorHandler.error(new SAXParseException(
+                                    error, locator));
+                        }
+                    }
                     structureStack.push(structureState);
                     structureState = new StructureState();
                     structureState.prevState = state;
@@ -941,19 +998,25 @@ public class XMLToIOCDBFactory {
                         state = State.idle;
                     }
                     DBDAttributeValues dbdAttributeValues =
-                        new ArrayDBDAttributeValues(elementType);
+                        new ArrayDBDAttributeValues(elementType,actualFieldName);
                     dbdAttribute = DBDAttributeFactory.create(dbd,dbdAttributeValues);
                     dbdField = DBDCreateFactory.createField(dbdAttribute,null);
                     DBArrayArray dbArrayArray = arrayState.dbArrayArray;
                     DBArray[] arrayData = arrayState.arrayData;
-                    arrayData[0] = (DBArray)FieldDataFactory.createData(dbArray.getParent(),dbdField);
+                    arrayData[0] = (DBArray)FieldDataFactory.createData(dbArray,dbdField);
                     dbArrayArray.put(arrayOffset,1,arrayData,0);
                     String value = attributes.getValue("capacity");
                     if(value!=null) arrayData[0].setCapacity(Integer.parseInt(value));
                     value = attributes.getValue("length");
                     if(value!=null) arrayData[0].setLength(Integer.parseInt(value));
                     String supportName = attributes.getValue("supportName");
-                    if(supportName!=null) arrayData[0].setSupportName(supportName);
+                    if(supportName!=null) {
+                        String error = arrayData[0].setSupportName(supportName);
+                        if(error!=null) {
+                            errorHandler.error(new SAXParseException(
+                                    error, locator));
+                        }
+                    }
                     arrayStack.push(arrayState);
                     arrayState = new ArrayState();
                     arrayState.prevState = state;
@@ -964,16 +1027,23 @@ public class XMLToIOCDBFactory {
                     return;
                 }
             case dbLink: {
-                       dbdAttribute = DBDAttributeFactory.create(
-                            dbd,linkDBDAttributeValues);
+                       DBDAttributeValues dbdAttributeValues =
+                           new LinkDBDAttributeValues(actualFieldName);
+                       dbdAttribute = DBDAttributeFactory.create(dbd,dbdAttributeValues);
                        dbdField = DBDCreateFactory.createField(dbdAttribute,null);
                        DBLinkArray dbLinkArray = arrayState.dbLinkArray;
                        DBLink[] linkData = arrayState.linkData;
                        linkData[0] = (DBLink)FieldDataFactory.createData(
-                           dbArray.getParent(),dbdField);
+                           dbArray,dbdField);
                        dbLinkArray.put(arrayOffset,1,linkData,0);
                        String supportName = attributes.getValue("supportName");
-                       if(supportName!=null) linkData[0].setSupportName(supportName);
+                       if(supportName!=null) {
+                           String error = linkData[0].setSupportName(supportName);
+                           if(error!=null) {
+                               errorHandler.error(new SAXParseException(
+                                       error, locator));
+                           }
+                       }
                        fieldState.prevState = state;
                        fieldState.dbData = linkData[0];
                        state = State.field;
@@ -1034,17 +1104,17 @@ public class XMLToIOCDBFactory {
             }
         }
     }
-    private static TypeDBDAttributeValues enumDBDAttributeValues =
-        new TypeDBDAttributeValues("enum");
-    private static TypeDBDAttributeValues linkDBDAttributeValues =
-        new TypeDBDAttributeValues("link");
-
-    private static class TypeDBDAttributeValues implements DBDAttributeValues
+//    private static TypeDBDAttributeValues enumDBDAttributeValues =
+//        new TypeDBDAttributeValues("enum");
+//    private static TypeDBDAttributeValues linkDBDAttributeValues =
+//        new TypeDBDAttributeValues("link");
+    
+    private static class EnumDBDAttributeValues implements DBDAttributeValues
     {   
-        private String type;
+        private String fieldName;
         
-        TypeDBDAttributeValues(String type) {
-            this.type= type;
+        EnumDBDAttributeValues(String fieldName) {
+            this.fieldName = fieldName;
         }
 
         public int getLength() {
@@ -1058,19 +1128,50 @@ public class XMLToIOCDBFactory {
         }
 
         public String getValue(int index) {
-            if(index==0) return "null";
-            if(index==1) return type;
+            if(index==0) return fieldName;
+            if(index==1) return "enum";
             return null;
         }
 
         public String getValue(String name) {
-            if(name.equals("name")) return "null";
-            if(name.equals("type")) return type;
+            if(name.equals("name")) return fieldName;
+            if(name.equals("type")) return "enum";
             return null;
         }
  
     }
+    private static class LinkDBDAttributeValues implements DBDAttributeValues
+    {   
+        private String fieldName;
+        
+        LinkDBDAttributeValues(String fieldName) {
+            this.fieldName = fieldName;
+        }
 
+        public int getLength() {
+            return 2;
+        }
+
+        public String getName(int index) {
+            if(index==0) return "name";
+            if(index==1) return "type";
+            return null;
+        }
+
+        public String getValue(int index) {
+            if(index==0) return fieldName;
+            if(index==1) return "link";
+            return null;
+        }
+
+        public String getValue(String name) {
+            if(name.equals("name")) return fieldName;
+            if(name.equals("type")) return "link";
+            return null;
+        }
+ 
+    }
+    
     private static class StructureDBDAttributeValues
     implements DBDAttributeValues
     {
@@ -1114,9 +1215,11 @@ public class XMLToIOCDBFactory {
     implements DBDAttributeValues
     {
         private String elementType;
+        private String fieldName;
         
-        public ArrayDBDAttributeValues(String elementType) {
+        public ArrayDBDAttributeValues(String elementType, String fieldName) {
             this.elementType = elementType;
+            this.fieldName = fieldName;
         }
         
         public int getLength() {
@@ -1131,14 +1234,14 @@ public class XMLToIOCDBFactory {
         }
 
         public String getValue(int index) {
-            if(index==0) return "null";
+            if(index==0) return fieldName;
             if(index==1) return "array";
             if(index==2) return elementType;
             return null;
         }
 
         public String getValue(String name) {
-            if(name.equals("name")) return "null";
+            if(name.equals("name")) return fieldName;
             if(name.equals("type")) return "array";
             if(name.equals("elementType")) return elementType;
             return null;
@@ -1150,9 +1253,11 @@ public class XMLToIOCDBFactory {
     implements DBDAttributeValues
     {
         private String menuName;
+        private String fieldName;
 
-        public MenuDBDAttributeValues(String menuName) {
+        public MenuDBDAttributeValues(String menuName,String fieldName) {
             this.menuName = menuName;
+            this.fieldName = fieldName;
         }
         
         public int getLength() {
@@ -1167,14 +1272,14 @@ public class XMLToIOCDBFactory {
         }
 
         public String getValue(int index) {
-            if(index==0) return "null";
+            if(index==0) return fieldName;
             if(index==1) return "menu";
             if(index==2) return menuName;
             return null;
         }
 
         public String getValue(String name) {
-            if(name.equals("name")) return "null";
+            if(name.equals("name")) return fieldName;
             if(name.equals("type")) return "menu";
             if(name.equals("menuName")) return menuName;
             return null;

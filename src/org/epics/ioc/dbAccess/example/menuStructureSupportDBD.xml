@@ -107,6 +107,8 @@
     <field name = "timeStampLink" type = "link" />
 </structure>
 
+<support name = "linearConvertInputSupport"
+    factoryName = "org.epics.ioc.support.SupportFactory" />
 
 <support name = "processLink" configurationStructureName = "processLink" 
     factoryName = "org.epics.ioc.support.LinkSupportFactory" />

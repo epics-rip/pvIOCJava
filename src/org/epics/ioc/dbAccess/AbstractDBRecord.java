@@ -64,7 +64,7 @@ public class AbstractDBRecord extends AbstractDBStructure implements DBRecord {
         Iterator<RecordStateListener> iter = recordStateListenerList.iterator();
         while(iter.hasNext()) {
             RecordStateListener listener = iter.next();
-            listener.newState(state);
+            listener.newState(this,state);
         }
         if(state==RecordState.zombie) {
             recordProcess = null;

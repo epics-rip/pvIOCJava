@@ -33,33 +33,33 @@ public class XMLToDBDTest extends TestCase {
         } catch (Exception e) {
             System.out.println("Exception: " + e);
         }
-        System.out.printf("\nmenus");
+        System.out.printf("%nmenus");
         Map<String,DBDMenu> menuMap = dbd.getMenuMap();
         Set<String> keys = menuMap.keySet();
         for(String key: keys) {
             DBDMenu dbdMenu = menuMap.get(key);
-            System.out.printf("\n%s",dbdMenu.toString());
+            System.out.printf("%n%s",dbdMenu.toString());
         }
-        System.out.printf("\n\nstructures");
+        System.out.printf("%n%nstructures");
         Map<String,DBDStructure> structureMap = dbd.getStructureMap();
         keys = structureMap.keySet();
         for(String key: keys) {
             DBDStructure dbdStructure = structureMap.get(key);
-            System.out.printf("\n%s",dbdStructure.toString());
+            System.out.printf("%n%s",dbdStructure.toString());
         }
-        System.out.printf("\n\nsupport");
+        System.out.printf("%n%nsupport");
         Map<String,DBDSupport> supportMap = dbd.getSupportMap();
         keys = supportMap.keySet();
         for(String key: keys) {
             DBDSupport dbdSupport = supportMap.get(key);
-            System.out.printf("\n%s",dbdSupport.toString());
+            System.out.printf("%n%s",dbdSupport.toString());
         }
-        System.out.printf("\n\nrecordTypes");
+        System.out.printf("%n%nrecordTypes");
         Map<String,DBDRecordType> recordTypeMap = dbd.getRecordTypeMap();
         keys = recordTypeMap.keySet();
         for(String key: keys) {
             DBDRecordType dbdRecordType = recordTypeMap.get(key);
-            System.out.printf("\n%s",dbdRecordType.toString());
+            System.out.printf("%n%s",dbdRecordType.toString());
         }
         
     }

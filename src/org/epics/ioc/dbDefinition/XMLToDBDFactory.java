@@ -21,6 +21,10 @@ import java.util.*;
  *
  */
 public class XMLToDBDFactory {
+    // For use by all private classes
+    private static DBD dbd;
+    private static ErrorHandler errorHandler;
+    private static Locator locator; 
     /**
      * Convert an xml file to Database definitions and put
      * the definitions in a database.
@@ -29,13 +33,16 @@ public class XMLToDBDFactory {
      * @throws MalformedURLException if SAX throws it.
      * @throws IllegalStateException if any errors were detected.
      */
-    public static void convert(DBD dbd, String fileName)
+    public static void convert(DBD dbdin, String fileName)
         throws MalformedURLException,IllegalStateException
     {
+        dbd = dbdin;
         String uri = new File(fileName).toURL().toString();
         XMLReader reader;
         
-        Handler handler = new Handler(dbd);
+        
+        Handler handler = new Handler();
+        errorHandler = handler;
         try {
             reader = XMLReaderFactory.createXMLReader();
             reader.setContentHandler(handler);
@@ -43,26 +50,36 @@ public class XMLToDBDFactory {
             reader.parse(uri);
         } catch (SAXException e) {
             throw new IllegalStateException(
-                "\nXMLToDBDFactory.convert terminating with SAXException\n"
+                String.format("%n")
+                + "XMLToDBDFactory.convert terminating with SAXException"
+                + String.format("%n")
                 + e.getMessage());
         } catch (IOException e) {
             throw new IllegalStateException(
-                "\nXMLToDBDFactory.convert terminating with IOException\n"
+                String.format("%n")
+                + "XMLToDBDFactory.convert terminating with IOException"
+                + String.format("%n")
                 + e.getMessage());
         } catch (IllegalStateException e) {
             handler.error("IllegalStateException " + e.getMessage());
             throw new IllegalStateException(
-                "\nXMLToDBDFactory.convert terminating with IllegalStateException\n"
+                String.format("%n")
+                + "XMLToDBDFactory.convert terminating with IllegalStateException"
+                + String.format("%n")
                 + e.getMessage());
         } catch (IllegalArgumentException e) {
             handler.error("IllegalArgumentException " + e.getMessage());
             throw new IllegalStateException(
-                "\nXMLToDBDFactory.convert terminating with IllegalArgumentException\n"
+                String.format("%n")
+                + "XMLToDBDFactory.convert terminating with IllegalArgumentException"
+                + String.format("%n")
                 + e.getMessage());
         } catch (Exception e) {
             handler.error("Exception " + e.getMessage());
             throw new IllegalStateException(
-                "\nXMLToDBDFactory.convert terminating with Exception\n"
+                String.format("%n")
+                + "XMLToDBDFactory.convert terminating with Exception"
+                + String.format("%n")
                 + e.getMessage());
         }
     }
@@ -77,19 +94,15 @@ public class XMLToDBDFactory {
             recordType,
             support
         } 
-        private DBD dbd;
-        private Locator locator = null;
         private State state = State.startDocument;
         private int nWarning = 0;
         private int nError = 0;
         private int nFatal = 0;
         
-        Handler(DBD dbd)  throws MalformedURLException {
-            this.dbd = dbd;    
-        }
+        Handler()  throws MalformedURLException {}
         private String printSAXParseExceptionMessage(SAXParseException e)
         {
-            return String.format("line %d column %d\nreason %s\n",
+            return String.format("line %d column %d%nreason %s%n",
                 locator.getLineNumber(),
                 locator.getColumnNumber(),
                 e.toString());
@@ -100,31 +113,31 @@ public class XMLToDBDFactory {
         private DBDXMLHandler supportHandler;
         
         public void error(String message) {
-            System.err.printf("line %d column %d\nreason %s\n",
+            System.err.printf("line %d column %d%nreason %s%n",
                 locator.getLineNumber(),
                 locator.getColumnNumber(),
                 message);
             nError++;
         }
         public void warning(SAXParseException e) throws SAXException {
-            System.err.printf("warning %s\n",printSAXParseExceptionMessage(e));
+            System.err.printf("warning %s%n",printSAXParseExceptionMessage(e));
             nWarning++;
         }
         public void error(SAXParseException e) throws SAXException {
-            System.err.printf("error %s\n",printSAXParseExceptionMessage(e));
+            System.err.printf("error %s%n",printSAXParseExceptionMessage(e));
             nError++;
         }
         
         public void fatalError(SAXParseException e) throws SAXException {
-            System.err.printf("fatal error %s\n",printSAXParseExceptionMessage(e));
+            System.err.printf("fatal error %s%n",printSAXParseExceptionMessage(e));
             nFatal++;
         }
         
-        public void setDocumentLocator(Locator locator) {
-            this.locator = locator;
-            menuHandler = new DBDXMLMenuHandler(dbd,this,locator);
-            structureHandler = new DBDXMLStructureHandler(dbd,this,locator);
-            supportHandler = new DBDXMLSupportHandler(dbd,this,locator);
+        public void setDocumentLocator(Locator locatorin) {
+            locator = locatorin;
+            menuHandler = new DBDXMLMenuHandler();
+            structureHandler = new DBDXMLStructureHandler();
+            supportHandler = new DBDXMLSupportHandler();
         }
         
         public void startDocument() throws SAXException {
@@ -134,7 +147,7 @@ public class XMLToDBDFactory {
         
         public void endDocument() throws SAXException {
             if(nWarning>0 || nError>0 || nFatal>0) {
-                System.err.printf("endDocument: warning %d severe %d fatal %d\n",
+                System.err.printf("endDocument: warning %d severe %d fatal %d%n",
                     nWarning,nError,nFatal);
             }
         }       
@@ -160,8 +173,9 @@ public class XMLToDBDFactory {
                     state = State.support;
                     supportHandler.start(qName,attributes);
                 } else {
-                    System.err.printf("startElement element %s not understood\n",qName);
-                    nError++;
+                    errorHandler.error(new SAXParseException(
+                        "startElement " + qName + " not understood",
+                        locator));
                 }
                 break;
             case menu: 
@@ -188,8 +202,9 @@ public class XMLToDBDFactory {
                 if(qName.equals("DBDefinition")) {
                     state = State.startDocument;
                 } else {
-                    System.err.printf("startElement element %s not understood\n",qName);
-                    nError++;
+                    errorHandler.error(new SAXParseException(
+                         "endElement " + qName + " not understood",
+                         locator));
                 }
                 break;
             case menu: 
@@ -289,21 +304,14 @@ public class XMLToDBDFactory {
     }
 
     private static class DBDXMLMenuHandler extends DBDXMLHandler{
-        
-        private DBD dbd;
-        private ErrorHandler errorHandler;
-        private Locator locator;
         private State state = State.idle;
         private String menuName;
         private LinkedList<String> choiceList;
         private StringBuilder choiceBuilder;
         private enum State {idle, nextChoice, getChoice}
         
-        DBDXMLMenuHandler(DBD dbd, ErrorHandler errorHandler, Locator locator) {
+        DBDXMLMenuHandler() {
             super();
-            this.dbd = dbd;
-            this.errorHandler = errorHandler;
-            this.locator = locator;
         }
         
         void start(String qName, Attributes attributes)
@@ -410,13 +418,12 @@ public class XMLToDBDFactory {
     {
  
         private enum State {idle, structure, field}      
-        private DBD dbd;
-        private ErrorHandler errorHandler;
-        private Locator locator;
+        
         private State state = State.idle;
         private String structureName;
         private boolean isRecordType;
-        private String supportName = null;
+        private String structureSupportName = null;
+        private String fieldSupportName = null;
         private LinkedList<Property> structurePropertyList;
         private LinkedList<DBDField> dbdFieldList;
         // remaining are for field elements
@@ -424,13 +431,9 @@ public class XMLToDBDFactory {
         private DBDAttribute dbdAttribute;
         private LinkedList<Property> fieldPropertyList;
         
-        DBDXMLStructureHandler(DBD dbd, ErrorHandler errorHandler,
-        Locator locator)
+        DBDXMLStructureHandler()
         {
             super();
-            this.dbd = dbd;
-            this.errorHandler = errorHandler;
-            this.locator = locator;
         }
             
         public int getLength() {
@@ -465,7 +468,7 @@ public class XMLToDBDFactory {
                 state = State.idle;
                 return;
             }
-            supportName = attributes.getValue("supportName");
+            structureSupportName = attributes.getValue("supportName");
             if(qName.equals("recordType")) {
                 if(dbd.getRecordType(structureName)!=null) {
                     errorHandler.warning(new SAXParseException(
@@ -529,8 +532,8 @@ public class XMLToDBDFactory {
                             "recordType " + structureName + " already exists",
                             locator));
                 }
-                if(supportName!=null) {
-                    dbdRecordType.setSupportName(supportName);
+                if(structureSupportName!=null) {
+                    dbdRecordType.setSupportName(structureSupportName);
                 }
             } else {
                 DBDStructure dbdStructure = DBDCreateFactory.createStructure(
@@ -541,8 +544,8 @@ public class XMLToDBDFactory {
                             "structure " + structureName + " already exists",
                             locator));
                 }
-                if(supportName!=null) {
-                    dbdStructure.setSupportName(supportName);
+                if(structureSupportName!=null) {
+                    dbdStructure.setSupportName(structureSupportName);
                 }
             }
             structurePropertyList = null;
@@ -576,6 +579,7 @@ public class XMLToDBDFactory {
                     state= State.idle;
                     return;
                 }
+                fieldSupportName = attributes.getValue("supportName");
                 fieldPropertyList =  new  LinkedList<Property>();
                 state = State.field;
             } else if(qName.equals("property")) {
@@ -618,6 +622,9 @@ public class XMLToDBDFactory {
             dbdFieldList.add(dbdField);
             dbdAttribute = null;
             fieldPropertyList = null;
+            if(fieldSupportName!=null) {
+                dbdField.setSupportName(fieldSupportName);
+            }
             return;
         }
     
@@ -684,15 +691,8 @@ public class XMLToDBDFactory {
             // nothing to do
         }
         
-        DBDXMLSupportHandler(DBD dbd, ErrorHandler errorHandler, Locator locator) {
+        DBDXMLSupportHandler() {
             super();
-            this.dbd = dbd;
-            this.errorHandler = errorHandler;
-            this.locator = locator;
         }
-        
-        private DBD dbd;
-        private ErrorHandler errorHandler;
-        private Locator locator;
     }
 }

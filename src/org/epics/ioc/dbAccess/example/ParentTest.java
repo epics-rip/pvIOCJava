@@ -24,7 +24,7 @@ public class ParentTest extends TestCase {
     public static void testParent() {
         DBD dbd = DBDFactory.create("test"); 
         IOCDB iocdb = IOCDBFactory.create(dbd,"testIOCDatabase");
-        System.out.printf("reading menuStructureSupport\n");
+        System.out.printf("reading menuStructureSupport%n");
         try {
             XMLToDBDFactory.convert(dbd,
                  "src/org/epics/ioc/dbAccess/example/menuStructureSupportDBD.xml");
@@ -32,63 +32,63 @@ public class ParentTest extends TestCase {
             System.out.println("Exception: " + e);
         }
         
-        System.out.printf("reading aiDBD\n");
+        System.out.printf("reading aiDBD%n");
         try {
             XMLToDBDFactory.convert(dbd,
                  "src/org/epics/ioc/dbAccess/example/aiDBD.xml");
         } catch (Exception e) {
             System.out.println("Exception: " + e);
         }
-        System.out.printf("reading powerSupplyDBD\n");
+        System.out.printf("reading powerSupplyDBD%n");
         try {
             XMLToDBDFactory.convert(dbd,
                  "src/org/epics/ioc/dbAccess/example/powerSupplyDBD.xml");
         } catch (Exception e) {
             System.out.println("Exception: " + e);
         }
-        System.out.printf("reading allTypesDBD\n");
+        System.out.printf("reading allTypesDBD%n");
         try {
             XMLToDBDFactory.convert(dbd,
                  "src/org/epics/ioc/dbAccess/example/allTypesDBD.xml");
         } catch (Exception e) {
             System.out.println("Exception: " + e);
         }
-        //System.out.printf("\n\nstructures");
+        //System.out.printf("%n%nstructures");
         //Map<String,DBDStructure> structureMap = dbd.getStructureMap();
         //Set<String> keys = structureMap.keySet();
         //for(String key: keys) {
         //DBDStructure dbdStructure = structureMap.get(key);
         //System.out.print(dbdStructure.toString());
         //}
-        //System.out.printf("\n\nrecordTypes");
+        //System.out.printf("%n%nrecordTypes");
         //Map<String,DBDRecordType> recordTypeMap = dbd.getRecordTypeMap();
         //keys = recordTypeMap.keySet();
         //for(String key: keys) {
         //DBDRecordType dbdRecordType = recordTypeMap.get(key);
         //System.out.print(dbdRecordType.toString());
         //}
-        System.out.printf("reading exampleAiLinearDB\n");
+        System.out.printf("reading exampleAiLinearDB%n");
         try {
             XMLToIOCDBFactory.convert(dbd,iocdb,
                  "src/org/epics/ioc/dbAccess/example/exampleAiLinearDB.xml");
         } catch (Exception e) {
             System.out.println("Exception: " + e);
         }
-        System.out.printf("reading examplePowerSupplyDB\n");
+        System.out.printf("reading examplePowerSupplyDB%n");
         try {
             XMLToIOCDBFactory.convert(dbd,iocdb,
                  "src/org/epics/ioc/dbAccess/example/examplePowerSupplyDB.xml");
         } catch (Exception e) {
             System.out.println("Exception: " + e);
         }
-        System.out.printf("reading examplePowerSupplyArrayDB\n");
+        System.out.printf("reading examplePowerSupplyArrayDB%n");
         try {
             XMLToIOCDBFactory.convert(dbd,iocdb,
                  "src/org/epics/ioc/dbAccess/example/examplePowerSupplyArrayDB.xml");
         } catch (Exception e) {
             System.out.println("Exception: " + e);
         }
-        System.out.printf("reading exampleAllTypeDB\n");
+        System.out.printf("reading exampleAllTypeDB%n");
         try {
             XMLToIOCDBFactory.convert(dbd,iocdb,
                  "src/org/epics/ioc/dbAccess/example/exampleAllTypeDB.xml");
@@ -96,7 +96,7 @@ public class ParentTest extends TestCase {
             System.out.println("Exception: " + e);
         }
         
-//        System.out.printf("\nrecords\n");
+//        System.out.printf("%nrecords%n");
 //        Map<String,DBRecord> recordMap = iocdb.getRecordMap();
 //        Set<String> keys = recordMap.keySet();
 //        for(String key: keys) {
@@ -111,18 +111,18 @@ public class ParentTest extends TestCase {
         showParent(iocdb,"exampleAiLinear","aiLinear.aiRaw.status");
         showParent(iocdb,"exampleAiLinear","aiLinear.aiRaw.input");
         showParent(iocdb,"exampleAiLinear","aiLinear.aiRaw.input.configurationStructureName");
-        System.out.printf("\n");
+        System.out.printf("%n");
         showParent(iocdb,"examplePowerSupply","power");
         showParent(iocdb,"examplePowerSupply","current");
         showParent(iocdb,"examplePowerSupply","voltage");
-        System.out.printf("\n");
+        System.out.printf("%n");
         showParent(iocdb,"examplePowerSupplyArray","status");
         showParent(iocdb,"examplePowerSupplyArray","powerSupply[0].power");
         showParent(iocdb,"examplePowerSupplyArray","powerSupply[0].current");
         showParent(iocdb,"examplePowerSupplyArray","powerSupply[0].voltage");
-        System.out.printf("\n");
+        System.out.printf("%n");
         showParent(iocdb,"examplePowerSupplyArray","powerSupply[1]");
-        System.out.printf("\n");
+        System.out.printf("%n");
         showParent(iocdb,"allTypes","boolean");
         showParent(iocdb,"allTypes","byte");
         showParent(iocdb,"allTypes","short");
@@ -165,30 +165,36 @@ public class ParentTest extends TestCase {
         showParent(iocdb,"allTypes","allTypes.floatArray");
         showParent(iocdb,"allTypes","allTypes.doubleArray");
         showParent(iocdb,"allTypes","allTypes.enumArray");
+        showParent(iocdb,"allTypes","allTypes.enumArray[1]");
         showParent(iocdb,"allTypes","allTypes.menuArray");
+        showParent(iocdb,"allTypes","allTypes.menuArray[0]");
         showParent(iocdb,"allTypes","allTypes.linkArray");
+        showParent(iocdb,"allTypes","allTypes.linkArray[0]");
         showParent(iocdb,"allTypes","allTypes.structArray");
+        showParent(iocdb,"allTypes","allTypes.structArray[0]");
+        showParent(iocdb,"allTypes","allTypes.structArray[0].low");
         showParent(iocdb,"allTypes","allTypes.arrayArray");
+        showParent(iocdb,"allTypes","allTypes.arrayArray[0]");
     }
 
     static void showParent(IOCDB iocdb,String recordName,String fieldName) {
         DBAccess dbAccess = iocdb.createAccess(recordName);
         if(dbAccess==null) {
-            System.out.printf("record %s not found\n",recordName);
+            System.out.printf("record %s not found%n",recordName);
             return;
         }
         if(dbAccess.setField(fieldName)!=AccessSetResult.thisRecord){
-            System.out.printf("field %s not in record %s\n",fieldName,recordName);
+            System.out.printf("field %s not in record %s%n",fieldName,recordName);
             return;
         }
         DBData dbData = dbAccess.getField();
         DBRecord record = dbData.getRecord();
-        System.out.printf("fieldName %s actualField %s record %s\n",
+        System.out.printf("fieldName %s actualField %s record %s%n",
             fieldName,dbData.getField().getName(),record.getRecordName());
-        DBStructure parent = dbData.getParent();
+        DBData parent = dbData.getParent();
         while(parent!=null) {
             record = parent.getRecord();
-            System.out.printf("     parent %s record %s\n",
+            System.out.printf("     parent %s record %s%n",
                     parent.getField().getName(),record.getRecordName());
             parent = parent.getParent();
         }

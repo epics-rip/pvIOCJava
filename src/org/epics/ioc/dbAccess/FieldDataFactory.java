@@ -23,7 +23,7 @@ public class FieldDataFactory {
      * @param dbdField The reflection interface for the field
      * @return The DBData implementation
      */
-    public static DBData createData(DBStructure parent,DBDField dbdField)
+    public static DBData createData(DBData parent,DBDField dbdField)
     {
         if(parent==null) throw new IllegalArgumentException("Illegal parent is null");
         DBType dbType = dbdField.getDBType();
@@ -57,7 +57,7 @@ public class FieldDataFactory {
      * @param choice The enum choices.
      * @return The DBData implementation.
      */
-    public static DBData createEnumData(DBStructure parent,DBDField dbdField, String[] choice)
+    public static DBData createEnumData(DBData parent,DBDField dbdField, String[] choice)
     {
         if(parent==null) throw new IllegalArgumentException("Illegal parent is null");
         return new EnumData(parent,(DBDEnumField)dbdField,choice);
@@ -70,7 +70,7 @@ public class FieldDataFactory {
      * @param capacityMutable Can the capacity be changed after initialization?
      * @return The DBArray implementation.
      */
-    public static DBArray createArrayData(DBStructure parent,
+    public static DBArray createArrayData(DBData parent,
             DBDField dbdField,int capacity,boolean capacityMutable)
     {
         if(parent==null) throw new IllegalArgumentException("Illegal parent is null");
@@ -143,7 +143,7 @@ public class FieldDataFactory {
                 + super.toString(indentLevel);
         }
 
-        UnknownData(DBStructure parent,DBDField dbdField) {
+        UnknownData(DBData parent,DBDField dbdField) {
             super(parent,dbdField);
         }
 
@@ -175,7 +175,7 @@ public class FieldDataFactory {
             + super.toString(indentLevel);
         }
 
-        BooleanData(DBStructure parent,DBDField dbdField) {
+        BooleanData(DBData parent,DBDField dbdField) {
             super(parent,dbdField);
             value = false;
             String defaultValue = dbdField.getAttribute().getDefault();
@@ -212,7 +212,7 @@ public class FieldDataFactory {
             + super.toString(indentLevel);
         }
 
-        ByteData(DBStructure parent,DBDField dbdField) {
+        ByteData(DBData parent,DBDField dbdField) {
             super(parent,dbdField);
             value = 0;
             String defaultValue = dbdField.getAttribute().getDefault();
@@ -249,7 +249,7 @@ public class FieldDataFactory {
             + super.toString(indentLevel);
         }
 
-        ShortData(DBStructure parent,DBDField dbdField) {
+        ShortData(DBData parent,DBDField dbdField) {
             super(parent,dbdField);
             value = 0;
             String defaultValue = dbdField.getAttribute().getDefault();
@@ -286,7 +286,7 @@ public class FieldDataFactory {
             + super.toString(indentLevel);
         }
 
-        IntData(DBStructure parent,DBDField dbdField) {
+        IntData(DBData parent,DBDField dbdField) {
             super(parent,dbdField);
             value = 0;
             String defaultValue = dbdField.getAttribute().getDefault();
@@ -323,7 +323,7 @@ public class FieldDataFactory {
             + super.toString(indentLevel);
         }
 
-        LongData(DBStructure parent,DBDField dbdField) {
+        LongData(DBData parent,DBDField dbdField) {
             super(parent,dbdField);
             value = 0;
             String defaultValue = dbdField.getAttribute().getDefault();
@@ -360,7 +360,7 @@ public class FieldDataFactory {
             + super.toString(indentLevel);
         }
 
-        FloatData(DBStructure parent,DBDField dbdField) {
+        FloatData(DBData parent,DBDField dbdField) {
             super(parent,dbdField);
             value = 0;
             String defaultValue = dbdField.getAttribute().getDefault();
@@ -397,7 +397,7 @@ public class FieldDataFactory {
             + super.toString(indentLevel);
         }
 
-        DoubleData(DBStructure parent,DBDField dbdField) {
+        DoubleData(DBData parent,DBDField dbdField) {
             super(parent,dbdField);
             value = 0;
             String defaultValue = dbdField.getAttribute().getDefault();
@@ -434,7 +434,7 @@ public class FieldDataFactory {
             + super.toString(indentLevel);
         }
 
-        StringData(DBStructure parent,DBDField dbdField) {
+        StringData(DBData parent,DBDField dbdField) {
             super(parent,dbdField);
             value = null;
             String defaultValue = dbdField.getAttribute().getDefault();
@@ -450,14 +450,14 @@ public class FieldDataFactory {
     private static class EnumData extends AbstractDBEnum {
 
         
-        EnumData(DBStructure parent,DBDEnumField dbdEnumField, String[]choice) {
+        EnumData(DBData parent,DBDEnumField dbdEnumField, String[]choice) {
             super(parent,dbdEnumField,choice);
         }
     }
 
     private static class MenuData extends AbstractDBMenu {
 
-        MenuData(DBStructure parent,DBDMenuField dbdMenuField) {
+        MenuData(DBData parent,DBDMenuField dbdMenuField) {
             super(parent,dbdMenuField);
         }
         
@@ -465,7 +465,7 @@ public class FieldDataFactory {
 
     private static class StructureData extends AbstractDBStructure
     {
-        StructureData(DBStructure parent,DBDStructureField dbdStructureField) {
+        StructureData(DBData parent,DBDStructureField dbdStructureField) {
             super(parent,dbdStructureField);
         }
     }
@@ -534,7 +534,7 @@ public class FieldDataFactory {
             length = len;
         }
 
-        BooleanArray(DBStructure parent,DBDArrayField dbdArrayField,
+        BooleanArray(DBData parent,DBDArrayField dbdArrayField,
             int capacity,boolean capacityMutable)
         {
             super(parent,dbdArrayField);
@@ -613,7 +613,7 @@ public class FieldDataFactory {
             length = len;
         }
 
-        ByteArray(DBStructure parent,DBDArrayField dbdArrayField,
+        ByteArray(DBData parent,DBDArrayField dbdArrayField,
             int capacity,boolean capacityMutable)
         {
             super(parent,dbdArrayField);
@@ -693,7 +693,7 @@ public class FieldDataFactory {
             length = len;
         }
 
-        ShortArray(DBStructure parent,DBDArrayField dbdArrayField,
+        ShortArray(DBData parent,DBDArrayField dbdArrayField,
             int capacity,boolean capacityMutable)
         {
             super(parent,dbdArrayField);
@@ -773,7 +773,7 @@ public class FieldDataFactory {
             length = len;
         }
 
-        IntArray(DBStructure parent,DBDArrayField dbdArrayField,
+        IntArray(DBData parent,DBDArrayField dbdArrayField,
             int capacity,boolean capacityMutable)
         {
             super(parent,dbdArrayField);
@@ -852,7 +852,7 @@ public class FieldDataFactory {
             length = len;
         }
 
-        LongArray(DBStructure parent,DBDArrayField dbdArrayField,
+        LongArray(DBData parent,DBDArrayField dbdArrayField,
             int capacity,boolean capacityMutable)
         {
             super(parent,dbdArrayField);
@@ -931,7 +931,7 @@ public class FieldDataFactory {
             length = len;
         }
 
-        FloatArray(DBStructure parent,DBDArrayField dbdArrayField,
+        FloatArray(DBData parent,DBDArrayField dbdArrayField,
             int capacity,boolean capacityMutable)
         {
             super(parent,dbdArrayField);
@@ -1011,7 +1011,7 @@ public class FieldDataFactory {
             length = len;
         }
 
-        DoubleArray(DBStructure parent,DBDArrayField dbdArrayField,
+        DoubleArray(DBData parent,DBDArrayField dbdArrayField,
             int capacity,boolean capacityMutable)
         {
             super(parent,dbdArrayField);
@@ -1090,7 +1090,7 @@ public class FieldDataFactory {
             length = len;
         }
 
-        StringArray(DBStructure parent,DBDArrayField dbdArrayField,
+        StringArray(DBData parent,DBDArrayField dbdArrayField,
             int capacity,boolean capacityMutable)
         {
             super(parent,dbdArrayField);
@@ -1169,7 +1169,7 @@ public class FieldDataFactory {
             length = len;
         }
 
-        EnumArray(DBStructure parent,DBDArrayField dbdArrayField,
+        EnumArray(DBData parent,DBDArrayField dbdArrayField,
             int capacity,boolean capacityMutable)
         {
             super(parent,dbdArrayField);
@@ -1257,7 +1257,7 @@ public class FieldDataFactory {
             length = len;
         }
 
-        MenuArray(DBStructure parent,DBDArrayField dbdArrayField,
+        MenuArray(DBData parent,DBDArrayField dbdArrayField,
             int capacity,boolean capacityMutable)
         {
             super(parent,dbdArrayField);
@@ -1361,7 +1361,7 @@ public class FieldDataFactory {
             return len;
         }
 
-        StructureArray(DBStructure parent,DBDArrayField dbdArrayField,
+        StructureArray(DBData parent,DBDArrayField dbdArrayField,
             int capacity,boolean capacityMutable)
         {
             super(parent,dbdArrayField);
@@ -1467,7 +1467,7 @@ public class FieldDataFactory {
             return len;
         }
 
-        ArrayArray(DBStructure parent,DBDArrayField dbdArrayField,
+        ArrayArray(DBData parent,DBDArrayField dbdArrayField,
             int capacity,boolean capacityMutable)
         {
             super(parent,dbdArrayField);
@@ -1556,7 +1556,7 @@ public class FieldDataFactory {
             return len;
         }
 
-        LinkArray(DBStructure parent,DBDArrayField dbdArrayField,
+        LinkArray(DBData parent,DBDArrayField dbdArrayField,
             int capacity,boolean capacityMutable)
         {
             super(parent,dbdArrayField);

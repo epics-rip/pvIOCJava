@@ -5,25 +5,28 @@
     <max>10.0</max>
     <inc>1.0</inc>
     <priority>medium</priority>
-    <process>
-        <value structureName = "processLink"
-                structureSupportName = "org.epics.ioc.support.ProcessLink">
-            <pvname>double01</pvname>
-            <wait>true</wait>
+    <process supportName = "processLinkArray" >
+        <value  supportName = "processLink" >
+            <configure structureName = "processLink">
+                <pvname>double01</pvname>
+                <wait>true</wait>
+            </configure>
         </value>
-        <value structureName = "processLink"
-                structureSupportName = "org.epics.ioc.support.ProcessLink">
-            <pvname>double02</pvname>
-            <wait>true</wait>
+        <value supportName = "processLink" >
+            <configure structureName = "processLink">
+                <pvname>double02</pvname>
+                <wait>true</wait>
+            </configure>
         </value>
     </process>
 </record>
 <record name = "double01" type = "doubleRecord">
-    <input linkSupportName = "org.epics.ioc.support.InputLink"
-             configStructureName = "inputLink">
-        <pvname>counter</pvname>
-        <process>false</process>
-        <wait>false</wait>
+    <input supportName = "inputLink" >
+        <configure structureName = "inputLink">
+            <pvname>counter</pvname>
+            <process>false</process>
+            <wait>false</wait>
+        </configure>
     </input>
     <units>volts</units>
     <displayLimit>
@@ -33,11 +36,12 @@
     <priority>medium</priority>
 </record>
 <record name = "double02" type = "doubleRecord">
-    <input linkSupportName = "org.epics.ioc.support.InputLink"
-             configStructureName = "inputLink">
-        <pvname>counter</pvname>
-        <process>false</process>
-        <wait>false</wait>
+    <input supportName = "inputLink">
+        <configure structureName = "inputLink">
+            <pvname>counter</pvname>
+            <process>false</process>
+            <wait>false</wait>
+        </configure>
     </input>
     <units>volts</units>
     <displayLimit>

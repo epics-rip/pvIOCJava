@@ -98,7 +98,7 @@ public final class  DBDCreateFactory {
     }
 
    static private void newLine(StringBuilder builder, int indentLevel) {
-        builder.append("\n");
+        builder.append(String.format("%n"));
         for (int i=0; i <indentLevel; i++) builder.append(indentString);
     }
     static private String indentString = "    ";

@@ -9,19 +9,23 @@ package org.epics.ioc.channelAccess;
  * @author mrk
  *
  */
-public enum ChannelSetResult {
+public enum ChannelSetFieldResult {
     /**
-     * the requested field is located via another channel.
-     * calls to getOtherChannel and getOtherField can be used to connect to the channel and field.
+     * The requested field is located via another channel.
+     * Calls to getOtherChannel and getOtherField can be used to connect to the channel and field.
      */
     otherChannel,
     /**
-     * the requested field is in this channel.
+     * t=The requested field is in this channel.
      * getField can be called to retrieve the ChannelData interface.
      */
     thisChannel,
     /**
-     * the field could not be found.
+     * The field could not be found.
      */
-    notFound
+    notFound,
+    /**
+     * Failure. A common reason for failure is that the channel was destroyed.
+     */
+    failure
 }

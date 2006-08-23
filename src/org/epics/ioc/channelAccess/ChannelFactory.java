@@ -5,7 +5,6 @@
  */
 package org.epics.ioc.channelAccess;
 
-import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * @author mrk
@@ -13,28 +12,26 @@ import java.util.concurrent.atomic.AtomicReference;
  */
 public class ChannelFactory {
     
-    private static AtomicReference<ChannelAccess> localAccess = new AtomicReference<ChannelAccess>();
-    private static AtomicReference<ChannelAccess> remoteAccess = new AtomicReference<ChannelAccess>();
+    private static ChannelAccess localAccess = null;
+    private static ChannelAccess remoteAccess = null;
     
     public static Channel createChannel(String name,ChannelStateListener listener) {
         Channel channel = null;
-        ChannelAccess access = localAccess.get();
-        if(access!=null) {
-            channel = access.createChannel(name,listener);
+        if(localAccess!=null) {
+            channel = localAccess.createChannel(name,listener);
             if(channel!=null) return channel;
         }
-        access = remoteAccess.get();
-        if(access!=null) {
-            channel = access.createChannel(name,listener);
+        if(remoteAccess!=null) {
+            channel = remoteAccess.createChannel(name,listener);
         }
         return channel;
     }
     
-    public static boolean registerLocalChannelAccess(ChannelAccess channelAccess) {
-        return localAccess.compareAndSet(null,channelAccess);
+    public static void registerLocalChannelAccess(ChannelAccess channelAccess) {
+        localAccess = channelAccess;
     }
     
-    public static boolean registerRemoteChannelAccess(ChannelAccess channelAccess) {
-        return remoteAccess.compareAndSet(null,channelAccess);
+    public static void registerRemoteChannelAccess(ChannelAccess channelAccess) {
+        remoteAccess = channelAccess;
     }
 }

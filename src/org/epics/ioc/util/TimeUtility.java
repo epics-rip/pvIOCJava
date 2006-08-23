@@ -11,10 +11,10 @@ package org.epics.ioc.util;
  */
 public class TimeUtility {
     public static long getMillis(TimeStamp timeStamp) {
-        return timeStamp.seconds + (timeStamp.nanoSeconds/1000000);
+        return timeStamp.secondsPastEpoch + (timeStamp.nanoSeconds/1000000);
     }
     public static void set(TimeStamp timeStamp,long millis) {
-        timeStamp.seconds = millis/1000;
-        timeStamp.nanoSeconds = ((int)(timeStamp.seconds%1000))*1000000;
+        timeStamp.secondsPastEpoch = millis/1000;
+        timeStamp.nanoSeconds = ((int)(timeStamp.secondsPastEpoch%1000))*1000000;
     }
 }

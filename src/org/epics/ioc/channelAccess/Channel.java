@@ -5,8 +5,6 @@
  */
 package org.epics.ioc.channelAccess;
 
-import org.epics.ioc.pvAccess.*;
-
 /**
  * @author mrk
  *
@@ -14,15 +12,16 @@ import org.epics.ioc.pvAccess.*;
 public interface Channel {
     void destroy();
     boolean isConnected();
-    ChannelSetResult setField(String name);
+    ChannelSetFieldResult setField(String name);
     String getOtherChannel();
     String getOtherField();
     ChannelField getChannelField();
     ChannelFieldGroup createFieldGroup(ChannelFieldGroupListener listener);
     void setTimeout(double timeout);
-    ChannelDataProcess createChannelDataProcess();
-    ChannelDataGet createChannelDataGet();
-    ChannelDataPut createChannelDataPut( );
-    ChannelDataPutGet createChannelDataPutGet();
+    ChannelProcess createChannelProcess();
+    ChannelGet createChannelGet();
+    ChannelPut createChannelPut( );
+    ChannelPutGet createChannelPutGet();
     ChannelSubscribe createSubscribe();
+    boolean isLocal();
 }

@@ -9,6 +9,8 @@ package org.epics.ioc.channelAccess;
  * @author mrk
  *
  */
-public interface ChannelDataPutListener {
-    void processComplete();
+public interface ChannelGet {
+    void destroy();
+    void get(ChannelFieldGroup fieldGroup,ChannelGetListener callback,boolean process, boolean wait);
+    void cancelGet();
 }

@@ -159,13 +159,16 @@ public class IOCDBFactory {
                 throw new IllegalArgumentException(
                     "newField is not same DBtype as oldField");
             }
-            DBStructure parent = oldField.getParent();
+            DBData parent = oldField.getParent();
             if(parent==null) throw new IllegalArgumentException("no parent");
-            DBData[] fields = parent.getFieldDBDatas();
-            for(int i=0; i<fields.length; i++) {
-                if(fields[i]==oldField) {
-                    fields[i] = newField;
-                    return;
+            DBType parentType = parent.getDBDField().getDBType();
+            if(parentType==DBType.dbStructure) {
+                DBData[] fields = ((DBStructure)parent).getFieldDBDatas();
+                for(int i=0; i<fields.length; i++) {
+                    if(fields[i]==oldField) {
+                        fields[i] = newField;
+                        return;
+                    }
                 }
             }
             throw new IllegalArgumentException("oldField not found in parent");
@@ -215,22 +218,81 @@ public class IOCDBFactory {
                 currentData = newData;
                 if(currentData==null) break;
                 if(arrayIndex>=0) {
-                    Field field = currentData.getField();
-                    if(field.getType()!=Type.pvArray) break;
-                    Array array = (Array)field;
-                    if(array.getElementType()!=Type.pvStructure) break;
-                    DBStructureArray dbStructureArray =
-                        (DBStructureArray)currentData;
-                    if(arrayIndex>=dbStructureArray.getLength()) break;
-                    DBStructureArrayData data = new DBStructureArrayData();
-                    int n = dbStructureArray.get(arrayIndex,1,data);
-                    DBStructure[] structureArray = data.data;
-                    int offset = data.offset;
-                    if(n<1 || structureArray[offset]==null) {
+                    DBType dbType = currentData.getDBDField().getDBType();
+                    if(dbType!=DBType.dbArray) break;
+                    DBArray dbArray = (DBArray)currentData;
+                    DBType elementDBType = dbArray.getElementDBType();
+                    if(elementDBType==DBType.dbStructure) {
+                        DBStructureArray dbStructureArray =
+                            (DBStructureArray)currentData;
+                        if(arrayIndex>=dbStructureArray.getLength()) break;
+                        DBStructureArrayData data = new DBStructureArrayData();
+                        int n = dbStructureArray.get(arrayIndex,1,data);
+                        DBStructure[] structureArray = data.data;
+                        int offset = data.offset;
+                        if(n<1 || structureArray[offset]==null) {
+                            currentData = null;
+                            break;
+                        }
+                        currentData = structureArray[offset];
+                    } else if(elementDBType==DBType.dbArray) {
+                        DBArrayArray dbArrayArray = (DBArrayArray)currentData;
+                        if(arrayIndex>=dbArrayArray.getLength()) break;
+                        DBArrayArrayData data = new DBArrayArrayData();
+                        int n = dbArrayArray.get(arrayIndex,1,data);
+                        DBArray[] arrayArray = data.data;
+                        int offset = data.offset;
+                        if(n<1 || arrayArray[offset]==null) {
+                            currentData = null;
+                            break;
+                        }
+                        currentData = arrayArray[offset];
+                        break;
+                    } else if(elementDBType==DBType.dbLink) {
+                        DBLinkArray dbLinkArray = (DBLinkArray)currentData;
+                        if(arrayIndex>=dbLinkArray.getLength()) break;
+                        LinkArrayData data = new LinkArrayData();
+                        int n = dbLinkArray.get(arrayIndex,1,data);
+                        DBLink[] linkArray = data.data;
+                        int offset = data.offset;
+                        if(n<1 || linkArray[offset]==null) {
+                            currentData = null;
+                            break;
+                        }
+                        currentData = linkArray[offset];
+                        break;
+                    } else if(elementDBType==DBType.dbMenu) {
+                        DBMenuArray dbMenuArray = (DBMenuArray)currentData;
+                        if(arrayIndex>=dbMenuArray.getLength()) break;
+                        MenuArrayData data = new MenuArrayData();
+                        int n = dbMenuArray.get(arrayIndex,1,data);
+                        DBMenu[] menuArray = data.data;
+                        int offset = data.offset;
+                        if(n<1 || menuArray[offset]==null) {
+                            currentData = null;
+                            break;
+                        }
+                        currentData = menuArray[offset];
+                        break;
+                    } else {
+                        Type type = dbArray.getElementType();
+                        if(type==Type.pvEnum) {
+                            PVEnumArray pvEnumArray = (PVEnumArray)currentData;
+                            if(arrayIndex>=pvEnumArray.getLength()) break;
+                            EnumArrayData data = new EnumArrayData();
+                            int n = pvEnumArray.get(arrayIndex,1,data);
+                            PVEnum[] enumArray = data.data;
+                            int offset = data.offset;
+                            if(n<1 || enumArray[offset]==null) {
+                                currentData = null;
+                                break;
+                            }
+                            currentData = (DBData)enumArray[offset];
+                            break;
+                        }
                         currentData = null;
                         break;
                     }
-                    currentData = structureArray[offset];
                 }
                 if(currentData==null) break;
                 if(names.length<=1) break;
@@ -357,7 +419,7 @@ public class IOCDBFactory {
                 DBRecord dbRecord = dbData.getRecord();
                 System.err.printf(
                     "somewhere in recordType %s field %s " +
-                    "has bad property fieldName %s\n",
+                    "has bad property fieldName %s%n",
                     ((Structure)dbRecord.getField()).getStructureName(),
                     dbData.getField().getName(),propertyFieldName);
                 return null;
@@ -367,7 +429,7 @@ public class IOCDBFactory {
                 DBRecord dbRecord = dbData.getRecord();
                 System.err.printf(
                     "somewhere in recordType %s field %s " +
-                    "has recursive property fieldName %s\n",
+                    "has recursive property fieldName %s%n",
                     ((Structure)dbRecord.getField()).getStructureName(),
                     dbData.getField().getName(),propertyFieldName);
                 return null;
@@ -389,26 +451,27 @@ public class IOCDBFactory {
         }
         
         static private DBData getField(DBData dbData, String fieldName) {
-            DBData newData = null;
             if(dbData.getField().getType()==Type.pvStructure) {
                 DBStructure structure = (DBStructure)dbData;
                 DBData[] dbDatas = structure.getFieldDBDatas();
                 int dataIndex = structure.getFieldDBDataIndex(fieldName);
                 if(dataIndex>=0) {
-                    newData = dbDatas[dataIndex];
+                    return dbDatas[dataIndex];
                 }
             }
-            if(newData==null) {
-                DBStructure structure = dbData.getParent();
-                if(structure!=null) {
-                    DBData[]dbDatas = structure.getFieldDBDatas();
-                    int dataIndex = structure.getFieldDBDataIndex(fieldName);
-                    if(dataIndex>=0) {
-                        newData = dbDatas[dataIndex];
-                    }
+            DBData parent = dbData.getParent();
+            if(parent==null) return null;
+            DBType parentType = parent.getDBDField().getDBType();
+            if(parentType!=DBType.dbStructure) return null;
+            DBStructure structure = (DBStructure)parent;
+            if(structure!=null) {
+                DBData[]dbDatas = structure.getFieldDBDatas();
+                int dataIndex = structure.getFieldDBDataIndex(fieldName);
+                if(dataIndex>=0) {
+                    return dbDatas[dataIndex];
                 }
             }
-            return newData;
+            return null;
         }
         static private Property getProperty(DBData dbData,String name) {
             Property property = null;

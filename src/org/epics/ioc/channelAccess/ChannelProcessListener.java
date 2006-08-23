@@ -5,15 +5,14 @@
  */
 package org.epics.ioc.channelAccess;
 
-import org.epics.ioc.pvAccess.*;
+import org.epics.ioc.dbProcess.*;
+import org.epics.ioc.util.*;
 
 /**
  * @author mrk
  *
  */
-public interface ChannelDataGetListener {
-    void beginSynchronous();
-    void endSynchronous();
-    void newData(ChannelField field,PVData data);
-    void failure(String reason);
+public interface ChannelProcessListener {
+    void processDone(Channel channel,ProcessResult result,AlarmSeverity alarmSeverity,String status);
+    void failure(Channel channel,String reason);
 }

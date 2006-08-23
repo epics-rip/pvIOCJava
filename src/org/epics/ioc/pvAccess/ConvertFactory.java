@@ -2162,7 +2162,7 @@ public final class ConvertFactory {
         }
     
         private static void newLine(StringBuilder builder, int indentLevel) {
-            builder.append("\n");
+            builder.append(String.format("%n"));
             for (int i=0; i <indentLevel; i++) builder.append(indentString);
         }
         private static String indentString = "    ";

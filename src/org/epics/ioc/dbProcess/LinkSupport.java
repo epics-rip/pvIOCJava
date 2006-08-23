@@ -8,22 +8,15 @@ package org.epics.ioc.dbProcess;
 import org.epics.ioc.pvAccess.*;
 
 /**
- * interface that must be implemented by link support.
+ * Interface that must be implemented by support for a channel access link field.
  * @author mrk
  *
  */
 public interface LinkSupport extends Support {
     /**
-     * set the field for which the link support should get/put data.
-     * @param field the field.
-     * @return true if the support can access the field
-     * and false if the support does not know how to access the field.
+     * Set the field for which the link support should get/put data.
+     * This is called by processDB.createSupport(DBData dbData) when it is called for a link field. 
+     * @param field The field.
      */
-    boolean setField(PVData field);
-    /**
-     * Request processing.
-     * @param listener The listener to call when returning active.
-     * @return The result.
-     */
-    LinkReturn process(LinkListener listener);
+    void setField(PVData field);
 }

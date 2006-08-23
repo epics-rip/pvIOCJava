@@ -10,21 +10,13 @@ package org.epics.ioc.dbProcess;
  * @author mrk
  *
  */
-public enum LinkReturn {
+public enum ProcessResult {
     /**
-     * the support has nothing to do. 
+     * The support is done.
      */
-    noop,
+    success,
     /**
-     * the support is done.
-     */
-    done,
-    /**
-     * failure.
+     * The request failed.
      */
     failure,
-    /**
-     * support is still active.
-     */
-    active,
 }

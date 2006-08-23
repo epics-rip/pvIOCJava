@@ -43,11 +43,11 @@
     <field name = "timeStampLink" type = "link" />
 </structure>
 
-<structure name = "disableLink">
+<structure name = "disableLink" supportName = "disableSupport" >
     <field name = "disabled" type = "boolean" />
     <field name = "value" type = "short" default = "1" />
     <field name = "input" type = "short" />
-    <field name = "link" type = "link" />
+    <field name = "link" type = "link" supportName = "disableLinkSupport" />
     <field name = "disableAlarmSeverity"
            type = "menu" menuName = "menuAlarmSevr" />
 </structure>
@@ -114,6 +114,9 @@
     <field name = "intercept" type = "double" />
 </structure>
 
+<support name = "disableSupport"
+    factoryName = "org.epics.ioc.support.SupportFactory" />
+
 <support name = "processLink" configureStructureName = "processLink"
     factoryName = "org.epics.ioc.support.LinkSupportFactory" />
 <support name = "monitorLink" configureStructureName = "monitorLink"
@@ -179,8 +182,9 @@
         type = "structure" structureName = "linearConvertInput" />
 </structure>
 
-<recordType name = "aiLinearRecord" supportName = "LinearSupport">
-    <property name = "value" associatedField = "aiLinear.value" />
+<recordType name = "aiLinearRecord" supportName = "linearSupport">
+    <property name = "value" associatedField = "aiLinear.value"
+         supportName = "linearValueSupport" />
     <property name = "rawValue" associatedField = "aiLinear.rawValue" />
     <property name = "status" associatedField = "aiLinear.status" />
     <property name = "severity" associatedField = "aiLinear.severity" />

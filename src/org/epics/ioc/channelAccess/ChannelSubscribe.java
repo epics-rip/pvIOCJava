@@ -12,6 +12,6 @@ package org.epics.ioc.channelAccess;
 public interface ChannelSubscribe {
     void destroy();
     void start(ChannelFieldGroup fieldGroup,ChannelNotifyListener listener,Event why);
-    void start(ChannelFieldGroup fieldGroup,ChannelDataListener listener,Event why);
+    void start(ChannelFieldGroup fieldGroup,ChannelNotifyGetListener listener,Event why);
     void stop();
 }

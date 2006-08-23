@@ -14,14 +14,43 @@ import org.epics.ioc.dbAccess.*;
  */
 public interface Support {
     /**
-     * get the record support name.
-     * @return the name of the record support.
+     * Get the support name.
+     * @return The support name.
      */
     String getName();
     /**
+     * Get the support state.
+     * @return The state.
+     */
+    SupportState getSupportState();
+    /**
+     * Get the field which this support supports.
+     * @return The field.
+     */
+    DBData getDBData();
+    /**
+     * Add a listener for change of SupportState.
+     * @param listener The listener.
+     * @return (false,true) if the listener (was not, was) added to list.
+     */
+    boolean addSupportStateListener(SupportStateListener listener);
+    /**
+     * Remove a listener for change of SupportState.
+     * @param listener The listener.
+     * @return (false,true) if the listener (was not, was) removed from the list.
+     */
+    boolean removeSupportStateListener(SupportStateListener listener);
+    /**
+     * Generate an error message.
+     * The name of the field (complete hierarchy) will be prepended to the error
+     * message and recordSupport.errorMessage called.
+     * @param message The error message.
+     */
+    public void errorMessage(String message);
+    /**
      * initialize.
      * perform initialization related to record instance but
-     * do not connect to I/O pr other records.
+     * do not connect to I/O or other records.
      */
     void initialize();
     /**
@@ -33,7 +62,21 @@ public interface Support {
      */
     void stop();
     /**
-     * clean up any internal state.
+     * Clean up any internal state created during initialize.
      */
-    void destroy();
+    void uninitialize();
+    /**
+     * Perform support processing.
+     * @param listener The listener to call when returning active.
+     * @return The result of the process request.
+     */
+    ProcessReturn process(ProcessCompleteListener listener);
+    /**
+     * Continue processing. This is only called while support is active.
+     */
+    void processContinue();
+    /**
+     * Update state. This is only called while support is active.
+     */
+    void update();
 }

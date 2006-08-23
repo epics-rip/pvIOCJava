@@ -25,7 +25,7 @@ public abstract class AbstractDBStructure extends AbstractDBData
      * @param parent the DBStructure of the parent.
      * @param dbdStructureField the reflection interface for the DBStructure data.
      */
-    protected AbstractDBStructure(DBStructure parent, DBDStructureField dbdStructureField) {
+    protected AbstractDBStructure(DBData parent, DBDStructureField dbdStructureField) {
         super(parent,dbdStructureField);
         dbdStructure = super.getDBDField().getAttribute().getStructure();
         if(dbdStructure==null) {

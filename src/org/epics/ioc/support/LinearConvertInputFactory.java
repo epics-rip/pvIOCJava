@@ -51,9 +51,9 @@ public class LinearConvertInputFactory {
             System.out.printf("%s.initialize entered\n",supportName);
         }
 
-        public ProcessReturn process(ProcessListener listener) {
+        public ProcessResult process(ProcessCompleteListener listener) {
             System.out.printf("%s.process entered\n",supportName);
-            return ProcessReturn.noop;
+            return ProcessResult.noop;
         }
 
         public void linkSupportDone(LinkReturn result) {

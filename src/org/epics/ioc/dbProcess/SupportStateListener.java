@@ -5,18 +5,16 @@
  */
 package org.epics.ioc.dbProcess;
 
-
 /**
+ * A callback for change of support state.
  * @author mrk
  *
  */
-public class ChannelAccessIOC {
-    
-    public static ChannelAccessIOC getChannelAccess(String pvname) {
-        return null;
-    }
-    
-    public ChannelIOC getChannel() {
-        return null;
-    }
+public interface SupportStateListener {
+    /**
+     * The SupportState has changed.
+     * @param The support that is calling newState.
+     * @param state The new state.
+     */
+    void newState(Support support,SupportState state);
 }

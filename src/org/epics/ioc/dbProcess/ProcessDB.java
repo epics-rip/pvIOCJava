@@ -16,14 +16,14 @@ import org.epics.ioc.dbAccess.*;
  */
 public interface ProcessDB {
     /**
-     * get the IOCDB that this ProcessDB accesses.
-     * @return the IOCDBD.
+     * Get the IOCDB that this ProcessDB accesses.
+     * @return The IOCDBD.
      */
     IOCDB getIOCDB();
     /**
-     * find the RecordProcess interface for a record instance.
-     * @param recordName the instance name.
-     * @return the interface or null if the record is not located.
+     * Find the RecordProcess interface for a record instance.
+     * @param recordName The instance name.
+     * @return The interface or null if the record is not located.
      */
     RecordProcess getRecordProcess(String recordName);
     /**
@@ -34,23 +34,24 @@ public interface ProcessDB {
     boolean createRecordProcess(String recordName);
     /**
      * Remove the RecordProcess from the database.
-     * @param recordName
+     * @param recordName The name of the record instance.
      */
     void removeRecordProcess(String recordName);
     /**
-     * Find record and link support for a record instance.
+     * Create record and link support for a record instance.
      * @param recordName The name of the record.
-     * @return (false,true) if all necessary support (was not, was) found.
+     * @return (false,true) if all necessary support (was not, was) created.
      */
     boolean createSupport(String recordName);
     /**
-     * Find record and link support.
-     * @return (false,true) if all necessary support (was not, was) found.
+     * Create record and link support for all record instances in the iocdb
+     * as well a a RecordProcess for each instance.
+     * @return (false,true) if all necessary support (was not, was) created.
      */
     boolean createSupport();
     /**
-     * get the complete set of RecordProcess instances.
-     * @return the collection.
+     * Get the complete set of RecordProcess instances.
+     * @return The collection.
      */
     Map<String,RecordProcess> getRecordProcessMap();
 }

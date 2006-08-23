@@ -31,7 +31,7 @@ public class XMLSupportTest extends TestCase {
         Set<String> keys;
         DBD dbd = DBDFactory.create("test");
         
-        System.out.printf("reading supportDBD\n");
+        System.out.printf("reading supportDBD%n");
         try {
             XMLToDBDFactory.convert(dbd,
                  "src/org/epics/ioc/dbAccess/example/supportDBD.xml");
@@ -40,7 +40,7 @@ public class XMLSupportTest extends TestCase {
         }
 
         IOCDB iocdb = IOCDBFactory.create(dbd,"testIOCDatabase");
-        System.out.printf("reading exampleSupportDB\n");
+        System.out.printf("reading exampleSupportDB%n");
         try {
             XMLToIOCDBFactory.convert(dbd,iocdb,
                  "src/org/epics/ioc/dbAccess/example/exampleSupportDB.xml");
@@ -49,12 +49,12 @@ public class XMLSupportTest extends TestCase {
         }
         Map<String,DBRecord> recordMap = iocdb.getRecordMap();
         keys = recordMap.keySet();
-        System.out.printf("\n\nrecord list\n");
+        System.out.printf("%n%nrecord list%n");
         for(String key: keys) {
             DBRecord record = recordMap.get(key);
-            System.out.printf("\n%s",record.getRecordName());
+            System.out.printf("%n%s",record.getRecordName());
         }
-        System.out.printf("\n\nrecord contents\n");
+        System.out.printf("%n%nrecord contents%n");
         for(String key: keys) {
             DBRecord record = recordMap.get(key);
             System.out.print(record.toString());

@@ -40,4 +40,9 @@ public interface PVArray extends PVData{
      * @return if it can be modified.
      */
     boolean isCapacityMutable();
+    /**
+     * Get the element type.
+     * @return The element type.
+     */
+    Type getElementType();
 }

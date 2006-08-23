@@ -12,9 +12,8 @@
 
 <h1 style="text-align: center">EPICS JavaIoc: Database Definition <br />
 package: org.epics.ioc.dbDefinition<br />
-2006.06.28</h1>
+2006.08.07</h1>
 <hr />
-<p>MARTY LET DEFAULT SUPPORT BE DEFINED FOR ANY FIELD</p>
 <a href="#Overview">Overview</a> <br />
 <a href="#Syntax">Database Definition Syntax</a>
 <ul>
@@ -153,7 +152,7 @@ A structure is defined as follows:
 <pre>&lt;structure name = "structureName" supportName = "supportName" &gt;
      &lt;property name = "propertyName" associatedField = "fieldName" /&gt;
      ...
-     &lt;field name = "fieldName" type = "fieldType" ... &gt;
+     &lt;field name = "fieldName" supportName = "supportName" type = "fieldType" ... &gt;
          &lt;property name = "propertyName" associatedField = "fieldName" /&gt;
          ...
 
@@ -166,7 +165,7 @@ A structure is defined as follows:
     &lt;property name = "propertyName" associatedField = "fieldName" /&gt;
     ...
     &lt;include filename = "base.dbd" /&gt;
-     &lt;field name = "fieldName" type = "fieldType" ... &gt;
+     &lt;field name = "fieldName"  supportName = "supportName" type = "fieldType" ... &gt;
          &lt;property name = "propertyName" associatedField = "fieldName" /&gt;
          ...
      &lt;/field&gt;
@@ -181,11 +180,10 @@ A structure is defined as follows:
   <dt><span style="font-family: courier">recordtypeName</span></dt>
     <dd>The structure or record type name should have the same syntax as a
       Java identifier.</dd>
-  <dt>supportName</dt>
-    <dd>The name of support for the structure or record type.
-    A support definition, described below, defines the support.
-      When record instances are defined, the default
-      can be overridden.</dd>
+  <dt style="font-family: courier;">supportName</dt>
+    <dd>The name of support for the structure, record type, or field. A
+      support definition, described below, defines the support. When record
+      instances are defined, the default can be overridden.</dd>
   <dt><span style="font-family: courier">fieldName</span></dt>
     <dd>Should also have the same syntax as a Java identifier, unique within
       the context of this particular structure.</dd>
@@ -226,7 +224,7 @@ style="font-family: courier;">string</span> field type is just defined as
 
 <h4><a id="SyntaxEnumerated"></a>enumerated</h4>
 
-<p>An enumerated field type is just bspecified as enum For example:</p>
+<p>An enumerated field type specified as enum For example:</p>
 <pre>    &lt;field name = "value" type = "enum" /&gt;</pre>
 
 <h4><a id="SyntaxStructure"></a>structure</h4>
@@ -347,9 +345,9 @@ as:
 <pre>    &lt;property name = "name" associatedField = "field name" /&gt;</pre>
 where
 <dl>
-  <dt>name</dt>
+  <dt style="font-family: courier;">name</dt>
     <dd>The name of the property</dd>
-  <dt>associatedField</dt>
+  <dt style="font-family: courier;">associatedField</dt>
     <dd>The name of a field that has the value for the property. It can have
       one of the following forms:
       <dl>
@@ -385,13 +383,14 @@ where
     &lt;/field&gt;</pre>
 
 <h2 style="text-align: center"><a id="SyntaxSupport"></a>Support</h2>
-<p>Support can be associated with any field of a record instance when it is created.
-See package org.epics.ioc.dbAccess for details. Record types and structures
-can have default support as shown above.</p>
-<p>Each support can optionally have an associated structure for
-configuration information. In addition a support definition must be defined.
-The syntax is:</p>
 
+<p>Support can be associated with any field of a record instance when it is
+created. See package org.epics.ioc.dbAccess for details. Record types and
+structures can have default support as shown above.</p>
+
+<p>Each support can optionally have an associated structure for configuration
+information. In addition a support definition must be defined. The syntax
+is:</p>
 <pre>    &lt;structure name = "configurationStructureName"&gt;
         ...
     &lt;/structure&gt;
@@ -410,10 +409,9 @@ where
     <dd>The name of a structure containing configuration information for the
       support. Database configuration tools prompt the user to assign values
       to the structure. This is optional.</dd>
-  <dt><span
-  style="font-family: courier">factoryName</span></dt>
-    <dd>The name of a Java factory class that creates support instances.
-    See package org.epics.ioc.dbProcess for details,</dd>
+  <dt><span style="font-family: courier">factoryName</span></dt>
+    <dd>The name of a Java factory class that creates support instances. See
+      package org.epics.ioc.dbProcess for details,</dd>
 </dl>
 
 <p>When a record instance is created the supportName selects the support to
@@ -527,7 +525,8 @@ recordType</p>
 <p>getElementType returns DBType dvPvType and getElementType returns
 pcUnknown if the field DBType is not dbArray.</p>
 
-<p>getSupportName returns null if the support name was not defined in a dbDefinition</p>
+<p>getSupportName returns null if the support name was not defined in a
+dbDefinition</p>
 
 <p>Since DBDField extends Field it has the following methods:</p>
 <pre>    String getName();

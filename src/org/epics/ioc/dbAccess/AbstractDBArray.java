@@ -21,7 +21,7 @@ public abstract class AbstractDBArray extends AbstractDBData implements DBArray{
      * @param parent the parent interface.
      * @param dbdArrayField the reflection interface for the DBArray data.
      */
-    protected AbstractDBArray(DBStructure parent,DBDArrayField dbdArrayField) {
+    protected AbstractDBArray(DBData parent,DBDArrayField dbdArrayField) {
         super(parent,dbdArrayField);
     }
     /* (non-Javadoc)
@@ -56,5 +56,11 @@ public abstract class AbstractDBArray extends AbstractDBData implements DBArray{
      */
     public DBType getElementDBType() {
         return getDBDField().getAttribute().getElementDBType();
+    }
+    /* (non-Javadoc)
+     * @see org.epics.ioc.pvAccess.PVArray#getElementType()
+     */
+    public Type getElementType() {
+        return getDBDField().getAttribute().getElementType();
     }
 }

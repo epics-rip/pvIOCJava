@@ -6,9 +6,15 @@
 package org.epics.ioc.dbAccess;
 
 /**
+ * Listener for change of record state.
  * @author mrk
  *
  */
 public interface RecordStateListener {
-    void newState(RecordState newState);
+    /**
+     * The record state has changed.
+     * @param dbRecord The record with the state change.
+     * @param newState The new state.
+     */
+    void newState(DBRecord dbRecord,RecordState newState);
 }

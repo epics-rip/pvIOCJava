@@ -30,35 +30,35 @@ public class XMLToDataBaseTest extends TestCase {
     public static void testXML() {
         Set<String> keys;
         DBD dbd = DBDFactory.create("test");
-        System.out.printf("reading menuStructureSupport\n");
+        System.out.printf("reading menuStructureSupport%n");
         try {
             XMLToDBDFactory.convert(dbd,
                  "src/org/epics/ioc/dbAccess/example/menuStructureSupportDBD.xml");
         } catch (Exception e) {
             System.out.println("Exception: " + e);
         }
-        System.out.printf("reading analogDBD\n");
+        System.out.printf("reading analogDBD%n");
         try {
             XMLToDBDFactory.convert(dbd,
                  "src/org/epics/ioc/dbAccess/example/analogDBD.xml");
         } catch (Exception e) {
             System.out.println("Exception: " + e);
         }
-        System.out.printf("reading aiDBD\n");
+        System.out.printf("reading aiDBD%n");
         try {
             XMLToDBDFactory.convert(dbd,
                  "src/org/epics/ioc/dbAccess/example/aiDBD.xml");
         } catch (Exception e) {
             System.out.println("Exception: " + e);
         }
-        System.out.printf("reading powerSupplyDBD\n");
+        System.out.printf("reading powerSupplyDBD%n");
         try {
             XMLToDBDFactory.convert(dbd,
                  "src/org/epics/ioc/dbAccess/example/powerSupplyDBD.xml");
         } catch (Exception e) {
             System.out.println("Exception: " + e);
         }
-        System.out.printf("reading allTypesDBD\n");
+        System.out.printf("reading allTypesDBD%n");
         try {
             XMLToDBDFactory.convert(dbd,
                  "src/org/epics/ioc/dbAccess/example/allTypesDBD.xml");
@@ -67,35 +67,35 @@ public class XMLToDataBaseTest extends TestCase {
         }
 
         IOCDB iocdb = IOCDBFactory.create(dbd,"testIOCDatabase");
-        System.out.printf("reading exampleAnalogDB\n");
+        System.out.printf("reading exampleAnalogDB%n");
         try {
             XMLToIOCDBFactory.convert(dbd,iocdb,
                  "src/org/epics/ioc/dbAccess/example/exampleAnalogDB.xml");
         } catch (Exception e) {
             System.out.println("Exception: " + e);
         }
-        System.out.printf("reading exampleAiLinearDB\n");
+        System.out.printf("reading exampleAiLinearDB%n");
         try {
             XMLToIOCDBFactory.convert(dbd,iocdb,
                  "src/org/epics/ioc/dbAccess/example/exampleAiLinearDB.xml");
         } catch (Exception e) {
             System.out.println("Exception: " + e);
         }
-        System.out.printf("reading exampleAiDB\n");
+        System.out.printf("reading exampleAiDB%n");
         try {
             XMLToIOCDBFactory.convert(dbd,iocdb,
                  "src/org/epics/ioc/dbAccess/example/exampleAiDB.xml");
         } catch (Exception e) {
             System.out.println("Exception: " + e);
         }
-        System.out.printf("reading examplePowerSupplyDB\n");
+        System.out.printf("reading examplePowerSupplyDB%n");
         try {
             XMLToIOCDBFactory.convert(dbd,iocdb,
                  "src/org/epics/ioc/dbAccess/example/examplePowerSupplyDB.xml");
         } catch (Exception e) {
             System.out.println("Exception: " + e);
         }
-        System.out.printf("reading examplePowerSupplyArrayDB\n");
+        System.out.printf("reading examplePowerSupplyArrayDB%n");
         try {
             XMLToIOCDBFactory.convert(dbd,iocdb,
                  "src/org/epics/ioc/dbAccess/example/examplePowerSupplyArrayDB.xml");
@@ -104,12 +104,12 @@ public class XMLToDataBaseTest extends TestCase {
         }
         Map<String,DBRecord> recordMap = iocdb.getRecordMap();
         keys = recordMap.keySet();
-        System.out.printf("\n\nrecord list\n");
+        System.out.printf("%n%nrecord list%n");
         for(String key: keys) {
             DBRecord record = recordMap.get(key);
-            System.out.printf("\n%s",record.getRecordName());
+            System.out.printf("%n%s",record.getRecordName());
         }
-        System.out.printf("\n\nrecord contents\n");
+        System.out.printf("%n%nrecord contents%n");
         for(String key: keys) {
             DBRecord record = recordMap.get(key);
             System.out.print(record.toString());

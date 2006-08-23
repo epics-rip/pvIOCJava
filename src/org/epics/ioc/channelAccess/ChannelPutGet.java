@@ -11,10 +11,11 @@ import org.epics.ioc.pvAccess.PVData;
  * @author mrk
  *
  */
-public interface ChannelDataPutGet {
+public interface ChannelPutGet {
     void destroy();
-    void beginSynchronous(ChannelFieldGroup inputFieldGroup,ChannelDataGetListener callback);
-    PVData getPutPVData(ChannelField field);
-    void endSynchronous(boolean process,boolean wait);
-    void cancelGetPut();
+    void putGet(
+        ChannelFieldGroup putFieldGroup,ChannelPutListener putCallback,
+        ChannelFieldGroup getFieldGroup,ChannelGetListener getCallback,
+        boolean process, boolean wait);
+    void cancelPutGet();
 }

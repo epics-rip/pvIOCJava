@@ -24,7 +24,7 @@ public class ReplaceTest extends TestCase {
     public static void testReplaceField() {
         DBD dbd = DBDFactory.create("test"); 
         IOCDB iocdb = IOCDBFactory.create(dbd,"testIOCDatabase");
-        System.out.printf("reading menuStructureSupport\n");
+        System.out.printf("reading menuStructureSupport%n");
         try {
             XMLToDBDFactory.convert(dbd,
                  "src/org/epics/ioc/dbAccess/example/menuStructureSupportDBD.xml");
@@ -32,63 +32,63 @@ public class ReplaceTest extends TestCase {
             System.out.println("Exception: " + e);
         }
         
-        System.out.printf("reading aiDBD\n");
+        System.out.printf("reading aiDBD%n");
         try {
             XMLToDBDFactory.convert(dbd,
                  "src/org/epics/ioc/dbAccess/example/aiDBD.xml");
         } catch (Exception e) {
             System.out.println("Exception: " + e);
         }
-        System.out.printf("reading powerSupplyDBD\n");
+        System.out.printf("reading powerSupplyDBD%n");
         try {
             XMLToDBDFactory.convert(dbd,
                  "src/org/epics/ioc/dbAccess/example/powerSupplyDBD.xml");
         } catch (Exception e) {
             System.out.println("Exception: " + e);
         }
-        System.out.printf("reading allTypesDBD\n");
+        System.out.printf("reading allTypesDBD%n");
         try {
             XMLToDBDFactory.convert(dbd,
                  "src/org/epics/ioc/dbAccess/example/allTypesDBD.xml");
         } catch (Exception e) {
             System.out.println("Exception: " + e);
         }
-        //System.out.printf("\n\nstructures");
+        //System.out.printf("%n%nstructures");
         //Map<String,DBDStructure> structureMap = dbd.getStructureMap();
         //Set<String> keys = structureMap.keySet();
         //for(String key: keys) {
         //DBDStructure dbdStructure = structureMap.get(key);
         //System.out.print(dbdStructure.toString());
         //}
-        //System.out.printf("\n\nrecordTypes");
+        //System.out.printf("%n%nrecordTypes");
         //Map<String,DBDRecordType> recordTypeMap = dbd.getRecordTypeMap();
         //keys = recordTypeMap.keySet();
         //for(String key: keys) {
         //DBDRecordType dbdRecordType = recordTypeMap.get(key);
         //System.out.print(dbdRecordType.toString());
         //}
-        System.out.printf("reading exampleAiLinearDB\n");
+        System.out.printf("reading exampleAiLinearDB%n");
         try {
             XMLToIOCDBFactory.convert(dbd,iocdb,
                  "src/org/epics/ioc/dbAccess/example/exampleAiLinearDB.xml");
         } catch (Exception e) {
             System.out.println("Exception: " + e);
         }
-        System.out.printf("reading examplePowerSupplyDB\n");
+        System.out.printf("reading examplePowerSupplyDB%n");
         try {
             XMLToIOCDBFactory.convert(dbd,iocdb,
                  "src/org/epics/ioc/dbAccess/example/examplePowerSupplyDB.xml");
         } catch (Exception e) {
             System.out.println("Exception: " + e);
         }
-        System.out.printf("reading examplePowerSupplyArrayDB\n");
+        System.out.printf("reading examplePowerSupplyArrayDB%n");
         try {
             XMLToIOCDBFactory.convert(dbd,iocdb,
                  "src/org/epics/ioc/dbAccess/example/examplePowerSupplyArrayDB.xml");
         } catch (Exception e) {
             System.out.println("Exception: " + e);
         }
-        System.out.printf("reading exampleAllTypeDB\n");
+        System.out.printf("reading exampleAllTypeDB%n");
         try {
             XMLToIOCDBFactory.convert(dbd,iocdb,
                  "src/org/epics/ioc/dbAccess/example/exampleAllTypeDB.xml");
@@ -96,7 +96,7 @@ public class ReplaceTest extends TestCase {
             System.out.println("Exception: " + e);
         }
         
-//        System.out.printf("\nrecords\n");
+//        System.out.printf("%nrecords%n");
 //        Map<String,DBRecord> recordMap = iocdb.getRecordMap();
 //        Set<String> keys = recordMap.keySet();
 //        for(String key: keys) {
@@ -104,15 +104,15 @@ public class ReplaceTest extends TestCase {
 //            System.out.print(record.toString());
 //        }
         
-        System.out.printf("\ntest replaceField\n");
+        System.out.printf("%ntest replaceField%n");
         testReplace(iocdb,"exampleAiLinear","rawValue");
         testReplace(iocdb,"exampleAiLinear","value");
-        System.out.printf("\n");
+        System.out.printf("%n");
         new TestListener(iocdb,"exampleAiLinear","rawValue");
         new TestListener(iocdb,"exampleAiLinear","value");
         testPut(iocdb,"exampleAiLinear","rawValue",2.0);
         testPut(iocdb,"exampleAiLinear","value",5.0);
-        System.out.printf("\ntest put and listen examplePowerSupply\n");
+        System.out.printf("%ntest put and listen examplePowerSupply%n");
         testReplace(iocdb,"examplePowerSupply","power");
         testReplace(iocdb,"examplePowerSupply","current");
         testReplace(iocdb,"examplePowerSupply","voltage");
@@ -122,7 +122,7 @@ public class ReplaceTest extends TestCase {
         testPut(iocdb,"examplePowerSupply","current",25.0);
         testPut(iocdb,"examplePowerSupply","voltage",2.0);
         testPut(iocdb,"examplePowerSupply","power",50.0);
-        System.out.printf("\ntest put and listen examplePowerSupplyArray\n");
+        System.out.printf("%ntest put and listen examplePowerSupplyArray%n");
         testReplace(iocdb,"examplePowerSupplyArray","powerSupply[0].power");
         testReplace(iocdb,"examplePowerSupplyArray","powerSupply[0].current");
         testReplace(iocdb,"examplePowerSupplyArray","powerSupply[0].voltage");
@@ -141,7 +141,7 @@ public class ReplaceTest extends TestCase {
         testPut(iocdb,"examplePowerSupplyArray","powerSupply[1].current",2.50);
         testPut(iocdb,"examplePowerSupplyArray","powerSupply[1].voltage",1.00);
         testPut(iocdb,"examplePowerSupplyArray","powerSupply[1].power",2.50);
-        System.out.printf("\ntest put and listen allTypes\n");
+        System.out.printf("%ntest put and listen allTypes%n");
         testReplace(iocdb,"allTypes","boolean");
         testReplace(iocdb,"allTypes","byte");
         testReplace(iocdb,"allTypes","short");
@@ -266,7 +266,7 @@ public class ReplaceTest extends TestCase {
             this.pvName = pvName;
             DBAccess dbAccess = iocdb.createAccess(recordName);
             if(dbAccess==null) {
-                System.out.printf("record %s not found\n",recordName);
+                System.out.printf("record %s not found%n",recordName);
                 return;
             }
             DBData dbData;
@@ -274,7 +274,7 @@ public class ReplaceTest extends TestCase {
                 dbData = dbAccess.getDbRecord();
             } else {
                 if(dbAccess.setField(pvName)!=AccessSetResult.thisRecord){
-                    System.out.printf("name %s not in record %s\n",pvName,recordName);
+                    System.out.printf("name %s not in record %s%n",pvName,recordName);
                     return;
                 }
                 dbData = dbAccess.getField();
@@ -308,7 +308,7 @@ public class ReplaceTest extends TestCase {
          * @see org.epics.ioc.dbAccess.DBListener#newData(org.epics.ioc.dbAccess.DBData)
          */
         public void newData(DBData dbData) {
-            System.out.printf(" actualField %s value %s\n",
+            System.out.printf(" actualField %s value %s%n",
                 dbData.getField().getName(), dbData.toString());
             System.out.printf("TestListener recordName %s is Synchronous %b"
                     + " pvName %s actualFieldName %s",
@@ -323,7 +323,7 @@ public class ReplaceTest extends TestCase {
                 parent = parent.getParent();
             }
             String value = dbData.toString();
-            System.out.printf("    dbDataName %s value %s\n",
+            System.out.printf("    dbDataName %s value %s%n",
                 dbDataName,value);    
         }
         /* (non-Javadoc)
@@ -339,24 +339,24 @@ public class ReplaceTest extends TestCase {
     {
         DBAccess dbAccess = iocdb.createAccess(recordName);
         if(dbAccess==null) {
-            System.out.printf("record %s not found\n",recordName);
+            System.out.printf("record %s not found%n",recordName);
             return;
         }
         if(dbAccess.setField(fieldName)!=AccessSetResult.thisRecord){
-            System.out.printf("field %s not in record %s\n",
+            System.out.printf("field %s not in record %s%n",
                 fieldName,recordName);
             return;
         }
         DBData dbData = dbAccess.getField();
         Type type = dbData.getField().getType();
         if(type.isNumeric()) {
-            System.out.printf("\ntestPut recordName %s fieldName %s value %f",
+            System.out.printf("%ntestPut recordName %s fieldName %s value %f",
                 recordName,fieldName,value);
             convert.fromDouble(dbData,value);
             return;
         }
         if(type!=Type.pvStructure) {
-            System.out.printf("\ntestPut recordName %s fieldName %s cant handle\n",
+            System.out.printf("%ntestPut recordName %s fieldName %s cant handle%n",
                 fieldName,recordName);
             return;
         }
@@ -364,7 +364,7 @@ public class ReplaceTest extends TestCase {
         DBData[] fields = structure.getFieldDBDatas();
         for(DBData field : fields) {
             if(field.getField().getType().isNumeric()) {
-                System.out.printf("\ntestPut recordName %s fieldName %s value %f",
+                System.out.printf("%ntestPut recordName %s fieldName %s value %f",
                         recordName,field.getField().getName(),value);
                     convert.fromDouble(field,value);
             }
@@ -376,31 +376,31 @@ public class ReplaceTest extends TestCase {
     {
         DBAccess dbAccess = iocdb.createAccess(recordName);
         if(dbAccess==null) {
-            System.out.printf("record %s not found\n",recordName);
+            System.out.printf("record %s not found%n",recordName);
             return;
         }
         if(dbAccess.setField(fieldName)!=AccessSetResult.thisRecord){
-            System.out.printf("field %s not in record %s\n",
+            System.out.printf("field %s not in record %s%n",
                 fieldName,recordName);
             return;
         }
         DBData dbData = dbAccess.getField();
         Type type = dbData.getField().getType();
         if(type!=Type.pvArray) {
-            System.out.printf("\ntestPutArray recordName %s fieldName %s no an array\n",
+            System.out.printf("%ntestPutArray recordName %s fieldName %s no an array%n",
                     fieldName,recordName);
                 return;
         }
         DBArray dataArray = (DBArray)dbData;
         Type elementType = ((Array)dataArray.getField()).getElementType();
         if(elementType.isNumeric()) {
-            System.out.printf("\ntestPut recordName %s fieldName %s values %f %f %f",
+            System.out.printf("%ntestPut recordName %s fieldName %s values %f %f %f",
                 recordName,fieldName,value1,value2,value3);
             double[] values = new double[]{value1,value2,value3};
             convert.fromDoubleArray(dbData,0,3,values,0);
             return;
         } else {
-            System.out.printf("\ntestPut recordName %s fieldName %s cant handle\n",
+            System.out.printf("%ntestPut recordName %s fieldName %s cant handle%n",
                     fieldName,recordName);
             return;
         }
@@ -411,11 +411,11 @@ public class ReplaceTest extends TestCase {
     {
         DBAccess dbAccess = iocdb.createAccess(recordName);
         if(dbAccess==null) {
-            System.out.printf("record %s not found\n",recordName);
+            System.out.printf("record %s not found%n",recordName);
             return;
         }
         if(dbAccess.setField(fieldName)!=AccessSetResult.thisRecord){
-            System.out.printf("field %s not in record %s\n",
+            System.out.printf("field %s not in record %s%n",
                 fieldName,recordName);
             return;
         }
@@ -423,7 +423,7 @@ public class ReplaceTest extends TestCase {
         Type type = dbData.getField().getType();
         if(type==Type.pvBoolean) {
             DBBoolean data = (DBBoolean)dbData;
-            System.out.printf("\ntestPutBoolean recordName %s fieldName %s value %b",
+            System.out.printf("%ntestPutBoolean recordName %s fieldName %s value %b",
                 recordName,fieldName,value);
             data.put(value);
             return;
@@ -435,11 +435,11 @@ public class ReplaceTest extends TestCase {
     {
         DBAccess dbAccess = iocdb.createAccess(recordName);
         if(dbAccess==null) {
-            System.out.printf("record %s not found\n",recordName);
+            System.out.printf("record %s not found%n",recordName);
             return;
         }
         if(dbAccess.setField(fieldName)!=AccessSetResult.thisRecord){
-            System.out.printf("field %s not in record %s\n",
+            System.out.printf("field %s not in record %s%n",
                 fieldName,recordName);
             return;
         }
@@ -447,7 +447,7 @@ public class ReplaceTest extends TestCase {
         Type type = dbData.getField().getType();
         if(type==Type.pvString) {
             DBString data = (DBString)dbData;
-            System.out.printf("\ntestPutString recordName %s fieldName %s value %s",
+            System.out.printf("%ntestPutString recordName %s fieldName %s value %s",
                 recordName,fieldName,value);
             data.put(value);
             return;
@@ -459,16 +459,16 @@ public class ReplaceTest extends TestCase {
     {
         DBAccess dbAccess = iocdb.createAccess(recordName);
         if(dbAccess==null) {
-            System.out.printf("record %s not found\n",recordName);
+            System.out.printf("record %s not found%n",recordName);
             return;
         }
         if(dbAccess.setField(fieldName)!=AccessSetResult.thisRecord){
-            System.out.printf("field %s not in record %s\n",
+            System.out.printf("field %s not in record %s%n",
                 fieldName,recordName);
             return;
         }
         DBData oldField = dbAccess.getField();
-        DBStructure parent = oldField.getParent();
+        DBData parent = oldField.getParent();
         DBDField dbdField = oldField.getDBDField();
         DBType dbType = dbdField.getDBType();
         DBData newField = null;
@@ -477,7 +477,7 @@ public class ReplaceTest extends TestCase {
             Type type = dbdField.getType();
             switch(type) {
             case pvUnknown:
-                 System.out.printf("type is pvUnknown. Why???\n");
+                 System.out.printf("type is pvUnknown. Why???%n");
                  return;
             case pvBoolean:
                  newField = new BooleanData(parent,dbdField);
@@ -504,15 +504,15 @@ public class ReplaceTest extends TestCase {
                  newField = new StringData(parent,dbdField);
                  break;
             case pvEnum:
-                 System.out.printf("pvEnum not supported.\n");
+                 System.out.printf("pvEnum not supported.%n");
                  return;
             }
             break;
         case dbMenu:
-             System.out.printf("dbMenu not supported.\n");
+             System.out.printf("dbMenu not supported.%n");
              return;
         case dbStructure:
-             System.out.printf("dbStructure not supported.\n");
+             System.out.printf("dbStructure not supported.%n");
              return;
         case dbArray:
              DBType elementDbType= dbdField.getAttribute().getElementDBType();
@@ -578,7 +578,7 @@ public class ReplaceTest extends TestCase {
              }
              break;
         case dbLink:
-             System.out.printf("dbLink not supported.\n");
+             System.out.printf("dbLink not supported.%n");
              return;
         }
         dbAccess.replaceField(oldField,newField);
@@ -592,7 +592,7 @@ public class ReplaceTest extends TestCase {
          * @see org.epics.ioc.pvAccess.PVBoolean#get()
          */
         public boolean get() {
-            System.out.printf("\n    **%s.get**",getField().getType().toString());
+            System.out.printf("%n    **%s.get**",getField().getType().toString());
             return value;
         }
 
@@ -601,7 +601,7 @@ public class ReplaceTest extends TestCase {
          */
         public void put(boolean value) {
             if(getField().isMutable()) {
-                System.out.printf("\n    **.put**",getField().getType().toString());
+                System.out.printf("%n    **.put**",getField().getType().toString());
                 this.value = value;
                 postPut();
                 return ;
@@ -623,7 +623,7 @@ public class ReplaceTest extends TestCase {
             return convert.getString(this, indentLevel);
         }
 
-        BooleanData(DBStructure parent,DBDField dbdField) {
+        BooleanData(DBData parent,DBDField dbdField) {
             super(parent,dbdField);
             value = false;
         }
@@ -638,7 +638,7 @@ public class ReplaceTest extends TestCase {
          * @see org.epics.ioc.pvAccess.PVByte#get()
          */
         public byte get() {
-            System.out.printf("\n    **.get**",getField().getType().toString());
+            System.out.printf("%n    **.get**",getField().getType().toString());
             return value;
         }
 
@@ -647,7 +647,7 @@ public class ReplaceTest extends TestCase {
          */
         public void put(byte value) {
             if(getField().isMutable()) {
-                System.out.printf("\n    **.put**",getField().getType().toString());
+                System.out.printf("%n    **.put**",getField().getType().toString());
                 this.value = value;
                 postPut();
                 return ;
@@ -669,7 +669,7 @@ public class ReplaceTest extends TestCase {
             return convert.getString(this, indentLevel);
         }
 
-        ByteData(DBStructure parent,DBDField dbdField) {
+        ByteData(DBData parent,DBDField dbdField) {
             super(parent,dbdField);
             value = 0;
         }
@@ -684,7 +684,7 @@ public class ReplaceTest extends TestCase {
          * @see org.epics.ioc.pvAccess.PVShort#get()
          */
         public short get() {
-            System.out.printf("\n    **.get**",getField().getType().toString());
+            System.out.printf("%n    **.get**",getField().getType().toString());
             return value;
         }
 
@@ -693,7 +693,7 @@ public class ReplaceTest extends TestCase {
          */
         public void put(short value) {
             if(getField().isMutable()) {
-                System.out.printf("\n    **.put**",getField().getType().toString());
+                System.out.printf("%n    **.put**",getField().getType().toString());
                 this.value = value;
                 postPut();
                 return ;
@@ -715,7 +715,7 @@ public class ReplaceTest extends TestCase {
             return convert.getString(this, indentLevel);
         }
 
-        ShortData(DBStructure parent,DBDField dbdField) {
+        ShortData(DBData parent,DBDField dbdField) {
             super(parent,dbdField);
             value = 0;
         }
@@ -730,7 +730,7 @@ public class ReplaceTest extends TestCase {
          * @see org.epics.ioc.pvAccess.PVInt#get()
          */
         public int get() {
-            System.out.printf("\n    **.get**",getField().getType().toString());
+            System.out.printf("%n    **.get**",getField().getType().toString());
             return value;
         }
 
@@ -739,7 +739,7 @@ public class ReplaceTest extends TestCase {
          */
         public void put(int value) {
             if(getField().isMutable()) {
-                System.out.printf("\n    **.put**",getField().getType().toString());
+                System.out.printf("%n    **.put**",getField().getType().toString());
                 this.value = value;
                 postPut();
                 return ;
@@ -761,7 +761,7 @@ public class ReplaceTest extends TestCase {
             return convert.getString(this, indentLevel);
         }
 
-        IntData(DBStructure parent,DBDField dbdField) {
+        IntData(DBData parent,DBDField dbdField) {
             super(parent,dbdField);
             value = 0;
         }
@@ -776,7 +776,7 @@ public class ReplaceTest extends TestCase {
          * @see org.epics.ioc.pvAccess.PVLong#get()
          */
         public long get() {
-            System.out.printf("\n    **.get**",getField().getType().toString());
+            System.out.printf("%n    **.get**",getField().getType().toString());
             return value;
         }
 
@@ -785,7 +785,7 @@ public class ReplaceTest extends TestCase {
          */
         public void put(long value) {
             if(getField().isMutable()) {
-                System.out.printf("\n    **.put**",getField().getType().toString());
+                System.out.printf("%n    **.put**",getField().getType().toString());
                 this.value = value;
                 postPut();
                 return ;
@@ -807,7 +807,7 @@ public class ReplaceTest extends TestCase {
             return convert.getString(this, indentLevel);
         }
 
-        LongData(DBStructure parent,DBDField dbdField) {
+        LongData(DBData parent,DBDField dbdField) {
             super(parent,dbdField);
             value = 0;
         }
@@ -822,7 +822,7 @@ public class ReplaceTest extends TestCase {
          * @see org.epics.ioc.pvAccess.PVFloat#get()
          */
         public float get() {
-            System.out.printf("\n    **.get**",getField().getType().toString());
+            System.out.printf("%n    **.get**",getField().getType().toString());
             return value;
         }
 
@@ -831,7 +831,7 @@ public class ReplaceTest extends TestCase {
          */
         public void put(float value) {
             if(getField().isMutable()) {
-                System.out.printf("\n    **.put**",getField().getType().toString());
+                System.out.printf("%n    **.put**",getField().getType().toString());
                 this.value = value;
                 postPut();
                 return ;
@@ -853,7 +853,7 @@ public class ReplaceTest extends TestCase {
             return convert.getString(this, indentLevel);
         }
 
-        FloatData(DBStructure parent,DBDField dbdField) {
+        FloatData(DBData parent,DBDField dbdField) {
             super(parent,dbdField);
             value = 0;
         }
@@ -868,7 +868,7 @@ public class ReplaceTest extends TestCase {
          * @see org.epics.ioc.pvAccess.PVDouble#get()
          */
         public double get() {
-            System.out.printf("\n    **.get**",getField().getType().toString());
+            System.out.printf("%n    **.get**",getField().getType().toString());
             return value;
         }
 
@@ -877,7 +877,7 @@ public class ReplaceTest extends TestCase {
          */
         public void put(double value) {
             if(getField().isMutable()) {
-                System.out.printf("\n    **.put**",getField().getType().toString());
+                System.out.printf("%n    **.put**",getField().getType().toString());
                 this.value = value;
                 postPut();
                 return ;
@@ -899,7 +899,7 @@ public class ReplaceTest extends TestCase {
             return convert.getString(this, indentLevel);
         }
 
-        DoubleData(DBStructure parent,DBDField dbdField) {
+        DoubleData(DBData parent,DBDField dbdField) {
             super(parent,dbdField);
             value = 0;
         }
@@ -914,7 +914,7 @@ public class ReplaceTest extends TestCase {
          * @see org.epics.ioc.pvAccess.PVString#get()
          */
         public String get() {
-            System.out.printf("\n    **.get**",getField().getType().toString());
+            System.out.printf("%n    **.get**",getField().getType().toString());
             return value;
         }
 
@@ -923,7 +923,7 @@ public class ReplaceTest extends TestCase {
          */
         public void put(String value) {
             if(getField().isMutable()) {
-                System.out.printf("\n    **.put**",getField().getType().toString());
+                System.out.printf("%n    **.put**",getField().getType().toString());
                 this.value = value;
                 postPut();
                 return ;
@@ -945,7 +945,7 @@ public class ReplaceTest extends TestCase {
             return convert.getString(this, indentLevel);
         }
 
-        StringData(DBStructure parent,DBDField dbdField) {
+        StringData(DBData parent,DBDField dbdField) {
             super(parent,dbdField);
             value = null;
         }
@@ -981,7 +981,7 @@ public class ReplaceTest extends TestCase {
          * @see org.epics.ioc.pvAccess.PVBooleanArray#get(int, int, org.epics.ioc.pvAccess.BooleanArrayData)
          */
         public int get(int offset, int len, BooleanArrayData data) {
-            System.out.printf("\n    **.get**",getField().getType().toString());
+            System.out.printf("%n    **.get**",getField().getType().toString());
             int n = len;
             if(offset+len > length) n = length;
             data.data = value;
@@ -992,7 +992,7 @@ public class ReplaceTest extends TestCase {
          * @see org.epics.ioc.pvAccess.PVBooleanArray#put(int, int, boolean[], int)
          */
         public int put(int offset, int len, boolean[]from, int fromOffset) {
-            System.out.printf("\n    **.put**",getField().getType().toString());
+            System.out.printf("%n    **.put**",getField().getType().toString());
             if(!super.getField().isMutable())
                 throw new IllegalStateException("PVData.isMutable is false");
             if(offset+len > length) {
@@ -1042,7 +1042,7 @@ public class ReplaceTest extends TestCase {
             length = len;
         }
 
-        BooleanArray(DBStructure parent,DBDArrayField dbdArrayField,
+        BooleanArray(DBData parent,DBDArrayField dbdArrayField,
             int capacity,boolean capacityMutable)
         {
             super(parent,dbdArrayField);
@@ -1084,7 +1084,7 @@ public class ReplaceTest extends TestCase {
          * @see org.epics.ioc.pvAccess.PVByteArray#get(int, int, org.epics.ioc.pvAccess.ByteArrayData)
          */
         public int get(int offset, int len, ByteArrayData data) {
-            System.out.printf("\n    **.get**",getField().getType().toString());
+            System.out.printf("%n    **.get**",getField().getType().toString());
             int n = len;
             if(offset+len > length) n = length;
             data.data = value;
@@ -1095,7 +1095,7 @@ public class ReplaceTest extends TestCase {
          * @see org.epics.ioc.pvAccess.PVByteArray#put(int, int, byte[], int)
          */
         public int put(int offset, int len, byte[]from, int fromOffset) {
-            System.out.printf("\n    **.put**",getField().getType().toString());
+            System.out.printf("%n    **.put**",getField().getType().toString());
             if(!super.getField().isMutable())
                 throw new IllegalStateException("PVData.isMutable is false");
             if(offset+len > length) {
@@ -1145,7 +1145,7 @@ public class ReplaceTest extends TestCase {
             length = len;
         }
 
-        ByteArray(DBStructure parent,DBDArrayField dbdArrayField,
+        ByteArray(DBData parent,DBDArrayField dbdArrayField,
             int capacity,boolean capacityMutable)
         {
             super(parent,dbdArrayField);
@@ -1187,7 +1187,7 @@ public class ReplaceTest extends TestCase {
          * @see org.epics.ioc.pvAccess.PVShortArray#get(int, int, org.epics.ioc.pvAccess.ShortArrayData)
          */
         public int get(int offset, int len, ShortArrayData data) {
-            System.out.printf("\n    **.get**",getField().getType().toString());
+            System.out.printf("%n    **.get**",getField().getType().toString());
             int n = len;
             if(offset+len > length) n = length;
             data.data = value;
@@ -1198,7 +1198,7 @@ public class ReplaceTest extends TestCase {
          * @see org.epics.ioc.pvAccess.PVShortArray#put(int, int, short[], int)
          */
         public int put(int offset, int len, short[]from, int fromOffset) {
-            System.out.printf("\n    **.put**",getField().getType().toString());
+            System.out.printf("%n    **.put**",getField().getType().toString());
             if(!super.getField().isMutable())
                 throw new IllegalStateException("PVData.isMutable is false");
             if(offset+len > length) {
@@ -1247,7 +1247,7 @@ public class ReplaceTest extends TestCase {
             length = len;
         }
 
-        ShortArray(DBStructure parent,DBDArrayField dbdArrayField,
+        ShortArray(DBData parent,DBDArrayField dbdArrayField,
             int capacity,boolean capacityMutable)
         {
             super(parent,dbdArrayField);
@@ -1289,7 +1289,7 @@ public class ReplaceTest extends TestCase {
          * @see org.epics.ioc.pvAccess.PVIntArray#get(int, int, org.epics.ioc.pvAccess.IntArrayData)
          */
         public int get(int offset, int len, IntArrayData data) {
-            System.out.printf("\n    **.get**",getField().getType().toString());
+            System.out.printf("%n    **.get**",getField().getType().toString());
             int n = len;
             if(offset+len > length) n = length;
             data.data = value;
@@ -1300,7 +1300,7 @@ public class ReplaceTest extends TestCase {
          * @see org.epics.ioc.pvAccess.PVIntArray#put(int, int, int[], int)
          */
         public int put(int offset, int len, int[]from,int fromOffset) {
-            System.out.printf("\n    **.put**",getField().getType().toString());
+            System.out.printf("%n    **.put**",getField().getType().toString());
             if(!super.getField().isMutable())
                 throw new IllegalStateException("PVData.isMutable is false");
             if(offset+len > length) {
@@ -1349,7 +1349,7 @@ public class ReplaceTest extends TestCase {
             length = len;
         }
 
-        IntArray(DBStructure parent,DBDArrayField dbdArrayField,
+        IntArray(DBData parent,DBDArrayField dbdArrayField,
             int capacity,boolean capacityMutable)
         {
             super(parent,dbdArrayField);
@@ -1391,7 +1391,7 @@ public class ReplaceTest extends TestCase {
          * @see org.epics.ioc.pvAccess.PVLongArray#get(int, int, org.epics.ioc.pvAccess.LongArrayData)
          */
         public int get(int offset, int len, LongArrayData data) {
-            System.out.printf("\n    **.get**",getField().getType().toString());
+            System.out.printf("%n    **.get**",getField().getType().toString());
             int n = len;
             if(offset+len > length) n = length;
             data.data = value;
@@ -1402,7 +1402,7 @@ public class ReplaceTest extends TestCase {
          * @see org.epics.ioc.pvAccess.PVLongArray#put(int, int, long[], int)
          */
         public int put(int offset, int len, long[]from, int fromOffset) {
-            System.out.printf("\n    **.put**",getField().getType().toString());
+            System.out.printf("%n    **.put**",getField().getType().toString());
             if(!super.getField().isMutable())
                 throw new IllegalStateException("PVData.isMutable is false");
             if(offset+len > length) {
@@ -1451,7 +1451,7 @@ public class ReplaceTest extends TestCase {
             length = len;
         }
 
-        LongArray(DBStructure parent,DBDArrayField dbdArrayField,
+        LongArray(DBData parent,DBDArrayField dbdArrayField,
             int capacity,boolean capacityMutable)
         {
             super(parent,dbdArrayField);
@@ -1493,7 +1493,7 @@ public class ReplaceTest extends TestCase {
          * @see org.epics.ioc.pvAccess.PVFloatArray#get(int, int, org.epics.ioc.pvAccess.FloatArrayData)
          */
         public int get(int offset, int len, FloatArrayData data) {
-            System.out.printf("\n    **.get**",getField().getType().toString());
+            System.out.printf("%n    **.get**",getField().getType().toString());
             int n = len;
             if(offset+len > length) n = length;
             data.data = value;
@@ -1504,7 +1504,7 @@ public class ReplaceTest extends TestCase {
          * @see org.epics.ioc.pvAccess.PVFloatArray#put(int, int, float[], int)
          */
         public int put(int offset, int len, float[]from,int fromOffset) {
-            System.out.printf("\n    **.put**",getField().getType().toString());
+            System.out.printf("%n    **.put**",getField().getType().toString());
             if(!super.getField().isMutable())
                 throw new IllegalStateException("PVData.isMutable is false");
             if(offset+len > length) {
@@ -1554,7 +1554,7 @@ public class ReplaceTest extends TestCase {
             length = len;
         }
 
-        FloatArray(DBStructure parent,DBDArrayField dbdArrayField,
+        FloatArray(DBData parent,DBDArrayField dbdArrayField,
             int capacity,boolean capacityMutable)
         {
             super(parent,dbdArrayField);
@@ -1596,7 +1596,7 @@ public class ReplaceTest extends TestCase {
          * @see org.epics.ioc.pvAccess.PVDoubleArray#get(int, int, org.epics.ioc.pvAccess.DoubleArrayData)
          */
         public int get(int offset, int len, DoubleArrayData data) {
-            System.out.printf("\n    **.get**",getField().getType().toString());
+            System.out.printf("%n    **.get**",getField().getType().toString());
             int n = len;
             if(offset+len > length) n = length;
             data.data = value;
@@ -1607,7 +1607,7 @@ public class ReplaceTest extends TestCase {
          * @see org.epics.ioc.pvAccess.PVDoubleArray#put(int, int, double[], int)
          */
         public int put(int offset, int len, double[]from, int fromOffset) {
-            System.out.printf("\n    **.put**",getField().getType().toString());
+            System.out.printf("%n    **.put**",getField().getType().toString());
             if(!super.getField().isMutable())
                 throw new IllegalStateException("PVData.isMutable is false");
             if(offset+len > length) {
@@ -1656,7 +1656,7 @@ public class ReplaceTest extends TestCase {
             length = len;
         }
 
-        DoubleArray(DBStructure parent,DBDArrayField dbdArrayField,
+        DoubleArray(DBData parent,DBDArrayField dbdArrayField,
             int capacity,boolean capacityMutable)
         {
             super(parent,dbdArrayField);
@@ -1698,7 +1698,7 @@ public class ReplaceTest extends TestCase {
          * @see org.epics.ioc.pvAccess.PVStringArray#get(int, int, org.epics.ioc.pvAccess.StringArrayData)
          */
         public int get(int offset, int len, StringArrayData data) {
-            System.out.printf("\n    **.get**",getField().getType().toString());
+            System.out.printf("%n    **.get**",getField().getType().toString());
             int n = len;
             if(offset+len > length) n = length;
             data.data = value;
@@ -1709,7 +1709,7 @@ public class ReplaceTest extends TestCase {
          * @see org.epics.ioc.pvAccess.PVStringArray#put(int, int, java.lang.String[], int)
          */
         public int put(int offset, int len, String[]from, int fromOffset) {
-            System.out.printf("\n    **.put**",getField().getType().toString());
+            System.out.printf("%n    **.put**",getField().getType().toString());
             if(!super.getField().isMutable())
                 throw new IllegalStateException("PVData.isMutable is false");
             if(offset+len > length) {
@@ -1758,7 +1758,7 @@ public class ReplaceTest extends TestCase {
             length = len;
         }
 
-        StringArray(DBStructure parent,DBDArrayField dbdArrayField,
+        StringArray(DBData parent,DBDArrayField dbdArrayField,
             int capacity,boolean capacityMutable)
         {
             super(parent,dbdArrayField);
@@ -1800,7 +1800,7 @@ public class ReplaceTest extends TestCase {
          * @see org.epics.ioc.pvAccess.PVEnumArray#get(int, int, org.epics.ioc.pvAccess.EnumArrayData)
          */
         public int get(int offset, int len, EnumArrayData data) {
-            System.out.printf("\n    **.get**",getField().getType().toString());
+            System.out.printf("%n    **.get**",getField().getType().toString());
             int n = len;
             if(offset+len > length) n = length;
             data.data = value;
@@ -1811,7 +1811,7 @@ public class ReplaceTest extends TestCase {
          * @see org.epics.ioc.pvAccess.PVEnumArray#put(int, int, org.epics.ioc.pvAccess.PVEnum[], int)
          */
         public int put(int offset, int len, PVEnum[]from, int fromOffset) {
-            System.out.printf("\n    **.put**",getField().getType().toString());
+            System.out.printf("%n    **.put**",getField().getType().toString());
             if(!super.getField().isMutable())
                 throw new IllegalStateException("PVData.isMutable is false");
             if(offset+len > length) {
@@ -1860,7 +1860,7 @@ public class ReplaceTest extends TestCase {
             length = len;
         }
 
-        EnumArray(DBStructure parent,DBDArrayField dbdArrayField,
+        EnumArray(DBData parent,DBDArrayField dbdArrayField,
             int capacity,boolean capacityMutable)
         {
             super(parent,dbdArrayField);
@@ -1919,7 +1919,7 @@ public class ReplaceTest extends TestCase {
          * @see org.epics.ioc.dbAccess.DBMenuArray#get(int, int, org.epics.ioc.dbAccess.MenuArrayData)
          */
         public int get(int offset, int len, MenuArrayData data) {
-            System.out.printf("\n    **.get**",getField().getType().toString());
+            System.out.printf("%n    **.get**",getField().getType().toString());
             int n = len;
             if(offset+len > length) n = length;
             data.data = value;
@@ -1930,7 +1930,7 @@ public class ReplaceTest extends TestCase {
          * @see org.epics.ioc.dbAccess.DBMenuArray#put(int, int, org.epics.ioc.dbAccess.DBMenu[], int)
          */
         public int put(int offset, int len, DBMenu[]from, int fromOffset) {
-            System.out.printf("\n    **.put**",getField().getType().toString());
+            System.out.printf("%n    **.put**",getField().getType().toString());
             if(!super.getField().isMutable())
                 throw new IllegalStateException("PVData.isMutable is false");
             if(offset+len > length) {
@@ -1979,7 +1979,7 @@ public class ReplaceTest extends TestCase {
             length = len;
         }
 
-        MenuArray(DBStructure parent,DBDArrayField dbdArrayField,
+        MenuArray(DBData parent,DBDArrayField dbdArrayField,
             int capacity,boolean capacityMutable)
         {
             super(parent,dbdArrayField);
@@ -2001,7 +2001,7 @@ public class ReplaceTest extends TestCase {
          * @see org.epics.ioc.pvAccess.PVStructureArray#get(int, int, org.epics.ioc.pvAccess.StructureArrayData)
          */
         public int get(int offset, int len, StructureArrayData data) {
-            System.out.printf("\n    **.get**",getField().getType().toString());
+            System.out.printf("%n    **.get**",getField().getType().toString());
             int n = len;
             if(offset+len > length) n = length;
             data.data = value;
@@ -2012,7 +2012,7 @@ public class ReplaceTest extends TestCase {
          * @see org.epics.ioc.pvAccess.PVStructureArray#put(int, int, org.epics.ioc.pvAccess.PVStructure[], int)
          */
         public int put(int offset, int len, PVStructure[]from,int fromOffset) {
-            System.out.printf("\n    **.put**",getField().getType().toString());
+            System.out.printf("%n    **.put**",getField().getType().toString());
             if(!super.getField().isMutable())
                 throw new IllegalStateException("PVData.isMutable is false");
             if(offset+len > length) {
@@ -2064,7 +2064,7 @@ public class ReplaceTest extends TestCase {
          * @see org.epics.ioc.dbAccess.DBStructureArray#get(int, int, org.epics.ioc.dbAccess.DBStructureArrayData)
          */
         public int get(int offset, int len, DBStructureArrayData data) {
-            System.out.printf("\n    **.get**",getField().getType().toString());
+            System.out.printf("%n    **.get**",getField().getType().toString());
             int n = len;
             if(offset+len > length) n = length;
             data.data = value;
@@ -2075,7 +2075,7 @@ public class ReplaceTest extends TestCase {
          * @see org.epics.ioc.dbAccess.DBStructureArray#put(int, int, org.epics.ioc.dbAccess.DBStructure[], int)
          */
         public int put(int offset, int len, DBStructure[]from,int fromOffset) {
-            System.out.printf("\n    **.put**",getField().getType().toString());
+            System.out.printf("%n    **.put**",getField().getType().toString());
             if(!super.getField().isMutable())
                 throw new IllegalStateException("PVData.isMutable is false");
             if(offset+len > length) {
@@ -2124,7 +2124,7 @@ public class ReplaceTest extends TestCase {
             length = len;
         }
 
-        StructureArray(DBStructure parent,DBDArrayField dbdArrayField,
+        StructureArray(DBData parent,DBDArrayField dbdArrayField,
             int capacity,boolean capacityMutable)
         {
             super(parent,dbdArrayField);
@@ -2147,7 +2147,7 @@ public class ReplaceTest extends TestCase {
          * @see org.epics.ioc.pvAccess.PVArrayArray#get(int, int, org.epics.ioc.pvAccess.ArrayArrayData)
          */
         public int get(int offset, int len, ArrayArrayData data) {
-            System.out.printf("\n    **.get**",getField().getType().toString());
+            System.out.printf("%n    **.get**",getField().getType().toString());
             int n = len;
             if(offset+len > length) n = length;
             data.data = value;
@@ -2158,7 +2158,7 @@ public class ReplaceTest extends TestCase {
          * @see org.epics.ioc.pvAccess.PVArrayArray#put(int, int, org.epics.ioc.pvAccess.PVArray[], int)
          */
         public int put(int offset, int len, PVArray[]from, int fromOffset) {
-            System.out.printf("\n    **.put**",getField().getType().toString());
+            System.out.printf("%n    **.put**",getField().getType().toString());
             if(!super.getField().isMutable())
                 throw new IllegalStateException("PVData.isMutable is false");
             if(offset+len > length) {
@@ -2213,7 +2213,7 @@ public class ReplaceTest extends TestCase {
          * @see org.epics.ioc.dbAccess.DBArrayArray#get(int, int, org.epics.ioc.dbAccess.DBArrayArrayData)
          */
         public int get(int offset, int len, DBArrayArrayData data) {
-            System.out.printf("\n    **.get**",getField().getType().toString());
+            System.out.printf("%n    **.get**",getField().getType().toString());
             int n = len;
             if(offset+len > length) n = length;
             data.data = value;
@@ -2224,7 +2224,7 @@ public class ReplaceTest extends TestCase {
          * @see org.epics.ioc.dbAccess.DBArrayArray#put(int, int, org.epics.ioc.dbAccess.DBArray[], int)
          */
         public int put(int offset, int len, DBArray[]from, int fromOffset) {
-            System.out.printf("\n    **.put**",getField().getType().toString());
+            System.out.printf("%n    **.put**",getField().getType().toString());
             if(!super.getField().isMutable())
                 throw new IllegalStateException("PVData.isMutable is false");
             if(offset+len > length) {
@@ -2274,7 +2274,7 @@ public class ReplaceTest extends TestCase {
             length = len;
         }
 
-        ArrayArray(DBStructure parent,DBDArrayField dbdArrayField,
+        ArrayArray(DBData parent,DBDArrayField dbdArrayField,
             int capacity,boolean capacityMutable)
         {
             super(parent,dbdArrayField);
@@ -2335,7 +2335,7 @@ public class ReplaceTest extends TestCase {
          * @see org.epics.ioc.dbAccess.DBLinkArray#get(int, int, org.epics.ioc.dbAccess.LinkArrayData)
          */
         public int get(int offset, int len, LinkArrayData data) {
-            System.out.printf("\n    **.get**",getField().getType().toString());
+            System.out.printf("%n    **.get**",getField().getType().toString());
             int n = len;
             if(offset+len > length) n = length;
             data.data = value;
@@ -2346,7 +2346,7 @@ public class ReplaceTest extends TestCase {
          * @see org.epics.ioc.dbAccess.DBLinkArray#put(int, int, org.epics.ioc.dbAccess.DBLink[], int)
          */
         public int put(int offset, int len, DBLink[]from ,int fromOffset) {
-            System.out.printf("\n    **.put**",getField().getType().toString());
+            System.out.printf("%n    **.put**",getField().getType().toString());
             if(!super.getField().isMutable())
                 throw new IllegalStateException("PVData.isMutable is false");
             if(offset+len > length) {
@@ -2395,7 +2395,7 @@ public class ReplaceTest extends TestCase {
             length = len;
         }
 
-        LinkArray(DBStructure parent,DBDArrayField dbdArrayField,
+        LinkArray(DBData parent,DBDArrayField dbdArrayField,
             int capacity,boolean capacityMutable)
         {
             super(parent,dbdArrayField);

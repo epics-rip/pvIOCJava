@@ -657,6 +657,10 @@ public class DatabaseExample {
             return true;
         }
         /* (non-Javadoc)
+         * @see org.epics.ioc.pvAccess.PVArray#getElementType()
+         */
+        public Type getElementType() {return Type.pvBoolean;}
+        /* (non-Javadoc)
          * @see java.lang.Object#toString()
          */
         public String toString() {
@@ -740,6 +744,10 @@ public class DatabaseExample {
         public boolean isCapacityMutable() {
             return true;
         }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pvAccess.PVArray#getElementType()
+         */
+        public Type getElementType() {return Type.pvByte;}
         /* (non-Javadoc)
          * @see java.lang.Object#toString()
          */
@@ -825,6 +833,10 @@ public class DatabaseExample {
             return true;
         }
         /* (non-Javadoc)
+         * @see org.epics.ioc.pvAccess.PVArray#getElementType()
+         */
+        public Type getElementType() {return Type.pvShort;}
+        /* (non-Javadoc)
          * @see java.lang.Object#toString()
          */
         public String toString() {
@@ -908,6 +920,10 @@ public class DatabaseExample {
         public boolean isCapacityMutable() {
             return true;
         }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pvAccess.PVArray#getElementType()
+         */
+        public Type getElementType() {return Type.pvInt;}
         /* (non-Javadoc)
          * @see java.lang.Object#toString()
          */
@@ -993,6 +1009,10 @@ public class DatabaseExample {
             return true;
         }
         /* (non-Javadoc)
+         * @see org.epics.ioc.pvAccess.PVArray#getElementType()
+         */
+        public Type getElementType() {return Type.pvLong;}
+        /* (non-Javadoc)
          * @see java.lang.Object#toString()
          */
         public String toString() {
@@ -1076,6 +1096,10 @@ public class DatabaseExample {
         public boolean isCapacityMutable() {
             return true;
         }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pvAccess.PVArray#getElementType()
+         */
+        public Type getElementType() {return Type.pvFloat;}
         /* (non-Javadoc)
          * @see java.lang.Object#toString()
          */
@@ -1165,6 +1189,10 @@ public class DatabaseExample {
             return true;
         }
         /* (non-Javadoc)
+         * @see org.epics.ioc.pvAccess.PVArray#getElementType()
+         */
+        public Type getElementType() {return Type.pvDouble;}
+        /* (non-Javadoc)
          * @see java.lang.Object#toString()
          */
         public String toString() {
@@ -1248,6 +1276,10 @@ public class DatabaseExample {
         public boolean isCapacityMutable() {
             return true;
         }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pvAccess.PVArray#getElementType()
+         */
+        public Type getElementType() {return Type.pvString;}
         /* (non-Javadoc)
          * @see java.lang.Object#toString()
          */
@@ -1333,6 +1365,10 @@ public class DatabaseExample {
             return true;
         }
         /* (non-Javadoc)
+         * @see org.epics.ioc.pvAccess.PVArray#getElementType()
+         */
+        public Type getElementType() {return Type.pvEnum;}
+        /* (non-Javadoc)
          * @see java.lang.Object#toString()
          */
         public String toString() {
@@ -1417,6 +1453,10 @@ public class DatabaseExample {
             return true;
         }
         /* (non-Javadoc)
+         * @see org.epics.ioc.pvAccess.PVArray#getElementType()
+         */
+        public Type getElementType() {return Type.pvStructure;}
+        /* (non-Javadoc)
          * @see java.lang.Object#toString()
          */
         public String toString() {
@@ -1500,6 +1540,10 @@ public class DatabaseExample {
         public boolean isCapacityMutable() {
             return true;
         }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pvAccess.PVArray#getElementType()
+         */
+        public Type getElementType() {return Type.pvArray;}
         /* (non-Javadoc)
          * @see java.lang.Object#toString()
          */

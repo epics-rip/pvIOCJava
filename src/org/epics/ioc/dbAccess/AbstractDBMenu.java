@@ -24,7 +24,7 @@ public abstract class AbstractDBMenu extends AbstractDBData implements DBMenu
      * @param parent the parent interface.
      * @param dbdMenuField the reflection interface for the DBMenu data. 
      */
-    protected AbstractDBMenu(DBStructure parent,DBDMenuField dbdMenuField) {
+    protected AbstractDBMenu(DBData parent,DBDMenuField dbdMenuField) {
         super(parent,dbdMenuField);
         index = 0;
         DBDMenu dbdMenu = super.getDBDField().getAttribute().getMenu();

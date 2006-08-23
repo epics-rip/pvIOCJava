@@ -30,14 +30,14 @@ public class XMLAllTypesTest extends TestCase {
     public static void testXML() {
         Set<String> keys;
         DBD dbd = DBDFactory.create("test");
-        System.out.printf("reading menuStructureSupport\n");
+        System.out.printf("reading menuStructureSupport%n");
         try {
             XMLToDBDFactory.convert(dbd,
                  "src/org/epics/ioc/dbAccess/example/menuStructureSupportDBD.xml");
         } catch (Exception e) {
             System.out.println("Exception: " + e);
         }
-        System.out.printf("reading allTypesDBD\n");
+        System.out.printf("reading allTypesDBD%n");
         try {
             XMLToDBDFactory.convert(dbd,
                  "src/org/epics/ioc/dbAccess/example/allTypesDBD.xml");
@@ -46,7 +46,7 @@ public class XMLAllTypesTest extends TestCase {
         }
 
         IOCDB iocdb = IOCDBFactory.create(dbd,"testIOCDatabase");
-        System.out.printf("reading exampleAllTypeDB\n");
+        System.out.printf("reading exampleAllTypeDB%n");
         try {
             XMLToIOCDBFactory.convert(dbd,iocdb,
                  "src/org/epics/ioc/dbAccess/example/exampleAllTypeDB.xml");
@@ -55,12 +55,12 @@ public class XMLAllTypesTest extends TestCase {
         }
         Map<String,DBRecord> recordMap = iocdb.getRecordMap();
         keys = recordMap.keySet();
-        System.out.printf("\n\nrecord list\n");
+        System.out.printf("%n%nrecord list%n");
         for(String key: keys) {
             DBRecord record = recordMap.get(key);
-            System.out.printf("\n%s",record.getRecordName());
+            System.out.printf("%n%s",record.getRecordName());
         }
-        System.out.printf("\n\nrecord contents\n");
+        System.out.printf("%n%nrecord contents%n");
         for(String key: keys) {
             DBRecord record = recordMap.get(key);
             System.out.print(record.toString());

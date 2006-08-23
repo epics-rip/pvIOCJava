@@ -12,7 +12,7 @@
 
 <h1 style="text-align: center">EPICS JavaIoc: Database Access <br />
 package: org.epics.ioc.dbAcess <br />
-2006.07.28</h1>
+2006.08.07</h1>
 
 <div class="toc">
 <ul>
@@ -54,7 +54,7 @@ package: org.epics.ioc.dbAcess <br />
       <li><a href="#AbstractDB5">AbstractDBArray</a></li>
     </ul>
   </li>
-  <li><a href="#IOCDB1"> IOCDB: IOC Database</a></li>
+  <li><a href="#IOCDB1">IOCDB: IOC Database</a></li>
   <li><a href="#Database1">IOC Database Access</a></li>
   <li><a href="#Listener1">Listener Support</a></li>
 </ul>
@@ -106,14 +106,12 @@ combination of the following characters:</p>
   <li>Any Unicode/UTF-8 character outside of the Basic Latin set</li>
 </ul>
 
-<p>supportName is the name of support. If not given the supportName
-specified in the record type definition is used. In either case a
-support definition with the supportName must exist.
-Package org.epics.ioc.dbProcess provides support that creates support
-for each record instance. See that package for details.
-If the same record instance appears multiple times then then last
-supportName is used.
-</p>
+<p>supportName is the name of support. If not given the supportName specified
+in the record type definition is used. In either case a support definition
+with the supportName must exist. Package org.epics.ioc.dbProcess provides
+support that creates support for each record instance. See that package for
+details. If the same record instance appears multiple times then then last
+supportName is used.</p>
 
 <p>A <span style="font-family: courier">fieldAssignment</span> has the
 format:</p>
@@ -125,52 +123,66 @@ format:</p>
 definied in the record type definition.</p>
 
 <p>Any field can optionally have associated support. If a supportName is
-given with a field instance then it overides any support defined
-in the record type field definition. Thus support is only used if the
-record support for the record instance calls the support methods.
-If a field is initialized multiple times than the last supportName definition
-determines the support.
-</p>
+given with a field instance then it overides any support defined in the
+record type field definition. Thus support is only used if the record support
+for the record instance calls the support methods. If a field is initialized
+multiple times than the last supportName definition determines the
+support.</p>
 
 <p>If multiple field instance definitions appear then the last instance
 determines how the field is initialized.</p>
+
 <p>The syntax for the <span style="font-family: courier">initializer</span>
 depends on the field type.</p>
 
 <h4 id="Configure"><a id="configure"></a>Primitive Types</h4>
-<p>If a supportName is defined for a record instance of for
-a field on a record instance and the support definition specifies
-a configuration structure then a configure XML element
-can be used to initialize the fields of the configuration structure.
-This configure element MUST appear immediately after the record instance
-or field instance definition.</p>
+
+<p>If a supportName is defined for a record instance of for a field on a
+record instance and the support definition specifies a configuration
+structure then a configure XML element can be used to initialize the fields
+of the configuration structure. This configure element MUST appear
+immediately after the record instance or field instance definition.</p>
+
 <p>For example assume the following Database Definitions:</p>
-<pre>
-    MARTY GET EXAMPLE
-</pre>
+<pre>    &lt;structure name = "dummy"&gt;
+        &lt;field name = "xxx" type = "string" /&gt;
+        &lt;field name = "yyy" type = "int" /&gt;
+    &lt;/structure&gt;
+    
+    
+    &lt;support name = "exampleSupport" configurationStructureName = "dummy"
+        factoryName = "org.epics.ioc.support.Dummy" /&gt;</pre>
+
 <p>Then an instance of field link can be initialized as follows:</p>
-<pre>
-   MARTY GET EXAMPLE
-</pre>
-<p>This example was for a link field but similar definitions
-can be given for any field that has associated support.
-If the record support defines a configuration structure than the
-configuration must be given before any field initializations.</p>
+<pre> &lt;value supportName = "exampleSupport"&gt;
+        &lt;configure structureName = "dummy"&gt;
+            &lt;xxx&gt;xxxxxx&lt;/xxx&gt;
+            &lt;yyy&gt;5&lt;/yyy&gt;
+        &lt;/configure&gt;
+        This is a string
+    &lt;/value&gt;</pre>
+
+<p>This example was for a field that has type string but similar definitions
+can be given for any field that has associated support.</p>
+
+<p>If the support is for a structure field then the configuration must be
+given before any fields of the structure. If the support is for a record
+type, the configuration must be given before any fields of the record
+instance.</p>
 
 <h4 id="Primitive"><a id="FieldPrimitive"></a>Primitive Types</h4>
 
 <p>For primitive types the initializer has the same format as the Java
 constants for the type. For example if the type for field value is double:</p>
 <pre>    &lt;value supportName = "supportNAme" &gt;.98&lt;/value&gt;</pre>
-
 Notes:
 <ul>
-<li>supportName is optional</li>
-<li>Byte.decode, Short.decode, Integer.decide, and Long.decode are used
-to convert a string to an integer data type. Thus hex values are allowed but
-the sign bit MUST not be set. This for byte data 0xff is not allowed but
--0x01 is allowed. Note for example that the byte value -128 can not be
-specified in hex.</li>
+  <li>supportName is optional</li>
+  <li>Byte.decode, Short.decode, Integer.decide, and Long.decode are used to
+    convert a string to an integer data type. Thus hex values are allowed but
+    the sign bit MUST not be set. This for byte data 0xff is not allowed but
+    -0x01 is allowed. Note for example that the byte value -128 can not be
+    specified in hex.</li>
 </ul>
 
 <h4 id="string"><a id="FieldString"></a>string</h4>
@@ -205,8 +217,8 @@ example:</p>
 <p>Note that supportName can optionally be defined</p>
 
 <p>It is permissible to define a field to be a structure without providing a
-structure name. In this case the structureName must be provided when the field
-is being created. The syntax is:</p>
+structure name. In this case the structureName must be provided when the
+field is being created. The syntax is:</p>
 <pre>    &lt;fieldName structureName = "structureName" &gt;</pre>
 
 <h4 id="array"><a id="FieldArray"></a>array</h4>
@@ -285,6 +297,7 @@ where stringValue is one of the allowed values for the menu.
 
 <p>For example:</p>
 <pre>    &lt;scan&gt;periodic&lt;/scan&gt;</pre>
+
 <p>Again supportName is optional.</p>
 
 <h4 id="enumerated"><a id="FieldEnumerated"></a>enumerated</h4>
@@ -334,7 +347,6 @@ A link field is initialized as follows:
     <dd>The value for the structure field.<br />
     </dd>
 </dl>
-
 <hr />
 
 <h2 style="text-align: center" id="Database"><a id="XMLToDB"></a>XML to
@@ -359,12 +371,14 @@ support, Channel Access, etc.</p>
 <h3 id="Listener">Listener Interface</h3>
 
 <h4>DBListener</h4>
+
 <p>DBListener is an interface that must be implemented by code that calls
 DBdata.addListener, which is a request to be notified whenever a field
-changes value. A request can be made for any field including structure
-fields or even a record instance. If the request is made for a structure
-field then the requester will be notified whenever any field of the structure
-changes value.</p>
+changes value. A request can be made for any field including structure fields
+or even a record instance. If the request is made for a structure field then
+the requester will be notified whenever any field of the structure changes
+value.</p>
+
 <p>DBListener has the definition:</p>
 <pre>    public interface DBListener {
         void newData(DBData dbData);
@@ -372,26 +386,26 @@ changes value.</p>
         void endSynchronous();
         void unlisten(RecordListener listener);
     }</pre>
-
 where
 <dl>
-  <dt>newData</dt>
-    <dd>The new data value. This is always an elementary field, i.e. not
-    a structure.</dd>
-  <dt>beginSynchronous</dt>
-     <dd>This is called before a set of synchronous data modifications.
-         It is followed by an arbitrary number calls to newData and
-         finally a call to endSynchronous</dd>
-   <dt>endSynchronous</dt>
-      <dd>End of synchronous data</dd>
-   <dt>unlisten</dt>
-      <dd>The data source is undergoing destruction of major structural changes.
-       The DBData.addListener call is no longer valid and the user
-       should null the object reference returned by addListener.</dd>
+  <dt style="font-family: courier;">newData</dt>
+    <dd>The new data value. This is always an elementary field, i.e. not a
+      structure.</dd>
+  <dt style="font-family: courier;">beginSynchronous</dt>
+    <dd>This is called before a set of synchronous data modifications. It is
+      followed by an arbitrary number calls to newData and finally a call to
+      endSynchronous</dd>
+  <dt style="font-family: courier;">endSynchronous</dt>
+    <dd>End of synchronous data</dd>
+  <dt style="font-family: courier;">unlisten</dt>
+    <dd>The data source is undergoing destruction or major structural
+      changes. The DBData.addListener call is no longer valid and the user
+      should null the object reference returned by addListener.</dd>
 </dl>
-<p>Assume that a field named value has properties status and severity.
-Then when the record is processed and field value is written then the
-following calls might occur:</p>
+
+<p>Assume that a field named value has properties status and severity. Then
+when the record is processed and field value is written then the following
+calls might occur:</p>
 <ul>
   <li>beginSynchronous</li>
   <li>newData for value</li>
@@ -403,10 +417,9 @@ following calls might occur:</p>
 <h4>RecordListener</h4>
 
 <p>RecordListener is an interface that is implemented by the code that
-implements DBRecord. This is normamally class AbstractDBRecord.
-DBRecord provides a method to create a RecordListener.
-See class FieldDataFactory and AbstractDBRecord for details.
-The definition of RecordListener is:</p>
+implements DBRecord. This is normally class AbstractDBRecord. DBRecord
+provides a method to create a RecordListener. See class FieldDataFactory and
+AbstractDBRecord for details. The definition of RecordListener is:</p>
 <pre>    public interface RecordListener {
         void newData(DBData dbData);
     }</pre>
@@ -430,48 +443,63 @@ instance.</p>
 
 <p>Since it extends PVData it also has the methods:</p>
 <pre>        Field getField();
-        String getSupportNamed();
+        String getSupportName();
         String setSupportName(String name);
         PVStructure getConfigurationStructure();
         String toString();
         String toString(int indentLevel);</pre>
-<p>AbstractDBData implements all of the DBData methods.
-The methods are:</p>
+
+<p>AbstractDBData implements all of the DBData methods. The methods are:</p>
 <dl>
-  <dt>getField</dt>
+  <dt style="font-family: courier;">getField</dt>
     <dd>Get the Field introspection interface.</dd>
-  <dt>getSupportName</dt>
-    <dd>Get the name of the support for the field. If no support
-    has been specified null is returned.</dd>
-  <dt>setSupportName</dt>
+  <dt style="font-family: courier;">getSupportName</dt>
+    <dd>Get the name of the support for the field. If no support has been
+      specified null is returned.</dd>
+  <dt style="font-family: courier;">setSupportName</dt>
     <dd>Set the support name. This is called by the XML parser.</dd>
-  <dt>getConfigurationStructure</dt>
+  <dt style="font-family: courier;">getConfigurationStructure</dt>
     <dd>Get the configuration structure interface. In no configuration
-    structure is associated with the field then null is returned.
-    The caller can ask for either a PVStructure or a DBStructure.
-  <dt>toString</dt>
+      structure is associated with the field then null is returned. The
+      caller can ask for either a PVStructure or a DBStructure.</dd>
+  <dt style="font-family: courier;">toString</dt>
     <dd>This is for debugging. It dumps the contents of the field.
-    AbstractDBData shows the supportName of it has been defined and
-    the contents of the configuration structure if it exists.
-    Any code that extents DBData should append super.toString(level)
-    to any output it generates.</dd>
-  <dt>getDBDField</dt>
+      AbstractDBData shows the supportName of it has been defined and the
+      contents of the configuration structure if it exists. Any code that
+      extents DBData should append super.toString(level) to any output it
+      generates.</dd>
+  <dt style="font-family: courier;">getDBDField</dt>
     <dd>Get the DBDField introspection interface</dd>
-  <dt>getParent</dt>
+  <dt style="font-family: courier;">getParent</dt>
     <dd>Get the interface for the parent of this field</dd>
-  <dt>getRecord</dt>
+  <dt style="font-family: courier;">getRecord</dt>
     <dd>Get the interface of the record instance that has this field.</dd>
-  <dt>addListener</dt>
-    <dd>Add a record listener. This is normally only called by MARTY WHAT</dd>
-  <dt>removelistener</dt>
-  <dt>postPut</dt>
-   <dt>getConfigurationStructure</dt>
-   <dt>getSupport</dt>
-   <dt>setSupport</dt>
+  <dt style="font-family: courier;">addListener</dt>
+    <dd>Add a record listener. This is normally only called by code that
+      wants to be notified of any data updates. The caller must first create
+      a RecordListener by calling DBRecord.createListener.</dd>
+  <dt style="font-family: courier;">removelistener</dt>
+    <dd>Remove a listener.</dd>
+  <dt style="font-family: courier;">postPut()</dt>
+    <dd>This is called by the code that implements the put method for a
+      DBData instance. It is implemented by AbstractDBData.</dd>
+  <dt style="font-family: courier;">postPut(DBData dbdata)</dt>
+    <dd>This is called AbstractDBData whenever the field or any subfield of a
+      field changes value. It is implemented and called by
+    ABStractDBData.</dd>
+  <dt style="font-family: courier;">getConfigurationStructure</dt>
+    <dd>Get the configuration structure or null if no configuration exists
+      for the field instance. A value is determined when setSupportName is
+      called.</dd>
+  <dt style="font-family: courier;">getSupport</dt>
+    <dd>Get the support or return null if no support exists for the
+    field.</dd>
+  <dt style="font-family: courier;">setSupport</dt>
+    <dd>Set the support for the field.</dd>
 </dl>
 
-Field is the introspection interface for pvAccess Types. DBDField is the
-introspection interface for DBTypes.
+<p>Field is the introspection interface for pvAccess Types. DBDField is the
+introspection interface for DBTypes.</p>
 
 <h3 id="Scalar"><a id="DBPVData"></a>Scalar and String Data</h3>
 The following are the data interfaces for fields that have a pvAccess Type.
@@ -530,18 +558,17 @@ A menu field is accessed via the interface:
 
 <p>where</p>
 <dl>
-  <dt>getDBDStructure</dt>
-    <dd>This returns the DBDStructure for the field. If the database
-      definition for the field did not specify a structure name then this is
-      the only way to introspect the structure information.</dd>
-  <dt>createFields</dt>
+  <dt style="font-family: courier;">createFields</dt>
     <dd>If the database definition for the field did not specify a
       structureName than when a field is being created this must be called to
       associate a structure with the field.</dd>
-  <dt>getFieldDBDatas</dt>
+  <dt style="font-family: courier;">getDBDStructure</dt>
+    <dd>This returns the DBDStructure for the field, i.e. the interface that
+      describes the structure.</dd>
+  <dt style="font-family: courier;">getFieldDBDatas</dt>
     <dd>Get the array of interfaces for the fields of the structure
     instance.</dd>
-  <dt>getFieldDBDataIndex</dt>
+  <dt style="font-family: courier;">getFieldDBDataIndex</dt>
     <dd>Get the index into DBData for the specified field.</dd>
 </dl>
 
@@ -572,10 +599,70 @@ A menu field is accessed via the interface:
         void setDBD(DBD dbd);
     }</pre>
 
-<h3 id="Link"><a id="LinkData"></a>Link Data</h3>
+<p>where</p>
+<dl>
+  <dt style="font-family: courier;">getRecordName</dt>
+    <dd>Get the name of the record intsance.</dd>
+  <dt style="font-family: courier;">getRecordState</dt>
+    <dd>Get the state of record processing.</dd>
+  <dt style="font-family: courier;">setRecordState</dt>
+    <dd>Set the state of record processing. This is called by
+    RecordProcess.</dd>
+  <dt style="font-family: courier;">addRecordStateListener</dt>
+    <dd>Add a listener to call wheneven the state of record processing
+      changes.</dd>
+  <dt style="font-family: courier;">removeRecordStateListener</dt>
+    <dd>Remove a record state listener.</dd>
+  <dt style="font-family: courier;">lock</dt>
+    <dd>Lock the record. The record must be locked for record processing and
+      whenever the data of any field in a record is accessed.</dd>
+  <dt style="font-family: courier;">unlock</dt>
+    <dd>Unlock the record.</dd>
+  <dt style="font-family: courier;">lockOtherRecord</dt>
+    <dd>While holding the lock for this record lock another record. The lock
+      for the cxurrent record might be unlocked while this call is active but
+      upon retirn both record will be locked. The caller must unlock both
+      records when the caller is done. Noremally it unlocks the other record,
+      via it's unlock method, first.</dd>
+  <dt style="font-family: courier;">getRecordProcess</dt>
+    <dd>Get the interface of the RecordProcess for this instance.</dd>
+  <dt style="font-family: courier;">setRecordProcess</dt>
+    <dd>Set the RecordProcess inyerface for this record instance.</dd>
+  <dt style="font-family: courier;">getRecordID</dt>
+    <dd>Normally only called by AbstractDBRecord.lock. Each record instance
+      is assigned a unique id.</dd>
+  <dt style="font-family: courier;">beginSynchronous</dt>
+    <dd>Called by record processing when a set of synchronous puts is
+    started.</dd>
+  <dt style="font-family: courier;">endSynchronous</dt>
+    <dd>End of a set of synchronous puts.</dd>
+  <dt style="font-family: courier;">createListener</dt>
+    <dd>Create a RecordListener than can be used to call
+    DBData.addListener.</dd>
+  <dt style="font-family: courier;">removeListener</dt>
+    <dd>Remove a listener. This also calls DBData.removeListener.</dd>
+  <dt style="font-family: courier;">removeListeners</dt>
+    <dd>Remove all listeners. This is called if a record insance is being
+      removed or if it's structure is being changed.</dd>
+  <dt style="font-family: courier;">addListenerSource</dt>
+    <dd>Add a listener source. Used for communication between
+      AbstractDBRecord and AbstractDBData. AbstractDBData calls this the
+      first time DBData.addListener is called. It should not be called by
+      other code.</dd>
+  <dt style="font-family: courier;">getDBD</dt>
+    <dd>Get the DBD that holds this record instance.</dd>
+  <dt style="font-family: courier;">setDBD</dt>
+    <dd>Set the DBD that holds this record instance.</dd>
+    <dd></dd>
+</dl>
+
+<h3 id="Link1">Link Data</h3>
 <pre>    public interface DBLink extends DBData {}</pre>
 
-<h3 id="Array"><a id="ArrayData"></a>Array Data</h3>
+<p>A DBLink is a link to external support. It has no data other than
+configuration data.</p>
+
+<h3 id="Array">Array Data</h3>
 
 <p>The base interface for array fields is:</p>
 <pre>    public interface DBArray extends DBData, PVArray {
@@ -630,6 +717,9 @@ A menu field is accessed via the interface:
         int get(int offset, int len, LinkArrayData data);
         int put(int offset, int len, DBLink[]from, int fromOffset);
     }</pre>
+
+<p>The array interfaces are an extension of the pvAccess array interfaces.
+See pvAccess for details about how arrays are supported.</p>
 <hr />
 
 <h2 style="text-align: center" id="Factory"><a
@@ -637,7 +727,8 @@ id="FieldDataFactory"></a>Factory for creating Data Fields</h2>
 <hr />
 
 <p>A factory is available that implements the interfaces for record instance
-fields.</p>
+fields. The methods are called by XMLToIOCDBFactory when it is reading
+instance definitions.</p>
 <pre>    public class FieldDataFactory {
         public static DBData createData(DBStructure parent,
             DDBDField dbdField);
@@ -648,6 +739,18 @@ fields.</p>
         public static DBRecord createRecord(String recordName,
              DBDRecordType dbdRecordType);
     }</pre>
+where
+<dl>
+  <dt style="font-family: courier;">createData</dt>
+    <dd>Creates an instance of any type of field except enum, array fields,
+      or a record instance itself.</dd>
+  <dt style="font-family: courier;">createEnumData</dt>
+    <dd>Create an enum field instance.</dd>
+  <dt style="font-family: courier;">createArrayData</dt>
+    <dd>Create an array field instance.</dd>
+  <dt style="font-family: courier;">createRecord</dt>
+    <dd>Create a record instance.</dd>
+</dl>
 <hr />
 
 <h2 style="text-align: center" id="Abstract"><a
@@ -666,8 +769,8 @@ database fields.</p>
         public Field getField();
         public String getSupportName();
         public String setSupportName(String name);
-        abstract public String toString();
-        abstract public String toString(int indentLevel);
+        public String toString();
+        public String toString(int indentLevel);
         // DBData methods
         public DBDField getDBDField();
         public DBStructure getParent();
@@ -944,14 +1047,14 @@ all properties of the field.</p>
         }
     }</pre>
 
-<p>In order for the listen support to work any support that implements the
-DBRecord interface must extend AbstractDBRecord and an support that
-implements any other DB field interface must extend AbstractDBdata. In
-addition any code that implements a put methods must call</p>
+<p>In order for the listen support to work support that implements the
+DBRecord interface must extend AbstractDBRecord and support that implements
+any other DB field interface must extend AbstractDBdata. In addition any code
+that implements a put methods must call</p>
 <pre>    postPut();</pre>
 
 <p>whenever the put method is called. It must call postPut whenever if
-modifies its internal data for the field. Note that it must call postPut even
-if the new value is the same as the old value.</p>
+modifies its internal data for the field. It must call postPut even if the
+new value is the same as the old value.</p>
 </body>
 </html>

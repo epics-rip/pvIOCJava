@@ -109,7 +109,7 @@ public interface DBRecord extends DBStructure {
     void addListenerSource(AbstractDBData dbData);
     /**
      * Get the DBD that contains this record.
-     * @return The DBD or null if it bwas never set.
+     * @return The DBD or null if it was never set.
      */
     DBD getDBD();
     /**

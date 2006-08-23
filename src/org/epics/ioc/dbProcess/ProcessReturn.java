@@ -1,35 +1,38 @@
 /**
- * Copyright - See the COPYRIGHT that is included with this disctibution.
+ * Copyright - See the COPYRIGHT that is included with this distribution.
  * EPICS JavaIOC is distributed subject to a Software License Agreement found
  * in file LICENSE that is included with this distribution.
  */
 package org.epics.ioc.dbProcess;
 
 /**
- * return values for returning from process.
+ * The return value from a process request.
  * @author mrk
  *
  */
 public enum ProcessReturn {
     /**
      * The support is going away.
-     * Remove any reference to the support.
      */
     zombie,
     /**
-     * the support has nothing to do. 
+     * The support has nothing to do. 
      */
     noop,
     /**
-     * the support is done.
+     * The support is done.
      */
-    done,
+    success,
     /**
-     * failure. do not attempt any further processing.
+     * The request failed.
      */
-    abort,
+    failure,
     /**
-     * support is still active.
+     * The support is active.
      */
-    active
+    active,
+    /**
+     * The support was already active when process was called.
+     */
+    alreadyActive
 }

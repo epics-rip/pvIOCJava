@@ -23,14 +23,14 @@ public class DefaultTest extends TestCase {
      */
     public static void testDefault() {
         DBD dbd = DBDFactory.create("test");
-        System.out.printf("reading menuStructureSupport\n");
+        System.out.printf("reading menuStructureSupport%n");
         try {
             XMLToDBDFactory.convert(dbd,
                  "src/org/epics/ioc/dbAccess/example/menuStructureSupportDBD.xml");
         } catch (Exception e) {
             System.out.println("Exception: " + e);
         }
-        System.out.printf("reading defaultDBD\n");
+        System.out.printf("reading defaultDBD%n");
         try {
             XMLToDBDFactory.convert(dbd,
                  "src/org/epics/ioc/dbAccess/example/defaultDBD.xml");
@@ -39,7 +39,7 @@ public class DefaultTest extends TestCase {
         }
 
         IOCDB iocdb = IOCDBFactory.create(dbd,"testIOCDatabase");
-        System.out.printf("reading defaultDB\n");
+        System.out.printf("reading defaultDB%n");
         try {
             XMLToIOCDBFactory.convert(dbd,iocdb,
                  "src/org/epics/ioc/dbAccess/example/defaultDB.xml");
@@ -48,12 +48,12 @@ public class DefaultTest extends TestCase {
         }
         Map<String,DBRecord> recordMap = iocdb.getRecordMap();
         Set<String> keys = recordMap.keySet();
-        System.out.printf("\n\nrecord list\n");
+        System.out.printf("%n%nrecord list%n");
         for(String key: keys) {
             DBRecord record = recordMap.get(key);
-            System.out.printf("\n%s",record.getRecordName());
+            System.out.printf("%n%s",record.getRecordName());
         }
-        System.out.printf("\n\nrecord contents\n");
+        System.out.printf("%n%nrecord contents%n");
         for(String key: keys) {
             DBRecord record = recordMap.get(key);
             System.out.print(record.toString());

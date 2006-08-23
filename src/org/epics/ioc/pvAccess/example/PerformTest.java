@@ -45,7 +45,7 @@ public class PerformTest extends TestCase {
         endTime = System.nanoTime();
         perArray = (double)(endTime - startTime)/(double)ntimes/1000.0;
         perElement = perArray/(double)arraySize;
-        System.out.printf("data to toData perArray %f perElement %f microseconds\n",perArray,perElement);
+        System.out.printf("data to toData perArray %f perElement %f microseconds%n",perArray,perElement);
         startTime = System.nanoTime();
         for(int i=0; i<ntimes; i++) {
             convert.copyArray(from,0,to,0,arraySize);
@@ -53,7 +53,7 @@ public class PerformTest extends TestCase {
         endTime = System.nanoTime();
         perArray = (double)(endTime - startTime)/(double)ntimes/1000.0;
         perElement = perArray/(double)arraySize;
-        System.out.printf("double to double perArray %f perElement %f microseconds\n",perArray,perElement);
+        System.out.printf("double to double perArray %f perElement %f microseconds%n",perArray,perElement);
         startTime = System.nanoTime();
         for(int i=0; i<ntimes; i++) {
             convert.copyArray(from,0,toLong,0,arraySize);
@@ -61,7 +61,7 @@ public class PerformTest extends TestCase {
         endTime = System.nanoTime();
         perArray = (double)(endTime - startTime)/(double)ntimes/1000.0;
         perElement = perArray/(double)arraySize;
-        System.out.printf("double to long perArray %f perElement %f microseconds\n",perArray,perElement);
+        System.out.printf("double to long perArray %f perElement %f microseconds%n",perArray,perElement);
     }
 
 }
