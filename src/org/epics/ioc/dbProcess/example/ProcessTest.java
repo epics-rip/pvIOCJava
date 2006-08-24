@@ -120,13 +120,13 @@ public class ProcessTest extends TestCase {
         dbRecord = iocdb.findRecord("counter");
         assertNotNull(dbRecord);
         TestProcess testProcess = new TestProcess(dbRecord);
+        testProcess.test();
         testProcess.testPerform();
-System.out.printf("\nrecords\n");
-for(String key: keys) {
-    DBRecord record = recordMap.get(key);
-    System.out.print(record.toString());
-}
-//        testProcess.testPerform();
+//      System.out.printf("\nrecords\n");
+//      for(String key: keys) {
+//          DBRecord record = recordMap.get(key);
+//          System.out.print(record.toString());
+//      }
     }
     
     private static class TestProcess implements ProcessCompleteListener {
@@ -161,11 +161,12 @@ for(String key: keys) {
         void testPerform() {
             ProcessReturn processReturn = ProcessReturn.noop;
             long startTime,endTime;
-            int ntimes = 1000000;
+            int nwarmup = 1000;
+            int ntimes = 100000;
             double microseconds;
             double processPerSecond;
             startTime = System.nanoTime();
-            for(int i=0; i<ntimes; i++) {
+            for(int i=0; i< nwarmup + ntimes; i++) {
                 allDone = false;
                 processReturn = recordProcess.process(this);
                 if(processReturn==ProcessReturn.active || processReturn==ProcessReturn.alreadyActive) {
@@ -178,6 +179,7 @@ for(String key: keys) {
                         lock.unlock();
                     }
                 }
+                if(i==nwarmup) startTime = System.nanoTime();
             }
             endTime = System.nanoTime();
             microseconds = (double)(endTime - startTime)/(double)ntimes/1000.0;

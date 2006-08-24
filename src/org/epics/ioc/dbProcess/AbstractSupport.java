@@ -118,18 +118,25 @@ public abstract class AbstractSupport implements Support {
      * and calls recordProgress.errorMessage, which will prepend the record instance name.
      */
     public void errorMessage(String message) {
+        String fieldName = getFullFieldName();
+        
+        RecordProcessSupport recordProcessSupport = dbRecord.getRecordProcess().getRecordProcessSupport();
+        recordProcessSupport.errorMessage("." + fieldName + " " + message);
+    }
+    
+    /* (non-Javadoc)
+     * @see org.epics.ioc.dbProcess.Support#getFullFieldName()
+     */
+    public String getFullFieldName() {
         StringBuilder fieldName = new StringBuilder();
         fieldName.append(dbData.getField().getName());
         DBData parent = dbData.getParent();
         while(parent!=null && parent!=dbRecord) {
-            fieldName.insert(0,'.');
             fieldName.insert(0,parent.getField().getName());
             parent = parent.getParent();
         }
-        RecordProcessSupport recordProcessSupport = dbRecord.getRecordProcess().getRecordProcessSupport();
-        recordProcessSupport.errorMessage("." + fieldName.toString() + " " + message);
+        return fieldName.toString();
     }
-    
     /* (non-Javadoc)
      * @see org.epics.ioc.dbProcess.Support#update()
      */

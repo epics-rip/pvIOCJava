@@ -96,7 +96,7 @@ public class CounterRecordFactory {
             double inc = dbInc.get();
             double value = dbValue.get();
             value += inc;
-//            if(value>max) value = min;
+            if(value>max) value = min;
             dbValue.put(value);
             this.listener = listener;
             if(processLinkArray!=null) {

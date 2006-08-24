@@ -46,7 +46,12 @@ public interface Support {
      * message and recordSupport.errorMessage called.
      * @param message The error message.
      */
-    public void errorMessage(String message);
+    void errorMessage(String message);
+    /**
+     * Get the full field name, i.e. the complete hierarchy.
+     * @return The name.
+     */
+    String getFullFieldName();
     /**
      * initialize.
      * perform initialization related to record instance but

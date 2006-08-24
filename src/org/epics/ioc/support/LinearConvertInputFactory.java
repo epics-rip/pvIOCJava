@@ -16,27 +16,31 @@ import org.epics.ioc.dbProcess.*;
 public class LinearConvertInputFactory {
     public static Support create(DBStructure dbStructure) {
         Support support = null;
-        String supportName = dbStructure.getStructureSupportName();
+        String supportName = dbStructure.getSupportName();
         if(supportName.equals("linearConvert")) {
             support = new LinearConvert(dbStructure);
         }
         return support;
     }
     
-    private static class LinearConvert implements RecordSupport {
+    private static class LinearConvert extends AbstractSupport {
         private static String supportName = "LinearConvert";
         private DBStructure dbStructure = null;
         
         public LinearConvert(DBStructure dbStructure) {
+            super(supportName,dbStructure);
             this.dbStructure = dbStructure;
         }
 
         public String getName() {
             return supportName;
         }
-        
-        public void destroy() {
-            System.out.printf("%s.destroy entered\n",supportName);
+
+        public void initialize() {
+            System.out.printf("%s.initialize entered\n",supportName);
+        }
+        public void uninitialize() {
+            System.out.printf("%s.uninitialize entered\n",supportName);
         }
 
         public void start() {
@@ -47,16 +51,12 @@ public class LinearConvertInputFactory {
             System.out.printf("%s.stop entered\n",supportName);
         }
 
-        public void initialize() {
-            System.out.printf("%s.initialize entered\n",supportName);
-        }
-
-        public ProcessResult process(ProcessCompleteListener listener) {
+        public ProcessReturn process(ProcessCompleteListener listener) {
             System.out.printf("%s.process entered\n",supportName);
-            return ProcessResult.noop;
+            return ProcessReturn.failure;
         }
 
-        public void linkSupportDone(LinkReturn result) {
+        public void processContinue() {
             // TODO Auto-generated method stub
             
         }

@@ -291,7 +291,6 @@ public class ChannelAccessLocalFactory  {
          */
         public void destroy() {
             isDestroyed = true;
-            fieldGroupListener.destroy();
             fieldList.clear();
         }
         /* (non-Javadoc)
