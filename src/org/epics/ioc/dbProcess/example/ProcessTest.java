@@ -120,13 +120,19 @@ public class ProcessTest extends TestCase {
         dbRecord = iocdb.findRecord("counter");
         assertNotNull(dbRecord);
         TestProcess testProcess = new TestProcess(dbRecord);
+        for(String key: keys) {
+//            RecordProcessSupport recordProcessSupport = 
+                recordMap.get(key).getRecordProcess().getRecordProcessSupport();
+//            recordProcessSupport.setTrace(true);
+            
+        }
         testProcess.test();
         testProcess.testPerform();
-//      System.out.printf("\nrecords\n");
-//      for(String key: keys) {
-//          DBRecord record = recordMap.get(key);
-//          System.out.print(record.toString());
-//      }
+      System.out.printf("\nrecords\n");
+      for(String key: keys) {
+          DBRecord record = recordMap.get(key);
+          System.out.print(record.toString());
+      }
     }
     
     private static class TestProcess implements ProcessCompleteListener {
@@ -135,7 +141,7 @@ public class ProcessTest extends TestCase {
         private Condition waitDone = lock.newCondition();
         private boolean allDone = false;
         
-        TestProcess(DBRecord record) {
+        private TestProcess(DBRecord record) {
             recordProcess = record.getRecordProcess();
             assertNotNull(recordProcess);
         }
@@ -155,7 +161,6 @@ public class ProcessTest extends TestCase {
                     lock.unlock();
                 }
             }
-            System.out.printf("processReturn %s\n",processReturn.toString());
         }
         
         void testPerform() {
@@ -187,7 +192,9 @@ public class ProcessTest extends TestCase {
             System.out.printf("time per process %f microseconds processPerSecond %f\n",
                 microseconds,processPerSecond);
         }
-
+        /* (non-Javadoc)
+         * @see org.epics.ioc.dbProcess.ProcessCompleteListener#processComplete(org.epics.ioc.dbProcess.Support, org.epics.ioc.dbProcess.ProcessResult)
+         */
         public void processComplete(Support support,ProcessResult result) {
             lock.lock();
             try {

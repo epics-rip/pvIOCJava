@@ -14,7 +14,7 @@ public interface ProcessCompleteListener {
     /**
      * Called by support to signify completion.
      * If the support returns active than the listener must expect additional calls.
-     * @param The support that is calling processComplete.
+     * @param support The support that is calling processComplete.
      * @param result The process result.
      */
     void processComplete(Support support,ProcessResult result);

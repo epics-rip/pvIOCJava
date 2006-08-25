@@ -32,6 +32,7 @@ public class RecordProcessFactory {
     RecordProcess,RecordProcessSupport,
     RecordStateListener,ProcessCompleteListener
     {
+        private boolean trace = false;
         private ProcessDB processDB;
         private DBRecord dbRecord;
         private boolean disabled = false;
@@ -139,8 +140,7 @@ public class RecordProcessFactory {
             } finally {
                 dbRecord.unlock();
             }
-        }
-        
+        }     
         /* (non-Javadoc)
          * @see org.epics.ioc.dbProcess.RecordProcess#process(org.epics.ioc.dbProcess.ProcessCompleteListener)
          */
@@ -148,6 +148,9 @@ public class RecordProcessFactory {
             ProcessReturn result = ProcessReturn.success;
             dbRecord.lock();
             try {
+                if(trace) {
+                    System.out.printf("%s process%n",dbRecord.getRecordName());
+                }
                 if(active) {
                     if(listener!=null) processListenerList.add(listener);
                     return ProcessReturn.alreadyActive;
@@ -159,7 +162,6 @@ public class RecordProcessFactory {
                 }
                 if(isDisabled()) {
                     setStatusSeverity("record is disabled",AlarmSeverity.invalid);
-                    active = false;
                     return ProcessReturn.failure;
                 }
                 SupportState supportState = recordSupport.getSupportState();
@@ -214,6 +216,9 @@ public class RecordProcessFactory {
         public void update() {
             dbRecord.lock();
             try {
+                if(trace) {
+                    System.out.printf("%s update%n",dbRecord.getRecordName());
+                }
                 if(!active) {
                     return;
                 }
@@ -221,6 +226,15 @@ public class RecordProcessFactory {
             } finally {
                 dbRecord.unlock();
             }
+        }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.dbProcess.RecordProcessSupport#setTrace(boolean)
+         */
+        public boolean setTrace(boolean value) {
+            boolean oldValue = trace;
+            trace = value;
+            if(value!=oldValue) return true;
+            return false;
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.dbProcess.RecordProcess#removeCompletionListener(org.epics.ioc.dbProcess.ProcessCompleteListener)
@@ -239,13 +253,15 @@ public class RecordProcessFactory {
         public RecordProcessSupport getRecordProcessSupport() {
             return this;
         }
-
         /* (non-Javadoc)
          * @see org.epics.ioc.dbProcess.RecordProcessSupport#processContinue()
          */
         public void processContinue(Support support) {
             dbRecord.lock();
             try {
+                if(trace) {
+                    System.out.printf("%s processContinue%n",dbRecord.getRecordName());
+                }
                 if(!active) {
                     return;
                 }
@@ -341,6 +357,9 @@ public class RecordProcessFactory {
         public void processComplete(Support support,ProcessResult result) {
             dbRecord.lock();
             try {
+                if(trace) {
+                    System.out.printf("%s processComplete%n",dbRecord.getRecordName());
+                }
                 if(!active) return;
                 updateStatusSeverityTimeStamp();
             } finally {

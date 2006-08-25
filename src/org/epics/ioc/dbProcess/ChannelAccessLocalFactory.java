@@ -278,13 +278,10 @@ public class ChannelAccessLocalFactory  {
     
     private static class FieldGroup implements ChannelFieldGroup {
         private boolean isDestroyed = false;
-        private ChannelFieldGroupListener fieldGroupListener;
         private LinkedList<ChannelFieldInstance> fieldList = 
             new LinkedList<ChannelFieldInstance>();
 
-        private FieldGroup(ChannelFieldGroupListener listener) {
-            fieldGroupListener = listener;
-        }
+        private FieldGroup(ChannelFieldGroupListener listener) {}
         
         /* (non-Javadoc)
          * @see org.epics.ioc.channelAccess.ChannelFieldGroup#destroy()
@@ -404,8 +401,7 @@ public class ChannelAccessLocalFactory  {
             this.dbRecord = dbRecord;
             recordProcess = dbRecord.getRecordProcess();
             linkRecord = channel.getLinkRecord();
-         }
-        
+         }       
         /* (non-Javadoc)
          * @see org.epics.ioc.channelAccess.ChannelGet#destroy()
          */
@@ -413,7 +409,6 @@ public class ChannelAccessLocalFactory  {
             isDestroyed = true;
             return;
         }
-
         /* (non-Javadoc)
          * @see org.epics.ioc.channelAccess.ChannelGet#get(org.epics.ioc.channelAccess.ChannelFieldGroup, org.epics.ioc.channelAccess.ChannelGetListener, boolean, boolean)
          */
@@ -428,8 +423,7 @@ public class ChannelAccessLocalFactory  {
                 return;
             }
             linkRecordProcessSupport.requestProcessCallback(this);
-        }
-        
+        }       
         /* (non-Javadoc)
          * @see org.epics.ioc.dbProcess.ProcessCallbackListener#callback()
          */
@@ -526,7 +520,7 @@ public class ChannelAccessLocalFactory  {
                 Iterator<ChannelFieldInstance> iter = list.iterator();
                 while(iter.hasNext()) {
                     ChannelFieldInstance field = iter.next();
-                    listener.nextData(channel,field,field.dbData);
+                    callback.nextData(channel,field,field.dbData);
                 }
             } finally {
                 dbRecord.unlock();
@@ -561,6 +555,19 @@ public class ChannelAccessLocalFactory  {
                 }
             }
             
+        } 
+        /* (non-Javadoc)
+         * @see org.epics.ioc.dbProcess.ProcessCompleteListener#processComplete(org.epics.ioc.dbProcess.Support, org.epics.ioc.dbProcess.ProcessResult)
+         */
+        public void processComplete(Support support,ProcessResult result) {
+            processComplete(result);
+        }       
+        /* (non-Javadoc)
+         * @see org.epics.ioc.channelAccess.ChannelPut#cancelPut()
+         */
+        public void cancelPut() {
+            listener = null;
+            recordProcess.removeCompletionListener(this);
         }
         
         private void processComplete(ProcessResult result) {
@@ -571,22 +578,7 @@ public class ChannelAccessLocalFactory  {
                 recordProcessSupport.getAlarmSeverity(),
                 recordProcessSupport.getStatus());
             listener = null;
-        }      
-        /* (non-Javadoc)
-         * @see org.epics.ioc.dbProcess.ProcessCompleteListener#processComplete(org.epics.ioc.dbProcess.Support, org.epics.ioc.dbProcess.ProcessResult)
-         */
-        public void processComplete(Support support,ProcessResult result) {
-            processComplete(result);
-        }
-        
-        /* (non-Javadoc)
-         * @see org.epics.ioc.channelAccess.ChannelPut#cancelPut()
-         */
-        public void cancelPut() {
-            listener = null;
-            recordProcess.removeCompletionListener(this);
-        }
-        
+        }        
     }
     
     private static class ChannelPutGetInstance implements ChannelPutGet,ChannelPutListener {
@@ -650,25 +642,28 @@ public class ChannelAccessLocalFactory  {
             if(isDestroyed) return;
             dataPut.cancelPut();
             dataGet.cancelGet();
-        }
-        
+        }       
     }
     
     private static class Subscribe implements ChannelSubscribe,DBListener {
-        private Channel channel;
+        private static boolean firstTime = true; // just for warning message
+        private ChannelLink channel;
+        private DBRecord dbRecord;
+        private DBRecord linkRecord;
         private boolean isDestroyed = false;
         private RecordListener recordListener = null;
         private FieldGroup fieldGroup = null;
         private ChannelNotifyListener notifyListener = null;
         private ChannelNotifyGetListener dataListener = null;
-        private Event event = null;
+        private List<DBData> newDataList = new ArrayList<DBData>();
         
-        private Subscribe(Channel channel,DBRecord dbRecord)
+        private Subscribe(ChannelLink channel,DBRecord dbRecord)
         {
             this.channel = channel;
             recordListener = dbRecord.createListener(this);
-        }
-        
+            this.dbRecord = dbRecord;
+            linkRecord = channel.getLinkRecord();
+        }        
         /* (non-Javadoc)
          * @see org.epics.ioc.channelAccess.ChannelSubscribe#destroy()
          */
@@ -696,9 +691,7 @@ public class ChannelAccessLocalFactory  {
             notifyListener = listener;
             dataListener = null;
             startCommon(fieldGroup,why);
-        }
-        
-        
+        }      
         /* (non-Javadoc)
          * @see org.epics.ioc.channelAccess.ChannelSubscribe#stop()
          */
@@ -712,17 +705,17 @@ public class ChannelAccessLocalFactory  {
                 DBData dbData = field.getDBData();
                 dbData.removeListener(this.recordListener);
             }
-            event = null;
             fieldGroup = null;
             dataListener = null;
             notifyListener = null;
-        }
-        
-        
+        }  
         /* (non-Javadoc)
          * @see org.epics.ioc.dbAccess.DBListener#beginSynchronous()
          */
         public void beginSynchronous() {
+            if(isDestroyed) return;
+            newDataList.clear();
+            dbRecord.lockOtherRecord(linkRecord);
             if(dataListener!=null) {
                 dataListener.beginSynchronous(channel);
             }
@@ -734,11 +727,49 @@ public class ChannelAccessLocalFactory  {
          * @see org.epics.ioc.dbAccess.DBListener#endSynchronous()
          */
         public void endSynchronous() {
-            if(dataListener!=null) {
-                dataListener.endSynchronous(channel);
+            if(firstTime) {
+                firstTime = false;
+                System.out.println("MARTY Subscribe must support process by requesting a thread to process the record");
             }
-            if(notifyListener!=null) {
-                notifyListener.endSynchronous(channel);
+            if(isDestroyed) return;
+            dbRecord.lockOtherRecord(linkRecord);
+            try {
+                if(dataListener!=null) {
+                    dataListener.beginSynchronous(channel);
+                }
+                if(notifyListener!=null) {
+                    notifyListener.beginSynchronous(channel);
+                }
+                while(newDataList.size()>0) {
+                    DBData dbData = newDataList.remove(0);
+                    ChannelFieldInstance field = null;
+                    List<ChannelFieldInstance> list = fieldGroup.getList();
+                    Iterator<ChannelFieldInstance> iter = list.iterator();
+                    
+                    while(iter.hasNext()) {
+                        ChannelFieldInstance fieldNow = iter.next();
+                        if(dbData==fieldNow.getDBData()) {
+                            field = fieldNow;
+                            break;
+                        }
+                    }
+                    if(field==null) {
+                        throw new IllegalStateException("ChannelAccessLocalFactory logic error");
+                    }
+                    if(dataListener!=null) {
+                        dataListener.newData(channel,field,dbData);
+                    } else {
+                        notifyListener.newData(channel,field);
+                    }
+                }
+                if(dataListener!=null) {
+                    dataListener.endSynchronous(channel);
+                }
+                if(notifyListener!=null) {
+                    notifyListener.endSynchronous(channel);
+                }
+            } finally {
+                linkRecord.unlock();
             }
         }
         /* (non-Javadoc)
@@ -746,24 +777,8 @@ public class ChannelAccessLocalFactory  {
          */
         public void newData(DBData dbData) {
             // must be expanded to support Event
-            ChannelFieldInstance field = null;
-            List<ChannelFieldInstance> list = fieldGroup.getList();
-            Iterator<ChannelFieldInstance> iter = list.iterator();
-            while(iter.hasNext()) {
-                ChannelFieldInstance fieldNow = iter.next();
-                if(dbData==fieldNow.getDBData()) {
-                    field = fieldNow;
-                    break;
-                }
-            }
-            if(field==null) {
-                throw new IllegalStateException("ChannelAccessLocalFactory logic error");
-            }
-            if(dataListener!=null) {
-                dataListener.newData(channel,field,dbData);
-            } else {
-                notifyListener.newData(channel,field);
-            }
+            if(isDestroyed) return;
+            newDataList.add(dbData);
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.dbAccess.DBListener#unlisten(org.epics.ioc.dbAccess.RecordListener)
@@ -775,7 +790,6 @@ public class ChannelAccessLocalFactory  {
         private void startCommon(ChannelFieldGroup channelFieldGroup, Event why) {
             if(fieldGroup!=null) throw new IllegalStateException("Channel already started");
             fieldGroup = (FieldGroup)channelFieldGroup;
-            event = why;
             List<ChannelFieldInstance> list = fieldGroup.getList();
             Iterator<ChannelFieldInstance> iter = list.iterator();
             while(iter.hasNext()) {

@@ -132,7 +132,7 @@
     configurationStructureName = "asynLink" 
     factoryName = "org.epics.ioc.support.LinkSupportFactory"
 />
-<support name = "processLinkArray"
-    factoryName = "org.epics.ioc.support.ProcessLinkArrayFactory"
+<support name = "linkArray"
+    factoryName = "org.epics.ioc.support.LinkArraySupportFactory"
 />
 </DBDefinition>

@@ -53,6 +53,19 @@ public abstract class AbstractDBData implements DBData{
     public String toString(int indentLevel) {
         return getString(indentLevel);
     }
+    /* (non-Javadoc)
+     * @see org.epics.ioc.dbAccess.DBData#getFullFieldName()
+     */
+    public String getFullFieldName() {
+        StringBuilder fieldName = new StringBuilder();
+        fieldName.append(getField().getName());
+        DBData parent = getParent();
+        while(parent!=null && parent!=this.parent) {
+            fieldName.insert(0,parent.getField().getName());
+            parent = parent.getParent();
+        }
+        return fieldName.toString();
+    }
     private String getString(int indentLevel) {
         StringBuilder builder = new StringBuilder();
         if(supportName!=null) {
@@ -196,12 +209,6 @@ public abstract class AbstractDBData implements DBData{
     protected static void newLine(StringBuilder builder, int indentLevel) {
         builder.append(String.format("%n"));
         for (int i=0; i <indentLevel; i++) builder.append(indentString);
-    }
-    protected String baseString(int indentLevel) {
-        if(configDBStructure!=null) {
-            return(configDBStructure.toString(indentLevel));
-        }
-        return "";
     }
     /**
      * Called by AbstractDBRecord when DBRecord.removeListener or DBrecord.removeListeners are called.

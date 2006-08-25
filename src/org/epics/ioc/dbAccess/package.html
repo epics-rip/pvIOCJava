@@ -12,7 +12,7 @@
 
 <h1 style="text-align: center">EPICS JavaIoc: Database Access <br />
 package: org.epics.ioc.dbAcess <br />
-2006.08.07</h1>
+2006.08.25</h1>
 
 <div class="toc">
 <ul>
@@ -174,7 +174,7 @@ instance.</p>
 
 <p>For primitive types the initializer has the same format as the Java
 constants for the type. For example if the type for field value is double:</p>
-<pre>    &lt;value supportName = "supportNAme" &gt;.98&lt;/value&gt;</pre>
+<pre>    &lt;value supportName = "supportName" &gt;.98&lt;/value&gt;</pre>
 Notes:
 <ul>
   <li>supportName is optional</li>
@@ -424,12 +424,30 @@ AbstractDBRecord for details. The definition of RecordListener is:</p>
         void newData(DBData dbData);
     }</pre>
 
-<h3 id="Base"><a id="DBData"></a>Base Interface for accessing data</h3>
+<h3>Example</h3>
+
+<p>The following is sample code that implements RecordListener.</p>
+<pre>    private static class TestListener implements DBListener{
+
+        TestListener(DBData dbData) {
+            RecordListener listener = dbData.getRecord().createListener(this);
+            dbData.addListener(listener);
+        }
+        public void beginSynchronous() { }
+        public void endSynchronous() { }
+        public void newData(DBData dbData) {
+            System.out.println("new data " + dbData.toString);
+        }
+        public void unlisten(RecordListener listener) { }
+    }</pre>
+
+<h3 id="Base">Base Interface for accessing data</h3>
 
 <p>The following is the base interface for accessing a field of a record
 instance.</p>
 <pre>    public interface DBData extends PVData {
         DBDField getDBDField();
+        String getFullFieldName();
         DBStructure getParent();
         DBRecord getRecord();
         void addListener(RecordListener listener);
@@ -459,9 +477,9 @@ instance.</p>
   <dt style="font-family: courier;">setSupportName</dt>
     <dd>Set the support name. This is called by the XML parser.</dd>
   <dt style="font-family: courier;">getConfigurationStructure</dt>
-    <dd>Get the configuration structure interface. In no configuration
-      structure is associated with the field then null is returned. The
-      caller can ask for either a PVStructure or a DBStructure.</dd>
+    <dd>Get the configuration structure or null if no configuration exists
+      for the field instance. A value is determined when setSupportName is
+      called. The caller bcan ask for a PVStructurte or a DBStructure.</dd>
   <dt style="font-family: courier;">toString</dt>
     <dd>This is for debugging. It dumps the contents of the field.
       AbstractDBData shows the supportName of it has been defined and the
@@ -470,6 +488,9 @@ instance.</p>
       generates.</dd>
   <dt style="font-family: courier;">getDBDField</dt>
     <dd>Get the DBDField introspection interface</dd>
+  <dt style="font-family: courier;">getFullFieldName</dt>
+    <dd>Get the full field name, i.e. The hierarcharical name with
+      a '.' separating each field.</dd>
   <dt style="font-family: courier;">getParent</dt>
     <dd>Get the interface for the parent of this field</dd>
   <dt style="font-family: courier;">getRecord</dt>
@@ -487,10 +508,6 @@ instance.</p>
     <dd>This is called AbstractDBData whenever the field or any subfield of a
       field changes value. It is implemented and called by
     ABStractDBData.</dd>
-  <dt style="font-family: courier;">getConfigurationStructure</dt>
-    <dd>Get the configuration structure or null if no configuration exists
-      for the field instance. A value is determined when setSupportName is
-      called.</dd>
   <dt style="font-family: courier;">getSupport</dt>
     <dd>Get the support or return null if no support exists for the
     field.</dd>
@@ -517,7 +534,7 @@ get and put data values.
 <p>The following example shows how a double field can be read.</p>
 <pre>     double getValue(DBData db) {
         Type type = db.getField().getType();
-        if(type != Type.pvDouble) throw new IllegaStateException("not double");
+        if(type != Type.pvDouble) throw new IllegalStateException("not double");
         PVDouble data = (PVDouble)db;
         return data.get();
     }</pre>
@@ -543,7 +560,7 @@ A menu field is accessed via the interface:
 <pre>    void dumpMenuField(DBMenu menu) {
         String[] choice = menu.getChoices();
         int index = menu.getIndex();
-        printf("field %s is menu %s. Value is %d %s\n",
+        System.out.printf("field %s is menu %s. Value is %d %s%n",
             menu.getField().getName(),menu.getMenuName(),
             menu.getIndex(),choice[index]);
     }</pre>
@@ -574,7 +591,7 @@ A menu field is accessed via the interface:
 
 <h3 id="RecordData1"><a id="RecordData"></a>RecordData</h3>
 <pre>    public interface RecordStateListener {
-        void newState(RecordState newState);
+        void newState(DBRecord dbRecord,RecordState newState);
     }
 
     public interface DBRecord extends DBStructure {
@@ -622,7 +639,7 @@ A menu field is accessed via the interface:
     <dd>While holding the lock for this record lock another record. The lock
       for the cxurrent record might be unlocked while this call is active but
       upon retirn both record will be locked. The caller must unlock both
-      records when the caller is done. Noremally it unlocks the other record,
+      records when the caller is done. Normally it unlocks the other record,
       via it's unlock method, first.</dd>
   <dt style="font-family: courier;">getRecordProcess</dt>
     <dd>Get the interface of the RecordProcess for this instance.</dd>
@@ -650,7 +667,8 @@ A menu field is accessed via the interface:
       first time DBData.addListener is called. It should not be called by
       other code.</dd>
   <dt style="font-family: courier;">getDBD</dt>
-    <dd>Get the DBD that holds this record instance.</dd>
+    <dd>Get the DBD that holds this record instance. See package
+      org.epics.ioc.dbDefinition for an explaination of a DBD.</dd>
   <dt style="font-family: courier;">setDBD</dt>
     <dd>Set the DBD that holds this record instance.</dd>
     <dd></dd>
@@ -660,7 +678,7 @@ A menu field is accessed via the interface:
 <pre>    public interface DBLink extends DBData {}</pre>
 
 <p>A DBLink is a link to external support. It has no data other than
-configuration data.</p>
+configuration data. </p>
 
 <h3 id="Array">Array Data</h3>
 
@@ -719,7 +737,8 @@ configuration data.</p>
     }</pre>
 
 <p>The array interfaces are an extension of the pvAccess array interfaces.
-See pvAccess for details about how arrays are supported.</p>
+See pvAccess for details about how arrays are supported. The package overview
+gives an example of how to read array data.</p>
 <hr />
 
 <h2 style="text-align: center" id="Factory"><a
@@ -730,11 +749,11 @@ id="FieldDataFactory"></a>Factory for creating Data Fields</h2>
 fields. The methods are called by XMLToIOCDBFactory when it is reading
 instance definitions.</p>
 <pre>    public class FieldDataFactory {
-        public static DBData createData(DBStructure parent,
+        public static DBData createData(DBData parent,
             DDBDField dbdField);
-        public static DBData createEnumData(DBStructure parent,
+        public static DBData createEnumData(DBData parent,
             DDBDField dbdField, String[] choice);
-        public static DBArray createArrayData(DBStructure parent,
+        public static DBArray createArrayData(DBData parent,
             DDBDField dbdField, int capacity,boolean capacityMutable);
         public static DBRecord createRecord(String recordName,
              DBDRecordType dbdRecordType);
@@ -764,16 +783,23 @@ database fields.</p>
 
 <h3 id="AbstractDB"><a id="AbstractDBData"></a>AbstractDBData</h3>
 
-<p>Abstract base class for a scalar field.</p>
+<p>Abstract base class for a scalar field. Any code that implements scalar
+fields should extend this class since it implements almost all methods except
+the methods to actually get ot put data.</p>
 <pre>    public abstract class AbstractDBData implements DBData{
         public Field getField();
         public String getSupportName();
         public String setSupportName(String name);
+        public Support getSupport();
+        public void setSupport(Support support);
+        public DBStructure getConfigurationStructure();
         public String toString();
         public String toString(int indentLevel);
+        //PVData methods
+        public Field getField();
         // DBData methods
         public DBDField getDBDField();
-        public DBStructure getParent();
+        public DBData getParent();
         public DBRecord getRecord();
         public Support getSupport();
         public void setSupport(Support support);
@@ -785,16 +811,18 @@ database fields.</p>
         // convenience method for derived classes
         protected static void newLine(StringBuilder builder, int indentLevel);
         // constructor
-        protected AbstractDBData(DBStructure parent, DBDField dbdField);
+        protected AbstractDBData(DBData parent, DBDField dbdField);
         // must be called by derived class 
         protected void setRecord(DBRecord record);
+        protected static void newLine(StringBuilder builder, int indentLevel);
+        protected void removeListeners();
     }</pre>
 
 <h3 id="AbstractDB1"><a id="AbstractDBEnum"></a>AbstractDBEnum</h3>
 
 <p>Abstract base class for an enumerated field.</p>
 <pre>    public abstract class AbstractDBEnum extends AbstractDBData implements DBEnum {
-        protected AbstractDBEnum(DBStructure parent,
+        protected AbstractDBEnum(DBData parent,
             DBDEnumField dbdEnumField, String[]choice);
         // PVEnum methods
         public int getIndex();
@@ -811,7 +839,7 @@ database fields.</p>
 <p>Abstract base class for a menu field.</p>
 <pre>    public abstract class AbstractDBMenu extends AbstractDBData implements DBMenu
     {
-        protected AbstractDBMenu(DBStructure parent, DBDMenuField dbdMenuField);
+        protected AbstractDBMenu(DBData parent, DBDMenuField dbdMenuField);
         // DBMenu methods
         public String getMenuName();
         // PVEnum methods
@@ -831,7 +859,7 @@ database fields.</p>
     implements DBStructure
     {
         // constructor for structure fields
-        protected AbstractDBStructure(DBStructure parent, DBDStructureField dbdStructureField);
+        protected AbstractDBStructure(DBData parent, DBDStructureField dbdStructureField);
         // constructor for record instances
         protected AbstractDBStructure(DBDRecordType dbdRecordType));
         // called by record instance constructor
@@ -884,17 +912,19 @@ database fields.</p>
 <pre>    public abstract class AbstractDBArray
     extends AbstractDBData implements DBArray
     {
-        protected AbstractDBArray(DBStructure parent,DBDArrayField dbdArrayField);
+        protected AbstractDBArray(DBData parent,DBDArrayField dbdArrayField);
         // PVArray methods
         public boolean isCapacityMutable();
-        public DBType getElementDBType() ();
+        public DBType getElementDBType(); 
+        public Type getElementType();
         abstract public int getCapacity();
         abstract public int getLength();
         abstract public void setCapacity(int len);
         abstract public void setLength(int len);
     }</pre>
 
-<p>This is probably the most usefull abstract class.</p>
+<p>This is likely to be the class that is most often extented for special
+purposes.</p>
 <hr />
 
 <h2 style="text-align: center" id="IOCDB1"><a id="IOCDB"></a> IOCDB: IOC

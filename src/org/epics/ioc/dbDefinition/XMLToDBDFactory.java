@@ -33,10 +33,10 @@ public class XMLToDBDFactory {
      * @throws MalformedURLException if SAX throws it.
      * @throws IllegalStateException if any errors were detected.
      */
-    public static void convert(DBD dbdin, String fileName)
+    public static void convert(DBD dbd, String fileName)
         throws MalformedURLException,IllegalStateException
     {
-        dbd = dbdin;
+        XMLToDBDFactory.dbd = dbd;
         String uri = new File(fileName).toURL().toString();
         XMLReader reader;
         

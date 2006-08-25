@@ -10,13 +10,350 @@
 <body>
 <h1 style="text-align: center">EPICS JavaIOC: dbProcess<br />
 package: org.epics.ioc.dbProcess<br />
-2006.06.02</h1>
-
-
+2006.08.25</h1>
 <hr />
 
 <h1 style="text-align: center">Overview</h1>
 <hr />
-<p>Work on this package is just beginning.</p>
+
+<p>This package contains basic support for processing IOC database
+records.</p>
+<hr />
+
+<h2 style="text-align: center;">Record Process</h2>
+<hr />
+
+<p>The following are the interfaces for record processing:</p>
+<pre>   public interface RecordProcess {
+        boolean isDisabled();
+        boolean setDisabled(boolean value);
+        boolean isActive();
+        ProcessDB getProcessDB();
+        DBRecord getRecord();
+        ProcessReturn process(ProcessCompleteListener listener);
+        void update();
+        void removeCompletionListener(ProcessCompleteListener listener);
+        RecordProcessSupport getRecordProcessSupport();
+    }
+
+    public interface RecordProcessSupport {
+        boolean setTrace(boolean value);
+        void requestProcessCallback(
+            ProcessCallbackListener processCallbackListener);
+        void processContinue(Support support);
+        boolean setStatusSeverity(String status, AlarmSeverity alarmSeverity);
+        String getStatus();
+        AlarmSeverity getAlarmSeverity();
+        void setTimeStamp(TimeStamp timeStamp);
+        void getTimeStamp(TimeStamp timeStamp);
+        void errorMessage(String message);
+    }
+
+    public interface ProcessCompleteListener {
+        void processComplete(Support support,ProcessResult result);
+    }
+
+    public interface ProcessCallbackListener {
+        void callback();
+    }</pre>
+
+<p><span style="font-family: courier;">RecordProcess</span> contains methods
+normally called by code not involved with support for record processing but
+with requesting a record to process. <span
+style="font-family: courier;">RecordProcessSupport</span> contains methods
+normally called by support code, i.e. code that implemements the details
+about record processing.</p>
+
+<p><span style="font-family: courier;">RecordProcess</span> has the
+methods:</p>
+<dl>
+  <dt style="font-family: courier;">isDisabled</dt>
+    <dd>Is the record disabled?</dd>
+  <dt style="font-family: courier;">setDisabled</dt>
+    <dd>When record is disabled then all requests to process the record fail.
+      If the record is already being processed when setDisable is issued the
+      current process is allowed to complete.</dd>
+  <dt style="font-family: courier;">isActive</dt>
+    <dd>Is the record active, i.e. processing?</dd>
+  <dt style="font-family: courier;">getProcessDB</dt>
+    <dd>Get the process database to which this RecordProcess belongs.</dd>
+  <dt style="font-family: courier;">getRecord</dt>
+    <dd>Get the record instance to which this RecordProcess is attached.</dd>
+  <dt style="font-family: courier;">process</dt>
+    <dd>Request that the record be processed. If successful the record is set
+      active and the record support process method is called. In this case
+      the return value from record support is returned. If record support
+      returns active then it must call listener provided by RecordProcess
+      when it completes processing. <br />
+      The request will fail for the following reasons:
+      <ul>
+        <li>The record is already active. Unless the caller passed a null
+          value for listener it will be added to a list of listeners to call
+          when the record completes processing. The return value will be
+          active.</li>
+        <li>The record state is not RecordState.constructed. The return value
+          is failure. This can happen if the changes are being made to the
+          the definitions of any of the fields in the record instance, i.e.
+          on-line add/delete is in process for the record.</li>
+        <li>The record is disabled. The return value is failure.</li>
+        <li>The support state is not SupportState.ready. This can happen if
+          online add/delete is in process or if support has failed to start
+          successfully. The return value is failure.</li>
+      </ul>
+    </dd>
+  <dt style="font-family: courier;">update</dt>
+    <dd>Request that the record update. What happens is record support
+      dependent. Most support does nothing. Some support, e.g. motor record
+      support updates it's internal state.</dd>
+  <dt style="font-family: courier;">removeCompletionListener</dt>
+    <dd>Remove a record completion listener from the list of listeners to
+      call.</dd>
+  <dt style="font-family: courier;">getRecordProcessSupport</dt>
+    <dd>Get the RecordProcessSupport interface.</dd>
+</dl>
+
+<p><span style="font-family: courier;">RecordProcessSupport</span> has the
+methods:</p>
+<dl>
+  <dt style="font-family: courier;">setTrace</dt>
+    <dd>Set process trace. If true a message will displayed whenever process,
+      requestProcessCallback, or processContinue are called.</dd>
+  <dt style="font-family: courier;">requestProcessCallback</dt>
+    <dd>This is a request to be called back after record support has returned
+      but before RecordProcess.process returns. The callback will be made
+      with the record unlocked. This the callback can request that other
+      records be processed. This is the only way support code should process
+      other records. If support code directly request processing of linked
+      records deadlocks can occur.</dd>
+  <dt style="font-family: courier;">processContinue</dt>
+    <dd>Request that the processContinue method of the support be called. The
+      record will be locked before the support is called. This is the only
+      way asynchronous support code should access a record after it's process
+      method has returned active.</dd>
+  <dt style="font-family: courier;">setStatusSeverity</dt>
+    <dd>Called by support code to set the status and severity of the record.
+      support code should never directly access the status and severity
+      fields of a record.</dd>
+  <dt style="font-family: courier;">getStatus</dt>
+    <dd>Get the latest status set by calls to <span
+      style="font-family: courier;">setStateSeverity.</span></dd>
+  <dt style="font-family: courier;">getAlarmSeverity</dt>
+    <dd>Get the latest severity set by calls to <span
+      style="font-family: courier;">setStateSeverity.</span></dd>
+  <dt style="font-family: courier;">setTimeStamp</dt>
+    <dd>Set the time stamp for the record. If no code calls this while a
+      record is being processed then RecordProcess will set the time stamp if
+      the record has a timneStamp field.</dd>
+  <dt style="font-family: courier;">getTimeStamp</dt>
+    <dd>Get the latest time stamp set by calls to <span
+      style="font-family: courier;">setTimeStamp</span></dd>
+</dl>
+
+<p><span style="font-family: courier;">ProcessCompleteListener</span> has the
+single method:</p>
+<dl>
+  <dt style="font-family: courier;">processComplete</dt>
+    <dd>Processing is complete. Either failure or success can be returned.
+      Note that this same interface is used by RecordProcess and by most
+      support code.</dd>
+</dl>
+
+<p><span style="font-family: courier;">ProcessCallbackListener</span> has the
+single method:</p>
+<dl>
+  <dt style="font-family: courier;">callback</dt>
+    <dd>The callback to call when the record support process method returns
+      it RecordProcess. Any support code that wants to process other records
+      must use this interface.</dd>
+</dl>
+<hr />
+
+<h2 style="text-align: center;">Support</h2>
+<hr />
+
+<p>The following interfaces are used by support code, i.e. record, link, and
+any other support code that is involved with record processing:</p>
+<pre>   public interface Support {
+        String getName();
+        SupportState getSupportState();
+        DBData getDBData();
+        boolean addSupportStateListener(SupportStateListener listener);
+        boolean removeSupportStateListener(SupportStateListener listener);
+        void errorMessage(String message);
+        void initialize();
+        void start();
+        void stop();
+        void uninitialize();
+        ProcessReturn process(ProcessCompleteListener listener);
+        void processContinue();
+        void update();
+    }
+
+    public enum SupportState {
+        readyForInitialize,
+        readyForStart,
+        ready,
+        zombie;
+    }
+
+    public interface SupportStateListener {
+        void newState(Support support,SupportState state);
+    }
+
+    public interface LinkSupport extends Support {
+        void setField(PVData field);
+    }</pre>
+
+<p><span style="font-family: courier;">Support</span> has the methods:</p>
+<dl>
+  <dt style="font-family: courier;">getName</dt>
+    <dd>Get the support name. Implemented by <span
+      style="font-family: courier;">AbstractSupport.</span></dd>
+  <dt style="font-family: courier;">getSupportState</dt>
+    <dd>Get the support state. Implemented by <span
+      style="font-family: courier;">AbstractSupport</span>. Note that <span
+      style="font-family: courier;">AbstractSupport</span> provides a
+      protected method <span
+      style="font-family: courier;">setSupportState</span> which must be
+      called by support code whenever it changes support state.</dd>
+  <dt style="font-family: courier;">getDBData</dt>
+    <dd>Get the <span style="font-family: courier;">DBData</span> interface
+      for the field that bis being supported. For record support this will be
+      the <span style="font-family: courier;">DBRecord</span> itself.
+      Implemented by <span
+      style="font-family: courier;">AbstractSupport.</span></dd>
+  <dt style="font-family: courier;">addSupportStateListener</dt>
+    <dd>Add listener to be called when the support state changes. Implemented
+      by <span style="font-family: courier;">AbstractSupport.</span></dd>
+  <dt style="font-family: courier;">removeSupportStateListener</dt>
+    <dd>Remove a support state listener. Implemented by <span
+      style="font-family: courier;">AbstractSupport.</span></dd>
+  <dt style="font-family: courier;">errorMessage</dt>
+    <dd>Generate an error message. Implemented by <span
+      style="font-family: courier;">AbstractSupport</span>. It adds to the
+      message the record instance name ands the hierarchical field name.</dd>
+  <dt style="font-family: courier;">initialize</dt>
+    <dd>Perform initialization that does not involve accessing other records
+      and/or support.</dd>
+  <dt style="font-family: courier;">start</dt>
+    <dd>Connect to other records and/or support.</dd>
+  <dt style="font-family: courier;">stop</dt>
+    <dd>Disconnect from other records and/or support and be ready to again
+      start.</dd>
+  <dt style="font-family: courier;">uninitialize</dt>
+    <dd>Remove all internal state are prepare to again initialize.</dd>
+  <dt style="font-family: courier;">process</dt>
+    <dd>Process.</dd>
+  <dt style="font-family: courier;">processContinue</dt>
+    <dd>Continue processing. Note that this must be called as a result of a
+      call to RecorrProcessSupport.processContinue.</dd>
+  <dt style="font-family: courier;">update</dt>
+    <dd>Optional method. <span
+      style="font-family: courier;">AbstractSupport</span> implements this by
+      doing nothing.</dd>
+</dl>
+
+<p><span style="font-family: courier;">SupportState</span> has the following
+values:</p>
+<dl>
+  <dt style="font-family: courier;">readyForInitialize</dt>
+    <dd>Initial state for support. It has been created but has not done
+    much.</dd>
+  <dt style="font-family: courier;">readyForStart</dt>
+    <dd>Support has done any initialization that does not involve connecting
+      to other records and/or support.</dd>
+  <dt style="font-family: courier;">ready</dt>
+    <dd>Support is ready for processing.</dd>
+  <dt style="font-family: courier;">zombie</dt>
+    <dd>Support is going away.</dd>
+</dl>
+
+<p><span style="font-family: courier;">SupportStateListener</span> has the
+single method:</p>
+<dl>
+  <dt style="font-family: courier;">newState</dt>
+    <dd>The new state.</dd>
+</dl>
+
+<p><span style="font-family: courier;">LinkSupport</span> extends <span
+style="font-family: courier;">Support</span> with the method:</p>
+<dl>
+  <dt style="font-family: courier;">setField</dt>
+    <dd>This specifies the field in the record to/from the support will
+      put/get data.</dd>
+</dl>
+
+<p>All support code should extend AbstractSupport, which declares the
+following methods abstract: initialize, start, stop, uninitialize, and
+process. Support code may also chose to override update. AbstractSupport also
+implements the protected methods:</p>
+<dl>
+  <dt>AbstractSupport(String name,DBData dbData)</dt>
+    <dd>The constructor which must be called by the support constructor.</dd>
+  <dt>setSupportState(SupportState state)</dt>
+    <dd>This must be called by support whenever it changes state.</dd>
+</dl>
+<hr />
+
+<h2 style="text-align: center;">ProcessDB</h2>
+<hr />
+
+<p>This is a database for supporting record processing:</p>
+<pre>    public interface ProcessDB {
+        IOCDB getIOCDB();
+        RecordProcess getRecordProcess(String recordName);
+        boolean createRecordProcess(String recordName);
+        void removeRecordProcess(String recordName);
+        boolean createSupport(String recordName);
+        boolean createSupport();
+        Map&lt;String,RecordProcess&gt; getRecordProcessMap();
+    }
+
+    public class ProcessDBFactory {
+        static public ProcessDB createProcessDB(IOCDB iocdb);
+    }</pre>
+
+<p>A ProcessDB is created by calling ProcessDBFactory.createProcessDB.
+ProcessDB has the methods</p>
+<dl>
+  <dt>getIOCDB</dt>
+    <dd>Get the IOCDB this processDB is supporting.</dd>
+  <dt>getRecordProcess</dt>
+    <dd>Get the RecordProcess interface for the record.</dd>
+  <dt>createRecordProcess</dt>
+    <dd>Create RecordProcess support for the record. This is called by
+      createSupport but can also be called by on line add.</dd>
+  <dt>removeRecordProcess</dt>
+    <dd>This can be called by on-line delete.</dd>
+  <dt>createSupport(String recordName)</dt>
+    <dd>Create createSupport with no arguments but can also be called by
+      on-line add.</dd>
+  <dt>createSupport()</dt>
+    <dd>Create support for all records in IOCDB. This includes creating the
+      support for all fields in each record that have associated support
+      defined in the database instance files.</dd>
+  <dt>getRecordProcessMap</dt>
+    <dd>Get the complete set of RecordProcess interfaces.</dd>
+</dl>
+<hr />
+
+<h2 style="text-align: center;">Local Channel Access</h2>
+<hr />
+
+<p>An implementation of a channel access client for accessing records in the
+IOC database is provided:</p>
+<pre>
+    public interface ChannelLink extends Channel {
+        void setLinkRecord(DBRecord record);
+        DBRecord getLinkRecord();
+    }
+
+    public class ChannelAccessLocalFactory  {
+        static public boolean create(IOCDB iocdb);
+    }
+</pre>
+<p>The factory creates a single instance of an implementation of a channel
+access client for accessing local records. This is used by link support.
+</p>
 </body>
 </html>

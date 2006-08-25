@@ -2,19 +2,20 @@
 <IOCDatabase>
 <record name = "counter" type = "counterRecord">
     <min>0.0</min>
-    <max>10.0</max>
+    <max>1e9</max>
     <inc>1.0</inc>
     <priority>medium</priority>
-    <process supportName = "processLinkArray" >
+    <process supportName = "linkArray" >
         <value  supportName = "processLink" >
             <configure structureName = "processLink">
                 <pvname>double01</pvname>
                 <wait>true</wait>
             </configure>
         </value>
-        <value supportName = "processLink" >
-            <configure structureName = "processLink">
+        <value supportName = "outputLink" >
+            <configure structureName = "outputLink">
                 <pvname>double02</pvname>
+                <process>true</process>
                 <wait>true</wait>
             </configure>
         </value>
@@ -36,11 +37,19 @@
     <priority>medium</priority>
 </record>
 <record name = "double02" type = "doubleRecord">
-    <input supportName = "inputLink">
-        <configure structureName = "inputLink">
+    <units>volts</units>
+    <displayLimit>
+        <low>0.0</low>
+        <high>10.0</high>
+    </displayLimit>
+    <priority>medium</priority>
+</record>
+<record name = "double03" type = "doubleRecord">
+    <input supportName = "monitorLink" >
+        <configure structureName = "monitorLink">
             <pvname>counter</pvname>
-            <process>false</process>
-            <wait>false</wait>
+            <process>true</process>
+            <monitorOnly>false</monitorOnly>
         </configure>
     </input>
     <units>volts</units>

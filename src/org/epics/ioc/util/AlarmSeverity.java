@@ -19,7 +19,7 @@ public enum AlarmSeverity {
     /**
      * get the alarm severity.
      * @param value the integer value.
-     * @return
+     * @return The alarm severity.
      */
     public static AlarmSeverity getSeverity(int value) {
         switch(value) {

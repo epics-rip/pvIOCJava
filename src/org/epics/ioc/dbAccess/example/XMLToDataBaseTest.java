@@ -11,7 +11,6 @@ import org.epics.ioc.dbDefinition.*;
 import org.epics.ioc.dbAccess.*;
 
 import java.util.*;
-import java.net.*;
 /**
  * JUnit test for XMLToIOCDB.
  * This also is a test for pvAccess, dbDefinition, and dbAccess because XMLToDBD

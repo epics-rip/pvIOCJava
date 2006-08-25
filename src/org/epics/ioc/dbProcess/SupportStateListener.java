@@ -13,7 +13,7 @@ package org.epics.ioc.dbProcess;
 public interface SupportStateListener {
     /**
      * The SupportState has changed.
-     * @param The support that is calling newState.
+     * @param support The support that is calling newState.
      * @param state The new state.
      */
     void newState(Support support,SupportState state);

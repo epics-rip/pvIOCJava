@@ -9,6 +9,7 @@ import org.epics.ioc.dbProcess.*;
 import org.epics.ioc.dbAccess.*;
 
 /**
+ * Counter record acts as a counter from a min to max value with a specified increment.
  * @author mrk
  *
  */
@@ -27,7 +28,7 @@ public class CounterRecordFactory {
         private DBDouble dbValue = null;
         private DBArray dbProcess = null;
         
-        private Support processLinkArray = null;
+        private LinkSupport linkArraySupport = null;
         private ProcessCompleteListener listener = null;
         private ProcessResult result = ProcessResult.success;
         
@@ -52,38 +53,50 @@ public class CounterRecordFactory {
             if(index<0) throw new IllegalStateException("field process does not exist");
             dbProcess = (DBArray)dbData[index];
         }
-    
+        /* (non-Javadoc)
+         * @see org.epics.ioc.dbProcess.Support#initialize()
+         */
         public void initialize() {
             supportState = SupportState.readyForStart;
-            processLinkArray = dbProcess.getSupport();
-            if(processLinkArray!=null) {
-                processLinkArray.initialize();
-                supportState = processLinkArray.getSupportState();
+            linkArraySupport = (LinkSupport)dbProcess.getSupport();
+            if(linkArraySupport!=null) {
+                linkArraySupport.setField(dbValue);
+                linkArraySupport.initialize();
+                supportState = linkArraySupport.getSupportState();
             }
             setSupportState(supportState);
-        }
-    
+        }   
+        /* (non-Javadoc)
+         * @see org.epics.ioc.dbProcess.Support#start()
+         */
         public void start() {
             supportState = SupportState.ready;
-            if(processLinkArray!=null) {
-                processLinkArray.start();
-                supportState = processLinkArray.getSupportState();
+            if(linkArraySupport!=null) {
+                linkArraySupport.start();
+                supportState = linkArraySupport.getSupportState();
             }
             setSupportState(supportState);
-        }
-    
+        }  
+        /* (non-Javadoc)
+         * @see org.epics.ioc.dbProcess.Support#stop()
+         */
         public void stop() {
             supportState = SupportState.readyForStart;
-            if(processLinkArray!=null) processLinkArray.stop();
+            if(linkArraySupport!=null) linkArraySupport.stop();
             setSupportState(supportState);
         }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.dbProcess.Support#uninitialize()
+         */
         public void uninitialize() {
             supportState = SupportState.readyForInitialize;
-            if(processLinkArray!=null) processLinkArray.uninitialize();
-            processLinkArray = null;
+            if(linkArraySupport!=null) linkArraySupport.uninitialize();
+            linkArraySupport = null;
             setSupportState(supportState);
-        }
-    
+        }   
+        /* (non-Javadoc)
+         * @see org.epics.ioc.dbProcess.Support#process(org.epics.ioc.dbProcess.ProcessCompleteListener)
+         */
         public ProcessReturn process(ProcessCompleteListener listener) {
             if(supportState!=SupportState.ready) {
                 errorMessage(
@@ -99,8 +112,8 @@ public class CounterRecordFactory {
             if(value>max) value = min;
             dbValue.put(value);
             this.listener = listener;
-            if(processLinkArray!=null) {
-                return processLinkArray.process(this);
+            if(linkArraySupport!=null) {
+                return linkArraySupport.process(this);
             }
             return ProcessReturn.success;
         }      
@@ -110,7 +123,9 @@ public class CounterRecordFactory {
         public void processContinue() {
             if(listener!=null) listener.processComplete(this,result);
         }
-
+        /* (non-Javadoc)
+         * @see org.epics.ioc.dbProcess.ProcessCompleteListener#processComplete(org.epics.ioc.dbProcess.Support, org.epics.ioc.dbProcess.ProcessResult)
+         */
         public void processComplete(Support support,ProcessResult result) {
             this.result = result;
             dbRecord.getRecordProcess().getRecordProcessSupport().processContinue(this);

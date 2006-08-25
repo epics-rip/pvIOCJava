@@ -7,40 +7,55 @@ package org.epics.ioc.support;
 
 import org.epics.ioc.dbAccess.*;
 import org.epics.ioc.dbProcess.*;
-import org.epics.ioc.dbProcess.*;
+import org.epics.ioc.pvAccess.*;
+import org.epics.ioc.dbDefinition.*;
 
 /**
  * @author mrk
  *
  */
-public class ProcessLinkArrayFactory {
+public class LinkArraySupportFactory {
+    /**
+     * Create support for an array of links.
+     * @param dbArray The array which must be an array of links.
+     * @return An interface to the support or null if the supportName was not "linkArray".
+     */
     public static Support create(DBArray dbArray) {
+        if(dbArray.getElementDBType()!=DBType.dbLink) {
+            System.out.println(
+                dbArray.getRecord().getRecordName()
+                + "." + dbArray.getFullFieldName()
+                + " element type is not a link");
+            return null;
+        }
         Support support = null;
         String supportName = dbArray.getSupportName();
-        if(supportName!=null && supportName.equals("processLinkArray")) {
-            support = new ProcessLinkArray(dbArray);
+        if(supportName!=null && supportName.equals("linkArray")) {
+            support = new LinkArray(dbArray);
         }
         return support;
     }
     
-    private static class ProcessLinkArray extends AbstractSupport
-    implements ProcessCallbackListener,ProcessCompleteListener,SupportStateListener
+    private static class LinkArray extends AbstractSupport
+    implements LinkSupport,ProcessCallbackListener,ProcessCompleteListener,SupportStateListener
     {
         private RecordProcess recordProcess;
         private RecordProcessSupport recordProcessSupport;
         private SupportState supportState = SupportState.readyForInitialize;
-        private static String supportName = "ProcessLinkArray";
+        private static String supportName = "ProcessOutputLinkArray";
         private DBLinkArray dbLinkArray;
         private LinkArrayData linkArrayData = new LinkArrayData();
         private DBLink[] dbLinks = null;
         private LinkSupport[] processLinks = null;
+        
+        private PVData recordData = null;
         
         private ProcessCompleteListener listener;
         private int nextLink;
         private int numberWait;
         private ProcessResult finalResult = ProcessResult.success;
        
-        ProcessLinkArray(DBArray array) {
+        LinkArray(DBArray array) {
             super(supportName,array);
             dbLinkArray = (DBLinkArray)array; 
         }
@@ -68,6 +83,7 @@ public class ProcessLinkArrayFactory {
                     continue;
                 }
                 linkSupport.initialize();
+                linkSupport.setField(recordData);
                 if(linkSupport.getSupportState()!=SupportState.readyForStart) {
                     supportState = SupportState.readyForInitialize;
                     linkSupport.uninitialize();
@@ -151,6 +167,10 @@ public class ProcessLinkArrayFactory {
                 }
             }
             if(allDone) listener.processComplete(this,finalResult);
+        }
+
+        public void setField(PVData field) {
+            recordData = field;
         }
 
         public void callback() {

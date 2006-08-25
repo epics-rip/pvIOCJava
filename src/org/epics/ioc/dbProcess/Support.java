@@ -48,11 +48,6 @@ public interface Support {
      */
     void errorMessage(String message);
     /**
-     * Get the full field name, i.e. the complete hierarchy.
-     * @return The name.
-     */
-    String getFullFieldName();
-    /**
      * initialize.
      * perform initialization related to record instance but
      * do not connect to I/O or other records.

@@ -7,9 +7,7 @@ package org.epics.ioc.dbAccess;
 
 import org.epics.ioc.dbDefinition.*;
 import org.epics.ioc.pvAccess.*;
-import org.epics.ioc.pvAccess.Array;
 import org.epics.ioc.pvAccess.Type;
-import org.epics.ioc.pvAccess.Field;
 
 import java.util.*;
 import java.util.regex.*;

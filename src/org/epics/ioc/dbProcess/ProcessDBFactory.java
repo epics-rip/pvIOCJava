@@ -195,14 +195,8 @@ public class ProcessDBFactory {
         }
         
         private void printError(DBData dbData,String message) {
-            String name = dbData.getField().getName();
-            DBData parent = dbData.getParent();
-            DBRecord record = dbData.getRecord();
-            while(parent!=null && parent!=record) {
-                name = parent.getField().getName() + "." + name;
-                parent = parent.getParent();
-            }
-            name = record.getRecordName() + "." + name;
+            String name = dbData.getFullFieldName();
+            name = dbData.getRecord().getRecordName() + "." + name;
             System.err.printf("%s %s\n",name,message);
         }
         

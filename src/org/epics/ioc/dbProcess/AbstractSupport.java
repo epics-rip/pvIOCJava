@@ -61,8 +61,7 @@ public abstract class AbstractSupport implements Support {
         this.name = name;
         this.dbData = dbData;
         dbRecord = dbData.getRecord();
-    }
-    
+    }   
     /**
      * This must be called whenever the supports changes state.
      * @param state The new state.
@@ -84,7 +83,6 @@ public abstract class AbstractSupport implements Support {
     public String getName() {
         return name;
     }
-
     /* (non-Javadoc)
      * @see org.epics.ioc.dbProcess.Support#getSupportState()
      */
@@ -96,8 +94,7 @@ public abstract class AbstractSupport implements Support {
      */
     public DBData getDBData() {
         return dbData;
-    }
-    
+    }   
     /* (non-Javadoc)
      * @see org.epics.ioc.dbProcess.Support#addSupportStateListener(org.epics.ioc.dbProcess.SupportStateListener)
      */
@@ -111,32 +108,14 @@ public abstract class AbstractSupport implements Support {
     public boolean removeSupportStateListener(SupportStateListener listener) {
         return listenerList.remove(listener);
     }
-
     /* (non-Javadoc)
      * @see org.epics.ioc.dbProcess.Support#errorMessage(java.lang.String)
-     * This is meant for use by support. It prepends the field name to the message
-     * and calls recordProgress.errorMessage, which will prepend the record instance name.
      */
     public void errorMessage(String message) {
-        String fieldName = getFullFieldName();
-        
+        String fieldName = dbData.getFullFieldName();
         RecordProcessSupport recordProcessSupport = dbRecord.getRecordProcess().getRecordProcessSupport();
         recordProcessSupport.errorMessage("." + fieldName + " " + message);
-    }
-    
-    /* (non-Javadoc)
-     * @see org.epics.ioc.dbProcess.Support#getFullFieldName()
-     */
-    public String getFullFieldName() {
-        StringBuilder fieldName = new StringBuilder();
-        fieldName.append(dbData.getField().getName());
-        DBData parent = dbData.getParent();
-        while(parent!=null && parent!=dbRecord) {
-            fieldName.insert(0,parent.getField().getName());
-            parent = parent.getParent();
-        }
-        return fieldName.toString();
-    }
+    } 
     /* (non-Javadoc)
      * @see org.epics.ioc.dbProcess.Support#update()
      */

@@ -21,6 +21,11 @@ public interface DBData extends PVData {
      */
     DBDField getDBDField();
     /**
+     * Get the full field name, i.e. the complete hierarchy.
+     * @return The name.
+     */
+    String getFullFieldName();
+    /**
      * Get the parent of this field.
      * @return The parent interface.
      */

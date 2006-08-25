@@ -6,7 +6,6 @@
 package org.epics.ioc.dbProcess;
 
 import org.epics.ioc.dbAccess.*;
-import org.epics.ioc.util.*;
 
 /**
  * Record processing support.
@@ -62,7 +61,7 @@ public interface RecordProcess {
     /**
      * Get RecordProcessSupport interface.
      * RecordProcessSupport is normally only used by support code.
-     * @return
+     * @return  The interface for RecordProcessSupport.
      */
     RecordProcessSupport getRecordProcessSupport();
 }
