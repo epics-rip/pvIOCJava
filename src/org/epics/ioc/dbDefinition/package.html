@@ -12,7 +12,7 @@
 
 <h1 style="text-align: center">EPICS JavaIoc: Database Definition <br />
 package: org.epics.ioc.dbDefinition<br />
-2006.08.31</h1>
+2006.09.01</h1>
 <hr />
 <a href="#Overview">Overview</a> <br />
 <a href="#Syntax">Database Definition Syntax</a>
@@ -21,6 +21,7 @@ package: org.epics.ioc.dbDefinition<br />
     <ul>
       <li><a href="#SyntaxNamespace">namespace</a></li>
       <li><a href="#SyntaxInclude">Include</a></li>
+      <li><a href="#SyntaxMacroSubstitution">Macro Substitution</a></li>
     </ul>
   </li>
   <li><a href="#SyntaxMenu">Menu</a></li>
@@ -97,6 +98,12 @@ uses a DBD to implement database reflection.</p>
 <h1 style="text-align: center"><a id="Syntax"></a>Database Definition
 Syntax</h1>
 <hr />
+A Database Definition file must be an XML file with a root tag of
+DBDDefinition:
+<pre>&lt;?xml version="1.0" ?&gt;
+&lt;DBDefinition&gt;
+  &lt;?-- valid Database Definition elements --&gt;
+&lt;/DBDefinition&gt;</pre>
 
 <h2 style="text-align: center"><a id="GeneralStatements"></a> General
 Statements</h2>
@@ -104,25 +111,34 @@ Statements</h2>
 <h3><a id="SyntaxNamespace"></a>namespace</h3>
 At this time namespaces are not used.
 
-<h3>Include</h3>
+<h3><a id="SyntaxInclude"></a>Include</h3>
+An XML file containing Database Definitions can include other files also
+containing Database Definitions. An included file must also be a valid XML
+Database Definition. Included files can also include other files. The syntax
+is:
 <pre>    
-&lt;include filename = "filename" /&gt;</pre>
+&lt;include addPath = "path" removePath = "path" href = "filename" /&gt;</pre>
 
-<p></p>
-
-<p>where</p>
+<p>Where</p>
 <dl>
-  <dt><span style="font-family: courier">filename</span> must be a valid
-  filename</dt>
+  <dt style="font-family: courier;">href</dt>
+    <dd>The <span style="font-family: courier;">filename</span>, which must
+      be a valid XML Database Definition file, is processed. If any addPaths
+      have been defined the last one specified is prefixed to the
+    filename.</dd>
+  <dt style="font-family: courier;">addPath</dt>
+    <dd>Add a path.</dd>
+  <dt style="font-family: courier;">removePath</dt>
+    <dd>Remove a path.</dd>
 </dl>
 
-<p><span style="font-family: courier;">include</span> statements can be used
-at the top level, or inside a <span
-style="font-family: courier;">menu</span>, <span
-style="font-family: courier;">structure</span> or <span
-style="font-family: courier;">record</span>Type or support element.</p>
+<p>NOTE: Path needs more work. But what to do???</p>
 
-<p>NOT CURRENTLY IMPLEMENTED.</p>
+<h3><a id="SyntaxMacroSubstitution"></a>Macro Substitution</h3>
+
+<p>Macro substitution is not very usefull for Database Definition but it is
+support just like for Database Instance files. See package
+org.epics.ioc.dbAccess for details about how macro substitution works.</p>
 
 <h2 style="text-align: center"><a id="SyntaxMenu"></a>Menu</h2>
 A menu is an enumerated type, defined below, where the choice strings are

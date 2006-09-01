@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+       "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta http-equiv="content-type" content="text/html; charset=iso-8859-1" />
+  <title>EPICS JavaIOC: support</title>
+</head>
+
+<body>
+<h1 style="text-align: center">EPICS JavaIOC: util<br />
+package: org.epics.ioc.util<br />
+2006.09.01</h1>
+<hr />
+
+<h2 style="text-align: center">Overview</h2>
+<hr />
+
+<p>This package provides utility code for a javaIOC.</p>
+<hr />
+
+<h2 style="text-align: center;">XML Include and Macro Substitution</h2>
+<hr />
+
+<p>This provides support for macro substitution and include. It is used by
+both org.epics.ioc.dbDefinition.XMLToDBDFactory and by
+org.epics.ioc.dbAccess.XMLToIOCDBFactory.</p>
+<pre>
+    public interface IOCXMLListener {
+        void endDocument();
+        void startElement(String name, Map&lt;String,String&gt; attributes);
+        void characters(char[] ch, int start, int length);
+        void endElement(String name);
+    }
+    
+    public interface IOCXMLReader {
+        void warningMessage(String message);
+        void errorMessage(String message);
+        void fatalMessage(String message);
+    }
+    
+    
+    public class IOCXMLReaderFactory {
+        public static void create(String rootElementName,String fileName,
+            IOCXMLListener listener) throws IllegalStateException;
+    }
+</pre>
+<hr />
+
+<h2 style="text-align: center;">Time Stamp Support</h2>
+<hr />
+
+<p>This provides support for time stamps.</p>
+<pre>
+    public class TimeStamp {
+        public long secondsPastEpoch;
+        public int nanoSeconds;
+    }
+    
+    
+    public class TimeStampField {
+        public static TimeStampField create(PVData pvData);
+        public void get(TimeStamp timeStamp);
+        public void put(TimeStamp timeStamp);
+    }
+    
+    public class TimeUtility {
+        public static long getMillis(TimeStamp timeStamp);
+        public static void set(TimeStamp timeStamp,long millis)
+    }
+</pre>
+
+</body>
+</html>
