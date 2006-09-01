@@ -219,39 +219,40 @@ public abstract class AbstractDBData implements DBData{
     private static class StructureDBDAttributeValues
     implements DBDAttributeValues
     {
-        private String structureName;
-        private String fieldName;
+        private static Map<String,String> attributeMap = new TreeMap<String,String>();
 
+        /**
+         * Constructor.
+         * @param structureName The structure name.
+         * @param fieldName The field name.
+         */
         public StructureDBDAttributeValues(String structureName,
             String fieldName)
         {
-            this.structureName = structureName;
-            this.fieldName = fieldName;
+            attributeMap.put("name",fieldName);
+            attributeMap.put("structureName",structureName);
+            attributeMap.put("type","structure");
         }
 
+        /* (non-Javadoc)
+         * @see org.epics.ioc.dbDefinition.DBDAttributeValues#getLength()
+         */
         public int getLength() {
-            return 3;
+            return attributeMap.size();
         }
 
-        public String getName(int index) {
-            if(index==0) return "name";
-            if(index==1) return "type";
-            if(index==2) return "structureName";
-            return null;
-        }
-
-        public String getValue(int index) {
-            if(index==0) return fieldName;
-            if(index==1) return "structure";
-            if(index==2) return structureName;
-            return null;
-        }
-
+        /* (non-Javadoc)
+         * @see org.epics.ioc.dbDefinition.DBDAttributeValues#getValue(java.lang.String)
+         */
         public String getValue(String name) {
-            if(name.equals("name")) return fieldName;
-            if(name.equals("type")) return "structure";
-            if(name.equals("structureName")) return structureName;
-            return null;
+            return attributeMap.get(name);
+        }
+
+        /* (non-Javadoc)
+         * @see org.epics.ioc.dbDefinition.DBDAttributeValues#keySet()
+         */
+        public Set<String> keySet() {
+            return attributeMap.keySet();
         }
     }
 }

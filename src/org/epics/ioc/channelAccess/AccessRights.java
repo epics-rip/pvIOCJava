@@ -6,11 +6,21 @@
 package org.epics.ioc.channelAccess;
 
 /**
+ * Access Rights.
  * @author mrk
  *
  */
 public enum AccessRights {
+    /**
+     * Neither read or write access is allowed.
+     */
     none,
+    /**
+     * Read access is allowed but write access is not allowed.
+     */
     read,
+    /**
+     * Both read and write access are allowed.
+     */
     readWrite
 }

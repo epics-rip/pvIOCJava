@@ -5,14 +5,12 @@
  */
 package org.epics.ioc.dbDefinition;
 
-import java.io.*;
 import java.net.*;
-import org.xml.sax.*;
-import org.xml.sax.ContentHandler;
-import org.xml.sax.helpers.XMLReaderFactory;
 import org.epics.ioc.pvAccess.*;
 
 import java.util.*;
+
+import org.epics.ioc.util.*;
 
 /**
  * Factory to convert an xml file to a Database Definition and put it in a database.
@@ -23,8 +21,7 @@ import java.util.*;
 public class XMLToDBDFactory {
     // For use by all private classes
     private static DBD dbd;
-    private static ErrorHandler errorHandler;
-    private static Locator locator; 
+    private static IOCXMLReader errorHandler;
     /**
      * Convert an xml file to Database definitions and put
      * the definitions in a database.
@@ -34,131 +31,34 @@ public class XMLToDBDFactory {
      * @throws IllegalStateException if any errors were detected.
      */
     public static void convert(DBD dbd, String fileName)
-        throws MalformedURLException,IllegalStateException
+        throws IllegalStateException
     {
         XMLToDBDFactory.dbd = dbd;
-        String uri = new File(fileName).toURL().toString();
-        XMLReader reader;
-        
-        
-        Handler handler = new Handler();
-        errorHandler = handler;
-        try {
-            reader = XMLReaderFactory.createXMLReader();
-            reader.setContentHandler(handler);
-            reader.setErrorHandler(handler);
-            reader.parse(uri);
-        } catch (SAXException e) {
-            throw new IllegalStateException(
-                String.format("%n")
-                + "XMLToDBDFactory.convert terminating with SAXException"
-                + String.format("%n")
-                + e.getMessage());
-        } catch (IOException e) {
-            throw new IllegalStateException(
-                String.format("%n")
-                + "XMLToDBDFactory.convert terminating with IOException"
-                + String.format("%n")
-                + e.getMessage());
-        } catch (IllegalStateException e) {
-            handler.error("IllegalStateException " + e.getMessage());
-            throw new IllegalStateException(
-                String.format("%n")
-                + "XMLToDBDFactory.convert terminating with IllegalStateException"
-                + String.format("%n")
-                + e.getMessage());
-        } catch (IllegalArgumentException e) {
-            handler.error("IllegalArgumentException " + e.getMessage());
-            throw new IllegalStateException(
-                String.format("%n")
-                + "XMLToDBDFactory.convert terminating with IllegalArgumentException"
-                + String.format("%n")
-                + e.getMessage());
-        } catch (Exception e) {
-            handler.error("Exception " + e.getMessage());
-            throw new IllegalStateException(
-                String.format("%n")
-                + "XMLToDBDFactory.convert terminating with Exception"
-                + String.format("%n")
-                + e.getMessage());
-        }
+        IOCXMLListener listener = new Listener();
+        errorHandler = IOCXMLReaderFactory.getReader();
+        IOCXMLReaderFactory.create("DBDefinition",fileName,listener);
     }
 
-    private static class Handler  implements ContentHandler, ErrorHandler {
+    private static class Listener implements IOCXMLListener {
           
         private enum State {
-            startDocument,
             idle,
             menu,
             structure,
             recordType,
             support
         } 
-        private State state = State.startDocument;
-        private int nWarning = 0;
-        private int nError = 0;
-        private int nFatal = 0;
-        
-        Handler()  throws MalformedURLException {}
-        private String printSAXParseExceptionMessage(SAXParseException e)
-        {
-            return String.format("line %d column %d%nreason %s%n",
-                locator.getLineNumber(),
-                locator.getColumnNumber(),
-                e.toString());
-        }
+        private State state = State.idle;
 
-        private DBDXMLHandler menuHandler;
-        private DBDXMLHandler structureHandler;
-        private DBDXMLHandler supportHandler;
+        private DBDXMLHandler menuHandler = new DBDXMLMenuHandler();
+        private DBDXMLHandler structureHandler = new DBDXMLStructureHandler();
+        private DBDXMLHandler supportHandler = new DBDXMLSupportHandler();
         
-        public void error(String message) {
-            System.err.printf("line %d column %d%nreason %s%n",
-                locator.getLineNumber(),
-                locator.getColumnNumber(),
-                message);
-            nError++;
-        }
-        public void warning(SAXParseException e) throws SAXException {
-            System.err.printf("warning %s%n",printSAXParseExceptionMessage(e));
-            nWarning++;
-        }
-        public void error(SAXParseException e) throws SAXException {
-            System.err.printf("error %s%n",printSAXParseExceptionMessage(e));
-            nError++;
-        }
-        
-        public void fatalError(SAXParseException e) throws SAXException {
-            System.err.printf("fatal error %s%n",printSAXParseExceptionMessage(e));
-            nFatal++;
-        }
-        
-        public void setDocumentLocator(Locator locatorin) {
-            locator = locatorin;
-            menuHandler = new DBDXMLMenuHandler();
-            structureHandler = new DBDXMLStructureHandler();
-            supportHandler = new DBDXMLSupportHandler();
-        }
-        
-        public void startDocument() throws SAXException {
-            state = State.startDocument;
-        }
-        
-        
-        public void endDocument() throws SAXException {
-            if(nWarning>0 || nError>0 || nFatal>0) {
-                System.err.printf("endDocument: warning %d severe %d fatal %d%n",
-                    nWarning,nError,nFatal);
-            }
-        }       
+        public void endDocument(){}       
 
-        public void startElement(String uri, String localName, String qName,
-            Attributes attributes) throws SAXException
+        public void startElement(String qName,Map<String,String> attributes)
         {
             switch(state) {
-            case startDocument:
-                if(qName.equals("DBDefinition")) state = State.idle;
-                break;
             case idle:
                 if(qName.equals("menu")) {
                     state = State.menu;
@@ -173,9 +73,7 @@ public class XMLToDBDFactory {
                     state = State.support;
                     supportHandler.start(qName,attributes);
                 } else {
-                    errorHandler.error(new SAXParseException(
-                        "startElement " + qName + " not understood",
-                        locator));
+                    errorHandler.errorMessage("startElement " + qName + " not understood");
                 }
                 break;
             case menu: 
@@ -192,20 +90,12 @@ public class XMLToDBDFactory {
             }
         }
         
-        public void endElement(String uri, String localName, String qName)
-        throws SAXException
+        public void endElement(String qName)
         {
             switch(state) {
-            case startDocument:
-                break;
             case idle:
-                if(qName.equals("DBDefinition")) {
-                    state = State.startDocument;
-                } else {
-                    errorHandler.error(new SAXParseException(
-                         "endElement " + qName + " not understood",
-                         locator));
-                }
+                errorHandler.errorMessage(
+                    "endElement " + qName + " not understood");
                 break;
             case menu: 
                 if(qName.equals("menu")) {
@@ -237,11 +127,8 @@ public class XMLToDBDFactory {
         }
         
         public void characters(char[] ch, int start, int length)
-        throws SAXException
         {
             switch(state) {
-            case startDocument:
-                break;
             case idle:
                 break;
             case menu: 
@@ -256,76 +143,33 @@ public class XMLToDBDFactory {
                 break;
             }
         }
-        
-        public void endPrefixMapping(String prefix) throws SAXException {
-            // nothing to do
-            
-        }
-
-        public void ignorableWhitespace(char[] ch, int start, int length)
-        throws SAXException
-        {
-            // nothing to do
-            
-        }
-
-        public void processingInstruction(String target, String data)
-        throws SAXException
-        {
-            // nothing to do
-            
-        }
-
-        public void skippedEntity(String name) throws SAXException {
-            // nothing to do
-            
-        }
-
-        public void startPrefixMapping(String prefix, String uri)
-        throws SAXException
-        {
-            // nothing to do
-            
-        }
-
-        
     }
 
 
-    private static abstract class  DBDXMLHandler {
-        abstract void start(String qName, Attributes attributes)
-            throws SAXException;
-        abstract void end(String qName) throws SAXException;
-        abstract void startElement(String qName, Attributes attributes)
-            throws SAXException;
-        abstract void characters(char[] ch, int start, int length)
-            throws SAXException;
-        abstract void endElement(String qName) throws SAXException;
+    private interface DBDXMLHandler {
+        void start(String qName, Map<String,String> attributes);
+        void end(String qName);
+        void startElement(String qName, Map<String,String> attributes);
+        void characters(char[] ch, int start, int length);
+        void endElement(String qName);
     }
 
-    private static class DBDXMLMenuHandler extends DBDXMLHandler{
+    private static class DBDXMLMenuHandler implements DBDXMLHandler{
         private State state = State.idle;
         private String menuName;
         private LinkedList<String> choiceList;
-        private StringBuilder choiceBuilder;
+        private StringBuilder choiceBuilder = new StringBuilder();
         private enum State {idle, nextChoice, getChoice}
         
-        DBDXMLMenuHandler() {
-            super();
-        }
-        
-        void start(String qName, Attributes attributes)
-        throws SAXException {
-            menuName = attributes.getValue("name");
+        public void start(String qName, Map<String,String> attributes) {
+            menuName = attributes.get("name");
             if(menuName==null) {
-                errorHandler.error(new SAXParseException(
-                    "attribute name not specified",locator));
+                errorHandler.errorMessage("attribute name not specified");
                 state = State.idle;
             }
             if(dbd.getMenu(menuName)!=null) {
-                errorHandler.warning(new SAXParseException(
-                    "menu " + menuName + " ignored because it already exists",
-                    locator));
+                errorHandler.warningMessage(
+                    "menu " + menuName + " ignored because it already exists");
                 state = State.idle;
             } else {
                 choiceList = new LinkedList<String>();
@@ -333,19 +177,19 @@ public class XMLToDBDFactory {
             }
         }
     
-        void end(String qName) throws SAXException {
+        public void end(String qName){
             if(state==State.idle) return;
             if(state!=State.nextChoice) {
-                errorHandler.error(new SAXParseException(
+                errorHandler.errorMessage(
                     "Logic error in DBDXMLMenuHandler.end"
-                    + " state should be nextChoice",locator));
+                    + " state should be nextChoice");
                 state = State.idle;
                 return;
             }
             if(menuName==null || menuName.length()==0
             || choiceList==null || choiceList.size()==0) {
-                errorHandler.error(new SAXParseException(
-                        "menu definition is not complete",locator));
+                errorHandler.errorMessage(
+                        "menu definition is not complete");
             } else {
                 String[] choice = new String[choiceList.size()];
                 ListIterator<String> iter = choiceList.listIterator();
@@ -360,49 +204,45 @@ public class XMLToDBDFactory {
             state= State.idle;
         }
     
-        void startElement(String qName, Attributes attributes)
-        throws SAXException {
+        public void startElement(String qName, Map<String,String> attributes) {
             if(state==State.idle) return;
             if(state!=State.nextChoice) {
-                errorHandler.error(new SAXParseException(
+                errorHandler.errorMessage(
                         "Logic error in DBDXMLMenuHandler.startElement"
-                        + "state should be nextChoice",locator));
+                        + "state should be nextChoice");
                 state = State.idle;
                 return;
             }
             if(!qName.equals("choice")) {
-                errorHandler.error(new SAXParseException(
-                        "illegal element. only choice is allowed",locator));
+                errorHandler.errorMessage(
+                        "illegal element. only choice is allowed");
                 state = State.idle;
                 return;
             }
             state = State.getChoice;
-            choiceBuilder = new StringBuilder();
+            choiceBuilder.setLength(0);
         }
     
-        void endElement(String qName) throws SAXException {
+        public void endElement(String qName){
             if(state==State.idle) return;
             if(state!=State.getChoice) {
-                errorHandler.error(new SAXParseException(
+                errorHandler.errorMessage(
                         "Logic error in DBDXMLMenuHandler.startElement"
-                        + "state should be nextChoice",locator));
+                        + "state should be nextChoice");
                 state = State.idle;
                 return;
             }
             String newChoice = choiceBuilder.toString();
             if(newChoice.length()<=0) {
-                errorHandler.error(new SAXParseException(
-                        "illegal choice",locator));
+                errorHandler.errorMessage("illegal choice");
                     state = State.idle;
                     return;
             }
             choiceList.add(choiceBuilder.toString());
-            choiceBuilder = null;
             state = State.nextChoice;
         }
     
-        void characters(char[] ch, int start, int length)
-        throws SAXException {
+        public void characters(char[] ch, int start, int length){
             if(state!=State.getChoice) return;
             while(start<ch.length && length>0 && ch[start]==' ') {
                 start++; length--;
@@ -413,8 +253,7 @@ public class XMLToDBDFactory {
         }
     }
 
-    private static class DBDXMLStructureHandler
-    extends DBDXMLHandler implements DBDAttributeValues
+    private static class DBDXMLStructureHandler implements DBDXMLHandler, DBDAttributeValues
     {
  
         private enum State {idle, structure, field}      
@@ -427,7 +266,7 @@ public class XMLToDBDFactory {
         private LinkedList<Property> structurePropertyList;
         private LinkedList<DBDField> dbdFieldList;
         // remaining are for field elements
-        private Attributes attributes;
+        private Map<String,String> attributes;
         private DBDAttribute dbdAttribute;
         private LinkedList<Property> fieldPropertyList;
         
@@ -437,59 +276,50 @@ public class XMLToDBDFactory {
         }
             
         public int getLength() {
-            return attributes.getLength();
-        }
-
-        public String getName(int index) {
-            return attributes.getQName(index);
-        }
-
-        public String getValue(int index) {
-            return attributes.getValue(index);
+            return attributes.size();
         }
 
         public String getValue(String name) {
-            return attributes.getValue(name);
+            return attributes.get(name);
         }
 
-        void start(String qName, Attributes attributes)
-        throws SAXException {
+        public Set<String> keySet() {
+            return attributes.keySet();
+        }
+
+        public void start(String qName, Map<String,String> attributes) {
             if(state!=State.idle) {
-                errorHandler.error(new SAXParseException(
-                   "DBDXMLStructureHandler.start logic error not idle",
-                   locator));
+                errorHandler.errorMessage(
+                   "DBDXMLStructureHandler.start logic error not idle");
                 state = State.idle;
                 return;
             }
-            structureName = attributes.getValue("name");
+            structureName = attributes.get("name");
             if(structureName==null || structureName.length() == 0) {
-                errorHandler.error(new SAXParseException(
-                    "name not specified",locator));
+                errorHandler.errorMessage("name not specified");
                 state = State.idle;
                 return;
             }
-            structureSupportName = attributes.getValue("supportName");
+            structureSupportName = attributes.get("supportName");
             if(qName.equals("recordType")) {
                 if(dbd.getRecordType(structureName)!=null) {
-                    errorHandler.warning(new SAXParseException(
-                        "recordType " + structureName + " already exists",
-                        locator));
+                    errorHandler.warningMessage(
+                        "recordType " + structureName + " already exists");
                     state = State.idle;
                     return;
                 }
                 isRecordType = true;
             } else if(qName.equals("structure")){
                 if(dbd.getStructure(structureName)!=null) {
-                    errorHandler.warning(new SAXParseException(
-                        "structure " + structureName + " already exists",
-                        locator));
+                    errorHandler.warningMessage(
+                        "structure " + structureName + " already exists");
                     state = State.idle;
                     return;
                 }
                 isRecordType = false;
             } else {
-                errorHandler.error(new SAXParseException(
-                        "DBDXMLStructureHandler.start logic error",locator));
+                errorHandler.errorMessage(
+                        "DBDXMLStructureHandler.start logic error");
                 state = State.idle;
                 return;
             }
@@ -498,16 +328,15 @@ public class XMLToDBDFactory {
             state = State.structure;
         }
     
-        void end(String qName) throws SAXException {
+        public void end(String qName){
             if(state==State.idle) {
                 structurePropertyList = null;
                 dbdFieldList = null;
                 return;
             }
             if(dbdFieldList.size()==0) {
-                errorHandler.error(new SAXParseException(
-                   "DBDXMLStructureHandler.end no fields were defined",
-                   locator));
+                errorHandler.errorMessage(
+                   "DBDXMLStructureHandler.end no fields were defined");
                 state = State.idle;
                 structurePropertyList = null;
                 dbdFieldList = null;
@@ -528,9 +357,8 @@ public class XMLToDBDFactory {
                         structureName,dbdField,property);
                 boolean result = dbd.addRecordType(dbdRecordType);
                 if(!result) {
-                    errorHandler.warning(new SAXParseException(
-                            "recordType " + structureName + " already exists",
-                            locator));
+                    errorHandler.warningMessage(
+                            "recordType " + structureName + " already exists");
                 }
                 if(structureSupportName!=null) {
                     dbdRecordType.setSupportName(structureSupportName);
@@ -540,9 +368,8 @@ public class XMLToDBDFactory {
                         structureName,dbdField,property);
                 boolean result = dbd.addStructure(dbdStructure);
                 if(!result) {
-                    errorHandler.warning(new SAXParseException(
-                            "structure " + structureName + " already exists",
-                            locator));
+                    errorHandler.warningMessage(
+                            "structure " + structureName + " already exists");
                 }
                 if(structureSupportName!=null) {
                     dbdStructure.setSupportName(structureSupportName);
@@ -553,8 +380,7 @@ public class XMLToDBDFactory {
             state= State.idle;
         }
      
-        void startElement(String qName, Attributes attributes)
-        throws SAXException {
+        public void startElement(String qName, Map<String,String> attributes){
             if(state==State.idle) return;
             if(qName.equals("field")) {
                 assert(state==State.structure);
@@ -563,8 +389,7 @@ public class XMLToDBDFactory {
                     dbdAttribute = DBDAttributeFactory.create(dbd,this);
                 }
                 catch(Exception e) {
-                    errorHandler.error(new SAXParseException(
-                            e.getMessage() ,locator));
+                    errorHandler.errorMessage(e.getMessage());
                     state = State.idle;
                     return;
                 }
@@ -574,25 +399,24 @@ public class XMLToDBDFactory {
                 Type type = dbdAttribute.getType();
                 DBType dbType = dbdAttribute.getDBType();
                 if(dbType!=DBType.dbLink && type==Type.pvUnknown ) {
-                    errorHandler.error(new SAXParseException(
-                            "type not specified correctly",locator));
+                    errorHandler.errorMessage("type not specified correctly");
                     state= State.idle;
                     return;
                 }
-                fieldSupportName = attributes.getValue("supportName");
+                fieldSupportName = attributes.get("supportName");
                 fieldPropertyList =  new  LinkedList<Property>();
                 state = State.field;
             } else if(qName.equals("property")) {
-                String propertyName = attributes.getValue("name");
-                String associatedName = attributes.getValue("associatedField");
+                String propertyName = attributes.get("name");
+                String associatedName = attributes.get("associatedField");
                 if(propertyName==null || propertyName.length()==0) {
-                    errorHandler.warning(new SAXParseException(
-                            "property name not specified",locator));
+                    errorHandler.warningMessage(
+                            "property name not specified");
                     return;
                 }
                 if(associatedName==null || associatedName.length()==0) {
-                    errorHandler.warning(new SAXParseException(
-                            "associatedField not specified",locator));
+                    errorHandler.warningMessage(
+                            "associatedField not specified");
                     return;
                 }
                 Property property= FieldFactory.createProperty(
@@ -602,13 +426,12 @@ public class XMLToDBDFactory {
                 } else if(state==State.field) {
                     fieldPropertyList.add(property);
                 } else {
-                    errorHandler.warning(new SAXParseException(
-                            "logic error",locator));
+                    errorHandler.warningMessage("logic error");
                 }
             }
         }
     
-        void endElement(String qName) throws SAXException {
+        public void endElement(String qName){
             if(state==State.idle) return;
             if(!qName.equals("field")) return;
             assert(state==State.field);
@@ -628,71 +451,53 @@ public class XMLToDBDFactory {
             return;
         }
     
-        void characters(char[] ch, int start, int length)
-        throws SAXException {
-            // nothing to do
-        }
+        public void characters(char[] ch, int start, int length){}
     }
     
-    private static class DBDXMLSupportHandler extends DBDXMLHandler{
+    private static class DBDXMLSupportHandler implements DBDXMLHandler{
         
-        void start(String qName, Attributes attributes)
-        throws SAXException {
-            String name = attributes.getValue("name");
+        public void start(String qName, Map<String,String> attributes) {
+            String name = attributes.get("name");
             String configurationStructureName =
-                attributes.getValue("configurationStructureName");
-            String factoryName = attributes.getValue("factoryName");
+                attributes.get("configurationStructureName");
+            String factoryName = attributes.get("factoryName");
             if(name==null||name.length()==0) {
-                errorHandler.error(new SAXParseException(
-                    "name was not specified correctly",locator));
+                errorHandler.errorMessage(
+                    "name was not specified correctly");
                 return;
             }
             DBDSupport support = dbd.getSupport(name);
             if(support!=null) {
-                errorHandler.warning(new SAXParseException(
-                    "support " + name  + " already exists",locator));
+                errorHandler.warningMessage(
+                    "support " + name  + " already exists");
                     return;
             }
             if(factoryName==null||factoryName.length()==0) {
-                errorHandler.error(new SAXParseException(
-                    "factoryName was not specified correctly",locator));
+                errorHandler.errorMessage(
+                    "factoryName was not specified correctly");
                 return;
             }
             support = DBDCreateFactory.createSupport(
                 name,configurationStructureName,factoryName);
             if(support==null) {
-                errorHandler.error(new SAXParseException(
-                    "failed to create support " + qName,locator));
+                errorHandler.errorMessage(
+                    "failed to create support " + qName);
                     return;
             }
             if(!dbd.addSupport(support)) {
-                errorHandler.warning(new SAXParseException(
-                    "support " + qName + " already exists",
-                    locator));
+                errorHandler.warningMessage(
+                    "support " + qName + " already exists");
                 return;
             }
         }
     
-        void end(String qName) throws SAXException {
-            // nothing to do
-        }
+        public void end(String qName) {}
     
-        void startElement(String qName, Attributes attributes)
-        throws SAXException {
-            // nothing to do
-        }
+        public void startElement(String qName, Map<String,String> attributes) {}
     
-        void endElement(String qName) throws SAXException {
-            // nothing to do
-        }
+        public void endElement(String qName) {}
     
-        void characters(char[] ch, int start, int length)
-        throws SAXException {
-            // nothing to do
-        }
+        public void characters(char[] ch, int start, int length) {}
         
-        DBDXMLSupportHandler() {
-            super();
-        }
     }
 }

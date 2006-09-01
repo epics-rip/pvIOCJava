@@ -11,7 +11,6 @@ import org.epics.ioc.dbDefinition.*;
 import org.epics.ioc.dbAccess.*;
 
 import java.util.*;
-import java.net.*;
 /**
  * JUnit test for XMLToIOCDB.
  * This also is a test for pvAccess, dbDefinition, and dbAccess because XMLToDBD
@@ -35,17 +34,17 @@ public class XMLSupportTest extends TestCase {
         try {
             XMLToDBDFactory.convert(dbd,
                  "src/org/epics/ioc/dbAccess/example/supportDBD.xml");
-        } catch (Exception e) {
-            System.out.println("Exception: " + e);
+        } catch (IllegalStateException e) {
+            System.out.println("IllegalStateException: " + e);
         }
 
         IOCDB iocdb = IOCDBFactory.create(dbd,"testIOCDatabase");
         System.out.printf("reading exampleSupportDB%n");
         try {
             XMLToIOCDBFactory.convert(dbd,iocdb,
-                 "src/org/epics/ioc/dbAccess/example/exampleSupportDB.xml");
-        } catch (MalformedURLException e) {
-            System.out.println("Exception: " + e);
+                 "src/org/epics/ioc/dbAccess/example/supportDB.xml");
+        } catch (IllegalStateException e) {
+            System.out.println("IllegalStateException: " + e);
         }
         Map<String,DBRecord> recordMap = iocdb.getRecordMap();
         keys = recordMap.keySet();

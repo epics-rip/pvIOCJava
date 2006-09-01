@@ -29,77 +29,19 @@ public class XMLToDataBaseTest extends TestCase {
     public static void testXML() {
         Set<String> keys;
         DBD dbd = DBDFactory.create("test");
-        System.out.printf("reading menuStructureSupport%n");
         try {
             XMLToDBDFactory.convert(dbd,
-                 "src/org/epics/ioc/dbAccess/example/menuStructureSupportDBD.xml");
-        } catch (Exception e) {
-            System.out.println("Exception: " + e);
+                 "src/org/epics/ioc/dbAccess/example/xmlToDataBaseDBD.xml");
+        } catch (IllegalStateException e) {
+            System.out.println("IllegalStateException: " + e);
         }
-        System.out.printf("reading analogDBD%n");
-        try {
-            XMLToDBDFactory.convert(dbd,
-                 "src/org/epics/ioc/dbAccess/example/analogDBD.xml");
-        } catch (Exception e) {
-            System.out.println("Exception: " + e);
-        }
-        System.out.printf("reading aiDBD%n");
-        try {
-            XMLToDBDFactory.convert(dbd,
-                 "src/org/epics/ioc/dbAccess/example/aiDBD.xml");
-        } catch (Exception e) {
-            System.out.println("Exception: " + e);
-        }
-        System.out.printf("reading powerSupplyDBD%n");
-        try {
-            XMLToDBDFactory.convert(dbd,
-                 "src/org/epics/ioc/dbAccess/example/powerSupplyDBD.xml");
-        } catch (Exception e) {
-            System.out.println("Exception: " + e);
-        }
-        System.out.printf("reading allTypesDBD%n");
-        try {
-            XMLToDBDFactory.convert(dbd,
-                 "src/org/epics/ioc/dbAccess/example/allTypesDBD.xml");
-        } catch (Exception e) {
-            System.out.println("Exception: " + e);
-        }
-
+        
         IOCDB iocdb = IOCDBFactory.create(dbd,"testIOCDatabase");
-        System.out.printf("reading exampleAnalogDB%n");
         try {
             XMLToIOCDBFactory.convert(dbd,iocdb,
-                 "src/org/epics/ioc/dbAccess/example/exampleAnalogDB.xml");
-        } catch (Exception e) {
-            System.out.println("Exception: " + e);
-        }
-        System.out.printf("reading exampleAiLinearDB%n");
-        try {
-            XMLToIOCDBFactory.convert(dbd,iocdb,
-                 "src/org/epics/ioc/dbAccess/example/exampleAiLinearDB.xml");
-        } catch (Exception e) {
-            System.out.println("Exception: " + e);
-        }
-        System.out.printf("reading exampleAiDB%n");
-        try {
-            XMLToIOCDBFactory.convert(dbd,iocdb,
-                 "src/org/epics/ioc/dbAccess/example/exampleAiDB.xml");
-        } catch (Exception e) {
-            System.out.println("Exception: " + e);
-        }
-        System.out.printf("reading examplePowerSupplyDB%n");
-        try {
-            XMLToIOCDBFactory.convert(dbd,iocdb,
-                 "src/org/epics/ioc/dbAccess/example/examplePowerSupplyDB.xml");
-        } catch (Exception e) {
-            System.out.println("Exception: " + e);
-        }
-        System.out.printf("reading examplePowerSupplyArrayDB%n");
-        try {
-            XMLToIOCDBFactory.convert(dbd,iocdb,
-                 "src/org/epics/ioc/dbAccess/example/examplePowerSupplyArrayDB.xml");
-        } catch (Exception e) {
-            System.out.println("Exception: " + e);
+                 "src/org/epics/ioc/dbAccess/example/xmlToDataBaseDB.xml");
+        } catch (IllegalStateException e) {
+            System.out.println("IllegalStateException: " + e);
         }
         Map<String,DBRecord> recordMap = iocdb.getRecordMap();
         keys = recordMap.keySet();

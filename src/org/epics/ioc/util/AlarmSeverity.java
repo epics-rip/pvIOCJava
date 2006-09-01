@@ -11,9 +11,21 @@ package org.epics.ioc.util;
  *
  */
 public enum AlarmSeverity {
+    /**
+     * Not in alarm.
+     */
     none,
+    /**
+     * Minor alarm.
+     */
     minor,
+    /**
+     * Major Alarm.
+     */
     major,
+    /**
+     * The value is invalid.
+     */
     invalid;
     
     /**

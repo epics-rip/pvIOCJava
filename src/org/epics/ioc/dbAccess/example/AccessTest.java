@@ -24,49 +24,13 @@ public class AccessTest extends TestCase {
     public static void testAccess() {
         DBD dbd = DBDFactory.create("test"); 
         IOCDB iocdb = IOCDBFactory.create(dbd,"testIOCDatabase");
-        System.out.printf("reading menuStructureSupport%n");
         try {
             XMLToDBDFactory.convert(dbd,
-                 "src/org/epics/ioc/dbAccess/example/menuStructureSupportDBD.xml");
-        } catch (Exception e) {
-            System.out.println("Exception: " + e);
+                 "src/org/epics/ioc/dbAccess/example/accessDBD.xml");
+        } catch (IllegalStateException e) {
+            System.out.println("IllegalStateException: " + e);
         }
-        
-        System.out.printf("reading aiDBD%n");
-        try {
-            XMLToDBDFactory.convert(dbd,
-                 "src/org/epics/ioc/dbAccess/example/aiDBD.xml");
-        } catch (Exception e) {
-            System.out.println("Exception: " + e);
-        }
-        System.out.printf("reading powerSupplyDBD%n");
-        try {
-            XMLToDBDFactory.convert(dbd,
-                 "src/org/epics/ioc/dbAccess/example/powerSupplyDBD.xml");
-        } catch (Exception e) {
-            System.out.println("Exception: " + e);
-        }
-        System.out.printf("reading allTypesDBD%n");
-        try {
-            XMLToDBDFactory.convert(dbd,
-                 "src/org/epics/ioc/dbAccess/example/allTypesDBD.xml");
-        } catch (Exception e) {
-            System.out.println("Exception: " + e);
-        }
-        System.out.printf("reading aiLinkedDBD%n");
-        try {
-            XMLToDBDFactory.convert(dbd,
-                 "src/org/epics/ioc/dbAccess/example/aiLinkedDBD.xml");
-        } catch (Exception e) {
-            System.out.println("Exception: " + e);
-        }
-        System.out.printf("reading powerSupplyLinkedDBD%n");
-        try {
-            XMLToDBDFactory.convert(dbd,
-                 "src/org/epics/ioc/dbAccess/example/powerSupplyLinkedDBD.xml");
-        } catch (Exception e) {
-            System.out.println("Exception: " + e);
-        }
+              
 //        System.out.printf("%n%nstructures");
 //        Map<String,DBDStructure> structureMap = dbd.getStructureMap();
 //        Set<String> keys = structureMap.keySet();
@@ -81,40 +45,12 @@ public class AccessTest extends TestCase {
 //            DBDRecordType dbdRecordType = recordTypeMap.get(key);
 //            System.out.print(dbdRecordType.toString());
 //        }
-        System.out.printf("reading exampleAiLinearDB%n");
+        
         try {
             XMLToIOCDBFactory.convert(dbd,iocdb,
-                "src/org/epics/ioc/dbAccess/example/exampleAiLinearDB.xml");
-        } catch (Exception e) {
-            System.out.println("Exception: " + e);
-        }
-        System.out.printf("reading examplePowerSupplyDB%n");
-        try {
-            XMLToIOCDBFactory.convert(dbd,iocdb,
-                 "src/org/epics/ioc/dbAccess/example/examplePowerSupplyDB.xml");
-        } catch (Exception e) {
-            System.out.println("Exception: " + e);
-        }
-        System.out.printf("reading examplePowerSupplyArrayDB%n");
-        try {
-            XMLToIOCDBFactory.convert(dbd,iocdb,
-                 "src/org/epics/ioc/dbAccess/example/examplePowerSupplyArrayDB.xml");
-        } catch (Exception e) {
-            System.out.println("Exception: " + e);
-        }
-        System.out.printf("reading exampleAllTypeDB%n");
-        try {
-            XMLToIOCDBFactory.convert(dbd,iocdb,
-                 "src/org/epics/ioc/dbAccess/example/exampleAllTypeDB.xml");
-        } catch (Exception e) {
-            System.out.println("Exception: " + e);
-        }
-        System.out.printf("reading examplePowerSupplyLinkedDB%n");
-        try {
-            XMLToIOCDBFactory.convert(dbd,iocdb,
-                 "src/org/epics/ioc/dbAccess/example/examplePowerSupplyLinkedDB.xml");
-        } catch (Exception e) {
-            System.out.println("Exception: " + e);
+                "src/org/epics/ioc/dbAccess/example/accessDB.xml");
+        } catch (IllegalStateException e) {
+            System.out.println("IllegalStateException: " + e);
         }
         
 //        System.out.printf("%nrecords%n");

@@ -16,13 +16,6 @@ import org.epics.ioc.util.TimeStamp;
  */
 public interface RecordProcessSupport {
     /**
-     * Set process trace.
-     * If true a message will displayed whenever process, requestProcessCallback, or processContinue are called.
-     * @param value true or false.
-     * @return (false,true) if the state (was not, was) changed.
-     */
-    boolean setTrace(boolean value);
-    /**
      * Request to be called back after process has called record support but before it returns.
      * This must only be called by code running as part of a Support.process request. 
      * The callback will be called with the record unlocked.

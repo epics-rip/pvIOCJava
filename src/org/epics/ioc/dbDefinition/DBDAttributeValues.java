@@ -5,6 +5,8 @@
  */
 package org.epics.ioc.dbDefinition;
 
+import java.util.*;
+
 /**
  * interface that provides values for field attributes.
  * @author mrk
@@ -25,15 +27,8 @@ public interface DBDAttributeValues {
      */
     String getValue(String name);
     /**
-     * Get the name for the specified attribute.
-     * @param index the index of the desired attribute.
-     * @return the name or null if index is out of bounds.
+     * Get  a set for the keys.
+     * @return The set.
      */
-    String getName(int index);
-    /**
-     * Get the value for the specified attribute.
-     * @param index the name or null if index is out of bounds.
-     * @return the name or null if index is out of bounds.
-     */
-    String getValue(int index);
+    Set<String> keySet();
 }

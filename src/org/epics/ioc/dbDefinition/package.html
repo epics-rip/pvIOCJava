@@ -12,7 +12,7 @@
 
 <h1 style="text-align: center">EPICS JavaIoc: Database Definition <br />
 package: org.epics.ioc.dbDefinition<br />
-2006.08.07</h1>
+2006.08.31</h1>
 <hr />
 <a href="#Overview">Overview</a> <br />
 <a href="#Syntax">Database Definition Syntax</a>
@@ -496,7 +496,13 @@ pvAccess.</p>
 
 <p>The following provides reflection for a field of a structure or
 recordType</p>
-<pre>    interface DBDAttribute {
+<pre>    interface DBDAttributeValues {
+        int getLength();
+        String getValue(String name);
+        Set&lt;String&gt; keySet();
+    }
+
+    interface DBDAttribute {
         String getName();
         DBType getDBType();
         Type getType();        
@@ -515,6 +521,11 @@ recordType</p>
     interface DBDField extends Field {
         DBType getDBType();
         DBDAttribute getAttribute();
+    }
+
+    public class DBDAttributeFactory {
+        static public DBDAttribute create(DBD dbd, DBDAttributeValues attributes) {
+        return new Attribute(dbd, attributes);
     }
     </pre>
 

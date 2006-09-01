@@ -77,10 +77,7 @@ public class IOCDBFactory {
         
         private DBD dbd;
         private String name;
-        private static Map<String,DBRecord> recordMap;
-        static {
-            recordMap = new HashMap<String,DBRecord>();
-        }
+        private static Map<String,DBRecord> recordMap = new HashMap<String,DBRecord>();
         /* (non-Javadoc)
          * @see org.epics.ioc.dbAccess.IOCDB#createAccess(java.lang.String)
          */

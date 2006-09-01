@@ -11,6 +11,8 @@ import org.epics.ioc.pvAccess.*;
 import org.epics.ioc.dbDefinition.*;
 
 /**
+ * Support for an array of links.
+ * The links can be process, input, or output.
  * @author mrk
  *
  */
@@ -48,18 +50,21 @@ public class LinkArraySupportFactory {
         private DBLink[] dbLinks = null;
         private LinkSupport[] processLinks = null;
         
-        private PVData recordData = null;
+        private PVData valueData = null;
         
         private ProcessCompleteListener listener;
         private int nextLink;
         private int numberWait;
         private ProcessResult finalResult = ProcessResult.success;
        
-        LinkArray(DBArray array) {
+        private LinkArray(DBArray array) {
             super(supportName,array);
             dbLinkArray = (DBLinkArray)array; 
         }
 
+        /* (non-Javadoc)
+         * @see org.epics.ioc.dbProcess.Support#initialize()
+         */
         public void initialize() {
             recordProcess = dbLinkArray.getRecord().getRecordProcess();
             recordProcessSupport = recordProcess.getRecordProcessSupport();
@@ -83,7 +88,7 @@ public class LinkArraySupportFactory {
                     continue;
                 }
                 linkSupport.initialize();
-                linkSupport.setField(recordData);
+                linkSupport.setField(valueData);
                 if(linkSupport.getSupportState()!=SupportState.readyForStart) {
                     supportState = SupportState.readyForInitialize;
                     linkSupport.uninitialize();
@@ -98,6 +103,9 @@ public class LinkArraySupportFactory {
             }
             setSupportState(supportState);
         }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.dbProcess.Support#start()
+         */
         public void start() {
             supportState = SupportState.ready;
             int n = dbLinkArray.getLength();
@@ -108,7 +116,9 @@ public class LinkArraySupportFactory {
             }
             setSupportState(supportState);
         }
-
+        /* (non-Javadoc)
+         * @see org.epics.ioc.dbProcess.Support#stop()
+         */
         public void stop() {
             int n = dbLinkArray.getLength();
             for(int i=0; i< n; i++) {
@@ -118,6 +128,9 @@ public class LinkArraySupportFactory {
             }
             setSupportState(SupportState.readyForInitialize);
         }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.dbProcess.Support#uninitialize()
+         */
         public void uninitialize() {
             supportState = SupportState.readyForInitialize;
             if(processLinks!=null) for(LinkSupport processLink: processLinks) {
@@ -125,8 +138,10 @@ public class LinkArraySupportFactory {
                 processLink.uninitialize();
             }
             setSupportState(supportState);
-        }
-        
+        }       
+        /* (non-Javadoc)
+         * @see org.epics.ioc.dbProcess.Support#process(org.epics.ioc.dbProcess.ProcessCompleteListener)
+         */
         public ProcessReturn process(ProcessCompleteListener listener) {
             if(supportState!=SupportState.ready) {
                 errorMessage(
@@ -142,8 +157,10 @@ public class LinkArraySupportFactory {
             this.listener = listener;
             recordProcessSupport.requestProcessCallback(this);
             return ProcessReturn.active;
-        }
-        
+        }        
+        /* (non-Javadoc)
+         * @see org.epics.ioc.dbProcess.Support#processContinue()
+         */
         public void processContinue() {
             boolean allDone = true;
             while(nextLink<processLinks.length) {
@@ -168,21 +185,30 @@ public class LinkArraySupportFactory {
             }
             if(allDone) listener.processComplete(this,finalResult);
         }
-
+        /* (non-Javadoc)
+         * @see org.epics.ioc.dbProcess.LinkSupport#setField(org.epics.ioc.pvAccess.PVData)
+         */
         public void setField(PVData field) {
-            recordData = field;
+            valueData = field;
         }
-
+        /* (non-Javadoc)
+         * @see org.epics.ioc.dbProcess.ProcessCallbackListener#callback()
+         */
         public void callback() {
             recordProcessSupport.processContinue(this);
-        }
-        
+        }       
+        /* (non-Javadoc)
+         * @see org.epics.ioc.dbProcess.ProcessCompleteListener#processComplete(org.epics.ioc.dbProcess.Support, org.epics.ioc.dbProcess.ProcessResult)
+         */
         public void processComplete(Support support,ProcessResult result) {
             if(result==ProcessResult.failure) finalResult = result;
             numberWait--;
             if(numberWait>0) return;
             listener.processComplete(this,finalResult);
         }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.dbProcess.SupportStateListener#newState(org.epics.ioc.dbProcess.Support, org.epics.ioc.dbProcess.SupportState)
+         */
         public void newState(Support support,SupportState state) {
             if(state.compareTo(getSupportState())>0) {
                 setSupportState(state);

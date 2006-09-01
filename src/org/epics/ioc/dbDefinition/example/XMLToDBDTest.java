@@ -30,8 +30,8 @@ public class XMLToDBDTest extends TestCase {
         try {
             XMLToDBDFactory.convert(dbd,
                  "src/org/epics/ioc/dbDefinition/example/test.xml");
-        } catch (Exception e) {
-            System.out.println("Exception: " + e);
+        } catch (IllegalStateException e) {
+            System.out.println("IllegalStateException: " + e);
         }
         System.out.printf("%nmenus");
         Map<String,DBDMenu> menuMap = dbd.getMenuMap();

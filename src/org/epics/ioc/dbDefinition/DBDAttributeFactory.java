@@ -6,6 +6,7 @@
 package org.epics.ioc.dbDefinition;
 
 import org.epics.ioc.pvAccess.Type;
+import java.util.*;
 
 /**
  * Factory for creating a DBDAttribute interface.
@@ -126,11 +127,10 @@ public class DBDAttributeFactory {
         }
         
         Attribute(DBD dbd,DBDAttributeValues attributes) {
-            int number = attributes.getLength();
             Types types = new Types();
-            for(int i=0; i< number; i++) {
-                String name = attributes.getName(i);
-                String value = attributes.getValue(i);
+            Set<String> keySet = attributes.keySet();
+            for(String name : keySet) {
+                String value = attributes.getValue(name);
                 if(name.equals("name")) {
                     this.name = value;
                     continue;

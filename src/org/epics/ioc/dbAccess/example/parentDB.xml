@@ -5,5 +5,4 @@
 <include href = "examplePowerSupplyDB.xml" />
 <include href = "examplePowerSupplyArrayDB.xml" />
 <include href = "exampleAllTypeDB.xml" />
-<include href = "examplePowerSupplyLinkedDB.xml" />
 </IOCDatabase>

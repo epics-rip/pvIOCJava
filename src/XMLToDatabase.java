@@ -114,10 +114,8 @@ public class XMLToDatabase {
         System.out.printf("\nparsing DBD file %s\n",fileName);
         try {
             XMLToDBDFactory.convert(dbd,fileName);
-        } catch (MalformedURLException e) {
-            System.out.println("Exception: " + e);
         } catch (IllegalStateException e) {
-            System.out.println("Exception: " + e);
+            System.out.println("IllegalStateException: " + e);
         }
     }
 
@@ -125,10 +123,8 @@ public class XMLToDatabase {
         System.out.printf("\nparsing DB file %s\n",fileName);
         try {
             XMLToIOCDBFactory.convert(dbd,iocdb,fileName);
-        } catch (MalformedURLException e) {
-            System.out.println("Exception: " + e);
         }  catch (IllegalStateException e) {
-            System.out.println("Exception: " + e);
+            System.out.println("IllegalStateException: " + e);
         }
     }
     

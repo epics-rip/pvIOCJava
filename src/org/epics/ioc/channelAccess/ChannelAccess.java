@@ -6,7 +6,7 @@
 package org.epics.ioc.channelAccess;
 
 /**
- * interface for creating and destroying a channel.
+ * Interface for creating and destroying a channel.
  * @author mrk
  *
  */

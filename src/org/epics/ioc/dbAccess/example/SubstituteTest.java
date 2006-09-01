@@ -12,33 +12,39 @@ import org.epics.ioc.dbAccess.*;
 
 import java.util.*;
 /**
- * test default values for fields.
+ * JUnit test for XMLToIOCDB.
+ * This also is a test for pvAccess, dbDefinition, and dbAccess because XMLToDBD
+ * is called, which makes extensive use of dbDefinition and pvAccess, and
+ * XMLToIOCDB is called, which makes extensive use of dbAccess.
+ * It also provides an example of parsing database definitions.
+ * The output is a dump of all the record instance files it reads.
  * @author mrk
  *
  */
-public class DefaultTest extends TestCase {
+public class SubstituteTest extends TestCase {
         
     /**
-     * test default.
+     * test XMLToIOCDB.
      */
-    public static void testDefault() {
+    public static void testXML() {
+        Set<String> keys;
         DBD dbd = DBDFactory.create("test");
         try {
             XMLToDBDFactory.convert(dbd,
-                 "src/org/epics/ioc/dbAccess/example/defaultDBD.xml");
+                 "src/org/epics/ioc/dbAccess/example/substituteDBD.xml");
         } catch (IllegalStateException e) {
             System.out.println("IllegalStateException: " + e);
         }
-
+        
         IOCDB iocdb = IOCDBFactory.create(dbd,"testIOCDatabase");
         try {
             XMLToIOCDBFactory.convert(dbd,iocdb,
-                 "src/org/epics/ioc/dbAccess/example/defaultDB.xml");
+                 "src/org/epics/ioc/dbAccess/example/substituteDB.xml");
         } catch (IllegalStateException e) {
             System.out.println("IllegalStateException: " + e);
         }
         Map<String,DBRecord> recordMap = iocdb.getRecordMap();
-        Set<String> keys = recordMap.keySet();
+        keys = recordMap.keySet();
         System.out.printf("%n%nrecord list%n");
         for(String key: keys) {
             DBRecord record = recordMap.get(key);

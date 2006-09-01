@@ -5,7 +5,5 @@
 <include href = "aiDBD.xml" />
 <include href = "powerSupplyDBD.xml" />
 <include href = "allTypesDBD.xml" />
-<include href = "aiLinkedDBD.xml" />
-<include href = "powerSupplyLinkedDBD.xml" />
 
 </DBDefinition>

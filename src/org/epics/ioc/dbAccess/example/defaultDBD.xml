@@ -1,6 +1,8 @@
 <?xml version="1.0" ?>
 <DBDefinition>
 
+<include href = "src/org/epics/ioc/dbAccess/example/menuStructureSupportDBD.xml" />
+
 <structure name = "structureAllTypes">
     <field name = "boolean" type = "boolean" default = "true" />
     <field name = "byte" type = "byte"  default = "-0x7f" />

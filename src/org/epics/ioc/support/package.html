@@ -10,13 +10,92 @@
 <body>
 <h1 style="text-align: center">EPICS JavaIOC: support<br />
 package: org.epics.ioc.support<br />
-2006.06.02</h1>
+2006.09.01</h1>
 
-
+<div class="toc">
+<ul>
+  <li><a href="#Overview">Overview</a></li>
+  <li><a href="#Link">Link Support Factory</a></li>
+  <li><a href="#Link1">Link Array Support Factory</a></li>
+  <li><a href="#Analog">Analog Input Factory</a></li>
+  <li><a href="#Linear">Linear Convert Input Factory</a></li>
+</ul>
+</div>
 <hr />
 
-<h1 style="text-align: center">Overview</h1>
+<h2 style="text-align: center" id="Overview">Overview</h2>
 <hr />
-<p>Work on this package is just beginning.</p>
+
+<p>This package provides support code for a javaIOC.</p>
+<hr />
+
+<h2 style="text-align: center" id="Link">Link Support Factory</h2>
+<hr />
+
+<p>This is a factory that provides an implementation of link support for the
+following:</p>
+<dl>
+  <dt>processLink</dt>
+    <dd>Support for a link that requests that another record process without
+      transfering any data.</dd>
+  <dt>inputLink</dt>
+    <dd>Support for a link that 1) optionally requests that another record
+      process, and 2) transfers data from the other record to the recordn
+      containing the link.</dd>
+  <dt>outputLink</dt>
+    <dd>Support for a link that 1) transfers data to another record, and 2)
+      optionally requests that the other record process.</dd>
+  <dt>monitorLink</dt>
+    <dd>Support for monitoring another record.</dd>
+</dl>
+
+<p>Each requires that other support code, e.g. record support knows how to
+call them. In addition the code that calls them must call
+linkSupport.setField for inputLink, outputLink, and monitorLink.</p>
+
+<p>Call the Type of the argument to setField valueType and the Type of the
+data the link references linkType. The types of data that can be transfered
+are.</p>
+<ul>
+  <li>Both valueType and linkType are scalars and they are copy compatible as
+    defined by org.epics.ioc.pvAccess.Convert.isCopyScalarCompatible.</li>
+  <li>Both are type Type.pvArray and are copy compatible as defined by
+    org.epics.ioc.pvAccess.Convert.isCopyArrayCompatible.</li>
+  <li>Both are Type.pvStructure and are copy compatible as defined by
+    org.epics.ioc.pvAccess.Convert.isCopyStructureCompatible.</li>
+</ul>
+
+<p></p>
+
+<p>NOTE: monitorLink is not implemented correctly and does not support
+events.</p>
+<hr />
+
+<h2 style="text-align: center;" id="Link1">Link Array Support Factory</h2>
+<hr />
+
+<p>This is a factory that provides support for an array of links. The
+supportName is linkArray. Each array element, which must have element type
+link, can be reference any support that implements LinkSupport.</p>
+
+<p>For example any record support could optionally support a field called
+process, which is an array of process links. When the record instance
+completes processing, it can request the the support for the process field
+process. Support for an output record would allow process and output links.
+Many other possibilities are possible.</p>
+<hr />
+
+<h2 style="text-align: center;" id="Analog">Analog Input Factory</h2>
+<hr />
+
+<p>Not implemented but it will be support that obtains a raw value. It will
+be able to comunicate with LinkSupport and also with AsynSupport.</p>
+<hr />
+
+<h2 style="text-align: center;" id="Linear">Linear Convert Input Factory</h2>
+<hr />
+
+<p>Not implemented but it will be support that takes a raw value and converts
+it to engineering units.</p>
 </body>
 </html>

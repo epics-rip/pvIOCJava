@@ -64,4 +64,11 @@ public interface RecordProcess {
      * @return  The interface for RecordProcessSupport.
      */
     RecordProcessSupport getRecordProcessSupport();
+    /**
+     * Set process trace.
+     * If true a message will displayed whenever process, requestProcessCallback, or processContinue are called.
+     * @param value true or false.
+     * @return (false,true) if the state (was not, was) changed.
+     */
+    boolean setTrace(boolean value);
 }

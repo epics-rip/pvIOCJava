@@ -8,10 +8,19 @@ package org.epics.ioc.channelAccess;
 import org.epics.ioc.pvAccess.Field;
 
 /**
+ * Interface for a field of a channel.
  * @author mrk
  *
  */
 public interface ChannelField {
+    /**
+     * Get the introspection interface for the field.
+     * @return the introspection interface.
+     */
     Field getField();
+    /**
+     * Get the access rights for the field.
+     * @return The access rights.
+     */
     AccessRights getAccessRights();
 }

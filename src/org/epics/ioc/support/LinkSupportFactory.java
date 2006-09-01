@@ -333,7 +333,7 @@ public class LinkSupportFactory {
         private PVBoolean inheritSeverityAccess = null;
         private PVBoolean forceLocalAccess = null;
         
-        private PVData recordData = null;
+        private PVData valueData = null;
         
         private boolean process = false;
         private boolean wait = false;
@@ -406,7 +406,7 @@ public class LinkSupportFactory {
          */
         public void start() {
             if(supportState!=SupportState.readyForStart) return;
-            if(recordData==null) {
+            if(valueData==null) {
                 errorMessage(
                     "Logic Error: InputLink.start called before setField");
                 setSupportState(SupportState.zombie);
@@ -455,7 +455,7 @@ public class LinkSupportFactory {
          * @see org.epics.ioc.dbProcess.LinkSupport#setField(org.epics.ioc.pvAccess.PVData)
          */
         public void setField(PVData data) {
-            recordData = data;
+            valueData = data;
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.dbProcess.LinkSupport#process(org.epics.ioc.dbProcess.LinkListener)
@@ -594,22 +594,22 @@ public class LinkSupportFactory {
                 processResult = ProcessResult.failure;
             }
             Type linkType = data.getField().getType();
-            Field recordField = recordData.getField();
-            Type recordType = recordField.getType();
-            if(recordType.isScalar() && linkType.isScalar()) {
-                convert.copyScalar(data,recordData);
+            Field valueField = valueData.getField();
+            Type valueType = valueField.getType();
+            if(valueType.isScalar() && linkType.isScalar()) {
+                convert.copyScalar(data,valueData);
                 return;
             }
-            if(linkType==Type.pvArray && recordType==Type.pvArray) {
+            if(linkType==Type.pvArray && valueType==Type.pvArray) {
                 PVArray linkArrayData = (PVArray)data;
-                PVArray recordArrayData = (PVArray)recordData;
+                PVArray recordArrayData = (PVArray)valueData;
                 convert.copyArray(linkArrayData,0,
                     recordArrayData,0,linkArrayData.getLength());
                 return;
             }
-            if(linkType==Type.pvStructure && recordType==Type.pvStructure) {
+            if(linkType==Type.pvStructure && valueType==Type.pvStructure) {
                 PVStructure linkStructureData = (PVStructure)data;
-                PVStructure recordStructureData = (PVStructure)recordData;
+                PVStructure recordStructureData = (PVStructure)valueData;
                 convert.copyStructure(linkStructureData,recordStructureData);
                 return;
             }
@@ -635,17 +635,17 @@ public class LinkSupportFactory {
         
         private String checkCompatibility() {
             Type linkType = linkField.getField().getType();
-            Field recordField = recordData.getField();
-            Type recordType = recordField.getType();
-            if(recordType.isScalar() && linkType.isScalar()) {
-                if(convert.isCopyScalarCompatible(linkField.getField(),recordField)) return null;
-            } else if(linkType==Type.pvArray && recordType==Type.pvArray) {
+            Field valueField = valueData.getField();
+            Type valueType = valueField.getType();
+            if(valueType.isScalar() && linkType.isScalar()) {
+                if(convert.isCopyScalarCompatible(linkField.getField(),valueField)) return null;
+            } else if(linkType==Type.pvArray && valueType==Type.pvArray) {
                 Array linkArray = (Array)linkField;
-                Array recordArray = (Array)recordField;
+                Array recordArray = (Array)valueField;
                 if(convert.isCopyArrayCompatible(linkArray,recordArray)) return null;
-            } else if(linkType==Type.pvStructure && recordType==Type.pvStructure) {
+            } else if(linkType==Type.pvStructure && valueType==Type.pvStructure) {
                 Structure linkStructure = (Structure)linkField;
-                Structure recordStructure = (Structure)recordField;
+                Structure recordStructure = (Structure)valueField;
                 if(convert.isCopyStructureCompatible(linkStructure,recordStructure)) return null;
             }
             String errorMessage = String.format(
@@ -677,7 +677,7 @@ public class LinkSupportFactory {
         private PVDouble timeoutAccess = null;
         private PVBoolean forceLocalAccess = null;
         
-        private PVData recordData = null;
+        private PVData valueData = null;
         
         private boolean process = false;
         private boolean wait = false;
@@ -747,7 +747,7 @@ public class LinkSupportFactory {
          */
         public void start() {
             if(supportState!=SupportState.readyForStart) return;
-            if(recordData==null) {
+            if(valueData==null) {
                 errorMessage(
                     "Logic Error: OutputLink.start called before setField");
                 setSupportState(SupportState.zombie);
@@ -796,7 +796,7 @@ public class LinkSupportFactory {
          * @see org.epics.ioc.dbProcess.LinkSupport#setField(org.epics.ioc.pvAccess.PVData)
          */
         public void setField(PVData data) {
-            recordData = data;
+            valueData = data;
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.dbProcess.LinkSupport#process(org.epics.ioc.dbProcess.LinkListener)
@@ -900,21 +900,21 @@ public class LinkSupportFactory {
                 processResult = ProcessResult.failure;
             }
             Type linkType = data.getField().getType();
-            Field recordField = recordData.getField();
-            Type recordType = recordField.getType();
-            if(recordType.isScalar() && linkType.isScalar()) {
-                convert.copyScalar(recordData,data);
+            Field valueField = valueData.getField();
+            Type valueType = valueField.getType();
+            if(valueType.isScalar() && linkType.isScalar()) {
+                convert.copyScalar(valueData,data);
                 return;
             }
-            if(linkType==Type.pvArray && recordType==Type.pvArray) {
+            if(linkType==Type.pvArray && valueType==Type.pvArray) {
                 PVArray linkArrayData = (PVArray)data;
-                PVArray recordArrayData = (PVArray)recordData;
+                PVArray recordArrayData = (PVArray)valueData;
                 convert.copyArray(recordArrayData,0,linkArrayData,0,recordArrayData.getLength());
                 return;
             }
-            if(linkType==Type.pvStructure && recordType==Type.pvStructure) {
+            if(linkType==Type.pvStructure && valueType==Type.pvStructure) {
                 PVStructure linkStructureData = (PVStructure)data;
-                PVStructure recordStructureData = (PVStructure)recordData;
+                PVStructure recordStructureData = (PVStructure)valueData;
                 convert.copyStructure(recordStructureData,linkStructureData);
                 return;
             }
@@ -950,17 +950,17 @@ public class LinkSupportFactory {
               
         private String checkCompatibility() {
             Type linkType = linkField.getField().getType();
-            Field recordField = recordData.getField();
-            Type recordType = recordField.getType();
-            if(recordType.isScalar() && linkType.isScalar()) {
-                if(convert.isCopyScalarCompatible(linkField.getField(),recordField)) return null;
-            } else if(linkType==Type.pvArray && recordType==Type.pvArray) {
+            Field valueField = valueData.getField();
+            Type valueType = valueField.getType();
+            if(valueType.isScalar() && linkType.isScalar()) {
+                if(convert.isCopyScalarCompatible(linkField.getField(),valueField)) return null;
+            } else if(linkType==Type.pvArray && valueType==Type.pvArray) {
                 Array linkArray = (Array)linkField;
-                Array recordArray = (Array)recordField;
+                Array recordArray = (Array)valueField;
                 if(convert.isCopyArrayCompatible(linkArray,recordArray)) return null;
-            } else if(linkType==Type.pvStructure && recordType==Type.pvStructure) {
+            } else if(linkType==Type.pvStructure && valueType==Type.pvStructure) {
                 Structure linkStructure = (Structure)linkField;
-                Structure recordStructure = (Structure)recordField;
+                Structure recordStructure = (Structure)valueField;
                 if(convert.isCopyStructureCompatible(linkStructure,recordStructure)) return null;
             }
             String errorMessage = String.format(
@@ -993,7 +993,7 @@ public class LinkSupportFactory {
         private PVBoolean inheritSeverityAccess = null;
         private PVBoolean forceLocalAccess = null;
         
-        private PVData recordData = null;
+        private PVData valueData = null;
         
         private boolean process = false;
         private boolean monitorOnly = false;
@@ -1060,7 +1060,7 @@ public class LinkSupportFactory {
          */
         public void start() {
             if(supportState!=SupportState.readyForStart) return;
-            if(recordData==null) {
+            if(valueData==null) {
                 errorMessage(
                     "Logic Error: MonitorLink.start called before setField");
                 setSupportState(SupportState.zombie);
@@ -1109,7 +1109,7 @@ public class LinkSupportFactory {
          * @see org.epics.ioc.dbProcess.LinkSupport#setField(org.epics.ioc.pvAccess.PVData)
          */
         public void setField(PVData data) {
-            recordData = data;
+            valueData = data;
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.dbProcess.LinkSupport#process(org.epics.ioc.dbProcess.LinkListener)
@@ -1236,22 +1236,22 @@ public class LinkSupportFactory {
                 return;
             }
             Type linkType = data.getField().getType();
-            Field recordField = recordData.getField();
-            Type recordType = recordField.getType();
-            if(recordType.isScalar() && linkType.isScalar()) {
-                convert.copyScalar(data,recordData);
+            Field valueField = valueData.getField();
+            Type valueType = valueField.getType();
+            if(valueType.isScalar() && linkType.isScalar()) {
+                convert.copyScalar(data,valueData);
                 return;
             }
-            if(linkType==Type.pvArray && recordType==Type.pvArray) {
+            if(linkType==Type.pvArray && valueType==Type.pvArray) {
                 PVArray linkArrayData = (PVArray)data;
-                PVArray recordArrayData = (PVArray)recordData;
+                PVArray recordArrayData = (PVArray)valueData;
                 convert.copyArray(linkArrayData,0,
                     recordArrayData,0,linkArrayData.getLength());
                 return;
             }
-            if(linkType==Type.pvStructure && recordType==Type.pvStructure) {
+            if(linkType==Type.pvStructure && valueType==Type.pvStructure) {
                 PVStructure linkStructureData = (PVStructure)data;
-                PVStructure recordStructureData = (PVStructure)recordData;
+                PVStructure recordStructureData = (PVStructure)valueData;
                 convert.copyStructure(linkStructureData,recordStructureData);
                 return;
             }
@@ -1284,17 +1284,17 @@ public class LinkSupportFactory {
             
         private String checkCompatibility() {
             Type linkType = linkField.getField().getType();
-            Field recordField = recordData.getField();
-            Type recordType = recordField.getType();
-            if(recordType.isScalar() && linkType.isScalar()) {
-                if(convert.isCopyScalarCompatible(linkField.getField(),recordField)) return null;
-            } else if(linkType==Type.pvArray && recordType==Type.pvArray) {
+            Field valueField = valueData.getField();
+            Type valueType = valueField.getType();
+            if(valueType.isScalar() && linkType.isScalar()) {
+                if(convert.isCopyScalarCompatible(linkField.getField(),valueField)) return null;
+            } else if(linkType==Type.pvArray && valueType==Type.pvArray) {
                 Array linkArray = (Array)linkField;
-                Array recordArray = (Array)recordField;
+                Array recordArray = (Array)valueField;
                 if(convert.isCopyArrayCompatible(linkArray,recordArray)) return null;
-            } else if(linkType==Type.pvStructure && recordType==Type.pvStructure) {
+            } else if(linkType==Type.pvStructure && valueType==Type.pvStructure) {
                 Structure linkStructure = (Structure)linkField;
-                Structure recordStructure = (Structure)recordField;
+                Structure recordStructure = (Structure)valueField;
                 if(convert.isCopyStructureCompatible(linkStructure,recordStructure)) return null;
             }
             String errorMessage = String.format(
