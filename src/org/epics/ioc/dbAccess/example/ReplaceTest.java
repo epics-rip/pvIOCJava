@@ -471,10 +471,11 @@ public class ReplaceTest extends TestCase {
              System.out.printf("dbStructure not supported.%n");
              return;
         case dbArray:
-             DBType elementDbType= dbdField.getAttribute().getElementDBType();
+             DBDArrayField dbdArrayField= (DBDArrayField)dbdField;
+             DBType elementDbType= dbdArrayField.getElementDBType();
              switch(elementDbType) {
              case dbPvType: {
-                     Type elementType = dbdField.getAttribute().getElementType();
+                     Type elementType = dbdArrayField.getElementType();
                      switch(elementType) {
                      case pvBoolean:
                           newField = new BooleanArray(parent,

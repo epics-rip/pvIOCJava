@@ -4,7 +4,6 @@
  * in file LICENSE that is included with this distribution.
  */
 package org.epics.ioc.dbDefinition;
-import org.epics.ioc.pvAccess.*;
 
 /**
  * reflection interface for field attributes.

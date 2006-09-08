@@ -7,7 +7,6 @@ package org.epics.ioc.dbDefinition.example;
 
 import junit.framework.TestCase;
 import org.epics.ioc.dbDefinition.*;
-import java.util.*;
 /**
  * JUnit test for DBD.
  * @author mrk

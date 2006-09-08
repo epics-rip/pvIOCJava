@@ -7,10 +7,16 @@ package org.epics.ioc.dbDefinition;
 import org.epics.ioc.pvAccess.Enum;
 
 /**
- * reflection interface for menu fields.
+ * Reflection interface for menu fields.
  * It is used for DBType.dbMenu.
  * @author mrk
  *
  */
 
-public interface DBDMenuField extends DBDField, Enum { }
+public interface DBDMenuField extends DBDField, Enum {
+    /**
+     * Get the introspection interface for the menu.
+     * @return The DBDMenu interface.
+     */
+    DBDMenu getMenu();
+}

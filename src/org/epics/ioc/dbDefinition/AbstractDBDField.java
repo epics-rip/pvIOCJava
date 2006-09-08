@@ -13,10 +13,57 @@ import org.epics.ioc.pvAccess.*;
  *
  */
 public abstract class AbstractDBDField implements DBDField {
-    /* (non-Javadoc)
-     * @see org.epics.ioc.dbDefinition.DBDField#getDBDAttribute()
+    protected Field field;
+    protected DBType dbType;
+    protected DBDFieldAttribute attribute;
+    protected String supportName;
+    /**
+     * AbstractDBDField constructor
+     * @param attribute attribute for field. This must be created first.
+     * @param property property array. It can be null.
      */
-    public DBDAttribute getAttribute() {
+    public AbstractDBDField(DBDAttribute attribute,Property[]property)
+    {
+        this.attribute = new FieldAttribute(attribute);
+        dbType = attribute.getDBType();
+        DBType dbType = attribute.getDBType();
+        Type type = attribute.getType();
+        String fieldName = attribute.getName();
+        switch(dbType) {
+        case dbPvType:
+            if(type==Type.pvEnum) {
+                field = FieldFactory.createEnumField(fieldName,true,property); 
+            } else {
+                field = FieldFactory.createField(fieldName,type,property);
+            }
+            break;
+        case dbMenu:
+            field = FieldFactory.createEnumField(fieldName,false,property);
+            break;
+        case dbLink:
+            field = FieldFactory.createField(fieldName,Type.pvUnknown,property);
+            break;
+        case dbStructure: {
+            DBDStructure dbdStructure = attribute.getStructure();
+            DBDField[] dbdField = null;
+            String structureName = null;
+            if(dbdStructure!=null) {
+                dbdField = dbdStructure.getDBDFields();
+                structureName = dbdStructure.getName();
+            } else {
+                dbdField = new DBDField[0];
+            }
+            field = FieldFactory.createStructureField(fieldName,
+                structureName,dbdField,property);
+            break;
+        }
+        case dbArray:
+            field = FieldFactory.createArrayField(fieldName,
+                attribute.getElementType(),property);
+           break;
+        }
+    }       
+    public DBDFieldAttribute getFieldAttribute() {
         return attribute;
     }
 
@@ -24,7 +71,7 @@ public abstract class AbstractDBDField implements DBDField {
      * @see org.epics.ioc.dbDefinition.DBDField#getDBType()
      */
     public DBType getDBType() {
-        return attribute.getDBType();
+        return dbType;
     }
 
     /* (non-Javadoc)
@@ -98,54 +145,49 @@ public abstract class AbstractDBDField implements DBDField {
         return builder.toString();
     }
 
-    /**
-     * AbstractDBDField constructor
-     * @param attribute attribute for field. This must be created first.
-     * @param property property array. It can be null.
-     */
-    public AbstractDBDField(DBDAttribute attribute,Property[]property)
-    {
-        this.attribute = attribute;
-        DBType dbType = attribute.getDBType();
-        Type type = attribute.getType();
-        String fieldName = attribute.getName();
-        switch(dbType) {
-        case dbPvType:
-            if(type==Type.pvEnum) {
-                field = FieldFactory.createEnumField(fieldName,true,property); 
-            } else {
-                field = FieldFactory.createField(fieldName,type,property);
-            }
-            break;
-        case dbMenu:
-            field = FieldFactory.createEnumField(fieldName,false,property);
-            break;
-        case dbLink:
-            field = FieldFactory.createField(fieldName,Type.pvUnknown,property);
-            break;
-        case dbStructure: {
-            DBDStructure dbdStructure = attribute.getStructure();
-            DBDField[] dbdField = null;
-            String structureName = null;
-            if(dbdStructure!=null) {
-                dbdField = dbdStructure.getDBDFields();
-                structureName = dbdStructure.getName();
-            } else {
-                dbdField = new DBDField[0];
-            }
-            field = FieldFactory.createStructureField(fieldName,
-                structureName,dbdField,property);
-            break;
-        }
-        case dbArray:
-            field = FieldFactory.createArrayField(fieldName,
-                attribute.getElementType(),property);
-           break;
-        }
-    }
+    
+    
+    private static class FieldAttribute implements DBDFieldAttribute {
+        private int asl = 1;
+        private String defaultValue = null;
+        private boolean isDesign = true;
+        private boolean isLink = false;
+        private boolean isReadOnly = false;
         
-    protected Field field;
-    protected DBDAttribute attribute;
-    protected String supportName;
+        private FieldAttribute(DBDAttribute attribute) {
+            asl = attribute.getAsl();
+            defaultValue = attribute.getDefault();
+            isDesign = attribute.isDesign();
+            isLink = attribute.isLink();
+            isReadOnly = attribute.isReadOnly();
+        }
+        
+        public int getAsl() {
+            return asl;
+        }
+
+        public String getDefault() {
+            return defaultValue;
+        }
+
+        public boolean isDesign() {
+            return isDesign;
+        }
+
+        public boolean isLink() {
+            return isLink;
+        }
+
+        public boolean isReadOnly() {
+            return isReadOnly;
+        }
+
+        public String toString(int indentLevel) {
+            return String.format(
+                " asl %d design %b link %b readOnly %b",
+                asl,isDesign,isLink,isReadOnly);
+        }
+        
+    }
 }
 

@@ -27,7 +27,7 @@ public abstract class AbstractDBStructure extends AbstractDBData
      */
     protected AbstractDBStructure(DBData parent, DBDStructureField dbdStructureField) {
         super(parent,dbdStructureField);
-        dbdStructure = super.getDBDField().getAttribute().getStructure();
+        dbdStructure = dbdStructureField.getDBDStructure();
         if(dbdStructure==null) {
             pvData = new PVData[0];
             dbData = new DBData[0];

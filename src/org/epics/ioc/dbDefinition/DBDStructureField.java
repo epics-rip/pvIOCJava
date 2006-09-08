@@ -13,6 +13,12 @@ import org.epics.ioc.pvAccess.*;
  */
 public interface DBDStructureField extends DBDField,Structure {
     /**
+     * Get all the <i>DBDField</i>s for the structure.
+     * @return An array of <i>DBDField</i> that describes
+     * each of the fields in the structure.
+     */
+    DBDField[] getDBDFields();
+    /**
      * get the DBDStructure definition for this field.
      * If the field definition did not specify a file name thid will return null.
      * @return the DBDStructure or null if a struicture was not defined.

@@ -109,26 +109,23 @@ public final class  DBDCreateFactory {
         private String menuName;
         private String[] choices;
 
-        MenuInstance(String menuName, String[] choices)
+        private MenuInstance(String menuName, String[] choices)
         {
             this.menuName = menuName;
             this.choices = choices;
         } 
-
         /* (non-Javadoc)
          * @see org.epics.ioc.dbDefinition.DBDMenu#getChoices()
          */
         public String[] getChoices() {
             return choices;
         }
-
         /* (non-Javadoc)
          * @see org.epics.ioc.dbDefinition.DBDMenu#getName()
          */
         public String getName() {
             return menuName;
-        }
-        
+        }        
         /* (non-Javadoc)
          * @see java.lang.Object#toString()
          */
@@ -165,7 +162,7 @@ public final class  DBDCreateFactory {
             supportName = name;
             
         }
-        StructureInstance(String name,
+        private StructureInstance(String name,
             DBDField[] dbdField,Property[] property)
         {
             structure = FieldFactory.createStructureField(
@@ -173,10 +170,11 @@ public final class  DBDCreateFactory {
             this.dbdField = dbdField;
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.dbDefinition.DBDField#getAttribute()
+         * @see org.epics.ioc.dbDefinition.DBDField#getFieldAttribute()
          */
-        public DBDAttribute getAttribute() {
-            return null; // structures have no attributes
+        public DBDFieldAttribute getFieldAttribute() {
+            // TODO Auto-generated method stub
+            return null;
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.dbDefinition.DBDField#getDBType()
@@ -290,7 +288,7 @@ public final class  DBDCreateFactory {
 
         private AtomicReference<String> supportName  = new AtomicReference<String>();
         
-        RecordTypeInstance(String name,
+        private RecordTypeInstance(String name,
             DBDField[] dbdField,Property[] property)
         {
             super(name,dbdField,property);
@@ -326,7 +324,7 @@ public final class  DBDCreateFactory {
         private String supportName;
         private String factoryName;
 
-        SupportInstance(String supportName,
+        private SupportInstance(String supportName,
             String configurationStructureName, String factoryName)
         {
             this.configurationStructureName = configurationStructureName;
@@ -350,9 +348,8 @@ public final class  DBDCreateFactory {
          * @see java.lang.Object#toString()
          */
         public String toString() { return getString(0);}
-        /**
-         * @param indentLevel
-         * @return
+        /* (non-Javadoc)
+         * @see org.epics.ioc.dbDefinition.DBDSupport#toString(int)
          */
         public String toString(int indentLevel) {
             return getString(indentLevel);
@@ -374,7 +371,7 @@ public final class  DBDCreateFactory {
     
     static private class FieldInstance extends AbstractDBDField
     {
-        FieldInstance(DBDAttribute attribute,Property[]property)
+        private FieldInstance(DBDAttribute attribute,Property[]property)
         {
             super(attribute,property); 
         }
@@ -385,12 +382,11 @@ public final class  DBDCreateFactory {
     {
         private Enum enumField;
 
-        EnumFieldInstance(DBDAttribute attribute,Property[]property)
+        private EnumFieldInstance(DBDAttribute attribute,Property[]property)
         {
             super(attribute,property);
             enumField = (Enum)field;
-        }
-        
+        }        
         /* (non-Javadoc)
          * @see org.epics.ioc.pvAccess.Enum#isChoicesMutable()
          */
@@ -403,18 +399,25 @@ public final class  DBDCreateFactory {
     implements DBDMenuField
     {
         private Enum enumField;
+        private DBDMenu dbdMenu;
 
-        MenuFieldInstance(DBDAttribute attribute,Property[]property)
+        private MenuFieldInstance(DBDAttribute attribute,Property[]property)
         {
             super(attribute,property);
+            dbdMenu = attribute.getMenu();
             enumField = (Enum)field;
-        }
-    
+        }   
         /* (non-Javadoc)
          * @see org.epics.ioc.pvAccess.Enum#isChoicesMutable()
          */
         public boolean isChoicesMutable() {
             return enumField.isChoicesMutable();
+        }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.dbDefinition.DBDMenuField#getMenu()
+         */
+        public DBDMenu getMenu() {
+            return dbdMenu;
         }
     }
     
@@ -424,7 +427,7 @@ public final class  DBDCreateFactory {
         private Array array;
         private DBType elementDBType;
 
-        ArrayFieldInstance(DBDAttribute attribute,Property[]property)
+        private ArrayFieldInstance(DBDAttribute attribute,Property[]property)
         {
             super(attribute,property);
             array = (Array)field;
@@ -449,12 +452,15 @@ public final class  DBDCreateFactory {
     implements DBDStructureField
     {
         private Structure structure;
+        private DBDField[] dbdField;
         private DBDStructure dbdStructure;
 
-        StructureFieldInstance(DBDAttribute attribute,Property[]property)
+        private StructureFieldInstance(DBDAttribute attribute,Property[]property)
         {
             super(attribute,property);
             structure = (Structure)field;
+            // The following cast is OK because AbstractDBDField creates DBDField[] not Field[].
+            dbdField = (DBDField[])structure.getFields();
             dbdStructure = attribute.getStructure();
         }
         /* (non-Javadoc)
@@ -486,6 +492,12 @@ public final class  DBDCreateFactory {
          */
         public Field[] getFields() {
             return structure.getFields();
+        }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.dbDefinition.DBDStructureField#getDBDFields()
+         */
+        public DBDField[] getDBDFields() {
+            return dbdField;
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.pvAccess.Structure#getStructureName()

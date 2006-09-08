@@ -373,7 +373,7 @@ public class IOCDBFactory {
             DBString pvname = null;
             if(config!=null) for(PVData pvdata: config.getFieldPVDatas()) {
                 DBData data = (DBData)pvdata;
-                DBDAttribute attribute = data.getDBDField().getAttribute();
+                DBDFieldAttribute attribute = data.getDBDField().getFieldAttribute();
                 if(attribute.isLink()) {
                     if(data.getField().getType()==Type.pvString) {
                         pvname = (DBString)data;

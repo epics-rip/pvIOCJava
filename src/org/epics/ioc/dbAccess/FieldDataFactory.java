@@ -74,10 +74,11 @@ public class FieldDataFactory {
             DBDField dbdField,int capacity,boolean capacityMutable)
     {
         if(parent==null) throw new IllegalArgumentException("Illegal parent is null");
-        DBType elementDbType= dbdField.getAttribute().getElementDBType();
+        DBDArrayField dbdArrayField = (DBDArrayField)dbdField;
+        DBType elementDbType= dbdArrayField.getElementDBType();
         switch(elementDbType) {
         case dbPvType: {
-                Type elementType = dbdField.getAttribute().getElementType();
+                Type elementType = dbdArrayField.getElementType();
                 switch(elementType) {
                 case pvBoolean: return new BooleanArray(parent,
                     (DBDArrayField)dbdField, capacity, capacityMutable);
@@ -178,7 +179,7 @@ public class FieldDataFactory {
         BooleanData(DBData parent,DBDField dbdField) {
             super(parent,dbdField);
             value = false;
-            String defaultValue = dbdField.getAttribute().getDefault();
+            String defaultValue = dbdField.getFieldAttribute().getDefault();
             if(defaultValue!=null && defaultValue.length()>0) {
                 value = Boolean.parseBoolean(defaultValue);
             }
@@ -215,7 +216,7 @@ public class FieldDataFactory {
         ByteData(DBData parent,DBDField dbdField) {
             super(parent,dbdField);
             value = 0;
-            String defaultValue = dbdField.getAttribute().getDefault();
+            String defaultValue = dbdField.getFieldAttribute().getDefault();
             if(defaultValue!=null && defaultValue.length()>0) {
                 value = Byte.decode(defaultValue);
             }
@@ -252,7 +253,7 @@ public class FieldDataFactory {
         ShortData(DBData parent,DBDField dbdField) {
             super(parent,dbdField);
             value = 0;
-            String defaultValue = dbdField.getAttribute().getDefault();
+            String defaultValue = dbdField.getFieldAttribute().getDefault();
             if(defaultValue!=null && defaultValue.length()>0) {
                 value = Short.decode(defaultValue);
             }
@@ -289,7 +290,7 @@ public class FieldDataFactory {
         IntData(DBData parent,DBDField dbdField) {
             super(parent,dbdField);
             value = 0;
-            String defaultValue = dbdField.getAttribute().getDefault();
+            String defaultValue = dbdField.getFieldAttribute().getDefault();
             if(defaultValue!=null && defaultValue.length()>0) {
                 value = Integer.decode(defaultValue);
             }
@@ -326,7 +327,7 @@ public class FieldDataFactory {
         LongData(DBData parent,DBDField dbdField) {
             super(parent,dbdField);
             value = 0;
-            String defaultValue = dbdField.getAttribute().getDefault();
+            String defaultValue = dbdField.getFieldAttribute().getDefault();
             if(defaultValue!=null && defaultValue.length()>0) {
                 value = Long.decode(defaultValue);
             }
@@ -363,7 +364,7 @@ public class FieldDataFactory {
         FloatData(DBData parent,DBDField dbdField) {
             super(parent,dbdField);
             value = 0;
-            String defaultValue = dbdField.getAttribute().getDefault();
+            String defaultValue = dbdField.getFieldAttribute().getDefault();
             if(defaultValue!=null && defaultValue.length()>0) {
                 value = Float.valueOf(defaultValue);
             }
@@ -400,7 +401,7 @@ public class FieldDataFactory {
         DoubleData(DBData parent,DBDField dbdField) {
             super(parent,dbdField);
             value = 0;
-            String defaultValue = dbdField.getAttribute().getDefault();
+            String defaultValue = dbdField.getFieldAttribute().getDefault();
             if(defaultValue!=null && defaultValue.length()>0) {
                 value = Float.valueOf(defaultValue);
             }
@@ -437,7 +438,7 @@ public class FieldDataFactory {
         StringData(DBData parent,DBDField dbdField) {
             super(parent,dbdField);
             value = null;
-            String defaultValue = dbdField.getAttribute().getDefault();
+            String defaultValue = dbdField.getFieldAttribute().getDefault();
             if(defaultValue!=null && defaultValue.length()>0) {
                 value = defaultValue;
             }
@@ -541,7 +542,7 @@ public class FieldDataFactory {
             this.capacity = capacity;
             this.capacityMutable = capacityMutable;
             value = new boolean[capacity];
-            String defaultValue = dbdArrayField.getAttribute().getDefault();
+            String defaultValue = dbdArrayField.getFieldAttribute().getDefault();
             if(defaultValue!=null && defaultValue.length()>0) {
                 String[] values = primitivePattern.split(defaultValue);
                 try {
@@ -620,7 +621,7 @@ public class FieldDataFactory {
             this.capacity = capacity;
             this.capacityMutable = capacityMutable;
             value = new byte[capacity];
-            String defaultValue = dbdArrayField.getAttribute().getDefault();
+            String defaultValue = dbdArrayField.getFieldAttribute().getDefault();
             if(defaultValue!=null && defaultValue.length()>0) {
                 String[] values = primitivePattern.split(defaultValue);
                 try {
@@ -700,7 +701,7 @@ public class FieldDataFactory {
             this.capacity = capacity;
             this.capacityMutable = capacityMutable;
             value = new short[capacity];
-            String defaultValue = dbdArrayField.getAttribute().getDefault();
+            String defaultValue = dbdArrayField.getFieldAttribute().getDefault();
             if(defaultValue!=null && defaultValue.length()>0) {
                 String[] values = primitivePattern.split(defaultValue);
                 try {
@@ -780,7 +781,7 @@ public class FieldDataFactory {
             this.capacity = capacity;
             this.capacityMutable = capacityMutable;
             value = new int[capacity];
-            String defaultValue = dbdArrayField.getAttribute().getDefault();
+            String defaultValue = dbdArrayField.getFieldAttribute().getDefault();
             if(defaultValue!=null && defaultValue.length()>0) {
                 String[] values = primitivePattern.split(defaultValue);
                 try {
@@ -859,7 +860,7 @@ public class FieldDataFactory {
             this.capacity = capacity;
             this.capacityMutable = capacityMutable;
             value = new long[capacity];
-            String defaultValue = dbdArrayField.getAttribute().getDefault();
+            String defaultValue = dbdArrayField.getFieldAttribute().getDefault();
             if(defaultValue!=null && defaultValue.length()>0) {
                 String[] values = primitivePattern.split(defaultValue);
                 try {
@@ -938,7 +939,7 @@ public class FieldDataFactory {
             this.capacity = capacity;
             this.capacityMutable = capacityMutable;
             value = new float[capacity];
-            String defaultValue = dbdArrayField.getAttribute().getDefault();
+            String defaultValue = dbdArrayField.getFieldAttribute().getDefault();
             if(defaultValue!=null && defaultValue.length()>0) {
                 String[] values = primitivePattern.split(defaultValue);
                 try {
@@ -1018,7 +1019,7 @@ public class FieldDataFactory {
             this.capacity = capacity;
             this.capacityMutable = capacityMutable;
             value = new double[capacity];
-            String defaultValue = dbdArrayField.getAttribute().getDefault();
+            String defaultValue = dbdArrayField.getFieldAttribute().getDefault();
             if(defaultValue!=null && defaultValue.length()>0) {
                 String[] values = primitivePattern.split(defaultValue);
                 try {
@@ -1097,7 +1098,7 @@ public class FieldDataFactory {
             this.capacity = capacity;
             this.capacityMutable = capacityMutable;
             value = new String[capacity];
-            String defaultValue = dbdArrayField.getAttribute().getDefault();
+            String defaultValue = dbdArrayField.getFieldAttribute().getDefault();
             if(defaultValue!=null && defaultValue.length()>0) {
                 String[] values = primitivePattern.split(defaultValue);
                 try {

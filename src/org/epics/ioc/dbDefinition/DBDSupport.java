@@ -25,4 +25,15 @@ public interface DBDSupport {
      * @return The name.
      */
     String getFactoryName();
+    /**
+     * convert to a string
+     * @return the field as a string
+     */
+    String toString();
+    /**
+     * convert to a string
+     * @param indentLevel indentation level
+     * @return the field as a string
+     */
+    String toString(int indentLevel);
 }

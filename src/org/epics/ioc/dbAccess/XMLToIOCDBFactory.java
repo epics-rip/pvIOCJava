@@ -636,9 +636,9 @@ public class XMLToIOCDBFactory {
         }
         private void arrayStart(Map<String,String> attributes)  {
             DBArray dbArray= arrayState.dbArray;
-            DBDAttribute dbdAttribute = dbArray.getDBDField().getAttribute();
-            Type arrayElementType = dbdAttribute.getElementType();
-            DBType arrayElementDBType = dbdAttribute.getElementDBType();
+            DBDArrayField dbdArrayField = (DBDArrayField)dbArray.getDBDField();
+            Type arrayElementType = dbdArrayField.getElementType();
+            DBType arrayElementDBType = dbdArrayField.getElementDBType();
             arrayState.arrayOffset = 0;
             arrayState.arrayElementType = arrayElementType;
             arrayState.arrayElementDBType = arrayElementDBType;

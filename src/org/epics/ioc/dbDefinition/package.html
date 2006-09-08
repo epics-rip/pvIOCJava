@@ -438,7 +438,7 @@ pvAccess. The new types are:</p>
       the field but it does have configuration information.</dd>
 </dl>
 
-<p>Reflection interfaces are available for the following XML definitions </p>
+<p>Reflection interfaces are available for the following XML definitions</p>
 <dl>
   <dt>DBDMenu</dt>
     <dd>This is for introspecting the XML menu definitions</dd>
@@ -527,9 +527,7 @@ is discussed in the next section.</p>
         System.out.printf("menu %s {\n",menu.getName();
         for(choice: choices) System.out.printf("    %s\n",choice);
         System.out.printf("}\n");
-    }
-
-</pre>
+    }</pre>
 
 <p>Note that a shorter way is:</p>
 <pre>    void dumpMenu(DBDMenu menu) {System.out.println(menu.toString());}</pre>
@@ -564,9 +562,7 @@ is discussed in the next section.</p>
             System.out.printf("field %s dbtype %s pvtype %s",
                 field.getName(),type.toString(),pvtype.toString());
         }
-    }
-
-</pre>
+    }</pre>
 
 <p>Again a shorter way is:</p>
 <pre>    void dumpStructure(DBDStructure structure) {System.out.println(structure.toString);}</pre>
@@ -602,12 +598,168 @@ is discussed in the next section.</p>
 <p>This section describes reflection for a field of a structure or
 recordType.</p>
 
-<h3>Attributes</h3>
+<h3>Field Introspection</h3>
 
-<p>Every field has a set of attributes defines by the following interface.
-This retrives the attribute information provided in the XML field definition
-and some additional information.</p>
-`
+<p>Every field has the following set of attributes.</p>
+<pre>   interface DBDFieldAttribute {
+       String getDefault();
+       boolean isReadOnly();
+       boolean isDesign();
+       boolean isLink();
+       int getAsl();
+       String toString(int indentLevel);
+   }</pre>
+
+<p>where</p>
+<dl>
+  <dt>getDefault</dt>
+    <dd>A default value for the field or null if no default was defined.</dd>
+  <dt>isReadonly</dt>
+    <dd>(false,true) if the data for the field is (immutable, mutable)</dd>
+  <dt>isDesign</dt>
+    <dd>This is for use by Database Configuration tools. It is (false,true)
+      if the DCT should allow values to be assigned to the field.</dd>
+  <dt>isLink</dt>
+    <dd>This is for use by Database Configuration tools. It is (false,true)
+      if the field is the name of linked process variable.</dd>
+  <dt>getAsl</dt>
+    <dd>Get the Access Security Level.</dd>
+</dl>
+
+<p>The interfaces for introspecting a field are:</p>
+<pre>   interface DBDField extends Field {
+        DBType getDBType();
+        DBDFieldAttribute getFieldAttribute();
+    }
+
+    interface DBDEnumField extends DBDField, Enum {}
+    interface DBDMenuField extends DBDField, Enum {
+        DBDMenu getMenu();
+    }
+    interface DBDStructureField extends DBDField,Structure {
+         DBDField[] getDBDFields();
+         DBDStructure getDBDStructure();
+    }
+    interface DBDArrayField extends DBDField, Array {
+        DBType getElementDBType();
+    }    
+    </pre>
+
+<p>Since DBDField extends Field it has the following methods:</p>
+<pre>    String getName();
+    Property[] getPropertys();
+    Property getProperty(String propertyName);
+    Type getType()
+    String getSupportName();
+    void setSupportName(String name);
+    boolean isMutable();
+    void setMutable(boolean value);
+    String toString();
+    String toString(int indent Level);</pre>
+
+<p>Thus DBDField has the following methods:</p>
+<dl>
+  <dt style="font-family: courier;">getName</dt>
+    <dd>Get the field name.</dd>
+  <dt style="font-family: courier;">getPropertys</dt>
+    <dd>Get the properties for the field. See org.epics.ioc.pvAccess for a
+      description of properties.</dd>
+  <dt style="font-family: courier;">getProperty</dt>
+    <dd>Given a name get the Property with that name of null if no such
+      property exists.</dd>
+  <dt style="font-family: courier;">getType</dt>
+    <dd>Get the PV Type.</dd>
+  <dt style="font-family: courier;">getSupportName</dt>
+    <dd>Get the name of the support for this field or null if no support is
+      defined.</dd>
+  <dt style="font-family: courier;">setSupportName</dt>
+    <dd>Set the name of the support for this field.</dd>
+  <dt style="font-family: courier;">isMutable</dt>
+    <dd>Can the value on the field be changed?</dd>
+  <dt style="font-family: courier;">setMutable</dt>
+    <dd>Set the mutable status for the field. This should NOT be called by
+      user code.</dd>
+  <dt style="font-family: courier;">toString</dt>
+    <dd>Dump a description of the DBDField into a string. This is for
+      debugging not for normal use.</dd>
+  <dt style="font-family: courier;">getDBType</dt>
+    <dd>Get the DBType for the field.</dd>
+  <dt style="font-family: courier;">getFieldAttribute</dt>
+    <dd>Get the DBFieldAttribute interface for the field.</dd>
+</dl>
+
+<p>DBDEnumField adds the method:</p>
+<pre>        boolean isChoicesMutable();</pre>
+
+<p>where</p>
+<dl>
+  <dt style="font-family: courier;">isChoicesMutable</dt>
+    <dd>The value true is returned.</dd>
+</dl>
+
+<p>DBDMenuField adds the methods:</p>
+<pre>        boolean isChoicesMutable();
+        DBDMenu getMenu();</pre>
+
+<p>where</p>
+<dl>
+  <dt style="font-family: courier;">isChoicesMutable</dt>
+    <dd>The value false is returned.</dd>
+  <dt style="font-family: courier;">getMenu</dt>
+    <dd>Get the introspection interface for the menu</dd>
+</dl>
+
+<p>DBDStructureField adds the methods:</p>
+<pre>         String getStructureName();
+         String[] getFieldNames();
+         Field getField(String fieldName);
+         int getFieldIndex(String fieldName);
+         Field[] getFields();
+         DBDField[] getDBDFields();
+         DBDStructure getDBDStructure();</pre>
+
+<p>where</p>
+<dl>
+  <dt style="font-family: courier;">getStructureName</dt>
+    <dd>Get the name of the structure.</dd>
+  <dt style="font-family: courier;">getFieldNames</dt>
+    <dd>Get an array containing the field name.</dd>
+  <dt style="font-family: courier;">getField</dt>
+    <dd>Get the introspection interface for the specified field.</dd>
+  <dt style="font-family: courier;">getFieldIndex</dt>
+    <dd>Get the index into Field[] or DBDField[] of the specified fieldName.
+      In the fieldName is not in the structure -1 is returned.</dd>
+  <dt style="font-family: courier;">getFields</dt>
+    <dd>Get the array of introspection interfaces for the fields.</dd>
+  <dt style="font-family: courier;">getDBDFields</dt>
+    <dd>Get the array of introspection interfaces for the fields.</dd>
+  <dt style="font-family: courier;">getDBDStructure</dt>
+    <dd>Get the introspection interface for the structure.</dd>
+</dl>
+
+<p>DBDArray adds the methods:</p>
+<pre>        Type getElementType();
+        DBType getElementDBType();</pre>
+
+<p>where</p>
+<dl>
+  <dt style="font-family: courier;">getElementType</dt>
+    <dd>Get the Type for the array elements</dd>
+  <dt style="font-family: courier;">getElementDBType</dt>
+    <dd>Get the DBType for the array elements.</dd>
+</dl>
+
+<h3>AbstractDBDField</h3>
+
+<p>An abstract class is available for creating implementations of the field
+reflection interfaces. This class is used by DBDCreateFactory and is probably
+not needed by other code.</p>
+
+<h3>DBDAttribute ETC..</h3>
+
+<p>Interfaces DBDAttribute and DBDAttribute and class DBDAttributeFactory are
+used by the XML parsers and are not of use after database creation. Thus,
+other than showing the interfaces they will not be discussed.</p>
 <pre>    interface DBDAttribute {
         String getName();      // If possible use the version from DBDField
         DBType getDBType();    // If possible use the version from DBDField
@@ -622,51 +774,9 @@ and some additional information.</p>
         DBType getElementDBType();
         Type getElementType();
         String getSupportName();
-    }</pre>
+    }
 
-<p>where</p>
-<dl>
-  <dt>getName</dt>
-    <dd>The field name. </dd>
-  <dt>getDBType</dt>
-    <dd>The DBType. </dd>
-  <dt>getType</dt>
-    <dd>The Type, i.e. the PV Type.</dd>
-  <dt>getDefault</dt>
-    <dd>A default value for the field or null if no default was defined.</dd>
-  <dt>isReadonly</dt>
-    <dd>(false,true) if the data for the field is (immutable, mutable)</dd>
-  <dt>isDesign</dt>
-    <dd>This is for use by Database Configuration tools. It is (false,true)
-      if the DCT should allow values to be assigned to the field.</dd>
-  <dt>isLink</dt>
-    <dd>This is for use by Database Configuration tools. It is (false,true)
-      if the field is the name of linked process variable.</dd>
-  <dt>getAsl</dt>
-    <dd>Get the Access Security Level.</dd>
-  <dt>getMenu</dt>
-    <dd>Get the DBDMenu for a menu field. A null is returned if the field is
-      not a menu.</dd>
-  <dt>getStructure</dt>
-    <dd>Get the DBDStructure for a structure field. A null is returned if the
-      field is not a structure.</dd>
-  <dt>getElementDBType</dt>
-    <dd>Get the DBType for the elements of an array. If the field is not an
-      array DBType.dbPvType is returned.</dd>
-  <dt>getElementType</dt>
-    <dd>Get the Type for the elements of an array. If the field is not an
-      array Type.pvUnknown is returned.</dd>
-  <dt>getSupportName</dt>
-    <dd>Get the name of the support for this field or null if support was not
-      defined in a Database Definition for the field.</dd>
-</dl>
-
-<h3>Attrubute creation</h3>
-
-<p>DBDAttributeValues and DBDAttributeFactory are not of interest to most
-code, They are required in order to parse the Database Definition and Record
-Instance xml files and implement instances of DBDField.</p>
-<pre>    interface DBDAttributeValues {
+    interface DBDAttributeValues {
         int getLength();
         String getValue(String name);
         Set&lt;String&gt; keySet();
@@ -675,70 +785,6 @@ Instance xml files and implement instances of DBDField.</p>
     public class DBDAttributeFactory {
         static public DBDAttribute create(DBD dbd, DBDAttributeValues attributes);
     }</pre>
-
-<h3>Field Introspection</h3>
-<pre>    interface DBDField extends Field {
-        DBType getDBType();
-        DBDAttribute getAttribute();
-    }
-
-    interface DBDEnumField extends DBDField, Enum {}
-    interface DBDMenuField extends DBDField, Enum {}
-    interface DBDStructureField extends DBDField,Structure {
-         DBDStructure getDBDStructure();
-    }
-    interface DBDArrayField extends DBDField, Array {
-        DBType getElementDBType();
-    }    
-    </pre>
-
-<p>Since DBDField extends Field it has the following methods:</p>
-<pre>    String getName();
-    Property[] getPropertys();
-    Property getProperty(String propertyName);
-    Type getType()
-    boolean isMutable();
-    void setMutable(boolean value);
-    String toString();
-    String toString(int indent Level);</pre>
-
-<p>Enum has the following method:</p>
-<pre>    boolean isChoicesMutable();</pre>
-
-<p>Array has the methods:</p>
-<pre>    Type getElementType();</pre>
-
-<p>where</p>
-<dl>
-  <dt style="font-family: courier;">getName</dt>
-    <dd>Get the field name.</dd>
-  <dt style="font-family: courier;">getPropertys</dt>
-    <dd>Get the properties for the field. See org.epics.ioc.pvAccess for a
-      description of properties.</dd>
-  <dt style="font-family: courier;">getProperty</dt>
-    <dd>Given a name get the Property with that name of null if no such
-      property exists.</dd>
-  <dt style="font-family: courier;">getType</dt>
-    <dd>Get the PV Type.</dd>
-  <dt style="font-family: courier;">isMutable</dt>
-    <dd>Can the value on the field be changed?</dd>
-  <dt style="font-family: courier;">setMutable</dt>
-    <dd>Set the mutable status for the field. This should NOT be called by
-      user code.</dd>
-  <dt style="font-family: courier;">toString</dt>
-    <dd>Dump a description of the DBDField into a string. This is for
-      debugging not for normal use.</dd>
-  <dt style="font-family: courier;">getDBType</dt>
-    <dd>Get the DBType for the field.</dd>
-  <dt style="font-family: courier;">getAttribute</dt>
-    <dd>Get the DBAttribute interface for the field.</dd>
-</dl>
-
-<h3>AbstractDBDField</h3>
-
-<p>An abstract class is available for creating implementations of the field
-reflection interfaces. This class is used by DBDCreateFactory and is probably
-not needed by other code.</p>
 <hr />
 
 <h2 style="text-align: center">Creation of Database Definition Components</h2>
