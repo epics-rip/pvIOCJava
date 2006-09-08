@@ -28,7 +28,7 @@ public class XMLToDataBaseTest extends TestCase {
      */
     public static void testXML() {
         Set<String> keys;
-        DBD dbd = DBDFactory.create("test");
+        DBD dbd = DBDFactory.create("master",null);
         try {
             XMLToDBDFactory.convert(dbd,
                  "src/org/epics/ioc/dbAccess/example/xmlToDataBaseDBD.xml");

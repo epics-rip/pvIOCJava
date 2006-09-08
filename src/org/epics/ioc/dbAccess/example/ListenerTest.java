@@ -22,7 +22,7 @@ public class ListenerTest extends TestCase {
      * test DBListener.
      */
     public static void testListener() {
-        DBD dbd = DBDFactory.create("test"); 
+        DBD dbd = DBDFactory.create("master",null); 
         IOCDB iocdb = IOCDBFactory.create(dbd,"testIOCDatabase");
         try {
             XMLToDBDFactory.convert(dbd,

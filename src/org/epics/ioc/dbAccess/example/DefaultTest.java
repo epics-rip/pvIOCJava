@@ -22,7 +22,7 @@ public class DefaultTest extends TestCase {
      * test default.
      */
     public static void testDefault() {
-        DBD dbd = DBDFactory.create("test");
+        DBD dbd = DBDFactory.create("master",null);
         try {
             XMLToDBDFactory.convert(dbd,
                  "src/org/epics/ioc/dbAccess/example/defaultDBD.xml");

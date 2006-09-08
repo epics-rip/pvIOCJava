@@ -51,16 +51,4 @@ public abstract class AbstractDBArray extends AbstractDBData implements DBArray{
      * @see org.epics.ioc.pvAccess.PVArray#setLength(int)
      */
     abstract public void setLength(int len);
-    /* (non-Javadoc)
-     * @see org.epics.ioc.dbAccess.DBArray#getElementDBType()
-     */
-    public DBType getElementDBType() {
-        return getDBDField().getAttribute().getElementDBType();
-    }
-    /* (non-Javadoc)
-     * @see org.epics.ioc.pvAccess.PVArray#getElementType()
-     */
-    public Type getElementType() {
-        return getDBDField().getAttribute().getElementType();
-    }
 }

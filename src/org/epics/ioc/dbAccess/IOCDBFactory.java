@@ -216,7 +216,8 @@ public class IOCDBFactory {
                     DBType dbType = currentData.getDBDField().getDBType();
                     if(dbType!=DBType.dbArray) break;
                     DBArray dbArray = (DBArray)currentData;
-                    DBType elementDBType = dbArray.getElementDBType();
+                    DBDArrayField dbdArrayField = (DBDArrayField)dbArray.getDBDField();
+                    DBType elementDBType = dbdArrayField.getElementDBType();
                     if(elementDBType==DBType.dbStructure) {
                         DBStructureArray dbStructureArray =
                             (DBStructureArray)currentData;
@@ -270,7 +271,8 @@ public class IOCDBFactory {
                         currentData = menuArray[offset];
                         break;
                     } else {
-                        Type type = dbArray.getElementType();
+                        Array array = (Array)dbArray.getField();
+                        Type type = array.getElementType();
                         if(type==Type.pvEnum) {
                             PVEnumArray pvEnumArray = (PVEnumArray)currentData;
                             if(arrayIndex>=pvEnumArray.getLength()) break;

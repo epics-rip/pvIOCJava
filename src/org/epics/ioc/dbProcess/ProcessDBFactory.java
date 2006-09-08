@@ -107,7 +107,6 @@ public class ProcessDBFactory {
             return recordProcessMap;
         }
         
-        
         private boolean createRecordSupport(DBRecord dbRecord) {
             if(dbRecord.getSupport()!=null) return true;
             String supportName = dbRecord.getSupportName();
@@ -141,7 +140,8 @@ public class ProcessDBFactory {
         private boolean createArraySupport(DBArray dbArray) {
             boolean result = true;
             if(!createSupport(dbArray)) result = false;
-            DBType elementType = dbArray.getElementDBType();
+            DBDArrayField dbdArrayField = (DBDArrayField)dbArray.getDBDField();
+            DBType elementType = dbdArrayField.getElementDBType();
             if(elementType==DBType.dbStructure) {
                 DBStructureArray dbStructureArray = (DBStructureArray)dbArray;
                 int len = dbStructureArray.getLength();

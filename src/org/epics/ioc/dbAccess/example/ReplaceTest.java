@@ -22,7 +22,7 @@ public class ReplaceTest extends TestCase {
      * test replacing the default data implementration for a field.
      */
     public static void testReplaceField() {
-        DBD dbd = DBDFactory.create("test"); 
+        DBD dbd = DBDFactory.create("master",null); 
         IOCDB iocdb = IOCDBFactory.create(dbd,"testIOCDatabase");
         try {
             XMLToDBDFactory.convert(dbd,

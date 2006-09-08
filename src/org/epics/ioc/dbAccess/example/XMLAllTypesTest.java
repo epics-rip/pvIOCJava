@@ -28,7 +28,7 @@ public class XMLAllTypesTest extends TestCase {
      */
     public static void testXML() {
         Set<String> keys;
-        DBD dbd = DBDFactory.create("test");
+        DBD dbd = DBDFactory.create("master",null);
         System.out.printf("reading menuStructureSupport%n");
         try {
             XMLToDBDFactory.convert(dbd,

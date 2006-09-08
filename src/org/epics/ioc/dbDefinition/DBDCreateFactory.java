@@ -422,17 +422,25 @@ public final class  DBDCreateFactory {
         implements DBDArrayField
     {
         private Array array;
+        private DBType elementDBType;
 
         ArrayFieldInstance(DBDAttribute attribute,Property[]property)
         {
             super(attribute,property);
             array = (Array)field;
+            elementDBType = attribute.getElementDBType();
         }       
         /* (non-Javadoc)
          * @see org.epics.ioc.pvAccess.Array#getElementType()
          */
         public Type getElementType() {
             return array.getElementType();
+        }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.dbDefinition.DBDArrayField#getElementDBType()
+         */
+        public DBType getElementDBType() {
+            return elementDBType;
         }
 
     }

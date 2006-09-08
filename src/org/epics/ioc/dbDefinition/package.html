@@ -14,89 +14,40 @@
 package: org.epics.ioc.dbDefinition<br />
 2006.09.01</h1>
 <hr />
-<a href="#Overview">Overview</a> <br />
-<a href="#Syntax">Database Definition Syntax</a>
-<ul>
-  <li><a href="#GeneralStatements">General Statements</a>
-    <ul>
-      <li><a href="#SyntaxNamespace">namespace</a></li>
-      <li><a href="#SyntaxInclude">Include</a></li>
-      <li><a href="#SyntaxMacroSubstitution">Macro Substitution</a></li>
-    </ul>
-  </li>
-  <li><a href="#SyntaxMenu">Menu</a></li>
-  <li><a href="#SyntaxStructureRecord">Structure and Record Type</a>
-    <ul>
-      <li><a href="#SyntaxStructure">structure and recordType</a></li>
-      <li><a href="#SyntaxField">Field</a>
-        <ul>
-          <li><a href="#SyntaxPrimitive">Primitive Types</a></li>
-          <li><a href="#SyntaxString">string</a></li>
-          <li><a href="#SyntaxEnumerated">enumerated</a></li>
-          <li><a href="#SyntaxStructure">structure</a></li>
-          <li><a href="#SyntaxArray">array</a></li>
-          <li><a href="#SyntaxMenuField">menu</a></li>
-          <li><a href="#SyntaxLink">link</a></li>
-        </ul>
-      </li>
-      <li><a href="#SyntaxFieldAttribute">field attribute</a></li>
-      <li><a href="#SyntaxProperties">property</a></li>
-    </ul>
-  </li>
-  <li><a href="#SyntaxSupport">Support</a></li>
-</ul>
-<a href="#OverviewJavaSupport">Overview of Java Support For Database
-Definition</a><br />
-<a href="#DBDataTypes">Database Types</a><br />
-<a href="#DataDefinition">Database Definition</a><br />
-
-<ul>
-  <li><a href="#Menu">Menu</a></li>
-  <li><a href="#Structure">Structure and RecordType</a></li>
-  <li><a href="#Support">Support</a></li>
-</ul>
-<br />
-<a href="#DBDFieldReflection">Reflection for Database Fields</a><br />
-<a href="#DBDCreate">Creation of Database Definition Components</a><br />
-<a href="#DBDAccess">Accessing Database Definitions</a><br />
-<a href="#DBDXML">XML to DBD Converter</a><br />
-
+PUT TOC HERE
 <hr />
 
-<h1 style="text-align: center"><a id="Overview"></a>Overview</h1>
+<h2 style="text-align: center">Overview</h2>
 <hr />
 
 <p>An EPICS IOC contains a memory resident real time database. The real time
 database has a set of "smart" records. Each record is an instance on a record
 of a particular type.</p>
 
-<p>This package describes support Database Definitions, i.e. support for the
-following database components: menu, structure, recordType, and support.
+<p>This package describes support for Database Definitions, i.e. support for
+the following database components: menu, structure, recordType, and support.
 Included are factories for creating multiple DBD (Database Definition)
 instances. A DBD provides reflection interfaces for all database components
-it contains. In particular dbAccess, which implements a javaIOC database,
-uses a DBD to implement database reflection.</p>
+it contains. dbAccess, which implements a javaIOC database, uses a DBD to
+implement database reflection.</p>
 
 <p>The following is discussed:</p>
 <ol>
-  <li>Database Definition Syntax
-    <p>The XML syntax for defining menus, structures, record types, and
+  <li>Database Definition Syntax<br />
+    The XML syntax for defining menus, structures, record types, and
     support.<br />
-    </p>
   </li>
   <li>Java Support for Database Definitions</li>
   <li>Factory support for Database Definitions</li>
-  <li>SAX parser support
-    <p>This reads an xml file containing menu, structure, record types, and
-    link support and adds them to a database definition file.</p>
-    <p>THIS DOES NOT CURRENTLY SUPPORT include statements or macro
-    substitution.</p>
+  <li>parser support<br />
+    This reads an xml file containing menu, structure, record types, and link
+    support and adds them to a database definition file.</li>
+  <li>Creating and using Database Definitions.<br />
   </li>
 </ol>
 <hr />
 
-<h1 style="text-align: center"><a id="Syntax"></a>Database Definition
-Syntax</h1>
+<h2 style="text-align: center">Database Definition Syntax</h2>
 <hr />
 A Database Definition file must be an XML file with a root tag of
 DBDDefinition:
@@ -105,13 +56,12 @@ DBDDefinition:
   &lt;?-- valid Database Definition elements --&gt;
 &lt;/DBDefinition&gt;</pre>
 
-<h2 style="text-align: center"><a id="GeneralStatements"></a> General
-Statements</h2>
+<h3>General Statements</h3>
 
-<h3><a id="SyntaxNamespace"></a>namespace</h3>
+<h4>namespace</h4>
 At this time namespaces are not used.
 
-<h3><a id="SyntaxInclude"></a>Include</h3>
+<h4>Include</h4>
 An XML file containing Database Definitions can include other files also
 containing Database Definitions. An included file must also be a valid XML
 Database Definition. Included files can also include other files. The syntax
@@ -134,13 +84,13 @@ is:
 
 <p>NOTE: Path needs more work. But what to do???</p>
 
-<h3><a id="SyntaxMacroSubstitution"></a>Macro Substitution</h3>
+<h4>Macro Substitution</h4>
 
 <p>Macro substitution is not very usefull for Database Definition but it is
 support just like for Database Instance files. See package
 org.epics.ioc.dbAccess for details about how macro substitution works.</p>
 
-<h2 style="text-align: center"><a id="SyntaxMenu"></a>Menu</h2>
+<h3>Menu</h3>
 A menu is an enumerated type, defined below, where the choice strings are
 defined once for each IOC. The syntax is:
 <pre>    
@@ -157,14 +107,13 @@ Example:
      &lt;choice&gt;periodic&lt;/choice&gt;
 &lt;/menu&gt;</pre>
 
-<h2 style="text-align: center"><a id="SyntaxStructureRecord"></a> Structure
-and Record Type</h2>
-Structure and recordType have significant commonality in that they both
-define a data structure containing fields. The main difference is that a
-structure can't be instanciated except as a field of a record.
+<h3>Structure and Record Type</h3>
 
-<h3><a id="SyntaxStructure"></a>structure and recordType</h3>
-A structure is defined as follows:
+<p>Structure and recordType both define a data structure containing fields.
+The main difference is that a structure can't be instanciated except as a
+field of a record.</p>
+
+<p>A structure is defined as follows:</p>
 <pre>&lt;structure name = "structureName" supportName = "supportName" &gt;
      &lt;property name = "propertyName" associatedField = "fieldName" /&gt;
      ...
@@ -180,7 +129,6 @@ A structure is defined as follows:
 <pre>&lt;recordType name = "recordtypeName" supportName = "supportName" &gt;
     &lt;property name = "propertyName" associatedField = "fieldName" /&gt;
     ...
-    &lt;include filename = "base.dbd" /&gt;
      &lt;field name = "fieldName"  supportName = "supportName" type = "fieldType" ... &gt;
          &lt;property name = "propertyName" associatedField = "fieldName" /&gt;
          ...
@@ -188,14 +136,11 @@ A structure is defined as follows:
      ...
 &lt;/recordType&gt;</pre>
 
-<p></p>
-
 <p>where</p>
 <dl>
   <dt><span style="font-family: courier">structureName</span></dt>
   <dt><span style="font-family: courier">recordtypeName</span></dt>
-    <dd>The structure or record type name should have the same syntax as a
-      Java identifier.</dd>
+    <dd>The structure or record type name.</dd>
   <dt style="font-family: courier;">supportName</dt>
     <dd>The name of support for the structure, record type, or field. A
       support definition, described below, defines the support. When record
@@ -212,11 +157,11 @@ A structure is defined as follows:
     <dd>See property below.</dd>
 </dl>
 
-<h3><a id="SyntaxField"></a>field</h3>
+<h3>field</h3>
 The syntax for <span style="font-family: courier">fieldType</span> depends on
 the field type.
 
-<h4><a id="SyntaxPrimitive"></a>Primitive Types</h4>
+<h4>Primitive Types</h4>
 Primitive types are the same as the Java primitive types, i.e. <span
 style="font-family: courier">boolean</span>, <span
 style="font-family: courier">byte</span>, <span
@@ -231,19 +176,19 @@ example
     &lt;field name = "value", type = "double" /&gt;
     &lt;field name = "rawValue" type = "int" /&gt;</pre>
 
-<h4><a id="SyntaxString"></a>string</h4>
+<h4>string</h4>
 A <span style="font-family: courier">string</span> is a Java <span
 style="font-family: courier;">String</span>. A <span
 style="font-family: courier;">string</span> field type is just defined as
 <span style="font-family: courier;">string</span>. For example:
 <pre>     &lt;field name = "description" type = "string" /&gt;</pre>
 
-<h4><a id="SyntaxEnumerated"></a>enumerated</h4>
+<h4>enumerated</h4>
 
 <p>An enumerated field type specified as enum For example:</p>
 <pre>    &lt;field name = "value" type = "enum" /&gt;</pre>
 
-<h4><a id="SyntaxStructure"></a>structure</h4>
+<h4>structure</h4>
 A structure field is declared as
 <pre>    &lt;field name = "value" type = "structure" structureName = "name" /&gt;</pre>
 <span style="font-family: courier;">structureName</span> is the name of a
@@ -261,7 +206,7 @@ structure which must have been previously defined. Example:
 <p>NOTE: The structureName does not have to be given. In this case the field
 instance must define the structureName.</p>
 
-<h4><a id="SyntaxArray"></a>array</h4>
+<h4>array</h4>
 
 <p>NOTE: One dimensional arrays are a supported type. Multidimensional arrays
 can be supported via a <span style="font-family: courier;">structure</span>
@@ -285,7 +230,7 @@ Examples:
      &lt;field name = "value" type = "array"  elementType = "double" /&gt;
      &lt;field name = "rectangle" type = "array" elementType = "structure" capacity = "2" /&gt;</pre>
 
-<h4><a id="SyntaxMenuField"></a>menu</h4>
+<h4>menu</h4>
 A menu field is defined as:
 <pre>     &lt;field name = "name" type = "menu" nameName = "menuName" /&gt;</pre>
 where <span style="font-family: courierfont-family: courier;">menuName</span>
@@ -296,11 +241,9 @@ Example:
 <p>To the database, a menu field is presented just like an enumerated field
 with constant choices. The choices are taken from the menu definition.</p>
 
-<h4><a id="SyntaxLink"></a>link</h4>
-This field type can get/put data from/to a location outside the record. <span
-style="font-family: courier;">link</span> replace the DBF_INLINK,
-DBF_OUTLINK, and DTYP fields from EPICS V3. When a record instance is
-created, the link choices come from <span
+<h4>link</h4>
+This field type can get/put data from/to a location outside the record. When
+a record instance is created, the link choices come from <span
 style="font-family: courier;">support</span> definitions which are defined
 below. A <span style="font-family: courier;">link</span> can be a link to
 another database record, to hardware device support, or something else. The
@@ -310,7 +253,7 @@ Examples:
 <pre>     &lt;field name = "disableLink" type = "link" /&gt;
      &lt;field name = "input" type = "link" /&gt;</pre>
 
-<h3><a id="SyntaxFieldAttribute"></a>field attribute</h3>
+<h3>field attribute</h3>
 
 <p>A field can have additional attributes which are specified via xml
 attributes. The additional attributes are:</p>
@@ -355,8 +298,8 @@ The following examples show how attributes are defined:
 <br />
 
 
-<h3><a id="SyntaxProperties"></a>property</h3>
-A structure, recordType, and field can have propertys. A property is defined
+<h3>property</h3>
+A structure, recordType, and field can have properties. A property is defined
 as:
 <pre>    &lt;property name = "name" associatedField = "field name" /&gt;</pre>
 where
@@ -398,7 +341,7 @@ where
         &lt;property name = "displayLimit" associatedField = "displayLimit" /&gt;
     &lt;/field&gt;</pre>
 
-<h2 style="text-align: center"><a id="SyntaxSupport"></a>Support</h2>
+<h3>Support</h3>
 
 <p>Support can be associated with any field of a record instance when it is
 created. See package org.epics.ioc.dbAccess for details. Record types and
@@ -463,9 +406,8 @@ Examples of support:
         factoryName = "org.epics.ioc.support.LinkSupportFactory" /&gt;</pre>
 <hr />
 
-<h1 style="text-align: center"><a name="OverviewJavaSupport"
-id="OverviewJavaSupport"></a>Overview of Java Support For Database
-Definition</h1>
+<h2 style="text-align: center">Overview of Java Support For Database
+Definition</h2>
 <hr />
 
 <p>This following sections describes support for code that accessses Database
@@ -481,10 +423,51 @@ following types: boolean, byte, short, int, long, float, double, string,
 enum, structure, and array.</p>
 
 <p>DBType defines the database types, which extend the types defined by
-pvAccess.</p>
+pvAccess. The new types are:</p>
+<dl>
+  <dt>dbMenu</dt>
+    <dd>Like Type.pvEnum except that the choices are readonly. This is to
+      support the XML menu definitions.</dd>
+  <dt>dbStructure</dt>
+    <dd>Like Type.pvStructure except that fields can be a DBType.</dd>
+  <dt>dbArray</dt>
+    <dd>Like Type.pvArray except that nthe array elements can ba a
+    DBType.</dd>
+  <dt>dbLink</dt>
+    <dd>This has type Type.pvUnknown, i.e. there is no data associated with
+      the field but it does have configuration information.</dd>
+</dl>
+
+<p>Reflection interfaces are available for the following XML definitions </p>
+<dl>
+  <dt>DBDMenu</dt>
+    <dd>This is for introspecting the XML menu definitions</dd>
+  <dt>DBDStructure</dt>
+    <dd>This is for introspecting the XML structure definitions.</dd>
+  <dt>DBDRecordType</dt>
+    <dd>This is for introspecting the XML recordType definitions.</dd>
+  <dt>DBDSupport</dt>
+    <dd>This is for introspecting the XML support definitions.</dd>
+</dl>
+
+<p>Reflection interfaces for structure and recordType fields extent the
+reflection interfaces provided by org.epics.ioc.pvAccess:</p>
+<dl>
+  <dt>DBDField</dt>
+    <dd>Extends Field</dd>
+  <dt>DBDEnumField</dt>
+    <dd>Extends Enum</dd>
+  <dt>DBDMenuField</dt>
+    <dd>Extends Enum</dd>
+  <dt>DBDArrayField</dt>
+    <dd>Extends Array</dd>
+  <dt>DBDStructureField</dt>
+    <dd>Extends Structure</dd>
+  <dt></dt>
+</dl>
 <hr />
 
-<h1 style="text-align: center"><a id="DBDataTypes"></a>Database Types</h1>
+<h2 style="text-align: center">Database Types</h2>
 <hr />
 
 <p>The types, which extends the types defined by pvAccess, are:</p>
@@ -509,74 +492,17 @@ pvAccess.</p>
   <dt style="font-family: courier;">dbLink</dt>
     <dd>A link appears as a pvUnknown field that has associated support.</dd>
 </dl>
-
-<p>The following provides reflection for a field of a structure or
-recordType</p>
-<pre>    interface DBDAttributeValues {
-        int getLength();
-        String getValue(String name);
-        Set&lt;String&gt; keySet();
-    }
-
-    interface DBDAttribute {
-        String getName();
-        DBType getDBType();
-        Type getType();        
-        String getDefault();
-        boolean isReadonly();
-        boolean isDesign();
-        boolean isLink();
-        int getAsl();
-        DBDMenu getMenu();
-        DBDStructure getStructure();
-        DBType getElementDBType();
-        Type getElementType();
-        String getSupportName();
-    }
-
-    interface DBDField extends Field {
-        DBType getDBType();
-        DBDAttribute getAttribute();
-    }
-
-    public class DBDAttributeFactory {
-        static public DBDAttribute create(DBD dbd, DBDAttributeValues attributes) {
-        return new Attribute(dbd, attributes);
-    }
-    </pre>
-
-<p>getMenu returns null if the field DBType is not dbMenu.</p>
-
-<p>getStructure returns null if the field DBType is not dbStructure.</p>
-
-<p>getElementType returns DBType dvPvType and getElementType returns
-pcUnknown if the field DBType is not dbArray.</p>
-
-<p>getSupportName returns null if the support name was not defined in a
-dbDefinition</p>
-
-<p>Since DBDField extends Field it has the following methods:</p>
-<pre>    String getName();
-    Property[] getPropertys();
-    Property getProperty(String propertyName);
-    Type getType()
-    boolean isMutable();
-    void setMutable(boolean value);
-    String toString();
-    String toString(int indent Level);</pre>
 <hr />
 
-<h1 style="text-align: center"><a id="DBDataDefinition"></a>Database
-Definition</h1>
+<h2 style="text-align: center">Introspection of Database Definitions</h2>
 <hr />
 
-<p>This section describes interfaces for accessing menus, record types,
-support, and recordSupport, i.e. everything defined in Database Definition
-files except record instances. Access to fields of record instances is
-discussed in the next section. These definitions are mostly of interest to
-the database itself.</p>
+<p>This section describes interfaces for accessing menu, structure,
+recordType, and support, i.e. everything defined in Database Definition files
+except record instances. Reflection for fields of a structure or recordType
+is discussed in the next section.</p>
 
-<h2><a id="Menu"></a>Menu</h2>
+<h3>Menu</h3>
 
 <p>The interface is:</p>
 <pre>    interface DBDMenu{
@@ -585,23 +511,48 @@ the database itself.</p>
         String toString(int indentLevel);
     }</pre>
 
+<p>where</p>
+<dl>
+  <dt style="font-family: courier;">getName</dt>
+    <dd>The menu name.</dd>
+  <dt style="font-family: courier;">getChoices</dt>
+    <dd>The array of choices for the menu.</dd>
+  <dt style="font-family: courier;">toString</dt>
+    <dd>Dumps the menu definition.</dd>
+</dl>
+
 <p>For example the following dumps a menu</p>
 <pre>    void dumpMenu(DBDMenu menu) {
         String[] choices = menu.getChoices();
         System.out.printf("menu %s {\n",menu.getName();
         for(choice: choices) System.out.printf("    %s\n",choice);
         System.out.printf("}\n");
-    }</pre>
+    }
 
-<h2><a id="Structure"></a>Structure and RecordType</h2>
+</pre>
 
-<p>The interfaces is:</p>
+<p>Note that a shorter way is:</p>
+<pre>    void dumpMenu(DBDMenu menu) {System.out.println(menu.toString());}</pre>
+
+<h3>Structure and RecordType</h3>
+
+<p>The interfaces are:</p>
 <pre>    interface DBDStructure extends DBDField, Structure{
-        DBDField getDBDFields(String fieldName);
+        DBDField[] getDBDFields(String fieldName);
         int getDBDFieldIndex(String fieldName);
     }
 
     interface DBDRecordType extends DBDStructure {}</pre>
+
+<p>where</p>
+<dl>
+  <dt style="font-family: courier;">getDBDFields</dt>
+    <dd>Get the introspection interfaces for the fields of the structure.
+      DBDField is descrtibed in the next section.</dd>
+  <dt style="font-family: courier;">getDBDFieldIndex</dt>
+    <dd>Given a field name find the index for the field in the DBDField[]. If
+      the field is not found -1 is returned.</dd>
+</dl>
 
 <p>For example the following dumps a structure</p>
 <pre>    void dumpStructure(DBDStructure structure) {
@@ -613,51 +564,184 @@ the database itself.</p>
             System.out.printf("field %s dbtype %s pvtype %s",
                 field.getName(),type.toString(),pvtype.toString());
         }
-    }</pre>
+    }
 
-<h2><a id="Support"></a>Link Support</h2>
+</pre>
 
-<p>The following interface is provided for accessing link support.</p>
+<p>Again a shorter way is:</p>
+<pre>    void dumpStructure(DBDStructure structure) {System.out.println(structure.toString);}</pre>
+
+<h3>Support</h3>
+
+<p>The following interface is provided for accessing support.</p>
 <pre>    interface DBDSupport {
         String getSupportName();
         String getConfigurationStructureName();
         String getFactoryName();
     }</pre>
+
+<p>where</p>
+<dl>
+  <dt style="font-family: courier;">getSupportName</dt>
+    <dd>Get the support name.</dd>
+  <dt style="font-family: courier;">getConfigurationStructureName</dt>
+    <dd>Get the configuration structire name. A null is returned if none was
+      defined in the support definition. This means the support does not
+      require configuration information.</dd>
+  <dt style="font-family: courier;">getFactoryName</dt>
+    <dd>Get the factory name. This must be the complete java package + method
+      name of a Factory that creates support for the field. See package
+      org.epics.ioc.dbProcess for details about support and support
+    factories.</dd>
+</dl>
 <hr />
 
-<h1 style="text-align: center">Reflection for Database Fields</h1>
+<h2 style="text-align: center">Reflection for Database Fields</h2>
 <hr />
 
-<p>The following are the reflection interfaces for database fields:</p>
+<p>This section describes reflection for a field of a structure or
+recordType.</p>
+
+<h3>Attributes</h3>
+
+<p>Every field has a set of attributes defines by the following interface.
+This retrives the attribute information provided in the XML field definition
+and some additional information.</p>
+`
+<pre>    interface DBDAttribute {
+        String getName();      // If possible use the version from DBDField
+        DBType getDBType();    // If possible use the version from DBDField
+        Type getType();        // If possible use the version from DBDField
+        String getDefault();
+        boolean isReadonly();
+        boolean isDesign();
+        boolean isLink();
+        int getAsl();
+        DBDMenu getMenu();
+        DBDStructure getStructure();
+        DBType getElementDBType();
+        Type getElementType();
+        String getSupportName();
+    }</pre>
+
+<p>where</p>
+<dl>
+  <dt>getName</dt>
+    <dd>The field name. </dd>
+  <dt>getDBType</dt>
+    <dd>The DBType. </dd>
+  <dt>getType</dt>
+    <dd>The Type, i.e. the PV Type.</dd>
+  <dt>getDefault</dt>
+    <dd>A default value for the field or null if no default was defined.</dd>
+  <dt>isReadonly</dt>
+    <dd>(false,true) if the data for the field is (immutable, mutable)</dd>
+  <dt>isDesign</dt>
+    <dd>This is for use by Database Configuration tools. It is (false,true)
+      if the DCT should allow values to be assigned to the field.</dd>
+  <dt>isLink</dt>
+    <dd>This is for use by Database Configuration tools. It is (false,true)
+      if the field is the name of linked process variable.</dd>
+  <dt>getAsl</dt>
+    <dd>Get the Access Security Level.</dd>
+  <dt>getMenu</dt>
+    <dd>Get the DBDMenu for a menu field. A null is returned if the field is
+      not a menu.</dd>
+  <dt>getStructure</dt>
+    <dd>Get the DBDStructure for a structure field. A null is returned if the
+      field is not a structure.</dd>
+  <dt>getElementDBType</dt>
+    <dd>Get the DBType for the elements of an array. If the field is not an
+      array DBType.dbPvType is returned.</dd>
+  <dt>getElementType</dt>
+    <dd>Get the Type for the elements of an array. If the field is not an
+      array Type.pvUnknown is returned.</dd>
+  <dt>getSupportName</dt>
+    <dd>Get the name of the support for this field or null if support was not
+      defined in a Database Definition for the field.</dd>
+</dl>
+
+<h3>Attrubute creation</h3>
+
+<p>DBDAttributeValues and DBDAttributeFactory are not of interest to most
+code, They are required in order to parse the Database Definition and Record
+Instance xml files and implement instances of DBDField.</p>
+<pre>    interface DBDAttributeValues {
+        int getLength();
+        String getValue(String name);
+        Set&lt;String&gt; keySet();
+    }
+
+    public class DBDAttributeFactory {
+        static public DBDAttribute create(DBD dbd, DBDAttributeValues attributes);
+    }</pre>
+
+<h3>Field Introspection</h3>
 <pre>    interface DBDField extends Field {
         DBType getDBType();
         DBDAttribute getAttribute();
-        String toString();
-        String toString(int indentLevel);
     }
 
     interface DBDEnumField extends DBDField, Enum {}
-
     interface DBDMenuField extends DBDField, Enum {}
-
     interface DBDStructureField extends DBDField,Structure {
          DBDStructure getDBDStructure();
     }
+    interface DBDArrayField extends DBDField, Array {
+        DBType getElementDBType();
+    }    
+    </pre>
 
-    interface DBDArrayField extends DBDField, Array {}
-    
-    interface DBDLinkField extends DBDStructureField { }</pre>
+<p>Since DBDField extends Field it has the following methods:</p>
+<pre>    String getName();
+    Property[] getPropertys();
+    Property getProperty(String propertyName);
+    Type getType()
+    boolean isMutable();
+    void setMutable(boolean value);
+    String toString();
+    String toString(int indent Level);</pre>
 
-<p>In addition an abstract class is available for creating implementations of
-the field reflection interfaces. This class is used by DBDCreateFactory and
-is probably not needed by other code.</p>
+<p>Enum has the following method:</p>
+<pre>    boolean isChoicesMutable();</pre>
 
-<p>NOTE: If the structureName is not specified for a DBDStructureField then
-getDBDStructure will return null.</p>
+<p>Array has the methods:</p>
+<pre>    Type getElementType();</pre>
+
+<p>where</p>
+<dl>
+  <dt style="font-family: courier;">getName</dt>
+    <dd>Get the field name.</dd>
+  <dt style="font-family: courier;">getPropertys</dt>
+    <dd>Get the properties for the field. See org.epics.ioc.pvAccess for a
+      description of properties.</dd>
+  <dt style="font-family: courier;">getProperty</dt>
+    <dd>Given a name get the Property with that name of null if no such
+      property exists.</dd>
+  <dt style="font-family: courier;">getType</dt>
+    <dd>Get the PV Type.</dd>
+  <dt style="font-family: courier;">isMutable</dt>
+    <dd>Can the value on the field be changed?</dd>
+  <dt style="font-family: courier;">setMutable</dt>
+    <dd>Set the mutable status for the field. This should NOT be called by
+      user code.</dd>
+  <dt style="font-family: courier;">toString</dt>
+    <dd>Dump a description of the DBDField into a string. This is for
+      debugging not for normal use.</dd>
+  <dt style="font-family: courier;">getDBType</dt>
+    <dd>Get the DBType for the field.</dd>
+  <dt style="font-family: courier;">getAttribute</dt>
+    <dd>Get the DBAttribute interface for the field.</dd>
+</dl>
+
+<h3>AbstractDBDField</h3>
+
+<p>An abstract class is available for creating implementations of the field
+reflection interfaces. This class is used by DBDCreateFactory and is probably
+not needed by other code.</p>
 <hr />
 
-<h1 style="text-align: center"><a id="DBDCreate"></a> Creation of Database
-Definition Components</h1>
+<h2 style="text-align: center">Creation of Database Definition Components</h2>
 <hr />
 
 <p>The following class provides methods to create components for a Database
@@ -674,14 +758,15 @@ Definition.</p>
 }</pre>
 <hr />
 
-<h1 style="text-align: center"><a id="DBDAccess"></a> Accessing Database
-Definitions</h1>
+<h2 style="text-align: center">Accessing Database Definitions</h2>
 <hr />
 
 <p>The following interface provides methods to access Database Defininition
 Components. It also provides methods to insert components.</p>
 <pre>public interface DBD {
     String getName();
+    DBD getMasterDBD();
+    void mergeIntoMaster();
     DBDMenu getMenu(String menuName);
     boolean addMenu(DBDMenu menu);
     Map&lt;String,DBDMenu&gt; getMenuMap();
@@ -694,18 +779,28 @@ Components. It also provides methods to insert components.</p>
     DBDSupport getSupport(String supportName);
     boolean addSupport(DBDSupport support);
     Map&lt;String,DBDSupport&gt; getSupportMap();
+    String menuList(String regularExpression);
+    String menuToString(String regularExpression);
+    String structureList(String regularExpression);
+    String structureToString(String regularExpression);
+    String recordTypeList(String regularExpression);
+    String recordTypeToString(String regularExpression);
+    String supportList(String regularExpression);
+    String supportToString(String regularExpression);
 }</pre>
 
 <p>The following class is a factory to create DBDs</p>
 <pre>public class DBDFactory {
-    public static DBD create(String name);
+    public static DBD create(String name,DBD masterDBD);
     public static DBD find(String name);
     public static Collection&lt;DBD&gt; getDBDList();
     public static void remove(DBD dbd);
+    public static Map&lt;String,DBD&gt; getDBDList();
+    public static String list(String regularExpression);
 }</pre>
 <hr />
 
-<h1 style="text-align: center"><a id="DBDXML"></a> XML to DBD Converter</h1>
+<h2 style="text-align: center">XML to DBD Converter</h2>
 <hr />
 
 <p>The following reads an xml file containing menu, structure, record type,
@@ -714,5 +809,62 @@ definition database.</p>
 <pre>    public class XMLToDBDFactory {
         public static void convert(DBD dbd, String fileName);
     }</pre>
+<hr />
+
+<h2 style="text-align: center">Creating and Using Database Definitions</h2>
+<hr />
+
+<p>This section explains how Database Definitions are used in an IOC.
+Database Definitions are created during IOC initialization but new
+definitions can also be added to a running IOC. Thus on-line add is
+supported. It is not, however, possible to remove definitions after they have
+been created.</p>
+
+<p>Before record instances can be created all menu, structure, recordType,
+and support definitions used by record instances must be created. The
+definitions are created by calling XMLToDBDFactory.convert, which has two
+arguments:</p>
+<ul>
+  <li>DBD dbd<br />
+    A database into which to store new definitions.</li>
+  <li>String fileName<br />
+    A file containing xml definitions for the new definitions.</li>
+</ul>
+
+<p>Thus a DBD must first be created. A DBD is created via a call to
+DBDFactory.create, which also has two arguments:</p>
+<ul>
+  <li>String name<br />
+    The name of the DBD being created.</li>
+  <li>DBD masterDBD<br />
+    A master DBD or null</li>
+</ul>
+
+<p>During IOC initialization name is given the value "master" and masterDBD
+is given the value null. This this is the masterDBD.</p>
+
+<p>In order to add new definitions to a running IOC the following is done:</p>
+<pre>    DBD masterDBD = DBDFactory.find("master");
+    DBD addDBD = DBDFactory.create("add",masterDBD);
+    boolean success = true;
+    try {
+        XMLToDBDFactory.convert(addDBD,fileName);
+    } catch (IllegalStateException e) {
+        System.out.println("IllegalStateException: " + e);
+        success = false;
+    }
+    if(success) {
+        addDBD.mergeIntoMaster();
+    }</pre>
+
+<p>This the new definitions are created in a separate DBD and if successfull
+then the new definitions are merged into the master DBD.</p>
+
+<p>DBDFactory implements DBD so that all methods arte thread safe. It does
+this by:</p>
+<ul>
+  <li>Using readWrite locks.</li>
+  <li>Returns a shallow copy for all getXXXMap methods.</li>
+</ul>
 </body>
 </html>

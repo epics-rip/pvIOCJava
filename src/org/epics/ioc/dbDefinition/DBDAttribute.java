@@ -7,7 +7,7 @@ package org.epics.ioc.dbDefinition;
 import org.epics.ioc.pvAccess.*;
 
 /**
- * reflection interface for field attributes.
+ * Interface required during XML processing.
  * @author mrk
  *
  */
@@ -82,9 +82,9 @@ public interface DBDAttribute {
      */
     String getSupportName();
     /**
-     * create a string describing the properties.
-     * @param indentLevel indent level. Ecah level is four spaces.
-     * @return the string describing the properties.
+     * create a string describing the attributes.
+     * @param indentLevel indent level. Each level is four spaces.
+     * @return the string describing the attributes.
      */
     String toString(int indentLevel);
     

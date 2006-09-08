@@ -10,22 +10,29 @@
 <body>
 <h1 style="text-align: center">EPICS JavaIOC: dbDerfinition example<br />
 package: org.epics.ioc.dbDefinition.example<br />
-2006.05.18</h1>
+2006.09.07</h1>
 
-<p>This package is an eclipse JUnit test for org.epics.ioc.dbDefinition. It
-contains:<ul>
+<p>This package provides JUnit tests for org.epics.ioc.dbDefinition:<ul>
   <li>XMLToDBDTest.java<br />
-    A JUnit test for XMLToDBD.</li>
-  <li>test.xml<br />
-    An xml file containing database definitions.</li>
+    A JUnit test for XMLToDBDFactory.</li>
+  <li>DBDTest.java<br />
+    A JUnit test for DBDFactory.</li>
 </ul>
 </p>
 
-<p>This is a JUnit test for DMLToDBD. This also is a test for dbDefinition
-and pvAccess because XMLToDBD makes extensive use of dbDefinition and
-pvAccess. It also provides an example of parsing database definitions. When
-run it produces four warning messages. These demonstrate what happens when an
-xml file has errors. The output is a dump of all the dsatabase definitions
-defined by test.xml.</p>
+<p>XMLToDBDTest is a Junit test for XMLToDBDFactory. It also is a test for
+dbDefinition and pvAccess because XMLToDBD makes extensive use of
+dbDefinition and pvAccess. It also provides an example of parsing database
+definitions. When run it produces four warning messages. These demonstrate
+what happens when an xml file has errors. The output is a dump of all the
+dsatabase definitions defined by test.xml.</p>
+
+<p>DBDTest.java is a Junit test for DBDFactory, which implements DBD. It
+creates a DBD called master and creates menu definitions. It then creates a
+DBD called add which has master as it's master DBD. It creates structure,
+recordType, and support definitions in add. It then lists everything in
+master and in add. It then merges add into master and again lists everything
+in both master and add (master has all definitions and add is empty). It then
+dumps everything in master.</p>
 </body>
 </html>

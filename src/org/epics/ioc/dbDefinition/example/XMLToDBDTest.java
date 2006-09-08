@@ -9,7 +9,7 @@ import junit.framework.TestCase;
 import org.epics.ioc.dbDefinition.*;
 import java.util.*;
 /**
- * JUnit test for DMLToDBD.
+ * JUnit test for XMLToDBDFactory.
  * This also is a test for dbDefinition and pvAccess because XMLToDBD makes
  * extensive use of dbDefinition and pvAccess.
  * It also provides an example of parsing database definitions.
@@ -26,7 +26,7 @@ public class XMLToDBDTest extends TestCase {
      * This is the only public method.
      */
     public static void testXML() {
-        DBD dbd = DBDFactory.create("test");
+        DBD dbd = DBDFactory.create("master",null);
         try {
             XMLToDBDFactory.convert(dbd,
                  "src/org/epics/ioc/dbDefinition/example/test.xml");

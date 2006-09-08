@@ -22,7 +22,7 @@ public class AccessTest extends TestCase {
      * test DBAccess.
      */
     public static void testAccess() {
-        DBD dbd = DBDFactory.create("test"); 
+        DBD dbd = DBDFactory.create("master",null); 
         IOCDB iocdb = IOCDBFactory.create(dbd,"testIOCDatabase");
         try {
             XMLToDBDFactory.convert(dbd,

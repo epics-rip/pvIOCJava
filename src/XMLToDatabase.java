@@ -5,7 +5,6 @@ import org.epics.ioc.dbAccess.XMLToIOCDBFactory;
 import org.epics.ioc.dbDefinition.*;
 
 import java.util.*;
-import java.net.*;
 
 /**
  * read and dump a Database Definition and Record Instance Files.
@@ -33,7 +32,7 @@ public class XMLToDatabase {
                     + " -db InstanceList -dumpDBD -dumpDB  ...\n");
             return;
         }
-        DBD dbd = DBDFactory.create("test");
+        DBD dbd = DBDFactory.create("master",null);
         IOCDB iocdb = IOCDBFactory.create(dbd,"testIOCDatabase");
         int nextArg = 0;
         State state = State.dbdFile;

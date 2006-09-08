@@ -803,11 +803,8 @@ configuration data.</p>
 <h3 id="Array">Array Data</h3>
 
 <p>The base interface for array fields is:</p>
-<pre>    public interface DBArray extends DBData, PVArray {
-        DBType getElementDBType();
-    }</pre>
-
-<p></p>
+<pre>    public interface DBArray extends DBData, PVArray {}
+</pre>
 
 <p>The following are the interfaces for each of the array types:</p>
 <pre>    public interface DBBooleanArray extends DBArray, PVBooleanArray{}

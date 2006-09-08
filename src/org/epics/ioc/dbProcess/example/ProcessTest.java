@@ -23,7 +23,7 @@ public class ProcessTest extends TestCase {
      * test DBAccess.
      */
     public static void testProcess() {
-        DBD dbd = DBDFactory.create("test"); 
+        DBD dbd = DBDFactory.create("master",null); 
         IOCDB iocdb = IOCDBFactory.create(dbd,"testIOCDatabase");
         System.out.printf("reading menuStructureSupport\n");
         try {

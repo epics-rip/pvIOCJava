@@ -23,7 +23,9 @@ public class LinkArraySupportFactory {
      * @return An interface to the support or null if the supportName was not "linkArray".
      */
     public static Support create(DBArray dbArray) {
-        if(dbArray.getElementDBType()!=DBType.dbLink) {
+        DBDArrayField dbdArrayField = (DBDArrayField)dbArray.getDBDField();
+        DBType elementDBType = dbdArrayField.getElementDBType();
+        if(elementDBType!=DBType.dbLink) {
             System.out.println(
                 dbArray.getRecord().getRecordName()
                 + "." + dbArray.getFullFieldName()

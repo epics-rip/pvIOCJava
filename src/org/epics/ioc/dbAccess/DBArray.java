@@ -13,10 +13,4 @@ import org.epics.ioc.dbDefinition.*;
  * @author mrk
  *
  */
-public interface DBArray extends DBData, PVArray {
-    /**
-     * Get the element DBType.
-     * @return The DBType.
-     */
-    DBType getElementDBType();
-}
+public interface DBArray extends DBData, PVArray {}
