@@ -12,12 +12,77 @@
 
 <h1 style="text-align: center">EPICS JavaIoc: Database Definition <br />
 package: org.epics.ioc.dbDefinition<br />
-2006.09.01</h1>
-<hr />
-PUT TOC HERE
+2006.09.13</h1>
 <hr />
 
-<h2 style="text-align: center">Overview</h2>
+<div class="toc">
+<ul>
+  <li><a href="#Overview">Overview</a></li>
+  <li><a href="#Database">Database Definition Syntax</a>
+    <ul>
+      <li><a href="#General">General Statements</a>
+        <ul>
+          <li><a href="#namespace">namespace</a></li>
+          <li><a href="#Include">Include</a></li>
+          <li><a href="#Macro">Macro Substitution</a></li>
+        </ul>
+      </li>
+      <li><a href="#Menu">Menu</a></li>
+      <li><a href="#Structure">Structure and Record Type</a></li>
+      <li><a href="#field">field</a>
+        <ul>
+          <li><a href="#Primitive">Primitive Types</a></li>
+          <li><a href="#string">string</a></li>
+          <li><a href="#enumerated">enumerated</a></li>
+          <li><a href="#structure">structure</a></li>
+          <li><a href="#array">array</a></li>
+          <li><a href="#menu">menu</a></li>
+          <li><a href="#link">link</a></li>
+        </ul>
+      </li>
+      <li><a href="#field1">field attribute</a></li>
+      <li><a href="#property">property</a></li>
+      <li><a href="#Support">Support</a></li>
+    </ul>
+  </li>
+  <li><a href="#Overview1">Overview of Java Support For Database Definition</a></li>
+  <li><a href="#Database1">Database Types</a></li>
+  <li><a href="#Introspect">Introspection of Database Definitions</a>
+    <ul>
+      <li><a href="#Menu1">Menu</a></li>
+      <li><a href="#Structure1">Structure and RecordType</a></li>
+      <li><a href="#Support1">Support</a></li>
+    </ul>
+  </li>
+  <li><a href="#Reflection">Reflection for Database Fields</a>
+    <ul>
+      <li><a href="#Field">Field Introspection</a></li>
+    </ul>
+  </li>
+  <li><a href="#Accessing">Accessing Database Definitions</a>
+    <ul>
+      <li><a href="#DBD">DBD</a></li>
+    </ul>
+  </li>
+  <li><a href="#Creating">Creating Database Definitions</a>
+    <ul>
+      <li><a href="#DBDFactory">DBDFactory</a></li>
+      <li><a href="#XMLToDBDFa">XMLToDBDFactory</a></li>
+      <li><a href="#Creating1">Creating Database Definitions</a></li>
+    </ul>
+  </li>
+  <li><a href="#Implementa">Implementation Specific Definitions</a>
+    <ul>
+      <li><a href="#DBDCreateF">DBDCreateFactory</a></li>
+      <li><a href="#AbstractDB">AbstractDBDField</a></li>
+      <li><a href="#DBDAttribu">DBDAttribute ETC</a></li>
+    </ul>
+  </li>
+</ul>
+</div>
+<hr />
+
+<h2 style="text-align: center" id="Overview">Overview</h2>
 <hr />
 
 <p>An EPICS IOC contains a memory resident real time database. The real time
@@ -47,7 +112,7 @@ implement database reflection.</p>
 </ol>
 <hr />
 
-<h2 style="text-align: center">Database Definition Syntax</h2>
+<h2 style="text-align: center" id="Database">Database Definition Syntax</h2>
 <hr />
 A Database Definition file must be an XML file with a root tag of
 DBDDefinition:
@@ -56,12 +121,12 @@ DBDDefinition:
   &lt;?-- valid Database Definition elements --&gt;
 &lt;/DBDefinition&gt;</pre>
 
-<h3>General Statements</h3>
+<h3 id="General">General Statements</h3>
 
-<h4>namespace</h4>
+<h4 id="namespace">namespace</h4>
 At this time namespaces are not used.
 
-<h4>Include</h4>
+<h4 id="Include">Include</h4>
 An XML file containing Database Definitions can include other files also
 containing Database Definitions. An included file must also be a valid XML
 Database Definition. Included files can also include other files. The syntax
@@ -81,16 +146,15 @@ is:
   <dt style="font-family: courier;">removePath</dt>
     <dd>Remove a path.</dd>
 </dl>
+<p>See {@link org.epics.ioc.util} for details.</p>
 
-<p>NOTE: Path needs more work. But what to do???</p>
-
-<h4>Macro Substitution</h4>
+<h4 id="Macro">Macro Substitution</h4>
 
 <p>Macro substitution is not very usefull for Database Definition but it is
 support just like for Database Instance files. See package
 org.epics.ioc.dbAccess for details about how macro substitution works.</p>
 
-<h3>Menu</h3>
+<h3 id="Menu">Menu</h3>
 A menu is an enumerated type, defined below, where the choice strings are
 defined once for each IOC. The syntax is:
 <pre>    
@@ -107,7 +171,7 @@ Example:
      &lt;choice&gt;periodic&lt;/choice&gt;
 &lt;/menu&gt;</pre>
 
-<h3>Structure and Record Type</h3>
+<h3 id="Structure">Structure and Record Type</h3>
 
 <p>Structure and recordType both define a data structure containing fields.
 The main difference is that a structure can't be instanciated except as a
@@ -157,11 +221,11 @@ field of a record.</p>
     <dd>See property below.</dd>
 </dl>
 
-<h3>field</h3>
+<h3 id="field">field</h3>
 The syntax for <span style="font-family: courier">fieldType</span> depends on
 the field type.
 
-<h4>Primitive Types</h4>
+<h4 id="Primitive">Primitive Types</h4>
 Primitive types are the same as the Java primitive types, i.e. <span
 style="font-family: courier">boolean</span>, <span
 style="font-family: courier">byte</span>, <span
@@ -176,19 +240,19 @@ example
     &lt;field name = "value", type = "double" /&gt;
     &lt;field name = "rawValue" type = "int" /&gt;</pre>
 
-<h4>string</h4>
+<h4 id="string">string</h4>
 A <span style="font-family: courier">string</span> is a Java <span
 style="font-family: courier;">String</span>. A <span
 style="font-family: courier;">string</span> field type is just defined as
 <span style="font-family: courier;">string</span>. For example:
 <pre>     &lt;field name = "description" type = "string" /&gt;</pre>
 
-<h4>enumerated</h4>
+<h4 id="enumerated">enumerated</h4>
 
 <p>An enumerated field type specified as enum For example:</p>
 <pre>    &lt;field name = "value" type = "enum" /&gt;</pre>
 
-<h4>structure</h4>
+<h4 id="structure">structure</h4>
 A structure field is declared as
 <pre>    &lt;field name = "value" type = "structure" structureName = "name" /&gt;</pre>
 <span style="font-family: courier;">structureName</span> is the name of a
@@ -206,7 +270,7 @@ structure which must have been previously defined. Example:
 <p>NOTE: The structureName does not have to be given. In this case the field
 instance must define the structureName.</p>
 
-<h4>array</h4>
+<h4 id="array">array</h4>
 
 <p>NOTE: One dimensional arrays are a supported type. Multidimensional arrays
 can be supported via a <span style="font-family: courier;">structure</span>
@@ -230,7 +294,7 @@ Examples:
      &lt;field name = "value" type = "array"  elementType = "double" /&gt;
      &lt;field name = "rectangle" type = "array" elementType = "structure" capacity = "2" /&gt;</pre>
 
-<h4>menu</h4>
+<h4 id="menu">menu</h4>
 A menu field is defined as:
 <pre>     &lt;field name = "name" type = "menu" nameName = "menuName" /&gt;</pre>
 where <span style="font-family: courierfont-family: courier;">menuName</span>
@@ -241,7 +305,7 @@ Example:
 <p>To the database, a menu field is presented just like an enumerated field
 with constant choices. The choices are taken from the menu definition.</p>
 
-<h4>link</h4>
+<h4 id="link">link</h4>
 This field type can get/put data from/to a location outside the record. When
 a record instance is created, the link choices come from <span
 style="font-family: courier;">support</span> definitions which are defined
@@ -253,7 +317,7 @@ Examples:
 <pre>     &lt;field name = "disableLink" type = "link" /&gt;
      &lt;field name = "input" type = "link" /&gt;</pre>
 
-<h3>field attribute</h3>
+<h3 id="field1">field attribute</h3>
 
 <p>A field can have additional attributes which are specified via xml
 attributes. The additional attributes are:</p>
@@ -298,7 +362,7 @@ The following examples show how attributes are defined:
 <br />
 
 
-<h3>property</h3>
+<h3 id="property">property</h3>
 A structure, recordType, and field can have properties. A property is defined
 as:
 <pre>    &lt;property name = "name" associatedField = "field name" /&gt;</pre>
@@ -341,7 +405,7 @@ where
         &lt;property name = "displayLimit" associatedField = "displayLimit" /&gt;
     &lt;/field&gt;</pre>
 
-<h3>Support</h3>
+<h3 id="Support">Support</h3>
 
 <p>Support can be associated with any field of a record instance when it is
 created. See package org.epics.ioc.dbAccess for details. Record types and
@@ -406,8 +470,8 @@ Examples of support:
         factoryName = "org.epics.ioc.support.LinkSupportFactory" /&gt;</pre>
 <hr />
 
-<h2 style="text-align: center">Overview of Java Support For Database
-Definition</h2>
+<h2 style="text-align: center" id="Overview1">Overview of Java Support For
+Database Definition</h2>
 <hr />
 
 <p>This following sections describes support for code that accessses Database
@@ -467,7 +531,7 @@ reflection interfaces provided by org.epics.ioc.pvAccess:</p>
 </dl>
 <hr />
 
-<h2 style="text-align: center">Database Types</h2>
+<h2 style="text-align: center" id="Database1">Database Types</h2>
 <hr />
 
 <p>The types, which extends the types defined by pvAccess, are:</p>
@@ -494,7 +558,8 @@ reflection interfaces provided by org.epics.ioc.pvAccess:</p>
 </dl>
 <hr />
 
-<h2 style="text-align: center">Introspection of Database Definitions</h2>
+<h2 style="text-align: center" id="Introspect">Introspection of Database
+Definitions</h2>
 <hr />
 
 <p>This section describes interfaces for accessing menu, structure,
@@ -502,7 +567,7 @@ recordType, and support, i.e. everything defined in Database Definition files
 except record instances. Reflection for fields of a structure or recordType
 is discussed in the next section.</p>
 
-<h3>Menu</h3>
+<h3 id="Menu1">Menu</h3>
 
 <p>The interface is:</p>
 <pre>    interface DBDMenu{
@@ -532,7 +597,7 @@ is discussed in the next section.</p>
 <p>Note that a shorter way is:</p>
 <pre>    void dumpMenu(DBDMenu menu) {System.out.println(menu.toString());}</pre>
 
-<h3>Structure and RecordType</h3>
+<h3 id="Structure1">Structure and RecordType</h3>
 
 <p>The interfaces are:</p>
 <pre>    interface DBDStructure extends DBDField, Structure{
@@ -567,7 +632,7 @@ is discussed in the next section.</p>
 <p>Again a shorter way is:</p>
 <pre>    void dumpStructure(DBDStructure structure) {System.out.println(structure.toString);}</pre>
 
-<h3>Support</h3>
+<h3 id="Support1">Support</h3>
 
 <p>The following interface is provided for accessing support.</p>
 <pre>    interface DBDSupport {
@@ -592,13 +657,14 @@ is discussed in the next section.</p>
 </dl>
 <hr />
 
-<h2 style="text-align: center">Reflection for Database Fields</h2>
+<h2 style="text-align: center" id="Reflection">Reflection for Database
+Fields</h2>
 <hr />
 
 <p>This section describes reflection for a field of a structure or
 recordType.</p>
 
-<h3>Field Introspection</h3>
+<h3 id="Field">Field Introspection</h3>
 
 <p>Every field has the following set of attributes.</p>
 <pre>   interface DBDFieldAttribute {
@@ -748,18 +814,254 @@ recordType.</p>
   <dt style="font-family: courier;">getElementDBType</dt>
     <dd>Get the DBType for the array elements.</dd>
 </dl>
+<hr />
 
-<h3>AbstractDBDField</h3>
+<h2 style="text-align: center" id="Accessing">Accessing Database
+Definitions</h2>
+<hr />
+
+<h3 id="DBD">DBD</h3>
+
+<p>DBD is an interface for accessing a Database containing Database
+Definitions. Methods are provided for accessing and inserting components. In
+addition a number of "convenience" methods are provided.</p>
+<pre>public interface DBD {
+    String getName();
+    DBD getMasterDBD();
+    void mergeIntoMaster();
+    DBDMenu getMenu(String menuName);
+    boolean addMenu(DBDMenu menu);
+    Map&lt;String,DBDMenu&gt; getMenuMap();
+    DBDStructure getStructure(String structureName);
+    boolean addStructure(DBDStructure structure);
+    Map&lt;String,DBDStructure&gt; getStructureMap();
+    DBDRecordType getRecordType(String recordTypeName);
+    boolean addRecordType(DBDRecordType recordType);
+    Map&lt;String,DBDRecordType&gt; getRecordTypeMap();
+    DBDSupport getSupport(String supportName);
+    boolean addSupport(DBDSupport support);
+    Map&lt;String,DBDSupport&gt; getSupportMap();
+    String menuList(String regularExpression);
+    String menuToString(String regularExpression);
+    String structureList(String regularExpression);
+    String structureToString(String regularExpression);
+    String recordTypeList(String regularExpression);
+    String recordTypeToString(String regularExpression);
+    String supportList(String regularExpression);
+    String supportToString(String regularExpression);
+}</pre>
+
+<p>where</p>
+<dl>
+  <dt style="font-family: courier;">getName</dt>
+    <dd>The name of this DBD database.</dd>
+  <dt style="font-family: courier;">getMasterDBD</dt>
+    <dd>Get the master DBD or null if no master was passed to
+      DBDFactory.create. Normally this means that this is the master.</dd>
+  <dt style="font-family: courier;">mergeIntoMaster</dt>
+    <dd>Merge this DBD into the master DBD. After merging into master the
+      compoments are removed from this database.</dd>
+  <dt style="font-family: courier;">getMenu</dt>
+    <dd>Get the DBDMenu that describes menuName.</dd>
+  <dt style="font-family: courier;">addMenu</dt>
+    <dd>Add a menu definition and return true. If the definition already
+      exists the request fails and false is returned.</dd>
+  <dt style="font-family: courier;">getMenuMap</dt>
+    <dd>Get a map of all the menu definitions. A shallow copy of the map is
+      returned.</dd>
+  <dt style="font-family: courier;">getStructure</dt>
+    <dd>Get the DBDStructure that describes the structureName</dd>
+  <dt style="font-family: courier;">addStructure</dt>
+    <dd>Add a structure definition and return true. If the definition already
+      exists the request fails and false is returned.</dd>
+  <dt style="font-family: courier;">getStructureMap</dt>
+    <dd>Get a map of all the structure definitions. A shallow copy of the map
+      is returned.</dd>
+  <dt style="font-family: courier;">getRecordType</dt>
+    <dd>Get the DBDRecordType that describes recordTypeName.</dd>
+  <dt style="font-family: courier;">addRecordType</dt>
+    <dd>Add a recordType definition and return true. If the definition
+      already exists the request fails and false is returned.</dd>
+  <dt style="font-family: courier;">getRecordTypeMap</dt>
+    <dd>Get a map of all the recordType definitions. A shallow copy of the
+      map is returned.</dd>
+  <dt style="font-family: courier;">getSupport</dt>
+    <dd>Get the DBDSupport that describes supportName.</dd>
+  <dt style="font-family: courier;">addSupport</dt>
+    <dd>Add a support definition and return true. If the definition already
+      exists the request fails and false is returned.</dd>
+  <dt style="font-family: courier;">getSupportMap</dt>
+    <dd>Get a map of all the support definitions. A shallow copy of the map
+      is returned.</dd>
+</dl>
+The remaining methods are convenience methods. Each convenience method
+produces a string that lists or dumps all components with names that match a
+regular expression. The java.util.regex facility is used. Consult it for a
+definition of regular expressions.
+<dl>
+  <dt style="font-family: courier;">menuList</dt>
+    <dd>Get a list of menu names that match a regular expression</dd>
+  <dt style="font-family: courier;">menuToString</dt>
+    <dd>Get a dump of all the DBDMenu definitions with names that match a
+      regular expression.</dd>
+  <dt style="font-family: courier;">structureList</dt>
+    <dd>Get a list of structure names that match a regular expression</dd>
+  <dt style="font-family: courier;">structureToString</dt>
+    <dd>Get a dump of all the DBDStructure definitions with names that match
+      a regular expression.</dd>
+  <dt style="font-family: courier;">recordTypeList</dt>
+    <dd>Get a list of recordType names that match a regular expression</dd>
+  <dt style="font-family: courier;">recordTypeToString</dt>
+    <dd>Get a dump of all the DBDRecordType definitions with names that match
+      a regular expression.</dd>
+  <dt style="font-family: courier;">supportList</dt>
+    <dd>Get a list of support names that match a regular expression.</dd>
+  <dt style="font-family: courier;">supportToString</dt>
+    <dd>Get a dump of all the DBDSupport definitions with names that match a
+      regular expression.</dd>
+</dl>
+An example of using a convience method is:
+<pre>    String list = master.menuList(".*[S].*");</pre>
+Produces a list of all menu definitions that have an 'S" somewhere in the
+menu name.
+<hr />
+
+<h2 style="text-align: center" id="Creating">Creating Database
+Definitions</h2>
+<hr />
+Two classes are provided for creation of DBD Databases:
+<ul>
+  <li>DBDFactory<br />
+    A factory to create and manage DBD databases.</li>
+  <li>XMLToDBDFactory<br />
+    A factory that reads xml Database Definitions and puts them into a DBD
+    Database.</li>
+</ul>
+
+<h3 id="DBDFactory">DBDFactory</h3>
+
+<p>DBDFactory is a class that creates DBD Databases. It provides the
+following methods:</p>
+<pre>public class DBDFactory {
+    public static DBD create(String name,DBD masterDBD);
+    public static void remove(DBD dbd);
+    public static DBD find(String name);
+    public static Map&lt;String,DBD&gt; getDBDMap();
+    public static String list(String regularExpression);
+}
+ </pre>
+
+<p>where</p>
+<dl>
+  <dt style="font-family: courier;">create</dt>
+    <dd>Create a new DBD with the name "name". If the master DBD is being
+      created then masterDBD is null.</dd>
+  <dt style="font-family: courier;">remove</dt>
+    <dd>Remove the dbd from the DBD database.</dd>
+  <dt style="font-family: courier;">find</dt>
+    <dd>Find a DBD.</dd>
+  <dt style="font-family: courier;">getDBDMap</dt>
+    <dd>Get a Map of all the DBDs. A shallow copy of the internal map is
+      returned.</dd>
+  <dt style="font-family: courier;">list</dt>
+    <dd>Get a string containing a list of all the DBDs with names that match
+      the regular expression.</dd>
+  <dt>All methods of DBDFactory and of the DBD instances it creates are
+  thread safe.</dt>
+</dl>
+
+<h3 id="XMLToDBDFa">XMLToDBDFactory</h3>
+
+<p>The following reads an xml file containing menu, structure, record type,
+and link support definitions and adds the definitions to a database
+definition database.</p>
+<pre>    public class XMLToDBDFactory {
+        public static void convert(DBD dbd, String fileName);
+        public static DBD addToMaster(String fileName);
+    }</pre>
+<dl>
+  <dt style="font-family: courier;">convert</dt>
+    <dd>Convert the xml DBD definitions in file fileName and put the
+      definitions into dbd. When generating definitions for an IOC use
+      addToMaster instead of this.</dd>
+  <dt style="font-family: courier;">addToMaster</dt>
+    <dd>Add definitions defined in fileName to a DBD named "master". This can
+      be called either during IOC initialization or while an IOC is running,
+      i.e. on-line add of new definitions is supported. If master does not
+      exist it is created. Definitions will not be created if they already
+      appear in master or if they are defined more than once. If any errors
+      occur then no definitions are added to master and null is returned. A
+      DBD named "add" holds the definitions from fileName. If all definitions
+      are read successfully than the definitions are merged into master and
+      DVD add is returned. After addToMaster returns DBD add will not appear
+      in the map returned by getDBDMap.</dd>
+</dl>
+
+<h3 id="Creating1">Creating Database Definitions</h3>
+
+<p>Before record instances can be created all menu, structure, recordType,
+and support definitions used by record instances must be created.</p>
+
+<p>A running IOC always uses a DBD Database named "master" and an IOCDB also
+named "master". The prefered way to create definitions by calling:</p>
+<pre>    DBD add = XMLToDBDFactory.addToMaster(fileName);
+    if(add==null) // failure take appropriate action
+
+</pre>
+
+<p>addToMaster will not add any definitions to master if any errors are
+detected. It can be called during IOC initialization and also while an IOC is
+running. For an IOC this is the only method required for generating Database
+Definitions. Other code may decide to use DBDFactory.create instead.</p>
+
+<p>All DBDFactory and DBD methods are thread safe. In order to prevent race
+conditions:</p>
+<ul>
+  <li>DBDFactory has a private readWrite lock that manages all access to its
+    methods.</li>
+  <li>DBD has a private readWrite lock that manages all access to its
+  methods.</li>
+  <li>Database components can be added but not removed from a DBD.</li>
+  <li>All getXXXMap methods return shallow copies of the internal map.</li>
+</ul>
+<hr />
+
+<h2 style="text-align: center" id="Implementa">Implementation Specific
+Definitions</h2>
+<hr />
+
+<p>This section describes interfaces and classes used by the Database
+Definition implementation. Other than the possible exception of
+DBDCreateFactory, the definition are probably not of interest to other
+code.</p>
+
+<h3 id="DBDCreateF">DBDCreateFactory</h3>
+
+<p>The following class provides methods to create components for a Database
+Definition.</p>
+<pre>public final class  DBDCreateFactory {
+    public static DBDMenu createMenu(String menuName, String[] choices);  
+    public static DBDStructure createStructure(String name,
+        DBDField[] dbdField,Property[] property);
+    public static DBDRecordType createRecordType(String name,
+        DBDField[] dbdField,Property[] property);
+    public static DBDSupport createSupport(String supportName,
+        String configurationStructName,String factoryName);
+    public static DBDField createField(DBDAttribute attribute, Property[]property);
+}</pre>
+
+<h3 id="AbstractDB">AbstractDBDField</h3>
 
 <p>An abstract class is available for creating implementations of the field
 reflection interfaces. This class is used by DBDCreateFactory and is probably
 not needed by other code.</p>
 
-<h3>DBDAttribute ETC..</h3>
+<h3 id="DBDAttribu">DBDAttribute ETC</h3>
 
 <p>Interfaces DBDAttribute and DBDAttribute and class DBDAttributeFactory are
 used by the XML parsers and are not of use after database creation. Thus,
-other than showing the interfaces they will not be discussed.</p>
+other than showing the interfaces they are not discussed in this package
+overview.</p>
 <pre>    interface DBDAttribute {
         String getName();      // If possible use the version from DBDField
         DBType getDBType();    // If possible use the version from DBDField
@@ -785,132 +1087,5 @@ other than showing the interfaces they will not be discussed.</p>
     public class DBDAttributeFactory {
         static public DBDAttribute create(DBD dbd, DBDAttributeValues attributes);
     }</pre>
-<hr />
-
-<h2 style="text-align: center">Creation of Database Definition Components</h2>
-<hr />
-
-<p>The following class provides methods to create components for a Database
-Definition.</p>
-<pre>public final class  DBDCreateFactory {
-    public static DBDMenu createMenu(String menuName, String[] choices);  
-    public static DBDStructure createStructure(String name,
-        DBDField[] dbdField,Property[] property);
-    public static DBDRecordType createRecordType(String name,
-        DBDField[] dbdField,Property[] property);
-    public static DBDSupport createSupport(String supportName,
-        String configurationStructName,String factoryName);
-    public static DBDField createField(DBDAttribute attribute, Property[]property);
-}</pre>
-<hr />
-
-<h2 style="text-align: center">Accessing Database Definitions</h2>
-<hr />
-
-<p>The following interface provides methods to access Database Defininition
-Components. It also provides methods to insert components.</p>
-<pre>public interface DBD {
-    String getName();
-    DBD getMasterDBD();
-    void mergeIntoMaster();
-    DBDMenu getMenu(String menuName);
-    boolean addMenu(DBDMenu menu);
-    Map&lt;String,DBDMenu&gt; getMenuMap();
-    DBDStructure getStructure(String structureName);
-    boolean addStructure(DBDStructure structure);
-    Map&lt;String,DBDStructure&gt; getStructureMap();
-    DBDStructure getRecordType(String recordTypeName);
-    boolean addRecordType(DBDStructure recordType);
-    Map&lt;String,DBDRecordType&gt; getRecordTypeMap();
-    DBDSupport getSupport(String supportName);
-    boolean addSupport(DBDSupport support);
-    Map&lt;String,DBDSupport&gt; getSupportMap();
-    String menuList(String regularExpression);
-    String menuToString(String regularExpression);
-    String structureList(String regularExpression);
-    String structureToString(String regularExpression);
-    String recordTypeList(String regularExpression);
-    String recordTypeToString(String regularExpression);
-    String supportList(String regularExpression);
-    String supportToString(String regularExpression);
-}</pre>
-
-<p>The following class is a factory to create DBDs</p>
-<pre>public class DBDFactory {
-    public static DBD create(String name,DBD masterDBD);
-    public static DBD find(String name);
-    public static Collection&lt;DBD&gt; getDBDList();
-    public static void remove(DBD dbd);
-    public static Map&lt;String,DBD&gt; getDBDList();
-    public static String list(String regularExpression);
-}</pre>
-<hr />
-
-<h2 style="text-align: center">XML to DBD Converter</h2>
-<hr />
-
-<p>The following reads an xml file containing menu, structure, record type,
-and link support definitions and adds the definitions to a database
-definition database.</p>
-<pre>    public class XMLToDBDFactory {
-        public static void convert(DBD dbd, String fileName);
-    }</pre>
-<hr />
-
-<h2 style="text-align: center">Creating and Using Database Definitions</h2>
-<hr />
-
-<p>This section explains how Database Definitions are used in an IOC.
-Database Definitions are created during IOC initialization but new
-definitions can also be added to a running IOC. Thus on-line add is
-supported. It is not, however, possible to remove definitions after they have
-been created.</p>
-
-<p>Before record instances can be created all menu, structure, recordType,
-and support definitions used by record instances must be created. The
-definitions are created by calling XMLToDBDFactory.convert, which has two
-arguments:</p>
-<ul>
-  <li>DBD dbd<br />
-    A database into which to store new definitions.</li>
-  <li>String fileName<br />
-    A file containing xml definitions for the new definitions.</li>
-</ul>
-
-<p>Thus a DBD must first be created. A DBD is created via a call to
-DBDFactory.create, which also has two arguments:</p>
-<ul>
-  <li>String name<br />
-    The name of the DBD being created.</li>
-  <li>DBD masterDBD<br />
-    A master DBD or null</li>
-</ul>
-
-<p>During IOC initialization name is given the value "master" and masterDBD
-is given the value null. This this is the masterDBD.</p>
-
-<p>In order to add new definitions to a running IOC the following is done:</p>
-<pre>    DBD masterDBD = DBDFactory.find("master");
-    DBD addDBD = DBDFactory.create("add",masterDBD);
-    boolean success = true;
-    try {
-        XMLToDBDFactory.convert(addDBD,fileName);
-    } catch (IllegalStateException e) {
-        System.out.println("IllegalStateException: " + e);
-        success = false;
-    }
-    if(success) {
-        addDBD.mergeIntoMaster();
-    }</pre>
-
-<p>This the new definitions are created in a separate DBD and if successfull
-then the new definitions are merged into the master DBD.</p>
-
-<p>DBDFactory implements DBD so that all methods arte thread safe. It does
-this by:</p>
-<ul>
-  <li>Using readWrite locks.</li>
-  <li>Returns a shallow copy for all getXXXMap methods.</li>
-</ul>
 </body>
 </html>

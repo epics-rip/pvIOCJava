@@ -9,6 +9,8 @@ import java.util.*;
 import java.util.regex.*;
 import java.util.concurrent.locks.*;
 
+import org.epics.ioc.dbAccess.DBRecord;
+
 
 /**
  * DBDFactory creates, finds and removes a DBD.
@@ -43,7 +45,7 @@ public class DBDFactory {
     }
     /**
      * Remove the DBD from the list.
-     * @param dbd The BBD to remove.factoryName
+     * @param dbd The DBD to remove
      */
     public static void remove(DBD dbd) {
         rwLock.writeLock().lock();
@@ -70,7 +72,7 @@ public class DBDFactory {
      * Get a map of the DBDs.
      * @return the Collection.
      */
-    public static Map<String,DBD> getDBDList() {
+    public static Map<String,DBD> getDBDMap() {
         rwLock.readLock().lock();
         try {
             return (Map<String,DBD>)dbdMap.clone();
@@ -139,34 +141,42 @@ public class DBDFactory {
          */
         public void mergeIntoMaster() {
             if(masterDBD==null) return;
+            rwLock.readLock().lock();
+            try {
+                masterDBD.merge(menuMap,structureMap,recordTypeMap,supportMap);
+            } finally {
+                rwLock.readLock().unlock();
+            }
+        }
+        // merge allows master to be locked once
+        private void merge(TreeMap<String,DBDMenu> menu,
+                TreeMap<String,DBDStructure> structure,
+                TreeMap<String,DBDRecordType> recordType,
+                TreeMap<String,DBDSupport> support)
+        {
             Set<String> keys;
             rwLock.writeLock().lock();
             try {
-                keys = menuMap.keySet();
+                keys = menu.keySet();
                 for(String key: keys) {
-                    masterDBD.addMenu(menuMap.get(key));
+                    menuMap.put(key,menu.get(key));
                 }
-                menuMap.clear();
-                keys = structureMap.keySet();
+                keys = structure.keySet();
                 for(String key: keys) {
-                    masterDBD.addStructure(structureMap.get(key));
+                    structureMap.put(key,structure.get(key));
                 }
-                structureMap.clear();
-                keys = recordTypeMap.keySet();
+                keys = recordType.keySet();
                 for(String key: keys) {
-                    masterDBD.addRecordType(recordTypeMap.get(key));
+                    recordTypeMap.put(key,recordType.get(key));
                 }
-                recordTypeMap.clear();
-                keys = supportMap.keySet();
+                keys = support.keySet();
                 for(String key: keys) {
-                    masterDBD.addSupport(supportMap.get(key));
+                    supportMap.put(key,support.get(key));
                 }
-                supportMap.clear();
             } finally {
                 rwLock.writeLock().unlock();
             }
         }
-
         /* (non-Javadoc)
          * @see org.epics.ioc.dbDefinition.DBD#addMenu(org.epics.ioc.dbDefinition.DBDMenu)
          */

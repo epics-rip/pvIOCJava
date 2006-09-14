@@ -27,11 +27,10 @@ public class XMLToDBDTest extends TestCase {
      */
     public static void testXML() {
         DBD dbd = DBDFactory.create("master",null);
-        try {
-            XMLToDBDFactory.convert(dbd,
-                 "src/org/epics/ioc/dbDefinition/example/test.xml");
-        } catch (IllegalStateException e) {
-            System.out.println("IllegalStateException: " + e);
+        boolean result = XMLToDBDFactory.convert(dbd,
+            "src/org/epics/ioc/dbDefinition/example/test.xml");
+        if(!result) {
+            System.out.println("convert had errors");
         }
         System.out.printf("%nmenus");
         Map<String,DBDMenu> menuMap = dbd.getMenuMap();
