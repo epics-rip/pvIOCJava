@@ -29,20 +29,13 @@ public class SubstituteTest extends TestCase {
     public static void testXML() {
         Set<String> keys;
         DBD dbd = DBDFactory.create("master",null);
-        try {
-            XMLToDBDFactory.convert(dbd,
-                 "src/org/epics/ioc/dbAccess/example/substituteDBD.xml");
-        } catch (IllegalStateException e) {
-            System.out.println("IllegalStateException: " + e);
-        }
-        
-        IOCDB iocdb = IOCDBFactory.create(dbd,"testIOCDatabase");
-        try {
-            XMLToIOCDBFactory.convert(dbd,iocdb,
-                 "src/org/epics/ioc/dbAccess/example/substituteDB.xml");
-        } catch (IllegalStateException e) {
-            System.out.println("IllegalStateException: " + e);
-        }
+        boolean result = XMLToDBDFactory.convert(dbd,
+            "src/org/epics/ioc/dbAccess/example/substituteDBD.xml");
+        if(!result) System.out.printf("XMLToDBDFactory.convert reported errors");
+        IOCDB iocdb = IOCDBFactory.create(dbd,"testIOCDatabase",null);
+        result = XMLToIOCDBFactory.convert(dbd,iocdb,
+            "src/org/epics/ioc/dbAccess/example/substituteDB.xml");
+        if(!result) System.out.printf("XMLToIOCDBFactory.convert reported errors");
         Map<String,DBRecord> recordMap = iocdb.getRecordMap();
         keys = recordMap.keySet();
         System.out.printf("%n%nrecord list%n");

@@ -30,21 +30,12 @@ public class XMLAllTypesTest extends TestCase {
         Set<String> keys;
         DBD dbd = DBDFactory.create("master",null);
         System.out.printf("reading menuStructureSupport%n");
-        try {
-            XMLToDBDFactory.convert(dbd,
+        XMLToDBDFactory.convert(dbd,
                  "src/org/epics/ioc/dbAccess/example/menuStructureSupportDBD.xml");
-        } catch (IllegalStateException e) {
-            System.out.println("IllegalStateException: " + e);
-        }
         System.out.printf("reading allTypesDBD%n");
-        try {
-            XMLToDBDFactory.convert(dbd,
+        XMLToDBDFactory.convert(dbd,
                  "src/org/epics/ioc/dbAccess/example/allTypesDBD.xml");
-        } catch (IllegalStateException e) {
-            System.out.println("IllegalStateException: " + e);
-        }
-
-        IOCDB iocdb = IOCDBFactory.create(dbd,"testIOCDatabase");
+        IOCDB iocdb = IOCDBFactory.create(dbd,"testIOCDatabase",null);
         System.out.printf("reading exampleAllTypeDB%n");
         try {
             XMLToIOCDBFactory.convert(dbd,iocdb,

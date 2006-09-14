@@ -23,13 +23,9 @@ public class AccessTest extends TestCase {
      */
     public static void testAccess() {
         DBD dbd = DBDFactory.create("master",null); 
-        IOCDB iocdb = IOCDBFactory.create(dbd,"testIOCDatabase");
-        try {
-            XMLToDBDFactory.convert(dbd,
+        IOCDB iocdb = IOCDBFactory.create(dbd,"testIOCDatabase",null);
+        XMLToDBDFactory.convert(dbd,
                  "src/org/epics/ioc/dbAccess/example/accessDBD.xml");
-        } catch (IllegalStateException e) {
-            System.out.println("IllegalStateException: " + e);
-        }
               
 //        System.out.printf("%n%nstructures");
 //        Map<String,DBDStructure> structureMap = dbd.getStructureMap();
@@ -46,13 +42,9 @@ public class AccessTest extends TestCase {
 //            System.out.print(dbdRecordType.toString());
 //        }
         
-        try {
-            XMLToIOCDBFactory.convert(dbd,iocdb,
+          XMLToIOCDBFactory.convert(dbd,iocdb,
                 "src/org/epics/ioc/dbAccess/example/accessDB.xml");
-        } catch (IllegalStateException e) {
-            System.out.println("IllegalStateException: " + e);
-        }
-        
+               
 //        System.out.printf("%nrecords%n");
 //        Map<String,DBRecord> recordMap = iocdb.getRecordMap();
 //        Set<String> recordKey = recordMap.keySet();

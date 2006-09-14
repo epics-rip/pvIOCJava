@@ -24,22 +24,11 @@ public class ProcessTest extends TestCase {
      */
     public static void testProcess() {
         DBD dbd = DBDFactory.create("master",null); 
-        IOCDB iocdb = IOCDBFactory.create(dbd,"testIOCDatabase");
-        System.out.printf("reading menuStructureSupport\n");
-        try {
-            XMLToDBDFactory.convert(dbd,
+        IOCDB iocdb = IOCDBFactory.create(dbd,"testIOCDatabase",null);
+        XMLToDBDFactory.convert(dbd,
                  "src/org/epics/ioc/dbProcess/example/menuStructureSupportDBD.xml");
-        } catch (Exception e) {
-            System.out.println("Exception: " + e);
-        }
-        
-        System.out.printf("reading exampleDBD\n");
-        try {
-            XMLToDBDFactory.convert(dbd,
+        XMLToDBDFactory.convert(dbd,
                  "src/org/epics/ioc/dbProcess/example/exampleDBD.xml");
-        } catch (Exception e) {
-            System.out.println("Exception: " + e);
-        }
         
 //        System.out.printf("\n\nstructures");
 //        Map<String,DBDStructure> structureMap = dbd.getStructureMap();

@@ -7,77 +7,213 @@ package org.epics.ioc.dbAccess;
 
 import org.epics.ioc.dbDefinition.*;
 import org.epics.ioc.pvAccess.*;
-import org.epics.ioc.pvAccess.Type;
 
 import java.util.*;
+import java.util.concurrent.locks.*;
 import java.util.regex.*;
 
 
 /**
- * factory for creating an IOCDB.
+ * Factory for creating an IOCDB.
  * @author mrk
  *
  */
 public class IOCDBFactory {
-
+    private static TreeMap<String,IOCDB> iocdbMap = new TreeMap<String,IOCDB>();
+    private static ReentrantReadWriteLock rwLock = new ReentrantReadWriteLock();
     /**
      * Create an IOCDB.
      * @param dbd The reflection database.
      * @param name The name for the IOCDB.
-     * @return The newly created IOCDB.
+     * @param masterIOCDB The masterIOCDB or null if no master or this is the master.
+     * @return The newly created IOCDB or null if an IOCDB with this name already exists.
      */
-    public static IOCDB create(DBD dbd, String name) {
-        if(find(name)!=null) return null;
-        IOCDB iocdb = new IOCDBInstance(dbd,name);
-        iocdbList.addLast(iocdb);
-        return iocdb;
+    public static IOCDB create(DBD dbd, String name, IOCDB masterIOCDB) {
+        rwLock.writeLock().lock();
+        try {
+            if(iocdbMap.get(name)!=null) return null;
+            IOCDB iocdb = new IOCDBInstance(dbd,name,masterIOCDB);
+            iocdbMap.put(name,iocdb);
+            return iocdb;
+        } finally {
+            rwLock.writeLock().unlock();
+        }
     }
-    
+    /**
+     * Remove the IOCDB from the list.
+     * @param iocdb The IOCDB to remove.
+     * @return (false,true) if the iocdb (was not,was) removed.
+     */
+    public static boolean remove(IOCDB iocdb) {
+        rwLock.writeLock().lock();
+        try {
+            if(iocdbMap.remove(iocdb.getName())!=null) return true;
+            return false;
+        } finally {
+            rwLock.writeLock().unlock();
+        }
+    }
     /**
      * Find an IOCDB.
      * @param name The IOCDB name.
      * @return The IOCDB.
      */
     public static IOCDB find(String name) {
-        ListIterator<IOCDB> iter = iocdbList.listIterator();
-        while(iter.hasNext()) {
-            IOCDB iocdb = iter.next();
-            if(name.equals(iocdb.getName())) return iocdb;
+        rwLock.readLock().lock();
+        try {
+            return iocdbMap.get(name);
+        } finally {
+            rwLock.readLock().unlock();
         }
-        return null;
     }
-    
     /**
-     * Get the complete collection of IOCDBs.
-     * @return The collection.
+     * Get a map of the IOCDBs.
+     * @return the Collection.
      */
-    public static Collection<IOCDB> getIOCDBList() {
-        return iocdbList;
+    public static Map<String,IOCDB> getIOCDBMap() {
+        rwLock.readLock().lock();
+        try {
+            return (Map<String,IOCDB>)iocdbMap.clone();
+        } finally {
+            rwLock.readLock().unlock();
+        }
     }
-
     /**
-     * Remove an IOCDB from the collection.
-     * @param iocdb The iocdb to remove;
+     * List each IOCDB that has a name that matches the regular expression.
+     * @param regularExpression The regular expression.
+     * @return A string containing the list.
      */
-    public static void remove(IOCDB iocdb) {
-        iocdbList.remove(iocdb);
-    }
-    
-    private static LinkedList<IOCDB> iocdbList;
-    static {
-        iocdbList = new LinkedList<IOCDB>();
+    public static String list(String regularExpression) {
+        StringBuilder result = new StringBuilder();
+        if(regularExpression==null) regularExpression = ".*";
+        Pattern pattern;
+        try {
+            pattern = Pattern.compile(regularExpression);
+        } catch (PatternSyntaxException e) {
+            return "PatternSyntaxException: " + e;
+        }
+        rwLock.readLock().lock();
+        try {
+            Set<String> keys = iocdbMap.keySet();
+            for(String key: keys) {
+                IOCDB iocdb = iocdbMap.get(key);
+                String name = iocdb.getName();
+                if(pattern.matcher(name).matches()) {
+                    result.append(" " + name);
+                }
+            }
+            return result.toString();
+        } finally {
+            rwLock.readLock().unlock();
+        }
     }
     
     private static class IOCDBInstance implements IOCDB
     {
-        IOCDBInstance(DBD dbd, String name) {
-            this.dbd = dbd;
-            this.name = name;
-        }
-        
         private DBD dbd;
         private String name;
-        private static Map<String,DBRecord> recordMap = new HashMap<String,DBRecord>();
+        private IOCDBInstance masterIOCDB;
+        private LinkedHashMap<String,DBRecord> recordMap = new LinkedHashMap<String,DBRecord>();
+        private ReentrantReadWriteLock rwLock = new ReentrantReadWriteLock();
+        
+        private IOCDBInstance(DBD dbd, String name, IOCDB masterIOCDB) {
+            this.dbd = dbd;
+            this.name = name;
+            this.masterIOCDB = (IOCDBInstance)masterIOCDB;
+        }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.dbAccess.IOCDB#getName()
+         */
+        public String getName() {
+            return name;
+        }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.dbAccess.IOCDB#getDBD()
+         */
+        public DBD getDBD() {
+            return dbd;
+        }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.dbAccess.IOCDB#getMasterIOCDB()
+         */
+        public IOCDB getMasterIOCDB() {
+            return masterIOCDB;
+        }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.dbAccess.IOCDB#mergeIntoMaster()
+         */
+        public void mergeIntoMaster() {
+            if(masterIOCDB==null) return;
+            rwLock.readLock().lock();
+            try {
+                masterIOCDB.merge(recordMap);
+            } finally {
+                rwLock.readLock().unlock();
+            }
+        }
+        // merge allows master to be locked once instead of for each record instance
+        private void merge(LinkedHashMap<String,DBRecord> from) {
+            Set<String> keys;
+            rwLock.writeLock().lock();
+            try {
+                keys = from.keySet();
+                for(String key: keys) {
+                    recordMap.put(key,from.get(key));
+                }
+            }  finally {
+                rwLock.writeLock().unlock();
+            }
+        }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.dbAccess.IOCDB#findRecord(java.lang.String)
+         */
+        public DBRecord findRecord(String recordName) {
+            rwLock.readLock().lock();
+            try {
+                DBRecord record = null;
+                record = recordMap.get(recordName);
+                if(record==null && masterIOCDB!=null) record = masterIOCDB.findRecord(recordName);
+                return record;
+            } finally {
+                rwLock.readLock().unlock();
+            }
+        }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.dbAccess.IOCDB#addRecord(org.epics.ioc.dbAccess.DBRecord)
+         */
+        public boolean addRecord(DBRecord record) {
+            rwLock.writeLock().lock();
+            try {
+                String key = record.getRecordName();
+                if(recordMap.containsKey(key)) return false;
+                if(masterIOCDB!=null && masterIOCDB.findRecord(key)!=null) return false;
+                recordMap.put(key,record);
+                return true;
+            } finally {
+                rwLock.writeLock().unlock();
+            }
+        }
+        public boolean removeRecord(DBRecord record) {
+            rwLock.writeLock().lock();
+            try {
+                String key = record.getRecordName();
+                if(recordMap.remove(key)!=null) return true;
+                return false;
+            } finally {
+                rwLock.writeLock().unlock();
+            }
+        }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.dbAccess.IOCDB#getRecordMap()
+         */
+        public Map<String,DBRecord> getRecordMap() {
+            rwLock.readLock().lock();
+            try {
+                return (Map<String, DBRecord>)recordMap.clone();
+            } finally {
+                rwLock.readLock().unlock();
+            }
+        }
         /* (non-Javadoc)
          * @see org.epics.ioc.dbAccess.IOCDB#createAccess(java.lang.String)
          */
@@ -87,42 +223,58 @@ public class IOCDBFactory {
             return null;
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.dbAccess.IOCDB#createRecord(java.lang.String, org.epics.ioc.dbDefinition.DBDRecordType)
+         * @see org.epics.ioc.dbAccess.IOCDB#recordList(java.lang.String)
          */
-        public boolean createRecord(String recordName,
-            DBDRecordType dbdRecordType)
-        {
-            if(recordMap.containsKey(recordName)) return false;
-            DBRecord record = FieldDataFactory.createRecord(
-                recordName,dbdRecordType);
-            recordMap.put(recordName,record);
-            return true;
+        public String recordList(String regularExpression) {
+            StringBuilder result = new StringBuilder();
+            if(regularExpression==null) regularExpression = ".*";
+            Pattern pattern;
+            try {
+                pattern = Pattern.compile(regularExpression);
+            } catch (PatternSyntaxException e) {
+                return "PatternSyntaxException: " + e;
+            }
+            rwLock.readLock().lock();
+            try {
+                Set<String> keys = recordMap.keySet();
+                for(String key: keys) {
+                    DBRecord record = recordMap.get(key);
+                    String name = record.getRecordName();
+                    if(pattern.matcher(name).matches()) {
+                        result.append(" " + name);
+                    }
+                }
+                return result.toString();
+            } finally {
+                rwLock.readLock().unlock();
+            }
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.dbAccess.IOCDB#getDBD()
+         * @see org.epics.ioc.dbAccess.IOCDB#recordToString(java.lang.String)
          */
-        public DBD getDBD() {
-            return dbd;
-        }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.dbAccess.IOCDB#getName()
-         */
-        public String getName() {
-            return name;
-        }
-        
-        /* (non-Javadoc)
-         * @see org.epics.ioc.dbAccess.IOCDB#findRecord(java.lang.String)
-         */
-        public DBRecord findRecord(String recordName) {
-            return recordMap.get(recordName);
-        }
-        
-        /* (non-Javadoc)
-         * @see org.epics.ioc.dbAccess.IOCDB#getRecordMap()
-         */
-        public Map<String,DBRecord> getRecordMap() {
-            return recordMap;
+        public String recordToString(String regularExpression) {
+            StringBuilder result = new StringBuilder();
+            if(regularExpression==null) regularExpression = ".*";
+            Pattern pattern;
+            try {
+                pattern = Pattern.compile(regularExpression);
+            } catch (PatternSyntaxException e) {
+                return "PatternSyntaxException: " + e;
+            }
+            rwLock.readLock().lock();
+            try {
+                Set<String> keys = recordMap.keySet();
+                for(String key: keys) {
+                    DBRecord record = recordMap.get(key);
+                    String name = record.getRecordName();
+                    if(pattern.matcher(name).matches()) {
+                        result.append(String.format("%nrecord %s%s",name,record.toString()));
+                    }
+                }
+                return result.toString();
+            } finally {
+                rwLock.readLock().unlock();
+            }
         }
     }
 
@@ -135,12 +287,11 @@ public class IOCDBFactory {
         private String otherField = null;
 
         
-        Access(DBRecord dbRecord) {
+        private Access(DBRecord dbRecord) {
             this.dbRecord = dbRecord;
             dbDataSetField = null;
         }
-        
-        
+              
         /* (non-Javadoc)
          * @see org.epics.ioc.dbAccess.DBAccess#replaceField(org.epics.ioc.dbAccess.DBData, org.epics.ioc.dbAccess.DBData)
          */
@@ -179,9 +330,7 @@ public class IOCDBFactory {
          */
         public DBData getField() {
             return dbDataSetField;
-        }
-        
-        
+        }   
         /* (non-Javadoc)
          * @see org.epics.ioc.dbAccess.DBAccess#setField(java.lang.String)
          */
@@ -298,8 +447,7 @@ public class IOCDBFactory {
             if(currentData==null) return AccessSetResult.notFound;
             dbDataSetField = currentData;
             return AccessSetResult.thisRecord;
-        }
-        
+        }        
         /* (non-Javadoc)
          * @see org.epics.ioc.dbAccess.DBAccess#setField(org.epics.ioc.dbAccess.DBData)
          */
@@ -312,24 +460,19 @@ public class IOCDBFactory {
                 throw new IllegalArgumentException (
                     "field is not in this record instance");
             dbDataSetField = dbData;
-        }
-        
+        }        
         /* (non-Javadoc)
          * @see org.epics.ioc.dbAccess.DBAccess#getOtherField()
          */
         public String getOtherField() {
             return otherField;
         }
-
-
         /* (non-Javadoc)
          * @see org.epics.ioc.dbAccess.DBAccess#getOtherRecord()
          */
         public String getOtherRecord() {
             return otherRecord;
-        }
-
-        
+        }        
         /* (non-Javadoc)
          * @see org.epics.ioc.dbAccess.DBAccess#getPropertyField(org.epics.ioc.pvAccess.Property)
          */
@@ -339,7 +482,6 @@ public class IOCDBFactory {
             if(currentData==null) currentData = dbRecord;
             return findPropertyField(currentData,property);
         }
-
         /* (non-Javadoc)
          * @see org.epics.ioc.dbAccess.DBAccess#getPropertyField(java.lang.String)
          */

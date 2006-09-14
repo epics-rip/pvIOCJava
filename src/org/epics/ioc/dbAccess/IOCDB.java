@@ -27,11 +27,43 @@ public interface IOCDB {
      */
     DBD getDBD();
     /**
+     * Get the master IOCDB.
+     * In order to support on-line add of new record instances a master IOCDB can be created.
+     * A separate IOCDB can be created for adding new record instances.
+     * The new instances can be added to the new IOCDB and when all instances have been added
+     * the new IOCDB can be merged into the master IOCDB. 
+     * @return The master IOCDB or null if no master exists.
+     */
+    IOCDB getMasterIOCDB();
+    /**
+     * Merge all definitions into the master IOCDB.
+     * After the merge all definitions are cleared from this IOCDB and this IOCDB is removed from the IOCDBFactory list.
+     */
+    void mergeIntoMaster();
+    /**
      * Find the interface for a record instance.
+     * It will be returned if it resides in this IOCDB or in the master IOCDB.
      * @param recordName The instance name.
      * @return The interface on null if the record is not located.
      */
     DBRecord findRecord(String recordName);
+    /**
+     * Add a new record instance.
+     * @param record The record instance.
+     * @return true if the record was created.
+     */
+    boolean addRecord(DBRecord record);
+    /**
+     * Remove a record instance.
+     * @param record The record instance.
+     * @return true if the record was removed and false otherwise.
+     */
+    boolean removeRecord(DBRecord record);
+    /**
+     * Get the complete set of record instances.
+     * @return The map.
+     */
+    Map<String,DBRecord> getRecordMap();
     /**
      * Provide access to a record and it's fields.
      * @param recordName The record instance name.
@@ -39,15 +71,15 @@ public interface IOCDB {
      */
     DBAccess createAccess(String recordName);
     /**
-     * Create a new record instance.
-     * @param recordName The instance name.
-     * @param dbdRecordType The reflection interface for the instance record type.
-     * @return true if the record was created.
+     * Generate a list of record instance with names that match the regular expression.
+     * @param regularExpression The regular expression.
+     * @return A string containing the list.
      */
-    boolean createRecord(String recordName, DBDRecordType dbdRecordType);
+    String recordList(String regularExpression);
     /**
-     * Get the complete set of record instances.
-     * @return The collection.
+     * Dump all the record instances with names that match the regular expression.
+     * @param regularExpression The regular expression.
+     * @return A string containing the dump.
      */
-    Map<String,DBRecord> getRecordMap();
+    String recordToString(String regularExpression);
 }

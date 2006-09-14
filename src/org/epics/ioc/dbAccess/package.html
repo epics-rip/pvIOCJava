@@ -12,7 +12,7 @@
 
 <h1 style="text-align: center">EPICS JavaIoc: Database Access <br />
 package: org.epics.ioc.dbAcess <br />
-2006.09.01</h1>
+2006.09.14</h1>
 
 <div class="toc">
 <ul>
@@ -82,9 +82,8 @@ instances. The following is discussed:</p>
   <li>Record Instance Syntax<br />
     The XML syntax for defining record instances.</li>
   <li>An XML to database converter.<br />
-    This takes as input two files: 1) Database Definitions ( menu, structure,
-    recordType, linkSupport) and 2) record instance definitions. The files
-    are converted from xml and the result placed in an IOC database.</li>
+    Parses xml record instance files, creates record instances, and puts them
+    in an IOC database.</li>
   <li>Record Instance Access<br />
     Interfaces for accessing data in record instances.</li>
   <li>Data Factory<br />
@@ -93,6 +92,10 @@ instances. The following is discussed:</p>
   <li>Abstract Classes<br />
     A set of abstract classes for implementing ths support for database
     fields.</li>
+  <li>IOC Database<br />
+    Interface and factory for a database containing the record instances.</li>
+  <li>Database Access<br />
+    An interface for locating fields of a record instance.</li>
   <li>Listen Support<br />
     A description of the support for monitoring changes to the data in
     database instances fields.</li>
@@ -132,8 +135,6 @@ Definitions. Included files can also include other files. The syntax is:
     <dd>Remove a path.</dd>
 </dl>
 
-<p>NOTE: Path needs more work. But what to do???</p>
-
 <h4><a id="SyntaxMacroSubstitution"></a> Macro Substitution</h4>
 
 <p>Macro substitution replaces a string of the form "${from}" with some other
@@ -162,7 +163,7 @@ text. The syntax is:</p>
 </ol>
 
 <h4><a id="ExampleIncludeMacro"></a> Example Include and Macro
-Sustitution</h4>
+Substitution</h4>
 
 <p>The following is a template file:</p>
 <pre>&lt;?xml version="1.0" ?&gt;
@@ -189,11 +190,7 @@ Sustitution</h4>
     &lt;/aiInput&gt;
     &lt;priority&gt;medium&lt;/priority&gt;
 &lt;/record&gt;
-
-
-&lt;/IOCDatabase&gt;
-
-</pre>
+&lt;/IOCDatabase&gt;</pre>
 
 <p>The following creates two instance files from the template:</p>
 <pre>&lt;?xml version="1.0" ?&gt;
@@ -208,8 +205,7 @@ Sustitution</h4>
 &lt;include href = "protoAiDB.xml" /&gt;
 &lt;substitute fromTo = "recordExtension=02,pvname=nameFor02" /&gt;
 &lt;include href = "protoAiDB.xml" /&gt;
-&lt;/IOCDatabase&gt;
-</pre>
+&lt;/IOCDatabase&gt;</pre>
 
 <h3><a id="RecordInstance"></a>record</h3>
 
@@ -273,13 +269,14 @@ immediately after the record instance or field instance definition.</p>
     &lt;support name = "exampleSupport" configurationStructureName = "dummy"
         factoryName = "org.epics.ioc.support.Dummy" /&gt;</pre>
 
-<p>Then an instance of field link can be initialized as follows:</p>
+<p>Then an instance of field <span style="font-family: courier;">link</span>
+can be initialized as follows:</p>
 <pre> &lt;value supportName = "exampleSupport"&gt;
         &lt;configure structureName = "dummy"&gt;
             &lt;xxx&gt;xxxxxx&lt;/xxx&gt;
             &lt;yyy&gt;5&lt;/yyy&gt;
         &lt;/configure&gt;
-        This is a string
+        This is a string value
     &lt;/value&gt;</pre>
 
 <p>This example was for a field that has type string but similar definitions
@@ -476,8 +473,41 @@ Database Converter</h2>
 <p>The following reads an xml file containing record instance definitions and
 puts them into an IOCDB.</p>
 <pre>    public class XMLToIOCDBFactory {
-        public static void convert(DBD dbdin, IOCDB iocdbin, String fileName);
-    }</pre>
+        public static void convert(DBD dbd, IOCDB iocdb, String fileName);
+        public static IOCDB addToMaster(String fileName);
+    }
+  </pre>
+
+<p>where</p>
+<dl>
+  <dt style="font-family: courier;">convert</dt>
+    <dd>parse an xml file conaining record instance definitions and put the
+      resulting record instances into an IOC database.
+      <ul>
+        <li><span style="font-family: courier;">dbd</span> - The database
+          that has the Database Definitions required by the record
+        instances.</li>
+        <li><span style="font-family: courier;">iocdb</span> - The database
+          that hols the record instances.</li>
+        <li><span style="font-family: courier;">fileName</span> - The xml
+          file that has the record instance definitions.</li>
+      </ul>
+    </dd>
+  <dt style="font-family: courier;">addToMaster</dt>
+    <dd>Add definitions from fileName into an IOCDB named master. The DBD
+      database and the IOCDB are both named master. If any errors are
+      detected no definitions are added to master and a null is returned. If
+      no errors occur, the definitions are added to master and the return
+      value is an IOCDB that contains the newly created record instances.
+      Attempting to add definitions for a record instance that is already in
+      master is an error.</dd>
+  <dt>For an IOC addToMaster should be used to create record instances. This
+  can be done during IOC initialization or after an IOC is running, i.e.
+  on-line add of new record instances is supported. Only one user at a time
+  is allowed to call convert or addToMaster. If XMLToIOCDBFactory is busy
+  when another call is made an error is generated and nothing is done. Both
+  methods are thread safe.</dt>
+</dl>
 <hr />
 
 <h2 style="text-align: center" id="Record1"><a
@@ -803,8 +833,7 @@ configuration data.</p>
 <h3 id="Array">Array Data</h3>
 
 <p>The base interface for array fields is:</p>
-<pre>    public interface DBArray extends DBData, PVArray {}
-</pre>
+<pre>    public interface DBArray extends DBData, PVArray {}</pre>
 
 <p>The following are the interfaces for each of the array types:</p>
 <pre>    public interface DBBooleanArray extends DBArray, PVBooleanArray{}
@@ -937,7 +966,8 @@ the methods to actually get ot put data.</p>
 
 <h3 id="AbstractDB1"><a id="AbstractDBEnum"></a>AbstractDBEnum</h3>
 
-<p>Abstract base class for an enumerated field.</p>
+<p>Abstract base class for an enumerated field. Any code that implements
+DBEnum should extend this class.</p>
 <pre>    public abstract class AbstractDBEnum extends AbstractDBData implements DBEnum {
         protected AbstractDBEnum(DBData parent,
             DBDEnumField dbdEnumField, String[]choice);
@@ -953,7 +983,8 @@ the methods to actually get ot put data.</p>
 
 <h3 id="AbstractDB2"><a id="AbstractDBMenu"></a>AbstractDBMenu</h3>
 
-<p>Abstract base class for a menu field.</p>
+<p>Abstract base class for a menu field. Any code that implements DBMenu
+should extend this class.</p>
 <pre>    public abstract class AbstractDBMenu extends AbstractDBData implements DBMenu
     {
         protected AbstractDBMenu(DBData parent, DBDMenuField dbdMenuField);
@@ -971,7 +1002,8 @@ the methods to actually get ot put data.</p>
 
 <h3 id="AbstractDB3"><a id="AbstractDBStructure"></a>AbstractDBStructure</h3>
 
-<p>Abstract base class for a structure field.</p>
+<p>Abstract base class for a structure field. Any code that implements
+DBStructure should extend this class.</p>
 <pre>    public abstract class AbstractDBStructure extends AbstractDBData
     implements DBStructure
     {
@@ -1026,8 +1058,7 @@ the methods to actually get ot put data.</p>
 <h3 id="AbstractDB5"><a id="AbstractDBArray"></a>AbstractDBArray</h3>
 
 <p>Abstract base class for an array field.</p>
-<pre>    public abstract class AbstractDBArray
-    extends AbstractDBData implements DBArray
+<pre>    public abstract class AbstractDBArray extends AbstractDBData implements DBArray
     {
         protected AbstractDBArray(DBData parent,DBDArrayField dbdArrayField);
         // PVArray methods
@@ -1041,29 +1072,174 @@ the methods to actually get ot put data.</p>
     }</pre>
 
 <p>This is likely to be the class that is most often extented for special
-purposes.</p>
+purposes. The following is the code that provides the default implementation
+for a DBDoubleArray:</p>
+<pre>    private static class DoubleArray extends AbstractDBArray implements DBDoubleArray
+    {
+        private double[] value;
+        int length = 0;
+        int capacity;
+        boolean capacityMutable;
+
+        // The constructor
+        DoubleArray(DBData parent,DBDArrayField dbdArrayField,
+            int capacity,boolean capacityMutable)
+        {
+            super(parent,dbdArrayField);
+            this.capacity = capacity;
+            this.capacityMutable = capacityMutable;
+            value = new double[capacity];
+            String defaultValue = dbdArrayField.getFieldAttribute().getDefault();
+            if(defaultValue!=null &amp;&amp; defaultValue.length()&gt;0) {
+                String[] values = primitivePattern.split(defaultValue);
+                try {
+                    convert.fromStringArray(this,0,values.length,values,0);
+                } catch (NumberFormatException e) {
+                }
+            }
+        }
+
+        public String toString() { return toString(0); }
+        public String toString(int indentLevel) {
+            return convert.getString(this, indentLevel)
+            + super.toString(indentLevel);
+        }
+        public boolean isCapacityMutable() { return capacityMutable;}
+        public int get(int offset, int len, DoubleArrayData data) {
+            int n = len;
+            if(offset+len &gt; length) n = length;
+            data.data = value;
+            data.offset = offset;
+            return n;
+        }
+        public int put(int offset, int len, double[]from, int fromOffset) {
+            if(offset+len &gt; length) {
+                 int newlength = offset + len;
+                 if(newlength&gt;capacity) setCapacity(newlength);
+                 length = newlength;
+            }
+            System.arraycopy(from,fromOffset,value,offset,len);
+            return len;
+        }
+        public int getCapacity() { return capacity; }
+        public int getLength() { return length; }
+        public void setCapacity(int len) {
+            if(!capacityMutable)
+                throw new IllegalStateException("capacity is immutable");
+            if(length&gt;len) length = len;
+            double[]newarray = new double[len];
+            if(length&gt;0) System.arraycopy(value,0,newarray,0,length);
+            value = newarray;
+            capacity = len;
+        }
+        public void setLength(int len) {
+            if(!super.getField().isMutable())
+                throw new IllegalStateException("PVData.isMutable is false");
+            if(len&gt;capacity) setCapacity(len);
+            length = len;
+        }
+    }</pre>
+
+<p>This implementation starts with an array capacity passed to the
+constructor. If the capacity is mutable, the array grows as required.</p>
 <hr />
 
 <h2 style="text-align: center" id="IOCDB1"><a id="IOCDB"></a> IOCDB: IOC
 Database</h2>
 <hr />
 
-<p>An IOCDB is a database for a java IOC.</p>
+<p>An IOCDB is a database for a java IOC. All methods IOCDBFactory are thread
+safe. The instances of IOCDB created by IOCDBFactory are also thread safe.
+ReadWrite locks are used to implement thread safety.</p>
 <pre>    public interface IOCDB {
         String getName();
         DBD getDBD();
+        IOCDB getMasterIOCDB();
+        void mergeIntoMaster();
         DBRecord findRecord(String recordName);
+        boolean removeRecord(DBRecord record);
+        boolean addRecord(DBRecord record);
         DBAccess createAccess(String recordName);
-        boolean createRecord(String recordName, DBDRecordType dbdRecordType);
         Map&lt;String,DBRecord&gt; getRecordMap();
+        String recordList(String regularExpression);
+        String recordToString(String regularExpression);
     }
-    
+ </pre>
+
+<p>where</p>
+<dl>
+  <dt style="font-family: courier;">getName</dt>
+    <dd>The IOC database Name.</dd>
+  <dt style="font-family: courier;">getDBD</dt>
+    <dd>Get the Database Definition database that this DBD uses.</dd>
+  <dt style="font-family: courier;">getMasterIOCDB</dt>
+    <dd>Get the master DBD for this DBD. The return value is null if no
+      master.</dd>
+  <dt style="font-family: courier;">mergeIntoMaster</dt>
+    <dd>Merge the record instances from this database into the master
+      database.</dd>
+  <dt style="font-family: courier;">findRecord</dt>
+    <dd>Return the interface for the record with name recordName or null if
+      the record is not found. A search is made this database. If not found
+      and a master database exists than it is also serched.</dd>
+  <dt style="font-family: courier;">removeRecord</dt>
+    <dd>Remove the record. (false,true) is returned if the record (was
+      not,was) removed.</dd>
+  <dt style="font-family: courier;">addRecord</dt>
+    <dd>Add a record instance. (false,true) is returned if the instance (was
+      not,was) added to the database. A record is not added if it already
+      exists in this database or in the master database.</dd>
+  <dt style="font-family: courier;">createAccess</dt>
+    <dd>Create a DBAccess. See below for a description of IOC Database
+    Access.</dd>
+  <dt style="font-family: courier;">getRecordMap</dt>
+    <dd>Get a shallow copy of the map of all record instances in this
+      database. A copy is returned to ensure thread safety.</dd>
+  <dt style="font-family: courier;">recordList</dt>
+    <dd>Return a string that contains a list if all record names that match
+      the regular expression.</dd>
+  <dt style="font-family: courier;">recordToString</dt>
+    <dd>Return a dump of all record instances with names that match the
+      regular expression.</dd>
+</dl>
+
+<p>IOCDBFactory is a class that manages IOCDB databases.</p>
+<pre>    
     public class IOCDBFactory {
-        public static IOCDB create(DBD dbd, String name);
+        public static IOCDB create(DBD dbd, String name, IOCDB master);
+        public static boolean remove(IOCDB iocdb);
         public static IOCDB find(String name);
-        public static Collection&lt;IOCDB&gt; getIOCDBList();
-        public static void remove(IOCDB iocdb);
+        public static Map&lt;String,IOCDB&gt; getIOCDBMap();
+        public static String list(String regularExpression);
     }</pre>
+
+<p>where</p>
+<dl>
+  <dt style="font-family: courier;">create</dt>
+    <dd>Create an IOCDB and add it to the map of all IOCDBs. A nul is
+      returned if an IOCDB with the same name already exists.
+      <ul>
+        <li>dbd<br />
+          The Database Definition database for use with this IOCDB.</li>
+        <li>name<br />
+          The name for this IOCDB. It must not already exist.</li>
+        <li>master<br />
+          The master IOCDB or null if this is the master or no master is
+          required.</li>
+      </ul>
+    </dd>
+  <dt style="font-family: courier;">remove</dt>
+    <dd>Remove the iocdb. (false,true) is returned if the iocdb (was not,
+      was) removed.</dd>
+  <dt style="font-family: courier;">find</dt>
+    <dd>Find the IOCDB. Return null is not found.</dd>
+  <dt style="font-family: courier;">getIOCDBMap</dt>
+    <dd>Get a shallow copy of the map of all IOCDBs. A copy is returned to
+      ensure thread safety.</dd>
+  <dt style="font-family: courier;">list</dt>
+    <dd>Return a string that contains a list if all IOCDBs with names that
+      match the regular expression.</dd>
+</dl>
 <hr />
 
 <h2 style="text-align: center" id="Database1"><a id="DatabaseAccess"></a>IOC

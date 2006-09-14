@@ -7,6 +7,7 @@ package org.epics.ioc.util;
 
 import java.util.*;
 import java.util.regex.Pattern;
+import java.util.concurrent.atomic.*;
 import java.io.*;
 import java.net.*;
 
@@ -15,118 +16,124 @@ import org.xml.sax.ContentHandler;
 import org.xml.sax.helpers.*;
 
 /**
+ * IOCXMLReaderFactory implements IOCXMLReader.
+ * Only one reader is created and getReader returns the instance.
  * @author mrk
  *
  */
 public class IOCXMLReaderFactory {
-    static private UserHandler userHandler = new UserHandler();
+    
+    static private IOCReader iocReader = new IOCReader();
     static private IOCXMLListener listener = null;
     static private String rootElementName = null;
-    private static Map<String,String> substituteMap = new TreeMap<String,String>();
-    private static List<String> pathList = new ArrayList<String>();
-    private static Pattern separatorPattern = Pattern.compile("[, ]");
-    private static Pattern equalPattern = Pattern.compile("[=]");
-    
-    static public IOCXMLReader getReader() {
-        return userHandler;
-    }
+    static private Map<String,String> substituteMap = new TreeMap<String,String>();
+    static private List<String> pathList = new ArrayList<String>();
+    static private Pattern separatorPattern = Pattern.compile("[, ]");
+    static private Pattern equalPattern = Pattern.compile("[=]");
     
     /**
-     * Create an IOCXMLReader.
-     * @param rootElementName The root element tag name.
-     * The root file and any included files must have the same rootElementName.
-     * @param fileName The file.
-     * @param listener The callback listener.
-     * @throws IllegalStateException
+     * Get the IOCXMLReader.
+     * @return The reader.
      */
-    public static void create(String rootElementName,String fileName, IOCXMLListener listener) 
-    throws IllegalStateException
-    {
-        IOCXMLReaderFactory.rootElementName = rootElementName;
-        IOCXMLReaderFactory.listener = listener;
-        create(null,fileName);
+    static public IOCXMLReader getReader() {
+        return iocReader;
     }
     
-    private static IOCXMLReader create(Handler parent,String fileName) 
-    throws IllegalStateException
-    {
-        String uri = null;
-        try {
-            uri = new File(fileName).toURL().toString();
-        } catch (MalformedURLException e) {
-            throw new IllegalStateException(
-                    String.format("%n")
-                    + "XMLToDBDFactory.convert terminating with MalformedURLException"
-                    + String.format("%n")
-                    + e.getMessage());
-        }
-        XMLReader reader;
-        Handler handler = new Handler(parent);
-        try {
-            reader = XMLReaderFactory.createXMLReader();
-            reader.setContentHandler(handler);
-            reader.setErrorHandler(handler);
-            reader.parse(uri);
-        } catch (SAXException e) {
-            throw new IllegalStateException(
-                String.format("%n")
-                + "XMLToDBDFactory.convert terminating with SAXException"
-                + String.format("%n")
-                + e.getMessage());
-        } catch (IOException e) {
-            throw new IllegalStateException(
-                String.format("%n")
-                + "XMLToDBDFactory.convert terminating with IOException"
-                + String.format("%n")
-                + e.getMessage());
-        } catch (IllegalStateException e) {
-            handler.errorMessage("IllegalStateException " + e.getMessage());
-            throw new IllegalStateException(
-                String.format("%n")
-                + "XMLToDBDFactory.convert terminating with IllegalStateException"
-                + String.format("%n")
-                + e.getMessage());
-        } catch (IllegalArgumentException e) {
-            handler.errorMessage("IllegalArgumentException " + e.getMessage());
-            throw new IllegalStateException(
-                String.format("%n")
-                + "XMLToDBDFactory.convert terminating with IllegalArgumentException"
-                + String.format("%n")
-                + e.getMessage());
-        }
-        return handler;
-    }
-    
-    private static class UserHandler implements IOCXMLReader {
-        private IOCXMLReader currentReader = null;
+    private static class IOCReader implements IOCXMLReader {
+        private AtomicBoolean isInUse = new AtomicBoolean(false);
+        private Handler currentHandler = null;
         
-        private void setCurrentReader(IOCXMLReader reader) {
-            currentReader = reader;
+        /**
+         * Create an IOCXMLReader.
+         * @param rootElementName The root element tag name.
+         * The root file and any included files must have the same rootElementName.
+         * @param fileName The file.
+         * @param listener The callback listener.
+         */
+        public void parse(String rootElementName,String fileName, IOCXMLListener listener) 
+        {
+            boolean gotIt = isInUse.compareAndSet(false,true);
+            if(!gotIt) {
+                listener.errorMessage("IOCReader is already active");
+            }
+            if(listener==null) {
+                System.out.println("IOCXMLReader was called with a null listener");
+            }
+            try {
+                IOCXMLReaderFactory.rootElementName = rootElementName;
+                IOCXMLReaderFactory.listener = listener;
+                IOCXMLReaderFactory.substituteMap.clear();
+                IOCXMLReaderFactory.pathList.clear();
+                create(null,fileName);
+//            }catch (RuntimeException e) {
+//                listener.errorMessage("RuntimeException " + e.toString());
+            } finally {
+                isInUse.set(false);
+            }
         }
-        
         /* (non-Javadoc)
          * @see org.epics.ioc.util.IOCXMLReader#errorMessage(java.lang.String)
          */
         public void errorMessage(String message) {
-            currentReader.errorMessage(message);
+            currentHandler.errorMessage(message);
         }
 
         /* (non-Javadoc)
          * @see org.epics.ioc.util.IOCXMLReader#fatalMessage(java.lang.String)
          */
         public void fatalMessage(String message) {
-            currentReader.fatalMessage(message);
+            currentHandler.fatalMessage(message);
         }
 
         /* (non-Javadoc)
          * @see org.epics.ioc.util.IOCXMLReader#warningMessage(java.lang.String)
          */
         public void warningMessage(String message) {
-            currentReader.warningMessage(message);
+            currentHandler.warningMessage(message);
         }
         
+        private void setCurrentReader(Handler handler) {
+            currentHandler = handler;
+        }
+        
+        private Handler create(Handler parent,String fileName) throws IllegalStateException
+        {
+            String uri = null;
+            try {
+                uri = new File(fileName).toURL().toString();
+            } catch (MalformedURLException e) {
+                throw new IllegalStateException(
+                        String.format("%n")
+                        + "IOCXMLReader.convert terminating with MalformedURLException"
+                        + String.format("%n")
+                        + e.getMessage());
+            }
+            XMLReader reader;
+            Handler handler = new Handler(parent);
+            try {
+                reader = XMLReaderFactory.createXMLReader();
+                reader.setContentHandler(handler);
+                reader.setErrorHandler(handler);
+                reader.parse(uri);
+            } catch (SAXException e) {
+                // nothing to do. ErrorHandler reports errors.
+            } catch (IOException e) {
+                throw new IllegalStateException(
+                    String.format("%n")
+                    + "IOCXMLReader.convert terminating with IOException"
+                    + String.format("%n")
+                    + e.getMessage());
+            } catch (IllegalArgumentException e) {
+                throw new IllegalStateException(
+                    String.format("%n")
+                    + "IOCXMLReader.convert terminating with IllegalArgumentException"
+                    + String.format("%n")
+                    + e.getMessage());
+            }
+            return handler;
+        }
     }
-    private static class Handler implements IOCXMLReader, ContentHandler, ErrorHandler {
+    private static class Handler implements ContentHandler, ErrorHandler {
         private Handler parent = null;
         private Locator locator;
         private int nWarning = 0;
@@ -137,20 +144,21 @@ public class IOCXMLReaderFactory {
         
         private Handler(Handler parent) {
             this.parent = parent;
-            userHandler.setCurrentReader(this);
+            iocReader.setCurrentReader(this);
         }
         
-        private void printLocation() {
-            System.err.printf("line %d column %d in %s%n",
+        private String showLocation() {
+            String result;
+            result = String.format("line %d column %d in %s%n",
                 locator.getLineNumber(),
                 locator.getColumnNumber(),
                 locator.getSystemId());
-            if(parent!=null) parent.printLocation();
+            if(parent!=null) result += parent.showLocation();
+            return result;
         }
         private void printMessage(String message)
         {
-            System.out.printf("%n%s%n",message);
-            printLocation();
+            listener.errorMessage(String.format("%s%n%s",message,showLocation()));
         }
         public void errorMessage(String message) {
             printMessage("error " + message);
@@ -251,7 +259,7 @@ public class IOCXMLReaderFactory {
                 System.err.printf("%s endDocument: warning %d severe %d fatal %d%n",
                     locator.getSystemId(),nWarning,nError,nFatal);
             }
-            userHandler.setCurrentReader(parent);
+            iocReader.setCurrentReader(parent);
             parent = null;
             locator = null;
         }
@@ -365,7 +373,7 @@ public class IOCXMLReaderFactory {
             if(pathList.size()>0) {
                 href = pathList.get(0) + File.separator + href; 
             }
-            create(this,href);
+            iocReader.create(this,href);
             return;
         }
         

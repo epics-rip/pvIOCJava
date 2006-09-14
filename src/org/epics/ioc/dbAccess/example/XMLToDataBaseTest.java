@@ -28,32 +28,50 @@ public class XMLToDataBaseTest extends TestCase {
      */
     public static void testXML() {
         Set<String> keys;
-        DBD dbd = DBDFactory.create("master",null);
-        try {
-            XMLToDBDFactory.convert(dbd,
-                 "src/org/epics/ioc/dbAccess/example/xmlToDataBaseDBD.xml");
-        } catch (IllegalStateException e) {
-            System.out.println("IllegalStateException: " + e);
+        String list = null;
+        DBD addDBD = XMLToDBDFactory.addToMaster(
+            "src/org/epics/ioc/dbAccess/example/xmlToDataBaseDBD.xml");
+        if(addDBD==null) {
+            System.out.printf("XMLToDBDFactory.convert reported errors");
+            return;
         }
-        
-        IOCDB iocdb = IOCDBFactory.create(dbd,"testIOCDatabase");
-        try {
-            XMLToIOCDBFactory.convert(dbd,iocdb,
-                 "src/org/epics/ioc/dbAccess/example/xmlToDataBaseDB.xml");
-        } catch (IllegalStateException e) {
-            System.out.println("IllegalStateException: " + e);
+        DBD masterDBD = DBDFactory.find("master");
+        assertNotNull(masterDBD);
+        list = masterDBD.menuList(".*");
+        System.out.println("masterDBD menus: " + list);
+        list = addDBD.menuList(".*");
+        System.out.println("   addDBD menus: " + list);
+        list = masterDBD.structureList(".*");
+        System.out.println("masterDBD structures: " + list);
+        list = addDBD.structureList(".*");
+        System.out.println("   addDBD structures: " + list);
+        list = masterDBD.recordTypeList(".*");
+        System.out.println("masterDBD recordTypes: " + list);
+        list = addDBD.recordTypeList(".*");
+        System.out.println("   addDBD recordTypes: " + list);
+        list = masterDBD.supportList(".*");
+        System.out.println("masterDBD supports: " + list);
+        list = addDBD.supportList(".*");
+        System.out.println("   addDBD supports: " + list);
+        IOCDB addIOCDB = XMLToIOCDBFactory.addToMaster(
+            "src/org/epics/ioc/dbAccess/example/xmlToDataBaseDB.xml");
+        if(addIOCDB==null) {
+            System.out.printf("XMLToIOCDBFactory.convert reported errors");
+            return;
         }
-        Map<String,DBRecord> recordMap = iocdb.getRecordMap();
+        IOCDB masterIOCDB = IOCDBFactory.find("master");
+        list = masterIOCDB.recordList(".*");
+        System.out.println("   masterIOCDB records: " + list);
+        list = addIOCDB.recordList(".*");
+        System.out.println("      addIOCDB records: " + list);
+        list = masterIOCDB.recordList(".*Ai.*");
+        System.out.println("masterIOCDB Ai records: " + list);
+        Map<String,DBRecord> recordMap = masterIOCDB.getRecordMap();
         keys = recordMap.keySet();
-        System.out.printf("%n%nrecord list%n");
-        for(String key: keys) {
-            DBRecord record = recordMap.get(key);
-            System.out.printf("%n%s",record.getRecordName());
-        }
         System.out.printf("%n%nrecord contents%n");
         for(String key: keys) {
-            DBRecord record = recordMap.get(key);
-            System.out.print(record.toString());
+            list = masterIOCDB.recordToString(key);
+            System.out.println(list);
         }
     }
 

@@ -10,7 +10,7 @@
 <body>
 <h1 style="text-align: center">EPICS JavaIOC: util<br />
 package: org.epics.ioc.util<br />
-2006.09.01</h1>
+2006.09.13</h1>
 <hr />
 
 <h2 style="text-align: center">Overview</h2>
@@ -22,37 +22,256 @@ package: org.epics.ioc.util<br />
 <h2 style="text-align: center;">XML Include and Macro Substitution</h2>
 <hr />
 
-<p>This provides support for macro substitution and include. It is used by
-both org.epics.ioc.dbDefinition.XMLToDBDFactory and by
-org.epics.ioc.dbAccess.XMLToIOCDBFactory.</p>
-<pre>
-    public interface IOCXMLListener {
+<p>Support is provided for processing XML files with the following
+features:</p>
+<ul>
+  <li>Include and Macro Substitution are handled automatically.<br />
+    NOTE: include and substitute are reserved words.</li>
+  <li>xml namespaces are not support.</li>
+  <li>Although the implementation uses SAX, the user code only implements
+    IOCXMLListener and uses IOCXMLReader.</li>
+  <li>The support is used by XMLToDBDFactory and by XMLToIOCDBFactory and can
+    be used by other code.</li>
+</ul>
+
+<h3>Include and Substitution Syntax</h3>
+
+<p>An xml file can include other xml files. All files must be valid xml files
+and must have the same root element name. An include statement has the
+format:</p>
+<pre>&lt;include addPath = "path" removePath = "path" href = "filename" /&gt;</pre>
+
+<p>Where</p>
+<dl>
+  <dt style="font-family: courier;">href</dt>
+    <dd>The <span style="font-family: courier;">filename</span>, which must
+      be a valid XML Record Instance file, is processed. If any addPaths have
+      been defined the last one specified is prefixed to the filename.</dd>
+  <dt style="font-family: courier;">addPath</dt>
+    <dd>Add a path.</dd>
+  <dt style="font-family: courier;">removePath</dt>
+    <dd>Remove a path.</dd>
+</dl>
+
+<p>Macro substitution replaces a string of the form "${from}" with some other
+text. The syntax is:</p>
+<pre>    &lt;substitute from = "fromString" to = "toString" fromTo = "from=to,from=to,..."/&gt;</pre>
+
+<p>Where:</p>
+<dl>
+  <dt style="font-family: courier;">from</dt>
+    <dd><span style="font-family: courier;">fromString</span> is the string
+      that appears in ${from}. If <span
+      style="font-family: courier;">from</span> is specified then <span
+      style="font-family: courier;">to</span> must also be specified.</dd>
+  <dt style="font-family: courier;">to</dt>
+    <dd><span style="font-family: courier;">toString</span> replaces
+    ${from}</dd>
+  <dt style="font-family: courier;">toFrom</dt>
+    <dd>The attribute value is a series of "from=to" pairs separated by
+      commas.</dd>
+</dl>
+
+<p>Macro substitution can be performed on the foillowing:</p>
+<ol>
+  <li>Any attribute value in any element definition.</li>
+  <li>The content of any element definition.</li>
+</ol>
+
+<h3><a id="ExampleIncludeMacro"></a> Example Include and Macro Substitution
+Syntax</h3>
+
+<p>The following is a template file:</p>
+<pre>&lt;?xml version="1.0" ?&gt;
+&lt;IOCDatabase&gt;
+&lt;record name = "ai${recordExtension}Record" type = "aiRecord"&gt;
+    &lt;aiInput structureName = "aiLinear" &gt;
+        &lt;aiRaw&gt;
+            &lt;input supportName = "inputLink"&gt;
+                &lt;configure structureName = "inputLink"&gt;
+                    &lt;pvname&gt;${pvname}&lt;/pvname&gt;
+                    &lt;wait&gt;true&lt;/wait&gt;
+                &lt;/configure&gt;
+            &lt;/input&gt;
+        &lt;/aiRaw&gt;
+        &lt;units&gt;volts&lt;/units&gt;
+        &lt;displayLimit&gt;
+            &lt;low&gt;${displayLow}&lt;/low&gt;
+            &lt;high&gt;${displayHigh}&lt;/high&gt;
+        &lt;/displayLimit&gt;
+        &lt;linearConvert&gt;
+            &lt;engUnitsLow&gt;${engUnitsLow}&lt;/engUnitsLow&gt;
+            &lt;engUnitsHigh&gt;${engUnitsHigh}&lt;/engUnitsHigh&gt;
+        &lt;/linearConvert&gt;
+    &lt;/aiInput&gt;
+    &lt;priority&gt;medium&lt;/priority&gt;
+&lt;/record&gt;
+
+
+&lt;/IOCDatabase&gt;</pre>
+
+<p>The following creates two instance files from the template:</p>
+<pre>&lt;?xml version="1.0" ?&gt;
+&lt;IOCDatabase&gt;
+&lt;include addPath = "src/org/epics/ioc/dbAccess/example" /&gt;
+&lt;substitute from = "recordExtension" to = "01" /&gt;
+&lt;substitute from = "pvname" to = "nameFor01" /&gt;
+&lt;substitute from = "displayLow" to = "0.0" /&gt;
+&lt;substitute from = "displayHigh" to = "10.0" /&gt;
+&lt;substitute from = "engUnitsLow" to = "0.0" /&gt;
+&lt;substitute from = "engUnitsHigh" to = "9.0" /&gt;
+&lt;include href = "protoAiDB.xml" /&gt;
+&lt;substitute fromTo = "recordExtension=02,pvname=nameFor02" /&gt;
+&lt;include href = "protoAiDB.xml" /&gt;
+&lt;/IOCDatabase&gt;</pre>
+
+<h3>Example XML Application</h3>
+
+<p>The following code will report any syntax errors found when an xml file is
+processed.</p>
+<pre>   public class ExampleXMLRead {
+        private static IOCXMLReader reader;
+
+        public static void read(String rootElementName,String fileName)
+        {
+            reader = IOCXMLReaderFactory.getReader();
+            IOCXMLListener listener = new Listener();
+            reader.parse(rootElementName,fileName,listener);
+        }
+
+        private static class Listener implements IOCXMLListener
+        {
+
+            public void endDocument() {
+            }
+
+            public void startElement(String name,Map&lt;String,String&gt; attributes)
+            {
+            }
+
+            public void endElement(String name)
+            {
+            }
+
+            public void characters(char[] ch, int start, int length)
+            {
+            }
+
+            public void errorMessage(String message) {
+                System.out.println(message);
+                noErrors = false;
+            }
+        }
+    }</pre>
+
+<p>When ExampleXMLRead.read is called it:</p>
+<ul>
+  <li>locates the IOCXMLReader</li>
+  <li>Creates an IOCXMLListener</li>
+  <li>Calls reader.parse</li>
+</ul>
+
+<p>IOCXMLReader.parse does the following:</p>
+<ul>
+  <li>Automatically handles all include and macro substitutions.</li>
+  <li>Calls listener startElement when it detects a new xml element. It
+    passes the element name and a Map of the xml attributes</li>
+  <li>Calls listener.endElement when it detects the end of an xml
+  element.</li>
+  <li>Calls listener.errorMessage whenever an error occurs. The message also
+    shows the location in the xml files when the error occured.</li>
+  <li>Calls listener.endDocument when all xml files have been processed.</li>
+</ul>
+
+<h3>IOCXML Interface and Factory Definitions</h3>
+
+<p>IOCXMLListener is an interface that must be implemented by code that used
+IOCXMLReader.</p>
+<pre>    public interface IOCXMLListener {
         void endDocument();
         void startElement(String name, Map&lt;String,String&gt; attributes);
         void characters(char[] ch, int start, int length);
         void endElement(String name);
-    }
-    
-    public interface IOCXMLReader {
+        void errorMessage(String message);
+    }</pre>
+
+<p>where</p>
+<dl>
+  <dt style="font-family: courier;">endDocument</dt>
+    <dd>Called when the fileName passed to IOCXMLReader.parse and any
+      fincluded files have all been completely parsed.</dd>
+  <dt style="font-family: courier;">startElement</dt>
+    <dd>Called whenever a new xml element is detected exxept for an include
+      statement, which is handled automatically.
+      <ul>
+        <li>name is the xml element name, i.e. the tag name.</li>
+        <li>attributes is a map containing name,value pairs os each of the
+          xml attributes specified in xml element. Maco sybstitution on the
+          value is performed before calling startElement.</li>
+      </ul>
+    </dd>
+  <dt style="font-family: courier;">characters</dt>
+    <dd>Characters that appear between startElement and endElement. This can
+      be called multiple times between startElement and endElement. Macro
+      substitution is performed before calling characters, i.e. the listener
+      only sees the final result.</dd>
+  <dt style="font-family: courier;">endElement</dt>
+    <dd>Called whenever the end of an xml element is detected exxept for an
+      include statement, which is handled automatically.</dd>
+  <dt style="font-family: courier;">errorMessage</dt>
+    <dd>Called whenever IOCXMLReader detects an error or one of its message
+      methods is called. This should not called by the listener. Instead the
+      listener should call one of the IOCXMLReader message methods because
+      they add location information.</dd>
+</dl>
+
+<p>IOCXMLReader is the interface implemented by IOCXMLReaderFactory.</p>
+<pre>    public interface IOCXMLReader {
+        void parse(String rootElementName,String fileName, IOCXMLListener listener);
         void warningMessage(String message);
         void errorMessage(String message);
         void fatalMessage(String message);
-    }
-    
-    
-    public class IOCXMLReaderFactory {
-        public static void create(String rootElementName,String fileName,
-            IOCXMLListener listener) throws IllegalStateException;
-    }
-</pre>
+    }</pre>
+
+<p>where</p>
+<dl>
+  <dt style="font-family: courier;">parse</dt>
+    <dd>Parses fileName and calls the listener
+      <ul>
+        <li>rootElementName is the root xml element name. Any included files
+          must also have the same root name.</li>
+        <li>fileName is the xml file. </li>
+        <li>listener is the interface implemented by the caller.</li>
+      </ul>
+      <p>If the reader is already busy it calls listener.errorMessage and
+      returns.</p>
+    </dd>
+  <dt style="font-family: courier;">warningMessage</dt>
+    <dd>A warning message. This together with the current location in the xml
+      files is passed to listener.errorMessage.</dd>
+  <dt style="font-family: courier;">errorMessage</dt>
+    <dd>An error message. This together with the current location in the xml
+      files is passed to listener.errorMessage.</dd>
+  <dt style="font-family: courier;">fatalMessage</dt>
+    <dd>A fatal error message. This together with the current location in the
+      xml files is passed to listener.errorMessage.</dd>
+</dl>
+<pre>    public class IOCXMLReaderFactory {
+        static public IOCXMLReader getReader();
+    }</pre>
+
+<p>where</p>
+<dl>
+  <dt>getReader</dt>
+    <dd>Get the single instance of IOCXMLReader.</dd>
+</dl>
 <hr />
 
 <h2 style="text-align: center;">Time Stamp Support</h2>
 <hr />
 
 <p>This provides support for time stamps.</p>
-<pre>
-    public class TimeStamp {
+<pre>    public class TimeStamp {
         public long secondsPastEpoch;
         public int nanoSeconds;
     }
@@ -67,8 +286,6 @@ org.epics.ioc.dbAccess.XMLToIOCDBFactory.</p>
     public class TimeUtility {
         public static long getMillis(TimeStamp timeStamp);
         public static void set(TimeStamp timeStamp,long millis)
-    }
-</pre>
-
+    }</pre>
 </body>
 </html>

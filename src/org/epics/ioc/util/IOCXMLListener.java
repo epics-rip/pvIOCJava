@@ -25,6 +25,7 @@ public interface IOCXMLListener {
     void startElement(String name, Map<String,String> attributes);
     /**
      * Some characters for the element.
+     * This can be called zero or more times between the calls to startElement and endElement.
      * @param ch The array of characters.
      * @param start The index of the first character.
      * @param length The number of characters.
@@ -35,4 +36,11 @@ public interface IOCXMLListener {
      * @param name The tag name.
      */
     void endElement(String name);
+    /**
+     * Error message.
+     * This is called by IOCXMLReader when warningMessage, errorMessage, or fatalMessage are called.
+     * @param message The message.
+     * IOCXMLReader adds the location in the xml files when the message was generated.
+     */
+    void errorMessage(String message);
 }

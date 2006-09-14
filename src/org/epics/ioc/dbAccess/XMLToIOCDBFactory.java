@@ -6,8 +6,8 @@
 package org.epics.ioc.dbAccess;
 
 import java.util.*;
+import java.util.concurrent.atomic.*;
 import java.util.regex.Pattern;
-import java.net.*;
 import org.epics.ioc.dbDefinition.*;
 import org.epics.ioc.pvAccess.*;
 import org.epics.ioc.util.*;
@@ -20,7 +20,9 @@ import org.epics.ioc.util.*;
  *
  */
 public class XMLToIOCDBFactory {
+    private static AtomicBoolean isInUse = new AtomicBoolean(false);
 //  for use by private classes
+    private static boolean noErrors = false;
     private static Convert convert = ConvertFactory.getConvert();
     private static Pattern primitivePattern = Pattern.compile("[, ]");
     private static Pattern stringPattern = Pattern.compile("\\s*,\\s*");
@@ -32,18 +34,70 @@ public class XMLToIOCDBFactory {
      * @param dbdin the reflection database.
      * @param iocdbin IOC database.
      * @param fileName The name of the file containing xml record instance definitions.
-     * @throws MalformedURLException If SAX throws it.
-     * @throws IllegalStateException If any errors were detected.
+     * @return (false,true) If (not converted, converted) with no error messages.
      */
-    public static void convert(DBD dbdin, IOCDB iocdbin, String fileName)
-        throws IllegalStateException
+    public static boolean convert(DBD dbdin, IOCDB iocdbin, String fileName)
     {
-        dbd = dbdin;
-        iocdb = iocdbin;
-        IOCXMLListener listener = new Listener();
-        errorHandler = IOCXMLReaderFactory.getReader();
-        IOCXMLReaderFactory.create("IOCDatabase",fileName,listener);
+        boolean gotIt = isInUse.compareAndSet(false,true);
+        if(!gotIt) {
+            System.out.println("XMLToIOCDBFactory.convert is already active");
+            return false;
+        }
+        try {
+            noErrors = true;
+            dbd = dbdin;
+            iocdb = iocdbin;
+            IOCXMLListener listener = new Listener();
+            errorHandler = IOCXMLReaderFactory.getReader();
+            errorHandler.parse("IOCDatabase",fileName,listener);
+            return noErrors;
+        } finally {
+            isInUse.set(false);
+        }
         
+    }
+    
+    public static IOCDB addToMaster(String fileName) {
+        boolean gotIt = isInUse.compareAndSet(false,true);
+        if(!gotIt) {
+            System.out.println("XMLToIOCDBFactory is already active");
+            return null;
+        }
+        try {
+            DBD dbdin = DBDFactory.find("master");
+            if(dbdin==null) {
+                System.out.println("XMLToIOCDBFactory could not find DBD named master");
+                return null;
+            }
+            IOCDB master = IOCDBFactory.find("master");
+            if(master==null) {
+                master =IOCDBFactory.create(dbdin,"master", null);
+                if(master==null) {
+                    System.out.println("XMLToIOCDBFactory failed to create master IOCDB");
+                    return null;
+                }
+            }
+            IOCDB add =IOCDBFactory.create(dbdin,"add", master);
+            if(add==null) {
+                System.out.println("XMLToIOCDBFactory failed to create add IOCDB");
+                return null;
+            }
+            try {
+                noErrors = true;
+                dbd = dbdin;
+                iocdb = add;
+                IOCXMLListener listener = new Listener();
+                errorHandler = IOCXMLReaderFactory.getReader();
+                errorHandler.parse("IOCDatabase",fileName,listener);
+                if(!noErrors) return null;
+                add.mergeIntoMaster();
+                return add;
+            } finally {
+                IOCDBFactory.remove(add);
+            }
+        } finally {
+            isInUse.set(false);
+        }
     }
     
     private static class Listener implements IOCXMLListener
@@ -103,6 +157,10 @@ public class XMLToIOCDBFactory {
             }
         }
         
+        public void errorMessage(String message) {
+            System.out.println(message);
+            noErrors = false;
+        }
     }
 
     private static class RecordHandler
@@ -193,7 +251,8 @@ public class XMLToIOCDBFactory {
             }
             dbRecord = iocdb.findRecord(recordName);
             if(dbRecord==null) {
-                boolean result = iocdb.createRecord(recordName,dbdRecordType);
+                DBRecord record = FieldDataFactory.createRecord(recordName,dbdRecordType);
+                boolean result = iocdb.addRecord(record);
                 if(!result) {
                     errorHandler.warningMessage(
                             "failed to create record " + recordTypeName);

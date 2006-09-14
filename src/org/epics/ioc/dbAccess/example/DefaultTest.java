@@ -23,20 +23,11 @@ public class DefaultTest extends TestCase {
      */
     public static void testDefault() {
         DBD dbd = DBDFactory.create("master",null);
-        try {
-            XMLToDBDFactory.convert(dbd,
+        XMLToDBDFactory.convert(dbd,
                  "src/org/epics/ioc/dbAccess/example/defaultDBD.xml");
-        } catch (IllegalStateException e) {
-            System.out.println("IllegalStateException: " + e);
-        }
-
-        IOCDB iocdb = IOCDBFactory.create(dbd,"testIOCDatabase");
-        try {
-            XMLToIOCDBFactory.convert(dbd,iocdb,
+        IOCDB iocdb = IOCDBFactory.create(dbd,"testIOCDatabase",null);
+        XMLToIOCDBFactory.convert(dbd,iocdb,
                  "src/org/epics/ioc/dbAccess/example/defaultDB.xml");
-        } catch (IllegalStateException e) {
-            System.out.println("IllegalStateException: " + e);
-        }
         Map<String,DBRecord> recordMap = iocdb.getRecordMap();
         Set<String> keys = recordMap.keySet();
         System.out.printf("%n%nrecord list%n");

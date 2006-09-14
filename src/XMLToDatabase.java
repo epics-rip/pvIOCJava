@@ -33,7 +33,7 @@ public class XMLToDatabase {
             return;
         }
         DBD dbd = DBDFactory.create("master",null);
-        IOCDB iocdb = IOCDBFactory.create(dbd,"testIOCDatabase");
+        IOCDB iocdb = IOCDBFactory.create(dbd,"testIOCDatabase",null);
         int nextArg = 0;
         State state = State.dbdFile;
         while(nextArg<args.length) {

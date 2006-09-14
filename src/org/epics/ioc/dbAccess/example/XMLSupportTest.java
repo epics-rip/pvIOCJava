@@ -31,14 +31,9 @@ public class XMLSupportTest extends TestCase {
         DBD dbd = DBDFactory.create("master",null);
         
         System.out.printf("reading supportDBD%n");
-        try {
-            XMLToDBDFactory.convert(dbd,
+        XMLToDBDFactory.convert(dbd,
                  "src/org/epics/ioc/dbAccess/example/supportDBD.xml");
-        } catch (IllegalStateException e) {
-            System.out.println("IllegalStateException: " + e);
-        }
-
-        IOCDB iocdb = IOCDBFactory.create(dbd,"testIOCDatabase");
+        IOCDB iocdb = IOCDBFactory.create(dbd,"testIOCDatabase",null);
         System.out.printf("reading exampleSupportDB%n");
         try {
             XMLToIOCDBFactory.convert(dbd,iocdb,
