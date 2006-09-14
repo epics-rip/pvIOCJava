@@ -5,12 +5,11 @@
  */
 package org.epics.ioc.dbDefinition;
 
-import java.net.*;
-import org.epics.ioc.pvAccess.*;
-
 import java.util.*;
+import java.util.concurrent.atomic.*;
 
 import org.epics.ioc.util.*;
+import org.epics.ioc.pvAccess.*;
 
 /**
  * Factory to convert an xml file to a Database Definition and put it in a database.
@@ -19,7 +18,9 @@ import org.epics.ioc.util.*;
  *
  */
 public class XMLToDBDFactory {
+    private static AtomicBoolean isInUse = new AtomicBoolean(false);
     // For use by all private classes
+    private static boolean noErrors = false;
     private static DBD dbd;
     private static IOCXMLReader errorHandler;
     /**
@@ -27,18 +28,65 @@ public class XMLToDBDFactory {
      * the definitions in a database.
      * @param dbd a Database Definition Database
      * @param fileName the name of the xml file.
-     * @throws MalformedURLException if SAX throws it.
-     * @throws IllegalStateException if any errors were detected.
+     * @return (false,true) If (not converted, converted) with no error messages.
      */
-    public static void convert(DBD dbd, String fileName)
-        throws IllegalStateException
+    public static boolean convert(DBD dbd, String fileName)
     {
-        XMLToDBDFactory.dbd = dbd;
-        IOCXMLListener listener = new Listener();
-        errorHandler = IOCXMLReaderFactory.getReader();
-        IOCXMLReaderFactory.create("DBDefinition",fileName,listener);
+        boolean gotIt = isInUse.compareAndSet(false,true);
+        if(!gotIt) {
+            System.out.println("XMLToDBDFactory is already active");
+            return false;
+        }
+        try {
+            noErrors = true;
+            XMLToDBDFactory.dbd = dbd;
+            IOCXMLListener listener = new Listener();
+            errorHandler = IOCXMLReaderFactory.getReader();
+            errorHandler.parse("DBDefinition",fileName,listener);
+            return noErrors;
+        } finally {
+            isInUse.set(false);
+        }
     }
 
+    public static DBD addToMaster(String fileName) {
+        boolean gotIt = isInUse.compareAndSet(false,true);
+        if(!gotIt) {
+            System.out.println("XMLToDBDFactory is already active");
+            return null;
+        }
+        try {
+            DBD master = DBDFactory.find("master");
+            if(master==null) {
+                DBDFactory.create("master", null);
+                master = DBDFactory.find("master");
+                if(master==null) {
+                    System.out.println("XMLToDBDFactory failed to create master DBD");
+                    return null;
+                }
+            }
+            DBD add  = DBDFactory.create("add", master);
+            if(add==null) {
+                System.out.println("XMLToDBDFactory failed to create add DBD");
+                return null;
+            }
+            try {
+                noErrors = true;
+                XMLToDBDFactory.dbd = add;
+                IOCXMLListener listener = new Listener();
+                errorHandler = IOCXMLReaderFactory.getReader();
+                errorHandler.parse("DBDefinition",fileName,listener);
+                if(!noErrors) return null;
+                add.mergeIntoMaster();
+                return add;
+            } finally {
+                DBDFactory.remove(add);
+            }
+        } finally {
+            isInUse.set(false);
+        }
+    }
+    
     private static class Listener implements IOCXMLListener {
           
         private enum State {
@@ -142,6 +190,11 @@ public class XMLToDBDFactory {
                 supportHandler.characters(ch,start,length);
                 break;
             }
+        }
+
+        public void errorMessage(String message) {
+            System.out.println(message);
+            noErrors = false;
         }
     }
 

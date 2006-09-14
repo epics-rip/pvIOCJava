@@ -30,7 +30,8 @@ public interface DBD {
      */
     DBD getMasterDBD();
     /**
-     * Merge all definitions into the master.
+     * Merge all definitions into the master DBD.
+     * After the merge all definitions are cleared from this DBD and this DBD is removed from the DBDFactory list.
      */
     void mergeIntoMaster();
     /**
@@ -41,6 +42,7 @@ public interface DBD {
      */
     DBDMenu getMenu(String menuName);
     /**
+     * Add a menu definition.
      * @param menu The DBDMenu to add.
      * @return (true,false) if the menu (was not, was) added.
      * If it is already present in either this DBD or in the master DBD it is not added.
@@ -59,7 +61,7 @@ public interface DBD {
      */
     DBDStructure getStructure(String structureName);
     /**
-     * Add a DVDStructure.
+     * Add a structure definition.
      * @param structure The DBDStructure to add.
      * @return  (true,false) if the structure (was not, was) added.
      * If it is already present in either this DBD or in the master DBD it is not added.
@@ -78,7 +80,7 @@ public interface DBD {
      */
     DBDRecordType getRecordType(String recordTypeName);
     /**
-     * Add a record type description.
+     * Add a record type definition.
      * @param recordType The DBDRecordType that describes the recordType.
      * @return  (true,false) if the recordType (was not, was) added.
      * If it is already present in either this DBD or in the master DBD it is not added.
@@ -97,7 +99,7 @@ public interface DBD {
      */
     DBDSupport getSupport(String supportName);
     /**
-     * Add a support
+     * Add a support definition.
      * @param support The support to add.
      * @return  (true,false) if the support (was not, was) added.
      * If it is already present in either this DBD or in the master DBD it is not added.
