@@ -1,9 +1,11 @@
 <?xml version="1.0" ?>
 <DBDefinition>
 <menu name = "menuPriority">
+    <choice>lowest</choice>
     <choice>low</choice>
     <choice>medium</choice>
     <choice>high</choice>
+    <choice>highest</choice>
 </menu>
 <menu name = "menuScan">
     <choice>passive</choice>
@@ -23,13 +25,12 @@
     <field name = "nanoSeconds" type = "int" />
 </structure>
 
-<structure name = "scan" supportName = "scan" >
-    <field name = "scan" type = "menu" menuName = "menuScan" />
-    <field name = "rate" type = "double" />
-    <field name = "event" type = "string" />
-    <field name = "phase" type = "int" />
+<structure name = "scan">
+    <field name = "priority" type = "menu" menuName = "menuPriority" default = "middle" />
+    <field name = "scan" type = "menu" menuName = "menuScan" default = "passive" />
+    <field name = "rate" type = "double"  default = "1.0" />
+    <field name = "eventName" type = "string" />
 </structure>
-
 <structure name = "processLink">
     <field name = "pvname" type = "string" link = "true" />
     <field name = "wait" type = "boolean" />
@@ -135,8 +136,5 @@
 />
 <support name = "linkArray"
     factoryName = "org.epics.ioc.support.LinkArraySupportFactory"
-/>
-<support name = "scan"
-    factoryName = "org.epics.ioc.support.ScanFactory"
 />
 </DBDefinition>

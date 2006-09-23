@@ -20,36 +20,36 @@ import org.epics.ioc.pvAccess.*;
 public class XMLToDBDFactory {
     private static AtomicBoolean isInUse = new AtomicBoolean(false);
     // For use by all private classes
-    private static boolean noErrors = false;
     private static DBD dbd;
-    private static IOCXMLReader errorHandler;
+    private static IOCMessageListener iocMessageListener;
+    private static IOCMessageType okToAddType = IOCMessageType.fatalError;
+    private static boolean okToAdd;
+    private static IOCXMLReader iocxmlReader;
     /**
      * Convert an xml file to Database definitions and put
      * the definitions in a database.
      * @param dbd a Database Definition Database
      * @param fileName the name of the xml file.
-     * @return (false,true) If (not converted, converted) with no error messages.
+     * @param messageListener The listener to receive messages.
      */
-    public static boolean convert(DBD dbd, String fileName)
+    public static void convert(DBD dbd, String fileName,IOCMessageListener messageListener)
     {
         boolean gotIt = isInUse.compareAndSet(false,true);
         if(!gotIt) {
-            System.out.println("XMLToDBDFactory is already active");
-            return false;
+            messageListener.message("XMLToDBDFactory is already active",IOCMessageType.fatalError);
         }
         try {
-            noErrors = true;
             XMLToDBDFactory.dbd = dbd;
+            iocMessageListener = messageListener;
             IOCXMLListener listener = new Listener();
-            errorHandler = IOCXMLReaderFactory.getReader();
-            errorHandler.parse("DBDefinition",fileName,listener);
-            return noErrors;
+            iocxmlReader = IOCXMLReaderFactory.getReader();
+            iocxmlReader.parse("DBDefinition",fileName,listener);
         } finally {
             isInUse.set(false);
         }
     }
 
-    public static DBD addToMaster(String fileName) {
+    public static DBD addToMaster(String fileName,IOCMessageListener messageListener,IOCMessageType okToAddType) {
         boolean gotIt = isInUse.compareAndSet(false,true);
         if(!gotIt) {
             System.out.println("XMLToDBDFactory is already active");
@@ -71,12 +71,13 @@ public class XMLToDBDFactory {
                 return null;
             }
             try {
-                noErrors = true;
                 XMLToDBDFactory.dbd = add;
+                XMLToDBDFactory.okToAddType = okToAddType;
+                okToAdd = true;
                 IOCXMLListener listener = new Listener();
-                errorHandler = IOCXMLReaderFactory.getReader();
-                errorHandler.parse("DBDefinition",fileName,listener);
-                if(!noErrors) return null;
+                iocxmlReader = IOCXMLReaderFactory.getReader();
+                iocxmlReader.parse("DBDefinition",fileName,listener);
+                if(!okToAdd) return null;
                 add.mergeIntoMaster();
                 return add;
             } finally {
@@ -121,7 +122,8 @@ public class XMLToDBDFactory {
                     state = State.support;
                     supportHandler.start(qName,attributes);
                 } else {
-                    errorHandler.errorMessage("startElement " + qName + " not understood");
+                    iocxmlReader.message("startElement " + qName + " not understood",
+                            IOCMessageType.error);
                 }
                 break;
             case menu: 
@@ -142,8 +144,9 @@ public class XMLToDBDFactory {
         {
             switch(state) {
             case idle:
-                errorHandler.errorMessage(
-                    "endElement " + qName + " not understood");
+                iocxmlReader.message(
+                    "endElement " + qName + " not understood",
+                    IOCMessageType.error);
                 break;
             case menu: 
                 if(qName.equals("menu")) {
@@ -192,9 +195,9 @@ public class XMLToDBDFactory {
             }
         }
 
-        public void errorMessage(String message) {
-            System.out.println(message);
-            noErrors = false;
+        public void message(String message,IOCMessageType messageType) {
+            iocMessageListener.message(message, messageType);
+            if(messageType.ordinal()>okToAddType.ordinal()) okToAdd = false;
         }
     }
 
@@ -217,12 +220,14 @@ public class XMLToDBDFactory {
         public void start(String qName, Map<String,String> attributes) {
             menuName = attributes.get("name");
             if(menuName==null) {
-                errorHandler.errorMessage("attribute name not specified");
+                iocxmlReader.message("attribute name not specified",
+                        IOCMessageType.error);
                 state = State.idle;
             }
             if(dbd.getMenu(menuName)!=null) {
-                errorHandler.warningMessage(
-                    "menu " + menuName + " ignored because it already exists");
+                iocxmlReader.message(
+                    "menu " + menuName + " ignored because it already exists",
+                    IOCMessageType.warning);
                 state = State.idle;
             } else {
                 choiceList = new LinkedList<String>();
@@ -233,16 +238,18 @@ public class XMLToDBDFactory {
         public void end(String qName){
             if(state==State.idle) return;
             if(state!=State.nextChoice) {
-                errorHandler.errorMessage(
+                iocxmlReader.message(
                     "Logic error in DBDXMLMenuHandler.end"
-                    + " state should be nextChoice");
+                    + " state should be nextChoice",
+                    IOCMessageType.error);
                 state = State.idle;
                 return;
             }
             if(menuName==null || menuName.length()==0
             || choiceList==null || choiceList.size()==0) {
-                errorHandler.errorMessage(
-                        "menu definition is not complete");
+                iocxmlReader.message(
+                        "menu definition is not complete",
+                        IOCMessageType.error);
             } else {
                 String[] choice = new String[choiceList.size()];
                 ListIterator<String> iter = choiceList.listIterator();
@@ -260,15 +267,17 @@ public class XMLToDBDFactory {
         public void startElement(String qName, Map<String,String> attributes) {
             if(state==State.idle) return;
             if(state!=State.nextChoice) {
-                errorHandler.errorMessage(
+                iocxmlReader.message(
                         "Logic error in DBDXMLMenuHandler.startElement"
-                        + "state should be nextChoice");
+                        + "state should be nextChoice",
+                        IOCMessageType.error);
                 state = State.idle;
                 return;
             }
             if(!qName.equals("choice")) {
-                errorHandler.errorMessage(
-                        "illegal element. only choice is allowed");
+                iocxmlReader.message(
+                        "illegal element. only choice is allowed",
+                        IOCMessageType.error);
                 state = State.idle;
                 return;
             }
@@ -279,15 +288,17 @@ public class XMLToDBDFactory {
         public void endElement(String qName){
             if(state==State.idle) return;
             if(state!=State.getChoice) {
-                errorHandler.errorMessage(
+                iocxmlReader.message(
                         "Logic error in DBDXMLMenuHandler.startElement"
-                        + "state should be nextChoice");
+                        + "state should be nextChoice",
+                        IOCMessageType.error);
                 state = State.idle;
                 return;
             }
             String newChoice = choiceBuilder.toString();
             if(newChoice.length()<=0) {
-                errorHandler.errorMessage("illegal choice");
+                iocxmlReader.message("illegal choice",
+                        IOCMessageType.error);
                     state = State.idle;
                     return;
             }
@@ -342,37 +353,42 @@ public class XMLToDBDFactory {
 
         public void start(String qName, Map<String,String> attributes) {
             if(state!=State.idle) {
-                errorHandler.errorMessage(
-                   "DBDXMLStructureHandler.start logic error not idle");
+                iocxmlReader.message(
+                   "DBDXMLStructureHandler.start logic error not idle",
+                   IOCMessageType.error);
                 state = State.idle;
                 return;
             }
             structureName = attributes.get("name");
             if(structureName==null || structureName.length() == 0) {
-                errorHandler.errorMessage("name not specified");
+                iocxmlReader.message("name not specified",
+                        IOCMessageType.error);
                 state = State.idle;
                 return;
             }
             structureSupportName = attributes.get("supportName");
             if(qName.equals("recordType")) {
                 if(dbd.getRecordType(structureName)!=null) {
-                    errorHandler.warningMessage(
-                        "recordType " + structureName + " already exists");
+                    iocxmlReader.message(
+                        "recordType " + structureName + " already exists",
+                        IOCMessageType.warning);
                     state = State.idle;
                     return;
                 }
                 isRecordType = true;
             } else if(qName.equals("structure")){
                 if(dbd.getStructure(structureName)!=null) {
-                    errorHandler.warningMessage(
-                        "structure " + structureName + " already exists");
+                    iocxmlReader.message(
+                        "structure " + structureName + " already exists",
+                        IOCMessageType.warning);
                     state = State.idle;
                     return;
                 }
                 isRecordType = false;
             } else {
-                errorHandler.errorMessage(
-                        "DBDXMLStructureHandler.start logic error");
+                iocxmlReader.message(
+                        "DBDXMLStructureHandler.start logic error",
+                        IOCMessageType.error);
                 state = State.idle;
                 return;
             }
@@ -388,8 +404,9 @@ public class XMLToDBDFactory {
                 return;
             }
             if(dbdFieldList.size()==0) {
-                errorHandler.errorMessage(
-                   "DBDXMLStructureHandler.end no fields were defined");
+                iocxmlReader.message(
+                   "DBDXMLStructureHandler.end no fields were defined",
+                   IOCMessageType.error);
                 state = State.idle;
                 structurePropertyList = null;
                 dbdFieldList = null;
@@ -410,8 +427,9 @@ public class XMLToDBDFactory {
                         structureName,dbdField,property);
                 boolean result = dbd.addRecordType(dbdRecordType);
                 if(!result) {
-                    errorHandler.warningMessage(
-                            "recordType " + structureName + " already exists");
+                    iocxmlReader.message(
+                            "recordType " + structureName + " already exists",
+                            IOCMessageType.warning);
                 }
                 if(structureSupportName!=null) {
                     dbdRecordType.setSupportName(structureSupportName);
@@ -421,8 +439,9 @@ public class XMLToDBDFactory {
                         structureName,dbdField,property);
                 boolean result = dbd.addStructure(dbdStructure);
                 if(!result) {
-                    errorHandler.warningMessage(
-                            "structure " + structureName + " already exists");
+                    iocxmlReader.message(
+                            "structure " + structureName + " already exists",
+                            IOCMessageType.warning);
                 }
                 if(structureSupportName!=null) {
                     dbdStructure.setSupportName(structureSupportName);
@@ -442,7 +461,8 @@ public class XMLToDBDFactory {
                     dbdAttribute = DBDAttributeFactory.create(dbd,this);
                 }
                 catch(Exception e) {
-                    errorHandler.errorMessage(e.getMessage());
+                    iocxmlReader.message(e.getMessage(),
+                            IOCMessageType.error);
                     state = State.idle;
                     return;
                 }
@@ -452,7 +472,8 @@ public class XMLToDBDFactory {
                 Type type = dbdAttribute.getType();
                 DBType dbType = dbdAttribute.getDBType();
                 if(dbType!=DBType.dbLink && type==Type.pvUnknown ) {
-                    errorHandler.errorMessage("type not specified correctly");
+                    iocxmlReader.message("type not specified correctly",
+                            IOCMessageType.error);
                     state= State.idle;
                     return;
                 }
@@ -463,13 +484,15 @@ public class XMLToDBDFactory {
                 String propertyName = attributes.get("name");
                 String associatedName = attributes.get("associatedField");
                 if(propertyName==null || propertyName.length()==0) {
-                    errorHandler.warningMessage(
-                            "property name not specified");
+                    iocxmlReader.message(
+                            "property name not specified",
+                            IOCMessageType.warning);
                     return;
                 }
                 if(associatedName==null || associatedName.length()==0) {
-                    errorHandler.warningMessage(
-                            "associatedField not specified");
+                    iocxmlReader.message(
+                            "associatedField not specified",
+                            IOCMessageType.error);
                     return;
                 }
                 Property property= FieldFactory.createProperty(
@@ -479,7 +502,8 @@ public class XMLToDBDFactory {
                 } else if(state==State.field) {
                     fieldPropertyList.add(property);
                 } else {
-                    errorHandler.warningMessage("logic error");
+                    iocxmlReader.message("logic error",
+                            IOCMessageType.fatalError);
                 }
             }
         }
@@ -515,31 +539,36 @@ public class XMLToDBDFactory {
                 attributes.get("configurationStructureName");
             String factoryName = attributes.get("factoryName");
             if(name==null||name.length()==0) {
-                errorHandler.errorMessage(
-                    "name was not specified correctly");
+                iocxmlReader.message(
+                    "name was not specified correctly",
+                    IOCMessageType.error);
                 return;
             }
             DBDSupport support = dbd.getSupport(name);
             if(support!=null) {
-                errorHandler.warningMessage(
-                    "support " + name  + " already exists");
+                iocxmlReader.message(
+                    "support " + name  + " already exists",
+                    IOCMessageType.warning);
                     return;
             }
             if(factoryName==null||factoryName.length()==0) {
-                errorHandler.errorMessage(
-                    "factoryName was not specified correctly");
+                iocxmlReader.message(
+                    "factoryName was not specified correctly",
+                    IOCMessageType.error);
                 return;
             }
             support = DBDCreateFactory.createSupport(
                 name,configurationStructureName,factoryName);
             if(support==null) {
-                errorHandler.errorMessage(
-                    "failed to create support " + qName);
+                iocxmlReader.message(
+                    "failed to create support " + qName,
+                    IOCMessageType.error);
                     return;
             }
             if(!dbd.addSupport(support)) {
-                errorHandler.warningMessage(
-                    "support " + qName + " already exists");
+                iocxmlReader.message(
+                    "support " + qName + " already exists",
+                    IOCMessageType.warning);
                 return;
             }
         }

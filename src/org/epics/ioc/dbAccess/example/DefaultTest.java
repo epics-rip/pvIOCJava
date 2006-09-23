@@ -9,6 +9,8 @@ import junit.framework.TestCase;
 
 import org.epics.ioc.dbDefinition.*;
 import org.epics.ioc.dbAccess.*;
+import org.epics.ioc.util.IOCMessageListener;
+import org.epics.ioc.util.IOCMessageType;
 
 import java.util.*;
 /**
@@ -23,11 +25,12 @@ public class DefaultTest extends TestCase {
      */
     public static void testDefault() {
         DBD dbd = DBDFactory.create("master",null);
+        IOCMessageListener iocMessageListener = new Listener();
         XMLToDBDFactory.convert(dbd,
-                 "src/org/epics/ioc/dbAccess/example/defaultDBD.xml");
-        IOCDB iocdb = IOCDBFactory.create(dbd,"testIOCDatabase",null);
+                 "src/org/epics/ioc/dbAccess/example/defaultDBD.xml",iocMessageListener);
+        IOCDB iocdb = IOCDBFactory.create(dbd,"testIOCDatabase");
         XMLToIOCDBFactory.convert(dbd,iocdb,
-                 "src/org/epics/ioc/dbAccess/example/defaultDB.xml");
+                 "src/org/epics/ioc/dbAccess/example/defaultDB.xml",iocMessageListener);
         Map<String,DBRecord> recordMap = iocdb.getRecordMap();
         Set<String> keys = recordMap.keySet();
         System.out.printf("%n%nrecord list%n");
@@ -41,5 +44,13 @@ public class DefaultTest extends TestCase {
             System.out.print(record.toString());
         }
     }
-
+    private static class Listener implements IOCMessageListener {
+        /* (non-Javadoc)
+         * @see org.epics.ioc.util.IOCMessageListener#message(java.lang.String, org.epics.ioc.util.IOCMessageType)
+         */
+        public void message(String message, IOCMessageType messageType) {
+            System.out.println(message);
+            
+        }
+    }
 }

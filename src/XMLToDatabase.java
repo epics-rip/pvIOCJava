@@ -3,6 +3,8 @@ import org.epics.ioc.dbAccess.IOCDB;
 import org.epics.ioc.dbAccess.IOCDBFactory;
 import org.epics.ioc.dbAccess.XMLToIOCDBFactory;
 import org.epics.ioc.dbDefinition.*;
+import org.epics.ioc.util.IOCMessageListener;
+import org.epics.ioc.util.IOCMessageType;
 
 import java.util.*;
 
@@ -33,7 +35,8 @@ public class XMLToDatabase {
             return;
         }
         DBD dbd = DBDFactory.create("master",null);
-        IOCDB iocdb = IOCDBFactory.create(dbd,"testIOCDatabase",null);
+        IOCDB iocdb = IOCDBFactory.create(dbd,"testIOCDatabase");
+        IOCMessageListener iocMessageListener = new Listener();
         int nextArg = 0;
         State state = State.dbdFile;
         while(nextArg<args.length) {
@@ -60,9 +63,9 @@ public class XMLToDatabase {
                     System.out.printf("arg %d %s not understood\n",nextArg,arg);
                 }
             } else if(state==State.dbdFile) {
-                parseDBD(dbd,arg);
+                parseDBD(dbd,arg,iocMessageListener);
             } else {
-                parseDB(dbd,iocdb,arg);
+                parseDB(dbd,iocdb,arg,iocMessageListener);
             }
         }
     }
@@ -109,19 +112,19 @@ public class XMLToDatabase {
         }           
     }
         
-    static void parseDBD(DBD dbd, String fileName) {
+    static void parseDBD(DBD dbd, String fileName,IOCMessageListener iocMessageListener) {
         System.out.printf("\nparsing DBD file %s\n",fileName);
         try {
-            XMLToDBDFactory.convert(dbd,fileName);
+            XMLToDBDFactory.convert(dbd,fileName,iocMessageListener);
         } catch (IllegalStateException e) {
             System.out.println("IllegalStateException: " + e);
         }
     }
 
-    static void parseDB(DBD dbd, IOCDB iocdb,String fileName) {
+    static void parseDB(DBD dbd, IOCDB iocdb,String fileName,IOCMessageListener iocMessageListener) {
         System.out.printf("\nparsing DB file %s\n",fileName);
         try {
-            XMLToIOCDBFactory.convert(dbd,iocdb,fileName);
+            XMLToIOCDBFactory.convert(dbd,iocdb,fileName,iocMessageListener);
         }  catch (IllegalStateException e) {
             System.out.println("IllegalStateException: " + e);
         }
@@ -136,5 +139,14 @@ public class XMLToDatabase {
             System.out.print(record.toString());
         }
     }
-
+    
+    private static class Listener implements IOCMessageListener {
+        /* (non-Javadoc)
+         * @see org.epics.ioc.util.IOCMessageListener#message(java.lang.String, org.epics.ioc.util.IOCMessageType)
+         */
+        public void message(String message, IOCMessageType messageType) {
+            System.out.println(message);
+            
+        }
+    }
 }

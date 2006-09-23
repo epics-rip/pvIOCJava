@@ -5,11 +5,14 @@
  */
 package org.epics.ioc.dbAccess;
 
-import org.epics.ioc.pvAccess.*;
-
 /**
- * Base interface for database array data.
+ * A listener to call after and IOCDB has been merged into the master IOCDB.
  * @author mrk
  *
  */
-public interface DBArray extends DBData, PVArray {}
+public interface IOCDBMergeListener {
+    /**
+     * The IOCDB has been merged.
+     */
+    void merged();
+}

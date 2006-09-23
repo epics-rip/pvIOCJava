@@ -10,6 +10,7 @@ import junit.framework.TestCase;
 import org.epics.ioc.dbDefinition.*;
 import org.epics.ioc.dbAccess.*;
 import org.epics.ioc.pvAccess.*;
+import org.epics.ioc.util.*;
 
 /**
  * JUnit test for DBAccess.
@@ -23,9 +24,10 @@ public class AccessTest extends TestCase {
      */
     public static void testAccess() {
         DBD dbd = DBDFactory.create("master",null); 
-        IOCDB iocdb = IOCDBFactory.create(dbd,"testIOCDatabase",null);
+        IOCDB iocdb = IOCDBFactory.create(dbd,"testIOCDatabase");
+        IOCMessageListener iocMessageListener = new Listener();
         XMLToDBDFactory.convert(dbd,
-                 "src/org/epics/ioc/dbAccess/example/accessDBD.xml");
+                 "src/org/epics/ioc/dbAccess/example/accessDBD.xml",iocMessageListener);
               
 //        System.out.printf("%n%nstructures");
 //        Map<String,DBDStructure> structureMap = dbd.getStructureMap();
@@ -43,7 +45,7 @@ public class AccessTest extends TestCase {
 //        }
         
           XMLToIOCDBFactory.convert(dbd,iocdb,
-                "src/org/epics/ioc/dbAccess/example/accessDB.xml");
+                "src/org/epics/ioc/dbAccess/example/accessDB.xml",iocMessageListener);
                
 //        System.out.printf("%nrecords%n");
 //        Map<String,DBRecord> recordMap = iocdb.getRecordMap();
@@ -185,6 +187,16 @@ public class AccessTest extends TestCase {
                 }
             }
             System.out.printf("        }%n");
+        }
+    }
+    
+    private static class Listener implements IOCMessageListener {
+        /* (non-Javadoc)
+         * @see org.epics.ioc.util.IOCMessageListener#message(java.lang.String, org.epics.ioc.util.IOCMessageType)
+         */
+        public void message(String message, IOCMessageType messageType) {
+            System.out.println(message);
+            
         }
     }
 }

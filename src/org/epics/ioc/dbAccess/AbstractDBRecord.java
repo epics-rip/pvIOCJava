@@ -20,6 +20,7 @@ public class AbstractDBRecord extends AbstractDBStructure implements DBRecord {
     private static int numberRecords = 0;
     private int id = numberRecords++;
     private String recordName;
+    private IOCDB iocdb = null;
     private RecordState recordState;
     private ReentrantLock lock = new ReentrantLock();
     private RecordProcess recordProcess = null;
@@ -201,6 +202,18 @@ public class AbstractDBRecord extends AbstractDBStructure implements DBRecord {
      */
     public void setDBD(DBD dbd) {
         this.dbd = dbd;
+    }
+    /* (non-Javadoc)
+     * @see org.epics.ioc.dbAccess.DBRecord#getIOCDB()
+     */
+    public IOCDB getIOCDB() {
+        return iocdb;
+    }
+    /* (non-Javadoc)
+     * @see org.epics.ioc.dbAccess.DBRecord#setIOCDB(org.epics.ioc.dbAccess.IOCDB)
+     */
+    public void setIOCDB(IOCDB iocdb) {
+        this.iocdb = iocdb;
     }
     /* (non-Javadoc)
      * @see java.lang.Object#toString()

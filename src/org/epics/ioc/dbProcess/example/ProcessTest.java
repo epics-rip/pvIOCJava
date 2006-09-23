@@ -12,6 +12,8 @@ import java.util.concurrent.locks.*;
 import org.epics.ioc.dbDefinition.*;
 import org.epics.ioc.dbAccess.*;
 import org.epics.ioc.dbProcess.*;
+import org.epics.ioc.util.IOCMessageListener;
+import org.epics.ioc.util.IOCMessageType;
 
 /**
  * JUnit test for RecordProcess.
@@ -24,11 +26,15 @@ public class ProcessTest extends TestCase {
      */
     public static void testProcess() {
         DBD dbd = DBDFactory.create("master",null); 
-        IOCDB iocdb = IOCDBFactory.create(dbd,"testIOCDatabase",null);
+        IOCDB iocdbMaster = IOCDBFactory.create(dbd,"master");
+        IOCDB iocdbAdd = IOCDBFactory.create(dbd,"add");
+        IOCMessageListener iocMessageListener = new Listener();
         XMLToDBDFactory.convert(dbd,
-                 "src/org/epics/ioc/dbProcess/example/menuStructureSupportDBD.xml");
+                 "src/org/epics/ioc/dbProcess/example/menuStructureSupportDBD.xml",
+                 iocMessageListener);
         XMLToDBDFactory.convert(dbd,
-                 "src/org/epics/ioc/dbProcess/example/exampleDBD.xml");
+                 "src/org/epics/ioc/dbProcess/example/exampleDBD.xml",
+                 iocMessageListener);
         
 //        System.out.printf("\n\nstructures");
 //        Map<String,DBDStructure> structureMap = dbd.getStructureMap();
@@ -46,26 +52,22 @@ public class ProcessTest extends TestCase {
 //        }
         System.out.printf("reading exampleDB\n");
         try {
-            XMLToIOCDBFactory.convert(dbd,iocdb,
-                 "src/org/epics/ioc/dbProcess/example/exampleDB.xml");
+            XMLToIOCDBFactory.convert(dbd,iocdbAdd,
+                 "src/org/epics/ioc/dbProcess/example/exampleDB.xml",
+                 iocMessageListener);
         } catch (Exception e) {
             System.out.println("Exception: " + e);
         }
         
-        Map<String,DBRecord> recordMap = iocdb.getRecordMap();
+        Map<String,DBRecord> recordMap = iocdbAdd.getRecordMap();
         Set<String> keys = recordMap.keySet();
-        ProcessDB processDB = ProcessDBFactory.createProcessDB(iocdb);
-//        System.out.printf("\nrecords\n");
-//        for(String key: keys) {
-//            DBRecord record = recordMap.get(key);
-//            System.out.print(record.toString());
-//        }
-        boolean createdLocal = ChannelAccessLocalFactory.create(iocdb);
+        SupportCreation supportCreation = SupportCreationFactory.createSupportCreation(iocdbAdd);
+        boolean createdLocal = ChannelAccessLocalFactory.create(iocdbAdd);
         if(!createdLocal) {
             System.out.printf("Did not create local channel access\n");
             return;
         }
-        boolean gotSupport = processDB.createSupport();
+        boolean gotSupport = supportCreation.createSupport();
         if(!gotSupport) {
             System.out.printf("Did not find all support\n");
             System.out.printf("\nrecords\n");
@@ -82,31 +84,21 @@ public class ProcessTest extends TestCase {
             }
             return;
         }
-        for(String key: keys) {
-            DBRecord record = recordMap.get(key);
-            Support recordSupport = (Support)record.getSupport();
-            if(recordSupport==null) {
-                System.out.println(record.getRecordName() + " has no support");
-            } else {
-                recordSupport.initialize();
-                SupportState supportState = recordSupport.getSupportState();
-                if(supportState!=SupportState.readyForStart) {
-                    System.out.println(
-                            record.getRecordName()
-                            + " initialize returned " + supportState.toString());
-                } else {
-                    recordSupport.start();
-                    supportState = recordSupport.getSupportState();
-                    if(supportState!=SupportState.ready) {
-                        System.out.println(
-                            record.getRecordName()
-                            + " start returned " + supportState.toString());
-                    }   
-                }
-            }
+        boolean readyForStart = supportCreation.initializeSupport();
+        if(!readyForStart) {
+            System.out.println("initializeSupport failed");
+            return;
         }
+        boolean ready = supportCreation.startSupport();
+        if(!ready) {
+            System.out.println("startSupport failed");
+            return;
+        }
+        supportCreation = null;
         DBRecord dbRecord = null;
-        dbRecord = iocdb.findRecord("counter");
+        iocdbAdd.mergeIntoMaster();
+        iocdbAdd = null;
+        dbRecord = iocdbMaster.findRecord("counter");
         assertNotNull(dbRecord);
         TestProcess testProcess = new TestProcess(dbRecord);
         for(String key: keys) {
@@ -192,6 +184,16 @@ public class ProcessTest extends TestCase {
             } finally {
                 lock.unlock();
             }
+        }
+    }
+    
+    private static class Listener implements IOCMessageListener {
+        /* (non-Javadoc)
+         * @see org.epics.ioc.util.IOCMessageListener#message(java.lang.String, org.epics.ioc.util.IOCMessageType)
+         */
+        public void message(String message, IOCMessageType messageType) {
+            System.out.println(message);
+            
         }
     }
 }

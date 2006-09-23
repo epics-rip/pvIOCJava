@@ -10,7 +10,7 @@
 <body>
 <h1 style="text-align: center">EPICS JavaIOC: dbProcess<br />
 package: org.epics.ioc.dbProcess<br />
-2006.09.01</h1>
+2006.09.22</h1>
 <hr />
 
 <h2 style="text-align: center">Overview</h2>
@@ -37,9 +37,9 @@ the following interfaces:</p>
     <dd>An extension of interface Channel, which is described in package
       org.epics.ioc.channelAccess. It is used by code that implements channel
       access links, i.e. links to other IOC records.</dd>
-  <dt>ProcessDB</dt>
-    <dd>Methods for Process Database, i.e. a databases for creating and
-      locating process and support code.</dd>
+  <dt>SupportCreation</dt>
+    <dd>An interface for creating and initializing all support for a set of
+      record instances.</dd>
 </dl>
 
 <p>It also has a number of listener interfaces implement by code that
@@ -52,10 +52,10 @@ ProcessCallbackListener.</p>
   <dt>AbstractSupport</dt>
     <dd>A base class that can be extended by most support code. It implements
       a number of the Support methods.</dd>
-  <dt>ProcessDBFactory</dt>
-    <dd>Implements ProcessDB</dd>
   <dt>RecordProcessFactory</dt>
     <dd>Implements RecordProcess and RecordProcessSupport.</dd>
+  <dt>SupportCreationFactory</dt>
+    <dd>Creates a process Database.</dd>
   <dt>ChannelAccessLocalFactory</dt>
     <dd>Implements the Channel Access client for accessing a local IOC
       database. This is used by Link Support code and can also by used by any
@@ -299,8 +299,11 @@ try {
         boolean isDisabled();
         boolean setDisabled(boolean value);
         boolean isActive();
-        ProcessDB getProcessDB();
         DBRecord getRecord();
+        void initialize();
+        void start();
+        void stop();
+        void uninitialize();
         ProcessReturn process(ProcessCompleteListener listener);
         void update();
         void removeCompletionListener(ProcessCompleteListener listener);
@@ -344,10 +347,13 @@ methods:</p>
       is allowed to complete.</dd>
   <dt style="font-family: courier;">isActive</dt>
     <dd>Is the record active, i.e. processing?</dd>
-  <dt style="font-family: courier;">getProcessDB</dt>
-    <dd>Get the process database to which this RecordProcess belongs.</dd>
   <dt style="font-family: courier;">getRecord</dt>
     <dd>Get the record instance to which this RecordProcess is attached.</dd>
+
+  <dt style="font-family: courier;">initialize</dt>
+  <dt style="font-family: courier;">start</dt>
+  <dt style="font-family: courier;">stop</dt>
+  <dt style="font-family: courier;">uninitialize</dt>
   <dt style="font-family: courier;">process</dt>
     <dd>Request that the record be processed. If successful the record is set
       active and the record support process method is called. In this case
@@ -565,46 +571,32 @@ implements the protected methods:</p>
 </dl>
 <hr />
 
-<h2 style="text-align: center;">ProcessDB</h2>
+<h2 style="text-align: center;">SupportCreation</h2>
 <hr />
-
-<p>This is a database for supporting record processing:</p>
-<pre>    public interface ProcessDB {
-        IOCDB getIOCDB();
-        RecordProcess getRecordProcess(String recordName);
-        boolean createRecordProcess(String recordName);
-        void removeRecordProcess(String recordName);
-        boolean createSupport(String recordName);
+<p>This is MARTY SAY SOMETHING</p>
+<pre>
+    public interface SupportCreation {
         boolean createSupport();
-        Map&lt;String,RecordProcess&gt; getRecordProcessMap();
+        boolean initializeSupport();
+        boolean  startSupport();
+        void uninitializeSupport();
+        void stopSupport();
     }
-
-    public class ProcessDBFactory {
-        static public ProcessDB createProcessDB(IOCDB iocdb);
-    }</pre>
-
-<p>A ProcessDB is created by calling ProcessDBFactory.createProcessDB.
-ProcessDB has the methods</p>
+</pre>
+<p>where</p>
 <dl>
-  <dt style="font-family: courier;">getIOCDB</dt>
-    <dd>Get the IOCDB this processDB is supporting.</dd>
-  <dt style="font-family: courier;">getRecordProcess</dt>
-    <dd>Get the RecordProcess interface for the record.</dd>
-  <dt style="font-family: courier;">createRecordProcess</dt>
-    <dd>Create RecordProcess support for the record. This is called by
-      createSupport but can also be called by on line add.</dd>
-  <dt style="font-family: courier;">removeRecordProcess</dt>
-    <dd>This can be called by on-line delete.</dd>
-  <dt style="font-family: courier;">createSupport(String recordName)</dt>
-    <dd>Create createSupport with no arguments but can also be called by
-      on-line add.</dd>
-  <dt style="font-family: courier;">createSupport()</dt>
-    <dd>Create support for all records in IOCDB. This includes creating the
-      support for all fields in each record that have associated support
-      defined in the database instance files.</dd>
-  <dt style="font-family: courier;">getRecordProcessMap</dt>
-    <dd>Get the complete set of RecordProcess interfaces.</dd>
-</dl>
+  <dt style="font-family: courier;">createSupport</dt>
+   <dd>Create the support. The return value is true only if no errors are reported.</dd>
+  <dt style="font-family: courier;">initializeSupport</dt>
+   <dd>Initialize the support. The return value is true only if all record
+      instances enter the state readyForStart.</dd>
+  <dt style="font-family: courier;">startSupport</dt>
+   <dd>Start the support. The return value is true only if all record
+      instances enter the state ready.</dd>
+  <dt style="font-family: courier;">uninitializeSupport</dt>
+    <dd>Uninitialize the support.</dd>
+  <dt style="font-family: courier;">stopSupport</dt>
+    <dd>Stop the support.</dd>
 <hr />
 
 <h2 style="text-align: center;">Record Process</h2>
@@ -617,6 +609,10 @@ ProcessDB has the methods</p>
         boolean isActive();
         ProcessDB getProcessDB();
         DBRecord getRecord();
+        void initialize();
+        void start();
+        void stop();
+        void uninitialize();
         ProcessReturn process(ProcessCompleteListener listener);
         void update();
         void removeCompletionListener(ProcessCompleteListener listener);
@@ -636,10 +632,23 @@ ProcessDB has the methods</p>
     }
     
     public class RecordProcessFactory {
-        static public RecordProcess createRecordProcess(
-            ProcessDB processDB,DBRecord dbRecord) {
+        static public RecordProcess createRecordProcess(DBRecord dbRecord) {
     }</pre>
 <hr />
+
+<h2 style="text-align: center;">Support Creation Factory</h2>
+<hr />
+<hr />
+<pre>
+    public class SupportCreationFactory
+        static public SupportCreation createSupportCreation(IOCDB iocdb)
+    }
+</pre>
+<p>where</p>
+<dl>
+   <dt>createSupportCreation</dt>
+    <dd>Create a SupportCreation database.</dd>
+</dl>
 
 <h2 style="text-align: center;">Local Channel Access</h2>
 <hr />

@@ -12,7 +12,7 @@
 
 <h1 style="text-align: center">EPICS JavaIoc: Database Definition <br />
 package: org.epics.ioc.dbDefinition<br />
-2006.09.13</h1>
+2006.09.22</h1>
 <hr />
 
 <div class="toc">
@@ -45,7 +45,8 @@ package: org.epics.ioc.dbDefinition<br />
       <li><a href="#Support">Support</a></li>
     </ul>
   </li>
-  <li><a href="#Overview1">Overview of Java Support For Database Definition</a></li>
+  <li><a href="#Overview1">Overview of Java Support For Database
+    Definition</a></li>
   <li><a href="#Database1">Database Types</a></li>
   <li><a href="#Introspect">Introspection of Database Definitions</a>
     <ul>
@@ -146,6 +147,7 @@ is:
   <dt style="font-family: courier;">removePath</dt>
     <dd>Remove a path.</dd>
 </dl>
+
 <p>See {@link org.epics.ioc.util} for details.</p>
 
 <h4 id="Macro">Macro Substitution</h4>
@@ -976,8 +978,10 @@ following methods:</p>
 and link support definitions and adds the definitions to a database
 definition database.</p>
 <pre>    public class XMLToDBDFactory {
-        public static void convert(DBD dbd, String fileName);
-        public static DBD addToMaster(String fileName);
+        public static void convert(DBD dbd, String fileName,
+            IOCMessageListener messageListener);
+        public static DBD addToMaster(String fileName,
+            IOCMessageListener messageListener,IOCMessageType okToAddType);
     }</pre>
 <dl>
   <dt style="font-family: courier;">convert</dt>
@@ -997,6 +1001,21 @@ definition database.</p>
       in the map returned by getDBDMap.</dd>
 </dl>
 
+<p>The method arguments are:</p>
+<dl>
+  <dt style="font-family: courier;">dbd</dt>
+    <dd>The Database Definition Database.</dd>
+  <dt style="font-family: courier;">fileName</dt>
+    <dd>The filename relative to the current working directory that contains
+      the Database Definitions.</dd>
+  <dt style="font-family: courier;">messageListener</dt>
+    <dd>A listener for all messages generated while the method is
+    execuiting.</dd>
+  <dt style="font-family: courier;">okToAddType</dt>
+    <dd>The definitions will only be added if all messages types are of type
+      less than or equal to this type.</dd>
+</dl>
+
 <h3 id="Creating1">Creating Database Definitions</h3>
 
 <p>Before record instances can be created all menu, structure, recordType,
@@ -1005,9 +1024,7 @@ and support definitions used by record instances must be created.</p>
 <p>A running IOC always uses a DBD Database named "master" and an IOCDB also
 named "master". The prefered way to create definitions by calling:</p>
 <pre>    DBD add = XMLToDBDFactory.addToMaster(fileName);
-    if(add==null) // failure take appropriate action
-
-</pre>
+    if(add==null) // failure take appropriate action</pre>
 
 <p>addToMaster will not add any definitions to master if any errors are
 detected. It can be called during IOC initialization and also while an IOC is

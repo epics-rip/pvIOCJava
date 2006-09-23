@@ -20,23 +20,22 @@ public class RecordProcessFactory {
     
     /**
      * Create RecordProcess for a record instance.
-     * @param processDB The processDB which has the record instance.
      * @param dbRecord The record instance.
      * @return The interrace for the newly created RecordProcess.
      */
-    static public RecordProcess createRecordProcess(ProcessDB processDB,DBRecord dbRecord) {
-        return new Process(processDB,dbRecord);
+    static public RecordProcess createRecordProcess(DBRecord dbRecord) {
+        return new ProcessInstance(dbRecord);
     }
     
-    static private class Process implements
+    static private class ProcessInstance implements
     RecordProcess,RecordProcessSupport,
     RecordStateListener,ProcessCompleteListener
     {
         private boolean trace = false;
-        private ProcessDB processDB;
         private DBRecord dbRecord;
         private boolean disabled = false;
         private Support recordSupport = null;
+        private Support scanSupport = null;
         
         private boolean active = false;
         private List<ProcessCompleteListener> processListenerList =
@@ -54,45 +53,39 @@ public class RecordProcessFactory {
         private TimeStamp timeStamp = new TimeStamp();
         private TimeStampField timeStampField = null;
         
-        private Process(ProcessDB processDB,DBRecord record) {
-            this.processDB = processDB;
+        private ProcessInstance(DBRecord record) {
             dbRecord = record;
             recordSupport = dbRecord.getSupport();
             if(recordSupport==null) {
                 throw new IllegalStateException(
                     record.getRecordName() + " has no support");
             }
-            PVData[] pvData = dbRecord.getFieldPVDatas();
-            PVData data;
+            DBData[] dbData = dbRecord.getFieldDBDatas();
+            DBData data;
             int index = record.getFieldDBDataIndex("status");
             if(index>=0) {
-                data = pvData[index];
+                data = dbData[index];
                 if(data.getField().getType()==Type.pvString)
                     status = (PVString)data;
             }
             index = record.getFieldDBDataIndex("alarmSeverity");
             if(index>=0) {
-                data = pvData[index];
+                data = dbData[index];
                 if(data.getField().getType()==Type.pvEnum)
                     severity = (PVEnum)data;
             }
             index = record.getFieldDBDataIndex("timeStamp");
             if(index>=0) {
-                timeStampField = TimeStampField.create(pvData[index]);
+                timeStampField = TimeStampField.create(dbData[index]);
             }
             timeStampSet = false;
             TimeUtility.set(timeStamp,System.currentTimeMillis());
-        }
-        
-        /* (non-Javadoc)
-         * @see org.epics.ioc.dbProcess.RecordProcess#getProcessDB()
-         */
-        public ProcessDB getProcessDB() {
-            dbRecord.lock();
-            try {
-                return processDB;
-            } finally {
-                dbRecord.unlock();
+            index = record.getFieldDBDataIndex("scan");
+            if(index>=0) {
+                data = dbData[index];
+                if(data.getField().getType()==Type.pvStructure) {
+                    scanSupport = data.getSupport();
+                }
             }
         }
         /* (non-Javadoc)
@@ -141,6 +134,26 @@ public class RecordProcessFactory {
                 dbRecord.unlock();
             }
         }     
+        public void initialize() {
+            if(scanSupport!=null) scanSupport.initialize();
+            recordSupport.initialize();
+        }
+
+        public void start() {
+            if(scanSupport!=null) scanSupport.start();
+            recordSupport.start();
+        }
+
+        public void stop() {
+            if(scanSupport!=null) scanSupport.stop();
+            recordSupport.stop();
+        }
+
+        public void uninitialize() {
+            if(scanSupport!=null) scanSupport.uninitialize();
+            recordSupport.uninitialize();
+        }
+
         /* (non-Javadoc)
          * @see org.epics.ioc.dbProcess.RecordProcess#process(org.epics.ioc.dbProcess.ProcessCompleteListener)
          */
@@ -236,6 +249,7 @@ public class RecordProcessFactory {
             if(value!=oldValue) return true;
             return false;
         }
+
         /* (non-Javadoc)
          * @see org.epics.ioc.dbProcess.RecordProcess#removeCompletionListener(org.epics.ioc.dbProcess.ProcessCompleteListener)
          */
@@ -339,17 +353,9 @@ public class RecordProcessFactory {
                 Support support = dbRecord.getSupport();
                 removeAndCallLinkedProcessListeners(support,ProcessResult.failure);
                 dbRecord.lock();
-            } else {
-                active = true;
             }
-            try {
-                if(newState==RecordState.zombie) {
-                    processDB.removeRecordProcess(dbRecord.getRecordName());
-                }
-            } finally {
-                active = false;
-                dbRecord.unlock();
-            }
+            active = false;
+            dbRecord.unlock();
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.dbProcess.ProcessCompleteListener#processComplete(org.epics.ioc.dbProcess.ProcessResult)

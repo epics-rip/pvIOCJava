@@ -264,7 +264,7 @@ public class LinkSupportFactory {
                 channel.setTimeout(timeoutAccess.get());
                 channelRecord = null;
                 if(channel.isLocal()) {
-                    IOCDB iocdb = dbRecord.getRecordProcess().getProcessDB().getIOCDB();
+                    IOCDB iocdb = dbRecord.getIOCDB();
                     channelRecord = iocdb.findRecord(recordName);
                     if(channelRecord==null) {
                         throw new IllegalStateException(
@@ -538,7 +538,7 @@ public class LinkSupportFactory {
                 channel.setTimeout(timeoutAccess.get());
                 channelRecord = null;
                 if(channel.isLocal()) {
-                    IOCDB iocdb = dbRecord.getRecordProcess().getProcessDB().getIOCDB();
+                    IOCDB iocdb = dbRecord.getIOCDB();
                     channelRecord = iocdb.findRecord(recordName);
                     if(channelRecord==null) {
                         throw new IllegalStateException(
@@ -869,7 +869,7 @@ public class LinkSupportFactory {
                 channel.setTimeout(timeoutAccess.get());
                 channelRecord = null;
                 if(channel.isLocal()) {
-                    IOCDB iocdb = dbRecord.getRecordProcess().getProcessDB().getIOCDB();
+                    IOCDB iocdb = dbRecord.getIOCDB();
                     channelRecord = iocdb.findRecord(recordName);
                     if(channelRecord==null) {
                         throw new IllegalStateException(
@@ -1183,7 +1183,7 @@ public class LinkSupportFactory {
                 }
                 channelRecord = null;
                 if(channel.isLocal()) {
-                    IOCDB iocdb = dbRecord.getRecordProcess().getProcessDB().getIOCDB();
+                    IOCDB iocdb = dbRecord.getIOCDB();
                     channelRecord = iocdb.findRecord(recordName);
                     if(channelRecord==null) {
                         throw new IllegalStateException(

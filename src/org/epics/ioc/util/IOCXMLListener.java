@@ -37,10 +37,11 @@ public interface IOCXMLListener {
      */
     void endElement(String name);
     /**
-     * Error message.
-     * This is called by IOCXMLReader when warningMessage, errorMessage, or fatalMessage are called.
+     * Message.
+     * This is called by IOCXMLReader.message when it is called..
      * @param message The message.
      * IOCXMLReader adds the location in the xml files when the message was generated.
+     * @param messageType The type of message.
      */
-    void errorMessage(String message);
+    void message(String message,IOCMessageType messageType);
 }

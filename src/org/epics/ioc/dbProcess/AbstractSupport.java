@@ -17,32 +17,7 @@ import org.epics.ioc.dbAccess.*;
  *
  */
 public abstract class AbstractSupport implements Support {
-    
-    /* (non-Javadoc)
-     * @see org.epics.ioc.dbProcess.Support#initialize()
-     */
-    abstract public void initialize();
-    /* (non-Javadoc)
-     * @see org.epics.ioc.dbProcess.Support#start()
-     */
-    abstract public void start();
-    /* (non-Javadoc)
-     * @see org.epics.ioc.dbProcess.Support#stop()
-     */
-    abstract public void stop();
-    /* (non-Javadoc)
-     * @see org.epics.ioc.dbProcess.Support#uninitialize()
-     */
-    abstract public void uninitialize() ;
-    /* (non-Javadoc)
-     * @see org.epics.ioc.dbProcess.Support#process(org.epics.ioc.dbProcess.ProcessCompleteListener)
-     */
-    abstract public ProcessReturn process(ProcessCompleteListener listener);
-    /* (non-Javadoc)
-     * @see org.epics.ioc.dbProcess.Support#processContinue()
-     */
-    abstract public void processContinue();
-    
+        
     private String name;
     private DBData dbData;
     private DBRecord dbRecord = null;
@@ -77,6 +52,36 @@ public abstract class AbstractSupport implements Support {
             }
         }
     }
+    /* (non-Javadoc)
+     * @see org.epics.ioc.dbProcess.Support#initialize()
+     */
+    public void initialize() {}
+    /* (non-Javadoc)
+     * @see org.epics.ioc.dbProcess.Support#start()
+     */
+    public void start() {}
+    /* (non-Javadoc)
+     * @see org.epics.ioc.dbProcess.Support#stop()
+     */
+    public void stop() {}
+    /* (non-Javadoc)
+     * @see org.epics.ioc.dbProcess.Support#uninitialize()
+     */
+    public void uninitialize() {}
+    /* (non-Javadoc)
+     * @see org.epics.ioc.dbProcess.Support#process(org.epics.ioc.dbProcess.ProcessCompleteListener)
+     */
+    public ProcessReturn process(ProcessCompleteListener listener) {
+        return ProcessReturn.noop;
+    }
+    /* (non-Javadoc)
+     * @see org.epics.ioc.dbProcess.Support#processContinue()
+     */
+    public void processContinue(){}
+    /* (non-Javadoc)
+     * @see org.epics.ioc.dbProcess.Support#update()
+     */
+    public void update() {}
     /* (non-Javadoc)
      * @see org.epics.ioc.dbProcess.Support#getName()
      */
@@ -116,11 +121,5 @@ public abstract class AbstractSupport implements Support {
         RecordProcessSupport recordProcessSupport = dbRecord.getRecordProcess().getRecordProcessSupport();
         recordProcessSupport.errorMessage("." + fieldName + " " + message);
     } 
-    /* (non-Javadoc)
-     * @see org.epics.ioc.dbProcess.Support#update()
-     */
-    public void update() {
-        // Do nothing.
-    }
     
 }

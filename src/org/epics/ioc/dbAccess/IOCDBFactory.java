@@ -19,25 +19,33 @@ import java.util.regex.*;
  *
  */
 public class IOCDBFactory {
+    private static IOCDBInstance master = null;
     private static TreeMap<String,IOCDB> iocdbMap = new TreeMap<String,IOCDB>();
     private static ReentrantReadWriteLock rwLock = new ReentrantReadWriteLock();
     /**
      * Create an IOCDB.
      * @param dbd The reflection database.
      * @param name The name for the IOCDB.
-     * @param masterIOCDB The masterIOCDB or null if no master or this is the master.
      * @return The newly created IOCDB or null if an IOCDB with this name already exists.
      */
-    public static IOCDB create(DBD dbd, String name, IOCDB masterIOCDB) {
+    public static IOCDB create(DBD dbd, String name) {
         rwLock.writeLock().lock();
         try {
             if(iocdbMap.get(name)!=null) return null;
-            IOCDB iocdb = new IOCDBInstance(dbd,name,masterIOCDB);
+            IOCDBInstance iocdb = new IOCDBInstance(dbd,name);
+            if(name.equals("master")) master = iocdb;
             iocdbMap.put(name,iocdb);
             return iocdb;
         } finally {
             rwLock.writeLock().unlock();
         }
+    }
+    /**
+     * Get the master IOC Database.
+     * @return The master or null if "master" has not been created.
+     */
+    public static IOCDB getMaster() {
+        return master;
     }
     /**
      * Remove the IOCDB from the list.
@@ -112,14 +120,16 @@ public class IOCDBFactory {
     {
         private DBD dbd;
         private String name;
-        private IOCDBInstance masterIOCDB;
-        private LinkedHashMap<String,DBRecord> recordMap = new LinkedHashMap<String,DBRecord>();
-        private ReentrantReadWriteLock rwLock = new ReentrantReadWriteLock();
+        private List<IOCDBMergeListener> mergeListenerList =
+            new ArrayList<IOCDBMergeListener>();
+        private LinkedHashMap<String,DBRecord> recordMap = 
+            new LinkedHashMap<String,DBRecord>();
+        private ReentrantReadWriteLock rwLock = 
+            new ReentrantReadWriteLock();
         
-        private IOCDBInstance(DBD dbd, String name, IOCDB masterIOCDB) {
+        private IOCDBInstance(DBD dbd, String name) {
             this.dbd = dbd;
             this.name = name;
-            this.masterIOCDB = (IOCDBInstance)masterIOCDB;
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.dbAccess.IOCDB#getName()
@@ -134,22 +144,28 @@ public class IOCDBFactory {
             return dbd;
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.dbAccess.IOCDB#getMasterIOCDB()
-         */
-        public IOCDB getMasterIOCDB() {
-            return masterIOCDB;
-        }
-        /* (non-Javadoc)
          * @see org.epics.ioc.dbAccess.IOCDB#mergeIntoMaster()
          */
         public void mergeIntoMaster() {
-            if(masterIOCDB==null) return;
-            rwLock.readLock().lock();
-            try {
-                masterIOCDB.merge(recordMap);
-            } finally {
-                rwLock.readLock().unlock();
+            if(master!=null && !(this==master)) {
+                rwLock.readLock().lock();
+                try {
+                    master.merge(recordMap);
+                } finally {
+                    rwLock.readLock().unlock();
+                }
             }
+            Iterator<IOCDBMergeListener> iter = mergeListenerList.iterator();
+            while(iter.hasNext()) {
+                iter.next().merged();
+                iter.remove();
+            }
+        }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.dbAccess.IOCDB#addIOCDBMergeListener(org.epics.ioc.dbAccess.IOCDBMergeListener)
+         */
+        public void addIOCDBMergeListener(IOCDBMergeListener listener) {
+            mergeListenerList.add(listener);
         }
         // merge allows master to be locked once instead of for each record instance
         private void merge(LinkedHashMap<String,DBRecord> from) {
@@ -158,7 +174,9 @@ public class IOCDBFactory {
             try {
                 keys = from.keySet();
                 for(String key: keys) {
-                    recordMap.put(key,from.get(key));
+                    DBRecord dbRecord = from.get(key);
+                    dbRecord.setIOCDB(this);
+                    recordMap.put(key,dbRecord);
                 }
             }  finally {
                 rwLock.writeLock().unlock();
@@ -172,7 +190,7 @@ public class IOCDBFactory {
             try {
                 DBRecord record = null;
                 record = recordMap.get(recordName);
-                if(record==null && masterIOCDB!=null) record = masterIOCDB.findRecord(recordName);
+                if(record==null && master!=null && master!=this) record = master.findRecord(recordName);
                 return record;
             } finally {
                 rwLock.readLock().unlock();
@@ -186,8 +204,9 @@ public class IOCDBFactory {
             try {
                 String key = record.getRecordName();
                 if(recordMap.containsKey(key)) return false;
-                if(masterIOCDB!=null && masterIOCDB.findRecord(key)!=null) return false;
+                if(master!=null && master!=this && master.findRecord(key)!=null) return false;
                 recordMap.put(key,record);
+                record.setIOCDB(this);
                 return true;
             } finally {
                 rwLock.writeLock().unlock();

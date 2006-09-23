@@ -25,21 +25,10 @@ public interface IOCXMLReader {
      */
     void parse(String rootElementName,String fileName, IOCXMLListener listener);
     /**
-     * Warning message.
-     * The current location in the xml files together with the massage are given to listener.errorMessage.
+     * Message.
+     * The current location in the xml files together with the massage are given to listener.message.
      * @param message The message.
+     * @param messageType The type of message.
      */
-    void warningMessage(String message);
-    /**
-     * Error message.
-     * The current location in the xml files together with the massage are given to listener.errorMessage.
-     * @param message The message.
-     */
-    void errorMessage(String message);
-    /**
-     * Fatal error message.
-     * The current location in the xml files together with the massage are given to listener.errorMessage.
-     * @param message The message.
-     */
-    void fatalMessage(String message);
+    void message(String message,IOCMessageType messageType);
 }

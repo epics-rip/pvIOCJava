@@ -31,15 +31,34 @@ public interface RecordProcess {
      */
     boolean isActive();
     /**
-     * Get the ProcessDB.
-     * @return The ProcessDB.
-     */
-    ProcessDB getProcessDB();
-    /**
      * Get the record this RecordProcess processes.
      * @return The DBRecord interface.
      */
     DBRecord getRecord();
+    /**
+     * Initialize.
+     * This must be called rather than directly calling record support.
+     * This handles global fields like scan and then calls record support.
+     */
+    void initialize();
+    /**
+     * Start.
+     * This must be called rather than directly calling record support.
+     * This handles global fields like scan and then calls record support.
+     */
+    void start();
+    /**
+     * Stop
+     * This must be called rather than directly calling record support.
+     * This handles global fields like scan and then calls record support.
+     */
+    void stop();
+    /**
+     * Uninitialize.
+     * This must be called rather than directly calling record support.
+     * This handles global fields like scan and then calls record support.
+     */
+    void uninitialize();
     /**
      * Process the record instance.
      * @param listener The listener to call to show the result.

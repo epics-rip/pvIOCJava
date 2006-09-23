@@ -6,8 +6,10 @@
 package org.epics.ioc.dbDefinition.example;
 
 import junit.framework.TestCase;
-import org.epics.ioc.dbDefinition.*;
 import java.util.*;
+
+import org.epics.ioc.dbDefinition.*;
+import org.epics.ioc.util.*;
 /**
  * JUnit test for XMLToDBDFactory.
  * This also is a test for dbDefinition and pvAccess because XMLToDBD makes
@@ -19,48 +21,59 @@ import java.util.*;
  * @author mrk
  *
  */
-public class XMLToDBDTest extends TestCase {
-        
+public class XMLToDBDTest extends TestCase {        
     /**
      * the test.
      * This is the only public method.
      */
     public static void testXML() {
-        DBD dbd = DBDFactory.create("master",null);
-        boolean result = XMLToDBDFactory.convert(dbd,
-            "src/org/epics/ioc/dbDefinition/example/test.xml");
-        if(!result) {
-            System.out.println("convert had errors");
-        }
-        System.out.printf("%nmenus");
-        Map<String,DBDMenu> menuMap = dbd.getMenuMap();
-        Set<String> keys = menuMap.keySet();
-        for(String key: keys) {
-            DBDMenu dbdMenu = menuMap.get(key);
-            System.out.printf("%n%s",dbdMenu.toString());
-        }
-        System.out.printf("%n%nstructures");
-        Map<String,DBDStructure> structureMap = dbd.getStructureMap();
-        keys = structureMap.keySet();
-        for(String key: keys) {
-            DBDStructure dbdStructure = structureMap.get(key);
-            System.out.printf("%n%s",dbdStructure.toString());
-        }
-        System.out.printf("%n%nsupport");
-        Map<String,DBDSupport> supportMap = dbd.getSupportMap();
-        keys = supportMap.keySet();
-        for(String key: keys) {
-            DBDSupport dbdSupport = supportMap.get(key);
-            System.out.printf("%n%s",dbdSupport.toString());
-        }
-        System.out.printf("%n%nrecordTypes");
-        Map<String,DBDRecordType> recordTypeMap = dbd.getRecordTypeMap();
-        keys = recordTypeMap.keySet();
-        for(String key: keys) {
-            DBDRecordType dbdRecordType = recordTypeMap.get(key);
-            System.out.printf("%n%s",dbdRecordType.toString());
-        }
-        
+        Test test = new Test();
+        test.doit();
     }
+    
+    private static class Test implements IOCMessageListener {
+        
+        private void doit () {
+            DBD dbd = DBDFactory.create("master",null);
+            XMLToDBDFactory.convert(dbd,
+                "src/org/epics/ioc/dbDefinition/example/test.xml",this);
+            System.out.printf("%nmenus");
+            Map<String,DBDMenu> menuMap = dbd.getMenuMap();
+            Set<String> keys = menuMap.keySet();
+            for(String key: keys) {
+                DBDMenu dbdMenu = menuMap.get(key);
+                System.out.printf("%n%s",dbdMenu.toString());
+            }
+            System.out.printf("%n%nstructures");
+            Map<String,DBDStructure> structureMap = dbd.getStructureMap();
+            keys = structureMap.keySet();
+            for(String key: keys) {
+                DBDStructure dbdStructure = structureMap.get(key);
+                System.out.printf("%n%s",dbdStructure.toString());
+            }
+            System.out.printf("%n%nsupport");
+            Map<String,DBDSupport> supportMap = dbd.getSupportMap();
+            keys = supportMap.keySet();
+            for(String key: keys) {
+                DBDSupport dbdSupport = supportMap.get(key);
+                System.out.printf("%n%s",dbdSupport.toString());
+            }
+            System.out.printf("%n%nrecordTypes");
+            Map<String,DBDRecordType> recordTypeMap = dbd.getRecordTypeMap();
+            keys = recordTypeMap.keySet();
+            for(String key: keys) {
+                DBDRecordType dbdRecordType = recordTypeMap.get(key);
+                System.out.printf("%n%s",dbdRecordType.toString());
+            }
+            
+        }
 
+        /* (non-Javadoc)
+         * @see org.epics.ioc.util.IOCMessageListener#message(java.lang.String, org.epics.ioc.util.IOCMessageType)
+         */
+        public void message(String message, IOCMessageType messageType) {
+            System.out.println(message);
+            
+        }
+    }
 }

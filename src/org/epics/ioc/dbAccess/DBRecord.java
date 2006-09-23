@@ -117,4 +117,16 @@ public interface DBRecord extends DBStructure {
      * @param dbd The DBD.
      */
     void setDBD(DBD dbd);
+    /**
+     * Get the IOCDB to which this record belongs.
+     * This can change so user code should never save the return value.
+     * @return The current IOC database.
+     */
+    IOCDB getIOCDB();
+    /**
+     * Set the IOCDB.
+     * @param iocdb The iocdb to which this record belongs.
+     * This is called after an IOCDB is merged into the master to change it to the master.
+     */
+    void setIOCDB(IOCDB iocdb);
 }

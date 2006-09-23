@@ -6,6 +6,7 @@
 package org.epics.ioc.dbProcess.example;
 
 import org.epics.ioc.dbProcess.*;
+import org.epics.ioc.dbDefinition.*;
 import org.epics.ioc.dbAccess.*;
 import org.epics.ioc.dbDefinition.*;
 
@@ -44,7 +45,7 @@ public class DoubleRecordFactory {
          * @see org.epics.ioc.dbProcess.Support#initialize()
          */
         public void initialize() {
-            IOCDB iocdb = dbRecord.getRecordProcess().getProcessDB().getIOCDB();
+            IOCDB iocdb = dbRecord.getIOCDB();
             DBAccess dbAccess = iocdb.createAccess(dbRecord.getRecordName());
             DBData dbData;
             AccessSetResult result = dbAccess.setField("input");

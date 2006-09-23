@@ -10,6 +10,8 @@ import junit.framework.TestCase;
 import org.epics.ioc.dbDefinition.*;
 import org.epics.ioc.dbAccess.*;
 import org.epics.ioc.pvAccess.*;
+import org.epics.ioc.util.IOCMessageListener;
+import org.epics.ioc.util.IOCMessageType;
 
 /**
  * JUnit test for replacing the default data implementration for a field.
@@ -23,9 +25,10 @@ public class ReplaceTest extends TestCase {
      */
     public static void testReplaceField() {
         DBD dbd = DBDFactory.create("master",null); 
-        IOCDB iocdb = IOCDBFactory.create(dbd,"testIOCDatabase",null);
+        IOCDB iocdb = IOCDBFactory.create(dbd,"testIOCDatabase");
+        IOCMessageListener iocMessageListener = new Listener();
         XMLToDBDFactory.convert(dbd,
-                 "src/org/epics/ioc/dbAccess/example/replaceDBD.xml");
+                 "src/org/epics/ioc/dbAccess/example/replaceDBD.xml",iocMessageListener);
         
         //System.out.printf("%n%nstructures");
         //Map<String,DBDStructure> structureMap = dbd.getStructureMap();
@@ -42,7 +45,7 @@ public class ReplaceTest extends TestCase {
         //System.out.print(dbdRecordType.toString());
         //}
         XMLToIOCDBFactory.convert(dbd,iocdb,
-                 "src/org/epics/ioc/dbAccess/example/replaceDB.xml");
+                 "src/org/epics/ioc/dbAccess/example/replaceDB.xml",iocMessageListener);
 //        System.out.printf("%nrecords%n");
 //        Map<String,DBRecord> recordMap = iocdb.getRecordMap();
 //        Set<String> keys = recordMap.keySet();
@@ -2359,4 +2362,14 @@ public class ReplaceTest extends TestCase {
     }
     
     private static Convert convert = ConvertFactory.getConvert();
+    
+    private static class Listener implements IOCMessageListener {
+        /* (non-Javadoc)
+         * @see org.epics.ioc.util.IOCMessageListener#message(java.lang.String, org.epics.ioc.util.IOCMessageType)
+         */
+        public void message(String message, IOCMessageType messageType) {
+            System.out.println(message);
+            
+        }
+    }
 }

@@ -7,6 +7,7 @@ package org.epics.ioc.dbProcess;
 
 import java.lang.reflect.*;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.epics.ioc.dbAccess.*;
 import org.epics.ioc.dbDefinition.*;
@@ -16,95 +17,96 @@ import org.epics.ioc.dbDefinition.*;
  * @author mrk
  *
  */
-public class ProcessDBFactory {
-    private static IOCDB iocdb;
+public class SupportCreationFactory {
     /**
      * create a process database.
      * @param iocdb the iocdb associated with the record processing.
-     * @return the ProcessDB.
+     * @return the SupportCreation.
      */
-    static public ProcessDB createProcessDB(IOCDB iocdb) {
-        return new ProcessDatabase(iocdb);
+    static public SupportCreation createSupportCreation(IOCDB iocdb) {
+        SupportCreationInstance processDB = new SupportCreationInstance(iocdb);
+        return processDB;
     }
     
-    static private class ProcessDatabase implements ProcessDB{
-        private static Map<String,RecordProcess> recordProcessMap;
-        static {
-            recordProcessMap = new HashMap<String,RecordProcess>();
-        }
+    static private class SupportCreationInstance implements SupportCreation{
+        private IOCDB iocdb;
+        private Collection<DBRecord> records;
         
-        private ProcessDatabase(IOCDB iocdbin) {
+        private SupportCreationInstance(IOCDB iocdbin) {
             iocdb = iocdbin;
+            records = iocdb.getRecordMap().values();
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.dbProcess.ProcessDB#getIOCDB()
+         * @see org.epics.ioc.dbProcess.SupportCreation#getIOCDB()
          */
         public IOCDB getIOCDB() {
             return iocdb;
         }
+        
         /* (non-Javadoc)
-         * @see org.epics.ioc.dbProcess.ProcessDB#findRecordProcess(java.lang.String)
-         */
-        public RecordProcess getRecordProcess(String recordName) {
-            return recordProcessMap.get(recordName);
-        }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.dbProcess.ProcessDB#createRecordProcess(java.lang.String)
-         */
-        public boolean createRecordProcess(String recordName) {
-            if(recordProcessMap.containsKey(recordName)) return false;
-            DBRecord dbRecord = iocdb.findRecord(recordName);
-            RecordProcess recordProcess =
-                RecordProcessFactory.createRecordProcess(this,dbRecord);
-            if(recordProcessMap.put(recordName,recordProcess)==null) {
-                dbRecord.setRecordProcess(recordProcess);
-                return true;
-            }
-            System.out.printf("ProcessDB.createRecordProcess failure. Why??\n");
-            return true;
-        }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.dbProcess.ProcessDB#removeRecordProcess(java.lang.String)
-         */
-        public void removeRecordProcess(String recordName) {
-            recordProcessMap.remove(recordName);
-        }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.dbProcess.ProcessDB#createSupport(java.lang.String)
-         */
-        public boolean createSupport(String recordName) {
-            boolean result = true;
-            DBRecord record = iocdb.findRecord(recordName);
-            if(record==null) {
-                System.err.printf("%s not found%n",recordName);
-                return false;
-            }
-            if(!createRecordSupport(record)) result = false;
-            if(!createStructureSupport(record)) result = false;
-            if(!recordProcessMap.containsKey(recordName)) {
-                if(!createRecordProcess(recordName)) {
-                    return false;
-                }
-            }
-            return result;
-        }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.dbProcess.ProcessDB#createSupport()
+         * @see org.epics.ioc.dbProcess.SupportCreation#createSupport()
          */
         public boolean createSupport() {
             boolean result = true;
-            Map<String,DBRecord> recordMap = iocdb.getRecordMap();
-            Set<String> keys = recordMap.keySet();
-            for(String key: keys) {
-                if(!createSupport(key)) result = false;
+            Iterator<DBRecord> iter = records.iterator();
+            while(iter.hasNext()) {
+                DBRecord record = iter.next();
+                if(!createRecordSupport(record)) result = false;
+                if(!createStructureSupport(record)) result = false;
+            }
+            if(!result) return result;
+            iter = records.iterator();
+            while(iter.hasNext()) {
+                DBRecord record = iter.next();
+                if(record.getRecordProcess()!=null) continue;
+                RecordProcess recordProcess =
+                    RecordProcessFactory.createRecordProcess(record);
+                record.setRecordProcess(recordProcess);
             }
             return result;
         }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.dbProcess.ProcessDB#getRecordProcessMap()
-         */
-        public Map<String, RecordProcess> getRecordProcessMap() {
-            return recordProcessMap;
+        
+        public boolean initializeSupport() {
+            boolean result = true;
+            Iterator<DBRecord> iter = records.iterator();
+            while(iter.hasNext()) {
+                DBRecord record = iter.next();
+                Support support = record.getSupport();
+                RecordProcess process = record.getRecordProcess();
+                process.initialize();
+                if(support.getSupportState()!=SupportState.readyForStart) result = false;
+            }
+            return result;
+        }
+        
+        public boolean startSupport() {
+            boolean result = true;
+            Iterator<DBRecord> iter = records.iterator();
+            while(iter.hasNext()) {
+                DBRecord record = iter.next();
+                Support support = record.getSupport();
+                RecordProcess process = record.getRecordProcess();
+                process.start();
+                if(support.getSupportState()!=SupportState.ready) result = false;
+            }
+            return result;
+            
+        }
+        public void stopSupport() {
+            Iterator<DBRecord> iter = records.iterator();
+            while(iter.hasNext()) {
+                DBRecord record = iter.next();
+                RecordProcess process = record.getRecordProcess();
+                process.stop();
+            }
+        }
+        public void uninitializeSupport() {
+            Iterator<DBRecord> iter = records.iterator();
+            while(iter.hasNext()) {
+                DBRecord record = iter.next();
+                RecordProcess process = record.getRecordProcess();
+                process.uninitialize();
+            }
         }
         
         private boolean createRecordSupport(DBRecord dbRecord) {

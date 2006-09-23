@@ -48,17 +48,17 @@ public interface Support {
      */
     void errorMessage(String message);
     /**
-     * initialize.
-     * perform initialization related to record instance but
+     * Initialize.
+     * Perform initialization related to record instance but
      * do not connect to I/O or other records.
      */
     void initialize();
     /**
-     * invoked when it is safe to link to I/O and/or other records.
+     * Invoked when it is safe to link to I/O and/or other records.
      */
     void start();
     /**
-     * disconnect all links to I/O and/or other records.
+     * Disconnect all links to I/O and/or other records.
      */
     void stop();
     /**

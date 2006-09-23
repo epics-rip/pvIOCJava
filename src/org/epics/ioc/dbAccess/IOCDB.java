@@ -27,19 +27,16 @@ public interface IOCDB {
      */
     DBD getDBD();
     /**
-     * Get the master IOCDB.
-     * In order to support on-line add of new record instances a master IOCDB can be created.
-     * A separate IOCDB can be created for adding new record instances.
-     * The new instances can be added to the new IOCDB and when all instances have been added
-     * the new IOCDB can be merged into the master IOCDB. 
-     * @return The master IOCDB or null if no master exists.
-     */
-    IOCDB getMasterIOCDB();
-    /**
      * Merge all definitions into the master IOCDB.
      * After the merge all definitions are cleared from this IOCDB and this IOCDB is removed from the IOCDBFactory list.
      */
     void mergeIntoMaster();
+    /**
+     * Add a listener to call after the IOCDB is merged into the master.
+     * If this is the master the listener will be called immediately.
+     * @param listener The listener.
+     */
+    void addIOCDBMergeListener(IOCDBMergeListener listener);
     /**
      * Find the interface for a record instance.
      * It will be returned if it resides in this IOCDB or in the master IOCDB.
