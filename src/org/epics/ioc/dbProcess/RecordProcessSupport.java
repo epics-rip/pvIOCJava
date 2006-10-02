@@ -6,6 +6,7 @@
 package org.epics.ioc.dbProcess;
 
 import org.epics.ioc.util.AlarmSeverity;
+import org.epics.ioc.util.IOCMessageType;
 import org.epics.ioc.util.TimeStamp;
 
 /**
@@ -64,11 +65,4 @@ public interface RecordProcessSupport {
      * @param timeStamp The current timeStamp.
      */
     void getTimeStamp(TimeStamp timeStamp);
-    /**
-     * Issue an error message.
-     * This is normally only called by support processing code.
-     * In particular it is called by AbstractSupport.errorMessage.
-     * @param message The error message.
-     */
-    void errorMessage(String message);
 }

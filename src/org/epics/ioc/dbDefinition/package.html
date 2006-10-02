@@ -12,7 +12,7 @@
 
 <h1 style="text-align: center">EPICS JavaIoc: Database Definition <br />
 package: org.epics.ioc.dbDefinition<br />
-2006.09.22</h1>
+2006.09.29</h1>
 <hr />
 
 <div class="toc">
@@ -843,13 +843,13 @@ addition a number of "convenience" methods are provided.</p>
     DBDSupport getSupport(String supportName);
     boolean addSupport(DBDSupport support);
     Map&lt;String,DBDSupport&gt; getSupportMap();
-    String menuList(String regularExpression);
+    String[] menuList(String regularExpression);
     String menuToString(String regularExpression);
-    String structureList(String regularExpression);
+    String[] structureList(String regularExpression);
     String structureToString(String regularExpression);
-    String recordTypeList(String regularExpression);
+    String[] recordTypeList(String regularExpression);
     String recordTypeToString(String regularExpression);
-    String supportList(String regularExpression);
+    String[] supportList(String regularExpression);
     String supportToString(String regularExpression);
 }</pre>
 
@@ -902,28 +902,32 @@ regular expression. The java.util.regex facility is used. Consult it for a
 definition of regular expressions.
 <dl>
   <dt style="font-family: courier;">menuList</dt>
-    <dd>Get a list of menu names that match a regular expression</dd>
+    <dd>Return an array of strings that is the list of menu names that match
+      a regular expression</dd>
   <dt style="font-family: courier;">menuToString</dt>
     <dd>Get a dump of all the DBDMenu definitions with names that match a
       regular expression.</dd>
   <dt style="font-family: courier;">structureList</dt>
-    <dd>Get a list of structure names that match a regular expression</dd>
+    <dd>Return an array of strings that is the list of structure names that
+      match a regular expression</dd>
   <dt style="font-family: courier;">structureToString</dt>
     <dd>Get a dump of all the DBDStructure definitions with names that match
       a regular expression.</dd>
   <dt style="font-family: courier;">recordTypeList</dt>
-    <dd>Get a list of recordType names that match a regular expression</dd>
+    <dd>Return an array of strings that is the list of recordType names that
+      match a regular expression</dd>
   <dt style="font-family: courier;">recordTypeToString</dt>
     <dd>Get a dump of all the DBDRecordType definitions with names that match
       a regular expression.</dd>
   <dt style="font-family: courier;">supportList</dt>
-    <dd>Get a list of support names that match a regular expression.</dd>
+    <dd>Return an array of strings that is the list of support names that
+      match a regular expression.</dd>
   <dt style="font-family: courier;">supportToString</dt>
     <dd>Get a dump of all the DBDSupport definitions with names that match a
       regular expression.</dd>
 </dl>
 An example of using a convience method is:
-<pre>    String list = master.menuList(".*[S].*");</pre>
+<pre>    String[] list = master.menuList(".*[S].*");</pre>
 Produces a list of all menu definitions that have an 'S" somewhere in the
 menu name.
 <hr />
@@ -945,31 +949,23 @@ Two classes are provided for creation of DBD Databases:
 <p>DBDFactory is a class that creates DBD Databases. It provides the
 following methods:</p>
 <pre>public class DBDFactory {
-    public static DBD create(String name,DBD masterDBD);
-    public static void remove(DBD dbd);
-    public static DBD find(String name);
-    public static Map&lt;String,DBD&gt; getDBDMap();
-    public static String list(String regularExpression);
+    public static DBD create(String name);
+    public static DBD getMasterDBD();
 }
  </pre>
 
 <p>where</p>
 <dl>
   <dt style="font-family: courier;">create</dt>
-    <dd>Create a new DBD with the name "name". If the master DBD is being
-      created then masterDBD is null.</dd>
-  <dt style="font-family: courier;">remove</dt>
-    <dd>Remove the dbd from the DBD database.</dd>
-  <dt style="font-family: courier;">find</dt>
-    <dd>Find a DBD.</dd>
-  <dt style="font-family: courier;">getDBDMap</dt>
-    <dd>Get a Map of all the DBDs. A shallow copy of the internal map is
-      returned.</dd>
-  <dt style="font-family: courier;">list</dt>
-    <dd>Get a string containing a list of all the DBDs with names that match
-      the regular expression.</dd>
+    <dd>Create a new DBD with the specified name. If the name is "master"
+      than the master DBD is returned.</dd>
+  <dt style="font-family: courier;">getMasterDBD</dt>
+    <dd>Return the master DBD. This is created automatically by
+    DBDFactory</dd>
+  <dt></dt>
   <dt>All methods of DBDFactory and of the DBD instances it creates are
   thread safe.</dt>
+  <dt></dt>
 </dl>
 
 <h3 id="XMLToDBDFa">XMLToDBDFactory</h3>
@@ -980,25 +976,26 @@ definition database.</p>
 <pre>    public class XMLToDBDFactory {
         public static void convert(DBD dbd, String fileName,
             IOCMessageListener messageListener);
-        public static DBD addToMaster(String fileName,
-            IOCMessageListener messageListener,IOCMessageType okToAddType);
+        public static DBD create(String dbdName,String fileName,
+            IOCMessageListener messageListener);
     }</pre>
 <dl>
   <dt style="font-family: courier;">convert</dt>
     <dd>Convert the xml DBD definitions in file fileName and put the
       definitions into dbd. When generating definitions for an IOC use
       addToMaster instead of this.</dd>
-  <dt style="font-family: courier;">addToMaster</dt>
-    <dd>Add definitions defined in fileName to a DBD named "master". This can
-      be called either during IOC initialization or while an IOC is running,
-      i.e. on-line add of new definitions is supported. If master does not
-      exist it is created. Definitions will not be created if they already
-      appear in master or if they are defined more than once. If any errors
-      occur then no definitions are added to master and null is returned. A
-      DBD named "add" holds the definitions from fileName. If all definitions
-      are read successfully than the definitions are merged into master and
-      DVD add is returned. After addToMaster returns DBD add will not appear
-      in the map returned by getDBDMap.</dd>
+  <dt style="font-family: courier;">create</dt>
+    <dd>Create a DBD with the specified name and put the definitions obtained
+      by pasrsing the XML defininitions in fileName into the dbd. The caller
+      can, if desired, call DBD.mergeToMaster to put bthe newly created
+      definitions into the master DBD. This can be called either during IOC
+      initialization or while an IOC is running, i.e. on-line add of new
+      definitions is supported. Definitions will not be created if they
+      already appear in master or if they are defined more than once. A
+      general rule is that the new definitions should not be added to master
+      if any messages with message type greater than info are passed to the
+      messageListener. In any case the caller should remove all references to
+      the new DBD after it decides not to merge or after the merge.</dd>
 </dl>
 
 <p>The method arguments are:</p>
@@ -1011,9 +1008,8 @@ definition database.</p>
   <dt style="font-family: courier;">messageListener</dt>
     <dd>A listener for all messages generated while the method is
     execuiting.</dd>
-  <dt style="font-family: courier;">okToAddType</dt>
-    <dd>The definitions will only be added if all messages types are of type
-      less than or equal to this type.</dd>
+  <dt style="font-family: courier;">dbdName</dt>
+    <dd>The name for the DBD field that is created..</dd>
 </dl>
 
 <h3 id="Creating1">Creating Database Definitions</h3>
@@ -1023,19 +1019,22 @@ and support definitions used by record instances must be created.</p>
 
 <p>A running IOC always uses a DBD Database named "master" and an IOCDB also
 named "master". The prefered way to create definitions by calling:</p>
-<pre>    DBD add = XMLToDBDFactory.addToMaster(fileName);
-    if(add==null) // failure take appropriate action</pre>
+<pre>    maxMessageType = IOCMessageType.iofo;
+    DBD add = XMLToDBDFactory.create("add",fileName,this);
+    if(maxMessageType!=IOCMessageType.iofo) // failure take appropriate action</pre>
 
 <p>addToMaster will not add any definitions to master if any errors are
 detected. It can be called during IOC initialization and also while an IOC is
 running. For an IOC this is the only method required for generating Database
 Definitions. Other code may decide to use DBDFactory.create instead.</p>
 
-<p>All DBDFactory and DBD methods are thread safe. In order to prevent race
-conditions:</p>
+<p>XMLToDBDFactory is thread safe because it only allows one user at a time
+to create new definitions. If it is busy and another user calls either
+convert or create it call the message Listener with a fatal error and returns
+immediately.</p>
+
+<p>All DBD methods are thread safe. In order to prevent race conditions:</p>
 <ul>
-  <li>DBDFactory has a private readWrite lock that manages all access to its
-    methods.</li>
   <li>DBD has a private readWrite lock that manages all access to its
   methods.</li>
   <li>Database components can be added but not removed from a DBD.</li>

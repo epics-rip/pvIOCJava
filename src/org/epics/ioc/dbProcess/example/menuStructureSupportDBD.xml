@@ -1,17 +1,19 @@
 <?xml version="1.0" ?>
 <DBDefinition>
-<menu name = "menuPriority">
+<menu name = "priority">
+    <choice>lower</choice>
     <choice>low</choice>
     <choice>medium</choice>
     <choice>high</choice>
+    <choice>higher</choice>
 </menu>
-<menu name = "menuScan">
+<menu name = "scan">
     <choice>passive</choice>
     <choice>event</choice>
     <choice>periodic</choice>
 </menu>
 
-<menu name = "menuAlarmSeverity">
+<menu name = "alarmSeverity">
     <choice>none</choice>
     <choice>minor</choice>
     <choice>major</choice>
@@ -24,9 +26,9 @@
 </structure>
 
 <structure name = "scan" supportName = "scan" >
-    <field name = "scan" type = "menu" menuName = "menuScan" />
+    <field name = "scan" type = "menu" menuName = "scan" />
     <field name = "rate" type = "double" />
-    <field name = "event" type = "string" />
+    <field name = "eventName" type = "string" />
     <field name = "phase" type = "int" />
 </structure>
 
@@ -83,7 +85,7 @@
     <field name = "input" type = "short" />
     <field name = "link" type = "link" />
     <field name = "disableAlarmSeverity"
-           type = "menu" menuName = "menuAlarmSeverity" />
+           type = "menu" menuName = "alarmSeverity" />
 </structure>
 
 <structure name = "asynLink">
@@ -137,6 +139,6 @@
     factoryName = "org.epics.ioc.support.LinkArraySupportFactory"
 />
 <support name = "scan"
-    factoryName = "org.epics.ioc.support.ScanFactory"
+    factoryName = "org.epics.ioc.support.ScanFieldSupportFactory"
 />
 </DBDefinition>

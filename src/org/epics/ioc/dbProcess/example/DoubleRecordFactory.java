@@ -9,6 +9,7 @@ import org.epics.ioc.dbProcess.*;
 import org.epics.ioc.dbDefinition.*;
 import org.epics.ioc.dbAccess.*;
 import org.epics.ioc.dbDefinition.*;
+import org.epics.ioc.util.IOCMessageType;
 
 /**
  * Record that holds a double value, an input link, and an array of process or output links.
@@ -50,23 +51,31 @@ public class DoubleRecordFactory {
             DBData dbData;
             AccessSetResult result = dbAccess.setField("input");
             if(result!=AccessSetResult.thisRecord) {
-                errorMessage("field input does not exists");
+                dbRecord.message(
+                        "field input does not exist",
+                        IOCMessageType.error);
                 return;
             }
             dbData = dbAccess.getField();
             if(dbData.getDBDField().getDBType()!=DBType.dbLink) {
-                errorMessage("field input is not a link");
+                dbRecord.message(
+                        "field input is not a link",
+                        IOCMessageType.error);
                 return;
             }
             link = (DBLink)dbData;
             result = dbAccess.setField("value");
             if(result!=AccessSetResult.thisRecord) {
-                errorMessage("field value does not exists");
+                dbRecord.message(
+                        "field value does not exist",
+                        IOCMessageType.error);
                 return;
             }
             dbData = dbAccess.getField();
             if(!dbData.getField().getType().isNumeric()) {
-                errorMessage("field value is not numeric");
+                dbRecord.message(
+                        "field value is not numeric",
+                        IOCMessageType.error);
                 return;
             }
             value = dbData;
@@ -138,9 +147,10 @@ public class DoubleRecordFactory {
          */
         public ProcessReturn process(ProcessCompleteListener listener) {
             if(supportState!=SupportState.ready) {
-                errorMessage(
+                dbRecord.message(
                         "process called but supportState is "
-                        + supportState.toString());
+                        + supportState.toString(),
+                        IOCMessageType.error);
                 return ProcessReturn.failure;
             }
             processState = ProcessState.input;

@@ -41,13 +41,6 @@ public interface Support {
      */
     boolean removeSupportStateListener(SupportStateListener listener);
     /**
-     * Generate an error message.
-     * The name of the field (complete hierarchy) will be prepended to the error
-     * message and recordSupport.errorMessage called.
-     * @param message The error message.
-     */
-    void errorMessage(String message);
-    /**
      * Initialize.
      * Perform initialization related to record instance but
      * do not connect to I/O or other records.

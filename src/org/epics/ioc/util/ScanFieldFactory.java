@@ -19,27 +19,28 @@ import org.epics.ioc.pvAccess.Type;
 public class ScanFieldFactory {
     public static ScanField create(DBRecord dbRecord) {
         DBData[] datas = dbRecord.getFieldDBDatas();
-        int index = dbRecord.getFieldDBDataIndex("scan");
-        if(index<0) return null;
-        DBData data = datas[index];
-        if(data.getDBDField().getDBType()!=DBType.dbStructure) return null;
-        DBStructure scan = (DBStructure)data;
-        DBDStructure dbdStructure = scan.getDBDStructure();
-        if(!dbdStructure.getStructureName().equals("scan")) return null;
-        datas = scan.getFieldDBDatas();
-        index = scan.getFieldDBDataIndex("priority");
+        int index;
+        DBData data;
+        index = dbRecord.getFieldDBDataIndex("priority");
         if(index<0) return null;
         data = datas[index];
         if(data.getDBDField().getDBType()!=DBType.dbMenu) return null;
         DBMenu priorityField = (DBMenu)data;
-        if(!isPriorityMenu(priorityField)) return null;        
+        if(!isPriorityMenu(priorityField)) return null;   
+        index = dbRecord.getFieldDBDataIndex("scan");
+        if(index<0) return null;
+        data = datas[index];
+        if(data.getDBDField().getDBType()!=DBType.dbStructure) return null;
+        DBStructure scan = (DBStructure)data;
+        DBDStructure dbdStructure = scan.getDBDStructure();
+        if(!dbdStructure.getStructureName().equals("scan")) return null;
+        datas = scan.getFieldDBDatas();     
         index = scan.getFieldDBDataIndex("scan");
         if(index<0) return null;
         data = datas[index];
         if(data.getDBDField().getDBType()!=DBType.dbMenu) return null;
         DBMenu scanField = (DBMenu)data;
-        if(!isScanMenu(scanField)) return null;
-        
+        if(!isScanMenu(scanField)) return null;        
         index = scan.getFieldDBDataIndex("rate");
         if(index<0) return null;
         data = datas[index];
@@ -57,20 +58,26 @@ public class ScanFieldFactory {
         if(!dbMenu.getMenuName().equals("scan")) return false;
         String[] choices = dbMenu.getChoices();
         if(choices.length!=3) return false;
-        if(!choices[0].equals("passive")) return false;
-        if(!choices[1].equals("event")) return false;
-        if(!choices[2].equals("periodic")) return false;
+        for(int i=0; i<choices.length; i++) {
+            try {
+                if(ScanType.valueOf(choices[i]).ordinal()!=i) return false;
+            } catch(IllegalArgumentException e) {
+                return false;
+            }
+        }
         return true;
     }
     public static boolean isPriorityMenu(DBMenu dbMenu) {
         if(!dbMenu.getMenuName().equals("priority")) return false;
         String[] choices = dbMenu.getChoices();
         if(choices.length!=5) return false;
-        if(!choices[0].equals("lowest")) return false;
-        if(!choices[1].equals("low")) return false;
-        if(!choices[2].equals("medium")) return false;
-        if(!choices[3].equals("high")) return false;
-        if(!choices[4].equals("highest")) return false;
+        for(int i=0; i<choices.length; i++) {
+            try {
+                if(ScanPriority.valueOf(choices[i]).ordinal()!=i) return false;
+            } catch(IllegalArgumentException e) {
+                return false;
+            }
+        }
         return true;
     }
     private static class ScanFieldInstance implements ScanField {

@@ -9,6 +9,7 @@ import org.epics.ioc.dbAccess.*;
 import org.epics.ioc.dbProcess.*;
 import org.epics.ioc.pvAccess.*;
 import org.epics.ioc.dbDefinition.*;
+import org.epics.ioc.util.*;
 
 /**
  * Support for an array of links.
@@ -28,7 +29,7 @@ public class LinkArraySupportFactory {
         if(elementDBType!=DBType.dbLink) {
             System.out.println(
                 dbArray.getRecord().getRecordName()
-                + "." + dbArray.getFullFieldName()
+                + dbArray.getFullFieldName()
                 + " element type is not a link");
             return null;
         }
@@ -85,7 +86,9 @@ public class LinkArraySupportFactory {
                 try {
                     linkSupport = (LinkSupport)dbLink.getSupport();
                 } catch (Exception e) {
-                    errorMessage("getSupport " + e.getMessage());
+                    dbLinkArray.message(
+                        "LinkSupport.getSupport failed " + e.getMessage(),
+                        IOCMessageType.error);
                     supportState = SupportState.readyForInitialize;
                     continue;
                 }
@@ -146,9 +149,9 @@ public class LinkArraySupportFactory {
          */
         public ProcessReturn process(ProcessCompleteListener listener) {
             if(supportState!=SupportState.ready) {
-                errorMessage(
-                    "process called but supportState is "
-                    + supportState.toString());
+                dbLinkArray.message(
+                    "process called but supportState is " + supportState.toString(),
+                        IOCMessageType.error);
                 return ProcessReturn.failure;
             }
             if(processLinks.length<=0) {

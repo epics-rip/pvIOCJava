@@ -24,8 +24,8 @@ public class ReplaceTest extends TestCase {
      * test replacing the default data implementration for a field.
      */
     public static void testReplaceField() {
-        DBD dbd = DBDFactory.create("master",null); 
-        IOCDB iocdb = IOCDBFactory.create(dbd,"testIOCDatabase");
+        DBD dbd = DBDFactory.getMasterDBD();
+        IOCDB iocdb = IOCDBFactory.create("testIOCDatabase");
         IOCMessageListener iocMessageListener = new Listener();
         XMLToDBDFactory.convert(dbd,
                  "src/org/epics/ioc/dbAccess/example/replaceDBD.xml",iocMessageListener);

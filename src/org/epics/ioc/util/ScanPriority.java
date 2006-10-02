@@ -10,11 +10,11 @@ package org.epics.ioc.util;
  *
  */
 public enum ScanPriority {
-    lowest,
+    lower,
     low,
     medium,
     high,
-    highest;
+    higher;
     
     private static final int[] javaPriority = {
         Thread.MIN_PRIORITY,

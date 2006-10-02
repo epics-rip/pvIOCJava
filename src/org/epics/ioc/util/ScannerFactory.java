@@ -9,8 +9,7 @@ import java.util.*;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 
-import org.epics.ioc.dbAccess.DBMenu;
-import org.epics.ioc.dbAccess.DBRecord;
+import org.epics.ioc.dbAccess.*;
 import org.epics.ioc.dbProcess.*;
 
 /**
@@ -19,36 +18,37 @@ import org.epics.ioc.dbProcess.*;
  */
 public class ScannerFactory {
      private static PeriodicScanner periodicScanner = new Periodic();
+     private static EventScanner eventScanner = new Event();
      
      public static PeriodicScanner getPeriodicScanner() {
          return periodicScanner;
      }
      public static EventScanner getEventScanner() {
-         return null;
+         return eventScanner;
      }
      
      private static String lineBreak = System.getProperty("line.separator");
      
      private static class Executor {
-         private List<RecordProcess> workingList = new ArrayList<RecordProcess>();
+         private ArrayList<RecordProcess> workingList = new ArrayList<RecordProcess>();
          private ArrayList<RecordProcess> processList = new ArrayList<RecordProcess>();
          private boolean listModified = false;
          private ReentrantLock lock = new ReentrantLock();
          
          private void runList() {
-             Iterator<RecordProcess> iter = workingList.iterator();
-             while(iter.hasNext()) {
-                 RecordProcess recordProcess = iter.next();
-                 recordProcess.process(null);
-             }
              lock.lock();
              try {                
                  if(listModified) {
-                     workingList = new ArrayList<RecordProcess>(processList);
+                     workingList = (ArrayList<RecordProcess>)processList.clone();
                      listModified = false;
                  }
              } finally {
                  lock.unlock();
+             }
+             Iterator<RecordProcess> iter = workingList.iterator();
+             while(iter.hasNext()) {
+                 RecordProcess recordProcess = iter.next();
+                 recordProcess.process(null);
              }
          }
          
@@ -84,6 +84,7 @@ public class ScannerFactory {
          }
          
          public void run() {
+             int itime = 0;
              try {
                  long startTime = System.currentTimeMillis();
                  while(true) {
@@ -131,6 +132,12 @@ public class ScannerFactory {
          
          public void schedule(DBRecord dbRecord) {
              ScanField scanField = ScanFieldFactory.create(dbRecord);
+             if(scanField==null) {
+                 dbRecord.message(
+                     "PeriodicScanner: ScanFieldFactory.create failed",
+                     IOCMessageType.fatalError);;
+                 return;
+             }
              double rate = scanField.getRate();
              int priority = scanField.getPriority().getJavaPriority();
              long period = rateToPeriod(rate);
@@ -291,7 +298,7 @@ public class ScannerFactory {
         }
         
         private long rateToPeriod(double rate) {
-            long period = (long)rate*1000;
+            long period = (long)(rate*1000);
             if(period<minPeriod) period = minPeriod;
             long n = (period - minPeriod)/deltaPeriod;
             period = minPeriod + n*deltaPeriod;
@@ -376,7 +383,7 @@ public class ScannerFactory {
          private Announce(String name) {
              super();
              eventName = name;
-             thread = new Thread(this,name);
+             thread = new Thread(this,"event(" + name + ")");
              thread.setPriority(ScanPriority.valueOf("high").getJavaPriority());
              thread.start();
          }
@@ -387,22 +394,17 @@ public class ScannerFactory {
                      lock.lock();
                      try {
                          waitForWork.await();
-                     } finally {
-                         lock.unlock();
-                     }
-                     ListIterator<EventExecutor> iter = eventExecutorList.listIterator();
-                     while(iter.hasNext()) {
-                         EventExecutor eventExecutor = iter.next();
-                         eventExecutor.announce();
-                     }
-                     lock.lock();
-                     try {                
                          if(listModified) {
                              workingList = new ArrayList<EventExecutor>(eventExecutorList);
                              listModified = false;
                          }
                      } finally {
                          lock.unlock();
+                     }
+                     ListIterator<EventExecutor> iter = workingList.listIterator();
+                     while(iter.hasNext()) {
+                         EventExecutor eventExecutor = iter.next();
+                         eventExecutor.announce();
                      }
                  }
              } catch(InterruptedException e) {}
@@ -474,17 +476,25 @@ public class ScannerFactory {
          private ArrayList<Announce> eventAnnouncerList = new ArrayList<Announce>();
 
          private Announce getAnnounce(String name) {
+             Announce announce = null;
              ListIterator<Announce> iter = eventAnnouncerList.listIterator();
              while(iter.hasNext()) {
-                 Announce announce = iter.next();
+                 announce = iter.next();
                  int compare = name.compareTo(announce.getEventName());
                  if(compare>0) continue;
                  if(compare==0) return announce;
-                 return new Announce("event(" + name + ")");
+                 announce = new Announce(name);
+                 iter.previous();
+                 iter.add(announce);
+                 break;
              }
-             return null;
+             if(announce==null) {
+                 announce = new Announce(name);
+                 eventAnnouncerList.add(announce);
+             }
+             return announce;
          }
-        public EventAnnounce addEventAnouncer(String eventName, String announcer) {
+        public EventAnnounce addEventAnnouncer(String eventName, String announcer) {
             Announce announce = getAnnounce(eventName);
             announce.addAnnouncer(announcer);
             return announce;
@@ -517,9 +527,11 @@ public class ScannerFactory {
             if(eventExecutor==null) {
                 eventExecutor = new EventExecutor(threadName,priority);
                 eventExecuterList.add(eventExecutor);
+                announce.setEventExecutorList(eventExecuterList);
             }
             ArrayList<RecordProcess> recordProcessList = eventExecutor.getList();
             recordProcessList.add(dbRecord.getRecordProcess());
+            eventExecutor.setList(recordProcessList);
         }
 
         public void removeEventAnnouncer(EventAnnounce eventAnnounce, String announcer) {
@@ -589,7 +601,7 @@ public class ScannerFactory {
             while(iter1.hasNext()) {
                 EventExecutor eventExecutor = iter1.next();
                 thread = eventExecutor.getThread();
-                builder.append(String.format("    thread %s priority %d record list{%n",
+                builder.append(String.format(lineBreak + "    thread %s priority %d record list{",
                         thread.getName(),
                         thread.getPriority()));
                 List<RecordProcess> processList = eventExecutor.getList();

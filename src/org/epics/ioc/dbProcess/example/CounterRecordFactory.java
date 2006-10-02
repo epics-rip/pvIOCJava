@@ -7,6 +7,7 @@ package org.epics.ioc.dbProcess.example;
 
 import org.epics.ioc.dbProcess.*;
 import org.epics.ioc.dbAccess.*;
+import org.epics.ioc.util.IOCMessageType;
 
 /**
  * Counter record acts as a counter from a min to max value with a specified increment.
@@ -99,9 +100,10 @@ public class CounterRecordFactory {
          */
         public ProcessReturn process(ProcessCompleteListener listener) {
             if(supportState!=SupportState.ready) {
-                errorMessage(
-                    "process called but supportState is "
-                    + supportState.toString());
+                dbRecord.message(
+                        "process called but supportState is "
+                        + supportState.toString(),
+                        IOCMessageType.error);
                 return ProcessReturn.failure;
             }
             double min = dbMin.get();

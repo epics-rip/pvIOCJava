@@ -20,7 +20,6 @@ public abstract class AbstractSupport implements Support {
         
     private String name;
     private DBData dbData;
-    private DBRecord dbRecord = null;
     private SupportState supportState = SupportState.readyForInitialize;
     private LinkedList<SupportStateListener> listenerList
         = new LinkedList<SupportStateListener>();
@@ -35,7 +34,6 @@ public abstract class AbstractSupport implements Support {
     protected AbstractSupport(String name,DBData dbData) {
         this.name = name;
         this.dbData = dbData;
-        dbRecord = dbData.getRecord();
     }   
     /**
      * This must be called whenever the supports changes state.
@@ -113,13 +111,4 @@ public abstract class AbstractSupport implements Support {
     public boolean removeSupportStateListener(SupportStateListener listener) {
         return listenerList.remove(listener);
     }
-    /* (non-Javadoc)
-     * @see org.epics.ioc.dbProcess.Support#errorMessage(java.lang.String)
-     */
-    public void errorMessage(String message) {
-        String fieldName = dbData.getFullFieldName();
-        RecordProcessSupport recordProcessSupport = dbRecord.getRecordProcess().getRecordProcessSupport();
-        recordProcessSupport.errorMessage("." + fieldName + " " + message);
-    } 
-    
 }

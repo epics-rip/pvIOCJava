@@ -5,8 +5,6 @@
  */
 package org.epics.ioc.dbProcess;
 
-import org.epics.ioc.dbAccess.*;
-
 /**
  * An interface for creating and initializing all support for a set of record instances.
  * @author mrk

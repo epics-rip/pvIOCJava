@@ -6,6 +6,7 @@
 package org.epics.ioc.dbAccess;
 
 import org.epics.ioc.dbDefinition.*;
+import org.epics.ioc.util.*;
 
 import java.util.*;
 
@@ -21,11 +22,6 @@ public interface IOCDB {
      * @return The name.
      */
     String getName();
-    /**
-     * Get the DBD that provides reflection interfaces for menus, structures, etc.
-     * @return The DBD.
-     */
-    DBD getDBD();
     /**
      * Merge all definitions into the master IOCDB.
      * After the merge all definitions are cleared from this IOCDB and this IOCDB is removed from the IOCDBFactory list.
@@ -62,6 +58,24 @@ public interface IOCDB {
      */
     Map<String,DBRecord> getRecordMap();
     /**
+     * Report a message.
+     * If no listeners are registered the messages are sent to System.out.
+     * If listeners are registered they are called.
+     * @param message The message.
+     * @param messageType The message type.
+     */
+    void message(String message, IOCMessageType messageType);
+    /**
+     * Add a message listener.
+     * @param listener The listener.
+     */
+    void addMessageListener(IOCMessageListener listener);
+    /**
+     * Remove a message listener.
+     * @param listener The listener.
+     */
+    void removeMessageListener(IOCMessageListener listener);
+    /**
      * Provide access to a record and it's fields.
      * @param recordName The record instance name.
      * @return The access interface.
@@ -70,9 +84,9 @@ public interface IOCDB {
     /**
      * Generate a list of record instance with names that match the regular expression.
      * @param regularExpression The regular expression.
-     * @return A string containing the list.
+     * @return A string array containing the list.
      */
-    String recordList(String regularExpression);
+    String[] recordList(String regularExpression);
     /**
      * Dump all the record instances with names that match the regular expression.
      * @param regularExpression The regular expression.

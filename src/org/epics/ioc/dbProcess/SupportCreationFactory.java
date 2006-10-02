@@ -7,10 +7,10 @@ package org.epics.ioc.dbProcess;
 
 import java.lang.reflect.*;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.epics.ioc.dbAccess.*;
 import org.epics.ioc.dbDefinition.*;
+import org.epics.ioc.util.*;
 
 /**
  * A factory for creating RecordProcess support for record instances.
@@ -23,17 +23,19 @@ public class SupportCreationFactory {
      * @param iocdb the iocdb associated with the record processing.
      * @return the SupportCreation.
      */
-    static public SupportCreation createSupportCreation(IOCDB iocdb) {
-        SupportCreationInstance processDB = new SupportCreationInstance(iocdb);
+    static public SupportCreation createSupportCreation(IOCDB iocdb,IOCMessageListener iocMessageListener) {
+        SupportCreationInstance processDB = new SupportCreationInstance(iocdb,iocMessageListener);
         return processDB;
     }
     
     static private class SupportCreationInstance implements SupportCreation{
         private IOCDB iocdb;
+        private IOCMessageListener iocMessageListener;
         private Collection<DBRecord> records;
         
-        private SupportCreationInstance(IOCDB iocdbin) {
+        private SupportCreationInstance(IOCDB iocdbin,IOCMessageListener iocMessageListener) {
             iocdb = iocdbin;
+            this.iocMessageListener = iocMessageListener;
             records = iocdb.getRecordMap().values();
         }
         /* (non-Javadoc)
@@ -51,8 +53,8 @@ public class SupportCreationFactory {
             Iterator<DBRecord> iter = records.iterator();
             while(iter.hasNext()) {
                 DBRecord record = iter.next();
-                if(!createRecordSupport(record)) result = false;
                 if(!createStructureSupport(record)) result = false;
+                if(!createRecordSupport(record)) result = false;
             }
             if(!result) return result;
             iter = records.iterator();
@@ -74,7 +76,13 @@ public class SupportCreationFactory {
                 Support support = record.getSupport();
                 RecordProcess process = record.getRecordProcess();
                 process.initialize();
-                if(support.getSupportState()!=SupportState.readyForStart) result = false;
+                SupportState supportState = support.getSupportState();
+                if(supportState!=SupportState.readyForStart) {
+                    printError(record,
+                        " state " + supportState.toString()
+                        + " but should be readyForStart");
+                    result = false;
+                }
             }
             return result;
         }
@@ -87,7 +95,13 @@ public class SupportCreationFactory {
                 Support support = record.getSupport();
                 RecordProcess process = record.getRecordProcess();
                 process.start();
-                if(support.getSupportState()!=SupportState.ready) result = false;
+                SupportState supportState = support.getSupportState();
+                if(supportState!=SupportState.ready) {
+                    printError(record,
+                            " state " + supportState.toString()
+                            + " but should be ready");
+                    result = false;
+                }
             }
             return result;
             
@@ -113,8 +127,9 @@ public class SupportCreationFactory {
             if(dbRecord.getSupport()!=null) return true;
             String supportName = dbRecord.getSupportName();
             if(supportName==null) {
-                System.err.printf("%s no support found\n",
-                        dbRecord.getRecordName());
+                iocMessageListener.message(
+                    dbRecord.getRecordName() + " no support found",
+                    IOCMessageType.fatalError);
                 return false;
             }
             boolean result = createSupport(dbRecord);
@@ -198,15 +213,17 @@ public class SupportCreationFactory {
         
         private void printError(DBData dbData,String message) {
             String name = dbData.getFullFieldName();
-            name = dbData.getRecord().getRecordName() + "." + name;
-            System.err.printf("%s %s\n",name,message);
+            name = dbData.getRecord().getRecordName() + name;
+            iocMessageListener.message(
+                    name + " " + message,
+                    IOCMessageType.error);
         }
         
         private boolean createSupport(DBData dbData) {
             if(dbData.getSupport()!=null) return true;
             String supportName = dbData.getSupportName();
             if(supportName==null) return true;
-            DBDSupport dbdSupport = iocdb.getDBD().getSupport(supportName);
+            DBDSupport dbdSupport = DBDFactory.getMasterDBD().getSupport(supportName);
             if(dbdSupport==null) {
                 printError(dbData,"support " + supportName + " does not exist");
                 return false;

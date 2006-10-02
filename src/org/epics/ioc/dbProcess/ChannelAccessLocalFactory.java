@@ -6,6 +6,9 @@
 package org.epics.ioc.dbProcess;
 
 import java.util.*;
+import java.util.concurrent.locks.*;
+import java.util.concurrent.atomic.AtomicBoolean;
+
 import org.epics.ioc.dbAccess.*;
 import org.epics.ioc.pvAccess.Field;
 import org.epics.ioc.pvAccess.PVData;
@@ -19,7 +22,7 @@ import org.epics.ioc.channelAccess.*;
  *
  */
 public class ChannelAccessLocalFactory  {
-    private static ChannelAccess channelAccess = null;
+    private static ChannelAccessLocal channelAccess = new ChannelAccessLocal();
     
     /**
      * Create local channel access.
@@ -27,24 +30,36 @@ public class ChannelAccessLocalFactory  {
      * @param iocdb The ioc database that the support will access.
      * @return (false,true) if it (already existed, was created).
      */
-    static public boolean create(IOCDB iocdb) {
-        if(channelAccess!=null) return false;
-        channelAccess = new ChannelAccessLocal(iocdb);
-        return true;
+    static public void setIOCDB(IOCDB iocdb) {
+        channelAccess.setIOCDB(iocdb);
     }
     
     private static class ChannelAccessLocal implements ChannelAccess{
-        private IOCDB iocdb;
+        private static AtomicBoolean isRegistered = new AtomicBoolean(false);
+        private static ReentrantLock lock = new ReentrantLock();
+        private IOCDB iocdb = null;
         
-        private ChannelAccessLocal(IOCDB iocdb) {
-            this.iocdb = iocdb;
-            ChannelFactory.registerLocalChannelAccess(this);
+        private void setIOCDB(IOCDB iocdb) {
+            boolean result = false;
+            lock.lock();
+            try {
+                this.iocdb = iocdb;
+                result = isRegistered.compareAndSet(false, true);
+            } finally {
+              lock.unlock();  
+            }
+            if(result) ChannelFactory.registerLocalChannelAccess(this);
         }
         
         public Channel createChannel(String name,ChannelStateListener listener) {
-            DBRecord dbRecord = iocdb.findRecord(name);
-            if(dbRecord==null) return null;
-            return new ChannelImpl(iocdb,dbRecord,listener);
+            lock.lock();
+            try {
+                DBRecord dbRecord = iocdb.findRecord(name);
+                if(dbRecord==null) return null;
+                return new ChannelImpl(dbRecord,listener);
+            } finally {
+                lock.unlock();  
+            }
         }
     }
         
@@ -70,9 +85,9 @@ public class ChannelAccessLocalFactory  {
         private LinkedList<ChannelSubscribe> subscribeList = 
             new LinkedList<ChannelSubscribe>();
         
-        private ChannelImpl(IOCDB iocdb,DBRecord record,ChannelStateListener listener) {
+        private ChannelImpl(DBRecord record,ChannelStateListener listener) {
             stateListener = listener;
-            dbAccess = iocdb.createAccess(record.getRecordName());
+            dbAccess = record.getIOCDB().createAccess(record.getRecordName());
             if(dbAccess==null) {
                 throw new IllegalStateException("ChannelLink createAccess failed. Why?");
             }

@@ -6,6 +6,7 @@
 package org.epics.ioc.dbAccess;
 
 import org.epics.ioc.pvAccess.*;
+import org.epics.ioc.util.*;
 import org.epics.ioc.dbDefinition.*;
 import org.epics.ioc.dbProcess.*;
 
@@ -57,12 +58,17 @@ public abstract class AbstractDBData implements DBData{
      * @see org.epics.ioc.dbAccess.DBData#getFullFieldName()
      */
     public String getFullFieldName() {
+        if(this==record) return "";
         StringBuilder fieldName = new StringBuilder();
-        fieldName.append(getField().getName());
+        fieldName.insert(0,getField().getName());
+        if(parent.getDBDField().getDBType()!=DBType.dbArray) fieldName.insert(0,".");
         DBData parent = getParent();
-        while(parent!=null && parent!=this.parent) {
-            fieldName.insert(0,parent.getField().getName());
-            parent = parent.getParent();
+        while(parent!=null && parent!=this.record) {
+            DBData now = parent;
+            fieldName.insert(0,now.getField().getName());
+            if(now.getParent()==null
+            || now.getParent().getDBDField().getDBType()!=DBType.dbArray) fieldName.insert(0,".");
+            parent = now.getParent();
         }
         return fieldName.toString();
     }
@@ -139,7 +145,7 @@ public abstract class AbstractDBData implements DBData{
         }
         if(parent==null) return;
         if(parent==this) {
-            System.out.printf("postPut parent = this Why???%n");
+            System.err.printf("postPut parent = this Why???%n");
         } else {
             parent.postPut(dbData);
         }
@@ -215,6 +221,12 @@ public abstract class AbstractDBData implements DBData{
      */
     protected void removeListeners(){
         listenerList.clear();
+    }
+    /* (non-Javadoc)
+     * @see org.epics.ioc.dbAccess.DBData#message(java.lang.String, org.epics.ioc.util.IOCMessageType)
+     */
+    public void message(String message, IOCMessageType messageType) {
+        record.message(getFullFieldName() + message, messageType);
     }
     private static class StructureDBDAttributeValues
     implements DBDAttributeValues

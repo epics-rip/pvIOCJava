@@ -34,64 +34,81 @@ public class XMLToDataBaseTest extends TestCase {
     }
     
     private static class Test implements IOCMessageListener {
-        
+        private IOCMessageType maxMessageType = IOCMessageType.info;
         private void doit () {
     
             Set<String> keys;
-            String list = null;
-            DBD addDBD = XMLToDBDFactory.addToMaster(
-                "src/org/epics/ioc/dbAccess/example/xmlToDataBaseDBD.xml",
-                this,IOCMessageType.info);
-            if(addDBD==null) {
+            String[] list = null;
+            DBD addDBD = XMLToDBDFactory.create( "add",
+                "src/org/epics/ioc/dbAccess/example/xmlToDataBaseDBD.xml",this);
+            if(maxMessageType!=IOCMessageType.info) {
                 System.out.printf("XMLToDBDFactory.convert reported errors");
                 return;
             }
-            DBD masterDBD = DBDFactory.find("master");
+            addDBD.mergeIntoMaster();
+            DBD masterDBD = DBDFactory.getMasterDBD();
             assertNotNull(masterDBD);
             list = masterDBD.menuList(".*");
-            System.out.println("masterDBD menus: " + list);
+            System.out.print("masterDBD menus: "); printList(list);
             list = addDBD.menuList(".*");
-            System.out.println("   addDBD menus: " + list);
+            System.out.print("addDBD menus: "); printList(list);
             list = masterDBD.structureList(".*");
-            System.out.println("masterDBD structures: " + list);
+            System.out.print("masterDBD structures: "); printList(list);
             list = addDBD.structureList(".*");
-            System.out.println("   addDBD structures: " + list);
+            System.out.print("addDBD structures: "); printList(list);
             list = masterDBD.recordTypeList(".*");
-            System.out.println("masterDBD recordTypes: " + list);
+            System.out.print("masterDBD recordTypes: "); printList(list);
             list = addDBD.recordTypeList(".*");
-            System.out.println("   addDBD recordTypes: " + list);
+            System.out.print("addDBD recordTypes: "); printList(list);
             list = masterDBD.supportList(".*");
-            System.out.println("masterDBD supports: " + list);
+            System.out.print("masterDBD supports: "); printList(list);
             list = addDBD.supportList(".*");
-            System.out.println("   addDBD supports: " + list);
-            IOCDB addIOCDB = XMLToIOCDBFactory.addToMaster(
-                "src/org/epics/ioc/dbAccess/example/xmlToDataBaseDB.xml",
-                this,IOCMessageType.info);
-            if(addIOCDB==null) {
+            System.out.print("addDBD supports: "); printList(list);
+            addDBD = null;
+            maxMessageType = IOCMessageType.info;
+            IOCDB addIOCDB = XMLToIOCDBFactory.convert("add",
+                "src/org/epics/ioc/dbAccess/example/xmlToDataBaseDB.xml",this);
+            if(maxMessageType!=IOCMessageType.info) {
                 System.out.printf("XMLToIOCDBFactory.convert reported errors");
                 return;
             }
-            IOCDB masterIOCDB = IOCDBFactory.find("master");
+            addIOCDB.mergeIntoMaster();
+            IOCDB masterIOCDB = IOCDBFactory.getMaster();
             list = masterIOCDB.recordList(".*");
-            System.out.println("   masterIOCDB records: " + list);
+            System.out.print("masterIOCDB records: "); printList(list);
             list = addIOCDB.recordList(".*");
-            System.out.println("      addIOCDB records: " + list);
+            System.out.print("addIOCDB records: "); printList(list);
             list = masterIOCDB.recordList(".*Ai.*");
-            System.out.println("masterIOCDB Ai records: " + list);
-            Map<String,DBRecord> recordMap = masterIOCDB.getRecordMap();
-            keys = recordMap.keySet();
+            System.out.print("masterIOCDB Ai records: "); printList(list);
             System.out.printf("%n%nrecord contents%n");
-            for(String key: keys) {
-                list = masterIOCDB.recordToString(key);
-                System.out.println(list);
+            TreeMap<String,DBRecord> recordMap = new TreeMap<String,DBRecord>(masterIOCDB.getRecordMap());
+            Set<Map.Entry<String,DBRecord>> recordSet = recordMap.entrySet();
+            Iterator<Map.Entry<String,DBRecord>> iter = recordSet.iterator();
+            while(iter.hasNext()) {
+                Map.Entry<String,DBRecord> entry = iter.next();
+                System.out.println("record " + entry.getKey() + entry.getValue().toString());
             }
+        }
+        private void printList(String[] list) {
+            for(int i=0; i<list.length; i++) {
+                if((i+1)%5 == 0) {
+                    System.out.println();
+                    System.out.print("    ");
+                } else {
+                    System.out.print(" ");
+                }
+                System.out.print(list[i]);
+            }
+            System.out.println();
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.util.IOCMessageListener#message(java.lang.String, org.epics.ioc.util.IOCMessageType)
          */
         public void message(String message, IOCMessageType messageType) {
             System.out.println(message);
-            
+            if(messageType.ordinal()>maxMessageType.ordinal()) {
+                maxMessageType = messageType;
+            }
         }
     }
 }

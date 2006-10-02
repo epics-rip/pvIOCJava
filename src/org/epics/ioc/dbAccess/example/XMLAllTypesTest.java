@@ -30,7 +30,7 @@ public class XMLAllTypesTest extends TestCase {
      */
     public static void testXML() {
         Set<String> keys;
-        DBD dbd = DBDFactory.create("master",null);
+        DBD dbd = DBDFactory.getMasterDBD();
         System.out.printf("reading menuStructureSupport%n");
         IOCMessageListener iocMessageListener = new Listener();
         XMLToDBDFactory.convert(dbd,
@@ -38,7 +38,7 @@ public class XMLAllTypesTest extends TestCase {
         System.out.printf("reading allTypesDBD%n");
         XMLToDBDFactory.convert(dbd,
                  "src/org/epics/ioc/dbAccess/example/allTypesDBD.xml",iocMessageListener);
-        IOCDB iocdb = IOCDBFactory.create(dbd,"testIOCDatabase");
+        IOCDB iocdb = IOCDBFactory.create("testIOCDatabase");
         System.out.printf("reading exampleAllTypeDB%n");
         try {
             XMLToIOCDBFactory.convert(dbd,iocdb,

@@ -7,6 +7,7 @@ package org.epics.ioc.dbAccess;
 
 import org.epics.ioc.dbDefinition.*;
 import org.epics.ioc.dbProcess.*;
+import org.epics.ioc.util.IOCMessageType;
 
 
 
@@ -129,4 +130,11 @@ public interface DBRecord extends DBStructure {
      * This is called after an IOCDB is merged into the master to change it to the master.
      */
     void setIOCDB(IOCDB iocdb);
+    /**
+     * Report a message.
+     * The record name will be appended to the message and sent to iocdb.message.
+     * @param message The message.
+     * @param messageType The message type.
+     */
+    void message(String message, IOCMessageType messageType);
 }

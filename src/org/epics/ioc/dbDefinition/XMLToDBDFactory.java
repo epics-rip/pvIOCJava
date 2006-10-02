@@ -22,8 +22,6 @@ public class XMLToDBDFactory {
     // For use by all private classes
     private static DBD dbd;
     private static IOCMessageListener iocMessageListener;
-    private static IOCMessageType okToAddType = IOCMessageType.fatalError;
-    private static boolean okToAdd;
     private static IOCXMLReader iocxmlReader;
     /**
      * Convert an xml file to Database definitions and put
@@ -49,40 +47,36 @@ public class XMLToDBDFactory {
         }
     }
 
-    public static DBD addToMaster(String fileName,IOCMessageListener messageListener,IOCMessageType okToAddType) {
+    /**
+     * Create a Database Definition Database (DBD) and populate it
+     * with definitions from an XML Database Definition file.
+     * @param dbdName The name for the database.
+     * This name will not appear in the map returned by DBDFactory.getDBDMap.
+     * @param fileName The XML file containing database definitions.
+     * @param messageListener A listener for error messages.
+     * @return a DBD or null. If not null than the definitions are not in the master DBD.
+     * The caller must call DBD.mergeIntoMaster to put the definitions into the master.
+     */
+    public static DBD create(String dbdName,String fileName,IOCMessageListener messageListener) {
         boolean gotIt = isInUse.compareAndSet(false,true);
         if(!gotIt) {
-            System.out.println("XMLToDBDFactory is already active");
+            messageListener.message("XMLToDBDFactory is already active",IOCMessageType.error);
             return null;
         }
         try {
-            DBD master = DBDFactory.find("master");
-            if(master==null) {
-                DBDFactory.create("master", null);
-                master = DBDFactory.find("master");
-                if(master==null) {
-                    System.out.println("XMLToDBDFactory failed to create master DBD");
-                    return null;
-                }
-            }
-            DBD add  = DBDFactory.create("add", master);
-            if(add==null) {
-                System.out.println("XMLToDBDFactory failed to create add DBD");
+            DBD dbd  = DBDFactory.create(dbdName);
+            if(dbd==null) {
+                messageListener.message(
+                    "XMLToDBDFactory failed to create DBD " + dbdName,
+                    IOCMessageType.error);
                 return null;
             }
-            try {
-                XMLToDBDFactory.dbd = add;
-                XMLToDBDFactory.okToAddType = okToAddType;
-                okToAdd = true;
-                IOCXMLListener listener = new Listener();
-                iocxmlReader = IOCXMLReaderFactory.getReader();
-                iocxmlReader.parse("DBDefinition",fileName,listener);
-                if(!okToAdd) return null;
-                add.mergeIntoMaster();
-                return add;
-            } finally {
-                DBDFactory.remove(add);
-            }
+            XMLToDBDFactory.dbd = dbd;
+            iocMessageListener = messageListener;
+            IOCXMLListener listener = new Listener();
+            iocxmlReader = IOCXMLReaderFactory.getReader();
+            iocxmlReader.parse("DBDefinition",fileName,listener);
+            return dbd;        
         } finally {
             isInUse.set(false);
         }
@@ -197,7 +191,6 @@ public class XMLToDBDFactory {
 
         public void message(String message,IOCMessageType messageType) {
             iocMessageListener.message(message, messageType);
-            if(messageType.ordinal()>okToAddType.ordinal()) okToAdd = false;
         }
     }
 

@@ -9,11 +9,9 @@ import java.util.*;
 import java.util.regex.*;
 import java.util.concurrent.locks.*;
 
-import org.epics.ioc.dbAccess.DBRecord;
-
 
 /**
- * DBDFactory creates, finds and removes a DBD.
+ * DBDFactory creates a Database Definition Database (DBD) and gets the master DBD.
  * A DBD contains the description of Database Definitions:
  *  menu, structure, recordType, and support.
  * 
@@ -21,108 +19,35 @@ import org.epics.ioc.dbAccess.DBRecord;
  * 
  */
 public class DBDFactory {
-    private static TreeMap<String,DBD> dbdMap = new TreeMap<String,DBD>();
-    private static ReentrantReadWriteLock rwLock = new ReentrantReadWriteLock();
-    
+    private static DBDInstance masterDBD = new DBDInstance("master");  
     /**
      * Creates and returns a DBD.
-     * If a DBD with the specified name already exists
-     * the request fails and null is returned.
      * @param name The name for the new DBD.
-     * @param masterDBD The masterDBD or null if no master or this is the master.
-     * @return The new DBD or null if a DBD with this name already exists.
+     * @return The new DBD.
      */
-    public static DBD create(String name, DBD masterDBD) {
-        rwLock.writeLock().lock();
-        try {
-            if(dbdMap.get(name)!=null) return null;
-            DBD dbd = new DBDInstance(name,masterDBD);
-            dbdMap.put(name,dbd);
-            return dbd;
-        } finally {
-            rwLock.writeLock().unlock();
-        }
+    public static DBD create(String name) {
+        if(name.equals("master")) return masterDBD;
+        return new DBDInstance(name);
     }
     /**
-     * Remove the DBD from the list.
-     * @param dbd The DBD to remove
+     * Get the master DBD.
+     * @return The master DBD.
      */
-    public static void remove(DBD dbd) {
-        rwLock.writeLock().lock();
-        try {
-            dbdMap.remove(dbd.getName());
-        } finally {
-            rwLock.writeLock().unlock();
-        }
+    public static DBD getMasterDBD() {
+        return masterDBD;
     }
-    /**
-     * Find a DBD with the specified name.
-     * @param name The DBD name.
-     * @return The DBD or null if it does not exist.
-     */
-    public static DBD find(String name) {
-        rwLock.readLock().lock();
-        try {
-            return dbdMap.get(name);
-        } finally {
-            rwLock.readLock().unlock();
-        }
-    }    
-    /**
-     * Get a map of the DBDs.
-     * @return the Collection.
-     */
-    public static Map<String,DBD> getDBDMap() {
-        rwLock.readLock().lock();
-        try {
-            return (Map<String,DBD>)dbdMap.clone();
-        } finally {
-            rwLock.readLock().unlock();
-        }
-    }
-    /**
-     * List each DBD that has a name that matches the regular expression.
-     * @param regularExpression The regular expression.
-     * @return A string containing the list.
-     */
-    public static String list(String regularExpression) {
-        StringBuilder result = new StringBuilder();
-        if(regularExpression==null) regularExpression = ".*";
-        Pattern pattern;
-        try {
-            pattern = Pattern.compile(regularExpression);
-        } catch (PatternSyntaxException e) {
-            return "PatternSyntaxException: " + e;
-        }
-        rwLock.readLock().lock();
-        try {
-            Set<String> keys = dbdMap.keySet();
-            for(String key: keys) {
-                DBD dbd = dbdMap.get(key);
-                String name = dbd.getName();
-                if(pattern.matcher(name).matches()) {
-                    result.append(" " + name);
-                }
-            }
-            return result.toString();
-        } finally {
-            rwLock.readLock().unlock();
-        }
-    }
+    
 
     private static class DBDInstance implements DBD {
-        
         private String name;
-        private DBDInstance masterDBD = null;
         private TreeMap<String,DBDMenu> menuMap = new TreeMap<String,DBDMenu>();
         private TreeMap<String,DBDStructure> structureMap = new TreeMap<String,DBDStructure>();
         private TreeMap<String,DBDRecordType> recordTypeMap = new TreeMap<String,DBDRecordType>();
         private TreeMap<String,DBDSupport> supportMap = new TreeMap<String,DBDSupport>();
         private ReentrantReadWriteLock rwLock = new ReentrantReadWriteLock();
         
-        private DBDInstance(String name,DBD masterDBD) {
+        private DBDInstance(String name) {
             this.name = name;
-            this.masterDBD = (DBDInstance)masterDBD;
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.dbDefinition.DBD#getName()
@@ -140,12 +65,16 @@ public class DBDFactory {
          * @see org.epics.ioc.dbDefinition.DBD#mergeIntoMaster()
          */
         public void mergeIntoMaster() {
-            if(masterDBD==null) return;
-            rwLock.readLock().lock();
+            if(getMasterDBD()==this) return;
+            rwLock.writeLock().lock();
             try {
                 masterDBD.merge(menuMap,structureMap,recordTypeMap,supportMap);
+                menuMap.clear();
+                structureMap.clear();
+                recordTypeMap.clear();
+                supportMap.clear();
             } finally {
-                rwLock.readLock().unlock();
+                rwLock.writeLock().unlock();
             }
         }
         // merge allows master to be locked once
@@ -185,7 +114,7 @@ public class DBDFactory {
             try {
                 String key = menu.getName();
                 if(menuMap.containsKey(key)) return false;
-                if(masterDBD!=null && masterDBD.getMenu(key)!=null) return false;
+                if(this!=masterDBD && masterDBD.getMenu(key)!=null) return false;
                 menuMap.put(key,menu);
                 return true;
             } finally {
@@ -200,7 +129,7 @@ public class DBDFactory {
             try {
                 DBDMenu dbdMenu = null;
                 dbdMenu = menuMap.get(menuName);
-                if(dbdMenu==null && masterDBD!=null) dbdMenu = masterDBD.getMenu(menuName);
+                if(dbdMenu==null && this!=masterDBD) dbdMenu = masterDBD.getMenu(menuName);
                 return dbdMenu;
             } finally {
                 rwLock.readLock().unlock();
@@ -225,7 +154,7 @@ public class DBDFactory {
             try {
                 String key = structure.getName();
                 if(structureMap.containsKey(key)) return false;
-                if(masterDBD!=null && masterDBD.getStructure(key)!=null) return false;
+                if(this!=masterDBD && masterDBD.getStructure(key)!=null) return false;
                 structureMap.put(key,structure);
                 return true;
             } finally {
@@ -240,7 +169,7 @@ public class DBDFactory {
             try {
                 DBDStructure dbdStructure = null;
                 dbdStructure = structureMap.get(structureName);
-                if(dbdStructure==null && masterDBD!=null) dbdStructure = masterDBD.getStructure(structureName);
+                if(dbdStructure==null && this!=masterDBD) dbdStructure = masterDBD.getStructure(structureName);
                 return dbdStructure;
             } finally {
                 rwLock.readLock().unlock();
@@ -265,7 +194,7 @@ public class DBDFactory {
             try {
                 String key = recordType.getName();
                 if(recordTypeMap.containsKey(key)) return false;
-                if(masterDBD!=null && masterDBD.getRecordType(key)!=null) return false;
+                if(this!=masterDBD && masterDBD.getRecordType(key)!=null) return false;
                 recordTypeMap.put(key,recordType);
                 return true;
             } finally {
@@ -280,7 +209,7 @@ public class DBDFactory {
             try {
                 DBDRecordType dbdRecordType = null;
                 dbdRecordType = recordTypeMap.get(recordTypeName);
-                if(dbdRecordType==null && masterDBD!=null) dbdRecordType = masterDBD.getRecordType(recordTypeName);
+                if(dbdRecordType==null && this!=masterDBD) dbdRecordType = masterDBD.getRecordType(recordTypeName);
                 return dbdRecordType;
             } finally {
                 rwLock.readLock().unlock();
@@ -305,7 +234,7 @@ public class DBDFactory {
             try {
                 DBDSupport dbdSupport = null;
                 dbdSupport = supportMap.get(supportName);
-                if(dbdSupport==null && masterDBD!=null) dbdSupport = masterDBD.getSupport(supportName);
+                if(dbdSupport==null && this!=masterDBD) dbdSupport = masterDBD.getSupport(supportName);
                 return dbdSupport;
             } finally {
                 rwLock.readLock().unlock();
@@ -319,7 +248,7 @@ public class DBDFactory {
             try {
                 String key = support.getSupportName();
                 if(supportMap.containsKey(key)) return false;
-                if(masterDBD!=null && masterDBD.getSupport(key)!=null) return false;
+                if(this!=masterDBD && masterDBD.getSupport(key)!=null) return false;
                 supportMap.put(key,support);
                 return true;
             } finally {
@@ -340,14 +269,14 @@ public class DBDFactory {
         /* (non-Javadoc)
          * @see org.epics.ioc.dbDefinition.DBD#menuList(java.lang.String)
          */
-        public String menuList(String regularExpression) {
-            StringBuilder result = new StringBuilder();
+        public String[] menuList(String regularExpression) {
+            ArrayList<String> list = new ArrayList<String>();
             if(regularExpression==null) regularExpression = ".*";
             Pattern pattern;
             try {
                 pattern = Pattern.compile(regularExpression);
             } catch (PatternSyntaxException e) {
-                return "PatternSyntaxException: " + e;
+                return new String[0];
             }
             rwLock.readLock().lock();
             try {
@@ -356,10 +285,12 @@ public class DBDFactory {
                     DBDMenu dbdMenu = menuMap.get(key);
                     String name = dbdMenu.getName();
                     if(pattern.matcher(name).matches()) {
-                        result.append(" " + name);
+                        list.add(name);
                     }
                 }
-                return result.toString();
+                String[] result = new String[list.size()];
+                for(int i=0; i< list.size(); i++) result[i] = list.get(i);
+                return result;
             } finally {
                 rwLock.readLock().unlock();
             }
@@ -394,14 +325,14 @@ public class DBDFactory {
         /* (non-Javadoc)
          * @see org.epics.ioc.dbDefinition.DBD#structureList(java.lang.String)
          */
-        public String structureList(String regularExpression) {
-            StringBuilder result = new StringBuilder();
+        public String[] structureList(String regularExpression) {
+            ArrayList<String> list = new ArrayList<String>();
             if(regularExpression==null) regularExpression = ".*";
             Pattern pattern;
             try {
                 pattern = Pattern.compile(regularExpression);
             } catch (PatternSyntaxException e) {
-                return "PatternSyntaxException: " + e;
+                return new String[0];
             }
             rwLock.readLock().lock();
             try {
@@ -410,15 +341,16 @@ public class DBDFactory {
                     DBDStructure dbdStructure = structureMap.get(key);
                     String name = dbdStructure.getName();
                     if(pattern.matcher(name).matches()) {
-                        result.append(" " + name);
+                        list.add(name);
                     }
                 }
-                return result.toString();
+                String[] result = new String[list.size()];
+                for(int i=0; i< list.size(); i++) result[i] = list.get(i);
+                return result;
             } finally {
                 rwLock.readLock().unlock();
             }
         }
-
         /* (non-Javadoc)
          * @see org.epics.ioc.dbDefinition.DBD#structureToString(java.lang.String)
          */
@@ -449,14 +381,14 @@ public class DBDFactory {
         /* (non-Javadoc)
          * @see org.epics.ioc.dbDefinition.DBD#recordTypeList(java.lang.String)
          */
-        public String recordTypeList(String regularExpression) {
-            StringBuilder result = new StringBuilder();
+        public String[] recordTypeList(String regularExpression) {
+            ArrayList<String> list = new ArrayList<String>();
             if(regularExpression==null) regularExpression = ".*";
             Pattern pattern;
             try {
                 pattern = Pattern.compile(regularExpression);
             } catch (PatternSyntaxException e) {
-                return "PatternSyntaxException: " + e;
+                return new String[0];
             }
             rwLock.readLock().lock();
             try {
@@ -465,10 +397,12 @@ public class DBDFactory {
                     DBDRecordType dbdRecordType = recordTypeMap.get(key);
                     String name = dbdRecordType.getName();
                     if(pattern.matcher(name).matches()) {
-                        result.append(" " + name);
+                        list.add(name);
                     }
                 }
-                return result.toString();
+                String[] result = new String[list.size()];
+                for(int i=0; i< list.size(); i++) result[i] = list.get(i);
+                return result;
             } finally {
                 rwLock.readLock().unlock();
             }
@@ -503,14 +437,14 @@ public class DBDFactory {
         /* (non-Javadoc)
          * @see org.epics.ioc.dbDefinition.DBD#supportList(java.lang.String)
          */
-        public String supportList(String regularExpression) {
-            StringBuilder result = new StringBuilder();
+        public String[] supportList(String regularExpression) {
+            ArrayList<String> list = new ArrayList<String>();
             if(regularExpression==null) regularExpression = ".*";
             Pattern pattern;
             try {
                 pattern = Pattern.compile(regularExpression);
             } catch (PatternSyntaxException e) {
-                return "PatternSyntaxException: " + e;
+                return new String[0];
             }
             rwLock.readLock().lock();
             try {
@@ -519,10 +453,12 @@ public class DBDFactory {
                     DBDSupport dbdSupport = supportMap.get(key);
                     String name = dbdSupport.getSupportName();
                     if(pattern.matcher(name).matches()) {
-                        result.append(" " + name);
+                        list.add(name);
                     }
                 }
-                return result.toString();
+                String[] result = new String[list.size()];
+                for(int i=0; i< list.size(); i++) result[i] = list.get(i);
+                return result;
             } finally {
                 rwLock.readLock().unlock();
             }

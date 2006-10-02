@@ -27,8 +27,7 @@ public class XMLToIOCDBFactory {
     private static Pattern stringPattern = Pattern.compile("\\s*,\\s*");
     private static DBD dbd;
     private static IOCDB iocdb;
-    private static IOCMessageType okToAddType = IOCMessageType.fatalError;
-    private static boolean okToAdd;
+    private static IOCDB iocdbMaster;
     private static IOCMessageListener iocMessageListener;
     private static IOCXMLReader iocxmlReader;
     /**
@@ -46,6 +45,7 @@ public class XMLToIOCDBFactory {
         try {
             dbd = dbdin;
             iocdb = iocdbin;
+            iocdbMaster = null;
             iocMessageListener = messageListener;
             IOCXMLListener listener = new Listener();
             iocxmlReader = IOCXMLReaderFactory.getReader();
@@ -57,54 +57,34 @@ public class XMLToIOCDBFactory {
     }
     
     /**
-     * Add the definitions in filename to the master IOCDB.
-     * The DBD database and the IOCDB are both named master.
-     * If any errors are detected no definitions are added to master and a null is returned.
-     * If no errors occur, the definitions are added to master and the return
-     * value is an IOCDB that contains the newly created record instances.
+     * Create an IOC Database (IOCDB) and populate it
+     * with definitions from an XML record instance.
+     * @param iocdbName The name for the IOC Database
+     * The definitions are not added to the master IOCDB but the caller can call IOCDB.mergeIntoMaster
+     * to add them to master.
+     * The DBD database is named master.
      * Attempting to add definitions for a record instance that is already in master is an error.
+     * @param iocdbName The name to be given to the newly created IOCDB.
      * @param fileName The file containing record instances definitions.
-     * @return An IOC Database that has only the newly created record instances.
+     * @param messageListener A listener for error messages.
+     * @return An IOC Database that has the newly created record instances.
      */
-    public static IOCDB addToMaster(String fileName,IOCMessageListener messageListener,IOCMessageType okToAddType) {
+    public static IOCDB convert(String iocdbName,String fileName,IOCMessageListener messageListener) {
         boolean gotIt = isInUse.compareAndSet(false,true);
         if(!gotIt) {
-            System.out.println("XMLToIOCDBFactory is already active");
+            messageListener.message("XMLToIOCDBFactory is already active", IOCMessageType.error);
             return null;
         }
         try {
-            DBD dbdin = DBDFactory.find("master");
-            if(dbdin==null) {
-                System.out.println("XMLToIOCDBFactory could not find DBD named master");
-                return null;
-            }
-            IOCDB master = IOCDBFactory.find("master");
-            if(master==null) {
-                master =IOCDBFactory.create(dbdin,"master");
-                if(master==null) {
-                    System.out.println("XMLToIOCDBFactory failed to create master IOCDB");
-                    return null;
-                }
-            }
-            IOCDB add =IOCDBFactory.create(dbdin,"add");
-            if(add==null) {
-                System.out.println("XMLToIOCDBFactory failed to create add IOCDB");
-                return null;
-            }
-            try {
-                dbd = dbdin;
-                iocdb = add;
-                XMLToIOCDBFactory.okToAddType = okToAddType;
-                okToAdd = true;
-                IOCXMLListener listener = new Listener();
-                iocxmlReader = IOCXMLReaderFactory.getReader();
-                iocxmlReader.parse("IOCDatabase",fileName,listener);
-                if(!okToAdd) return null;
-                add.mergeIntoMaster();
-                return add;
-            } finally {
-                IOCDBFactory.remove(add);
-            }
+            iocdb =IOCDBFactory.create(iocdbName);           
+            dbd = DBDFactory.getMasterDBD();
+            iocdbMaster = IOCDBFactory.getMaster();
+            iocMessageListener = messageListener;
+            IOCXMLListener listener = new Listener();
+            iocxmlReader = IOCXMLReaderFactory.getReader();
+            iocxmlReader.parse("IOCDatabase",fileName,listener);
+            return iocdb;
+            
         } finally {
             isInUse.set(false);
         }
@@ -171,14 +151,13 @@ public class XMLToIOCDBFactory {
         
         public void message(String message,IOCMessageType messageType) {
             iocMessageListener.message(message, messageType);
-            if(messageType.ordinal()>okToAddType.ordinal()) okToAdd = false;
         }
     }
 
     private static class RecordHandler
     {
         enum State {idle, structure, field, enumerated, array}
-        private State state;
+        private State state = State.idle;
         private StringBuilder stringBuilder = new StringBuilder();
         private DBRecord dbRecord = null;
         
@@ -264,6 +243,15 @@ public class XMLToIOCDBFactory {
                 state = State.idle;
                 return;
             }
+            if(iocdbMaster!=null && iocdbMaster!=iocdb) {
+                if(iocdbMaster.findRecord(recordName)!=null) {
+                    iocxmlReader.message(
+                            "record " + recordName + " already present in master",
+                            IOCMessageType.warning);
+                    state = State.idle;
+                    return;
+                }
+            }
             dbRecord = iocdb.findRecord(recordName);
             if(dbRecord==null) {
                 DBRecord record = FieldDataFactory.createRecord(recordName,dbdRecordType);
@@ -305,10 +293,9 @@ public class XMLToIOCDBFactory {
         void startElement(String qName, Map<String,String> attributes) {
             switch(state) {
             case idle: 
-                idleState.prevState = state;
-                state = State.idle;
                 idleStack.push(idleState);
                 idleState = new IdleState();
+                idleState.prevState  = state;
                 break;
             case structure:
                 if(qName.equals("configure")) {

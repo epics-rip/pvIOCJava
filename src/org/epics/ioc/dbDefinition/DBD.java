@@ -113,9 +113,9 @@ public interface DBD {
     /**
      * Generate a list of menu definitions with menu names that match the regular expression.
      * @param regularExpression The regular expression.
-     * @return A string containing the list.
+     * @return A string array containing the list.
      */
-    String menuList(String regularExpression);
+    String[] menuList(String regularExpression);
     /**
      * Dump all the menu definitions with menu names that match the regular expression.
      * @param regularExpression The regular expression.
@@ -125,9 +125,9 @@ public interface DBD {
     /**
      * Generate a list of structure definitions with structure names that match the regular expression.
      * @param regularExpression The regular expression.
-     * @return A string containing the list.
+     * @return A string array containing the list.
      */
-    String structureList(String regularExpression);
+    String[] structureList(String regularExpression);
     /**
      * Dump all the structure definitions with structure names that match the regular expression.
      * @param regularExpression The regular expression.
@@ -137,9 +137,9 @@ public interface DBD {
     /**
      * Generate a list of recordType definitions with recordType names that match the regular expression.
      * @param regularExpression The regular expression.
-     * @return A string containing the list.
+     * @return A string array containing the list.
      */
-    String recordTypeList(String regularExpression);
+    String[] recordTypeList(String regularExpression);
     /**
      * Dump all the recordType definitions with recordType names that match the regular expression.
      * @param regularExpression The regular expression.
@@ -149,9 +149,9 @@ public interface DBD {
     /**
      * Generate a list of support definitions with support names that match the regular expression.
      * @param regularExpression The regular expression.
-     * @return A string containing the list.
+     * @return A string array containing the list.
      */
-    String supportList(String regularExpression);
+    String[] supportList(String regularExpression);
     /**
      * Dump all the support definitions with support names that match the regular expression.
      * @param regularExpression The regular expression.

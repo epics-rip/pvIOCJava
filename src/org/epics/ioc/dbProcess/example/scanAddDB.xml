@@ -1,0 +1,12 @@
+<?xml version="1.0" ?>
+<IOCDatabase>
+<include addPath = "src/org/epics/ioc/dbProcess/example" />
+<include href = "exampleDB.xml" />
+<record name = "counter" type = "counterRecord">
+<scan>
+    <scan>periodic</scan>
+        <rate>0.5</rate>
+    </scan>
+</record>
+
+</IOCDatabase>

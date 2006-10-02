@@ -245,8 +245,8 @@ public class IOCXMLReaderFactory {
         public void endDocument() throws SAXException {
             if(parent==null) listener.endDocument();
             if(nWarning>0 || nError>0 || nFatal>0) {
-                System.err.printf("%s endDocument: warning %d severe %d fatal %d%n",
-                    locator.getSystemId(),nWarning,nError,nFatal);
+                message(String.format("%s endDocument: warning %d severe %d fatal %d",
+                    locator.getSystemId(),nWarning,nError,nFatal),IOCMessageType.info);
             }
             iocReader.setCurrentReader(parent);
             parent = null;

@@ -25,9 +25,9 @@ public class ProcessTest extends TestCase {
      * test DBAccess.
      */
     public static void testProcess() {
-        DBD dbd = DBDFactory.create("master",null); 
-        IOCDB iocdbMaster = IOCDBFactory.create(dbd,"master");
-        IOCDB iocdbAdd = IOCDBFactory.create(dbd,"add");
+        DBD dbd = DBDFactory.getMasterDBD();
+        IOCDB iocdbMaster = IOCDBFactory.getMaster();
+        IOCDB iocdbAdd = IOCDBFactory.create("add");
         IOCMessageListener iocMessageListener = new Listener();
         XMLToDBDFactory.convert(dbd,
                  "src/org/epics/ioc/dbProcess/example/menuStructureSupportDBD.xml",
@@ -61,12 +61,9 @@ public class ProcessTest extends TestCase {
         
         Map<String,DBRecord> recordMap = iocdbAdd.getRecordMap();
         Set<String> keys = recordMap.keySet();
-        SupportCreation supportCreation = SupportCreationFactory.createSupportCreation(iocdbAdd);
-        boolean createdLocal = ChannelAccessLocalFactory.create(iocdbAdd);
-        if(!createdLocal) {
-            System.out.printf("Did not create local channel access\n");
-            return;
-        }
+        SupportCreation supportCreation = SupportCreationFactory.createSupportCreation(
+            iocdbAdd,iocMessageListener);
+        ChannelAccessLocalFactory.setIOCDB(iocdbAdd);
         boolean gotSupport = supportCreation.createSupport();
         if(!gotSupport) {
             System.out.printf("Did not find all support\n");

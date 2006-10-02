@@ -12,7 +12,7 @@
 
 <h1 style="text-align: center">EPICS JavaIoc: Database Access <br />
 package: org.epics.ioc.dbAcess <br />
-2006.09.22</h1>
+2006.09.29</h1>
 
 <div class="toc">
 <ul>
@@ -67,6 +67,7 @@ package: org.epics.ioc.dbAcess <br />
   <li><a href="#IOCDB1">IOCDB: IOC Database</a></li>
   <li><a href="#Database1">IOC Database Access</a></li>
   <li><a href="#Listener1">Listener Support</a></li>
+  <li><a href="#ThreadSafety">Thread Safety</a></li>
 </ul>
 </div>
 <hr />
@@ -470,29 +471,34 @@ A link field is initialized as follows:
 Database Converter</h2>
 <hr />
 
+<p><span style="font-weight:bold;">NOTE</span> : To create definitions for an
+IOC, use org.epics.ioc.IOCFactory.initDatabase instead of directly calling
+XMLToIOCDBFactory. initDatabase calls XMLToIOCDBFactory and also initializes
+all support. Database instances should not be added to the master IOCDB
+unless all support initializes and starts correctly.</p>
+
 <p>The following reads an xml file containing record instance definitions and
 puts them into an IOCDB.</p>
 <pre>    public class XMLToIOCDBFactory {
         public static void convert(DBD dbd, IOCDB iocdb, String fileName,
             IOCMessageListener messageListener);
-        public static IOCDB addToMaster(String fileName,
-            IOCMessageListener messageListener,IOCMessageType okToAddType);
+        public static IOCDB convert(String iocdbName,String fileName,
+            IOCMessageListener messageListener);
     }
   </pre>
-
-<p>where</p>
 <dl>
-  <dt style="font-family: courier;">convert</dt>
-    <dd>parse an xml file conaining record instance definitions and put the
+  <dt style="font-family: courier;">convert(DBD dbd, IOCDB iocdb, String
+  fileName, IOCMessageListener messageListener)</dt>
+    <dd>Parse an xml file conaining record instance definitions and put the
       resulting record instances into an IOC database.</dd>
-  <dt style="font-family: courier;">addToMaster</dt>
-    <dd>Add definitions from fileName into an IOCDB named master. The DBD
-      database and the IOCDB are both named master. If any errors are
-      detected no definitions are added to master and a null is returned. If
-      no errors occur, the definitions are added to master and the return
-      value is an IOCDB that contains the newly created record instances.
-      Attempting to add definitions for a record instance that is already in
-      master is an error.</dd>
+  <dt style="font-family: courier;">convert(String iocdbName,String fileName,
+  IOCMessageListener messageListener)</dt>
+    <dd>Create an IOC Database (IOCDB) with name iocdbName and populate it
+      with definitions from an XML file. The definitions are not added to the
+      master IOCDB but the caller can call IOCDB.mergeIntoMaster to add them
+      to master. The DBD database is named master. Attempting to add
+      definitions for a record instance that is already in master is an
+    error.</dd>
 </dl>
 
 <p>The method arguments are:</p>
@@ -507,17 +513,16 @@ puts them into an IOCDB.</p>
   <dt style="font-family: courier;">messageListener</dt>
     <dd>A listener for all messages generated while the method is
     execuiting.</dd>
-  <dt style="font-family: courier;">okToAddType</dt>
-    <dd>The definitions will only be added if all messages types are of type
-      less than or equal to this type.</dd>
+  <dt style="font-family: courier;">iocdbName</dt>
+    <dd>The name of the IOCDB into which definitions are created.</dd>
 </dl>
 
-<p>For an IOC addToMaster should be used to create record instances. This can
-be done during IOC initialization or after an IOC is running, i.e. on-line
-add of new record instances is supported. Only one user at a time is allowed
-to call convert or addToMaster. If XMLToIOCDBFactory is busy when another
-call is made an error is generated and nothing is done. Both methods are
-thread safe.</p>
+<p>For an IOC convert should be used to create record instances. This can be
+done during IOC initialization or after an IOC is running, i.e. on-line add
+of new record instances is supported. Only one user at a time is allowed to
+call convert or convert. If XMLToIOCDBFactory is busy when another call is
+made an error is generated and nothing is done. Both methods are thread
+safe.</p>
 <hr />
 
 <h2 style="text-align: center" id="Record1"><a
@@ -617,6 +622,7 @@ instance.</p>
         DBStructure getConfigurationStructure();
         Support getSupport();
         void setSupport(Support support);
+        void message(String message, IOCMessageType messageType);
     }</pre>
 
 <p>Since it extends PVData it also has the methods:</p>
@@ -673,6 +679,9 @@ instance.</p>
     field.</dd>
   <dt style="font-family: courier;">setSupport</dt>
     <dd>Set the support for the field.</dd>
+  <dt style="font-family: courier;">message</dt>
+    <dd>The field name will be added to the message and passed to
+      DBRecord.message.</dd>
 </dl>
 
 <p>Field is the introspection interface for pvAccess Types. DBDField is the
@@ -776,6 +785,7 @@ A menu field is accessed via the interface:
         void setDBD(DBD dbd);
         IOCDB getIOCDB();
         void setIOCDB(IOCDB iocdb);
+        void message(String message, IOCMessageType messageType);
     }</pre>
 
 <p>where</p>
@@ -838,6 +848,9 @@ A menu field is accessed via the interface:
   <dt style="font-family: courier;">setIOCDB</dt>
     <dd>Set the IOCDB that holds this record instance. Note that this changes
       after record initialization.</dd>
+  <dt style="font-family: courier;">message</dt>
+    <dd>The record name will be appended to the message and sent to
+      iocdb.message.</dd>
 </dl>
 
 <h3 id="Link1">Link Data</h3>
@@ -1180,6 +1193,9 @@ ReadWrite locks are used to implement thread safety.</p>
         boolean addRecord(DBRecord record);
         boolean removeRecord(DBRecord record);
         Map&lt;String,DBRecord&gt; getRecordMap();
+        void message(String message, IOCMessageType messageType);
+        void addMessageListener(IOCMessageListener listener);
+        void removeMessageListener(IOCMessageListener listener);
         DBAccess createAccess(String recordName);
         String recordList(String regularExpression);
         String recordToString(String regularExpression);
@@ -1216,6 +1232,13 @@ ReadWrite locks are used to implement thread safety.</p>
   <dt style="font-family: courier;">getRecordMap</dt>
     <dd>Get a shallow copy of the map of all record instances in this
       database. A copy is returned to ensure thread safety.</dd>
+  <dt style="font-family: courier;">message</dt>
+    <dd>Report a message. If no listeners are registered the messages are
+      sent to System.out. If listeners are registered they are called.</dd>
+  <dt style="font-family: courier;">addMessageListener</dt>
+    <dd>Add a message listener.</dd>
+  <dt style="font-family: courier;">removeMessageListener</dt>
+    <dd>Remove a message listener.</dd>
   <dt style="font-family: courier;">createAccess</dt>
     <dd>Create a DBAccess. See below for a description of IOC Database
     Access.</dd>
@@ -1230,40 +1253,18 @@ ReadWrite locks are used to implement thread safety.</p>
 <p>IOCDBFactory is a class that manages IOCDB databases.</p>
 <pre>    
     public class IOCDBFactory {
-        public static IOCDB create(DBD dbd, String name);
+        public static IOCDB create(String name);
         public static IOCDB getMaster();
-        public static boolean remove(IOCDB iocdb);
-        public static IOCDB find(String name);
-        public static Map&lt;String,IOCDB&gt; getIOCDBMap();
-        public static String list(String regularExpression);
     }</pre>
 
 <p>where</p>
 <dl>
   <dt style="font-family: courier;">create</dt>
-    <dd>Create an IOCDB and add it to the map of all IOCDBs. A nul is
-      returned if an IOCDB with the same name already exists.
-      <ul>
-        <li>dbd<br />
-          The Database Definition database for use with this IOCDB.</li>
-        <li>name<br />
-          The name for this IOCDB. It must not already exist.</li>
-      </ul>
-    </dd>
+    <dd>Create an IOCDB or return the master IOCDB if the name is
+    "master".</dd>
   <dt style="font-family: courier;">getMaster</dt>
-    <dd>Get the master IOC Database, i.e. the database with name "master".
-      This does the same as find except it is more efficent.</dd>
-  <dt style="font-family: courier;">remove</dt>
-    <dd>Remove the iocdb. (false,true) is returned if the iocdb (was not,
-      was) removed.</dd>
-  <dt style="font-family: courier;">find</dt>
-    <dd>Find the IOCDB. Return null is not found.</dd>
-  <dt style="font-family: courier;">getIOCDBMap</dt>
-    <dd>Get a shallow copy of the map of all IOCDBs. A copy is returned to
-      ensure thread safety.</dd>
-  <dt style="font-family: courier;">list</dt>
-    <dd>Return a string that contains a list if all IOCDBs with names that
-      match the regular expression.</dd>
+    <dd>Get the master IOC Database, i.e. the database with name
+    "master".</dd>
 </dl>
 <hr />
 
@@ -1404,5 +1405,26 @@ that implements a put methods must call</p>
 <p>whenever the put method is called. It must call postPut whenever if
 modifies its internal data for the field. It must call postPut even if the
 new value is the same as the old value.</p>
+<hr />
+
+<h2 style="text-align: center" id="ThreadSafety">Thread Safety</h2>
+<hr />
+The dbAccess components are designed to be used in an IOC, which is a
+multithreaded environment. The design includes:
+<dl>
+  <dt>XMLToIOCDBFactory</dt>
+    <dd>This is thread safe because only one user at a time can be using it.
+      If a call to XMLToIOCDBFactory.convert is made while it is alreadty
+      busy, a fatal error message is sent to the caller and convert
+    returns.</dd>
+  <dt>IOCDB</dt>
+    <dd>All methods are thread safe.</dd>
+  <dt>Record Instance interfaces.</dt>
+    <dd>While accessing fields of a record instance the instance must be
+      locked. This means that DBRecord.lock must be called before accessing
+      fields and DBRecord.unlock must be called after the caller is done. See
+      package org.epics.ioc.dbProcess for more details about record
+      processing.</dd>
+</dl>
 </body>
 </html>

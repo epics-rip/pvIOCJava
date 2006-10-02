@@ -30,13 +30,13 @@ public class XMLSupportTest extends TestCase {
      */
     public static void testXML() {
         Set<String> keys;
-        DBD dbd = DBDFactory.create("master",null);
+        DBD dbd = DBDFactory.getMasterDBD();
         
         System.out.printf("reading supportDBD%n");
         IOCMessageListener iocMessageListener = new Listener();
         XMLToDBDFactory.convert(dbd,
                  "src/org/epics/ioc/dbAccess/example/supportDBD.xml",iocMessageListener);
-        IOCDB iocdb = IOCDBFactory.create(dbd,"testIOCDatabase");
+        IOCDB iocdb = IOCDBFactory.create("testIOCDatabase");
         System.out.printf("reading exampleSupportDB%n");
         try {
             XMLToIOCDBFactory.convert(dbd,iocdb,

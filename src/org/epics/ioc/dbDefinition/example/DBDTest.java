@@ -27,14 +27,12 @@ public class DBDTest extends TestCase {
         
         private void doit () {
         
-            DBD master = DBDFactory.create("master",null);
-            System.out.printf("dbdList %s%n",DBDFactory.list(null));
+            DBD master = DBDFactory.create("master");
             listAll(master,"before reading anything");
             XMLToDBDFactory.convert(master,"src/org/epics/ioc/dbDefinition/example/menu.xml",this);
             listAll(master,"after reading menus");
             System.out.printf("menuList with S in name: %s%n",master.menuList(".*[S].*"));
-            DBD add = DBDFactory.create("add",master);
-            System.out.printf("dbdList %s%n",DBDFactory.list(null));
+            DBD add = DBDFactory.create("add");
             XMLToDBDFactory.convert(add,"src/org/epics/ioc/dbDefinition/example/structure.xml",this);
             XMLToDBDFactory.convert(add,"src/org/epics/ioc/dbDefinition/example/support.xml",this);
             XMLToDBDFactory.convert(add,"src/org/epics/ioc/dbDefinition/example/recordType.xml",this);
@@ -43,12 +41,13 @@ public class DBDTest extends TestCase {
             add.mergeIntoMaster();
             listAll(master,"after merging into master");
             listAll(add,"after merging into master");
-            DBDFactory.remove(add);
+            add = null;
             dumpAll(master,"dump of everything");
-            System.out.printf("%n%n try to add already existing definitions%n");
-            DBD newDBD = XMLToDBDFactory.addToMaster("src/org/epics/ioc/dbDefinition/example/test.xml",
-                    this, IOCMessageType.info);
+            System.out.printf("%n%n******try to add already existing definitions%n%n");
+            DBD newDBD = XMLToDBDFactory.create("add",
+                "src/org/epics/ioc/dbDefinition/example/test.xml",this);
             System.out.printf("addToMaster is %s%n",(newDBD==null) ? "null" : "not null");
+            newDBD.mergeIntoMaster();
         }
         
         private static void listAll(DBD dbd,String message) {

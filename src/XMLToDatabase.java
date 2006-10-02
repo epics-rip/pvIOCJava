@@ -34,8 +34,8 @@ public class XMLToDatabase {
                     + " -db InstanceList -dumpDBD -dumpDB  ...\n");
             return;
         }
-        DBD dbd = DBDFactory.create("master",null);
-        IOCDB iocdb = IOCDBFactory.create(dbd,"testIOCDatabase");
+        DBD dbd = DBDFactory.getMasterDBD();
+        IOCDB iocdb = IOCDBFactory.create("master");
         IOCMessageListener iocMessageListener = new Listener();
         int nextArg = 0;
         State state = State.dbdFile;

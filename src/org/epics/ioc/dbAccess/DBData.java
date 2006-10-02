@@ -5,6 +5,7 @@
  */
 package org.epics.ioc.dbAccess;
 import org.epics.ioc.pvAccess.*;
+import org.epics.ioc.util.IOCMessageType;
 import org.epics.ioc.dbDefinition.*;
 import org.epics.ioc.dbProcess.*;
 
@@ -73,4 +74,11 @@ public interface DBData extends PVData {
      * @param support The support.
      */
     void setSupport(Support support);
+    /**
+     * Report a message.
+     * The field name will be added to the message and passed to DBRecord.message.
+     * @param message The message.
+     * @param messageType The message type.
+     */
+    void message(String message, IOCMessageType messageType);
 }

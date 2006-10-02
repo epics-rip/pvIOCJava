@@ -30,11 +30,11 @@ public class SubstituteTest extends TestCase {
      */
     public static void testXML() {
         Set<String> keys;
-        DBD dbd = DBDFactory.create("master",null);
+        DBD dbd = DBDFactory.getMasterDBD();
         IOCMessageListener iocMessageListener = new Listener();
         XMLToDBDFactory.convert(dbd,
             "src/org/epics/ioc/dbAccess/example/substituteDBD.xml",iocMessageListener);
-        IOCDB iocdb = IOCDBFactory.create(dbd,"testIOCDatabase");
+        IOCDB iocdb = IOCDBFactory.create("testIOCDatabase");
         XMLToIOCDBFactory.convert(dbd,iocdb,
             "src/org/epics/ioc/dbAccess/example/substituteDB.xml",iocMessageListener);
         Map<String,DBRecord> recordMap = iocdb.getRecordMap();

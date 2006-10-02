@@ -34,9 +34,10 @@ public class XMLToDBDTest extends TestCase {
     private static class Test implements IOCMessageListener {
         
         private void doit () {
-            DBD dbd = DBDFactory.create("master",null);
-            XMLToDBDFactory.convert(dbd,
+            DBD dbd = XMLToDBDFactory.create("add",
                 "src/org/epics/ioc/dbDefinition/example/test.xml",this);
+            dbd.mergeIntoMaster();
+            dbd = DBDFactory.getMasterDBD();
             System.out.printf("%nmenus");
             Map<String,DBDMenu> menuMap = dbd.getMenuMap();
             Set<String> keys = menuMap.keySet();

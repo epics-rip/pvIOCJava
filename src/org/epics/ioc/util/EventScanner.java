@@ -14,7 +14,7 @@ import org.epics.ioc.dbAccess.*;
 public interface EventScanner {
     void addRecord(DBRecord dbRecord);
     void removeRecord(DBRecord dbRecord);
-    EventAnnounce addEventAnouncer(String eventName,String announcer);
+    EventAnnounce addEventAnnouncer(String eventName,String announcer);
     void removeEventAnnouncer(EventAnnounce eventAnnounce,String announcer);
     String toString();
     String show(String eventName);

@@ -1,0 +1,125 @@
+<?xml version="1.0" ?>
+<IOCDatabase>
+<record name = "counterPush" type = "counterRecord">
+    <min>0.0</min>
+    <max>1e9</max>
+    <inc>1.0</inc>
+    <priority>medium</priority>
+    <process supportName = "linkArray" >
+        <value supportName = "outputLink" >
+            <configure structureName = "outputLink">
+                <pvname>doubleReceive00</pvname>
+                <process>true</process>
+                <wait>true</wait>
+            </configure>
+        </value>
+        <value supportName = "outputLink" >
+            <configure structureName = "outputLink">
+                <pvname>doubleReceive01</pvname>
+                <process>true</process>
+                <wait>true</wait>
+            </configure>
+        </value>
+        <value supportName = "outputLink" >
+            <configure structureName = "outputLink">
+                <pvname>doubleReceive02</pvname>
+                <process>true</process>
+                <wait>true</wait>
+            </configure>
+        </value>
+        <value supportName = "outputLink" >
+            <configure structureName = "outputLink">
+                <pvname>doubleReceive03</pvname>
+                <process>true</process>
+                <wait>true</wait>
+            </configure>
+        </value>
+        <value supportName = "outputLink" >
+            <configure structureName = "outputLink">
+                <pvname>doubleReceive04</pvname>
+                <process>true</process>
+                <wait>true</wait>
+            </configure>
+        </value>
+        <value supportName = "outputLink" >
+            <configure structureName = "outputLink">
+                <pvname>doubleReceive05</pvname>
+                <process>true</process>
+                <wait>true</wait>
+            </configure>
+        </value>
+        <value supportName = "outputLink" >
+            <configure structureName = "outputLink">
+                <pvname>doubleReceive06</pvname>
+                <process>true</process>
+                <wait>true</wait>
+            </configure>
+        </value>
+        <value supportName = "outputLink" >
+            <configure structureName = "outputLink">
+                <pvname>doubleReceive07</pvname>
+                <process>true</process>
+                <wait>true</wait>
+            </configure>
+        </value>
+        <value supportName = "outputLink" >
+            <configure structureName = "outputLink">
+                <pvname>doubleReceive08</pvname>
+                <process>true</process>
+                <wait>true</wait>
+            </configure>
+        </value>
+        <value supportName = "outputLink" >
+            <configure structureName = "outputLink">
+                <pvname>doubleReceive09</pvname>
+                <process>true</process>
+                <wait>true</wait>
+            </configure>
+        </value>
+    </process>
+    <scan>
+        <scan>periodic</scan>
+        <rate>0.2</rate>
+    </scan>
+</record>
+<record name = "doubleReceive00" type = "doubleRecord"> </record>
+<record name = "doubleReceive01" type = "doubleRecord"> </record>
+<record name = "doubleReceive02" type = "doubleRecord"> </record>
+<record name = "doubleReceive03" type = "doubleRecord"> </record>
+<record name = "doubleReceive04" type = "doubleRecord"> </record>
+<record name = "doubleReceive05" type = "doubleRecord"> </record>
+<record name = "doubleReceive06" type = "doubleRecord"> </record>
+<record name = "doubleReceive07" type = "doubleRecord"> </record>
+<record name = "doubleReceive08" type = "doubleRecord"> </record>
+<record name = "doubleReceive09" type = "doubleRecord"> </record>
+
+<record name = "event" type = "eventRecord">
+    <value>eventOne</value>
+    <scan>
+        <scan>periodic</scan>
+        <rate>0.1</rate>
+    </scan>
+</record>
+
+<record name = "counterEvent0" type = "counterRecord">
+    <min>0.0</min>
+    <max>1e9</max>
+    <inc>1.0</inc>
+    <scan>
+        <scan>event</scan>
+        <eventName>eventOne</eventName>
+    </scan>
+</record>
+<record name = "counterEvent1" type = "counterRecord">
+    <min>0.0</min>
+    <max>1e9</max>
+    <inc>1.0</inc>
+    <priority>medium</priority>
+    <scan>
+        <scan>event</scan>
+        <eventName>eventOne</eventName>
+    </scan>
+</record>
+
+
+</IOCDatabase>

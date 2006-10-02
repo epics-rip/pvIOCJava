@@ -24,8 +24,8 @@ public class ListenerTest extends TestCase {
      * test DBListener.
      */
     public static void testListener() {
-        DBD dbd = DBDFactory.create("master",null); 
-        IOCDB iocdb = IOCDBFactory.create(dbd,"testIOCDatabase");
+        DBD dbd = DBDFactory.getMasterDBD(); 
+        IOCDB iocdb = IOCDBFactory.create("testIOCDatabase");
         IOCMessageListener iocMessageListener = new Listener();
         XMLToDBDFactory.convert(dbd,
                  "src/org/epics/ioc/dbAccess/example/listenerDBD.xml",iocMessageListener);

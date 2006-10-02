@@ -48,15 +48,16 @@ public class LinkSupportFactory {
         DBData[] dbData = configStructure.getFieldDBDatas();
         int index = configStructure.getFieldDBDataIndex(fieldName);
         if(index<0) {
-            support.errorMessage(
-                "InputLink.initialize: configStructure does not have field"
-                + fieldName);
+            configStructure.message(
+                "InputLink.initialize: configStructure does not have field" + fieldName,
+                IOCMessageType.error);
             return null;
         }
         if(dbData[index].getField().getType()!=Type.pvString) {
-            support.errorMessage(
+            dbData[index].message(
                 "InputLink.initialize: configStructure field "
-                + fieldName + " is not a string ");
+                + fieldName + " does not have type string ",
+                IOCMessageType.error);
             return null;
         }
         return (PVString)dbData[index];
@@ -68,15 +69,16 @@ public class LinkSupportFactory {
         DBData[] dbData = configStructure.getFieldDBDatas();
         int index = configStructure.getFieldDBDataIndex(fieldName);
         if(index<0) {
-            support.errorMessage(
-                "InputLink.initialize: configStructure does not have field"
-                + fieldName);
+            configStructure.message(
+                "InputLink.initialize: configStructure does not have field" + fieldName,
+                IOCMessageType.error);
             return null;
         }
         if(dbData[index].getField().getType()!=Type.pvBoolean) {
-            support.errorMessage(
-                "InputLink.initialize: configStructure field "
-                + fieldName + " is not a boolean ");
+            dbData[index].message(
+                    "InputLink.initialize: configStructure field "
+                    + fieldName + " does not have type boolean ",
+                    IOCMessageType.error);
             return null;
         }
         return (PVBoolean)dbData[index];
@@ -88,15 +90,16 @@ public class LinkSupportFactory {
         DBData[] dbData = configStructure.getFieldDBDatas();
         int index = configStructure.getFieldDBDataIndex(fieldName);
         if(index<0) {
-            support.errorMessage(
-                "InputLink.initialize: configStructure does not have field"
-                + fieldName);
+            configStructure.message(
+                "InputLink.initialize: configStructure does not have field" + fieldName,
+                IOCMessageType.error);
             return null;
         }
         if(dbData[index].getField().getType()!=Type.pvDouble) {
-            support.errorMessage(
+            dbData[index].message(
                 "InputLink.initialize: configStructure field "
-                + fieldName + " is not a double ");
+                + fieldName + " does not have type double ",
+                IOCMessageType.error);
             return null;
         }
         return (PVDouble)dbData[index];
@@ -183,7 +186,13 @@ public class LinkSupportFactory {
             String[]pvname = periodPattern.split(pvnameAccess.get(),2);
             recordName = pvname[0];
             channel = ChannelFactory.createChannel(recordName,this);
-            if(channel==null) return;
+            if(channel==null) {
+                dbLink.message(
+                    "Failed to create channel for " + recordName,
+                    IOCMessageType.error);
+                setSupportState(SupportState.readyForInitialize);
+                return;
+            }
             if(channel.isLocal()) {
                 ChannelLink channelLocal = (ChannelLink)channel;
                 channelLocal.setLinkRecord(dbLink.getRecord());
@@ -209,9 +218,10 @@ public class LinkSupportFactory {
          */
         public ProcessReturn process(ProcessCompleteListener listener) {
             if(supportState!=SupportState.ready) {
-                errorMessage(
-                        "process called but supportState is "
-                        + supportState.toString());
+                dbLink.message(
+                    "process called but supportState is "
+                    + supportState.toString(),
+                    IOCMessageType.error);
                 return ProcessReturn.failure;
             }
             if(channel==null) return ProcessReturn.failure;
@@ -251,14 +261,10 @@ public class LinkSupportFactory {
                     channelRecord = null;
                     return;
                 }
-                String errorMessage = null;
                 if(forceLocalAccess.get() && !channel.isLocal()) {
-                    errorMessage = String.format(
-                        "%s.%s pvname %s is not local",
-                        dbLink.getRecord().getRecordName(),
-                        dbLink.getDBDField().getName(),
-                        pvnameAccess.get());
-                    errorMessage(errorMessage);
+                    dbLink.message(
+                        "pvname " + pvnameAccess.get() + " is not local",
+                        IOCMessageType.error);
                     setSupportState(SupportState.readyForInitialize);
                 }
                 channel.setTimeout(timeoutAccess.get());
@@ -370,11 +376,11 @@ public class LinkSupportFactory {
             Structure structure = (Structure)configStructure.getField();
             String configStructureName = structure.getStructureName();
             if(!configStructureName.equals("inputLink")) {
-                errorMessage(
+                dbLink.message(
                     "InputLink.initialize: configStructure name is "
                     + configStructureName
-                    + " but expecting inputLink"
-                    );
+                    + " but expecting inputLink",
+                    IOCMessageType.error);
                 return;
             }
             pvnameAccess = getString(this,configStructure,"pvname");
@@ -407,8 +413,9 @@ public class LinkSupportFactory {
         public void start() {
             if(supportState!=SupportState.readyForStart) return;
             if(valueData==null) {
-                errorMessage(
-                    "Logic Error: InputLink.start called before setField");
+                dbLink.message(
+                    "Logic Error: InputLink.start called before setField",
+                    IOCMessageType.error);
                 setSupportState(SupportState.zombie);
                 return;
             }
@@ -424,7 +431,9 @@ public class LinkSupportFactory {
             }
             channel = ChannelFactory.createChannel(recordName,this);
             if(channel==null) {
-                errorMessage("Failed to create channel for " + recordName);
+                dbLink.message(
+                        "Failed to create channel for " + recordName,
+                        IOCMessageType.error);
                 setSupportState(SupportState.readyForInitialize);
                 return;
             }
@@ -462,9 +471,10 @@ public class LinkSupportFactory {
          */
         public ProcessReturn process(ProcessCompleteListener listener) {
             if(supportState!=SupportState.ready) {
-                errorMessage(
-                    "process called but supportState is "
-                    + supportState.toString());
+                dbLink.message(
+                        "process called but supportState is "
+                        + supportState.toString(),
+                        IOCMessageType.error);
                 return ProcessReturn.failure;
             }
             if(!channel.isConnected()) {
@@ -505,12 +515,9 @@ public class LinkSupportFactory {
                 }
                 String errorMessage = null;
                 if(forceLocalAccess.get() && !channel.isLocal()) {
-                    errorMessage = String.format(
-                        "%s.%s pvname %s is not local",
-                        dbLink.getRecord().getRecordName(),
-                        dbLink.getDBDField().getName(),
-                        pvnameAccess.get());
-                    errorMessage(errorMessage);
+                    dbLink.message(
+                            "pvname " + pvnameAccess.get(),
+                            IOCMessageType.error);
                     setSupportState(SupportState.readyForInitialize);
                 }
                 ChannelSetFieldResult result = channel.setField(fieldName);
@@ -521,7 +528,7 @@ public class LinkSupportFactory {
                 linkField = channel.getChannelField();
                 errorMessage = checkCompatibility();
                 if(errorMessage!=null) {
-                    errorMessage(errorMessage);
+                    dbLink.message(errorMessage,IOCMessageType.error);
                     return;
                 }
                 fieldGroup = channel.createFieldGroup(this);
@@ -590,7 +597,9 @@ public class LinkSupportFactory {
                 return;
             }
             if(field!=linkField) {
-                errorMessage("Logic error in InputLink field!=linkField");
+                dbLink.message(
+                    "Logic error in InputLink field!=linkField",
+                    IOCMessageType.fatalError);
                 processResult = ProcessResult.failure;
             }
             Type linkType = data.getField().getType();
@@ -613,7 +622,9 @@ public class LinkSupportFactory {
                 convert.copyStructure(linkStructureData,recordStructureData);
                 return;
             }
-            errorMessage("Logic error in InputLink: unsupported type");
+            dbLink.message(
+                    "Logic error in InputLink: unsupported type",
+                    IOCMessageType.fatalError);
             processResult = ProcessResult.failure;
         }
         /* (non-Javadoc)
@@ -648,11 +659,8 @@ public class LinkSupportFactory {
                 Structure recordStructure = (Structure)valueField;
                 if(convert.isCopyStructureCompatible(linkStructure,recordStructure)) return null;
             }
-            String errorMessage = String.format(
-                "%s.%s is not compatible with pvname %s",
-                dbLink.getRecord().getRecordName(),
-                dbLink.getDBDField().getName(),
-                pvnameAccess.get());
+            String errorMessage =
+                "is not compatible with pvname " + pvnameAccess.get();
             channel = null;
             return errorMessage;
         }
@@ -713,11 +721,11 @@ public class LinkSupportFactory {
             Structure structure = (Structure)configStructure.getField();
             String configStructureName = structure.getStructureName();
             if(!configStructureName.equals("outputLink")) {
-                errorMessage(
-                    "OutputLink.initialize: configStructure name is "
-                    + configStructureName
-                    + " but expecting outputLink"
-                    );
+                dbLink.message(
+                        "OutputLink.initialize: configStructure name is "
+                        + configStructureName
+                        + " but expecting outputLink",
+                        IOCMessageType.error);
                 return;
             }
             pvnameAccess = getString(this,configStructure,"pvname");
@@ -748,8 +756,9 @@ public class LinkSupportFactory {
         public void start() {
             if(supportState!=SupportState.readyForStart) return;
             if(valueData==null) {
-                errorMessage(
-                    "Logic Error: OutputLink.start called before setField");
+                dbLink.message(
+                        "Logic Error: OutputLink.start called before setField",
+                        IOCMessageType.fatalError);
                 setSupportState(SupportState.zombie);
                 return;
             }
@@ -765,7 +774,9 @@ public class LinkSupportFactory {
             }
             channel = ChannelFactory.createChannel(recordName,this);
             if(channel==null) {
-                errorMessage("Failed to create channel for " + recordName);
+                dbLink.message(
+                        "Failed to create channel for " + recordName,
+                        IOCMessageType.error);
                 setSupportState(SupportState.readyForInitialize);
                 return;
             }
@@ -803,9 +814,10 @@ public class LinkSupportFactory {
          */
         public ProcessReturn process(ProcessCompleteListener listener) {
             if(supportState!=SupportState.ready) {
-                errorMessage(
-                    "process called but supportState is "
-                    + supportState.toString());
+                dbLink.message(
+                        "process called but supportState is "
+                        + supportState.toString(),
+                        IOCMessageType.error);
                 return ProcessReturn.failure;
             }
             if(!channel.isConnected()) {
@@ -845,12 +857,9 @@ public class LinkSupportFactory {
                 }
                 String errorMessage = null;
                 if(forceLocalAccess.get() && !channel.isLocal()) {
-                    errorMessage = String.format(
-                        "%s.%s pvname %s is not local",
-                        dbLink.getRecord().getRecordName(),
-                        dbLink.getDBDField().getName(),
-                        pvnameAccess.get());
-                    errorMessage(errorMessage);
+                    dbLink.message(
+                            "pvname " + pvnameAccess.get() + " is not local",
+                            IOCMessageType.error);
                     setSupportState(SupportState.readyForInitialize);
                 }
                 ChannelSetFieldResult result = channel.setField(fieldName);
@@ -861,7 +870,7 @@ public class LinkSupportFactory {
                 linkField = channel.getChannelField();
                 errorMessage = checkCompatibility();
                 if(errorMessage!=null) {
-                    errorMessage(errorMessage);
+                    dbLink.message(errorMessage,IOCMessageType.error);
                     return;
                 }
                 fieldGroup = channel.createFieldGroup(this);
@@ -896,7 +905,9 @@ public class LinkSupportFactory {
          */
         public void nextData(Channel channel, ChannelField field, PVData data) {
             if(field!=linkField) {
-                errorMessage("Logic error in OutputLink field!=linkField");
+                dbLink.message(
+                        "Logic error in OutputLink field!=linkField",
+                        IOCMessageType.fatalError);
                 processResult = ProcessResult.failure;
             }
             Type linkType = data.getField().getType();
@@ -918,7 +929,9 @@ public class LinkSupportFactory {
                 convert.copyStructure(recordStructureData,linkStructureData);
                 return;
             }
-            errorMessage("Logic error in OutputLink: unsupported type");
+            dbLink.message(
+                    "Logic error in OutputLink: unsupported type",
+                    IOCMessageType.fatalError);
             processResult = ProcessResult.failure;
         }
         /* (non-Javadoc)
@@ -963,11 +976,8 @@ public class LinkSupportFactory {
                 Structure recordStructure = (Structure)valueField;
                 if(convert.isCopyStructureCompatible(linkStructure,recordStructure)) return null;
             }
-            String errorMessage = String.format(
-                "%s.%s is not compatible with pvname %s",
-                dbLink.getRecord().getRecordName(),
-                dbLink.getDBDField().getName(),
-                pvnameAccess.get());
+            String errorMessage = 
+                "is not compatible with pvname " + pvnameAccess.get();
             channel = null;
             return errorMessage;
         }
@@ -1026,11 +1036,11 @@ public class LinkSupportFactory {
             Structure structure = (Structure)configStructure.getField();
             String configStructureName = structure.getStructureName();
             if(!configStructureName.equals("monitorLink")) {
-                errorMessage(
-                    "MonitorLink.initialize: configStructure name is "
-                    + configStructureName
-                    + " but expecting monitorLink"
-                    );
+                dbLink.message(
+                        "MonitorLink.initialize: configStructure name is "
+                        + configStructureName
+                        + " but expecting monitorLink",
+                        IOCMessageType.error);
                 return;
             }
             pvnameAccess = getString(this,configStructure,"pvname");
@@ -1061,8 +1071,9 @@ public class LinkSupportFactory {
         public void start() {
             if(supportState!=SupportState.readyForStart) return;
             if(valueData==null) {
-                errorMessage(
-                    "Logic Error: MonitorLink.start called before setField");
+                dbLink.message(
+                        "Logic Error: MonitorLink.start called before setField",
+                        IOCMessageType.fatalError);
                 setSupportState(SupportState.zombie);
                 return;
             }
@@ -1078,7 +1089,9 @@ public class LinkSupportFactory {
             }
             channel = ChannelFactory.createChannel(recordName,this);
             if(channel==null) {
-                errorMessage("Failed to create channel for " + recordName);
+                dbLink.message(
+                        "Failed to create channel for " + recordName,
+                        IOCMessageType.error);
                 setSupportState(SupportState.readyForInitialize);
                 return;
             }
@@ -1116,9 +1129,10 @@ public class LinkSupportFactory {
          */
         public ProcessReturn process(ProcessCompleteListener listener) {
             if(supportState!=SupportState.ready) {
-                errorMessage(
-                    "process called but supportState is "
-                    + supportState.toString());
+                dbLink.message(
+                        "process called but supportState is "
+                        + supportState.toString(),
+                        IOCMessageType.error);
                 return ProcessReturn.failure;
             }
             if(!channel.isConnected()) {
@@ -1149,14 +1163,10 @@ public class LinkSupportFactory {
                     fieldGroup = null;
                     return;
                 }
-                String errorMessage = null;
                 if(forceLocalAccess.get() && !channel.isLocal()) {
-                    errorMessage = String.format(
-                        "%s.%s pvname %s is not local",
-                        dbLink.getRecord().getRecordName(),
-                        dbLink.getDBDField().getName(),
-                        pvnameAccess.get());
-                    errorMessage(errorMessage);
+                    dbLink.message(
+                            "pvname " + pvnameAccess.get() + " is not local",
+                            IOCMessageType.error);
                     setSupportState(SupportState.readyForInitialize);
                 }
                 ChannelSetFieldResult result = channel.setField(fieldName);
@@ -1165,9 +1175,9 @@ public class LinkSupportFactory {
                     "Logic Error: MonitorLink.connect bad return from setField");
                 }
                 linkField = channel.getChannelField();
-                errorMessage = checkCompatibility();
+                String errorMessage = checkCompatibility();
                 if(errorMessage!=null) {
-                    errorMessage(errorMessage);
+                    dbLink.message(errorMessage,IOCMessageType.error);
                     return;
                 }
                 fieldGroup = channel.createFieldGroup(this);
@@ -1232,7 +1242,9 @@ public class LinkSupportFactory {
                 return;
             }
             if(field!=linkField) {
-                errorMessage("Logic error in MonitorLink field!=linkField");
+                dbLink.message(
+                        "Logic error in MonitorLink field!=linkField",
+                        IOCMessageType.fatalError);
                 return;
             }
             Type linkType = data.getField().getType();
@@ -1255,7 +1267,9 @@ public class LinkSupportFactory {
                 convert.copyStructure(linkStructureData,recordStructureData);
                 return;
             }
-            errorMessage("Logic error in MonitorLink: unsupported type");
+            dbLink.message(
+                    "Logic error in MonitorLink: unsupported type",
+                    IOCMessageType.fatalError);
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.channelAccess.ChannelNotifyListener#newData(org.epics.ioc.channelAccess.Channel, org.epics.ioc.channelAccess.ChannelField)
@@ -1297,11 +1311,8 @@ public class LinkSupportFactory {
                 Structure recordStructure = (Structure)valueField;
                 if(convert.isCopyStructureCompatible(linkStructure,recordStructure)) return null;
             }
-            String errorMessage = String.format(
-                "%s.%s is not compatible with pvname %s",
-                dbLink.getRecord().getRecordName(),
-                dbLink.getDBDField().getName(),
-                pvnameAccess.get());
+            String errorMessage = 
+                "is not compatible with pvname " + pvnameAccess.get();
             channel = null;
             return errorMessage;
         }
