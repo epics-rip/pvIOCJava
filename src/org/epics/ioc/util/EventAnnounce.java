@@ -6,9 +6,15 @@
 package org.epics.ioc.util;
 
 /**
+ * Announce an event.
+ * This is created by calling EventScanner.addEventAnnouncer.
  * @author mrk
  *
  */
 public interface EventAnnounce {
+    /**
+     * Announce an event.
+     * All records that are event scanned for the event name are scheduled for execution.
+     */
     void announce();
 }
