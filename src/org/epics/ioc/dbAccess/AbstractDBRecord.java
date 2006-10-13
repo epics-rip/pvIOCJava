@@ -220,6 +220,7 @@ public class AbstractDBRecord extends AbstractDBStructure implements DBRecord {
      * @see org.epics.ioc.dbAccess.DBRecord#message(java.lang.String, org.epics.ioc.util.IOCMessageType)
      */
     public void message(String message, IOCMessageType messageType) {
+        if(message!=null && message.charAt(0)!='.') message = " " + message;
         iocdb.message(recordName + message, messageType);
     }
     /* (non-Javadoc)

@@ -63,6 +63,18 @@ public class PerformTest extends TestCase {
         perElement = perArray/(double)arraySize;
         System.out.printf("double to long perArray %f perElement %f microseconds%n",perArray,perElement);
     }
+    
+    public static void testCurentTime() {
+        long startTime,endTime;
+        int ntimes = 10000;
+        startTime = System.nanoTime();
+        for(int i=0; i<ntimes; i++) {
+            long time = System.currentTimeMillis();
+        }
+        endTime = System.nanoTime();
+        double perCall = (double)(endTime - startTime)/(double)ntimes/1000.0;
+        System.out.printf("currentTimeMillis %f microseconds%n",perCall);
+    }
 
 }
 

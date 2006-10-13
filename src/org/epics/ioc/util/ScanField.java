@@ -6,7 +6,8 @@
 package org.epics.ioc.util;
 
 /**
- * An interface for retreiving data from the scan field of a record instance.
+ * An convenience interface for the scan field of a record instance.
+ * This is created by ScanFieldFactory.create.
  * @author mrk
  *
  */

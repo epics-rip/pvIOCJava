@@ -205,9 +205,19 @@ public class DBDAttributeFactory {
                 throw new IllegalStateException(
                     "elementType not specified");
             if(defaultValue!=null) {
-                if(!(type.isScalar()||(type==Type.pvArray && elementType.isScalar()))) {
+                boolean isOK = false;
+                if(type.isScalar()) {
+                    isOK = true;
+                } else if(type==Type.pvArray && elementType.isScalar()) {
+                    isOK = true;
+                } else if(dbType==DBType.dbMenu) {
+                    isOK = true;
+                }
+                if(!isOK) {
                     throw new IllegalStateException(
-                    "default value is only legal for scalar or array with scalar elements");
+                    "default value is only legal for scalar,"
+                    + " array with scalar elements"
+                    + ", or a menu");
                 }
             }
         }

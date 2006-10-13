@@ -173,19 +173,13 @@ public abstract class AbstractDBData implements DBData{
                 + " for support " + name
                 + " does not exist";
         }
-        DBData parent;
-        if(getDBDField().getDBType()==DBType.dbStructure) {
-            parent = (DBStructure)this;
-        } else {
-            parent = getParent();
-        }
         DBDAttributeValues dbdAttributeValues =
             new StructureDBDAttributeValues(configurationStructureName,"configurationStructure");
         DBDAttribute dbdAttribute = DBDAttributeFactory.create(
             dbd,dbdAttributeValues);
         DBDField dbdField = DBDCreateFactory.createField(
                 dbdAttribute,null);
-        configDBStructure  = (DBStructure)FieldDataFactory.createData(parent,dbdField);
+        configDBStructure  = (DBStructure)FieldDataFactory.createData(this,dbdField);
         return null;
     }
     /* (non-Javadoc)
@@ -226,7 +220,7 @@ public abstract class AbstractDBData implements DBData{
      * @see org.epics.ioc.dbAccess.DBData#message(java.lang.String, org.epics.ioc.util.IOCMessageType)
      */
     public void message(String message, IOCMessageType messageType) {
-        record.message(getFullFieldName() + message, messageType);
+        record.message(getFullFieldName() + " " + message, messageType);
     }
     private static class StructureDBDAttributeValues
     implements DBDAttributeValues

@@ -16,28 +16,44 @@ import org.epics.ioc.util.*;
  * @author mrk
  *
  */
-public class ScanFieldSupportFactory {
+public class ScanSupportFactory {
     private static Convert convert = ConvertFactory.getConvert();
     private static PeriodicScanner periodicScanner = ScannerFactory.getPeriodicScanner();
     private static EventScanner eventScanner = ScannerFactory.getEventScanner();
     
+    /**
+     * Create support for the scan field.
+     * @param dbStructure The interface to the scan field.
+     * @return The support or null if the scan field is improperly defined.
+     */
     public static Support create(DBStructure dbStructure) {
-        String supportName = dbStructure.getSupportName();
-        if(supportName.equals("scan")) {
-            try {
-                return new ScanFieldSupport(dbStructure);
-            } catch (IllegalStateException e) {
-                System.err.printf("ScanFieldSupportFactory create failure %s%n",e.getMessage());
-                return null;
-            }  
+        ScanField scanField = ScanFieldFactory.create(dbStructure.getRecord());
+        if(scanField==null) {
+            dbStructure.message("scan field is not properly defined", IOCMessageType.fatalError);
+            return null;
         }
-        System.err.printf("ScanFieldSupportFactory create supportName %s but expected scan%n",supportName);
-        return null;
+        String supportName = dbStructure.getSupportName();
+        if(!supportName.equals("scan")) {
+            dbStructure.message(
+                    "ScanSupportFactory create supportName is " + supportName
+                    + " but expected scan",
+                    IOCMessageType.fatalError);
+                return null;
+        }
+        try {
+            return new ScanFieldSupport(dbStructure);
+        } catch (IllegalStateException e) {
+            dbStructure.message(
+                "ScanSupportFactory create failure " + e.getMessage(),
+                IOCMessageType.fatalError);
+            return null;
+        }  
     }
     
     private static class ScanFieldSupport extends AbstractSupport implements IOCDBMergeListener {
         private static String supportName = "scan";
-        private boolean isStarted = false;
+        private boolean isMerged = false;
+        private DBStructure dbStructure;
         private DBRecord dbRecord = null;
         private String recordName = null;
         private ScanType scanType;
@@ -45,12 +61,7 @@ public class ScanFieldSupportFactory {
         private String eventName = null;
         private double rate = 0.0;
         
-        
-        /**
-         * The public constructor.
-         * @param dbStructure The structure for accessing the scan field.
-         */
-        public ScanFieldSupport(DBStructure dbStructure) {
+        private ScanFieldSupport(DBStructure dbStructure) {
             super(supportName,dbStructure);
             String fieldName;
             DBData oldField;
@@ -59,22 +70,11 @@ public class ScanFieldSupportFactory {
             DBDMenuField dbdMenuField;
             DBMenu newMenu;
             
+            this.dbStructure = dbStructure;
             dbRecord = dbStructure.getRecord();
             recordName = dbRecord.getRecordName();
-            if(!dbStructure.getField().getName().equals("scan")
-            || dbStructure.getParent()!=dbRecord) {
-                throw new IllegalStateException(recordName + " scan support: illegal scan field definition.");
-            }
             IOCDB iocdb = dbRecord.getIOCDB();
-            DBAccess dbAccess = iocdb.createAccess(recordName);
-            
-            fieldName = "scan";
-            if(dbAccess.setField(fieldName)!=AccessSetResult.thisRecord){
-                throw new IllegalStateException(recordName + "." + fieldName + " not found");
-            }
-            if(dbAccess.getField()!=dbStructure) {
-                throw new IllegalStateException(recordName + " scan field is not at top level");
-            }
+            DBAccess dbAccess = iocdb.createAccess(recordName);            
             
             dbAccess.setField("");
             fieldName = "priority";
@@ -93,7 +93,7 @@ public class ScanFieldSupportFactory {
             choice = priorityMenu.getChoices()[index];
             priority = ScanPriority.valueOf(choice);
             dbdMenuField = (DBDMenuField)oldField.getDBDField();
-            newMenu = new PriorityField(this,dbStructure,dbdMenuField);
+            newMenu = new DBPriority(this,dbStructure,dbdMenuField);
             newMenu.setIndex(index);
             dbAccess.replaceField(oldField,newMenu);
 
@@ -114,7 +114,7 @@ public class ScanFieldSupportFactory {
             choice = scanMenu.getChoices()[index];
             scanType = ScanType.valueOf(choice);
             dbdMenuField = (DBDMenuField)oldField.getDBDField();
-            newMenu = new ScanField(this,dbStructure,dbdMenuField);
+            newMenu = new DBScan(this,dbStructure,dbdMenuField);
             newMenu.setIndex(index);
             dbAccess.replaceField(oldField,newMenu);
             
@@ -129,7 +129,7 @@ public class ScanFieldSupportFactory {
             }
             DBDouble oldRate = (DBDouble)oldField;
             rate = oldRate.get();
-            DBDouble newRate = new RateField(this,dbStructure,oldField.getDBDField());
+            DBDouble newRate = new DBRate(this,dbStructure,oldField.getDBDField());
             newRate.put(rate);
             dbAccess.replaceField(oldField,newRate);
             
@@ -144,9 +144,11 @@ public class ScanFieldSupportFactory {
             }
             DBString oldEventName = (DBString)oldField;
             eventName = oldEventName.get();
-            DBString newEventName = new EventNameField(this,dbStructure,oldField.getDBDField());
+            DBString newEventName = new DBEventName(this,dbStructure,oldField.getDBDField());
             newEventName.put(eventName);
             dbAccess.replaceField(oldField,newEventName);
+            
+            dbRecord.getIOCDB().addIOCDBMergeListener(this);
         }       
         /* (non-Javadoc)
          * @see org.epics.ioc.dbProcess.AbstractSupport#getName()
@@ -158,52 +160,67 @@ public class ScanFieldSupportFactory {
          * @see org.epics.ioc.dbProcess.AbstractSupport#initialize(org.epics.ioc.dbProcess.SupportCreation)
          */
         public void initialize() {
-            // Nothing to do
+            setSupportState(SupportState.readyForStart);
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.dbProcess.AbstractSupport#uninitialize()
          */
         public void uninitialize() {
             stop();
+            setSupportState(SupportState.readyForInitialize);
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.dbProcess.AbstractSupport#start()
          */
         public void start() {
-            dbRecord.getIOCDB().addIOCDBMergeListener(this);
+            if(isMerged) startScanner();
+            setSupportState(SupportState.ready);
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.dbProcess.AbstractSupport#stop()
          */
         public void stop() {
-            switch (scanType) {
-            case passive: break;
-            case event:
-                eventScanner.removeRecord(dbRecord);
-                break;
-            case periodic:
-                periodicScanner.unschedule(dbRecord);
-                break;
+            if(isMerged) {
+                switch (scanType) {
+                case passive: break;
+                case event:
+                    eventScanner.removeRecord(dbRecord);
+                    break;
+                case periodic:
+                    periodicScanner.unschedule(dbRecord);
+                    break;
+                }
             }
-            isStarted = false;
+            setSupportState(SupportState.readyForStart);
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.dbProcess.AbstractSupport#process(org.epics.ioc.dbProcess.ProcessCompleteListener)
+         * @see org.epics.ioc.dbProcess.AbstractSupport#process(org.epics.ioc.dbProcess.ProcessRequestListener)
          */
-        public ProcessReturn process(ProcessCompleteListener listener) {
-            System.err.println(recordName + " ScanField process is being called. Why?");
+        public ProcessReturn process(ProcessRequestListener listener) {
+            dbStructure.message("process is being called. Why?", IOCMessageType.error);
             return ProcessReturn.failure;
         }       
         /* (non-Javadoc)
          * @see org.epics.ioc.dbProcess.AbstractSupport#processContinue()
          */
-        public void processContinue() {
-            System.err.println(recordName + " ScanField processContinue is being called. Why?");
+        public ProcessContinueReturn processContinue() {
+            dbStructure.message("processContinue is being called. Why?", IOCMessageType.error);
+            return ProcessContinueReturn.failure;
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.dbAccess.IOCDBMergeListener#merged()
          */
         public void merged() {
+            dbRecord.lock();
+            try {
+                if(super.getSupportState()==SupportState.ready) startScanner();
+                isMerged = true;
+            } finally {
+                dbRecord.unlock();
+            }
+        }
+        
+        private void startScanner() {
             switch (scanType) {
             case passive: break;
             case event:
@@ -213,19 +230,17 @@ public class ScanFieldSupportFactory {
                 periodicScanner.schedule(dbRecord);
                 break;
             }
-            isStarted = true;
         }
-        
         private void putPriority(ScanPriority value) {
             if(value==priority) return;
-            boolean isStarted = this.isStarted;
+            boolean isStarted = this.isMerged;
             if(isStarted) stop();
             priority = value;
             if(isStarted) start();
         }
         private void putScanType(ScanType type) {
             if(type==scanType) return;
-            boolean isStarted = this.isStarted;
+            boolean isStarted = this.isMerged;
             if(isStarted) stop();
             scanType = type;
             if(isStarted) start();
@@ -233,14 +248,14 @@ public class ScanFieldSupportFactory {
         private void putEventName(String name) {
             if(name==null && eventName==null) return;
             if(name!=null && name.equals(eventName)) return;
-            boolean isStarted = this.isStarted;
+            boolean isStarted = this.isMerged;
             if(isStarted && scanType==ScanType.event) stop();
             eventName = name;
             if(isStarted && scanType==ScanType.event) start();
         }
         private void putRate(double rate) {
             if(rate==this.rate) return;
-            boolean isStarted = this.isStarted;
+            boolean isStarted = this.isMerged;
             if(isStarted && scanType==ScanType.periodic) stop();
             this.rate = rate;
             if(isStarted && scanType==ScanType.periodic) start();
@@ -248,10 +263,10 @@ public class ScanFieldSupportFactory {
         
     }
     
-    private static class PriorityField extends AbstractDBMenu {
+    private static class DBPriority extends AbstractDBMenu {
         private ScanFieldSupport scanFieldSupport;
         
-        private PriorityField(ScanFieldSupport scanFieldSupport,DBStructure parent,DBDMenuField dbdMenuField) {
+        private DBPriority(ScanFieldSupport scanFieldSupport,DBStructure parent,DBDMenuField dbdMenuField) {
             super(parent,dbdMenuField);
             this.scanFieldSupport = scanFieldSupport;
         }
@@ -265,10 +280,10 @@ public class ScanFieldSupportFactory {
         }
     }
     
-    private static class ScanField extends AbstractDBMenu {
+    private static class DBScan extends AbstractDBMenu {
         private ScanFieldSupport scanFieldSupport;
         
-        private ScanField(ScanFieldSupport scanFieldSupport,DBStructure parent,DBDMenuField dbdMenuField) {
+        private DBScan(ScanFieldSupport scanFieldSupport,DBStructure parent,DBDMenuField dbdMenuField) {
             super(parent,dbdMenuField);
             this.scanFieldSupport = scanFieldSupport;
         }
@@ -282,11 +297,11 @@ public class ScanFieldSupportFactory {
         }
     }
     
-    private static class RateField extends AbstractDBData implements DBDouble{
+    private static class DBRate extends AbstractDBData implements DBDouble{
         private double value;
         private ScanFieldSupport scanFieldSupport;
         
-        private RateField(ScanFieldSupport scanFieldSupport,DBData parent,DBDField dbdField) {
+        private DBRate(ScanFieldSupport scanFieldSupport,DBData parent,DBDField dbdField) {
             super(parent,dbdField);
             value = 0;
             this.scanFieldSupport = scanFieldSupport;
@@ -319,11 +334,11 @@ public class ScanFieldSupportFactory {
 
     }
     
-    private static class EventNameField extends AbstractDBData implements DBString{
+    private static class DBEventName extends AbstractDBData implements DBString{
         private String value;
         private ScanFieldSupport scanFieldSupport;
         
-        private EventNameField(ScanFieldSupport scanFieldSupport,DBData parent,DBDField dbdField) {
+        private DBEventName(ScanFieldSupport scanFieldSupport,DBData parent,DBDField dbdField) {
             super(parent,dbdField);
             value = null;
             this.scanFieldSupport = scanFieldSupport;

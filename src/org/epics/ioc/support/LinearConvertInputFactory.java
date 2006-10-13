@@ -7,6 +7,7 @@ package org.epics.ioc.support;
 
 import org.epics.ioc.dbAccess.*;
 import org.epics.ioc.dbProcess.*;
+import org.epics.ioc.util.IOCMessageType;
 
 
 /**
@@ -51,14 +52,13 @@ public class LinearConvertInputFactory {
             System.out.printf("%s.stop entered\n",supportName);
         }
 
-        public ProcessReturn process(ProcessCompleteListener listener) {
+        public ProcessReturn process(ProcessRequestListener listener) {
             System.out.printf("%s.process entered\n",supportName);
             return ProcessReturn.failure;
         }
 
-        public void processContinue() {
-            // TODO Auto-generated method stub
-            
+        public ProcessContinueReturn processContinue() {
+            return ProcessContinueReturn.failure;
         }
     }
 }

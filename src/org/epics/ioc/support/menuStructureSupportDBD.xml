@@ -1,19 +1,21 @@
 <?xml version="1.0" ?>
 <DBDefinition>
-<menu name = "menuPriority">
+<menu name = "priority">
     <choice>lowest</choice>
+    <choice>lower</choice>
     <choice>low</choice>
-    <choice>medium</choice>
+    <choice>middle</choice>
     <choice>high</choice>
+    <choice>higher</choice>
     <choice>highest</choice>
 </menu>
-<menu name = "menuScan">
+<menu name = "scan">
     <choice>passive</choice>
     <choice>event</choice>
     <choice>periodic</choice>
 </menu>
 
-<menu name = "menuAlarmSeverity">
+<menu name = "alarmSeverity">
     <choice>none</choice>
     <choice>minor</choice>
     <choice>major</choice>
@@ -26,15 +28,13 @@
 </structure>
 
 <structure name = "scan">
-    <field name = "priority" type = "menu" menuName = "menuPriority" default = "middle" />
-    <field name = "scan" type = "menu" menuName = "menuScan" default = "passive" />
+    <field name = "priority" type = "menu" menuName = "priority" default = "middle" />
+    <field name = "scan" type = "menu" menuName = "scan" default = "passive" />
     <field name = "rate" type = "double"  default = "1.0" />
     <field name = "eventName" type = "string" />
 </structure>
 <structure name = "processLink">
     <field name = "pvname" type = "string" link = "true" />
-    <field name = "wait" type = "boolean" />
-    <field name = "timeout" type = "double" />
     <field name = "inheritSeverity" type = "boolean" />
     <field name = "forceLocal" type = "boolean">
         <!-- if true pvname must be in local IOC -->
@@ -58,8 +58,6 @@
 <structure name = "inputLink">
     <field name = "pvname" type = "string" link = "true" />
     <field name = "process" type = "boolean" />
-    <field name = "wait" type = "boolean" />
-    <field name = "timeout" type = "double" />
     <field name = "inheritSeverity" type = "boolean" />
     <field name = "forceLocal" type = "boolean" >
         <!-- if true pvname must be in local IOC -->
@@ -69,8 +67,6 @@
 <structure name = "outputLink">
     <field name = "pvname" type = "string" link = "true" />
     <field name = "process" type = "boolean" />
-    <field name = "wait" type = "boolean" />
-    <field name = "timeout" type = "double" />
     <field name = "inheritSeverity" type = "boolean" />
     <field name = "forceLocal" type = "boolean" >
         <!-- if true pvname must be in local IOC -->
@@ -84,7 +80,7 @@
     <field name = "input" type = "short" />
     <field name = "link" type = "link" />
     <field name = "disableAlarmSeverity"
-           type = "menu" menuName = "menuAlarmSeverity" />
+           type = "menu" menuName = "alarmSeverity" />
 </structure>
 
 <structure name = "asynLink">
@@ -136,5 +132,8 @@
 />
 <support name = "linkArray"
     factoryName = "org.epics.ioc.support.LinkArraySupportFactory"
+/>
+<support name = "scan"
+    factoryName = "org.epics.ioc.support.ScanSupportFactory"
 />
 </DBDefinition>

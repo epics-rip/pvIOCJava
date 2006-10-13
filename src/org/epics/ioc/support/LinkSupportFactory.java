@@ -25,206 +25,119 @@ public class LinkSupportFactory {
      * @return A LinkSupport interface or null failure.
      */
     public static LinkSupport create(DBLink dbLink) {
-        LinkSupport support = null;
         String supportName = dbLink.getSupportName();
-        if(supportName.equals("processLink")) {
-            support = new ProcessLink(dbLink);
-        } else if(supportName.equals("inputLink")) {
-            support = new InputLink(dbLink);
-        } else if(supportName.equals("outputLink")) {
-            support = new OutputLink(dbLink);
-        }else if(supportName.equals("monitorLink")) {
-            support = new MonitorLink(dbLink);
+        if(supportName.equals(processLinkSupportName)) {
+            return new ProcessLink(dbLink);
+        } else if(supportName.equals(inputLinkSupportName)) {
+            return new InputLink(dbLink);
+        } else if(supportName.equals(outputLinkSupportName)) {
+            return new OutputLink(dbLink);
+        } else if(supportName.equals(monitorLinkSupportName)) {
+            return new MonitorLink(dbLink);
         }
-        return support;
+        dbLink.message("no support for " + supportName, IOCMessageType.fatalError);
+        return null;
     }
+    
+    private static final String processLinkSupportName = "processLink";
+    private static final String inputLinkSupportName = "inputLink";
+    private static final String outputLinkSupportName = "outputLink";
+    private static final String monitorLinkSupportName = "monitorLink";
 
     private static Convert convert = ConvertFactory.getConvert();
-    static private Pattern periodPattern = Pattern.compile("[.]");
-    
-    private static PVString getString(AbstractSupport support,
-    DBStructure configStructure,String fieldName)
-    {
-        DBData[] dbData = configStructure.getFieldDBDatas();
-        int index = configStructure.getFieldDBDataIndex(fieldName);
-        if(index<0) {
-            configStructure.message(
-                "InputLink.initialize: configStructure does not have field" + fieldName,
-                IOCMessageType.error);
-            return null;
-        }
-        if(dbData[index].getField().getType()!=Type.pvString) {
-            dbData[index].message(
-                "InputLink.initialize: configStructure field "
-                + fieldName + " does not have type string ",
-                IOCMessageType.error);
-            return null;
-        }
-        return (PVString)dbData[index];
-    }
-    
-    private static PVBoolean getBoolean(AbstractSupport support,
-    DBStructure configStructure,String fieldName)
-    {
-        DBData[] dbData = configStructure.getFieldDBDatas();
-        int index = configStructure.getFieldDBDataIndex(fieldName);
-        if(index<0) {
-            configStructure.message(
-                "InputLink.initialize: configStructure does not have field" + fieldName,
-                IOCMessageType.error);
-            return null;
-        }
-        if(dbData[index].getField().getType()!=Type.pvBoolean) {
-            dbData[index].message(
-                    "InputLink.initialize: configStructure field "
-                    + fieldName + " does not have type boolean ",
-                    IOCMessageType.error);
-            return null;
-        }
-        return (PVBoolean)dbData[index];
-    }
-    
-    private static PVDouble getDouble(AbstractSupport support,
-    DBStructure configStructure,String fieldName)
-    {
-        DBData[] dbData = configStructure.getFieldDBDatas();
-        int index = configStructure.getFieldDBDataIndex(fieldName);
-        if(index<0) {
-            configStructure.message(
-                "InputLink.initialize: configStructure does not have field" + fieldName,
-                IOCMessageType.error);
-            return null;
-        }
-        if(dbData[index].getField().getType()!=Type.pvDouble) {
-            dbData[index].message(
-                "InputLink.initialize: configStructure field "
-                + fieldName + " does not have type double ",
-                IOCMessageType.error);
-            return null;
-        }
-        return (PVDouble)dbData[index];
-    }
+    private static Pattern periodPattern = Pattern.compile("[.]");
     
     private static class ProcessLink extends AbstractSupport
-    implements LinkSupport,ChannelStateListener, ChannelProcessListener,ChannelFieldGroupListener
+    implements LinkSupport,ChannelStateListener, ChannelProcessListener
     {
-        private static String supportName = "ProcessLink";
-        private SupportState supportState = SupportState.readyForInitialize;
         private DBLink dbLink = null;
         private DBRecord dbRecord = null;
         private RecordProcess recordProcess = null;
         private RecordProcessSupport recordProcessSupport = null;
         private DBStructure configStructure = null;
         private PVString pvnameAccess = null;
-        private String recordName = null;
-        private PVBoolean waitAccess = null;
-        private PVDouble timeoutAccess = null;
         private PVBoolean inheritSeverityAccess = null;
-        private PVBoolean forceLocalAccess = null;
-        
-        private boolean wait = false;
         
         private Channel channel = null;
-        private DBRecord channelRecord = null;
         
         private ChannelProcess channelProcess = null;
-        private ProcessCompleteListener processListener = null;
-        private AlarmSeverity alarmSeverity = AlarmSeverity.invalid;
-        private String status = null;
-        private ProcessResult processResult = ProcessResult.failure;
+        private ProcessRequestListener processListener = null;
 
         private ProcessLink(DBLink dbLink) {
-            super(supportName,dbLink);
+            super(processLinkSupportName,dbLink);
             this.dbLink = dbLink;
         }       
         /* (non-Javadoc)
          * @see org.epics.ioc.dbProcess.Support#initialize()
          */
         public void initialize() {
-            if(supportState!=SupportState.readyForInitialize) return;
+            if(!super.checkSupportState(SupportState.readyForInitialize,processLinkSupportName)) return;
             dbRecord = dbLink.getRecord();
             recordProcess = dbRecord.getRecordProcess();
             recordProcessSupport = recordProcess.getRecordProcessSupport();
-            configStructure = dbLink.getConfigurationStructure();
-            Structure structure = (Structure)configStructure.getField();
-            String configStructureName = structure.getStructureName();
-            if(!configStructureName.equals("processLink")) {
-                throw new IllegalStateException(
-                    "InputLink.initialize: configStructure name is "
-                    + configStructureName
-                    + " but expecting inputLink"
-                    );
-            }
+            configStructure = getConfigStructure(dbLink,"processLink");
+            if(configStructure==null) return;
             pvnameAccess = getString(this,configStructure,"pvname");
             if(pvnameAccess==null) return;
-            waitAccess = getBoolean(this,configStructure,"wait");
-            if(waitAccess==null) return;
-            timeoutAccess = getDouble(this,configStructure,"timeout");
-            if(timeoutAccess==null) return;
             inheritSeverityAccess = getBoolean(this,configStructure,"inheritSeverity");
             if(inheritSeverityAccess==null) return;
-            forceLocalAccess = getBoolean(this,configStructure,"forceLocal");
-            if(forceLocalAccess==null) return;
-            supportState = SupportState.readyForStart;
-            setSupportState(supportState);
+            setSupportState(SupportState.readyForStart);
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.dbProcess.Support#uninitialize()
          */
         public void uninitialize() {
-            stop();
-            supportState = SupportState.readyForInitialize;
-            setSupportState(supportState);
+            if(super.getSupportState()==SupportState.ready) {
+                stop();
+            }
+            if(super.getSupportState()!=SupportState.readyForStart) return;
+            setSupportState(SupportState.readyForInitialize);
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.dbProcess.Support#start()
          */
         public void start() {
-            if(supportState!=SupportState.readyForStart) return;
-            wait = waitAccess.get();
+            if(!super.checkSupportState(SupportState.readyForStart,processLinkSupportName)) return;
             // split pvname into record name and rest of name
-            String[]pvname = periodPattern.split(pvnameAccess.get(),2);
-            recordName = pvname[0];
+            String name = pvnameAccess.get();
+            if(name==null) {
+                dbLink.message("pvname is not defined",IOCMessageType.error);
+                return;
+            }
+            String[]pvname = periodPattern.split(name,2);
+            String recordName = pvname[0];
             channel = ChannelFactory.createChannel(recordName,this);
             if(channel==null) {
                 dbLink.message(
                     "Failed to create channel for " + recordName,
                     IOCMessageType.error);
-                setSupportState(SupportState.readyForInitialize);
                 return;
             }
             if(channel.isLocal()) {
-                ChannelLink channelLocal = (ChannelLink)channel;
-                channelLocal.setLinkRecord(dbLink.getRecord());
+                ChannelLink channelLink = (ChannelLink)channel;
+                channelLink.setDBLink(dbLink);
             }
             channelProcess = channel.createChannelProcess();
-            supportState = SupportState.ready;
-            setSupportState(supportState);
+            setSupportState(SupportState.ready);
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.dbProcess.Support#stop()
          */
         public void stop() {
-            if(supportState!=SupportState.ready) return;
-            channelRecord = null;
-            wait = false;
-            if(channel!=null) channel.destroy();
+            if(super.getSupportState()!=SupportState.ready) return;
+            channelProcess.destroy();
+            channelProcess = null;
+            channel.destroy();
             channel = null;
-            supportState = SupportState.readyForStart;
-            setSupportState(supportState);
-        }
+            setSupportState(SupportState.readyForStart);
+        }        
         /* (non-Javadoc)
-         * @see org.epics.ioc.dbProcess.Support#process(org.epics.ioc.dbProcess.ProcessCompleteListener)
+         * @see org.epics.ioc.dbProcess.AbstractSupport#process(org.epics.ioc.dbProcess.ProcessRequestListener)
          */
-        public ProcessReturn process(ProcessCompleteListener listener) {
-            if(supportState!=SupportState.ready) {
-                dbLink.message(
-                    "process called but supportState is "
-                    + supportState.toString(),
-                    IOCMessageType.error);
+        public ProcessReturn process(ProcessRequestListener listener) {
+            if(!super.checkSupportState(SupportState.ready,processLinkSupportName + ".process")) {
                 return ProcessReturn.failure;
             }
-            if(channel==null) return ProcessReturn.failure;
             if(!channel.isConnected()) {
                 recordProcessSupport.setStatusSeverity(
                     dbLink.getFullFieldName() + " not connected",
@@ -232,17 +145,17 @@ public class LinkSupportFactory {
                 return ProcessReturn.failure;
             }
             processListener = listener;
-            channelProcess.process(this,wait);
-            return ProcessReturn.active;
-        }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.dbProcess.Support#processContinue()
-         */
-        public void processContinue() {
-            if(inheritSeverityAccess.get() && alarmSeverity!=AlarmSeverity.none) {
-                recordProcessSupport.setStatusSeverity("inherit" + status,alarmSeverity);
+            ChannelRequestReturn result = channelProcess.process(this);
+            switch(result) {
+            case active: return ProcessReturn.active;
+            case success: return ProcessReturn.success;
+            default: break;
             }
-            processListener.processComplete(this,processResult);
+            recordProcessSupport.setStatusSeverity(
+                dbLink.getRecord().getRecordName()
+                + dbLink.getFullFieldName() + " process request failed",
+                AlarmSeverity.major);
+            return ProcessReturn.failure;
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.dbProcess.LinkSupport#setField(org.epics.ioc.pvAccess.PVData)
@@ -253,165 +166,111 @@ public class LinkSupportFactory {
         /* (non-Javadoc)
          * @see org.epics.ioc.channelAccess.ChannelStateListener#channelStateChange(org.epics.ioc.channelAccess.Channel)
          */
-        public void channelStateChange(Channel c) {
-            assert(c==channel);
-            dbRecord.lock();
-            try {
-                if(!channel.isConnected()) {
-                    channelRecord = null;
-                    return;
-                }
-                if(forceLocalAccess.get() && !channel.isLocal()) {
-                    dbLink.message(
-                        "pvname " + pvnameAccess.get() + " is not local",
-                        IOCMessageType.error);
-                    setSupportState(SupportState.readyForInitialize);
-                }
-                channel.setTimeout(timeoutAccess.get());
-                channelRecord = null;
-                if(channel.isLocal()) {
-                    IOCDB iocdb = dbRecord.getIOCDB();
-                    channelRecord = iocdb.findRecord(recordName);
-                    if(channelRecord==null) {
-                        throw new IllegalStateException(
-                        "Logic Error: channel is local but cant find record");
-                    }
-                }
-            } finally {
-                dbRecord.unlock();
-            }
+        public void channelStateChange(Channel c,boolean isConnected) {
+            //nothing to do. Just wait until next process
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.channelAccess.ChannelStateListener#disconnect(org.epics.ioc.channelAccess.Channel)
          */
         public void disconnect(Channel c) {
-            dbRecord.lock();
-            try {
-                uninitialize();
-            } finally {
-                dbRecord.unlock();
-            }
-        }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.channelAccess.ChannelProcessListener#processDone(org.epics.ioc.dbProcess.ProcessResult, org.epics.ioc.util.AlarmSeverity, java.lang.String)
-         */
-        public void processDone(Channel channel,ProcessResult result,AlarmSeverity alarmSeverity,String status) {
-            this.alarmSeverity = alarmSeverity;
-            this.status = status;
-            processResult = result;
-            recordProcessSupport.processContinue(this);
-        }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.channelAccess.ChannelProcessListener#failure(java.lang.String)
-         */
-        public void failure(Channel channel,String reason) {
-            alarmSeverity = AlarmSeverity.major;
-            status = "linked process failed";
-            processResult = ProcessResult.failure;
-            recordProcessSupport.processContinue(this);
+            // record is not locked must not call uninitialize directly
+            recordProcess.uninitialize();
         }
         
         /* (non-Javadoc)
-         * @see org.epics.ioc.channelAccess.ChannelFieldGroupListener#accessRightsChange(org.epics.ioc.channelAccess.Channel, org.epics.ioc.channelAccess.ChannelField)
+         * @see org.epics.ioc.channelAccess.ChannelRequestListener#requestResult(org.epics.ioc.channelAccess.Channel, org.epics.ioc.util.AlarmSeverity, java.lang.String, org.epics.ioc.util.TimeStamp)
          */
-        public void accessRightsChange(Channel channel,ChannelField channelField) {
-            // nothing to do
+        public void requestResult(Channel channel, AlarmSeverity alarmSeverity, String status, TimeStamp timeStamp) {
+            if(inheritSeverityAccess.get()) {
+                dbRecord.lock();
+                try {
+                    recordProcessSupport.setStatusSeverity("inherit" + status,alarmSeverity);
+                } finally {
+                    dbRecord.unlock();
+                }
+            }
+        }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.channelAccess.ChannelRequestListener#requestDone(org.epics.ioc.channelAccess.Channel)
+         */
+        public void requestDone(Channel channel) {
+            processListener.processComplete();
+        }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.channelAccess.ChannelProcessListener#message(org.epics.ioc.channelAccess.Channel, java.lang.String)
+         */
+        public void message(Channel channel,String message) {
+            dbLink.message(message, IOCMessageType.warning);
         }
     }
     
     private static class InputLink extends AbstractSupport
     implements LinkSupport,ChannelStateListener, ChannelGetListener, ChannelFieldGroupListener
     {
-        private static String supportName = "InputLink";
-        
-        private SupportState supportState = SupportState.readyForInitialize;
+        private DBLink dbLink;
+        private DBRecord dbRecord = null;
         private RecordProcess recordProcess = null;
         private RecordProcessSupport recordProcessSupport = null;
-        private DBLink dbLink = null;
-        private DBRecord dbRecord = null;
         private DBStructure configStructure = null;
         private PVString pvnameAccess = null;
-        private String recordName = null;
         private String fieldName = null;
         private PVBoolean processAccess = null;
-        private PVBoolean waitAccess = null;
-        private PVDouble timeoutAccess = null;
         private PVBoolean inheritSeverityAccess = null;
-        private PVBoolean forceLocalAccess = null;
         
         private PVData valueData = null;
         
         private boolean process = false;
-        private boolean wait = false;
         
         private Channel channel = null;
         private DBRecord channelRecord = null;
         private ChannelGet channelGet = null;
-        private ChannelField linkField = null;
-        private ChannelField severityField = null;
+        private ChannelField channelField = null;
         private ChannelFieldGroup fieldGroup = null;
         
-        private boolean isSynchronous = false;
-        private ProcessResult processResult = ProcessResult.failure;
-        private ProcessReturn processReturn = ProcessReturn.failure;
-        private ProcessCompleteListener processListener = null;
+        private ProcessRequestListener processListener = null;
         
         /**
          * Constructor for InputLink.
          * @param dbLink The field for which to create support.
          */
         public InputLink(DBLink dbLink) {
-            super(supportName,dbLink);
+            super(inputLinkSupportName,dbLink);
             this.dbLink = dbLink;
-            dbRecord = dbLink.getRecord();
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.dbProcess.Support#initialize()
          */
         public void initialize() {
-            if(supportState!=SupportState.readyForInitialize) return;
+            if(!super.checkSupportState(SupportState.readyForInitialize,inputLinkSupportName)) return;
+            dbRecord = dbLink.getRecord();
             recordProcess = dbRecord.getRecordProcess();
             recordProcessSupport = recordProcess.getRecordProcessSupport();
-            configStructure = dbLink.getConfigurationStructure();
-            Structure structure = (Structure)configStructure.getField();
-            String configStructureName = structure.getStructureName();
-            if(!configStructureName.equals("inputLink")) {
-                dbLink.message(
-                    "InputLink.initialize: configStructure name is "
-                    + configStructureName
-                    + " but expecting inputLink",
-                    IOCMessageType.error);
-                return;
-            }
+            configStructure = getConfigStructure(dbLink,"inputLink");
+            if(configStructure==null) return;
             pvnameAccess = getString(this,configStructure,"pvname");
             if(pvnameAccess==null) return;
             processAccess = getBoolean(this,configStructure,"process");
             if(processAccess==null) return;
-            waitAccess = getBoolean(this,configStructure,"wait");
-            if(waitAccess==null) return;
-            timeoutAccess = getDouble(this,configStructure,"timeout");
-            if(timeoutAccess==null) return;
             inheritSeverityAccess = getBoolean(this,configStructure,"inheritSeverity");
             if(inheritSeverityAccess==null) return;
-            forceLocalAccess = getBoolean(this,configStructure,"forceLocal");
-            if(forceLocalAccess==null) return;
-            supportState = SupportState.readyForStart;
-            setSupportState(supportState);
+            setSupportState(SupportState.readyForStart);
         }
         
         /* (non-Javadoc)
          * @see org.epics.ioc.dbProcess.Support#uninitialize()
          */
         public void uninitialize() {
-            stop();
-            supportState = SupportState.readyForInitialize;
-            setSupportState(supportState);
+            if(super.getSupportState()==SupportState.ready) {
+                stop();
+            }
+            if(super.getSupportState()!=SupportState.readyForStart) return;
+            setSupportState(SupportState.readyForInitialize);
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.dbProcess.Support#start()
          */
         public void start() {
-            if(supportState!=SupportState.readyForStart) return;
+            if(!super.checkSupportState(SupportState.readyForStart,inputLinkSupportName)) return;
             if(valueData==null) {
                 dbLink.message(
                     "Logic Error: InputLink.start called before setField",
@@ -420,10 +279,9 @@ public class LinkSupportFactory {
                 return;
             }
             process = processAccess.get();
-            wait = waitAccess.get();
             // split pvname into record name and rest of name
             String[]pvname = periodPattern.split(pvnameAccess.get(),2);
-            recordName = pvname[0];
+            String recordName = pvname[0];
             if(pvname.length==2) {
                 fieldName = pvname[1];
             } else {
@@ -438,27 +296,22 @@ public class LinkSupportFactory {
                 return;
             }
             if(channel.isLocal()) {
-                ChannelLink channelLocal = (ChannelLink)channel;
-                channelLocal.setLinkRecord(dbLink.getRecord());
+                ChannelLink channelLink = (ChannelLink)channel;
+                channelLink.setDBLink(dbLink);
             }
-            
             channelGet = channel.createChannelGet();
-            if(channel.isConnected()) {
-                channelStateChange(channel);
-            }
-            supportState = SupportState.ready;
-            setSupportState(supportState);
+            if(channel.isConnected()) prepareForInput();
+            setSupportState(SupportState.ready);
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.dbProcess.Support#stop()
          */
         public void stop() {
-            if(supportState!=SupportState.ready) return;
+            if(super.getSupportState()!=SupportState.ready) return;
             channelRecord = null;
             if(channel!=null) channel.destroy();
             channel = null;
-            supportState = SupportState.readyForStart;
-            setSupportState(supportState);
+            setSupportState(SupportState.readyForStart);
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.dbProcess.LinkSupport#setField(org.epics.ioc.pvAccess.PVData)
@@ -469,88 +322,47 @@ public class LinkSupportFactory {
         /* (non-Javadoc)
          * @see org.epics.ioc.dbProcess.LinkSupport#process(org.epics.ioc.dbProcess.LinkListener)
          */
-        public ProcessReturn process(ProcessCompleteListener listener) {
-            if(supportState!=SupportState.ready) {
-                dbLink.message(
-                        "process called but supportState is "
-                        + supportState.toString(),
-                        IOCMessageType.error);
-                return ProcessReturn.failure;
-            }
+        public ProcessReturn process(ProcessRequestListener listener) {
+            if(!super.checkSupportState(SupportState.ready,inputLinkSupportName + ".process")) return ProcessReturn.failure;
             if(!channel.isConnected()) {
                 recordProcessSupport.setStatusSeverity("Link not connected",
                     AlarmSeverity.invalid);
                 return ProcessReturn.failure;
             }
+            if(channelField==null) {
+                recordProcessSupport.setStatusSeverity("Link is not prepared for input",
+                        AlarmSeverity.invalid);
+                    return ProcessReturn.failure;
+            }
             processListener = listener;
-            isSynchronous = true;
-            processResult = ProcessResult.success;
-            processReturn = ProcessReturn.active;
-            channelGet.get(fieldGroup,this,process,wait);
-            isSynchronous = false;
-            if(processReturn==ProcessReturn.active) return processReturn;
-            if(processResult==ProcessResult.success) return ProcessReturn.success;
+            ChannelRequestReturn result = channelGet.get(fieldGroup,this,process);
+            switch(result) {
+            case active: return ProcessReturn.active;
+            case success: return ProcessReturn.success;
+            default: break;
+            }
+            recordProcessSupport.setStatusSeverity(
+                dbLink.getRecord().getRecordName()
+                + dbLink.getFullFieldName() + " get request failed",
+                AlarmSeverity.major);
             return ProcessReturn.failure;
         }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.dbProcess.Support#processContinue()
-         */
-        public void processContinue() {
-            processListener.processComplete(this,processResult);
-        }
+        
         /* (non-Javadoc)
          * @see org.epics.ioc.channelAccess.ChannelStateListener#channelStateChange(org.epics.ioc.channelAccess.Channel)
          */
-        public void channelStateChange(Channel c) {
+        public void channelStateChange(Channel c,boolean isConnected) {
             assert(c==channel);
             dbRecord.lock();
             try {
-                if(!channel.isConnected()) {
-                    channelRecord = null;
-                    severityField = null;
-                    linkField = null;
+                if(!isConnected) {
                     if(fieldGroup!=null) fieldGroup.destroy();
                     fieldGroup = null;
+                    channelRecord = null;
+                    channelField = null;
                     return;
-                }
-                String errorMessage = null;
-                if(forceLocalAccess.get() && !channel.isLocal()) {
-                    dbLink.message(
-                            "pvname " + pvnameAccess.get(),
-                            IOCMessageType.error);
-                    setSupportState(SupportState.readyForInitialize);
-                }
-                ChannelSetFieldResult result = channel.setField(fieldName);
-                if(result!=ChannelSetFieldResult.thisChannel) {
-                    throw new IllegalStateException(
-                    "Logic Error: InputLink.connect bad return from setField");
-                }
-                linkField = channel.getChannelField();
-                errorMessage = checkCompatibility();
-                if(errorMessage!=null) {
-                    dbLink.message(errorMessage,IOCMessageType.error);
-                    return;
-                }
-                fieldGroup = channel.createFieldGroup(this);
-                fieldGroup.addChannelField(linkField);
-                if(inheritSeverityAccess.get()) {
-                    result = channel.setField("severity");
-                    if(result==ChannelSetFieldResult.thisChannel) {
-                        severityField = channel.getChannelField();
-                        fieldGroup.addChannelField(severityField);
-                    } else {
-                        severityField = null;
-                    }
-                }
-                channel.setTimeout(timeoutAccess.get());
-                channelRecord = null;
-                if(channel.isLocal()) {
-                    IOCDB iocdb = dbRecord.getIOCDB();
-                    channelRecord = iocdb.findRecord(recordName);
-                    if(channelRecord==null) {
-                        throw new IllegalStateException(
-                        "Logic Error: channel is local but cant find record");
-                    }
+                } else {
+                    prepareForInput();
                 }
             } finally {
                 dbRecord.unlock();
@@ -560,47 +372,29 @@ public class LinkSupportFactory {
          * @see org.epics.ioc.channelAccess.ChannelStateListener#disconnect(org.epics.ioc.channelAccess.Channel)
          */
         public void disconnect(Channel c) {
-            dbRecord.lock();
-            try {
-                uninitialize();
-            } finally {
-                dbRecord.unlock();
-            }
+            //  record is not locked must not call uninitialize directly
+            recordProcess.uninitialize();
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.channelAccess.ChannelGetListener#beginSynchronous()
          */
         public void beginSynchronous(Channel channel) {
-            processReturn = ProcessReturn.success;
+            // nothing to do
         }
-
         /* (non-Javadoc)
          * @see org.epics.ioc.channelAccess.ChannelGetListener#endSynchronous()
          */
         public void endSynchronous(Channel channel) {
-            processResult = ProcessResult.success;
-            if(!isSynchronous) {
-                recordProcessSupport.processContinue(this);
-            }
+            // nothing to do.
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.channelAccess.ChannelGetListener#newData(org.epics.ioc.channelAccess.ChannelField, org.epics.ioc.pvAccess.PVData)
          */
         public void newData(Channel channel,ChannelField field,PVData data) {
-            if(field==severityField) {
-                PVEnum pvEnum = (PVEnum)data;
-                AlarmSeverity severity = AlarmSeverity.getSeverity(
-                    pvEnum.getIndex());
-                if(severity!=AlarmSeverity.none) {
-                    recordProcess.getRecordProcessSupport().setStatusSeverity("inherit severity",severity);
-                }
-                return;
-            }
-            if(field!=linkField) {
+            if(field!=channelField) {
                 dbLink.message(
-                    "Logic error in InputLink field!=linkField",
+                    "Logic error in InputLink field!=channelField",
                     IOCMessageType.fatalError);
-                processResult = ProcessResult.failure;
             }
             Type linkType = data.getField().getType();
             Field valueField = valueData.getField();
@@ -625,16 +419,27 @@ public class LinkSupportFactory {
             dbLink.message(
                     "Logic error in InputLink: unsupported type",
                     IOCMessageType.fatalError);
-            processResult = ProcessResult.failure;
+        }       
+        /* (non-Javadoc)
+         * @see org.epics.ioc.channelAccess.ChannelRequestListener#requestDone(org.epics.ioc.channelAccess.Channel)
+         */
+        public void requestDone(Channel channel) {
+            processListener.processComplete();
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.channelAccess.ChannelGetListener#failure(java.lang.String)
+         * @see org.epics.ioc.channelAccess.ChannelRequestListener#requestResult(org.epics.ioc.channelAccess.Channel, org.epics.ioc.util.AlarmSeverity, java.lang.String, org.epics.ioc.util.TimeStamp)
          */
-        public void failure(Channel channel,String reason) {
-            processResult = ProcessResult.failure;
-            if(!isSynchronous) {
-                recordProcessSupport.processContinue(this);
+        public void requestResult(Channel channel, AlarmSeverity alarmSeverity, String status, TimeStamp timeStamp) {
+            if(inheritSeverityAccess.get()) {
+                recordProcessSupport.setStatusSeverity("inherit" + status,alarmSeverity);
             }
+            
+        }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.channelAccess.ChannelProcessListener#message(org.epics.ioc.channelAccess.Channel, java.lang.String)
+         */
+        public void message(Channel channel,String message) {
+            dbLink.message(message, IOCMessageType.warning);
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.channelAccess.ChannelFieldGroupListener#accessRightsChange(org.epics.ioc.channelAccess.ChannelField)
@@ -643,19 +448,47 @@ public class LinkSupportFactory {
             // nothing to do
         }
         
+        private void prepareForInput() {
+            String errorMessage = null;
+            ChannelSetFieldResult result = channel.setField(fieldName);
+            if(result!=ChannelSetFieldResult.thisChannel) {
+                dbLink.message(
+                    "Logic Error: InputLink.connect bad return from setField",
+                    IOCMessageType.error);
+                return;
+            }
+            channelField = channel.getChannelField();
+            errorMessage = checkCompatibility();
+            if(errorMessage!=null) {
+                channelField = null;
+                dbLink.message(errorMessage,IOCMessageType.error);
+                return;
+            }
+            fieldGroup = channel.createFieldGroup(this);
+            fieldGroup.addChannelField(channelField);
+            channelRecord = null;
+            if(channel.isLocal()) {
+                IOCDB iocdb = dbRecord.getIOCDB();
+                channelRecord = iocdb.findRecord(dbRecord.getRecordName());
+                if(channelRecord==null) {
+                    throw new IllegalStateException(
+                    "Logic Error: channel is local but can't find record");
+                }
+            }
+        }
         
         private String checkCompatibility() {
-            Type linkType = linkField.getField().getType();
+            Type linkType = channelField.getField().getType();
             Field valueField = valueData.getField();
             Type valueType = valueField.getType();
             if(valueType.isScalar() && linkType.isScalar()) {
-                if(convert.isCopyScalarCompatible(linkField.getField(),valueField)) return null;
+                if(convert.isCopyScalarCompatible(channelField.getField(),valueField)) return null;
             } else if(linkType==Type.pvArray && valueType==Type.pvArray) {
-                Array linkArray = (Array)linkField;
+                Array linkArray = (Array)channelField;
                 Array recordArray = (Array)valueField;
                 if(convert.isCopyArrayCompatible(linkArray,recordArray)) return null;
             } else if(linkType==Type.pvStructure && valueType==Type.pvStructure) {
-                Structure linkStructure = (Structure)linkField;
+                Structure linkStructure = (Structure)channelField;
                 Structure recordStructure = (Structure)valueField;
                 if(convert.isCopyStructureCompatible(linkStructure,recordStructure)) return null;
             }
@@ -669,44 +502,34 @@ public class LinkSupportFactory {
     private static class OutputLink extends AbstractSupport
     implements LinkSupport,ChannelStateListener, ChannelPutListener, ChannelFieldGroupListener
     {
-        private static String supportName = "OutputLink";
-        
-        private SupportState supportState = SupportState.readyForInitialize;
         private RecordProcess recordProcess = null;
         private RecordProcessSupport recordProcessSupport = null;
         private DBLink dbLink = null;
         private DBRecord dbRecord = null;
         private DBStructure configStructure = null;
         private PVString pvnameAccess = null;
-        private String recordName = null;
         private String fieldName = null;
         private PVBoolean processAccess = null;
-        private PVBoolean waitAccess = null;
-        private PVDouble timeoutAccess = null;
-        private PVBoolean forceLocalAccess = null;
+        private PVBoolean inheritSeverityAccess = null;
         
         private PVData valueData = null;
         
         private boolean process = false;
-        private boolean wait = false;
         
         private Channel channel = null;
         private DBRecord channelRecord = null;
         private ChannelPut dataPut = null;
-        private ChannelField linkField = null;
+        private ChannelField channelField = null;
         private ChannelFieldGroup fieldGroup = null;
         
-        private boolean isSynchronous = false;
-        private ProcessResult processResult = ProcessResult.failure;
-        private ProcessReturn processReturn = ProcessReturn.failure;
-        private ProcessCompleteListener processListener = null;
+        private ProcessRequestListener processListener = null;
         
         /**
          * Constructor for an OutputLink
          * @param dbLink
          */
         public OutputLink(DBLink dbLink) {
-            super(supportName,dbLink);
+            super(outputLinkSupportName,dbLink);
             this.dbLink = dbLink;
             dbRecord = dbLink.getRecord();
         }
@@ -714,47 +537,35 @@ public class LinkSupportFactory {
          * @see org.epics.ioc.dbProcess.Support#initialize()
          */
         public void initialize() {
-            if(supportState!=SupportState.readyForInitialize) return;
+            if(!super.checkSupportState(SupportState.readyForInitialize,outputLinkSupportName)) return;
             recordProcess = dbRecord.getRecordProcess();
             recordProcessSupport = recordProcess.getRecordProcessSupport();
-            configStructure = dbLink.getConfigurationStructure();
-            Structure structure = (Structure)configStructure.getField();
-            String configStructureName = structure.getStructureName();
-            if(!configStructureName.equals("outputLink")) {
-                dbLink.message(
-                        "OutputLink.initialize: configStructure name is "
-                        + configStructureName
-                        + " but expecting outputLink",
-                        IOCMessageType.error);
-                return;
-            }
+            configStructure = getConfigStructure(dbLink,"outputLink");
+            if(configStructure==null) return;
             pvnameAccess = getString(this,configStructure,"pvname");
             if(pvnameAccess==null) return;
             processAccess = getBoolean(this,configStructure,"process");
             if(processAccess==null) return;
-            waitAccess = getBoolean(this,configStructure,"wait");
-            if(waitAccess==null) return;
-            timeoutAccess = getDouble(this,configStructure,"timeout");
-            if(timeoutAccess==null) return;
-            forceLocalAccess = getBoolean(this,configStructure,"forceLocal");
-            if(forceLocalAccess==null) return;
-            supportState = SupportState.readyForStart;
-            setSupportState(supportState);
+            inheritSeverityAccess = getBoolean(this,configStructure,"inheritSeverity");
+            if(inheritSeverityAccess==null) return;
+            setSupportState(SupportState.readyForStart);
         }
         
         /* (non-Javadoc)
          * @see org.epics.ioc.dbProcess.Support#uninitialize()
          */
         public void uninitialize() {
-            stop();
-            supportState = SupportState.readyForInitialize;
-            setSupportState(supportState);
+            if(super.getSupportState()==SupportState.ready) {
+                stop();
+            }
+            if(super.getSupportState()!=SupportState.readyForStart) return;
+            setSupportState(SupportState.readyForInitialize);
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.dbProcess.Support#start()
          */
         public void start() {
-            if(supportState!=SupportState.readyForStart) return;
+            if(!super.checkSupportState(SupportState.readyForStart,outputLinkSupportName)) return;
             if(valueData==null) {
                 dbLink.message(
                         "Logic Error: OutputLink.start called before setField",
@@ -763,10 +574,9 @@ public class LinkSupportFactory {
                 return;
             }
             process = processAccess.get();
-            wait = waitAccess.get();
             // split pvname into record name and rest of name
             String[]pvname = periodPattern.split(pvnameAccess.get(),2);
-            recordName = pvname[0];
+            String recordName = pvname[0];
             if(pvname.length==2) {
                 fieldName = pvname[1];
             } else {
@@ -781,27 +591,23 @@ public class LinkSupportFactory {
                 return;
             }
             if(channel.isLocal()) {
-                ChannelLink channelLocal = (ChannelLink)channel;
-                channelLocal.setLinkRecord(dbLink.getRecord());
+                ChannelLink channelLink = (ChannelLink)channel;
+                channelLink.setDBLink(dbLink);
             }
             
             dataPut = channel.createChannelPut();
-            if(channel.isConnected()) {
-                channelStateChange(channel);
-            }
-            supportState = SupportState.ready;
-            setSupportState(supportState);
+            if(channel.isConnected()) prepareForOutput();
+            setSupportState(SupportState.ready);
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.dbProcess.Support#stop()
          */
         public void stop() {
-            if(supportState!=SupportState.ready) return;
+            if(super.getSupportState()!=SupportState.ready) return;
             channelRecord = null;
             if(channel!=null) channel.destroy();
             channel = null;
-            supportState = SupportState.readyForStart;
-            setSupportState(supportState);
+            setSupportState(SupportState.readyForStart);
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.dbProcess.LinkSupport#setField(org.epics.ioc.pvAccess.PVData)
@@ -812,90 +618,64 @@ public class LinkSupportFactory {
         /* (non-Javadoc)
          * @see org.epics.ioc.dbProcess.LinkSupport#process(org.epics.ioc.dbProcess.LinkListener)
          */
-        public ProcessReturn process(ProcessCompleteListener listener) {
-            if(supportState!=SupportState.ready) {
-                dbLink.message(
-                        "process called but supportState is "
-                        + supportState.toString(),
-                        IOCMessageType.error);
-                return ProcessReturn.failure;
-            }
+        public ProcessReturn process(ProcessRequestListener listener) {
+            if(!super.checkSupportState(SupportState.ready,outputLinkSupportName + ".process")) return ProcessReturn.failure;
             if(!channel.isConnected()) {
                 recordProcessSupport.setStatusSeverity("Link not connected",
                     AlarmSeverity.invalid);
                 return ProcessReturn.failure;
             }
+            if(channelField==null) {
+                recordProcessSupport.setStatusSeverity("Link is not prepared for output",
+                    AlarmSeverity.invalid);
+                return ProcessReturn.failure;
+            }
             processListener = listener;
-            isSynchronous = true;
-            processResult = ProcessResult.success;
-            processReturn = ProcessReturn.active;
-            dataPut.put(fieldGroup,this,process,wait);
-            isSynchronous = false;
-            if(processReturn==ProcessReturn.active) return processReturn;
-            if(processResult==ProcessResult.success) return ProcessReturn.success;
+            ChannelRequestReturn result = dataPut.put(fieldGroup,this,process);
+            switch(result) {
+            case active: return ProcessReturn.active;
+            case success: return ProcessReturn.success;
+            default: break;
+            }
+            recordProcessSupport.setStatusSeverity(
+                dbLink.getRecord().getRecordName()
+                 + dbLink.getFullFieldName() + " put request failed",
+                AlarmSeverity.major);
             return ProcessReturn.failure;
-        }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.dbProcess.Support#processContinue()
-         */
-        public void processContinue() {
-            processListener.processComplete(this,processResult);
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.channelAccess.ChannelStateListener#channelStateChange(org.epics.ioc.channelAccess.Channel)
          */
-        public void channelStateChange(Channel c) {
+        public void channelStateChange(Channel c,boolean isConnected) {
             assert(c==channel);
             dbRecord.lock();
             try {
                 if(!channel.isConnected()) {
-                    channelRecord = null;
-                    linkField = null;
                     if(fieldGroup!=null) fieldGroup.destroy();
                     fieldGroup = null;
+                    channelRecord = null;
+                    channelField = null;
                     return;
                 }
-                String errorMessage = null;
-                if(forceLocalAccess.get() && !channel.isLocal()) {
-                    dbLink.message(
-                            "pvname " + pvnameAccess.get() + " is not local",
-                            IOCMessageType.error);
-                    setSupportState(SupportState.readyForInitialize);
-                }
-                ChannelSetFieldResult result = channel.setField(fieldName);
-                if(result!=ChannelSetFieldResult.thisChannel) {
-                    throw new IllegalStateException(
-                    "Logic Error: OutputLink.connect bad return from setField");
-                }
-                linkField = channel.getChannelField();
-                errorMessage = checkCompatibility();
-                if(errorMessage!=null) {
-                    dbLink.message(errorMessage,IOCMessageType.error);
-                    return;
-                }
-                fieldGroup = channel.createFieldGroup(this);
-                fieldGroup.addChannelField(linkField);
-                channel.setTimeout(timeoutAccess.get());
-                channelRecord = null;
-                if(channel.isLocal()) {
-                    IOCDB iocdb = dbRecord.getIOCDB();
-                    channelRecord = iocdb.findRecord(recordName);
-                    if(channelRecord==null) {
-                        throw new IllegalStateException(
-                        "Logic Error: channel is local but cant find record");
-                    }
-                }
+                prepareForOutput();
             } finally {
                 dbRecord.unlock();
             }
-        }       
+        } 
         /* (non-Javadoc)
          * @see org.epics.ioc.channelAccess.ChannelStateListener#disconnect(org.epics.ioc.channelAccess.Channel)
          */
         public void disconnect(Channel c) {
             dbRecord.lock();
             try {
+                SupportState supportState = dbRecord.getSupport().getSupportState();
                 uninitialize();
+                switch(supportState) {
+                case readyForInitialize: break;
+                case readyForStart: initialize(); break;
+                case ready: initialize(); start(); break;
+                case zombie: break;
+                }
             } finally {
                 dbRecord.unlock();
             }
@@ -904,11 +684,10 @@ public class LinkSupportFactory {
          * @see org.epics.ioc.channelAccess.ChannelPutListener#nextData(org.epics.ioc.channelAccess.Channel, org.epics.ioc.channelAccess.ChannelField, org.epics.ioc.pvAccess.PVData)
          */
         public void nextData(Channel channel, ChannelField field, PVData data) {
-            if(field!=linkField) {
+            if(field!=channelField) {
                 dbLink.message(
-                        "Logic error in OutputLink field!=linkField",
+                        "Logic error in OutputLink field!=channelField",
                         IOCMessageType.fatalError);
-                processResult = ProcessResult.failure;
             }
             Type linkType = data.getField().getType();
             Field valueField = valueData.getField();
@@ -932,26 +711,28 @@ public class LinkSupportFactory {
             dbLink.message(
                     "Logic error in OutputLink: unsupported type",
                     IOCMessageType.fatalError);
-            processResult = ProcessResult.failure;
+        }
+        
+        /* (non-Javadoc)
+         * @see org.epics.ioc.channelAccess.ChannelRequestListener#requestDone(org.epics.ioc.channelAccess.Channel)
+         */
+        public void requestDone(Channel channel) {
+            processListener.processComplete();
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.channelAccess.ChannelPutListener#processDone(org.epics.ioc.channelAccess.Channel, org.epics.ioc.dbProcess.ProcessResult, org.epics.ioc.util.AlarmSeverity, java.lang.String)
+         * @see org.epics.ioc.channelAccess.ChannelRequestListener#requestResult(org.epics.ioc.channelAccess.Channel, org.epics.ioc.util.AlarmSeverity, java.lang.String, org.epics.ioc.util.TimeStamp)
          */
-        public void processDone(Channel channel, ProcessResult result, AlarmSeverity alarmSeverity, String status) {
-            processResult = ProcessResult.success;
-            if(!isSynchronous) {
-                recordProcessSupport.processContinue(this);
+        public void requestResult(Channel channel, AlarmSeverity alarmSeverity, String status, TimeStamp timeStamp) {
+            if(inheritSeverityAccess.get()) {
+                recordProcessSupport.setStatusSeverity("inherit" + status,alarmSeverity);
             }
             
-        }      
+        }
         /* (non-Javadoc)
          * @see org.epics.ioc.channelAccess.ChannelPutListener#failure(org.epics.ioc.channelAccess.Channel, java.lang.String)
          */
-        public void failure(Channel channel,String reason) {
-            processResult = ProcessResult.failure;
-            if(!isSynchronous) {
-                recordProcessSupport.processContinue(this);
-            }
+        public void message(Channel channel,String message) {
+            dbLink.message(message, IOCMessageType.warning);
         }
         
         /* (non-Javadoc)
@@ -960,19 +741,44 @@ public class LinkSupportFactory {
         public void accessRightsChange(Channel channel,ChannelField channelField) {
             // nothing to do
         }
-              
+        
+        private void prepareForOutput() {
+            String errorMessage = null;
+            ChannelSetFieldResult result = channel.setField(fieldName);
+            if(result!=ChannelSetFieldResult.thisChannel) {
+                throw new IllegalStateException(
+                "Logic Error: OutputLink.connect bad return from setField");
+            }
+            channelField = channel.getChannelField();
+            errorMessage = checkCompatibility();
+            if(errorMessage!=null) {
+                dbLink.message(errorMessage,IOCMessageType.error);
+                return;
+            }
+            fieldGroup = channel.createFieldGroup(this);
+            fieldGroup.addChannelField(channelField);
+            channelRecord = null;
+            if(channel.isLocal()) {
+                IOCDB iocdb = dbRecord.getIOCDB();
+                channelRecord = iocdb.findRecord(dbRecord.getRecordName());
+                if(channelRecord==null) {
+                    throw new IllegalStateException(
+                    "Logic Error: channel is local but cant find record");
+                }
+            }
+        }      
         private String checkCompatibility() {
-            Type linkType = linkField.getField().getType();
+            Type linkType = channelField.getField().getType();
             Field valueField = valueData.getField();
             Type valueType = valueField.getType();
             if(valueType.isScalar() && linkType.isScalar()) {
-                if(convert.isCopyScalarCompatible(linkField.getField(),valueField)) return null;
+                if(convert.isCopyScalarCompatible(channelField.getField(),valueField)) return null;
             } else if(linkType==Type.pvArray && valueType==Type.pvArray) {
-                Array linkArray = (Array)linkField;
+                Array linkArray = (Array)channelField;
                 Array recordArray = (Array)valueField;
                 if(convert.isCopyArrayCompatible(linkArray,recordArray)) return null;
             } else if(linkType==Type.pvStructure && valueType==Type.pvStructure) {
-                Structure linkStructure = (Structure)linkField;
+                Structure linkStructure = (Structure)channelField;
                 Structure recordStructure = (Structure)valueField;
                 if(convert.isCopyStructureCompatible(linkStructure,recordStructure)) return null;
             }
@@ -987,26 +793,21 @@ public class LinkSupportFactory {
     implements LinkSupport,ChannelStateListener,ChannelFieldGroupListener,
     ChannelNotifyGetListener, ChannelNotifyListener
     {
-        private static String supportName = "MonitorLink";
-        
-        private SupportState supportState = SupportState.readyForInitialize;
         private RecordProcess recordProcess = null;
         private RecordProcessSupport recordProcessSupport = null;
         private DBLink dbLink = null;
         private DBRecord dbRecord = null;
         private DBStructure configStructure = null;
         private PVString pvnameAccess = null;
-        private String recordName = null;
         private String fieldName = null;
         private PVBoolean processAccess = null;
-        private PVBoolean monitorOnlyAccess = null;
+        private PVInt queueCapacityAccess = null;
         private PVBoolean inheritSeverityAccess = null;
-        private PVBoolean forceLocalAccess = null;
         
         private PVData valueData = null;
         
         private boolean process = false;
-        private boolean monitorOnly = false;
+        private int queueCapacity = 0;
         
         private Channel channel = null;
         private DBRecord channelRecord = null;
@@ -1021,7 +822,7 @@ public class LinkSupportFactory {
          * @param dbLink The field for which to create support.
          */
         public MonitorLink(DBLink dbLink) {
-            super(supportName,dbLink);
+            super(monitorLinkSupportName,dbLink);
             this.dbLink = dbLink;
             dbRecord = dbLink.getRecord();
         }
@@ -1029,47 +830,37 @@ public class LinkSupportFactory {
          * @see org.epics.ioc.dbProcess.Support#initialize()
          */
         public void initialize() {
-            if(supportState!=SupportState.readyForInitialize) return;
+            if(!super.checkSupportState(SupportState.readyForInitialize,monitorLinkSupportName)) return;
             recordProcess = dbRecord.getRecordProcess();
             recordProcessSupport = recordProcess.getRecordProcessSupport();
-            configStructure = dbLink.getConfigurationStructure();
-            Structure structure = (Structure)configStructure.getField();
-            String configStructureName = structure.getStructureName();
-            if(!configStructureName.equals("monitorLink")) {
-                dbLink.message(
-                        "MonitorLink.initialize: configStructure name is "
-                        + configStructureName
-                        + " but expecting monitorLink",
-                        IOCMessageType.error);
-                return;
-            }
+            configStructure = getConfigStructure(dbLink,"monitorLink");
+            if(configStructure==null) return;
             pvnameAccess = getString(this,configStructure,"pvname");
             if(pvnameAccess==null) return;
             processAccess = getBoolean(this,configStructure,"process");
             if(processAccess==null) return;
-            monitorOnlyAccess = getBoolean(this,configStructure,"monitorOnly");
-            if(monitorOnlyAccess==null) return;
+            queueCapacityAccess = getInt(this,configStructure,"queueCapacity");
+            if(queueCapacityAccess==null) return;
             inheritSeverityAccess = getBoolean(this,configStructure,"inheritSeverity");
             if(inheritSeverityAccess==null) return;
-            forceLocalAccess = getBoolean(this,configStructure,"forceLocal");
-            if(forceLocalAccess==null) return;
-            supportState = SupportState.readyForStart;
-            setSupportState(supportState);
+            setSupportState(SupportState.readyForStart);
         }
         
         /* (non-Javadoc)
          * @see org.epics.ioc.dbProcess.Support#uninitialize()
          */
         public void uninitialize() {
-            stop();
-            supportState = SupportState.readyForInitialize;
-            setSupportState(supportState);
+            if(super.getSupportState()==SupportState.ready) {
+                stop();
+            }
+            if(super.getSupportState()!=SupportState.readyForStart) return;
+            setSupportState(SupportState.readyForInitialize);
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.dbProcess.Support#start()
          */
         public void start() {
-            if(supportState!=SupportState.readyForStart) return;
+            if(!super.checkSupportState(SupportState.readyForStart,monitorLinkSupportName)) return;
             if(valueData==null) {
                 dbLink.message(
                         "Logic Error: MonitorLink.start called before setField",
@@ -1078,10 +869,10 @@ public class LinkSupportFactory {
                 return;
             }
             process = processAccess.get();
-            monitorOnly = monitorOnlyAccess.get();
+            queueCapacity = queueCapacityAccess.get();
             // split pvname into record name and rest of name
             String[]pvname = periodPattern.split(pvnameAccess.get(),2);
-            recordName = pvname[0];
+            String recordName = pvname[0];
             if(pvname.length==2) {
                 fieldName = pvname[1];
             } else {
@@ -1096,27 +887,25 @@ public class LinkSupportFactory {
                 return;
             }
             if(channel.isLocal()) {
-                ChannelLink channelLocal = (ChannelLink)channel;
-                channelLocal.setLinkRecord(dbLink.getRecord());
+                ChannelLink channelLink = (ChannelLink)channel;
+                channelLink.setDBLink(dbLink);
             }
             
-            channelSubscribe = channel.createSubscribe();
+            channelSubscribe = channel.createSubscribe(queueCapacity);
             if(channel.isConnected()) {
-                channelStateChange(channel);
+                channelStateChange(channel,true);
             }
-            supportState = SupportState.ready;
-            setSupportState(supportState);
+            setSupportState(SupportState.ready);
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.dbProcess.Support#stop()
          */
         public void stop() {
-            if(supportState!=SupportState.ready) return;
+            if(super.getSupportState()!=SupportState.ready) return;
             channelRecord = null;
             if(channel!=null) channel.destroy();
             channel = null;
-            supportState = SupportState.readyForStart;
-            setSupportState(supportState);
+            setSupportState(SupportState.readyForStart);
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.dbProcess.LinkSupport#setField(org.epics.ioc.pvAccess.PVData)
@@ -1127,14 +916,8 @@ public class LinkSupportFactory {
         /* (non-Javadoc)
          * @see org.epics.ioc.dbProcess.LinkSupport#process(org.epics.ioc.dbProcess.LinkListener)
          */
-        public ProcessReturn process(ProcessCompleteListener listener) {
-            if(supportState!=SupportState.ready) {
-                dbLink.message(
-                        "process called but supportState is "
-                        + supportState.toString(),
-                        IOCMessageType.error);
-                return ProcessReturn.failure;
-            }
+        public ProcessReturn process(ProcessRequestListener listener) {
+            if(!super.checkSupportState(SupportState.ready,monitorLinkSupportName + ".process")) return ProcessReturn.failure;
             if(!channel.isConnected()) {
                 recordProcessSupport.setStatusSeverity("Link not connected",
                     AlarmSeverity.invalid);
@@ -1143,15 +926,9 @@ public class LinkSupportFactory {
             return ProcessReturn.success;
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.dbProcess.Support#processContinue()
-         */
-        public void processContinue() {
-            // nothing to do
-        }
-        /* (non-Javadoc)
          * @see org.epics.ioc.channelAccess.ChannelStateListener#channelStateChange(org.epics.ioc.channelAccess.Channel)
          */
-        public void channelStateChange(Channel c) {
+        public void channelStateChange(Channel c,boolean isConnected) {
             assert(c==channel);
             dbRecord.lock();
             try {
@@ -1162,12 +939,6 @@ public class LinkSupportFactory {
                     if(fieldGroup!=null) fieldGroup.destroy();
                     fieldGroup = null;
                     return;
-                }
-                if(forceLocalAccess.get() && !channel.isLocal()) {
-                    dbLink.message(
-                            "pvname " + pvnameAccess.get() + " is not local",
-                            IOCMessageType.error);
-                    setSupportState(SupportState.readyForInitialize);
                 }
                 ChannelSetFieldResult result = channel.setField(fieldName);
                 if(result!=ChannelSetFieldResult.thisChannel) {
@@ -1194,13 +965,13 @@ public class LinkSupportFactory {
                 channelRecord = null;
                 if(channel.isLocal()) {
                     IOCDB iocdb = dbRecord.getIOCDB();
-                    channelRecord = iocdb.findRecord(recordName);
+                    channelRecord = iocdb.findRecord(dbRecord.getRecordName());
                     if(channelRecord==null) {
                         throw new IllegalStateException(
                         "Logic Error: channel is local but cant find record");
                     }
                 }
-                if(monitorOnly) {
+                if(queueCapacity==0) {
                     channelSubscribe.start(fieldGroup,(ChannelNotifyListener)this,null);
                 } else {
                     channelSubscribe.start(fieldGroup,(ChannelNotifyGetListener)this,null);
@@ -1215,7 +986,14 @@ public class LinkSupportFactory {
         public void disconnect(Channel c) {
             dbRecord.lock();
             try {
+                SupportState supportState = dbRecord.getSupport().getSupportState();
                 uninitialize();
+                switch(supportState) {
+                case readyForInitialize: break;
+                case readyForStart: initialize(); break;
+                case ready: initialize(); start(); break;
+                case zombie: break;
+                }
             } finally {
                 dbRecord.unlock();
             }
@@ -1243,7 +1021,7 @@ public class LinkSupportFactory {
             }
             if(field!=linkField) {
                 dbLink.message(
-                        "Logic error in MonitorLink field!=linkField",
+                        "Logic error in MonitorLink field!=channelField",
                         IOCMessageType.fatalError);
                 return;
             }
@@ -1277,16 +1055,21 @@ public class LinkSupportFactory {
         public void newData(Channel channel, ChannelField field) {
             // nothing to do
         }
+        
         /* (non-Javadoc)
-         * @see org.epics.ioc.channelAccess.ChannelNotifyListener#reason(org.epics.ioc.channelAccess.Channel, org.epics.ioc.channelAccess.Event)
+         * @see org.epics.ioc.channelAccess.ChannelRequestListener#requestDone(org.epics.ioc.channelAccess.Channel)
          */
-        public void reason(Channel channel, Event reason) {
-            // nothing to do
+        public void requestDone(Channel channel) {
+            // What to do ???
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.channelAccess.ChannelNotifyListener#failure(org.epics.ioc.channelAccess.Channel, java.lang.String)
+         * @see org.epics.ioc.channelAccess.ChannelRequestListener#requestResult(org.epics.ioc.channelAccess.Channel, org.epics.ioc.util.AlarmSeverity, java.lang.String, org.epics.ioc.util.TimeStamp)
          */
-        public void failure(Channel channel,String reason) {
+        public void requestResult(Channel channel, AlarmSeverity alarmSeverity, String status, TimeStamp timeStamp) {
+            // What to do???
+            
+        }
+        public void message(Channel channel,String message) {
             // What to do????
         }
         /* (non-Javadoc)
@@ -1316,5 +1099,107 @@ public class LinkSupportFactory {
             channel = null;
             return errorMessage;
         }
+    }
+    
+    private static DBStructure getConfigStructure(DBLink dbLink,String structureName) {
+        DBStructure configStructure = dbLink.getConfigurationStructure();
+        if(configStructure==null) {
+            dbLink.message("no configuration structure", IOCMessageType.fatalError);
+            return null;
+        }
+        Structure structure = (Structure)configStructure.getField();
+        String configStructureName = structure.getStructureName();
+        if(!configStructureName.equals(structureName)) {
+            configStructure.message(
+                    "configurationStructure name is " + configStructureName
+                    + " but expecting " + structureName,
+                IOCMessageType.fatalError);
+            return null;
+        }
+        return configStructure;
+    }
+    
+    private static PVString getString(AbstractSupport support,
+    DBStructure configStructure,String fieldName)
+    {
+        DBData[] dbData = configStructure.getFieldDBDatas();
+        int index = configStructure.getFieldDBDataIndex(fieldName);
+        if(index<0) {
+            configStructure.message(
+                "configStructure does not have field" + fieldName,
+                IOCMessageType.error);
+            return null;
+        }
+        if(dbData[index].getField().getType()!=Type.pvString) {
+            dbData[index].message(
+                "configStructure field "
+                + fieldName + " does not have type string ",
+                IOCMessageType.error);
+            return null;
+        }
+        return (PVString)dbData[index];
+    }
+    
+    private static PVBoolean getBoolean(AbstractSupport support,
+    DBStructure configStructure,String fieldName)
+    {
+        DBData[] dbData = configStructure.getFieldDBDatas();
+        int index = configStructure.getFieldDBDataIndex(fieldName);
+        if(index<0) {
+            configStructure.message(
+                "configStructure does not have field" + fieldName,
+                IOCMessageType.error);
+            return null;
+        }
+        if(dbData[index].getField().getType()!=Type.pvBoolean) {
+            dbData[index].message(
+                "configStructure field "
+                + fieldName + " does not have type boolean ",
+                IOCMessageType.error);
+            return null;
+        }
+        return (PVBoolean)dbData[index];
+    }
+    
+    private static PVInt getInt(AbstractSupport support,
+            DBStructure configStructure,String fieldName)
+            {
+                DBData[] dbData = configStructure.getFieldDBDatas();
+                int index = configStructure.getFieldDBDataIndex(fieldName);
+                if(index<0) {
+                    configStructure.message(
+                        "configStructure does not have field" + fieldName,
+                        IOCMessageType.error);
+                    return null;
+                }
+                if(dbData[index].getField().getType()!=Type.pvInt) {
+                    dbData[index].message(
+                        "configStructure field "
+                        + fieldName + " does not have type int ",
+                        IOCMessageType.error);
+                    return null;
+                }
+                return (PVInt)dbData[index];
+            }
+    
+    private static PVDouble getDouble(AbstractSupport support,
+    DBStructure configStructure,String fieldName)
+    {
+        DBData[] dbData = configStructure.getFieldDBDatas();
+        int index = configStructure.getFieldDBDataIndex(fieldName);
+        if(index<0) {
+            configStructure.message(
+                "configStructure does not have field" + fieldName,
+                IOCMessageType.error);
+            return null;
+        }
+        if(dbData[index].getField().getType()!=Type.pvDouble) {
+            dbData[index].message(
+                "configStructure field "
+                + fieldName + " does not have type double ",
+                IOCMessageType.error);
+            return null;
+        }
+        return (PVDouble)dbData[index];
     }
 }

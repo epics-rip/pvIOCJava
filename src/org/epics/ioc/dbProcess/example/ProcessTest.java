@@ -12,8 +12,11 @@ import java.util.concurrent.locks.*;
 import org.epics.ioc.dbDefinition.*;
 import org.epics.ioc.dbAccess.*;
 import org.epics.ioc.dbProcess.*;
+import org.epics.ioc.util.AlarmSeverity;
+import org.epics.ioc.util.IOCFactory;
 import org.epics.ioc.util.IOCMessageListener;
 import org.epics.ioc.util.IOCMessageType;
+import org.epics.ioc.util.TimeStamp;
 
 /**
  * JUnit test for RecordProcess.
@@ -27,93 +30,59 @@ public class ProcessTest extends TestCase {
     public static void testProcess() {
         DBD dbd = DBDFactory.getMasterDBD();
         IOCDB iocdbMaster = IOCDBFactory.getMaster();
-        IOCDB iocdbAdd = IOCDBFactory.create("add");
         IOCMessageListener iocMessageListener = new Listener();
         XMLToDBDFactory.convert(dbd,
-                 "src/org/epics/ioc/dbProcess/example/menuStructureSupportDBD.xml",
+                 "src/org/epics/ioc/support/menuStructureSupportDBD.xml",
                  iocMessageListener);
         XMLToDBDFactory.convert(dbd,
                  "src/org/epics/ioc/dbProcess/example/exampleDBD.xml",
-                 iocMessageListener);
-        
-//        System.out.printf("\n\nstructures");
-//        Map<String,DBDStructure> structureMap = dbd.getStructureMap();
-//        Set<String> keys = structureMap.keySet();
-//        for(String key: keys) {
-//            DBDStructure dbdStructure = structureMap.get(key);
-//            System.out.print(dbdStructure.toString());
-//        }
-//        System.out.printf("\n\nrecordTypes");
-//        Map<String,DBDRecordType> recordTypeMap = dbd.getRecordTypeMap();
-//        keys = recordTypeMap.keySet();
-//        for(String key: keys) {
-//            DBDRecordType dbdRecordType = recordTypeMap.get(key);
-//            System.out.print(dbdRecordType.toString());
-//        }
-        System.out.printf("reading exampleDB\n");
-        try {
-            XMLToIOCDBFactory.convert(dbd,iocdbAdd,
-                 "src/org/epics/ioc/dbProcess/example/exampleDB.xml",
-                 iocMessageListener);
-        } catch (Exception e) {
-            System.out.println("Exception: " + e);
-        }
-        
-        Map<String,DBRecord> recordMap = iocdbAdd.getRecordMap();
+                 iocMessageListener);        
+        boolean initOK = IOCFactory.initDatabase(
+            "src/org/epics/ioc/dbProcess/example/exampleDB.xml",iocMessageListener);
+        if(!initOK) return;
+        Map<String,DBRecord> recordMap = iocdbMaster.getRecordMap();
         Set<String> keys = recordMap.keySet();
-        SupportCreation supportCreation = SupportCreationFactory.createSupportCreation(
-            iocdbAdd,iocMessageListener);
-        ChannelAccessLocalFactory.setIOCDB(iocdbAdd);
-        boolean gotSupport = supportCreation.createSupport();
-        if(!gotSupport) {
-            System.out.printf("Did not find all support\n");
-            System.out.printf("\nrecords\n");
-            for(String key: keys) {
-                DBRecord record = recordMap.get(key);
-                System.out.print(record.toString());
-            }
-            System.out.printf("%n%nsupport");
-            Map<String,DBDSupport> supportMap = dbd.getSupportMap();
-            keys = supportMap.keySet();
-            for(String key: keys) {
-                DBDSupport dbdSupport = supportMap.get(key);
-                System.out.printf("%n%s",dbdSupport.toString());
-            }
-            return;
-        }
-        boolean readyForStart = supportCreation.initializeSupport();
-        if(!readyForStart) {
-            System.out.println("initializeSupport failed");
-            return;
-        }
-        boolean ready = supportCreation.startSupport();
-        if(!ready) {
-            System.out.println("startSupport failed");
-            return;
-        }
-        supportCreation = null;
-        DBRecord dbRecord = null;
-        iocdbAdd.mergeIntoMaster();
-        iocdbAdd = null;
-        dbRecord = iocdbMaster.findRecord("counter");
+        DBRecord dbRecord = iocdbMaster.findRecord("counter");
         assertNotNull(dbRecord);
         TestProcess testProcess = new TestProcess(dbRecord);
         for(String key: keys) {
-//            RecordProcessSupport recordProcessSupport = 
-                recordMap.get(key).getRecordProcess().getRecordProcessSupport();
-//            recordProcessSupport.setTrace(true);
-            
+            RecordProcess recordProcess = recordMap.get(key).getRecordProcess();
+            recordProcess.setTrace(true);
         }
-        testProcess.test();
+        testProcess.test();     
+        for(String key: keys) {
+            RecordProcess recordProcess = recordMap.get(key).getRecordProcess();
+            recordProcess.setTrace(false);
+        }
+        System.out.println("starting performance test"); 
         testProcess.testPerform();
-      System.out.printf("\nrecords\n");
-      for(String key: keys) {
-          DBRecord record = recordMap.get(key);
-          System.out.print(record.toString());
-      }
+        System.out.printf("\nrecords\n");
+        for(String key: keys) {
+            DBRecord record = recordMap.get(key);
+            System.out.print(record.toString());
+        }
+        initOK = IOCFactory.initDatabase(
+            "src/org/epics/ioc/dbProcess/example/loopDB.xml",iocMessageListener);
+        if(!initOK) return;
+        dbRecord = iocdbMaster.findRecord("root");
+        assertNotNull(dbRecord);
+        testProcess = new TestProcess(dbRecord);
+        recordMap = iocdbMaster.getRecordMap();
+        keys = recordMap.keySet();
+        for(String key: keys) {
+            RecordProcess recordProcess = recordMap.get(key).getRecordProcess();
+            recordProcess.setTrace(true);
+        }
+        System.out.printf("%n%n");
+        testProcess.test();
+        System.out.printf("\nrecords\n");
+        for(String key: keys) {
+            DBRecord record = recordMap.get(key);
+            System.out.print(record.toString());
+        }
     }
     
-    private static class TestProcess implements ProcessCompleteListener {
+    private static class TestProcess implements ProcessRequestListener {
         private RecordProcess recordProcess = null;
         private Lock lock = new ReentrantLock();
         private Condition waitDone = lock.newCondition();
@@ -127,7 +96,7 @@ public class ProcessTest extends TestCase {
         void test() {
             allDone = false;
             ProcessReturn processReturn = recordProcess.process(this);
-            if(processReturn==ProcessReturn.active || processReturn==ProcessReturn.alreadyActive) {
+            if(processReturn==ProcessReturn.active) {
                 lock.lock();
                 try {
                     if(!allDone) {
@@ -152,7 +121,7 @@ public class ProcessTest extends TestCase {
             for(int i=0; i< nwarmup + ntimes; i++) {
                 allDone = false;
                 processReturn = recordProcess.process(this);
-                if(processReturn==ProcessReturn.active || processReturn==ProcessReturn.alreadyActive) {
+                if(processReturn==ProcessReturn.active) {
                     lock.lock();
                     try {
                         if(!allDone) waitDone.await();
@@ -171,9 +140,9 @@ public class ProcessTest extends TestCase {
                 microseconds,processPerSecond);
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.dbProcess.ProcessCompleteListener#processComplete(org.epics.ioc.dbProcess.Support, org.epics.ioc.dbProcess.ProcessResult)
+         * @see org.epics.ioc.dbProcess.ProcessRequestListener#processComplete(org.epics.ioc.dbProcess.Support, org.epics.ioc.dbProcess.ProcessResult)
          */
-        public void processComplete(Support support,ProcessResult result) {
+        public void processComplete() {
             lock.lock();
             try {
                 allDone = true;
@@ -181,6 +150,12 @@ public class ProcessTest extends TestCase {
             } finally {
                 lock.unlock();
             }
+        }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.dbProcess.ProcessRequestListener#requestResult(org.epics.ioc.util.AlarmSeverity, java.lang.String, org.epics.ioc.util.TimeStamp)
+         */
+        public void requestResult(AlarmSeverity alarmSeverity, String status, TimeStamp timeStamp) {
+            // nothing to do 
         }
     }
     

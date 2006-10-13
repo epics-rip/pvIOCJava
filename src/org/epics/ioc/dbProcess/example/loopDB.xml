@@ -1,6 +1,6 @@
 <?xml version="1.0" ?>
 <IOCDatabase>
-<record name = "counter" type = "counterRecord">
+<record name = "root" type = "counterRecord">
     <min>0.0</min>
     <max>1e9</max>
     <inc>1.0</inc>
@@ -8,21 +8,21 @@
     <process supportName = "linkArray" >
         <value  supportName = "processLink" >
             <configure structureName = "processLink">
-                <pvname>double01</pvname>
+                <pvname>other01</pvname>
             </configure>
         </value>
         <value supportName = "outputLink" >
             <configure structureName = "outputLink">
-                <pvname>double02</pvname>
+                <pvname>other02</pvname>
                 <process>true</process>
             </configure>
         </value>
     </process>
 </record>
-<record name = "double01" type = "doubleRecord">
+<record name = "other01" type = "doubleRecord">
     <input supportName = "inputLink" >
         <configure structureName = "inputLink">
-            <pvname>counter</pvname>
+            <pvname>root</pvname>
             <process>false</process>
         </configure>
     </input>
@@ -33,21 +33,26 @@
     </displayLimit>
     <priority>middle</priority>
 </record>
-<record name = "double02" type = "doubleRecord">
+<record name = "other02" type = "doubleRecord">
     <units>volts</units>
     <displayLimit>
         <low>0.0</low>
         <high>10.0</high>
     </displayLimit>
     <priority>middle</priority>
+    <process supportName = "linkArray" >
+        <value  supportName = "processLink" >
+            <configure structureName = "processLink">
+                <pvname>other03</pvname>
+            </configure>
+        </value>
+    </process>
 </record>
-<!--
-<record name = "double03" type = "doubleRecord">
-    <input supportName = "monitorLink" >
-        <configure structureName = "monitorLink">
-            <pvname>counter</pvname>
+<record name = "other03" type = "doubleRecord">
+    <input supportName = "inputLink" >
+        <configure structureName = "inputLink">
+            <pvname>root</pvname>
             <process>true</process>
-            <queueCapacity>0</queueCapacity>
         </configure>
     </input>
     <units>volts</units>
@@ -57,7 +62,6 @@
     </displayLimit>
     <priority>middle</priority>
 </record>
--->
 
 
 </IOCDatabase>

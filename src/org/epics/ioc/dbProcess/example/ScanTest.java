@@ -28,7 +28,7 @@ public class ScanTest extends TestCase {
         iocMessageListener = new Listener();
         DBD dbd = DBDFactory.getMasterDBD();
         XMLToDBDFactory.convert(dbd,
-                "src/org/epics/ioc/dbProcess/example/menuStructureSupportDBD.xml",
+                "src/org/epics/ioc/support/menuStructureSupportDBD.xml",
                 iocMessageListener);
         XMLToDBDFactory.convert(dbd,
                 "src/org/epics/ioc/dbProcess/example/exampleDBD.xml",
@@ -79,6 +79,7 @@ public class ScanTest extends TestCase {
                 System.out.println("doubleReceive09 " + doubleReceive09Value.toString());
                 System.out.println("  counterEvent0 " + counterEvent0Value.toString());
                 System.out.println("  counterEvent1 " + counterEvent1Value.toString());
+                System.out.println();
             } catch (InterruptedException e) {
             }
         }
@@ -123,6 +124,7 @@ public class ScanTest extends TestCase {
                 System.out.println("  counterEvent1 " + counterEvent1Value.toString());
                 System.out.println(" counter " + counterValue.toString());
                 System.out.println("double02 " + double02Value.toString());
+                System.out.println();
             } catch (InterruptedException e) {
             }
         }

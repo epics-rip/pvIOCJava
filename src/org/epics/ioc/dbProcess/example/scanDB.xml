@@ -4,76 +4,66 @@
     <min>0.0</min>
     <max>1e9</max>
     <inc>1.0</inc>
-    <priority>medium</priority>
+    <priority>middle</priority>
     <process supportName = "linkArray" >
         <value supportName = "outputLink" >
             <configure structureName = "outputLink">
                 <pvname>doubleReceive00</pvname>
                 <process>true</process>
-                <wait>true</wait>
             </configure>
         </value>
         <value supportName = "outputLink" >
             <configure structureName = "outputLink">
                 <pvname>doubleReceive01</pvname>
                 <process>true</process>
-                <wait>true</wait>
             </configure>
         </value>
         <value supportName = "outputLink" >
             <configure structureName = "outputLink">
                 <pvname>doubleReceive02</pvname>
                 <process>true</process>
-                <wait>true</wait>
             </configure>
         </value>
         <value supportName = "outputLink" >
             <configure structureName = "outputLink">
                 <pvname>doubleReceive03</pvname>
                 <process>true</process>
-                <wait>true</wait>
             </configure>
         </value>
         <value supportName = "outputLink" >
             <configure structureName = "outputLink">
                 <pvname>doubleReceive04</pvname>
                 <process>true</process>
-                <wait>true</wait>
             </configure>
         </value>
         <value supportName = "outputLink" >
             <configure structureName = "outputLink">
                 <pvname>doubleReceive05</pvname>
                 <process>true</process>
-                <wait>true</wait>
             </configure>
         </value>
         <value supportName = "outputLink" >
             <configure structureName = "outputLink">
                 <pvname>doubleReceive06</pvname>
                 <process>true</process>
-                <wait>true</wait>
             </configure>
         </value>
         <value supportName = "outputLink" >
             <configure structureName = "outputLink">
                 <pvname>doubleReceive07</pvname>
                 <process>true</process>
-                <wait>true</wait>
             </configure>
         </value>
         <value supportName = "outputLink" >
             <configure structureName = "outputLink">
                 <pvname>doubleReceive08</pvname>
                 <process>true</process>
-                <wait>true</wait>
             </configure>
         </value>
         <value supportName = "outputLink" >
             <configure structureName = "outputLink">
                 <pvname>doubleReceive09</pvname>
                 <process>true</process>
-                <wait>true</wait>
             </configure>
         </value>
     </process>
@@ -114,7 +104,7 @@
     <min>0.0</min>
     <max>1e9</max>
     <inc>1.0</inc>
-    <priority>medium</priority>
+    <priority>middle</priority>
     <scan>
         <scan>event</scan>
         <eventName>eventOne</eventName>

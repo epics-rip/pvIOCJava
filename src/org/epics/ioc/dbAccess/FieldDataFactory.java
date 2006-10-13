@@ -459,6 +459,20 @@ public class FieldDataFactory {
 
         MenuData(DBData parent,DBDMenuField dbdMenuField) {
             super(parent,dbdMenuField);
+            String defaultValue = dbdMenuField.getFieldAttribute().getDefault();
+            if(defaultValue!=null && defaultValue.length()>0) {
+                String[] choices = super.getChoices();
+                int index = -1;
+                for(int i=0; i<choices.length; i++) {
+                    if(defaultValue.equals(choices[i])) {
+                        index = i; break;
+                    }
+                }
+                if(index==-1) {
+                    throw new IllegalStateException("default value is not a choice");
+                }
+                super.setIndex(index);
+            }
         }
         
     }

@@ -26,7 +26,6 @@ public class EventRecordFactory {
         private SupportState supportState = SupportState.readyForInitialize;
         private DBRecord dbRecord;
         private DBString value = null;
-        private ProcessResult result = ProcessResult.success;
         private EventScanner eventScanner = null;
         private EventAnnounce eventAnnounce = null;
         private String eventName = null;
@@ -92,9 +91,9 @@ public class EventRecordFactory {
             setSupportState(SupportState.readyForInitialize);
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.dbProcess.Support#process(org.epics.ioc.dbProcess.ProcessCompleteListener)
+         * @see org.epics.ioc.dbProcess.Support#process(org.epics.ioc.dbProcess.ProcessRequestListener)
          */
-        public ProcessReturn process(ProcessCompleteListener listener) {
+        public ProcessReturn process(ProcessRequestListener listener) {
             if(supportState!=SupportState.ready) {
                 dbRecord.message(
                         "process called but supportState is "
@@ -117,8 +116,9 @@ public class EventRecordFactory {
         /* (non-Javadoc)
          * @see org.epics.ioc.dbProcess.Support#processContinue()
          */
-        public void processContinue() {
-            // nothing to do
+        public ProcessContinueReturn processContinue() {
+            dbRecord.message("why was processContinue called", IOCMessageType.error);
+            return ProcessContinueReturn.failure;
         }
     }
 }
