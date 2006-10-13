@@ -49,25 +49,45 @@ public interface RecordProcess {
      */
     void start();
     /**
-     * Stop
+     * Stop.
      * This must be called rather than directly calling record support.
      * This handles global fields like scan and then calls record support.
+     * If the record is active when stop is called then the record will not be stopped
+     * until the record completes the current process request.
      */
     void stop();
     /**
      * Uninitialize.
      * This must be called rather than directly calling record support.
      * This handles global fields like scan and then calls record support.
+     * If the record is active when uninitialize is called then the record will not be uninitialized
+     * until the record completes the current process request.
      */
     void uninitialize();
     /**
      * Process the record instance.
      * @param listener The listener to call to show the result.
      * @return The result of the process request.
-     * If active or already active and the caller supplies a listener, it will be called when the record completes
+     * If active and the caller supplies a listener, it will be called when the record completes
      * processing.
      */
-    ProcessReturn process(ProcessCompleteListener listener);
+    ProcessReturn process(ProcessRequestListener listener);
+    /**
+     * Request that the record become active but wait for the caller
+     * to request that the record support be called.
+     * @param listener The listener to call.
+     * @return The result of the request.
+     */
+    ProcessReturn preProcess(RecordPreProcessListener listener);
+    /**
+     * Request that the record become active but wait for the caller
+     * to request that the record support be called.
+     * The called is a database link.
+     * @param dbLink The link field of the record that is making the request.
+     * @param listener The listener to call.
+     * @return The result of the request.
+     */
+    ProcessReturn preProcess(DBLink dbLink,RecordPreProcessListener listener);
     /**
      * Ask the record to update.
      * If the record is not active this is a noop.
@@ -77,7 +97,7 @@ public interface RecordProcess {
      * Remove a completion listener.
      * @param listener The listener.
      */
-    void removeCompletionListener(ProcessCompleteListener listener);
+    void removeCompletionListener(ProcessRequestListener listener);
     /**
      * Get RecordProcessSupport interface.
      * RecordProcessSupport is normally only used by support code.

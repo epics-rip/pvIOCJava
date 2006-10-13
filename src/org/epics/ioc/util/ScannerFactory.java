@@ -13,6 +13,8 @@ import org.epics.ioc.dbAccess.*;
 import org.epics.ioc.dbProcess.*;
 
 /**
+ * Factory for periodic and event scanning.
+ * All methods are thread safe.
  * @author mrk
  *
  */
@@ -84,16 +86,14 @@ public class ScannerFactory {
          }
          
          public void run() {
-             int itime = 0;
              try {
-                 long startTime = System.currentTimeMillis();
                  while(true) {
+                     long startTime = System.currentTimeMillis();
                      super.runList();
                      long endTime = System.currentTimeMillis();
                      long delay = period - (endTime - startTime);
                      if(delay<1) delay = 1;
                      Thread.sleep(delay);
-                     startTime = System.currentTimeMillis();
                  }
              } catch(InterruptedException e) {}
          }
@@ -305,7 +305,6 @@ public class ScannerFactory {
             return period;
         }        
         
-       
        private String showExecutor(PeriodiocExecutor executor) {
            StringBuilder builder = new StringBuilder();
            List<RecordProcess> processList = executor.getList();
@@ -384,7 +383,7 @@ public class ScannerFactory {
              super();
              eventName = name;
              thread = new Thread(this,"event(" + name + ")");
-             thread.setPriority(ScanPriority.valueOf("high").getJavaPriority());
+             thread.setPriority(ScanPriority.valueOf("higher").getJavaPriority());
              thread.start();
          }
          
@@ -472,7 +471,7 @@ public class ScannerFactory {
      
      
      private static class Event implements EventScanner {
-         
+         private ReentrantLock lock = new ReentrantLock();
          private ArrayList<Announce> eventAnnouncerList = new ArrayList<Announce>();
 
          private Announce getAnnounce(String name) {
@@ -495,91 +494,121 @@ public class ScannerFactory {
              return announce;
          }
         public EventAnnounce addEventAnnouncer(String eventName, String announcer) {
-            Announce announce = getAnnounce(eventName);
-            announce.addAnnouncer(announcer);
-            return announce;
+            lock.lock();
+            try {
+                Announce announce = getAnnounce(eventName);
+                announce.addAnnouncer(announcer);
+                return announce;
+            } finally {
+                lock.unlock();
+            }
         }
 
         public void addRecord(DBRecord dbRecord) {
-            ScanField scanField = ScanFieldFactory.create(dbRecord);
-            int priority = scanField.getPriority().getJavaPriority();
-            String eventName = scanField.getEventName();
-            String threadName = "event(" + eventName + "," + String.valueOf(priority) + ")";
-            Announce announce = getAnnounce(eventName);
-            EventExecutor eventExecutor = null;
-            ArrayList<EventExecutor> eventExecuterList = announce.getEventExecutorList();
-            ListIterator<EventExecutor> iter = eventExecuterList.listIterator();
-            while(iter.hasNext()) {
-                EventExecutor eventExecutorNow = iter.next();
-                int threadPriority = eventExecutorNow.getThread().getPriority();
-                if(priority<threadPriority) continue;
-                if(priority==threadPriority) {
-                    eventExecutor = eventExecutorNow;
-                    break;
+            lock.lock();
+            try {
+                ScanField scanField = ScanFieldFactory.create(dbRecord);
+                int priority = scanField.getPriority().getJavaPriority();
+                String eventName = scanField.getEventName();
+                String threadName = "event(" + eventName + "," + String.valueOf(priority) + ")";
+                Announce announce = getAnnounce(eventName);
+                EventExecutor eventExecutor = null;
+                ArrayList<EventExecutor> eventExecuterList = announce.getEventExecutorList();
+                ListIterator<EventExecutor> iter = eventExecuterList.listIterator();
+                while(iter.hasNext()) {
+                    EventExecutor eventExecutorNow = iter.next();
+                    int threadPriority = eventExecutorNow.getThread().getPriority();
+                    if(priority<threadPriority) continue;
+                    if(priority==threadPriority) {
+                        eventExecutor = eventExecutorNow;
+                        break;
+                    }
+                    if(iter.hasNext()) {
+                        eventExecutor = new EventExecutor(threadName,priority);
+                        iter.previous();
+                        iter.add(eventExecutor);
+                        break;
+                    }
                 }
-                if(iter.hasNext()) {
+                if(eventExecutor==null) {
                     eventExecutor = new EventExecutor(threadName,priority);
-                    iter.previous();
-                    iter.add(eventExecutor);
-                    break;
+                    eventExecuterList.add(eventExecutor);
+                    announce.setEventExecutorList(eventExecuterList);
                 }
+                ArrayList<RecordProcess> recordProcessList = eventExecutor.getList();
+                recordProcessList.add(dbRecord.getRecordProcess());
+                eventExecutor.setList(recordProcessList);
+            } finally {
+                lock.unlock();
             }
-            if(eventExecutor==null) {
-                eventExecutor = new EventExecutor(threadName,priority);
-                eventExecuterList.add(eventExecutor);
-                announce.setEventExecutorList(eventExecuterList);
-            }
-            ArrayList<RecordProcess> recordProcessList = eventExecutor.getList();
-            recordProcessList.add(dbRecord.getRecordProcess());
-            eventExecutor.setList(recordProcessList);
         }
 
         public void removeEventAnnouncer(EventAnnounce eventAnnounce, String announcer) {
-            Announce announce = (Announce)eventAnnounce;
-            announce.removeAnnouncer(announcer);
+            lock.lock();
+            try {
+                Announce announce = (Announce)eventAnnounce;
+                announce.removeAnnouncer(announcer);
+            } finally {
+                lock.unlock();
+            }
         }
 
         public void removeRecord(DBRecord dbRecord) {
-            ScanField scanField = ScanFieldFactory.create(dbRecord);
-            int priority = scanField.getPriority().getJavaPriority();
-            String eventName = scanField.getEventName();
-            Announce announce = getAnnounce(eventName);
-            ArrayList<EventExecutor> eventExecuterList = announce.getEventExecutorList();
-            ListIterator<EventExecutor> iter = eventExecuterList.listIterator();
-            while(iter.hasNext()) {
-                EventExecutor eventExecutor = iter.next();
-                int threadPriority = eventExecutor.getThread().getPriority();
-                if(priority<threadPriority) continue;
-                if(priority==threadPriority) {
-                    ArrayList<RecordProcess> recordProcessList = eventExecutor.getList();
-                    recordProcessList.remove(dbRecord.getRecordProcess());
-                    return;
+            lock.lock();
+            try {
+                ScanField scanField = ScanFieldFactory.create(dbRecord);
+                int priority = scanField.getPriority().getJavaPriority();
+                String eventName = scanField.getEventName();
+                Announce announce = getAnnounce(eventName);
+                ArrayList<EventExecutor> eventExecuterList = announce.getEventExecutorList();
+                ListIterator<EventExecutor> iter = eventExecuterList.listIterator();
+                while(iter.hasNext()) {
+                    EventExecutor eventExecutor = iter.next();
+                    int threadPriority = eventExecutor.getThread().getPriority();
+                    if(priority<threadPriority) continue;
+                    if(priority==threadPriority) {
+                        ArrayList<RecordProcess> recordProcessList = eventExecutor.getList();
+                        recordProcessList.remove(dbRecord.getRecordProcess());
+                        return;
+                    }
+                    break;
                 }
-                break;
+                return;
+            } finally {
+                lock.unlock();
             }
-            return;
         }
 
         public String toString() {
             StringBuilder builder = new StringBuilder();
-            ListIterator<Announce> iter = eventAnnouncerList.listIterator();
-            while(iter.hasNext()) {
-                Announce announce = iter.next();
-                builder.append(showAnnounce(announce));
+            lock.lock();
+            try {
+                ListIterator<Announce> iter = eventAnnouncerList.listIterator();
+                while(iter.hasNext()) {
+                    Announce announce = iter.next();
+                    builder.append(showAnnounce(announce));
+                }
+                return builder.toString();
+            } finally {
+                lock.unlock();
             }
-            return builder.toString();
         }
 
         public String show(String eventName) {
-            StringBuilder builder = new StringBuilder();
-            ListIterator<Announce> iter = eventAnnouncerList.listIterator();
-            while(iter.hasNext()) {
-                Announce announce = iter.next();
-                if(eventName.equals(announce.getEventName())) {
-                    builder.append(showAnnounce(announce));
+            lock.lock();
+            try {
+                StringBuilder builder = new StringBuilder();
+                ListIterator<Announce> iter = eventAnnouncerList.listIterator();
+                while(iter.hasNext()) {
+                    Announce announce = iter.next();
+                    if(eventName.equals(announce.getEventName())) {
+                        builder.append(showAnnounce(announce));
+                    }
                 }
+                return builder.toString();
+            } finally {
+                lock.unlock();
             }
-            return builder.toString();
         }
         
         private String showAnnounce(Announce announce) {

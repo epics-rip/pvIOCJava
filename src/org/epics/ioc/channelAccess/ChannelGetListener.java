@@ -12,7 +12,7 @@ import org.epics.ioc.pvAccess.*;
  * @author mrk
  *
  */
-public interface ChannelGetListener {
+public interface ChannelGetListener extends ChannelRequestListener {
     /**
      * A set of synchronous data is coming.
      * @param channel The channel which has tye data.
@@ -30,10 +30,4 @@ public interface ChannelGetListener {
      * @param data The data.
      */
     void newData(Channel channel,ChannelField field,PVData data);
-    /**
-     * The request failed.
-     * @param channel The channel.
-     * @param reason The reason.
-     */
-    void failure(Channel channel,String reason);
 }

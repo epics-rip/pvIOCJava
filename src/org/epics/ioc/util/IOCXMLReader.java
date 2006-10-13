@@ -26,7 +26,7 @@ public interface IOCXMLReader {
     void parse(String rootElementName,String fileName, IOCXMLListener listener);
     /**
      * Message.
-     * The current location in the xml files together with the massage are given to listener.message.
+     * The current location in the xml files together with the message are given to listener.message.
      * @param message The message.
      * @param messageType The type of message.
      */

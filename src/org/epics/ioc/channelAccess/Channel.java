@@ -50,11 +50,6 @@ public interface Channel {
      */
     ChannelFieldGroup createFieldGroup(ChannelFieldGroupListener listener);
     /**
-     * Set a timeout for get/put requests.
-     * @param timeout The timeout value in seconds.
-     */
-    void setTimeout(double timeout);
-    /**
      * Create a ChannelProcess.
      * @return An interface for the ChannelProcess.
      */
@@ -76,9 +71,10 @@ public interface Channel {
     ChannelPutGet createChannelPutGet();
     /*
      * Create a ChannelSubscribe.
+     * @param queueCapacity capacity of queue for events.
      * @return An interface for the ChannelSunscribe.
      */
-    ChannelSubscribe createSubscribe();
+    ChannelSubscribe createSubscribe(int queueCapacity);
     /**
      * Is the channel a local channel?
      * @return (false,true) if channel (is not, is) local.

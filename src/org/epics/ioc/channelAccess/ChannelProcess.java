@@ -17,10 +17,12 @@ public interface ChannelProcess {
     void destroy();
     /**
      * Issue a process request.
-     * @param callback The listener to call when process is complete.
-     * @param wait Wait until process completes?
+     * @param channelProcessListener The listener to call when process is complete.
+     * This can be null.
+     * @return The result of the request.
+     * 
      */
-    void process(ChannelProcessListener callback, boolean wait);
+    ChannelRequestReturn process(ChannelProcessListener channelProcessListener);
     /**
      * Cancel the process request.
      */

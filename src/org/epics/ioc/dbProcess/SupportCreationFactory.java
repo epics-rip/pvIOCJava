@@ -43,8 +43,7 @@ public class SupportCreationFactory {
          */
         public IOCDB getIOCDB() {
             return iocdb;
-        }
-        
+        }        
         /* (non-Javadoc)
          * @see org.epics.ioc.dbProcess.SupportCreation#createSupport()
          */

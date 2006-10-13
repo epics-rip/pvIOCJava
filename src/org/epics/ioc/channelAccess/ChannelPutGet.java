@@ -20,16 +20,16 @@ public interface ChannelPutGet {
     /**
      * Issue a put/get request.
      * @param putFieldGroup The put field group.
-     * @param putCallback The put callback listener.
+     * @param channelPutListener The put callback listener.
      * @param getFieldGroup The get field group.
-     * @param getCallback The get callback listener.
-     * @param process Should the record be processed after the put but before the get?
-     * @param wait Should the get wait until after process completes?
+     * @param channelGetListener The get callback listener.
+     * @param process (false,true) if server (should not, should) process after put.
+     * @return The result of the request.
      */
-    void putGet(
-        ChannelFieldGroup putFieldGroup,ChannelPutListener putCallback,
-        ChannelFieldGroup getFieldGroup,ChannelGetListener getCallback,
-        boolean process, boolean wait);
+    ChannelRequestReturn putGet(
+        ChannelFieldGroup putFieldGroup,ChannelPutListener channelPutListener,
+        ChannelFieldGroup getFieldGroup,ChannelGetListener channelGetListener,
+        boolean process);
     /**
      * Cancel the put/get. The listeners may be called after this request is issued.
      */

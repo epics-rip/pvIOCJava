@@ -30,9 +30,5 @@ public enum ProcessReturn {
     /**
      * The support is active.
      */
-    active,
-    /**
-     * The support was already active when process was called.
-     */
-    alreadyActive
+    active
 }

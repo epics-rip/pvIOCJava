@@ -13,17 +13,17 @@ package org.epics.ioc.channelAccess;
  */
 public interface ChannelPut {
     /**
-     * Delete and internal state.
+     * Delete any internal state.
      */
     void destroy();
     /**
      * Put data to a channel.
      * @param fieldGroup The field group for the data.
-     * @param callback The listener to notify when done.
-     * @param process Process the record after putting data?
-     * @param wait Wait until processing is complete?
+     * @param channelPutListener The listener that provides data.
+     * @param process (false,true) if server (should not, should) process after put.
+     * @return The result of the request.
      */
-    void put(ChannelFieldGroup fieldGroup,ChannelPutListener callback,boolean process, boolean wait);
+    ChannelRequestReturn put(ChannelFieldGroup fieldGroup,ChannelPutListener channelPutListener,boolean process);
     /**
      *  Cancel a put request.
      *  It is possible for the listener to be called after this is called.

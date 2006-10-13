@@ -3,28 +3,24 @@
  * EPICS JavaIOC is distributed subject to a Software License Agreement found
  * in file LICENSE that is included with this distribution.
  */
-package org.epics.ioc.util;
+package org.epics.ioc.channelAccess;
 
 /**
- * Types for IOC messages.
+ * Return value for channel requests.
  * @author mrk
  *
  */
-public enum IOCMessageType {
+public enum ChannelRequestReturn {
     /**
-     * Informational message.
+     * The request is done.
      */
-    info,
+    success,
     /**
-     * Warning message.
+     * The request failed.
      */
-    warning,
+    failure,
     /**
-     * Error message.
+     * The request is active.
      */
-    error,
-    /**
-     * Fatal message.
-     */
-    fatalError
+    active,
 }

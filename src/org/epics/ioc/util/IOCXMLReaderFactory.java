@@ -43,21 +43,19 @@ public class IOCXMLReaderFactory {
         private AtomicBoolean isInUse = new AtomicBoolean(false);
         private Handler currentHandler = null;
         
-        /**
-         * Create an IOCXMLReader.
-         * @param rootElementName The root element tag name.
-         * The root file and any included files must have the same rootElementName.
-         * @param fileName The file.
-         * @param listener The callback listener.
+        /* (non-Javadoc)
+         * @see org.epics.ioc.util.IOCXMLReader#parse(java.lang.String, java.lang.String, org.epics.ioc.util.IOCXMLListener)
          */
         public void parse(String rootElementName,String fileName, IOCXMLListener listener) 
         {
             boolean gotIt = isInUse.compareAndSet(false,true);
             if(!gotIt) {
                 listener.message("IOCReader is already active",IOCMessageType.fatalError);
+                return;
             }
             if(listener==null) {
                 System.out.println("IOCXMLReader was called with a null listener");
+                return;
             }
             try {
                 IOCXMLReaderFactory.rootElementName = rootElementName;
@@ -65,8 +63,6 @@ public class IOCXMLReaderFactory {
                 IOCXMLReaderFactory.substituteMap.clear();
                 IOCXMLReaderFactory.pathList.clear();
                 create(null,fileName);
-//            }catch (RuntimeException e) {
-//                listener.errorMessage("RuntimeException " + e.toString());
             } finally {
                 isInUse.set(false);
             }

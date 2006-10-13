@@ -13,6 +13,7 @@ package org.epics.ioc.dbProcess;
 public interface SupportStateListener {
     /**
      * The SupportState has changed.
+     * This is called with the associated record locked.
      * @param support The support that is calling newState.
      * @param state The new state.
      */

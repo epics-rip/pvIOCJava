@@ -18,11 +18,11 @@ public interface ChannelGet {
     /**
      * Get data from the channel.
      * @param fieldGroup The description of the data to get.
-     * @param listener listener to call when the operation is complete.
-     * @param process Should the channel be processed before retrieving data?
-     * @param wait Wait until process is complete beforec retrieving data?
+     * @param channelGetListener Listener to call when the operation is complete.
+     * @param process (false,true) if server (should not, should) process before getting data.
+     * @return The result of request.
      */
-    void get(ChannelFieldGroup fieldGroup,ChannelGetListener listener,boolean process, boolean wait);
+    ChannelRequestReturn get(ChannelFieldGroup fieldGroup,ChannelGetListener channelGetListener,boolean process);
     /**
      * Cancel the get request.
      */

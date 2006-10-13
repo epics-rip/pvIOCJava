@@ -12,10 +12,11 @@ package org.epics.ioc.channelAccess;
  */
 public interface ChannelStateListener {
     /**
-     * The channel has change connection state. Call channel.isConnected to find the state.
+     * The channel has change connection state.
      * @param c The channel.
+     * @param isConnected (false,true) if new state (is not, is) connected.
      */
-    void channelStateChange(Channel c);
+    void channelStateChange(Channel c,boolean isConnected);
     /**
      * Disconnect from the channel. The channel will not honor any further requests.
      * @param c The channel.

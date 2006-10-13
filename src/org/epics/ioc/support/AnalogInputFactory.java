@@ -54,14 +54,14 @@ public class AnalogInputFactory {
         }
 
        
-        public ProcessReturn process(ProcessCompleteListener listener) {
+        public ProcessReturn process(ProcessRequestListener listener) {
             System.out.printf("%s.process entered\n",supportName);
             return ProcessReturn.failure;
         }
         
-        public void processContinue() {
-            // TODO Auto-generated method stub
-            
+        public ProcessContinueReturn processContinue() {
+            dbRecord.message("why was processContinue called", IOCMessageType.error);
+            return ProcessContinueReturn.failure;
         }
     }
 }

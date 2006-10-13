@@ -23,5 +23,5 @@ public interface ProcessCallbackListener {
      * The callback is called with the record unlocked but still active.
      * The callback can request that other records be processed.
      */
-    void callback();
+    void processCallback();
 }

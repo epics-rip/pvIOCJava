@@ -63,11 +63,12 @@ public interface Support {
      * @param listener The listener to call when returning active.
      * @return The result of the process request.
      */
-    ProcessReturn process(ProcessCompleteListener listener);
+    ProcessReturn process(ProcessRequestListener listener);
     /**
      * Continue processing. This is only called while support is active.
+     * @return The result of the processContinue request.
      */
-    void processContinue();
+    ProcessContinueReturn processContinue();
     /**
      * Update state. This is only called while support is active.
      */

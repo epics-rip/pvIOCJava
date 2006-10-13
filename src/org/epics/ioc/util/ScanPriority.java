@@ -6,23 +6,53 @@
 package org.epics.ioc.util;
 
 /**
+ * The scan priorities for a record instance that is event or periodically scanned.
  * @author mrk
  *
  */
 public enum ScanPriority {
+    /**
+     * Lowest prority.
+     */
+    lowest,
+    /**
+     * Lower priority.
+     */
     lower,
+    /**
+     * Low priority.
+     */
     low,
-    medium,
+    /**
+     * Middle priority.
+     */
+    middle,
+    /**
+     * High priority. 
+     */
     high,
-    higher;
+    /**
+     * Higher priority.
+     */
+    higher,
+    /**
+     * Highest priority.
+     */
+    highest;
     
     private static final int[] javaPriority = {
         Thread.MIN_PRIORITY,
-        Thread.MIN_PRIORITY+2,
+        Thread.MIN_PRIORITY + 1,
+        Thread.NORM_PRIORITY - 1,
         Thread.NORM_PRIORITY,
-        Thread.MAX_PRIORITY-2,
+        Thread.MIN_PRIORITY + 1,
+        Thread.MAX_PRIORITY - 1,
         Thread.MAX_PRIORITY};
     
+    /**
+     * Get the Java priority for this ScanPriority.
+     * @return
+     */
     public int getJavaPriority() {
         return javaPriority[ordinal()];
     }

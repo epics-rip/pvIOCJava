@@ -13,7 +13,7 @@ import org.epics.ioc.pvAccess.PVData;
  * @author mrk
  *
  */
-public interface ChannelNotifyGetListener {
+public interface ChannelNotifyGetListener extends ChannelRequestListener {
     /**
      * Beginning of a set of synchronous data.
      * @param channel the channel.
@@ -25,22 +25,10 @@ public interface ChannelNotifyGetListener {
      */
     void endSynchronous(Channel channel);
     /**
-     * The reason why the data is being sent.
-     * @param channel The channel.
-     * @param reason The reason.
-     */
-    void reason(Channel channel,Event reason);
-    /**
      * New data value.
      * @param channel The channel.
      * @param field The field.
      * @param data The data.
      */
     void newData(Channel channel,ChannelField field,PVData data);
-    /**
-     * Failure.
-     * @param channel The channel.
-     * @param reason The reason.
-     */
-    void failure(Channel channel,String reason);
 }

@@ -22,7 +22,7 @@ public interface Event {
      * Monitor periodically.
      * @param value true or false.
      */
-    void    setOnPeriodic(boolean value);
+    void  setOnPeriodic(boolean value);
     /**
      * Monitoring on value change?
      * @return If true or false.
@@ -32,7 +32,7 @@ public interface Event {
      * Monitor for value changes.
      * @param value true or false. 
      */
-    void    setOnChange(boolean value);
+    void  setOnChange(boolean value);
     /**
      * Monitoring for alarm changes?
      * @return If true or false.
@@ -42,7 +42,7 @@ public interface Event {
      * Monitor for alarm changes.
      * @param value true or false.
      */
-    void    setOnAlarm(boolean value);
+    void  setOnAlarm(boolean value);
     /**
      * Monitoring for event changes.
      * @return If true or false.
@@ -52,7 +52,7 @@ public interface Event {
      * Monitor for event changhes.
      * @param value true or false.
      */
-    void    setOnEvent(boolean value);
+    void  setOnEvent(boolean value);
     /**
      * Get the periodic rate.
      * @return The rate in seconds.
@@ -62,7 +62,7 @@ public interface Event {
      * Set the rate for periodic monitoring.
      * @param seconds The rate in seconds.
      */
-    void    setPeriod(double seconds);
+    void  setPeriod(double seconds);
     /**
      * Get the absolute deadband for change of value monitoring.
      * @return The deadband.
@@ -72,7 +72,7 @@ public interface Event {
      * Set an absolute deadband for change of value monitoring.
      * @param value The deadband.
      */
-    void    setAbsoluteDeadband(double value);
+    void  setAbsoluteDeadband(double value);
     /**
      * Get the percentage change for change of value monitoring.
      * @return The percantage.
@@ -82,35 +82,35 @@ public interface Event {
      * Set a percentage change for change of value monitoring.
      * @param value The percentage.
      */
-    void    setPercentageDeadband(double value);
+    void  setPercentageDeadband(double value);
     /**
      * Get the event code for event monitoring.
      * @return The event code.
      */
-    long    getEvent(); // event code that triggers event
+    long  getEvent(); // event code that triggers event
     /**
      * Set the event code for event montitoring.
      * @param value The event code.
      */
-    void    setEvent(long value);
+    void  setEvent(long value);
     /**
      * Get the event mode mask.
      * @return The mode mask.
      */
-    BitSet  getModeMask();
+    BitSet getModeMask();
     /**
      * ???
      * @param value ???
      */
-    void    setModeMask(BitSet value);
+    void  setModeMask(BitSet value);
     /**
      * ???
      * @return  ???
      */
-    BitSet  getModeFilter();
+    BitSet getModeFilter();
     /**
      * ???
      * @param value ???
      */
-    void    setModeFilter(BitSet value);
+    void  setModeFilter(BitSet value);
 }

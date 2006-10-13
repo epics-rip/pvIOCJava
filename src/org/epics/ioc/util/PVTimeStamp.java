@@ -8,22 +8,24 @@ package org.epics.ioc.util;
 import org.epics.ioc.pvAccess.*;
 
 /**
- * A convience class for a timeStamp field.
+ * A convenience class for a timeStamp field.
+ * This class does no locking.
+ * The code that uses it must be thread safe, which means that the
+ * associated record must be locked while the field is accessed.
  * @author mrk
  *
  */
-public class TimeStampField {
-    
+public class PVTimeStamp {
     private PVLong secondsPastEpoch;
     private PVInt nanoSeconds;
     
     /**
-     * Given a pvData create a TimeStampField if the field is actually
+     * Given a pvData create a PVTimeStamp if the field is actually
      * a timeStamp structure.
      * @param pvData The field.
-     * @return A TimeStampField or null if the field is not a timeStamp structure.
+     * @return A PVTimeStamp or null if the field is not a timeStamp structure.
      */
-    public static TimeStampField create(PVData pvData) {
+    public static PVTimeStamp create(PVData pvData) {
         if(pvData.getField().getType()!=Type.pvStructure) return null;
         PVStructure structure = (PVStructure)pvData;
         PVData[] pvDatas = structure.getFieldPVDatas();
@@ -34,10 +36,11 @@ public class TimeStampField {
         if(!field.getName().equals("secondsPastEpoch")) return null;
         PVLong secondsPastEpoch = (PVLong)fieldPvData;
         fieldPvData = pvDatas[1];
+        field = fieldPvData.getField();
         if(field.getType()!=Type.pvInt) return null;
         if(!field.getName().equals("nanoSeconds")) return null;
         PVInt nanoSeconds = (PVInt)fieldPvData; 
-        return new TimeStampField(secondsPastEpoch,nanoSeconds);
+        return new PVTimeStamp(secondsPastEpoch,nanoSeconds);
     }
     
     /**
@@ -58,7 +61,7 @@ public class TimeStampField {
         nanoSeconds.put(timeStamp.nanoSeconds);
     }
     
-    private TimeStampField(PVLong secondsPastEpoch,PVInt nanoSeconds){
+    private PVTimeStamp(PVLong secondsPastEpoch,PVInt nanoSeconds){
         this.secondsPastEpoch = secondsPastEpoch;
         this.nanoSeconds = nanoSeconds;
     }
