@@ -8,37 +8,45 @@ package org.epics.ioc.dbDefinition;
 import org.epics.ioc.pvAccess.*;
 
 /**
- * abstract class for implementing a DBDField interface or extension.
  * @author mrk
  *
  */
-public class AbstractDBDField extends AbstractField implements DBDField {
-    private DBType dbType;
+public class AbstractDBDStructureField extends AbstractStructure implements DBDStructureField {
     private DBDFieldAttribute attribute;
+    private DBDField[] dbdField;
+    private DBDStructure dbdStructure;
     
-    /**
-     * Constructor for AbstractDBDField.
-     * @param name Field name.
-     * @param type Field Type.
-     * @param dbType Field DBType.
-     * @param property Array of properties.
-     * @param attribute Array of attributes.
-     */
-    public AbstractDBDField(String name, Type type,DBType dbType,
-            Property[] property,DBDFieldAttribute attribute)
+    public AbstractDBDStructureField(String name,Property[] property,DBDFieldAttribute attribute,
+        DBDField[] dbdField,DBDStructure dbdStructure)
     {
-        super(name,type,property);
-        this.dbType = dbType;
+        super(name,property,dbdStructure.getStructureName(),(Field[])dbdField);
         this.attribute = attribute;
-    }       
+        this.dbdField = dbdField;
+        this.dbdStructure = dbdStructure;
+    }
     /* (non-Javadoc)
      * @see org.epics.ioc.dbDefinition.DBDField#getDBType()
      */
     public DBType getDBType() {
-        return dbType;
+        return DBType.dbStructure;
     }
+    /* (non-Javadoc)
+     * @see org.epics.ioc.dbDefinition.DBDField#getFieldAttribute()
+     */
     public DBDFieldAttribute getFieldAttribute() {
         return attribute;
+    }
+    /* (non-Javadoc)
+     * @see org.epics.ioc.dbDefinition.DBDStructureField#getDBDFields()
+     */
+    public DBDField[] getDBDFields() {
+        return dbdField;
+    }
+    /* (non-Javadoc)
+     * @see org.epics.ioc.dbDefinition.DBDStructureField#getDBDStructure()
+     */
+    public DBDStructure getDBDStructure() {
+        return dbdStructure;
     }
     /* (non-Javadoc)
      * @see java.lang.Object#toString()
@@ -50,14 +58,13 @@ public class AbstractDBDField extends AbstractField implements DBDField {
     public String toString(int indentLevel) {
         return getString(indentLevel);
     }
+    
     private String getString(int indentLevel) {
         StringBuilder builder = new StringBuilder();
         builder.append(super.toString(indentLevel));
         newLine(builder,indentLevel);
-        builder.append("DBType " + dbType.toString());
+        builder.append("DBType dbStructure ");
         builder.append(attribute.toString(indentLevel));
         return builder.toString();
     }
-   
 }
-

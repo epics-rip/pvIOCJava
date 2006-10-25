@@ -4,69 +4,98 @@
     <min>0.0</min>
     <max>1e9</max>
     <inc>1.0</inc>
-    <priority>middle</priority>
-    <process supportName = "linkArray" >
-        <value supportName = "outputLink" >
-            <configure structureName = "outputLink">
-                <pvname>doubleReceive00</pvname>
-                <process>true</process>
-            </configure>
+    <linkArray>
+        <value structureName = "linkArrayElement">
+            <wait>false</wait>
+            <link  supportName = "outputLink" >
+                <configure structureName = "outputLink">
+                    <pvname>doubleReceive00</pvname>
+                    <process>true</process>
+                </configure>
+            </link>
         </value>
-        <value supportName = "outputLink" >
-            <configure structureName = "outputLink">
-                <pvname>doubleReceive01</pvname>
-                <process>true</process>
-            </configure>
+        <value structureName = "linkArrayElement">
+            <wait>false</wait>
+            <link  supportName = "outputLink" >
+                <configure structureName = "outputLink">
+                    <pvname>doubleReceive01</pvname>
+                    <process>true</process>
+                </configure>
+            </link>
         </value>
-        <value supportName = "outputLink" >
-            <configure structureName = "outputLink">
-                <pvname>doubleReceive02</pvname>
-                <process>true</process>
-            </configure>
+        <value structureName = "linkArrayElement">
+            <wait>false</wait>
+            <link  supportName = "outputLink" >
+                <configure structureName = "outputLink">
+                    <pvname>doubleReceive02</pvname>
+                    <process>true</process>
+                </configure>
+            </link>
         </value>
-        <value supportName = "outputLink" >
-            <configure structureName = "outputLink">
-                <pvname>doubleReceive03</pvname>
-                <process>true</process>
-            </configure>
+        <value structureName = "linkArrayElement">
+            <wait>false</wait>
+            <link  supportName = "outputLink" >
+                <configure structureName = "outputLink">
+                    <pvname>doubleReceive03</pvname>
+                    <process>true</process>
+                </configure>
+            </link>
         </value>
-        <value supportName = "outputLink" >
-            <configure structureName = "outputLink">
-                <pvname>doubleReceive04</pvname>
-                <process>true</process>
-            </configure>
+        <value structureName = "linkArrayElement">
+            <wait>false</wait>
+            <link  supportName = "outputLink" >
+                <configure structureName = "outputLink">
+                    <pvname>doubleReceive04</pvname>
+                    <process>true</process>
+                </configure>
+            </link>
         </value>
-        <value supportName = "outputLink" >
-            <configure structureName = "outputLink">
-                <pvname>doubleReceive05</pvname>
-                <process>true</process>
-            </configure>
+        <value structureName = "linkArrayElement">
+            <wait>false</wait>
+            <link  supportName = "outputLink" >
+                <configure structureName = "outputLink">
+                    <pvname>doubleReceive05</pvname>
+                    <process>true</process>
+                </configure>
+            </link>
         </value>
-        <value supportName = "outputLink" >
-            <configure structureName = "outputLink">
-                <pvname>doubleReceive06</pvname>
-                <process>true</process>
-            </configure>
+        <value structureName = "linkArrayElement">
+            <wait>false</wait>
+            <link  supportName = "outputLink" >
+                <configure structureName = "outputLink">
+                    <pvname>doubleReceive06</pvname>
+                    <process>true</process>
+                </configure>
+            </link>
         </value>
-        <value supportName = "outputLink" >
-            <configure structureName = "outputLink">
-                <pvname>doubleReceive07</pvname>
-                <process>true</process>
-            </configure>
+        <value structureName = "linkArrayElement">
+            <wait>false</wait>
+            <link  supportName = "outputLink" >
+                <configure structureName = "outputLink">
+                    <pvname>doubleReceive07</pvname>
+                    <process>true</process>
+                </configure>
+            </link>
         </value>
-        <value supportName = "outputLink" >
-            <configure structureName = "outputLink">
-                <pvname>doubleReceive08</pvname>
-                <process>true</process>
-            </configure>
+        <value structureName = "linkArrayElement">
+            <wait>false</wait>
+            <link  supportName = "outputLink" >
+                <configure structureName = "outputLink">
+                    <pvname>doubleReceive08</pvname>
+                    <process>true</process>
+                </configure>
+            </link>
         </value>
-        <value supportName = "outputLink" >
-            <configure structureName = "outputLink">
-                <pvname>doubleReceive09</pvname>
-                <process>true</process>
-            </configure>
+        <value structureName = "linkArrayElement">
+            <wait>false</wait>
+            <link  supportName = "outputLink" >
+                <configure structureName = "outputLink">
+                    <pvname>doubleReceive09</pvname>
+                    <process>true</process>
+                </configure>
+            </link>
         </value>
-    </process>
+    </linkArray>
     <scan>
         <scan>periodic</scan>
         <rate>0.2</rate>
@@ -104,10 +133,10 @@
     <min>0.0</min>
     <max>1e9</max>
     <inc>1.0</inc>
-    <priority>middle</priority>
     <scan>
         <scan>event</scan>
         <eventName>eventOne</eventName>
+    <priority>middle</priority>
     </scan>
 </record>
 

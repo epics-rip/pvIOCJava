@@ -54,14 +54,13 @@ public class AnalogInputFactory {
         }
 
        
-        public ProcessReturn process(ProcessRequestListener listener) {
+        public RequestResult process(SupportProcessRequestor supportProcessRequestor) {
             System.out.printf("%s.process entered\n",supportName);
-            return ProcessReturn.failure;
+            return RequestResult.failure;
         }
         
-        public ProcessContinueReturn processContinue() {
+        public void processContinue() {
             dbRecord.message("why was processContinue called", IOCMessageType.error);
-            return ProcessContinueReturn.failure;
         }
     }
 }

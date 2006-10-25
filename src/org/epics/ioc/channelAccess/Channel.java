@@ -5,6 +5,8 @@
  */
 package org.epics.ioc.channelAccess;
 
+import org.epics.ioc.dbAccess.*;
+
 /**
  * Interface for accessing a channel.
  * For an IOC database a channel allows access to all the fields in a single record instance.
@@ -13,7 +15,7 @@ package org.epics.ioc.channelAccess;
  */
 public interface Channel {
     /**
-     * Prevent any further access and cleanup internal state.
+     * Prevent any further access.
      * If the channel is connected it will be disconnected.
      */
     void destroy();
@@ -22,6 +24,11 @@ public interface Channel {
      * @return (false,true) means (not, is) connected.
      */
     boolean isConnected();
+    /**
+     * If the channel belongs to an IOC database link return it.
+     * @return The DBLink or null if the channel is not for an IOC database link.
+     */
+    DBLink getDBLink();
     /**
      * Specify a field to access. See package org.epics.ioc.dbAccess for how IOC database fields are accessed.
      * @param name The name.
@@ -51,24 +58,38 @@ public interface Channel {
     ChannelFieldGroup createFieldGroup(ChannelFieldGroupListener listener);
     /**
      * Create a ChannelProcess.
+     * @param channelProcessRequestor The channelRequestor.
      * @return An interface for the ChannelProcess.
      */
-    ChannelProcess createChannelProcess();
+    ChannelProcess createChannelProcess(ChannelProcessRequestor channelProcessRequestor);
+    /**
+     * Create a ChannelPreProcess.
+     * @param channelPreProcessRequestor The channelPreRequestor.
+     * @return An interface for the ChannelPreProcess.
+     */
+    ChannelPreProcess createChannelPreProcess(ChannelPreProcessRequestor channelPreProcessRequestor);
     /**
      * Create a ChannelGet.
+     * @param channelGetRequestor The channelGetRequestor.
+     * @param processBeforeGet Process before get.
      * @return An interface for the ChannelGet.
      */
-    ChannelGet createChannelGet();
+    ChannelGet createChannelGet(ChannelGetRequestor channelGetRequestor, boolean processBeforeGet);
     /**
      * Create a ChannelPut.
+     * @param channelPutRequestor The channelPutRequestor.
+     * @param processAfterPut Should record be processed after put.
      * @return An interface for the ChannelPut.
      */
-    ChannelPut createChannelPut( );
+    ChannelPut createChannelPut(ChannelPutRequestor channelPutRequestor, boolean processAfterPut);
     /**
      * Create a ChannelPutGet.
+     * @param channelPutGetRequestor The channelPutGetRequestor.
+     * @param processAfterPut Should record be processed after put.
      * @return An interface for the ChannelPutGet.
      */
-    ChannelPutGet createChannelPutGet();
+    ChannelPutGet createChannelPutGet(
+        ChannelPutGetRequestor channelPutGetRequestor, boolean processAfterPut);
     /*
      * Create a ChannelSubscribe.
      * @param queueCapacity capacity of queue for events.

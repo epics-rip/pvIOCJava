@@ -11,7 +11,7 @@ package org.epics.ioc.channelAccess;
  * @author mrk
  *
  */
-public interface ChannelNotifyListener extends ChannelRequestListener {
+public interface ChannelNotifyListener extends ChannelRequestor {
     /**
      * Beginning of a set of synchronous data.
      * @param channel The channel.

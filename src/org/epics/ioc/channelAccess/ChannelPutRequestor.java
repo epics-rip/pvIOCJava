@@ -12,7 +12,7 @@ import org.epics.ioc.pvAccess.PVData;
  * @author mrk
  *
  */
-public interface ChannelPutListener extends ChannelRequestListener {
+public interface ChannelPutRequestor extends ChannelProcessRequestor {
     /**
      * Provide the next set of data to put to the channel.
      * The listener is expected to call the put method.

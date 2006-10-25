@@ -8,21 +8,11 @@ package org.epics.ioc.channelAccess;
 import org.epics.ioc.pvAccess.*;
 
 /**
- * Listener for a get request.
+ * Requestor for a ChannelGet.get request.
  * @author mrk
  *
  */
-public interface ChannelGetListener extends ChannelRequestListener {
-    /**
-     * A set of synchronous data is coming.
-     * @param channel The channel which has tye data.
-     */
-    void beginSynchronous(Channel channel);
-    /**
-     * End of a set of synchronous data. This is also the end of the request. 
-     * @param channel The channel.
-     */
-    void endSynchronous(Channel channel);
+public interface ChannelGetRequestor extends ChannelProcessRequestor {
     /**
      * Data.
      * @param channel The channel.

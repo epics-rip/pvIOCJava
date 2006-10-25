@@ -28,10 +28,7 @@ public class ScanSupportFactory {
      */
     public static Support create(DBStructure dbStructure) {
         ScanField scanField = ScanFieldFactory.create(dbStructure.getRecord());
-        if(scanField==null) {
-            dbStructure.message("scan field is not properly defined", IOCMessageType.fatalError);
-            return null;
-        }
+        if(scanField==null) return null;
         String supportName = dbStructure.getSupportName();
         if(!supportName.equals("scan")) {
             dbStructure.message(
@@ -76,27 +73,6 @@ public class ScanSupportFactory {
             IOCDB iocdb = dbRecord.getIOCDB();
             DBAccess dbAccess = iocdb.createAccess(recordName);            
             
-            dbAccess.setField("");
-            fieldName = "priority";
-            if(dbAccess.setField(fieldName)!=AccessSetResult.thisRecord){
-                throw new IllegalStateException(recordName + "." + fieldName + " not found");
-            }
-            oldField = dbAccess.getField();
-            if(oldField.getDBDField().getDBType()!=DBType.dbMenu) {
-                throw new IllegalStateException(recordName + "." + fieldName + " is not a menu field ");
-            }
-            DBMenu priorityMenu = (DBMenu)oldField;
-            if(!ScanFieldFactory.isPriorityMenu(priorityMenu)) {
-                throw new IllegalStateException(recordName + "." + fieldName + " is not a menuPriority ");
-            }
-            index = priorityMenu.getIndex();
-            choice = priorityMenu.getChoices()[index];
-            priority = ScanPriority.valueOf(choice);
-            dbdMenuField = (DBDMenuField)oldField.getDBDField();
-            newMenu = new DBPriority(this,dbStructure,dbdMenuField);
-            newMenu.setIndex(index);
-            dbAccess.replaceField(oldField,newMenu);
-
             dbAccess.setField("");
             fieldName = "scan.scan";
             if(dbAccess.setField(fieldName)!=AccessSetResult.thisRecord){
@@ -147,6 +123,26 @@ public class ScanSupportFactory {
             DBString newEventName = new DBEventName(this,dbStructure,oldField.getDBDField());
             newEventName.put(eventName);
             dbAccess.replaceField(oldField,newEventName);
+            dbAccess.setField("");
+            fieldName = "scan.priority";
+            if(dbAccess.setField(fieldName)!=AccessSetResult.thisRecord){
+                throw new IllegalStateException(recordName + "." + fieldName + " not found");
+            }
+            oldField = dbAccess.getField();
+            if(oldField.getDBDField().getDBType()!=DBType.dbMenu) {
+                throw new IllegalStateException(recordName + "." + fieldName + " is not a menu field ");
+            }
+            DBMenu priorityMenu = (DBMenu)oldField;
+            if(!ScanFieldFactory.isPriorityMenu(priorityMenu)) {
+                throw new IllegalStateException(recordName + "." + fieldName + " is not a menuPriority ");
+            }
+            index = priorityMenu.getIndex();
+            choice = priorityMenu.getChoices()[index];
+            priority = ScanPriority.valueOf(choice);
+            dbdMenuField = (DBDMenuField)oldField.getDBDField();
+            newMenu = new DBPriority(this,dbStructure,dbdMenuField);
+            newMenu.setIndex(index);
+            dbAccess.replaceField(oldField,newMenu);
             
             dbRecord.getIOCDB().addIOCDBMergeListener(this);
         }       
@@ -194,18 +190,17 @@ public class ScanSupportFactory {
             setSupportState(SupportState.readyForStart);
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.dbProcess.AbstractSupport#process(org.epics.ioc.dbProcess.ProcessRequestListener)
+         * @see org.epics.ioc.dbProcess.AbstractSupport#process(org.epics.ioc.dbProcess.RecordProcessRequestor)
          */
-        public ProcessReturn process(ProcessRequestListener listener) {
+        public RequestResult process(SupportProcessRequestor supportProcessRequestor) {
             dbStructure.message("process is being called. Why?", IOCMessageType.error);
-            return ProcessReturn.failure;
+            return RequestResult.failure;
         }       
         /* (non-Javadoc)
          * @see org.epics.ioc.dbProcess.AbstractSupport#processContinue()
          */
-        public ProcessContinueReturn processContinue() {
+        public void processContinue() {
             dbStructure.message("processContinue is being called. Why?", IOCMessageType.error);
-            return ProcessContinueReturn.failure;
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.dbAccess.IOCDBMergeListener#merged()

@@ -1,0 +1,9 @@
+<?xml version="1.0" ?>
+<DBDefinition>
+    <field name = "status" type = "string" />
+    <field name = "severity" type = "menu" menuName = "alarmSeverity" />
+    <field name = "timeStamp" type = "structure" structureName = "timeStamp"/>
+    <field name = "scan" type = "structure" structureName = "scan"
+         supportName = "scan" />
+</DBDefinition>
+

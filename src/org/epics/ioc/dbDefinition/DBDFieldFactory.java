@@ -6,8 +6,8 @@
 package org.epics.ioc.dbDefinition;
 
 import java.util.concurrent.atomic.*;
+
 import org.epics.ioc.pvAccess.*;
-import org.epics.ioc.pvAccess.Enum;
 
 /**
  * Factory that creates an implementation of the various
@@ -15,8 +15,20 @@ import org.epics.ioc.pvAccess.Enum;
  * @author mrk
  *
  */
-public final class  DBDCreateFactory {
-
+public final class  DBDFieldFactory {
+    /**
+     * Create a DBDFieldAttribute.
+     * @param asl Access Security Level.
+     * @param defaultValue Default value.
+     * @param isDesign Is this a design field?
+     * @param isLink Is this a link field.
+     * @param isReadOnly Is this a read only field, i.e. can not be modified.
+     * @return The DBDFieldAttribute.
+     */
+    public static DBDFieldAttribute createDBDFieldAttribute(int asl, String defaultValue,
+            boolean isDesign, boolean isLink, boolean isReadOnly) {
+        return new FieldAttribute(asl,defaultValue,isDesign,isLink,isReadOnly);
+    }
     /**
      * Create a DBDMenu.
      * @param menuName The name of the menu.
@@ -36,9 +48,9 @@ public final class  DBDCreateFactory {
      * @return The interface for the newly created structure.
      */
     public static DBDStructure createStructure(String name,
-        DBDField[] dbdField,Property[] property)
+        DBDField[] dbdField,Property[] property,DBDFieldAttribute attribute)
     {
-        return new StructureInstance(name,dbdField,property);
+        return new StructureInstance(name,dbdField,property,attribute);
     }
     
     /**
@@ -49,9 +61,9 @@ public final class  DBDCreateFactory {
      * @return interface The for the newly created structure.
      */
     public static DBDRecordType createRecordType(String name,
-        DBDField[] dbdField,Property[] property)
+        DBDField[] dbdField,Property[] property,DBDFieldAttribute attribute)
     {
-        return new RecordTypeInstance(name,dbdField,property);
+        return new RecordTypeInstance(name,dbdField,property,attribute);
     }
 
     /**
@@ -67,6 +79,57 @@ public final class  DBDCreateFactory {
         return new SupportInstance(supportName,configurationStructureName,factoryName);
     }
     
+    public static DBDMenuField createMenuField(String fieldName,Property[]property,
+            DBDFieldAttribute attribute,DBDMenu dbdMenu)
+    {
+        return new AbstractDBDMenuField(fieldName,property,attribute,dbdMenu);
+    }
+    public static DBDArrayField createArrayField(String fieldName,Property[]property,
+        DBDFieldAttribute attribute,Type elementType,DBType dbElementType)
+    {
+        return new AbstractDBDArrayField(fieldName,property,attribute,elementType,dbElementType);
+    }
+    public static DBDStructureField createStructureField(String fieldName,Property[]property,
+            DBDFieldAttribute attribute,DBDStructure dbdStructure)
+    {
+        DBDField[] original = dbdStructure.getDBDFields();
+        int length = original.length;
+        DBDField[] dbdFields = new DBDField[length];
+        for(int i=0; i<length; i++) {
+            DBDField dbdField = original[i];
+            DBDField copy = null;
+            String name = dbdField.getName();
+            DBDFieldAttribute attr = dbdField.getFieldAttribute();
+            Property[] prop = dbdField.getPropertys();
+            DBType dbType = dbdField.getDBType();
+            switch(dbType) {
+            case dbPvType:
+            case dbLink:
+                Type type = dbdField.getType();
+                copy = createField(name,prop,attr,type,dbType);
+                break;
+            case dbMenu:
+                DBDMenu dbdMenu = ((DBDMenuField)dbdField).getMenu();
+                copy = createMenuField(name,prop,attr,dbdMenu);
+                break;
+            case dbArray:
+                DBDArrayField arrayField = (DBDArrayField)dbdField;
+                Type elementType = arrayField.getElementType();
+                DBType elementDBType = arrayField.getDBType();
+                copy = createArrayField(name,prop,attr,elementType,elementDBType);
+                break;
+            case dbStructure:
+                DBDStructure structure = ((DBDStructureField)dbdField).getDBDStructure();
+                copy = createStructureField(name,prop,attr,structure);
+                break;
+            }
+            if(copy==null) {
+                throw new IllegalStateException("logic error");
+            }
+            dbdFields[i] = copy;
+        }
+        return new AbstractDBDStructureField(fieldName,property,attribute,dbdFields,dbdStructure);
+    }
     /**
      * Creates a DBDField.
      * This is used for all DBTypes.
@@ -74,35 +137,76 @@ public final class  DBDCreateFactory {
      * @param property An array of properties for the field.
      * @return The interface for the newly created field.
      */
-    public static DBDField createField(DBDAttribute attribute, Property[]property)
+    public static DBDField createField(String fieldName,
+        Property[]property,DBDFieldAttribute attribute,Type type,DBType dbType)
     {
-        DBType dbType = attribute.getDBType();
-        Type type = attribute.getType();
-        switch(dbType) {
-        case dbPvType:
+        if(dbType==DBType.dbPvType || dbType==DBType.dbLink) {
             if(type==Type.pvEnum) {
-                return new EnumFieldInstance(attribute,property);
+                return new AbstractDBDEnumField(fieldName,property,attribute); 
             } else {
-                return new FieldInstance(attribute,property);
+                return new AbstractDBDField(fieldName,type,dbType,property,attribute);
             }
-        case dbMenu:
-            return new MenuFieldInstance(attribute,property);
-        case dbArray:
-            return new ArrayFieldInstance(attribute,property);
-        case dbStructure:
-            return new StructureFieldInstance(attribute,property);
-        case dbLink:
-            return new FieldInstance(attribute,property);
         }
-        throw new IllegalStateException("Illegal DBType. Logic error");
+        throw new IllegalStateException("Illegal types");
     }
-
-   static private void newLine(StringBuilder builder, int indentLevel) {
-        builder.append(String.format("%n"));
-        for (int i=0; i <indentLevel; i++) builder.append(indentString);
+    
+    private static class FieldAttribute implements DBDFieldAttribute {
+        private int asl = 1;
+        private String defaultValue = null;
+        private boolean isDesign = true;
+        private boolean isLink = false;
+        private boolean isReadOnly = false;
+        
+        private FieldAttribute(int asl, String defaultValue,
+            boolean isDesign, boolean isLink, boolean isReadOnly)
+        {
+            super();
+            this.asl = asl;
+            this.defaultValue = defaultValue;
+            this.isDesign = isDesign;
+            this.isLink = isLink;
+            this.isReadOnly = isReadOnly;
+        }
+        
+        /* (non-Javadoc)
+         * @see org.epics.ioc.dbDefinition.DBDFieldAttribute#getAsl()
+         */
+        public int getAsl() {
+            return asl;
+        }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.dbDefinition.DBDFieldAttribute#getDefault()
+         */
+        public String getDefault() {
+            return defaultValue;
+        }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.dbDefinition.DBDFieldAttribute#isDesign()
+         */
+        public boolean isDesign() {
+            return isDesign;
+        }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.dbDefinition.DBDFieldAttribute#isLink()
+         */
+        public boolean isLink() {
+            return isLink;
+        }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.dbDefinition.DBDFieldAttribute#isReadOnly()
+         */
+        public boolean isReadOnly() {
+            return isReadOnly;
+        }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.dbDefinition.DBDFieldAttribute#toString(int)
+         */
+        public String toString(int indentLevel) {
+            return String.format(
+                " asl %d design %b link %b readOnly %b",
+                asl,isDesign,isLink,isReadOnly);
+        }
     }
-    static private String indentString = "    ";
-
     static private class MenuInstance implements DBDMenu
     {
 
@@ -139,7 +243,7 @@ public final class  DBDCreateFactory {
 
         private String getString(int indentLevel) {
             StringBuilder builder = new StringBuilder();
-            newLine(builder,indentLevel);
+            AbstractField.newLine(builder,indentLevel);
             builder.append(String.format("menu %s { ",menuName));
             for(String value: choices) {
                 builder.append(String.format("\"%s\" ",value));
@@ -151,6 +255,7 @@ public final class  DBDCreateFactory {
     
     static private class StructureInstance implements DBDStructure
     {
+        private DBDFieldAttribute attribute;
         protected Structure structure;
         protected DBDField[] dbdField;
         protected String supportName = null;
@@ -158,23 +263,29 @@ public final class  DBDCreateFactory {
         public String getSupportName() {
             return supportName;
         }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pvAccess.Field#getParent()
+         */
+        public Field getParent() {
+            return null;
+        }
         public void setSupportName(String name) {
             supportName = name;
             
         }
         private StructureInstance(String name,
-            DBDField[] dbdField,Property[] property)
+            DBDField[] dbdField,Property[] property,DBDFieldAttribute attribute)
         {
             structure = FieldFactory.createStructureField(
                 name,name,dbdField,property);
             this.dbdField = dbdField;
-        }
+            this.attribute = attribute;
+        }        
         /* (non-Javadoc)
          * @see org.epics.ioc.dbDefinition.DBDField#getFieldAttribute()
          */
         public DBDFieldAttribute getFieldAttribute() {
-            // TODO Auto-generated method stub
-            return null;
+            return attribute;
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.dbDefinition.DBDField#getDBType()
@@ -275,7 +386,7 @@ public final class  DBDCreateFactory {
             StringBuilder builder = new StringBuilder();
             builder.append(structure.toString(indentLevel));
             if(supportName!=null) {
-                newLine(builder,indentLevel);
+                AbstractField.newLine(builder,indentLevel);
                 builder.append(String.format(
                     "supportName %s",supportName));
             }
@@ -289,9 +400,9 @@ public final class  DBDCreateFactory {
         private AtomicReference<String> supportName  = new AtomicReference<String>();
         
         private RecordTypeInstance(String name,
-            DBDField[] dbdField,Property[] property)
+            DBDField[] dbdField,Property[] property,DBDFieldAttribute attribute)
         {
-            super(name,dbdField,property);
+            super(name,dbdField,property,attribute);
         }
         /* (non-Javadoc)
          * @see java.lang.Object#toString()
@@ -309,7 +420,7 @@ public final class  DBDCreateFactory {
             builder.append(super.toString(indentLevel));
             String name = supportName.get();
             if(name!=null) {
-                newLine(builder,indentLevel);
+                AbstractField.newLine(builder,indentLevel);
                 builder.append(String.format(
                     "supportName %s",name));
             }
@@ -357,186 +468,18 @@ public final class  DBDCreateFactory {
         
         private String getString(int indentLevel) {
             StringBuilder builder = new StringBuilder();
-            newLine(builder,indentLevel);
+            AbstractField.newLine(builder,indentLevel);
             builder.append(String.format(
                     "supportName %s configurationStructureName %s factoryName %s",
                     supportName,configurationStructureName,factoryName));
             return builder.toString();
         }
 
+        /* (non-Javadoc)
+         * @see org.epics.ioc.dbDefinition.DBDSupport#getFactoryName()
+         */
         public String getFactoryName() {
             return factoryName;
         }
     }
-    
-    static private class FieldInstance extends AbstractDBDField
-    {
-        private FieldInstance(DBDAttribute attribute,Property[]property)
-        {
-            super(attribute,property); 
-        }
-    }
-    
-    static private class EnumFieldInstance extends AbstractDBDField
-        implements DBDEnumField
-    {
-        private Enum enumField;
-
-        private EnumFieldInstance(DBDAttribute attribute,Property[]property)
-        {
-            super(attribute,property);
-            enumField = (Enum)field;
-        }        
-        /* (non-Javadoc)
-         * @see org.epics.ioc.pvAccess.Enum#isChoicesMutable()
-         */
-        public boolean isChoicesMutable() {
-            return enumField.isChoicesMutable();
-        }
-    }
-    
-    static private class MenuFieldInstance extends AbstractDBDField
-    implements DBDMenuField
-    {
-        private Enum enumField;
-        private DBDMenu dbdMenu;
-
-        private MenuFieldInstance(DBDAttribute attribute,Property[]property)
-        {
-            super(attribute,property);
-            dbdMenu = attribute.getMenu();
-            enumField = (Enum)field;
-        }   
-        /* (non-Javadoc)
-         * @see org.epics.ioc.pvAccess.Enum#isChoicesMutable()
-         */
-        public boolean isChoicesMutable() {
-            return enumField.isChoicesMutable();
-        }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.dbDefinition.DBDMenuField#getMenu()
-         */
-        public DBDMenu getMenu() {
-            return dbdMenu;
-        }
-    }
-    
-    static private class ArrayFieldInstance extends AbstractDBDField
-        implements DBDArrayField
-    {
-        private Array array;
-        private DBType elementDBType;
-
-        private ArrayFieldInstance(DBDAttribute attribute,Property[]property)
-        {
-            super(attribute,property);
-            array = (Array)field;
-            elementDBType = attribute.getElementDBType();
-        }       
-        /* (non-Javadoc)
-         * @see org.epics.ioc.pvAccess.Array#getElementType()
-         */
-        public Type getElementType() {
-            return array.getElementType();
-        }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.dbDefinition.DBDArrayField#getElementDBType()
-         */
-        public DBType getElementDBType() {
-            return elementDBType;
-        }
-
-    }
-    
-    static private class StructureFieldInstance extends AbstractDBDField
-    implements DBDStructureField
-    {
-        private Structure structure;
-        private DBDField[] dbdField;
-        private DBDStructure dbdStructure;
-
-        private StructureFieldInstance(DBDAttribute attribute,Property[]property)
-        {
-            super(attribute,property);
-            structure = (Structure)field;
-            // The following cast is OK because AbstractDBDField creates DBDField[] not Field[].
-            dbdField = (DBDField[])structure.getFields();
-            dbdStructure = attribute.getStructure();
-        }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.dbDefinition.DBDStructureField#getDBDStructure()
-         */
-        public DBDStructure getDBDStructure() {
-            return dbdStructure;
-        }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.pvAccess.Structure#getFieldIndex(java.lang.String)
-         */
-        public int getFieldIndex(String fieldName) {
-            return structure.getFieldIndex(fieldName);
-        }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.pvAccess.Structure#getField(java.lang.String)
-         */
-        public Field getField(String fieldName) {
-            return structure.getField(fieldName);
-        }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.pvAccess.Structure#getFieldNames()
-         */
-        public String[] getFieldNames() {
-            return structure.getFieldNames();
-        }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.pvAccess.Structure#getFields()
-         */
-        public Field[] getFields() {
-            return structure.getFields();
-        }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.dbDefinition.DBDStructureField#getDBDFields()
-         */
-        public DBDField[] getDBDFields() {
-            return dbdField;
-        }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.pvAccess.Structure#getStructureName()
-         */
-        public String getStructureName() {
-            return structure.getStructureName();
-        }
-        /* (non-Javadoc)
-         * @see java.lang.Object#toString()
-         */
-        public String toString() { return getString(0);}
-        /* (non-Javadoc)
-         * @see org.epics.ioc.pvAccess.Field#toString(int)
-         */
-        public String toString(int indentLevel) {
-            return getString(indentLevel);
-        }
-
-        private String getString(int indentLevel) {
-            StringBuilder builder = new StringBuilder();
-            if(dbdStructure != null) {
-                Property[] structureProperty = dbdStructure.getPropertys();
-                if(structureProperty.length>0) {
-                    newLine(builder,indentLevel);
-                    builder.append(String.format("field %s is structure with property {",
-                            field.getName()));
-                    for(Property property : structureProperty) {
-                        newLine(builder,indentLevel+1);
-                        builder.append(String.format("{name = %s field = %s}",
-                            property.getName(),property.getFieldName()));
-                    }
-                    newLine(builder,indentLevel);
-                    builder.append("}");
-                }
-            }
-            builder.append(super.toString(indentLevel));
-            return builder.toString();
-        }
-
-    }
-    
 }

@@ -17,6 +17,12 @@ public interface Field {
      */
     String getName();
     /**
+     * Get the parent field.
+     * This is the structure or null if this is a top level structure.
+     * @return The parent field or null.
+     */
+    Field getParent();
+    /**
      * Get the propertys for the field.
      * @return A Property array.
      * If null is returned then the field has no associated properties.

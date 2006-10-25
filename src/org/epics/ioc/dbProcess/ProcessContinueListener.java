@@ -6,21 +6,17 @@
 package org.epics.ioc.dbProcess;
 
 /**
- * Return from a processContinue request.
  * @author mrk
  *
  */
-public enum ProcessContinueReturn {
+public interface ProcessContinueListener {
     /**
-     * The support is done.
+     * Get the name.
+     * @return The name.
      */
-    success,
+    String getName();
     /**
-     * The request failed.
+     * Continue processing. This is called by RecordProcess.processContinue
      */
-    failure,
-    /**
-     * The support is active.
-     */
-    active
+    void processContinue();
 }

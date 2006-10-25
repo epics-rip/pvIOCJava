@@ -12,7 +12,7 @@ import org.epics.ioc.dbAccess.*;
  * @author mrk
  *
  */
-public interface Support {
+public interface Support extends ProcessContinueListener{
     /**
      * Get the support name.
      * @return The support name.
@@ -60,15 +60,10 @@ public interface Support {
     void uninitialize();
     /**
      * Perform support processing.
-     * @param listener The listener to call when returning active.
+     * @param supportProcessRequestor The listener to call when returning active.
      * @return The result of the process request.
      */
-    ProcessReturn process(ProcessRequestListener listener);
-    /**
-     * Continue processing. This is only called while support is active.
-     * @return The result of the processContinue request.
-     */
-    ProcessContinueReturn processContinue();
+    RequestResult process(SupportProcessRequestor supportProcessRequestor);
     /**
      * Update state. This is only called while support is active.
      */

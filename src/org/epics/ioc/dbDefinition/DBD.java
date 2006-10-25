@@ -16,7 +16,7 @@ import java.util.*;
 public interface DBD {
     /**
      * Get the name of this DBD.
-     * Multiple DBDs can be created via DBDCreateFactory.
+     * Multiple DBDs can be created via DBDFieldFactory.
      * @return The name.
      */
     String getName();

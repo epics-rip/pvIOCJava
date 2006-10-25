@@ -173,12 +173,8 @@ public abstract class AbstractDBData implements DBData{
                 + " for support " + name
                 + " does not exist";
         }
-        DBDAttributeValues dbdAttributeValues =
-            new StructureDBDAttributeValues(configurationStructureName,"configurationStructure");
-        DBDAttribute dbdAttribute = DBDAttributeFactory.create(
-            dbd,dbdAttributeValues);
-        DBDField dbdField = DBDCreateFactory.createField(
-                dbdAttribute,null);
+        DBDFieldAttribute attribute = DBDFieldFactory.createDBDFieldAttribute(1,null, true, false, false);
+        DBDField dbdField =DBDFieldFactory.createStructureField(name, null, attribute, dbdStructure);
         configDBStructure  = (DBStructure)FieldDataFactory.createData(this,dbdField);
         return null;
     }
@@ -221,44 +217,5 @@ public abstract class AbstractDBData implements DBData{
      */
     public void message(String message, IOCMessageType messageType) {
         record.message(getFullFieldName() + " " + message, messageType);
-    }
-    private static class StructureDBDAttributeValues
-    implements DBDAttributeValues
-    {
-        private static Map<String,String> attributeMap = new TreeMap<String,String>();
-
-        /**
-         * Constructor.
-         * @param structureName The structure name.
-         * @param fieldName The field name.
-         */
-        public StructureDBDAttributeValues(String structureName,
-            String fieldName)
-        {
-            attributeMap.put("name",fieldName);
-            attributeMap.put("structureName",structureName);
-            attributeMap.put("type","structure");
-        }
-
-        /* (non-Javadoc)
-         * @see org.epics.ioc.dbDefinition.DBDAttributeValues#getLength()
-         */
-        public int getLength() {
-            return attributeMap.size();
-        }
-
-        /* (non-Javadoc)
-         * @see org.epics.ioc.dbDefinition.DBDAttributeValues#getValue(java.lang.String)
-         */
-        public String getValue(String name) {
-            return attributeMap.get(name);
-        }
-
-        /* (non-Javadoc)
-         * @see org.epics.ioc.dbDefinition.DBDAttributeValues#keySet()
-         */
-        public Set<String> keySet() {
-            return attributeMap.keySet();
-        }
     }
 }

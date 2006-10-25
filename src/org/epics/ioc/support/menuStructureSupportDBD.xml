@@ -36,9 +36,6 @@
 <structure name = "processLink">
     <field name = "pvname" type = "string" link = "true" />
     <field name = "inheritSeverity" type = "boolean" />
-    <field name = "forceLocal" type = "boolean">
-        <!-- if true pvname must be in local IOC -->
-    </field>
 </structure>
 
 <structure name = "monitorLink">
@@ -46,32 +43,22 @@
     <field name = "process" type = "boolean">
         <!-- process this record when monitor occurs -->
     </field>
-    <field name = "monitorOnly" type = "boolean">
+    <field name = "queueCapacity" type = "int">
         <!-- monitor only or data also -->
     </field>
     <field name = "inheritSeverity" type = "boolean" />
-    <field name = "forceLocal" type = "boolean">
-        <!-- if true pvname must be in local IOC -->
-    </field>
 </structure>
 
 <structure name = "inputLink">
     <field name = "pvname" type = "string" link = "true" />
     <field name = "process" type = "boolean" />
     <field name = "inheritSeverity" type = "boolean" />
-    <field name = "forceLocal" type = "boolean" >
-        <!-- if true pvname must be in local IOC -->
-    </field>
 </structure>
 
 <structure name = "outputLink">
     <field name = "pvname" type = "string" link = "true" />
     <field name = "process" type = "boolean" />
     <field name = "inheritSeverity" type = "boolean" />
-    <field name = "forceLocal" type = "boolean" >
-        <!-- if true pvname must be in local IOC -->
-        <boolean />
-    </field>
 </structure>
 
 <structure name = "disableLink">
@@ -88,6 +75,13 @@
     <field name = "addr" type = "int" />
     <field name = "timeout" type = "double" />
 </structure>
+
+<structure name = "linkArrayElement">
+    <field name = "wait" type = "boolean" />
+    <field name = "link" type = "link" />
+    <field name = "name" type = "string" />
+</structure>
+
 
 <structure name = "displayLimit">
     <field name = "low" type = "double" />

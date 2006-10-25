@@ -5,6 +5,7 @@
  */
 package org.epics.ioc.channelAccess;
 
+import java.util.List;
 
 /**
  * Interface for getting data from a group of fields.
@@ -12,10 +13,6 @@ package org.epics.ioc.channelAccess;
  *
  */
 public interface ChannelFieldGroup {
-    /**
-     * Allow no further requests and clean up any internal state.
-     */
-    void destroy();
     /**
      * Add a field to the group.
      * @param channelField The field to add.
@@ -26,4 +23,9 @@ public interface ChannelFieldGroup {
      * @param channelField The field to remove.
      */
     void removeChannelField(ChannelField channelField);
+    /**
+     * Get the list of channel fields.
+     * @return The list.
+     */
+    public List<ChannelField> getList();
 }

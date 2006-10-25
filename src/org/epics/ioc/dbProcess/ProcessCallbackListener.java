@@ -19,6 +19,11 @@ package org.epics.ioc.dbProcess;
  */
 public interface ProcessCallbackListener {
     /**
+     * Get the name.
+     * @return The name.
+     */
+    String getName();
+    /**
      * The callback to call after recordSupport.process returns.
      * The callback is called with the record unlocked but still active.
      * The callback can request that other records be processed.

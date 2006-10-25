@@ -5,6 +5,9 @@
  */
 package org.epics.ioc.channelAccess;
 
+import org.epics.ioc.dbProcess.RequestResult;
+import org.epics.ioc.util.*;
+
 
 /**
  * Channel access put/get request.
@@ -14,24 +17,11 @@ package org.epics.ioc.channelAccess;
  */
 public interface ChannelPutGet {
     /**
-     * Refuse further requests and clean up internal state.
-     */
-    void destroy();
-    /**
      * Issue a put/get request.
      * @param putFieldGroup The put field group.
-     * @param channelPutListener The put callback listener.
      * @param getFieldGroup The get field group.
-     * @param channelGetListener The get callback listener.
-     * @param process (false,true) if server (should not, should) process after put.
      * @return The result of the request.
      */
-    ChannelRequestReturn putGet(
-        ChannelFieldGroup putFieldGroup,ChannelPutListener channelPutListener,
-        ChannelFieldGroup getFieldGroup,ChannelGetListener channelGetListener,
-        boolean process);
-    /**
-     * Cancel the put/get. The listeners may be called after this request is issued.
-     */
-    void cancelPutGet();
+    RequestResult putGet(
+        ChannelFieldGroup putFieldGroup,ChannelFieldGroup getFieldGroup);
 }

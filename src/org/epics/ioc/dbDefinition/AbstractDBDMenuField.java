@@ -8,37 +8,37 @@ package org.epics.ioc.dbDefinition;
 import org.epics.ioc.pvAccess.*;
 
 /**
- * abstract class for implementing a DBDField interface or extension.
  * @author mrk
  *
  */
-public class AbstractDBDField extends AbstractField implements DBDField {
-    private DBType dbType;
+public class AbstractDBDMenuField extends AbstractEnum implements DBDMenuField {
     private DBDFieldAttribute attribute;
+    private DBDMenu dbdMenu;
     
-    /**
-     * Constructor for AbstractDBDField.
-     * @param name Field name.
-     * @param type Field Type.
-     * @param dbType Field DBType.
-     * @param property Array of properties.
-     * @param attribute Array of attributes.
-     */
-    public AbstractDBDField(String name, Type type,DBType dbType,
-            Property[] property,DBDFieldAttribute attribute)
+    public AbstractDBDMenuField(String name,Property[] property,
+            DBDFieldAttribute attribute,DBDMenu dbdMenu)
     {
-        super(name,type,property);
-        this.dbType = dbType;
+        super(name,property,false);
         this.attribute = attribute;
-    }       
+        this.dbdMenu = dbdMenu;
+    }
     /* (non-Javadoc)
      * @see org.epics.ioc.dbDefinition.DBDField#getDBType()
      */
     public DBType getDBType() {
-        return dbType;
+        return DBType.dbMenu;
     }
+    /* (non-Javadoc)
+     * @see org.epics.ioc.dbDefinition.DBDField#getFieldAttribute()
+     */
     public DBDFieldAttribute getFieldAttribute() {
         return attribute;
+    }
+    /* (non-Javadoc)
+     * @see org.epics.ioc.dbDefinition.DBDMenuField#getMenu()
+     */
+    public DBDMenu getMenu() {
+        return dbdMenu;
     }
     /* (non-Javadoc)
      * @see java.lang.Object#toString()
@@ -50,14 +50,13 @@ public class AbstractDBDField extends AbstractField implements DBDField {
     public String toString(int indentLevel) {
         return getString(indentLevel);
     }
+    
     private String getString(int indentLevel) {
         StringBuilder builder = new StringBuilder();
         builder.append(super.toString(indentLevel));
         newLine(builder,indentLevel);
-        builder.append("DBType " + dbType.toString());
+        builder.append("DBType dbMenu ");
         builder.append(attribute.toString(indentLevel));
         return builder.toString();
     }
-   
 }
-

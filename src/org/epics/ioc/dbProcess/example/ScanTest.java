@@ -113,6 +113,11 @@ public class ScanTest extends TestCase {
         dbData = dbRecord.getFieldDBDatas();        
         index = dbRecord.getFieldDBDataIndex("value");
         DBData double02Value = dbData[index];
+        dbRecord = iocdbMaster.findRecord("double03");
+        assertNotNull(dbRecord);
+        dbData = dbRecord.getFieldDBDatas();        
+        index = dbRecord.getFieldDBDataIndex("value");
+        DBData double03Value = dbData[index];
         list = periodicScanner.toString();
         System.out.println(list);
         while(true) {
@@ -124,6 +129,7 @@ public class ScanTest extends TestCase {
                 System.out.println("  counterEvent1 " + counterEvent1Value.toString());
                 System.out.println(" counter " + counterValue.toString());
                 System.out.println("double02 " + double02Value.toString());
+                System.out.println("double03 " + double03Value.toString());
                 System.out.println();
             } catch (InterruptedException e) {
             }

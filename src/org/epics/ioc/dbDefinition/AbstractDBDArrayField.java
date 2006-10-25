@@ -8,37 +8,46 @@ package org.epics.ioc.dbDefinition;
 import org.epics.ioc.pvAccess.*;
 
 /**
- * abstract class for implementing a DBDField interface or extension.
  * @author mrk
  *
  */
-public class AbstractDBDField extends AbstractField implements DBDField {
-    private DBType dbType;
+public class AbstractDBDArrayField extends AbstractArray implements DBDArrayField {
     private DBDFieldAttribute attribute;
+    private DBType elementDBType;
     
     /**
-     * Constructor for AbstractDBDField.
-     * @param name Field name.
-     * @param type Field Type.
-     * @param dbType Field DBType.
-     * @param property Array of properties.
-     * @param attribute Array of attributes.
+     * Constructor for AbstractDBDArrayField.
+     * @param name The field name.
+     * @param property An array of Property.
+     * @param attribute The atributes for the field.
+     * @param elementType The Type for the array elements.
+     * @param elementDBType The DBType for tye array elements.
      */
-    public AbstractDBDField(String name, Type type,DBType dbType,
-            Property[] property,DBDFieldAttribute attribute)
+    public AbstractDBDArrayField(String name,Property[] property,
+        DBDFieldAttribute attribute,Type elementType,DBType elementDBType)
     {
-        super(name,type,property);
-        this.dbType = dbType;
+        super(name,property,elementType);
         this.attribute = attribute;
-    }       
+        this.elementDBType = elementDBType;
+    }
     /* (non-Javadoc)
      * @see org.epics.ioc.dbDefinition.DBDField#getDBType()
      */
     public DBType getDBType() {
-        return dbType;
+        return DBType.dbArray;
     }
+    /* (non-Javadoc)
+     * @see org.epics.ioc.dbDefinition.DBDField#getFieldAttribute()
+     */
     public DBDFieldAttribute getFieldAttribute() {
         return attribute;
+    }
+    /* (non-Javadoc)
+     * @see org.epics.ioprivate DBType dbType;
+    private DBDFieldAttribute attribute;c.dbDefinition.DBDArrayField#getElementDBType()
+     */
+    public DBType getElementDBType() {
+        return elementDBType;
     }
     /* (non-Javadoc)
      * @see java.lang.Object#toString()
@@ -50,14 +59,12 @@ public class AbstractDBDField extends AbstractField implements DBDField {
     public String toString(int indentLevel) {
         return getString(indentLevel);
     }
+    
     private String getString(int indentLevel) {
         StringBuilder builder = new StringBuilder();
         builder.append(super.toString(indentLevel));
         newLine(builder,indentLevel);
-        builder.append("DBType " + dbType.toString());
-        builder.append(attribute.toString(indentLevel));
+        builder.append("elementDBType " + elementDBType.toString());
         return builder.toString();
     }
-   
 }
-

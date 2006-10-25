@@ -6,19 +6,15 @@
 package org.epics.ioc.dbProcess;
 
 /**
- * The return value from a process request.
+ * The return value from a request.
  * @author mrk
  *
  */
-public enum ProcessReturn {
+public enum RequestResult {
     /**
      * The support is going away.
      */
     zombie,
-    /**
-     * The support has nothing to do. 
-     */
-    noop,
     /**
      * The support is done.
      */

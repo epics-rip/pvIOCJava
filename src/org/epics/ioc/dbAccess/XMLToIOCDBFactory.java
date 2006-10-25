@@ -802,7 +802,7 @@ public class XMLToIOCDBFactory {
                     DBDAttributeValues dbdAttributeValues =
                         new EnumDBDAttributeValues(actualFieldName);
                     dbdAttribute = DBDAttributeFactory.create(dbd,dbdAttributeValues);
-                    dbdField = DBDCreateFactory.createField(dbdAttribute,null);
+                    dbdField = DBDFieldFactory.createField(dbdAttribute,null);
                     DBEnumArray dbEnumArray = arrayState.dbEnumArray;
                     DBEnum[] enumData = arrayState.enumData;
                     enumData[0] = (DBEnum)FieldDataFactory.createEnumData(
@@ -835,7 +835,7 @@ public class XMLToIOCDBFactory {
                         new MenuDBDAttributeValues(menuName,actualFieldName);
                     dbdAttribute = DBDAttributeFactory.create(
                         dbd,dbdAttributeValues);
-                    dbdField = DBDCreateFactory.createField(dbdAttribute,null);
+                    dbdField = DBDFieldFactory.createField(dbdAttribute,null);
                     DBMenuArray dbMenuArray = arrayState.dbMenuArray;
                     DBMenu[] menuData = arrayState.menuData;
                     menuData[0] = (DBMenu)FieldDataFactory.createData(dbArray,dbdField);
@@ -875,7 +875,7 @@ public class XMLToIOCDBFactory {
                     dbdAttribute = DBDAttributeFactory.create(
                         dbd,dbdAttributeValues);
                     Property[] property = structure.getPropertys();
-                    dbdField = DBDCreateFactory.createField(dbdAttribute,property);
+                    dbdField = DBDFieldFactory.createField(dbdAttribute,property);
                     DBStructureArray dbStructureArray = arrayState.dbStructureArray;
                     DBStructure[] structureData = arrayState.structureData;
                     structureData[0] = (DBStructure)FieldDataFactory.createData(dbArray,dbdField);
@@ -908,7 +908,7 @@ public class XMLToIOCDBFactory {
                     DBDAttributeValues dbdAttributeValues =
                         new ArrayDBDAttributeValues(elementType,actualFieldName);
                     dbdAttribute = DBDAttributeFactory.create(dbd,dbdAttributeValues);
-                    dbdField = DBDCreateFactory.createField(dbdAttribute,null);
+                    dbdField = DBDFieldFactory.createField(dbdAttribute,null);
                     DBArrayArray dbArrayArray = arrayState.dbArrayArray;
                     DBArray[] arrayData = arrayState.arrayData;
                     arrayData[0] = (DBArray)FieldDataFactory.createData(dbArray,dbdField);
@@ -939,7 +939,7 @@ public class XMLToIOCDBFactory {
                        DBDAttributeValues dbdAttributeValues =
                            new LinkDBDAttributeValues(actualFieldName);
                        dbdAttribute = DBDAttributeFactory.create(dbd,dbdAttributeValues);
-                       dbdField = DBDCreateFactory.createField(dbdAttribute,null);
+                       dbdField = DBDFieldFactory.createField(dbdAttribute,null);
                        DBLinkArray dbLinkArray = arrayState.dbLinkArray;
                        DBLink[] linkData = arrayState.linkData;
                        linkData[0] = (DBLink)FieldDataFactory.createData(

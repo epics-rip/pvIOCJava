@@ -5,14 +5,15 @@
  */
 package org.epics.ioc.channelAccess;
 
-import org.epics.ioc.util.*;
+import org.epics.ioc.util.AlarmSeverity;
+import org.epics.ioc.util.TimeStamp;
 
 /**
- * Base interface for channel requests.
+ * Requestor for a ChannelProcess.
  * @author mrk
  *
  */
-public interface ChannelRequestListener {
+public interface ChannelProcessRequestor extends ChannelRequestor {
     /**
      * The result of the process request.
      * @param channel The channel.
@@ -20,19 +21,6 @@ public interface ChannelRequestListener {
      * @param status The status after processing.
      * @param timeStamp The time stamp after processing.
      */
-    void requestResult(Channel channel,
+    void processResult(Channel channel,
             AlarmSeverity alarmSeverity,String status,TimeStamp timeStamp);
-    /**
-     * A message for requester.
-     * @param channel The channel.
-     * @param message The message.
-     */
-    void message(Channel channel,String message);
-    /**
-     * The request is done. This is always called with no locks held.
-     * This is only called if the request is asynchronous,
-     * i.e. if the original request returned ChannelRequestReturn.active.
-     * @param channel The channel.
-     */
-    void requestDone(Channel channel);
 }

@@ -21,7 +21,11 @@ public class EventRecordFactory {
     }
     
     
-    static private class EventRecordSupport extends AbstractSupport {
+    static private class EventRecordSupport extends AbstractSupport
+    {
+        /* (non-Javadoc)
+         * @see org.epics.ioc.dbProcess.RecordSupport#processRecord(org.epics.ioc.dbProcess.RecordProcessRequestor)
+         */
         private static String supportName = "eventRecord";
         private SupportState supportState = SupportState.readyForInitialize;
         private DBRecord dbRecord;
@@ -34,6 +38,12 @@ public class EventRecordFactory {
             super(supportName,dbStructure);
             dbRecord = dbStructure.getRecord();
             eventScanner = ScannerFactory.getEventScanner();
+        }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.dbProcess.SupportProcessRequestor#getProcessRequestorName()
+         */
+        public String getProcessRequestorName() {
+            return dbRecord.getRecordName();
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.dbProcess.Support#initialize()
@@ -91,15 +101,15 @@ public class EventRecordFactory {
             setSupportState(SupportState.readyForInitialize);
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.dbProcess.Support#process(org.epics.ioc.dbProcess.ProcessRequestListener)
+         * @see org.epics.ioc.dbProcess.Support#process(org.epics.ioc.dbProcess.RecordProcessRequestor)
          */
-        public ProcessReturn process(ProcessRequestListener listener) {
+        public RequestResult process(SupportProcessRequestor supportProcessRequestor) {
             if(supportState!=SupportState.ready) {
                 dbRecord.message(
                         "process called but supportState is "
                         + supportState.toString(),
                         IOCMessageType.error);
-                return ProcessReturn.failure;
+                return RequestResult.failure;
             }
             String newName = value.get();
             if(newName!=eventName) {
@@ -111,14 +121,13 @@ public class EventRecordFactory {
                 }
             }
             if(eventAnnounce!=null) eventAnnounce.announce();
-            return ProcessReturn.success;
+            return RequestResult.success;
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.dbProcess.Support#processContinue()
          */
-        public ProcessContinueReturn processContinue() {
+        public void processContinue() {
             dbRecord.message("why was processContinue called", IOCMessageType.error);
-            return ProcessContinueReturn.failure;
         }
     }
 }

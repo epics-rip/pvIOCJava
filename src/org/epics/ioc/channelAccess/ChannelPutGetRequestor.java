@@ -6,21 +6,7 @@
 package org.epics.ioc.channelAccess;
 
 /**
- * Return value for channel requests.
  * @author mrk
  *
  */
-public enum ChannelRequestReturn {
-    /**
-     * The request is done.
-     */
-    success,
-    /**
-     * The request failed.
-     */
-    failure,
-    /**
-     * The request is active.
-     */
-    active,
-}
+public interface ChannelPutGetRequestor extends ChannelPutRequestor,ChannelGetRequestor {}

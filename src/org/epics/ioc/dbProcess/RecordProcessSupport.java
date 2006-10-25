@@ -6,7 +6,6 @@
 package org.epics.ioc.dbProcess;
 
 import org.epics.ioc.util.*;
-import org.epics.ioc.dbAccess.*;
 
 /**
  * Support for record processing.
@@ -14,7 +13,20 @@ import org.epics.ioc.dbAccess.*;
  * @author mrk
  *
  */
-public interface RecordProcessSupport {
+public interface RecordProcessSupport extends SupportProcessRequestor  {
+    /**
+     * Ask recordProcess to call the support to continue processing.
+     * This is called with no locks held.
+     * Only valid if the record is active.
+     * @param processContinueListener The support to call.
+     */
+    void processContinue(ProcessContinueListener processContinueListener);
+    /**
+     * Called by SupportPreProcessRequestor when a preProcess request was issued.
+     * @param recordProcessRequestor The recordProcessRequestor.
+     * @return The result of the processNow request.
+     */
+    RequestResult processNow(RecordProcessRequestor recordProcessRequestor);
     /**
      * Request to be called back after process or processContinue
      * has called record support but before it returns.
@@ -23,27 +35,6 @@ public interface RecordProcessSupport {
      * @param processCallbackListener The listener to call.
      */
     void requestProcessCallback(ProcessCallbackListener processCallbackListener);
-    /**
-     * Request that a linked record be processed.
-     * This must be called with the current record being locked.
-     * It will lock the other record and request that it be processed.
-     * @param dbRecord The record to process.
-     * @param listener The listener for the linked record..
-     * @return The result of the process request.
-     * If the record containing the link and the linked record have the same root record that resulted
-     * in the two records being active than the request will fail.
-     * This means that a processing loop has been detected. 
-     * If active or already active and the caller supplies a listener,
-     * it will be called when the record completes processing.
-     */
-    ProcessReturn processLinkedRecord(DBRecord dbRecord,ProcessRequestListener listener);
-    /**
-     * Ask recordProcess to call the support to continue processing.
-     * This is called with no locks held.
-     * Only valid if the record is active.
-     * @param support The support to call.
-     */
-    void processContinue(Support support);
     /**
      * Set the status and severity for the record.
      * This must only be called by code running as a result of Support.process or Support.processContinue. 
@@ -66,14 +57,14 @@ public interface RecordProcessSupport {
     /**
      * Get the current status.
      * This must only be called by code running as a result of Support.process, Support.processContinue,
-     * or ProcessRequestListener.processComplete.
+     * or RecordProcessRequestor.processComplete.
      * @return The status. If the record does not have a status field null will be returned.
      */
     String getStatus();
     /**
      * Get the current alarm severity.
      * This must only be called by code running as a result of Support.process, Support.processContinue,
-     * or ProcessRequestListener.processComplete. 
+     * or RecordProcessRequestor.processComplete. 
      * @return The severity. If the record does not have an alarmSeverity field null is returned.
      */
     AlarmSeverity getAlarmSeverity();
@@ -86,7 +77,7 @@ public interface RecordProcessSupport {
     /**
      * Get the current timeStamp.
      * This must only be called by code running as a result of Support.process, Support.processContinue,
-     * or ProcessRequestListener.processComplete. 
+     * or RecordProcessRequestor.processComplete. 
      * @param timeStamp The current timeStamp.
      */
     void getTimeStamp(TimeStamp timeStamp);

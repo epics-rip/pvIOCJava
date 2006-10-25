@@ -26,8 +26,8 @@ public class LinkArraySupportFactory {
     public static Support create(DBArray dbArray) {
         DBDArrayField dbdArrayField = (DBDArrayField)dbArray.getDBDField();
         DBType elementDBType = dbdArrayField.getElementDBType();
-        if(elementDBType!=DBType.dbLink) {
-            dbArray.message("element type is not a link",IOCMessageType.error);
+        if(elementDBType!=DBType.dbStructure) {
+            dbArray.message("element type is not a structure",IOCMessageType.error);
             return null;
         }
         String supportName = dbArray.getSupportName();
@@ -35,30 +35,41 @@ public class LinkArraySupportFactory {
             dbArray.message("does not have support " + supportName,IOCMessageType.error);
             return null;
         }
-        return new LinkArray((DBLinkArray)dbArray);
+        return new StructureArray((DBStructureArray)dbArray);
     }
     private static String supportName = "linkArray";
     
-    private static class LinkArray extends AbstractSupport
-    implements LinkSupport,ProcessCallbackListener,ProcessRequestListener
+    private static class StructureArray extends AbstractSupport
+    implements LinkSupport,ProcessCallbackListener,SupportProcessRequestor
     {
-        
-        private DBLinkArray dbLinkArray;
+        private DBStructureArray dbStructureArray;
+        private String processRequestorName = null;
         private RecordProcess recordProcess = null;
         private RecordProcessSupport recordProcessSupport = null;
-        private LinkArrayData linkArrayData = new LinkArrayData();
+        private DBStructureArrayData structureArrayData = new DBStructureArrayData();
+        private PVBoolean[] pvWaits = null;
         private DBLink[] dbLinks = null;
-        private LinkSupport[] processLinks = null;
+        private LinkSupport[] linkSupports = null;
         
-        private PVData valueData = null;
-        
-        private ProcessRequestListener listener;
+        private PVData valueData = null;        
+        private SupportProcessRequestor supportProcessRequestor;
         private int nextLink;
         private int numberWait;
+        private RequestResult finalResult;
        
-        private LinkArray(DBLinkArray array) {
+        private StructureArray(DBStructureArray array) {
             super(supportName,array);
-            dbLinkArray = array; 
+            dbStructureArray = array; 
+            processRequestorName = 
+                dbStructureArray.getRecord().getRecordName()
+                + dbStructureArray.getFullFieldName();
+        }
+
+        /* (non-Javadoc)
+         * @see org.epics.ioc.dbProcess.SupportProcessRequestor#getProcessRequestorName()
+         */
+        public String getSupportProcessRequestorName() {
+            return processRequestorName;
         }
 
         /* (non-Javadoc)
@@ -66,29 +77,65 @@ public class LinkArraySupportFactory {
          */
         public void initialize() {
             if(!super.checkSupportState(SupportState.readyForInitialize,supportName)) return;
-            recordProcess = dbLinkArray.getRecord().getRecordProcess();
+            recordProcess = dbStructureArray.getRecord().getRecordProcess();
             recordProcessSupport = recordProcess.getRecordProcessSupport();
             SupportState supportState = SupportState.readyForStart;
-            int n = dbLinkArray.getLength();
-            linkArrayData.offset = 0;
-            n = dbLinkArray.get(0,n,linkArrayData);
-            processLinks = new LinkSupport[n];
-            dbLinks = linkArrayData.data;;
+            int n = dbStructureArray.getLength();
+            structureArrayData.offset = 0;
+            n = dbStructureArray.get(0,n,structureArrayData);
+            pvWaits = new PVBoolean[n];
+            dbLinks = new DBLink[n];
+            linkSupports = new LinkSupport[n];
             for(int i=0; i< n; i++) {
-                processLinks[i] = null;
+                pvWaits[i] = null;
+                dbLinks[i] = null;
+                linkSupports[i] = null;
+                
+                DBStructure dbStructure = structureArrayData.data[i];
+                if(dbStructure==null) continue;
+                if(!dbStructure.getDBDStructure().getStructureName().equals("linkArrayElement")) {
+                    dbStructure.message("structureName not linkArrayElement", IOCMessageType.fatalError);
+                    continue;
+                }
+                DBData[] dbDatas = dbStructure.getFieldDBDatas();
+                int index = dbStructure.getFieldDBDataIndex("wait");
+                if(index<0) {
+                    dbStructure.message("structure does not have field wait", IOCMessageType.fatalError);
+                    continue;
+                }
+                DBData dbData = dbDatas[index];
+                if(dbData.getField().getType()!=Type.pvBoolean) {
+                    dbStructure.message("field wait is not boolean", IOCMessageType.fatalError);
+                    continue;
+                }
+                pvWaits[i] = (PVBoolean)dbData;
+                index = dbStructure.getFieldDBDataIndex("link");
+                if(index<0) {
+                    dbStructure.message("structure does not have field link", IOCMessageType.fatalError);
+                    continue;
+                }
+                dbData = dbDatas[index];
+                if(dbData.getDBDField().getDBType()!=DBType.dbLink) {
+                    dbStructure.message("field link is not a link", IOCMessageType.fatalError);
+                    continue;
+                }
+                dbLinks[i] = (DBLink)dbData;
                 DBLink dbLink = dbLinks[i];
-                if(dbLink==null) continue;
                 LinkSupport linkSupport = (LinkSupport)dbLink.getSupport();
+                if(linkSupport==null) {
+                    dbStructure.message("field link is not a link", IOCMessageType.fatalError);
+                    continue;
+                }
                 linkSupport.initialize();
                 linkSupport.setField(valueData);
                 if(linkSupport.getSupportState()!=SupportState.readyForStart) {
                     supportState = SupportState.readyForInitialize;
                     for(int j=0; j<i; j++) {
-                        if(processLinks[j]!=null) processLinks[j].uninitialize();
+                        if(linkSupports[j]!=null) linkSupports[j].uninitialize();
                     }
                     break;
                 }
-                processLinks[i] = linkSupport;
+                linkSupports[i] = linkSupport;
             }
             setSupportState(supportState);
         }
@@ -98,9 +145,9 @@ public class LinkArraySupportFactory {
         public void start() {
             if(!super.checkSupportState(SupportState.readyForStart,supportName)) return;
             SupportState supportState = SupportState.ready;
-            int n = dbLinkArray.getLength();
+            int n = dbStructureArray.getLength();
             for(int i=0; i< n; i++) {
-                LinkSupport processLink = processLinks[i];
+                LinkSupport processLink = linkSupports[i];
                 if(processLink==null) continue;
                 processLink.start();
             }
@@ -111,9 +158,9 @@ public class LinkArraySupportFactory {
          */
         public void stop() {
             if(super.getSupportState()!=SupportState.ready) return;
-            int n = dbLinkArray.getLength();
+            int n = dbStructureArray.getLength();
             for(int i=0; i< n; i++) {
-                LinkSupport processLink = processLinks[i];
+                LinkSupport processLink = linkSupports[i];
                 if(processLink==null) continue;
                 processLink.stop();
             }
@@ -127,62 +174,72 @@ public class LinkArraySupportFactory {
                 stop();
             }
             if(super.getSupportState()!=SupportState.readyForStart) return;
-            if(processLinks!=null) for(LinkSupport processLink: processLinks) {
+            if(linkSupports!=null) for(LinkSupport processLink: linkSupports) {
                 if(processLink==null) continue;
                 processLink.uninitialize();
             }
             setSupportState(SupportState.readyForInitialize);
         }       
         /* (non-Javadoc)
-         * @see org.epics.ioc.dbProcess.Support#process(org.epics.ioc.dbProcess.ProcessRequestListener)
+         * @see org.epics.ioc.dbProcess.Support#process(org.epics.ioc.dbProcess.RecordProcessRequestor)
          */
-        public ProcessReturn process(ProcessRequestListener listener) {
-            if(!super.checkSupportState(SupportState.ready,supportName + ".process")) return ProcessReturn.failure;
-            if(processLinks.length<=0) {
-                return ProcessReturn.noop;
+        public RequestResult process(SupportProcessRequestor supportProcessRequestor) {
+            if(supportProcessRequestor==null) {
+                throw new IllegalStateException("no processRequestListener");
+            }
+            if(!super.checkSupportState(SupportState.ready,supportName + ".process")) return RequestResult.failure;
+            if(linkSupports.length<=0) {
+                return RequestResult.success;
             }
             nextLink = 0;
-            this.listener = listener;
+            finalResult = RequestResult.success;
+            this.supportProcessRequestor = supportProcessRequestor;
             recordProcessSupport.requestProcessCallback(this);
-            return ProcessReturn.active;
+            return RequestResult.active;
         }        
         /* (non-Javadoc)
          * @see org.epics.ioc.dbProcess.Support#processContinue()
          */
-        public ProcessContinueReturn processContinue() {
+        public void processContinue() {
             if(!super.checkSupportState(SupportState.ready,supportName + ".processContinue")) {
-                return ProcessContinueReturn.failure;
+                throw new IllegalStateException("processContinue but not ready");
             }
-            boolean allDone = true;
-            while(nextLink<processLinks.length) {
-                LinkSupport processLink = processLinks[nextLink++];
-                if(processLink==null) continue;
-                ProcessReturn processReturn;
-                if(processLink.getSupportState()!=SupportState.ready) {
-                    processReturn = ProcessReturn.failure;
-                } else {
-                    processReturn = processLink.process(this);
+            while(nextLink<linkSupports.length) {    
+                LinkSupport processLink = linkSupports[nextLink];
+                if(processLink==null) {
+                    nextLink++;
+                    continue;
                 }
-                switch(processReturn) {
+                boolean wait = pvWaits[nextLink].get(); 
+                nextLink++;
+                RequestResult requestResult;
+                if(processLink.getSupportState()!=SupportState.ready) {
+                    requestResult = RequestResult.failure;
+                } else {
+                    requestResult = processLink.process(this);
+                }
+                switch(requestResult) {
                 case zombie:
-                case noop:
-                case success: break;
+                     finalResult = RequestResult.failure;
+                     break;
                 case failure:
+                    finalResult = RequestResult.failure;
+                    break;
+                case success:
+                    wait = false;
                     break;
                 case active:
                     numberWait++;
-                    allDone = false;
                     break;
                 default:
-                    dbLinkArray.message(
-                        "Unknown ProcessReturn state in ChannelAccessLocal",IOCMessageType.fatalError);
+                    dbStructureArray.message(
+                        "Unknown RequestResult state in ChannelAccessLocal",IOCMessageType.fatalError);
                 }
+                if(wait) return;
             }
-            if(allDone) {
-                listener.processComplete();
-                return ProcessContinueReturn.success;
+            if(numberWait<=0) {
+                supportProcessRequestor.processComplete(null);
             }
-            return ProcessContinueReturn.active;
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.dbProcess.LinkSupport#setField(org.epics.ioc.pvAccess.PVData)
@@ -191,32 +248,18 @@ public class LinkArraySupportFactory {
             valueData = field;
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.dbProcess.ProcessCallbackListener#callback()
+         * @see org.epics.ioc.dbProcess.ProcessCallbackListener#processCallback()
          */
         public void processCallback() {
             recordProcessSupport.processContinue(this);
         }       
         /* (non-Javadoc)
-         * @see org.epics.ioc.dbProcess.ProcessRequestListener#processComplete(org.epics.ioc.dbProcess.Support, org.epics.ioc.dbProcess.ProcessResult)
+         * @see org.epics.ioc.dbProcess.RecordProcessRequestor#processComplete(org.epics.ioc.dbProcess.Support, org.epics.ioc.dbProcess.ProcessResult)
          */
-        public void processComplete() {
-            ProcessRequestListener listener = null;
-            dbLinkArray.getRecord().lock();
-            try {
-                if(!super.checkSupportState(SupportState.ready,supportName + ".processComplete")) return;
-                numberWait--;
-                if(numberWait>0) return;
-                listener = this.listener;
-            } finally {
-                dbLinkArray.getRecord().unlock();
-            }
-            if(listener!=null) listener.processComplete();
-        }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.dbProcess.ProcessRequestListener#requestResult(org.epics.ioc.util.AlarmSeverity, java.lang.String, org.epics.ioc.util.TimeStamp)
-         */
-        public void requestResult(AlarmSeverity alarmSeverity, String status, TimeStamp timeStamp) {
-            // nothing to do   
+        public void processComplete(RequestResult requestResult) {
+            numberWait--;
+            if(numberWait>0) return;
+            recordProcessSupport.requestProcessCallback(this);
         }
     }
 }

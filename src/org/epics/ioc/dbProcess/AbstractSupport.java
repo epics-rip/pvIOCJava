@@ -96,18 +96,17 @@ public abstract class AbstractSupport implements Support {
         setSupportState(SupportState.readyForInitialize);
     }
     /* (non-Javadoc)
-     * @see org.epics.ioc.dbProcess.Support#process(org.epics.ioc.dbProcess.ProcessRequestListener)
+     * @see org.epics.ioc.dbProcess.Support#process(org.epics.ioc.dbProcess.RecordProcessRequestor)
      */
-    public ProcessReturn process(ProcessRequestListener listener) {
+    public RequestResult process(SupportProcessRequestor supportProcessRequestor) {
         dbData.message("process default called", IOCMessageType.error);
-        return ProcessReturn.noop;
+        return RequestResult.success;
     }
     /* (non-Javadoc)
      * @see org.epics.ioc.dbProcess.Support#processContinue()
      */
-    public ProcessContinueReturn processContinue(){
+    public void processContinue(){
         dbData.message("processContinue default called", IOCMessageType.error);
-        return ProcessContinueReturn.failure;
     }
     /* (non-Javadoc)
      * @see org.epics.ioc.dbProcess.Support#update()

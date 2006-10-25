@@ -15,21 +15,27 @@ import org.epics.ioc.util.*;
  *
  */
 public class CounterRecordFactory {
+    /**
+     * Create support.
+     * @param dbStructure The structure for which the support will be created.
+     * @return The newly created support.
+     */
     public static Support create(DBStructure dbStructure) {
         return new CounterRecord(dbStructure);
     }
     
-    private static class CounterRecord extends AbstractSupport implements ProcessRequestListener {
+    private static class CounterRecord extends AbstractSupport implements SupportProcessRequestor
+    {
         private static String supportName = "counterRecord";
         private DBRecord dbRecord = null;
+        private RecordProcess recordProcess = null;
         private DBDouble dbMin = null;
         private DBDouble dbMax = null;
         private DBDouble dbInc = null;
         private DBDouble dbValue = null;
-        private DBArray dbProcess = null;
+        private DBArray dbLinkArray = null;
         
         private LinkSupport linkArraySupport = null;
-        private ProcessRequestListener listener = null;
         
         private CounterRecord(DBStructure dbStructure) {
             super(supportName,dbStructure);
@@ -48,16 +54,23 @@ public class CounterRecordFactory {
             index = dbStructure.getFieldDBDataIndex("value");
             if(index<0) throw new IllegalStateException("field value does not exist");
             dbValue = (DBDouble)dbData[index];
-            index = dbStructure.getFieldDBDataIndex("process");
-            if(index<0) throw new IllegalStateException("field process does not exist");
-            dbProcess = (DBArray)dbData[index];
+            index = dbStructure.getFieldDBDataIndex("linkArray");
+            if(index<0) throw new IllegalStateException("field linkArray does not exist");
+            dbLinkArray = (DBArray)dbData[index];
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.dbProcess.Support#initialize()
+         * @see org.epics.ioc.dbProcess.SupportProcessRequestor#getProcessRequestorName()
+         */
+        public String getSupportProcessRequestorName() {
+            return dbRecord.getRecordName();
+        }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.dbLinkArray.Support#initialize()
          */
         public void initialize() {
             if(!super.checkSupportState(SupportState.readyForInitialize,"initialize")) return;
-            linkArraySupport = (LinkSupport)dbProcess.getSupport();
+            recordProcess = dbRecord.getRecordProcess();
+            linkArraySupport = (LinkSupport)dbLinkArray.getSupport();
             if(linkArraySupport!=null) {
                 linkArraySupport.setField(dbValue);
                 linkArraySupport.initialize();
@@ -67,7 +80,7 @@ public class CounterRecordFactory {
             }
         }   
         /* (non-Javadoc)
-         * @see org.epics.ioc.dbProcess.Support#start()
+         * @see org.epics.ioc.dbLinkArray.Support#start()
          */
         public void start() {
             if(!super.checkSupportState(SupportState.readyForStart,supportName)) return;
@@ -79,7 +92,7 @@ public class CounterRecordFactory {
             }
         }  
         /* (non-Javadoc)
-         * @see org.epics.ioc.dbProcess.Support#stop()
+         * @see org.epics.ioc.dbLinkArray.Support#stop()
          */
         public void stop() {
             if(!super.checkSupportState(SupportState.ready,supportName)) return;
@@ -87,7 +100,7 @@ public class CounterRecordFactory {
             setSupportState(SupportState.readyForStart);
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.dbProcess.Support#uninitialize()
+         * @see org.epics.ioc.dbLinkArray.Support#uninitialize()
          */
         public void uninitialize() {
             if(super.getSupportState()==SupportState.ready) {
@@ -99,10 +112,10 @@ public class CounterRecordFactory {
             setSupportState(SupportState.readyForInitialize);
         }   
         /* (non-Javadoc)
-         * @see org.epics.ioc.dbProcess.Support#process(org.epics.ioc.dbProcess.ProcessRequestListener)
+         * @see org.epics.ioc.dbLinkArray.Support#process(org.epics.ioc.dbLinkArray.ProcessRequestListener)
          */
-        public ProcessReturn process(ProcessRequestListener listener) {
-            if(!super.checkSupportState(SupportState.ready,"process")) return ProcessReturn.failure;
+        public RequestResult process(SupportProcessRequestor supportProcessRequestor) {
+            if(!super.checkSupportState(SupportState.ready,"process")) return RequestResult.failure;
             double min = dbMin.get();
             double max = dbMax.get();
             double inc = dbInc.get();
@@ -110,29 +123,27 @@ public class CounterRecordFactory {
             value += inc;
             if(value>max) value = min;
             dbValue.put(value);
-            this.listener = listener;
             if(linkArraySupport!=null) {
                 return linkArraySupport.process(this);
             }
-            return ProcessReturn.success;
+            return RequestResult.success;
         }      
         /* (non-Javadoc)
-         * @see org.epics.ioc.dbProcess.Support#processContinue()
+         * @see org.epics.ioc.dbLinkArray.Support#processContinue()
          */
-        public ProcessContinueReturn processContinue() {
+        public void processContinue() {
             dbRecord.message("why was processContinue called", IOCMessageType.error);
-            return ProcessContinueReturn.failure;
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.dbProcess.ProcessRequestListener#processComplete(org.epics.ioc.dbProcess.Support, org.epics.ioc.dbProcess.ProcessResult)
+         * @see org.epics.ioc.dbLinkArray.ProcessRequestListener#processComplete(org.epics.ioc.dbLinkArray.Support, org.epics.ioc.dbLinkArray.ProcessResult)
          */
-        public void processComplete() {
-            if(listener!=null) listener.processComplete();
+        public void processComplete(RequestResult requestResult) {
+            recordProcess.getRecordProcessSupport().processComplete(requestResult);
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.dbProcess.ProcessRequestListener#requestResult(org.epics.ioc.util.AlarmSeverity, java.lang.String, org.epics.ioc.util.TimeStamp)
+         * @see org.epics.ioc.dbLinkArray.ProcessRequestListener#requestResult(org.epics.ioc.util.AlarmSeverity, java.lang.String, org.epics.ioc.util.TimeStamp)
          */
-        public void requestResult(AlarmSeverity alarmSeverity, String status, TimeStamp timeStamp) {
+        public void processResult(AlarmSeverity alarmSeverity, String status, TimeStamp timeStamp) {
             // nothing to do 
         }
     }

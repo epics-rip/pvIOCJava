@@ -4,20 +4,25 @@
     <min>0.0</min>
     <max>1e9</max>
     <inc>1.0</inc>
-    <priority>middle</priority>
-    <process supportName = "linkArray" >
-        <value  supportName = "processLink" >
-            <configure structureName = "processLink">
-                <pvname>double01</pvname>
-            </configure>
+    <linkArray>
+        <value structureName = "linkArrayElement">
+            <wait>true</wait>
+            <link  supportName = "processLink" >
+                <configure structureName = "processLink">
+                    <pvname>double01</pvname>
+                </configure>
+            </link>
         </value>
-        <value supportName = "outputLink" >
-            <configure structureName = "outputLink">
-                <pvname>double02</pvname>
-                <process>true</process>
-            </configure>
+        <value structureName = "linkArrayElement">
+            <wait>false</wait>
+            <link  supportName = "outputLink" >
+                <configure structureName = "outputLink">
+                    <pvname>double02</pvname>
+                    <process>true</process>
+                </configure>
+            </link>
         </value>
-    </process>
+    </linkArray>
 </record>
 <record name = "double01" type = "doubleRecord">
     <input supportName = "inputLink" >
@@ -31,7 +36,6 @@
         <low>0.0</low>
         <high>10.0</high>
     </displayLimit>
-    <priority>middle</priority>
 </record>
 <record name = "double02" type = "doubleRecord">
     <units>volts</units>
@@ -39,15 +43,13 @@
         <low>0.0</low>
         <high>10.0</high>
     </displayLimit>
-    <priority>middle</priority>
 </record>
-<!--
 <record name = "double03" type = "doubleRecord">
     <input supportName = "monitorLink" >
         <configure structureName = "monitorLink">
             <pvname>counter</pvname>
             <process>true</process>
-            <queueCapacity>0</queueCapacity>
+            <queueCapacity>1</queueCapacity>
         </configure>
     </input>
     <units>volts</units>
@@ -55,9 +57,7 @@
         <low>0.0</low>
         <high>10.0</high>
     </displayLimit>
-    <priority>middle</priority>
 </record>
--->
 
 
 </IOCDatabase>

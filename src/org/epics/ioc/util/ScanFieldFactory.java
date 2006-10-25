@@ -32,36 +32,75 @@ public class ScanFieldFactory {
     public static ScanField create(DBRecord dbRecord) {
         DBData[] datas = dbRecord.getFieldDBDatas();
         int index;
-        DBData data;
-        index = dbRecord.getFieldDBDataIndex("priority");
-        if(index<0) return null;
-        data = datas[index];
-        if(data.getDBDField().getDBType()!=DBType.dbMenu) return null;
-        DBMenu priorityField = (DBMenu)data;
-        if(!isPriorityMenu(priorityField)) return null;   
+        DBData data;  
         index = dbRecord.getFieldDBDataIndex("scan");
-        if(index<0) return null;
+        if(index<0) {
+            dbRecord.message("field scan does not exist", IOCMessageType.fatalError);
+            return null;
+        }
         data = datas[index];
-        if(data.getDBDField().getDBType()!=DBType.dbStructure) return null;
+        if(data.getDBDField().getDBType()!=DBType.dbStructure){
+            dbRecord.message("field scan is not a structure", IOCMessageType.fatalError);
+            return null;
+        }
         DBStructure scan = (DBStructure)data;
         DBDStructure dbdStructure = scan.getDBDStructure();
-        if(!dbdStructure.getStructureName().equals("scan")) return null;
-        datas = scan.getFieldDBDatas();     
+        if(!dbdStructure.getStructureName().equals("scan")) {
+            scan.message("is not a scan structure", IOCMessageType.fatalError);
+            return null;
+        }
+        datas = scan.getFieldDBDatas(); 
+        index = scan.getFieldDBDataIndex("priority");
+        if(index<0) {
+            scan.message("does not have field priority", IOCMessageType.fatalError);
+            return null;
+        }
+        data = datas[index];
+        if(data.getDBDField().getDBType()!=DBType.dbMenu) {
+            scan.message("is not a menu", IOCMessageType.fatalError);
+            return null;
+        }
+        DBMenu priorityField = (DBMenu)data;
+        if(!isPriorityMenu(priorityField)) {
+            scan.message("is not a priority menu", IOCMessageType.fatalError);
+            return null;     
+        }
         index = scan.getFieldDBDataIndex("scan");
-        if(index<0) return null;
+        if(index<0) {
+            scan.message("does not have a field scan", IOCMessageType.fatalError);
+            return null;
+        }
         data = datas[index];
-        if(data.getDBDField().getDBType()!=DBType.dbMenu) return null;
+        if(data.getDBDField().getDBType()!=DBType.dbMenu) {
+            data.message("is not a menu", IOCMessageType.fatalError);
+            return null;
+        }
         DBMenu scanField = (DBMenu)data;
-        if(!isScanMenu(scanField)) return null;        
+        if(!isScanMenu(scanField)) {
+            scanField.message("is not a scan menu", IOCMessageType.fatalError);
+            return null;        
+        }
         index = scan.getFieldDBDataIndex("rate");
-        if(index<0) return null;
+        if(index<0) {
+            scan.message("does not have a field rate", IOCMessageType.fatalError);
+            return null;
+        }
         data = datas[index];
-        if(data.getField().getType()!=Type.pvDouble) return null;
+        if(data.getField().getType()!=Type.pvDouble) {
+            data.message("is not a double", IOCMessageType.fatalError);
+            return null;
+        }
         DBDouble rateField = (DBDouble)data;
         index = scan.getFieldDBDataIndex("eventName");
-        if(index<0) return null;
+        if(index<0) {
+            scan.message("does not have a field eventName", IOCMessageType.fatalError);
+            return null;
+        }
         data = datas[index];
-        if(data.getField().getType()!=Type.pvString) return null;
+        if(data.getField().getType()!=Type.pvString) {
+            data.message("is not a string", IOCMessageType.fatalError);
+            return null;
+        }
         DBString eventNameField = (DBString)data;
         return new ScanFieldInstance(priorityField,scanField,rateField,eventNameField);
     }

@@ -25,8 +25,8 @@ public class DoubleRecordFactory {
         linkArraySupport
     }
     
-    static private class DoubleRecordSupport extends AbstractSupport
-    implements ProcessRequestListener {
+    static private class DoubleRecordSupport extends AbstractSupport implements SupportProcessRequestor
+    {
         private static String supportName = "doubleRecord";
         private SupportState supportState = SupportState.readyForInitialize;
         private DBRecord dbRecord;
@@ -34,13 +34,19 @@ public class DoubleRecordFactory {
         private DBLink link = null;
         private DBData value = null;
         private LinkSupport support = null;
-        private ProcessRequestListener processListener = null;
+        private SupportProcessRequestor supportProcessRequestor = null;
         private LinkSupport linkArraySupport = null;
         private ProcessState processState = ProcessState.input;
         
         private DoubleRecordSupport(DBStructure dbStructure) {
             super(supportName,dbStructure);
             dbRecord = dbStructure.getRecord();
+        }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.dbProcess.SupportProcessRequestor#getProcessRequestorName()
+         */
+        public String getSupportProcessRequestorName() {
+            return dbRecord.getRecordName();
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.dbProcess.Support#initialize()
@@ -90,7 +96,7 @@ public class DoubleRecordFactory {
             } else {
                 supportState = SupportState.readyForStart;
             }
-            result = dbAccess.setField("process");
+            result = dbAccess.setField("linkArray");
             if(result==AccessSetResult.thisRecord) {
                 linkArraySupport = (LinkSupport)dbAccess.getField().getSupport();
                 if(linkArraySupport!=null) {
@@ -149,63 +155,59 @@ public class DoubleRecordFactory {
             setSupportState(SupportState.readyForInitialize);
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.dbProcess.Support#process(org.epics.ioc.dbProcess.ProcessRequestListener)
+         * @see org.epics.ioc.dbProcess.Support#process(org.epics.ioc.dbProcess.RecordProcessRequestor)
          */
-        public ProcessReturn process(ProcessRequestListener listener) {
+        public RequestResult process(SupportProcessRequestor supportProcessRequestor) {
             if(supportState!=SupportState.ready) {
                 dbRecord.message(
                         "process called but supportState is "
                         + supportState.toString(),
                         IOCMessageType.error);
-                return ProcessReturn.failure;
+                return RequestResult.failure;
             }
             processState = ProcessState.input;
-            ProcessReturn processReturn = ProcessReturn.success;
+            RequestResult requestResult = RequestResult.success;
             if(support!=null) {
-                processReturn = support.process(this);
-                if(processReturn==ProcessReturn.active) {
-                    processListener = listener;
-                    return ProcessReturn.active;
+                requestResult = support.process(this);
+                if(requestResult==RequestResult.active) {
+                    this.supportProcessRequestor = supportProcessRequestor;
+                    return RequestResult.active;
                 }
-                if(processReturn!=ProcessReturn.noop&&processReturn!=ProcessReturn.success) {
-                    return processReturn;
+                if(requestResult!=RequestResult.success) {
+                    return requestResult;
                 }
             }           
             if(linkArraySupport!=null) {
                 processState = ProcessState.linkArraySupport;
-                processReturn =  linkArraySupport.process(this);
-                if(processReturn==ProcessReturn.active) {
-                    processListener = listener;
-                    return ProcessReturn.active;
+                requestResult =  linkArraySupport.process(this);
+                if(requestResult==RequestResult.active) {
+                    this.supportProcessRequestor = supportProcessRequestor;
+                    return RequestResult.active;
                 }
-                return processReturn;
+                return requestResult;
             }
-            return processReturn;
+            return requestResult;
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.dbProcess.Support#processContinue()
          */
-        public ProcessContinueReturn processContinue() {
+        public void processContinue() {
             processState = ProcessState.linkArraySupport;
-            ProcessReturn processReturn = linkArraySupport.process(this);
-            if(processReturn==ProcessReturn.active) return ProcessContinueReturn.active;
-            if(processReturn==ProcessReturn.success) return ProcessContinueReturn.success;
-            return ProcessContinueReturn.failure;
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.dbProcess.ProcessRequestListener#processComplete(org.epics.ioc.dbProcess.Support, org.epics.ioc.dbProcess.ProcessResult)
+         * @see org.epics.ioc.dbProcess.RecordProcessRequestor#processComplete(org.epics.ioc.dbProcess.Support, org.epics.ioc.dbProcess.ProcessResult)
          */
-        public void processComplete() {
+        public void processComplete(RequestResult requestResult) {
             if(processState==ProcessState.input) {
                 recordProcessSupport.processContinue(this);
                 return;
             }
-            processListener.processComplete();
+            supportProcessRequestor.processComplete(null);
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.dbProcess.ProcessRequestListener#requestResult(org.epics.ioc.util.AlarmSeverity, java.lang.String, org.epics.ioc.util.TimeStamp)
+         * @see org.epics.ioc.dbProcess.RecordProcessRequestor#requestResult(org.epics.ioc.util.AlarmSeverity, java.lang.String, org.epics.ioc.util.TimeStamp)
          */
-        public void requestResult(AlarmSeverity alarmSeverity, String status, TimeStamp timeStamp) {
+        public void processResult(AlarmSeverity alarmSeverity, String status, TimeStamp timeStamp) {
             // nothing to do
         }
     }

@@ -5,6 +5,8 @@
  */
 package org.epics.ioc.channelAccess;
 
+import org.epics.ioc.dbProcess.*;
+
 /**
  * Channel Process Request.
  * @author mrk
@@ -12,19 +14,10 @@ package org.epics.ioc.channelAccess;
  */
 public interface ChannelProcess {
     /**
-     * Don't allow any more requests.
-     */
-    void destroy();
-    /**
      * Issue a process request.
-     * @param channelProcessListener The listener to call when process is complete.
-     * This can be null.
+     * @param channelProcessRequestor The channelProcessRequestor.
      * @return The result of the request.
      * 
      */
-    ChannelRequestReturn process(ChannelProcessListener channelProcessListener);
-    /**
-     * Cancel the process request.
-     */
-    void cancelProcess();
+    RequestResult process();
 }

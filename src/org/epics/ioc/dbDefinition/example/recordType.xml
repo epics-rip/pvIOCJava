@@ -86,6 +86,7 @@
     <field name = "float" type = "float" supportName = "floatSupport" />
     <field name = "double" type = "double" supportName = "doubleSupport" />
     <field name = "string" type = "string" supportName = "stringSupport" />
+    <field name = "enum" type = "enum" />
     <field name = "link" type = "link" supportName = "linkSupport" />
     <field name = "displayLimit"
          type = "structure" structureName = "displayLimit" supportName = "structSupport" />

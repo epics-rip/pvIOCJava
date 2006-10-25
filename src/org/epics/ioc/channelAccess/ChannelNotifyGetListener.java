@@ -13,7 +13,7 @@ import org.epics.ioc.pvAccess.PVData;
  * @author mrk
  *
  */
-public interface ChannelNotifyGetListener extends ChannelRequestListener {
+public interface ChannelNotifyGetListener extends ChannelRequestor {
     /**
      * Beginning of a set of synchronous data.
      * @param channel the channel.

@@ -17,6 +17,7 @@ import org.epics.ioc.util.IOCFactory;
 import org.epics.ioc.util.IOCMessageListener;
 import org.epics.ioc.util.IOCMessageType;
 import org.epics.ioc.util.TimeStamp;
+import org.epics.ioc.util.TimeUtility;
 
 /**
  * JUnit test for RecordProcess.
@@ -53,7 +54,7 @@ public class ProcessTest extends TestCase {
         for(String key: keys) {
             RecordProcess recordProcess = recordMap.get(key).getRecordProcess();
             recordProcess.setTrace(false);
-        }
+        } 
         System.out.println("starting performance test"); 
         testProcess.testPerform();
         System.out.printf("\nrecords\n");
@@ -82,7 +83,7 @@ public class ProcessTest extends TestCase {
         }
     }
     
-    private static class TestProcess implements ProcessRequestListener {
+    private static class TestProcess implements RecordProcessRequestor {
         private RecordProcess recordProcess = null;
         private Lock lock = new ReentrantLock();
         private Condition waitDone = lock.newCondition();
@@ -93,10 +94,24 @@ public class ProcessTest extends TestCase {
             assertNotNull(recordProcess);
         }
         
+        /* (non-Javadoc)
+         * @see org.epics.ioc.dbProcess.SupportProcessRequestor#getProcessRequestorName()
+         */
+        public String getSupportProcessRequestorName() {
+            return "testProcess";
+        }
+
         void test() {
+            TimeStamp timeStamp = new TimeStamp();
             allDone = false;
-            ProcessReturn processReturn = recordProcess.process(this);
-            if(processReturn==ProcessReturn.active) {
+            TimeUtility.set(timeStamp,System.currentTimeMillis());
+            boolean gotIt =recordProcess.setRecordProcessRequestor(this);
+            if(!gotIt) {
+                System.out.println("could not become recordProcessor");
+                return;
+            }
+            RequestResult requestResult = recordProcess.process(this,timeStamp);
+            if(requestResult==RequestResult.active) {
                 lock.lock();
                 try {
                     if(!allDone) {
@@ -108,20 +123,28 @@ public class ProcessTest extends TestCase {
                     lock.unlock();
                 }
             }
+            recordProcess.releaseRecordProcessRequestor(this);
         }
         
         void testPerform() {
-            ProcessReturn processReturn = ProcessReturn.noop;
+            RequestResult requestResult = RequestResult.success;
             long startTime,endTime;
             int nwarmup = 1000;
             int ntimes = 100000;
             double microseconds;
             double processPerSecond;
             startTime = System.nanoTime();
+            TimeStamp timeStamp = new TimeStamp();
+            allDone = false;
+            boolean gotIt =recordProcess.setRecordProcessRequestor(this);
+            if(!gotIt) {
+                System.out.printf("could not become recordProcessor");
+            }
             for(int i=0; i< nwarmup + ntimes; i++) {
                 allDone = false;
-                processReturn = recordProcess.process(this);
-                if(processReturn==ProcessReturn.active) {
+                TimeUtility.set(timeStamp,System.currentTimeMillis());
+                requestResult = recordProcess.process(this,timeStamp);
+                if(requestResult==RequestResult.active) {
                     lock.lock();
                     try {
                         if(!allDone) waitDone.await();
@@ -134,15 +157,24 @@ public class ProcessTest extends TestCase {
                 if(i==nwarmup) startTime = System.nanoTime();
             }
             endTime = System.nanoTime();
+            recordProcess.releaseRecordProcessRequestor(this);
             microseconds = (double)(endTime - startTime)/(double)ntimes/1000.0;
             processPerSecond = 1e6/microseconds;
             System.out.printf("time per process %f microseconds processPerSecond %f\n",
                 microseconds,processPerSecond);
+            recordProcess.releaseRecordProcessRequestor(this);
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.dbProcess.ProcessRequestListener#processComplete(org.epics.ioc.dbProcess.Support, org.epics.ioc.dbProcess.ProcessResult)
+         * @see org.epics.ioc.dbProcess.RecordProcessRequestor#getRecordProcessRequestorName()
          */
-        public void processComplete() {
+        public String getRecordProcessRequestorName() {
+            return "testProcess";
+        }
+
+        /* (non-Javadoc)
+         * @see org.epics.ioc.dbProcess.RecordProcessRequestor#processComplete(org.epics.ioc.dbProcess.Support, org.epics.ioc.dbProcess.ProcessResult)
+         */
+        public void recordProcessComplete(RequestResult requestResult) {
             lock.lock();
             try {
                 allDone = true;
@@ -152,10 +184,18 @@ public class ProcessTest extends TestCase {
             }
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.dbProcess.ProcessRequestListener#requestResult(org.epics.ioc.util.AlarmSeverity, java.lang.String, org.epics.ioc.util.TimeStamp)
+         * @see org.epics.ioc.dbProcess.RecordProcessRequestor#requestResult(org.epics.ioc.util.AlarmSeverity, java.lang.String, org.epics.ioc.util.TimeStamp)
          */
-        public void requestResult(AlarmSeverity alarmSeverity, String status, TimeStamp timeStamp) {
+        public void recordProcessResult(AlarmSeverity alarmSeverity, String status, TimeStamp timeStamp) {
             // nothing to do 
+        }
+
+        /* (non-Javadoc)
+         * @see org.epics.ioc.dbProcess.RecordProcessRequestor#ready()
+         */
+        public RequestResult ready() {
+            System.out.println("Why did ready get called");
+            return RequestResult.failure;
         }
     }
     

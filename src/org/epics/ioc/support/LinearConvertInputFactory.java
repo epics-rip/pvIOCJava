@@ -52,13 +52,12 @@ public class LinearConvertInputFactory {
             System.out.printf("%s.stop entered\n",supportName);
         }
 
-        public ProcessReturn process(ProcessRequestListener listener) {
+        public RequestResult process(SupportProcessRequestor supportProcessRequestor) {
             System.out.printf("%s.process entered\n",supportName);
-            return ProcessReturn.failure;
+            return RequestResult.failure;
         }
 
-        public ProcessContinueReturn processContinue() {
-            return ProcessContinueReturn.failure;
+        public void processContinue() {
         }
     }
 }

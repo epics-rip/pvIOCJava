@@ -6,6 +6,7 @@
 package org.epics.ioc.dbProcess;
 
 import org.epics.ioc.dbAccess.*;
+import org.epics.ioc.util.*;;
 
 /**
  * Record processing support.
@@ -65,39 +66,72 @@ public interface RecordProcess {
      */
     void uninitialize();
     /**
+     * Attempt to become the record processor, i.e. the code that can call process and preProcess.
+     * @param recordProcessRequestor The interface implemented by the record processor.
+     * @return (false,true) if the caller (is not, is) has become the record processor.
+     */
+    boolean setRecordProcessRequestor(RecordProcessRequestor recordProcessRequestor);
+    /**
+     * Release the current record processor.
+     * @param recordProcessRequestor The current record processor.
+     * @return (false,true) if the caller (is not, is) has been released as the record processor.
+     * This should only fail if the caller was not the record processor.
+     */
+    boolean releaseRecordProcessRequestor(RecordProcessRequestor recordProcessRequestor);
+    /**
+     * Release the record processor unconditionally.
+     * This should only be used if a record processor failed without calling releaseRecordProcessor.
+     */
+    void releaseRecordProcessRequestor();
+    /**
+     * Get the name of the current record processor.
+     * @return The name of the current record processor or null if no record processor is registered.
+     */
+    String getRecordProcessRequestorName();
+    /**
      * Process the record instance.
-     * @param listener The listener to call to show the result.
+     * If the record is already active the request will fail.
+     * @param recordProcessRequestor The recordProcessRequestor.
      * @return The result of the process request.
-     * If active and the caller supplies a listener, it will be called when the record completes
-     * processing.
      */
-    ProcessReturn process(ProcessRequestListener listener);
+    RequestResult process(RecordProcessRequestor recordProcessRequestor); 
+    /**
+     * Process the record instance with the caller supplying the time stamp.
+     * If the record is already active the request will fail.
+     * @param recordProcessRequestor The recordProcessRequestor.
+     * @param timeStamp The initial timeStamp for the record.
+     * @return The result of the process request.
+     */
+    RequestResult process(RecordProcessRequestor recordProcessRequestor,
+        TimeStamp timeStamp);
     /**
      * Request that the record become active but wait for the caller
      * to request that the record support be called.
-     * @param listener The listener to call.
-     * @return The result of the request.
+     * If the record is already active the request will fail.
+     * @param recordProcessRequestor The recordProcessRequestor.
+     * @param supportPreProcessRequestor TODO
+     * @return The result of the preProcess request.
      */
-    ProcessReturn preProcess(RecordPreProcessListener listener);
+    RequestResult preProcess(RecordProcessRequestor recordProcessRequestor,
+        SupportPreProcessRequestor supportPreProcessRequestor);
     /**
      * Request that the record become active but wait for the caller
      * to request that the record support be called.
-     * The called is a database link.
-     * @param dbLink The link field of the record that is making the request.
-     * @param listener The listener to call.
-     * @return The result of the request.
+     * The caller provides the initial timeStamp.
+     * If the record is already active the request will fail.
+     * @param recordProcessRequestor The recordProcessRequestor.
+     * @param supportPreProcessRequestor TODO
+     * @return The result of the preProcess request.
      */
-    ProcessReturn preProcess(DBLink dbLink,RecordPreProcessListener listener);
+    RequestResult preProcess(RecordProcessRequestor recordProcessRequestor,
+        SupportPreProcessRequestor supportPreProcessRequestor, TimeStamp timeStamp);
     /**
-     * Ask the record to update.
-     * If the record is not active this is a noop.
+     * Called by recordProcessRequestor when a preProcess request was issued.
+     * This is called with the record locked.
+     * @param recordProcessRequestor The recordProcessRequestor.
+     * @return The result of the processNow request.
      */
-    void update();
-    /**
-     * Remove a completion listener.
-     * @param listener The listener.
-     */
-    void removeCompletionListener(ProcessRequestListener listener);
+    RequestResult processNow(RecordProcessRequestor recordProcessRequestor);
     /**
      * Get RecordProcessSupport interface.
      * RecordProcessSupport is normally only used by support code.

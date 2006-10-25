@@ -5,6 +5,9 @@
  */
 package org.epics.ioc.channelAccess;
 
+import org.epics.ioc.dbProcess.*;
+import org.epics.ioc.util.*;
+
 
 /**
  * Interface for a channel access put request.
@@ -13,20 +16,9 @@ package org.epics.ioc.channelAccess;
  */
 public interface ChannelPut {
     /**
-     * Delete any internal state.
-     */
-    void destroy();
-    /**
      * Put data to a channel.
      * @param fieldGroup The field group for the data.
-     * @param channelPutListener The listener that provides data.
-     * @param process (false,true) if server (should not, should) process after put.
      * @return The result of the request.
      */
-    ChannelRequestReturn put(ChannelFieldGroup fieldGroup,ChannelPutListener channelPutListener,boolean process);
-    /**
-     *  Cancel a put request.
-     *  It is possible for the listener to be called after this is called.
-     */
-    void cancelPut();
+    RequestResult put(ChannelFieldGroup fieldGroup);
 }
