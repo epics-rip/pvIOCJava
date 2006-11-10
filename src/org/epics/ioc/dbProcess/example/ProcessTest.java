@@ -12,10 +12,10 @@ import java.util.concurrent.locks.*;
 import org.epics.ioc.dbDefinition.*;
 import org.epics.ioc.dbAccess.*;
 import org.epics.ioc.dbProcess.*;
-import org.epics.ioc.util.AlarmSeverity;
 import org.epics.ioc.util.IOCFactory;
-import org.epics.ioc.util.IOCMessageListener;
-import org.epics.ioc.util.IOCMessageType;
+import org.epics.ioc.util.MessageListener;
+import org.epics.ioc.util.MessageType;
+import org.epics.ioc.util.RequestResult;
 import org.epics.ioc.util.TimeStamp;
 import org.epics.ioc.util.TimeUtility;
 
@@ -31,7 +31,7 @@ public class ProcessTest extends TestCase {
     public static void testProcess() {
         DBD dbd = DBDFactory.getMasterDBD();
         IOCDB iocdbMaster = IOCDBFactory.getMaster();
-        IOCMessageListener iocMessageListener = new Listener();
+        MessageListener iocMessageListener = new Listener();
         XMLToDBDFactory.convert(dbd,
                  "src/org/epics/ioc/support/menuStructureSupportDBD.xml",
                  iocMessageListener);
@@ -110,8 +110,8 @@ public class ProcessTest extends TestCase {
                 System.out.println("could not become recordProcessor");
                 return;
             }
-            RequestResult requestResult = recordProcess.process(this,timeStamp);
-            if(requestResult==RequestResult.active) {
+            recordProcess.process(this,false,timeStamp);
+            if(!allDone) {
                 lock.lock();
                 try {
                     if(!allDone) {
@@ -127,7 +127,6 @@ public class ProcessTest extends TestCase {
         }
         
         void testPerform() {
-            RequestResult requestResult = RequestResult.success;
             long startTime,endTime;
             int nwarmup = 1000;
             int ntimes = 100000;
@@ -143,8 +142,8 @@ public class ProcessTest extends TestCase {
             for(int i=0; i< nwarmup + ntimes; i++) {
                 allDone = false;
                 TimeUtility.set(timeStamp,System.currentTimeMillis());
-                requestResult = recordProcess.process(this,timeStamp);
-                if(requestResult==RequestResult.active) {
+                recordProcess.process(this,false,timeStamp);
+                if(!allDone) {
                     lock.lock();
                     try {
                         if(!allDone) waitDone.await();
@@ -167,14 +166,14 @@ public class ProcessTest extends TestCase {
         /* (non-Javadoc)
          * @see org.epics.ioc.dbProcess.RecordProcessRequestor#getRecordProcessRequestorName()
          */
-        public String getRecordProcessRequestorName() {
+        public String getRequestorName() {
             return "testProcess";
         }
 
         /* (non-Javadoc)
          * @see org.epics.ioc.dbProcess.RecordProcessRequestor#processComplete(org.epics.ioc.dbProcess.Support, org.epics.ioc.dbProcess.ProcessResult)
          */
-        public void recordProcessComplete(RequestResult requestResult) {
+        public void recordProcessComplete() {
             lock.lock();
             try {
                 allDone = true;
@@ -186,7 +185,7 @@ public class ProcessTest extends TestCase {
         /* (non-Javadoc)
          * @see org.epics.ioc.dbProcess.RecordProcessRequestor#requestResult(org.epics.ioc.util.AlarmSeverity, java.lang.String, org.epics.ioc.util.TimeStamp)
          */
-        public void recordProcessResult(AlarmSeverity alarmSeverity, String status, TimeStamp timeStamp) {
+        public void recordProcessResult(RequestResult requestResult) {
             // nothing to do 
         }
 
@@ -199,11 +198,11 @@ public class ProcessTest extends TestCase {
         }
     }
     
-    private static class Listener implements IOCMessageListener {
+    private static class Listener implements MessageListener {
         /* (non-Javadoc)
-         * @see org.epics.ioc.util.IOCMessageListener#message(java.lang.String, org.epics.ioc.util.IOCMessageType)
+         * @see org.epics.ioc.util.MessageListener#message(java.lang.String, org.epics.ioc.util.MessageType)
          */
-        public void message(String message, IOCMessageType messageType) {
+        public void message(String message, MessageType messageType) {
             System.out.println(message);
             
         }

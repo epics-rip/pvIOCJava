@@ -5,8 +5,8 @@
 <record name = "counter" type = "counterRecord">
 <scan>
     <scan>periodic</scan>
-        <rate>0.5</rate>
-    </scan>
+    <rate>0.5</rate>
+</scan>
 </record>
 
 </IOCDatabase>

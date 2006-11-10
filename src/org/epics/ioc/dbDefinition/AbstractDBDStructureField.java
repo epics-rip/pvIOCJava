@@ -16,6 +16,14 @@ public class AbstractDBDStructureField extends AbstractStructure implements DBDS
     private DBDField[] dbdField;
     private DBDStructure dbdStructure;
     
+    /**
+     * Constructor when DBDStructure is specified.
+     * @param name Field name.
+     * @param property Field properties.
+     * @param attribute Field attributes.
+     * @param dbdField Array of fields in the structure.
+     * @param dbdStructure The DBDStructure.
+     */
     public AbstractDBDStructureField(String name,Property[] property,DBDFieldAttribute attribute,
         DBDField[] dbdField,DBDStructure dbdStructure)
     {
@@ -23,6 +31,19 @@ public class AbstractDBDStructureField extends AbstractStructure implements DBDS
         this.attribute = attribute;
         this.dbdField = dbdField;
         this.dbdStructure = dbdStructure;
+    }
+    /**
+     * Constructor when structure is not known.
+     * @param name Field name.
+     * @param property Field properties.
+     * @param attribute Field attributes.
+     */
+    public AbstractDBDStructureField(String name,Property[] property,DBDFieldAttribute attribute)
+    {
+        super(name,property,null,new Field[0]);
+        this.attribute = attribute;
+        this.dbdField = null;
+        this.dbdStructure = null;
     }
     /* (non-Javadoc)
      * @see org.epics.ioc.dbDefinition.DBDField#getDBType()

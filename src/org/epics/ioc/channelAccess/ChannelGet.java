@@ -5,7 +5,6 @@
  */
 package org.epics.ioc.channelAccess;
 
-import org.epics.ioc.dbProcess.RequestResult;
 import org.epics.ioc.util.*;
 
 /**
@@ -15,9 +14,12 @@ import org.epics.ioc.util.*;
  */
 public interface ChannelGet {
     /**
+     * Refuse further requests.
+     */
+    void destroy();
+    /**
      * Get data from the channel.
      * @param fieldGroup The description of the data to get.
-     * @return The result of request.
      */
-    RequestResult get(ChannelFieldGroup fieldGroup);
+    void get(ChannelFieldGroup fieldGroup);
 }

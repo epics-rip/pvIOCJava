@@ -5,6 +5,7 @@
  */
 package org.epics.ioc.dbDefinition;
 
+import java.util.Map;
 import java.util.concurrent.atomic.*;
 
 import org.epics.ioc.pvAccess.*;
@@ -17,17 +18,116 @@ import org.epics.ioc.pvAccess.*;
  */
 public final class  DBDFieldFactory {
     /**
-     * Create a DBDFieldAttribute.
-     * @param asl Access Security Level.
-     * @param defaultValue Default value.
-     * @param isDesign Is this a design field?
-     * @param isLink Is this a link field.
-     * @param isReadOnly Is this a read only field, i.e. can not be modified.
-     * @return The DBDFieldAttribute.
+     * Create a DBDFieldFactory from a map of attrbute values.
+     * @param attributes The map of attributes.
+     * @return The DBDFieldAttributes.
      */
-    public static DBDFieldAttribute createDBDFieldAttribute(int asl, String defaultValue,
-            boolean isDesign, boolean isLink, boolean isReadOnly) {
+    public static DBDFieldAttribute createFieldAttribute(Map<String,String> attributes) {
+        int asl = 1;
+        String defaultValue = null;
+        boolean isDesign = true;
+        boolean isLink = false;
+        boolean isReadOnly = false;
+        String value = attributes.get("default");
+        if(value!=null) defaultValue = value;
+        value = attributes.get("asl");
+        if(value!=null) asl = Integer.parseInt(value);
+        value = attributes.get("design");
+        if(value!=null) isDesign = Boolean.parseBoolean(value);
+        value = attributes.get("link");
+        if(value!=null) isLink = Boolean.parseBoolean(value);
+        value = attributes.get("readonly");
+        if(value!=null) isReadOnly = Boolean.parseBoolean(value);
         return new FieldAttribute(asl,defaultValue,isDesign,isLink,isReadOnly);
+    }
+    /**
+     * Create default field attributes.
+     * @return The DBDFieldAttribute with default values.
+     */
+    public static DBDFieldAttribute createFieldAttribute() {
+        return new FieldAttribute(1,null,true,false,false);
+    }
+    /**
+     * Get the Type from a map of attributes.
+     * @param attributes The map of attributes.
+     * @return The Type.
+     * If the attributes does not have a key "type" the result will be Type.pvUnknown.
+     */
+    public static Type getType(Map<String,String> attributes) {
+        return getType(attributes.get("type"));
+    }
+    /**
+     * Get the element Type from a map of attributes.
+     * @param attributes The map of attributes.
+     * @return The Type.
+     * If the attributes does not have a key "elementType" the result will be Type.pvUnknown.
+     */
+    public static Type getElementType(Map<String,String> attributes) {
+        return getType(attributes.get("elementType"));
+    }
+    /**
+     * Get the Type from string.
+     * @param value A string with the name of the type.
+     * @return The Type.
+     * If the string is null or is not the name of a Type, Type.pvUnknown is returned.
+     */
+    public static Type getType(String value) {
+        if(value==null)  return Type.pvUnknown;
+        if(value.equals("boolean")) return Type.pvBoolean;
+        if(value.equals("byte")) return Type.pvByte;
+        if(value.equals("short")) return Type.pvShort;
+        if(value.equals("int")) return Type.pvInt;
+        if(value.equals("long")) return Type.pvLong;
+        if(value.equals("float")) return Type.pvFloat;
+        if(value.equals("double")) return Type.pvDouble;
+        if(value.equals("string")) return Type.pvString;
+        if(value.equals("enum")) return Type.pvEnum;
+        if(value.equals("menu")) return Type.pvEnum;
+        if(value.equals("structure")) return Type.pvStructure;
+        if(value.equals("array")) return Type.pvArray;
+        if(value.equals("link")) return Type.pvUnknown;
+        return Type.pvUnknown;
+    }
+    /**
+     * Get the DBType from a map of attributes.
+     * @param attributes The map of attributes.
+     * @return The DBType.
+     * If the attributes does not have a key "type" the result will be DBType.dbPvType.
+     */
+    public static DBType getDBType(Map<String,String> attributes) {
+        return getDBType(attributes.get("type"));
+    }
+    /**
+     * Get the element DBType from a map of attributes.
+     * @param attributes The map of attributes.
+     * @return The DBType.
+     * If the attributes does not have a key "elementType" the result will be DBType.dbPvType.
+     */
+    public static DBType getElementDBType(Map<String,String> attributes) {
+        return getDBType(attributes.get("elementType"));
+    }
+    /**
+     * Get the DBType from string.
+     * @param value A string with the name of the type.
+     * @return The DBType.
+     * If the string is null or is not the name of a DBType DBType.dbPvType will be returned.
+     */
+    public static DBType getDBType(String value) {
+        if(value==null)  return DBType.dbPvType;
+        if(value.equals("boolean"))  return DBType.dbPvType;
+        if(value.equals("byte"))  return DBType.dbPvType;
+        if(value.equals("short"))  return DBType.dbPvType;
+        if(value.equals("int")) return DBType.dbPvType;
+        if(value.equals("long")) return DBType.dbPvType;
+        if(value.equals("float")) return DBType.dbPvType;
+        if(value.equals("double")) return DBType.dbPvType;
+        if(value.equals("string")) return DBType.dbPvType;
+        if(value.equals("enum"))  return DBType.dbPvType;
+        if(value.equals("menu")) return DBType.dbMenu;
+        if(value.equals("structure")) return DBType.dbStructure;
+        if(value.equals("array")) return DBType.dbArray;
+        if(value.equals("link")) return DBType.dbLink;
+        return DBType.dbPvType;
     }
     /**
      * Create a DBDMenu.
@@ -92,6 +192,9 @@ public final class  DBDFieldFactory {
     public static DBDStructureField createStructureField(String fieldName,Property[]property,
             DBDFieldAttribute attribute,DBDStructure dbdStructure)
     {
+        if(dbdStructure==null) {
+            return new AbstractDBDStructureField(fieldName,property,attribute);
+        }
         DBDField[] original = dbdStructure.getDBDFields();
         int length = original.length;
         DBDField[] dbdFields = new DBDField[length];

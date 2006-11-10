@@ -9,6 +9,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 
 import org.epics.ioc.dbAccess.*;
+import org.epics.ioc.pvAccess.*;
 import org.epics.ioc.util.*;
 
 /**
@@ -68,7 +69,7 @@ public abstract class AbstractSupport implements Support {
              message
              + " expected supportState " + expectedState.toString()
              + " but state is " +supportState.toString(),
-             IOCMessageType.fatalError);
+             MessageType.fatalError);
         return false;
     }
     /* (non-Javadoc)
@@ -98,15 +99,9 @@ public abstract class AbstractSupport implements Support {
     /* (non-Javadoc)
      * @see org.epics.ioc.dbProcess.Support#process(org.epics.ioc.dbProcess.RecordProcessRequestor)
      */
-    public RequestResult process(SupportProcessRequestor supportProcessRequestor) {
-        dbData.message("process default called", IOCMessageType.error);
-        return RequestResult.success;
-    }
-    /* (non-Javadoc)
-     * @see org.epics.ioc.dbProcess.Support#processContinue()
-     */
-    public void processContinue(){
-        dbData.message("processContinue default called", IOCMessageType.error);
+    public void process(SupportProcessRequestor supportProcessRequestor) {
+        dbData.message("process default called", MessageType.error);
+        supportProcessRequestor.supportProcessDone(RequestResult.failure);
     }
     /* (non-Javadoc)
      * @see org.epics.ioc.dbProcess.Support#update()
@@ -115,7 +110,7 @@ public abstract class AbstractSupport implements Support {
     /* (non-Javadoc)
      * @see org.epics.ioc.dbProcess.Support#getName()
      */
-    public String getName() {
+    public String getRequestorName() {
         return name;
     }
     /* (non-Javadoc)
@@ -141,5 +136,202 @@ public abstract class AbstractSupport implements Support {
      */
     public boolean removeSupportStateListener(SupportStateListener listener) {
         return listenerList.remove(listener);
+    }
+    /**
+     * Get the configuration structure for this support.
+     * @param structureName The expected struvture name.
+     * @return The PVStructure or null if the structure is not located.
+     */
+    protected DBStructure getConfigStructure(String structureName) {
+        DBStructure configStructure = dbData.getConfigurationStructure();
+        if(configStructure==null) {
+            dbData.message("no configuration structure", MessageType.fatalError);
+            return null;
+        }
+        Structure structure = (Structure)configStructure.getField();
+        String configStructureName = structure.getStructureName();
+        if(!configStructureName.equals(structureName)) {
+            configStructure.message(
+                    "configurationStructure name is " + configStructureName
+                    + " but expecting " + structureName,
+                MessageType.fatalError);
+            return null;
+        }
+        return configStructure;
+    }
+    /**
+     * Get a string field from the configuration structure.
+     * @param configStructure The configuration structure.
+     * @param fieldName The field name.
+     * @return The PVString for accessing the field or null if it does not exist.
+     */
+    protected static PVString getString(DBStructure configStructure,String fieldName)
+    {
+        DBData[] dbData = configStructure.getFieldDBDatas();
+        int index = configStructure.getFieldDBDataIndex(fieldName);
+        if(index<0) {
+            configStructure.message(
+                "configStructure does not have field" + fieldName,
+                MessageType.error);
+            return null;
+        }
+        if(dbData[index].getField().getType()!=Type.pvString) {
+            dbData[index].message(
+                "configStructure field "
+                + fieldName + " does not have type string ",
+                MessageType.error);
+            return null;
+        }
+        return (PVString)dbData[index];
+    }
+    /**
+     * Get a boolean field from the configuration structure.
+     * @param configStructure The configuration structure.
+     * @param fieldName The field name.
+     * @return The PVBoolean for accessing the field or null if it does not exist.
+     */
+    protected static PVBoolean getBoolean(DBStructure configStructure,String fieldName)
+    {
+        DBData[] dbData = configStructure.getFieldDBDatas();
+        int index = configStructure.getFieldDBDataIndex(fieldName);
+        if(index<0) {
+            configStructure.message(
+                "configStructure does not have field" + fieldName,
+                MessageType.error);
+            return null;
+        }
+        if(dbData[index].getField().getType()!=Type.pvBoolean) {
+            dbData[index].message(
+                "configStructure field "
+                + fieldName + " does not have type boolean ",
+                MessageType.error);
+            return null;
+        }
+        return (PVBoolean)dbData[index];
+    }
+    /**
+     * Get a byte field from the configuration structure.
+     * @param configStructure The configuration structure.
+     * @param fieldName The field name.
+     * @return The PVBoolean for accessing the field or null if it does not exist.
+     */
+    protected static PVByte getByte(DBStructure configStructure,String fieldName)
+    {
+        DBData[] dbData = configStructure.getFieldDBDatas();
+        int index = configStructure.getFieldDBDataIndex(fieldName);
+        if(index<0) {
+            configStructure.message(
+                "configStructure does not have field" + fieldName,
+                MessageType.error);
+            return null;
+        }
+        if(dbData[index].getField().getType()!=Type.pvByte) {
+            dbData[index].message(
+                "configStructure field "
+                + fieldName + " does not have type byte ",
+                MessageType.error);
+            return null;
+        }
+        return (PVByte)dbData[index];
+    }
+    /**
+     * Get an int field from the configuration structure.
+     * @param configStructure The configuration structure.
+     * @param fieldName The field name.
+     * @return The PVInt for accessing the field or null if it does not exist.
+     */
+    protected static PVInt getInt(DBStructure configStructure,String fieldName)
+    {
+        DBData[] dbData = configStructure.getFieldDBDatas();
+        int index = configStructure.getFieldDBDataIndex(fieldName);
+        if(index<0) {
+            configStructure.message(
+                "configStructure does not have field" + fieldName,
+                MessageType.error);
+            return null;
+        }
+        if(dbData[index].getField().getType()!=Type.pvInt) {
+            dbData[index].message(
+                "configStructure field "
+                + fieldName + " does not have type int ",
+                MessageType.error);
+            return null;
+        }
+        return (PVInt)dbData[index];
+    }
+    /**
+     * Get a long field from the configuration structure.
+     * @param configStructure The configuration structure.
+     * @param fieldName The field name.
+     * @return The PVLong for accessing the field or null if it does not exist.
+     */
+    protected static PVLong getLong(DBStructure configStructure,String fieldName)
+    {
+        DBData[] dbData = configStructure.getFieldDBDatas();
+        int index = configStructure.getFieldDBDataIndex(fieldName);
+        if(index<0) {
+            configStructure.message(
+                "configStructure does not have field" + fieldName,
+                MessageType.error);
+            return null;
+        }
+        if(dbData[index].getField().getType()!=Type.pvLong) {
+            dbData[index].message(
+                "configStructure field "
+                + fieldName + " does not have type int ",
+                MessageType.error);
+            return null;
+        }
+        return (PVLong)dbData[index];
+    }
+    /**
+     * Get a float field from the configuration structure.
+     * @param configStructure The configuration structure.
+     * @param fieldName The field name.
+     * @return The PVFloat for accessing the field or null if it does not exist.
+     */
+    protected static PVFloat getFloat(DBStructure configStructure,String fieldName)
+    {
+        DBData[] dbData = configStructure.getFieldDBDatas();
+        int index = configStructure.getFieldDBDataIndex(fieldName);
+        if(index<0) {
+            configStructure.message(
+                "configStructure does not have field" + fieldName,
+                MessageType.error);
+            return null;
+        }
+        if(dbData[index].getField().getType()!=Type.pvFloat) {
+            dbData[index].message(
+                "configStructure field "
+                + fieldName + " does not have type int ",
+                MessageType.error);
+            return null;
+        }
+        return (PVFloat)dbData[index];
+    }
+    /**
+     * Get a double field from the configuration structure.
+     * @param configStructure The configuration structure.
+     * @param fieldName The field name.
+     * @return The PVDouble for accessing the field or null if it does not exist.
+     */
+    protected static PVDouble getDouble(DBStructure configStructure,String fieldName)
+    {
+        DBData[] dbData = configStructure.getFieldDBDatas();
+        int index = configStructure.getFieldDBDataIndex(fieldName);
+        if(index<0) {
+            configStructure.message(
+                "configStructure does not have field" + fieldName,
+                MessageType.error);
+            return null;
+        }
+        if(dbData[index].getField().getType()!=Type.pvDouble) {
+            dbData[index].message(
+                "configStructure field "
+                + fieldName + " does not have type int ",
+                MessageType.error);
+            return null;
+        }
+        return (PVDouble)dbData[index];
     }
 }

@@ -12,23 +12,18 @@ import org.epics.ioc.util.*;
  * @author mrk
  *
  */
-public interface RecordProcessRequestor {
-    /**
-     * Get the name of the SupportProcessRequestor;
-     * @return The name.
-     */
-    String getRecordProcessRequestorName();
-    /**
-     * Called by record process to signify asynchronous completion.
-     * @param requestResult The result of the process request.
-     * This is always success or failure.
-     */
-    void recordProcessComplete(RequestResult requestResult);
+public interface RecordProcessRequestor extends Requestor{
     /**
      * The result of the process request.
-     * @param alarmSeverity The alarm Severity after processing.
-     * @param status The status after processing.
-     * @param timeStamp The time stamp after processing.
+     * This is called with the record still active and locked.
+     * The requester can read data from the record.
+     * @param requestResult The result of the process request.
      */
-    void recordProcessResult(AlarmSeverity alarmSeverity,String status,TimeStamp timeStamp);
+    void recordProcessResult(RequestResult requestResult);
+    /**
+     * Called by record process to signify asynchronous completion.
+     * This is called with the record no longer active and also unlocked.
+     * This is NOT called for a postProcess request.
+     */
+    void recordProcessComplete();
 }

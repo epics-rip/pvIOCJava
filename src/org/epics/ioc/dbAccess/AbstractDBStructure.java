@@ -70,7 +70,9 @@ public abstract class AbstractDBStructure extends AbstractDBData
      * @see org.epics.ioc.dbAccess.DBStructure#createFields(org.epics.ioc.dbDefinition.DBDStructure)
      */
     public boolean createFields(DBDStructure dbdStructure) {
-        if(this.dbdStructure!=null) return false;
+        if(this.dbdStructure!=null) {
+            return false;
+        }
         this.dbdStructure = dbdStructure;
         DBDField[] dbdFields = dbdStructure.getDBDFields();
         dbData = new DBData[dbdFields.length];

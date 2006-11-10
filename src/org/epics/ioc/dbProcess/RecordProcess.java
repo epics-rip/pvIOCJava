@@ -89,60 +89,81 @@ public interface RecordProcess {
      */
     String getRecordProcessRequestorName();
     /**
-     * Process the record instance.
-     * If the record is already active the request will fail.
-     * @param recordProcessRequestor The recordProcessRequestor.
-     * @return The result of the process request.
-     */
-    RequestResult process(RecordProcessRequestor recordProcessRequestor); 
-    /**
-     * Process the record instance with the caller supplying the time stamp.
-     * If the record is already active the request will fail.
-     * @param recordProcessRequestor The recordProcessRequestor.
-     * @param timeStamp The initial timeStamp for the record.
-     * @return The result of the process request.
-     */
-    RequestResult process(RecordProcessRequestor recordProcessRequestor,
-        TimeStamp timeStamp);
-    /**
-     * Request that the record become active but wait for the caller
-     * to request that the record support be called.
-     * If the record is already active the request will fail.
-     * @param recordProcessRequestor The recordProcessRequestor.
-     * @param supportPreProcessRequestor TODO
-     * @return The result of the preProcess request.
-     */
-    RequestResult preProcess(RecordProcessRequestor recordProcessRequestor,
-        SupportPreProcessRequestor supportPreProcessRequestor);
-    /**
-     * Request that the record become active but wait for the caller
-     * to request that the record support be called.
-     * The caller provides the initial timeStamp.
-     * If the record is already active the request will fail.
-     * @param recordProcessRequestor The recordProcessRequestor.
-     * @param supportPreProcessRequestor TODO
-     * @return The result of the preProcess request.
-     */
-    RequestResult preProcess(RecordProcessRequestor recordProcessRequestor,
-        SupportPreProcessRequestor supportPreProcessRequestor, TimeStamp timeStamp);
-    /**
-     * Called by recordProcessRequestor when a preProcess request was issued.
-     * This is called with the record locked.
-     * @param recordProcessRequestor The recordProcessRequestor.
-     * @return The result of the processNow request.
-     */
-    RequestResult processNow(RecordProcessRequestor recordProcessRequestor);
-    /**
-     * Get RecordProcessSupport interface.
-     * RecordProcessSupport is normally only used by support code.
-     * @return  The interface for RecordProcessSupport.
-     */
-    RecordProcessSupport getRecordProcessSupport();
-    /**
      * Set process trace.
      * If true a message will displayed whenever process, requestProcessCallback, or processContinue are called.
      * @param value true or false.
      * @return (false,true) if the state (was not, was) changed.
      */
     boolean setTrace(boolean value);
+    void setActive(RecordProcessRequestor recordProcessRequestor);
+    /**
+     * Process the record instance.
+     * If the record is already active the request will fail.
+     * @param recordProcessRequestor The recordProcessRequestor.
+     * @param leaveActive Leave the record active when process is done.
+     * The requestor must call setInactive.
+     * @param timeStamp TODO
+     */
+    void process(RecordProcessRequestor recordProcessRequestor, boolean leaveActive, TimeStamp timeStamp); 
+    void setInactive(RecordProcessRequestor recordProcessRequestor);
+    /**
+     * Ask recordProcess to continue processing.
+     * This is called with the record unlocked.
+     * Only valid if the record is active.
+     * @param processContinueRequestor The requestor to call.
+     */
+    void processContinue(ProcessContinueRequestor processContinueRequestor);
+    /**
+     * Request to be called back after process, preProcess or processContinue
+     * has called support but before it returns.
+     * This must only be called by code running as a result of process, preProcess, or processContinue. 
+     * The callback will be called with the record unlocked.
+     * @param processCallbackRequestor The listener to call.
+     */
+    void requestProcessCallback(ProcessCallbackRequestor processCallbackRequestor);
+    /**
+     * Set the status and severity for the record.
+     * This must only be called by code running as a result of process, preProcess, or processContinue. 
+     * The algorithm is to maxamize the severity, i.e. if the requested severity is greater than the current
+     * severity than the status and severity are set to the requested values. When a recvord starts processing the
+     * status is set to null and the alarmSeverity is set the "not defined". This the first call with a severity of
+     * none will set the status and severity.
+     * @param status The status
+     * @param alarmSeverity The severity
+     * @return (false, true) if the status and severity (were not, were) set the requested values.
+     */
+    boolean setStatusSeverity(String status, AlarmSeverity alarmSeverity);
+    /**
+     * Set the status for the record.
+     * This must only be called by code running as a result of process, preProcess, or processContinue. 
+     * The status will be changed only is the current alarmSeverity is none.
+     * @param status The new status.
+     * @return (false,true) if the status (was not, was) changed.
+     */
+    boolean setStatus(String status);
+    /**
+     * Get the current status.
+     * This must only be called by code running as a result of process, preProcess, or processContinue. 
+     * or RecordProcessRequestor.processComplete.
+     * @return The status. If the record does not have a status field null will be returned.
+     */
+    String getStatus();
+    /**
+     * Get the current alarm severity.
+     * This must only be called by code running as a result of process, preProcess, or processContinue.  
+     * @return The severity. If the record does not have an alarmSeverity field null is returned.
+     */
+    AlarmSeverity getAlarmSeverity();
+    /**
+     * Set the timeStamp for the record.
+     * This must only be called by code running as a result of process, preProcess, or processContinue. 
+     * @param timeStamp The timeStamp.
+     */
+    void setTimeStamp(TimeStamp timeStamp);
+    /**
+     * Get the current timeStamp.
+     * This must only be called by code running as a result of process, preProcess, or processContinue. 
+     * @param timeStamp The current timeStamp.
+     */
+    void getTimeStamp(TimeStamp timeStamp);
 }

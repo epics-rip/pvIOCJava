@@ -1,0 +1,92 @@
+<?xml version="1.0" ?>
+<IOCDatabase>
+
+<record name = "counter" type = "counterRecord">
+    <min>0.0</min>
+    <max>1e9</max>
+    <inc>1.0</inc>
+    <scan>
+        <scan>periodic</scan>
+        <rate>0.5</rate>
+    </scan>
+</record>
+
+<record name = "monitor00" type = "doubleRecord">
+    <input supportName = "monitorLink" >
+        <configure structureName = "monitorLink">
+            <pvname>counter</pvname>
+            <process>true</process>
+            <queueCapacity>0</queueCapacity>
+        </configure>
+    </input>
+    <units>volts</units>
+    <displayLimit>
+        <low>0.0</low>
+        <high>10.0</high>
+    </displayLimit>
+    <linkArray>
+        <value structureName = "linkArrayElement">
+            <link  supportName = "delayLink" >
+                <configure structureName = "delayLink">
+                    <min>100</min>
+                    <max>1000</max>
+                    <inc>100</inc>
+                </configure>
+            </link>
+        </value>
+    </linkArray>
+</record>
+<record name = "monitor01" type = "doubleRecord">
+    <input supportName = "monitorLink" >
+        <configure structureName = "monitorLink">
+            <pvname>counter</pvname>
+            <process>true</process>
+            <queueCapacity>1</queueCapacity>
+        </configure>
+    </input>
+    <units>volts</units>
+    <displayLimit>
+        <low>0.0</low>
+        <high>10.0</high>
+    </displayLimit>
+    <linkArray>
+        <value structureName = "linkArrayElement">
+            <link  supportName = "delayLink" >
+                <configure structureName = "delayLink">
+                    <min>100</min>
+                    <max>1000</max>
+                    <inc>100</inc>
+                </configure>
+            </link>
+        </value>
+    </linkArray>
+</record>
+
+<record name = "monitor02" type = "doubleRecord">
+    <input supportName = "monitorLink" >
+        <configure structureName = "monitorLink">
+            <pvname>counter</pvname>
+            <process>true</process>
+            <queueCapacity>2</queueCapacity>
+        </configure>
+    </input>
+    <units>volts</units>
+    <displayLimit>
+        <low>0.0</low>
+        <high>10.0</high>
+    </displayLimit>
+    <linkArray>
+        <value structureName = "linkArrayElement">
+            <link  supportName = "delayLink" >
+                <configure structureName = "delayLink">
+                    <min>100</min>
+                    <max>1000</max>
+                    <inc>100</inc>
+                </configure>
+            </link>
+        </value>
+    </linkArray>
+</record>
+
+
+</IOCDatabase>

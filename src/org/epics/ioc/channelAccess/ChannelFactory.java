@@ -5,8 +5,6 @@
  */
 package org.epics.ioc.channelAccess;
 
-import org.epics.ioc.dbAccess.*;
-
 
 /**
  * Factory for creating channels. 
@@ -31,17 +29,6 @@ public class ChannelFactory {
         }
         if(remoteAccess!=null) {
             channel = remoteAccess.createChannel(name,listener);
-        }
-        return channel;
-    }
-    public static Channel createLinkChannel(DBLink dbLink,String name,ChannelStateListener listener) {
-        Channel channel = null;
-        if(localAccess!=null) {
-            channel = localAccess.createLinkChannel(dbLink,name,listener);
-            if(channel!=null) return channel;
-        }
-        if(remoteAccess!=null) {
-            channel = remoteAccess.createLinkChannel(dbLink,name,listener);
         }
         return channel;
     }

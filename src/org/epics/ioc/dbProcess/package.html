@@ -65,6 +65,131 @@ ProcessCallbackListener.</p>
 
 <h2 style="text-align: center">Record Processing Theory of Operation</h2>
 
+<h3>Definitions</h3>
+
+<p>Record Processing uses the following definitions:</p>
+<dl>
+  <dt>synchronous</dt>
+    <dd>Code that does not block, i.e. does not perform actions like waiting
+      for I/O to complete. It is permissible to take locks that that are
+      shared by other synchronous code.</dd>
+  <dt>asynchronous</dt>
+    <dd>Code that can block.</dd>
+  <dt>record</dt>
+    <dd>Short for record instance.</dd>
+  <dt>process</dt>
+    <dd>Short for processing a record instance.</dd>
+  <dt>support</dt>
+    <dd>Short for code that is involved with implementing record processing.
+      This code can be either synchronous or asynchronous. Support code can
+      also invoke other support code.</dd>
+  <dt>record support</dt>
+    <dd>The top level support for a record instance.</dd>
+  <dt>recordProcess</dt>
+    <dd>Every record instance has an implementation of an object that
+      coordinates record processing. RecordProcess is the name of the
+      interface implemented by record processing.</dd>
+  <dt>process requestor</dt>
+    <dd>Code that asks recordProcess to process a record. Code must register
+      to be the requestor and only one requestor is allow to request
+      processing. Thus a registration request fails if a requestor is already
+      attached to a record. If code that is not the requestor attempt to
+      process a record an exception is thrown.</dd>
+  <dt>active</dt>
+    <dd>A record instance is active while processing is active. Issuing a new
+      process request while a record is already active will cause an
+      exception.</dd>
+  <dt>lock</dt>
+    <dd>Short for record instance lock. A record must be locked whenever any
+      field of a record is accessed. Code executing with a record locked must
+      be synchronous. There is not way to detect if code violates this rule
+      so code must be implemented carefully.</dd>
+</dl>
+
+<h3>Requestor Examples</h3>
+<dl>
+  <dt>Local Channel Access</dt>
+    <dd>An example is a channel access server that is accessing IOC database.
+      The following are typical requests it makes:
+      <dl>
+        <dt>get or put</dt>
+          <dd>Just get or put data from a record instance. It must lock the
+            record while accessing but does not interact with recordProcess.
+            For arrays it may have to lock and unlock the record multiple
+            times. For example a channel access server might not be able to
+            allocate a network buffer that hold the entire array.</dd>
+        <dt>process and get</dt>
+          <dd>A typical example is to process a record and get some data as
+            well as the status, severity, and timeStamp. In this case the
+            requestor wants the following:
+            <ul>
+              <li>set record active and process but leave record active</li>
+              <li>get data <br />
+                Note that the record must be unlocked before the requestor
+                starts getting data. The requestor is responsible for locking
+                and unlocking while accessing the record.</li>
+              <li>make record inactive</li>
+            </ul>
+          </dd>
+        <dt>put, process, get</dt>
+          <dd>A example is to put something into the record, make it process,
+            and after processing get the status, severity, and timeStamp. The
+            requestor wants the following:
+            <ul>
+              <li>set record active</li>
+              <li>put data <br />
+                Note that the record must be unlocked before the requestor
+                starts putting data. The requestor is responsible for locking
+                and unlocking while accessing the record.</li>
+              <li>process the record but leave it active</li>
+              <li>get data <br />
+                Note that the record must be unlocked before the requestor
+                starts getting data. The requestor is responsible for locking
+                and unlocking while accessing the record.</li>
+              <li>make record inactive</li>
+            </ul>
+          </dd>
+      </dl>
+    </dd>
+  <dt>Database Links</dt>
+    <dd>Links between records in the same IOC. When a database link makes a
+      request to process a linked record, the record containing the link MUST
+      be unlocked or deadlocks may occur. For efficency requests should be
+      done with as few lock/unlock cycles and context switches as possible.
+      In particular the only asynchronous support should cause a context
+      switch. <br />
+      Typical requests are:
+      <dl>
+        <dt>process and get</dt>
+          <dd>Just cause a record to process and after the record processes
+            get data and/or severity. The requestor wants the following:
+            <ul>
+              <li>make the record active</li>
+              <li>process the record</li>
+              <li>get the data and/or severity.<br />
+                This is done with both records locked since data will be
+                transfered between the two records.</li>
+              <li>make the record inactive</li>
+            </ul>
+          </dd>
+        <dt>put, process, and get severity</dt>
+          <dd>Put data to the linked record, make it process, and then get
+            the severity. The requestor wants the following:
+            <ul>
+              <li>make the record active</li>
+              <li>put data the record<br />
+                This is done with both records locked since data will be
+                transfered between the two records.</li>
+              <li>process the record</li>
+              <li>get the severity.<br />
+                This is done with both records locked.</li>
+              <li>make the record inactive</li>
+            </ul>
+          </dd>
+      </dl>
+    </dd>
+</dl>
+
 <h3>Overview</h3>
 
 <p>A record is processed via a call to RecordProcess.process. It in turn
@@ -349,7 +474,6 @@ methods:</p>
     <dd>Is the record active, i.e. processing?</dd>
   <dt style="font-family: courier;">getRecord</dt>
     <dd>Get the record instance to which this RecordProcess is attached.</dd>
-
   <dt style="font-family: courier;">initialize</dt>
   <dt style="font-family: courier;">start</dt>
   <dt style="font-family: courier;">stop</dt>
@@ -573,30 +697,32 @@ implements the protected methods:</p>
 
 <h2 style="text-align: center;">SupportCreation</h2>
 <hr />
+
 <p>This is MARTY SAY SOMETHING</p>
-<pre>
-    public interface SupportCreation {
+<pre>    public interface SupportCreation {
         boolean createSupport();
         boolean initializeSupport();
         boolean  startSupport();
         void uninitializeSupport();
         void stopSupport();
-    }
-</pre>
+    }</pre>
+
 <p>where</p>
 <dl>
   <dt style="font-family: courier;">createSupport</dt>
-   <dd>Create the support. The return value is true only if no errors are reported.</dd>
+    <dd>Create the support. The return value is true only if no errors are
+      reported.</dd>
   <dt style="font-family: courier;">initializeSupport</dt>
-   <dd>Initialize the support. The return value is true only if all record
+    <dd>Initialize the support. The return value is true only if all record
       instances enter the state readyForStart.</dd>
   <dt style="font-family: courier;">startSupport</dt>
-   <dd>Start the support. The return value is true only if all record
+    <dd>Start the support. The return value is true only if all record
       instances enter the state ready.</dd>
   <dt style="font-family: courier;">uninitializeSupport</dt>
     <dd>Uninitialize the support.</dd>
   <dt style="font-family: courier;">stopSupport</dt>
     <dd>Stop the support.</dd>
+</dl>
 <hr />
 
 <h2 style="text-align: center;">Record Process</h2>
@@ -639,14 +765,13 @@ implements the protected methods:</p>
 <h2 style="text-align: center;">Support Creation Factory</h2>
 <hr />
 <hr />
-<pre>
-    public class SupportCreationFactory
+<pre>    public class SupportCreationFactory
         static public SupportCreation createSupportCreation(IOCDB iocdb)
-    }
-</pre>
+    }</pre>
+
 <p>where</p>
 <dl>
-   <dt>createSupportCreation</dt>
+  <dt>createSupportCreation</dt>
     <dd>Create a SupportCreation database.</dd>
 </dl>
 

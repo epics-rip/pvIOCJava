@@ -5,9 +5,12 @@
  */
 package org.epics.ioc.dbProcess;
 
+import org.epics.ioc.util.*;
+
 /**
  * The interface that must be implemented by code that makes a recordProcess.requestProcessCallback
  * request.
+ * This is called with the record unlocked.
  * This is a request to be called back just before recordSupport.process or recordSupport.processContinue returns.
  * Code that wants to process other records as a result of recordProcess.process
  * can only request processing of the other records via this method.
@@ -17,12 +20,7 @@ package org.epics.ioc.dbProcess;
  * @author mrk
  *
  */
-public interface ProcessCallbackListener {
-    /**
-     * Get the name.
-     * @return The name.
-     */
-    String getName();
+public interface ProcessCallbackRequestor extends Requestor{
     /**
      * The callback to call after recordSupport.process returns.
      * The callback is called with the record unlocked but still active.

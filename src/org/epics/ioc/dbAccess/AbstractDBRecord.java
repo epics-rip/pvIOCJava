@@ -10,7 +10,7 @@ import java.util.concurrent.locks.*;
 
 import org.epics.ioc.dbDefinition.*;
 import org.epics.ioc.dbProcess.*;
-import org.epics.ioc.util.IOCMessageType;
+import org.epics.ioc.util.MessageType;
 
 /**
  * Abstract base class for a record instance.
@@ -217,9 +217,9 @@ public class AbstractDBRecord extends AbstractDBStructure implements DBRecord {
         this.iocdb = iocdb;
     }
     /* (non-Javadoc)
-     * @see org.epics.ioc.dbAccess.DBRecord#message(java.lang.String, org.epics.ioc.util.IOCMessageType)
+     * @see org.epics.ioc.dbAccess.DBRecord#message(java.lang.String, org.epics.ioc.util.MessageType)
      */
-    public void message(String message, IOCMessageType messageType) {
+    public void message(String message, MessageType messageType) {
         if(message!=null && message.charAt(0)!='.') message = " " + message;
         iocdb.message(recordName + message, messageType);
     }

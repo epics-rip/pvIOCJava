@@ -56,14 +56,14 @@ public class EventRecordFactory {
             if(result!=AccessSetResult.thisRecord) {
                 dbRecord.message(
                         "field value does not exist",
-                        IOCMessageType.error);
+                        MessageType.error);
                 return;
             }
             dbData = dbAccess.getField();
             if(dbData.getField().getType()!=Type.pvString) {
                 dbRecord.message(
                         "field value is not a string",
-                        IOCMessageType.error);
+                        MessageType.error);
                 return;
             }
             value = (DBString)dbData;
@@ -103,13 +103,13 @@ public class EventRecordFactory {
         /* (non-Javadoc)
          * @see org.epics.ioc.dbProcess.Support#process(org.epics.ioc.dbProcess.RecordProcessRequestor)
          */
-        public RequestResult process(SupportProcessRequestor supportProcessRequestor) {
+        public void process(SupportProcessRequestor supportProcessRequestor) {
             if(supportState!=SupportState.ready) {
                 dbRecord.message(
                         "process called but supportState is "
                         + supportState.toString(),
-                        IOCMessageType.error);
-                return RequestResult.failure;
+                        MessageType.error);
+                supportProcessRequestor.supportProcessDone(RequestResult.failure);
             }
             String newName = value.get();
             if(newName!=eventName) {
@@ -121,13 +121,7 @@ public class EventRecordFactory {
                 }
             }
             if(eventAnnounce!=null) eventAnnounce.announce();
-            return RequestResult.success;
-        }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.dbProcess.Support#processContinue()
-         */
-        public void processContinue() {
-            dbRecord.message("why was processContinue called", IOCMessageType.error);
+            supportProcessRequestor.supportProcessDone(RequestResult.success);
         }
     }
 }

@@ -27,12 +27,12 @@ public class LinkArraySupportFactory {
         DBDArrayField dbdArrayField = (DBDArrayField)dbArray.getDBDField();
         DBType elementDBType = dbdArrayField.getElementDBType();
         if(elementDBType!=DBType.dbStructure) {
-            dbArray.message("element type is not a structure",IOCMessageType.error);
+            dbArray.message("element type is not a structure",MessageType.error);
             return null;
         }
         String supportName = dbArray.getSupportName();
         if(supportName==null || !supportName.equals(supportName)) {
-            dbArray.message("does not have support " + supportName,IOCMessageType.error);
+            dbArray.message("does not have support " + supportName,MessageType.error);
             return null;
         }
         return new StructureArray((DBStructureArray)dbArray);
@@ -40,12 +40,10 @@ public class LinkArraySupportFactory {
     private static String supportName = "linkArray";
     
     private static class StructureArray extends AbstractSupport
-    implements LinkSupport,ProcessCallbackListener,SupportProcessRequestor
+    implements LinkSupport,SupportProcessRequestor
     {
         private DBStructureArray dbStructureArray;
         private String processRequestorName = null;
-        private RecordProcess recordProcess = null;
-        private RecordProcessSupport recordProcessSupport = null;
         private DBStructureArrayData structureArrayData = new DBStructureArrayData();
         private PVBoolean[] pvWaits = null;
         private DBLink[] dbLinks = null;
@@ -68,7 +66,7 @@ public class LinkArraySupportFactory {
         /* (non-Javadoc)
          * @see org.epics.ioc.dbProcess.SupportProcessRequestor#getProcessRequestorName()
          */
-        public String getSupportProcessRequestorName() {
+        public String getRequestorName() {
             return processRequestorName;
         }
 
@@ -77,8 +75,6 @@ public class LinkArraySupportFactory {
          */
         public void initialize() {
             if(!super.checkSupportState(SupportState.readyForInitialize,supportName)) return;
-            recordProcess = dbStructureArray.getRecord().getRecordProcess();
-            recordProcessSupport = recordProcess.getRecordProcessSupport();
             SupportState supportState = SupportState.readyForStart;
             int n = dbStructureArray.getLength();
             structureArrayData.offset = 0;
@@ -94,36 +90,36 @@ public class LinkArraySupportFactory {
                 DBStructure dbStructure = structureArrayData.data[i];
                 if(dbStructure==null) continue;
                 if(!dbStructure.getDBDStructure().getStructureName().equals("linkArrayElement")) {
-                    dbStructure.message("structureName not linkArrayElement", IOCMessageType.fatalError);
+                    dbStructure.message("structureName not linkArrayElement", MessageType.fatalError);
                     continue;
                 }
                 DBData[] dbDatas = dbStructure.getFieldDBDatas();
                 int index = dbStructure.getFieldDBDataIndex("wait");
                 if(index<0) {
-                    dbStructure.message("structure does not have field wait", IOCMessageType.fatalError);
+                    dbStructure.message("structure does not have field wait", MessageType.fatalError);
                     continue;
                 }
                 DBData dbData = dbDatas[index];
                 if(dbData.getField().getType()!=Type.pvBoolean) {
-                    dbStructure.message("field wait is not boolean", IOCMessageType.fatalError);
+                    dbStructure.message("field wait is not boolean", MessageType.fatalError);
                     continue;
                 }
                 pvWaits[i] = (PVBoolean)dbData;
                 index = dbStructure.getFieldDBDataIndex("link");
                 if(index<0) {
-                    dbStructure.message("structure does not have field link", IOCMessageType.fatalError);
+                    dbStructure.message("structure does not have field link", MessageType.fatalError);
                     continue;
                 }
                 dbData = dbDatas[index];
                 if(dbData.getDBDField().getDBType()!=DBType.dbLink) {
-                    dbStructure.message("field link is not a link", IOCMessageType.fatalError);
+                    dbStructure.message("field link is not a link", MessageType.fatalError);
                     continue;
                 }
                 dbLinks[i] = (DBLink)dbData;
                 DBLink dbLink = dbLinks[i];
                 LinkSupport linkSupport = (LinkSupport)dbLink.getSupport();
                 if(linkSupport==null) {
-                    dbStructure.message("field link is not a link", IOCMessageType.fatalError);
+                    dbStructure.message("field link is not a link", MessageType.fatalError);
                     continue;
                 }
                 linkSupport.initialize();
@@ -183,24 +179,45 @@ public class LinkArraySupportFactory {
         /* (non-Javadoc)
          * @see org.epics.ioc.dbProcess.Support#process(org.epics.ioc.dbProcess.RecordProcessRequestor)
          */
-        public RequestResult process(SupportProcessRequestor supportProcessRequestor) {
+        public void process(SupportProcessRequestor supportProcessRequestor) {
             if(supportProcessRequestor==null) {
                 throw new IllegalStateException("no processRequestListener");
             }
-            if(!super.checkSupportState(SupportState.ready,supportName + ".process")) return RequestResult.failure;
-            if(linkSupports.length<=0) {
-                return RequestResult.success;
+            if(!super.checkSupportState(SupportState.ready,supportName + ".process")) {
+                supportProcessRequestor.supportProcessDone(RequestResult.failure);
+                return;
             }
+            if(linkSupports.length<=0) {
+                supportProcessRequestor.supportProcessDone(RequestResult.success);
+                return;
+            }
+            this.supportProcessRequestor = supportProcessRequestor;
             nextLink = 0;
             finalResult = RequestResult.success;
-            this.supportProcessRequestor = supportProcessRequestor;
-            recordProcessSupport.requestProcessCallback(this);
-            return RequestResult.active;
+            callLinkSupport();
         }        
+        
         /* (non-Javadoc)
-         * @see org.epics.ioc.dbProcess.Support#processContinue()
+         * @see org.epics.ioc.dbProcess.LinkSupport#setField(org.epics.ioc.pvAccess.PVData)
          */
-        public void processContinue() {
+        public void setField(PVData field) {
+            valueData = field;
+        }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.dbProcess.SupportProcessRequestor#supportProcessDone(org.epics.ioc.util.RequestResult)
+         */
+        public void supportProcessDone(RequestResult requestResult) {
+            if(requestResult!=RequestResult.success) {
+                if(finalResult!=RequestResult.zombie) {
+                    finalResult = requestResult;
+                }
+            }
+            numberWait--;
+            if(numberWait>0) return;
+            callLinkSupport();
+        }
+        
+        private void callLinkSupport() {
             if(!super.checkSupportState(SupportState.ready,supportName + ".processContinue")) {
                 throw new IllegalStateException("processContinue but not ready");
             }
@@ -212,54 +229,19 @@ public class LinkArraySupportFactory {
                 }
                 boolean wait = pvWaits[nextLink].get(); 
                 nextLink++;
-                RequestResult requestResult;
                 if(processLink.getSupportState()!=SupportState.ready) {
-                    requestResult = RequestResult.failure;
+                    if(finalResult==RequestResult.success) {
+                        finalResult = RequestResult.failure;
+                    }
                 } else {
-                    requestResult = processLink.process(this);
-                }
-                switch(requestResult) {
-                case zombie:
-                     finalResult = RequestResult.failure;
-                     break;
-                case failure:
-                    finalResult = RequestResult.failure;
-                    break;
-                case success:
-                    wait = false;
-                    break;
-                case active:
                     numberWait++;
-                    break;
-                default:
-                    dbStructureArray.message(
-                        "Unknown RequestResult state in ChannelAccessLocal",IOCMessageType.fatalError);
+                    processLink.process(this);
                 }
                 if(wait) return;
             }
             if(numberWait<=0) {
-                supportProcessRequestor.processComplete(null);
+                supportProcessRequestor.supportProcessDone(finalResult);
             }
-        }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.dbProcess.LinkSupport#setField(org.epics.ioc.pvAccess.PVData)
-         */
-        public void setField(PVData field) {
-            valueData = field;
-        }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.dbProcess.ProcessCallbackListener#processCallback()
-         */
-        public void processCallback() {
-            recordProcessSupport.processContinue(this);
-        }       
-        /* (non-Javadoc)
-         * @see org.epics.ioc.dbProcess.RecordProcessRequestor#processComplete(org.epics.ioc.dbProcess.Support, org.epics.ioc.dbProcess.ProcessResult)
-         */
-        public void processComplete(RequestResult requestResult) {
-            numberWait--;
-            if(numberWait>0) return;
-            recordProcessSupport.requestProcessCallback(this);
         }
     }
 }

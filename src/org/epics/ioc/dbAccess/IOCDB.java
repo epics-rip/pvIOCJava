@@ -64,17 +64,17 @@ public interface IOCDB {
      * @param message The message.
      * @param messageType The message type.
      */
-    void message(String message, IOCMessageType messageType);
+    void message(String message, MessageType messageType);
     /**
      * Add a message listener.
      * @param listener The listener.
      */
-    void addMessageListener(IOCMessageListener listener);
+    void addMessageListener(MessageListener listener);
     /**
      * Remove a message listener.
      * @param listener The listener.
      */
-    void removeMessageListener(IOCMessageListener listener);
+    void removeMessageListener(MessageListener listener);
     /**
      * Provide access to a record and it's fields.
      * @param recordName The record instance name.

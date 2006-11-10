@@ -23,7 +23,7 @@ public class DBDTest extends TestCase {
         test.doit();
     }
     
-    private static class Test implements IOCMessageListener {
+    private static class Test implements MessageListener {
         
         private void doit () {
         
@@ -31,7 +31,10 @@ public class DBDTest extends TestCase {
             listAll(master,"before reading anything");
             XMLToDBDFactory.convert(master,"src/org/epics/ioc/dbDefinition/example/menu.xml",this);
             listAll(master,"after reading menus");
-            System.out.printf("menuList with S in name: %s%n",master.menuList(".*[S].*"));
+            String[] list = master.menuList(".*[S].*");
+            System.out.print("menuList with S in name:");
+            for(String item : list) System.out.print(" " + item);
+            System.out.println();
             DBD add = DBDFactory.create("add");
             XMLToDBDFactory.convert(add,"src/org/epics/ioc/dbDefinition/example/structure.xml",this);
             XMLToDBDFactory.convert(add,"src/org/epics/ioc/dbDefinition/example/support.xml",this);
@@ -51,11 +54,24 @@ public class DBDTest extends TestCase {
         }
         
         private static void listAll(DBD dbd,String message) {
+            String[] list;
             System.out.printf("%nDBD %s %s%n",dbd.getName(),message);
-            System.out.printf("menuList %s%n",dbd.menuList(null));
-            System.out.printf("structureList %s%n",dbd.structureList(null));
-            System.out.printf("recordTypeList %s%n",dbd.recordTypeList(null));
-            System.out.printf("supportList %s%n",dbd.supportList(null));
+            list = dbd.menuList(null);
+            System.out.print("menuList:");
+            for(String item : list) System.out.print(" " + item);
+            System.out.println();
+            list = dbd.structureList(null);
+            System.out.print("structureList:");
+            for(String item : list) System.out.print(" " + item);
+            System.out.println();
+            list = dbd.recordTypeList(null);
+            System.out.print("recordTypeList:");
+            for(String item : list) System.out.print(" " + item);
+            System.out.println();
+            list = dbd.supportList(null);
+            System.out.print("supportList:");
+            for(String item : list) System.out.print(" " + item);
+            System.out.println();
         }
         
         private static void dumpAll(DBD dbd,String message) {
@@ -66,9 +82,9 @@ public class DBDTest extends TestCase {
             System.out.printf("%n****support%n%s%n",dbd.supportToString(null));
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.util.IOCMessageListener#message(java.lang.String, org.epics.ioc.util.IOCMessageType)
+         * @see org.epics.ioc.util.MessageListener#message(java.lang.String, org.epics.ioc.util.MessageType)
          */
-        public void message(String message, IOCMessageType messageType) {
+        public void message(String message, MessageType messageType) {
             System.out.println(message);
             
         }

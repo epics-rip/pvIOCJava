@@ -31,7 +31,7 @@ public class XMLToDBDTest extends TestCase {
         test.doit();
     }
     
-    private static class Test implements IOCMessageListener {
+    private static class Test implements MessageListener {
         
         private void doit () {
             DBD dbd = XMLToDBDFactory.create("add",
@@ -50,7 +50,7 @@ public class XMLToDBDTest extends TestCase {
             keys = structureMap.keySet();
             for(String key: keys) {
                 DBDStructure dbdStructure = structureMap.get(key);
-                System.out.printf("%n%s",dbdStructure.toString());
+                System.out.printf("%n%nstructure %s%s",dbdStructure.getName(),dbdStructure.toString());
             }
             System.out.printf("%n%nsupport");
             Map<String,DBDSupport> supportMap = dbd.getSupportMap();
@@ -64,15 +64,15 @@ public class XMLToDBDTest extends TestCase {
             keys = recordTypeMap.keySet();
             for(String key: keys) {
                 DBDRecordType dbdRecordType = recordTypeMap.get(key);
-                System.out.printf("%n%s",dbdRecordType.toString());
+                System.out.printf("%n%nrecordType %s%s",dbdRecordType.getName(),dbdRecordType.toString());
             }
             
         }
 
         /* (non-Javadoc)
-         * @see org.epics.ioc.util.IOCMessageListener#message(java.lang.String, org.epics.ioc.util.IOCMessageType)
+         * @see org.epics.ioc.util.MessageListener#message(java.lang.String, org.epics.ioc.util.MessageType)
          */
-        public void message(String message, IOCMessageType messageType) {
+        public void message(String message, MessageType messageType) {
             System.out.println(message);
             
         }

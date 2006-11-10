@@ -9,8 +9,8 @@ import junit.framework.TestCase;
 
 import org.epics.ioc.dbDefinition.*;
 import org.epics.ioc.dbAccess.*;
-import org.epics.ioc.util.IOCMessageListener;
-import org.epics.ioc.util.IOCMessageType;
+import org.epics.ioc.util.MessageListener;
+import org.epics.ioc.util.MessageType;
 
 import java.util.*;
 /**
@@ -33,7 +33,7 @@ public class XMLSupportTest extends TestCase {
         DBD dbd = DBDFactory.getMasterDBD();
         
         System.out.printf("reading supportDBD%n");
-        IOCMessageListener iocMessageListener = new Listener();
+        MessageListener iocMessageListener = new Listener();
         XMLToDBDFactory.convert(dbd,
                  "src/org/epics/ioc/dbAccess/example/supportDBD.xml",iocMessageListener);
         IOCDB iocdb = IOCDBFactory.create("testIOCDatabase");
@@ -58,11 +58,11 @@ public class XMLSupportTest extends TestCase {
         }
     }
 
-    private static class Listener implements IOCMessageListener {
+    private static class Listener implements MessageListener {
         /* (non-Javadoc)
-         * @see org.epics.ioc.util.IOCMessageListener#message(java.lang.String, org.epics.ioc.util.IOCMessageType)
+         * @see org.epics.ioc.util.MessageListener#message(java.lang.String, org.epics.ioc.util.MessageType)
          */
-        public void message(String message, IOCMessageType messageType) {
+        public void message(String message, MessageType messageType) {
             System.out.println(message);
             
         }

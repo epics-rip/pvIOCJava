@@ -19,11 +19,11 @@ import org.epics.ioc.util.*;
  *
  */
 public class ScanTest extends TestCase {
-    private static IOCMessageListener iocMessageListener = null;
+    private static MessageListener iocMessageListener = null;
     /**
      * test scan.
      */
-    private static IOCMessageType maxError = IOCMessageType.info;
+    private static MessageType maxError = MessageType.info;
     public static void testScan() {
         iocMessageListener = new Listener();
         DBD dbd = DBDFactory.getMasterDBD();
@@ -113,11 +113,6 @@ public class ScanTest extends TestCase {
         dbData = dbRecord.getFieldDBDatas();        
         index = dbRecord.getFieldDBDataIndex("value");
         DBData double02Value = dbData[index];
-        dbRecord = iocdbMaster.findRecord("double03");
-        assertNotNull(dbRecord);
-        dbData = dbRecord.getFieldDBDatas();        
-        index = dbRecord.getFieldDBDataIndex("value");
-        DBData double03Value = dbData[index];
         list = periodicScanner.toString();
         System.out.println(list);
         while(true) {
@@ -129,18 +124,17 @@ public class ScanTest extends TestCase {
                 System.out.println("  counterEvent1 " + counterEvent1Value.toString());
                 System.out.println(" counter " + counterValue.toString());
                 System.out.println("double02 " + double02Value.toString());
-                System.out.println("double03 " + double03Value.toString());
                 System.out.println();
             } catch (InterruptedException e) {
             }
         }
     }
        
-    private static class Listener implements IOCMessageListener {
+    private static class Listener implements MessageListener {
         /* (non-Javadoc)
-         * @see org.epics.ioc.util.IOCMessageListener#message(java.lang.String, org.epics.ioc.util.IOCMessageType)
+         * @see org.epics.ioc.util.MessageListener#message(java.lang.String, org.epics.ioc.util.MessageType)
          */
-        public void message(String message, IOCMessageType messageType) {
+        public void message(String message, MessageType messageType) {
             System.out.println(message);
             if(messageType.ordinal()>maxError.ordinal()) maxError = messageType;
         }

@@ -68,6 +68,7 @@ public interface DBAccess {
     
     /**
      * Get the interface for the current field.
+     * This returns the field found by setField when it returns AccessSetResult.thisRecord.
      * @return The interface for the field.
      * If setField was never called or the last call failed then null is returned.
      */

@@ -35,7 +35,7 @@ public class AnalogInputFactory {
             this.dbStructure = dbStructure;
         }
 
-        public String getName() {
+        public String getRequestorName() {
             return supportName;
         }
 
@@ -54,13 +54,13 @@ public class AnalogInputFactory {
         }
 
        
-        public RequestResult process(SupportProcessRequestor supportProcessRequestor) {
+        public void process(SupportProcessRequestor supportProcessRequestor) {
             System.out.printf("%s.process entered\n",supportName);
-            return RequestResult.failure;
+            supportProcessRequestor.supportProcessDone(RequestResult.failure);
         }
         
         public void processContinue() {
-            dbRecord.message("why was processContinue called", IOCMessageType.error);
+            dbRecord.message("why was processContinue called", MessageType.error);
         }
     }
 }

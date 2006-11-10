@@ -47,10 +47,10 @@ public class IOCDBFactory {
         private ReentrantReadWriteLock rwLock = 
             new ReentrantReadWriteLock();
         private boolean workingMessageListenerListModified = false;
-        private ArrayList<IOCMessageListener> workingMessageListenerList =
-            new ArrayList<IOCMessageListener>();
-        private ArrayList<IOCMessageListener> messageListenerList =
-            new ArrayList<IOCMessageListener>();
+        private ArrayList<MessageListener> workingMessageListenerList =
+            new ArrayList<MessageListener>();
+        private ArrayList<MessageListener> messageListenerList =
+            new ArrayList<MessageListener>();
         
         private IOCDBInstance(String name) {
             this.name = name;
@@ -163,13 +163,13 @@ public class IOCDBFactory {
         }
         
         /* (non-Javadoc)
-         * @see org.epics.ioc.dbAccess.IOCDB#message(java.lang.String, org.epics.ioc.util.IOCMessageType)
+         * @see org.epics.ioc.dbAccess.IOCDB#message(java.lang.String, org.epics.ioc.util.MessageType)
          */
-        public void message(String message, IOCMessageType messageType) {
+        public void message(String message, MessageType messageType) {
             rwLock.writeLock().lock();
             try {                
                 if(workingMessageListenerListModified) {
-                    workingMessageListenerList = (ArrayList<IOCMessageListener>)messageListenerList.clone();
+                    workingMessageListenerList = (ArrayList<MessageListener>)messageListenerList.clone();
                     workingMessageListenerListModified = false;
                 }
             } finally {
@@ -179,15 +179,15 @@ public class IOCDBFactory {
                 System.out.println(messageType.toString() + " " + message);
                 return;
             }
-            Iterator<IOCMessageListener> iter = workingMessageListenerList.iterator();
+            Iterator<MessageListener> iter = workingMessageListenerList.iterator();
             while(iter.hasNext()) {
                 iter.next().message(message, messageType);
             }
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.dbAccess.IOCDB#addMessageListener(org.epics.ioc.util.IOCMessageListener)
+         * @see org.epics.ioc.dbAccess.IOCDB#addMessageListener(org.epics.ioc.util.MessageListener)
          */
-        public void addMessageListener(IOCMessageListener listener) {
+        public void addMessageListener(MessageListener listener) {
             rwLock.writeLock().lock();
             try {
                 workingMessageListenerList.add(listener);
@@ -197,9 +197,9 @@ public class IOCDBFactory {
             }
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.dbAccess.IOCDB#removeMessageListener(org.epics.ioc.util.IOCMessageListener)
+         * @see org.epics.ioc.dbAccess.IOCDB#removeMessageListener(org.epics.ioc.util.MessageListener)
          */
-        public void removeMessageListener(IOCMessageListener listener) {
+        public void removeMessageListener(MessageListener listener) {
             rwLock.writeLock().lock();
             try {
                 workingMessageListenerList.remove(listener);
@@ -616,6 +616,7 @@ public class IOCDBFactory {
             // Look first for field property
             property = dbData.getField().getProperty(name);
             if(property!=null) return property;
+            if(dbData==dbData.getRecord()) return null;
             // if structure look for structure property
             DBDField dbdField = dbData.getDBDField();
             DBType dbType = dbdField.getDBType();

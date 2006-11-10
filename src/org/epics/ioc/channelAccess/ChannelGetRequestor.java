@@ -12,12 +12,16 @@ import org.epics.ioc.pvAccess.*;
  * @author mrk
  *
  */
-public interface ChannelGetRequestor extends ChannelProcessRequestor {
+public interface ChannelGetRequestor extends ChannelRequestor {
     /**
-     * Data.
+     * Next data for a get request..
      * @param channel The channel.
      * @param field The field.
      * @param data The data.
+     * @return (false,true) if the requestor (has,has not) obtained all the data.
+     * A value of true means that the requestor wants to be called again for this data.
+     * This normally means that an array is being transfered and the requestor is
+     * not able to handle the array as a single chunk of data. 
      */
-    void newData(Channel channel,ChannelField field,PVData data);
+    boolean nextGetData(Channel channel,ChannelField field,PVData data);
 }

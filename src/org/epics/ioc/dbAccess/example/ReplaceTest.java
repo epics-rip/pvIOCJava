@@ -10,8 +10,8 @@ import junit.framework.TestCase;
 import org.epics.ioc.dbDefinition.*;
 import org.epics.ioc.dbAccess.*;
 import org.epics.ioc.pvAccess.*;
-import org.epics.ioc.util.IOCMessageListener;
-import org.epics.ioc.util.IOCMessageType;
+import org.epics.ioc.util.MessageListener;
+import org.epics.ioc.util.MessageType;
 
 /**
  * JUnit test for replacing the default data implementration for a field.
@@ -26,7 +26,7 @@ public class ReplaceTest extends TestCase {
     public static void testReplaceField() {
         DBD dbd = DBDFactory.getMasterDBD();
         IOCDB iocdb = IOCDBFactory.create("testIOCDatabase");
-        IOCMessageListener iocMessageListener = new Listener();
+        MessageListener iocMessageListener = new Listener();
         XMLToDBDFactory.convert(dbd,
                  "src/org/epics/ioc/dbAccess/example/replaceDBD.xml",iocMessageListener);
         
@@ -55,13 +55,13 @@ public class ReplaceTest extends TestCase {
 //        }
         
         System.out.printf("%ntest replaceField%n");
-        testReplace(iocdb,"exampleAiLinear","rawValue");
-        testReplace(iocdb,"exampleAiLinear","value");
+        testReplace(iocdb,"exampleAi","rawValue");
+        testReplace(iocdb,"exampleAi","value");
         System.out.printf("%n");
-        new TestListener(iocdb,"exampleAiLinear","rawValue");
-        new TestListener(iocdb,"exampleAiLinear","value");
-        testPut(iocdb,"exampleAiLinear","rawValue",2.0);
-        testPut(iocdb,"exampleAiLinear","value",5.0);
+        new TestListener(iocdb,"exampleAi","rawValue");
+        new TestListener(iocdb,"exampleAi","value");
+        testPut(iocdb,"exampleAi","rawValue",2.0);
+        testPut(iocdb,"exampleAi","value",5.0);
         System.out.printf("%ntest put and listen examplePowerSupply%n");
         testReplace(iocdb,"examplePowerSupply","power");
         testReplace(iocdb,"examplePowerSupply","current");
@@ -2363,11 +2363,11 @@ public class ReplaceTest extends TestCase {
     
     private static Convert convert = ConvertFactory.getConvert();
     
-    private static class Listener implements IOCMessageListener {
+    private static class Listener implements MessageListener {
         /* (non-Javadoc)
-         * @see org.epics.ioc.util.IOCMessageListener#message(java.lang.String, org.epics.ioc.util.IOCMessageType)
+         * @see org.epics.ioc.util.MessageListener#message(java.lang.String, org.epics.ioc.util.MessageType)
          */
-        public void message(String message, IOCMessageType messageType) {
+        public void message(String message, MessageType messageType) {
             System.out.println(message);
             
         }

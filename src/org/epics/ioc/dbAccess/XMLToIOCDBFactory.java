@@ -28,7 +28,7 @@ public class XMLToIOCDBFactory {
     private static DBD dbd;
     private static IOCDB iocdb;
     private static IOCDB iocdbMaster;
-    private static IOCMessageListener iocMessageListener;
+    private static MessageListener iocMessageListener;
     private static IOCXMLReader iocxmlReader;
     /**
      * Convert an xml file to IOCDatabase definitions and put the definitions in a database.
@@ -36,11 +36,11 @@ public class XMLToIOCDBFactory {
      * @param iocdbin IOC database.
      * @param fileName The name of the file containing xml record instance definitions.
      */
-    public static void convert(DBD dbdin, IOCDB iocdbin, String fileName,IOCMessageListener messageListener)
+    public static void convert(DBD dbdin, IOCDB iocdbin, String fileName,MessageListener messageListener)
     {
         boolean gotIt = isInUse.compareAndSet(false,true);
         if(!gotIt) {
-            messageListener.message("XMLToIOCDBFactory.convert is already active",IOCMessageType.fatalError);
+            messageListener.message("XMLToIOCDBFactory.convert is already active",MessageType.fatalError);
         }
         try {
             dbd = dbdin;
@@ -69,10 +69,10 @@ public class XMLToIOCDBFactory {
      * @param messageListener A listener for error messages.
      * @return An IOC Database that has the newly created record instances.
      */
-    public static IOCDB convert(String iocdbName,String fileName,IOCMessageListener messageListener) {
+    public static IOCDB convert(String iocdbName,String fileName,MessageListener messageListener) {
         boolean gotIt = isInUse.compareAndSet(false,true);
         if(!gotIt) {
-            messageListener.message("XMLToIOCDBFactory is already active", IOCMessageType.error);
+            messageListener.message("XMLToIOCDBFactory is already active", MessageType.error);
             return null;
         }
         try {
@@ -111,7 +111,7 @@ public class XMLToIOCDBFactory {
                 } else {
                     iocxmlReader.message(
                         "startElement " + qName + " not understood",
-                        IOCMessageType.error);
+                        MessageType.error);
                 }
                 break;
             case record: 
@@ -126,7 +126,7 @@ public class XMLToIOCDBFactory {
             case idle:
                 iocxmlReader.message(
                             "endElement element " + qName + " not understood",
-                            IOCMessageType.error);
+                            MessageType.error);
                 break;
             case record: 
                 if(qName.equals("record")) {
@@ -149,7 +149,7 @@ public class XMLToIOCDBFactory {
             }
         }
         
-        public void message(String message,IOCMessageType messageType) {
+        public void message(String message,MessageType messageType) {
             iocMessageListener.message(message, messageType);
         }
     }
@@ -224,14 +224,14 @@ public class XMLToIOCDBFactory {
             if(recordName==null) {
                 iocxmlReader.message(
                     "attribute name not specified",
-                    IOCMessageType.error);
+                    MessageType.error);
                 state = State.idle;
                 return;
             }
             if(recordTypeName==null) {
                 iocxmlReader.message(
                     "attribute type not specified",
-                    IOCMessageType.error);
+                    MessageType.error);
                 state = State.idle;
                 return;
             }
@@ -239,7 +239,7 @@ public class XMLToIOCDBFactory {
             if(dbdRecordType==null) {
                 iocxmlReader.message(
                     "record type " + recordTypeName + " does not exist.",
-                    IOCMessageType.warning);
+                    MessageType.warning);
                 state = State.idle;
                 return;
             }
@@ -247,7 +247,7 @@ public class XMLToIOCDBFactory {
                 if(iocdbMaster.findRecord(recordName)!=null) {
                     iocxmlReader.message(
                             "record " + recordName + " already present in master",
-                            IOCMessageType.warning);
+                            MessageType.warning);
                     state = State.idle;
                     return;
                 }
@@ -259,7 +259,7 @@ public class XMLToIOCDBFactory {
                 if(!result) {
                     iocxmlReader.message(
                             "failed to create record " + recordTypeName,
-                            IOCMessageType.warning);
+                            MessageType.warning);
                     state = State.idle;
                     return;
                 }
@@ -276,14 +276,14 @@ public class XMLToIOCDBFactory {
             if(supportName==null) {
                 iocxmlReader.message(
                         "record  " + recordName + " has no record support",
-                        IOCMessageType.error);
+                        MessageType.error);
             } else {
                 String error = dbRecord.setSupportName(supportName);
                 if(error!=null) {
                     iocxmlReader.message(
                             "record  " + recordName
                             + " " + error,
-                            IOCMessageType.error);
+                            MessageType.error);
                 }
             }
             structureState.dbStructure = dbRecord;
@@ -363,7 +363,7 @@ public class XMLToIOCDBFactory {
                     iocxmlReader.message(
                             "Logic error: qName " + qName
                             + " but expected " + structureState.fieldName,
-                            IOCMessageType.error);
+                            MessageType.error);
                 }
                 if(qName.equals("configure")) {
                     supportEnd();
@@ -411,7 +411,7 @@ public class XMLToIOCDBFactory {
             if(dbDataIndex<0) {
                 iocxmlReader.message(
                     "fieldName " + qName + " not found",
-                    IOCMessageType.error);
+                    MessageType.error);
                 idleState.prevState = state;
                 state = State.idle;
                 return;
@@ -428,7 +428,7 @@ public class XMLToIOCDBFactory {
                     iocxmlReader.message(
                             "fieldName " + qName + " setSupportName failed "
                             + error,
-                            IOCMessageType.error);
+                            MessageType.error);
                 }
             }
             DBDField dbdField = dbData.getDBDField();
@@ -446,7 +446,7 @@ public class XMLToIOCDBFactory {
                     if(type!=Type.pvEnum) {
                         iocxmlReader.message(
                                 "fieldName " + qName + " illegal type ???",
-                                IOCMessageType.error);
+                                MessageType.error);
                         idleState.prevState = state;
                         state = State.idle;
                         return;
@@ -472,17 +472,17 @@ public class XMLToIOCDBFactory {
                         if(dbdStructure==null) {
                             iocxmlReader.message(
                                     "structureName " + structureName + " not defined",
-                                    IOCMessageType.error);
+                                    MessageType.error);
                             idleState.prevState = state;
                             state = State.idle;
                             return;
                         }
-                        DBStructure fieldStructure = (DBStructure)dbData;
-                        if(!fieldStructure.createFields(dbdStructure)) {
+                        DBStructure structure = (DBStructure)dbData;
+                        if(!structure.createFields(dbdStructure)) {
                             iocxmlReader.message(
                                 "structureName " + structureName
                                 + " not used because a structure was already defined",
-                                IOCMessageType.warning);
+                                MessageType.warning);
                         } 
                     }
                 }
@@ -501,7 +501,7 @@ public class XMLToIOCDBFactory {
                             iocxmlReader.message(
                                     "fieldName " + qName + " setSupportName failed "
                                     + error,
-                                    IOCMessageType.error);
+                                    MessageType.error);
                         }
                     }
                 }
@@ -534,14 +534,14 @@ public class XMLToIOCDBFactory {
                             convert.fromString(dbData, value);
                         } catch (NumberFormatException e) {
                             iocxmlReader.message(e.toString(),
-                                    IOCMessageType.warning);
+                                    MessageType.warning);
                         }
                     }
                     return;
                 } else {
                     iocxmlReader.message(
                             " Logic Error endField illegal type ???",
-                            IOCMessageType.error);
+                            MessageType.error);
                 }
                 return;
             } else if(dbType==DBType.dbMenu) {
@@ -555,21 +555,21 @@ public class XMLToIOCDBFactory {
                 }
                 iocxmlReader.message(
                     "menu value " + value + " is not a valid choice",
-                    IOCMessageType.error);
+                    MessageType.error);
                 return;
             } else if(dbType==DBType.dbLink) {
                 return;
             }
             iocxmlReader.message(
                 "Logic error in endField",
-                IOCMessageType.error);
+                MessageType.error);
         }
         
         private void startEnumElement(String qName, Map<String,String> attributes) {
             if(!qName.equals("choice")) {
                 iocxmlReader.message(
                     qName + " illegal. Only choice is valid.",
-                    IOCMessageType.error);
+                    MessageType.error);
                 idleState.prevState = state;
                 state = State.idle;
                 return;
@@ -603,7 +603,7 @@ public class XMLToIOCDBFactory {
             if(value!=null) {
                 iocxmlReader.message(
                     value + " is not a valid choice",
-                    IOCMessageType.warning);
+                    MessageType.warning);
             }
             return;
         }
@@ -618,7 +618,7 @@ public class XMLToIOCDBFactory {
             if(supportName==null) {
                 iocxmlReader.message(
                         "no support is defined",
-                        IOCMessageType.error);
+                        MessageType.error);
                 idleState.prevState = state;
                 state = State.idle;
                 return;
@@ -627,7 +627,7 @@ public class XMLToIOCDBFactory {
             if(support==null) {
                 iocxmlReader.message(
                         "support " + supportName + " not defined",
-                        IOCMessageType.error);
+                        MessageType.error);
                 idleState.prevState = state;
                 state = State.idle;
                 return;
@@ -636,7 +636,7 @@ public class XMLToIOCDBFactory {
             if(configurationStructureName==null) {
                 iocxmlReader.message(
                         "support " + supportName + " does not define a configurationStructureName",
-                        IOCMessageType.error);
+                        MessageType.error);
                 idleState.prevState = state;
                 state = State.idle;
                 return;
@@ -645,7 +645,7 @@ public class XMLToIOCDBFactory {
             if(structureName==null) {
                 iocxmlReader.message(
                         "structureName was not specified",
-                        IOCMessageType.error);
+                        MessageType.error);
                 idleState.prevState = state;
                 state = State.idle;
                 return;
@@ -653,7 +653,7 @@ public class XMLToIOCDBFactory {
             if(!structureName.equals(configurationStructureName)) {
                 iocxmlReader.message(
                         "structureName was not specified",
-                        IOCMessageType.error);
+                        MessageType.error);
                 idleState.prevState = state;
                 state = State.idle;
                 return; 
@@ -661,14 +661,14 @@ public class XMLToIOCDBFactory {
             String error = dbData.setSupportName(supportName);
             if(error!=null) {
                 iocxmlReader.message(error,
-                        IOCMessageType.error);
+                        MessageType.error);
                 return;
             }
             DBStructure dbStructure = dbData.getConfigurationStructure();
             if(dbStructure==null) {
                 iocxmlReader.message(
                         "support " + supportName + " does not use a configuration structure",
-                        IOCMessageType.error);
+                        MessageType.error);
                 idleState.prevState = state;
                 state = State.idle;
                 return;
@@ -731,7 +731,7 @@ public class XMLToIOCDBFactory {
                 String error = dbArray.setSupportName(supportName);
                 if(error!=null) {
                     iocxmlReader.message(error,
-                            IOCMessageType.error);
+                            MessageType.error);
                 }
                 
             }
@@ -748,7 +748,7 @@ public class XMLToIOCDBFactory {
                 } else {
                     iocxmlReader.message(
                             " Logic error ArrayHandler",
-                            IOCMessageType.error);
+                            MessageType.error);
                 }
                 break;
             case dbMenu:
@@ -774,7 +774,7 @@ public class XMLToIOCDBFactory {
             if(!qName.equals("value")) {
                 iocxmlReader.message(
                         "arrayStartElement Logic error: expected value",
-                        IOCMessageType.error);
+                        MessageType.error);
             }
             String offset = attributes.get("offset");
             if(offset!=null) arrayState.arrayOffset = Integer.parseInt(offset);
@@ -782,7 +782,7 @@ public class XMLToIOCDBFactory {
             DBArray dbArray = arrayState.dbArray;
             String fieldName = "value";
             String actualFieldName = "[" + String.format("%d",arrayOffset) + "]";
-            DBDAttribute dbdAttribute;
+            DBDFieldAttribute dbdFieldAttribute = DBDFieldFactory.createFieldAttribute(attributes);
             DBDField dbdField;
             switch(arrayState.arrayElementDBType) {
             case dbPvType:{
@@ -794,15 +794,13 @@ public class XMLToIOCDBFactory {
                     if(arrayElementType!=Type.pvEnum) {
                         iocxmlReader.message(
                                 "fieldName " + qName + " illegal type ???",
-                                IOCMessageType.error);
+                                MessageType.error);
                         idleState.prevState = state;
                         state = State.idle;
                         return;
                     }
-                    DBDAttributeValues dbdAttributeValues =
-                        new EnumDBDAttributeValues(actualFieldName);
-                    dbdAttribute = DBDAttributeFactory.create(dbd,dbdAttributeValues);
-                    dbdField = DBDFieldFactory.createField(dbdAttribute,null);
+                    dbdField = DBDFieldFactory.createField(actualFieldName, null,dbdFieldAttribute,
+                            arrayState.arrayElementType, arrayState.arrayElementDBType);
                     DBEnumArray dbEnumArray = arrayState.dbEnumArray;
                     DBEnum[] enumData = arrayState.enumData;
                     enumData[0] = (DBEnum)FieldDataFactory.createEnumData(
@@ -813,7 +811,7 @@ public class XMLToIOCDBFactory {
                         String error = enumData[0].setSupportName(supportName);
                         if(error!=null) {
                             iocxmlReader.message(error,
-                                    IOCMessageType.error);
+                                    MessageType.error);
                         }
                     }
                     enumState.prevState = state;
@@ -827,15 +825,12 @@ public class XMLToIOCDBFactory {
                     if(menuName==null) {
                         iocxmlReader.message(
                                 "menuName not given",
-                                IOCMessageType.warning);
+                                MessageType.warning);
                         idleState.prevState = state;
                         state = State.idle;
                     }
-                    DBDAttributeValues dbdAttributeValues =
-                        new MenuDBDAttributeValues(menuName,actualFieldName);
-                    dbdAttribute = DBDAttributeFactory.create(
-                        dbd,dbdAttributeValues);
-                    dbdField = DBDFieldFactory.createField(dbdAttribute,null);
+                    dbdField = DBDFieldFactory.createMenuField(actualFieldName,null,
+                            dbdFieldAttribute, dbd.getMenu(menuName));
                     DBMenuArray dbMenuArray = arrayState.dbMenuArray;
                     DBMenu[] menuData = arrayState.menuData;
                     menuData[0] = (DBMenu)FieldDataFactory.createData(dbArray,dbdField);
@@ -844,7 +839,7 @@ public class XMLToIOCDBFactory {
                     if(supportName!=null) {
                         String error = menuData[0].setSupportName(supportName);
                         if(error!=null) {
-                            iocxmlReader.message(error,IOCMessageType.error);
+                            iocxmlReader.message(error,MessageType.error);
                         }
                     }
                     fieldState.prevState = state;
@@ -858,7 +853,7 @@ public class XMLToIOCDBFactory {
                     if(structureName==null) {
                         iocxmlReader.message(
                                 "structureName not given",
-                                IOCMessageType.warning);
+                                MessageType.warning);
                         idleState.prevState = state;
                         state = State.idle;
                     }
@@ -866,16 +861,13 @@ public class XMLToIOCDBFactory {
                     if(structure==null) {
                         iocxmlReader.message(
                                 "structureName not found",
-                                IOCMessageType.warning);
+                                MessageType.warning);
                         idleState.prevState = state;
                         state = State.idle;
                     }
-                    DBDAttributeValues dbdAttributeValues =
-                        new StructureDBDAttributeValues(structureName,actualFieldName);
-                    dbdAttribute = DBDAttributeFactory.create(
-                        dbd,dbdAttributeValues);
-                    Property[] property = structure.getPropertys();
-                    dbdField = DBDFieldFactory.createField(dbdAttribute,property);
+                    dbdField = DBDFieldFactory.createStructureField(actualFieldName,
+                            structure.getPropertys(),
+                            dbdFieldAttribute,dbd.getStructure(structureName));
                     DBStructureArray dbStructureArray = arrayState.dbStructureArray;
                     DBStructure[] structureData = arrayState.structureData;
                     structureData[0] = (DBStructure)FieldDataFactory.createData(dbArray,dbdField);
@@ -886,7 +878,7 @@ public class XMLToIOCDBFactory {
                         if(error!=null) {
                             iocxmlReader.message(
                                     error,
-                                    IOCMessageType.error);
+                                    MessageType.error);
                         }
                     }
                     structureStack.push(structureState);
@@ -902,13 +894,11 @@ public class XMLToIOCDBFactory {
                     if(elementType==null) {
                         iocxmlReader.message(
                                 "elementType not given",
-                                IOCMessageType.warning);
+                                MessageType.warning);
                         state = State.idle;
                     }
-                    DBDAttributeValues dbdAttributeValues =
-                        new ArrayDBDAttributeValues(elementType,actualFieldName);
-                    dbdAttribute = DBDAttributeFactory.create(dbd,dbdAttributeValues);
-                    dbdField = DBDFieldFactory.createField(dbdAttribute,null);
+                    dbdField = DBDFieldFactory.createArrayField(actualFieldName, null,dbdFieldAttribute,
+                            DBDFieldFactory.getType(elementType),DBDFieldFactory.getDBType(elementType));
                     DBArrayArray dbArrayArray = arrayState.dbArrayArray;
                     DBArray[] arrayData = arrayState.arrayData;
                     arrayData[0] = (DBArray)FieldDataFactory.createData(dbArray,dbdField);
@@ -923,7 +913,7 @@ public class XMLToIOCDBFactory {
                         if(error!=null) {
                             iocxmlReader.message(
                                     error,
-                                    IOCMessageType.error);
+                                    MessageType.error);
                         }
                     }
                     arrayStack.push(arrayState);
@@ -936,10 +926,8 @@ public class XMLToIOCDBFactory {
                     return;
                 }
             case dbLink: {
-                       DBDAttributeValues dbdAttributeValues =
-                           new LinkDBDAttributeValues(actualFieldName);
-                       dbdAttribute = DBDAttributeFactory.create(dbd,dbdAttributeValues);
-                       dbdField = DBDFieldFactory.createField(dbdAttribute,null);
+                       dbdField = DBDFieldFactory.createField(actualFieldName, null,dbdFieldAttribute,
+                               arrayState.arrayElementType, arrayState.arrayElementDBType);
                        DBLinkArray dbLinkArray = arrayState.dbLinkArray;
                        DBLink[] linkData = arrayState.linkData;
                        linkData[0] = (DBLink)FieldDataFactory.createData(
@@ -951,7 +939,7 @@ public class XMLToIOCDBFactory {
                            if(error!=null) {
                                iocxmlReader.message(
                                        error,
-                                       IOCMessageType.error);
+                                       MessageType.error);
                            }
                        }
                        fieldState.prevState = state;
@@ -966,7 +954,7 @@ public class XMLToIOCDBFactory {
             if(!qName.equals("value")) {
                 iocxmlReader.message(
                         "arrayEndElement Logic error: expected value",
-                        IOCMessageType.error);
+                        MessageType.error);
             }
             int arrayOffset = arrayState.arrayOffset;
             DBArray dbArray = arrayState.dbArray;
@@ -984,7 +972,7 @@ public class XMLToIOCDBFactory {
                     iocxmlReader.message(
                         "illegal array element type "
                         + arrayElementType.toString(),
-                        IOCMessageType.warning);
+                        MessageType.warning);
                     return;
                 }
                 try {
@@ -994,12 +982,12 @@ public class XMLToIOCDBFactory {
                     if(values.length!=num) {
                         iocxmlReader.message(
                             "not all values were written",
-                            IOCMessageType.warning);
+                            MessageType.warning);
                     }
                 } catch (NumberFormatException e) {
                     iocxmlReader.message(
                         e.toString(),
-                        IOCMessageType.warning);
+                        MessageType.warning);
                 }
                 arrayState.arrayOffset = arrayOffset;
                 stringBuilder.setLength(0);
@@ -1014,112 +1002,6 @@ public class XMLToIOCDBFactory {
                 ++arrayState.arrayOffset;
             }
         }
-    }
-    
-    private static class EnumDBDAttributeValues implements DBDAttributeValues
-    {   
-        private static Map<String,String> attributeMap = new TreeMap<String,String>();
-        
-        private EnumDBDAttributeValues(String fieldName) {
-            attributeMap.put("type","enum");
-            attributeMap.put("name",fieldName);
-        }
-        public int getLength() {
-            return attributeMap.size();
-        }
-        public String getValue(String name) {
-            return attributeMap.get(name);
-        }
-        public Set<String> keySet() {
-            return attributeMap.keySet();
-        }
- 
-    }
-    private static class LinkDBDAttributeValues implements DBDAttributeValues
-    {   
-        private static Map<String,String> attributeMap = new TreeMap<String,String>();
-        
-        private LinkDBDAttributeValues(String fieldName) {
-            attributeMap.put("type","link");
-            attributeMap.put("name",fieldName);
-        }
-        public int getLength() {
-            return attributeMap.size();
-        }
-        public String getValue(String name) {
-            return attributeMap.get(name);
-        }
-        public Set<String> keySet() {
-            return attributeMap.keySet();
-        }
-    }
-    
-    private static class StructureDBDAttributeValues
-    implements DBDAttributeValues
-    {
-        private static Map<String,String> attributeMap = new TreeMap<String,String>();
-
-        public StructureDBDAttributeValues(String structureName,
-        String fieldName)
-        {
-            attributeMap.put("type","structure");
-            attributeMap.put("name",fieldName);
-            attributeMap.put("structureName",structureName);
-        }
-        public int getLength() {
-            return attributeMap.size();
-        }
-        public String getValue(String name) {
-            return attributeMap.get(name);
-        }
-        public Set<String> keySet() {
-            return attributeMap.keySet();
-        }
-
-    }
-    
-    private static class ArrayDBDAttributeValues
-    implements DBDAttributeValues
-    {
-        private static Map<String,String> attributeMap = new TreeMap<String,String>();
-        
-        public ArrayDBDAttributeValues(String elementType, String fieldName) {
-            attributeMap.put("type","array");
-            attributeMap.put("name",fieldName);
-            attributeMap.put("elementType",elementType);
-        }
-        public int getLength() {
-            return attributeMap.size();
-        }
-        public String getValue(String name) {
-            return attributeMap.get(name);
-        }
-        public Set<String> keySet() {
-            return attributeMap.keySet();
-        }
-
-    }
-    
-    private static class MenuDBDAttributeValues
-    implements DBDAttributeValues
-    {
-        private static Map<String,String> attributeMap = new TreeMap<String,String>();
-
-        public MenuDBDAttributeValues(String menuName,String fieldName) {
-            attributeMap.put("type","menu");
-            attributeMap.put("name",fieldName);
-            attributeMap.put("menuName",menuName);
-        }
-        public int getLength() {
-            return attributeMap.size();
-        }
-        public String getValue(String name) {
-            return attributeMap.get(name);
-        }
-        public Set<String> keySet() {
-            return attributeMap.keySet();
-        }
-
     }
         
 }

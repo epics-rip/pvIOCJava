@@ -50,7 +50,7 @@ public class IOCXMLReaderFactory {
         {
             boolean gotIt = isInUse.compareAndSet(false,true);
             if(!gotIt) {
-                listener.message("IOCReader is already active",IOCMessageType.fatalError);
+                listener.message("IOCReader is already active",MessageType.fatalError);
                 return;
             }
             if(listener==null) {
@@ -68,9 +68,9 @@ public class IOCXMLReaderFactory {
             }
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.util.IOCXMLReader#message(java.lang.String, org.epics.ioc.util.IOCMessageType)
+         * @see org.epics.ioc.util.IOCXMLReader#message(java.lang.String, org.epics.ioc.util.MessageType)
          */
-        public void message(String message, IOCMessageType messageType) {
+        public void message(String message, MessageType messageType) {
             currentHandler.message(message,messageType);
             
         }
@@ -141,7 +141,7 @@ public class IOCXMLReaderFactory {
             return result;
         }
         
-        private void message(String message,IOCMessageType messageType)
+        private void message(String message,MessageType messageType)
         {
             listener.message(String.format("%s %s%n%s",
                 messageType.name(),message,showLocation()),
@@ -158,21 +158,21 @@ public class IOCXMLReaderFactory {
          * @see org.xml.sax.ErrorHandler#error(org.xml.sax.SAXParseException)
          */
         public void error(SAXParseException e) throws SAXException {
-            message(e.toString(),IOCMessageType.error);
+            message(e.toString(),MessageType.error);
         }
 
         /* (non-Javadoc)
          * @see org.xml.sax.ErrorHandler#fatalError(org.xml.sax.SAXParseException)
          */
         public void fatalError(SAXParseException e) throws SAXException {
-            message(e.toString(),IOCMessageType.fatalError);
+            message(e.toString(),MessageType.fatalError);
         }
 
         /* (non-Javadoc)
          * @see org.xml.sax.ErrorHandler#warning(org.xml.sax.SAXParseException)
          */
         public void warning(SAXParseException e) throws SAXException {
-            message(e.toString(),IOCMessageType.warning);
+            message(e.toString(),MessageType.warning);
         }
 
         private enum CharState {
@@ -242,7 +242,7 @@ public class IOCXMLReaderFactory {
             if(parent==null) listener.endDocument();
             if(nWarning>0 || nError>0 || nFatal>0) {
                 message(String.format("%s endDocument: warning %d severe %d fatal %d",
-                    locator.getSystemId(),nWarning,nError,nFatal),IOCMessageType.info);
+                    locator.getSystemId(),nWarning,nError,nFatal),MessageType.info);
             }
             iocReader.setCurrentReader(parent);
             parent = null;
@@ -256,7 +256,7 @@ public class IOCXMLReaderFactory {
                     message(
                         "rootElementName is " + qName +
                         " but expected " + rootElementName,
-                        IOCMessageType.error);
+                        MessageType.error);
                 }
                 return;
             }
@@ -279,7 +279,7 @@ public class IOCXMLReaderFactory {
                     end = value.indexOf("}",prefix);
                     if(end<0 || (end-prefix)<3) {
                         message("attribute " + name + " has bad value",
-                                IOCMessageType.error);
+                                MessageType.error);
                     } else {
                         StringBuilder builder = new StringBuilder();
                         if(prefix>0) builder.append(value.substring(0,prefix));
@@ -287,7 +287,7 @@ public class IOCXMLReaderFactory {
                         temp = substituteMap.get(temp);
                         if(temp==null) {
                             message("attribute " + name + " no substitution found",
-                                    IOCMessageType.error);
+                                    MessageType.error);
                         } else {
                             builder.append(temp);
                         }
@@ -345,7 +345,7 @@ public class IOCXMLReaderFactory {
             if(removePath!=null) {
                 if(!pathList.remove(removePath)) {
                     message("path " + removePath + " not in pathList",
-                            IOCMessageType.warning);
+                            MessageType.warning);
                 }
             }
             String addPath = atts.getValue("addPath");
@@ -356,7 +356,7 @@ public class IOCXMLReaderFactory {
             if(href==null) {
                 if(removePath==null && addPath==null) {
                     message("no attribute was recognized",
-                            IOCMessageType.warning);
+                            MessageType.warning);
                 }
                 return;
             }
@@ -373,7 +373,7 @@ public class IOCXMLReaderFactory {
             if(remove!=null) {
                 if(substituteMap.remove(remove)==null) {
                     message(remove + " not found",
-                            IOCMessageType.warning);
+                            MessageType.warning);
                 }
             }
             String from = atts.getValue("from");
@@ -381,7 +381,7 @@ public class IOCXMLReaderFactory {
                 String to = atts.getValue("to");
                 if(to==null) {
                     message("from without corresonding to",
-                            IOCMessageType.warning);
+                            MessageType.warning);
                 } else {
                     substituteMap.put(from,to);
                 }
@@ -390,7 +390,7 @@ public class IOCXMLReaderFactory {
             if(fromTo==null) {
                 if(remove==null && from==null) {
                     message("no attribute was recognized",
-                            IOCMessageType.warning);
+                            MessageType.warning);
                 }
                 return;
             }
@@ -399,7 +399,7 @@ public class IOCXMLReaderFactory {
                 String[] parts = equalPattern.split(item);
                 if(parts.length!=2) {
                     message(item + " is not a valid substitution",
-                            IOCMessageType.warning);
+                            MessageType.warning);
                 } else {
                     substituteMap.put(parts[0],parts[1]);
                 }

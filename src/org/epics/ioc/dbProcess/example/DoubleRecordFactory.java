@@ -25,18 +25,19 @@ public class DoubleRecordFactory {
         linkArraySupport
     }
     
-    static private class DoubleRecordSupport extends AbstractSupport implements SupportProcessRequestor
+    static private class DoubleRecordSupport extends AbstractSupport
+    implements SupportProcessRequestor
     {
         private static String supportName = "doubleRecord";
         private SupportState supportState = SupportState.readyForInitialize;
         private DBRecord dbRecord;
-        private RecordProcessSupport recordProcessSupport = null;
         private DBLink link = null;
         private DBData value = null;
         private LinkSupport support = null;
-        private SupportProcessRequestor supportProcessRequestor = null;
         private LinkSupport linkArraySupport = null;
+        private SupportProcessRequestor supportProcessRequestor = null;
         private ProcessState processState = ProcessState.input;
+        private RequestResult requestResult;
         
         private DoubleRecordSupport(DBStructure dbStructure) {
             super(supportName,dbStructure);
@@ -45,7 +46,7 @@ public class DoubleRecordFactory {
         /* (non-Javadoc)
          * @see org.epics.ioc.dbProcess.SupportProcessRequestor#getProcessRequestorName()
          */
-        public String getSupportProcessRequestorName() {
+        public String getRequestorName() {
             return dbRecord.getRecordName();
         }
         /* (non-Javadoc)
@@ -53,7 +54,6 @@ public class DoubleRecordFactory {
          */
         public void initialize() {
             if(!super.checkSupportState(SupportState.readyForInitialize,supportName)) return;
-            recordProcessSupport = dbRecord.getRecordProcess().getRecordProcessSupport();
             IOCDB iocdb = dbRecord.getIOCDB();
             DBAccess dbAccess = iocdb.createAccess(dbRecord.getRecordName());
             DBData dbData;
@@ -61,14 +61,14 @@ public class DoubleRecordFactory {
             if(result!=AccessSetResult.thisRecord) {
                 dbRecord.message(
                         "field input does not exist",
-                        IOCMessageType.error);
+                        MessageType.error);
                 return;
             }
             dbData = dbAccess.getField();
             if(dbData.getDBDField().getDBType()!=DBType.dbLink) {
                 dbRecord.message(
                         "field input is not a link",
-                        IOCMessageType.error);
+                        MessageType.error);
                 return;
             }
             link = (DBLink)dbData;
@@ -76,14 +76,14 @@ public class DoubleRecordFactory {
             if(result!=AccessSetResult.thisRecord) {
                 dbRecord.message(
                         "field value does not exist",
-                        IOCMessageType.error);
+                        MessageType.error);
                 return;
             }
             dbData = dbAccess.getField();
             if(!dbData.getField().getType().isNumeric()) {
                 dbRecord.message(
                         "field value is not numeric",
-                        IOCMessageType.error);
+                        MessageType.error);
                 return;
             }
             value = dbData;
@@ -157,58 +157,37 @@ public class DoubleRecordFactory {
         /* (non-Javadoc)
          * @see org.epics.ioc.dbProcess.Support#process(org.epics.ioc.dbProcess.RecordProcessRequestor)
          */
-        public RequestResult process(SupportProcessRequestor supportProcessRequestor) {
-            if(supportState!=SupportState.ready) {
-                dbRecord.message(
-                        "process called but supportState is "
-                        + supportState.toString(),
-                        IOCMessageType.error);
-                return RequestResult.failure;
-            }
-            processState = ProcessState.input;
-            RequestResult requestResult = RequestResult.success;
-            if(support!=null) {
-                requestResult = support.process(this);
-                if(requestResult==RequestResult.active) {
-                    this.supportProcessRequestor = supportProcessRequestor;
-                    return RequestResult.active;
-                }
-                if(requestResult!=RequestResult.success) {
-                    return requestResult;
-                }
-            }           
-            if(linkArraySupport!=null) {
-                processState = ProcessState.linkArraySupport;
-                requestResult =  linkArraySupport.process(this);
-                if(requestResult==RequestResult.active) {
-                    this.supportProcessRequestor = supportProcessRequestor;
-                    return RequestResult.active;
-                }
-                return requestResult;
-            }
-            return requestResult;
-        }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.dbProcess.Support#processContinue()
-         */
-        public void processContinue() {
-            processState = ProcessState.linkArraySupport;
-        }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.dbProcess.RecordProcessRequestor#processComplete(org.epics.ioc.dbProcess.Support, org.epics.ioc.dbProcess.ProcessResult)
-         */
-        public void processComplete(RequestResult requestResult) {
-            if(processState==ProcessState.input) {
-                recordProcessSupport.processContinue(this);
+        public void process(SupportProcessRequestor supportProcessRequestor) {
+            if(!super.checkSupportState(SupportState.ready,"process")) {
+                supportProcessRequestor.supportProcessDone(RequestResult.failure);
                 return;
             }
-            supportProcessRequestor.processComplete(null);
+            if(supportProcessRequestor==null) {
+                throw new IllegalStateException("supportProcessRequestor is null");
+            }
+            this.supportProcessRequestor = supportProcessRequestor;
+            if(support!=null) {
+                processState = ProcessState.input;
+                support.process(this);
+            } else if(linkArraySupport!=null) {
+                processState = ProcessState.linkArraySupport;
+                linkArraySupport.process(this);
+            } else {
+                supportProcessRequestor.supportProcessDone(RequestResult.success);
+            }
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.dbProcess.RecordProcessRequestor#requestResult(org.epics.ioc.util.AlarmSeverity, java.lang.String, org.epics.ioc.util.TimeStamp)
+         * @see org.epics.ioc.dbProcess.SupportProcessRequestor#supportProcessDone(org.epics.ioc.util.RequestResult)
          */
-        public void processResult(AlarmSeverity alarmSeverity, String status, TimeStamp timeStamp) {
-            // nothing to do
+        public void supportProcessDone(RequestResult requestResult) {
+            if(processState==ProcessState.linkArraySupport
+            || requestResult!=RequestResult.success
+            || linkArraySupport==null) {
+                supportProcessRequestor.supportProcessDone(requestResult);
+                return;
+            }
+            processState = ProcessState.linkArraySupport;
+            linkArraySupport.process(this);
         }
     }
 }

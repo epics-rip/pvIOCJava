@@ -15,9 +15,7 @@ import org.epics.ioc.pvAccess.*;
  */
 public interface ChannelNotifyData {
     void clear();
-    void add(PVData pvData);
-    ChannelNotifyGetListener getChannelNotifyGetListener();
-    Channel getChannel();
-    ChannelFieldGroup getChannelFieldGroup();
+    void add(ChannelField channelField,PVData pvData);
     List<PVData> getPVDataList();
+    List<ChannelField> getChannelFieldList();
 }

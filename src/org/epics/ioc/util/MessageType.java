@@ -6,11 +6,11 @@
 package org.epics.ioc.util;
 
 /**
- * Types for IOC messages.
+ * Types for messages.
  * @author mrk
  *
  */
-public enum IOCMessageType {
+public enum MessageType {
     /**
      * Informational message.
      */

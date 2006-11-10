@@ -3,7 +3,7 @@
  * EPICS JavaIOC is distributed subject to a Software License Agreement found
  * in file LICENSE that is included with this distribution.
  */
-package org.epics.ioc.dbProcess;
+package org.epics.ioc.util;
 
 /**
  * The return value from a request.
@@ -23,8 +23,4 @@ public enum RequestResult {
      * The request failed.
      */
     failure,
-    /**
-     * The support is active.
-     */
-    active
 }

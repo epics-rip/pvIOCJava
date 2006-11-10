@@ -6,47 +6,155 @@
 package org.epics.ioc.channelAccess;
 
 import java.util.*;
+import java.util.concurrent.locks.*;
 
 import org.epics.ioc.pvAccess.*;
+import org.epics.ioc.pvAccess.example.DatabaseExample;
 
 /**
  * @author mrk
  *
  */
 public class ChannelNotifyDataFactory {
-     public ChannelNotifyData createChannelDataNotify(
-         Channel channel,ChannelFieldGroup channelFieldGroup,
-         ChannelNotifyGetListener channelNotifyGetListener)
+     public static ChannelNotifyData createData(
+         Channel channel,ChannelFieldGroup channelFieldGroup)
      {
          NotifyData notifyData = 
-             new NotifyData(channel,channelFieldGroup,channelNotifyGetListener);
+             new NotifyData(channel,channelFieldGroup);
          if(notifyData.createData()) {
              return notifyData;
          }
          return null;
      }
      
+     public static ChannelNotifyDataQueue createQueue(
+             int queueSize,
+             Channel channel,ChannelFieldGroup channelFieldGroup)
+     {
+          ChannelNotifyData[] queue = new ChannelNotifyData[queueSize];
+          for(int i = 0; i<queueSize; i++) {
+              queue[i] = createData(channel,channelFieldGroup);
+          }
+          return new NotifyDataQueue(queue);
+     }
+     
      private static Convert convert = ConvertFactory.getConvert();
      
+     private static class NotifyDataQueue implements ChannelNotifyDataQueue {
+         private ReentrantLock lock = new ReentrantLock();
+         private int queueSize;
+         private ArrayList<ChannelNotifyData> freeList;
+         private ArrayList<ChannelNotifyData> inUseList;
+         private ChannelNotifyData next = null;
+         private int numberMissed = 0;
+
+         private NotifyDataQueue(ChannelNotifyData[] queue) {
+             queueSize = queue.length;
+             freeList = new ArrayList<ChannelNotifyData>(queueSize);
+             for(ChannelNotifyData data : queue) freeList.add(data);
+             inUseList = new ArrayList<ChannelNotifyData>(queueSize);
+         }
+
+        /* (non-Javadoc)
+         * @see org.epics.ioc.channelAccess.ChannelNotifyDataQueue#capacity()
+         */
+        public int capacity() {
+            return queueSize;
+        }
+
+        /* (non-Javadoc)
+         * @see org.epics.ioc.channelAccess.ChannelNotifyDataQueue#getFree()
+         */
+        public ChannelNotifyData getFree() {
+            lock.lock();
+            try {
+                if(freeList.size()>0) {
+                    ChannelNotifyData data = freeList.remove(0);
+                    inUseList.add(data);
+                    return data;
+                }
+                numberMissed++;
+                if(inUseList.size()<=0) return null;
+                return inUseList.get(0);
+            } finally {
+                lock.unlock();
+            }
+        }
+
+        /* (non-Javadoc)
+         * @see org.epics.ioc.channelAccess.ChannelNotifyDataQueue#getNext()
+         */
+        public ChannelNotifyData getNext() {
+            lock.lock();
+            try {
+                if(next!=null) {
+                    throw new IllegalStateException("already have next");
+                }
+                if(inUseList.size()<=0) return null;
+                next = inUseList.remove(0);
+                return next;
+            } finally {
+                lock.unlock();
+            }
+        }
+
+        /* (non-Javadoc)
+         * @see org.epics.ioc.channelAccess.ChannelNotifyDataQueue#getNumberMissed()
+         */
+        public int getNumberMissed() {
+            return numberMissed;
+        }
+
+        /* (non-Javadoc)
+         * @see org.epics.ioc.channelAccess.ChannelNotifyDataQueue#getNumberFree()
+         */
+        public int getNumberFree() {
+            lock.lock();
+            try {
+                return freeList.size();
+            } finally {
+                lock.unlock();
+            }
+        }
+
+        /* (non-Javadoc)
+         * @see org.epics.ioc.channelAccess.ChannelNotifyDataQueue#releaseNext(org.epics.ioc.channelAccess.ChannelNotifyData)
+         */
+        public void releaseNext(ChannelNotifyData channelNotifyData) {
+            lock.lock();
+            try {
+                if(next!=channelNotifyData) {
+                    throw new IllegalStateException("channelNotifyData is not that returned by getNext");
+                }
+                numberMissed = 0;
+                freeList.add(next);
+                next = null;
+            } finally {
+                lock.unlock();
+            }
+        }
+        
+     }
+     
      private static class NotifyData implements ChannelNotifyData {
-         private Channel channel;
          private ChannelFieldGroup channelFieldGroup;
-         private ChannelNotifyGetListener channelNotifyGetListener;
          private boolean[] hasData;
          private PVData[] pvDataArray;
-         private ArrayList<PVData> pvDataList = new ArrayList<PVData>();
+         private ChannelField[] channelFieldArray;
+         private ArrayList<PVData> pvDataList;
+         private ArrayList<ChannelField> channelFieldList;
         
-         private NotifyData(Channel channel, ChannelFieldGroup channelFieldGroup, ChannelNotifyGetListener channelNotifyGetListener) {
+         private NotifyData(Channel channel, ChannelFieldGroup channelFieldGroup)
+         {
              super();
-             this.channel = channel;
              this.channelFieldGroup = channelFieldGroup;
-             this.channelNotifyGetListener = channelNotifyGetListener;
          }
          
          private boolean createData() {
              List<ChannelField> channelFieldList = channelFieldGroup.getList();
              int size = channelFieldList.size();
              pvDataArray = new PVData[size];
+             channelFieldArray = new ChannelField[size];
              for(int i=0; i<size; i++) {
                  ChannelField channelField = channelFieldList.get(i);
                  Field field = channelField.getField();
@@ -63,14 +171,82 @@ public class ChannelNotifyDataFactory {
                  case pvString:   pvData = new StringData(field); break;
                  case pvEnum:     pvData = new EnumData(field); break;
                  case pvArray:    pvData = createArrayData(field); break;
-                 case pvStructure: break;
+                 case pvStructure: pvData = createStructureData(field);
+                                 break;
                  }
                  if(pvData==null) return false;
                  pvDataArray[i] = pvData;
+                 channelFieldArray[i] = channelField;
              }
              hasData = new boolean[size];
              pvDataList = new ArrayList<PVData>(size);
+             this.channelFieldList = new ArrayList<ChannelField>(size);
              return true;
+         }
+         
+         /* (non-Javadoc)
+          * @see org.epics.ioc.channelAccess.ChannelNotifyData#add(org.epics.ioc.pvAccess.PVData)
+          */
+         public void add(ChannelField channelField, PVData fromData) {
+             Field fromField = fromData.getField();
+             for(int i=0; i< pvDataArray.length; i++) {
+                 PVData toData = pvDataArray[i];
+                 if(toData.getField()==fromField) {
+                     Type type = fromField.getType();
+                     if(type.isScalar()) {
+                         convert.copyScalar(fromData, toData);
+                     } else if(type==Type.pvArray) {
+                         PVArray from = (PVArray)fromData;
+                         PVArray to = (PVArray)toData;
+                         convert.copyArray(from,0, to, 0, from.getLength());
+                     } else if(type==Type.pvEnum) {
+                         PVEnum from = (PVEnum)fromData;
+                         PVEnum to = (PVEnum)toData;
+                         to.setChoices(from.getChoices());
+                         to.setIndex(from.getIndex());
+                     } else if(type==Type.pvStructure) {
+                         PVStructure from = (PVStructure)fromData;
+                         PVStructure to = (PVStructure)toData;
+                         convert.copyStructure(from, to);
+                     } else {
+                         throw new IllegalStateException("unsupported type");
+                     }
+                     hasData[i] = true;
+                     return;
+                 }
+             }
+         }
+
+        /* (non-Javadoc)
+          * @see org.epics.ioc.channelAccess.ChannelNotifyData#clear()
+          */
+         public void clear() {
+             for(int i=0; i< hasData.length; i++) hasData[i] = false;
+             pvDataList.clear();
+             channelFieldList.clear();
+         }
+         /* (non-Javadoc)
+          * @see org.epics.ioc.channelAccess.ChannelNotifyData#getPVDataList()
+          */
+         public List<PVData> getPVDataList() {
+             if(pvDataList.size()<=0) {
+                 for(int i=0; i< hasData.length; i++) {
+                     if(hasData[i]) pvDataList.add(pvDataArray[i]);
+                 }
+             }
+             return pvDataList;
+         } 
+         
+         /* (non-Javadoc)
+          * @see org.epics.ioc.channelAccess.ChannelNotifyData#getChannelFieldList()
+          */
+         public List<ChannelField> getChannelFieldList() {
+             if(channelFieldList.size()<=0) {
+                 for(int i=0; i< hasData.length; i++) {
+                     if(hasData[i]) channelFieldList.add(channelFieldArray[i]);
+                 }
+             }
+             return channelFieldList;
          }
          
          private PVData createArrayData(Field field) {
@@ -87,67 +263,57 @@ public class ChannelNotifyDataFactory {
              case pvString:   return new StringArray(array);
              case pvEnum:     return new EnumArray(array);
              case pvArray:    return new ArrayArray(array);
-             case pvStructure: return null;
+             case pvStructure: return new StructureArray(array);
              }
              return null;
          }
          
-         /* (non-Javadoc)
-          * @see org.epics.ioc.channelAccess.ChannelNotifyData#add(org.epics.ioc.pvAccess.PVData)
-          */
-         public void add(PVData pvData) {
-             Field field = pvData.getField();
-             for(int i=0; i< pvDataArray.length; i++) {
-                 PVData data = pvDataArray[i];
-                 
+         private PVData createStructureData(Field structureField) {
+             Structure structure = (Structure)structureField;
+             Field[] fields = structure.getFields();
+             int length = fields.length;
+             if(length<=0) return null;
+             PVData[] pvDataArray = new PVData[length];
+             for(int i=0; i<length; i++) {
+                 PVData pvData = null;
+                 Field field = fields[i];
+                 switch(field.getType()) {
+                 case pvUnknown:  return null;
+                 case pvBoolean:  pvData = new BooleanData(field); break;
+                 case pvByte:     pvData = new ByteData(field); break;
+                 case pvShort:    pvData = new ShortData(field); break;
+                 case pvInt:      pvData = new IntData(field); break;
+                 case pvLong:     pvData = new LongData(field); break;
+                 case pvFloat:    pvData = new FloatData(field); break;
+                 case pvDouble:   pvData = new DoubleData(field); break;
+                 case pvString:   pvData = new StringData(field); break;
+                 case pvEnum:     pvData = new EnumData(field); break;
+                 case pvArray:    pvData = createArrayData(field); break;
+                 case pvStructure: pvData = createStructureData(field); break;
+                 }
+                 if(pvData==null) {
+                     throw new IllegalStateException("unsupported type");
+                 }
+                 pvDataArray[i] = pvData;
              }
+             return new StructureData(structureField,pvDataArray);
          }
-
-         /* (non-Javadoc)
-          * @see org.epics.ioc.channelAccess.ChannelNotifyData#clear()
-          */
-         public void clear() {
-             for(int i=0; i< hasData.length; i++) hasData[i] = false;
-             pvDataList.clear();
-         }
-
-         /* (non-Javadoc)
-          * @see org.epics.ioc.channelAccess.ChannelNotifyData#getChannel()
-          */
-         public Channel getChannel() {
-             return channel;
-         }
-
-         /* (non-Javadoc)
-          * @see org.epics.ioc.channelAccess.ChannelNotifyData#getChannelFieldGroup()
-          */
-         public ChannelFieldGroup getChannelFieldGroup() {
-             return channelFieldGroup;
-         }
-
-         /* (non-Javadoc)
-          * @see org.epics.ioc.channelAccess.ChannelNotifyData#getChannelNotifyGetListener()
-          */
-         public ChannelNotifyGetListener getChannelNotifyGetListener() {
-             return channelNotifyGetListener;
-         }
-
-         /* (non-Javadoc)
-          * @see org.epics.ioc.channelAccess.ChannelNotifyData#getPVDataList()
-          */
-         public List<PVData> getPVDataList() {
-             return pvDataList;
-         } 
      }
      
      private static abstract class Data implements PVData {
-         String supportName = null;
-         PVStructure configureStructure = null;
+         private Field field;;
+         private String supportName = null;
+         private PVStructure configureStructure = null;
          
+         private Data(Field field) {
+             this.field = field;
+         }
          /* (non-Javadoc)
           * @see org.epics.ioc.pvAccess.PVData#getField()
           */
-         abstract public Field getField();
+         public Field getField() {
+             return field;
+         }
          /* (non-Javadoc)
           * @see org.epics.ioc.pvAccess.PVData#getSupportName()
           */
@@ -178,9 +344,12 @@ public class ChannelNotifyDataFactory {
      }
 
      private static class BooleanData extends Data implements PVBoolean {
-         boolean value;
-         Field field;
-         BooleanData(Field field) {this.field = field; value = false;}
+         private boolean value;
+
+         private BooleanData(Field field) {
+             super(field);
+             value = false;
+         }
          /* (non-Javadoc)
           * @see org.epics.ioc.pvAccess.PVBoolean#get()
           */
@@ -191,10 +360,6 @@ public class ChannelNotifyDataFactory {
          public void put(boolean value) { this.value = value;}
          /* (non-Javadoc)
           * @see org.epics.ioc.pvAccess.PVData#getField()
-          */
-         public Field getField() { return field;}
-         /* (non-Javadoc)
-          * @see java.lang.Object#toString()
           */
          public String toString() {
              return toString(0);
@@ -209,9 +374,12 @@ public class ChannelNotifyDataFactory {
      }
 
      private static class ByteData extends Data implements PVByte {
-         byte value;
-         Field field;
-         ByteData(Field field) {this.field = field; value = 0;}
+         private byte value;
+         
+         private ByteData(Field field) {
+             super(field);
+             value = 0;
+         }
          /* (non-Javadoc)
           * @see org.epics.ioc.pvAccess.PVByte#get()
           */
@@ -220,10 +388,6 @@ public class ChannelNotifyDataFactory {
           * @see org.epics.ioc.pvAccess.PVByte#put(byte)
           */
          public void put(byte value) { this.value = value;}
-         /* (non-Javadoc)
-          * @see org.epics.ioc.pvAccess.PVData#getField()
-          */
-         public Field getField() { return field;}
          /* (non-Javadoc)
           * @see java.lang.Object#toString()
           */
@@ -240,9 +404,12 @@ public class ChannelNotifyDataFactory {
      }
      
      private static class ShortData extends Data implements PVShort {
-         short value;
-         Field field;
-         ShortData(Field field) {this.field = field; value = 0;}
+         private short value;
+
+         private ShortData(Field field) {
+             super(field);
+             value = 0;
+         }
          /* (non-Javadoc)
           * @see org.epics.ioc.pvAccess.PVShort#get()
           */
@@ -251,10 +418,6 @@ public class ChannelNotifyDataFactory {
           * @see org.epics.ioc.pvAccess.PVShort#put(short)
           */
          public void put(short value) { this.value = value;}
-         /* (non-Javadoc)
-          * @see org.epics.ioc.pvAccess.PVData#getField()
-          */
-         public Field getField() { return field;}
          /* (non-Javadoc)
           * @see java.lang.Object#toString()
           */
@@ -271,9 +434,12 @@ public class ChannelNotifyDataFactory {
      }
      
      private static class IntData extends Data implements PVInt {
-         int value;
-         Field field;
-         IntData(Field field) {this.field = field; value = 0;}
+         private int value;
+         
+         private IntData(Field field) {
+             super(field);
+             value = 0;
+         }
          /* (non-Javadoc)
           * @see org.epics.ioc.pvAccess.PVInt#get()
           */
@@ -282,10 +448,6 @@ public class ChannelNotifyDataFactory {
           * @see org.epics.ioc.pvAccess.PVInt#put(int)
           */
          public void put(int value) { this.value = value;}
-         /* (non-Javadoc)
-          * @see org.epics.ioc.pvAccess.PVData#getField()
-          */
-         public Field getField() { return field;}
          /* (non-Javadoc)
           * @see java.lang.Object#toString()
           */
@@ -302,9 +464,12 @@ public class ChannelNotifyDataFactory {
      }
      
      private static class LongData extends Data implements PVLong {
-         long value;
-         Field field;
-         LongData(Field field) {this.field = field; value = 0;}
+         private long value;
+
+         private LongData(Field field) {
+             super(field);
+             value = 0;
+         }
          /* (non-Javadoc)
           * @see org.epics.ioc.pvAccess.PVLong#get()
           */
@@ -313,10 +478,6 @@ public class ChannelNotifyDataFactory {
           * @see org.epics.ioc.pvAccess.PVLong#put(long)
           */
          public void put(long value) { this.value = value;}
-         /* (non-Javadoc)
-          * @see org.epics.ioc.pvAccess.PVData#getField()
-          */
-         public Field getField() { return field;}
          /* (non-Javadoc)
           * @see java.lang.Object#toString()
           */
@@ -333,9 +494,12 @@ public class ChannelNotifyDataFactory {
      }
      
      private static class FloatData extends Data implements PVFloat {
-         float value;
-         Field field;
-         FloatData(Field field) {this.field = field; value = 0;}
+         private float value;
+
+         private FloatData(Field field) {
+             super(field);
+             value = 0;
+         }
          /* (non-Javadoc)
           * @see org.epics.ioc.pvAccess.PVFloat#get()
           */
@@ -344,10 +508,6 @@ public class ChannelNotifyDataFactory {
           * @see org.epics.ioc.pvAccess.PVFloat#put(float)
           */
          public void put(float value) { this.value = value;}
-         /* (non-Javadoc)
-          * @see org.epics.ioc.pvAccess.PVData#getField()
-          */
-         public Field getField() { return field;}
          /* (non-Javadoc)
           * @see java.lang.Object#toString()
           */
@@ -364,9 +524,12 @@ public class ChannelNotifyDataFactory {
      }
      
      private static class DoubleData extends Data implements PVDouble {
-         double value;
-         Field field;
-         DoubleData(Field field) {this.field = field; value = 0;}
+         private double value;
+
+         private DoubleData(Field field) {
+             super(field);
+             value = 0;
+         }
          /* (non-Javadoc)
           * @see org.epics.ioc.pvAccess.PVDouble#get()
           */
@@ -375,10 +538,6 @@ public class ChannelNotifyDataFactory {
           * @see org.epics.ioc.pvAccess.PVDouble#put(double)
           */
          public void put(double value) { this.value = value;}
-         /* (non-Javadoc)
-          * @see org.epics.ioc.pvAccess.PVData#getField()
-          */
-         public Field getField() { return field;}
          /* (non-Javadoc)
           * @see java.lang.Object#toString()
           */
@@ -395,9 +554,12 @@ public class ChannelNotifyDataFactory {
      }
      
      private static class StringData extends Data implements PVString {
-         String value;
-         Field field;
-         StringData(Field field) {this.field = field; value = null;}
+         private String value;
+
+         private StringData(Field field) {
+             super(field);
+             value = null;
+         }
          /* (non-Javadoc)
           * @see org.epics.ioc.pvAccess.PVString#get()
           */
@@ -406,10 +568,6 @@ public class ChannelNotifyDataFactory {
           * @see org.epics.ioc.pvAccess.PVString#put(java.lang.String)
           */
          public void put(String value) { this.value = value;}
-         /* (non-Javadoc)
-          * @see org.epics.ioc.pvAccess.PVData#getField()
-          */
-         public Field getField() { return field;}
          /* (non-Javadoc)
           * @see java.lang.Object#toString()
           */
@@ -428,12 +586,11 @@ public class ChannelNotifyDataFactory {
      private static class EnumData extends Data implements PVEnum {
          private int index;
          private String[] choice;
-         private Field field;
 
          private final static String[] EMPTY_STRING_ARRAY = new String[0];
 
-         EnumData(Field field) {
-             this.field = field;
+         private EnumData(Field field) {
+             super(field);
              index = 0;
              choice = EMPTY_STRING_ARRAY;
          }
@@ -466,13 +623,6 @@ public class ChannelNotifyDataFactory {
          public void setIndex(int index) {
              this.index = index;
          }
-
-         /* (non-Javadoc)
-          * @see org.epics.ioc.pvAccess.PVData#getField()
-          */
-         public Field getField() {
-             return field;
-         }
          /* (non-Javadoc)
           * @see java.lang.Object#toString()
           */
@@ -491,19 +641,13 @@ public class ChannelNotifyDataFactory {
      private static class BooleanArray extends Data implements PVBooleanArray {
          private int length = 0;
          private int capacity = 0;
-         boolean[] value;
-         Array array;
-
-         private final static boolean[] EMPTY_BOOLEAN_ARRAY = new boolean[0];
+         private boolean[] value;
      
-         BooleanArray(Array array) {
-             this.array = array;
-             value = EMPTY_BOOLEAN_ARRAY;
+         private BooleanArray(Array array) {
+             super(array);
+             value = new boolean[0];
          }
-         /* (non-Javadoc)
-          * @see org.epics.ioc.pvAccess.PVData#getField()
-          */
-         public Field getField() { return array;}
+         
          /* (non-Javadoc)
           * @see org.epics.ioc.pvAccess.PVArray#getLength()
           */
@@ -579,19 +723,12 @@ public class ChannelNotifyDataFactory {
      private static class ByteArray extends Data implements PVByteArray {
          private int length = 0;
          private int capacity = 0;
-         byte[] value;
-         Array array;
-
-         private final static byte[] EMPTY_BYTE_ARRAY = new byte[0];
+         private byte[] value;
      
-         ByteArray(Array array) {
-             this.array = array;
-             value = EMPTY_BYTE_ARRAY;
+         private ByteArray(Array array) {
+             super(array);
+             value = new byte[0];
          }
-         /* (non-Javadoc)
-          * @see org.epics.ioc.pvAccess.PVData#getField()
-          */
-         public Field getField() { return array;}
          /* (non-Javadoc)
           * @see org.epics.ioc.pvAccess.PVArray#getLength()
           */
@@ -667,19 +804,12 @@ public class ChannelNotifyDataFactory {
      private static class ShortArray extends Data implements PVShortArray {
          private int length = 0;
          private int capacity = 0;
-         short[] value;
-         Array array;
-
-         private final static short[] EMPTY_SHORT_ARRAY = new short[0];
+         private short[] value;
      
-         ShortArray(Array array) {
-             this.array = array;
-             value = EMPTY_SHORT_ARRAY;
+         private ShortArray(Array array) {
+             super(array);
+             value = new short[0];
          }
-         /* (non-Javadoc)
-          * @see org.epics.ioc.pvAccess.PVData#getField()
-          */
-         public Field getField() { return array;}
          /* (non-Javadoc)
           * @see org.epics.ioc.pvAccess.PVArray#getLength()
           */
@@ -755,19 +885,12 @@ public class ChannelNotifyDataFactory {
      private static class IntArray extends Data implements PVIntArray {
          private int length = 0;
          private int capacity = 0;
-         int[] value;
-         Array array;
-
-         private final static int[] EMPTY_INT_ARRAY = new int[0];
+         private int[] value;
      
-         IntArray(Array array) {
-             this.array = array;
-             value = EMPTY_INT_ARRAY;
+         private IntArray(Array array) {
+             super(array);
+             value = new int[0];
          }
-         /* (non-Javadoc)
-          * @see org.epics.ioc.pvAccess.PVData#getField()
-          */
-         public Field getField() { return array;}
          /* (non-Javadoc)
           * @see org.epics.ioc.pvAccess.PVArray#getLength()
           */
@@ -843,19 +966,12 @@ public class ChannelNotifyDataFactory {
      private static class LongArray extends Data implements PVLongArray {
          private int length = 0;
          private int capacity = 0;
-         long[] value;
-         Array array;
-
-         private final static long[] EMPTY_LONG_ARRAY = new long[0];
+         private long[] value;
      
-         LongArray(Array array) {
-             this.array = array;
-             value = EMPTY_LONG_ARRAY;
+         private LongArray(Array array) {
+             super(array);
+             value = new long[0];
          }
-         /* (non-Javadoc)
-          * @see org.epics.ioc.pvAccess.PVData#getField()
-          */
-         public Field getField() { return array;}
          /* (non-Javadoc)
           * @see org.epics.ioc.pvAccess.PVArray#getLength()
           */
@@ -931,19 +1047,12 @@ public class ChannelNotifyDataFactory {
      private static class FloatArray extends Data implements PVFloatArray {
          private int length = 0;
          private int capacity = 0;
-         float[] value;
-         Array array;
-
-         private final static float[] EMPTY_FLOAT_ARRAY = new float[0];
+         private float[] value;
      
-         FloatArray(Array array) {
-             this.array = array;
-             value = EMPTY_FLOAT_ARRAY;
+         private FloatArray(Array array) {
+             super(array);
+             value = new float[0];
          }
-         /* (non-Javadoc)
-          * @see org.epics.ioc.pvAccess.PVData#getField()
-          */
-         public Field getField() { return array;}
          /* (non-Javadoc)
           * @see org.epics.ioc.pvAccess.PVArray#getLength()
           */
@@ -1019,19 +1128,12 @@ public class ChannelNotifyDataFactory {
      private static class DoubleArray extends Data implements PVDoubleArray {
          private int length = 0;
          private int capacity = 0;
-         double[] value;
-         Array array;
-
-         private final static double[] EMPTY_DOUBLE_ARRAY = new double[0];
+         private double[] value;
      
-         DoubleArray(Array array) {
-             this.array = array;
-             value = EMPTY_DOUBLE_ARRAY;
+         private DoubleArray(Array array) {
+             super(array);
+             value = new double[0];
          }
-         /* (non-Javadoc)
-          * @see org.epics.ioc.pvAccess.PVData#getField()
-          */
-         public Field getField() { return array;}
          /* (non-Javadoc)
           * @see org.epics.ioc.pvAccess.PVArray#getLength()
           */
@@ -1111,19 +1213,12 @@ public class ChannelNotifyDataFactory {
      private static class StringArray extends Data implements PVStringArray {
          private int length = 0;
          private int capacity = 0;
-         String[] value;
-         Array array;
-
-         private final static String[] EMPTY_STRING_ARRAY = new String[0];
+         private String[] value;
      
-         StringArray(Array array) {
-             this.array = array;
-             value = EMPTY_STRING_ARRAY;
+         private StringArray(Array array) {
+             super(array);
+             value = new String[0];
          }
-         /* (non-Javadoc)
-          * @see org.epics.ioc.pvAccess.PVData#getField()
-          */
-         public Field getField() { return array;}
          /* (non-Javadoc)
           * @see org.epics.ioc.pvAccess.PVArray#getLength()
           */
@@ -1199,19 +1294,13 @@ public class ChannelNotifyDataFactory {
      private static class EnumArray extends Data implements PVEnumArray {
          private int length = 0;
          private int capacity = 0;
-         PVEnum[] value;
-         Array array;
-
-         private final static PVEnum[] EMPTY_PVENUM_ARRAY = new PVEnum[0];
+         private PVEnum[] value;
      
-         EnumArray(Array array) {
-             this.array = array;
-             value = EMPTY_PVENUM_ARRAY;
+         private EnumArray(Array array) {
+             super(array);
+             value = new PVEnum[0];
          }
-         /* (non-Javadoc)
-          * @see org.epics.ioc.pvAccess.PVData#getField()
-          */
-         public Field getField() { return array;}
+         
          /* (non-Javadoc)
           * @see org.epics.ioc.pvAccess.PVArray#getLength()
           */
@@ -1287,19 +1376,12 @@ public class ChannelNotifyDataFactory {
      private static class StructureArray extends Data implements PVStructureArray {
          private int length = 0;
          private int capacity = 0;
-         PVStructure[] value;
-         Array array;
-
-         private final static PVStructure[] EMPTY_PVS_ARRAY = new PVStructure[0];
+         private PVStructure[] value;
      
-         StructureArray(Array array) {
-             this.array = array;
-             value = EMPTY_PVS_ARRAY;
+         private StructureArray(Array array) {
+             super(array);
+             value = new PVStructure[0];
          }
-         /* (non-Javadoc)
-          * @see org.epics.ioc.pvAccess.PVData#getField()
-          */
-         public Field getField() { return array;}
          /* (non-Javadoc)
           * @see org.epics.ioc.pvAccess.PVArray#getLength()
           */
@@ -1375,19 +1457,12 @@ public class ChannelNotifyDataFactory {
      private static class ArrayArray extends Data implements PVArrayArray {
          private int length = 0;
          private int capacity = 0;
-         PVArray[] value;
-         Array array;
-
-         private final static PVArray[] EMPTY_PVA_ARRAY = new PVArray[0];
+         private PVArray[] value;
      
          ArrayArray(Array array) {
-             this.array = array;
-             value = EMPTY_PVA_ARRAY;
+             super(array);
+             value = new PVArray[0];
          }
-         /* (non-Javadoc)
-          * @see org.epics.ioc.pvAccess.PVData#getField()
-          */
-         public Field getField() { return array;}
          /* (non-Javadoc)
           * @see org.epics.ioc.pvAccess.PVArray#getLength()
           */
@@ -1459,4 +1534,34 @@ public class ChannelNotifyDataFactory {
                  + super.toString(indentLevel);
          }
      }
+     
+     private static class StructureData extends Data implements PVStructure {
+         
+         private PVData[] fieldPVDatas;
+         
+         private StructureData(Field field,PVData[] pvDatas) {
+             super(field);
+             fieldPVDatas = pvDatas;
+         }
+         /* (non-Javadoc)
+          * @see org.epics.ioc.pvAccess.PVStructure#getFieldPVDatas()
+          */
+         public PVData[] getFieldPVDatas() {
+             return fieldPVDatas;
+         }
+         /* (non-Javadoc)
+          * @see java.lang.Object#toString()
+          */
+         public String toString() {
+             return toString(0);
+         }
+         /* (non-Javadoc)
+          * @see org.epics.ioc.pvAccess.PVData#toString(int)
+          */
+         public String toString(int indentLevel) {
+             return convert.getString(this,indentLevel)
+                 + super.toString(indentLevel);
+         }
+          
+      }
 }

@@ -43,5 +43,5 @@ public interface IOCXMLListener {
      * IOCXMLReader adds the location in the xml files when the message was generated.
      * @param messageType The type of message.
      */
-    void message(String message,IOCMessageType messageType);
+    void message(String message,MessageType messageType);
 }

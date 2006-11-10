@@ -9,8 +9,8 @@ import junit.framework.TestCase;
 
 import org.epics.ioc.dbDefinition.*;
 import org.epics.ioc.dbAccess.*;
-import org.epics.ioc.util.IOCMessageListener;
-import org.epics.ioc.util.IOCMessageType;
+import org.epics.ioc.util.MessageListener;
+import org.epics.ioc.util.MessageType;
 
 import java.util.*;
 /**
@@ -33,15 +33,15 @@ public class XMLToDataBaseTest extends TestCase {
         test.doit();
     }
     
-    private static class Test implements IOCMessageListener {
-        private IOCMessageType maxMessageType = IOCMessageType.info;
+    private static class Test implements MessageListener {
+        private MessageType maxMessageType = MessageType.info;
         private void doit () {
     
             Set<String> keys;
             String[] list = null;
             DBD addDBD = XMLToDBDFactory.create( "add",
                 "src/org/epics/ioc/dbAccess/example/xmlToDataBaseDBD.xml",this);
-            if(maxMessageType!=IOCMessageType.info) {
+            if(maxMessageType!=MessageType.info) {
                 System.out.printf("XMLToDBDFactory.convert reported errors");
                 return;
             }
@@ -65,10 +65,10 @@ public class XMLToDataBaseTest extends TestCase {
             list = addDBD.supportList(".*");
             System.out.print("addDBD supports: "); printList(list);
             addDBD = null;
-            maxMessageType = IOCMessageType.info;
+            maxMessageType = MessageType.info;
             IOCDB addIOCDB = XMLToIOCDBFactory.convert("add",
                 "src/org/epics/ioc/dbAccess/example/xmlToDataBaseDB.xml",this);
-            if(maxMessageType!=IOCMessageType.info) {
+            if(maxMessageType!=MessageType.info) {
                 System.out.printf("XMLToIOCDBFactory.convert reported errors");
                 return;
             }
@@ -102,9 +102,9 @@ public class XMLToDataBaseTest extends TestCase {
             System.out.println();
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.util.IOCMessageListener#message(java.lang.String, org.epics.ioc.util.IOCMessageType)
+         * @see org.epics.ioc.util.MessageListener#message(java.lang.String, org.epics.ioc.util.MessageType)
          */
-        public void message(String message, IOCMessageType messageType) {
+        public void message(String message, MessageType messageType) {
             System.out.println(message);
             if(messageType.ordinal()>maxMessageType.ordinal()) {
                 maxMessageType = messageType;

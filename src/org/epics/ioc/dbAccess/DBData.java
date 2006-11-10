@@ -5,7 +5,7 @@
  */
 package org.epics.ioc.dbAccess;
 import org.epics.ioc.pvAccess.*;
-import org.epics.ioc.util.IOCMessageType;
+import org.epics.ioc.util.MessageType;
 import org.epics.ioc.dbDefinition.*;
 import org.epics.ioc.dbProcess.*;
 
@@ -80,5 +80,5 @@ public interface DBData extends PVData {
      * @param message The message.
      * @param messageType The message type.
      */
-    void message(String message, IOCMessageType messageType);
+    void message(String message, MessageType messageType);
 }

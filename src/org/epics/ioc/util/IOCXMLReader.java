@@ -30,5 +30,5 @@ public interface IOCXMLReader {
      * @param message The message.
      * @param messageType The type of message.
      */
-    void message(String message,IOCMessageType messageType);
+    void message(String message,MessageType messageType);
 }

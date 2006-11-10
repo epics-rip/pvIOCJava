@@ -37,12 +37,12 @@
         type = "structure" structureName = "linearConvertInput" />
 </structure>
 
-<recordType name = "aiLinearRecord" supportName = "aiLinear">
-    <property name = "value" associatedField = "aiLinear.value" />
-    <property name = "rawValue" associatedField = "aiLinear.rawValue" />
-    <property name = "status" associatedField = "aiLinear.status" />
-    <property name = "severity" associatedField = "aiLinear.severity" />
-    <field name = "aiLinear" type = "structure" structureName = "aiLinear" >
+<recordType name = "aiRecord" supportName = "aiLinear">
+    <property name = "value" associatedField = "input.value" />
+    <property name = "rawValue" associatedField = "input.rawValue" />
+    <property name = "status" associatedField = "input.status" />
+    <property name = "severity" associatedField = "input.severity" />
+    <field name = "input" type = "structure" structureName = "aiLinear" >
         <property name = "timeStamp" associatedField = "timeStamp" />
     </field>
     <field name = "priority" type = "menu" menuName = "menuPriority" />
@@ -50,11 +50,12 @@
     <field name = "scan" type = "structure" structureName = "scan"/>
 </recordType>
 
-<recordType name = "aiRecord" supportName = "ai">
-    <property name = "value" associatedField = "aiInput.value" />
-    <property name = "status" associatedField = "aiInput.status" />
-    <property name = "severity" associatedField = "aiInput.severity" />
-    <field name = "aiInput" type = "structure" >
+<recordType name = "inputRecord" supportName = "aiLinear">
+    <property name = "value" associatedField = "input.value" />
+    <property name = "rawValue" associatedField = "input.rawValue" />
+    <property name = "status" associatedField = "input.status" />
+    <property name = "severity" associatedField = "input.severity" />
+    <field name = "input" type = "structure"  >
         <property name = "timeStamp" associatedField = "timeStamp" />
     </field>
     <field name = "priority" type = "menu" menuName = "menuPriority" />

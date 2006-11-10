@@ -23,17 +23,17 @@ public class SupportCreationFactory {
      * @param iocdb the iocdb associated with the record processing.
      * @return the SupportCreation.
      */
-    static public SupportCreation createSupportCreation(IOCDB iocdb,IOCMessageListener iocMessageListener) {
+    static public SupportCreation createSupportCreation(IOCDB iocdb,MessageListener iocMessageListener) {
         SupportCreationInstance processDB = new SupportCreationInstance(iocdb,iocMessageListener);
         return processDB;
     }
     
     static private class SupportCreationInstance implements SupportCreation{
         private IOCDB iocdb;
-        private IOCMessageListener iocMessageListener;
+        private MessageListener iocMessageListener;
         private Collection<DBRecord> records;
         
-        private SupportCreationInstance(IOCDB iocdbin,IOCMessageListener iocMessageListener) {
+        private SupportCreationInstance(IOCDB iocdbin,MessageListener iocMessageListener) {
             iocdb = iocdbin;
             this.iocMessageListener = iocMessageListener;
             records = iocdb.getRecordMap().values();
@@ -128,7 +128,7 @@ public class SupportCreationFactory {
             if(supportName==null) {
                 iocMessageListener.message(
                     dbRecord.getRecordName() + " no support found",
-                    IOCMessageType.fatalError);
+                    MessageType.fatalError);
                 return false;
             }
             boolean result = createSupport(dbRecord);
@@ -215,7 +215,7 @@ public class SupportCreationFactory {
             name = dbData.getRecord().getRecordName() + name;
             iocMessageListener.message(
                     name + " " + message,
-                    IOCMessageType.error);
+                    MessageType.error);
         }
         
         private boolean createSupport(DBData dbData) {

@@ -12,13 +12,17 @@ import org.epics.ioc.pvAccess.PVData;
  * @author mrk
  *
  */
-public interface ChannelPutRequestor extends ChannelProcessRequestor {
+public interface ChannelPutRequestor extends ChannelRequestor {
     /**
      * Provide the next set of data to put to the channel.
-     * The listener is expected to call the put method.
+     * The requestor is expected to call the put method.
      * @param channel The channel.
      * @param field The field.
      * @param data The interface for putting data.
+     * @return (false,true) if the requestor (has,has not) obtained all the data.
+     * A value of true means that the requestor wants to be called again for this data.
+     * This normally means that an array is being transfered and the requestor is
+     * not able to handle the array as a single chunk of data.
      */
-    void nextData(Channel channel,ChannelField field,PVData data);
+    boolean nextPutData(Channel channel,ChannelField field,PVData data);
 }

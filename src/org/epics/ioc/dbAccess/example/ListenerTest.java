@@ -10,8 +10,8 @@ import junit.framework.TestCase;
 import org.epics.ioc.dbDefinition.*;
 import org.epics.ioc.dbAccess.*;
 import org.epics.ioc.pvAccess.*;
-import org.epics.ioc.util.IOCMessageListener;
-import org.epics.ioc.util.IOCMessageType;
+import org.epics.ioc.util.MessageListener;
+import org.epics.ioc.util.MessageType;
 
 /**
  * JUnit test for DBListener.
@@ -26,7 +26,7 @@ public class ListenerTest extends TestCase {
     public static void testListener() {
         DBD dbd = DBDFactory.getMasterDBD(); 
         IOCDB iocdb = IOCDBFactory.create("testIOCDatabase");
-        IOCMessageListener iocMessageListener = new Listener();
+        MessageListener iocMessageListener = new Listener();
         XMLToDBDFactory.convert(dbd,
                  "src/org/epics/ioc/dbAccess/example/listenerDBD.xml",iocMessageListener);
         
@@ -54,13 +54,13 @@ public class ListenerTest extends TestCase {
 //            DBRecord record = recordMap.get(key);
 //            System.out.print(record.toString());
 //        }
-        System.out.printf("%ntest put and listen exampleAiLinear%n");
-        new TestListener(iocdb,"exampleAiLinear","value");
-        new TestListener(iocdb,"exampleAiLinear","aiLinear");
-        new TestListener(iocdb,"exampleAiLinear",null);
-        testPut(iocdb,"exampleAiLinear","rawValue",2.0);
-        testPut(iocdb,"exampleAiLinear","value",5.0);
-        testPut(iocdb,"exampleAiLinear","timeStamp",100.0);
+        System.out.printf("%ntest put and listen exampleAi%n");
+        new TestListener(iocdb,"exampleAi","value");
+        new TestListener(iocdb,"exampleAi","input");
+        new TestListener(iocdb,"exampleAi",null);
+        testPut(iocdb,"exampleAi","rawValue",2.0);
+        testPut(iocdb,"exampleAi","value",5.0);
+        testPut(iocdb,"exampleAi","timeStamp",100.0);
         System.out.printf("%ntest put and listen examplePowerSupply%n");
         new TestListener(iocdb,"examplePowerSupply","power");
         new TestListener(iocdb,"examplePowerSupply","current");
@@ -220,11 +220,11 @@ public class ListenerTest extends TestCase {
         dbRecord.endSynchronous();
     }
     
-    private static class Listener implements IOCMessageListener {
+    private static class Listener implements MessageListener {
         /* (non-Javadoc)
-         * @see org.epics.ioc.util.IOCMessageListener#message(java.lang.String, org.epics.ioc.util.IOCMessageType)
+         * @see org.epics.ioc.util.MessageListener#message(java.lang.String, org.epics.ioc.util.MessageType)
          */
-        public void message(String message, IOCMessageType messageType) {
+        public void message(String message, MessageType messageType) {
             System.out.println(message);
             
         }

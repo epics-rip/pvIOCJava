@@ -5,7 +5,6 @@
  */
 package org.epics.ioc.channelAccess;
 
-import org.epics.ioc.dbProcess.*;
 
 /**
  * Channel Process Request.
@@ -14,10 +13,12 @@ import org.epics.ioc.dbProcess.*;
  */
 public interface ChannelProcess {
     /**
+     * Refuse further requests.
+     */
+    void destroy();
+    /**
      * Issue a process request.
-     * @param channelProcessRequestor The channelProcessRequestor.
-     * @return The result of the request.
      * 
      */
-    RequestResult process();
+    void process();
 }

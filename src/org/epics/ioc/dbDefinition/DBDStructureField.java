@@ -20,8 +20,8 @@ public interface DBDStructureField extends DBDField,Structure {
     DBDField[] getDBDFields();
     /**
      * get the DBDStructure definition for this field.
-     * If the field definition did not specify a file name thid will return null.
-     * @return the DBDStructure or null if a struicture was not defined.
+     * If the field definition did not specify a file name this will return null.
+     * @return the DBDStructure or null if a structure was not defined.
      */
     DBDStructure getDBDStructure();
 }

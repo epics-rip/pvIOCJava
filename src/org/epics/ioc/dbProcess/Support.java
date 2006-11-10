@@ -6,18 +6,19 @@
 package org.epics.ioc.dbProcess;
 
 import org.epics.ioc.dbAccess.*;
+import org.epics.ioc.util.*;
 
 /**
  * interface that must be implemented by record support.
  * @author mrk
  *
  */
-public interface Support extends ProcessContinueListener{
+public interface Support extends Requestor{
     /**
      * Get the support name.
      * @return The support name.
      */
-    String getName();
+    String getRequestorName();
     /**
      * Get the support state.
      * @return The state.
@@ -60,10 +61,9 @@ public interface Support extends ProcessContinueListener{
     void uninitialize();
     /**
      * Perform support processing.
-     * @param supportProcessRequestor The listener to call when returning active.
-     * @return The result of the process request.
+     * @param supportProcessRequestor The process requestor.
      */
-    RequestResult process(SupportProcessRequestor supportProcessRequestor);
+    void process(SupportProcessRequestor supportProcessRequestor);
     /**
      * Update state. This is only called while support is active.
      */

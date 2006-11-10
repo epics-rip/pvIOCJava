@@ -5,7 +5,6 @@
  */
 package org.epics.ioc.channelAccess;
 
-import org.epics.ioc.dbProcess.RequestResult;
 import org.epics.ioc.util.*;
 
 
@@ -17,11 +16,14 @@ import org.epics.ioc.util.*;
  */
 public interface ChannelPutGet {
     /**
+     * Refuse further requests.
+     */
+    void destroy();
+    /**
      * Issue a put/get request.
      * @param putFieldGroup The put field group.
      * @param getFieldGroup The get field group.
-     * @return The result of the request.
      */
-    RequestResult putGet(
+    void putGet(
         ChannelFieldGroup putFieldGroup,ChannelFieldGroup getFieldGroup);
 }

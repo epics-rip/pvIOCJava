@@ -5,7 +5,6 @@
  */
 package org.epics.ioc.channelAccess;
 
-import org.epics.ioc.dbProcess.*;
 import org.epics.ioc.util.*;
 
 
@@ -16,9 +15,12 @@ import org.epics.ioc.util.*;
  */
 public interface ChannelPut {
     /**
+     * Refuse further requests.
+     */
+    void destroy();
+    /**
      * Put data to a channel.
      * @param fieldGroup The field group for the data.
-     * @return The result of the request.
      */
-    RequestResult put(ChannelFieldGroup fieldGroup);
+    void put(ChannelFieldGroup fieldGroup);
 }

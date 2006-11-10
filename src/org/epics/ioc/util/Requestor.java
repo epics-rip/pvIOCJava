@@ -6,17 +6,14 @@
 package org.epics.ioc.util;
 
 /**
- * 
- * Listener to receive IOC messages.
+ * Base interface for requestors.
  * @author mrk
  *
  */
-public interface IOCMessageListener {
+public interface Requestor {
     /**
-     * Message.
-     * This is called to report a message.
-     * @param message The message.
-     * @param messageType The type of message.
+     * Get the name of the requestor.
+     * @return The name.
      */
-    void message(String message,IOCMessageType messageType);
+    String getRequestorName();
 }

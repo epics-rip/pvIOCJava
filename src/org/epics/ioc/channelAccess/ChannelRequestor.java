@@ -5,29 +5,26 @@
  */
 package org.epics.ioc.channelAccess;
 
-import org.epics.ioc.dbProcess.RequestResult;
+import org.epics.ioc.util.*;
 
 /**
  * Base interface for channel requests.
  * @author mrk
  *
  */
-public interface ChannelRequestor {
-    /**
-     * Get the name of the ChannelRequestor;
-     * @return The name.
-     */
-    String getChannelRequestorName();
+public interface ChannelRequestor extends Requestor{
     /**
      * A message for requester.
      * @param channel The channel.
      * @param message The message.
+     * @param messageType The type of message.
      */
-    void message(Channel channel,String message);
+    void message(Channel channel,String message,MessageType messageType);
     /**
      * The request is done. This is always called with no locks held.
      * This is only called if the request is asynchronous,
-     * i.e. if the original request returned ChannelRequestReturn.active.
+     * i.e. if the original request returned ChannelRequestReturn.active
+     * or was a subscription request.
      * @param channel The channel.
      * @param requestResult The result of the request.
      * This is always success or failure.

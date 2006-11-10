@@ -9,14 +9,10 @@ package org.epics.ioc.dbProcess;
  * @author mrk
  *
  */
-public interface ProcessContinueListener {
+public interface ProcessContinueRequestor {
     /**
-     * Get the name.
-     * @return The name.
-     */
-    String getName();
-    /**
-     * Continue processing. This is called by RecordProcess.processContinue
+     * Continue processing.
+     * This is called by RecordProcess.processContinue with the record locked.
      */
     void processContinue();
 }

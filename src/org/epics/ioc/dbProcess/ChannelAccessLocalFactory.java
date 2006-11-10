@@ -65,33 +65,27 @@ public class ChannelAccessLocalFactory  {
                 lock.unlock();  
             }
         }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.channelAccess.ChannelAccess#createLinkChannel(org.epics.ioc.dbAccess.DBLink, java.lang.String, org.epics.ioc.channelAccess.ChannelStateListener)
-         */
-        public Channel createLinkChannel(DBLink dbLink, String name, ChannelStateListener listener) {
-            lock.lock();
-            try {
-                DBRecord dbRecord = iocdb.findRecord(name);
-                if(dbRecord==null) return null;
-                return new ChannelImpl(dbLink,dbRecord,listener);
-            } finally {
-                lock.unlock();  
-            }
-        }
     }
-        
+    
     private static class ChannelImpl implements Channel {
         private boolean isDestroyed = false;
         private ReentrantLock lock = new ReentrantLock();
         private ChannelStateListener stateListener = null;
-        private DBLink dbLink = null;
         private DBAccess dbAccess;
         private DBData currentData = null;
         private String otherChannel = null;
         private String otherField = null;
         private LinkedList<ChannelFieldGroup> fieldGroupList = 
             new LinkedList<ChannelFieldGroup>();
-        private LinkedList<ChannelSubscribe> subscribeList = 
+        private LinkedList<ChannelProcess> channelProcessList =
+            new LinkedList<ChannelProcess>();
+        private LinkedList<ChannelGet> channelGetList =
+            new LinkedList<ChannelGet>();
+        private LinkedList<ChannelPut> channelPutList =
+            new LinkedList<ChannelPut>();
+        private LinkedList<ChannelPutGet> channelPutGetList =
+            new LinkedList<ChannelPutGet>();
+        private LinkedList<ChannelSubscribe> channelSubscribeList = 
             new LinkedList<ChannelSubscribe>();
         
         private ChannelImpl(DBRecord record,ChannelStateListener listener) {
@@ -101,20 +95,7 @@ public class ChannelAccessLocalFactory  {
                 throw new IllegalStateException("ChannelLink createAccess failed. Why?");
             }
         }
-        private ChannelImpl(DBLink dbLink,DBRecord record,ChannelStateListener listener) {
-            this.dbLink = dbLink;
-            stateListener = listener;
-            dbAccess = record.getIOCDB().createAccess(record.getRecordName());
-            if(dbAccess==null) {
-                throw new IllegalStateException("ChannelLink createAccess failed. Why?");
-            }
-        }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.channelAccess.Channel#getDBLink()
-         */
-        public DBLink getDBLink() {
-            return dbLink;
-        }
+        
         /* (non-Javadoc)
          * @see org.epics.ioc.channelAccess.Channel#destroy()
          */
@@ -122,6 +103,36 @@ public class ChannelAccessLocalFactory  {
             lock.lock();
             try {
                 if(isDestroyed) return;
+                Iterator<ChannelProcess> processIter = channelProcessList.iterator();
+                while(processIter.hasNext()) {
+                    ChannelProcess channelProcess = processIter.next();
+                    channelProcess.destroy();
+                    processIter.remove();
+                }
+                Iterator<ChannelGet> getIter = channelGetList.iterator();
+                while(getIter.hasNext()) {
+                    ChannelGet channelGet = getIter.next();
+                    channelGet.destroy();
+                    getIter.remove();
+                }
+                Iterator<ChannelPut> putIter = channelPutList.iterator();
+                while(putIter.hasNext()) {
+                    ChannelPut channelPut = putIter.next();
+                    channelPut.destroy();
+                    putIter.remove();
+                }
+                Iterator<ChannelPutGet> putGetIter = channelPutGetList.iterator();
+                while(putGetIter.hasNext()) {
+                    ChannelPutGet channelPutGet = putGetIter.next();
+                    channelPutGet.destroy();
+                    putGetIter.remove();
+                }
+                Iterator<ChannelSubscribe> subscribeIter = channelSubscribeList.iterator();
+                while(subscribeIter.hasNext()) {
+                    ChannelSubscribe channelSubscribe = subscribeIter.next();
+                    channelSubscribe.destroy();
+                    subscribeIter.remove();
+                }
                 isDestroyed = true;
             } finally {
                 lock.unlock();
@@ -235,19 +246,22 @@ public class ChannelAccessLocalFactory  {
         /* (non-Javadoc)
          * @see org.epics.ioc.channelAccess.Channel#createChannelProcess()
          */
-        public ChannelProcess createChannelProcess(ChannelProcessRequestor channelProcessRequestor) {
+        public ChannelProcess createChannelProcess(ChannelRequestor channelRequestor) {
             lock.lock();
             try {
                 if(isDestroyed) {
-                    channelProcessRequestor.message(this,"channel has been destroyed");
+                    channelRequestor.message(this,
+                        "channel has been destroyed",MessageType.fatalError);
                     return null;
                 } else {
                     ChannelProcess channelProcess;
                     try {
                         channelProcess = new ChannelProcessInstance(
-                            this,dbAccess.getDbRecord(),channelProcessRequestor);
+                            this,dbAccess.getDbRecord(),channelRequestor);
+                        channelProcessList.add(channelProcess);
                     } catch(IllegalStateException e) {
-                        channelProcessRequestor.message(this, e.getMessage());
+                        channelRequestor.message(this,
+                            e.getMessage(),MessageType.fatalError);
                         return null;
                     }
                     return channelProcess;
@@ -256,31 +270,10 @@ public class ChannelAccessLocalFactory  {
                 lock.unlock();
             }
         }
-        public ChannelPreProcess createChannelPreProcess(ChannelPreProcessRequestor channelPreProcessRequestor) {
-            lock.lock();
-            try {
-                if(isDestroyed) {
-                    channelPreProcessRequestor.message(this,"channel has been destroyed");
-                    return null;
-                } else {
-                    ChannelPreProcess channelPreProcess;
-                    try {
-                        channelPreProcess = new ChannelPreProcessInstance(
-                            this,dbAccess.getDbRecord(),channelPreProcessRequestor);
-                    } catch(IllegalStateException e) {
-                        channelPreProcessRequestor.message(this, e.getMessage());
-                        return null;
-                    }
-                    return channelPreProcess;
-                }
-            } finally {
-                lock.unlock();
-            }
-        }
         /* (non-Javadoc)
-         * @see org.epics.ioc.channelAccess.Channel#createChannelGet()
+         * @see org.epics.ioc.channelAccess.Channel#createChannelGet(org.epics.ioc.channelAccess.ChannelGetRequestor, org.epics.ioc.channelAccess.ChannelProcessRequestor)
          */
-        public ChannelGet createChannelGet(ChannelGetRequestor channelGetRequestor, boolean processBeforeGet) {
+        public ChannelGet createChannelGet(ChannelGetRequestor channelGetRequestor,boolean process) {
             lock.lock();
             try {
                 if(isDestroyed) {
@@ -289,9 +282,11 @@ public class ChannelAccessLocalFactory  {
                     ChannelGet channelGet;
                     try {
                         channelGet = new ChannelGetInstance(
-                            this,dbAccess.getDbRecord(),channelGetRequestor,processBeforeGet);
+                            this,dbAccess.getDbRecord(),channelGetRequestor,process);
+                        channelGetList.add(channelGet);
                     } catch(IllegalStateException e) {
-                        channelGetRequestor.message(this, e.getMessage());
+                        channelGetRequestor.message(this,
+                            e.getMessage(),MessageType.fatalError);
                         return null;
                     }
                     return channelGet;
@@ -301,36 +296,38 @@ public class ChannelAccessLocalFactory  {
             }
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.channelAccess.Channel#createChannelPut()
+         * @see org.epics.ioc.channelAccess.Channel#createChannelPut(org.epics.ioc.channelAccess.ChannelPutRequestor, org.epics.ioc.channelAccess.ChannelProcessRequestor)
          */
-        public ChannelPut createChannelPut(ChannelPutRequestor channelPutRequestor, boolean processAfterPut) {
-            lock.lock();
-            try {
-                if(isDestroyed) {
-                    return null;
-                } else {
-                    ChannelPut dataPut = new ChannelPutInstance(
-                            this,dbAccess.getDbRecord(),channelPutRequestor,processAfterPut);
-                    return dataPut;
-                }
-            } finally {
-                lock.unlock();
-            }
-        }       
-        /* (non-Javadoc)
-         * @see org.epics.ioc.channelAccess.Channel#createChannelPutGet()
-         */
-        public ChannelPutGet createChannelPutGet(
-        ChannelPutGetRequestor channelPutGetRequestor, boolean processAfterPut)
+        public ChannelPut createChannelPut(ChannelPutRequestor channelPutRequestor,boolean process)
         {
             lock.lock();
             try {
                 if(isDestroyed) {
                     return null;
                 } else {
-                    ChannelPutGet dataPutGet =  new ChannelPutGetInstance(
-                        this,dbAccess.getDbRecord(),channelPutGetRequestor,processAfterPut);
-                    return dataPutGet;
+                    ChannelPut channelPut = new ChannelPutInstance(
+                            this,dbAccess.getDbRecord(),channelPutRequestor,process);
+                    channelPutList.add(channelPut);
+                    return channelPut;
+                }
+            } finally {
+                lock.unlock();
+            }
+        }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.channelAccess.Channel#createChannelPutGet(org.epics.ioc.channelAccess.ChannelPutGetRequestor, org.epics.ioc.channelAccess.ChannelProcessRequestor)
+         */
+        public ChannelPutGet createChannelPutGet(ChannelPutGetRequestor channelPutGetRequestor,boolean process)
+        {
+            lock.lock();
+            try {
+                if(isDestroyed) {
+                    return null;
+                } else {
+                    ChannelPutGet channelPutGet =  new ChannelPutGetInstance(
+                        this,dbAccess.getDbRecord(),channelPutGetRequestor,process);
+                    channelPutGetList.add(channelPutGet);
+                    return channelPutGet;
                 }
             } finally {
                 lock.unlock();
@@ -339,14 +336,14 @@ public class ChannelAccessLocalFactory  {
         /* (non-Javadoc)
          * @see org.epics.ioc.channelAccess.Channel#createSubscribe()
          */
-        public ChannelSubscribe createSubscribe(int queueCapacity) {
+        public ChannelSubscribe createSubscribe() {
             lock.lock();
             try {
                 if(isDestroyed) {
                     return null;
                 } else {
-                    ChannelSubscribe subscribe =  new Subscribe(this,dbAccess.getDbRecord(),queueCapacity);
-                    subscribeList.add(subscribe);
+                    ChannelSubscribe subscribe =  new Subscribe(this,dbAccess.getDbRecord());
+                    channelSubscribeList.add(subscribe);
                     return subscribe;
                 }
             } finally {
@@ -424,569 +421,406 @@ public class ChannelAccessLocalFactory  {
         }
     }
     
-    private static class ChannelProcessInstance
-    implements ChannelProcess,ProcessCallbackListener,
-    RecordProcessRequestor,ProcessContinueListener
+    private static class ChannelProcessInstance implements ChannelProcess,RecordProcessRequestor
     {
+        private boolean isDestroyed = false;
         private Channel channel;
-        private ChannelProcessRequestor channelProcessRequestor = null;
-        private DBRecord dbRecord = null;
+        private String requestorName;
+        private ChannelRequestor channelRequestor = null;
         private RecordProcess recordProcess = null;
         
-        private DBLink dbLink = null;
-        private DBRecord linkRecord = null;
-        private RecordProcessSupport linkRecordProcessSupport = null;
-        private TimeStamp timeStamp = null;
         private RequestResult requestResult = null;
              
         private ChannelProcessInstance(
-        Channel channel,DBRecord dbRecord,ChannelProcessRequestor channelProcessRequestor)
+        Channel channel,DBRecord dbRecord,ChannelRequestor channelRequestor)
         {
             this.channel = channel;
-            this.channelProcessRequestor = channelProcessRequestor;
-            this.dbRecord = dbRecord;
+            this.channelRequestor = channelRequestor;
             recordProcess = dbRecord.getRecordProcess();
             boolean isRequestor = recordProcess.setRecordProcessRequestor(this);
             if(!isRequestor) {
                 throw new IllegalStateException("record already has recordProcessRequestor"); 
             }
-            dbLink = channel.getDBLink();
-            if(dbLink!=null) {
-                linkRecord = dbLink.getRecord();
-                linkRecordProcessSupport = linkRecord.getRecordProcess().getRecordProcessSupport();
-                timeStamp = new TimeStamp();
-            }
+            requestorName = "ChannelProcess:" + channelRequestor.getRequestorName();
+        }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.channelAccess.ChannelProcess#destroy()
+         */
+        public void destroy() {
+            if(isDestroyed) return;
+            recordProcess.releaseRecordProcessRequestor(this);
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.channelAccess.ChannelProcess#process()
          */
-        public RequestResult process() {
+        public void process() {
             if(!channel.isConnected()) {
-                channelProcessRequestor.message(channel, "channel is not connected");
-                return RequestResult.failure;
+                channelRequestor.message(channel,
+                    "channel is not connected",MessageType.info);
+                channelRequestor.requestDone(channel, RequestResult.failure);
             }
-            if(dbLink==null) {
-                return recordProcess.process(this, null);
-            } else {
-                // This is called with linked record locked
-                linkRecordProcessSupport.getTimeStamp(timeStamp);
-                linkRecordProcessSupport.requestProcessCallback(this);
-                return RequestResult.active;
-            }
-        }       
+            recordProcess.process(this, false, null);
+            
+        }    
         /* (non-Javadoc)
-         * @see org.epics.ioc.dbProcess.ProcessCallbackListener#processCallback()
+         * @see org.epics.ioc.util.Requestor#getRequestorName()
          */
-        public void processCallback() {
-            RequestResult requestResult = recordProcess.process(this, timeStamp);
-            if(requestResult!=RequestResult.active) {
-                recordProcessComplete(requestResult);
-            }
-        }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.dbProcess.RecordProcessRequestor#getRecordProcessRequestorName()
-         */
-        public String getRecordProcessRequestorName() {
-            return channelProcessRequestor.getChannelRequestorName();
+        public String getRequestorName() {
+            return requestorName;
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.dbProcess.RecordProcessRequestor#processResult(org.epics.ioc.util.AlarmSeverity, java.lang.String, org.epics.ioc.util.TimeStamp)
          */
-        public void recordProcessResult(AlarmSeverity alarmSeverity, String status, TimeStamp timeStamp) {
-            if(dbLink==null) {
-                channelProcessRequestor.processResult(channel, alarmSeverity, status, timeStamp);
-            } else {
-                dbRecord.lockOtherRecord(linkRecord);
-                try {
-                    channelProcessRequestor.processResult(channel, alarmSeverity, status, timeStamp);
-                } finally {
-                    linkRecord.unlock();
+        public void recordProcessResult(RequestResult requestResult) {
+            this.requestResult = requestResult;
+        }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.dbProcess.RecordProcessRequestor#recordProcessComplete(org.epics.ioc.dbProcess.RequestResult)
+         */
+        public void recordProcessComplete() {
+            channelRequestor.requestDone(channel, requestResult);
+        }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.dbProcess.RecordProcessRequestor#ready()
+         */
+        public RequestResult ready() {
+            throw new IllegalStateException("Logic error. Why was this called?");
+        }
+    }
+    
+    private static class ChannelGetInstance implements ChannelGet,RecordProcessRequestor
+    {
+        private boolean isDestroyed = false;
+        private ChannelImpl channel;
+        private String requestorName;
+        private DBRecord dbRecord = null;
+        private ChannelGetRequestor channelGetRequestor = null;
+        private FieldGroup fieldGroup = null;
+        private RequestResult requestResult = RequestResult.success;
+        
+        private RecordProcess recordProcess = null;
+        
+        private ChannelGetInstance(ChannelImpl channel,DBRecord dbRecord,
+        ChannelGetRequestor channelGetRequestor,boolean process) {
+            this.channel = channel;
+            this.dbRecord = dbRecord;
+            this.channelGetRequestor = channelGetRequestor;
+            requestorName = "ChannelGet:" + channelGetRequestor.getRequestorName();
+            if(process) {
+                recordProcess = dbRecord.getRecordProcess();
+                boolean isRequestor = recordProcess.setRecordProcessRequestor(this);
+                if(!isRequestor) {
+                    throw new IllegalStateException("record already has recordProcessRequestor"); 
                 }
             }
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.dbProcess.RecordProcessRequestor#recordProcessComplete(org.epics.ioc.dbProcess.RequestResult)
+         * @see org.epics.ioc.channelAccess.ChannelProcess#destroy()
          */
-        public void recordProcessComplete(RequestResult requestResult) {
-            if(dbLink==null) {
-                channelProcessRequestor.requestDone(channel, requestResult);
-            } else {
-                // must call channelProcessRequestor via processContinue
-                this.requestResult = requestResult;
-                linkRecordProcessSupport.processContinue(this);
-            }
+        public void destroy() {
+            if(isDestroyed) return;
+            if(recordProcess!=null) recordProcess.releaseRecordProcessRequestor(this);
         }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.dbProcess.ProcessContinueListener#processContinue()
-         */
-        public void processContinue() {
-            channelProcessRequestor.requestDone(channel, requestResult);
-        }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.dbProcess.ProcessContinueListener#getName()
-         */
-        public String getName() {
-            return "ChannelProcess:" + channelProcessRequestor.getChannelRequestorName();
-        }
-    }
-
-    private static class ChannelPreProcessInstance
-    implements ChannelPreProcess,ProcessCallbackListener,
-    SupportPreProcessRequestor,RecordProcessRequestor,ProcessContinueListener
-    {
-        private Channel channel;
-        private ChannelPreProcessRequestor channelPreProcessRequestor = null;
-        private RecordProcess recordProcess = null;
-        
-        private DBLink dbLink = null;
-        private RecordProcessSupport linkRecordProcessSupport = null;
-        private TimeStamp timeStamp = null;
-        private RequestResult requestResult = null;
-             
-        private ChannelPreProcessInstance(
-        Channel channel,DBRecord dbRecord,ChannelPreProcessRequestor channelPreProcessRequestor)
-        {
-            this.channel = channel;
-            this.channelPreProcessRequestor = channelPreProcessRequestor;
-            recordProcess = dbRecord.getRecordProcess();
-            boolean isRequestor = recordProcess.setRecordProcessRequestor(this);
-            if(!isRequestor) {
-                throw new IllegalStateException("record already has recordProcessRequestor"); 
-            }
-            dbLink = channel.getDBLink();
-            if(dbLink!=null) {
-                linkRecordProcessSupport = dbLink.getRecord().getRecordProcess().getRecordProcessSupport();
-                timeStamp = new TimeStamp();
-            }
-        }
-            
-        /* (non-Javadoc)
-         * @see org.epics.ioc.channelAccess.ChannelPreProcess#preProcess()
-         */
-        public RequestResult preProcess() {
-            if(!channel.isConnected()) {
-                channelPreProcessRequestor.message(channel, "channel is not connected");
-                return RequestResult.failure;
-            }
-            if(dbLink==null) {
-                return recordProcess.preProcess(this, this);
-            } else {
-                linkRecordProcessSupport.getTimeStamp(timeStamp);
-                linkRecordProcessSupport.requestProcessCallback(this);
-                return RequestResult.active;
-            }
-        }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.channelAccess.ChannelPreProcess#processNow()
-         */
-        public RequestResult processNow() {
-            return recordProcess.processNow(this);
-        }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.dbProcess.ProcessCallbackListener#processCallback()
-         */
-        public void processCallback() {
-            RequestResult requestResult = recordProcess.preProcess(this, this, timeStamp);
-            if(requestResult!=RequestResult.active) {
-                recordProcessComplete(requestResult);
-            }
-        }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.dbProcess.SupportProcessRequestor#getSupportProcessRequestorName()
-         */
-        public String getSupportProcessRequestorName() {
-            return channelPreProcessRequestor.getChannelRequestorName();
-        }   
-        
-        /* (non-Javadoc)
-         * @see org.epics.ioc.dbProcess.SupportProcessRequestor#processComplete(org.epics.ioc.dbProcess.RequestResult)
-         */
-        public void processComplete(RequestResult requestResult) {
-            channelPreProcessRequestor.requestDone(channel,requestResult);
-        }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.dbProcess.SupportPreProcessRequestor#ready()
-         */
-        public RequestResult ready() {
-            return channelPreProcessRequestor.ready();
-        }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.dbProcess.RecordProcessRequestor#getRecordProcessRequestorName()
-         */
-        public String getRecordProcessRequestorName() {
-            return channelPreProcessRequestor.getChannelRequestorName();
-        }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.dbProcess.RecordProcessRequestor#requestResult(org.epics.ioc.util.AlarmSeverity, java.lang.String, org.epics.ioc.util.TimeStamp)
-         */
-        public void recordProcessResult(AlarmSeverity alarmSeverity, String status, TimeStamp timeStamp) {
-            channelPreProcessRequestor.processResult(channel, alarmSeverity, status, timeStamp);
-        }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.dbProcess.RecordProcessRequestor#recordProcessComplete(org.epics.ioc.dbProcess.RequestResult)
-         */
-        public void recordProcessComplete(RequestResult requestResult) {
-            if(dbLink==null) {
-                channelPreProcessRequestor.requestDone(channel, requestResult);
-            } else {
-                // must call channelPreProcessRequestor via processContinue
-                this.requestResult = requestResult;
-                linkRecordProcessSupport.processContinue(this);
-            }
-        }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.dbProcess.ProcessContinueListener#processContinue()
-         */
-        public void processContinue() {
-            channelPreProcessRequestor.requestDone(channel, requestResult);
-        }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.dbProcess.ProcessContinueListener#getName()
-         */
-        public String getName() {
-            return "ChannelPreProcess:" + channelPreProcessRequestor.getChannelRequestorName();
-        }
-    }
-    
-    private static class ChannelGetInstance implements ChannelGet,
-    ChannelProcessRequestor
-    {
-        private Channel channel;
-        private DBRecord dbRecord = null;
-        private ChannelGetRequestor channelGetRequestor = null;
-        private ChannelProcess channelProcess = null;
-        private FieldGroup fieldGroup = null;
-        
-        private DBLink dbLink = null;
-        private DBRecord linkRecord = null;
-        
-        private ChannelGetInstance(Channel channel,DBRecord dbRecord,
-        ChannelGetRequestor channelGetRequestor, boolean processBeforeGet) {
-            this.channel = channel;
-            this.dbRecord = dbRecord;
-            this.channelGetRequestor = channelGetRequestor;
-            if(processBeforeGet) {
-                channelProcess = channel.createChannelProcess(this);
-            }
-            dbLink = channel.getDBLink();
-            if(dbLink!=null) {
-                linkRecord = dbLink.getRecord();
-            }
-        }       
         /* (non-Javadoc)
          * @see org.epics.ioc.channelAccess.ChannelGet#get(org.epics.ioc.channelAccess.ChannelFieldGroup)
          */
-        public RequestResult get(ChannelFieldGroup fieldGroup) {
+        public void get(ChannelFieldGroup fieldGroup) {
             if(!channel.isConnected()) {
-                channelGetRequestor.message(channel, "channel is not connected");
-                return RequestResult.failure;
+                channelGetRequestor.message(channel,
+                    "channel is not connected",MessageType.info);
+                channelGetRequestor.requestDone(channel, RequestResult.failure);
             }
             if(fieldGroup==null) {
                 throw new IllegalStateException("no field group");
             }
             this.fieldGroup = (FieldGroup)fieldGroup;
-            if(channelProcess!=null) return channelProcess.process();
-            if(dbLink==null) {
-                dbRecord.lock();
-            } else {
-                linkRecord.lockOtherRecord(dbRecord);
+            if(recordProcess!=null) {
+                recordProcess.process(this, true, null);
+                return;
             }
-            try {
-                transferData();
-            } finally {
-                dbRecord.unlock();
-            }
-            return RequestResult.success;
-        }         
+            getData();
+            channelGetRequestor.requestDone(channel, RequestResult.success);
+        }                
         /* (non-Javadoc)
-         * @see org.epics.ioc.channelAccess.ChannelProcessRequestor#processResult(org.epics.ioc.channelAccess.Channel, org.epics.ioc.util.AlarmSeverity, java.lang.String, org.epics.ioc.util.TimeStamp)
+         * @see org.epics.ioc.util.Requestor#getRequestorName()
          */
-        public void processResult(Channel channel,
-        AlarmSeverity alarmSeverity, String status, TimeStamp timeStamp) {
-            channelGetRequestor.processResult(channel, alarmSeverity, status, timeStamp);
-            transferData();
-        }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.channelAccess.ChannelRequestor#getChannelRequestorName()
-         */
-        public String getChannelRequestorName() {
-            return "ChannelGet:" +channelGetRequestor.getChannelRequestorName();
-        }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.channelAccess.ChannelRequestor#message(org.epics.ioc.channelAccess.Channel, java.lang.String)
-         */
-        public void message(Channel channel, String message) {
-            channelGetRequestor.message(channel, message);
-        }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.channelAccess.ChannelRequestor#requestDone(org.epics.ioc.channelAccess.Channel)
-         */
-        public void requestDone(Channel channel, RequestResult requestResult) {
-            channelGetRequestor.requestDone(channel, requestResult);
+        public String getRequestorName() {
+            return requestorName;
         }
         
-        private void transferData()
-        {
+        /* (non-Javadoc)
+         * @see org.epics.ioc.dbProcess.RecordProcessRequestor#recordProcessComplete()
+         */
+        public void recordProcessComplete() {
+            getData();
+            recordProcess.setInactive(this);
+            channelGetRequestor.requestDone(channel, requestResult);
+        }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.dbProcess.RecordProcessRequestor#recordProcessResult(org.epics.ioc.util.RequestResult)
+         */
+        public void recordProcessResult(RequestResult requestResult) {
+            this.requestResult = requestResult;
+        }
+        private void getData() {
             List<ChannelField> list = fieldGroup.getList();
             Iterator<ChannelField> iter = list.iterator();
             while(iter.hasNext()) {
                 ChannelFieldInstance field = (ChannelFieldInstance)iter.next();
-                channelGetRequestor.newData(channel,field,field.getDBData());
+                while(true) {
+                    DBData dbData = field.getDBData();
+                    boolean more;
+                    dbRecord.lock();
+                    try {
+                        more = channelGetRequestor.nextGetData(channel,field,dbData);
+                    } finally {
+                        dbRecord.unlock();
+                    }
+                    if(!more) break;
+                }
             }
         }
     }
     
-    private static class ChannelPutInstance implements ChannelPut,
-    ChannelPreProcessRequestor
+    private static class ChannelPutInstance implements ChannelPut,RecordProcessRequestor
     {
-        private Channel channel;
+        private boolean isDestroyed = false;
+        private ChannelImpl channel;
+        private String requestorName;
         private DBRecord dbRecord = null;
         private ChannelPutRequestor channelPutRequestor = null;
-        private ChannelPreProcess channelPreProcess = null;
         private FieldGroup fieldGroup = null;
         
-        private DBLink dbLink = null;
-        private DBRecord linkRecord = null;
+        private RecordProcess recordProcess = null;
         
-        private ChannelPutInstance(Channel channel,DBRecord dbRecord,
-        ChannelPutRequestor channelPutRequestor, boolean processAfterPut) {
+        private RequestResult requestResult = null;
+        
+        private ChannelPutInstance(ChannelImpl channel,DBRecord dbRecord,
+        ChannelPutRequestor channelPutRequestor, boolean process) {
             this.channel = channel;
             this.dbRecord = dbRecord;
             this.channelPutRequestor = channelPutRequestor;
-            if(processAfterPut) {
-                channelPreProcess = channel.createChannelPreProcess(this);
+            if(process) {
+                recordProcess = dbRecord.getRecordProcess();
+                boolean isRequestor = recordProcess.setRecordProcessRequestor(this);
+                if(!isRequestor) {
+                    throw new IllegalStateException("record already has recordProcessRequestor"); 
+                }
             }
-            dbLink = channel.getDBLink();
-            if(dbLink!=null) {
-                linkRecord = dbLink.getRecord();
-            }
-        }  
+            requestorName = "ChannelPut:" + channelPutRequestor.getRequestorName();
+        } 
+        /* (non-Javadoc)
+         * @see org.epics.ioc.channelAccess.ChannelProcess#destroy()
+         */
+        public void destroy() {
+            if(isDestroyed) return;
+            if(recordProcess!=null) recordProcess.releaseRecordProcessRequestor(this);
+        }
         /* (non-Javadoc)
          * @see org.epics.ioc.channelAccess.ChannelPut#put(org.epics.ioc.channelAccess.ChannelFieldGroup)
          */
-        public RequestResult put(ChannelFieldGroup fieldGroup) {
+        public void put(ChannelFieldGroup fieldGroup) {
             if(!channel.isConnected()) {
-                channelPutRequestor.message(channel, "channel is not connected");
-                return RequestResult.failure;
+                channelPutRequestor.message(channel,
+                    "channel is not connected",MessageType.info);
+                channelPutRequestor.requestDone(channel, RequestResult.failure);
             }
             if(fieldGroup==null) {
                 throw new IllegalStateException("no field group");
             }
             this.fieldGroup = (FieldGroup)fieldGroup;
-            if(channelPreProcess!=null) return channelPreProcess.preProcess();
-            if(dbLink==null) {
-                dbRecord.lock();
-            } else {
-                linkRecord.lockOtherRecord(dbRecord);
-            }
-            try {
-                transferData();        
-            } finally {
-                dbRecord.unlock();
-            }
-            return RequestResult.success;
-        }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.channelAccess.ChannelPreProcessRequestor#processResult(org.epics.ioc.channelAccess.Channel, org.epics.ioc.util.AlarmSeverity, java.lang.String, org.epics.ioc.util.TimeStamp)
-         */
-        public void processResult(Channel channel, AlarmSeverity alarmSeverity, String status, TimeStamp timeStamp) {
-            channelPutRequestor.processResult(channel, alarmSeverity, status, timeStamp);
-        }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.channelAccess.ChannelPreProcessRequestor#ready()
-         */
-        public RequestResult ready() {
-            if(dbLink==null) {
+            if(recordProcess!=null) {
+                recordProcess.setActive(this);
                 transferData();
+                recordProcess.process(this, false, null);
+                return;
             }
-            dbRecord.lockOtherRecord(linkRecord);
-            try {
-                transferData();
-            } finally {
-                linkRecord.unlock();
-            }
-            return channelPreProcess.processNow();
-        }
+            transferData();        
+            channelPutRequestor.requestDone(channel, RequestResult.success);
+        }        
         /* (non-Javadoc)
-         * @see org.epics.ioc.channelAccess.ChannelRequestor#getChannelRequestorName()
+         * @see org.epics.ioc.dbProcess.RecordProcessRequestor#recordProcessComplete()
          */
-        public String getChannelRequestorName() {
-            return "ChannelPut:" + channelPutRequestor.getChannelRequestorName();
-        }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.channelAccess.ChannelRequestor#message(org.epics.ioc.channelAccess.Channel, java.lang.String)
-         */
-        public void message(Channel channel, String message) {
-            channelPutRequestor.message(channel, message);
-        }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.channelAccess.ChannelRequestor#requestDone(org.epics.ioc.channelAccess.Channel)
-         */
-        public void requestDone(Channel channel, RequestResult requestResult) {
+        public void recordProcessComplete() {
             channelPutRequestor.requestDone(channel, requestResult);
         }
-
+        /* (non-Javadoc)
+         * @see org.epics.ioc.dbProcess.RecordProcessRequestor#recordProcessResult(org.epics.ioc.util.RequestResult)
+         */
+        public void recordProcessResult(RequestResult requestResult) {
+            this.requestResult = requestResult;
+        }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.util.Requestor#getRequestorName()
+         */
+        public String getRequestorName() {
+            return requestorName;
+        }
         private void transferData() {
             List<ChannelField> list = ((FieldGroup)fieldGroup).getList();
             Iterator<ChannelField> iter = list.iterator();
             while(iter.hasNext()) {
                 ChannelFieldInstance field = (ChannelFieldInstance)iter.next();
-                channelPutRequestor.nextData(channel,field,field.dbData);
+                while(true) {
+                    DBData dbData = field.getDBData();
+                    boolean more;
+                    dbRecord.lock();
+                    try {
+                        more = channelPutRequestor.nextPutData(channel,field,dbData);
+                    } finally {
+                        dbRecord.unlock();
+                    }
+                    if(!more) break;
+                }
             }
         }
     }
     
-    private static class ChannelPutGetInstance implements ChannelPutGet,
-    ChannelPutRequestor,ChannelGetRequestor
+    private static class ChannelPutGetInstance implements ChannelPutGet,RecordProcessRequestor
     {
+        private boolean isDestroyed = false;
+        private String requestorName;
+        private DBRecord dbRecord = null;
+        private ChannelImpl channel = null;
         private ChannelPutGetRequestor channelPutGetRequestor = null;
-        private ChannelPut channelPut = null;
-        private ChannelGet channelGet = null;
         private ChannelFieldGroup getFieldGroup = null;
-        private ChannelPutGetInstance(Channel channel,DBRecord dbRecord,
-        ChannelPutGetRequestor channelPutGetRequestor, boolean processAfterPut)
+        private ChannelFieldGroup putFieldGroup = null;
+        private RecordProcess recordProcess = null;
+        private RequestResult requestResult = null;
+        
+        private ChannelPutGetInstance(ChannelImpl channel,DBRecord dbRecord,
+        ChannelPutGetRequestor channelPutGetRequestor,boolean process)
         {
+            this.dbRecord = dbRecord;
+            this.channel = channel;
             this.channelPutGetRequestor = channelPutGetRequestor;
-            channelPut = channel.createChannelPut(this, processAfterPut);
-            channelGet = channel.createChannelGet(this,false);
+            requestorName = "ChannelGetPut:" + channelPutGetRequestor.getRequestorName();
+            if(process) {
+                recordProcess = dbRecord.getRecordProcess();
+                boolean isRequestor = recordProcess.setRecordProcessRequestor(this);
+                if(!isRequestor) {
+                    throw new IllegalStateException("record already has recordProcessRequestor"); 
+                }
+            }
+        }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.channelAccess.ChannelProcess#destroy()
+         */
+        public void destroy() {
+            if(isDestroyed) return;
+            if(recordProcess!=null)recordProcess.releaseRecordProcessRequestor(this);
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.channelAccess.ChannelPutGet#putGet(org.epics.ioc.channelAccess.ChannelFieldGroup, org.epics.ioc.channelAccess.ChannelFieldGroup)
          */
-        public RequestResult putGet(
-        ChannelFieldGroup putFieldGroup, ChannelFieldGroup getFieldGroup)
+        public void putGet(ChannelFieldGroup putFieldGroup, ChannelFieldGroup getFieldGroup)
         {
-            RequestResult requestResult;
             this.getFieldGroup = getFieldGroup;
-                requestResult = channelPut.put(putFieldGroup);
-            if(requestResult==RequestResult.active) return requestResult;
-            if(requestResult!=RequestResult.success) return requestResult;
-            return channelGet.get(getFieldGroup);
+            this.putFieldGroup = putFieldGroup;
+            requestResult = RequestResult.success;
+            if(recordProcess!=null) {
+                recordProcess.setActive(this);
+                transferPutData();
+                recordProcess.process(this, true, null);
+                return;
+            }
+            transferPutData();
+            transferGetData();
+            channelPutGetRequestor.requestDone(channel, RequestResult.success);
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.channelAccess.ChannelPutRequestor#nextData(org.epics.ioc.channelAccess.Channel, org.epics.ioc.channelAccess.ChannelField, org.epics.ioc.pvAccess.PVData)
+         * @see org.epics.ioc.dbProcess.RecordProcessRequestor#recordProcessComplete()
          */
-        public void nextData(Channel channel, ChannelField field, PVData data) {
-            channelPutGetRequestor.newData(channel, field, data);
-        }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.channelAccess.ChannelGetRequestor#newData(org.epics.ioc.channelAccess.Channel, org.epics.ioc.channelAccess.ChannelField, org.epics.ioc.pvAccess.PVData)
-         */
-        public void newData(Channel channel, ChannelField field, PVData data) {
-            channelPutGetRequestor.newData(channel, field, data);
-        }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.channelAccess.ChannelPreProcessRequestor#processResult(org.epics.ioc.channelAccess.Channel, org.epics.ioc.util.AlarmSeverity, java.lang.String, org.epics.ioc.util.TimeStamp)
-         */
-        public void processResult(Channel channel, AlarmSeverity alarmSeverity, String status, TimeStamp timeStamp) {
-            channelPutGetRequestor.processResult(channel, alarmSeverity, status, timeStamp);
-        }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.channelAccess.ChannelPreProcessRequestor#ready()
-         */
-        public RequestResult ready() {
-            throw new IllegalStateException("ready should never be called for ChannelPutGet");
-        }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.channelAccess.ChannelRequestor#getChannelRequestorName()
-         */
-        public String getChannelRequestorName() {
-            return "ChannelPutGet:" + channelPutGetRequestor.getChannelRequestorName();
-        }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.channelAccess.ChannelRequestor#message(org.epics.ioc.channelAccess.Channel, java.lang.String)
-         */
-        public void message(Channel channel, String message) {
-            channelPutGetRequestor.message(channel, message);
-        }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.channelAccess.ChannelRequestor#requestDone(org.epics.ioc.channelAccess.Channel)
-         */
-        public void requestDone(Channel channel, RequestResult requestResult) {
-            channelGet.get(getFieldGroup);
+        public void recordProcessComplete() {
+            transferGetData();
+            recordProcess.setInactive(this);
             channelPutGetRequestor.requestDone(channel, requestResult);
-        }       
-            
+        }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.dbProcess.RecordProcessRequestor#recordProcessResult(org.epics.ioc.util.RequestResult)
+         */
+        public void recordProcessResult(RequestResult requestResult) {
+            this.requestResult = requestResult;
+        }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.util.Requestor#getRequestorName()
+         */
+        public String getRequestorName() {
+            return requestorName;
+        }        
+        /* (non-Javadoc)
+         * @see org.epics.ioc.channelAccess.ChannelRequestor#message(org.epics.ioc.channelAccess.Channel, java.lang.String, org.epics.ioc.util.MessageType)
+         */
+        public void message(Channel channel, String message, MessageType messageType) {
+            channelPutGetRequestor.message(channel, message, messageType);
+        }
+        
+        private void transferPutData() {
+            List<ChannelField> list = ((FieldGroup)putFieldGroup).getList();
+            Iterator<ChannelField> iter = list.iterator();
+            while(iter.hasNext()) {
+                ChannelFieldInstance field = (ChannelFieldInstance)iter.next();
+                while(true) {
+                    DBData dbData = field.getDBData();
+                    boolean more;
+                    dbRecord.lock();
+                    try {
+                        more = channelPutGetRequestor.nextPutData(channel,field,dbData);
+                    } finally {
+                        dbRecord.unlock();
+                    }
+                    if(!more) break;
+                }
+            }
+        }
+        
+        private void transferGetData() {
+            List<ChannelField> list = getFieldGroup.getList();
+            Iterator<ChannelField> iter = list.iterator();
+            while(iter.hasNext()) {
+                ChannelFieldInstance field = (ChannelFieldInstance)iter.next();
+                while(true) {
+                    DBData dbData = field.getDBData();
+                    boolean more;
+                    dbRecord.lock();
+                    try {
+                        more = channelPutGetRequestor.nextGetData(channel,field,dbData);
+                    } finally {
+                        dbRecord.unlock();
+                    }
+                    if(!more) break;
+                }
+            }
+        }
     }
     
-    private static class Subscribe implements ChannelSubscribe,DBListener {
+    private static class Subscribe implements ChannelSubscribe,DBListener
+    {
         private static CallbackThread callbackThread = new CallbackThread();
-        private static Convert convert = ConvertFactory.getConvert();
         private Channel channel;
-        private DBRecord dbRecord;
-        private DBLink dbLink = null;
         private boolean isDestroyed = false;
         private RecordListener recordListener = null;
         private FieldGroup fieldGroup = null;
-        private ChannelNotifyListener notifyListener = null;
-        private ChannelNotifyGetListener dataListener = null;
-        NotifyDataQueue notifyDataQueue;
-        NotifyData notifyData = null;
+        private ChannelNotifyRequestor notifyListener = null;
+        private ChannelNotifyGetRequestor dataListener = null;
+        private ChannelNotifyDataQueue notifyDataQueue;
+        private ChannelNotifyData notifyData = null;
+        private ChannelSubscribeInfo subscribeInfo = new ChannelSubscribeInfo();
         
         
-        private static class NotifyData {
-            Subscribe subscribe;
+        private static class ChannelSubscribeInfo {
             Channel channel;
-            DBRecord dbRecord;
-            DBLink dbLink;
             FieldGroup fieldGroup;
-            ChannelNotifyListener notifyListener = null;
-            ChannelNotifyGetListener dataListener = null;
-            List<DBData> dataList = new ArrayList<DBData>();
+            ChannelNotifyRequestor notifyListener = null;
+            ChannelNotifyGetRequestor dataListener = null;
+            ChannelNotifyDataQueue notifyDataQueue;
         }
-        
-        private class NotifyDataQueue {
-            ReentrantLock lock = new ReentrantLock();
-            private NotifyData[] notifyDataArray;
-            private int nextFree = 0;
-            private int numberFree = 0;
-            
-            NotifyDataQueue(Subscribe subscribe,int queueCapacity) {
-                notifyDataArray = new NotifyData[queueCapacity];
-                for(int i=0; i < notifyDataArray.length; i++) {
-                    NotifyData notifyData = new NotifyData();
-                    notifyData.subscribe = subscribe;
-                    notifyData.channel = channel;
-                    notifyData.dbRecord = dbRecord;
-                    notifyData.dbLink = dbLink;
-                    notifyDataArray[i] = notifyData;
-                    nextFree = 0;
-                    numberFree = notifyDataArray.length;
-                }
-            }
-            
-            NotifyData getFree() {
-                lock.lock();
-                try {
-                    if(numberFree==0) return null;
-                    numberFree--;
-                    NotifyData notifyData = notifyDataArray[nextFree];
-                    nextFree++;
-                    if(nextFree==notifyDataArray.length) nextFree = 0;
-                    return notifyData;
-                } finally {
-                    lock.unlock();
-                }
-            }
-            
-            void setFree() {
-                lock.lock();
-                try {
-                    numberFree++;
-                } finally {
-                    lock.unlock();
-                }
-            }
-            
-        }
-        
-        private Subscribe(Channel channel,DBRecord dbRecord,int queueCapacity)
+              
+        private Subscribe(Channel channel,DBRecord dbRecord)
         {
             this.channel = channel;
             recordListener = dbRecord.createListener(this);
-            this.dbRecord = dbRecord;
-            dbLink = channel.getDBLink();
-            notifyDataQueue = new NotifyDataQueue(this,queueCapacity);
+            subscribeInfo.channel = channel;
         }
         
         
@@ -995,28 +829,36 @@ public class ChannelAccessLocalFactory  {
          */
         public void destroy() {
             isDestroyed = true;
-            if(notifyListener!=null) notifyListener.message(channel,"deleted");
-            if(dataListener!=null) dataListener.message(channel,"deleted");
+            if(notifyListener!=null) notifyListener.message(channel,"deleted",MessageType.info);
+            if(dataListener!=null) dataListener.message(channel,"deleted",MessageType.info);
             if(fieldGroup!=null) stop();
             recordListener = null;
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.channelAccess.ChannelSubscribe#start(org.epics.ioc.channelAccess.ChannelFieldGroup, org.epics.ioc.channelAccess.ChannelNotifyGetListener, org.epics.ioc.channelAccess.Event)
+         * @see org.epics.ioc.channelAccess.ChannelSubscribe#start(org.epics.ioc.channelAccess.ChannelFieldGroup, org.epics.ioc.channelAccess.ChannelNotifyGetRequestor, org.epics.ioc.channelAccess.Event)
          */
-        public void start(ChannelFieldGroup fieldGroup, ChannelNotifyGetListener listener, Event why) {
-            if(isDestroyed) return;
+        public void start(ChannelFieldGroup channelFieldGroup,int queueCapacity,
+        ChannelNotifyGetRequestor listener, Event why)
+        {
+            if(!beginCommon(channelFieldGroup)) return;  
+            if(queueCapacity<=0) {
+                throw new IllegalStateException("queueCapacity must be > 0"); 
+            }
+            notifyDataQueue = ChannelNotifyDataFactory.createQueue(
+                    queueCapacity, channel, fieldGroup);
             notifyListener = null;
             dataListener = listener;
-            startCommon(fieldGroup,why);
+            startCommon(why);
         }
+        
         /* (non-Javadoc)
-         * @see org.epics.ioc.channelAccess.ChannelSubscribe#start(org.epics.ioc.channelAccess.ChannelFieldGroup, org.epics.ioc.channelAccess.ChannelNotifyListener, org.epics.ioc.channelAccess.Event)
+         * @see org.epics.ioc.channelAccess.ChannelSubscribe#start(org.epics.ioc.channelAccess.ChannelFieldGroup, org.epics.ioc.channelAccess.ChannelNotifyRequestor, org.epics.ioc.channelAccess.Event)
          */
-        public void start(ChannelFieldGroup fieldGroup, ChannelNotifyListener listener, Event why) {
-            if(isDestroyed) return;
+        public void start(ChannelFieldGroup channelFieldGroup, ChannelNotifyRequestor listener, Event why) {
+            if(!beginCommon(channelFieldGroup)) return;  
             notifyListener = listener;
             dataListener = null;
-            startCommon(fieldGroup,why);
+            startCommon(why);
         }      
         /* (non-Javadoc)
          * @see org.epics.ioc.channelAccess.ChannelSubscribe#stop()
@@ -1036,44 +878,32 @@ public class ChannelAccessLocalFactory  {
             notifyListener = null;
         }  
         /* (non-Javadoc)
+         * @see org.epics.ioc.channelAccess.ChannelSubscribe#readyForData()
+         */
+        public void readyForData() {
+            callbackThread.add(subscribeInfo);
+            notifyData = null;
+        }
+        /* (non-Javadoc)
          * @see org.epics.ioc.dbAccess.DBListener#beginSynchronous()
          */
         public void beginSynchronous() {
             if(isDestroyed) return;
             notifyData = notifyDataQueue.getFree();
-            if(notifyData==null) return;
-            notifyData.fieldGroup = fieldGroup;
-            notifyData.notifyListener = notifyListener;
-            notifyData.dataListener = dataListener;
-            notifyData.dataList.clear();
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.dbAccess.DBListener#endSynchronous()
          */
         public void endSynchronous() {
             if(isDestroyed||notifyData==null) return;
-            callbackThread.add(notifyDataQueue,notifyData);
-            notifyData = null;
+            dataListener.startNotifyGetData();
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.dbAccess.DBListener#newData(org.epics.ioc.dbAccess.DBData)
          */
         public void newData(DBData dbData) {
             if(isDestroyed||notifyData==null) return;
-            List<DBData> dataList = notifyData.dataList;
-            if(dataListener==null) {
-                dataList.add(dbData);
-                return;
-            }
-            PVData pvData = (PVData)dbData;
-            Field field = pvData.getField();
-            if(convert.isCopyScalarCompatible(field, field)) {
-                DBData newData = FieldDataFactory.createData(dbData.getParent(), dbData.getDBDField());
-                convert.copyScalar(dbData, newData);
-                dataList.add(newData);
-            } else {
-                dataList.add(dbData);
-            }
+           // WHAT TO DO notifyData.add(dbData);
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.dbAccess.DBListener#unlisten(org.epics.ioc.dbAccess.RecordListener)
@@ -1082,9 +912,18 @@ public class ChannelAccessLocalFactory  {
             if(fieldGroup!=null) stop();
         }
         
-        private void startCommon(ChannelFieldGroup channelFieldGroup, Event why) {
+        private boolean beginCommon(ChannelFieldGroup channelFieldGroup) {
+            if(isDestroyed) return false;
             if(fieldGroup!=null) throw new IllegalStateException("Channel already started");
-            fieldGroup = (FieldGroup)channelFieldGroup;
+            fieldGroup = (FieldGroup)channelFieldGroup; 
+            return true;
+        }
+        private void startCommon(Event why) {                      
+            subscribeInfo.channel = channel;
+            subscribeInfo.dataListener = dataListener;
+            subscribeInfo.fieldGroup = fieldGroup;
+            subscribeInfo.notifyDataQueue = notifyDataQueue;
+            subscribeInfo.notifyListener = notifyListener;
             List<ChannelField> list = fieldGroup.getList();
             Iterator<ChannelField> iter = list.iterator();
             while(iter.hasNext()) {
@@ -1092,18 +931,15 @@ public class ChannelAccessLocalFactory  {
                 DBData dbData = field.getDBData();
                 dbData.addListener(this.recordListener);
             }
-        }
-        private void notifyDone(NotifyData notifyData) {
             
         }
-        
         
         private static class CallbackThread implements Runnable {
             private Thread thread;
             private ReentrantLock lock = new ReentrantLock();
             private Condition moreWork = lock.newCondition();
-            private List<NotifyDataQueue> notifyDataQueueList = new ArrayList<NotifyDataQueue>();
-            private List<NotifyData> notifyDataList = new ArrayList<NotifyData>();
+            private List<ChannelSubscribeInfo> subscribeList =
+                new ArrayList<ChannelSubscribeInfo>();
             
             CallbackThread() {
                 thread = new Thread(this,"ChannelAccessLocal");
@@ -1118,86 +954,68 @@ public class ChannelAccessLocalFactory  {
             public void run() {
                 try {
                     while(true) {
+                        ChannelSubscribeInfo subscribeInfo = null;
                         lock.lock();
                         try {
-                            while(notifyDataList.isEmpty()) {
+                            while(subscribeList.isEmpty()) {
                                 moreWork.await();
                             }
-                            NotifyData notifyData = notifyDataList.get(0);
-                            NotifyDataQueue notifyDataQueue = notifyDataQueueList.get(0);
-                            notify(notifyData);
-                            notifyData.subscribe.notifyDone(notifyData);
-                            notifyDataQueue.setFree();
+                            subscribeInfo = subscribeList.get(0);
                         }finally {
                             lock.unlock();
                         }
+                        notify(subscribeInfo);
                     }
-                } catch(InterruptedException e) {
-                    
-                }
+                } catch(InterruptedException e) {}
             }
             
-            private void add(NotifyDataQueue notifyDataQueue,NotifyData notifyData) {
+            private void add(ChannelSubscribeInfo subscribeInfo) {
                 lock.lock();
                 try {
-                    boolean isEmpty = notifyDataList.isEmpty();
-                    notifyDataQueueList.add(notifyDataQueue);
-                    notifyDataList.add(notifyData);
-                    if(isEmpty) moreWork.signal();
+                    subscribeList.add(subscribeInfo);
+                    moreWork.signal();
                 } finally {
                     lock.unlock();
                 }
             }
             
-            private void notify(NotifyData notifyData) {
-                DBRecord dbRecord = notifyData.dbRecord;
-                DBLink dbLink = notifyData.dbLink;                
-                if(dbLink==null) {
-                    notifyCommon(notifyData);
-                } else {
-                    DBRecord linkRecord = dbLink.getRecord();
-                    dbRecord.lockOtherRecord(linkRecord);
-                    try {
-                        notifyCommon(notifyData);
-                    } finally {
-                        linkRecord.unlock();
-                    }
-                }
-            }
-            
-            private void notifyCommon(NotifyData notifyData) {
-                ChannelNotifyGetListener dataListener = notifyData.dataListener;
-                ChannelNotifyListener notifyListener = notifyData.notifyListener;
-                Channel channel = notifyData.channel;
-                List<DBData> dataList = notifyData.dataList;
-                FieldGroup fieldGroup = notifyData.fieldGroup;
-                if(dataListener!=null) {
-                    dataListener.beginSynchronous(channel);
-                }
+            private void notify(ChannelSubscribeInfo subscribe) {
+                Channel channel = subscribe.channel;
+                ChannelNotifyRequestor notifyListener = subscribe.notifyListener;
                 if(notifyListener!=null) {
-                    notifyListener.beginSynchronous(channel);
+                    notifyListener.dataModified(channel);
                 }
-                while(dataList.size()>0) {
-                    DBData dbData = dataList.remove(0);
-                    ChannelFieldInstance field = null;
-                    List<ChannelField> list = fieldGroup.getList();
-                    Iterator<ChannelField> iter = list.iterator();
-                    
+                ChannelNotifyGetRequestor dataListener = subscribe.dataListener;
+                if(dataListener==null) return;
+                FieldGroup fieldGroup = subscribe.fieldGroup;
+                ChannelNotifyDataQueue dataQueue = subscribe.notifyDataQueue;
+                ChannelNotifyData data = dataQueue.getNext();
+                while(data!=null) {
+                    List<PVData> dataList = data.getPVDataList();
+                    int numberMissed = dataQueue.getNumberMissed();
+                    if(numberMissed>0) dataListener.dataOverrun(numberMissed);
+                    Iterator<PVData> iter = dataList.iterator();
                     while(iter.hasNext()) {
-                        ChannelFieldInstance fieldNow = (ChannelFieldInstance)iter.next();
-                        if(dbData.getField()==fieldNow.getField()) {
-                            field = fieldNow;
-                            break;
+                        PVData pvData = iter.next();
+                        ChannelFieldInstance field = null;
+                        List<ChannelField> list = fieldGroup.getList();
+                        Iterator<ChannelField> iter1 = list.iterator();
+                        
+                        while(iter1.hasNext()) {
+                            ChannelFieldInstance fieldNow = (ChannelFieldInstance)iter1.next();
+                            if(pvData.getField()==fieldNow.getField()) {
+                                field = fieldNow;
+                                break;
+                            }
                         }
+                        if(field==null) {
+                            throw new IllegalStateException("ChannelAccessLocalFactory logic error");
+                        }
+                        boolean isLast = !iter.hasNext();
+                        dataListener.nextNotifyGetData(channel, field, pvData,isLast);
                     }
-                    if(field==null) {
-                        throw new IllegalStateException("ChannelAccessLocalFactory logic error");
-                    }
-                    if(dataListener!=null) {
-                        dataListener.newData(channel,field,dbData);
-                    } else {
-                        notifyListener.newData(channel,field);
-                    }
+                    dataQueue.releaseNext(data);
+                    data = dataQueue.getNext();
                 }
                     
             }

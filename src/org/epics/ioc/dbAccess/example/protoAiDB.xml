@@ -1,7 +1,7 @@
 <?xml version="1.0" ?>
 <IOCDatabase>
 <record name = "ai${recordExtension}Record" type = "aiRecord">
-    <aiInput structureName = "aiLinear" >
+    <input >
         <aiRaw>
             <input supportName = "inputLink">
                 <configure structureName = "inputLink">
@@ -19,7 +19,7 @@
             <engUnitsLow>${engUnitsLow}</engUnitsLow>
             <engUnitsHigh>${engUnitsHigh}</engUnitsHigh>
         </linearConvert>
-    </aiInput>
+    </input>
     <priority>medium</priority>
 </record>
 

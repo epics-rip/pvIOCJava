@@ -28,7 +28,7 @@
 
 <!-- test for duplicate recordType -->
 
-<recordType name = "aiRecord">
+<recordType name = "aiLinearRecord">
     <field name = "value" type = "int" >
         <property name = "status" associatedField = "status" />
         <property name = "severity" associatedField = "severity" />

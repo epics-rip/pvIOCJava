@@ -40,13 +40,18 @@
 
 <structure name = "monitorLink">
     <field name = "pvname" type = "string" link = "true" />
+    <field name = "queueCapacity" type = "int">
+        <!-- 0 means monitor only >0 means data also -->
+    </field>
+    <field name = "reportOverrun" type = "boolean" >
+        <!-- only applicable if queueCapacity>=0 -->
+     </field>
     <field name = "process" type = "boolean">
         <!-- process this record when monitor occurs -->
     </field>
-    <field name = "queueCapacity" type = "int">
-        <!-- monitor only or data also -->
+    <field name = "inheritSeverity" type = "boolean" >
+        <!-- only applicable if process is true -->
     </field>
-    <field name = "inheritSeverity" type = "boolean" />
 </structure>
 
 <structure name = "inputLink">

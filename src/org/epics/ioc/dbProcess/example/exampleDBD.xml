@@ -41,4 +41,15 @@
 <support name = "eventRecord"
    factoryName = "org.epics.ioc.dbProcess.example.EventRecordFactory" />
 
+<structure name = "delayLink">
+    <!-- min, max, inc are delay in milliseconds -->
+    <field name = "min" type = "long" />
+    <field name = "max" type = "long" />
+    <field name = "inc" type = "long" />
+</structure>
+<support name = "delayLink"
+    configurationStructureName = "delayLink"
+    factoryName = "org.epics.ioc.dbProcess.example.DelayLinkFactory"
+/>
+
 </DBDefinition>

@@ -5,20 +5,18 @@
  */
 package org.epics.ioc.dbProcess;
 
+import org.epics.ioc.util.*;
+
 /**
+ * An asynchronous process request is done.
  * @author mrk
  *
  */
 public interface SupportProcessRequestor {
     /**
-     * Get the name of the SupportProcessRequestor;
-     * @return The name.
+     * The asynchronous process request is finished.
+     * This must be called with the record locked.
+     * @param requestResult The result.
      */
-    String getSupportProcessRequestorName();
-    /**
-     * Called by support process to signify asynchronous completion.
-     * @param requestResult The result of the process request.
-     * If support for a record instance, this must be called with the record locked.
-     */
-    void processComplete(RequestResult requestResult);
+    void supportProcessDone(RequestResult requestResult);
 }

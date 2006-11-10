@@ -9,8 +9,8 @@ import junit.framework.TestCase;
 
 import org.epics.ioc.dbDefinition.*;
 import org.epics.ioc.dbAccess.*;
-import org.epics.ioc.util.IOCMessageListener;
-import org.epics.ioc.util.IOCMessageType;
+import org.epics.ioc.util.MessageListener;
+import org.epics.ioc.util.MessageType;
 
 /**
  * JUnit test for parent.
@@ -26,7 +26,7 @@ public class ParentTest extends TestCase {
     public static void testParent() {
         DBD dbd = DBDFactory.getMasterDBD();
         IOCDB iocdb = IOCDBFactory.create("testIOCDatabase");
-        IOCMessageListener iocMessageListener = new Listener();
+        MessageListener iocMessageListener = new Listener();
         XMLToDBDFactory.convert(dbd,
                  "src/org/epics/ioc/dbAccess/example/parentDBD.xml",iocMessageListener);
         
@@ -55,14 +55,14 @@ public class ParentTest extends TestCase {
 //            DBRecord record = recordMap.get(key);
 //            System.out.print(record.toString());
 //        }
-        showParent(iocdb,"exampleAiLinear","status");
-        showParent(iocdb,"exampleAiLinear","timeStamp");
-        showParent(iocdb,"exampleAiLinear","value");
-        showParent(iocdb,"exampleAiLinear","rawValue");
-        showParent(iocdb,"exampleAiLinear","aiLinear.aiRaw.value");
-        showParent(iocdb,"exampleAiLinear","aiLinear.aiRaw.status");
-        showParent(iocdb,"exampleAiLinear","aiLinear.aiRaw.input");
-        showParent(iocdb,"exampleAiLinear","aiLinear.aiRaw.input.configurationStructureName");
+        showParent(iocdb,"exampleAi","status");
+        showParent(iocdb,"exampleAi","timeStamp");
+        showParent(iocdb,"exampleAi","value");
+        showParent(iocdb,"exampleAi","rawValue");
+        showParent(iocdb,"exampleAi","input.aiRaw.value");
+        showParent(iocdb,"exampleAi","input.aiRaw.status");
+        showParent(iocdb,"exampleAi","input.aiRaw.input");
+        showParent(iocdb,"exampleAi","input.aiRaw.input.configurationStructureName");
         System.out.printf("%n");
         showParent(iocdb,"examplePowerSupply","power");
         showParent(iocdb,"examplePowerSupply","current");
@@ -153,11 +153,11 @@ public class ParentTest extends TestCase {
         
     }
     
-    private static class Listener implements IOCMessageListener {
+    private static class Listener implements MessageListener {
         /* (non-Javadoc)
-         * @see org.epics.ioc.util.IOCMessageListener#message(java.lang.String, org.epics.ioc.util.IOCMessageType)
+         * @see org.epics.ioc.util.MessageListener#message(java.lang.String, org.epics.ioc.util.MessageType)
          */
-        public void message(String message, IOCMessageType messageType) {
+        public void message(String message, MessageType messageType) {
             System.out.println(message);
             
         }

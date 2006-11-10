@@ -38,6 +38,7 @@ public class ScannerFactory {
          private DBRecord dbRecord;
          private boolean isActive = false;
          private int numberConsecutiveActive = 0;
+         private RequestResult requestResult = RequestResult.failure;
          
          private RecordExecutor(String name,RecordProcess recordProcess) {
              this.name = name;
@@ -49,7 +50,7 @@ public class ScannerFactory {
                  if(++numberConsecutiveActive == maxNumberConsecutiveActive) {
                      dbRecord.lock();
                      try {
-                         dbRecord.message("record active too long", IOCMessageType.warning);
+                         dbRecord.message("record active too long", MessageType.warning);
                      } finally {
                          dbRecord.unlock();
                      }
@@ -57,30 +58,35 @@ public class ScannerFactory {
              } else {
                  isActive = true;
                  numberConsecutiveActive = 0;
-                 RequestResult requestResult = recordProcess.process(this, timeStamp);
-                 if(requestResult!=RequestResult.active) isActive = false;
+                 recordProcess.process(this, false,timeStamp);
              }
          }
          /* (non-Javadoc)
           * @see org.epics.ioc.dbProcess.RecordProcessRequestor#getRecordProcessRequestorName()
           */
-         public String getRecordProcessRequestorName() {
+         public String getRequestorName() {
              return name;
          }
 
          /* (non-Javadoc)
           * @see org.epics.ioc.dbProcess.RecordProcessRequestor#recordProcessComplete(org.epics.ioc.dbProcess.RequestResult)
           */
-         public void recordProcessComplete(RequestResult requestResult) {
+         public void recordProcessComplete() {
              isActive = false;
          }
 
          /* (non-Javadoc)
           * @see org.epics.ioc.dbProcess.RecordProcessRequestor#recordProcessResult(org.epics.ioc.util.AlarmSeverity, java.lang.String, org.epics.ioc.util.TimeStamp)
           */
-         public void recordProcessResult(AlarmSeverity alarmSeverity, String status, TimeStamp timeStamp) {
+         public void recordProcessResult(RequestResult requestResult) {
              // nothing to do.    
          }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.dbProcess.RecordProcessRequestor#ready()
+         */
+        public RequestResult ready() {
+            throw new IllegalStateException("Why was this called?"); 
+        }
      }
      
      private static class Executor {
@@ -217,7 +223,7 @@ public class ScannerFactory {
              if(scanField==null) {
                  dbRecord.message(
                      "PeriodicScanner: ScanFieldFactory.create failed",
-                     IOCMessageType.fatalError);;
+                     MessageType.fatalError);;
                  return;
              }
              double rate = scanField.getRate();

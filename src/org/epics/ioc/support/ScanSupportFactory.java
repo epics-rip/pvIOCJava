@@ -34,7 +34,7 @@ public class ScanSupportFactory {
             dbStructure.message(
                     "ScanSupportFactory create supportName is " + supportName
                     + " but expected scan",
-                    IOCMessageType.fatalError);
+                    MessageType.fatalError);
                 return null;
         }
         try {
@@ -42,7 +42,7 @@ public class ScanSupportFactory {
         } catch (IllegalStateException e) {
             dbStructure.message(
                 "ScanSupportFactory create failure " + e.getMessage(),
-                IOCMessageType.fatalError);
+                MessageType.fatalError);
             return null;
         }  
     }
@@ -149,7 +149,7 @@ public class ScanSupportFactory {
         /* (non-Javadoc)
          * @see org.epics.ioc.dbProcess.AbstractSupport#getName()
          */
-        public String getName() {
+        public String getRequestorName() {
             return supportName;
         }       
         /* (non-Javadoc)
@@ -192,15 +192,15 @@ public class ScanSupportFactory {
         /* (non-Javadoc)
          * @see org.epics.ioc.dbProcess.AbstractSupport#process(org.epics.ioc.dbProcess.RecordProcessRequestor)
          */
-        public RequestResult process(SupportProcessRequestor supportProcessRequestor) {
-            dbStructure.message("process is being called. Why?", IOCMessageType.error);
-            return RequestResult.failure;
+        public void process(SupportProcessRequestor supportProcessRequestor) {
+            dbStructure.message("process is being called. Why?", MessageType.error);
+            supportProcessRequestor.supportProcessDone(RequestResult.failure);
         }       
         /* (non-Javadoc)
          * @see org.epics.ioc.dbProcess.AbstractSupport#processContinue()
          */
         public void processContinue() {
-            dbStructure.message("processContinue is being called. Why?", IOCMessageType.error);
+            dbStructure.message("processContinue is being called. Why?", MessageType.error);
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.dbAccess.IOCDBMergeListener#merged()

@@ -25,7 +25,7 @@ public class AccessTest extends TestCase {
     public static void testAccess() {
         DBD dbd = DBDFactory.getMasterDBD(); 
         IOCDB iocdb = IOCDBFactory.create("testIOCDatabase");
-        IOCMessageListener iocMessageListener = new Listener();
+        MessageListener iocMessageListener = new Listener();
         XMLToDBDFactory.convert(dbd,
                  "src/org/epics/ioc/dbAccess/example/accessDBD.xml",iocMessageListener);
               
@@ -54,15 +54,15 @@ public class AccessTest extends TestCase {
 //            DBRecord record = recordMap.get(key);
 //            System.out.print(record.toString());
 //        }
-        testAccess(iocdb,"exampleAiLinear","status");
-        testAccess(iocdb,"exampleAiLinear","timeStamp");
-        testAccess(iocdb,"exampleAiLinear","value");
-        testAccess(iocdb,"exampleAiLinear","rawValue");
-        testAccess(iocdb,"exampleAiLinear","aiLinear.aiRaw.value");
-        testAccess(iocdb,"exampleAiLinear","aiLinear.aiRaw.status");
-        testAccess(iocdb,"exampleAiLinear","aiLinear.aiRaw.input");
-        testAccess(iocdb,"exampleAiLinear","aiLinear.timeStamp");
-        testAccess(iocdb,"exampleAiLinear","aiLinear.rawValue");
+        testAccess(iocdb,"exampleAi","status");
+        testAccess(iocdb,"exampleAi","timeStamp");
+        testAccess(iocdb,"exampleAi","value");
+        testAccess(iocdb,"exampleAi","rawValue");
+        testAccess(iocdb,"exampleAi","input.aiRaw.value");
+        testAccess(iocdb,"exampleAi","input.aiRaw.status");
+        testAccess(iocdb,"exampleAi","input.aiRaw.input");
+        testAccess(iocdb,"exampleAi","input.timeStamp");
+        testAccess(iocdb,"exampleAi","input.rawValue");
         System.out.printf("%n");
         testAccess(iocdb,"examplePowerSupply","power");
         testAccess(iocdb,"examplePowerSupply","power.status");
@@ -190,11 +190,11 @@ public class AccessTest extends TestCase {
         }
     }
     
-    private static class Listener implements IOCMessageListener {
+    private static class Listener implements MessageListener {
         /* (non-Javadoc)
-         * @see org.epics.ioc.util.IOCMessageListener#message(java.lang.String, org.epics.ioc.util.IOCMessageType)
+         * @see org.epics.ioc.util.MessageListener#message(java.lang.String, org.epics.ioc.util.MessageType)
          */
-        public void message(String message, IOCMessageType messageType) {
+        public void message(String message, MessageType messageType) {
             System.out.println(message);
             
         }

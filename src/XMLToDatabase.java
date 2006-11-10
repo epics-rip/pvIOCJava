@@ -3,8 +3,8 @@ import org.epics.ioc.dbAccess.IOCDB;
 import org.epics.ioc.dbAccess.IOCDBFactory;
 import org.epics.ioc.dbAccess.XMLToIOCDBFactory;
 import org.epics.ioc.dbDefinition.*;
-import org.epics.ioc.util.IOCMessageListener;
-import org.epics.ioc.util.IOCMessageType;
+import org.epics.ioc.util.MessageListener;
+import org.epics.ioc.util.MessageType;
 
 import java.util.*;
 
@@ -36,7 +36,7 @@ public class XMLToDatabase {
         }
         DBD dbd = DBDFactory.getMasterDBD();
         IOCDB iocdb = IOCDBFactory.create("master");
-        IOCMessageListener iocMessageListener = new Listener();
+        MessageListener iocMessageListener = new Listener();
         int nextArg = 0;
         State state = State.dbdFile;
         while(nextArg<args.length) {
@@ -112,7 +112,7 @@ public class XMLToDatabase {
         }           
     }
         
-    static void parseDBD(DBD dbd, String fileName,IOCMessageListener iocMessageListener) {
+    static void parseDBD(DBD dbd, String fileName,MessageListener iocMessageListener) {
         System.out.printf("\nparsing DBD file %s\n",fileName);
         try {
             XMLToDBDFactory.convert(dbd,fileName,iocMessageListener);
@@ -121,7 +121,7 @@ public class XMLToDatabase {
         }
     }
 
-    static void parseDB(DBD dbd, IOCDB iocdb,String fileName,IOCMessageListener iocMessageListener) {
+    static void parseDB(DBD dbd, IOCDB iocdb,String fileName,MessageListener iocMessageListener) {
         System.out.printf("\nparsing DB file %s\n",fileName);
         try {
             XMLToIOCDBFactory.convert(dbd,iocdb,fileName,iocMessageListener);
@@ -140,11 +140,11 @@ public class XMLToDatabase {
         }
     }
     
-    private static class Listener implements IOCMessageListener {
+    private static class Listener implements MessageListener {
         /* (non-Javadoc)
-         * @see org.epics.ioc.util.IOCMessageListener#message(java.lang.String, org.epics.ioc.util.IOCMessageType)
+         * @see org.epics.ioc.util.MessageListener#message(java.lang.String, org.epics.ioc.util.MessageType)
          */
-        public void message(String message, IOCMessageType messageType) {
+        public void message(String message, MessageType messageType) {
             System.out.println(message);
             
         }

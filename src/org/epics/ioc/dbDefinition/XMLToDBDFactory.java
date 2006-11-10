@@ -21,7 +21,7 @@ public class XMLToDBDFactory {
     private static AtomicBoolean isInUse = new AtomicBoolean(false);
     // For use by all private classes
     private static DBD dbd;
-    private static IOCMessageListener iocMessageListener;
+    private static MessageListener iocMessageListener;
     private static IOCXMLReader iocxmlReader;
     /**
      * Convert an xml file to Database definitions and put
@@ -30,11 +30,11 @@ public class XMLToDBDFactory {
      * @param fileName the name of the xml file.
      * @param messageListener The listener to receive messages.
      */
-    public static void convert(DBD dbd, String fileName,IOCMessageListener messageListener)
+    public static void convert(DBD dbd, String fileName,MessageListener messageListener)
     {
         boolean gotIt = isInUse.compareAndSet(false,true);
         if(!gotIt) {
-            messageListener.message("XMLToDBDFactory is already active",IOCMessageType.fatalError);
+            messageListener.message("XMLToDBDFactory is already active",MessageType.fatalError);
         }
         try {
             XMLToDBDFactory.dbd = dbd;
@@ -57,10 +57,10 @@ public class XMLToDBDFactory {
      * @return a DBD or null. If not null than the definitions are not in the master DBD.
      * The caller must call DBD.mergeIntoMaster to put the definitions into the master.
      */
-    public static DBD create(String dbdName,String fileName,IOCMessageListener messageListener) {
+    public static DBD create(String dbdName,String fileName,MessageListener messageListener) {
         boolean gotIt = isInUse.compareAndSet(false,true);
         if(!gotIt) {
-            messageListener.message("XMLToDBDFactory is already active",IOCMessageType.error);
+            messageListener.message("XMLToDBDFactory is already active",MessageType.error);
             return null;
         }
         try {
@@ -68,7 +68,7 @@ public class XMLToDBDFactory {
             if(dbd==null) {
                 messageListener.message(
                     "XMLToDBDFactory failed to create DBD " + dbdName,
-                    IOCMessageType.error);
+                    MessageType.error);
                 return null;
             }
             XMLToDBDFactory.dbd = dbd;
@@ -117,7 +117,7 @@ public class XMLToDBDFactory {
                     supportHandler.start(qName,attributes);
                 } else {
                     iocxmlReader.message("startElement " + qName + " not understood",
-                            IOCMessageType.error);
+                            MessageType.error);
                 }
                 break;
             case menu: 
@@ -140,7 +140,7 @@ public class XMLToDBDFactory {
             case idle:
                 iocxmlReader.message(
                     "endElement " + qName + " not understood",
-                    IOCMessageType.error);
+                    MessageType.error);
                 break;
             case menu: 
                 if(qName.equals("menu")) {
@@ -189,7 +189,7 @@ public class XMLToDBDFactory {
             }
         }
 
-        public void message(String message,IOCMessageType messageType) {
+        public void message(String message,MessageType messageType) {
             iocMessageListener.message(message, messageType);
         }
     }
@@ -214,13 +214,13 @@ public class XMLToDBDFactory {
             menuName = attributes.get("name");
             if(menuName==null) {
                 iocxmlReader.message("attribute name not specified",
-                        IOCMessageType.error);
+                        MessageType.error);
                 state = State.idle;
             }
             if(dbd.getMenu(menuName)!=null) {
                 iocxmlReader.message(
                     "menu " + menuName + " ignored because it already exists",
-                    IOCMessageType.warning);
+                    MessageType.warning);
                 state = State.idle;
             } else {
                 choiceList = new LinkedList<String>();
@@ -234,7 +234,7 @@ public class XMLToDBDFactory {
                 iocxmlReader.message(
                     "Logic error in DBDXMLMenuHandler.end"
                     + " state should be nextChoice",
-                    IOCMessageType.error);
+                    MessageType.error);
                 state = State.idle;
                 return;
             }
@@ -242,7 +242,7 @@ public class XMLToDBDFactory {
             || choiceList==null || choiceList.size()==0) {
                 iocxmlReader.message(
                         "menu definition is not complete",
-                        IOCMessageType.error);
+                        MessageType.error);
             } else {
                 String[] choice = new String[choiceList.size()];
                 ListIterator<String> iter = choiceList.listIterator();
@@ -263,14 +263,14 @@ public class XMLToDBDFactory {
                 iocxmlReader.message(
                         "Logic error in DBDXMLMenuHandler.startElement"
                         + "state should be nextChoice",
-                        IOCMessageType.error);
+                        MessageType.error);
                 state = State.idle;
                 return;
             }
             if(!qName.equals("choice")) {
                 iocxmlReader.message(
                         "illegal element. only choice is allowed",
-                        IOCMessageType.error);
+                        MessageType.error);
                 state = State.idle;
                 return;
             }
@@ -284,14 +284,14 @@ public class XMLToDBDFactory {
                 iocxmlReader.message(
                         "Logic error in DBDXMLMenuHandler.startElement"
                         + "state should be nextChoice",
-                        IOCMessageType.error);
+                        MessageType.error);
                 state = State.idle;
                 return;
             }
             String newChoice = choiceBuilder.toString();
             if(newChoice.length()<=0) {
                 iocxmlReader.message("illegal choice",
-                        IOCMessageType.error);
+                        MessageType.error);
                     state = State.idle;
                     return;
             }
@@ -345,15 +345,15 @@ public class XMLToDBDFactory {
             if(state!=State.idle) {
                 iocxmlReader.message(
                    "DBDXMLStructureHandler.start logic error not idle",
-                   IOCMessageType.error);
+                   MessageType.error);
                 state = State.idle;
                 return;
             }
-            structureFieldAttribute = createFieldAttribute(attributes);
+            structureFieldAttribute = DBDFieldFactory.createFieldAttribute(attributes);
             structureName = attributes.get("name");
             if(structureName==null || structureName.length() == 0) {
                 iocxmlReader.message("name not specified",
-                        IOCMessageType.error);
+                        MessageType.error);
                 state = State.idle;
                 return;
             }
@@ -362,7 +362,7 @@ public class XMLToDBDFactory {
                 if(dbd.getRecordType(structureName)!=null) {
                     iocxmlReader.message(
                         "recordType " + structureName + " already exists",
-                        IOCMessageType.warning);
+                        MessageType.warning);
                     state = State.idle;
                     return;
                 }
@@ -371,7 +371,7 @@ public class XMLToDBDFactory {
                 if(dbd.getStructure(structureName)!=null) {
                     iocxmlReader.message(
                         "structure " + structureName + " already exists",
-                        IOCMessageType.warning);
+                        MessageType.warning);
                     state = State.idle;
                     return;
                 }
@@ -379,7 +379,7 @@ public class XMLToDBDFactory {
             } else {
                 iocxmlReader.message(
                         "DBDXMLStructureHandler.start logic error",
-                        IOCMessageType.error);
+                        MessageType.error);
                 state = State.idle;
                 return;
             }
@@ -397,7 +397,7 @@ public class XMLToDBDFactory {
             if(dbdFieldList.size()==0) {
                 iocxmlReader.message(
                    "DBDXMLStructureHandler.end no fields were defined",
-                   IOCMessageType.error);
+                   MessageType.error);
                 state = State.idle;
                 structurePropertyList = null;
                 dbdFieldList = null;
@@ -420,7 +420,7 @@ public class XMLToDBDFactory {
                 if(!result) {
                     iocxmlReader.message(
                             "recordType " + structureName + " already exists",
-                            IOCMessageType.warning);
+                            MessageType.warning);
                 }
                 if(structureSupportName!=null) {
                     dbdRecordType.setSupportName(structureSupportName);
@@ -432,7 +432,7 @@ public class XMLToDBDFactory {
                 if(!result) {
                     iocxmlReader.message(
                             "structure " + structureName + " already exists",
-                            IOCMessageType.warning);
+                            MessageType.warning);
                 }
                 if(structureSupportName!=null) {
                     dbdStructure.setSupportName(structureSupportName);
@@ -447,20 +447,19 @@ public class XMLToDBDFactory {
             if(state==State.idle) return;
             if(qName.equals("field")) {
                 assert(state==State.structure);
-                fieldFieldAttribute = createFieldAttribute(attributes);
+                fieldFieldAttribute = DBDFieldFactory.createFieldAttribute(attributes);
                 fieldName = attributes.get("name");
                 if(fieldName==null) {
                     iocxmlReader.message("name not specified",
-                            IOCMessageType.error);
+                            MessageType.error);
                     state= State.idle;
                     return;
                 }
-                String value = attributes.get("type");
-                type = getType(value);
-                dbType = getDBType(value);
+                type = DBDFieldFactory.getType(attributes);
+                dbType = DBDFieldFactory.getDBType(attributes);
                 if(dbType!=DBType.dbLink && type==Type.pvUnknown ) {
                     iocxmlReader.message("type not specified correctly",
-                            IOCMessageType.error);
+                            MessageType.error);
                     state= State.idle;
                     return;
                 }
@@ -468,41 +467,38 @@ public class XMLToDBDFactory {
                     menuName = attributes.get("menuName");
                     if(menuName==null) {
                         iocxmlReader.message("menuName not specified",
-                                IOCMessageType.error);
+                                MessageType.error);
                         state= State.idle;
                         return;
                     }
                     dbdMenu = dbd.getMenu(menuName);
                     if(dbdMenu==null) {
                         iocxmlReader.message("menuName not found in DBD database",
-                                IOCMessageType.error);
+                                MessageType.error);
                         state= State.idle;
                         return;
                     }
                 }
                 if(dbType==DBType.dbStructure) {
                     fieldStructureName = attributes.get("structureName");
-                    if(fieldStructureName==null) {
-                        iocxmlReader.message("structureName not specified",
-                                IOCMessageType.error);
-                        state= State.idle;
-                        return;
-                    }
-                    fieldStructure = dbd.getStructure(fieldStructureName);
-                    if(fieldStructure==null) {
-                        iocxmlReader.message("structureName not found in DBD database",
-                                IOCMessageType.error);
-                        state= State.idle;
-                        return;
+                    if(fieldStructureName!=null) {
+                        fieldStructure = dbd.getStructure(fieldStructureName);
+                        if(fieldStructure==null) {
+                            iocxmlReader.message("structureName not found in DBD database",
+                                    MessageType.error);
+                            state= State.idle;
+                            return;
+                        }
+                    } else {
+                        fieldStructure = null;
                     }
                 }
                 if(dbType==DBType.dbArray) {
-                    value = attributes.get("elementType");
-                    elementType = getType(value);
-                    elementDBType = getDBType(value);
+                    elementType = DBDFieldFactory.getElementType(attributes);
+                    elementDBType = DBDFieldFactory.getElementDBType(attributes);
                     if(elementDBType!=DBType.dbLink && elementType==Type.pvUnknown ) {
                         iocxmlReader.message("elementType not specified correctly",
-                                IOCMessageType.error);
+                                MessageType.error);
                         state= State.idle;
                         return;
                     }
@@ -516,13 +512,13 @@ public class XMLToDBDFactory {
                 if(propertyName==null || propertyName.length()==0) {
                     iocxmlReader.message(
                             "property name not specified",
-                            IOCMessageType.warning);
+                            MessageType.warning);
                     return;
                 }
                 if(associatedName==null || associatedName.length()==0) {
                     iocxmlReader.message(
                             "associatedField not specified",
-                            IOCMessageType.error);
+                            MessageType.error);
                     return;
                 }
                 Property property= FieldFactory.createProperty(
@@ -533,7 +529,7 @@ public class XMLToDBDFactory {
                     fieldPropertyList.add(property);
                 } else {
                     iocxmlReader.message("logic error",
-                            IOCMessageType.fatalError);
+                            MessageType.fatalError);
                 }
             }
         }
@@ -592,20 +588,20 @@ public class XMLToDBDFactory {
             if(name==null||name.length()==0) {
                 iocxmlReader.message(
                     "name was not specified correctly",
-                    IOCMessageType.error);
+                    MessageType.error);
                 return;
             }
             DBDSupport support = dbd.getSupport(name);
             if(support!=null) {
                 iocxmlReader.message(
                     "support " + name  + " already exists",
-                    IOCMessageType.warning);
+                    MessageType.warning);
                     return;
             }
             if(factoryName==null||factoryName.length()==0) {
                 iocxmlReader.message(
                     "factoryName was not specified correctly",
-                    IOCMessageType.error);
+                    MessageType.error);
                 return;
             }
             support = DBDFieldFactory.createSupport(
@@ -613,13 +609,13 @@ public class XMLToDBDFactory {
             if(support==null) {
                 iocxmlReader.message(
                     "failed to create support " + qName,
-                    IOCMessageType.error);
+                    MessageType.error);
                     return;
             }
             if(!dbd.addSupport(support)) {
                 iocxmlReader.message(
                     "support " + qName + " already exists",
-                    IOCMessageType.warning);
+                    MessageType.warning);
                 return;
             }
         }
@@ -634,59 +630,4 @@ public class XMLToDBDFactory {
         
     }
     
-    static private DBDFieldAttribute createFieldAttribute(Map<String,String> attributes) {
-        int asl = 1;
-        String defaultValue = null;
-        boolean isDesign = true;
-        boolean isLink = false;
-        boolean isReadOnly = false;
-        String value = attributes.get("default");
-        if(value!=null) defaultValue = value;
-        value = attributes.get("asl");
-        if(value!=null) asl = Integer.parseInt(value);
-        value = attributes.get("design");
-        if(value!=null) isDesign = Boolean.parseBoolean(value);
-        value = attributes.get("link");
-        if(value!=null) isLink = Boolean.parseBoolean(value);
-        value = attributes.get("readonly");
-        if(value!=null) isReadOnly = Boolean.parseBoolean(value);
-        return DBDFieldFactory.createDBDFieldAttribute(
-                asl, defaultValue, isDesign, isLink, isReadOnly);
-    }
-    
-    private static Type getType(String value) {
-        if(value==null)  return Type.pvUnknown;
-        if(value.equals("boolean")) return Type.pvBoolean;
-        if(value.equals("byte")) return Type.pvByte;
-        if(value.equals("short")) return Type.pvShort;
-        if(value.equals("int")) return Type.pvInt;
-        if(value.equals("long")) return Type.pvLong;
-        if(value.equals("float")) return Type.pvFloat;
-        if(value.equals("double")) return Type.pvDouble;
-        if(value.equals("string")) return Type.pvString;
-        if(value.equals("enum")) return Type.pvEnum;
-        if(value.equals("menu")) return Type.pvEnum;
-        if(value.equals("structure")) return Type.pvStructure;
-        if(value.equals("array")) return Type.pvArray;
-        if(value.equals("link")) return Type.pvUnknown;
-        return Type.pvUnknown;
-    }
-
-    private static DBType getDBType(String value) {
-        if(value==null)  return DBType.dbPvType;
-        if(value.equals("boolean"))  return DBType.dbPvType;
-        if(value.equals("byte"))  return DBType.dbPvType;
-        if(value.equals("short"))  return DBType.dbPvType;
-        if(value.equals("int")) return DBType.dbPvType;
-        if(value.equals("long")) return DBType.dbPvType;
-        if(value.equals("float")) return DBType.dbPvType;
-        if(value.equals("double")) return DBType.dbPvType;
-        if(value.equals("string")) return DBType.dbPvType;
-        if(value.equals("enum"))  return DBType.dbPvType;
-        if(value.equals("menu")) return DBType.dbMenu;
-        if(value.equals("structure")) return DBType.dbStructure;
-        if(value.equals("array")) return DBType.dbArray;
-        if(value.equals("link")) return DBType.dbLink;
-        return DBType.dbPvType;
-    }
 }

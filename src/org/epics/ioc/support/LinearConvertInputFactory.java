@@ -7,7 +7,8 @@ package org.epics.ioc.support;
 
 import org.epics.ioc.dbAccess.*;
 import org.epics.ioc.dbProcess.*;
-import org.epics.ioc.util.IOCMessageType;
+import org.epics.ioc.util.MessageType;
+import org.epics.ioc.util.RequestResult;
 
 
 /**
@@ -33,7 +34,7 @@ public class LinearConvertInputFactory {
             this.dbStructure = dbStructure;
         }
 
-        public String getName() {
+        public String getRequestorName() {
             return supportName;
         }
 
@@ -52,9 +53,9 @@ public class LinearConvertInputFactory {
             System.out.printf("%s.stop entered\n",supportName);
         }
 
-        public RequestResult process(SupportProcessRequestor supportProcessRequestor) {
+        public void process(SupportProcessRequestor supportProcessRequestor) {
             System.out.printf("%s.process entered\n",supportName);
-            return RequestResult.failure;
+            supportProcessRequestor.supportProcessDone(RequestResult.failure);
         }
 
         public void processContinue() {
