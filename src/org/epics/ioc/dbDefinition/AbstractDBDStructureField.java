@@ -17,12 +17,12 @@ public class AbstractDBDStructureField extends AbstractStructure implements DBDS
     private DBDStructure dbdStructure;
     
     /**
-     * Constructor when DBDStructure is specified.
-     * @param name Field name.
-     * @param property Field properties.
-     * @param attribute Field attributes.
-     * @param dbdField Array of fields in the structure.
-     * @param dbdStructure The DBDStructure.
+     * Constructor for AbstractDBDStructureField.
+     * @param name The field name.
+     * @param property The field properties.
+     * @param attribute The field attributes.
+     * @param dbdField The introspection interfaces for the fields of the structure.
+     * @param dbdStructure The DBDStructure that describes this structure.
      */
     public AbstractDBDStructureField(String name,Property[] property,DBDFieldAttribute attribute,
         DBDField[] dbdField,DBDStructure dbdStructure)

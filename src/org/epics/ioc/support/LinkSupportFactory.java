@@ -287,6 +287,13 @@ public class LinkSupportFactory {
             return false;
         }
         /* (non-Javadoc)
+         * @see org.epics.ioc.channelAccess.ChannelGetRequestor#nextDelayedGetData(org.epics.ioc.pvAccess.PVData)
+         */
+        public boolean nextDelayedGetData(PVData data) {
+            // Nothing to do.
+            return false;
+        }
+        /* (non-Javadoc)
          * @see org.epics.ioc.channelAccess.ChannelRequestor#requestDone(org.epics.ioc.channelAccess.Channel, org.epics.ioc.util.RequestResult)
          */
         public void requestDone(Channel channel, RequestResult requestResult) {
@@ -310,6 +317,7 @@ public class LinkSupportFactory {
         public void channelStateChange(Channel c,boolean isConnected) {
             dbRecord.lock();
             try {
+                if(isConnected==this.isConnected) return;
                 this.isConnected = false;
             } finally {
                 dbRecord.unlock();
@@ -672,6 +680,7 @@ public class LinkSupportFactory {
         public void channelStateChange(Channel c,boolean isConnected) {
             dbRecord.lock();
             try {
+                if(isConnected==this.isConnected) return;
                 this.isConnected = false;
             } finally {
                 dbRecord.unlock();
@@ -753,6 +762,13 @@ public class LinkSupportFactory {
                     MessageType.fatalError);
             return false;
         }       
+        /* (non-Javadoc)
+         * @see org.epics.ioc.channelAccess.ChannelGetRequestor#nextDelayedGetData(org.epics.ioc.pvAccess.PVData)
+         */
+        public boolean nextDelayedGetData(PVData data) {
+            // nothing to do
+            return false;
+        }
         /* (non-Javadoc)
          * @see org.epics.ioc.channelAccess.ChannelRequestor#requestDone(org.epics.ioc.channelAccess.Channel)
          */
@@ -1183,6 +1199,7 @@ public class LinkSupportFactory {
         public void channelStateChange(Channel c,boolean isConnected) {
             dbRecord.lock();
             try {
+                if(isConnected==this.isConnected) return;
                 this.isConnected = false;
             } finally {
                 dbRecord.unlock();
@@ -1276,6 +1293,20 @@ public class LinkSupportFactory {
             PVEnum pvEnum = (PVEnum)data;
             int index = pvEnum.getIndex();
             alarmSeverity = AlarmSeverity.getSeverity(index);
+            return false;
+        }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.channelAccess.ChannelGetRequestor#nextDelayedGetData(org.epics.ioc.pvAccess.PVData)
+         */
+        public boolean nextDelayedGetData(PVData data) {
+            // nothing to do
+            return false;
+        }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.channelAccess.ChannelPutRequestor#nextDelayedPutData(org.epics.ioc.pvAccess.PVData)
+         */
+        public boolean nextDelayedPutData(PVData data) {
+            // nothing to do
             return false;
         }
         /* (non-Javadoc)
@@ -1394,9 +1425,9 @@ public class LinkSupportFactory {
     implements LinkSupport,
     ChannelStateListener,
     ChannelFieldGroupListener,
-    RecordProcessRequestor,ProcessCallbackRequestor,ProcessContinueRequestor,
-    ChannelNotifyGetRequestor,
-    ChannelNotifyRequestor, ChannelGetRequestor
+    RecordProcessRequestor,
+    ChannelSubscribeGetRequestor,
+    ChannelSubscribeRequestor, ChannelGetRequestor
     {
         private DBLink dbLink = null;
         private DBRecord dbRecord = null;
@@ -1418,7 +1449,7 @@ public class LinkSupportFactory {
         private boolean process = false;
         private boolean inheritSeverity = false;
         
-        private boolean isNotifyGet = false;
+        private boolean isSubscribeGet = false;
         
         private Channel channel = null;
         private DBRecord channelRecord = null;
@@ -1509,9 +1540,9 @@ public class LinkSupportFactory {
             }                       
             queueCapacity = queueCapacityAccess.get();
             if(queueCapacity<=0) {
-                isNotifyGet = false;
+                isSubscribeGet = false;
             } else {
-                isNotifyGet = true;
+                isSubscribeGet = true;
             }
             reportOverrun = reportOverrunAccess.get();
             if(queueCapacity<=0 && reportOverrun) {
@@ -1532,9 +1563,13 @@ public class LinkSupportFactory {
                 inheritSeverity = false;
             }
             channelSubscribe = channel.createSubscribe();
+            if(!isSubscribeGet) {
+                channelGet = channel.createChannelGet(this,false);
+            }
             if(channel.isConnected()) {
                 channelStart();
             }
+            
             setSupportState(SupportState.ready);
         }
         /* (non-Javadoc)
@@ -1579,7 +1614,6 @@ public class LinkSupportFactory {
                     AlarmSeverity.none);
                 numberOverrun = 0;
             }
-            supportProcessRequestor.supportProcessDone(RequestResult.success);
         }
         
         /* (non-Javadoc)
@@ -1622,47 +1656,30 @@ public class LinkSupportFactory {
             // nothing to do
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.dbProcess.ProcessCallbackRequestor#processCallback()
-         */
-        public void processCallback() {
-            if(isNotifyGet) {
-                channelSubscribe.readyForData();
-            } else {
-                channelGet.get(fieldGroup);
-            }
-        }       
-        /* (non-Javadoc)
-         * @see org.epics.ioc.dbProcess.ProcessContinueRequestor#processContinue()
-         */
-        public void processContinue() {
-            // TODO
-        }
-        /* (non-Javadoc)
          * @see org.epics.ioc.channelAccess.ChannelRequestor#requestDone(org.epics.ioc.channelAccess.Channel, org.epics.ioc.dbProcess.RequestResult)
          */
         public void requestDone(Channel channel, RequestResult requestResult) {
             if(process) {
-                recordProcess.processContinue(this);
+                recordProcess.process(this,false,null);
             }
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.channelAccess.ChannelNotifyGetRequestor#message(org.epics.ioc.channelAccess.Channel, java.lang.String, org.epics.ioc.util.MessageType)
+         * @see org.epics.ioc.channelAccess.ChannelSubscribeGetRequestor#message(org.epics.ioc.channelAccess.Channel, java.lang.String, org.epics.ioc.util.MessageType)
          */
         public void message(Channel channel,String message, MessageType messageType) {
             dbLink.message(message, messageType);
-        }
+        }       
         /* (non-Javadoc)
-         * @see org.epics.ioc.channelAccess.ChannelNotifyGetRequestor#startNotifyGetData()
+         * @see org.epics.ioc.channelAccess.ChannelSubscribeGetRequestor#startSubscribeGetData()
          */
-        public void startNotifyGetData() {
+        public void startSubscribeGetData() {
             if(process) {
-                recordProcess.process(this, false, null);
-            } else {
-                channelSubscribe.readyForData();
+                recordProcess.setActive(this);
             }
+            channelSubscribe.readyForData();
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.channelAccess.ChannelNotifyGetRequestor#dataOverrun(int)
+         * @see org.epics.ioc.channelAccess.ChannelSubscribeGetRequestor#dataOverrun(int)
          */
         public void dataOverrun(int numberSets) {
             if(!reportOverrun) return;
@@ -1680,9 +1697,9 @@ public class LinkSupportFactory {
             }
         }                
         /* (non-Javadoc)
-         * @see org.epics.ioc.channelAccess.ChannelNotifyGetRequestor#nextNotifyData(org.epics.ioc.channelAccess.Channel, org.epics.ioc.channelAccess.ChannelField, org.epics.ioc.pvAccess.PVData, boolean)
+         * @see org.epics.ioc.channelAccess.ChannelSubscribeGetRequestor#nextSubscribeGetData(org.epics.ioc.channelAccess.Channel, org.epics.ioc.channelAccess.ChannelField, org.epics.ioc.pvAccess.PVData)
          */
-        public void nextNotifyGetData(Channel channel, ChannelField field, PVData data, boolean last) {
+        public void nextSubscribeGetData(Channel channel, ChannelField field, PVData data) {
             dbRecord.lock();
             try {
                 if(field==severityField) {
@@ -1722,18 +1739,23 @@ public class LinkSupportFactory {
             } finally {
                 dbRecord.unlock();
             }
-            if(last && process) recordProcess.processContinue(this);
         }       
         
         /* (non-Javadoc)
-         * @see org.epics.ioc.channelAccess.ChannelNotifyRequestor#dataModified(org.epics.ioc.channelAccess.Channel)
+         * @see org.epics.ioc.channelAccess.ChannelGetRequestor#nextDelayedGetData(org.epics.ioc.pvAccess.PVData)
+         */
+        public boolean nextDelayedGetData(PVData data) {
+            // nothing to do
+            return false;
+        }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.channelAccess.ChannelSubscribeRequestor#dataModified(org.epics.ioc.channelAccess.Channel)
          */
         public void dataModified(Channel channel) {
             if(process) {
-                recordProcess.process(this, false, null);
-            } else {
-                channelGet.get(fieldGroup);
+                recordProcess.setActive(this);
             }
+            channelGet.get(fieldGroup);
         }                    
         /* (non-Javadoc)
          * @see org.epics.ioc.channelAccess.ChannelGetRequestor#nextGetData(org.epics.ioc.channelAccess.Channel, org.epics.ioc.channelAccess.ChannelField, org.epics.ioc.pvAccess.PVData)
@@ -1846,10 +1868,9 @@ public class LinkSupportFactory {
                 }
             }
             if(queueCapacity==0) {
-                channelGet = channel.createChannelGet(this,false);
-                channelSubscribe.start(fieldGroup,(ChannelNotifyRequestor)this,null);
+                channelSubscribe.start(fieldGroup,(ChannelSubscribeRequestor)this,null);
             } else {
-                channelSubscribe.start(fieldGroup,queueCapacity,(ChannelNotifyGetRequestor)this,null);
+                channelSubscribe.start(fieldGroup,queueCapacity,(ChannelSubscribeGetRequestor)this,null);
             }
         }
     }

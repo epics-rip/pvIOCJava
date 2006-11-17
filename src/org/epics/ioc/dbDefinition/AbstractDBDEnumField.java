@@ -14,6 +14,12 @@ import org.epics.ioc.pvAccess.*;
 public class AbstractDBDEnumField extends AbstractEnum implements DBDEnumField {
     private DBDFieldAttribute attribute;
     
+    /**
+     * Constructor for AbstractDBDEnumField.
+     * @param name The field name.
+     * @param property The field properties.
+     * @param attribute The attributes for the field.
+     */
     public AbstractDBDEnumField(String name,Property[] property,
             DBDFieldAttribute attribute)
     {
@@ -31,8 +37,7 @@ public class AbstractDBDEnumField extends AbstractEnum implements DBDEnumField {
      */
     public DBDFieldAttribute getFieldAttribute() {
         return attribute;
-    }
-    
+    }   
     /* (non-Javadoc)
      * @see java.lang.Object#toString()
      */

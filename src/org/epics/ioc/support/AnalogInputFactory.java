@@ -5,10 +5,8 @@
  */
 package org.epics.ioc.support;
 
-import org.epics.ioc.channelAccess.*;
 import org.epics.ioc.dbAccess.*;
 import org.epics.ioc.dbProcess.*;
-import org.epics.ioc.pvAccess.*;
 import org.epics.ioc.util.*;
 
 /**
@@ -28,11 +26,9 @@ public class AnalogInputFactory {
     private static class Ai extends AbstractSupport {
         private static String supportName = "Ai";
         private DBRecord dbRecord = null;
-        private DBStructure dbStructure = null;
         
         public Ai(DBStructure dbStructure) {
             super(supportName,dbStructure);
-            this.dbStructure = dbStructure;
         }
 
         public String getRequestorName() {

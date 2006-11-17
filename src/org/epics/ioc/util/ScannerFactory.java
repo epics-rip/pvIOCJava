@@ -38,7 +38,6 @@ public class ScannerFactory {
          private DBRecord dbRecord;
          private boolean isActive = false;
          private int numberConsecutiveActive = 0;
-         private RequestResult requestResult = RequestResult.failure;
          
          private RecordExecutor(String name,RecordProcess recordProcess) {
              this.name = name;
@@ -69,6 +68,12 @@ public class ScannerFactory {
          }
 
          /* (non-Javadoc)
+         * @see org.epics.ioc.util.Requestor#message(java.lang.String, org.epics.ioc.util.MessageType)
+         */
+        public void message(String message, MessageType messageType) {
+            dbRecord.message(message, messageType);
+        }
+        /* (non-Javadoc)
           * @see org.epics.ioc.dbProcess.RecordProcessRequestor#recordProcessComplete(org.epics.ioc.dbProcess.RequestResult)
           */
          public void recordProcessComplete() {

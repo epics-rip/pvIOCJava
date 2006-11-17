@@ -15,6 +15,13 @@ public class AbstractDBDMenuField extends AbstractEnum implements DBDMenuField {
     private DBDFieldAttribute attribute;
     private DBDMenu dbdMenu;
     
+    /**
+     * Constructor for AbstractDBDMenuField.
+     * @param name The field name.
+     * @param property The field properties.
+     * @param attribute The attributes for the field.
+     * @param dbdMenu The menu definition for this menu.
+     */
     public AbstractDBDMenuField(String name,Property[] property,
             DBDFieldAttribute attribute,DBDMenu dbdMenu)
     {

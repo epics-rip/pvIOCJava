@@ -18,10 +18,10 @@ public class AbstractDBDArrayField extends AbstractArray implements DBDArrayFiel
     /**
      * Constructor for AbstractDBDArrayField.
      * @param name The field name.
-     * @param property An array of Property.
-     * @param attribute The atributes for the field.
+     * @param property The field properties.
+     * @param attribute The attributes for the field.
      * @param elementType The Type for the array elements.
-     * @param elementDBType The DBType for tye array elements.
+     * @param elementDBType The DBType for the array elements.
      */
     public AbstractDBDArrayField(String name,Property[] property,
         DBDFieldAttribute attribute,Type elementType,DBType elementDBType)

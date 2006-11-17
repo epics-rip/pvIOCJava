@@ -18,11 +18,11 @@ public class AbstractDBDField extends AbstractField implements DBDField {
     
     /**
      * Constructor for AbstractDBDField.
-     * @param name Field name.
-     * @param type Field Type.
-     * @param dbType Field DBType.
-     * @param property Array of properties.
-     * @param attribute Array of attributes.
+     * @param name The field name.
+     * @param type The field Type.
+     * @param dbType The field DBType.
+     * @param property The field properties.
+     * @param attribute The attributes for the field.
      */
     public AbstractDBDField(String name, Type type,DBType dbType,
             Property[] property,DBDFieldAttribute attribute)
@@ -37,6 +37,9 @@ public class AbstractDBDField extends AbstractField implements DBDField {
     public DBType getDBType() {
         return dbType;
     }
+    /* (non-Javadoc)
+     * @see org.epics.ioc.dbDefinition.DBDField#getFieldAttribute()
+     */
     public DBDFieldAttribute getFieldAttribute() {
         return attribute;
     }
