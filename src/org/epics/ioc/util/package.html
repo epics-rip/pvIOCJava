@@ -10,16 +10,377 @@
 <body>
 <h1 style="text-align: center">EPICS JavaIOC: util<br />
 package: org.epics.ioc.util<br />
-2006.09.13</h1>
+2006.11.15</h1>
+
+<div class="toc">
+<ul>
+  <li><a href="#Overview">Overview</a></li>
+  <li><a href="#Message">Message Support</a>
+    <ul>
+      <li><a href="#Definition">Definitions</a></li>
+      <li><a href="#Requestor">Requestor</a></li>
+      <li><a href="#MessageTyp">MessageType</a></li>
+      <li><a href="#RequestRes">RequestResult</a></li>
+    </ul>
+  </li>
+  <li><a href="#Time">Time Stamp Support</a>
+    <ul>
+      <li><a href="#Definition1">Definitions</a></li>
+      <li><a href="#TimeStamp">TimeStamp</a></li>
+      <li><a href="#TimeUtilit">TimeUtility</a></li>
+      <li><a href="#PVTimeStam">PVTimeStamp</a></li>
+    </ul>
+  </li>
+  <li><a href="#Scan">Scan Field Support</a>
+    <ul>
+      <li><a href="#Definition2">Definitions</a></li>
+      <li><a href="#ScanField">ScanField</a></li>
+      <li><a href="#ScanPriori">ScanPriority</a></li>
+      <li><a href="#ScanType">ScanType</a></li>
+    </ul>
+  </li>
+  <li><a href="#Periodic">Periodic and Event Scanners</a>
+    <ul>
+      <li><a href="#Definition3">Definitions</a></li>
+      <li><a href="#EventAnnou">EventAnnounce</a></li>
+      <li><a href="#EventScann">EventScanner</a></li>
+      <li><a href="#PeriodicSc">PeriodicScanner</a></li>
+    </ul>
+  </li>
+  <li><a href="#IOCFactory">IOCFactory</a></li>
+  <li><a href="#Include">XML Include and Macro Substitution</a>
+    <ul>
+      <li><a href="#Include1">Include and Substitution Syntax</a></li>
+      <li><a href="#Example"> Example Include and Macro Substitution
+        Syntax</a></li>
+      <li><a href="#Example1">Example XML Application</a></li>
+      <li><a href="#IOCXML">IOCXML Interface and Factory Definitions</a></li>
+    </ul>
+  </li>
+</ul>
+</div>
 <hr />
 
-<h2 style="text-align: center">Overview</h2>
+<h2 style="text-align: center" id="Overview">Overview</h2>
 <hr />
 
-<p>This package provides utility code for a javaIOC.</p>
+<p>This package provides utility code for a javaIOC:</p>
+<dl>
+  <dt>Message Support</dt>
+    <dd>This is an interface for passing messages to a requestor of many
+      services.</dd>
+  <dt>Time Stamp support</dt>
+    <dd>Support is provided to make it easier to work with time stamps.</dd>
+  <dt>Scan Field Support</dt>
+    <dd>Support that makes it easier to access the scan field of a
+    record.</dd>
+  <dt>Periodic and Event Scanners</dt>
+    <dd>Support for records that are periodic or event scanned.</dd>
+  <dt>IOCFactory</dt>
+    <dd>A factory for creating and initializing IOC records. This can be used
+      at IOC initialization or for on-line add of new record instances.</dd>
+  <dt>XML Reader</dt>
+    <dd>Support for reading XML Database Definition and Record Instance
+      files. It is an abstraction above Java SAX (Simple API for XML). It
+      implements macro substitution and include.</dd>
+</dl>
 <hr />
 
-<h2 style="text-align: center;">XML Include and Macro Substitution</h2>
+<h2 style="text-align: center;" id="Message">Message Support</h2>
+<hr />
+
+<h3 id="Definition">Definitions</h3>
+<pre>    public interface Requestor {
+        String getRequestorName();
+        void message(String message, MessageType messageType);
+    }
+    
+    public enum MessageType {
+        info,
+        warning,
+        error,
+        fatalError
+    }
+    
+    public enum RequestResult {
+        zombie,
+        success,
+        failure
+    }</pre>
+
+<h3 id="Requestor">Requestor</h3>
+
+<p>Many javaIOC interfaces extend interface Requestor, which has just two
+methods:</p>
+<dl>
+  <dt>getRequestorName</dt>
+    <dd>Returns the name of the requestor.</dd>
+  <dt>message</dt>
+    <dd>This is for passing messages to a requestor.</dd>
+</dl>
+
+<h3 id="MessageTyp">MessageType</h3>
+
+<p>Each message has a message type argument. The type is one of:</p>
+<dl>
+  <dt>info</dt>
+    <dd>The message is informational only.</dd>
+  <dt>warning</dt>
+    <dd>A problem is possible/</dd>
+  <dt>error</dt>
+    <dd>An error has occured.</dd>
+  <dt>fatal</dt>
+    <dd>The support can not implement the request.</dd>
+</dl>
+
+<h3 id="RequestRes">RequestResult</h3>
+
+<p>Both recordProcess and support code report a result by passing a
+RequestResult to the requestor. The result is one of:</p>
+<dl>
+  <dt>zombie</dt>
+    <dd>The support has been asked to destroy itself. Thus the requestor
+      should disconnect from the support.</dd>
+  <dt>success</dt>
+    <dd>The request was successful.</dd>
+  <dt>failure</dt>
+    <dd>The request failed. In this case requester.message is called to
+      report the reason for the failure.</dd>
+</dl>
+<hr />
+
+<h2 style="text-align: center;" id="Time">Time Stamp Support</h2>
+<hr />
+
+<p style="font-weight:bold;">Questions:</p>
+<ol>
+  <li>Should TimeUtility and PVTimeStamp be interfaces?</li>
+  <li>Should PVTimeStamp extend PVStructure?</li>
+</ol>
+
+<h3 id="Definition1">Definitions</h3>
+<pre>    public class TimeStamp {
+        public long secondsPastEpoch;
+        public int nanoSeconds;
+    }
+    
+    public class TimeUtility {
+        public static long getMillis(TimeStamp timeStamp);
+        public static void set(TimeStamp timeStamp,long millis)
+    }
+    
+    public class PVTimeStamp {
+        public static TimeStampField create(PVData pvData);
+        public void get(TimeStamp timeStamp);
+        public void put(TimeStamp timeStamp);
+    }</pre>
+
+<h3 id="TimeStamp">TimeStamp</h3>
+
+<p>This is a class that has two public data fields and no methods:</p>
+<dl>
+  <dt>secondsPastEpoch</dt>
+    <dd>This is the number of seconds since January 1, 1970 UTC, which is the
+      same as what Java POSIX uses.</dd>
+  <dt>nanoSeconds</dt>
+    <dd>The number of nanoseconds within the second.</dd>
+</dl>
+
+<h3 id="TimeUtilit">TimeUtility</h3>
+
+<p>This is a class with the following static members:</p>
+<dl>
+  <dt>getMillis</dt>
+    <dd>This converts the time stamp to milliseconds.</dd>
+  <dt>set</dt>
+    <dd>This converts milliseconds to a time stamp.</dd>
+</dl>
+
+<h3 id="PVTimeStam">PVTimeStamp</h3>
+
+<p>This has the following methods:</p>
+<dl>
+  <dt>create</dt>
+    <dd>A static factory methods to create a PVTimeStamp from a PVData. If
+      the PVData does not reference a timeStamp structure a null is
+    returned.</dd>
+  <dt>get</dt>
+    <dd>Reads the PVData into the timeStamp provided by the caller.</dd>
+  <dt>put</dt>
+    <dd>Takes the timeStamp supplied by the caller and puts it into the
+      PVData.</dd>
+</dl>
+<hr />
+
+<h2 style="text-align: center;" id="Scan">Scan Field Support</h2>
+<hr />
+
+<h3 id="Definition2">Definitions</h3>
+<pre>    public interface ScanField {
+        ScanPriority getPriority();
+        ScanType getScanType();
+        double getRate();
+        String getEventName();
+    }
+    
+    public enum ScanPriority {
+        lowest,
+        lower,
+        low,
+        middle,
+        high,
+        higher,
+        highest;
+        public int getJavaPriority();
+    }
+    
+    public enum ScanType {
+        passive,
+        event,
+        periodic
+    }
+    
+    public class ScanFieldFactory {
+        public static ScanField create(DBRecord dbRecord);
+        public static boolean isScanMenu(DBMenu dbMenu);
+        public static boolean isPriorityMenu(DBMenu dbMenu);
+    }</pre>
+
+<h3 id="ScanField">ScanField</h3>
+
+<p>This is a convience interface for accessing the scan field of a record. It
+has the methods:</p>
+<dl>
+  <dt>getPriority</dt>
+    <dd>Get the priority as a Java enum.</dd>
+  <dt>getScanType</dt>
+    <dd>Get the scan type as a Java enum</dd>
+  <dt>getRate</dt>
+    <dd>Get the scan rate for periodically scanned records.</dd>
+  <dt>getEventName</dt>
+    <dd>Get the event name for event scanned records.</dd>
+</dl>
+
+<h3 id="ScanPriori">ScanPriority</h3>
+
+<p>This is a Jave enum that defines the priority of the thread that processes
+event or periodically scanned records.</p>
+
+<h3 id="ScanType">ScanType</h3>
+
+<p>This is a Java enum which defines the scan types:</p>
+<dl>
+  <dt>passive</dt>
+    <dd>This is a record that is not periodically or event scanned. It can be
+      processed by another requestor. For example database links can request
+      processing and Channel Access clients can also request processing.</dd>
+  <dt>event</dt>
+    <dd>A record can be event scanned. If so the record also has an eventName
+      assigned to it. An event announcer, defined below, can declare and
+      event. This makes all records with the associated eventName
+    process.</dd>
+  <dt>periodic</dt>
+    <dd>The record is periodically scanned. A peridically scanned record has
+      a rate assigned it it.</dd>
+</dl>
+<hr />
+
+<h2 style="text-align: center;" id="Periodic">Periodic and Event Scanners</h2>
+<hr />
+
+<h3 id="Definition3">Definitions</h3>
+<pre>    public interface EventAnnounce {
+        void announce();
+    }
+    public interface EventScanner {
+        void addRecord(DBRecord dbRecord);
+        void removeRecord(DBRecord dbRecord);
+        EventAnnounce addEventAnnouncer(String eventName,String announcer);
+        void removeEventAnnouncer(EventAnnounce eventAnnounce,String announcer);
+        String show(String eventName);
+    }
+    
+    public interface PeriodicScanner {
+        void schedule(DBRecord dbRecord);
+        void unschedule(DBRecord dbRecord);
+        String show(ScanPriority priority);
+        String show(double rate);
+        String show(double rate,ScanPriority priority);
+    }
+    
+    public class ScannerFactory {
+         public static PeriodicScanner getPeriodicScanner();
+         public static EventScanner getEventScanner();
+    }</pre>
+
+<h3 id="EventAnnou">EventAnnounce</h3>
+
+<p>This is the interface for announcing an event. The event scanner
+implements this interface and an announcer call
+eventScanner.addEventAnnouncer in order to get an EventAnnounce. The
+announcer then just calls:</p>
+<pre>    eventAnnounce.announce();</pre>
+
+<p>when it wants to announce an event.</p>
+
+<h3 id="EventScann">EventScanner</h3>
+
+<p>This is the interface for the event scanning facility implemented by
+ScannerFactory. It implements the methods:</p>
+<dl>
+  <dt>addRecord</dt>
+    <dd>Add an event scanned record.</dd>
+  <dt>removeRecord</dt>
+    <dd>Remove a record from being event scanned.</dd>
+  <dt>addEventAnnouncer</dt>
+    <dd>Add an event announcer.</dd>
+  <dt>removeEventAnnouncer</dt>
+    <dd>Remove an event announcer.</dd>
+  <dt>show</dt>
+    <dd>report announcers and event scanned records</dd>
+</dl>
+
+<h3 id="PeriodicSc">PeriodicScanner</h3>
+
+<p>This is the interface for the periodic scanning facility implemented by
+ScannerFactory. It implements the methods:</p>
+<dl>
+  <dt>schedule</dt>
+    <dd>Add a new record to a periodically scanned list.</dd>
+  <dt>unschedule</dt>
+    <dd>Remove a record from being periodically scanned.</dd>
+  <dt>show</dt>
+    <dd>Show periodically scanned records.</dd>
+</dl>
+<hr />
+
+<h2 style="text-align: center;" id="IOCFactory">IOCFactory</h2>
+<hr />
+
+<p>This has the definition:</p>
+<pre>    public class IOCFactory {
+        public static boolean initDatabase(String dbFile,Requestor requestor) {
+    }</pre>
+
+<p>where</p>
+<dl>
+  <dt>dbFile</dt>
+    <dd>A file containing xml record instance definitions.</dd>
+  <dt>requestor</dt>
+    <dd>A listener for any messages generated while initDatabase is
+    executing.</dd>
+</dl>
+
+<p>Install and initialize record instances. The file must define only new
+instances, i.e. if any record names are already in the master IOC Database,
+the request will fails. Each new record is then initialized. All record
+instances must initialize, i.e. enter the readyForStart state or else the
+request fails. If all records initialize the records are merged into the
+master IOCDB and then started.</p>
+<hr />
+
+<h2 style="text-align: center;" id="Include">XML Include and Macro
+Substitution</h2>
 <hr />
 
 <p>Support is provided for processing XML files with the following
@@ -34,7 +395,7 @@ features:</p>
     be used by other code.</li>
 </ul>
 
-<h3>Include and Substitution Syntax</h3>
+<h3 id="Include1">Include and Substitution Syntax</h3>
 
 <p>An xml file can include other xml files. All files must be valid xml files
 and must have the same root element name. An include statement has the
@@ -78,8 +439,8 @@ text. The syntax is:</p>
   <li>The content of any element definition.</li>
 </ol>
 
-<h3><a id="ExampleIncludeMacro"></a> Example Include and Macro Substitution
-Syntax</h3>
+<h3 id="Example"><a id="ExampleIncludeMacro"></a> Example Include and Macro
+Substitution Syntax</h3>
 
 <p>The following is a template file:</p>
 <pre>&lt;?xml version="1.0" ?&gt;
@@ -125,7 +486,7 @@ Syntax</h3>
 &lt;include href = "protoAiDB.xml" /&gt;
 &lt;/IOCDatabase&gt;</pre>
 
-<h3>Example XML Application</h3>
+<h3 id="Example1">Example XML Application</h3>
 
 <p>The following code will report any syntax errors found when an xml file is
 processed.</p>
@@ -183,7 +544,7 @@ processed.</p>
   <li>Calls listener.endDocument when all xml files have been processed.</li>
 </ul>
 
-<h3>IOCXML Interface and Factory Definitions</h3>
+<h3 id="IOCXML">IOCXML Interface and Factory Definitions</h3>
 
 <p>IOCXMLListener is an interface that must be implemented by code that used
 IOCXMLReader.</p>
@@ -240,7 +601,7 @@ IOCXMLReader.</p>
       <ul>
         <li>rootElementName is the root xml element name. Any included files
           must also have the same root name.</li>
-        <li>fileName is the xml file. </li>
+        <li>fileName is the xml file.</li>
         <li>listener is the interface implemented by the caller.</li>
       </ul>
       <p>If the reader is already busy it calls listener.errorMessage and
@@ -266,26 +627,5 @@ IOCXMLReader.</p>
     <dd>Get the single instance of IOCXMLReader.</dd>
 </dl>
 <hr />
-
-<h2 style="text-align: center;">Time Stamp Support</h2>
-<hr />
-
-<p>This provides support for time stamps.</p>
-<pre>    public class TimeStamp {
-        public long secondsPastEpoch;
-        public int nanoSeconds;
-    }
-    
-    
-    public class TimeStampField {
-        public static TimeStampField create(PVData pvData);
-        public void get(TimeStamp timeStamp);
-        public void put(TimeStamp timeStamp);
-    }
-    
-    public class TimeUtility {
-        public static long getMillis(TimeStamp timeStamp);
-        public static void set(TimeStamp timeStamp,long millis)
-    }</pre>
 </body>
 </html>

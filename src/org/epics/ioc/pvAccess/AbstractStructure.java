@@ -20,6 +20,13 @@ public class AbstractStructure extends AbstractField implements Structure {
     private List<String> sortedFieldNameList;
     private int[] fieldIndex;
     
+    /**
+     * Constructir for a structure field.
+     * @param name The field name.
+     * @param property The field properties.
+     * @param structureName The structure name.
+     * @param field The array of field definitions for the fields of the structure.
+     */
     public AbstractStructure(String name,Property[] property,String structureName,Field[] field)
     {
         super(name, Type.pvStructure,property);
@@ -61,15 +68,6 @@ public class AbstractStructure extends AbstractField implements Structure {
             }
         }
    }
-
-    /**
-     * Get the Field definition.
-     * @return The Field.
-     */
-    public Field[] getField() {
-        return field;
-    }
-
     /* (non-Javadoc)
      * @see org.epics.ioc.pvAccess.Structure#getField(java.lang.String)
      */

@@ -9,7 +9,7 @@ import junit.framework.TestCase;
 
 import org.epics.ioc.dbDefinition.*;
 import org.epics.ioc.dbAccess.*;
-import org.epics.ioc.util.MessageListener;
+import org.epics.ioc.util.Requestor;
 import org.epics.ioc.util.MessageType;
 
 import java.util.*;
@@ -33,14 +33,14 @@ public class XMLSupportTest extends TestCase {
         DBD dbd = DBDFactory.getMasterDBD();
         
         System.out.printf("reading supportDBD%n");
-        MessageListener iocMessageListener = new Listener();
+        Requestor iocRequestor = new Listener();
         XMLToDBDFactory.convert(dbd,
-                 "src/org/epics/ioc/dbAccess/example/supportDBD.xml",iocMessageListener);
+                 "src/org/epics/ioc/dbAccess/example/supportDBD.xml",iocRequestor);
         IOCDB iocdb = IOCDBFactory.create("testIOCDatabase");
         System.out.printf("reading exampleSupportDB%n");
         try {
             XMLToIOCDBFactory.convert(dbd,iocdb,
-                 "src/org/epics/ioc/dbAccess/example/supportDB.xml",iocMessageListener);
+                 "src/org/epics/ioc/dbAccess/example/supportDB.xml",iocRequestor);
         } catch (IllegalStateException e) {
             System.out.println("IllegalStateException: " + e);
         }
@@ -58,9 +58,16 @@ public class XMLSupportTest extends TestCase {
         }
     }
 
-    private static class Listener implements MessageListener {
+    private static class Listener implements Requestor {
         /* (non-Javadoc)
-         * @see org.epics.ioc.util.MessageListener#message(java.lang.String, org.epics.ioc.util.MessageType)
+         * @see org.epics.ioc.util.Requestor#getRequestorName()
+         */
+        public String getRequestorName() {
+            return "XMLSupportTest";
+        }
+
+        /* (non-Javadoc)
+         * @see org.epics.ioc.util.Requestor#message(java.lang.String, org.epics.ioc.util.MessageType)
          */
         public void message(String message, MessageType messageType) {
             System.out.println(message);

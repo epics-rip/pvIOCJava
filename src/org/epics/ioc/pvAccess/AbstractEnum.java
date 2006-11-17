@@ -16,7 +16,7 @@ public class AbstractEnum extends AbstractField implements Enum{
      * Constructor for AbstractArray.
      * @param name The field name.
      * @param property An array of properties for the field.
-     * @param elementType The type for the array elements.
+     * @param choicesMutable Are the choices mutable?
      */
     public AbstractEnum(String name,Property[] property,boolean choicesMutable) {
         super(name,Type.pvEnum,property);

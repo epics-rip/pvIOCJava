@@ -13,12 +13,9 @@ package org.epics.ioc.channelAccess;
  */
 public interface ChannelProcess {
     /**
-     * Refuse further requests.
-     */
-    void destroy();
-    /**
      * Issue a process request.
-     * 
+     * @return (false,true) if the request (is not, is) started.
+     * This fails if the request can not be satisfied.
      */
-    void process();
+    boolean process();
 }

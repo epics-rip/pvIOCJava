@@ -9,67 +9,80 @@ import java.util.*;
 import java.util.concurrent.locks.*;
 
 import org.epics.ioc.pvAccess.*;
-import org.epics.ioc.pvAccess.example.DatabaseExample;
 
 /**
+ * A factory for creating ChannelData and ChannelDataQueue.
  * @author mrk
  *
  */
-public class ChannelNotifyDataFactory {
-     public static ChannelNotifyData createData(
+public class ChannelDataFactory {
+     /**
+      * Create a ChannelData for the specified channel and channelFieldGroup.
+     * @param channel The channel.
+     * @param channelFieldGroup The field group.
+     * @return The interface for ChannelData.
+     */
+    public static ChannelData createData(
          Channel channel,ChannelFieldGroup channelFieldGroup)
      {
-         NotifyData notifyData = 
-             new NotifyData(channel,channelFieldGroup);
-         if(notifyData.createData()) {
-             return notifyData;
+         ChannelDataImpl channelData = 
+             new ChannelDataImpl(channel,channelFieldGroup);
+         if(channelData.createData()) {
+             return channelData;
          }
          return null;
      }
      
-     public static ChannelNotifyDataQueue createQueue(
+     /**
+      * Create a queue of ChannelData.
+     * @param queueSize The queueSize. This is can not be changed after creation.
+     * @param channel The channel.
+     * @param channelFieldGroup The field group.
+     * @return The queue.
+     */
+    public static ChannelDataQueue createQueue(
              int queueSize,
              Channel channel,ChannelFieldGroup channelFieldGroup)
      {
-          ChannelNotifyData[] queue = new ChannelNotifyData[queueSize];
+          ChannelData[] queue = new ChannelData[queueSize];
           for(int i = 0; i<queueSize; i++) {
               queue[i] = createData(channel,channelFieldGroup);
           }
-          return new NotifyDataQueue(queue);
+          return new ChannelDataQueueImpl(queue);
      }
      
      private static Convert convert = ConvertFactory.getConvert();
      
-     private static class NotifyDataQueue implements ChannelNotifyDataQueue {
+     private static class ChannelDataQueueImpl implements ChannelDataQueue {
          private ReentrantLock lock = new ReentrantLock();
          private int queueSize;
-         private ArrayList<ChannelNotifyData> freeList;
-         private ArrayList<ChannelNotifyData> inUseList;
-         private ChannelNotifyData next = null;
+         private ArrayList<ChannelData> freeList;
+         private ArrayList<ChannelData> inUseList;
+         private ChannelData next = null;
          private int numberMissed = 0;
 
-         private NotifyDataQueue(ChannelNotifyData[] queue) {
+         private ChannelDataQueueImpl(ChannelData[] queue) {
              queueSize = queue.length;
-             freeList = new ArrayList<ChannelNotifyData>(queueSize);
-             for(ChannelNotifyData data : queue) freeList.add(data);
-             inUseList = new ArrayList<ChannelNotifyData>(queueSize);
+             freeList = new ArrayList<ChannelData>(queueSize);
+             for(ChannelData data : queue) freeList.add(data);
+             inUseList = new ArrayList<ChannelData>(queueSize);
          }
 
         /* (non-Javadoc)
-         * @see org.epics.ioc.channelAccess.ChannelNotifyDataQueue#capacity()
+         * @see org.epics.ioc.channelAccess.ChannelDataQueue#capacity()
          */
         public int capacity() {
             return queueSize;
         }
 
         /* (non-Javadoc)
-         * @see org.epics.ioc.channelAccess.ChannelNotifyDataQueue#getFree()
+         * @see org.epics.ioc.channelAccess.ChannelDataQueue#getFree()
          */
-        public ChannelNotifyData getFree() {
+        public ChannelData getFree() {
             lock.lock();
             try {
                 if(freeList.size()>0) {
-                    ChannelNotifyData data = freeList.remove(0);
+                    ChannelData data = freeList.remove(0);
                     inUseList.add(data);
                     return data;
                 }
@@ -82,9 +95,9 @@ public class ChannelNotifyDataFactory {
         }
 
         /* (non-Javadoc)
-         * @see org.epics.ioc.channelAccess.ChannelNotifyDataQueue#getNext()
+         * @see org.epics.ioc.channelAccess.ChannelDataQueue#getNext()
          */
-        public ChannelNotifyData getNext() {
+        public ChannelData getNext() {
             lock.lock();
             try {
                 if(next!=null) {
@@ -99,14 +112,14 @@ public class ChannelNotifyDataFactory {
         }
 
         /* (non-Javadoc)
-         * @see org.epics.ioc.channelAccess.ChannelNotifyDataQueue#getNumberMissed()
+         * @see org.epics.ioc.channelAccess.ChannelDataQueue#getNumberMissed()
          */
         public int getNumberMissed() {
             return numberMissed;
         }
 
         /* (non-Javadoc)
-         * @see org.epics.ioc.channelAccess.ChannelNotifyDataQueue#getNumberFree()
+         * @see org.epics.ioc.channelAccess.ChannelDataQueue#getNumberFree()
          */
         public int getNumberFree() {
             lock.lock();
@@ -118,13 +131,13 @@ public class ChannelNotifyDataFactory {
         }
 
         /* (non-Javadoc)
-         * @see org.epics.ioc.channelAccess.ChannelNotifyDataQueue#releaseNext(org.epics.ioc.channelAccess.ChannelNotifyData)
+         * @see org.epics.ioc.channelAccess.ChannelDataQueue#releaseNext(org.epics.ioc.channelAccess.ChannelData)
          */
-        public void releaseNext(ChannelNotifyData channelNotifyData) {
+        public void releaseNext(ChannelData channelData) {
             lock.lock();
             try {
-                if(next!=channelNotifyData) {
-                    throw new IllegalStateException("channelNotifyData is not that returned by getNext");
+                if(next!=channelData) {
+                    throw new IllegalStateException("channelData is not that returned by getNext");
                 }
                 numberMissed = 0;
                 freeList.add(next);
@@ -136,7 +149,7 @@ public class ChannelNotifyDataFactory {
         
      }
      
-     private static class NotifyData implements ChannelNotifyData {
+     private static class ChannelDataImpl implements ChannelData {
          private ChannelFieldGroup channelFieldGroup;
          private boolean[] hasData;
          private PVData[] pvDataArray;
@@ -144,7 +157,7 @@ public class ChannelNotifyDataFactory {
          private ArrayList<PVData> pvDataList;
          private ArrayList<ChannelField> channelFieldList;
         
-         private NotifyData(Channel channel, ChannelFieldGroup channelFieldGroup)
+         private ChannelDataImpl(Channel channel, ChannelFieldGroup channelFieldGroup)
          {
              super();
              this.channelFieldGroup = channelFieldGroup;
@@ -185,7 +198,7 @@ public class ChannelNotifyDataFactory {
          }
          
          /* (non-Javadoc)
-          * @see org.epics.ioc.channelAccess.ChannelNotifyData#add(org.epics.ioc.pvAccess.PVData)
+          * @see org.epics.ioc.channelAccess.ChannelData#add(org.epics.ioc.pvAccess.PVData)
           */
          public void add(ChannelField channelField, PVData fromData) {
              Field fromField = fromData.getField();
@@ -218,7 +231,7 @@ public class ChannelNotifyDataFactory {
          }
 
         /* (non-Javadoc)
-          * @see org.epics.ioc.channelAccess.ChannelNotifyData#clear()
+          * @see org.epics.ioc.channelAccess.ChannelData#clear()
           */
          public void clear() {
              for(int i=0; i< hasData.length; i++) hasData[i] = false;
@@ -226,7 +239,7 @@ public class ChannelNotifyDataFactory {
              channelFieldList.clear();
          }
          /* (non-Javadoc)
-          * @see org.epics.ioc.channelAccess.ChannelNotifyData#getPVDataList()
+          * @see org.epics.ioc.channelAccess.ChannelData#getPVDataList()
           */
          public List<PVData> getPVDataList() {
              if(pvDataList.size()<=0) {
@@ -238,7 +251,7 @@ public class ChannelNotifyDataFactory {
          } 
          
          /* (non-Javadoc)
-          * @see org.epics.ioc.channelAccess.ChannelNotifyData#getChannelFieldList()
+          * @see org.epics.ioc.channelAccess.ChannelData#getChannelFieldList()
           */
          public List<ChannelField> getChannelFieldList() {
              if(channelFieldList.size()<=0) {

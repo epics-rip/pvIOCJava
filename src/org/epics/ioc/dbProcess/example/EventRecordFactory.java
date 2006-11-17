@@ -46,6 +46,12 @@ public class EventRecordFactory {
             return dbRecord.getRecordName();
         }
         /* (non-Javadoc)
+         * @see org.epics.ioc.util.Requestor#message(java.lang.String, org.epics.ioc.util.MessageType)
+         */
+        public void message(String message, MessageType messageType) {
+            dbRecord.message(message, messageType);
+        }
+        /* (non-Javadoc)
          * @see org.epics.ioc.dbProcess.Support#initialize()
          */
         public void initialize() {

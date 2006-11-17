@@ -10,10 +10,62 @@
 <body>
 <h1 style="text-align: center">EPICS JavaIOC: dbProcess<br />
 package: org.epics.ioc.dbProcess<br />
-2006.09.22</h1>
+2006.11.15</h1>
+
+<div class="toc">
+<ul>
+  <li><a href="#Overview">Overview</a></li>
+  <li><a href="#Record">Record Processing: Theory of Operation</a>
+    <ul>
+      <li><a href="#Definition">Definitions</a></li>
+      <li><a href="#Requestor">Requestor Examples</a></li>
+      <li><a href="#Overview1">Overview</a></li>
+      <li><a href="#Local">Local Channel Access Example</a></li>
+      <li><a href="#Link">Link Support Example</a></li>
+      <li><a href="#Support">Support State</a></li>
+      <li><a href="#Locking">Locking</a></li>
+    </ul>
+  </li>
+  <li><a href="#Record1">Record Process</a>
+    <ul>
+      <li><a href="#Definition1">Definitions</a></li>
+      <li><a href="#RecordProc">RecordProcess - General Purpose
+      Methods</a></li>
+      <li><a href="#RecordProc1">RecordProcess - Record Lifetime
+      Methods.</a></li>
+      <li><a href="#RecordProc2">RecordProcess - Record Process Requestor
+        Methods</a></li>
+      <li><a href="#RecordProc3">RecordProcess - Support Processing
+        methods.</a></li>
+      <li><a href="#RecordProc4">RecordProcessRequestor</a></li>
+      <li><a href="#ProcessCal">ProcessCallbackRequestor</a></li>
+      <li><a href="#ProcessCon">ProcessContinueRequestor</a></li>
+      <li><a href="#SupportPro">SupportProcessRequestor</a></li>
+      <li><a href="#RecordProc5">RecordProcessFactory</a></li>
+    </ul>
+  </li>
+  <li><a href="#Support1">Support</a>
+    <ul>
+      <li><a href="#Definition2">Definitions</a></li>
+      <li><a href="#Support2">Support</a></li>
+      <li><a href="#SupportSta">SupportState</a></li>
+      <li><a href="#LinkSuppor">LinkSupport</a></li>
+      <li><a href="#AbstractSu">AbstractSupport</a></li>
+    </ul>
+  </li>
+  <li><a href="#Support3">Support Creation</a>
+    <ul>
+      <li><a href="#Definition3">Definitions:</a></li>
+      <li><a href="#Support4">Support Creation</a></li>
+      <li><a href="#Factory">Factory</a></li>
+    </ul>
+  </li>
+  <li><a href="#Local1">Local Channel Access</a></li>
+</ul>
+</div>
 <hr />
 
-<h2 style="text-align: center">Overview</h2>
+<h2 style="text-align: center" id="Overview">Overview</h2>
 <hr />
 
 <p>This package provides support for processing IOC database records. It has
@@ -22,9 +74,6 @@ the following interfaces:</p>
   <dt>RecordProcess</dt>
     <dd>An instance is created for each IOC record. It has methods for use by
       any code interested in record processing.</dd>
-  <dt>recordProcessSupport</dt>
-    <dd>An instance is created for each IOC record. It has methods called by
-      support code.</dd>
   <dt>Support</dt>
     <dd>Methods implemented by support code. A record instance can have one
       or more support modules. Each instance must have a record support
@@ -33,19 +82,31 @@ the following interfaces:</p>
       AbstractSupport</dd>
   <dt>LinkSupport</dt>
     <dd>An extension of Support for link fields.</dd>
-  <dt>ChannelLink</dt>
-    <dd>An extension of interface Channel, which is described in package
-      org.epics.ioc.channelAccess. It is used by code that implements channel
-      access links, i.e. links to other IOC records.</dd>
   <dt>SupportCreation</dt>
     <dd>An interface for creating and initializing all support for a set of
       record instances.</dd>
 </dl>
 
-<p>It also has a number of listener interfaces implement by code that
-requests to be notified about process or support events:
-SupportStateListener, ProcessCompleteListener, and
-ProcessCallbackListener.</p>
+<p>It also has a number of interfaces implement by code that requests to be
+notified about process or support events:</p>
+<dl>
+  <dt>RecordProcessRequestor.</dt>
+    <dd>Implemented by code that calls recordProcess.process..</dd>
+  <dt>SupportProcessRequestor</dt>
+    <dd>Implemented by code that calls support.process.</dd>
+  <dt>ProcessCallbackRequestor</dt>
+    <dd>Implemented by code that calls
+    recordProcess.requestProcessCallback.</dd>
+  <dt>ProcessContinueRequestor</dt>
+    <dd>Implemented by code that call recordProcess.processContinue.</dd>
+</dl>
+
+<p>The following enum specified the support state:</p>
+<dl>
+  <dt>SupportState</dt>
+    <dd>Specifies the current status of the support/ For example is it ready
+      for processing.</dd>
+</dl>
 
 <p>In addition the following classes are provided:</p>
 <dl>
@@ -53,7 +114,7 @@ ProcessCallbackListener.</p>
     <dd>A base class that can be extended by most support code. It implements
       a number of the Support methods.</dd>
   <dt>RecordProcessFactory</dt>
-    <dd>Implements RecordProcess and RecordProcessSupport.</dd>
+    <dd>Implements RecordProcess.</dd>
   <dt>SupportCreationFactory</dt>
     <dd>Creates a process Database.</dd>
   <dt>ChannelAccessLocalFactory</dt>
@@ -63,11 +124,10 @@ ProcessCallbackListener.</p>
 </dl>
 <hr />
 
-<h2 style="text-align: center">Record Processing Theory of Operation</h2>
+<h2 style="text-align: center" id="Record">Record Processing: Theory of
+Operation</h2>
 
-<h3>Definitions</h3>
-
-<p>Record Processing uses the following definitions:</p>
+<h3 id="Definition">Definitions</h3>
 <dl>
   <dt>synchronous</dt>
     <dd>Code that does not block, i.e. does not perform actions like waiting
@@ -76,13 +136,13 @@ ProcessCallbackListener.</p>
   <dt>asynchronous</dt>
     <dd>Code that can block.</dd>
   <dt>record</dt>
-    <dd>Short for record instance.</dd>
+    <dd>A record instance.</dd>
   <dt>process</dt>
-    <dd>Short for processing a record instance.</dd>
+    <dd>Processing a record instance.</dd>
   <dt>support</dt>
-    <dd>Short for code that is involved with implementing record processing.
-      This code can be either synchronous or asynchronous. Support code can
-      also invoke other support code.</dd>
+    <dd>Code that is involved with implementing record processing. This code
+      can be either synchronous or asynchronous. Support code can invoke
+      other support code.</dd>
   <dt>record support</dt>
     <dd>The top level support for a record instance.</dd>
   <dt>recordProcess</dt>
@@ -93,62 +153,33 @@ ProcessCallbackListener.</p>
     <dd>Code that asks recordProcess to process a record. Code must register
       to be the requestor and only one requestor is allow to request
       processing. Thus a registration request fails if a requestor is already
-      attached to a record. If code that is not the requestor attempt to
+      attached to a record. If code that is not the requestor attempts to
       process a record an exception is thrown.</dd>
   <dt>active</dt>
-    <dd>A record instance is active while processing is active. Issuing a new
-      process request while a record is already active will cause an
-      exception.</dd>
+    <dd>A record instance is active while a process request is active. A
+      request to set a record active will fail if it is already active..</dd>
   <dt>lock</dt>
     <dd>Short for record instance lock. A record must be locked whenever any
       field of a record is accessed. Code executing with a record locked must
-      be synchronous. There is not way to detect if code violates this rule
-      so code must be implemented carefully.</dd>
+      be synchronous. There is no way to detect if code violates this rule so
+      code must be implemented carefully.</dd>
 </dl>
 
-<h3>Requestor Examples</h3>
+<h3 id="Requestor">Requestor Examples</h3>
 <dl>
   <dt>Local Channel Access</dt>
     <dd>An example is a channel access server that is accessing IOC database.
-      The following are typical requests it makes:
+      The following are typical requests:
       <dl>
         <dt>get or put</dt>
-          <dd>Just get or put data from a record instance. It must lock the
-            record while accessing but does not interact with recordProcess.
-            For arrays it may have to lock and unlock the record multiple
-            times. For example a channel access server might not be able to
-            allocate a network buffer that hold the entire array.</dd>
+          <dd>Just get or put data from a record instance.</dd>
         <dt>process and get</dt>
-          <dd>A typical example is to process a record and get some data as
-            well as the status, severity, and timeStamp. In this case the
-            requestor wants the following:
-            <ul>
-              <li>set record active and process but leave record active</li>
-              <li>get data <br />
-                Note that the record must be unlocked before the requestor
-                starts getting data. The requestor is responsible for locking
-                and unlocking while accessing the record.</li>
-              <li>make record inactive</li>
-            </ul>
-          </dd>
+          <dd>An example is to process a record and get an array of data as
+            well as the status, severity, and timeStamp.</dd>
         <dt>put, process, get</dt>
           <dd>A example is to put something into the record, make it process,
-            and after processing get the status, severity, and timeStamp. The
-            requestor wants the following:
-            <ul>
-              <li>set record active</li>
-              <li>put data <br />
-                Note that the record must be unlocked before the requestor
-                starts putting data. The requestor is responsible for locking
-                and unlocking while accessing the record.</li>
-              <li>process the record but leave it active</li>
-              <li>get data <br />
-                Note that the record must be unlocked before the requestor
-                starts getting data. The requestor is responsible for locking
-                and unlocking while accessing the record.</li>
-              <li>make record inactive</li>
-            </ul>
-          </dd>
+            and after processing get some data as well as the status,
+            severity, and timeStamp.</dd>
       </dl>
     </dd>
   <dt>Database Links</dt>
@@ -161,41 +192,23 @@ ProcessCallbackListener.</p>
       Typical requests are:
       <dl>
         <dt>process and get</dt>
-          <dd>Just cause a record to process and after the record processes
-            get data and/or severity. The requestor wants the following:
-            <ul>
-              <li>make the record active</li>
-              <li>process the record</li>
-              <li>get the data and/or severity.<br />
-                This is done with both records locked since data will be
-                transfered between the two records.</li>
-              <li>make the record inactive</li>
-            </ul>
-          </dd>
+          <dd>Process and after procsss completes get data and/or
+          severity.</dd>
         <dt>put, process, and get severity</dt>
-          <dd>Put data to the linked record, make it process, and then get
-            the severity. The requestor wants the following:
-            <ul>
-              <li>make the record active</li>
-              <li>put data the record<br />
-                This is done with both records locked since data will be
-                transfered between the two records.</li>
-              <li>process the record</li>
-              <li>get the severity.<br />
-                This is done with both records locked.</li>
-              <li>make the record inactive</li>
-            </ul>
-          </dd>
+          <dd>Put data to the linked record, process it, and then get the
+            severity.</dd>
       </dl>
     </dd>
 </dl>
 
-<h3>Overview</h3>
+<h3 id="Overview1">Overview</h3>
 
 <p>A record is processed via a call to RecordProcess.process. It in turn
-calls record support Support.process. Record support optionally calls the
+calls the record support process method. Record support optionally calls the
 process methods of field support modules. Each support module can optionally
-call the process method of support code for subfields.</p>
+call the process method of support code for subfields. Record support is just
+like field support except that it is attached to the record rather than to a
+subfield of the record.</p>
 
 <p>Record processing has the following features:</p>
 <ul>
@@ -203,9 +216,9 @@ call the process method of support code for subfields.</p>
     <p>Synchronous support is suport that can implemented without blocking,
     i.e. waiting. Asynchronous support is support that must wait. For example
     network requests must block. Asynchronous support does not cause record
-    processing to block. Instead the support code returns active and arranges
-    some other way to perform it's function. When it is done it again
-    interacts with record processing to complete.</p>
+    processing to block. Instead the support code returns without completing
+    and arranges some other way to perform it's function. When it is done it
+    again interacts with record processing to complete.</p>
     <p>While asynchronous support is active the associated record is active
     and other requests to process the record will not succeed.</p>
   </li>
@@ -215,49 +228,118 @@ call the process method of support code for subfields.</p>
     communication between support code or between support code and
     RecordProcess.</p>
   </li>
+  <li>RecordProcsssRequestor
+    <p>A record can have only a single process requestor. A requestor must
+    register before it can request processing.</p>
+  </li>
+  <li>RecordProcess
+    <p>Each record has an instance of RecordProcess. It manages all process
+    related activities.</p>
+  </li>
 </ul>
-
-<p>In the following recordProcess will mean a combination of RecordProcess
-and RecordProcessSupport methods.</p>
 
 <p>The methods involved in processing are:</p>
 <ul>
   <li>recordProcess
     <ul>
-      <li>ProcessReturn process(ProcessCompleteListener listener);
-        <p>This is the request to process a record. If the record is already
-        active, i.e. being processed the rerturn value is alreadyActive. If
-        the record is not active it is set active, the record is locked, and
-        record support is called. If record support returns active the record
-        stays in the active state until listener is called. When record
-        support returns the record is unlocked.</p>
+      <li>setActive
+        <p>Set the record active but do not call the record support process
+        method.</p>
       </li>
-      <li>void requestProcessCallback(ProcessCallbackListener
-        processCallbackListener);
-        <p>Any support code called as a result of process being called can
-        call this method. When record support returns to recordProcess all
-        the callback are called with the record unlocked. Support code that
-        wants to process other records must only issue the process requests
-        via this method or deadlocks can occur.</p>
+      <li>process
+        <p>If the record has not been made active via a call to setActive it
+        is set active. recordSupport.process is called. The results of
+        processing are sent to the requestor via the RecordProcessRequestor
+        methods. The requestor can request the record be left active when
+        processing completes.</p>
       </li>
-      <li>void processContinue(Support support);
-        <p>When asynchronous support code is again ready to access records
-        and/or interact with other support code it must first call
-        processContinue which will lock the record.</p>
+      <li>setInactive
+        <p>Must be called if the requestor asked that the record be left
+        active when processing completes.</p>
+      </li>
+      <li>processContinue
+        <p>Called by asynchronous support when it is ready to continue
+        processing. The record is locked and
+        processContinueRequestor.processContinue is called..</p>
+      </li>
+      <li>requestProcessCallback
+        <p>Any support code called directly or indirectly by process or
+        processContinue can call this method.
+        processRequestRequestor.processCallback is called with the record
+        unlocked. Support code that processes other records must only issue
+        the process requests via this method or deadlocks can occur.</p>
       </li>
     </ul>
   </li>
   <li>Support
     <ul>
-      <li>ProcessReturn process(ProcessCompleteListener listener);
-        <p>This is a method that must be implemented by all support
-        modules.</p>
+      <li>process(SupportProcessRequestor supportProcessRequestor)
+        <p>This is a method that must be implemented by all support modules.
+        When the support is done it calls the supportProcessRequestor to
+        report completion.</p>
+      </li>
+    </ul>
+  </li>
+  <li>RecordProcessRequestor
+    <ul>
+      <li>recordProcessResult(RequestResult requestResult)
+        <p>Called with the record locked and all processing is complete.</p>
+      </li>
+      <li>recordProcessComplete()
+        <p>Called with the record inlocked and processing complete.</p>
+      </li>
+    </ul>
+  </li>
+  <li>SupportProcessRequestor
+    <ul>
+      <li>supportProcessDone(RequestResult requestResult)
+        <p>called by whoever calls support.process. In particular
+        recordSupport also implements this interface.</p>
+      </li>
+    </ul>
+  </li>
+  <li>ProcessCallbackRequestor
+    <ul>
+      <li>processCallback()
+        <p>called by recordProcess with record unlocked.</p>
+      </li>
+    </ul>
+  </li>
+  <li>ProcessContinueRequestor
+    <ul>
+      <li>processContinue()
+        <p>called by recordProcess with record unlocked.</p>
       </li>
     </ul>
   </li>
 </ul>
 
-<h3>Example</h3>
+<h3 id="Local">Local Channel Access Example</h3>
+
+<p>As an example assume that a channel access server does the following to a
+record:</p>
+<ul>
+  <li>Puts data into the record.</li>
+  <li>Processes the record.</li>
+  <li>Reads a large array from the record. The array is too big to fit in a
+    single network buffer.</li>
+</ul>
+
+<p>This can be implemented as follows:</p>
+<ul>
+  <li>server calls recordSupport.setActive</li>
+  <li>server locks the record, puts data, unlocks the record.</li>
+  <li>server calls recordSupport.process and specifies that the record be
+    left active.</li>
+  <li>When processing is complete recordSupport calls
+    server.recordProcessResult and server.recordProcessDone.</li>
+  <li>The server gets the array. It may have to access the array multiple
+    times because of the network buffer restrictions. It must lock the record
+    as it reads each segment.</li>
+  <li>The server calls recordSupport.setInactive.</li>
+</ul>
+
+<h3 id="Link">Link Support Example</h3>
 
 <p>As an example assume that a record type double has the following
 fields:</p>
@@ -273,12 +355,12 @@ fields:</p>
 <p>In addition the following support modules are available.</p>
 <dl>
   <dt>doubleRecord</dt>
-    <dd>The record support module. When it's process method is called it
-      calls two other support modules: The first must be support for a link
-      that can input a double value. The second must support an array of
-      links. The support must be able to call link support for each element
-      of the array. Each element support can either require no input or a
-      single value that is a double.</dd>
+    <dd>The record support module. It's process method calls two other
+      support modules: The first must be support for a link that can input a
+      double value. The second must support an array of links. The support
+      must be able to call link support for each element of the array. Each
+      element support can either require no input or a single value that is a
+      double.</dd>
   <dt>inputLink</dt>
     <dd>A link support modules that supports channel access input links, i.e.
       a link that gets input from another IOC record.</dd>
@@ -299,68 +381,75 @@ fields:</p>
         &lt;configure structureName = "inputLink"&gt;
             &lt;pvname&gt;recordForInput&lt;/pvname&gt;
             &lt;process&gt;false&lt;/process&gt;
-            &lt;wait&gt;false&lt;/wait&gt;
         &lt;/configure&gt;
     &lt;/input&gt;
-    &lt;process supportName = "linkArray" &gt;
-        &lt;value  supportName = "processLink" &gt;
-            &lt;configure structureName = "processLink"&gt;
-                &lt;pvname&gt;recordToProcess&lt;/pvname&gt;
-                &lt;wait&gt;true&lt;/wait&gt;
-            &lt;/configure&gt;
+
+    &lt;linkArray&gt;
+        &lt;value structureName = "linkArrayElement"&gt;
+            &lt;wait&gt;false&lt;/wait&gt;
+            &lt;link  supportName = "processLink" &gt;
+                &lt;configure structureName = "processLink"&gt;
+                    &lt;pvname&gt;processRecord&lt;/pvname&gt;
+                &lt;/configure&gt;
+            &lt;/link&gt;
         &lt;/value&gt;
-        &lt;value supportName = "outputLink" &gt;
-            &lt;configure structureName = "outputLink"&gt;
-                &lt;pvname&gt;recordToPutAndProcess&lt;/pvname&gt;
-                &lt;process&gt;true&lt;/process&gt;
-                &lt;wait&gt;true&lt;/wait&gt;
-            &lt;/configure&gt;
+        &lt;value structureName = "linkArrayElement"&gt;
+            &lt;wait&gt;false&lt;/wait&gt;
+            &lt;link  supportName = "outputLink" &gt;
+                &lt;configure structureName = "outputLink"&gt;
+                    &lt;pvname&gt;outputRecord&lt;/pvname&gt;
+                    &lt;process&gt;true&lt;/process&gt;
+                &lt;/configure&gt;
+            &lt;/link&gt;
         &lt;/value&gt;
-    &lt;/process&gt;
+    &lt;/linkArray&gt;
+
 &lt;/record&gt;</pre>
 
 <p>When the record is processed, via a call to recordProcess.process, the
 following happens:</p>
 <ul>
-  <li>recordProcess sets the record active. The record will remain active
-    until the record is completely processed.</li>
-  <li>recordProcess locks the record.</li>
-  <li>recordProcess calls doubleRecord.</li>
-  <li>doubleRecord calls the inputLink support.</li>
-  <li>inputLink calls recordProcess.requestProcessCallback and returns
-  active.</li>
-  <li>doubleRecord returns active.</li>
-  <li>recordProcess unlocks the record and calls inputLink.callback.
-    inputLink performs whatever action is required to get the data. For
-    example if the link is a local link, the linked record and the record
-    containing the link are both locked and the data is copied between the
-    records. When inputLink is done it calls the processComplete method of
-    the listener passed to linkSupport by doubleRecord.</li>
-  <li>doubleRecord calls recordProcess.processContinue.</li>
-  <li>recordProcess locks the record and calls
-  doubleRecord.processContinue.</li>
-  <li>doubleRecord call linkArray.</li>
-  <li>linkArray calls recordProcess.requestProcessCallback and returns
-  active.</li>
-  <li>doubleRecord returns active.</li>
-  <li>recordProcess unlocks the record and calls linkArray.callback.
+  <li>recordProcess locks the record, prepares it for processing and sets it
+    active. The record will remain active until the record is completely
+    processed.</li>
+  <li>recordProcess calls doubleRecord.process</li>
+  <li>doubleRecord calls the inputLink.process</li>
+  <li>Assuming the recordForInput is local and since process is false, the
+    inputLink support just:
+    <ul>
+      <li>locks the linked record</li>
+      <li>transfers data from the linked record to the double record.</li>
+      <li>unlocks the linked record.</li>
+      <li>notifys doubleRecord that it has completed.</li>
+    </ul>
+  </li>
+  <li>doubleRecord call linkArray.process.</li>
+  <li>linkArray calls recordProcess.requestProcessCallback.</li>
+  <li>doubleRecord returns.</li>
+  <li>recordProcess unlocks the record and calls linkArray.processCallback.
     linkArray performs whatever action is required to process the
     recordToProcess and to put data into and process record
-    recordToPutAndProcess. When linkArray is done it calls the
-    processComplete method of the listener passed to linkArray by
-    doubleRecord.</li>
-  <li>doubleRecord is now done and calls the processComplete method of the
-    listener passed to it by recordProcess.</li>
-  <li>recordProcess sets the record inactive.</li>
+    recordToPutAndProcess.</li>
+  <li>linkArray, when done, calls recordSupport.processContinue.</li>
+  <li>recordSupport calls linkArray.processContinue</li>
+  <li>linkArray call doubleRecord.supportProcessDone.</li>
+  <li>doubleRecord calls recordProcess.supportProcessDone</li>
+  <li>recordProcess completes record processing
+    <ul>
+      <li>calls recordProcessRequestor.recordProcessResult</li>
+      <li>unlocks the record and sets the record inactive.</li>
+      <li>calls recordProcessRequestor.recordProcessComplete.</li>
+    </ul>
+  </li>
 </ul>
 
-<h3>Support State</h3>
+<h3 id="Support">Support State</h3>
 
 <p>Before support is ready for processing it must be ready. In addition
 on-line add and delete is supported. Thus it is possible to dynamically
 redefine link fields, array fields, etc. Unless a support module is in the
 ready state it's process method should not be called and if it is it should
-just return failure.</p>
+just report failure.</p>
 
 <p>An enum SupportState defines the following states: readyForInitialize,
 readyForStart, ready, and zombie. Zombie is for support that is being removed
@@ -373,7 +462,7 @@ Start completes all initialization including linking to the outside, e.g. to
 other records. Stop must remove all access to the outside. Uninitialize must
 remove all access to the record instance being supported.</p>
 
-<h3>Locking</h3>
+<h3 id="Locking">Locking</h3>
 
 <p>The locking strategy is based on the following:</p>
 <ul>
@@ -388,81 +477,106 @@ remove all access to the record instance being supported.</p>
   </li>
   <li>Whenever possible listeners should be called with no locks take.</li>
   <li>Locks should always be taken with code that has the form:
-    <pre>lock();
+    <pre>record.lock();
 try {
      ...
 
 } finally {
-    unlock();
+    record.unlock();
 }
     </pre>
   </li>
+  <li>Code must not block while a record is locked.</li>
+  <li>Two record can be locked simultaneously via:
+    <pre>record.lockOtherRecord(otherRecord);
+try {
+     ...
+
+} finally {
+    otherRecord.unlock();
+}
+    </pre>
+    While a record is locked another record should never be locked by calling
+    it's record.lock directly. Doing so can lead to deadlocks. It is NOT
+    permissible to lock more than two records at a time.</li>
 </ul>
 
 <p></p>
 <hr />
 
-<h2 style="text-align: center;">Record Process</h2>
+<h2 style="text-align: center;" id="Record1">Record Process</h2>
 <hr />
 
+<h3 id="Definition1">Definitions</h3>
+
 <p>The following are the interfaces for record processing:</p>
-<pre>    public enum ProcessReturn {
-        zombie,
-        noop,
-        success,
-        failure,
-        active,
-        alreadyActive
-    }
-
-    public enum ProcessResult {
-        success,
-        failure
-    }
-
-    public interface RecordProcess {
+<pre>    public interface RecordProcess {
+        // general purpose methods
         boolean isDisabled();
         boolean setDisabled(boolean value);
         boolean isActive();
         DBRecord getRecord();
+        boolean setTrace(boolean value);
+        // support lifecycle methods
         void initialize();
         void start();
         void stop();
         void uninitialize();
-        ProcessReturn process(ProcessCompleteListener listener);
-        void update();
-        void removeCompletionListener(ProcessCompleteListener listener);
-        RecordProcessSupport getRecordProcessSupport();
-        boolean setTrace(boolean value);
-    }
-
-    public interface RecordProcessSupport {
+        // record process requestor methods
+        boolean setRecordProcessRequestor(
+            RecordProcessRequestor recordProcessRequestor);
+        boolean releaseRecordProcessRequestor(
+            RecordProcessRequestor recordProcessRequestor);
+        void releaseRecordProcessRequestor();
+        String getRecordProcessRequestorName();
+        boolean setActive(RecordProcessRequestor recordProcessRequestor);
+        boolean process(RecordProcessRequestor recordProcessRequestor,
+            boolean leaveActive, TimeStamp timeStamp);
+        void setInactive(RecordProcessRequestor recordProcessRequestor);
+        // support processing methods
+        void processContinue(
+            ProcessContinueRequestor processContinueRequestor);
         void requestProcessCallback(
-            ProcessCallbackListener processCallbackListener);
-        void processContinue(Support support);
+            ProcessCallbackRequestor processCallbackRequestor);
         boolean setStatusSeverity(String status, AlarmSeverity alarmSeverity);
+        boolean setStatus(String status);
         String getStatus();
         AlarmSeverity getAlarmSeverity();
         void setTimeStamp(TimeStamp timeStamp);
         void getTimeStamp(TimeStamp timeStamp);
-        void errorMessage(String message);
     }
 
-    public interface ProcessCompleteListener {
-        void processComplete(Support support,ProcessResult result);
+    public interface RecordProcessRequestor extends Requestor{
+        void recordProcessResult(RequestResult requestResult);
+        void recordProcessComplete();
+    }
+    
+    public interface ProcessCallbackRequestor extends Requestor{
+        void processCallback();
     }
 
-    public interface ProcessCallbackListener {
-        void callback();
+    public interface ProcessContinueRequestor {
+        void processContinue();
+    }
+    
+    public interface SupportProcessRequestor {
+        void supportProcessDone(RequestResult requestResult);
     }</pre>
 
-<p>An instance of RecordProcess and RecordProcessSupport are created for each
-IOCrecord. RecordProcessSupport methods are called by support code, i.e.
-recordSupport, linkSupport, etc. RecordProcess methods are called to request
-record processing and or find out the process state of a record.</p>
+<p>An instance of RecordProcess is created for each IOCrecord. Each method
+falls into one of the following classes:</p>
+<ol>
+  <li>General Purpose. These are methods that can be called by any code. If
+    necessary a method locks the record while performing its action and
+    unlocks before returning.</li>
+  <li>Record Support Lifetime. Initialize,start,stop,ininitialize.</li>
+  <li>Record Process Requestor: These are methods for code that requests
+    record processing.</li>
+  <li>Support Processing. These are methods for use by support code, i.e.
+    code that implements record processing.</li>
+</ol>
 
-<p><span style="font-family: courier;">RecordProcess</span> has the
-methods:</p>
+<h3 id="RecordProc">RecordProcess - General Purpose Methods</h3>
 <dl>
   <dt style="font-family: courier;">isDisabled</dt>
     <dd>Is the record disabled?</dd>
@@ -474,22 +588,75 @@ methods:</p>
     <dd>Is the record active, i.e. processing?</dd>
   <dt style="font-family: courier;">getRecord</dt>
     <dd>Get the record instance to which this RecordProcess is attached.</dd>
+  <dt style="font-family: courier;">setTrace</dt>
+    <dd>Set tracing on or off. When true info messages are sent to
+      dbRecord.message whenever any processing related method is called.</dd>
+</dl>
+
+<h3 id="RecordProc1">RecordProcess - Record Lifetime Methods.</h3>
+<dl>
   <dt style="font-family: courier;">initialize</dt>
+    <dd>Initialize record support. record support, in turn, initializes
+      support that it invokes. Initialize should perform any initialiation
+      not requiring access aanything outside the record. For example it is
+      not permissible to connect to other records. If initialize is
+      successful record support enters state <span
+      style="font-family: courier;">SupportState.readyForStart</span></dd>
   <dt style="font-family: courier;">start</dt>
+    <dd>Start record support. Again record support calls start for any
+      support it invokes. If successful, the support enters state <span
+      style="font-family: courier;">SupportState.ready</span>. Until record
+      support is in the ready state and attempt to process a record will
+    fail.</dd>
   <dt style="font-family: courier;">stop</dt>
+    <dd>Stop record support. Record support calls stop for any support it
+      invokes. The support enters state <span
+      style="font-family: courier;">SupportState.readyForStart</span>.</dd>
   <dt style="font-family: courier;">uninitialize</dt>
+    <dd>Unitialize record support. It calls unitialize for any support it
+      invokes. The support enters state <span
+      style="font-family: courier;">SupportState.readyForInitialize.</span></dd>
+</dl>
+
+<h3 id="RecordProc2">RecordProcess - Record Process Requestor Methods</h3>
+
+<p>These are methods called by code that wants a record processed.</p>
+<dl>
+  <dt style="font-family: courier;">setRecordProcessRequestor</dt>
+    <dd>Request to be the record processor. Each record instance can have
+      only one record process requestor. If a requester is already registered
+      a message is sent to the requestor and false is returned.</dd>
+  <dt style="font-family: courier;">releaseRecordProcessRequestor</dt>
+    <dd>Release the requestor. Normally a requestor passes itself to this
+      method when it no longer wishes to be the requestor. the method without
+      an argument is for use if a requestor crashes without calling
+    release.</dd>
+  <dt style="font-family: courier;">setActive</dt>
+    <dd>Prepare the record for processing but do not call record support. The
+      caller must be the registered requestor. If the request fails a message
+      is sent to the requestor and false is returned. If the request is
+      successful than the caller can access the record and when ready call
+      process. If successful the record is set active and another request to
+      setActive will fail.</dd>
   <dt style="font-family: courier;">process</dt>
-    <dd>Request that the record be processed. If successful the record is set
-      active and the record support process method is called. In this case
-      the return value from record support is returned. If record support
-      returns active then it must call listener provided by RecordProcess
-      when it completes processing. <br />
+    <dd>Request that the record be processed. If the caller has not called
+      setActive the record is prepared for processing. In either case if the
+      record is ready record support process is called. If true is returned
+      the methods implemented by the recordProcessRequestor are called to
+      show the results of the process request. If <span
+      style="font-family: courier;">leaveActive</span> is true than when the
+      record completes processing it is left active until setInActive is
+      called. Until the record becomes inactive another request to process
+      the record will fail. Record support is called with the record
+      locked.<br />
       The request will fail for the following reasons:
       <ul>
         <li>The record is already active. Unless the caller passed a null
           value for listener it will be added to a list of listeners to call
           when the record completes processing. The return value will be
           alreadyActive.</li>
+        <li>The caller is not the registered process requestor. If this case
+          an exception is thrown.</li>
         <li>The record state is not RecordState.constructed. The return value
           is failure. This can happen if the changes are being made to the
           the definitions of any of the fields in the record instance, i.e.
@@ -500,29 +667,28 @@ methods:</p>
           successfully. The return value is failure.</li>
       </ul>
     </dd>
-  <dt style="font-family: courier;">update</dt>
-    <dd>Request that an active record update. The result is record support
-      dependent. Most support does nothing. Some support, e.g. motor record
-      support updates it's internal state.</dd>
-  <dt style="font-family: courier;">removeCompletionListener</dt>
-    <dd>Remove a record completion listener from the list of listeners to
-      call.</dd>
-  <dt style="font-family: courier;">getRecordProcessSupport</dt>
-    <dd>Get the RecordProcessSupport interface.</dd>
-  <dt>setTrace</dt>
-    <dd>If true a message will displayed whenever process,
-      requestProcessCallback, or processContinue are called.</dd>
+  <dt style="font-family: courier;">setInActive</dt>
+    <dd>Call by the record process requestor when it is done with processing.
+      Calling process with <span
+      style="font-family: courier;">leaveActive</span> true and then calling
+      setInactive allows the requestor to communicated with other code after
+      the record is unlocked but before it becomes inactive.</dd>
 </dl>
 
-<p><span style="font-family: courier;">RecordProcessSupport</span>, which
-should only be called by support code, has the methods:</p>
+<h3 id="RecordProc3">RecordProcess - Support Processing methods.</h3>
+
+<p>Methods called by support code which may be record support or support
+called directly or indirectly by record support. Except for <span
+style="font-family: courier;">processContinue</span> these methods throw an
+exception unless <span style="font-family: courier;">process</span> or <span
+style="font-family: courier;">processContinue</span> is running.</p>
 <dl>
   <dt style="font-family: courier;">requestProcessCallback</dt>
     <dd>Request to be called back after record support has returned but
-      before RecordProcess.process returns. The callback will be made with
-      the record unlocked. Thus the callback can request that other records
-      be processed. This is the way support code can process other records.
-      If support code directly request processing of linked records deadlocks
+      before RecordProcess.process returns. The callback is made with the
+      record unlocked. Thus the callback can request that other records be
+      processed. This is the way support code can process other records. If
+      support code directly request processing of linked records deadlocks
       can occur.</dd>
   <dt style="font-family: courier;">processContinue</dt>
     <dd>Request that the processContinue method of the support be called. The
@@ -548,44 +714,78 @@ should only be called by support code, has the methods:</p>
       style="font-family: courier;">setTimeStamp</span></dd>
 </dl>
 
-<p><span style="font-family: courier;">ProcessCompleteListener</span> has the
-single method:</p>
+<h3 id="RecordProc4">RecordProcessRequestor</h3>
+
+<p>Methods implemented by code that requests that a record be processed.</p>
 <dl>
-  <dt style="font-family: courier;">processComplete</dt>
-    <dd>Processing is complete. Either failure or success can be returned.
-      Note that this same interface is used by RecordProcess and by most
-      support code.</dd>
+  <dt style="font-family: courier;">recordProcessResult</dt>
+    <dd>The results of record processing. This is called with the record
+      locked so that the process requestor can access data from the
+    record.</dd>
+  <dt style="font-family: courier;">recordProcessComplete</dt>
+    <dd>Processing is complete. This is called with the record unlocked. If
+      the process requestor called process with <span
+      style="font-family: courier;">leaveActive</span> <span
+      style="font-family: courier;">true</span> then the requestor must call
+      <span style="font-family: courier;">setInactive.</span></dd>
 </dl>
 
-<p><span style="font-family: courier;">ProcessCallbackListener</span> has the
-single method:</p>
+<h3 id="ProcessCal">ProcessCallbackRequestor</h3>
+
+<p>The method implemented by code that calls requestProcessCallback.</p>
 <dl>
-  <dt style="font-family: courier;">callback</dt>
+  <dt style="font-family: courier;">processCallback</dt>
     <dd>The callback to call when the record support process method returns
       it RecordProcess. Any support code that wants to process other records
-      must use this interface.</dd>
+      must use this interface. The callback is called with the record
+      unlocked.</dd>
 </dl>
+
+<h3 id="ProcessCon">ProcessContinueRequestor</h3>
+
+<p>The method implemented by code that calls processContinue.</p>
+<dl>
+  <dt style="font-family: courier;">processContinue</dt>
+    <dd>A request to call support with the record locked. This is the only
+      way asynchronous support should continue processing.</dd>
+</dl>
+
+<h3 id="SupportPro">SupportProcessRequestor</h3>
+
+<p>The method implemented by code that calls the process method of any
+support code.</p>
+<dl>
+  <dt style="font-family: courier;">supportProcessDone</dt>
+    <dd>The callback to call when the record support process method returns
+      it RecordProcess. Any support code that wants to process other records
+      must use this interface. This MUST be called with either process or
+      processContinue running.</dd>
+</dl>
+
+<h3 id="RecordProc5">RecordProcessFactory</h3>
+
+<p>A factory is provided to create an instance of RecordProcess for a record
+instance. It has the method:</p>
+<pre>public class RecordProcessFactory {
+    static public RecordProcess createRecordProcess(DBRecord dbRecord);
+}</pre>
 <hr />
 
-<h2 style="text-align: center;">Support</h2>
+<h2 style="text-align: center;" id="Support1">Support</h2>
 <hr />
 
-<p>The following interfaces are used by support code, i.e. record, link, and
-any other support code that is involved with record processing:</p>
-<pre>   public interface Support {
-        String getName();
+<h3 id="Definition2">Definitions</h3>
+
+<p>The following are used by support code, i.e. record support, link support,
+and any other support code that is involved with record processing:</p>
+<pre>   public interface Support extends Requestor{
         SupportState getSupportState();
         DBData getDBData();
-        boolean addSupportStateListener(SupportStateListener listener);
-        boolean removeSupportStateListener(SupportStateListener listener);
-        void errorMessage(String message);
         void initialize();
         void start();
         void stop();
         void uninitialize();
-        ProcessReturn process(ProcessCompleteListener listener);
-        void processContinue();
-        void update();
+        void process(SupportProcessRequestor supportProcessRequestor);
     }
 
     public enum SupportState {
@@ -595,42 +795,61 @@ any other support code that is involved with record processing:</p>
         zombie;
     }
 
-    public interface SupportStateListener {
-        void newState(Support support,SupportState state);
-    }
-
     public interface LinkSupport extends Support {
         void setField(PVData field);
+    }
+
+    public abstract class AbstractSupport implements Support {
+        protected AbstractSupport(String name,DBData dbData);
+        // methods from Requestor
+        public String getRequestorName();
+        public void message(String message, MessageType messageType);
+        // methods that are rarely overridden
+        public SupportState getSupportState();
+        public DBData getDBData();
+        // following normally overridden
+        public void initialize();
+        public void start();
+        public void stop();
+        public void uninitialize();
+        public void process(SupportProcessRequestor supportProcessRequestor);
+        // following must always be called when support state changes
+        protected void setSupportState(SupportState state);
+        // following are for use by support code
+        protected boolean checkSupportState(
+            SupportState expectedState,String message);
+        protected DBStructure getConfigStructure(String structureName);
+        protected static PVBoolean getBoolean(
+            DBStructure configStructure,String fieldName)
+        protected static PVByte getByte(
+            DBStructure configStructure,String fieldName)
+        protected static PVInt getInt(
+            DBStructure configStructure,String fieldName)
+        protected static PVLong getLong(
+            DBStructure configStructure,String fieldName)
+        protected static PVFloat getFloat(
+            DBStructure configStructure,String fieldName)
+        protected static PVDouble getDouble(
+            DBStructure configStructure,String fieldName)
+        protected static PVString getString(
+            DBStructure configStructure,String fieldName)
     }</pre>
+
+<h3 id="Support2">Support</h3>
 
 <p><span style="font-family: courier;">Support</span> has the methods:</p>
 <dl>
-  <dt style="font-family: courier;">getName</dt>
-    <dd>Get the support name. Implemented by <span
-      style="font-family: courier;">AbstractSupport.</span></dd>
+  <dt style="font-family: courier;">getRequestorName</dt>
+    <dd>A requestor method to get the name of the support.</dd>
+  <dt style="font-family: courier;">message</dt>
+    <dd>A Requestor method. This is called to pass messages to the
+    support.</dd>
   <dt style="font-family: courier;">getSupportState</dt>
-    <dd>Get the support state. Implemented by <span
-      style="font-family: courier;">AbstractSupport</span>. Note that <span
-      style="font-family: courier;">AbstractSupport</span> provides a
-      protected method <span
-      style="font-family: courier;">setSupportState</span> which must be
-      called by support code whenever it changes support state.</dd>
+    <dd>Get the support state.</dd>
   <dt style="font-family: courier;">getDBData</dt>
     <dd>Get the <span style="font-family: courier;">DBData</span> interface
-      for the field that bis being supported. For record support this will be
-      the <span style="font-family: courier;">DBRecord</span> itself.
-      Implemented by <span
-      style="font-family: courier;">AbstractSupport.</span></dd>
-  <dt style="font-family: courier;">addSupportStateListener</dt>
-    <dd>Add listener to be called when the support state changes. Implemented
-      by <span style="font-family: courier;">AbstractSupport.</span></dd>
-  <dt style="font-family: courier;">removeSupportStateListener</dt>
-    <dd>Remove a support state listener. Implemented by <span
-      style="font-family: courier;">AbstractSupport.</span></dd>
-  <dt style="font-family: courier;">errorMessage</dt>
-    <dd>Generate an error message. Implemented by <span
-      style="font-family: courier;">AbstractSupport</span>. It adds to the
-      message the record instance name ands the hierarchical field name.</dd>
+      for the field that is being supported. For record support this will be
+      the record itself. <span style="font-family: courier;"></span></dd>
   <dt style="font-family: courier;">initialize</dt>
     <dd>Perform initialization that does not involve accessing other records
       and/or support.</dd>
@@ -643,14 +862,9 @@ any other support code that is involved with record processing:</p>
     <dd>Remove all internal state are prepare to again initialize.</dd>
   <dt style="font-family: courier;">process</dt>
     <dd>Process.</dd>
-  <dt style="font-family: courier;">processContinue</dt>
-    <dd>Continue processing. Note that this must be called as a result of a
-      call to RecorrProcessSupport.processContinue.</dd>
-  <dt style="font-family: courier;">update</dt>
-    <dd>Optional method. <span
-      style="font-family: courier;">AbstractSupport</span> implements this by
-      doing nothing.</dd>
 </dl>
+
+<h3 id="SupportSta">SupportState</h3>
 
 <p><span style="font-family: courier;">SupportState</span> has the following
 values:</p>
@@ -667,12 +881,7 @@ values:</p>
     <dd>Support is going away.</dd>
 </dl>
 
-<p><span style="font-family: courier;">SupportStateListener</span> has the
-single method:</p>
-<dl>
-  <dt style="font-family: courier;">newState</dt>
-    <dd>The new state.</dd>
-</dl>
+<h3 id="LinkSuppor">LinkSupport</h3>
 
 <p><span style="font-family: courier;">LinkSupport</span> extends <span
 style="font-family: courier;">Support</span> with the method:</p>
@@ -682,32 +891,99 @@ style="font-family: courier;">Support</span> with the method:</p>
       put/get data.</dd>
 </dl>
 
-<p>All support code should extend AbstractSupport, which declares the
-following methods abstract: initialize, start, stop, uninitialize, and
-process. Support code may also chose to override update. AbstractSupport also
-implements the protected methods:</p>
+<h3 id="AbstractSu">AbstractSupport</h3>
+
+<p>All support code should extend AbstractSupport.</p>
 <dl>
-  <dt style="font-family: courier;">AbstractSupport(String name,DBData
-  dbData)</dt>
-    <dd>The constructor which must be called by the support constructor.</dd>
-  <dt style="font-family: courier;">setSupportState(SupportState state)</dt>
+  <dt style="font-family: courier;">AbstractSupport</dt>
+    <dd>The constructor which must be called by the derived support
+      constructor.</dd>
+  <dt style="font-family: courier;">getRequestorName</dt>
+    <dd>The returns the name passed to constructor.</dd>
+  <dt style="font-family: courier;">message</dt>
+    <dd>Calls dbData.message.</dd>
+  <dt style="font-family: courier;">getSupportState</dt>
+    <dd>Gets the current support state.</dd>
+  <dt style="font-family: courier;">getDBData</dt>
+    <dd>Returns dbData.</dd>
+  <dt style="font-family: courier;">initialize</dt>
+    <dd>Normally overridden. The default version always succeeds, i.e. enters
+      state readyForStart.</dd>
+  <dt style="font-family: courier;">start</dt>
+    <dd>Normally overridden. The default version always succeeds, i.e. enters
+      state ready.</dd>
+  <dt style="font-family: courier;">stop</dt>
+    <dd>Normally overridden. The default version always succeeds, i.e. enters
+      state readyForStart.</dd>
+  <dt style="font-family: courier;">unintialize</dt>
+    <dd>Normally overridden. The default version always succeeds, i.e. enters
+      state readyForInitialize.</dd>
+  <dt style="font-family: courier;">process</dt>
+    <dd>Normally overridden. The default version sends a message to dbData
+      and calls supportProcessRequestor with a failure result.</dd>
+  <dt style="font-family: courier;">setSupportState</dt>
     <dd>This must be called by support whenever it changes state.</dd>
+  <dt style="font-family: courier;">checkSupportState</dt>
+    <dd>Checks that the state is the expected state and generates an error
+      message if it isn't.</dd>
+  <dt style="font-family: courier;">getConfigStructure</dt>
+    <dd>Get the configuration structure for the field. <span
+      style="font-family: courier;">null</span> is returned if no
+      configuration structure exists.</dd>
+  <dt style="font-family: courier;">getBoolean</dt>
+    <dd>Get the interface for a <span
+      style="font-family: courier;">boolean</span> field of the configuration
+      structure.</dd>
+  <dt style="font-family: courier;">getByte</dt>
+    <dd>Get the interface for a <span
+      style="font-family: courier;">byte</span> field of the configuration
+      structure.</dd>
+  <dt style="font-family: courier;">getInt</dt>
+    <dd>Get the interface for a <span
+      style="font-family: courier;">integer</span> field of the configuration
+      structure.</dd>
+  <dt style="font-family: courier;">getLong</dt>
+    <dd>Get the interface for a <span
+      style="font-family: courier;">long</span> field of the configuration
+      structure.</dd>
+  <dt style="font-family: courier;">getFloat</dt>
+    <dd>Get the interface for a <span
+      style="font-family: courier;">float</span> field of the configuration
+      structure.</dd>
+  <dt style="font-family: courier;">getDouble</dt>
+    <dd>Get the interface for a <span
+      style="font-family: courier;">double</span> field of the configuration
+      structure.</dd>
+  <dt style="font-family: courier;">getString</dt>
+    <dd>Get the interface for a <span
+      style="font-family: courier;">string</span> field of the configuration
+      structure.</dd>
 </dl>
 <hr />
 
-<h2 style="text-align: center;">SupportCreation</h2>
+<h2 style="text-align: center;" id="Support3">Support Creation</h2>
 <hr />
 
-<p>This is MARTY SAY SOMETHING</p>
+<p>This is called to create all support for all fields of all records in the
+IOC database passed to createSupportCreation.</p>
+
+<h3 id="Definition3">Definitions:</h3>
 <pre>    public interface SupportCreation {
         boolean createSupport();
         boolean initializeSupport();
         boolean  startSupport();
         void uninitializeSupport();
         void stopSupport();
+    }
+
+    public class SupportCreationFactory
+        static public SupportCreation createSupportCreation(
+            IOCDB iocdb,MessageListener messageListener)
     }</pre>
 
-<p>where</p>
+<h3 id="Support4">Support Creation</h3>
+
+<p>SupportCreation has the methods:</p>
 <dl>
   <dt style="font-family: courier;">createSupport</dt>
     <dd>Create the support. The return value is true only if no errors are
@@ -723,73 +999,26 @@ implements the protected methods:</p>
   <dt style="font-family: courier;">stopSupport</dt>
     <dd>Stop the support.</dd>
 </dl>
-<hr />
 
-<h2 style="text-align: center;">Record Process</h2>
-<hr />
+<h3 id="Factory">Factory</h3>
 
-<p>RecordProcess is an interface implemented for every record instance.</p>
-<pre>    public interface RecordProcess {
-        boolean isDisabled();
-        boolean setDisabled(boolean value);
-        boolean isActive();
-        ProcessDB getProcessDB();
-        DBRecord getRecord();
-        void initialize();
-        void start();
-        void stop();
-        void uninitialize();
-        ProcessReturn process(ProcessCompleteListener listener);
-        void update();
-        void removeCompletionListener(ProcessCompleteListener listener);
-        RecordProcessSupport getRecordProcessSupport();
-        boolean setTrace(boolean value);
-    }
-    
-    public interface RecordProcessSupport {
-        void requestProcessCallback(ProcessCallbackListener processCallbackListener);
-        void processContinue(Support support);
-        boolean setStatusSeverity(String status, AlarmSeverity alarmSeverity);
-        String getStatus();
-        AlarmSeverity getAlarmSeverity();
-        void setTimeStamp(TimeStamp timeStamp);
-        void getTimeStamp(TimeStamp timeStamp);
-        void errorMessage(String message);
-    }
-    
-    public class RecordProcessFactory {
-        static public RecordProcess createRecordProcess(DBRecord dbRecord) {
-    }</pre>
-<hr />
-
-<h2 style="text-align: center;">Support Creation Factory</h2>
-<hr />
-<hr />
-<pre>    public class SupportCreationFactory
-        static public SupportCreation createSupportCreation(IOCDB iocdb)
-    }</pre>
-
-<p>where</p>
+<p>SupportCreationFactory has the method:</p>
 <dl>
   <dt>createSupportCreation</dt>
     <dd>Create a SupportCreation database.</dd>
 </dl>
 
-<h2 style="text-align: center;">Local Channel Access</h2>
+<h2 style="text-align: center;" id="Local1">Local Channel Access</h2>
 <hr />
 
 <p>An implementation of a channel access client for accessing records in the
-IOC database is provided:</p>
-<pre>    public interface ChannelLink extends Channel {
-        void setLinkRecord(DBRecord record);
-        DBRecord getLinkRecord();
-    }
-
-    public class ChannelAccessLocalFactory  {
-        static public boolean create(IOCDB iocdb);
+IOC database is provided. This is created automatically by
+ChannelAccessLocalFactory . The factory creates a single instance of an
+implementation of a channel access client for accessing local records. This
+is used by link support. ChannelAccessLocalFactory has only one public
+method.</p>
+<pre>    public class ChannelAccessLocalFactory  {
+        static public void setIOCDB(IOCDB iocdb);
     }</pre>
-
-<p>The factory creates a single instance of an implementation of a channel
-access client for accessing local records. This is used by link support.</p>
 </body>
 </html>

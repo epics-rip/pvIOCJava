@@ -21,8 +21,18 @@ public interface ChannelPutRequestor extends ChannelRequestor {
      * @param data The interface for putting data.
      * @return (false,true) if the requestor (has,has not) obtained all the data.
      * A value of true means that the requestor wants to be called again for this data.
+     * The caller must call ChannelPut.putDelayed in order to access more data.
+     * The putDelayed call will result in nextDelayedPutData being called. 
      * This normally means that an array is being transfered and the requestor is
      * not able to handle the array as a single chunk of data.
      */
     boolean nextPutData(Channel channel,ChannelField field,PVData data);
+    /**
+     * Called as a result of a call to ChannelPut.putDelayed,
+     * The underlying database is locked and this is called. 
+     * @param data The data.
+     * @return (false,true) if the requestor (will not, will)
+     * call ChannelPut.putDelayed again for this pvData.
+     */
+    boolean nextDelayedPutData(PVData data);
 }

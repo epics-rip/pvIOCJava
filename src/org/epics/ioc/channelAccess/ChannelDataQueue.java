@@ -6,11 +6,11 @@
 package org.epics.ioc.channelAccess;
 
 /**
- * A queue of ChannelNotifyData.
+ * A queue of ChannelData.
  * @author mrk
  *
  */
-public interface ChannelNotifyDataQueue {
+public interface ChannelDataQueue {
     /**
      * Get the number of free queue elements.
      * @return The number.
@@ -23,14 +23,14 @@ public interface ChannelNotifyDataQueue {
     int capacity();
     /**
      * Get the next free queue element.
-     * @return
+     * @return A ChannelData.
      */
-    ChannelNotifyData getFree();
+    ChannelData getFree();
     /**
      * Get the oldest queue element.
      * @return The oldest element.
      */
-    ChannelNotifyData getNext();
+    ChannelData getNext();
     /**
      * Get the number of missed sets of data.
      * @return The number of missed sets of data.
@@ -38,7 +38,7 @@ public interface ChannelNotifyDataQueue {
     int getNumberMissed();
     /**
      * Release the queue element. This must be the element returned by getNext.
-     * @param channelNotifyData The queue element to release.
+     * @param channelData The queue element to release.
      */
-    void releaseNext(ChannelNotifyData channelNotifyData);
+    void releaseNext(ChannelData channelData);
 }

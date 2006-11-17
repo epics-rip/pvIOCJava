@@ -28,25 +28,26 @@ public class XMLToIOCDBFactory {
     private static DBD dbd;
     private static IOCDB iocdb;
     private static IOCDB iocdbMaster;
-    private static MessageListener iocMessageListener;
+    private static Requestor requestor;
     private static IOCXMLReader iocxmlReader;
     /**
      * Convert an xml file to IOCDatabase definitions and put the definitions in a database.
      * @param dbdin the reflection database.
      * @param iocdbin IOC database.
      * @param fileName The name of the file containing xml record instance definitions.
+     * @param requestor The requestor.
      */
-    public static void convert(DBD dbdin, IOCDB iocdbin, String fileName,MessageListener messageListener)
+    public static void convert(DBD dbdin, IOCDB iocdbin, String fileName,Requestor requestor)
     {
         boolean gotIt = isInUse.compareAndSet(false,true);
         if(!gotIt) {
-            messageListener.message("XMLToIOCDBFactory.convert is already active",MessageType.fatalError);
+            requestor.message("XMLToIOCDBFactory.convert is already active",MessageType.fatalError);
         }
         try {
             dbd = dbdin;
             iocdb = iocdbin;
             iocdbMaster = null;
-            iocMessageListener = messageListener;
+            XMLToIOCDBFactory.requestor = requestor;
             IOCXMLListener listener = new Listener();
             iocxmlReader = IOCXMLReaderFactory.getReader();
             iocxmlReader.parse("IOCDatabase",fileName,listener);
@@ -64,12 +65,11 @@ public class XMLToIOCDBFactory {
      * to add them to master.
      * The DBD database is named master.
      * Attempting to add definitions for a record instance that is already in master is an error.
-     * @param iocdbName The name to be given to the newly created IOCDB.
      * @param fileName The file containing record instances definitions.
      * @param messageListener A listener for error messages.
      * @return An IOC Database that has the newly created record instances.
      */
-    public static IOCDB convert(String iocdbName,String fileName,MessageListener messageListener) {
+    public static IOCDB convert(String iocdbName,String fileName,Requestor messageListener) {
         boolean gotIt = isInUse.compareAndSet(false,true);
         if(!gotIt) {
             messageListener.message("XMLToIOCDBFactory is already active", MessageType.error);
@@ -79,7 +79,7 @@ public class XMLToIOCDBFactory {
             iocdb =IOCDBFactory.create(iocdbName);           
             dbd = DBDFactory.getMasterDBD();
             iocdbMaster = IOCDBFactory.getMaster();
-            iocMessageListener = messageListener;
+            requestor = messageListener;
             IOCXMLListener listener = new Listener();
             iocxmlReader = IOCXMLReaderFactory.getReader();
             iocxmlReader.parse("IOCDatabase",fileName,listener);
@@ -150,7 +150,7 @@ public class XMLToIOCDBFactory {
         }
         
         public void message(String message,MessageType messageType) {
-            iocMessageListener.message(message, messageType);
+            requestor.message(message, messageType);
         }
     }
 

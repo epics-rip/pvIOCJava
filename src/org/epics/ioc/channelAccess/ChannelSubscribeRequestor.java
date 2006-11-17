@@ -12,7 +12,7 @@ import org.epics.ioc.util.*;
  * @author mrk
  *
  */
-public interface ChannelNotifyRequestor extends Requestor {
+public interface ChannelSubscribeRequestor extends Requestor {
     /**
      * A message for requester.
      * @param channel The channel.

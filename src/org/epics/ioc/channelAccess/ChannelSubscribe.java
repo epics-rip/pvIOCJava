@@ -12,16 +12,12 @@ package org.epics.ioc.channelAccess;
  */
 public interface ChannelSubscribe {
     /**
-     * Refuse further requests.
-     */
-    void destroy();
-    /**
      * Start monitoring for changes and send notification of changes but not the data.
      * @param fieldGroup The field group to monitor.
      * @param listener The listener to send notification messages.
      * @param why The types of events desired.
      */
-    void start(ChannelFieldGroup fieldGroup,ChannelNotifyRequestor listener,Event why);
+    void start(ChannelFieldGroup fieldGroup,ChannelSubscribeRequestor listener,Event why);
     /**
      * Start monitoring for changes and send notification and data.
      * @param fieldGroup The field group to monitor.
@@ -31,13 +27,13 @@ public interface ChannelSubscribe {
      * @param why The types of events desired.
      */
     void start(ChannelFieldGroup fieldGroup,int queueCapacity,
-        ChannelNotifyGetRequestor listener,Event why);
+        ChannelSubscribeGetRequestor listener,Event why);
     /**
      * Stop monitoring.
      */
     void stop();
     /**
-     * Called by ChannelNotifyGetRequestor when it is ready for new data.
+     * Called by ChannelSubscribeGetRequestor when it is ready for new data.
      */
     void readyForData();
 }

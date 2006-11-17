@@ -10,7 +10,7 @@
 <body>
 <h1 style="text-align: center">EPICS JavaIOC: pvAccess<br />
 package: org.epics.ioc.pvAccess<br />
-2006.08.07</h1>
+2006.11.14</h1>
 
 <p><a href="#Overview">Overview</a></p>
 <ul>
@@ -28,6 +28,7 @@ package: org.epics.ioc.pvAccess<br />
   <li><a href="#StructAccess">Structure</a></li>
   <li><a href="#ArrayAccess">Array</a></li>
 </ul>
+<a href="#AbstractField">Abstract Field Classes</a><br />
 <a href="#Convert">Convert</a><br />
 <a href="#FieldFactory">Field Factory</a><br />
 <a href="#ConvertFactory">Convert Factory</a><br />
@@ -95,6 +96,9 @@ systems, e.g. TANGO, TINI, DOOCS, etc.</p>
   <li>Field Factory
     <p>This is an object factory that creates objects implementing the
     reflection interfaces.</p>
+  </li>
+  <li>Abstract Field Classes
+    <p>Abstract base classes for implementing Field objects.</p>
   </li>
   <li>Convert Factory
     <p>An object factory that provides an implementation of the conversion
@@ -201,6 +205,7 @@ especially important for arrays and structures.</p>
 
     interface Field{
         String getName();
+        Field getParent();
         Property[] getPropertys();
         Property getProperty(String propertyName);
         Type getType();
@@ -233,11 +238,14 @@ especially important for arrays and structures.</p>
   <li>Field
     <ul>
       <li>A field has a name.</li>
+      <li>A field can have a parent. In particular each field of a structure
+        has the structure as it's parent.</li>
       <li>A field has a Type.</li>
       <li>A field can have an arbitrary number of associated properties
         including none.</li>
       <li>A field can optionally have support identified via a name.</li>
-      <li>A field can be made immutable.</li>
+      <li>A field can be made immutable. This means that the data associated
+        with the field is immutable.</li>
       <li>A field can be converted to a string.</li>
     </ul>
   </li>
@@ -384,6 +392,7 @@ change the support the procedure is:</p>
         void setLength(int len);
         int getCapacity();
         void setCapacity(int len);
+        boolean isCapacityMutable();
     }
 
     public class UnknownArrayData {
@@ -548,6 +557,62 @@ the following reads an entire array:</p>
     } </pre>
 <hr />
 
+<h1 style="text-align: center"><a id="AbstractField"></a>Abstract Field
+Classes</h1>
+<hr />
+
+<p>The following are base classes for implementimg Field objects:</p>
+<pre>    public class AbstractField implements Field {
+        public AbstractField(String name, Type type,Property[] property);
+        public static void newLine(StringBuilder builder, int indentLevel);
+        public String getName();
+        public Field getParent();
+        protected void setParent(Field field);
+        public Property[] getPropertys();
+        public Property getProperty(String propertyName);
+        public Type getType();
+        public String getSupportName();
+        public void setSupportName(String name);
+        public boolean isMutable();
+        public void setMutable(boolean value);
+        public String toString();
+        public String toString(int indentLevel);
+    }
+    
+    public class AbstractEnum extends AbstractField implements Enum{
+        public AbstractEnum(String name,Property[] property,boolean choicesMutable);
+        public boolean isChoicesMutable();
+        public String toString();
+        public String toString(int indentLevel);
+    }
+    
+    public class AbstractStructure extends AbstractField implements Structure {
+        public AbstractStructure(String name,Property[] property,
+             String structureName,Field[] field);
+        public Field getField(String name);
+        public int getFieldIndex(String name);
+        public String[] getFieldNames();
+        public Field[] getFields();
+        public String getStructureName();
+        public String toString();
+        public String toString(int indentLevel);
+    }
+
+    public class AbstractArray extends AbstractField implements Array {
+        public AbstractArray(String name, Property[] property,Type elementType);
+        public Type getElementType();
+        public String toString();
+        public String toString(int indentLevel);      
+        private String getString(int indentLevel);
+    }
+}
+
+</pre>
+
+<p>These classes are used by FieldFactory, described below, to create
+instances of the reflection onterfaces.</p>
+<hr />
+
 <h1 style="text-align: center"><a id="Convert"></a>Convert</h1>
 <hr />
 
@@ -641,7 +706,7 @@ array contains less than len elements.
 <p>The field factory creates objects for each on the interspection
 interfaces. It has the following public methods:</p>
 <pre>public final class FieldFactory {
-    public static Property createProperty(String name, Field field);
+    public static Property createProperty(String name, String fieldName);
 
     public static Field createField(String name,
         Type type,Property[] property);

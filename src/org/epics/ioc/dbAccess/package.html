@@ -12,7 +12,7 @@
 
 <h1 style="text-align: center">EPICS JavaIoc: Database Access <br />
 package: org.epics.ioc.dbAcess <br />
-2006.09.29</h1>
+2006.11.14</h1>
 
 <div class="toc">
 <ul>
@@ -472,27 +472,27 @@ Database Converter</h2>
 <hr />
 
 <p><span style="font-weight:bold;">NOTE</span> : To create definitions for an
-IOC, use org.epics.ioc.IOCFactory.initDatabase instead of directly calling
-XMLToIOCDBFactory. initDatabase calls XMLToIOCDBFactory and also initializes
-all support. Database instances should not be added to the master IOCDB
-unless all support initializes and starts correctly.</p>
+IOC, use org.epics.ioc.util.IOCFactory.initDatabase instead of directly
+calling XMLToIOCDBFactory. initDatabase calls XMLToIOCDBFactory and also
+initializes all support. Database instances should not be added to the master
+IOCDB unless all support initializes and starts correctly.</p>
 
 <p>The following reads an xml file containing record instance definitions and
 puts them into an IOCDB.</p>
 <pre>    public class XMLToIOCDBFactory {
         public static void convert(DBD dbd, IOCDB iocdb, String fileName,
-            IOCMessageListener messageListener);
+            Requestor requestor);
         public static IOCDB convert(String iocdbName,String fileName,
-            IOCMessageListener messageListener);
+            Requestor requestor);
     }
   </pre>
 <dl>
   <dt style="font-family: courier;">convert(DBD dbd, IOCDB iocdb, String
-  fileName, IOCMessageListener messageListener)</dt>
+  fileName, Requestor requestor)</dt>
     <dd>Parse an xml file conaining record instance definitions and put the
       resulting record instances into an IOC database.</dd>
   <dt style="font-family: courier;">convert(String iocdbName,String fileName,
-  IOCMessageListener messageListener)</dt>
+  Requestor requestor)</dt>
     <dd>Create an IOC Database (IOCDB) with name iocdbName and populate it
       with definitions from an XML file. The definitions are not added to the
       master IOCDB but the caller can call IOCDB.mergeIntoMaster to add them
@@ -510,7 +510,7 @@ puts them into an IOCDB.</p>
   <dt style="font-family: courier;">fileName</dt>
     <dd>The filename relative to the current working directory that contains
       the Database Definitions.</dd>
-  <dt style="font-family: courier;">messageListener</dt>
+  <dt style="font-family: courier;">requestor</dt>
     <dd>A listener for all messages generated while the method is
     execuiting.</dd>
   <dt style="font-family: courier;">iocdbName</dt>
@@ -983,13 +983,15 @@ the methods to actually get ot put data.</p>
         public void removeListener(Listener listener);
         public void postPut();
         public void postPut(DBData dbData);
+        // adds full field name to message and calls dbRecord.message
+        public void message(String message, MessageType messageType);
         // convenience method for derived classes
         protected static void newLine(StringBuilder builder, int indentLevel);
         // constructor
         protected AbstractDBData(DBData parent, DBDField dbdField);
         // must be called by derived class 
         protected void setRecord(DBRecord record);
-        protected static void newLine(StringBuilder builder, int indentLevel);
+        // Called by AbstractDBRecord
         protected void removeListeners();
     }</pre>
 
@@ -1194,8 +1196,8 @@ ReadWrite locks are used to implement thread safety.</p>
         boolean removeRecord(DBRecord record);
         Map&lt;String,DBRecord&gt; getRecordMap();
         void message(String message, IOCMessageType messageType);
-        void addMessageListener(IOCMessageListener listener);
-        void removeMessageListener(IOCMessageListener listener);
+        void addMessageListener(Requestor listener);
+        void removeMessageListener(Requestor listener);
         DBAccess createAccess(String recordName);
         String recordList(String regularExpression);
         String recordToString(String regularExpression);

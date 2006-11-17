@@ -23,19 +23,19 @@ public class SupportCreationFactory {
      * @param iocdb the iocdb associated with the record processing.
      * @return the SupportCreation.
      */
-    static public SupportCreation createSupportCreation(IOCDB iocdb,MessageListener iocMessageListener) {
-        SupportCreationInstance processDB = new SupportCreationInstance(iocdb,iocMessageListener);
+    static public SupportCreation createSupportCreation(IOCDB iocdb,Requestor requestor) {
+        SupportCreationInstance processDB = new SupportCreationInstance(iocdb,requestor);
         return processDB;
     }
     
     static private class SupportCreationInstance implements SupportCreation{
         private IOCDB iocdb;
-        private MessageListener iocMessageListener;
+        private Requestor requestor;
         private Collection<DBRecord> records;
         
-        private SupportCreationInstance(IOCDB iocdbin,MessageListener iocMessageListener) {
+        private SupportCreationInstance(IOCDB iocdbin,Requestor requestor) {
             iocdb = iocdbin;
-            this.iocMessageListener = iocMessageListener;
+            this.requestor = requestor;
             records = iocdb.getRecordMap().values();
         }
         /* (non-Javadoc)
@@ -126,7 +126,7 @@ public class SupportCreationFactory {
             if(dbRecord.getSupport()!=null) return true;
             String supportName = dbRecord.getSupportName();
             if(supportName==null) {
-                iocMessageListener.message(
+                requestor.message(
                     dbRecord.getRecordName() + " no support found",
                     MessageType.fatalError);
                 return false;
@@ -213,7 +213,7 @@ public class SupportCreationFactory {
         private void printError(DBData dbData,String message) {
             String name = dbData.getFullFieldName();
             name = dbData.getRecord().getRecordName() + name;
-            iocMessageListener.message(
+            requestor.message(
                     name + " " + message,
                     MessageType.error);
         }

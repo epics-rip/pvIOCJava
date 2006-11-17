@@ -7,8 +7,7 @@ package org.epics.ioc.util;
 
 /**
  * The reader for IOC XML processing.
- * 
- * The implementation will supply filenames and line and character positions.
+ * This is an abstraction above the XML SAX reader.
  * @author mrk
  *
  */

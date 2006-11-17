@@ -21,7 +21,7 @@ public abstract class AbstractDBEnum extends AbstractDBData implements DBEnum {
     private static Convert convert = ConvertFactory.getConvert();
     /**
      * constructor that derived classes must call.
-     * @param the parent interface.
+     * @param parent The parent interface.
      * @param dbdEnumField the reflection interface for the DBEnum data.
      * @param choice the choices for the enum.
      */

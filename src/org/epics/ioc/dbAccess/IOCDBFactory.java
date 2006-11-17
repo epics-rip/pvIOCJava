@@ -46,11 +46,11 @@ public class IOCDBFactory {
             new LinkedHashMap<String,DBRecord>();
         private ReentrantReadWriteLock rwLock = 
             new ReentrantReadWriteLock();
-        private boolean workingMessageListenerListModified = false;
-        private ArrayList<MessageListener> workingMessageListenerList =
-            new ArrayList<MessageListener>();
-        private ArrayList<MessageListener> messageListenerList =
-            new ArrayList<MessageListener>();
+        private boolean workingRequestorListModified = false;
+        private ArrayList<Requestor> workingRequestorList =
+            new ArrayList<Requestor>();
+        private ArrayList<Requestor> messageListenerList =
+            new ArrayList<Requestor>();
         
         private IOCDBInstance(String name) {
             this.name = name;
@@ -168,42 +168,42 @@ public class IOCDBFactory {
         public void message(String message, MessageType messageType) {
             rwLock.writeLock().lock();
             try {                
-                if(workingMessageListenerListModified) {
-                    workingMessageListenerList = (ArrayList<MessageListener>)messageListenerList.clone();
-                    workingMessageListenerListModified = false;
+                if(workingRequestorListModified) {
+                    workingRequestorList = (ArrayList<Requestor>)messageListenerList.clone();
+                    workingRequestorListModified = false;
                 }
             } finally {
                 rwLock.writeLock().unlock();
             }
-            if(workingMessageListenerList.size()<=0) {
+            if(workingRequestorList.size()<=0) {
                 System.out.println(messageType.toString() + " " + message);
                 return;
             }
-            Iterator<MessageListener> iter = workingMessageListenerList.iterator();
+            Iterator<Requestor> iter = workingRequestorList.iterator();
             while(iter.hasNext()) {
                 iter.next().message(message, messageType);
             }
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.dbAccess.IOCDB#addMessageListener(org.epics.ioc.util.MessageListener)
+         * @see org.epics.ioc.dbAccess.IOCDB#addRequestor(org.epics.ioc.util.Requestor)
          */
-        public void addMessageListener(MessageListener listener) {
+        public void addRequestor(Requestor requestor) {
             rwLock.writeLock().lock();
             try {
-                workingMessageListenerList.add(listener);
-                workingMessageListenerListModified = true;
+                workingRequestorList.add(requestor);
+                workingRequestorListModified = true;
             } finally {
                 rwLock.writeLock().unlock();
             }
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.dbAccess.IOCDB#removeMessageListener(org.epics.ioc.util.MessageListener)
+         * @see org.epics.ioc.dbAccess.IOCDB#removeRequestor(org.epics.ioc.util.Requestor)
          */
-        public void removeMessageListener(MessageListener listener) {
+        public void removeRequestor(Requestor requestor) {
             rwLock.writeLock().lock();
             try {
-                workingMessageListenerList.remove(listener);
-                workingMessageListenerListModified = true;
+                workingRequestorList.remove(requestor);
+                workingRequestorListModified = true;
             } finally {
                 rwLock.writeLock().unlock();
             }

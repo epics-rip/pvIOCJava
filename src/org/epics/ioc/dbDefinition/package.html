@@ -12,7 +12,7 @@
 
 <h1 style="text-align: center">EPICS JavaIoc: Database Definition <br />
 package: org.epics.ioc.dbDefinition<br />
-2006.09.29</h1>
+2006.11.14</h1>
 <hr />
 
 <div class="toc">
@@ -75,8 +75,7 @@ package: org.epics.ioc.dbDefinition<br />
   <li><a href="#Implementa">Implementation Specific Definitions</a>
     <ul>
       <li><a href="#DBDCreateF">DBDCreateFactory</a></li>
-      <li><a href="#AbstractDB">AbstractDBDField</a></li>
-      <li><a href="#DBDAttribu">DBDAttribute ETC</a></li>
+      <li><a href="#AbstractDBD">Abstract Classes</a></li>
     </ul>
   </li>
 </ul>
@@ -516,7 +515,7 @@ pvAccess. The new types are:</p>
     <dd>This is for introspecting the XML support definitions.</dd>
 </dl>
 
-<p>Reflection interfaces for structure and recordType fields extent the
+<p>Reflection interfaces for structure and recordType fields extend the
 reflection interfaces provided by org.epics.ioc.pvAccess:</p>
 <dl>
   <dt>DBDField</dt>
@@ -975,9 +974,9 @@ and link support definitions and adds the definitions to a database
 definition database.</p>
 <pre>    public class XMLToDBDFactory {
         public static void convert(DBD dbd, String fileName,
-            IOCMessageListener messageListener);
+            Requestor requestor);
         public static DBD create(String dbdName,String fileName,
-            IOCMessageListener messageListener);
+            Requestor requestor);
     }</pre>
 <dl>
   <dt style="font-family: courier;">convert</dt>
@@ -986,15 +985,15 @@ definition database.</p>
       addToMaster instead of this.</dd>
   <dt style="font-family: courier;">create</dt>
     <dd>Create a DBD with the specified name and put the definitions obtained
-      by pasrsing the XML defininitions in fileName into the dbd. The caller
-      can, if desired, call DBD.mergeToMaster to put bthe newly created
+      by parsing the XML defininitions in fileName into the dbd. The caller
+      can, if desired, call DBD.mergeToMaster to put the newly created
       definitions into the master DBD. This can be called either during IOC
       initialization or while an IOC is running, i.e. on-line add of new
       definitions is supported. Definitions will not be created if they
       already appear in master or if they are defined more than once. A
       general rule is that the new definitions should not be added to master
       if any messages with message type greater than info are passed to the
-      messageListener. In any case the caller should remove all references to
+      requestor. In any case the caller should remove all references to
       the new DBD after it decides not to merge or after the merge.</dd>
 </dl>
 
@@ -1005,7 +1004,7 @@ definition database.</p>
   <dt style="font-family: courier;">fileName</dt>
     <dd>The filename relative to the current working directory that contains
       the Database Definitions.</dd>
-  <dt style="font-family: courier;">messageListener</dt>
+  <dt style="font-family: courier;">requestor</dt>
     <dd>A listener for all messages generated while the method is
     execuiting.</dd>
   <dt style="font-family: courier;">dbdName</dt>
@@ -1066,42 +1065,18 @@ Definition.</p>
     public static DBDField createField(DBDAttribute attribute, Property[]property);
 }</pre>
 
-<h3 id="AbstractDB">AbstractDBDField</h3>
+<h3 id="AbstractDBD">Abstract Classes</h3>
+The following abstract classes are available for implementing DBD
+introspection interfaces:
+<ul>
+  <li>AbstractDBDField</li>
+  <li>AbstractDBDEnumField</li>
+  <li>AbstractDBDMenuField</li>
+  <li>AbstractDBDArrayField</li>
+  <li>AbstractDBDStructureField</li>
+</ul>
 
-<p>An abstract class is available for creating implementations of the field
-reflection interfaces. This class is used by DBDCreateFactory and is probably
-not needed by other code.</p>
-
-<h3 id="DBDAttribu">DBDAttribute ETC</h3>
-
-<p>Interfaces DBDAttribute and DBDAttribute and class DBDAttributeFactory are
-used by the XML parsers and are not of use after database creation. Thus,
-other than showing the interfaces they are not discussed in this package
-overview.</p>
-<pre>    interface DBDAttribute {
-        String getName();      // If possible use the version from DBDField
-        DBType getDBType();    // If possible use the version from DBDField
-        Type getType();        // If possible use the version from DBDField
-        String getDefault();
-        boolean isReadonly();
-        boolean isDesign();
-        boolean isLink();
-        int getAsl();
-        DBDMenu getMenu();
-        DBDStructure getStructure();
-        DBType getElementDBType();
-        Type getElementType();
-        String getSupportName();
-    }
-
-    interface DBDAttributeValues {
-        int getLength();
-        String getValue(String name);
-        Set&lt;String&gt; keySet();
-    }
-
-    public class DBDAttributeFactory {
-        static public DBDAttribute create(DBD dbd, DBDAttributeValues attributes);
-    }</pre>
+<p>These classes are used by DBDCreateFactory and are probably not needed by
+other code.</p>
 </body>
 </html>

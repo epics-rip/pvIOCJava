@@ -13,7 +13,7 @@ import org.epics.ioc.dbDefinition.*;
 import org.epics.ioc.dbAccess.*;
 import org.epics.ioc.dbProcess.*;
 import org.epics.ioc.util.IOCFactory;
-import org.epics.ioc.util.MessageListener;
+import org.epics.ioc.util.Requestor;
 import org.epics.ioc.util.MessageType;
 import org.epics.ioc.util.RequestResult;
 import org.epics.ioc.util.TimeStamp;
@@ -31,15 +31,15 @@ public class ProcessTest extends TestCase {
     public static void testProcess() {
         DBD dbd = DBDFactory.getMasterDBD();
         IOCDB iocdbMaster = IOCDBFactory.getMaster();
-        MessageListener iocMessageListener = new Listener();
+        Requestor iocRequestor = new Listener();
         XMLToDBDFactory.convert(dbd,
                  "src/org/epics/ioc/support/menuStructureSupportDBD.xml",
-                 iocMessageListener);
+                 iocRequestor);
         XMLToDBDFactory.convert(dbd,
                  "src/org/epics/ioc/dbProcess/example/exampleDBD.xml",
-                 iocMessageListener);        
+                 iocRequestor);        
         boolean initOK = IOCFactory.initDatabase(
-            "src/org/epics/ioc/dbProcess/example/exampleDB.xml",iocMessageListener);
+            "src/org/epics/ioc/dbProcess/example/exampleDB.xml",iocRequestor);
         if(!initOK) return;
         Map<String,DBRecord> recordMap = iocdbMaster.getRecordMap();
         Set<String> keys = recordMap.keySet();
@@ -63,7 +63,7 @@ public class ProcessTest extends TestCase {
             System.out.print(record.toString());
         }
         initOK = IOCFactory.initDatabase(
-            "src/org/epics/ioc/dbProcess/example/loopDB.xml",iocMessageListener);
+            "src/org/epics/ioc/dbProcess/example/loopDB.xml",iocRequestor);
         if(!initOK) return;
         dbRecord = iocdbMaster.findRecord("root");
         assertNotNull(dbRecord);
@@ -99,6 +99,13 @@ public class ProcessTest extends TestCase {
          */
         public String getSupportProcessRequestorName() {
             return "testProcess";
+        }
+
+        /* (non-Javadoc)
+         * @see org.epics.ioc.util.Requestor#message(java.lang.String, org.epics.ioc.util.MessageType)
+         */
+        public void message(String message, MessageType messageType) {
+            System.out.println(message + " messageType " + messageType.toString());
         }
 
         void test() {
@@ -198,9 +205,16 @@ public class ProcessTest extends TestCase {
         }
     }
     
-    private static class Listener implements MessageListener {
+    private static class Listener implements Requestor {
         /* (non-Javadoc)
-         * @see org.epics.ioc.util.MessageListener#message(java.lang.String, org.epics.ioc.util.MessageType)
+         * @see org.epics.ioc.util.Requestor#getRequestorName()
+         */
+        public String getRequestorName() {
+            return "ProcessTest";
+        }
+
+        /* (non-Javadoc)
+         * @see org.epics.ioc.util.Requestor#message(java.lang.String, org.epics.ioc.util.MessageType)
          */
         public void message(String message, MessageType messageType) {
             System.out.println(message);

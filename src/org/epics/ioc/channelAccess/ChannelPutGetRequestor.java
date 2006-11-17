@@ -6,6 +6,7 @@
 package org.epics.ioc.channelAccess;
 
 /**
+ * Requestor for a putGet request.
  * @author mrk
  *
  */

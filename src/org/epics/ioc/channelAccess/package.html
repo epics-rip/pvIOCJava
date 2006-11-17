@@ -4,19 +4,1247 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
   <meta http-equiv="content-type" content="text/html; charset=iso-8859-1" />
-  <title>EPICS JavaIOC: Channel Access</title>
+  <title>EPICS JavaIOC: channel Access</title>
 </head>
 
 <body>
-<h1 style="text-align: center">EPICS JavaIOC: Channel Access<br />
+<h1 style="text-align: center">EPICS JavaIOC: channel Access<br />
 package: org.epics.ioc.channelAccess<br />
-2006.06.02</h1>
+2006.11.17</h1>
 
-
+<div class="toc">
+<ul>
+  <li><a href="#Overview">Overview</a></li>
+  <li><a href="#Channel">Channel</a>
+    <ul>
+      <li><a href="#Definition">Definitions</a></li>
+      <li><a href="#Channel1">Channel</a></li>
+      <li><a href="#ChannelSet">ChannelSetFieldResult</a></li>
+      <li><a href="#ChannelReq">ChannelRequestor</a></li>
+      <li><a href="#ChannelSta">ChannelStateListener</a></li>
+      <li><a href="#AccessRigh">AccessRights</a></li>
+      <li><a href="#ChannelFie">ChannelFieldGroup</a></li>
+      <li><a href="#ChannelFac">ChannelFactory</a></li>
+      <li><a href="#ChannelAcc">ChannelAccess</a></li>
+    </ul>
+  </li>
+  <li><a href="#Channel2">Channel Data</a>
+    <ul>
+      <li><a href="#Definition1">Definitions</a></li>
+      <li><a href="#ChannelDat">ChannelData</a></li>
+      <li><a href="#ChannelDat1">ChannelDataQueue</a></li>
+    </ul>
+  </li>
+  <li><a href="#Channel3">Channel Process, Get, Put, PutGet</a>
+    <ul>
+      <li><a href="#Definition2">Definitions</a></li>
+      <li><a href="#ChannelPro">ChannelProcess</a></li>
+      <li><a href="#ChannelGet">ChannelGet</a></li>
+      <li><a href="#ChannelPut">ChannelPut</a></li>
+      <li><a href="#ChannelPut1">ChannelPutGet</a></li>
+    </ul>
+  </li>
+  <li><a href="#Channel4">Channel Subscribe</a>
+    <ul>
+      <li><a href="#Definition3">Definitions</a></li>
+    </ul>
+  </li>
+  <li><a href="#Example">Example For ChannelData</a>
+    <ul>
+      <li><a href="#Discussion">Discussion</a></li>
+      <li><a href="#Implementa">Implementation</a></li>
+    </ul>
+  </li>
+  <li><a href="#Process">Process Example</a>
+    <ul>
+      <li><a href="#Discussion1">Discussion</a></li>
+      <li><a href="#Implementa1">Implementation</a></li>
+    </ul>
+  </li>
+  <li><a href="#Example1">Get Example</a>
+    <ul>
+      <li><a href="#Discussion2">Discussion</a></li>
+      <li><a href="#Implementa2">Implementation</a></li>
+    </ul>
+  </li>
+  <li><a href="#Example2">Put Example</a>
+    <ul>
+      <li><a href="#Discussion3">Discussion</a></li>
+      <li><a href="#Implementa3">Implementation</a></li>
+    </ul>
+  </li>
+  <li><a href="#PutGet">PutGet Example</a>
+    <ul>
+      <li><a href="#Discussion4">Discussion</a></li>
+      <li><a href="#Implementa4">Implementation</a></li>
+    </ul>
+  </li>
+</ul>
+</div>
 <hr />
 
-<h1 style="text-align: center">Overview</h1>
+<h2 style="text-align: center" id="Overview">Overview</h2>
 <hr />
-<p>Work on this package is just beginning.</p>
+
+<p>This package contains Java definitions for Channel Access clients:</p>
+<dl>
+  <dt>channel</dt>
+    <dd>A channel is a connection to a source of data. For a javaIOC database
+      a channel is a connection to a record instance.</dd>
+  <dt>channelData</dt>
+    <dd>This is a "container" for data for a channel. It is used by code that
+      must block while handling data for a channel. It allows the user to
+      block without locking a record.</dd>
+  <dt>channelProcess,channelGet, channelPut, channelGetPut</dt>
+    <dd>The basic operations that can be performed on a channel.</dd>
+  <dt>channelSubscribe</dt>
+    <dd>Channel monitors.</dd>
+</dl>
+<hr />
+
+<h2 style="text-align: center" id="Channel">Channel</h2>
+<hr />
+
+<h3 id="Definition">Definitions</h3>
+<pre>    public interface Channel {
+        void destroy();
+        boolean isConnected();
+        ChannelSetFieldResult setField(String name);
+        String getOtherChannel();
+        String getOtherField();
+        ChannelField getChannelField();
+        ChannelFieldGroup createFieldGroup(ChannelFieldGroupListener listener);
+        ChannelProcess createChannelProcess(ChannelRequestor channelRequestor);
+        void destroy(ChannelProcess channelProcess);
+        ChannelGet createChannelGet(
+            ChannelGetRequestor channelGetRequestor,boolean process);
+        void destroy(ChannelGet channelGet);
+        ChannelPut createChannelPut(
+            ChannelPutRequestor channelPutRequestor,boolean process);
+        void destroy(ChannelPut channelPut);
+        ChannelPutGet createChannelPutGet(
+            ChannelPutGetRequestor channelPutGetRequestor,boolean process);
+        void destroy(ChannelPutGet channelPutGet);
+        ChannelSubscribe createSubscribe();
+        void destroy(ChannelSubscribe channelSubscribe);
+        boolean isLocal();
+    }
+
+    public enum ChannelSetFieldResult {
+        otherChannel,
+        thisChannel,
+        notFound,
+        failure
+    }
+
+    public interface ChannelRequestor extends Requestor{
+        void message(Channel channel,String message,MessageType messageType);
+        void requestDone(Channel channel, RequestResult requestResult);
+    }
+
+    public interface ChannelStateListener {
+        void channelStateChange(Channel c,boolean isConnected);
+        void disconnect(Channel c);
+    }
+
+    public enum AccessRights {
+        none,
+        read,
+        readWrite
+    }
+
+    public interface ChannelFieldGroup {
+        void addChannelField(ChannelField channelField);
+        void removeChannelField(ChannelField channelField);
+        public List&lt;ChannelField&gt; getList();
+    }
+
+    public interface ChannelFieldGroupListener {
+        void accessRightsChange(Channel channel,ChannelField channelField);
+    }
+
+    public interface ChannelField {
+        Field getField();
+        AccessRights getAccessRights();
+    }
+
+    public interface ChannelAccess {
+        Channel createChannel(String name,ChannelStateListener listener);
+    }
+
+    public class ChannelFactory {
+        public static Channel createChannel(
+            String name,ChannelStateListener listener);
+        public static void registerLocalChannelAccess(
+            ChannelAccess channelAccess);
+        public static void registerRemoteChannelAccess(
+            ChannelAccess channelAccess);
+    }</pre>
+
+<h3 id="Channel1">Channel</h3>
+
+<p>This is interface for accessing a single channel. When connecting to a
+javaIOC, a channel connects to a single record instance. A channel provides
+access to an arbitrary number of fields in the record instance. The methods
+are:</p>
+<dl>
+  <dt style="font-family: courier;">destroy</dt>
+    <dd>Destroy the channel. Any active requests will still occur but no new
+      requests will be accepted for the channel.</dd>
+  <dt style="font-family: courier;">isConnected</dt>
+    <dd>Is the channel connected?</dd>
+  <dt style="font-family: courier;">setField</dt>
+    <dd>Locate the field, The result of the request is returned. Depending on
+      the result the following three methods provide more information.</dd>
+  <dt style="font-family: courier;">getOtherChannel</dt>
+    <dd>If <span style="font-family: courier;">setField</span> returned <span
+      style="font-family: courier;">otherChannel</span>, this returns the
+      name of the channel that has the data. In order to access the data a
+      new channel must be created</dd>
+  <dt style="font-family: courier;">getOtherField</dt>
+    <dd>If <span style="font-family: courier;">setField</span> returned <span
+      style="font-family: courier;">otherChannel</span>, this returns the
+      name of the field that has the data. <span
+      style="font-family: courier;">getOtherChannel</span> and <span
+      style="font-family: courier;">getOtherField</span> provide all the
+      information needed to connect to the other channel.</dd>
+  <dt style="font-family: courier;">getChannelField</dt>
+    <dd>If <span style="font-family: courier;">setField</span> returned <span
+      style="font-family: courier;">thisChannel</span>, this returns a <span
+      style="font-family: courier;">channelField</span> that can be added to
+      a <span style="font-family: courier;">fieldGroup.</span></dd>
+  <dt style="font-family: courier;">createFieldGroup</dt>
+    <dd>get, put, putGet, and subscribe all use fieldGroup to specify the
+      data to get/put from/to a channel.</dd>
+  <dt style="font-family: courier;">createChannelProcess</dt>
+    <dd>Create a process request. This is used to ask a channel to
+    process.</dd>
+  <dt><span style="font-family: courier;">destroy</span> - channelProcess</dt>
+    <dd>Destroy a channelProcess. This is done automatically when a channel
+      is destroyed.</dd>
+  <dt style="font-family: courier;">createChannelGet</dt>
+    <dd>Create a get request.</dd>
+  <dt><span style="font-family: courier;">destroy</span> - channelGet</dt>
+    <dd>Destroy a channelGet. This is done automatically when a channel is
+      destroyed.</dd>
+  <dt style="font-family: courier;">createChannelPut</dt>
+    <dd>Create a put request.</dd>
+  <dt><span style="font-family: courier;">destroy</span> - channelPut</dt>
+    <dd>Destroy a channelPut. This is done automatically when a channel is
+      destroyed.</dd>
+  <dt style="font-family: courier;">createChannelPutGet</dt>
+    <dd>Create a putGet request.</dd>
+  <dt><span style="font-family: courier;">destroy</span> - channelPutGet</dt>
+    <dd>Destroy a channelPutGet.</dd>
+  <dt style="font-family: courier;">createSubscribe</dt>
+    <dd>Create a subscribe request. This is used to create monitors for the
+      channel.</dd>
+  <dt><span style="font-family: courier;">destroy</span> -
+  channelSubscribe</dt>
+    <dd>Destroy a channelSubscribe. This is done automatically when a channel
+      is destroyed.</dd>
+  <dt style="font-family: courier;">isLocal</dt>
+</dl>
+
+<h3 id="ChannelSet">ChannelSetFieldResult</h3>
+
+<p><span style="font-family: courier;">setField</span> returns <span
+style="font-family: courier;">ChannelSetFieldResult</span>. This has the
+values:</p>
+<dl>
+  <dt style="font-family: courier;">otherChannel</dt>
+    <dd>The data resides in another channel. <span
+      style="font-family: courier;">getOtherChannel</span> and <span
+      style="font-family: courier;">getOtherField</span> can be called to get
+      the information needed to create and access the other channel.</dd>
+  <dt style="font-family: courier;">thisChannel</dt>
+    <dd>The data resides in this channel. <span
+      style="font-family: courier;">getChannelField</span> can be called to
+      get an interface for accessing the field.</dd>
+  <dt style="font-family: courier;">notFound</dt>
+    <dd>The requested field does not exist in this channel.</dd>
+  <dt style="font-family: courier;">failure</dt>
+    <dd>The request failed.</dd>
+</dl>
+
+<h3 id="ChannelReq">ChannelRequestor</h3>
+
+<p>A <span style="font-family: courier;">ChannelRequestor</span> is an
+interface that must be implemented by code that makes process, get, put, etc
+requests. The methods are:</p>
+<dl>
+  <dt style="font-family: courier;">getRequestorName</dt>
+    <dd>This is inherited from Requestor.</dd>
+  <dt style="font-family: courier;">message</dt>
+    <dd>A message for the requestor. Note that two overloaded methods must be
+      implemented. The difference is that the one inherited from Requestor
+      dosr not have a channel argument.</dd>
+  <dt style="font-family: courier;">requestDone</dt>
+    <dd>This is called whenever a request is done.</dd>
+</dl>
+
+<h3 id="ChannelSta">ChannelStateListener</h3>
+
+<p><span style="font-family: courier;">ChannelStateListener</span> is an
+interface that must be implemented by code that creates a channel. It has the
+methods:</p>
+<dl>
+  <dt style="font-family: courier;">channelStateChange</dt>
+    <dd>The connection state changed. The listener can call <span
+      style="font-family: courier;">channel.isConnected</span> to find the
+      connection state.</dd>
+  <dt style="font-family: courier;">disconnect</dt>
+    <dd>The channel is going away. The channel will not accept any further
+      requests.</dd>
+</dl>
+
+<h3 id="AccessRigh">AccessRights</h3>
+
+<p>AccessRights is an enum specifying access rights to fields of a channel.
+Note that access rights are not currently implemented.</p>
+<dl>
+  <dt style="font-family: courier;">none</dt>
+    <dd>The channel can neither read or write the field.</dd>
+  <dt style="font-family: courier;">read</dt>
+    <dd>The channel can read but not modify the channel.</dd>
+  <dt style="font-family: courier;">write</dt>
+    <dd>The channel can both read and modify the channel</dd>
+</dl>
+
+<h3 id="ChannelFie">ChannelFieldGroup</h3>
+
+<p><span style="font-family: courier;">ChannelField</span> describes a
+specific field in a channel.</p>
+<dl>
+  <dt style="font-family: courier;">getField</dt>
+    <dd>Returns the Field that describes the field. See pvAccess for
+    details.</dd>
+  <dt style="font-family: courier;">getAccessRights</dt>
+    <dd>Get the access rights for the field.</dd>
+</dl>
+
+<p><span style="font-family: courier;">ChannelFieldGroupListener</span>
+provides a method that is called whenever the access rights change. The
+method is:</p>
+<dl>
+  <dt style="font-family: courier;">accessRightsChange</dt>
+    <dd>The listener can call <span
+      style="font-family: courier;">channelField.getAccessRights</span> to
+      get the current rights.</dd>
+</dl>
+
+<p><span style="font-family: courier;">ChannelFieldGroup</span> has the
+methods:</p>
+<dl>
+  <dt style="font-family: courier;">addChannelField</dt>
+    <dd>Add a channelField to the group. Note that getChannelField returns a
+      channelField.</dd>
+  <dt style="font-family: courier;">removeChannelField</dt>
+    <dd>Remove a channelField from the group.</dd>
+  <dt style="font-family: courier;">getList</dt>
+    <dd>Get the list of channelFields in the group.</dd>
+</dl>
+
+<h3 id="ChannelFac">ChannelFactory</h3>
+
+<p>A channelFactory creates a channel. A channel is either local, i.e. code
+running in an IOC is accessing a field in the local IOC database, or remote,
+code is accessing a channel that is available over the network.
+Channelfactory also has methods called by support for local access and by
+support for remote access.</p>
+
+<p>NOTES:</p>
+<ul>
+  <li>Currently only local access is implemented.</li>
+  <li>ChannelFactory will have to be modified to support multiple remote
+    servers. For example servers for both javaIOCs and V3 IOCs should be
+    developed and supported.</li>
+</ul>
+
+<p>The methods implemented by ChannelFactory are:</p>
+<dl>
+  <dt style="font-family: courier;">createChannel</dt>
+    <dd>This is the clients call to create a channel. The channel is created
+      and connection managment is started.</dd>
+  <dt style="font-family: courier;">registerLocalChannelAccess</dt>
+    <dd>This is the registration call for local channel access.</dd>
+  <dt style="font-family: courier;">registerRemoteChannelAccess</dt>
+    <dd>This is the registration call for remote channel access.</dd>
+</dl>
+
+<h3 id="ChannelAcc">ChannelAccess</h3>
+
+<p>This is an interface that must be implemented by code that implements
+channel access. It is called by ChannelFactory.</p>
+<hr />
+
+<h2 style="text-align: center" id="Channel2">Channel Data</h2>
+<hr />
+
+<p>ChannelData helps solve two problems:</p>
+<ol>
+  <li>Blocking with a record locked.<br />
+    An example is a channel access server. Instead of pre allocating network
+    buffers for a fieldGroup it can create a channelData, transfer data from
+    a record to the channelData, and then transfer the channeldData to a
+    network buffer. In the case of a large array multiple network buffers
+    will be required.</li>
+  <li>Data repository for database monitoring.<br />
+    For database monitoring a queue of channelDatas can be created. When a
+    monitored record changes, a channelData can be taken from the queue, and
+    the data values stored in the channelData. This can be done without
+    blocking. When the server is ready it can empty the queue and send the
+    channelData over the network.</li>
+</ol>
+
+<h3 id="Definition1">Definitions</h3>
+<pre>    public interface ChannelData {
+        void clear();
+        void add(ChannelField channelField,PVData pvData);
+        List&lt;PVData&gt; getPVDataList();
+        List&lt;ChannelField&gt; getChannelFieldList();
+    }
+
+    public interface ChannelDataQueue {
+        int getNumberFree();
+        int capacity();
+        ChannelData getFree();
+        ChannelData getNext();
+        int getNumberMissed();
+        void releaseNext(ChannelData channelData);
+    }
+
+    public class ChannelDataFactory {
+         public static ChannelData createData(
+             Channel channel,ChannelFieldGroup channelFieldGroup);
+         public static ChannelDataQueue createQueue(
+             int queueSize,Channel channel,ChannelFieldGroup channelFieldGroup);
+    }</pre>
+
+<h3 id="ChannelDat">ChannelData</h3>
+
+<p>ChannelData has the following methods:</p>
+<dl>
+  <dt style="font-family: courier;">clear</dt>
+    <dd>Clear the internal list of items that have been added.</dd>
+  <dt style="font-family: courier;">add</dt>
+    <dd>Add an item to the list. The pvData MUST be for a Field that is a
+      member of the fieldGroup specified when the channeldata was created and
+      MUST not already be in the list.</dd>
+  <dt style="font-family: courier;">getPVDataList</dt>
+    <dd>Get the list of all pvDatas that have been added since the last clear
+      request.</dd>
+  <dt style="font-family: courier;">getChannelFieldList</dt>
+    <dd>Get the ChannelFields corresponding to the pvDatas returned by
+      getPVDataList. These will be in the same order as the pvDatas.</dd>
+</dl>
+
+<p>A ChannelData is allocated as follows:</p>
+<pre>    ChannelData channelData = ChannelDataFactory.createData(
+        channel,channelFieldGroup);</pre>
+
+<p>This creates storage for each element of the field group. It can create
+storage for all pvTypes. For Array types, the initial size and capacity is 0.
+The arrays will grow as data is placed in them but will not be released.</p>
+
+<p>A new set of data is colllected as follows:</p>
+<ul>
+  <li>The requestor calls channelData.clear</li>
+  <li>The data source, which is NOT allowed to block a record, does the
+    following:
+    <ul>
+      <li>Wait until data is not available.</li>
+      <li>When one or more pvData items are available, with the data source
+        (for example a record) locked, call channelData.add.</li>
+      <li>When the last pvData has been copied to channelData notify the
+        requestor.</li>
+    </ul>
+  </li>
+  <li>The requestor calls channelData.getPVDataList and
+    channelData.getPVDataList. It can block if necessary because the actual
+    data source, e.g. a data base record, is not locked.</li>
+</ul>
+
+<h3 id="ChannelDat1">ChannelDataQueue</h3>
+
+<p>ChannelDataQueue has the following methods:</p>
+<dl>
+  <dt style="font-family: courier;">getNumberFree</dt>
+    <dd>Get the number of unused channelData elements in the queue.</dd>
+  <dt style="font-family: courier;">capacity</dt>
+    <dd>Get the number of channelData elements in the queue.</dd>
+  <dt style="font-family: courier;">getFree</dt>
+    <dd>Get a channelData element from the queue. If there are no more free
+      elements numberMissed is increlemted and null is returned.</dd>
+  <dt style="font-family: courier;">getNext</dt>
+  <dt></dt>
+    <dd>Get the next channelData element that has new data in it. Return null
+      if there are no more elements.</dd>
+  <dt style="font-family: courier;">getNumberMissed</dt>
+    <dd>Get the number of times getGree has been called since the last call
+      to releaseNext.</dd>
+  <dt style="font-family: courier;">releaseNext</dt>
+    <dd>Release the element returned by getNext.</dd>
+</dl>
+
+<p>A ChannelDataQueue is created as follows:</p>
+<pre>    ChannelDataQueue channelDataQueue = ChannelDataFactory.createQueue(
+         queueSize,channel,channelFieldGroup);</pre>
+
+<p>This creates <span style="font-family: courier;">queueSize</span> <span
+style="font-family: courier;">channelFieldGroup</span>s and a queue to manage
+them. As an example of how a queue is used consider a channel access server
+monitoring a fieldGroup of an IOC database record. The server must implement
+interface DBListener.</p>
+
+<p></p>
+<ul>
+  <li>dbListener.beginSynchronous calls getFree.</li>
+  <li>dbListener.newData calls channelData.add.</li>
+  <li>dbListener.endSynchronous signals a part of the server that sends data
+    to the client, e.g. the network layer.</li>
+  <li>The network layer has code like:
+    <pre>    while(ChannelData channelData = channeldataQueue.getNext()) {
+        // send channelData through the network
+        releaseNext(channelData);
+        if(channelDataQueue.getNumberMissed()) { /*do something*/ }
+    }
+    </pre>
+  </li>
+</ul>
+<hr />
+
+<h2 style="text-align: center" id="Channel3">Channel Process, Get, Put,
+PutGet</h2>
+<hr />
+
+<h3 id="Definition2">Definitions</h3>
+<pre>    public interface ChannelProcess {
+        boolean process();
+    }
+
+    public interface ChannelGet {
+        boolean get(ChannelFieldGroup fieldGroup);
+        void getDelayed(PVData pvData);
+    }
+
+    public interface ChannelGetRequestor extends ChannelRequestor {
+        boolean nextGetData(Channel channel,ChannelField field,PVData data);
+        boolean nextDelayedGetData(PVData data);
+    }
+
+    public interface ChannelPut {
+        boolean put(ChannelFieldGroup fieldGroup);
+        void putDelayed(PVData pvData);
+    }
+
+    public interface ChannelPutRequestor extends ChannelRequestor {
+        boolean nextPutData(Channel channel,ChannelField field,PVData data);
+        boolean nextDelayedPutData(PVData data);
+    }
+
+    public interface ChannelPutGet {
+        boolean putGet(
+            ChannelFieldGroup putFieldGroup,ChannelFieldGroup getFieldGroup);
+        void putDelayed(PVData pvData);
+        void getDelayed(PVData pvData);
+    }
+
+    public interface ChannelPutGetRequestor extends
+        ChannelPutRequestor,ChannelGetRequestor {}</pre>
+
+<h3 id="ChannelPro">ChannelProcess</h3>
+
+<p>This has the single method:</p>
+<dl>
+  <dt style="font-family: courier;">process</dt>
+    <dd>Process the channel. For example if the channel is a database record,
+      process the record. <span style="font-family: courier;">process</span>
+      returns (false, true) if the request (can not, can) be done. Normally
+      true is returned. A false value probably means that the channel is not
+      connected.</dd>
+</dl>
+
+<p>A ChannelProcess is created via a call:</p>
+<pre>    ChannelProcess channelProcess = channel.createChannelProcess(this).</pre>
+
+<p>The requestor must implement interface <span
+style="font-family: courier;">ChannelRequestor</span>. <span
+style="font-family: courier;">null</span> is returned if the requestor is not
+allowed to process the channel. For example the channel is connected to a
+record, that already has an assigned record processor.</p>
+
+<p>If <span style="font-family: courier;">createChannelProcess</span> or
+<span style="font-family: courier;">process</span> itself fails, <span
+style="font-family: courier;">channelRequestor.message</span> is called. If
+<span style="font-family: courier;">process</span> returns true, then <span
+style="font-family: courier;">channelRequestor.requestDone</span> is called
+when the channel completes processing.</p>
+
+<h3 id="ChannelGet">ChannelGet</h3>
+
+<p><span style="font-family: courier;">ChannelGet</span> has the methods:</p>
+<dl>
+  <dt style="font-family: courier;">get</dt>
+    <dd>Get all data for the fieldGroup. The data is returned via calls to
+      channelGetRequestor.</dd>
+  <dt style="font-family: courier;">getDelayed</dt>
+    <dd>If <span
+      style="font-family: courier;">channelGetRequestor.nextGetData</span>
+      returns true, meaning the requestor is not done retrieving the data,
+      then the requestor calls <span
+      style="font-family: courier;">getDelayed</span> to retrieve the
+    data.</dd>
+</dl>
+
+<p><span style="font-family: courier;">ChannelGetRequestor</span> has the
+methods:</p>
+<dl>
+  <dt style="font-family: courier;">nextGetData</dt>
+    <dd>The next pvData in the fieldGroup. The requestor returns false if it
+      is done with the data and true otherwise. If true is returned the the
+      requestor calls <span
+      style="font-family: courier;">channelGet.getDelayed</span> when it is
+      ready.</dd>
+  <dt style="font-family: courier;">nextDelayedGetData</dt>
+    <dd>When the requestor calls <span
+      style="font-family: courier;">channelGet.getDelayed</span> the data is
+      returned via a call to <span
+      style="font-family: courier;">nextDelayedGetData</span></dd>
+</dl>
+
+<p>Delayed gets are provided for channel access servers that need to block
+while handling data. Consider a server that needs to send an array over the
+network. If it is a very large array, the server has to send the array in
+multuple network buffers. In order not to lock a database record while the
+array is being sent it can use the delayed methods. It implements something
+like:</p>
+<pre>    PVArray pvArray;
+    int size,offset;
+
+    boolean nextGetData(Channel channel,ChannelField field,PVData data) {
+        // recognize that data is actually an array
+        pvArray = (PVArray)data;
+        size = pvArray.getLength();
+        offset = 0;
+        return true;
+    }
+    ...
+    while(moreToDo) {
+       // get networkBuffer. This may block while waiting
+       channelGet.getDelayed(pvArray();
+       // send buffer. This might block
+       if(offset&gt;=size) break; // all done
+    }
+    ...
+    boolean nextDelayedGetData(PVData data) {
+        // transfer data to network buffer
+        // update offset
+        if(offset&lt;size) return true // getDelayed will again be called
+        return false // all done
+    }</pre>
+
+<h3 id="ChannelPut">ChannelPut</h3>
+
+<p><span style="font-family: courier;">ChannelPut</span> has the methods:</p>
+<dl>
+  <dt style="font-family: courier;">put</dt>
+    <dd>Put all data for the fieldGroup. The data is fetched via calls to
+      <span style="font-family: courier;">channelPutRequestor.</span></dd>
+  <dt style="font-family: courier;">putDelayed</dt>
+    <dd>If <span
+      style="font-family: courier;">channelPutRequestor.nextPutData</span>
+      returns true, meaning the requestor has not put the data, then the
+      requestor calls <span style="font-family: courier;">putDelayed</span>
+      when it is ready to put the data.</dd>
+</dl>
+
+<p><span style="font-family: courier;">ChannelPutRequestor</span> has the
+methods:</p>
+<dl>
+  <dt style="font-family: courier;">nextPutData</dt>
+    <dd>The next pvData in the fieldGroup. The requestor returns false if it
+      is done with that data and true if it is not ready to put the data. If
+      true is returned the the requestor calls <span
+      style="font-family: courier;">channelPut.putDelayed</span> when it is
+      ready.</dd>
+  <dt style="font-family: courier;">nextDelayedPutData</dt>
+    <dd>When the requestor calls <span
+      style="font-family: courier;">channelPut.putDelayed</span> the data is
+      put via a call to <span
+      style="font-family: courier;">nextDelayedPutData</span></dd>
+</dl>
+
+<p>Like delayed gets delayed puts are used by servers that need to block. For
+example servers that transfer data from the network to an IOC database.</p>
+
+<h3 id="ChannelPut1">ChannelPutGet</h3>
+
+<p>This is a combination of <span
+style="font-family: courier;">ChannelPut</span> and <span
+style="font-family: courier;">ChannelGet</span>. A typical example is a
+client request to:</p>
+<ul>
+  <li>Put data to a record.</li>
+  <li>Process the record</li>
+  <li>Return the status and severity to the client.</li>
+</ul>
+<hr />
+
+<h2 style="text-align: center" id="Channel4">Channel Subscribe</h2>
+<hr />
+
+<p>Channel Sunscribe is not working. Documentaion will be provided after it
+is. In particular no waork has started of implementing Event.</p>
+
+<h3 id="Definition3">Definitions</h3>
+<pre>    public interface ChannelSubscribeRequestor extends Requestor {
+        void message(Channel channel,String message,MessageType messageType);
+        void dataModified(Channel channel);
+    }
+
+    public interface ChannelSubscribeGetRequestor extends Requestor{
+        void message(Channel channel,String message,MessageType messageType);
+        void startSubscribeGetData();
+        void dataOverrun(int numberSets);
+        void nextSubscribeGetData(Channel channel,
+            ChannelField field,PVData data);
+    }
+
+    
+    public interface ChannelSubscribe {
+        void start(ChannelFieldGroup fieldGroup,
+            ChannelSubscribeRequestor listener,Event why);
+        void start(ChannelFieldGroup fieldGroup,int queueCapacity,
+            ChannelSubscribeGetRequestor listener,Event why);
+        void stop();
+        void readyForData();
+    }</pre>
+<hr />
+
+<h2 style="text-align: center" id="Example">Example For ChannelData</h2>
+<hr />
+
+<h3 id="Discussion">Discussion</h3>
+
+<p>This example creates a ChannelData for a fieldGroup that has the
+following:</p>
+<ul>
+  <li>value<br />
+    This must be a double field with the name "value"</li>
+  <li>status</li>
+  <li>severity</li>
+  <li>timeStamp</li>
+</ul>
+
+<p>The definition is:</p>
+<pre>    static class ValueData implements ChannelFieldGroupListener{
+        ValueData(Channel channel);
+        ChannelFieldGroup init();
+        void clear();
+            channelData.clear();
+        }
+        boolean nextGetData(Channel channel, ChannelField field, PVData data);
+        void printResults();
+    }</pre>
+where
+<dl>
+  <dt style="font-family: courier;">ValueData</dt>
+    <dd>The constructor</dd>
+  <dt style="font-family: courier;">init</dt>
+    <dd>creates everthing it needs. Returns null if anything fails.</dd>
+  <dt style="font-family: courier;">clear</dt>
+    <dd>Prepares to accept a new set of data for the fieldGroup</dd>
+  <dt style="font-family: courier;">nextGetData</dt>
+    <dd>Adds the data to the channelData list.</dd>
+  <dt style="font-family: courier;">prinntResults</dt>
+    <dd>Prints all data received since last clear.</dd>
+</dl>
+
+<p>What it provides for later examples is the ability to dump everthing the
+examples gets from a record and displaying the results after the record is no
+longer locked.</p>
+
+<h3 id="Implementa">Implementation</h3>
+<pre>    static class ValueData implements ChannelFieldGroupListener{
+        private Channel channel;
+        private ChannelData channelData;
+        private ChannelFieldGroup fieldGroup;
+        private ChannelField valueField;
+        private ChannelField statusField;
+        private ChannelField severityField;
+        private ChannelField timeStampField;
+
+        ValueData(Channel channel) {
+            this.channel = channel;
+        }
+
+        public void accessRightsChange(Channel channel, ChannelField channelField) {}
+
+        ChannelFieldGroup init() {
+            fieldGroup = channel.createFieldGroup(this);
+            ChannelSetFieldResult result;
+            result = channel.setField("value");
+            if(result!=ChannelSetFieldResult.thisChannel) {
+                System.out.printf("PutGet:set returned %s%n", result.toString());
+                return null;
+            }
+            valueField = channel.getChannelField();
+            fieldGroup.addChannelField(valueField);
+            result = channel.setField("status");
+            if(result!=ChannelSetFieldResult.thisChannel) {
+                System.out.printf("PutGet:set returned %s%n", result.toString());
+                return null;
+            }
+            statusField = channel.getChannelField();
+            fieldGroup.addChannelField(statusField);
+            result = channel.setField("severity");
+            if(result!=ChannelSetFieldResult.thisChannel) {
+                System.out.printf("PutGet:set returned %s%n", result.toString());
+                return null;
+            }
+            severityField = channel.getChannelField();
+            fieldGroup.addChannelField(severityField);
+            result = channel.setField("timeStamp");
+            if(result!=ChannelSetFieldResult.thisChannel) {
+                System.out.printf("PutGet:set returned %s%n", result.toString());
+                return null;
+            }
+            timeStampField = channel.getChannelField();
+            fieldGroup.addChannelField(timeStampField);
+            channelData = ChannelDataFactory.createData(channel,fieldGroup);
+            if(channelData==null) {
+                System.out.printf("ChannelDataFactory.createData failed");
+                return null;
+            }
+            return fieldGroup;
+        }
+        void clear() {
+            channelData.clear();
+        }
+        boolean nextGetData(Channel channel, ChannelField field, PVData data) {
+            channelData.add(field, data);
+            return false;
+        }
+
+        void printResults() {
+            List&lt;PVData&gt; pvDataList = channelData.getPVDataList();
+            List&lt;ChannelField&gt; channelFieldList = channelData.getChannelFieldList();
+            Iterator&lt;PVData&gt; pvDataIter = pvDataList.iterator();
+            Iterator&lt;ChannelField&gt; channelFieldIter = channelFieldList.iterator();
+            while(pvDataIter.hasNext()) {
+                PVData data = pvDataIter.next();
+                ChannelField field = channelFieldIter.next();
+                if(field==valueField) {
+                    PVDouble pvDouble = (PVDouble)data;
+                    System.out.printf("value %f", pvDouble.get());
+                } else if (field==severityField) {
+                    PVEnum pvEnum = (PVEnum)data;
+                    int index = pvEnum.getIndex();
+                    System.out.printf(" severity %s",AlarmSeverity.getSeverity(index).toString());
+                } else if(field==statusField) {
+                    PVString pvString = (PVString)data;
+                    String value = pvString.get();
+                    System.out.printf(" status %s",value);
+                } else if(field==timeStampField) {
+                    PVTimeStamp pvTimeStamp = PVTimeStamp.create(data);
+                    TimeStamp timeStamp = new TimeStamp();
+                    pvTimeStamp.get(timeStamp);
+                    long seconds = timeStamp.secondsPastEpoch;
+                    int nano = timeStamp.nanoSeconds;
+                    long now = nano/1000000 + seconds*1000;
+                    Date date = new Date(now);
+                    System.out.printf(" time %s%n",date.toLocaleString());
+                }
+            }
+        }
+    }</pre>
+<hr />
+
+<h2 style="text-align: center" id="Process">Process Example</h2>
+<hr />
+
+<h3 id="Discussion1">Discussion</h3>
+
+<p>This example shows how to implement a process request.</p>
+
+<h3 id="Implementa1">Implementation</h3>
+<pre>    static class Process implements ChannelRequestor,ChannelStateListener
+    {
+        private Lock lock = new ReentrantLock();
+        private Condition waitDone = lock.newCondition();
+        private boolean allDone = false;
+        private String pvname = null;
+        private Channel channel;
+        private ChannelProcess channelProcess;
+
+        Process(String pvname) {
+            this.pvname = pvname;
+            channel = ChannelFactory.createChannel(pvname, this);
+            channelProcess = channel.createChannelProcess(this);
+           // SHOULD CHECK FOR NULL
+        }
+        void destroy() {
+            channel.destroy();
+        }
+        void process() {
+            allDone = false;
+            channelProcess.process();
+            lock.lock();
+            try {
+                if(!allDone) {
+                    waitDone.await();
+                }
+            } catch (InterruptedException e) {
+                return;
+            } finally {
+                lock.unlock();
+            }
+        }
+
+        public String getRequestorName() {
+            return "Put:" + pvname;
+        }
+
+        public void message(String message, MessageType messageType) {
+            message(channel,message,messageType);
+        }
+
+        public void message(Channel channel, String message, MessageType messageType) {
+            System.out.printf("putGet.massage %s%n", message);
+        }
+
+        public void requestDone(Channel channel, RequestResult requestResult) {
+            lock.lock();
+            try {
+                allDone = true;
+                    waitDone.signal();
+            } finally {
+                lock.unlock();
+            }
+        }
+
+        public void channelStateChange(Channel c, boolean isConnected) { }
+
+        public void disconnect(Channel c) { }
+
+        public void accessRightsChange(Channel channel, ChannelField channelField) { }
+    }</pre>
+<hr />
+
+<h2 style="text-align: center" id="Example1">Get Example</h2>
+<hr />
+
+<h3 id="Discussion2">Discussion</h3>
+
+<p>This example shows how to implement a get request.</p>
+
+<h3 id="Implementa2">Implementation</h3>
+<pre>    static class Get implements
+    ChannelGetRequestor,
+    ChannelStateListener, ChannelFieldGroupListener
+    {
+        private Lock lock = new ReentrantLock();
+        private Condition waitDone = lock.newCondition();
+        private boolean allDone = false;
+        private String pvname = null;
+        private Channel channel;
+        private ChannelGet channelGet;
+        private ValueData valueData;
+        private ChannelFieldGroup getFieldGroup;
+
+        Get(String pvname,boolean process) {
+            this.pvname = pvname;
+            channel = ChannelFactory.createChannel(pvname, this);
+            channelGet = channel.createChannelGet(this, process);
+        }
+        void destroy() {
+            channel.destroy();
+        }
+        boolean connect() {
+
+            valueData = new ValueData(channel);
+            getFieldGroup = valueData.init();
+            if(getFieldGroup==null) return false;
+            return true;
+        }
+
+        void get() {
+            allDone = false;
+            valueData.clear();
+            channelGet.get(getFieldGroup);
+            lock.lock();
+            try {
+                if(!allDone) {
+                    waitDone.await();
+                }
+            } catch (InterruptedException ie) {
+                return;
+            } finally {
+                lock.unlock();
+            }
+            valueData.printResults();
+        }
+
+        public boolean nextDelayedGetData(PVData data) {
+            //nothing to do
+        }
+
+        public String getRequestorName() {
+            return "PutGet:" + pvname;
+        }
+
+        public void message(String message, MessageType messageType) {
+            message(channel,message,messageType);
+        }
+
+        public boolean nextGetData(Channel channel, ChannelField field, PVData data) {
+            valueData.nextGetData(channel, field, data);
+            return false;
+        }
+
+        public void message(Channel channel, String message, MessageType messageType) {
+            System.out.printf("putGet.massage %s%n", message);
+        }
+
+        public void requestDone(Channel channel, RequestResult requestResult) {
+            lock.lock();
+            try {
+                allDone = true;
+                    waitDone.signal();
+            } finally {
+                lock.unlock();
+            }
+        }
+
+        public void channelStateChange(Channel c, boolean isConnected) { }
+
+        public void disconnect(Channel c) { }
+
+        public void accessRightsChange(Channel channel, ChannelField channelField) { }
+    }</pre>
+<hr />
+
+<h2 style="text-align: center" id="Example2">Put Example</h2>
+<hr />
+
+<h3 id="Discussion3">Discussion</h3>
+
+<p>This example shows how to implement a put request.</p>
+
+<h3 id="Implementa3">Implementation</h3>
+<pre>    static class Put implements
+    ChannelPutRequestor,
+    ChannelStateListener, ChannelFieldGroupListener
+    {
+        private Lock lock = new ReentrantLock();
+        private Condition waitDone = lock.newCondition();
+        private boolean allDone = false;
+        private String pvname = null;
+        private Channel channel;
+        private ChannelPut channelPut;
+        private ChannelFieldGroup putFieldGroup;
+        private ChannelField valueField;
+        private double value;
+
+        Put(String pvname, boolean process) {
+            this.pvname = pvname;
+            channel = ChannelFactory.createChannel(pvname, this);
+
+            channelPut = channel.createChannelPut(this, process);
+        }
+
+        public boolean nextDelayedPutData(PVData data) {
+            // nothing to do
+            return false;
+        }
+        void destroy() {
+            channel.destroy();
+        }
+        boolean connect() {
+            putFieldGroup = channel.createFieldGroup(this);
+            ChannelSetFieldResult result;
+            result = channel.setField("value");
+            if(result!=ChannelSetFieldResult.thisChannel) {
+                System.out.printf("PutGet:set returned %s%n", result.toString());
+                return false;
+            }
+            valueField = channel.getChannelField();
+            putFieldGroup.addChannelField(valueField);
+            return true;
+        }
+
+        void put(double value) {
+            this.value = value;
+            allDone = false;
+            channelPut.put(putFieldGroup);
+            lock.lock();
+            try {
+                if(!allDone) {
+                    waitDone.await();
+                }
+            } catch (InterruptedException ie) {
+                return;
+            } finally {
+                lock.unlock();
+            }
+        }
+
+        public String getRequestorName() {
+            return "Put:" + pvname;
+        }
+
+        public void message(String message, MessageType messageType) {
+            message(channel,message,messageType);
+        }
+
+        public boolean nextPutData(Channel channel, ChannelField field, PVData data) {
+            PVDouble pvDouble = (PVDouble)data;
+            pvDouble.put(value);
+            return false;
+        }
+
+        public void message(Channel channel, String message, MessageType messageType) {
+            System.out.printf("putGet.massage %s%n", message);
+        }
+
+        public void requestDone(Channel channel, RequestResult requestResult) {
+            lock.lock();
+            try {
+                allDone = true;
+                    waitDone.signal();
+            } finally {
+                lock.unlock();
+            }
+        }
+
+        public void channelStateChange(Channel c, boolean isConnected) { }
+
+        public void disconnect(Channel c) { }
+
+        public void accessRightsChange(Channel channel, ChannelField channelField) { }
+    }</pre>
+<hr />
+
+<h2 style="text-align: center" id="PutGet">PutGet Example</h2>
+<hr />
+
+<h3 id="Discussion4">Discussion</h3>
+
+<p>This example shows how to implement a putGet request. When it;s put method
+is called, it puts a double value to a field named value, optionally
+processes the record, and retrieves the value, status, severity, and
+timeStamp. </p>
+
+<h3 id="Implementa4">Implementation</h3>
+<pre>    static class PutGet implements
+    ChannelPutGetRequestor,
+    ChannelStateListener, ChannelFieldGroupListener
+    {
+        private Lock lock = new ReentrantLock();
+        private Condition waitDone = lock.newCondition();
+        private boolean allDone = false;
+        private String pvname = null;
+        private Channel channel;
+        private ChannelPutGet channelPutGet;
+        private ChannelFieldGroup putFieldGroup;
+        private ValueData valueData;
+        private ChannelFieldGroup getFieldGroup;
+        private ChannelField valueField;
+        private double value;
+
+        PutGet(String pvname,boolean process) {
+            this.pvname = pvname;
+            channel = ChannelFactory.createChannel(pvname, this);
+            channelPutGet = channel.createChannelPutGet(this, process);
+        }
+
+        public boolean nextDelayedPutData(PVData data) {
+            // Nothing to do
+            return false;
+        }
+
+        public boolean nextDelayedGetData(PVData data) {
+            // Nothing to do
+            return false;
+        }
+
+        boolean connect() {
+            putFieldGroup = channel.createFieldGroup(this);
+            ChannelSetFieldResult result;
+            result = channel.setField("value");
+            if(result!=ChannelSetFieldResult.thisChannel) {
+                System.out.printf("PutGet:set returned %s%n", result.toString());
+                return false;
+            }
+            valueField = channel.getChannelField();
+            putFieldGroup.addChannelField(valueField);
+            valueData = new ValueData(channel);
+            getFieldGroup = valueData.init();
+            if(getFieldGroup==null) return false;
+            return true;
+        }
+
+        void destroy() {
+            channel.destroy();
+        }
+
+        void putGet(double value) {
+            this.value = value;
+            allDone = false;
+            valueData.clear();
+            channelPutGet.putGet(putFieldGroup, getFieldGroup);
+            lock.lock();
+            try {
+                if(!allDone) {
+                    waitDone.await();
+                }
+            } catch (InterruptedException ie) {
+                return;
+            } finally {
+                lock.unlock();
+            }
+            valueData.printResults();
+        }
+
+        public String getRequestorName() {
+            return "PutGet:" + pvname;
+        }
+
+        public void message(String message, MessageType messageType) {
+            message(channel,message,messageType);
+        }
+
+        public boolean nextGetData(Channel channel, ChannelField field, PVData data) {
+            valueData.nextGetData(channel, field, data);
+            return false;
+        }
+
+        public boolean nextPutData(Channel channel, ChannelField field, PVData data) {
+            PVDouble pvDouble = (PVDouble)data;
+            pvDouble.put(value);
+            return false;
+        }
+
+        public void message(Channel channel, String message, MessageType messageType) {
+            System.out.printf("putGet.massage %s%n", message);
+        }
+
+        public void requestDone(Channel channel, RequestResult requestResult) {
+            lock.lock();
+            try {
+                allDone = true;
+                    waitDone.signal();
+            } finally {
+                lock.unlock();
+            }
+        }
+
+        public void channelStateChange(Channel c, boolean isConnected) { }
+
+        public void disconnect(Channel c) { }
+
+        public void accessRightsChange(Channel channel, ChannelField channelField) { }
+    }</pre>
 </body>
 </html>

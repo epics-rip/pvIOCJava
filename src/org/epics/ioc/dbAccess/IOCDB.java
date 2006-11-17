@@ -66,15 +66,15 @@ public interface IOCDB {
      */
     void message(String message, MessageType messageType);
     /**
-     * Add a message listener.
-     * @param listener The listener.
+     * Add a message requestor.
+     * @param requestor The requestor.
      */
-    void addMessageListener(MessageListener listener);
+    void addRequestor(Requestor requestor);
     /**
-     * Remove a message listener.
-     * @param listener The listener.
+     * Remove a message requestor.
+     * @param requestor The requestor.
      */
-    void removeMessageListener(MessageListener listener);
+    void removeRequestor(Requestor requestor);
     /**
      * Provide access to a record and it's fields.
      * @param recordName The record instance name.

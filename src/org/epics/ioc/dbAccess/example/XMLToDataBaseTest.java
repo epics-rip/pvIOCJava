@@ -9,7 +9,7 @@ import junit.framework.TestCase;
 
 import org.epics.ioc.dbDefinition.*;
 import org.epics.ioc.dbAccess.*;
-import org.epics.ioc.util.MessageListener;
+import org.epics.ioc.util.Requestor;
 import org.epics.ioc.util.MessageType;
 
 import java.util.*;
@@ -33,7 +33,7 @@ public class XMLToDataBaseTest extends TestCase {
         test.doit();
     }
     
-    private static class Test implements MessageListener {
+    private static class Test implements Requestor {
         private MessageType maxMessageType = MessageType.info;
         private void doit () {
     
@@ -102,7 +102,13 @@ public class XMLToDataBaseTest extends TestCase {
             System.out.println();
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.util.MessageListener#message(java.lang.String, org.epics.ioc.util.MessageType)
+         * @see org.epics.ioc.util.Requestor#getRequestorName()
+         */
+        public String getRequestorName() {
+            return "XMLTODatabaseTest";
+        }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.util.Requestor#message(java.lang.String, org.epics.ioc.util.MessageType)
          */
         public void message(String message, MessageType messageType) {
             System.out.println(message);

@@ -14,7 +14,7 @@ import org.epics.ioc.util.*;
  * @author mrk
  *
  */
-public interface ChannelNotifyGetRequestor extends Requestor{
+public interface ChannelSubscribeGetRequestor extends Requestor{
     /**
      * A message for requester.
      * @param channel The channel.
@@ -26,18 +26,17 @@ public interface ChannelNotifyGetRequestor extends Requestor{
      * A new set of data is available.
      * The requestor calls ChannelSubscribe.readyForData when ready to receive the new data.
      */
-    void startNotifyGetData();
+    void startSubscribeGetData();
     /**
      * A number of sets of data have been discarded. 
      * @param numberSets The number of sets of data that have been discarded.
      */
     void dataOverrun(int numberSets);
     /**
-     * New notify data value.
+     * New subscribe data value.
      * @param channel The channel.
      * @param field The field.
      * @param data The data.
-     * @param last Is this the last data item for this notify request?
      */
-    void nextNotifyGetData(Channel channel,ChannelField field,PVData data,boolean last);
+    void nextSubscribeGetData(Channel channel,ChannelField field,PVData data);
 }

@@ -26,15 +26,15 @@ public class LocalChannelAccessTest extends TestCase {
      */
     public static void testLocalChannelAccess() {
         DBD dbd = DBDFactory.getMasterDBD();
-        MessageListener iocMessageListener = new Listener();
+        Requestor iocRequestor = new Listener();
         XMLToDBDFactory.convert(dbd,
                  "src/org/epics/ioc/support/menuStructureSupportDBD.xml",
-                 iocMessageListener);
+                 iocRequestor);
         XMLToDBDFactory.convert(dbd,
                  "src/org/epics/ioc/dbProcess/example/exampleDBD.xml",
-                 iocMessageListener);        
+                 iocRequestor);        
         boolean initOK = IOCFactory.initDatabase(
-            "src/org/epics/ioc/dbProcess/example/localLinkDB.xml",iocMessageListener);
+            "src/org/epics/ioc/dbProcess/example/localLinkDB.xml",iocRequestor);
         if(!initOK) return;
         PutGet counter = new PutGet("counter",true);
         Get getDouble01 = new Get("double01",false);
@@ -144,6 +144,12 @@ public class LocalChannelAccessTest extends TestCase {
             return "Put:" + pvname;
         }
         /* (non-Javadoc)
+         * @see org.epics.ioc.util.Requestor#message(java.lang.String, org.epics.ioc.util.MessageType)
+         */
+        public void message(String message, MessageType messageType) {
+            message(channel,message,messageType);
+        }
+        /* (non-Javadoc)
          * @see org.epics.ioc.channelAccess.ChannelRequestor#message(org.epics.ioc.channelAccess.Channel, java.lang.String, org.epics.ioc.util.MessageType)
          */
         public void message(Channel channel, String message, MessageType messageType) {
@@ -195,7 +201,7 @@ public class LocalChannelAccessTest extends TestCase {
         private Channel channel;
         private ChannelPutGet channelPutGet;
         private ChannelFieldGroup putFieldGroup;
-        private ValueNotifyData valueData;
+        private ValueData valueData;
         private ChannelFieldGroup getFieldGroup;
         private ChannelField valueField;
         private double value;
@@ -206,6 +212,22 @@ public class LocalChannelAccessTest extends TestCase {
             channelPutGet = channel.createChannelPutGet(this, process);
         }
         
+        /* (non-Javadoc)
+         * @see org.epics.ioc.channelAccess.ChannelPutRequestor#nextDelayedPutData(org.epics.ioc.pvAccess.PVData)
+         */
+        public boolean nextDelayedPutData(PVData data) {
+            // TODO Auto-generated method stub
+            return false;
+        }
+
+        /* (non-Javadoc)
+         * @see org.epics.ioc.channelAccess.ChannelGetRequestor#nextDelayedGetData(org.epics.ioc.pvAccess.PVData)
+         */
+        public boolean nextDelayedGetData(PVData data) {
+            // TODO Auto-generated method stub
+            return false;
+        }
+
         private boolean connect() {
             putFieldGroup = channel.createFieldGroup(this);
             ChannelSetFieldResult result;
@@ -216,7 +238,7 @@ public class LocalChannelAccessTest extends TestCase {
             }
             valueField = channel.getChannelField();
             putFieldGroup.addChannelField(valueField);
-            valueData = new ValueNotifyData(channel);
+            valueData = new ValueData(channel);
             getFieldGroup = valueData.init();
             if(getFieldGroup==null) return false;
             return true;   
@@ -248,6 +270,12 @@ public class LocalChannelAccessTest extends TestCase {
          */
         public String getRequestorName() {
             return "PutGet:" + pvname;
+        }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.util.Requestor#message(java.lang.String, org.epics.ioc.util.MessageType)
+         */
+        public void message(String message, MessageType messageType) {
+            message(channel,message,messageType);
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.channelAccess.ChannelGetRequestor#nextGetData(org.epics.ioc.channelAccess.Channel, org.epics.ioc.channelAccess.ChannelField, org.epics.ioc.pvAccess.PVData)
@@ -325,6 +353,13 @@ public class LocalChannelAccessTest extends TestCase {
             
             channelPut = channel.createChannelPut(this, process);
         }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.channelAccess.ChannelPutRequestor#nextDelayedPutData(org.epics.ioc.pvAccess.PVData)
+         */
+        public boolean nextDelayedPutData(PVData data) {
+            // TODO Auto-generated method stub
+            return false;
+        }
         private void destroy() {
             channel.destroy();
         }
@@ -361,6 +396,12 @@ public class LocalChannelAccessTest extends TestCase {
          */
         public String getRequestorName() {
             return "Put:" + pvname;
+        }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.util.Requestor#message(java.lang.String, org.epics.ioc.util.MessageType)
+         */
+        public void message(String message, MessageType messageType) {
+            message(channel,message,messageType);
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.channelAccess.ChannelPutRequestor#nextPutData(org.epics.ioc.channelAccess.Channel, org.epics.ioc.channelAccess.ChannelField, org.epics.ioc.pvAccess.PVData)
@@ -421,7 +462,7 @@ public class LocalChannelAccessTest extends TestCase {
         private String pvname = null;
         private Channel channel;
         private ChannelGet channelGet;
-        private ValueNotifyData valueData;
+        private ValueData valueData;
         private ChannelFieldGroup getFieldGroup;
         
         private Get(String pvname,boolean process) {
@@ -434,7 +475,7 @@ public class LocalChannelAccessTest extends TestCase {
         }
         private boolean connect() {
             
-            valueData = new ValueNotifyData(channel);
+            valueData = new ValueData(channel);
             getFieldGroup = valueData.init();
             if(getFieldGroup==null) return false;
             return true;   
@@ -457,10 +498,23 @@ public class LocalChannelAccessTest extends TestCase {
             valueData.printResults();
         }
         /* (non-Javadoc)
+         * @see org.epics.ioc.channelAccess.ChannelGetRequestor#nextDelayedGetData(org.epics.ioc.pvAccess.PVData)
+         */
+        public boolean nextDelayedGetData(PVData data) {
+            // TODO Auto-generated method stub
+            return false;
+        }
+        /* (non-Javadoc)
          * @see org.epics.ioc.util.Requestor#getRequestorName()
          */
         public String getRequestorName() {
             return "PutGet:" + pvname;
+        }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.util.Requestor#message(java.lang.String, org.epics.ioc.util.MessageType)
+         */
+        public void message(String message, MessageType messageType) {
+            message(channel,message,messageType);
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.channelAccess.ChannelGetRequestor#nextGetData(org.epics.ioc.channelAccess.Channel, org.epics.ioc.channelAccess.ChannelField, org.epics.ioc.pvAccess.PVData)
@@ -510,9 +564,16 @@ public class LocalChannelAccessTest extends TestCase {
         }
     }
     
-    private static class Listener implements MessageListener {
+    private static class Listener implements Requestor {
         /* (non-Javadoc)
-         * @see org.epics.ioc.util.MessageListener#message(java.lang.String, org.epics.ioc.util.MessageType)
+         * @see org.epics.ioc.util.Requestor#getRequestorName()
+         */
+        public String getRequestorName() {
+            return "LocalChannelAccessTest";
+        }
+
+        /* (non-Javadoc)
+         * @see org.epics.ioc.util.Requestor#message(java.lang.String, org.epics.ioc.util.MessageType)
          */
         public void message(String message, MessageType messageType) {
             System.out.println(message);
@@ -520,16 +581,16 @@ public class LocalChannelAccessTest extends TestCase {
         }
     } 
     
-    private static class ValueNotifyData implements ChannelFieldGroupListener{
+    private static class ValueData implements ChannelFieldGroupListener{
         private Channel channel;
-        private ChannelNotifyData channelNotifyData;
+        private ChannelData channelData;
         private ChannelFieldGroup fieldGroup;
         private ChannelField valueField;
         private ChannelField statusField;
         private ChannelField severityField;
         private ChannelField timeStampField;
         
-        private ValueNotifyData(Channel channel) {
+        private ValueData(Channel channel) {
             this.channel = channel;
         }
         
@@ -571,25 +632,25 @@ public class LocalChannelAccessTest extends TestCase {
             }
             timeStampField = channel.getChannelField();
             fieldGroup.addChannelField(timeStampField);
-            channelNotifyData = ChannelNotifyDataFactory.createData(channel,fieldGroup);
-            if(channelNotifyData==null) {
-                System.out.printf("ChannelNotifyDataFactory.createData failed");
+            channelData = ChannelDataFactory.createData(channel,fieldGroup);
+            if(channelData==null) {
+                System.out.printf("ChannelDataFactory.createData failed");
                 return null;
             }
             return fieldGroup;
         }
         
         private void clear() {
-            channelNotifyData.clear();
+            channelData.clear();
         }
         private boolean nextGetData(Channel channel, ChannelField field, PVData data) {
-            channelNotifyData.add(field, data);
+            channelData.add(field, data);
             return false;
         }
         
         private void printResults() {
-            List<PVData> pvDataList = channelNotifyData.getPVDataList();
-            List<ChannelField> channelFieldList = channelNotifyData.getChannelFieldList();
+            List<PVData> pvDataList = channelData.getPVDataList();
+            List<ChannelField> channelFieldList = channelData.getChannelFieldList();
             Iterator<PVData> pvDataIter = pvDataList.iterator();
             Iterator<ChannelField> channelFieldIter = channelFieldList.iterator();
             while(pvDataIter.hasNext()) {

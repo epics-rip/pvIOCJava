@@ -19,23 +19,23 @@ import org.epics.ioc.util.*;
  *
  */
 public class MonitorTest extends TestCase {
-    private static MessageListener iocMessageListener = null;
+    private static Requestor iocRequestor = null;
     /**
      * test scan.
      */
     private static MessageType maxError = MessageType.info;
     public static void testMonitor() {
-        iocMessageListener = new Listener();
+        iocRequestor = new Listener();
         DBD dbd = DBDFactory.getMasterDBD();
         XMLToDBDFactory.convert(dbd,
                 "src/org/epics/ioc/support/menuStructureSupportDBD.xml",
-                iocMessageListener);
+                iocRequestor);
         XMLToDBDFactory.convert(dbd,
                 "src/org/epics/ioc/dbProcess/example/exampleDBD.xml",
-                iocMessageListener);      
+                iocRequestor);      
         boolean initOK = IOCFactory.initDatabase(
             "src/org/epics/ioc/dbProcess/example/monitorDB.xml",
-             iocMessageListener);
+             iocRequestor);
         if(!initOK) return;
         IOCDB iocdbMaster = IOCDBFactory.getMaster();
         Map<String,DBRecord> recordMap = iocdbMaster.getRecordMap();
@@ -75,7 +75,7 @@ public class MonitorTest extends TestCase {
         DBData monitor02Value = dbData[index];
         while(true) {
             try {
-                Thread.sleep(1000);
+                Thread.sleep(2000);
                 System.out.println("  counter " + counterValue.toString());
                 System.out.println("monitor00 " + monitor00Value.toString());
                 System.out.println("monitor01 " + monitor01Value.toString());
@@ -86,9 +86,16 @@ public class MonitorTest extends TestCase {
         }
     }
        
-    private static class Listener implements MessageListener {
+    private static class Listener implements Requestor {
         /* (non-Javadoc)
-         * @see org.epics.ioc.util.MessageListener#message(java.lang.String, org.epics.ioc.util.MessageType)
+         * @see org.epics.ioc.util.Requestor#getRequestorName()
+         */
+        public String getRequestorName() {
+            return "MonitorTest";
+        }
+
+        /* (non-Javadoc)
+         * @see org.epics.ioc.util.Requestor#message(java.lang.String, org.epics.ioc.util.MessageType)
          */
         public void message(String message, MessageType messageType) {
             System.out.println(message);

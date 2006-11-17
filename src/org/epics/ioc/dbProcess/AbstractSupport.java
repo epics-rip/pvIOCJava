@@ -24,8 +24,6 @@ public abstract class AbstractSupport implements Support {
     private String name;
     private DBData dbData;
     private SupportState supportState = SupportState.readyForInitialize;
-    private LinkedList<SupportStateListener> listenerList
-        = new LinkedList<SupportStateListener>();
     
     /**
      * Constructor.
@@ -37,41 +35,32 @@ public abstract class AbstractSupport implements Support {
     protected AbstractSupport(String name,DBData dbData) {
         this.name = name;
         this.dbData = dbData;
-    }   
-    /**
-     * This must be called whenever the supports changes state.
-     * @param state The new state.
+    } 
+    
+    /* (non-Javadoc)
+     * @see org.epics.ioc.dbProcess.Support#getName()
      */
-    protected void setSupportState(SupportState state) {
-        SupportState oldState = supportState;
-        supportState = state;
-        if(oldState!=state) {
-            Iterator<SupportStateListener> iter = listenerList.iterator();
-            while(iter.hasNext()) {
-                SupportStateListener listener = iter.next();
-                listener.newState(this,state);
-            }
-        }
+    public String getRequestorName() {
+        return name;
     }
-    /**
-     * Check the support state.
-     * The result should always be true.
-     * If the result is false then some support code, normally the support than calls this support
-     * is incorrectly implemented.
-     * This it is safe to call this methods without the record lock being held.
-     * @param expectedState Expected state.
-     * @param message A message to display if the state is incorrect.
-     * @return (false,true) if the state (is not, is) the expected state.
+    /* (non-Javadoc)
+     * @see org.epics.ioc.util.Requestor#message(java.lang.String, org.epics.ioc.util.MessageType)
      */
-    protected boolean checkSupportState(SupportState expectedState,String message) {
-        if(expectedState==supportState) return true;
-        dbData.message(
-             message
-             + " expected supportState " + expectedState.toString()
-             + " but state is " +supportState.toString(),
-             MessageType.fatalError);
-        return false;
+    public void message(String message, MessageType messageType) {
+        dbData.message(message, messageType);
     }
+    /* (non-Javadoc)
+     * @see org.epics.ioc.dbProcess.Support#getSupportState()
+     */
+    public SupportState getSupportState() {
+        return supportState;
+    }
+    /* (non-Javadoc)
+     * @see org.epics.ioc.dbProcess.Support#getDBData()
+     */
+    public DBData getDBData() {
+        return dbData;
+    } 
     /* (non-Javadoc)
      * @see org.epics.ioc.dbProcess.Support#initialize()
      */
@@ -102,40 +91,33 @@ public abstract class AbstractSupport implements Support {
     public void process(SupportProcessRequestor supportProcessRequestor) {
         dbData.message("process default called", MessageType.error);
         supportProcessRequestor.supportProcessDone(RequestResult.failure);
+    } 
+    /**
+     * This must be called whenever the supports changes state.
+     * @param state The new state.
+     */
+    protected void setSupportState(SupportState state) {
+        supportState = state;
     }
-    /* (non-Javadoc)
-     * @see org.epics.ioc.dbProcess.Support#update()
+    /**
+     * Check the support state.
+     * The result should always be true.
+     * If the result is false then some support code, normally the support than calls this support
+     * is incorrectly implemented.
+     * This it is safe to call this methods without the record lock being held.
+     * @param expectedState Expected state.
+     * @param message A message to display if the state is incorrect.
+     * @return (false,true) if the state (is not, is) the expected state.
      */
-    public void update() {}
-    /* (non-Javadoc)
-     * @see org.epics.ioc.dbProcess.Support#getName()
-     */
-    public String getRequestorName() {
-        return name;
-    }
-    /* (non-Javadoc)
-     * @see org.epics.ioc.dbProcess.Support#getSupportState()
-     */
-    public SupportState getSupportState() {
-        return supportState;
-    }
-    /* (non-Javadoc)
-     * @see org.epics.ioc.dbProcess.Support#getDBData()
-     */
-    public DBData getDBData() {
-        return dbData;
-    }   
-    /* (non-Javadoc)
-     * @see org.epics.ioc.dbProcess.Support#addSupportStateListener(org.epics.ioc.dbProcess.SupportStateListener)
-     */
-    public boolean addSupportStateListener(SupportStateListener listener) {
-        return listenerList.add(listener);
-    }
-    /* (non-Javadoc)
-     * @see org.epics.ioc.dbProcess.Support#removeSupportStateListener(org.epics.ioc.dbProcess.SupportStateListener)
-     */
-    public boolean removeSupportStateListener(SupportStateListener listener) {
-        return listenerList.remove(listener);
+    protected boolean checkSupportState(SupportState expectedState,String message) {
+        if(expectedState==supportState) return true;
+        dbData.message(
+             message
+             + " expected supportState " + expectedState.toString()
+             + String.format("%n")
+             + "but state is " +supportState.toString(),
+             MessageType.fatalError);
+        return false;
     }
     /**
      * Get the configuration structure for this support.

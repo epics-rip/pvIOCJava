@@ -38,6 +38,18 @@ public interface RecordProcess {
      */
     DBRecord getRecord();
     /**
+     * Set process trace.
+     * If true a message will displayed whenever process, requestProcessCallback, or processContinue are called.
+     * @param value true or false.
+     * @return (false,true) if the state (was not, was) changed.
+     */
+    boolean setTrace(boolean value);
+    /**
+     * Get the current record support state.
+     * @return The state.
+     */
+    SupportState getSupportState();
+    /**
      * Initialize.
      * This must be called rather than directly calling record support.
      * This handles global fields like scan and then calls record support.
@@ -89,22 +101,36 @@ public interface RecordProcess {
      */
     String getRecordProcessRequestorName();
     /**
-     * Set process trace.
-     * If true a message will displayed whenever process, requestProcessCallback, or processContinue are called.
-     * @param value true or false.
-     * @return (false,true) if the state (was not, was) changed.
+     * Prepare for processing a record but do not call record support.
+     * A typical use of this method is when the processor wants to modify fields
+     * of the record before it is processed.
+     * If successful the record is active but unlocked.
+     * @param recordProcessRequestor The recordProcessRequestor.
+     * @return (false,true) if the record (is not,is) ready for processing.
+     * The call can fail for a number of reasons. If false is returned the caller
+     * must not modify or process the record.
      */
-    boolean setTrace(boolean value);
-    void setActive(RecordProcessRequestor recordProcessRequestor);
+    boolean setActive(RecordProcessRequestor recordProcessRequestor);
     /**
      * Process the record instance.
-     * If the record is already active the request will fail.
+     * Unless the record was activated by setActive,
+     * the record is prepared for processing just like for setActive.
+     * If the record is successfully prepared recordSupport.process is called.
+     * All results of record processing are reported
+     * via the RecordProcessRequestor methods.
      * @param recordProcessRequestor The recordProcessRequestor.
      * @param leaveActive Leave the record active when process is done.
      * The requestor must call setInactive.
-     * @param timeStamp TODO
+     * @param timeStamp The initial timeStamp for record procsssing.
+     * If null the initial timeStamp will be the current time.
+     * @return (false,true) if the record (is not,is) ready for processing.
      */
-    void process(RecordProcessRequestor recordProcessRequestor, boolean leaveActive, TimeStamp timeStamp); 
+    boolean process(RecordProcessRequestor recordProcessRequestor, boolean leaveActive, TimeStamp timeStamp); 
+    /**
+     * Call by the recordProcessRequestor when it has called process with leaveActive
+     * true and is done.
+     * @param recordProcessRequestor
+     */
     void setInactive(RecordProcessRequestor recordProcessRequestor);
     /**
      * Ask recordProcess to continue processing.
@@ -114,7 +140,7 @@ public interface RecordProcess {
      */
     void processContinue(ProcessContinueRequestor processContinueRequestor);
     /**
-     * Request to be called back after process, preProcess or processContinue
+     * Request to be called back after process or processContinue
      * has called support but before it returns.
      * This must only be called by code running as a result of process, preProcess, or processContinue. 
      * The callback will be called with the record unlocked.

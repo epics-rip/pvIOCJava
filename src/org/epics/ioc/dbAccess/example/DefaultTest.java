@@ -9,7 +9,7 @@ import junit.framework.TestCase;
 
 import org.epics.ioc.dbDefinition.*;
 import org.epics.ioc.dbAccess.*;
-import org.epics.ioc.util.MessageListener;
+import org.epics.ioc.util.Requestor;
 import org.epics.ioc.util.MessageType;
 
 import java.util.*;
@@ -25,12 +25,12 @@ public class DefaultTest extends TestCase {
      */
     public static void testDefault() {
         DBD dbd = DBDFactory.getMasterDBD();
-        MessageListener iocMessageListener = new Listener();
+        Requestor iocRequestor = new Listener();
         XMLToDBDFactory.convert(dbd,
-                 "src/org/epics/ioc/dbAccess/example/defaultDBD.xml",iocMessageListener);
+                 "src/org/epics/ioc/dbAccess/example/defaultDBD.xml",iocRequestor);
         IOCDB iocdb = IOCDBFactory.create("testIOCDatabase");
         XMLToIOCDBFactory.convert(dbd,iocdb,
-                 "src/org/epics/ioc/dbAccess/example/defaultDB.xml",iocMessageListener);
+                 "src/org/epics/ioc/dbAccess/example/defaultDB.xml",iocRequestor);
         Map<String,DBRecord> recordMap = iocdb.getRecordMap();
         Set<String> keys = recordMap.keySet();
         System.out.printf("%n%nrecord list%n");
@@ -44,9 +44,16 @@ public class DefaultTest extends TestCase {
             System.out.print(record.toString());
         }
     }
-    private static class Listener implements MessageListener {
+    private static class Listener implements Requestor {
         /* (non-Javadoc)
-         * @see org.epics.ioc.util.MessageListener#message(java.lang.String, org.epics.ioc.util.MessageType)
+         * @see org.epics.ioc.util.Requestor#getRequestorName()
+         */
+        public String getRequestorName() {
+            return "DEfaultTest";
+        }
+
+        /* (non-Javadoc)
+         * @see org.epics.ioc.util.Requestor#message(java.lang.String, org.epics.ioc.util.MessageType)
          */
         public void message(String message, MessageType messageType) {
             System.out.println(message);

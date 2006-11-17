@@ -30,58 +30,59 @@ public class IOCFactory {
      * in the master IOC Database, the request will fails.
      * Each new record is then initialized. All record instances must initialize,
      * i.e. enter the readyForStart state or else the request fails.
-     * If all records initialize the records are merged into the master IOCDB and then started.
-     * @param iocMessageListener A listener for any messages generated while initDatabase is executing.
+     * If all records initialize the records are merged into the master IOCDB
+     * and then started.
+     * @param requestor A listener for any messages generated while initDatabase is executing.
      * @return (false,true) if the request (failed,succeeded)
      */
-    public static boolean initDatabase(String dbFile,MessageListener iocMessageListener) {
+    public static boolean initDatabase(String dbFile,Requestor requestor) {
         boolean gotIt = isInUse.compareAndSet(false,true);
         if(!gotIt) {
-            iocMessageListener.message("XMLToIOCDBFactory.convert is already active",
+            requestor.message("XMLToIOCDBFactory.convert is already active",
                 MessageType.fatalError);
             return false;
         }
         try {
             maxError = MessageType.info;
             DBD dbd = DBDFactory.getMasterDBD(); 
-            IOCDB iocdbAdd = XMLToIOCDBFactory.convert("add",dbFile,iocMessageListener);
+            IOCDB iocdbAdd = XMLToIOCDBFactory.convert("add",dbFile,requestor);
             if(maxError!=MessageType.info) {
-                iocMessageListener.message("iocInit failed because of xml errors.",
+                requestor.message("iocInit failed because of xml errors.",
                         MessageType.fatalError);
                 return false;
             }
             SupportCreation supportCreation = SupportCreationFactory.createSupportCreation(
-                iocdbAdd,iocMessageListener);
+                iocdbAdd,requestor);
             ChannelAccessLocalFactory.setIOCDB(iocdbAdd);
             boolean gotSupport = supportCreation.createSupport();
             if(!gotSupport) {
-                iocMessageListener.message("Did not find all support.",MessageType.fatalError);
-                iocMessageListener.message("nrecords",MessageType.info);
+                requestor.message("Did not find all support.",MessageType.fatalError);
+                requestor.message("nrecords",MessageType.info);
                 Map<String,DBRecord> recordMap = iocdbAdd.getRecordMap();
                 Set<String> keys = recordMap.keySet();
                 for(String key: keys) {
                     DBRecord record = recordMap.get(key);
-                    iocMessageListener.message(record.toString(),MessageType.info);
+                    requestor.message(record.toString(),MessageType.info);
                 }
-                iocMessageListener.message("support",MessageType.info);
+                requestor.message("support",MessageType.info);
                 Map<String,DBDSupport> supportMap = dbd.getSupportMap();
                 keys = supportMap.keySet();
                 for(String key: keys) {
                     DBDSupport dbdSupport = supportMap.get(key);
-                    iocMessageListener.message(dbdSupport.toString(),MessageType.info);
+                    requestor.message(dbdSupport.toString(),MessageType.info);
                 }
                 return false;
             }
             boolean readyForStart = supportCreation.initializeSupport();
             if(!readyForStart) {
-                iocMessageListener.message("initializeSupport failed",MessageType.fatalError);
+                requestor.message("initializeSupport failed",MessageType.fatalError);
                 return false;
             }
             iocdbAdd.mergeIntoMaster();
             ChannelAccessLocalFactory.setIOCDB(IOCDBFactory.getMaster());
             boolean ready = supportCreation.startSupport();
             if(!ready) {
-                iocMessageListener.message("startSupport failed",MessageType.fatalError);
+                requestor.message("startSupport failed",MessageType.fatalError);
                 return false;
             }
             supportCreation = null;

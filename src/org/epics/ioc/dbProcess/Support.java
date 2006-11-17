@@ -15,11 +15,6 @@ import org.epics.ioc.util.*;
  */
 public interface Support extends Requestor{
     /**
-     * Get the support name.
-     * @return The support name.
-     */
-    String getRequestorName();
-    /**
      * Get the support state.
      * @return The state.
      */
@@ -29,18 +24,6 @@ public interface Support extends Requestor{
      * @return The field.
      */
     DBData getDBData();
-    /**
-     * Add a listener for change of SupportState.
-     * @param listener The listener.
-     * @return (false,true) if the listener (was not, was) added to list.
-     */
-    boolean addSupportStateListener(SupportStateListener listener);
-    /**
-     * Remove a listener for change of SupportState.
-     * @param listener The listener.
-     * @return (false,true) if the listener (was not, was) removed from the list.
-     */
-    boolean removeSupportStateListener(SupportStateListener listener);
     /**
      * Initialize.
      * Perform initialization related to record instance but
@@ -64,8 +47,4 @@ public interface Support extends Requestor{
      * @param supportProcessRequestor The process requestor.
      */
     void process(SupportProcessRequestor supportProcessRequestor);
-    /**
-     * Update state. This is only called while support is active.
-     */
-    void update();
 }

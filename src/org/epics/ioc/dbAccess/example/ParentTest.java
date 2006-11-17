@@ -9,7 +9,7 @@ import junit.framework.TestCase;
 
 import org.epics.ioc.dbDefinition.*;
 import org.epics.ioc.dbAccess.*;
-import org.epics.ioc.util.MessageListener;
+import org.epics.ioc.util.Requestor;
 import org.epics.ioc.util.MessageType;
 
 /**
@@ -26,9 +26,9 @@ public class ParentTest extends TestCase {
     public static void testParent() {
         DBD dbd = DBDFactory.getMasterDBD();
         IOCDB iocdb = IOCDBFactory.create("testIOCDatabase");
-        MessageListener iocMessageListener = new Listener();
+        Requestor iocRequestor = new Listener();
         XMLToDBDFactory.convert(dbd,
-                 "src/org/epics/ioc/dbAccess/example/parentDBD.xml",iocMessageListener);
+                 "src/org/epics/ioc/dbAccess/example/parentDBD.xml",iocRequestor);
         
         //System.out.printf("%n%nstructures");
         //Map<String,DBDStructure> structureMap = dbd.getStructureMap();
@@ -46,7 +46,7 @@ public class ParentTest extends TestCase {
         //}
 
         XMLToIOCDBFactory.convert(dbd,iocdb,
-                 "src/org/epics/ioc/dbAccess/example/parentDB.xml",iocMessageListener);
+                 "src/org/epics/ioc/dbAccess/example/parentDB.xml",iocRequestor);
         
 //        System.out.printf("%nrecords%n");
 //        Map<String,DBRecord> recordMap = iocdb.getRecordMap();
@@ -153,9 +153,16 @@ public class ParentTest extends TestCase {
         
     }
     
-    private static class Listener implements MessageListener {
+    private static class Listener implements Requestor {
         /* (non-Javadoc)
-         * @see org.epics.ioc.util.MessageListener#message(java.lang.String, org.epics.ioc.util.MessageType)
+         * @see org.epics.ioc.util.Requestor#getRequestorName()
+         */
+        public String getRequestorName() {
+            return "ParentTest";
+        }
+
+        /* (non-Javadoc)
+         * @see org.epics.ioc.util.Requestor#message(java.lang.String, org.epics.ioc.util.MessageType)
          */
         public void message(String message, MessageType messageType) {
             System.out.println(message);

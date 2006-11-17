@@ -16,4 +16,10 @@ public interface Requestor {
      * @return The name.
      */
     String getRequestorName();
+    /**
+     * Report a message.
+     * @param message The message.
+     * @param messageType The message type.
+     */
+    void message(String message, MessageType messageType);
 }

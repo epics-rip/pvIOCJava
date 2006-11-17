@@ -19,9 +19,19 @@ public interface ChannelGetRequestor extends ChannelRequestor {
      * @param field The field.
      * @param data The data.
      * @return (false,true) if the requestor (has,has not) obtained all the data.
-     * A value of true means that the requestor wants to be called again for this data.
+     * A value of true means that the requestor has not retrieved all the data.
+     * The caller must call ChannelGet.getDelayed in order to access more data.
+     * The getDelayed call will result in nextDelayedGetData being called. 
      * This normally means that an array is being transfered and the requestor is
      * not able to handle the array as a single chunk of data. 
      */
     boolean nextGetData(Channel channel,ChannelField field,PVData data);
+    /**
+     * Called as a result of a call to ChannelGet.getDelayed,
+     * The underlying database is locked and this is called. 
+     * @param data The data.
+     * @return (false,true) if the requestor (will not, will)
+     * call ChannelGet.getDelayed again for this pvData.
+     */
+    boolean nextDelayedGetData(PVData data);
 }

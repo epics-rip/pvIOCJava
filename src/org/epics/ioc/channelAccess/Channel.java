@@ -56,12 +56,24 @@ public interface Channel {
      */
     ChannelProcess createChannelProcess(ChannelRequestor channelRequestor);
     /**
+     * Destroy a channelProcess.
+     * If a request is active it will complete but no new requestes will be accepted.
+     * @param channelProcess The channelProcess.
+     */
+    void destroy(ChannelProcess channelProcess);
+    /**
      * Create a ChannelGet.
      * @param channelGetRequestor The channelGetRequestor.
      * @param process Process before getting data.
      * @return An interface for the ChannelGet.
      */
     ChannelGet createChannelGet(ChannelGetRequestor channelGetRequestor,boolean process);
+    /**
+     * Destroy a channelGet.
+     * If a request is active it will complete but no new requestes will be accepted.
+     * @param channelGet The channelGet.
+     */
+    void destroy(ChannelGet channelGet);
     /**
      * Create a ChannelPut.
      * @param channelPutRequestor The channelPutRequestor.
@@ -70,17 +82,34 @@ public interface Channel {
      */
     ChannelPut createChannelPut(ChannelPutRequestor channelPutRequestor,boolean process);
     /**
+     * Destroy a channelPut.
+     * If a request is active it will complete but no new requestes will be accepted.
+     * @param channelPut The channelPut.
+     */
+    void destroy(ChannelPut channelPut);
+    /**
      * Create a ChannelPutGet.
      * @param channelPutGetRequestor The channelPutGetRequestor.
      * @param process Process after put and before get.
      * @return An interface for the ChannelPutGet.
      */
     ChannelPutGet createChannelPutGet(ChannelPutGetRequestor channelPutGetRequestor,boolean process);
+    /**
+     * Destroy a channelPut.
+     * If a request is active it will complete but no new requestes will be accepted.
+     * @param channelPutGet The channelPut.
+     */
+    void destroy(ChannelPutGet channelPutGet);
     /*
      * Create a ChannelSubscribe.
      * @return An interface for the ChannelSunscribe.
      */
     ChannelSubscribe createSubscribe();
+    /**
+     * Destroy a channelSubscribe.
+     * @param channelSubscribe The channelSubscribe.
+     */
+    void destroy(ChannelSubscribe channelSubscribe);
     /**
      * Is the channel a local channel?
      * @return (false,true) if channel (is not, is) local.

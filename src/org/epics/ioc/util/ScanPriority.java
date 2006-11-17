@@ -51,7 +51,7 @@ public enum ScanPriority {
     
     /**
      * Get the Java priority for this ScanPriority.
-     * @return
+     * @return The java priority.
      */
     public int getJavaPriority() {
         return javaPriority[ordinal()];

@@ -25,9 +25,9 @@ public class AccessTest extends TestCase {
     public static void testAccess() {
         DBD dbd = DBDFactory.getMasterDBD(); 
         IOCDB iocdb = IOCDBFactory.create("testIOCDatabase");
-        MessageListener iocMessageListener = new Listener();
+        Requestor iocRequestor = new Listener();
         XMLToDBDFactory.convert(dbd,
-                 "src/org/epics/ioc/dbAccess/example/accessDBD.xml",iocMessageListener);
+                 "src/org/epics/ioc/dbAccess/example/accessDBD.xml",iocRequestor);
               
 //        System.out.printf("%n%nstructures");
 //        Map<String,DBDStructure> structureMap = dbd.getStructureMap();
@@ -45,7 +45,7 @@ public class AccessTest extends TestCase {
 //        }
         
           XMLToIOCDBFactory.convert(dbd,iocdb,
-                "src/org/epics/ioc/dbAccess/example/accessDB.xml",iocMessageListener);
+                "src/org/epics/ioc/dbAccess/example/accessDB.xml",iocRequestor);
                
 //        System.out.printf("%nrecords%n");
 //        Map<String,DBRecord> recordMap = iocdb.getRecordMap();
@@ -190,9 +190,16 @@ public class AccessTest extends TestCase {
         }
     }
     
-    private static class Listener implements MessageListener {
+    private static class Listener implements Requestor {
         /* (non-Javadoc)
-         * @see org.epics.ioc.util.MessageListener#message(java.lang.String, org.epics.ioc.util.MessageType)
+         * @see org.epics.ioc.util.Requestor#getRequestorName()
+         */
+        public String getRequestorName() {
+            return "AccessTest";
+        }
+
+        /* (non-Javadoc)
+         * @see org.epics.ioc.util.Requestor#message(java.lang.String, org.epics.ioc.util.MessageType)
          */
         public void message(String message, MessageType messageType) {
             System.out.println(message);

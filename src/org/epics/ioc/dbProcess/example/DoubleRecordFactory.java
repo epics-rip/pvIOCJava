@@ -37,7 +37,6 @@ public class DoubleRecordFactory {
         private LinkSupport linkArraySupport = null;
         private SupportProcessRequestor supportProcessRequestor = null;
         private ProcessState processState = ProcessState.input;
-        private RequestResult requestResult;
         
         private DoubleRecordSupport(DBStructure dbStructure) {
             super(supportName,dbStructure);
@@ -48,6 +47,12 @@ public class DoubleRecordFactory {
          */
         public String getRequestorName() {
             return dbRecord.getRecordName();
+        }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.util.Requestor#message(java.lang.String, org.epics.ioc.util.MessageType)
+         */
+        public void message(String message, MessageType messageType) {
+            dbRecord.message(message, messageType);
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.dbProcess.Support#initialize()
