@@ -22,5 +22,5 @@ public enum RequestResult {
     /**
      * The request failed.
      */
-    failure,
+    failure
 }
