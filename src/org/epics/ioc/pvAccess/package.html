@@ -40,26 +40,21 @@ package: org.epics.ioc.pvAccess<br />
 
 <p>Process Variable (PV) Data supports any data consisting of the following
 types:</p>
-<ul>
-  <li>primitive
-    <p>All Java primitive types except char, i.e. boolean, byte, short, int,
-    float, and double.</p>
-  </li>
-  <li>string
-    <p>A Java String.</p>
-  </li>
-  <li>enum
-    <p>A enum is an array of choices and an index that selects a choice.</p>
-  </li>
-  <li>structure
-    <p>A structure has a name and contains an arbitrary number of fields of
-    an supported type</p>
-  </li>
-  <li>array
-    <p>A one dimensional array. The element type is any of the supported
-    types</p>
-  </li>
-</ul>
+<dl>
+  <dt>primitive</dt>
+    <dd>All Java primitive types except char, i.e. boolean, byte, short, int,
+      float, and double.</dd>
+  <dt>string</dt>
+    <dd>A Java String.</dd>
+  <dt>enum</dt>
+    <dd>A enum is an array of choices and an index that selects a choice.</dd>
+  <dt>structure</dt>
+    <dd>A structure has a name and contains an arbitrary number of fields of
+      an supported type</dd>
+  <dt>array</dt>
+    <dd>A one dimensional array. The element type is any of the supported
+      types</dd>
+</dl>
 
 <p>In addition to the Java IOC, PV data is intended for use by 1) Channel
 Access client, 2) interface from client to network, e.g. ICE, 3) interface
@@ -68,43 +63,36 @@ database. Since it is the interface to data, it could also be used by other
 systems, e.g. TANGO, TINI, DOOCS, etc.</p>
 
 <p>This package provides the following:</p>
-<ul>
-  <li>Type
-    <p>An enum that describes the valid types.</p>
-  </li>
-  <li>Reflection Interfaces
-    <p>These are interfaces that describe a PV. They are designed so that
-    characteristics of a PV can be discovered without requiring access to the
-    data associated with it.</p>
-  </li>
-  <li>Data Interfaces
-    <p>These are interfaces for accessing the data associated with a PV.</p>
-  </li>
-  <li>Conversion Facility
-    <p>Conversion of the data from any PV to a string is provided.</p>
-    <p>Conversion from a string to any scalar or array of srings to an array
-    of scaler types is supported.</p>
-    <p>Conversion between a PV and numeric primitive types is supported. The
-    PV must contain scalar numeric type.</p>
-    <p>Conversion between a PV and an array of numeric primitive types is
-    supported. The PV must contain an array of a numeric type.</p>
-    <p>Copy, with conversion if the types differ, between compatible scalar
-    PVs.</p>
-    <p>Copy, with conversion if the element types differ, between compatible
-    arrays of PVs.</p>
-  </li>
-  <li>Field Factory
-    <p>This is an object factory that creates objects implementing the
-    reflection interfaces.</p>
-  </li>
-  <li>Abstract Field Classes
-    <p>Abstract base classes for implementing Field objects.</p>
-  </li>
-  <li>Convert Factory
-    <p>An object factory that provides an implementation of the conversion
-    facility.</p>
-  </li>
-</ul>
+<dl>
+  <dt>Type</dt>
+    <dd>An enum that describes the valid types.</dd>
+  <dt>Reflection Interfaces</dt>
+    <dd>These are interfaces that describe a PV. They are designed so that
+      characteristics of a PV can be discovered without requiring access to
+      the data associated with it.</dd>
+  <dt>Data Interfaces</dt>
+    <dd>These are interfaces for accessing the data associated with a PV.</dd>
+  <dt>Conversion Facility</dt>
+    <dd>Conversion of the data from any PV to a string is provided.</dd>
+    <dd>Conversion from a string to any scalar or array of srings to an array
+      of scaler types is supported.</dd>
+    <dd>Conversion between a PV and numeric primitive types is supported. The
+      PV must contain scalar numeric type.</dd>
+    <dd>Conversion between a PV and an array of numeric primitive types is
+      supported. The PV must contain an array of a numeric type.</dd>
+    <dd>Copy, with conversion if the types differ, between compatible scalar
+      PVs.</dd>
+    <dd>Copy, with conversion if the element types differ, between compatible
+      arrays of PVs.</dd>
+  <dt>Field Factory</dt>
+    <dd>This is an object factory that creates objects implementing the
+      reflection interfaces.</dd>
+  <dt>Abstract Field Classes</dt>
+    <dd>Abstract base classes for implementing Field objects.</dd>
+  <dt>Convert Factory</dt>
+    <dd>An object factory that provides an implementation of the conversion
+      facility.</dd>
+</dl>
 
 <p>This package does not provide any facilities to create objects that
 implement the Data Interfaces. This is the responsibility of a particular
@@ -112,15 +100,17 @@ implementation. For a javaIOC, dbAccess provides an implementation.</p>
 
 <h2><a id="PVDescription"></a>Process Variable</h2>
 
-<p>Definitions</p>
-<ul>
-  <li>Processs Variable (PV) - The name used to specify the type of data this
-    package supports.</li>
-  <li>Field - A Field has a name and a type that is any of the supported
-    types. It can also have properties.</li>
-  <li>Property - A property has a name and an associated field within the PV
-    for the data.</li>
-</ul>
+<p>Definitions:</p>
+<dl>
+  <dt>Processs Variable (PV)</dt>
+    <dd>The name used to specify the type of data this package supports.</dd>
+  <dt>Field</dt>
+    <dd>A Field has a name and a type that is any of the supported types. It
+      can also have properties.</dd>
+  <dt>Property</dt>
+    <dd>A property has a name and an associated field within the PV for the
+      data.</dd>
+</dl>
 
 <p>Examples of fields are: value, rawValue. Examples of properties are:
 status, timeStamp, alarmSeverity, displayLimits, controlLimits,
@@ -139,26 +129,38 @@ follows:</p>
 <h2><a id="PVDataTypes"></a>Process Variable Data Types</h2>
 
 <p>The following types are supported:</p>
-<ul>
-  <li>unknown - type is not known</li>
-  <li>primitive
-    <ul>
-      <li>byte - An 8 bit signed byte</li>
-      <li>boolean - true or false</li>
-      <li>short - 16 bit signed integer</li>
-      <li>int- 32 bit signed integer</li>
-      <li>long - 64 bit signed integer</li>
-      <li>float - 32 bit IEEE float</li>
-      <li>double - 64 bit IEEE float</li>
-    </ul>
-  </li>
-  <li>string - A Java String</li>
-  <li>enum - a String array of choices and an index selecting a choice.</li>
-  <li>structure - A struture with fields of type primitive, string,enum,
-    structure, or array</li>
-  <li>array - a one dimensional array of type primitive, string,enum,
-    structure, or array</li>
-</ul>
+<dl>
+  <dt>unknown</dt>
+    <dd>type is not known</dd>
+  <dt>primitive</dt>
+    <dd><dl>
+        <dt>byte</dt>
+          <dd>An 8 bit signed byte</dd>
+        <dt>boolean</dt>
+          <dd>true or false</dd>
+        <dt>short</dt>
+          <dd>16 bit signed integer</dd>
+        <dt>int</dt>
+          <dd>32 bit signed integer</dd>
+        <dt>long</dt>
+          <dd>64 bit signed integer</dd>
+        <dt>float</dt>
+          <dd>32 bit IEEE float</dd>
+        <dt>double</dt>
+          <dd>64 bit IEEE float</dd>
+      </dl>
+    </dd>
+  <dt>string</dt>
+    <dd>A Java String</dd>
+  <dt>enum</dt>
+    <dd>a String array of choices and an index selecting a choice.</dd>
+  <dt>structure</dt>
+    <dd>A struture with fields of type primitive, string,enum, structure, or
+      array</dd>
+  <dt>array</dt>
+    <dd>a one dimensional array of type primitive, string,enum, structure, or
+      array</dd>
+</dl>
 
 <h2><a id="PVReflection"></a>Process Variable Reflection</h2>
 
@@ -605,9 +607,7 @@ Classes</h1>
         public String toString(int indentLevel);      
         private String getString(int indentLevel);
     }
-}
-
-</pre>
+}</pre>
 
 <p>These classes are used by FieldFactory, described below, to create
 instances of the reflection onterfaces.</p>
