@@ -214,7 +214,11 @@ public class LinkArraySupportFactory {
             }
             numberWait--;
             if(numberWait>0) return;
-            callLinkSupport();
+            if(nextLink<linkSupports.length) {
+                callLinkSupport();
+            } else {
+                supportProcessRequestor.supportProcessDone(finalResult);
+            }
         }
         
         private void callLinkSupport() {
@@ -238,9 +242,6 @@ public class LinkArraySupportFactory {
                     processLink.process(this);
                 }
                 if(wait) return;
-            }
-            if(numberWait<=0) {
-                supportProcessRequestor.supportProcessDone(finalResult);
             }
         }
     }

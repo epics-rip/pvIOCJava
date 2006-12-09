@@ -22,6 +22,12 @@
     <choice>invalid</choice>
 </menu>
 
+<menu name = "monitorType">
+    <choice>change</choice>
+    <choice>deltaChange</choice>
+    <choice>percentageChange</choice>
+</menu>
+
 <structure name = "timeStamp">
     <field name = "secondsPastEpoch" type = "long" />
     <field name = "nanoSeconds" type = "int" />
@@ -40,18 +46,24 @@
 
 <structure name = "monitorLink">
     <field name = "pvname" type = "string" link = "true" />
-    <field name = "queueCapacity" type = "int">
-        <!-- 0 means monitor only >0 means data also -->
-    </field>
-    <field name = "reportOverrun" type = "boolean" >
-        <!-- only applicable if queueCapacity>=0 -->
-     </field>
+    <field name = "type" type = "menu" menuName = "monitorType" default = "change" />
+    <field name = "deadband" type = "double" />
+    <field name = "onlyWhileProcessing" type = "boolean" />
+    <field name = "queueSize" type = "int"  default = "2" />
+    <field name = "reportOverrun" type = "boolean" />
     <field name = "process" type = "boolean">
         <!-- process this record when monitor occurs -->
     </field>
     <field name = "inheritSeverity" type = "boolean" >
         <!-- only applicable if process is true -->
     </field>
+</structure>
+
+<structure name = "monitorNotifyLink">
+    <field name = "pvname" type = "string" link = "true" />
+    <field name = "type" type = "menu" menuName = "monitorType" default = "change" />
+    <field name = "deadband" type = "double" />
+    <field name = "onlyWhileProcessing" type = "boolean" />
 </structure>
 
 <structure name = "inputLink">
@@ -115,6 +127,10 @@
 />
 <support name = "monitorLink"
     configurationStructureName = "monitorLink"
+    factoryName = "org.epics.ioc.support.LinkSupportFactory"
+/>
+<support name = "monitorNotifyLink"
+    configurationStructureName = "monitorNotifyLink"
     factoryName = "org.epics.ioc.support.LinkSupportFactory"
 />
 <support name = "inputLink"

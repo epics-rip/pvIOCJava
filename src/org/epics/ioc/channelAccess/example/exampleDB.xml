@@ -1,0 +1,13 @@
+<?xml version="1.0" ?>
+<IOCDatabase>
+<record name = "counter" type = "counterRecord">
+    <min>0.0</min>
+    <max>1e9</max>
+    <inc>1.0</inc>
+    <scan>
+        <scan>periodic</scan>
+        <rate>1.0</rate>
+    </scan>
+</record>
+
+</IOCDatabase>

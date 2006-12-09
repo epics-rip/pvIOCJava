@@ -13,76 +13,48 @@ import java.util.concurrent.locks.*;
  *
  */
 public class IOCExecutorFactory {
-    static public IOCExecutor create() {
-        String poolSize = System.getenv("IOCExecutorPoolSize");
-        if(poolSize==null) poolSize = "1";
-        int threadPoolSize = Integer.parseInt(poolSize);
-        assert(threadPoolSize>=1);
-        return new ExecutorInstance(threadPoolSize);
-    }
-    
-    static private class ThreadPool {
-        private ThreadInstance[] threadPool;
-        private int[] size;
-        private ThreadPool(int nthreads) {
-            threadPool = new ThreadInstance[nthreads];
-            size = new int[nthreads];
-        }
+    static public IOCExecutor create(String name) {
+        return new ExecutorInstance(name);
     }
     
     static private class ExecutorInstance implements IOCExecutor {
-        private ThreadPool[] threadPool = null;
-        private int threadPoolSize;
+        private ThreadInstance[] threads;
 
-        private ExecutorInstance(int threadPoolSize) {
+        private ExecutorInstance(String name) {
             super();
-            this.threadPoolSize = threadPoolSize;
-            int numPriorities = ScanPriority.values().length;
-            threadPool = new ThreadPool[numPriorities];
+            int[] javaPriority = ScanPriority.javaPriority;
+            int numPriorities = javaPriority.length;
+            threads = new ThreadInstance[numPriorities];
             for(int i=0; i<numPriorities; i++) {
-                threadPool[i] = new ThreadPool(threadPoolSize);
+                int priority = javaPriority[i];
+                String threadName = name + "(" + String.valueOf(priority) + ")";
+                threads[i] = new ThreadInstance(threadName,priority);
             }
         }
 
         public synchronized void execute(List<Runnable> commands, ScanPriority priority) {
-            ThreadPool threadPool = this.threadPool[priority.ordinal()];
-            int size = threadPool.size[0];
-            int index = 0;
-            for(int next =1; next<threadPoolSize; next++) {
-                int sizeNext = threadPool.size[next];
-                if(sizeNext<size) {
-                    size = sizeNext;
-                    index = next;
-                }
-            }
-            size = threadPool.size[index];
-            ThreadInstance threadInstance = threadPool.threadPool[index];
-            threadPool.size[index] = threadInstance.add(commands);
-            
+            ThreadInstance thread = threads[priority.ordinal()];
+            thread.add(commands);
         }
 
         public synchronized void execute(Runnable command, ScanPriority priority) {
-            ThreadPool threadPool = this.threadPool[priority.ordinal()];
-            int size = threadPool.size[0];
-            int index = 0;
-            for(int next =1; next<threadPoolSize; next++) {
-                int sizeNext = threadPool.size[next];
-                if(sizeNext<size) {
-                    size = sizeNext;
-                    index = next;
-                }
-            }
-            size = threadPool.size[index];
-            ThreadInstance threadInstance = threadPool.threadPool[index];
-            threadPool.size[index] = threadInstance.add(command);
+            ThreadInstance thread = threads[priority.ordinal()];
+            thread.add(command);
         }
     }
     
     static private class ThreadInstance implements Runnable {
+        private Thread thread = null;
         private List<Runnable> runList = new ArrayList<Runnable>();
         private ReentrantLock lock = new ReentrantLock();
         private Condition moreWork = lock.newCondition();
 
+        private ThreadInstance(String name,int priority) {
+            thread = new Thread(this,name);
+            thread.setPriority(priority);
+            thread.start();
+        } 
+        
         public void run() {
             try {
                 while(true) {

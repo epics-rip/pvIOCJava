@@ -17,10 +17,10 @@ import org.epics.ioc.pvAccess.*;
  */
 public class ChannelDataFactory {
      /**
-      * Create a ChannelData for the specified channel and channelFieldGroup.
+      * Create a ChannelData for the specified channel and fieldGroupImpl.
      * @param channel The channel.
-     * @param channelFieldGroup The field group.
-     * @return The interface for ChannelData.
+     * @param channelFieldGroup The field group defining what should be in the channelData.
+     * @return The channelData interface.
      */
     public static ChannelData createData(
          Channel channel,ChannelFieldGroup channelFieldGroup)
@@ -37,8 +37,8 @@ public class ChannelDataFactory {
       * Create a queue of ChannelData.
      * @param queueSize The queueSize. This is can not be changed after creation.
      * @param channel The channel.
-     * @param channelFieldGroup The field group.
-     * @return The queue.
+     * @param fieldGroup The field group defining what should be in each channelData.
+     * @return The channelDataQueue interface.
      */
     public static ChannelDataQueue createQueue(
              int queueSize,
@@ -78,7 +78,7 @@ public class ChannelDataFactory {
         /* (non-Javadoc)
          * @see org.epics.ioc.channelAccess.ChannelDataQueue#getFree()
          */
-        public ChannelData getFree() {
+        public ChannelData getFree(boolean forceFree) {
             lock.lock();
             try {
                 if(freeList.size()>0) {
@@ -87,8 +87,11 @@ public class ChannelDataFactory {
                     return data;
                 }
                 numberMissed++;
+                if(!forceFree) return null;
                 if(inUseList.size()<=0) return null;
-                return inUseList.get(0);
+                ChannelData data = inUseList.remove(0);
+                inUseList.add(data);
+                return data;
             } finally {
                 lock.unlock();
             }
@@ -115,7 +118,9 @@ public class ChannelDataFactory {
          * @see org.epics.ioc.channelAccess.ChannelDataQueue#getNumberMissed()
          */
         public int getNumberMissed() {
-            return numberMissed;
+            int number = numberMissed;
+            numberMissed = 0;
+            return number;
         }
 
         /* (non-Javadoc)
@@ -139,7 +144,7 @@ public class ChannelDataFactory {
                 if(next!=channelData) {
                     throw new IllegalStateException("channelData is not that returned by getNext");
                 }
-                numberMissed = 0;
+                channelData.clear();
                 freeList.add(next);
                 next = null;
             } finally {
@@ -198,9 +203,16 @@ public class ChannelDataFactory {
          }
          
          /* (non-Javadoc)
+         * @see org.epics.ioc.channelAccess.ChannelData#getChannelFieldGroup()
+         */
+        public ChannelFieldGroup getChannelFieldGroup() {
+            return channelFieldGroup;
+        }
+
+        /* (non-Javadoc)
           * @see org.epics.ioc.channelAccess.ChannelData#add(org.epics.ioc.pvAccess.PVData)
           */
-         public void add(ChannelField channelField, PVData fromData) {
+         public boolean add(PVData fromData) {
              Field fromField = fromData.getField();
              for(int i=0; i< pvDataArray.length; i++) {
                  PVData toData = pvDataArray[i];
@@ -225,9 +237,10 @@ public class ChannelDataFactory {
                          throw new IllegalStateException("unsupported type");
                      }
                      hasData[i] = true;
-                     return;
+                     return true;
                  }
              }
+             return false;
          }
 
         /* (non-Javadoc)

@@ -54,7 +54,7 @@ public interface Channel {
      * Create a ChannelProcess.
      * @return An interface for the ChannelProcess.
      */
-    ChannelProcess createChannelProcess(ChannelRequestor channelRequestor);
+    ChannelProcess createChannelProcess(ChannelProcessRequestor channelProcessRequestor);
     /**
      * Destroy a channelProcess.
      * If a request is active it will complete but no new requestes will be accepted.
@@ -100,16 +100,17 @@ public interface Channel {
      * @param channelPutGet The channelPut.
      */
     void destroy(ChannelPutGet channelPutGet);
-    /*
-     * Create a ChannelSubscribe.
-     * @return An interface for the ChannelSunscribe.
-     */
-    ChannelSubscribe createSubscribe();
     /**
-     * Destroy a channelSubscribe.
-     * @param channelSubscribe The channelSubscribe.
+     * Create a ChannelMonitor.
+     * @param onlyWhileProcessing Monitor only while processing?
+     * @return An interface for the ChannelMonitor.
      */
-    void destroy(ChannelSubscribe channelSubscribe);
+    ChannelMonitor createChannelMonitor(boolean onlyWhileProcessing);
+    /**
+     * Destroy a channelMonitor.
+     * @param channelMonitor The channelMonitor.
+     */
+    void destroy(ChannelMonitor channelMonitor);
     /**
      * Is the channel a local channel?
      * @return (false,true) if channel (is not, is) local.

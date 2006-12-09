@@ -1987,7 +1987,7 @@ public final class ConvertFactory {
             int num = ncopy;
             switch(elementType) {
             case pvUnknown: {
-                    for(int i=0; i<num; i++) to[toOffset+i] = "unknown";
+                    for(int i=0; i<num; i++) to[toOffset+i] = "unknown type";
                 }
                 break;
             case pvBoolean: {

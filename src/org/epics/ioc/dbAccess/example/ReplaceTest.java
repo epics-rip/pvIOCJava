@@ -209,7 +209,7 @@ public class ReplaceTest extends TestCase {
         private String recordName;
         private String pvName = null;
         private String actualFieldName = null;
-        private boolean synchronousData = false;
+        private boolean isProcessing = false;
        
         TestListener(IOCDB iocdb,String recordName,String pvName) {
             this.recordName = recordName;
@@ -239,19 +239,19 @@ public class ReplaceTest extends TestCase {
                     dbData.addListener(listener);
                 }
             }
-        }
+        }     
         /* (non-Javadoc)
-         * @see org.epics.ioc.dbAccess.DBListener#beginSynchronous()
+         * @see org.epics.ioc.dbAccess.DBListener#beginProcess()
          */
-        public void beginSynchronous() {
-            synchronousData = true;
+        public void beginProcess() {
+            isProcessing = true;
         }
         
         /* (non-Javadoc)
-         * @see org.epics.ioc.dbAccess.DBListener#endSynchronous()
+         * @see org.epics.ioc.dbAccess.DBListener#endProcess()
          */
-        public void endSynchronous() {
-            synchronousData = false;
+        public void endProcess() {
+            isProcessing = false;
         }
 
         /* (non-Javadoc)
@@ -260,10 +260,10 @@ public class ReplaceTest extends TestCase {
         public void newData(DBData dbData) {
             System.out.printf(" actualField %s value %s%n",
                 dbData.getField().getName(), dbData.toString());
-            System.out.printf("TestListener recordName %s is Synchronous %b"
+            System.out.printf("TestListener recordName %s isProcessing %b"
                     + " pvName %s actualFieldName %s",
                 recordName,
-                synchronousData,
+                isProcessing,
                 pvName,
                 actualFieldName);
             String dbDataName = dbData.getField().getName();

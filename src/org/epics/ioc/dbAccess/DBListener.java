@@ -17,15 +17,15 @@ public interface DBListener {
      */
     void newData(DBData dbData);
     /**
-     * Begin synchronous data.
-     * From begin until end of synchronous data,
-     * each newData returns part of the synchronous data.
+     * Begin record processing.
+     * From begin until end of record processing,
+     * each newData returns data modified while record is being processed.
      */
-    void beginSynchronous();
+    void beginProcess();
     /**
-     * End of synchronous data.
+     * End of record processing.
      */
-    void endSynchronous();
+    void endProcess();
     /**
      * Connection to record is being terminated and the RecordListener is no longer valid.
      */

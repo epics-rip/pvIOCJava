@@ -27,8 +27,8 @@ public class AbstractDBRecord extends AbstractDBStructure implements DBRecord {
     private RecordProcess recordProcess = null;
     private LinkedList<RecordStateListener> recordStateListenerList
         = new LinkedList<RecordStateListener>();
-    private LinkedList<ListenerPvt> listenerList
-        = new LinkedList<ListenerPvt>();
+    private LinkedList<RecordListenerPvt> recordListenerList
+        = new LinkedList<RecordListenerPvt>();
     private LinkedList<AbstractDBData> listenerSourceList
           = new LinkedList<AbstractDBData>();
     private DBD dbd = null;
@@ -132,32 +132,32 @@ public class AbstractDBRecord extends AbstractDBStructure implements DBRecord {
         return id;
     }
     /* (non-Javadoc)
-     * @see org.epics.ioc.dbAccess.DBRecord#beginSynchronous()
+     * @see org.epics.ioc.dbAccess.DBRecord#beginProcess()
      */
-    public void beginSynchronous() {
-        Iterator<ListenerPvt> iter = listenerList.iterator();
+    public void beginProcess() {
+        Iterator<RecordListenerPvt> iter = recordListenerList.iterator();
         while(iter.hasNext()) {
-            ListenerPvt listener = iter.next();
-            listener.beginSynchronous();
+            RecordListenerPvt listener = iter.next();
+            listener.beginProcess();
         }
     }
     /* (non-Javadoc)
-     * @see org.epics.ioc.dbAccess.DBRecord#endSynchronous()
+     * @see org.epics.ioc.dbAccess.DBRecord#endProcess()
      */
-    public void endSynchronous() {
-        Iterator<ListenerPvt> iter = listenerList.iterator();
+    public void endProcess() {
+        Iterator<RecordListenerPvt> iter = recordListenerList.iterator();
         while(iter.hasNext()) {
-            ListenerPvt listener = iter.next();
-            listener.endSynchronous();
+            RecordListenerPvt listener = iter.next();
+            listener.endProcesss();
         }
     }
     /* (non-Javadoc)
      * @see org.epics.ioc.dbAccess.DBRecord#createListener(org.epics.ioc.dbAccess.DBListener)
      */
     public RecordListener createListener(DBListener listener) {
-        ListenerPvt listenerPvt = new ListenerPvt(listener);
-        listenerList.add(listenerPvt);
-        return listenerPvt;
+        RecordListenerPvt recordListenerPvt = new RecordListenerPvt(listener);
+        recordListenerList.add(recordListenerPvt);
+        return recordListenerPvt;
     }
     /* (non-Javadoc)
      * @see org.epics.ioc.dbAccess.DBRecord#destroyListener(org.epics.ioc.dbAccess.RecordListener)
@@ -168,14 +168,14 @@ public class AbstractDBRecord extends AbstractDBStructure implements DBRecord {
             AbstractDBData dbData = iter.next();
             dbData.removeListener(listener);
         }
-        listenerList.remove(listener);
+        recordListenerList.remove(listener);
     }
     /* (non-Javadoc)
      * @see org.epics.ioc.dbAccess.AbstractDBData#removeListeners()
      */
     public void removeListeners() {
         while(true) {
-            ListenerPvt listener = listenerList.remove();
+            RecordListenerPvt listener = recordListenerList.remove();
             if(listener==null) break;
             listener.unlisten();
             Iterator<AbstractDBData> iter = listenerSourceList.iterator();
@@ -235,37 +235,29 @@ public class AbstractDBRecord extends AbstractDBStructure implements DBRecord {
         return super.toString(recordName + " recordType",indentLevel);
     }
 
-    private static class ListenerPvt implements RecordListener {
+    private static class RecordListenerPvt implements RecordListener {
         private DBListener dbListener;
-        private boolean isSynchronous = false;
-        private boolean sentWhileSynchronous = false;
         
         void unlisten() {
             dbListener.unlisten(this);
         }
 
-        ListenerPvt(DBListener listener) {
+        RecordListenerPvt(DBListener listener) {
             dbListener = listener;
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.dbAccess.RecordListener#newData(org.epics.ioc.dbAccess.DBData)
          */
         public void newData(DBData data) {
-            if(isSynchronous && !sentWhileSynchronous) {
-                dbListener.beginSynchronous();
-                sentWhileSynchronous = true;
-            }
             dbListener.newData(data);
         }
         
-        void beginSynchronous() {
-            isSynchronous = true;
-            sentWhileSynchronous = false;
+        void beginProcess() {
+            dbListener.beginProcess();
         }
         
-        void endSynchronous() {
-            if(sentWhileSynchronous) dbListener.endSynchronous();
-            isSynchronous = false;
+        void endProcesss() {
+            dbListener.endProcess();
         }
     }
 }

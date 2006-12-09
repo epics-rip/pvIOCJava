@@ -6,17 +6,17 @@
 package org.epics.ioc.channelAccess;
 
 import org.epics.ioc.pvAccess.PVData;
+import org.epics.ioc.util.*;
 
 /**
  * Listener for ChannelPut requests.
  * @author mrk
  *
  */
-public interface ChannelPutRequestor extends ChannelRequestor {
+public interface ChannelPutRequestor extends Requestor {
     /**
      * Provide the next set of data to put to the channel.
      * The requestor is expected to call the put method.
-     * @param channel The channel.
      * @param field The field.
      * @param data The interface for putting data.
      * @return (false,true) if the requestor (has,has not) obtained all the data.
@@ -26,7 +26,7 @@ public interface ChannelPutRequestor extends ChannelRequestor {
      * This normally means that an array is being transfered and the requestor is
      * not able to handle the array as a single chunk of data.
      */
-    boolean nextPutData(Channel channel,ChannelField field,PVData data);
+    boolean nextPutData(ChannelField field,PVData data);
     /**
      * Called as a result of a call to ChannelPut.putDelayed,
      * The underlying database is locked and this is called. 
@@ -35,4 +35,9 @@ public interface ChannelPutRequestor extends ChannelRequestor {
      * call ChannelPut.putDelayed again for this pvData.
      */
     boolean nextDelayedPutData(PVData data);
+    /**
+     * The request is done. This is always called with no locks held.
+     * @param requestResult The result of the request.
+     */
+    void putDone(RequestResult requestResult);
 }

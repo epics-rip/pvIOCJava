@@ -28,14 +28,14 @@ public interface ChannelPutGet {
      * If ChannelPutGetRequestor.nextPutData or ChannelPutGetRequestor.nextDelayedPutData returns true
      * this is the call to ask again for the data. The result is that the underlying database
      * is locked and ChannelPutGetRequestor.nextDelayedPutData is called.
-     * @param pvData
+     * @param pvData The pvData to put.
      */
     void putDelayed(PVData pvData);
     /**
      * If ChannelPutGetRequestor.nextGetData or ChannelPutGetRequestor.nextDelayedGetData returns true
      * this is the call to ask again for the data. The result is that the underlying database
      * is locked and ChannelPutGetRequestor.nextDelayedGetData is called.
-     * @param pvData
+     * @param pvData The pvData to get.
      */
     void getDelayed(PVData pvData);
 }

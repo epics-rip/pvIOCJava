@@ -28,7 +28,7 @@ public class DelayLinkFactory {
     private static class DelayLink extends AbstractSupport
     implements LinkSupport,ProcessContinueRequestor
     {
-        private TimerTask timerTask = new DelayTask(this);
+        private TimerTask timerTask = null;
         private DBLink dbLink = null;
         private DBRecord dbRecord = null;
         private RecordProcess recordProcess = null;
@@ -102,6 +102,7 @@ public class DelayLinkFactory {
          */
         public void process(SupportProcessRequestor supportProcessRequestor) {
             this.supportProcessRequestor = supportProcessRequestor;
+            timerTask = new DelayTask(this);
             timer.schedule(timerTask, delay);
             delay += inc;
             if(delay>max) delay = min;

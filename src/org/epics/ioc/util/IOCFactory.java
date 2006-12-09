@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import org.epics.ioc.channelAccess.ChannelAccessLocalFactory;
 import org.epics.ioc.dbAccess.*;
 import org.epics.ioc.dbDefinition.DBD;
 import org.epics.ioc.dbDefinition.DBDFactory;

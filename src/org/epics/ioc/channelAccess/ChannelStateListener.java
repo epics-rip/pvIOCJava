@@ -5,12 +5,13 @@
  */
 package org.epics.ioc.channelAccess;
 
+import org.epics.ioc.util.*;
 /**
  * Listener for connect state changes.
  * @author mrk
  *
  */
-public interface ChannelStateListener {
+public interface ChannelStateListener extends Requestor {
     /**
      * The channel has change connection state.
      * @param c The channel.

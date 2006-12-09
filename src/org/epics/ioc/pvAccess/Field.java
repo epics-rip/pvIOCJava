@@ -36,8 +36,8 @@ public interface Field {
      */
     Property getProperty(String propertyName);
     /**
-     * Get the field type
-     * @return the field type
+     * Get the field type.
+     * @return The field type.
      */
     Type getType();
     /**

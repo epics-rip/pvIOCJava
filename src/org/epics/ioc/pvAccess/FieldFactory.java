@@ -56,8 +56,8 @@ public final class FieldFactory {
      * i.e. <i>pvBoolean</i>, ... , <i>pvString</i>
      * For <i>pvEnum</i>, <i>pvArray</i>, and <i>pvStructure</i>
      * the appropriate create method must be called.
-     * @param name field name
-     * @param type field type 
+     * @param name field name.
+     * @param type field type .
      * @param property the field properties.
      * The properties must be created before calling this method.
      * <i>null</i> means that the field has no properties.

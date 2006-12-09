@@ -23,9 +23,10 @@ public interface ChannelDataQueue {
     int capacity();
     /**
      * Get the next free queue element.
+     * @param forceFree TODO
      * @return A ChannelData.
      */
-    ChannelData getFree();
+    ChannelData getFree(boolean forceFree);
     /**
      * Get the oldest queue element.
      * @return The oldest element.
@@ -33,6 +34,7 @@ public interface ChannelDataQueue {
     ChannelData getNext();
     /**
      * Get the number of missed sets of data.
+     * The number is reset to 0.
      * @return The number of missed sets of data.
      */
     int getNumberMissed();

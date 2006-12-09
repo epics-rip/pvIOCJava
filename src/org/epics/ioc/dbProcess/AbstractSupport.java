@@ -142,31 +142,6 @@ public abstract class AbstractSupport implements Support {
         return configStructure;
     }
     /**
-     * Get a string field from the configuration structure.
-     * @param configStructure The configuration structure.
-     * @param fieldName The field name.
-     * @return The PVString for accessing the field or null if it does not exist.
-     */
-    protected static PVString getString(DBStructure configStructure,String fieldName)
-    {
-        DBData[] dbData = configStructure.getFieldDBDatas();
-        int index = configStructure.getFieldDBDataIndex(fieldName);
-        if(index<0) {
-            configStructure.message(
-                "configStructure does not have field" + fieldName,
-                MessageType.error);
-            return null;
-        }
-        if(dbData[index].getField().getType()!=Type.pvString) {
-            dbData[index].message(
-                "configStructure field "
-                + fieldName + " does not have type string ",
-                MessageType.error);
-            return null;
-        }
-        return (PVString)dbData[index];
-    }
-    /**
      * Get a boolean field from the configuration structure.
      * @param configStructure The configuration structure.
      * @param fieldName The field name.
@@ -315,5 +290,56 @@ public abstract class AbstractSupport implements Support {
             return null;
         }
         return (PVDouble)dbData[index];
+    }
+    /**
+     * Get a string field from the configuration structure.
+     * @param configStructure The configuration structure.
+     * @param fieldName The field name.
+     * @return The PVString for accessing the field or null if it does not exist.
+     */
+    protected static PVString getString(DBStructure configStructure,String fieldName)
+    {
+        DBData[] dbData = configStructure.getFieldDBDatas();
+        int index = configStructure.getFieldDBDataIndex(fieldName);
+        if(index<0) {
+            configStructure.message(
+                "configStructure does not have field" + fieldName,
+                MessageType.error);
+            return null;
+        }
+        if(dbData[index].getField().getType()!=Type.pvString) {
+            dbData[index].message(
+                "configStructure field "
+                + fieldName + " does not have type string ",
+                MessageType.error);
+            return null;
+        }
+        return (PVString)dbData[index];
+    }
+    /**
+     * Get a string field from the configuration structure.
+     * @param configStructure The configuration structure.
+     * @param fieldName The field name.
+     * @return The PVEnum for accessing the field or null if it does not exist.
+     */
+    protected static PVEnum getEnum(
+            DBStructure configStructure,String fieldName)
+    {
+        DBData[] dbData = configStructure.getFieldDBDatas();
+        int index = configStructure.getFieldDBDataIndex(fieldName);
+        if(index<0) {
+            configStructure.message(
+                "configStructure does not have field" + fieldName,
+                MessageType.error);
+            return null;
+        }
+        if(dbData[index].getField().getType()!=Type.pvEnum) {
+            dbData[index].message(
+                "configStructure field "
+                + fieldName + " does not have type string ",
+                MessageType.error);
+            return null;
+        }
+        return (PVEnum)dbData[index];
     }
 }

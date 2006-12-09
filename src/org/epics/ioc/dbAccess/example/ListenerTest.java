@@ -97,7 +97,7 @@ public class ListenerTest extends TestCase {
         private String recordName;
         private String pvName = null;
         private String actualFieldName = null;
-        private boolean synchronousData = false;
+        private boolean isProcessing = false;
         
         TestListener(IOCDB iocdb,String recordName,String pvName) {
             this.recordName = recordName;
@@ -128,21 +128,19 @@ public class ListenerTest extends TestCase {
                 }
             }
         }
-        
         /* (non-Javadoc)
-         * @see org.epics.ioc.dbAccess.DBListener#beginSynchronous()
+         * @see org.epics.ioc.dbAccess.DBListener#beginProcess()
          */
-        public void beginSynchronous() {
-            System.out.printf("TestListener start synchronous data pvName %s%n",pvName);
-            synchronousData = true;
+        public void beginProcess() {
+            System.out.printf("TestListener start processing pvName %s%n",pvName);
+            isProcessing = true;
         }
-        
         /* (non-Javadoc)
-         * @see org.epics.ioc.dbAccess.DBListener#endSynchronous()
+         * @see org.epics.ioc.dbAccess.DBListener#endProcess()
          */
-        public void endSynchronous() {
-          System.out.printf("TestListener end synchronous data pvName %s%n",pvName);
-          synchronousData = false;
+        public void endProcess() {
+          System.out.printf("TestListener end processing pvName %s%n",pvName);
+          isProcessing = false;
       }
 
 
@@ -150,10 +148,10 @@ public class ListenerTest extends TestCase {
          * @see org.epics.ioc.dbAccess.DBListener#newData(org.epics.ioc.dbAccess.DBData)
          */
         public void newData(DBData dbData) {
-            System.out.printf("TestListener recordName %s is Synchronous %b"
+            System.out.printf("TestListener recordName %s isProcessing %b"
                     + " pvName %s actualFieldName %s%n",
                 recordName,
-                synchronousData,
+                isProcessing,
                 pvName,
                 actualFieldName);
             String dbDataName = dbData.getField().getName();
@@ -201,7 +199,7 @@ public class ListenerTest extends TestCase {
         DBStructure structure = (DBStructure)dbData;
         DBRecord dbRecord = structure.getRecord();
         DBData[] fields = structure.getFieldDBDatas();
-        dbRecord.beginSynchronous();
+        dbRecord.beginProcess();
         for(DBData field : fields) {
             Type fieldType = field.getField().getType();
             if(fieldType.isNumeric()) {
@@ -217,7 +215,7 @@ public class ListenerTest extends TestCase {
             }
             
         }
-        dbRecord.endSynchronous();
+        dbRecord.endProcess();
     }
     
     private static class Listener implements Requestor {

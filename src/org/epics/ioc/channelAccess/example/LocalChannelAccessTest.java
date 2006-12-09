@@ -3,7 +3,7 @@
  * EPICS JavaIOC is distributed subject to a Software License Agreement found
  * in file LICENSE that is included with this distribution.
  */
-package org.epics.ioc.dbProcess.example;
+package org.epics.ioc.channelAccess.example;
 
 import junit.framework.TestCase;
 import java.util.*;
@@ -106,7 +106,7 @@ public class LocalChannelAccessTest extends TestCase {
     }
     
     private static class Process implements
-    ChannelRequestor,ChannelStateListener
+    ChannelProcessRequestor,ChannelStateListener
     {
         private Lock lock = new ReentrantLock();
         private Condition waitDone = lock.newCondition();
@@ -117,7 +117,7 @@ public class LocalChannelAccessTest extends TestCase {
         
         private Process(String pvname) {
             this.pvname = pvname;
-            channel = ChannelFactory.createChannel(pvname, this);            
+            channel = ChannelFactory.createChannel(pvname, this, false);            
             channelProcess = channel.createChannelProcess(this);
         }
         private void destroy() {
@@ -147,18 +147,12 @@ public class LocalChannelAccessTest extends TestCase {
          * @see org.epics.ioc.util.Requestor#message(java.lang.String, org.epics.ioc.util.MessageType)
          */
         public void message(String message, MessageType messageType) {
-            message(channel,message,messageType);
-        }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.channelAccess.ChannelRequestor#message(org.epics.ioc.channelAccess.Channel, java.lang.String, org.epics.ioc.util.MessageType)
-         */
-        public void message(Channel channel, String message, MessageType messageType) {
             System.out.printf("putGet.massage %s%n", message);
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.channelAccess.ChannelRequestor#requestDone(org.epics.ioc.channelAccess.Channel, org.epics.ioc.util.RequestResult)
+         * @see org.epics.ioc.channelAccess.ChannelProcessRequestor#processDone(org.epics.ioc.util.RequestResult)
          */
-        public void requestDone(Channel channel, RequestResult requestResult) {
+        public void processDone(RequestResult requestResult) {
             lock.lock();
             try {
                 allDone = true;
@@ -208,7 +202,7 @@ public class LocalChannelAccessTest extends TestCase {
         
         private PutGet(String pvname,boolean process) {
             this.pvname = pvname;
-            channel = ChannelFactory.createChannel(pvname, this);           
+            channel = ChannelFactory.createChannel(pvname, this, false);           
             channelPutGet = channel.createChannelPutGet(this, process);
         }
         
@@ -275,33 +269,35 @@ public class LocalChannelAccessTest extends TestCase {
          * @see org.epics.ioc.util.Requestor#message(java.lang.String, org.epics.ioc.util.MessageType)
          */
         public void message(String message, MessageType messageType) {
-            message(channel,message,messageType);
+            System.out.printf("putGet.massage %s%n", message);
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.channelAccess.ChannelGetRequestor#nextGetData(org.epics.ioc.channelAccess.Channel, org.epics.ioc.channelAccess.ChannelField, org.epics.ioc.pvAccess.PVData)
          */
-        public boolean nextGetData(Channel channel, ChannelField field, PVData data) {
+        public boolean nextGetData(ChannelField field, PVData data) {
             valueData.nextGetData(channel, field, data);
             return false;
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.channelAccess.ChannelPutRequestor#nextPutData(org.epics.ioc.channelAccess.Channel, org.epics.ioc.channelAccess.ChannelField, org.epics.ioc.pvAccess.PVData)
          */
-        public boolean nextPutData(Channel channel, ChannelField field, PVData data) {
+        public boolean nextPutData(ChannelField field, PVData data) {
             PVDouble pvDouble = (PVDouble)data;
             pvDouble.put(value);
             return false;
         }
+        
         /* (non-Javadoc)
-         * @see org.epics.ioc.channelAccess.ChannelRequestor#message(org.epics.ioc.channelAccess.Channel, java.lang.String, org.epics.ioc.util.MessageType)
+         * @see org.epics.ioc.channelAccess.ChannelPutRequestor#putDone(org.epics.ioc.util.RequestResult)
          */
-        public void message(Channel channel, String message, MessageType messageType) {
-            System.out.printf("putGet.massage %s%n", message);
+        public void putDone(RequestResult requestResult) {
+            // nothing to do
         }
+        
         /* (non-Javadoc)
-         * @see org.epics.ioc.channelAccess.ChannelRequestor#requestDone(org.epics.ioc.channelAccess.Channel, org.epics.ioc.util.RequestResult)
+         * @see org.epics.ioc.channelAccess.ChannelGetRequestor#getDone(org.epics.ioc.util.RequestResult)
          */
-        public void requestDone(Channel channel, RequestResult requestResult) {
+        public void getDone(RequestResult requestResult) {
             lock.lock();
             try {
                 allDone = true;
@@ -349,7 +345,7 @@ public class LocalChannelAccessTest extends TestCase {
         
         private Put(String pvname, boolean process) {
             this.pvname = pvname;
-            channel = ChannelFactory.createChannel(pvname, this);
+            channel = ChannelFactory.createChannel(pvname, this, false);
             
             channelPut = channel.createChannelPut(this, process);
         }
@@ -401,26 +397,20 @@ public class LocalChannelAccessTest extends TestCase {
          * @see org.epics.ioc.util.Requestor#message(java.lang.String, org.epics.ioc.util.MessageType)
          */
         public void message(String message, MessageType messageType) {
-            message(channel,message,messageType);
+            System.out.printf("put.massage %s%n", message);
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.channelAccess.ChannelPutRequestor#nextPutData(org.epics.ioc.channelAccess.Channel, org.epics.ioc.channelAccess.ChannelField, org.epics.ioc.pvAccess.PVData)
          */
-        public boolean nextPutData(Channel channel, ChannelField field, PVData data) {
+        public boolean nextPutData(ChannelField field, PVData data) {
             PVDouble pvDouble = (PVDouble)data;
             pvDouble.put(value);
             return false;
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.channelAccess.ChannelRequestor#message(org.epics.ioc.channelAccess.Channel, java.lang.String, org.epics.ioc.util.MessageType)
-         */
-        public void message(Channel channel, String message, MessageType messageType) {
-            System.out.printf("putGet.massage %s%n", message);
-        }
-        /* (non-Javadoc)
          * @see org.epics.ioc.channelAccess.ChannelRequestor#requestDone(org.epics.ioc.channelAccess.Channel, org.epics.ioc.util.RequestResult)
          */
-        public void requestDone(Channel channel, RequestResult requestResult) {
+        public void putDone(RequestResult requestResult) {
             lock.lock();
             try {
                 allDone = true;
@@ -467,7 +457,7 @@ public class LocalChannelAccessTest extends TestCase {
         
         private Get(String pvname,boolean process) {
             this.pvname = pvname;
-            channel = ChannelFactory.createChannel(pvname, this);            
+            channel = ChannelFactory.createChannel(pvname, this, false);            
             channelGet = channel.createChannelGet(this, process);
         }
         private void destroy() {
@@ -514,25 +504,20 @@ public class LocalChannelAccessTest extends TestCase {
          * @see org.epics.ioc.util.Requestor#message(java.lang.String, org.epics.ioc.util.MessageType)
          */
         public void message(String message, MessageType messageType) {
-            message(channel,message,messageType);
+            System.out.printf("putGet.massage %s%n", message);
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.channelAccess.ChannelGetRequestor#nextGetData(org.epics.ioc.channelAccess.Channel, org.epics.ioc.channelAccess.ChannelField, org.epics.ioc.pvAccess.PVData)
          */
-        public boolean nextGetData(Channel channel, ChannelField field, PVData data) {
+        public boolean nextGetData(ChannelField field, PVData data) {
             valueData.nextGetData(channel, field, data);
             return false;
         }
+        
         /* (non-Javadoc)
-         * @see org.epics.ioc.channelAccess.ChannelRequestor#message(org.epics.ioc.channelAccess.Channel, java.lang.String, org.epics.ioc.util.MessageType)
+         * @see org.epics.ioc.channelAccess.ChannelGetRequestor#getDone(org.epics.ioc.util.RequestResult)
          */
-        public void message(Channel channel, String message, MessageType messageType) {
-            System.out.printf("putGet.massage %s%n", message);
-        }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.channelAccess.ChannelRequestor#requestDone(org.epics.ioc.channelAccess.Channel, org.epics.ioc.util.RequestResult)
-         */
-        public void requestDone(Channel channel, RequestResult requestResult) {
+        public void getDone(RequestResult requestResult) {
             lock.lock();
             try {
                 allDone = true;
@@ -584,7 +569,7 @@ public class LocalChannelAccessTest extends TestCase {
     private static class ValueData implements ChannelFieldGroupListener{
         private Channel channel;
         private ChannelData channelData;
-        private ChannelFieldGroup fieldGroup;
+        private ChannelFieldGroup channelFieldGroup;
         private ChannelField valueField;
         private ChannelField statusField;
         private ChannelField severityField;
@@ -602,7 +587,7 @@ public class LocalChannelAccessTest extends TestCase {
             
         }
         private ChannelFieldGroup init() {
-            fieldGroup = channel.createFieldGroup(this);
+            channelFieldGroup = channel.createFieldGroup(this);
             ChannelSetFieldResult result;
             result = channel.setField("value");
             if(result!=ChannelSetFieldResult.thisChannel) {
@@ -610,41 +595,41 @@ public class LocalChannelAccessTest extends TestCase {
                 return null;
             }
             valueField = channel.getChannelField();
-            fieldGroup.addChannelField(valueField);
+            channelFieldGroup.addChannelField(valueField);
             result = channel.setField("status");
             if(result!=ChannelSetFieldResult.thisChannel) {
                 System.out.printf("PutGet:set returned %s%n", result.toString());
                 return null;
             }
             statusField = channel.getChannelField();
-            fieldGroup.addChannelField(statusField);
+            channelFieldGroup.addChannelField(statusField);
             result = channel.setField("severity");
             if(result!=ChannelSetFieldResult.thisChannel) {
                 System.out.printf("PutGet:set returned %s%n", result.toString());
                 return null;
             }
             severityField = channel.getChannelField();
-            fieldGroup.addChannelField(severityField);
+            channelFieldGroup.addChannelField(severityField);
             result = channel.setField("timeStamp");
             if(result!=ChannelSetFieldResult.thisChannel) {
                 System.out.printf("PutGet:set returned %s%n", result.toString());
                 return null;
             }
             timeStampField = channel.getChannelField();
-            fieldGroup.addChannelField(timeStampField);
-            channelData = ChannelDataFactory.createData(channel,fieldGroup);
+            channelFieldGroup.addChannelField(timeStampField);
+            channelData = ChannelDataFactory.createData(channel,channelFieldGroup);
             if(channelData==null) {
                 System.out.printf("ChannelDataFactory.createData failed");
                 return null;
             }
-            return fieldGroup;
+            return channelFieldGroup;
         }
         
         private void clear() {
             channelData.clear();
         }
         private boolean nextGetData(Channel channel, ChannelField field, PVData data) {
-            channelData.add(field, data);
+            channelData.add(data);
             return false;
         }
         

@@ -76,13 +76,13 @@ public interface DBRecord extends DBStructure {
      */
     int getRecordID();
     /**
-     * Begin a set of synchronous puts.
+     * Begin a set of record processing.
      */
-    void beginSynchronous();
+    void beginProcess();
     /**
-     * End of synchronous puts.
+     * End of record processing.
      */
-    void endSynchronous();
+    void endProcess();
     /**
      * Create a RecordListener.
      * This must be called by a client that wants to call DBData.addListener for one or more

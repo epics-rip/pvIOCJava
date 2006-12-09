@@ -48,15 +48,9 @@ public interface DBData extends PVData {
     void removeListener(RecordListener listener);
     /**
      * The data was modified.
-     * This is the version of postPut that must be called by the code that implements a put method. 
+     * This is must be called by the code that implements a put method. 
      */
     void postPut();
-    /**
-     * The data was modified.
-     * This version is called by postPut() of fields of a structure.
-     * @param dbData The data that was modified.
-     */
-    void postPut(DBData dbData);
     /**
      * Get the configuration structure for the support.
      * There is no method setConfigurationStructure since the implementation

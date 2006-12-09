@@ -24,6 +24,8 @@ public class MonitorTest extends TestCase {
      * test scan.
      */
     private static MessageType maxError = MessageType.info;
+    
+    
     public static void testMonitor() {
         iocRequestor = new Listener();
         DBD dbd = DBDFactory.getMasterDBD();
@@ -43,7 +45,7 @@ public class MonitorTest extends TestCase {
         for(String key: keys) {
             RecordProcess recordProcess = 
                 recordMap.get(key).getRecordProcess();
-            recordProcess.setTrace(true);
+//            recordProcess.setTrace(true);
         }
         PeriodicScanner periodicScanner = ScannerFactory.getPeriodicScanner();
         String list = periodicScanner.toString();
@@ -51,36 +53,25 @@ public class MonitorTest extends TestCase {
         EventScanner eventScanner = ScannerFactory.getEventScanner();
         list = eventScanner.toString();
         System.out.println(list);
-        
-        DBRecord dbRecord = null;
-        dbRecord = iocdbMaster.findRecord("counter");
-        assertNotNull(dbRecord);
-        DBData[] dbData = dbRecord.getFieldDBDatas();        
-        int index = dbRecord.getFieldDBDataIndex("value");
-        DBData counterValue = dbData[index];
-        dbRecord = iocdbMaster.findRecord("monitor00");
-        assertNotNull(dbRecord);
-        dbData = dbRecord.getFieldDBDatas();        
-        index = dbRecord.getFieldDBDataIndex("value");
-        DBData monitor00Value = dbData[index];
-        dbRecord = iocdbMaster.findRecord("monitor01");
-        assertNotNull(dbRecord);
-        dbData = dbRecord.getFieldDBDatas();        
-        index = dbRecord.getFieldDBDataIndex("value");
-        DBData monitor01Value = dbData[index];
-        dbRecord = iocdbMaster.findRecord("monitor02");
-        assertNotNull(dbRecord);
-        dbData = dbRecord.getFieldDBDatas();        
-        index = dbRecord.getFieldDBDataIndex("value");
-        DBData monitor02Value = dbData[index];
+        String[] recordNames = new String[] {
+                "counter",
+                "monitorChange",
+                "monitorDeltaChange",
+                "monitorPercentageChange",
+                "notifyChange",
+                "notifyDeltaChange",
+                "notifyPercentageChange"
+        };
+        for(int i=0; i<recordNames.length; i++) {
+            DBRecord dbRecord = iocdbMaster.findRecord(recordNames[i]);
+            assertNotNull(dbRecord);
+            DBData[] dbData = dbRecord.getFieldDBDatas();        
+            int index = dbRecord.getFieldDBDataIndex("value");
+            new Monitor(dbData[index]);
+        }
         while(true) {
             try {
-                Thread.sleep(2000);
-                System.out.println("  counter " + counterValue.toString());
-                System.out.println("monitor00 " + monitor00Value.toString());
-                System.out.println("monitor01 " + monitor01Value.toString());
-                System.out.println("monitor02 " + monitor02Value.toString());
-                System.out.println();
+                Thread.sleep(1000);
             } catch (InterruptedException e) {
             }
         }
@@ -101,5 +92,25 @@ public class MonitorTest extends TestCase {
             System.out.println(message);
             if(messageType.ordinal()>maxError.ordinal()) maxError = messageType;
         }
+    }
+    
+    private static class Monitor implements RecordListener {
+        private String recordName;
+        private DBData dbData;
+        
+        private Monitor(DBData data) {
+            dbData = data;
+            DBRecord dbRecord = data.getRecord();
+            recordName = dbRecord.getRecordName();
+            dbData.addListener(this);
+        }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.dbAccess.RecordListener#newData(org.epics.ioc.dbAccess.DBData)
+         */
+        public void newData(DBData data) {
+            if(data!=dbData) return;
+            System.out.println(data.toString() + " " + recordName);
+        }
+        
     }
 }

@@ -34,12 +34,23 @@
     <field name = "value" type = "string"/>
 </recordType>
 
+<recordType name = "monitorNotifyRecord" supportName = "monitorNotifyRecord" >
+    <include href = "commonDBD.xml" />
+    <field name = "inputArray" type = "array" 
+         elementType = "structure" supportName = "linkArray" />
+    <field name = "notify" type = "boolean" />
+    <field name = "outputArray" type = "array" 
+         elementType = "structure" supportName = "linkArray" />
+</recordType>
+
 <support name = "doubleRecord"
    factoryName = "org.epics.ioc.dbProcess.example.DoubleRecordFactory" />
 <support name = "counterRecord"
    factoryName = "org.epics.ioc.dbProcess.example.CounterRecordFactory" />
 <support name = "eventRecord"
    factoryName = "org.epics.ioc.dbProcess.example.EventRecordFactory" />
+<support name = "monitorNotifyRecord"
+   factoryName = "org.epics.ioc.dbProcess.example.MonitorNotifyRecordFactory" />
 
 <structure name = "delayLink">
     <!-- min, max, inc are delay in milliseconds -->

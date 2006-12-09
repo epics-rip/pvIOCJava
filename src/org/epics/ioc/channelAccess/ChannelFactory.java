@@ -19,9 +19,10 @@ public class ChannelFactory {
      * Create a channel.
      * @param name The channel name.
      * @param listener The listener for channel state changes.
+     * @param mustBeLocal TODO
      * @return The channel or null if it could not be created.
      */
-    public static Channel createChannel(String name,ChannelStateListener listener) {
+    public static Channel createChannel(String name,ChannelStateListener listener, boolean mustBeLocal) {
         Channel channel = null;
         if(localAccess!=null) {
             channel = localAccess.createChannel(name,listener);

@@ -563,7 +563,7 @@ public class RecordProcessFactory {
             newSeverity = 0;
             active = true;
             processIsComplete = false;
-            dbRecord.beginSynchronous();
+            dbRecord.beginProcess();
             return true;
         }
         // called by process, preProcess, and processContinue with record locked.
@@ -589,6 +589,8 @@ public class RecordProcessFactory {
                 dbRecord.message(
                     "completing processing but ProcessCallbackListeners are still present",
                     MessageType.fatalError);
+dbRecord.message("process " + processProcessCallbackListenerList.size()
++ " continue " + continueProcessCallbackListenerList.size() , MessageType.info);
             }
             if(newSeverity!=startSeverity) {
                 if(pvSeverity!=null) pvSeverity.setIndex(newSeverity);
@@ -599,7 +601,7 @@ public class RecordProcessFactory {
             if(pvTimeStamp!=null) {
                 pvTimeStamp.put(timeStamp);
             }
-            dbRecord.endSynchronous();
+            dbRecord.endProcess();
             recordProcessRequestor.recordProcessResult(requestResult);
             if(!leaveActive) active = false;
             setActiveBySetActive = false;

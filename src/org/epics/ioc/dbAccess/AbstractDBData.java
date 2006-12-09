@@ -132,22 +132,16 @@ public abstract class AbstractDBData implements DBData{
      * @see org.epics.ioc.dbAccess.DBData#postPut()
      */
     public final void postPut() {
-        postPut(this);
-    }
-    /* (non-Javadoc)
-     * @see org.epics.ioc.dbAccess.DBData#postPut()
-     */
-    public final void postPut(DBData dbData) {
         Iterator<RecordListener> iter = listenerList.iterator();
         while(iter.hasNext()) {
             RecordListener listener = iter.next();
-            listener.newData(dbData);
+            listener.newData(this);
         }
         if(parent==null) return;
         if(parent==this) {
             System.err.printf("postPut parent = this Why???%n");
         } else {
-            parent.postPut(dbData);
+            parent.postPut();
         }
     }
     /* (non-Javadoc)

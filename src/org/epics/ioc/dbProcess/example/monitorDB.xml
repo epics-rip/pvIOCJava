@@ -7,41 +7,15 @@
     <inc>1.0</inc>
     <scan>
         <scan>periodic</scan>
-        <rate>2.0</rate>
+        <rate>1.0</rate>
     </scan>
 </record>
 
-<record name = "monitor00" type = "doubleRecord">
+<record name = "monitorChange" type = "doubleRecord">
     <input supportName = "monitorLink" >
         <configure structureName = "monitorLink">
             <pvname>counter</pvname>
             <process>true</process>
-            <queueCapacity>0</queueCapacity>
-        </configure>
-    </input>
-    <units>volts</units>
-    <displayLimit>
-        <low>0.0</low>
-        <high>10.0</high>
-    </displayLimit>
-    <linkArray>
-        <value structureName = "linkArrayElement">
-            <link  supportName = "delayLink" >
-                <configure structureName = "delayLink">
-                    <min>100</min>
-                    <max>1000</max>
-                    <inc>100</inc>
-                </configure>
-            </link>
-        </value>
-    </linkArray>
-</record>
-<record name = "monitor01" type = "doubleRecord">
-    <input supportName = "monitorLink" >
-        <configure structureName = "monitorLink">
-            <pvname>counter</pvname>
-            <process>true</process>
-            <queueCapacity>1</queueCapacity>
         </configure>
     </input>
     <units>volts</units>
@@ -62,12 +36,185 @@
     </linkArray>
 </record>
 
-<record name = "monitor02" type = "doubleRecord">
+<record name = "monitorDeltaChange" type = "doubleRecord">
     <input supportName = "monitorLink" >
         <configure structureName = "monitorLink">
             <pvname>counter</pvname>
+            <type>deltaChange</type>
+            <deadband>1.001</deadband>
             <process>true</process>
-            <queueCapacity>2</queueCapacity>
+        </configure>
+    </input>
+    <units>volts</units>
+    <displayLimit>
+        <low>0.0</low>
+        <high>10.0</high>
+    </displayLimit>
+    <linkArray>
+        <value structureName = "linkArrayElement">
+            <link  supportName = "delayLink" >
+                <configure structureName = "delayLink">
+                    <min>100</min>
+                    <max>1000</max>
+                    <inc>100</inc>
+                </configure>
+            </link>
+        </value>
+    </linkArray>
+</record>
+
+<record name = "monitorPercentageChange" type = "doubleRecord">
+    <input supportName = "monitorLink" >
+        <configure structureName = "monitorLink">
+            <pvname>counter</pvname>
+            <type>percentageChange</type>
+            <deadband>10.0</deadband>
+            <process>true</process>
+        </configure>
+    </input>
+    <units>volts</units>
+    <displayLimit>
+        <low>0.0</low>
+        <high>10.0</high>
+    </displayLimit>
+    <linkArray>
+        <value structureName = "linkArrayElement">
+            <link  supportName = "delayLink" >
+                <configure structureName = "delayLink">
+                    <min>100</min>
+                    <max>1000</max>
+                    <inc>100</inc>
+                </configure>
+            </link>
+        </value>
+    </linkArray>
+</record>
+
+<record name = "monitorNotifyChange" type = "monitorNotifyRecord">
+    <inputArray>
+        <value structureName = "linkArrayElement">
+            <link  supportName = "monitorNotifyLink" >
+                <configure structureName = "monitorNotifyLink">
+                    <pvname>counter</pvname>
+                </configure>
+            </link>
+        </value>
+    </inputArray>
+    <outputArray>
+        <value structureName = "linkArrayElement">
+            <wait>false</wait>
+            <link  supportName = "processLink" >
+                <configure structureName = "processLink">
+                    <pvname>notifyChange</pvname>
+                </configure>
+            </link>
+        </value>
+    </outputArray>
+</record>
+
+<record name = "notifyChange" type = "doubleRecord">
+    <input supportName = "inputLink" >
+        <configure structureName = "inputLink">
+            <pvname>counter</pvname>
+            <process>false</process>
+        </configure>
+    </input>
+    <units>volts</units>
+    <displayLimit>
+        <low>0.0</low>
+        <high>10.0</high>
+    </displayLimit>
+    <linkArray>
+        <value structureName = "linkArrayElement">
+            <link  supportName = "delayLink" >
+                <configure structureName = "delayLink">
+                    <min>100</min>
+                    <max>1000</max>
+                    <inc>100</inc>
+                </configure>
+            </link>
+        </value>
+    </linkArray>
+</record>
+
+<record name = "monitorNotifyDeltaChange" type = "monitorNotifyRecord">
+    <inputArray>
+        <value structureName = "linkArrayElement">
+            <link  supportName = "monitorNotifyLink" >
+                <configure structureName = "monitorNotifyLink">
+                    <pvname>counter</pvname>
+                    <type>deltaChange</type>
+                    <deadband>1.001</deadband>
+                </configure>
+            </link>
+        </value>
+    </inputArray>
+    <outputArray>
+        <value structureName = "linkArrayElement">
+            <wait>false</wait>
+            <link  supportName = "processLink" >
+                <configure structureName = "processLink">
+                    <pvname>notifyDeltaChange</pvname>
+                </configure>
+            </link>
+        </value>
+    </outputArray>
+</record>
+
+<record name = "notifyDeltaChange" type = "doubleRecord">
+    <input supportName = "inputLink" >
+        <configure structureName = "inputLink">
+            <pvname>counter</pvname>
+            <process>false</process>
+        </configure>
+    </input>
+    <units>volts</units>
+    <displayLimit>
+        <low>0.0</low>
+        <high>10.0</high>
+    </displayLimit>
+    <linkArray>
+        <value structureName = "linkArrayElement">
+            <link  supportName = "delayLink" >
+                <configure structureName = "delayLink">
+                    <min>100</min>
+                    <max>1000</max>
+                    <inc>100</inc>
+                </configure>
+            </link>
+        </value>
+    </linkArray>
+</record>
+
+<record name = "monitorNotifyPercentageChange" type = "monitorNotifyRecord">
+    <inputArray>
+        <value structureName = "linkArrayElement">
+            <link  supportName = "monitorNotifyLink" >
+                <configure structureName = "monitorNotifyLink">
+                    <pvname>counter</pvname>
+                    <type>percentageChange</type>
+                    <deadband>10.0</deadband>
+                </configure>
+            </link>
+        </value>
+    </inputArray>
+    <outputArray>
+        <value structureName = "linkArrayElement">
+            <wait>false</wait>
+            <link  supportName = "processLink" >
+                <configure structureName = "processLink">
+                    <pvname>notifyPercentageChange</pvname>
+                </configure>
+            </link>
+        </value>
+    </outputArray>
+</record>
+
+<record name = "notifyPercentageChange" type = "doubleRecord">
+    <input supportName = "inputLink" >
+        <configure structureName = "inputLink">
+            <pvname>counter</pvname>
+            <process>false</process>
         </configure>
     </input>
     <units>volts</units>
