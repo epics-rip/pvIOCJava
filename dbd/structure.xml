@@ -1,0 +1,103 @@
+<?xml version="1.0" ?>
+<DBDefinition>
+
+<structure name = "timeStamp">
+    <field name = "secondsPastEpoch" type = "long" />
+    <field name = "nanoSeconds" type = "int" />
+</structure>
+
+<structure name = "scan">
+    <field name = "priority" type = "menu" menuName = "priority" default = "middle" />
+    <field name = "scan" type = "menu" menuName = "scan" default = "passive" />
+    <field name = "rate" type = "double"  default = "1.0" />
+    <field name = "eventName" type = "string" />
+</structure>
+<structure name = "processLink">
+    <field name = "pvname" type = "string" link = "true" />
+    <field name = "inheritSeverity" type = "boolean" />
+</structure>
+
+<structure name = "monitorLink">
+    <field name = "pvname" type = "string" link = "true" />
+    <field name = "type" type = "menu" menuName = "monitorType" default = "change" />
+    <field name = "deadband" type = "double" />
+    <field name = "onlyWhileProcessing" type = "boolean" />
+    <field name = "queueSize" type = "int"  default = "2" />
+    <field name = "reportOverrun" type = "boolean" />
+    <field name = "process" type = "boolean">
+        <!-- process this record when monitor occurs -->
+    </field>
+    <field name = "inheritSeverity" type = "boolean" >
+        <!-- only applicable if process is true -->
+    </field>
+</structure>
+
+<structure name = "monitorNotifyLink">
+    <field name = "pvname" type = "string" link = "true" />
+    <field name = "type" type = "menu" menuName = "monitorType" default = "change" />
+    <field name = "deadband" type = "double" />
+    <field name = "onlyWhileProcessing" type = "boolean" />
+</structure>
+
+<structure name = "inputLink">
+    <field name = "pvname" type = "string" link = "true" />
+    <field name = "process" type = "boolean" />
+    <field name = "inheritSeverity" type = "boolean" />
+</structure>
+
+<structure name = "outputLink">
+    <field name = "pvname" type = "string" link = "true" />
+    <field name = "process" type = "boolean" />
+    <field name = "inheritSeverity" type = "boolean" />
+</structure>
+
+<structure name = "disableLink">
+    <field name = "disabled" type = "boolean" />
+    <field name = "value" type = "short" default = "1" />
+    <field name = "input" type = "short" />
+    <field name = "link" type = "link" />
+    <field name = "disableAlarmSeverity"
+           type = "menu" menuName = "alarmSeverity" />
+</structure>
+
+<structure name = "asynLink">
+    <field name = "portName" type = "string" />
+    <field name = "addr" type = "int" />
+    <field name = "timeout" type = "double" />
+</structure>
+
+<structure name = "linkArrayElement">
+    <field name = "wait" type = "boolean" />
+    <field name = "link" type = "link" />
+    <field name = "name" type = "string" />
+</structure>
+
+
+<structure name = "displayLimit">
+    <field name = "low" type = "double" />
+    <field name = "high" type = "double" />
+</structure>
+
+<structure name = "linearConvertInput"
+         supportName = "linearConvertInput">
+    <field name = "engUnitsLow" type = "double" />
+    <field name = "engUnitsHigh" type = "double" />
+    <field name = "slope" type = "double" />
+    <field name = "intercept" type = "double" />
+</structure>
+
+<structure name = "linearConvertOutput"
+         supportName = "linearConvertOutput">
+    <field name = "engUnitsLow" type = "double" />
+    <field name = "engUnitsHigh" type = "double" />
+    <field name = "slope" type = "double" />
+    <field name = "intercept" type = "double" />
+</structure>
+
+<structure name = "event">
+    <field name = "eventNumber" type = "short" />
+    <field name = "timeStampEvent" type = "int" />
+    <field name = "timeStampLink" type = "link" />
+</structure>
+
+</DBDefinition>

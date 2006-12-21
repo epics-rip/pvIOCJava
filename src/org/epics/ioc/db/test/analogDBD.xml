@@ -1,0 +1,28 @@
+<?xml version="1.0" ?>
+<DBDefinition>
+
+<recordType name = "analog" supportName = "exampleRecordSupport">
+    <field name = "value" type = "double">
+        <property name = "status" associatedField = "status" />
+        <property name = "severity" associatedField = "severity" />
+        <property name = "timeStamp" associatedField = "timeStamp" />
+        <property name = "units" associatedField = "units" />
+        <property name = "displayLimit" associatedField = "displayLimit" />
+    </field>
+    <field name = "priority" type = "menu" menuName = "priority" />
+    <field name = "units" type = "string" />
+    <field name = "status" type = "string" />
+    <field name = "severity" type = "menu" menuName = "alarmSeverity" />
+    <field name = "timeStamp" type = "structure" structureName = "timeStamp" />
+    <field name = "displayLimit"
+         type = "structure" structureName = "displayLimit" />
+    <field name = "input" type = "link" />
+    <field name = "rawValue" type = "int" />
+    <field name = "linearConvert"
+        type = "structure" structureName = "linearConvertInput" />
+</recordType>
+
+<support name = "exampleRecordSupport" 
+    factoryName = "ExampleRecordSupport" />
+
+</DBDefinition>

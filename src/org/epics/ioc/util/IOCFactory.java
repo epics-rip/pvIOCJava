@@ -9,12 +9,10 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import org.epics.ioc.channelAccess.ChannelAccessLocalFactory;
-import org.epics.ioc.dbAccess.*;
-import org.epics.ioc.dbDefinition.DBD;
-import org.epics.ioc.dbDefinition.DBDFactory;
-import org.epics.ioc.dbDefinition.DBDSupport;
-import org.epics.ioc.dbProcess.*;
+import org.epics.ioc.ca.ChannelAccessLocalFactory;
+import org.epics.ioc.db.*;
+import org.epics.ioc.dbd.*;
+import org.epics.ioc.process.*;
 
 /**
  * A factory for installing and initializing record instances.

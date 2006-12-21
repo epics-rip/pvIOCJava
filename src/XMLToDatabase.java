@@ -1,9 +1,7 @@
-import org.epics.ioc.dbAccess.DBRecord;
-import org.epics.ioc.dbAccess.IOCDB;
-import org.epics.ioc.dbAccess.IOCDBFactory;
-import org.epics.ioc.dbAccess.XMLToIOCDBFactory;
-import org.epics.ioc.dbDefinition.*;
-import org.epics.ioc.util.Requestor;
+
+import org.epics.ioc.dbd.*;
+import org.epics.ioc.db.*;
+import org.epics.ioc.util.*;
 import org.epics.ioc.util.MessageType;
 
 import java.util.*;

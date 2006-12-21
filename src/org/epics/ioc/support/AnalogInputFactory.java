@@ -5,8 +5,9 @@
  */
 package org.epics.ioc.support;
 
-import org.epics.ioc.dbAccess.*;
-import org.epics.ioc.dbProcess.*;
+import org.epics.ioc.pv.*;
+import org.epics.ioc.db.*;
+import org.epics.ioc.process.*;
 import org.epics.ioc.util.*;
 
 /**
@@ -14,21 +15,22 @@ import org.epics.ioc.util.*;
  *
  */
 public class AnalogInputFactory {
-    public static Support create(DBStructure dbStructure) {
+    public static Support create(PVStructure pvStructure) {
         Support support = null;
-        String supportName = dbStructure.getSupportName();
-        if(supportName.equals("ai")) {
-            support = new Ai(dbStructure);
+        String supportName = pvStructure.getSupportName();
+        if(supportName.equals(supportName)) {
+            support = new Ai(pvStructure);
         }
         return support;
     }
     
+    private static final String supportName = "ai";
+    
     private static class Ai extends AbstractSupport {
-        private static String supportName = "Ai";
         private DBRecord dbRecord = null;
         
-        public Ai(DBStructure dbStructure) {
-            super(supportName,dbStructure);
+        public Ai(PVStructure pvStructure) {
+            super(supportName,(DBData)pvStructure);
         }
 
         public String getRequestorName() {

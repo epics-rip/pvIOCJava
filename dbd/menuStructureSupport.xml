@@ -1,0 +1,8 @@
+<?xml version="1.0" ?>
+<DBDefinition>
+<include addPath = "dbd" />
+<include href = "menu.xml" />
+<include href = "structure.xml" />
+<include href = "support.xml" />
+
+</DBDefinition>

@@ -1,0 +1,38 @@
+<?xml version="1.0" ?>
+<DBDefinition>
+
+<support name = "linearConvert"
+    factoryName = "org.epics.ioc.support.LinearConvertFactory"
+/>
+<support name = "linkArray"
+    factoryName = "org.epics.ioc.support.LinkArraySupportFactory"
+/>
+<support name = "scan"
+    factoryName = "org.epics.ioc.support.ScanSupportFactory"
+/>
+
+<linkSupport name = "processLink"
+    configurationStructureName = "processLink" 
+    factoryName = "org.epics.ioc.support.LinkSupportFactory"
+/>
+<linkSupport name = "monitorLink"
+    configurationStructureName = "monitorLink"
+    factoryName = "org.epics.ioc.support.LinkSupportFactory"
+/>
+<linkSupport name = "monitorNotifyLink"
+    configurationStructureName = "monitorNotifyLink"
+    factoryName = "org.epics.ioc.support.LinkSupportFactory"
+/>
+<linkSupport name = "inputLink"
+    configurationStructureName = "inputLink"
+    factoryName = "org.epics.ioc.support.LinkSupportFactory"
+/>
+<linkSupport name = "outputLink"
+    configurationStructureName = "outputLink"
+    factoryName = "org.epics.ioc.support.LinkSupportFactory"
+/>
+<linkSupport name = "asynLink"
+    configurationStructureName = "asynLink" 
+    factoryName = "org.epics.ioc.support.LinkSupportFactory"
+/>
+</DBDefinition>

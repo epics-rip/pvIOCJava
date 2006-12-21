@@ -1,0 +1,120 @@
+<?xml version="1.0" ?>
+<DBDefinition>
+
+<recordType name = "analog" supportName = "AnalogSupport">
+    <field name = "value" type = "double">
+        <property name = "status" associatedField = "status" />
+        <property name = "severity" associatedField = "severity" />
+        <property name = "timeStamp" associatedField = "timeStamp" />
+        <property name = "units" associatedField = "units" />
+        <property name = "displayLimit" associatedField = "displayLimit" />
+    </field>
+    <field name = "priority" type = "menu" menuName = "menuPriority" />
+    <field name = "units" type = "string" />
+    <field name = "status" type = "string" />
+    <field name = "severity" type = "menu" menuName = "menuAlarmSevr" />
+    <field name = "timeStamp" type = "structure" structureName = "timeStamp" />
+    <field name = "displayLimit"
+         type = "structure" structureName = "displayLimit" />
+    <field name = "input" type = "link" />
+    <field name = "rawValue" type = "int" />
+    <field name = "linearConvert"
+        type = "structure" structureName = "linearConvertInput" />
+</recordType>
+
+
+<structure name = "aiRaw">
+    <field name = "value" type = "int" >
+        <property name = "status" associatedField = "status" />
+        <property name = "severity" associatedField = "severity" />
+        <property name = "timeStamp" associatedField = ".." />
+    </field>
+    <field name = "status" type = "string" />
+    <field name = "severity" type = "menu" menuName = "menuAlarmSevr" />
+    <field name = "input" type = "link" />
+</structure>
+
+<structure name = "aiLinear">
+    <property name = "rawValue" associatedField = "aiRaw.value" />
+    <field name = "value" type = "double" >
+        <property name = "status" associatedField = "status" />
+        <property name = "severity" associatedField = "severity" />
+        <property name = "units" associatedField = "units" />
+        <property name = "displayLimit" associatedField = "displayLimit" />
+        <property name = "timeStamp" associatedField = ".." />
+    </field>
+    <field name = "status" type = "string" />
+    <field name = "severity" type = "menu" menuName = "menuAlarmSevr" />
+    <field name = "units" type = "string" />
+    <field name = "displayLimit"
+         type = "structure" structureName = "displayLimit" />
+    <field name = "aiRaw" type = "structure" structureName = "aiRaw"/>
+    <field name = "linearConvert"
+        type = "structure" structureName = "linearConvertInput" />
+</structure>
+
+<recordType name = "aiLinearRecord" supportName = "linearSupport">
+    <property name = "value" associatedField = "aiLinear.value"
+         supportName = "linearValueSupport" />
+    <property name = "rawValue" associatedField = "aiLinear.rawValue" />
+    <property name = "status" associatedField = "aiLinear.status" />
+    <property name = "severity" associatedField = "aiLinear.severity" />
+    <field name = "aiLinear" type = "structure" structureName = "aiLinear" >
+        <property name = "timeStamp" associatedField = "timeStamp" />
+    </field>
+    <field name = "priority" type = "menu" menuName = "menuPriority" />
+    <field name = "timeStamp" type = "structure" structureName = "timeStamp"/>
+    <field name = "scan" type = "structure" structureName = "scan"/>
+</recordType>
+
+<recordType name = "aiRecord" supportName = "linearSupport">
+    <property name = "value" associatedField = "aiLinear.value"
+         supportName = "linearValueSupport" />
+    <property name = "rawValue" associatedField = "aiLinear.rawValue" />
+    <property name = "status" associatedField = "aiLinear.status" />
+    <property name = "severity" associatedField = "aiLinear.severity" />
+    <field name = "input" type = "structure" structureName = "null" >
+        <property name = "timeStamp" associatedField = "timeStamp" />
+    </field>
+    <field name = "priority" type = "menu" menuName = "menuPriority" />
+    <field name = "timeStamp" type = "structure" structureName = "timeStamp"/>
+    <field name = "scan" type = "structure" structureName = "scan"/>
+</recordType>
+
+
+<recordType name = "allTypes">
+    <field name = "boolean" type = "boolean" supportName = "booleanSupport" />
+    <field name = "byte" type = "byte" supportName = "byteSupport"  />
+    <field name = "short" type = "short" supportName = "shortSupport" />
+    <field name = "int" type = "int" supportName = "intSupport" />
+    <field name = "long" type = "long" supportName = "longSupport" />
+    <field name = "float" type = "float" supportName = "floatSupport" />
+    <field name = "double" type = "double" supportName = "doubleSupport" />
+    <field name = "string" type = "string" supportName = "stringSupport" />
+    <field name = "enum" type = "enum" />
+    <field name = "link" type = "link" supportName = "linkSupport" />
+    <field name = "displayLimit"
+         type = "structure" structureName = "displayLimit" supportName = "structSupport" />
+    <field name = "booleanArray" type = "array" elementType = "boolean"
+         supportName = "booleanArraySupport" />
+    <field name = "byteArray" type = "array" elementType = "byte"
+         supportName = "byteArraySupport" />
+    <field name = "shortArray" type = "array" elementType = "short"
+         supportName = "shortArraySupport" />
+    <field name = "intArray" type = "array" elementType = "int"
+         supportName = "intArraySupport" />
+    <field name = "longArray" type = "array" elementType = "long"
+         supportName = "longArraySupport" />
+    <field name = "floatArray" type = "array" elementType = "float"
+         supportName = "floatArraySupport" />
+    <field name = "doubleArray" type = "array" elementType = "double"
+         supportName = "doubleArraySupport" />
+    <field name = "stringArray" type = "array" elementType = "string"
+         supportName = "stringArraySupport" />
+    <field name = "linkArray" type = "array" elementType = "link"
+         supportName = "linkArraySupport" />
+    <field name = "structArray" type = "array" elementType = "structure"
+         supportName = "structArraySupport" />
+</recordType>
+
+</DBDefinition>

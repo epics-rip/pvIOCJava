@@ -1,0 +1,16 @@
+<?xml version="1.0" ?>
+<DBDefinition>
+
+<support name = "disableSupport" 
+    factoryName = "org.epics.ioc.support.SupportFactory" />
+
+<linkSupport name = "processLink" configurationStructureName = "processLink"
+    factoryName = "org.epics.ioc.support.LinkSupportFactory" />
+<linkSupport name = "monitorLink" configurationStructureName = "monitorLink"
+    factoryName = "org.epics.ioc.support.LinkSupportFactory" />
+<linkSupport name = "inputLink" configurationStructureName = "inputLink"
+    factoryName = "org.epics.ioc.support.LinkSupportFactory" />
+<linkSupport name = "outputLink" configurationStructureName = "outputLink"
+    factoryName = "org.epics.ioc.support.LinkSupportFactory" />
+
+</DBDefinition>

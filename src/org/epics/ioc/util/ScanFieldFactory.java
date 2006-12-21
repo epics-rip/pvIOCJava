@@ -5,9 +5,9 @@
  */
 package org.epics.ioc.util;
 
-import org.epics.ioc.dbAccess.*;
-import org.epics.ioc.dbDefinition.*;
-import org.epics.ioc.pvAccess.Type;
+import org.epics.ioc.db.*;
+import org.epics.ioc.pv.*;
+import org.epics.ioc.pv.Type;
 
 
 /**
@@ -30,78 +30,80 @@ public class ScanFieldFactory {
      * a valid scan field.
      */
     public static ScanField create(DBRecord dbRecord) {
-        DBData[] datas = dbRecord.getFieldDBDatas();
+        Structure structure = (Structure)dbRecord.getField();
+        PVData[] datas = dbRecord.getFieldPVDatas();
         int index;
-        DBData data;  
-        index = dbRecord.getFieldDBDataIndex("scan");
+        PVData data;  
+        index = structure.getFieldIndex("scan");
         if(index<0) {
             dbRecord.message("field scan does not exist", MessageType.fatalError);
             return null;
         }
         data = datas[index];
-        if(data.getDBDField().getDBType()!=DBType.dbStructure){
+        if(data.getField().getType()!=Type.pvStructure){
             dbRecord.message("field scan is not a structure", MessageType.fatalError);
             return null;
         }
-        DBStructure scan = (DBStructure)data;
-        DBDStructure dbdStructure = scan.getDBDStructure();
-        if(!dbdStructure.getStructureName().equals("scan")) {
-            scan.message("is not a scan structure", MessageType.fatalError);
+        PVStructure scan = (PVStructure)data;
+        structure = (Structure)scan.getField();
+        DBData dbData = (DBData)scan;
+        if(!structure.getStructureName().equals("scan")) {
+            dbData.message("is not a scan structure", MessageType.fatalError);
             return null;
         }
-        datas = scan.getFieldDBDatas(); 
-        index = scan.getFieldDBDataIndex("priority");
+        datas = scan.getFieldPVDatas(); 
+        index = structure.getFieldIndex("priority");
         if(index<0) {
-            scan.message("does not have field priority", MessageType.fatalError);
+            dbData.message("does not have field priority", MessageType.fatalError);
             return null;
         }
         data = datas[index];
-        if(data.getDBDField().getDBType()!=DBType.dbMenu) {
-            scan.message("is not a menu", MessageType.fatalError);
+        if(data.getField().getType()!=Type.pvMenu) {
+            dbData.message("is not a menu", MessageType.fatalError);
             return null;
         }
-        DBMenu priorityField = (DBMenu)data;
+        PVMenu priorityField = (PVMenu)data;
         if(!isPriorityMenu(priorityField)) {
-            scan.message("is not a priority menu", MessageType.fatalError);
+            dbData.message("is not a priority menu", MessageType.fatalError);
             return null;     
         }
-        index = scan.getFieldDBDataIndex("scan");
+        index = structure.getFieldIndex("scan");
         if(index<0) {
-            scan.message("does not have a field scan", MessageType.fatalError);
+            dbData.message("does not have a field scan", MessageType.fatalError);
             return null;
         }
         data = datas[index];
-        if(data.getDBDField().getDBType()!=DBType.dbMenu) {
-            data.message("is not a menu", MessageType.fatalError);
+        if(data.getField().getType()!=Type.pvMenu) {
+            ((DBData)data).message("is not a menu", MessageType.fatalError);
             return null;
         }
-        DBMenu scanField = (DBMenu)data;
+        PVMenu scanField = (PVMenu)data;
         if(!isScanMenu(scanField)) {
-            scanField.message("is not a scan menu", MessageType.fatalError);
+            ((DBData)scanField).message("is not a scan menu", MessageType.fatalError);
             return null;        
         }
-        index = scan.getFieldDBDataIndex("rate");
+        index = structure.getFieldIndex("rate");
         if(index<0) {
-            scan.message("does not have a field rate", MessageType.fatalError);
+            dbData.message("does not have a field rate", MessageType.fatalError);
             return null;
         }
         data = datas[index];
         if(data.getField().getType()!=Type.pvDouble) {
-            data.message("is not a double", MessageType.fatalError);
+            ((DBData)data).message("is not a double", MessageType.fatalError);
             return null;
         }
-        DBDouble rateField = (DBDouble)data;
-        index = scan.getFieldDBDataIndex("eventName");
+        PVDouble rateField = (PVDouble)data;
+        index = structure.getFieldIndex("eventName");
         if(index<0) {
-            scan.message("does not have a field eventName", MessageType.fatalError);
+            dbData.message("does not have a field eventName", MessageType.fatalError);
             return null;
         }
         data = datas[index];
         if(data.getField().getType()!=Type.pvString) {
-            data.message("is not a string", MessageType.fatalError);
+            ((DBData)data).message("is not a string", MessageType.fatalError);
             return null;
         }
-        DBString eventNameField = (DBString)data;
+        PVString eventNameField = (PVString)data;
         return new ScanFieldInstance(priorityField,scanField,rateField,eventNameField);
     }
     
@@ -110,9 +112,10 @@ public class ScanFieldFactory {
      * @param dbMenu The menu.
      * @return (false,true) is the menu defined the scan types.
      */
-    public static boolean isScanMenu(DBMenu dbMenu) {
-        if(!dbMenu.getMenuName().equals("scan")) return false;
-        String[] choices = dbMenu.getChoices();
+    public static boolean isScanMenu(PVMenu pvMenu) {
+        Menu menu = (Menu)pvMenu.getField();
+        if(!menu.getMenuName().equals("scan")) return false;
+        String[] choices = pvMenu.getChoices();
         if(choices.length!=3) return false;
         for(int i=0; i<choices.length; i++) {
             try {
@@ -128,9 +131,10 @@ public class ScanFieldFactory {
      * @param dbMenu The menu.
      * @return (false,true) is the menu defined the thread priorities.
      */
-    public static boolean isPriorityMenu(DBMenu dbMenu) {
-        if(!dbMenu.getMenuName().equals("priority")) return false;
-        String[] choices = dbMenu.getChoices();
+    public static boolean isPriorityMenu(PVMenu pvMenu) {
+        Menu menu = (Menu)pvMenu.getField();
+        if(!menu.getMenuName().equals("priority")) return false;
+        String[] choices = pvMenu.getChoices();
         if(choices.length!=7) return false;
         for(int i=0; i<choices.length; i++) {
             try {
@@ -142,12 +146,12 @@ public class ScanFieldFactory {
         return true;
     }
     private static class ScanFieldInstance implements ScanField {
-        private DBMenu priority;
-        private DBMenu scan;
-        private DBDouble rate;
-        private DBString eventName;
+        private PVMenu priority;
+        private PVMenu scan;
+        private PVDouble rate;
+        private PVString eventName;
         
-        private ScanFieldInstance(DBMenu priority, DBMenu scan, DBDouble rate, DBString eventName) {
+        private ScanFieldInstance(PVMenu priority, PVMenu scan, PVDouble rate, PVString eventName) {
             super();
             this.priority = priority;
             this.scan = scan;

@@ -1,0 +1,194 @@
+<?xml version="1.0" ?>
+<DBDefinition>
+<menu name = "menuPriority">
+    <choice>low</choice>
+    <choice>medium</choice>
+    <choice>high</choice>
+</menu>
+<menu name = "menuScan">
+    <choice>passive</choice>
+    <choice>event</choice>
+    <choice>interrupt</choice>
+    <choice>periodic</choice>
+</menu>
+
+<menu name = "menuAlarmSevr">
+    <choice>none</choice>
+    <choice>minor</choice>
+    <choice>major</choice>
+    <choice>invalid</choice>
+</menu>
+
+<structure name = "null" />
+
+<structure name = "timeStamp">
+    <field name = "secondsPastEpoch" type = "long" />
+    <field name = "nanoSeconds" type = "int" />
+</structure>
+
+<structure name = "scan">
+    <field name = "scan" type = "menu" menuName = "menuScan" />
+    <field name = "rate" type = "double" />
+    <field name = "phase" type = "int" />
+</structure>
+<structure name = "event">
+    <field name = "eventNumber" type = "short" />
+    <field name = "timeStampEvent" type = "int" />
+    <field name = "timeStampLink" type = "link" />
+</structure>
+
+<structure name = "disableLink">
+    <field name = "disabled" type = "boolean" />
+    <field name = "value" type = "short" default = "1" />
+    <field name = "input" type = "short" />
+    <field name = "link" type = "link" />
+    <field name = "disableAlarmSeverity"
+           type = "menu" menuName = "menuAlarmSevr" />
+</structure>
+<structure name = "processLink">
+    <field name = "pvname" type = "string" link = "true" />
+    <field name = "wait" type = "boolean" />
+    <field name = "timeout" type = "double" />
+    <field name = "forceLocal" type = "boolean">
+        <!-- if true pvname must be in local IOC -->
+    </field>
+</structure>
+
+<structure name = "monitorLink">
+    <field name = "pvname" type = "string" link = "true" />
+    <field name = "process" type = "boolean">
+        <!-- process this record when monitor occurs -->
+    </field>
+    <field name = "monitorOnly" type = "boolean">
+        <!-- monitor only or data also -->
+    </field>
+    <field name = "inheritSeverity" type = "boolean" />
+    <field name = "forceLocal" type = "boolean">
+        <!-- if true pvname must be in local IOC -->
+    </field>
+</structure>
+
+<structure name = "inputLink">
+    <field name = "pvname" type = "string" link = "true" />
+    <field name = "process" type = "boolean" />
+    <field name = "wait" type = "boolean" />
+    <field name = "timeout" type = "double" />
+    <field name = "inheritSeverity" type = "boolean" />
+    <field name = "forceLocal" type = "boolean" >
+        <!-- if true pvname must be in local IOC -->
+    </field>
+</structure>
+
+<structure name = "outputLink">
+    <field name = "pvname" type = "string" link = "true" />
+    <field name = "process" type = "boolean" />
+    <field name = "wait" type = "boolean" />
+    <field name = "timeout" type = "double" />
+    <field name = "forceLocal" type = "boolean" >
+        <!-- if true pvname must be in local IOC -->
+        <boolean />
+    </field>
+</structure>
+
+<structure name = "displayLimit">
+    <field name = "low" type = "double" />
+    <field name = "high" type = "double" />
+</structure>
+
+<structure name = "linearConvert">
+    <field name = "engUnitsLow" type = "double" />
+    <field name = "engUnitsHigh" type = "double" />
+    <field name = "slope" type = "double" />
+    <field name = "intercept" type = "double" />
+</structure>
+
+<linkSupport name = "processLink" configurationStructureName = "processLink" />
+<linkSupport name = "monitorLink" configurationStructureName = "monitorLink" />
+<linkSupport name = "inputLink" configurationStructureName = "inputLink" />
+<linkSupport name = "outputLink" configurationStructureName = "outputLink" />
+
+<recordType name = "ai">
+    <property name = "value" associatedField = "value" />
+    <property name = "status" associatedField = "status" />
+    <property name = "severity" associatedField = "severity" />
+    <property name = "timeStamp" associatedField = "timeStamp" />
+    <property name = "units" associatedField = "units" />
+    <property name = "displayLimit" associatedField = "displayLimit" />
+    <field name = "value" type = "double">
+        <property name = "status" associatedField = "status" />
+        <property name = "severity" associatedField = "severity" />
+        <property name = "timeStamp" associatedField = "timeStamp" />
+        <property name = "units" associatedField = "units" />
+        <property name = "displayLimit" associatedField = "displayLimit" />
+    </field>
+    <field name = "priority" type = "menu" menuName = "menuPriority" />
+    <field name = "units" type = "string" />
+    <field name = "displayLimit"
+         type = "structure" structureName = "displayLimit" />
+    <field name = "input" type = "link" />
+    <field name = "rawValue" type = "int" />
+    <field name = "linearConvert"
+        type = "structure" structureName = "linearConvert" />
+</recordType>
+
+<structure name = "structureAllTypes">
+    <field name = "boolean" type = "boolean" />
+    <field name = "byte" type = "byte" />
+    <field name = "short" type = "short" />
+    <field name = "int" type = "int" />
+    <field name = "long" type = "long" />
+    <field name = "float" type = "float" />
+    <field name = "double" type = "double" />
+    <field name = "string" type = "string" />
+    <field name = "enum" type = "enum" />
+    <field name = "menu" type = "menu" menuName = "menuPriority" />
+    <field name = "displayLimit"
+         type = "structure" structureName = "displayLimit" />
+    <field name = "link" type = "link" />
+    <field name = "booleanArray" type = "array" elementType = "boolean" />
+    <field name = "byteArray" type = "array" elementType = "byte" />
+    <field name = "shortArray" type = "array" elementType = "short" />
+    <field name = "intArray" type = "array" elementType = "int" />
+    <field name = "longArray" type = "array" elementType = "long" />
+    <field name = "floatArray" type = "array" elementType = "float" />
+    <field name = "doubleArray" type = "array" elementType = "double" />
+    <field name = "stringArray" type = "array" elementType = "string" />
+    <field name = "enumArray" type = "array" elementType = "enum" />
+    <field name = "menuArray" type = "array" elementType = "menu" />
+    <field name = "linkArray" type = "array" elementType = "link" />
+    <field name = "structArray" type = "array" elementType = "structure" />
+    <field name = "arrayArray" type = "array" elementType = "array" />
+</structure>
+
+<recordType name = "allTypes">
+    <field name = "boolean" type = "boolean" />
+    <field name = "byte" type = "byte" />
+    <field name = "short" type = "short" />
+    <field name = "int" type = "int" />
+    <field name = "long" type = "long" />
+    <field name = "float" type = "float" />
+    <field name = "double" type = "double" />
+    <field name = "string" type = "string" />
+    <field name = "enum" type = "enum" />
+    <field name = "menu" type = "menu" menuName = "menuPriority" />
+    <field name = "displayLimit"
+         type = "structure" structureName = "displayLimit" />
+    <field name = "link" type = "link" />
+    <field name = "booleanArray" type = "array" elementType = "boolean" />
+    <field name = "byteArray" type = "array" elementType = "byte" />
+    <field name = "shortArray" type = "array" elementType = "short" />
+    <field name = "intArray" type = "array" elementType = "int" />
+    <field name = "longArray" type = "array" elementType = "long" />
+    <field name = "floatArray" type = "array" elementType = "float" />
+    <field name = "doubleArray" type = "array" elementType = "double" />
+    <field name = "stringArray" type = "array" elementType = "string" />
+    <field name = "enumArray" type = "array" elementType = "enum" />
+    <field name = "menuArray" type = "array" elementType = "menu" />
+    <field name = "linkArray" type = "array" elementType = "link" />
+    <field name = "structArray" type = "array" elementType = "structure" />
+    <field name = "arrayArray" type = "array" elementType = "array" />
+    <field name = "allTypes"
+         type = "structure" structureName = "structureAllTypes" />
+</recordType>
+
+</DBDefinition>

@@ -5,10 +5,10 @@
  */
 package org.epics.ioc.support;
 
-import org.epics.ioc.dbAccess.*;
-import org.epics.ioc.dbDefinition.*;
-import org.epics.ioc.dbProcess.*;
-import org.epics.ioc.pvAccess.*;
+import org.epics.ioc.db.*;
+import org.epics.ioc.dbd.*;
+import org.epics.ioc.process.*;
+import org.epics.ioc.pv.*;
 import org.epics.ioc.util.*;
 
 /**
@@ -20,27 +20,28 @@ public class ScanSupportFactory {
     private static Convert convert = ConvertFactory.getConvert();
     private static PeriodicScanner periodicScanner = ScannerFactory.getPeriodicScanner();
     private static EventScanner eventScanner = ScannerFactory.getEventScanner();
-    
+    private static final String supportName = "scan";
     /**
      * Create support for the scan field.
-     * @param dbStructure The interface to the scan field.
+     * @param pvStructure The interface to the scan field.
      * @return The support or null if the scan field is improperly defined.
      */
-    public static Support create(DBStructure dbStructure) {
-        ScanField scanField = ScanFieldFactory.create(dbStructure.getRecord());
+    public static Support create(PVStructure pvStructure) {
+        DBData dbData = (DBData)pvStructure;
+        ScanField scanField = ScanFieldFactory.create(dbData.getRecord());
         if(scanField==null) return null;
-        String supportName = dbStructure.getSupportName();
-        if(!supportName.equals("scan")) {
-            dbStructure.message(
+        String supportName = dbData.getSupportName();
+        if(!supportName.equals(supportName)) {
+            pvStructure.message(
                     "ScanSupportFactory create supportName is " + supportName
                     + " but expected scan",
                     MessageType.fatalError);
                 return null;
         }
         try {
-            return new ScanFieldSupport(dbStructure);
+            return new ScanFieldSupport(pvStructure);
         } catch (IllegalStateException e) {
-            dbStructure.message(
+            pvStructure.message(
                 "ScanSupportFactory create failure " + e.getMessage(),
                 MessageType.fatalError);
             return null;
@@ -48,9 +49,9 @@ public class ScanSupportFactory {
     }
     
     private static class ScanFieldSupport extends AbstractSupport implements IOCDBMergeListener {
-        private static String supportName = "scan";
+        
         private boolean isMerged = false;
-        private DBStructure dbStructure;
+        private PVStructure pvStructure;
         private DBRecord dbRecord = null;
         private String recordName = null;
         private ScanType scanType;
@@ -58,17 +59,17 @@ public class ScanSupportFactory {
         private String eventName = null;
         private double rate = 0.0;
         
-        private ScanFieldSupport(DBStructure dbStructure) {
-            super(supportName,dbStructure);
+        private ScanFieldSupport(PVStructure pvStructure) {
+            super(supportName,(DBData)pvStructure);
             String fieldName;
-            DBData oldField;
+            PVData oldField;
             int index;
             String choice;
-            DBDMenuField dbdMenuField;
-            DBMenu newMenu;
+            Menu menu;
+            PVMenu newMenu;
             
-            this.dbStructure = dbStructure;
-            dbRecord = dbStructure.getRecord();
+            this.pvStructure = pvStructure;
+            dbRecord = ((DBData)pvStructure).getRecord();
             recordName = dbRecord.getRecordName();
             IOCDB iocdb = dbRecord.getIOCDB();
             DBAccess dbAccess = iocdb.createAccess(recordName);            
@@ -79,18 +80,19 @@ public class ScanSupportFactory {
                 throw new IllegalStateException(recordName + "." + fieldName + " not in record ");
             }
             oldField = dbAccess.getField();
-            if(oldField.getDBDField().getDBType()!=DBType.dbMenu) {
+            if(oldField.getField().getType()!=Type.pvMenu) {
                 throw new IllegalStateException(recordName + "." + fieldName + " is not a menu field ");
             }
-            DBMenu scanMenu = (DBMenu)oldField;
+            PVMenu scanMenu = (PVMenu)oldField;
             if(!ScanFieldFactory.isScanMenu(scanMenu)) {
                 throw new IllegalStateException(recordName + "." + fieldName + " is not a menuScan ");
             }
             index = scanMenu.getIndex();
-            choice = scanMenu.getChoices()[index];
+            String[] choices = scanMenu.getChoices();
+            choice = choices[index];
             scanType = ScanType.valueOf(choice);
-            dbdMenuField = (DBDMenuField)oldField.getDBDField();
-            newMenu = new DBScan(this,dbStructure,dbdMenuField);
+            menu = (Menu)oldField.getField();
+            newMenu = new DBScan(this,(DBData)pvStructure,menu,choices);
             newMenu.setIndex(index);
             dbAccess.replaceField(oldField,newMenu);
             
@@ -103,9 +105,9 @@ public class ScanSupportFactory {
             if(oldField.getField().getType()!=Type.pvDouble) {
                 throw new IllegalStateException(recordName + "." + fieldName + " is not a double field ");
             }
-            DBDouble oldRate = (DBDouble)oldField;
+            PVDouble oldRate = (PVDouble)oldField;
             rate = oldRate.get();
-            DBDouble newRate = new DBRate(this,dbStructure,oldField.getDBDField());
+            PVDouble newRate = new DBRate(this,(DBData)pvStructure,oldField.getField());
             newRate.put(rate);
             dbAccess.replaceField(oldField,newRate);
             
@@ -118,9 +120,9 @@ public class ScanSupportFactory {
             if(oldField.getField().getType()!=Type.pvString) {
                 throw new IllegalStateException(recordName + "." + fieldName + " is not a string field ");
             }
-            DBString oldEventName = (DBString)oldField;
+            PVString oldEventName = (PVString)oldField;
             eventName = oldEventName.get();
-            DBString newEventName = new DBEventName(this,dbStructure,oldField.getDBDField());
+            PVString newEventName = new DBEventName(this,(DBData)pvStructure,oldField.getField());
             newEventName.put(eventName);
             dbAccess.replaceField(oldField,newEventName);
             dbAccess.setField("");
@@ -129,51 +131,51 @@ public class ScanSupportFactory {
                 throw new IllegalStateException(recordName + "." + fieldName + " not found");
             }
             oldField = dbAccess.getField();
-            if(oldField.getDBDField().getDBType()!=DBType.dbMenu) {
+            if(oldField.getField().getType()!=Type.pvMenu) {
                 throw new IllegalStateException(recordName + "." + fieldName + " is not a menu field ");
             }
-            DBMenu priorityMenu = (DBMenu)oldField;
+            PVMenu priorityMenu = (PVMenu)oldField;
             if(!ScanFieldFactory.isPriorityMenu(priorityMenu)) {
                 throw new IllegalStateException(recordName + "." + fieldName + " is not a menuPriority ");
             }
             index = priorityMenu.getIndex();
             choice = priorityMenu.getChoices()[index];
             priority = ScanPriority.valueOf(choice);
-            dbdMenuField = (DBDMenuField)oldField.getDBDField();
-            newMenu = new DBPriority(this,dbStructure,dbdMenuField);
+            menu = (Menu)oldField.getField();
+            newMenu = new DBPriority(this,(DBData)pvStructure,menu,priorityMenu.getChoices());
             newMenu.setIndex(index);
             dbAccess.replaceField(oldField,newMenu);
             
             dbRecord.getIOCDB().addIOCDBMergeListener(this);
         }       
         /* (non-Javadoc)
-         * @see org.epics.ioc.dbProcess.AbstractSupport#getName()
+         * @see org.epics.ioc.process.AbstractSupport#getName()
          */
         public String getRequestorName() {
             return supportName;
         }       
         /* (non-Javadoc)
-         * @see org.epics.ioc.dbProcess.AbstractSupport#initialize(org.epics.ioc.dbProcess.SupportCreation)
+         * @see org.epics.ioc.process.AbstractSupport#initialize(org.epics.ioc.process.SupportCreation)
          */
         public void initialize() {
             setSupportState(SupportState.readyForStart);
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.dbProcess.AbstractSupport#uninitialize()
+         * @see org.epics.ioc.process.AbstractSupport#uninitialize()
          */
         public void uninitialize() {
             stop();
             setSupportState(SupportState.readyForInitialize);
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.dbProcess.AbstractSupport#start()
+         * @see org.epics.ioc.process.AbstractSupport#start()
          */
         public void start() {
             if(isMerged) startScanner();
             setSupportState(SupportState.ready);
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.dbProcess.AbstractSupport#stop()
+         * @see org.epics.ioc.process.AbstractSupport#stop()
          */
         public void stop() {
             if(isMerged) {
@@ -190,17 +192,17 @@ public class ScanSupportFactory {
             setSupportState(SupportState.readyForStart);
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.dbProcess.AbstractSupport#process(org.epics.ioc.dbProcess.RecordProcessRequestor)
+         * @see org.epics.ioc.process.AbstractSupport#process(org.epics.ioc.process.RecordProcessRequestor)
          */
         public void process(SupportProcessRequestor supportProcessRequestor) {
-            dbStructure.message("process is being called. Why?", MessageType.error);
+            pvStructure.message("process is being called. Why?", MessageType.error);
             supportProcessRequestor.supportProcessDone(RequestResult.failure);
         }       
         /* (non-Javadoc)
-         * @see org.epics.ioc.dbProcess.AbstractSupport#processContinue()
+         * @see org.epics.ioc.process.AbstractSupport#processContinue()
          */
         public void processContinue() {
-            dbStructure.message("processContinue is being called. Why?", MessageType.error);
+            pvStructure.message("processContinue is being called. Why?", MessageType.error);
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.dbAccess.IOCDBMergeListener#merged()
@@ -261,8 +263,8 @@ public class ScanSupportFactory {
     private static class DBPriority extends AbstractDBMenu {
         private ScanFieldSupport scanFieldSupport;
         
-        private DBPriority(ScanFieldSupport scanFieldSupport,DBStructure parent,DBDMenuField dbdMenuField) {
-            super(parent,dbdMenuField);
+        private DBPriority(ScanFieldSupport scanFieldSupport,DBData parent,Menu menu,String[]choice) {
+            super(parent,menu,choice);
             this.scanFieldSupport = scanFieldSupport;
         }
         
@@ -278,8 +280,8 @@ public class ScanSupportFactory {
     private static class DBScan extends AbstractDBMenu {
         private ScanFieldSupport scanFieldSupport;
         
-        private DBScan(ScanFieldSupport scanFieldSupport,DBStructure parent,DBDMenuField dbdMenuField) {
-            super(parent,dbdMenuField);
+        private DBScan(ScanFieldSupport scanFieldSupport,DBData parent,Menu menu,String[]choice) {
+            super(parent,menu,choice);
             this.scanFieldSupport = scanFieldSupport;
         }
         
@@ -292,15 +294,15 @@ public class ScanSupportFactory {
         }
     }
     
-    private static class DBRate extends AbstractDBData implements DBDouble{
+    private static class DBRate extends AbstractDBData implements PVDouble{
         private double value;
         private ScanFieldSupport scanFieldSupport;
         
-        private DBRate(ScanFieldSupport scanFieldSupport,DBData parent,DBDField dbdField) {
-            super(parent,dbdField);
+        private DBRate(ScanFieldSupport scanFieldSupport,DBData parent,Field field) {
+            super(parent,field);
             value = 0;
             this.scanFieldSupport = scanFieldSupport;
-            String defaultValue = dbdField.getFieldAttribute().getDefault();
+            String defaultValue = field.getFieldAttribute().getDefault();
             if(defaultValue!=null && defaultValue.length()>0) {
                 value = Float.valueOf(defaultValue);
             }
@@ -329,15 +331,15 @@ public class ScanSupportFactory {
 
     }
     
-    private static class DBEventName extends AbstractDBData implements DBString{
+    private static class DBEventName extends AbstractDBData implements PVString{
         private String value;
         private ScanFieldSupport scanFieldSupport;
         
-        private DBEventName(ScanFieldSupport scanFieldSupport,DBData parent,DBDField dbdField) {
-            super(parent,dbdField);
+        private DBEventName(ScanFieldSupport scanFieldSupport,DBData parent,Field field) {
+            super(parent,field);
             value = null;
             this.scanFieldSupport = scanFieldSupport;
-            String defaultValue = dbdField.getFieldAttribute().getDefault();
+            String defaultValue = field.getFieldAttribute().getDefault();
             if(defaultValue!=null && defaultValue.length()>0) {
                 value = defaultValue;
             }

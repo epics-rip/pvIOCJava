@@ -5,7 +5,7 @@
  */
 package org.epics.ioc.util;
 
-import org.epics.ioc.dbAccess.*;
+import org.epics.ioc.db.*;
 
 /**
  * Event Scanner.

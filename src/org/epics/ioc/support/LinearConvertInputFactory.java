@@ -5,8 +5,9 @@
  */
 package org.epics.ioc.support;
 
-import org.epics.ioc.dbAccess.*;
-import org.epics.ioc.dbProcess.*;
+import org.epics.ioc.pv.*;
+import org.epics.ioc.db.*;
+import org.epics.ioc.process.*;
 import org.epics.ioc.util.MessageType;
 import org.epics.ioc.util.RequestResult;
 
@@ -16,22 +17,24 @@ import org.epics.ioc.util.RequestResult;
  *
  */
 public class LinearConvertInputFactory {
-    public static Support create(DBStructure dbStructure) {
+    public static Support create(PVStructure pvStructure) {
         Support support = null;
-        String supportName = dbStructure.getSupportName();
-        if(supportName.equals("linearConvert")) {
-            support = new LinearConvert(dbStructure);
+        String supportName = pvStructure.getSupportName();
+        if(supportName.equals(supportName)) {
+            support = new LinearConvert(pvStructure);
         }
         return support;
     }
     
+    private static final String supportName = "linearConvert";
+    
     private static class LinearConvert extends AbstractSupport {
-        private static String supportName = "LinearConvert";
-        private DBStructure dbStructure = null;
         
-        public LinearConvert(DBStructure dbStructure) {
-            super(supportName,dbStructure);
-            this.dbStructure = dbStructure;
+        private PVStructure pvStructure = null;
+        
+        public LinearConvert(PVStructure pvStructure) {
+            super(supportName,(DBData)pvStructure);
+            this.pvStructure = pvStructure;
         }
 
         public String getRequestorName() {

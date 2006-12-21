@@ -5,10 +5,10 @@
  */
 package org.epics.ioc.support;
 
-import org.epics.ioc.channelAccess.*;
-import org.epics.ioc.dbAccess.*;
-import org.epics.ioc.dbProcess.*;
-import org.epics.ioc.pvAccess.*;
+import org.epics.ioc.ca.*;
+import org.epics.ioc.db.*;
+import org.epics.ioc.process.*;
+import org.epics.ioc.pv.*;
 import org.epics.ioc.util.*;
 
 import java.util.List;
@@ -24,23 +24,23 @@ import java.util.regex.*;
 public class LinkSupportFactory {
     /**
      * Create link support.
-     * @param dbLink The field for which to create support.
+     * @param pvLink The field for which to create support.
      * @return A LinkSupport interface or null failure.
      */
-    public static LinkSupport create(DBLink dbLink) {
-        String supportName = dbLink.getSupportName();
+    public static LinkSupport create(PVLink pvLink) {
+        String supportName = pvLink.getSupportName();
         if(supportName.equals(processLinkSupportName)) {
-            return new ProcessLink(dbLink);
+            return new ProcessLink(pvLink);
         } else if(supportName.equals(inputLinkSupportName)) {
-            return new InputLink(dbLink);
+            return new InputLink(pvLink);
         } else if(supportName.equals(outputLinkSupportName)) {
-            return new OutputLink(dbLink);
+            return new OutputLink(pvLink);
         } else if(supportName.equals(monitorLinkSupportName)) {
-            return new MonitorLink(dbLink);
+            return new MonitorLink(pvLink);
         } else if(supportName.equals(monitorNotifyLinkSupportName)) {
-            return new MonitorNotifyLink(dbLink);
+            return new MonitorNotifyLink(pvLink);
         }
-        dbLink.message("no support for " + supportName, MessageType.fatalError);
+        pvLink.message("no support for " + supportName, MessageType.fatalError);
         return null;
     }
     private static final String processLinkSupportName = "processLink";
@@ -58,11 +58,11 @@ public class LinkSupportFactory {
     ChannelProcessRequestor,
     ChannelGetRequestor,ChannelStateListener,ChannelFieldGroupListener
     {
-        private DBLink dbLink = null;
+        private PVLink pvLink = null;
         private String channelRequestorName = null;
         private DBRecord dbRecord = null;
         private RecordProcess recordProcess = null;
-        private DBStructure configStructure = null;
+        private PVStructure configStructure = null;
         private PVString pvnameAccess = null;
         private PVBoolean inheritSeverityAccess = null;
         
@@ -85,12 +85,13 @@ public class LinkSupportFactory {
         private ChannelField severityField = null;
         private ChannelFieldGroup channelFieldGroup = null;
 
-        private ProcessLink(DBLink dbLink) {
-            super(processLinkSupportName,dbLink);
-            this.dbLink = dbLink;
+        private ProcessLink(PVLink pvLink) {
+            super(processLinkSupportName,(DBData)pvLink);
+            this.pvLink = pvLink;
+            DBData dbData = (DBData)pvLink;
             channelRequestorName = 
-                dbLink.getRecord().getRecordName()
-                + dbLink.getFullFieldName();
+                dbData.getRecord().getRecordName()
+                + dbData.getFullFieldName();
         }               
         /* (non-Javadoc)
          * @see org.epics.ioc.util.Requestor#getRequestorName()
@@ -99,11 +100,11 @@ public class LinkSupportFactory {
             return channelRequestorName;
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.dbProcess.Support#initialize()
+         * @see org.epics.ioc.process.Support#initialize()
          */
         public void initialize() {
             if(!super.checkSupportState(SupportState.readyForInitialize,processLinkSupportName)) return;
-            dbRecord = dbLink.getRecord();
+            dbRecord = ((DBData)pvLink).getRecord();
             recordProcess = dbRecord.getRecordProcess();
             configStructure = super.getConfigStructure("processLink");
             if(configStructure==null) return;
@@ -114,7 +115,7 @@ public class LinkSupportFactory {
             setSupportState(SupportState.readyForStart);
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.dbProcess.Support#uninitialize()
+         * @see org.epics.ioc.process.Support#uninitialize()
          */
         public void uninitialize() {
             if(super.getSupportState()==SupportState.ready) {
@@ -124,7 +125,7 @@ public class LinkSupportFactory {
             setSupportState(SupportState.readyForInitialize);
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.dbProcess.Support#start()
+         * @see org.epics.ioc.process.Support#start()
          */
         public void start() {
             if(!super.checkSupportState(SupportState.readyForStart,processLinkSupportName)) return;
@@ -133,7 +134,7 @@ public class LinkSupportFactory {
             // split pvname into record name and rest of name
             String name = pvnameAccess.get();
             if(name==null) {
-                dbLink.message("pvname is not defined",MessageType.error);
+                pvLink.message("pvname is not defined",MessageType.error);
                 return;
             }
             String[]pvname = periodPattern.split(name,2);
@@ -146,14 +147,14 @@ public class LinkSupportFactory {
                     if(dbAccess.setField("severity")==AccessSetResult.thisRecord) {
                         pvSeverity = (PVEnum)dbAccess.getField();
                     } else {
-                        dbLink.message("severity field not found",MessageType.error);
+                        pvLink.message("severity field not found",MessageType.error);
                         return;
                     }
                 }
                 linkRecordProcess = linkDBRecord.getRecordProcess();
                 boolean result = linkRecordProcess.setRecordProcessRequestor(this);
                 if(!result) {
-                    dbLink.message("record already has processor", MessageType.error);
+                    pvLink.message("record already has processor", MessageType.error);
                     linkDBRecord = null;
                     return;
                 }
@@ -163,7 +164,7 @@ public class LinkSupportFactory {
                 isLocal = false;
                 channel = ChannelFactory.createChannel(recordName, this, false);
                 if(channel==null) {
-                    dbLink.message(
+                    pvLink.message(
                         "Failed to create channel for " + recordName,
                         MessageType.error);
                     return;
@@ -187,7 +188,7 @@ public class LinkSupportFactory {
             setSupportState(SupportState.ready);
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.dbProcess.Support#stop()
+         * @see org.epics.ioc.process.Support#stop()
          */
         public void stop() {
             if(super.getSupportState()!=SupportState.ready) return;
@@ -206,12 +207,12 @@ public class LinkSupportFactory {
             setSupportState(SupportState.readyForStart);
         }        
         /* (non-Javadoc)
-         * @see org.epics.ioc.dbProcess.AbstractSupport#process(org.epics.ioc.dbProcess.RecordProcessRequestor)
+         * @see org.epics.ioc.process.AbstractSupport#process(org.epics.ioc.process.RecordProcessRequestor)
          */
         public void process(SupportProcessRequestor supportProcessRequestor) {
             if(!super.checkSupportState(SupportState.ready,processLinkSupportName + ".process")) {
                 recordProcess.setStatusSeverity(
-                        dbLink.getFullFieldName() + " not ready",
+                        pvLink.getFullFieldName() + " not ready",
                         AlarmSeverity.major);
                 supportProcessRequestor.supportProcessDone(RequestResult.failure);
                 return;
@@ -226,12 +227,12 @@ public class LinkSupportFactory {
                 return;
             }
             recordProcess.setStatusSeverity(
-                dbLink.getFullFieldName() + " not connected",
+                pvLink.getFullFieldName() + " not connected",
                 AlarmSeverity.major);
             supportProcessRequestor.supportProcessDone(RequestResult.success);
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.dbProcess.ProcessCallbackRequestor#processCallback()
+         * @see org.epics.ioc.process.ProcessCallbackRequestor#processCallback()
          */
         public void processCallback() {
             if(isLocal) {
@@ -245,7 +246,7 @@ public class LinkSupportFactory {
             }
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.dbProcess.RecordProcessRequestor#recordProcessResult(org.epics.ioc.util.RequestResult)
+         * @see org.epics.ioc.process.RecordProcessRequestor#recordProcessResult(org.epics.ioc.util.RequestResult)
          */
         public void recordProcessResult(RequestResult requestResult) {
             this.requestResult = requestResult;
@@ -259,13 +260,13 @@ public class LinkSupportFactory {
             }
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.dbProcess.RecordProcessRequestor#recordProcessComplete()
+         * @see org.epics.ioc.process.RecordProcessRequestor#recordProcessComplete()
          */
         public void recordProcessComplete() {
             recordProcess.processContinue(this);
         }        
         /* (non-Javadoc)
-         * @see org.epics.ioc.dbProcess.ProcessContinueRequestor#processContinue()
+         * @see org.epics.ioc.process.ProcessContinueRequestor#processContinue()
          */
         public void processContinue() {
             if(inheritSeverity && alarmSeverity!=AlarmSeverity.none) {
@@ -275,13 +276,13 @@ public class LinkSupportFactory {
             supportProcessRequestor.supportProcessDone(requestResult);
         }        
         /* (non-Javadoc)
-         * @see org.epics.ioc.dbProcess.LinkSupport#setField(org.epics.ioc.pvAccess.PVData)
+         * @see org.epics.ioc.process.LinkSupport#setField(org.epics.ioc.pvAccess.PVData)
          */
         public void setField(PVData field) {
             // nothing to do
         }  
         /* (non-Javadoc)
-         * @see org.epics.ioc.channelAccess.ChannelGetRequestor#nextGetData(org.epics.ioc.channelAccess.Channel, org.epics.ioc.channelAccess.ChannelField, org.epics.ioc.pvAccess.PVData)
+         * @see org.epics.ioc.ca.ChannelGetRequestor#nextGetData(org.epics.ioc.ca.Channel, org.epics.ioc.ca.ChannelField, org.epics.ioc.pvAccess.PVData)
          */
         public boolean nextGetData(ChannelField field, PVData data) {
             if(field!=severityField) {
@@ -293,7 +294,7 @@ public class LinkSupportFactory {
             return false;
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.channelAccess.ChannelGetRequestor#nextDelayedGetData(org.epics.ioc.pvAccess.PVData)
+         * @see org.epics.ioc.ca.ChannelGetRequestor#nextDelayedGetData(org.epics.ioc.pvAccess.PVData)
          */
         public boolean nextDelayedGetData(PVData data) {
             // Nothing to do.
@@ -306,7 +307,7 @@ public class LinkSupportFactory {
         }
         
         /* (non-Javadoc)
-         * @see org.epics.ioc.channelAccess.ChannelProcessRequestor#processDone(org.epics.ioc.util.RequestResult)
+         * @see org.epics.ioc.ca.ChannelProcessRequestor#processDone(org.epics.ioc.util.RequestResult)
          */
         public void processDone(RequestResult requestResult) {
             this.requestResult = requestResult;
@@ -314,18 +315,18 @@ public class LinkSupportFactory {
             
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.dbProcess.AbstractSupport#message(java.lang.String, org.epics.ioc.util.MessageType)
+         * @see org.epics.ioc.process.AbstractSupport#message(java.lang.String, org.epics.ioc.util.MessageType)
          */
         public void message(String message,MessageType messageType) {
             dbRecord.lock();
             try {
-                dbLink.message(message, messageType);
+                pvLink.message(message, messageType);
             } finally {
                 dbRecord.unlock();
             }
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.channelAccess.ChannelStateListener#channelStateChange(org.epics.ioc.channelAccess.Channel)
+         * @see org.epics.ioc.ca.ChannelStateListener#channelStateChange(org.epics.ioc.ca.Channel)
          */
         public void channelStateChange(Channel c,boolean isConnected) {
             dbRecord.lock();
@@ -352,7 +353,7 @@ public class LinkSupportFactory {
             }
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.channelAccess.ChannelStateListener#disconnect(org.epics.ioc.channelAccess.Channel)
+         * @see org.epics.ioc.ca.ChannelStateListener#disconnect(org.epics.ioc.ca.Channel)
          */
         public void disconnect(Channel c) {
             dbRecord.lock();
@@ -366,7 +367,7 @@ public class LinkSupportFactory {
             recordProcess.start();
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.channelAccess.ChannelFieldGroupListener#accessRightsChange(org.epics.ioc.channelAccess.Channel, org.epics.ioc.channelAccess.ChannelField)
+         * @see org.epics.ioc.ca.ChannelFieldGroupListener#accessRightsChange(org.epics.ioc.ca.Channel, org.epics.ioc.ca.ChannelField)
          */
         public void accessRightsChange(Channel channel, ChannelField channelField) {
             // nothing to do         
@@ -395,11 +396,11 @@ public class LinkSupportFactory {
     RecordProcessRequestor,ProcessCallbackRequestor,ProcessContinueRequestor,
     ChannelGetRequestor,ChannelFieldGroupListener,ChannelStateListener
     {
-        private DBLink dbLink;
+        private PVLink pvLink;
         private String channelRequestorName = null;
         private DBRecord dbRecord = null;
         private RecordProcess recordProcess = null;
-        private DBStructure configStructure = null;
+        private PVStructure configStructure = null;
         private PVString pvnameAccess = null;
         private PVBoolean processAccess = null;
         private PVBoolean inheritSeverityAccess = null;
@@ -433,14 +434,15 @@ public class LinkSupportFactory {
         
         /**
          * Constructor for InputLink.
-         * @param dbLink The field for which to create support.
+         * @param pvLink The field for which to create support.
          */
-        public InputLink(DBLink dbLink) {
-            super(inputLinkSupportName,dbLink);
-            this.dbLink = dbLink;
+        public InputLink(PVLink pvLink) {
+            super(inputLinkSupportName,(DBData)pvLink);
+            this.pvLink = pvLink;
+            DBData dbData = (DBData)pvLink;
             channelRequestorName = 
-                dbLink.getRecord().getRecordName()
-                + dbLink.getFullFieldName();
+                dbData.getRecord().getRecordName()
+                + dbData.getFullFieldName();
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.util.Requestor#getRequestorName()
@@ -449,11 +451,11 @@ public class LinkSupportFactory {
             return channelRequestorName;
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.dbProcess.Support#initialize()
+         * @see org.epics.ioc.process.Support#initialize()
          */
         public void initialize() {
             if(!super.checkSupportState(SupportState.readyForInitialize,inputLinkSupportName)) return;
-            dbRecord = dbLink.getRecord();
+            dbRecord = ((DBData)pvLink).getRecord();
             recordProcess = dbRecord.getRecordProcess();
             configStructure = super.getConfigStructure("inputLink");
             if(configStructure==null) return;
@@ -467,7 +469,7 @@ public class LinkSupportFactory {
         }
         
         /* (non-Javadoc)
-         * @see org.epics.ioc.dbProcess.Support#uninitialize()
+         * @see org.epics.ioc.process.Support#uninitialize()
          */
         public void uninitialize() {
             if(super.getSupportState()==SupportState.ready) {
@@ -477,13 +479,13 @@ public class LinkSupportFactory {
             setSupportState(SupportState.readyForInitialize);
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.dbProcess.Support#start()
+         * @see org.epics.ioc.process.Support#start()
          */
         public void start() {
             if(!super.checkSupportState(SupportState.readyForStart,inputLinkSupportName)) return;
             isConnected = false;
             if(valueData==null) {
-                dbLink.message(
+                pvLink.message(
                     "Logic Error: InputLink.start called before setField",
                     MessageType.error);
                 setSupportState(SupportState.zombie);
@@ -494,7 +496,7 @@ public class LinkSupportFactory {
             // split pvname into record name and rest of name
             String name = pvnameAccess.get();
             if(name==null) {
-                dbLink.message("pvname is not defined",MessageType.error);
+                pvLink.message("pvname is not defined",MessageType.error);
                 return;
             }
             String[]pvname = periodPattern.split(name,2);
@@ -532,7 +534,7 @@ public class LinkSupportFactory {
                         if(dbAccess.setField("severity")==AccessSetResult.thisRecord) {
                             pvSeverity = (PVEnum)dbAccess.getField();
                         } else {
-                            dbLink.message("severity field not found",MessageType.error);
+                            pvLink.message("severity field not found",MessageType.error);
                             return;
                         }
                     }
@@ -547,7 +549,7 @@ public class LinkSupportFactory {
                     linkRecordProcess = linkDBRecord.getRecordProcess();
                     boolean result = linkRecordProcess.setRecordProcessRequestor(this);
                     if(!result) {
-                        dbLink.message("record already has processor", MessageType.error);
+                        pvLink.message("record already has processor", MessageType.error);
                         linkDBRecord = null;
                         return;
                     }
@@ -563,7 +565,7 @@ public class LinkSupportFactory {
                 isLocal = false;
                 channel = ChannelFactory.createChannel(recordName,this, false);
                 if(channel==null) {
-                    dbLink.message(
+                    pvLink.message(
                             "Failed to create channel for " + recordName,
                             MessageType.error);
                     return;
@@ -583,7 +585,7 @@ public class LinkSupportFactory {
             setSupportState(SupportState.ready);
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.dbProcess.Support#stop()
+         * @see org.epics.ioc.process.Support#stop()
          */
         public void stop() {
             if(super.getSupportState()!=SupportState.ready) return;
@@ -601,18 +603,18 @@ public class LinkSupportFactory {
             setSupportState(SupportState.readyForStart);
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.dbProcess.LinkSupport#setField(org.epics.ioc.pvAccess.PVData)
+         * @see org.epics.ioc.process.LinkSupport#setField(org.epics.ioc.pvAccess.PVData)
          */
         public void setField(PVData data) {
             valueData = data;
         }       
         /* (non-Javadoc)
-         * @see org.epics.ioc.dbProcess.AbstractSupport#process(org.epics.ioc.dbProcess.SupportProcessRequestor)
+         * @see org.epics.ioc.process.AbstractSupport#process(org.epics.ioc.process.SupportProcessRequestor)
          */
         public void process(SupportProcessRequestor supportProcessRequestor) {
             if(!super.checkSupportState(SupportState.ready,inputLinkSupportName + ".process")) {
                 recordProcess.setStatusSeverity(
-                        dbLink.getFullFieldName() + " not ready",
+                        pvLink.getFullFieldName() + " not ready",
                         AlarmSeverity.major);
                 supportProcessRequestor.supportProcessDone(RequestResult.failure);
             }
@@ -636,13 +638,13 @@ public class LinkSupportFactory {
                 return;
             }
             recordProcess.setStatusSeverity(
-                dbLink.getFullFieldName() + " not connected",
+                pvLink.getFullFieldName() + " not connected",
                 AlarmSeverity.major);
             supportProcessRequestor.supportProcessDone(RequestResult.success);
         }
         
         /* (non-Javadoc)
-         * @see org.epics.ioc.dbProcess.ProcessCallbackRequestor#processCallback()
+         * @see org.epics.ioc.process.ProcessCallbackRequestor#processCallback()
          */
         public void processCallback() {
             if(isLocal) {
@@ -653,13 +655,13 @@ public class LinkSupportFactory {
             }
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.dbProcess.RecordProcessRequestor#ready()
+         * @see org.epics.ioc.process.RecordProcessRequestor#ready()
          */
         public RequestResult ready() {
             throw new IllegalStateException(channelRequestorName + " why was ready called?");      
         }        
         /* (non-Javadoc)
-         * @see org.epics.ioc.dbProcess.ProcessContinueRequestor#processContinue()
+         * @see org.epics.ioc.process.ProcessContinueRequestor#processContinue()
          */
         public void processContinue() {
             if(inheritSeverity && alarmSeverity!=AlarmSeverity.none) {
@@ -669,13 +671,13 @@ public class LinkSupportFactory {
              supportProcessRequestor.supportProcessDone(requestResult);
         }        
         /* (non-Javadoc)
-         * @see org.epics.ioc.dbProcess.RecordProcessRequestor#recordProcessComplete()
+         * @see org.epics.ioc.process.RecordProcessRequestor#recordProcessComplete()
          */
         public void recordProcessComplete() {
             recordProcess.processContinue(this);
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.dbProcess.RecordProcessRequestor#recordProcessResult(org.epics.ioc.util.RequestResult)
+         * @see org.epics.ioc.process.RecordProcessRequestor#recordProcessResult(org.epics.ioc.util.RequestResult)
          */
         public void recordProcessResult(RequestResult requestResult) {
             this.requestResult = requestResult;
@@ -688,7 +690,7 @@ public class LinkSupportFactory {
         }
         
         /* (non-Javadoc)
-         * @see org.epics.ioc.channelAccess.ChannelStateListener#channelStateChange(org.epics.ioc.channelAccess.Channel)
+         * @see org.epics.ioc.ca.ChannelStateListener#channelStateChange(org.epics.ioc.ca.Channel)
          */
         public void channelStateChange(Channel c,boolean isConnected) {
             dbRecord.lock();
@@ -716,7 +718,7 @@ public class LinkSupportFactory {
             }
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.channelAccess.ChannelStateListener#disconnect(org.epics.ioc.channelAccess.Channel)
+         * @see org.epics.ioc.ca.ChannelStateListener#disconnect(org.epics.ioc.ca.Channel)
          */
         public void disconnect(Channel c) {
             dbRecord.lock();
@@ -730,7 +732,7 @@ public class LinkSupportFactory {
             recordProcess.start();
         }   
         /* (non-Javadoc)
-         * @see org.epics.ioc.channelAccess.ChannelGetRequestor#newData(org.epics.ioc.channelAccess.ChannelField, org.epics.ioc.pvAccess.PVData)
+         * @see org.epics.ioc.ca.ChannelGetRequestor#newData(org.epics.ioc.ca.ChannelField, org.epics.ioc.pvAccess.PVData)
          */
         public boolean nextGetData(ChannelField field,PVData data) {
             if(field==severityField) {
@@ -740,7 +742,7 @@ public class LinkSupportFactory {
                 return false;
             }
             if(field!=valueField) {
-                dbLink.message(
+                pvLink.message(
                     "Logic error in InputLink field!=valueField",
                     MessageType.fatalError);
             }
@@ -770,20 +772,20 @@ public class LinkSupportFactory {
                 convert.copyStructure(linkStructureData,recordStructureData);
                 return false;
             }
-            dbLink.message(
+            pvLink.message(
                     "Logic error in InputLink: unsupported type",
                     MessageType.fatalError);
             return false;
         }       
         /* (non-Javadoc)
-         * @see org.epics.ioc.channelAccess.ChannelGetRequestor#nextDelayedGetData(org.epics.ioc.pvAccess.PVData)
+         * @see org.epics.ioc.ca.ChannelGetRequestor#nextDelayedGetData(org.epics.ioc.pvAccess.PVData)
          */
         public boolean nextDelayedGetData(PVData data) {
             // nothing to do
             return false;
         }        
         /* (non-Javadoc)
-         * @see org.epics.ioc.channelAccess.ChannelGetRequestor#getDone(org.epics.ioc.util.RequestResult)
+         * @see org.epics.ioc.ca.ChannelGetRequestor#getDone(org.epics.ioc.util.RequestResult)
          */
         public void getDone(RequestResult requestResult) {
             this.requestResult = requestResult;
@@ -791,18 +793,18 @@ public class LinkSupportFactory {
         }      
         
         /* (non-Javadoc)
-         * @see org.epics.ioc.dbProcess.AbstractSupport#message(java.lang.String, org.epics.ioc.util.MessageType)
+         * @see org.epics.ioc.process.AbstractSupport#message(java.lang.String, org.epics.ioc.util.MessageType)
          */
         public void message(String message,MessageType messageType) {
             dbRecord.lock();
             try {
-                dbLink.message(message, messageType);
+                pvLink.message(message, messageType);
             } finally {
                 dbRecord.unlock();
             }
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.channelAccess.ChannelFieldGroupListener#accessRightsChange(org.epics.ioc.channelAccess.ChannelField)
+         * @see org.epics.ioc.ca.ChannelFieldGroupListener#accessRightsChange(org.epics.ioc.ca.ChannelField)
          */
         public void accessRightsChange(Channel channel,ChannelField channelField) {
             // nothing to do
@@ -835,7 +837,7 @@ public class LinkSupportFactory {
                     convert.copyStructure(linkStructureData,recordStructureData);
                     return;
                 }
-                dbLink.message(
+                pvLink.message(
                         "Logic error in InputLink: unsupported type",
                         MessageType.fatalError);
             } finally {
@@ -906,11 +908,11 @@ public class LinkSupportFactory {
     ChannelPutGetRequestor,
     ChannelFieldGroupListener,ChannelStateListener
     {
-        private DBLink dbLink;
+        private PVLink pvLink;
         private String channelRequestorName = null;
         private DBRecord dbRecord = null;
         private RecordProcess recordProcess = null;
-        private DBStructure configStructure = null;
+        private PVStructure configStructure = null;
         private PVString pvnameAccess = null;
         private PVBoolean processAccess = null;
         private PVBoolean inheritSeverityAccess = null;
@@ -946,14 +948,15 @@ public class LinkSupportFactory {
         
         /**
          * Constructor for InputLink.
-         * @param dbLink The field for which to create support.
+         * @param pvLink The field for which to create support.
          */
-        public OutputLink(DBLink dbLink) {
-            super(inputLinkSupportName,dbLink);
-            this.dbLink = dbLink;
+        public OutputLink(PVLink pvLink) {
+            super(inputLinkSupportName,(DBData)pvLink);
+            this.pvLink = pvLink;
+            DBData dbData = (DBData)pvLink;
             channelRequestorName = 
-                dbLink.getRecord().getRecordName()
-                + dbLink.getFullFieldName();
+                dbData.getRecord().getRecordName()
+                + dbData.getFullFieldName();
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.util.Requestor#getRequestorName()
@@ -962,11 +965,11 @@ public class LinkSupportFactory {
             return channelRequestorName;
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.dbProcess.Support#initialize()
+         * @see org.epics.ioc.process.Support#initialize()
          */
         public void initialize() {
             if(!super.checkSupportState(SupportState.readyForInitialize,inputLinkSupportName)) return;
-            dbRecord = dbLink.getRecord();
+            dbRecord = ((DBData)pvLink).getRecord();
             recordProcess = dbRecord.getRecordProcess();
             configStructure = super.getConfigStructure("outputLink");
             if(configStructure==null) return;
@@ -980,7 +983,7 @@ public class LinkSupportFactory {
         }
         
         /* (non-Javadoc)
-         * @see org.epics.ioc.dbProcess.Support#uninitialize()
+         * @see org.epics.ioc.process.Support#uninitialize()
          */
         public void uninitialize() {
             if(super.getSupportState()==SupportState.ready) {
@@ -990,13 +993,13 @@ public class LinkSupportFactory {
             setSupportState(SupportState.readyForInitialize);
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.dbProcess.Support#start()
+         * @see org.epics.ioc.process.Support#start()
          */
         public void start() {
             if(!super.checkSupportState(SupportState.readyForStart,inputLinkSupportName)) return;
             isConnected = false;
             if(valueData==null) {
-                dbLink.message(
+                pvLink.message(
                     "Logic Error: InputLink.start called before setField",
                     MessageType.error);
                 setSupportState(SupportState.zombie);
@@ -1007,7 +1010,7 @@ public class LinkSupportFactory {
             // split pvname into record name and rest of name
             String name = pvnameAccess.get();
             if(name==null) {
-                dbLink.message("pvname is not defined",MessageType.error);
+                pvLink.message("pvname is not defined",MessageType.error);
                 return;
             }
             String[]pvname = periodPattern.split(name,2);
@@ -1045,7 +1048,7 @@ public class LinkSupportFactory {
                         if(dbAccess.setField("severity")==AccessSetResult.thisRecord) {
                             pvSeverity = (PVEnum)dbAccess.getField();
                         } else {
-                            dbLink.message("severity field not found",MessageType.error);
+                            pvLink.message("severity field not found",MessageType.error);
                             return;
                         }
                     }
@@ -1060,7 +1063,7 @@ public class LinkSupportFactory {
                     linkRecordProcess = linkDBRecord.getRecordProcess();
                     boolean result = linkRecordProcess.setRecordProcessRequestor(this);
                     if(!result) {
-                        dbLink.message("record already has processor", MessageType.error);
+                        pvLink.message("record already has processor", MessageType.error);
                         linkDBRecord = null;
                         return;
                     }
@@ -1076,7 +1079,7 @@ public class LinkSupportFactory {
                 isLocal = false;
                 channel = ChannelFactory.createChannel(recordName,this, false);
                 if(channel==null) {
-                    dbLink.message(
+                    pvLink.message(
                             "Failed to create channel for " + recordName,
                             MessageType.error);
                     return;
@@ -1100,7 +1103,7 @@ public class LinkSupportFactory {
             setSupportState(SupportState.ready);
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.dbProcess.Support#stop()
+         * @see org.epics.ioc.process.Support#stop()
          */
         public void stop() {
             if(super.getSupportState()!=SupportState.ready) return;
@@ -1119,18 +1122,18 @@ public class LinkSupportFactory {
             setSupportState(SupportState.readyForStart);
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.dbProcess.LinkSupport#setField(org.epics.ioc.pvAccess.PVData)
+         * @see org.epics.ioc.process.LinkSupport#setField(org.epics.ioc.pvAccess.PVData)
          */
         public void setField(PVData data) {
             valueData = data;
         }       
         /* (non-Javadoc)
-         * @see org.epics.ioc.dbProcess.AbstractSupport#process(org.epics.ioc.dbProcess.SupportProcessRequestor)
+         * @see org.epics.ioc.process.AbstractSupport#process(org.epics.ioc.process.SupportProcessRequestor)
          */
         public void process(SupportProcessRequestor supportProcessRequestor) {
             if(!super.checkSupportState(SupportState.ready,inputLinkSupportName + ".process")) {
                 recordProcess.setStatusSeverity(
-                        dbLink.getFullFieldName() + " not ready",
+                        pvLink.getFullFieldName() + " not ready",
                         AlarmSeverity.major);
                 supportProcessRequestor.supportProcessDone(RequestResult.failure);
             }
@@ -1154,13 +1157,13 @@ public class LinkSupportFactory {
                 return;
             }
             recordProcess.setStatusSeverity(
-                dbLink.getFullFieldName() + " not connected",
+                pvLink.getFullFieldName() + " not connected",
                 AlarmSeverity.major);
             supportProcessRequestor.supportProcessDone(RequestResult.success);
         }
         
         /* (non-Javadoc)
-         * @see org.epics.ioc.dbProcess.ProcessCallbackRequestor#processCallback()
+         * @see org.epics.ioc.process.ProcessCallbackRequestor#processCallback()
          */
         public void processCallback() {
             if(isLocal) {
@@ -1177,7 +1180,7 @@ public class LinkSupportFactory {
             }
         }   
         /* (non-Javadoc)
-         * @see org.epics.ioc.dbProcess.ProcessContinueRequestor#processContinue()
+         * @see org.epics.ioc.process.ProcessContinueRequestor#processContinue()
          */
         public void processContinue() {
             if(inheritSeverity && alarmSeverity!=AlarmSeverity.none) {
@@ -1187,13 +1190,13 @@ public class LinkSupportFactory {
              supportProcessRequestor.supportProcessDone(requestResult);
         }        
         /* (non-Javadoc)
-         * @see org.epics.ioc.dbProcess.RecordProcessRequestor#recordProcessComplete()
+         * @see org.epics.ioc.process.RecordProcessRequestor#recordProcessComplete()
          */
         public void recordProcessComplete() {
             recordProcess.processContinue(this);
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.dbProcess.RecordProcessRequestor#recordProcessResult(org.epics.ioc.util.RequestResult)
+         * @see org.epics.ioc.process.RecordProcessRequestor#recordProcessResult(org.epics.ioc.util.RequestResult)
          */
         public void recordProcessResult(RequestResult requestResult) {
             this.requestResult = requestResult;
@@ -1208,7 +1211,7 @@ public class LinkSupportFactory {
         }
         
         /* (non-Javadoc)
-         * @see org.epics.ioc.channelAccess.ChannelStateListener#channelStateChange(org.epics.ioc.channelAccess.Channel)
+         * @see org.epics.ioc.ca.ChannelStateListener#channelStateChange(org.epics.ioc.ca.Channel)
          */
         public void channelStateChange(Channel c,boolean isConnected) {
             dbRecord.lock();
@@ -1237,7 +1240,7 @@ public class LinkSupportFactory {
             }
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.channelAccess.ChannelStateListener#disconnect(org.epics.ioc.channelAccess.Channel)
+         * @see org.epics.ioc.ca.ChannelStateListener#disconnect(org.epics.ioc.ca.Channel)
          */
         public void disconnect(Channel c) {
             dbRecord.lock();
@@ -1251,7 +1254,7 @@ public class LinkSupportFactory {
             recordProcess.start();
         }   
         /* (non-Javadoc)
-         * @see org.epics.ioc.channelAccess.ChannelPutRequestor#newData(org.epics.ioc.channelAccess.ChannelField, org.epics.ioc.pvAccess.PVData)
+         * @see org.epics.ioc.ca.ChannelPutRequestor#newData(org.epics.ioc.ca.ChannelField, org.epics.ioc.pvAccess.PVData)
          */
         public boolean nextPutData(ChannelField field,PVData data) {
             if(field==severityField) {
@@ -1261,7 +1264,7 @@ public class LinkSupportFactory {
                 return false;
             }
             if(field!=valueField) {
-                dbLink.message(
+                pvLink.message(
                     "Logic error in InputLink field!=valueField",
                     MessageType.fatalError);
             }
@@ -1292,13 +1295,13 @@ public class LinkSupportFactory {
                 convert.copyStructure(linkStructureData,recordStructureData);
                 return false;
             }
-            dbLink.message(
+            pvLink.message(
                     "Logic error in InputLink: unsupported type",
                     MessageType.fatalError);
             return false;
         }       
         /* (non-Javadoc)
-         * @see org.epics.ioc.channelAccess.ChannelGetRequestor#nextGetData(org.epics.ioc.channelAccess.Channel, org.epics.ioc.channelAccess.ChannelField, org.epics.ioc.pvAccess.PVData)
+         * @see org.epics.ioc.ca.ChannelGetRequestor#nextGetData(org.epics.ioc.ca.Channel, org.epics.ioc.ca.ChannelField, org.epics.ioc.pvAccess.PVData)
          */
         public boolean nextGetData(ChannelField field, PVData data) {
             if(field!=severityField) {
@@ -1310,45 +1313,45 @@ public class LinkSupportFactory {
             return false;
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.channelAccess.ChannelGetRequestor#nextDelayedGetData(org.epics.ioc.pvAccess.PVData)
+         * @see org.epics.ioc.ca.ChannelGetRequestor#nextDelayedGetData(org.epics.ioc.pvAccess.PVData)
          */
         public boolean nextDelayedGetData(PVData data) {
             // nothing to do
             return false;
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.channelAccess.ChannelPutRequestor#nextDelayedPutData(org.epics.ioc.pvAccess.PVData)
+         * @see org.epics.ioc.ca.ChannelPutRequestor#nextDelayedPutData(org.epics.ioc.pvAccess.PVData)
          */
         public boolean nextDelayedPutData(PVData data) {
             // nothing to do
             return false;
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.channelAccess.ChannelGetRequestor#getDone(org.epics.ioc.util.RequestResult)
+         * @see org.epics.ioc.ca.ChannelGetRequestor#getDone(org.epics.ioc.util.RequestResult)
          */
         public void getDone(RequestResult requestResult) {
             this.requestResult = requestResult;
             recordProcess.processContinue(this);
         }      
         /* (non-Javadoc)
-         * @see org.epics.ioc.channelAccess.ChannelPutRequestor#putDone(org.epics.ioc.util.RequestResult)
+         * @see org.epics.ioc.ca.ChannelPutRequestor#putDone(org.epics.ioc.util.RequestResult)
          */
         public void putDone(RequestResult requestResult) {
             // nothing to do
         }      
         /* (non-Javadoc)
-         * @see org.epics.ioc.dbProcess.AbstractSupport#message(java.lang.String, org.epics.ioc.util.MessageType)
+         * @see org.epics.ioc.process.AbstractSupport#message(java.lang.String, org.epics.ioc.util.MessageType)
          */
         public void message(String message,MessageType messageType) {
             dbRecord.lock();
             try {
-                dbLink.message(message, messageType);
+                pvLink.message(message, messageType);
             } finally {
                 dbRecord.unlock();
             }
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.channelAccess.ChannelFieldGroupListener#accessRightsChange(org.epics.ioc.channelAccess.ChannelField)
+         * @see org.epics.ioc.ca.ChannelFieldGroupListener#accessRightsChange(org.epics.ioc.ca.ChannelField)
          */
         public void accessRightsChange(Channel channel,ChannelField channelField) {
             // nothing to do
@@ -1377,7 +1380,7 @@ public class LinkSupportFactory {
                     convert.copyStructure(recordStructureData,linkStructureData);
                     return;
                 }
-                dbLink.message(
+                pvLink.message(
                         "Logic error in OutputLink: unsupported type",
                         MessageType.fatalError);
             } finally {
@@ -1452,11 +1455,11 @@ public class LinkSupportFactory {
     ChannelStateListener,
     ChannelMonitorNotifyRequestor
     {
-        private DBLink dbLink = null;
+        private PVLink pvLink = null;
         private DBRecord dbRecord = null;
         private String channelRequestorName = null;
         private RecordProcess recordProcess = null;
-        private DBStructure configStructure = null;       
+        private PVStructure configStructure = null;       
         
         private PVString pvnameAccess = null;
         private PVEnum monitorTypeAccess = null;
@@ -1476,13 +1479,14 @@ public class LinkSupportFactory {
         private ChannelField dataField = null;
         /**
          * Constructor for MonitorLink.
-         * @param dbLink The field for which to create support.
+         * @param pvLink The field for which to create support.
          */
-        public MonitorNotifyLink(DBLink dbLink) {
-            super(monitorNotifyLinkSupportName,dbLink);
-            this.dbLink = dbLink;
-            dbRecord = dbLink.getRecord();
-            channelRequestorName = dbRecord.getRecordName() + dbLink.getFullFieldName();
+        public MonitorNotifyLink(PVLink pvLink) {
+            super(monitorNotifyLinkSupportName,(DBData)pvLink);
+            this.pvLink = pvLink;
+            DBData dbData = (DBData)pvLink;
+            dbRecord = dbData.getRecord();
+            channelRequestorName = dbRecord.getRecordName() + pvLink.getFullFieldName();
         }       
         /* (non-Javadoc)
          * @see org.epics.ioc.util.Requestor#getRequestorName()
@@ -1491,7 +1495,7 @@ public class LinkSupportFactory {
             return channelRequestorName;
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.dbProcess.Support#initialize()
+         * @see org.epics.ioc.process.Support#initialize()
          */
         public void initialize() {
             if(!super.checkSupportState(SupportState.readyForInitialize,monitorLinkSupportName)) return;
@@ -1507,7 +1511,7 @@ public class LinkSupportFactory {
             || !choices[0].equals("change")
             || !choices[1].equals("deltaChange")
             || !choices[2].equals("percentageChange") ) {
-                dbLink.message("field type is not a valid enum", MessageType.error);
+                pvLink.message("field type is not a valid enum", MessageType.error);
                 return;
             }
             deadbandAccess = super.getDouble(configStructure,"deadband");
@@ -1517,7 +1521,7 @@ public class LinkSupportFactory {
             setSupportState(SupportState.readyForStart);  
         }       
         /* (non-Javadoc)
-         * @see org.epics.ioc.dbProcess.Support#uninitialize()
+         * @see org.epics.ioc.process.Support#uninitialize()
          */
         public void uninitialize() {
             if(super.getSupportState()==SupportState.ready) {
@@ -1527,12 +1531,12 @@ public class LinkSupportFactory {
             setSupportState(SupportState.readyForInitialize);
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.dbProcess.Support#start()
+         * @see org.epics.ioc.process.Support#start()
          */
         public void start() {
             if(!super.checkSupportState(SupportState.readyForStart,monitorLinkSupportName)) return;
             if(pvNotify==null) {
-                dbLink.message(
+                pvLink.message(
                         "Logic Error: MonitorLink.start called before setField",
                         MessageType.fatalError);
                 setSupportState(SupportState.zombie);
@@ -1548,7 +1552,7 @@ public class LinkSupportFactory {
             }
             channel = ChannelFactory.createChannel(recordName,this, false);
             if(channel==null) {
-                dbLink.message(
+                pvLink.message(
                         "Failed to create channel for " + recordName,
                         MessageType.error);
                 setSupportState(SupportState.readyForInitialize);
@@ -1566,7 +1570,7 @@ public class LinkSupportFactory {
             setSupportState(SupportState.ready);
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.dbProcess.Support#stop()
+         * @see org.epics.ioc.process.Support#stop()
          */
         public void stop() {
             if(super.getSupportState()!=SupportState.ready) return;
@@ -1575,12 +1579,12 @@ public class LinkSupportFactory {
             setSupportState(SupportState.readyForStart);
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.dbProcess.AbstractSupport#process(org.epics.ioc.dbProcess.SupportProcessRequestor)
+         * @see org.epics.ioc.process.AbstractSupport#process(org.epics.ioc.process.SupportProcessRequestor)
          */
         public void process(SupportProcessRequestor supportProcessRequestor) {
             if(!super.checkSupportState(SupportState.ready,monitorLinkSupportName + ".process")) {
                 recordProcess.setStatusSeverity(
-                        dbLink.getFullFieldName() + " not ready",
+                        pvLink.getFullFieldName() + " not ready",
                         AlarmSeverity.major);
                 supportProcessRequestor.supportProcessDone(RequestResult.failure);
                 return;
@@ -1594,7 +1598,7 @@ public class LinkSupportFactory {
             supportProcessRequestor.supportProcessDone(RequestResult.success);
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.dbProcess.LinkSupport#setField(org.epics.ioc.pvAccess.PVData)
+         * @see org.epics.ioc.process.LinkSupport#setField(org.epics.ioc.pvAccess.PVData)
          */
         public void setField(PVData data) {
             Type type = data.getField().getType();
@@ -1602,7 +1606,7 @@ public class LinkSupportFactory {
             pvNotify = (PVBoolean)data;
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.channelAccess.ChannelStateListener#channelStateChange(org.epics.ioc.channelAccess.Channel)
+         * @see org.epics.ioc.ca.ChannelStateListener#channelStateChange(org.epics.ioc.ca.Channel)
          */
         public void channelStateChange(Channel c,boolean isConnected) {
             assert(c==channel);
@@ -1621,7 +1625,7 @@ public class LinkSupportFactory {
             }
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.channelAccess.ChannelStateListener#disconnect(org.epics.ioc.channelAccess.Channel)
+         * @see org.epics.ioc.ca.ChannelStateListener#disconnect(org.epics.ioc.ca.Channel)
          */
         public void disconnect(Channel c) {
             dbRecord.lock();
@@ -1635,7 +1639,7 @@ public class LinkSupportFactory {
             recordProcess.start();
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.channelAccess.ChannelMonitorNotifyRequestor#dataModified(org.epics.ioc.channelAccess.Channel)
+         * @see org.epics.ioc.ca.ChannelMonitorNotifyRequestor#dataModified(org.epics.ioc.ca.Channel)
          */
         public void monitorEvent() {
             dbRecord.lock();
@@ -1648,7 +1652,7 @@ public class LinkSupportFactory {
         private void channelStart() {
             ChannelSetFieldResult result = channel.setField(fieldName);
             if(result!=ChannelSetFieldResult.thisChannel) {
-                dbLink.message(
+                pvLink.message(
                     "fieldName " + fieldName
                     + " is not in record " + recordName,
                     MessageType.error);
@@ -1667,7 +1671,7 @@ public class LinkSupportFactory {
                     channelMonitor.lookForPercentageChange(dataField, deadband); break;
                 }
             }
-            String threadName = dbRecord.getRecordName() + dbLink.getFullFieldName();
+            String threadName = dbRecord.getRecordName() + pvLink.getFullFieldName();
             channelMonitor.start((ChannelMonitorNotifyRequestor)this, threadName, ScanPriority.low);
         }
     }
@@ -1679,11 +1683,11 @@ public class LinkSupportFactory {
     ChannelMonitorRequestor,
     RecordProcessRequestor
     {
-        private DBLink dbLink = null;
+        private PVLink pvLink = null;
         private DBRecord dbRecord = null;
         private String channelRequestorName = null;
         private RecordProcess recordProcess = null;
-        private DBStructure configStructure = null;       
+        private PVStructure configStructure = null;       
         
         private PVString pvnameAccess = null;
         private PVEnum monitorTypeAccess = null;
@@ -1721,13 +1725,13 @@ public class LinkSupportFactory {
         private boolean processDone;
         /**
          * Constructor for MonitorLink.
-         * @param dbLink The field for which to create support.
+         * @param pvLink The field for which to create support.
          */
-        public MonitorLink(DBLink dbLink) {
-            super(monitorLinkSupportName,dbLink);
-            this.dbLink = dbLink;
-            dbRecord = dbLink.getRecord();
-            channelRequestorName = dbRecord.getRecordName() + dbLink.getFullFieldName();
+        public MonitorLink(PVLink pvLink) {
+            super(monitorLinkSupportName,(DBData)pvLink);
+            this.pvLink = pvLink;
+            dbRecord = ((DBData)pvLink).getRecord();
+            channelRequestorName = dbRecord.getRecordName() + pvLink.getFullFieldName();
         }       
         /* (non-Javadoc)
          * @see org.epics.ioc.util.Requestor#getRequestorName()
@@ -1736,7 +1740,7 @@ public class LinkSupportFactory {
             return channelRequestorName;
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.dbProcess.Support#initialize()
+         * @see org.epics.ioc.process.Support#initialize()
          */
         public void initialize() {
             if(!super.checkSupportState(SupportState.readyForInitialize,monitorLinkSupportName)) return;
@@ -1752,7 +1756,7 @@ public class LinkSupportFactory {
             || !choices[0].equals("change")
             || !choices[1].equals("deltaChange")
             || !choices[2].equals("percentageChange") ) {
-                dbLink.message("field type is not a valid enum", MessageType.error);
+                pvLink.message("field type is not a valid enum", MessageType.error);
                 return;
             }
             deadbandAccess = super.getDouble(configStructure,"deadband");
@@ -1770,7 +1774,7 @@ public class LinkSupportFactory {
             setSupportState(SupportState.readyForStart);  
         }       
         /* (non-Javadoc)
-         * @see org.epics.ioc.dbProcess.Support#uninitialize()
+         * @see org.epics.ioc.process.Support#uninitialize()
          */
         public void uninitialize() {
             if(super.getSupportState()==SupportState.ready) {
@@ -1780,12 +1784,12 @@ public class LinkSupportFactory {
             setSupportState(SupportState.readyForInitialize);
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.dbProcess.Support#start()
+         * @see org.epics.ioc.process.Support#start()
          */
         public void start() {
             if(!super.checkSupportState(SupportState.readyForStart,monitorLinkSupportName)) return;
             if(valueData==null) {
-                dbLink.message(
+                pvLink.message(
                         "Logic Error: MonitorLink.start called before setField",
                         MessageType.fatalError);
                 setSupportState(SupportState.zombie);
@@ -1801,7 +1805,7 @@ public class LinkSupportFactory {
             }
             channel = ChannelFactory.createChannel(recordName,this, false);
             if(channel==null) {
-                dbLink.message(
+                pvLink.message(
                         "Failed to create channel for " + recordName,
                         MessageType.error);
                 setSupportState(SupportState.readyForInitialize);
@@ -1822,7 +1826,7 @@ public class LinkSupportFactory {
             onlyWhileProcessing = onlyWhileProcessingAccess.get();
             queueSize = queueSizeAccess.get();
             if(queueSize<=1) {
-                dbLink.message("queueSize being change to 2", MessageType.warning);
+                pvLink.message("queueSize being change to 2", MessageType.warning);
                 queueSize = 2;
             }
             reportOverrun = reportOverrunAccess.get();
@@ -1849,7 +1853,7 @@ public class LinkSupportFactory {
             setSupportState(SupportState.ready);
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.dbProcess.Support#stop()
+         * @see org.epics.ioc.process.Support#stop()
          */
         public void stop() {
             if(super.getSupportState()!=SupportState.ready) return;
@@ -1858,18 +1862,18 @@ public class LinkSupportFactory {
             setSupportState(SupportState.readyForStart);
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.dbProcess.LinkSupport#setField(org.epics.ioc.pvAccess.PVData)
+         * @see org.epics.ioc.process.LinkSupport#setField(org.epics.ioc.pvAccess.PVData)
          */
         public void setField(PVData data) {
             valueData = data;
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.dbProcess.LinkSupport#process(org.epics.ioc.dbProcess.LinkListener)
+         * @see org.epics.ioc.process.LinkSupport#process(org.epics.ioc.process.LinkListener)
          */
         public void process(SupportProcessRequestor supportProcessRequestor) {
             if(!super.checkSupportState(SupportState.ready,monitorLinkSupportName + ".process")) {
                 recordProcess.setStatusSeverity(
-                        dbLink.getFullFieldName() + " not ready",
+                        pvLink.getFullFieldName() + " not ready",
                         AlarmSeverity.major);
                 supportProcessRequestor.supportProcessDone(RequestResult.failure);
                 return;
@@ -1893,7 +1897,7 @@ public class LinkSupportFactory {
         }
         
         /* (non-Javadoc)
-         * @see org.epics.ioc.channelAccess.ChannelStateListener#channelStateChange(org.epics.ioc.channelAccess.Channel)
+         * @see org.epics.ioc.ca.ChannelStateListener#channelStateChange(org.epics.ioc.ca.Channel)
          */
         public void channelStateChange(Channel c,boolean isConnected) {
             assert(c==channel);
@@ -1911,7 +1915,7 @@ public class LinkSupportFactory {
             }
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.channelAccess.ChannelStateListener#disconnect(org.epics.ioc.channelAccess.Channel)
+         * @see org.epics.ioc.ca.ChannelStateListener#disconnect(org.epics.ioc.ca.Channel)
          */
         public void disconnect(Channel c) {
             dbRecord.lock();
@@ -1925,13 +1929,13 @@ public class LinkSupportFactory {
             recordProcess.start();
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.channelAccess.ChannelFieldGroupListener#accessRightsChange(org.epics.ioc.channelAccess.ChannelField)
+         * @see org.epics.ioc.ca.ChannelFieldGroupListener#accessRightsChange(org.epics.ioc.ca.ChannelField)
          */
         public void accessRightsChange(Channel channel,ChannelField channelField) {
             // nothing to do
         }        
         /* (non-Javadoc)
-         * @see org.epics.ioc.channelAccess.ChannelMonitorRequestor#dataOverrun(int)
+         * @see org.epics.ioc.ca.ChannelMonitorRequestor#dataOverrun(int)
          */
         public void dataOverrun(int number) {
             if(!reportOverrun) return;
@@ -1941,7 +1945,7 @@ public class LinkSupportFactory {
             }
             dbRecord.lock();
             try {
-                dbLink.message(
+                pvLink.message(
                     "missed " + Integer.toString(number) + " notifications",
                     MessageType.warning);
             } finally {
@@ -1950,7 +1954,7 @@ public class LinkSupportFactory {
         }                
         
         /* (non-Javadoc)
-         * @see org.epics.ioc.channelAccess.ChannelMonitorRequestor#monitorData(org.epics.ioc.channelAccess.ChannelData)
+         * @see org.epics.ioc.ca.ChannelMonitorRequestor#monitorData(org.epics.ioc.ca.ChannelData)
          */
         public void monitorData(ChannelData channelData) {
             if(isLocal) {
@@ -1970,7 +1974,7 @@ public class LinkSupportFactory {
                         continue;
                     }
                     if(field!=dataField) {
-                        dbLink.message(
+                        pvLink.message(
                                 "Logic error in MonitorLink field!=channelField",
                                 MessageType.fatalError);
                         continue;
@@ -1995,7 +1999,7 @@ public class LinkSupportFactory {
                         convert.copyStructure(linkStructureData,recordStructureData);
                         continue;
                     }
-                    dbLink.message(
+                    pvLink.message(
                             "Logic error in MonitorLink: unsupported type",
                             MessageType.fatalError);
                 }
@@ -2019,7 +2023,7 @@ public class LinkSupportFactory {
             }
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.dbProcess.RecordProcessRequestor#recordProcessComplete(org.epics.ioc.dbProcess.RequestResult)
+         * @see org.epics.ioc.process.RecordProcessRequestor#recordProcessComplete(org.epics.ioc.process.RequestResult)
          */
         public void recordProcessComplete() {
             processLock.lock();
@@ -2030,7 +2034,7 @@ public class LinkSupportFactory {
             }
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.dbProcess.RecordProcessRequestor#recordProcessResult(org.epics.ioc.util.AlarmSeverity, java.lang.String, org.epics.ioc.util.TimeStamp)
+         * @see org.epics.ioc.process.RecordProcessRequestor#recordProcessResult(org.epics.ioc.util.AlarmSeverity, java.lang.String, org.epics.ioc.util.TimeStamp)
          */
         public void recordProcessResult(RequestResult requestResult) {
             processDone = true;
@@ -2060,7 +2064,7 @@ public class LinkSupportFactory {
         private void channelStart() {
             ChannelSetFieldResult result = channel.setField(fieldName);
             if(result!=ChannelSetFieldResult.thisChannel) {
-                dbLink.message(
+                pvLink.message(
                     "fieldName " + fieldName
                     + " is not in record " + recordName,
                     MessageType.error);
@@ -2069,7 +2073,7 @@ public class LinkSupportFactory {
             dataField = channel.getChannelField();
             String errorMessage = checkCompatibility();
             if(errorMessage!=null) {
-                dbLink.message(errorMessage,MessageType.error);
+                pvLink.message(errorMessage,MessageType.error);
                 return;
             }
             channelFieldGroup = channel.createFieldGroup(this);
@@ -2096,7 +2100,7 @@ public class LinkSupportFactory {
                     severityField = null;
                 }
             }
-            String threadName = dbRecord.getRecordName() + dbLink.getFullFieldName();
+            String threadName = dbRecord.getRecordName() + pvLink.getFullFieldName();
             channelMonitor.start((ChannelMonitorRequestor)this, queueSize, threadName, ScanPriority.low);
         }
     }

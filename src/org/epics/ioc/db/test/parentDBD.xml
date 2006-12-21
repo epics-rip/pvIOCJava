@@ -1,0 +1,10 @@
+<?xml version="1.0" ?>
+<DBDefinition>
+<include addPath = "dbd" />
+<include href = "menuStructureSupport.xml" />
+<include addPath = "src/org/epics/ioc/db/test" />
+<include href = "aiDBD.xml" />
+<include href = "powerSupplyDBD.xml" />
+<include href = "allTypesDBD.xml" />
+
+</DBDefinition>

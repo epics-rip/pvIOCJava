@@ -5,7 +5,7 @@
  */
 package org.epics.ioc.util;
 
-import org.epics.ioc.pvAccess.*;
+import org.epics.ioc.pv.*;
 
 /**
  * A convenience class for a timeStamp field.
@@ -16,6 +16,7 @@ import org.epics.ioc.pvAccess.*;
  *
  */
 public class PVTimeStamp {
+    private PVStructure timeStamp;
     private PVLong secondsPastEpoch;
     private PVInt nanoSeconds;
     
@@ -27,20 +28,20 @@ public class PVTimeStamp {
      */
     public static PVTimeStamp create(PVData pvData) {
         if(pvData.getField().getType()!=Type.pvStructure) return null;
-        PVStructure structure = (PVStructure)pvData;
-        PVData[] pvDatas = structure.getFieldPVDatas();
+        PVStructure timeStamp = (PVStructure)pvData;
+        PVData[] pvDatas = timeStamp.getFieldPVDatas();
         if(pvDatas.length!=2) return null;
         PVData fieldPvData = pvDatas[0];
         Field field = fieldPvData.getField();
         if(field.getType()!=Type.pvLong) return null;
-        if(!field.getName().equals("secondsPastEpoch")) return null;
+        if(!field.getFieldName().equals("secondsPastEpoch")) return null;
         PVLong secondsPastEpoch = (PVLong)fieldPvData;
         fieldPvData = pvDatas[1];
         field = fieldPvData.getField();
         if(field.getType()!=Type.pvInt) return null;
-        if(!field.getName().equals("nanoSeconds")) return null;
+        if(!field.getFieldName().equals("nanoSeconds")) return null;
         PVInt nanoSeconds = (PVInt)fieldPvData; 
-        return new PVTimeStamp(secondsPastEpoch,nanoSeconds);
+        return new PVTimeStamp(timeStamp,secondsPastEpoch,nanoSeconds);
     }
     
     /**
@@ -57,11 +58,14 @@ public class PVTimeStamp {
      * @param timeStamp The new value.
      */
     public void put(TimeStamp timeStamp) {
+        this.timeStamp.beginPut();
         secondsPastEpoch.put(timeStamp.secondsPastEpoch);
         nanoSeconds.put(timeStamp.nanoSeconds);
+        this.timeStamp.endPut();
     }
     
-    private PVTimeStamp(PVLong secondsPastEpoch,PVInt nanoSeconds){
+    private PVTimeStamp(PVStructure timeStamp,PVLong secondsPastEpoch,PVInt nanoSeconds){
+        this.timeStamp = timeStamp;
         this.secondsPastEpoch = secondsPastEpoch;
         this.nanoSeconds = nanoSeconds;
     }

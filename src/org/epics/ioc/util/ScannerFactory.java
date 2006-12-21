@@ -9,8 +9,8 @@ import java.util.*;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 
-import org.epics.ioc.dbAccess.*;
-import org.epics.ioc.dbProcess.*;
+import org.epics.ioc.db.*;
+import org.epics.ioc.process.*;
 
 /**
  * Factory for periodic and event scanning.
@@ -61,7 +61,7 @@ public class ScannerFactory {
              }
          }
          /* (non-Javadoc)
-          * @see org.epics.ioc.dbProcess.RecordProcessRequestor#getRecordProcessRequestorName()
+          * @see org.epics.ioc.process.RecordProcessRequestor#getRecordProcessRequestorName()
           */
          public String getRequestorName() {
              return name;
@@ -74,20 +74,20 @@ public class ScannerFactory {
             dbRecord.message(message, messageType);
         }
         /* (non-Javadoc)
-          * @see org.epics.ioc.dbProcess.RecordProcessRequestor#recordProcessComplete(org.epics.ioc.dbProcess.RequestResult)
+          * @see org.epics.ioc.process.RecordProcessRequestor#recordProcessComplete(org.epics.ioc.process.RequestResult)
           */
          public void recordProcessComplete() {
              isActive = false;
          }
 
          /* (non-Javadoc)
-          * @see org.epics.ioc.dbProcess.RecordProcessRequestor#recordProcessResult(org.epics.ioc.util.AlarmSeverity, java.lang.String, org.epics.ioc.util.TimeStamp)
+          * @see org.epics.ioc.process.RecordProcessRequestor#recordProcessResult(org.epics.ioc.util.AlarmSeverity, java.lang.String, org.epics.ioc.util.TimeStamp)
           */
          public void recordProcessResult(RequestResult requestResult) {
              // nothing to do.    
          }
         /* (non-Javadoc)
-         * @see org.epics.ioc.dbProcess.RecordProcessRequestor#ready()
+         * @see org.epics.ioc.process.RecordProcessRequestor#ready()
          */
         public RequestResult ready() {
             throw new IllegalStateException("Why was this called?"); 

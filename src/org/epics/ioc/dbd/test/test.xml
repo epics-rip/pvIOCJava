@@ -1,0 +1,44 @@
+<?xml version="1.0" ?>
+<DBDefinition>
+
+<include href = "src/org/epics/ioc/dbd/test/menuStructureSupport.xml" />
+<!-- test for duplicate menu -->
+<menu name = "menuAlarmSevr">
+    <choice>none</choice>
+    <choice>minor</choice>
+    <choice>major</choice>
+    <choice>invalid</choice>
+</menu>
+
+
+<!-- test for duplicate structure -->
+<structure name = "displayLimit">
+    <field name = "low" type = "double" />
+    <field name = "high" type = "double" />
+</structure>
+
+
+<!-- test for duplicate support -->
+<linkSupport name = "outputLink" configurationStructureName = "outputLink" 
+    factoryName = "org.epics.ioc.support.LinkSupportFactory"/>
+
+<include addPath = "src/org/epics/ioc/dbd/test" />
+<include href = "recordType.xml" />
+
+
+<!-- test for duplicate recordType -->
+
+<recordType name = "aiLinearRecord">
+    <field name = "value" type = "int" >
+        <property name = "status" associatedField = "status" />
+        <property name = "severity" associatedField = "severity" />
+        <property name = "timeStamp" associatedField = ".." />
+    </field>
+    <field name = "status" type = "string" />
+    <field name = "severity" type = "menu" menuName = "menuAlarmSevr" />
+    <field name = "input" type = "link" />
+</recordType>
+    
+
+
+</DBDefinition>

@@ -1,0 +1,8 @@
+<?xml version="1.0" ?>
+<IOCDatabase>
+<include addPath = "src/org/epics/ioc/db/test" />
+<include href = "exampleAiDB.xml" />
+<include href = "examplePowerSupplyDB.xml" />
+<include href = "examplePowerSupplyArrayDB.xml" />
+<include href = "exampleAllTypeDB.xml" />
+</IOCDatabase>
