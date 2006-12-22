@@ -12,67 +12,11 @@
 
 <h1 style="text-align: center">EPICS JavaIoc: Database Access <br />
 package: org.epics.ioc.dbAcess <br />
-2006.11.14</h1>
-
-<div class="toc">
-<ul>
-  <li><a href="#Overview">Overview</a></li>
-  <li><a href="#Record">Record Instance Syntax</a>
-    <ul>
-      <li><a href="#GeneralStatements">General Statements</a>
-        <ul>
-          <li><a href="#SyntaxNamespace">namespace</a></li>
-          <li><a href="#SyntaxInclude">Include</a></li>
-          <li><a href="#SyntaxMacroSubstitution">Macro Substitution</a></li>
-          <li><a href="#ExampleIncludeMacro">Example Include and Macro
-            Substitution</a></li>
-        </ul>
-      </li>
-      <li><a href="#RecordInstance">record</a></li>
-      <li><a href="#Configure">configure</a></li>
-      <li><a href="#Primitive">Primitive Types</a></li>
-      <li><a href="#string">string</a></li>
-      <li><a href="#structure">structure</a></li>
-      <li><a href="#array">array</a></li>
-      <li><a href="#menu">menu</a></li>
-      <li><a href="#enumerated">enumerated</a></li>
-      <li><a href="#link">link</a></li>
-    </ul>
-  </li>
-  <li><a href="#Database">XML to Database Converter</a></li>
-  <li><a href="#Record1">Record Instance Access</a>
-    <ul>
-      <li><a href="#Listener">Listener Interface</a></li>
-      <li><a href="#Base">Base Interface for accessing data</a></li>
-      <li><a href="#Scalar">Scalar and String Data</a></li>
-      <li><a href="#Enumerated">Enumerated Data</a></li>
-      <li><a href="#Menu">Menu Data</a></li>
-      <li><a href="#Structure">Structure Data</a></li>
-      <li><a href="#RecordData1">RecordData</a></li>
-      <li><a href="#Link">Link Data</a></li>
-      <li><a href="#Array">Array Data</a></li>
-    </ul>
-  </li>
-  <li><a href="#Factory">Factory for creating Data Fields</a></li>
-  <li><a href="#Abstract">Abstract Classes</a>
-    <ul>
-      <li><a href="#AbstractDB">AbstractDBData</a></li>
-      <li><a href="#AbstractDB1">AbstractDBEnum</a></li>
-      <li><a href="#AbstractDB2">AbstractDBMenu</a></li>
-      <li><a href="#AbstractDB3">AbstractDBStructure</a></li>
-      <li><a href="#AbstractDB4">AbstractDBRecord</a></li>
-      <li><a href="#AbstractDB5">AbstractDBArray</a></li>
-    </ul>
-  </li>
-  <li><a href="#IOCDB1">IOCDB: IOC Database</a></li>
-  <li><a href="#Database1">IOC Database Access</a></li>
-  <li><a href="#Listener1">Listener Support</a></li>
-  <li><a href="#ThreadSafety">Thread Safety</a></li>
-</ul>
-</div>
+2006.12.21</h1>
+TABLE OF CONTENTS
 <hr />
 
-<h2 style="text-align: center" id="Overview">Overview</h2>
+<h2 style="text-align: center">Overview</h2>
 <hr />
 
 <p>An EPICS IOC contains a memory resident real time database. The real time
@@ -103,8 +47,7 @@ instances. The following is discussed:</p>
 </ol>
 <hr />
 
-<h2 style="text-align: center" id="Record"><a id="Instance"></a>Record
-Instance Syntax</h2>
+<h2 style="text-align: center">Record Instance Syntax</h2>
 <hr />
 A Record Instance file must be an XML file with a root tag of IOCDatabase:
 <pre>    &lt;?xml version="1.0" ?&gt;
@@ -112,12 +55,12 @@ A Record Instance file must be an XML file with a root tag of IOCDatabase:
       &lt;?-- valid Record Instance Definitions --&gt;
     &lt;/IOCDatabase&gt;</pre>
 
-<h3><a id="GeneralStatements"></a>General Statements</h3>
+<h3>General Statements</h3>
 
-<h4><a id="SyntaxNamespace"></a> namespace</h4>
+<h4>namespace</h4>
 At this time namespaces are not used.
 
-<h4><a id="SyntaxInclude"></a> Include</h4>
+<h4>Include</h4>
 The XML file can include other files also containing Record Instance
 Definitions. An included file must also be a valid XML Record Instance
 Definitions. Included files can also include other files. The syntax is:
@@ -136,7 +79,7 @@ Definitions. Included files can also include other files. The syntax is:
     <dd>Remove a path.</dd>
 </dl>
 
-<h4><a id="SyntaxMacroSubstitution"></a> Macro Substitution</h4>
+<h4>Macro Substitution</h4>
 
 <p>Macro substitution replaces a string of the form "${from}" with some other
 text. The syntax is:</p>
@@ -163,8 +106,7 @@ text. The syntax is:</p>
   <li>The content of any element definition.</li>
 </ol>
 
-<h4><a id="ExampleIncludeMacro"></a> Example Include and Macro
-Substitution</h4>
+<h4>Example Include and Macro Substitution</h4>
 
 <p>The following is a template file:</p>
 <pre>&lt;?xml version="1.0" ?&gt;
@@ -208,7 +150,7 @@ Substitution</h4>
 &lt;include href = "protoAiDB.xml" /&gt;
 &lt;/IOCDatabase&gt;</pre>
 
-<h3><a id="RecordInstance"></a>record</h3>
+<h3>record</h3>
 
 <p>The syntax for a record instance is:</p>
 <pre>&lt;record type = "recordType" name = "recordName" supportName = "supportName"&gt;
@@ -252,7 +194,7 @@ determines how the field is initialized.</p>
 <p>The syntax for the <span style="font-family: courier">initializer</span>
 depends on the field type.</p>
 
-<h3 id="Configure"><a id="configure" name="configure"></a>configure</h3>
+<h3>configure</h3>
 
 <p>If a supportName is defined for a record instance of for a field on a
 record instance and the support definition specifies a configuration
@@ -288,7 +230,7 @@ given before any fields of the structure. If the support is for a record
 type, the configuration must be given before any fields of the record
 instance.</p>
 
-<h3 id="Primitive"><a id="FieldPrimitive"></a>Primitive Types</h3>
+<h3>Primitive Types</h3>
 
 <p>For primitive types the initializer has the same format as the Java
 constants for the type. For example if the type for field value is double:</p>
@@ -303,13 +245,13 @@ Notes:
     specified in hex.</li>
 </ul>
 
-<h3 id="string"><a id="FieldString"></a>string</h3>
+<h3>string</h3>
 
 <p>For string types the initializer is a valid Java string constant. For
 example:</p>
 <pre>    &lt;units&gt;voltage&lt;/units&gt;</pre>
 
-<h3 id="structure"><a id="FieldStructure"></a>structure</h3>
+<h3>structure</h3>
 
 <p>Structure fields are initialized via a recursive definition of field.</p>
 
@@ -339,7 +281,7 @@ structure name. In this case the structureName must be provided when the
 field is being created. The syntax is:</p>
 <pre>    &lt;fieldName structureName = "structureName" &gt;</pre>
 
-<h3 id="array"><a id="FieldArray"></a>array</h3>
+<h3>array</h3>
 The syntax for an array initializer is:
 <pre>    &lt;fieldName capacity = "capacity" supportName = "supportName" &gt;
         &lt;value offset = "offset"&gt;value&lt;/value&gt;
@@ -407,7 +349,7 @@ style="font-family: courier;">structArray</span></p>
         &lt;/value&gt;
     &lt;/structArray&gt;</pre>
 
-<h3 id="menu"><a id="FieldMenu"></a>menu</h3>
+<h3>menu</h3>
 
 <p>A menu field is initialized as follows:</p>
 <pre>    &lt;fieldName supportName = "supportName" &gt;stringValue&lt;/fieldName&gt;</pre>
@@ -418,7 +360,7 @@ where stringValue is one of the allowed values for the menu.
 
 <p>Again supportName is optional.</p>
 
-<h3 id="enumerated"><a id="FieldEnumerated"></a>enumerated</h3>
+<h3>enumerated</h3>
 
 <p>An enumerated field is initialized as follows:</p>
 <pre>    &lt;fieldName supportName = "supportName" &gt;
@@ -444,7 +386,7 @@ where stringValue is one of the allowed values for the menu.
          oneState
     &lt;/enumExample&gt;</pre>
 
-<h3 id="link"><a id="FieldLink"></a>link</h3>
+<h3>link</h3>
 A link field is initialized as follows:
 <pre>    &lt;fieldName supportName = "supportName" &gt;
         &lt;configure structureName = "supportStructureName"&gt;
@@ -467,8 +409,7 @@ A link field is initialized as follows:
 </dl>
 <hr />
 
-<h2 style="text-align: center" id="Database"><a id="XMLToDB"></a>XML to
-Database Converter</h2>
+<h2 style="text-align: center">XML to Database Converter</h2>
 <hr />
 
 <p><span style="font-weight:bold;">NOTE</span> : To create definitions for an
@@ -525,15 +466,14 @@ made an error is generated and nothing is done. Both methods are thread
 safe.</p>
 <hr />
 
-<h2 style="text-align: center" id="Record1"><a
-id="RecordInstanceAccess"></a>Record Instance Access</h2>
+<h2 style="text-align: center">Instance Access</h2>
 <hr />
 
 <p>This section describes interfaces for acessing fields of record instances.
 These interfaces are of interest to the database, record support, link
 support, Channel Access, etc.</p>
 
-<h3 id="Listener">Listener Interface</h3>
+<h3>Listener Interface</h3>
 
 <h4>DBListener</h4>
 
@@ -606,7 +546,7 @@ AbstractDBRecord for details. The definition of RecordListener is:</p>
         public void unlisten(RecordListener listener) { }
     }</pre>
 
-<h3 id="Base">Base Interface for accessing data</h3>
+<h3>Base Interface for accessing data</h3>
 
 <p>The following is the base interface for accessing a field of a record
 instance.</p>
@@ -682,7 +622,7 @@ instance.</p>
 <p>Field is the introspection interface for pvAccess Types. DBDField is the
 introspection interface for DBTypes.</p>
 
-<h3 id="Scalar"><a id="DBPVData"></a>Scalar and String Data</h3>
+<h3>Scalar and String Data</h3>
 The following are the data interfaces for fields that have a pvAccess Type.
 <pre>    public interface DBBoolean extends DBData, PVBoolean{}
     public interface DBByte extends DBData, PVByte{}
@@ -710,11 +650,11 @@ DBData is not a PVDouble:</p>
         return data.get();
     }</pre>
 
-<h3 id="Enumerated"><a id="EnumData"></a>Enumerated Data</h3>
+<h3>Enumerated Data</h3>
 An enumerated field is accessed via the interface
 <pre>    public interface DBEnum extends DBData, PVEnum{}</pre>
 
-<h3 id="Menu"><a id="MenuData"></a>Menu Data</h3>
+<h3>Menu Data</h3>
 A menu field is accessed via the interface:
 <pre>    public interface DBMenu extends DBData, DBEnum {
         String getMenuName();
@@ -729,7 +669,7 @@ A menu field is accessed via the interface:
             menu.getIndex(),choice[index]);
     }</pre>
 
-<h3 id="Structure"><a id="StructureData"></a>Structure Data</h3>
+<h3>Structure Data</h3>
 <pre>    public interface DBStructure extends DBData, PVStructure {
          boolean createFields(DBDStructure dbdStructure);
          DBDStructure getDBDStructure();
@@ -753,7 +693,7 @@ A menu field is accessed via the interface:
     <dd>Get the index into DBData for the specified field.</dd>
 </dl>
 
-<h3 id="RecordData1"><a id="RecordData"></a>RecordData</h3>
+<h3>RecordData</h3>
 <pre>    public interface RecordStateListener {
         void newState(DBRecord dbRecord,RecordState newState);
     }
@@ -848,13 +788,13 @@ A menu field is accessed via the interface:
       iocdb.message.</dd>
 </dl>
 
-<h3 id="Link1">Link Data</h3>
+<h3>Link Data</h3>
 <pre>    public interface DBLink extends DBData {}</pre>
 
 <p>A DBLink is a link to external support. It has no data other than
 configuration data.</p>
 
-<h3 id="Array">Array Data</h3>
+<h3>Array Data</h3>
 
 <p>The base interface for array fields is:</p>
 <pre>    public interface DBArray extends DBData, PVArray {}</pre>
@@ -911,8 +851,7 @@ See pvAccess for details about how arrays are supported. The package overview
 gives an example of how to read array data.</p>
 <hr />
 
-<h2 style="text-align: center" id="Factory"><a
-id="FieldDataFactory"></a>Factory for creating Data Fields</h2>
+<h2 style="text-align: center">Factory for creating Data Fields</h2>
 <hr />
 
 <p>A factory is available that implements the interfaces for record instance
@@ -942,8 +881,7 @@ where
 </dl>
 <hr />
 
-<h2 style="text-align: center" id="Abstract"><a
-id="AbstractClasses"></a>Abstract Classes</h2>
+<h2 style="text-align: center">Abstract Classes</h2>
 <hr />
 
 <p>This section describes abstract classes for implementing the data
@@ -951,7 +889,7 @@ interface for database fields. These classes are used by FieldDataFactory and
 can also be used by code that wants to provide special implementations of
 database fields.</p>
 
-<h3 id="AbstractDB"><a id="AbstractDBData"></a>AbstractDBData</h3>
+<h3>AbstractDBData</h3>
 
 <p>Abstract base class for a scalar field. Any code that implements scalar
 fields should extend this class since it implements almost all methods except
@@ -989,7 +927,7 @@ the methods to actually get ot put data.</p>
         protected void removeListeners();
     }</pre>
 
-<h3 id="AbstractDB1"><a id="AbstractDBEnum"></a>AbstractDBEnum</h3>
+<h3>AbstractDBEnum</h3>
 
 <p>Abstract base class for an enumerated field. Any code that implements
 DBEnum should extend this class.</p>
@@ -1006,7 +944,7 @@ DBEnum should extend this class.</p>
         public String toString(int indentLevel);
     }</pre>
 
-<h3 id="AbstractDB2"><a id="AbstractDBMenu"></a>AbstractDBMenu</h3>
+<h3>AbstractDBMenu</h3>
 
 <p>Abstract base class for a menu field. Any code that implements DBMenu
 should extend this class.</p>
@@ -1025,7 +963,7 @@ should extend this class.</p>
         public String toString(int indentLevel);
     }</pre>
 
-<h3 id="AbstractDB3"><a id="AbstractDBStructure"></a>AbstractDBStructure</h3>
+<h3>AbstractDBStructure</h3>
 
 <p>Abstract base class for a structure field. Any code that implements
 DBStructure should extend this class.</p>
@@ -1048,7 +986,7 @@ DBStructure should extend this class.</p>
         public String toString(String prefix,int indentLevel)
     }</pre>
 
-<h3 id="AbstractDB4"><a id="AbstractDBRecord"></a>AbstractDBRecord</h3>
+<h3>AbstractDBRecord</h3>
 
 <p>Abstract base class for a record instance.</p>
 <pre>    public class AbstractDBRecord extends AbstractDBStructure implements DBRecord {
@@ -1080,7 +1018,7 @@ DBStructure should extend this class.</p>
         public String toString(int indentLevel);
     }</pre>
 
-<h3 id="AbstractDB5"><a id="AbstractDBArray"></a>AbstractDBArray</h3>
+<h3>AbstractDBArray</h3>
 
 <p>Abstract base class for an array field.</p>
 <pre>    public abstract class AbstractDBArray extends AbstractDBData implements DBArray
@@ -1169,8 +1107,7 @@ for a DBDoubleArray:</p>
 constructor. If the capacity is mutable, the array grows as required.</p>
 <hr />
 
-<h2 style="text-align: center" id="IOCDB1"><a id="IOCDB"></a> IOCDB: IOC
-Database</h2>
+<h2 style="text-align: center">IOCDB: IOC Database</h2>
 <hr />
 
 <p>An IOCDB is a database for a java IOC. All methods IOCDBFactory are thread
@@ -1264,8 +1201,7 @@ ReadWrite locks are used to implement thread safety.</p>
 </dl>
 <hr />
 
-<h2 style="text-align: center" id="Database1"><a id="DatabaseAccess"></a>IOC
-Database Access</h2>
+<h2 style="text-align: center">IOC Database Access</h2>
 <hr />
 <pre>    public enum AccessSetResult {
         otherRecord,
@@ -1286,7 +1222,7 @@ Database Access</h2>
     }</pre>
 <hr />
 
-<h2 style="text-align: center" id="Listener1">Listener Support</h2>
+<h2 style="text-align: center">Listener Support</h2>
 <hr />
 
 <p>The classes AbstractDBData and AbstractDBRecord provide support for
@@ -1403,7 +1339,7 @@ modifies its internal data for the field. It must call postPut even if the
 new value is the same as the old value.</p>
 <hr />
 
-<h2 style="text-align: center" id="ThreadSafety">Thread Safety</h2>
+<h2 style="text-align: center">Thread Safety</h2>
 <hr />
 The dbAccess components are designed to be used in an IOC, which is a
 multithreaded environment. The design includes:

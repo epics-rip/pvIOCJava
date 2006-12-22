@@ -13,7 +13,7 @@ package org.epics.ioc.pv;
  */
 public class IntArrayData {
     /**
-     * The PVInt[].
+     * The int[].
      * PVIntArray.get sets this value.
      * PVIntArray.put requires that the caller set the value. 
      */

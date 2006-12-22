@@ -4,40 +4,17 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
   <meta http-equiv="content-type" content="text/html; charset=iso-8859-1" />
-  <title>EPICS JavaIOC: pvAccess</title>
+  <title>EPICS JavaIOC: pv</title>
 </head>
 
 <body>
-<h1 style="text-align: center">EPICS JavaIOC: pvAccess<br />
-package: org.epics.ioc.pvAccess<br />
-2006.11.14</h1>
-
-<p><a href="#Overview">Overview</a></p>
-<ul>
-  <li><a href="#PVDescription">Process Variable</a></li>
-  <li><a href="#PVDataTypes">Process Variable Data Types</a></li>
-  <li><a href="#PVReflection">Process Variable Reflection</a></li>
-</ul>
-<a href="#Type">Type</a><br />
-<a href="#Reflection">Reflection</a><br />
-<a href="#DataAccess">Data Access</a>
-<ul>
-  <li><a href="#PrimitiveAccess">Primitive Types</a></li>
-  <li><a href="#StringAccess">String</a></li>
-  <li><a href="#EnumAccess">Enum</a></li>
-  <li><a href="#StructAccess">Structure</a></li>
-  <li><a href="#ArrayAccess">Array</a></li>
-</ul>
-<a href="#AbstractField">Abstract Field Classes</a><br />
-<a href="#Convert">Convert</a><br />
-<a href="#FieldFactory">Field Factory</a><br />
-<a href="#ConvertFactory">Convert Factory</a><br />
-
+<h1 style="text-align: center">EPICS JavaIOC: pv<br />
+package: org.epics.ioc.pv<br />
+2006.12.21</h1>
 <hr />
 
-<h1 style="text-align: center"><a id="Overview"></a>Overview</h1>
+<h2 style="text-align: center">Overview</h2>
 <hr />
-
 <p>Process Variable (PV) Data supports any data consisting of the following
 types:</p>
 <dl>
@@ -48,12 +25,18 @@ types:</p>
     <dd>A Java String.</dd>
   <dt>enum</dt>
     <dd>A enum is an array of choices and an index that selects a choice.</dd>
+  <dt>menu</dt>
+    <dd>Like an enum except that it has a menuName and the array
+     of choices can not be modified.</dd>
   <dt>structure</dt>
     <dd>A structure has a name and contains an arbitrary number of fields of
       an supported type</dd>
   <dt>array</dt>
     <dd>A one dimensional array. The element type is any of the supported
       types</dd>
+   <dt>link</dt>
+    <dd>A link has no data but can have support and an associated
+     structure of configuration information.</dd>
 </dl>
 
 <p>In addition to the Java IOC, PV data is intended for use by 1) Channel
@@ -96,9 +79,9 @@ systems, e.g. TANGO, TINI, DOOCS, etc.</p>
 
 <p>This package does not provide any facilities to create objects that
 implement the Data Interfaces. This is the responsibility of a particular
-implementation. For a javaIOC, dbAccess provides an implementation.</p>
+implementation. For a javaIOC, db provides an implementation.</p>
 
-<h2><a id="PVDescription"></a>Process Variable</h2>
+<h3>Process Variable</h3>
 
 <p>Definitions:</p>
 <dl>
@@ -126,12 +109,10 @@ follows:</p>
     <dd>status, timeStamp, and alarmSeverity.</dd>
 </dl>
 
-<h2><a id="PVDataTypes"></a>Process Variable Data Types</h2>
+<h3>Process Variable Data Types</h3>
 
 <p>The following types are supported:</p>
 <dl>
-  <dt>unknown</dt>
-    <dd>type is not known</dd>
   <dt>primitive</dt>
     <dd><dl>
         <dt>byte</dt>
@@ -154,15 +135,20 @@ follows:</p>
     <dd>A Java String</dd>
   <dt>enum</dt>
     <dd>a String array of choices and an index selecting a choice.</dd>
+  <dt>menu</dt>
+    <dd>An enum with a menuName and immutable choices.</dd>
+   <dt>link</dt>
+     <dd>No data is associated with a link but each support
+     can define a structure that contains configuration information.</dd>
   <dt>structure</dt>
-    <dd>A struture with fields of type primitive, string,enum, structure, or
-      array</dd>
+    <dd>A struture with fields of type primitive, string, enum, menu,
+        structure, or array</dd>
   <dt>array</dt>
     <dd>a one dimensional array of type primitive, string,enum, structure, or
       array</dd>
 </dl>
 
-<h2><a id="PVReflection"></a>Process Variable Reflection</h2>
+<h3>Process Variable Reflection</h3>
 
 <p>Given a PV it is possible to introspect its fields. The reflection
 interface does not provide access to data. Other interfaces, e.g. Channel
@@ -173,7 +159,7 @@ client issues an I/O request will data be available. This separation is
 especially important for arrays and structures.</p>
 <hr />
 
-<h1 style="text-align: center"><a id="Type"></a>Type</h1>
+<h2 style="text-align: center">Type</h2>
 <hr />
 
 <p>The types are defined by:</p>
@@ -185,7 +171,9 @@ especially important for arrays and structures.</p>
         pvString,
         pvEnum,
         pvStructure,
-        pvArray;
+        pvArray,
+        pvMenu,
+        pvLink;
 
         //Convenience methods
         boolean isNumeric();
@@ -194,16 +182,27 @@ especially important for arrays and structures.</p>
     }</pre>
 <hr />
 
-<h1 style="text-align: center"><a id="Reflection"></a>Reflection</h1>
+<h2 style="text-align: center">Reflection</h2>
 <hr />
 
 <p>The following provide reflection.</p>
-<pre>    interface Property {
+<pre>
+    interface Property {
         String getName(); // Property name
         String getFieldName(); // name of the field that has the property data
         String toString();
         String toString(int indentLevel);
     }
+
+    public interface FieldAttribute {
+        String getDefault();
+        boolean isReadOnly();
+        boolean isDesign();
+        boolean isLink();
+        int getAsl();
+        String toString(int indentLevel);
+    }
+
 
     interface Field{
         String getName();
@@ -217,10 +216,15 @@ especially important for arrays and structures.</p>
         void setMutable();
         String toString();
         String toString(int indentLevel);
+        FieldAttribute getFieldAttribute();
     } 
 
     interface Enum extends Field {
         boolean isChoicesMutable();
+    }
+
+    interface Menu extends Enum {
+        String getMenuName();
     }
 
     interface Structure extends Field{
@@ -229,6 +233,8 @@ especially important for arrays and structures.</p>
         Field getField(String fieldName);
         int getFieldIndex(String fieldName);
         Field[] getFields();
+        Structure copy();
+        boolean replaceField(String name,Field field);
     }
 
     interface Array extends Field{
@@ -275,15 +281,17 @@ especially important for arrays and structures.</p>
 </ul>
 <hr />
 
-<h1 style="text-align: center"><a id="DataAccess"></a>DataAccess</h1>
+<h2 style="text-align: center">DataAccess</h2>
 <hr />
 
 <p>The following is the base interface for accessing data.</p>
 <pre>    interface PVData {
+        String getFullFieldName();
+        void message(String message, MessageType messageType);
         Field getField();
+        PVData getParent();
         String getSupportName();
         String setSupportName(String name);
-        PVStructure getConfigurationStructure();
         String toString();
         String toString(int indentLevel);
     }</pre>
@@ -298,18 +306,15 @@ where
   <li>setSupportName
     <p>Set the name of the support for this field.</p>
   </li>
-  <li>getConfigurationStructure
-    <p>Get the configuration interface for the support.</p>
-  </li>
   <li>toString
     <p>Converts the field data to a string. This is mostly for debugging
     purposes.</p>
   </li>
 </ul>
 
-<p>Packages dbAccess and dbProcess allow custom support code for any field of
-any record instance of an IOC database. In order to allow the support code to
-be changed via Channel Access pvAccess provides the methods getSupportName,
+<p>Packages db and process allow custom support code for any field of any
+record instance of an IOC database. In order to allow the support code to be
+changed via Channel Access pv provides the methods getSupportName,
 setSupportName, and getConfiguration Structure. If a client has permission to
 change the support the procedure is:</p>
 <ul>
@@ -323,7 +328,7 @@ change the support the procedure is:</p>
     information.</li>
 </ul>
 
-<h2><a id="PrimitiveAccess"></a>Primitive Types</h2>
+<h3>Primitive Types</h3>
 
 <p>The interfaces for primitive data types are:</p>
 <pre>    interface PVBoolean extends PVData {
@@ -361,7 +366,7 @@ change the support the procedure is:</p>
         void put(double value);
     }</pre>
 
-<h2><a id="StringAccess"></a>String</h2>
+<h3>String</h3>
 
 <p>The interface for string is:</p>
 <pre>    interface PVString extends PVData {
@@ -369,7 +374,7 @@ change the support the procedure is:</p>
         void put(String value);
     }</pre>
 
-<h2><a id="EnumAccess"></a>Enum</h2>
+<h3>Enum</h3>
 
 <p>The interface for enum is:</p>
 <pre>    interface PVEnum extends PVData{
@@ -378,15 +383,31 @@ change the support the procedure is:</p>
         String[] getChoices();
         boolean setChoices(String[] choice);
     }</pre>
+<h3>Menu</h3>
+<p>The interface for a menu is:</p>
+<pre>
+    interface PVMenu extends PVEnum {}
+</pre>
+<h3>Menu</h3>
+<p>The interface for a link is:</p>
+<pre>
+    interface PVLink extends PVData {
+        PVStructure getConfigurationStructure();
+        boolean setConfigurationStructure(PVStructure pvStructure);
+    }
+</pre>
 
-<h2><a id="StructAccess"></a>Structure</h2>
+<h3>Structure</h3>
 
 <p>The interface for structure is:</p>
 <pre>    interface PVStructure extends PVData {
         PVData[] getFieldPVDatas();
+        boolean replaceField(String fieldName,PVData pvData);
+        void beginPut();
+        void endPut();
     }</pre>
 
-<h2><a id="ArrayAccess"></a>Array</h2>
+<h3>Array</h3>
 
 <p>The interfaces for array are:</p>
 <pre>    interface PVArray extends PVData {
@@ -395,15 +416,6 @@ change the support the procedure is:</p>
         int getCapacity();
         void setCapacity(int len);
         boolean isCapacityMutable();
-    }
-
-    public class UnknownArrayData {
-        public PVData[] data;
-        public int offset;
-    }
-    interface PVUnknownArray extends PVArray {
-        int get(int offset, int len, UnknownArrayData data);
-        int put(int offset, int len, PVData[]from, int fromOffset);
     }
 
     public class BooleanArrayData {
@@ -487,6 +499,24 @@ change the support the procedure is:</p>
         int put(int offset, int len, PVEnum[]from, int fromOffset);
     }
 
+    public class MenuArrayData {
+        public PVMenu[] data;
+        public int offset;
+    }
+    interface PVMenuArray extends PVArray {
+        int get(int offset, int len, MenuArrayData data);
+        int put(int offset, int len, PVMenu[]from, int fromOffset);
+    }
+
+    public class LinkArrayData {
+        public PVLink[] data;
+        public int offset;
+    }
+    interface PVLinkArray extends PVArray {
+        int get(int offset, int len, LinkArrayData data);
+        int put(int offset, int len, PVLink[]from, int fromOffset);
+    }
+
     public class ArrayArrayData {
         public PVArray[] data;
         public int offset;
@@ -559,8 +589,7 @@ the following reads an entire array:</p>
     } </pre>
 <hr />
 
-<h1 style="text-align: center"><a id="AbstractField"></a>Abstract Field
-Classes</h1>
+<h2 style="text-align: center">Abstract Field Classes</h2>
 <hr />
 
 <p>The following are base classes for implementimg Field objects:</p>
@@ -613,7 +642,7 @@ Classes</h1>
 instances of the reflection onterfaces.</p>
 <hr />
 
-<h1 style="text-align: center"><a id="Convert"></a>Convert</h1>
+<h2 style="text-align: center">Convert</h2>
 <hr />
 
 <p>This section describes the supported conversions between data types.</p>
@@ -700,7 +729,7 @@ can be less than <span style="font-family: courier;">len</span> if the PVData
 array contains less than len elements.
 <hr />
 
-<h1 style="text-align: center"><a id="FieldFactory"></a>Field Factory</h1>
+<h2 style="text-align: center">Field Factory</h2>
 <hr />
 
 <p>The field factory creates objects for each on the interspection
@@ -722,7 +751,7 @@ interfaces. It has the following public methods:</p>
 }</pre>
 <hr />
 
-<h1 style="text-align: center"><a id="ConvertFactory"></a>Convert Factory</h1>
+<h2 style="text-align: center">Convert Factory</h2>
 <hr />
 
 <p>The convert factory provides an implementation of the <span

@@ -14,7 +14,7 @@ package org.epics.ioc.pv;
  */
 public class DoubleArrayData {
     /**
-     * The PVDouble[].
+     * The double[].
      * PVDoubleArray.get sets this value.
      * PVDoubleArray.put requires that the caller set the value. 
      */

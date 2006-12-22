@@ -6,6 +6,7 @@
 package org.epics.ioc.pv;
 
 /**
+ * Get/put a PVLinkArray.
  * @author mrk
  *
  */

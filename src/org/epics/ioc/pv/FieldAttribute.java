@@ -6,7 +6,7 @@
 package org.epics.ioc.pv;
 
 /**
- * reflection interface for field attributes.
+ * Reflection interface for field attributes.
  * @author mrk
  *
  */

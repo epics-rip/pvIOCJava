@@ -18,6 +18,11 @@ public abstract class AbstractPVData implements PVData{
     private PVData parent;
     private String supportName = null;
        
+    /**
+     * Constructor that must be called by derived classes.
+     * @param parent The parent PVData.
+     * @param field The introspection interface for the PVData.
+     */
     protected AbstractPVData(PVData parent, Field field) {
         this.field = field;
         this.parent = parent;

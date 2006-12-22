@@ -270,12 +270,20 @@ public class ReplaceTest extends TestCase {
             String name = dbData.getRecord().getRecordName() + pvStructure.getFullFieldName();
             System.out.println("      endPut " + name);
         }
+        
         /* (non-Javadoc)
-         * @see org.epics.ioc.db.DBListener#newData(org.epics.ioc.db.DBData)
+         * @see org.epics.ioc.db.DBListener#configurationStructurePut(org.epics.ioc.pv.PVLink)
          */
-        public void newData(PVStructure pvStructure,DBData dbData) {
+        public void configurationStructurePut(PVLink pvLink) {
+            // TODO Auto-generated method stub
+            
+        }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.db.DBListener#dataPut(org.epics.ioc.db.DBData)
+         */
+        public void dataPut(DBData dbData) {
             System.out.printf(" actualField %s value %s%n",
-                dbData.getField().getFieldName(), dbData.toString());
+                    dbData.getField().getFieldName(), dbData.toString());
             System.out.printf("      TestListener recordName %s isProcessing %b%n"
                     + "      pvName %s actualFieldName %s",
                 recordName,
@@ -291,6 +299,49 @@ public class ReplaceTest extends TestCase {
             String value = dbData.toString();
             System.out.printf("    dbDataName %s value %s%n",
                 dbDataName,value);    
+        }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.db.DBListener#enumChoicesPut(org.epics.ioc.pv.PVEnum)
+         */
+        public void enumChoicesPut(PVEnum pvEnum) {
+            // TODO Auto-generated method stub
+            
+        }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.db.DBListener#enumIndexPut(org.epics.ioc.pv.PVEnum)
+         */
+        public void enumIndexPut(PVEnum pvEnum) {
+            // TODO Auto-generated method stub
+            
+        }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.db.DBListener#structurePut(org.epics.ioc.pv.PVStructure, org.epics.ioc.db.DBData)
+         */
+        public void structurePut(PVStructure pvStructure, DBData dbData) {
+            System.out.printf(" actualField %s value %s%n",
+                    dbData.getField().getFieldName(), dbData.toString());
+            System.out.printf("      TestListener recordName %s isProcessing %b%n"
+                    + "      pvName %s actualFieldName %s",
+                recordName,
+                isProcessing,
+                pvName,
+                actualFieldName);
+            String dbDataName = dbData.getField().getFieldName();
+            PVData parent = dbData.getParent();
+            while(parent!=dbData.getRecord()) {
+                dbDataName = parent.getField().getFieldName() + "." + dbDataName;
+                parent = parent.getParent();
+            }
+            String value = dbData.toString();
+            System.out.printf("    dbDataName %s value %s%n",
+                dbDataName,value);    
+        }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.db.DBListener#supportNamePut(org.epics.ioc.db.DBData)
+         */
+        public void supportNamePut(DBData dbData) {
+            // TODO Auto-generated method stub
+            
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.db.DBListener#unlisten(org.epics.ioc.db.RecordListener)

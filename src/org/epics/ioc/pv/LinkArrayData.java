@@ -6,6 +6,9 @@
 package org.epics.ioc.pv;
 
 /**
+ * Class required by get/put PVLinkArray methods.
+ * Get will set data and offset.
+ * Put requires that the caller set data and offset.
  * @author mrk
  *
  */

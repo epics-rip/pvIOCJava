@@ -6,10 +6,12 @@
 package org.epics.ioc.pv;
 
 /**
+ * Base class for creating a Field.
+ * It can also be a complete implementation.
  * @author mrk
  *
  */
-public class AbstractField implements Field
+public class FieldBase implements Field
 {
     private static String indentString = "    ";
     private Field parent;
@@ -21,13 +23,13 @@ public class AbstractField implements Field
     private FieldAttribute fieldAttribute;
 
     /**
-     * Constructor for AbstractField.
+     * Constructor for FieldBase.
      * @param name The field name.
      * @param type The field type.
      * @param property An array of properties for the field.
      * @param fieldAttribute The field attributes.
      */
-    public AbstractField(String name, Type type,Property[] property,FieldAttribute fieldAttribute) {
+    public FieldBase(String name, Type type,Property[] property,FieldAttribute fieldAttribute) {
         this.name = name;
         this.type = type;
         if(property==null) property = new Property[0];
@@ -45,13 +47,13 @@ public class AbstractField implements Field
         for (int i=0; i <indentLevel; i++) builder.append(indentString);
     }    
     /* (non-Javadoc)
-     * @see org.epics.ioc.pvAccess.Field#getName()
+     * @see org.epics.ioc.pv.Field#getName()
      */
     public String getFieldName() {
         return(name);
     }
     /* (non-Javadoc)
-     * @see org.epics.ioc.pvAccess.Field#getParent()
+     * @see org.epics.ioc.pv.Field#getParent()
      */
     public Field getParent() {
         return parent;
@@ -64,13 +66,13 @@ public class AbstractField implements Field
         parent = field;
     }
     /* (non-Javadoc)
-     * @see org.epics.ioc.pvAccess.Field#getPropertys()
+     * @see org.epics.ioc.pv.Field#getPropertys()
      */
     public Property[] getPropertys() {
         return property;
     }
     /* (non-Javadoc)
-     * @see org.epics.ioc.pvAccess.Field#getProperty(java.lang.String)
+     * @see org.epics.ioc.pv.Field#getProperty(java.lang.String)
      */
     public Property getProperty(String propertyName) {
         for(int i=0; i<property.length; i++) {
@@ -79,32 +81,32 @@ public class AbstractField implements Field
         return null;
     }
     /* (non-Javadoc)
-     * @see org.epics.ioc.pvAccess.Field#getType()
+     * @see org.epics.ioc.pv.Field#getType()
      */
     public Type getType() {
         return type;
     }   
     /* (non-Javadoc)
-     * @see org.epics.ioc.pvAccess.Field#getSupportName()
+     * @see org.epics.ioc.pv.Field#getSupportName()
      */
     public String getSupportName() {
         return supportName;
     }
     /* (non-Javadoc)
-     * @see org.epics.ioc.pvAccess.Field#setSupportName(java.lang.String)
+     * @see org.epics.ioc.pv.Field#setSupportName(java.lang.String)
      */
     public void setSupportName(String name) {
         this.supportName = name;
     }
 
     /* (non-Javadoc)
-     * @see org.epics.ioc.pvAccess.Field#isMutable()
+     * @see org.epics.ioc.pv.Field#isMutable()
      */
     public boolean isMutable() {
         return(isMutable);
     }
     /* (non-Javadoc)
-     * @see org.epics.ioc.pvAccess.Field#setMutable(boolean)
+     * @see org.epics.ioc.pv.Field#setMutable(boolean)
      */
     public void setMutable(boolean value) {
         isMutable = value;
@@ -121,7 +123,7 @@ public class AbstractField implements Field
      */
     public String toString() { return getString(0);}
     /* (non-Javadoc)
-     * @see org.epics.ioc.pvAccess.Field#toString(int)
+     * @see org.epics.ioc.pv.Field#toString(int)
      */
     public String toString(int indentLevel) {
         return getString(indentLevel);

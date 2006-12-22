@@ -13,7 +13,7 @@ package org.epics.ioc.pv;
  */
 public class FloatArrayData {
     /**
-     * The PVFloat[].
+     * The float[].
      * PVFloatArray.get sets this value.
      * PVFloatArray.put requires that the caller set the value. 
      */

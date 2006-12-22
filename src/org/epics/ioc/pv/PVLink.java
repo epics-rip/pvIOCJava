@@ -6,6 +6,7 @@
 package org.epics.ioc.pv;
 
 /**
+ * Interface for link data.
  * @author mrk
  *
  */

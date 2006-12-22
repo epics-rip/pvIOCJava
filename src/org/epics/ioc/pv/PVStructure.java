@@ -6,7 +6,6 @@
 package org.epics.ioc.pv;
 
 /**
- * get the PVData for the structure fields.
  * @author mrk
  *
  */

@@ -8,6 +8,7 @@ import org.epics.ioc.dbd.*;
 import org.epics.ioc.pv.*;
 import org.epics.ioc.pv.Enum;
 
+import java.util.Iterator;
 import java.util.regex.Pattern;
 
 /**
@@ -114,70 +115,12 @@ public class FieldDataFactory {
     private static Pattern primitivePattern = Pattern.compile("[, ]");
 
 
-    private static class LinkData extends AbstractDBData implements PVLink {
-        private PVStructure configDBStructure = null;
+    private static class LinkData extends DBLinkBase {
         
         private LinkData(DBData parent,Field field) {
             super(parent,field);
         }
         
-        /* (non-Javadoc)
-         * @see org.epics.ioc.db.AbstractDBData#setSupportName(java.lang.String)
-         */
-        public String setSupportName(String name) {
-            DBD dbd = getRecord().getDBD();
-            if(dbd==null) return "DBD was not set";
-            DBDLinkSupport dbdLinkSupport = dbd.getLinkSupport(name);
-            if(dbdLinkSupport==null) return "support " + name + " not defined";
-            super.setSupportName(name);
-            String configurationStructureName = dbdLinkSupport.getConfigurationStructureName();
-            if(configurationStructureName==null) return null;
-            DBDStructure dbdStructure = dbd.getStructure(configurationStructureName);
-            if(dbdStructure==null) {
-                return "configurationStructure " + configurationStructureName
-                    + " for support " + name
-                    + " does not exist";
-            }
-            Field field =DBDFieldFactory.createStructureField(
-                name, null,dbdStructure.getFieldAttribute(), dbdStructure,dbd);
-            configDBStructure  = (PVStructure)FieldDataFactory.createData(this,field);
-            return null;
-        }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.pv.PVLink#getConfigurationStructure()
-         */
-        public PVStructure getConfigurationStructure() {
-            return configDBStructure;
-        }
-        
-        /* (non-Javadoc)
-         * @see org.epics.ioc.pv.PVLink#setConfigurationStructure(org.epics.ioc.pv.PVStructure)
-         */
-        public boolean setConfigurationStructure(PVStructure pvStructure) {
-            if(configDBStructure==null) return false;
-            if(!convert.isCopyStructureCompatible(
-            (Structure)pvStructure.getField(),
-            (Structure)configDBStructure.getField())) {
-                return false;
-            }
-            convert.copyStructure(pvStructure, configDBStructure);
-            return true;
-        }
-
-        public String toString() {
-            return toString(0);
-        }
-
-        public String toString(int indentLevel) {
-            StringBuilder builder = new StringBuilder();
-            builder.append(convert.getString(this, indentLevel));
-            builder.append(super.toString(indentLevel));
-            if(configDBStructure!=null) {
-                builder.append(configDBStructure.toString(indentLevel));
-            }
-            return builder.toString();
-        }
-
     }
 
     private static class BooleanData extends AbstractDBData

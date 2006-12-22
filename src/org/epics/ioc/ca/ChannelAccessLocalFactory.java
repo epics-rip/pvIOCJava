@@ -1255,6 +1255,66 @@ public class ChannelAccessLocalFactory  {
             }
            
             
+            /* (non-Javadoc)
+             * @see org.epics.ioc.db.DBListener#configurationStructurePut(org.epics.ioc.pv.PVLink)
+             */
+            public void configurationStructurePut(PVLink pvLink) {
+                // TODO Auto-generated method stub
+                
+            }
+
+            /* (non-Javadoc)
+             * @see org.epics.ioc.db.DBListener#dataPut(org.epics.ioc.db.DBData)
+             */
+            public void dataPut(DBData dbData) {
+                if(!isActive) return;
+                if(onlyWhileProcesing && !processActive) return;
+                ChannelField channelField = monitor.newData(dbData);
+                if(channelField==null) return;                
+                if(channelMonitorRequestor!=null) {
+                    if(channelData!=null) channelData.add(dbData);
+                }                    
+                if(!processActive) notifyRequestor();
+            }
+
+            /* (non-Javadoc)
+             * @see org.epics.ioc.db.DBListener#enumChoicesPut(org.epics.ioc.pv.PVEnum)
+             */
+            public void enumChoicesPut(PVEnum pvEnum) {
+                // TODO Auto-generated method stub
+                
+            }
+
+            /* (non-Javadoc)
+             * @see org.epics.ioc.db.DBListener#enumIndexPut(org.epics.ioc.pv.PVEnum)
+             */
+            public void enumIndexPut(PVEnum pvEnum) {
+                // TODO Auto-generated method stub
+                
+            }
+
+            /* (non-Javadoc)
+             * @see org.epics.ioc.db.DBListener#structurePut(org.epics.ioc.pv.PVStructure, org.epics.ioc.db.DBData)
+             */
+            public void structurePut(PVStructure pvStructure, DBData dbData) {
+                if(!isActive) return;
+                if(onlyWhileProcesing && !processActive) return;
+                ChannelField channelField = monitor.newData(dbData);
+                if(channelField==null) return;                
+                if(channelMonitorRequestor!=null) {
+                    if(channelData!=null) channelData.add(dbData);
+                }                    
+                if(!processActive) notifyRequestor();
+            }
+
+            /* (non-Javadoc)
+             * @see org.epics.ioc.db.DBListener#supportNamePut(org.epics.ioc.db.DBData)
+             */
+            public void supportNamePut(DBData dbData) {
+                // TODO Auto-generated method stub
+                
+            }
+
             private void notifyRequestor() {
                 boolean monitorOccured = false;
                 List<MonitorField> list = monitor.getMonitorFieldList();

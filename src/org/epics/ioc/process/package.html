@@ -10,62 +10,11 @@
 <body>
 <h1 style="text-align: center">EPICS JavaIOC: dbProcess<br />
 package: org.epics.ioc.dbProcess<br />
-2006.11.15</h1>
-
-<div class="toc">
-<ul>
-  <li><a href="#Overview">Overview</a></li>
-  <li><a href="#Record">Record Processing: Theory of Operation</a>
-    <ul>
-      <li><a href="#Definition">Definitions</a></li>
-      <li><a href="#Requestor">Requestor Examples</a></li>
-      <li><a href="#Overview1">Overview</a></li>
-      <li><a href="#Local">Local Channel Access Example</a></li>
-      <li><a href="#Link">Link Support Example</a></li>
-      <li><a href="#Support">Support State</a></li>
-      <li><a href="#Locking">Locking</a></li>
-    </ul>
-  </li>
-  <li><a href="#Record1">Record Process</a>
-    <ul>
-      <li><a href="#Definition1">Definitions</a></li>
-      <li><a href="#RecordProc">RecordProcess - General Purpose
-      Methods</a></li>
-      <li><a href="#RecordProc1">RecordProcess - Record Lifetime
-      Methods.</a></li>
-      <li><a href="#RecordProc2">RecordProcess - Record Process Requestor
-        Methods</a></li>
-      <li><a href="#RecordProc3">RecordProcess - Support Processing
-        methods.</a></li>
-      <li><a href="#RecordProc4">RecordProcessRequestor</a></li>
-      <li><a href="#ProcessCal">ProcessCallbackRequestor</a></li>
-      <li><a href="#ProcessCon">ProcessContinueRequestor</a></li>
-      <li><a href="#SupportPro">SupportProcessRequestor</a></li>
-      <li><a href="#RecordProc5">RecordProcessFactory</a></li>
-    </ul>
-  </li>
-  <li><a href="#Support1">Support</a>
-    <ul>
-      <li><a href="#Definition2">Definitions</a></li>
-      <li><a href="#Support2">Support</a></li>
-      <li><a href="#SupportSta">SupportState</a></li>
-      <li><a href="#LinkSuppor">LinkSupport</a></li>
-      <li><a href="#AbstractSu">AbstractSupport</a></li>
-    </ul>
-  </li>
-  <li><a href="#Support3">Support Creation</a>
-    <ul>
-      <li><a href="#Definition3">Definitions:</a></li>
-      <li><a href="#Support4">Support Creation</a></li>
-      <li><a href="#Factory">Factory</a></li>
-    </ul>
-  </li>
-  <li><a href="#Local1">Local Channel Access</a></li>
-</ul>
-</div>
+2006.12.21</h1>
+TABLE OF CONTENTS
 <hr />
 
-<h2 style="text-align: center" id="Overview">Overview</h2>
+<h2 style="text-align: center">Overview</h2>
 <hr />
 
 <p>This package provides support for processing IOC database records. It has
@@ -124,10 +73,9 @@ notified about process or support events:</p>
 </dl>
 <hr />
 
-<h2 style="text-align: center" id="Record">Record Processing: Theory of
-Operation</h2>
+<h2 style="text-align: center">Record Processing: Theory of Operation</h2>
 
-<h3 id="Definition">Definitions</h3>
+<h3>Definitions</h3>
 <dl>
   <dt>synchronous</dt>
     <dd>Code that does not block, i.e. does not perform actions like waiting
@@ -165,7 +113,7 @@ Operation</h2>
       code must be implemented carefully.</dd>
 </dl>
 
-<h3 id="Requestor">Requestor Examples</h3>
+<h3>Requestor Examples</h3>
 <dl>
   <dt>Local Channel Access</dt>
     <dd>An example is a channel access server that is accessing IOC database.
@@ -201,7 +149,7 @@ Operation</h2>
     </dd>
 </dl>
 
-<h3 id="Overview1">Overview</h3>
+<h3>Overview</h3>
 
 <p>A record is processed via a call to RecordProcess.process. It in turn
 calls the record support process method. Record support optionally calls the
@@ -314,7 +262,7 @@ subfield of the record.</p>
   </li>
 </ul>
 
-<h3 id="Local">Local Channel Access Example</h3>
+<h3>Local Channel Access Example</h3>
 
 <p>As an example assume that a channel access server does the following to a
 record:</p>
@@ -339,7 +287,7 @@ record:</p>
   <li>The server calls recordSupport.setInactive.</li>
 </ul>
 
-<h3 id="Link">Link Support Example</h3>
+<h3>Link Support Example</h3>
 
 <p>As an example assume that a record type double has the following
 fields:</p>
@@ -443,7 +391,7 @@ following happens:</p>
   </li>
 </ul>
 
-<h3 id="Support">Support State</h3>
+<h3>Support State</h3>
 
 <p>Before support is ready for processing it must be ready. In addition
 on-line add and delete is supported. Thus it is possible to dynamically
@@ -462,7 +410,7 @@ Start completes all initialization including linking to the outside, e.g. to
 other records. Stop must remove all access to the outside. Uninitialize must
 remove all access to the record instance being supported.</p>
 
-<h3 id="Locking">Locking</h3>
+<h3>Locking</h3>
 
 <p>The locking strategy is based on the following:</p>
 <ul>
@@ -504,10 +452,10 @@ try {
 <p></p>
 <hr />
 
-<h2 style="text-align: center;" id="Record1">Record Process</h2>
+<h2 style="text-align: center;">Record Process</h2>
 <hr />
 
-<h3 id="Definition1">Definitions</h3>
+<h3>Definitions</h3>
 
 <p>The following are the interfaces for record processing:</p>
 <pre>    public interface RecordProcess {
@@ -576,7 +524,7 @@ falls into one of the following classes:</p>
     code that implements record processing.</li>
 </ol>
 
-<h3 id="RecordProc">RecordProcess - General Purpose Methods</h3>
+<h3>RecordProcess - General Purpose Methods</h3>
 <dl>
   <dt style="font-family: courier;">isDisabled</dt>
     <dd>Is the record disabled?</dd>
@@ -593,7 +541,7 @@ falls into one of the following classes:</p>
       dbRecord.message whenever any processing related method is called.</dd>
 </dl>
 
-<h3 id="RecordProc1">RecordProcess - Record Lifetime Methods.</h3>
+<h3>RecordProcess - Record Lifetime Methods.</h3>
 <dl>
   <dt style="font-family: courier;">initialize</dt>
     <dd>Initialize record support. record support, in turn, initializes
@@ -618,7 +566,7 @@ falls into one of the following classes:</p>
       style="font-family: courier;">SupportState.readyForInitialize.</span></dd>
 </dl>
 
-<h3 id="RecordProc2">RecordProcess - Record Process Requestor Methods</h3>
+<h3>RecordProcess - Record Process Requestor Methods</h3>
 
 <p>These are methods called by code that wants a record processed.</p>
 <dl>
@@ -675,7 +623,7 @@ falls into one of the following classes:</p>
       the record is unlocked but before it becomes inactive.</dd>
 </dl>
 
-<h3 id="RecordProc3">RecordProcess - Support Processing methods.</h3>
+<h3>RecordProcess - Support Processing methods.</h3>
 
 <p>Methods called by support code which may be record support or support
 called directly or indirectly by record support. Except for <span
@@ -714,7 +662,7 @@ style="font-family: courier;">processContinue</span> is running.</p>
       style="font-family: courier;">setTimeStamp</span></dd>
 </dl>
 
-<h3 id="RecordProc4">RecordProcessRequestor</h3>
+<h3>RecordProcessRequestor</h3>
 
 <p>Methods implemented by code that requests that a record be processed.</p>
 <dl>
@@ -730,7 +678,7 @@ style="font-family: courier;">processContinue</span> is running.</p>
       <span style="font-family: courier;">setInactive.</span></dd>
 </dl>
 
-<h3 id="ProcessCal">ProcessCallbackRequestor</h3>
+<h3>ProcessCallbackRequestor</h3>
 
 <p>The method implemented by code that calls requestProcessCallback.</p>
 <dl>
@@ -741,7 +689,7 @@ style="font-family: courier;">processContinue</span> is running.</p>
       unlocked.</dd>
 </dl>
 
-<h3 id="ProcessCon">ProcessContinueRequestor</h3>
+<h3>ProcessContinueRequestor</h3>
 
 <p>The method implemented by code that calls processContinue.</p>
 <dl>
@@ -750,7 +698,7 @@ style="font-family: courier;">processContinue</span> is running.</p>
       way asynchronous support should continue processing.</dd>
 </dl>
 
-<h3 id="SupportPro">SupportProcessRequestor</h3>
+<h3>SupportProcessRequestor</h3>
 
 <p>The method implemented by code that calls the process method of any
 support code.</p>
@@ -762,7 +710,7 @@ support code.</p>
       processContinue running.</dd>
 </dl>
 
-<h3 id="RecordProc5">RecordProcessFactory</h3>
+<h3>RecordProcessFactory</h3>
 
 <p>A factory is provided to create an instance of RecordProcess for a record
 instance. It has the method:</p>
@@ -771,10 +719,10 @@ instance. It has the method:</p>
 }</pre>
 <hr />
 
-<h2 style="text-align: center;" id="Support1">Support</h2>
+<h2 style="text-align: center;">Support</h2>
 <hr />
 
-<h3 id="Definition2">Definitions</h3>
+<h3>Definitions</h3>
 
 <p>The following are used by support code, i.e. record support, link support,
 and any other support code that is involved with record processing:</p>
@@ -835,7 +783,7 @@ and any other support code that is involved with record processing:</p>
             DBStructure configStructure,String fieldName)
     }</pre>
 
-<h3 id="Support2">Support</h3>
+<h3>Support</h3>
 
 <p><span style="font-family: courier;">Support</span> has the methods:</p>
 <dl>
@@ -864,7 +812,7 @@ and any other support code that is involved with record processing:</p>
     <dd>Process.</dd>
 </dl>
 
-<h3 id="SupportSta">SupportState</h3>
+<h3>SupportState</h3>
 
 <p><span style="font-family: courier;">SupportState</span> has the following
 values:</p>
@@ -881,7 +829,7 @@ values:</p>
     <dd>Support is going away.</dd>
 </dl>
 
-<h3 id="LinkSuppor">LinkSupport</h3>
+<h3>LinkSupport</h3>
 
 <p><span style="font-family: courier;">LinkSupport</span> extends <span
 style="font-family: courier;">Support</span> with the method:</p>
@@ -891,7 +839,7 @@ style="font-family: courier;">Support</span> with the method:</p>
       put/get data.</dd>
 </dl>
 
-<h3 id="AbstractSu">AbstractSupport</h3>
+<h3>AbstractSupport</h3>
 
 <p>All support code should extend AbstractSupport.</p>
 <dl>
@@ -961,13 +909,13 @@ style="font-family: courier;">Support</span> with the method:</p>
 </dl>
 <hr />
 
-<h2 style="text-align: center;" id="Support3">Support Creation</h2>
+<h2 style="text-align: center;">Support Creation</h2>
 <hr />
 
 <p>This is called to create all support for all fields of all records in the
 IOC database passed to createSupportCreation.</p>
 
-<h3 id="Definition3">Definitions:</h3>
+<h3>Definitions:</h3>
 <pre>    public interface SupportCreation {
         boolean createSupport();
         boolean initializeSupport();
@@ -981,7 +929,7 @@ IOC database passed to createSupportCreation.</p>
             IOCDB iocdb,MessageListener messageListener)
     }</pre>
 
-<h3 id="Support4">Support Creation</h3>
+<h3>Support Creation</h3>
 
 <p>SupportCreation has the methods:</p>
 <dl>
@@ -1000,7 +948,7 @@ IOC database passed to createSupportCreation.</p>
     <dd>Stop the support.</dd>
 </dl>
 
-<h3 id="Factory">Factory</h3>
+<h3>Factory</h3>
 
 <p>SupportCreationFactory has the method:</p>
 <dl>
@@ -1008,7 +956,7 @@ IOC database passed to createSupportCreation.</p>
     <dd>Create a SupportCreation database.</dd>
 </dl>
 
-<h2 style="text-align: center;" id="Local1">Local Channel Access</h2>
+<h2 style="text-align: center;">Local Channel Access</h2>
 <hr />
 
 <p>An implementation of a channel access client for accessing records in the

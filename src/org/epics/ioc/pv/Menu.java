@@ -6,6 +6,7 @@
 package org.epics.ioc.pv;
 
 /**
+ * Menu interface.
  * @author mrk
  *
  */

@@ -95,7 +95,7 @@ public abstract class AbstractDBStructure extends AbstractDBData
             Iterator<RecordListener> iter = dbData.listenerList.iterator();
             while(iter.hasNext()) {
                 RecordListener listener = iter.next();
-                listener.endPut((PVStructure)dbData);
+                listener.getDBListener().endPut((PVStructure)dbData);
             }
             DBData parent = (DBData)dbData.getParent();
             if(parent==dbData) {
@@ -114,7 +114,7 @@ public abstract class AbstractDBStructure extends AbstractDBData
             Iterator<RecordListener> iter = dbData.listenerList.iterator();
             while(iter.hasNext()) {
                 RecordListener listener = iter.next();
-                listener.beginPut((PVStructure)dbData);
+                listener.getDBListener().beginPut((PVStructure)dbData);
             }
             DBData parent = (DBData)dbData.getParent();
             if(parent==dbData) {

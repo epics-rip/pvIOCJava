@@ -10,10 +10,12 @@ import java.util.Collections;
 import java.util.List;
 
 /**
+ * Base interface for a Structure.
+ * It is also a complete implementation.
  * @author mrk
  *
  */
-public class AbstractStructure extends AbstractField implements Structure {
+public class StructureBase extends FieldBase implements Structure {
     private Field[] field;
     private String[] fieldName;
     private String structureName;
@@ -29,7 +31,7 @@ public class AbstractStructure extends AbstractField implements Structure {
      * @param structureName The structure name.
      * @param field The array of field definitions for the fields of the structure.
      */
-    public AbstractStructure(String name,Property[] property,FieldAttribute fieldAttribute,String structureName,Field[] field)
+    public StructureBase(String name,Property[] property,FieldAttribute fieldAttribute,String structureName,Field[] field)
     {
         super(name, Type.pvStructure,property,fieldAttribute);
         if(property!=null) for(Property prop : property) {
@@ -60,7 +62,7 @@ public class AbstractStructure extends AbstractField implements Structure {
         }
         fieldIndex = new int[field.length];
         for(int i=0; i<field.length; i++) {
-            AbstractField childField = (AbstractField)field[i];
+            FieldBase childField = (FieldBase)field[i];
             childField.setParent(this);
             String value = sortedFieldNameList.get(i);
             for(int j=0; j<field.length; j++) {
@@ -71,7 +73,7 @@ public class AbstractStructure extends AbstractField implements Structure {
         }
    }
     /* (non-Javadoc)
-     * @see org.epics.ioc.pvAccess.Structure#getField(java.lang.String)
+     * @see org.epics.ioc.pv.Structure#getField(java.lang.String)
      */
     public Field getField(String name) {
         int i = Collections.binarySearch(sortedFieldNameList,name);
@@ -82,7 +84,7 @@ public class AbstractStructure extends AbstractField implements Structure {
     }
 
     /* (non-Javadoc)
-     * @see org.epics.ioc.pvAccess.Structure#getFieldIndex(java.lang.String)
+     * @see org.epics.ioc.pv.Structure#getFieldIndex(java.lang.String)
      */
     public int getFieldIndex(String name) {
         int i = Collections.binarySearch(sortedFieldNameList,name);
@@ -91,21 +93,21 @@ public class AbstractStructure extends AbstractField implements Structure {
     }
 
     /* (non-Javadoc)
-     * @see org.epics.ioc.pvAccess.Structure#getFieldNames()
+     * @see org.epics.ioc.pv.Structure#getFieldNames()
      */
     public String[] getFieldNames() {
         return fieldName;
     }
 
     /* (non-Javadoc)
-     * @see org.epics.ioc.pvAccess.Structure#getFields()
+     * @see org.epics.ioc.pv.Structure#getFields()
      */
     public Field[] getFields() {
         return field;
     }
 
     /* (non-Javadoc)
-     * @see org.epics.ioc.pvAccess.Structure#getStructureName()
+     * @see org.epics.ioc.pv.Structure#getStructureName()
      */
     public String getStructureName() {
         return structureName;
@@ -117,7 +119,7 @@ public class AbstractStructure extends AbstractField implements Structure {
     public Structure copy() {
         Field[] newFields = new Field[field.length];
         for(int i=0; i<field.length; i++) newFields[i] = field[i];
-        AbstractStructure structure = new AbstractStructure(
+        StructureBase structure = new StructureBase(
             super.getFieldName(),null,super.getFieldAttribute(),structureName,newFields);
         structure.replaceOK = true;
         return structure;
@@ -141,7 +143,7 @@ public class AbstractStructure extends AbstractField implements Structure {
     public String toString() { return getString(0);}
 
     /* (non-Javadoc)
-     * @see org.epics.ioc.pvAccess.Field#toString(int)
+     * @see org.epics.ioc.pv.Field#toString(int)
      */
     public String toString(int indentLevel) {
         return getString(indentLevel);

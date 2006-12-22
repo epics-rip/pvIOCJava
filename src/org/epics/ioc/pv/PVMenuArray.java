@@ -6,6 +6,7 @@
 package org.epics.ioc.pv;
 
 /**
+ * Get/put an aray of menus.
  * @author mrk
  *
  */

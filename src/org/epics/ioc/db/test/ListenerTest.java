@@ -56,11 +56,15 @@ public class ListenerTest extends TestCase {
 //        }
         System.out.printf("%ntest put and listen exampleAi%n");
         new TestListener(iocdb,"exampleAi","value");
+        new TestListener(iocdb,"exampleAi","priority");
         new TestListener(iocdb,"exampleAi","input");
         new TestListener(iocdb,"exampleAi",null);
+        new TestListener(iocdb,"exampleAi","input.aiRaw.input");
+        testPut(iocdb,"exampleAi","priority",2.0);
         testPut(iocdb,"exampleAi","rawValue",2.0);
         testPut(iocdb,"exampleAi","value",5.0);
         testPut(iocdb,"exampleAi","timeStamp",100.0);
+        testPut(iocdb,"exampleAi","input.aiRaw.input",1.0);
         System.out.printf("%ntest put and listen examplePowerSupply%n");
         new TestListener(iocdb,"examplePowerSupply","power");
         new TestListener(iocdb,"examplePowerSupply","current");
@@ -94,14 +98,13 @@ public class ListenerTest extends TestCase {
     
     private static class TestListener implements DBListener{ 
         private RecordListener listener;
-        private String recordName;
         private String pvName = null;
         private String actualFieldName = null;
         private boolean isProcessing = false;
         private boolean changeOccured;
+        private String fullName = null;
         
         TestListener(IOCDB iocdb,String recordName,String pvName) {
-            this.recordName = recordName;
             this.pvName = pvName;
             DBAccess dbAccess = iocdb.createAccess(recordName);
             if(dbAccess==null) {
@@ -114,10 +117,12 @@ public class ListenerTest extends TestCase {
             } else {
                 if(dbAccess.setField(pvName)!=AccessSetResult.thisRecord){
                     System.out.printf("name %s not in record %s%n",pvName,recordName);
+                    System.out.printf("%s\n",dbAccess.getDbRecord().toString());
                     return;
                 }
                 dbData = dbAccess.getField();
                 actualFieldName = dbData.getField().getFieldName();
+                fullName = dbData.getRecord().getRecordName() + dbData.getFullFieldName();
             }
             listener = dbData.getRecord().createListener(this);
             dbData.addListener(listener);
@@ -129,23 +134,31 @@ public class ListenerTest extends TestCase {
                 }
             }
         }
+        
+        private void putCommon(String message) {
+            System.out.printf("%s %s isProcessing %b pvName %s actualFieldName %s%n",
+                message,
+                fullName,
+                isProcessing,
+                pvName,
+                actualFieldName);
+        }
         /* (non-Javadoc)
          * @see org.epics.ioc.dbAccess.DBListener#beginProcess()
          */
         public void beginProcess() {
-            System.out.printf("TestListener start processing pvName %s%n",pvName);
             isProcessing = true;
             changeOccured = false;
+            putCommon("beginProcess");
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.dbAccess.DBListener#endProcess()
          */
         public void endProcess() {
-          System.out.printf("TestListener end processing pvName %s changeOccured %b%n",pvName,changeOccured);
-          isProcessing = false;
-      }
-
-
+            putCommon("endProcess changeOccured " + Boolean.toString(changeOccured));
+            isProcessing = false;
+            changeOccured = false;
+        }
         /* (non-Javadoc)
          * @see org.epics.ioc.db.DBListener#beginPut(org.epics.ioc.pv.PVStructure)
          */
@@ -163,27 +176,78 @@ public class ListenerTest extends TestCase {
             System.out.println("endPut " + name);
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.dbAccess.DBListener#newData(org.epics.ioc.dbAccess.DBData)
+         * @see org.epics.ioc.db.DBListener#configurationStructurePut(org.epics.ioc.pv.PVLink)
          */
-        public void newData(PVStructure pvStructure,DBData dbData) {
-            if(pvStructure!=null)
-            changeOccured = true;
-            System.out.printf("%s isProcessing %b"
-                    + " pvName %s actualFieldName %s%n",
-                recordName,
-                isProcessing,
-                pvName,
-                actualFieldName);
-            String recordName = dbData.getRecord().getRecordName();
-            String dbDataName = recordName + dbData.getFullFieldName();
-            System.out.printf("    %s = %s%n",
-                dbDataName,dbData.toString(2));
-            if(pvStructure!=null) {
-                String structureName = recordName + pvStructure.getFullFieldName();
-                System.out.printf("    structure is %s%n",structureName);
+        public void configurationStructurePut(PVLink pvLink) {
+            putCommon("configurationStructurePut");
+            String recordName = ((DBData)pvLink).getRecord().getRecordName();
+            String name = recordName + pvLink.getFullFieldName();
+            if(!name.equals(fullName)) {
+                System.out.printf("%s NOT_EQUAL %s%n",name,fullName);
             }
+            System.out.printf("%n    %s = %s%n",
+                name,pvLink.getConfigurationStructure().toString(2));
         }
-
+        /* (non-Javadoc)
+         * @see org.epics.ioc.db.DBListener#dataPut(org.epics.ioc.db.DBData)
+         */
+        public void dataPut(DBData dbData) {
+            putCommon("dataPut");
+            changeOccured = true;
+            String recordName = dbData.getRecord().getRecordName();
+            String name = recordName + dbData.getFullFieldName();
+            if(!name.equals(fullName)) {
+                System.out.printf("%s NOT_EQUAL %s%n",name,fullName);
+            }
+            System.out.printf("    %s = %s%n",
+                name,dbData.toString(2));
+        }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.db.DBListener#enumChoicesPut(org.epics.ioc.pv.PVEnum)
+         */
+        public void enumChoicesPut(PVEnum pvEnum) {
+            putCommon("enumChoicesPut");
+            String recordName = ((DBData)pvEnum).getRecord().getRecordName();
+            String name = recordName + pvEnum.getFullFieldName();
+            if(!name.equals(fullName)) {
+                System.out.printf("%s NOT_EQUAL %s%n",name,fullName);
+            }
+            System.out.printf("    %s = %s%n",
+                name,pvEnum.toString(2));
+        }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.db.DBListener#enumIndexPut(org.epics.ioc.pv.PVEnum)
+         */
+        public void enumIndexPut(PVEnum pvEnum) {
+            putCommon("enumIndexPut");
+            String recordName = ((DBData)pvEnum).getRecord().getRecordName();
+            String name = recordName + pvEnum.getFullFieldName();
+            if(!name.equals(fullName)) {
+                System.out.printf("%s NOT_EQUAL %s%n",name,fullName);
+            }
+            System.out.printf("    %s index = %d%n",
+                name,pvEnum.getIndex());
+        }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.db.DBListener#structurePut(org.epics.ioc.pv.PVStructure, org.epics.ioc.db.DBData)
+         */
+        public void structurePut(PVStructure pvStructure, DBData dbData) {
+            putCommon("structurePut");
+            changeOccured = true;
+            String recordName = dbData.getRecord().getRecordName();
+            String name = recordName + dbData.getFullFieldName();
+            System.out.printf("    %s = %s%n",
+                name,dbData.toString(2));
+            String structureName = recordName + pvStructure.getFullFieldName();
+            System.out.printf("    structure is %s%n",structureName);
+        }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.db.DBListener#supportNamePut(org.epics.ioc.db.DBData)
+         */
+        public void supportNamePut(DBData dbData) {
+            // TODO Auto-generated method stub
+            
+        }
         /* (non-Javadoc)
          * @see org.epics.ioc.dbAccess.DBListener#unlisten(org.epics.ioc.dbAccess.RecordListener)
          */
@@ -211,6 +275,51 @@ public class ListenerTest extends TestCase {
             convert.fromDouble(dbData,value);
             return;
         }
+        if(type==Type.pvEnum) {
+            System.out.printf("%ntestPut enum index recordName %s fieldName %s value %f%n",
+                    recordName,fieldName,value);
+            int index = (int)value;
+            PVEnum pvEnum = (PVEnum)dbData;
+            pvEnum.setIndex(index);
+            System.out.printf("%ntestPut enum choices recordName %s fieldName %s value %f%n",
+                    recordName,fieldName,value);
+            String[] choice = pvEnum.getChoices();
+            pvEnum.setChoices(choice);
+            return;
+        }
+        if(type==Type.pvMenu) {
+            System.out.printf("%ntestPut menu index recordName %s fieldName %s value %f%n",
+                    recordName,fieldName,value);
+            int index = (int)value;
+            PVEnum pvEnum = (PVEnum)dbData;
+            pvEnum.setIndex(index);
+            return;
+        }
+        if(type==Type.pvLink) {
+            System.out.printf("%ntestPut link configurationStructure recordName %s fieldName %s value %f%n",
+                    recordName,fieldName,value);
+            PVLink pvLink = (PVLink)dbData;
+            PVStructure configStructure = pvLink.getConfigurationStructure();
+            boolean boolResult = pvLink.setConfigurationStructure(configStructure);
+            if(!boolResult) {
+                System.out.println("setConfigurationStructure failed");
+                return;
+            }
+            System.out.println("change supportName");
+            String supportName = pvLink.getSupportName();
+            String result = pvLink.setSupportName(supportName);
+            if(result!=null) {
+                System.out.println("setSupportName failed " + result);
+                return;
+            }
+            System.out.println("setConfigurationStructure");
+            boolResult = pvLink.setConfigurationStructure(configStructure);
+            if(!boolResult) {
+                System.out.println("setConfigurationStructure failed");
+                return;
+            }
+            return;
+        }
         if(type!=Type.pvStructure) {
             System.out.printf("%ntestPut recordName %s fieldName %s cant handle%n",
                 fieldName,recordName);
@@ -219,17 +328,19 @@ public class ListenerTest extends TestCase {
         PVStructure structure = (PVStructure)dbData;
         DBRecord dbRecord = dbData.getRecord();
         PVData[] fields = structure.getFieldPVDatas();
+        System.out.printf("%ntestPut begin structure put %s%n",
+                recordName + dbData.getFullFieldName());
         dbRecord.beginProcess();
         structure.beginPut();
         for(PVData field : fields) {
             Type fieldType = field.getField().getType();
             if(fieldType.isNumeric()) {
-                System.out.printf("%ntestPut recordName %s fieldName %s value %f%n",
+                System.out.printf("testPut recordName %s fieldName %s value %f%n",
                         recordName,field.getField().getFieldName(),value);
                     convert.fromDouble(field,value);
             } else if (fieldType==Type.pvString) {
                 String valueString = Double.toString(value);
-                System.out.printf("%ntestPut recordName %s fieldName %s value %s%n",
+                System.out.printf("testPut recordName %s fieldName %s value %s%n",
                         recordName,field.getField().getFieldName(),valueString);
                 PVString pvString = (PVString)field;
                 pvString.put(valueString);

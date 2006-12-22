@@ -5,6 +5,8 @@
  */
 package org.epics.ioc.db;
 
+import java.util.Iterator;
+
 import org.epics.ioc.pv.*;
 import org.epics.ioc.pv.Enum;
 
@@ -49,6 +51,27 @@ public abstract class AbstractDBEnum extends AbstractDBData implements PVEnum {
     public boolean setChoices(String[] choice) {
         if(super.getField().isMutable()) {
             this.choice = choice;
+            AbstractDBData dbData = this;
+            while(dbData!=null) {
+                Iterator<RecordListener> iter = dbData.listenerList.iterator();
+                while(iter.hasNext()) {
+                    RecordListener listener = iter.next();
+                    DBListener dbListener = listener.getDBListener();
+                    Type type = dbData.getField().getType();
+                    if(type==Type.pvEnum) {
+                        dbListener.enumChoicesPut(this);
+                    } else if(type==Type.pvStructure) {
+                        dbListener.structurePut(dbData.thisStructure, this);
+                    } else {
+                        throw new IllegalStateException("Logic error");
+                    }
+                }
+                if(dbData.parent==dbData) {
+                    System.err.printf("setChoices parent = this Why???%n");
+                } else {
+                    dbData = (AbstractDBData)dbData.parent;
+                }
+            }
             return true;
         }
         return false;
@@ -59,6 +82,27 @@ public abstract class AbstractDBEnum extends AbstractDBData implements PVEnum {
     public void setIndex(int index) {
         if(super.getField().isMutable()) {
             this.index = index;
+            AbstractDBData dbData = this;
+            while(dbData!=null) {
+                Iterator<RecordListener> iter = dbData.listenerList.iterator();
+                while(iter.hasNext()) {
+                    RecordListener listener = iter.next();
+                    DBListener dbListener = listener.getDBListener();
+                    Type type = dbData.getField().getType();
+                    if(type==Type.pvEnum || type ==Type.pvMenu) {
+                        dbListener.enumIndexPut(this);
+                    } else if(type==Type.pvStructure) {
+                        dbListener.structurePut(dbData.thisStructure, this);
+                    } else {
+                        throw new IllegalStateException("Logic error");
+                    }
+                }
+                if(dbData.parent==dbData) {
+                    System.err.printf("setChoices parent = this Why???%n");
+                } else {
+                    dbData = (AbstractDBData)dbData.parent;
+                }
+            }
             return;
         }
         throw new IllegalStateException("PVData.isMutable is false");

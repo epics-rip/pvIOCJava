@@ -6,10 +6,12 @@
 package org.epics.ioc.pv;
 
 /**
+ * Base class for implementing a Menu.
+ * It is also a complete implementation.
  * @author mrk
  *
  */
-public class AbstractMenu extends AbstractField implements Menu{
+public class MenuBase extends FieldBase implements Menu{
     private String menuName;
     
     /**
@@ -19,13 +21,13 @@ public class AbstractMenu extends AbstractField implements Menu{
      * @param fieldAttribute The field attributes.
      * @param menuName The menu name.
      */
-    public AbstractMenu(String name,Property[] property,FieldAttribute fieldAttribute,String menuName) {
+    public MenuBase(String name,Property[] property,FieldAttribute fieldAttribute,String menuName) {
         super(name,Type.pvMenu,property,fieldAttribute);
         this.menuName = menuName;
     }
     
     /* (non-Javadoc)
-     * @see org.epics.ioc.pvAccess.Enum#isChoicesMutable()
+     * @see org.epics.ioc.pv.Enum#isChoicesMutable()
      */
     public boolean isChoicesMutable() {
         return false;
@@ -36,7 +38,7 @@ public class AbstractMenu extends AbstractField implements Menu{
     public String toString() { return getString(0);}
 
     /* (non-Javadoc)
-     * @see org.epics.ioc.pvAccess.Field#toString(int)
+     * @see org.epics.ioc.pv.Field#toString(int)
      */
     public String toString(int indentLevel) {
         return getString(indentLevel);

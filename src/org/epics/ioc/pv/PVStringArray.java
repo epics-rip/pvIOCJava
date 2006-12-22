@@ -6,7 +6,7 @@
 package org.epics.ioc.pv;
 
 /**
- * get/put a String array.
+ * Get/put a String array.
  * The caller must be prepared to get/put the array in chunks.
  * The return argument is always the number of elements that were transfered.
  * It may be less than the number requested.

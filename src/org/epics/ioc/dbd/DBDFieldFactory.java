@@ -121,17 +121,17 @@ public final class  DBDFieldFactory {
     
     public static Menu createMenuField(String fieldName,Property[]property,FieldAttribute fieldAttribute,String menuName)
     {
-        return new AbstractMenu(fieldName,property,fieldAttribute,menuName);
+        return new MenuBase(fieldName,property,fieldAttribute,menuName);
     }
     public static Array createArrayField(String fieldName,Property[]property,FieldAttribute fieldAttribute,Type elementType)
     {
-        return new AbstractArray(fieldName,property,fieldAttribute,elementType);
+        return new ArrayBase(fieldName,property,fieldAttribute,elementType);
     }
     public static Structure createStructureField(String fieldName,Property[]property,FieldAttribute fieldAttribute,
             DBDStructure dbdStructure,DBD dbd)
     {
         if(dbdStructure==null) {
-            return new AbstractStructure(fieldName,property,fieldAttribute,null, new Field[0]);
+            return new StructureBase(fieldName,property,fieldAttribute,null, new Field[0]);
         }
         // Must create a copy of all fields so that parent will be correct.
         Field[] original = dbdStructure.getFields();
@@ -171,7 +171,7 @@ public final class  DBDFieldFactory {
             }
             fields[i] = copy;
         }
-        return new AbstractStructure(fieldName,property,fieldAttribute,dbdStructure.getStructureName(),fields);
+        return new StructureBase(fieldName,property,fieldAttribute,dbdStructure.getStructureName(),fields);
     }
     
     public static Field createField(String fieldName,
@@ -181,9 +181,9 @@ public final class  DBDFieldFactory {
             throw new IllegalStateException("Illegal type");
         }
         if(type==Type.pvEnum) {
-            return new AbstractEnum(fieldName,property,fieldAttribute,true); 
+            return new EnumBase(fieldName,property,fieldAttribute,true); 
         } else {
-            return new AbstractField(fieldName,type,property,fieldAttribute);
+            return new FieldBase(fieldName,type,property,fieldAttribute);
         }
     }
     
@@ -223,7 +223,7 @@ public final class  DBDFieldFactory {
 
         private String getString(int indentLevel) {
             StringBuilder builder = new StringBuilder();
-            AbstractField.newLine(builder,indentLevel);
+            FieldBase.newLine(builder,indentLevel);
             builder.append(String.format("menu %s { ",menuName));
             for(String value: choices) {
                 builder.append(String.format("\"%s\" ",value));
@@ -233,7 +233,7 @@ public final class  DBDFieldFactory {
         }
     }
     
-    static private class StructureInstance extends AbstractStructure implements DBDStructure
+    static private class StructureInstance extends StructureBase implements DBDStructure
     {   
         private StructureInstance(String name,
             Field[] field,Property[] property,FieldAttribute fieldAttribute)
@@ -288,7 +288,7 @@ public final class  DBDFieldFactory {
         
         private String getString(int indentLevel) {
             StringBuilder builder = new StringBuilder();
-            AbstractField.newLine(builder,indentLevel);
+            FieldBase.newLine(builder,indentLevel);
             builder.append(String.format(
                     "supportName %s factoryName %s",
                     supportName,factoryName));

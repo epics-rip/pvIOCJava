@@ -9,9 +9,9 @@ import java.util.Map;
 
 /**
  * FieldFactory creates Field instances.
- * This is a complete factory for the PV reflection.
- * Most PV database implementations should find this sufficient for
- * PV reflection.
+ * This is a complete factory for the <i>PV</i> reflection.
+ * Most <i>PV</i> database implementations should find this sufficient for
+ * <i>PV</i> reflection.
  * @author mrk
  *
  */
@@ -62,7 +62,7 @@ public final class FieldFactory {
      */
     public static Array createArrayField(String name,
     Type elementType,Property[] property,FieldAttribute fieldAttribute) {
-        return new AbstractArray(name,property,fieldAttribute,elementType);
+        return new ArrayBase(name,property,fieldAttribute,elementType);
     } 
 
     /**
@@ -81,7 +81,7 @@ public final class FieldFactory {
     public static Enum createEnumField(String name,
     boolean choicesMutable,Property[] property,FieldAttribute fieldAttribute)
     {
-        return new AbstractEnum(name,property,fieldAttribute,choicesMutable);
+        return new EnumBase(name,property,fieldAttribute,choicesMutable);
     }
     
     /**
@@ -97,7 +97,7 @@ public final class FieldFactory {
     public static Menu createMenuField(String fieldName,
             Property[]property,FieldAttribute fieldAttribute, String menuName)
     {
-        return new AbstractMenu(fieldName,property,fieldAttribute,menuName);
+        return new MenuBase(fieldName,property,fieldAttribute,menuName);
     }
     /**
      * Create a <i>Field</i>.
@@ -118,7 +118,7 @@ public final class FieldFactory {
     {
         if(!type.isScalar() && type!=Type.pvLink) throw new IllegalArgumentException(
                 "Illegal PVType. Must be scalar but it is " + type.toString() );
-        return new AbstractField(name,type,property,fieldAttribute);
+        return new FieldBase(name,type,property,fieldAttribute);
     } 
     
     /**
@@ -145,7 +145,7 @@ public final class FieldFactory {
     public static Structure createStructureField(String name,
     String structureName, Field[] field,Property[] property,FieldAttribute fieldAttribute)
     {
-        return new AbstractStructure(name,property,fieldAttribute,structureName,field);
+        return new StructureBase(name,property,fieldAttribute,structureName,field);
     }
     
     private static class FieldAttributeImpl implements FieldAttribute {
@@ -190,7 +190,7 @@ public final class FieldFactory {
             return isLink;
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.dbDefinition.DBDFieldAttribute#isReadOnly()
+         * @see org.epics.ioc.pv.FieldAttribute#isReadOnly()
          */
         public boolean isReadOnly() {
             return isReadOnly;
@@ -227,7 +227,7 @@ public final class FieldFactory {
 
         private String getString(int indentLevel) {
             StringBuilder builder = new StringBuilder();
-            AbstractField.newLine(builder,indentLevel);
+            FieldBase.newLine(builder,indentLevel);
             builder.append(String.format("{name = %s field = %s}",
                     name,fieldName));
             return builder.toString();

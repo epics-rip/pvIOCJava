@@ -6,46 +6,47 @@
 package org.epics.ioc.pv;
 
 /**
+ * Base class for implementing an Enum.
+ * It is also a complete implementation.
  * @author mrk
  *
  */
-public class AbstractArray extends AbstractField implements Array {
-    
-    private Type elementType;
-    
+public class EnumBase extends FieldBase implements Enum{
+    private boolean choicesMutable;
     /**
-     * Constructor for AbstractArray.
+     * Constructor for ArrayBase.
      * @param name The field name.
-     * @param property An array of Property.
+     * @param property An array of properties for the field.
      * @param fieldAttribute The field attributes.
-     * @param elementType The element Type.
+     * @param choicesMutable Are the choices mutable?
      */
-    public AbstractArray(String name, Property[] property,FieldAttribute fieldAttribute,Type elementType) {
-        super(name, Type.pvArray,property,fieldAttribute);
-        this.elementType = elementType;
+    public EnumBase(String name,Property[] property,FieldAttribute fieldAttribute,boolean choicesMutable) {
+        super(name,Type.pvEnum,property,fieldAttribute);
+        this.choicesMutable = choicesMutable;
     }
     /* (non-Javadoc)
-     * @see org.epics.ioc.pvAccess.Array#getElementType()
+     * @see org.epics.ioc.pv.Enum#isChoicesMutable()
      */
-    public Type getElementType() {
-        return elementType;
-    }
+    public boolean isChoicesMutable() {
+        return choicesMutable;
+    }  
     /* (non-Javadoc)
      * @see java.lang.Object#toString()
      */
     public String toString() { return getString(0);}
+
     /* (non-Javadoc)
-     * @see org.epics.ioc.pvAccess.Field#toString(int)
+     * @see org.epics.ioc.pv.Field#toString(int)
      */
     public String toString(int indentLevel) {
         return getString(indentLevel);
     }
-    
+
     private String getString(int indentLevel) {
         StringBuilder builder = new StringBuilder();
         builder.append(super.toString(indentLevel));
-        builder.append("elementType " + elementType.toString());
+        builder.append(String.format("choicesMutable %b ",
+             choicesMutable));
         return builder.toString();
     }
-
 }

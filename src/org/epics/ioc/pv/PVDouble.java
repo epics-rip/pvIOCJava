@@ -6,7 +6,7 @@
 package org.epics.ioc.pv;
 
 /**
- * get/put double data
+ * Get/put double data
  * @author mrk
  *
  */

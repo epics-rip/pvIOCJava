@@ -18,12 +18,12 @@ import java.util.*;
  *
  */
 public abstract class AbstractDBData extends AbstractPVData implements DBData{
-    private DBData parent;
+    protected DBData parent;
     private DBRecord record;
     protected LinkedList<RecordListener> listenerList
         = new LinkedList<RecordListener>(); 
     private Support support = null;
-    private PVStructure thisStructure = null;
+    protected PVStructure thisStructure = null;
     
     /**
      * constructor which must be called by classes that derive from this class.
@@ -123,7 +123,17 @@ public abstract class AbstractDBData extends AbstractPVData implements DBData{
             Iterator<RecordListener> iter = dbData.listenerList.iterator();
             while(iter.hasNext()) {
                 RecordListener listener = iter.next();
-                listener.newData(dbData.thisStructure,this);
+                DBListener dbListener = listener.getDBListener();
+                Type type = dbData.getField().getType();
+                if(type.isScalar()||type==Type.pvArray) {
+                    dbListener.dataPut(dbData);
+                } else if(type==Type.pvStructure) {
+                    dbListener.structurePut(dbData.thisStructure, this);
+                } else  if(type==Type.pvLink){
+                    return; // dont report changes to configStructure
+                } else {
+                    throw new IllegalStateException("postPut called for illegal Type");
+                }
             }
             if(dbData.parent==dbData) {
                 System.err.printf("postPut parent = this Why???%n");
@@ -143,7 +153,14 @@ public abstract class AbstractDBData extends AbstractPVData implements DBData{
      * @see org.epics.ioc.pv.PVData#setSupportName(java.lang.String)
      */
     public String setSupportName(String name) {
-        return super.setSupportName(name);
+        String supportName = super.setSupportName(name);
+        Iterator<RecordListener> iter = listenerList.iterator();
+        while(iter.hasNext()) {
+            RecordListener listener = iter.next();
+            DBListener dbListener = listener.getDBListener();
+            dbListener.supportNamePut(this);
+        }
+        return supportName;
     }
     /* (non-Javadoc)
      * @see org.epics.ioc.db.DBData#getSupport()
@@ -156,6 +173,12 @@ public abstract class AbstractDBData extends AbstractPVData implements DBData{
      */
     public void setSupport(Support support) {
         this.support = support;
+        Iterator<RecordListener> iter = listenerList.iterator();
+        while(iter.hasNext()) {
+            RecordListener listener = iter.next();
+            DBListener dbListener = listener.getDBListener();
+            dbListener.supportNamePut(this);
+        }
     }    
     /**
      * Called by AbstractDBRecord when DBRecord.removeListener or DBrecord.removeListeners are called.

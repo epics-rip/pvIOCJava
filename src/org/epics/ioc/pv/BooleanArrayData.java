@@ -14,7 +14,7 @@ package org.epics.ioc.pv;
  */
 public class BooleanArrayData {
     /**
-     * The PVBoolean[].
+     * The boolean[].
      * PVBooleanArray.get sets this value.
      * PVBooleanArray.put requires that the caller set the value. 
      */

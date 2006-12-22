@@ -14,6 +14,17 @@ import org.epics.ioc.pv.*;
  */
 public interface DBListener {
     /**
+     * The supportName has been modified.
+     * @param dbData
+     */
+    void supportNamePut(DBData dbData);
+    /**
+     * A scalar or array modification has occured.
+     * @param dbData The data.
+     * @param dbData
+     */
+    void dataPut(DBData dbData);
+    /**
      * Start of a structure modification.
      * @param pvStructure The structure.
      */
@@ -24,12 +35,27 @@ public interface DBListener {
      */
     void endPut(PVStructure pvStructure);
     /**
-     * Called when data has been modified.
+     * A put to a subfield of a structure has occured. 
      * @param pvStructure If the requester is listening on a structure this is the structure.
      * It is <i>null</i> if the listener is listening on a non-structure field. 
-     * @param dbData The interface for the modified data.
+     * @param dbData The datathat has been modified..
      */
-    void newData(PVStructure pvStructure,DBData dbData);
+    void structurePut(PVStructure pvStructure,DBData dbData);
+    /**
+     * The enum index has been modified.
+     * @param pvEnum The enum interface.
+     */
+    void enumIndexPut(PVEnum pvEnum);
+    /**
+     * The enum choices has been modified.
+     * @param pvEnum The enum interface.
+     */
+    void enumChoicesPut(PVEnum pvEnum);
+    /**
+     * The link configration structure has been modified.
+     * @param pvLink The link interface.
+     */
+    void configurationStructurePut(PVLink pvLink);
     /**
      * Begin record processing.
      * From begin until end of record processing,

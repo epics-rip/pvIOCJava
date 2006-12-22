@@ -69,7 +69,7 @@ public enum Type {
     pvLink;
 
     /**
-     * is this a Java numeric type?
+     * Is this a Java numeric type?
      * @return Returns true if the type is a Java numeric type.
      * The numeric types are byte, int, long, float, and double.
      */
@@ -79,7 +79,7 @@ public enum Type {
         return true;
     }
     /**
-     * is this a Java primitive type?
+     * Is this a Java primitive type?
      * @return Returns true if the type is a Java primitive type.
      * This is the numeric types and boolean.
      */
@@ -89,7 +89,7 @@ public enum Type {
         return true;
     }
     /**
-     * is this either a Java primitive or a <i>string</i>?
+     * Is this either a Java primitive or a <i>string</i>?
      * @return Returns true if the type is a Java primitive or a String
      */
     public boolean isScalar() {

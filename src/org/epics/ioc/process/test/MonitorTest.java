@@ -96,36 +96,96 @@ public class MonitorTest extends TestCase {
         }
     }
     
-    private static class Monitor implements RecordListener {
+    private static class Monitor implements DBListener {
         private String recordName;
         private DBData dbData;
+        private RecordListener recordListener = null;
         
         private Monitor(DBData data) {
             dbData = data;
             DBRecord dbRecord = data.getRecord();
             recordName = dbRecord.getRecordName();
-            dbData.addListener(this);
+            recordListener = dbRecord.createListener(this);
+            dbRecord.addListener(recordListener);
         }
+        
         /* (non-Javadoc)
-         * @see org.epics.ioc.db.RecordListener#beginPut(org.epics.ioc.pv.PVStructure)
+         * @see org.epics.ioc.db.DBListener#beginProcess()
+         */
+        public void beginProcess() {
+            // nothing to do
+        }
+
+        /* (non-Javadoc)
+         * @see org.epics.ioc.db.DBListener#beginPut(org.epics.ioc.pv.PVStructure)
          */
         public void beginPut(PVStructure pvStructure) {
-            // TODO Auto-generated method stub
-            
+            // nothing to do
         }
+
         /* (non-Javadoc)
-         * @see org.epics.ioc.db.RecordListener#endPut(org.epics.ioc.pv.PVStructure)
+         * @see org.epics.ioc.db.DBListener#configurationStructurePut(org.epics.ioc.pv.PVLink)
          */
-        public void endPut(PVStructure pvStructure) {
-            // TODO Auto-generated method stub
-            
+        public void configurationStructurePut(PVLink pvLink) {
+            // nothing to do
         }
+
         /* (non-Javadoc)
-         * @see org.epics.ioc.db.RecordListener#newData(org.epics.ioc.pv.PVStructure, org.epics.ioc.db.DBData)
+         * @see org.epics.ioc.db.DBListener#dataPut(org.epics.ioc.db.DBData)
          */
-        public void newData(PVStructure pvStructure, DBData data) {
+        public void dataPut(DBData data) {
             if(data!=dbData) return;
             System.out.println(data.toString() + " " + recordName);
+        }
+
+        /* (non-Javadoc)
+         * @see org.epics.ioc.db.DBListener#endProcess()
+         */
+        public void endProcess() {
+            // nothing to do
+        }
+
+        /* (non-Javadoc)
+         * @see org.epics.ioc.db.DBListener#endPut(org.epics.ioc.pv.PVStructure)
+         */
+        public void endPut(PVStructure pvStructure) {
+            // nothing to do
+        }
+
+        /* (non-Javadoc)
+         * @see org.epics.ioc.db.DBListener#enumChoicesPut(org.epics.ioc.pv.PVEnum)
+         */
+        public void enumChoicesPut(PVEnum pvEnum) {
+            // nothing to do
+        }
+
+        /* (non-Javadoc)
+         * @see org.epics.ioc.db.DBListener#enumIndexPut(org.epics.ioc.pv.PVEnum)
+         */
+        public void enumIndexPut(PVEnum pvEnum) {
+            // nothing to do
+        }
+
+        /* (non-Javadoc)
+         * @see org.epics.ioc.db.DBListener#structurePut(org.epics.ioc.pv.PVStructure, org.epics.ioc.db.DBData)
+         */
+        public void structurePut(PVStructure pvStructure, DBData data) {
+            if(data!=dbData) return;
+            System.out.println(data.toString() + " " + recordName);
+        }
+
+        /* (non-Javadoc)
+         * @see org.epics.ioc.db.DBListener#supportNamePut(org.epics.ioc.db.DBData)
+         */
+        public void supportNamePut(DBData dbData) {
+            // nothing to do
+        }
+
+        /* (non-Javadoc)
+         * @see org.epics.ioc.db.DBListener#unlisten(org.epics.ioc.db.RecordListener)
+         */
+        public void unlisten(RecordListener listener) {
+            // nothing to do
         }
     }
 }

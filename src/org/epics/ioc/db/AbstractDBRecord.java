@@ -8,7 +8,6 @@ package org.epics.ioc.db;
 import java.util.*;
 import java.util.concurrent.locks.*;
 
-import org.epics.ioc.pv.*;
 import org.epics.ioc.dbd.*;
 import org.epics.ioc.process.*;
 import org.epics.ioc.util.MessageType;
@@ -139,7 +138,7 @@ public class AbstractDBRecord extends AbstractDBStructure implements DBRecord {
         Iterator<RecordListenerPvt> iter = recordListenerList.iterator();
         while(iter.hasNext()) {
             RecordListenerPvt listener = iter.next();
-            listener.beginProcess();
+            listener.getDBListener().beginProcess();
         }
     }
     /* (non-Javadoc)
@@ -149,7 +148,7 @@ public class AbstractDBRecord extends AbstractDBStructure implements DBRecord {
         Iterator<RecordListenerPvt> iter = recordListenerList.iterator();
         while(iter.hasNext()) {
             RecordListenerPvt listener = iter.next();
-            listener.endProcesss();
+            listener.getDBListener().endProcess();
         }
     }
     /* (non-Javadoc)
@@ -178,7 +177,7 @@ public class AbstractDBRecord extends AbstractDBStructure implements DBRecord {
         while(true) {
             RecordListenerPvt listener = recordListenerList.remove();
             if(listener==null) break;
-            listener.unlisten();
+            listener.getDBListener().unlisten(listener);
             Iterator<AbstractDBData> iter = listenerSourceList.iterator();
             while(iter.hasNext()) {
                 AbstractDBData dbData = iter.next();
@@ -238,41 +237,16 @@ public class AbstractDBRecord extends AbstractDBStructure implements DBRecord {
 
     private static class RecordListenerPvt implements RecordListener {
         private DBListener dbListener;
-        
-        void unlisten() {
-            dbListener.unlisten(this);
-        }
 
         RecordListenerPvt(DBListener listener) {
             dbListener = listener;
         }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.db.RecordListener#endPut(org.epics.ioc.pv.PVStructure)
-         */
-        public void endPut(PVStructure pvStructure) {
-            dbListener.endPut(pvStructure);
-        }
 
         /* (non-Javadoc)
-         * @see org.epics.ioc.db.RecordListener#startPut(org.epics.ioc.pv.PVStructure)
+         * @see org.epics.ioc.db.RecordListener#getDBListener()
          */
-        public void beginPut(PVStructure pvStructure) {
-            dbListener.beginPut(pvStructure);
-        }
-
-        /* (non-Javadoc)
-         * @see org.epics.ioc.db.RecordListener#newData(org.epics.ioc.db.DBData)
-         */
-        public void newData(PVStructure pvStructure,DBData data) {
-            dbListener.newData(pvStructure,data);
-        }
-        
-        void beginProcess() {
-            dbListener.beginProcess();
-        }
-        
-        void endProcesss() {
-            dbListener.endProcess();
+        public DBListener getDBListener() {
+            return dbListener;
         }
     }
 }

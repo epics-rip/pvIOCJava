@@ -14,7 +14,7 @@ package org.epics.ioc.pv;
  */
 public class ByteArrayData {
     /**
-     * The PVByte[].
+     * The byte[].
      * PVByteArray.get sets this value.
      * PVByteArray.put requires that the caller set the value. 
      */
