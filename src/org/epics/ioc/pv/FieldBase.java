@@ -14,7 +14,6 @@ package org.epics.ioc.pv;
 public class FieldBase implements Field
 {
     private static String indentString = "    ";
-    private Field parent;
     private boolean isMutable;
     private String name;
     private Property[] property;
@@ -51,19 +50,6 @@ public class FieldBase implements Field
      */
     public String getFieldName() {
         return(name);
-    }
-    /* (non-Javadoc)
-     * @see org.epics.ioc.pv.Field#getParent()
-     */
-    public Field getParent() {
-        return parent;
-    }
-    /**
-     * Set the parent field.
-     * @param field The parent.
-     */
-    protected void setParent(Field field) {
-        parent = field;
     }
     /* (non-Javadoc)
      * @see org.epics.ioc.pv.Field#getPropertys()
@@ -134,9 +120,6 @@ public class FieldBase implements Field
         newLine(builder,indentLevel);
         builder.append(String.format("field %s type %s isMutable %b ",
                 name,type.toString(),isMutable));
-        if(parent!=null) {
-            builder.append(String.format("parent %s ", parent.getFieldName()));
-        }
         if(supportName!=null) {
             builder.append("supportName " + supportName + " ");
         }

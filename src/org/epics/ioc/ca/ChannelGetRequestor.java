@@ -15,7 +15,7 @@ import org.epics.ioc.util.*;
  */
 public interface ChannelGetRequestor extends Requestor {
     /**
-     * Next data for a get request..
+     * Next data for a get request.
      * @param field The field.
      * @param data The data.
      * @return (false,true) if the requestor (has,has not) obtained all the data.

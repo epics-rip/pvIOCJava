@@ -1259,8 +1259,7 @@ public class ChannelAccessLocalFactory  {
              * @see org.epics.ioc.db.DBListener#configurationStructurePut(org.epics.ioc.pv.PVLink)
              */
             public void configurationStructurePut(PVLink pvLink) {
-                // TODO Auto-generated method stub
-                
+                dataPut((DBData)pvLink);
             }
 
             /* (non-Javadoc)
@@ -1281,16 +1280,14 @@ public class ChannelAccessLocalFactory  {
              * @see org.epics.ioc.db.DBListener#enumChoicesPut(org.epics.ioc.pv.PVEnum)
              */
             public void enumChoicesPut(PVEnum pvEnum) {
-                // TODO Auto-generated method stub
-                
+                dataPut((DBData)pvEnum);
             }
 
             /* (non-Javadoc)
              * @see org.epics.ioc.db.DBListener#enumIndexPut(org.epics.ioc.pv.PVEnum)
              */
             public void enumIndexPut(PVEnum pvEnum) {
-                // TODO Auto-generated method stub
-                
+                dataPut((DBData)pvEnum);
             }
 
             /* (non-Javadoc)

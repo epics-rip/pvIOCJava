@@ -27,10 +27,10 @@ public class ChannelMonitorTest extends TestCase {
                  "dbd/menuStructureSupport.xml",
                  iocRequestor);
         XMLToDBDFactory.convert(dbd,
-                 "src/org/epics/ioc/ca/test/exampleDBD.xml",
+                 "src/org/epics/ioc/process/test/exampleDBD.xml",
                  iocRequestor);        
         boolean initOK = IOCFactory.initDatabase(
-            "src/org/epics/ioc/ca/test/exampleDB.xml",iocRequestor);
+            "src/org/epics/ioc/process/test/monitorDB.xml",iocRequestor);
         if(!initOK) return;
         Monitor monitor;
         monitor =new Monitor("          onChange","counter");
@@ -42,6 +42,15 @@ public class ChannelMonitorTest extends TestCase {
         monitor =new Monitor("onPercentageChange","counter");
         result = monitor.connect(2);
         if(result) monitor.lookForPercentageChange(10.0);
+        monitor =new Monitor("              link","monitorChange","input");
+        result = monitor.connect(2);
+        if(result) monitor.lookForChange();
+        monitor =new Monitor("          severity","monitorChange","severity");
+        result = monitor.connect(2);
+        if(result) monitor.lookForChange();
+        monitor =new Monitor("     monitorChange","monitorChange","value");
+        result = monitor.connect(2);
+        if(result) monitor.lookForChange();
         
         MonitorNotify monitorNotify;
         monitorNotify =new MonitorNotify("          onChange","counter");
@@ -66,21 +75,36 @@ public class ChannelMonitorTest extends TestCase {
     ChannelMonitorRequestor,ChannelStateListener {
         private String requestorName;
         private String pvName;
+        private String fieldName = null;
         private Channel channel;
         private ValueData valueData;
         private ChannelFieldGroup fieldGroup;
         private ChannelMonitor channelMonitor;
+        
+        public Monitor(String requestorName, String pvName, String fieldName) {
+            super();
+            this.requestorName = requestorName;
+            this.pvName = pvName;
+            this.fieldName = fieldName;
+            channel = ChannelFactory.createChannel(pvName, this, false);
+            if(channel==null) {
+                System.out.println(pvName + " not found");
+            }
+        }
         
         public Monitor(String requestorName, String pvName) {
             super();
             this.requestorName = requestorName;
             this.pvName = pvName;
             channel = ChannelFactory.createChannel(pvName, this, false);
+            if(channel==null) {
+                System.out.println(pvName + " not found");
+            }
         }
         
         private boolean connect(int queueSize) {
             if(channel==null) return false;
-            valueData = new ValueData(channel);
+            valueData = new ValueData(channel,fieldName);
             fieldGroup = valueData.init();
             if(fieldGroup==null) return false;
             channelMonitor = channel.createChannelMonitor(false);
@@ -158,10 +182,19 @@ public class ChannelMonitorTest extends TestCase {
     ChannelMonitorNotifyRequestor,ChannelStateListener {
         private String requestorName;
         private String pvName;
+        private String fieldName = null;
         private Channel channel;
         private ValueData valueData;
         private ChannelFieldGroup fieldGroup;
         private ChannelMonitor channelMonitor;
+        
+        public MonitorNotify(String requestorName, String pvName,String fieldName) {
+            super();
+            this.requestorName = requestorName;
+            this.pvName = pvName;
+            this.fieldName = fieldName;
+            channel = ChannelFactory.createChannel(pvName, this, false);
+        }
         
         public MonitorNotify(String requestorName, String pvName) {
             super();
@@ -172,7 +205,7 @@ public class ChannelMonitorTest extends TestCase {
         
         private boolean connect(int queueSize) {
             if(channel==null) return false;
-            valueData = new ValueData(channel);
+            valueData = new ValueData(channel,fieldName);
             fieldGroup = valueData.init();
             if(fieldGroup==null) return false;
             channelMonitor = channel.createChannelMonitor(false);
@@ -236,14 +269,17 @@ public class ChannelMonitorTest extends TestCase {
     
     private static class ValueData implements ChannelFieldGroupListener{
         private Channel channel;
+        private String fieldName;
         private ChannelFieldGroup channelFieldGroup;
         private ChannelField valueField;
         private ChannelField statusField;
         private ChannelField severityField;
         private ChannelField timeStampField;
         
-        private ValueData(Channel channel) {
+        private ValueData(Channel channel,String fieldName) {
             this.channel = channel;
+            if(fieldName==null) fieldName = "value";
+            this.fieldName = fieldName;
         }
         
         private void lookForOther(ChannelMonitor channelMonitor) {
@@ -274,7 +310,7 @@ public class ChannelMonitorTest extends TestCase {
         private ChannelFieldGroup init() {
             channelFieldGroup = channel.createFieldGroup(this);
             ChannelSetFieldResult result;
-            result = channel.setField("value");
+            result = channel.setField(fieldName);
             if(result!=ChannelSetFieldResult.thisChannel) {
                 System.out.printf("PutGet:set returned %s%n", result.toString());
                 return null;

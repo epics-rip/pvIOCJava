@@ -62,8 +62,6 @@ public class StructureBase extends FieldBase implements Structure {
         }
         fieldIndex = new int[field.length];
         for(int i=0; i<field.length; i++) {
-            FieldBase childField = (FieldBase)field[i];
-            childField.setParent(this);
             String value = sortedFieldNameList.get(i);
             for(int j=0; j<field.length; j++) {
                 if(value.equals(fieldName[j])) {
