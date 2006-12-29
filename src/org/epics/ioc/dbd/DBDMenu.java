@@ -12,19 +12,19 @@ package org.epics.ioc.dbd;
  */
 public interface DBDMenu {
     /**
-     * get the menu name.
-     * @return the name.
+     * Get the menu name.
+     * @return The name.
      */
-    String getName();
+    String getMenuName();
     /**
-     * get the menu choices.
-     * @return array of choices.
+     * Get the menu choices.
+     * @return The array of choices.
      */
     String[] getChoices();
     /**
-     * convert to a string
-     * @param indentLevel indentation level
-     * @return the field as a string
+     * Convert to a string
+     * @param indentLevel Indentation level
+     * @return The DBDMenu as a string
      */
     String toString(int indentLevel);
 }

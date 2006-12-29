@@ -39,19 +39,4 @@ public interface Structure extends Field{
      * each of the fields in the structure.
      */
     Field[] getFields();
-    /**
-     * Return a copy of the structure.
-     * @return The copy.
-     */
-    Structure copy();
-    /**
-     * Replace a field of the structure.
-     * The structure must a copy created via a call to copy
-     * and the field must have the same field name as the original.
-     * This operation can only be performed once on a copy.
-     * @param name The name of the field to replace.
-     * @param field The replacement field.
-     * @return (false,true) if the the field (was not, was) replaced.
-     */
-    boolean replaceField(String name,Field field);
 }

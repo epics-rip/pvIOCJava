@@ -33,10 +33,10 @@ public class SubstituteTest extends TestCase {
         DBD dbd = DBDFactory.getMasterDBD();
         Requestor iocRequestor = new Listener();
         XMLToDBDFactory.convert(dbd,
-            "src/org/epics/ioc/dbAccess/example/substituteDBD.xml",iocRequestor);
+            "src/org/epics/ioc/db/test/substituteDBD.xml",iocRequestor);
         IOCDB iocdb = IOCDBFactory.create("testIOCDatabase");
         XMLToIOCDBFactory.convert(dbd,iocdb,
-            "src/org/epics/ioc/dbAccess/example/substituteDB.xml",iocRequestor);
+            "src/org/epics/ioc/db/test/substituteDB.xml",iocRequestor);
         Map<String,DBRecord> recordMap = iocdb.getRecordMap();
         keys = recordMap.keySet();
         System.out.printf("%n%nrecord list%n");

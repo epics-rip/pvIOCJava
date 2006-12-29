@@ -42,7 +42,7 @@ public class CounterRecordFactory {
             super(supportName,(DBData)pvStructure);
             DBData dbData = (DBData)pvStructure;
             Structure structure = (Structure)pvStructure.getField();
-            dbRecord = dbData.getRecord();
+            dbRecord = dbData.getDBRecord();
             PVData[] pvData = pvStructure.getFieldPVDatas();
             int index;
             index = structure.getFieldIndex("min");

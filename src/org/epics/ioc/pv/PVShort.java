@@ -18,7 +18,7 @@ public interface PVShort extends PVData{
     short get();
     /**
      * Put the <i>short</i> value into the field.
-     * @param value new short value for field.
+     * @param value New value.
      * @throws IllegalStateException if the field is not mutable.
      */
     void put(short value);

@@ -59,10 +59,9 @@ public class LinkArraySupportFactory {
         private StructureArray(PVStructureArray array) {
             super(supportName,(DBData)array);
             pvStructureArray = array;
-            DBData dbData = (DBData)pvStructureArray;
             processRequestorName = 
-                dbData.getRecord().getRecordName()
-                + dbData.getFullFieldName();
+                array.getPVRecord().getRecordName()
+                + array.getFullFieldName();
         }
 
         /* (non-Javadoc)

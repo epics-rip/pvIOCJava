@@ -13,5 +13,9 @@ package org.epics.ioc.db;
  *
  */
 public interface RecordListener {
+    /**
+     * Get the DBlistener.
+     * @return The listener.
+     */
     DBListener getDBListener();
 }

@@ -37,7 +37,7 @@ public interface PVArray extends PVData{
     void setCapacity(int len);
     /**
      * Can the capacity be changed?
-     * @return if it can be modified.
+     * @return If it can be modified.
      */
     boolean isCapacityMutable();
 }

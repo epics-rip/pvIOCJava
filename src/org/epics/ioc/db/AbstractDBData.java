@@ -5,9 +5,10 @@
  */
 package org.epics.ioc.db;
 
+import org.epics.ioc.dbd.*;
+import org.epics.ioc.dbd.DBDLinkSupport;
 import org.epics.ioc.process.*;
 import org.epics.ioc.pv.*;
-import org.epics.ioc.util.*;
 
 import java.util.*;
 
@@ -19,22 +20,23 @@ import java.util.*;
  */
 public abstract class AbstractDBData extends AbstractPVData implements DBData{
     protected DBData parent;
-    private DBRecord record;
+    private   DBRecord record;
     protected LinkedList<RecordListener> listenerList
         = new LinkedList<RecordListener>(); 
-    private Support support = null;
+    private   Support support = null;
     protected PVStructure thisStructure = null;
     
     /**
-     * constructor which must be called by classes that derive from this class.
-     * @param parent the parent structure.
-     * @param field the reflection interface for the DBData data.
+     * Constructor which must be called by classes that derive from this class.
+     * @param parent The parent structure.
+     * @param field The reflection interface.
      */
     protected AbstractDBData(DBData parent, Field field) {
         super(parent,field);
         this.parent = parent;
         if(parent!=null) {
-            record = parent.getRecord();
+            record = parent.getDBRecord();
+            super.setRecord(record);
         } else {
             record = null;
         }
@@ -47,34 +49,6 @@ public abstract class AbstractDBData extends AbstractPVData implements DBData{
     protected void replaceField(Field field) {
         super.replaceField(field);
     }
-    /* (non-Javadoc)
-     * @see java.lang.Object#toString()
-     */
-    public String toString() { return toString(0);}
-    /* (non-Javadoc)
-     * @see org.epics.ioc.pv.PVData#toString(int)
-     */
-    public String toString(int indentLevel) {
-        return super.toString(indentLevel);
-    }
-    /* (non-Javadoc)
-     * @see org.epics.ioc.db.DBData#getFullFieldName()
-     */
-    public String getFullFieldName() {
-        if(this==record) return "";
-        StringBuilder fieldName = new StringBuilder();
-        fieldName.insert(0,getField().getFieldName());
-        if(parent.getField().getType()!=Type.pvArray) fieldName.insert(0,".");
-        PVData parent = getParent();
-        while(parent!=null && parent!=this.record) {
-            PVData now = parent;
-            fieldName.insert(0,now.getField().getFieldName());
-            if(now.getParent()==null
-            || now.getParent().getField().getType()!=Type.pvArray) fieldName.insert(0,".");
-            parent = now.getParent();
-        }
-        return fieldName.toString();
-    }   
     /**
      * specify the record that holds this data.
      * This is called by AbstractDBRecord.
@@ -82,24 +56,13 @@ public abstract class AbstractDBData extends AbstractPVData implements DBData{
      */
     protected void setRecord(DBRecord record) {
         this.record = record;
+        super.setRecord((PVRecord)record);
     }
     /* (non-Javadoc)
-     * @see org.epics.ioc.pv.PVData#getParent()
+     * @see org.epics.ioc.db.DBData#getDBRecord()
      */
-    public PVData getParent() {
-        return parent;
-    }
-    /* (non-Javadoc)
-     * @see org.epics.ioc.db.DBData#getRecord()
-     */
-    public DBRecord getRecord() {
+    public DBRecord getDBRecord() {
         return record;
-    }
-    /* (non-Javadoc)
-     * @see org.epics.ioc.pv.PVData#getField()
-     */
-    public Field getField() {
-        return super.getField();
     }
     /* (non-Javadoc)
      * @see org.epics.ioc.db.DBData#addListener(org.epics.ioc.db.RecordListener)
@@ -141,26 +104,78 @@ public abstract class AbstractDBData extends AbstractPVData implements DBData{
                 dbData = (AbstractDBData)dbData.parent;
             }
         }
-    }  
-    /* (non-Javadoc)
-     * @see org.epics.ioc.pv.PVData#getSupportName()
-     */
-    public String getSupportName() {
-        return super.getSupportName();
     }
-    
     /* (non-Javadoc)
      * @see org.epics.ioc.pv.PVData#setSupportName(java.lang.String)
      */
     public String setSupportName(String name) {
-        String supportName = super.setSupportName(name);
+        DBD dbd = record.getDBD();
+        if(dbd==null) return "DBD was not set";
+        if(getField().getType()==Type.pvLink) {
+            DBDLinkSupport dbdLinkSupport = dbd.getLinkSupport(name);
+            if(dbdLinkSupport==null) {
+                dbd = DBDFactory.getMasterDBD();
+                dbdLinkSupport = dbd.getLinkSupport(name);
+            }
+            if(dbdLinkSupport==null) {
+                return "linkSupport " + name + " not defined";
+            }
+        } else {
+            DBDSupport dbdSupport = dbd.getSupport(name);
+            if(dbdSupport==null) {
+                dbd = DBDFactory.getMasterDBD();
+                dbdSupport = dbd.getSupport(name);
+            }
+            if(dbdSupport==null) {
+                return "support " + name + " not defined";
+            }
+        }
+        if(support==null) {
+            // Wait until SupportCreation has been run
+            return super.setSupportName(name);
+        }
+        SupportState supportState = SupportState.readyForInitialize;
+        if(support!=null) {
+            supportState = support.getSupportState();
+            if(supportState!=SupportState.readyForInitialize) {
+                support.uninitialize();
+            }
+            support = null;
+        }
+        String result = super.setSupportName(name);
+        if(result!=null) return result;
         Iterator<RecordListener> iter = listenerList.iterator();
         while(iter.hasNext()) {
             RecordListener listener = iter.next();
             DBListener dbListener = listener.getDBListener();
             dbListener.supportNamePut(this);
         }
-        return supportName;
+        if(!SupportCreationFactory.createSupport(this)) {
+            return "could not create support";
+        }
+        if(support==null) {
+            return "support does not exist";
+        }
+        // if pvLink then wait for configurationStructure before changing state.
+        if(getField().getType()==Type.pvLink) return null;
+        if(this!=record) {
+            if(record.getSupport()==null) return "record has no support";
+            supportState = record.getSupport().getSupportState();
+        }
+        switch(supportState) {
+        case readyForInitialize:
+            break;
+        case readyForStart:
+            support.initialize();
+            break;
+        case ready:
+            support.initialize();
+            if(support.getSupportState()!=SupportState.readyForStart) break;
+            support.start();
+            break;
+        default:
+        }
+        return null;
     }
     /* (non-Javadoc)
      * @see org.epics.ioc.db.DBData#getSupport()
@@ -183,13 +198,7 @@ public abstract class AbstractDBData extends AbstractPVData implements DBData{
     /**
      * Called by AbstractDBRecord when DBRecord.removeListener or DBrecord.removeListeners are called.
      */
-    protected void removeListeners(){
+    protected void removeRecordListeners(){
         listenerList.clear();
-    }
-    /* (non-Javadoc)
-     * @see org.epics.ioc.dbAccess.DBData#message(java.lang.String, org.epics.ioc.util.MessageType)
-     */
-    public void message(String message, MessageType messageType) {
-        record.message(getFullFieldName() + " " + message, messageType);
     }
 }

@@ -164,21 +164,20 @@ public class AccessTest extends TestCase {
             return;
         }
         PVData parent = pvData.getParent();
-        DBData dbData = (DBData)pvData;
-        DBRecord record = dbData.getRecord();
+        PVRecord record = pvData.getPVRecord();
         String parentName = "none";
-        Field field = dbData.getField();
+        Field field = pvData.getField();
         if(parent!=null) parentName = ((Structure)parent.getField()).getStructureName();
         System.out.printf("record %s fieldRequested %s fieldActual %s parent %s%n",
                 record.getRecordName(),
                 fieldName,field.getFieldName(),
                 parentName);
-        System.out.printf("    value %s%n",dbData.toString(1));
+        System.out.printf("    value %s%n",pvData.toString(1));
         Property[] property = field.getPropertys();
         if(property.length>0) {
             System.out.printf("    property {%n");
             for(Property prop : property) {
-                System.out.printf("        name %s field %s%n",prop.getName(),prop.getFieldName());
+                System.out.printf("        name %s field %s%n",prop.getPropertyName(),prop.getAssociatedFieldName());
                 PVData propData = dbAccess.getPropertyField(prop);
                 if(propData!=null) {
                     System.out.printf("            value %s%n",propData.toString(3));

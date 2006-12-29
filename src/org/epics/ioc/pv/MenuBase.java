@@ -16,16 +16,15 @@ public class MenuBase extends FieldBase implements Menu{
     
     /**
      * Constructor for a menu field.
-     * @param name The field name.
+     * @param fieldName The field name.
      * @param property The field properties.
      * @param fieldAttribute The field attributes.
      * @param menuName The menu name.
      */
-    public MenuBase(String name,Property[] property,FieldAttribute fieldAttribute,String menuName) {
-        super(name,Type.pvMenu,property,fieldAttribute);
+    public MenuBase(String fieldName,Property[] property,FieldAttribute fieldAttribute,String menuName) {
+        super(fieldName,Type.pvMenu,property,fieldAttribute);
         this.menuName = menuName;
     }
-    
     /* (non-Javadoc)
      * @see org.epics.ioc.pv.Enum#isChoicesMutable()
      */
@@ -43,7 +42,6 @@ public class MenuBase extends FieldBase implements Menu{
     public String toString(int indentLevel) {
         return getString(indentLevel);
     }
-
     /* (non-Javadoc)
      * @see org.epics.ioc.pv.Menu#getMenuName()
      */

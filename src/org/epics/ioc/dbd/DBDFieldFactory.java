@@ -71,7 +71,7 @@ public final class  DBDFieldFactory {
     /**
      * Create a DBDStructure.
      * @param name The name of the structure.
-     * @param dbdField An array of DBDField for the fields of the structure.
+     * @param field An array of Field for the fields of the structure.
      * @param property An array of properties for the structure.
      * @return The interface for the newly created structure.
      */
@@ -84,7 +84,7 @@ public final class  DBDFieldFactory {
     /**
      * Create a DBDRecordType.
      * @param name The recordType name.
-     * @param dbdField An array of DBDField for the fields of the structure.
+     * @param field An array of Field for the fields of the structure.
      * @param property An array of properties for the structure.
      * @return interface The for the newly created structure.
      */
@@ -97,7 +97,6 @@ public final class  DBDFieldFactory {
     /**
      * Create a DBDSupport.
      * @param supportName The name of the support.
-     * @param configurationStructureName The name of the configuration structure.
      * @param factoryName The name of the factory for creating support instances.
      * @return the DBDSupport or null if it already existed.
      */
@@ -119,61 +118,71 @@ public final class  DBDFieldFactory {
         return new LinkSupportInstance(supportName,factoryName,configurationStructureName);
     }
     
-    public static Menu createMenuField(String fieldName,Property[]property,FieldAttribute fieldAttribute,String menuName)
+    /**
+     * Create a Menu.
+     * @param fieldName The fieldName.
+     * @param property The properties.
+     * @param fieldAttribute The field attributes.
+     * @param menuName the menuName.
+     * @return The Meny interface.
+     */
+    public static Menu createMenuField(String fieldName,
+        Property[]property,FieldAttribute fieldAttribute,String menuName)
     {
         return new MenuBase(fieldName,property,fieldAttribute,menuName);
     }
+    /**
+     * Create an Array.
+     * @param fieldName The fieldName.
+     * @param property The properties.
+     * @param fieldAttribute The field attributes.
+     * @param elementType The type for the array elements.
+     * @return The Array interface.
+     */
     public static Array createArrayField(String fieldName,Property[]property,FieldAttribute fieldAttribute,Type elementType)
     {
         return new ArrayBase(fieldName,property,fieldAttribute,elementType);
     }
-    public static Structure createStructureField(String fieldName,Property[]property,FieldAttribute fieldAttribute,
-            DBDStructure dbdStructure,DBD dbd)
+    /**
+     * Create a Structure.
+     * @param fieldName The fieldName.
+     * @param property The properties.
+     * @param fieldAttribute The field attributes.
+     * @param dbdStructure The dbdStructure for the structure or null of the fields will be defined later.
+     * @return The Structure interface.
+     */
+    public static Structure createStructureField(String fieldName,
+        Property[]property,FieldAttribute fieldAttribute,DBDStructure dbdStructure)
     {
         if(dbdStructure==null) {
             return new StructureBase(fieldName,property,fieldAttribute,null, new Field[0]);
         }
-        // Must create a copy of all fields so that parent will be correct.
-        Field[] original = dbdStructure.getFields();
-        int length = original.length;
-        Field[] fields = new Field[length];
-        for(int i=0; i<length; i++) {
-            Field field = original[i];
-            Field copy = null;
-            String name = field.getFieldName();
-            Property[] prop = field.getPropertys();
-            Type type = field.getType();
-            FieldAttribute attr = field.getFieldAttribute();
-            switch(type) {
-            case pvMenu:
-                Menu menu = (Menu)field;
-                copy = createMenuField(name,prop,attr,menu.getMenuName());
-                break;
-            case pvArray:
-                Array arrayField = (Array)field;
-                Type elementType = arrayField.getElementType();
-                copy = createArrayField(name,prop,attr,elementType);
-                break;
-            case pvStructure:
-                Structure structure = (Structure)field;
-                DBDStructure dbdStruct = dbd.getStructure(structure.getStructureName());
-                if(dbdStruct==null) {
-                    DBD dbdMaster = DBDFactory.getMasterDBD();
-                    dbdStruct = dbdMaster.getStructure(structure.getStructureName());
-                }
-                copy = createStructureField(name,prop,attr,dbdStruct,dbd);
-                break;
-            default:
-                copy = createField(name,prop,attr,type);
-            }
-            if(copy==null) {
-                throw new IllegalStateException("logic error");
-            }
-            fields[i] = copy;
-        }
-        return new StructureBase(fieldName,property,fieldAttribute,dbdStructure.getStructureName(),fields);
+        return new StructureBase(fieldName,property,fieldAttribute,
+            dbdStructure.getStructureName(),dbdStructure.getFields());
     }
-    
+    /**
+     * Create a Structure.
+     * @param fieldName The fieldName.
+     * @param property The properties.
+     * @param fieldAttribute The field attributes.
+     * @param structureName The name of the structure.
+     * @param field The fields of the structure.
+     * @return The Structure interface.
+     */
+    public static Structure createStructureField(String fieldName,
+            Property[]property,FieldAttribute fieldAttribute,String structureName,Field[] field)
+        {
+            return new StructureBase(fieldName,property,fieldAttribute,
+                structureName,field);
+        }
+    /**
+     * Create a Field.
+     * @param fieldName The fieldName.
+     * @param property The properties.
+     * @param fieldAttribute The field attributes.
+     * @param type The field Type.
+     * @return The Field interface.
+     */
     public static Field createField(String fieldName,
         Property[]property,FieldAttribute fieldAttribute,Type type)
     {
@@ -207,7 +216,7 @@ public final class  DBDFieldFactory {
         /* (non-Javadoc)
          * @see org.epics.ioc.dbDefinition.DBDMenu#getName()
          */
-        public String getName() {
+        public String getMenuName() {
             return menuName;
         }        
         /* (non-Javadoc)

@@ -9,14 +9,15 @@ import java.util.Iterator;
 
 import org.epics.ioc.dbd.*;
 import org.epics.ioc.pv.*;
-import org.epics.ioc.util.MessageType;
+import org.epics.ioc.process.*;
+import org.epics.ioc.util.*;
 
 /**
  * Base class for PVLink.
  * @author mrk
  *
  */
-public class DBLinkBase extends AbstractDBData implements PVLink {
+public class DBLinkBase extends AbstractDBData implements PVLink, Requestor {
     private static Convert convert = ConvertFactory.getConvert();
     private ConfigStructure configStructure = null;
     
@@ -28,13 +29,31 @@ public class DBLinkBase extends AbstractDBData implements PVLink {
      * @see org.epics.ioc.db.AbstractDBData#setSupportName(java.lang.String)
      */
     public String setSupportName(String name) {
-        DBD dbd = getRecord().getDBD();
-        if(dbd==null) return "DBD was not set";
+        String result = super.setSupportName(name);
+        if(result!=null) return result;
+        DBRecord dbRecord = super.getDBRecord();
+        DBD dbd = dbRecord.getDBD();
         DBDLinkSupport dbdLinkSupport = dbd.getLinkSupport(name);
-        if(dbdLinkSupport==null) return "support " + name + " not defined";
-        super.setSupportName(name);
+        if(dbdLinkSupport==null) return "DBDLinkSupport not found";
         String configurationStructureName = dbdLinkSupport.getConfigurationStructureName();
-        if(configurationStructureName==null) return null;
+        if(configurationStructureName==null) {
+            SupportState supportState = super.getDBRecord().getSupport().getSupportState();
+            Support support = super.getSupport();
+            switch(supportState) {
+            case readyForInitialize:
+                break;
+            case readyForStart:
+                support.initialize();
+                break;
+            case ready:
+                support.initialize();
+                if(support.getSupportState()!=SupportState.readyForStart) break;
+                support.start();
+                break;
+            default:
+            }
+            return null;
+        }
         DBDStructure dbdStructure = dbd.getStructure(configurationStructureName);
         if(dbdStructure==null) {
             return "configurationStructure " + configurationStructureName
@@ -43,6 +62,10 @@ public class DBLinkBase extends AbstractDBData implements PVLink {
         }
         configStructure = new ConfigStructure(this,dbdStructure);
         configStructure.createFields(dbdStructure);
+        if(super.getSupport()==null) {
+            // Wait until SupportCreation has been run
+            return super.setSupportName(name);
+        }
         Iterator<RecordListener> iter = super.listenerList.iterator();
         while(iter.hasNext()) {
             RecordListener listener = iter.next();
@@ -68,6 +91,29 @@ public class DBLinkBase extends AbstractDBData implements PVLink {
             return false;
         }
         convert.copyStructure(pvStructure, configStructure);
+        Support support = super.getSupport();
+        if(support==null) {
+            //Wait until SupportCreation has been run
+            return true;
+        }
+        SupportState supportState = support.getSupportState();
+        if(supportState!=SupportState.readyForInitialize) {
+            support.uninitialize();
+        }
+        supportState = super.getDBRecord().getSupport().getSupportState();
+        switch(supportState) {
+        case readyForInitialize:
+            break;
+        case readyForStart:
+            support.initialize();
+            break;
+        case ready:
+            support.initialize();
+            if(support.getSupportState()!=SupportState.readyForStart) break;
+            support.start();
+            break;
+        default:
+        }
         Iterator<RecordListener> iter = super.listenerList.iterator();
         while(iter.hasNext()) {
             RecordListener listener = iter.next();
@@ -99,12 +145,10 @@ public class DBLinkBase extends AbstractDBData implements PVLink {
     
     private static class ConfigStructure extends AbstractDBData implements PVStructure{
         private DBData[] dbData = null;
-        private String fullFieldName;
         
         private ConfigStructure(DBData parent, Structure structure) {
             super(parent,structure);
             dbData = new DBData[structure.getFields().length];
-            fullFieldName = parent.getFullFieldName() + "." + "configStructure";
         }
         
         private void createFields(DBDStructure dbdStructure) {
@@ -113,20 +157,6 @@ public class DBLinkBase extends AbstractDBData implements PVLink {
                 dbData[i] = FieldDataFactory.createData(this,field[i]);
             }
         }    
-        /* (non-Javadoc)
-         * @see org.epics.ioc.pv.AbstractPVData#getFullFieldName()
-         */
-        public String getFullFieldName() {
-            return fullFieldName;
-        }
-
-        /* (non-Javadoc)
-         * @see org.epics.ioc.pv.AbstractPVData#message(java.lang.String, org.epics.ioc.util.MessageType)
-         */
-        public void message(String message, MessageType messageType) {
-            super.getParent().message(message, messageType);
-        }
-
         /* (non-Javadoc)
          * @see org.epics.ioc.pv.PVStructure#beginPut()
          */
@@ -151,11 +181,10 @@ public class DBLinkBase extends AbstractDBData implements PVLink {
         /* (non-Javadoc)
          * @see org.epics.ioc.pv.PVStructure#replaceField(java.lang.String, org.epics.ioc.pv.PVData)
          */
-        public boolean replaceField(String fieldName, PVData pvData) {
+        public boolean replaceStructureField(String fieldName, String structureName) {
             // nothing to do
             return false;
-        }
-        
+        }       
         /* (non-Javadoc)
          * @see java.lang.Object#toString()
          */

@@ -59,7 +59,7 @@ public enum Type {
     pvArray,
     /**
      * Value is a enum with immutable choices.
-     * A menu also hace a menuName.
+     * A menu also has a menuName.
      */
     pvMenu,
     /**

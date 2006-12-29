@@ -26,7 +26,7 @@ public class LinearConvertInputFactory {
         return support;
     }
     
-    private static final String supportName = "linearConvert";
+    private static final String supportName = "linearConvertInput";
     
     private static class LinearConvert extends AbstractSupport {
         

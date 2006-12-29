@@ -7,7 +7,6 @@ package org.epics.ioc.dbd;
 
 import java.util.*;
 
-import org.epics.ioc.pv.*;
 
 /**
  * DBD (DatabaseDefinition) is the interface for locating interfaces for

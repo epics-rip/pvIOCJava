@@ -1119,7 +1119,7 @@ public class ChannelAccessLocalFactory  {
                         this.channelMonitorNotifyRequestor = channelMonitorNotifyRequestor;
                         channelMonitorRequestor = null;
                         monitor.start();
-                        recordListener = dbRecord.createListener(this);
+                        recordListener = dbRecord.createRecordListener(this);
                         List<ChannelFieldImpl> channelFieldList = monitor.getChannelFieldList();
                         if(threadName==null) threadName =
                             channelMonitorNotifyRequestor.getRequestorName() + "NotifyThread";
@@ -1167,7 +1167,7 @@ public class ChannelAccessLocalFactory  {
                         monitorThread = new MonitorThread(
                             threadName,priority,channelMonitorRequestor,channelDataQueue);
                         monitor.start();
-                        recordListener = dbRecord.createListener(this);
+                        recordListener = dbRecord.createRecordListener(this);
                         for(ChannelFieldImpl channelField: channelFieldList) {
                             DBData dbData = (DBData)channelField.getPVData();
                             dbData.addListener(recordListener);

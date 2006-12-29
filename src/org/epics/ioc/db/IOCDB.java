@@ -5,7 +5,6 @@
  */
 package org.epics.ioc.db;
 
-import org.epics.ioc.dbd.*;
 import org.epics.ioc.util.*;
 
 import java.util.*;

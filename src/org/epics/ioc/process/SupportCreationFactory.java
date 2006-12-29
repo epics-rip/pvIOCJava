@@ -31,6 +31,10 @@ public class SupportCreationFactory {
         return processDB;
     }
     
+    static public boolean createSupport(PVData pvData) {
+        return createSupportPvt(pvData,pvData);
+    }
+    
     static private class SupportCreationInstance implements SupportCreation{
         private IOCDB iocdb;
         private Requestor requestor;
@@ -70,6 +74,9 @@ public class SupportCreationFactory {
             return result;
         }
         
+        /* (non-Javadoc)
+         * @see org.epics.ioc.process.SupportCreation#initializeSupport()
+         */
         public boolean initializeSupport() {
             boolean result = true;
             Iterator<DBRecord> iter = records.iterator();
@@ -80,7 +87,7 @@ public class SupportCreationFactory {
                 process.initialize();
                 SupportState supportState = support.getSupportState();
                 if(supportState!=SupportState.readyForStart) {
-                    printError(record,
+                    printError(requestor,record,
                         " state " + supportState.toString()
                         + " but should be readyForStart");
                     result = false;
@@ -89,6 +96,9 @@ public class SupportCreationFactory {
             return result;
         }
         
+        /* (non-Javadoc)
+         * @see org.epics.ioc.process.SupportCreation#startSupport()
+         */
         public boolean startSupport() {
             boolean result = true;
             Iterator<DBRecord> iter = records.iterator();
@@ -99,7 +109,7 @@ public class SupportCreationFactory {
                 process.start();
                 SupportState supportState = support.getSupportState();
                 if(supportState!=SupportState.ready) {
-                    printError(record,
+                    printError(requestor,record,
                             " state " + supportState.toString()
                             + " but should be ready");
                     result = false;
@@ -108,6 +118,9 @@ public class SupportCreationFactory {
             return result;
             
         }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.process.SupportCreation#stopSupport()
+         */
         public void stopSupport() {
             Iterator<DBRecord> iter = records.iterator();
             while(iter.hasNext()) {
@@ -116,6 +129,9 @@ public class SupportCreationFactory {
                 process.stop();
             }
         }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.process.SupportCreation#uninitializeSupport()
+         */
         public void uninitializeSupport() {
             Iterator<DBRecord> iter = records.iterator();
             while(iter.hasNext()) {
@@ -124,7 +140,7 @@ public class SupportCreationFactory {
                 process.uninitialize();
             }
         }
-        
+  
         private boolean createRecordSupport(DBRecord dbRecord) {
             if(dbRecord.getSupport()!=null) return true;
             String supportName = dbRecord.getSupportName();
@@ -134,14 +150,14 @@ public class SupportCreationFactory {
                     MessageType.fatalError);
                 return false;
             }
-            boolean result = createSupport(dbRecord);
+            boolean result = SupportCreationFactory.createSupportPvt(requestor,dbRecord);
             if(!result) return result;
             return true;
         }
         
         
         private boolean createStructureSupport(PVStructure pvStructure) {
-            boolean result = createSupport((DBData)pvStructure);
+            boolean result = SupportCreationFactory.createSupportPvt(requestor,(DBData)pvStructure);
             PVData[] pvDatas = pvStructure.getFieldPVDatas();
             for(PVData pvData : pvDatas) {
                 Type type = pvData.getField().getType();
@@ -150,7 +166,7 @@ public class SupportCreationFactory {
                 } else if(type==Type.pvArray) {
                     if(!createArraySupport((PVArray)pvData)) result = false;
                 } else {
-                    if(!createSupport(pvData)) result = false;
+                    if(!SupportCreationFactory.createSupportPvt(requestor,pvData)) result = false;
                 }
             }
             return result;
@@ -158,7 +174,7 @@ public class SupportCreationFactory {
         
         private boolean createArraySupport(PVArray pvArray) {
             boolean result = true;
-            if(!createSupport((DBData)pvArray)) result = false;
+            if(!SupportCreationFactory.createSupportPvt(requestor,(DBData)pvArray)) result = false;
             Array array = (Array)pvArray.getField();
             Type elementType = array.getElementType();
             if(elementType==Type.pvStructure) {
@@ -189,7 +205,7 @@ public class SupportCreationFactory {
                     PVLink[] pvLink = data.data;
                     for(int i=0; i<n; i++) {
                         if(pvLink[i]==null) continue;
-                        if(!createSupport((DBData)pvLink[i])) result = false;
+                        if(!SupportCreationFactory.createSupportPvt(requestor,(DBData)pvLink[i])) result = false;
                     }
                     nsofar += n; offset += n;
                 }
@@ -212,110 +228,110 @@ public class SupportCreationFactory {
             } 
             return result;
         }
-        
-        private void printError(DBData dbData,String message) {
-            String name = dbData.getFullFieldName();
-            name = dbData.getRecord().getRecordName() + name;
-            requestor.message(
-                    name + " " + message,
-                    MessageType.error);
+    }
+    
+    private static void printError(Requestor requestor,DBData dbData,String message) {
+        String name = dbData.getFullFieldName();
+        name = dbData.getPVRecord().getRecordName() + name;
+        requestor.message(
+                name + " " + message,
+                MessageType.error);
+    }
+    
+    private static boolean createSupportPvt(Requestor requestor,PVData pvData) {
+        DBData dbData = (DBData)pvData;
+        if(dbData.getSupport()!=null) return true;
+        String supportName = dbData.getSupportName();
+        if(supportName==null) return true;
+        DBD dbd = DBDFactory.getMasterDBD();
+        DBDSupport dbdSupport = dbd.getSupport(supportName);
+        if(dbdSupport==null) {
+            dbdSupport = dbd.getLinkSupport(supportName);
         }
-        
-        private boolean createSupport(PVData pvData) {
-            DBData dbData = (DBData)pvData;
-            if(dbData.getSupport()!=null) return true;
-            String supportName = dbData.getSupportName();
-            if(supportName==null) return true;
-            DBD dbd = DBDFactory.getMasterDBD();
-            DBDSupport dbdSupport = dbd.getSupport(supportName);
-            if(dbdSupport==null) {
-                dbdSupport = dbd.getLinkSupport(supportName);
-            }
-            if(dbdSupport==null) {
-                printError(dbData,"support " + supportName + " does not exist");
-                return false;
-            }
-            String factoryName = dbdSupport.getFactoryName();
-            if(factoryName==null) {
-                printError(dbData,"support " + supportName + " does not define a factory name");
-                return false;
-            }
-            Class supportClass;
-            Support support = null;
-            Method method = null;
-            try {
-                supportClass = Class.forName(factoryName);
-            }catch (ClassNotFoundException e) {
-                printError(dbData,
-                        "support " + supportName 
-                        + " factory " + e.getLocalizedMessage()
-                        + " class not found");
-                return false;
-            }
-            String data = null;
-            Type type = dbData.getField().getType();
-            if(type==Type.pvArray) {
-                data = "PVArray";
-            } else if (type==Type.pvLink) {
-                data = "PVLink";
-            } else if (type==Type.pvStructure) {
-                data = "PVStructure";
-            } else {
-                data = "PVData";
-            }
-            data = "org.epics.ioc.pv." + data;
-            try {
-                method = supportClass.getDeclaredMethod("create",
-                        Class.forName(data));    
-            } catch (NoSuchMethodException e) {
-                printError(dbData,
-                        "support "
-                        + supportName
-                        + " no factory method "
-                        + e.getLocalizedMessage());
-                return false;
-            } catch (ClassNotFoundException e) {
-                printError(dbData,
-                        "support "
-                        + factoryName
-                        + " arg class "
-                        + e.getLocalizedMessage());
-                return false;
-            }
-            if(!Modifier.isStatic(method.getModifiers())) {
-                printError(dbData,
-                        "support "
-                        + factoryName
-                        + " create is not a static method ");
-                return false;
-            }
-            try {
-                support = (Support)method.invoke(null,dbData);
-            } catch(IllegalAccessException e) {
-                printError(dbData,
-                        "support "
-                        + supportName
-                        + " create IllegalAccessException "
-                        + e.getLocalizedMessage());
-                return false;
-            } catch(IllegalArgumentException e) {
-                printError(dbData,
-                        "support "
-                        + supportName
-                        + " create IllegalArgumentException "
-                        + e.getLocalizedMessage());
-                return false;
-            } catch(InvocationTargetException e) {
-                printError(dbData,
-                        "support "
-                        + supportName
-                        + " create InvocationTargetException "
-                        + e.getLocalizedMessage());
-                return false;
-            }
-            dbData.setSupport(support);
-            return true;
+        if(dbdSupport==null) {
+            printError(requestor,dbData,"support " + supportName + " does not exist");
+            return false;
         }
+        String factoryName = dbdSupport.getFactoryName();
+        if(factoryName==null) {
+            printError(requestor,dbData,"support " + supportName + " does not define a factory name");
+            return false;
+        }
+        Class supportClass;
+        Support support = null;
+        Method method = null;
+        try {
+            supportClass = Class.forName(factoryName);
+        }catch (ClassNotFoundException e) {
+            printError(requestor,dbData,
+                    "support " + supportName 
+                    + " factory " + e.getLocalizedMessage()
+                    + " class not found");
+            return false;
+        }
+        String data = null;
+        Type type = dbData.getField().getType();
+        if(type==Type.pvArray) {
+            data = "PVArray";
+        } else if (type==Type.pvLink) {
+            data = "PVLink";
+        } else if (type==Type.pvStructure) {
+            data = "PVStructure";
+        } else {
+            data = "PVData";
+        }
+        data = "org.epics.ioc.pv." + data;
+        try {
+            method = supportClass.getDeclaredMethod("create",
+                    Class.forName(data));    
+        } catch (NoSuchMethodException e) {
+            printError(requestor,dbData,
+                    "support "
+                    + supportName
+                    + " no factory method "
+                    + e.getLocalizedMessage());
+            return false;
+        } catch (ClassNotFoundException e) {
+            printError(requestor,dbData,
+                    "support "
+                    + factoryName
+                    + " arg class "
+                    + e.getLocalizedMessage());
+            return false;
+        }
+        if(!Modifier.isStatic(method.getModifiers())) {
+            printError(requestor,dbData,
+                    "support "
+                    + factoryName
+                    + " create is not a static method ");
+            return false;
+        }
+        try {
+            support = (Support)method.invoke(null,dbData);
+        } catch(IllegalAccessException e) {
+            printError(requestor,dbData,
+                    "support "
+                    + supportName
+                    + " create IllegalAccessException "
+                    + e.getLocalizedMessage());
+            return false;
+        } catch(IllegalArgumentException e) {
+            printError(requestor,dbData,
+                    "support "
+                    + supportName
+                    + " create IllegalArgumentException "
+                    + e.getLocalizedMessage());
+            return false;
+        } catch(InvocationTargetException e) {
+            printError(requestor,dbData,
+                    "support "
+                    + supportName
+                    + " create InvocationTargetException "
+                    + e.getLocalizedMessage());
+            return false;
+        }
+        dbData.setSupport(support);
+        return true;
     }
     
 }

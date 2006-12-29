@@ -122,9 +122,9 @@ public class ListenerTest extends TestCase {
                 }
                 dbData = dbAccess.getField();
                 actualFieldName = dbData.getField().getFieldName();
-                fullName = dbData.getRecord().getRecordName() + dbData.getFullFieldName();
+                fullName = dbData.getPVRecord().getRecordName() + dbData.getFullFieldName();
             }
-            listener = dbData.getRecord().createListener(this);
+            listener = dbData.getDBRecord().createRecordListener(this);
             dbData.addListener(listener);
             if(dbData.getField().getType()!=Type.pvStructure) {
                 Property[] property = dbData.getField().getPropertys();
@@ -164,7 +164,7 @@ public class ListenerTest extends TestCase {
          */
         public void beginPut(PVStructure pvStructure) {
             DBData dbData = (DBData)pvStructure;
-            String name = dbData.getRecord().getRecordName() + pvStructure.getFullFieldName();
+            String name = dbData.getPVRecord().getRecordName() + pvStructure.getFullFieldName();
             System.out.println("beginPut " + name);
         }
         /* (non-Javadoc)
@@ -172,7 +172,7 @@ public class ListenerTest extends TestCase {
          */
         public void endPut(PVStructure pvStructure) {
             DBData dbData = (DBData)pvStructure;
-            String name = dbData.getRecord().getRecordName() + pvStructure.getFullFieldName();
+            String name = dbData.getPVRecord().getRecordName() + pvStructure.getFullFieldName();
             System.out.println("endPut " + name);
         }
         /* (non-Javadoc)
@@ -180,8 +180,7 @@ public class ListenerTest extends TestCase {
          */
         public void configurationStructurePut(PVLink pvLink) {
             putCommon("configurationStructurePut");
-            String recordName = ((DBData)pvLink).getRecord().getRecordName();
-            String name = recordName + pvLink.getFullFieldName();
+            String name = pvLink.getPVRecord().getRecordName() + pvLink.getFullFieldName();
             if(!name.equals(fullName)) {
                 System.out.printf("%s NOT_EQUAL %s%n",name,fullName);
             }
@@ -194,8 +193,7 @@ public class ListenerTest extends TestCase {
         public void dataPut(DBData dbData) {
             putCommon("dataPut");
             changeOccured = true;
-            String recordName = dbData.getRecord().getRecordName();
-            String name = recordName + dbData.getFullFieldName();
+            String name = dbData.getPVRecord().getRecordName() + dbData.getFullFieldName();
             if(!name.equals(fullName)) {
                 System.out.printf("%s NOT_EQUAL %s%n",name,fullName);
             }
@@ -207,8 +205,7 @@ public class ListenerTest extends TestCase {
          */
         public void enumChoicesPut(PVEnum pvEnum) {
             putCommon("enumChoicesPut");
-            String recordName = ((DBData)pvEnum).getRecord().getRecordName();
-            String name = recordName + pvEnum.getFullFieldName();
+            String name = pvEnum.getPVRecord().getRecordName() + pvEnum.getFullFieldName();
             if(!name.equals(fullName)) {
                 System.out.printf("%s NOT_EQUAL %s%n",name,fullName);
             }
@@ -220,8 +217,7 @@ public class ListenerTest extends TestCase {
          */
         public void enumIndexPut(PVEnum pvEnum) {
             putCommon("enumIndexPut");
-            String recordName = ((DBData)pvEnum).getRecord().getRecordName();
-            String name = recordName + pvEnum.getFullFieldName();
+            String name = pvEnum.getPVRecord().getRecordName() + pvEnum.getFullFieldName();
             if(!name.equals(fullName)) {
                 System.out.printf("%s NOT_EQUAL %s%n",name,fullName);
             }
@@ -234,7 +230,7 @@ public class ListenerTest extends TestCase {
         public void structurePut(PVStructure pvStructure, DBData dbData) {
             putCommon("structurePut");
             changeOccured = true;
-            String recordName = dbData.getRecord().getRecordName();
+            String recordName = dbData.getPVRecord().getRecordName();
             String name = recordName + dbData.getFullFieldName();
             System.out.printf("    %s = %s%n",
                 name,dbData.toString(2));
@@ -326,7 +322,7 @@ public class ListenerTest extends TestCase {
             return;
         }
         PVStructure structure = (PVStructure)dbData;
-        DBRecord dbRecord = dbData.getRecord();
+        DBRecord dbRecord = dbData.getDBRecord();
         PVData[] fields = structure.getFieldPVDatas();
         System.out.printf("%ntestPut begin structure put %s%n",
                 recordName + dbData.getFullFieldName());

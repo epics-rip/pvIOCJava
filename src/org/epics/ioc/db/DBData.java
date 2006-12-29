@@ -6,7 +6,6 @@
 package org.epics.ioc.db;
 import org.epics.ioc.process.*;
 import org.epics.ioc.pv.*;
-import org.epics.ioc.util.MessageType;
 
 
 /**
@@ -16,10 +15,10 @@ import org.epics.ioc.util.MessageType;
  */
 public interface DBData extends PVData {
     /**
-     * Get the record instance that contains this field.
-     * @return The record interface.
+     * Get the DBRecord interface.
+     * @return The interface.
      */
-    DBRecord getRecord();
+    DBRecord getDBRecord();
     /**
      * Add a listener for puts.
      * @param listener The listener.

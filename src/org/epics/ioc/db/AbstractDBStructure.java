@@ -14,8 +14,7 @@ import org.epics.ioc.pv.*;
  * @author mrk
  *
  */
-public abstract class AbstractDBStructure extends AbstractDBData
-    implements PVStructure
+public abstract class AbstractDBStructure extends AbstractDBData implements PVStructure
 {
     
     private DBDRecordType dbdRecordType  = null;
@@ -33,9 +32,7 @@ public abstract class AbstractDBStructure extends AbstractDBData
             dbData = new DBData[0];
             return;
         }
-        DBD dbd = DBDFactory.getMasterDBD();
-        DBDStructure dbdStructure = dbd.getStructure(structureName);
-        Field[] fields = dbdStructure.getFields();
+        Field[] fields = structure.getFields();
         dbData = new DBData[fields.length];
         for(int i=0; i < dbData.length; i++) {
             dbData[i] = FieldDataFactory.createData(this,fields[i]);
@@ -43,8 +40,8 @@ public abstract class AbstractDBStructure extends AbstractDBData
     }
     
     /**
-     * constructor for record instance classes.
-     * @param dbdRecordType the reflection interface for the record type.
+     * Constructor for record instance classes.
+     * @param dbdRecordType The reflection interface for the record type.
      */
     protected AbstractDBStructure(DBDRecordType dbdRecordType) {
         super(null,dbdRecordType);
@@ -53,7 +50,7 @@ public abstract class AbstractDBStructure extends AbstractDBData
         dbData = new DBData[numberFields];
     }
     /**
-     * create the fields for the record.
+     * Create the fields for the record.
      * This is only called by whatever called the record instance constructor.
      * @param record the record instance.
      */
@@ -67,16 +64,33 @@ public abstract class AbstractDBStructure extends AbstractDBData
     /* (non-Javadoc)
      * @see org.epics.ioc.pv.PVStructure#replaceField(java.lang.String, org.epics.ioc.pv.PVData)
      */
-    public boolean replaceField(String fieldName, PVData pvData) {
+    public boolean replaceStructureField(String fieldName, String structureName) {
         Structure oldStructure = (Structure)super.getField();
         int index = oldStructure.getFieldIndex(fieldName);
         Field oldField = oldStructure.getFields()[index];
-        Field newField = pvData.getField();
-        if(!oldField.getFieldName().equals(newField.getFieldName())) return false;
-        Structure newStructure = oldStructure.copy();
-        if(!newStructure.replaceField(newField.getFieldName(),newField)) return false;
-        super.replaceField(newField);
-        dbData[index] = (DBData)pvData;
+        DBD dbd = DBDFactory.getMasterDBD();
+        DBDStructure dbdStructure = dbd.getStructure(structureName);
+        if(dbdStructure==null) return false;
+        Structure fieldStructure = DBDFieldFactory.createStructureField(
+              fieldName,
+              oldField.getPropertys(),
+              oldField.getFieldAttribute(),
+              dbdStructure);
+        Field[] oldFields = oldStructure.getFields();
+        int length = oldFields.length;
+        Field[] newFields = new Field[length];
+        for(int i=0; i<length; i++) newFields[i] = oldFields[i];
+        newFields[index] = fieldStructure;
+        Structure newStructure = DBDFieldFactory.createStructureField(
+                oldStructure.getFieldName(),
+                oldStructure.getPropertys(), oldStructure.getFieldAttribute(),
+                oldStructure.getStructureName(),newFields);
+        String supportName = oldStructure.getSupportName();
+        if(supportName==null) supportName = dbdStructure.getSupportName();
+        newStructure.setSupportName(supportName);
+        DBData newData = FieldDataFactory.createData(this, newStructure);
+        super.replaceField(newStructure);
+        dbData[index] = newData;
         return true;
     }
 

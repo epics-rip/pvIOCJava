@@ -230,7 +230,7 @@ public class ReplaceTest extends TestCase {
                 dbData = dbAccess.getField();
                 actualFieldName = dbData.getField().getFieldName();
             }
-            listener = dbData.getRecord().createListener(this);
+            listener = dbData.getDBRecord().createRecordListener(this);
             dbData.addListener(listener);
             if(dbData.getField().getType()!=Type.pvStructure) {
                 Property[] property = dbData.getField().getPropertys();
@@ -259,7 +259,7 @@ public class ReplaceTest extends TestCase {
          */
         public void beginPut(PVStructure pvStructure) {
             DBData dbData = (DBData)pvStructure;
-            String name = dbData.getRecord().getRecordName() + pvStructure.getFullFieldName();
+            String name = dbData.getPVRecord().getRecordName() + pvStructure.getFullFieldName();
             System.out.println("      beginPut " + name);
         }
         /* (non-Javadoc)
@@ -267,7 +267,7 @@ public class ReplaceTest extends TestCase {
          */
         public void endPut(PVStructure pvStructure) {
             DBData dbData = (DBData)pvStructure;
-            String name = dbData.getRecord().getRecordName() + pvStructure.getFullFieldName();
+            String name = dbData.getPVRecord().getRecordName() + pvStructure.getFullFieldName();
             System.out.println("      endPut " + name);
         }
         
@@ -292,7 +292,7 @@ public class ReplaceTest extends TestCase {
                 actualFieldName);
             String dbDataName = dbData.getField().getFieldName();
             PVData parent = dbData.getParent();
-            while(parent!=dbData.getRecord()) {
+            while(parent!=dbData.getPVRecord()) {
                 dbDataName = parent.getField().getFieldName() + "." + dbDataName;
                 parent = parent.getParent();
             }
@@ -313,7 +313,9 @@ public class ReplaceTest extends TestCase {
         public void enumIndexPut(PVEnum pvEnum) {
             // TODO Auto-generated method stub
             
-        }
+        }int length = 0;
+        int capacity;
+        boolean capacityMutable;
         /* (non-Javadoc)
          * @see org.epics.ioc.db.DBListener#structurePut(org.epics.ioc.pv.PVStructure, org.epics.ioc.db.DBData)
          */
@@ -328,7 +330,7 @@ public class ReplaceTest extends TestCase {
                 actualFieldName);
             String dbDataName = dbData.getField().getFieldName();
             PVData parent = dbData.getParent();
-            while(parent!=dbData.getRecord()) {
+            while(parent!=dbData.getPVRecord()) {
                 dbDataName = parent.getField().getFieldName() + "." + dbDataName;
                 parent = parent.getParent();
             }
@@ -957,29 +959,64 @@ public class ReplaceTest extends TestCase {
         private String value;
 
     }
-
-    private static class BooleanArray
-        extends AbstractDBArray implements PVBooleanArray
-    {
-        /* (non-Javadoc)
-         * @see java.lang.Object#toString()
+    
+    private static abstract class AbstractDBArray extends AbstractDBData implements PVArray{
+        protected int length = 0;
+        protected int capacity;
+        protected boolean capacityMutable = true;
+        /**
+         * Constructer that derived classes must call.
+         * @param parent The parent interface.
+         * @param dbdArrayField The reflection interface for the DBArray data.
          */
-        public String toString() {
-            return convert.getString(this);
+        protected AbstractDBArray(DBData parent,Array array) {
+            super(parent,array);
         }
-        
-        /* (non-Javadoc)
-         * @see org.epics.ioc.pv.PVData#toString(int)
-         */
-        public String toString(int indentLevel) {
-            return convert.getString(this, indentLevel);
-        }
-
         /* (non-Javadoc)
          * @see org.epics.ioc.pv.PVArray#isCapacityMutable()
          */
         public boolean isCapacityMutable() {
             return capacityMutable;
+        }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pv.PVArray#getCapacity()
+         */
+        public int getCapacity() {
+            return capacity;
+        }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pv.PVArray#getLength()
+         */
+        public int getLength() {
+            return length;
+        }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pv.PVArray#setCapacity(int)
+         */
+        abstract public void setCapacity(int capacity);
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pv.PVArray#setLength(int)
+         */
+        public void setLength(int len) {
+            if(!super.getField().isMutable())
+                throw new IllegalStateException("PVData.isMutable is false");
+            if(len>capacity) setCapacity(len);
+            length = len;
+        }
+        /* (non-Javadoc)
+         * @see java.lang.Object#toString()
+         */
+        public String toString() {
+            return toString(0);
+        }
+    }
+    private static class BooleanArray extends AbstractDBArray implements PVBooleanArray
+    {
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pv.PVData#toString(int)
+         */
+        public String toString(int indentLevel) {
+            return convert.getString(this, indentLevel);
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.pv.PVBooleanArray#get(int, int, org.epics.ioc.pv.BooleanArrayData)
@@ -1008,21 +1045,6 @@ public class ReplaceTest extends TestCase {
             postPut();
             return len;
         }
-        
-        /* (non-Javadoc)
-         * @see org.epics.ioc.pv.PVArray#getCapacity()
-         */
-        public int getCapacity() {
-            return capacity;
-        }
-
-        /* (non-Javadoc)
-         * @see org.epics.ioc.pv.PVArray#getLength()
-         */
-        public int getLength() {
-            return length;
-        }
-
         /* (non-Javadoc)
          * @see org.epics.ioc.pv.PVArray#setCapacity(int)
          */
@@ -1035,18 +1057,8 @@ public class ReplaceTest extends TestCase {
             value = newarray;
             capacity = len;
         }
-
-        /* (non-Javadoc)
-         * @see org.epics.ioc.pv.PVArray#setLength(int)
-         */
-        public void setLength(int len) {
-            if(!super.getField().isMutable())
-                throw new IllegalStateException("PVData.isMutable is false");
-            if(len>capacity) setCapacity(len);
-            length = len;
-        }
-
-        BooleanArray(DBData parent,Array array,
+        
+        private BooleanArray(DBData parent,Array array,
             int capacity,boolean capacityMutable)
         {
             super(parent,array);
@@ -1056,21 +1068,10 @@ public class ReplaceTest extends TestCase {
         }
         
         private boolean[] value;
-        int length = 0;
-        int capacity;
-        boolean capacityMutable;
     }
 
-    private static class ByteArray
-        extends AbstractDBArray implements PVByteArray
+    private static class ByteArray extends AbstractDBArray implements PVByteArray
     {
-        /* (non-Javadoc)
-         * @see java.lang.Object#toString()
-         */
-        public String toString() {
-            return convert.getString(this);
-        }
-        
         /* (non-Javadoc)
          * @see org.epics.ioc.pv.PVData#toString(int)
          */
@@ -1078,12 +1079,6 @@ public class ReplaceTest extends TestCase {
             return convert.getString(this, indentLevel);
         }
 
-        /* (non-Javadoc)
-         * @see org.epics.ioc.pv.PVArray#isCapacityMutable()
-         */
-        public boolean isCapacityMutable() {
-            return capacityMutable;
-        }
         /* (non-Javadoc)
          * @see org.epics.ioc.pv.PVByteArray#get(int, int, org.epics.ioc.pv.ByteArrayData)
          */
@@ -1111,20 +1106,6 @@ public class ReplaceTest extends TestCase {
             postPut();
             return len;
         }
-        
-        /* (non-Javadoc)
-         * @see org.epics.ioc.pv.PVArray#getCapacity()
-         */
-        public int getCapacity() {
-            return capacity;
-        }
-
-        /* (non-Javadoc)
-         * @see org.epics.ioc.pv.PVArray#getLength()
-         */
-        public int getLength() {
-            return length;
-        }
 
         /* (non-Javadoc)
          * @see org.epics.ioc.pv.PVArray#setCapacity(int)
@@ -1139,17 +1120,7 @@ public class ReplaceTest extends TestCase {
             capacity = len;
         }
 
-        /* (non-Javadoc)
-         * @see org.epics.ioc.pv.PVArray#setLength(int)
-         */
-        public void setLength(int len) {
-            if(!super.getField().isMutable())
-                throw new IllegalStateException("PVData.isMutable is false");
-            if(len>capacity) setCapacity(len);
-            length = len;
-        }
-
-        ByteArray(DBData parent,Array array,
+        private ByteArray(DBData parent,Array array,
             int capacity,boolean capacityMutable)
         {
             super(parent,array);
@@ -1159,33 +1130,15 @@ public class ReplaceTest extends TestCase {
         }
         
         private byte[] value;
-        int length = 0;
-        int capacity;
-        boolean capacityMutable;
     }
 
-    private static class ShortArray
-        extends AbstractDBArray implements PVShortArray
+    private static class ShortArray extends AbstractDBArray implements PVShortArray
     {
-        /* (non-Javadoc)
-         * @see java.lang.Object#toString()
-         */
-        public String toString() {
-            return convert.getString(this);
-        }
-        
         /* (non-Javadoc)
          * @see org.epics.ioc.pv.PVData#toString(int)
          */
         public String toString(int indentLevel) {
             return convert.getString(this, indentLevel);
-        }
-
-        /* (non-Javadoc)
-         * @see org.epics.ioc.pv.PVArray#isCapacityMutable()
-         */
-        public boolean isCapacityMutable() {
-            return capacityMutable;
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.pv.PVShortArray#get(int, int, org.epics.ioc.pv.ShortArrayData)
@@ -1215,20 +1168,6 @@ public class ReplaceTest extends TestCase {
             return len;
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.pv.PVArray#getCapacity()
-         */
-        public int getCapacity() {
-            return capacity;
-        }
-
-        /* (non-Javadoc)
-         * @see org.epics.ioc.pv.PVArray#getLength()
-         */
-        public int getLength() {
-            return length;
-        }
-
-        /* (non-Javadoc)
          * @see org.epics.ioc.pv.PVArray#setCapacity(int)
          */
         public void setCapacity(int len) {
@@ -1241,17 +1180,7 @@ public class ReplaceTest extends TestCase {
             capacity = len;
         }
 
-        /* (non-Javadoc)
-         * @see org.epics.ioc.pv.PVArray#setLength(int)
-         */
-        public void setLength(int len) {
-            if(!super.getField().isMutable())
-                throw new IllegalStateException("PVData.isMutable is false");
-            if(len>capacity) setCapacity(len);
-            length = len;
-        }
-
-        ShortArray(DBData parent,Array array,
+        private ShortArray(DBData parent,Array array,
             int capacity,boolean capacityMutable)
         {
             super(parent,array);
@@ -1261,33 +1190,16 @@ public class ReplaceTest extends TestCase {
         }
         
         private short[] value;
-        int length = 0;
-        int capacity;
-        boolean capacityMutable;
     }
 
-    private static class IntArray
-        extends AbstractDBArray implements PVIntArray
+    private static class IntArray extends AbstractDBArray implements PVIntArray
     {
-        /* (non-Javadoc)
-         * @see java.lang.Object#toString()
-         */
-        public String toString() {
-            return convert.getString(this);
-        }
-        
+       
         /* (non-Javadoc)
          * @see org.epics.ioc.pv.PVData#toString(int)
          */
         public String toString(int indentLevel) {
             return convert.getString(this, indentLevel);
-        }
-
-        /* (non-Javadoc)
-         * @see org.epics.ioc.pv.PVArray#isCapacityMutable()
-         */
-        public boolean isCapacityMutable() {
-            return capacityMutable;
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.pv.PVIntArray#get(int, int, org.epics.ioc.pv.IntArrayData)
@@ -1317,20 +1229,6 @@ public class ReplaceTest extends TestCase {
             return len;
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.pv.PVArray#getCapacity()
-         */
-        public int getCapacity() {
-            return capacity;
-        }
-
-        /* (non-Javadoc)
-         * @see org.epics.ioc.pv.PVArray#getLength()
-         */
-        public int getLength() {
-            return length;
-        }
-
-        /* (non-Javadoc)
          * @see org.epics.ioc.pv.PVArray#setCapacity(int)
          */
         public void setCapacity(int len) {
@@ -1343,17 +1241,7 @@ public class ReplaceTest extends TestCase {
             capacity = len;
         }
 
-        /* (non-Javadoc)
-         * @see org.epics.ioc.pv.PVArray#setLength(int)
-         */
-        public void setLength(int len) {
-            if(!super.getField().isMutable())
-                throw new IllegalStateException("PVData.isMutable is false");
-            if(len>capacity) setCapacity(len);
-            length = len;
-        }
-
-        IntArray(DBData parent,Array array,
+        private IntArray(DBData parent,Array array,
             int capacity,boolean capacityMutable)
         {
             super(parent,array);
@@ -1363,33 +1251,15 @@ public class ReplaceTest extends TestCase {
         }
         
         private int[] value;
-        int length = 0;
-        int capacity;
-        boolean capacityMutable;
     }
 
-    private static class LongArray
-        extends AbstractDBArray implements PVLongArray
+    private static class LongArray extends AbstractDBArray implements PVLongArray
     {
-        /* (non-Javadoc)
-         * @see java.lang.Object#toString()
-         */
-        public String toString() {
-            return convert.getString(this);
-        }
-        
         /* (non-Javadoc)
          * @see org.epics.ioc.pv.PVData#toString(int)
          */
         public String toString(int indentLevel) {
             return convert.getString(this, indentLevel);
-        }
-
-        /* (non-Javadoc)
-         * @see org.epics.ioc.pv.PVArray#isCapacityMutable()
-         */
-        public boolean isCapacityMutable() {
-            return capacityMutable;
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.pv.PVLongArray#get(int, int, org.epics.ioc.pv.LongArrayData)
@@ -1419,20 +1289,6 @@ public class ReplaceTest extends TestCase {
             return len;
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.pv.PVArray#getCapacity()
-         */
-        public int getCapacity() {
-            return capacity;
-        }
-
-        /* (non-Javadoc)
-         * @see org.epics.ioc.pv.PVArray#getLength()
-         */
-        public int getLength() {
-            return length;
-        }
-
-        /* (non-Javadoc)
          * @see org.epics.ioc.pv.PVArray#setCapacity(int)
          */
         public void setCapacity(int len) {
@@ -1445,17 +1301,7 @@ public class ReplaceTest extends TestCase {
             capacity = len;
         }
 
-        /* (non-Javadoc)
-         * @see org.epics.ioc.pv.PVArray#setLength(int)
-         */
-        public void setLength(int len) {
-            if(!super.getField().isMutable())
-                throw new IllegalStateException("PVData.isMutable is false");
-            if(len>capacity) setCapacity(len);
-            length = len;
-        }
-
-        LongArray(DBData parent,Array array,
+        private LongArray(DBData parent,Array array,
             int capacity,boolean capacityMutable)
         {
             super(parent,array);
@@ -1465,33 +1311,16 @@ public class ReplaceTest extends TestCase {
         }
         
         private long[] value;
-        int length = 0;
-        int capacity;
-        boolean capacityMutable;
     }
 
-    private static class FloatArray
-        extends AbstractDBArray implements PVFloatArray
+    private static class FloatArray extends AbstractDBArray implements PVFloatArray
     {
-        /* (non-Javadoc)
-         * @see java.lang.Object#toString()
-         */
-        public String toString() {
-            return convert.getString(this);
-        }
         
         /* (non-Javadoc)
          * @see org.epics.ioc.pv.PVData#toString(int)
          */
         public String toString(int indentLevel) {
             return convert.getString(this, indentLevel);
-        }
-
-        /* (non-Javadoc)
-         * @see org.epics.ioc.pv.PVArray#isCapacityMutable()
-         */
-        public boolean isCapacityMutable() {
-            return capacityMutable;
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.pv.PVFloatArray#get(int, int, org.epics.ioc.pv.FloatArrayData)
@@ -1520,21 +1349,6 @@ public class ReplaceTest extends TestCase {
             postPut();
             return len;
         }
-        
-        /* (non-Javadoc)
-         * @see org.epics.ioc.pv.PVArray#getCapacity()
-         */
-        public int getCapacity() {
-            return capacity;
-        }
-
-        /* (non-Javadoc)
-         * @see org.epics.ioc.pv.PVArray#getLength()
-         */
-        public int getLength() {
-            return length;
-        }
-
         /* (non-Javadoc)
          * @see org.epics.ioc.pv.PVArray#setCapacity(int)
          */
@@ -1548,17 +1362,7 @@ public class ReplaceTest extends TestCase {
             capacity = len;
         }
 
-        /* (non-Javadoc)
-         * @see org.epics.ioc.pv.PVArray#setLength(int)
-         */
-        public void setLength(int len) {
-            if(!super.getField().isMutable())
-                throw new IllegalStateException("PVData.isMutable is false");
-            if(len>capacity) setCapacity(len);
-            length = len;
-        }
-
-        FloatArray(DBData parent,Array array,
+        private FloatArray(DBData parent,Array array,
             int capacity,boolean capacityMutable)
         {
             super(parent,array);
@@ -1568,21 +1372,10 @@ public class ReplaceTest extends TestCase {
         }
         
         private float[] value;
-        int length = 0;
-        int capacity;
-        boolean capacityMutable;
     }
 
-    private static class DoubleArray
-        extends AbstractDBArray implements PVDoubleArray
+    private static class DoubleArray extends AbstractDBArray implements PVDoubleArray
     {
-        /* (non-Javadoc)
-         * @see java.lang.Object#toString()
-         */
-        public String toString() {
-            return convert.getString(this);
-        }
-        
         /* (non-Javadoc)
          * @see org.epics.ioc.pv.PVData#toString(int)
          */
@@ -1590,12 +1383,6 @@ public class ReplaceTest extends TestCase {
             return convert.getString(this, indentLevel);
         }
 
-        /* (non-Javadoc)
-         * @see org.epics.ioc.pv.PVArray#isCapacityMutable()
-         */
-        public boolean isCapacityMutable() {
-            return capacityMutable;
-        }
         /* (non-Javadoc)
          * @see org.epics.ioc.pv.PVDoubleArray#get(int, int, org.epics.ioc.pv.DoubleArrayData)
          */
@@ -1624,20 +1411,6 @@ public class ReplaceTest extends TestCase {
             return len;
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.pv.PVArray#getCapacity()
-         */
-        public int getCapacity() {
-            return capacity;
-        }
-
-        /* (non-Javadoc)
-         * @see org.epics.ioc.pv.PVArray#getLength()
-         */
-        public int getLength() {
-            return length;
-        }
-
-        /* (non-Javadoc)
          * @see org.epics.ioc.pv.PVArray#setCapacity(int)
          */
         public void setCapacity(int len) {
@@ -1650,17 +1423,7 @@ public class ReplaceTest extends TestCase {
             capacity = len;
         }
 
-        /* (non-Javadoc)
-         * @see org.epics.ioc.pv.PVArray#setLength(int)
-         */
-        public void setLength(int len) {
-            if(!super.getField().isMutable())
-                throw new IllegalStateException("PVData.isMutable is false");
-            if(len>capacity) setCapacity(len);
-            length = len;
-        }
-
-        DoubleArray(DBData parent,Array array,
+        private DoubleArray(DBData parent,Array array,
             int capacity,boolean capacityMutable)
         {
             super(parent,array);
@@ -1670,33 +1433,15 @@ public class ReplaceTest extends TestCase {
         }
         
         private double[] value;
-        int length = 0;
-        int capacity;
-        boolean capacityMutable;
     }
 
-    private static class StringArray
-        extends AbstractDBArray implements PVStringArray
+    private static class StringArray extends AbstractDBArray implements PVStringArray
     {
-        /* (non-Javadoc)
-         * @see java.lang.Object#toString()
-         */
-        public String toString() {
-            return convert.getString(this);
-        }
-        
         /* (non-Javadoc)
          * @see org.epics.ioc.pv.PVData#toString(int)
          */
         public String toString(int indentLevel) {
             return convert.getString(this, indentLevel);
-        }
-
-        /* (non-Javadoc)
-         * @see org.epics.ioc.pv.PVArray#isCapacityMutable()
-         */
-        public boolean isCapacityMutable() {
-            return capacityMutable;
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.pv.PVStringArray#get(int, int, org.epics.ioc.pv.StringArrayData)
@@ -1726,20 +1471,6 @@ public class ReplaceTest extends TestCase {
             return len;
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.pv.PVArray#getCapacity()
-         */
-        public int getCapacity() {
-            return capacity;
-        }
-
-        /* (non-Javadoc)
-         * @see org.epics.ioc.pv.PVArray#getLength()
-         */
-        public int getLength() {
-            return length;
-        }
-
-        /* (non-Javadoc)
          * @see org.epics.ioc.pv.PVArray#setCapacity(int)
          */
         public void setCapacity(int len) {
@@ -1752,17 +1483,7 @@ public class ReplaceTest extends TestCase {
             capacity = len;
         }
 
-        /* (non-Javadoc)
-         * @see org.epics.ioc.pv.PVArray#setLength(int)
-         */
-        public void setLength(int len) {
-            if(!super.getField().isMutable())
-                throw new IllegalStateException("PVData.isMutable is false");
-            if(len>capacity) setCapacity(len);
-            length = len;
-        }
-
-        StringArray(DBData parent,Array array,
+        private StringArray(DBData parent,Array array,
             int capacity,boolean capacityMutable)
         {
             super(parent,array);
@@ -1772,33 +1493,15 @@ public class ReplaceTest extends TestCase {
         }
         
         private String[] value;
-        int length = 0;
-        int capacity;
-        boolean capacityMutable;
     }
 
-    private static class EnumArray
-        extends AbstractDBArray implements PVEnumArray
+    private static class EnumArray extends AbstractDBArray implements PVEnumArray
     {
-        /* (non-Javadoc)
-         * @see java.lang.Object#toString()
-         */
-        public String toString() {
-            return convert.getString(this);
-        }
-        
         /* (non-Javadoc)
          * @see org.epics.ioc.pv.PVData#toString(int)
          */
         public String toString(int indentLevel) {
             return convert.getString(this, indentLevel);
-        }
-
-        /* (non-Javadoc)
-         * @see org.epics.ioc.pv.PVArray#isCapacityMutable()
-         */
-        public boolean isCapacityMutable() {
-            return capacityMutable;
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.pv.PVEnumArray#get(int, int, org.epics.ioc.pv.EnumArrayData)
@@ -1828,20 +1531,6 @@ public class ReplaceTest extends TestCase {
             return len;
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.pv.PVArray#getCapacity()
-         */
-        public int getCapacity() {
-            return capacity;
-        }
-
-        /* (non-Javadoc)
-         * @see org.epics.ioc.pv.PVArray#getLength()
-         */
-        public int getLength() {
-            return length;
-        }
-
-        /* (non-Javadoc)
          * @see org.epics.ioc.pv.PVArray#setCapacity(int)
          */
         public void setCapacity(int len) {
@@ -1854,17 +1543,7 @@ public class ReplaceTest extends TestCase {
             capacity = len;
         }
 
-        /* (non-Javadoc)
-         * @see org.epics.ioc.pv.PVArray#setLength(int)
-         */
-        public void setLength(int len) {
-            if(!super.getField().isMutable())
-                throw new IllegalStateException("PVData.isMutable is false");
-            if(len>capacity) setCapacity(len);
-            length = len;
-        }
-
-        EnumArray(DBData parent,Array array,
+        private EnumArray(DBData parent,Array array,
             int capacity,boolean capacityMutable)
         {
             super(parent,array);
@@ -1879,16 +1558,8 @@ public class ReplaceTest extends TestCase {
         boolean capacityMutable;
     }
 
-    private static class MenuArray
-        extends AbstractDBArray implements PVMenuArray
+    private static class MenuArray extends AbstractDBArray implements PVMenuArray
     {
-        /* (non-Javadoc)
-         * @see java.lang.Object#toString()
-         */
-        public String toString() {
-            return getString(0);
-        }
-        
         /* (non-Javadoc)
          * @see org.epics.ioc.pv.PVData#toString(int)
          */
@@ -1911,13 +1582,6 @@ public class ReplaceTest extends TestCase {
             newLine(builder,indentLevel);
             builder.append("}");
             return builder.toString();
-        }
-
-        /* (non-Javadoc)
-         * @see org.epics.ioc.pv.PVArray#isCapacityMutable()
-         */
-        public boolean isCapacityMutable() {
-            return capacityMutable;
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.pv.PVMenuArray#get(int, int, org.epics.ioc.pv.MenuArrayData)
@@ -1947,20 +1611,6 @@ public class ReplaceTest extends TestCase {
             return len;
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.pv.PVArray#getCapacity()
-         */
-        public int getCapacity() {
-            return capacity;
-        }
-
-        /* (non-Javadoc)
-         * @see org.epics.ioc.pv.PVArray#getLength()
-         */
-        public int getLength() {
-            return length;
-        }
-
-        /* (non-Javadoc)
          * @see org.epics.ioc.pv.PVArray#setCapacity(int)
          */
         public void setCapacity(int len) {
@@ -1973,17 +1623,7 @@ public class ReplaceTest extends TestCase {
             capacity = len;
         }
 
-        /* (non-Javadoc)
-         * @see org.epics.ioc.pv.PVArray#setLength(int)
-         */
-        public void setLength(int len) {
-            if(!super.getField().isMutable())
-                throw new IllegalStateException("PVData.isMutable is false");
-            if(len>capacity) setCapacity(len);
-            length = len;
-        }
-
-        MenuArray(DBData parent,Array array,
+        private MenuArray(DBData parent,Array array,
             int capacity,boolean capacityMutable)
         {
             super(parent,array);
@@ -1993,13 +1633,9 @@ public class ReplaceTest extends TestCase {
         }
         
         private PVMenu[] value;
-        int length = 0;
-        int capacity;
-        boolean capacityMutable;
     }
 
-    private static class StructureArray
-        extends AbstractDBArray implements PVStructureArray
+    private static class StructureArray extends AbstractDBArray implements PVStructureArray
     {
         /* (non-Javadoc)
          * @see org.epics.ioc.pv.PVStructureArray#get(int, int, org.epics.ioc.pv.StructureArrayData)
@@ -2029,13 +1665,6 @@ public class ReplaceTest extends TestCase {
             return len;
         }
         /* (non-Javadoc)
-         * @see java.lang.Object#toString()
-         */
-        public String toString() {
-            return getString(0);
-        }
-        
-        /* (non-Javadoc)
          * @see org.epics.ioc.pv.PVData#toString(int)
          */
         public String toString(int indentLevel) {
@@ -2057,27 +1686,6 @@ public class ReplaceTest extends TestCase {
             builder.append("}");
             return builder.toString();
         }
-
-        /* (non-Javadoc)
-         * @see org.epics.ioc.pv.PVArray#isCapacityMutable()
-         */
-        public boolean isCapacityMutable() {
-            return capacityMutable;
-        }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.pv.PVArray#getCapacity()
-         */
-        public int getCapacity() {
-            return capacity;
-        }
-
-        /* (non-Javadoc)
-         * @see org.epics.ioc.pv.PVArray#getLength()
-         */
-        public int getLength() {
-            return length;
-        }
-
         /* (non-Javadoc)
          * @see org.epics.ioc.pv.PVArray#setCapacity(int)
          */
@@ -2091,17 +1699,7 @@ public class ReplaceTest extends TestCase {
             capacity = len;
         }
 
-        /* (non-Javadoc)
-         * @see org.epics.ioc.pv.PVArray#setLength(int)
-         */
-        public void setLength(int len) {
-            if(!super.getField().isMutable())
-                throw new IllegalStateException("PVData.isMutable is false");
-            if(len>capacity) setCapacity(len);
-            length = len;
-        }
-
-        StructureArray(DBData parent,Array array,
+        private StructureArray(DBData parent,Array array,
             int capacity,boolean capacityMutable)
         {
             super(parent,array);
@@ -2111,13 +1709,9 @@ public class ReplaceTest extends TestCase {
         }
         
         private PVStructure[] value;
-        int length = 0;
-        int capacity;
-        boolean capacityMutable;
     }
 
-    private static class ArrayArray
-        extends AbstractDBArray implements PVArrayArray
+    private static class ArrayArray extends AbstractDBArray implements PVArrayArray
     {
  
         /* (non-Javadoc)
@@ -2147,14 +1741,6 @@ public class ReplaceTest extends TestCase {
             postPut();
             return len;
         }
-
-        /* (non-Javadoc)
-         * @see java.lang.Object#toString()
-         */
-        public String toString() {
-            return getString(0);
-        }
-        
         /* (non-Javadoc)
          * @see org.epics.ioc.pv.PVData#toString(int)
          */
@@ -2180,26 +1766,6 @@ public class ReplaceTest extends TestCase {
         }
 
         /* (non-Javadoc)
-         * @see org.epics.ioc.pv.PVArray#isCapacityMutable()
-         */
-        public boolean isCapacityMutable() {
-            return capacityMutable;
-        }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.pv.PVArray#getCapacity()
-         */
-        public int getCapacity() {
-            return capacity;
-        }
-
-        /* (non-Javadoc)
-         * @see org.epics.ioc.pv.PVArray#getLength()
-         */
-        public int getLength() {
-            return length;
-        }
-
-        /* (non-Javadoc)
          * @see org.epics.ioc.pv.PVArray#setCapacity(int)
          */
         public void setCapacity(int len) {
@@ -2212,17 +1778,7 @@ public class ReplaceTest extends TestCase {
             capacity = len;
         }
 
-        /* (non-Javadoc)
-         * @see org.epics.ioc.pv.PVArray#setLength(int)
-         */
-        public void setLength(int len) {
-            if(!super.getField().isMutable())
-                throw new IllegalStateException("PVData.isMutable is false");
-            if(len>capacity) setCapacity(len);
-            length = len;
-        }
-
-        ArrayArray(DBData parent,Array array,
+        private ArrayArray(DBData parent,Array array,
             int capacity,boolean capacityMutable)
         {
             super(parent,array);
@@ -2232,21 +1788,10 @@ public class ReplaceTest extends TestCase {
         }
         
         private PVArray[] value;
-        int length = 0;
-        int capacity;
-        boolean capacityMutable;
     }
 
-    private static class LinkArray
-        extends AbstractDBArray implements PVLinkArray
+    private static class LinkArray extends AbstractDBArray implements PVLinkArray
     {
-        /* (non-Javadoc)
-         * @see java.lang.Object#toString()
-         */
-        public String toString() {
-            return toString(0);
-        }
-        
         /* (non-Javadoc)
          * @see org.epics.ioc.pv.PVData#toString(int)
          */
@@ -2270,13 +1815,6 @@ public class ReplaceTest extends TestCase {
             newLine(builder,indentLevel);
             builder.append("}");
             return builder.toString() + super.toString(indentLevel);
-        }
-
-        /* (non-Javadoc)
-         * @see org.epics.ioc.pv.PVArray#isCapacityMutable()
-         */
-        public boolean isCapacityMutable() {
-            return capacityMutable;
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.pv.PVLinkArray#get(int, int, org.epics.ioc.pv.LinkArrayData)
@@ -2306,20 +1844,6 @@ public class ReplaceTest extends TestCase {
             return len;
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.pv.PVArray#getCapacity()
-         */
-        public int getCapacity() {
-            return capacity;
-        }
-
-        /* (non-Javadoc)
-         * @see org.epics.ioc.pv.PVArray#getLength()
-         */
-        public int getLength() {
-            return length;
-        }
-
-        /* (non-Javadoc)
          * @see org.epics.ioc.pv.PVArray#setCapacity(int)
          */
         public void setCapacity(int len) {
@@ -2332,17 +1856,7 @@ public class ReplaceTest extends TestCase {
             capacity = len;
         }
 
-        /* (non-Javadoc)
-         * @see org.epics.ioc.pv.PVArray#setLength(int)
-         */
-        public void setLength(int len) {
-            if(!super.getField().isMutable())
-                throw new IllegalStateException("PVData.isMutable is false");
-            if(len>capacity) setCapacity(len);
-            length = len;
-        }
-
-        LinkArray(DBData parent,Array array,
+        private LinkArray(DBData parent,Array array,
             int capacity,boolean capacityMutable)
         {
             super(parent,array);
@@ -2352,9 +1866,6 @@ public class ReplaceTest extends TestCase {
         }
         
         private PVLink[] value;
-        int length = 0;
-        int capacity;
-        boolean capacityMutable;
     }
     
     private static Convert convert = ConvertFactory.getConvert();

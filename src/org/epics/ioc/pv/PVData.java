@@ -5,7 +5,7 @@
  */
 package org.epics.ioc.pv;
 
-import org.epics.ioc.util.MessageType;
+import org.epics.ioc.util.*;
 
 /**
  * PVData is the base class for field data.
@@ -13,18 +13,12 @@ import org.epics.ioc.util.MessageType;
  * @author mrk
  *
  */
-public interface PVData {
+public interface PVData extends Requestor {
     /**
      * Get the full field name, i.e. the complete hierarchy.
      * @return The name.
      */
     String getFullFieldName();
-    /**
-     * Report a message.
-     * @param message The message.
-     * @param messageType The message type.
-     */
-    void message(String message, MessageType messageType);
     /**
      * Get the <i>Field</i> that describes the field.
      * @return Field, which is the reflection interface.
@@ -35,6 +29,11 @@ public interface PVData {
      * @return The parent interface.
      */
     PVData getParent();
+    /**
+     * Get the record.
+     * @return The record interface.
+     */
+    PVRecord getPVRecord();
     /**
      * Get the support name if it exists.
      * @return The name of the support.

@@ -6,7 +6,7 @@
 package org.epics.ioc.pv;
 
 /**
- * Base interface for array field reflection
+ * Base interface for array field reflection.
  * @author mrk
  *
  */

@@ -36,7 +36,7 @@ public class EventRecordFactory {
         
         private EventRecordSupport(PVStructure pvStructure) {
             super(supportName,(DBData)pvStructure);
-            dbRecord = ((DBData)pvStructure).getRecord();
+            dbRecord = (DBRecord)pvStructure.getPVRecord();
             eventScanner = ScannerFactory.getEventScanner();
         }
         /* (non-Javadoc)

@@ -15,13 +15,13 @@ public class EnumBase extends FieldBase implements Enum{
     private boolean choicesMutable;
     /**
      * Constructor for ArrayBase.
-     * @param name The field name.
+     * @param fieldName The field name.
      * @param property An array of properties for the field.
      * @param fieldAttribute The field attributes.
      * @param choicesMutable Are the choices mutable?
      */
-    public EnumBase(String name,Property[] property,FieldAttribute fieldAttribute,boolean choicesMutable) {
-        super(name,Type.pvEnum,property,fieldAttribute);
+    public EnumBase(String fieldName,Property[] property,FieldAttribute fieldAttribute,boolean choicesMutable) {
+        super(fieldName,Type.pvEnum,property,fieldAttribute);
         this.choicesMutable = choicesMutable;
     }
     /* (non-Javadoc)

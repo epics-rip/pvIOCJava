@@ -450,7 +450,7 @@ public class IOCDBFactory {
                 dbDataSetField = dbRecord;
                 return;
             }
-            if(((DBData)pvData).getRecord()!=dbRecord) 
+            if(pvData.getPVRecord()!=dbRecord) 
                 throw new IllegalArgumentException (
                     "field is not in this record instance");
             dbDataSetField = (DBData)pvData;
@@ -501,7 +501,7 @@ public class IOCDBFactory {
             if(names.length==0) return false;
             Property property = pvData.getField().getProperty(names[0]);
             if(property==null) return false;
-            String[] fieldNames = periodPattern.split(property.getFieldName(),2);
+            String[] fieldNames = periodPattern.split(property.getAssociatedFieldName(),2);
             pvData = findField(dbData,fieldNames[0]);
             if(pvData==null) return false;
             if(pvData.getField().getType()!=Type.pvLink) return false;
@@ -541,8 +541,8 @@ public class IOCDBFactory {
             Property property)
         {
             if(property==null) return null;
-            DBRecord dbRecord = dbData.getRecord();
-            String propertyFieldName = property.getFieldName();
+            DBRecord dbRecord = dbData.getDBRecord();
+            String propertyFieldName = property.getAssociatedFieldName();
             if(propertyFieldName.charAt(0)=='/') {
                 propertyFieldName = propertyFieldName.substring(1);
                 dbData = dbRecord;
@@ -613,7 +613,7 @@ public class IOCDBFactory {
             // Look first for field property
             property = pvData.getField().getProperty(name);
             if(property!=null) return property;
-            DBData record = ((DBData)pvData).getRecord();
+            PVRecord record = pvData.getPVRecord();
             if(pvData==record) return null;
             // if structure look for structure property
             Field field = pvData.getField();

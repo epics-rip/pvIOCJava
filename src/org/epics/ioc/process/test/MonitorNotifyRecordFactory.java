@@ -5,7 +5,6 @@
  */
 package org.epics.ioc.process.test;
 
-import org.epics.ioc.dbd.*;
 import org.epics.ioc.db.*;
 import org.epics.ioc.process.*;
 import org.epics.ioc.pv.*;
@@ -40,7 +39,7 @@ public class MonitorNotifyRecordFactory {
         
         private MonitorNotifyRecordSupport(PVStructure pvStructure) {
             super(supportName,(DBData)pvStructure);
-            dbRecord = ((DBData)pvStructure).getRecord();
+            dbRecord = (DBRecord)pvStructure.getPVRecord();
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.process.SupportProcessRequestor#getProcessRequestorName()
@@ -195,7 +194,7 @@ public class MonitorNotifyRecordFactory {
         
         private BooleanData(DBData parent,Field field) {
             super(parent,field);
-            dbRecord = parent.getRecord();
+            dbRecord = parent.getDBRecord();
             recordProcess = dbRecord.getRecordProcess();
             boolean result = recordProcess.setRecordProcessRequestor(this);
             if(!result) {

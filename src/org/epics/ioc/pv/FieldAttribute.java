@@ -12,34 +12,34 @@ package org.epics.ioc.pv;
  */
 public interface FieldAttribute {
     /**
-     * get the default value for the field as a String.
-     * @return the default.
+     * Get the default value for the field as a String.
+     * @return The default.
      */
     String getDefault();
     /**
-     * is the field readonly .
+     * Is the field readonly .
      * @return (false,true) if it (is not, is) readonly.
      */
     boolean isReadOnly();
     /**
-     * can this field be configurable by Database Configuration Tools.
+     * Can this field be configurable by Database Configuration Tools.
      * @return (false,true) if it (can't, can) be configured.
      */
     boolean isDesign();
     /**
-     * Is this field is a link to another record.
+     * Is this field a link to another record.
      * @return (false,true) if it (is not, is) a link to another record.
      */
     boolean isLink();
     /**
-     * get the Access Security Level for this field.
-     * @return the level.
+     * Get the Access Security Level for this field.
+     * @return The level.
      */
     int getAsl();
     /**
-     * create a string describing the attributes.
-     * @param indentLevel indent level. Each level is four spaces.
-     * @return the string describing the attributes.
+     * Create a string describing the attributes.
+     * @param indentLevel Indent level. Each level is four spaces.
+     * @return The string describing the attributes.
      */
     String toString(int indentLevel);
     

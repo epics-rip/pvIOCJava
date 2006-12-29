@@ -6,7 +6,6 @@
 package org.epics.ioc.process.test;
 
 import org.epics.ioc.pv.*;
-import org.epics.ioc.dbd.*;
 import org.epics.ioc.db.*;
 import org.epics.ioc.process.*;
 import org.epics.ioc.util.*;
@@ -41,7 +40,7 @@ public class DoubleRecordFactory {
         
         private DoubleRecordSupport(PVStructure pvStructure) {
             super(supportName,(DBData)pvStructure);
-            dbRecord = ((DBData)pvStructure).getRecord();
+            dbRecord = (DBRecord)pvStructure.getPVRecord();
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.process.SupportProcessRequestor#getProcessRequestorName()

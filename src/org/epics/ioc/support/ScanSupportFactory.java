@@ -28,7 +28,7 @@ public class ScanSupportFactory {
      */
     public static Support create(PVStructure pvStructure) {
         DBData dbData = (DBData)pvStructure;
-        ScanField scanField = ScanFieldFactory.create(dbData.getRecord());
+        ScanField scanField = ScanFieldFactory.create(dbData.getDBRecord());
         if(scanField==null) return null;
         String supportName = dbData.getSupportName();
         if(!supportName.equals(supportName)) {
@@ -69,7 +69,7 @@ public class ScanSupportFactory {
             PVMenu newMenu;
             
             this.pvStructure = pvStructure;
-            dbRecord = ((DBData)pvStructure).getRecord();
+            dbRecord = (DBRecord)pvStructure.getPVRecord();
             recordName = dbRecord.getRecordName();
             IOCDB iocdb = dbRecord.getIOCDB();
             DBAccess dbAccess = iocdb.createAccess(recordName);            

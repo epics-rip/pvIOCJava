@@ -13,7 +13,7 @@ package org.epics.ioc.pv;
 public interface Menu extends Enum {
     /**
      * Get the name of the menu.
-     * @return
+     * @return The menu name.
      */
     String getMenuName();
 }

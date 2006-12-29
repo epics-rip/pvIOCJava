@@ -13,12 +13,12 @@ package org.epics.ioc.pv;
 public interface PVFloat extends PVData{
     /**
      * Get the <i>float</i> value stored in the field.
-     * @return float value of field.
+     * @return float Value of field.
      */
     float get();
     /**
      * Put the <i>float</i> value into the field.
-     * @param value new float value for field.
+     * @param value New value.
      * @throws IllegalStateException if the field is not mutable.
      */
     void put(float value);

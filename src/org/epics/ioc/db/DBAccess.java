@@ -8,7 +8,7 @@ package org.epics.ioc.db;
 import org.epics.ioc.pv.*;
 
 /**
- * interface for accessing fields of a record instance.
+ * Interface for accessing fields of a record instance.
  * @author mrk
  *
  */

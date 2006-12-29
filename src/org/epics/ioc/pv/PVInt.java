@@ -18,7 +18,7 @@ public interface PVInt extends PVData{
     int get();
     /**
      * Put the <i>int</i> value into the field.
-     * @param value new int value for field.
+     * @param value New value.
      * @throws IllegalStateException if the field is not mutable.
      */
     void put(int value);

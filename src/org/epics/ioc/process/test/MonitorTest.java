@@ -103,9 +103,9 @@ public class MonitorTest extends TestCase {
         
         private Monitor(DBData data) {
             dbData = data;
-            DBRecord dbRecord = data.getRecord();
+            DBRecord dbRecord = data.getDBRecord();
             recordName = dbRecord.getRecordName();
-            recordListener = dbRecord.createListener(this);
+            recordListener = dbRecord.createRecordListener(this);
             dbRecord.addListener(recordListener);
         }
         

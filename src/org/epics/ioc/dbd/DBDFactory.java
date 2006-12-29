@@ -117,7 +117,7 @@ public class DBDFactory {
         public boolean addMenu(DBDMenu menu) {
             rwLock.writeLock().lock();
             try {
-                String key = menu.getName();
+                String key = menu.getMenuName();
                 if(menuMap.containsKey(key)) return false;
                 if(this!=masterDBD && masterDBD.getMenu(key)!=null) return false;
                 menuMap.put(key,menu);
@@ -330,7 +330,7 @@ public class DBDFactory {
                 Set<String> keys = menuMap.keySet();
                 for(String key: keys) {
                     DBDMenu dbdMenu = menuMap.get(key);
-                    String name = dbdMenu.getName();
+                    String name = dbdMenu.getMenuName();
                     if(pattern.matcher(name).matches()) {
                         list.add(name);
                     }
@@ -359,7 +359,7 @@ public class DBDFactory {
                 Set<String> keys = menuMap.keySet();
                 for(String key: keys) {
                     DBDMenu dbdMenu = menuMap.get(key);
-                    String name = dbdMenu.getName();
+                    String name = dbdMenu.getMenuName();
                     if(pattern.matcher(name).matches()) {
                         result.append(" " + dbdMenu.toString());
                     }

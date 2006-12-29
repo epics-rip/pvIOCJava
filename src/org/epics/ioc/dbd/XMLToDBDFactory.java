@@ -28,7 +28,7 @@ public class XMLToDBDFactory {
      * the definitions in a database.
      * @param dbd a Database Definition Database
      * @param fileName the name of the xml file.
-     * @param requestor The requestor..
+     * @param requestor The requestor.
      */
     public static void convert(DBD dbd, String fileName,Requestor requestor)
     {
@@ -557,11 +557,11 @@ public class XMLToDBDFactory {
             switch(type) {
             case pvMenu:
                 field = DBDFieldFactory.createMenuField(fieldName,
-                    property,fieldAttribute,dbdMenu.getName());
+                    property,fieldAttribute,dbdMenu.getMenuName());
                 break;
             case pvStructure:
                 field = DBDFieldFactory.createStructureField(fieldName,
-                    property,fieldAttribute,fieldStructure,dbd);
+                    property,fieldAttribute,fieldStructure);
                 break;
             case pvArray:
                 field = DBDFieldFactory.createArrayField(fieldName,

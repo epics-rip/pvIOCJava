@@ -8,20 +8,14 @@ package org.epics.ioc.db;
 import org.epics.ioc.pv.*;
 
 /**
- * listener interface.
+ * DB listener interface.
  * @author mrk
  *
  */
 public interface DBListener {
     /**
-     * The supportName has been modified.
-     * @param dbData
-     */
-    void supportNamePut(DBData dbData);
-    /**
      * A scalar or array modification has occured.
      * @param dbData The data.
-     * @param dbData
      */
     void dataPut(DBData dbData);
     /**
@@ -51,6 +45,11 @@ public interface DBListener {
      * @param pvEnum The enum interface.
      */
     void enumChoicesPut(PVEnum pvEnum);
+    /**
+     * The supportName has been modified.
+     * @param dbData
+     */
+    void supportNamePut(DBData dbData);
     /**
      * The link configration structure has been modified.
      * @param pvLink The link interface.

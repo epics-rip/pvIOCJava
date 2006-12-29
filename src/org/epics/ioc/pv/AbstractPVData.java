@@ -9,13 +9,17 @@ import org.epics.ioc.util.MessageType;
 
 /**
  * Abstract base class for a PVData.
+ * A factory that implements PVData should extend this class.
  * @author mrk
  *
  */
 public abstract class AbstractPVData implements PVData{
-    private static String indentString = "    "; 
+    private static String indentString = "    ";
+    private static String fullFieldName = "";
+    private static String requestorName = "";
     private Field field;
     private PVData parent;
+    private PVRecord record;
     private String supportName = null;
        
     /**
@@ -26,6 +30,9 @@ public abstract class AbstractPVData implements PVData{
     protected AbstractPVData(PVData parent, Field field) {
         this.field = field;
         this.parent = parent;
+        if(parent==null) return;
+        record = parent.getPVRecord();
+        createFullFieldAndRequestorNames();
     }
     /**
      * Called by derived classes to replace a field.
@@ -35,22 +42,46 @@ public abstract class AbstractPVData implements PVData{
         this.field = field;
     }
     /**
-     * used by toString to start a new line.
-     * @param builder the stringBuilder to which output is added.
-     * @param indentLevel indentation level.
+     * Called by derived class to specify the PVRecord interface.
+     * @param record The PVRecord interface.
+     */
+    protected void setRecord(PVRecord record) {
+        this.record = record;
+        createFullFieldAndRequestorNames();
+    }
+    /**
+     * Called by toString to start a new line.
+     * @param builder The stringBuilder to which output is added.
+     * @param indentLevel Indentation level.
      */
     protected static void newLine(StringBuilder builder, int indentLevel) {
         builder.append(String.format("%n"));
         for (int i=0; i <indentLevel; i++) builder.append(indentString);
     }
     /* (non-Javadoc)
+     * @see org.epics.ioc.util.Requestor#getRequestorName()
+     */
+    public String getRequestorName() {
+        return requestorName;
+    }
+    /* (non-Javadoc)
+     * @see org.epics.ioc.util.Requestor#message(java.lang.String, org.epics.ioc.util.MessageType)
+     */
+    public void message(String message, MessageType messageType) {
+        if(record==null) {
+            System.out.println(
+                    messageType.toString() + " " + fullFieldName + " " + message);
+        } else {
+            record.message(fullFieldName + " " + message, messageType);
+        }
+    }
+    /* (non-Javadoc)
      * @see org.epics.ioc.pv.PVData#getFullFieldName()
      */
-    public abstract String getFullFieldName();
-    /* (non-Javadoc)
-     * @see org.epics.ioc.pv.PVData#message(java.lang.String, org.epics.ioc.util.MessageType)
-     */
-    public abstract void message(String message, MessageType messageType);
+    public String getFullFieldName() {
+        return fullFieldName;
+    } 
+    
     /* (non-Javadoc)
      * @see org.epics.ioc.pv.PVData#getField()
      */
@@ -62,6 +93,12 @@ public abstract class AbstractPVData implements PVData{
      */
     public PVData getParent() {
         return parent;
+    }
+    /* (non-Javadoc)
+     * @see org.epics.ioc.pv.PVData#getPVRecord()
+     */
+    public PVRecord getPVRecord() {
+       return record;
     }
     /* (non-Javadoc)
      * @see org.epics.ioc.pv.PVData#getSupportName()
@@ -87,4 +124,23 @@ public abstract class AbstractPVData implements PVData{
         return "";
     }
 
+    private void createFullFieldAndRequestorNames() {
+        if(this==record) {
+            fullFieldName = "";
+            return;
+        }
+        StringBuilder fieldName = new StringBuilder();
+        fieldName.insert(0,getField().getFieldName());
+        if(parent.getField().getType()!=Type.pvArray) fieldName.insert(0,".");
+        PVData parent = getParent();
+        while(parent!=null && parent!=this.record) {
+            PVData now = parent;
+            fieldName.insert(0,now.getField().getFieldName());
+            if(now.getParent()==null
+            || now.getParent().getField().getType()!=Type.pvArray) fieldName.insert(0,".");
+            parent = now.getParent();
+        }
+        fullFieldName = fieldName.toString();
+        requestorName = record.getRecordName() + fullFieldName;
+    }
 }

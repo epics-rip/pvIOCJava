@@ -17,12 +17,12 @@ public interface PVStructure extends PVData {
     PVData[] getFieldPVDatas();
     /**
      * Replace a field of the structure.
-     * Dor an ioc record this should only be called when a record is in the readyForInitialization state.
+     * For an ioc record. This should only be called when a record is in the readyForInitialization state.
      * @param fieldName The field name.
-     * @param pvData The replacement field.
+     * @param structureName The nmame of the structure for the replacement field.
      * @return (false,true) if the field (was not,was) replaced.
      */
-    boolean replaceField(String fieldName,PVData pvData);
+    boolean replaceStructureField(String fieldName,String structureName);
     /**
      * The caller is ready to modify field of the structure.
      */

@@ -15,7 +15,7 @@ package org.epics.ioc.pv;
  */
 public interface PVArrayArray extends PVArray{
     /**
-     * get values from the <i>PVArrayArray</i> and put them in <i>PVArray[]to</i>
+     * Get values from the <i>PVArrayArray</i> and put them in <i>PVArray[]to</i>
      * @param offset The offset to the first element to get.
      * @param len The maximum number of elements to transfer.
      * @param data The class containing the data and an offset into the data.
@@ -29,7 +29,7 @@ public interface PVArrayArray extends PVArray{
      */
     int get(int offset, int len, ArrayArrayData data);
     /**
-     * put values into the <i>PVArrayArray</i> from <i>PVArray[]to</i>
+     * Put values into the <i>PVArrayArray</i> from <i>PVArray[]to</i>
      * @param offset The offset to the first element to put.
      * @param len The maximum number of elements to transfer.
      * @param from The array from which to get the data.

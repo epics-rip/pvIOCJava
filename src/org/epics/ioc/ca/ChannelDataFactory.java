@@ -335,6 +335,18 @@ public class ChannelDataFactory {
              this.field = field;
          }
          /* (non-Javadoc)
+          * @see org.epics.ioc.util.Requestor#getRequestorName()
+          */
+         public String getRequestorName() {
+             return getFullFieldName();
+         }     
+         /* (non-Javadoc)
+          * @see org.epics.ioc.util.Requestor#message(java.lang.String, org.epics.ioc.util.MessageType)
+          */
+         public void message(String message, MessageType messageType) {
+             System.out.printf("%s %s",messageType.toString(),message);
+         }
+         /* (non-Javadoc)
          * @see org.epics.ioc.pv.PVData#getFullFieldName()
          */
         public String getFullFieldName() {
@@ -347,10 +359,10 @@ public class ChannelDataFactory {
             return null;
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.pv.PVData#message(java.lang.String, org.epics.ioc.util.MessageType)
+         * @see org.epics.ioc.pv.PVData#getRecord()
          */
-        public void message(String message, MessageType messageType) {
-            System.out.printf("%s %s",message,messageType.toString());
+        public PVRecord getPVRecord() {
+            return null;
         }
         /* (non-Javadoc)
           * @see org.epics.ioc.pv.PVData#getField()
@@ -1305,7 +1317,7 @@ public class ChannelDataFactory {
          /* (non-Javadoc)
          * @see org.epics.ioc.pv.PVStructure#replaceField(java.lang.String, org.epics.ioc.pv.PVData)
          */
-        public boolean replaceField(String fieldName, PVData pvData) {
+        public boolean replaceStructureField(String fieldName, String structureName) {
             return false;
         }
         /* (non-Javadoc)

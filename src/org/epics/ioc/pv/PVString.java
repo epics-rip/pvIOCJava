@@ -18,7 +18,7 @@ public interface PVString extends PVData{
     String get();
     /**
      * Put the <i>String</i> value into the field.
-     * @param value new string value for field.
+     * @param value New value.
      * @throws IllegalStateException if the field is not mutable.
      */
     void put(String value);

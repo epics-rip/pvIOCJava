@@ -15,7 +15,7 @@ public class FieldBase implements Field
 {
     private static String indentString = "    ";
     private boolean isMutable;
-    private String name;
+    private String fieldName;
     private Property[] property;
     private Type type;
     private String supportName = null;
@@ -23,13 +23,13 @@ public class FieldBase implements Field
 
     /**
      * Constructor for FieldBase.
-     * @param name The field name.
+     * @param fieldName The field fieldName.
      * @param type The field type.
      * @param property An array of properties for the field.
      * @param fieldAttribute The field attributes.
      */
-    public FieldBase(String name, Type type,Property[] property,FieldAttribute fieldAttribute) {
-        this.name = name;
+    public FieldBase(String fieldName, Type type,Property[] property,FieldAttribute fieldAttribute) {
+        this.fieldName = fieldName;
         this.type = type;
         if(property==null) property = new Property[0];
         this.property = property;
@@ -49,7 +49,7 @@ public class FieldBase implements Field
      * @see org.epics.ioc.pv.Field#getName()
      */
     public String getFieldName() {
-        return(name);
+        return(fieldName);
     }
     /* (non-Javadoc)
      * @see org.epics.ioc.pv.Field#getPropertys()
@@ -62,7 +62,7 @@ public class FieldBase implements Field
      */
     public Property getProperty(String propertyName) {
         for(int i=0; i<property.length; i++) {
-            if(property[i].getName().equals(propertyName)) return property[i];
+            if(property[i].getPropertyName().equals(propertyName)) return property[i];
         }
         return null;
     }
@@ -84,7 +84,6 @@ public class FieldBase implements Field
     public void setSupportName(String name) {
         this.supportName = name;
     }
-
     /* (non-Javadoc)
      * @see org.epics.ioc.pv.Field#isMutable()
      */
@@ -119,7 +118,7 @@ public class FieldBase implements Field
         StringBuilder builder = new StringBuilder();
         newLine(builder,indentLevel);
         builder.append(String.format("field %s type %s isMutable %b ",
-                name,type.toString(),isMutable));
+                fieldName,type.toString(),isMutable));
         if(supportName!=null) {
             builder.append("supportName " + supportName + " ");
         }

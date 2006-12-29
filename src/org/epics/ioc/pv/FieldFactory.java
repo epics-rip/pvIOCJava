@@ -23,7 +23,7 @@ public final class FieldFactory {
     /**
      * Create a FieldAttribute from a map of attribute values.
      * @param attributes The map of attributes.
-     * @return The DBDFieldAttributes.
+     * @return The FieldAttributes.
      */
     public static FieldAttribute createFieldAttribute(Map<String,String> attributes) {
         int asl = 1;
@@ -51,8 +51,38 @@ public final class FieldFactory {
         return new FieldAttributeImpl(1,null,true,false,false);
     }
     /**
+     * Create a <i>Property</i>
+     * @param propertyName the property name
+     * @param fieldName the associated field
+     * @return a <i>Property<i/> interface for the newly created object.
+     */
+    public static Property createProperty(String propertyName, String fieldName) {
+        return new PropertyInstance(propertyName,fieldName);
+    } 
+    /**
+     * Create a <i>Field</i>.
+     * This must only be called for scalar types,
+     * i.e. <i>pvBoolean</i>, ... , <i>pvString</i>
+     * For <i>pvEnum</i>, <i>pvArray</i>, and <i>pvStructure</i>
+     * the appropriate create method must be called.
+     * @param fieldName The field name.
+     * @param type The field type .
+     * @param property The field properties.
+     * The properties must be created before calling this method.
+     * <i>null</i> means that the field has no properties.
+     * @param fieldAttribute The attributes for the field.
+     * @return a <i>Field</i> interface for the newly created object.
+     * @throws <i>IllegalArgumentException</i> if an illegal type is specified.
+     */
+    public static Field createField(String fieldName,Type type,Property[] property,FieldAttribute fieldAttribute)
+    {
+        if(!type.isScalar() && type!=Type.pvLink) throw new IllegalArgumentException(
+                "Illegal PVType. Must be scalar but it is " + type.toString() );
+        return new FieldBase(fieldName,type,property,fieldAttribute);
+    } 
+    /**
      * Create an <i>Array</i>
-     * @param name The field name
+     * @param fieldName The field name
      * @param elementType The <i>Type</i> for array elements
      * @param property The field properties.
      * The properties must be created before calling this method.
@@ -60,14 +90,14 @@ public final class FieldFactory {
      * @param fieldAttribute The attributes for the field.
      * @return An <i>Array</i> Interface for the newly created object.
      */
-    public static Array createArrayField(String name,
+    public static Array createArrayField(String fieldName,
     Type elementType,Property[] property,FieldAttribute fieldAttribute) {
-        return new ArrayBase(name,property,fieldAttribute,elementType);
+        return new ArrayBase(fieldName,property,fieldAttribute,elementType);
     } 
 
     /**
      * Create an <i>Enum</i>
-     * @param name The field name
+     * @param fieldName The field name
      * @param choicesMutable Can the choices be modified?
      * If no then <i>Enum.isChoicesMutable</i> will return <i>false</i>
      * and an implementation of <i>PVEnum</i> must
@@ -78,10 +108,10 @@ public final class FieldFactory {
      * @param fieldAttribute The attributes for the field.
      * @return An <i>Enum</i> interface for the newly created object.
      */
-    public static Enum createEnumField(String name,
+    public static Enum createEnumField(String fieldName,
     boolean choicesMutable,Property[] property,FieldAttribute fieldAttribute)
     {
-        return new EnumBase(name,property,fieldAttribute,choicesMutable);
+        return new EnumBase(fieldName,property,fieldAttribute,choicesMutable);
     }
     
     /**
@@ -90,7 +120,7 @@ public final class FieldFactory {
      * @param property The field properties.
      * The properties must be created before calling this method.
      * <i>null</i> means that the field has no properties.
-     * @param fieldAttributeThe attributes for the field.
+     * @param fieldAttribute The attributes for the field.
      * @param menuName The menu name.
      * @return A <i>Menu</i> interface for the newly created object.
      */
@@ -99,41 +129,10 @@ public final class FieldFactory {
     {
         return new MenuBase(fieldName,property,fieldAttribute,menuName);
     }
-    /**
-     * Create a <i>Field</i>.
-     * This must only be called for scalar types,
-     * i.e. <i>pvBoolean</i>, ... , <i>pvString</i>
-     * For <i>pvEnum</i>, <i>pvArray</i>, and <i>pvStructure</i>
-     * the appropriate create method must be called.
-     * @param name The field name.
-     * @param type The field type .
-     * @param property The field properties.
-     * The properties must be created before calling this method.
-     * <i>null</i> means that the field has no properties.
-     * @param fieldAttribute The attributes for the field.
-     * @return a <i>Field</i> interface for the newly created object.
-     * @throws <i>IllegalArgumentException</i> if an illegal type is specified.
-     */
-    public static Field createField(String name,Type type,Property[] property,FieldAttribute fieldAttribute)
-    {
-        if(!type.isScalar() && type!=Type.pvLink) throw new IllegalArgumentException(
-                "Illegal PVType. Must be scalar but it is " + type.toString() );
-        return new FieldBase(name,type,property,fieldAttribute);
-    } 
     
     /**
-     * Create a <i>Property</i>
-     * @param name the property name
-     * @param fieldName the associated field
-     * @return a <i>Property<i/> interface for the newly created object.
-     */
-    public static Property createProperty(String name, String fieldName) {
-        return new PropertyInstance(name,fieldName);
-    } 
-
-    /**
      * Create a <i>Structure</i>
-     * @param name The field name
+     * @param fieldName The field name
      * @param structureName The structure name
      * @param field The array of <i>Field</i> for the structure.
      * @param property the field properties.
@@ -142,10 +141,10 @@ public final class FieldFactory {
      * @param fieldAttribute The attributes for the field.
      * @return a <i>Structure</i> interface for the newly created object.
      */
-    public static Structure createStructureField(String name,
+    public static Structure createStructureField(String fieldName,
     String structureName, Field[] field,Property[] property,FieldAttribute fieldAttribute)
     {
-        return new StructureBase(name,property,fieldAttribute,structureName,field);
+        return new StructureBase(fieldName,property,fieldAttribute,structureName,field);
     }
     
     private static class FieldAttributeImpl implements FieldAttribute {
@@ -213,7 +212,6 @@ public final class FieldFactory {
             this.name = name;
             this.fieldName = fieldName;
         }
-
         /* (non-Javadoc)
          * @see java.lang.Object#toString()
          */
@@ -235,10 +233,10 @@ public final class FieldFactory {
         /* (non-Javadoc)
          * @see org.epics.ioc.pv.Property#getFieldName()
          */
-        public String getFieldName() { return fieldName;}
+        public String getAssociatedFieldName() { return fieldName;} 
         /* (non-Javadoc)
-         * @see org.epics.ioc.pv.Property#getName()
+         * @see org.epics.ioc.pv.Property#getPropertyName()
          */
-        public String getName() { return name;}
+        public String getPropertyName() { return name;}
     }
 }

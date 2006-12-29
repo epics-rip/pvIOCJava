@@ -124,18 +124,11 @@ public final class ConvertFactory {
         public boolean isCopyScalarCompatible(Field fromField, Field toField) {
             Type fromType = fromField.getType();
             Type toType = toField.getType();
-            switch(fromType) {
-            case pvBoolean:
-                if(toType==Type.pvBoolean || toType==Type.pvString) return true;
-                break;
-            case pvString:
-                if(toType.isScalar()) return true;
-                break;
-            default:
-                if(fromType.isNumeric() && toType.isNumeric()) return true;
-                if(fromType.isScalar() && toType==Type.pvString) return true;
-                break;
-            }
+            if(!fromType.isScalar() || !toType.isScalar()) return false;
+            if(fromType.isNumeric() && toType.isNumeric()) return true;
+            if(fromType==toType) return true;
+            if(fromType==Type.pvString) return true;
+            if(toType==Type.pvString) return true;
             return false;
         }
 
@@ -215,14 +208,13 @@ public final class ConvertFactory {
          * @see org.epics.ioc.pv.Convert#isCopyArrayCompatible(org.epics.ioc.pv.Array, org.epics.ioc.pv.Array)
          */
         public boolean isCopyArrayCompatible(Array fromArray, Array toArray) {
-            Type fromElementType = fromArray.getElementType();
-            Type toElementType = toArray.getElementType();
-            if(toElementType.isNumeric() && fromElementType.isNumeric()) return true;
-            if(toElementType==Type.pvBoolean && fromElementType==Type.pvBoolean) return true;
-            if(toElementType==Type.pvString) return true;
-            if(fromElementType==Type.pvString && toElementType.isScalar()) return true;
-            if(fromElementType==Type.pvArray && toElementType==Type.pvArray) return true;
-            if(fromElementType==Type.pvStructure && toElementType==Type.pvStructure) return true;
+            Type fromType = fromArray.getElementType();
+            Type toType = toArray.getElementType();
+            if(!fromType.isScalar() || !toType.isScalar()) return false;
+            if(fromType.isNumeric() && toType.isNumeric()) return true;
+            if(fromType==toType) return true;
+            if(toType==Type.pvString) return true;
+            if(toType==Type.pvString) return true;
             return false;
         }
 
@@ -233,6 +225,7 @@ public final class ConvertFactory {
         {
             Type fromElementType = ((Array)from.getField()).getElementType();
             Type toElementType = ((Array)to.getField()).getElementType();
+            if(!fromElementType.isScalar() || !toElementType.isScalar()) return 0;
             if(toElementType.isNumeric() && fromElementType.isNumeric())
                 return CopyNumericArray(from,offset,to,toOffset,len);
             if(toElementType==Type.pvBoolean && fromElementType==Type.pvBoolean) {
@@ -273,38 +266,6 @@ public final class ConvertFactory {
                     if(num<=0) break;
                     while(num>0) {
                         int n = fromStringArray(to,toOffset,num,data.data,data.offset);
-                        if(n<=0) break;
-                        len -= n; num -= n; ncopy+=n; offset += n; toOffset += n; 
-                    }
-                }
-                return ncopy;
-            }
-            if(fromElementType==Type.pvArray && toElementType==Type.pvArray) {
-                PVArrayArray pvfrom = (PVArrayArray)from;
-                PVArrayArray pvto = (PVArrayArray)to;
-                ArrayArrayData data = new ArrayArrayData();
-                int ncopy = 0;
-                while(len>0) {
-                    int num = pvfrom.get(offset,len,data);
-                    if(num<=0) break;
-                    while(num>0) {
-                        int n = pvto.put(toOffset,num,data.data,data.offset);
-                        if(n<=0) break;
-                        len -= n; num -= n; ncopy+=n; offset += n; toOffset += n; 
-                    }
-                }
-                return ncopy;
-            }
-            if(fromElementType==Type.pvStructure && toElementType==Type.pvStructure) {
-                PVStructureArray pvfrom = (PVStructureArray)from;
-                PVStructureArray pvto = (PVStructureArray)to;
-                StructureArrayData data = new StructureArrayData();
-                int ncopy = 0;
-                while(len>0) {
-                    int num = pvfrom.get(offset,len,data);
-                    if(num<=0) break;
-                    while(num>0) {
-                        int n = pvto.put(toOffset,num,data.data,data.offset);
                         if(n<=0) break;
                         len -= n; num -= n; ncopy+=n; offset += n; toOffset += n; 
                     }
@@ -357,6 +318,15 @@ public final class ConvertFactory {
                     int index = fromEnum.getIndex();
                     toEnum.setChoices(choices);
                     toEnum.setIndex(index);
+                } else if(type==Type.pvMenu) {
+                    PVMenu fromMenu = (PVMenu)fromData;
+                    PVMenu toMenu = (PVMenu)toData;
+                    Menu toMenuType = (Menu)fromMenu.getField();
+                    Menu fromMenuType = (Menu)toMenu.getField();
+                    if(toMenuType.getMenuName().equals(fromMenuType.getMenuName())) {
+                        int index = fromMenu.getIndex();
+                        toMenu.setIndex(index);
+                    }
                 } else if(type==Type.pvStructure) {
                     Structure fromElementStructure = (Structure)fromData.getField();
                     Structure toElementStructure = (Structure)toData.getField();
@@ -2099,6 +2069,19 @@ public final class ConvertFactory {
                     }
                 }
                 break;
+            case pvMenu: {
+                    PVMenuArray pvdata = (PVMenuArray)pv;
+                    MenuArrayData data = new MenuArrayData();
+                    for(int i=0; i<num; i++) {
+                        if(pvdata.get(offset+i,1,data)==1) {
+                            PVMenu[] dataArray = data.data;
+                            to[toOffset+i] = dataArray[data.offset].toString();
+                        } else {
+                            to[toOffset+i] = "bad pv";
+                        }
+                    }
+                }
+            break;
             case pvStructure: {
                     PVStructureArray pvdata = (PVStructureArray)pv;
                     StructureArrayData data = new StructureArrayData();

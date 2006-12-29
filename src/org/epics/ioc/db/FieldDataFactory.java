@@ -8,7 +8,6 @@ import org.epics.ioc.dbd.*;
 import org.epics.ioc.pv.*;
 import org.epics.ioc.pv.Enum;
 
-import java.util.Iterator;
 import java.util.regex.Pattern;
 
 /**
@@ -21,7 +20,7 @@ public class FieldDataFactory {
     /**
      * Create implementation for all non-array fields except enum.
      * @param parent The parent interface.
-     * @param dbdField The reflection interface for the field
+     * @param field The reflection interface for the field
      * @return The DBData implementation
      */
     public static DBData createData(DBData parent,Field field)
@@ -58,7 +57,7 @@ public class FieldDataFactory {
 
     /**
      * Create an implementation for an enumerated field.
-     * @param dbdField The reflection interface for the field.
+     * @param field The reflection interface for the field.
      * @param choice The enum choices.
      * @return The DBData implementation.
      */
@@ -70,7 +69,7 @@ public class FieldDataFactory {
 
     /**
      * Create an implementation for an array field.
-     * @param dbdField The reflection interface for the field.
+     * @param field The reflection interface for the field.
      * @param capacity The default capacity for the field.
      * @param capacityMutable Can the capacity be changed after initialization?
      * @return The DBArray implementation.
@@ -126,28 +125,7 @@ public class FieldDataFactory {
     private static class BooleanData extends AbstractDBData
         implements PVBoolean
     {
-
-        public boolean get() {
-            return value;
-        }
-
-        public void put(boolean value) {
-            if(getField().isMutable()) {
-                this.value = value;
-                postPut();
-                return ;
-            }
-            throw new IllegalStateException("PVData.isMutable is false");
-        }
-        
-        public String toString() {
-            return toString(0);
-        }
-        
-        public String toString(int indentLevel) {
-            return convert.getString(this, indentLevel)
-            + super.toString(indentLevel);
-        }
+        private boolean value;
 
         private BooleanData(DBData parent,Field field,String defaultValue) {
             super(parent,field);
@@ -155,18 +133,58 @@ public class FieldDataFactory {
             if(defaultValue!=null && defaultValue.length()>0) {
                 value = Boolean.parseBoolean(defaultValue);
             }
+        }        
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pv.PVBoolean#get()
+         */
+        public boolean get() {
+            return value;
         }
-        
-        private boolean value;
-
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pv.PVBoolean#put(boolean)
+         */
+        public void put(boolean value) {
+            if(getField().isMutable()) {
+                this.value = value;
+                postPut();
+                return ;
+            }
+            throw new IllegalStateException("PVData.isMutable is false");
+        }       
+        /* (non-Javadoc)
+         * @see java.lang.Object#toString()
+         */
+        public String toString() {
+            return toString(0);
+        }       
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pv.AbstractPVData#toString(int)
+         */
+        public String toString(int indentLevel) {
+            return convert.getString(this, indentLevel)
+            + super.toString(indentLevel);
+        }
     }
 
     private static class ByteData extends AbstractDBData implements PVByte {
-
+        private byte value;
+        
+        private ByteData(DBData parent,Field field,String defaultValue) {
+            super(parent,field);
+            value = 0;
+            if(defaultValue!=null && defaultValue.length()>0) {
+                value = Byte.decode(defaultValue);
+            }
+        }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pv.PVByte#get()
+         */
         public byte get() {
             return value;
         }
-
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pv.PVByte#put(byte)
+         */
         public void put(byte value) {
             if(getField().isMutable()) {
                 this.value = value;
@@ -175,34 +193,40 @@ public class FieldDataFactory {
             }
             throw new IllegalStateException("PVData.isMutable is false");
         }
-        
+        /* (non-Javadoc)
+         * @see java.lang.Object#toString()
+         */
         public String toString() {
             return toString(0);
         }
-        
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pv.AbstractPVData#toString(int)
+         */
         public String toString(int indentLevel) {
             return convert.getString(this, indentLevel)
             + super.toString(indentLevel);
         }
-
-        private ByteData(DBData parent,Field field,String defaultValue) {
-            super(parent,field);
-            value = 0;
-            if(defaultValue!=null && defaultValue.length()>0) {
-                value = Byte.decode(defaultValue);
-            }
-        }
-        
-        private byte value;
-
     }
 
     private static class ShortData extends AbstractDBData implements PVShort {
-
+        private short value;
+        
+        private ShortData(DBData parent,Field field,String defaultValue) {
+            super(parent,field);
+            value = 0;
+            if(defaultValue!=null && defaultValue.length()>0) {
+                value = Short.decode(defaultValue);
+            }
+        }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pv.PVShort#get()
+         */
         public short get() {
             return value;
         }
-
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pv.PVShort#put(short)
+         */
         public void put(short value) {
             if(getField().isMutable()) {
                 this.value = value;
@@ -211,51 +235,23 @@ public class FieldDataFactory {
             }
             throw new IllegalStateException("PVData.isMutable is false");
         }
-        
+        /* (non-Javadoc)
+         * @see java.lang.Object#toString()
+         */
         public String toString() {
             return toString(0);
         }
-
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pv.AbstractPVData#toString(int)
+         */
         public String toString(int indentLevel) {
             return convert.getString(this, indentLevel)
             + super.toString(indentLevel);
         }
-
-        private ShortData(DBData parent,Field field,String defaultValue) {
-            super(parent,field);
-            value = 0;
-            if(defaultValue!=null && defaultValue.length()>0) {
-                value = Short.decode(defaultValue);
-            }
-        }
-        
-        private short value;
-
     }
 
     private static class IntData extends AbstractDBData implements PVInt {
-
-        public int get() {
-            return value;
-        }
-
-        public void put(int value) {
-            if(getField().isMutable()) {
-                this.value = value;
-                postPut();
-                return ;
-            }
-            throw new IllegalStateException("PVData.isMutable is false");
-        }
-        
-        public String toString() {
-            return toString(0);
-        }
-        
-        public String toString(int indentLevel) {
-            return convert.getString(this, indentLevel)
-            + super.toString(indentLevel);
-        }
+        private int value;
 
         private IntData(DBData parent,Field field,String defaultValue) {
             super(parent,field);
@@ -264,17 +260,57 @@ public class FieldDataFactory {
                 value = Integer.decode(defaultValue);
             }
         }
-        
-        private int value;
-
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pv.PVInt#get()
+         */
+        public int get() {
+            return value;
+        }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pv.PVInt#put(int)
+         */
+        public void put(int value) {
+            if(getField().isMutable()) {
+                this.value = value;
+                postPut();
+                return ;
+            }
+            throw new IllegalStateException("PVData.isMutable is false");
+        }
+        /* (non-Javadoc)
+         * @see java.lang.Object#toString()
+         */
+        public String toString() {
+            return toString(0);
+        }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pv.AbstractPVData#toString(int)
+         */
+        public String toString(int indentLevel) {
+            return convert.getString(this, indentLevel)
+            + super.toString(indentLevel);
+        }
     }
 
     private static class LongData extends AbstractDBData implements PVLong {
-
+        private long value;
+        
+        private LongData(DBData parent,Field field,String defaultValue) {
+            super(parent,field);
+            value = 0;
+            if(defaultValue!=null && defaultValue.length()>0) {
+                value = Long.decode(defaultValue);
+            }
+        }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pv.PVLong#get()
+         */
         public long get() {
             return value;
         }
-
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pv.PVLong#put(long)
+         */
         public void put(long value) {
             if(getField().isMutable()) {
                 this.value = value;
@@ -283,34 +319,40 @@ public class FieldDataFactory {
             }
             throw new IllegalStateException("PVData.isMutable is false");
         }
-        
+        /* (non-Javadoc)
+         * @see java.lang.Object#toString()
+         */
         public String toString() {
             return toString(0);
         }
-        
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pv.AbstractPVData#toString(int)
+         */
         public String toString(int indentLevel) {
             return convert.getString(this, indentLevel)
             + super.toString(indentLevel);
         }
-
-        private LongData(DBData parent,Field field,String defaultValue) {
-            super(parent,field);
-            value = 0;
-            if(defaultValue!=null && defaultValue.length()>0) {
-                value = Long.decode(defaultValue);
-            }
-        }
-        
-        private long value;
-
     }
 
     private static class FloatData extends AbstractDBData implements PVFloat {
-
+        private float value;
+        
+        private FloatData(DBData parent,Field field,String defaultValue) {
+            super(parent,field);
+            value = 0;
+            if(defaultValue!=null && defaultValue.length()>0) {
+                value = Float.valueOf(defaultValue);
+            }
+        }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pv.PVFloat#get()
+         */
         public float get() {
             return value;
         }
-
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pv.PVFloat#put(float)
+         */
         public void put(float value) {
             if(getField().isMutable()) {
                 this.value = value;
@@ -319,34 +361,40 @@ public class FieldDataFactory {
             }
             throw new IllegalStateException("PVData.isMutable is false");
         }
-        
+        /* (non-Javadoc)
+         * @see java.lang.Object#toString()
+         */
         public String toString() {
             return toString(0);
         }
-        
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pv.AbstractPVData#toString(int)
+         */
         public String toString(int indentLevel) {
             return convert.getString(this, indentLevel)
             + super.toString(indentLevel);
         }
+    }
 
-        private FloatData(DBData parent,Field field,String defaultValue) {
+    private static class DoubleData extends AbstractDBData implements PVDouble {
+        private double value;
+        
+        private DoubleData(DBData parent,Field field,String defaultValue) {
             super(parent,field);
             value = 0;
             if(defaultValue!=null && defaultValue.length()>0) {
                 value = Float.valueOf(defaultValue);
             }
-        }
-        
-        private float value;
-
-    }
-
-    private static class DoubleData extends AbstractDBData implements PVDouble {
-
+        }        
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pv.PVDouble#get()
+         */
         public double get() {
             return value;
         }
-
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pv.PVDouble#put(double)
+         */
         public void put(double value) {
             if(getField().isMutable()) {
                 this.value = value;
@@ -354,35 +402,41 @@ public class FieldDataFactory {
                 return ;
             }
             throw new IllegalStateException("PVData.isMutable is false");
-        }
-        
+        }        
+        /* (non-Javadoc)
+         * @see java.lang.Object#toString()
+         */
         public String toString() {
             return toString(0);
-        }
-        
+        }        
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pv.AbstractPVData#toString(int)
+         */
         public String toString(int indentLevel) {
             return convert.getString(this, indentLevel)
             + super.toString(indentLevel);
         }
-
-        private DoubleData(DBData parent,Field field,String defaultValue) {
-            super(parent,field);
-            value = 0;
-            if(defaultValue!=null && defaultValue.length()>0) {
-                value = Float.valueOf(defaultValue);
-            }
-        }
-        
-        private double value;
-
     }
 
     private static class StringData extends AbstractDBData implements PVString {
-
+        private String value;
+        
+        private StringData(DBData parent,Field field,String defaultValue) {
+            super(parent,field);
+            value = null;
+            if(defaultValue!=null && defaultValue.length()>0) {
+                value = defaultValue;
+            }
+        }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pv.PVString#get()
+         */
         public String get() {
             return value;
         }
-
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pv.PVString#put(java.lang.String)
+         */
         public void put(String value) {
             if(getField().isMutable()) {
                 this.value = value;
@@ -391,38 +445,28 @@ public class FieldDataFactory {
             }
             throw new IllegalStateException("PVData.isMutable is false");
         }
-        
+        /* (non-Javadoc)
+         * @see java.lang.Object#toString()
+         */
         public String toString() {
             return toString(0);
         }
-        
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pv.AbstractPVData#toString(int)
+         */
         public String toString(int indentLevel) {
             return convert.getString(this, indentLevel)
             + super.toString(indentLevel);
         }
-
-        private StringData(DBData parent,Field field,String defaultValue) {
-            super(parent,field);
-            value = null;
-            if(defaultValue!=null && defaultValue.length()>0) {
-                value = defaultValue;
-            }
-        }
-        
-        private String value;
-
     }
 
     private static class EnumData extends AbstractDBEnum {
-
-        
         private EnumData(DBData parent,Enum enumField, String[]choice) {
             super(parent,enumField,choice);
         }
     }
 
     private static class MenuData extends AbstractDBMenu {
-
         private MenuData(DBData parent,Menu menu,String defaultValue,String[]choice) {
             super(parent,menu,choice);
             if(defaultValue!=null && defaultValue.length()>0) {
@@ -444,58 +488,97 @@ public class FieldDataFactory {
 
     private static class StructureData extends AbstractDBStructure
     {
-        StructureData(DBData parent,Structure structure) {
+        private StructureData(DBData parent,Structure structure) {
             super(parent,structure);
         }
     }
     
     private static class RecordData extends AbstractDBRecord
     {
-        RecordData(String recordName,DBDRecordType dbdRecordType) {
+        private RecordData(String recordName,DBDRecordType dbdRecordType) {
             super(recordName,dbdRecordType);
         }
     }
-
-    private static class BooleanArray
-        extends AbstractDBArray implements PVBooleanArray
-    {
+    
+    private static abstract class DBArray extends AbstractDBData implements PVArray{
+        protected int length = 0;
+        protected int capacity;
+        protected boolean capacityMutable = true;
+        /**
+         * Constructer that derived classes must call.
+         * @param parent The parent interface.
+         * @param dbdArrayField The reflection interface for the DBArray data.
+         */
+        protected DBArray(DBData parent,Array array,int capacity,boolean capacityMutable) {
+            super(parent,array);
+            this.capacity = capacity;
+            this.capacityMutable = capacityMutable;
+        }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pv.PVArray#isCapacityMutable()
+         */
+        public boolean isCapacityMutable() {
+            return capacityMutable;
+        }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pv.PVArray#getCapacity()
+         */
+        public int getCapacity() {
+            return capacity;
+        }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pv.PVArray#getLength()
+         */
+        public int getLength() {
+            return length;
+        }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pv.PVArray#setCapacity(int)
+         */
+        abstract public void setCapacity(int capacity);
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pv.PVArray#setLength(int)
+         */
+        public void setLength(int len) {
+            if(!super.getField().isMutable())
+                throw new IllegalStateException("PVData.isMutable is false");
+            if(len>capacity) setCapacity(len);
+            length = len;
+        }
+        /* (non-Javadoc)
+         * @see java.lang.Object#toString()
+         */
         public String toString() {
             return toString(0);
         }
+    }
+    
+    private static class BooleanArray extends DBArray implements PVBooleanArray
+    {
+        private boolean[] value;
         
+        private BooleanArray(DBData parent,Array array,
+            int capacity,boolean capacityMutable,String defaultValue)
+        {
+            super(parent,array,capacity,capacityMutable);
+            value = new boolean[capacity];
+            if(defaultValue!=null && defaultValue.length()>0) {
+                String[] values = primitivePattern.split(defaultValue);
+                try {
+                    convert.fromStringArray(this,0,values.length,values,0);
+                } catch (NumberFormatException e) {}
+            }
+        }        
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pv.AbstractPVData#toString(int)
+         */
         public String toString(int indentLevel) {
             return convert.getString(this, indentLevel)
             + super.toString(indentLevel);
         }
-
-        public boolean isCapacityMutable() {
-            return capacityMutable;
-        }
-
-        public int get(int offset, int len, BooleanArrayData data) {
-            int n = len;
-            if(offset+len > length) n = length;
-            data.data = value;
-            data.offset = offset;
-            return n;
-        }
-        public int put(int offset, int len, boolean[]from, int fromOffset) {
-            if(offset+len > length) {
-                 int newlength = offset + len;
-                 if(newlength>capacity) setCapacity(newlength);
-                 length = newlength;
-            }
-            System.arraycopy(from,fromOffset,value,offset,len);
-            return len;
-        }
-        public int getCapacity() {
-            return capacity;
-        }
-
-        public int getLength() {
-            return length;
-        }
-
+        /* (non-Javadoc)
+         * @see org.epics.ioc.db.FieldDataFactory.DBArray#setCapacity(int)
+         */
         public void setCapacity(int len) {
             if(!capacityMutable)
                 throw new IllegalStateException("capacity is immutable");
@@ -505,59 +588,20 @@ public class FieldDataFactory {
             value = newarray;
             capacity = len;
         }
-
-        public void setLength(int len) {
-            if(!super.getField().isMutable())
-                throw new IllegalStateException("PVData.isMutable is false");
-            if(len>capacity) setCapacity(len);
-            length = len;
-        }
-
-        private BooleanArray(DBData parent,Array array,
-            int capacity,boolean capacityMutable,String defaultValue)
-        {
-            super(parent,array);
-            this.capacity = capacity;
-            this.capacityMutable = capacityMutable;
-            value = new boolean[capacity];
-            if(defaultValue!=null && defaultValue.length()>0) {
-                String[] values = primitivePattern.split(defaultValue);
-                try {
-                    convert.fromStringArray(this,0,values.length,values,0);
-                } catch (NumberFormatException e) {
-                }
-            }
-        }
-        
-        private boolean[] value;
-        int length = 0;
-        int capacity;
-        boolean capacityMutable;
-    }
-
-    private static class ByteArray
-        extends AbstractDBArray implements PVByteArray
-    {
-        public String toString() {
-            return toString(0);
-        }
-        
-        public String toString(int indentLevel) {
-            return convert.getString(this, indentLevel)
-            + super.toString(indentLevel);
-        }
-
-        public boolean isCapacityMutable() {
-            return capacityMutable;
-        }
-        public int get(int offset, int len, ByteArrayData data) {
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pv.PVBooleanArray#get(int, int, org.epics.ioc.pv.BooleanArrayData)
+         */
+        public int get(int offset, int len, BooleanArrayData data) {
             int n = len;
             if(offset+len > length) n = length;
             data.data = value;
             data.offset = offset;
             return n;
         }
-        public int put(int offset, int len, byte[]from, int fromOffset) {
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pv.PVBooleanArray#put(int, int, boolean[], int)
+         */
+        public int put(int offset, int len, boolean[]from, int fromOffset) {
             if(offset+len > length) {
                  int newlength = offset + len;
                  if(newlength>capacity) setCapacity(newlength);
@@ -566,35 +610,16 @@ public class FieldDataFactory {
             System.arraycopy(from,fromOffset,value,offset,len);
             return len;
         }
-        public int getCapacity() {
-            return capacity;
-        }
+    }
 
-        public int getLength() {
-            return length;
-        }
-
-        public void setCapacity(int len) {
-            if(!capacityMutable)
-                throw new IllegalStateException("capacity is immutable");
-            if(length>len) length = len;
-            byte[]newarray = new byte[len];
-            if(length>0) System.arraycopy(value,0,newarray,0,length);
-            value = newarray;
-            capacity = len;
-        }
-
-        public void setLength(int len) {
-            if(!super.getField().isMutable())
-                throw new IllegalStateException("PVData.isMutable is false");
-            if(len>capacity) setCapacity(len);
-            length = len;
-        }
-
+    private static class ByteArray extends DBArray implements PVByteArray
+    {
+        private byte[] value;
+        
         private ByteArray(DBData parent,Array array,
             int capacity,boolean capacityMutable,String defaultValue)
         {
-            super(parent,array);
+            super(parent,array,capacity,capacityMutable);
             this.capacity = capacity;
             this.capacityMutable = capacityMutable;
             value = new byte[capacity];
@@ -606,37 +631,39 @@ public class FieldDataFactory {
                 }
             }
         }
-     
-        private byte[] value;
-        int length = 0;
-        int capacity;
-        boolean capacityMutable;
-    }
-
-    private static class ShortArray
-        extends AbstractDBArray implements PVShortArray
-    {
-        public String toString() {
-            return toString(0);
-        }
-        
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pv.AbstractPVData#toString(int)
+         */
         public String toString(int indentLevel) {
             return convert.getString(this, indentLevel)
             + super.toString(indentLevel);
         }
-
-        public boolean isCapacityMutable() {
-            return capacityMutable;
+        /* (non-Javadoc)
+         * @see org.epics.ioc.db.FieldDataFactory.DBArray#setCapacity(int)
+         */
+        public void setCapacity(int len) {
+            if(!capacityMutable)
+                throw new IllegalStateException("capacity is immutable");
+            if(length>len) length = len;
+            byte[]newarray = new byte[len];
+            if(length>0) System.arraycopy(value,0,newarray,0,length);
+            value = newarray;
+            capacity = len;
         }
-
-        public int get(int offset, int len, ShortArrayData data) {
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pv.PVByteArray#get(int, int, org.epics.ioc.pv.ByteArrayData)
+         */
+        public int get(int offset, int len, ByteArrayData data) {
             int n = len;
             if(offset+len > length) n = length;
             data.data = value;
             data.offset = offset;
             return n;
         }
-        public int put(int offset, int len, short[]from, int fromOffset) {
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pv.PVByteArray#put(int, int, byte[], int)
+         */
+        public int put(int offset, int len, byte[]from, int fromOffset) {
             if(offset+len > length) {
                  int newlength = offset + len;
                  if(newlength>capacity) setCapacity(newlength);
@@ -645,35 +672,16 @@ public class FieldDataFactory {
             System.arraycopy(from,fromOffset,value,offset,len);
             return len;
         }
-        public int getCapacity() {
-            return capacity;
-        }
+    }
 
-        public int getLength() {
-            return length;
-        }
-
-        public void setCapacity(int len) {
-            if(!capacityMutable)
-                throw new IllegalStateException("capacity is immutable");
-            if(length>len) length = len;
-            short[]newarray = new short[len];
-            if(length>0) System.arraycopy(value,0,newarray,0,length);
-            value = newarray;
-            capacity = len;
-        }
-
-        public void setLength(int len) {
-            if(!super.getField().isMutable())
-                throw new IllegalStateException("PVData.isMutable is false");
-            if(len>capacity) setCapacity(len);
-            length = len;
-        }
-
+    private static class ShortArray extends DBArray implements PVShortArray
+    {
+        private short[] value;
+        
         private ShortArray(DBData parent,Array array,
             int capacity,boolean capacityMutable,String defaultValue)
         {
-            super(parent,array);
+            super(parent,array,capacity,capacityMutable);
             this.capacity = capacity;
             this.capacityMutable = capacityMutable;
             value = new short[capacity];
@@ -685,37 +693,39 @@ public class FieldDataFactory {
                 }
             }
         }
-        
-        private short[] value;
-        int length = 0;
-        int capacity;
-        boolean capacityMutable;
-    }
-
-    private static class IntArray
-        extends AbstractDBArray implements PVIntArray
-    {
-        public String toString() {
-            return toString(0);
-        }
-        
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pv.AbstractPVData#toString(int)
+         */
         public String toString(int indentLevel) {
             return convert.getString(this, indentLevel)
             + super.toString(indentLevel);
         }
-
-        public boolean isCapacityMutable() {
-            return capacityMutable;
+        /* (non-Javadoc)
+         * @see org.epics.ioc.db.FieldDataFactory.DBArray#setCapacity(int)
+         */
+        public void setCapacity(int len) {
+            if(!capacityMutable)
+                throw new IllegalStateException("capacity is immutable");
+            if(length>len) length = len;
+            short[]newarray = new short[len];
+            if(length>0) System.arraycopy(value,0,newarray,0,length);
+            value = newarray;
+            capacity = len;
         }
-
-        public int get(int offset, int len, IntArrayData data) {
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pv.PVShortArray#get(int, int, org.epics.ioc.pv.ShortArrayData)
+         */
+        public int get(int offset, int len, ShortArrayData data) {
             int n = len;
             if(offset+len > length) n = length;
             data.data = value;
             data.offset = offset;
             return n;
         }
-        public int put(int offset, int len, int[]from, int fromOffset) {
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pv.PVShortArray#put(int, int, short[], int)
+         */
+        public int put(int offset, int len, short[]from, int fromOffset) {
             if(offset+len > length) {
                  int newlength = offset + len;
                  if(newlength>capacity) setCapacity(newlength);
@@ -724,35 +734,16 @@ public class FieldDataFactory {
             System.arraycopy(from,fromOffset,value,offset,len);
             return len;
         }
-        public int getCapacity() {
-            return capacity;
-        }
+    }
 
-        public int getLength() {
-            return length;
-        }
-
-        public void setCapacity(int len) {
-            if(!capacityMutable)
-                throw new IllegalStateException("capacity is immutable");
-            if(length>len) length = len;
-            int[]newarray = new int[len];
-            if(length>0) System.arraycopy(value,0,newarray,0,length);
-            value = newarray;
-            capacity = len;
-        }
-
-        public void setLength(int len) {
-            if(!super.getField().isMutable())
-                throw new IllegalStateException("PVData.isMutable is false");
-            if(len>capacity) setCapacity(len);
-            length = len;
-        }
-
+    private static class IntArray extends DBArray implements PVIntArray
+    {
+        private int[] value;
+        
         private IntArray(DBData parent,Array array,
             int capacity,boolean capacityMutable,String defaultValue)
         {
-            super(parent,array);
+            super(parent,array,capacity,capacityMutable);
             this.capacity = capacity;
             this.capacityMutable = capacityMutable;
             value = new int[capacity];
@@ -764,36 +755,39 @@ public class FieldDataFactory {
                 }
             }
         }
-        
-        private int[] value;
-        int length = 0;
-        int capacity;
-        boolean capacityMutable;
-    }
-
-    private static class LongArray
-        extends AbstractDBArray implements PVLongArray
-    {
-        public String toString() {
-            return toString(0);
-        }
-        
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pv.AbstractPVData#toString(int)
+         */
         public String toString(int indentLevel) {
             return convert.getString(this, indentLevel)
             + super.toString(indentLevel);
         }
-
-        public boolean isCapacityMutable() {
-            return capacityMutable;
+        /* (non-Javadoc)
+         * @see org.epics.ioc.db.FieldDataFactory.DBArray#setCapacity(int)
+         */
+        public void setCapacity(int len) {
+            if(!capacityMutable)
+                throw new IllegalStateException("capacity is immutable");
+            if(length>len) length = len;
+            int[]newarray = new int[len];
+            if(length>0) System.arraycopy(value,0,newarray,0,length);
+            value = newarray;
+            capacity = len;
         }
-        public int get(int offset, int len, LongArrayData data) {
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pv.PVIntArray#get(int, int, org.epics.ioc.pv.IntArrayData)
+         */
+        public int get(int offset, int len, IntArrayData data) {
             int n = len;
             if(offset+len > length) n = length;
             data.data = value;
             data.offset = offset;
             return n;
         }
-        public int put(int offset, int len, long[]from, int fromOffset) {
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pv.PVIntArray#put(int, int, int[], int)
+         */
+        public int put(int offset, int len, int[]from, int fromOffset) {
             if(offset+len > length) {
                  int newlength = offset + len;
                  if(newlength>capacity) setCapacity(newlength);
@@ -802,35 +796,16 @@ public class FieldDataFactory {
             System.arraycopy(from,fromOffset,value,offset,len);
             return len;
         }
-        public int getCapacity() {
-            return capacity;
-        }
+    }
 
-        public int getLength() {
-            return length;
-        }
-
-        public void setCapacity(int len) {
-            if(!capacityMutable)
-                throw new IllegalStateException("capacity is immutable");
-            if(length>len) length = len;
-            long[]newarray = new long[len];
-            if(length>0) System.arraycopy(value,0,newarray,0,length);
-            value = newarray;
-            capacity = len;
-        }
-
-        public void setLength(int len) {
-            if(!super.getField().isMutable())
-                throw new IllegalStateException("PVData.isMutable is false");
-            if(len>capacity) setCapacity(len);
-            length = len;
-        }
-
+    private static class LongArray extends DBArray implements PVLongArray
+    {
+        private long[] value;   
+        
         private LongArray(DBData parent,Array array,
             int capacity,boolean capacityMutable,String defaultValue)
         {
-            super(parent,array);
+            super(parent,array,capacity,capacityMutable);
             this.capacity = capacity;
             this.capacityMutable = capacityMutable;
             value = new long[capacity];
@@ -842,36 +817,39 @@ public class FieldDataFactory {
                 }
             }
         }
-        
-        private long[] value;
-        int length = 0;
-        int capacity;
-        boolean capacityMutable;
-    }
-
-    private static class FloatArray
-        extends AbstractDBArray implements PVFloatArray
-    {
-        public String toString() {
-            return toString(0);
-        }
-        
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pv.AbstractPVData#toString(int)
+         */
         public String toString(int indentLevel) {
             return convert.getString(this, indentLevel)
             + super.toString(indentLevel);
         }
-
-        public boolean isCapacityMutable() {
-            return capacityMutable;
-        }
-        public int get(int offset, int len, FloatArrayData data) {
+        /* (non-Javadoc)
+         * @see org.epics.ioc.db.FieldDataFactory.DBArray#setCapacity(int)
+         */
+        public void setCapacity(int len) {
+            if(!capacityMutable)
+                throw new IllegalStateException("capacity is immutable");
+            if(length>len) length = len;
+            long[]newarray = new long[len];
+            if(length>0) System.arraycopy(value,0,newarray,0,length);
+            value = newarray;
+            capacity = len;
+        }      
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pv.PVLongArray#get(int, int, org.epics.ioc.pv.LongArrayData)
+         */
+        public int get(int offset, int len, LongArrayData data) {
             int n = len;
             if(offset+len > length) n = length;
             data.data = value;
             data.offset = offset;
             return n;
         }
-        public int put(int offset, int len, float[]from, int fromOffset) {
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pv.PVLongArray#put(int, int, long[], int)
+         */
+        public int put(int offset, int len, long[]from, int fromOffset) {
             if(offset+len > length) {
                  int newlength = offset + len;
                  if(newlength>capacity) setCapacity(newlength);
@@ -880,35 +858,16 @@ public class FieldDataFactory {
             System.arraycopy(from,fromOffset,value,offset,len);
             return len;
         }
-        public int getCapacity() {
-            return capacity;
-        }
+    }
 
-        public int getLength() {
-            return length;
-        }
-
-        public void setCapacity(int len) {
-            if(!capacityMutable)
-                throw new IllegalStateException("capacity is immutable");
-            if(length>len) length = len;
-            float[]newarray = new float[len];
-            if(length>0) System.arraycopy(value,0,newarray,0,length);
-            value = newarray;
-            capacity = len;
-        }
-
-        public void setLength(int len) {
-            if(!super.getField().isMutable())
-                throw new IllegalStateException("PVData.isMutable is false");
-            if(len>capacity) setCapacity(len);
-            length = len;
-        }
-
+    private static class FloatArray extends DBArray implements PVFloatArray
+    {
+        private float[] value;
+        
         private FloatArray(DBData parent,Array array,
             int capacity,boolean capacityMutable,String defaultValue)
         {
-            super(parent,array);
+            super(parent,array,capacity,capacityMutable);
             this.capacity = capacity;
             this.capacityMutable = capacityMutable;
             value = new float[capacity];
@@ -920,37 +879,39 @@ public class FieldDataFactory {
                 }
             }
         }
-        
-        private float[] value;
-        int length = 0;
-        int capacity;
-        boolean capacityMutable;
-    }
-
-    private static class DoubleArray
-        extends AbstractDBArray implements PVDoubleArray
-    {
-
-        public String toString() {
-            return toString(0);
-        }
-        
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pv.AbstractPVData#toString(int)
+         */
         public String toString(int indentLevel) {
             return convert.getString(this, indentLevel)
             + super.toString(indentLevel);
         }
-
-        public boolean isCapacityMutable() {
-            return capacityMutable;
+        /* (non-Javadoc)
+         * @see org.epics.ioc.db.FieldDataFactory.DBArray#setCapacity(int)
+         */
+        public void setCapacity(int len) {
+            if(!capacityMutable)
+                throw new IllegalStateException("capacity is immutable");
+            if(length>len) length = len;
+            float[]newarray = new float[len];
+            if(length>0) System.arraycopy(value,0,newarray,0,length);
+            value = newarray;
+            capacity = len;
         }
-        public int get(int offset, int len, DoubleArrayData data) {
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pv.PVFloatArray#get(int, int, org.epics.ioc.pv.FloatArrayData)
+         */
+        public int get(int offset, int len, FloatArrayData data) {
             int n = len;
             if(offset+len > length) n = length;
             data.data = value;
             data.offset = offset;
             return n;
         }
-        public int put(int offset, int len, double[]from, int fromOffset) {
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pv.PVFloatArray#put(int, int, float[], int)
+         */
+        public int put(int offset, int len, float[]from, int fromOffset) {
             if(offset+len > length) {
                  int newlength = offset + len;
                  if(newlength>capacity) setCapacity(newlength);
@@ -959,35 +920,16 @@ public class FieldDataFactory {
             System.arraycopy(from,fromOffset,value,offset,len);
             return len;
         }
-        public int getCapacity() {
-            return capacity;
-        }
+    }
 
-        public int getLength() {
-            return length;
-        }
-
-        public void setCapacity(int len) {
-            if(!capacityMutable)
-                throw new IllegalStateException("capacity is immutable");
-            if(length>len) length = len;
-            double[]newarray = new double[len];
-            if(length>0) System.arraycopy(value,0,newarray,0,length);
-            value = newarray;
-            capacity = len;
-        }
-
-        public void setLength(int len) {
-            if(!super.getField().isMutable())
-                throw new IllegalStateException("PVData.isMutable is false");
-            if(len>capacity) setCapacity(len);
-            length = len;
-        }
-
+    private static class DoubleArray extends DBArray implements PVDoubleArray
+    {
+        private double[] value;
+        
         private DoubleArray(DBData parent,Array array,
             int capacity,boolean capacityMutable,String defaultValue)
         {
-            super(parent,array);
+            super(parent,array,capacity,capacityMutable);
             this.capacity = capacity;
             this.capacityMutable = capacityMutable;
             value = new double[capacity];
@@ -999,36 +941,39 @@ public class FieldDataFactory {
                 }
             }
         }
-        
-        private double[] value;
-        int length = 0;
-        int capacity;
-        boolean capacityMutable;
-    }
-
-    private static class StringArray
-        extends AbstractDBArray implements PVStringArray
-    {
-        public String toString() {
-            return toString(0);
-        }
-        
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pv.AbstractPVData#toString(int)
+         */
         public String toString(int indentLevel) {
             return convert.getString(this, indentLevel)
             + super.toString(indentLevel);
         }
-
-        public boolean isCapacityMutable() {
-            return capacityMutable;
-        }
-        public int get(int offset, int len, StringArrayData data) {
+        /* (non-Javadoc)
+         * @see org.epics.ioc.db.FieldDataFactory.DBArray#setCapacity(int)
+         */
+        public void setCapacity(int len) {
+            if(!capacityMutable)
+                throw new IllegalStateException("capacity is immutable");
+            if(length>len) length = len;
+            double[]newarray = new double[len];
+            if(length>0) System.arraycopy(value,0,newarray,0,length);
+            value = newarray;
+            capacity = len;
+        }       
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pv.PVDoubleArray#get(int, int, org.epics.ioc.pv.DoubleArrayData)
+         */
+        public int get(int offset, int len, DoubleArrayData data) {
             int n = len;
             if(offset+len > length) n = length;
             data.data = value;
             data.offset = offset;
             return n;
         }
-        public int put(int offset, int len, String[]from, int fromOffset) {
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pv.PVDoubleArray#put(int, int, double[], int)
+         */
+        public int put(int offset, int len, double[]from, int fromOffset) {
             if(offset+len > length) {
                  int newlength = offset + len;
                  if(newlength>capacity) setCapacity(newlength);
@@ -1036,36 +981,18 @@ public class FieldDataFactory {
             }
             System.arraycopy(from,fromOffset,value,offset,len);
             return len;
-        }
-        public int getCapacity() {
-            return capacity;
-        }
+        }     
+    }
 
-        public int getLength() {
-            return length;
-        }
+    private static class StringArray extends DBArray implements PVStringArray
+    {
 
-        public void setCapacity(int len) {
-            if(!capacityMutable)
-                throw new IllegalStateException("capacity is immutable");
-            if(length>len) length = len;
-            String[]newarray = new String[len];
-            if(length>0) System.arraycopy(value,0,newarray,0,length);
-            value = newarray;
-            capacity = len;
-        }
-
-        public void setLength(int len) {
-            if(!super.getField().isMutable())
-                throw new IllegalStateException("PVData.isMutable is false");
-            if(len>capacity) setCapacity(len);
-            length = len;
-        }
-
+        private String[] value;
+        
         private StringArray(DBData parent,Array array,
             int capacity,boolean capacityMutable,String defaultValue)
         {
-            super(parent,array);
+            super(parent,array,capacity,capacityMutable);
             this.capacity = capacity;
             this.capacityMutable = capacityMutable;
             value = new String[capacity];
@@ -1076,37 +1003,40 @@ public class FieldDataFactory {
                 } catch (NumberFormatException e) {
                 }
             }
-        }
-        
-        private String[] value;
-        int length = 0;
-        int capacity;
-        boolean capacityMutable;
-    }
-
-    private static class EnumArray
-        extends AbstractDBArray implements PVEnumArray
-    {
-        public String toString() {
-            return toString(0);
-        }
-        
+        }       
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pv.AbstractPVData#toString(int)
+         */
         public String toString(int indentLevel) {
             return convert.getString(this, indentLevel)
             + super.toString(indentLevel);
         }
-
-        public boolean isCapacityMutable() {
-            return capacityMutable;
+        /* (non-Javadoc)
+         * @see org.epics.ioc.db.FieldDataFactory.DBArray#setCapacity(int)
+         */
+        public void setCapacity(int len) {
+            if(!capacityMutable)
+                throw new IllegalStateException("capacity is immutable");
+            if(length>len) length = len;
+            String[]newarray = new String[len];
+            if(length>0) System.arraycopy(value,0,newarray,0,length);
+            value = newarray;
+            capacity = len;
         }
-        public int get(int offset, int len, EnumArrayData data) {
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pv.PVStringArray#get(int, int, org.epics.ioc.pv.StringArrayData)
+         */
+        public int get(int offset, int len, StringArrayData data) {
             int n = len;
             if(offset+len > length) n = length;
             data.data = value;
             data.offset = offset;
             return n;
         }
-        public int put(int offset, int len, PVEnum[]from, int fromOffset) {
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pv.PVStringArray#put(int, int, java.lang.String[], int)
+         */
+        public int put(int offset, int len, String[]from, int fromOffset) {
             if(offset+len > length) {
                  int newlength = offset + len;
                  if(newlength>capacity) setCapacity(newlength);
@@ -1115,14 +1045,31 @@ public class FieldDataFactory {
             System.arraycopy(from,fromOffset,value,offset,len);
             return len;
         }
-        public int getCapacity() {
-            return capacity;
-        }
+    }
 
-        public int getLength() {
-            return length;
-        }
+    private static class EnumArray extends DBArray implements PVEnumArray
+    {
 
+        private PVEnum[] value;
+        
+        private EnumArray(DBData parent,Array array,
+            int capacity,boolean capacityMutable)
+        {
+            super(parent,array,capacity,capacityMutable);
+            this.capacity = capacity;
+            this.capacityMutable = capacityMutable;
+            value = new PVEnum[capacity];
+        }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pv.AbstractPVData#toString(int)
+         */
+        public String toString(int indentLevel) {
+            return convert.getString(this, indentLevel)
+            + super.toString(indentLevel);
+        }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.db.FieldDataFactory.DBArray#setCapacity(int)
+         */
         public void setCapacity(int len) {
             if(!capacityMutable)
                 throw new IllegalStateException("capacity is immutable");
@@ -1133,40 +1080,84 @@ public class FieldDataFactory {
             capacity = len;
         }
 
-        public void setLength(int len) {
-            if(!super.getField().isMutable())
-                throw new IllegalStateException("PVData.isMutable is false");
-            if(len>capacity) setCapacity(len);
-            length = len;
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pv.PVEnumArray#get(int, int, org.epics.ioc.pv.EnumArrayData)
+         */
+        public int get(int offset, int len, EnumArrayData data) {
+            int n = len;
+            if(offset+len > length) n = length;
+            data.data = value;
+            data.offset = offset;
+            return n;
         }
-
-        private EnumArray(DBData parent,Array array,
-            int capacity,boolean capacityMutable)
-        {
-            super(parent,array);
-            this.capacity = capacity;
-            this.capacityMutable = capacityMutable;
-            value = new PVEnum[capacity];
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pv.PVEnumArray#put(int, int, org.epics.ioc.pv.PVEnum[], int)
+         */
+        public int put(int offset, int len, PVEnum[]from, int fromOffset) {
+            if(offset+len > length) {
+                 int newlength = offset + len;
+                 if(newlength>capacity) setCapacity(newlength);
+                 length = newlength;
+            }
+            System.arraycopy(from,fromOffset,value,offset,len);
+            return len;
         }
-        
-        private PVEnum[] value;
-        int length = 0;
-        int capacity;
-        boolean capacityMutable;
     }
 
-    private static class MenuArray
-        extends AbstractDBArray implements PVMenuArray
+    private static class MenuArray extends DBArray implements PVMenuArray
     {
-        public String toString() {
-            return toString(0);
-        }
+        private PVMenu[] value;
         
+        private MenuArray(DBData parent,Array array,
+            int capacity,boolean capacityMutable)
+        {
+            super(parent,array,capacity,capacityMutable);
+            this.capacity = capacity;
+            this.capacityMutable = capacityMutable;
+            value = new PVMenu[capacity];
+        }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pv.AbstractPVData#toString(int)
+         */
         public String toString(int indentLevel) {
             return getString(indentLevel)
             + super.toString(indentLevel);
         }
-
+        /* (non-Javadoc)
+         * @see org.epics.ioc.db.FieldDataFactory.DBArray#setCapacity(int)
+         */
+        public void setCapacity(int len) {
+            if(!capacityMutable)
+                throw new IllegalStateException("capacity is immutable");
+            if(length>len) length = len;
+            PVMenu[]newarray = new PVMenu[len];
+            if(length>0) System.arraycopy(value,0,newarray,0,length);
+            value = newarray;
+            capacity = len;
+        }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pv.PVMenuArray#get(int, int, org.epics.ioc.pv.MenuArrayData)
+         */
+        public int get(int offset, int len, MenuArrayData data) {
+            int n = len;
+            if(offset+len > length) n = length;
+            data.data = value;
+            data.offset = offset;
+            return n;
+        }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pv.PVMenuArray#put(int, int, org.epics.ioc.pv.PVMenu[], int)
+         */
+        public int put(int offset, int len, PVMenu[]from, int fromOffset) {
+            if(offset+len > length) {
+                 int newlength = offset + len;
+                 if(newlength>capacity) setCapacity(newlength);
+                 length = newlength;
+            }
+            System.arraycopy(from,fromOffset,value,offset,len);
+            return len;
+        }
+        
         private String getString(int indentLevel) {
             StringBuilder builder = new StringBuilder();
             newLine(builder,indentLevel);
@@ -1182,19 +1173,54 @@ public class FieldDataFactory {
             newLine(builder,indentLevel);
             builder.append("}");
             return builder.toString();
-        }
+        }       
+    }
 
-        public boolean isCapacityMutable() {
-            return capacityMutable;
+    private static class StructureArray extends DBArray implements PVStructureArray
+    {
+        private PVStructure[] value;
+        
+        private StructureArray(DBData parent,Array array,
+            int capacity,boolean capacityMutable)
+        {
+            super(parent,array,capacity,capacityMutable);
+            this.capacity = capacity;
+            this.capacityMutable = capacityMutable;
+            value = new PVStructure[capacity];
         }
-        public int get(int offset, int len, MenuArrayData data) {
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pv.AbstractPVData#toString(int)
+         */
+        public String toString(int indentLevel) {
+            return getString(indentLevel)
+            + super.toString(indentLevel);
+        }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.db.FieldDataFactory.DBArray#setCapacity(int)
+         */
+        public void setCapacity(int len) {
+            if(!capacityMutable)
+                throw new IllegalStateException("capacity is immutable");
+            if(length>len) length = len;
+            PVStructure[]newarray = new PVStructure[len];
+            if(length>0) System.arraycopy(value,0,newarray,0,length);
+            value = newarray;
+            capacity = len;
+        }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pv.PVStructureArray#get(int, int, org.epics.ioc.pv.StructureArrayData)
+         */
+        public int get(int offset, int len, StructureArrayData data) {
             int n = len;
             if(offset+len > length) n = length;
             data.data = value;
             data.offset = offset;
             return n;
         }
-        public int put(int offset, int len, PVMenu[]from, int fromOffset) {
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pv.PVStructureArray#put(int, int, org.epics.ioc.pv.PVStructure[], int)
+         */
+        public int put(int offset, int len, PVStructure[]from, int fromOffset) {
             if(offset+len > length) {
                  int newlength = offset + len;
                  if(newlength>capacity) setCapacity(newlength);
@@ -1203,58 +1229,7 @@ public class FieldDataFactory {
             System.arraycopy(from,fromOffset,value,offset,len);
             return len;
         }
-        public int getCapacity() {
-            return capacity;
-        }
-
-        public int getLength() {
-            return length;
-        }
-
-        public void setCapacity(int len) {
-            if(!capacityMutable)
-                throw new IllegalStateException("capacity is immutable");
-            if(length>len) length = len;
-            PVMenu[]newarray = new PVMenu[len];
-            if(length>0) System.arraycopy(value,0,newarray,0,length);
-            value = newarray;
-            capacity = len;
-        }
-
-        public void setLength(int len) {
-            if(!super.getField().isMutable())
-                throw new IllegalStateException("PVData.isMutable is false");
-            if(len>capacity) setCapacity(len);
-            length = len;
-        }
-
-        private MenuArray(DBData parent,Array array,
-            int capacity,boolean capacityMutable)
-        {
-            super(parent,array);
-            this.capacity = capacity;
-            this.capacityMutable = capacityMutable;
-            value = new PVMenu[capacity];
-        }
         
-        private PVMenu[] value;
-        int length = 0;
-        int capacity;
-        boolean capacityMutable;
-    }
-
-    private static class StructureArray
-        extends AbstractDBArray implements PVStructureArray
-    {
-        public String toString() {
-            return toString(0);
-        }
-        
-        public String toString(int indentLevel) {
-            return getString(indentLevel)
-            + super.toString(indentLevel);
-        }
-
         private String getString(int indentLevel) {
             StringBuilder builder = new StringBuilder();
             newLine(builder,indentLevel);
@@ -1270,43 +1245,53 @@ public class FieldDataFactory {
             builder.append("}");
             return builder.toString();
         }
+    }
 
-        public boolean isCapacityMutable() {
-            return capacityMutable;
-        }
+    private static class ArrayArray extends DBArray implements PVArrayArray
+    {
+        private PVArray[] value;
         
-        public int getCapacity() {
-            return capacity;
+        private ArrayArray(DBData parent,Array array,
+            int capacity,boolean capacityMutable)
+        {
+            super(parent,array,capacity,capacityMutable);
+            this.capacity = capacity;
+            this.capacityMutable = capacityMutable;
+            value = new PVArray[capacity];
         }
-
-        public int getLength() {
-            return length;
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pv.AbstractPVData#toString(int)
+         */
+        public String toString(int indentLevel) {
+            return getString(indentLevel)
+            + super.toString(indentLevel);
         }
-
+        /* (non-Javadoc)
+         * @see org.epics.ioc.db.FieldDataFactory.DBArray#setCapacity(int)
+         */
         public void setCapacity(int len) {
             if(!capacityMutable)
                 throw new IllegalStateException("capacity is immutable");
             if(length>len) length = len;
-            PVStructure[]newarray = new PVStructure[len];
+            PVArray[]newarray = new PVArray[len];
             if(length>0) System.arraycopy(value,0,newarray,0,length);
             value = newarray;
             capacity = len;
         }
-
-        public void setLength(int len) {
-            if(!super.getField().isMutable())
-                throw new IllegalStateException("PVData.isMutable is false");
-            if(len>capacity) setCapacity(len);
-            length = len;
-        }
-        public int get(int offset, int len, StructureArrayData data) {
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pv.PVArrayArray#get(int, int, org.epics.ioc.pv.ArrayArrayData)
+         */
+        public int get(int offset, int len, ArrayArrayData data) {
             int n = len;
             if(offset+len > length) n = length;
             data.data = value;
             data.offset = offset;
             return n;
         }
-        public int put(int offset, int len, PVStructure[]from, int fromOffset) {
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pv.PVArrayArray#put(int, int, org.epics.ioc.pv.PVArray[], int)
+         */
+        public int put(int offset, int len, PVArray[]from, int fromOffset) {
             if(offset+len > length) {
                  int newlength = offset + len;
                  if(newlength>capacity) setCapacity(newlength);
@@ -1316,35 +1301,6 @@ public class FieldDataFactory {
             return len;
         }
         
-        private StructureArray(DBData parent,Array array,
-            int capacity,boolean capacityMutable)
-        {
-            super(parent,array);
-            this.capacity = capacity;
-            this.capacityMutable = capacityMutable;
-            value = new PVStructure[capacity];
-        }
-        
-        private PVStructure[] value;
-        int length = 0;
-        int capacity;
-        boolean capacityMutable;
-    }
-
-    private static class ArrayArray
-        extends AbstractDBArray implements PVArrayArray
-    {
- 
-
-        public String toString() {
-            return toString(0);
-        }
-        
-        public String toString(int indentLevel) {
-            return getString(indentLevel)
-            + super.toString(indentLevel);
-        }
-
         private String getString(int indentLevel) {
             StringBuilder builder = new StringBuilder();
             newLine(builder,indentLevel);
@@ -1361,42 +1317,53 @@ public class FieldDataFactory {
             builder.append("}");
             return builder.toString();
         }
+    }
 
-        public boolean isCapacityMutable() {
-            return capacityMutable;
+    private static class LinkArray extends DBArray implements PVLinkArray
+    {
+        private PVLink[] value;
+        
+        private LinkArray(DBData parent,Array array,
+            int capacity,boolean capacityMutable)
+        {
+            super(parent,array,capacity,capacityMutable);
+            this.capacity = capacity;
+            this.capacityMutable = capacityMutable;
+            value = new PVLink[capacity];
         }
-        public int getCapacity() {
-            return capacity;
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pv.AbstractPVData#toString(int)
+         */
+        public String toString(int indentLevel) {
+            return getString(indentLevel)
+            + super.toString(indentLevel);
         }
-
-        public int getLength() {
-            return length;
-        }
-
+        /* (non-Javadoc)
+         * @see org.epics.ioc.db.FieldDataFactory.DBArray#setCapacity(int)
+         */
         public void setCapacity(int len) {
             if(!capacityMutable)
                 throw new IllegalStateException("capacity is immutable");
             if(length>len) length = len;
-            PVArray[]newarray = new PVArray[len];
+            PVLink[]newarray = new PVLink[len];
             if(length>0) System.arraycopy(value,0,newarray,0,length);
             value = newarray;
             capacity = len;
         }
-
-        public void setLength(int len) {
-            if(!super.getField().isMutable())
-                throw new IllegalStateException("PVData.isMutable is false");
-            if(len>capacity) setCapacity(len);
-            length = len;
-        }
-        public int get(int offset, int len, ArrayArrayData data) {
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pv.PVLinkArray#get(int, int, org.epics.ioc.pv.LinkArrayData)
+         */
+        public int get(int offset, int len, LinkArrayData data) {
             int n = len;
             if(offset+len > length) n = length;
             data.data = value;
             data.offset = offset;
             return n;
         }
-        public int put(int offset, int len, PVArray[]from, int fromOffset) {
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pv.PVLinkArray#put(int, int, org.epics.ioc.pv.PVLink[], int)
+         */
+        public int put(int offset, int len, PVLink[]from, int fromOffset) {
             if(offset+len > length) {
                  int newlength = offset + len;
                  if(newlength>capacity) setCapacity(newlength);
@@ -1405,34 +1372,7 @@ public class FieldDataFactory {
             System.arraycopy(from,fromOffset,value,offset,len);
             return len;
         }
-
-        private ArrayArray(DBData parent,Array array,
-            int capacity,boolean capacityMutable)
-        {
-            super(parent,array);
-            this.capacity = capacity;
-            this.capacityMutable = capacityMutable;
-            value = new PVArray[capacity];
-        }
         
-        private PVArray[] value;
-        int length = 0;
-        int capacity;
-        boolean capacityMutable;
-    }
-
-    private static class LinkArray
-        extends AbstractDBArray implements PVLinkArray
-    {
-        public String toString() {
-            return toString(0);
-        }
-        
-        public String toString(int indentLevel) {
-            return getString(indentLevel)
-            + super.toString(indentLevel);
-        }
-
         private String getString(int indentLevel) {
             StringBuilder builder = new StringBuilder();
             newLine(builder,indentLevel);
@@ -1450,64 +1390,5 @@ public class FieldDataFactory {
             builder.append("}");
             return builder.toString();
         }
-
-        public boolean isCapacityMutable() {
-            return capacityMutable;
-        }
-        public int getCapacity() {
-            return capacity;
-        }
-
-        public int getLength() {
-            return length;
-        }
-
-        public void setCapacity(int len) {
-            if(!capacityMutable)
-                throw new IllegalStateException("capacity is immutable");
-            if(length>len) length = len;
-            PVLink[]newarray = new PVLink[len];
-            if(length>0) System.arraycopy(value,0,newarray,0,length);
-            value = newarray;
-            capacity = len;
-        }
-
-        public void setLength(int len) {
-            if(!super.getField().isMutable())
-                throw new IllegalStateException("PVData.isMutable is false");
-            if(len>capacity) setCapacity(len);
-            length = len;
-        }
-        public int get(int offset, int len, LinkArrayData data) {
-            int n = len;
-            if(offset+len > length) n = length;
-            data.data = value;
-            data.offset = offset;
-            return n;
-        }
-        public int put(int offset, int len, PVLink[]from, int fromOffset) {
-            if(offset+len > length) {
-                 int newlength = offset + len;
-                 if(newlength>capacity) setCapacity(newlength);
-                 length = newlength;
-            }
-            System.arraycopy(from,fromOffset,value,offset,len);
-            return len;
-        }
-
-        private LinkArray(DBData parent,Array array,
-            int capacity,boolean capacityMutable)
-        {
-            super(parent,array);
-            this.capacity = capacity;
-            this.capacityMutable = capacityMutable;
-            value = new PVLink[capacity];
-        }
-        
-        private PVLink[] value;
-        int length = 0;
-        int capacity;
-        boolean capacityMutable;
     }
-
 }

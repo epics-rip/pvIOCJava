@@ -17,12 +17,12 @@ public interface Property {
      * Get the property name.
      * @return The property name.
      */
-    String getName();
+    String getPropertyName();
     /**
      * Get the name of the field that has the property value.
      * @return The field name.
      */
-    String getFieldName();
+    String getAssociatedFieldName();
     /**
      * Convert to a string.
      * @return The property as a string.

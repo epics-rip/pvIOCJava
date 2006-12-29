@@ -13,12 +13,12 @@ package org.epics.ioc.pv;
 public interface PVDouble extends PVData{
     /**
      * Get the <i>double</i> value stored in the field.
-     * @return double value of field.
+     * @return double The value.
      */
     double get();
     /**
      * Put the <i>double</i> value into the field.
-     * @param value new double value for field.
+     * @param value New value.
      * @throws IllegalStateException if the field is not mutable.
      */
     void put(double value);

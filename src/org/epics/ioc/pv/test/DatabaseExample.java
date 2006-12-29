@@ -219,13 +219,24 @@ public class DatabaseExample {
          * @see org.epics.ioc.pv.PVData#getFullFieldName()
          */
         public String getFullFieldName() {
-            // TODO Auto-generated method stub
             return null;
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.pv.PVData#getParent()
          */
         public PVData getParent() {
+            return null;
+        }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pv.PVData#getRecord()
+         */
+        public PVRecord getPVRecord() {
+            return null;
+        }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.util.Requestor#getRequestorName()
+         */
+        public String getRequestorName() {
             // TODO Auto-generated method stub
             return null;
         }
@@ -619,7 +630,7 @@ public class DatabaseExample {
         /* (non-Javadoc)
          * @see org.epics.ioc.pv.PVStructure#replaceField(java.lang.String, org.epics.ioc.pv.PVData)
          */
-        public boolean replaceField(String fieldName, PVData pvData) {
+        public boolean replaceStructureField(String fieldName, String structureName) {
             // TODO Auto-generated method stub
             return false;
         }

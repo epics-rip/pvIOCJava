@@ -6,6 +6,7 @@
 package org.epics.ioc.dbd;
 
 /**
+ * Reflection interface for a DBDSupport.
  * @author mrk
  *
  */

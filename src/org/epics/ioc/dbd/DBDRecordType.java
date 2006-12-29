@@ -6,7 +6,7 @@
 package org.epics.ioc.dbd;
 
 /**
- * reflection interface for a recordType.
+ * Reflection interface for a recordType.
  * @author mrk
  *
  */

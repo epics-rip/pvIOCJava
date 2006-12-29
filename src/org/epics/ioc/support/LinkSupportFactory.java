@@ -88,10 +88,9 @@ public class LinkSupportFactory {
         private ProcessLink(PVLink pvLink) {
             super(processLinkSupportName,(DBData)pvLink);
             this.pvLink = pvLink;
-            DBData dbData = (DBData)pvLink;
             channelRequestorName = 
-                dbData.getRecord().getRecordName()
-                + dbData.getFullFieldName();
+                pvLink.getPVRecord().getRecordName()
+                + pvLink.getFullFieldName();
         }               
         /* (non-Javadoc)
          * @see org.epics.ioc.util.Requestor#getRequestorName()
@@ -104,7 +103,7 @@ public class LinkSupportFactory {
          */
         public void initialize() {
             if(!super.checkSupportState(SupportState.readyForInitialize,processLinkSupportName)) return;
-            dbRecord = ((DBData)pvLink).getRecord();
+            dbRecord = (DBRecord)pvLink.getPVRecord();
             recordProcess = dbRecord.getRecordProcess();
             configStructure = super.getConfigStructure("processLink");
             if(configStructure==null) return;
@@ -439,10 +438,9 @@ public class LinkSupportFactory {
         public InputLink(PVLink pvLink) {
             super(inputLinkSupportName,(DBData)pvLink);
             this.pvLink = pvLink;
-            DBData dbData = (DBData)pvLink;
             channelRequestorName = 
-                dbData.getRecord().getRecordName()
-                + dbData.getFullFieldName();
+                pvLink.getPVRecord().getRecordName()
+                + pvLink.getFullFieldName();
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.util.Requestor#getRequestorName()
@@ -455,7 +453,7 @@ public class LinkSupportFactory {
          */
         public void initialize() {
             if(!super.checkSupportState(SupportState.readyForInitialize,inputLinkSupportName)) return;
-            dbRecord = ((DBData)pvLink).getRecord();
+            dbRecord = (DBRecord)pvLink.getPVRecord();
             recordProcess = dbRecord.getRecordProcess();
             configStructure = super.getConfigStructure("inputLink");
             if(configStructure==null) return;
@@ -953,10 +951,9 @@ public class LinkSupportFactory {
         public OutputLink(PVLink pvLink) {
             super(inputLinkSupportName,(DBData)pvLink);
             this.pvLink = pvLink;
-            DBData dbData = (DBData)pvLink;
             channelRequestorName = 
-                dbData.getRecord().getRecordName()
-                + dbData.getFullFieldName();
+                pvLink.getPVRecord().getRecordName()
+                + pvLink.getFullFieldName();
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.util.Requestor#getRequestorName()
@@ -969,7 +966,7 @@ public class LinkSupportFactory {
          */
         public void initialize() {
             if(!super.checkSupportState(SupportState.readyForInitialize,inputLinkSupportName)) return;
-            dbRecord = ((DBData)pvLink).getRecord();
+            dbRecord = (DBRecord)pvLink.getPVRecord();
             recordProcess = dbRecord.getRecordProcess();
             configStructure = super.getConfigStructure("outputLink");
             if(configStructure==null) return;
@@ -1485,7 +1482,7 @@ public class LinkSupportFactory {
             super(monitorNotifyLinkSupportName,(DBData)pvLink);
             this.pvLink = pvLink;
             DBData dbData = (DBData)pvLink;
-            dbRecord = dbData.getRecord();
+            dbRecord = dbData.getDBRecord();
             channelRequestorName = dbRecord.getRecordName() + pvLink.getFullFieldName();
         }       
         /* (non-Javadoc)
@@ -1730,8 +1727,7 @@ public class LinkSupportFactory {
         public MonitorLink(PVLink pvLink) {
             super(monitorLinkSupportName,(DBData)pvLink);
             this.pvLink = pvLink;
-            dbRecord = ((DBData)pvLink).getRecord();
-            channelRequestorName = dbRecord.getRecordName() + pvLink.getFullFieldName();
+            channelRequestorName = pvLink.getPVRecord().getRecordName() + pvLink.getFullFieldName();
         }       
         /* (non-Javadoc)
          * @see org.epics.ioc.util.Requestor#getRequestorName()

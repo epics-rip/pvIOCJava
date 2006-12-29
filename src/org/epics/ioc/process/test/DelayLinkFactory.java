@@ -50,7 +50,7 @@ public class DelayLinkFactory {
         @Override
         public void initialize() {
             if(!super.checkSupportState(SupportState.readyForInitialize,supportName)) return;
-            dbRecord = ((DBData)pvLink).getRecord();
+            dbRecord = (DBRecord)pvLink.getPVRecord();
             recordProcess = dbRecord.getRecordProcess();
             configStructure = super.getConfigStructure("delayLink");
             if(configStructure==null) return;

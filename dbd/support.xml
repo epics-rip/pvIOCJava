@@ -1,7 +1,7 @@
 <?xml version="1.0" ?>
 <DBDefinition>
 
-<support name = "linearConvert"
+<support name = "linearConvertInput"
     factoryName = "org.epics.ioc.support.LinearConvertFactory"
 />
 <support name = "linkArray"

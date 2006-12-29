@@ -8,41 +8,15 @@ package org.epics.ioc.db;
 import org.epics.ioc.process.*;
 import org.epics.ioc.pv.*;
 import org.epics.ioc.dbd.*;
-import org.epics.ioc.util.MessageType;
 
 
 
 /**
- * interface for a record instance.
+ * Interface for a record instance.
  * @author mrk
  *
  */
-public interface DBRecord extends DBData, PVStructure {
-    /**
-     * Get the record instance name.
-     * @return The name.
-     */
-    String getRecordName();
-    /**
-     * Get the recordState.
-     * @return The state.
-     */
-    RecordState getRecordState();
-    /**
-     * Set the recordState.
-     * @param state The new state.
-     */
-    void setRecordState(RecordState state);
-    /**
-     * Add a RecordState listener that will be called whenever the record state changes.
-     * @param listener The listener.
-     */
-    void addRecordStateListener(RecordStateListener listener);
-    /**
-     * Remove a RecordState listener.
-     * @param listener The listener.
-     */
-    void removeRecordStateListener(RecordStateListener listener);
+public interface DBRecord extends DBData, PVRecord {
     /**
      * Lock the record instance.
      * This must be called before accessing anything contained in the record.
@@ -91,18 +65,18 @@ public interface DBRecord extends DBData, PVStructure {
      * @param listener The DBListener interface.
      * @return A RecordListener interface.
      */
-    RecordListener createListener(DBListener listener);
+    RecordListener createRecordListener(DBListener listener);
     /**
      * Remove a RecordListener interface.
      * This also removes all calls to DBData.addListener; 
      * @param listener The Listen interface returned by the call to createListener.
      */
-    void removeListener(RecordListener listener);
+    void removeRecordListener(RecordListener listener);
     /**
      * Remove all listeners.
      * Any code that modifies the structure of a record must call this before making modifications.
      */
-    void removeListeners();
+    void removeRecordListeners();
     /**
      * Used for communication between AbstractDBRecord and AbstractDBData.
      * AbstractDBData calls this the first time DBData.addListener is called.
@@ -131,11 +105,4 @@ public interface DBRecord extends DBData, PVStructure {
      * This is called after an IOCDB is merged into the master to change it to the master.
      */
     void setIOCDB(IOCDB iocdb);
-    /**
-     * Report a message.
-     * The record name will be appended to the message and sent to iocdb.message.
-     * @param message The message.
-     * @param messageType The message type.
-     */
-    void message(String message, MessageType messageType);
 }

@@ -74,8 +74,8 @@ public class XMLToDataBaseTest extends TestCase {
             IOCDB addIOCDB = XMLToIOCDBFactory.convert("add",
                 "src/org/epics/ioc/db/test/xmlToDataBaseDB.xml",this);
             if(maxMessageType!=MessageType.info) {
-                System.out.printf("XMLToIOCDBFactory.convert reported errors");
-                return;
+                System.out.printf("XMLToIOCDBFactory.convert reported errors%n");
+                //if(maxMessageType!=MessageType.warning) return;
             }
             addIOCDB.mergeIntoMaster();
             IOCDB masterIOCDB = IOCDBFactory.getMaster();

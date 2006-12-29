@@ -18,7 +18,7 @@ public interface PVLong extends PVData{
     long get();
     /**
      * Put the <i>long</i> value into the field.
-     * @param value new long value for field.
+     * @param value New value.
      * @throws IllegalStateException if the field is not mutable.
      */
     void put(long value);

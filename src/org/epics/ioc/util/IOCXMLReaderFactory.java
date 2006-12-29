@@ -101,11 +101,10 @@ public class IOCXMLReaderFactory {
             } catch (SAXException e) {
                 // nothing to do. ErrorHandler reports errors.
             } catch (IOException e) {
-                throw new IllegalStateException(
-                    String.format("%n")
-                    + "IOCXMLReader.convert terminating with IOException"
-                    + String.format("%n")
-                    + e.getMessage());
+                String message = String.format(
+                        "IOCXMLReader.convert terminating with IOException %n%s%n",
+                        e.getMessage());
+                listener.message(message, MessageType.fatalError);
             } catch (IllegalArgumentException e) {
                 throw new IllegalStateException(
                     String.format("%n")
