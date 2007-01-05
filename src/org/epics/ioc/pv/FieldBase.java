@@ -26,9 +26,17 @@ public class FieldBase implements Field
      * @param fieldName The field fieldName.
      * @param type The field type.
      * @param property An array of properties for the field.
+     * If the argument is null then a null array of properties is created.
      * @param fieldAttribute The field attributes.
+     * @throws IllegalArgumentException if type or fieldAttribute is null;
      */
     public FieldBase(String fieldName, Type type,Property[] property,FieldAttribute fieldAttribute) {
+        if(type==null) {
+            throw new IllegalArgumentException("type is null");
+        }
+        if(fieldAttribute==null) {
+            throw new IllegalArgumentException("fieldAttribute is null");
+        }
         this.fieldName = fieldName;
         this.type = type;
         if(property==null) property = new Property[0];

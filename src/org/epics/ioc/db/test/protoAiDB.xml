@@ -19,7 +19,7 @@
             <engUnitsHigh>${engUnitsHigh}</engUnitsHigh>
         </linearConvert>
     </input>
-    <priority>medium</priority>
+    <priority>middle</priority>
 </record>
 
 </IOCDatabase>

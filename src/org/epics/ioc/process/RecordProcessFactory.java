@@ -238,7 +238,7 @@ public class RecordProcessFactory {
                     return true;
                 }
                 recordProcessRequestor.message(
-                    "record already has a procsss requestor", MessageType.error);
+                    "record already has a process requestor", MessageType.error);
                 return false;
             } finally {
                 dbRecord.unlock();

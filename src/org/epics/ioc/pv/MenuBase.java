@@ -17,11 +17,11 @@ public class MenuBase extends FieldBase implements Menu{
     /**
      * Constructor for a menu field.
      * @param fieldName The field name.
+     * @param menuName The menu name.
      * @param property The field properties.
      * @param fieldAttribute The field attributes.
-     * @param menuName The menu name.
      */
-    public MenuBase(String fieldName,Property[] property,FieldAttribute fieldAttribute,String menuName) {
+    public MenuBase(String fieldName,String menuName,Property[] property,FieldAttribute fieldAttribute) {
         super(fieldName,Type.pvMenu,property,fieldAttribute);
         this.menuName = menuName;
     }

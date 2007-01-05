@@ -7,6 +7,7 @@ package org.epics.ioc.ca;
 
 import java.util.*;
 
+import org.epics.ioc.db.DBData;
 import org.epics.ioc.pv.*;
 
 /**
@@ -25,20 +26,84 @@ public interface ChannelData {
      */
     void clear();
     /**
-     * Add a pvData to a monitor event.
-     * @param pvData The pvData.
-     * @return (false,true) if the pvData (was not, was) in the channelFieldGroup.
+     * The initial data when a connection is made.
+     * @param channelField The channelField.
+     * @param pvData The data.
      */
-    boolean add(PVData pvData);
+    void initData(ChannelField channelField,PVData pvData);
     /**
-     * The list of pvDatas in this monitor event.
+    * Add a pvData to a monitor event.
+    * @param pvData The pvData.
+    */
+   void dataPut(PVData pvData);
+   /**
+    * The enum index has been modified.
+    * @param pvEnum The enum interface.
+    */
+   void enumIndexPut(PVEnum pvEnum);
+   /**
+    * The enum choices has been modified.
+    * @param pvEnum The enum interface.
+    */
+   void enumChoicesPut(PVEnum pvEnum);
+   /**
+    * The supportName has been modified.
+    * @param dbData
+    */
+   void supportNamePut(PVData pvData);
+   /**
+    * The link configration structure has been modified.
+    * @param pvLink The link interface.
+    */
+   void configurationStructurePut(PVLink pvLink);
+    /**
+     * Start of a structure modification.
+     * @param pvStructure The structure.
+     */
+    void beginPut(PVStructure pvStructure);
+    /**
+     * End of a structure modification.
+     * @param pvStructure The structure.
+     */
+    void endPut(PVStructure pvStructure);
+    /**
+     * A put to a subfield of a structure has occured. 
+     * @param pvStructure The requester is listening on a structure and this is the structure.
+     * It is <i>null</i> if the listener is listening on a non-structure field. 
+     * @param pvData The data that has been modified..
+     */
+    void dataPut(PVStructure pvStructure,PVData pvData);
+    /**
+     * A put to an enum subfield of a structure has occured. 
+     * The enum index has been modified.
+     * @param pvStructure The requester is listening on a structure and this is the structure.
+     * @param pvEnum The enum interface.
+     */
+    void enumIndexPut(PVStructure pvStructure,PVEnum pvEnum);
+    /**
+     * A put to an enum subfield of a structure has occured. 
+     * The enum choices has been modified.
+     * @param pvStructure The requester is listening on a structure and this is the structure.
+     * @param pvEnum The enum interface.
+     */
+    void enumChoicesPut(PVStructure pvStructure,PVEnum pvEnum);
+    /**
+     * A put to the supportName of a subfield of a structure has occured. 
+     * The supportName has been modified.
+     * @param pvStructure The requester is listening on a structure and this is the structure.
+     * @param dbData
+     */
+    void supportNamePut(PVStructure pvStructure,PVData pvData);
+    /**
+     * A put to the configurationStructure of a pvLink subfield of a structure has occured. 
+     * The link configration structure has been modified.
+     * @param pvStructure The requester is listening on a structure and this is the structure.
+     * @param pvLink The link interface.
+     */
+    void configurationStructurePut(PVStructure pvStructure,PVLink pvLink);
+    /**
+     * The list of channelDataPV that have been added since the last clear.
      * @return The list.
      */
-    List<PVData> getPVDataList();
-    /**
-     * Get the list of channelFields in this monitor event.
-     * These is guaranteed to have the same size and order as the pvData list.
-     * @return The list.
-     */
-    List<ChannelField> getChannelFieldList();
+    List<ChannelDataPV> getChannelDataPVList();
 }

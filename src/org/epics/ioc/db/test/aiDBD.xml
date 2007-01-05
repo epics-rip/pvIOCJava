@@ -8,8 +8,6 @@
 <support name = "aiLinear"
     factoryName = "AiLinear" />
 
-<structure name = "null" />
-
 <structure name = "aiRaw" supportName = "aiRaw" >
     <field name = "value" type = "int" >
         <property name = "status" associatedField = "status" />

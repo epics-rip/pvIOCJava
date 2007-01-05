@@ -260,7 +260,7 @@ public class ScanSupportFactory {
         
     }
     
-    private static class DBPriority extends AbstractDBMenu {
+    private static class DBPriority extends DBMenuBase {
         private ScanFieldSupport scanFieldSupport;
         
         private DBPriority(ScanFieldSupport scanFieldSupport,DBData parent,Menu menu,String[]choice) {
@@ -277,7 +277,7 @@ public class ScanSupportFactory {
         }
     }
     
-    private static class DBScan extends AbstractDBMenu {
+    private static class DBScan extends DBMenuBase {
         private ScanFieldSupport scanFieldSupport;
         
         private DBScan(ScanFieldSupport scanFieldSupport,DBData parent,Menu menu,String[]choice) {

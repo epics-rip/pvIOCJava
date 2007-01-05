@@ -16,11 +16,11 @@ public class EnumBase extends FieldBase implements Enum{
     /**
      * Constructor for ArrayBase.
      * @param fieldName The field name.
+     * @param choicesMutable Are the choices mutable?
      * @param property An array of properties for the field.
      * @param fieldAttribute The field attributes.
-     * @param choicesMutable Are the choices mutable?
      */
-    public EnumBase(String fieldName,Property[] property,FieldAttribute fieldAttribute,boolean choicesMutable) {
+    public EnumBase(String fieldName,boolean choicesMutable,Property[] property,FieldAttribute fieldAttribute) {
         super(fieldName,Type.pvEnum,property,fieldAttribute);
         this.choicesMutable = choicesMutable;
     }

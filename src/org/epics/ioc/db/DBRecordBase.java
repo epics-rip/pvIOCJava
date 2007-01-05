@@ -17,7 +17,7 @@ import org.epics.ioc.util.MessageType;
  * @author mrk
  *
  */
-public class AbstractDBRecord extends AbstractDBStructure implements DBRecord {
+public class DBRecordBase extends DBStructureBase implements DBRecord {
     private static int numberRecords = 0;
     private int id = numberRecords++;
     private String recordName;
@@ -31,11 +31,11 @@ public class AbstractDBRecord extends AbstractDBStructure implements DBRecord {
     private DBD dbd = null;
     
     /**
-     * Constructor that derived clases must call.
+     * Constructor.
      * @param recordName The name of the record.
      * @param dbdRecordType The introspection interface for the record.
      */
-    protected AbstractDBRecord(String recordName,DBDRecordType dbdRecordType)
+    public DBRecordBase(String recordName,DBDRecordType dbdRecordType)
     {
         super(dbdRecordType);
         this.recordName = recordName;

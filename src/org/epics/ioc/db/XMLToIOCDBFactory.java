@@ -20,6 +20,8 @@ import org.epics.ioc.util.*;
  *
  */
 public class XMLToIOCDBFactory {
+    private static DBDataCreate dbDataCreate = DBDataFactory.getDBDataCreate();
+    private static FieldCreate fieldCreate = FieldFactory.getFieldCreate();
     private static AtomicBoolean isInUse = new AtomicBoolean(false);
 //  for use by private classes
     private static Convert convert = ConvertFactory.getConvert();
@@ -253,7 +255,7 @@ public class XMLToIOCDBFactory {
             }
             dbRecord = iocdb.findRecord(recordName);
             if(dbRecord==null) {
-                DBRecord record = FieldDataFactory.createRecord(recordName,dbdRecordType);
+                DBRecord record = dbDataCreate.createRecord(recordName,dbdRecordType);
                 boolean result = iocdb.addRecord(record);
                 if(!result) {
                     iocxmlReader.message(
@@ -406,6 +408,12 @@ public class XMLToIOCDBFactory {
             }
             DBData dbData = (DBData)pvStructure.getFieldPVDatas()[fieldIndex];
             String supportName = attributes.get("supportName");
+            if(supportName==null) {
+                DBDStructure dbdStructure = dbd.getStructure(structure.getStructureName());
+                if(dbdStructure!=null) {
+                    supportName = dbdStructure.getSupportName();
+                }
+            }
             if(supportName!=null) {
                 String error = dbData.setSupportName(supportName);
                 if(error!=null) {
@@ -451,10 +459,6 @@ public class XMLToIOCDBFactory {
                             return;
                         }
                         dbData = (DBData)pvStructure.getFieldPVDatas()[fieldIndex];
-iocxmlReader.message("at location",MessageType.error);
-System.out.println(dbData.getDBRecord().getRecordName() + dbData.getFullFieldName());
-System.out.println(dbData.toString());
-System.out.println("dbData.field " + dbData.getField().toString());
                     }
                 }
                 structureStack.push(structureState);
@@ -752,7 +756,6 @@ System.out.println("dbData.field " + dbData.getField().toString());
             PVArray dbArray = arrayState.pvArray;
             String fieldName = "value";
             String actualFieldName = "[" + String.format("%d",arrayOffset) + "]";
-            FieldAttribute fieldAttribute = FieldFactory.createFieldAttribute(attributes);
             Field field;
             Type arrayElementType = arrayState.arrayElementType;
             if(arrayElementType.isScalar()) {
@@ -761,10 +764,10 @@ System.out.println("dbData.field " + dbData.getField().toString());
             }
             switch(arrayElementType) {
             case pvEnum : {
-                    field = DBDFieldFactory.createField(actualFieldName, null,fieldAttribute,arrayElementType);
+                    field = fieldCreate.createEnum(actualFieldName,true);
                     PVEnumArray pvEnumArray = arrayState.pvEnumArray;
                     PVEnum[] enumData = arrayState.enumData;
-                    enumData[0] = (PVEnum)FieldDataFactory.createEnumData((DBData)dbArray,field,null);
+                    enumData[0] = (PVEnum)dbDataCreate.createEnumData((DBData)dbArray,field,null);
                     pvEnumArray.put(arrayOffset,1,enumData,0);
                     String supportName = attributes.get("supportName");
                     if(supportName!=null) {
@@ -796,10 +799,10 @@ System.out.println("dbData.field " + dbData.getField().toString());
                         idleState.prevState = state;
                         state = State.idle;
                     }
-                    field = DBDFieldFactory.createMenuField(actualFieldName,null,fieldAttribute,menuName);
+                    field = fieldCreate.createMenu(actualFieldName,menuName);
                     PVMenuArray pvMenuArray = arrayState.pvMenuArray;
                     PVMenu[] menuData = arrayState.menuData;
-                    menuData[0] = (PVMenu)FieldDataFactory.createData((DBData)dbArray,field);
+                    menuData[0] = (PVMenu)dbDataCreate.createData((DBData)dbArray,field);
                     pvMenuArray.put(arrayOffset,1,menuData,0);
                     String supportName = attributes.get("supportName");
                     if(supportName!=null) {
@@ -831,13 +834,21 @@ System.out.println("dbData.field " + dbData.getField().toString());
                         idleState.prevState = state;
                         state = State.idle;
                     }
-                    field = DBDFieldFactory.createStructureField(actualFieldName,
-                            structure.getPropertys(),fieldAttribute,dbd.getStructure(structureName));
+                    DBDStructure dbdStructure = dbd.getStructure(structureName);
+                    field = fieldCreate.createStructure(
+                        actualFieldName,
+                        dbdStructure.getStructureName(),
+                        dbdStructure.getFields(),
+                        dbdStructure.getPropertys(),
+                        dbdStructure.getFieldAttribute());
                     PVStructureArray pvStructureArray = arrayState.pvStructureArray;
                     PVStructure[] structureData = arrayState.structureData;
-                    structureData[0] = (PVStructure)FieldDataFactory.createData((DBData)dbArray,field);
+                    structureData[0] = (PVStructure)dbDataCreate.createData((DBData)dbArray,field);
                     pvStructureArray.put(arrayOffset,1,structureData,0);
                     String supportName = attributes.get("supportName");
+                    if(supportName==null) {
+                        supportName = dbdStructure.getSupportName();
+                    }
                     if(supportName!=null) {
                         String error = structureData[0].setSupportName(supportName);
                         if(error!=null) {
@@ -862,11 +873,11 @@ System.out.println("dbData.field " + dbData.getField().toString());
                                 MessageType.warning);
                         state = State.idle;
                     }
-                    field = DBDFieldFactory.createArrayField(actualFieldName, null,fieldAttribute,
-                            DBDFieldFactory.getType(elementType));
+                    field = fieldCreate.createArray(
+                        actualFieldName,fieldCreate.getType(elementType));
                     PVArrayArray pvArrayArray = arrayState.pvArrayArray;
                     PVArray[] arrayData = arrayState.arrayData;
-                    arrayData[0] = (PVArray)FieldDataFactory.createData((DBData)dbArray,field);
+                    arrayData[0] = (PVArray)dbDataCreate.createData((DBData)dbArray,field);
                     pvArrayArray.put(arrayOffset,1,arrayData,0);
                     String value = attributes.get("capacity");
                     if(value!=null) arrayData[0].setCapacity(Integer.parseInt(value));
@@ -891,11 +902,10 @@ System.out.println("dbData.field " + dbData.getField().toString());
                     return;
                 }
             case pvLink: {
-                       field = DBDFieldFactory.createField(actualFieldName, null,fieldAttribute,
-                               Type.pvLink);
+                       field = fieldCreate.createField(actualFieldName,Type.pvLink);
                        PVLinkArray pvLinkArray = arrayState.pvLinkArray;
                        PVLink[] linkData = arrayState.linkData;
-                       linkData[0] = (PVLink)FieldDataFactory.createData((DBData)dbArray,field);
+                       linkData[0] = (PVLink)dbDataCreate.createData((DBData)dbArray,field);
                        pvLinkArray.put(arrayOffset,1,linkData,0);
                        String supportName = attributes.get("supportName");
                        if(supportName!=null) {

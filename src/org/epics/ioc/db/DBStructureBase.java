@@ -14,18 +14,19 @@ import org.epics.ioc.pv.*;
  * @author mrk
  *
  */
-public abstract class AbstractDBStructure extends AbstractDBData implements PVStructure
+public class DBStructureBase extends AbstractDBData implements PVStructure
 {
-    
+    private static DBDataCreate dbDataCreate = DBDataFactory.getDBDataCreate();
+    private static FieldCreate fieldCreate = FieldFactory.getFieldCreate();
     private DBDRecordType dbdRecordType  = null;
     private DBData[] dbData;
     
     /**
-     * constructor that derived classes must call.
+     * Constructor.
      * @param parent the DBStructure of the parent.
      * @param dbdStructureField the reflection interface for the DBStructure data.
      */
-    protected AbstractDBStructure(DBData parent, Structure structure) {
+    public DBStructureBase(DBData parent, Structure structure) {
         super(parent,structure);
         String structureName = structure.getStructureName();
         if(structureName==null) {
@@ -35,7 +36,7 @@ public abstract class AbstractDBStructure extends AbstractDBData implements PVSt
         Field[] fields = structure.getFields();
         dbData = new DBData[fields.length];
         for(int i=0; i < dbData.length; i++) {
-            dbData[i] = FieldDataFactory.createData(this,fields[i]);
+            dbData[i] = dbDataCreate.createData(this,fields[i]);
         }
     }
     
@@ -43,7 +44,7 @@ public abstract class AbstractDBStructure extends AbstractDBData implements PVSt
      * Constructor for record instance classes.
      * @param dbdRecordType The reflection interface for the record type.
      */
-    protected AbstractDBStructure(DBDRecordType dbdRecordType) {
+    protected DBStructureBase(DBDRecordType dbdRecordType) {
         super(null,dbdRecordType);
         this.dbdRecordType = dbdRecordType;
         int numberFields = dbdRecordType.getFields().length;
@@ -54,10 +55,10 @@ public abstract class AbstractDBStructure extends AbstractDBData implements PVSt
      * This is only called by whatever called the record instance constructor.
      * @param record the record instance.
      */
-    public void createFields(DBRecord record) {
+    protected void createFields(DBRecord record) {
         Field[] field = dbdRecordType.getFields();
         for(int i=0; i < dbData.length; i++) {
-            dbData[i] = FieldDataFactory.createData(record,field[i]);
+            dbData[i] = dbDataCreate.createData(record,field[i]);
         }
     }    
     
@@ -71,26 +72,31 @@ public abstract class AbstractDBStructure extends AbstractDBData implements PVSt
         DBD dbd = DBDFactory.getMasterDBD();
         DBDStructure dbdStructure = dbd.getStructure(structureName);
         if(dbdStructure==null) return false;
-        Structure fieldStructure = DBDFieldFactory.createStructureField(
+        Structure fieldStructure = fieldCreate.createStructure(
               fieldName,
+              dbdStructure.getStructureName(),
+              dbdStructure.getFields(),
               oldField.getPropertys(),
-              oldField.getFieldAttribute(),
-              dbdStructure);
+              oldField.getFieldAttribute());
+        DBData newData = dbDataCreate.createData(this, fieldStructure);
+        dbData[index] = newData;
+        String supportName = dbdStructure.getSupportName();
+        if(supportName!=null) newData.setSupportName(supportName);
+        // Must create and replace the Structure for this structure.
         Field[] oldFields = oldStructure.getFields();
         int length = oldFields.length;
         Field[] newFields = new Field[length];
         for(int i=0; i<length; i++) newFields[i] = oldFields[i];
         newFields[index] = fieldStructure;
-        Structure newStructure = DBDFieldFactory.createStructureField(
-                oldStructure.getFieldName(),
-                oldStructure.getPropertys(), oldStructure.getFieldAttribute(),
-                oldStructure.getStructureName(),newFields);
-        String supportName = oldStructure.getSupportName();
-        if(supportName==null) supportName = dbdStructure.getSupportName();
-        newStructure.setSupportName(supportName);
-        DBData newData = FieldDataFactory.createData(this, newStructure);
+        Structure newStructure = fieldCreate.createStructure(
+            oldStructure.getFieldName(),
+            oldStructure.getStructureName(),
+            newFields,
+            oldStructure.getPropertys(),
+            oldStructure.getFieldAttribute());
+        supportName = oldStructure.getSupportName();
         super.replaceField(newStructure);
-        dbData[index] = newData;
+        super.setSupportName(supportName);
         return true;
     }
 

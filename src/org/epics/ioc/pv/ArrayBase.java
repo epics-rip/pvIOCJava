@@ -18,11 +18,11 @@ public class ArrayBase extends FieldBase implements Array {
     /**
      * Constructor for ArrayBase.
      * @param fieldName The field name.
+     * @param elementType The element Type.
      * @param property An array of Property.
      * @param fieldAttribute The field attributes.
-     * @param elementType The element Type.
      */
-    public ArrayBase(String fieldName, Property[] property,FieldAttribute fieldAttribute,Type elementType) {
+    public ArrayBase(String fieldName,Type elementType, Property[] property,FieldAttribute fieldAttribute) {
         super(fieldName, Type.pvArray,property,fieldAttribute);
         this.elementType = elementType;
     }

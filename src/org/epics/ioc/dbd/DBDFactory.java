@@ -9,17 +9,27 @@ import java.util.*;
 import java.util.regex.*;
 import java.util.concurrent.locks.*;
 
+import org.epics.ioc.pv.*;
+
 
 /**
- * DBDFactory creates a Database Definition Database (DBD) and gets the master DBD.
+ * DBDFactory creates a Database Definition Database (DBD) and automatically creates the master DBD.
  * A DBD contains the description of Database Definitions:
  *  menu, structure, recordType, and support.
- * 
+ * The masterDBD automatically creates a DBDStructure which has structureName = "null: and has 0 fields.
  * @author mrk
  * 
  */
 public class DBDFactory {
-    private static DBDInstance masterDBD = new DBDInstance("master");  
+    private static DBDInstance masterDBD;
+    
+    static {
+        masterDBD = new DBDInstance("master");
+        FieldCreate fieldCreate = FieldFactory.getFieldCreate();
+        DBDStructure dbdStructure = masterDBD.createStructure(
+            "null", new Field[0],new Property[0], fieldCreate.createFieldAttribute());
+        masterDBD.addStructure(dbdStructure);
+    }
     /**
      * Creates and returns a DBD.
      * @param name The name for the new DBD.
@@ -76,6 +86,42 @@ public class DBDFactory {
             } finally {
                 rwLock.writeLock().unlock();
             }
+        }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.dbd.DBD#createLinkSupport(java.lang.String, java.lang.String, java.lang.String)
+         */
+        public DBDLinkSupport createLinkSupport(String supportName, String factoryName,
+                String configurationStructureName)
+        {
+            return new LinkSupportInstance(supportName,factoryName,configurationStructureName);
+        }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.dbd.DBD#createMenu(java.lang.String, java.lang.String[])
+         */
+        public DBDMenu createMenu(String menuName, String[] choices) {
+            return new MenuInstance(menuName,choices);
+        }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.dbd.DBD#createRecordType(java.lang.String, org.epics.ioc.pv.Field[], org.epics.ioc.pv.Property[], org.epics.ioc.pv.FieldAttribute)
+         */
+        public DBDRecordType createRecordType(String name, Field[] field,
+            Property[] property, FieldAttribute fieldAttribute)
+        {
+            return new RecordTypeInstance(name,field,property,fieldAttribute);
+        }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.dbd.DBD#createStructure(java.lang.String, org.epics.ioc.pv.Field[], org.epics.ioc.pv.Property[], org.epics.ioc.pv.FieldAttribute)
+         */
+        public DBDStructure createStructure(String name, Field[] field,
+            Property[] property, FieldAttribute fieldAttribute)
+        {
+            return new StructureInstance(name,field,property,fieldAttribute);
+        }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.dbd.DBD#createSupport(java.lang.String, java.lang.String)
+         */
+        public DBDSupport createSupport(String supportName, String factoryName) {
+            return new SupportInstance(supportName,factoryName);
         }
         // merge allows master to be locked once
         private void merge(TreeMap<String,DBDMenu> menu,
@@ -594,5 +640,137 @@ public class DBDFactory {
             }
         }
     }
+    static private class MenuInstance implements DBDMenu
+    {
 
+        private String menuName;
+        private String[] choices;
+
+        private MenuInstance(String menuName, String[] choices)
+        {
+            this.menuName = menuName;
+            this.choices = choices;
+        } 
+        /* (non-Javadoc)
+         * @see org.epics.ioc.dbDefinition.DBDMenu#getChoices()
+         */
+        public String[] getChoices() {
+            return choices;
+        }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.dbDefinition.DBDMenu#getName()
+         */
+        public String getMenuName() {
+            return menuName;
+        }        
+        /* (non-Javadoc)
+         * @see java.lang.Object#toString()
+         */
+        public String toString() { return getString(0);}
+        /* (non-Javadoc)
+         * @see org.epics.ioc.dbDefinition.DBDMenu#toString(int)
+         */
+        public String toString(int indentLevel) {
+            return getString(indentLevel);
+        }
+
+        private String getString(int indentLevel) {
+            StringBuilder builder = new StringBuilder();
+            FieldBase.newLine(builder,indentLevel);
+            builder.append(String.format("menu %s { ",menuName));
+            for(String value: choices) {
+                builder.append(String.format("\"%s\" ",value));
+            }
+            builder.append("}");
+            return builder.toString();
+        }
+    }
+    
+    static private class StructureInstance extends StructureBase implements DBDStructure
+    {   
+        private StructureInstance(String name,
+            Field[] field,Property[] property,FieldAttribute fieldAttribute)
+        {
+            super(name,name,field,property,fieldAttribute);
+        }
+    }
+
+    static private class RecordTypeInstance extends StructureInstance implements DBDRecordType
+    {   
+        private RecordTypeInstance(String name,
+            Field[] field,Property[] property,FieldAttribute fieldAttribute)
+        {
+            super(name,field,property,fieldAttribute);
+        }
+    }
+    
+    static private class SupportInstance implements DBDSupport
+    {
+        private String supportName;
+        private String factoryName;
+
+        private SupportInstance(String supportName, String factoryName)
+        {
+            this.supportName = supportName;
+            this.factoryName = factoryName;
+        }
+        
+        /* (non-Javadoc)
+         * @see org.epics.ioc.dbd.DBDSupport#getSupportName()
+         */
+        public String getSupportName() {
+            return supportName;
+        }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.dbDefinition.DBDSupport#getFactoryName()
+         */
+        public String getFactoryName() {
+            return factoryName;
+        }
+        /* (non-Javadoc)
+         * @see java.lang.Object#toString()
+         */
+        public String toString() { return getString(0);}
+        
+        /* (non-Javadoc)
+         * @see org.epics.ioc.dbd.DBDSupport#toString(int)
+         */
+        public String toString(int indentLevel) {
+            return getString(indentLevel);
+        }
+        
+        private String getString(int indentLevel) {
+            StringBuilder builder = new StringBuilder();
+            FieldBase.newLine(builder,indentLevel);
+            builder.append(String.format(
+                    "supportName %s factoryName %s",
+                    supportName,factoryName));
+            return builder.toString();
+        }
+    }
+    
+    static private class LinkSupportInstance extends SupportInstance implements DBDLinkSupport {
+        private String configurationStructureName;
+        
+        private LinkSupportInstance(String supportName, String factoryName,
+                String configurationStructureName)
+        {
+            super(supportName,factoryName);
+            this.configurationStructureName = configurationStructureName;
+        }
+
+        /* (non-Javadoc)
+         * @see org.epics.ioc.dbd.DBDLinkSupport#getConfigurationStructureName()
+         */
+        public String getConfigurationStructureName() {
+            return configurationStructureName;
+        }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.dbd.DBDSupport#toString(int)
+         */
+        public String toString(int indentLevel) {
+            return super.getString(indentLevel) +
+                " configurationStructureName " + configurationStructureName;
+        }
+    }
 }

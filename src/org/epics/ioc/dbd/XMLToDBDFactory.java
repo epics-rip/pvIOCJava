@@ -21,6 +21,7 @@ public class XMLToDBDFactory {
     private static AtomicBoolean isInUse = new AtomicBoolean(false);
     // For use by all private classes
     private static DBD dbd;
+    private static FieldCreate fieldCreate = FieldFactory.getFieldCreate();
     private static Requestor requestor;
     private static IOCXMLReader iocxmlReader;
     /**
@@ -269,7 +270,7 @@ public class XMLToDBDFactory {
                     choice[i] = iter.next();
                 }
                 choiceList = null;
-                DBDMenu dbdMenu = DBDFieldFactory.createMenu(
+                DBDMenu dbdMenu = dbd.createMenu(
                     menuName,choice);
                 dbd.addMenu(dbdMenu);
             }
@@ -344,9 +345,7 @@ public class XMLToDBDFactory {
         // remaining are for field elements
         private String fieldName;
         private String menuName;
-        private String fieldStructureName;
         private DBDStructure fieldStructure;
-        private DBDMenu dbdMenu;
         private Type type;
         private Type elementType;
         private FieldAttribute fieldAttribute;
@@ -399,7 +398,7 @@ public class XMLToDBDFactory {
                 state = State.idle;
                 return;
             }
-            structureAttribute = FieldFactory.createFieldAttribute(attributes);
+            structureAttribute = fieldCreate.createFieldAttribute(attributes);
             structurePropertyList = new LinkedList<Property>();
             fieldList = new LinkedList<Field>();
             state = State.structure;
@@ -418,12 +417,11 @@ public class XMLToDBDFactory {
             }
             Field[] field = new Field[fieldList.size()];
             ListIterator<Field> iter1 = fieldList.listIterator();
-            FieldAttribute[] fieldAttribute = new FieldAttribute[fieldList.size()];
             for(int i=0; i<field.length; i++) {
                 field[i] = iter1.next();
             }
             if(isRecordType) {
-                DBDRecordType dbdRecordType = DBDFieldFactory.createRecordType(
+                DBDRecordType dbdRecordType = dbd.createRecordType(
                         structureName,field,property,structureAttribute);
                 boolean result = dbd.addRecordType(dbdRecordType);
                 if(!result) {
@@ -435,7 +433,7 @@ public class XMLToDBDFactory {
                     dbdRecordType.setSupportName(structureSupportName);
                 }
             } else {
-                DBDStructure dbdStructure = DBDFieldFactory.createStructure(
+                DBDStructure dbdStructure = dbd.createStructure(
                         structureName,field,property,structureAttribute);
                 boolean result = dbd.addStructure(dbdStructure);
                 if(!result) {
@@ -456,7 +454,7 @@ public class XMLToDBDFactory {
             if(state==State.idle) return;
             if(qName.equals("field")) {
                 assert(state==State.structure);
-                fieldAttribute = FieldFactory.createFieldAttribute(attributes);
+                fieldAttribute = fieldCreate.createFieldAttribute(attributes);
                 fieldName = attributes.get("name");
                 if(fieldName==null) {
                     iocxmlReader.message("name not specified",
@@ -464,7 +462,7 @@ public class XMLToDBDFactory {
                     state= State.idle;
                     return;
                 }
-                type = DBDFieldFactory.getType(attributes);
+                type = fieldCreate.getType(attributes);
                 if(type==null) {
                     iocxmlReader.message("type not specified correctly",
                             MessageType.error);
@@ -479,7 +477,7 @@ public class XMLToDBDFactory {
                         state= State.idle;
                         return;
                     }
-                    dbdMenu = dbd.getMenu(menuName);
+                    DBDMenu dbdMenu = dbd.getMenu(menuName);
                     if(dbdMenu==null) {
                         iocxmlReader.message("menuName not found in DBD database",
                                 MessageType.error);
@@ -488,7 +486,7 @@ public class XMLToDBDFactory {
                     }
                 }
                 if(type==Type.pvStructure) {
-                    fieldStructureName = attributes.get("structureName");
+                    String fieldStructureName = attributes.get("structureName");
                     if(fieldStructureName==null) {
                         iocxmlReader.message("structureName not specified",
                                 MessageType.error);
@@ -504,7 +502,7 @@ public class XMLToDBDFactory {
                     }
                 }
                 if(type==Type.pvArray) {
-                    elementType = DBDFieldFactory.getElementType(attributes);
+                    elementType = fieldCreate.getElementType(attributes);
                     if(elementType==null) {
                         iocxmlReader.message("elementType not specified correctly",
                                 MessageType.error);
@@ -530,7 +528,7 @@ public class XMLToDBDFactory {
                             MessageType.error);
                     return;
                 }
-                Property property= FieldFactory.createProperty(
+                Property property= fieldCreate.createProperty(
                     propertyName,associatedName);
                 if(state==State.structure) {
                     structurePropertyList.add(property);
@@ -556,20 +554,25 @@ public class XMLToDBDFactory {
             Field field = null;
             switch(type) {
             case pvMenu:
-                field = DBDFieldFactory.createMenuField(fieldName,
-                    property,fieldAttribute,dbdMenu.getMenuName());
+                field = fieldCreate.createMenu(fieldName,menuName,
+                    property,fieldAttribute);
                 break;
             case pvStructure:
-                field = DBDFieldFactory.createStructureField(fieldName,
-                    property,fieldAttribute,fieldStructure);
+                field = fieldCreate.createStructure(fieldName,
+                    fieldStructure.getStructureName(),fieldStructure.getFields(),
+                    property,fieldAttribute);
                 break;
             case pvArray:
-                field = DBDFieldFactory.createArrayField(fieldName,
-                    property,fieldAttribute,elementType);
+                field = fieldCreate.createArray(fieldName,elementType,
+                    property,fieldAttribute);
+                break;
+            case pvEnum:
+                field = fieldCreate.createEnum(fieldName, true,
+                    property,fieldAttribute);
                 break;
             default:
-                field = DBDFieldFactory.createField(fieldName,
-                        property,fieldAttribute,type);
+                field = fieldCreate.createField(fieldName,type,
+                        property,fieldAttribute);
                     break;
             }
             if(field==null) {
@@ -610,7 +613,7 @@ public class XMLToDBDFactory {
                     MessageType.error);
                 return;
             }
-            support = DBDFieldFactory.createSupport(
+            support = dbd.createSupport(
                 name,factoryName);
             if(support==null) {
                 iocxmlReader.message(
@@ -662,7 +665,7 @@ private static class DBDXMLLinkSupportHandler implements DBDXMLHandler{
                     MessageType.error);
                 return;
             }
-            support = DBDFieldFactory.createLinkSupport(
+            support = dbd.createLinkSupport(
                 name,factoryName,configurationStructureName);
             if(support==null) {
                 iocxmlReader.message(

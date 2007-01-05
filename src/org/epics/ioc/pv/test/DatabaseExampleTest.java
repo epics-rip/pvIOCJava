@@ -286,7 +286,7 @@ public class DatabaseExampleTest extends TestCase {
         // discard data now obtained via displayLimit
         low = null; high = null; structFieldData = null;
         Property[] property = new Property[1];
-        property[0] = FieldFactory.createProperty("displayLimit",
+        property[0] = FieldFactory.getFieldCreate().createProperty("displayLimit",
             "displayLimit");
         PVDouble valueData = (PVDouble)database.createData(
             "value",Type.pvDouble,property);

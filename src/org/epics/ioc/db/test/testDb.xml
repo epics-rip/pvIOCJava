@@ -32,7 +32,7 @@
          <choice>choice2</choice>
          choice1
     </enum>
-    <menu>medium</menu>
+    <menu>middle</menu>
     <displayLimit>
         <low>0.0</low>
         <high>10.0</high>
@@ -80,7 +80,7 @@
         </value>
     </enumArray>
     <menuArray>
-        <value menuName = "menuPriority">medium</value>
+        <value menuName = "menuPriority">middle</value>
         <value menuName = "menuScan">interrupt</value>
     </menuArray>
     <linkArray>
@@ -126,7 +126,7 @@
              <choice>choice2</choice>
              choice1
         </enum>
-        <menu>medium</menu>
+        <menu>middle</menu>
         <displayLimit>
             <low>0.0</low>
             <high>10.0</high>
@@ -174,7 +174,7 @@
             </value>
         </enumArray>
         <menuArray>
-            <value menuName = "menuPriority">medium</value>
+            <value menuName = "menuPriority">middle</value>
             <value menuName = "menuScan">interrupt</value>
         </menuArray>
         <linkArray>

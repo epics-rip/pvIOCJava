@@ -11,6 +11,7 @@ import org.epics.ioc.process.*;
 import org.epics.ioc.pv.*;
 import org.epics.ioc.util.*;
 
+import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
@@ -1727,6 +1728,7 @@ public class LinkSupportFactory {
         public MonitorLink(PVLink pvLink) {
             super(monitorLinkSupportName,(DBData)pvLink);
             this.pvLink = pvLink;
+            dbRecord = ((DBData)pvLink).getDBRecord();
             channelRequestorName = pvLink.getPVRecord().getRecordName() + pvLink.getFullFieldName();
         }       
         /* (non-Javadoc)
@@ -1959,11 +1961,12 @@ public class LinkSupportFactory {
                 dbRecord.lock();
             }
             try {
-                List<ChannelField> channelFieldList = channelData.getChannelFieldList();
-                List<PVData>dataFieldList = channelData.getPVDataList();
-                for(int i=0; i <channelFieldList.size(); i++) {
-                    ChannelField field = channelFieldList.get(i);
-                    PVData data = dataFieldList.get(i);
+                List<ChannelDataPV> channelDataPVList = channelData.getChannelDataPVList();
+                Iterator<ChannelDataPV> iter = channelDataPVList.iterator();
+                while(iter.hasNext()) {
+                    ChannelDataPV channelDataPV = iter.next();
+                    PVData data = channelDataPV.getPVData();
+                    ChannelField field = channelDataPV.getChannelField();
                     if(field==severityField) {
                         PVEnum pvEnum = (PVEnum)data;
                         alarmSeverity = AlarmSeverity.getSeverity(pvEnum.getIndex());

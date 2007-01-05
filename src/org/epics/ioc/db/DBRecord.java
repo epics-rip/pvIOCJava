@@ -78,7 +78,7 @@ public interface DBRecord extends DBData, PVRecord {
      */
     void removeRecordListeners();
     /**
-     * Used for communication between AbstractDBRecord and AbstractDBData.
+     * Used for communication between DBRecordBase and AbstractDBData.
      * AbstractDBData calls this the first time DBData.addListener is called.
      * @param dbData The AbstractDBData instance.
      */

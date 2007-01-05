@@ -20,6 +20,15 @@ import org.epics.ioc.util.*;
  */
 public class ChannelMonitorTest extends TestCase {
     
+    private static void delay(long milliSeconds) {
+        while(true) {
+            try {
+                Thread.sleep(milliSeconds);
+            } catch (InterruptedException e) {
+            }
+        }   
+    }
+    
     public static void testChannelData() {
         DBD dbd = DBDFactory.getMasterDBD();
         Requestor iocRequestor = new Listener();
@@ -33,30 +42,30 @@ public class ChannelMonitorTest extends TestCase {
             "src/org/epics/ioc/process/test/monitorDB.xml",iocRequestor);
         if(!initOK) return;
         Monitor monitor;
-        monitor =new Monitor("          onChange","counter");
+        monitor =new Monitor("onChange","counter");
         boolean result = monitor.connect(2);
         if(result) monitor.lookForChange();
-        monitor =new Monitor("  onAbsoluteChange","counter");
+        monitor =new Monitor("onAbsoluteChange","counter");
         result = monitor.connect(2);
         if(result) monitor.lookForAbsoluteChange(1.1);
         monitor =new Monitor("onPercentageChange","counter");
         result = monitor.connect(2);
         if(result) monitor.lookForPercentageChange(10.0);
-        monitor =new Monitor("              link","monitorChange","input");
+        monitor =new Monitor("link","monitorChange","input");
         result = monitor.connect(2);
         if(result) monitor.lookForChange();
-        monitor =new Monitor("          severity","monitorChange","severity");
+        monitor =new Monitor("severity","monitorChange","severity");
         result = monitor.connect(2);
         if(result) monitor.lookForChange();
-        monitor =new Monitor("     monitorChange","monitorChange","value");
+        monitor =new Monitor("monitorChange","monitorChange","value");
         result = monitor.connect(2);
         if(result) monitor.lookForChange();
         
         MonitorNotify monitorNotify;
-        monitorNotify =new MonitorNotify("          onChange","counter");
+        monitorNotify =new MonitorNotify("onChange","counter");
         result = monitorNotify.connect(2);
         if(result) monitorNotify.lookForChange();
-        monitorNotify =new MonitorNotify("  onAbsoluteChange","counter");
+        monitorNotify =new MonitorNotify("onAbsoluteChange","counter");
         result = monitorNotify.connect(2);
         if(result) monitorNotify.lookForAbsoluteChange(1.1);
         monitorNotify =new MonitorNotify("onPercentageChange","counter");
@@ -64,10 +73,7 @@ public class ChannelMonitorTest extends TestCase {
         if(result) monitorNotify.lookForPercentageChange(10.0);
         
         while(true) {
-            try {
-                Thread.sleep(1000);
-            } catch (InterruptedException e) {
-            }
+            delay(1000);
         }
     }
     
@@ -136,11 +142,6 @@ public class ChannelMonitorTest extends TestCase {
          * @see org.epics.ioc.ca.ChannelMonitorRequestor#monitorData(java.util.List, java.util.List)
          */
         public void monitorData(ChannelData channelData) {
-            List<PVData> pvDataList = channelData.getPVDataList();;
-            for(int i=0; i < pvDataList.size(); i++) {
-                PVData pvData = pvDataList.get(i);
-                channelData.add(pvData);
-            }
             System.out.printf("%s %s %s%n",
                 requestorName,pvName,valueData.printResults(channelData));
         }
@@ -238,15 +239,14 @@ public class ChannelMonitorTest extends TestCase {
          */
         public String getRequestorName() {
             // TODO Auto-generated method stub
-            return null;
+            return requestorName;
         }
 
         /* (non-Javadoc)
          * @see org.epics.ioc.util.Requestor#message(java.lang.String, org.epics.ioc.util.MessageType)
          */
         public void message(String message, MessageType messageType) {
-            // TODO Auto-generated method stub
-            
+            System.out.printf("%s %s %s",messageType.toString(),requestorName,message);
         }
 
         /* (non-Javadoc)
@@ -272,9 +272,9 @@ public class ChannelMonitorTest extends TestCase {
         private String fieldName;
         private ChannelFieldGroup channelFieldGroup;
         private ChannelField valueField;
-        private ChannelField statusField;
-        private ChannelField severityField;
-        private ChannelField timeStampField;
+        private ChannelField statusField = null;
+        private ChannelField severityField = null;
+        private ChannelField timeStampField = null;
         
         private ValueData(Channel channel,String fieldName) {
             this.channel = channel;
@@ -283,9 +283,9 @@ public class ChannelMonitorTest extends TestCase {
         }
         
         private void lookForOther(ChannelMonitor channelMonitor) {
-            channelMonitor.lookForChange(statusField, true);
-            channelMonitor.lookForChange(severityField, true);
-            channelMonitor.lookForChange(timeStampField, false);
+            if(statusField!=null) channelMonitor.lookForChange(statusField, true);
+            if(severityField!=null) channelMonitor.lookForChange(severityField, true);
+            if(timeStampField!=null) channelMonitor.lookForChange(timeStampField, false);
         }
         
         private void lookForChange(ChannelMonitor channelMonitor) {
@@ -317,42 +317,46 @@ public class ChannelMonitorTest extends TestCase {
             }
             valueField = channel.getChannelField();
             channelFieldGroup.addChannelField(valueField);
-            result = channel.setField("status");
-            if(result!=ChannelSetFieldResult.thisChannel) {
-                System.out.printf("PutGet:set returned %s%n", result.toString());
-                return null;
+            if(fieldName.equals("status")) return channelFieldGroup;
+            if(fieldName.equals("severity")) return channelFieldGroup;
+            if(fieldName.equals("timeStamp")) return channelFieldGroup;
+            String newFieldName = fieldName + ".status";
+            channel.setField(null);
+            result = channel.setField(newFieldName);
+            if(result==ChannelSetFieldResult.thisChannel) {
+                statusField = channel.getChannelField();
+                channelFieldGroup.addChannelField(statusField);
             }
-            statusField = channel.getChannelField();
-            channelFieldGroup.addChannelField(statusField);
-            result = channel.setField("severity");
-            if(result!=ChannelSetFieldResult.thisChannel) {
-                System.out.printf("PutGet:set returned %s%n", result.toString());
-                return null;
+            newFieldName = fieldName + ".severity";
+            channel.setField(null);
+            result = channel.setField(newFieldName);
+            if(result==ChannelSetFieldResult.thisChannel) {
+                severityField = channel.getChannelField();
+                channelFieldGroup.addChannelField(severityField);
             }
-            severityField = channel.getChannelField();
-            channelFieldGroup.addChannelField(severityField);
-            result = channel.setField("timeStamp");
-            if(result!=ChannelSetFieldResult.thisChannel) {
-                System.out.printf("PutGet:set returned %s%n", result.toString());
-                return null;
+            newFieldName = fieldName + ".timeStamp";
+            channel.setField(null);
+            result = channel.setField(newFieldName);
+            if(result==ChannelSetFieldResult.thisChannel) {
+                timeStampField = channel.getChannelField();
+                channelFieldGroup.addChannelField(timeStampField);
             }
-            timeStampField = channel.getChannelField();
-            channelFieldGroup.addChannelField(timeStampField);
             return channelFieldGroup;
         }
 
         private String printResults(ChannelData channelData) {
             StringBuilder builder = new StringBuilder();
-            List<PVData> pvDataList = channelData.getPVDataList();
-            List<ChannelField> channelFieldList = channelData.getChannelFieldList();
-            Iterator<PVData> pvDataIter = pvDataList.iterator();
-            Iterator<ChannelField> channelFieldIter = channelFieldList.iterator();
-            while(pvDataIter.hasNext()) {
-                PVData data = pvDataIter.next();
-                ChannelField field = channelFieldIter.next();
-                if(field==valueField) {
-                    PVDouble pvDouble = (PVDouble)data;
-                    builder.append(String.format("value %f", pvDouble.get()));
+            List<ChannelDataPV> channelDataPVList = channelData.getChannelDataPVList();
+            Iterator<ChannelDataPV> iter = channelDataPVList.iterator();
+            while(iter.hasNext()) {
+                ChannelDataPV channelDataPV = iter.next();
+                builder.append(String.format("%n    %s",channelDataPV.toString()));
+                PVData data = channelDataPV.getPVData();
+                ChannelField field = channelDataPV.getChannelField();
+                if(channelDataPV.isInitial()) {
+                    builder.append(String.format("%n    initialValue %s%n", data.toString(2)));
+                } else if(field==valueField) {
+                    builder.append(String.format("value %s", data.toString(2)));
                 } else if (field==severityField) {
                     PVEnum pvEnum = (PVEnum)data;
                     int index = pvEnum.getIndex();
@@ -363,14 +367,17 @@ public class ChannelMonitorTest extends TestCase {
                     String value = pvString.get();
                     builder.append(" status " + value);
                 } else if(field==timeStampField) {
-                    PVTimeStamp pvTimeStamp = PVTimeStamp.create(data);
-                    TimeStamp timeStamp = new TimeStamp();
-                    pvTimeStamp.get(timeStamp);
-                    long seconds = timeStamp.secondsPastEpoch;
-                    int nano = timeStamp.nanoSeconds;
-                    long now = nano/1000000 + seconds*1000;
-                    Date date = new Date(now);
-                    builder.append(String.format(" time %s",date.toLocaleString()));
+                    // wait for nanoSecond to change.
+                    if(data.getField().getFieldName().equals("nanoSeconds")) {
+                        PVTimeStamp pvTimeStamp = PVTimeStamp.create(data.getParent());
+                        TimeStamp timeStamp = new TimeStamp();
+                        pvTimeStamp.get(timeStamp);
+                        long seconds = timeStamp.secondsPastEpoch;
+                        int nano = timeStamp.nanoSeconds;
+                        long now = nano/1000000 + seconds*1000;
+                        Date date = new Date(now);
+                        builder.append(String.format(" time %s",date.toLocaleString()));
+                    }
                 }
             }
             return builder.toString();

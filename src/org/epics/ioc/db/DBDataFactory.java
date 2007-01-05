@@ -4,124 +4,135 @@
  * in file LICENSE that is included with this distribution.
  */
 package org.epics.ioc.db;
+
+import java.util.regex.Pattern;
+
 import org.epics.ioc.dbd.*;
 import org.epics.ioc.pv.*;
 import org.epics.ioc.pv.Enum;
 
-import java.util.regex.Pattern;
 
 /**
  * Factory to create default implementations for field data
  * @author mrk
  *
  */
-public class FieldDataFactory {
-   
-    /**
-     * Create implementation for all non-array fields except enum.
-     * @param parent The parent interface.
-     * @param field The reflection interface for the field
-     * @return The DBData implementation
-     */
-    public static DBData createData(DBData parent,Field field)
-    {
-        if(parent==null) throw new IllegalArgumentException("Illegal parent is null");
-        String defaultValue = field.getFieldAttribute().getDefault();
-        DBD dbd = DBDFactory.getMasterDBD();
-        Type type = field.getType();
-        switch(type) {
-        case pvBoolean: return new BooleanData(parent,field,defaultValue);
-        case pvByte:    return new ByteData(parent,field,defaultValue);
-        case pvShort:   return new ShortData(parent,field,defaultValue);
-        case pvInt:     return new IntData(parent,field,defaultValue);
-        case pvLong:    return new LongData(parent,field,defaultValue);
-        case pvFloat:   return new FloatData(parent,field,defaultValue);
-        case pvDouble:  return new DoubleData(parent,field,defaultValue);
-        case pvString:  return new StringData(parent,field,defaultValue);
-        case pvEnum:    return createEnumData(parent,field,null);
-        case pvMenu: {
-                Menu menu = (Menu)field;
-                DBDMenu dbdMenu = dbd.getMenu(menu.getMenuName());
-                return new MenuData(parent,menu,defaultValue,dbdMenu.getChoices());
-            }
-        case pvStructure: {
-                Structure structure = (Structure)field;
-                return new StructureData(parent,structure);
-            }
-        case pvArray: return (DBData)createArrayData(parent,field,0,true);
-        case pvLink: return new LinkData(parent,field);
-        }
-        throw new IllegalArgumentException(
-            "Illegal Type. Must be pvBoolean,...,pvLink");
-    }
-
-    /**
-     * Create an implementation for an enumerated field.
-     * @param field The reflection interface for the field.
-     * @param choice The enum choices.
-     * @return The DBData implementation.
-     */
-    public static DBData createEnumData(DBData parent,Field field, String[] choice)
-    {
-        if(parent==null) throw new IllegalArgumentException("Illegal parent is null");
-        return new EnumData(parent,(Enum)field,choice);
-    }
-
-    /**
-     * Create an implementation for an array field.
-     * @param field The reflection interface for the field.
-     * @param capacity The default capacity for the field.
-     * @param capacityMutable Can the capacity be changed after initialization?
-     * @return The DBArray implementation.
-     */
-    public static PVArray createArrayData(DBData parent,
-            Field field,int capacity,boolean capacityMutable)
-    {
-        if(parent==null) throw new IllegalArgumentException("Illegal parent is null");
-        Array array = (Array)field;
-        Type elementType= array.getElementType();
-        String defaultValue = field.getFieldAttribute().getDefault();
-        switch(elementType) {
-        case pvBoolean: return new BooleanArray(parent,array,capacity,capacityMutable,defaultValue);
-        case pvByte:    return new ByteArray(parent,array,capacity,capacityMutable,defaultValue);
-        case pvShort:   return new ShortArray(parent,array,capacity,capacityMutable,defaultValue);
-        case pvInt:     return new IntArray(parent,array,capacity,capacityMutable,defaultValue);
-        case pvLong:    return new LongArray(parent,array,capacity,capacityMutable,defaultValue);
-        case pvFloat:   return new FloatArray(parent,array,capacity,capacityMutable,defaultValue);
-        case pvDouble:  return new DoubleArray(parent,array,capacity,capacityMutable,defaultValue);
-        case pvString:  return new StringArray(parent,array,capacity,capacityMutable,defaultValue);
-        case pvEnum:    return new EnumArray(parent,array, capacity, capacityMutable);
-        case pvMenu:    return new MenuArray(parent,array, capacity, capacityMutable);
-        case pvStructure: return new StructureArray(parent,array, capacity, capacityMutable);
-        case pvArray:   return new ArrayArray(parent,array, capacity, capacityMutable);
-        case pvLink:    return new LinkArray(parent,array, capacity, capacityMutable);
-        }
-        throw new IllegalArgumentException("Illegal Type. Logic error");
+public class DBDataFactory {
+    private DBDataFactory(){} // dont create
+    
+    public static DBDataCreate getDBDataCreate() {
+        return DBDataCreateImpl.getDBDataCreate();
     }
     
-    /**
-     * Create a record instance.
-     * @param recordName The instance name.
-     * @param dbdRecordType The reflection interface for the record type.
-     * @return The interface for accessing the record instance.
-     */
-    public static DBRecord createRecord(String recordName, DBDRecordType dbdRecordType) {
-        DBRecord dbRecord = new RecordData(recordName,dbdRecordType);
-        return dbRecord;
+    private static final class DBDataCreateImpl implements DBDataCreate{
+        private static DBDataCreateImpl singleImplementation = null;
+        private static synchronized DBDataCreate getDBDataCreate() {
+                if (singleImplementation==null) {
+                    singleImplementation = new DBDataCreateImpl();
+                }
+                return singleImplementation;
+        }
+        // Guarantee that ImplementConvert can only be created via getDBDataCreate
+        private DBDataCreateImpl() {}
+        /* (non-Javadoc)
+         * @see org.epics.ioc.db.DBDataCreate#createData(org.epics.ioc.db.DBData, org.epics.ioc.pv.Field)
+         */
+        public DBData createData(DBData parent,Field field)
+        {
+            if(parent==null) throw new IllegalArgumentException("Illegal parent is null");
+            String defaultValue = field.getFieldAttribute().getDefault();
+            DBD dbd = DBDFactory.getMasterDBD();
+            Type type = field.getType();
+            switch(type) {
+            case pvBoolean: return new BooleanData(parent,field,defaultValue);
+            case pvByte:    return new ByteData(parent,field,defaultValue);
+            case pvShort:   return new ShortData(parent,field,defaultValue);
+            case pvInt:     return new IntData(parent,field,defaultValue);
+            case pvLong:    return new LongData(parent,field,defaultValue);
+            case pvFloat:   return new FloatData(parent,field,defaultValue);
+            case pvDouble:  return new DoubleData(parent,field,defaultValue);
+            case pvString:  return new StringData(parent,field,defaultValue);
+            case pvEnum:    return createEnumData(parent,field,null);
+            case pvMenu: {
+                    Menu menu = (Menu)field;
+                    DBDMenu dbdMenu = dbd.getMenu(menu.getMenuName());
+                    return createMenuData(parent,menu,defaultValue,dbdMenu.getChoices());
+                }
+            case pvStructure: {
+                    Structure structure = (Structure)field;
+                    return new DBStructureBase(parent,structure);
+                }
+            case pvArray: return (DBData)createArrayData(parent,field,0,true);
+            case pvLink: return new DBLinkBase(parent,field);
+            }
+            throw new IllegalArgumentException(
+                "Illegal Type. Must be pvBoolean,...,pvLink");
+        }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.db.DBDataCreate#createEnumData(org.epics.ioc.db.DBData, org.epics.ioc.pv.Field, java.lang.String[])
+         */
+        public DBData createEnumData(DBData parent,Field field, String[] choice)
+        {
+            if(parent==null) throw new IllegalArgumentException("Illegal parent is null");
+            return new DBEnumBase(parent,(Enum)field,choice);
+        }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.db.DBDataCreate#createArrayData(org.epics.ioc.db.DBData, org.epics.ioc.pv.Field, int, boolean)
+         */
+        public PVArray createArrayData(DBData parent,
+                Field field,int capacity,boolean capacityMutable)
+        {
+            if(parent==null) throw new IllegalArgumentException("Illegal parent is null");
+            Array array = (Array)field;
+            Type elementType= array.getElementType();
+            String defaultValue = field.getFieldAttribute().getDefault();
+            switch(elementType) {
+            case pvBoolean: return new BooleanArray(parent,array,capacity,capacityMutable,defaultValue);
+            case pvByte:    return new ByteArray(parent,array,capacity,capacityMutable,defaultValue);
+            case pvShort:   return new ShortArray(parent,array,capacity,capacityMutable,defaultValue);
+            case pvInt:     return new IntArray(parent,array,capacity,capacityMutable,defaultValue);
+            case pvLong:    return new LongArray(parent,array,capacity,capacityMutable,defaultValue);
+            case pvFloat:   return new FloatArray(parent,array,capacity,capacityMutable,defaultValue);
+            case pvDouble:  return new DoubleArray(parent,array,capacity,capacityMutable,defaultValue);
+            case pvString:  return new StringArray(parent,array,capacity,capacityMutable,defaultValue);
+            case pvEnum:    return new EnumArray(parent,array, capacity, capacityMutable);
+            case pvMenu:    return new MenuArray(parent,array, capacity, capacityMutable);
+            case pvStructure: return new StructureArray(parent,array, capacity, capacityMutable);
+            case pvArray:   return new ArrayArray(parent,array, capacity, capacityMutable);
+            case pvLink:    return new LinkArray(parent,array, capacity, capacityMutable);
+            }
+            throw new IllegalArgumentException("Illegal Type. Logic error");
+        }    
+        /* (non-Javadoc)
+         * @see org.epics.ioc.db.DBDataCreate#createRecord(java.lang.String, org.epics.ioc.dbd.DBDRecordType)
+         */
+        public DBRecord createRecord(String recordName, DBDRecordType dbdRecordType) {
+            DBRecord dbRecord = new DBRecordBase(recordName,dbdRecordType);
+            return dbRecord;
+        }
     }
     
     private static Convert convert = ConvertFactory.getConvert();
     private static Pattern primitivePattern = Pattern.compile("[, ]");
 
-
-    private static class LinkData extends DBLinkBase {
-        
-        private LinkData(DBData parent,Field field) {
-            super(parent,field);
+    private static DBData createMenuData(DBData parent,Menu menu,String defaultValue,String[]choice) {
+        PVMenu pvMenu = new DBMenuBase(parent,menu,choice);
+        if(defaultValue!=null && defaultValue.length()>0) {
+            String[] choices = pvMenu.getChoices();
+            int index = -1;
+            for(int i=0; i<choices.length; i++) {
+                if(defaultValue.equals(choices[i])) {
+                    index = i; break;
+                }
+            }
+            if(index==-1) {
+                throw new IllegalStateException("default value is not a choice");
+            }
+            pvMenu.setIndex(index);
         }
-        
+        return (DBData)pvMenu;
     }
-
+    
     private static class BooleanData extends AbstractDBData
         implements PVBoolean
     {
@@ -460,46 +471,6 @@ public class FieldDataFactory {
         }
     }
 
-    private static class EnumData extends AbstractDBEnum {
-        private EnumData(DBData parent,Enum enumField, String[]choice) {
-            super(parent,enumField,choice);
-        }
-    }
-
-    private static class MenuData extends AbstractDBMenu {
-        private MenuData(DBData parent,Menu menu,String defaultValue,String[]choice) {
-            super(parent,menu,choice);
-            if(defaultValue!=null && defaultValue.length()>0) {
-                String[] choices = super.getChoices();
-                int index = -1;
-                for(int i=0; i<choices.length; i++) {
-                    if(defaultValue.equals(choices[i])) {
-                        index = i; break;
-                    }
-                }
-                if(index==-1) {
-                    throw new IllegalStateException("default value is not a choice");
-                }
-                super.setIndex(index);
-            }
-        }
-        
-    }
-
-    private static class StructureData extends AbstractDBStructure
-    {
-        private StructureData(DBData parent,Structure structure) {
-            super(parent,structure);
-        }
-    }
-    
-    private static class RecordData extends AbstractDBRecord
-    {
-        private RecordData(String recordName,DBDRecordType dbdRecordType) {
-            super(recordName,dbdRecordType);
-        }
-    }
-    
     private static abstract class DBArray extends AbstractDBData implements PVArray{
         protected int length = 0;
         protected int capacity;
@@ -577,7 +548,7 @@ public class FieldDataFactory {
             + super.toString(indentLevel);
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.db.FieldDataFactory.DBArray#setCapacity(int)
+         * @see org.epics.ioc.db.DBDataFactory.DBArray#setCapacity(int)
          */
         public void setCapacity(int len) {
             if(!capacityMutable)
@@ -639,7 +610,7 @@ public class FieldDataFactory {
             + super.toString(indentLevel);
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.db.FieldDataFactory.DBArray#setCapacity(int)
+         * @see org.epics.ioc.db.DBDataFactory.DBArray#setCapacity(int)
          */
         public void setCapacity(int len) {
             if(!capacityMutable)
@@ -701,7 +672,7 @@ public class FieldDataFactory {
             + super.toString(indentLevel);
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.db.FieldDataFactory.DBArray#setCapacity(int)
+         * @see org.epics.ioc.db.DBDataFactory.DBArray#setCapacity(int)
          */
         public void setCapacity(int len) {
             if(!capacityMutable)
@@ -763,7 +734,7 @@ public class FieldDataFactory {
             + super.toString(indentLevel);
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.db.FieldDataFactory.DBArray#setCapacity(int)
+         * @see org.epics.ioc.db.DBDataFactory.DBArray#setCapacity(int)
          */
         public void setCapacity(int len) {
             if(!capacityMutable)
@@ -825,7 +796,7 @@ public class FieldDataFactory {
             + super.toString(indentLevel);
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.db.FieldDataFactory.DBArray#setCapacity(int)
+         * @see org.epics.ioc.db.DBDataFactory.DBArray#setCapacity(int)
          */
         public void setCapacity(int len) {
             if(!capacityMutable)
@@ -887,7 +858,7 @@ public class FieldDataFactory {
             + super.toString(indentLevel);
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.db.FieldDataFactory.DBArray#setCapacity(int)
+         * @see org.epics.ioc.db.DBDataFactory.DBArray#setCapacity(int)
          */
         public void setCapacity(int len) {
             if(!capacityMutable)
@@ -949,7 +920,7 @@ public class FieldDataFactory {
             + super.toString(indentLevel);
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.db.FieldDataFactory.DBArray#setCapacity(int)
+         * @see org.epics.ioc.db.DBDataFactory.DBArray#setCapacity(int)
          */
         public void setCapacity(int len) {
             if(!capacityMutable)
@@ -1012,7 +983,7 @@ public class FieldDataFactory {
             + super.toString(indentLevel);
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.db.FieldDataFactory.DBArray#setCapacity(int)
+         * @see org.epics.ioc.db.DBDataFactory.DBArray#setCapacity(int)
          */
         public void setCapacity(int len) {
             if(!capacityMutable)
@@ -1068,7 +1039,7 @@ public class FieldDataFactory {
             + super.toString(indentLevel);
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.db.FieldDataFactory.DBArray#setCapacity(int)
+         * @see org.epics.ioc.db.DBDataFactory.DBArray#setCapacity(int)
          */
         public void setCapacity(int len) {
             if(!capacityMutable)
@@ -1124,7 +1095,7 @@ public class FieldDataFactory {
             + super.toString(indentLevel);
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.db.FieldDataFactory.DBArray#setCapacity(int)
+         * @see org.epics.ioc.db.DBDataFactory.DBArray#setCapacity(int)
          */
         public void setCapacity(int len) {
             if(!capacityMutable)
@@ -1196,7 +1167,7 @@ public class FieldDataFactory {
             + super.toString(indentLevel);
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.db.FieldDataFactory.DBArray#setCapacity(int)
+         * @see org.epics.ioc.db.DBDataFactory.DBArray#setCapacity(int)
          */
         public void setCapacity(int len) {
             if(!capacityMutable)
@@ -1267,7 +1238,7 @@ public class FieldDataFactory {
             + super.toString(indentLevel);
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.db.FieldDataFactory.DBArray#setCapacity(int)
+         * @see org.epics.ioc.db.DBDataFactory.DBArray#setCapacity(int)
          */
         public void setCapacity(int len) {
             if(!capacityMutable)
@@ -1339,7 +1310,7 @@ public class FieldDataFactory {
             + super.toString(indentLevel);
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.db.FieldDataFactory.DBArray#setCapacity(int)
+         * @see org.epics.ioc.db.DBDataFactory.DBArray#setCapacity(int)
          */
         public void setCapacity(int len) {
             if(!capacityMutable)

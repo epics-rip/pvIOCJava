@@ -37,7 +37,12 @@ public interface FieldAttribute {
      */
     int getAsl();
     /**
-     * Create a string describing the attributes.
+     * Generate a string describing the attributes.
+     * @return The string describing the attributes.
+     */
+    String toString();
+    /**
+     * Generate a string describing the attributes.
      * @param indentLevel Indent level. Each level is four spaces.
      * @return The string describing the attributes.
      */

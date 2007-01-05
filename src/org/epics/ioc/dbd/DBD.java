@@ -7,6 +7,7 @@ package org.epics.ioc.dbd;
 
 import java.util.*;
 
+import org.epics.ioc.pv.*;
 
 /**
  * DBD (DatabaseDefinition) is the interface for locating interfaces for
@@ -35,6 +36,47 @@ public interface DBD {
      * After the merge all definitions are cleared from this DBD and this DBD is removed from the DBDFactory list.
      */
     void mergeIntoMaster();
+    /**
+     * Create a DBDMenu.
+     * @param menuName The name of the menu.
+     * @param choices The menu choices.
+     * @return The menu or null if it already existed.
+     */
+    public DBDMenu createMenu(String menuName, String[] choices);
+    /**
+     * Create a DBDStructure.
+     * @param name The name of the structure.
+     * @param field An array of Field for the fields of the structure.
+     * @param property An array of properties for the structure.
+     * @return The interface for the newly created structure.
+     */
+    public DBDStructure createStructure(String name,
+        Field[] field,Property[] property,FieldAttribute fieldAttribute);
+    /**
+     * Create a DBDRecordType.
+     * @param name The recordType name.
+     * @param field An array of Field for the fields of the structure.
+     * @param property An array of properties for the structure.
+     * @return interface The for the newly created structure.
+     */
+    public DBDRecordType createRecordType(String name,
+        Field[] field,Property[] property,FieldAttribute fieldAttribute);
+    /**
+     * Create a DBDSupport.
+     * @param supportName The name of the support.
+     * @param factoryName The name of the factory for creating support instances.
+     * @return the DBDSupport or null if it already existed.
+     */
+    public DBDSupport createSupport(String supportName,String factoryName);
+    /**
+     * Create a DBDLinkSupport.
+     * @param supportName The name of the support.
+     * @param factoryName The name of the factory for creating support instances.
+     * @param configurationStructureName The name of the configuration structure.
+     * @return the DBDSupport or null if it already existed.
+     */
+    public DBDLinkSupport createLinkSupport(
+        String supportName,String factoryName,String configurationStructureName);
     /**
      * Get the DBDMenu for the specified name.
      * It will be returned if it resides in this DBD or in the master DBD.

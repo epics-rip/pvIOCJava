@@ -5,6 +5,8 @@
  */
 package org.epics.ioc.ca;
 
+import org.epics.ioc.util.*;
+
 
 /**
  * Interface for accessing a channel.
@@ -13,6 +15,17 @@ package org.epics.ioc.ca;
  *
  */
 public interface Channel {
+    /**
+     * Get the channel name.
+     * @return The name.
+     */
+    String getChannelName();
+    /**
+     * Report a message.
+     * @param message The message.
+     * @param messageType The message type.
+     */
+    public void message(String message, MessageType messageType);
     /**
      * Prevent any further access.
      * If the channel is connected it will be disconnected.

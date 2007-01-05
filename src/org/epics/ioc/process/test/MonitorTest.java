@@ -11,6 +11,7 @@ import java.util.*;
 import org.epics.ioc.pv.*;
 import org.epics.ioc.dbd.*;
 import org.epics.ioc.db.*;
+import org.epics.ioc.db.test.TestListener;
 import org.epics.ioc.process.*;
 import org.epics.ioc.util.*;
 
@@ -69,7 +70,10 @@ public class MonitorTest extends TestCase {
             PVData[] pvData = dbRecord.getFieldPVDatas();
             Structure structure = (Structure)dbRecord.getField();
             int index = structure.getFieldIndex("value");
-            new Monitor((DBData)pvData[index]);
+            new TestListener(iocdbMaster,
+                    dbRecord.getRecordName(),
+                    pvData[index].getField().getFieldName(),
+                    false,false);
         }
         while(true) {
             try {
@@ -93,99 +97,6 @@ public class MonitorTest extends TestCase {
         public void message(String message, MessageType messageType) {
             System.out.println(message);
             if(messageType.ordinal()>maxError.ordinal()) maxError = messageType;
-        }
-    }
-    
-    private static class Monitor implements DBListener {
-        private String recordName;
-        private DBData dbData;
-        private RecordListener recordListener = null;
-        
-        private Monitor(DBData data) {
-            dbData = data;
-            DBRecord dbRecord = data.getDBRecord();
-            recordName = dbRecord.getRecordName();
-            recordListener = dbRecord.createRecordListener(this);
-            dbRecord.addListener(recordListener);
-        }
-        
-        /* (non-Javadoc)
-         * @see org.epics.ioc.db.DBListener#beginProcess()
-         */
-        public void beginProcess() {
-            // nothing to do
-        }
-
-        /* (non-Javadoc)
-         * @see org.epics.ioc.db.DBListener#beginPut(org.epics.ioc.pv.PVStructure)
-         */
-        public void beginPut(PVStructure pvStructure) {
-            // nothing to do
-        }
-
-        /* (non-Javadoc)
-         * @see org.epics.ioc.db.DBListener#configurationStructurePut(org.epics.ioc.pv.PVLink)
-         */
-        public void configurationStructurePut(PVLink pvLink) {
-            // nothing to do
-        }
-
-        /* (non-Javadoc)
-         * @see org.epics.ioc.db.DBListener#dataPut(org.epics.ioc.db.DBData)
-         */
-        public void dataPut(DBData data) {
-            if(data!=dbData) return;
-            System.out.println(data.toString() + " " + recordName);
-        }
-
-        /* (non-Javadoc)
-         * @see org.epics.ioc.db.DBListener#endProcess()
-         */
-        public void endProcess() {
-            // nothing to do
-        }
-
-        /* (non-Javadoc)
-         * @see org.epics.ioc.db.DBListener#endPut(org.epics.ioc.pv.PVStructure)
-         */
-        public void endPut(PVStructure pvStructure) {
-            // nothing to do
-        }
-
-        /* (non-Javadoc)
-         * @see org.epics.ioc.db.DBListener#enumChoicesPut(org.epics.ioc.pv.PVEnum)
-         */
-        public void enumChoicesPut(PVEnum pvEnum) {
-            // nothing to do
-        }
-
-        /* (non-Javadoc)
-         * @see org.epics.ioc.db.DBListener#enumIndexPut(org.epics.ioc.pv.PVEnum)
-         */
-        public void enumIndexPut(PVEnum pvEnum) {
-            // nothing to do
-        }
-
-        /* (non-Javadoc)
-         * @see org.epics.ioc.db.DBListener#structurePut(org.epics.ioc.pv.PVStructure, org.epics.ioc.db.DBData)
-         */
-        public void structurePut(PVStructure pvStructure, DBData data) {
-            if(data!=dbData) return;
-            System.out.println(data.toString() + " " + recordName);
-        }
-
-        /* (non-Javadoc)
-         * @see org.epics.ioc.db.DBListener#supportNamePut(org.epics.ioc.db.DBData)
-         */
-        public void supportNamePut(DBData dbData) {
-            // nothing to do
-        }
-
-        /* (non-Javadoc)
-         * @see org.epics.ioc.db.DBListener#unlisten(org.epics.ioc.db.RecordListener)
-         */
-        public void unlisten(RecordListener listener) {
-            // nothing to do
         }
     }
 }

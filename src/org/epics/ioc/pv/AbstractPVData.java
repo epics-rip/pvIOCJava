@@ -15,8 +15,8 @@ import org.epics.ioc.util.MessageType;
  */
 public abstract class AbstractPVData implements PVData{
     private static String indentString = "    ";
-    private static String fullFieldName = "";
-    private static String requestorName = "";
+    private String fullFieldName = "";
+    private String requestorName = "";
     private Field field;
     private PVData parent;
     private PVRecord record;

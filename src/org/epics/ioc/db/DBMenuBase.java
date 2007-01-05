@@ -12,9 +12,15 @@ import org.epics.ioc.pv.*;
  * @author mrk
  *
  */
-public abstract class AbstractDBMenu extends AbstractDBEnum implements PVMenu
+public class DBMenuBase extends DBEnumBase implements PVMenu
 { 
-    protected AbstractDBMenu(DBData parent,Menu menu,String[] choice) {
+    /**
+     * Constructor for DBMenuBase
+     * @param parent The parent.
+     * @param menu The introspection interface.
+     * @param choice The array of choices.
+     */
+    public DBMenuBase(DBData parent,Menu menu,String[] choice) {
         super(parent,menu,choice);
     }
 

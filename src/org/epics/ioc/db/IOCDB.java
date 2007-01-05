@@ -17,6 +17,11 @@ import java.util.*;
  */
 public interface IOCDB {
     /**
+     * Get the master IOCDB.
+     * @return The master IOCDB.
+     */
+    IOCDB getMaster();
+    /**
      * Get the name of the IOCDB.
      * @return The name.
      */

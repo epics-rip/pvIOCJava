@@ -56,6 +56,12 @@ public class IOCDBFactory {
             this.name = name;
         }
         /* (non-Javadoc)
+         * @see org.epics.ioc.db.IOCDB#getMaster()
+         */
+        public IOCDB getMaster() {
+            return master;
+        }
+        /* (non-Javadoc)
          * @see org.epics.ioc.db.IOCDB#getName()
          */
         public String getName() {

@@ -19,23 +19,6 @@ public interface DBListener {
      */
     void dataPut(DBData dbData);
     /**
-     * Start of a structure modification.
-     * @param pvStructure The structure.
-     */
-    void beginPut(PVStructure pvStructure);
-    /**
-     * End of a structure modification.
-     * @param pvStructure The structure.
-     */
-    void endPut(PVStructure pvStructure);
-    /**
-     * A put to a subfield of a structure has occured. 
-     * @param pvStructure If the requester is listening on a structure this is the structure.
-     * It is <i>null</i> if the listener is listening on a non-structure field. 
-     * @param dbData The datathat has been modified..
-     */
-    void structurePut(PVStructure pvStructure,DBData dbData);
-    /**
      * The enum index has been modified.
      * @param pvEnum The enum interface.
      */
@@ -51,10 +34,54 @@ public interface DBListener {
      */
     void supportNamePut(DBData dbData);
     /**
-     * The link configration structure has been modified.
+     * The link configuration structure has been modified.
      * @param pvLink The link interface.
      */
     void configurationStructurePut(PVLink pvLink);
+    /**
+     * Start of a structure modification.
+     * @param pvStructure The structure.
+     */
+    void beginPut(PVStructure pvStructure);
+    /**
+     * End of a structure modification.
+     * @param pvStructure The structure.
+     */
+    void endPut(PVStructure pvStructure);
+    /**
+     * A put to a subfield of a structure has occured.
+     * @param pvStructure The requester is listening on a structure and this is the structure.
+     * @param dbData The data that has been modified.
+     */
+    void dataPut(PVStructure pvStructure,DBData dbData);
+    /**
+     * A put to an enum subfield of a structure has occured.
+     * The enum index has been modified.
+     * @param pvStructure The requester is listening on a structure and this is the structure.
+     * @param pvEnum The enum interface.
+     */
+    void enumIndexPut(PVStructure pvStructure,PVEnum pvEnum);
+    /**
+     * A put to an enum subfield of a structure has occured.
+     * The enum choices has been modified.
+     * @param pvStructure The requester is listening on a structure and this is the structure.
+     * @param pvEnum The enum interface.
+     */
+    void enumChoicesPut(PVStructure pvStructure,PVEnum pvEnum);
+    /**
+     * A put to a subfield of a structure has occured.
+     * The supportName has been modified.
+     * @param pvStructure The requester is listening on a structure and this is the structure.
+     * @param dbData
+     */
+    void supportNamePut(PVStructure pvStructure,DBData dbData);
+    /**
+     * A put to a subfield of a structure has occured.
+     * The link configuration structure has been modified.
+     * @param pvStructure The requester is listening on a structure and this is the structure.
+     * @param pvLink The link interface.
+     */
+    void configurationStructurePut(PVStructure pvStructure,PVLink pvLink);
     /**
      * Begin record processing.
      * From begin until end of record processing,

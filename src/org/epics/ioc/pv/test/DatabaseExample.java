@@ -40,38 +40,38 @@ public class DatabaseExample {
      * @return the PVData interface for the newly created field.
      */
     public PVData createData(String name,Type type, Property[] property) {
-        FieldAttribute fieldAttribute = FieldFactory.createFieldAttribute();
+        FieldAttribute fieldAttribute = fieldCreate.createFieldAttribute();
     	switch(type) {
     	case pvBoolean : {
-            Field field = FieldFactory.createField(name,type, property,fieldAttribute);
+            Field field = fieldCreate.createField(name,type, property,fieldAttribute);
             return new BooleanData(field);
         }
     	case pvByte : {
-            Field field = FieldFactory.createField(name,type, property,fieldAttribute);
+            Field field = fieldCreate.createField(name,type, property,fieldAttribute);
             return new ByteData(field);
         }
     	case pvShort : {
-            Field field = FieldFactory.createField(name,type, property,fieldAttribute);
+            Field field = fieldCreate.createField(name,type, property,fieldAttribute);
             return new ShortData(field);
         }
     	case pvInt : {
-            Field field = FieldFactory.createField(name,type, property,fieldAttribute);
+            Field field = fieldCreate.createField(name,type, property,fieldAttribute);
             return new IntData(field);
         }
     	case pvLong : {
-            Field field = FieldFactory.createField(name,type, property,fieldAttribute);
+            Field field = fieldCreate.createField(name,type, property,fieldAttribute);
             return new LongData(field);
         }
     	case pvFloat : {
-            Field field = FieldFactory.createField(name,type, property,fieldAttribute);
+            Field field = fieldCreate.createField(name,type, property,fieldAttribute);
             return new FloatData(field);
         }
     	case pvDouble : {
-            Field field = FieldFactory.createField(name,type,property,fieldAttribute);
+            Field field = fieldCreate.createField(name,type,property,fieldAttribute);
             return new DoubleData(field);
         }
     	case pvString : {
-            Field field = FieldFactory.createField(name,type,property,fieldAttribute);
+            Field field = fieldCreate.createField(name,type,property,fieldAttribute);
             return new StringData(field);
         }
     	default: {throw new Error ("type not implemented");}
@@ -88,8 +88,8 @@ public class DatabaseExample {
     public PVEnum createEnumData(String name,
     boolean choicesMutable, Property[] property)
     {
-        FieldAttribute fieldAttribute = FieldFactory.createFieldAttribute();
-        Enum field = FieldFactory.createEnumField(name,choicesMutable,property,fieldAttribute);
+        FieldAttribute fieldAttribute = fieldCreate.createFieldAttribute();
+        Enum field = fieldCreate.createEnum(name,choicesMutable,property,fieldAttribute);
         return new EnumData(field);
     }
 
@@ -105,12 +105,12 @@ public class DatabaseExample {
     public PVStructure createStructureData(String name, String structureName,
             PVData[] pvData, Property[] property)
     {
-        FieldAttribute fieldAttribute = FieldFactory.createFieldAttribute();
+        FieldAttribute fieldAttribute = fieldCreate.createFieldAttribute();
         int length = 0;
         if(pvData!=null) length = pvData.length;
         Field[] field = new Field[length];
         for(int i =0; i < length; i++)  field[i] = pvData[i].getField();
-        Structure structure = FieldFactory.createStructureField(
+        Structure structure = fieldCreate.createStructure(
             name,structureName,field,property,fieldAttribute);
         return new StructureData(structure,pvData);
     }
@@ -126,7 +126,7 @@ public class DatabaseExample {
     public PVStructure createStructureData(String name, Structure structure,
             PVData[] pvData, Property[] property)
     {
-        FieldAttribute fieldAttribute = FieldFactory.createFieldAttribute();
+        FieldAttribute fieldAttribute = fieldCreate.createFieldAttribute();
         return new StructureData(structure,pvData);
     }
     /**
@@ -137,10 +137,10 @@ public class DatabaseExample {
      */
     public PVStructure createStructureData(String name, Property[] property)
     {
-        FieldAttribute fieldAttribute = FieldFactory.createFieldAttribute();
+        FieldAttribute fieldAttribute = fieldCreate.createFieldAttribute();
         Field[] field = new Field[0];
         PVData[] pvData = new PVData[0];
-        Structure structure = FieldFactory.createStructureField(
+        Structure structure = fieldCreate.createStructure(
             name,null,field,property,fieldAttribute);
         return new StructureData(structure,pvData);
     }
@@ -154,50 +154,50 @@ public class DatabaseExample {
      * @return the PVArray interface for the newly created array field.
      */
     public PVArray createArrayData(String name,Type type, Property[] property) {
-        FieldAttribute fieldAttribute = FieldFactory.createFieldAttribute();
+        FieldAttribute fieldAttribute = fieldCreate.createFieldAttribute();
     	switch(type) {
     	case pvBoolean : {
-            Array array = FieldFactory.createArrayField(name,type,property,fieldAttribute);
+            Array array = fieldCreate.createArray(name,type,property,fieldAttribute);
             return new BooleanArray(array);
         }
     	case pvByte : {
-            Array array = FieldFactory.createArrayField(name,type,property,fieldAttribute);
+            Array array = fieldCreate.createArray(name,type,property,fieldAttribute);
             return new ByteArray(array);
         }
     	case pvShort : {
-            Array array = FieldFactory.createArrayField(name,type,property,fieldAttribute);
+            Array array = fieldCreate.createArray(name,type,property,fieldAttribute);
             return new ShortArray(array);
         }
     	case pvInt : {
-            Array array = FieldFactory.createArrayField(name,type,property,fieldAttribute);
+            Array array = fieldCreate.createArray(name,type,property,fieldAttribute);
             return new IntArray(array);
         }
     	case pvLong : {
-            Array array = FieldFactory.createArrayField(name,type,property,fieldAttribute);
+            Array array = fieldCreate.createArray(name,type,property,fieldAttribute);
             return new LongArray(array);
         }
     	case pvFloat : {
-            Array array = FieldFactory.createArrayField(name,type,property,fieldAttribute);
+            Array array = fieldCreate.createArray(name,type,property,fieldAttribute);
             return new FloatArray(array);
         }
     	case pvDouble : {
-            Array array = FieldFactory.createArrayField(name,type,property,fieldAttribute);
+            Array array = fieldCreate.createArray(name,type,property,fieldAttribute);
             return new DoubleArray(array);
         }
         case pvString : {
-            Array array = FieldFactory.createArrayField(name,type,property,fieldAttribute);
+            Array array = fieldCreate.createArray(name,type,property,fieldAttribute);
             return new StringArray(array);
         }
         case pvEnum : {
-            Array array = FieldFactory.createArrayField(name,type,property,fieldAttribute);
+            Array array = fieldCreate.createArray(name,type,property,fieldAttribute);
             return new EnumArray(array);
         }
         case pvStructure : {
-            Array array = FieldFactory.createArrayField(name,type,property,fieldAttribute);
+            Array array = fieldCreate.createArray(name,type,property,fieldAttribute);
             return new StructureArray(array);
         }
         case pvArray : {
-            Array array = FieldFactory.createArrayField(name,type,property,fieldAttribute);
+            Array array = fieldCreate.createArray(name,type,property,fieldAttribute);
             return new ArrayArray(array);
         }
     	default: {throw new Error ("type not implemented");}
@@ -206,6 +206,7 @@ public class DatabaseExample {
 
     private String name;
     private static Convert convert = ConvertFactory.getConvert();
+    private static FieldCreate fieldCreate = FieldFactory.getFieldCreate();
     
     private static abstract class Data implements PVData {
         String supportName = null;

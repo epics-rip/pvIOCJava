@@ -40,10 +40,14 @@ public abstract class AbstractDBData extends AbstractPVData implements DBData{
         } else {
             record = null;
         }
+        String supportName = field.getSupportName();
+        if(supportName!=null) {
+            super.setSupportName(supportName);
+        }
         if(field.getType()==Type.pvStructure) thisStructure = (PVStructure)this;
     }
     /**
-     * Called by AbstractDBStructure when it replaces a field of the structure.
+     * Called by DBStructureBase when it replaces a field of the structure.
      * @param field The new field.
      */
     protected void replaceField(Field field) {
@@ -51,7 +55,7 @@ public abstract class AbstractDBData extends AbstractPVData implements DBData{
     }
     /**
      * specify the record that holds this data.
-     * This is called by AbstractDBRecord.
+     * This is called by DBRecordBase.
      * @param record the record instance containing this field.
      */
     protected void setRecord(DBRecord record) {
@@ -91,9 +95,9 @@ public abstract class AbstractDBData extends AbstractPVData implements DBData{
                 if(type.isScalar()||type==Type.pvArray) {
                     dbListener.dataPut(dbData);
                 } else if(type==Type.pvStructure) {
-                    dbListener.structurePut(dbData.thisStructure, this);
-                } else  if(type==Type.pvLink){
-                    return; // dont report changes to configStructure
+                    dbListener.dataPut(dbData.thisStructure, this);
+                } else if(type==Type.pvLink) {
+                    // let PVLink handle the change
                 } else {
                     throw new IllegalStateException("postPut called for illegal Type");
                 }
@@ -111,8 +115,10 @@ public abstract class AbstractDBData extends AbstractPVData implements DBData{
     public String setSupportName(String name) {
         DBD dbd = record.getDBD();
         if(dbd==null) return "DBD was not set";
+        DBDLinkSupport dbdLinkSupport = null;
+        DBDSupport dbdSupport = null;
         if(getField().getType()==Type.pvLink) {
-            DBDLinkSupport dbdLinkSupport = dbd.getLinkSupport(name);
+            dbdLinkSupport = dbd.getLinkSupport(name);
             if(dbdLinkSupport==null) {
                 dbd = DBDFactory.getMasterDBD();
                 dbdLinkSupport = dbd.getLinkSupport(name);
@@ -120,8 +126,10 @@ public abstract class AbstractDBData extends AbstractPVData implements DBData{
             if(dbdLinkSupport==null) {
                 return "linkSupport " + name + " not defined";
             }
+            String result = ((DBLink)this).newSupport(dbdLinkSupport,dbd);
+            if(result!=null) return result;
         } else {
-            DBDSupport dbdSupport = dbd.getSupport(name);
+            dbdSupport = dbd.getSupport(name);
             if(dbdSupport==null) {
                 dbd = DBDFactory.getMasterDBD();
                 dbdSupport = dbd.getSupport(name);
@@ -144,11 +152,26 @@ public abstract class AbstractDBData extends AbstractPVData implements DBData{
         }
         String result = super.setSupportName(name);
         if(result!=null) return result;
-        Iterator<RecordListener> iter = listenerList.iterator();
-        while(iter.hasNext()) {
-            RecordListener listener = iter.next();
-            DBListener dbListener = listener.getDBListener();
-            dbListener.supportNamePut(this);
+        AbstractDBData dbData = this;
+        while(dbData!=null) {
+            Iterator<RecordListener> iter = dbData.listenerList.iterator();
+            while(iter.hasNext()) {
+                RecordListener listener = iter.next();
+                DBListener dbListener = listener.getDBListener();
+                Type type = dbData.getField().getType();
+                if(type.isScalar()||type==Type.pvArray) {
+                    dbListener.supportNamePut(dbData);
+                } else if(type==Type.pvStructure) {
+                    dbListener.supportNamePut(dbData.thisStructure, this);
+                } else {
+                    throw new IllegalStateException("postPut called for illegal Type");
+                }
+            }
+            if(dbData.parent==dbData) {
+                System.err.printf("postPut parent = this Why???%n");
+            } else {
+                dbData = (AbstractDBData)dbData.parent;
+            }
         }
         if(!SupportCreationFactory.createSupport(this)) {
             return "could not create support";
@@ -156,8 +179,10 @@ public abstract class AbstractDBData extends AbstractPVData implements DBData{
         if(support==null) {
             return "support does not exist";
         }
-        // if pvLink then wait for configurationStructure before changing state.
-        if(getField().getType()==Type.pvLink) return null;
+        // if configurationStructure then wait for it to be initialized before changing state.
+        if(getField().getType()==Type.pvLink) {
+            if(dbdLinkSupport.getConfigurationStructureName()!=null) return null;
+        }
         if(this!=record) {
             if(record.getSupport()==null) return "record has no support";
             supportState = record.getSupport().getSupportState();
@@ -188,15 +213,9 @@ public abstract class AbstractDBData extends AbstractPVData implements DBData{
      */
     public void setSupport(Support support) {
         this.support = support;
-        Iterator<RecordListener> iter = listenerList.iterator();
-        while(iter.hasNext()) {
-            RecordListener listener = iter.next();
-            DBListener dbListener = listener.getDBListener();
-            dbListener.supportNamePut(this);
-        }
     }    
     /**
-     * Called by AbstractDBRecord when DBRecord.removeListener or DBrecord.removeListeners are called.
+     * Called by DBRecordBase when DBRecord.removeListener or DBrecord.removeListeners are called.
      */
     protected void removeRecordListeners(){
         listenerList.clear();

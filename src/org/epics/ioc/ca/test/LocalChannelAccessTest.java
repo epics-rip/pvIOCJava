@@ -629,18 +629,17 @@ public class LocalChannelAccessTest extends TestCase {
             channelData.clear();
         }
         private boolean nextGetData(Channel channel, ChannelField field, PVData data) {
-            channelData.add(data);
+            channelData.dataPut(data);
             return false;
         }
         
         private void printResults() {
-            List<PVData> pvDataList = channelData.getPVDataList();
-            List<ChannelField> channelFieldList = channelData.getChannelFieldList();
-            Iterator<PVData> pvDataIter = pvDataList.iterator();
-            Iterator<ChannelField> channelFieldIter = channelFieldList.iterator();
-            while(pvDataIter.hasNext()) {
-                PVData data = pvDataIter.next();
-                ChannelField field = channelFieldIter.next();
+            List<ChannelDataPV> channelDataPVList = channelData.getChannelDataPVList();
+            Iterator<ChannelDataPV> iter = channelDataPVList.iterator();
+            while(iter.hasNext()) {
+                ChannelDataPV channelDataPV = iter.next();
+                PVData data = channelDataPV.getPVData();
+                ChannelField field = channelDataPV.getChannelField();
                 if(field==valueField) {
                     PVDouble pvDouble = (PVDouble)data;
                     System.out.printf("value %f", pvDouble.get());

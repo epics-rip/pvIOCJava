@@ -10,8 +10,8 @@
 <body>
 <h1 style="text-align: center">EPICS JavaIOC: pv<br />
 package: org.epics.ioc.pv<br />
-2006.12.27</h1>
-style="font-weight:bold;"CONTENTS
+2007.01.05</h1>
+CONTENTS
 
 <div class="toc">
 <ul>
@@ -35,6 +35,7 @@ style="font-weight:bold;"CONTENTS
       <li><a href="#PVStructur">PVStructure</a></li>
       <li><a href="#PVRecord">PVRecord</a></li>
       <li><a href="#PVArray">PVArray</a></li>
+      <li><a href="#FieldCreat">FieldCreate</a></li>
     </ul>
   </li>
   <li><a href="#Base">Base Introspection Classes</a></li>
@@ -70,23 +71,23 @@ records together with support code:</p>
     <dd>A enum is an array of choices and an index that selects a choice.</dd>
   <dt>menu</dt>
     <dd>Like an enum except that it has a menuName and the array of choices
-      can not be modified.</dd>
+      is immutable.</dd>
   <dt>structure</dt>
-    <dd>A structure has a name and contains an arbitrary number of fields of
-      an supported type.</dd>
+    <dd>A structure has a name and contains an array of fields of any
+      supported type.</dd>
   <dt>array</dt>
     <dd>A one dimensional array. The element type is any of the supported
       types.</dd>
   <dt>link</dt>
-    <dd>A link has no data but can have support and an associated structure
-      of configuration information.</dd>
+    <dd>A link has no data but can have support and a configuration
+    structure.</dd>
 </dl>
 
 <p>In addition to the Java IOC, PV data is intended for use by 1) Channel
-Access client, 2) interface from client to network, e.g. ICE, 3) interface
-from network to Channel Access server, 4) interface from server to IOC
-database. Since it is the interface to data, it could also be used by other
-systems, e.g. TANGO, TINI, DOOCS, etc.</p>
+Access client, 2) interface from client to network, 3) interface from network
+to Channel Access server, 4) interface from server to IOC database. Since it
+is the interface to data, it could also be used by other systems, e.g. TANGO,
+TINI, DOOCS, etc.</p>
 
 <p>This package provides the following:</p>
 <dl>
@@ -227,6 +228,8 @@ especially important for arrays and structures.</p>
         boolean isPrimitive();  // pvBoolean,...pvDouble
         boolean isScalar();     //pvBoolean,...pvString
     }</pre>
+
+<p>Note that a string is a scalar.</p>
 <hr />
 
 <h2 style="text-align: center" id="Reflection">Reflection</h2>
@@ -246,6 +249,7 @@ especially important for arrays and structures.</p>
         boolean isDesign();
         boolean isLink();
         int getAsl();
+        String toString();
         String toString(int indentLevel);
     }
 
@@ -339,13 +343,6 @@ especially important for arrays and structures.</p>
       <li>Has a name.</li>
       <li>Has fields that can be any of the supported types.</li>
     </ul>
-    <p>NOTE: An implementation may defer the definition of a structure until
-    a field instance is being created.</p>
-    <ol>
-      <li>getStructureName, and getField both returns null</li>
-      <li>getFieldNames and getFields return a 0 length array</li>
-      <li>getFieldIndex returns a value less than 0.</li>
-    </ol>
   </li>
   <li>Array - The array has elements of any of the supported types.</li>
 </ul>
@@ -369,7 +366,6 @@ record.</p>
 
     interface PVData extends Requestor {
         String getFullFieldName();
-        void message(String message, MessageType messageType);
         Field getField();
         PVData getParent();
         PVRecord getPVRecord();
@@ -480,10 +476,24 @@ where
         boolean setChoices(String[] choice);
     }</pre>
 
+<p>where</p>
+<dl>
+  <dt>getIndex</dt>
+    <dd>Get the index of the currently selected choice.</dd>
+  <dt>setIndex</dt>
+    <dd>Select a choice</dd>
+  <dt>setChoices</dt>
+    <dd>Change the set of choices. This returns false if the choices can not
+      be changed</dd>
+</dl>
+
 <h3 id="PVMenu">PVMenu</h3>
 
 <p>The interface for a menu is:</p>
 <pre>    interface PVMenu extends PVEnum {}</pre>
+
+<p>The difference from an enum is that the reflection interface provides a
+menuName and the choices can not be modified.</p>
 
 <h3 id="PVLink">PVLink</h3>
 
@@ -494,10 +504,10 @@ where
     }</pre>
 
 <p>Packages db and process allow custom support code for any field of any
-record instance of an IOC database. Only PVLink fields allow the support to
-be modified after a record instance has been initialized. A Channel Access
-client can change the support for a PVLink field as follows. This assumes
-that the client has permission to change the support:</p>
+record instance of an IOC database. A PVLink field can also have an
+associated structure that contains configuration information.. A Channel
+Access client can change the support for a PVLink field as follows. This
+assumes that the client has permission to change the support:</p>
 <ul>
   <li>Call setSupportName</li>
   <li>Call getSupportName. If the new name is what the client specified then
@@ -520,6 +530,21 @@ that the client has permission to change the support:</p>
         void endPut();
     }</pre>
 
+<p>where</p>
+<dl>
+  <dt>getFieldPVDatas</dt>
+    <dd>Returns the array of subfields. The set of subfields must all have
+      different field names.</dd>
+  <dt>replaceStructureField</dt>
+    <dd>Replace a subfield. The implementation must know how to find a
+      reflection interface for structureName and how to create a PVStructure
+      for the subfield. In addition it must create a new Structure reflection
+      interface for itself.</dd>
+  <dt>beginPut endPut</dt>
+    <dd>Code that puts to multiple fields of a structure should call beginPut
+      before the first put and endPut after the last put.</dd>
+</dl>
+
 <h3 id="PVRecord">PVRecord</h3>
 
 <p>Each PVData is a field within a PVRecord:</p>
@@ -527,6 +552,17 @@ that the client has permission to change the support:</p>
         String getRecordName();
         void message(String message, MessageType messageType);
     }</pre>
+
+<p>where</p>
+<dl>
+  <dt>getRecordName</dt>
+    <dd>Returns the record name.</dd>
+  <dt>message</dt>
+    <dd>This will be called any code that has access to the record instance.
+      The implementation should prepend the record name to the message and
+      then call a more generic message handler. For example package
+      org.epics.ioc.db calls iocdb.message.</dd>
+</dl>
 
 <h3 id="PVArray">PVArray</h3>
 
@@ -708,6 +744,104 @@ the following reads an entire array:</p>
         }
         return storage;
     } </pre>
+
+<h3 id="FieldCreat">FieldCreate</h3>
+
+<p>This is an interface for creating introspection objects that implement the
+introspection interfaces. The methods are:</p>
+<pre>    public interface FieldCreate {
+        public Type getType(Map&lt;String,String&gt;attributes);
+        public Type getElementType(Map&lt;String,String&gt; attributes);
+        public Type getType(String value);
+
+        public static FieldAttribute createFieldAttribute();
+        public static FieldAttribute createFieldAttribute(
+            Map&lt;String,String&gt; attributes);
+
+        public static Property createProperty(String name, String fieldName);
+
+        public static Field createField(String fieldName,Type type);
+        public static Field createField(String fieldName,Type type,
+            Property[] property,FieldAttribute fieldAttribute);
+
+        public static Array createArrayField(String fieldName,Type elementType);
+        public static Array createArrayField(String fieldName,Type elementType,
+            Property[] property,FieldAttribute fieldAttribute);
+
+        public static Enum createEnumField(String fieldName,boolean choicesMutable);
+        public static Enum createEnumField(String fieldName,boolean choicesMutable,
+            Property[] property,FieldAttribute fieldAttribute);
+
+        public static Menu createMenuField(String fieldName,String menuName);
+        public static Menu createMenuField(String fieldName,String menuName,
+            Property[]property,FieldAttribute fieldAttribute);
+
+        public static Structure createStructureField(String fieldName,
+            String structureName, Field[] field);
+        public static Structure createStructureField(String fieldName,
+            String structureName, Field[] field,
+            Property[] property,FieldAttribute fieldAttribute);
+    }</pre>
+
+<p>where</p>
+<dl>
+  <dt>getType(Map&lt;String,String&gt;attributes)</dt>
+    <dd>Look for a map is expected to contain a key,value pair with key =
+      "type". If found getType(value) is called an returned.</dd>
+    <dd>Like getType except that the key must be "elementType"</dd>
+  <dt>getType(String value)</dt>
+    <dd>Looks for value to be one of the following: "boolean", "byte",
+      "short", "int", "long", "float", "double", "string", "enum", "menu",
+      "structure", "array",or "link". If found the Type associated with the
+      value is returned. If not found a null is returned.</dd>
+  <dt>createFieldAttribute()</dt>
+    <dd>Create a default set of field attributes. The defaults are: asl = 1,
+      default = null, isDesign = true, isLink = false, isReadOnly =
+    false.</dd>
+  <dt>createFieldAttribute(Map&lt;String,String&gt; attributes)</dt>
+    <dd>Looks for keys that have the values: "default", "asl", "design",
+      "link", or "readonly". If a key is found than the value determines the
+      attribute value. And attributes not found are set the the default
+    value.</dd>
+  <dt>createProperty</dt>
+    <dd>Create a property.</dd>
+  <dt>createField(String fieldName,Type type)</dt>
+    <dd>create a Field with the specified type, no properties, and default
+      attributes. The type must be a scalar or a link.</dd>
+  <dt>createField(String fieldName,Type type,<br />
+  Property[] property,FieldAttribute fieldAttribute)</dt>
+    <dd>create a Field with the specified type, properties, and attributes.
+      The type must be a scalar or a link.</dd>
+  <dt>createArrayField(String fieldName,Type elementType)</dt>
+    <dd>create an Array with the specified elementType, no properties, and
+      default attributes. The elementType can be any Type but must not be
+      null.</dd>
+  <dt>createArrayField(String fieldName,Type elementType,<br />
+  Property[] property,FieldAttribute fieldAttribute)</dt>
+    <dd>create an Array with the specified elementType, properties, and
+      attributes. The elementType can be any Type but must not be null.</dd>
+  <dt>createEnumField(String fieldName,boolean choicesMutable)</dt>
+    <dd>create an Enum with no properties and default attributes.</dd>
+  <dt>createEnumField(String fieldName,boolean choicesMutable,<br />
+  Property[] property,FieldAttribute fieldAttribute)</dt>
+    <dd>create an Enum with properties and attributes.</dd>
+  <dt>createMenuField(String fieldName,String menuName)</dt>
+    <dd>create a Menu with no properties and default attributes.</dd>
+  <dt>createMenuField(String fieldName,String menuName,<br />
+  Property[]property,FieldAttribute fieldAttribute)</dt>
+    <dd>create a Menu with properties and attributes.</dd>
+  <dt>createStructureField(String fieldName,<br />
+  String structureName, Field[] field)</dt>
+    <dd>create a Structure with no properties and default attributes. The
+      structureName must not be null. It is permissible to have a Field[]
+      with length 0.</dd>
+  <dt>createStructureField(String fieldName,<br />
+  String structureName, Field[] field,<br />
+  Property[] property,FieldAttribute fieldAttribute)</dt>
+    <dd>create a Structure with properties and attributes. The structureName
+      must not be null. It is permissible to have a Field[] with length
+    0.</dd>
+</dl>
 <hr />
 
 <h2 style="text-align: center" id="Base">Base Introspection Classes</h2>
@@ -734,18 +868,16 @@ introspection implementation but they could be extended if necessary.</p>
     }
     
     public class EnumBase extends FieldBase implements Enum{
-        public EnumBase(String fieldName,
-            Property[] property,FieldAttribute fieldAttribute,
-            boolean choicesMutable);
+        public EnumBase(String fieldName,boolean choicesMutable,
+            Property[] property,FieldAttribute fieldAttribute);
         public boolean isChoicesMutable();
         public String toString();
         public String toString(int indentLevel);
     }
     
     public class MenuBase extends FieldBase implements Menu{
-        public MenuBase(String fieldName,
-            Property[] property,FieldAttribute fieldAttribute,
-            String menuName);
+        public MenuBase(String fieldName,String menuName,
+            Property[] property,FieldAttribute fieldAttribute);
         public String getMenuName();
         public boolean isChoicesMutable();
         public String toString();
@@ -753,9 +885,8 @@ introspection implementation but they could be extended if necessary.</p>
     }
     
     public class StructureBase extends FieldBase implements Structure {
-        public StructureBase(String fieldName,
-             Property[] property,FieldAttribute fieldAttribute,
-             String structureName,Field[] field);
+        public StructureBase(String fieldName,String structureName,Field[] field,
+             Property[] property,FieldAttribute fieldAttribute);
         public Field getField(String name);
         public int getFieldIndex(String name);
         public String[] getFieldNames();
@@ -766,9 +897,8 @@ introspection implementation but they could be extended if necessary.</p>
     }
 
     public class ArrayBase extends FieldBase implements Array {
-        public ArrayBase(String fieldName,
-            Property[] property,FieldAttribute fieldAttribute,
-            Type elementType);
+        public ArrayBase(String fieldName,Type elementType,
+            Property[] property,FieldAttribute fieldAttribute);
         public Type getElementType();
         public String toString();
         public String toString(int indentLevel);      
@@ -776,8 +906,8 @@ introspection implementation but they could be extended if necessary.</p>
     }
 }</pre>
 
-<p>These classes are used by FieldFactory, described below, to create
-instances of the reflection onterfaces.</p>
+<p>These classes are used to create instances of the reflection
+interfaces.</p>
 <hr />
 
 <h2 style="text-align: center" id="AbstractPV">AbstractPVData</h2>
@@ -790,8 +920,9 @@ interfaces:</p>
     protected void replaceField(Field field);
     protected void setRecord(PVRecord record);
     protected static void newLine(StringBuilder builder, int indentLevel);
-    public String getFullFieldName();
+    public String getRequestorName();
     public void message(String message, MessageType messageType);
+    public String getFullFieldName();
     public Field getField();
     public PVData getParent();
     public PVRecord getPVRecord();
@@ -916,26 +1047,7 @@ array contains less than len elements.
 <p>The field factory creates objects for each on the interspection
 interfaces. It has the following public methods:</p>
 <pre>public final class FieldFactory {
-    public static FieldAttribute createFieldAttribute(
-       Map&lt;String,String&gt; attributes);
-    public static FieldAttribute createFieldAttribute();
-
-    public static Property createProperty(String name, String fieldName);
-
-    public static Field createField(String fieldName,
-        Type type,Property[] property,FieldAttribute fieldAttribute);
-
-    public static Array createArrayField(String fieldName,Type elementType,
-        Property[] property,FieldAttribute fieldAttribute);
-
-    public static Enum createEnumField(String fieldName,boolean choicesMutable,
-        Property[] property,FieldAttribute fieldAttribute);
-    public static Menu createMenuField(String fieldName,
-        Property[]property,FieldAttribute fieldAttribute, String menuName);
-
-    public static Structure createStructureField(String fieldName,
-        String structureName, Field[] field,
-        Property[] property,FieldAttribute fieldAttribute);
+    public static FieldCreate getFieldCreate();
 }</pre>
 <hr />
 

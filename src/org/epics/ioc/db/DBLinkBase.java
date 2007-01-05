@@ -10,68 +10,38 @@ import java.util.Iterator;
 import org.epics.ioc.dbd.*;
 import org.epics.ioc.pv.*;
 import org.epics.ioc.process.*;
-import org.epics.ioc.util.*;
 
 /**
  * Base class for PVLink.
  * @author mrk
  *
  */
-public class DBLinkBase extends AbstractDBData implements PVLink, Requestor {
+public class DBLinkBase extends AbstractDBData implements DBLink {
     private static Convert convert = ConvertFactory.getConvert();
     private ConfigStructure configStructure = null;
     
     public DBLinkBase(DBData parent,Field field) {
         super(parent,field);
-    }
-    
+    }   
     /* (non-Javadoc)
-     * @see org.epics.ioc.db.AbstractDBData#setSupportName(java.lang.String)
+     * @see org.epics.ioc.db.DBLink#newSupport(org.epics.ioc.dbd.DBDLinkSupport)
      */
-    public String setSupportName(String name) {
-        String result = super.setSupportName(name);
-        if(result!=null) return result;
-        DBRecord dbRecord = super.getDBRecord();
-        DBD dbd = dbRecord.getDBD();
-        DBDLinkSupport dbdLinkSupport = dbd.getLinkSupport(name);
-        if(dbdLinkSupport==null) return "DBDLinkSupport not found";
-        String configurationStructureName = dbdLinkSupport.getConfigurationStructureName();
-        if(configurationStructureName==null) {
-            SupportState supportState = super.getDBRecord().getSupport().getSupportState();
-            Support support = super.getSupport();
-            switch(supportState) {
-            case readyForInitialize:
-                break;
-            case readyForStart:
-                support.initialize();
-                break;
-            case ready:
-                support.initialize();
-                if(support.getSupportState()!=SupportState.readyForStart) break;
-                support.start();
-                break;
-            default:
-            }
-            return null;
-        }
+    public String newSupport(DBDLinkSupport linkSupport,DBD dbd) {
+        String configurationStructureName = linkSupport.getConfigurationStructureName();
         DBDStructure dbdStructure = dbd.getStructure(configurationStructureName);
         if(dbdStructure==null) {
             return "configurationStructure " + configurationStructureName
-                + " for support " + name
+                + " for support " + super.getSupportName()
                 + " does not exist";
         }
-        configStructure = new ConfigStructure(this,dbdStructure);
-        configStructure.createFields(dbdStructure);
-        if(super.getSupport()==null) {
-            // Wait until SupportCreation has been run
-            return super.setSupportName(name);
-        }
-        Iterator<RecordListener> iter = super.listenerList.iterator();
-        while(iter.hasNext()) {
-            RecordListener listener = iter.next();
-            DBListener dbListener = listener.getDBListener();
-            dbListener.configurationStructurePut(this);
-        }
+        FieldCreate fieldCreate = FieldFactory.getFieldCreate();
+        Field[] fields = dbdStructure.getFields();
+        Structure structure = fieldCreate.createStructure(
+            "configuration",
+            dbdStructure.getStructureName(),
+            fields);
+        configStructure = new ConfigStructure(this,structure);
+        configStructure.createFields(fields);
         return null;
     }
     /* (non-Javadoc)
@@ -96,11 +66,7 @@ public class DBLinkBase extends AbstractDBData implements PVLink, Requestor {
             //Wait until SupportCreation has been run
             return true;
         }
-        SupportState supportState = support.getSupportState();
-        if(supportState!=SupportState.readyForInitialize) {
-            support.uninitialize();
-        }
-        supportState = super.getDBRecord().getSupport().getSupportState();
+        SupportState supportState = super.getDBRecord().getSupport().getSupportState();
         switch(supportState) {
         case readyForInitialize:
             break;
@@ -114,11 +80,26 @@ public class DBLinkBase extends AbstractDBData implements PVLink, Requestor {
             break;
         default:
         }
-        Iterator<RecordListener> iter = super.listenerList.iterator();
-        while(iter.hasNext()) {
-            RecordListener listener = iter.next();
-            DBListener dbListener = listener.getDBListener();
-            dbListener.configurationStructurePut(this);
+        AbstractDBData dbData = this;
+        while(dbData!=null) {
+            Iterator<RecordListener> iter = dbData.listenerList.iterator();
+            while(iter.hasNext()) {
+                RecordListener listener = iter.next();
+                DBListener dbListener = listener.getDBListener();
+                Type type = dbData.getField().getType();
+                if(type==Type.pvEnum || type ==Type.pvMenu) {
+                    dbListener.configurationStructurePut(this);
+                } else if(type==Type.pvStructure) {
+                    dbListener.configurationStructurePut(dbData.thisStructure, this);
+                } else {
+                    throw new IllegalStateException("Logic error");
+                }
+            }
+            if(dbData.parent==dbData) {
+                System.err.printf("setChoices parent = this Why???%n");
+            } else {
+                dbData = (AbstractDBData)dbData.parent;
+            }
         }
         return true;
     }
@@ -151,12 +132,11 @@ public class DBLinkBase extends AbstractDBData implements PVLink, Requestor {
             dbData = new DBData[structure.getFields().length];
         }
         
-        private void createFields(DBDStructure dbdStructure) {
-            Field[] field = dbdStructure.getFields();
+        private void createFields(Field[] field) {
             for(int i=0; i < dbData.length; i++) {
-                dbData[i] = FieldDataFactory.createData(this,field[i]);
+                dbData[i] = DBDataFactory.getDBDataCreate().createData(this,field[i]);
             }
-        }    
+        }           
         /* (non-Javadoc)
          * @see org.epics.ioc.pv.PVStructure#beginPut()
          */

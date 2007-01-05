@@ -53,6 +53,7 @@ public class ChannelDataFactory {
      }
      
      private static Convert convert = ConvertFactory.getConvert();
+     private static FieldCreate fieldCreate = FieldFactory.getFieldCreate();
      
      private static class ChannelDataQueueImpl implements ChannelDataQueue {
          private ReentrantLock lock = new ReentrantLock();
@@ -156,184 +157,551 @@ public class ChannelDataFactory {
      }
      
      private static class ChannelDataImpl implements ChannelData {
+         private Channel channel;
          private ChannelFieldGroup channelFieldGroup;
-         private boolean[] hasData;
-         private PVData[] pvDataArray;
-         private ChannelField[] channelFieldArray;
-         private ArrayList<PVData> pvDataList;
-         private ArrayList<ChannelField> channelFieldList;
+         private ChannelRecord channelRecord;
+         private PVData[] pvDatas;
+         private ChannelField[] channelFields;
+         private ArrayList<ChannelDataPV> channelDataPVList;
+         private ArrayList<ChannelDataPV> channelDataPVFreeList;
         
          private ChannelDataImpl(Channel channel, ChannelFieldGroup channelFieldGroup)
          {
-             super();
+             this.channel = channel;
              this.channelFieldGroup = channelFieldGroup;
          }
          
          private boolean createData() {
              List<ChannelField> channelFieldList = channelFieldGroup.getList();
              int size = channelFieldList.size();
-             pvDataArray = new PVData[size];
-             channelFieldArray = new ChannelField[size];
+             pvDatas = new PVData[size];
+             channelFields = new ChannelField[size];
+             Field[] fields = new Field[size];
+             for(int i=0; i<size; i++) {
+                 fields[i] = channelFieldList.get(i).getField();
+             }
+             Structure structure = fieldCreate.createStructure(
+                 "channelData", "channelData", fields);
+             channelRecord = new ChannelRecord(channel,structure);
              for(int i=0; i<size; i++) {
                  ChannelField channelField = channelFieldList.get(i);
                  Field field = channelField.getField();
                  PVData pvData = null;
                  switch(field.getType()) {
-                 case pvBoolean:  pvData = new BooleanData(field); break;
-                 case pvByte:     pvData = new ByteData(field); break;
-                 case pvShort:    pvData = new ShortData(field); break;
-                 case pvInt:      pvData = new IntData(field); break;
-                 case pvLong:     pvData = new LongData(field); break;
-                 case pvFloat:    pvData = new FloatData(field); break;
-                 case pvDouble:   pvData = new DoubleData(field); break;
-                 case pvString:   pvData = new StringData(field); break;
-                 case pvEnum:     pvData = new EnumData(field); break;
-                 case pvMenu:     pvData = new EnumData(field); break;
-                 case pvLink:     pvData = new LinkData(field); break;
-                 case pvArray:    pvData = createArrayData(field); break;
-                 case pvStructure: pvData = createStructureData(field); break;
+                 case pvBoolean:  pvData = new BooleanData(channelRecord,field); break;
+                 case pvByte:     pvData = new ByteData(channelRecord,field); break;
+                 case pvShort:    pvData = new ShortData(channelRecord,field); break;
+                 case pvInt:      pvData = new IntData(channelRecord,field); break;
+                 case pvLong:     pvData = new LongData(channelRecord,field); break;
+                 case pvFloat:    pvData = new FloatData(channelRecord,field); break;
+                 case pvDouble:   pvData = new DoubleData(channelRecord,field); break;
+                 case pvString:   pvData = new StringData(channelRecord,field); break;
+                 case pvEnum:     pvData = new EnumData(channelRecord,field); break;
+                 case pvMenu:     pvData = new EnumData(channelRecord,field); break;
+                 case pvLink:     pvData = new LinkData(channelRecord,field); break;
+                 case pvArray:    pvData = createArrayData(channelRecord,field); break;
+                 case pvStructure: pvData = createStructureData(channelRecord,field); break;
                  }
                  if(pvData==null) return false;
-                 pvDataArray[i] = pvData;
-                 channelFieldArray[i] = channelField;
+                 pvDatas[i] = pvData;
+                 channelFields[i] = channelField;
              }
-             hasData = new boolean[size];
-             pvDataList = new ArrayList<PVData>(size);
-             this.channelFieldList = new ArrayList<ChannelField>(size);
+             channelRecord.setPVDatas(pvDatas);
+             channelDataPVList = new ArrayList<ChannelDataPV>(size);
+             channelDataPVFreeList = new ArrayList<ChannelDataPV>(size);
              return true;
-         }
-         
+         }        
          /* (non-Javadoc)
          * @see org.epics.ioc.ca.ChannelData#getChannelFieldGroup()
          */
-        public ChannelFieldGroup getChannelFieldGroup() {
-            return channelFieldGroup;
-        }
-
-        /* (non-Javadoc)
-          * @see org.epics.ioc.ca.ChannelData#add(org.epics.ioc.pv.PVData)
-          */
-         public boolean add(PVData fromData) {
-             Field fromField = fromData.getField();
-             for(int i=0; i< pvDataArray.length; i++) {
-                 PVData toData = pvDataArray[i];
-                 if(toData.getField()==fromField) {
-                     Type type = fromField.getType();
-                     if(type.isScalar()) {
-                         convert.copyScalar(fromData, toData);
-                     } else if(type==Type.pvArray) {
-                         PVArray from = (PVArray)fromData;
-                         PVArray to = (PVArray)toData;
-                         convert.copyArray(from,0, to, 0, from.getLength());
-                     } else if(type==Type.pvEnum || type==Type.pvMenu) {
-                         PVEnum from = (PVEnum)fromData;
-                         PVEnum to = (PVEnum)toData;
-                         to.setChoices(from.getChoices());
-                         to.setIndex(from.getIndex());
-                     } else if(type==Type.pvStructure) {
-                         PVStructure from = (PVStructure)fromData;
-                         PVStructure to = (PVStructure)toData;
-                         convert.copyStructure(from, to);
-                     } else {
-                         throw new IllegalStateException("unsupported type");
-                     }
-                     hasData[i] = true;
-                     return true;
-                 }
-             }
-             return false;
+         public ChannelFieldGroup getChannelFieldGroup() {
+             return channelFieldGroup;
          }
-
-        /* (non-Javadoc)
+         /* (non-Javadoc)
           * @see org.epics.ioc.ca.ChannelData#clear()
           */
          public void clear() {
-             for(int i=0; i< hasData.length; i++) hasData[i] = false;
-             pvDataList.clear();
-             channelFieldList.clear();
+             channelDataPVFreeList.addAll(channelDataPVList);
+             channelDataPVList.clear();
          }
          /* (non-Javadoc)
-          * @see org.epics.ioc.ca.ChannelData#getPVDataList()
-          */
-         public List<PVData> getPVDataList() {
-             if(pvDataList.size()<=0) {
-                 for(int i=0; i< hasData.length; i++) {
-                     if(hasData[i]) pvDataList.add(pvDataArray[i]);
-                 }
+         * @see org.epics.ioc.ca.ChannelData#initData(org.epics.ioc.ca.ChannelField, org.epics.ioc.pv.PVData)
+         */
+        public void initData(ChannelField channelField, PVData pvData) {
+            ChannelDataPVImpl channelDataPV = getChannelDataPV();
+            channelDataPV.setChannelField(channelField);
+            channelDataPV.setPVdata(pvData);
+            channelDataPV.setInitial();
+            channelDataPVList.add(channelDataPV);
+        }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.ca.ChannelData#dataPut(org.epics.ioc.pv.PVData)
+         */
+        public void dataPut(PVData fromData) {
+             int index = pvDatasIndex(fromData);
+             PVData toData = pvDatas[index];
+             Type type = fromData.getField().getType();
+             if(type.isScalar()) {
+                 convert.copyScalar(fromData, toData);
+             } else if(type==Type.pvArray) {
+                 PVArray from = (PVArray)fromData;
+                 PVArray to = (PVArray)toData;
+                 convert.copyArray(from,0, to, 0, from.getLength());
+             } else if(type==Type.pvEnum || type==Type.pvMenu) {
+                 PVEnum from = (PVEnum)fromData;
+                 PVEnum to = (PVEnum)toData;
+                 to.setChoices(from.getChoices());
+                 to.setIndex(from.getIndex());
+             } else if(type==Type.pvStructure) {
+                 PVStructure from = (PVStructure)fromData;
+                 PVStructure to = (PVStructure)toData;
+                 convert.copyStructure(from, to);
+             } else if(type==Type.pvLink) {
+                 PVLink from = (PVLink)fromData;
+                 PVLink to = (PVLink)toData;
+                 to.setConfigurationStructure(from.getConfigurationStructure());
+             } else {
+                 throw new IllegalStateException("Logic error");
              }
-             return pvDataList;
-         } 
-         
-         /* (non-Javadoc)
-          * @see org.epics.ioc.ca.ChannelData#getChannelFieldList()
-          */
-         public List<ChannelField> getChannelFieldList() {
-             if(channelFieldList.size()<=0) {
-                 for(int i=0; i< hasData.length; i++) {
-                     if(hasData[i]) channelFieldList.add(channelFieldArray[i]);
-                 }
-             }
-             return channelFieldList;
+             ChannelDataPVImpl channelDataPV = getChannelDataPV();
+             channelDataPV.setChannelField(channelFields[index]);
+             channelDataPV.setPVdata(toData);
+             channelDataPVList.add(channelDataPV);
          }
-         
-         private PVData createArrayData(Field field) {
+
+        /* (non-Javadoc)
+         * @see org.epics.ioc.ca.ChannelData#enumChoicesPut(org.epics.ioc.pv.PVEnum)
+         */
+        public void enumChoicesPut(PVEnum pvEnum) {
+            int index = pvDatasIndex(pvEnum);
+            PVEnum toEnum = (PVEnum)pvDatas[index];
+            toEnum.setChoices(pvEnum.getChoices());
+            ChannelDataPVImpl channelDataPV = getChannelDataPV();
+            channelDataPV.setChannelField(channelFields[index]);
+            channelDataPV.setPVdata(toEnum);
+            channelDataPV.setEumChoicesChange();
+            channelDataPVList.add(channelDataPV);
+        }
+
+        /* (non-Javadoc)
+         * @see org.epics.ioc.ca.ChannelData#enumIndexPut(org.epics.ioc.pv.PVEnum)
+         */
+        public void enumIndexPut(PVEnum pvEnum) {
+            int index = pvDatasIndex(pvEnum);
+            PVEnum toEnum = (PVEnum)pvDatas[index];
+            toEnum.setIndex(pvEnum.getIndex());
+            ChannelDataPVImpl channelDataPV = getChannelDataPV();
+            channelDataPV.setChannelField(channelFields[index]);
+            channelDataPV.setPVdata(toEnum);
+            channelDataPV.setEnumIndexChange();
+            channelDataPVList.add(channelDataPV);
+        }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.ca.ChannelData#supportNamePut(org.epics.ioc.pv.PVData)
+         */
+        public void supportNamePut(PVData pvData) {
+            int index = pvDatasIndex(pvData);
+            PVData toData = pvDatas[index];
+            toData.setSupportName(pvData.getSupportName());
+            ChannelDataPVImpl channelDataPV = getChannelDataPV();
+            channelDataPV.setChannelField(channelFields[index]);
+            channelDataPV.setPVdata(toData);
+            channelDataPV.setSupportNameChange();
+            channelDataPVList.add(channelDataPV);
+        }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.ca.ChannelData#configurationStructurePut(org.epics.ioc.pv.PVLink)
+         */
+        public void configurationStructurePut(PVLink pvLink) {
+            int index = pvDatasIndex(pvLink);
+            PVLink toLink = (PVLink)pvDatas[index];
+            toLink.setConfigurationStructure(pvLink.getConfigurationStructure());
+            ChannelDataPVImpl channelDataPV = getChannelDataPV();
+            channelDataPV.setChannelField(channelFields[index]);
+            channelDataPV.setPVdata(toLink);
+            channelDataPV.setConfigurationStructureChange();
+            channelDataPVList.add(channelDataPV);
+        }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.ca.ChannelData#beginPut(org.epics.ioc.pv.PVStructure)
+         */
+        public void beginPut(PVStructure pvStructure) {
+            // nothing to do
+        }
+
+        /* (non-Javadoc)
+         * @see org.epics.ioc.ca.ChannelData#endPut(org.epics.ioc.pv.PVStructure)
+         */
+        public void endPut(PVStructure pvStructure) {
+            // nothing to do
+        }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.ca.ChannelData#structurePut(org.epics.ioc.pv.PVStructure, org.epics.ioc.pv.PVData)
+         */
+        public void dataPut(PVStructure pvStructure, PVData pvData) {
+            int index = pvDatasIndex(pvStructure);
+            PVStructure toStructure = (PVStructure)pvDatas[index];
+            PVData data = findField(toStructure,pvData);
+            Type type = data.getField().getType();
+            if(type.isScalar()) {
+                convert.copyScalar(pvData, data);
+            } else if(type==Type.pvArray) {
+                PVArray from = (PVArray)pvData;
+                PVArray to = (PVArray)data;
+                convert.copyArray(from,0, to, 0, from.getLength());
+            } else {
+                throw new IllegalStateException("Logic error");
+            }
+            ChannelDataPVImpl channelDataPV = getChannelDataPV();
+            channelDataPV.setChannelField(channelFields[index]);
+            channelDataPV.setPVdata(data);
+            channelDataPVList.add(channelDataPV);
+        }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.ca.ChannelData#enumChoicesPut(org.epics.ioc.pv.PVStructure, org.epics.ioc.pv.PVEnum)
+         */
+        public void enumChoicesPut(PVStructure pvStructure, PVEnum pvEnum) {
+            int index = pvDatasIndex(pvStructure);
+            PVStructure toStructure = (PVStructure)pvDatas[index];
+            PVEnum toEnum = (PVEnum)findField(toStructure,pvEnum);
+            toEnum.setChoices(pvEnum.getChoices());
+            ChannelDataPVImpl channelDataPV = getChannelDataPV();
+            channelDataPV.setChannelField(channelFields[index]);
+            channelDataPV.setPVdata(toEnum);
+            channelDataPV.setEumChoicesChange();
+            channelDataPVList.add(channelDataPV);
+        }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.ca.ChannelData#enumIndexPut(org.epics.ioc.pv.PVStructure, org.epics.ioc.pv.PVEnum)
+         */
+        public void enumIndexPut(PVStructure pvStructure, PVEnum pvEnum) {
+            int index = pvDatasIndex(pvStructure);
+            PVStructure toStructure = (PVStructure)pvDatas[index];
+            PVEnum toEnum = (PVEnum)findField(toStructure,pvEnum);
+            toEnum.setIndex(pvEnum.getIndex());
+            ChannelDataPVImpl channelDataPV = getChannelDataPV();
+            channelDataPV.setChannelField(channelFields[index]);
+            channelDataPV.setPVdata(toEnum);
+            channelDataPV.setEnumIndexChange();
+            channelDataPVList.add(channelDataPV);
+        }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.ca.ChannelData#supportNamePut(org.epics.ioc.pv.PVStructure, org.epics.ioc.pv.PVData)
+         */
+        public void supportNamePut(PVStructure pvStructure, PVData pvData) {
+            int index = pvDatasIndex(pvStructure);
+            PVStructure toStructure = (PVStructure)pvDatas[index];
+            PVData toData = findField(toStructure,pvData);
+            toData.setSupportName(pvData.getSupportName());
+            ChannelDataPVImpl channelDataPV = getChannelDataPV();
+            channelDataPV.setChannelField(channelFields[index]);
+            channelDataPV.setPVdata(toData);
+            channelDataPV.setSupportNameChange();
+            channelDataPVList.add(channelDataPV);
+        }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.ca.ChannelData#configurationStructurePut(org.epics.ioc.pv.PVStructure, org.epics.ioc.pv.PVLink)
+         */
+        public void configurationStructurePut(PVStructure pvStructure, PVLink pvLink) {
+            int index = pvDatasIndex(pvStructure);
+            PVStructure toStructure = (PVStructure)pvDatas[index];
+            PVLink toLink = (PVLink)findField(toStructure,pvLink);
+            toLink.setConfigurationStructure(pvLink.getConfigurationStructure());
+            ChannelDataPVImpl channelDataPV = getChannelDataPV();
+            channelDataPV.setChannelField(channelFields[index]);
+            channelDataPV.setPVdata(toLink);
+            channelDataPV.setConfigurationStructureChange();
+            channelDataPVList.add(channelDataPV);
+        }
+         /* (non-Javadoc)
+         * @see org.epics.ioc.ca.ChannelData#getChannelDataPVList()
+         */
+        public List<ChannelDataPV> getChannelDataPVList() {
+            return channelDataPVList;
+        }
+ 
+         private PVData createArrayData(PVData parent,Field field) {
              Array array = (Array)field;
              switch(array.getElementType()) {
-             case pvBoolean:  return new BooleanArray(array);
-             case pvByte:     return new ByteArray(array);
-             case pvShort:    return new ShortArray(array);
-             case pvInt:      return new IntArray(array);
-             case pvLong:     return new LongArray(array);
-             case pvFloat:    return new FloatArray(array);
-             case pvDouble:   return new DoubleArray(array);
-             case pvString:   return new StringArray(array);
+             case pvBoolean:  return new BooleanArray(parent,array);
+             case pvByte:     return new ByteArray(parent,array);
+             case pvShort:    return new ShortArray(parent,array);
+             case pvInt:      return new IntArray(parent,array);
+             case pvLong:     return new LongArray(parent,array);
+             case pvFloat:    return new FloatArray(parent,array);
+             case pvDouble:   return new DoubleArray(parent,array);
+             case pvString:   return new StringArray(parent,array);
              case pvMenu:
-             case pvEnum:     return new EnumArray(array);
-             case pvLink:     return new LinkArray(array);
-             case pvArray:    return new ArrayArray(array);
-             case pvStructure: return new StructureArray(array);
+             case pvEnum:     return new EnumArray(parent,array);
+             case pvLink:     return new LinkArray(parent,array);
+             case pvArray:    return new ArrayArray(parent,array);
+             case pvStructure: return new StructureArray(parent,array);
              }
              return null;
          }
          
-         private PVData createStructureData(Field structureField) {
+         private PVData createStructureData(PVData parent,Field structureField) {
              Structure structure = (Structure)structureField;
              Field[] fields = structure.getFields();
              int length = fields.length;
              if(length<=0) return null;
              PVData[] pvDataArray = new PVData[length];
+             StructureData structureData = new StructureData(parent,structureField,pvDataArray);
              for(int i=0; i<length; i++) {
                  PVData pvData = null;
                  Field field = fields[i];
                  switch(field.getType()) {
-                 case pvBoolean:  pvData = new BooleanData(field); break;
-                 case pvByte:     pvData = new ByteData(field); break;
-                 case pvShort:    pvData = new ShortData(field); break;
-                 case pvInt:      pvData = new IntData(field); break;
-                 case pvLong:     pvData = new LongData(field); break;
-                 case pvFloat:    pvData = new FloatData(field); break;
-                 case pvDouble:   pvData = new DoubleData(field); break;
-                 case pvString:   pvData = new StringData(field); break;
-                 case pvEnum:     pvData = new EnumData(field); break;
-                 case pvArray:    pvData = createArrayData(field); break;
-                 case pvStructure: pvData = createStructureData(field); break;
+                 case pvBoolean:  pvData = new BooleanData(structureData,field); break;
+                 case pvByte:     pvData = new ByteData(structureData,field); break;
+                 case pvShort:    pvData = new ShortData(structureData,field); break;
+                 case pvInt:      pvData = new IntData(structureData,field); break;
+                 case pvLong:     pvData = new LongData(structureData,field); break;
+                 case pvFloat:    pvData = new FloatData(structureData,field); break;
+                 case pvDouble:   pvData = new DoubleData(structureData,field); break;
+                 case pvString:   pvData = new StringData(structureData,field); break;
+                 case pvEnum:     pvData = new EnumData(structureData,field); break;
+                 case pvArray:    pvData = createArrayData(structureData,field); break;
+                 case pvStructure: pvData = createStructureData(structureData,field); break;
                  }
                  if(pvData==null) {
                      throw new IllegalStateException("unsupported type");
                  }
                  pvDataArray[i] = pvData;
              }
-             return new StructureData(structureField,pvDataArray);
+             return structureData;
          }
+         // find the pvData[i] that corresponds to pvData
+         private int pvDatasIndex(PVData pvData) {
+             Field fromField = pvData.getField();
+             PVData toData = null;
+             for(int i=0; i< pvDatas.length; i++) {
+                 toData = pvDatas[i];
+                 if(toData.getField()==fromField) {
+                     return i;
+                 }
+             }
+             throw new IllegalStateException("Logic error");
+         }
+         // recursively look for fromData
+         private PVData findField(PVStructure pvStructure,PVData fromData) {
+             PVData[] datas = pvStructure.getFieldPVDatas();
+             Field fromField = fromData.getField();
+             for(int i=0; i<datas.length; i++) {
+                 PVData data = datas[i];
+                 if(data.getField()==fromField) return data;
+                 if(data.getField().getType()!=Type.pvStructure) continue;
+                 PVStructure dataStruct = (PVStructure)data;
+                 data = findField(dataStruct,fromData);
+                 if(data!=null) return data;
+             }
+             throw new IllegalStateException("Logic error");
+         }
+         // get a free ChannelDataPVImpl or allocate one
+         private ChannelDataPVImpl getChannelDataPV() {
+             ChannelDataPVImpl channelDataPV;
+             if(channelDataPVFreeList.isEmpty()) {
+                 channelDataPV = new ChannelDataPVImpl(this);
+             } else {
+                 channelDataPV = (ChannelDataPVImpl)
+                     channelDataPVFreeList.remove(channelDataPVFreeList.size()-1);
+             }
+             return channelDataPV;
+         }
+     }
+     
+     private static class ChannelDataPVImpl implements ChannelDataPV {
+        private ChannelData channelData;
+        private ChannelField channelField;
+        private PVData pvData;
+        private boolean isInitial;
+        private boolean configurationStructureChange;
+        private boolean enumChoicesChange;
+        private boolean enumIndexChange;
+        private boolean supportNameChange;
+        
+        private ChannelDataPVImpl(ChannelData channelData) {
+            this.channelData = channelData;
+        }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.ca.ChannelDataPV#getChannelData()
+         */
+        public ChannelData getChannelData() {
+            return channelData;
+        }
+
+        /* (non-Javadoc)
+         * @see org.epics.ioc.ca.ChannelDataPV#getChannelField()
+         */
+        public ChannelField getChannelField() {
+            return channelField;
+        }
+
+        /* (non-Javadoc)
+         * @see org.epics.ioc.ca.ChannelDataPV#getPVData()
+         */
+        public PVData getPVData() {
+            return pvData;
+        }
+        
+        /* (non-Javadoc)
+         * @see org.epics.ioc.ca.ChannelDataPV#isInitial()
+         */
+        public boolean isInitial() {
+            return isInitial;
+        }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.ca.ChannelDataPV#enumChoicesChange()
+         */
+        public boolean enumChoicesChange() {
+            return enumChoicesChange;
+        }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.ca.ChannelDataPV#enumIndexChange()
+         */
+        public boolean enumIndexChange() {
+            return enumIndexChange;
+        }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.ca.ChannelDataPV#supportNameChange()
+         */
+        public boolean supportNameChange() {
+            return supportNameChange;
+        }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.ca.ChannelDataPV#configurationStructureChange()
+         */
+        public boolean configurationStructureChange() {
+            return configurationStructureChange;
+        }
+        /* (non-Javadoc)
+         * @see java.lang.Object#toString()
+         */
+        public String toString() {
+            StringBuilder builder = new StringBuilder();
+            if(channelField!=null) {
+                builder.append("channelField " + channelField.getField().getFieldName() + " ");
+            }
+            if(pvData!=null) {
+                builder.append("pvField " + pvData.getField().getFieldName() + " ");
+            }
+            if(isInitial) builder.append("isInitial " + Boolean.toString(isInitial) + " ");
+            if(enumChoicesChange) builder.append("enumChoicesChange " + Boolean.toString(enumChoicesChange) + " ");
+            if(enumIndexChange) builder.append("enumIndexChange " + Boolean.toString(enumIndexChange) + " ");
+            if(supportNameChange) builder.append(
+                "supportNameChange " + Boolean.toString(supportNameChange) + " ");
+            if(configurationStructureChange) builder.append(
+                "configurationStructureChange " + Boolean.toString(configurationStructureChange) + " ");
+            return builder.toString();
+        }
+        
+        private void setChannelField(ChannelField channelField) {
+            this.channelField = channelField;
+            isInitial = false;
+            configurationStructureChange = false;
+            enumChoicesChange = false;
+            enumIndexChange = false;
+            supportNameChange = false;
+        }
+        
+        private void setPVdata(PVData pvData) {
+            this.pvData = pvData;
+        }
+        
+        private void setInitial() {
+            isInitial = true;
+        }
+        private void setConfigurationStructureChange() {
+            configurationStructureChange = true;
+        }
+        
+        private void setEumChoicesChange() {
+            enumChoicesChange = true;
+        }
+        
+        private void setEnumIndexChange() {
+            enumIndexChange = true;
+        }
+        
+        private void setSupportNameChange() {
+            supportNameChange = true;
+        }
+         
+     }
+     
+     private static class ChannelRecord extends AbstractPVData implements PVRecord {
+         private Channel channel;
+         private String recordName;
+         private PVData[] pvDatas;
+         
+         private ChannelRecord(Channel channel,Structure structure) {
+             super(null,structure);
+             this.channel = channel;
+             recordName = channel.getChannelName();
+         }
+         
+         /* (non-Javadoc)
+         * @see org.epics.ioc.pv.AbstractPVData#message(java.lang.String, org.epics.ioc.util.MessageType)
+         */
+        @Override
+        public void message(String message, MessageType messageType) {
+            channel.message(message, messageType);
+        }
+
+        private void setPVDatas(PVData[] pvDatas) {
+             this.pvDatas = pvDatas;
+         }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pv.PVRecord#getRecordName()
+         */
+        public String getRecordName() {
+            return recordName;
+        }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pv.PVStructure#beginPut()
+         */
+        public void beginPut() {
+            // Nothing to do
+        }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pv.PVStructure#endPut()
+         */
+        public void endPut() {
+            // Nothing to do
+        }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pv.PVStructure#getFieldPVDatas()
+         */
+        public PVData[] getFieldPVDatas() {
+            return pvDatas;
+        }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pv.PVStructure#replaceStructureField(java.lang.String, java.lang.String)
+         */
+        public boolean replaceStructureField(String fieldName, String structureName) {
+            // nothing to do
+            return false;
+        }
      }
      
      private static abstract class Data implements PVData {
          private Field field;
+         private PVData parent;
+         private PVRecord pvRecord;
+         private String fullFieldName;
          private String supportName = null;
          
-         private Data(Field field) {
+         private Data(PVData parent,Field field) {
+             this.parent = parent;
              this.field = field;
+             pvRecord = parent.getPVRecord();
+             fullFieldName = "." + field.getFieldName();
+             PVData newParent = parent;
+             while(newParent!=null) {
+                 fullFieldName = "." + newParent.getField().getFieldName() + fullFieldName;
+                 newParent = newParent.getParent();
+             }
          }
+         
          /* (non-Javadoc)
           * @see org.epics.ioc.util.Requestor#getRequestorName()
           */
@@ -350,19 +718,19 @@ public class ChannelDataFactory {
          * @see org.epics.ioc.pv.PVData#getFullFieldName()
          */
         public String getFullFieldName() {
-            return "." + field.getFieldName();
+            return fullFieldName;
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.pv.PVData#getParent()
          */
         public PVData getParent() {
-            return null;
+            return parent;
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.pv.PVData#getRecord()
          */
         public PVRecord getPVRecord() {
-            return null;
+            return pvRecord;
         }
         /* (non-Javadoc)
           * @see org.epics.ioc.pv.PVData#getField()
@@ -397,8 +765,8 @@ public class ChannelDataFactory {
      private static class BooleanData extends Data implements PVBoolean {
          private boolean value;
 
-         private BooleanData(Field field) {
-             super(field);
+         private BooleanData(PVData parent,Field field) {
+             super(parent,field);
              value = false;
          }
          /* (non-Javadoc)
@@ -427,8 +795,8 @@ public class ChannelDataFactory {
      private static class ByteData extends Data implements PVByte {
          private byte value;
          
-         private ByteData(Field field) {
-             super(field);
+         private ByteData(PVData parent,Field field) {
+             super(parent,field);
              value = 0;
          }
          /* (non-Javadoc)
@@ -457,8 +825,8 @@ public class ChannelDataFactory {
      private static class ShortData extends Data implements PVShort {
          private short value;
 
-         private ShortData(Field field) {
-             super(field);
+         private ShortData(PVData parent,Field field) {
+             super(parent,field);
              value = 0;
          }
          /* (non-Javadoc)
@@ -487,8 +855,8 @@ public class ChannelDataFactory {
      private static class IntData extends Data implements PVInt {
          private int value;
          
-         private IntData(Field field) {
-             super(field);
+         private IntData(PVData parent,Field field) {
+             super(parent,field);
              value = 0;
          }
          /* (non-Javadoc)
@@ -517,8 +885,8 @@ public class ChannelDataFactory {
      private static class LongData extends Data implements PVLong {
          private long value;
 
-         private LongData(Field field) {
-             super(field);
+         private LongData(PVData parent,Field field) {
+             super(parent,field);
              value = 0;
          }
          /* (non-Javadoc)
@@ -547,8 +915,8 @@ public class ChannelDataFactory {
      private static class FloatData extends Data implements PVFloat {
          private float value;
 
-         private FloatData(Field field) {
-             super(field);
+         private FloatData(PVData parent,Field field) {
+             super(parent,field);
              value = 0;
          }
          /* (non-Javadoc)
@@ -577,8 +945,8 @@ public class ChannelDataFactory {
      private static class DoubleData extends Data implements PVDouble {
          private double value;
 
-         private DoubleData(Field field) {
-             super(field);
+         private DoubleData(PVData parent,Field field) {
+             super(parent,field);
              value = 0;
          }
          /* (non-Javadoc)
@@ -607,8 +975,8 @@ public class ChannelDataFactory {
      private static class StringData extends Data implements PVString {
          private String value;
 
-         private StringData(Field field) {
-             super(field);
+         private StringData(PVData parent,Field field) {
+             super(parent,field);
              value = null;
          }
          /* (non-Javadoc)
@@ -640,8 +1008,8 @@ public class ChannelDataFactory {
 
          private final static String[] EMPTY_STRING_ARRAY = new String[0];
 
-         private EnumData(Field field) {
-             super(field);
+         private EnumData(PVData parent,Field field) {
+             super(parent,field);
              index = 0;
              choice = EMPTY_STRING_ARRAY;
          }
@@ -692,8 +1060,8 @@ public class ChannelDataFactory {
      private static class LinkData extends Data implements PVLink {
          PVStructure configStructure = null;
          
-         private LinkData(Field field) {
-             super(field);
+         private LinkData(PVData parent,Field field) {
+             super(parent,field);
          }       
          /* (non-Javadoc)
          * @see org.epics.ioc.pv.PVLink#getConfigurationStructure()
@@ -715,8 +1083,8 @@ public class ChannelDataFactory {
          protected int length = 0;
          protected int capacity = 0;
      
-         private DataArray(Array array) {
-             super(array);
+         private DataArray(PVData parent,Array array) {
+             super(parent,array);
          }
         /* (non-Javadoc)
          * @see org.epics.ioc.pv.PVArray#getCapacity()
@@ -765,8 +1133,8 @@ public class ChannelDataFactory {
      private static class BooleanArray extends DataArray implements PVBooleanArray {
          private boolean[] value;
      
-         private BooleanArray(Array array) {
-             super(array);
+         private BooleanArray(PVData parent,Array array) {
+             super(parent,array);
              value = new boolean[0];
          }
               
@@ -801,8 +1169,8 @@ public class ChannelDataFactory {
      private static class ByteArray extends DataArray implements PVByteArray {
          private byte[] value;
      
-         private ByteArray(Array array) {
-             super(array);
+         private ByteArray(PVData parent,Array array) {
+             super(parent,array);
              value = new byte[0];
          }
          /* (non-Javadoc)
@@ -836,8 +1204,8 @@ public class ChannelDataFactory {
      private static class ShortArray extends DataArray implements PVShortArray {
          private short[] value;
      
-         private ShortArray(Array array) {
-             super(array);
+         private ShortArray(PVData parent,Array array) {
+             super(parent,array);
              value = new short[0];
          }
          /* (non-Javadoc)
@@ -871,8 +1239,8 @@ public class ChannelDataFactory {
      private static class IntArray extends DataArray implements PVIntArray {
          private int[] value;
      
-         private IntArray(Array array) {
-             super(array);
+         private IntArray(PVData parent,Array array) {
+             super(parent,array);
              value = new int[0];
          }
          /* (non-Javadoc)
@@ -908,8 +1276,8 @@ public class ChannelDataFactory {
          private int capacity = 0;
          private long[] value;
      
-         private LongArray(Array array) {
-             super(array);
+         private LongArray(PVData parent,Array array) {
+             super(parent,array);
              value = new long[0];
          }
          /* (non-Javadoc)
@@ -968,8 +1336,8 @@ public class ChannelDataFactory {
      private static class FloatArray extends DataArray implements PVFloatArray {
          private float[] value;
      
-         private FloatArray(Array array) {
-             super(array);
+         private FloatArray(PVData parent,Array array) {
+             super(parent,array);
              value = new float[0];
          }
          /* (non-Javadoc)
@@ -1003,8 +1371,8 @@ public class ChannelDataFactory {
      private static class DoubleArray extends DataArray implements PVDoubleArray {
          private double[] value;
      
-         private DoubleArray(Array array) {
-             super(array);
+         private DoubleArray(PVData parent,Array array) {
+             super(parent,array);
              value = new double[0];
          }
          /* (non-Javadoc)
@@ -1044,8 +1412,8 @@ public class ChannelDataFactory {
      private static class StringArray extends DataArray implements PVStringArray {
          private String[] value;
      
-         private StringArray(Array array) {
-             super(array);
+         private StringArray(PVData parent,Array array) {
+             super(parent,array);
              value = new String[0];
          }
          /* (non-Javadoc)
@@ -1079,8 +1447,8 @@ public class ChannelDataFactory {
      private static class EnumArray extends DataArray implements PVEnumArray {
          private PVEnum[] value;
      
-         private EnumArray(Array array) {
-             super(array);
+         private EnumArray(PVData parent,Array array) {
+             super(parent,array);
              value = new PVEnum[0];
          }
          /* (non-Javadoc)
@@ -1114,8 +1482,8 @@ public class ChannelDataFactory {
      private static class LinkArray extends DataArray implements PVLinkArray {
          private PVLink[] value;
      
-         private LinkArray(Array array) {
-             super(array);
+         private LinkArray(PVData parent,Array array) {
+             super(parent,array);
              value = new PVLink[0];
          }
          
@@ -1149,8 +1517,8 @@ public class ChannelDataFactory {
          private int capacity = 0;
          private PVStructure[] value;
      
-         private StructureArray(Array array) {
-             super(array);
+         private StructureArray(PVData parent,Array array) {
+             super(parent,array);
              value = new PVStructure[0];
          }
          /* (non-Javadoc)
@@ -1230,8 +1598,8 @@ public class ChannelDataFactory {
          private int capacity = 0;
          private PVArray[] value;
      
-         ArrayArray(Array array) {
-             super(array);
+         ArrayArray(PVData parent,Array array) {
+             super(parent,array);
              value = new PVArray[0];
          }
          /* (non-Javadoc)
@@ -1310,8 +1678,8 @@ public class ChannelDataFactory {
          
          private PVData[] fieldPVDatas;
          
-         private StructureData(Field field,PVData[] pvDatas) {
-             super(field);
+         private StructureData(PVData parent,Field field,PVData[] pvDatas) {
+             super(parent,field);
              fieldPVDatas = pvDatas;
          }
          /* (non-Javadoc)

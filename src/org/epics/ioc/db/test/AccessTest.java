@@ -55,6 +55,7 @@ public class AccessTest extends TestCase {
 //            System.out.print(record.toString());
 //        }
         testAccess(iocdb,"exampleAi","status");
+        testAccess(iocdb,"exampleAi","priority");
         testAccess(iocdb,"exampleAi","timeStamp");
         testAccess(iocdb,"exampleAi","value");
         testAccess(iocdb,"exampleAi","rawValue");

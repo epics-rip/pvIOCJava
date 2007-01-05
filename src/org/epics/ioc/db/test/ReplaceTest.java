@@ -173,186 +173,37 @@ public class ReplaceTest extends TestCase {
         new TestListener(iocdb,"allTypes","allTypes.linkArray");
         new TestListener(iocdb,"allTypes","allTypes.structArray");
         new TestListener(iocdb,"allTypes","allTypes.arrayArray");
-//        testPutBoolean(iocdb,"allTypes","boolean",true);
-//        testPut(iocdb,"allTypes","byte",1.0);
-//        testPut(iocdb,"allTypes","short",2.0);
-//        testPut(iocdb,"allTypes","int",3.0);
-//        testPut(iocdb,"allTypes","long",4.0);
-//        testPut(iocdb,"allTypes","float",5.0);
-//        testPut(iocdb,"allTypes","double",6.0);
-//        testPutString(iocdb,"allTypes","string","test string");
-//        testPutArray(iocdb,"allTypes","byteArray",1.0,2.0,3.0);
-//        testPutArray(iocdb,"allTypes","shortArray",1.0,2.0,3.0);
-//        testPutArray(iocdb,"allTypes","intArray",1.0,2.0,3.0);
-//        testPutArray(iocdb,"allTypes","longArray",1.0,2.0,3.0);
-//        testPutArray(iocdb,"allTypes","floatArray",1.0,2.0,3.0);
+        testPutBoolean(iocdb,"allTypes","boolean",true);
+        testPut(iocdb,"allTypes","byte",1.0);
+        testPut(iocdb,"allTypes","short",2.0);
+        testPut(iocdb,"allTypes","int",3.0);
+        testPut(iocdb,"allTypes","long",4.0);
+        testPut(iocdb,"allTypes","float",5.0);
+        testPut(iocdb,"allTypes","double",6.0);
+        testPutString(iocdb,"allTypes","string","test string");
+        testPutArray(iocdb,"allTypes","byteArray",1.0,2.0,3.0);
+        testPutArray(iocdb,"allTypes","shortArray",1.0,2.0,3.0);
+        testPutArray(iocdb,"allTypes","intArray",1.0,2.0,3.0);
+        testPutArray(iocdb,"allTypes","longArray",1.0,2.0,3.0);
+        testPutArray(iocdb,"allTypes","floatArray",1.0,2.0,3.0);
         testPutArray(iocdb,"allTypes","doubleArray",1.0,2.0,3.0);
-//        testPutBoolean(iocdb,"allTypes","allTypes.boolean",true);
-//        testPut(iocdb,"allTypes","allTypes.byte",1.0);
-//        testPut(iocdb,"allTypes","allTypes.short",2.0);
-//        testPut(iocdb,"allTypes","allTypes.int",3.0);
-//        testPut(iocdb,"allTypes","allTypes.long",4.0);
-//        testPut(iocdb,"allTypes","allTypes.float",5.0);
-//        testPut(iocdb,"allTypes","allTypes.double",6.0);
-//        testPutString(iocdb,"allTypes","allTypes.string","test string");
-//        testPutArray(iocdb,"allTypes","allTypes.booleanArray",1.0,2.0,3.0);
-//        testPutArray(iocdb,"allTypes","allTypes.byteArray",1.0,2.0,3.0);
-//        testPutArray(iocdb,"allTypes","allTypes.shortArray",1.0,2.0,3.0);
-//        testPutArray(iocdb,"allTypes","allTypes.intArray",1.0,2.0,3.0);
-//        testPutArray(iocdb,"allTypes","allTypes.longArray",1.0,2.0,3.0);
-//        testPutArray(iocdb,"allTypes","allTypes.floatArray",1.0,2.0,3.0);
-//        testPutArray(iocdb,"allTypes","allTypes.doubleArray",1.0,2.0,3.0);
+        testPutBoolean(iocdb,"allTypes","allTypes.boolean",true);
+        testPut(iocdb,"allTypes","allTypes.byte",1.0);
+        testPut(iocdb,"allTypes","allTypes.short",2.0);
+        testPut(iocdb,"allTypes","allTypes.int",3.0);
+        testPut(iocdb,"allTypes","allTypes.long",4.0);
+        testPut(iocdb,"allTypes","allTypes.float",5.0);
+        testPut(iocdb,"allTypes","allTypes.double",6.0);
+        testPutString(iocdb,"allTypes","allTypes.string","test string");
+        testPutArray(iocdb,"allTypes","allTypes.booleanArray",1.0,2.0,3.0);
+        testPutArray(iocdb,"allTypes","allTypes.byteArray",1.0,2.0,3.0);
+        testPutArray(iocdb,"allTypes","allTypes.shortArray",1.0,2.0,3.0);
+        testPutArray(iocdb,"allTypes","allTypes.intArray",1.0,2.0,3.0);
+        testPutArray(iocdb,"allTypes","allTypes.longArray",1.0,2.0,3.0);
+        testPutArray(iocdb,"allTypes","allTypes.floatArray",1.0,2.0,3.0);
+        testPutArray(iocdb,"allTypes","allTypes.doubleArray",1.0,2.0,3.0);
     }
     
-    private static class TestListener implements DBListener{
-        private RecordListener listener;
-        private String recordName;
-        private String pvName = null;
-        private String actualFieldName = null;
-        private boolean isProcessing = false;
-       
-        TestListener(IOCDB iocdb,String recordName,String pvName) {
-            this.recordName = recordName;
-            this.pvName = pvName;
-            DBAccess dbAccess = iocdb.createAccess(recordName);
-            if(dbAccess==null) {
-                System.out.printf("record %s not found%n",recordName);
-                return;
-            }
-            DBData dbData;
-            if(pvName==null || pvName.length()==0) {
-                dbData = dbAccess.getDbRecord();
-            } else {
-                if(dbAccess.setField(pvName)!=AccessSetResult.thisRecord){
-                    System.out.printf("name %s not in record %s%n",pvName,recordName);
-                    return;
-                }
-                dbData = dbAccess.getField();
-                actualFieldName = dbData.getField().getFieldName();
-            }
-            listener = dbData.getDBRecord().createRecordListener(this);
-            dbData.addListener(listener);
-            if(dbData.getField().getType()!=Type.pvStructure) {
-                Property[] property = dbData.getField().getPropertys();
-                for(Property prop : property) {
-                    dbData = dbAccess.getPropertyField(prop);
-                    dbData.addListener(listener);
-                }
-            }
-        }     
-        /* (non-Javadoc)
-         * @see org.epics.ioc.db.DBListener#beginProcess()
-         */
-        public void beginProcess() {
-            isProcessing = true;
-        }
-        
-        /* (non-Javadoc)
-         * @see org.epics.ioc.db.DBListener#endProcess()
-         */
-        public void endProcess() {
-            isProcessing = false;
-        }
-
-        /* (non-Javadoc)
-         * @see org.epics.ioc.db.DBListener#beginPut(org.epics.ioc.pv.PVStructure)
-         */
-        public void beginPut(PVStructure pvStructure) {
-            DBData dbData = (DBData)pvStructure;
-            String name = dbData.getPVRecord().getRecordName() + pvStructure.getFullFieldName();
-            System.out.println("      beginPut " + name);
-        }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.db.DBListener#endPut(org.epics.ioc.pv.PVStructure)
-         */
-        public void endPut(PVStructure pvStructure) {
-            DBData dbData = (DBData)pvStructure;
-            String name = dbData.getPVRecord().getRecordName() + pvStructure.getFullFieldName();
-            System.out.println("      endPut " + name);
-        }
-        
-        /* (non-Javadoc)
-         * @see org.epics.ioc.db.DBListener#configurationStructurePut(org.epics.ioc.pv.PVLink)
-         */
-        public void configurationStructurePut(PVLink pvLink) {
-            // TODO Auto-generated method stub
-            
-        }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.db.DBListener#dataPut(org.epics.ioc.db.DBData)
-         */
-        public void dataPut(DBData dbData) {
-            System.out.printf(" actualField %s value %s%n",
-                    dbData.getField().getFieldName(), dbData.toString());
-            System.out.printf("      TestListener recordName %s isProcessing %b%n"
-                    + "      pvName %s actualFieldName %s",
-                recordName,
-                isProcessing,
-                pvName,
-                actualFieldName);
-            String dbDataName = dbData.getField().getFieldName();
-            PVData parent = dbData.getParent();
-            while(parent!=dbData.getPVRecord()) {
-                dbDataName = parent.getField().getFieldName() + "." + dbDataName;
-                parent = parent.getParent();
-            }
-            String value = dbData.toString();
-            System.out.printf("    dbDataName %s value %s%n",
-                dbDataName,value);    
-        }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.db.DBListener#enumChoicesPut(org.epics.ioc.pv.PVEnum)
-         */
-        public void enumChoicesPut(PVEnum pvEnum) {
-            // TODO Auto-generated method stub
-            
-        }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.db.DBListener#enumIndexPut(org.epics.ioc.pv.PVEnum)
-         */
-        public void enumIndexPut(PVEnum pvEnum) {
-            // TODO Auto-generated method stub
-            
-        }int length = 0;
-        int capacity;
-        boolean capacityMutable;
-        /* (non-Javadoc)
-         * @see org.epics.ioc.db.DBListener#structurePut(org.epics.ioc.pv.PVStructure, org.epics.ioc.db.DBData)
-         */
-        public void structurePut(PVStructure pvStructure, DBData dbData) {
-            System.out.printf(" actualField %s value %s%n",
-                    dbData.getField().getFieldName(), dbData.toString());
-            System.out.printf("      TestListener recordName %s isProcessing %b%n"
-                    + "      pvName %s actualFieldName %s",
-                recordName,
-                isProcessing,
-                pvName,
-                actualFieldName);
-            String dbDataName = dbData.getField().getFieldName();
-            PVData parent = dbData.getParent();
-            while(parent!=dbData.getPVRecord()) {
-                dbDataName = parent.getField().getFieldName() + "." + dbDataName;
-                parent = parent.getParent();
-            }
-            String value = dbData.toString();
-            System.out.printf("    dbDataName %s value %s%n",
-                dbDataName,value);    
-        }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.db.DBListener#supportNamePut(org.epics.ioc.db.DBData)
-         */
-        public void supportNamePut(DBData dbData) {
-            // TODO Auto-generated method stub
-            
-        }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.db.DBListener#unlisten(org.epics.ioc.db.RecordListener)
-         */
-        public void unlisten(RecordListener listener) {
-            // Nothing to do.
-        }
-    }
-
     static void testPut(IOCDB iocdb,String recordName,
         String fieldName,double value)
     {

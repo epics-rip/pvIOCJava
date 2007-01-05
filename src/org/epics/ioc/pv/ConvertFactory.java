@@ -279,8 +279,14 @@ public final class ConvertFactory {
          * @see org.epics.ioc.pv.Convert#isCopyStructureCompatible(org.epics.ioc.pv.Structure, org.epics.ioc.pv.Structure)
          */
         public boolean isCopyStructureCompatible(Structure from, Structure to) {
-            if(from==to) return true;
-            return false;
+            Field[] fromFields = from.getFields();
+            Field[] toFields = to.getFields();
+            int length = fromFields.length;
+            if(length!=toFields.length) return false;
+            for(int i=0; i<length; i++) {
+                if(fromFields[i].getType()!=toFields[i].getType()) return false;
+            }
+            return true;
         }
 
         /* (non-Javadoc)
@@ -289,7 +295,7 @@ public final class ConvertFactory {
         public void copyStructure(PVStructure from, PVStructure to) {
             Structure fromStructure = (Structure)from.getField();
             Structure toStructure = (Structure)to.getField();
-            if(fromStructure!=toStructure) {
+            if(!isCopyStructureCompatible(fromStructure,toStructure)) {
                 throw new IllegalArgumentException(
                     "Convert.copyStructure from and to are not the same type of structure");
             }

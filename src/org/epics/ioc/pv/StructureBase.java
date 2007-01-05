@@ -16,22 +16,23 @@ import java.util.List;
  *
  */
 public class StructureBase extends FieldBase implements Structure {
-    private Field[] field;
-    private String[] fieldName;
+    private Field[] fields;
+    private String[] fieldNames;
     private String structureName;
     private List<String> sortedFieldNameList;
     private int[] fieldIndex;
     
     /**
-     * Constructor for a structure field.
-     * @param fieldName The field name.
-     * @param property The field properties.
-     * @param fieldAttribute The field attributes.
+     * Constructor for a structure fields.
+     * @param fieldNames The fields name.
      * @param structureName The structure name.
-     * @param field The array of field definitions for the fields of the structure.
+     * @param fields The array of fields definitions for the fields of the structure.
+     * @param property The fields properties.
+     * @param fieldAttribute The fields attributes.
+     * @throws IllegalArgumentException if structureName is null;
      */
-    public StructureBase(String fieldName,Property[] property,FieldAttribute fieldAttribute,
-        String structureName,Field[] field)
+    public StructureBase(String fieldName,String structureName,Field[] field,
+            Property[] property,FieldAttribute fieldAttribute)
     {
         super(fieldName, Type.pvStructure,property,fieldAttribute);
         if(property!=null) for(Property prop : property) {
@@ -39,16 +40,42 @@ public class StructureBase extends FieldBase implements Structure {
                 if(fieldNow.getFieldName().equals(prop.getPropertyName())) {
                     throw new IllegalArgumentException(
                         "propertyName " + prop.getPropertyName()
-                        + " is the same as a field name");
+                        + " is the same as a fields name");
                 }
             }
         }
-        this.field = field;
+        if(field==null) field = new Field[0];
+        this.fields = field;
+        if(structureName==null) {
+            throw new IllegalArgumentException("structureName is null");
+        }
         this.structureName = structureName;
-        this.fieldName = new String[field.length];
+        fieldNames = new String[field.length];
         sortedFieldNameList = new ArrayList<String>(field.length);
-        createNameLists();
-   }
+        sortedFieldNameList.clear();
+        for(int i = 0; i <field.length; i++) {
+            fieldNames[i] = field[i].getFieldName();
+            sortedFieldNameList.add(fieldNames[i]);
+        }
+        Collections.sort(sortedFieldNameList);
+        // look for duplicates
+        for(int i=0; i<field.length-1; i++) {
+            if(sortedFieldNameList.get(i).equals(sortedFieldNameList.get(i+1))) {
+                throw new IllegalArgumentException(
+                        "fieldNames " + sortedFieldNameList.get(i)
+                        + " appears more than once");
+            }
+        }
+        fieldIndex = new int[field.length];
+        for(int i=0; i<field.length; i++) {
+            String value = sortedFieldNameList.get(i);
+            for(int j=0; j<field.length; j++) {
+                if(value.equals(this.fieldNames[j])) {
+                    fieldIndex[i] = j;
+                }
+            }
+        }
+    }
     
     /* (non-Javadoc)
      * @see org.epics.ioc.pv.Structure#getField(java.lang.String)
@@ -56,7 +83,7 @@ public class StructureBase extends FieldBase implements Structure {
     public Field getField(String name) {
         int i = Collections.binarySearch(sortedFieldNameList,name);
         if(i>=0) {
-            return field[fieldIndex[i]];
+            return fields[fieldIndex[i]];
         }
         return null;
     }
@@ -74,14 +101,14 @@ public class StructureBase extends FieldBase implements Structure {
      * @see org.epics.ioc.pv.Structure#getFieldNames()
      */
     public String[] getFieldNames() {
-        return fieldName;
+        return fieldNames;
     }
 
     /* (non-Javadoc)
      * @see org.epics.ioc.pv.Structure#getFields()
      */
     public Field[] getFields() {
-        return field;
+        return fields;
     }
 
     /* (non-Javadoc)
@@ -108,37 +135,11 @@ public class StructureBase extends FieldBase implements Structure {
         newLine(builder,indentLevel);
         builder.append(String.format("structure %s {",
             structureName));
-        for(int i=0, n= field.length; i < n; i++) {
-            builder.append(field[i].toString(indentLevel + 1));
+        for(int i=0, n= fields.length; i < n; i++) {
+            builder.append(fields[i].toString(indentLevel + 1));
         }
         newLine(builder,indentLevel);
         builder.append("}");
         return builder.toString();
-    }
-    
-    private void createNameLists() {
-        sortedFieldNameList.clear();
-        for(int i = 0; i <field.length; i++) {
-            fieldName[i] = field[i].getFieldName();
-            sortedFieldNameList.add(this.fieldName[i]);
-        }
-        Collections.sort(sortedFieldNameList);
-        // look for duplicates
-        for(int i=0; i<field.length-1; i++) {
-            if(sortedFieldNameList.get(i).equals(sortedFieldNameList.get(i+1))) {
-                throw new IllegalArgumentException(
-                        "fieldName " + sortedFieldNameList.get(i)
-                        + " appears more than once");
-            }
-        }
-        fieldIndex = new int[field.length];
-        for(int i=0; i<field.length; i++) {
-            String value = sortedFieldNameList.get(i);
-            for(int j=0; j<field.length; j++) {
-                if(value.equals(this.fieldName[j])) {
-                    fieldIndex[i] = j;
-                }
-            }
-        }
     }
 }
