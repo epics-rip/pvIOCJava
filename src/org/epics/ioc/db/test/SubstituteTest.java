@@ -15,9 +15,9 @@ import org.epics.ioc.util.MessageType;
 import java.util.*;
 /**
  * JUnit test for XMLToIOCDB.
- * This also is a test for pvAccess, dbDefinition, and dbAccess because XMLToDBD
- * is called, which makes extensive use of dbDefinition and pvAccess, and
- * XMLToIOCDB is called, which makes extensive use of dbAccess.
+ * This also is a test for pv, dbd, and db because XMLToDBD
+ * is called, which makes extensive use of dbd and pv, and
+ * XMLToIOCDB is called, which makes extensive use of db.
  * It also provides an example of parsing database definitions.
  * The output is a dump of all the record instance files it reads.
  * @author mrk

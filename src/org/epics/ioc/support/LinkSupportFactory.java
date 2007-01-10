@@ -143,8 +143,8 @@ public class LinkSupportFactory {
             linkDBRecord = iocdb.findRecord(recordName);
             if(linkDBRecord!=null) {
                 if(inheritSeverity) {
-                    DBAccess dbAccess = iocdb.createAccess(recordName);
-                    if(dbAccess.setField("severity")==AccessSetResult.thisRecord) {
+                    PVAccess dbAccess = PVAccessFactory.createPVAccess(linkDBRecord);
+                    if(dbAccess.findField("severity")==AccessSetResult.thisRecord) {
                         pvSeverity = (PVEnum)dbAccess.getField();
                     } else {
                         pvLink.message("severity field not found",MessageType.error);
@@ -300,7 +300,9 @@ public class LinkSupportFactory {
             // Nothing to do.
             return false;
         }
-        
+        /* (non-Javadoc)
+         * @see org.epics.ioc.ca.ChannelGetRequestor#getDone(org.epics.ioc.util.RequestResult)
+         */
         public void getDone(RequestResult requestResult) {
             this.requestResult = requestResult;
             recordProcess.processContinue(this);
@@ -371,10 +373,11 @@ public class LinkSupportFactory {
          */
         public void accessRightsChange(Channel channel, ChannelField channelField) {
             // nothing to do         
-        }       
+        }
+        
         private boolean prepareForInput() {
-            ChannelSetFieldResult result = channel.setField("severity");
-            if(result!=ChannelSetFieldResult.thisChannel) {
+            ChannelFindFieldResult result = channel.findField("severity");
+            if(result!=ChannelFindFieldResult.thisChannel) {
                 message("field severity does not exist",MessageType.error);
                 return false;
             }
@@ -432,11 +435,7 @@ public class LinkSupportFactory {
         private int arrayLength = 0;
         private int arrayOffset = 0;
         
-        /**
-         * Constructor for InputLink.
-         * @param pvLink The field for which to create support.
-         */
-        public InputLink(PVLink pvLink) {
+        private InputLink(PVLink pvLink) {
             super(inputLinkSupportName,(DBData)pvLink);
             this.pvLink = pvLink;
             channelRequestorName = 
@@ -465,8 +464,7 @@ public class LinkSupportFactory {
             inheritSeverityAccess = super.getBoolean(configStructure,"inheritSeverity");
             if(inheritSeverityAccess==null) return;
             setSupportState(SupportState.readyForStart);
-        }
-        
+        }       
         /* (non-Javadoc)
          * @see org.epics.ioc.process.Support#uninitialize()
          */
@@ -509,12 +507,13 @@ public class LinkSupportFactory {
             IOCDB iocdb = IOCDBFactory.getMaster();
             forever:
             while(true) {
-                DBAccess dbAccess = iocdb.createAccess(recordName);
-                if(dbAccess==null) {
+                PVRecord pvRecord = iocdb.findRecord(recordName);
+                if(pvRecord==null) {
                     linkDBRecord = null;
                     break;
                 }
-                switch(dbAccess.setField(fieldName)) {
+                PVAccess dbAccess = PVAccessFactory.createPVAccess(pvRecord);
+                switch(dbAccess.findField(fieldName)) {
                 case otherRecord:
                     recordName = dbAccess.getOtherRecord();
                     fieldName = dbAccess.getOtherField();
@@ -529,8 +528,8 @@ public class LinkSupportFactory {
                         throw new IllegalStateException(channelRequestorName + "logic error?"); 
                     }
                     if(inheritSeverity) {
-                        dbAccess.setField("");
-                        if(dbAccess.setField("severity")==AccessSetResult.thisRecord) {
+                        dbAccess.findField("");
+                        if(dbAccess.findField("severity")==AccessSetResult.thisRecord) {
                             pvSeverity = (PVEnum)dbAccess.getField();
                         } else {
                             pvLink.message("severity field not found",MessageType.error);
@@ -640,8 +639,7 @@ public class LinkSupportFactory {
                 pvLink.getFullFieldName() + " not connected",
                 AlarmSeverity.major);
             supportProcessRequestor.supportProcessDone(RequestResult.success);
-        }
-        
+        }       
         /* (non-Javadoc)
          * @see org.epics.ioc.process.ProcessCallbackRequestor#processCallback()
          */
@@ -686,8 +684,7 @@ public class LinkSupportFactory {
             } finally {
                 dbRecord.unlock();
             }
-        }
-        
+        }       
         /* (non-Javadoc)
          * @see org.epics.ioc.ca.ChannelStateListener#channelStateChange(org.epics.ioc.ca.Channel)
          */
@@ -845,8 +842,8 @@ public class LinkSupportFactory {
         }
         
         private boolean prepareForInput() {
-            ChannelSetFieldResult result = channel.setField(valueFieldName);
-            if(result!=ChannelSetFieldResult.thisChannel) {
+            ChannelFindFieldResult result = channel.findField(valueFieldName);
+            if(result!=ChannelFindFieldResult.thisChannel) {
                 message(valueFieldName + " does not exist ",MessageType.error);
                 return false;
             }
@@ -858,8 +855,8 @@ public class LinkSupportFactory {
             channelFieldGroup = channel.createFieldGroup(this);
             channelFieldGroup.addChannelField(valueField);
             if(inheritSeverity) {
-                result = channel.setField("severity");
-                if(result!=ChannelSetFieldResult.thisChannel) {
+                result = channel.findField("severity");
+                if(result!=ChannelFindFieldResult.thisChannel) {
                     channelFieldGroup = null;
                     valueField = null;
                     message(" severity does not exist ",MessageType.error);
@@ -899,8 +896,7 @@ public class LinkSupportFactory {
             return false;
         }
     }
-    
-    
+        
     private static class OutputLink extends AbstractSupport
     implements LinkSupport,
     RecordProcessRequestor,ProcessCallbackRequestor,ProcessContinueRequestor,
@@ -945,11 +941,7 @@ public class LinkSupportFactory {
         private int arrayLength = 0;
         private int arrayOffset = 0;
         
-        /**
-         * Constructor for InputLink.
-         * @param pvLink The field for which to create support.
-         */
-        public OutputLink(PVLink pvLink) {
+        private OutputLink(PVLink pvLink) {
             super(inputLinkSupportName,(DBData)pvLink);
             this.pvLink = pvLink;
             channelRequestorName = 
@@ -1022,12 +1014,13 @@ public class LinkSupportFactory {
             IOCDB iocdb = IOCDBFactory.getMaster();
             forever:
             while(true) {
-                DBAccess dbAccess = iocdb.createAccess(recordName);
-                if(dbAccess==null) {
+                PVRecord pvRecord = iocdb.findRecord(recordName);
+                if(dbRecord==null) {
                     linkDBRecord = null;
                     break;
                 }
-                switch(dbAccess.setField(fieldName)) {
+                PVAccess dbAccess = PVAccessFactory.createPVAccess(pvRecord);
+                switch(dbAccess.findField(fieldName)) {
                 case otherRecord:
                     recordName = dbAccess.getOtherRecord();
                     fieldName = dbAccess.getOtherField();
@@ -1042,8 +1035,8 @@ public class LinkSupportFactory {
                         throw new IllegalStateException(channelRequestorName + "logic error?"); 
                     }
                     if(inheritSeverity) {
-                        dbAccess.setField("");
-                        if(dbAccess.setField("severity")==AccessSetResult.thisRecord) {
+                        dbAccess.findField("");
+                        if(dbAccess.findField("severity")==AccessSetResult.thisRecord) {
                             pvSeverity = (PVEnum)dbAccess.getField();
                         } else {
                             pvLink.message("severity field not found",MessageType.error);
@@ -1158,8 +1151,7 @@ public class LinkSupportFactory {
                 pvLink.getFullFieldName() + " not connected",
                 AlarmSeverity.major);
             supportProcessRequestor.supportProcessDone(RequestResult.success);
-        }
-        
+        }        
         /* (non-Javadoc)
          * @see org.epics.ioc.process.ProcessCallbackRequestor#processCallback()
          */
@@ -1206,8 +1198,7 @@ public class LinkSupportFactory {
                     alarmSeverity = AlarmSeverity.invalid;
                 }
             }
-        }
-        
+        }       
         /* (non-Javadoc)
          * @see org.epics.ioc.ca.ChannelStateListener#channelStateChange(org.epics.ioc.ca.Channel)
          */
@@ -1387,8 +1378,8 @@ public class LinkSupportFactory {
         }
         
         private boolean prepareForOutput() {
-            ChannelSetFieldResult result = channel.setField(valueFieldName);
-            if(result!=ChannelSetFieldResult.thisChannel) {
+            ChannelFindFieldResult result = channel.findField(valueFieldName);
+            if(result!=ChannelFindFieldResult.thisChannel) {
                 message(valueFieldName + " does not exist ",MessageType.error);
                 return false;
             }
@@ -1400,9 +1391,9 @@ public class LinkSupportFactory {
             putFieldGroup = channel.createFieldGroup(this);
             putFieldGroup.addChannelField(valueField);
             if(inheritSeverity) {
-                channel.setField("");
-                result = channel.setField("severity");
-                if(result!=ChannelSetFieldResult.thisChannel) {
+                channel.findField("");
+                result = channel.findField("severity");
+                if(result!=ChannelFindFieldResult.thisChannel) {
                     putFieldGroup = null;
                     valueField = null;
                     message(" severity does not exist ",MessageType.error);
@@ -1475,11 +1466,8 @@ public class LinkSupportFactory {
         private Channel channel = null;
         private ChannelMonitor channelMonitor = null;
         private ChannelField dataField = null;
-        /**
-         * Constructor for MonitorLink.
-         * @param pvLink The field for which to create support.
-         */
-        public MonitorNotifyLink(PVLink pvLink) {
+       
+        private MonitorNotifyLink(PVLink pvLink) {
             super(monitorNotifyLinkSupportName,(DBData)pvLink);
             this.pvLink = pvLink;
             DBData dbData = (DBData)pvLink;
@@ -1646,10 +1634,11 @@ public class LinkSupportFactory {
             } finally {
                 dbRecord.unlock();
             }
-        }   
+        } 
+        
         private void channelStart() {
-            ChannelSetFieldResult result = channel.setField(fieldName);
-            if(result!=ChannelSetFieldResult.thisChannel) {
+            ChannelFindFieldResult result = channel.findField(fieldName);
+            if(result!=ChannelFindFieldResult.thisChannel) {
                 pvLink.message(
                     "fieldName " + fieldName
                     + " is not in record " + recordName,
@@ -1721,11 +1710,8 @@ public class LinkSupportFactory {
         private ReentrantLock processLock = null;
         private Condition processCondition = null;
         private boolean processDone;
-        /**
-         * Constructor for MonitorLink.
-         * @param pvLink The field for which to create support.
-         */
-        public MonitorLink(PVLink pvLink) {
+        
+        private MonitorLink(PVLink pvLink) {
             super(monitorLinkSupportName,(DBData)pvLink);
             this.pvLink = pvLink;
             dbRecord = ((DBData)pvLink).getDBRecord();
@@ -1892,8 +1878,7 @@ public class LinkSupportFactory {
                 numberOverrun = 0;
             }
             supportProcessRequestor.supportProcessDone(RequestResult.success);
-        }
-        
+        }       
         /* (non-Javadoc)
          * @see org.epics.ioc.ca.ChannelStateListener#channelStateChange(org.epics.ioc.ca.Channel)
          */
@@ -1949,8 +1934,7 @@ public class LinkSupportFactory {
             } finally {
                 dbRecord.unlock();
             }
-        }                
-        
+        }                       
         /* (non-Javadoc)
          * @see org.epics.ioc.ca.ChannelMonitorRequestor#monitorData(org.epics.ioc.ca.ChannelData)
          */
@@ -2061,8 +2045,8 @@ public class LinkSupportFactory {
         }
         
         private void channelStart() {
-            ChannelSetFieldResult result = channel.setField(fieldName);
-            if(result!=ChannelSetFieldResult.thisChannel) {
+            ChannelFindFieldResult result = channel.findField(fieldName);
+            if(result!=ChannelFindFieldResult.thisChannel) {
                 pvLink.message(
                     "fieldName " + fieldName
                     + " is not in record " + recordName,
@@ -2090,8 +2074,8 @@ public class LinkSupportFactory {
                 }
             }
             if(inheritSeverityAccess.get()) {
-                result = channel.setField("severity");
-                if(result==ChannelSetFieldResult.thisChannel) {
+                result = channel.findField("severity");
+                if(result==ChannelFindFieldResult.thisChannel) {
                     severityField = channel.getChannelField();
                     channelFieldGroup.addChannelField(severityField);
                     channelMonitor.lookForChange(severityField, true);

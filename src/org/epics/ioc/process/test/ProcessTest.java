@@ -21,7 +21,7 @@ import org.epics.ioc.util.*;
  */
 public class ProcessTest extends TestCase {
     /**
-     * test DBAccess.
+     * test PVAccess.
      */
     public static void testProcess() {
         DBD dbd = DBDFactory.getMasterDBD();

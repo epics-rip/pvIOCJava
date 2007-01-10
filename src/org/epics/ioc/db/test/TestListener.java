@@ -25,32 +25,40 @@ public class TestListener implements DBListener{
     {
         this.pvName = pvName;
         this.verbose = verbose;
-        DBAccess dbAccess = iocdb.createAccess(recordName);
-        if(dbAccess==null) {
+        PVRecord pvRecord = iocdb.findRecord(recordName);
+        if(pvRecord==null) {
             System.out.printf("record %s not found%n",recordName);
             return;
         }
-        DBData dbData;
+        PVAccess pvAccess = PVAccessFactory.createPVAccess(pvRecord);
+        DBData pvData;
         if(pvName==null || pvName.length()==0) {
-            dbData = dbAccess.getDbRecord();
+            pvData = (DBData)pvAccess.getPVRecord();
         } else {
-            if(dbAccess.setField(pvName)!=AccessSetResult.thisRecord){
+            if(pvAccess.findField(pvName)!=AccessSetResult.thisRecord){
                 System.out.printf("name %s not in record %s%n",pvName,recordName);
-                System.out.printf("%s\n",dbAccess.getDbRecord().toString());
+                System.out.printf("%s\n",pvAccess.getPVRecord().toString());
                 return;
             }
-            dbData = dbAccess.getField();
+            pvData = (DBData)pvAccess.getField();
         }
-        actualFieldName = dbData.getField().getFieldName();
-        fullName = dbData.getPVRecord().getRecordName() + dbData.getFullFieldName();
-        listener = dbData.getDBRecord().createRecordListener(this);
-        dbData.addListener(listener);
+        actualFieldName = pvData.getField().getFieldName();
+        fullName = pvData.getPVRecord().getRecordName() + pvData.getFullFieldName();
+        listener = pvData.getDBRecord().createRecordListener(this);
+        pvData.addListener(listener);
         if(monitorProperties) {
-            if(dbData.getField().getType()!=Type.pvStructure) {
-                Property[] property = dbData.getField().getPropertys();
+            if(pvData.getField().getType()!=Type.pvStructure) {
+                Property[] property = pvData.getField().getPropertys();
+                DBData propertyData;
                 for(Property prop : property) {
-                    dbData = dbAccess.getPropertyField(prop);
-                    dbData.addListener(listener);
+                    pvAccess.setPVField(pvData);
+                    if(pvAccess.findField(prop.getPropertyName())!=AccessSetResult.thisRecord){
+                        System.out.printf("name %s not in record %s%n",pvName,recordName);
+                        System.out.printf("%s\n",pvAccess.getPVRecord().toString());
+                    } else {
+                        propertyData = (DBData)pvAccess.getField();
+                        propertyData.addListener(listener);
+                    }
                 }
             }
         }

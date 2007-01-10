@@ -22,6 +22,10 @@ public abstract class AbstractPVData implements PVData{
     private PVRecord record;
     private String supportName = null;
        
+    /* (non-Javadoc)
+     * @see org.epics.ioc.pv.PVData#replacePVData(org.epics.ioc.pv.PVData, org.epics.ioc.pv.PVData)
+     */
+    abstract public void replacePVData(PVData newPVData);
     /**
      * Constructor that must be called by derived classes.
      * @param parent The parent PVData.

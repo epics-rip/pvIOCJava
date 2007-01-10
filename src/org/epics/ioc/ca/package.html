@@ -9,37 +9,110 @@
 
 <body>
 <h1 style="text-align: center">EPICS JavaIOC: channel Access<br />
-package: org.epics.ioc.channelAccess<br />
-2006.12.07</h1>
+package: org.epics.ioc.ca<br />
+2007.01.10</h1>
+CONTENTS
+
+<div class="toc">
+<ul>
+  <li><a href="#Overview">Overview</a></li>
+  <li><a href="#Channel">Channel Definitions</a>
+    <ul>
+      <li><a href="#Definition">Definitions</a></li>
+      <li><a href="#Channel1">Channel</a></li>
+      <li><a href="#ChannelFin">ChannelFindFieldResult</a></li>
+      <li><a href="#ChannelSta">ChannelStateListener</a></li>
+      <li><a href="#AccessRigh">AccessRights</a></li>
+      <li><a href="#ChannelFie">ChannelField</a></li>
+      <li><a href="#ChannelFie1">ChannelFieldGroupListener</a></li>
+      <li><a href="#ChannelFie2">ChannelFieldGroup</a></li>
+      <li><a href="#ChannelFac">ChannelFactory</a></li>
+      <li><a href="#ChannelAcc">ChannelAccess</a></li>
+    </ul>
+  </li>
+  <li><a href="#Channel2">Channel Process, Get, Put, PutGet</a>
+    <ul>
+      <li><a href="#Definition1">Definitions</a></li>
+      <li><a href="#ChannelPro">ChannelProcess</a></li>
+      <li><a href="#ChannelGet">ChannelGet</a></li>
+      <li><a href="#ChannelPut">ChannelPut</a></li>
+      <li><a href="#ChannelPut1">ChannelPutGet</a></li>
+    </ul>
+  </li>
+  <li><a href="#ChannelMon">ChannelMonitor</a>
+    <ul>
+      <li><a href="#Definition2">Definitions</a></li>
+      <li><a href="#ChannelMon1">ChannelMonitor</a></li>
+    </ul>
+  </li>
+  <li><a href="#Channel3">Channel Data</a>
+    <ul>
+      <li><a href="#Definition3">Definitions</a></li>
+      <li><a href="#ChannelDat">ChannelDataPV</a></li>
+      <li><a href="#ChannelDat1">ChannelData</a></li>
+      <li><a href="#ChannelDat2">ChannelDataQueue</a></li>
+      <li><a href="#ChannelDat3">ChannelDataFactory</a></li>
+    </ul>
+  </li>
+  <li><a href="#Local">Local Channel Access</a></li>
+  <li><a href="#Example">Example For ChannelData</a>
+    <ul>
+      <li><a href="#Discussion">Discussion</a></li>
+      <li><a href="#Implementa">Implementation</a></li>
+    </ul>
+  </li>
+  <li><a href="#Process">Process Example</a>
+    <ul>
+      <li><a href="#Discussion1">Discussion</a></li>
+      <li><a href="#Implementa1">Implementation</a></li>
+    </ul>
+  </li>
+  <li><a href="#Example1">Get Example</a>
+    <ul>
+      <li><a href="#Discussion2">Discussion</a></li>
+      <li><a href="#Implementa2">Implementation</a></li>
+    </ul>
+  </li>
+  <li><a href="#Example2">Put Example</a>
+    <ul>
+      <li><a href="#Discussion3">Discussion</a></li>
+      <li><a href="#Implementa3">Implementation</a></li>
+    </ul>
+  </li>
+  <li><a href="#PutGet">PutGet Example</a>
+    <ul>
+      <li><a href="#Discussion4">Discussion</a></li>
+      <li><a href="#Implementa4">Implementation</a></li>
+    </ul>
+  </li>
+</ul>
+</div>
 <hr />
 
-<h2 style="text-align: center">Overview</h2>
+<h2 style="text-align: center" id="Overview">Overview</h2>
 <hr />
 
 <p>This package contains Java definitions for Channel Access clients:</p>
-<dl>
-  <dt>channel</dt>
-    <dd>A channel is a connection to a source of data. For a javaIOC database
-      a channel is a connection to a record instance.</dd>
-  <dt>channelData</dt>
-    <dd>A "container" for data for a channel. It is used by code that must
-      block while handling data for a channel. It allows the user to block
-      without locking a record.</dd>
-  <dt>channelProcess,channelGet, channelPut, channelGetPut</dt>
-    <dd>The basic operations that can be performed on a channel.</dd>
-  <dt>channelMonitor</dt>
-    <dd>Channel monitors.</dd>
-</dl>
 <hr />
 
-<h2 style="text-align: center">Channel</h2>
+<h2 style="text-align: center" id="Channel">Channel Definitions</h2>
 <hr />
 
-<h3>Definitions</h3>
+<p>A channel is a connection to a PVRecord. The channel definitions allow
+access to an arbitrary number of fields in a record. A channel allows remote
+access to PVRecords.</p>
+
+<p>This section defines the interface and factory classes for connecting to a
+channel and creating interfaces for accessing a channel. The interfaces for
+accessing a channel are defined in later sections.</p>
+
+<h3 id="Definition">Definitions</h3>
 <pre>    public interface Channel {
+        String getChannelName();
+        public void message(String message, MessageType messageType);
         void destroy();
         boolean isConnected();
-        ChannelSetFieldResult setField(String name);
+        ChannelFindFieldResult findField(String name);
         String getOtherChannel();
         String getOtherField();
         ChannelField getChannelField();
@@ -61,7 +134,7 @@ package: org.epics.ioc.channelAccess<br />
         boolean isLocal();
     }
 
-    public enum ChannelSetFieldResult {
+    public enum ChannelFindFieldResult {
         otherChannel,
         thisChannel,
         notFound,
@@ -79,23 +152,19 @@ package: org.epics.ioc.channelAccess<br />
         readWrite
     }
 
-    public interface ChannelFieldGroup {
-        void addChannelField(ChannelField channelField);
-        void removeChannelField(ChannelField channelField);
-        public List&lt;ChannelField&gt; getList();
+    public interface ChannelField {
+        Field getField();
+        AccessRights getAccessRights();
     }
 
     public interface ChannelFieldGroupListener {
         void accessRightsChange(Channel channel,ChannelField channelField);
     }
 
-    public interface ChannelField {
-        Field getField();
-        AccessRights getAccessRights();
-    }
-
-    public interface ChannelAccess {
-        Channel createChannel(String name,ChannelStateListener listener);
+    public interface ChannelFieldGroup {
+        void addChannelField(ChannelField channelField);
+        void removeChannelField(ChannelField channelField);
+        public List&lt;ChannelField&gt; getList();
     }
 
     public class ChannelFactory {
@@ -105,40 +174,47 @@ package: org.epics.ioc.channelAccess<br />
             ChannelAccess channelAccess);
         public static void registerRemoteChannelAccess(
             ChannelAccess channelAccess);
+    }
+
+    public interface ChannelAccess {
+        Channel createChannel(String name,ChannelStateListener listener);
     }</pre>
 
-<h3>Channel</h3>
+<h3 id="Channel1">Channel</h3>
 
-<p>This is interface for accessing a single channel. When connecting to a
-javaIOC, a channel connects to a single record instance. A channel provides
-access to an arbitrary number of fields in the record instance. The methods
-are:</p>
+<p>A channel provides access to a single PVRecord, but to an arbitrary number
+of fields in the record. The methods are:</p>
 <dl>
+  <dt style="font-family: courier;">getChannelName</dt>
+    <dd>This is the PVRecord name or closely related to the recordName.</dd>
+  <dt style="font-family: courier;">message</dt>
+    <dd>Channel Access code calls this to report errors and/or diagnostic
+      information.</dd>
   <dt style="font-family: courier;">destroy</dt>
     <dd>Destroy the channel. Any active requests will still occur but no new
       requests will be accepted for the channel.</dd>
   <dt style="font-family: courier;">isConnected</dt>
     <dd>Is the channel connected?</dd>
-  <dt style="font-family: courier;">setField</dt>
+  <dt style="font-family: courier;">findField</dt>
     <dd>Locate the field, The result of the request is returned. Depending on
       the result the following three methods provide more information.</dd>
   <dt style="font-family: courier;">getOtherChannel</dt>
-    <dd>If <span style="font-family: courier;">setField</span> returned <span
-      style="font-family: courier;">otherChannel</span>, this returns the
-      name of the channel that has the data. In order to access the data a
-      new channel must be created</dd>
+    <dd>If <span style="font-family: courier;">findField</span> returned
+      <span style="font-family: courier;">otherChannel</span>, this returns
+      the name of the channel that has the data. In order to access the data
+      a new channel must be created</dd>
   <dt style="font-family: courier;">getOtherField</dt>
-    <dd>If <span style="font-family: courier;">setField</span> returned <span
-      style="font-family: courier;">otherChannel</span>, this returns the
-      name of the field that has the data. <span
+    <dd>If <span style="font-family: courier;">findField</span> returned
+      <span style="font-family: courier;">otherChannel</span>, this returns
+      the name of the field that has the data. <span
       style="font-family: courier;">getOtherChannel</span> and <span
       style="font-family: courier;">getOtherField</span> provide all the
       information needed to connect to the other channel.</dd>
   <dt style="font-family: courier;">getChannelField</dt>
-    <dd>If <span style="font-family: courier;">setField</span> returned <span
-      style="font-family: courier;">thisChannel</span>, this returns a <span
-      style="font-family: courier;">channelField</span> that can be added to
-      a <span style="font-family: courier;">fieldGroup.</span></dd>
+    <dd>If <span style="font-family: courier;">findField</span> returned
+      <span style="font-family: courier;">thisChannel</span>, this returns a
+      <span style="font-family: courier;">channelField</span> that can be
+      added to a <span style="font-family: courier;">fieldGroup.</span></dd>
   <dt style="font-family: courier;">createFieldGroup</dt>
     <dd>get, put, putGet, and monitor all use fieldGroup to specify the data
       to get/put from/to a channel.</dd>
@@ -161,7 +237,8 @@ are:</p>
   <dt style="font-family: courier;">createChannelPutGet</dt>
     <dd>Create a putGet request.</dd>
   <dt><span style="font-family: courier;">destroy</span> - channelPutGet</dt>
-    <dd>Destroy a channelPutGet.</dd>
+    <dd>Destroy a channelPutGet. This is done automatically when a channel is
+      destroyed.</dd>
   <dt style="font-family: courier;">createChannelMonitor</dt>
     <dd>Create a channel monitor. This is used to create monitors for the
       channel.</dd>
@@ -169,12 +246,13 @@ are:</p>
     <dd>Destroy a channelMonitor. This is done automatically when a channel
       is destroyed.</dd>
   <dt style="font-family: courier;">isLocal</dt>
+    <dd>Is the channel local or remote.</dd>
 </dl>
 
-<h3>ChannelSetFieldResult</h3>
+<h3 id="ChannelFin">ChannelFindFieldResult</h3>
 
-<p><span style="font-family: courier;">setField</span> returns <span
-style="font-family: courier;">ChannelSetFieldResult</span>. This has the
+<p><span style="font-family: courier;">findField</span> returns <span
+style="font-family: courier;">ChannelFindFieldResult</span>. This has the
 values:</p>
 <dl>
   <dt style="font-family: courier;">otherChannel</dt>
@@ -189,10 +267,11 @@ values:</p>
   <dt style="font-family: courier;">notFound</dt>
     <dd>The requested field does not exist in this channel.</dd>
   <dt style="font-family: courier;">failure</dt>
-    <dd>The request failed.</dd>
+    <dd>The request failed. This will happen if the channel has been
+      destroyed or disconnected.</dd>
 </dl>
 
-<h3>ChannelStateListener</h3>
+<h3 id="ChannelSta">ChannelStateListener</h3>
 
 <p><span style="font-family: courier;">ChannelStateListener</span> is an
 interface that must be implemented by code that creates a channel. It has the
@@ -207,7 +286,7 @@ methods:</p>
       requests.</dd>
 </dl>
 
-<h3>AccessRights</h3>
+<h3 id="AccessRigh">AccessRights</h3>
 
 <p>AccessRights is an enum specifying access rights to fields of a channel.
 Note that access rights are not currently implemented.</p>
@@ -220,7 +299,7 @@ Note that access rights are not currently implemented.</p>
     <dd>The channel can both read and modify the channel</dd>
 </dl>
 
-<h3>ChannelFieldGroup</h3>
+<h3 id="ChannelFie">ChannelField</h3>
 
 <p><span style="font-family: courier;">ChannelField</span> describes a
 specific field in a channel.</p>
@@ -232,6 +311,8 @@ specific field in a channel.</p>
     <dd>Get the access rights for the field.</dd>
 </dl>
 
+<h3 id="ChannelFie1">ChannelFieldGroupListener</h3>
+
 <p><span style="font-family: courier;">ChannelFieldGroupListener</span>
 provides a method that is called whenever the access rights change. The
 method is:</p>
@@ -241,6 +322,8 @@ method is:</p>
       style="font-family: courier;">channelField.getAccessRights</span> to
       get the current rights.</dd>
 </dl>
+
+<h3 id="ChannelFie2">ChannelFieldGroup</h3>
 
 <p><span style="font-family: courier;">ChannelFieldGroup</span> has the
 methods:</p>
@@ -254,7 +337,7 @@ methods:</p>
     <dd>Get the list of channelFields in the group.</dd>
 </dl>
 
-<h3>ChannelFactory</h3>
+<h3 id="ChannelFac">ChannelFactory</h3>
 
 <p>A channelFactory creates a channel. A channel is either local, i.e. code
 running in an IOC is accessing a field in the local IOC database, or remote,
@@ -273,162 +356,30 @@ support for remote access.</p>
 <p>The methods implemented by ChannelFactory are:</p>
 <dl>
   <dt style="font-family: courier;">createChannel</dt>
-    <dd>This is the clients call to create a channel. The channel is created
-      and connection managment is started.</dd>
+    <dd>A client calls this to create a channel. The channel is created and
+      connection managment is started.</dd>
   <dt style="font-family: courier;">registerLocalChannelAccess</dt>
     <dd>This is the registration call for local channel access.</dd>
   <dt style="font-family: courier;">registerRemoteChannelAccess</dt>
     <dd>This is the registration call for remote channel access.</dd>
 </dl>
 
-<h3>ChannelAccess</h3>
+<h3 id="ChannelAcc">ChannelAccess</h3>
 
 <p>This is an interface that must be implemented by code that implements
-channel access. It is called by ChannelFactory.</p>
-<hr />
-
-<h2 style="text-align: center">Channel Data</h2>
-<hr />
-
-<p>ChannelData helps solve two problems:</p>
-<ol>
-  <li>Blocking with a record locked.<br />
-    An example is a channel access server. Instead of pre allocating network
-    buffers for a fieldGroup it can create a channelData, transfer data from
-    a record to the channelData, and then transfer the channeldData to a
-    network buffer. In the case of a large array multiple network buffers
-    will be required.</li>
-  <li>Data repository for database monitoring.<br />
-    For database monitoring a queue of channelDatas can be created. When a
-    monitored record changes, a channelData can be taken from the queue, and
-    the data values stored in the channelData. This can be done without
-    blocking. When the server is ready it can empty the queue and send the
-    channelData over the network.</li>
-</ol>
-
-<h3>Definitions</h3>
-<pre>    public interface ChannelData {
-        void clear();
-        void add(PVData pvData);
-        List&lt;PVData&gt; getPVDataList();
-        List&lt;ChannelField&gt; getChannelFieldList();
-    }
-
-    public interface ChannelDataQueue {
-        int getNumberFree();
-        int capacity();
-        ChannelData getFree(boolean forceFree);
-        ChannelData getNext();
-        int getNumberMissed();
-        void releaseNext(ChannelData channelData);
-    }
-
-    public class ChannelDataFactory {
-         public static ChannelData createData(
-             Channel channel,ChannelFieldGroup channelFieldGroup);
-         public static ChannelDataQueue createQueue(
-             int queueSize,Channel channel,ChannelFieldGroup channelFieldGroup);
-    }</pre>
-
-<h3>ChannelData</h3>
-
-<p>ChannelData has the following methods:</p>
+channel access. It is called by ChannelFactory. It has onl one method</p>
 <dl>
-  <dt style="font-family: courier;">clear</dt>
-    <dd>Clear the internal list of items that have been added.</dd>
-  <dt style="font-family: courier;">add</dt>
-    <dd>Add an item to the list. The pvData MUST be for a Field that is a
-      member of the fieldGroup specified when the channeldata was created and
-      MUST not already be in the list.</dd>
-  <dt style="font-family: courier;">getPVDataList</dt>
-    <dd>Get the list of all pvDatas that have been added since the last clear
-      request.</dd>
-  <dt style="font-family: courier;">getChannelFieldList</dt>
-    <dd>Get the ChannelFields corresponding to the pvDatas returned by
-      getPVDataList. These will be in the same order as the pvDatas.</dd>
+  <dt style="font-family: courier;">createChannel</dt>
+    <dd>ChannelFactory calls this first for local channel access and if the
+      channel is not found then for remote channel access.</dd>
 </dl>
-
-<p>A ChannelData is allocated as follows:</p>
-<pre>    ChannelData channelData = ChannelDataFactory.createData(
-        channel,channelFieldGroup);</pre>
-
-<p>This creates storage for each element of the field group. It can create
-storage for all pvTypes. For Array types, the initial size and capacity is 0.
-The arrays will grow as data is placed in them but will not be released.</p>
-
-<p>A new set of data is colllected as follows:</p>
-<ul>
-  <li>The requestor calls channelData.clear</li>
-  <li>The data source, which is NOT allowed to block a record, does the
-    following:
-    <ul>
-      <li>Wait until data is not available.</li>
-      <li>When one or more pvData items are available, with the data source
-        (for example a record) locked, call channelData.add.</li>
-      <li>When the last pvData has been copied to channelData notify the
-        requestor.</li>
-    </ul>
-  </li>
-  <li>The requestor calls channelData.getPVDataList and
-    channelData.getPVDataList. It can block if necessary because the actual
-    data source, e.g. a data base record, is not locked.</li>
-</ul>
-
-<h3>ChannelDataQueue</h3>
-
-<p>ChannelDataQueue has the following methods:</p>
-<dl>
-  <dt style="font-family: courier;">getNumberFree</dt>
-    <dd>Get the number of unused channelData elements in the queue.</dd>
-  <dt style="font-family: courier;">capacity</dt>
-    <dd>Get the number of channelData elements in the queue.</dd>
-  <dt style="font-family: courier;">getFree</dt>
-    <dd>Get a channelData element from the queue. If there are no more
-      free elements numberMissed is incremented.
-      If forceFree is true the oldest used element is reused.
-      If no free element is available then null is returned.</dd>
-  <dt style="font-family: courier;">getNext</dt>
-  <dt></dt>
-    <dd>Get the next channelData element that has new data in it. Return null
-      if there are no more elements.</dd>
-  <dt style="font-family: courier;">getNumberMissed</dt>
-    <dd>Get the number of times getGree has been called since the last call
-      to releaseNext.</dd>
-  <dt style="font-family: courier;">releaseNext</dt>
-    <dd>Release the element returned by getNext.</dd>
-</dl>
-
-<p>A ChannelDataQueue is created as follows:</p>
-<pre>    ChannelDataQueue channelDataQueue = ChannelDataFactory.createQueue(
-         queueSize,channel,channelFieldGroup);</pre>
-
-<p>This creates <span style="font-family: courier;">queueSize</span> <span
-style="font-family: courier;">channelFieldGroup</span>s and a queue to manage
-them. As an example of how a queue is used consider a channel access server
-monitoring a fieldGroup of an IOC database record. The server must implement
-interface DBListener.</p>
-
-<p></p>
-<ul>
-  <li>dbListener.beginSynchronous calls getFree.</li>
-  <li>dbListener.newData calls channelData.add.</li>
-  <li>dbListener.endSynchronous signals a part of the server that sends data
-    to the client, e.g. the network layer.</li>
-  <li>The network layer has code like:
-    <pre>    while(ChannelData channelData = channeldataQueue.getNext()) {
-        // send channelData through the network
-        releaseNext(channelData);
-        if(channelDataQueue.getNumberMissed()) { /*do something*/ }
-    }
-    </pre>
-  </li>
-</ul>
 <hr />
 
-<h2 style="text-align: center">Channel Process, Get, Put, PutGet</h2>
+<h2 style="text-align: center" id="Channel2">Channel Process, Get, Put,
+PutGet</h2>
 <hr />
 
-<h3>Definitions</h3>
+<h3 id="Definition1">Definitions</h3>
 <pre>    public interface ChannelProcess {
         boolean process();
     }
@@ -443,7 +394,7 @@ interface DBListener.</p>
     }
 
     public interface ChannelGetRequestor extends Requestor {
-        boolean nextGetData(Channel channel,ChannelField field,PVData data);
+        boolean nextGetData(ChannelField field,PVData data);
         boolean nextDelayedGetData(PVData data);
         void getDone(RequestResult requestResult);
     }
@@ -454,7 +405,7 @@ interface DBListener.</p>
     }
 
     public interface ChannelPutRequestor extends Requestor {
-        boolean nextPutData(Channel channel,ChannelField field,PVData data);
+        boolean nextPutData(ChannelField field,PVData data);
         boolean nextDelayedPutData(PVData data);
         void putDone(RequestResult requestResult);
     }
@@ -469,9 +420,9 @@ interface DBListener.</p>
     public interface ChannelPutGetRequestor extends
         ChannelPutRequestor,ChannelGetRequestor {}</pre>
 
-<h3>ChannelProcess</h3>
+<h3 id="ChannelPro">ChannelProcess</h3>
 
-<p>This has the single method:</p>
+<p>ChannelProcess has the single method:</p>
 <dl>
   <dt style="font-family: courier;">process</dt>
     <dd>Process the channel. For example if the channel is a database record,
@@ -479,6 +430,17 @@ interface DBListener.</p>
       returns (false, true) if the request (can not, can) be done. Normally
       true is returned. A false value probably means that the channel is not
       connected.</dd>
+</dl>
+
+<p>ChannelProcessRequestor has the methods:</p>
+<dl>
+  <dt style="font-family: courier;">getRequestorName</dt>
+    <dd>Determined by the requestor.</dd>
+  <dt style="font-family: courier;">message</dt>
+    <dd>Called for error or informational messages.</dd>
+  <dt style="font-family: courier;">processDone</dt>
+    <dd>Called when the record associated with the channel completes
+      processing.</dd>
 </dl>
 
 <p>A ChannelProcess is created via a call:</p>
@@ -498,7 +460,7 @@ then <span
 style="font-family: courier;">channelProcessRequestor.requestDone</span> is
 called when the channel completes processing.</p>
 
-<h3>ChannelGet</h3>
+<h3 id="ChannelGet">ChannelGet</h3>
 
 <p><span style="font-family: courier;">ChannelGet</span> has the methods:</p>
 <dl>
@@ -528,6 +490,8 @@ methods:</p>
       style="font-family: courier;">channelGet.getDelayed</span> the data is
       returned via a call to <span
       style="font-family: courier;">nextDelayedGetData</span></dd>
+  <dt style="font-family: courier;">getDone</dt>
+    <dd>The request is done.</dd>
 </dl>
 
 <p>Delayed gets are provided for channel access servers that need to block
@@ -561,7 +525,7 @@ like:</p>
         return false // all done
     }</pre>
 
-<h3>ChannelPut</h3>
+<h3 id="ChannelPut">ChannelPut</h3>
 
 <p><span style="font-family: courier;">ChannelPut</span> has the methods:</p>
 <dl>
@@ -590,12 +554,14 @@ methods:</p>
       style="font-family: courier;">channelPut.putDelayed</span> the data is
       put via a call to <span
       style="font-family: courier;">nextDelayedPutData</span></dd>
+  <dt style="font-family: courier;">putDone</dt>
+    <dd>The put request is complete.</dd>
 </dl>
 
 <p>Like delayed gets delayed puts are used by servers that need to block. For
 example servers that transfer data from the network to an IOC database.</p>
 
-<h3>ChannelPutGet</h3>
+<h3 id="ChannelPut1">ChannelPutGet</h3>
 
 <p>This is a combination of <span
 style="font-family: courier;">ChannelPut</span> and <span
@@ -608,42 +574,306 @@ client request to:</p>
 </ul>
 <hr />
 
-<h2 style="text-align: center">ChannelMonitor</h2>
+<h2 style="text-align: center" id="ChannelMon">ChannelMonitor</h2>
 <hr />
 
-<h3>Definitions</h3>
+<p>NOTE: ChannelData is described in the next section.</p>
+
+<h3 id="Definition2">Definitions</h3>
 <pre>    public interface ChannelMonitor {
-        void lookForChange(ChannelField channelField);
+        void lookForChange(ChannelField channelField,boolean causeMonitor);
         void lookForAbsoluteChange(ChannelField channelField,double value);
         void lookForPercentageChange(ChannelField channelField,double value);
-        boolean start(ChannelMonitorNotifyRequestor channelMonitorNotifyRequestor);
-        boolean start(ChannelMonitorRequestor channelMonitorRequestor);
+        boolean start(ChannelMonitorNotifyRequestor channelMonitorNotifyRequestor,
+            String threadName, ScanPriority scanPriority);
+        boolean start(ChannelMonitorRequestor channelMonitorRequestor,
+            int queueSize, String threadName, ScanPriority scanPriority);
         void stop();
     }
     
     public interface ChannelMonitorRequestor extends Requestor{
-        void monitorData(List&lt;ChannelField&gt; field,List&lt;PVData&gt; data);
+        void monitorData(ChannelData channelData);
         void dataOverrun(int number);
     }
     
     public interface ChannelMonitorNotifyRequestor extends Requestor {
         void monitorEvent();
     }</pre>
+
+<h3 id="ChannelMon1">ChannelMonitor</h3>
+
+<p>ChannelMonitor has the methods:</p>
+<dl>
+  <dt style="font-family: courier;">lookForChange</dt>
+    <dd>Look for a change. If the ChannelField is a structure then look for a
+      change in any subfield of the structure.</dd>
+  <dt style="font-family: courier;">lookForAbsoluteChange</dt>
+    <dd>Look for an absolute change in the data. The argument value is the
+      deadband. This is only valid if ChannelField is a numeric scalar.</dd>
+  <dt style="font-family: courier;">lookForPercentageChange</dt>
+    <dd>Look for a percentage change in the data. The argument value is the
+      deadband. This is only valid if ChannelField is a numeric scalar.</dd>
+  <dt style="font-family: courier;">start - MonitorNotify</dt>
+    <dd>Notify when a change occurs but do not send data. The caller can
+      issue a get request to retrieve the data.</dd>
+  <dt style="font-family: courier;">start - Monitor</dt>
+    <dd>When data changes send it the the requestor.</dd>
+  <dt style="font-family: courier;">stop</dt>
+    <dd>Stop monitoring.</dd>
+</dl>
+
+<p>ChannelMonitorRequestor has the methods:</p>
+<dl>
+  <dt style="font-family: courier;">monitorData</dt>
+    <dd>The modified data.</dd>
+  <dt style="font-family: courier;">dataOverrun</dt>
+    <dd>The number of missed monitors.</dd>
+</dl>
+
+<p>ChannelMonitorNotifyRequestor has the methods:</p>
+<dl>
+  <dt style="font-family: courier;">monitorEvent</dt>
+    <dd>Data has been modified.</dd>
+</dl>
 <hr />
 
-<h2 style="text-align: center">Example For ChannelData</h2>
+<h2 style="text-align: center" id="Channel3">Channel Data</h2>
 <hr />
 
-<h3>Discussion</h3>
+<p>PROBLEMS:</p>
+<ul>
+  <li>Field<br />
+    Currently the implementation just copys the Field implementation from the
+    PVData. The property definitions are not correct. The implementation must
+    create a new Field implementation that is identical to the Field obtained
+    from the PVData except that it has no properties. A possible solution is
+    to defined the following:
+    <pre>    interface CAData extends PVData {
+        Field getPVDataField();
+    }</pre>
+  </li>
+  <li>getChannelDataPVList<br />
+    Currently the implementation allocates a new ChannelDataPV each time a
+    change occurs. The ChannelDataPV list will grow without bound if the
+    requestor never empties it's queues.</li>
+</ul>
+
+<p>ChannelData, which is used for monitoring, helps solve two problems:</p>
+<ol>
+  <li>Blocking with a record locked.<br />
+    An example is a channel access server. Instead of pre allocating network
+    buffers for a fieldGroup it can create a channelData, transfer data from
+    a record to the channelData, and then transfer the channeldData to a
+    network buffer. In the case of a large array multiple network buffers
+    will be required.</li>
+  <li>Data repository for database monitoring.<br />
+    For database monitoring a queue of channelDatas can be created. When a
+    monitored record changes, a channelData can be taken from the queue, and
+    the data values stored in the channelData. This can be done without
+    blocking. When the server is ready it can empty the queue and send the
+    channelData over the network.</li>
+</ol>
+
+<h3 id="Definition3">Definitions</h3>
+<pre>    public interface ChannelDataPV {
+        ChannelData getChannelData();
+        ChannelField getChannelField();
+        PVData getPVData();
+        boolean isInitial();
+        boolean enumIndexChange();
+        boolean enumChoicesChange();
+        boolean supportNameChange();
+        boolean configurationStructureChange();
+    }
+
+    public interface ChannelData {
+        ChannelFieldGroup getChannelFieldGroup();
+        void clear();
+        void initData(ChannelField channelField,PVData pvData);
+        void dataPut(PVData pvData);
+        void enumIndexPut(PVEnum pvEnum);
+        void enumChoicesPut(PVEnum pvEnum);
+        void supportNamePut(PVData pvData);
+        void configurationStructurePut(PVLink pvLink);
+        void beginPut(PVStructure pvStructure);
+        void endPut(PVStructure pvStructure);
+        void dataPut(PVStructure pvStructure,PVData pvData);
+        void enumIndexPut(PVStructure pvStructure,PVEnum pvEnum);
+        void enumChoicesPut(PVStructure pvStructure,PVEnum pvEnum);
+        void supportNamePut(PVStructure pvStructure,PVData pvData);
+        void configurationStructurePut(PVStructure pvStructure,PVLink pvLink);
+        List&lt;ChannelDataPV&gt; getChannelDataPVList();
+    }
+
+    public interface ChannelDataQueue {
+        int getNumberFree();
+        int capacity();
+        ChannelData getFree(boolean forceFree);
+        ChannelData getNext();
+        int getNumberMissed();
+        void releaseNext(ChannelData channelData);
+    }
+
+    public class ChannelDataFactory {
+         public static ChannelData createData(
+             Channel channel,ChannelFieldGroup channelFieldGroup);
+         public static ChannelDataQueue createQueue(
+             int queueSize,Channel channel,ChannelFieldGroup channelFieldGroup);
+    }</pre>
+
+<h3 id="ChannelDat">ChannelDataPV</h3>
+
+<p>ChannelDataPV has the following methods:</p>
+<dl>
+  <dt style="font-family: courier;">getChannelData</dt>
+    <dd>Get the ChannelData for this monitor.</dd>
+  <dt style="font-family: courier;">getChannelField</dt>
+    <dd>Get the ChannelField for this monitor.</dd>
+  <dt style="font-family: courier;">getPVData</dt>
+    <dd>Get the PVData.</dd>
+  <dt style="font-family: courier;">isInitial</dt>
+    <dd>This is true when a connection is first made. It allows the client to
+      get the initial data values.</dd>
+  <dt style="font-family: courier;">enumIndexChange</dt>
+    <dd>The PVData is an enum or menu and a put was made to the index.</dd>
+  <dt style="font-family: courier;">enumChoicesChange</dt>
+    <dd>The PVData is an enum put was made to the choices.</dd>
+  <dt style="font-family: courier;">supportNameChange</dt>
+    <dd>The supportName was changed.</dd>
+  <dt style="font-family: courier;">configurationStructureChange</dt>
+    <dd>PVData is a linl and the configuration structure was changed.</dd>
+</dl>
+
+<h3 id="ChannelDat1">ChannelData</h3>
+
+<p>ChannelData has the following methods:</p>
+<dl>
+  <dt style="font-family: courier;">getChannelFieldGroup</dt>
+    <dd>Get the ChannelFieldGroup for this ChannelData.</dd>
+  <dt style="font-family: courier;">clear</dt>
+    <dd>Clear the internal list of items that have been added.</dd>
+  <dt style="font-family: courier;">initData</dt>
+    <dd>When a connection is made this is called for each ChannelField the
+      ChannelData contains.</dd>
+  <dt style="font-family: courier;">dataPut</dt>
+    <dd>The PVData has been modified. Two versions are provided. One is if a
+      ChannelField is connected to the PVData itself and the other if the
+      PVData is a subfield of the PVStructure to which the ChannelField is
+      connected.</dd>
+  <dt style="font-family: courier;">enumIndexPut</dt>
+    <dd>Like dataPut except for an enum or menu field.</dd>
+  <dt style="font-family: courier;">enumChoicesPut</dt>
+    <dd>Like dataPut except for a enum field.</dd>
+  <dt style="font-family: courier;">supportNamePut</dt>
+    <dd>The supportName has been modified.</dd>
+  <dt style="font-family: courier;">configurationStructurePut</dt>
+    <dd>The PVData is a link and the configuration structure has been
+      modified.</dd>
+  <dt style="font-family: courier;">beginPut</dt>
+    <dd>A set of puts to the fields of a structure is starting.</dd>
+  <dt style="font-family: courier;">endPut</dt>
+    <dd>The set of puts to a structure is done.</dd>
+  <dt style="font-family: courier;">getChannelDataPVList</dt>
+    <dd>Get the list of all ChannelDataPVs that have been added since the
+      last clear request.</dd>
+</dl>
+
+<p>A ChannelData is allocated as follows:</p>
+<pre>    ChannelData channelData = ChannelDataFactory.createData(
+        channel,channelFieldGroup);</pre>
+
+<p>This creates storage for each element of the field group. It can create
+storage for all pvTypes. For Array types, the initial size and capacity is 0.
+The arrays will grow as data is placed in them but will not be released.</p>
+
+<p>A new set of data is colllected as follows:</p>
+<ul>
+  <li>The requestor calls channelData.clear</li>
+  <li>The data source, which is NOT allowed to block a record, does the
+    following:
+    <ul>
+      <li>Wait until data is not available.</li>
+      <li>When one or more pvData items are available, with the data source
+        (for example a record) locked, call channelData.add.</li>
+      <li>When the last pvData has been copied to channelData notify the
+        requestor.</li>
+    </ul>
+  </li>
+  <li>The requestor calls channelData.getPVDataList and
+    channelData.getPVDataList. It can block if necessary because the actual
+    data source, e.g. a data base record, is not locked.</li>
+</ul>
+
+<h3 id="ChannelDat2">ChannelDataQueue</h3>
+
+<p>ChannelDataQueue has the following methods:</p>
+<dl>
+  <dt style="font-family: courier;">getNumberFree</dt>
+    <dd>Get the number of unused channelData elements in the queue.</dd>
+  <dt style="font-family: courier;">capacity</dt>
+    <dd>Get the number of channelData elements in the queue.</dd>
+  <dt style="font-family: courier;">getFree</dt>
+    <dd>Get a channelData element from the queue. If there are no more free
+      elements numberMissed is incremented. If forceFree is true the oldest
+      used element is reused. If no free element is available then null is
+      returned.</dd>
+  <dt style="font-family: courier;">getNext</dt>
+    <dd>Get the next channelData element that has new data in it. Return null
+      if there are no more elements.</dd>
+  <dt style="font-family: courier;">getNumberMissed</dt>
+    <dd>Get the number of times getGree has been called since the last call
+      to releaseNext.</dd>
+  <dt style="font-family: courier;">releaseNext</dt>
+    <dd>Release the element returned by getNext.</dd>
+</dl>
+
+<p>A ChannelDataQueue is created as follows:</p>
+<pre>    ChannelDataQueue channelDataQueue = ChannelDataFactory.createQueue(
+         queueSize,channel,channelFieldGroup);</pre>
+
+<p>This creates <span style="font-family: courier;">queueSize</span> <span
+style="font-family: courier;">channelFieldGroup</span>s and a queue to manage
+them. As an example of how a queue is used consider a channel access server
+monitoring a fieldGroup of an IOC database record.</p>
+
+<h3 id="ChannelDat3">ChannelDataFactory</h3>
+
+<p>ChannelDataFactory has the following methods:</p>
+<dl>
+  <dt style="font-family: courier;">createData</dt>
+    <dd>Create a ChannelData.</dd>
+  <dt style="font-family: courier;">createQueue</dt>
+    <dd>Create a ChannelDataQueue.</dd>
+</dl>
+<hr />
+
+<h2 style="text-align: center;" id="Local">Local Channel Access</h2>
+<hr />
+
+<p>An implementation of a channel access client for accessing records in the
+IOC database is provided. This is created automatically by
+ChannelAccessLocalFactory . The factory creates a single instance of an
+implementation of a channel access client for accessing local records. This
+is used by link support. ChannelAccessLocalFactory has only one public
+method.</p>
+<pre>    public class ChannelAccessLocalFactory  {
+        static public void setIOCDB(IOCDB iocdb);
+    }</pre>
+<hr />
+
+<h2 style="text-align: center" id="Example">Example For ChannelData</h2>
+<hr />
+
+<h3 id="Discussion">Discussion</h3>
 
 <p>This example creates a ChannelData for a fieldGroup that has the
 following:</p>
 <ul>
   <li>value<br />
-    This must be a double field with the name "value"</li>
-  <li>status</li>
-  <li>severity</li>
-  <li>timeStamp</li>
+  </li>
+  <li>status - a property of value</li>
+  <li>severity - a property of value</li>
+  <li>timeStamp - a property of value</li>
 </ul>
 
 <p>The definition is:</p>
@@ -674,110 +904,126 @@ where
 examples gets from a record and displaying the results after the record is no
 longer locked.</p>
 
-<h3>Implementation</h3>
-<pre>    static class ValueData implements ChannelFieldGroupListener{
+<h3 id="Implementa">Implementation</h3>
+<pre>    class ValueData implements ChannelFieldGroupListener{
         private Channel channel;
-        private ChannelData channelData;
-        private ChannelFieldGroup fieldGroup;
+        private String fieldName;
+        private ChannelFieldGroup channelFieldGroup;
         private ChannelField valueField;
-        private ChannelField statusField;
-        private ChannelField severityField;
-        private ChannelField timeStampField;
+        private ChannelField statusField = null;
+        private ChannelField severityField = null;
+        private ChannelField timeStampField = null;
 
-        ValueData(Channel channel) {
+        ValueData(Channel channel,String fieldName) {
             this.channel = channel;
+            if(fieldName==null) fieldName = "value";
+            this.fieldName = fieldName;
         }
 
-        public void accessRightsChange(Channel channel, ChannelField channelField) {}
+        void lookForOther(ChannelMonitor channelMonitor) {
+            if(statusField!=null) channelMonitor.lookForChange(statusField, true);
+            if(severityField!=null) channelMonitor.lookForChange(severityField, true);
+            if(timeStampField!=null) channelMonitor.lookForChange(timeStampField, false);
+        }
+
+        void lookForChange(ChannelMonitor channelMonitor) {
+            channelMonitor.lookForChange(valueField, true);
+            lookForOther(channelMonitor);
+        }
+        void lookForAbsoluteChange(ChannelMonitor channelMonitor,double deadband) {
+            channelMonitor.lookForAbsoluteChange(valueField, deadband);
+            lookForOther(channelMonitor);
+        }
+        void lookForPercentageChange(ChannelMonitor channelMonitor,double deadband) {
+            channelMonitor.lookForPercentageChange(valueField, deadband);
+            lookForOther(channelMonitor);
+        }
+       
+        public void accessRightsChange(Channel channel, ChannelField channelField) {
+            // TODO Auto-generated method stub
+
+        }
 
         ChannelFieldGroup init() {
-            fieldGroup = channel.createFieldGroup(this);
-            ChannelSetFieldResult result;
-            result = channel.setField("value");
-            if(result!=ChannelSetFieldResult.thisChannel) {
+            channelFieldGroup = channel.createFieldGroup(this);
+            ChannelFindFieldResult result;
+            result = channel.findField(fieldName);
+            if(result!=ChannelFindFieldResult.thisChannel) {
                 System.out.printf("PutGet:set returned %s%n", result.toString());
                 return null;
             }
             valueField = channel.getChannelField();
-            fieldGroup.addChannelField(valueField);
-            result = channel.setField("status");
-            if(result!=ChannelSetFieldResult.thisChannel) {
-                System.out.printf("PutGet:set returned %s%n", result.toString());
-                return null;
+            channelFieldGroup.addChannelField(valueField);
+            channel.findField(valueField);
+            result = channel.findField("status");
+            if(result==ChannelFindFieldResult.thisChannel) {
+                statusField = channel.getChannelField();
+                channelFieldGroup.addChannelField(statusField);
             }
-            statusField = channel.getChannelField();
-            fieldGroup.addChannelField(statusField);
-            result = channel.setField("severity");
-            if(result!=ChannelSetFieldResult.thisChannel) {
-                System.out.printf("PutGet:set returned %s%n", result.toString());
-                return null;
+            channel.findField(valueField);
+            result = channel.findField("severity");
+            if(result==ChannelFindFieldResult.thisChannel) {
+                severityField = channel.getChannelField();
+                channelFieldGroup.addChannelField(severityField);
             }
-            severityField = channel.getChannelField();
-            fieldGroup.addChannelField(severityField);
-            result = channel.setField("timeStamp");
-            if(result!=ChannelSetFieldResult.thisChannel) {
-                System.out.printf("PutGet:set returned %s%n", result.toString());
-                return null;
+            channel.findField(valueField);
+            result = channel.findField("timeStamp");
+            if(result==ChannelFindFieldResult.thisChannel) {
+                timeStampField = channel.getChannelField();
+                channelFieldGroup.addChannelField(timeStampField);
             }
-            timeStampField = channel.getChannelField();
-            fieldGroup.addChannelField(timeStampField);
-            channelData = ChannelDataFactory.createData(channel,fieldGroup);
-            if(channelData==null) {
-                System.out.printf("ChannelDataFactory.createData failed");
-                return null;
-            }
-            return fieldGroup;
-        }
-        void clear() {
-            channelData.clear();
-        }
-        boolean nextGetData(Channel channel, ChannelField field, PVData data) {
-            channelData.add(field, data);
-            return false;
+            return channelFieldGroup;
         }
 
-        void printResults() {
-            List&lt;PVData&gt; pvDataList = channelData.getPVDataList();
-            List&lt;ChannelField&gt; channelFieldList = channelData.getChannelFieldList();
-            Iterator&lt;PVData&gt; pvDataIter = pvDataList.iterator();
-            Iterator&lt;ChannelField&gt; channelFieldIter = channelFieldList.iterator();
-            while(pvDataIter.hasNext()) {
-                PVData data = pvDataIter.next();
-                ChannelField field = channelFieldIter.next();
-                if(field==valueField) {
-                    PVDouble pvDouble = (PVDouble)data;
-                    System.out.printf("value %f", pvDouble.get());
+        String printResults(ChannelData channelData) {
+            StringBuilder builder = new StringBuilder();
+            List&lt;ChannelDataPV&gt; channelDataPVList = channelData.getChannelDataPVList();
+            Iterator&lt;ChannelDataPV&gt; iter = channelDataPVList.iterator();
+            while(iter.hasNext()) {
+                ChannelDataPV channelDataPV = iter.next();
+                builder.append(String.format("%n    %s",channelDataPV.toString()));
+                PVData data = channelDataPV.getPVData();
+                ChannelField field = channelDataPV.getChannelField();
+                if(channelDataPV.isInitial()) {
+                    builder.append(String.format("%n    initialValue %s%n",
+                       data.toString(2)));
+                } else if(field==valueField) {
+                    builder.append(String.format("value %s", data.toString(2)));
                 } else if (field==severityField) {
                     PVEnum pvEnum = (PVEnum)data;
                     int index = pvEnum.getIndex();
-                    System.out.printf(" severity %s",AlarmSeverity.getSeverity(index).toString());
+                    builder.append(String.format(
+                        " severity %s",AlarmSeverity.getSeverity(index).toString()));
                 } else if(field==statusField) {
                     PVString pvString = (PVString)data;
                     String value = pvString.get();
-                    System.out.printf(" status %s",value);
+                    builder.append(" status " + value);
                 } else if(field==timeStampField) {
-                    PVTimeStamp pvTimeStamp = PVTimeStamp.create(data);
-                    TimeStamp timeStamp = new TimeStamp();
-                    pvTimeStamp.get(timeStamp);
-                    long seconds = timeStamp.secondsPastEpoch;
-                    int nano = timeStamp.nanoSeconds;
-                    long now = nano/1000000 + seconds*1000;
-                    Date date = new Date(now);
-                    System.out.printf(" time %s%n",date.toLocaleString());
+                    // wait for nanoSecond to change.
+                    if(data.getField().getFieldName().equals("nanoSeconds")) {
+                        PVTimeStamp pvTimeStamp = PVTimeStamp.create(data.getParent());
+                        TimeStamp timeStamp = new TimeStamp();
+                        pvTimeStamp.get(timeStamp);
+                        long seconds = timeStamp.secondsPastEpoch;
+                        int nano = timeStamp.nanoSeconds;
+                        long now = nano/1000000 + seconds*1000;
+                        Date date = new Date(now);
+                        builder.append(String.format(" time %s",date.toLocaleString()));
+                    }
                 }
             }
-        }
-    }</pre>
+            return builder.toString();
+        }</pre>
 <hr />
 
-<h2 style="text-align: center">Process Example</h2>
+<h2 style="text-align: center" id="Process">Process Example</h2>
 <hr />
 
-<h3>Discussion</h3>
+<h3 id="Discussion1">Discussion</h3>
 
 <p>This example shows how to implement a process request.</p>
 
-<h3>Implementation</h3>
+<h3 id="Implementa1">Implementation</h3>
 <pre>    static class Process implements ChannelProcessRequestor,ChannelStateListener
     {
         private Lock lock = new ReentrantLock();
@@ -841,14 +1087,14 @@ longer locked.</p>
     }</pre>
 <hr />
 
-<h2 style="text-align: center">Get Example</h2>
+<h2 style="text-align: center" id="Example1">Get Example</h2>
 <hr />
 
-<h3>Discussion</h3>
+<h3 id="Discussion2">Discussion</h3>
 
 <p>This example shows how to implement a get request.</p>
 
-<h3>Implementation</h3>
+<h3 id="Implementa2">Implementation</h3>
 <pre>    static class Get implements
     ChannelGetRequestor,
     ChannelStateListener, ChannelFieldGroupListener
@@ -934,14 +1180,14 @@ longer locked.</p>
     }</pre>
 <hr />
 
-<h2 style="text-align: center">Put Example</h2>
+<h2 style="text-align: center" id="Example2">Put Example</h2>
 <hr />
 
-<h3>Discussion</h3>
+<h3 id="Discussion3">Discussion</h3>
 
 <p>This example shows how to implement a put request.</p>
 
-<h3>Implementation</h3>
+<h3 id="Implementa3">Implementation</h3>
 <pre>    static class Put implements
     ChannelPutRequestor,
     ChannelStateListener, ChannelFieldGroupListener
@@ -972,9 +1218,9 @@ longer locked.</p>
         }
         boolean connect() {
             putFieldGroup = channel.createFieldGroup(this);
-            ChannelSetFieldResult result;
-            result = channel.setField("value");
-            if(result!=ChannelSetFieldResult.thisChannel) {
+            ChannelFindFieldResult result;
+            result = channel.findField("value");
+            if(result!=ChannelFindFieldResult.thisChannel) {
                 System.out.printf("PutGet:set returned %s%n", result.toString());
                 return false;
             }
@@ -1035,17 +1281,17 @@ longer locked.</p>
     }</pre>
 <hr />
 
-<h2 style="text-align: center">PutGet Example</h2>
+<h2 style="text-align: center" id="PutGet">PutGet Example</h2>
 <hr />
 
-<h3>Discussion</h3>
+<h3 id="Discussion4">Discussion</h3>
 
 <p>This example shows how to implement a putGet request. When it;s put method
 is called, it puts a double value to a field named value, optionally
 processes the record, and retrieves the value, status, severity, and
 timeStamp.</p>
 
-<h3>Implementation</h3>
+<h3 id="Implementa4">Implementation</h3>
 <pre>    static class PutGet implements
     ChannelPutGetRequestor,
     ChannelStateListener, ChannelFieldGroupListener
@@ -1080,9 +1326,9 @@ timeStamp.</p>
 
         boolean connect() {
             putFieldGroup = channel.createFieldGroup(this);
-            ChannelSetFieldResult result;
-            result = channel.setField("value");
-            if(result!=ChannelSetFieldResult.thisChannel) {
+            ChannelFindFieldResult result;
+            result = channel.findField("value");
+            if(result!=ChannelFindFieldResult.thisChannel) {
                 System.out.printf("PutGet:set returned %s%n", result.toString());
                 return false;
             }

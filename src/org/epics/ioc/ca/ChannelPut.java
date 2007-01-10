@@ -16,7 +16,7 @@ import org.epics.ioc.pv.PVData;
 public interface ChannelPut {
     /**
      * Put data to a channel.
-     * @param fieldGroupImpl The field group for the data.
+     * @param channelFieldGroup The field group for the data.
      * @return (false,true) if the request (is not, is) started.
      * This fails if the request can not be satisfied.
      */

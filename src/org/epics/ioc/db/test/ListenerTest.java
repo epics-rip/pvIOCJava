@@ -97,28 +97,29 @@ public class ListenerTest extends TestCase {
     }
     
     static void testPut(IOCDB iocdb,String recordName,String fieldName,double value) {
-        DBAccess dbAccess = iocdb.createAccess(recordName);
-        if(dbAccess==null) {
+        PVRecord pvRecord = iocdb.findRecord(recordName);
+        if(pvRecord==null) {
             System.out.printf("%nrecord %s not found%n",recordName);
             return;
         }
-        if(dbAccess.setField(fieldName)!=AccessSetResult.thisRecord){
+        PVAccess pvAccess = PVAccessFactory.createPVAccess(pvRecord);
+        if(pvAccess.findField(fieldName)!=AccessSetResult.thisRecord){
             System.out.printf("%nfield %s not in record %s%n",fieldName,recordName);
             return;
         }
-        DBData dbData = dbAccess.getField();
-        Type type = dbData.getField().getType();
+        PVData pvData = pvAccess.getField();
+        Type type = pvData.getField().getType();
         if(type.isNumeric()) {
             System.out.printf("%ntestPut recordName %s fieldName %s value %f%n",
                 recordName,fieldName,value);
-            convert.fromDouble(dbData,value);
+            convert.fromDouble(pvData,value);
             return;
         }
         if(type==Type.pvEnum) {
             System.out.printf("%ntestPut enum index recordName %s fieldName %s value %f%n",
                     recordName,fieldName,value);
             int index = (int)value;
-            PVEnum pvEnum = (PVEnum)dbData;
+            PVEnum pvEnum = (PVEnum)pvData;
             pvEnum.setIndex(index);
             System.out.printf("%ntestPut enum choices recordName %s fieldName %s value %f%n",
                     recordName,fieldName,value);
@@ -130,14 +131,14 @@ public class ListenerTest extends TestCase {
             System.out.printf("%ntestPut menu index recordName %s fieldName %s value %f%n",
                     recordName,fieldName,value);
             int index = (int)value;
-            PVEnum pvEnum = (PVEnum)dbData;
+            PVEnum pvEnum = (PVEnum)pvData;
             pvEnum.setIndex(index);
             return;
         }
         if(type==Type.pvLink) {
             System.out.printf("%ntestPut link configurationStructure recordName %s fieldName %s value %f%n",
                     recordName,fieldName,value);
-            PVLink pvLink = (PVLink)dbData;
+            PVLink pvLink = (PVLink)pvData;
             PVStructure configStructure = pvLink.getConfigurationStructure();
             boolean boolResult = pvLink.setConfigurationStructure(configStructure);
             if(!boolResult) {
@@ -164,11 +165,11 @@ public class ListenerTest extends TestCase {
                 fieldName,recordName);
             return;
         }
-        PVStructure structure = (PVStructure)dbData;
-        DBRecord dbRecord = dbData.getDBRecord();
+        PVStructure structure = (PVStructure)pvData;
+        DBRecord dbRecord = ((DBData)pvData).getDBRecord();
         PVData[] fields = structure.getFieldPVDatas();
         System.out.printf("%ntestPut begin structure put %s%n",
-                recordName + dbData.getFullFieldName());
+                recordName + pvData.getFullFieldName());
         dbRecord.beginProcess();
         structure.beginPut();
         for(PVData field : fields) {

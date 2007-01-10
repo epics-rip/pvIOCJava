@@ -11,10 +11,16 @@ import org.epics.ioc.process.*;
 import org.epics.ioc.util.*;
 
 /**
+ * This is not implemented.
  * @author mrk
  *
  */
 public class AnalogInputFactory {
+    /**
+     * Factory creation method.
+     * @param pvStructure The structure to support.
+     * @return The Support interface.
+     */
     public static Support create(PVStructure pvStructure) {
         Support support = null;
         String supportName = pvStructure.getSupportName();
@@ -29,36 +35,45 @@ public class AnalogInputFactory {
     private static class Ai extends AbstractSupport {
         private DBRecord dbRecord = null;
         
-        public Ai(PVStructure pvStructure) {
+        private Ai(PVStructure pvStructure) {
             super(supportName,(DBData)pvStructure);
         }
-
+        /* (non-Javadoc)
+         * @see org.epics.ioc.process.AbstractSupport#getRequestorName()
+         */
         public String getRequestorName() {
             return supportName;
         }
-
+        /* (non-Javadoc)
+         * @see org.epics.ioc.process.AbstractSupport#initialize()
+         */
         public void initialize() {
             System.out.printf("%s.initialize entered\n",supportName);
         }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.process.AbstractSupport#uninitialize()
+         */
         public void uninitialize() {
             System.out.printf("%s.uninitialize entered\n",supportName);
         }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.process.AbstractSupport#start()
+         */
         public void start() {
             System.out.printf("%s.start entered\n",supportName);
         }
-
+        /* (non-Javadoc)
+         * @see org.epics.ioc.process.AbstractSupport#stop()
+         */
         public void stop() {
             System.out.printf("%s.stop entered\n",supportName);
-        }
-
-       
+        }      
+        /* (non-Javadoc)
+         * @see org.epics.ioc.process.AbstractSupport#process(org.epics.ioc.process.SupportProcessRequestor)
+         */
         public void process(SupportProcessRequestor supportProcessRequestor) {
             System.out.printf("%s.process entered\n",supportName);
             supportProcessRequestor.supportProcessDone(RequestResult.failure);
-        }
-        
-        public void processContinue() {
-            dbRecord.message("why was processContinue called", MessageType.error);
         }
     }
 }

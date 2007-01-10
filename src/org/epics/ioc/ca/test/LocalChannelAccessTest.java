@@ -22,7 +22,7 @@ import org.epics.ioc.dbd.*;
  */
 public class LocalChannelAccessTest extends TestCase {
     /**
-     * test DBAccess.
+     * test PVAccess.
      */
     public static void testLocalChannelAccess() {
         DBD dbd = DBDFactory.getMasterDBD();
@@ -224,9 +224,9 @@ public class LocalChannelAccessTest extends TestCase {
 
         private boolean connect() {
             putFieldGroup = channel.createFieldGroup(this);
-            ChannelSetFieldResult result;
-            result = channel.setField("value");
-            if(result!=ChannelSetFieldResult.thisChannel) {
+            ChannelFindFieldResult result;
+            result = channel.findField("value");
+            if(result!=ChannelFindFieldResult.thisChannel) {
                 System.out.printf("PutGet:set returned %s%n", result.toString());
                 return false;
             }
@@ -346,7 +346,6 @@ public class LocalChannelAccessTest extends TestCase {
         private Put(String pvname, boolean process) {
             this.pvname = pvname;
             channel = ChannelFactory.createChannel(pvname, this, false);
-            
             channelPut = channel.createChannelPut(this, process);
         }
         /* (non-Javadoc)
@@ -361,9 +360,9 @@ public class LocalChannelAccessTest extends TestCase {
         }
         private boolean connect() {
             putFieldGroup = channel.createFieldGroup(this);
-            ChannelSetFieldResult result;
-            result = channel.setField("value");
-            if(result!=ChannelSetFieldResult.thisChannel) {
+            ChannelFindFieldResult result;
+            result = channel.findField("value");
+            if(result!=ChannelFindFieldResult.thisChannel) {
                 System.out.printf("PutGet:set returned %s%n", result.toString());
                 return false;
             }
@@ -588,30 +587,34 @@ public class LocalChannelAccessTest extends TestCase {
         }
         private ChannelFieldGroup init() {
             channelFieldGroup = channel.createFieldGroup(this);
-            ChannelSetFieldResult result;
-            result = channel.setField("value");
-            if(result!=ChannelSetFieldResult.thisChannel) {
+            ChannelFindFieldResult result;
+            channel.findField(null);
+            result = channel.findField("value");
+            if(result!=ChannelFindFieldResult.thisChannel) {
                 System.out.printf("PutGet:set returned %s%n", result.toString());
                 return null;
             }
             valueField = channel.getChannelField();
             channelFieldGroup.addChannelField(valueField);
-            result = channel.setField("status");
-            if(result!=ChannelSetFieldResult.thisChannel) {
+            channel.findField(null);
+            result = channel.findField("status");
+            if(result!=ChannelFindFieldResult.thisChannel) {
                 System.out.printf("PutGet:set returned %s%n", result.toString());
                 return null;
             }
             statusField = channel.getChannelField();
             channelFieldGroup.addChannelField(statusField);
-            result = channel.setField("severity");
-            if(result!=ChannelSetFieldResult.thisChannel) {
+            channel.findField(null);
+            result = channel.findField("severity");
+            if(result!=ChannelFindFieldResult.thisChannel) {
                 System.out.printf("PutGet:set returned %s%n", result.toString());
                 return null;
             }
             severityField = channel.getChannelField();
             channelFieldGroup.addChannelField(severityField);
-            result = channel.setField("timeStamp");
-            if(result!=ChannelSetFieldResult.thisChannel) {
+            channel.findField(null);
+            result = channel.findField("timeStamp");
+            if(result!=ChannelFindFieldResult.thisChannel) {
                 System.out.printf("PutGet:set returned %s%n", result.toString());
                 return null;
             }

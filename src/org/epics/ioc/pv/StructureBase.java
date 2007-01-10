@@ -24,9 +24,9 @@ public class StructureBase extends FieldBase implements Structure {
     
     /**
      * Constructor for a structure fields.
-     * @param fieldNames The fields name.
+     * @param fieldName The field name.
      * @param structureName The structure name.
-     * @param fields The array of fields definitions for the fields of the structure.
+     * @param field The array of fields definitions for the fields of the structure.
      * @param property The fields properties.
      * @param fieldAttribute The fields attributes.
      * @throws IllegalArgumentException if structureName is null;

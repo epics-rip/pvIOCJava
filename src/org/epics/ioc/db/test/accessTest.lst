@@ -1,0 +1,688 @@
+warning fieldName boolean setSupportName failed support dummy not defined
+line 4 column 36 in file:/home/mrk/workspace/javaIOC/src/org/epics/ioc/db/test/exampleAllTypeDB.xml
+line 7 column 42 in file:/home/mrk/workspace/javaIOC/src/org/epics/ioc/db/test/accessDB.xml
+
+warning fieldName string setSupportName failed support dummy not defined
+line 11 column 35 in file:/home/mrk/workspace/javaIOC/src/org/epics/ioc/db/test/exampleAllTypeDB.xml
+line 7 column 42 in file:/home/mrk/workspace/javaIOC/src/org/epics/ioc/db/test/accessDB.xml
+
+warning fieldName enum setSupportName failed support dummy not defined
+line 14 column 33 in file:/home/mrk/workspace/javaIOC/src/org/epics/ioc/db/test/exampleAllTypeDB.xml
+line 7 column 42 in file:/home/mrk/workspace/javaIOC/src/org/epics/ioc/db/test/accessDB.xml
+
+warning fieldName displayLimit setSupportName failed support dummy not defined
+line 21 column 41 in file:/home/mrk/workspace/javaIOC/src/org/epics/ioc/db/test/exampleAllTypeDB.xml
+line 7 column 42 in file:/home/mrk/workspace/javaIOC/src/org/epics/ioc/db/test/accessDB.xml
+
+warning fieldName displayLimit setSupportName failed support dummy not defined
+line 21 column 41 in file:/home/mrk/workspace/javaIOC/src/org/epics/ioc/db/test/exampleAllTypeDB.xml
+line 7 column 42 in file:/home/mrk/workspace/javaIOC/src/org/epics/ioc/db/test/accessDB.xml
+
+info file:/home/mrk/workspace/javaIOC/src/org/epics/ioc/db/test/exampleAllTypeDB.xml endDocument: warning 5 severe 0 fatal 0
+line 203 column 1 in file:/home/mrk/workspace/javaIOC/src/org/epics/ioc/db/test/exampleAllTypeDB.xml
+line 7 column 42 in file:/home/mrk/workspace/javaIOC/src/org/epics/ioc/db/test/accessDB.xml
+
+record exampleAi fieldRequested status fieldActual status parent aiLinear
+    value null
+record exampleAi fieldRequested priority fieldActual priority parent aiRecord
+    value 
+    menu(priority) {
+        {index = 3 choices = {"lowest" "lower" "low" "middle" "high" "higher" "highest" }}
+    }
+record exampleAi fieldRequested timeStamp fieldActual timeStamp parent aiRecord
+    value 
+    structure timeStamp
+    {
+        secondsPastEpoch = 0
+        nanoSeconds = 0
+    }
+record exampleAi fieldRequested value fieldActual value parent aiLinear
+    value 0.000000
+    property {
+        name status field status
+            value null
+        name severity field severity
+            value 
+            menu(alarmSeverity) {
+                {index = 0 choices = {"none" "minor" "major" "invalid" }}
+            }
+        name units field units
+            value volts supportName aiLinear
+        name displayLimit field displayLimit
+            value 
+            structure displayLimit supportName aiLinear
+            {
+                low = 0.000000
+                high = 10.000000
+            }
+        name timeStamp field /timeStamp
+            value 
+            structure timeStamp
+            {
+                secondsPastEpoch = 0
+                nanoSeconds = 0
+            }
+        }
+record exampleAi fieldRequested rawValue fieldActual value parent aiRaw
+    value 0
+    property {
+        name status field status
+            value null
+        name severity field severity
+            value 
+            menu(alarmSeverity) {
+                {index = 0 choices = {"none" "minor" "major" "invalid" }}
+            }
+        name timeStamp field /timeStamp
+            value 
+            structure timeStamp
+            {
+                secondsPastEpoch = 0
+                nanoSeconds = 0
+            }
+        }
+record exampleAi fieldRequested input.aiRaw.value fieldActual value parent aiRaw
+    value 0
+    property {
+        name status field status
+            value null
+        name severity field severity
+            value 
+            menu(alarmSeverity) {
+                {index = 0 choices = {"none" "minor" "major" "invalid" }}
+            }
+        name timeStamp field /timeStamp
+            value 
+            structure timeStamp
+            {
+                secondsPastEpoch = 0
+                nanoSeconds = 0
+            }
+        }
+record exampleAi fieldRequested input.aiRaw.status fieldActual status parent aiRaw
+    value null
+record exampleAi fieldRequested input.aiRaw.input fieldActual input parent aiRaw
+    value isLink supportName inputLink
+    structure inputLink
+    {
+        pvname = xxxxxx
+        process = false
+        inheritSeverity = false
+    }
+record exampleAi fieldRequested input.timeStamp fieldActual timeStamp parent aiRecord
+    value 
+    structure timeStamp
+    {
+        secondsPastEpoch = 0
+        nanoSeconds = 0
+    }
+record exampleAi fieldRequested input.rawValue fieldActual value parent aiRaw
+    value 0
+    property {
+        name status field status
+            value null
+        name severity field severity
+            value 
+            menu(alarmSeverity) {
+                {index = 0 choices = {"none" "minor" "major" "invalid" }}
+            }
+        name timeStamp field /timeStamp
+            value 
+            structure timeStamp
+            {
+                secondsPastEpoch = 0
+                nanoSeconds = 0
+            }
+        }
+
+record examplePowerSupply fieldRequested power fieldActual power parent powerSupply
+    value 0.000000
+    property {
+        name status field status
+            value null
+        name severity field severity
+            value 
+            menu(alarmSeverity) {
+                {index = 0 choices = {"none" "minor" "major" "invalid" }}
+            }
+        name units field units
+            value watts supportName powerSupply
+        name displayLimit field displayLimit
+            value 
+            structure displayLimit supportName powerSupply
+            {
+                low = 0.000000
+                high = 100.000000
+            }
+        name timeStamp field /timeStamp
+            value 
+            structure timeStamp
+            {
+                secondsPastEpoch = 0
+                nanoSeconds = 0
+            }
+        }
+record examplePowerSupply fieldRequested power.status fieldActual status parent powerSupply
+    value null
+record examplePowerSupply fieldRequested power.timeStamp fieldActual timeStamp parent powerSupplyRecord
+    value 
+    structure timeStamp
+    {
+        secondsPastEpoch = 0
+        nanoSeconds = 0
+    }
+record examplePowerSupply fieldRequested current fieldActual value parent aiLinear
+    value 0.000000
+    property {
+        name status field status
+            value null
+        name severity field severity
+            value 
+            menu(alarmSeverity) {
+                {index = 0 choices = {"none" "minor" "major" "invalid" }}
+            }
+        name units field units
+            value amps supportName aiLinear
+        name displayLimit field displayLimit
+            value 
+            structure displayLimit supportName aiLinear
+            {
+                low = 0.000000
+                high = 10.000000
+            }
+        name timeStamp field /timeStamp
+            value 
+            structure timeStamp
+            {
+                secondsPastEpoch = 0
+                nanoSeconds = 0
+            }
+        }
+record examplePowerSupply fieldRequested current.status fieldActual status parent aiLinear
+    value null
+record examplePowerSupply fieldRequested current.timeStamp fieldActual timeStamp parent powerSupplyRecord
+    value 
+    structure timeStamp
+    {
+        secondsPastEpoch = 0
+        nanoSeconds = 0
+    }
+record examplePowerSupply fieldRequested voltage fieldActual value parent aiLinear
+    value 0.000000
+    property {
+        name status field status
+            value null
+        name severity field severity
+            value 
+            menu(alarmSeverity) {
+                {index = 0 choices = {"none" "minor" "major" "invalid" }}
+            }
+        name units field units
+            value volts supportName aiLinear
+        name displayLimit field displayLimit
+            value 
+            structure displayLimit supportName aiLinear
+            {
+                low = 0.000000
+                high = 2.000000
+            }
+        name timeStamp field /timeStamp
+            value 
+            structure timeStamp
+            {
+                secondsPastEpoch = 0
+                nanoSeconds = 0
+            }
+        }
+
+record examplePowerSupplyLinked fieldRequested power fieldActual power parent powerSupplyLinkedRecord
+    value 0.000000
+    property {
+        name status field status
+            value null
+        name severity field severity
+            value 
+            menu(alarmSeverity) {
+                {index = 0 choices = {"none" "minor" "major" "invalid" }}
+            }
+        name units field units
+            value watts
+        name displayLimit field displayLimit
+            value 
+            structure displayLimit
+            {
+                low = 0.000000
+                high = 100.000000
+            }
+        name timeStamp field /timeStamp
+            value 
+            structure timeStamp
+            {
+                secondsPastEpoch = 0
+                nanoSeconds = 0
+            }
+        }
+record examplePowerSupplyLinked fieldRequested power.status fieldActual status parent powerSupplyLinkedRecord
+    value null
+record examplePowerSupplyLinked fieldRequested power.timeStamp fieldActual timeStamp parent powerSupplyLinkedRecord
+    value 
+    structure timeStamp
+    {
+        secondsPastEpoch = 0
+        nanoSeconds = 0
+    }
+field current is in other record with name current field value
+record current fieldRequested value fieldActual value parent aiLinearLinkedRecord
+    value 0.000000
+    property {
+        name rawValue field aiRaw.value
+            value isLink supportName inputLink
+            structure inputLink
+            {
+                pvname = currentRaw.value
+                process = true
+                inheritSeverity = false
+            }
+        name status field status
+            value null
+        name severity field severity
+            value 
+            menu(alarmSeverity) {
+                {index = 0 choices = {"none" "minor" "major" "invalid" }}
+            }
+        name units field units
+            value null
+        name displayLimit field displayLimit
+            value 
+            structure displayLimit
+            {
+                low = 0.000000
+                high = 0.000000
+            }
+        name timeStamp field timeStamp
+            value 
+            structure timeStamp
+            {
+                secondsPastEpoch = 0
+                nanoSeconds = 0
+            }
+        }
+field current.status is in other record with name current field value.status
+record current fieldRequested value.status fieldActual status parent aiLinearLinkedRecord
+    value null
+field current.timeStamp is in other record with name current field value.timeStamp
+record current fieldRequested value.timeStamp fieldActual timeStamp parent aiLinearLinkedRecord
+    value 
+    structure timeStamp
+    {
+        secondsPastEpoch = 0
+        nanoSeconds = 0
+    }
+field current.rawValue is in other record with name current field value.rawValue
+field value.rawValue is in other record with name currentRaw field value
+record currentRaw fieldRequested value fieldActual value parent aiRawRecord
+    value 0
+    property {
+        name status field status
+            value null
+        name severity field severity
+            value 
+            menu(alarmSeverity) {
+                {index = 0 choices = {"none" "minor" "major" "invalid" }}
+            }
+        name timeStamp field timeStamp
+            value 
+            structure timeStamp
+            {
+                secondsPastEpoch = 0
+                nanoSeconds = 0
+            }
+        }
+field current.rawValue.status is in other record with name current field value.rawValue.status
+field value.rawValue.status is in other record with name currentRaw field value.status
+record currentRaw fieldRequested value.status fieldActual status parent aiRawRecord
+    value null
+field voltage is in other record with name voltage field value
+record voltage fieldRequested value fieldActual value parent aiLinearLinkedRecord
+    value 0.000000
+    property {
+        name rawValue field aiRaw.value
+            value isLink supportName inputLink
+            structure inputLink
+            {
+                pvname = voltageRaw.value
+                process = true
+                inheritSeverity = false
+            }
+        name status field status
+            value null
+        name severity field severity
+            value 
+            menu(alarmSeverity) {
+                {index = 0 choices = {"none" "minor" "major" "invalid" }}
+            }
+        name units field units
+            value null
+        name displayLimit field displayLimit
+            value 
+            structure displayLimit
+            {
+                low = 0.000000
+                high = 0.000000
+            }
+        name timeStamp field timeStamp
+            value 
+            structure timeStamp
+            {
+                secondsPastEpoch = 0
+                nanoSeconds = 0
+            }
+        }
+
+record examplePowerSupplyArray fieldRequested status fieldActual status parent powerSupplyArrayRecord
+    value null
+record examplePowerSupplyArray fieldRequested powerSupply[0].power fieldActual power parent powerSupply
+    value 0.000000
+    property {
+        name status field status
+            value null
+        name severity field severity
+            value 
+            menu(alarmSeverity) {
+                {index = 0 choices = {"none" "minor" "major" "invalid" }}
+            }
+        name units field units
+            value watts supportName powerSupply
+        name displayLimit field displayLimit
+            value 
+            structure displayLimit supportName powerSupply
+            {
+                low = 0.000000
+                high = 100.000000
+            }
+        name timeStamp field /timeStamp
+            value 
+            structure timeStamp
+            {
+                secondsPastEpoch = 0
+                nanoSeconds = 0
+            }
+        }
+record examplePowerSupplyArray fieldRequested powerSupply[0].current fieldActual value parent aiLinear
+    value 0.000000
+    property {
+        name status field status
+            value null
+        name severity field severity
+            value 
+            menu(alarmSeverity) {
+                {index = 0 choices = {"none" "minor" "major" "invalid" }}
+            }
+        name units field units
+            value amps supportName aiLinear
+        name displayLimit field displayLimit
+            value 
+            structure displayLimit supportName aiLinear
+            {
+                low = 0.000000
+                high = 10.000000
+            }
+        name timeStamp field /timeStamp
+            value 
+            structure timeStamp
+            {
+                secondsPastEpoch = 0
+                nanoSeconds = 0
+            }
+        }
+record examplePowerSupplyArray fieldRequested powerSupply[0].voltage fieldActual value parent aiLinear
+    value 0.000000
+    property {
+        name status field status
+            value null
+        name severity field severity
+            value 
+            menu(alarmSeverity) {
+                {index = 0 choices = {"none" "minor" "major" "invalid" }}
+            }
+        name units field units
+            value volts supportName aiLinear
+        name displayLimit field displayLimit
+            value 
+            structure displayLimit supportName aiLinear
+            {
+                low = 0.000000
+                high = 2.000000
+            }
+        name timeStamp field /timeStamp
+            value 
+            structure timeStamp
+            {
+                secondsPastEpoch = 0
+                nanoSeconds = 0
+            }
+        }
+
+record allTypes fieldRequested boolean fieldActual boolean parent allTypes
+    value true
+record allTypes fieldRequested byte fieldActual byte parent allTypes
+    value 127
+record allTypes fieldRequested short fieldActual short parent allTypes
+    value 32767
+record allTypes fieldRequested int fieldActual int parent allTypes
+    value 2147483647
+record allTypes fieldRequested long fieldActual long parent allTypes
+    value 9223372036854775807
+record allTypes fieldRequested float fieldActual float parent allTypes
+    value 1.000000
+record allTypes fieldRequested double fieldActual double parent allTypes
+    value -0.000010
+record allTypes fieldRequested string fieldActual string parent allTypes
+    value This is a string
+record allTypes fieldRequested enum fieldActual enum parent allTypes
+    value {index = 1 choices = {"choice0" "choice1" "choice2" }}
+record allTypes fieldRequested menu fieldActual menu parent allTypes
+    value 
+    menu(priority) {
+        {index = 3 choices = {"lowest" "lower" "low" "middle" "high" "higher" "highest" }}
+    }
+record allTypes fieldRequested displayLimit fieldActual displayLimit parent allTypes
+    value 
+    structure displayLimit
+    {
+        low = 0.000000
+        high = 10.000000
+    }
+record allTypes fieldRequested link fieldActual link parent allTypes
+    value isLink supportName inputLink
+    structure inputLink
+    {
+        pvname = xxxxxx
+        process = false
+        inheritSeverity = false
+    }
+record allTypes fieldRequested booleanArray fieldActual booleanArray parent allTypes
+    value {false true false }
+record allTypes fieldRequested byteArray fieldActual byteArray parent allTypes
+    value {1 2 3 }
+record allTypes fieldRequested shortArray fieldActual shortArray parent allTypes
+    value {0 0 3 4 }
+record allTypes fieldRequested intArray fieldActual intArray parent allTypes
+    value {}
+record allTypes fieldRequested longArray fieldActual longArray parent allTypes
+    value {255 16777215 }
+record allTypes fieldRequested floatArray fieldActual floatArray parent allTypes
+    value {1.000000 20000000000.000000 -355000005355292850000.000000 }
+record allTypes fieldRequested doubleArray fieldActual doubleArray parent allTypes
+    value {1.000000 2.000000 3.000000 }
+record allTypes fieldRequested stringArray fieldActual stringArray parent allTypes
+    value {"string1" "string 2" "string 3" "string 4" }
+record allTypes fieldRequested enumArray fieldActual enumArray parent allTypes
+    value 
+    {
+        {} 
+        {index = 1 choices = {"choice0" "choice1" "choice2" }}
+        {} 
+        {index = 1 choices = {"off" "on" }}
+    }
+record allTypes fieldRequested menuArray fieldActual menuArray parent allTypes
+    value 
+    {
+        menu(priority) {
+            {index = 3 choices = {"lowest" "lower" "low" "middle" "high" "higher" "highest" }}
+        }
+        menu(scan) {
+            {index = 1 choices = {"passive" "event" "periodic" }}
+        }
+    }
+record allTypes fieldRequested linkArray fieldActual linkArray parent allTypes
+    value 
+    {isLink supportName inputLink
+        structure inputLink
+        {
+            pvname = xxxxxx
+            process = false
+            inheritSeverity = false
+        }
+        isLink supportName inputLink
+        structure inputLink
+        {
+            pvname = yyyyyyyy
+            process = false
+            inheritSeverity = false
+        }
+    }
+record allTypes fieldRequested structArray fieldActual structArray parent allTypes
+    value 
+    {
+        structure displayLimit
+        {
+            low = 0.000000
+            high = 10.000000
+        }
+        structure linearConvertInput supportName linearConvertInput
+        {
+            engUnitsLow = 0.000000 supportName linearConvertInput
+            engUnitsHigh = 100.000000 supportName linearConvertInput
+            slope = 0.000000
+            intercept = 0.000000
+        }
+    }
+record allTypes fieldRequested arrayArray fieldActual arrayArray parent allTypes
+    value 
+    {
+        {0.000000 0.000000 0.000000 0.000000 0.000000 }
+        {}
+        {}
+        {null null null null null }
+    }
+record allTypes fieldRequested allTypes.boolean fieldActual boolean parent structureAllTypes
+    value true supportName exampleSupport
+record allTypes fieldRequested allTypes.byte fieldActual byte parent structureAllTypes
+    value 1 supportName exampleSupport
+record allTypes fieldRequested allTypes.short fieldActual short parent structureAllTypes
+    value 2 supportName exampleSupport
+record allTypes fieldRequested allTypes.int fieldActual int parent structureAllTypes
+    value 3 supportName exampleSupport
+record allTypes fieldRequested allTypes.long fieldActual long parent structureAllTypes
+    value 4 supportName exampleSupport
+record allTypes fieldRequested allTypes.float fieldActual float parent structureAllTypes
+    value 1.000000 supportName exampleSupport
+record allTypes fieldRequested allTypes.double fieldActual double parent structureAllTypes
+    value 2.000000 supportName exampleSupport
+record allTypes fieldRequested allTypes.string fieldActual string parent structureAllTypes
+    value This is a string supportName exampleSupport
+record allTypes fieldRequested allTypes.enum fieldActual enum parent structureAllTypes
+    value {index = 1 choices = {"choice0" "choice1" "choice2" }} supportName exampleSupport
+record allTypes fieldRequested allTypes.menu fieldActual menu parent structureAllTypes
+    value 
+    menu(priority) {
+        {index = 3 choices = {"lowest" "lower" "low" "middle" "high" "higher" "highest" }} supportName exampleSupport
+    }
+record allTypes fieldRequested allTypes.displayLimit fieldActual displayLimit parent structureAllTypes
+    value 
+    structure displayLimit supportName exampleSupport
+    {
+        low = 0.000000
+        high = 10.000000
+    }
+record allTypes fieldRequested allTypes.link fieldActual link parent structureAllTypes
+    value isLink supportName processLink
+    structure processLink
+    {
+        pvname = xxxxxx
+        inheritSeverity = false
+    }
+record allTypes fieldRequested allTypes.booleanArray fieldActual booleanArray parent structureAllTypes
+    value {false true false } supportName exampleSupport
+record allTypes fieldRequested allTypes.byteArray fieldActual byteArray parent structureAllTypes
+    value {1 2 3 } supportName exampleSupport
+record allTypes fieldRequested allTypes.shortArray fieldActual shortArray parent structureAllTypes
+    value {0 0 3 4 } supportName exampleSupport
+record allTypes fieldRequested allTypes.intArray fieldActual intArray parent structureAllTypes
+    value {}
+record allTypes fieldRequested allTypes.longArray fieldActual longArray parent structureAllTypes
+    value {255 16777215 } supportName exampleSupport
+record allTypes fieldRequested allTypes.floatArray fieldActual floatArray parent structureAllTypes
+    value {1.000000 20000000000.000000 -355000005355292850000.000000 } supportName exampleSupport
+record allTypes fieldRequested allTypes.doubleArray fieldActual doubleArray parent structureAllTypes
+    value {1.000000 2.000000 3.000000 } supportName exampleSupport
+record allTypes fieldRequested allTypes.stringArray fieldActual stringArray parent structureAllTypes
+    value {"string1" "string 2" "string 3" "string 4" } supportName exampleSupport
+record allTypes fieldRequested allTypes.enumArray fieldActual enumArray parent structureAllTypes
+    value 
+    {
+        {} 
+        {index = 1 choices = {"choice0" "choice1" "choice2" }}
+        {} 
+        {index = 1 choices = {"off" "on" }}
+    } supportName exampleSupport
+record allTypes fieldRequested allTypes.menuArray fieldActual menuArray parent structureAllTypes
+    value 
+    {
+        menu(priority) {
+            {index = 3 choices = {"lowest" "lower" "low" "middle" "high" "higher" "highest" }}
+        }
+        menu(scan) {
+            {index = 1 choices = {"passive" "event" "periodic" }}
+        }
+    } supportName exampleSupport
+record allTypes fieldRequested allTypes.linkArray fieldActual linkArray parent structureAllTypes
+    value 
+    {isLink supportName processLink
+        structure processLink
+        {
+            pvname = xxxxxx
+            inheritSeverity = false
+        }
+        isLink supportName processLink
+        structure processLink
+        {
+            pvname = yyyyyyy
+            inheritSeverity = false
+        }
+    } supportName exampleSupport
+record allTypes fieldRequested allTypes.structArray fieldActual structArray parent structureAllTypes
+    value 
+    {
+        structure displayLimit
+        {
+            low = 0.000000
+            high = 10.000000
+        }
+        structure linearConvertInput supportName linearConvertInput
+        {
+            engUnitsLow = 0.000000 supportName linearConvertInput
+            engUnitsHigh = 100.000000 supportName linearConvertInput
+            slope = 0.000000
+            intercept = 0.000000
+        }
+    } supportName exampleSupport
+record allTypes fieldRequested allTypes.arrayArray fieldActual arrayArray parent structureAllTypes
+    value 
+    {
+        {0.000000 0.000000 0.000000 0.000000 0.000000 }
+        {}
+        {}
+        {null null null null null }
+    } supportName exampleSupport

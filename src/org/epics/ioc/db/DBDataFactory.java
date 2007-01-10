@@ -470,61 +470,8 @@ public class DBDataFactory {
             + super.toString(indentLevel);
         }
     }
-
-    private static abstract class DBArray extends AbstractDBData implements PVArray{
-        protected int length = 0;
-        protected int capacity;
-        protected boolean capacityMutable = true;
-        /**
-         * Constructer that derived classes must call.
-         * @param parent The parent interface.
-         * @param dbdArrayField The reflection interface for the DBArray data.
-         */
-        protected DBArray(DBData parent,Array array,int capacity,boolean capacityMutable) {
-            super(parent,array);
-            this.capacity = capacity;
-            this.capacityMutable = capacityMutable;
-        }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.pv.PVArray#isCapacityMutable()
-         */
-        public boolean isCapacityMutable() {
-            return capacityMutable;
-        }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.pv.PVArray#getCapacity()
-         */
-        public int getCapacity() {
-            return capacity;
-        }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.pv.PVArray#getLength()
-         */
-        public int getLength() {
-            return length;
-        }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.pv.PVArray#setCapacity(int)
-         */
-        abstract public void setCapacity(int capacity);
-        /* (non-Javadoc)
-         * @see org.epics.ioc.pv.PVArray#setLength(int)
-         */
-        public void setLength(int len) {
-            if(!super.getField().isMutable())
-                throw new IllegalStateException("PVData.isMutable is false");
-            if(len>capacity) setCapacity(len);
-            length = len;
-        }
-        /* (non-Javadoc)
-         * @see java.lang.Object#toString()
-         */
-        public String toString() {
-            return toString(0);
-        }
-    }
     
-    private static class BooleanArray extends DBArray implements PVBooleanArray
+    private static class BooleanArray extends AbstractDBArray implements PVBooleanArray
     {
         private boolean[] value;
         
@@ -548,7 +495,7 @@ public class DBDataFactory {
             + super.toString(indentLevel);
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.db.DBDataFactory.DBArray#setCapacity(int)
+         * @see org.epics.ioc.db.AbstractDBArray#setCapacity(int)
          */
         public void setCapacity(int len) {
             if(!capacityMutable)
@@ -583,7 +530,7 @@ public class DBDataFactory {
         }
     }
 
-    private static class ByteArray extends DBArray implements PVByteArray
+    private static class ByteArray extends AbstractDBArray implements PVByteArray
     {
         private byte[] value;
         
@@ -610,7 +557,7 @@ public class DBDataFactory {
             + super.toString(indentLevel);
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.db.DBDataFactory.DBArray#setCapacity(int)
+         * @see org.epics.ioc.db.AbstractDBArray#setCapacity(int)
          */
         public void setCapacity(int len) {
             if(!capacityMutable)
@@ -645,7 +592,7 @@ public class DBDataFactory {
         }
     }
 
-    private static class ShortArray extends DBArray implements PVShortArray
+    private static class ShortArray extends AbstractDBArray implements PVShortArray
     {
         private short[] value;
         
@@ -672,7 +619,7 @@ public class DBDataFactory {
             + super.toString(indentLevel);
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.db.DBDataFactory.DBArray#setCapacity(int)
+         * @see org.epics.ioc.db.AbstractDBArray#setCapacity(int)
          */
         public void setCapacity(int len) {
             if(!capacityMutable)
@@ -707,7 +654,7 @@ public class DBDataFactory {
         }
     }
 
-    private static class IntArray extends DBArray implements PVIntArray
+    private static class IntArray extends AbstractDBArray implements PVIntArray
     {
         private int[] value;
         
@@ -734,7 +681,7 @@ public class DBDataFactory {
             + super.toString(indentLevel);
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.db.DBDataFactory.DBArray#setCapacity(int)
+         * @see org.epics.ioc.db.AbstractDBArray#setCapacity(int)
          */
         public void setCapacity(int len) {
             if(!capacityMutable)
@@ -769,7 +716,7 @@ public class DBDataFactory {
         }
     }
 
-    private static class LongArray extends DBArray implements PVLongArray
+    private static class LongArray extends AbstractDBArray implements PVLongArray
     {
         private long[] value;   
         
@@ -796,7 +743,7 @@ public class DBDataFactory {
             + super.toString(indentLevel);
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.db.DBDataFactory.DBArray#setCapacity(int)
+         * @see org.epics.ioc.db.AbstractDBArray#setCapacity(int)
          */
         public void setCapacity(int len) {
             if(!capacityMutable)
@@ -831,7 +778,7 @@ public class DBDataFactory {
         }
     }
 
-    private static class FloatArray extends DBArray implements PVFloatArray
+    private static class FloatArray extends AbstractDBArray implements PVFloatArray
     {
         private float[] value;
         
@@ -858,7 +805,7 @@ public class DBDataFactory {
             + super.toString(indentLevel);
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.db.DBDataFactory.DBArray#setCapacity(int)
+         * @see org.epics.ioc.db.AbstractDBArray#setCapacity(int)
          */
         public void setCapacity(int len) {
             if(!capacityMutable)
@@ -893,7 +840,7 @@ public class DBDataFactory {
         }
     }
 
-    private static class DoubleArray extends DBArray implements PVDoubleArray
+    private static class DoubleArray extends AbstractDBArray implements PVDoubleArray
     {
         private double[] value;
         
@@ -920,7 +867,7 @@ public class DBDataFactory {
             + super.toString(indentLevel);
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.db.DBDataFactory.DBArray#setCapacity(int)
+         * @see org.epics.ioc.db.AbstractDBArray#setCapacity(int)
          */
         public void setCapacity(int len) {
             if(!capacityMutable)
@@ -955,7 +902,7 @@ public class DBDataFactory {
         }     
     }
 
-    private static class StringArray extends DBArray implements PVStringArray
+    private static class StringArray extends AbstractDBArray implements PVStringArray
     {
 
         private String[] value;
@@ -983,7 +930,7 @@ public class DBDataFactory {
             + super.toString(indentLevel);
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.db.DBDataFactory.DBArray#setCapacity(int)
+         * @see org.epics.ioc.db.AbstractDBArray#setCapacity(int)
          */
         public void setCapacity(int len) {
             if(!capacityMutable)
@@ -1018,7 +965,7 @@ public class DBDataFactory {
         }
     }
 
-    private static class EnumArray extends DBArray implements PVEnumArray
+    private static class EnumArray extends AbstractDBArray implements PVEnumArray
     {
 
         private PVEnum[] value;
@@ -1038,8 +985,9 @@ public class DBDataFactory {
             return convert.getString(this, indentLevel)
             + super.toString(indentLevel);
         }
+        
         /* (non-Javadoc)
-         * @see org.epics.ioc.db.DBDataFactory.DBArray#setCapacity(int)
+         * @see org.epics.ioc.db.AbstractDBArray#setCapacity(int)
          */
         public void setCapacity(int len) {
             if(!capacityMutable)
@@ -1075,7 +1023,7 @@ public class DBDataFactory {
         }
     }
 
-    private static class MenuArray extends DBArray implements PVMenuArray
+    private static class MenuArray extends AbstractDBArray implements PVMenuArray
     {
         private PVMenu[] value;
         
@@ -1095,7 +1043,7 @@ public class DBDataFactory {
             + super.toString(indentLevel);
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.db.DBDataFactory.DBArray#setCapacity(int)
+         * @see org.epics.ioc.db.AbstractDBArray#setCapacity(int)
          */
         public void setCapacity(int len) {
             if(!capacityMutable)
@@ -1147,7 +1095,7 @@ public class DBDataFactory {
         }       
     }
 
-    private static class StructureArray extends DBArray implements PVStructureArray
+    private static class StructureArray extends AbstractDBArray implements PVStructureArray
     {
         private PVStructure[] value;
         
@@ -1167,7 +1115,7 @@ public class DBDataFactory {
             + super.toString(indentLevel);
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.db.DBDataFactory.DBArray#setCapacity(int)
+         * @see org.epics.ioc.db.AbstractDBArray#setCapacity(int)
          */
         public void setCapacity(int len) {
             if(!capacityMutable)
@@ -1218,7 +1166,7 @@ public class DBDataFactory {
         }
     }
 
-    private static class ArrayArray extends DBArray implements PVArrayArray
+    private static class ArrayArray extends AbstractDBArray implements PVArrayArray
     {
         private PVArray[] value;
         
@@ -1238,7 +1186,7 @@ public class DBDataFactory {
             + super.toString(indentLevel);
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.db.DBDataFactory.DBArray#setCapacity(int)
+         * @see org.epics.ioc.db.AbstractDBArray#setCapacity(int)
          */
         public void setCapacity(int len) {
             if(!capacityMutable)
@@ -1290,7 +1238,7 @@ public class DBDataFactory {
         }
     }
 
-    private static class LinkArray extends DBArray implements PVLinkArray
+    private static class LinkArray extends AbstractDBArray implements PVLinkArray
     {
         private PVLink[] value;
         
@@ -1310,7 +1258,7 @@ public class DBDataFactory {
             + super.toString(indentLevel);
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.db.DBDataFactory.DBArray#setCapacity(int)
+         * @see org.epics.ioc.db.AbstractDBArray#setCapacity(int)
          */
         public void setCapacity(int len) {
             if(!capacityMutable)

@@ -48,7 +48,7 @@ public class DBDTest extends TestCase {
             dumpAll(master,"dump of everything");
             System.out.printf("%n%n******try to add already existing definitions%n%n");
             DBD newDBD = XMLToDBDFactory.create("add",
-                "src/org/epics/ioc/dbDefinition/example/test.xml",this);
+                "src/org/epics/ioc/dbd/test/test.xml",this);
             System.out.printf("addToMaster is %s%n",(newDBD==null) ? "null" : "not null");
             newDBD.mergeIntoMaster();
         }

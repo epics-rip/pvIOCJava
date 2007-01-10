@@ -23,7 +23,8 @@ public interface ChannelDataQueue {
     int capacity();
     /**
      * Get the next free queue element.
-     * @param forceFree TODO
+     * @param forceFree If true than return a ChannelData even
+     * if the client has not retrieved the data it contains.
      * @return A ChannelData.
      */
     ChannelData getFree(boolean forceFree);

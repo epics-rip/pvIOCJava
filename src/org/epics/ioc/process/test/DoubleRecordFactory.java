@@ -59,17 +59,17 @@ public class DoubleRecordFactory {
          */
         public void initialize() {
             if(!super.checkSupportState(SupportState.readyForInitialize,supportName)) return;
-            IOCDB iocdb = dbRecord.getIOCDB();
-            DBAccess dbAccess = iocdb.createAccess(dbRecord.getRecordName());
+            PVAccess pvAccess = PVAccessFactory.createPVAccess(dbRecord);
             PVData pvData;
-            AccessSetResult result = dbAccess.setField("input");
+            pvAccess.findField(null);
+            AccessSetResult result = pvAccess.findField("input");
             if(result!=AccessSetResult.thisRecord) {
                 dbRecord.message(
                         "field input does not exist",
                         MessageType.error);
                 return;
             }
-            pvData = dbAccess.getField();
+            pvData = pvAccess.getField();
             if(pvData.getField().getType()!=Type.pvLink) {
                 dbRecord.message(
                         "field input is not a link",
@@ -77,14 +77,15 @@ public class DoubleRecordFactory {
                 return;
             }
             link = (PVLink)pvData;
-            result = dbAccess.setField("value");
+            pvAccess.findField(null);
+            result = pvAccess.findField("value");
             if(result!=AccessSetResult.thisRecord) {
                 dbRecord.message(
                         "field value does not exist",
                         MessageType.error);
                 return;
             }
-            pvData = dbAccess.getField();
+            pvData = pvAccess.getField();
             if(!pvData.getField().getType().isNumeric()) {
                 dbRecord.message(
                         "field value is not numeric",
@@ -101,9 +102,11 @@ public class DoubleRecordFactory {
             } else {
                 supportState = SupportState.readyForStart;
             }
-            result = dbAccess.setField("linkArray");
+            pvAccess.findField(null);
+            result = pvAccess.findField("linkArray");
             if(result==AccessSetResult.thisRecord) {
-                linkArraySupport = (LinkSupport)dbAccess.getField().getSupport();
+                DBData dbData = (DBData)pvAccess.getField();
+                linkArraySupport = (LinkSupport)dbData.getSupport();
                 if(linkArraySupport!=null) {
                     linkArraySupport.setField(value);
                     linkArraySupport.initialize();

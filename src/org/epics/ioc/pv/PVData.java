@@ -35,6 +35,11 @@ public interface PVData extends Requestor {
      */
     PVRecord getPVRecord();
     /**
+     * Replace the data implementation for a field.
+     * @param newPVData The new implementation for this field.
+     */
+    void replacePVData(PVData newPVData);
+    /**
      * Get the support name if it exists.
      * @return The name of the support.
      */

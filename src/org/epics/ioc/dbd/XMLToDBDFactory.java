@@ -558,6 +558,24 @@ public class XMLToDBDFactory {
                     property,fieldAttribute);
                 break;
             case pvStructure:
+                // Combine the current properties with the dbdStructure properties
+                DBDStructure dbdStructure = dbd.getStructure(fieldStructure.getStructureName());
+                Property[] structPropertys = dbdStructure.getPropertys();
+                LinkedList<Property> combinedPropertyList = new  LinkedList<Property>();
+                for(Property newProperty: property) combinedPropertyList.add(newProperty);
+                outer:
+                for(Property structProperty: structPropertys) {
+                    String propertyName = structProperty.getPropertyName();
+                    for(Property combined: combinedPropertyList) {
+                        if(combined.getPropertyName().equals(propertyName)) continue outer;
+                    }
+                    combinedPropertyList.add(structProperty);
+                }
+                property = new Property[combinedPropertyList.size()];
+                iter = combinedPropertyList.listIterator();
+                for(int i=0; i<property.length; i++) {
+                     property[i] = iter.next();
+                }
                 field = fieldCreate.createStructure(fieldName,
                     fieldStructure.getStructureName(),fieldStructure.getFields(),
                     property,fieldAttribute);

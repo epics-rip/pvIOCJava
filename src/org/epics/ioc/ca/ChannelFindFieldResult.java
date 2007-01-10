@@ -9,15 +9,15 @@ package org.epics.ioc.ca;
  * @author mrk
  *
  */
-public enum ChannelSetFieldResult {
+public enum ChannelFindFieldResult {
     /**
      * The requested field is located via another channel.
      * Calls to getOtherChannel and getOtherField can be used to connect to the channel and field.
      */
     otherChannel,
     /**
-     * t=The requested field is in this channel.
-     * getField can be called to retrieve the ChannelData interface.
+     * The requested field is in this channel.
+     * getChannelField can be called to retrieve the ChannelField interface.
      */
     thisChannel,
     /**

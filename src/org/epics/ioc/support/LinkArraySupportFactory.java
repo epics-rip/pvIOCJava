@@ -20,7 +20,7 @@ import org.epics.ioc.util.*;
 public class LinkArraySupportFactory {
     /**
      * Create support for an array of links.
-     * @param dbArray The array which must be an array of links.
+     * @param pvArray The array which must be an array of links.
      * @return An interface to the support or null if the supportName was not "linkArray".
      */
     public static Support create(PVArray pvArray) {
@@ -38,6 +38,7 @@ public class LinkArraySupportFactory {
         }
         return new StructureArray((PVStructureArray)pvArray);
     }
+    
     private static String supportName = "linkArray";
     
     private static class StructureArray extends AbstractSupport
@@ -63,14 +64,12 @@ public class LinkArraySupportFactory {
                 array.getPVRecord().getRecordName()
                 + array.getFullFieldName();
         }
-
         /* (non-Javadoc)
          * @see org.epics.ioc.process.SupportProcessRequestor#getProcessRequestorName()
          */
         public String getRequestorName() {
             return processRequestorName;
         }
-
         /* (non-Javadoc)
          * @see org.epics.ioc.process.Support#initialize()
          */

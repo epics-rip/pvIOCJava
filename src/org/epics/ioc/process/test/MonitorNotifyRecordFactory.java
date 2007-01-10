@@ -64,32 +64,34 @@ public class MonitorNotifyRecordFactory {
                         MessageType.error);
                 return;
             }
-            IOCDB iocdb = dbRecord.getIOCDB();
-            DBAccess dbAccess = iocdb.createAccess(dbRecord.getRecordName());
+            PVAccess pvAccess = PVAccessFactory.createPVAccess(dbRecord);
             PVData pvData;
             AccessSetResult result;
-            result = dbAccess.setField("notify");
+            pvAccess.findField(null);
+            result = pvAccess.findField("notify");
             if(result!=AccessSetResult.thisRecord) {
                 dbRecord.message(
                         "field notify does not exist",
                         MessageType.error);
                 return;
             }
-            pvData = dbAccess.getField();
+            pvData = pvAccess.getField();
             if(pvData.getField().getType()!=Type.pvBoolean) {
                 dbRecord.message(
                         "field notify is not boolean",
                         MessageType.error);
                 return;
             }
-            PVData oldField = dbAccess.getField();
+            PVData oldField = pvAccess.getField();
             PVData parent = oldField.getParent();
             Field field = oldField.getField();
             notify = new BooleanData((DBData)parent,field);
-            dbAccess.replaceField(oldField,notify);
-            result = dbAccess.setField("inputArray");
+            oldField.replacePVData(notify);
+            pvAccess.findField(null);
+            result = pvAccess.findField("inputArray");
             if(result==AccessSetResult.thisRecord) {
-                inputSupport = (LinkSupport)dbAccess.getField().getSupport();
+                DBData dbData = (DBData)pvAccess.getField();
+                inputSupport = (LinkSupport)dbData.getSupport();
                 if(inputSupport!=null) {
                     inputSupport.setField(notify);
                     inputSupport.initialize();
@@ -104,10 +106,11 @@ public class MonitorNotifyRecordFactory {
                         MessageType.error);
                 return;
             }
-            
-            result = dbAccess.setField("outputArray");
+            pvAccess.findField(null);
+            result = pvAccess.findField("outputArray");
             if(result==AccessSetResult.thisRecord) {
-                outputSupport = (LinkSupport)dbAccess.getField().getSupport();
+                DBData dbData = (DBData)pvAccess.getField();
+                outputSupport = (LinkSupport)dbData.getSupport();
                 if(outputSupport!=null) {
                     outputSupport.setField(notify);
                     outputSupport.initialize();

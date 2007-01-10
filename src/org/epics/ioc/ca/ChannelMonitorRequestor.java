@@ -16,8 +16,7 @@ import org.epics.ioc.util.*;
 public interface ChannelMonitorRequestor extends Requestor{
     /**
      * New subscribe data value.
-     * The two lists are in the same order.
-     * @param channelData The field list.
+     * @param channelData The channelData.
      */
     void monitorData(ChannelData channelData);
     /**

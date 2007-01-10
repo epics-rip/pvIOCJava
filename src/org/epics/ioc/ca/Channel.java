@@ -37,29 +37,29 @@ public interface Channel {
      */
     boolean isConnected();
     /**
-     * Specify a field to access. See package org.epics.ioc.dbAccess for how IOC database fields are accessed.
+     * Specify a field to access. See package org.epics.ioc.pv for how IOC database fields are accessed.
      * @param name The name.
-     * @return The result
+     * @return The result.
      */
-    ChannelSetFieldResult setField(String name);
+    ChannelFindFieldResult findField(String name);
     /**
-     * If the result of setField was other otherChannel, This returns the name of the other channel.
-     * @return the name or null if setField did not return otherChannel.
+     * If the result of findField was otherChannel, This returns the name of the other channel.
+     * @return the name or null if findField did not return otherChannel.
      */
     String getOtherChannel();
     /**
-     * If the result of setField was other otherChannel, This returns the name of the field in the other channel.
-     * @return The name of the field or null if setField did not return otherChannel.
+     * If the result of findField was other otherChannel, This returns the name of the field in the other channel.
+     * @return The name of the field or null if findField did not return otherChannel.
      */
     String getOtherField();
     /**
-     * If setField returned thisChannel this is the interface for the field.
-     * @return The interrace for the field or null if setField did not return otherChannel.
+     * If findField returned thisChannel get the interface for the field.
+     * @return The interface for the field or null if findField did not return otherChannel.
      */
     ChannelField getChannelField();
     /**
      * Create a field group.
-     * @param listener The liustener to call if the field group is deleted.
+     * @param listener The listener to call if the field group is deleted.
      * @return The interface for the field group.
      */
     ChannelFieldGroup createFieldGroup(ChannelFieldGroupListener listener);

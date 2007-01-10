@@ -207,22 +207,23 @@ public class ReplaceTest extends TestCase {
     static void testPut(IOCDB iocdb,String recordName,
         String fieldName,double value)
     {
-        DBAccess dbAccess = iocdb.createAccess(recordName);
-        if(dbAccess==null) {
+        PVRecord pvRecord = iocdb.findRecord(recordName);
+        if(pvRecord==null) {
             System.out.printf("record %s not found%n",recordName);
             return;
         }
-        if(dbAccess.setField(fieldName)!=AccessSetResult.thisRecord){
+        PVAccess pvAccess = PVAccessFactory.createPVAccess(pvRecord);
+        if(pvAccess.findField(fieldName)!=AccessSetResult.thisRecord){
             System.out.printf("field %s not in record %s%n",
                 fieldName,recordName);
             return;
         }
-        DBData dbData = dbAccess.getField();
-        Type type = dbData.getField().getType();
+        PVData pvData = pvAccess.getField();
+        Type type = pvData.getField().getType();
         if(type.isNumeric()) {
             System.out.printf("%ntestPut recordName %s fieldName %s value %f",
                 recordName,fieldName,value);
-            convert.fromDouble(dbData,value);
+            convert.fromDouble(pvData,value);
             return;
         }
         if(type!=Type.pvStructure) {
@@ -230,7 +231,7 @@ public class ReplaceTest extends TestCase {
                 fieldName,recordName);
             return;
         }
-        PVStructure structure = (PVStructure)dbData;
+        PVStructure structure = (PVStructure)pvData;
         PVData[] fields = structure.getFieldPVDatas();
         for(PVData field : fields) {
             if(field.getField().getType().isNumeric()) {
@@ -244,30 +245,31 @@ public class ReplaceTest extends TestCase {
     static void testPutArray(IOCDB iocdb,String recordName,
             String fieldName,double value1,double value2,double value3)
     {
-        DBAccess dbAccess = iocdb.createAccess(recordName);
-        if(dbAccess==null) {
+        PVRecord pvRecord = iocdb.findRecord(recordName);
+        if(pvRecord==null) {
             System.out.printf("record %s not found%n",recordName);
             return;
         }
-        if(dbAccess.setField(fieldName)!=AccessSetResult.thisRecord){
+        PVAccess pvAccess = PVAccessFactory.createPVAccess(pvRecord);
+        if(pvAccess.findField(fieldName)!=AccessSetResult.thisRecord){
             System.out.printf("field %s not in record %s%n",
                 fieldName,recordName);
             return;
         }
-        DBData dbData = dbAccess.getField();
-        Type type = dbData.getField().getType();
+        PVData pvData = pvAccess.getField();
+        Type type = pvData.getField().getType();
         if(type!=Type.pvArray) {
             System.out.printf("%ntestPutArray recordName %s fieldName %s no an array%n",
                     fieldName,recordName);
                 return;
         }
-        PVArray dataArray = (PVArray)dbData;
+        PVArray dataArray = (PVArray)pvData;
         Type elementType = ((Array)dataArray.getField()).getElementType();
         if(elementType.isNumeric()) {
             System.out.printf("%ntestPut recordName %s fieldName %s values %f %f %f",
                 recordName,fieldName,value1,value2,value3);
             double[] values = new double[]{value1,value2,value3};
-            convert.fromDoubleArray(dbData,0,3,values,0);
+            convert.fromDoubleArray(pvData,0,3,values,0);
             return;
         } else {
             System.out.printf("%ntestPut recordName %s fieldName %s cant handle%n",
@@ -279,20 +281,21 @@ public class ReplaceTest extends TestCase {
     static void testPutBoolean(IOCDB iocdb,String recordName,
             String fieldName,boolean value)
     {
-        DBAccess dbAccess = iocdb.createAccess(recordName);
-        if(dbAccess==null) {
+        PVRecord pvRecord = iocdb.findRecord(recordName);
+        if(pvRecord==null) {
             System.out.printf("record %s not found%n",recordName);
             return;
         }
-        if(dbAccess.setField(fieldName)!=AccessSetResult.thisRecord){
+        PVAccess pvAccess = PVAccessFactory.createPVAccess(pvRecord);
+        if(pvAccess.findField(fieldName)!=AccessSetResult.thisRecord){
             System.out.printf("field %s not in record %s%n",
                 fieldName,recordName);
             return;
         }
-        DBData dbData = dbAccess.getField();
-        Type type = dbData.getField().getType();
+        PVData pvData = pvAccess.getField();
+        Type type = pvData.getField().getType();
         if(type==Type.pvBoolean) {
-            PVBoolean data = (PVBoolean)dbData;
+            PVBoolean data = (PVBoolean)pvData;
             System.out.printf("%ntestPutBoolean recordName %s fieldName %s value %b",
                 recordName,fieldName,value);
             data.put(value);
@@ -303,20 +306,21 @@ public class ReplaceTest extends TestCase {
     static void testPutString(IOCDB iocdb,String recordName,
             String fieldName,String value)
     {
-        DBAccess dbAccess = iocdb.createAccess(recordName);
-        if(dbAccess==null) {
+        PVRecord pvRecord = iocdb.findRecord(recordName);
+        if(pvRecord==null) {
             System.out.printf("record %s not found%n",recordName);
             return;
         }
-        if(dbAccess.setField(fieldName)!=AccessSetResult.thisRecord){
+        PVAccess pvAccess = PVAccessFactory.createPVAccess(pvRecord);
+        if(pvAccess.findField(fieldName)!=AccessSetResult.thisRecord){
             System.out.printf("field %s not in record %s%n",
                 fieldName,recordName);
             return;
         }
-        DBData dbData = dbAccess.getField();
-        Type type = dbData.getField().getType();
+        PVData pvData = pvAccess.getField();
+        Type type = pvData.getField().getType();
         if(type==Type.pvString) {
-            PVString data = (PVString)dbData;
+            PVString data = (PVString)pvData;
             System.out.printf("%ntestPutString recordName %s fieldName %s value %s",
                 recordName,fieldName,value);
             data.put(value);
@@ -327,17 +331,18 @@ public class ReplaceTest extends TestCase {
     private static void testReplace(IOCDB iocdb,String recordName,
         String fieldName)
     {
-        DBAccess dbAccess = iocdb.createAccess(recordName);
-        if(dbAccess==null) {
+        PVRecord pvRecord = iocdb.findRecord(recordName);
+        if(pvRecord==null) {
             System.out.printf("record %s not found%n",recordName);
             return;
         }
-        if(dbAccess.setField(fieldName)!=AccessSetResult.thisRecord){
+        PVAccess pvAccess = PVAccessFactory.createPVAccess(pvRecord);
+        if(pvAccess.findField(fieldName)!=AccessSetResult.thisRecord){
             System.out.printf("field %s not in record %s%n",
                 fieldName,recordName);
             return;
         }
-        DBData oldField = dbAccess.getField();
+        PVData oldField = pvAccess.getField();
         DBData parent = (DBData)oldField.getParent();
         Field field = oldField.getField();
         Type type = field.getType();
@@ -438,7 +443,7 @@ public class ReplaceTest extends TestCase {
              System.out.printf("dbLink not supported.%n");
              return;
         }
-        dbAccess.replaceField(oldField,newField);
+        oldField.replacePVData(newField);
     }
     
     

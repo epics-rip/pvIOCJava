@@ -38,8 +38,8 @@ public class ChannelDataFactory {
       * Create a queue of ChannelData.
      * @param queueSize The queueSize. This is can not be changed after creation.
      * @param channel The channel.
-     * @param fieldGroup The field group defining what should be in each channelData.
-     * @return The channelDataQueue interface.
+     * @param channelFieldGroup The field group defining what should be in each channelData.
+     * @return The ChannelDataQueue interface.
      */
     public static ChannelDataQueue createQueue(
              int queueSize,
@@ -640,6 +640,14 @@ public class ChannelDataFactory {
          }
          
          /* (non-Javadoc)
+         * @see org.epics.ioc.pv.AbstractPVData#replacePVData(org.epics.ioc.pv.PVData)
+         */
+        @Override
+        public void replacePVData(PVData newPVData) {
+            // for now do nothing
+        }
+
+        /* (non-Javadoc)
          * @see org.epics.ioc.pv.AbstractPVData#message(java.lang.String, org.epics.ioc.util.MessageType)
          */
         @Override
@@ -732,6 +740,13 @@ public class ChannelDataFactory {
         public PVRecord getPVRecord() {
             return pvRecord;
         }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pv.PVData#replacePVData(org.epics.ioc.pv.PVData)
+         */
+        public void replacePVData(PVData newPVData) {
+            // for now do nothing
+        }
+
         /* (non-Javadoc)
           * @see org.epics.ioc.pv.PVData#getField()
           */

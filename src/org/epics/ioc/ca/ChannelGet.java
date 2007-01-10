@@ -15,7 +15,7 @@ import org.epics.ioc.pv.*;
 public interface ChannelGet {
     /**
      * Get data from the channel.
-     * @param fieldGroupImpl The description of the data to get.
+     * @param channelFieldGroup The set of data to get.
      * @return (false,true) if the request (is not, is) started.
      * This fails if the request can not be satisfied.
      */

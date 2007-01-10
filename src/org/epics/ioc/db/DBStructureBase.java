@@ -24,7 +24,7 @@ public class DBStructureBase extends AbstractDBData implements PVStructure
     /**
      * Constructor.
      * @param parent the DBStructure of the parent.
-     * @param dbdStructureField the reflection interface for the DBStructure data.
+     * @param structure the reflection interface for the DBStructure data.
      */
     public DBStructureBase(DBData parent, Structure structure) {
         super(parent,structure);

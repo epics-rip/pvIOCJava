@@ -6,7 +6,6 @@
 package org.epics.ioc.support;
 
 import org.epics.ioc.db.*;
-import org.epics.ioc.dbd.*;
 import org.epics.ioc.process.*;
 import org.epics.ioc.pv.*;
 import org.epics.ioc.util.*;
@@ -71,12 +70,10 @@ public class ScanSupportFactory {
             this.pvStructure = pvStructure;
             dbRecord = (DBRecord)pvStructure.getPVRecord();
             recordName = dbRecord.getRecordName();
-            IOCDB iocdb = dbRecord.getIOCDB();
-            DBAccess dbAccess = iocdb.createAccess(recordName);            
-            
-            dbAccess.setField("");
+            PVAccess dbAccess = PVAccessFactory.createPVAccess(dbRecord);           
+            dbAccess.findField("");
             fieldName = "scan.scan";
-            if(dbAccess.setField(fieldName)!=AccessSetResult.thisRecord){
+            if(dbAccess.findField(fieldName)!=AccessSetResult.thisRecord){
                 throw new IllegalStateException(recordName + "." + fieldName + " not in record ");
             }
             oldField = dbAccess.getField();
@@ -94,11 +91,11 @@ public class ScanSupportFactory {
             menu = (Menu)oldField.getField();
             newMenu = new DBScan(this,(DBData)pvStructure,menu,choices);
             newMenu.setIndex(index);
-            dbAccess.replaceField(oldField,newMenu);
+            oldField.replacePVData(newMenu);
             
-            dbAccess.setField("");
+            dbAccess.findField("");
             fieldName = "scan.rate";
-            if(dbAccess.setField(fieldName)!=AccessSetResult.thisRecord){
+            if(dbAccess.findField(fieldName)!=AccessSetResult.thisRecord){
                 throw new IllegalStateException(recordName + "." + fieldName + " not in record ");
             }
             oldField = dbAccess.getField();
@@ -109,11 +106,11 @@ public class ScanSupportFactory {
             rate = oldRate.get();
             PVDouble newRate = new DBRate(this,(DBData)pvStructure,oldField.getField());
             newRate.put(rate);
-            dbAccess.replaceField(oldField,newRate);
+            oldField.replacePVData(newRate);
             
-            dbAccess.setField("");
+            dbAccess.findField("");
             fieldName = "scan.eventName";
-            if(dbAccess.setField(fieldName)!=AccessSetResult.thisRecord){
+            if(dbAccess.findField(fieldName)!=AccessSetResult.thisRecord){
                 throw new IllegalStateException(recordName + "." + fieldName + " not in record ");
             }
             oldField = dbAccess.getField();
@@ -124,10 +121,10 @@ public class ScanSupportFactory {
             eventName = oldEventName.get();
             PVString newEventName = new DBEventName(this,(DBData)pvStructure,oldField.getField());
             newEventName.put(eventName);
-            dbAccess.replaceField(oldField,newEventName);
-            dbAccess.setField("");
+            oldField.replacePVData(newEventName);
+            dbAccess.findField("");
             fieldName = "scan.priority";
-            if(dbAccess.setField(fieldName)!=AccessSetResult.thisRecord){
+            if(dbAccess.findField(fieldName)!=AccessSetResult.thisRecord){
                 throw new IllegalStateException(recordName + "." + fieldName + " not found");
             }
             oldField = dbAccess.getField();
@@ -144,7 +141,7 @@ public class ScanSupportFactory {
             menu = (Menu)oldField.getField();
             newMenu = new DBPriority(this,(DBData)pvStructure,menu,priorityMenu.getChoices());
             newMenu.setIndex(index);
-            dbAccess.replaceField(oldField,newMenu);
+            oldField.replacePVData(newMenu);
             
             dbRecord.getIOCDB().addIOCDBMergeListener(this);
         }       
@@ -266,8 +263,10 @@ public class ScanSupportFactory {
         private DBPriority(ScanFieldSupport scanFieldSupport,DBData parent,Menu menu,String[]choice) {
             super(parent,menu,choice);
             this.scanFieldSupport = scanFieldSupport;
-        }
-        
+        }      
+        /* (non-Javadoc)
+         * @see org.epics.ioc.db.DBEnumBase#setIndex(int)
+         */
         public void setIndex(int index) {
             int oldIndex = super.getIndex();
             super.setIndex(index);
@@ -284,7 +283,9 @@ public class ScanSupportFactory {
             super(parent,menu,choice);
             this.scanFieldSupport = scanFieldSupport;
         }
-        
+        /* (non-Javadoc)
+         * @see org.epics.ioc.db.DBEnumBase#setIndex(int)
+         */
         public void setIndex(int index) {
             int oldIndex = super.getIndex();
             super.setIndex(index);
@@ -307,9 +308,15 @@ public class ScanSupportFactory {
                 value = Float.valueOf(defaultValue);
             }
         }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pv.PVDouble#get()
+         */
         public double get() {
             return value;
         }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pv.PVDouble#put(double)
+         */
         public void put(double value) {
             if(getField().isMutable()) {
                 double oldValue = this.value;
@@ -321,9 +328,15 @@ public class ScanSupportFactory {
             }
             throw new IllegalStateException("PVData.isMutable is false");
         }       
+        /* (non-Javadoc)
+         * @see java.lang.Object#toString()
+         */
         public String toString() {
             return toString(0);
         }       
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pv.AbstractPVData#toString(int)
+         */
         public String toString(int indentLevel) {
             return convert.getString(this, indentLevel)
             + super.toString(indentLevel);
@@ -344,9 +357,15 @@ public class ScanSupportFactory {
                 value = defaultValue;
             }
         }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pv.PVString#get()
+         */
         public String get() {
             return value;
         }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pv.PVString#put(java.lang.String)
+         */
         public void put(String value) {
             if(getField().isMutable()) {
                 String oldValue = this.value;
@@ -359,9 +378,15 @@ public class ScanSupportFactory {
             }
             throw new IllegalStateException("PVData.isMutable is false");
         }       
+        /* (non-Javadoc)
+         * @see java.lang.Object#toString()
+         */
         public String toString() {
             return toString(0);
         }       
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pv.AbstractPVData#toString(int)
+         */
         public String toString(int indentLevel) {
             return convert.getString(this, indentLevel)
             + super.toString(indentLevel);

@@ -309,35 +309,32 @@ public class ChannelMonitorTest extends TestCase {
         }
         private ChannelFieldGroup init() {
             channelFieldGroup = channel.createFieldGroup(this);
-            ChannelSetFieldResult result;
-            result = channel.setField(fieldName);
-            if(result!=ChannelSetFieldResult.thisChannel) {
+            ChannelFindFieldResult result;
+            result = channel.findField(fieldName);
+            if(result!=ChannelFindFieldResult.thisChannel) {
                 System.out.printf("PutGet:set returned %s%n", result.toString());
                 return null;
             }
             valueField = channel.getChannelField();
             channelFieldGroup.addChannelField(valueField);
-            if(fieldName.equals("status")) return channelFieldGroup;
-            if(fieldName.equals("severity")) return channelFieldGroup;
-            if(fieldName.equals("timeStamp")) return channelFieldGroup;
             String newFieldName = fieldName + ".status";
-            channel.setField(null);
-            result = channel.setField(newFieldName);
-            if(result==ChannelSetFieldResult.thisChannel) {
+            channel.findField(null);
+            result = channel.findField(newFieldName);
+            if(result==ChannelFindFieldResult.thisChannel) {
                 statusField = channel.getChannelField();
                 channelFieldGroup.addChannelField(statusField);
             }
             newFieldName = fieldName + ".severity";
-            channel.setField(null);
-            result = channel.setField(newFieldName);
-            if(result==ChannelSetFieldResult.thisChannel) {
+            channel.findField(null);
+            result = channel.findField(newFieldName);
+            if(result==ChannelFindFieldResult.thisChannel) {
                 severityField = channel.getChannelField();
                 channelFieldGroup.addChannelField(severityField);
             }
             newFieldName = fieldName + ".timeStamp";
-            channel.setField(null);
-            result = channel.setField(newFieldName);
-            if(result==ChannelSetFieldResult.thisChannel) {
+            channel.findField(null);
+            result = channel.findField(newFieldName);
+            if(result==ChannelFindFieldResult.thisChannel) {
                 timeStampField = channel.getChannelField();
                 channelFieldGroup.addChannelField(timeStampField);
             }

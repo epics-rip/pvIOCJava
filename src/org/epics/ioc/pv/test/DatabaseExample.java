@@ -235,6 +235,12 @@ public class DatabaseExample {
             return null;
         }
         /* (non-Javadoc)
+         * @see org.epics.ioc.pv.PVData#replacePVData(org.epics.ioc.pv.PVData, org.epics.ioc.pv.PVData)
+         */
+        public void replacePVData(PVData newPVData) {
+            throw new Error ("replacePVData not implemented"); 
+        }
+        /* (non-Javadoc)
          * @see org.epics.ioc.util.Requestor#getRequestorName()
          */
         public String getRequestorName() {

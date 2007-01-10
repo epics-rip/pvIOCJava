@@ -3,10 +3,10 @@
  * EPICS JavaIOC is distributed subject to a Software License Agreement found
  * in file LICENSE that is included with this distribution.
  */
-package org.epics.ioc.db;
+package org.epics.ioc.pv;
 
 /**
- * The result returned by DBAccess.findField.
+ * The result returned by PVAccess.findField.
  * @author mrk
  *
  */

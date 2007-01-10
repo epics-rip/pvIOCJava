@@ -8,9 +8,9 @@
 </head>
 
 <body>
-<h1 style="text-align: center">EPICS JavaIOC dbAccess example<br />
-package: org.epics.ioc.dbAccess.example<br />
-2006.05.18</h1>
+<h1 style="text-align: center">EPICS JavaIOC db test<br />
+package: org.epics.ioc.db.test<br />
+2007.01.09</h1>
 
 <h2>Introduction</h2>
 
@@ -20,6 +20,9 @@ contains The following JUnit tests:</p>
   <li>XMLToDataBaseTest<br />
     Reads a set of database definition files and a set of record instance
     files. It dumps the record instances.</li>
+  <li>XMLAllTypesTest<br />
+    Reads a set of definitions that include all types.
+  </li>
   <li>DefaultTest<br />
     Reads a set of database definition files that have defaults for all
     fields that are allowed to have defualts. Creates an instance definition
@@ -33,43 +36,60 @@ contains The following JUnit tests:</p>
     Tests DBListener.</li>
   <li>ReplaceTest<br />
     Test repacing the default implementation of all the field types.</li>
+  <li>SubstituteTest<br />
+    Tests include and macro substitution. This also is a test for pv, dbd,
+    and db because XMLToDBD
+    is called, which makes extensive use of dbd and pv, and
+    XMLToIOCDB is called, which makes extensive use of db.
+    It also provides an example of parsing database definitions.
+  </li>
 </ul>
+<p>It also has a Java class TestListener, which is used by some of the other tests
+and is an example of implementing a DBListener.</p>
+<p>The examples use the DBD definitions defined in javaIOC/dbd.</p>
 
 <p>The following database definition files are available:</p>
 <ul>
-  <li>menuStructureSupportDBD.xml<br />
-    A set of menu, structure, and linkSupport definitions. These are used by
-    all the tests.</li>
-  <li>analogDBD.xml<br />
-    A simple recordType definition.</li>
-  <li>aiDBD.xml<br />
+  <li>accessDBD.xml<br />
+    Include statements for the files requires by AccessTest.
+  </li>
+  <li>aiDBD.xml
     aiRaw, aiLinear, aiLinearRecord</li>
-  <li>powerSupplyDBD.xml<br />
-    A simple power supply for power, current, and voltage.</li>
+  <li>aiLinkedDBD.xml<br />
+    Definitions for an ai record that links to an aiRaw record.
+  </li>
   <li>allTypesDBD.xml<br />
     A structure and recordType that has fields of every supported type.</li>
+  <li>analogDBD.xml<br />
+    A simple recordType definition.</li>
   <li>defaultDBD.xml<br />
     Like allTypesDBD.xml but assigns defaults to all fields that are allowed
     to have defaults.</li>
+  <li>listenerDBD.xml<br />
+    Include statements for the files requires by ListenerTest.
+  </li>
+  <li>parentDBD.xml<br />
+    Include statements for the files requires by ParentTest.
+  </li>
+  <li>powerSupplyDBD.xml<br />
+    A simple power supply for power, current, and voltage.</li>
+  <li>powerSupplyLinkedDBD.xml<br />
+    A simple power supply that links to other records for current and voltage.
+  </li>
+  <li>replaceDBD.xml<br />
+    Include statements for the files requires by ReplaceTest.
+  </li>
+  <li>substituteDBD.xml<br />
+    Include statements for the files requires by SubstituteTest.
+  </li>
+  <li>xmlToDataBaseDBD.xml<br />
+    Include statements for the files requires by XMLToDataBaseTest.
+  </li>
 </ul>
 
-<p>The following record instance files are available.</p>
-<ul>
-  <li>exampleAnalogDB.xml<br />
-    An analogRecord.</li>
-  <li>exampleAiLinearDB.xml<br />
-    An aiLinearRecord.</li>
-  <li>examplePowerSupplyDB.xml<br />
-    A powerSupplyRecord.</li>
-  <li>examplePowerSupplyArrayDB.xml<br />
-    A powerSupplyArrayRecord.</li>
-  <li>exampleAllTypeDB.xml<br />
-    An allTypesRecord.</li>
-  <li>defaultDB.xml<br />
-    An allTypesRecord with defualt values.</li>
-</ul>
+<p>The DB.xml files are read by the various tests.
 
-<p>These database files and tests are good examples of the kinds of data a
+These database files and tests are good examples of the kinds of data a
 JavaIOC can hold.</p>
 </body>
 </html>

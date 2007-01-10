@@ -131,16 +131,17 @@ public class ParentTest extends TestCase {
     }
 
     static void showParent(IOCDB iocdb,String recordName,String fieldName) {
-        DBAccess dbAccess = iocdb.createAccess(recordName);
-        if(dbAccess==null) {
+        PVRecord pvRecord = iocdb.findRecord(recordName);
+        if(pvRecord==null) {
             System.out.printf("record %s not found%n",recordName);
             return;
         }
-        if(dbAccess.setField(fieldName)!=AccessSetResult.thisRecord){
+        PVAccess pvAccess = PVAccessFactory.createPVAccess(pvRecord);
+        if(pvAccess.findField(fieldName)!=AccessSetResult.thisRecord){
             System.out.printf("field %s not in record %s%n",fieldName,recordName);
             return;
         }
-        PVData pvData = dbAccess.getField();
+        PVData pvData = pvAccess.getField();
         PVRecord record = pvData.getPVRecord();
         System.out.printf("fieldName %s actualField %s record %s fullName %s%n",
             fieldName,

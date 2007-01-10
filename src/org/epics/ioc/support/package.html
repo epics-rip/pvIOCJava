@@ -10,11 +10,20 @@
 <body>
 <h1 style="text-align: center">EPICS JavaIOC: support<br />
 package: org.epics.ioc.support<br />
-2006.11.15</h1>
-TABLEOFCONTENTS
+2007.01.05</h1>
+CONTENTS
+
+<div class="toc">
+<ul>
+  <li><a href="#Overview">Overview</a></li>
+  <li><a href="#Link">Link Support Factory</a></li>
+  <li><a href="#Link1">Link Array Support Factory</a></li>
+  <li><a href="#Linear">Linear Convert Input Factory</a></li>
+</ul>
+</div>
 <hr />
 
-<h2 style="text-align: center">Overview</h2>
+<h2 style="text-align: center" id="Overview">Overview</h2>
 <hr />
 
 <p>This package provides standard support for the following:</p>
@@ -32,21 +41,10 @@ TABLEOFCONTENTS
       IMPLEMENTED.</dd>
 </dl>
 
-<p>In addition it provides the following XML Database Definition files.</p>
-<dl>
-  <dt>menuStructureSupportDBD.xml</dt>
-    <dd>Menu, Structure, and Support Database Definitions required by support
-      provided with javaIOC.</dd>
-  <dt>commonDBD.xml</dt>
-    <dd>Database Definitions for fields that should (must?) be part of every
-      record type. This should be included at the beginning of the Database
-      Definition for each record type.</dd>
-</dl>
 <p>In addition a file that does not have an implementation is present.
-  Something like this will be part of the standard set of record types
-  provided by javaIOC. It will most likely be moved to a different package
-  perhaps: <span
-  style="font-family: courier;">org.epics.ioc.recordType.</span></p>
+Something like this will be part of the standard set of record types provided
+by javaIOC. It will most likely be moved to a different package perhaps:
+<span style="font-family: courier;">org.epics.ioc.recordType.</span></p>
 <dl>
   <dt>AnalogInputFactory</dt>
     <dd>A record type that has an input link which provides a raw value,
@@ -56,11 +54,8 @@ TABLEOFCONTENTS
 </dl>
 <hr />
 
-<h2 style="text-align: center">Link Support Factory</h2>
+<h2 style="text-align: center" id="Link">Link Support Factory</h2>
 <hr />
-
-<p><span style="font-weight:bold;">NOTE</span>: monitorLink is not working
-and does not support events.</p>
 
 <p>This is a factory that provides an implementation of link support for the
 following:</p>
@@ -110,7 +105,7 @@ a description of how the various links are defined.</p>
 <p></p>
 <hr />
 
-<h2 style="text-align: center;">Link Array Support Factory</h2>
+<h2 style="text-align: center;" id="Link1">Link Array Support Factory</h2>
 <hr />
 
 <p>This is a factory that provides support for an array of links. The
@@ -124,178 +119,11 @@ process. Support for an output record would allow process and output links.
 Many other possibilities are possible.</p>
 <hr />
 
-<h2 style="text-align: center;">Linear Convert Input Factory</h2>
+<h2 style="text-align: center;" id="Linear">Linear Convert Input Factory</h2>
 <hr />
 
 <p>Not implemented but it will be support that takes a raw value and converts
 it to engineering units.</p>
 <hr />
-
-<h2 style="text-align: center;">Standard Database
-Definitions</h2>
-<hr />
-
-<h3>menuStructureSupportDBD</h3>
-
-<p>Definitions for the following menus:</p>
-<dl>
-  <dt>priority</dt>
-    <dd>The scan priorities: lowest,...,highest</dd>
-  <dt>scan</dt>
-    <dd>The scan types:
-      <dl>
-        <dt>passive</dt>
-          <dd>A record that is neither periodically or event scanned.
-            Something elase can make it process. For example anothe record
-            with a process link.</dd>
-        <dt>event</dt>
-          <dd>An event scanned record. In this case an eventName is also
-            assigned to the record.</dd>
-        <dt>periodioc</dt>
-          <dd>A periodically scanned record. In this case a rate is also
-            assigned to the record.</dd>
-      </dl>
-    </dd>
-  <dt>alarmSeverity</dt>
-    <dd>The alarm severities: none,minor,major,invalid</dd>
-</dl>
-
-<p>Definitions for the following structures:</p>
-<dl>
-  <dt>timeStamp</dt>
-  <dl>
-    <dt>secondsPastEpoch</dt>
-      <dd>Seconds past the epoch which is Jan 1, 1970 UTC. This is compatible
-        with Java and POSIX.</dd>
-    <dt>nanoSeconds</dt>
-      <dd>nanoseconds within the second.</dd>
-  </dl>
-  <dt>scan</dt>
-  <dl>
-    <dt>priority</dt>
-      <dd>The thread priority for a periodic and event scanning.</dd>
-    <dt>scan</dt>
-      <dd>Scan type, i.e. passive, event, or periodic</dd>
-    <dt>rate</dt>
-      <dd>Periodic scan rate in seconds</dd>
-    <dt>eventName</dt>
-      <dd>The event name for event scanned records.</dd>
-  </dl>
-  <dt>processLink</dt>
-  <dl>
-    <dt>pvname</dt>
-      <dd>recordName.fieldName of link</dd>
-    <dt>inheritSeverity</dt>
-      <dd>Should this record be put in alarm if the linked record is in
-      alarm?</dd>
-  </dl>
-  <dt>monitorLink</dt>
-    <dd>pvname,queueCapacity,reportOverrun,process,inheritSeverity</dd>
-  <dl>
-    <dt>pvname</dt>
-      <dd>recordName.fieldName of link</dd>
-    <dt>process</dt>
-      <dd>Should the record containing the link be processed after the
-        monotered data is read.</dd>
-    <dt>queueCapacity</dt>
-      <dd>A data queue can be created for a monitored link. If the capacity
-        is set to 0 then the link will be monitored for changes and when a
-        monitor occurs a read will be issued. In order to ensure that the
-        latest update is also read the capacity should be set to at least
-      2.</dd>
-    <dt>reportOverrun</dt>
-      <dd>If the data queue is overrun should it be reported by setting
-        status and severity?</dd>
-    <dt>inheritSeverity</dt>
-      <dd>Should this record be put in alarm if the linked record is in
-      alarm?</dd>
-  </dl>
-  <dt>inputLink</dt>
-  <dl>
-    <dt>pvname</dt>
-      <dd>recordName.fieldName of link</dd>
-    <dt>process</dt>
-      <dd>Should the linked record be processed before getting data?</dd>
-    <dt>inheritSeverity</dt>
-      <dd>Should this record be put in alarm if the linked record is in
-      alarm?</dd>
-  </dl>
-  <dt>outputLink</dt>
-  <dl>
-    <dt>pvname</dt>
-      <dd>recordName.fieldName of link</dd>
-    <dt>process</dt>
-      <dd>Should the linked record be processed after putting data?</dd>
-    <dt>inheritSeverity</dt>
-      <dd>Should this record be put in alarm if the linked record is in
-      alarm?</dd>
-  </dl>
-  <dt>disableLink</dt>
-    <dd>Defined but not used. Support must be created.</dd>
-  <dt>asynLink</dt>
-    <dd>Defined but not used. Support must be created.</dd>
-  <dt>linkArrayElement</dt>
-  <dl>
-    <dt>wait</dt>
-      <dd>After this link is started should linkArraySupport wait for
-        completion of all links currently started before starting the next
-        link.</dd>
-    <dt>link</dt>
-      <dd>A database link</dd>
-    <dt>name</dt>
-      <dd>A name that can be used is desired. For example a calculation
-        record (not implemented) could use it.</dd>
-  </dl>
-  <dt>displayLimit</dt>
-    <dd>Can be used as needed.</dd>
-  <dt>linearConvert</dt>
-    <dd>Not currently used.</dd>
-  <dt>event</dt>
-    <dd>Is this what we want? This is an attempt at defining fields to
-      support the proposed extensions for V3 events.</dd>
-</dl>
-
-<p>Definitions for the following support:</p>
-<dl>
-  <dt>linearConvert</dt>
-    <dd>Not implemented.</dd>
-  <dt>processLink</dt>
-  <dt>monitorLink</dt>
-    <dd>Not working. Must support monitorv events</dd>
-  <dt>inputLink</dt>
-  <dt>outputLink</dt>
-  <dt>asynLink</dt>
-    <dd>Not implemented</dd>
-  <dt>linkArray</dt>
-  <dt>scan</dt>
-    <dd>Support for the scan field. This is called by recordProcess. This all
-      records that have a scan field as a top level field can be periodically
-      or event scanned.</dd>
-</dl>
-
-<h3>commonDBD</h3>
-
-<p>This has definitions for fields that are common to all (most?) record
-types.</p>
-<pre>put it here
-
-&lt;?xml version="1.0" ?&gt;
-&lt;DBDefinition&gt;
-    &lt;field name = "status" type = "string" /&gt;
-    &lt;field name = "severity" type = "menu" menuName = "alarmSeverity" /&gt;
-    &lt;field name = "timeStamp" type = "structure" structureName = "timeStamp"/&gt;
-    &lt;field name = "scan" type = "structure" structureName = "scan"
-         supportName = "scan" /&gt;
-&lt;/DBDefinition&gt;</pre>
-
-<p>For example a record type for a double record could start with:</p>
-<pre>put it here
-
-&lt;?xml version="1.0" ?&gt;
-&lt;DBDefinition&gt;
-&lt;include addPath = "src/org/epics/ioc/support" /&gt;
-
-&lt;recordType name = "doubleRecord" supportName = "doubleRecord" &gt;
-    &lt;include href = "commonDBD.xml" /&gt;</pre>
 </body>
 </html>

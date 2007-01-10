@@ -48,7 +48,7 @@ public interface ChannelData {
    void enumChoicesPut(PVEnum pvEnum);
    /**
     * The supportName has been modified.
-    * @param dbData
+    * @param pvData The pvData.
     */
    void supportNamePut(PVData pvData);
    /**
@@ -91,7 +91,7 @@ public interface ChannelData {
      * A put to the supportName of a subfield of a structure has occured. 
      * The supportName has been modified.
      * @param pvStructure The requester is listening on a structure and this is the structure.
-     * @param dbData
+     * @param pvData The pvData in the structure.
      */
     void supportNamePut(PVStructure pvStructure,PVData pvData);
     /**

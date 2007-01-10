@@ -22,10 +22,18 @@ public class ScannerFactory {
      private static PeriodicScanner periodicScanner = new Periodic();
      private static EventScanner eventScanner = new Event();
      
-     public static PeriodicScanner getPeriodicScanner() {
+     /**
+      * Get the interface for the periodic scanner.
+     * @return The interface.
+     */
+    public static PeriodicScanner getPeriodicScanner() {
          return periodicScanner;
      }
-     public static EventScanner getEventScanner() {
+     /**
+      * Get the interface for the event scanner.
+     * @return The interface.
+     */
+    public static EventScanner getEventScanner() {
          return eventScanner;
      }
      

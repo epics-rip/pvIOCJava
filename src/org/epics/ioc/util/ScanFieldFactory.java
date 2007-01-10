@@ -109,7 +109,7 @@ public class ScanFieldFactory {
     
     /**
      * Does the menu define the scan types?
-     * @param dbMenu The menu.
+     * @param pvMenu The menu.
      * @return (false,true) is the menu defined the scan types.
      */
     public static boolean isScanMenu(PVMenu pvMenu) {
@@ -128,7 +128,7 @@ public class ScanFieldFactory {
     }
     /**
      * Does the menu define the thread priorities.
-     * @param dbMenu The menu.
+     * @param pvMenu The menu.
      * @return (false,true) is the menu defined the thread priorities.
      */
     public static boolean isPriorityMenu(PVMenu pvMenu) {
@@ -145,6 +145,7 @@ public class ScanFieldFactory {
         }
         return true;
     }
+    
     private static class ScanFieldInstance implements ScanField {
         private PVMenu priority;
         private PVMenu scan;

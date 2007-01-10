@@ -71,8 +71,8 @@ public class ChannelAccessLocalFactory  {
         private ReentrantLock lock = new ReentrantLock();
         private ChannelStateListener stateListener = null;
         private DBRecord dbRecord;
-        private DBAccess dbAccess;
-        private DBData currentData = null;
+        private PVAccess pvAccess;
+        private PVData currentData = null;
         private String otherChannel = null;
         private String otherField = null;
         private LinkedList<FieldGroupImpl> fieldGroupList = 
@@ -91,8 +91,8 @@ public class ChannelAccessLocalFactory  {
         private ChannelImpl(DBRecord record,ChannelStateListener listener) {
             stateListener = listener;
             dbRecord = record;
-            dbAccess = record.getIOCDB().createAccess(record.getRecordName());
-            if(dbAccess==null) {
+            pvAccess = PVAccessFactory.createPVAccess(record);
+            if(pvAccess==null) {
                 throw new IllegalStateException("ChannelLink createAccess failed. Why?");
             }
         }
@@ -283,23 +283,23 @@ public class ChannelAccessLocalFactory  {
         /* (non-Javadoc)
          * @see org.epics.ioc.ca.Channel#setField(java.lang.String)
          */
-        public ChannelSetFieldResult setField(String name) {
+        public ChannelFindFieldResult findField(String name) {
             lock.lock();
             try {
-                if(isDestroyed) return ChannelSetFieldResult.failure;
-                AccessSetResult result = dbAccess.setField(name);
-                if(result==AccessSetResult.notFound) return ChannelSetFieldResult.notFound;
+                if(isDestroyed) return ChannelFindFieldResult.failure;
+                AccessSetResult result = pvAccess.findField(name);
+                if(result==AccessSetResult.notFound) return ChannelFindFieldResult.notFound;
                 if(result==AccessSetResult.otherRecord) {
-                    otherChannel = dbAccess.getOtherRecord();
-                    otherField = dbAccess.getOtherField();
+                    otherChannel = pvAccess.getOtherRecord();
+                    otherField = pvAccess.getOtherField();
                     currentData = null;
-                    return ChannelSetFieldResult.otherChannel;
+                    return ChannelFindFieldResult.otherChannel;
                 }
                 if(result==AccessSetResult.thisRecord) {
-                    currentData = dbAccess.getField();
+                    currentData = pvAccess.getField();
                     otherChannel = null;
                     otherField = null;
-                    return ChannelSetFieldResult.thisChannel;
+                    return ChannelFindFieldResult.thisChannel;
                 }
                 throw new IllegalStateException(
                     "ChannelAccessLocal logic error unknown AccessSetResult value");

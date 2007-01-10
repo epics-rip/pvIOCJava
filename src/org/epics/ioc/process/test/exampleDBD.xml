@@ -21,7 +21,11 @@
 
 <recordType name = "counterRecord" supportName = "counterRecord">
     <include href = "common.xml" />
-    <field name = "value" type = "double"/>
+    <field name = "value" type = "double" >
+        <property name = "status" associatedField = "status" />
+        <property name = "severity" associatedField = "severity" />
+        <property name = "timeStamp" associatedField = "/timeStamp" />
+    </field>
     <field name = "min" type = "double"/>
     <field name = "max" type = "double"/>
     <field name = "inc" type = "double"/>

@@ -8,6 +8,7 @@ package org.epics.ioc.ca;
 import org.epics.ioc.util.*;
 
 /**
+ * Callback for a channel process request.
  * @author mrk
  *
  */

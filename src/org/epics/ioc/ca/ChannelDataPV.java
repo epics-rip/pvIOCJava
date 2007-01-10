@@ -55,7 +55,7 @@ public interface ChannelDataPV {
      */
     public boolean configurationStructureChange();
     /**
-     * @return
+     * @return A dump of the contents,
      */
     public String toString();
 }

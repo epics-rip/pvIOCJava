@@ -6,7 +6,6 @@
 package org.epics.ioc.db;
 
 import org.epics.ioc.dbd.*;
-import org.epics.ioc.dbd.DBDLinkSupport;
 import org.epics.ioc.process.*;
 import org.epics.ioc.pv.*;
 
@@ -67,6 +66,37 @@ public abstract class AbstractDBData extends AbstractPVData implements DBData{
      */
     public DBRecord getDBRecord() {
         return record;
+    }
+    /* (non-Javadoc)
+     * @see org.epics.ioc.pv.AbstractPVData#replacePVData(org.epics.ioc.pv.PVData, org.epics.ioc.pv.PVData)
+     */
+    @Override
+    public void replacePVData(PVData newPVData) {
+        if(this.getField().getType()!=newPVData.getField().getType()) {
+            throw new IllegalArgumentException(
+                "newField is not same type as oldField");
+        }
+        if(this.getField().getType()!=newPVData.getField().getType()) {
+            throw new IllegalArgumentException(
+                "newField is not same DBtype as oldField");
+        }
+        if(!(newPVData instanceof DBData)) {
+            throw new IllegalArgumentException(
+            "newField is not a DBData");
+        }
+        PVData parent = getParent();
+        if(parent==null) throw new IllegalArgumentException("no parent");
+        Type parentType = parent.getField().getType();
+        if(parentType==Type.pvStructure) {
+            PVData[] fields = ((PVStructure)parent).getFieldPVDatas();
+            for(int i=0; i<fields.length; i++) {
+                if(fields[i]==this) {
+                    fields[i] = newPVData;
+                    return;
+                }
+            }
+        }
+        throw new IllegalArgumentException("oldField not found in parent");
     }
     /* (non-Javadoc)
      * @see org.epics.ioc.db.DBData#addListener(org.epics.ioc.db.RecordListener)

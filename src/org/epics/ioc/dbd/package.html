@@ -12,7 +12,7 @@
 
 <h1 style="text-align: center">EPICS JavaIoc: Database Definition <br />
 package: org.epics.ioc.dbd<br />
-2006.12.27</h1>
+2007.01.09</h1>
 <hr />
 CONTENTS:
 
@@ -67,7 +67,6 @@ CONTENTS:
       <li><a href="#Creating1">Creating Database Definitions</a></li>
     </ul>
   </li>
-  <li><a href="#DBDFieldFa">DBDFieldFactory</a></li>
 </ul>
 </div>
 <hr />
@@ -363,28 +362,8 @@ where
     <dd>The name of the property</dd>
   <dt style="font-family: courier;">associatedField</dt>
     <dd>The name of a field that has the value for the property. It can have
-      one of the following forms:
-      <dl>
-        <dt>..</dt>
-          <dd>A search is made up the structure hierarchy for a field name
-            that is the same as the property name. If the property is
-            attached to a field then the search starts with the parent of the
-            structure containing the structure. If the property is attached
-            to a structure, the search starts with the parent of the
-            structure itself. This is not valid for a property attached to a
-            recordType.</dd>
-        <dt>name</dt>
-          <dd>If attached to a structure or recordType the associated field
-            must be a field in that structure or recordType. If attached to a
-            field it must be a field or a property in the structure that
-            holds the field.</dd>
-        <dt>name1.name2</dt>
-          <dd>Only valid for a property attached to a structure or
-            recordType. name1 must be the name of a structure field in the
-            structure to which the property is attached. name2 must be a
-            property of field in the structure field.</dd>
-      </dl>
-    </dd>
+      one of the following forms: "name", "name.name", "/name", or
+      "/name.name". See package org.epics.ioc.pv for details.</dd>
 </dl>
 
 <p>For example:</p>
@@ -536,39 +515,28 @@ structure or recordType is discussed in the next section.</p>
         System.out.printf("}\n");
     }</pre>
 
-<p>Note that a shorter way is:</p>
+<p>A shorter way is:</p>
 <pre>    void dumpMenu(DBDMenu menu) {System.out.println(menu.toString());}</pre>
 
 <h3 id="Structure1">Structure and RecordType</h3>
 
 <p>The interfaces are:</p>
-<pre>    interface DBDStructure  Structure{}
+<pre>    interface DBDStructure extends Structure{}
 
     interface DBDRecordType extends DBDStructure {}</pre>
 
-<p>where</p>
-<dl>
-  <dt style="font-family: courier;">getDBDFields</dt>
-    <dd>Get the introspection interfaces for the fields of the structure.
-      DBDField is descrtibed in the next section.</dd>
-  <dt style="font-family: courier;">getDBDFieldIndex</dt>
-    <dd>Given a field name find the index for the field in the DBDField[]. If
-      the field is not found -1 is returned.</dd>
-</dl>
-
 <p>For example the following dumps a structure</p>
 <pre>    void dumpStructure(DBDStructure structure) {
-        DBDField[] fields = structure.getDBDFields();
+        Field[] fields = structure.getFields();
         System.out.printf("structure %s {\n",structure.getStructureName();
-        for(DBDField field : fields) {
-            DBType type = field.getDBType();
-            Type pvtype = field.getType();
-            System.out.printf("field %s dbtype %s pvtype %s",
-                field.getName(),type.toString(),pvtype.toString());
+        for(Field field : fields) {
+            Type type = field.getType();
+            System.out.printf("field %s type %s",
+                field.getName(),type.toString());
         }
     }</pre>
 
-<p>Again a shorter way is:</p>
+<p>A shorter way is:</p>
 <pre>    void dumpStructure(DBDStructure structure) {System.out.println(structure.toString);}</pre>
 
 <h3 id="Support1">Support and LinkSupport</h3>
@@ -596,8 +564,8 @@ structure or recordType is discussed in the next section.</p>
     factories.</dd>
   <dt style="font-family: courier;">getConfigurationStructureName</dt>
     <dd>Get the configuration structire name. A null is returned if none was
-      defined in the support definition. This means the support does not
-      require configuration information.</dd>
+      defined in the linkSupport definition. This means the linkSupport does
+      not require configuration information.</dd>
 </dl>
 <hr />
 <hr />
@@ -615,6 +583,14 @@ addition a number of "convenience" methods are provided.</p>
     String getName();
     DBD getMasterDBD();
     void mergeIntoMaster();
+    DBDMenu createMenu(String menuName, String[] choices);
+    DBDStructure createStructure(String name,
+        Field[] field,Property[] property,FieldAttribute fieldAttribute);
+    DBDRecordType createRecordType(String name,
+        Field[] field,Property[] property,FieldAttribute fieldAttribute);
+    DBDSupport createSupport(String supportName,String factoryName);
+    DBDLinkSupport createLinkSupport(
+        String supportName,String factoryName,String configurationStructureName);
     DBDMenu getMenu(String menuName);
     boolean addMenu(DBDMenu menu);
     Map&lt;String,DBDMenu&gt; getMenuMap();
@@ -652,6 +628,16 @@ addition a number of "convenience" methods are provided.</p>
   <dt style="font-family: courier;">mergeIntoMaster</dt>
     <dd>Merge this DBD into the master DBD. After merging into master the
       compoments are removed from this database.</dd>
+  <dt style="font-family: courier;">createMenu</dt>
+    <dd>Create a DBDMenu.</dd>
+  <dt style="font-family: courier;">createStructure</dt>
+    <dd>Create a DBDStructure.</dd>
+  <dt style="font-family: courier;">createRecordType</dt>
+    <dd>Create a DBDRecordType.</dd>
+  <dt style="font-family: courier;">createSupport</dt>
+    <dd>Create a DBDSupport.</dd>
+  <dt style="font-family: courier;">createLinkSupport</dt>
+    <dd>Create a DBDLinkSupport.</dd>
   <dt style="font-family: courier;">getMenu</dt>
     <dd>Get the DBDMenu that describes menuName.</dd>
   <dt style="font-family: courier;">addMenu</dt>
@@ -786,8 +772,8 @@ definition database.</p>
   <dt style="font-family: courier;">convert</dt>
     <dd>Convert the xml DBD definitions in file fileName and put the
       definitions into dbd. When generating definitions for an IOC use
-      addToMaster instead of this. The Requestor interface is described
-      in package org.epics.ioc.util.</dd>
+      addToMaster instead of this. The Requestor interface is described in
+      package org.epics.ioc.util.</dd>
   <dt style="font-family: courier;">create</dt>
     <dd>Create a DBD with the specified name and put the definitions obtained
       by parsing the XML defininitions in fileName into the dbd. The caller
@@ -845,37 +831,5 @@ immediately.</p>
   <li>All getXXXMap methods return shallow copies of the internal map.</li>
 </ul>
 <hr />
-
-<h2 style="text-align: center" id="DBDFieldFa">DBDFieldFactory</h2>
-<hr />
-
-<p>The following class provides methods to create components for a Database
-Definition.</p>
-<pre>public final class  DBDFieldFactory {
-    public static Type getType(Map&lt;String,String&gt; attributes);
-    public static Type getElementType(Map&lt;String,String&gt; attributes);
-    public static Type getType(String value);
-    public static DBDMenu createMenu(String menuName, String[] choices);  
-    public static DBDStructure createStructure(String name,
-        Field[] field,Property[] property,FieldAttribute fieldAttribute);
-    public static DBDRecordType createRecordType(String name,
-        Field[] field,Property[] property,FieldAttribute fieldAttribute);
-    public static DBDSupport createSupport(String supportName,
-        String factoryName);
-    public static DBDLinkSupport createLinkSupport(String supportName,
-        String factoryName,String configurationStructName);
-    public static Menu createMenuField(String fieldName,
-        Property[]property,FieldAttribute fieldAttribute,String menuName);
-    public static Array createArrayField(String fieldName,
-        Property[]property,FieldAttribute fieldAttribute,Type elementType);
-    public static Structure createStructureField(String fieldName,
-        Property[]property,FieldAttribute fieldAttribute,
-        DBDStructure dbdStructure);
-    public static Field createField(String fieldName,
-        Property[]property,FieldAttribute fieldAttribute,Type type);
-}</pre>
-
-<p>This class is used by DBDFieldFactory and are probably not needed by other
-code.</p>
 </body>
 </html>

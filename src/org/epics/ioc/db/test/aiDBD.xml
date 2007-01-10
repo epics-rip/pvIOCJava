@@ -44,7 +44,7 @@
     <property name = "status" associatedField = "input.status" />
     <property name = "severity" associatedField = "input.severity" />
     <field name = "input" type = "structure" structureName = "aiLinear" >
-        <property name = "timeStamp" associatedField = "timeStamp" />
+        <property name = "timeStamp" associatedField = "/timeStamp" />
     </field>
     <field name = "priority" type = "menu" menuName = "priority" />
     <field name = "timeStamp" type = "structure" structureName = "timeStamp"/>

@@ -10,14 +10,30 @@
 <body>
 <h1 style="text-align: center">EPICS JavaIOC: Java Input/Output Controller<br
 />
-2006.11.20</h1>
+2007.01.10</h1>
 
 <p>This product is available via the <a href="#LicenseAgreement">open source
 license</a> described at the end of this document.</p>
 
+<p>CONTENTS</p>
+
 <div class="toc">
 <ul>
-  <li><a href="#Overview">Overview</a></li>
+  <li><a href="#Overview">Overview</a>
+    <ul>
+      <li><a href="#default">default</a></li>
+      <li><a href="#org.epics.">org.epics.ioc.pv</a></li>
+      <li><a href="#org.epics.1">org.epics.ioc.dbd</a></li>
+      <li><a href="#org.epics.2">org.epics.ioc.db</a></li>
+      <li><a href="#org.epics.3">org.epics.ioc.ca</a></li>
+      <li><a href="#org.epics.4">org.epics.ioc.util</a></li>
+      <li><a href="#org.epics.5">org.epics.ioc.support</a></li>
+      <li><a href="#org.epics.6">org.epics.ioc.process</a></li>
+      <li><a href="#javaIOC">javaIOC/dbd</a></li>
+      <li><a href="#Getting">Getting Started</a></li>
+      <li><a href="#Status">Status and Remaining Tasks</a></li>
+    </ul>
+  </li>
   <li><a href="#Database">Database Syntax</a>
     <ul>
       <li><a href="#Include">Include and Macro Substitution</a>
@@ -33,10 +49,10 @@ license</a> described at the end of this document.</p>
           <li><a href="#Property">Property Syntax</a></li>
           <li><a href="#Example1">Example Structure, Menu, and Support
             Definitions</a></li>
-          <li><a href="#Record1">Record Type Examples</a></li>
+          <li><a href="#Record">Record Type Examples</a></li>
         </ul>
       </li>
-      <li><a href="#Record2">Record Instance Definition</a>
+      <li><a href="#Record1">Record Instance Definition</a>
         <ul>
           <li><a href="#Syntax1">Syntax</a></li>
           <li><a href="#Example2">Example</a></li>
@@ -47,20 +63,19 @@ license</a> described at the end of this document.</p>
   <li><a href="#Java">Java Database Definitions</a>
     <ul>
       <li><a href="#Field1">Field Types</a></li>
-      <li><a href="#Data">Data Access Interfaces</a></li>
+      <li><a href="#Data">Data Interfaces</a></li>
     </ul>
   </li>
   <li><a href="#Database2">Database Reflection</a>
     <ul>
       <li><a href="#pvAccess">pvAccess reflection</a></li>
-      <li><a href="#dbAccess">dbAccess reflection</a></li>
       <li><a href="#Example3">Example: Database Access via Reflection</a></li>
     </ul>
     <ul>
-      <li><a href="#DBAccess">DBAccess</a></li>
+      <li><a href="#PVAccess">PVAccess</a></li>
     </ul>
   </li>
-  <li><a href="#Record">Record Processing: Brief Theory of Operation</a>
+  <li><a href="#Record2">Record Processing: Brief Theory of Operation</a>
     <ul>
       <li><a href="#Definition">Definitions</a></li>
       <li><a href="#Requestor">Requestor Examples</a></li>
@@ -91,7 +106,7 @@ license</a> described at the end of this document.</p>
     </ul>
   </li>
   <li><a href="#Field2">Field Access and Property Definitions</a></li>
-  <li><a href="#Examples">Examples of Accessing Fields via DBAccess</a>
+  <li><a href="#Examples">Examples of Accessing Fields via PVAccess</a>
     <ul>
       <li><a href="#exampleAiE">exampleAiEmbeded</a></li>
       <li><a href="#exampleAi">exampleAi</a></li>
@@ -125,185 +140,99 @@ reader is familiar with EPICS Version 3.</p>
 <p>Documentation is provided via javaDOC. Each package of the javaIOC project
 has a package.html overview document. The packages that currently exists
 are:</p>
+
+<h3 id="default">default</h3>
+
+<p>This package contains the overview you are now reading. It also contains
+XMLToDatabase, which is the example program discussed below.</p>
+
+<h3 id="org.epics.">org.epics.ioc.pv</h3>
+
+<p>This package defines definitions for the data that javaIOC supports. This
+is a combination of data and reflection interfaces. Read the package overview
+for details. Read it, at least quickly, before continuing with this
+document.</p>
+
+<h3 id="org.epics.1">org.epics.ioc.dbd</h3>
+
+<p>This package provides support for a Database Definition Database (DBD). A
+DBD holds definitions of the following:</p>
+<dl>
+  <dt>menu</dt>
+  <dt>structure</dt>
+  <dt>support</dt>
+  <dt>recordType</dt>
+</dl>
+
+<p>An XML parser is provided that reads xml descriptions of the above and
+creates a DBD. Examples of the xml files are presented below.</p>
+
+<h3 id="org.epics.2">org.epics.ioc.db</h3>
+
+<p>Package org.epics.ioc.pv provides a factory for creating the reflection
+interfaces but not for data. This package provides a factory for creating the
+data required by javaIOC. It also extends the data interfaces defined in
+org.epics.ioc.pv so that:</p>
 <ul>
-  <li>default<br />
-    This package contains the overview you are now reading. It also contains
-    the main program XMLToDatabase.</li>
-  <li>org.epics.ioc.pvAccess<br />
-    A description of the basic data types. The basic data types are for data
-    that is passed in or out of record instances, i.e. these are the data
-    types used by channel access:
-    <ul>
-      <li>primitive<br />
-        All Java primitive types except char, i.e. boolean, byte, short, int,
-        float, and double.</li>
-      <li>string<br />
-        A Java String.</li>
-      <li>enum<br />
-        A enum is an array of choices and an index that selects a choice.</li>
-      <li>structure<br />
-        A structure has a name and contains an arbitrary number of fields of
-        an supported type.</li>
-      <li>array<br />
-        A one dimensional array. The element type is any of the supported
-        types.</li>
-    </ul>
-    <p>pvAccess implements the reflection interfaces and defines the data
-    interfaces for these types.</p>
-  </li>
-  <li>org.epics.ioc.dbDefinition<br />
-    dbDefinition provides the following:
-    <ul>
-      <li>Adds the following types to the basic types.<br />
-
-        <dl>
-          <dt>menu</dt>
-            <dd>A menu is an enum with immutable choices.</dd>
-          <dt>structure</dt>
-            <dd>sructure is extended to allow fields that have an extended
-              type.</dd>
-          <dt>array</dt>
-            <dd>array is extended to allow fields that have an extended
-            type.</dd>
-          <dt>link</dt>
-            <dd>A link is a special kind of structure.</dd>
-        </dl>
-      </li>
-      <li>Implements the reflection interfaces for the extended types.</li>
-      <li>Provides an xml to database converter for database definitions,
-        i.e. definitions of the following:
-        <ul>
-          <li>menu</li>
-          <li>structure</li>
-          <li>recordType</li>
-          <li>linkSupport</li>
-        </ul>
-      </li>
-      <li>Implements one or more DBDs which provides access to database
-        definitions.</li>
-    </ul>
-  </li>
-  <li>org.epics.ioc.dbAccess<br />
-    dbAccess provides the following:
-    <ul>
-      <li>Provides an xml to database converter for record instancess</li>
-      <li>Defines interfaces for data types defined by dbDefinition.</li>
-      <li>Provides a factory that implements the data interfaces for a field
-        of any of the supported types.</li>
-      <li>Implements one or more IOCDBs ( IOC DataBase).</li>
-      <li>Implements DBAccess, which is an interface for accessing an
-      IOCDB.</li>
-    </ul>
-  </li>
-  <li>org.epics.ioc.channelAccess<br />
-    channelAccess provides the following:
-    <ul>
-      <li>Defines the client interfaces.
-        <ul>
-          <li>Channel, ChannelAccess <br />
-            A channel is a connection to a source of data. For a javaIOC
-            database a channel is a connection to a record instance.
-            ChannelAccess is an interface implemented by code that implements
-            channel access. At the present time only one implementation,
-            ChannelAccessLocal is implemented. It supports local access to
-            javaIOC records.</li>
-          <li>ChannelFieldGroup, ChannelField <br />
-            Specifies a set of fields within a channel.</li>
-          <li>ChannelData, ChannelDataQueue, ChannelDataFactory<br />
-            A "container" for data for a channel. It is used by code that
-            must block while handling data for a channel. It allows the user
-            to block without locking a record.</li>
-          <li>channelProcess,channelGet, channelPut, channelGetPut <br />
-            The basic operations that can be performed on a channel.</li>
-          <li>channelSubscribe, Event<br />
-            Channel monitoring.</li>
-        </ul>
-      </li>
-      <li>Provides the following factories.
-        <ul>
-          <li>ChannelFactory<br />
-            Provides a registrar for implementors of ChannelAccess. Creates
-            Channels by calling the regeistered ChannelAccess
-          implementations.</li>
-          <li>ChannelDataFactory<br />
-            Creates and implements instances of ChannelData and
-            ChannelDataQueue.</li>
-        </ul>
-      </li>
-    </ul>
-  </li>
-  <li>org.epics.ioc.util <br />
-    This package provides utility code for a javaIOC:
-    <dl>
-      <dt>Message Support</dt>
-        <dd>This is an interface for passing messages to a requestor of many
-          services.</dd>
-      <dt>Time Stamp support</dt>
-        <dd>Support is provided to make it easier to work with time
-        stamps.</dd>
-      <dt>Scan Field Support</dt>
-        <dd>Support that makes it easier to access the scan field of a
-        record.</dd>
-      <dt>Periodic and Event Scanners</dt>
-        <dd>Support for records that are periodic or event scanned.</dd>
-      <dt>IOCFactory</dt>
-        <dd>A factory for creating and initializing IOC records. This can be
-          used at IOC initialization or for on-line add of new record
-          instances.</dd>
-      <dt>XML Reader</dt>
-        <dd>Support for reading XML Database Definition and Record Instance
-          files. It is an abstraction above Java SAX (Simple API for XML). It
-          implements macro substitution and include.</dd>
-    </dl>
-  </li>
-  <li>org.epics.ioc.support
-    <dl>
-      <dt>LinkSupportFactory</dt>
-        <dd>Support for the following link types: processLink, inputLink,
-          outputLink, and monitorLink.</dd>
-      <dt>LinkArraySupportFactory</dt>
-        <dd>Support for an array of links. This can be used by most record
-          types</dd>
-      <dt>ScanSupportFactory</dt>
-        <dd>Support for the scan field.</dd>
-      <dt>LinearConvertInputFactory</dt>
-        <dd>Support for converting a raw value to engineering units. NOT
-          IMPLEMENTED.</dd>
-    </dl>
-    <p>In addition it provides the following XML Database Definition
-    files.</p>
-    <dl>
-      <dt>menuStructureSupportDBD.xml</dt>
-        <dd>Menu, Structure, and Support Database Definitions required by
-          support provided with javaIOC.</dd>
-      <dt>commonDBD.xml</dt>
-        <dd>Database Definitions for fields that should (must?) be part of
-          every record type. This should be included at the beginning of the
-          Database Definition for each record type.</dd>
-    </dl>
-  </li>
-  <li>org.epics.ioc.dbProcess<br />
-
-    <p>This package provides support for processing IOC database records. It
-    has the following interfaces:</p>
-    <dl>
-      <dt>RecordProcess</dt>
-        <dd>An instance is created for each IOC record. It has methods for
-          use by any code interested in record processing.</dd>
-      <dt>Support</dt>
-        <dd>Methods implemented by support code. A record instance can have
-          one or more support modules. Each instance must have a record
-          support modules and each field can optionally have a field support
-          module. All support modules must implement interface Support. Most
-          will extend AbstractSupport</dd>
-      <dt>LinkSupport</dt>
-        <dd>An extension of Support for link fields.</dd>
-      <dt>SupportCreation</dt>
-        <dd>An interface for creating and initializing all support for a set
-          of record instances.</dd>
-    </dl>
-  </li>
+  <li>Support can be attached to records and fields.</li>
+  <li>Record instances can be locked.</li>
+  <li>Fields of records can be monitored for changes.</li>
 </ul>
+
+<p>This package implements an XML parser that creates record instances and
+puts them into an IOC Database (IOCCB).</p>
+
+<h3 id="org.epics.3">org.epics.ioc.ca</h3>
+
+<p>This package is Channel Access for a javaIOC.</p>
+
+<h3 id="org.epics.4">org.epics.ioc.util</h3>
+This package provides utility code for a javaIOC:
+<dl>
+  <dt>Message Support</dt>
+    <dd>This is an interface for passing messages to a requestor of many
+      services.</dd>
+  <dt>Time Stamp support</dt>
+    <dd>Support is provided to make it easier to work with time stamps.</dd>
+  <dt>Scan Field Support</dt>
+    <dd>Support that makes it easier to access the scan field of a
+    record.</dd>
+  <dt>Periodic and Event Scanners</dt>
+    <dd>Support for records that are periodic or event scanned.</dd>
+  <dt>IOCFactory</dt>
+    <dd>A factory for creating and initializing IOC records. This can be used
+      at IOC initialization or for on-line add of new record instances.</dd>
+  <dt>XML Reader</dt>
+    <dd>Support for reading XML Database Definition and Record Instance
+      files. It is an abstraction above Java SAX (Simple API for XML). It
+      implements macro substitution and include.</dd>
+</dl>
+
+<h3 id="org.epics.5">org.epics.ioc.support</h3>
+<dl>
+  <dt>LinkSupportFactory</dt>
+    <dd>Support for the following link types: processLink, inputLink,
+      outputLink, and monitorLink.</dd>
+  <dt>LinkArraySupportFactory</dt>
+    <dd>Support for an array of links. This can be used by most record
+    types</dd>
+  <dt>ScanSupportFactory</dt>
+    <dd>Support for the scan field.</dd>
+  <dt>LinearConvertInputFactory</dt>
+    <dd>Support for converting a raw value to engineering units. NOT
+      IMPLEMENTED.</dd>
+</dl>
+
+<h3 id="org.epics.6">org.epics.ioc.process</h3>
+
+<p>This package provides support for processing IOC database records.</p>
+
+<h3 id="javaIOC">javaIOC/dbd</h3>
+
+<p>In javaIOC there is a directory dbd, which has database Definitions for
+everything implemented by javaIOC.</p>
+
+<h3 id="Getting">Getting Started</h3>
 
 <p>In package default there is a Java main program that reads Database
 Definition and Record Instance files and dumps the resulting database. This
@@ -330,17 +259,15 @@ The arguments can be any combination of:
 </ul>
 
 <p>For example:</p>
-<pre>cd javaIOC/src
-java XMLToDatabase \
- -dbd "src/org/epics/ioc/dbAccess/example/xmlToDataBaseDBD.xml" \
- -db "src/org/epics/ioc/dbAccess/example/xmlToDataBaseDB.xml" \
-   -dumpDBD -dumpDB &gt; temp  </pre>
+<pre>cd javaIOC
+java XMLToDatabase -dbd "src/exampleDBD.xml" -db "src/exampleDB.xml" -dumpDBD -dumpDB &gt; temp  </pre>
 
-<p>Will read a database definition file and a record instance file, dump the
-database definitions and dump the record instances. The output will be
-written to file temp. This example will actually work if you have unziped the
-javaIOC distribution file. Just cd to directory
-src.org/epics/dbAccess/example and execute the above command.</p>
+<p>Will read a set of database definition and record instance files and then
+dump the database definitions record instances. The output will be written to
+file temp. This example will actually work if you have unziped the javaIOC
+distribution file. Just cd javaIOC and execute the above command. NOTE that
+this produces a lot of output since the example has lots of different menu,
+structure, support, and recordType definitions.</p>
 
 <p>The remainder of this document gives an overview of what is currently
 implemented:</p>
@@ -352,7 +279,15 @@ implemented:</p>
     like an ADC and complex devices like a power supply can be defined.</li>
 </ul>
 
-<p>The following JavaIOC components are not yet defined or implemented:</p>
+<h3 id="Status">Status and Remaining Tasks</h3>
+
+<p>With the exception of remote Channel Access, the basic functionality
+required for a javaIOC is now implemented. It is possible to create a running
+javaIOC but since it can not comminicate with the outside world it can not do
+anything usefull.</p>
+
+<p>The following JavaIOC components, which are not yet defined or
+implemented, are required before a usable javaIOC exists.</p>
 <ul>
   <li>Remote Channel Access<br />
     This requires both client and server. This could wait until after a beta
@@ -395,14 +330,17 @@ implemented:</p>
 things are desirable:</p>
 <ul>
   <li>VDCT - A Visual Database Configuration Tool.</li>
-  <li>Access Security - Based on V3 Access Security.</li>
-  <li>Monitoring of database modifica of work tion from outside IOC</li>
+  <li>Access Security - Based on V3 Access Security but extended to properly
+    support a javaIOC.</li>
   <li>Channel Access Clients that implement the JavaIOC Channel Access
     Semantics.</li>
   <li>...</li>
 </ul>
 
 <p>Thus lots of work has been done but lots of work remains.</p>
+
+<p>Marty Kraimer's next priorities are the GUI based shell and a core set of
+recordTypes.</p>
 <hr />
 
 <h2 style="text-align: center" id="Database">Database Syntax</h2>
@@ -410,7 +348,7 @@ things are desirable:</p>
 
 <p>The syntax for both Database Definitions (menu, structure, recordType,
 etc) and Record Instance Definitions is XML based. In addition XML based
-macro substitution and include is supported. Package org.epics.ioc.utility
+macro substitution and include is supported. Package org.epics.ioc.util
 provides XML support with the following features:</p>
 <ul>
   <li>Include and Macro Substitution are handled automatically.<br />
@@ -501,7 +439,7 @@ text. The syntax is:</p>
 <p>The following creates two instance files from the template:</p>
 <pre>&lt;?xml version="1.0" ?&gt;
 &lt;IOCDatabase&gt;
-&lt;include addPath = "src/org/epics/ioc/dbAccess/example" /&gt;
+&lt;include addPath = "src/org/epics/ioc/pvAccess/example" /&gt;
 &lt;substitute from = "recordExtension" to = "01" /&gt;
 &lt;substitute from = "pvname" to = "nameFor01" /&gt;
 &lt;substitute from = "displayLow" to = "0.0" /&gt;
@@ -516,7 +454,7 @@ text. The syntax is:</p>
 <h3 style="text-align: center" id="Database1">Database Definition</h3>
 
 <p>This section provides a brief description of database definitions. See
-package org.epics.ioc.dbDefinition for complete details.</p>
+package org.epics.ioc.dbd for complete details.</p>
 
 <h4 id="Basic">Basic Syntax</h4>
 
@@ -677,8 +615,7 @@ where
 <h4 id="Example1">Example Structure, Menu, and Support Definitions</h4>
 
 <p>The following are examples of menu and structure definitions. These are
-taken from menuStructureSupportDBD.xml which resides in package
-org.epics.ioc.support :</p>
+taken from menuStructureSupport.xml which resides in javaIOC/dbd:</p>
 <pre>&lt;menu name = "menuPriority"&gt;
     &lt;choice&gt;lowest&lt;/choice&gt;
     &lt;choice&gt;lower&lt;/choice&gt;
@@ -790,17 +727,17 @@ javaIOC will use these as well as the soft link support interfaces.</p>
 &lt;/structure&gt;
 &lt;linkSupport name = "asynLink" configStructureName = "asynLink" /&gt;</pre>
 
-<h4 id="Record1">Record Type Examples</h4>
+<h4 id="Record">Record Type Examples</h4>
 
 <p>A sample record type definition was presented above. The last section
 discusses some possibilities for defining complex devices.</p>
 
-<h3 style="text-align: center" id="Record2">Record Instance Definition</h3>
+<h3 style="text-align: center" id="Record1">Record Instance Definition</h3>
 
 <h4 id="Syntax1">Syntax</h4>
 
 <p>The syntax for a record instance is:</p>
-<pre>&lt;record type = "recordType" name = "recordName" recordSupportName = "supportName"&gt;
+<pre>&lt;record type = "recordType" name = "recordName" supportName = "supportName"&gt;
     fieldAssignment
 &lt;/record&gt;</pre>
 
@@ -853,30 +790,26 @@ The interfaces are a combination of reflection ( what is a field) and data
         pvString,
         pvEnum,
         pvStructure,
-        pvArray;
+        pvArray,
+        pvMenu,
+        pvLink;
     }</pre>
+<pre>    </pre>
 
-<p>Access to database fields from outside a record, i.e. Channel Access,
-always uses only the pv types.</p>
-
-<p>The IOC database adds the types:</p>
-<pre>    public enum DBType {
-        dbPvType,
-        dbMenu,
-        dbStructure,
-        dbArray,
-        dbLink;
-    }
-    </pre>
-
-<h3 style="text-align: center" id="Data">Data Access Interfaces</h3>
+<h3 style="text-align: center" id="Data">Data Interfaces</h3>
 
 <p>The following describe the interfaces for accessing the data a field
 contains.</p>
 
 <p>The data interfaces for accessing Type data are:</p>
 <pre>    interface PVData {
+         String getFullFieldName();
          Field getField(); // get the reflection interface
+         PVData getParent();
+         PVRecord getPVRecord();
+         void replacePVData(PVData newPVData);
+         String getSupportName();
+         String setSupportName(String name);
          String toString();
          String toString(int indentLevel);
     }
@@ -898,6 +831,11 @@ contains.</p>
     interface PVStructure extends PVData {
         PVData[] getFieldPVDatas();
     }
+    public interface PVMenu extends PVEnum {}
+    public interface PVLink extends PVData {
+        PVStructure getConfigurationStructure();
+        boolean setConfigurationStructure(PVStructure pvStructure);
+    }
     interface PVArray extends PVData{
         int getLength();
         void setLength(int len);
@@ -912,35 +850,26 @@ contains.</p>
         int get(int offset, int len, BooleanArrayData data);
         int put(int offset, int len, boolean[]from, int fromOffset);
     }
-    // ... for arrays of other pv Types</pre>
+    // ... for arrays of other pv Types
+    public interface PVRecord extends PVStructure {
+        String getRecordName();
+        void message(String message, MessageType messageType);
+    }</pre>
 
 <p>The following interfaces extend the PVData interfaces for DBType data:</p>
 <pre>    interface DBData extends PVData {
-        DBDField getDBDField(); // get the reflection interface
-        DBStructure getParent();
-        DBRecord getRecord();
+        DBRecord getDBRecord();
         void addListener(DBListener listener);
         void removeListener(DBListener listener);
         void postPut();
-        void postPut(DBData dbData);
+        Support getSupport();
+        void setSupport(Support support);
     }
-    interface DBBoolean extends DBData, PVBoolean{}
-    // ... similar interfaces for all other PVData interfaces
-    interface DBStructure extends DBData, PVStructure {
-        DBData[] getFieldDBDatas();
-        int getFieldDBDataIndex(String fieldName);
-        DBStructure getParent();
-    }
-    interface DBLink extends DBStructure {
-        String getConfigStructureName();
-        void putConfigStructureName(String name);
-        String getLinkSupportName();
-        void putLinkSupportName(String name);
-        DBStructure getConfigStructure();
-        void putConfigStructure(DBStructure dbStructure);
-    }
-    interface DBRecord extends DBStructure {
-        String getRecordName();
+
+    interface DBRecord extends DBData, PVRecord {
+        void lock();
+        void unlock();
+        ...
     }</pre>
 
 <h2 style="text-align: center" id="Database2">Database Reflection</h2>
@@ -955,55 +884,56 @@ properties of each field of each record instance.</p>
 
 <p>The reflection interfaces for pvAccess data are:</p>
 <pre>    interface Property {
-        String getName();
-        String getFieldName();
+        String getPropertyName();
+        String getAssociatedFieldName();
+        String toString();
+        String toString(int indentLevel);
     }
-    interface Field {
-        String getName();
+
+    public interface FieldAttribute {
+        String getDefault();
+        boolean isReadOnly();
+        boolean isDesign();
+        boolean isLink();
+        int getAsl();
+        String toString();
+        String toString(int indentLevel);
+    }
+
+
+    interface Field{
+        String getFieldName();
         Property[] getPropertys();
         Property getProperty(String propertyName);
         Type getType();
+        String getSupportName();
+        void setSupportName(String name);
+        boolean isMutable();
+        void setMutable();
+        FieldAttribute getFieldAttribute();
+        String toString();
+        String toString(int indentLevel);
     }
+
     interface Enum extends Field {
         boolean isChoicesMutable();
     }
-    interface Array extends Field{
-        Type getElementType();
+
+    interface Menu extends Enum {
+        String getMenuName();
     }
+
     interface Structure extends Field{
         String getStructureName();
         String[] getFieldNames();
         Field getField(String fieldName);
         int getFieldIndex(String fieldName);
         Field[] getFields();
+    }
+
+    interface Array extends Field{
+        Type getElementType();
     }</pre>
-
-<h4 id="dbAccess">dbAccess reflection</h4>
-
-<p>For DBType reflection the following are added:</p>
-<pre>interface DBDAttribute {
-    String getName();
-    DBType getDBType();
-    Type getType();
-    String getDefault();
-    boolean isReadOnly();
-    boolean isDesign();
-    boolean isLink();
-    int getAsl();
-    DBDMenu getMenu();
-    DBDStructure getStructure();
-    DBType getElementDBType();
-    Type getElementType();
-}
-interface DBDField extends Field {
-    DBType getDBType();
-    DBDAttribute getAttribute();
-}
-public interface DBDArrayField extends DBDField, Array {}
-public interface DBDEnumField extends DBDField, Enum { }
-public interface DBDLinkField extends DBDStructureField { }
-public interface DBDMenuField extends DBDField, Enum { }
-public interface DBDStructureField extends DBDField,Structure { }</pre>
 
 <h4 id="Example3">Example: Database Access via Reflection</h4>
 An interface IOCDB provides a method that locates the interface for a record
@@ -1011,108 +941,85 @@ instance. For example, to locate the aiAnalogExample record the call is:
 <pre>    DBRecord dbRecord = iocdb.findRecord("exampleAiLinear");</pre>
 
 <p>Starting with this the data in the value field can be read as follows:</p>
-<pre>    DBData[] dbData = dbRecord.getFieldDBDatas();
-    int index = dbRecord.getFieldDBDataIndex("value");
-    assert(dbData[index].getField().getType==Type.dbDouble);
-    DBDouble valueData= (DBDouble)dbData[index];
+<pre>    PVData[] pvData = dbRecord.getFieldPVdatas();
+    Structure structure = (Structure)dbRecord.getField();
+    int index = structure.getFieldIndex("value");
+    assert(pvData[index].getField().getType==Type.dbDouble);
+    PVDouble valueData= (PVDouble)pvData[index];
     double value = valueData.get();</pre>
 
 <p>The data for exampleAiLinear.aiLinear.aiRaw.value can also be located and
 read via reflection as follows:</p>
-<pre>    DBData[] dbData = dbRecord.getFieldDBDatas();
-    int index = dbRecord.getFieldDBDataIndex("aiLinear");
-    assert(dbData[index].getField().getType()==Type.pvStructure);
-    DBStructure dbStructure = (DBStructure)dbData[index];
-    index = dbStructure.getFieldDBDataIndex("aiRaw");
-    dbData = dbStructure.getFieldDBDatas();
-    assert(dbData[index].getField().getType()==Type.pvStructure);
-    dbStructure = (DBStructure)dbData[index];
-    index = dbStructure.getFieldDBDataIndex("value");
-    dbData = dbStructure.getFieldDBDatas();
-    assert(dbData[index].getField().getType==Type.dbInt);
-    DBInt valueData = (DBInt)dbData[index];
+<pre>    PVData[] pvData = dbRecord.getFieldPVdatas();
+    Structure structure = (Structure)dbRecord.getField();
+    int index = structure.getFieldIndex("aiLinear");
+    assert(pvData[index].getField().getType()==Type.pvStructure);
+    PVStructure pvStructure = (PVStructure)pvData[index];
+    Structure aiLinearStructure = (Structure)pvStructure.getField();
+    index = aiLinearStructure.getFieldIndex("aiRaw");
+    pvData = pvStructure.getFieldPVdatas();
+    assert(pvData[index].getField().getType()==Type.pvStructure);
+    pvStructure = (PVStructure)pvData[index];
+    Structure aiRawStructure = (Structure)pvStructure.getField();
+    index = aiRawStructure.getFieldIndex("value");
+    pvData = pvStructure.getFieldPVdatas();
+    assert(pvData[index].getField().getType==Type.pvInt);
+    PVInt valueData = (PVInt)pvData[index];
     int value = valueData.get();</pre>
 
 <p>The next section provides a much easier way to find the data interfaces
 for a field.</p>
 
-<h3 style="text-align: center" id="DBAccess">DBAccess</h3>
+<h3 style="text-align: center" id="PVAccess">PVAccess</h3>
 
-<p>DBAccess is an interface for accessing a record instance. A DBAccess can
+<p>PVAccess is an interface for accessing a record instance. A PVAccess can
 be created via:</p>
-<pre>    DBAccess dbAccess = iocdb.createAccess(instanceName);</pre>
+<pre>    PVAccess pvAccess = PVAccessFactory.create(instanceName);</pre>
 Where instanceName is a Java String. For example:
-<pre>    DBAccess dbAccess = iocdb.createAccess("exampleAiLinear");</pre>
+<pre>    PVAccess pvAccess = PVAccessFactory.create("exampleAiLinear");</pre>
 
-<p>DBAccess provides the following methods:</p>
+<p>PVAccess provides the following methods:</p>
 <pre>    public enum AccessSetResult {
         otherRecord,
         thisRecord,
         notFound
     }
 
-    public interface DBAccess {
-        DBRecord getDbRecord();
-        AccessSetResult setField(String name);
+    interface PVAccess {
+        PVRecord getPVRecord();
+        AccessSetResult findField(String name);
         String getOtherRecord();
         String getOtherField();
-        void setField(DBData dbData);
-        DBData getField();
-        DBData getPropertyField(Property property);
-        DBData getPropertyField(String propertyName);
-        void replaceField(DBData oldField, DBData newField);
-    }</pre>
-where
-<dl>
-  <dt>getDBRecord</dt>
-    <dd>Returns the interface for the record instance.</dd>
-  <dt>setField</dt>
-    <dd>Locates a field. It returns one of the following:
-      <dl>
-        <dt>otherRecord</dt>
-          <dd>The data is located in another record. The other record name
-            can be obtained by calling getOtherRecord and the field by
-            calling getOtherField.</dd>
-        <dt>thisRecord</dt>
-          <dd>The field is located in this record. It sets the field that
-            will be used for future calls to setField(name) and for calls to
-            getField and getPropertyField.</dd>
-        <dt>notFound</dt>
-          <dd>The field was not found.</dd>
-      </dl>
-    </dd>
-  <dt>setField(DBData dbData)</dt>
-    <dd>sets the field that will be used as the base for future calls to
-      setField(name) and for calls to getField and getPropertyField.</dd>
-  <dt>getField</dt>
-    <dd>Returns the interface for the field located via the call to
-    setField</dd>
-  <dt>getPropertyField</dt>
-    <dd>Returns the interface for the property field associated with the
-      field located via the call to setField.</dd>
-</dl>
+        void setPVField(PVData pvData);
+        PVData getField();
+    }
 
-<p>The argument to setField(name) has the form:</p>
+    public class PVAccessFactory {
+        public static PVAccess createPVAccess(PVRecord pvRecord);
+    }</pre>
+
+<p>The argument to findField(name) has the form:</p>
 <pre>    name.name...</pre>
 Each <span style="font-family: courier;">name</span> is the name of a
 property or a field. For example:
-<pre>    DBAccess dbAccess = IOCDB.createAccess("exampleAiLinear");
-    boolean found = dbAccess.setField("aiLinear.aiRaw.value");</pre>
+<pre>    PVAccess pvAccess = PVAccessFactory.create("exampleAiLinear");
+    boolean found = pvAccess.findField("aiLinear.aiRaw.value");</pre>
 
 <p>Locates the value field of the aiRaw structure of the aiLinear structure
 in the aiLinearRecord.</p>
 
 <p>But because the way properties are defined, the same field can be located
 via the call:</p>
-<pre>      found = dbAccess.setField("rawValue");</pre>
+<pre>      found = pvAccess.findField("rawValue");</pre>
 
-<p>A later section provides more examples of DBAccess.</p>
+<p>A later section provides more examples of PVAccess.</p>
 <hr />
 
-<h2 style="text-align: center" id="Record">Record Processing: Brief Theory of
-Operation</h2>
+<h2 style="text-align: center" id="Record2">Record Processing: Brief Theory
+of Operation</h2>
+<hr />
 
-<p>Package org.epics.ioc.dbProcess describes and implements code directly
+<p>Package org.epics.ioc.process describes and implements code directly
 related to record processing. This section gives a brief introduction to
 record processing.</p>
 
@@ -1210,17 +1117,6 @@ javaIOC records. It provides standard support for the following:</p>
       IMPLEMENTED.</dd>
 </dl>
 
-<p>In addition it provides the following XML Database Definition files.</p>
-<dl>
-  <dt>menuStructureSupportDBD.xml</dt>
-    <dd>Menu, Structure, and Support Database Definitions required by support
-      provided with javaIOC.</dd>
-  <dt>commonDBD.xml</dt>
-    <dd>Database Definitions for fields that should (must?) be part of every
-      record type. This should be included at the beginning of the Database
-      Definition for each record type.</dd>
-</dl>
-
 <p>In addition a file that does not have an implementation is present.
 Something like this will be part of the standard set of record types provided
 by javaIOC. It will most likely be moved to a different package perhaps:
@@ -1273,7 +1169,7 @@ several ways. The examples are:</p>
     &lt;field name = "value" type = "double"&gt;
         &lt;property name = "status" associatedField = "status" /&gt;
         &lt;property name = "severity" associatedField = "severity" /&gt;
-        &lt;property name = "timeStamp" associatedField = "timeStamp" /&gt;
+        &lt;property name = "timeStamp" associatedField = "/timeStamp" /&gt;
         &lt;property name = "units" associatedField = "units" /&gt;
         &lt;property name = "displayLimit" associatedField = "displayLimit" /&gt;
     &lt;/field&gt;
@@ -1281,7 +1177,7 @@ several ways. The examples are:</p>
     &lt;field name = "units" type = "string" /&gt;
     &lt;field name = "status" type = "string" /&gt;
     &lt;field name = "severity" type = "menu" menuName = "menuAlarmSevr" /&gt;
-    &lt;field name = "timeStamp" type = "structure" structureName = "timeStamp" /&gt;
+    &lt;field name = "timeStamp" type = "structure" structureName = "/timeStamp" /&gt;
     &lt;field name = "displayLimit"
          type = "structure" structureName = "displayLimit" /&gt;
     &lt;field name = "input" type = "link" /&gt;
@@ -1964,40 +1860,42 @@ is the name of the record that has the current.</p>
 </ol>
 <hr />
 
-<h2 id="Examples">Examples of Accessing Fields via DBAccess</h2>
+<h2 id="Examples">Examples of Accessing Fields via PVAccess</h2>
 <hr />
 
-<p>DBAccess is an interface that allows "device"oriented access. DBAccess
+<p>PVAccess is an interface that allows "device"oriented access. PVAccess
 uses the structure property definitions that are designed fot this purpose.
 It also is usefull for obtaining the properties associated with a field
 without using the reflection interfaces.</p>
 
 <h3 id="exampleAiE">exampleAiEmbeded</h3>
-<pre>    DBAccess dbAccess = IOCDB.createAccess("exampleAiEmbeded");
+<pre>    PVAccess pvAccess = PVAccessFactory.create("exampleAiEmbeded");
 
     // get the value field and make sure its type is double
-    assert(dbAccess.setField("value")==AccessSetResult.thisRecord);
-    DBData valueData = dbAccess.getField();
+    assert(pvAccess.findField("value")==AccessSetResult.thisRecord);
+    PVData valueData = pvAccess.getField();
     Field field = valueData.getField();
     assert(field.getType()==Type.pvDouble);
-    double value = ((DBDouble)valueData).get();
+    double value = ((PVDouble)valueData).get();
 
     // now get the status for field value
-    DBData valueStatusData = dbAccess.getPropertyField("status");
-    assert(valueStatusData!=null);
+    pvAccess.findField(valueData);
+    assert(pvAccess.findField("status")==AccessSetResult.thisRecord);
+    PVData valueStatusData = pvAccess.getField();
     assert(field.getType()==Type.pvString);
-    String status = ((DBString)valueStatusData).get();
-
+    String status = ((PVString)valueStatusData).get();
     // now get rawData and rawData status
-    assert(dbAccess.setField("rawData")==AccessSetResult.thisRecord));
-    DBData rawValueData = dbAccess.getField();
+    pvAccess.findField(valueData);
+    assert(pvAccess.findField("rawData")==AccessSetResult.thisRecord));
+    PVData rawValueData = pvAccess.getField();
     Field field = rawValueData.getField();
     assert(field.getType()==Type.pvInt);
-    int rawValue = ((DBInt)rawValueData).get();
-    DBData rawValueStatusData = dbAccess.getPropertyField("status");
-    assert(rawValueStatusData!=null);
+    int rawValue = ((PVInt)rawValueData).get();
+    assert(pvAccess.findField("status")==AccessSetResult.thisRecord));
+    PVData rawValueStatusData = pvAccess.getField();
+    field = rawValueStatusData.getField();
     assert(field.getType()==Type.pvString);
-    String status = ((DBString)valueStatusData).get();</pre>
+    String status = ((PVString)rawValueStatusData).get();</pre>
 
 <h3 id="exampleAi">exampleAi</h3>
 
@@ -2010,55 +1908,55 @@ that the record name is different.</p>
 either via links or by embeding. The example is for the linked instance but
 will also work for the embeded instance. The following is an example of code
 to access the power, current, and voltage.</p>
-<pre>    DBAccess powerSupply = IOCDB.createAccess("examplePowerSupplyLinked")
-    DBAccess powerAccess;
-    DBAccess currentAccess;
-    DBAcess voltageAccess;
-    DBData power;
-    DBData current;
-    DBData voltage;
+<pre>    PVAccess powerSupply = PVAccessFactory.create("examplePowerSupplyLinked")
+    PVAccess powerAccess;
+    PVAccess currentAccess;
+    PVAcess voltageAccess;
+    PVData power;
+    PVData current;
+    PVData voltage;
     AccessSetResult setResult;
     
     // get access to power
-    setResult = powerSupply.setField("power");
+    setResult = powerSupply.findField("power");
     switch(setResult) {
     case notFound: throw new Exception("power not found");
     case thisRecord: 
         powerAccess = powerSupply; break;
     case otherRecord:
-        powerAccess = IOCDB.createAccess(powerSupply.getOtherRecord());
+        powerAccess = PVAccessFactory.create(powerSupply.getOtherRecord());
         if(powerAccess==null) throw new Exception("power not found");
-        setResult = powerAccess.setField(powerSupply.getOtherField());
+        setResult = powerAccess.findField(powerSupply.getOtherField());
         if(setResult!=AccessSetResult.thisRecord) throw new Exception("power not found");
         break;
     }
     power = powerAccess.getField();
 
     // get access to current
-    setResult = powerSupply.setField("current");
+    setResult = powerSupply.findField("current");
     switch(setResult) {
     case notFound: throw new Exception("current not found");
     case thisRecord: 
         currentAccess = powerSupply; break;
     case otherRecord:
-        currentAccess = IOCDB.createAccess(powerSupply.getOtherRecord());
+        currentAccess = PVAccessFactory.create(powerSupply.getOtherRecord());
         if(currentAccess==null) throw new Exception("current not found");
-        setResult = currentAccess.setField(powerSupply.getOtherField());
+        setResult = currentAccess.findField(powerSupply.getOtherField());
         if(setResult!=AccessSetResult.thisRecord) throw new Exception("current not found");
         break;
     }
     current = current.getField();
 
     // get access to voltage
-    setResult = powerSupply.setField("voltage");
+    setResult = powerSupply.findField("voltage");
     switch(setResult) {
     case notFound: throw new Exception("voltage not found");
     case thisRecord: 
         voltageAccess = powerSupply; break;
     case otherRecord:
-        voltageAccess = IOCDB.createAccess(powerSupply.getOtherRecord());
+        voltageAccess = PVAccessFactory.create(powerSupply.getOtherRecord());
         if(voltageAccess==null) throw new Exception("voltage not found");
-        setResult = voltageAccess.setField(powerSupply.getOtherField());
+        setResult = voltageAccess.findField(powerSupply.getOtherField());
         if(setResult!=AccessSetResult.thisRecord) throw new Exception("voltage not found");
         break;
     }
@@ -2067,7 +1965,7 @@ to access the power, current, and voltage.</p>
     // can now get data as well as properties for power, current, voltage</pre>
 
 <p>NOTE: The example is not correct because of calls like</p>
-<pre>    DBAccess access = IOCDB.createAccess(powerSupply.getOtherRecord());</pre>
+<pre>    PVAccess access = PVAccessFactory.create(powerSupply.getOtherRecord());</pre>
 
 <p>This assumes the records are located in the same IOC as record
 examplePowerSupplyLinked. In a real example channel access, not database

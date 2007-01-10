@@ -9,10 +9,17 @@ import java.util.*;
 import java.util.concurrent.locks.*;
 
 /**
+ * Create an IOCExecutor.
+ * The executor implements a set of threads, one for each ScanPriority.
  * @author mrk
  *
  */
 public class IOCExecutorFactory {
+    /**
+     * Create a new set of threads.
+     * @param name The name for the set of threads.
+     * @return The IOCExecutor interface.
+     */
     static public IOCExecutor create(String name) {
         return new ExecutorInstance(name);
     }

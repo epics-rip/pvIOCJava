@@ -1,0 +1,246 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+       "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta http-equiv="content-type" content="text/html; charset=iso-8859-1" />
+  <title>EPICS JavaIOC: support</title>
+</head>
+
+<body>
+<h1 style="text-align: center">EPICS JavaIOC: dbd<br />
+2007.01.05</h1>
+CONTENTS
+
+<div class="toc">
+<ul>
+  <li><a href="#Overview">Overview</a></li>
+  <li><a href="#Standard">Standard Database Definitions</a>
+    <ul>
+      <li><a href="#menu.dbd">menu.dbd</a></li>
+      <li><a href="#structure.">structure.xml</a></li>
+      <li><a href="#support.xm">support.xml</a></li>
+      <li><a href="#common.xml">common.xml</a></li>
+    </ul>
+  </li>
+</ul>
+</div>
+<hr />
+
+<h2 style="text-align: center" id="Overview">Overview</h2>
+<hr />
+
+<p>This package describes the Database Definition Files in javaIOC/dbd.</p>
+<dl>
+  <dt>menu.xml</dt>
+    <dd>Standard menu definitions.</dd>
+  <dt>structure.xml</dt>
+    <dd>Standard structure definitions.</dd>
+  <dt>support.xml</dt>
+    <dd>Support definitions for support implemented by javaIOC.</dd>
+  <dt>menuStructureSupport.xml</dt>
+    <dd>Includes the menu, structure, and support definitions.</dd>
+  <dt>common.xml</dt>
+    <dd>Database Definitions for fields that should (must?) be part of every
+      record type. This should be included at the beginning of the Database
+      Definition for each record type.</dd>
+</dl>
+
+<h2 style="text-align: center;" id="Standard">Standard Database
+Definitions</h2>
+<hr />
+
+<h3 id="menu.dbd">menu.dbd</h3>
+
+<p>Definitions for the following menus:</p>
+<dl>
+  <dt>priority</dt>
+    <dd>The scan priorities: lowest,...,highest</dd>
+  <dt>scan</dt>
+    <dd>The scan types:
+      <dl>
+        <dt>passive</dt>
+          <dd>A record that is neither periodically or event scanned.
+            Something elase can make it process. For example anothe record
+            with a process link.</dd>
+        <dt>event</dt>
+          <dd>An event scanned record. In this case an eventName is also
+            assigned to the record.</dd>
+        <dt>periodioc</dt>
+          <dd>A periodically scanned record. In this case a rate is also
+            assigned to the record.</dd>
+      </dl>
+    </dd>
+  <dt>alarmSeverity</dt>
+    <dd>The alarm severities: none,minor,major,invalid</dd>
+  <dt>monitorType</dt>
+    <dd>The types change, deltaChange, and percentageChange.</dd>
+</dl>
+
+<h3 id="structure.">structure.xml</h3>
+
+<p>Definitions for the following structures:</p>
+<dl>
+  <dt>timeStamp</dt>
+  <dl>
+    <dt>secondsPastEpoch</dt>
+      <dd>Seconds past the epoch which is Jan 1, 1970 UTC. This is compatible
+        with Java and POSIX.</dd>
+    <dt>nanoSeconds</dt>
+      <dd>nanoseconds within the second.</dd>
+  </dl>
+  <dt>scan</dt>
+  <dl>
+    <dt>priority</dt>
+      <dd>The thread priority for a periodic and event scanning.</dd>
+    <dt>scan</dt>
+      <dd>Scan type, i.e. passive, event, or periodic</dd>
+    <dt>rate</dt>
+      <dd>Periodic scan rate in seconds</dd>
+    <dt>eventName</dt>
+      <dd>The event name for event scanned records.</dd>
+  </dl>
+  <dt>processLink</dt>
+  <dl>
+    <dt>pvname</dt>
+      <dd>recordName.fieldName of link</dd>
+    <dt>inheritSeverity</dt>
+      <dd>Should this record be put in alarm if the linked record is in
+      alarm?</dd>
+  </dl>
+  <dt>monitorLink</dt>
+  <dl>
+    <dt>pvname</dt>
+      <dd>recordName.fieldName of link</dd>
+    <dt>type</dt>
+      <dd>A monitorType menu.</dd>
+    <dt>deadband</dt>
+      <dd>If monitorType is deltaChange or percentageChange this is the
+        deadband for reporting monitors.</dd>
+    <dt>onlyWhileProcessing</dt>
+      <dd>Look only for changes while record is being processed.</dd>
+    <dt>queueSize</dt>
+      <dd>Must be greater than 1. The default is 2.</dd>
+    <dt>reportOverrun</dt>
+      <dd>If the data queue is overrun should it be reported by setting
+        status and severity?</dd>
+    <dt>process</dt>
+      <dd>Should the record containing the link be processed after the
+        monotered data is read.</dd>
+    <dt>inheritSeverity</dt>
+      <dd>Should this record be put in alarm if the linked record is in
+      alarm?</dd>
+  </dl>
+  <dt>monitorNotifyLink</dt>
+  <dl>
+    <dt>pvname</dt>
+      <dd>recordName.fieldName of link</dd>
+    <dt>type</dt>
+      <dd>A monitorType menu.</dd>
+    <dt>deadband</dt>
+      <dd>If monitorType is deltaChange or percentageChange this is the
+        deadband for reporting monitors.</dd>
+    <dt>onlyWhileProcessing</dt>
+      <dd>Look only for changes while record is being processed.</dd>
+  </dl>
+  <dt>inputLink</dt>
+  <dl>
+    <dt>pvname</dt>
+      <dd>recordName.fieldName of link</dd>
+    <dt>process</dt>
+      <dd>Should the linked record be processed before getting data?</dd>
+    <dt>inheritSeverity</dt>
+      <dd>Should this record be put in alarm if the linked record is in
+      alarm?</dd>
+  </dl>
+  <dt>outputLink</dt>
+  <dl>
+    <dt>pvname</dt>
+      <dd>recordName.fieldName of link</dd>
+    <dt>process</dt>
+      <dd>Should the linked record be processed after putting data?</dd>
+    <dt>inheritSeverity</dt>
+      <dd>Should this record be put in alarm if the linked record is in
+      alarm?</dd>
+  </dl>
+  <dt>disableLink</dt>
+    <dd>Defined but not used. Support must be created.</dd>
+  <dt>asynLink</dt>
+    <dd>Defined but not used. Support must be created.</dd>
+  <dt>linkArrayElement</dt>
+  <dl>
+    <dt>wait</dt>
+      <dd>After this link is started should linkArraySupport wait for
+        completion of all links currently started before starting the next
+        link.</dd>
+    <dt>link</dt>
+      <dd>A database link</dd>
+    <dt>name</dt>
+      <dd>A name that can be used is desired. For example a calculation
+        record (not implemented) could use it.</dd>
+  </dl>
+  <dt>linkArrayElement</dt>
+  <dl>
+    <dt>wait</dt>
+      <dd>If true than no more links will be processed until this and all
+        preceeding links complete.</dd>
+    <dt>link</dt>
+      <dd>The link</dd>
+    <dt>name</dt>
+      <dd>A name that can be assigned to the link. This will be used for
+        calculations.</dd>
+  </dl>
+  <dt>displayLimit</dt>
+    <dd>Can be used as needed.</dd>
+  <dt>linearConvertInput</dt>
+    <dd>Not currently used.</dd>
+  <dt>linearConvertOutput</dt>
+    <dd>Not currently used.</dd>
+</dl>
+
+<h3 id="support.xm">support.xml</h3>
+
+<p>Definitions for the following support:</p>
+<dl>
+  <dt>linearConvertInput</dt>
+    <dd>Not implemented.</dd>
+  <dt>linearConvertOutput</dt>
+    <dd>Not implemented.</dd>
+  <dt>processLink</dt>
+  <dt>monitorLink</dt>
+  <dt>inputLink</dt>
+  <dt>outputLink</dt>
+  <dt>asynLink</dt>
+    <dd>Not implemented</dd>
+  <dt>linkArray</dt>
+  <dt>scan</dt>
+    <dd>Support for the scan field. This is called by recordProcess. This all
+      records that have a scan field as a top level field can be periodically
+      or event scanned.</dd>
+</dl>
+
+<h3 id="common.xml">common.xml</h3>
+
+<p>This has definitions for fields that are common to all (most?) record
+types.</p>
+<pre>
+&lt;?xml version="1.0" ?&gt;
+&lt;DBDefinition&gt;
+    &lt;field name = "status" type = "string" /&gt;
+    &lt;field name = "severity" type = "menu" menuName = "alarmSeverity" /&gt;
+    &lt;field name = "timeStamp" type = "structure" structureName = "timeStamp"/&gt;
+    &lt;field name = "scan" type = "structure" structureName = "scan"
+         supportName = "scan" /&gt;
+&lt;/DBDefinition&gt;
+</pre>
+
+<p>For example a record type for a double record could start with:</p>
+<pre>
+&lt;?xml version="1.0" ?&gt;
+&lt;DBDefinition&gt;
+&lt;include addPath = "src/org/epics/ioc/support" /&gt;
+
+&lt;recordType name = "doubleRecord" supportName = "doubleRecord" &gt;
+    &lt;include href = "commonDBD.xml" /&gt;</pre>
+</body>
+</html>

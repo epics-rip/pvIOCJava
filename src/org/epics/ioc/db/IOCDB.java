@@ -5,6 +5,7 @@
  */
 package org.epics.ioc.db;
 
+import org.epics.ioc.pv.PVAccess;
 import org.epics.ioc.util.*;
 
 import java.util.*;
@@ -79,12 +80,6 @@ public interface IOCDB {
      * @param requestor The requestor.
      */
     void removeRequestor(Requestor requestor);
-    /**
-     * Provide access to a record and it's fields.
-     * @param recordName The record instance name.
-     * @return The access interface.
-     */
-    DBAccess createAccess(String recordName);
     /**
      * Generate a list of record instance with names that match the regular expression.
      * @param regularExpression The regular expression.

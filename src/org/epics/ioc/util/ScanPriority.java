@@ -40,6 +40,9 @@ public enum ScanPriority {
      */
     highest;
     
+    /**
+     * Get the java priority corresponding to each ScanPriority.
+     */
     public static final int[] javaPriority = {
         Thread.MIN_PRIORITY,
         Thread.MIN_PRIORITY + 1,

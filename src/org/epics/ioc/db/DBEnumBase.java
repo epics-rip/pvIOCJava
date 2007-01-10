@@ -24,7 +24,7 @@ public class DBEnumBase extends AbstractDBData implements PVEnum {
     /**
      * constructor that derived classes must call.
      * @param parent The parent interface.
-     * @param dbdEnumField the reflection interface for the DBEnum data.
+     * @param enumField the reflection interface for the DBEnum data.
      * @param choice the choices for the enum.
      */
     public DBEnumBase(DBData parent,Enum enumField, String[]choice) {

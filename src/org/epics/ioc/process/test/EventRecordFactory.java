@@ -55,17 +55,17 @@ public class EventRecordFactory {
          * @see org.epics.ioc.process.Support#initialize()
          */
         public void initialize() {
-            IOCDB iocdb = dbRecord.getIOCDB();
-            DBAccess dbAccess = iocdb.createAccess(dbRecord.getRecordName());
+            PVAccess pvAccess = PVAccessFactory.createPVAccess(dbRecord);
             PVData pvData;
-            AccessSetResult result = dbAccess.setField("value");
+            pvAccess.findField(null);
+            AccessSetResult result = pvAccess.findField("value");
             if(result!=AccessSetResult.thisRecord) {
                 dbRecord.message(
                         "field value does not exist",
                         MessageType.error);
                 return;
             }
-            pvData = dbAccess.getField();
+            pvData = pvAccess.getField();
             if(pvData.getField().getType()!=Type.pvString) {
                 dbRecord.message(
                         "field value is not a string",

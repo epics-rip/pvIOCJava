@@ -10,7 +10,7 @@
 <body>
 <h1 style="text-align: center">EPICS JavaIOC: pv<br />
 package: org.epics.ioc.pv<br />
-2007.01.05</h1>
+2007.01.09</h1>
 CONTENTS
 
 <div class="toc">
@@ -41,8 +41,13 @@ CONTENTS
   <li><a href="#Base">Base Introspection Classes</a></li>
   <li><a href="#AbstractPV">AbstractPVData</a></li>
   <li><a href="#Convert">Convert</a></li>
-  <li><a href="#Field">Field Factory</a></li>
-  <li><a href="#Convert1">Convert Factory</a></li>
+  <li><a href="#PVAccess">PVAccess</a>
+    <ul>
+      <li><a href="#Overview1">Overview</a></li>
+      <li><a href="#Definition">Definition</a></li>
+      <li><a href="#findField">findField</a></li>
+    </ul>
+  </li>
 </ul>
 </div>
 <hr />
@@ -59,14 +64,15 @@ records together with support code:</p>
   <li>Each field can optionally have associated support.</li>
 </ul>
 
-<p>A PV Data has one of the following types:</p>
+<p>PVData, which is an interface for accessing the data residing in a field
+of a database record, has one of the following types:</p>
 <dl>
   <dt>primitive</dt>
     <dd>All Java primitive types except char, i.e. boolean, byte, short, int,
       float, and double.</dd>
   <dt>string</dt>
-    <dd>A Java String. NOTE: primitive and string types are considered scalar
-      types.</dd>
+    <dd>A Java String. Primitive and string types are considered scalar
+    types.</dd>
   <dt>enum</dt>
     <dd>A enum is an array of choices and an index that selects a choice.</dd>
   <dt>menu</dt>
@@ -94,11 +100,10 @@ TINI, DOOCS, etc.</p>
   <dt>Type</dt>
     <dd>An enum that describes the valid types.</dd>
   <dt>Reflection Interfaces</dt>
-    <dd>These are interfaces that describe a PV. They are designed so that
-      characteristics of a PV can be discovered without requiring access to
-      the data associated with it.</dd>
+    <dd>Interfaces that describe a PV. Characteristics of a PV can be
+      discovered without requiring access to the data associated with it.</dd>
   <dt>Data Interfaces</dt>
-    <dd>These are interfaces for accessing the data associated with a PV.</dd>
+    <dd>Interfaces for accessing the data associated with a PV.</dd>
   <dt>Conversion Facility</dt>
     <dd>Conversion of the data from any PV to a string is provided.</dd>
     <dd>Conversion from a string to a scalar or array of srings to an array
@@ -115,14 +120,19 @@ TINI, DOOCS, etc.</p>
   <dt>Field Factory</dt>
     <dd>This is an object factory that creates objects implementing the
       reflection interfaces.</dd>
-  <dt>Abstract and Base Field Classes</dt>
-    <dd>Abstract and Base classes for implementing Field objects.</dd>
+  <dt>Base Field Classes</dt>
+    <dd>Base classes for implementing Field objects.</dd>
+  <dt>AbstractPVData</dt>
+    <dd>An abstract base class for creating PVData implementations.</dd>
   <dt>Convert Factory</dt>
     <dd>An object factory that provides an implementation of the conversion
       facility.</dd>
+  <dt>PVAccess</dt>
+    <dd>An interface for locating fields within a record instance.</dd>
 </dl>
 
-<p>This package does not provide any facilities to create objects that
+<p>This package provides a factory for creating reflection interfaces. Other
+than AbstractPVData it does not provide any facilities to create objects that
 implement the Data Interfaces. This is the responsibility of a particular
 implementation. For a javaIOC, db provides an implementation.</p>
 
@@ -134,7 +144,7 @@ implementation. For a javaIOC, db provides an implementation.</p>
     <dd>The name used to specify the data this package supports.</dd>
   <dt>Field</dt>
     <dd>A Field has a name and a type that is any of the supported types. It
-      can also have properties.</dd>
+      has attributes and can also have properties.</dd>
   <dt>Property</dt>
     <dd>A property has a name and an associated field within the PV for the
       data.</dd>
@@ -157,6 +167,24 @@ follows:</p>
   <dt>rawValue</dt>
     <dd>status, timeStamp, and alarmSeverity.</dd>
 </dl>
+
+<p>The associatedField of a property is is used to locate a field that has
+the value for the property. Examples are given later in this document. An
+associatedField must be one of the following:</p>
+<dl>
+  <dt>/name</dt>
+    <dd>If the associatedField value starts with '/' then the search will
+      start at the record not with the field that has the property.</dd>
+  <dt>name</dt>
+    <dd>The name of a structure field.</dd>
+  <dt>name1.name2</dt>
+    <dd>name1 must be the name of a structure field. name2 must be a property
+      or field in the structure field.</dd>
+</dl>
+
+<p>Properties can also be used to create "device" abstractions. For example a
+powerSupply record type can be created that has properties like "current",
+"voltage", and "power".</p>
 
 <h3 id="Process1">Process Variable Data Types</h3>
 
@@ -199,13 +227,14 @@ follows:</p>
 
 <h3 id="Process2">Process Variable Reflection</h3>
 
-<p>Given a PV it is possible to introspect its fields. The reflection
-interface does not provide access to data. Other interfaces, e.g. Channel
-Access provide access to the data. The reason is that the data may not be
-available. For example when a client connects to a PV, the client library can
-obtain the reflection information without obtaining any data. Only when a
-client issues an I/O request will data be available. This separation is
-especially important for arrays and structures.</p>
+<p>Given a pvname, which consists of a record name and field name, it is
+possible to introspect the field. The reflection interface does not provide
+access to data. The PVData and derived PV interfaces provide access to the
+data. The reflection and data interfaces are separate because the data may
+not be available. For example when a client connects to a PV, the client
+library can obtain the reflection information without obtaining any data.
+Only when a client issues an I/O request will data be available. This
+separation is especially important for arrays and structures.</p>
 <hr />
 
 <h2 style="text-align: center" id="Type">Type</h2>
@@ -293,8 +322,42 @@ especially important for arrays and structures.</p>
   <li>Property
     <ul>
       <li>A property has a name.</li>
-      <li>A property has a an associated field that holds the data.</li>
+      <li>A property has an associated field that holds the data. The
+        associated field must be one of the following:
+        <dl>
+          <dt>name</dt>
+            <dd>If the field is a structure and name is a subfield of the
+              structure than it is the associated field. If field is not a
+              structure but name is a subfield of the parent structure it is
+              the associated field.</dd>
+          <dt>name1.name2</dt>
+            <dd>name1 is located just like name above. The meaning for name2
+              depends of the type of name 1. If name1 is a structure than
+              name2 must be a subfield of name1. If name 1 is a link than the
+              following is done: The link is assumed to have a configuration
+              structure that has a field with a "isLink" attribute (call this
+              field pvname). The pvname is the name of a field in another
+              record. In the other record the field located by pvname acts
+              just like name1 and name2 is handled just like it is for the
+              local record.</dd>
+          <dt>/name</dt>
+            <dd>name must be a subfield of the record instance.</dd>
+          <dt>/name1.name2</dt>
+            <dd>This is like name1.name2 except that the search is relative
+              to the record instance itself instead if the field that has the
+              property.</dd>
+        </dl>
+      </li>
       <li>A property can be converted to a string.</li>
+      <li>Properties can be used for two purposes:
+        <ol>
+          <li>Reference other fields related to a field. For example the
+            "value" field of many record types will have properties with
+            names "status", "severity", and "timeStamp".</li>
+          <li>"device" abstractions. For example a powerSupply record would
+            define properties "current", "voltage", and "Power".</li>
+        </ol>
+      </li>
     </ul>
   </li>
   <li>FieldAttribute<br />
@@ -307,8 +370,8 @@ especially important for arrays and structures.</p>
       <li>isDesign<br />
         Can this field be configurable by Database Configuration Tools.</li>
       <li>isLink<br />
-        Is this field a link to another record. This can only be true for a
-        pvString field.</li>
+        Is this field a link to another record. The field type must be
+      string.</li>
       <li>asl<br />
         Access security level. Currently access security is not
       implemented.</li>
@@ -369,6 +432,7 @@ record.</p>
         Field getField();
         PVData getParent();
         PVRecord getPVRecord();
+        void replacePVData(PVData newPVData);
         String getSupportName();
         String setSupportName(String name);
         String toString();
@@ -379,8 +443,8 @@ where
   <li>MessageType<br />
     This is defined in org.epics.ioc.util.</li>
   <li>Requestor<br />
-    Requestor is defined in package org.epics.ioc.util. For an IOC database
-    the methods are implemented as follows:
+    Requestor is also defined in org.epics.ioc.util. For an IOC database the
+    methods are implemented as follows:
     <ul>
       <li>getRequestorName<br />
         This is the full field name concatenated to the record name.</li>
@@ -408,6 +472,10 @@ where
   itself.</li>
   <li>getPVRecord<br />
     Get the interface for the record that contains this field.</li>
+  <li>replacePVData<br />
+    Replace this PVData. This is called by support code that wants to replace
+    the default implementation of a data field with it;s own implementation.
+    The new PVData must have the same Type as the oroginal field.</li>
   <li>getSupportName<br />
     Get the name of the support for this PV.</li>
   <li>setSupportName<br />
@@ -565,6 +633,11 @@ assumes that the client has permission to change the support:</p>
 </dl>
 
 <h3 id="PVArray">PVArray</h3>
+
+<p>PROBLEM: If the capacity is mutable then there is no maximum capacity. A
+channel access client could disable an ioc by sending very large arrays.
+Perhaps PVArray should have two additional methods: setMaxCapacity and
+getMaxCapacity. setMaxCapacity can have tight access security.</p>
 
 <p>The interfaces for array are:</p>
 <pre>    interface PVArray extends PVData {
@@ -781,6 +854,10 @@ introspection interfaces. The methods are:</p>
         public static Structure createStructureField(String fieldName,
             String structureName, Field[] field,
             Property[] property,FieldAttribute fieldAttribute);
+    }
+
+    public final class FieldFactory {
+        public static FieldCreate getFieldCreate();
     }</pre>
 
 <p>where</p>
@@ -842,6 +919,8 @@ introspection interfaces. The methods are:</p>
       must not be null. It is permissible to have a Field[] with length
     0.</dd>
 </dl>
+
+<p>The field factory gets the single implementation of FieldCreate.</p>
 <hr />
 
 <h2 style="text-align: center" id="Base">Base Introspection Classes</h2>
@@ -916,6 +995,7 @@ interfaces.</p>
 <p>The following is an abstract base class for implementing PVData
 interfaces:</p>
 <pre>public abstract class AbstractPVData implements PVData{
+    abstract public void replacePVData(PVData newPVData);
     protected AbstractPVData(PVData parent, Field field);
     protected void replaceField(Field field);
     protected void setRecord(PVRecord record);
@@ -1035,31 +1115,163 @@ interfaces:</p>
             int offset, int len, float[]from, fromOffset);
         int fromDoubleArray(PVData pv,
             int offset, int len, double[]from, fromOffset);
-    }</pre>
-The array methods all return the number of elements copied or converted. This
-can be less than <span style="font-family: courier;">len</span> if the PVData
-array contains less than len elements.
-<hr />
+    }
 
-<h2 style="text-align: center" id="Field">Field Factory</h2>
-<hr />
-
-<p>The field factory creates objects for each on the interspection
-interfaces. It has the following public methods:</p>
-<pre>public final class FieldFactory {
-    public static FieldCreate getFieldCreate();
-}</pre>
-<hr />
-
-<h2 style="text-align: center" id="Convert1">Convert Factory</h2>
-<hr />
-
-<p>The convert factory provides an implementation of the <span
-style="font-family: courier;">Convert</span> interface.</p>
-<pre>    public final class ConvertFactory {
+    public final class ConvertFactory {
         public static Convert getConvert();
     }</pre>
 
-<p>It provides a single implementation which is returned by getConvert.</p>
+<p>The array methods all return the number of elements copied or converted.
+This can be less than <span style="font-family: courier;">len</span> if the
+PVData array contains less than len elements.</p>
+
+<p>ConvertFactory gets the single implementation of Convert.</p>
+<hr />
+
+<h2 style="text-align: center" id="PVAccess">PVAccess</h2>
+<hr />
+
+<h3 id="Overview1">Overview</h3>
+
+<p>PVAccess is an interface that makes it easier to locate data fields of a
+record. It also works with field properties to support "device" oriented
+records, e.g. a "powerSupply" record.</p>
+
+<p>The key method of PVAccess is:</p>
+<pre>    findField(String name)</pre>
+
+<p>name is a string that has an arbitray number of field names separated by
+".". Simple examples are:</p>
+<pre>    value
+    value.status
+    value.timeStamp</pre>
+
+<p>If a powerSupply record type is properly defined then the following are
+valid names.</p>
+<pre>    current
+    current.status
+    current.rawValue
+    voltage
+    voltage.rawValue</pre>
+
+<p>In addition PVAccess provides access to structure arrays. For example if a
+record type implements an array of power supplies then the following are
+valid names.</p>
+<pre>    powerSupply[0].power
+    powerSupply[0].current
+    powerSupply[0].current.status</pre>
+
+<p>The javaIOC unnamed package provides more complete examples.</p>
+
+<h3 id="Definition">Definition</h3>
+
+<p>The definition of PVAccess is:</p>
+<pre>    public enum AccessSetResult {
+        otherRecord,
+        thisRecord,
+        notFound
+    }
+
+    interface PVAccess {
+        PVRecord getPVRecord();
+        AccessSetResult findField(String name);
+        String getOtherRecord();
+        String getOtherField();
+        void setPVField(PVData pvData);
+        PVData getField();
+    }
+
+    public class PVAccessFactory {
+        public static PVAccess createPVAccess(PVRecord pvRecord);
+    }</pre>
+
+<p>where</p>
+<dl>
+  <dt>AccessSetResult</dt>
+    <dd>The result of calling PVAccess.findField.
+      <dl>
+        <dt>otherRecord</dt>
+          <dd>The requested field is located in another record instance.
+            getOtherRecord and getOtherField can be called to get the record
+            and field that has the data. A new PVAccess must be created to
+            access the other record.</dd>
+        <dt>thisRecord</dt>
+          <dd>The requested record is located in this record. getField can be
+            called to get the interface for accessing the data.</dd>
+        <dt>notFound</dt>
+          <dd>The requested field could not be found.</dd>
+      </dl>
+    </dd>
+  <dt>PVAccess</dt>
+    <dd>The interface for locating data fields within a record instance.
+      <dl>
+        <dt>getPVRecord</dt>
+          <dd>Get the record instance interface this PVAccess accesses.</dd>
+        <dt>findField</dt>
+          <dd>Look for a data field. See below for the semantics for the
+            name. See AccessSetResult for the results. The search starts at
+            the current internal location, which initially is the record
+            itself. A null or empty name sets the internal location to the
+            record instance itself.</dd>
+        <dt>getOtherRecord</dt>
+          <dd>Get the name of the record instance is findField returned
+            AccessSetResult.otherRecord.</dd>
+        <dt>getOtherField</dt>
+          <dd>Get the name of the field in the other record instance is
+            findField returned AccessSetResult.otherRecord. This is the name
+            that can be given to setField in a new PVAccess for the other
+            record.</dd>
+        <dt>setPVField</dt>
+          <dd>Set the internal location in PVAccess so that the next request
+            to findField is relative to this field. The argument must either
+            be null or a value returned by getField. A null value sets the
+            internal location to the record itself.</dd>
+        <dt>getField</dt>
+          <dd>Get the interface for the data field located by findField when
+            it returns AccessSetResult.thisRecord.</dd>
+      </dl>
+    </dd>
+  <dt>PVAccessFactory</dt>
+    <dd>A factory for creating PVAccess</dd>
+</dl>
+
+<h3 id="findField">findField Examples</h3>
+
+<p>The semantics allow searching down a structure hierarchy and for searching
+via properties. At a particular level the search is first made for subfields
+and if the search fails than for properties.</p>
+
+<p>Lets first consider some examples of locating fields within a record
+instance. As the first example assume that a PVAccess has just been created,
+which means it is connected to a record. The following will locate the
+interfaces for a field named "value" and all properties of this field.</p>
+<pre>     // Assume pvRecord has been located
+     PVAccess pvAccess = PVAccessFactory.createPVAccess(pvRecord);
+     AccessSetResult setResult;
+     setResult = pvAccess.findField("value");
+     if(setResult!=AccessSetResult.thisRecord) { /*take some action*/}
+     PVData value = pvAccess.getField();
+     Property[] properties = value.getField.getPropertys();
+     while(Property property: properties) {
+         pvAccess.setField(value);
+         setResult = pvAccess.findField(property.getPropertyName());
+         if(setResult!=AccessSetResult.thisRecord) { /*take some action*/}
+         PVData propData = pvAccess.getField();
+         // do something with propData
+    }</pre>
+
+<p>Assume that a powerSupply array instance record defines an array of
+structures which each access a powerSupply:</p>
+<pre>    //Locate the current for the first powerSupply
+    setResult = pvAccess.findField("powerSupply[0].current");
+    if(setResult==AccessSetResult.thisRecord) {
+       // it is local
+    } else if(setResult==AccessSetResult.otherRecord) {
+       // it is remote. Must create a new PVAccess for it.
+    }
+    //Locate the rawValue for the current for the third power supply
+    pvAccess.findField(null); // set internal location to the record itself
+    setResult = pvAccess.findField("powerSupply[2].current.rawValue");
+    ...</pre>
 </body>
 </html>

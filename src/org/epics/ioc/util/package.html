@@ -10,11 +10,62 @@
 <body>
 <h1 style="text-align: center">EPICS JavaIOC: util<br />
 package: org.epics.ioc.util<br />
-2006.11.15</h1>
+2007.01.05</h1>
+CONTENTS
 
+<div class="toc">
+<ul>
+  <li><a href="#Overview">Overview</a></li>
+  <li><a href="#Message">Message Support</a>
+    <ul>
+      <li><a href="#Definition">Definitions</a></li>
+      <li><a href="#Requestor">Requestor</a></li>
+      <li><a href="#MessageTyp">MessageType</a></li>
+      <li><a href="#RequestRes">RequestResult</a></li>
+    </ul>
+  </li>
+  <li><a href="#Time">Time Stamp Support</a>
+    <ul>
+      <li><a href="#Definition1">Definitions</a></li>
+      <li><a href="#TimeStamp">TimeStamp</a></li>
+      <li><a href="#TimeUtilit">TimeUtility</a></li>
+      <li><a href="#PVTimeStam">PVTimeStamp</a></li>
+    </ul>
+  </li>
+  <li><a href="#Alarm">Alarm Sverity Support</a></li>
+  <li><a href="#Scan">Scan Field Support</a>
+    <ul>
+      <li><a href="#Definition2">Definitions</a></li>
+      <li><a href="#ScanField">ScanField</a></li>
+      <li><a href="#ScanPriori">ScanPriority</a></li>
+      <li><a href="#ScanType">ScanType</a></li>
+      <li><a href="#ScanFieldF">ScanFieldFactory</a></li>
+    </ul>
+  </li>
+  <li><a href="#Periodic">Periodic and Event Scanners</a>
+    <ul>
+      <li><a href="#Definition3">Definitions</a></li>
+      <li><a href="#EventAnnou">EventAnnounce</a></li>
+      <li><a href="#EventScann">EventScanner</a></li>
+      <li><a href="#PeriodicSc">PeriodicScanner</a></li>
+    </ul>
+  </li>
+  <li><a href="#IOCFactory">IOCFactory</a></li>
+  <li><a href="#Include">XML Include and Macro Substitution</a>
+    <ul>
+      <li><a href="#Include1">Include and Substitution Syntax</a></li>
+      <li><a href="#Example">Example Include and Macro Substitution
+      Syntax</a></li>
+      <li><a href="#Example1">Example XML Application</a></li>
+      <li><a href="#IOCXML">IOCXML Interface and Factory Definitions</a></li>
+    </ul>
+  </li>
+  <li><a href="#IOCExecuto">IOCExecutor</a></li>
+</ul>
+</div>
 <hr />
 
-<h2 style="text-align: center">Overview</h2>
+<h2 style="text-align: center" id="Overview">Overview</h2>
 <hr />
 
 <p>This package provides utility code for a javaIOC:</p>
@@ -22,11 +73,13 @@ package: org.epics.ioc.util<br />
   <dt>Message Support</dt>
     <dd>This is an interface for passing messages to a requestor of many
       services.</dd>
-  <dt>Time Stamp support</dt>
+  <dt>Time Stamp Support</dt>
     <dd>Support is provided to make it easier to work with time stamps.</dd>
   <dt>Scan Field Support</dt>
     <dd>Support that makes it easier to access the scan field of a
     record.</dd>
+  <dt>Alarm Severity Support</dt>
+    <dd>Convenience support for the severity field.</dd>
   <dt>Periodic and Event Scanners</dt>
     <dd>Support for records that are periodic or event scanned.</dd>
   <dt>IOCFactory</dt>
@@ -36,13 +89,15 @@ package: org.epics.ioc.util<br />
     <dd>Support for reading XML Database Definition and Record Instance
       files. It is an abstraction above Java SAX (Simple API for XML). It
       implements macro substitution and include.</dd>
+  <dt>IOCExecutor</dt>
+    <dd>Thread support</dd>
 </dl>
 <hr />
 
-<h2 style="text-align: center;">Message Support</h2>
+<h2 style="text-align: center;" id="Message">Message Support</h2>
 <hr />
 
-<h3>Definitions</h3>
+<h3 id="Definition">Definitions</h3>
 <pre>    public interface Requestor {
         String getRequestorName();
         void message(String message, MessageType messageType);
@@ -61,7 +116,7 @@ package: org.epics.ioc.util<br />
         failure
     }</pre>
 
-<h3>Requestor</h3>
+<h3 id="Requestor">Requestor</h3>
 
 <p>Many javaIOC interfaces extend interface Requestor, which has just two
 methods:</p>
@@ -72,7 +127,7 @@ methods:</p>
     <dd>This is for passing messages to a requestor.</dd>
 </dl>
 
-<h3>MessageType</h3>
+<h3 id="MessageTyp">MessageType</h3>
 
 <p>Each message has a message type argument. The type is one of:</p>
 <dl>
@@ -86,7 +141,7 @@ methods:</p>
     <dd>The support can not implement the request.</dd>
 </dl>
 
-<h3>RequestResult</h3>
+<h3 id="RequestRes">RequestResult</h3>
 
 <p>Both recordProcess and support code report a result by passing a
 RequestResult to the requestor. The result is one of:</p>
@@ -102,7 +157,7 @@ RequestResult to the requestor. The result is one of:</p>
 </dl>
 <hr />
 
-<h2 style="text-align: center;">Time Stamp Support</h2>
+<h2 style="text-align: center;" id="Time">Time Stamp Support</h2>
 <hr />
 
 <p style="font-weight:bold;">Questions:</p>
@@ -111,7 +166,7 @@ RequestResult to the requestor. The result is one of:</p>
   <li>Should PVTimeStamp extend PVStructure?</li>
 </ol>
 
-<h3>Definitions</h3>
+<h3 id="Definition1">Definitions</h3>
 <pre>    public class TimeStamp {
         public long secondsPastEpoch;
         public int nanoSeconds;
@@ -128,7 +183,7 @@ RequestResult to the requestor. The result is one of:</p>
         public void put(TimeStamp timeStamp);
     }</pre>
 
-<h3>TimeStamp</h3>
+<h3 id="TimeStamp">TimeStamp</h3>
 
 <p>This is a class that has two public data fields and no methods:</p>
 <dl>
@@ -139,7 +194,7 @@ RequestResult to the requestor. The result is one of:</p>
     <dd>The number of nanoseconds within the second.</dd>
 </dl>
 
-<h3>TimeUtility</h3>
+<h3 id="TimeUtilit">TimeUtility</h3>
 
 <p>This is a class with the following static members:</p>
 <dl>
@@ -149,7 +204,7 @@ RequestResult to the requestor. The result is one of:</p>
     <dd>This converts milliseconds to a time stamp.</dd>
 </dl>
 
-<h3>PVTimeStamp</h3>
+<h3 id="PVTimeStam">PVTimeStamp</h3>
 
 <p>This has the following methods:</p>
 <dl>
@@ -165,10 +220,23 @@ RequestResult to the requestor. The result is one of:</p>
 </dl>
 <hr />
 
-<h2 style="text-align: center;">Scan Field Support</h2>
+<h2 style="text-align: center;" id="Alarm">Alarm Sverity Support</h2>
 <hr />
 
-<h3>Definitions</h3>
+<p>The following defines alarm severities:</p>
+<pre>    public enum AlarmSeverity {
+       none,
+       minor,
+       major,
+       invalid;
+       public static AlarmSeverity getSeverity(int value);
+    }</pre>
+<hr />
+
+<h2 style="text-align: center;" id="Scan">Scan Field Support</h2>
+<hr />
+
+<h3 id="Definition2">Definitions</h3>
 <pre>    public interface ScanField {
         ScanPriority getPriority();
         ScanType getScanType();
@@ -184,6 +252,7 @@ RequestResult to the requestor. The result is one of:</p>
         high,
         higher,
         highest;
+        public static final int[] javaPriority;
         public int getJavaPriority();
     }
     
@@ -199,10 +268,10 @@ RequestResult to the requestor. The result is one of:</p>
         public static boolean isPriorityMenu(DBMenu dbMenu);
     }</pre>
 
-<h3>ScanField</h3>
+<h3 id="ScanField">ScanField</h3>
 
-<p>This is a convience interface for accessing the scan field of a record. It
-has the methods:</p>
+<p>ScanField is a convenience interface for accessing the scan field of a
+record. It has the methods:</p>
 <dl>
   <dt>getPriority</dt>
     <dd>Get the priority as a Java enum.</dd>
@@ -214,12 +283,12 @@ has the methods:</p>
     <dd>Get the event name for event scanned records.</dd>
 </dl>
 
-<h3>ScanPriority</h3>
+<h3 id="ScanPriori">ScanPriority</h3>
 
-<p>This is a Jave enum that defines the priority of the thread that processes
+<p>This is a Java enum that defines the priority of the thread that processes
 event or periodically scanned records.</p>
 
-<h3>ScanType</h3>
+<h3 id="ScanType">ScanType</h3>
 
 <p>This is a Java enum which defines the scan types:</p>
 <dl>
@@ -236,12 +305,27 @@ event or periodically scanned records.</p>
     <dd>The record is periodically scanned. A peridically scanned record has
       a rate assigned it it.</dd>
 </dl>
+
+<h3 id="ScanFieldF">ScanFieldFactory</h3>
+
+<p>This is a factory for creating a ScanField and some additionaly
+convenience methods.</p>
+<dl>
+  <dt>create</dt>
+    <dd>Create a ScanField.</dd>
+  <dt>isScanMenu</dt>
+    <dd>Checks to see if a menu is a valid scanMenu, i.e. has the correct
+      menu name and choices.</dd>
+  <dt>isPriorityMenu</dt>
+    <dd>Checks to see if a menu is a valid priorityMenu, i.e. has the correct
+      menu name and choices.</dd>
+</dl>
 <hr />
 
-<h2 style="text-align: center;">Periodic and Event Scanners</h2>
+<h2 style="text-align: center;" id="Periodic">Periodic and Event Scanners</h2>
 <hr />
 
-<h3>Definitions</h3>
+<h3 id="Definition3">Definitions</h3>
 <pre>    public interface EventAnnounce {
         void announce();
     }
@@ -266,7 +350,7 @@ event or periodically scanned records.</p>
          public static EventScanner getEventScanner();
     }</pre>
 
-<h3>EventAnnounce</h3>
+<h3 id="EventAnnou">EventAnnounce</h3>
 
 <p>This is the interface for announcing an event. The event scanner
 implements this interface and an announcer call
@@ -276,7 +360,7 @@ announcer then just calls:</p>
 
 <p>when it wants to announce an event.</p>
 
-<h3>EventScanner</h3>
+<h3 id="EventScann">EventScanner</h3>
 
 <p>This is the interface for the event scanning facility implemented by
 ScannerFactory. It implements the methods:</p>
@@ -293,7 +377,7 @@ ScannerFactory. It implements the methods:</p>
     <dd>report announcers and event scanned records</dd>
 </dl>
 
-<h3>PeriodicScanner</h3>
+<h3 id="PeriodicSc">PeriodicScanner</h3>
 
 <p>This is the interface for the periodic scanning facility implemented by
 ScannerFactory. It implements the methods:</p>
@@ -307,7 +391,7 @@ ScannerFactory. It implements the methods:</p>
 </dl>
 <hr />
 
-<h2 style="text-align: center;">IOCFactory</h2>
+<h2 style="text-align: center;" id="IOCFactory">IOCFactory</h2>
 <hr />
 
 <p>This has the definition:</p>
@@ -332,7 +416,7 @@ request fails. If all records initialize the records are merged into the
 master IOCDB and then started.</p>
 <hr />
 
-<h2 style="text-align: center;">XML Include and Macro
+<h2 style="text-align: center;" id="Include">XML Include and Macro
 Substitution</h2>
 <hr />
 
@@ -348,7 +432,7 @@ features:</p>
     be used by other code.</li>
 </ul>
 
-<h3>Include and Substitution Syntax</h3>
+<h3 id="Include1">Include and Substitution Syntax</h3>
 
 <p>An xml file can include other xml files. All files must be valid xml files
 and must have the same root element name. An include statement has the
@@ -392,8 +476,7 @@ text. The syntax is:</p>
   <li>The content of any element definition.</li>
 </ol>
 
-<h3></a> Example Include and Macro
-Substitution Syntax</h3>
+<h3 id="Example">Example Include and Macro Substitution Syntax</h3>
 
 <p>The following is a template file:</p>
 <pre>&lt;?xml version="1.0" ?&gt;
@@ -439,7 +522,7 @@ Substitution Syntax</h3>
 &lt;include href = "protoAiDB.xml" /&gt;
 &lt;/IOCDatabase&gt;</pre>
 
-<h3>Example XML Application</h3>
+<h3 id="Example1">Example XML Application</h3>
 
 <p>The following code will report any syntax errors found when an xml file is
 processed.</p>
@@ -497,7 +580,7 @@ processed.</p>
   <li>Calls listener.endDocument when all xml files have been processed.</li>
 </ul>
 
-<h3>IOCXML Interface and Factory Definitions</h3>
+<h3 id="IOCXML">IOCXML Interface and Factory Definitions</h3>
 
 <p>IOCXMLListener is an interface that must be implemented by code that used
 IOCXMLReader.</p>
@@ -506,7 +589,7 @@ IOCXMLReader.</p>
         void startElement(String name, Map&lt;String,String&gt; attributes);
         void characters(char[] ch, int start, int length);
         void endElement(String name);
-        void errorMessage(String message);
+        void message(String message,MessageType messageType);
     }</pre>
 
 <p>where</p>
@@ -542,9 +625,7 @@ IOCXMLReader.</p>
 <p>IOCXMLReader is the interface implemented by IOCXMLReaderFactory.</p>
 <pre>    public interface IOCXMLReader {
         void parse(String rootElementName,String fileName, IOCXMLListener listener);
-        void warningMessage(String message);
-        void errorMessage(String message);
-        void fatalMessage(String message);
+        void message(String message,MessageType messageType);
     }</pre>
 
 <p>where</p>
@@ -580,5 +661,18 @@ IOCXMLReader.</p>
     <dd>Get the single instance of IOCXMLReader.</dd>
 </dl>
 <hr />
+
+<h2 style="text-align: center;" id="IOCExecuto">IOCExecutor</h2>
+<hr />
+<pre>    public interface IOCExecutor {
+        void execute(Runnable command,ScanPriority priority);
+        void execute(List&lt;Runnable&gt; commands,ScanPriority priority);
+    }
+    public class IOCExecutorFactory {
+        static public IOCExecutor create(String name);
+    }</pre>
+
+<p>An IOCExecutor is a set of threads, one for each ScanPriority. It can
+execute any object that implements the Java Runnable interface.</p>
 </body>
 </html>
