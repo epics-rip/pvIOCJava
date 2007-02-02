@@ -31,20 +31,19 @@ public class ChannelAccessLocalFactory  {
      * Set the IOC database to be used by local channel access.
      * @param iocdb The iocdb.
      */
-    static public void setIOCDB(IOCDB iocdb) {
-        channelAccess.setIOCDB(iocdb);
+    static public void register() {
+        channelAccess.register();
     }
     
     private static class ChannelAccessLocal implements ChannelAccess{
         private static AtomicBoolean isRegistered = new AtomicBoolean(false);
         private static ReentrantLock lock = new ReentrantLock();
-        private IOCDB iocdb = null;
+        private IOCDB iocdb = IOCDBFactory.getMaster();
         
-        private void setIOCDB(IOCDB iocdb) {
+        private void register() {
             boolean result = false;
             lock.lock();
             try {
-                this.iocdb = iocdb;
                 result = isRegistered.compareAndSet(false, true);
             } finally {
               lock.unlock();  
@@ -522,6 +521,13 @@ public class ChannelAccessLocalFactory  {
             }       
             private PVData getPVData() {
                 return pvData;
+            }
+            /* (non-Javadoc)
+             * @see java.lang.Object#toString()
+             */
+            @Override
+            public String toString() {
+                return pvData.getField().toString();
             }
     
         }
@@ -1048,9 +1054,6 @@ public class ChannelAccessLocalFactory  {
             private boolean isActive = false;
             private RecordListener recordListener = null;
             private boolean processActive = false;
-            
-            private ChannelMonitorNotifyRequestor channelMonitorNotifyRequestor;
-            
             private boolean firstNotify = false;
             private ChannelMonitorRequestor channelMonitorRequestor;
             private ChannelFieldGroup channelFieldGroup = null;
@@ -1161,7 +1164,6 @@ public class ChannelAccessLocalFactory  {
                     } else if(isActive) {
                         throw new IllegalStateException("illegal request. monitor active");
                     } else {
-                        this.channelMonitorNotifyRequestor = channelMonitorNotifyRequestor;
                         channelMonitorRequestor = null;
                         monitor.start();
                         recordListener = dbRecord.createRecordListener(this);
@@ -1199,7 +1201,6 @@ public class ChannelAccessLocalFactory  {
                     } else {
                         firstNotify = true;
                         this.channelMonitorRequestor = channelMonitorRequestor;
-                        channelMonitorNotifyRequestor = null;
                         channelFieldGroup = channel.createFieldGroup(this);
                         List<ChannelFieldImpl> channelFieldList = monitor.getChannelFieldList();
                         for(ChannelField channelField: channelFieldList) {
@@ -1248,7 +1249,6 @@ public class ChannelAccessLocalFactory  {
                     channelData = null;
                     monitorThread.stop();
                 }
-                channelMonitorNotifyRequestor = null;
                 channelMonitorRequestor = null;
             }
             /* (non-Javadoc)

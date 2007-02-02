@@ -19,6 +19,7 @@ import java.util.Map;
 
 
 public final class FieldFactory {
+    private static Convert convert = ConvertFactory.getConvert();
     
     private FieldFactory(){} // dont create
     
@@ -157,19 +158,19 @@ public final class FieldFactory {
         /* (non-Javadoc)
          * @see org.epics.ioc.pv.FieldCreate#createMenuField(java.lang.String, java.lang.String, org.epics.ioc.pv.Property[], org.epics.ioc.pv.FieldAttribute)
          */
-        public Menu createMenu(String fieldName, String menuName,
+        public Menu createMenu(String fieldName, String menuName, String[] menuChoices,
         Property[] property, FieldAttribute fieldAttribute)
         {
             if(property==null) property = new Property[0];
             if(fieldAttribute==null) fieldAttribute = createFieldAttribute();
-            return new MenuBase(fieldName,menuName,property,fieldAttribute);
+            return new MenuBase(fieldName,menuName,menuChoices,property,fieldAttribute);
         }
 
         /* (non-Javadoc)
          * @see org.epics.ioc.pv.FieldCreate#createMenuField(java.lang.String, java.lang.String)
          */
-        public Menu createMenu(String fieldName, String menuName) {
-            return createMenu(fieldName,menuName,null,null);
+        public Menu createMenu(String fieldName, String menuName, String[] menuChoices) {
+            return createMenu(fieldName,menuName,menuChoices,null, null);
         }
 
         /* (non-Javadoc)
@@ -277,7 +278,7 @@ public final class FieldFactory {
     
             private String getString(int indentLevel) {
                 StringBuilder builder = new StringBuilder();
-                FieldBase.newLine(builder,indentLevel);
+                convert.newLine(builder,indentLevel);
                 builder.append(String.format("{name = %s field = %s}",
                         name,fieldName));
                 return builder.toString();

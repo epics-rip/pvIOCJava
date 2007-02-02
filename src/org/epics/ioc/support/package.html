@@ -10,7 +10,7 @@
 <body>
 <h1 style="text-align: center">EPICS JavaIOC: support<br />
 package: org.epics.ioc.support<br />
-2007.01.05</h1>
+2007.02.02</h1>
 CONTENTS
 
 <div class="toc">
@@ -18,6 +18,7 @@ CONTENTS
   <li><a href="#Overview">Overview</a></li>
   <li><a href="#Link">Link Support Factory</a></li>
   <li><a href="#Link1">Link Array Support Factory</a></li>
+  <li><a href="#Scan">Scan Support Factory</a></li>
   <li><a href="#Linear">Linear Convert Input Factory</a></li>
 </ul>
 </div>
@@ -117,6 +118,13 @@ process, which is an array of process links. When the record instance
 completes processing, it can request the the support for the process field
 process. Support for an output record would allow process and output links.
 Many other possibilities are possible.</p>
+<hr />
+
+<h2 style="text-align: center;" id="Scan">Scan Support Factory</h2>
+<hr />
+
+<p>This provides support for the scan field of any record. It is called by
+RecordProcess.</p>
 <hr />
 
 <h2 style="text-align: center;" id="Linear">Linear Convert Input Factory</h2>

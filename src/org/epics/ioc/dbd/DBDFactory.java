@@ -21,6 +21,8 @@ import org.epics.ioc.pv.*;
  * 
  */
 public class DBDFactory {
+    private static Convert convert = ConvertFactory.getConvert();
+    
     private static DBDInstance masterDBD;
     
     static {
@@ -676,7 +678,7 @@ public class DBDFactory {
 
         private String getString(int indentLevel) {
             StringBuilder builder = new StringBuilder();
-            FieldBase.newLine(builder,indentLevel);
+            convert.newLine(builder,indentLevel);
             builder.append(String.format("menu %s { ",menuName));
             for(String value: choices) {
                 builder.append(String.format("\"%s\" ",value));
@@ -741,7 +743,7 @@ public class DBDFactory {
         
         private String getString(int indentLevel) {
             StringBuilder builder = new StringBuilder();
-            FieldBase.newLine(builder,indentLevel);
+            convert.newLine(builder,indentLevel);
             builder.append(String.format(
                     "supportName %s factoryName %s",
                     supportName,factoryName));

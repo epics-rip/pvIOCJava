@@ -13,13 +13,13 @@ package org.epics.ioc.pv;
  */
 public class FieldBase implements Field
 {
-    private static String indentString = "    ";
     private boolean isMutable;
     private String fieldName;
     private Property[] property;
     private Type type;
     private String supportName = null;
     private FieldAttribute fieldAttribute;
+    private static Convert convert = ConvertFactory.getConvert();
 
     /**
      * Constructor for FieldBase.
@@ -44,15 +44,6 @@ public class FieldBase implements Field
         this.fieldAttribute = fieldAttribute;
         isMutable = true;
     }   
-    /**
-     * Generate a newLine and spaces at the beginning of the new line.
-     * @param builder The StringBuilder to add the new line.
-     * @param indentLevel Indentation level. Ecah level is four spaces.
-     */
-    public static void newLine(StringBuilder builder, int indentLevel) {
-        builder.append(String.format("%n"));
-        for (int i=0; i <indentLevel; i++) builder.append(indentString);
-    }    
     /* (non-Javadoc)
      * @see org.epics.ioc.pv.Field#getName()
      */
@@ -124,7 +115,7 @@ public class FieldBase implements Field
 
     private String getString(int indentLevel) {
         StringBuilder builder = new StringBuilder();
-        newLine(builder,indentLevel);
+        convert.newLine(builder,indentLevel);
         builder.append(String.format("field %s type %s isMutable %b ",
                 fieldName,type.toString(),isMutable));
         if(supportName!=null) {
@@ -132,12 +123,12 @@ public class FieldBase implements Field
         }
         builder.append(" " + fieldAttribute.toString(indentLevel));
         if(property.length>0) {
-            newLine(builder,indentLevel);
+            convert.newLine(builder,indentLevel);
             builder.append("property{");
             for(Property prop : property) {
                 builder.append(prop.toString(indentLevel + 1));
             }
-            newLine(builder,indentLevel);
+            convert.newLine(builder,indentLevel);
             builder.append("}");
         }
         return builder.toString();

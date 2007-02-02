@@ -7,7 +7,6 @@ package org.epics.ioc.ca;
 
 import java.util.*;
 
-import org.epics.ioc.db.DBData;
 import org.epics.ioc.pv.*;
 
 /**

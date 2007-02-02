@@ -10,7 +10,7 @@
 <body>
 <h1 style="text-align: center">EPICS JavaIOC: Java Input/Output Controller<br
 />
-2007.01.10</h1>
+2007.02.02</h1>
 
 <p>This product is available via the <a href="#LicenseAgreement">open source
 license</a> described at the end of this document.</p>
@@ -29,6 +29,7 @@ license</a> described at the end of this document.</p>
       <li><a href="#org.epics.4">org.epics.ioc.util</a></li>
       <li><a href="#org.epics.5">org.epics.ioc.support</a></li>
       <li><a href="#org.epics.6">org.epics.ioc.process</a></li>
+      <li><a href="#org.epics.7">org.epics.ioc.swtshell</a></li>
       <li><a href="#javaIOC">javaIOC/dbd</a></li>
       <li><a href="#Getting">Getting Started</a></li>
       <li><a href="#Status">Status and Remaining Tasks</a></li>
@@ -227,6 +228,11 @@ This package provides utility code for a javaIOC:
 
 <p>This package provides support for processing IOC database records.</p>
 
+<h3 id="org.epics.7">org.epics.ioc.swtshell</h3>
+
+<p>This is a GUI shell for an ioc. It is implemented via the Standard Widget
+Toolkit. Getting Started explains how to invoke it.</p>
+
 <h3 id="javaIOC">javaIOC/dbd</h3>
 
 <p>In javaIOC there is a directory dbd, which has database Definitions for
@@ -234,28 +240,34 @@ everything implemented by javaIOC.</p>
 
 <h3 id="Getting">Getting Started</h3>
 
-<p>In package default there is a Java main program that reads Database
-Definition and Record Instance files and dumps the resulting database. This
-program can be executed as follows:</p>
+<p>In package default there is a Java main program that: <ul>
+  <li>reads Database Definition and Record Instance files</li>
+  <li>dumps the resulting DBD and DB definitions</li>
+  <li>Starts an IOC with an swtshell</li>
+</ul>
+This program can be executed as follows:</p>
 
-<p>Make sure class path is properly defined. For example if your shell is
-bash:</p>
-<pre>    export CLASSPATH=pathToJavaIOC/bin</pre>
-
-<p>Then execute:</p>
+<p>Make sure class path is properly defined. In addition the SWT load
+libraries for your platform must be defined. For example if your shell is
+bash: <pre>    export CLASSPATH=${CLASSPATH}:pathToJavaIOC/bin
+    export CLASSPATH=${CLASSPATH}:/usr/local/swt/swt.jar
+    export LD_LIBRARY_PATH=/usr/local/swt</pre>
+Then execute:</p>
 <pre>    java XMLToDatabase ...</pre>
 The arguments can be any combination of:
 <ul>
-  <li>- dbd <br />
+  <li>-dbd <br />
     the following filenames are database definition files</li>
-  <li>- db <br />
+  <li>-db <br />
     the following filenames are record instance files</li>
   <li>fileName <br />
     a database definition or record instance file</li>
-  <li>- dumpDBD<br />
+  <li>-dumpDBD<br />
     dump all that database definitions read so far</li>
-  <li>- dumpDB<br />
+  <li>-dumpDB<br />
     dump all the record instances read so far</li>
+  <li>-swtshell<br />
+    Start swtshell and initialize the ioc.</li>
 </ul>
 
 <p>For example:</p>
@@ -268,6 +280,11 @@ file temp. This example will actually work if you have unziped the javaIOC
 distribution file. Just cd javaIOC and execute the above command. NOTE that
 this produces a lot of output since the example has lots of different menu,
 structure, support, and recordType definitions.</p>
+
+<p>The javaIOC distribution has an example that starts swtshell. On Linux do
+the following:</p>
+<pre>    cd javaIOC
+    . exampleCommand</pre>
 
 <p>The remainder of this document gives an overview of what is currently
 implemented:</p>

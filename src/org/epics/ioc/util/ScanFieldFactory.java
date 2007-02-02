@@ -5,7 +5,6 @@
  */
 package org.epics.ioc.util;
 
-import org.epics.ioc.db.*;
 import org.epics.ioc.pv.*;
 import org.epics.ioc.pv.Type;
 
@@ -25,82 +24,82 @@ public class ScanFieldFactory {
      * org.epics.ioc.support.
      * ScanFieldFactory does no locking so code that uses it must be thread safe.
      * In general this means that the record instance must be locked when any method is called. 
-     * @param dbRecord The record instance.
+     * @param pvRecord The record instance.
      * @return The ScanField interface or null of the record instance does not have
      * a valid scan field.
      */
-    public static ScanField create(DBRecord dbRecord) {
-        Structure structure = (Structure)dbRecord.getField();
-        PVData[] datas = dbRecord.getFieldPVDatas();
+    public static ScanField create(PVRecord pvRecord) {
+        Structure structure = (Structure)pvRecord.getField();
+        PVData[] datas = pvRecord.getFieldPVDatas();
         int index;
         PVData data;  
         index = structure.getFieldIndex("scan");
         if(index<0) {
-            dbRecord.message("field scan does not exist", MessageType.fatalError);
+            pvRecord.message("field scan does not exist", MessageType.fatalError);
             return null;
         }
         data = datas[index];
         if(data.getField().getType()!=Type.pvStructure){
-            dbRecord.message("field scan is not a structure", MessageType.fatalError);
+            pvRecord.message("field scan is not a structure", MessageType.fatalError);
             return null;
         }
         PVStructure scan = (PVStructure)data;
         structure = (Structure)scan.getField();
-        DBData dbData = (DBData)scan;
+        PVData pvData = (PVData)scan;
         if(!structure.getStructureName().equals("scan")) {
-            dbData.message("is not a scan structure", MessageType.fatalError);
+            pvData.message("is not a scan structure", MessageType.fatalError);
             return null;
         }
         datas = scan.getFieldPVDatas(); 
         index = structure.getFieldIndex("priority");
         if(index<0) {
-            dbData.message("does not have field priority", MessageType.fatalError);
+            pvData.message("does not have field priority", MessageType.fatalError);
             return null;
         }
         data = datas[index];
         if(data.getField().getType()!=Type.pvMenu) {
-            dbData.message("is not a menu", MessageType.fatalError);
+            pvData.message("is not a menu", MessageType.fatalError);
             return null;
         }
         PVMenu priorityField = (PVMenu)data;
         if(!isPriorityMenu(priorityField)) {
-            dbData.message("is not a priority menu", MessageType.fatalError);
+            pvData.message("is not a priority menu", MessageType.fatalError);
             return null;     
         }
         index = structure.getFieldIndex("scan");
         if(index<0) {
-            dbData.message("does not have a field scan", MessageType.fatalError);
+            pvData.message("does not have a field scan", MessageType.fatalError);
             return null;
         }
         data = datas[index];
         if(data.getField().getType()!=Type.pvMenu) {
-            ((DBData)data).message("is not a menu", MessageType.fatalError);
+            ((PVData)data).message("is not a menu", MessageType.fatalError);
             return null;
         }
         PVMenu scanField = (PVMenu)data;
         if(!isScanMenu(scanField)) {
-            ((DBData)scanField).message("is not a scan menu", MessageType.fatalError);
+            ((PVData)scanField).message("is not a scan menu", MessageType.fatalError);
             return null;        
         }
         index = structure.getFieldIndex("rate");
         if(index<0) {
-            dbData.message("does not have a field rate", MessageType.fatalError);
+            pvData.message("does not have a field rate", MessageType.fatalError);
             return null;
         }
         data = datas[index];
         if(data.getField().getType()!=Type.pvDouble) {
-            ((DBData)data).message("is not a double", MessageType.fatalError);
+            ((PVData)data).message("is not a double", MessageType.fatalError);
             return null;
         }
         PVDouble rateField = (PVDouble)data;
         index = structure.getFieldIndex("eventName");
         if(index<0) {
-            dbData.message("does not have a field eventName", MessageType.fatalError);
+            pvData.message("does not have a field eventName", MessageType.fatalError);
             return null;
         }
         data = datas[index];
         if(data.getField().getType()!=Type.pvString) {
-            ((DBData)data).message("is not a string", MessageType.fatalError);
+            ((PVData)data).message("is not a string", MessageType.fatalError);
             return null;
         }
         PVString eventNameField = (PVString)data;

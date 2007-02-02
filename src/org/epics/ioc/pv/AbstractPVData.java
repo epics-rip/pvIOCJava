@@ -14,7 +14,6 @@ import org.epics.ioc.util.MessageType;
  *
  */
 public abstract class AbstractPVData implements PVData{
-    private static String indentString = "    ";
     private String fullFieldName = "";
     private String requestorName = "";
     private Field field;
@@ -52,15 +51,6 @@ public abstract class AbstractPVData implements PVData{
     protected void setRecord(PVRecord record) {
         this.record = record;
         createFullFieldAndRequestorNames();
-    }
-    /**
-     * Called by toString to start a new line.
-     * @param builder The stringBuilder to which output is added.
-     * @param indentLevel Indentation level.
-     */
-    protected static void newLine(StringBuilder builder, int indentLevel) {
-        builder.append(String.format("%n"));
-        for (int i=0; i <indentLevel; i++) builder.append(indentString);
     }
     /* (non-Javadoc)
      * @see org.epics.ioc.util.Requestor#getRequestorName()

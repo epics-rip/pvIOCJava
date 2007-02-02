@@ -128,21 +128,23 @@ public interface FieldCreate {
      * Create a <i>Menu</i> field with no properties and default attributes.
      * @param fieldName The field name.
      * @param menuName The menu name.
+     * @param menuChoices The menu choices.
      * @return A <i>Menu</i> interface for the newly created object.
      */
-    public Menu createMenu(String fieldName,String menuName);
+    public Menu createMenu(String fieldName,String menuName, String[] menuChoices);
     /**
      * Create a <i>Menu</i> field.
      * @param fieldName The field name.
+     * @param menuName The menu name.
+     * @param menuChoices The menu choices.
      * @param property The field properties.
      * If <i>null</i> then a null array of properties is created.
      * @param fieldAttribute The attributes for the field.
      * If <i>null</i> then a default set of attributes is created.
-     * @param menuName The menu name.
      * @return A <i>Menu</i> interface for the newly created object.
      */
     public Menu createMenu(String fieldName,String menuName,
-        Property[]property,FieldAttribute fieldAttribute);
+        String[] menuChoices,Property[]property, FieldAttribute fieldAttribute);
     /**
      * Create a <i>Structure</i> field with no properties and default attributes.
      * @param fieldName The field name

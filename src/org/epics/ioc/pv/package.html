@@ -10,7 +10,7 @@
 <body>
 <h1 style="text-align: center">EPICS JavaIOC: pv<br />
 package: org.epics.ioc.pv<br />
-2007.01.09</h1>
+2007.02.02</h1>
 CONTENTS
 
 <div class="toc">
@@ -303,6 +303,7 @@ separation is especially important for arrays and structures.</p>
 
     interface Menu extends Enum {
         String getMenuName();
+        String[] getMenuChoices();
     }
 
     interface Structure extends Field{
@@ -837,21 +838,21 @@ introspection interfaces. The methods are:</p>
         public static Field createField(String fieldName,Type type,
             Property[] property,FieldAttribute fieldAttribute);
 
-        public static Array createArrayField(String fieldName,Type elementType);
-        public static Array createArrayField(String fieldName,Type elementType,
+        public static Array createArray(String fieldName,Type elementType);
+        public static Array createArray(String fieldName,Type elementType,
             Property[] property,FieldAttribute fieldAttribute);
 
-        public static Enum createEnumField(String fieldName,boolean choicesMutable);
-        public static Enum createEnumField(String fieldName,boolean choicesMutable,
+        public static Enum createEnum(String fieldName,boolean choicesMutable);
+        public static Enum createEnum(String fieldName,boolean choicesMutable,
             Property[] property,FieldAttribute fieldAttribute);
 
-        public static Menu createMenuField(String fieldName,String menuName);
-        public static Menu createMenuField(String fieldName,String menuName,
+        public static Menu createMenu(String fieldName,String menuName,String[] menuChoices);
+        public static Menu createMenu(String fieldName,String menuName,String[] menuChoices,
             Property[]property,FieldAttribute fieldAttribute);
 
-        public static Structure createStructureField(String fieldName,
+        public static Structure createStructure(String fieldName,
             String structureName, Field[] field);
-        public static Structure createStructureField(String fieldName,
+        public static Structure createStructure(String fieldName,
             String structureName, Field[] field,
             Property[] property,FieldAttribute fieldAttribute);
     }
@@ -889,30 +890,30 @@ introspection interfaces. The methods are:</p>
   Property[] property,FieldAttribute fieldAttribute)</dt>
     <dd>create a Field with the specified type, properties, and attributes.
       The type must be a scalar or a link.</dd>
-  <dt>createArrayField(String fieldName,Type elementType)</dt>
+  <dt>createArray(String fieldName,Type elementType)</dt>
     <dd>create an Array with the specified elementType, no properties, and
       default attributes. The elementType can be any Type but must not be
       null.</dd>
-  <dt>createArrayField(String fieldName,Type elementType,<br />
+  <dt>createArray(String fieldName,Type elementType,<br />
   Property[] property,FieldAttribute fieldAttribute)</dt>
     <dd>create an Array with the specified elementType, properties, and
       attributes. The elementType can be any Type but must not be null.</dd>
-  <dt>createEnumField(String fieldName,boolean choicesMutable)</dt>
+  <dt>createEnum(String fieldName,boolean choicesMutable)</dt>
     <dd>create an Enum with no properties and default attributes.</dd>
-  <dt>createEnumField(String fieldName,boolean choicesMutable,<br />
+  <dt>createEnum(String fieldName,boolean choicesMutable,<br />
   Property[] property,FieldAttribute fieldAttribute)</dt>
     <dd>create an Enum with properties and attributes.</dd>
-  <dt>createMenuField(String fieldName,String menuName)</dt>
+  <dt>createMenu(String fieldName,String menuName,String[] menuChoices)</dt>
     <dd>create a Menu with no properties and default attributes.</dd>
-  <dt>createMenuField(String fieldName,String menuName,<br />
+  <dt>createMenu(String fieldName,String menuName,String[] menuChoices,<br />
   Property[]property,FieldAttribute fieldAttribute)</dt>
     <dd>create a Menu with properties and attributes.</dd>
-  <dt>createStructureField(String fieldName,<br />
+  <dt>createStructure(String fieldName,<br />
   String structureName, Field[] field)</dt>
     <dd>create a Structure with no properties and default attributes. The
       structureName must not be null. It is permissible to have a Field[]
       with length 0.</dd>
-  <dt>createStructureField(String fieldName,<br />
+  <dt>createStructure(String fieldName,<br />
   String structureName, Field[] field,<br />
   Property[] property,FieldAttribute fieldAttribute)</dt>
     <dd>create a Structure with properties and attributes. The structureName
@@ -932,7 +933,6 @@ introspection implementation but they could be extended if necessary.</p>
 <pre>    public class FieldBase implements Field {
         public FieldBase(String fieldName,
             Type type,Property[] property,FieldAttribute fieldAttribute);
-        public static void newLine(StringBuilder builder, int indentLevel);
         public String getFieldName();
         public Property[] getPropertys();
         public Property getProperty(String propertyName);
@@ -961,6 +961,7 @@ introspection implementation but they could be extended if necessary.</p>
         public boolean isChoicesMutable();
         public String toString();
         public String toString(int indentLevel);
+        public String[] getMenuChoices();
     }
     
     public class StructureBase extends FieldBase implements Structure {
@@ -999,7 +1000,6 @@ interfaces:</p>
     protected AbstractPVData(PVData parent, Field field);
     protected void replaceField(Field field);
     protected void setRecord(PVRecord record);
-    protected static void newLine(StringBuilder builder, int indentLevel);
     public String getRequestorName();
     public void message(String message, MessageType messageType);
     public String getFullFieldName();
@@ -1023,8 +1023,6 @@ interfaces:</p>
   <dt>setRecord</dt>
     <dd>This is called a derived PVStructure implementation to specify the
       record containing the field.</dd>
-  <dt>newLine</dt>
-    <dd>This is used by derived classes to implement toString</dd>
   <dt>getFullFieldName,...,getPVRecord</dt>
     <dd>The implementation should be sufficient for all derived classes.</dd>
   <dt>getSupportName and setSupportName</dt>
@@ -1115,6 +1113,7 @@ interfaces:</p>
             int offset, int len, float[]from, fromOffset);
         int fromDoubleArray(PVData pv,
             int offset, int len, double[]from, fromOffset);
+        void newLine(StringBuilder builder, int indentLevel);
     }
 
     public final class ConvertFactory {
@@ -1124,6 +1123,9 @@ interfaces:</p>
 <p>The array methods all return the number of elements copied or converted.
 This can be less than <span style="font-family: courier;">len</span> if the
 PVData array contains less than len elements.</p>
+<p><span style="font-family: courier;">newLine</span> is a convenience method for
+code that implements <span style="font-family: courier;">toString</span>
+It generates a newline and inserts blanks at the beginning of the newline.</p>
 
 <p>ConvertFactory gets the single implementation of Convert.</p>
 <hr />

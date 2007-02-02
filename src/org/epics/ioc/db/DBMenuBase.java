@@ -14,14 +14,15 @@ import org.epics.ioc.pv.*;
  */
 public class DBMenuBase extends DBEnumBase implements PVMenu
 { 
+    private static Convert convert = ConvertFactory.getConvert();
     /**
      * Constructor for DBMenuBase
      * @param parent The parent.
      * @param menu The introspection interface.
      * @param choice The array of choices.
      */
-    public DBMenuBase(DBData parent,Menu menu,String[] choice) {
-        super(parent,menu,choice);
+    public DBMenuBase(DBData parent,Menu menu) {
+        super(parent,menu,menu.getMenuChoices());
     }
 
     public boolean setChoices(String[] choice) {
@@ -41,12 +42,12 @@ public class DBMenuBase extends DBEnumBase implements PVMenu
 
     private String getString(int indentLevel) {
         StringBuilder builder = new StringBuilder();
-        newLine(builder,indentLevel);
+        convert.newLine(builder,indentLevel);
         Menu menu = (Menu)super.getField();
         builder.append("menu(" + menu.getMenuName() + ")" + " {");
-        newLine(builder,indentLevel+1);
+        convert.newLine(builder,indentLevel+1);
         builder.append(super.toString(indentLevel+1));
-        newLine(builder,indentLevel);
+        convert.newLine(builder,indentLevel);
         builder.append("}");
         return builder.toString();
     }

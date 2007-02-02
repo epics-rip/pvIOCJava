@@ -345,6 +345,7 @@ public class XMLToDBDFactory {
         // remaining are for field elements
         private String fieldName;
         private String menuName;
+        private DBDMenu dbdMenu;
         private DBDStructure fieldStructure;
         private Type type;
         private Type elementType;
@@ -477,7 +478,7 @@ public class XMLToDBDFactory {
                         state= State.idle;
                         return;
                     }
-                    DBDMenu dbdMenu = dbd.getMenu(menuName);
+                    dbdMenu = dbd.getMenu(menuName);
                     if(dbdMenu==null) {
                         iocxmlReader.message("menuName not found in DBD database",
                                 MessageType.error);
@@ -554,8 +555,8 @@ public class XMLToDBDFactory {
             Field field = null;
             switch(type) {
             case pvMenu:
-                field = fieldCreate.createMenu(fieldName,menuName,
-                    property,fieldAttribute);
+                field = fieldCreate.createMenu(fieldName,menuName,dbdMenu.getChoices(),
+                    property, fieldAttribute);
                 break;
             case pvStructure:
                 // Combine the current properties with the dbdStructure properties

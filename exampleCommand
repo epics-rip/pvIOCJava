@@ -1,0 +1,4 @@
+java XMLToDatabase -dbd dbd/menuStructureSupport.xml \
+    -dbd src/org/epics/ioc/process/test/exampleDBD.xml \
+    -db src/org/epics/ioc/process/test/localLinkDB.xml \
+    -swtshell            

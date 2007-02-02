@@ -2,7 +2,7 @@
 import org.epics.ioc.dbd.*;
 import org.epics.ioc.db.*;
 import org.epics.ioc.util.*;
-import org.epics.ioc.util.MessageType;
+import org.epics.ioc.swtshell.*;
 
 import java.util.*;
 
@@ -29,7 +29,7 @@ public class XMLToDatabase {
     public static void main(String[] args) {
         if(args.length==0 || args[0].equals("?")) {
             System.out.printf("-dbd DatabaseDefinitionList"
-                    + " -db InstanceList -dumpDBD -dumpDB  ...\n");
+                    + " -db InstanceList -dumpDBD -dumpDB ... -swtshell\n");
             return;
         }
         DBD dbd = DBDFactory.getMasterDBD();
@@ -57,6 +57,8 @@ public class XMLToDatabase {
                     state = State.dbdFile;
                 } else if(arg.equals("db")){
                     state = State.dbFile;
+                } else if(arg.equals("swtshell")) {
+                    Swtshell.swtshell();
                 } else {
                     System.out.printf("arg %d %s not understood\n",nextArg,arg);
                 }

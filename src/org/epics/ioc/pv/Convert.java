@@ -352,4 +352,11 @@ public interface Convert {
      * @throws IllegalArgumentException if the element type is not numeric
      */
     int fromDoubleArray(PVData pv, int offset, int len, double[]from, int fromOffset);
+    /**
+     * Convenience method for implementing toString.
+     * It generates a newline and inserts blanks at the beginning of the newline.
+     * @param builder The StringBuilder being constructed.
+     * @param indentLevel Indent level, Each level is four spaces.
+     */
+    void newLine(StringBuilder builder, int indentLevel);
 }

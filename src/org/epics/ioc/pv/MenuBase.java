@@ -12,7 +12,9 @@ package org.epics.ioc.pv;
  *
  */
 public class MenuBase extends FieldBase implements Menu{
+    private static Convert convert = ConvertFactory.getConvert();
     private String menuName;
+    private String[] menuChoices;
     
     /**
      * Constructor for a menu field.
@@ -21,9 +23,12 @@ public class MenuBase extends FieldBase implements Menu{
      * @param property The field properties.
      * @param fieldAttribute The field attributes.
      */
-    public MenuBase(String fieldName,String menuName,Property[] property,FieldAttribute fieldAttribute) {
+    public MenuBase(String fieldName,String menuName,String[] menuChoices,
+        Property[] property,FieldAttribute fieldAttribute)
+    {
         super(fieldName,Type.pvMenu,property,fieldAttribute);
         this.menuName = menuName;
+        this.menuChoices = menuChoices;
     }
     /* (non-Javadoc)
      * @see org.epics.ioc.pv.Enum#isChoicesMutable()
@@ -49,7 +54,23 @@ public class MenuBase extends FieldBase implements Menu{
         return menuName;
     }
 
+    /* (non-Javadoc)
+     * @see org.epics.ioc.pv.Menu#getMenuChoices()
+     */
+    public String[] getMenuChoices() {
+        return menuChoices;
+    }
     private String getString(int indentLevel) {
-        return super.toString(indentLevel) + " choicesMutable false";
+        StringBuilder builder = new StringBuilder();
+        builder.append(super.toString(indentLevel));
+        convert.newLine(builder,indentLevel);
+        builder.append("menu(" + menuName + ")" + " {");
+        convert.newLine(builder,indentLevel+1);
+        for(String choice: menuChoices) {
+            builder.append(choice + " ");
+        }
+        convert.newLine(builder,indentLevel);
+        builder.append("}");
+        return builder.toString();
     }
 }

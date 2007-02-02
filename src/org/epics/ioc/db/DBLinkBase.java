@@ -186,19 +186,19 @@ public class DBLinkBase extends AbstractDBData implements DBLink {
         }
         private String getString(String prefix,int indentLevel) {
             StringBuilder builder = new StringBuilder();
-            newLine(builder,indentLevel);
+            convert.newLine(builder,indentLevel);
             Structure structure = (Structure)super.getField();
             builder.append(prefix + " " + structure.getStructureName());
             builder.append(super.toString(indentLevel));
-            newLine(builder,indentLevel);
+            convert.newLine(builder,indentLevel);
             builder.append("{");
             for(int i=0, n= dbData.length; i < n; i++) {
-                newLine(builder,indentLevel + 1);
+                convert.newLine(builder,indentLevel + 1);
                 Field field = dbData[i].getField();
                 builder.append(field.getFieldName() + " = ");
                 builder.append(dbData[i].toString(indentLevel + 2));            
             }
-            newLine(builder,indentLevel);
+            convert.newLine(builder,indentLevel);
             builder.append("}");
             return builder.toString();
         }

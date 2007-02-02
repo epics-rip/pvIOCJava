@@ -2135,7 +2135,7 @@ public final class ConvertFactory {
             return ncopy;
         }
     
-        private static void newLine(StringBuilder builder, int indentLevel) {
+        public void newLine(StringBuilder builder, int indentLevel) {
             builder.append(String.format("%n"));
             for (int i=0; i <indentLevel; i++) builder.append(indentString);
         }

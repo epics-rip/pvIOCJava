@@ -792,14 +792,15 @@ public class XMLToIOCDBFactory {
                         idleState.prevState = state;
                         state = State.idle;
                     }
-                    if(dbd.getMenu(menuName)==null) {
+                    DBDMenu dbdMenu = dbd.getMenu(menuName);
+                    if(dbdMenu==null) {
                         iocxmlReader.message(
                                 "menuName " + menuName + " is not defined",
                                 MessageType.warning);
                         idleState.prevState = state;
                         state = State.idle;
                     }
-                    field = fieldCreate.createMenu(actualFieldName,menuName);
+                    field = fieldCreate.createMenu(actualFieldName,menuName,dbdMenu.getChoices());
                     PVMenuArray pvMenuArray = arrayState.pvMenuArray;
                     PVMenu[] menuData = arrayState.menuData;
                     menuData[0] = (PVMenu)dbDataCreate.createData((DBData)dbArray,field);

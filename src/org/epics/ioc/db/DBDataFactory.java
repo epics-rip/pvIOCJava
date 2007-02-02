@@ -41,7 +41,6 @@ public class DBDataFactory {
         {
             if(parent==null) throw new IllegalArgumentException("Illegal parent is null");
             String defaultValue = field.getFieldAttribute().getDefault();
-            DBD dbd = DBDFactory.getMasterDBD();
             Type type = field.getType();
             switch(type) {
             case pvBoolean: return new BooleanData(parent,field,defaultValue);
@@ -53,11 +52,7 @@ public class DBDataFactory {
             case pvDouble:  return new DoubleData(parent,field,defaultValue);
             case pvString:  return new StringData(parent,field,defaultValue);
             case pvEnum:    return createEnumData(parent,field,null);
-            case pvMenu: {
-                    Menu menu = (Menu)field;
-                    DBDMenu dbdMenu = dbd.getMenu(menu.getMenuName());
-                    return createMenuData(parent,menu,defaultValue,dbdMenu.getChoices());
-                }
+            case pvMenu:    return createMenuData(parent,(Menu)field,defaultValue);
             case pvStructure: {
                     Structure structure = (Structure)field;
                     return new DBStructureBase(parent,structure);
@@ -115,8 +110,8 @@ public class DBDataFactory {
     private static Convert convert = ConvertFactory.getConvert();
     private static Pattern primitivePattern = Pattern.compile("[, ]");
 
-    private static DBData createMenuData(DBData parent,Menu menu,String defaultValue,String[]choice) {
-        PVMenu pvMenu = new DBMenuBase(parent,menu,choice);
+    private static DBData createMenuData(DBData parent,Menu menu,String defaultValue) {
+        PVMenu pvMenu = new DBMenuBase(parent,menu);
         if(defaultValue!=null && defaultValue.length()>0) {
             String[] choices = pvMenu.getChoices();
             int index = -1;
@@ -1079,17 +1074,17 @@ public class DBDataFactory {
         
         private String getString(int indentLevel) {
             StringBuilder builder = new StringBuilder();
-            newLine(builder,indentLevel);
+            convert.newLine(builder,indentLevel);
             builder.append("{");
             for(int i=0; i < length; i++) {
                 if(value[i]==null) {
-                    newLine(builder,indentLevel+1);
+                    convert.newLine(builder,indentLevel+1);
                     builder.append("{}");
                 } else {
                     builder.append(value[i].toString(indentLevel+1));
                 }
             }
-            newLine(builder,indentLevel);
+            convert.newLine(builder,indentLevel);
             builder.append("}");
             return builder.toString();
         }       
@@ -1151,7 +1146,7 @@ public class DBDataFactory {
         
         private String getString(int indentLevel) {
             StringBuilder builder = new StringBuilder();
-            newLine(builder,indentLevel);
+            convert.newLine(builder,indentLevel);
             builder.append("{");
             for(int i=0; i < length; i++) {
                 if(value[i]==null) {
@@ -1160,7 +1155,7 @@ public class DBDataFactory {
                     builder.append(value[i].toString(indentLevel+1));
                 }
             }
-            newLine(builder,indentLevel);
+            convert.newLine(builder,indentLevel);
             builder.append("}");
             return builder.toString();
         }
@@ -1222,17 +1217,17 @@ public class DBDataFactory {
         
         private String getString(int indentLevel) {
             StringBuilder builder = new StringBuilder();
-            newLine(builder,indentLevel);
+            convert.newLine(builder,indentLevel);
             builder.append("{");
             for(int i=0; i < length; i++) {
-                newLine(builder,indentLevel + 1);
+                convert.newLine(builder,indentLevel + 1);
                 if(value[i]==null) {
                     builder.append("{}");
                 } else {
                     builder.append(value[i].toString(indentLevel+1));
                 }
             }
-            newLine(builder,indentLevel);
+            convert.newLine(builder,indentLevel);
             builder.append("}");
             return builder.toString();
         }
@@ -1294,7 +1289,7 @@ public class DBDataFactory {
         
         private String getString(int indentLevel) {
             StringBuilder builder = new StringBuilder();
-            newLine(builder,indentLevel);
+            convert.newLine(builder,indentLevel);
             builder.append("{");
             for(int i=0; i < length; i++) {
                 if(value[i]==null) {
@@ -1303,9 +1298,9 @@ public class DBDataFactory {
                 } else {
                     builder.append(value[i].toString(indentLevel+1));
                 }
-                if(i<length-1) newLine(builder,indentLevel + 1);
+                if(i<length-1) convert.newLine(builder,indentLevel + 1);
             }
-            newLine(builder,indentLevel);
+            convert.newLine(builder,indentLevel);
             builder.append("}");
             return builder.toString();
         }

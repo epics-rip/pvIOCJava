@@ -89,7 +89,7 @@ public class ScanSupportFactory {
             choice = choices[index];
             scanType = ScanType.valueOf(choice);
             menu = (Menu)oldField.getField();
-            newMenu = new DBScan(this,(DBData)pvStructure,menu,choices);
+            newMenu = new DBScan(this,(DBData)pvStructure,menu);
             newMenu.setIndex(index);
             oldField.replacePVData(newMenu);
             
@@ -139,7 +139,7 @@ public class ScanSupportFactory {
             choice = priorityMenu.getChoices()[index];
             priority = ScanPriority.valueOf(choice);
             menu = (Menu)oldField.getField();
-            newMenu = new DBPriority(this,(DBData)pvStructure,menu,priorityMenu.getChoices());
+            newMenu = new DBPriority(this,(DBData)pvStructure,menu);
             newMenu.setIndex(index);
             oldField.replacePVData(newMenu);
             
@@ -260,8 +260,8 @@ public class ScanSupportFactory {
     private static class DBPriority extends DBMenuBase {
         private ScanFieldSupport scanFieldSupport;
         
-        private DBPriority(ScanFieldSupport scanFieldSupport,DBData parent,Menu menu,String[]choice) {
-            super(parent,menu,choice);
+        private DBPriority(ScanFieldSupport scanFieldSupport,DBData parent,Menu menu) {
+            super(parent,menu);
             this.scanFieldSupport = scanFieldSupport;
         }      
         /* (non-Javadoc)
@@ -279,8 +279,8 @@ public class ScanSupportFactory {
     private static class DBScan extends DBMenuBase {
         private ScanFieldSupport scanFieldSupport;
         
-        private DBScan(ScanFieldSupport scanFieldSupport,DBData parent,Menu menu,String[]choice) {
-            super(parent,menu,choice);
+        private DBScan(ScanFieldSupport scanFieldSupport,DBData parent,Menu menu) {
+            super(parent,menu);
             this.scanFieldSupport = scanFieldSupport;
         }
         /* (non-Javadoc)

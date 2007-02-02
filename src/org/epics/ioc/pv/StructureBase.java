@@ -16,6 +16,7 @@ import java.util.List;
  *
  */
 public class StructureBase extends FieldBase implements Structure {
+    private static Convert convert = ConvertFactory.getConvert();
     private Field[] fields;
     private String[] fieldNames;
     private String structureName;
@@ -132,13 +133,13 @@ public class StructureBase extends FieldBase implements Structure {
     private String getString(int indentLevel) {
         StringBuilder builder = new StringBuilder();
         builder.append(super.toString(indentLevel));
-        newLine(builder,indentLevel);
+        convert.newLine(builder,indentLevel);
         builder.append(String.format("structure %s {",
             structureName));
         for(int i=0, n= fields.length; i < n; i++) {
             builder.append(fields[i].toString(indentLevel + 1));
         }
-        newLine(builder,indentLevel);
+        convert.newLine(builder,indentLevel);
         builder.append("}");
         return builder.toString();
     }

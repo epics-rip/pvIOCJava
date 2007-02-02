@@ -16,4 +16,8 @@ public interface Menu extends Enum {
      * @return The menu name.
      */
     String getMenuName();
+    /**
+     * Get the menu choices;
+     */
+    String[] getMenuChoices();
 }

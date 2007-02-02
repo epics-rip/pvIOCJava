@@ -12,7 +12,7 @@
 
 <h1 style="text-align: center">EPICS JavaIoc: Database Access <br />
 package: org.epics.ioc.dbAcess <br />
-2007.01.09</h1>
+2007.02.02</h1>
 CONTENTS
 
 <div class="toc">
@@ -830,6 +830,7 @@ PVArray field for an IOC database should extend this class.</p>
         public int getCapacity();
         public int getLength();
         public void setLength(int len);
+        public String toString();
     }</pre>
 
 <h3 id="DBEnumBase">DBEnumBase</h3>
@@ -852,7 +853,10 @@ extend this class.</p>
 this class.</p>
 <pre>    public class DBMenuBase extends DBEnumBase implements PVMenu
     {
-        public DBMenuBase(DBData parent,Menu menu,String[] choice)
+        public DBMenuBase(DBData parent,Menu menu);
+        public boolean setChoices(String[] choice);
+        public String toString();
+        public String toString(int indentLevel);
     }</pre>
 
 <h3 id="DBStructur">DBStructureBase</h3>

@@ -9,7 +9,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import org.epics.ioc.ca.ChannelAccessLocalFactory;
 import org.epics.ioc.db.*;
 import org.epics.ioc.dbd.*;
 import org.epics.ioc.process.*;
@@ -52,7 +51,6 @@ public class IOCFactory {
             }
             SupportCreation supportCreation = SupportCreationFactory.createSupportCreation(
                 iocdbAdd,requestor);
-            ChannelAccessLocalFactory.setIOCDB(iocdbAdd);
             boolean gotSupport = supportCreation.createSupport();
             if(!gotSupport) {
                 requestor.message("Did not find all support.",MessageType.fatalError);
@@ -78,7 +76,6 @@ public class IOCFactory {
                 return false;
             }
             iocdbAdd.mergeIntoMaster();
-            ChannelAccessLocalFactory.setIOCDB(IOCDBFactory.getMaster());
             boolean ready = supportCreation.startSupport();
             if(!ready) {
                 requestor.message("startSupport failed",MessageType.fatalError);

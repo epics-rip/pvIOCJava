@@ -24,6 +24,7 @@ public class ChannelFactory {
      */
     public static Channel createChannel(String name,ChannelStateListener listener, boolean mustBeLocal) {
         Channel channel = null;
+        if(localAccess==null) ChannelAccessLocalFactory.register();
         if(localAccess!=null) {
             channel = localAccess.createChannel(name,listener);
             if(channel!=null) return channel;

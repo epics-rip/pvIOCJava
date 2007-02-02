@@ -10,7 +10,7 @@
 <body>
 <h1 style="text-align: center">EPICS JavaIOC: channel Access<br />
 package: org.epics.ioc.ca<br />
-2007.01.10</h1>
+2007.02.02</h1>
 CONTENTS
 
 <div class="toc">
@@ -640,25 +640,7 @@ client request to:</p>
 <h2 style="text-align: center" id="Channel3">Channel Data</h2>
 <hr />
 
-<p>PROBLEMS:</p>
-<ul>
-  <li>Field<br />
-    Currently the implementation just copys the Field implementation from the
-    PVData. The property definitions are not correct. The implementation must
-    create a new Field implementation that is identical to the Field obtained
-    from the PVData except that it has no properties. A possible solution is
-    to defined the following:
-    <pre>    interface CAData extends PVData {
-        Field getPVDataField();
-    }</pre>
-  </li>
-  <li>getChannelDataPVList<br />
-    Currently the implementation allocates a new ChannelDataPV each time a
-    change occurs. The ChannelDataPV list will grow without bound if the
-    requestor never empties it's queues.</li>
-</ul>
-
-<p>ChannelData, which is used for monitoring, helps solve two problems:</p>
+<p>ChannelData helps solve two problems:</p>
 <ol>
   <li>Blocking with a record locked.<br />
     An example is a channel access server. Instead of pre allocating network
@@ -741,7 +723,7 @@ client request to:</p>
   <dt style="font-family: courier;">supportNameChange</dt>
     <dd>The supportName was changed.</dd>
   <dt style="font-family: courier;">configurationStructureChange</dt>
-    <dd>PVData is a linl and the configuration structure was changed.</dd>
+    <dd>PVData is a link and the configuration structure was changed.</dd>
 </dl>
 
 <h3 id="ChannelDat1">ChannelData</h3>
@@ -770,7 +752,8 @@ client request to:</p>
     <dd>The PVData is a link and the configuration structure has been
       modified.</dd>
   <dt style="font-family: courier;">beginPut</dt>
-    <dd>A set of puts to the fields of a structure is starting.</dd>
+    <dd>A set of puts to the fields of a structure is starting.
+    </dd>
   <dt style="font-family: courier;">endPut</dt>
     <dd>The set of puts to a structure is done.</dd>
   <dt style="font-family: courier;">getChannelDataPVList</dt>
