@@ -35,7 +35,7 @@ public class Swtshell {
         start();
     }
     
-    // text.setSize does not work. Don't know why. Is it a bug?
+    // setSize does not work. Don't know why. Is it a bug?
     public static void makeBlanks(Text text,int nrows,int ncols) {
         char[] blank = new char[ncols];
         for(int i=0; i<blank.length; i++) blank[i] = 'x';
@@ -44,7 +44,6 @@ public class Swtshell {
         for(int i=0; i<nrows; i++) format += "%n";
         text.setText(String.format(format, blankString));
     }
-//  list.setSize does not work. Don't know why. Is it a bug?
     public static void makeBlanks(List list,int nrows,int ncols) {
         char[] blank = new char[ncols];
         for(int i=0; i<blank.length; i++) blank[i] = 'x';
@@ -53,12 +52,11 @@ public class Swtshell {
         for(int i=0; i<nrows; i++) format += "%n";
         list.add(String.format(format, blankString));
     }
-    
-    public static void makeBlanks(Combo combo,int ncols) {
+    public static void makeBlanks(Label label,int ncols) {
         char[] blank = new char[ncols];
         for(int i=0; i<blank.length; i++) blank[i] = 'x';
         String blankString = String.copyValueOf(blank);
-        combo.add(blankString);
+        label.setText(blankString);
     }
     
     public static String pvDataToString(PVData pvData) {
@@ -87,7 +85,7 @@ public class Swtshell {
             }
             // no break
         default:
-            value = pvData.toString();
+            value = pvData.toString(2);
         }
         return value;
     }

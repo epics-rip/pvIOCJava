@@ -100,9 +100,8 @@ public interface ChannelData {
      * @param pvLink The link interface.
      */
     void configurationStructurePut(PVStructure pvStructure,PVLink pvLink);
-    /**
-     * The list of channelDataPV that have been added since the last clear.
-     * @return The list.
-     */
+    
     List<ChannelDataPV> getChannelDataPVList();
+    PVData[] getPVDatas();
+    ChannelField[] getChannelFields();
 }

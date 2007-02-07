@@ -406,8 +406,22 @@ public class ChannelDataFactory {
          */
         public List<ChannelDataPV> getChannelDataPVList() {
             return channelDataPVList;
+        }     
+        /* (non-Javadoc)
+         * @see org.epics.ioc.ca.ChannelData#getChannelFields()
+         */
+        public ChannelField[] getChannelFields() {
+            return channelFields;
         }
-        
+        /* (non-Javadoc)
+         * @see org.epics.ioc.ca.ChannelData#getPVDatas()
+         */
+        public PVData[] getPVDatas() {
+            return (PVData[])caDatas;
+        }
+
+
+
         // create a Field like original except no properties
         private static Field createField(Field oldField) {
             Field newField = null;
@@ -747,6 +761,7 @@ public class ChannelDataFactory {
              this.parent = parent;
              this.field = field;
              pvRecord = parent.getPVRecord();
+             if(pvRecord==null) pvRecord = (PVRecord)parent;
              fullFieldName = "." + field.getFieldName();
              PVData newParent = parent;
              while(newParent!=pvRecord) {

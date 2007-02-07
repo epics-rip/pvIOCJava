@@ -685,6 +685,8 @@ client request to:</p>
         void supportNamePut(PVStructure pvStructure,PVData pvData);
         void configurationStructurePut(PVStructure pvStructure,PVLink pvLink);
         List&lt;ChannelDataPV&gt; getChannelDataPVList();
+        ChannelField[] getChannelFields();
+        PVData[] getPVDatas();
     }
 
     public interface ChannelDataQueue {
@@ -759,6 +761,10 @@ client request to:</p>
   <dt style="font-family: courier;">getChannelDataPVList</dt>
     <dd>Get the list of all ChannelDataPVs that have been added since the
       last clear request.</dd>
+  <dt style="font-family: courier;">getChannelFields</dt>
+    <dd>Get the array of ChannelDataFields that ChannelData contains.</dd>
+  <dt style="font-family: courier;">getPVDatas</dt>
+    <dd>Get the array of getPVDatas that ChannelData contains.</dd>
 </dl>
 
 <p>A ChannelData is allocated as follows:</p>

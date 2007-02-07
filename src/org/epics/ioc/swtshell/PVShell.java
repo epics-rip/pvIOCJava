@@ -183,7 +183,7 @@ public class PVShell {
             private int ntimes = 0;
             
             public GetRecordName(Shell parent) {
-                super(parent,SWT.DIALOG_TRIM|SWT.APPLICATION_MODAL);
+                super(parent,SWT.DIALOG_TRIM|SWT.NONE);
             }
             
             public String getRecordName() {

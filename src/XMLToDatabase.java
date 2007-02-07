@@ -27,9 +27,9 @@ public class XMLToDatabase {
      * 
      */
     public static void main(String[] args) {
-        if(args.length==0 || args[0].equals("?")) {
-            System.out.printf("-dbd DatabaseDefinitionList"
-                    + " -db InstanceList -dumpDBD -dumpDB ... -swtshell\n");
+        if(args.length==1 && args[0].equals("?")) {
+            System.out.println("-dbd DatabaseDefinitionList"
+                    + " -db InstanceList -dumpDBD -dumpDB ... -swtshell");
             return;
         }
         DBD dbd = DBDFactory.getMasterDBD();
@@ -60,7 +60,8 @@ public class XMLToDatabase {
                 } else if(arg.equals("swtshell")) {
                     Swtshell.swtshell();
                 } else {
-                    System.out.printf("arg %d %s not understood\n",nextArg,arg);
+                    System.out.println("-dbd DatabaseDefinitionList"
+                            + " -db InstanceList -dumpDBD -dumpDB ... -swtshell");
                 }
             } else if(state==State.dbdFile) {
                 parseDBD(dbd,arg,iocRequestor);
@@ -68,6 +69,7 @@ public class XMLToDatabase {
                 parseDB(dbd,iocdb,arg,iocRequestor);
             }
         }
+        Swtshell.swtshell();
     }
         
     static void dumpDBD(DBD dbd) {
