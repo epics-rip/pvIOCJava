@@ -16,8 +16,8 @@ import org.epics.ioc.util.*;
  *
  */
 public class MonitorNotifyRecordFactory {
-    public static Support create(PVStructure pvStructure) {
-        return new MonitorNotifyRecordSupport(pvStructure);
+    public static Support create(DBStructure dbStructure) {
+        return new MonitorNotifyRecordSupport(dbStructure);
     }
     
     private enum ProcessState {
@@ -30,28 +30,32 @@ public class MonitorNotifyRecordFactory {
     {
         private static String supportName = "monitorNotifyRecord";
         private SupportState supportState = SupportState.readyForInitialize;
+        private PVStructure pvStructure;
         private DBRecord dbRecord;
-        private PVBoolean notify = null;
+        private PVRecord pvRecord;
+        private BooleanData notify = null;
         private LinkSupport inputSupport = null;
         private LinkSupport outputSupport = null;
         private SupportProcessRequestor supportProcessRequestor = null;
         private ProcessState processState = ProcessState.input;
         
-        private MonitorNotifyRecordSupport(PVStructure pvStructure) {
-            super(supportName,(DBData)pvStructure);
-            dbRecord = (DBRecord)pvStructure.getPVRecord();
+        private MonitorNotifyRecordSupport(DBStructure dbStructure) {
+            super(supportName,dbStructure);
+            pvStructure = dbStructure.getPVStructure();
+            dbRecord = dbStructure.getDBRecord();
+            pvRecord = dbRecord.getPVRecord();
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.process.SupportProcessRequestor#getProcessRequestorName()
          */
         public String getRequestorName() {
-            return dbRecord.getRecordName();
+            return pvRecord.getRecordName();
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.util.Requestor#message(java.lang.String, org.epics.ioc.util.MessageType)
          */
         public void message(String message, MessageType messageType) {
-            dbRecord.message(message, messageType);
+            pvStructure.message(message, messageType);
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.process.Support#initialize()
@@ -59,41 +63,37 @@ public class MonitorNotifyRecordFactory {
         public void initialize() {
             if(!super.checkSupportState(SupportState.readyForInitialize,supportName)) return;
             if(dbRecord.getRecordProcess().getRecordProcessRequestorName()!=null) {
-                dbRecord.message(
-                        "a recordProcessRequestor already exists",
-                        MessageType.error);
+                message("a recordProcessRequestor already exists",MessageType.error);
                 return;
             }
-            PVAccess pvAccess = PVAccessFactory.createPVAccess(dbRecord);
+            PVAccess pvAccess = PVAccessFactory.createPVAccess(pvRecord);
             PVData pvData;
             AccessSetResult result;
             pvAccess.findField(null);
             result = pvAccess.findField("notify");
             if(result!=AccessSetResult.thisRecord) {
-                dbRecord.message(
-                        "field notify does not exist",
-                        MessageType.error);
+                message("field notify does not exist",MessageType.error);
                 return;
             }
             pvData = pvAccess.getField();
             if(pvData.getField().getType()!=Type.pvBoolean) {
-                dbRecord.message(
-                        "field notify is not boolean",
-                        MessageType.error);
+                message("field notify is not boolean",MessageType.error);
                 return;
             }
             PVData oldField = pvAccess.getField();
             PVData parent = oldField.getParent();
             Field field = oldField.getField();
-            notify = new BooleanData((DBData)parent,field);
-            oldField.replacePVData(notify);
+            notify = new BooleanData(parent,field);
+            DBData dbNotify = dbRecord.findDBData(oldField);
+            dbNotify.replacePVData(notify);
+            notify.setDBData(dbNotify);
             pvAccess.findField(null);
             result = pvAccess.findField("inputArray");
             if(result==AccessSetResult.thisRecord) {
-                DBData dbData = (DBData)pvAccess.getField();
+                DBData dbData = dbRecord.findDBData(pvAccess.getField());
                 inputSupport = (LinkSupport)dbData.getSupport();
                 if(inputSupport!=null) {
-                    inputSupport.setField(notify);
+                    inputSupport.setField(dbNotify);
                     inputSupport.initialize();
                     supportState = inputSupport.getSupportState();
                 }
@@ -101,18 +101,16 @@ public class MonitorNotifyRecordFactory {
                     return;
                 }
             } else {
-                dbRecord.message(
-                        "field input does not exist",
-                        MessageType.error);
+                message("field input does not exist",MessageType.error);
                 return;
             }
             pvAccess.findField(null);
             result = pvAccess.findField("outputArray");
             if(result==AccessSetResult.thisRecord) {
-                DBData dbData = (DBData)pvAccess.getField();
+                DBData dbData = dbRecord.findDBData(pvAccess.getField());
                 outputSupport = (LinkSupport)dbData.getSupport();
                 if(outputSupport!=null) {
-                    outputSupport.setField(notify);
+                    outputSupport.setField(dbNotify);
                     outputSupport.initialize();
                     supportState = outputSupport.getSupportState();
                 }
@@ -183,29 +181,33 @@ public class MonitorNotifyRecordFactory {
         }
     }
     
-    private static class BooleanData extends AbstractDBData
+    private static class BooleanData extends AbstractPVData
     implements PVBoolean, Runnable, RecordProcessRequestor
     {
         private static IOCExecutor iocExecutor
             = IOCExecutorFactory.create("monitorNotifyRecord");
         private static Convert convert = ConvertFactory.getConvert();
         private boolean value;
-        private DBRecord dbRecord;
+        private DBData dbData;
         private RecordProcess recordProcess;
         private boolean processActive = false;
         private boolean processAgain = false;
         
-        private BooleanData(DBData parent,Field field) {
+        public BooleanData(PVData parent,Field field) {
             super(parent,field);
-            dbRecord = parent.getDBRecord();
+        }
+        
+        public boolean setDBData(DBData dbData) {
+            this.dbData = dbData;
+            DBRecord dbRecord = dbData.getDBRecord();
             recordProcess = dbRecord.getRecordProcess();
             boolean result = recordProcess.setRecordProcessRequestor(this);
             if(!result) {
                 throw new IllegalStateException("setRecordProcessRequestor failed");
             }
             value = false;
+            return result;
         }
-        
         /* (non-Javadoc)
          * @see org.epics.ioc.pvAccess.PVBoolean#get()
          */
@@ -218,7 +220,7 @@ public class MonitorNotifyRecordFactory {
          */
         public void put(boolean value) {
             this.value = value;
-            postPut();
+            dbData.postPut();
             if(value) {
                 if(processActive) {
                     processAgain = true;
@@ -273,7 +275,7 @@ public class MonitorNotifyRecordFactory {
          * @see org.epics.ioc.util.Requestor#getRequestorName()
          */
         public String getRequestorName() {
-            return dbRecord.getRecordName();
+            return super.getPVRecord().getRecordName();
         }
     }
 }

@@ -12,7 +12,7 @@ import org.epics.ioc.pv.*;
  * @author mrk
  *
  */
-public class TestListener implements DBListener{ 
+public class DBListenerForTesting implements DBListener{ 
     private RecordListener listener;
     private String pvName = null;
     private boolean verbose;
@@ -20,32 +20,34 @@ public class TestListener implements DBListener{
     private boolean isProcessing = false;
     private String fullName = null;
     
-    public TestListener(IOCDB iocdb,String recordName,String pvName,
+    public DBListenerForTesting(IOCDB iocdb,String recordName,String pvName,
         boolean monitorProperties,boolean verbose)
     {
         this.pvName = pvName;
         this.verbose = verbose;
-        PVRecord pvRecord = iocdb.findRecord(recordName);
+        DBRecord dbRecord = iocdb.findRecord(recordName);
+        PVRecord pvRecord = dbRecord.getPVRecord();
         if(pvRecord==null) {
             System.out.printf("record %s not found%n",recordName);
             return;
         }
         PVAccess pvAccess = PVAccessFactory.createPVAccess(pvRecord);
-        DBData pvData;
+        PVData pvData;
         if(pvName==null || pvName.length()==0) {
-            pvData = (DBData)pvAccess.getPVRecord();
+            pvData = pvAccess.getPVRecord();
         } else {
             if(pvAccess.findField(pvName)!=AccessSetResult.thisRecord){
                 System.out.printf("name %s not in record %s%n",pvName,recordName);
                 System.out.printf("%s\n",pvAccess.getPVRecord().toString());
                 return;
             }
-            pvData = (DBData)pvAccess.getField();
+            pvData = pvAccess.getField();
         }
         actualFieldName = pvData.getField().getFieldName();
         fullName = pvData.getPVRecord().getRecordName() + pvData.getFullFieldName();
-        listener = pvData.getDBRecord().createRecordListener(this);
-        pvData.addListener(listener);
+        listener = dbRecord.createRecordListener(this);
+        DBData dbData = dbRecord.findDBData(pvData);
+        dbData.addListener(listener);
         if(monitorProperties) {
             if(pvData.getField().getType()!=Type.pvStructure) {
                 Property[] property = pvData.getField().getPropertys();
@@ -56,7 +58,7 @@ public class TestListener implements DBListener{
                         System.out.printf("name %s not in record %s%n",pvName,recordName);
                         System.out.printf("%s\n",pvAccess.getPVRecord().toString());
                     } else {
-                        propertyData = (DBData)pvAccess.getField();
+                        propertyData = (DBData)dbRecord.findDBData(pvAccess.getField());
                         propertyData.addListener(listener);
                     }
                 }
@@ -64,7 +66,7 @@ public class TestListener implements DBListener{
         }
     }
     
-    public TestListener(IOCDB iocdb,String recordName,String pvName)
+    public DBListenerForTesting(IOCDB iocdb,String recordName,String pvName)
     {
         this(iocdb,recordName,pvName,true,true);
     }
@@ -95,33 +97,34 @@ public class TestListener implements DBListener{
         isProcessing = false;
     }
     /* (non-Javadoc)
-     * @see org.epics.ioc.db.DBListener#beginPut(org.epics.ioc.pv.PVStructure)
+     * @see org.epics.ioc.db.DBListener#beginPut(org.epics.ioc.db.DBStructure)
      */
-    public void beginPut(PVStructure pvStructure) {
+    public void beginPut(DBStructure dbStructure) {
+        PVStructure pvStructure = dbStructure.getPVStructure();
         if(!verbose) return;
-        DBData dbData = (DBData)pvStructure;
-        String name = dbData.getPVRecord().getRecordName() + pvStructure.getFullFieldName();
+        String name = pvStructure.getPVRecord().getRecordName() + pvStructure.getFullFieldName();
         System.out.println("beginPut " + name);
     }
     /* (non-Javadoc)
-     * @see org.epics.ioc.db.DBListener#endPut(org.epics.ioc.pv.PVStructure)
+     * @see org.epics.ioc.db.DBListener#endPut(org.epics.ioc.db.DBStructure)
      */
-    public void endPut(PVStructure pvStructure) {
+    public void endPut(DBStructure dbStructure) {
+        PVStructure pvStructure = dbStructure.getPVStructure();
         if(!verbose) return;
-        DBData dbData = (DBData)pvStructure;
-        String name = dbData.getPVRecord().getRecordName() + pvStructure.getFullFieldName();
+        String name = pvStructure.getPVRecord().getRecordName() + pvStructure.getFullFieldName();
         System.out.println("endPut " + name);
     }
     /* (non-Javadoc)
      * @see org.epics.ioc.db.DBListener#dataPut(org.epics.ioc.db.DBData)
      */
     public void dataPut(DBData dbData) {
+        PVData pvData = dbData.getPVData();
         String common = putCommon("dataPut");
         if(!verbose) {
             System.out.println(common + dbData.toString(1));
             return;
         }
-        String name = dbData.getPVRecord().getRecordName() + dbData.getFullFieldName();
+        String name = pvData.getPVRecord().getRecordName() + pvData.getFullFieldName();
         if(!name.equals(fullName)) {
             System.out.printf("%s%s NOT_EQUAL %s%n",common,name,fullName);
         }
@@ -129,9 +132,10 @@ public class TestListener implements DBListener{
             common,name,dbData.toString(2));
     }
     /* (non-Javadoc)
-     * @see org.epics.ioc.db.DBListener#enumChoicesPut(org.epics.ioc.pv.PVEnum)
+     * @see org.epics.ioc.db.DBListener#enumChoicesPut(org.epics.ioc.db.DBEnum)
      */
-    public void enumChoicesPut(PVEnum pvEnum) {
+    public void enumChoicesPut(DBEnum dbEnum) {
+        PVEnum pvEnum = dbEnum.getPVEnum();
         String common = putCommon("enumChoicesPut");
         if(!verbose) {
             System.out.println(common + pvEnum.toString(1));
@@ -145,9 +149,10 @@ public class TestListener implements DBListener{
             common,name,pvEnum.toString(2));
     }
     /* (non-Javadoc)
-     * @see org.epics.ioc.db.DBListener#enumIndexPut(org.epics.ioc.pv.PVEnum)
+     * @see org.epics.ioc.db.DBListener#enumIndexPut(org.epics.ioc.db.DBEnum)
      */
-    public void enumIndexPut(PVEnum pvEnum) {
+    public void enumIndexPut(DBEnum dbEnum) {
+        PVEnum pvEnum = dbEnum.getPVEnum();
         String common = putCommon("enumChoicesPut");
         if(!verbose) {
             System.out.println(common + pvEnum.toString(1));
@@ -164,75 +169,79 @@ public class TestListener implements DBListener{
      * @see org.epics.ioc.db.DBListener#supportNamePut(org.epics.ioc.db.DBData)
      */
     public void supportNamePut(DBData dbData) {
+        PVData pvData = dbData.getPVData();
         String common = putCommon("supportNamePut");
-        String name = dbData.getPVRecord().getRecordName() + dbData.getFullFieldName();
+        String name = pvData.getPVRecord().getRecordName() + pvData.getFullFieldName();
         if(!name.equals(fullName)) {
             System.out.printf("%s %s NOT_EQUAL %s%n",common,name,fullName);
         }
         System.out.printf("%s    %s = %s%n",
-            common,name,dbData.getSupportName());
+            common,name,pvData.getSupportName());
     }
     /* (non-Javadoc)
-     * @see org.epics.ioc.db.DBListener#configurationStructurePut(org.epics.ioc.pv.PVLink)
+     * @see org.epics.ioc.db.DBListener#configurationStructurePut(org.epics.ioc.db.DBLink)
      */
-    public void configurationStructurePut(PVLink pvLink) {
-        String common = putCommon("configurationStructurePut");
-        String name = pvLink.getPVRecord().getRecordName() + pvLink.getFullFieldName();
-        if(!name.equals(fullName)) {
-            System.out.printf("%s %s NOT_EQUAL %s%n",common,name,fullName);
-        }
-        System.out.printf("%s%n    %s = %s%n",
-            common,name,pvLink.getConfigurationStructure().toString(2));
+    public void configurationStructurePut(DBLink dbLink) {
+        PVLink pvLink = dbLink.getPVLink();
+        System.out.printf("configStructPut pvName %s actualField %s%s%n",
+            pvName,actualFieldName,pvLink.getConfigurationStructure().toString(2));
     }
     /* (non-Javadoc)
-     * @see org.epics.ioc.db.DBListener#structurePut(org.epics.ioc.pv.PVStructure, org.epics.ioc.db.DBData)
+     * @see org.epics.ioc.db.DBListener#dataPut(org.epics.ioc.db.DBStructure, org.epics.ioc.db.DBData)
      */
-    public void dataPut(PVStructure pvStructure, DBData dbData) {
+    public void dataPut(DBData requested, DBData dbData) {
+        PVData pvRequested = requested.getPVData();
+        PVData pvData = dbData.getPVData();
         String structureName = 
-            pvStructure.getPVRecord().getRecordName()
-            + pvStructure.getFullFieldName();
-        String common = putCommon(structureName +" dataPut to field " + dbData.getFullFieldName());
-        System.out.printf("%s    = %s%n",common,dbData.toString(2));
+            pvRequested.getPVRecord().getRecordName()
+            + pvRequested.getFullFieldName();
+        String common = putCommon(structureName +" dataPut to field " + pvData.getFullFieldName());
+        System.out.printf("%s    = %s%n",common,pvData.toString(2));
     }       
     /* (non-Javadoc)
-     * @see org.epics.ioc.db.DBListener#enumChoicesPut(org.epics.ioc.pv.PVStructure, org.epics.ioc.pv.PVEnum)
+     * @see org.epics.ioc.db.DBListener#enumChoicesPut(org.epics.ioc.db.DBStructure, org.epics.ioc.db.DBEnum)
      */
-    public void enumChoicesPut(PVStructure pvStructure,PVEnum pvEnum) {
+    public void enumChoicesPut(DBData requested,DBEnum dbEnum) {
+        PVData pvRequested = requested.getPVData();
+        PVEnum pvEnum = dbEnum.getPVEnum();
         String structureName = 
-            pvStructure.getPVRecord().getRecordName()
-            + pvStructure.getFullFieldName();
+            pvRequested.getPVRecord().getRecordName()
+            + pvRequested.getFullFieldName();
         String common = putCommon(structureName +" enumChoicesPut to field " + pvEnum.getFullFieldName());
         System.out.printf("%s    = %s%n",common,pvEnum.toString(2));
     }
     /* (non-Javadoc)
-     * @see org.epics.ioc.db.DBListener#enumIndexPut(org.epics.ioc.pv.PVStructure, org.epics.ioc.pv.PVEnum)
+     * @see org.epics.ioc.db.DBListener#enumIndexPut(org.epics.ioc.db.DBStructure, org.epics.ioc.db.DBEnum)
      */
-    public void enumIndexPut(PVStructure pvStructure,PVEnum pvEnum) {
+    public void enumIndexPut(DBData requested,DBEnum dbEnum) {
+        PVData pvRequested = requested.getPVData();
+        PVEnum pvEnum = dbEnum.getPVEnum();
         String structureName = 
-            pvStructure.getPVRecord().getRecordName()
-            + pvStructure.getFullFieldName();
+            pvRequested.getPVRecord().getRecordName()
+            + pvRequested.getFullFieldName();
         String common = putCommon(structureName +" enumIndexPut to field " + pvEnum.getFullFieldName());
         System.out.printf("%s    index = %d%n",common,pvEnum.getIndex());
     }
+    
     /* (non-Javadoc)
-     * @see org.epics.ioc.db.DBListener#supportNamePut(org.epics.ioc.pv.PVStructure, org.epics.ioc.db.DBData)
+     * @see org.epics.ioc.db.DBListener#supportNamePut(org.epics.ioc.db.DBStructure, org.epics.ioc.db.DBData)
      */
-    public void supportNamePut(PVStructure pvStructure,DBData dbData) {
+    public void supportNamePut(DBData requested,DBData dbData) {
+        PVData pvRequested = requested.getPVData();
+        PVData pvData = dbData.getPVData();
         String structureName = 
-            pvStructure.getPVRecord().getRecordName()
-            + pvStructure.getFullFieldName();
-        String common = putCommon(structureName +" supportNamePut to field " + dbData.getFullFieldName());
-        System.out.printf("%s    = %s%n",common,dbData.getSupportName());
+            pvRequested.getPVRecord().getRecordName()
+            + pvRequested.getFullFieldName();
+        String common = putCommon(structureName +" supportNamePut to field " + pvData.getFullFieldName());
+        System.out.printf("%s    = %s%n",common,pvData.getSupportName());
     }
     /* (non-Javadoc)
-     * @see org.epics.ioc.db.DBListener#configurationStructurePut(org.epics.ioc.pv.PVStructure, org.epics.ioc.pv.PVLink)
+     * @see org.epics.ioc.db.DBListener#configurationStructurePut(org.epics.ioc.db.DBStructure, org.epics.ioc.db.DBLink)
      */
-    public void configurationStructurePut(PVStructure pvStructure,PVLink pvLink) {
-        String structureName = 
-            pvStructure.getPVRecord().getRecordName()
-            + pvStructure.getFullFieldName();
-        String common = putCommon(structureName +" configurationStructurePut to field " + pvLink.getFullFieldName());
-        System.out.printf("%s%n    = %s%n",common,pvLink.getConfigurationStructure().toString(2));
+    public void configurationStructurePut(DBData requested,DBLink dbLink) {
+        PVLink pvLink = dbLink.getPVLink();
+        System.out.printf("configStructPut pvName %s actualField %s%s%n",
+            pvName,actualFieldName,pvLink.getConfigurationStructure().toString(2));
     }
     /* (non-Javadoc)
      * @see org.epics.ioc.dbAccess.DBListener#unlisten(org.epics.ioc.dbAccess.RecordListener)

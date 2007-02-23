@@ -6,6 +6,7 @@
 package org.epics.ioc.util;
 
 import org.epics.ioc.pv.*;
+import org.epics.ioc.db.*;
 
 /**
  * A convenience class for a timeStamp field.
@@ -16,14 +17,19 @@ import org.epics.ioc.pv.*;
  *
  */
 public class PVTimeStamp {
-    private PVStructure timeStamp;
+    private DBData dbData;
     private PVLong secondsPastEpoch;
     private PVInt nanoSeconds;
     
+    public static PVTimeStamp create(DBData dbData) {
+        PVTimeStamp pvTimeStamp = create(dbData.getPVData());
+        if(pvTimeStamp!=null) pvTimeStamp.setDBData(dbData);
+        return pvTimeStamp;
+    }
     /**
      * Given a pvData create a PVTimeStamp if the field is actually
      * a timeStamp structure.
-     * @param pvData The field.
+     * @param dbData The field.
      * @return A PVTimeStamp or null if the field is not a timeStamp structure.
      */
     public static PVTimeStamp create(PVData pvData) {
@@ -41,7 +47,7 @@ public class PVTimeStamp {
         if(field.getType()!=Type.pvInt) return null;
         if(!field.getFieldName().equals("nanoSeconds")) return null;
         PVInt nanoSeconds = (PVInt)fieldPvData; 
-        return new PVTimeStamp(timeStamp,secondsPastEpoch,nanoSeconds);
+        return new PVTimeStamp(pvData,secondsPastEpoch,nanoSeconds);
     }
     
     /**
@@ -58,16 +64,18 @@ public class PVTimeStamp {
      * @param timeStamp The new value.
      */
     public void put(TimeStamp timeStamp) {
-        this.timeStamp.beginPut();
         secondsPastEpoch.put(timeStamp.secondsPastEpoch);
         nanoSeconds.put(timeStamp.nanoSeconds);
-        this.timeStamp.endPut();
+        if(dbData!=null) dbData.postPut();
     }
     
-    private PVTimeStamp(PVStructure timeStamp,PVLong secondsPastEpoch,PVInt nanoSeconds){
-        this.timeStamp = timeStamp;
+    private PVTimeStamp(PVData pvData,PVLong secondsPastEpoch,PVInt nanoSeconds){
         this.secondsPastEpoch = secondsPastEpoch;
         this.nanoSeconds = nanoSeconds;
+    }
+    
+    private void setDBData(DBData dbData) {
+        this.dbData = dbData;
     }
         
 }

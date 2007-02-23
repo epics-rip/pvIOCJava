@@ -368,7 +368,7 @@ public class PVShell {
                     requestor.message("record " + recordName + " is not local",MessageType.error);
                     return null;
                 }
-                PVData[] fields = dbRecord.getFieldPVDatas();
+                PVData[] fields = dbRecord.getPVRecord().getFieldPVDatas();
                 list.removeAll();
                 for(PVData pvData: fields) list.add(pvData.getField().getFieldName());
                 list.addSelectionListener(this);

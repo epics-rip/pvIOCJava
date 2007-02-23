@@ -55,22 +55,22 @@ public class ListenerTest extends TestCase {
 //            System.out.print(record.toString());
 //        }
         System.out.printf("%ntest put and listen exampleAi%n");
-        new TestListener(iocdb,"exampleAi","value");
-        new TestListener(iocdb,"exampleAi","priority");
-        new TestListener(iocdb,"exampleAi","input");
-        new TestListener(iocdb,"exampleAi",null);
-        new TestListener(iocdb,"exampleAi","input.aiRaw.input");
+        new DBListenerForTesting(iocdb,"exampleAi","value");
+        new DBListenerForTesting(iocdb,"exampleAi","priority");
+        new DBListenerForTesting(iocdb,"exampleAi","input");
+        new DBListenerForTesting(iocdb,"exampleAi",null);
+        new DBListenerForTesting(iocdb,"exampleAi","input.aiRaw.input");
         testPut(iocdb,"exampleAi","priority",2.0);
         testPut(iocdb,"exampleAi","rawValue",2.0);
         testPut(iocdb,"exampleAi","value",5.0);
         testPut(iocdb,"exampleAi","timeStamp",100.0);
         testPut(iocdb,"exampleAi","input.aiRaw.input",1.0);
         System.out.printf("%ntest put and listen examplePowerSupply%n");
-        new TestListener(iocdb,"examplePowerSupply","power");
-        new TestListener(iocdb,"examplePowerSupply","current");
-        new TestListener(iocdb,"examplePowerSupply","voltage");
-        new TestListener(iocdb,"examplePowerSupply","powerSupply");
-        new TestListener(iocdb,"examplePowerSupply",null);
+        new DBListenerForTesting(iocdb,"examplePowerSupply","power");
+        new DBListenerForTesting(iocdb,"examplePowerSupply","current");
+        new DBListenerForTesting(iocdb,"examplePowerSupply","voltage");
+        new DBListenerForTesting(iocdb,"examplePowerSupply","powerSupply");
+        new DBListenerForTesting(iocdb,"examplePowerSupply",null);
         testPut(iocdb,"examplePowerSupply","current",25.0);
         testPut(iocdb,"examplePowerSupply","voltage",2.0);
         testPut(iocdb,"examplePowerSupply","power",50.0);
@@ -78,15 +78,15 @@ public class ListenerTest extends TestCase {
         System.out.printf("%ntest masterListener examplePowerSupply%n");
         testPut(iocdb,"examplePowerSupply","powerSupply",0.5);
         System.out.printf("%ntest put and listen examplePowerSupplyArray%n");
-        new TestListener(iocdb,"examplePowerSupplyArray","powerSupply[0].power");
-        new TestListener(iocdb,"examplePowerSupplyArray","powerSupply[0].current");
-        new TestListener(iocdb,"examplePowerSupplyArray","powerSupply[0].voltage");
-        new TestListener(iocdb,"examplePowerSupplyArray","powerSupply[0]");
-        new TestListener(iocdb,"examplePowerSupplyArray","powerSupply[1].power");
-        new TestListener(iocdb,"examplePowerSupplyArray","powerSupply[1].current");
-        new TestListener(iocdb,"examplePowerSupplyArray","powerSupply[1].voltage");
-        new TestListener(iocdb,"examplePowerSupplyArray","powerSupply[1]");
-        new TestListener(iocdb,"examplePowerSupplyArray",null);
+        new DBListenerForTesting(iocdb,"examplePowerSupplyArray","powerSupply[0].power");
+        new DBListenerForTesting(iocdb,"examplePowerSupplyArray","powerSupply[0].current");
+        new DBListenerForTesting(iocdb,"examplePowerSupplyArray","powerSupply[0].voltage");
+        new DBListenerForTesting(iocdb,"examplePowerSupplyArray","powerSupply[0]");
+        new DBListenerForTesting(iocdb,"examplePowerSupplyArray","powerSupply[1].power");
+        new DBListenerForTesting(iocdb,"examplePowerSupplyArray","powerSupply[1].current");
+        new DBListenerForTesting(iocdb,"examplePowerSupplyArray","powerSupply[1].voltage");
+        new DBListenerForTesting(iocdb,"examplePowerSupplyArray","powerSupply[1]");
+        new DBListenerForTesting(iocdb,"examplePowerSupplyArray",null);
         testPut(iocdb,"examplePowerSupplyArray","powerSupply[0].current",25.0);
         testPut(iocdb,"examplePowerSupplyArray","powerSupply[0].voltage",2.0);
         testPut(iocdb,"examplePowerSupplyArray","powerSupply[0].power",50.0);
@@ -97,7 +97,8 @@ public class ListenerTest extends TestCase {
     }
     
     static void testPut(IOCDB iocdb,String recordName,String fieldName,double value) {
-        PVRecord pvRecord = iocdb.findRecord(recordName);
+        DBRecord dbRecord = iocdb.findRecord(recordName);
+        PVRecord pvRecord = dbRecord.getPVRecord();
         if(pvRecord==null) {
             System.out.printf("%nrecord %s not found%n",recordName);
             return;
@@ -108,52 +109,54 @@ public class ListenerTest extends TestCase {
             return;
         }
         PVData pvData = pvAccess.getField();
+        DBData dbData = dbRecord.findDBData(pvData);
         Type type = pvData.getField().getType();
         if(type.isNumeric()) {
             System.out.printf("%ntestPut recordName %s fieldName %s value %f%n",
                 recordName,fieldName,value);
             convert.fromDouble(pvData,value);
+            dbData.postPut();
             return;
         }
         if(type==Type.pvEnum) {
             System.out.printf("%ntestPut enum index recordName %s fieldName %s value %f%n",
                     recordName,fieldName,value);
             int index = (int)value;
-            PVEnum pvEnum = (PVEnum)pvData;
-            pvEnum.setIndex(index);
+            DBEnum dbEnum = (DBEnum)dbData;
+            dbEnum.setIndex(index);
             System.out.printf("%ntestPut enum choices recordName %s fieldName %s value %f%n",
                     recordName,fieldName,value);
-            String[] choice = pvEnum.getChoices();
-            pvEnum.setChoices(choice);
+            String[] choice = dbEnum.getChoices();
+            dbEnum.setChoices(choice);
             return;
         }
         if(type==Type.pvMenu) {
             System.out.printf("%ntestPut menu index recordName %s fieldName %s value %f%n",
                     recordName,fieldName,value);
             int index = (int)value;
-            PVEnum pvEnum = (PVEnum)pvData;
-            pvEnum.setIndex(index);
+            DBMenu dbMenu = (DBMenu)dbData;
+            dbMenu.setIndex(index);
             return;
         }
         if(type==Type.pvLink) {
             System.out.printf("%ntestPut link configurationStructure recordName %s fieldName %s value %f%n",
                     recordName,fieldName,value);
-            PVLink pvLink = (PVLink)pvData;
-            PVStructure configStructure = pvLink.getConfigurationStructure();
-            boolean boolResult = pvLink.setConfigurationStructure(configStructure);
+            DBLink dbLink = (DBLink)dbData;
+            PVStructure configStructure = dbLink.getConfigurationStructure();
+            boolean boolResult = dbLink.setConfigurationStructure(configStructure);
             if(!boolResult) {
                 System.out.println("setConfigurationStructure failed");
                 return;
             }
             System.out.println("change supportName");
-            String supportName = pvLink.getSupportName();
-            String result = pvLink.setSupportName(supportName);
+            String supportName = dbLink.getSupportName();
+            String result = dbLink.setSupportName(supportName);
             if(result!=null) {
                 System.out.println("setSupportName failed " + result);
                 return;
             }
             System.out.println("setConfigurationStructure");
-            boolResult = pvLink.setConfigurationStructure(configStructure);
+            boolResult = dbLink.setConfigurationStructure(configStructure);
             if(!boolResult) {
                 System.out.println("setConfigurationStructure failed");
                 return;
@@ -165,29 +168,31 @@ public class ListenerTest extends TestCase {
                 fieldName,recordName);
             return;
         }
-        PVStructure structure = (PVStructure)pvData;
-        DBRecord dbRecord = ((DBData)pvData).getDBRecord();
-        PVData[] fields = structure.getFieldPVDatas();
+        DBStructure dbStructure = (DBStructure)dbRecord.findDBData(pvData);
+        DBData[] dbDatas = dbStructure.getFieldDBDatas();
         System.out.printf("%ntestPut begin structure put %s%n",
                 recordName + pvData.getFullFieldName());
         dbRecord.beginProcess();
-        structure.beginPut();
-        for(PVData field : fields) {
-            Type fieldType = field.getField().getType();
+        dbStructure.beginPut();
+        for(DBData data : dbDatas) {
+            PVData pv = data.getPVData();
+            Type fieldType = pv.getField().getType();
             if(fieldType.isNumeric()) {
                 System.out.printf("testPut recordName %s fieldName %s value %f%n",
-                        recordName,field.getField().getFieldName(),value);
-                    convert.fromDouble(field,value);
+                        recordName,pv.getField().getFieldName(),value);
+                    convert.fromDouble(pv,value);
             } else if (fieldType==Type.pvString) {
                 String valueString = Double.toString(value);
                 System.out.printf("testPut recordName %s fieldName %s value %s%n",
-                        recordName,field.getField().getFieldName(),valueString);
-                PVString pvString = (PVString)field;
+                        recordName,pv.getField().getFieldName(),valueString);
+                PVString pvString = (PVString)pv;
                 pvString.put(valueString);
+            } else {
+                continue;
             }
-            
+            data.postPut();
         }
-        structure.endPut();
+        dbStructure.endPut();
         dbRecord.endProcess();
     }
     

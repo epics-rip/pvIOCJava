@@ -5,6 +5,7 @@
  */
 package org.epics.ioc.process;
 
+import org.epics.ioc.db.DBData;
 import org.epics.ioc.pv.*;
 
 /**
@@ -16,7 +17,7 @@ public interface LinkSupport extends Support {
     /**
      * Set the field for which the link support should get/put data.
      * This is called by processDB.createSupport(DBData dbData) when it is called for a link field. 
-     * @param field The field.
+     * @param dbData The field.
      */
-    void setField(PVData field);
+    void setField(DBData dbData);
 }

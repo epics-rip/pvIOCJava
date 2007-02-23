@@ -3,28 +3,26 @@
  * EPICS JavaIOC is distributed subject to a Software License Agreement found
  * in file LICENSE that is included with this distribution.
  */
-package org.epics.ioc.db;
-
-import org.epics.ioc.pv.*;
+package org.epics.ioc.pv;
 
 /**
- * Abstract base class for any DBArray field.
+ * Abstract base class for any PVArray field.
  * Any code that implements a PVArray field for an IOC database should extend this class.
  * @author mrk
  *
  */
-public abstract class AbstractDBArray extends AbstractDBData implements PVArray{
+public abstract class AbstractPVArray extends AbstractPVData implements PVArray{
     protected int length = 0;
     protected int capacity;
     protected boolean capacityMutable = true;
     /**
      * Constructer that derived classes must call.
      * @param parent The parent interface.
-     * @param array The reflection interface for the DBArray data.
+     * @param array The reflection interface for the PVArray data.
      * @param capacity The default capacity.
      * @param capacityMutable Is the capacity mutable.
      */
-    public AbstractDBArray(DBData parent,Array array,int capacity,boolean capacityMutable) {
+    public AbstractPVArray(PVData parent,Array array,int capacity,boolean capacityMutable) {
         super(parent,array);
         this.capacity = capacity;
         this.capacityMutable = capacityMutable;

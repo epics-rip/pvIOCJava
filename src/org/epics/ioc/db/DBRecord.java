@@ -16,7 +16,23 @@ import org.epics.ioc.dbd.*;
  * @author mrk
  *
  */
-public interface DBRecord extends DBData, PVRecord {
+public interface DBRecord {
+    /**
+     * Given a PVData find the corresponding DBData.
+     * @param pvData The pvData.
+     * @return The corresponding DBData.
+     */
+    DBData findDBData(PVData pvData);
+    /**
+     * Get the PVRecord that has the data for this IOC record instance.
+     * @return The PVRecord interface.
+     */
+    PVRecord getPVRecord();
+    /**
+     * Get the interface to the subfields of this record.
+     * @return The DBStructure interface.
+     */
+    DBStructure getDBStructure();
     /**
      * Lock the record instance.
      * This must be called before accessing anything contained in the record.
@@ -78,11 +94,11 @@ public interface DBRecord extends DBData, PVRecord {
      */
     void removeRecordListeners();
     /**
-     * Used for communication between DBRecordBase and AbstractDBData.
-     * AbstractDBData calls this the first time DBData.addListener is called.
-     * @param dbData The AbstractDBData instance.
+     * Used for communication between BasePVRecord and BaseDBData.
+     * DBField calls this the first time DBField.addListener is called.
+     * @param dbData The DBField instance.
      */
-    void addListenerSource(AbstractDBData dbData);
+    void addListenerSource(DBData dbData);
     /**
      * Get the DBD that contains this record.
      * @return The DBD or null if it was never set.

@@ -16,8 +16,8 @@ import org.epics.ioc.util.*;
  *
  */
 public class EventRecordFactory {
-    public static Support create(PVStructure pvStructure) {
-        return new EventRecordSupport(pvStructure);
+    public static Support create(DBStructure dbStructure) {
+        return new EventRecordSupport(dbStructure);
     }
     
     
@@ -28,48 +28,48 @@ public class EventRecordFactory {
          */
         private static String supportName = "eventRecord";
         private SupportState supportState = SupportState.readyForInitialize;
+        private PVStructure pvStructure;
         private DBRecord dbRecord;
+        private PVRecord pvRecord;
         private PVString value = null;
         private EventScanner eventScanner = null;
         private EventAnnounce eventAnnounce = null;
         private String eventName = null;
         
-        private EventRecordSupport(PVStructure pvStructure) {
-            super(supportName,(DBData)pvStructure);
-            dbRecord = (DBRecord)pvStructure.getPVRecord();
+        private EventRecordSupport(DBStructure dbStructure) {
+            super(supportName,dbStructure);
+            pvStructure = dbStructure.getPVStructure();
+            dbRecord = dbStructure.getDBRecord();
+            pvRecord = dbRecord.getPVRecord();
             eventScanner = ScannerFactory.getEventScanner();
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.process.SupportProcessRequestor#getProcessRequestorName()
          */
         public String getProcessRequestorName() {
-            return dbRecord.getRecordName();
+            return pvRecord.getRecordName();
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.util.Requestor#message(java.lang.String, org.epics.ioc.util.MessageType)
          */
         public void message(String message, MessageType messageType) {
-            dbRecord.message(message, messageType);
+            pvStructure.message(message, messageType);
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.process.Support#initialize()
          */
         public void initialize() {
-            PVAccess pvAccess = PVAccessFactory.createPVAccess(dbRecord);
+            PVAccess pvAccess = PVAccessFactory.createPVAccess(pvRecord);
             PVData pvData;
             pvAccess.findField(null);
             AccessSetResult result = pvAccess.findField("value");
             if(result!=AccessSetResult.thisRecord) {
-                dbRecord.message(
-                        "field value does not exist",
-                        MessageType.error);
+                message("field value does not exist",MessageType.error);
                 return;
             }
             pvData = pvAccess.getField();
             if(pvData.getField().getType()!=Type.pvString) {
-                dbRecord.message(
-                        "field value is not a string",
-                        MessageType.error);
+                message("field value is not a string",MessageType.error);
                 return;
             }
             value = (PVString)pvData;
@@ -83,7 +83,7 @@ public class EventRecordFactory {
             supportState = SupportState.ready;
             eventName = value.get();
             if(eventName!=null) {
-                eventAnnounce = eventScanner.addEventAnnouncer(eventName, dbRecord.getRecordName());
+                eventAnnounce = eventScanner.addEventAnnouncer(eventName, pvRecord.getRecordName());
             }
             setSupportState(supportState);
         }
@@ -92,7 +92,7 @@ public class EventRecordFactory {
          */
         public void stop() {
             if(eventName!=null) {
-                eventScanner.removeEventAnnouncer(eventAnnounce, dbRecord.getRecordName());
+                eventScanner.removeEventAnnouncer(eventAnnounce, pvRecord.getRecordName());
                 eventAnnounce = null;
                 eventName = null;
             }
@@ -111,7 +111,7 @@ public class EventRecordFactory {
          */
         public void process(SupportProcessRequestor supportProcessRequestor) {
             if(supportState!=SupportState.ready) {
-                dbRecord.message(
+                message(
                         "process called but supportState is "
                         + supportState.toString(),
                         MessageType.error);
@@ -119,11 +119,11 @@ public class EventRecordFactory {
             }
             String newName = value.get();
             if(newName!=eventName) {
-                eventScanner.removeEventAnnouncer(eventAnnounce, dbRecord.getRecordName());
+                eventScanner.removeEventAnnouncer(eventAnnounce, pvRecord.getRecordName());
                 eventAnnounce = null;
                 eventName = newName;
                 if(eventName!=null) {
-                    eventAnnounce = eventScanner.addEventAnnouncer(eventName, dbRecord.getRecordName());
+                    eventAnnounce = eventScanner.addEventAnnouncer(eventName, pvRecord.getRecordName());
                 }
             }
             if(eventAnnounce!=null) eventAnnounce.announce();

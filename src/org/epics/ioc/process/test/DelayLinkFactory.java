@@ -17,8 +17,8 @@ import org.epics.ioc.util.*;
  */
 public class DelayLinkFactory {
     
-    public static LinkSupport create(PVLink pvLink) {
-        return new DelayLink(pvLink);
+    public static LinkSupport create(DBLink dbLink) {
+        return new DelayLink(dbLink);
     }
     
     private static Timer timer = new Timer("DelayLinkTimer");
@@ -28,7 +28,7 @@ public class DelayLinkFactory {
     implements LinkSupport,ProcessContinueRequestor
     {
         private TimerTask timerTask = null;
-        private PVLink pvLink = null;
+        private DBLink dbLink = null;
         private DBRecord dbRecord = null;
         private RecordProcess recordProcess = null;
         private PVStructure configStructure = null;
@@ -40,9 +40,9 @@ public class DelayLinkFactory {
         private long delay = 0;
         private SupportProcessRequestor supportProcessRequestor = null;
 
-        private DelayLink(PVLink pvLink) {
-            super(supportName,(DBData)pvLink);
-            this.pvLink = pvLink;
+        private DelayLink(DBLink dbLink) {
+            super(supportName,dbLink);
+            this.dbLink = dbLink;
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.process.AbstractSupport#initialize()
@@ -50,7 +50,7 @@ public class DelayLinkFactory {
         @Override
         public void initialize() {
             if(!super.checkSupportState(SupportState.readyForInitialize,supportName)) return;
-            dbRecord = (DBRecord)pvLink.getPVRecord();
+            dbRecord = dbLink.getDBRecord();
             recordProcess = dbRecord.getRecordProcess();
             configStructure = super.getConfigStructure("delayLink");
             if(configStructure==null) return;
@@ -115,7 +115,7 @@ public class DelayLinkFactory {
         /* (non-Javadoc)
          * @see org.epics.ioc.process.LinkSupport#setField(org.epics.ioc.pvAccess.PVData)
          */
-        public void setField(PVData field) {
+        public void setField(DBData dbData) {
             // nothing to do
         }
 

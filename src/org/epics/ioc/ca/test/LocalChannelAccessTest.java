@@ -620,16 +620,17 @@ public class LocalChannelAccessTest extends TestCase {
             }
             timeStampField = channel.getChannelField();
             channelFieldGroup.addChannelField(timeStampField);
-            channelData = ChannelDataFactory.createData(channel,channelFieldGroup);
+            channelData = ChannelDataFactory.createChannelData(channel,channelFieldGroup);
             if(channelData==null) {
                 System.out.printf("ChannelDataFactory.createData failed");
                 return null;
             }
+            List<ChannelField> channelFieldList =channelFieldGroup.getList();
             return channelFieldGroup;
         }
         
         private void clear() {
-            channelData.clear();
+            channelData.clearNumPuts();
         }
         private boolean nextGetData(Channel channel, ChannelField field, PVData data) {
             channelData.dataPut(data);
@@ -637,15 +638,18 @@ public class LocalChannelAccessTest extends TestCase {
         }
         
         private void printResults() {
-            List<ChannelDataPV> channelDataPVList = channelData.getChannelDataPVList();
-            Iterator<ChannelDataPV> iter = channelDataPVList.iterator();
-            while(iter.hasNext()) {
-                ChannelDataPV channelDataPV = iter.next();
-                PVData data = channelDataPV.getPVData();
-                ChannelField field = channelDataPV.getChannelField();
+            ChannelFieldGroup channelFieldGroup = channelData.getChannelFieldGroup();
+            List<ChannelField> channelFieldList = channelFieldGroup.getList();
+            CDBStructure cdbStructure = channelData.getCDBRecord().getCDBStructure();
+            CDBData[] cdbDatas = cdbStructure.getFieldCDBDatas();
+            System.out.printf(" maxNumPuts %d ",channelData.getMaxPutsToField());
+            for(int i=0;i<cdbDatas.length; i++) {
+                CDBData cdbData = cdbDatas[i];
+                PVData data = cdbData.getPVData();
+                ChannelField field = channelFieldList.get(i);
                 if(field==valueField) {
                     PVDouble pvDouble = (PVDouble)data;
-                    System.out.printf("value %f", pvDouble.get());
+                    System.out.printf("value %f numPuts %d", pvDouble.get(),cdbData.getNumPuts());
                 } else if (field==severityField) {
                     PVEnum pvEnum = (PVEnum)data;
                     int index = pvEnum.getIndex();
@@ -664,7 +668,12 @@ public class LocalChannelAccessTest extends TestCase {
                     Date date = new Date(now);
                     System.out.printf(" time %s%n",date.toLocaleString());
                 }
+                if(cdbData.getNumSupportNamePuts()>0) {
+                    System.out.printf("supportName %s numSupportNamePuts %d%n",
+                        data.getSupportName(),cdbData.getNumSupportNamePuts());
+                }
             }
+            channelData.clearNumPuts();
         }
     }
 }

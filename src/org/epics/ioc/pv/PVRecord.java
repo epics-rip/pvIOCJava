@@ -5,7 +5,7 @@
  */
 package org.epics.ioc.pv;
 
-import org.epics.ioc.util.MessageType;
+import org.epics.ioc.util.*;
 
 /**
  * @author mrk
@@ -24,4 +24,6 @@ public interface PVRecord extends PVStructure {
      * @param messageType The message type.
      */
     void message(String message, MessageType messageType);
+    void addRequestor(Requestor requestor);
+    void removeRequestor(Requestor requestor);
 }

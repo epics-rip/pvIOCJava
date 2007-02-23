@@ -18,69 +18,78 @@ import org.epics.ioc.util.*;
 public class CounterRecordFactory {
     /**
      * Create support.
-     * @param pvStructure The structure for which the support will be created.
+     * @param dbStructure The structure for which the support will be created.
      * @return The newly created support.
      */
-    public static Support create(PVStructure pvStructure) {
-        return new CounterRecord(pvStructure);
+    public static Support create(DBStructure dbStructure) {
+        return new CounterRecord(dbStructure);
     }
     
     private static class CounterRecord extends AbstractSupport implements SupportProcessRequestor
     {
         private static String supportName = "counterRecord";
-        private DBRecord dbRecord = null;
-        private SupportProcessRequestor supportProcessRequestor = null;
-        private PVDouble pvMin = null;
-        private PVDouble pvMax = null;
-        private PVDouble pvInc = null;
-        private PVDouble pvValue = null;
-        private PVArray pvLinkArray = null;
+        private DBStructure dbStructure;
+        private PVStructure pvStructure;
+        private DBRecord dbRecord;
+        private PVRecord pvRecord;
+        private SupportProcessRequestor supportProcessRequestor;
+        private PVDouble pvMin;
+        private PVDouble pvMax;
+        private PVDouble pvInc;
+        private PVDouble pvValue;
+        private DBData dbValue;
+        private DBData dbLinkArray;
         
         private LinkSupport linkArraySupport = null;
         
-        private CounterRecord(PVStructure pvStructure) {
-            super(supportName,(DBData)pvStructure);
-            DBData dbData = (DBData)pvStructure;
-            Structure structure = (Structure)pvStructure.getField();
-            dbRecord = dbData.getDBRecord();
-            PVData[] pvData = pvStructure.getFieldPVDatas();
-            int index;
-            index = structure.getFieldIndex("min");
-            if(index<0) throw new IllegalStateException("field min does not exist");
-            pvMin = (PVDouble)pvData[index];
-            index = structure.getFieldIndex("max");
-            if(index<0) throw new IllegalStateException("field max does not exist");
-            pvMax = (PVDouble)pvData[index];
-            index = structure.getFieldIndex("inc");
-            if(index<0) throw new IllegalStateException("field inc does not exist");
-            pvInc = (PVDouble)pvData[index];
-            index = structure.getFieldIndex("value");
-            if(index<0) throw new IllegalStateException("field value does not exist");
-            pvValue = (PVDouble)pvData[index];
-            index = structure.getFieldIndex("linkArray");
-            if(index<0) throw new IllegalStateException("field linkArray does not exist");
-            pvLinkArray = (PVArray)pvData[index];
+        private CounterRecord(DBStructure dbStructure) {
+            super(supportName,dbStructure);
+            this.dbStructure = dbStructure;
+            pvStructure = dbStructure.getPVStructure();
+            dbRecord = dbStructure.getDBRecord();
+            pvRecord = dbRecord.getPVRecord();
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.process.SupportProcessRequestor#getProcessRequestorName()
          */
         public String getRequestorName() {
-            return dbRecord.getRecordName();
+            return pvRecord.getRecordName();
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.util.Requestor#message(java.lang.String, org.epics.ioc.util.MessageType)
          */
         public void message(String message, MessageType messageType) {
-            dbRecord.message(message, messageType);
+            pvStructure.message(message, messageType);
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.dbLinkArray.Support#initialize()
          */
         public void initialize() {
             if(!super.checkSupportState(SupportState.readyForInitialize,"initialize")) return;
-            linkArraySupport = (LinkSupport)((DBData)pvLinkArray).getSupport();
+            Structure structure = (Structure)dbStructure.getPVData().getField();
+            PVStructure pvStructure = dbStructure.getPVStructure();
+            PVData[] pvDatas = pvStructure.getFieldPVDatas();
+            DBData[] dbDatas = dbStructure.getFieldDBDatas();
+            int index;
+            index = structure.getFieldIndex("min");
+            if(index<0) throw new IllegalStateException("field min does not exist");
+            pvMin = (PVDouble)pvDatas[index];
+            index = structure.getFieldIndex("max");
+            if(index<0) throw new IllegalStateException("field max does not exist");
+            pvMax = (PVDouble)pvDatas[index];
+            index = structure.getFieldIndex("inc");
+            if(index<0) throw new IllegalStateException("field inc does not exist");
+            pvInc = (PVDouble)pvDatas[index];
+            index = structure.getFieldIndex("value");
+            if(index<0) throw new IllegalStateException("field value does not exist");
+            pvValue = (PVDouble)pvDatas[index];
+            dbValue = dbDatas[index];
+            index = structure.getFieldIndex("linkArray");
+            if(index<0) throw new IllegalStateException("field linkArray does not exist");
+            dbLinkArray = dbDatas[index];
+            linkArraySupport = (LinkSupport)dbLinkArray.getSupport();
             if(linkArraySupport!=null) {
-                linkArraySupport.setField(pvValue);
+                linkArraySupport.setField(dbValue);
                 linkArraySupport.initialize();
                 setSupportState(linkArraySupport.getSupportState());
             } else {
@@ -138,6 +147,7 @@ public class CounterRecordFactory {
             value += inc;
             if(value>max) value = min;
             pvValue.put(value);
+            dbValue.postPut();
             if(linkArraySupport!=null) {
                 linkArraySupport.process(this);
             } else {

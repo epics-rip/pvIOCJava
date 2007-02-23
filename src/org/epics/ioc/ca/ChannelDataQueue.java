@@ -6,7 +6,7 @@
 package org.epics.ioc.ca;
 
 /**
- * A queue of ChannelData.
+ * A queue of CDBData.
  * @author mrk
  *
  */
@@ -23,9 +23,9 @@ public interface ChannelDataQueue {
     int capacity();
     /**
      * Get the next free queue element.
-     * @param forceFree If true than return a ChannelData even
+     * @param forceFree If true than return a CDBData even
      * if the client has not retrieved the data it contains.
-     * @return A ChannelData.
+     * @return A CDBData.
      */
     ChannelData getFree(boolean forceFree);
     /**

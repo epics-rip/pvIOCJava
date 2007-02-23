@@ -15,21 +15,24 @@ import org.epics.ioc.pv.*;
  *
  */
 public class PerformTest extends TestCase {
-        
-
+    private static FieldCreate fieldCreate = FieldFactory.getFieldCreate();
+    private static PVDataCreate dataCreate = PVDataFactory.getPVDataCreate();
+    private static Convert convert = ConvertFactory.getConvert();
     private static final int arraySize = 1000;
     /**
      * test copy array of double.
      */
     public static void testDoubleArrayCopy() {
-        DatabaseExample database = new DatabaseExample("test");
-        Convert convert = ConvertFactory.getConvert();
-        PVDoubleArray from = (PVDoubleArray)
-            database.createArrayData("from",Type.pvDouble,null);
-        PVDoubleArray to = (PVDoubleArray)
-            database.createArrayData("to",Type.pvDouble,null);
-        PVLongArray toLong = (PVLongArray)
-        database.createArrayData("toLong",Type.pvLong,null);
+        Field fieldFrom = fieldCreate.createArray("from",Type.pvDouble,null,null);
+        Field fieldTo = fieldCreate.createArray("to",Type.pvDouble,null,null);
+        Field fieldLong = fieldCreate.createArray("long",Type.pvLong,null,null);
+        Field[] fields = new Field[]{fieldFrom,fieldTo,fieldLong};
+        Structure structure = fieldCreate.createStructure("test", "test", fields);
+        PVRecord pvRecord = dataCreate.createRecord("test", structure);
+        PVData[] pvDatas = pvRecord.getFieldPVDatas();
+        PVDoubleArray from = (PVDoubleArray)pvDatas[0];
+        PVDoubleArray to = (PVDoubleArray)pvDatas[1];
+        PVLongArray toLong = (PVLongArray)pvDatas[2];
         double[] data = new double[arraySize];
         double[] toData = new double[arraySize];
         for(int i=0; i<arraySize; i++) data[i] = i;

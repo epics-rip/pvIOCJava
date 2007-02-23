@@ -688,7 +688,7 @@ public class DBDFactory {
         }
     }
     
-    static private class StructureInstance extends StructureBase implements DBDStructure
+    static private class StructureInstance extends BaseStructure implements DBDStructure
     {   
         private StructureInstance(String name,
             Field[] field,Property[] property,FieldAttribute fieldAttribute)

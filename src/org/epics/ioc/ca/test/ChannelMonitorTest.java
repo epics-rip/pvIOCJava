@@ -14,7 +14,7 @@ import org.epics.ioc.pv.*;
 import org.epics.ioc.util.*;
 
 /**
- * JUnit test for ChannelData.
+ * JUnit test for CDBData.
  * @author mrk
  *
  */
@@ -343,17 +343,20 @@ public class ChannelMonitorTest extends TestCase {
 
         private String printResults(ChannelData channelData) {
             StringBuilder builder = new StringBuilder();
-            List<ChannelDataPV> channelDataPVList = channelData.getChannelDataPVList();
-            Iterator<ChannelDataPV> iter = channelDataPVList.iterator();
-            while(iter.hasNext()) {
-                ChannelDataPV channelDataPV = iter.next();
-                builder.append(String.format("%n    %s",channelDataPV.toString()));
-                PVData data = channelDataPV.getPVData();
-                ChannelField field = channelDataPV.getChannelField();
-                if(channelDataPV.isInitial()) {
-                    builder.append(String.format("%n    initialValue %s%n", data.toString(2)));
-                } else if(field==valueField) {
-                    builder.append(String.format("value %s", data.toString(2)));
+            ChannelFieldGroup channelFieldGroup = channelData.getChannelFieldGroup();
+            List<ChannelField> channelFieldList = channelFieldGroup.getList();
+            CDBStructure cdbStructure = channelData.getCDBRecord().getCDBStructure();
+            CDBData[] cdbDatas = cdbStructure.getFieldCDBDatas();
+            builder.append(String.format(
+                " maxNumPuts %d ",channelData.getMaxPutsToField()));
+            for(int i=0;i<cdbDatas.length; i++) {
+                CDBData cdbData = cdbDatas[i];
+                PVData data = cdbData.getPVData();
+                ChannelField field = channelFieldList.get(i);
+                if(field==valueField) {
+                    builder.append(String.format(
+                        "value %s numPuts %d",
+                        data.toString(2),cdbData.getNumPuts()));
                 } else if (field==severityField) {
                     PVEnum pvEnum = (PVEnum)data;
                     int index = pvEnum.getIndex();
@@ -375,6 +378,10 @@ public class ChannelMonitorTest extends TestCase {
                         Date date = new Date(now);
                         builder.append(String.format(" time %s",date.toLocaleString()));
                     }
+                }
+                if(cdbData.getNumSupportNamePuts()>0) {
+                    builder.append(String.format("supportName %s numSupportNamePuts %d%n",
+                        data.getSupportName(),cdbData.getNumSupportNamePuts()));
                 }
             }
             return builder.toString();

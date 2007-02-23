@@ -143,7 +143,8 @@ public class AccessTest extends TestCase {
     
     static void testAccess(IOCDB iocdb,String recordName,String fieldName) {
         //PVAccess dbAccess = iocdb.createAccess(recordName);
-        PVRecord pvRecord = iocdb.findRecord(recordName);
+        DBRecord dbRecord = iocdb.findRecord(recordName);
+        PVRecord pvRecord = dbRecord.getPVRecord();
         PVAccess pvAccess = PVAccessFactory.createPVAccess(pvRecord);
         if(pvAccess==null) {
             System.out.printf("record %s not found%n",recordName);

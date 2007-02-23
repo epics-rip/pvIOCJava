@@ -20,6 +20,7 @@ public abstract class AbstractSupport implements Support {
         
     private String name;
     private DBData dbData;
+    private PVData pvData;
     private SupportState supportState = SupportState.readyForInitialize;
     
     /**
@@ -32,6 +33,7 @@ public abstract class AbstractSupport implements Support {
     protected AbstractSupport(String name,DBData dbData) {
         this.name = name;
         this.dbData = dbData;
+        pvData = dbData.getPVData();
     } 
     
     /* (non-Javadoc)
@@ -44,7 +46,7 @@ public abstract class AbstractSupport implements Support {
      * @see org.epics.ioc.util.Requestor#message(java.lang.String, org.epics.ioc.util.MessageType)
      */
     public void message(String message, MessageType messageType) {
-        dbData.message(message, messageType);
+        pvData.message(message, messageType);
     }
     /* (non-Javadoc)
      * @see org.epics.ioc.process.Support#getSupportState()
@@ -86,7 +88,7 @@ public abstract class AbstractSupport implements Support {
      * @see org.epics.ioc.process.Support#process(org.epics.ioc.process.RecordProcessRequestor)
      */
     public void process(SupportProcessRequestor supportProcessRequestor) {
-        dbData.message("process default called", MessageType.error);
+        pvData.message("process default called", MessageType.error);
         supportProcessRequestor.supportProcessDone(RequestResult.failure);
     } 
     /**
@@ -108,7 +110,7 @@ public abstract class AbstractSupport implements Support {
      */
     protected boolean checkSupportState(SupportState expectedState,String message) {
         if(expectedState==supportState) return true;
-        dbData.message(
+        pvData.message(
              message
              + " expected supportState " + expectedState.toString()
              + String.format("%n")
@@ -122,20 +124,20 @@ public abstract class AbstractSupport implements Support {
      * @return The PVStructure or null if the structure is not located.
      */
     protected PVStructure getConfigStructure(String structureName) {
-        if(dbData.getField().getType()!=Type.pvLink) {
-            dbData.message("field is not a link", MessageType.fatalError);
+        if(pvData.getField().getType()!=Type.pvLink) {
+            pvData.message("field is not a link", MessageType.fatalError);
             return null;
         }
-        PVLink pvLink = (PVLink)dbData;
+        PVLink pvLink = (PVLink)pvData;
         PVStructure configStructure = pvLink.getConfigurationStructure();
         if(configStructure==null) {
-            dbData.message("no configuration structure", MessageType.fatalError);
+            pvData.message("no configuration structure", MessageType.fatalError);
             return null;
         }
         Structure structure = (Structure)configStructure.getField();
         String configStructureName = structure.getStructureName();
         if(!configStructureName.equals(structureName)) {
-            dbData.message(
+            pvData.message(
                     "configurationStructure name is " + configStructureName
                     + " but expecting " + structureName,
                 MessageType.fatalError);
@@ -151,24 +153,23 @@ public abstract class AbstractSupport implements Support {
      */
     protected static PVBoolean getBoolean(PVStructure configStructure,String fieldName)
     {
-        DBData dbData = (DBData)configStructure;
         Structure structure = (Structure)configStructure.getField();
-        PVData[] pvData = configStructure.getFieldPVDatas();
+        PVData[] pvDatas = configStructure.getFieldPVDatas();
         int index = structure.getFieldIndex(fieldName);
         if(index<0) {
-            dbData.message(
+            configStructure.message(
                 "configStructure does not have field" + fieldName,
                 MessageType.error);
             return null;
         }
-        if(pvData[index].getField().getType()!=Type.pvBoolean) {
-            dbData.message(
+        if(pvDatas[index].getField().getType()!=Type.pvBoolean) {
+            configStructure.message(
                 "configStructure field "
                 + fieldName + " does not have type boolean ",
                 MessageType.error);
             return null;
         }
-        return (PVBoolean)pvData[index];
+        return (PVBoolean)pvDatas[index];
     }
     /**
      * Get a byte field from the configuration structure.
@@ -178,24 +179,23 @@ public abstract class AbstractSupport implements Support {
      */
     protected static PVByte getByte(PVStructure configStructure,String fieldName)
     {
-        DBData dbData = (DBData)configStructure;
         Structure structure = (Structure)configStructure.getField();
-        PVData[] pvData = configStructure.getFieldPVDatas();
+        PVData[] pvDatas = configStructure.getFieldPVDatas();
         int index = structure.getFieldIndex(fieldName);
         if(index<0) {
-            dbData.message(
+            configStructure.message(
                 "configStructure does not have field" + fieldName,
                 MessageType.error);
             return null;
         }
-        if(pvData[index].getField().getType()!=Type.pvByte) {
-            dbData.message(
+        if(pvDatas[index].getField().getType()!=Type.pvByte) {
+            configStructure.message(
                 "configStructure field "
                 + fieldName + " does not have type byte ",
                 MessageType.error);
             return null;
         }
-        return (PVByte)pvData[index];
+        return (PVByte)pvDatas[index];
     }
     /**
      * Get an int field from the configuration structure.
@@ -205,24 +205,23 @@ public abstract class AbstractSupport implements Support {
      */
     protected static PVInt getInt(PVStructure configStructure,String fieldName)
     {
-        DBData dbData = (DBData)configStructure;
         Structure structure = (Structure)configStructure.getField();
-        PVData[] pvData = configStructure.getFieldPVDatas();
+        PVData[] pvDatas = configStructure.getFieldPVDatas();
         int index = structure.getFieldIndex(fieldName);
         if(index<0) {
-            dbData.message(
+            configStructure.message(
                 "configStructure does not have field" + fieldName,
                 MessageType.error);
             return null;
         }
-        if(pvData[index].getField().getType()!=Type.pvInt) {
-            dbData.message(
+        if(pvDatas[index].getField().getType()!=Type.pvInt) {
+            configStructure.message(
                 "configStructure field "
                 + fieldName + " does not have type int ",
                 MessageType.error);
             return null;
         }
-        return (PVInt)pvData[index];
+        return (PVInt)pvDatas[index];
     }
     /**
      * Get a long field from the configuration structure.
@@ -232,24 +231,23 @@ public abstract class AbstractSupport implements Support {
      */
     protected static PVLong getLong(PVStructure configStructure,String fieldName)
     {
-        DBData dbData = (DBData)configStructure;
         Structure structure = (Structure)configStructure.getField();
-        PVData[] pvData = configStructure.getFieldPVDatas();
+        PVData[] pvDatas = configStructure.getFieldPVDatas();
         int index = structure.getFieldIndex(fieldName);
         if(index<0) {
-            dbData.message(
+            configStructure.message(
                 "configStructure does not have field" + fieldName,
                 MessageType.error);
             return null;
         }
-        if(pvData[index].getField().getType()!=Type.pvLong) {
-            dbData.message(
+        if(pvDatas[index].getField().getType()!=Type.pvLong) {
+            configStructure.message(
                 "configStructure field "
                 + fieldName + " does not have type int ",
                 MessageType.error);
             return null;
         }
-        return (PVLong)pvData[index];
+        return (PVLong)pvDatas[index];
     }
     /**
      * Get a float field from the configuration structure.
@@ -259,24 +257,23 @@ public abstract class AbstractSupport implements Support {
      */
     protected static PVFloat getFloat(PVStructure configStructure,String fieldName)
     {
-        DBData dbData = (DBData)configStructure;
         Structure structure = (Structure)configStructure.getField();
-        PVData[] pvData = configStructure.getFieldPVDatas();
+        PVData[] pvDatas = configStructure.getFieldPVDatas();
         int index = structure.getFieldIndex(fieldName);
         if(index<0) {
-            dbData.message(
+            configStructure.message(
                 "configStructure does not have field" + fieldName,
                 MessageType.error);
             return null;
         }
-        if(pvData[index].getField().getType()!=Type.pvFloat) {
-            dbData.message(
+        if(pvDatas[index].getField().getType()!=Type.pvFloat) {
+            configStructure.message(
                 "configStructure field "
                 + fieldName + " does not have type int ",
                 MessageType.error);
             return null;
         }
-        return (PVFloat)pvData[index];
+        return (PVFloat)pvDatas[index];
     }
     /**
      * Get a double field from the configuration structure.
@@ -286,24 +283,23 @@ public abstract class AbstractSupport implements Support {
      */
     protected static PVDouble getDouble(PVStructure configStructure,String fieldName)
     { 
-        DBData dbData = (DBData)configStructure;
         Structure structure = (Structure)configStructure.getField();
-        PVData[] pvData = configStructure.getFieldPVDatas();
+        PVData[] pvDatas = configStructure.getFieldPVDatas();
         int index = structure.getFieldIndex(fieldName);
         if(index<0) {
-            dbData.message(
+            configStructure.message(
                 "configStructure does not have field" + fieldName,
                 MessageType.error);
             return null;
         }
-        if(pvData[index].getField().getType()!=Type.pvDouble) {
-            dbData.message(
+        if(pvDatas[index].getField().getType()!=Type.pvDouble) {
+            configStructure.message(
                 "configStructure field "
                 + fieldName + " does not have type int ",
                 MessageType.error);
             return null;
         }
-        return (PVDouble)pvData[index];
+        return (PVDouble)pvDatas[index];
     }
     /**
      * Get a string field from the configuration structure.
@@ -313,24 +309,23 @@ public abstract class AbstractSupport implements Support {
      */
     protected static PVString getString(PVStructure configStructure,String fieldName)
     {
-        DBData dbData = (DBData)configStructure;
         Structure structure = (Structure)configStructure.getField();
-        PVData[] pvData = configStructure.getFieldPVDatas();
+        PVData[] pvDatas = configStructure.getFieldPVDatas();
         int index = structure.getFieldIndex(fieldName);
         if(index<0) {
-            dbData.message(
+            configStructure.message(
                 "configStructure does not have field" + fieldName,
                 MessageType.error);
             return null;
         }
-        if(pvData[index].getField().getType()!=Type.pvString) {
-            dbData.message(
+        if(pvDatas[index].getField().getType()!=Type.pvString) {
+            configStructure.message(
                 "configStructure field "
                 + fieldName + " does not have type string ",
                 MessageType.error);
             return null;
         }
-        return (PVString)pvData[index];
+        return (PVString)pvDatas[index];
     }
     /**
      * Get a string field from the configuration structure.
@@ -341,24 +336,23 @@ public abstract class AbstractSupport implements Support {
     protected static PVEnum getEnum(
             PVStructure configStructure,String fieldName)
     {
-        DBData dbData = (DBData)configStructure;
         Structure structure = (Structure)configStructure.getField();
-        PVData[] pvData = configStructure.getFieldPVDatas();
+        PVData[] pvDatas = configStructure.getFieldPVDatas();
         int index = structure.getFieldIndex(fieldName);
         if(index<0) {
-            dbData.message(
+            configStructure.message(
                 "configStructure does not have field" + fieldName,
                 MessageType.error);
             return null;
         }
-        Type type = pvData[index].getField().getType();
+        Type type = pvDatas[index].getField().getType();
         if(type!=Type.pvEnum && type!=Type.pvMenu) {
-            dbData.message(
+            configStructure.message(
                 "configStructure field "
                 + fieldName + " does not have type enum ",
                 MessageType.error);
             return null;
         }
-        return (PVEnum)pvData[index];
+        return (PVEnum)pvDatas[index];
     }
 }

@@ -9,6 +9,7 @@ import java.util.*;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 
+import org.epics.ioc.pv.*;
 import org.epics.ioc.db.*;
 import org.epics.ioc.process.*;
 
@@ -44,20 +45,22 @@ public class ScannerFactory {
          private String name;
          private RecordProcess recordProcess;
          private DBRecord dbRecord;
+         private PVRecord pvRecord;
          private boolean isActive = false;
          private int numberConsecutiveActive = 0;
          
          private RecordExecutor(String name,RecordProcess recordProcess) {
              this.name = name;
              this.recordProcess = recordProcess;
-             dbRecord = recordProcess.getRecord();   
+             dbRecord = recordProcess.getRecord();
+             pvRecord = dbRecord.getPVRecord();
          }
          void execute(TimeStamp timeStamp) {
              if(isActive) {
                  if(++numberConsecutiveActive == maxNumberConsecutiveActive) {
                      dbRecord.lock();
                      try {
-                         dbRecord.message("record active too long", MessageType.warning);
+                         pvRecord.message("record active too long", MessageType.warning);
                      } finally {
                          dbRecord.unlock();
                      }
@@ -79,7 +82,7 @@ public class ScannerFactory {
          * @see org.epics.ioc.util.Requestor#message(java.lang.String, org.epics.ioc.util.MessageType)
          */
         public void message(String message, MessageType messageType) {
-            dbRecord.message(message, messageType);
+            pvRecord.message(message, messageType);
         }
         /* (non-Javadoc)
           * @see org.epics.ioc.process.RecordProcessRequestor#recordProcessComplete(org.epics.ioc.process.RequestResult)
@@ -232,9 +235,10 @@ public class ScannerFactory {
          }
          
          public void schedule(DBRecord dbRecord) {
-             ScanField scanField = ScanFieldFactory.create(dbRecord);
+             ScanField scanField = ScanFieldFactory.create(dbRecord.getPVRecord());
+             PVRecord pvRecord = dbRecord.getPVRecord();
              if(scanField==null) {
-                 dbRecord.message(
+                 pvRecord.message(
                      "PeriodicScanner: ScanFieldFactory.create failed",
                      MessageType.fatalError);;
                  return;
@@ -294,7 +298,7 @@ public class ScannerFactory {
              }
          }
          public void unschedule(DBRecord dbRecord) {
-             ScanField scanField = ScanFieldFactory.create(dbRecord);
+             ScanField scanField = ScanFieldFactory.create(dbRecord.getPVRecord());
              double rate = scanField.getRate();
              int priority = scanField.getPriority().getJavaPriority();
              long period = rateToPeriod(rate);
@@ -416,7 +420,7 @@ public class ScannerFactory {
            ListIterator<RecordProcess> iter = processList.listIterator();
            while(iter.hasNext()) {
                RecordProcess recordProcess = iter.next();
-               String name = recordProcess.getRecord().getRecordName();
+               String name = recordProcess.getRecord().getPVRecord().getRecordName();
                builder.append(lineBreak + "    " + name);
            }
            builder.append(lineBreak + "}");
@@ -618,7 +622,7 @@ public class ScannerFactory {
         public void addRecord(DBRecord dbRecord) {
             lock.lock();
             try {
-                ScanField scanField = ScanFieldFactory.create(dbRecord);
+                ScanField scanField = ScanFieldFactory.create(dbRecord.getPVRecord());
                 int priority = scanField.getPriority().getJavaPriority();
                 String eventName = scanField.getEventName();
                 String threadName = "event(" + eventName + "," + String.valueOf(priority) + ")";
@@ -667,7 +671,7 @@ public class ScannerFactory {
         public void removeRecord(DBRecord dbRecord) {
             lock.lock();
             try {
-                ScanField scanField = ScanFieldFactory.create(dbRecord);
+                ScanField scanField = ScanFieldFactory.create(dbRecord.getPVRecord());
                 int priority = scanField.getPriority().getJavaPriority();
                 String eventName = scanField.getEventName();
                 Announce announce = getAnnounce(eventName);
@@ -748,7 +752,7 @@ public class ScannerFactory {
                 ListIterator<RecordProcess> iter2 = processList.listIterator();
                 while(iter2.hasNext()) {
                     RecordProcess recordProcess = iter2.next();
-                    String name = recordProcess.getRecord().getRecordName();
+                    String name = recordProcess.getRecord().getPVRecord().getRecordName();
                     builder.append(lineBreak + "        " + name);
                 }
                 builder.append(lineBreak + "    }");

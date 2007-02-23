@@ -31,6 +31,7 @@ public class RecordProcessFactory {
     {
         private boolean trace = false;
         private DBRecord dbRecord;
+        private PVRecord pvRecord;
         private String recordProcessSupportName;
         private boolean disabled = false;
         private Support recordSupport = null;
@@ -66,15 +67,18 @@ public class RecordProcessFactory {
         
         private ProcessInstance(DBRecord record) {
             dbRecord = record;
-            recordProcessSupportName = "recordProcess(" + dbRecord.getRecordName() + ")";
-            recordSupport = dbRecord.getSupport();
+            pvRecord = dbRecord.getPVRecord();
+            DBStructure dbStructure = dbRecord.getDBStructure();
+            recordProcessSupportName = "recordProcess(" + pvRecord.getRecordName() + ")";
+            recordSupport = dbStructure.getSupport();
             if(recordSupport==null) {
                 throw new IllegalStateException(
-                    dbRecord.getRecordName() + " has no support");
+                    pvRecord.getRecordName() + " has no support");
             }
-            PVData[] pvDatas = dbRecord.getFieldPVDatas();
+            PVData[] pvDatas = pvRecord.getFieldPVDatas();
+            DBData[] dbDatas = dbStructure.getFieldDBDatas();
             PVData pvData;
-            Structure structure = (Structure)dbRecord.getField();
+            Structure structure = (Structure)pvRecord.getField();
             int index = structure.getFieldIndex("status");
             if(index>=0) {
                 pvData = pvDatas[index];
@@ -89,13 +93,13 @@ public class RecordProcessFactory {
             }
             index = structure.getFieldIndex("timeStamp");
             if(index>=0) {
-                pvTimeStamp = PVTimeStamp.create(pvDatas[index]);
+                pvTimeStamp = PVTimeStamp.create(dbDatas[index]);
             }
             index = structure.getFieldIndex("scan");
             if(index>=0) {
                 pvData = pvDatas[index];
                 if(pvData.getField().getType()==Type.pvStructure) {
-                    scanSupport = ((DBData)pvData).getSupport();
+                    scanSupport = dbDatas[index].getSupport();
                 }
             }
         }
@@ -281,7 +285,7 @@ public class RecordProcessFactory {
         public void releaseRecordProcessRequestor() {
             dbRecord.lock();
             try {
-                dbRecord.message("recordProcessRequestor is being released", MessageType.error);
+                pvRecord.message("recordProcessRequestor is being released", MessageType.error);
                 if(active) {
                     removeRecordProcessRequestorAfterActive = true;
                 } else {
@@ -525,7 +529,7 @@ public class RecordProcessFactory {
         }
         
         private void traceMessage(String message) {
-            dbRecord.message(
+            pvRecord.message(
                 message + " thread " + Thread.currentThread().getName(),
                 MessageType.info);
         }
@@ -587,7 +591,7 @@ public class RecordProcessFactory {
             }
             if(!processProcessCallbackListenerList.isEmpty()
             || !continueProcessCallbackListenerList.isEmpty()){
-                dbRecord.message(
+                pvRecord.message(
                     "completing processing but ProcessCallbackListeners are still present",
                     MessageType.fatalError);
             }
@@ -610,11 +614,11 @@ public class RecordProcessFactory {
         private void checkForIllegalRequest() {
             if(active && (processIsRunning||processContinueIsRunning)) return;
             if(!active) {
-                dbRecord.message("illegal request because record is not active",
+                pvRecord.message("illegal request because record is not active",
                      MessageType.info);
                 throw new IllegalStateException("record is not active");
             } else {
-                dbRecord.message("illegal request because neither process or processContinue is running",
+                pvRecord.message("illegal request because neither process or processContinue is running",
                         MessageType.info);
                 throw new IllegalStateException("neither process or processContinue is running");
             }

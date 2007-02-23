@@ -210,9 +210,9 @@ public final class ConvertFactory {
         public boolean isCopyArrayCompatible(Array fromArray, Array toArray) {
             Type fromType = fromArray.getElementType();
             Type toType = toArray.getElementType();
+            if(fromType==toType) return true;
             if(!fromType.isScalar() || !toType.isScalar()) return false;
             if(fromType.isNumeric() && toType.isNumeric()) return true;
-            if(fromType==toType) return true;
             if(toType==Type.pvString) return true;
             if(toType==Type.pvString) return true;
             return false;
@@ -225,6 +225,57 @@ public final class ConvertFactory {
         {
             Type fromElementType = ((Array)from.getField()).getElementType();
             Type toElementType = ((Array)to.getField()).getElementType();
+            if(fromElementType==toElementType) {
+                switch(fromElementType) {
+                case pvEnum: {
+                        PVEnumArray fromArray = (PVEnumArray)from;
+                        PVEnumArray toArray = (PVEnumArray)to;
+                        EnumArrayData enumArrayData = new EnumArrayData();
+                        int length = fromArray.get(offset, len, enumArrayData);
+                        PVEnum[] data = enumArrayData.data;
+                        int result = toArray.put(toOffset, length, data, 0);
+                        return result;
+                    }
+                case pvMenu: {
+                    PVMenuArray fromArray = (PVMenuArray)from;
+                    PVMenuArray toArray = (PVMenuArray)to;
+                    MenuArrayData menuArrayData = new MenuArrayData();
+                    int length = fromArray.get(offset, len, menuArrayData);
+                    PVMenu[] data = menuArrayData.data;
+                    int result = toArray.put(toOffset, length, data, 0);
+                    return result;
+                    }
+                case pvLink: {
+                    PVLinkArray fromArray = (PVLinkArray)from;
+                    PVLinkArray toArray = (PVLinkArray)to;
+                    LinkArrayData linkArrayData = new LinkArrayData();
+                    int length = fromArray.get(offset, len, linkArrayData);
+                    PVLink[] data = linkArrayData.data;
+                    int result = toArray.put(toOffset, length, data, 0);
+                    return result;
+                    }
+                case pvArray: {
+                    PVArrayArray fromArray = (PVArrayArray)from;
+                    PVArrayArray toArray = (PVArrayArray)to;
+                    ArrayArrayData arrayArrayData = new ArrayArrayData();
+                    int length = fromArray.get(offset, len, arrayArrayData);
+                    PVArray[] data = arrayArrayData.data;
+                    int result = toArray.put(toOffset, length, data, 0);
+                    return result;
+                    }
+                case pvStructure: {
+                    PVStructureArray fromArray = (PVStructureArray)from;
+                    PVStructureArray toArray = (PVStructureArray)to;
+                    StructureArrayData structureArrayData = new StructureArrayData();
+                    int length = fromArray.get(offset, len, structureArrayData);
+                    PVStructure[] data = structureArrayData.data;
+                    int result = toArray.put(toOffset, length, data, 0);
+                    return result;
+                    }
+                default: break;
+                }
+                // just fall through
+            }
             if(!fromElementType.isScalar() || !toElementType.isScalar()) return 0;
             if(toElementType.isNumeric() && fromElementType.isNumeric())
                 return CopyNumericArray(from,offset,to,toOffset,len);
@@ -299,7 +350,6 @@ public final class ConvertFactory {
                 throw new IllegalArgumentException(
                     "Convert.copyStructure from and to are not the same type of structure");
             }
-            to.beginPut();
             PVData[] fromDatas = from.getFieldPVDatas();
             PVData[] toDatas = to.getFieldPVDatas();
             for(int i=0; i < fromDatas.length; i++) {
@@ -340,7 +390,6 @@ public final class ConvertFactory {
                         copyStructure((PVStructure)fromData,(PVStructure)toData);
                 }
             }
-            to.endPut();
         }
         
         /* (non-Javadoc)

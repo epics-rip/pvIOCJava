@@ -77,7 +77,7 @@ public final class FieldFactory {
         {
             if(property==null) property = new Property[0];
             if(fieldAttribute==null) fieldAttribute = createFieldAttribute();
-            return new ArrayBase(fieldName,elementType,property,fieldAttribute);
+            return new BaseArray(fieldName,elementType,property,fieldAttribute);
         }
 
         /* (non-Javadoc)
@@ -95,7 +95,7 @@ public final class FieldFactory {
         {
             if(property==null) property = new Property[0];
             if(fieldAttribute==null) fieldAttribute = createFieldAttribute();
-            return new EnumBase(fieldName,choicesMutable,property,fieldAttribute);
+            return new BaseEnum(fieldName,choicesMutable,property,fieldAttribute);
         }
 
         /* (non-Javadoc)
@@ -115,7 +115,7 @@ public final class FieldFactory {
                     "Illegal PVType. Must be scalar but it is " + type.toString() );
             if(property==null) property = new Property[0];
             if(fieldAttribute==null) fieldAttribute = createFieldAttribute();
-            return new FieldBase(fieldName,type,property,fieldAttribute);
+            return new BaseField(fieldName,type,property,fieldAttribute);
         }
 
         /* (non-Javadoc)
@@ -163,7 +163,7 @@ public final class FieldFactory {
         {
             if(property==null) property = new Property[0];
             if(fieldAttribute==null) fieldAttribute = createFieldAttribute();
-            return new MenuBase(fieldName,menuName,menuChoices,property,fieldAttribute);
+            return new BaseMenu(fieldName,menuName,menuChoices,property,fieldAttribute);
         }
 
         /* (non-Javadoc)
@@ -188,7 +188,7 @@ public final class FieldFactory {
         {
             if(property==null) property = new Property[0];
             if(fieldAttribute==null) fieldAttribute = createFieldAttribute();
-            return new StructureBase(fieldName,structureName,field,property,fieldAttribute);
+            return new BaseStructure(fieldName,structureName,field,property,fieldAttribute);
         }
 
         /* (non-Javadoc)

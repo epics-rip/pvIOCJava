@@ -20,7 +20,7 @@ import org.epics.ioc.util.*;
  *
  */
 public class XMLToIOCDBFactory {
-    private static DBDataCreate dbDataCreate = DBDataFactory.getDBDataCreate();
+    private static PVDataCreate pvDataCreate = PVDataFactory.getPVDataCreate();
     private static FieldCreate fieldCreate = FieldFactory.getFieldCreate();
     private static AtomicBoolean isInUse = new AtomicBoolean(false);
 //  for use by private classes
@@ -132,6 +132,7 @@ public class XMLToIOCDBFactory {
                 break;
             case record: 
                 if(qName.equals("record")) {
+                    recordHandler.endRecord();
                     state = State.idle;
                 } else {
                     recordHandler.endElement(qName);
@@ -161,6 +162,7 @@ public class XMLToIOCDBFactory {
         enum State {idle, structure, field, enumerated, array}
         private State state = State.idle;
         private StringBuilder stringBuilder = new StringBuilder();
+        private PVRecord pvRecord = null;
         private DBRecord dbRecord = null;
         
         private static class IdleState {
@@ -171,7 +173,7 @@ public class XMLToIOCDBFactory {
         
         private static class FieldState {
             private State prevState = null;
-            private DBData dbData = null;
+            private PVData pvData = null;
         }
         private FieldState fieldState = new FieldState();
         private Stack<FieldState> fieldStack = new Stack<FieldState>();
@@ -254,22 +256,15 @@ public class XMLToIOCDBFactory {
                 }
             }
             dbRecord = iocdb.findRecord(recordName);
-            if(dbRecord==null) {
-                DBRecord record = dbDataCreate.createRecord(recordName,dbdRecordType);
-                boolean result = iocdb.addRecord(record);
-                if(!result) {
-                    iocxmlReader.message(
-                            "failed to create record " + recordTypeName,
-                            MessageType.warning);
-                    state = State.idle;
-                    return;
-                }
-                dbRecord = iocdb.findRecord(recordName);
-                dbRecord.setDBD(dbd);
+            if(dbRecord==null) {              
+                Structure structure = dbd.getRecordType(recordTypeName);
+                pvRecord = pvDataCreate.createRecord(recordName, structure);
+            } else {
+               pvRecord = dbRecord.getPVRecord();
             }
             String supportName = attributes.get("supportName");
             if(supportName==null) {
-                supportName = dbRecord.getSupportName();
+                supportName = pvRecord.getSupportName();
             }
             if(supportName==null) {
                 supportName = dbdRecordType.getSupportName();
@@ -279,16 +274,24 @@ public class XMLToIOCDBFactory {
                         "record  " + recordName + " has no record support",
                         MessageType.error);
             } else {
-                String error = dbRecord.setSupportName(supportName);
-                if(error!=null) {
-                    iocxmlReader.message(
-                            "record  " + recordName
-                            + " " + error,
-                            MessageType.warning);
-                }
+                pvRecord.setSupportName(supportName);
             }
-            structureState.pvStructure = dbRecord;
+            structureState.pvStructure = pvRecord;
             state = State.structure;
+        }
+        
+        void endRecord() {
+            if(state==State.idle) return;
+            dbRecord = DBRecordFactory.create(pvRecord);
+            boolean result = iocdb.addRecord(dbRecord);
+            if(!result) {
+                iocxmlReader.message(
+                        "failed to add record to iocdb???",
+                        MessageType.fatalError);
+                return;
+            }
+            dbRecord.setIOCDB(iocdb);
+            dbRecord.setDBD(dbd);
         }
         
         void startElement(String qName, Map<String,String> attributes) {
@@ -303,7 +306,7 @@ public class XMLToIOCDBFactory {
                 break;
             case field:
                 if(qName.equals("configure")) {
-                    supportStart(fieldState.dbData,attributes);
+                    linkSupportStart(fieldState.pvData,attributes);
                     break;
                 }
                 // just ignore any additional xml elements
@@ -355,7 +358,7 @@ public class XMLToIOCDBFactory {
                             MessageType.error);
                 }
                 if(qName.equals("configure")) {
-                    supportEnd();
+                    linkSupportEnd();
                     break;
                 }
                 state = structureState.prevState;
@@ -406,7 +409,7 @@ public class XMLToIOCDBFactory {
                 state = State.idle;
                 return;
             }
-            DBData dbData = (DBData)pvStructure.getFieldPVDatas()[fieldIndex];
+            PVData pvData = pvStructure.getFieldPVDatas()[fieldIndex];
             String supportName = attributes.get("supportName");
             if(supportName==null) {
                 DBDStructure dbdStructure = dbd.getStructure(structure.getStructureName());
@@ -415,19 +418,13 @@ public class XMLToIOCDBFactory {
                 }
             }
             if(supportName!=null) {
-                String error = dbData.setSupportName(supportName);
-                if(error!=null) {
-                    iocxmlReader.message(
-                            "fieldName " + qName + " setSupportName failed "
-                            + error,
-                            MessageType.warning);
-                }
+                pvData.setSupportName(supportName);
             }
-            Field field = dbData.getField();
+            Field field = pvData.getField();
             Type type = field.getType();
             if(type.isScalar()) {
                 fieldState.prevState = state;
-                fieldState.dbData = dbData;
+                fieldState.pvData = pvData;
                 state = State.field;
                 stringBuilder.setLength(0);
                 return;
@@ -435,7 +432,7 @@ public class XMLToIOCDBFactory {
             switch(type) {
             case pvEnum:
                 enumState.prevState = state;
-                enumState.pvEnum = (PVEnum)dbData;
+                enumState.pvEnum = (PVEnum)pvData;
                 enumState.fieldName = qName;
                 enumState.value = "";
                 enumState.enumChoiceList.clear();
@@ -443,14 +440,23 @@ public class XMLToIOCDBFactory {
                 return;
             case pvMenu:
                 fieldState.prevState = state;
-                fieldState.dbData = dbData;
+                fieldState.pvData = pvData;
                 state = State.field;
                 stringBuilder.setLength(0);
                 return;
             case pvStructure: {
                     String structureName = attributes.get("structureName");
                     if(structureName!=null) {
-                        if(!pvStructure.replaceStructureField(qName, structureName)) {
+                        Structure replacement = dbd.getStructure(structureName);
+                        if(replacement==null) {
+                            iocxmlReader.message(
+                                    "structureName " + structureName + " not defined",
+                                    MessageType.error);
+                            idleState.prevState = state;
+                            state = State.idle;
+                            return;
+                        }
+                        if(!pvStructure.replaceStructureField(qName, replacement)) {
                             iocxmlReader.message(
                                     "structureName " + structureName + " not replaced",
                                     MessageType.error);
@@ -458,28 +464,22 @@ public class XMLToIOCDBFactory {
                             state = State.idle;
                             return;
                         }
-                        dbData = (DBData)pvStructure.getFieldPVDatas()[fieldIndex];
+                        pvData = pvStructure.getFieldPVDatas()[fieldIndex];
                     }
                 }
                 structureStack.push(structureState);
                 structureState = new StructureState();
                 structureState.prevState = state;
-                structureState.pvStructure = (PVStructure)dbData;
+                structureState.pvStructure = (PVStructure)pvData;
                 structureState.fieldName = qName;
                 state = State.structure;
                 supportName = attributes.get("supportName");
                 if(supportName!=null) {
-                    String error = dbData.setSupportName(supportName);
-                    if(error!=null) {
-                        iocxmlReader.message(
-                                "fieldName " + qName + " setSupportName failed "
-                                + error,
-                                MessageType.warning);
-                    }
+                    pvData.setSupportName(supportName);
                 }
                 return;
             case pvArray:
-                arrayState.pvArray = (PVArray)dbData;
+                arrayState.pvArray = (PVArray)pvData;
                 arrayState.prevState = state;
                 arrayState.fieldName = qName;
                 state = State.array;
@@ -487,7 +487,7 @@ public class XMLToIOCDBFactory {
                 return;
             case pvLink:
                 fieldState.prevState = state;
-                fieldState.dbData = dbData;
+                fieldState.pvData = pvData;
                 state = State.field;
                 return;
             }
@@ -500,14 +500,14 @@ public class XMLToIOCDBFactory {
         private void endField()  {
             String value = stringBuilder.toString();
             stringBuilder.setLength(0);
-            DBData dbData = fieldState.dbData;
-            Field field = dbData.getField();
+            PVData pvData = fieldState.pvData;
+            Field field = pvData.getField();
             Type type = field.getType();
            
             if(type.isScalar()) {
                 if(value!=null) {
                     try {
-                        convert.fromString(dbData, value);
+                        convert.fromString(pvData, value);
                     } catch (NumberFormatException e) {
                         iocxmlReader.message(e.toString(),
                                 MessageType.warning);
@@ -515,7 +515,7 @@ public class XMLToIOCDBFactory {
                 }
                 return;
             } else if(type==Type.pvMenu) {
-                PVMenu menu = (PVMenu)dbData;
+                PVMenu menu = (PVMenu)pvData;
                 String[] choice = menu.getChoices();
                 for(int i=0; i<choice.length; i++) {
                     if(value.equals(choice[i])) {
@@ -551,14 +551,14 @@ public class XMLToIOCDBFactory {
         }
         private void endEnum() {
             LinkedList<String> enumChoiceList = enumState.enumChoiceList;
-            PVEnum dbEnum = enumState.pvEnum;
+            PVEnum pvEnum = enumState.pvEnum;
             String value = enumState.value;
             if(enumChoiceList.size()==0) return;
             String[] choice = new String[enumChoiceList.size()];
             for(int i=0; i< choice.length; i++) {
                 choice[i] = enumChoiceList.removeFirst();
             }
-            dbEnum.setChoices(choice);
+            pvEnum.setChoices(choice);
             if(stringBuilder.length()>0) {
                 value = value + stringBuilder.toString();
                 stringBuilder.setLength(0);
@@ -566,7 +566,7 @@ public class XMLToIOCDBFactory {
             if(value==null) return;
             for(int i=0; i< choice.length; i++) {
                 if(value.equals(choice[i])) {
-                    dbEnum.setIndex(i);
+                    pvEnum.setIndex(i);
                     return;
                 }
             }
@@ -583,7 +583,7 @@ public class XMLToIOCDBFactory {
             stringBuilder.setLength(0);
         }
         
-        private void supportStart(PVData pvData, Map<String,String> attributes) {
+        private void linkSupportStart(PVData pvData, Map<String,String> attributes) {
             if(pvData.getField().getType()!=Type.pvLink) {
                 iocxmlReader.message(
                         "only a link field can be configured",
@@ -592,7 +592,8 @@ public class XMLToIOCDBFactory {
                 state = State.idle;
                 return;
             }
-            String supportName = pvData.getSupportName();
+            PVLink pvLink = (PVLink)pvData;
+            String supportName = pvLink.getSupportName();
             if(supportName==null) {
                 iocxmlReader.message(
                         "no support is defined",
@@ -636,18 +637,19 @@ public class XMLToIOCDBFactory {
                 state = State.idle;
                 return; 
             }
-            DBData dbData = (DBData)pvData;
-            String error = dbData.setSupportName(supportName);
-            if(error!=null) {
-                iocxmlReader.message(error,
-                        MessageType.warning);
+            Structure structure = dbd.getStructure(structureName);
+            if(structure==null) {
+                iocxmlReader.message(
+                        "structureName not in DBD",
+                        MessageType.error);
                 idleState.prevState = state;
                 state = State.idle;
-                return;
+                return; 
             }
-            PVLink pvLink = (PVLink)pvData;
-            PVStructure dbStructure = pvLink.getConfigurationStructure();
-            if(dbStructure==null) {
+            pvLink.setSupportName(supportName);
+            
+            PVStructure pvStructure = (PVStructure)pvDataCreate.createData(pvLink, structure);
+            if(pvStructure==null) {
                 iocxmlReader.message(
                         "support " + supportName + " does not use a configuration structure",
                         MessageType.warning);
@@ -655,6 +657,7 @@ public class XMLToIOCDBFactory {
                 state = State.idle;
                 return;
             }
+            pvLink.setConfigurationStructure(pvStructure);
             switch(state) {
             case field:
                 fieldStack.push(fieldState);
@@ -677,11 +680,11 @@ public class XMLToIOCDBFactory {
             structureStack.push(structureState);
             structureState = new StructureState();
             structureState.prevState = state;
-            structureState.pvStructure = dbStructure;
+            structureState.pvStructure = pvStructure;
             state = State.structure;
             structureState.fieldName = "configure";
         }
-        private void supportEnd() {
+        private void linkSupportEnd() {
             State prevState = structureState.prevState;
             structureState = structureStack.pop();
             state = prevState;
@@ -700,45 +703,38 @@ public class XMLToIOCDBFactory {
             }
         }
         private void arrayStart(Map<String,String> attributes)  {
-            PVArray dbArray= arrayState.pvArray;
-            Array array = (Array)dbArray.getField();
+            PVArray pvArray= arrayState.pvArray;
+            Array array = (Array)pvArray.getField();
             Type arrayElementType = array.getElementType();
             arrayState.arrayOffset = 0;
             arrayState.arrayElementType = arrayElementType;
             String supportName = attributes.get("supportName");
-            if(supportName!=null) {
-                String error = dbArray.setSupportName(supportName);
-                if(error!=null) {
-                    iocxmlReader.message(error,
-                            MessageType.warning);
-                }
-                
-            }
+            if(supportName!=null) pvArray.setSupportName(supportName);
             String value = attributes.get("capacity");
-            if(value!=null) dbArray.setCapacity(Integer.parseInt(value));
+            if(value!=null) pvArray.setCapacity(Integer.parseInt(value));
             value = attributes.get("length");
-            if(value!=null) dbArray.setLength(Integer.parseInt(value));
+            if(value!=null) pvArray.setLength(Integer.parseInt(value));
             if (arrayElementType.isScalar()) return;
             switch (arrayElementType) {
             case pvEnum:
                 arrayState.enumData = new PVEnum[1];
-                arrayState.pvEnumArray = (PVEnumArray)dbArray;
+                arrayState.pvEnumArray = (PVEnumArray)pvArray;
                 return;
             case pvMenu:
                 arrayState.menuData = new PVMenu[1];
-                arrayState.pvMenuArray = (PVMenuArray)dbArray;
+                arrayState.pvMenuArray = (PVMenuArray)pvArray;
                 return;
             case pvStructure:
                 arrayState.structureData = new PVStructure[1];
-                arrayState.pvStructureArray = (PVStructureArray)dbArray;
+                arrayState.pvStructureArray = (PVStructureArray)pvArray;
                 return;
             case pvArray:
                 arrayState.arrayData = new PVArray[1];
-                arrayState.pvArrayArray = (PVArrayArray)dbArray;
+                arrayState.pvArrayArray = (PVArrayArray)pvArray;
                 return;
             case pvLink:
                 arrayState.linkData = new PVLink[1];
-                arrayState.pvLinkArray = (PVLinkArray)dbArray;
+                arrayState.pvLinkArray = (PVLinkArray)pvArray;
                 return;
             }
             iocxmlReader.message(" Logic error ArrayHandler",MessageType.error);
@@ -753,7 +749,7 @@ public class XMLToIOCDBFactory {
             String offset = attributes.get("offset");
             if(offset!=null) arrayState.arrayOffset = Integer.parseInt(offset);
             int arrayOffset = arrayState.arrayOffset;
-            PVArray dbArray = arrayState.pvArray;
+            PVArray pvArray = arrayState.pvArray;
             String fieldName = "value";
             String actualFieldName = "[" + String.format("%d",arrayOffset) + "]";
             Field field;
@@ -767,15 +763,11 @@ public class XMLToIOCDBFactory {
                     field = fieldCreate.createEnum(actualFieldName,true);
                     PVEnumArray pvEnumArray = arrayState.pvEnumArray;
                     PVEnum[] enumData = arrayState.enumData;
-                    enumData[0] = (PVEnum)dbDataCreate.createEnumData((DBData)dbArray,field,null);
+                    enumData[0] = (PVEnum)pvDataCreate.createData(pvArray,field);
                     pvEnumArray.put(arrayOffset,1,enumData,0);
                     String supportName = attributes.get("supportName");
                     if(supportName!=null) {
-                        String error = enumData[0].setSupportName(supportName);
-                        if(error!=null) {
-                            iocxmlReader.message(error,
-                                    MessageType.warning);
-                        }
+                        enumData[0].setSupportName(supportName);
                     }
                     enumState.prevState = state;
                     enumState.pvEnum = enumData[0];
@@ -803,17 +795,14 @@ public class XMLToIOCDBFactory {
                     field = fieldCreate.createMenu(actualFieldName,menuName,dbdMenu.getChoices());
                     PVMenuArray pvMenuArray = arrayState.pvMenuArray;
                     PVMenu[] menuData = arrayState.menuData;
-                    menuData[0] = (PVMenu)dbDataCreate.createData((DBData)dbArray,field);
+                    menuData[0] = (PVMenu)pvDataCreate.createData(pvArray,field);
                     pvMenuArray.put(arrayOffset,1,menuData,0);
                     String supportName = attributes.get("supportName");
                     if(supportName!=null) {
-                        String error = menuData[0].setSupportName(supportName);
-                        if(error!=null) {
-                            iocxmlReader.message(error,MessageType.warning);
-                        }
+                        menuData[0].setSupportName(supportName);
                     }
                     fieldState.prevState = state;
-                    fieldState.dbData = (DBData)menuData[0];
+                    fieldState.pvData = menuData[0];
                     state = State.field;
                     stringBuilder.setLength(0);
                     return;
@@ -844,19 +833,14 @@ public class XMLToIOCDBFactory {
                         dbdStructure.getFieldAttribute());
                     PVStructureArray pvStructureArray = arrayState.pvStructureArray;
                     PVStructure[] structureData = arrayState.structureData;
-                    structureData[0] = (PVStructure)dbDataCreate.createData((DBData)dbArray,field);
+                    structureData[0] = (PVStructure)pvDataCreate.createData(pvArray,field);
                     pvStructureArray.put(arrayOffset,1,structureData,0);
                     String supportName = attributes.get("supportName");
                     if(supportName==null) {
                         supportName = dbdStructure.getSupportName();
                     }
                     if(supportName!=null) {
-                        String error = structureData[0].setSupportName(supportName);
-                        if(error!=null) {
-                            iocxmlReader.message(
-                                    error,
-                                    MessageType.warning);
-                        }
+                        structureData[0].setSupportName(supportName);
                     }
                     structureStack.push(structureState);
                     structureState = new StructureState();
@@ -878,7 +862,7 @@ public class XMLToIOCDBFactory {
                         actualFieldName,fieldCreate.getType(elementType));
                     PVArrayArray pvArrayArray = arrayState.pvArrayArray;
                     PVArray[] arrayData = arrayState.arrayData;
-                    arrayData[0] = (PVArray)dbDataCreate.createData((DBData)dbArray,field);
+                    arrayData[0] = (PVArray)pvDataCreate.createData(pvArray,field);
                     pvArrayArray.put(arrayOffset,1,arrayData,0);
                     String value = attributes.get("capacity");
                     if(value!=null) arrayData[0].setCapacity(Integer.parseInt(value));
@@ -886,12 +870,7 @@ public class XMLToIOCDBFactory {
                     if(value!=null) arrayData[0].setLength(Integer.parseInt(value));
                     String supportName = attributes.get("supportName");
                     if(supportName!=null) {
-                        String error = arrayData[0].setSupportName(supportName);
-                        if(error!=null) {
-                            iocxmlReader.message(
-                                    error,
-                                    MessageType.warning);
-                        }
+                        arrayData[0].setSupportName(supportName);
                     }
                     arrayStack.push(arrayState);
                     arrayState = new ArrayState();
@@ -906,19 +885,14 @@ public class XMLToIOCDBFactory {
                        field = fieldCreate.createField(actualFieldName,Type.pvLink);
                        PVLinkArray pvLinkArray = arrayState.pvLinkArray;
                        PVLink[] linkData = arrayState.linkData;
-                       linkData[0] = (PVLink)dbDataCreate.createData((DBData)dbArray,field);
+                       linkData[0] = (PVLink)pvDataCreate.createData(pvArray,field);
                        pvLinkArray.put(arrayOffset,1,linkData,0);
                        String supportName = attributes.get("supportName");
                        if(supportName!=null) {
-                           String error = linkData[0].setSupportName(supportName);
-                           if(error!=null) {
-                               iocxmlReader.message(
-                                       error,
-                                       MessageType.warning);
-                           }
+                           linkData[0].setSupportName(supportName);
                        }
                        fieldState.prevState = state;
-                       fieldState.dbData = (DBData)linkData[0];
+                       fieldState.pvData = linkData[0];
                        state = State.field;
                        return;
                 }
@@ -937,7 +911,7 @@ public class XMLToIOCDBFactory {
                         MessageType.error);
             }
             int arrayOffset = arrayState.arrayOffset;
-            PVArray dbArray = arrayState.pvArray;
+            PVArray pvArray = arrayState.pvArray;
             Type type = arrayState.arrayElementType;
             if(type.isPrimitive() || type==Type.pvString) {
                 String value = stringBuilder.toString();
@@ -950,7 +924,7 @@ public class XMLToIOCDBFactory {
                 }
                 try {
                     int num = convert.fromStringArray(
-                        dbArray,arrayOffset,values.length,values,0);
+                        pvArray,arrayOffset,values.length,values,0);
                     arrayOffset += values.length;
                     if(values.length!=num) {
                         iocxmlReader.message(

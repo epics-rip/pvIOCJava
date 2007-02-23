@@ -3,12 +3,10 @@
  * EPICS JavaIOC is distributed subject to a Software License Agreement found
  * in file LICENSE that is included with this distribution.
  */
-package org.epics.ioc.db;
+package org.epics.ioc.pv;
 
 import java.util.regex.Pattern;
 
-import org.epics.ioc.dbd.*;
-import org.epics.ioc.pv.*;
 import org.epics.ioc.pv.Enum;
 
 
@@ -17,27 +15,27 @@ import org.epics.ioc.pv.Enum;
  * @author mrk
  *
  */
-public class DBDataFactory {
-    private DBDataFactory(){} // dont create
+public class PVDataFactory {
+    private PVDataFactory(){} // dont create
     
-    public static DBDataCreate getDBDataCreate() {
-        return DBDataCreateImpl.getDBDataCreate();
+    public static PVDataCreate getPVDataCreate() {
+        return PVDataCreateImpl.getPVDataCreate();
     }
     
-    private static final class DBDataCreateImpl implements DBDataCreate{
-        private static DBDataCreateImpl singleImplementation = null;
-        private static synchronized DBDataCreate getDBDataCreate() {
+    private static final class PVDataCreateImpl implements PVDataCreate{
+        private static PVDataCreateImpl singleImplementation = null;
+        private static synchronized PVDataCreate getPVDataCreate() {
                 if (singleImplementation==null) {
-                    singleImplementation = new DBDataCreateImpl();
+                    singleImplementation = new PVDataCreateImpl();
                 }
                 return singleImplementation;
         }
-        // Guarantee that ImplementConvert can only be created via getDBDataCreate
-        private DBDataCreateImpl() {}
+        // Guarantee that ImplementConvert can only be created via getPVDataCreate
+        private PVDataCreateImpl() {}
         /* (non-Javadoc)
-         * @see org.epics.ioc.db.DBDataCreate#createData(org.epics.ioc.db.DBData, org.epics.ioc.pv.Field)
+         * @see org.epics.ioc.db.PVDataCreate#createData(org.epics.ioc.db.PVData, org.epics.ioc.pv.Field)
          */
-        public DBData createData(DBData parent,Field field)
+        public PVData createData(PVData parent,Field field)
         {
             if(parent==null) throw new IllegalArgumentException("Illegal parent is null");
             String defaultValue = field.getFieldAttribute().getDefault();
@@ -51,30 +49,22 @@ public class DBDataFactory {
             case pvFloat:   return new FloatData(parent,field,defaultValue);
             case pvDouble:  return new DoubleData(parent,field,defaultValue);
             case pvString:  return new StringData(parent,field,defaultValue);
-            case pvEnum:    return createEnumData(parent,field,null);
-            case pvMenu:    return createMenuData(parent,(Menu)field,defaultValue);
+            case pvEnum:    return new BasePVEnum(parent,(Enum)field);
+            case pvMenu:    return new BasePVMenu(parent,(Menu)field);
             case pvStructure: {
                     Structure structure = (Structure)field;
-                    return new DBStructureBase(parent,structure);
+                    return new BasePVStructure(parent,structure);
                 }
-            case pvArray: return (DBData)createArrayData(parent,field,0,true);
-            case pvLink: return new DBLinkBase(parent,field);
+            case pvArray: return (PVData)createArrayData(parent,field,0,true);
+            case pvLink: return new BasePVLink(parent,field);
             }
             throw new IllegalArgumentException(
                 "Illegal Type. Must be pvBoolean,...,pvLink");
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.db.DBDataCreate#createEnumData(org.epics.ioc.db.DBData, org.epics.ioc.pv.Field, java.lang.String[])
+         * @see org.epics.ioc.db.PVDataCreate#createArrayData(org.epics.ioc.db.PVData, org.epics.ioc.pv.Field, int, boolean)
          */
-        public DBData createEnumData(DBData parent,Field field, String[] choice)
-        {
-            if(parent==null) throw new IllegalArgumentException("Illegal parent is null");
-            return new DBEnumBase(parent,(Enum)field,choice);
-        }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.db.DBDataCreate#createArrayData(org.epics.ioc.db.DBData, org.epics.ioc.pv.Field, int, boolean)
-         */
-        public PVArray createArrayData(DBData parent,
+        public PVArray createArrayData(PVData parent,
                 Field field,int capacity,boolean capacityMutable)
         {
             if(parent==null) throw new IllegalArgumentException("Illegal parent is null");
@@ -99,41 +89,23 @@ public class DBDataFactory {
             throw new IllegalArgumentException("Illegal Type. Logic error");
         }    
         /* (non-Javadoc)
-         * @see org.epics.ioc.db.DBDataCreate#createRecord(java.lang.String, org.epics.ioc.dbd.DBDRecordType)
+         * @see org.epics.ioc.db.PVDataCreate#createRecord(java.lang.String, org.epics.ioc.dbd.PVDRecordType)
          */
-        public DBRecord createRecord(String recordName, DBDRecordType dbdRecordType) {
-            DBRecord dbRecord = new DBRecordBase(recordName,dbdRecordType);
+        public PVRecord createRecord(String recordName, Structure dbdRecordType) {
+            PVRecord dbRecord = new BasePVRecord(recordName,dbdRecordType);
             return dbRecord;
         }
     }
     
     private static Convert convert = ConvertFactory.getConvert();
     private static Pattern primitivePattern = Pattern.compile("[, ]");
-
-    private static DBData createMenuData(DBData parent,Menu menu,String defaultValue) {
-        PVMenu pvMenu = new DBMenuBase(parent,menu);
-        if(defaultValue!=null && defaultValue.length()>0) {
-            String[] choices = pvMenu.getChoices();
-            int index = -1;
-            for(int i=0; i<choices.length; i++) {
-                if(defaultValue.equals(choices[i])) {
-                    index = i; break;
-                }
-            }
-            if(index==-1) {
-                throw new IllegalStateException("default value is not a choice");
-            }
-            pvMenu.setIndex(index);
-        }
-        return (DBData)pvMenu;
-    }
     
-    private static class BooleanData extends AbstractDBData
+    private static class BooleanData extends AbstractPVData
         implements PVBoolean
     {
         private boolean value;
 
-        private BooleanData(DBData parent,Field field,String defaultValue) {
+        private BooleanData(PVData parent,Field field,String defaultValue) {
             super(parent,field);
             value = false;
             if(defaultValue!=null && defaultValue.length()>0) {
@@ -152,7 +124,6 @@ public class DBDataFactory {
         public void put(boolean value) {
             if(getField().isMutable()) {
                 this.value = value;
-                postPut();
                 return ;
             }
             throw new IllegalStateException("PVData.isMutable is false");
@@ -172,10 +143,10 @@ public class DBDataFactory {
         }
     }
 
-    private static class ByteData extends AbstractDBData implements PVByte {
+    private static class ByteData extends AbstractPVData implements PVByte {
         private byte value;
         
-        private ByteData(DBData parent,Field field,String defaultValue) {
+        private ByteData(PVData parent,Field field,String defaultValue) {
             super(parent,field);
             value = 0;
             if(defaultValue!=null && defaultValue.length()>0) {
@@ -194,7 +165,6 @@ public class DBDataFactory {
         public void put(byte value) {
             if(getField().isMutable()) {
                 this.value = value;
-                postPut();
                 return ;
             }
             throw new IllegalStateException("PVData.isMutable is false");
@@ -214,10 +184,10 @@ public class DBDataFactory {
         }
     }
 
-    private static class ShortData extends AbstractDBData implements PVShort {
+    private static class ShortData extends AbstractPVData implements PVShort {
         private short value;
         
-        private ShortData(DBData parent,Field field,String defaultValue) {
+        private ShortData(PVData parent,Field field,String defaultValue) {
             super(parent,field);
             value = 0;
             if(defaultValue!=null && defaultValue.length()>0) {
@@ -236,7 +206,6 @@ public class DBDataFactory {
         public void put(short value) {
             if(getField().isMutable()) {
                 this.value = value;
-                postPut();
                 return ;
             }
             throw new IllegalStateException("PVData.isMutable is false");
@@ -256,10 +225,10 @@ public class DBDataFactory {
         }
     }
 
-    private static class IntData extends AbstractDBData implements PVInt {
+    private static class IntData extends AbstractPVData implements PVInt {
         private int value;
 
-        private IntData(DBData parent,Field field,String defaultValue) {
+        private IntData(PVData parent,Field field,String defaultValue) {
             super(parent,field);
             value = 0;
             if(defaultValue!=null && defaultValue.length()>0) {
@@ -278,7 +247,6 @@ public class DBDataFactory {
         public void put(int value) {
             if(getField().isMutable()) {
                 this.value = value;
-                postPut();
                 return ;
             }
             throw new IllegalStateException("PVData.isMutable is false");
@@ -298,10 +266,10 @@ public class DBDataFactory {
         }
     }
 
-    private static class LongData extends AbstractDBData implements PVLong {
+    private static class LongData extends AbstractPVData implements PVLong {
         private long value;
         
-        private LongData(DBData parent,Field field,String defaultValue) {
+        private LongData(PVData parent,Field field,String defaultValue) {
             super(parent,field);
             value = 0;
             if(defaultValue!=null && defaultValue.length()>0) {
@@ -320,7 +288,6 @@ public class DBDataFactory {
         public void put(long value) {
             if(getField().isMutable()) {
                 this.value = value;
-                postPut();
                 return ;
             }
             throw new IllegalStateException("PVData.isMutable is false");
@@ -340,10 +307,10 @@ public class DBDataFactory {
         }
     }
 
-    private static class FloatData extends AbstractDBData implements PVFloat {
+    private static class FloatData extends AbstractPVData implements PVFloat {
         private float value;
         
-        private FloatData(DBData parent,Field field,String defaultValue) {
+        private FloatData(PVData parent,Field field,String defaultValue) {
             super(parent,field);
             value = 0;
             if(defaultValue!=null && defaultValue.length()>0) {
@@ -362,7 +329,6 @@ public class DBDataFactory {
         public void put(float value) {
             if(getField().isMutable()) {
                 this.value = value;
-                postPut();
                 return ;
             }
             throw new IllegalStateException("PVData.isMutable is false");
@@ -382,10 +348,10 @@ public class DBDataFactory {
         }
     }
 
-    private static class DoubleData extends AbstractDBData implements PVDouble {
+    private static class DoubleData extends AbstractPVData implements PVDouble {
         private double value;
         
-        private DoubleData(DBData parent,Field field,String defaultValue) {
+        private DoubleData(PVData parent,Field field,String defaultValue) {
             super(parent,field);
             value = 0;
             if(defaultValue!=null && defaultValue.length()>0) {
@@ -404,7 +370,6 @@ public class DBDataFactory {
         public void put(double value) {
             if(getField().isMutable()) {
                 this.value = value;
-                postPut();
                 return ;
             }
             throw new IllegalStateException("PVData.isMutable is false");
@@ -424,10 +389,10 @@ public class DBDataFactory {
         }
     }
 
-    private static class StringData extends AbstractDBData implements PVString {
+    private static class StringData extends AbstractPVData implements PVString {
         private String value;
         
-        private StringData(DBData parent,Field field,String defaultValue) {
+        private StringData(PVData parent,Field field,String defaultValue) {
             super(parent,field);
             value = null;
             if(defaultValue!=null && defaultValue.length()>0) {
@@ -446,7 +411,6 @@ public class DBDataFactory {
         public void put(String value) {
             if(getField().isMutable()) {
                 this.value = value;
-                postPut();
                 return ;
             }
             throw new IllegalStateException("PVData.isMutable is false");
@@ -466,11 +430,11 @@ public class DBDataFactory {
         }
     }
     
-    private static class BooleanArray extends AbstractDBArray implements PVBooleanArray
+    private static class BooleanArray extends AbstractPVArray implements PVBooleanArray
     {
         private boolean[] value;
         
-        private BooleanArray(DBData parent,Array array,
+        private BooleanArray(PVData parent,Array array,
             int capacity,boolean capacityMutable,String defaultValue)
         {
             super(parent,array,capacity,capacityMutable);
@@ -490,7 +454,7 @@ public class DBDataFactory {
             + super.toString(indentLevel);
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.db.AbstractDBArray#setCapacity(int)
+         * @see org.epics.ioc.db.AbstractPVArray#setCapacity(int)
          */
         public void setCapacity(int len) {
             if(!capacityMutable)
@@ -525,11 +489,11 @@ public class DBDataFactory {
         }
     }
 
-    private static class ByteArray extends AbstractDBArray implements PVByteArray
+    private static class ByteArray extends AbstractPVArray implements PVByteArray
     {
         private byte[] value;
         
-        private ByteArray(DBData parent,Array array,
+        private ByteArray(PVData parent,Array array,
             int capacity,boolean capacityMutable,String defaultValue)
         {
             super(parent,array,capacity,capacityMutable);
@@ -552,7 +516,7 @@ public class DBDataFactory {
             + super.toString(indentLevel);
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.db.AbstractDBArray#setCapacity(int)
+         * @see org.epics.ioc.db.AbstractPVArray#setCapacity(int)
          */
         public void setCapacity(int len) {
             if(!capacityMutable)
@@ -587,11 +551,11 @@ public class DBDataFactory {
         }
     }
 
-    private static class ShortArray extends AbstractDBArray implements PVShortArray
+    private static class ShortArray extends AbstractPVArray implements PVShortArray
     {
         private short[] value;
         
-        private ShortArray(DBData parent,Array array,
+        private ShortArray(PVData parent,Array array,
             int capacity,boolean capacityMutable,String defaultValue)
         {
             super(parent,array,capacity,capacityMutable);
@@ -614,7 +578,7 @@ public class DBDataFactory {
             + super.toString(indentLevel);
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.db.AbstractDBArray#setCapacity(int)
+         * @see org.epics.ioc.db.AbstractPVArray#setCapacity(int)
          */
         public void setCapacity(int len) {
             if(!capacityMutable)
@@ -649,11 +613,11 @@ public class DBDataFactory {
         }
     }
 
-    private static class IntArray extends AbstractDBArray implements PVIntArray
+    private static class IntArray extends AbstractPVArray implements PVIntArray
     {
         private int[] value;
         
-        private IntArray(DBData parent,Array array,
+        private IntArray(PVData parent,Array array,
             int capacity,boolean capacityMutable,String defaultValue)
         {
             super(parent,array,capacity,capacityMutable);
@@ -676,7 +640,7 @@ public class DBDataFactory {
             + super.toString(indentLevel);
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.db.AbstractDBArray#setCapacity(int)
+         * @see org.epics.ioc.db.AbstractPVArray#setCapacity(int)
          */
         public void setCapacity(int len) {
             if(!capacityMutable)
@@ -711,11 +675,11 @@ public class DBDataFactory {
         }
     }
 
-    private static class LongArray extends AbstractDBArray implements PVLongArray
+    private static class LongArray extends AbstractPVArray implements PVLongArray
     {
         private long[] value;   
         
-        private LongArray(DBData parent,Array array,
+        private LongArray(PVData parent,Array array,
             int capacity,boolean capacityMutable,String defaultValue)
         {
             super(parent,array,capacity,capacityMutable);
@@ -738,7 +702,7 @@ public class DBDataFactory {
             + super.toString(indentLevel);
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.db.AbstractDBArray#setCapacity(int)
+         * @see org.epics.ioc.db.AbstractPVArray#setCapacity(int)
          */
         public void setCapacity(int len) {
             if(!capacityMutable)
@@ -773,11 +737,11 @@ public class DBDataFactory {
         }
     }
 
-    private static class FloatArray extends AbstractDBArray implements PVFloatArray
+    private static class FloatArray extends AbstractPVArray implements PVFloatArray
     {
         private float[] value;
         
-        private FloatArray(DBData parent,Array array,
+        private FloatArray(PVData parent,Array array,
             int capacity,boolean capacityMutable,String defaultValue)
         {
             super(parent,array,capacity,capacityMutable);
@@ -800,7 +764,7 @@ public class DBDataFactory {
             + super.toString(indentLevel);
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.db.AbstractDBArray#setCapacity(int)
+         * @see org.epics.ioc.db.AbstractPVArray#setCapacity(int)
          */
         public void setCapacity(int len) {
             if(!capacityMutable)
@@ -835,11 +799,11 @@ public class DBDataFactory {
         }
     }
 
-    private static class DoubleArray extends AbstractDBArray implements PVDoubleArray
+    private static class DoubleArray extends AbstractPVArray implements PVDoubleArray
     {
         private double[] value;
         
-        private DoubleArray(DBData parent,Array array,
+        private DoubleArray(PVData parent,Array array,
             int capacity,boolean capacityMutable,String defaultValue)
         {
             super(parent,array,capacity,capacityMutable);
@@ -862,7 +826,7 @@ public class DBDataFactory {
             + super.toString(indentLevel);
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.db.AbstractDBArray#setCapacity(int)
+         * @see org.epics.ioc.db.AbstractPVArray#setCapacity(int)
          */
         public void setCapacity(int len) {
             if(!capacityMutable)
@@ -897,12 +861,12 @@ public class DBDataFactory {
         }     
     }
 
-    private static class StringArray extends AbstractDBArray implements PVStringArray
+    private static class StringArray extends AbstractPVArray implements PVStringArray
     {
 
         private String[] value;
         
-        private StringArray(DBData parent,Array array,
+        private StringArray(PVData parent,Array array,
             int capacity,boolean capacityMutable,String defaultValue)
         {
             super(parent,array,capacity,capacityMutable);
@@ -925,7 +889,7 @@ public class DBDataFactory {
             + super.toString(indentLevel);
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.db.AbstractDBArray#setCapacity(int)
+         * @see org.epics.ioc.db.AbstractPVArray#setCapacity(int)
          */
         public void setCapacity(int len) {
             if(!capacityMutable)
@@ -960,12 +924,12 @@ public class DBDataFactory {
         }
     }
 
-    private static class EnumArray extends AbstractDBArray implements PVEnumArray
+    private static class EnumArray extends AbstractPVArray implements PVEnumArray
     {
 
         private PVEnum[] value;
         
-        private EnumArray(DBData parent,Array array,
+        private EnumArray(PVData parent,Array array,
             int capacity,boolean capacityMutable)
         {
             super(parent,array,capacity,capacityMutable);
@@ -982,7 +946,7 @@ public class DBDataFactory {
         }
         
         /* (non-Javadoc)
-         * @see org.epics.ioc.db.AbstractDBArray#setCapacity(int)
+         * @see org.epics.ioc.db.AbstractPVArray#setCapacity(int)
          */
         public void setCapacity(int len) {
             if(!capacityMutable)
@@ -1018,11 +982,11 @@ public class DBDataFactory {
         }
     }
 
-    private static class MenuArray extends AbstractDBArray implements PVMenuArray
+    private static class MenuArray extends AbstractPVArray implements PVMenuArray
     {
         private PVMenu[] value;
         
-        private MenuArray(DBData parent,Array array,
+        private MenuArray(PVData parent,Array array,
             int capacity,boolean capacityMutable)
         {
             super(parent,array,capacity,capacityMutable);
@@ -1038,7 +1002,7 @@ public class DBDataFactory {
             + super.toString(indentLevel);
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.db.AbstractDBArray#setCapacity(int)
+         * @see org.epics.ioc.db.AbstractPVArray#setCapacity(int)
          */
         public void setCapacity(int len) {
             if(!capacityMutable)
@@ -1090,11 +1054,11 @@ public class DBDataFactory {
         }       
     }
 
-    private static class StructureArray extends AbstractDBArray implements PVStructureArray
+    private static class StructureArray extends AbstractPVArray implements PVStructureArray
     {
         private PVStructure[] value;
         
-        private StructureArray(DBData parent,Array array,
+        private StructureArray(PVData parent,Array array,
             int capacity,boolean capacityMutable)
         {
             super(parent,array,capacity,capacityMutable);
@@ -1110,7 +1074,7 @@ public class DBDataFactory {
             + super.toString(indentLevel);
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.db.AbstractDBArray#setCapacity(int)
+         * @see org.epics.ioc.db.AbstractPVArray#setCapacity(int)
          */
         public void setCapacity(int len) {
             if(!capacityMutable)
@@ -1161,11 +1125,11 @@ public class DBDataFactory {
         }
     }
 
-    private static class ArrayArray extends AbstractDBArray implements PVArrayArray
+    private static class ArrayArray extends AbstractPVArray implements PVArrayArray
     {
         private PVArray[] value;
         
-        private ArrayArray(DBData parent,Array array,
+        private ArrayArray(PVData parent,Array array,
             int capacity,boolean capacityMutable)
         {
             super(parent,array,capacity,capacityMutable);
@@ -1181,7 +1145,7 @@ public class DBDataFactory {
             + super.toString(indentLevel);
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.db.AbstractDBArray#setCapacity(int)
+         * @see org.epics.ioc.db.AbstractPVArray#setCapacity(int)
          */
         public void setCapacity(int len) {
             if(!capacityMutable)
@@ -1233,11 +1197,11 @@ public class DBDataFactory {
         }
     }
 
-    private static class LinkArray extends AbstractDBArray implements PVLinkArray
+    private static class LinkArray extends AbstractPVArray implements PVLinkArray
     {
         private PVLink[] value;
         
-        private LinkArray(DBData parent,Array array,
+        private LinkArray(PVData parent,Array array,
             int capacity,boolean capacityMutable)
         {
             super(parent,array,capacity,capacityMutable);
@@ -1253,7 +1217,7 @@ public class DBDataFactory {
             + super.toString(indentLevel);
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.db.AbstractDBArray#setCapacity(int)
+         * @see org.epics.ioc.db.AbstractPVArray#setCapacity(int)
          */
         public void setCapacity(int len) {
             if(!capacityMutable)

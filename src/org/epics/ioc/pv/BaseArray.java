@@ -11,18 +11,18 @@ package org.epics.ioc.pv;
  * @author mrk
  *
  */
-public class ArrayBase extends FieldBase implements Array {
+public class BaseArray extends BaseField implements Array {
     
     private Type elementType;
     
     /**
-     * Constructor for ArrayBase.
+     * Constructor for BaseArray.
      * @param fieldName The field name.
      * @param elementType The element Type.
      * @param property An array of Property.
      * @param fieldAttribute The field attributes.
      */
-    public ArrayBase(String fieldName,Type elementType, Property[] property,FieldAttribute fieldAttribute) {
+    public BaseArray(String fieldName,Type elementType, Property[] property,FieldAttribute fieldAttribute) {
         super(fieldName, Type.pvArray,property,fieldAttribute);
         this.elementType = elementType;
     }

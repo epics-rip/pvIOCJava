@@ -11,16 +11,16 @@ package org.epics.ioc.pv;
  * @author mrk
  *
  */
-public class EnumBase extends FieldBase implements Enum{
+public class BaseEnum extends BaseField implements Enum{
     private boolean choicesMutable;
     /**
-     * Constructor for ArrayBase.
+     * Constructor for BaseArray.
      * @param fieldName The field name.
      * @param choicesMutable Are the choices mutable?
      * @param property An array of properties for the field.
      * @param fieldAttribute The field attributes.
      */
-    public EnumBase(String fieldName,boolean choicesMutable,Property[] property,FieldAttribute fieldAttribute) {
+    public BaseEnum(String fieldName,boolean choicesMutable,Property[] property,FieldAttribute fieldAttribute) {
         super(fieldName,Type.pvEnum,property,fieldAttribute);
         this.choicesMutable = choicesMutable;
     }

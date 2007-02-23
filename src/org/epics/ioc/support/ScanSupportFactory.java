@@ -22,14 +22,14 @@ public class ScanSupportFactory {
     private static final String supportName = "scan";
     /**
      * Create support for the scan field.
-     * @param pvStructure The interface to the scan field.
+     * @param dbStructure The interface to the scan field.
      * @return The support or null if the scan field is improperly defined.
      */
-    public static Support create(PVStructure pvStructure) {
-        DBData dbData = (DBData)pvStructure;
-        ScanField scanField = ScanFieldFactory.create(dbData.getDBRecord());
+    public static Support create(DBStructure dbStructure) {
+        PVStructure pvStructure = dbStructure.getPVStructure();
+        ScanField scanField = ScanFieldFactory.create(pvStructure.getPVRecord());
         if(scanField==null) return null;
-        String supportName = dbData.getSupportName();
+        String supportName = pvStructure.getSupportName();
         if(!supportName.equals(supportName)) {
             pvStructure.message(
                     "ScanSupportFactory create supportName is " + supportName
@@ -38,7 +38,7 @@ public class ScanSupportFactory {
                 return null;
         }
         try {
-            return new ScanFieldSupport(pvStructure);
+            return new ScanFieldSupport(dbStructure);
         } catch (IllegalStateException e) {
             pvStructure.message(
                 "ScanSupportFactory create failure " + e.getMessage(),
@@ -50,33 +50,32 @@ public class ScanSupportFactory {
     private static class ScanFieldSupport extends AbstractSupport implements IOCDBMergeListener {
         
         private boolean isMerged = false;
-        private PVStructure pvStructure;
         private DBRecord dbRecord = null;
+        private PVRecord pvRecord;
         private String recordName = null;
         private ScanType scanType;
         private ScanPriority priority;
         private String eventName = null;
         private double rate = 0.0;
         
-        private ScanFieldSupport(PVStructure pvStructure) {
-            super(supportName,(DBData)pvStructure);
+        private ScanFieldSupport(DBStructure dbStructure) {
+            super(supportName,dbStructure);
             String fieldName;
             PVData oldField;
             int index;
             String choice;
             Menu menu;
             PVMenu newMenu;
-            
-            this.pvStructure = pvStructure;
-            dbRecord = (DBRecord)pvStructure.getPVRecord();
-            recordName = dbRecord.getRecordName();
-            PVAccess dbAccess = PVAccessFactory.createPVAccess(dbRecord);           
-            dbAccess.findField("");
+            dbRecord = dbStructure.getDBRecord();
+            pvRecord = dbRecord.getPVRecord();
+            recordName = pvRecord.getRecordName();
+            PVAccess pvAccess = PVAccessFactory.createPVAccess(pvRecord);           
+            pvAccess.findField("");
             fieldName = "scan.scan";
-            if(dbAccess.findField(fieldName)!=AccessSetResult.thisRecord){
+            if(pvAccess.findField(fieldName)!=AccessSetResult.thisRecord){
                 throw new IllegalStateException(recordName + "." + fieldName + " not in record ");
             }
-            oldField = dbAccess.getField();
+            oldField = pvAccess.getField();
             if(oldField.getField().getType()!=Type.pvMenu) {
                 throw new IllegalStateException(recordName + "." + fieldName + " is not a menu field ");
             }
@@ -89,45 +88,49 @@ public class ScanSupportFactory {
             choice = choices[index];
             scanType = ScanType.valueOf(choice);
             menu = (Menu)oldField.getField();
-            newMenu = new DBScan(this,(DBData)pvStructure,menu);
+            newMenu = new DBScan(this,(DBData)dbStructure,menu);
             newMenu.setIndex(index);
-            oldField.replacePVData(newMenu);
+            DBData dbData = dbRecord.findDBData(oldField);
+            dbData.replacePVData(newMenu);
             
-            dbAccess.findField("");
+            pvAccess.findField("");
             fieldName = "scan.rate";
-            if(dbAccess.findField(fieldName)!=AccessSetResult.thisRecord){
+            if(pvAccess.findField(fieldName)!=AccessSetResult.thisRecord){
                 throw new IllegalStateException(recordName + "." + fieldName + " not in record ");
             }
-            oldField = dbAccess.getField();
+            oldField = pvAccess.getField();
             if(oldField.getField().getType()!=Type.pvDouble) {
                 throw new IllegalStateException(recordName + "." + fieldName + " is not a double field ");
             }
             PVDouble oldRate = (PVDouble)oldField;
             rate = oldRate.get();
-            PVDouble newRate = new DBRate(this,(DBData)pvStructure,oldField.getField());
+            PVDouble newRate = new DBRate(this,(DBData)dbStructure,oldField.getField());
             newRate.put(rate);
-            oldField.replacePVData(newRate);
+            dbData = dbRecord.findDBData(oldField);
+            dbData.replacePVData(newRate);
             
-            dbAccess.findField("");
+            pvAccess.findField("");
             fieldName = "scan.eventName";
-            if(dbAccess.findField(fieldName)!=AccessSetResult.thisRecord){
+            if(pvAccess.findField(fieldName)!=AccessSetResult.thisRecord){
                 throw new IllegalStateException(recordName + "." + fieldName + " not in record ");
             }
-            oldField = dbAccess.getField();
+            oldField = pvAccess.getField();
             if(oldField.getField().getType()!=Type.pvString) {
                 throw new IllegalStateException(recordName + "." + fieldName + " is not a string field ");
             }
             PVString oldEventName = (PVString)oldField;
             eventName = oldEventName.get();
-            PVString newEventName = new DBEventName(this,(DBData)pvStructure,oldField.getField());
+            PVString newEventName = new DBEventName(this,(DBData)dbStructure,oldField.getField());
             newEventName.put(eventName);
-            oldField.replacePVData(newEventName);
-            dbAccess.findField("");
+            dbData = dbRecord.findDBData(oldField);
+            dbData.replacePVData(newEventName);
+            
+            pvAccess.findField("");
             fieldName = "scan.priority";
-            if(dbAccess.findField(fieldName)!=AccessSetResult.thisRecord){
+            if(pvAccess.findField(fieldName)!=AccessSetResult.thisRecord){
                 throw new IllegalStateException(recordName + "." + fieldName + " not found");
             }
-            oldField = dbAccess.getField();
+            oldField = pvAccess.getField();
             if(oldField.getField().getType()!=Type.pvMenu) {
                 throw new IllegalStateException(recordName + "." + fieldName + " is not a menu field ");
             }
@@ -139,10 +142,10 @@ public class ScanSupportFactory {
             choice = priorityMenu.getChoices()[index];
             priority = ScanPriority.valueOf(choice);
             menu = (Menu)oldField.getField();
-            newMenu = new DBPriority(this,(DBData)pvStructure,menu);
+            newMenu = new DBPriority(this,(DBData)dbStructure,menu);
             newMenu.setIndex(index);
-            oldField.replacePVData(newMenu);
-            
+            dbData = dbRecord.findDBData(oldField);
+            dbData.replacePVData(newMenu);
             dbRecord.getIOCDB().addIOCDBMergeListener(this);
         }       
         /* (non-Javadoc)
@@ -192,14 +195,14 @@ public class ScanSupportFactory {
          * @see org.epics.ioc.process.AbstractSupport#process(org.epics.ioc.process.RecordProcessRequestor)
          */
         public void process(SupportProcessRequestor supportProcessRequestor) {
-            pvStructure.message("process is being called. Why?", MessageType.error);
+            dbRecord.getPVRecord().message("process is being called. Why?", MessageType.error);
             supportProcessRequestor.supportProcessDone(RequestResult.failure);
         }       
         /* (non-Javadoc)
          * @see org.epics.ioc.process.AbstractSupport#processContinue()
          */
         public void processContinue() {
-            pvStructure.message("processContinue is being called. Why?", MessageType.error);
+            dbRecord.getPVRecord().message("processContinue is being called. Why?", MessageType.error);
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.dbAccess.IOCDBMergeListener#merged()
@@ -257,15 +260,15 @@ public class ScanSupportFactory {
         
     }
     
-    private static class DBPriority extends DBMenuBase {
+    private static class DBPriority extends BasePVMenu {
         private ScanFieldSupport scanFieldSupport;
         
         private DBPriority(ScanFieldSupport scanFieldSupport,DBData parent,Menu menu) {
-            super(parent,menu);
+            super(parent.getPVData(),menu);
             this.scanFieldSupport = scanFieldSupport;
         }      
         /* (non-Javadoc)
-         * @see org.epics.ioc.db.DBEnumBase#setIndex(int)
+         * @see org.epics.ioc.db.BaseDBEnum#setIndex(int)
          */
         public void setIndex(int index) {
             int oldIndex = super.getIndex();
@@ -276,15 +279,15 @@ public class ScanSupportFactory {
         }
     }
     
-    private static class DBScan extends DBMenuBase {
+    private static class DBScan extends BasePVMenu {
         private ScanFieldSupport scanFieldSupport;
         
         private DBScan(ScanFieldSupport scanFieldSupport,DBData parent,Menu menu) {
-            super(parent,menu);
+            super(parent.getPVData(),menu);
             this.scanFieldSupport = scanFieldSupport;
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.db.DBEnumBase#setIndex(int)
+         * @see org.epics.ioc.db.BaseDBEnum#setIndex(int)
          */
         public void setIndex(int index) {
             int oldIndex = super.getIndex();
@@ -295,12 +298,12 @@ public class ScanSupportFactory {
         }
     }
     
-    private static class DBRate extends AbstractDBData implements PVDouble{
+    private static class DBRate extends AbstractPVData implements PVDouble{
         private double value;
         private ScanFieldSupport scanFieldSupport;
         
         private DBRate(ScanFieldSupport scanFieldSupport,DBData parent,Field field) {
-            super(parent,field);
+            super(parent.getPVData(),field);
             value = 0;
             this.scanFieldSupport = scanFieldSupport;
             String defaultValue = field.getFieldAttribute().getDefault();
@@ -321,7 +324,6 @@ public class ScanSupportFactory {
             if(getField().isMutable()) {
                 double oldValue = this.value;
                 this.value = value;
-                postPut();
                 if(oldValue==value) return;
                 scanFieldSupport.putRate(value);
                 return ;
@@ -344,12 +346,12 @@ public class ScanSupportFactory {
 
     }
     
-    private static class DBEventName extends AbstractDBData implements PVString{
+    private static class DBEventName extends AbstractPVData implements PVString{
         private String value;
         private ScanFieldSupport scanFieldSupport;
         
         private DBEventName(ScanFieldSupport scanFieldSupport,DBData parent,Field field) {
-            super(parent,field);
+            super(parent.getPVData(),field);
             value = null;
             this.scanFieldSupport = scanFieldSupport;
             String defaultValue = field.getFieldAttribute().getDefault();
@@ -370,7 +372,6 @@ public class ScanSupportFactory {
             if(getField().isMutable()) {
                 String oldValue = this.value;
                 this.value = value;
-                postPut();
                 if(oldValue==null && value==null) return;
                 if(oldValue!=null && oldValue.equals(value)) return;
                 scanFieldSupport.putEventName(value);

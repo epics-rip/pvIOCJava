@@ -16,8 +16,8 @@ import org.epics.ioc.util.*;
  *
  */
 public class DoubleRecordFactory {
-    public static Support create(PVStructure pvStructure) {
-        return new DoubleRecordSupport(pvStructure);
+    public static Support create(DBStructure dbStructure) {
+        return new DoubleRecordSupport(dbStructure);
     }
     
     private enum ProcessState {
@@ -30,70 +30,65 @@ public class DoubleRecordFactory {
     {
         private static String supportName = "doubleRecord";
         private SupportState supportState = SupportState.readyForInitialize;
+        private PVStructure pvStructure;
         private DBRecord dbRecord;
-        private PVLink link = null;
-        private PVData value = null;
+        private PVRecord pvRecord;
+        private DBData value = null;
         private LinkSupport support = null;
         private LinkSupport linkArraySupport = null;
         private SupportProcessRequestor supportProcessRequestor = null;
         private ProcessState processState = ProcessState.input;
         
-        private DoubleRecordSupport(PVStructure pvStructure) {
-            super(supportName,(DBData)pvStructure);
-            dbRecord = (DBRecord)pvStructure.getPVRecord();
+        private DoubleRecordSupport(DBStructure dbStructure) {
+            super(supportName,dbStructure);
+            pvStructure = dbStructure.getPVStructure();
+            dbRecord = dbStructure.getDBRecord();
+            pvRecord = dbRecord.getPVRecord();
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.process.SupportProcessRequestor#getProcessRequestorName()
          */
         public String getRequestorName() {
-            return dbRecord.getRecordName();
+            return pvRecord.getRecordName();
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.util.Requestor#message(java.lang.String, org.epics.ioc.util.MessageType)
          */
         public void message(String message, MessageType messageType) {
-            dbRecord.message(message, messageType);
+            pvStructure.message(message, messageType);
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.process.Support#initialize()
          */
         public void initialize() {
             if(!super.checkSupportState(SupportState.readyForInitialize,supportName)) return;
-            PVAccess pvAccess = PVAccessFactory.createPVAccess(dbRecord);
+            PVAccess pvAccess = PVAccessFactory.createPVAccess(pvRecord);
             PVData pvData;
             pvAccess.findField(null);
             AccessSetResult result = pvAccess.findField("input");
             if(result!=AccessSetResult.thisRecord) {
-                dbRecord.message(
-                        "field input does not exist",
-                        MessageType.error);
+                message("field input does not exist",MessageType.error);
                 return;
             }
             pvData = pvAccess.getField();
             if(pvData.getField().getType()!=Type.pvLink) {
-                dbRecord.message(
-                        "field input is not a link",
-                        MessageType.error);
+                message("field input is not a link",MessageType.error);
                 return;
             }
-            link = (PVLink)pvData;
+            DBLink link = (DBLink)dbRecord.findDBData(pvData);
             pvAccess.findField(null);
             result = pvAccess.findField("value");
             if(result!=AccessSetResult.thisRecord) {
-                dbRecord.message(
-                        "field value does not exist",
-                        MessageType.error);
+                message("field value does not exist",MessageType.error);
                 return;
             }
             pvData = pvAccess.getField();
             if(!pvData.getField().getType().isNumeric()) {
-                dbRecord.message(
-                        "field value is not numeric",
-                        MessageType.error);
+                message("field value is not numeric",MessageType.error);
                 return;
             }
-            value = pvData;
-            support = (LinkSupport)((DBData)link).getSupport();
+            value = dbRecord.findDBData(pvData);
+            support = (LinkSupport)link.getSupport();
             if(support!=null) {
                 support.initialize();
                 supportState = support.getSupportState();
@@ -105,7 +100,8 @@ public class DoubleRecordFactory {
             pvAccess.findField(null);
             result = pvAccess.findField("linkArray");
             if(result==AccessSetResult.thisRecord) {
-                DBData dbData = (DBData)pvAccess.getField();
+                pvData = pvAccess.getField();
+                DBData dbData = dbRecord.findDBData(pvData);
                 linkArraySupport = (LinkSupport)dbData.getSupport();
                 if(linkArraySupport!=null) {
                     linkArraySupport.setField(value);
@@ -159,7 +155,7 @@ public class DoubleRecordFactory {
             if(linkArraySupport!=null) linkArraySupport.uninitialize();
             support = null;
             value = null;
-            link = null;
+            linkArraySupport = null;
             setSupportState(SupportState.readyForInitialize);
         }
         /* (non-Javadoc)

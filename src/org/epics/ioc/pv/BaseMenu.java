@@ -11,7 +11,7 @@ package org.epics.ioc.pv;
  * @author mrk
  *
  */
-public class MenuBase extends FieldBase implements Menu{
+public class BaseMenu extends BaseField implements Menu{
     private static Convert convert = ConvertFactory.getConvert();
     private String menuName;
     private String[] menuChoices;
@@ -23,7 +23,7 @@ public class MenuBase extends FieldBase implements Menu{
      * @param property The field properties.
      * @param fieldAttribute The field attributes.
      */
-    public MenuBase(String fieldName,String menuName,String[] menuChoices,
+    public BaseMenu(String fieldName,String menuName,String[] menuChoices,
         Property[] property,FieldAttribute fieldAttribute)
     {
         super(fieldName,Type.pvMenu,property,fieldAttribute);

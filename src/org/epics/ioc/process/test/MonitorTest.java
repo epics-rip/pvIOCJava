@@ -11,7 +11,7 @@ import java.util.*;
 import org.epics.ioc.pv.*;
 import org.epics.ioc.dbd.*;
 import org.epics.ioc.db.*;
-import org.epics.ioc.db.test.TestListener;
+import org.epics.ioc.db.test.DBListenerForTesting;
 import org.epics.ioc.process.*;
 import org.epics.ioc.util.*;
 
@@ -67,11 +67,12 @@ public class MonitorTest extends TestCase {
         for(int i=0; i<recordNames.length; i++) {
             DBRecord dbRecord = iocdbMaster.findRecord(recordNames[i]);
             assertNotNull(dbRecord);
-            PVData[] pvData = dbRecord.getFieldPVDatas();
-            Structure structure = (Structure)dbRecord.getField();
+            PVRecord pvRecord = dbRecord.getPVRecord();
+            PVData[] pvData = pvRecord.getFieldPVDatas();
+            Structure structure = (Structure)pvRecord.getField();
             int index = structure.getFieldIndex("value");
-            new TestListener(iocdbMaster,
-                    dbRecord.getRecordName(),
+            new DBListenerForTesting(iocdbMaster,
+                    pvRecord.getRecordName(),
                     pvData[index].getField().getFieldName(),
                     false,false);
         }

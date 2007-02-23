@@ -26,6 +26,7 @@ public interface PVData extends Requestor {
     Field getField();
     /**
      * Get the parent of this field.
+     * The parent can be a PVStructure, PVLink, or PVArray.
      * @return The parent interface.
      */
     PVData getParent();
@@ -47,16 +48,15 @@ public interface PVData extends Requestor {
     /**
      * Set the name of the support or null to specify no support.
      * @param name The name.
-     * @return null if the name was set or the reason why the name was not set.
      */
-    String setSupportName(String name);
+    void setSupportName(String name);
     /**
-     * Convert the data to a string.
+     * Convert the PVData to a string.
      * @return The string.
      */
     String toString();
     /**
-     * Convert the data to a string.
+     * Convert the PVData to a string.
      * Each line is indented.
      * @param indentLevel The indentation level.
      * @return The string.

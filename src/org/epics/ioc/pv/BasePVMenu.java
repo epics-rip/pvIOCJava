@@ -3,26 +3,25 @@
  * EPICS JavaIOC is distributed subject to a Software License Agreement found
  * in file LICENSE that is included with this distribution.
  */
-package org.epics.ioc.db;
-
-import org.epics.ioc.pv.*;
+package org.epics.ioc.pv;
 
 /**
- * Abstract base class for DBMenu.
+ * Abstract base class for PVMenu.
  * @author mrk
  *
  */
-public class DBMenuBase extends DBEnumBase implements PVMenu
+public class BasePVMenu extends BasePVEnum implements PVMenu
 { 
     private static Convert convert = ConvertFactory.getConvert();
     /**
-     * Constructor for DBMenuBase
+     * Constructor for BasePVMenu
      * @param parent The parent.
      * @param menu The introspection interface.
      * @param choice The array of choices.
      */
-    public DBMenuBase(DBData parent,Menu menu) {
-        super(parent,menu,menu.getMenuChoices());
+    public BasePVMenu(PVData parent,Menu menu) {
+        super(parent,menu);
+        super.setChoices(menu.getMenuChoices());
     }
 
     public boolean setChoices(String[] choice) {
@@ -34,7 +33,7 @@ public class DBMenuBase extends DBEnumBase implements PVMenu
      */
     public String toString() { return getString(0);}
     /* (non-Javadoc)
-     * @see org.epics.ioc.db.AbstractDBData#toString(int)
+     * @see org.epics.ioc.db.AbstractPVData#toString(int)
      */
     public String toString(int indentLevel) {
         return getString(indentLevel);

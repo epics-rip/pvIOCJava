@@ -5,7 +5,6 @@
  */
 package org.epics.ioc.db;
 
-import org.epics.ioc.pv.*;
 
 /**
  * DB listener interface.
@@ -20,14 +19,14 @@ public interface DBListener {
     void dataPut(DBData dbData);
     /**
      * The enum index has been modified.
-     * @param pvEnum The enum interface.
+     * @param dbEnum The enum interface.
      */
-    void enumIndexPut(PVEnum pvEnum);
+    void enumIndexPut(DBEnum dbEnum);
     /**
      * The enum choices has been modified.
-     * @param pvEnum The enum interface.
+     * @param dbEnum The enum interface.
      */
-    void enumChoicesPut(PVEnum pvEnum);
+    void enumChoicesPut(DBEnum dbEnum);
     /**
      * The supportName has been modified.
      * @param dbData
@@ -35,53 +34,102 @@ public interface DBListener {
     void supportNamePut(DBData dbData);
     /**
      * The link configuration structure has been modified.
-     * @param pvLink The link interface.
+     * @param dbLink The link interface.
      */
-    void configurationStructurePut(PVLink pvLink);
+    void configurationStructurePut(DBLink dbLink);
     /**
      * Start of a structure modification.
-     * @param pvStructure The structure.
+     * @param dbStructure The structure.
      */
-    void beginPut(PVStructure pvStructure);
+    void beginPut(DBStructure dbStructure);
     /**
      * End of a structure modification.
-     * @param pvStructure The structure.
+     * @param dbStructure The structure.
      */
-    void endPut(PVStructure pvStructure);
+    void endPut(DBStructure dbStructure);
     /**
-     * A put to a subfield of a structure has occured.
-     * @param pvStructure The requester is listening on a structure and this is the structure.
+     * A put to a subfield has occured.
+     * @param requested The requester is listening to this dbData.
+     * It can be any field that has subfields. This the pvType can be.
+     * <ol>
+     *  <li>pvStructure.</li>
+     *  <li>pvArray that has a elementType of
+     *     <ol>
+     *        <li>pvStructure</li>
+     *        <li>pvArray</li>
+     *     </ol>
+     *     </li>
+     * </ol>
      * @param dbData The data that has been modified.
      */
-    void dataPut(PVStructure pvStructure,DBData dbData);
+    void dataPut(DBData requested,DBData dbData);
     /**
-     * A put to an enum subfield of a structure has occured.
+     * A put to an enum subfield has occured.
      * The enum index has been modified.
-     * @param pvStructure The requester is listening on a structure and this is the structure.
-     * @param pvEnum The enum interface.
+     * @param requested The requester is listening to this dbData.
+     * It can be any field that has subfields. This the pvType can be.
+     * <ol>
+     *  <li>pvStructure.</li>
+     *  <li>pvArray that has a elementType of
+     *     <ol>
+     *        <li>pvStructure</li>
+     *        <li>pvArray</li>
+     *     </ol>
+     *     </li>
+     * </ol>
+     * @param dbEnum The enum interface.
      */
-    void enumIndexPut(PVStructure pvStructure,PVEnum pvEnum);
+    void enumIndexPut(DBData requested,DBEnum dbEnum);
     /**
-     * A put to an enum subfield of a structure has occured.
+     * A put to an enum subfield has occured.
      * The enum choices has been modified.
-     * @param pvStructure The requester is listening on a structure and this is the structure.
-     * @param pvEnum The enum interface.
+     * @param requested The requester is listening to this dbData.
+     * It can be any field that has subfields. This the pvType can be.
+     * <ol>
+     *  <li>pvStructure.</li>
+     *  <li>pvArray that has a elementType of
+     *     <ol>
+     *        <li>pvStructure</li>
+     *        <li>pvArray</li>
+     *     </ol>
+     *     </li>
+     * </ol>
+     * @param dbEnum The enum interface.
      */
-    void enumChoicesPut(PVStructure pvStructure,PVEnum pvEnum);
+    void enumChoicesPut(DBData requested,DBEnum dbEnum);
     /**
-     * A put to a subfield of a structure has occured.
-     * The supportName has been modified.
-     * @param pvStructure The requester is listening on a structure and this is the structure.
+     * The supportName of a subfield has been modified..
+     * @param requested The requester is listening to this dbData.
+     * It can be any field that has subfields. This the pvType can be.
+     * <ol>
+     *  <li>pvStructure.</li>
+     *  <li>pvArray that has a elementType of
+     *     <ol>
+     *        <li>pvStructure</li>
+     *        <li>pvArray</li>
+     *        <li>pvLink</li>
+     *     </ol>
+     *     </li>
+     * </ol>
      * @param dbData
      */
-    void supportNamePut(PVStructure pvStructure,DBData dbData);
+    void supportNamePut(DBData requested,DBData dbData);
     /**
-     * A put to a subfield of a structure has occured.
-     * The link configuration structure has been modified.
-     * @param pvStructure The requester is listening on a structure and this is the structure.
-     * @param pvLink The link interface.
+     * The configuration structure of a link subfield has been modified..
+     * @param requested The requester is listening to this dbData.
+     * It can be any field that has subfields. This the pvType can be.
+     * <ol>
+     *  <li>pvStructure.</li>
+     *  <li>pvArray that has a elementType of
+     *     <ol>
+     *        <li>pvStructurte</li>
+     *        <li>pvArray</li>
+     *     </ol>
+     *     </li>
+     * </ol>
+     * @param dbLink The link interface.
      */
-    void configurationStructurePut(PVStructure pvStructure,PVLink pvLink);
+    void configurationStructurePut(DBData requested,DBLink dbLink);
     /**
      * Begin record processing.
      * From begin until end of record processing,

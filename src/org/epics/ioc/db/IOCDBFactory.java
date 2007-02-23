@@ -136,7 +136,7 @@ public class IOCDBFactory {
         public boolean addRecord(DBRecord record) {
             rwLock.writeLock().lock();
             try {
-                String key = record.getRecordName();
+                String key = record.getPVRecord().getRecordName();
                 if(recordMap.containsKey(key)) return false;
                 if(this!=master && master.findRecord(key)!=null) return false;
                 recordMap.put(key,record);
@@ -152,7 +152,7 @@ public class IOCDBFactory {
         public boolean removeRecord(DBRecord record) {
             rwLock.writeLock().lock();
             try {
-                String key = record.getRecordName();
+                String key = record.getPVRecord().getRecordName();
                 if(recordMap.remove(key)!=null) return true;
                 return false;
             } finally {

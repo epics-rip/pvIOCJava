@@ -131,7 +131,8 @@ public class ParentTest extends TestCase {
     }
 
     static void showParent(IOCDB iocdb,String recordName,String fieldName) {
-        PVRecord pvRecord = iocdb.findRecord(recordName);
+        DBRecord dbRecord = iocdb.findRecord(recordName);
+        PVRecord pvRecord = dbRecord.getPVRecord();
         if(pvRecord==null) {
             System.out.printf("record %s not found%n",recordName);
             return;

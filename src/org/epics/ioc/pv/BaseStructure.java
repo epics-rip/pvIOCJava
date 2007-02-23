@@ -15,7 +15,7 @@ import java.util.List;
  * @author mrk
  *
  */
-public class StructureBase extends FieldBase implements Structure {
+public class BaseStructure extends BaseField implements Structure {
     private static Convert convert = ConvertFactory.getConvert();
     private Field[] fields;
     private String[] fieldNames;
@@ -32,7 +32,7 @@ public class StructureBase extends FieldBase implements Structure {
      * @param fieldAttribute The fields attributes.
      * @throws IllegalArgumentException if structureName is null;
      */
-    public StructureBase(String fieldName,String structureName,Field[] field,
+    public BaseStructure(String fieldName,String structureName,Field[] field,
             Property[] property,FieldAttribute fieldAttribute)
     {
         super(fieldName, Type.pvStructure,property,fieldAttribute);

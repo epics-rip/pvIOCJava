@@ -11,7 +11,7 @@ package org.epics.ioc.pv;
  * @author mrk
  *
  */
-public class FieldBase implements Field
+public class BaseField implements Field
 {
     private boolean isMutable;
     private String fieldName;
@@ -22,7 +22,7 @@ public class FieldBase implements Field
     private static Convert convert = ConvertFactory.getConvert();
 
     /**
-     * Constructor for FieldBase.
+     * Constructor for BaseField.
      * @param fieldName The field fieldName.
      * @param type The field type.
      * @param property An array of properties for the field.
@@ -30,7 +30,7 @@ public class FieldBase implements Field
      * @param fieldAttribute The field attributes.
      * @throws IllegalArgumentException if type or fieldAttribute is null;
      */
-    public FieldBase(String fieldName, Type type,Property[] property,FieldAttribute fieldAttribute) {
+    public BaseField(String fieldName, Type type,Property[] property,FieldAttribute fieldAttribute) {
         if(type==null) {
             throw new IllegalArgumentException("type is null");
         }

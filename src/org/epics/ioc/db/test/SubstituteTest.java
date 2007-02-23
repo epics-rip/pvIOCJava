@@ -42,7 +42,7 @@ public class SubstituteTest extends TestCase {
         System.out.printf("%n%nrecord list%n");
         for(String key: keys) {
             DBRecord record = recordMap.get(key);
-            System.out.printf("%n%s",record.getRecordName());
+            System.out.printf("%n%s",record.getPVRecord().getRecordName());
         }
         System.out.printf("%n%nrecord contents%n");
         for(String key: keys) {

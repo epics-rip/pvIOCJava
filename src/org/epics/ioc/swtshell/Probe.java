@@ -417,7 +417,7 @@ public class Probe {
                     }
                 }
                 allDone = false;
-                channelData = ChannelDataFactory.createData(channel,getFieldGroup);
+                channelData = ChannelDataFactory.createChannelData(channel,getFieldGroup);
                 if(channelData==null) {
                     requestor.message("ChannelDataFactory.createData failed",MessageType.error);
                 } else {
@@ -443,9 +443,11 @@ public class Probe {
                 display.syncExec( new Runnable() {
                     public void run() {
                         showText.append(String.format("%s%n",channel.getChannelName()));
-                        PVData[] pvDatas = channelData.getPVDatas();
-                        for(int i=0; i<pvDatas.length; i++) {
-                            PVData pvData = pvDatas[i];
+                        CDBStructure cdbStructure = channelData.getCDBRecord().getCDBStructure();
+                        CDBData[] cdbDatas= cdbStructure.getFieldCDBDatas();
+                        int length = cdbDatas.length;
+                        for(int i=0; i<length; i++) {
+                            PVData pvData = cdbDatas[i].getPVData();
                             showText.append(String.format("    %s %s%n",
                                 pvData.getFullFieldName(),Swtshell.pvDataToString(pvData)));
                         }
@@ -558,8 +560,13 @@ public class Probe {
                     requestor.message("ChannelDataFactory.createData failed",MessageType.error);
                     return;
                 }
-                channelFields = channelData.getChannelFields();
-                pvDatas = channelData.getPVDatas();
+                CDBStructure cdbStructure = channelData.getCDBRecord().getCDBStructure();
+                CDBData[] cdbDatas= cdbStructure.getFieldCDBDatas();
+                int length = cdbDatas.length;
+                pvDatas = new PVData[length];
+                for(int i=0; i<length; i++) {
+                    pvDatas[i] = cdbDatas[i].getPVData();
+                }
                 channelExecutor.request(this);
             }
             /* (non-Javadoc)
@@ -704,7 +711,13 @@ public class Probe {
                 gridLayout = new GridLayout();
                 gridLayout.numColumns = 1;
                 composite.setLayout(gridLayout);
-                pvDatas = channelData.getPVDatas();
+                CDBStructure cdbStructure = channelData.getCDBRecord().getCDBStructure();
+                CDBData[] cdbDatas= cdbStructure.getFieldCDBDatas();
+                int length = cdbDatas.length;
+                pvDatas = new PVData[length];
+                for(int i=0; i<length; i++) {
+                    pvDatas[i] = cdbDatas[i].getPVData();
+                }
                 label = new Label(composite,SWT.LEFT);
                 Swtshell.makeBlanks(label, 80);
                 Composite buttons = new Composite(composite,SWT.NONE);
