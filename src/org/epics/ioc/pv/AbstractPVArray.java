@@ -11,7 +11,7 @@ package org.epics.ioc.pv;
  * @author mrk
  *
  */
-public abstract class AbstractPVArray extends AbstractPVData implements PVArray{
+public abstract class AbstractPVArray extends AbstractPVField implements PVArray{
     protected int length = 0;
     protected int capacity;
     protected boolean capacityMutable = true;
@@ -22,7 +22,7 @@ public abstract class AbstractPVArray extends AbstractPVData implements PVArray{
      * @param capacity The default capacity.
      * @param capacityMutable Is the capacity mutable.
      */
-    public AbstractPVArray(PVData parent,Array array,int capacity,boolean capacityMutable) {
+    public AbstractPVArray(PVField parent,Array array,int capacity,boolean capacityMutable) {
         super(parent,array);
         this.capacity = capacity;
         this.capacityMutable = capacityMutable;
@@ -54,7 +54,7 @@ public abstract class AbstractPVArray extends AbstractPVData implements PVArray{
      */
     public void setLength(int len) {
         if(!super.getField().isMutable())
-            throw new IllegalStateException("PVData.isMutable is false");
+            throw new IllegalStateException("PVField.isMutable is false");
         if(len>capacity) setCapacity(len);
         length = len;
     }

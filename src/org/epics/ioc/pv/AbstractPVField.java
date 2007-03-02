@@ -8,25 +8,25 @@ package org.epics.ioc.pv;
 import org.epics.ioc.util.MessageType;
 
 /**
- * Abstract base class for a PVData.
- * A factory that implements PVData should extend this class.
+ * Abstract base class for a PVField.
+ * A factory that implements PVField should extend this class.
  * @author mrk
  *
  */
-public abstract class AbstractPVData implements PVData{
+public abstract class AbstractPVField implements PVField{
     private String fullFieldName = "";
     private String requestorName = "";
     private Field field;
-    private PVData parent;
+    private PVField parent;
     private PVRecord record;
     private String supportName = null;
        
     /**
      * Constructor that must be called by derived classes.
-     * @param parent The parent PVData.
-     * @param field The introspection interface for the PVData.
+     * @param parent The parent PVField.
+     * @param field The introspection interface for the PVField.
      */
-    protected AbstractPVData(PVData parent, Field field) {
+    protected AbstractPVField(PVField parent, Field field) {
         this.field = field;
         this.parent = parent;
         supportName = field.getSupportName();
@@ -51,29 +51,29 @@ public abstract class AbstractPVData implements PVData{
         createFullFieldAndRequestorNames();
     }
     /* (non-Javadoc)
-     * @see org.epics.ioc.pv.PVData#replacePVData(org.epics.ioc.pv.PVData, org.epics.ioc.pv.PVData)
+     * @see org.epics.ioc.pv.PVField#replacePVField(org.epics.ioc.pv.PVField)
      */
-    public void replacePVData(PVData newPVData) {
-        if(this.getField().getType()!=newPVData.getField().getType()) {
+    public void replacePVField(PVField newPVField) {
+        if(this.getField().getType()!=newPVField.getField().getType()) {
             throw new IllegalArgumentException(
                 "newField is not same type as oldField");
         }
-        if(this.getField().getType()!=newPVData.getField().getType()) {
+        if(this.getField().getType()!=newPVField.getField().getType()) {
             throw new IllegalArgumentException(
                 "newField is not same type as oldField");
         }
-        if(!(newPVData instanceof PVData)) {
+        if(!(newPVField instanceof PVField)) {
             throw new IllegalArgumentException(
-            "newField is not a PVData");
+            "newField is not a PVField");
         }
-        PVData parent = getParent();
+        PVField parent = getParent();
         if(parent==null) throw new IllegalArgumentException("no parent");
         Type parentType = parent.getField().getType();
         if(parentType==Type.pvStructure) {
-            PVData[] fields = ((PVStructure)parent).getFieldPVDatas();
+            PVField[] fields = ((PVStructure)parent).getFieldPVFields();
             for(int i=0; i<fields.length; i++) {
                 if(fields[i]==this) {
-                    fields[i] = newPVData;
+                    fields[i] = newPVField;
                     return;
                 }
             }
@@ -98,45 +98,45 @@ public abstract class AbstractPVData implements PVData{
         }
     }
     /* (non-Javadoc)
-     * @see org.epics.ioc.pv.PVData#getFullFieldName()
+     * @see org.epics.ioc.pv.PVField#getFullFieldName()
      */
     public String getFullFieldName() {
         return fullFieldName;
     } 
     
     /* (non-Javadoc)
-     * @see org.epics.ioc.pv.PVData#getField()
+     * @see org.epics.ioc.pv.PVField#getField()
      */
     public Field getField() {
         return field;
     }
     /* (non-Javadoc)
-     * @see org.epics.ioc.pv.PVData#getParent()
+     * @see org.epics.ioc.pv.PVField#getParent()
      */
-    public PVData getParent() {
+    public PVField getParent() {
         return parent;
     }
     /* (non-Javadoc)
-     * @see org.epics.ioc.pv.PVData#getPVRecord()
+     * @see org.epics.ioc.pv.PVField#getPVRecord()
      */
     public PVRecord getPVRecord() {
        return record;
     }
     /* (non-Javadoc)
-     * @see org.epics.ioc.pv.PVData#getSupportName()
+     * @see org.epics.ioc.pv.PVField#getSupportName()
      */
     public String getSupportName() {
         return supportName;
     }
 
     /* (non-Javadoc)
-     * @see org.epics.ioc.pv.PVData#setSupportName(java.lang.String)
+     * @see org.epics.ioc.pv.PVField#setSupportName(java.lang.String)
      */
     public void setSupportName(String name) {
         supportName = name;
     }
     /* (non-Javadoc)
-     * @see org.epics.ioc.pv.PVData#toString(int)
+     * @see org.epics.ioc.pv.PVField#toString(int)
      */
     public String toString(int indentLevel) {
         if(supportName!=null) {
@@ -145,7 +145,7 @@ public abstract class AbstractPVData implements PVData{
         return "";
     }
     
-    protected void createFullFieldAndRequestorNames() {
+    private void createFullFieldAndRequestorNames() {
         if(this==record) {
             fullFieldName = "";
             return;
@@ -153,9 +153,9 @@ public abstract class AbstractPVData implements PVData{
         StringBuilder fieldName = new StringBuilder();
         fieldName.insert(0,getField().getFieldName());
         if(parent.getField().getType()!=Type.pvArray) fieldName.insert(0,".");
-        PVData parent = getParent();
+        PVField parent = getParent();
         while(parent!=null && parent!=this.record) {
-            PVData now = parent;
+            PVField now = parent;
             fieldName.insert(0,now.getField().getFieldName());
             if(now.getParent()==null
             || now.getParent().getField().getType()!=Type.pvArray) fieldName.insert(0,".");

@@ -10,6 +10,7 @@ import java.util.*;
 import org.epics.ioc.dbd.DBD;
 import org.epics.ioc.dbd.DBDFactory;
 import org.epics.ioc.dbd.DBDLinkSupport;
+import org.epics.ioc.dbd.DBDStructure;
 import org.epics.ioc.dbd.DBDSupport;
 import org.epics.ioc.process.Support;
 import org.epics.ioc.process.SupportCreationFactory;
@@ -23,10 +24,10 @@ import org.epics.ioc.pv.*;
  * @author mrk
  *
  */
-public class BaseDBData implements DBData{
-    private DBData parent;
+public class BaseDBField implements DBField{
+    private DBField parent;
     private DBRecord dbRecord;
-    private PVData pvData;
+    private PVField pvField;
     private Support support = null;
     private LinkedList<RecordListener> recordListenerList
         = new LinkedList<RecordListener>();
@@ -34,42 +35,52 @@ public class BaseDBData implements DBData{
     /**
      * Constructor which must be called by classes that derive from this class.
      * @param parent The parent.
-     * @param field The reflection interface.
+     * @param record The DBRecord to which this field belongs.
+     * @param pvField The reflection interface.
      */
-    public BaseDBData(DBData parent,DBRecord record, PVData pvData) {
+    public BaseDBField(DBField parent,DBRecord record, PVField pvField) {
         this.parent = parent;
         this.dbRecord = record;
-        this.pvData = pvData;
+        this.pvField = pvField;
     }
     /* (non-Javadoc)
-     * @see org.epics.ioc.db.DBData#getDBRecord()
+     * @see org.epics.ioc.db.DBField#getDBRecord()
      */
     public DBRecord getDBRecord() {
         return dbRecord;
     }
     /* (non-Javadoc)
-     * @see org.epics.ioc.pv.AbstractPVData#getParent()
+     * @see org.epics.ioc.db.DBField#getParent()
      */
-    public DBData getParent() {
+    public DBField getParent() {
         return parent;
     }
     /* (non-Javadoc)
-     * @see org.epics.ioc.db.DBData#getPVData()
+     * @see org.epics.ioc.db.DBField#getPVField()
      */
-    public PVData getPVData() {
-        return pvData;
+    public PVField getPVField() {
+        return pvField;
     }
     /* (non-Javadoc)
-     * @see org.epics.ioc.db.DBData#replacePVData(org.epics.ioc.pv.PVData)
+     * @see org.epics.ioc.db.DBField#replacePVField(org.epics.ioc.pv.PVField)
      */
-    public void replacePVData(PVData newPVData) {
-        pvData.replacePVData(newPVData);
-        pvData = newPVData;
-        Field field = pvData.getField();
+    public void replacePVField(PVField newPVField) {
+        pvField.replacePVField(newPVField);
+        pvField = newPVField;
+        Field field = pvField.getField();
         Type type = field.getType();
         if(type==Type.pvStructure) {
             DBStructure dbStructure = (DBStructure)this;
             dbStructure.replacePVStructure();
+        } else if(type==Type.pvEnum) {
+            DBEnum dbEnum = (DBEnum)this;
+            dbEnum.replacePVEnum();
+        } else if(type==Type.pvMenu) {
+            DBMenu dbMenu = (DBMenu)this;
+            dbMenu.replacePVMenu();
+        } else if(type==Type.pvLink) {
+            DBLink dbLink = (DBLink)this;
+            dbLink.replacePVLink();
         } else if(type==Type.pvArray) {
             Array array = (Array)field;
             if(!array.getElementType().isScalar()) {
@@ -81,21 +92,23 @@ public class BaseDBData implements DBData{
         
     }
     /* (non-Javadoc)
-     * @see org.epics.ioc.db.DBData#getSupportName()
+     * @see org.epics.ioc.db.DBField#getSupportName()
      */
     public String getSupportName() {
-        return pvData.getSupportName();
+        return pvField.getSupportName();
     }
     /* (non-Javadoc)
-     * @see org.epics.ioc.db.DBData#setSupportName(java.lang.String)
+     * @see org.epics.ioc.db.DBField#setSupportName(java.lang.String)
      */
     public String setSupportName(String name) { 
         DBD dbd = dbRecord.getDBD();
         if(dbd==null) return "DBD was not set";
         DBDLinkSupport dbdLinkSupport = null;
         DBDSupport dbdSupport = null;
-        Type type = pvData.getField().getType();
-        if(type==Type.pvLink) {
+        String configurationStructureName = null;
+        Type type = pvField.getField().getType();
+        if(name!=null && type==Type.pvLink) {
+            PVLink pvLink = (PVLink)pvField;
             dbdLinkSupport = dbd.getLinkSupport(name);
             if(dbdLinkSupport==null) {
                 dbd = DBDFactory.getMasterDBD();
@@ -104,9 +117,26 @@ public class BaseDBData implements DBData{
             if(dbdLinkSupport==null) {
                 return "linkSupport " + name + " not defined";
             }
-            String result = ((DBLink)this).newSupport(dbdLinkSupport,dbd);
-            if(result!=null) return result;
-        } else {
+            configurationStructureName = dbdLinkSupport.getConfigurationStructureName();
+            PVStructure configurationStructure = null;
+            if(configurationStructureName!=null) {
+                DBDStructure dbdStructure = dbd.getStructure(configurationStructureName);
+                if(dbdStructure==null) {
+                    return "configurationStructure " + configurationStructureName
+                        + " for support " + name
+                        + " does not exist";
+                }
+                FieldCreate fieldCreate = FieldFactory.getFieldCreate();
+                Field[] fields = dbdStructure.getFields();
+                Structure structure = fieldCreate.createStructure(
+                    "configuration",
+                    dbdStructure.getStructureName(),
+                    fields);
+                PVDataCreate pvDataCreate = PVDataFactory.getPVDataCreate();
+                configurationStructure = (PVStructure)pvDataCreate.createPVField(pvLink, structure);
+            }
+            pvLink.setConfigurationStructure(configurationStructure);
+        } else if(name!=null) {
             dbdSupport = dbd.getSupport(name);
             if(dbdSupport==null) {
                 dbd = DBDFactory.getMasterDBD();
@@ -116,7 +146,7 @@ public class BaseDBData implements DBData{
                 return "support " + name + " not defined";
             }
         }
-        pvData.setSupportName(name);
+        pvField.setSupportName(name);
         if(support==null) {
             // Wait until SupportCreation has been run
             return null;
@@ -125,7 +155,7 @@ public class BaseDBData implements DBData{
         if(supportState!=SupportState.readyForInitialize) {
             support.uninitialize();
         }
-        support = null;
+        support = null;        
         Iterator<RecordListener> iter;
         iter = recordListenerList.iterator();
         while(iter.hasNext()) {
@@ -133,16 +163,17 @@ public class BaseDBData implements DBData{
             DBListener dbListener = listener.getDBListener();
             dbListener.supportNamePut(this);
         }
-        DBData dbData = parent;
-        while(dbData!=null) {
-            iter = dbData.getRecordListenerList().iterator();
+        DBField dbField = parent;
+        while(dbField!=null) {
+            iter = dbField.getRecordListenerList().iterator();
             while(iter.hasNext()) {
                 RecordListener listener = iter.next();
                 DBListener dbListener = listener.getDBListener();
-                dbListener.supportNamePut(dbData, this);
+                dbListener.supportNamePut(dbField, this);
             }
-            dbData = dbData.getParent();
+            dbField = dbField.getParent();
         }
+        if(name==null) return null;
         if(!SupportCreationFactory.createSupport(this)) {
             return "could not create support";
         }
@@ -151,7 +182,7 @@ public class BaseDBData implements DBData{
         }
         // if configurationStructure then wait for it to be initialized before changing state.
         if(type==Type.pvLink) {
-            if(dbdLinkSupport.getConfigurationStructureName()!=null) return null;
+            if(configurationStructureName!=null) return null;
         }
         DBStructure dbStructure = dbRecord.getDBStructure();
         if(this==dbStructure) return "dbRecord has no support";
@@ -172,19 +203,19 @@ public class BaseDBData implements DBData{
         return null;
     }
 /* (non-Javadoc)
-     * @see org.epics.ioc.db.DBData#getSupport()
+     * @see org.epics.ioc.db.DBField#getSupport()
      */
     public Support getSupport() {
         return support;
     }
     /* (non-Javadoc)
-     * @see org.epics.ioc.db.DBData#setSupport(org.epics.ioc.process.Support)
+     * @see org.epics.ioc.db.DBField#setSupport(org.epics.ioc.process.Support)
      */
     public void setSupport(Support support) {
         this.support = support;
     }
     /* (non-Javadoc)
-     * @see org.epics.ioc.db.DBData#postPut()
+     * @see org.epics.ioc.db.DBField#postPut()
      */
     public void postPut() {
         Iterator<RecordListener> iter;
@@ -192,21 +223,21 @@ public class BaseDBData implements DBData{
         while(iter.hasNext()) {
             RecordListener listener = iter.next();
             DBListener dbListener = listener.getDBListener();
-            dbListener.dataPut(this);
+            dbListener.fieldPut(this);
         }
-        DBData dbData = parent;
-        while(dbData!=null) {
-            iter = dbData.getRecordListenerList().iterator();
+        DBField dbField = parent;
+        while(dbField!=null) {
+            iter = dbField.getRecordListenerList().iterator();
             while(iter.hasNext()) {
                 RecordListener listener = iter.next();
                 DBListener dbListener = listener.getDBListener();
-                dbListener.dataPut(dbData, this);
+                dbListener.fieldPut(dbField, this);
             }
-            dbData = dbData.getParent();
+            dbField = dbField.getParent();
         }
     }
     /* (non-Javadoc)
-     * @see org.epics.ioc.db.DBData#addListener(org.epics.ioc.db.RecordListener)
+     * @see org.epics.ioc.db.DBField#addListener(org.epics.ioc.db.RecordListener)
      */
     public void addListener(RecordListener recordListener) {
         if(recordListenerList.isEmpty()) dbRecord.addListenerSource(this);
@@ -214,13 +245,13 @@ public class BaseDBData implements DBData{
         
     }
     /* (non-Javadoc)
-     * @see org.epics.ioc.db.DBData#removeListener(org.epics.ioc.db.RecordListener)
+     * @see org.epics.ioc.db.DBField#removeListener(org.epics.ioc.db.RecordListener)
      */
     public void removeListener(RecordListener recordListener) {
         recordListenerList.remove(recordListener);
     }
     /* (non-Javadoc)
-     * @see org.epics.ioc.db.DBData#getRecordListenerList()
+     * @see org.epics.ioc.db.DBField#getRecordListenerList()
      */
     public List<RecordListener> getRecordListenerList() {
         return recordListenerList;
@@ -238,9 +269,9 @@ public class BaseDBData implements DBData{
         return toString(0);
     }
     /* (non-Javadoc)
-     * @see org.epics.ioc.db.BaseDBData#toString(int)
+     * @see org.epics.ioc.db.BaseDBField#toString(int)
      */
     public String toString(int indentLevel) {
-        return pvData.toString(indentLevel);
+        return pvField.toString(indentLevel);
     }
 }

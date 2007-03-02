@@ -75,31 +75,31 @@ public class RecordProcessFactory {
                 throw new IllegalStateException(
                     pvRecord.getRecordName() + " has no support");
             }
-            PVData[] pvDatas = pvRecord.getFieldPVDatas();
-            DBData[] dbDatas = dbStructure.getFieldDBDatas();
-            PVData pvData;
+            PVField[] pvFields = pvRecord.getFieldPVFields();
+            DBField[] dbFields = dbStructure.getFieldDBFields();
+            PVField pvField;
             Structure structure = (Structure)pvRecord.getField();
             int index = structure.getFieldIndex("status");
             if(index>=0) {
-                pvData = pvDatas[index];
-                if(pvData.getField().getType()==Type.pvString)
-                    pvStatus = (PVString)pvData;
+                pvField = pvFields[index];
+                if(pvField.getField().getType()==Type.pvString)
+                    pvStatus = (PVString)pvField;
             }
             index = structure.getFieldIndex("severity");
             if(index>=0) {
-                pvData = pvDatas[index];
-                if(pvData.getField().getType()==Type.pvEnum)
-                    pvSeverity = (PVEnum)pvData;
+                pvField = pvFields[index];
+                if(pvField.getField().getType()==Type.pvEnum)
+                    pvSeverity = (PVEnum)pvField;
             }
             index = structure.getFieldIndex("timeStamp");
             if(index>=0) {
-                pvTimeStamp = PVTimeStamp.create(dbDatas[index]);
+                pvTimeStamp = PVTimeStamp.create(dbFields[index]);
             }
             index = structure.getFieldIndex("scan");
             if(index>=0) {
-                pvData = pvDatas[index];
-                if(pvData.getField().getType()==Type.pvStructure) {
-                    scanSupport = dbDatas[index].getSupport();
+                pvField = pvFields[index];
+                if(pvField.getField().getType()==Type.pvStructure) {
+                    scanSupport = dbFields[index].getSupport();
                 }
             }
         }

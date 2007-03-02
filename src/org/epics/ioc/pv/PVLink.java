@@ -10,7 +10,7 @@ package org.epics.ioc.pv;
  * @author mrk
  *
  */
-public interface PVLink extends PVData {
+public interface PVLink extends PVField {
     /**
      * Get the configuration data for the support.
      * @return The configuration structure.

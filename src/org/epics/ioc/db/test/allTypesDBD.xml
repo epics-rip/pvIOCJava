@@ -8,9 +8,9 @@
 
 
 <support name = "exampleSupport"
-    factoryName = "junkFactoryName" />
+    factoryName = "org.epics.ioc.support.NoopFactory" />
 <linkSupport name = "dummy" configurationStructureName = "dummy" 
-    factoryName = "org.epics.ioc.support.Dummy" />
+    factoryName = "org.epics.ioc.support.NoopFactory" />
 
 <structure name = "structureAllTypes" supportName = "exampleSupport">
     <field name = "boolean" type = "boolean" />

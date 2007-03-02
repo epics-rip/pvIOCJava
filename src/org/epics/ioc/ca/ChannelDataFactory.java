@@ -6,6 +6,7 @@
 package org.epics.ioc.ca;
 
 import org.epics.ioc.pv.*;
+import org.epics.ioc.util.*;
 
 /**
  * A factory for creating ChannelData and ChannelDataQueue.
@@ -37,6 +38,10 @@ public class ChannelDataFactory {
              int queueSize,
              Channel channel,ChannelFieldGroup channelFieldGroup)
      {
+          if(queueSize<3) {
+              channel.message("queueSize changed to 3", MessageType.warning);
+              queueSize = 3;
+          }
           ChannelData[] queue = new ChannelData[queueSize];
           for(int i = 0; i<queueSize; i++) {
               queue[i] = createChannelData(channel,channelFieldGroup);

@@ -11,7 +11,7 @@ package org.epics.ioc.pv;
  * @author mrk
  *
  */
-public interface PVArray extends PVData{
+public interface PVArray extends PVField{
     /**
      * Get the current length of the array.
      * @return The current length of the array.

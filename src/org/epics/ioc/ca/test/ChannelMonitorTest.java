@@ -14,18 +14,16 @@ import org.epics.ioc.pv.*;
 import org.epics.ioc.util.*;
 
 /**
- * JUnit test for CDBData.
+ * JUnit test for CDField.
  * @author mrk
  *
  */
 public class ChannelMonitorTest extends TestCase {
     
     private static void delay(long milliSeconds) {
-        while(true) {
-            try {
-                Thread.sleep(milliSeconds);
-            } catch (InterruptedException e) {
-            }
+        try {
+            Thread.sleep(milliSeconds);
+        } catch (InterruptedException e) {
         }   
     }
     
@@ -43,33 +41,33 @@ public class ChannelMonitorTest extends TestCase {
         if(!initOK) return;
         Monitor monitor;
         monitor =new Monitor("onChange","counter");
-        boolean result = monitor.connect(2);
+        boolean result = monitor.connect(3);
         if(result) monitor.lookForChange();
         monitor =new Monitor("onAbsoluteChange","counter");
-        result = monitor.connect(2);
+        result = monitor.connect(3);
         if(result) monitor.lookForAbsoluteChange(1.1);
         monitor =new Monitor("onPercentageChange","counter");
-        result = monitor.connect(2);
+        result = monitor.connect(3);
         if(result) monitor.lookForPercentageChange(10.0);
         monitor =new Monitor("link","monitorChange","input");
-        result = monitor.connect(2);
+        result = monitor.connect(3);
         if(result) monitor.lookForChange();
         monitor =new Monitor("severity","monitorChange","severity");
-        result = monitor.connect(2);
+        result = monitor.connect(3);
         if(result) monitor.lookForChange();
         monitor =new Monitor("monitorChange","monitorChange","value");
-        result = monitor.connect(2);
+        result = monitor.connect(3);
         if(result) monitor.lookForChange();
         
         MonitorNotify monitorNotify;
         monitorNotify =new MonitorNotify("onChange","counter");
-        result = monitorNotify.connect(2);
+        result = monitorNotify.connect(3);
         if(result) monitorNotify.lookForChange();
         monitorNotify =new MonitorNotify("onAbsoluteChange","counter");
-        result = monitorNotify.connect(2);
+        result = monitorNotify.connect(3);
         if(result) monitorNotify.lookForAbsoluteChange(1.1);
         monitorNotify =new MonitorNotify("onPercentageChange","counter");
-        result = monitorNotify.connect(2);
+        result = monitorNotify.connect(3);
         if(result) monitorNotify.lookForPercentageChange(10.0);
         
         while(true) {
@@ -86,6 +84,7 @@ public class ChannelMonitorTest extends TestCase {
         private ValueData valueData;
         private ChannelFieldGroup fieldGroup;
         private ChannelMonitor channelMonitor;
+        private int queueSize;
         
         public Monitor(String requestorName, String pvName, String fieldName) {
             super();
@@ -110,6 +109,7 @@ public class ChannelMonitorTest extends TestCase {
         
         private boolean connect(int queueSize) {
             if(channel==null) return false;
+            this.queueSize = queueSize;
             valueData = new ValueData(channel,fieldName);
             fieldGroup = valueData.init();
             if(fieldGroup==null) return false;
@@ -119,17 +119,17 @@ public class ChannelMonitorTest extends TestCase {
         
         private void lookForChange() {
             valueData.lookForChange(channelMonitor);
-            channelMonitor.start(this, 2, null, ScanPriority.low);
+            channelMonitor.start(this, queueSize, null, ScanPriority.low);
         }
         
         private void lookForAbsoluteChange(double value) {
             valueData.lookForAbsoluteChange(channelMonitor,value);
-            channelMonitor.start(this, 2, null, ScanPriority.low);
+            channelMonitor.start(this, queueSize, null, ScanPriority.low);
         }
         
         private void lookForPercentageChange(double value) {
             valueData.lookForPercentageChange(channelMonitor,value);
-            channelMonitor.start(this, 2, null, ScanPriority.low);
+            channelMonitor.start(this, queueSize, null, ScanPriority.low);
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.ca.ChannelMonitorRequestor#dataOverrun(int)
@@ -312,7 +312,7 @@ public class ChannelMonitorTest extends TestCase {
             ChannelFindFieldResult result;
             result = channel.findField(fieldName);
             if(result!=ChannelFindFieldResult.thisChannel) {
-                System.out.printf("PutGet:set returned %s%n", result.toString());
+                System.out.printf("findField returned %s%n", result.toString());
                 return null;
             }
             valueField = channel.getChannelField();
@@ -345,43 +345,52 @@ public class ChannelMonitorTest extends TestCase {
             StringBuilder builder = new StringBuilder();
             ChannelFieldGroup channelFieldGroup = channelData.getChannelFieldGroup();
             List<ChannelField> channelFieldList = channelFieldGroup.getList();
-            CDBStructure cdbStructure = channelData.getCDBRecord().getCDBStructure();
-            CDBData[] cdbDatas = cdbStructure.getFieldCDBDatas();
-            builder.append(String.format(
-                " maxNumPuts %d ",channelData.getMaxPutsToField()));
+            CDStructure cdStructure = channelData.getCDRecord().getCDStructure();
+            CDField[] cdbDatas = cdStructure.getFieldCDFields();
+            int maxNumPuts = channelData.getMaxPutsToField();
+            if(maxNumPuts!=1) {
+                builder.append(String.format(
+                    " maxNumPuts %d ",maxNumPuts));
+            }
             for(int i=0;i<cdbDatas.length; i++) {
-                CDBData cdbData = cdbDatas[i];
-                PVData data = cdbData.getPVData();
-                ChannelField field = channelFieldList.get(i);
-                if(field==valueField) {
+                CDField cdField = cdbDatas[i];
+                maxNumPuts = cdField.getMaxNumPuts();
+                if(maxNumPuts<=0) continue;
+                if(maxNumPuts!=1) {
                     builder.append(String.format(
-                        "value %s numPuts %d",
-                        data.toString(2),cdbData.getNumPuts()));
-                } else if (field==severityField) {
-                    PVEnum pvEnum = (PVEnum)data;
+                        " maxNumPuts %d ",maxNumPuts));
+                }
+                PVField pvField = cdField.getPVField();
+                ChannelField channelField = channelFieldList.get(i);
+                if(channelField==valueField) {
+                    builder.append(String.format(
+                        "value %s ",
+                        pvField.toString(2)));
+                } else if (channelField==severityField) {
+                    PVEnum pvEnum = (PVEnum)pvField;
                     int index = pvEnum.getIndex();
                     builder.append(String.format(
-                        " severity %s",AlarmSeverity.getSeverity(index).toString()));
-                } else if(field==statusField) {
-                    PVString pvString = (PVString)data;
+                        " severity %s",
+                        AlarmSeverity.getSeverity(index).toString()));
+                } else if(channelField==statusField) {
+                    PVString pvString = (PVString)pvField;
                     String value = pvString.get();
-                    builder.append(" status " + value);
-                } else if(field==timeStampField) {
-                    // wait for nanoSecond to change.
-                    if(data.getField().getFieldName().equals("nanoSeconds")) {
-                        PVTimeStamp pvTimeStamp = PVTimeStamp.create(data.getParent());
-                        TimeStamp timeStamp = new TimeStamp();
-                        pvTimeStamp.get(timeStamp);
-                        long seconds = timeStamp.secondsPastEpoch;
-                        int nano = timeStamp.nanoSeconds;
-                        long now = nano/1000000 + seconds*1000;
-                        Date date = new Date(now);
-                        builder.append(String.format(" time %s",date.toLocaleString()));
-                    }
+                    builder.append(String.format(" status %s",
+                        value));
+                } else if(channelField==timeStampField) {                 
+                    PVTimeStamp pvTimeStamp = PVTimeStamp.create(pvField);
+                    TimeStamp timeStamp = new TimeStamp();
+                    pvTimeStamp.get(timeStamp);
+                    long seconds = timeStamp.secondsPastEpoch;
+                    int nano = timeStamp.nanoSeconds;
+                    long now = nano/1000000 + seconds*1000;
+                    Date date = new Date(now);
+                    builder.append(String.format(" time %s",
+                        date.toLocaleString()));
                 }
-                if(cdbData.getNumSupportNamePuts()>0) {
+                if(cdField.getNumSupportNamePuts()>0) {
                     builder.append(String.format("supportName %s numSupportNamePuts %d%n",
-                        data.getSupportName(),cdbData.getNumSupportNamePuts()));
+                        pvField.getSupportName(),cdField.getNumSupportNamePuts()));
                 }
             }
             return builder.toString();

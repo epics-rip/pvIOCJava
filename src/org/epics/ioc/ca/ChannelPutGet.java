@@ -5,7 +5,7 @@
  */
 package org.epics.ioc.ca;
 
-import org.epics.ioc.pv.PVData;
+import org.epics.ioc.pv.PVField;
 
 
 /**
@@ -17,25 +17,22 @@ import org.epics.ioc.pv.PVData;
 public interface ChannelPutGet {
     /**
      * Issue a put/get request.
-     * @param putFieldGroup The put field group.
-     * @param getFieldGroup The get field group.
      * @return (false,true) if the request (is not, is) started.
      * This fails if the request can not be satisfied.
      */
-    boolean putGet(
-        ChannelFieldGroup putFieldGroup,ChannelFieldGroup getFieldGroup);
+    boolean putGet();
     /**
      * If ChannelPutGetRequestor.nextPutData or ChannelPutGetRequestor.nextDelayedPutData returns true
      * this is the call to ask again for the data. The result is that the underlying database
      * is locked and ChannelPutGetRequestor.nextDelayedPutData is called.
-     * @param pvData The pvData to put.
+     * @param pvField The pvField to put.
      */
-    void putDelayed(PVData pvData);
+    void putDelayed(PVField pvField);
     /**
      * If ChannelPutGetRequestor.nextGetData or ChannelPutGetRequestor.nextDelayedGetData returns true
      * this is the call to ask again for the data. The result is that the underlying database
      * is locked and ChannelPutGetRequestor.nextDelayedGetData is called.
-     * @param pvData The pvData to get.
+     * @param pvField The pvField to get.
      */
-    void getDelayed(PVData pvData);
+    void getDelayed(PVField pvField);
 }

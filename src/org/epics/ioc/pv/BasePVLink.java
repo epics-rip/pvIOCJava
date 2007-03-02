@@ -11,10 +11,15 @@ package org.epics.ioc.pv;
  * @author mrk
  *
  */
-public class BasePVLink extends AbstractPVData implements PVLink {
+public class BasePVLink extends AbstractPVField implements PVLink {
     private PVStructure pvStructure= null;
     
-    public BasePVLink(PVData parent,Field field) {
+    /**
+     * Constructor.
+     * @param parent The parent interface.
+     * @param field The introspection interface.
+     */
+    public BasePVLink(PVField parent,Field field) {
         super(parent,field);
     }   
     /* (non-Javadoc)
@@ -30,16 +35,14 @@ public class BasePVLink extends AbstractPVData implements PVLink {
         this.pvStructure = pvStructure;
         return true;
     }
-
     /* (non-Javadoc)
-     * @see org.epics.ioc.db.AbstractPVData#toString()
+     * @see java.lang.Object#toString()
      */
     public String toString() {
         return toString(0);
     }
-
     /* (non-Javadoc)
-     * @see org.epics.ioc.db.AbstractPVData#toString(int)
+     * @see org.epics.ioc.pv.AbstractPVField#toString(int)
      */
     public String toString(int indentLevel) {
         if(pvStructure==null) return "";

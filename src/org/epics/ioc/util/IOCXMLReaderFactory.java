@@ -181,6 +181,9 @@ public class IOCXMLReaderFactory {
         }
         private CharState charState = CharState.idle;
         
+        /* (non-Javadoc)
+         * @see org.xml.sax.ContentHandler#characters(char[], int, int)
+         */
         public void characters(char[] ch, int start, int length) throws SAXException {
             switch(charState) {
             case idle:
@@ -237,6 +240,9 @@ public class IOCXMLReaderFactory {
             }
         }
 
+        /* (non-Javadoc)
+         * @see org.xml.sax.ContentHandler#endDocument()
+         */
         public void endDocument() throws SAXException {
             if(parent==null) listener.endDocument();
             if(nWarning>0 || nError>0 || nFatal>0) {
@@ -248,6 +254,9 @@ public class IOCXMLReaderFactory {
             locator = null;
         }
          
+        /* (non-Javadoc)
+         * @see org.xml.sax.ContentHandler#startElement(java.lang.String, java.lang.String, java.lang.String, org.xml.sax.Attributes)
+         */
         public void startElement(String uri, String localName, String qName, Attributes atts) throws SAXException {
             if(!gotFirstElement) {
                 gotFirstElement = true;
@@ -300,6 +309,9 @@ public class IOCXMLReaderFactory {
             }
             listener.startElement(qName,attributes);
         }
+        /* (non-Javadoc)
+         * @see org.xml.sax.ContentHandler#endElement(java.lang.String, java.lang.String, java.lang.String)
+         */
         public void endElement(String uri, String localName, String qName) throws SAXException {
             if(qName.equals(rootElementName)) return;
             if(qName.equals("include")) return;
@@ -307,33 +319,54 @@ public class IOCXMLReaderFactory {
             listener.endElement(qName);
         }
 
+        /* (non-Javadoc)
+         * @see org.xml.sax.ContentHandler#endPrefixMapping(java.lang.String)
+         */
         public void endPrefixMapping(String prefix) throws SAXException {
             // TODO Auto-generated method stub
             
         }
 
+        /* (non-Javadoc)
+         * @see org.xml.sax.ContentHandler#ignorableWhitespace(char[], int, int)
+         */
         public void ignorableWhitespace(char[] ch, int start, int length) throws SAXException {
             // TODO Auto-generated method stub
             
         }
 
+        /* (non-Javadoc)
+         * @see org.xml.sax.ContentHandler#processingInstruction(java.lang.String, java.lang.String)
+         */
         public void processingInstruction(String target, String data) throws SAXException {
             // TODO Auto-generated method stub
             
         }
 
+        /* (non-Javadoc)
+         * @see org.xml.sax.ContentHandler#setDocumentLocator(org.xml.sax.Locator)
+         */
         public void setDocumentLocator(Locator locator) {
             this.locator = locator;
         }
 
+        /* (non-Javadoc)
+         * @see org.xml.sax.ContentHandler#skippedEntity(java.lang.String)
+         */
         public void skippedEntity(String name) throws SAXException {
             // TODO Auto-generated method stub
             
         }
 
+        /* (non-Javadoc)
+         * @see org.xml.sax.ContentHandler#startDocument()
+         */
         public void startDocument() throws SAXException {
         }
 
+        /* (non-Javadoc)
+         * @see org.xml.sax.ContentHandler#startPrefixMapping(java.lang.String, java.lang.String)
+         */
         public void startPrefixMapping(String prefix, String uri) throws SAXException {
             // TODO Auto-generated method stub
             

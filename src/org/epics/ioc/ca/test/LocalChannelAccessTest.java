@@ -66,11 +66,10 @@ public class LocalChannelAccessTest extends TestCase {
         System.out.printf("get double02 ");
         getDouble02.get();
         Put counterPut;
-        // this should fail
-        try {
-            counterPut = new Put("counter",true);
-        } catch (IllegalStateException e) {
-            System.out.println(e.getLocalizedMessage());
+        counterPut = new Put("counter",true);
+        if(counterPut!=null) {
+            System.out.println("should have failed because already has registered requestor");
+            counterPut.destroy();
         }
         counterProcess.destroy();
         counterPut = new Put("counter",true);
@@ -192,6 +191,7 @@ public class LocalChannelAccessTest extends TestCase {
         private Condition waitDone = lock.newCondition();
         private boolean allDone = false;
         private String pvname = null;
+        private boolean process;
         private Channel channel;
         private ChannelPutGet channelPutGet;
         private ChannelFieldGroup putFieldGroup;
@@ -202,14 +202,14 @@ public class LocalChannelAccessTest extends TestCase {
         
         private PutGet(String pvname,boolean process) {
             this.pvname = pvname;
+            this.process = process;
             channel = ChannelFactory.createChannel(pvname, this, false);           
-            channelPutGet = channel.createChannelPutGet(this, process);
         }
         
         /* (non-Javadoc)
          * @see org.epics.ioc.ca.ChannelPutRequestor#nextDelayedPutData(org.epics.ioc.pvAccess.PVData)
          */
-        public boolean nextDelayedPutData(PVData data) {
+        public boolean nextDelayedPutField(PVField field) {
             // TODO Auto-generated method stub
             return false;
         }
@@ -217,7 +217,7 @@ public class LocalChannelAccessTest extends TestCase {
         /* (non-Javadoc)
          * @see org.epics.ioc.ca.ChannelGetRequestor#nextDelayedGetData(org.epics.ioc.pvAccess.PVData)
          */
-        public boolean nextDelayedGetData(PVData data) {
+        public boolean nextDelayedGetField(PVField pvField) {
             // TODO Auto-generated method stub
             return false;
         }
@@ -235,6 +235,7 @@ public class LocalChannelAccessTest extends TestCase {
             valueData = new ValueData(channel);
             getFieldGroup = valueData.init();
             if(getFieldGroup==null) return false;
+            channelPutGet = channel.createChannelPutGet(putFieldGroup,getFieldGroup , this, process);
             return true;   
         }
         
@@ -246,7 +247,7 @@ public class LocalChannelAccessTest extends TestCase {
             this.value = value;
             allDone = false;
             valueData.clear();
-            channelPutGet.putGet(putFieldGroup, getFieldGroup);
+            channelPutGet.putGet();
             lock.lock();
             try {
                 if(!allDone) {                       
@@ -274,15 +275,15 @@ public class LocalChannelAccessTest extends TestCase {
         /* (non-Javadoc)
          * @see org.epics.ioc.ca.ChannelGetRequestor#nextGetData(org.epics.ioc.ca.Channel, org.epics.ioc.ca.ChannelField, org.epics.ioc.pvAccess.PVData)
          */
-        public boolean nextGetData(ChannelField field, PVData data) {
-            valueData.nextGetData(channel, field, data);
+        public boolean nextGetField(ChannelField channelField, PVField pvField) {
+            valueData.nextGetField(channel, channelField, pvField);
             return false;
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.ca.ChannelPutRequestor#nextPutData(org.epics.ioc.ca.Channel, org.epics.ioc.ca.ChannelField, org.epics.ioc.pvAccess.PVData)
          */
-        public boolean nextPutData(ChannelField field, PVData data) {
-            PVDouble pvDouble = (PVDouble)data;
+        public boolean nextPutField(ChannelField channelField, PVField pvField) {
+            PVDouble pvDouble = (PVDouble)pvField;
             pvDouble.put(value);
             return false;
         }
@@ -337,6 +338,7 @@ public class LocalChannelAccessTest extends TestCase {
         private Condition waitDone = lock.newCondition();
         private boolean allDone = false;
         private String pvname = null;
+        private boolean process;
         private Channel channel;
         private ChannelPut channelPut;
         private ChannelFieldGroup putFieldGroup;
@@ -345,13 +347,13 @@ public class LocalChannelAccessTest extends TestCase {
         
         private Put(String pvname, boolean process) {
             this.pvname = pvname;
+            this.process = process;
             channel = ChannelFactory.createChannel(pvname, this, false);
-            channelPut = channel.createChannelPut(this, process);
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.ca.ChannelPutRequestor#nextDelayedPutData(org.epics.ioc.pvAccess.PVData)
          */
-        public boolean nextDelayedPutData(PVData data) {
+        public boolean nextDelayedPutField(PVField field) {
             // TODO Auto-generated method stub
             return false;
         }
@@ -368,13 +370,15 @@ public class LocalChannelAccessTest extends TestCase {
             }
             valueField = channel.getChannelField();
             putFieldGroup.addChannelField(valueField);
+            channelPut = channel.createChannelPut(putFieldGroup, this, process);
+            if(channelPut==null) return false;
             return true;   
         }
         
         private void put(double value) {
             this.value = value;
             allDone = false;
-            channelPut.put(putFieldGroup);
+            channelPut.put();
             lock.lock();
             try {
                 if(!allDone) {                       
@@ -401,8 +405,8 @@ public class LocalChannelAccessTest extends TestCase {
         /* (non-Javadoc)
          * @see org.epics.ioc.ca.ChannelPutRequestor#nextPutData(org.epics.ioc.ca.Channel, org.epics.ioc.ca.ChannelField, org.epics.ioc.pvAccess.PVData)
          */
-        public boolean nextPutData(ChannelField field, PVData data) {
-            PVDouble pvDouble = (PVDouble)data;
+        public boolean nextPutField(ChannelField channelField, PVField pvField) {
+            PVDouble pvDouble = (PVDouble)pvField;
             pvDouble.put(value);
             return false;
         }
@@ -449,6 +453,7 @@ public class LocalChannelAccessTest extends TestCase {
         private Condition waitDone = lock.newCondition();
         private boolean allDone = false;
         private String pvname = null;
+        private boolean process;
         private Channel channel;
         private ChannelGet channelGet;
         private ValueData valueData;
@@ -456,8 +461,8 @@ public class LocalChannelAccessTest extends TestCase {
         
         private Get(String pvname,boolean process) {
             this.pvname = pvname;
+            this.process = process;
             channel = ChannelFactory.createChannel(pvname, this, false);            
-            channelGet = channel.createChannelGet(this, process);
         }
         private void destroy() {
             channel.destroy();
@@ -467,13 +472,14 @@ public class LocalChannelAccessTest extends TestCase {
             valueData = new ValueData(channel);
             getFieldGroup = valueData.init();
             if(getFieldGroup==null) return false;
+            channelGet = channel.createChannelGet(getFieldGroup, this, process);
             return true;   
         }
         
         private void get() {
             allDone = false;
             valueData.clear();
-            channelGet.get(getFieldGroup);
+            channelGet.get();
             lock.lock();
             try {
                 if(!allDone) {                       
@@ -489,7 +495,7 @@ public class LocalChannelAccessTest extends TestCase {
         /* (non-Javadoc)
          * @see org.epics.ioc.ca.ChannelGetRequestor#nextDelayedGetData(org.epics.ioc.pvAccess.PVData)
          */
-        public boolean nextDelayedGetData(PVData data) {
+        public boolean nextDelayedGetField(PVField pvField) {
             // TODO Auto-generated method stub
             return false;
         }
@@ -508,8 +514,8 @@ public class LocalChannelAccessTest extends TestCase {
         /* (non-Javadoc)
          * @see org.epics.ioc.ca.ChannelGetRequestor#nextGetData(org.epics.ioc.ca.Channel, org.epics.ioc.ca.ChannelField, org.epics.ioc.pvAccess.PVData)
          */
-        public boolean nextGetData(ChannelField field, PVData data) {
-            valueData.nextGetData(channel, field, data);
+        public boolean nextGetField(ChannelField channelField, PVField pvField) {
+            valueData.nextGetField(channel, channelField, pvField);
             return false;
         }
         
@@ -625,55 +631,57 @@ public class LocalChannelAccessTest extends TestCase {
                 System.out.printf("ChannelDataFactory.createData failed");
                 return null;
             }
-            List<ChannelField> channelFieldList =channelFieldGroup.getList();
             return channelFieldGroup;
         }
         
         private void clear() {
             channelData.clearNumPuts();
         }
-        private boolean nextGetData(Channel channel, ChannelField field, PVData data) {
-            channelData.dataPut(data);
+        private boolean nextGetField(Channel channel, ChannelField channelField, PVField pvField) {
+            channelData.fieldPut(pvField);
             return false;
         }
         
         private void printResults() {
             ChannelFieldGroup channelFieldGroup = channelData.getChannelFieldGroup();
             List<ChannelField> channelFieldList = channelFieldGroup.getList();
-            CDBStructure cdbStructure = channelData.getCDBRecord().getCDBStructure();
-            CDBData[] cdbDatas = cdbStructure.getFieldCDBDatas();
+            CDStructure cdStructure = channelData.getCDRecord().getCDStructure();
+            CDField[] cdbDatas = cdStructure.getFieldCDFields();
             System.out.printf(" maxNumPuts %d ",channelData.getMaxPutsToField());
             for(int i=0;i<cdbDatas.length; i++) {
-                CDBData cdbData = cdbDatas[i];
-                PVData data = cdbData.getPVData();
-                ChannelField field = channelFieldList.get(i);
-                if(field==valueField) {
-                    PVDouble pvDouble = (PVDouble)data;
-                    System.out.printf("value %f numPuts %d", pvDouble.get(),cdbData.getNumPuts());
-                } else if (field==severityField) {
-                    PVEnum pvEnum = (PVEnum)data;
+                CDField cdField = cdbDatas[i];
+                PVField pvField = cdField.getPVField();
+                ChannelField channelField = channelFieldList.get(i);
+                if(channelField==valueField) {
+                    PVDouble pvDouble = (PVDouble)pvField;
+                    System.out.printf("value %f numPuts %d", pvDouble.get(),cdField.getMaxNumPuts());
+                } else if (channelField==severityField) {
+                    PVEnum pvEnum = (PVEnum)pvField;
                     int index = pvEnum.getIndex();
-                    System.out.printf(" severity %s",AlarmSeverity.getSeverity(index).toString());
-                } else if(field==statusField) {
-                    PVString pvString = (PVString)data;
+                    System.out.printf(" severity %s numPuts %d",
+                        AlarmSeverity.getSeverity(index).toString(),cdField.getMaxNumPuts());
+                } else if(channelField==statusField) {
+                    PVString pvString = (PVString)pvField;
                     String value = pvString.get();
-                    System.out.printf(" status %s",value);
-                } else if(field==timeStampField) {
-                    PVTimeStamp pvTimeStamp = PVTimeStamp.create(data);
+                    System.out.printf(" status %s numPuts %d",value,cdField.getMaxNumPuts());
+                } else if(channelField==timeStampField) {
+                    PVTimeStamp pvTimeStamp = PVTimeStamp.create(pvField);
                     TimeStamp timeStamp = new TimeStamp();
                     pvTimeStamp.get(timeStamp);
                     long seconds = timeStamp.secondsPastEpoch;
                     int nano = timeStamp.nanoSeconds;
                     long now = nano/1000000 + seconds*1000;
                     Date date = new Date(now);
-                    System.out.printf(" time %s%n",date.toLocaleString());
+                    System.out.printf(" time %s numPuts %d%n",date.toLocaleString(),cdField.getMaxNumPuts());
+                } else {
+                    System.out.printf("%npvField not found %s%n",pvField.toString());
                 }
-                if(cdbData.getNumSupportNamePuts()>0) {
+                if(cdField.getNumSupportNamePuts()>0) {
                     System.out.printf("supportName %s numSupportNamePuts %d%n",
-                        data.getSupportName(),cdbData.getNumSupportNamePuts());
+                        pvField.getSupportName(),cdField.getNumSupportNamePuts());
                 }
             }
-            channelData.clearNumPuts();
+            cdStructure.clearNumPuts();
         }
     }
 }

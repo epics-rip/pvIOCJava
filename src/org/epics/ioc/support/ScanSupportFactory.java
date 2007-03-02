@@ -61,7 +61,7 @@ public class ScanSupportFactory {
         private ScanFieldSupport(DBStructure dbStructure) {
             super(supportName,dbStructure);
             String fieldName;
-            PVData oldField;
+            PVField oldField;
             int index;
             String choice;
             Menu menu;
@@ -88,10 +88,10 @@ public class ScanSupportFactory {
             choice = choices[index];
             scanType = ScanType.valueOf(choice);
             menu = (Menu)oldField.getField();
-            newMenu = new DBScan(this,(DBData)dbStructure,menu);
+            newMenu = new DBScan(this,(DBField)dbStructure,menu);
             newMenu.setIndex(index);
-            DBData dbData = dbRecord.findDBData(oldField);
-            dbData.replacePVData(newMenu);
+            DBField dbField = dbRecord.findDBField(oldField);
+            dbField.replacePVField(newMenu);
             
             pvAccess.findField("");
             fieldName = "scan.rate";
@@ -104,10 +104,10 @@ public class ScanSupportFactory {
             }
             PVDouble oldRate = (PVDouble)oldField;
             rate = oldRate.get();
-            PVDouble newRate = new DBRate(this,(DBData)dbStructure,oldField.getField());
+            PVDouble newRate = new DBRate(this,(DBField)dbStructure,oldField.getField());
             newRate.put(rate);
-            dbData = dbRecord.findDBData(oldField);
-            dbData.replacePVData(newRate);
+            dbField = dbRecord.findDBField(oldField);
+            dbField.replacePVField(newRate);
             
             pvAccess.findField("");
             fieldName = "scan.eventName";
@@ -120,10 +120,10 @@ public class ScanSupportFactory {
             }
             PVString oldEventName = (PVString)oldField;
             eventName = oldEventName.get();
-            PVString newEventName = new DBEventName(this,(DBData)dbStructure,oldField.getField());
+            PVString newEventName = new DBEventName(this,(DBField)dbStructure,oldField.getField());
             newEventName.put(eventName);
-            dbData = dbRecord.findDBData(oldField);
-            dbData.replacePVData(newEventName);
+            dbField = dbRecord.findDBField(oldField);
+            dbField.replacePVField(newEventName);
             
             pvAccess.findField("");
             fieldName = "scan.priority";
@@ -142,10 +142,10 @@ public class ScanSupportFactory {
             choice = priorityMenu.getChoices()[index];
             priority = ScanPriority.valueOf(choice);
             menu = (Menu)oldField.getField();
-            newMenu = new DBPriority(this,(DBData)dbStructure,menu);
+            newMenu = new DBPriority(this,(DBField)dbStructure,menu);
             newMenu.setIndex(index);
-            dbData = dbRecord.findDBData(oldField);
-            dbData.replacePVData(newMenu);
+            dbField = dbRecord.findDBField(oldField);
+            dbField.replacePVField(newMenu);
             dbRecord.getIOCDB().addIOCDBMergeListener(this);
         }       
         /* (non-Javadoc)
@@ -263,8 +263,8 @@ public class ScanSupportFactory {
     private static class DBPriority extends BasePVMenu {
         private ScanFieldSupport scanFieldSupport;
         
-        private DBPriority(ScanFieldSupport scanFieldSupport,DBData parent,Menu menu) {
-            super(parent.getPVData(),menu);
+        private DBPriority(ScanFieldSupport scanFieldSupport,DBField parent,Menu menu) {
+            super(parent.getPVField(),menu);
             this.scanFieldSupport = scanFieldSupport;
         }      
         /* (non-Javadoc)
@@ -282,8 +282,8 @@ public class ScanSupportFactory {
     private static class DBScan extends BasePVMenu {
         private ScanFieldSupport scanFieldSupport;
         
-        private DBScan(ScanFieldSupport scanFieldSupport,DBData parent,Menu menu) {
-            super(parent.getPVData(),menu);
+        private DBScan(ScanFieldSupport scanFieldSupport,DBField parent,Menu menu) {
+            super(parent.getPVField(),menu);
             this.scanFieldSupport = scanFieldSupport;
         }
         /* (non-Javadoc)
@@ -298,12 +298,12 @@ public class ScanSupportFactory {
         }
     }
     
-    private static class DBRate extends AbstractPVData implements PVDouble{
+    private static class DBRate extends AbstractPVField implements PVDouble{
         private double value;
         private ScanFieldSupport scanFieldSupport;
         
-        private DBRate(ScanFieldSupport scanFieldSupport,DBData parent,Field field) {
-            super(parent.getPVData(),field);
+        private DBRate(ScanFieldSupport scanFieldSupport,DBField parent,Field field) {
+            super(parent.getPVField(),field);
             value = 0;
             this.scanFieldSupport = scanFieldSupport;
             String defaultValue = field.getFieldAttribute().getDefault();
@@ -328,7 +328,7 @@ public class ScanSupportFactory {
                 scanFieldSupport.putRate(value);
                 return ;
             }
-            throw new IllegalStateException("PVData.isMutable is false");
+            throw new IllegalStateException("PVField.isMutable is false");
         }       
         /* (non-Javadoc)
          * @see java.lang.Object#toString()
@@ -337,7 +337,7 @@ public class ScanSupportFactory {
             return toString(0);
         }       
         /* (non-Javadoc)
-         * @see org.epics.ioc.pv.AbstractPVData#toString(int)
+         * @see org.epics.ioc.pv.AbstractPVField#toString(int)
          */
         public String toString(int indentLevel) {
             return convert.getString(this, indentLevel)
@@ -346,12 +346,12 @@ public class ScanSupportFactory {
 
     }
     
-    private static class DBEventName extends AbstractPVData implements PVString{
+    private static class DBEventName extends AbstractPVField implements PVString{
         private String value;
         private ScanFieldSupport scanFieldSupport;
         
-        private DBEventName(ScanFieldSupport scanFieldSupport,DBData parent,Field field) {
-            super(parent.getPVData(),field);
+        private DBEventName(ScanFieldSupport scanFieldSupport,DBField parent,Field field) {
+            super(parent.getPVField(),field);
             value = null;
             this.scanFieldSupport = scanFieldSupport;
             String defaultValue = field.getFieldAttribute().getDefault();
@@ -377,7 +377,7 @@ public class ScanSupportFactory {
                 scanFieldSupport.putEventName(value);
                 return ;
             }
-            throw new IllegalStateException("PVData.isMutable is false");
+            throw new IllegalStateException("PVField.isMutable is false");
         }       
         /* (non-Javadoc)
          * @see java.lang.Object#toString()
@@ -386,7 +386,7 @@ public class ScanSupportFactory {
             return toString(0);
         }       
         /* (non-Javadoc)
-         * @see org.epics.ioc.pv.AbstractPVData#toString(int)
+         * @see org.epics.ioc.pv.AbstractPVField#toString(int)
          */
         public String toString(int indentLevel) {
             return convert.getString(this, indentLevel)

@@ -163,34 +163,34 @@ public class AccessTest extends TestCase {
             testAccess(iocdb,otherRecord,otherField);
             return;
         }
-        PVData pvData = pvAccess.getField();
-        if(pvData==null) {
+        PVField pvField = pvAccess.getField();
+        if(pvField==null) {
             System.out.printf("field %s of record %s not found%n",fieldName,recordName);
             return;
         }
-        PVData parent = pvData.getParent();
-        PVRecord record = pvData.getPVRecord();
+        PVField parent = pvField.getParent();
+        PVRecord record = pvField.getPVRecord();
         String parentName = "none";
-        Field field = pvData.getField();
+        Field field = pvField.getField();
         if(parent!=null) parentName = ((Structure)parent.getField()).getStructureName();
         System.out.printf("record %s fieldRequested %s fieldActual %s parent %s%n",
                 record.getRecordName(),
                 fieldName,field.getFieldName(),
                 parentName);
-        System.out.printf("    value %s%n",pvData.toString(1));
+        System.out.printf("    value %s%n",pvField.toString(1));
         Property[] property = field.getPropertys();
         if(property.length>0) {
             System.out.printf("    property {%n");
             for(Property prop : property) {
                 String propertyName = prop.getPropertyName();
                 System.out.printf("        name %s field %s%n",propertyName,prop.getAssociatedFieldName());
-                pvAccess.setPVField(pvData);
+                pvAccess.setPVField(pvField);
                 if(pvAccess.findField(propertyName)!=AccessSetResult.thisRecord){
                     System.out.printf("name %s not in record %s%n",propertyName,recordName);
                     System.out.printf("%s\n",pvAccess.getPVRecord().toString());
                 } else {
-                    PVData propData = pvAccess.getField();
-                    System.out.printf("            value %s%n",propData.toString(3));
+                    PVField propField = pvAccess.getField();
+                    System.out.printf("            value %s%n",propField.toString(3));
                 }
             }
             System.out.printf("        }%n");

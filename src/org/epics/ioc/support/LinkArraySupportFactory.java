@@ -22,26 +22,26 @@ public class LinkArraySupportFactory {
      * @param pvArray The array which must be an array of links.
      * @return An interface to the support or null if the supportName was not "linkArray".
      */
-    public static Support create(DBData dbData) {
-        PVData pvData = dbData.getPVData();
-        Field field = pvData.getField();
+    public static Support create(DBField dbField) {
+        PVField pvField = dbField.getPVField();
+        Field field = pvField.getField();
         Type type = field.getType();
         if(type!=Type.pvArray) {
-            pvData.message("type is not an array",MessageType.error);
+            pvField.message("type is not an array",MessageType.error);
             return null;
         }
         Array array = (Array)field;
         Type elementType = array.getElementType();
         if(elementType!=Type.pvStructure) {
-            pvData.message("element type is not a structure",MessageType.error);
+            pvField.message("element type is not a structure",MessageType.error);
             return null;
         }
-        String supportName = pvData.getSupportName();
+        String supportName = pvField.getSupportName();
         if(supportName==null || !supportName.equals(supportName)) {
-            pvData.message("does not have support " + supportName,MessageType.error);
+            pvField.message("does not have support " + supportName,MessageType.error);
             return null;
         }
-        return new StructureArray(dbData);
+        return new StructureArray(dbField);
     }
     
     private static String supportName = "linkArray";
@@ -54,17 +54,17 @@ public class LinkArraySupportFactory {
         private PVBoolean[] pvWaits = null;
         private LinkSupport[] linkSupports = null;
         
-        private DBData valueData = null;        
+        private DBField valueField = null;        
         private SupportProcessRequestor supportProcessRequestor;
         private int nextLink;
         private int numberWait;
         private RequestResult finalResult;
        
-        private StructureArray(DBData dbData) {
-            super(supportName,dbData);
-            PVData pvData = dbData.getPVData();
+        private StructureArray(DBField dbField) {
+            super(supportName,dbField);
+            PVField pvField = dbField.getPVField();
             processRequestorName = 
-                pvData.getPVRecord().getRecordName() + pvData.getFullFieldName();
+                pvField.getPVRecord().getRecordName() + pvField.getFullFieldName();
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.process.SupportProcessRequestor#getProcessRequestorName()
@@ -77,8 +77,8 @@ public class LinkArraySupportFactory {
          */
         public void initialize() {
             if(!super.checkSupportState(SupportState.readyForInitialize,supportName)) return;
-            DBNonScalarArray dbNonScalarArray = (DBNonScalarArray)super.getDBData();
-            pvStructureArray = (PVStructureArray)dbNonScalarArray.getPVData();
+            DBNonScalarArray dbNonScalarArray = (DBNonScalarArray)super.getDBField();
+            pvStructureArray = (PVStructureArray)dbNonScalarArray.getPVField();
             processRequestorName = 
                 pvStructureArray.getPVRecord().getRecordName()
                 + pvStructureArray.getFullFieldName();
@@ -87,7 +87,7 @@ public class LinkArraySupportFactory {
             StructureArrayData structureArrayData = new StructureArrayData();
             structureArrayData.offset = 0;
             n = pvStructureArray.get(0,n,structureArrayData);
-            DBData[] datas = dbNonScalarArray.getElementDBDatas();
+            DBField[] datas = dbNonScalarArray.getElementDBFields();
             pvWaits = new PVBoolean[n];
             linkSupports = new LinkSupport[n];
             for(int i=0; i< n; i++) {
@@ -96,42 +96,42 @@ public class LinkArraySupportFactory {
                 PVStructure pvStructure = structureArrayData.data[i];
                 if(pvStructure==null) continue;
                 DBStructure dbStructure = (DBStructure)datas[i];
-                DBData[] dbDatas = dbStructure.getFieldDBDatas();
+                DBField[] dbFields = dbStructure.getFieldDBFields();
                 Structure structure = (Structure)pvStructure.getField();
                 String structureName = structure.getStructureName();
                 if(!structureName.equals("linkArrayElement")) {
                     pvStructure.message(structureName + " not linkArrayElement", MessageType.fatalError);
                     continue;
                 }
-                PVData[] pvdatas = pvStructure.getFieldPVDatas();
+                PVField[] pvdatas = pvStructure.getFieldPVFields();
                 int index = structure.getFieldIndex("wait");
                 if(index<0) {
                     pvStructure.message("structure does not have field wait", MessageType.fatalError);
                     continue;
                 }
-                PVData pvData = pvdatas[index];
-                if(pvData.getField().getType()!=Type.pvBoolean) {
+                PVField pvField = pvdatas[index];
+                if(pvField.getField().getType()!=Type.pvBoolean) {
                     pvStructure.message("field wait is not boolean", MessageType.fatalError);
                     continue;
                 }
-                pvWaits[i] = (PVBoolean)pvData;
+                pvWaits[i] = (PVBoolean)pvField;
                 index = structure.getFieldIndex("link");
                 if(index<0) {
                     pvStructure.message("structure does not have field link", MessageType.fatalError);
                     continue;
                 }
-                pvData = pvdatas[index];
-                if(pvData.getField().getType()!=Type.pvLink) {
+                pvField = pvdatas[index];
+                if(pvField.getField().getType()!=Type.pvLink) {
                     pvStructure.message("field link is not a link", MessageType.fatalError);
                     continue;
                 }
-                LinkSupport linkSupport = (LinkSupport)dbDatas[index].getSupport();
+                LinkSupport linkSupport = (LinkSupport)dbFields[index].getSupport();
                 if(linkSupport==null) {
                     pvStructure.message("field link is not a link", MessageType.fatalError);
                     continue;
                 }
                 linkSupport.initialize();
-                linkSupport.setField(valueData);
+                linkSupport.setField(valueField);
                 if(linkSupport.getSupportState()!=SupportState.readyForStart) {
                     supportState = SupportState.readyForInitialize;
                     for(int j=0; j<i; j++) {
@@ -203,13 +203,12 @@ public class LinkArraySupportFactory {
             nextLink = 0;
             finalResult = RequestResult.success;
             callLinkSupport();
-        }        
-        
+        }                
         /* (non-Javadoc)
-         * @see org.epics.ioc.process.LinkSupport#setField(org.epics.ioc.pvAccess.PVData)
+         * @see org.epics.ioc.process.LinkSupport#setField(org.epics.ioc.db.DBField)
          */
-        public void setField(DBData dbData) {
-            valueData = dbData;
+        public void setField(DBField dbField) {
+            valueField = dbField;
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.process.SupportProcessRequestor#supportProcessDone(org.epics.ioc.util.RequestResult)

@@ -15,33 +15,45 @@ import org.epics.ioc.pv.Enum;
  * @author mrk
  *
  */
-public class BaseDBEnum extends BaseDBData implements DBEnum {
+public class BaseDBEnum extends BaseDBField implements DBEnum {
     private PVEnum pvEnum;
    
     /**
      * constructor that derived classes must call.
-     * @param parent The parent interface.
-     * @param enumField the reflection interface for the DBEnum data.
-     * @param choice the choices for the enum.
+     * @param parent The parent.
+     * @param record The DBRecord to which this field belongs.
+     * @param pvField The reflection interface.
      */
-    public BaseDBEnum(DBData parent,DBRecord record, PVData pvData) {
-        super(parent,record,pvData);
-        pvEnum = (PVEnum)pvData;
+    public BaseDBEnum(DBField parent,DBRecord record, PVField pvField) {
+        super(parent,record,pvField);
+        pvEnum = (PVEnum)pvField;
     }
     /* (non-Javadoc)
-     * @see org.epics.ioc.pv.PVEnum#getChoices()
+     * @see org.epics.ioc.db.DBEnum#getPVEnum()
+     */
+    public PVEnum getPVEnum() {
+        return pvEnum;
+    }
+    /* (non-Javadoc)
+     * @see org.epics.ioc.db.DBEnum#replacePVEnum()
+     */
+    public void replacePVEnum() {
+        pvEnum = (PVEnum)super.getPVField();
+    }
+    /* (non-Javadoc)
+     * @see org.epics.ioc.db.DBEnum#getChoices()
      */
     public String[] getChoices() {
         return pvEnum.getChoices();
     }
     /* (non-Javadoc)
-     * @see org.epics.ioc.pv.PVEnum#getIndex()
+     * @see org.epics.ioc.db.DBEnum#getIndex()
      */
     public int getIndex() {
         return pvEnum.getIndex();
     }
     /* (non-Javadoc)
-     * @see org.epics.ioc.pv.PVEnum#setChoices(java.lang.String[])
+     * @see org.epics.ioc.db.DBEnum#setChoices(java.lang.String[])
      */
     public boolean setChoices(String[] choice) {
         if(((Enum)pvEnum.getField()).isChoicesMutable()) {
@@ -53,7 +65,7 @@ public class BaseDBEnum extends BaseDBData implements DBEnum {
                 DBListener dbListener = listener.getDBListener();
                 dbListener.enumChoicesPut(this);
             }
-            DBData parent = super.getParent();
+            DBField parent = super.getParent();
             while(parent!=null) {
                 iter = parent.getRecordListenerList().iterator();
                 while(iter.hasNext()) {
@@ -68,7 +80,7 @@ public class BaseDBEnum extends BaseDBData implements DBEnum {
         return false;
     }
     /* (non-Javadoc)
-     * @see org.epics.ioc.pv.PVEnum#setIndex(int)
+     * @see org.epics.ioc.db.DBEnum#setIndex(int)
      */
     public void setIndex(int index) {
         if(pvEnum.getField().isMutable()) {
@@ -80,7 +92,7 @@ public class BaseDBEnum extends BaseDBData implements DBEnum {
                 DBListener dbListener = listener.getDBListener();
                 dbListener.enumIndexPut(this);
             }
-            DBData parent = super.getParent();
+            DBField parent = super.getParent();
             while(parent!=null) {
                 iter = parent.getRecordListenerList().iterator();
                 while(iter.hasNext()) {
@@ -92,12 +104,6 @@ public class BaseDBEnum extends BaseDBData implements DBEnum {
             }
             return;
         }
-        throw new IllegalStateException("PVData.isMutable is false");
-    }
-    /* (non-Javadoc)
-     * @see org.epics.ioc.db.DBEnum#getPVEnum()
-     */
-    public PVEnum getPVEnum() {
-        return (PVEnum)super.getPVData();
+        throw new IllegalStateException("PVField.isMutable is false");
     }
 }

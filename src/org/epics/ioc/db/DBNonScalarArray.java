@@ -10,12 +10,15 @@ package org.epics.ioc.db;
  * @author mrk
  *
  */
-public interface DBNonScalarArray extends DBData{
+public interface DBNonScalarArray extends DBField{
     /**
-     * Get the array of DBData for the elementds of the array.
+     * Get the array of DBField for the elementds of the array.
      * @return The array of elements.
      * An element is null if the corresponding pvArray element is null.
      */
-    DBData[] getElementDBDatas();
+    DBField[] getElementDBFields();
+    /**
+     * Replace the current PVArray.
+     */
     void replacePVArray();
 }

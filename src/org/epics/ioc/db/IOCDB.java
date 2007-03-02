@@ -5,7 +5,6 @@
  */
 package org.epics.ioc.db;
 
-import org.epics.ioc.pv.PVAccess;
 import org.epics.ioc.util.*;
 
 import java.util.*;
@@ -16,7 +15,7 @@ import java.util.*;
  * @author mrk
  *
  */
-public interface IOCDB {
+public interface IOCDB extends Requestor{
     /**
      * Get the master IOCDB.
      * @return The master IOCDB.

@@ -33,7 +33,7 @@ public class DoubleRecordFactory {
         private PVStructure pvStructure;
         private DBRecord dbRecord;
         private PVRecord pvRecord;
-        private DBData value = null;
+        private DBField value = null;
         private LinkSupport support = null;
         private LinkSupport linkArraySupport = null;
         private SupportProcessRequestor supportProcessRequestor = null;
@@ -63,31 +63,31 @@ public class DoubleRecordFactory {
         public void initialize() {
             if(!super.checkSupportState(SupportState.readyForInitialize,supportName)) return;
             PVAccess pvAccess = PVAccessFactory.createPVAccess(pvRecord);
-            PVData pvData;
+            PVField pvField;
             pvAccess.findField(null);
             AccessSetResult result = pvAccess.findField("input");
             if(result!=AccessSetResult.thisRecord) {
                 message("field input does not exist",MessageType.error);
                 return;
             }
-            pvData = pvAccess.getField();
-            if(pvData.getField().getType()!=Type.pvLink) {
+            pvField = pvAccess.getField();
+            if(pvField.getField().getType()!=Type.pvLink) {
                 message("field input is not a link",MessageType.error);
                 return;
             }
-            DBLink link = (DBLink)dbRecord.findDBData(pvData);
+            DBLink link = (DBLink)dbRecord.findDBField(pvField);
             pvAccess.findField(null);
             result = pvAccess.findField("value");
             if(result!=AccessSetResult.thisRecord) {
                 message("field value does not exist",MessageType.error);
                 return;
             }
-            pvData = pvAccess.getField();
-            if(!pvData.getField().getType().isNumeric()) {
+            pvField = pvAccess.getField();
+            if(!pvField.getField().getType().isNumeric()) {
                 message("field value is not numeric",MessageType.error);
                 return;
             }
-            value = dbRecord.findDBData(pvData);
+            value = dbRecord.findDBField(pvField);
             support = (LinkSupport)link.getSupport();
             if(support!=null) {
                 support.initialize();
@@ -100,9 +100,9 @@ public class DoubleRecordFactory {
             pvAccess.findField(null);
             result = pvAccess.findField("linkArray");
             if(result==AccessSetResult.thisRecord) {
-                pvData = pvAccess.getField();
-                DBData dbData = dbRecord.findDBData(pvData);
-                linkArraySupport = (LinkSupport)dbData.getSupport();
+                pvField = pvAccess.getField();
+                DBField dbField = dbRecord.findDBField(pvField);
+                linkArraySupport = (LinkSupport)dbField.getSupport();
                 if(linkArraySupport!=null) {
                     linkArraySupport.setField(value);
                     linkArraySupport.initialize();

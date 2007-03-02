@@ -15,15 +15,15 @@ import org.epics.ioc.pv.*;
  * @author mrk
  *
  */
-public interface DBData {
+public interface DBField {
     /**
-     * Get the DBRecord that contains this dbData.
+     * Get the DBRecord that contains this dbField.
      * @return The DBRecord interface.
      */
     DBRecord getDBRecord();
     /**
-     * Get the parent of this dbData.
-     * @return The DBData interface.
+     * Get the parent of this dbField.
+     * @return The DBField interface.
      * The parent can have one of the following types:
      * <ol>
      *   <li>pvStructure</li>
@@ -36,18 +36,18 @@ public interface DBData {
      * </ol>
      * If this is the DBStructure for the record itself <i>null</i> is returned.
      */
-    DBData getParent();
+    DBField getParent();
     /**
-     * Get the pvData for this dbData.
-     * @return The pvData interface.
+     * Get the pvField for this dbField.
+     * @return The pvField interface.
      */
-    PVData getPVData();
+    PVField getPVField();
     /**
-     * Replace the pvData with a new implementation.
-     * This calls pvData.replacePVData();
-     * @param newPVData The new pvData implementation.
+     * Replace the pvField with a new implementation.
+     * This calls pvField.replacePVField();
+     * @param newPVField The new pvField implementation.
      */
-    void replacePVData(PVData newPVData);
+    void replacePVField(PVField newPVField);
     /**
      * Get the support name if it exists.
      * @return The name of the support.
@@ -56,7 +56,7 @@ public interface DBData {
     /**
      * Set the name of the support or null to specify no support.
      * @param name The name.
-     * @return null is the supportName was changed or the reason why it was not set.
+     * @return <i>null</i> if the supportName was changed or the reason why the request failed.
      */
     String setSupportName(String name);
     /**

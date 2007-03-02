@@ -582,9 +582,7 @@ public class ScannerFactory {
              }
          }
      }
-     
-     
-     
+
      private static class Event implements EventScanner {
          private ReentrantLock lock = new ReentrantLock();
          private ArrayList<Announce> eventAnnouncerList = new ArrayList<Announce>();

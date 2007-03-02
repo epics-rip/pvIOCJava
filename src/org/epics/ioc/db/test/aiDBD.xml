@@ -1,14 +1,7 @@
 <?xml version="1.0" ?>
 <DBDefinition>
 
-<support name = "ai"
-    factoryName = "Ai" />
-<support name = "aiRaw"
-    factoryName = "AiRaw" />
-<support name = "aiLinear"
-    factoryName = "AiLinear" />
-
-<structure name = "aiRaw" supportName = "aiRaw" >
+<structure name = "aiRaw" supportName = "noop" >
     <field name = "value" type = "int" >
         <property name = "status" associatedField = "status" />
         <property name = "severity" associatedField = "severity" />
@@ -19,7 +12,7 @@
     <field name = "input" type = "link" />
 </structure>
 
-<structure name = "aiLinear" supportName = "aiLinear" >
+<structure name = "aiLinear" supportName = "noop" >
     <property name = "rawValue" associatedField = "aiRaw.value" />
     <field name = "value" type = "double" >
         <property name = "status" associatedField = "status" />
@@ -38,7 +31,7 @@
         type = "structure" structureName = "linearConvertInput" />
 </structure>
 
-<recordType name = "aiRecord" supportName = "aiLinear">
+<recordType name = "aiRecord" supportName = "noop">
     <property name = "value" associatedField = "input.value" />
     <property name = "rawValue" associatedField = "input.rawValue" />
     <property name = "status" associatedField = "input.status" />
@@ -51,7 +44,7 @@
     <field name = "scan" type = "structure" structureName = "scan"/>
 </recordType>
 
-<recordType name = "inputRecord" supportName = "aiLinear">
+<recordType name = "inputRecord" supportName = "noop">
     <property name = "value" associatedField = "input.value" />
     <property name = "rawValue" associatedField = "input.rawValue" />
     <property name = "status" associatedField = "input.status" />

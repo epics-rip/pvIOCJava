@@ -6,7 +6,7 @@
 package org.epics.ioc.pv;
 
 /**
- * Create PVData field implementations.
+ * Create PVField field implementations.
  * @author mrk
  *
  */
@@ -16,9 +16,9 @@ public interface PVDataCreate {
      * @param parent The parent interface.
      * The parent can be a PVStructure, PVArray, or PVLink.
      * @param field The reflection interface for the field
-     * @return The PVData implementation
+     * @return The PVField implementation
      */
-    public PVData createData(PVData parent,Field field);
+    public PVField createPVField(PVField parent,Field field);
     /**
      * Create an implementation for an array field.
      * @param parent The parent interface.
@@ -28,12 +28,12 @@ public interface PVDataCreate {
      * @param capacityMutable Can the capacity be changed after initialization?
      * @return The PVArray implementation.
      */
-    public PVArray createArrayData(PVData parent,Field field,int capacity,boolean capacityMutable);
+    public PVArray createPVArray(PVField parent,Field field,int capacity,boolean capacityMutable);
     /**
      * Create a record instance.
      * @param recordName The instance name.
      * @param dbdRecordType The reflection interface for the record type.
      * @return The interface for accessing the record instance.
      */
-    public PVRecord createRecord(String recordName,Structure structure);
+    public PVRecord createPVRecord(String recordName,Structure structure);
 }

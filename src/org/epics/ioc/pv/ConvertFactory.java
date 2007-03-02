@@ -33,23 +33,23 @@ public final class ConvertFactory {
         private ImplementConvert() {}
         
         /* (non-Javadoc)
-         * @see org.epics.ioc.pv.Convert#getString(org.epics.ioc.pv.PVData)
+         * @see org.epics.ioc.pv.Convert#getString(org.epics.ioc.pv.PVField)
          */
-        public String getString(PVData pv) {
+        public String getString(PVField pv) {
             return ConvertToString(pv,0);
         }
     
         /* (non-Javadoc)
-         * @see org.epics.ioc.pv.Convert#getString(org.epics.ioc.pv.PVData, int)
+         * @see org.epics.ioc.pv.Convert#getString(org.epics.ioc.pv.PVField, int)
          */
-        public String getString(PVData pv,int indentLevel) {
+        public String getString(PVField pv,int indentLevel) {
             return ConvertToString(pv,indentLevel);
         }
 
         /* (non-Javadoc)
-         * @see org.epics.ioc.pv.Convert#fromString(org.epics.ioc.pv.PVData, java.lang.String)
+         * @see org.epics.ioc.pv.Convert#fromString(org.epics.ioc.pv.PVField, java.lang.String)
          */
-        public void fromString(PVData pv, String from) {
+        public void fromString(PVField pv, String from) {
             Field field = pv.getField();
             Type type = field.getType();
             switch(type) {
@@ -100,8 +100,7 @@ public final class ConvertFactory {
                     );
             }
             
-        }
-        
+        }       
         /* (non-Javadoc)
          * @see org.epics.ioc.pv.Convert#fromStringArray(org.epics.ioc.pv.PVArray, int, int, java.lang.String[], int)
          */
@@ -109,15 +108,13 @@ public final class ConvertFactory {
             String[] from, int fromOffset)
         {
             return ConvertFromStringArray(pv,offset,len,from,fromOffset);
-        }
-        
+        }       
         /* (non-Javadoc)
          * @see org.epics.ioc.pv.Convert#toStringArray(org.epics.ioc.pv.PVArray, int, int, java.lang.String[], int)
          */
         public int toStringArray(PVArray pv, int offset, int len, String[] to, int toOffset) {
             return ConvertToStringArray(pv,offset,len,to,toOffset);
-        }
-        
+        }        
         /* (non-Javadoc)
          * @see org.epics.ioc.pv.Convert#isCopyScalarCompatible(org.epics.ioc.pv.Field, org.epics.ioc.pv.Field)
          */
@@ -131,11 +128,10 @@ public final class ConvertFactory {
             if(toType==Type.pvString) return true;
             return false;
         }
-
         /* (non-Javadoc)
-         * @see org.epics.ioc.pv.Convert#copyScalar(org.epics.ioc.pv.PVData, org.epics.ioc.pv.PVData)
+         * @see org.epics.ioc.pv.Convert#copyScalar(org.epics.ioc.pv.PVField, org.epics.ioc.pv.PVField)
          */
-        public void copyScalar(PVData from, PVData to) {
+        public void copyScalar(PVField from, PVField to) {
             Field field = from.getField();
             Type type = field.getType();
             switch(type) {
@@ -203,7 +199,6 @@ public final class ConvertFactory {
                     "Convert.copyScalar arguments are not compatible"
                   );
         }
-
         /* (non-Javadoc)
          * @see org.epics.ioc.pv.Convert#isCopyArrayCompatible(org.epics.ioc.pv.Array, org.epics.ioc.pv.Array)
          */
@@ -217,7 +212,6 @@ public final class ConvertFactory {
             if(toType==Type.pvString) return true;
             return false;
         }
-
         /* (non-Javadoc)
          * @see org.epics.ioc.pv.Convert#copyArray(org.epics.ioc.pv.PVArray, int, org.epics.ioc.pv.PVArray, int, int)
          */
@@ -324,8 +318,7 @@ public final class ConvertFactory {
                 return ncopy;
             }
             return 0;
-        }
-        
+        }        
         /* (non-Javadoc)
          * @see org.epics.ioc.pv.Convert#isCopyStructureCompatible(org.epics.ioc.pv.Structure, org.epics.ioc.pv.Structure)
          */
@@ -339,7 +332,6 @@ public final class ConvertFactory {
             }
             return true;
         }
-
         /* (non-Javadoc)
          * @see org.epics.ioc.pv.Convert#copyStructure(org.epics.ioc.pv.PVStructure, org.epics.ioc.pv.PVStructure)
          */
@@ -350,33 +342,33 @@ public final class ConvertFactory {
                 throw new IllegalArgumentException(
                     "Convert.copyStructure from and to are not the same type of structure");
             }
-            PVData[] fromDatas = from.getFieldPVDatas();
-            PVData[] toDatas = to.getFieldPVDatas();
+            PVField[] fromDatas = from.getFieldPVFields();
+            PVField[] toDatas = to.getFieldPVFields();
             for(int i=0; i < fromDatas.length; i++) {
-                PVData fromData = fromDatas[i];
-                PVData toData = toDatas[i];
-                Type type = fromData.getField().getType();
+                PVField fromField = fromDatas[i];
+                PVField toField = toDatas[i];
+                Type type = fromField.getField().getType();
                 if(type.isScalar()) {
-                    copyScalar(fromData,toData);
+                    copyScalar(fromField,toField);
                 } else if(type==Type.pvLink) {
                     // do nothing
                 } else if(type==Type.pvArray) {
-                    Array fromElementArray = (Array)fromData.getField();
-                    Array toElementArray = (Array)toData.getField();
+                    Array fromElementArray = (Array)fromField.getField();
+                    Array toElementArray = (Array)toField.getField();
                     if(isCopyArrayCompatible(fromElementArray,toElementArray)) {
-                        int len = ((PVArray)fromData).getLength();
-                        copyArray((PVArray)fromData,0,(PVArray)toData,0,len);
+                        int len = ((PVArray)fromField).getLength();
+                        copyArray((PVArray)fromField,0,(PVArray)toField,0,len);
                     }
                 } else if(type==Type.pvEnum) {
-                    PVEnum fromEnum = (PVEnum)fromData;
-                    PVEnum toEnum = (PVEnum)toData;
+                    PVEnum fromEnum = (PVEnum)fromField;
+                    PVEnum toEnum = (PVEnum)toField;
                     String[] choices = fromEnum.getChoices();
                     int index = fromEnum.getIndex();
                     toEnum.setChoices(choices);
                     toEnum.setIndex(index);
                 } else if(type==Type.pvMenu) {
-                    PVMenu fromMenu = (PVMenu)fromData;
-                    PVMenu toMenu = (PVMenu)toData;
+                    PVMenu fromMenu = (PVMenu)fromField;
+                    PVMenu toMenu = (PVMenu)toField;
                     Menu toMenuType = (Menu)fromMenu.getField();
                     Menu fromMenuType = (Menu)toMenu.getField();
                     if(toMenuType.getMenuName().equals(fromMenuType.getMenuName())) {
@@ -384,18 +376,17 @@ public final class ConvertFactory {
                         toMenu.setIndex(index);
                     }
                 } else if(type==Type.pvStructure) {
-                    Structure fromElementStructure = (Structure)fromData.getField();
-                    Structure toElementStructure = (Structure)toData.getField();
+                    Structure fromElementStructure = (Structure)fromField.getField();
+                    Structure toElementStructure = (Structure)toField.getField();
                     if(isCopyStructureCompatible(fromElementStructure,toElementStructure))
-                        copyStructure((PVStructure)fromData,(PVStructure)toData);
+                        copyStructure((PVStructure)fromField,(PVStructure)toField);
                 }
             }
-        }
-        
+        }        
         /* (non-Javadoc)
-         * @see org.epics.ioc.pv.Convert#fromByte(org.epics.ioc.pv.PVData, byte)
+         * @see org.epics.ioc.pv.Convert#fromByte(org.epics.ioc.pv.PVField, byte)
          */
-        public void fromByte(PVData pv, byte from) {
+        public void fromByte(PVField pv, byte from) {
             Field field = pv.getField();
             Type type = field.getType();
             switch(type) {
@@ -417,20 +408,18 @@ public final class ConvertFactory {
                       + type.toString()
                     );
             }
-        }
-    
+        }    
         /* (non-Javadoc)
-         * @see org.epics.ioc.pv.Convert#fromByteArray(org.epics.ioc.pv.PVData, int, int, byte[], int)
+         * @see org.epics.ioc.pv.Convert#fromByteArray(org.epics.ioc.pv.PVField, int, int, byte[], int)
          */
-        public int fromByteArray(PVData pv, int offset, int len,
+        public int fromByteArray(PVField pv, int offset, int len,
             byte[] from, int fromOffset) {
             return ConvertByteArrayFrom(pv,offset,len,from,fromOffset);
-        }
-    
+        }   
         /* (non-Javadoc)
-         * @see org.epics.ioc.pv.Convert#fromDouble(org.epics.ioc.pv.PVData, double)
+         * @see org.epics.ioc.pv.Convert#fromDouble(org.epics.ioc.pv.PVField, double)
          */
-        public void fromDouble(PVData pv, double from) {
+        public void fromDouble(PVField pv, double from) {
             Field field = pv.getField();
             Type type = field.getType();
             switch(type) {
@@ -452,21 +441,18 @@ public final class ConvertFactory {
                       + type.toString()
                     );
             }
-        }
-    
+        }    
         /* (non-Javadoc)
-         * @see org.epics.ioc.pv.Convert#fromDoubleArray(org.epics.ioc.pv.PVData, int, int, double[], int)
+         * @see org.epics.ioc.pv.Convert#fromDoubleArray(org.epics.ioc.pv.PVField, int, int, double[], int)
          */
-        public int fromDoubleArray(PVData pv, int offset, int len,
+        public int fromDoubleArray(PVField pv, int offset, int len,
             double[] from, int fromOffset) {
             return ConvertDoubleArrayFrom(pv,offset,len,from,fromOffset);
-        }
-
-    
+        }    
         /* (non-Javadoc)
-         * @see org.epics.ioc.pv.Convert#fromFloat(org.epics.ioc.pv.PVData, float)
+         * @see org.epics.ioc.pv.Convert#fromFloat(org.epics.ioc.pv.PVField, float)
          */
-        public void fromFloat(PVData pv, float from) {
+        public void fromFloat(PVField pv, float from) {
             Field field = pv.getField();
             Type type = field.getType();
             switch(type) {
@@ -488,20 +474,18 @@ public final class ConvertFactory {
                       + type.toString()
                     );
             }
-        }
-    
+        }    
         /* (non-Javadoc)
-         * @see org.epics.ioc.pv.Convert#fromFloatArray(org.epics.ioc.pv.PVData, int, int, float[], int)
+         * @see org.epics.ioc.pv.Convert#fromFloatArray(org.epics.ioc.pv.PVField, int, int, float[], int)
          */
-        public int fromFloatArray(PVData pv, int offset, int len,
+        public int fromFloatArray(PVField pv, int offset, int len,
             float[] from, int fromOffset) {
             return ConvertFloatArrayFrom(pv,offset,len,from,fromOffset);
-        }
-    
+        }    
         /* (non-Javadoc)
-         * @see org.epics.ioc.pv.Convert#fromInt(org.epics.ioc.pv.PVData, int)
+         * @see org.epics.ioc.pv.Convert#fromInt(org.epics.ioc.pv.PVField, int)
          */
-        public void fromInt(PVData pv, int from) {
+        public void fromInt(PVField pv, int from) {
             Field field = pv.getField();
             Type type = field.getType();
             switch(type) {
@@ -523,20 +507,18 @@ public final class ConvertFactory {
                       + type.toString()
                     );
             }
-        }
-    
+        }    
         /* (non-Javadoc)
-         * @see org.epics.ioc.pv.Convert#fromIntArray(org.epics.ioc.pv.PVData, int, int, int[], int)
+         * @see org.epics.ioc.pv.Convert#fromIntArray(org.epics.ioc.pv.PVField, int, int, int[], int)
          */
-        public int fromIntArray(PVData pv, int offset, int len,
+        public int fromIntArray(PVField pv, int offset, int len,
             int[] from, int fromOffset) {
             return ConvertIntArrayFrom(pv,offset,len,from,fromOffset);
-        }
-    
+        }    
         /* (non-Javadoc)
-         * @see org.epics.ioc.pv.Convert#fromLong(org.epics.ioc.pv.PVData, long)
+         * @see org.epics.ioc.pv.Convert#fromLong(org.epics.ioc.pv.PVField, long)
          */
-        public void fromLong(PVData pv, long from) {
+        public void fromLong(PVField pv, long from) {
             Field field = pv.getField();
             Type type = field.getType();
             switch(type) {
@@ -558,20 +540,18 @@ public final class ConvertFactory {
                       + type.toString()
                     );
             }
-        }
-    
+        }    
         /* (non-Javadoc)
-         * @see org.epics.ioc.pv.Convert#fromLongArray(org.epics.ioc.pv.PVData, int, int, long[], int)
+         * @see org.epics.ioc.pv.Convert#fromLongArray(org.epics.ioc.pv.PVField, int, int, long[], int)
          */
-        public int fromLongArray(PVData pv, int offset, int len,
+        public int fromLongArray(PVField pv, int offset, int len,
             long[] from, int fromOffset) {
             return ConvertLongArrayFrom(pv,offset,len,from,fromOffset);
-        }
-    
+        }    
         /* (non-Javadoc)
-         * @see org.epics.ioc.pv.Convert#fromShort(org.epics.ioc.pv.PVData, short)
+         * @see org.epics.ioc.pv.Convert#fromShort(org.epics.ioc.pv.PVField, short)
          */
-        public void fromShort(PVData pv, short from) {
+        public void fromShort(PVField pv, short from) {
             Field field = pv.getField();
             Type type = field.getType();
             switch(type) {
@@ -593,20 +573,18 @@ public final class ConvertFactory {
                       + type.toString()
                     );
             }
-        }
-    
+        }    
         /* (non-Javadoc)
-         * @see org.epics.ioc.pv.Convert#fromShortArray(org.epics.ioc.pv.PVData, int, int, short[], int)
+         * @see org.epics.ioc.pv.Convert#fromShortArray(org.epics.ioc.pv.PVField, int, int, short[], int)
          */
-        public int fromShortArray(PVData pv, int offset, int len,
+        public int fromShortArray(PVField pv, int offset, int len,
             short[] from, int fromOffset) {
             return ConvertShortArrayFrom(pv,offset,len,from,fromOffset);
-        }
-    
+        }    
         /* (non-Javadoc)
-         * @see org.epics.ioc.pv.Convert#toByte(org.epics.ioc.pv.PVData)
+         * @see org.epics.ioc.pv.Convert#toByte(org.epics.ioc.pv.PVField)
          */
-        public byte toByte(PVData pv) {
+        public byte toByte(PVField pv) {
             Field field = pv.getField();
             Type type = field.getType();
             switch(type) {
@@ -628,20 +606,18 @@ public final class ConvertFactory {
                       + type.toString()
                     );
             }
-        }
-    
+        }    
         /* (non-Javadoc)
-         * @see org.epics.ioc.pv.Convert#toByteArray(org.epics.ioc.pv.PVData, int, int, byte[], int)
+         * @see org.epics.ioc.pv.Convert#toByteArray(org.epics.ioc.pv.PVField, int, int, byte[], int)
          */
-        public int toByteArray(PVData pv, int offset, int len,
+        public int toByteArray(PVField pv, int offset, int len,
             byte[] to, int toOffset) {
         	return ConvertByteArrayTo(pv,offset,len,to,toOffset);
-        }
-    
+        }   
         /* (non-Javadoc)
-         * @see org.epics.ioc.pv.Convert#toDouble(org.epics.ioc.pv.PVData)
+         * @see org.epics.ioc.pv.Convert#toDouble(org.epics.ioc.pv.PVField)
          */
-        public double toDouble(PVData pv) {
+        public double toDouble(PVField pv) {
             Field field = pv.getField();
             Type type = field.getType();
             switch(type) {
@@ -663,20 +639,18 @@ public final class ConvertFactory {
                       + type.toString()
                     );
             }
-        }
-    
+        }    
         /* (non-Javadoc)
-         * @see org.epics.ioc.pv.Convert#toDoubleArray(org.epics.ioc.pv.PVData, int, int, double[], int)
+         * @see org.epics.ioc.pv.Convert#toDoubleArray(org.epics.ioc.pv.PVField, int, int, double[], int)
          */
-        public int toDoubleArray(PVData pv, int offset, int len,
+        public int toDoubleArray(PVField pv, int offset, int len,
             double[] to, int toOffset) {
         	return ConvertDoubleArrayTo(pv,offset,len,to,toOffset);
-        }
-    
+        }    
         /* (non-Javadoc)
-         * @see org.epics.ioc.pv.Convert#toFloat(org.epics.ioc.pv.PVData)
+         * @see org.epics.ioc.pv.Convert#toFloat(org.epics.ioc.pv.PVField)
          */
-        public float toFloat(PVData pv) {
+        public float toFloat(PVField pv) {
             Field field = pv.getField();
             Type type = field.getType();
             switch(type) {
@@ -698,20 +672,18 @@ public final class ConvertFactory {
                       + type.toString()
                     );
             }
-        }
-    
+        }    
         /* (non-Javadoc)
-         * @see org.epics.ioc.pv.Convert#toFloatArray(org.epics.ioc.pv.PVData, int, int, float[], int)
+         * @see org.epics.ioc.pv.Convert#toFloatArray(org.epics.ioc.pv.PVField, int, int, float[], int)
          */
-        public int toFloatArray(PVData pv, int offset, int len,
+        public int toFloatArray(PVField pv, int offset, int len,
             float[] to, int toOffset) {
         	return ConvertFloatArrayTo(pv,offset,len,to,toOffset);
-        }
-    
+        }   
         /* (non-Javadoc)
-         * @see org.epics.ioc.pv.Convert#toInt(org.epics.ioc.pv.PVData)
+         * @see org.epics.ioc.pv.Convert#toInt(org.epics.ioc.pv.PVField)
          */
-        public int toInt(PVData pv) {
+        public int toInt(PVField pv) {
             Field field = pv.getField();
             Type type = field.getType();
             switch(type) {
@@ -733,20 +705,18 @@ public final class ConvertFactory {
                       + type.toString()
                     );
             }
-        }
-    
+        }    
         /* (non-Javadoc)
-         * @see org.epics.ioc.pv.Convert#toIntArray(org.epics.ioc.pv.PVData, int, int, int[], int)
+         * @see org.epics.ioc.pv.Convert#toIntArray(org.epics.ioc.pv.PVField, int, int, int[], int)
          */
-        public int toIntArray(PVData pv, int offset, int len,
+        public int toIntArray(PVField pv, int offset, int len,
             int[] to, int toOffset) {
         	return ConvertIntArrayTo(pv,offset,len,to,toOffset);
-        }
-    
+        }    
         /* (non-Javadoc)
-         * @see org.epics.ioc.pv.Convert#toLong(org.epics.ioc.pv.PVData)
+         * @see org.epics.ioc.pv.Convert#toLong(org.epics.ioc.pv.PVField)
          */
-        public long toLong(PVData pv) {
+        public long toLong(PVField pv) {
             Field field = pv.getField();
             Type type = field.getType();
             switch(type) {
@@ -768,20 +738,18 @@ public final class ConvertFactory {
                       + type.toString()
                     );
             }
-        }
-    
+        }    
         /* (non-Javadoc)
-         * @see org.epics.ioc.pv.Convert#toLongArray(org.epics.ioc.pv.PVData, int, int, long[], int)
+         * @see org.epics.ioc.pv.Convert#toLongArray(org.epics.ioc.pv.PVField, int, int, long[], int)
          */
-        public int toLongArray(PVData pv, int offset, int len,
+        public int toLongArray(PVField pv, int offset, int len,
             long[] to, int toOffset) {
         	return ConvertLongArrayTo(pv,offset,len,to,toOffset);
-        }
-    
+        }   
         /* (non-Javadoc)
-         * @see org.epics.ioc.pv.Convert#toShort(org.epics.ioc.pv.PVData)
+         * @see org.epics.ioc.pv.Convert#toShort(org.epics.ioc.pv.PVField)
          */
-        public short toShort(PVData pv) {
+        public short toShort(PVField pv) {
             Field field = pv.getField();
             Type type = field.getType();
             switch(type) {
@@ -803,18 +771,17 @@ public final class ConvertFactory {
                       + type.toString()
                     );
             }
-        }
-    
+        }    
         /* (non-Javadoc)
-         * @see org.epics.ioc.pv.Convert#toShortArray(org.epics.ioc.pv.PVData, int, int, short[], int)
+         * @see org.epics.ioc.pv.Convert#toShortArray(org.epics.ioc.pv.PVField, int, int, short[], int)
          */
-        public int toShortArray(PVData pv, int offset, int len,
+        public int toShortArray(PVField pv, int offset, int len,
             short[] to, int toOffset) {
         	return ConvertShortArrayTo(pv,offset,len,to,toOffset);
         }
     
     
-        private int ConvertByteArrayFrom(PVData pv, int offset, int len,
+        private int ConvertByteArrayFrom(PVField pv, int offset, int len,
         byte[]from, int fromOffset)
         {
             Field field = pv.getField();
@@ -892,7 +859,7 @@ public final class ConvertFactory {
             }
         }
     
-        private int ConvertByteArrayTo(PVData pv, int offset, int len,
+        private int ConvertByteArrayTo(PVField pv, int offset, int len,
         byte[]to, int toOffset)
         {
             Field field = pv.getField();
@@ -994,7 +961,7 @@ public final class ConvertFactory {
             }
         }
     
-        private int ConvertShortArrayFrom(PVData pv, int offset, int len,
+        private int ConvertShortArrayFrom(PVField pv, int offset, int len,
         short[]from, int fromOffset)
         {
             Field field = pv.getField();
@@ -1072,7 +1039,7 @@ public final class ConvertFactory {
             }
         }
     
-        private int ConvertShortArrayTo(PVData pv, int offset, int len,
+        private int ConvertShortArrayTo(PVField pv, int offset, int len,
         short[]to, int toOffset)
         {
             Field field = pv.getField();
@@ -1174,7 +1141,7 @@ public final class ConvertFactory {
             }
         }
     
-        private int ConvertIntArrayFrom(PVData pv, int offset, int len,
+        private int ConvertIntArrayFrom(PVField pv, int offset, int len,
             int[]from, int fromOffset)
         {
             Field field = pv.getField();
@@ -1252,7 +1219,7 @@ public final class ConvertFactory {
             }
         }
     
-        private int ConvertIntArrayTo(PVData pv, int offset, int len,
+        private int ConvertIntArrayTo(PVField pv, int offset, int len,
             int[]to, int toOffset)
         {
             Field field = pv.getField();
@@ -1354,7 +1321,7 @@ public final class ConvertFactory {
             }
         }
     
-        private int ConvertLongArrayFrom(PVData pv, int offset, int len,
+        private int ConvertLongArrayFrom(PVField pv, int offset, int len,
         long[]from, int fromOffset)
         {
             Field field = pv.getField();
@@ -1432,7 +1399,7 @@ public final class ConvertFactory {
             }
         }
     
-        private int ConvertLongArrayTo(PVData pv, int offset, int len,
+        private int ConvertLongArrayTo(PVField pv, int offset, int len,
         long[]to, int toOffset)
         {
             Field field = pv.getField();
@@ -1534,7 +1501,7 @@ public final class ConvertFactory {
             }
         }
     
-        private int ConvertFloatArrayFrom(PVData pv, int offset, int len,
+        private int ConvertFloatArrayFrom(PVField pv, int offset, int len,
         float[]from, int fromOffset)
         {
             Field field = pv.getField();
@@ -1612,7 +1579,7 @@ public final class ConvertFactory {
             }
         }
     
-        private int ConvertFloatArrayTo(PVData pv, int offset, int len,
+        private int ConvertFloatArrayTo(PVField pv, int offset, int len,
         float[]to, int toOffset)
         {
             Field field = pv.getField();
@@ -1714,7 +1681,7 @@ public final class ConvertFactory {
             }
         }
     
-        private int ConvertDoubleArrayFrom(PVData pv, int offset, int len,
+        private int ConvertDoubleArrayFrom(PVField pv, int offset, int len,
         double[]from, int fromOffset)
         {
             Field field = pv.getField();
@@ -1792,7 +1759,7 @@ public final class ConvertFactory {
             }
         }
     
-        private int ConvertDoubleArrayTo(PVData pv, int offset, int len,
+        private int ConvertDoubleArrayTo(PVField pv, int offset, int len,
         double[]to, int toOffset)
         {
             Field field = pv.getField();
@@ -2182,15 +2149,17 @@ public final class ConvertFactory {
                       );
             }
             return ncopy;
-        }
-    
+        }    
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pv.Convert#newLine(java.lang.StringBuilder, int)
+         */
         public void newLine(StringBuilder builder, int indentLevel) {
             builder.append(String.format("%n"));
             for (int i=0; i <indentLevel; i++) builder.append(indentString);
         }
         private static String indentString = "    ";
 
-        private String ConvertToString(PVData pv,int indentLevel) {
+        private String ConvertToString(PVField pv,int indentLevel) {
             Field field = pv.getField();
             switch(field.getType()) {
             case pvLink:{
@@ -2242,7 +2211,7 @@ public final class ConvertFactory {
             }
         }
     
-        private String convertEnum(PVData pv) {
+        private String convertEnum(PVField pv) {
             PVEnum data = (PVEnum)pv;
             StringBuilder builder = new StringBuilder();
             int index = data.getIndex();
@@ -2258,7 +2227,7 @@ public final class ConvertFactory {
             return builder.toString();
         }
         
-        private String convertMenu(PVData pv) {
+        private String convertMenu(PVField pv) {
             PVMenu data = (PVMenu)pv;
             StringBuilder builder = new StringBuilder();
             int index = data.getIndex();
@@ -2274,26 +2243,26 @@ public final class ConvertFactory {
             return builder.toString();
         }
     
-        private String convertStructure(PVData pv,int indentLevel) {
+        private String convertStructure(PVField pv,int indentLevel) {
             PVStructure data = (PVStructure)pv;
             Structure structure = (Structure)pv.getField();
             StringBuilder builder = new StringBuilder();
             newLine(builder,indentLevel);
             builder.append(String.format("structure %s{",
                 structure.getStructureName()));
-            PVData[] fieldsData = data.getFieldPVDatas();
-            if(fieldsData!=null) for(PVData fieldData : fieldsData) {
-                Field fieldnow = fieldData.getField();
+            PVField[] fieldsData = data.getFieldPVFields();
+            if(fieldsData!=null) for(PVField fieldField : fieldsData) {
+                Field fieldnow = fieldField.getField();
                 newLine(builder,indentLevel+1);
                 builder.append(String.format("%s = ", fieldnow.getFieldName()));
-                builder.append(ConvertToString(fieldData,indentLevel+1));
+                builder.append(ConvertToString(fieldField,indentLevel+1));
             }
             newLine(builder,indentLevel);
             builder.append("}");
             return builder.toString();
         }
     
-        private String convertArray(PVData pv,int indentLevel) {
+        private String convertArray(PVField pv,int indentLevel) {
             Array array = (Array)pv.getField();
             Type type = array.getElementType();
             StringBuilder builder = new StringBuilder();

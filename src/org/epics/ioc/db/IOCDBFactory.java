@@ -9,8 +9,6 @@ import java.util.*;
 import java.util.concurrent.locks.*;
 import java.util.regex.*;
 
-import org.epics.ioc.dbd.*;
-import org.epics.ioc.pv.*;
 import org.epics.ioc.util.*;
 
 /**
@@ -169,6 +167,12 @@ public class IOCDBFactory {
             } finally {
                 rwLock.readLock().unlock();
             }
+        }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.util.Requestor#getRequestorName()
+         */
+        public String getRequestorName() {
+            return name;
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.db.IOCDB#message(java.lang.String, org.epics.ioc.util.MessageType)

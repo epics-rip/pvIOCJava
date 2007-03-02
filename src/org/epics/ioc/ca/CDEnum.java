@@ -8,10 +8,11 @@ package org.epics.ioc.ca;
 import org.epics.ioc.pv.PVEnum;
 
 /**
+ * ChannelDataBaseEnum - A CDRecord field that holds a PVEnum.
  * @author mrk
  *
  */
-public interface CDBEnum extends CDBData{
+public interface CDEnum extends CDField{
     /**
      * The enum index has been modified.
      * @param targetPVEnum The enum interface.
@@ -28,7 +29,7 @@ public interface CDBEnum extends CDBData{
      */
     int getNumIndexPuts();
     /**
-     * Get the number of choics puts since the last <i>clearNumPuts</i>.
+     * Get the number of choices puts since the last <i>clearNumPuts</i>.
      * @return The number of choice puts.
      */
     int getNumChoicesPut();

@@ -1,7 +1,7 @@
 <?xml version="1.0" ?>
 <DBDefinition>
 
-<recordType name = "analog" supportName = "exampleRecordSupport">
+<recordType name = "analog" supportName = "noop">
     <field name = "value" type = "double">
         <property name = "status" associatedField = "status" />
         <property name = "severity" associatedField = "severity" />
@@ -21,8 +21,5 @@
     <field name = "linearConvert"
         type = "structure" structureName = "linearConvertInput" />
 </recordType>
-
-<support name = "exampleRecordSupport" 
-    factoryName = "ExampleRecordSupport" />
 
 </DBDefinition>

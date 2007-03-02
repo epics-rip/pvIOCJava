@@ -8,10 +8,11 @@ package org.epics.ioc.ca;
 import org.epics.ioc.pv.PVLink;
 
 /**
+ * ChannelDataBaseLink - A CDRecord field that holds a PVLink.
  * @author mrk
  *
  */
-public interface CDBLink extends CDBData{
+public interface CDLink extends CDField{
     /**
      * The link configration structure has been modified.
      * @param targetPVLink The link interface.

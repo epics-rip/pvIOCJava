@@ -19,11 +19,10 @@ public class BaseChannelData implements ChannelData
 {
     private Channel channel;
     private ChannelFieldGroup channelFieldGroup;
-    private CDBRecord cdbRecord;
-    private CDBStructure cdbStructure;
-    private CDBData[] cdbDatas;
+    private CDRecord cdRecord;
+    private CDStructure cdStructure;
+    private CDField[] cdFields;
     private Field[] targetFields;
-    private int maxPutsToField = 0;
     
     public BaseChannelData(Channel channel,ChannelFieldGroup channelFieldGroup,
             FieldCreate fieldCreate,PVDataCreate pvDataCreate)
@@ -36,10 +35,10 @@ public class BaseChannelData implements ChannelData
         for(int i=0; i<length; i++) {
             targetFields[i] = channelFieldList.get(i).getField();
         }
-        cdbRecord = new BaseCDBRecord(fieldCreate,pvDataCreate,
+        cdRecord = new BaseCDRecord(fieldCreate,pvDataCreate,
             targetFields,channel.getChannelName(),"channelData");
-        cdbStructure = cdbRecord.getCDBStructure();
-        cdbDatas = cdbStructure.getFieldCDBDatas();
+        cdStructure = cdRecord.getCDStructure();
+        cdFields = cdStructure.getFieldCDFields();
     }
     public Channel getChannel() {
         return channel;
@@ -49,25 +48,24 @@ public class BaseChannelData implements ChannelData
         return channelFieldGroup;   
     }
     
-    public CDBRecord getCDBRecord() {
-        return cdbRecord;
+    public CDRecord getCDRecord() {
+        return cdRecord;
     }
     public int getMaxPutsToField() {
-        return maxPutsToField;
+        return cdStructure.getMaxNumPuts();
     }
     
     public void clearNumPuts() {
-        cdbRecord.getCDBStructure().clearNumPuts();
-        maxPutsToField = 0;
+        cdRecord.getCDStructure().clearNumPuts();
     }
     
-    public void initData(PVData targetPVData) {
-        dataPut(targetPVData);
+    public void initField(PVField targetPVField) {
+        fieldPut(targetPVField);
     }
     
-    public void dataPut(PVData targetPVData) {
-        CDBData cdbData = findCDBData(targetPVData);
-        Field field = targetPVData.getField();
+    public void fieldPut(PVField targetPVField) {
+        CDField cdField = findCDField(targetPVField);
+        Field field = targetPVField.getField();
         Type type = field.getType();
         if(type==Type.pvArray) {
             Array array = (Array)field;
@@ -76,50 +74,30 @@ public class BaseChannelData implements ChannelData
                 
             }
         }
-        cdbData.dataPut(targetPVData);
-        int numPuts = cdbData.getNumPuts();
-        if(numPuts>maxPutsToField) {
-            maxPutsToField = numPuts;
-        }
+        cdField.fieldPut(targetPVField);
     }
     
     public void enumIndexPut(PVEnum targetPVEnum) {
-        CDBEnum cdbEnum  = (CDBEnum)findCDBData(targetPVEnum);
-        cdbEnum.enumIndexPut(targetPVEnum);
-        int numPuts = cdbEnum.getNumIndexPuts();
-        if(numPuts>maxPutsToField) {
-            maxPutsToField = numPuts;
-        }
+        CDEnum cdEnum  = (CDEnum)findCDField(targetPVEnum);
+        cdEnum.enumIndexPut(targetPVEnum);
     }
     
     public void enumChoicesPut(PVEnum targetPVEnum) {
-        CDBEnum cdbEnum  = (CDBEnum)findCDBData(targetPVEnum);
-        cdbEnum.enumChoicesPut(targetPVEnum);
-        int numPuts = cdbEnum.getNumChoicesPut();
-        if(numPuts>maxPutsToField) {
-            maxPutsToField = numPuts;
-        }
+        CDEnum cdEnum  = (CDEnum)findCDField(targetPVEnum);
+        cdEnum.enumChoicesPut(targetPVEnum);
     }
     
-    public void supportNamePut(PVData targetPVData) {
-        CDBData cdbData = findCDBData(targetPVData);
-        cdbData.supportNamePut(targetPVData);
-        int numPuts = cdbData.getNumSupportNamePuts();
-        if(numPuts>maxPutsToField) {
-            maxPutsToField = numPuts;
-        }
+    public void supportNamePut(PVField targetPVField) {
+        CDField cdField = findCDField(targetPVField);
+        cdField.supportNamePut(targetPVField);
     }
     
     public void configurationStructurePut(PVLink targetPVLink) {
-        CDBLink cdbLink = (CDBLink)findCDBData(targetPVLink);
-        if(cdbLink==null) {
+        CDLink cdLink = (CDLink)findCDField(targetPVLink);
+        if(cdLink==null) {
             throw new IllegalStateException("Logic error.");
         }
-        cdbLink.configurationStructurePut(targetPVLink);
-        int numPuts = cdbLink.getNumConfigurationStructurePuts();
-        if(numPuts>maxPutsToField) {
-            maxPutsToField = numPuts;
-        }
+        cdLink.configurationStructurePut(targetPVLink);
     }
     
     public void beginPut(PVStructure targetPVStructure) {
@@ -130,57 +108,35 @@ public class BaseChannelData implements ChannelData
         // nothing to do
     }
 
-    public void dataPut(PVData requested,PVData targetPVData) {
-        CDBData cdbData = findCDBData(requested);
-        int numPuts = cdbData.dataPut(requested, targetPVData);
-        if(numPuts>maxPutsToField) {
-            maxPutsToField = numPuts;
-        }
+    public void fieldPut(PVField requested,PVField targetPVField) {
+        CDField cdField = findCDField(requested);
+        cdField.fieldPut(requested, targetPVField);
     }
     
-    public void enumIndexPut(PVData requested,PVEnum targetPVEnum) {
-        CDBData cdbData = findCDBData(requested);
-        int numPuts = cdbData.enumIndexPut(requested, targetPVEnum);
-        if(numPuts>maxPutsToField) {
-            maxPutsToField = numPuts;
-        }
+    public void enumIndexPut(PVField requested,PVEnum targetPVEnum) {
+        CDField cdField = findCDField(requested);
+        cdField.enumIndexPut(requested, targetPVEnum);
     }
     
-    public void enumChoicesPut(PVData requested,PVEnum targetPVEnum) {
-        CDBData cdbData = findCDBData(requested);
-        int numPuts = cdbData.enumChoicesPut(requested, targetPVEnum);
-        if(numPuts>maxPutsToField) {
-            maxPutsToField = numPuts;
-        }
+    public void enumChoicesPut(PVField requested,PVEnum targetPVEnum) {
+        CDField cdField = findCDField(requested);
+        cdField.enumChoicesPut(requested, targetPVEnum);
     }
     
-    public void supportNamePut(PVData requested,PVData targetPVData) {
-        CDBData cdbData = findCDBData(requested);
-        int numPuts = cdbData.supportNamePut(requested, targetPVData);
-        if(numPuts>maxPutsToField) {
-            maxPutsToField = numPuts;
-        }
+    public void supportNamePut(PVField requested,PVField targetPVField) {
+        CDField cdField = findCDField(requested);
+        cdField.supportNamePut(requested, targetPVField);
     }
     
-    public void configurationStructurePut(PVData requested,PVLink targetPVLink) {
-        CDBData cdbData = findCDBData(requested);
-        int numPuts = cdbData.configurationStructurePut(requested, targetPVLink);
-        if(numPuts>maxPutsToField) {
-            maxPutsToField = numPuts;
-        }
+    public void configurationStructurePut(PVField requested,PVLink targetPVLink) {
+        CDField cdField = findCDField(requested);
+        cdField.configurationStructurePut(requested, targetPVLink);
     }
-    public String toString() {
-        return toString(0);
-    }
-    public String toString(int indentLevel) {
-        return String.format(
-                "maxPutsToField %d ",maxPutsToField);
-    }
-    private CDBData findCDBData(PVData targetPVData) {
-        Field targetField = targetPVData.getField();
+    private CDField findCDField(PVField targetPVField) {
+        Field targetField = targetPVField.getField();
         for(int i=0; i<targetFields.length; i++) {
             if(targetField==targetFields[i]) {
-                return cdbDatas[i];
+                return cdFields[i];
             }
         }
         throw new IllegalStateException("Logic error.");

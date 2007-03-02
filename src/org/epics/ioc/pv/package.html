@@ -10,49 +10,11 @@
 <body>
 <h1 style="text-align: center">EPICS JavaIOC: pv<br />
 package: org.epics.ioc.pv<br />
-2007.02.02</h1>
+2007.02.27</h1>
 CONTENTS
-
-<div class="toc">
-<ul>
-  <li><a href="#Overview">Overview</a>
-    <ul>
-      <li><a href="#Process">Process Variable</a></li>
-      <li><a href="#Process1">Process Variable Data Types</a></li>
-      <li><a href="#Process2">Process Variable Reflection</a></li>
-    </ul>
-  </li>
-  <li><a href="#Type">Type</a></li>
-  <li><a href="#Reflection">Reflection</a></li>
-  <li><a href="#PVData">PVData Interfaces</a>
-    <ul>
-      <li><a href="#PVData1">PVData</a></li>
-      <li><a href="#Primitive">Primitive PVData types</a></li>
-      <li><a href="#PVString">PVString</a></li>
-      <li><a href="#PVEnum">PVEnum</a></li>
-      <li><a href="#PVMenu">PVMenu</a></li>
-      <li><a href="#PVLink">PVLink</a></li>
-      <li><a href="#PVStructur">PVStructure</a></li>
-      <li><a href="#PVRecord">PVRecord</a></li>
-      <li><a href="#PVArray">PVArray</a></li>
-      <li><a href="#FieldCreat">FieldCreate</a></li>
-    </ul>
-  </li>
-  <li><a href="#Base">Base Introspection Classes</a></li>
-  <li><a href="#AbstractPV">AbstractPVData</a></li>
-  <li><a href="#Convert">Convert</a></li>
-  <li><a href="#PVAccess">PVAccess</a>
-    <ul>
-      <li><a href="#Overview1">Overview</a></li>
-      <li><a href="#Definition">Definition</a></li>
-      <li><a href="#findField">findField</a></li>
-    </ul>
-  </li>
-</ul>
-</div>
 <hr />
 
-<h2 style="text-align: center" id="Overview">Overview</h2>
+<h2 style="text-align: center">Overview</h2>
 <hr />
 
 <p>A Process Variable (PV) Database is a "smart" database because it has
@@ -64,7 +26,7 @@ records together with support code:</p>
   <li>Each field can optionally have associated support.</li>
 </ul>
 
-<p>PVData, which is an interface for accessing the data residing in a field
+<p>PVField, which is an interface for accessing the data residing in a field
 of a database record, has one of the following types:</p>
 <dl>
   <dt>primitive</dt>
@@ -117,13 +79,14 @@ TINI, DOOCS, etc.</p>
     <dd>Copy, with conversion if the element types differ, between compatible
       arrays of PVs.</dd>
     <dd>Copy between compatable structures.</dd>
-  <dt>Field Factory</dt>
-    <dd>This is an object factory that creates objects implementing the
-      reflection interfaces.</dd>
+  <dt>Field and PVField Factories</dt>
+    <dd>An object factory that creates objects implementing the reflection
+      interfaces and an object factory for implementing PVField
+    interfaces.</dd>
   <dt>Base Field Classes</dt>
     <dd>Base classes for implementing Field objects.</dd>
-  <dt>AbstractPVData</dt>
-    <dd>An abstract base class for creating PVData implementations.</dd>
+  <dt>Abstract and Base Classes for creating PVField objects.</dt>
+    <dd>An abstract base class for creating PVField implementations.</dd>
   <dt>Convert Factory</dt>
     <dd>An object factory that provides an implementation of the conversion
       facility.</dd>
@@ -131,12 +94,7 @@ TINI, DOOCS, etc.</p>
     <dd>An interface for locating fields within a record instance.</dd>
 </dl>
 
-<p>This package provides a factory for creating reflection interfaces. Other
-than AbstractPVData it does not provide any facilities to create objects that
-implement the Data Interfaces. This is the responsibility of a particular
-implementation. For a javaIOC, db provides an implementation.</p>
-
-<h3 id="Process">Process Variable</h3>
+<h3>Process Variable</h3>
 
 <p>Definitions:</p>
 <dl>
@@ -186,7 +144,7 @@ associatedField must be one of the following:</p>
 powerSupply record type can be created that has properties like "current",
 "voltage", and "power".</p>
 
-<h3 id="Process1">Process Variable Data Types</h3>
+<h3>Process Variable Data Types</h3>
 
 <p>The following types are supported:</p>
 <dl>
@@ -225,11 +183,11 @@ powerSupply record type can be created that has properties like "current",
       array</dd>
 </dl>
 
-<h3 id="Process2">Process Variable Reflection</h3>
+<h3>Process Variable Reflection</h3>
 
 <p>Given a pvname, which consists of a record name and field name, it is
 possible to introspect the field. The reflection interface does not provide
-access to data. The PVData and derived PV interfaces provide access to the
+access to data. The PVField and derived PV interfaces provide access to the
 data. The reflection and data interfaces are separate because the data may
 not be available. For example when a client connects to a PV, the client
 library can obtain the reflection information without obtaining any data.
@@ -237,7 +195,7 @@ Only when a client issues an I/O request will data be available. This
 separation is especially important for arrays and structures.</p>
 <hr />
 
-<h2 style="text-align: center" id="Type">Type</h2>
+<h2 style="text-align: center">Type</h2>
 <hr />
 
 <p>The types are defined by:</p>
@@ -261,7 +219,7 @@ separation is especially important for arrays and structures.</p>
 <p>Note that a string is a scalar.</p>
 <hr />
 
-<h2 style="text-align: center" id="Reflection">Reflection</h2>
+<h2 style="text-align: center">Reflection</h2>
 <hr />
 
 <p>This section defines the complete set of Java PV reflection interfaces.</p>
@@ -412,13 +370,13 @@ separation is especially important for arrays and structures.</p>
 </ul>
 <hr />
 
-<h2 style="text-align: center" id="PVData">PVData Interfaces</h2>
+<h2 style="text-align: center">PVField Interfaces</h2>
 <hr />
 
 <p>This section defines the Java Interfaces for accessing fields within a PV
 record.</p>
 
-<h3 id="PVData1">PVData</h3>
+<h3>PVField</h3>
 
 <p>The following is the base interface for accessing data.</p>
 <pre>    enum MessageType {info,warning,error,fatalError}
@@ -428,12 +386,12 @@ record.</p>
         void message(String message, MessageType messageType);
     }
 
-    interface PVData extends Requestor {
+    interface PVField extends Requestor {
         String getFullFieldName();
         Field getField();
-        PVData getParent();
+        PVField getParent();
         PVRecord getPVRecord();
-        void replacePVData(PVData newPVData);
+        void replacePVField(PVField newPVField);
         String getSupportName();
         String setSupportName(String name);
         String toString();
@@ -452,7 +410,7 @@ where
       <li>message<br />
 
         <ul>
-          <li>PVData prepends the full field name to the message and calls
+          <li>PVField prepends the full field name to the message and calls
             PVRecord.message. Note that this means that the PVRecord
             implementation must also implement message.</li>
           <li>PVRecord prepends the record name and passes the message to
@@ -473,10 +431,10 @@ where
   itself.</li>
   <li>getPVRecord<br />
     Get the interface for the record that contains this field.</li>
-  <li>replacePVData<br />
-    Replace this PVData. This is called by support code that wants to replace
+  <li>replacePVField<br />
+    Replace this PVField. This is called by support code that wants to replace
     the default implementation of a data field with it;s own implementation.
-    The new PVData must have the same Type as the oroginal field.</li>
+    The new PVField must have the same Type as the oroginal field.</li>
   <li>getSupportName<br />
     Get the name of the support for this PV.</li>
   <li>setSupportName<br />
@@ -489,56 +447,56 @@ where
     purposes.</li>
 </ul>
 
-<h3 id="Primitive">Primitive PVData types</h3>
+<h3>Primitive PVField types</h3>
 
 <p>The interfaces for primitive data types are:</p>
-<pre>    interface PVBoolean extends PVData {
+<pre>    interface PVBoolean extends PVField {
         boolean get();
         void put(boolean value);
     }
 
-    interface PVByte extends PVData {
+    interface PVByte extends PVField {
         byte get();
         void put(byte value);
     }
 
-    interface PVShort extends PVData {
+    interface PVShort extends PVField {
         short get();
         void put(short value);
     }
 
-    interface PVInt extends PVData {
+    interface PVInt extends PVField {
         int get();
         void put(int value);
     }
 
-    interface PVLong extends PVData {
+    interface PVLong extends PVField {
         long get();
         void put(long value);
     }
 
-    interface PVFloat extends PVData {
+    interface PVFloat extends PVField {
         float get();
         void put(float value);
     }
 
-    interface PVDouble extends PVData {
+    interface PVDouble extends PVField {
         double get();
         void put(double value);
     }</pre>
 
-<h3 id="PVString">PVString</h3>
+<h3>PVString</h3>
 
 <p>The interface for string is:</p>
-<pre>    interface PVString extends PVData {
+<pre>    interface PVString extends PVField {
         String get();
         void put(String value);
     }</pre>
 
-<h3 id="PVEnum">PVEnum</h3>
+<h3>PVEnum</h3>
 
 <p>The interface for enum is:</p>
-<pre>    interface PVEnum extends PVData{
+<pre>    interface PVEnum extends PVField{
         int getIndex();
         void setIndex(int index);
         String[] getChoices();
@@ -556,7 +514,7 @@ where
       be changed</dd>
 </dl>
 
-<h3 id="PVMenu">PVMenu</h3>
+<h3>PVMenu</h3>
 
 <p>The interface for a menu is:</p>
 <pre>    interface PVMenu extends PVEnum {}</pre>
@@ -564,10 +522,10 @@ where
 <p>The difference from an enum is that the reflection interface provides a
 menuName and the choices can not be modified.</p>
 
-<h3 id="PVLink">PVLink</h3>
+<h3>PVLink</h3>
 
 <p>The interface for a link is:</p>
-<pre>    interface PVLink extends PVData {
+<pre>    interface PVLink extends PVField {
         PVStructure getConfigurationStructure();
         boolean setConfigurationStructure(PVStructure pvStructure);
     }</pre>
@@ -589,11 +547,11 @@ assumes that the client has permission to change the support:</p>
   <li>Call setConfigurationStructure to set the new configuration.</li>
 </ul>
 
-<h3 id="PVStructur">PVStructure</h3>
+<h3>PVStructure</h3>
 
 <p>The interface for structure is:</p>
-<pre>    interface PVStructure extends PVData {
-        PVData[] getFieldPVDatas();
+<pre>    interface PVStructure extends PVField {
+        PVField[] getFieldPVFields();
         boolean replaceStructureField(String fieldName,String structureName)
         void beginPut();
         void endPut();
@@ -601,7 +559,7 @@ assumes that the client has permission to change the support:</p>
 
 <p>where</p>
 <dl>
-  <dt>getFieldPVDatas</dt>
+  <dt>getFieldPVFields</dt>
     <dd>Returns the array of subfields. The set of subfields must all have
       different field names.</dd>
   <dt>replaceStructureField</dt>
@@ -614,12 +572,14 @@ assumes that the client has permission to change the support:</p>
       before the first put and endPut after the last put.</dd>
 </dl>
 
-<h3 id="PVRecord">PVRecord</h3>
+<h3>PVRecord</h3>
 
-<p>Each PVData is a field within a PVRecord:</p>
+<p>Each PVField is a field within a PVRecord:</p>
 <pre>    interface PVRecord extends PVStructure
         String getRecordName();
         void message(String message, MessageType messageType);
+        void addRequestor(Requestor requestor);
+        void removeRequestor(Requestor requestor);
     }</pre>
 
 <p>where</p>
@@ -631,9 +591,13 @@ assumes that the client has permission to change the support:</p>
       The implementation should prepend the record name to the message and
       then call a more generic message handler. For example package
       org.epics.ioc.db calls iocdb.message.</dd>
+  <dt>addRequestor</dt>
+    <dd>Add a requestor to receive messages.</dd>
+  <dt>removeRequestor</dt>
+    <dd>Remove a message requestor</dd>
 </dl>
 
-<h3 id="PVArray">PVArray</h3>
+<h3>PVArray</h3>
 
 <p>PROBLEM: If the capacity is mutable then there is no maximum capacity. A
 channel access client could disable an ioc by sending very large arrays.
@@ -641,7 +605,7 @@ Perhaps PVArray should have two additional methods: setMaxCapacity and
 getMaxCapacity. setMaxCapacity can have tight access security.</p>
 
 <p>The interfaces for array are:</p>
-<pre>    interface PVArray extends PVData {
+<pre>    interface PVArray extends PVField {
         int getLength();
         void setLength(int len);
         int getCapacity();
@@ -818,8 +782,15 @@ the following reads an entire array:</p>
         }
         return storage;
     } </pre>
+<hr />
 
-<h3 id="FieldCreat">FieldCreate</h3>
+<h2 style="text-align: center">Field and PVField creation</h2>
+<hr />
+
+<p>Interfaces and factories are provided to create Introspection and PVField
+instances.</p>
+
+<h3>FieldCreate</h3>
 
 <p>This is an interface for creating introspection objects that implement the
 introspection interfaces. The methods are:</p>
@@ -864,8 +835,9 @@ introspection interfaces. The methods are:</p>
 <p>where</p>
 <dl>
   <dt>getType(Map&lt;String,String&gt;attributes)</dt>
-    <dd>Look for a map is expected to contain a key,value pair with key =
-      "type". If found getType(value) is called an returned.</dd>
+    <dd>Map is expected to contain a key,value pair with key = "type". If
+      found getType(value) is called and returned.</dd>
+  <dt>getElementType(Map&lt;String,String&gt;attributes)</dt>
     <dd>Like getType except that the key must be "elementType"</dd>
   <dt>getType(String value)</dt>
     <dd>Looks for value to be one of the following: "boolean", "byte",
@@ -886,52 +858,77 @@ introspection interfaces. The methods are:</p>
   <dt>createField(String fieldName,Type type)</dt>
     <dd>create a Field with the specified type, no properties, and default
       attributes. The type must be a scalar or a link.</dd>
-  <dt>createField(String fieldName,Type type,<br />
-  Property[] property,FieldAttribute fieldAttribute)</dt>
+  <dt>createField(String fieldName,Type type,Property[]
+  property,FieldAttribute fieldAttribute)</dt>
     <dd>create a Field with the specified type, properties, and attributes.
       The type must be a scalar or a link.</dd>
   <dt>createArray(String fieldName,Type elementType)</dt>
     <dd>create an Array with the specified elementType, no properties, and
       default attributes. The elementType can be any Type but must not be
       null.</dd>
-  <dt>createArray(String fieldName,Type elementType,<br />
-  Property[] property,FieldAttribute fieldAttribute)</dt>
+  <dt>createArray(String fieldName,Type elementType,Property[]
+  property,FieldAttribute fieldAttribute)</dt>
     <dd>create an Array with the specified elementType, properties, and
       attributes. The elementType can be any Type but must not be null.</dd>
   <dt>createEnum(String fieldName,boolean choicesMutable)</dt>
     <dd>create an Enum with no properties and default attributes.</dd>
-  <dt>createEnum(String fieldName,boolean choicesMutable,<br />
-  Property[] property,FieldAttribute fieldAttribute)</dt>
+  <dt>createEnum(String fieldName,boolean choicesMutable,Property[]
+  property,FieldAttribute fieldAttribute)</dt>
     <dd>create an Enum with properties and attributes.</dd>
   <dt>createMenu(String fieldName,String menuName,String[] menuChoices)</dt>
     <dd>create a Menu with no properties and default attributes.</dd>
-  <dt>createMenu(String fieldName,String menuName,String[] menuChoices,<br />
-  Property[]property,FieldAttribute fieldAttribute)</dt>
+  <dt>createMenu(String fieldName,String menuName,String[]
+  menuChoices,Property[]property,FieldAttribute fieldAttribute)</dt>
     <dd>create a Menu with properties and attributes.</dd>
-  <dt>createStructure(String fieldName,<br />
-  String structureName, Field[] field)</dt>
+  <dt>createStructure(String fieldName,String structureName, Field[]
+  field)</dt>
     <dd>create a Structure with no properties and default attributes. The
       structureName must not be null. It is permissible to have a Field[]
       with length 0.</dd>
-  <dt>createStructure(String fieldName,<br />
-  String structureName, Field[] field,<br />
-  Property[] property,FieldAttribute fieldAttribute)</dt>
+  <dt>createStructure(String fieldName,String structureName, Field[]
+  field,Property[] property,FieldAttribute fieldAttribute)</dt>
     <dd>create a Structure with properties and attributes. The structureName
       must not be null. It is permissible to have a Field[] with length
     0.</dd>
 </dl>
 
 <p>The field factory gets the single implementation of FieldCreate.</p>
+
+<h3>PVDataCreate</h3>
+
+<p>A factory is available that implements the interfaces for record instance
+fields. The methods are called by XMLToIOCDBFactory when it is reading
+instance definitions.</p>
+<pre>    interface PVDataCreate {
+        PVField createData(PVField parent,Field field);
+        PVArray createArrayData(PVField parent,Field field,
+            int capacity,boolean capacityMutable);
+        PVRecord createRecord(String recordName, Structure structure);
+    }
+
+    public class PVDataFactory {
+        public static PVDataCreate getPVDataCreate();
+    }</pre>
+where
+<dl>
+  <dt style="font-family: courier;">createData</dt>
+    <dd>Creates an instance of any type of field except array fields, or a
+      record instance itself.</dd>
+  <dt style="font-family: courier;">createArrayData</dt>
+    <dd>Create an array field instance.</dd>
+  <dt style="font-family: courier;">createRecord</dt>
+    <dd>Create a record instance.</dd>
+</dl>
 <hr />
 
-<h2 style="text-align: center" id="Base">Base Introspection Classes</h2>
+<h2 style="text-align: center">Base Introspection Classes</h2>
 <hr />
 
 <p>This section describes base classes for implementimg Field objects , i.e.
 introspection objects. For many applications they provide a complete
 introspection implementation but they could be extended if necessary.</p>
-<pre>    public class FieldBase implements Field {
-        public FieldBase(String fieldName,
+<pre>    public class BaseField implements Field {
+        public BaseField(String fieldName,
             Type type,Property[] property,FieldAttribute fieldAttribute);
         public String getFieldName();
         public Property[] getPropertys();
@@ -946,26 +943,26 @@ introspection implementation but they could be extended if necessary.</p>
         public String toString(int indentLevel);
     }
     
-    public class EnumBase extends FieldBase implements Enum{
-        public EnumBase(String fieldName,boolean choicesMutable,
+    public class BaseEnum extends BaseField implements Enum{
+        public BaseEnum(String fieldName,boolean choicesMutable,
             Property[] property,FieldAttribute fieldAttribute);
         public boolean isChoicesMutable();
         public String toString();
         public String toString(int indentLevel);
     }
     
-    public class MenuBase extends FieldBase implements Menu{
-        public MenuBase(String fieldName,String menuName,
+    public class BaseMenu extends BaseField implements Menu{
+        public BaseMenu(String fieldName,String menuName,String[] menuChoices,
             Property[] property,FieldAttribute fieldAttribute);
+        public boolean isChoicesMutable();
         public String getMenuName();
-        public boolean isChoicesMutable();
+        public String[] getMenuChoices();
         public String toString();
         public String toString(int indentLevel);
-        public String[] getMenuChoices();
     }
     
-    public class StructureBase extends FieldBase implements Structure {
-        public StructureBase(String fieldName,String structureName,Field[] field,
+    public class BaseStructure.java extends BaseField implements Structure {
+        public BaseStructure.java(String fieldName,String structureName,Field[] field,
              Property[] property,FieldAttribute fieldAttribute);
         public Field getField(String name);
         public int getFieldIndex(String name);
@@ -976,8 +973,8 @@ introspection implementation but they could be extended if necessary.</p>
         public String toString(int indentLevel);
     }
 
-    public class ArrayBase extends FieldBase implements Array {
-        public ArrayBase(String fieldName,Type elementType,
+    public class BaseArray extends BaseField implements Array {
+        public BaseArray(String fieldName,Type elementType,
             Property[] property,FieldAttribute fieldAttribute);
         public Type getElementType();
         public String toString();
@@ -990,21 +987,24 @@ introspection implementation but they could be extended if necessary.</p>
 interfaces.</p>
 <hr />
 
-<h2 style="text-align: center" id="AbstractPV">AbstractPVData</h2>
+<h2 style="text-align: center">Abstract and Base Classes for
+PVField</h2>
 <hr />
 
-<p>The following is an abstract base class for implementing PVData
+<h3>AbstractPVField</h3>
+
+<p>The following is an abstract base class for implementing PVField
 interfaces:</p>
-<pre>public abstract class AbstractPVData implements PVData{
-    abstract public void replacePVData(PVData newPVData);
-    protected AbstractPVData(PVData parent, Field field);
+<pre>public abstract class AbstractPVField implements PVField{
+    protected AbstractPVField(PVField parent, Field field);
     protected void replaceField(Field field);
-    protected void setRecord(PVRecord record);
+    public void replacePVField(PVField newPVField);
+    public void setRecord(PVRecord record);
     public String getRequestorName();
     public void message(String message, MessageType messageType);
     public String getFullFieldName();
     public Field getField();
-    public PVData getParent();
+    public PVField getParent();
     public PVRecord getPVRecord();
     public String getSupportName();
     public String setSupportName(String name);
@@ -1013,7 +1013,7 @@ interfaces:</p>
 
 <p>where</p>
 <dl>
-  <dt>AbstractPVData</dt>
+  <dt>AbstractPVField</dt>
     <dd>The constructor which must be called by any derived class.</dd>
   <dt>replaceField</dt>
     <dd>This is called by a derived PVStructure implementation when it wants
@@ -1031,9 +1031,70 @@ interfaces:</p>
   <dt>toString</dt>
     <dd>Should be called by derived classes to add the supportName.</dd>
 </dl>
+
+<h3>AbstractPVArray</h3>
+
+<p>The following is a abstract class for creating array fields.</p>
+<pre>public abstract class AbstractPVArray extends AbstractPVField implements PVArray{
+    public AbstractPVArray(PVField parent,Array array,int capacity,boolean capacityMutable);
+    public boolean isCapacityMutable();
+    public int getCapacity();
+    public int getLength();
+    abstract public void setCapacity(int capacity);
+    public void setLength(int len);
+    public String toString();
+}</pre>
+
+<h3>BasePVEnum</h3>
+<pre>public class BasePVEnum extends AbstractPVField implements PVEnum {
+    public BasePVEnum(PVField parent,Enum enumField);
+    public String[] getChoices();
+    public int getIndex();
+    public boolean setChoices(String[] choice);
+    public void setIndex(int index);
+    public String toString();
+    public String toString(int indentLevel);
+}</pre>
+
+<h3>BasePVMenu</h3>
+<pre>public class BasePVMenu extends BasePVEnum implements PVMenu
+    public BasePVMenu(PVField parent,Menu menu) {
+    public boolean setChoices(String[] choice) {
+    public String toString() { return getString(0);}
+    public String toString(int indentLevel) {
+}</pre>
+
+<h3>BasePVLink</h3>
+<pre>public class BasePVLink extends AbstractPVField implements PVLink {
+    public BasePVLink(PVField parent,Field field);
+    public PVStructure getConfigurationStructure();
+    public boolean setConfigurationStructure(PVStructure pvStructure);
+    public String toString();
+    public String toString(int indentLevel);
+}</pre>
+
+<h3>BasePVStructure</h3>
+<pre>public class BasePVStructure extends AbstractPVField implements PVStructure
+    public BasePVStructure(PVField parent, Structure structure);
+    public void setRecord(PVRecord record);
+    public boolean replaceStructureField(String fieldName, Structure structure);
+    public PVField[] getFieldPVFields();
+    public String toString();
+    public String toString(int indentLevel);
+    protected String toString(String prefix,int indentLevel);
+}</pre>
+
+<h3>BasePVRecord</h3>
+<pre>    public BasePVRecord(String recordName,Structure structure)
+    public void message(String message, MessageType messageType);
+    public String getRecordName();
+    public String toString(int indentLevel);
+    void addRequestor(Requestor requestor);
+    void removeRequestor(Requestor requestor);
+}</pre>
 <hr />
 
-<h2 style="text-align: center" id="Convert">Convert</h2>
+<h2 style="text-align: center">Convert</h2>
 <hr />
 
 <p>This section describes the supported conversions between data types.</p>
@@ -1062,56 +1123,56 @@ interfaces:</p>
   <li>Conversion between compatible structures.</li>
 </ul>
 <pre>    interface Convert {
-        String getString(PVData pv, int indentLevel);
-        String getString(PVData pv);
-        void fromString(PVData pv,String from);
-        int fromStringArray(PVData pv,
+        String getString(PVField pv, int indentLevel);
+        String getString(PVField pv);
+        void fromString(PVField pv,String from);
+        int fromStringArray(PVField pv,
              int offset, int len, String[]from, int fromOffset);
         int toStringArray(PVArray pv,
              int offset, int len, String[]to, int toOffset);
         boolean isCopyScalarCompatible(Field from, Field to);
-        void copyScalar(PVData from, PVData to);
+        void copyScalar(PVField from, PVField to);
         boolean isCopyArrayCompatible(Array from, Array to);
         int copyArray(PVArray from, int offset, int len, PVArray to, int toOffset);
         boolean isCopyStructureCompatible(Structure from, Structure to);
         void copyStructure(PVStructure from, PVStructure to);
         // For the following the pv Type must be PVByte, ...., PVDouble
-        byte toByte(PVData pv);
-        short toShort(PVData pv);
-        int   toInt(PVData pv);
-        long  toLong(PVData pv);
-        float toFloat(PVData pv);
-        double toDouble(PVData pv);
-        void fromByte(PVData pv, byte from);
-        void  fromShort(PVData pv, short from);
-        void  fromInt(PVData pv, int from);
-        void  fromLong(PVData pv, long from);
-        void  fromFloat(PVData pv, float from);
-        void  fromDouble(PVData pv, double from);
+        byte toByte(PVField pv);
+        short toShort(PVField pv);
+        int   toInt(PVField pv);
+        long  toLong(PVField pv);
+        float toFloat(PVField pv);
+        double toDouble(PVField pv);
+        void fromByte(PVField pv, byte from);
+        void  fromShort(PVField pv, short from);
+        void  fromInt(PVField pv, int from);
+        void  fromLong(PVField pv, long from);
+        void  fromFloat(PVField pv, float from);
+        void  fromDouble(PVField pv, double from);
         // For the following the element type must be PVByte, ...., PVDouble
-        int toByteArray(PVData pv,
+        int toByteArray(PVField pv,
             int offset, int len, byte[]to, int toOffset);
-        int toShortArray(PVData pv,
+        int toShortArray(PVField pv,
             int offset, int len, short[]to, int toOffset);
-        int toIntArray(PVData pv,
+        int toIntArray(PVField pv,
             int offset, int len, int[]to, int toOffset);
-        int toLongArray(PVData pv,
+        int toLongArray(PVField pv,
             int offset, int len, long[]to, int toOffset);
-        int toFloatArray(PVData pv,
+        int toFloatArray(PVField pv,
             int offset, int len, float[]to, int toOffset);
-        int toDoubleArray(PVData pv,
+        int toDoubleArray(PVField pv,
             int offset, int len, double[]to, int toOffset);
-        int fromByteArray(PVData pv,
+        int fromByteArray(PVField pv,
             int offset, int len, byte[]from, fromOffset);
-        int fromShortArray(PVData pv,
+        int fromShortArray(PVField pv,
             int offset, int len, short[]from, fromOffset);
-        int fromIntArray(PVData pv,
+        int fromIntArray(PVField pv,
             int offset, int len, int[]from, fromOffset);
-        int fromLongArray(PVData pv,
+        int fromLongArray(PVField pv,
             int offset, int len, long[]from, fromOffset);
-        int fromFloatArray(PVData pv,
+        int fromFloatArray(PVField pv,
             int offset, int len, float[]from, fromOffset);
-        int fromDoubleArray(PVData pv,
+        int fromDoubleArray(PVField pv,
             int offset, int len, double[]from, fromOffset);
         void newLine(StringBuilder builder, int indentLevel);
     }
@@ -1122,18 +1183,19 @@ interfaces:</p>
 
 <p>The array methods all return the number of elements copied or converted.
 This can be less than <span style="font-family: courier;">len</span> if the
-PVData array contains less than len elements.</p>
-<p><span style="font-family: courier;">newLine</span> is a convenience method for
-code that implements <span style="font-family: courier;">toString</span>
+PVField array contains less than len elements.</p>
+
+<p><span style="font-family: courier;">newLine</span> is a convenience method
+for code that implements <span style="font-family: courier;">toString</span>
 It generates a newline and inserts blanks at the beginning of the newline.</p>
 
 <p>ConvertFactory gets the single implementation of Convert.</p>
 <hr />
 
-<h2 style="text-align: center" id="PVAccess">PVAccess</h2>
+<h2 style="text-align: center">PVAccess</h2>
 <hr />
 
-<h3 id="Overview1">Overview</h3>
+<h3>Overview</h3>
 
 <p>PVAccess is an interface that makes it easier to locate data fields of a
 record. It also works with field properties to support "device" oriented
@@ -1165,7 +1227,7 @@ valid names.</p>
 
 <p>The javaIOC unnamed package provides more complete examples.</p>
 
-<h3 id="Definition">Definition</h3>
+<h3>Definition</h3>
 
 <p>The definition of PVAccess is:</p>
 <pre>    public enum AccessSetResult {
@@ -1179,8 +1241,8 @@ valid names.</p>
         AccessSetResult findField(String name);
         String getOtherRecord();
         String getOtherField();
-        void setPVField(PVData pvData);
-        PVData getField();
+        void setPVField(PVField pvData);
+        PVField getField();
     }
 
     public class PVAccessFactory {
@@ -1237,7 +1299,7 @@ valid names.</p>
     <dd>A factory for creating PVAccess</dd>
 </dl>
 
-<h3 id="findField">findField Examples</h3>
+<h3>findField Examples</h3>
 
 <p>The semantics allow searching down a structure hierarchy and for searching
 via properties. At a particular level the search is first made for subfields
@@ -1252,13 +1314,13 @@ interfaces for a field named "value" and all properties of this field.</p>
      AccessSetResult setResult;
      setResult = pvAccess.findField("value");
      if(setResult!=AccessSetResult.thisRecord) { /*take some action*/}
-     PVData value = pvAccess.getField();
+     PVField value = pvAccess.getField();
      Property[] properties = value.getField.getPropertys();
      while(Property property: properties) {
          pvAccess.setField(value);
          setResult = pvAccess.findField(property.getPropertyName());
          if(setResult!=AccessSetResult.thisRecord) { /*take some action*/}
-         PVData propData = pvAccess.getField();
+         PVField propData = pvAccess.getField();
          // do something with propData
     }</pre>
 

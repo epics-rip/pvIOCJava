@@ -18,6 +18,11 @@ import org.epics.ioc.process.*;
  *
  */
 public class DBRecordFactory {
+    /**
+     * Create a DBRecord.
+     * @param pvRecord The PVRecord for this DBRecord.
+     * @return The DBRecord interface.
+     */
     public static DBRecord create(PVRecord pvRecord) {
         return new DBRecordImpl(pvRecord);
     }
@@ -33,82 +38,75 @@ public class DBRecordFactory {
         private RecordProcess recordProcess = null;
         private LinkedList<RecordListenerPvt> recordListenerList
         = new LinkedList<RecordListenerPvt>();
-        private LinkedList<DBData> listenerSourceList
-        = new LinkedList<DBData>();
+        private LinkedList<DBField> listenerSourceList
+        = new LinkedList<DBField>();
         private DBD dbd = null;
 
-        /**
-         * @param recordName
-         *            The name of the record.
-         * @param dbdRecordType
-         *            The introspection interface for the record. Constructor.
-         */
-        public DBRecordImpl(PVRecord pvRecord){
+        private DBRecordImpl(PVRecord pvRecord){
             this.pvRecord = pvRecord;
             this.dbStructure = new BaseDBStructure(this,pvRecord);
         }
-
         /* (non-Javadoc)
-         * @see org.epics.ioc.db.DBRecord#findDBData(org.epics.ioc.pv.PVData)
+         * @see org.epics.ioc.db.DBRecord#findDBField(org.epics.ioc.pv.PVField)
          */
-        public DBData findDBData(PVData pvData) {
-            if(pvData==pvRecord) {
+        public DBField findDBField(PVField pvField) {
+            if(pvField==pvRecord) {
                 return dbStructure;
             }
             int nlevels = 0;
-            PVData parent = pvData.getParent();
+            PVField parent = pvField.getParent();
             while(parent!=null) {
                 nlevels++;
                 parent = parent.getParent();
             }
-            PVData[] pvDataFind = new PVData[nlevels];
-            pvDataFind[nlevels-1] = pvData;
-            parent = pvData.getParent();
+            PVField[] pvFieldFind = new PVField[nlevels];
+            pvFieldFind[nlevels-1] = pvField;
+            parent = pvField.getParent();
             int index = nlevels-2;
             while(parent!=pvRecord) {
-                pvDataFind[index--] = parent;
+                pvFieldFind[index--] = parent;
                 parent = parent.getParent();
             }
-            DBData[] dbDatas = dbStructure.getFieldDBDatas();
-            PVData[] pvDatas = pvRecord.getFieldPVDatas();
-            return findDBData(pvData,pvDataFind,0,dbDatas,pvDatas);
+            DBField[] dbFields = dbStructure.getFieldDBFields();
+            PVField[] pvFields = pvRecord.getFieldPVFields();
+            return findDBField(pvField,pvFieldFind,0,dbFields,pvFields);
         }
         
-        private DBData findDBData(
-            PVData pvData,PVData[] pvDataFind,int index,DBData[] dbDatas,PVData[] pvDatas)
+        private DBField findDBField(
+            PVField pvField,PVField[] pvFieldFind,int index,DBField[] dbFields,PVField[] pvFields)
         {
-            PVData pvNow = pvDataFind[index];
-            for(int j=0; j<dbDatas.length; j++) {
-                if(pvDatas[j]==pvNow) {
-                    if(pvNow==pvData) return dbDatas[j];
+            PVField pvNow = pvFieldFind[index];
+            for(int j=0; j<dbFields.length; j++) {
+                if(pvFields[j]==pvNow) {
+                    if(pvNow==pvField) return dbFields[j];
                     Type typeNow = pvNow.getField().getType();
                     if(typeNow==Type.pvArray) {
-                        return findArrayData(pvData,pvDataFind,index+1,dbDatas[j],(PVArray)pvDatas[j]);
+                        return findArrayField(pvField,pvFieldFind,index+1,dbFields[j],(PVArray)pvFields[j]);
                     }
-                    if(pvNow.getField().getType()!=Type.pvStructure) return dbDatas[j];
-                    DBStructure dbStructure = (DBStructure)dbDatas[j];
-                    dbDatas = dbStructure.getFieldDBDatas();
-                    PVStructure pvStructure = (PVStructure)pvDatas[j];
-                    pvDatas = pvStructure.getFieldPVDatas();
+                    if(pvNow.getField().getType()!=Type.pvStructure) return dbFields[j];
+                    DBStructure dbStructure = (DBStructure)dbFields[j];
+                    dbFields = dbStructure.getFieldDBFields();
+                    PVStructure pvStructure = (PVStructure)pvFields[j];
+                    pvFields = pvStructure.getFieldPVFields();
                     index++;
-                    return findDBData(pvData,pvDataFind,index,dbDatas,pvDatas);
+                    return findDBField(pvField,pvFieldFind,index,dbFields,pvFields);
                 }
             }
             throw new IllegalStateException("Logic error");
         }
         
-        private DBData findArrayData(
-                PVData pvData,PVData[]pvDataFind,int index,DBData dbData,PVArray pvArray)
+        private DBField findArrayField(
+                PVField pvField,PVField[]pvFieldFind,int index,DBField dbField,PVArray pvArray)
         {
             Array array = (Array)pvArray.getField();
             Type arrayElementType = array.getElementType();
             if(arrayElementType.isScalar()) {
-                if(dbData.getPVData()==pvData) return dbData;
+                if(dbField.getPVField()==pvField) return dbField;
                 throw new IllegalStateException("Logic error");
             }
             int size = pvArray.getLength();
-            DBNonScalarArray dbNonScalarArray = (DBNonScalarArray)dbData;
-            DBData[] dbDatas = dbNonScalarArray.getElementDBDatas();
+            DBNonScalarArray dbNonScalarArray = (DBNonScalarArray)dbField;
+            DBField[] dbFields = dbNonScalarArray.getElementDBFields();
             switch(arrayElementType) {
             case pvEnum:
                 PVEnumArray pvEnumArray = (PVEnumArray)pvArray;
@@ -118,9 +116,9 @@ public class DBRecordFactory {
                 for(int i=0; i<size; i++) {
                     PVEnum pvEnum = pvEnums[i];
                     if(pvEnum==null) continue;
-                    if(pvEnum==pvData) {
-                        if(pvEnum==dbDatas[i].getPVData()) {
-                            return dbDatas[i];
+                    if(pvEnum==pvField) {
+                        if(pvEnum==dbFields[i].getPVField()) {
+                            return dbFields[i];
                         }
                         throw new IllegalStateException("Logic error");
                     }
@@ -134,14 +132,14 @@ public class DBRecordFactory {
                 for(int i=0; i<size; i++) {
                     PVStructure pvStructure = pvStructures[i];
                     if(pvStructure==null) continue;
-                    if(pvStructure==pvDataFind[index]) {
-                        DBStructure dbStructure = (DBStructure)dbDatas[i];
-                        if(pvStructure==pvData) {
-                            if(dbStructure.getPVData()==pvStructure) return dbStructure;
+                    if(pvStructure==pvFieldFind[index]) {
+                        DBStructure dbStructure = (DBStructure)dbFields[i];
+                        if(pvStructure==pvField) {
+                            if(dbStructure.getPVField()==pvStructure) return dbStructure;
                             throw new IllegalStateException("Logic error");
                         }
-                        return findDBData(pvData,pvDataFind,index+1,
-                            dbStructure.getFieldDBDatas(),pvStructure.getFieldPVDatas());
+                        return findDBField(pvField,pvFieldFind,index+1,
+                            dbStructure.getFieldDBFields(),pvStructure.getFieldPVFields());
                     }
                 }
                 throw new IllegalStateException("Logic error");
@@ -153,13 +151,13 @@ public class DBRecordFactory {
                 for(int i=0; i<size; i++) {
                     PVArray elementArray = pvArrays[i];
                     if(elementArray==null) continue;
-                    if(elementArray==pvDataFind[index]) {
+                    if(elementArray==pvFieldFind[index]) {
                         Type elementType = ((Array)elementArray.getField()).getElementType();
                         if(elementType.isScalar()) {
-                            if(elementArray==pvData) return dbDatas[i];
+                            if(elementArray==pvField) return dbFields[i];
                             throw new IllegalStateException("Logic error");
                         }
-                        return findArrayData(pvData,pvDataFind,index+1,dbDatas[i],elementArray);
+                        return findArrayField(pvField,pvFieldFind,index+1,dbFields[i],elementArray);
                     }
                 }
                 throw new IllegalStateException("Logic error");
@@ -171,8 +169,8 @@ public class DBRecordFactory {
                 for(int i=0; i<size; i++) {
                     PVMenu pvMenu = pvMenus[i];
                     if(pvMenu==null) continue;
-                    if(pvMenu==pvData) {
-                        if(pvMenu==dbDatas[i].getPVData()) return dbDatas[i];
+                    if(pvMenu==pvField) {
+                        if(pvMenu==dbFields[i].getPVField()) return dbFields[i];
                         throw new IllegalStateException("Logic error");
                     }
                 }
@@ -185,8 +183,8 @@ public class DBRecordFactory {
                 for(int i=0; i<size; i++) {
                     PVLink pvLink = pvLinks[i];
                     if(pvLink==null) continue;
-                    if(pvLink==pvData) {
-                        if(pvLink==dbDatas[i].getPVData()) return dbDatas[i];
+                    if(pvLink==pvField) {
+                        if(pvLink==dbFields[i].getPVField()) return dbFields[i];
                         throw new IllegalStateException("Logic error");
                     }
                 }
@@ -194,43 +192,32 @@ public class DBRecordFactory {
             }
             throw new IllegalStateException("Logic error");
         }
-
-        /*
-         * (non-Javadoc)
-         * 
+        /* (non-Javadoc)
          * @see org.epics.ioc.db.DBRecord#getDBStructure()
          */
         public DBStructure getDBStructure() {
             return dbStructure;
         }
-        /*
-         * (non-Javadoc)
-         * 
+        /* (non-Javadoc)
          * @see org.epics.ioc.db.DBRecord#getPVRecord()
          */
         public PVRecord getPVRecord() {
             return pvRecord;
         }
-        /*
-         * (non-Javadoc)
-         * 
+        /* (non-Javadoc)
          * @see org.epics.ioc.db.DBRecord#lock()
          */
         public void lock() {
             lock.lock();
         }
-        /*
-         * (non-Javadoc)
-         * 
+        /* (non-Javadoc)
          * @see org.epics.ioc.db.DBRecord#unlock()
          */
         public void unlock() {
             lock.unlock();
         }
-        /*
-         * (non-Javadoc)
-         * 
-         * @see org.epics.ioc.db.DBRecord#lockOtherRecord(org.epics.ioc.dbAccess.DBRecord)
+        /* (non-Javadoc)
+         * @see org.epics.ioc.db.DBRecord#lockOtherRecord(org.epics.ioc.db.DBRecord)
          */
         public void lockOtherRecord(DBRecord otherRecord) {
             int otherId = otherRecord.getRecordID();
@@ -243,18 +230,13 @@ public class DBRecordFactory {
             otherRecord.lock();
             for(int i=0; i<count; i++) lock.lock();
         }
-
-        /*
-         * (non-Javadoc)
-         * 
+        /* (non-Javadoc)
          * @see org.epics.ioc.db.DBRecord#getRecordProcess()
          */
         public RecordProcess getRecordProcess() {
             return recordProcess;
         }
-        /*
-         * (non-Javadoc)
-         * 
+        /* (non-Javadoc)
          * @see org.epics.ioc.db.DBRecord#setRecordProcess(org.epics.ioc.process.RecordProcess)
          */
         public boolean setRecordProcess(RecordProcess process) {
@@ -262,17 +244,13 @@ public class DBRecordFactory {
             recordProcess = process;
             return true;
         }
-        /*
-         * (non-Javadoc)
-         * 
+        /* (non-Javadoc)
          * @see org.epics.ioc.db.DBRecord#getRecordID()
          */
         public int getRecordID() {
             return id;
         }
-        /*
-         * (non-Javadoc)
-         * 
+        /* (non-Javadoc)
          * @see org.epics.ioc.db.DBRecord#beginProcess()
          */
         public void beginProcess() {
@@ -282,9 +260,7 @@ public class DBRecordFactory {
                 listener.getDBListener().beginProcess();
             }
         }
-        /*
-         * (non-Javadoc)
-         * 
+        /* (non-Javadoc)
          * @see org.epics.ioc.db.DBRecord#endProcess()
          */
         public void endProcess() {
@@ -294,9 +270,7 @@ public class DBRecordFactory {
                 listener.getDBListener().endProcess();
             }
         }
-        /*
-         * (non-Javadoc)
-         * 
+        /* (non-Javadoc)
          * @see org.epics.ioc.db.DBRecord#createRecordListener(org.epics.ioc.db.DBListener)
          */
         public RecordListener createRecordListener(DBListener listener) {
@@ -304,88 +278,69 @@ public class DBRecordFactory {
             recordListenerList.add(recordListenerPvt);
             return recordListenerPvt;
         }   
-        /*
-         * (non-Javadoc)pvData
-         * 
+        /* (non-Javadoc)
          * @see org.epics.ioc.db.DBRecord#removeRecordListener(org.epics.ioc.db.RecordListener)
          */
         public void removeRecordListener(RecordListener listener) {
-            Iterator<DBData> iter = listenerSourceList.iterator();
+            Iterator<DBField> iter = listenerSourceList.iterator();
             while(iter.hasNext()) {
-                DBData dbData = iter.next();
-                dbData.removeListener(listener);
+                DBField dbField = iter.next();
+                dbField.removeListener(listener);
             }
             recordListenerList.remove(listener);
         }
-        /*
-         * (non-Javadoc)
-         * 
-         * @see org.epics.ioc.db.BaseDBData#removeListeners()
+        /* (non-Javadoc)
+         * @see org.epics.ioc.db.DBRecord#removeRecordListeners()
          */
         public void removeRecordListeners() {
             while(true) {
                 RecordListenerPvt listener = recordListenerList.remove();
                 if(listener==null) break;
                 listener.getDBListener().unlisten(listener);
-                Iterator<DBData> iter = listenerSourceList.iterator();
+                Iterator<DBField> iter = listenerSourceList.iterator();
                 while(iter.hasNext()) {
-                    DBData dbData = iter.next();
-                    dbData.removeListener(listener);
+                    DBField dbField = iter.next();
+                    dbField.removeListener(listener);
                 }
             }
             listenerSourceList.clear();
         }
-        /*
-         * (non-Javadoc)
-         * 
-         * @see org.epics.ioc.db.DBRecord#addListenerSource(org.epics.ioc.db.BaseDBData)
+        /* (non-Javadoc)
+         * @see org.epics.ioc.db.DBRecord#addListenerSource(org.epics.ioc.db.DBField)
          */
-        public void addListenerSource(DBData dbData) {
-            listenerSourceList.add(dbData);
+        public void addListenerSource(DBField dbField) {
+            listenerSourceList.add(dbField);
         }
-        /*
-         * (non-Javadoc)
-         * 
+        /* (non-Javadoc)
          * @see org.epics.ioc.db.DBRecord#getDBD()
          */
         public DBD getDBD() {
             return dbd;
         }
-        /*
-         * (non-Javadoc)
-         * 
-         * @see org.epics.ioc.db.DBRecord#setDBD(org.epics.ioc.dbDefinition.DBD)
+        /* (non-Javadoc)
+         * @see org.epics.ioc.db.DBRecord#setDBD(org.epics.ioc.dbd.DBD)
          */
         public void setDBD(DBD dbd) {
             this.dbd = dbd;
         }
-        /*
-         * (non-Javadoc)
-         * 
+        /* (non-Javadoc)
          * @see org.epics.ioc.db.DBRecord#getIOCDB()
          */
         public IOCDB getIOCDB() {
             return iocdb;
         }
-        /*
-         * (non-Javadoc)
-         * 
+        /* (non-Javadoc)
          * @see org.epics.ioc.db.DBRecord#setIOCDB(org.epics.ioc.db.IOCDB)
          */
         public void setIOCDB(IOCDB iocdb) {
             this.iocdb = iocdb;
         }
-        /*
-         * (non-Javadoc)
-         * 
+        /* (non-Javadoc)
          * @see java.lang.Object#toString()
          */
-        public String toString() { return pvRecord.toString(0);}
-
-        /*
-         * (non-Javadoc)
-         * 
-         * @see org.epics.ioc.pvAccess.PVData#toString(int)
+        public String toString() { return pvRecord.toString(0);}       
+        /* (non-Javadoc)
+         * @see org.epics.ioc.db.DBRecord#toString(int)
          */
         public String toString(int indentLevel) {
             return pvRecord.toString(indentLevel);

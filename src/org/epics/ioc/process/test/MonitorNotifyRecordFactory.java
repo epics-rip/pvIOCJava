@@ -67,7 +67,7 @@ public class MonitorNotifyRecordFactory {
                 return;
             }
             PVAccess pvAccess = PVAccessFactory.createPVAccess(pvRecord);
-            PVData pvData;
+            PVField pvField;
             AccessSetResult result;
             pvAccess.findField(null);
             result = pvAccess.findField("notify");
@@ -75,23 +75,23 @@ public class MonitorNotifyRecordFactory {
                 message("field notify does not exist",MessageType.error);
                 return;
             }
-            pvData = pvAccess.getField();
-            if(pvData.getField().getType()!=Type.pvBoolean) {
+            pvField = pvAccess.getField();
+            if(pvField.getField().getType()!=Type.pvBoolean) {
                 message("field notify is not boolean",MessageType.error);
                 return;
             }
-            PVData oldField = pvAccess.getField();
-            PVData parent = oldField.getParent();
+            PVField oldField = pvAccess.getField();
+            PVField parent = oldField.getParent();
             Field field = oldField.getField();
             notify = new BooleanData(parent,field);
-            DBData dbNotify = dbRecord.findDBData(oldField);
-            dbNotify.replacePVData(notify);
-            notify.setDBData(dbNotify);
+            DBField dbNotify = dbRecord.findDBField(oldField);
+            dbNotify.replacePVField(notify);
+            notify.setDBField(dbNotify);
             pvAccess.findField(null);
             result = pvAccess.findField("inputArray");
             if(result==AccessSetResult.thisRecord) {
-                DBData dbData = dbRecord.findDBData(pvAccess.getField());
-                inputSupport = (LinkSupport)dbData.getSupport();
+                DBField dbField = dbRecord.findDBField(pvAccess.getField());
+                inputSupport = (LinkSupport)dbField.getSupport();
                 if(inputSupport!=null) {
                     inputSupport.setField(dbNotify);
                     inputSupport.initialize();
@@ -107,8 +107,8 @@ public class MonitorNotifyRecordFactory {
             pvAccess.findField(null);
             result = pvAccess.findField("outputArray");
             if(result==AccessSetResult.thisRecord) {
-                DBData dbData = dbRecord.findDBData(pvAccess.getField());
-                outputSupport = (LinkSupport)dbData.getSupport();
+                DBField dbField = dbRecord.findDBField(pvAccess.getField());
+                outputSupport = (LinkSupport)dbField.getSupport();
                 if(outputSupport!=null) {
                     outputSupport.setField(dbNotify);
                     outputSupport.initialize();
@@ -181,25 +181,25 @@ public class MonitorNotifyRecordFactory {
         }
     }
     
-    private static class BooleanData extends AbstractPVData
+    private static class BooleanData extends AbstractPVField
     implements PVBoolean, Runnable, RecordProcessRequestor
     {
         private static IOCExecutor iocExecutor
             = IOCExecutorFactory.create("monitorNotifyRecord");
         private static Convert convert = ConvertFactory.getConvert();
         private boolean value;
-        private DBData dbData;
+        private DBField dbField;
         private RecordProcess recordProcess;
         private boolean processActive = false;
         private boolean processAgain = false;
         
-        public BooleanData(PVData parent,Field field) {
+        public BooleanData(PVField parent,Field field) {
             super(parent,field);
         }
         
-        public boolean setDBData(DBData dbData) {
-            this.dbData = dbData;
-            DBRecord dbRecord = dbData.getDBRecord();
+        public boolean setDBField(DBField dbField) {
+            this.dbField = dbField;
+            DBRecord dbRecord = dbField.getDBRecord();
             recordProcess = dbRecord.getRecordProcess();
             boolean result = recordProcess.setRecordProcessRequestor(this);
             if(!result) {
@@ -220,7 +220,7 @@ public class MonitorNotifyRecordFactory {
          */
         public void put(boolean value) {
             this.value = value;
-            dbData.postPut();
+            dbField.postPut();
             if(value) {
                 if(processActive) {
                     processAgain = true;

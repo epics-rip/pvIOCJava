@@ -16,7 +16,7 @@ import org.epics.ioc.pv.*;
  * DBDFactory creates a Database Definition Database (DBD) and automatically creates the master DBD.
  * A DBD contains the description of Database Definitions:
  *  menu, structure, recordType, and support.
- * The masterDBD automatically creates a DBDStructure which has structureName = "null: and has 0 fields.
+ * The masterDBD automatically creates a DBDStructure which has structureName = "null" and has 0 fields.
  * @author mrk
  * 
  */

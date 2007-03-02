@@ -40,20 +40,24 @@ public class BaseChannelDataQueue implements ChannelDataQueue {
        try {
            if(freeList.size()>0) {
                ChannelData data = freeList.remove(0);
-               inUseList.add(data);
                return data;
            }
            numberMissed++;
            if(!forceFree) return null;
            if(inUseList.size()<=0) return null;
            ChannelData data = inUseList.remove(0);
-           inUseList.add(data);
            return data;
        } finally {
            lock.unlock();
        }
    }
    /* (non-Javadoc)
+ * @see org.epics.ioc.ca.ChannelDataQueue#setInUse(org.epics.ioc.ca.ChannelData)
+ */
+public void setInUse(ChannelData channelData) {
+    inUseList.add(channelData);
+}
+/* (non-Javadoc)
     * @see org.epics.ioc.ca.ChannelDataQueue#getNext()
     */
    public ChannelData getNext() {
@@ -89,7 +93,7 @@ public class BaseChannelDataQueue implements ChannelDataQueue {
        }
    }
    /* (non-Javadoc)
-    * @see org.epics.ioc.ca.ChannelDataQueue#releaseNext(org.epics.ioc.ca.CDBData)
+    * @see org.epics.ioc.ca.ChannelDataQueue#releaseNext(org.epics.ioc.ca.CDField)
     */
    public void releaseNext(ChannelData channelData) {
        lock.lock();

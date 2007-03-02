@@ -23,11 +23,11 @@ public class LinearConvertInputFactory {
      * @param pvStructure The structure to support.
      * @return The Support interface.
      */
-    public static Support create(PVStructure pvStructure) {
+    public static Support create(DBField dbField) {
         Support support = null;
-        String supportName = pvStructure.getSupportName();
+        String supportName = dbField.getSupportName();
         if(supportName.equals(supportName)) {
-            support = new LinearConvert(pvStructure);
+            support = new LinearConvert(dbField);
         }
         return support;
     }
@@ -36,11 +36,11 @@ public class LinearConvertInputFactory {
     
     private static class LinearConvert extends AbstractSupport {
         
-        private PVStructure pvStructure = null;
+        private DBField dbField = null;
         
-        private LinearConvert(PVStructure pvStructure) {
-            super(supportName,(DBData)pvStructure);
-            this.pvStructure = pvStructure;
+        private LinearConvert(DBField dbField) {
+            super(supportName,dbField);
+            this.dbField = dbField;
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.process.AbstractSupport#getRequestorName()

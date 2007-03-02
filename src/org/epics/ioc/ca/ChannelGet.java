@@ -15,16 +15,15 @@ import org.epics.ioc.pv.*;
 public interface ChannelGet {
     /**
      * Get data from the channel.
-     * @param channelFieldGroup The set of data to get.
      * @return (false,true) if the request (is not, is) started.
      * This fails if the request can not be satisfied.
      */
-    boolean get(ChannelFieldGroup channelFieldGroup);
+    boolean get();
     /**
      * If ChannelGetRequestor.nextGetData or ChannelGetRequestor.nextDelayedGetData returns true
      * this is the call to ask again for the data. The result is that the underlying database
      * is locked and ChannelGetRequestor.nextDelayedGetData is called.
-     * @param pvData The pvData to get.
+     * @param pvField The pvField to get.
      */
-    void getDelayed(PVData pvData);
+    void getDelayed(PVField pvField);
 }

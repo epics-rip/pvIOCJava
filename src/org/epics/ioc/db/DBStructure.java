@@ -12,12 +12,15 @@ import org.epics.ioc.pv.*;
  * @author mrk
  *
  */
-public interface DBStructure extends DBData {
+public interface DBStructure extends DBField {
     /**
-     * Get the <i>DBData</i> array for the fields of the structure.
-     * @return array of DBData. One for each field.
+     * Get the <i>DBField</i> array for the fields of the structure.
+     * @return array of DBField. One for each field.
      */
-    DBData[] getFieldDBDatas();
+    DBField[] getFieldDBFields();
+    /**
+     * Replace the current PVStructure.
+     */
     void replacePVStructure();
     /**
      * The caller  is ready to modify multiple fields of the structure.

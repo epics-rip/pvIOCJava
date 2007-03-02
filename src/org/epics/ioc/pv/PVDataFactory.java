@@ -11,13 +11,19 @@ import org.epics.ioc.pv.Enum;
 
 
 /**
- * Factory to create default implementations for field data
+ * Factory to create default implementations for PVField objects.
+ * The PVField instances are created via interface PVDataCreate,
+ * which is obtained via a call to <i>PVDataCreateFactory.getPVDataCreate</i>.
  * @author mrk
  *
  */
 public class PVDataFactory {
     private PVDataFactory(){} // dont create
     
+    /**
+     * Get the interface for PVDataCreate.
+     * @return The interface.
+     */
     public static PVDataCreate getPVDataCreate() {
         return PVDataCreateImpl.getPVDataCreate();
     }
@@ -35,7 +41,7 @@ public class PVDataFactory {
         /* (non-Javadoc)
          * @see org.epics.ioc.db.PVDataCreate#createData(org.epics.ioc.db.PVData, org.epics.ioc.pv.Field)
          */
-        public PVData createData(PVData parent,Field field)
+        public PVField createPVField(PVField parent,Field field)
         {
             if(parent==null) throw new IllegalArgumentException("Illegal parent is null");
             String defaultValue = field.getFieldAttribute().getDefault();
@@ -55,7 +61,7 @@ public class PVDataFactory {
                     Structure structure = (Structure)field;
                     return new BasePVStructure(parent,structure);
                 }
-            case pvArray: return (PVData)createArrayData(parent,field,0,true);
+            case pvArray: return (PVField)createPVArray(parent,field,0,true);
             case pvLink: return new BasePVLink(parent,field);
             }
             throw new IllegalArgumentException(
@@ -64,7 +70,7 @@ public class PVDataFactory {
         /* (non-Javadoc)
          * @see org.epics.ioc.db.PVDataCreate#createArrayData(org.epics.ioc.db.PVData, org.epics.ioc.pv.Field, int, boolean)
          */
-        public PVArray createArrayData(PVData parent,
+        public PVArray createPVArray(PVField parent,
                 Field field,int capacity,boolean capacityMutable)
         {
             if(parent==null) throw new IllegalArgumentException("Illegal parent is null");
@@ -91,7 +97,7 @@ public class PVDataFactory {
         /* (non-Javadoc)
          * @see org.epics.ioc.db.PVDataCreate#createRecord(java.lang.String, org.epics.ioc.dbd.PVDRecordType)
          */
-        public PVRecord createRecord(String recordName, Structure dbdRecordType) {
+        public PVRecord createPVRecord(String recordName, Structure dbdRecordType) {
             PVRecord dbRecord = new BasePVRecord(recordName,dbdRecordType);
             return dbRecord;
         }
@@ -100,12 +106,12 @@ public class PVDataFactory {
     private static Convert convert = ConvertFactory.getConvert();
     private static Pattern primitivePattern = Pattern.compile("[, ]");
     
-    private static class BooleanData extends AbstractPVData
+    private static class BooleanData extends AbstractPVField
         implements PVBoolean
     {
         private boolean value;
 
-        private BooleanData(PVData parent,Field field,String defaultValue) {
+        private BooleanData(PVField parent,Field field,String defaultValue) {
             super(parent,field);
             value = false;
             if(defaultValue!=null && defaultValue.length()>0) {
@@ -126,7 +132,7 @@ public class PVDataFactory {
                 this.value = value;
                 return ;
             }
-            throw new IllegalStateException("PVData.isMutable is false");
+            throw new IllegalStateException("PVField.isMutable is false");
         }       
         /* (non-Javadoc)
          * @see java.lang.Object#toString()
@@ -135,7 +141,7 @@ public class PVDataFactory {
             return toString(0);
         }       
         /* (non-Javadoc)
-         * @see org.epics.ioc.pv.AbstractPVData#toString(int)
+         * @see org.epics.ioc.pv.AbstractPVField#toString(int)
          */
         public String toString(int indentLevel) {
             return convert.getString(this, indentLevel)
@@ -143,10 +149,10 @@ public class PVDataFactory {
         }
     }
 
-    private static class ByteData extends AbstractPVData implements PVByte {
+    private static class ByteData extends AbstractPVField implements PVByte {
         private byte value;
         
-        private ByteData(PVData parent,Field field,String defaultValue) {
+        private ByteData(PVField parent,Field field,String defaultValue) {
             super(parent,field);
             value = 0;
             if(defaultValue!=null && defaultValue.length()>0) {
@@ -167,7 +173,7 @@ public class PVDataFactory {
                 this.value = value;
                 return ;
             }
-            throw new IllegalStateException("PVData.isMutable is false");
+            throw new IllegalStateException("PVField.isMutable is false");
         }
         /* (non-Javadoc)
          * @see java.lang.Object#toString()
@@ -176,7 +182,7 @@ public class PVDataFactory {
             return toString(0);
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.pv.AbstractPVData#toString(int)
+         * @see org.epics.ioc.pv.AbstractPVField#toString(int)
          */
         public String toString(int indentLevel) {
             return convert.getString(this, indentLevel)
@@ -184,10 +190,10 @@ public class PVDataFactory {
         }
     }
 
-    private static class ShortData extends AbstractPVData implements PVShort {
+    private static class ShortData extends AbstractPVField implements PVShort {
         private short value;
         
-        private ShortData(PVData parent,Field field,String defaultValue) {
+        private ShortData(PVField parent,Field field,String defaultValue) {
             super(parent,field);
             value = 0;
             if(defaultValue!=null && defaultValue.length()>0) {
@@ -208,7 +214,7 @@ public class PVDataFactory {
                 this.value = value;
                 return ;
             }
-            throw new IllegalStateException("PVData.isMutable is false");
+            throw new IllegalStateException("PVField.isMutable is false");
         }
         /* (non-Javadoc)
          * @see java.lang.Object#toString()
@@ -217,7 +223,7 @@ public class PVDataFactory {
             return toString(0);
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.pv.AbstractPVData#toString(int)
+         * @see org.epics.ioc.pv.AbstractPVField#toString(int)
          */
         public String toString(int indentLevel) {
             return convert.getString(this, indentLevel)
@@ -225,10 +231,10 @@ public class PVDataFactory {
         }
     }
 
-    private static class IntData extends AbstractPVData implements PVInt {
+    private static class IntData extends AbstractPVField implements PVInt {
         private int value;
 
-        private IntData(PVData parent,Field field,String defaultValue) {
+        private IntData(PVField parent,Field field,String defaultValue) {
             super(parent,field);
             value = 0;
             if(defaultValue!=null && defaultValue.length()>0) {
@@ -249,7 +255,7 @@ public class PVDataFactory {
                 this.value = value;
                 return ;
             }
-            throw new IllegalStateException("PVData.isMutable is false");
+            throw new IllegalStateException("PVField.isMutable is false");
         }
         /* (non-Javadoc)
          * @see java.lang.Object#toString()
@@ -258,7 +264,7 @@ public class PVDataFactory {
             return toString(0);
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.pv.AbstractPVData#toString(int)
+         * @see org.epics.ioc.pv.AbstractPVField#toString(int)
          */
         public String toString(int indentLevel) {
             return convert.getString(this, indentLevel)
@@ -266,10 +272,10 @@ public class PVDataFactory {
         }
     }
 
-    private static class LongData extends AbstractPVData implements PVLong {
+    private static class LongData extends AbstractPVField implements PVLong {
         private long value;
         
-        private LongData(PVData parent,Field field,String defaultValue) {
+        private LongData(PVField parent,Field field,String defaultValue) {
             super(parent,field);
             value = 0;
             if(defaultValue!=null && defaultValue.length()>0) {
@@ -290,7 +296,7 @@ public class PVDataFactory {
                 this.value = value;
                 return ;
             }
-            throw new IllegalStateException("PVData.isMutable is false");
+            throw new IllegalStateException("PVField.isMutable is false");
         }
         /* (non-Javadoc)
          * @see java.lang.Object#toString()
@@ -299,7 +305,7 @@ public class PVDataFactory {
             return toString(0);
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.pv.AbstractPVData#toString(int)
+         * @see org.epics.ioc.pv.AbstractPVField#toString(int)
          */
         public String toString(int indentLevel) {
             return convert.getString(this, indentLevel)
@@ -307,10 +313,10 @@ public class PVDataFactory {
         }
     }
 
-    private static class FloatData extends AbstractPVData implements PVFloat {
+    private static class FloatData extends AbstractPVField implements PVFloat {
         private float value;
         
-        private FloatData(PVData parent,Field field,String defaultValue) {
+        private FloatData(PVField parent,Field field,String defaultValue) {
             super(parent,field);
             value = 0;
             if(defaultValue!=null && defaultValue.length()>0) {
@@ -331,7 +337,7 @@ public class PVDataFactory {
                 this.value = value;
                 return ;
             }
-            throw new IllegalStateException("PVData.isMutable is false");
+            throw new IllegalStateException("PVField.isMutable is false");
         }
         /* (non-Javadoc)
          * @see java.lang.Object#toString()
@@ -340,7 +346,7 @@ public class PVDataFactory {
             return toString(0);
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.pv.AbstractPVData#toString(int)
+         * @see org.epics.ioc.pv.AbstractPVField#toString(int)
          */
         public String toString(int indentLevel) {
             return convert.getString(this, indentLevel)
@@ -348,10 +354,10 @@ public class PVDataFactory {
         }
     }
 
-    private static class DoubleData extends AbstractPVData implements PVDouble {
+    private static class DoubleData extends AbstractPVField implements PVDouble {
         private double value;
         
-        private DoubleData(PVData parent,Field field,String defaultValue) {
+        private DoubleData(PVField parent,Field field,String defaultValue) {
             super(parent,field);
             value = 0;
             if(defaultValue!=null && defaultValue.length()>0) {
@@ -372,7 +378,7 @@ public class PVDataFactory {
                 this.value = value;
                 return ;
             }
-            throw new IllegalStateException("PVData.isMutable is false");
+            throw new IllegalStateException("PVField.isMutable is false");
         }        
         /* (non-Javadoc)
          * @see java.lang.Object#toString()
@@ -381,7 +387,7 @@ public class PVDataFactory {
             return toString(0);
         }        
         /* (non-Javadoc)
-         * @see org.epics.ioc.pv.AbstractPVData#toString(int)
+         * @see org.epics.ioc.pv.AbstractPVField#toString(int)
          */
         public String toString(int indentLevel) {
             return convert.getString(this, indentLevel)
@@ -389,10 +395,10 @@ public class PVDataFactory {
         }
     }
 
-    private static class StringData extends AbstractPVData implements PVString {
+    private static class StringData extends AbstractPVField implements PVString {
         private String value;
         
-        private StringData(PVData parent,Field field,String defaultValue) {
+        private StringData(PVField parent,Field field,String defaultValue) {
             super(parent,field);
             value = null;
             if(defaultValue!=null && defaultValue.length()>0) {
@@ -413,7 +419,7 @@ public class PVDataFactory {
                 this.value = value;
                 return ;
             }
-            throw new IllegalStateException("PVData.isMutable is false");
+            throw new IllegalStateException("PVField.isMutable is false");
         }
         /* (non-Javadoc)
          * @see java.lang.Object#toString()
@@ -422,7 +428,7 @@ public class PVDataFactory {
             return toString(0);
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.pv.AbstractPVData#toString(int)
+         * @see org.epics.ioc.pv.AbstractPVField#toString(int)
          */
         public String toString(int indentLevel) {
             return convert.getString(this, indentLevel)
@@ -434,7 +440,7 @@ public class PVDataFactory {
     {
         private boolean[] value;
         
-        private BooleanArray(PVData parent,Array array,
+        private BooleanArray(PVField parent,Array array,
             int capacity,boolean capacityMutable,String defaultValue)
         {
             super(parent,array,capacity,capacityMutable);
@@ -447,7 +453,7 @@ public class PVDataFactory {
             }
         }        
         /* (non-Javadoc)
-         * @see org.epics.ioc.pv.AbstractPVData#toString(int)
+         * @see org.epics.ioc.pv.AbstractPVField#toString(int)
          */
         public String toString(int indentLevel) {
             return convert.getString(this, indentLevel)
@@ -493,7 +499,7 @@ public class PVDataFactory {
     {
         private byte[] value;
         
-        private ByteArray(PVData parent,Array array,
+        private ByteArray(PVField parent,Array array,
             int capacity,boolean capacityMutable,String defaultValue)
         {
             super(parent,array,capacity,capacityMutable);
@@ -509,7 +515,7 @@ public class PVDataFactory {
             }
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.pv.AbstractPVData#toString(int)
+         * @see org.epics.ioc.pv.AbstractPVField#toString(int)
          */
         public String toString(int indentLevel) {
             return convert.getString(this, indentLevel)
@@ -555,7 +561,7 @@ public class PVDataFactory {
     {
         private short[] value;
         
-        private ShortArray(PVData parent,Array array,
+        private ShortArray(PVField parent,Array array,
             int capacity,boolean capacityMutable,String defaultValue)
         {
             super(parent,array,capacity,capacityMutable);
@@ -571,7 +577,7 @@ public class PVDataFactory {
             }
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.pv.AbstractPVData#toString(int)
+         * @see org.epics.ioc.pv.AbstractPVField#toString(int)
          */
         public String toString(int indentLevel) {
             return convert.getString(this, indentLevel)
@@ -617,7 +623,7 @@ public class PVDataFactory {
     {
         private int[] value;
         
-        private IntArray(PVData parent,Array array,
+        private IntArray(PVField parent,Array array,
             int capacity,boolean capacityMutable,String defaultValue)
         {
             super(parent,array,capacity,capacityMutable);
@@ -633,7 +639,7 @@ public class PVDataFactory {
             }
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.pv.AbstractPVData#toString(int)
+         * @see org.epics.ioc.pv.AbstractPVField#toString(int)
          */
         public String toString(int indentLevel) {
             return convert.getString(this, indentLevel)
@@ -679,7 +685,7 @@ public class PVDataFactory {
     {
         private long[] value;   
         
-        private LongArray(PVData parent,Array array,
+        private LongArray(PVField parent,Array array,
             int capacity,boolean capacityMutable,String defaultValue)
         {
             super(parent,array,capacity,capacityMutable);
@@ -695,7 +701,7 @@ public class PVDataFactory {
             }
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.pv.AbstractPVData#toString(int)
+         * @see org.epics.ioc.pv.AbstractPVField#toString(int)
          */
         public String toString(int indentLevel) {
             return convert.getString(this, indentLevel)
@@ -741,7 +747,7 @@ public class PVDataFactory {
     {
         private float[] value;
         
-        private FloatArray(PVData parent,Array array,
+        private FloatArray(PVField parent,Array array,
             int capacity,boolean capacityMutable,String defaultValue)
         {
             super(parent,array,capacity,capacityMutable);
@@ -757,7 +763,7 @@ public class PVDataFactory {
             }
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.pv.AbstractPVData#toString(int)
+         * @see org.epics.ioc.pv.AbstractPVField#toString(int)
          */
         public String toString(int indentLevel) {
             return convert.getString(this, indentLevel)
@@ -803,7 +809,7 @@ public class PVDataFactory {
     {
         private double[] value;
         
-        private DoubleArray(PVData parent,Array array,
+        private DoubleArray(PVField parent,Array array,
             int capacity,boolean capacityMutable,String defaultValue)
         {
             super(parent,array,capacity,capacityMutable);
@@ -819,7 +825,7 @@ public class PVDataFactory {
             }
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.pv.AbstractPVData#toString(int)
+         * @see org.epics.ioc.pv.AbstractPVField#toString(int)
          */
         public String toString(int indentLevel) {
             return convert.getString(this, indentLevel)
@@ -866,7 +872,7 @@ public class PVDataFactory {
 
         private String[] value;
         
-        private StringArray(PVData parent,Array array,
+        private StringArray(PVField parent,Array array,
             int capacity,boolean capacityMutable,String defaultValue)
         {
             super(parent,array,capacity,capacityMutable);
@@ -882,7 +888,7 @@ public class PVDataFactory {
             }
         }       
         /* (non-Javadoc)
-         * @see org.epics.ioc.pv.AbstractPVData#toString(int)
+         * @see org.epics.ioc.pv.AbstractPVField#toString(int)
          */
         public String toString(int indentLevel) {
             return convert.getString(this, indentLevel)
@@ -929,7 +935,7 @@ public class PVDataFactory {
 
         private PVEnum[] value;
         
-        private EnumArray(PVData parent,Array array,
+        private EnumArray(PVField parent,Array array,
             int capacity,boolean capacityMutable)
         {
             super(parent,array,capacity,capacityMutable);
@@ -938,7 +944,7 @@ public class PVDataFactory {
             value = new PVEnum[capacity];
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.pv.AbstractPVData#toString(int)
+         * @see org.epics.ioc.pv.AbstractPVField#toString(int)
          */
         public String toString(int indentLevel) {
             return convert.getString(this, indentLevel)
@@ -986,7 +992,7 @@ public class PVDataFactory {
     {
         private PVMenu[] value;
         
-        private MenuArray(PVData parent,Array array,
+        private MenuArray(PVField parent,Array array,
             int capacity,boolean capacityMutable)
         {
             super(parent,array,capacity,capacityMutable);
@@ -995,7 +1001,7 @@ public class PVDataFactory {
             value = new PVMenu[capacity];
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.pv.AbstractPVData#toString(int)
+         * @see org.epics.ioc.pv.AbstractPVField#toString(int)
          */
         public String toString(int indentLevel) {
             return getString(indentLevel)
@@ -1058,7 +1064,7 @@ public class PVDataFactory {
     {
         private PVStructure[] value;
         
-        private StructureArray(PVData parent,Array array,
+        private StructureArray(PVField parent,Array array,
             int capacity,boolean capacityMutable)
         {
             super(parent,array,capacity,capacityMutable);
@@ -1067,7 +1073,7 @@ public class PVDataFactory {
             value = new PVStructure[capacity];
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.pv.AbstractPVData#toString(int)
+         * @see org.epics.ioc.pv.AbstractPVField#toString(int)
          */
         public String toString(int indentLevel) {
             return getString(indentLevel)
@@ -1129,7 +1135,7 @@ public class PVDataFactory {
     {
         private PVArray[] value;
         
-        private ArrayArray(PVData parent,Array array,
+        private ArrayArray(PVField parent,Array array,
             int capacity,boolean capacityMutable)
         {
             super(parent,array,capacity,capacityMutable);
@@ -1138,7 +1144,7 @@ public class PVDataFactory {
             value = new PVArray[capacity];
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.pv.AbstractPVData#toString(int)
+         * @see org.epics.ioc.pv.AbstractPVField#toString(int)
          */
         public String toString(int indentLevel) {
             return getString(indentLevel)
@@ -1201,7 +1207,7 @@ public class PVDataFactory {
     {
         private PVLink[] value;
         
-        private LinkArray(PVData parent,Array array,
+        private LinkArray(PVField parent,Array array,
             int capacity,boolean capacityMutable)
         {
             super(parent,array,capacity,capacityMutable);
@@ -1210,7 +1216,7 @@ public class PVDataFactory {
             value = new PVLink[capacity];
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.pv.AbstractPVData#toString(int)
+         * @see org.epics.ioc.pv.AbstractPVField#toString(int)
          */
         public String toString(int indentLevel) {
             return getString(indentLevel)

@@ -8,47 +8,50 @@ package org.epics.ioc.db;
 import org.epics.ioc.pv.*;
 
 /**
+ * Base class for a non scalar array.
  * @author mrk
  *
  */
-public class BaseDBNonScalarArray extends BaseDBData implements DBNonScalarArray {
+public class BaseDBNonScalarArray extends BaseDBField implements DBNonScalarArray {
     private PVArray pvArray;
-    private DBData[] elementDBDatas;
+    private DBField[] elementDBFields;
     
     /**
-     * Constructuor.
-     * @param parent The parent DBData.
+     * Constructor.
+     * @param parent The parent DBField.
      * @param record The DBRecord to which this field belongs.
      * @param pvArray The pvArray interface.
      */
-    public BaseDBNonScalarArray(DBData parent,DBRecord record, PVArray pvArray) {
+    public BaseDBNonScalarArray(DBField parent,DBRecord record, PVArray pvArray) {
         super(parent,record,pvArray);
         this.pvArray = pvArray;
-        createElementDBDatas();
+        createElementDBFields();
         
     }
-
     /* (non-Javadoc)
-     * @see org.epics.ioc.db.DBNonScalarArray#getElementDBDatas()
+     * @see org.epics.ioc.db.DBNonScalarArray#getElementDBFields()
      */
-    public DBData[] getElementDBDatas() {
-        return elementDBDatas;
-    }
-    public void replacePVArray() {
-        pvArray = (PVArray)super.getPVData();
-        createElementDBDatas();
+    public DBField[] getElementDBFields() {
+        return elementDBFields;
     }
     /* (non-Javadoc)
-     * @see org.epics.ioc.db.BaseDBData#postPut()
+     * @see org.epics.ioc.db.DBNonScalarArray#replacePVArray()
+     */
+    public void replacePVArray() {
+        pvArray = (PVArray)super.getPVField();
+        createElementDBFields();
+    }
+    /* (non-Javadoc)
+     * @see org.epics.ioc.db.BaseDBField#postPut()
      */
     public void postPut() {
-        createElementDBDatas();
+        createElementDBFields();
         super.postPut();
     }
     
-    private void createElementDBDatas() {
+    private void createElementDBFields() {
         int length = pvArray.getLength();
-        elementDBDatas = new DBData[length];
+        elementDBFields = new DBField[length];
         Type elementType = ((Array)pvArray.getField()).getElementType();
         DBRecord dbRecord = super.getDBRecord();
         switch(elementType) {
@@ -60,9 +63,9 @@ public class BaseDBNonScalarArray extends BaseDBData implements DBNonScalarArray
             for(int i=0; i<length; i++) {
                 PVEnum pvEnum = pvEnums[i];
                 if(pvEnum==null) {
-                    elementDBDatas[i] = null;
+                    elementDBFields[i] = null;
                 } else {
-                    elementDBDatas[i] = new BaseDBEnum(this,dbRecord,pvEnum);
+                    elementDBFields[i] = new BaseDBEnum(this,dbRecord,pvEnum);
                 }
             }
             return;
@@ -74,9 +77,9 @@ public class BaseDBNonScalarArray extends BaseDBData implements DBNonScalarArray
             for(int i=0; i<length; i++) {
                 PVStructure pvStructure = pvStructures[i];
                 if(pvStructure==null) {
-                    elementDBDatas[i] = null;
+                    elementDBFields[i] = null;
                 } else {
-                    elementDBDatas[i] = new BaseDBStructure(this,dbRecord,pvStructure);
+                    elementDBFields[i] = new BaseDBStructure(this,dbRecord,pvStructure);
                 }
             }
             return;
@@ -88,12 +91,12 @@ public class BaseDBNonScalarArray extends BaseDBData implements DBNonScalarArray
             for(int i=0; i<length; i++) {
                 PVArray elementArray = pvArrays[i];
                 if(elementArray==null) {
-                    elementDBDatas[i] = null;
+                    elementDBFields[i] = null;
                 } else {
                     if(((Array)elementArray.getField()).getElementType().isScalar()) {
-                        elementDBDatas[i] = new BaseDBData(this,dbRecord,pvArray);
+                        elementDBFields[i] = new BaseDBField(this,dbRecord,pvArray);
                     } else {
-                        elementDBDatas[i] = new BaseDBNonScalarArray(this,dbRecord,elementArray);
+                        elementDBFields[i] = new BaseDBNonScalarArray(this,dbRecord,elementArray);
                     }
                 }
             }
@@ -106,9 +109,9 @@ public class BaseDBNonScalarArray extends BaseDBData implements DBNonScalarArray
             for(int i=0; i<length; i++) {
                 PVMenu pvMenu = pvMenus[i];
                 if(pvMenu==null) {
-                    elementDBDatas[i] = null;
+                    elementDBFields[i] = null;
                 } else {
-                    elementDBDatas[i] = new BaseDBMenu(this,dbRecord,pvMenu);
+                    elementDBFields[i] = new BaseDBMenu(this,dbRecord,pvMenu);
                 }
             }
             return;
@@ -120,9 +123,9 @@ public class BaseDBNonScalarArray extends BaseDBData implements DBNonScalarArray
             for(int i=0; i<length; i++) {
                 PVLink pvLink = pvLinks[i];
                 if(pvLink==null) {
-                    elementDBDatas[i] = null;
+                    elementDBFields[i] = null;
                 } else {
-                    elementDBDatas[i] = new BaseDBLink(this,dbRecord,pvLink);
+                    elementDBFields[i] = new BaseDBLink(this,dbRecord,pvLink);
                 }
             }
             return;

@@ -38,7 +38,7 @@
     <field name = "arrayArray" type = "array" elementType = "array" />
 </structure>
 
-<recordType name = "allTypes" supportName = "exampleRecordSupport">
+<recordType name = "allTypes" supportName = "noop">
     <field name = "boolean" type = "boolean" default = "true" />
     <field name = "byte" type = "byte"  default = "-0x1" />
     <field name = "short" type = "short"  default = "201" />
@@ -77,8 +77,5 @@
     <field name = "allTypes"
          type = "structure" structureName = "structureAllTypes" />
 </recordType>
-
-<support name = "exampleRecordSupport" 
-    factoryName = "ExampleRecordSupport" />
 
 </DBDefinition>

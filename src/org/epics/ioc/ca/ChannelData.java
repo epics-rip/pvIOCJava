@@ -22,10 +22,10 @@ public interface ChannelData {
      */
     ChannelFieldGroup getChannelFieldGroup();
     /**
-     * Get the array of CDBData. One each element of the channelFieldGroup.
+     * Get the array of CDField. One each element of the channelFieldGroup.
      * @return The array.
      */
-    CDBRecord getCDBRecord();
+    CDRecord getCDRecord();
     /**
      * Get the maximum number of put to a single field since the last <i>clearNumPuts</i>.
      * @return The maximum number of puts.
@@ -37,14 +37,14 @@ public interface ChannelData {
     void clearNumPuts();
     /**
      * Is this data initialization?
-     * @param targetPVData The pvData at initialization.
+     * @param targetPVField The pvField at initialization.
      */
-    void initData(PVData targetPVData);
+    void initField(PVField targetPVField);
     /**
-     * The pvData has been modified.
-     * @param targetPVData The pvData.
+     * The pvField has been modified.
+     * @param targetPVField The pvField.
      */
-    void dataPut(PVData targetPVData);
+    void fieldPut(PVField targetPVField);
     /**
      * The enum index has been modified.
      * @param targetPVEnum The enum interface.
@@ -57,9 +57,9 @@ public interface ChannelData {
     void enumChoicesPut(PVEnum targetPVEnum);
     /**
      * The supportName has been modified.
-     * @param targetPVData The pvData.
+     * @param targetPVField The pvField.
      */
-    void supportNamePut(PVData targetPVData);
+    void supportNamePut(PVField targetPVField);
     /**
      * The link configration structure has been modified.
      * @param targetPVLink The link interface.
@@ -77,48 +77,36 @@ public interface ChannelData {
     void endPut(PVStructure targetPVStructure);
     /**
      * A put to a subfield of a structure has occured. 
-     * @param requested The target field that has targetPVData as a subfield.
-     * @param targetPVData The data that has been modified..
+     * @param requested The target field that has targetPVField as a subfield.
+     * @param targetPVField The data that has been modified..
      */
-    void dataPut(PVData requested,PVData targetPVData);
+    void fieldPut(PVField requested,PVField targetPVField);
     /**
      * A put to an enum subfield of a structure has occured. 
      * The enum index has been modified.
-     * @param requested The target field that has targetPVData as a subfield.
+     * @param requested The target field that has targetPVEnum as a subfield.
      * @param targetPVEnum The enum interface.
      */
-    void enumIndexPut(PVData requested,PVEnum targetPVEnum);
+    void enumIndexPut(PVField requested,PVEnum targetPVEnum);
     /**
      * A put to an enum subfield of a structure has occured. 
      * The enum choices has been modified.
-     * @param requested The target field that has targetPVData as a subfield.
+     * @param requested The target field that has targetPVEnum as a subfield.
      * @param targetPVEnum The enum interface.
      */
-    void enumChoicesPut(PVData requested,PVEnum targetPVEnum);
+    void enumChoicesPut(PVField requested,PVEnum targetPVEnum);
     /**
      * A put to the supportName of a subfield of a structure has occured. 
      * The supportName has been modified.
-     * @param requested The target field that has targetPVData as a subfield.
-     * @param targetPVData The pvData in the structure.
+     * @param requested The target field that has targetPVField as a subfield.
+     * @param targetPVField The pvField in the structure.
      */
-    void supportNamePut(PVData requested,PVData targetPVData);
+    void supportNamePut(PVField requested,PVField targetPVField);
     /**
      * A put to the configurationStructure of a pvLink subfield of a structure has occured. 
      * The link configration structure has been modified.
-     * @param requested The target field that has targetPVData as a subfield.
+     * @param requested The target field that has targetPVLink as a subfield.
      * @param targetPVLink The link interface.
      */
-    void configurationStructurePut(PVData requested,PVLink targetPVLink);
-    /**
-     * Convert the ChannelData to a string.
-     * @return The string.
-     */
-    String toString();
-    /**
-     * Convert the ChannelData to a string.
-     * Each line is indented.
-     * @param indentLevel The indentation level.
-     * @return The string.
-     */
-    String toString(int indentLevel);
+    void configurationStructurePut(PVField requested,PVLink targetPVLink);
 }

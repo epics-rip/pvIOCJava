@@ -59,20 +59,20 @@ public class Swtshell {
         label.setText(blankString);
     }
     
-    public static String pvDataToString(PVData pvData) {
+    public static String pvFieldToString(PVField pvField) {
         String value = null;
-        Type type = pvData.getField().getType();
+        Type type = pvField.getField().getType();
         switch(type) {
         case pvEnum:
-            PVEnum pvEnum = (PVEnum)pvData;
+            PVEnum pvEnum = (PVEnum)pvField;
             value = pvEnum.getChoices()[pvEnum.getIndex()];
             break;
         case pvMenu:
-            PVMenu pvMenu = (PVMenu)pvData;
+            PVMenu pvMenu = (PVMenu)pvField;
             value = pvMenu.getChoices()[pvMenu.getIndex()];
             break;
         case pvStructure:
-            PVTimeStamp pvTimeStamp = PVTimeStamp.create(pvData);
+            PVTimeStamp pvTimeStamp = PVTimeStamp.create(pvField);
             if(pvTimeStamp!=null) {
                 TimeStamp timeStamp = new TimeStamp();
                 pvTimeStamp.get(timeStamp);
@@ -85,7 +85,7 @@ public class Swtshell {
             }
             // no break
         default:
-            value = pvData.toString(2);
+            value = pvField.toString(2);
         }
         return value;
     }

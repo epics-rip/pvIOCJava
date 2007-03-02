@@ -19,11 +19,13 @@ public class BasePVMenu extends BasePVEnum implements PVMenu
      * @param menu The introspection interface.
      * @param choice The array of choices.
      */
-    public BasePVMenu(PVData parent,Menu menu) {
+    public BasePVMenu(PVField parent,Menu menu) {
         super(parent,menu);
         super.setChoices(menu.getMenuChoices());
     }
-
+    /* (non-Javadoc)
+     * @see org.epics.ioc.pv.BasePVEnum#setChoices(java.lang.String[])
+     */
     public boolean setChoices(String[] choice) {
         throw new UnsupportedOperationException(
             "Menu choices can not be modified");
@@ -33,7 +35,7 @@ public class BasePVMenu extends BasePVEnum implements PVMenu
      */
     public String toString() { return getString(0);}
     /* (non-Javadoc)
-     * @see org.epics.ioc.db.AbstractPVData#toString(int)
+     * @see org.epics.ioc.pv.BasePVEnum#toString(int)
      */
     public String toString(int indentLevel) {
         return getString(indentLevel);

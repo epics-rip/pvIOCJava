@@ -8,10 +8,11 @@ package org.epics.ioc.ca;
 import org.epics.ioc.pv.*;
 
 /**
+ * ChannelDataBaseRecord - A record that holds a PVRecord.
  * @author mrk
  *
  */
-public interface CDBRecord {
+public interface CDRecord {
     /**
      * Get the PVRecord that has the data for this CDB record instance.
      * @return The PVRecord interface.
@@ -19,10 +20,18 @@ public interface CDBRecord {
     PVRecord getPVRecord();
     /**
      * Get the interface to the subfields of this record.
-     * @return The CDBStructure interface.
+     * @return The CDStructure interface.
      */
-    CDBStructure getCDBStructure();
+    CDStructure getCDStructure();
+    /**
+     * Get the factory for creating the introspection interfaces.
+     * @return The FieldCreate interface.
+     */
     FieldCreate getFieldCreate();
+    /**
+     * Get the factory for creating PVField instances.
+     * @return The PVDataCreate interface.
+     */
     PVDataCreate getPVDataCreate();
     /**
      * Create a Field that is like oldField except that it has no properties.

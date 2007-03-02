@@ -10,7 +10,7 @@ package org.epics.ioc.pv;
  * @author mrk
  *
  */
-public interface PVLong extends PVData{
+public interface PVLong extends PVField{
     /**
      * Get the <i>long</i> value stored in the field.
      * @return long value of field.

@@ -1,6 +1,8 @@
 <?xml version="1.0" ?>
 <DBDefinition>
 
+<!-- structure null is created automatically -->
+
 <structure name = "timeStamp">
     <field name = "secondsPastEpoch" type = "long" />
     <field name = "nanoSeconds" type = "int" />
@@ -22,7 +24,7 @@
     <field name = "type" type = "menu" menuName = "monitorType" default = "change" />
     <field name = "deadband" type = "double" />
     <field name = "onlyWhileProcessing" type = "boolean" />
-    <field name = "queueSize" type = "int"  default = "2" />
+    <field name = "queueSize" type = "int"  default = "3" />
     <field name = "reportOverrun" type = "boolean" />
     <field name = "process" type = "boolean">
         <!-- process this record when monitor occurs -->

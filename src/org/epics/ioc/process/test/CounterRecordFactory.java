@@ -37,8 +37,8 @@ public class CounterRecordFactory {
         private PVDouble pvMax;
         private PVDouble pvInc;
         private PVDouble pvValue;
-        private DBData dbValue;
-        private DBData dbLinkArray;
+        private DBField dbValue;
+        private DBField dbLinkArray;
         
         private LinkSupport linkArraySupport = null;
         
@@ -66,10 +66,10 @@ public class CounterRecordFactory {
          */
         public void initialize() {
             if(!super.checkSupportState(SupportState.readyForInitialize,"initialize")) return;
-            Structure structure = (Structure)dbStructure.getPVData().getField();
+            Structure structure = (Structure)dbStructure.getPVField().getField();
             PVStructure pvStructure = dbStructure.getPVStructure();
-            PVData[] pvDatas = pvStructure.getFieldPVDatas();
-            DBData[] dbDatas = dbStructure.getFieldDBDatas();
+            PVField[] pvDatas = pvStructure.getFieldPVFields();
+            DBField[] dbDatas = dbStructure.getFieldDBFields();
             int index;
             index = structure.getFieldIndex("min");
             if(index<0) throw new IllegalStateException("field min does not exist");

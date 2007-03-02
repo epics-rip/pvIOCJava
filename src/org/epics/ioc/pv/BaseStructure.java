@@ -24,7 +24,7 @@ public class BaseStructure extends BaseField implements Structure {
     private int[] fieldIndex;
     
     /**
-     * Constructor for a structure fields.
+     * Constructor for a structure field.
      * @param fieldName The field name.
      * @param structureName The structure name.
      * @param field The array of fields definitions for the fields of the structure.
@@ -76,8 +76,7 @@ public class BaseStructure extends BaseField implements Structure {
                 }
             }
         }
-    }
-    
+    }    
     /* (non-Javadoc)
      * @see org.epics.ioc.pv.Structure#getField(java.lang.String)
      */
@@ -88,7 +87,6 @@ public class BaseStructure extends BaseField implements Structure {
         }
         return null;
     }
-
     /* (non-Javadoc)
      * @see org.epics.ioc.pv.Structure#getFieldIndex(java.lang.String)
      */
@@ -97,21 +95,18 @@ public class BaseStructure extends BaseField implements Structure {
         if(i>=0) return fieldIndex[i];
         return -1;
     }
-
     /* (non-Javadoc)
      * @see org.epics.ioc.pv.Structure#getFieldNames()
      */
     public String[] getFieldNames() {
         return fieldNames;
     }
-
     /* (non-Javadoc)
      * @see org.epics.ioc.pv.Structure#getFields()
      */
     public Field[] getFields() {
         return fields;
     }
-
     /* (non-Javadoc)
      * @see org.epics.ioc.pv.Structure#getStructureName()
      */
@@ -122,7 +117,6 @@ public class BaseStructure extends BaseField implements Structure {
      * @see java.lang.Object#toString()
      */
     public String toString() { return getString(0);}
-
     /* (non-Javadoc)
      * @see org.epics.ioc.pv.Field#toString(int)
      */

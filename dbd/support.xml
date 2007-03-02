@@ -1,9 +1,18 @@
 <?xml version="1.0" ?>
 <DBDefinition>
 
-<support name = "linearConvertInput"
-    factoryName = "org.epics.ioc.support.LinearConvertFactory"
+<support name = "noop"
+    factoryName = "org.epics.ioc.support.NoopFactory"
 />
+
+<linkSupport name = "noop"
+    factoryName = "org.epics.ioc.support.NoopFactory"
+/>
+
+<support name = "linearConvertInput"
+    factoryName = "org.epics.ioc.support.LinearConvertInputFactory"
+/>
+
 <support name = "linkArray"
     factoryName = "org.epics.ioc.support.LinkArraySupportFactory"
 />

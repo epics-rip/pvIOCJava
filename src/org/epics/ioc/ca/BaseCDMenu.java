@@ -6,7 +6,7 @@
 package org.epics.ioc.ca;
 
 import org.epics.ioc.pv.Field;
-import org.epics.ioc.pv.PVData;
+import org.epics.ioc.pv.PVField;
 import org.epics.ioc.pv.PVEnum;
 import org.epics.ioc.pv.PVMenu;
 
@@ -14,17 +14,17 @@ import org.epics.ioc.pv.PVMenu;
  * @author mrk
  *
  */
-public class BaseCDBMenu extends BaseCDBEnum implements CDBMenu{
+public class BaseCDMenu extends BaseCDEnum implements CDMenu{
     private PVMenu pvMenu;
 
-    public BaseCDBMenu(
-        CDBData parent,CDBRecord cdbRecord,PVData pvData)
+    public BaseCDMenu(
+        CDField parent,CDRecord cdRecord,PVField pvField)
     {
-        super(parent,cdbRecord,pvData);
-        pvMenu= (PVMenu)pvData;
+        super(parent,cdRecord,pvField);
+        pvMenu= (PVMenu)pvField;
     }
     /* (non-Javadoc)
-     * @see org.epics.ioc.ca.CDBMenu#getPVMenu()
+     * @see org.epics.ioc.ca.CDMenu#getPVMenu()
      */
     public PVMenu getPVMenu() {
         return pvMenu;

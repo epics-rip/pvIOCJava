@@ -60,19 +60,19 @@ public class EventRecordFactory {
          */
         public void initialize() {
             PVAccess pvAccess = PVAccessFactory.createPVAccess(pvRecord);
-            PVData pvData;
+            PVField pvField;
             pvAccess.findField(null);
             AccessSetResult result = pvAccess.findField("value");
             if(result!=AccessSetResult.thisRecord) {
                 message("field value does not exist",MessageType.error);
                 return;
             }
-            pvData = pvAccess.getField();
-            if(pvData.getField().getType()!=Type.pvString) {
+            pvField = pvAccess.getField();
+            if(pvField.getField().getType()!=Type.pvString) {
                 message("field value is not a string",MessageType.error);
                 return;
             }
-            value = (PVString)pvData;
+            value = (PVString)pvField;
             supportState = SupportState.readyForStart;
             setSupportState(supportState);
         }

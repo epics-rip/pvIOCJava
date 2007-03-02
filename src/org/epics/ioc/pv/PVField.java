@@ -8,12 +8,12 @@ package org.epics.ioc.pv;
 import org.epics.ioc.util.*;
 
 /**
- * PVData is the base class for field data.
- * Each PVType has an interface that extends PVData.
+ * PVField is the base class for each PVData field.
+ * Each PVType has an interface that extends PVField.
  * @author mrk
  *
  */
-public interface PVData extends Requestor {
+public interface PVField extends Requestor {
     /**
      * Get the full field name, i.e. the complete hierarchy.
      * @return The name.
@@ -29,7 +29,7 @@ public interface PVData extends Requestor {
      * The parent can be a PVStructure, PVLink, or PVArray.
      * @return The parent interface.
      */
-    PVData getParent();
+    PVField getParent();
     /**
      * Get the record.
      * @return The record interface.
@@ -37,9 +37,9 @@ public interface PVData extends Requestor {
     PVRecord getPVRecord();
     /**
      * Replace the data implementation for a field.
-     * @param newPVData The new implementation for this field.
+     * @param newPVField The new implementation for this field.
      */
-    void replacePVData(PVData newPVData);
+    void replacePVField(PVField newPVField);
     /**
      * Get the support name if it exists.
      * @return The name of the support.
@@ -51,12 +51,12 @@ public interface PVData extends Requestor {
      */
     void setSupportName(String name);
     /**
-     * Convert the PVData to a string.
+     * Convert the PVField to a string.
      * @return The string.
      */
     String toString();
     /**
-     * Convert the PVData to a string.
+     * Convert the PVField to a string.
      * Each line is indented.
      * @param indentLevel The indentation level.
      * @return The string.

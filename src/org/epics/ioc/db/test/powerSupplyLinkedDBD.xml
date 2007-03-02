@@ -1,7 +1,7 @@
 <?xml version="1.0" ?>
 <DBDefinition>
-<support name = "powerSupplyLinked" factoryName = "PowerSupplyLinked" />
-<recordType name = "powerSupplyLinkedRecord" supportName = "powerSupplyLinked">
+
+<recordType name = "powerSupplyLinkedRecord" supportName = "noop">
     <property name = "current" associatedField = "currentInput.value" />
     <property name = "voltage" associatedField = "voltageInput.value" />
     <field name = "power" type = "double" >

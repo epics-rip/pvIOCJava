@@ -10,7 +10,7 @@ package org.epics.ioc.pv;
  * @author mrk
  *
  */
-public interface PVString extends PVData{
+public interface PVString extends PVField{
     /**
      * Get the <i>String</i> value stored in the field.
      * @return string value of field.

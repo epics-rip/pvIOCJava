@@ -29,6 +29,7 @@ public class ChannelFactory {
             channel = localAccess.createChannel(name,listener);
             if(channel!=null) return channel;
         }
+        if(mustBeLocal) return null;
         if(remoteAccess!=null) {
             channel = remoteAccess.createChannel(name,listener);
         }

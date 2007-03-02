@@ -6,15 +6,16 @@
 package org.epics.ioc.pv;
 
 /**
+ * PVStructure interface.
  * @author mrk
  *
  */
-public interface PVStructure extends PVData {	
+public interface PVStructure extends PVField {	
     /**
-     * Get the <i>PVData</i> array for the fields of the structure.
-     * @return array of PVData. One for each field.
+     * Get the <i>PVField</i> array for the fields of the structure.
+     * @return array of PVField. One for each field.
      */
-    PVData[] getFieldPVDatas();
+    PVField[] getFieldPVFields();
     /**
      * Replace a field of the structure that is itself a structure.
      * For an ioc record. This should only be called when a record is in the readyForInitialization state.

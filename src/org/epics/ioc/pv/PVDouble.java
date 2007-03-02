@@ -10,7 +10,7 @@ package org.epics.ioc.pv;
  * @author mrk
  *
  */
-public interface PVDouble extends PVData{
+public interface PVDouble extends PVField{
     /**
      * Get the <i>double</i> value stored in the field.
      * @return double The value.

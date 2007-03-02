@@ -68,7 +68,7 @@ public class MonitorTest extends TestCase {
             DBRecord dbRecord = iocdbMaster.findRecord(recordNames[i]);
             assertNotNull(dbRecord);
             PVRecord pvRecord = dbRecord.getPVRecord();
-            PVData[] pvData = pvRecord.getFieldPVDatas();
+            PVField[] pvData = pvRecord.getFieldPVFields();
             Structure structure = (Structure)pvRecord.getField();
             int index = structure.getFieldIndex("value");
             new DBListenerForTesting(iocdbMaster,

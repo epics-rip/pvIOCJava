@@ -6,7 +6,7 @@
 package org.epics.ioc.ca;
 
 /**
- * A queue of CDBData.
+ * A queue of CDField.
  * @author mrk
  *
  */
@@ -23,11 +23,16 @@ public interface ChannelDataQueue {
     int capacity();
     /**
      * Get the next free queue element.
-     * @param forceFree If true than return a CDBData even
+     * @param forceFree If true than return a CDField even
      * if the client has not retrieved the data it contains.
-     * @return A CDBData.
+     * @return A CDField.
      */
     ChannelData getFree(boolean forceFree);
+    /**
+     * Add channelData to inUseList
+     * @param channelData The channelData to add.
+     */
+    void setInUse(ChannelData channelData);
     /**
      * Get the oldest queue element.
      * @return The oldest element.

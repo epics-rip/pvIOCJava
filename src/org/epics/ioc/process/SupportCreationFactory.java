@@ -30,8 +30,8 @@ public class SupportCreationFactory {
         return new SupportCreationInstance(iocdb,requestor);
     }
     
-    static public boolean createSupport(DBData dbData) {
-        return createSupportPvt(dbData.getPVData(),dbData);
+    static public boolean createSupport(DBField dbField) {
+        return createSupportPvt(dbField.getPVField(),dbField);
     }
     
     static private class SupportCreationInstance implements SupportCreation{
@@ -160,34 +160,34 @@ public class SupportCreationFactory {
         }
         
         
-        private boolean createStructureSupport(DBData dbData) {
-            boolean result = SupportCreationFactory.createSupportPvt(requestor,dbData);
-            DBStructure dbStructure = (DBStructure)dbData;
-            DBData[] dbDatas = dbStructure.getFieldDBDatas();
-            for(DBData data : dbDatas) {
-                Type type = data.getPVData().getField().getType();
+        private boolean createStructureSupport(DBField dbField) {
+            boolean result = SupportCreationFactory.createSupportPvt(requestor,dbField);
+            DBStructure dbStructure = (DBStructure)dbField;
+            DBField[] dbFields = dbStructure.getFieldDBFields();
+            for(DBField field : dbFields) {
+                Type type = field.getPVField().getField().getType();
                 if(type==Type.pvStructure) {
-                    if(!createStructureSupport(data)) result = false;
+                    if(!createStructureSupport(field)) result = false;
                 } else if(type==Type.pvArray) {
-                    if(!createArraySupport(data)) result = false;
+                    if(!createArraySupport(field)) result = false;
                 } else {
-                    if(!SupportCreationFactory.createSupportPvt(requestor,data)) result = false;
+                    if(!SupportCreationFactory.createSupportPvt(requestor,field)) result = false;
                 }
             }
             return result;
         }
         
-        private boolean createArraySupport(DBData dbData) {
+        private boolean createArraySupport(DBField dbField) {
             boolean result = true;
-            PVArray pvArray = (PVArray)dbData.getPVData();
-            if(!SupportCreationFactory.createSupportPvt(requestor,dbData)) result = false;
+            PVArray pvArray = (PVArray)dbField.getPVField();
+            if(!SupportCreationFactory.createSupportPvt(requestor,dbField)) result = false;
             Array array = (Array)pvArray.getField();
             Type elementType = array.getElementType();
             if(elementType.isScalar()) return result;
-            DBNonScalarArray dbNonScalayArray = (DBNonScalarArray)dbData;
-            DBData[] dbDatas = dbNonScalayArray.getElementDBDatas();
+            DBNonScalarArray dbNonScalayArray = (DBNonScalarArray)dbField;
+            DBField[] dbFields = dbNonScalayArray.getElementDBFields();
             if(elementType==Type.pvStructure) {
-                PVStructureArray pvStructureArray = (PVStructureArray)dbData.getPVData();
+                PVStructureArray pvStructureArray = (PVStructureArray)dbField.getPVField();
                 int len = pvStructureArray.getLength();
                 StructureArrayData data = new StructureArrayData();
                 int nsofar = 0;
@@ -198,12 +198,12 @@ public class SupportCreationFactory {
                     PVStructure[] pvStructures = data.data;
                     for(int i=0; i<n; i++) {
                         if(pvStructures[i]==null) continue;
-                        if(!createStructureSupport(dbDatas[i])) result = false;
+                        if(!createStructureSupport(dbFields[i])) result = false;
                     }
                     nsofar += n; offset += n;
                 }
             } else if(elementType==Type.pvLink) {
-                PVLinkArray pvLinkArray = (PVLinkArray)dbData.getPVData();
+                PVLinkArray pvLinkArray = (PVLinkArray)dbField.getPVField();
                 int len = pvLinkArray.getLength();
                 LinkArrayData data = new LinkArrayData();
                 int nsofar = 0;
@@ -214,12 +214,12 @@ public class SupportCreationFactory {
                     PVLink[] pvLink = data.data;
                     for(int i=0; i<n; i++) {
                         if(pvLink[i]==null) continue;
-                        if(!SupportCreationFactory.createSupportPvt(requestor,dbDatas[i])) result = false;
+                        if(!SupportCreationFactory.createSupportPvt(requestor,dbFields[i])) result = false;
                     }
                     nsofar += n; offset += n;
                 }
             } else if(elementType==Type.pvArray) {
-                PVArrayArray pvArrayArray = (PVArrayArray)dbData.getPVData();
+                PVArrayArray pvArrayArray = (PVArrayArray)dbField.getPVField();
                 int len = pvArrayArray.getLength();
                 ArrayArrayData data = new ArrayArrayData();
                 int nsofar = 0;
@@ -228,8 +228,8 @@ public class SupportCreationFactory {
                     int n = pvArrayArray.get(offset,len-nsofar,data);
                     if(n<=0) break;
                     for(int i=0; i<n; i++) {
-                        if(dbDatas[i]==null) continue;
-                        if(!createArraySupport(dbDatas[i])) result = false;
+                        if(dbFields[i]==null) continue;
+                        if(!createArraySupport(dbFields[i])) result = false;
                     }
                     nsofar += n; offset += n;
                 }
@@ -238,41 +238,41 @@ public class SupportCreationFactory {
         }
     }
     
-    private static void printError(Requestor requestor,PVData pvData,String message) {
-        String name = pvData.getFullFieldName();
-        name = pvData.getPVRecord().getRecordName() + name;
+    private static void printError(Requestor requestor,PVField pvField,String message) {
+        String name = pvField.getFullFieldName();
+        name = pvField.getPVRecord().getRecordName() + name;
         requestor.message(
                 name + " " + message,
                 MessageType.error);
     }
     
-    private static boolean createSupportPvt(Requestor requestor,DBData dbData) {
-        if(dbData.getSupport()!=null) return true;
-        String supportName = dbData.getSupportName();
+    private static boolean createSupportPvt(Requestor requestor,DBField dbField) {
+        if(dbField.getSupport()!=null) return true;
+        String supportName = dbField.getSupportName();
         if(supportName==null) return true;
         String factoryName = null;
-        PVData pvData = dbData.getPVData();
+        PVField pvField = dbField.getPVField();
         DBD dbd = DBDFactory.getMasterDBD();
-        if(pvData.getField().getType()==Type.pvLink) {
+        if(pvField.getField().getType()==Type.pvLink) {
             DBDLinkSupport dbdLinkSupport = dbd.getLinkSupport(supportName);
             if(dbdLinkSupport==null) {
-                printError(requestor,pvData,"linkSupport " + supportName + " does not exist");
+                printError(requestor,pvField,"linkSupport " + supportName + " does not exist");
                 return false;
             }
             factoryName = dbdLinkSupport.getFactoryName();
             if(factoryName==null) {
-                printError(requestor,pvData,"linkSupport " + supportName + " does not define a factory name");
+                printError(requestor,pvField,"linkSupport " + supportName + " does not define a factory name");
                 return false;
             }
         } else {
             DBDSupport dbdSupport = dbd.getSupport(supportName);
             if(dbdSupport==null) {
-                printError(requestor,pvData,"support " + supportName + " does not exist");
+                printError(requestor,pvField,"support " + supportName + " does not exist");
                 return false;
             }
             factoryName = dbdSupport.getFactoryName();
             if(factoryName==null) {
-                printError(requestor,pvData,"support " + supportName + " does not define a factory name");
+                printError(requestor,pvField,"support " + supportName + " does not define a factory name");
                 return false;
             }
         }
@@ -282,34 +282,34 @@ public class SupportCreationFactory {
         try {
             supportClass = Class.forName(factoryName);
         }catch (ClassNotFoundException e) {
-            printError(requestor,pvData,
+            printError(requestor,pvField,
                     "support " + supportName 
                     + " factory " + e.getLocalizedMessage()
                     + " class not found");
             return false;
         }
         String data = null;
-        Type type = pvData.getField().getType();
+        Type type = pvField.getField().getType();
         if (type==Type.pvLink) {
             data = "DBLink";
         } else if (type==Type.pvStructure) {
             data = "DBStructure";
         } else {
-            data = "DBData";
+            data = "DBField";
         }
         data = "org.epics.ioc.db." + data;
         try {
             method = supportClass.getDeclaredMethod("create",
                     Class.forName(data));    
         } catch (NoSuchMethodException e) {
-            printError(requestor,pvData,
+            printError(requestor,pvField,
                     "support "
                     + supportName
                     + " no factory method "
                     + e.getLocalizedMessage());
             return false;
         } catch (ClassNotFoundException e) {
-            printError(requestor,pvData,
+            printError(requestor,pvField,
                     "support "
                     + factoryName
                     + " arg class "
@@ -317,37 +317,37 @@ public class SupportCreationFactory {
             return false;
         }
         if(!Modifier.isStatic(method.getModifiers())) {
-            printError(requestor,pvData,
+            printError(requestor,pvField,
                     "support "
                     + factoryName
                     + " create is not a static method ");
             return false;
         }
         try {
-            support = (Support)method.invoke(null,dbData);
+            support = (Support)method.invoke(null,dbField);
         } catch(IllegalAccessException e) {
-            printError(requestor,pvData,
+            printError(requestor,pvField,
                     "support "
                     + supportName
                     + " create IllegalAccessException "
                     + e.getLocalizedMessage());
             return false;
         } catch(IllegalArgumentException e) {
-            printError(requestor,pvData,
+            printError(requestor,pvField,
                     "support "
                     + supportName
                     + " create IllegalArgumentException "
                     + e.getLocalizedMessage());
             return false;
         } catch(InvocationTargetException e) {
-            printError(requestor,pvData,
+            printError(requestor,pvField,
                     "support "
                     + supportName
                     + " create InvocationTargetException "
                     + e.getLocalizedMessage());
             return false;
         }
-        dbData.setSupport(support);
+        dbField.setSupport(support);
         return true;
     }
     

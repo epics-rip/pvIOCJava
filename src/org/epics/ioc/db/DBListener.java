@@ -14,9 +14,9 @@ package org.epics.ioc.db;
 public interface DBListener {
     /**
      * A scalar or array modification has occured.
-     * @param dbData The data.
+     * @param dbField The data.
      */
-    void dataPut(DBData dbData);
+    void fieldPut(DBField dbField);
     /**
      * The enum index has been modified.
      * @param dbEnum The enum interface.
@@ -29,9 +29,9 @@ public interface DBListener {
     void enumChoicesPut(DBEnum dbEnum);
     /**
      * The supportName has been modified.
-     * @param dbData
+     * @param dbField
      */
-    void supportNamePut(DBData dbData);
+    void supportNamePut(DBField dbField);
     /**
      * The link configuration structure has been modified.
      * @param dbLink The link interface.
@@ -49,7 +49,7 @@ public interface DBListener {
     void endPut(DBStructure dbStructure);
     /**
      * A put to a subfield has occured.
-     * @param requested The requester is listening to this dbData.
+     * @param requested The requester is listening to this dbField.
      * It can be any field that has subfields. This the pvType can be.
      * <ol>
      *  <li>pvStructure.</li>
@@ -60,13 +60,13 @@ public interface DBListener {
      *     </ol>
      *     </li>
      * </ol>
-     * @param dbData The data that has been modified.
+     * @param dbField The data that has been modified.
      */
-    void dataPut(DBData requested,DBData dbData);
+    void fieldPut(DBField requested,DBField dbField);
     /**
      * A put to an enum subfield has occured.
      * The enum index has been modified.
-     * @param requested The requester is listening to this dbData.
+     * @param requested The requester is listening to this dbField.
      * It can be any field that has subfields. This the pvType can be.
      * <ol>
      *  <li>pvStructure.</li>
@@ -79,11 +79,11 @@ public interface DBListener {
      * </ol>
      * @param dbEnum The enum interface.
      */
-    void enumIndexPut(DBData requested,DBEnum dbEnum);
+    void enumIndexPut(DBField requested,DBEnum dbEnum);
     /**
      * A put to an enum subfield has occured.
      * The enum choices has been modified.
-     * @param requested The requester is listening to this dbData.
+     * @param requested The requester is listening to this dbField.
      * It can be any field that has subfields. This the pvType can be.
      * <ol>
      *  <li>pvStructure.</li>
@@ -96,10 +96,10 @@ public interface DBListener {
      * </ol>
      * @param dbEnum The enum interface.
      */
-    void enumChoicesPut(DBData requested,DBEnum dbEnum);
+    void enumChoicesPut(DBField requested,DBEnum dbEnum);
     /**
      * The supportName of a subfield has been modified..
-     * @param requested The requester is listening to this dbData.
+     * @param requested The requester is listening to this dbField.
      * It can be any field that has subfields. This the pvType can be.
      * <ol>
      *  <li>pvStructure.</li>
@@ -111,12 +111,12 @@ public interface DBListener {
      *     </ol>
      *     </li>
      * </ol>
-     * @param dbData
+     * @param dbField
      */
-    void supportNamePut(DBData requested,DBData dbData);
+    void supportNamePut(DBField requested,DBField dbField);
     /**
      * The configuration structure of a link subfield has been modified..
-     * @param requested The requester is listening to this dbData.
+     * @param requested The requester is listening to this dbField.
      * It can be any field that has subfields. This the pvType can be.
      * <ol>
      *  <li>pvStructure.</li>
@@ -129,7 +129,7 @@ public interface DBListener {
      * </ol>
      * @param dbLink The link interface.
      */
-    void configurationStructurePut(DBData requested,DBLink dbLink);
+    void configurationStructurePut(DBField requested,DBLink dbLink);
     /**
      * Begin record processing.
      * From begin until end of record processing,

@@ -142,14 +142,14 @@ public class ParentTest extends TestCase {
             System.out.printf("field %s not in record %s%n",fieldName,recordName);
             return;
         }
-        PVData pvData = pvAccess.getField();
-        PVRecord record = pvData.getPVRecord();
+        PVField pvField = pvAccess.getField();
+        PVRecord record = pvField.getPVRecord();
         System.out.printf("fieldName %s actualField %s record %s fullName %s%n",
             fieldName,
-            pvData.getField().getFieldName(),
+            pvField.getField().getFieldName(),
             record.getRecordName(),
-            record.getRecordName() + pvData.getFullFieldName());
-        PVData parent = pvData.getParent();
+            record.getRecordName() + pvField.getFullFieldName());
+        PVField parent = pvField.getParent();
         while(parent!=null) {
             record = parent.getPVRecord();
             System.out.printf("     parent %s record %s%n",

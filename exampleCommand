@@ -1,15 +1,4 @@
-# Where you installed Eclipse
-ECLIPSE=/Users/ky9/MacStuff/Eclipse/eclipse32
-
-# SWT jar
-SWT=$ECLIPSE/eclipse/plugins/org.eclipse.swt.carbon.macosx_3.2.0.v3232m.jar
-
-mkdir /tmp/swt
-(cd /tmp/swt; unzip $SWT)
-
-CP=/tmp/swt:bin
-export DYLD_LIBRARY_PATH=/tmp/swt
-java -cp $CP XMLToDatabase -dbd dbd/menuStructureSupport.xml \
+java XMLToDatabase -dbd dbd/menuStructureSupport.xml \
     -dbd src/org/epics/ioc/process/test/exampleDBD.xml \
     -db src/org/epics/ioc/process/test/localLinkDB.xml \
     -swtshell            

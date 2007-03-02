@@ -8,6 +8,7 @@ package org.epics.ioc.pv;
 import java.util.Map;
 
 /**
+ * Interface for creating introspection interraces.
  * @author mrk
  *
  */

@@ -76,11 +76,13 @@ public interface Channel {
     void destroy(ChannelProcess channelProcess);
     /**
      * Create a ChannelGet.
+     * @param channelFieldGroup The fieldGroup describing the data to get.
      * @param channelGetRequestor The channelGetRequestor.
      * @param process Process before getting data.
      * @return An interface for the ChannelGet.
      */
-    ChannelGet createChannelGet(ChannelGetRequestor channelGetRequestor,boolean process);
+    ChannelGet createChannelGet(
+        ChannelFieldGroup channelFieldGroup,ChannelGetRequestor channelGetRequestor, boolean process);
     /**
      * Destroy a channelGet.
      * If a request is active it will complete but no new requestes will be accepted.
@@ -89,11 +91,13 @@ public interface Channel {
     void destroy(ChannelGet channelGet);
     /**
      * Create a ChannelPut.
+     * @param channelFieldGroup The chanelFieldGroup describing the data to put.
      * @param channelPutRequestor The channelPutRequestor.
      * @param process Should record be processed after put.
      * @return An interface for the ChannelPut.
      */
-    ChannelPut createChannelPut(ChannelPutRequestor channelPutRequestor,boolean process);
+    ChannelPut createChannelPut(
+        ChannelFieldGroup channelFieldGroup,ChannelPutRequestor channelPutRequestor, boolean process);
     /**
      * Destroy a channelPut.
      * If a request is active it will complete but no new requestes will be accepted.
@@ -102,11 +106,15 @@ public interface Channel {
     void destroy(ChannelPut channelPut);
     /**
      * Create a ChannelPutGet.
+     * @param putFieldGroup The fieldGroup describing the data to put.
+     * @param getFieldGroup The fieldGroup describing the data to get.
      * @param channelPutGetRequestor The channelPutGetRequestor.
      * @param process Process after put and before get.
      * @return An interface for the ChannelPutGet.
      */
-    ChannelPutGet createChannelPutGet(ChannelPutGetRequestor channelPutGetRequestor,boolean process);
+    ChannelPutGet createChannelPutGet(
+        ChannelFieldGroup putFieldGroup,ChannelFieldGroup getFieldGroup,
+        ChannelPutGetRequestor channelPutGetRequestor, boolean process);
     /**
      * Destroy a channelPut.
      * If a request is active it will complete but no new requestes will be accepted.

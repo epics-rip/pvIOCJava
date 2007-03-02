@@ -17,4 +17,8 @@ public interface DBMenu extends DBEnum {
      * @return The PVMenu.
      */
     PVMenu getPVMenu();
+    /**
+     * Replace the current PVMenu.
+     */
+    void replacePVMenu();
 }

@@ -8,6 +8,7 @@ package org.epics.ioc.pv;
 import org.epics.ioc.util.*;
 
 /**
+ * PVRecord interrace.
  * @author mrk
  *
  */
@@ -24,6 +25,14 @@ public interface PVRecord extends PVStructure {
      * @param messageType The message type.
      */
     void message(String message, MessageType messageType);
+    /**
+     * Add a requestor to receive messages.
+     * @param requestor The requestor to add.
+     */
     void addRequestor(Requestor requestor);
+    /**
+     * Remove a message requestor.
+     * @param requestor The requestor to remove.
+     */
     void removeRequestor(Requestor requestor);
 }

@@ -8,12 +8,13 @@ package org.epics.ioc.ca;
 import org.epics.ioc.pv.PVMenu;
 
 /**
+ * ChannelDataBaseMenu - A CDRecord field that holds a PVMenu.
  * @author mrk
  *
  */
-public interface CDBMenu extends CDBEnum {
+public interface CDMenu extends CDEnum {
     /**
-     * Get the PVMenu for this CDBMenu.
+     * Get the PVMenu for this CDMenu.
      * @return The PVMenu.
      */
     PVMenu getPVMenu();

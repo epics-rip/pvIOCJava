@@ -11,7 +11,7 @@ package org.epics.ioc.pv;
  * @author mrk
  *
  */
-public interface PVEnum extends PVData{
+public interface PVEnum extends PVField{
     /**
      * Get the index of the current selected choice.
      * @return index of current choice.

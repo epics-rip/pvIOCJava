@@ -16,7 +16,7 @@ package org.epics.ioc.pv;
  * <i>pvLong</i>, <i>pvFloat</i>, or <i>pvDouble</i>.</p>
  * 
  * <p><i>getString</i> converts any supported type to a <i>String</i>.
- * Code that implements a PVData interface can implement
+ * Code that implements a PVField interface can implement
  * method <i>toString</i> by calling this method.</p>
  *
  * <p><i>fromString</i> converts a <i>String<i> to a scalar.
@@ -34,14 +34,14 @@ public interface Convert {
      * @param indentLevel indentation level
      * @return value converted to string
      */
-    String getString(PVData pv, int indentLevel);
+    String getString(PVField pv, int indentLevel);
     /**
      * Convert a <i>PV</i> to a string.
      * @param pv a <i>PV</i> to convert to a string.
      * If a <i>PV</i> is a structure or array be prepared for a very long string.
      * @return value converted to string
      */
-    String getString(PVData pv);
+    String getString(PVField pv);
     /**
      * Convert a <i>PV</i> from a <i>String</i>.
      * The <i>PV</i> must be a scaler.
@@ -50,7 +50,7 @@ public interface Convert {
      * @throws IllegalArgumentException if the Type is not a scalar
      * @throws NumberFormatException if the String does not have a valid value.
      */
-    void fromString(PVData pv,String from);
+    void fromString(PVField pv,String from);
     /**
      * Convert a <i>PV</i> array from a <i>String</i> array.
      * The array element type must be a scalar.
@@ -95,7 +95,7 @@ public interface Convert {
      * @param to the destination.
      * @throws IllegalArgumentException if the arguments are not compatible.
      */
-    void copyScalar(PVData from, PVData to);
+    void copyScalar(PVField from, PVField to);
     /**
      * Are from and to valid arguments to copyArray.
      * The results are like isCopyScalarCompatible except that the tests are made on the elementType.
@@ -142,84 +142,84 @@ public interface Convert {
      * @param pv a PV
      * @return converted value
      */
-    byte toByte(PVData pv);
+    byte toByte(PVField pv);
     /**
      * Convert a <i>PV</i> to a <i>short</i>.
      * @param pv a PV
      * @return converted value
      * @throws IllegalArgumentException if the Type is not a numeric scalar
      */
-    short toShort(PVData pv);
+    short toShort(PVField pv);
     /**
      * Convert a <i>PV</i> to an <i>int</i>
      * @param pv a PV
      * @return converted value
      * @throws IllegalArgumentException if the Type is not a numeric scalar
      */
-    int   toInt(PVData pv);
+    int   toInt(PVField pv);
     /**
      * Convert a <i>PV</i> to a <i>long</i>
      * @param pv a PV
      * @return converted value
      * @throws IllegalArgumentException if the Type is not a numeric scalar
      */
-    long  toLong(PVData pv);
+    long  toLong(PVField pv);
     /**
      * Convert a <i>PV</i> to a <i>float</i>
      * @param pv a PV
      * @return converted value
      * @throws IllegalArgumentException if the Type is not a numeric scalar
      */
-    float toFloat(PVData pv);
+    float toFloat(PVField pv);
     /**
      * Convert a <i>PV</i> to a <i>double</i>
      * @param pv a PV
      * @return converted value
      * @throws IllegalArgumentException if the Type is not a numeric scalar
      */
-    double toDouble(PVData pv);
+    double toDouble(PVField pv);
     /**
      * Convert a <i>PV</i> from a <i>byte</i>
      * @param pv a PV
      * @param from value to put into PV
      * @throws IllegalArgumentException if the Type is not a numeric scalar
      */
-    void fromByte(PVData pv, byte from);
+    void fromByte(PVField pv, byte from);
     /**
      * Convert a <i>PV</i> from a <i>short</i>
      * @param pv a PV
      * @param from value to put into PV
      * @throws IllegalArgumentException if the Type is not a numeric scalar
      */
-    void  fromShort(PVData pv, short from);
+    void  fromShort(PVField pv, short from);
     /**
      * Convert a <i>PV</i> from an <i>int</i>
      * @param pv a PV
      * @param from value to put into PV
      * @throws IllegalArgumentException if the Type is not a numeric scalar
      */
-    void  fromInt(PVData pv, int from);
+    void  fromInt(PVField pv, int from);
     /**
      * Convert a <i>PV</i> from a <i>long</i>
      * @param pv a PV
      * @param from value to put into PV
      * @throws IllegalArgumentException if the Type is not a numeric scalar
      */
-    void  fromLong(PVData pv, long from);
+    void  fromLong(PVField pv, long from);
     /**
      * Convert a <i>PV</i> from a <i>float</i>
      * @param pv a PV
      * @param from value to put into PV
      * @throws IllegalArgumentException if the Type is not a numeric scalar
      */
-    void  fromFloat(PVData pv, float from);
+    void  fromFloat(PVField pv, float from);
     /**
      * Convert a <i>PV</i> from a <i>double</i>
      * @param pv a PV
      * @param from value to put into PV
      * @throws IllegalArgumentException if the Type is not a numeric scalar
      */
-    void  fromDouble(PVData pv, double from);
+    void  fromDouble(PVField pv, double from);
     /**
      * Convert a <i>PV</i> array to a <i>byte</i> array.
      * @param pv a PV
@@ -230,7 +230,7 @@ public interface Convert {
      * @return number of elements converted
      * @throws IllegalArgumentException if the element type is not numeric
      */
-    int toByteArray(PVData pv, int offset, int len, byte[]to, int toOffset);
+    int toByteArray(PVField pv, int offset, int len, byte[]to, int toOffset);
     /**
      * Convert a <i>PV</i> array to a <i>short</i> array.
      * @param pv a PV
@@ -241,7 +241,7 @@ public interface Convert {
      * @return number of elements converted
      * @throws IllegalArgumentException if the element type is not numeric
      */
-    int toShortArray(PVData pv, int offset, int len, short[]to, int toOffset);
+    int toShortArray(PVField pv, int offset, int len, short[]to, int toOffset);
     /**
      * Convert a <i>PV</i> array to an <i>int</i> array.
      * @param pv a PV
@@ -252,7 +252,7 @@ public interface Convert {
      * @return number of elements converted
      * @throws IllegalArgumentException if the element type is not numeric
      */
-    int toIntArray(PVData pv, int offset, int len, int[]to, int toOffset);
+    int toIntArray(PVField pv, int offset, int len, int[]to, int toOffset);
     /**
      * Convert a <i>PV</i> array to a <i>long</i> array.
      * @param pv a PV
@@ -263,7 +263,7 @@ public interface Convert {
      * @return number of elements converted
      * @throws IllegalArgumentException if the element type is not numeric
      */
-    int toLongArray(PVData pv, int offset, int len, long[]to, int toOffset);
+    int toLongArray(PVField pv, int offset, int len, long[]to, int toOffset);
     /**
      * Convert a <i>PV</i> array to a <i>float</i> array.
      * @param pv a PV
@@ -274,7 +274,7 @@ public interface Convert {
      * @return number of elements converted
      * @throws IllegalArgumentException if the element type is not numeric
      */
-    int toFloatArray(PVData pv, int offset, int len, float[]to, int toOffset);
+    int toFloatArray(PVField pv, int offset, int len, float[]to, int toOffset);
     /**
      * Convert a <i>PV</i> array to a <i>double</i> array.
      * @param pv a PV
@@ -285,7 +285,7 @@ public interface Convert {
      * @return number of elements converted
      * @throws IllegalArgumentException if the element type is not numeric
      */
-    int toDoubleArray(PVData pv, int offset, int len, double[]to, int toOffset);
+    int toDoubleArray(PVField pv, int offset, int len, double[]to, int toOffset);
     /**
      * Convert a <i>PV</i> array from a <i>byte</i> array.
      * @param pv a PV
@@ -296,7 +296,7 @@ public interface Convert {
      * @return number of elements converted
      * @throws IllegalArgumentException if the element type is not numeric
      */
-    int fromByteArray(PVData pv, int offset, int len, byte[]from, int fromOffset);
+    int fromByteArray(PVField pv, int offset, int len, byte[]from, int fromOffset);
     /**
      * Convert a <i>PV</i> array from a <i>short</i> array.
      * @param pv a PV
@@ -307,7 +307,7 @@ public interface Convert {
      * @return number of elements converted
      * @throws IllegalArgumentException if the element type is not numeric
      */
-    int fromShortArray(PVData pv, int offset, int len, short[]from, int fromOffset);
+    int fromShortArray(PVField pv, int offset, int len, short[]from, int fromOffset);
     /**
      * Convert a <i>PV</i> array from an <i>int</i> array.
      * @param pv a PV
@@ -318,7 +318,7 @@ public interface Convert {
      * @return number of elements converted
      * @throws IllegalArgumentException if the element type is not numeric
      */
-    int fromIntArray(PVData pv, int offset, int len, int[]from, int fromOffset);
+    int fromIntArray(PVField pv, int offset, int len, int[]from, int fromOffset);
     /**
      * Convert a <i>PV</i> array from a <i>long</i> array.
      * @param pv a PV
@@ -329,7 +329,7 @@ public interface Convert {
      * @return number of elements converted
      * @throws IllegalArgumentException if the element type is not numeric
      */
-    int fromLongArray(PVData pv, int offset, int len, long[]from, int fromOffset);
+    int fromLongArray(PVField pv, int offset, int len, long[]from, int fromOffset);
     /**
      * Convert a <i>PV</i> array from a <i>float</i> array.
      * @param pv a PV
@@ -340,7 +340,7 @@ public interface Convert {
      * @return number of elements converted
      * @throws IllegalArgumentException if the element type is not numeric
      */
-    int fromFloatArray(PVData pv, int offset, int len, float[]from, int fromOffset);
+    int fromFloatArray(PVField pv, int offset, int len, float[]from, int fromOffset);
     /**
      * Convert a <i>PV</i> array from a <i>double</i> array.
      * @param pv a PV
@@ -351,7 +351,7 @@ public interface Convert {
      * @return number of elements converted
      * @throws IllegalArgumentException if the element type is not numeric
      */
-    int fromDoubleArray(PVData pv, int offset, int len, double[]from, int fromOffset);
+    int fromDoubleArray(PVField pv, int offset, int len, double[]from, int fromOffset);
     /**
      * Convenience method for implementing toString.
      * It generates a newline and inserts blanks at the beginning of the newline.

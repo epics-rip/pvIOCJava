@@ -23,7 +23,7 @@ public interface Support extends Requestor{
      * Get the field which this support supports.
      * @return The field.
      */
-    DBData getDBData();
+    DBField getDBField();
     /**
      * Initialize.
      * Perform initialization related to record instance but

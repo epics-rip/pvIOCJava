@@ -12,68 +12,11 @@
 
 <h1 style="text-align: center">EPICS JavaIoc: Database Access <br />
 package: org.epics.ioc.dbAcess <br />
-2007.02.02</h1>
+2007.02.26</h1>
 CONTENTS
-
-<div class="toc">
-<ul>
-  <li><a href="#Overview">Overview</a></li>
-  <li><a href="#Record">Record Instance Syntax</a>
-    <ul>
-      <li><a href="#General">General Statements</a>
-        <ul>
-          <li><a href="#namespace">namespace</a></li>
-          <li><a href="#Include">Include</a></li>
-          <li><a href="#Macro">Macro Substitution</a></li>
-          <li><a href="#Example">Example Include and Macro
-          Substitution</a></li>
-        </ul>
-      </li>
-      <li><a href="#record">record</a></li>
-      <li><a href="#configure">configure</a></li>
-      <li><a href="#Primitive">Primitive Types</a></li>
-      <li><a href="#string">string</a></li>
-      <li><a href="#structure">structure</a></li>
-      <li><a href="#array">array</a></li>
-      <li><a href="#menu">menu</a></li>
-      <li><a href="#enumerated">enumerated</a></li>
-      <li><a href="#link">link</a></li>
-    </ul>
-  </li>
-  <li><a href="#Database">XML to Database Converter</a></li>
-  <li><a href="#Database1">Database Access</a>
-    <ul>
-      <li><a href="#Listener">Listener Interface</a>
-        <ul>
-          <li><a href="#DBListener">DBListener</a></li>
-          <li><a href="#RecordList">RecordListener</a></li>
-        </ul>
-      </li>
-      <li><a href="#DBData">DBData</a></li>
-      <li><a href="#DBLink">DBLink</a></li>
-      <li><a href="#DBRecord">DBRecord</a></li>
-    </ul>
-  </li>
-  <li><a href="#DBDataCrea">DBDataCreate</a></li>
-  <li><a href="#Abstract">Abstract and Base Classes</a>
-    <ul>
-      <li><a href="#AbstractDB">AbstractDBData</a></li>
-      <li><a href="#AbstractDB1">AbstractDBArray</a></li>
-      <li><a href="#DBEnumBase">DBEnumBase</a></li>
-      <li><a href="#DBMenuBase">DBMenuBase</a></li>
-      <li><a href="#DBStructur">DBStructureBase</a></li>
-      <li><a href="#DBLinkBase">DBLinkBase</a></li>
-      <li><a href="#DBRecordBa">DBRecordBase</a></li>
-    </ul>
-  </li>
-  <li><a href="#IOCDB">IOCDB: IOC Database</a></li>
-  <li><a href="#Listener1">Listener Support</a></li>
-  <li><a href="#Thread">Thread Safety</a></li>
-</ul>
-</div>
 <hr />
 
-<h2 style="text-align: center" id="Overview">Overview</h2>
+<h2 style="text-align: center">Overview</h2>
 <hr />
 
 <p>An EPICS IOC contains a memory resident real time database. The real time
@@ -91,9 +34,8 @@ instances. The following is discussed:</p>
   <li>Data Factory<br />
     A factory for creating support for database fields. It can create support
     for all types of fields.</li>
-  <li>Abstract and Base Classes<br />
-    A set of abstract and base classes for implementing PVData
-  interfaces.</li>
+  <li>Base Classes<br />
+    A set of base classes for implementing DBField interfaces.</li>
   <li>IOC Database<br />
     Interface and factory for a database containing the record instances</li>
   <li>Listen Support<br />
@@ -102,7 +44,7 @@ instances. The following is discussed:</p>
 </ol>
 <hr />
 
-<h2 style="text-align: center" id="Record">Record Instance Syntax</h2>
+<h2 style="text-align: center">Record Instance Syntax</h2>
 <hr />
 A Record Instance file must be an XML file with a root tag of IOCDatabase:
 <pre>    &lt;?xml version="1.0" ?&gt;
@@ -110,12 +52,12 @@ A Record Instance file must be an XML file with a root tag of IOCDatabase:
       &lt;?-- valid Record Instance Definitions --&gt;
     &lt;/IOCDatabase&gt;</pre>
 
-<h3 id="General">General Statements</h3>
+<h3>General Statements</h3>
 
-<h4 id="namespace">namespace</h4>
+<h4>namespace</h4>
 At this time namespaces are not used.
 
-<h4 id="Include">Include</h4>
+<h4>Include</h4>
 The XML file can include other files also containing Record Instance
 Definitions. An included file must also be a valid XML Record Instance
 Definitions. Included files can also include other files. The syntax is:
@@ -134,7 +76,7 @@ Definitions. Included files can also include other files. The syntax is:
     <dd>Remove a path.</dd>
 </dl>
 
-<h4 id="Macro">Macro Substitution</h4>
+<h4>Macro Substitution</h4>
 
 <p>Macro substitution replaces a string of the form "${from}" with some other
 text. The syntax is:</p>
@@ -161,7 +103,7 @@ text. The syntax is:</p>
   <li>The content of any element definition.</li>
 </ol>
 
-<h4 id="Example">Example Include and Macro Substitution</h4>
+<h4>Example Include and Macro Substitution</h4>
 
 <p>The following is a template file:</p>
 <pre>&lt;?xml version="1.0" ?&gt;
@@ -205,7 +147,7 @@ text. The syntax is:</p>
 &lt;include href = "protoAiDB.xml" /&gt;
 &lt;/IOCDatabase&gt;</pre>
 
-<h3 id="record">record</h3>
+<h3>record</h3>
 
 <p>The syntax for a record instance is:</p>
 <pre>&lt;record type = "recordType" name = "recordName" supportName = "supportName"&gt;
@@ -249,7 +191,7 @@ determines how the field is initialized.</p>
 <p>The syntax for the <span style="font-family: courier">initializer</span>
 depends on the field type.</p>
 
-<h3 id="configure">configure</h3>
+<h3>configure</h3>
 
 <p>If a supportName is defined for a record instance of for a field on a
 record instance and the support definition specifies a configuration
@@ -285,7 +227,7 @@ given before any fields of the structure. If the support is for a record
 type, the configuration must be given before any fields of the record
 instance.</p>
 
-<h3 id="Primitive">Primitive Types</h3>
+<h3>Primitive Types</h3>
 
 <p>For primitive types the initializer has the same format as the Java
 constants for the type. For example if the type for field value is double:</p>
@@ -300,13 +242,13 @@ Notes:
     specified in hex.</li>
 </ul>
 
-<h3 id="string">string</h3>
+<h3>string</h3>
 
 <p>For string types the initializer is a valid Java string constant. For
 example:</p>
 <pre>    &lt;units&gt;voltage&lt;/units&gt;</pre>
 
-<h3 id="structure">structure</h3>
+<h3>structure</h3>
 
 <p>Structure fields are initialized via a recursive definition of field.</p>
 
@@ -336,7 +278,7 @@ structure name. In this case the structureName must be provided when the
 field is being created. The syntax is:</p>
 <pre>    &lt;fieldName structureName = "structureName" &gt;</pre>
 
-<h3 id="array">array</h3>
+<h3>array</h3>
 The syntax for an array initializer is:
 <pre>    &lt;fieldName capacity = "capacity" supportName = "supportName" &gt;
         &lt;value offset = "offset"&gt;value&lt;/value&gt;
@@ -404,7 +346,7 @@ style="font-family: courier;">structArray</span></p>
         &lt;/value&gt;
     &lt;/structArray&gt;</pre>
 
-<h3 id="menu">menu</h3>
+<h3>menu</h3>
 
 <p>A menu field is initialized as follows:</p>
 <pre>    &lt;fieldName supportName = "supportName" &gt;stringValue&lt;/fieldName&gt;</pre>
@@ -415,7 +357,7 @@ where stringValue is one of the allowed values for the menu.
 
 <p>Again supportName is optional.</p>
 
-<h3 id="enumerated">enumerated</h3>
+<h3>enumerated</h3>
 
 <p>An enumerated field is initialized as follows:</p>
 <pre>    &lt;fieldName supportName = "supportName" &gt;
@@ -441,7 +383,7 @@ where stringValue is one of the allowed values for the menu.
          oneState
     &lt;/enumExample&gt;</pre>
 
-<h3 id="link">link</h3>
+<h3>link</h3>
 A link field is initialized as follows:
 <pre>    &lt;fieldName supportName = "supportName" &gt;
         &lt;configure structureName = "supportStructureName"&gt;
@@ -464,7 +406,7 @@ A link field is initialized as follows:
 </dl>
 <hr />
 
-<h2 style="text-align: center" id="Database">XML to Database Converter</h2>
+<h2 style="text-align: center">XML to Database Converter</h2>
 <hr />
 
 <p><span style="font-weight:bold;">NOTE</span> : To create definitions for an
@@ -521,27 +463,26 @@ made an error is generated and nothing is done. Both methods are thread
 safe.</p>
 <hr />
 
-<h2 style="text-align: center" id="Database1">Database Access</h2>
+<h2 style="text-align: center">Database Access</h2>
 <hr />
 
 <p>This section describes interfaces for acessing fields of record instances.
 These interfaces are of interest to the database, record support, link
 support, Channel Access, etc.</p>
 
-<p>All IOC database fields are extended version of the PVData interfaces
-described in package org.epics.ioc.pv. The differenct is that every PVData
-field is also a DBData and every PVRecord is also a DBRecord.</p>
-
-<p>DBData provides the following features:</p>
+<p>Each DBField interface provides access to a corrseponding PVField interface
+and in addition provide access to support and implement monitoring,
+i.e.DBField provides the following features:</p>
 <ul>
   <li>Access to support.<br />
-    PVData provides the name of support code. DBdata provides access to the
+    PVField provides the name of support code. DBdata provides access to the
     support itself.</li>
   <li>Monitoring.<br />
     This is implemented via the DBListener interface.</li>
+  <li>Access to the associated PVField interface.</li>
 </ul>
 
-<p>DBRecord provides the following features:</p>
+<p>In addition DBRecord provides the following features:</p>
 <ul>
   <li>Record locking.<br />
     Whenever code accesses any part of a record instance it must be locked.
@@ -550,14 +491,14 @@ field is also a DBData and every PVRecord is also a DBRecord.</p>
     During ioc initialization an instance of RecordProcess created for each
     record instance.</li>
   <li>Monitoring.<br />
-    DBData and DBRecord are both involved with monitoring.</li>
+    DBField and DBRecord are both involved with monitoring.</li>
   <li>Location of the IOCDB and DBD to which this record instance
   belongs.</li>
 </ul>
 
-<h3 id="Listener">Listener Interface</h3>
+<h3>Listener Interface</h3>
 
-<h4 id="DBListener">DBListener</h4>
+<h4>DBListener</h4>
 
 <p>DBListener is an interface that must be implemented by code that calls
 DBdata.addListener, which is a request to be notified whenever a field
@@ -568,18 +509,18 @@ value.</p>
 
 <p>DBListener has the definition:</p>
 <pre>    public interface DBListener {
-        void dataPut(DBData dbData);
-        void enumIndexPut(PVEnum pvEnum);
-        void enumChoicesPut(PVEnum pvEnum);
-        void supportNamePut(DBData dbData);
-        void configurationStructurePut(PVLink pvLink);
-        void beginPut(PVStructure pvStructure);
-        void endPut(PVStructure pvStructure);
-        void dataPut(PVStructure pvStructure,DBData dbData);
-        void enumIndexPut(PVStructure pvStructure,PVEnum pvEnum);
-        void enumChoicesPut(PVStructure pvStructure,PVEnum pvEnum);
-        void supportNamePut(PVStructure pvStructure,DBData dbData);
-        void configurationStructurePut(PVStructure pvStructure,PVLink pvLink);
+        void dataPut(DBField dbField);
+        void enumIndexPut(DBEnum dbEnum);
+        void enumChoicesPut(DBEnum dbEnum);
+        void supportNamePut(DBField dbField);
+        void configurationStructurePut(DBLink dbLink);
+        void beginPut(DBStructure dbStructure);
+        void endPut(DBStructure dbStructure);
+        void dataPut(DBField requested,DBField dbField);
+        void enumIndexPut(DBField requested,DBEnum dbEnum);
+        void enumChoicesPut(DBField requested,DBEnum dbEnum);
+        void supportNamePut(DBField requested,DBField dbField);
+        void configurationStructurePut(DBField requested,DBLink dbLink);
         void beginProcess();
         void endProcess();
         void unlisten(RecordListener listener);
@@ -607,7 +548,7 @@ where
     <dd>The record has completed processing.</dd>
   <dt style="font-family: courier;">unlisten</dt>
     <dd>The data source is undergoing destruction or major structural
-      changes. The DBData.addListener call is no longer valid and the user
+      changes. The DBField.addListener call is no longer valid and the user
       should null the object reference returned by addListener.</dd>
 </dl>
 
@@ -630,7 +571,7 @@ calls might occur:</p>
   <li>endProcess</li>
 </ul>
 
-<h4 id="RecordList">RecordListener</h4>
+<h4>RecordListener</h4>
 
 <p>RecordListener is an interface that is implemented by the code that
 implements DBRecord. This is normally class DBRecordBase. DBRecord provides a
@@ -642,49 +583,133 @@ DBRecordBase for details. The definition of RecordListener is:</p>
 
 <p>At the end of this document is a example implementation of DBListener.</p>
 
-<h3 id="DBData">DBData</h3>
+<h3>DBField</h3>
 
 <p>The following is the base interface for accessing a field of a record
 instance.</p>
-<pre>    public interface DBData extends PVData {
+<pre>    public interface DBField {
         DBRecord getDBRecord();
-        void addListener(RecordListener listener);
-        void removeListener(RecordListener listener);
-        void postPut();
+        DBField getParent();
+        PVField getPVField();
+        void replacePVField(PVField newPVField);
+        String getSupportName();
+        String setSupportName(String name);
         Support getSupport();
         void setSupport(Support support);
+        void postPut();
+        void addListener(RecordListener recordListener);
+        void removeListener(RecordListener recordListener);
+        List&lt;RecordListener&gt; getRecordListenerList();
+        String toString();
+        String toString(int indentLevel);
     }</pre>
 
 <p>where</p>
 <dl>
   <dt>getDBRecord</dt>
     <dd>Return the DBRecord interface for the record instance.</dd>
-  <dt>addListener</dt>
-    <dd>Add a monitor listener. The RecordListener interface must be created
-      by calling DBRecord.createRecordListener. If the DBData is a structure
-      field the listener will be called when any field in the structure is
-      modified.</dd>
-  <dt>removeListener</dt>
-    <dd>Remove a listener.</dd>
+  <dt>getParent</dt>
+    <dd>Return the DBField interface of the parent.</dd>
+  <dt>getPVField</dt>
+    <dd>Get the PVField interface that hold the data for the field.</dd>
+  <dt>getSupportName</dt>
+    <dd>Just gets the associated PVField bsupportName.</dd>
+  <dt>setSupportName</dt>
+    <dd>This connects the field to associated support and also handles
+      support initialization.</dd>
   <dt>getSupport</dt>
     <dd>Get the support for this field. This returns null if no support
       exists.</dd>
   <dt>setSupport</dt>
     <dd>Set the support for the field. It can be null.</dd>
+  <dt>postPut</dt>
+    <dd>This is called by code that puts to the PVField associated with the
+      field. It implements monitoring.</dd>
+  <dt>addListener</dt>
+    <dd>Add a monitor listener. The RecordListener interface must be created
+      by calling DBRecord.createRecordListener. If the DBField is a structure
+      field the listener will be called when any field in the structure is
+      modified.</dd>
+  <dt>removeListener</dt>
+    <dd>Remove a listener.</dd>
+  <dt>getRecordListenerList</dt>
+    <dd>Get a list of all the record listeners.</dd>
 </dl>
 
-<h3 id="DBLink">DBLink</h3>
+<h3>DBEnum</h3>
+<pre>    public interface DBEnum extends DBField {
+        int getIndex();
+        void setIndex(int index);
+        String[] getChoices();
+        boolean setChoices(String[] choice);
+        PVEnum getPVEnum();
+    }</pre>
+<p>where</p>
+<dl>
+  <dt>getIndex</dt>
+    <dd>Get the current index. This method just calls the associated PVField method.</dd>
+  <dt>setIndex</dt>
+    <dd>This method calls the associated PVField method AND also calls dbListener.enumIndexPut
+for all registered listeners.</dd>
+   <dt>setChoices</dt>
+    <dd>Get the current choices. This method just calls the associated PVField method.</dd>
+  <dt>setIndex</dt>
+    <dd>This method calls the associated PVField method AND also calls dbListener.enumChoicesPut
+for all registered listeners.</dd>
+   <dt>getPVEnum</dt>
+     <dd>Get the associated PVEnum interface</dd>
+</dl>
+
+<h3>DBMenu</h3>
+<pre>    public interface DBMenu extends DBEnum {
+        PVMenu getPVMenu();
+    }</pre>
+<p>This is like PVEnum except that it will not allow the choices to be modified.</p>
+
+<h3>DBLink</h3>
 
 <p>A link is a field with no data but can have an associated configuration
 structure.</p>
-<pre>    public interface DBLink extends DBData,PVLink {
+<pre>    public interface DBLink extends DBField{
+        PVStructure getConfigurationStructure();
+        boolean setConfigurationStructure(PVStructure pvStructure);
         String newSupport(DBDLinkSupport linkSupport,DBD dbd);
+        PVLink getPVLink();
+    }</pre>
+<p>where</p>
+<dl>
+  <dt>getConfigurationStructure</dt>
+   <dd>Get the interface for the configuration structure.</dd>
+  <dt>setConfigurationStructure</dt>
+   <dd>In any support is already active the support is forced to state readyForInitialize.
+    Then the configuration structure is modified and an attempt is made to put
+    the link support in the same supportState as the record itself.</dd>
+  <dt>newSupport</dt>
+   <dd>Stop existing support and connect and start the speecified support.</dd>
+   <dt>getPVLink</dt>
+    <dd>Get the associated PVLink interface.</dd>
+</dl>
+
+<h3>DBStructure</h3>
+<pre>    public interface DBStructure extends DBField {
+        DBField[] getFieldDBFields();
+        void replacePVStructure();
+        void beginPut();
+        void endPut();
+        PVStructure getPVStructure();
     }</pre>
 
-<p>The single method is used to set the support.</p>
+<h3>DBNonScalarArray</h3>
+<pre>    public interface DBNonScalarArray extends DBField{
+        DBField[] getElementDBFields();
+        void replacePVArray();
+    }</pre>
 
-<h3 id="DBRecord">DBRecord</h3>
-<pre>    interface DBRecord extends DBData, PVRecord {
+<h3>DBRecord</h3>
+<pre>    interface DBRecord {
+        DBField findDBField(PVField pvField);
+        PVRecord getPVRecord();
+        DBStructure getDBStructure();
         void lock();
         void unlock();
         void lockOtherRecord(DBRecord otherRecord);
@@ -696,7 +721,7 @@ structure.</p>
         RecordListener createRecordListener(DBListener listener);
         void removeRecordListener(RecordListener listener);
         void removeRecordListeners();
-        void addListenerSource(AbstractDBData dbData);
+        void addListenerSource(BaseDBField dbField);
         DBD getDBD();
         void setDBD(DBD dbd);
         IOCDB getIOCDB();
@@ -726,18 +751,18 @@ structure.</p>
   <dt style="font-family: courier;">createRecordListener</dt>
     <dd>Create a RecordListener. The listener is called when record
       processing starts and when it completes. The record listener can also
-      be used to call DBData.addListener.</dd>
+      be used to call DBField.addListener.</dd>
   <dt style="font-family: courier;">removeRecordListener</dt>
     <dd>Remove a record listener. This will also call removeListener for all
-      DBDatas that have this listener attached.</dd>
+      DBFields that have this listener attached.</dd>
   <dt style="font-family: courier;">removeRecordListeners</dt>
     <dd>Remove all listeners. This is called if a record insance is being
       removed or if it's structure is being changed.</dd>
   <dt style="font-family: courier;">addListenerSource</dt>
     <dd>Add a listener source. Used for communication between
-      DBRecordBase.java and AbstractDBData. AbstractDBData calls this the
-      first time DBData.addListener is called. It should not be called by
-      other code.</dd>
+      DBRecordBase.java and BaseDBField. BaseDBField calls this the first time
+      DBField.addListener is called. It should not be called by other
+    code.</dd>
   <dt style="font-family: courier;">getDBD</dt>
     <dd>Get the DBD that this record instance uses. See package
       org.epics.ioc.dbDefinition for an explaination of a DBD.</dd>
@@ -749,152 +774,111 @@ structure.</p>
     <dd>Set the IOCDB that holds this record instance. Note that this changes
       after record initialization.</dd>
 </dl>
-<hr />
 
-<h2 style="text-align: center" id="DBDataCrea">DBDataCreate</h2>
-<hr />
+<h3>DBREcordFactory</h3>
 
-<p>A factory is available that implements the interfaces for record instance
-fields. The methods are called by XMLToIOCDBFactory when it is reading
-instance definitions.</p>
-<pre>    interface DBDataCreate {
-        DBData createData(DBData parent,Field field);
-        DBData createEnumData(DBData parent,Field field, String[] choice);
-        PVArray createArrayData(DBData parent,Field field,
-            int capacity,boolean capacityMutable);
-        DBRecord createRecord(String recordName, DBDRecordType dbdRecordType);
-    }
-
-    public class DBDataFactory {
-        public static DBDataCreate getDBDataCreate();
+<p>A factory is available that implements the DBField interfaces for record
+instance fields.</p>
+<pre>    public class DBRecordFactory {
+        public static DBRecord create(PVRecord pvRecord);
     }</pre>
-where
-<dl>
-  <dt style="font-family: courier;">createData</dt>
-    <dd>Creates an instance of any type of field except enum, array fields,
-      or a record instance itself.</dd>
-  <dt style="font-family: courier;">createEnumData</dt>
-    <dd>Create an enum field instance.</dd>
-  <dt style="font-family: courier;">createArrayData</dt>
-    <dd>Create an array field instance.</dd>
-  <dt style="font-family: courier;">createRecord</dt>
-    <dd>Create a record instance.</dd>
-</dl>
+
+<p>The Base Classes described in the next section provide the implementation
+of the various DBField interfraces.</p>
 <hr />
 
-<h2 style="text-align: center" id="Abstract">Abstract and Base Classes</h2>
+<h2 style="text-align: center">Base Classes</h2>
 <hr />
 
 <p>This section describes abstract classes for implementing the data
 interface for database fields. These classes are used by DBDataFactory and
 can also be used by code that wants to provide special implementations of
 database fields. The only abstract classes are AbstractDBdata and
-AbstractDBArray. The remaining classes are base classes that provide complete
-implementations but can be extended. Any code that wants to provide its own
-implementation should extend AbstractDBdata ot the appropriate base class.</p>
+BaseDBNonScalarArray. The remaining classes are base classes that provide
+complete implementations but can be extended. Any code that wants to provide
+its own implementation should extend AbstractDBdata ot the appropriate base
+class.</p>
 
-<h3 id="AbstractDB">AbstractDBData</h3>
-
-<p>Abstract base class for a scalar field. Any code that implements scalar
-fields should extend this class since it implements almost all methods except
-the methods to actually get or put data.</p>
-<pre>    public abstract class AbstractDBData extends AbstractPVData implements DBData{
-
-        protected AbstractDBData(DBData parent, Field field);
-        protected void replaceField(Field field);
-        protected void setRecord(DBRecord record);
-        protected void removeRecordListeners();
-
-        public DBRecord getDBRecord();
-        public void replacePVData(PVData newPVData); // override PVData
-        public void addListener(RecordListener listener);
-        public void removeListener(RecordListener listener);
-        public final void postPut();
-        public String setSupportName(String name);
-        public Support getSupport();
+<h3>BaseDBField</h3>
+<pre>    public class BaseDBField implements DBField{
+        public BaseDBField(DBField parent,DBRecord record, PVField pvField) {
+        public DBRecord getDBRecord() {
+        public DBField getParent() {
+        public PVField getPVField() {
+        public void replacePVField(PVField newPVField) {
+        public String getSupportName() {
+        public String setSupportName(String name) {
+        public Support getSupport() {
+        public void setSupport(Support support) {
+        public void postPut() {
+        public void addListener(RecordListener recordListener) {
+        public void removeListener(RecordListener recordListener) {
+        public List&lt;RecordListener&gt; getRecordListenerList() {
+        protected void removeRecordListeners(){
+        public String toString() {
+        public String toString(int indentLevel) {
     }</pre>
 
-<h3 id="AbstractDB1">AbstractDBArray</h3>
+<h3>BaseDBNonScalarArray</h3>
 
-<p>Abstract base class for implementing PVArray. Any code that implements a
-PVArray field for an IOC database should extend this class.</p>
-<pre>    public abstract class AbstractDBArray extends AbstractDBData implements PVArray{
-        protected int length = 0;
-        protected int capacity;
-        protected boolean capacityMutable = true;
-        abstract public void setCapacity(int capacity);
-
-        public AbstractDBArray(DBData parent,Array array,
-            int capacity,boolean capacityMutable);
-        public boolean isCapacityMutable();
-        public int getCapacity();
-        public int getLength();
-        public void setLength(int len);
-        public String toString();
+<p>Base class for implementing DBArray.</p>
+<pre>    public class BaseDBNonScalarArray extends BaseDBField implements DBNonScalarArray {
+        public BaseDBNonScalarArray(DBField parent,DBRecord record, PVArray pvArray);
+        public DBField[] getElementDBFields();
+        public void replacePVArray();
+        public void postPut();
     }</pre>
 
-<h3 id="DBEnumBase">DBEnumBase</h3>
+<h3>BaseDBEnum</h3>
 
-<p>Base class for an enumerated field. Any code that implements DBEnum should
-extend this class.</p>
-<pre>    public class DBEnumBase extends AbstractDBData implements PVEnum {
-        public AbstractDBEnum(DBData parent,Enum enumField, String[]choice);
-        public int getIndex();
-        public void setIndex(int index);
+<p>Base class for an enumerated field.</p>
+<pre>    public class BaseDBEnum extends BaseDBField implements DBEnum {
+        public BaseDBEnum(DBField parent,DBRecord record, PVField pvField);
         public String[] getChoices();
+        public int getIndex();
         public boolean setChoices(String[] choice);
-        public String toString();
-        public String toString(int indentLevel);
+        public void setIndex(int index);
+        public PVEnum getPVEnum();
     }</pre>
 
-<h3 id="DBMenuBase">DBMenuBase</h3>
+<h3>BaseDBMenu</h3>
 
 <p>Base class for a menu field. Any code that implements DBMenu should extend
 this class.</p>
-<pre>    public class DBMenuBase extends DBEnumBase implements PVMenu
-    {
-        public DBMenuBase(DBData parent,Menu menu);
+<pre>    public class BaseDBMenu extends BaseDBEnum implements DBMenu {
+        public BaseDBMenu(DBField parent,DBRecord record, PVField pvField);
         public boolean setChoices(String[] choice);
-        public String toString();
-        public String toString(int indentLevel);
+        public PVMenu getPVMenu();
     }</pre>
 
-<h3 id="DBStructur">DBStructureBase</h3>
+<h3>BaseDBStructure</h3>
 
-<p>Abstract base class for a structure field. Any code that implements
-DBStructure should extend this class.</p>
-<pre>    public class DBStructureBase extends AbstractDBData implements PVStructure
-    {
+<p>Base class for a structure field.</p>
+<pre>    public class BaseDBStructure extends BaseDBField implements DBStructure {
         // constructor for structure fields
-        public DBStructureBase(DBData parent, Structure structure);
+        public BaseDBStructure(DBField parent,DBRecord record, PVField pvField)
         // constructor for record instances
-        protected DBStructureBase(DBDRecordType dbdRecordType)
-        // called by record instance constructor
-        protected void createFields(DBRecord record);
-        public boolean replaceStructureField(String fieldName, String structureName);
-        public PVData[] getFieldPVDatas();
+        public BaseDBStructure(DBRecord dbRecord,PVRecord pvRecord);
+        public void replacePVStructure();
+        public DBField[] getFieldDBFields();
+        public PVStructure getPVStructure();
         public void beginPut();
         public void endPut();
-        public String toString();
-        public String toString(int indentLevel);
-        protected String toString(String prefix,int indentLevel)
     }</pre>
 
-<h3 id="DBLinkBase">DBLinkBase</h3>
-<pre>    public class DBLinkBase extends AbstractDBData implements DBLink
-    {
-        public DBLinkBase(DBData parent,Field field);
-        public String newSupport(DBDLinkSupport linkSupport,DBD dbd);
-        public PVStructure getConfigurationStructure();
-        public boolean setConfigurationStructure(PVStructure pvStructure);
-        public String toString();
-        public String toString(int indentLevel);
+<h3>BaseDBLink</h3>
+<pre>    public class BaseDBLink extends BaseDBField implements DBLink {
+        public BaseDBLink(DBField parent,DBRecord record, PVField pvField) {
+        public String newSupport(DBDLinkSupport linkSupport,DBD dbd) {
+        public PVStructure getConfigurationStructure() {
+        public boolean setConfigurationStructure(PVStructure pvStructure) {
+        public PVLink getPVLink() {
     }</pre>
 
-<h3 id="DBRecordBa">DBRecordBase</h3>
+<h3>DBRecordBase</h3>
 
 <p>Abstract base class for a record instance.</p>
-<pre>    public class DBRecordBase extends DBStructureBase implements DBRecord {
+<pre>    public class DBRecordBase extends BaseDBStructure implements DBRecord {
         public DBRecordBase(String recordName,DBDRecordType dbdRecordType);
         public void message(String message, MessageType messageType);
         public String getRecordName();
@@ -909,7 +893,7 @@ DBStructure should extend this class.</p>
         public RecordListener createRecordListener(DBListener listener);
         public void removeRecordListener(RecordListener listener);
         public void removeRecordListeners();
-        public void addListenerSource(AbstractDBData dbData);
+        public void addListenerSource(BaseDBField dbField);
         public DBD getDBD();
         public void setDBD(DBD dbd);
         public IOCDB getIOCDB();
@@ -919,7 +903,7 @@ DBStructure should extend this class.</p>
     }</pre>
 <hr />
 
-<h2 style="text-align: center" id="IOCDB">IOCDB: IOC Database</h2>
+<h2 style="text-align: center">IOCDB: IOC Database</h2>
 <hr />
 
 <p>An IOCDB is a database for a java IOC. All methods IOCDBFactory are thread
@@ -1012,12 +996,12 @@ ReadWrite locks are used to implement thread safety.</p>
 </dl>
 <hr />
 
-<h2 style="text-align: center" id="Listener1">Listener Support</h2>
+<h2 style="text-align: center">Listener Support</h2>
 <hr />
 
-<p>The classes AbstractDBData and DBRecordBase provide support for
-implementing database monitors, i.e. support for notifying a client whenever
-a field of a database instance changes value.</p>
+<p>The classes BaseDBField and DBRecordBase provide support for implementing
+database monitors, i.e. support for notifying a client whenever a field of a
+database instance changes value.</p>
 
 <p>A client must implement the interface DBListener. A client can listen to
 an arbitrary number of fields in a record. It must first obtain a Listen
@@ -1027,7 +1011,7 @@ interface by calling dbRecord..createListener:</p>
     DBListener listener = dbRecord.createListener(this);</pre>
 
 <p>and then, for each field it wants to monitor makes the call:</p>
-<pre>    dbData.addListener(listener);</pre>
+<pre>    dbField.addListener(listener);</pre>
 
 <p>The support provides the following features:</p>
 <ul>
@@ -1072,33 +1056,33 @@ all properties of the field.</p>
             return;
         }
         PVAccess pvAccess = PVAccessFactory.createPVAccess(pvRecord);
-        DBData pvData;
+        DBField pvField;
         if(pvName==null || pvName.length()==0) {
-            pvData = (DBData)pvAccess.getPVRecord();
+            pvField = (DBField)pvAccess.getPVRecord();
         } else {
             if(pvAccess.findField(pvName)!=AccessSetResult.thisRecord){
                 System.out.printf("name %s not in record %s%n",pvName,recordName);
                 System.out.printf("%s\n",pvAccess.getPVRecord().toString());
                 return;
             }
-            pvData = (DBData)pvAccess.getField();
+            pvField = (DBField)pvAccess.getField();
         }
-        actualFieldName = pvData.getField().getFieldName();
-        fullName = pvData.getPVRecord().getRecordName() + pvData.getFullFieldName();
-        listener = pvData.getDBRecord().createRecordListener(this);
-        pvData.addListener(listener);
+        actualFieldName = pvField.getField().getFieldName();
+        fullName = pvField.getPVRecord().getRecordName() + pvField.getFullFieldName();
+        listener = pvField.getDBRecord().createRecordListener(this);
+        pvField.addListener(listener);
         if(monitorProperties) {
-            if(pvData.getField().getType()!=Type.pvStructure) {
-                Property[] property = pvData.getField().getPropertys();
-                DBData propertyData;
+            if(pvField.getField().getType()!=Type.pvStructure) {
+                Property[] property = pvField.getField().getPropertys();
+                DBField propertyData;
                 for(Property prop : property) {
-                    pvAccess.setPVField(pvData);
+                    pvAccess.setPVField(pvField);
                     if(pvAccess.findField(prop.getPropertyName())
                     !=AccessSetResult.thisRecord){
                         System.out.printf("name %s not in record %s%n",pvName,recordName);
                         System.out.printf("%s\n",pvAccess.getPVRecord().toString());
                     } else {
-                        propertyData = (DBData)pvAccess.getField();
+                        propertyData = (DBField)pvAccess.getField();
                         propertyData.addListener(listener);
                     }
                 }
@@ -1135,32 +1119,32 @@ all properties of the field.</p>
     
     public void beginPut(PVStructure pvStructure) {
         if(!verbose) return;
-        DBData dbData = (DBData)pvStructure;
-        String name = dbData.getPVRecord().getRecordName()
+        DBField dbField = (DBField)pvStructure;
+        String name = dbField.getPVRecord().getRecordName()
             + pvStructure.getFullFieldName();
         System.out.println("beginPut " + name);
     }
  
     public void endPut(PVStructure pvStructure) {
         if(!verbose) return;
-        DBData dbData = (DBData)pvStructure;
-        String name = dbData.getPVRecord().getRecordName()
+        DBField dbField = (DBField)pvStructure;
+        String name = dbField.getPVRecord().getRecordName()
             + pvStructure.getFullFieldName();
         System.out.println("endPut " + name);
     }
     
-    public void dataPut(DBData dbData) {
+    public void dataPut(DBField dbField) {
         String common = putCommon("dataPut");
         if(!verbose) {
-            System.out.println(common + dbData.toString(1));
+            System.out.println(common + dbField.toString(1));
             return;
         }
-        String name = dbData.getPVRecord().getRecordName() + dbData.getFullFieldName();
+        String name = dbField.getPVRecord().getRecordName() + dbField.getFullFieldName();
         if(!name.equals(fullName)) {
             System.out.printf("%s%s NOT_EQUAL %s%n",common,name,fullName);
         }
         System.out.printf("%s    %s = %s%n",
-            common,name,dbData.toString(2));
+            common,name,dbField.toString(2));
     }
     
     public void enumChoicesPut(PVEnum pvEnum) {
@@ -1191,14 +1175,14 @@ all properties of the field.</p>
             common,name,pvEnum.getIndex());
     }
    
-    public void supportNamePut(DBData dbData) {
+    public void supportNamePut(DBField dbField) {
         String common = putCommon("supportNamePut");
-        String name = dbData.getPVRecord().getRecordName() + dbData.getFullFieldName();
+        String name = dbField.getPVRecord().getRecordName() + dbField.getFullFieldName();
         if(!name.equals(fullName)) {
             System.out.printf("%s %s NOT_EQUAL %s%n",common,name,fullName);
         }
         System.out.printf("%s    %s = %s%n",
-            common,name,dbData.getSupportName());
+            common,name,dbField.getSupportName());
     }
  
     public void configurationStructurePut(PVLink pvLink) {
@@ -1211,13 +1195,13 @@ all properties of the field.</p>
             common,name,pvLink.getConfigurationStructure().toString(2));
     }
     
-    public void dataPut(PVStructure pvStructure, DBData dbData) {
+    public void dataPut(PVStructure pvStructure, DBField dbField) {
         String structureName =
             pvStructure.getPVRecord().getRecordName()
             + pvStructure.getFullFieldName();
         String common = putCommon(structureName +" dataPut to field "
-            + dbData.getFullFieldName());
-        System.out.printf("%s    = %s%n",common,dbData.toString(2));
+            + dbField.getFullFieldName());
+        System.out.printf("%s    = %s%n",common,dbField.toString(2));
     }
     
     public void enumChoicesPut(PVStructure pvStructure,PVEnum pvEnum) {
@@ -1238,13 +1222,13 @@ all properties of the field.</p>
         System.out.printf("%s    index = %d%n",common,pvEnum.getIndex());
     }
  
-    public void supportNamePut(PVStructure pvStructure,DBData dbData) {
+    public void supportNamePut(PVStructure pvStructure,DBField dbField) {
         String structureName =
             pvStructure.getPVRecord().getRecordName()
             + pvStructure.getFullFieldName();
         String common = putCommon(structureName + " supportNamePut to field "
-            + dbData.getFullFieldName());
-        System.out.printf("%s    = %s%n",common,dbData.getSupportName());
+            + dbField.getFullFieldName());
+        System.out.printf("%s    = %s%n",common,dbField.getSupportName());
     }
     
     public void configurationStructurePut(PVStructure pvStructure,PVLink pvLink) {
@@ -1275,7 +1259,7 @@ modifies its internal data for the field. It must call postPut even if the
 new value is the same as the old value.</p>
 <hr />
 
-<h2 style="text-align: center" id="Thread">Thread Safety</h2>
+<h2 style="text-align: center">Thread Safety</h2>
 <hr />
 The dbAccess components are designed to be used in an IOC, which is a
 multithreaded environment. The design includes:

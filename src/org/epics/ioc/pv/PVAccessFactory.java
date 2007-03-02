@@ -12,17 +12,23 @@ import org.epics.ioc.util.*;
 
 
 /**
+ * Factory for creating PVAccess instances.
  * @author mrk
  *
  */
 public class PVAccessFactory {
+    /**
+     * Create a PVAccess instance.
+     * @param pvRecord The record to be accessed.
+     * @return The PVAccess interface.
+     */
     public static PVAccess createPVAccess(PVRecord pvRecord) {
         return new Access(pvRecord);
     }
     
     private static class Access implements PVAccess {
         private PVRecord pvRecord;
-        private PVData pvDataSetField;
+        private PVField pvFieldSetField;
         static private Pattern periodPattern = Pattern.compile("[.]");
         //following are for setName(String name)
         private String otherRecord = null;
@@ -31,7 +37,7 @@ public class PVAccessFactory {
         
         private Access(PVRecord pvRecord) {
             this.pvRecord = pvRecord;
-            pvDataSetField = null;
+            pvFieldSetField = null;
         }    
         /* (non-Javadoc)
          * @see org.epics.ioc.pv.PVAccess#getPVRecord()
@@ -42,15 +48,15 @@ public class PVAccessFactory {
         /* (non-Javadoc)
          * @see org.epics.ioc.pv.PVAccess#getField()
          */
-        public PVData getField() {
-            return pvDataSetField;
+        public PVField getField() {
+            return pvFieldSetField;
         }   
         /* (non-Javadoc)
          * @see org.epics.ioc.pv.PVAccess#setField(java.lang.String)
          */
         public AccessSetResult findField(String fieldName) {
             if(fieldName==null || fieldName.length()==0) {
-                pvDataSetField = pvRecord;
+                pvFieldSetField = pvRecord;
                 return AccessSetResult.thisRecord;
             }
             otherRecord = null;
@@ -58,8 +64,8 @@ public class PVAccessFactory {
             if(names.length<=0) {
                 return AccessSetResult.notFound;
             }
-            PVData currentData = pvDataSetField;
-            if(currentData==null) currentData = pvRecord;
+            PVField currentField = pvFieldSetField;
+            if(currentField==null) currentField = pvRecord;
             while(true) {
                 String name = names[0];
                 int arrayIndex = -1;
@@ -72,120 +78,120 @@ public class PVAccessFactory {
                     arrayIndexString = arrayIndexString.substring(0,endBracket);
                     arrayIndex = Integer.parseInt(arrayIndexString);
                 }
-                PVData newData = findField(currentData,name);
-                currentData = newData;
-                if(currentData==null) break;
+                PVField newField = findField(currentField,name);
+                currentField = newField;
+                if(currentField==null) break;
                 if(arrayIndex>=0) {
-                    Type type = currentData.getField().getType();
+                    Type type = currentField.getField().getType();
                     if(type!=Type.pvArray) break;
-                    PVArray pvArray = (PVArray)currentData;
+                    PVArray pvArray = (PVArray)currentField;
                     Array field = (Array)pvArray.getField();
                     Type elementType = field.getElementType();
                     if(elementType==Type.pvStructure) {
                         PVStructureArray pvStructureArray =
-                            (PVStructureArray)currentData;
+                            (PVStructureArray)currentField;
                         if(arrayIndex>=pvStructureArray.getLength()) break;
                         StructureArrayData data = new StructureArrayData();
                         int n = pvStructureArray.get(arrayIndex,1,data);
                         PVStructure[] structureArray = data.data;
                         int offset = data.offset;
                         if(n<1 || structureArray[offset]==null) {
-                            currentData = null;
+                            currentField = null;
                             break;
                         }
-                        currentData = (PVData)structureArray[offset];
+                        currentField = (PVField)structureArray[offset];
                     } else if(elementType==Type.pvArray) {
-                        PVArrayArray pvArrayArray = (PVArrayArray)currentData;
+                        PVArrayArray pvArrayArray = (PVArrayArray)currentField;
                         if(arrayIndex>=pvArrayArray.getLength()) break;
                         ArrayArrayData data = new ArrayArrayData();
                         int n = pvArrayArray.get(arrayIndex,1,data);
                         PVArray[] arrayArray = data.data;
                         int offset = data.offset;
                         if(n<1 || arrayArray[offset]==null) {
-                            currentData = null;
+                            currentField = null;
                             break;
                         }
-                        currentData = (PVData)arrayArray[offset];
+                        currentField = (PVField)arrayArray[offset];
                         break;
                     } else if(elementType==Type.pvLink) {
-                        PVLinkArray pvLinkArray = (PVLinkArray)currentData;
+                        PVLinkArray pvLinkArray = (PVLinkArray)currentField;
                         if(arrayIndex>=pvLinkArray.getLength()) break;
                         LinkArrayData data = new LinkArrayData();
                         int n = pvLinkArray.get(arrayIndex,1,data);
                         PVLink[] linkArray = data.data;
                         int offset = data.offset;
                         if(n<1 || linkArray[offset]==null) {
-                            currentData = null;
+                            currentField = null;
                             break;
                         }
-                        currentData = (PVData)linkArray[offset];
+                        currentField = (PVField)linkArray[offset];
                         break;
                     } else if(elementType==Type.pvMenu) {
-                        PVMenuArray pvMenuArray = (PVMenuArray)currentData;
+                        PVMenuArray pvMenuArray = (PVMenuArray)currentField;
                         if(arrayIndex>=pvMenuArray.getLength()) break;
                         MenuArrayData data = new MenuArrayData();
                         int n = pvMenuArray.get(arrayIndex,1,data);
                         PVMenu[] menuArray = data.data;
                         int offset = data.offset;
                         if(n<1 || menuArray[offset]==null) {
-                            currentData = null;
+                            currentField = null;
                             break;
                         }
-                        currentData = (PVData)menuArray[offset];
+                        currentField = (PVField)menuArray[offset];
                         break;
                     } else if(elementType==Type.pvEnum){
-                        PVEnumArray pvEnumArray = (PVEnumArray)currentData;
+                        PVEnumArray pvEnumArray = (PVEnumArray)currentField;
                         if(arrayIndex>=pvEnumArray.getLength()) break;
                         EnumArrayData data = new EnumArrayData();
                         int n = pvEnumArray.get(arrayIndex,1,data);
                         PVEnum[] enumArray = data.data;
                         int offset = data.offset;
                         if(n<1 || enumArray[offset]==null) {
-                            currentData = null;
+                            currentField = null;
                             break;
                         }
-                        currentData = (PVData)enumArray[offset];
+                        currentField = (PVField)enumArray[offset];
                         break;
                     } else {
-                        currentData = null;
+                        currentField = null;
                         break;
                     }
                 }
-                if(currentData==null) break;
-                if(currentData.getField().getType()==Type.pvLink) {
+                if(currentField==null) break;
+                if(currentField.getField().getType()==Type.pvLink) {
                     if(otherRecord!=null) {
                         if(names.length>1) otherField += "." + names[1];
-                        currentData = null;
+                        currentField = null;
                         break;
                     }
                     if(names.length<=1) break;
-                    PVLink pvLink = (PVLink)currentData;
+                    PVLink pvLink = (PVLink)currentField;
                     lookForRemote(pvLink,names[1]);
-                    currentData = null;
+                    currentField = null;
                     break;
                 }
                 if(names.length<=1) break;
                 names = periodPattern.split(names[1],2);
             }
-            if(currentData==null) {
+            if(currentField==null) {
                 if(otherRecord==null) return AccessSetResult.notFound;
                 return AccessSetResult.otherRecord;
             }
-            pvDataSetField = currentData;
+            pvFieldSetField = currentField;
             return AccessSetResult.thisRecord;
         }                
         /* (non-Javadoc)
-         * @see org.epics.ioc.pv.PVAccess#setField(org.epics.ioc.pv.PVData)
+         * @see org.epics.ioc.pv.PVAccess#setField(org.epics.ioc.pv.PVField)
          */
-        public void setPVField(PVData pvData) {
-            if(pvData==null) {
-                pvDataSetField = pvRecord;
+        public void setPVField(PVField pvField) {
+            if(pvField==null) {
+                pvFieldSetField = pvRecord;
                 return;
             }
-            if(pvData.getPVRecord()!=pvRecord) 
+            if(pvField.getPVRecord()!=pvRecord) 
                 throw new IllegalArgumentException (
                     "field is not in this record instance");
-            pvDataSetField = (PVData)pvData;
+            pvFieldSetField = (PVField)pvField;
         }        
         /* (non-Javadoc)
          * @see org.epics.ioc.pv.PVAccess#getOtherField()
@@ -199,30 +205,29 @@ public class PVAccessFactory {
         public String getOtherRecord() {
             return otherRecord;
         }        
-
-        
-        private PVData findField(PVData pvData,String name) {
-            PVData newField = getPVStructureField(pvData,name);
+       
+        private PVField findField(PVField pvField,String name) {
+            PVField newField = getPVStructureField(pvField,name);
             if(newField!=null) return newField;
-            Property property = pvData.getField().getProperty(name);
-            return findPropertyField(pvData,property);
+            Property property = pvField.getField().getProperty(name);
+            return findPropertyField(pvField,property);
             
         }
         
-        private PVData  findPropertyField(PVData pvData,
+        private PVField  findPropertyField(PVField pvField,
             Property property)
         {
             if(property==null) return null;
-            PVRecord pvRecord = pvData.getPVRecord();
+            PVRecord pvRecord = pvField.getPVRecord();
             String propertyFieldName = property.getAssociatedFieldName();
             if(propertyFieldName.charAt(0)=='/') {
                 propertyFieldName = propertyFieldName.substring(1);
-                pvData = pvRecord;
+                pvField = pvRecord;
             }
             String[] names = periodPattern.split(propertyFieldName,0);
             int length = names.length;
             if(length<1 || length>2) {
-                pvData.message(
+                pvField.message(
                         " recordType "
                      + ((Structure)pvRecord.getField()).getStructureName()
                      + " has a bad property definition "
@@ -230,14 +235,14 @@ public class PVAccessFactory {
                      MessageType.error);
                 return null;
             }
-            PVData newField = null;
-            if(pvData.getField().getType()==Type.pvStructure) {
-                newField = getPVStructureField(pvData,names[0]);
+            PVField newField = null;
+            if(pvField.getField().getType()==Type.pvStructure) {
+                newField = getPVStructureField(pvField,names[0]);
             } else {
-                newField = getPVStructureField(pvData.getParent(),names[0]);
+                newField = getPVStructureField(pvField.getParent(),names[0]);
             }
-            if(newField==pvData) {
-                pvData.message(
+            if(newField==pvField) {
+                pvField.message(
                         " recordType "
                      + ((Structure)pvRecord.getField()).getStructureName()
                      + " has a recursive property  = "
@@ -245,40 +250,40 @@ public class PVAccessFactory {
                      MessageType.error);
                 return null;
             }
-            pvData = newField;
-            if(pvData==null) return null;
+            pvField = newField;
+            if(pvField==null) return null;
             if(length==2) {
-                Type type = pvData.getField().getType();
+                Type type = pvField.getField().getType();
                 if(type==Type.pvLink) {
-                    PVLink pvLink = (PVLink)pvData;
+                    PVLink pvLink = (PVLink)pvField;
                     lookForRemote(pvLink,names[1]);
-                    return pvData;
+                    return pvField;
                 }
                 if(type==Type.pvStructure) {
-                    newField = getPVStructureField(pvData,names[1]);
+                    newField = getPVStructureField(pvField,names[1]);
                 } else {
-                    newField = getPVStructureField(pvData.getParent(),names[1]);
+                    newField = getPVStructureField(pvField.getParent(),names[1]);
                 }
                 if(newField!=null) {
-                    pvData = newField;
+                    pvField = newField;
                 } else {
-                    property = pvData.getField().getProperty(names[1]);
+                    property = pvField.getField().getProperty(names[1]);
                     if(property!=null) {
-                        pvData = findPropertyField(pvData,property);
+                        pvField = findPropertyField(pvField,property);
                     }
                 }
             }
-            return pvData;            
+            return pvField;            
         }
         
-        private PVData getPVStructureField(PVData pvData, String fieldName) {
-            if(pvData.getField().getType()!=Type.pvStructure)  return null;
-            PVStructure pvStructure = (PVStructure)pvData;
-            PVData[] pvDatas = pvStructure.getFieldPVDatas();
+        private PVField getPVStructureField(PVField pvField, String fieldName) {
+            if(pvField.getField().getType()!=Type.pvStructure)  return null;
+            PVStructure pvStructure = (PVStructure)pvField;
+            PVField[] pvDatas = pvStructure.getFieldPVFields();
             Structure structure = (Structure)pvStructure.getField();
             int dataIndex = structure.getFieldIndex(fieldName);
             if(dataIndex>=0) {
-                return (PVData)pvDatas[dataIndex];
+                return (PVField)pvDatas[dataIndex];
             }
             return null;
         }
@@ -288,7 +293,7 @@ public class PVAccessFactory {
             PVStructure config = pvLink.getConfigurationStructure();
             if(config==null) return;
             PVString pvname = null;
-            for(PVData pvdata: config.getFieldPVDatas()) {
+            for(PVField pvdata: config.getFieldPVFields()) {
                 FieldAttribute attribute = pvdata.getField().getFieldAttribute();
                 if(attribute.isLink()) {
                     if(pvdata.getField().getType()==Type.pvString) {

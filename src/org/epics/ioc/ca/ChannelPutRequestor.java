@@ -5,7 +5,7 @@
  */
 package org.epics.ioc.ca;
 
-import org.epics.ioc.pv.PVData;
+import org.epics.ioc.pv.PVField;
 import org.epics.ioc.util.*;
 
 /**
@@ -17,8 +17,8 @@ public interface ChannelPutRequestor extends Requestor {
     /**
      * Provide the next set of data to put to the channel.
      * The requestor is expected to call the put method.
-     * @param field The field.
-     * @param data The interface for putting data.
+     * @param channelField The channelField.
+     * @param pvField The interface for putting data.
      * @return (false,true) if the requestor (has,has not) obtained all the data.
      * A value of true means that the requestor wants to be called again for this data.
      * The caller must call ChannelPut.putDelayed in order to access more data.
@@ -26,15 +26,15 @@ public interface ChannelPutRequestor extends Requestor {
      * This normally means that an array is being transfered and the requestor is
      * not able to handle the array as a single chunk of data.
      */
-    boolean nextPutData(ChannelField field,PVData data);
+    boolean nextPutField(ChannelField channelField,PVField pvField);
     /**
      * Called as a result of a call to ChannelPut.putDelayed,
      * The underlying database is locked and this is called. 
-     * @param data The data.
+     * @param field The data.
      * @return (false,true) if the requestor (will not, will)
-     * call ChannelPut.putDelayed again for this pvData.
+     * call ChannelPut.putDelayed again for this pvField.
      */
-    boolean nextDelayedPutData(PVData data);
+    boolean nextDelayedPutField(PVField field);
     /**
      * The request is done. This is always called with no locks held.
      * @param requestResult The result of the request.

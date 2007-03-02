@@ -10,7 +10,7 @@ package org.epics.ioc.pv;
  * @author mrk
  *
  */
-public interface PVFloat extends PVData{
+public interface PVFloat extends PVField{
     /**
      * Get the <i>float</i> value stored in the field.
      * @return float Value of field.

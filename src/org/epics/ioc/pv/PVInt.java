@@ -10,7 +10,7 @@ package org.epics.ioc.pv;
  * @author mrk
  *
  */
-public interface PVInt extends PVData{
+public interface PVInt extends PVField{
     /**
      * Get the <i>int</i> value stored in the field.
      * @return int value of field.

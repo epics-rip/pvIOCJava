@@ -45,24 +45,24 @@ public interface Field {
      */
     void setSupportName(String name);
     /**
-     * can the data for the field be modified?
-     * @return if it can be modified
+     * Can the data for the field be modified?
+     * @return If it can be modified
      */
     boolean isMutable();
     /**
-     * specify if the data for the field can be modified
+     * Specify if the data for the field can be modified
      * @param value (false,true) if the data (can not, can) be modified
      */
     void setMutable(boolean value);
     /**
-     * convert to a string
-     * @return the field as a string
+     * Convert to a string
+     * @return The field as a string
      */
     String toString();
     /**
-     * convert to a string
-     * @param indentLevel indentation level
-     * @return the field as a string
+     * Convert to a string
+     * @param indentLevel Indentation level
+     * @return The field as a string
      */
     String toString(int indentLevel);
     /**

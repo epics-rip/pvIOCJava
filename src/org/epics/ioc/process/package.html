@@ -776,7 +776,7 @@ instance. It has the method:</p>
 and any other support code that is involved with record processing:</p>
 <pre>   public interface Support extends Requestor{
         SupportState getSupportState();
-        DBData getDBData();
+        DBField getDBField();
         void initialize();
         void start();
         void stop();
@@ -792,17 +792,17 @@ and any other support code that is involved with record processing:</p>
     }
 
     public interface LinkSupport extends Support {
-        void setField(PVData field);
+        void setField(DBField dbField);
     }
 
     public abstract class AbstractSupport implements Support {
-        protected AbstractSupport(String name,DBData dbData);
+        protected AbstractSupport(String name,DBField dbField);
         // methods from Requestor
         public String getRequestorName();
         public void message(String message, MessageType messageType);
         // methods that are rarely overridden
         public SupportState getSupportState();
-        public DBData getDBData();
+        public DBField getDBField();
         // following normally overridden
         public void initialize();
         public void start();
@@ -842,8 +842,8 @@ and any other support code that is involved with record processing:</p>
     support.</dd>
   <dt style="font-family: courier;">getSupportState</dt>
     <dd>Get the support state.</dd>
-  <dt style="font-family: courier;">getDBData</dt>
-    <dd>Get the <span style="font-family: courier;">DBData</span> interface
+  <dt style="font-family: courier;">getDBField</dt>
+    <dd>Get the <span style="font-family: courier;">DBField</span> interface
       for the field that is being supported. For record support this will be
       the record itself. <span style="font-family: courier;"></span></dd>
   <dt style="font-family: courier;">initialize</dt>
@@ -897,11 +897,11 @@ style="font-family: courier;">Support</span> with the method:</p>
   <dt style="font-family: courier;">getRequestorName</dt>
     <dd>The returns the name passed to constructor.</dd>
   <dt style="font-family: courier;">message</dt>
-    <dd>Calls dbData.message.</dd>
+    <dd>Calls dbField.message.</dd>
   <dt style="font-family: courier;">getSupportState</dt>
     <dd>Gets the current support state.</dd>
-  <dt style="font-family: courier;">getDBData</dt>
-    <dd>Returns dbData.</dd>
+  <dt style="font-family: courier;">getDBField</dt>
+    <dd>Returns dbField.</dd>
   <dt style="font-family: courier;">initialize</dt>
     <dd>Normally overridden. The default version always succeeds, i.e. enters
       state readyForStart.</dd>
@@ -915,7 +915,7 @@ style="font-family: courier;">Support</span> with the method:</p>
     <dd>Normally overridden. The default version always succeeds, i.e. enters
       state readyForInitialize.</dd>
   <dt style="font-family: courier;">process</dt>
-    <dd>Normally overridden. The default version sends a message to dbData
+    <dd>Normally overridden. The default version sends a message to dbField
       and calls supportProcessRequestor with a failure result.</dd>
   <dt style="font-family: courier;">setSupportState</dt>
     <dd>This must be called by support whenever it changes state.</dd>
@@ -975,7 +975,7 @@ IOC database passed to createSupportCreation.</p>
     public class SupportCreationFactory
         static public SupportCreation createSupportCreation(
             IOCDB iocdb,Requestor requestor);
-        static public boolean createSupport(PVData pvData);
+        static public boolean createSupport(DBField dbField);
     }</pre>
 
 <h3 id="Support4">Support Creation</h3>

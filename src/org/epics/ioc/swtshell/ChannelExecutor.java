@@ -28,7 +28,7 @@ public class ChannelExecutor implements Runnable, ChannelGetRequestor, ChannelFi
         ChannelFindFieldResult result = channel.findField("scan.priority");
         if(result==ChannelFindFieldResult.thisChannel) {
             channelField = channel.getChannelField();
-            channelGet = channel.createChannelGet(this, false);
+            channelGet = channel.createChannelGet(null, this, false);
             iocExecutor.execute(this, scanPriority);
         }
     }
@@ -49,7 +49,7 @@ public class ChannelExecutor implements Runnable, ChannelGetRequestor, ChannelFi
         }
         ChannelFieldGroup channelFieldGroup = channel.createFieldGroup(this);
         channelFieldGroup.addChannelField(channelField);
-        boolean result = channelGet.get(channelFieldGroup);
+        boolean result = channelGet.get();
         if(!result) {
             requestor.message("channelGet scan.priority failed", MessageType.error);
         }
@@ -65,18 +65,18 @@ public class ChannelExecutor implements Runnable, ChannelGetRequestor, ChannelFi
     }
 
     /* (non-Javadoc)
-     * @see org.epics.ioc.ca.ChannelGetRequestor#nextDelayedGetData(org.epics.ioc.pv.PVData)
+     * @see org.epics.ioc.ca.ChannelGetRequestor#nextDelayedGetData(org.epics.ioc.pv.PVField)
      */
-    public boolean nextDelayedGetData(PVData data) {
+    public boolean nextDelayedGetField(PVField pvField) {
         // nothing to do
         return false;
     }
 
     /* (non-Javadoc)
-     * @see org.epics.ioc.ca.ChannelGetRequestor#nextGetData(org.epics.ioc.ca.ChannelField, org.epics.ioc.pv.PVData)
+     * @see org.epics.ioc.ca.ChannelGetRequestor#nextGetData(org.epics.ioc.ca.ChannelField, org.epics.ioc.pv.PVField)
      */
-    public boolean nextGetData(ChannelField field, PVData data) {
-        PVMenu priorityMenu = (PVMenu)data;
+    public boolean nextGetField(ChannelField channelField, PVField pvField) {
+        PVMenu priorityMenu = (PVMenu)channelField;
         if(ScanFieldFactory.isPriorityMenu(priorityMenu)) {
             String[] choices = priorityMenu.getChoices();
             scanPriority = ScanPriority.valueOf(choices[priorityMenu.getIndex()]);

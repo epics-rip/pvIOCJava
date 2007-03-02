@@ -10,7 +10,7 @@ package org.epics.ioc.pv;
  * @author mrk
  *
  */
-public interface PVShort extends PVData{
+public interface PVShort extends PVField{
     /**
      * Get the <i>short</i> value stored in the field.
      * @return short value of field.

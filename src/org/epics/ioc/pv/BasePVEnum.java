@@ -11,19 +11,18 @@ package org.epics.ioc.pv;
  * @author mrk
  *
  */
-public class BasePVEnum extends AbstractPVData implements PVEnum {
+public class BasePVEnum extends AbstractPVField implements PVEnum {
     private int index;
     private String[]choice;
 
     private final static String[] EMPTY_STRING_ARRAY = new String[0];
     private static Convert convert = ConvertFactory.getConvert();
     /**
-     * constructor that derived classes must call.
+     * Constructor.
      * @param parent The parent interface.
      * @param enumField the reflection interface for the PVEnum data.
-     * @param choice the choices for the enum.
      */
-    public BasePVEnum(PVData parent,Enum enumField) {
+    public BasePVEnum(PVField parent,Enum enumField) {
         super(parent,enumField);
         index = 0;
         choice = EMPTY_STRING_ARRAY;
@@ -58,7 +57,7 @@ public class BasePVEnum extends AbstractPVData implements PVEnum {
             this.index = index;       
             return;
         }
-        throw new IllegalStateException("PVData.isMutable is false");
+        throw new IllegalStateException("PVField.isMutable is false");
     }
     /* (non-Javadoc)
      * @see java.lang.Object#toString()
@@ -67,7 +66,7 @@ public class BasePVEnum extends AbstractPVData implements PVEnum {
         return toString(0);
     }
     /* (non-Javadoc)
-     * @see org.epics.ioc.db.AbstractPVData#toString(int)
+     * @see org.epics.ioc.pv.AbstractPVField#toString(int)
      */
     public String toString(int indentLevel) {
         return convert.getString(this, indentLevel)

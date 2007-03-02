@@ -16,8 +16,8 @@ import org.epics.ioc.util.*;
 public interface ChannelGetRequestor extends Requestor {
     /**
      * Next data for a get request.
-     * @param field The field.
-     * @param data The data.
+     * @param channelField The channelField.
+     * @param pvField The data.
      * @return (false,true) if the requestor (has,has not) obtained all the data.
      * A value of true means that the requestor has not retrieved all the data.
      * The caller must call ChannelGet.getDelayed in order to access more data.
@@ -25,15 +25,15 @@ public interface ChannelGetRequestor extends Requestor {
      * This normally means that an array is being transfered and the requestor is
      * not able to handle the array as a single chunk of data. 
      */
-    boolean nextGetData(ChannelField field,PVData data);
+    boolean nextGetField(ChannelField channelField,PVField pvField);
     /**
      * Called as a result of a call to ChannelGet.getDelayed,
      * The underlying database is locked and this is called. 
-     * @param data The data.
+     * @param pvField The data.
      * @return (false,true) if the requestor (will not, will)
-     * call ChannelGet.getDelayed again for this pvData.
+     * call ChannelGet.getDelayed again for this pvField.
      */
-    boolean nextDelayedGetData(PVData data);
+    boolean nextDelayedGetField(PVField pvField);
     /**
      * The request is done. This is always called with no locks held.
      * @param requestResult The result of the request.

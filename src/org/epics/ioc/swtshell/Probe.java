@@ -397,7 +397,7 @@ public class Probe {
             }
             
             private ChannelData get(ChannelField channelField,Property[] properties) {
-                channelGet = channel.createChannelGet(this, process);
+                channelGet = channel.createChannelGet(null, this, process);
                 channelExecutor = new ChannelExecutor(requestor,channel);
                 getFieldGroup = channel.createFieldGroup(this);
                 getFieldGroup.addChannelField(channelField);
@@ -429,7 +429,7 @@ public class Probe {
              * @see java.lang.Runnable#run()
              */
             public void run() {
-                channelGet.get(getFieldGroup);
+                channelGet.get();
                 lock.lock();
                 try {
                     if(!allDone) {                       
@@ -443,13 +443,13 @@ public class Probe {
                 display.syncExec( new Runnable() {
                     public void run() {
                         showText.append(String.format("%s%n",channel.getChannelName()));
-                        CDBStructure cdbStructure = channelData.getCDBRecord().getCDBStructure();
-                        CDBData[] cdbDatas= cdbStructure.getFieldCDBDatas();
+                        CDStructure cdStructure = channelData.getCDRecord().getCDStructure();
+                        CDField[] cdbDatas= cdStructure.getFieldCDFields();
                         int length = cdbDatas.length;
                         for(int i=0; i<length; i++) {
-                            PVData pvData = cdbDatas[i].getPVData();
+                            PVField pvField = cdbDatas[i].getPVField();
                             showText.append(String.format("    %s %s%n",
-                                pvData.getFullFieldName(),Swtshell.pvDataToString(pvData)));
+                                pvField.getFullFieldName(),Swtshell.pvFieldToString(pvField)));
                         }
                     }
                     
@@ -460,7 +460,7 @@ public class Probe {
             /* (non-Javadoc)
              * @see org.epics.ioc.ca.ChannelGetRequestor#nextDelayedGetData(org.epics.ioc.pvAccess.PVData)
              */
-            public boolean nextDelayedGetData(PVData data) {
+            public boolean nextDelayedGetField(PVField pvField) {
                 return false;
             }
             /* (non-Javadoc)
@@ -483,8 +483,8 @@ public class Probe {
             /* (non-Javadoc)
              * @see org.epics.ioc.ca.ChannelGetRequestor#nextGetData(org.epics.ioc.ca.Channel, org.epics.ioc.ca.ChannelField, org.epics.ioc.pvAccess.PVData)
              */
-            public boolean nextGetData(ChannelField field, PVData data) {
-                channelData.dataPut(data);
+            public boolean nextGetField(ChannelField channelField, PVField pvField) {
+                channelData.fieldPut(pvField);
                 return false;
             }
             
@@ -539,7 +539,7 @@ public class Probe {
             private ChannelFieldGroup putFieldGroup;
             private ChannelData channelData;
             private ChannelField[] channelFields;
-            private PVData[] pvDatas;
+            private PVField[] pvFields;
             
             private Put(Channel channel,Requestor requestor,boolean process) {
                 this.channel = channel;
@@ -548,7 +548,7 @@ public class Probe {
             }
             
             private void put(ChannelField channelField) {
-                channelPut = channel.createChannelPut(this, process);
+                channelPut = channel.createChannelPut(null, this, process);
                 channelExecutor = new ChannelExecutor(requestor,channel);
                 putFieldGroup = channel.createFieldGroup(this);
                 putFieldGroup.addChannelField(channelField);
@@ -560,12 +560,12 @@ public class Probe {
                     requestor.message("ChannelDataFactory.createData failed",MessageType.error);
                     return;
                 }
-                CDBStructure cdbStructure = channelData.getCDBRecord().getCDBStructure();
-                CDBData[] cdbDatas= cdbStructure.getFieldCDBDatas();
+                CDStructure cdStructure = channelData.getCDRecord().getCDStructure();
+                CDField[] cdbDatas= cdStructure.getFieldCDFields();
                 int length = cdbDatas.length;
-                pvDatas = new PVData[length];
+                pvFields = new PVField[length];
                 for(int i=0; i<length; i++) {
-                    pvDatas[i] = cdbDatas[i].getPVData();
+                    pvFields[i] = cdbDatas[i].getPVField();
                 }
                 channelExecutor.request(this);
             }
@@ -579,7 +579,7 @@ public class Probe {
                         getValue.getValue(channelData);
                     }      
                 });
-                channelPut.put(putFieldGroup);
+                channelPut.put();
                 lock.lock();
                 try {
                     if(!allDone) {                       
@@ -612,36 +612,36 @@ public class Probe {
             /* (non-Javadoc)
              * @see org.epics.ioc.ca.ChannelPutRequestor#nextDelayedPutData(org.epics.ioc.pvAccess.PVData)
              */
-            public boolean nextDelayedPutData(PVData data) {
+            public boolean nextDelayedPutField(PVField field) {
                 return false;
             }
             /* (non-Javadoc)
              * @see org.epics.ioc.ca.ChannelPutRequestor#nextPutData(org.epics.ioc.ca.Channel, org.epics.ioc.ca.ChannelField, org.epics.ioc.pvAccess.PVData)
              */
-            public boolean nextPutData(ChannelField field, PVData data) {
+            public boolean nextPutField(ChannelField channelField, PVField pvField) {
                 for(int i=0; i<channelFields.length; i++) {
-                    ChannelField channelField = channelFields[i];
-                    if(field!=channelField) continue;
-                    PVData pvData = pvDatas[i];
+                    ChannelField cField = channelFields[i];
+                    if(channelField!=cField) continue;
+                    PVField pField = pvFields[i];
                     Type type = channelField.getField().getType();
                     if(type==Type.pvArray) {
-                        PVArray pvArray = (PVArray)pvData;
-                        convert.copyArray(pvArray, 0, (PVArray)data, 0, pvArray.getLength());
+                        PVArray pvArray = (PVArray)pField;
+                        convert.copyArray(pvArray, 0, (PVArray)pvField, 0, pvArray.getLength());
                     } else if(type==Type.pvStructure) {
-                        convert.copyStructure((PVStructure)pvData, (PVStructure)data);
+                        convert.copyStructure((PVStructure)pField, (PVStructure)pvField);
                     } else if(type==Type.pvMenu) {
-                        PVMenu from = (PVMenu)pvData;
-                        PVMenu to = (PVMenu)data;
+                        PVMenu from = (PVMenu)pField;
+                        PVMenu to = (PVMenu)pvField;
                         to.setIndex(from.getIndex());
                     } else if(type==Type.pvEnum) {
-                        PVEnum from = (PVEnum)pvData;
-                        PVEnum to = (PVEnum)data;
+                        PVEnum from = (PVEnum)pField;
+                        PVEnum to = (PVEnum)pvField;
                         to.setIndex(from.getIndex());
                         if(from.getChoices()!=to.getChoices()) {
                             to.setChoices(from.getChoices());
                         }
                     } else {
-                        convert.copyScalar(pvData, data);
+                        convert.copyScalar(pField, pvField);
                     }
                     return false;
                 }
@@ -691,7 +691,7 @@ public class Probe {
             private Button done;
             private Button next;
             private Text text;
-            private PVData[] pvDatas;
+            private PVField[] pvFields;
             private int index = -1;
             private boolean more = true;
             private boolean started = false;
@@ -711,12 +711,12 @@ public class Probe {
                 gridLayout = new GridLayout();
                 gridLayout.numColumns = 1;
                 composite.setLayout(gridLayout);
-                CDBStructure cdbStructure = channelData.getCDBRecord().getCDBStructure();
-                CDBData[] cdbDatas= cdbStructure.getFieldCDBDatas();
+                CDStructure cdStructure = channelData.getCDRecord().getCDStructure();
+                CDField[] cdbDatas= cdStructure.getFieldCDFields();
                 int length = cdbDatas.length;
-                pvDatas = new PVData[length];
+                pvFields = new PVField[length];
                 for(int i=0; i<length; i++) {
-                    pvDatas[i] = cdbDatas[i].getPVData();
+                    pvFields[i] = cdbDatas[i].getPVField();
                 }
                 label = new Label(composite,SWT.LEFT);
                 Swtshell.makeBlanks(label, 80);
@@ -755,21 +755,21 @@ public class Probe {
                     shell.close();
                 } else if(arg0.getSource()==next) {
                     index++;
-                    if(index>=pvDatas.length) {
+                    if(index>=pvFields.length) {
                         shell.close();
                         return;
                     }
-                    PVData pvData = pvDatas[index];
-                    label.setText(pvData.getFullFieldName());
+                    PVField pvField = pvFields[index];
+                    label.setText(pvField.getFullFieldName());
                 } if(arg0.getSource()==text) {
                     if(index==-1) index = 0;
-                    if(index>=pvDatas.length) {
+                    if(index>=pvFields.length) {
                         shell.close();
                         return;
                     }
-                    PVData pvData = pvDatas[index];
+                    PVField pvField = pvFields[index];
 requestor.message("text is " + text.getText(), MessageType.info);
-                    convert.fromString(pvData, text.getText());
+                    convert.fromString(pvField, text.getText());
                 }
             }
                 

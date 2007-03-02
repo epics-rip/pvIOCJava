@@ -12,13 +12,13 @@ import org.epics.ioc.pv.Enum;
  * @author mrk
  *
  */
-public class BaseCDBRecord implements CDBRecord {
+public class BaseCDRecord implements CDRecord {
     private FieldCreate fieldCreate;
     private PVDataCreate pvDataCreate;
     private PVRecord pvRecord;
-    private CDBStructure cdbStructure;
+    private CDStructure cdStructure;
     
-    public BaseCDBRecord(FieldCreate fieldCreate,PVDataCreate pvDataCreate,
+    public BaseCDRecord(FieldCreate fieldCreate,PVDataCreate pvDataCreate,
         Field[] targetFields,String recordName,String structureName)
     {
         this.fieldCreate = fieldCreate;
@@ -30,9 +30,9 @@ public class BaseCDBRecord implements CDBRecord {
         }
         Structure structure = fieldCreate.createStructure(
             structureName, structureName, newFields);
-        pvRecord = pvDataCreate.createRecord(
+        pvRecord = pvDataCreate.createPVRecord(
             recordName, structure);
-        cdbStructure = new BaseCDBStructure(null,this,pvRecord);
+        cdStructure = new BaseCDStructure(null,this,pvRecord);
     }
     
     public Field createField(Field oldField) {
@@ -73,30 +73,29 @@ public class BaseCDBRecord implements CDBRecord {
         return newField;
     }
     /* (non-Javadoc)
-     * @see org.epics.ioc.ca.CDBRecord#getCDBStructure()
+     * @see org.epics.ioc.ca.CDRecord#getCDBStructure()
      */
-    public CDBStructure getCDBStructure() {
-        return cdbStructure;
+    public CDStructure getCDStructure() {
+        return cdStructure;
     }
     /* (non-Javadoc)
-     * @see org.epics.ioc.ca.CDBRecord#getFieldCreate()
+     * @see org.epics.ioc.ca.CDRecord#getFieldCreate()
      */
     public FieldCreate getFieldCreate() {
         return fieldCreate;
     }
 
     /* (non-Javadoc)
-     * @see org.epics.ioc.ca.CDBRecord#getPVDataCreate()
+     * @see org.epics.ioc.ca.CDRecord#getPVDataCreate()
      */
     public PVDataCreate getPVDataCreate() {
         return pvDataCreate;
     }
 
     /* (non-Javadoc)
-     * @see org.epics.ioc.ca.CDBRecord#getPVRecord()
+     * @see org.epics.ioc.ca.CDRecord#getPVRecord()
      */
     public PVRecord getPVRecord() {
         return pvRecord;
     }
-    
 }

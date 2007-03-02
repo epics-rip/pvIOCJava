@@ -8,16 +8,23 @@ package org.epics.ioc.ca;
 import org.epics.ioc.pv.PVStructure;
 
 /**
- * 
+ * ChannelDataBaseStructure - A CDRecord field that holds a PVStructure.
  * @author mrk
  *
  */
-public interface CDBStructure extends CDBData {
+public interface CDStructure extends CDField {
     /**
-     * Get the <i>CDBData</i> array for the fields of the structure.
-     * @return array of CDBData. One for each field.
+     * Get the <i>CDField</i> array for the fields of the structure.
+     * @return array of CDField. One for each field.
      */
-    CDBData[] getFieldCDBDatas();
+    CDField[] getFieldCDFields();
+    /**
+     * Replace the PVStructure.
+     */
     void replacePVStructure();
+    /**
+     * Get the PVStructure.
+     * @return
+     */
     PVStructure getPVStructure();
 }

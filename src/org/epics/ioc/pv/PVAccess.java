@@ -60,11 +60,11 @@ public interface PVAccess {
     String getOtherField();
     /**
      * Set field.
-     * @param pvData A field of the record instance.
+     * @param pvField A field of the record instance.
      * If pvData is null then the field is set to the record instance itself.
      * @throws IllegalArgumentException If pvData is not in the record instance.
      */
-    void setPVField(PVData pvData);
+    void setPVField(PVField pvField);
     
     /**
      * Get the interface for the current field.
@@ -72,5 +72,5 @@ public interface PVAccess {
      * @return The interface for the field.
      * If setField was never called or the last call failed then null is returned.
      */
-    PVData getField();
+    PVField getField();
 }

@@ -19,8 +19,6 @@
     <choice>invalid</choice>
 </menu>
 
-<structure name = "null" />
-
 <structure name = "timeStamp">
     <field name = "secondsPastEpoch" type = "long" />
     <field name = "nanoSeconds" type = "int" />

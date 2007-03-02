@@ -6,53 +6,54 @@
 package org.epics.ioc.pv;
 
 /**
+ * Base class for a PVStructure.
  * @author mrk
  *
  */
-public class BasePVStructure extends AbstractPVData implements PVStructure
+public class BasePVStructure extends AbstractPVField implements PVStructure
 {
     private static Convert convert = ConvertFactory.getConvert();
     private static PVDataCreate pvDataCreate = PVDataFactory.getPVDataCreate();
     private static FieldCreate fieldCreate = FieldFactory.getFieldCreate();
-    private PVData[] pvDatas;
+    private PVField[] pvFields;
     
     /**
      * Constructor.
      * @param parent The parent interface.
      * @param structure the reflection interface for the PVStructure data.
      */
-    public BasePVStructure(PVData parent, Structure structure) {
+    public BasePVStructure(PVField parent, Structure structure) {
         super(parent,structure);
         String structureName = structure.getStructureName();
         if(structureName==null) {
-            pvDatas = new PVData[0];
+            pvFields = new PVField[0];
             return;
         }
         Field[] fields = structure.getFields();
-        pvDatas = new PVData[fields.length];
-        for(int i=0; i < pvDatas.length; i++) {
-            pvDatas[i] = pvDataCreate.createData(this,fields[i]);
+        pvFields = new PVField[fields.length];
+        for(int i=0; i < pvFields.length; i++) {
+            pvFields[i] = pvDataCreate.createPVField(this,fields[i]);
         }
     }
     /* (non-Javadoc)
-     * @see org.epics.ioc.pv.AbstractPVData#setRecord(org.epics.ioc.pv.PVRecord)
+     * @see org.epics.ioc.pv.AbstractPVField#setRecord(org.epics.ioc.pv.PVRecord)
      */
     @Override
     public void setRecord(PVRecord record) {
         super.setRecord(record);
-        for(PVData pvData : pvDatas) {
-            AbstractPVData abstractPVData = (AbstractPVData)pvData;
-            abstractPVData.setRecord(record);
+        for(PVField pvField : pvFields) {
+            AbstractPVField abstractPVField = (AbstractPVField)pvField;
+            abstractPVField.setRecord(record);
         }
     }
     /* (non-Javadoc)
-     * @see org.epics.ioc.pv.PVStructure#replaceField(java.lang.String, org.epics.ioc.pv.PVData)
+     * @see org.epics.ioc.pv.PVStructure#replaceField(java.lang.String, org.epics.ioc.pv.PVField)
      */
     public boolean replaceStructureField(String fieldName, Structure structure) {
         Structure oldStructure = (Structure)super.getField();
         int index = oldStructure.getFieldIndex(fieldName);
-        PVData newData = pvDataCreate.createData(this, structure);
-        pvDatas[index] = newData;
+        PVField newField = pvDataCreate.createPVField(this, structure);
+        pvFields[index] = newField;
         // Must create and replace the Structure for this structure.
         Field[] oldFields = oldStructure.getFields();
         int length = oldFields.length;
@@ -69,32 +70,32 @@ public class BasePVStructure extends AbstractPVData implements PVStructure
         super.setSupportName(oldStructure.getSupportName());
         return true;
     }
-
     /* (non-Javadoc)
-     * @see org.epics.ioc.pv.PVStructure#getFieldPVDatas()
+     * @see org.epics.ioc.pv.PVStructure#getFieldPVFields()
      */
-    public PVData[] getFieldPVDatas() {
-        return pvDatas;
+    public PVField[] getFieldPVFields() {
+        return pvFields;
     }
     /* (non-Javadoc)
      * @see java.lang.Object#toString()
      */
     public String toString() { return toString(0);}
     /* (non-Javadoc)
-     * @see org.epics.ioc.pv.AbstractPVData#toString(int)
+     * @see org.epics.ioc.pv.AbstractPVField#toString(int)
      */
     public String toString(int indentLevel) {
         return toString("structure",indentLevel);
-    }    
+    }       
     /**
-     * Convert to string with a prefix.
-     * @param prefix The prefix.
+     * Called by BasePVRecord.
+     * @param prefix A prefix for the generated stting.
      * @param indentLevel The indentation level.
-     * @return The string showing the structure.
+     * @return String showing the PVStructure.
      */
     protected String toString(String prefix,int indentLevel) {
         return getString(prefix,indentLevel);
     }
+    
     private String getString(String prefix,int indentLevel) {
         StringBuilder builder = new StringBuilder();
         convert.newLine(builder,indentLevel);
@@ -103,11 +104,11 @@ public class BasePVStructure extends AbstractPVData implements PVStructure
         builder.append(super.toString(indentLevel));
         convert.newLine(builder,indentLevel);
         builder.append("{");
-        for(int i=0, n= pvDatas.length; i < n; i++) {
+        for(int i=0, n= pvFields.length; i < n; i++) {
             convert.newLine(builder,indentLevel + 1);
-            Field field = pvDatas[i].getField();
+            Field field = pvFields[i].getField();
             builder.append(field.getFieldName() + " = ");
-            builder.append(pvDatas[i].toString(indentLevel + 2));            
+            builder.append(pvFields[i].toString(indentLevel + 2));            
         }
         convert.newLine(builder,indentLevel);
         builder.append("}");

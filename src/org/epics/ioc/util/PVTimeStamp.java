@@ -17,37 +17,42 @@ import org.epics.ioc.db.*;
  *
  */
 public class PVTimeStamp {
-    private DBData dbData;
+    private DBField dbField;
     private PVLong secondsPastEpoch;
     private PVInt nanoSeconds;
     
-    public static PVTimeStamp create(DBData dbData) {
-        PVTimeStamp pvTimeStamp = create(dbData.getPVData());
-        if(pvTimeStamp!=null) pvTimeStamp.setDBData(dbData);
+    /**
+     * Constructor.
+     * @param dbField The dbField. It must be a PVStructure that is a timeStamp.
+     * @return The PVTimeStamp interface.
+     */
+    public static PVTimeStamp create(DBField dbField) {
+        PVTimeStamp pvTimeStamp = create(dbField.getPVField());
+        if(pvTimeStamp!=null) pvTimeStamp.setDBField(dbField);
         return pvTimeStamp;
     }
     /**
-     * Given a pvData create a PVTimeStamp if the field is actually
+     * Given a pvField create a PVTimeStamp if the field is actually
      * a timeStamp structure.
-     * @param dbData The field.
+     * @param dbField The field.
      * @return A PVTimeStamp or null if the field is not a timeStamp structure.
      */
-    public static PVTimeStamp create(PVData pvData) {
-        if(pvData.getField().getType()!=Type.pvStructure) return null;
-        PVStructure timeStamp = (PVStructure)pvData;
-        PVData[] pvDatas = timeStamp.getFieldPVDatas();
-        if(pvDatas.length!=2) return null;
-        PVData fieldPvData = pvDatas[0];
-        Field field = fieldPvData.getField();
+    public static PVTimeStamp create(PVField pvField) {
+        if(pvField.getField().getType()!=Type.pvStructure) return null;
+        PVStructure timeStamp = (PVStructure)pvField;
+        PVField[] pvFields = timeStamp.getFieldPVFields();
+        if(pvFields.length!=2) return null;
+        PVField fieldPvField = pvFields[0];
+        Field field = fieldPvField.getField();
         if(field.getType()!=Type.pvLong) return null;
         if(!field.getFieldName().equals("secondsPastEpoch")) return null;
-        PVLong secondsPastEpoch = (PVLong)fieldPvData;
-        fieldPvData = pvDatas[1];
-        field = fieldPvData.getField();
+        PVLong secondsPastEpoch = (PVLong)fieldPvField;
+        fieldPvField = pvFields[1];
+        field = fieldPvField.getField();
         if(field.getType()!=Type.pvInt) return null;
         if(!field.getFieldName().equals("nanoSeconds")) return null;
-        PVInt nanoSeconds = (PVInt)fieldPvData; 
-        return new PVTimeStamp(pvData,secondsPastEpoch,nanoSeconds);
+        PVInt nanoSeconds = (PVInt)fieldPvField; 
+        return new PVTimeStamp(pvField,secondsPastEpoch,nanoSeconds);
     }
     
     /**
@@ -66,16 +71,16 @@ public class PVTimeStamp {
     public void put(TimeStamp timeStamp) {
         secondsPastEpoch.put(timeStamp.secondsPastEpoch);
         nanoSeconds.put(timeStamp.nanoSeconds);
-        if(dbData!=null) dbData.postPut();
+        if(dbField!=null) dbField.postPut();
     }
     
-    private PVTimeStamp(PVData pvData,PVLong secondsPastEpoch,PVInt nanoSeconds){
+    private PVTimeStamp(PVField pvField,PVLong secondsPastEpoch,PVInt nanoSeconds){
         this.secondsPastEpoch = secondsPastEpoch;
         this.nanoSeconds = nanoSeconds;
     }
     
-    private void setDBData(DBData dbData) {
-        this.dbData = dbData;
+    private void setDBField(DBField dbField) {
+        this.dbField = dbField;
     }
         
 }

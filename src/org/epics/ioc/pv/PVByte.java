@@ -10,7 +10,7 @@ package org.epics.ioc.pv;
  * @author mrk
  *
  */
-public interface PVByte extends PVData{
+public interface PVByte extends PVField{
     /**
      * Get the <i>byte</i> value stored in the field.
      * @return byte value of field.

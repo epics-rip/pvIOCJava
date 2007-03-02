@@ -10,6 +10,8 @@ import java.util.Map;
 
 /**
  * FieldFactory creates Field instances.
+ * User code creates introspection objects via the FieldCreate,
+ * which is obtained via a call to <i>FieldFactory.getFieldCreate</i>.
  * This is a complete factory for the <i>PV</i> reflection.
  * Most <i>PV</i> database implementations should find this sufficient for
  * <i>PV</i> reflection.
@@ -23,6 +25,10 @@ public final class FieldFactory {
     
     private FieldFactory(){} // dont create
     
+    /**
+     * Get the FieldCreate interface.
+     * @return The interface for creating introspection objects.
+     */
     public static FieldCreate getFieldCreate() {
         return FieldCreateImpl.getFieldCreate();
     }
@@ -97,14 +103,12 @@ public final class FieldFactory {
             if(fieldAttribute==null) fieldAttribute = createFieldAttribute();
             return new BaseEnum(fieldName,choicesMutable,property,fieldAttribute);
         }
-
         /* (non-Javadoc)
          * @see org.epics.ioc.pv.FieldCreate#createEnumField(java.lang.String, boolean)
          */
         public Enum createEnum(String fieldName, boolean choicesMutable) {
             return createEnum(fieldName,choicesMutable,null,null);
         }
-
         /* (non-Javadoc)
          * @see org.epics.ioc.pv.FieldCreate#createField(java.lang.String, org.epics.ioc.pv.Type, org.epics.ioc.pv.Property[], org.epics.ioc.pv.FieldAttribute)
          */
@@ -117,21 +121,18 @@ public final class FieldFactory {
             if(fieldAttribute==null) fieldAttribute = createFieldAttribute();
             return new BaseField(fieldName,type,property,fieldAttribute);
         }
-
         /* (non-Javadoc)
          * @see org.epics.ioc.pv.FieldCreate#createField(java.lang.String, org.epics.ioc.pv.Type)
          */
         public Field createField(String fieldName, Type type) {
             return createField(fieldName,type,null,null);
         }
-
         /* (non-Javadoc)
          * @see org.epics.ioc.pv.FieldCreate#createFieldAttribute()
          */
         public FieldAttribute createFieldAttribute() {
             return new FieldAttributeImpl(1,null,true,false,false);
         }
-
         /* (non-Javadoc)
          * @see org.epics.ioc.pv.FieldCreate#createFieldAttribute(java.util.Map)
          */
@@ -154,7 +155,6 @@ public final class FieldFactory {
             return new FieldAttributeImpl(asl,defaultValue,isDesign,isLink,isReadOnly);
             
         }
-
         /* (non-Javadoc)
          * @see org.epics.ioc.pv.FieldCreate#createMenuField(java.lang.String, java.lang.String, org.epics.ioc.pv.Property[], org.epics.ioc.pv.FieldAttribute)
          */
@@ -165,21 +165,18 @@ public final class FieldFactory {
             if(fieldAttribute==null) fieldAttribute = createFieldAttribute();
             return new BaseMenu(fieldName,menuName,menuChoices,property,fieldAttribute);
         }
-
         /* (non-Javadoc)
          * @see org.epics.ioc.pv.FieldCreate#createMenuField(java.lang.String, java.lang.String)
          */
         public Menu createMenu(String fieldName, String menuName, String[] menuChoices) {
             return createMenu(fieldName,menuName,menuChoices,null, null);
         }
-
         /* (non-Javadoc)
          * @see org.epics.ioc.pv.FieldCreate#createProperty(java.lang.String, java.lang.String)
          */
         public Property createProperty(String propertyName, String fieldName) {
             return new PropertyInstance(propertyName,fieldName);
         }
-
         /* (non-Javadoc)
          * @see org.epics.ioc.pv.FieldCreate#createStructureField(java.lang.String, java.lang.String, org.epics.ioc.pv.Field[], org.epics.ioc.pv.Property[], org.epics.ioc.pv.FieldAttribute)
          */
@@ -190,16 +187,13 @@ public final class FieldFactory {
             if(fieldAttribute==null) fieldAttribute = createFieldAttribute();
             return new BaseStructure(fieldName,structureName,field,property,fieldAttribute);
         }
-
         /* (non-Javadoc)
          * @see org.epics.ioc.pv.FieldCreate#createStructureField(java.lang.String, java.lang.String, org.epics.ioc.pv.Field[])
          */
         public Structure createStructure(String fieldName, String structureName, Field[] field) {
             return createStructure(fieldName,structureName,field,null,null);
         }
-        
-       
-         
+                
         private static class FieldAttributeImpl implements FieldAttribute {
             private int asl = 1;
             private String defaultValue = null;
@@ -261,7 +255,7 @@ public final class FieldFactory {
             private String fieldName;
             private String name;
         
-            PropertyInstance(String name, String fieldName) {
+            private PropertyInstance(String name, String fieldName) {
                 this.name = name;
                 this.fieldName = fieldName;
             }

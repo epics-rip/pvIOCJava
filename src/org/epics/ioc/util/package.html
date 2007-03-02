@@ -178,7 +178,7 @@ RequestResult to the requestor. The result is one of:</p>
     }
     
     public class PVTimeStamp {
-        public static TimeStampField create(PVData pvData);
+        public static TimeStampField create(PVField pvField);
         public void get(TimeStamp timeStamp);
         public void put(TimeStamp timeStamp);
     }</pre>
@@ -209,14 +209,14 @@ RequestResult to the requestor. The result is one of:</p>
 <p>This has the following methods:</p>
 <dl>
   <dt>create</dt>
-    <dd>A static factory methods to create a PVTimeStamp from a PVData. If
-      the PVData does not reference a timeStamp structure a null is
+    <dd>A static factory methods to create a PVTimeStamp from a PVField. If
+      the PVField does not reference a timeStamp structure a null is
     returned.</dd>
   <dt>get</dt>
-    <dd>Reads the PVData into the timeStamp provided by the caller.</dd>
+    <dd>Reads the PVField into the timeStamp provided by the caller.</dd>
   <dt>put</dt>
     <dd>Takes the timeStamp supplied by the caller and puts it into the
-      PVData.</dd>
+      PVField.</dd>
 </dl>
 <hr />
 

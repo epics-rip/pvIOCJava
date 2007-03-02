@@ -115,7 +115,7 @@ public class DelayLinkFactory {
         /* (non-Javadoc)
          * @see org.epics.ioc.process.LinkSupport#setField(org.epics.ioc.pvAccess.PVData)
          */
-        public void setField(DBData dbData) {
+        public void setField(DBField dbField) {
             // nothing to do
         }
 

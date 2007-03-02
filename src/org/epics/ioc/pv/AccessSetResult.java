@@ -18,7 +18,7 @@ public enum AccessSetResult {
     otherRecord,
     /**
      * The requested field is in this record.
-     * getField can be called to retrieve the PVData interface.
+     * getField can be called to retrieve the PVField interface.
      */
     thisRecord,
     /**

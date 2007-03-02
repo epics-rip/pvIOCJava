@@ -10,7 +10,7 @@ import java.util.*;
 import org.epics.ioc.util.*;
 
 /**
- * Abstract base class for a record instance.
+ * Base class for a record instance.
  * @author mrk
  *
  */
@@ -30,38 +30,37 @@ public class BasePVRecord extends BasePVStructure implements PVRecord {
         super.setRecord(this);
     }
     /* (non-Javadoc)
-     * @see org.epics.ioc.pv.AbstractPVData#message(java.lang.String, org.epics.ioc.util.MessageType)
-     */
-    public synchronized void message(String message, MessageType messageType) {
-        if(message!=null && message.charAt(0)!='.') message = " " + message;
-        message = recordName + message;
-        for (Requestor requestor : requestorList) requestor.message(message, messageType);
-    }
-    /* (non-Javadoc)
      * @see org.epics.ioc.pv.PVRecord#getRecordName()
      */
     public String getRecordName() {
         return recordName;
     }
     /* (non-Javadoc)
+     * @see org.epics.ioc.pv.AbstractPVField#message(java.lang.String, org.epics.ioc.util.MessageType)
+     */
+    public void message(String message, MessageType messageType) {
+        if(message!=null && message.charAt(0)!='.') message = " " + message;
+        message = recordName + message;
+        for (Requestor requestor : requestorList) requestor.message(message, messageType);
+    }
+    /* (non-Javadoc)
      * @see org.epics.ioc.pv.PVRecord#addRequestor(org.epics.ioc.util.Requestor)
      */
-    public synchronized void addRequestor(Requestor requestor) {
+    public void addRequestor(Requestor requestor) {
         requestorList.add(requestor);
     }
     /* (non-Javadoc)
      * @see org.epics.ioc.pv.PVRecord#removeRequestor(org.epics.ioc.util.Requestor)
      */
-    public synchronized void removeRequestor(Requestor requestor) {
+    public void removeRequestor(Requestor requestor) {
         requestorList.remove(requestor);
     }
     /* (non-Javadoc)
      * @see java.lang.Object#toString()
      */
     public String toString() { return toString(0);}
-
     /* (non-Javadoc)
-     * @see org.epics.ioc.pvAccess.PVData#toString(int)
+     * @see org.epics.ioc.pv.BasePVStructure#toString(int)
      */
     public String toString(int indentLevel) {
         return super.toString(recordName + " recordType",indentLevel);

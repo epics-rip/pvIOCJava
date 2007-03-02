@@ -5,8 +5,7 @@
  */
 package org.epics.ioc.process;
 
-import org.epics.ioc.db.DBData;
-import org.epics.ioc.pv.*;
+import org.epics.ioc.db.DBField;
 
 /**
  * Interface that must be implemented by support for a channel access link field.
@@ -16,8 +15,8 @@ import org.epics.ioc.pv.*;
 public interface LinkSupport extends Support {
     /**
      * Set the field for which the link support should get/put data.
-     * This is called by processDB.createSupport(DBData dbData) when it is called for a link field. 
-     * @param dbData The field.
+     * This is called by processDB.createSupport(DBField dbField) when it is called for a link field. 
+     * @param dbField The field.
      */
-    void setField(DBData dbData);
+    void setField(DBField dbField);
 }

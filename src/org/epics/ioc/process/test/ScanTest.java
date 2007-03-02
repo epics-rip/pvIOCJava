@@ -55,27 +55,27 @@ public class ScanTest extends TestCase {
         assertNotNull(dbRecord);
         PVRecord pvRecord = dbRecord.getPVRecord();
         Structure structure = (Structure)pvRecord.getField();
-        PVData[] pvData = pvRecord.getFieldPVDatas();        
+        PVField[] pvData = pvRecord.getFieldPVFields();        
         int index = structure.getFieldIndex("value");
-        PVData counterPushValue = pvData[index];
+        PVField counterPushValue = pvData[index];
         dbRecord = iocdbMaster.findRecord("doubleReceive09");
         assertNotNull(dbRecord);
         pvRecord = dbRecord.getPVRecord();
-        pvData = pvRecord.getFieldPVDatas();        
+        pvData = pvRecord.getFieldPVFields();        
         index = structure.getFieldIndex("value");
-        PVData doubleReceive09Value = pvData[index];
+        PVField doubleReceive09Value = pvData[index];
         dbRecord = iocdbMaster.findRecord("counterEvent0");
         assertNotNull(dbRecord);
         pvRecord = dbRecord.getPVRecord();
-        pvData = pvRecord.getFieldPVDatas();        
+        pvData = pvRecord.getFieldPVFields();        
         index = structure.getFieldIndex("value");
-        PVData counterEvent0Value = pvData[index];
+        PVField counterEvent0Value = pvData[index];
         dbRecord = iocdbMaster.findRecord("counterEvent1");
         assertNotNull(dbRecord);
         pvRecord = dbRecord.getPVRecord();
-        pvData = pvRecord.getFieldPVDatas();        
+        pvData = pvRecord.getFieldPVFields();        
         index = structure.getFieldIndex("value");
-        PVData counterEvent1Value = pvData[index];
+        PVField counterEvent1Value = pvData[index];
         for(int i=0; i<5; i++) {
             try {
                 Thread.sleep(1000);
@@ -110,15 +110,15 @@ public class ScanTest extends TestCase {
         dbRecord = iocdbMaster.findRecord("counter");
         assertNotNull(dbRecord);
         pvRecord = dbRecord.getPVRecord();
-        pvData = pvRecord.getFieldPVDatas();        
+        pvData = pvRecord.getFieldPVFields();        
         index = structure.getFieldIndex("value");
-        PVData counterValue = pvData[index];
+        PVField counterValue = pvData[index];
         dbRecord = iocdbMaster.findRecord("double02");
         assertNotNull(dbRecord);
         pvRecord = dbRecord.getPVRecord();
-        pvData = pvRecord.getFieldPVDatas();        
+        pvData = pvRecord.getFieldPVFields();        
         index = structure.getFieldIndex("value");
-        PVData double02Value = pvData[index];
+        PVField double02Value = pvData[index];
         list = periodicScanner.toString();
         System.out.println(list);
         while(true) {

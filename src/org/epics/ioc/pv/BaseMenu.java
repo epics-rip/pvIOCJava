@@ -40,7 +40,6 @@ public class BaseMenu extends BaseField implements Menu{
      * @see java.lang.Object#toString()
      */
     public String toString() { return getString(0);}
-
     /* (non-Javadoc)
      * @see org.epics.ioc.pv.Field#toString(int)
      */
@@ -53,13 +52,13 @@ public class BaseMenu extends BaseField implements Menu{
     public String getMenuName() {
         return menuName;
     }
-
     /* (non-Javadoc)
      * @see org.epics.ioc.pv.Menu#getMenuChoices()
      */
     public String[] getMenuChoices() {
         return menuChoices;
     }
+    
     private String getString(int indentLevel) {
         StringBuilder builder = new StringBuilder();
         builder.append(super.toString(indentLevel));

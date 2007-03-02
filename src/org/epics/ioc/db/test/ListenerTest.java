@@ -108,21 +108,21 @@ public class ListenerTest extends TestCase {
             System.out.printf("%nfield %s not in record %s%n",fieldName,recordName);
             return;
         }
-        PVData pvData = pvAccess.getField();
-        DBData dbData = dbRecord.findDBData(pvData);
-        Type type = pvData.getField().getType();
+        PVField pvField = pvAccess.getField();
+        DBField dbField = dbRecord.findDBField(pvField);
+        Type type = pvField.getField().getType();
         if(type.isNumeric()) {
             System.out.printf("%ntestPut recordName %s fieldName %s value %f%n",
                 recordName,fieldName,value);
-            convert.fromDouble(pvData,value);
-            dbData.postPut();
+            convert.fromDouble(pvField,value);
+            dbField.postPut();
             return;
         }
         if(type==Type.pvEnum) {
             System.out.printf("%ntestPut enum index recordName %s fieldName %s value %f%n",
                     recordName,fieldName,value);
             int index = (int)value;
-            DBEnum dbEnum = (DBEnum)dbData;
+            DBEnum dbEnum = (DBEnum)dbField;
             dbEnum.setIndex(index);
             System.out.printf("%ntestPut enum choices recordName %s fieldName %s value %f%n",
                     recordName,fieldName,value);
@@ -134,20 +134,15 @@ public class ListenerTest extends TestCase {
             System.out.printf("%ntestPut menu index recordName %s fieldName %s value %f%n",
                     recordName,fieldName,value);
             int index = (int)value;
-            DBMenu dbMenu = (DBMenu)dbData;
+            DBMenu dbMenu = (DBMenu)dbField;
             dbMenu.setIndex(index);
             return;
         }
         if(type==Type.pvLink) {
             System.out.printf("%ntestPut link configurationStructure recordName %s fieldName %s value %f%n",
                     recordName,fieldName,value);
-            DBLink dbLink = (DBLink)dbData;
+            DBLink dbLink = (DBLink)dbField;
             PVStructure configStructure = dbLink.getConfigurationStructure();
-            boolean boolResult = dbLink.setConfigurationStructure(configStructure);
-            if(!boolResult) {
-                System.out.println("setConfigurationStructure failed");
-                return;
-            }
             System.out.println("change supportName");
             String supportName = dbLink.getSupportName();
             String result = dbLink.setSupportName(supportName);
@@ -156,9 +151,9 @@ public class ListenerTest extends TestCase {
                 return;
             }
             System.out.println("setConfigurationStructure");
-            boolResult = dbLink.setConfigurationStructure(configStructure);
-            if(!boolResult) {
-                System.out.println("setConfigurationStructure failed");
+            result = dbLink.setConfigurationStructure(configStructure);
+            if(result!=null) {
+                System.out.println("setConfigurationStructure failed " + result);
                 return;
             }
             return;
@@ -168,14 +163,14 @@ public class ListenerTest extends TestCase {
                 fieldName,recordName);
             return;
         }
-        DBStructure dbStructure = (DBStructure)dbRecord.findDBData(pvData);
-        DBData[] dbDatas = dbStructure.getFieldDBDatas();
+        DBStructure dbStructure = (DBStructure)dbRecord.findDBField(pvField);
+        DBField[] dbDatas = dbStructure.getFieldDBFields();
         System.out.printf("%ntestPut begin structure put %s%n",
-                recordName + pvData.getFullFieldName());
+                recordName + pvField.getFullFieldName());
         dbRecord.beginProcess();
         dbStructure.beginPut();
-        for(DBData data : dbDatas) {
-            PVData pv = data.getPVData();
+        for(DBField field : dbDatas) {
+            PVField pv = field.getPVField();
             Type fieldType = pv.getField().getType();
             if(fieldType.isNumeric()) {
                 System.out.printf("testPut recordName %s fieldName %s value %f%n",
@@ -190,7 +185,7 @@ public class ListenerTest extends TestCase {
             } else {
                 continue;
             }
-            data.postPut();
+            field.postPut();
         }
         dbStructure.endPut();
         dbRecord.endProcess();

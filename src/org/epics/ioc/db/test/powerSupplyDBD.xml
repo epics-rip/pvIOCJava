@@ -1,11 +1,7 @@
 <?xml version="1.0" ?>
 <DBDefinition>
-<support name = "powerSupply"
-    factoryName = "PowerSupply" />
-<support name = "powerSupplyArray"
-    factoryName = "PowerSupplyArray" />
 
-<structure name = "powerSupply" supportName = "powerSupply">
+<structure name = "powerSupply" supportName = "noop">
     <property name = "current" associatedField = "currentInput.value" />
     <property name = "voltage" associatedField = "voltageInput.value" />
     <field name = "power" type = "double" >
@@ -24,7 +20,7 @@
          type = "structure" structureName = "displayLimit" />
 </structure>
 
-<recordType name = "powerSupplyRecord" supportName = "powerSupply">
+<recordType name = "powerSupplyRecord" supportName = "noop">
     <property name = "power" associatedField = "powerSupply.power" />
     <property name = "current" associatedField = "powerSupply.current" />
     <property name = "voltage" associatedField = "powerSupply.voltage" />
@@ -37,7 +33,7 @@
     <field name = "scan" type = "structure" structureName = "scan"/>
 </recordType>
 
-<recordType name = "powerSupplyArrayRecord" supportName = "powerSupplyArray">
+<recordType name = "powerSupplyArrayRecord" supportName = "noop">
     <field name = "powerSupply" type = "array" elementType = "structure" />
     <field name = "status" type = "string" />
     <field name = "severity" type = "menu" menuName = "alarmSeverity" />

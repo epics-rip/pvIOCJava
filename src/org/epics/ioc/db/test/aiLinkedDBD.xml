@@ -1,13 +1,7 @@
 <?xml version="1.0" ?>
 <DBDefinition>
 
-<support name = "aiRawRecord"
-    factoryName = "AiRawRecord" />
-
-<support name = "aiLinearLinkedRecord"
-    factoryName = "AiLinearLinkedRecord" />
-
-<recordType name = "aiRawRecord" supportName = "aiRawRecord">
+<recordType name = "aiRawRecord" supportName = "noop">
     <field name = "value" type = "int" >
         <property name = "status" associatedField = "status" />
         <property name = "severity" associatedField = "severity" />
@@ -19,7 +13,7 @@
     <field name = "input" type = "link" />
 </recordType>
 
-<recordType name = "aiLinearLinkedRecord" supportName = "aiLinearLinkedRecord">
+<recordType name = "aiLinearLinkedRecord" supportName = "noop">
     <field name = "value" type = "double" >
         <property name = "rawValue" associatedField = "aiRaw.value" />
         <property name = "status" associatedField = "status" />

@@ -10,7 +10,7 @@ package org.epics.ioc.pv;
  * @author mrk
  *
  */
-public interface PVBoolean extends PVData{
+public interface PVBoolean extends PVField{
     /**
      * Get the <i>booolean</i> value stored in the field.
      * @return boolean The value of field.

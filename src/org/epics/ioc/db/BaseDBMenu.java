@@ -8,7 +8,7 @@ package org.epics.ioc.db;
 import org.epics.ioc.pv.*;
 
 /**
- * Abstract base class for DBMenu.
+ * Base class for DBMenu.
  * @author mrk
  *
  */
@@ -17,11 +17,23 @@ public class BaseDBMenu extends BaseDBEnum implements DBMenu
     /**
      * Constructor for BasePVMenu
      * @param parent The parent.
-     * @param menu The introspection interface.
-     * @param choice The array of choices.
+     * @param record The DBRecord to which this field belongs.
+     * @param pvField The reflection interface.
      */
-    public BaseDBMenu(DBData parent,DBRecord record, PVData pvData) {
-        super(parent,record,pvData);
+    public BaseDBMenu(DBField parent,DBRecord record, PVField pvField) {
+        super(parent,record,pvField);
+    }
+    /* (non-Javadoc)
+     * @see org.epics.ioc.db.DBMenu#getPVMenu()
+     */
+    public PVMenu getPVMenu() {
+        return (PVMenu)super.getPVField();
+    }
+    /* (non-Javadoc)
+     * @see org.epics.ioc.db.DBMenu#replacePVMenu()
+     */
+    public void replacePVMenu() {
+        super.replacePVEnum();
     }
     /* (non-Javadoc)
      * @see org.epics.ioc.db.BaseDBEnum#setChoices(java.lang.String[])
@@ -29,11 +41,5 @@ public class BaseDBMenu extends BaseDBEnum implements DBMenu
     public boolean setChoices(String[] choice) {
         throw new UnsupportedOperationException(
             "Menu choices can not be modified");
-    }
-    /* (non-Javadoc)
-     * @see org.epics.ioc.db.DBMenu#getPVMenu()
-     */
-    public PVMenu getPVMenu() {
-        return (PVMenu)super.getPVData();
     }
 }

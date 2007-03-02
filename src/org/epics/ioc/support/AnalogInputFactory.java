@@ -21,11 +21,11 @@ public class AnalogInputFactory {
      * @param pvStructure The structure to support.
      * @return The Support interface.
      */
-    public static Support create(PVStructure pvStructure) {
+    public static Support create(DBStructure dbStructure) {
         Support support = null;
-        String supportName = pvStructure.getSupportName();
+        String supportName = dbStructure.getSupportName();
         if(supportName.equals(supportName)) {
-            support = new Ai(pvStructure);
+            support = new Ai(dbStructure);
         }
         return support;
     }
@@ -35,8 +35,8 @@ public class AnalogInputFactory {
     private static class Ai extends AbstractSupport {
         private DBRecord dbRecord = null;
         
-        private Ai(PVStructure pvStructure) {
-            super(supportName,(DBData)pvStructure);
+        private Ai(DBStructure dbStructure) {
+            super(supportName,dbStructure);
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.process.AbstractSupport#getRequestorName()

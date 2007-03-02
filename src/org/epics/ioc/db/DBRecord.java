@@ -18,11 +18,11 @@ import org.epics.ioc.dbd.*;
  */
 public interface DBRecord {
     /**
-     * Given a PVData find the corresponding DBData.
-     * @param pvData The pvData.
-     * @return The corresponding DBData.
+     * Given a PVField find the corresponding DBField.
+     * @param pvField The pvField.
+     * @return The corresponding DBField.
      */
-    DBData findDBData(PVData pvData);
+    DBField findDBField(PVField pvField);
     /**
      * Get the PVRecord that has the data for this IOC record instance.
      * @return The PVRecord interface.
@@ -76,7 +76,7 @@ public interface DBRecord {
     void endProcess();
     /**
      * Create a RecordListener.
-     * This must be called by a client that wants to call DBData.addListener for one or more
+     * This must be called by a client that wants to call DBField.addListener for one or more
      * fields of this record instance.
      * @param listener The DBListener interface.
      * @return A RecordListener interface.
@@ -84,7 +84,7 @@ public interface DBRecord {
     RecordListener createRecordListener(DBListener listener);
     /**
      * Remove a RecordListener interface.
-     * This also removes all calls to DBData.addListener; 
+     * This also removes all calls to DBField.addListener; 
      * @param listener The Listen interface returned by the call to createListener.
      */
     void removeRecordListener(RecordListener listener);
@@ -94,11 +94,11 @@ public interface DBRecord {
      */
     void removeRecordListeners();
     /**
-     * Used for communication between BasePVRecord and BaseDBData.
+     * Used for communication between BasePVRecord and BaseDBField.
      * DBField calls this the first time DBField.addListener is called.
-     * @param dbData The DBField instance.
+     * @param dbField The DBField instance.
      */
-    void addListenerSource(DBData dbData);
+    void addListenerSource(DBField dbField);
     /**
      * Get the DBD that contains this record.
      * @return The DBD or null if it was never set.
@@ -121,4 +121,16 @@ public interface DBRecord {
      * This is called after an IOCDB is merged into the master to change it to the master.
      */
     void setIOCDB(IOCDB iocdb);
+    /**
+     * Convert the DBRecord to a string.
+     * @return The string.
+     */
+    String toString();
+    /**
+     * Convert the DBRecord to a string.
+     * Each line is indented.
+     * @param indentLevel The indentation level.
+     * @return The string.
+     */
+    String toString(int indentLevel);
 }

@@ -12,7 +12,16 @@ import org.epics.ioc.pv.PVEnum;
  * @author mrk
  *
  */
-public interface DBEnum extends DBData {
+public interface DBEnum extends DBField {
+    /**
+     * Get the PVEnum for this DBEnum.
+     * @return The pvEnum.
+     */
+    PVEnum getPVEnum();
+    /**
+     * Replace the current PVEnum.
+     */
+    void replacePVEnum();
     /**
      * Get the index of the current selected choice.
      * @return index of current choice.
@@ -36,10 +45,5 @@ public interface DBEnum extends DBData {
      * A value of false normally means the choice strings were readonly.
      * @throws UnsupportedOperationException if the choices are not mutable.
      */
-    boolean setChoices(String[] choice);
-    /**
-     * Get the PVEnum for this DBEnum.
-     * @return The pvEnum.
-     */
-    PVEnum getPVEnum();
+    boolean setChoices(String[] choice);    
 }
