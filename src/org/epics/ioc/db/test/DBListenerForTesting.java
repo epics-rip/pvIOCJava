@@ -117,7 +117,7 @@ public class DBListenerForTesting implements DBListener{
     /* (non-Javadoc)
      * @see org.epics.ioc.db.DBListener#dataPut(org.epics.ioc.db.DBField)
      */
-    public void fieldPut(DBField dbField) {
+    public void dataPut(DBField dbField) {
         PVField pvField = dbField.getPVField();
         String common = putCommon("dataPut");
         if(!verbose) {
@@ -189,7 +189,7 @@ public class DBListenerForTesting implements DBListener{
     /* (non-Javadoc)
      * @see org.epics.ioc.db.DBListener#dataPut(org.epics.ioc.db.DBStructure, org.epics.ioc.db.DBField)
      */
-    public void fieldPut(DBField requested, DBField dbField) {
+    public void dataPut(DBField requested, DBField dbField) {
         PVField pvRequested = requested.getPVField();
         PVField pvField = dbField.getPVField();
         String structureName = 

@@ -6,7 +6,7 @@
 package org.epics.ioc.ca;
 
 /**
- * A queue of CDField.
+ * A queue of ChannelData.
  * @author mrk
  *
  */

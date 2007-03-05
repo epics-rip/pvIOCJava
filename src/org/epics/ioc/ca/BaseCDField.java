@@ -21,6 +21,12 @@ public class BaseCDField implements CDField {
     private int numPuts = 0;
     private int numSupportNamePuts = 0;
     
+    /**
+     * Constructor.
+     * @param parent The parent cdField.
+     * @param cdRecord The cdRecord that contains this field.
+     * @param pvField The pvField that this CDField references.
+     */
     public BaseCDField(
         CDField parent,CDRecord cdRecord,PVField pvField)
     {
@@ -100,7 +106,7 @@ public class BaseCDField implements CDField {
     /* (non-Javadoc)
      * @see org.epics.ioc.ca.CDField#dataPut(org.epics.ioc.pv.PVField)
      */
-    public void fieldPut(PVField targetPVField) {
+    public void dataPut(PVField targetPVField) {
         Field field = targetPVField.getField();
         Type type = field.getType();
         if(type!=targetPVField.getField().getType()) {
@@ -140,7 +146,7 @@ public class BaseCDField implements CDField {
     /* (non-Javadoc)
      * @see org.epics.ioc.ca.CDField#dataPut(org.epics.ioc.pv.PVField, org.epics.ioc.pv.PVField)
      */
-    public boolean fieldPut(PVField requested, PVField targetPVField) {
+    public boolean dataPut(PVField requested, PVField targetPVField) {
         throw new IllegalStateException("Logic error.");
     }
     /* (non-Javadoc)

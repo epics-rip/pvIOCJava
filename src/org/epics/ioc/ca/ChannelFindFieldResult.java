@@ -6,6 +6,7 @@
 package org.epics.ioc.ca;
 
 /**
+ * Result for a channel.findField request.
  * @author mrk
  *
  */

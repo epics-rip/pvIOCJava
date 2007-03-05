@@ -32,7 +32,7 @@ public interface PVDataCreate {
     /**
      * Create a record instance.
      * @param recordName The instance name.
-     * @param dbdRecordType The reflection interface for the record type.
+     * @param structure The reflection interface for the record type.
      * @return The interface for accessing the record instance.
      */
     public PVRecord createPVRecord(String recordName,Structure structure);

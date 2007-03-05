@@ -34,7 +34,7 @@ public class ChannelDataFactory {
      * @param channelFieldGroup The field group defining what should be in each channelDataField.
      * @return The ChannelDataQueue interface.
      */
-    public static ChannelDataQueue createQueue(
+    public static ChannelDataQueue createDataQueue(
              int queueSize,
              Channel channel,ChannelFieldGroup channelFieldGroup)
      {

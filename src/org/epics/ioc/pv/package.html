@@ -10,11 +10,64 @@
 <body>
 <h1 style="text-align: center">EPICS JavaIOC: pv<br />
 package: org.epics.ioc.pv<br />
-2007.02.27</h1>
+2007.03.05</h1>
 CONTENTS
+
+<div class="toc">
+<ul>
+  <li><a href="#Overview">Overview</a>
+    <ul>
+      <li><a href="#Process">Process Variable</a></li>
+      <li><a href="#Process1">Process Variable Data Types</a></li>
+      <li><a href="#Process2">Process Variable Reflection</a></li>
+    </ul>
+  </li>
+  <li><a href="#Type">Type</a></li>
+  <li><a href="#Reflection">Reflection</a></li>
+  <li><a href="#PVField">PVField Interfaces</a>
+    <ul>
+      <li><a href="#PVField1">PVField</a></li>
+      <li><a href="#Primitive">Primitive PVField types</a></li>
+      <li><a href="#PVString">PVString</a></li>
+      <li><a href="#PVEnum">PVEnum</a></li>
+      <li><a href="#PVMenu">PVMenu</a></li>
+      <li><a href="#PVLink">PVLink</a></li>
+      <li><a href="#PVStructur">PVStructure</a></li>
+      <li><a href="#PVRecord">PVRecord</a></li>
+      <li><a href="#PVArray">PVArray</a></li>
+    </ul>
+  </li>
+  <li><a href="#Field">Field and PVField creation</a>
+    <ul>
+      <li><a href="#FieldCreat">FieldCreate</a></li>
+      <li><a href="#PVDataCrea">PVDataCreate</a></li>
+    </ul>
+  </li>
+  <li><a href="#Base">Base Introspection Classes</a></li>
+  <li><a href="#Abstract">Abstract and Base Classes for PVField</a>
+    <ul>
+      <li><a href="#AbstractPV">AbstractPVField</a></li>
+      <li><a href="#AbstractPV1">AbstractPVArray</a></li>
+      <li><a href="#BasePVEnum">BasePVEnum</a></li>
+      <li><a href="#BasePVMenu">BasePVMenu</a></li>
+      <li><a href="#BasePVLink">BasePVLink</a></li>
+      <li><a href="#BasePVStru">BasePVStructure</a></li>
+      <li><a href="#BasePVReco">BasePVRecord</a></li>
+    </ul>
+  </li>
+  <li><a href="#Convert">Convert</a></li>
+  <li><a href="#PVAccess">PVAccess</a>
+    <ul>
+      <li><a href="#Overview1">Overview</a></li>
+      <li><a href="#Definition">Definition</a></li>
+      <li><a href="#findField">findField Examples</a></li>
+    </ul>
+  </li>
+</ul>
+</div>
 <hr />
 
-<h2 style="text-align: center">Overview</h2>
+<h2 style="text-align: center" id="Overview">Overview</h2>
 <hr />
 
 <p>A Process Variable (PV) Database is a "smart" database because it has
@@ -94,7 +147,7 @@ TINI, DOOCS, etc.</p>
     <dd>An interface for locating fields within a record instance.</dd>
 </dl>
 
-<h3>Process Variable</h3>
+<h3 id="Process">Process Variable</h3>
 
 <p>Definitions:</p>
 <dl>
@@ -144,7 +197,7 @@ associatedField must be one of the following:</p>
 powerSupply record type can be created that has properties like "current",
 "voltage", and "power".</p>
 
-<h3>Process Variable Data Types</h3>
+<h3 id="Process1">Process Variable Data Types</h3>
 
 <p>The following types are supported:</p>
 <dl>
@@ -183,7 +236,7 @@ powerSupply record type can be created that has properties like "current",
       array</dd>
 </dl>
 
-<h3>Process Variable Reflection</h3>
+<h3 id="Process2">Process Variable Reflection</h3>
 
 <p>Given a pvname, which consists of a record name and field name, it is
 possible to introspect the field. The reflection interface does not provide
@@ -195,7 +248,7 @@ Only when a client issues an I/O request will data be available. This
 separation is especially important for arrays and structures.</p>
 <hr />
 
-<h2 style="text-align: center">Type</h2>
+<h2 style="text-align: center" id="Type">Type</h2>
 <hr />
 
 <p>The types are defined by:</p>
@@ -219,7 +272,7 @@ separation is especially important for arrays and structures.</p>
 <p>Note that a string is a scalar.</p>
 <hr />
 
-<h2 style="text-align: center">Reflection</h2>
+<h2 style="text-align: center" id="Reflection">Reflection</h2>
 <hr />
 
 <p>This section defines the complete set of Java PV reflection interfaces.</p>
@@ -370,13 +423,13 @@ separation is especially important for arrays and structures.</p>
 </ul>
 <hr />
 
-<h2 style="text-align: center">PVField Interfaces</h2>
+<h2 style="text-align: center" id="PVField">PVField Interfaces</h2>
 <hr />
 
 <p>This section defines the Java Interfaces for accessing fields within a PV
 record.</p>
 
-<h3>PVField</h3>
+<h3 id="PVField1">PVField</h3>
 
 <p>The following is the base interface for accessing data.</p>
 <pre>    enum MessageType {info,warning,error,fatalError}
@@ -432,9 +485,10 @@ where
   <li>getPVRecord<br />
     Get the interface for the record that contains this field.</li>
   <li>replacePVField<br />
-    Replace this PVField. This is called by support code that wants to replace
-    the default implementation of a data field with it;s own implementation.
-    The new PVField must have the same Type as the oroginal field.</li>
+    Replace this PVField. This is called by support code that wants to
+    replace the default implementation of a data field with it;s own
+    implementation. The new PVField must have the same Type as the oroginal
+    field.</li>
   <li>getSupportName<br />
     Get the name of the support for this PV.</li>
   <li>setSupportName<br />
@@ -447,7 +501,7 @@ where
     purposes.</li>
 </ul>
 
-<h3>Primitive PVField types</h3>
+<h3 id="Primitive">Primitive PVField types</h3>
 
 <p>The interfaces for primitive data types are:</p>
 <pre>    interface PVBoolean extends PVField {
@@ -485,7 +539,7 @@ where
         void put(double value);
     }</pre>
 
-<h3>PVString</h3>
+<h3 id="PVString">PVString</h3>
 
 <p>The interface for string is:</p>
 <pre>    interface PVString extends PVField {
@@ -493,7 +547,7 @@ where
         void put(String value);
     }</pre>
 
-<h3>PVEnum</h3>
+<h3 id="PVEnum">PVEnum</h3>
 
 <p>The interface for enum is:</p>
 <pre>    interface PVEnum extends PVField{
@@ -514,7 +568,7 @@ where
       be changed</dd>
 </dl>
 
-<h3>PVMenu</h3>
+<h3 id="PVMenu">PVMenu</h3>
 
 <p>The interface for a menu is:</p>
 <pre>    interface PVMenu extends PVEnum {}</pre>
@@ -522,7 +576,7 @@ where
 <p>The difference from an enum is that the reflection interface provides a
 menuName and the choices can not be modified.</p>
 
-<h3>PVLink</h3>
+<h3 id="PVLink">PVLink</h3>
 
 <p>The interface for a link is:</p>
 <pre>    interface PVLink extends PVField {
@@ -547,7 +601,7 @@ assumes that the client has permission to change the support:</p>
   <li>Call setConfigurationStructure to set the new configuration.</li>
 </ul>
 
-<h3>PVStructure</h3>
+<h3 id="PVStructur">PVStructure</h3>
 
 <p>The interface for structure is:</p>
 <pre>    interface PVStructure extends PVField {
@@ -572,7 +626,7 @@ assumes that the client has permission to change the support:</p>
       before the first put and endPut after the last put.</dd>
 </dl>
 
-<h3>PVRecord</h3>
+<h3 id="PVRecord">PVRecord</h3>
 
 <p>Each PVField is a field within a PVRecord:</p>
 <pre>    interface PVRecord extends PVStructure
@@ -597,7 +651,7 @@ assumes that the client has permission to change the support:</p>
     <dd>Remove a message requestor</dd>
 </dl>
 
-<h3>PVArray</h3>
+<h3 id="PVArray">PVArray</h3>
 
 <p>PROBLEM: If the capacity is mutable then there is no maximum capacity. A
 channel access client could disable an ioc by sending very large arrays.
@@ -784,13 +838,13 @@ the following reads an entire array:</p>
     } </pre>
 <hr />
 
-<h2 style="text-align: center">Field and PVField creation</h2>
+<h2 style="text-align: center" id="Field">Field and PVField creation</h2>
 <hr />
 
 <p>Interfaces and factories are provided to create Introspection and PVField
 instances.</p>
 
-<h3>FieldCreate</h3>
+<h3 id="FieldCreat">FieldCreate</h3>
 
 <p>This is an interface for creating introspection objects that implement the
 introspection interfaces. The methods are:</p>
@@ -894,7 +948,7 @@ introspection interfaces. The methods are:</p>
 
 <p>The field factory gets the single implementation of FieldCreate.</p>
 
-<h3>PVDataCreate</h3>
+<h3 id="PVDataCrea">PVDataCreate</h3>
 
 <p>A factory is available that implements the interfaces for record instance
 fields. The methods are called by XMLToIOCDBFactory when it is reading
@@ -921,7 +975,7 @@ where
 </dl>
 <hr />
 
-<h2 style="text-align: center">Base Introspection Classes</h2>
+<h2 style="text-align: center" id="Base">Base Introspection Classes</h2>
 <hr />
 
 <p>This section describes base classes for implementimg Field objects , i.e.
@@ -987,11 +1041,11 @@ introspection implementation but they could be extended if necessary.</p>
 interfaces.</p>
 <hr />
 
-<h2 style="text-align: center">Abstract and Base Classes for
+<h2 style="text-align: center" id="Abstract">Abstract and Base Classes for
 PVField</h2>
 <hr />
 
-<h3>AbstractPVField</h3>
+<h3 id="AbstractPV">AbstractPVField</h3>
 
 <p>The following is an abstract base class for implementing PVField
 interfaces:</p>
@@ -1032,7 +1086,7 @@ interfaces:</p>
     <dd>Should be called by derived classes to add the supportName.</dd>
 </dl>
 
-<h3>AbstractPVArray</h3>
+<h3 id="AbstractPV1">AbstractPVArray</h3>
 
 <p>The following is a abstract class for creating array fields.</p>
 <pre>public abstract class AbstractPVArray extends AbstractPVField implements PVArray{
@@ -1045,7 +1099,7 @@ interfaces:</p>
     public String toString();
 }</pre>
 
-<h3>BasePVEnum</h3>
+<h3 id="BasePVEnum">BasePVEnum</h3>
 <pre>public class BasePVEnum extends AbstractPVField implements PVEnum {
     public BasePVEnum(PVField parent,Enum enumField);
     public String[] getChoices();
@@ -1056,7 +1110,7 @@ interfaces:</p>
     public String toString(int indentLevel);
 }</pre>
 
-<h3>BasePVMenu</h3>
+<h3 id="BasePVMenu">BasePVMenu</h3>
 <pre>public class BasePVMenu extends BasePVEnum implements PVMenu
     public BasePVMenu(PVField parent,Menu menu) {
     public boolean setChoices(String[] choice) {
@@ -1064,7 +1118,7 @@ interfaces:</p>
     public String toString(int indentLevel) {
 }</pre>
 
-<h3>BasePVLink</h3>
+<h3 id="BasePVLink">BasePVLink</h3>
 <pre>public class BasePVLink extends AbstractPVField implements PVLink {
     public BasePVLink(PVField parent,Field field);
     public PVStructure getConfigurationStructure();
@@ -1073,7 +1127,7 @@ interfaces:</p>
     public String toString(int indentLevel);
 }</pre>
 
-<h3>BasePVStructure</h3>
+<h3 id="BasePVStru">BasePVStructure</h3>
 <pre>public class BasePVStructure extends AbstractPVField implements PVStructure
     public BasePVStructure(PVField parent, Structure structure);
     public void setRecord(PVRecord record);
@@ -1084,7 +1138,7 @@ interfaces:</p>
     protected String toString(String prefix,int indentLevel);
 }</pre>
 
-<h3>BasePVRecord</h3>
+<h3 id="BasePVReco">BasePVRecord</h3>
 <pre>    public BasePVRecord(String recordName,Structure structure)
     public void message(String message, MessageType messageType);
     public String getRecordName();
@@ -1094,7 +1148,7 @@ interfaces:</p>
 }</pre>
 <hr />
 
-<h2 style="text-align: center">Convert</h2>
+<h2 style="text-align: center" id="Convert">Convert</h2>
 <hr />
 
 <p>This section describes the supported conversions between data types.</p>
@@ -1192,10 +1246,10 @@ It generates a newline and inserts blanks at the beginning of the newline.</p>
 <p>ConvertFactory gets the single implementation of Convert.</p>
 <hr />
 
-<h2 style="text-align: center">PVAccess</h2>
+<h2 style="text-align: center" id="PVAccess">PVAccess</h2>
 <hr />
 
-<h3>Overview</h3>
+<h3 id="Overview1">Overview</h3>
 
 <p>PVAccess is an interface that makes it easier to locate data fields of a
 record. It also works with field properties to support "device" oriented
@@ -1227,7 +1281,7 @@ valid names.</p>
 
 <p>The javaIOC unnamed package provides more complete examples.</p>
 
-<h3>Definition</h3>
+<h3 id="Definition">Definition</h3>
 
 <p>The definition of PVAccess is:</p>
 <pre>    public enum AccessSetResult {
@@ -1299,7 +1353,7 @@ valid names.</p>
     <dd>A factory for creating PVAccess</dd>
 </dl>
 
-<h3>findField Examples</h3>
+<h3 id="findField">findField Examples</h3>
 
 <p>The semantics allow searching down a structure hierarchy and for searching
 via properties. At a particular level the search is first made for subfields

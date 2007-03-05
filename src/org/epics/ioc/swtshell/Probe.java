@@ -484,7 +484,7 @@ public class Probe {
              * @see org.epics.ioc.ca.ChannelGetRequestor#nextGetData(org.epics.ioc.ca.Channel, org.epics.ioc.ca.ChannelField, org.epics.ioc.pvAccess.PVData)
              */
             public boolean nextGetField(ChannelField channelField, PVField pvField) {
-                channelData.fieldPut(pvField);
+                channelData.dataPut(pvField);
                 return false;
             }
             

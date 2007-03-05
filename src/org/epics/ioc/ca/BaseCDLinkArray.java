@@ -6,14 +6,21 @@
 package org.epics.ioc.ca;
 import org.epics.ioc.pv.*;
 /**
+ * Base class for a CD (Channel Data) Array of Links.
  * @author mrk
  *
  */
-public class BaseCDLinkArray extends BaseCDField implements CDLinkArray{
+public class BaseCDLinkArray extends BaseCDField implements CDNonScalarArray{
     private PVLinkArray pvLinkArray;
     private CDLink[] elementCDLinks;
     private LinkArrayData linkArrayData = new LinkArrayData();
     
+    /**
+     * Constructor.
+     * @param parent The parent cdField.
+     * @param cdRecord The cdRecord that contains this field.
+     * @param pvLinkArray The pvLinkArray that this CDField references.
+     */
     public BaseCDLinkArray(
         CDField parent,CDRecord cdRecord,PVLinkArray pvLinkArray)
     {
@@ -24,15 +31,15 @@ public class BaseCDLinkArray extends BaseCDField implements CDLinkArray{
     /* (non-Javadoc)
      * @see org.epics.ioc.ca.BaseCDField#clearNumPuts()
      */
-    @Override
     public void clearNumPuts() {
         for(CDField cdField : elementCDLinks) cdField.clearNumPuts();
         super.clearNumPuts();
     }
     /* (non-Javadoc)
-     * @see org.epics.ioc.ca.CDLinkArray#dataPut(org.epics.ioc.pv.PVLinkArray)
+     * @see org.epics.ioc.ca.BaseCDField#dataPut(org.epics.ioc.pv.PVField)
      */
-    public void dataPut(PVLinkArray targetPVLinkArray) {
+    public void dataPut(PVField targetPVField) {
+        PVLinkArray targetPVLinkArray = (PVLinkArray)targetPVField;
         if(checkPVLinkArray(targetPVLinkArray)) {
             super.incrementNumPuts();
             return;
@@ -46,28 +53,28 @@ public class BaseCDLinkArray extends BaseCDField implements CDLinkArray{
             PVLink targetPVLink = targetLinks[i];
             if(targetPVLink==null) continue;
             CDLink cdLink = elementCDLinks[i];   
-            cdLink.fieldPut(targetPVLink);
+            cdLink.dataPut(targetPVLink);
         }
         pvLinkArray.put(0, pvLinks.length, pvLinks, 0);
         super.incrementNumPuts();
     }
-
     /* (non-Javadoc)
-     * @see org.epics.ioc.ca.CDLinkArray#getElementCDBLinks()
+     * @see org.epics.ioc.ca.CDNonScalarArray#getElementCDFields()
      */
-    public CDLink[] getElementCDLinks() {
+    public CDLink[] getElementCDFields() {
         return elementCDLinks;
     }
-
     /* (non-Javadoc)
-     * @see org.epics.ioc.ca.CDLinkArray#replacePVArray()
+     * @see org.epics.ioc.ca.CDNonScalarArray#replacePVArray()
      */
-    public void replacePVLinkArray() {
+    public void replacePVArray() {
         pvLinkArray = (PVLinkArray)super.getPVField();
         createElementCDBLinks();
     }
-
-    public boolean fieldPut(PVField requested,PVField targetPVField) {
+    /* (non-Javadoc)
+     * @see org.epics.ioc.ca.BaseCDField#dataPut(org.epics.ioc.pv.PVField, org.epics.ioc.pv.PVField)
+     */
+    public boolean dataPut(PVField requested,PVField targetPVField) {
         PVLinkArray targetPVLinkArray = (PVLinkArray)requested;
         checkPVLinkArray(targetPVLinkArray);
         int length = targetPVLinkArray.getLength();
@@ -77,13 +84,15 @@ public class BaseCDLinkArray extends BaseCDField implements CDLinkArray{
             PVLink targetLink = targetLinks[i];
             if(targetLink==targetPVField) {
                 CDLink cdLink = elementCDLinks[i];
-                cdLink.fieldPut(targetPVField);
+                cdLink.dataPut(targetPVField);
                 return true;
             }
         }
         throw new IllegalStateException("Logic error.");
     }
-    
+    /* (non-Javadoc)
+     * @see org.epics.ioc.ca.BaseCDField#supportNamePut(org.epics.ioc.pv.PVField, org.epics.ioc.pv.PVField)
+     */
     public boolean supportNamePut(PVField requested,PVField targetPVField) {
         PVLinkArray targetPVLinkArray = (PVLinkArray)requested;
         checkPVLinkArray(targetPVLinkArray);
@@ -99,8 +108,10 @@ public class BaseCDLinkArray extends BaseCDField implements CDLinkArray{
             }
         }
         throw new IllegalStateException("Logic error.");
-    }
-    
+    }    
+    /* (non-Javadoc)
+     * @see org.epics.ioc.ca.BaseCDField#configurationStructurePut(org.epics.ioc.pv.PVField, org.epics.ioc.pv.PVLink)
+     */
     public boolean configurationStructurePut(PVField requested,PVLink targetPVLink) {
         PVLinkArray targetPVLinkArray = (PVLinkArray)requested;
         checkPVLinkArray(targetPVLinkArray);

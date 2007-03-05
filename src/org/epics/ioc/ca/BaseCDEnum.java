@@ -8,6 +8,7 @@ package org.epics.ioc.ca;
 import org.epics.ioc.pv.*;
 
 /**
+ * Base class for a CDEnum (Channel Data Enum).
  * @author mrk
  *
  */
@@ -16,6 +17,12 @@ public class BaseCDEnum extends BaseCDField implements CDEnum {
     private int numIndexPuts;
     private int numChoicesPut;
     
+    /**
+     * Constructor.
+     * @param parent The parent cdField.
+     * @param cdRecord The cdRecord that contains this field.
+     * @param pvField The pvEnum that this CDField references.
+     */
     public BaseCDEnum(
         CDField parent,CDRecord cdRecord,PVField pvField)
     {
@@ -68,7 +75,7 @@ public class BaseCDEnum extends BaseCDField implements CDEnum {
     /* (non-Javadoc)
      * @see org.epics.ioc.ca.BaseCDField#dataPut(org.epics.ioc.pv.PVField)
      */
-    public void fieldPut(PVField targetPVField) {
+    public void dataPut(PVField targetPVField) {
         PVEnum targetPVEnum = (PVEnum)targetPVField;
         pvEnum.setIndex(targetPVEnum.getIndex());
         numIndexPuts++;

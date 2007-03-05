@@ -8,7 +8,7 @@ package org.epics.ioc.ca;
 import org.epics.ioc.pv.PVStructure;
 
 /**
- * ChannelDataBaseStructure - A CDRecord field that holds a PVStructure.
+ * CDStructure - A CDRecord field that holds a PVStructure.
  * @author mrk
  *
  */
@@ -24,7 +24,7 @@ public interface CDStructure extends CDField {
     void replacePVStructure();
     /**
      * Get the PVStructure.
-     * @return
+     * @return The PVStructure interface.
      */
     PVStructure getPVStructure();
 }

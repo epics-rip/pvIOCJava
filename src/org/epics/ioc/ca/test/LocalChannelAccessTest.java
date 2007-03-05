@@ -638,7 +638,7 @@ public class LocalChannelAccessTest extends TestCase {
             channelData.clearNumPuts();
         }
         private boolean nextGetField(Channel channel, ChannelField channelField, PVField pvField) {
-            channelData.fieldPut(pvField);
+            channelData.dataPut(pvField);
             return false;
         }
         

@@ -17,7 +17,6 @@ public class BasePVMenu extends BasePVEnum implements PVMenu
      * Constructor for BasePVMenu
      * @param parent The parent.
      * @param menu The introspection interface.
-     * @param choice The array of choices.
      */
     public BasePVMenu(PVField parent,Menu menu) {
         super(parent,menu);

@@ -8,7 +8,7 @@ package org.epics.ioc.ca;
 import org.epics.ioc.pv.PVLink;
 
 /**
- * ChannelDataBaseLink - A CDRecord field that holds a PVLink.
+ * CDLink - A CDRecord field that holds a PVLink.
  * @author mrk
  *
  */
@@ -20,7 +20,7 @@ public interface CDLink extends CDField{
     void configurationStructurePut(PVLink targetPVLink);
     /**
      * Get the number times configurationStructurePut has been called since the last call to <i>clearNumPuts</i>.
-     * @return
+     * @return Number of puts.
      */
     public int getNumConfigurationStructurePuts();
     /**

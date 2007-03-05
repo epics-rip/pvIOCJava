@@ -8,14 +8,14 @@ package org.epics.ioc.ca;
 import org.epics.ioc.pv.*;
 
 /**
- * ChannelDataBaseData - Data for a field of a CDRecord (ChannelDataBase Record)
+ * CDField - Data for a field of a CDRecord (ChannelData Record)
  * @author mrk
  *
  */
 public interface CDField {
     /**
-     * Get the parent CDStructure.
-     * @return The parent or null if this is associated witk an element of a ChannelFieldGroup.
+     * Get the parent CDField.
+     * @return The parent or null if this is associated with an element of a ChannelFieldGroup.
      */
     CDField getParent();
     /**
@@ -29,7 +29,8 @@ public interface CDField {
      */
     PVField getPVField();
     /**
-     * @param newPVField
+     * Replace the PVField.
+     * @param newPVField The new PVField.
      */
     void replacePVField(PVField newPVField);
     /**
@@ -42,16 +43,17 @@ public interface CDField {
      */
     void incrementNumPuts();
     /**
-     * Get the number of puts since the last <i>clearNumPuts</i>.
+     * Get the maximum number of puts since the last <i>clearNumPuts</i>.
      * This is the maximum number of puts to any particular element of the associated PVField,
-     * i.e. supportNamePut, enumIndexPut, enumChoicePut, etc.
+     * i.e. dataPut, supportNamePut, enumIndexPut, enumChoicePut, etc.
      * If PVField is a scalar or an array of scalars then this is either the number of calls to dataPut
-     * ot to supportNamePut, whichever is greater.
-     * @return
+     * or to supportNamePut, whichever is greater.
+     * @return The maximum number.
      */
     int getMaxNumPuts();
     /**
      * Set the maximum number of puts.
+     * This is called by derived classes.
      * @param numPuts The number of puts.
      */
     void setMaxNumPuts(int numPuts);
@@ -61,14 +63,14 @@ public interface CDField {
      */
     int getNumSupportNamePuts();
     /**
-     * Set number of puts to 0 and initial to false.
+     * Set all number of puts to 0.
      */
     void clearNumPuts();
     /**
      * The data has been modified.
      * @param targetPVField The pvField to which the channel is connected. 
      */
-    void fieldPut(PVField targetPVField);
+    void dataPut(PVField targetPVField);
     /**
      * The support name has been modified.
      * @param targetPVField The pvField to which the channel is connected.
@@ -78,15 +80,17 @@ public interface CDField {
      * A put to a subfield has occured. 
      * @param requested The target field that has targetPVField as a subfield.
      * @param targetPVField The data that has been modified..
-     * @return 
+     * @return (false,true) if the associated PVField is modified.
+     * The return value can be false of the requested field is an array of structures or an array of arrays.
      */
-    boolean fieldPut(PVField requested,PVField targetPVField);
+    boolean dataPut(PVField requested,PVField targetPVField);
     /**
      * A put to an enum subfield has occured. 
      * The enum index has been modified.
      * @param requested The target field that has targetPVEnum as a subfield.
      * @param targetPVEnum The enum interface.
-     * @return (false,true) if a put to requested (was not,was) issued. 
+     * @return (false,true) if the associated PVField is modified.
+     * The return value can be false of the requested field is an array of structures or an array of arrays.
      */
     boolean enumIndexPut(PVField requested,PVEnum targetPVEnum);
     /**
@@ -94,23 +98,24 @@ public interface CDField {
      * The enum choices has been modified.
      * @param requested The target field that has targetPVEnum as a subfield.
      * @param targetPVEnum The enum interface.
-     * @return (false,true) if a put to requested (was not,was) issued. 
+     * @return (false,true) if the associated PVField is modified.
+     * The return value can be false of the requested field is an array of structures or an array of arrays.
      */
     boolean enumChoicesPut(PVField requested,PVEnum targetPVEnum);
     /**
      * A put to the supportName of a subfield has occured. 
-     * The supportName has been modified.
      * @param requested The target field that has targetPVField as a subfield.
      * @param targetPVField The pvField in the structure.
-     * @return (false,true) if a put to requested (was not,was) issued. 
+     * @return (false,true) if the associated PVField is modified.
+     * The return value can be false of the requested field is an array of structures or an array of arrays.
      */
     boolean supportNamePut(PVField requested,PVField targetPVField);
     /**
      * A put to the configurationStructure of a pvLink subfield has occured. 
-     * The link configration structure has been modified.
      * @param requested The target field that has targetPVLink as a subfield.
      * @param targetPVLink The link interface.
-     * @return (false,true) if a put to requested (was not,was) issued. 
+     * @return (false,true) if the associated PVField is modified.
+     * The return value can be false of the requested field is an array of structures or an array of arrays.
      */
     boolean configurationStructurePut(PVField requested,PVLink targetPVLink);
     /**

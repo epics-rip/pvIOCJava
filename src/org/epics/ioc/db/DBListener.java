@@ -16,7 +16,7 @@ public interface DBListener {
      * A scalar or array modification has occured.
      * @param dbField The data.
      */
-    void fieldPut(DBField dbField);
+    void dataPut(DBField dbField);
     /**
      * The enum index has been modified.
      * @param dbEnum The enum interface.
@@ -62,7 +62,7 @@ public interface DBListener {
      * </ol>
      * @param dbField The data that has been modified.
      */
-    void fieldPut(DBField requested,DBField dbField);
+    void dataPut(DBField requested,DBField dbField);
     /**
      * A put to an enum subfield has occured.
      * The enum index has been modified.

@@ -17,7 +17,7 @@ import org.epics.ioc.util.RequestResult;
 public class NoopFactory {
     /**
      * Factory creation method.
-     * @param pvStructure The structure to support.
+     * @param dbStructure The structure to support.
      * @return The Support interface.
      */
     public static Support create(DBStructure dbStructure) {

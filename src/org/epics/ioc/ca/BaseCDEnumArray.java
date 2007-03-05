@@ -8,14 +8,21 @@ package org.epics.ioc.ca;
 import org.epics.ioc.pv.*;
 
 /**
+ * Base class for a CD (Channel Data) Array of Enums.
  * @author mrk
  *
  */
-public class BaseCDEnumArray extends BaseCDField implements CDEnumArray {
+public class BaseCDEnumArray extends BaseCDField implements CDNonScalarArray {
     private PVEnumArray pvEnumArray;
     private CDEnum[] elementCDEnums;
     private EnumArrayData enumArrayData = new EnumArrayData();
     
+    /**
+     * Constructor.
+     * @param parent The parent cdField.
+     * @param cdRecord The cdRecord that contains this field.
+     * @param pvEnumArray The pvEnumArray that this CDField references.
+     */
     public BaseCDEnumArray(
         CDField parent,CDRecord cdRecord,PVEnumArray pvEnumArray)
     {
@@ -26,15 +33,15 @@ public class BaseCDEnumArray extends BaseCDField implements CDEnumArray {
     /* (non-Javadoc)
      * @see org.epics.ioc.ca.BaseCDField#clearNumPuts()
      */
-    @Override
     public void clearNumPuts() {
         for(CDField cdField : elementCDEnums) cdField.clearNumPuts();
         super.clearNumPuts();
     }
     /* (non-Javadoc)
-     * @see org.epics.ioc.ca.CDEnumArray#dataPut(org.epics.ioc.pv.PVEnumArray)
+     * @see org.epics.ioc.ca.BaseCDField#dataPut(org.epics.ioc.pv.PVField)
      */
-    public void dataPut(PVEnumArray targetPVEnumArray) {
+    public void dataPut(PVField targetPVField) {
+        PVEnumArray targetPVEnumArray = (PVEnumArray)targetPVField;
         if(checkPVEnumArray(targetPVEnumArray)) {
             super.incrementNumPuts();
             return;
@@ -54,23 +61,23 @@ public class BaseCDEnumArray extends BaseCDField implements CDEnumArray {
         pvEnumArray.put(0, pvEnums.length, pvEnums, 0);
         super.incrementNumPuts();
     }
-
     /* (non-Javadoc)
-     * @see org.epics.ioc.ca.CDEnumArray#getElementCDBEnums()
+     * @see org.epics.ioc.ca.CDNonScalarArray#getElementCDFields()
      */
-    public CDEnum[] getElementCDEnums() {
+    public CDField[] getElementCDFields() {
         return elementCDEnums;
     }
-
     /* (non-Javadoc)
-     * @see org.epics.ioc.ca.CDEnumArray#replacePVArray()
+     * @see org.epics.ioc.ca.CDNonScalarArray#replacePVArray()
      */
-    public void replacePVEnumArray() {
+    public void replacePVArray() {
         pvEnumArray = (PVEnumArray)super.getPVField();
         createElementCDBEnums();
-    }
-    
-    public boolean fieldPut(PVField requested,PVField targetPVField) {
+    }   
+    /* (non-Javadoc)
+     * @see org.epics.ioc.ca.BaseCDField#dataPut(org.epics.ioc.pv.PVField, org.epics.ioc.pv.PVField)
+     */
+    public boolean dataPut(PVField requested,PVField targetPVField) {
         PVEnumArray targetPVEnumArray = (PVEnumArray)requested;
         checkPVEnumArray(targetPVEnumArray);
         int length = targetPVEnumArray.getLength();
@@ -80,13 +87,15 @@ public class BaseCDEnumArray extends BaseCDField implements CDEnumArray {
             PVEnum targetEnum = targetEnums[i];
             if(targetEnum==targetPVField) {
                 CDEnum cdEnum = elementCDEnums[i];
-                cdEnum.fieldPut(targetPVField);
+                cdEnum.dataPut(targetPVField);
                 return true;
             }
         }
         throw new IllegalStateException("Logic error.");
-    }
-    
+    }    
+    /* (non-Javadoc)
+     * @see org.epics.ioc.ca.BaseCDField#enumIndexPut(org.epics.ioc.pv.PVField, org.epics.ioc.pv.PVEnum)
+     */
     public boolean enumIndexPut(PVField requested,PVEnum targetPVEnum) {
         PVEnumArray targetPVEnumArray = (PVEnumArray)requested;
         checkPVEnumArray(targetPVEnumArray);
@@ -102,8 +111,10 @@ public class BaseCDEnumArray extends BaseCDField implements CDEnumArray {
             }
         }
         throw new IllegalStateException("Logic error.");
-    }
-    
+    }   
+    /* (non-Javadoc)
+     * @see org.epics.ioc.ca.BaseCDField#enumChoicesPut(org.epics.ioc.pv.PVField, org.epics.ioc.pv.PVEnum)
+     */
     public boolean enumChoicesPut(PVField requested,PVEnum targetPVEnum) {
         PVEnumArray targetPVEnumArray = (PVEnumArray)requested;
         checkPVEnumArray(targetPVEnumArray);
@@ -119,8 +130,10 @@ public class BaseCDEnumArray extends BaseCDField implements CDEnumArray {
             }
         }
         throw new IllegalStateException("Logic error.");
-    }
-    
+    }  
+    /* (non-Javadoc)
+     * @see org.epics.ioc.ca.BaseCDField#supportNamePut(org.epics.ioc.pv.PVField, org.epics.ioc.pv.PVField)
+     */
     public boolean supportNamePut(PVField requested,PVField targetPVField) {
         PVEnumArray targetPVEnumArray = (PVEnumArray)requested;
         checkPVEnumArray(targetPVEnumArray);
@@ -137,7 +150,7 @@ public class BaseCDEnumArray extends BaseCDField implements CDEnumArray {
         }
         throw new IllegalStateException("Logic error.");
     }
-
+    
     private void createElementCDBEnums() {
         int length = pvEnumArray.getLength();
         elementCDEnums = new CDEnum[length];

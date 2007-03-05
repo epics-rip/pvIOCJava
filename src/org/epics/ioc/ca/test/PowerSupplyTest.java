@@ -68,6 +68,9 @@ public class PowerSupplyTest extends TestCase {
         powerSupplyArrayPowerPut.put(1.0);
         powerSupplyArrayPowerGet.get();
         powerSupplyArrayCurrentGet.get();
+        Get powerSupplyArrayGet = new Get("examplePowerSupplyArray",false);
+        if(!powerSupplyArrayGet.connect("powerSupply")) return;
+        powerSupplyArrayGet.get();
         
         for(int i=1; i<8; i++) {
             delay(1);
@@ -520,7 +523,7 @@ public class PowerSupplyTest extends TestCase {
             channelData.clearNumPuts();
         }
         private boolean nextGetField(Channel channel, ChannelField channelField, PVField pvField) {
-            channelData.fieldPut(pvField);
+            channelData.dataPut(pvField);
             return false;
         }
         
@@ -535,8 +538,7 @@ public class PowerSupplyTest extends TestCase {
                 PVField pvField = cdField.getPVField();
                 ChannelField channelField = channelFieldList.get(i);
                 if(channelField==valueField) {
-                    PVDouble pvDouble = (PVDouble)pvField;
-                    System.out.printf("value %f numPuts %d", pvDouble.get(),cdField.getMaxNumPuts());
+                    System.out.printf("value %s numPuts %d", pvField.toString(),cdField.getMaxNumPuts());
                 } else if (channelField==severityField) {
                     PVEnum pvEnum = (PVEnum)pvField;
                     int index = pvEnum.getIndex();

@@ -34,7 +34,7 @@ public class PVTimeStamp {
     /**
      * Given a pvField create a PVTimeStamp if the field is actually
      * a timeStamp structure.
-     * @param dbField The field.
+     * @param pvField The field.
      * @return A PVTimeStamp or null if the field is not a timeStamp structure.
      */
     public static PVTimeStamp create(PVField pvField) {

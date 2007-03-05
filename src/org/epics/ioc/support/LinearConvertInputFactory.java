@@ -20,7 +20,7 @@ import org.epics.ioc.util.RequestResult;
 public class LinearConvertInputFactory {
     /**
      * Factory creation method.
-     * @param pvStructure The structure to support.
+     * @param dbField The field to support.
      * @return The Support interface.
      */
     public static Support create(DBField dbField) {

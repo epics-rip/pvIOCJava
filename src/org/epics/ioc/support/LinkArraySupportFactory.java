@@ -19,7 +19,7 @@ import org.epics.ioc.util.*;
 public class LinkArraySupportFactory {
     /**
      * Create support for an array of links.
-     * @param pvArray The array which must be an array of links.
+     * @param dbField The array which must be an array of links.
      * @return An interface to the support or null if the supportName was not "linkArray".
      */
     public static Support create(DBField dbField) {

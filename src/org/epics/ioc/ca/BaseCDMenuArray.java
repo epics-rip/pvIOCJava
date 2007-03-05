@@ -6,14 +6,21 @@
 package org.epics.ioc.ca;
 import org.epics.ioc.pv.*;
 /**
+ * Base class for a CD (Channel Data) Array of Menus.
  * @author mrk
  *
  */
-public class BaseCDMenuArray extends BaseCDField implements CDMenuArray{
+public class BaseCDMenuArray extends BaseCDField implements CDNonScalarArray{
     private PVMenuArray pvMenuArray;
     private CDMenu[] elementCDMenus;
     private MenuArrayData menuArrayData = new MenuArrayData();
     
+    /**
+     * Constructor.
+     * @param parent The parent cdField.
+     * @param cdRecord The cdRecord that contains this field.
+     * @param pvMenuArray The pvMenuArray that this CDField references.
+     */
     public BaseCDMenuArray(
         CDField parent,CDRecord cdRecord,PVMenuArray pvMenuArray)
     {
@@ -24,15 +31,15 @@ public class BaseCDMenuArray extends BaseCDField implements CDMenuArray{
     /* (non-Javadoc)
      * @see org.epics.ioc.ca.BaseCDField#clearNumPuts()
      */
-    @Override
     public void clearNumPuts() {
         for(CDField cdField : elementCDMenus) cdField.clearNumPuts();
         super.clearNumPuts();
     }
     /* (non-Javadoc)
-     * @see org.epics.ioc.ca.CDMenuArray#dataPut(org.epics.ioc.pv.PVMenuArray)
+     * @see org.epics.ioc.ca.BaseCDField#dataPut(org.epics.ioc.pv.PVField)
      */
-    public void dataPut(PVMenuArray targetPVMenuArray) {
+    public void dataPut(PVField targetPVField) {
+        PVMenuArray targetPVMenuArray = (PVMenuArray)targetPVField;
         if(checkPVMenuArray(targetPVMenuArray)) {
             super.incrementNumPuts();
             return;
@@ -69,25 +76,23 @@ public class BaseCDMenuArray extends BaseCDField implements CDMenuArray{
         pvMenuArray.put(0, pvMenus.length, pvMenus, 0);
         super.incrementNumPuts();
     }
-
     /* (non-Javadoc)
-     * @see org.epics.ioc.ca.CDMenuArray#getElementCDBMenus()
+     * @see org.epics.ioc.ca.CDNonScalarArray#getElementCDFields()
      */
-    public CDMenu[] getElementCDMenus() {
+    public CDMenu[] getElementCDFields() {
         return elementCDMenus;
     }
-
     /* (non-Javadoc)
-     * @see org.epics.ioc.ca.CDMenuArray#replacePVArray()
+     * @see org.epics.ioc.ca.CDNonScalarArray#replacePVArray()
      */
-    public void replacePVMenuArray() {
+    public void replacePVArray() {
         pvMenuArray = (PVMenuArray)super.getPVField();
         createElementCDBMenus();
     }
     /* (non-Javadoc)
      * @see org.epics.ioc.ca.BaseCDField#dataPut(org.epics.ioc.pv.PVField, org.epics.ioc.pv.PVField)
      */
-    public boolean fieldPut(PVField requested,PVField targetPVField) {
+    public boolean dataPut(PVField requested,PVField targetPVField) {
         PVMenuArray targetPVMenuArray = (PVMenuArray)requested;
         checkPVMenuArray(targetPVMenuArray);
         int length = targetPVMenuArray.getLength();
@@ -97,7 +102,7 @@ public class BaseCDMenuArray extends BaseCDField implements CDMenuArray{
             PVMenu targetMenu = targetMenus[i];
             if(targetMenu==targetPVField) {
                 CDMenu cdMenu = elementCDMenus[i];
-                cdMenu.fieldPut(targetPVField);
+                cdMenu.dataPut(targetPVField);
                 return true;
             }
         }

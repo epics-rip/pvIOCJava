@@ -7,6 +7,8 @@ package org.epics.ioc.ca;
 
 import org.epics.ioc.pv.*;
 /**
+ * ChannelData. This provides storage for a ChannelFieldGroup.
+ * The storage is presented as a CRRecord an a PVRecord.
  * @author mrk
  *
  */
@@ -36,15 +38,10 @@ public interface ChannelData {
      */
     void clearNumPuts();
     /**
-     * Is this data initialization?
-     * @param targetPVField The pvField at initialization.
-     */
-    void initField(PVField targetPVField);
-    /**
      * The pvField has been modified.
      * @param targetPVField The pvField.
      */
-    void fieldPut(PVField targetPVField);
+    void dataPut(PVField targetPVField);
     /**
      * The enum index has been modified.
      * @param targetPVEnum The enum interface.
@@ -80,7 +77,7 @@ public interface ChannelData {
      * @param requested The target field that has targetPVField as a subfield.
      * @param targetPVField The data that has been modified..
      */
-    void fieldPut(PVField requested,PVField targetPVField);
+    void dataPut(PVField requested,PVField targetPVField);
     /**
      * A put to an enum subfield of a structure has occured. 
      * The enum index has been modified.

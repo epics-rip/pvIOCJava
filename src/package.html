@@ -10,7 +10,7 @@
 <body>
 <h1 style="text-align: center">EPICS JavaIOC: Java Input/Output Controller<br
 />
-2007.02.02</h1>
+2007.03.05</h1>
 
 <p>This product is available via the <a href="#LicenseAgreement">open source
 license</a> described at the end of this document.</p>
@@ -151,8 +151,9 @@ XMLToDatabase, which is the example program discussed below.</p>
 
 <p>This package defines definitions for the data that javaIOC supports. This
 is a combination of data and reflection interfaces. Read the package overview
-for details. Read it, at least quickly, before continuing with this
-document.</p>
+for details. It has factories for creating a PV database. including both
+reflection and data instances. Read it, at least quickly, before continuing
+with this document.</p>
 
 <h3 id="org.epics.1">org.epics.ioc.dbd</h3>
 
@@ -162,6 +163,7 @@ DBD holds definitions of the following:</p>
   <dt>menu</dt>
   <dt>structure</dt>
   <dt>support</dt>
+  <dt>linkSupport</dt>
   <dt>recordType</dt>
 </dl>
 
@@ -170,10 +172,9 @@ creates a DBD. Examples of the xml files are presented below.</p>
 
 <h3 id="org.epics.2">org.epics.ioc.db</h3>
 
-<p>Package org.epics.ioc.pv provides a factory for creating the reflection
-interfaces but not for data. This package provides a factory for creating the
-data required by javaIOC. It also extends the data interfaces defined in
-org.epics.ioc.pv so that:</p>
+<p>This package provides a factory for creating the data required by javaIOC.
+It defines a set data interfaces that contain references to PV Data and
+provides methods so that:</p>
 <ul>
   <li>Support can be attached to records and fields.</li>
   <li>Record instances can be locked.</li>
@@ -819,41 +820,41 @@ The interfaces are a combination of reflection ( what is a field) and data
 contains.</p>
 
 <p>The data interfaces for accessing Type data are:</p>
-<pre>    interface PVData {
+<pre>    interface PVField {
          String getFullFieldName();
          Field getField(); // get the reflection interface
-         PVData getParent();
+         PVField getParent();
          PVRecord getPVRecord();
-         void replacePVData(PVData newPVData);
+         void replacePVField(PVField newPVField);
          String getSupportName();
          String setSupportName(String name);
          String toString();
          String toString(int indentLevel);
     }
-    interface PVBoolean extends PVData{
+    interface PVBoolean extends PVField{
         boolean get();
         void put(boolean value);
     }
     //   similar interfaces for other primitve types
-    interface PVString extends PVData{
+    interface PVString extends PVField{
         String get();
         void put(String value);
     }
-    interface PVEnum extends PVData{
+    interface PVEnum extends PVField{
         int getIndex();
         void setIndex(int index);
         String[] getChoices();
         boolean setChoices(String[] choice);
     }
-    interface PVStructure extends PVData {
-        PVData[] getFieldPVDatas();
+    interface PVStructure extends PVField {
+        PVField[] getFieldPVFields();
     }
     public interface PVMenu extends PVEnum {}
-    public interface PVLink extends PVData {
+    public interface PVLink extends PVField {
         PVStructure getConfigurationStructure();
         boolean setConfigurationStructure(PVStructure pvStructure);
     }
-    interface PVArray extends PVData{
+    interface PVArray extends PVField{
         int getLength();
         void setLength(int len);
         int getCapacity();
@@ -873,26 +874,37 @@ contains.</p>
         void message(String message, MessageType messageType);
     }</pre>
 
-<p>The following interfaces extend the PVData interfaces for DBType data:</p>
-<pre>    interface DBData extends PVData {
+<p>The following interfaces extend the PVField interfaces for DBType data:</p>
+<pre>    interface DBDField extends {
         DBRecord getDBRecord();
-        void addListener(DBListener listener);
-        void removeListener(DBListener listener);
-        void postPut();
+        DBField getParent();
+        PVField getPVField();
+        void replacePVField(PVField newPVField);
+        String getSupportName();
+        String setSupportName(String name);
         Support getSupport();
         void setSupport(Support support);
+        void postPut();
+        void addListener(DBListener listener);
+        void removeListener(DBListener listener);
+        List&lt;RecordListener&gt; getRecordListenerList();
     }
 
     interface DBRecord extends DBData, PVRecord {
+        DBField findDBField(PVField pvField);
+        ...
         void lock();
         void unlock();
         ...
-    }</pre>
+    }
+
+    ...
+</pre>
 
 <h2 style="text-align: center" id="Database2">Database Reflection</h2>
 
 <p>The previous section listed the interfaces for accessing data. The
-interfaces also provided methods (PVData.getField and DBData.get DBDField)
+interfaces also provided methods (PVField.getField and DBData.get DBDField)
 which provide access to the reflection interfaces described in this section.
 The reflection interfaces provide access to the type, attributes, and
 properties of each field of each record instance.</p>
@@ -958,30 +970,32 @@ instance. For example, to locate the aiAnalogExample record the call is:
 <pre>    DBRecord dbRecord = iocdb.findRecord("exampleAiLinear");</pre>
 
 <p>Starting with this the data in the value field can be read as follows:</p>
-<pre>    PVData[] pvData = dbRecord.getFieldPVdatas();
-    Structure structure = (Structure)dbRecord.getField();
+<pre>    PVRecord pvRecord = dbRecord.getPVRecord();
+    PVField[] pvField = pvRecord.getPVStructure().getFieldPVFields();
+    Structure structure = (Structure)pvRecord.getField();
     int index = structure.getFieldIndex("value");
-    assert(pvData[index].getField().getType==Type.dbDouble);
-    PVDouble valueData= (PVDouble)pvData[index];
+    assert(pvField[index].getField().getType==Type.dbDouble);
+    PVDouble valueData= (PVDouble)pvField[index];
     double value = valueData.get();</pre>
 
 <p>The data for exampleAiLinear.aiLinear.aiRaw.value can also be located and
 read via reflection as follows:</p>
-<pre>    PVData[] pvData = dbRecord.getFieldPVdatas();
-    Structure structure = (Structure)dbRecord.getField();
+<pre>    PVRecord pvRecord = dbRecord.getPVRecord();
+    PVField[] pvField = pvRecord.getPVStructure().getFieldPVFields();
+    Structure structure = (Structure)pvRecord.getField();
     int index = structure.getFieldIndex("aiLinear");
-    assert(pvData[index].getField().getType()==Type.pvStructure);
-    PVStructure pvStructure = (PVStructure)pvData[index];
+    assert(pvField[index].getField().getType()==Type.pvStructure);
+    PVStructure pvStructure = (PVStructure)pvField[index];
     Structure aiLinearStructure = (Structure)pvStructure.getField();
     index = aiLinearStructure.getFieldIndex("aiRaw");
-    pvData = pvStructure.getFieldPVdatas();
-    assert(pvData[index].getField().getType()==Type.pvStructure);
-    pvStructure = (PVStructure)pvData[index];
+    pvField = pvStructure.getFieldPVdatas();
+    assert(pvField[index].getField().getType()==Type.pvStructure);
+    pvStructure = (PVStructure)pvField[index];
     Structure aiRawStructure = (Structure)pvStructure.getField();
     index = aiRawStructure.getFieldIndex("value");
-    pvData = pvStructure.getFieldPVdatas();
-    assert(pvData[index].getField().getType==Type.pvInt);
-    PVInt valueData = (PVInt)pvData[index];
+    pvField = pvStructure.getFieldPVdatas();
+    assert(pvField[index].getField().getType==Type.pvInt);
+    PVInt valueData = (PVInt)pvField[index];
     int value = valueData.get();</pre>
 
 <p>The next section provides a much easier way to find the data interfaces
@@ -1007,8 +1021,8 @@ Where instanceName is a Java String. For example:
         AccessSetResult findField(String name);
         String getOtherRecord();
         String getOtherField();
-        void setPVField(PVData pvData);
-        PVData getField();
+        void setPVField(PVField pvField);
+        PVField getField();
     }
 
     public class PVAccessFactory {
@@ -1890,7 +1904,7 @@ without using the reflection interfaces.</p>
 
     // get the value field and make sure its type is double
     assert(pvAccess.findField("value")==AccessSetResult.thisRecord);
-    PVData valueData = pvAccess.getField();
+    PVField valueData = pvAccess.getField();
     Field field = valueData.getField();
     assert(field.getType()==Type.pvDouble);
     double value = ((PVDouble)valueData).get();
@@ -1898,18 +1912,18 @@ without using the reflection interfaces.</p>
     // now get the status for field value
     pvAccess.findField(valueData);
     assert(pvAccess.findField("status")==AccessSetResult.thisRecord);
-    PVData valueStatusData = pvAccess.getField();
+    PVField valueStatusData = pvAccess.getField();
     assert(field.getType()==Type.pvString);
     String status = ((PVString)valueStatusData).get();
     // now get rawData and rawData status
     pvAccess.findField(valueData);
     assert(pvAccess.findField("rawData")==AccessSetResult.thisRecord));
-    PVData rawValueData = pvAccess.getField();
+    PVField rawValueData = pvAccess.getField();
     Field field = rawValueData.getField();
     assert(field.getType()==Type.pvInt);
     int rawValue = ((PVInt)rawValueData).get();
     assert(pvAccess.findField("status")==AccessSetResult.thisRecord));
-    PVData rawValueStatusData = pvAccess.getField();
+    PVField rawValueStatusData = pvAccess.getField();
     field = rawValueStatusData.getField();
     assert(field.getType()==Type.pvString);
     String status = ((PVString)rawValueStatusData).get();</pre>
@@ -1929,9 +1943,9 @@ to access the power, current, and voltage.</p>
     PVAccess powerAccess;
     PVAccess currentAccess;
     PVAcess voltageAccess;
-    PVData power;
-    PVData current;
-    PVData voltage;
+    PVField power;
+    PVField current;
+    PVField voltage;
     AccessSetResult setResult;
     
     // get access to power

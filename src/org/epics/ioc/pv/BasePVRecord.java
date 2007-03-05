@@ -21,7 +21,7 @@ public class BasePVRecord extends BasePVStructure implements PVRecord {
     /**
      * Constructor.
      * @param recordName The name of the record.
-     * @param dbdRecordType The introspection interface for the record.
+     * @param structure The introspection interface for the record.
      */
     public BasePVRecord(String recordName,Structure structure)
     {

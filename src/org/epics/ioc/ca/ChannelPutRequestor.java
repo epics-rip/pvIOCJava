@@ -9,7 +9,7 @@ import org.epics.ioc.pv.PVField;
 import org.epics.ioc.util.*;
 
 /**
- * Listener for ChannelPut requests.
+ * Requestor for ChannelPut requests.
  * @author mrk
  *
  */

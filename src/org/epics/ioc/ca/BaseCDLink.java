@@ -8,6 +8,7 @@ package org.epics.ioc.ca;
 import org.epics.ioc.pv.*;
 
 /**
+ * Base class for a CDLink (Channel Data Link).
  * @author mrk
  *
  */
@@ -15,6 +16,12 @@ public class BaseCDLink extends BaseCDField implements CDLink {
     private PVLink pvLink;
     private int numConfigurationStructurePuts;
     
+    /**
+     * Constructor.
+     * @param parent The parent cdField.
+     * @param cdRecord The cdRecord that contains this field.
+     * @param pvField The pvField that this CDField references.
+     */
     public BaseCDLink(
         CDField parent,CDRecord cdRecord,PVField pvField)
     {
@@ -24,7 +31,6 @@ public class BaseCDLink extends BaseCDField implements CDLink {
     /* (non-Javadoc)
      * @see org.epics.ioc.ca.BaseCDField#clearNumPuts()
      */
-    @Override
     public void clearNumPuts() {
         numConfigurationStructurePuts = 0;
         super.clearNumPuts();
@@ -54,7 +60,7 @@ public class BaseCDLink extends BaseCDField implements CDLink {
     /* (non-Javadoc)
      * @see org.epics.ioc.ca.BaseCDField#dataPut(org.epics.ioc.pv.PVField)
      */
-    public void fieldPut(PVField targetPVField) {
+    public void dataPut(PVField targetPVField) {
         configurationStructurePut((PVLink)targetPVField);
         numConfigurationStructurePuts++;
         super.incrementNumPuts();

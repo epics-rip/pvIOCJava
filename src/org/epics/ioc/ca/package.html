@@ -10,7 +10,7 @@
 <body>
 <h1 style="text-align: center">EPICS JavaIOC: channel Access<br />
 package: org.epics.ioc.ca<br />
-2007.02.02</h1>
+2007.03.05</h1>
 CONTENTS
 
 <div class="toc">
@@ -47,11 +47,23 @@ CONTENTS
   </li>
   <li><a href="#Channel3">Channel Data</a>
     <ul>
-      <li><a href="#Definition3">Definitions</a></li>
-      <li><a href="#ChannelDat">ChannelDataPV</a></li>
+      <li><a href="#ChannelDat">ChannelData Definitions</a></li>
       <li><a href="#ChannelDat1">ChannelData</a></li>
       <li><a href="#ChannelDat2">ChannelDataQueue</a></li>
       <li><a href="#ChannelDat3">ChannelDataFactory</a></li>
+    </ul>
+  </li>
+  <li><a href="#Channel4">CD - Channel Data Fields</a>
+    <ul>
+      <li><a href="#Definition3">CD Definitions</a></li>
+      <li><a href="#CDRecord">CDRecord</a></li>
+      <li><a href="#CDField">CDField</a></li>
+      <li><a href="#CDEnum">CDEnum</a></li>
+      <li><a href="#CDMenu">CDMenu</a></li>
+      <li><a href="#CDLink">CDLink</a></li>
+      <li><a href="#CDStructur">CDStructure</a></li>
+      <li><a href="#CDNonScala">CDNonScalarArray</a></li>
+      <li><a href="#Base">Base CD Classes</a></li>
     </ul>
   </li>
   <li><a href="#Local">Local Channel Access</a></li>
@@ -107,9 +119,9 @@ channel and creating interfaces for accessing a channel. The interfaces for
 accessing a channel are defined in later sections.</p>
 
 <h3 id="Definition">Definitions</h3>
-<pre>    public interface Channel {
+<pre>    Channel {
         String getChannelName();
-        public void message(String message, MessageType messageType);
+        void message(String message, MessageType messageType);
         void destroy();
         boolean isConnected();
         ChannelFindFieldResult findField(String name);
@@ -120,13 +132,14 @@ accessing a channel are defined in later sections.</p>
         ChannelProcess createChannelProcess(
             ChannelProcessRequestor channelProcessRequestor);
         void destroy(ChannelProcess channelProcess);
-        ChannelGet createChannelGet(
+        ChannelGet createChannelGet(ChannelFieldGroup channelFieldGroup,
             ChannelGetRequestor channelGetRequestor,boolean process);
         void destroy(ChannelGet channelGet);
-        ChannelPut createChannelPut(
+        ChannelPut createChannelPut(ChannelFieldGroup channelFieldGroup,
             ChannelPutRequestor channelPutRequestor,boolean process);
         void destroy(ChannelPut channelPut);
         ChannelPutGet createChannelPutGet(
+            channelFieldGroup putFieldGroup,ChannelFieldGroup getFieldGroup,
             ChannelPutGetRequestor channelPutGetRequestor,boolean process);
         void destroy(ChannelPutGet channelPutGet);
         ChannelMonitor createChannelMonitor(boolean onlyWhileProcessing);
@@ -134,49 +147,49 @@ accessing a channel are defined in later sections.</p>
         boolean isLocal();
     }
 
-    public enum ChannelFindFieldResult {
+    enum ChannelFindFieldResult {
         otherChannel,
         thisChannel,
         notFound,
         failure
     }
 
-    public interface ChannelStateListener {
+    interface ChannelStateListener {
         void channelStateChange(Channel c,boolean isConnected);
         void disconnect(Channel c);
     }
 
-    public enum AccessRights {
+    enum AccessRights {
         none,
         read,
         readWrite
     }
 
-    public interface ChannelField {
+    interface ChannelField {
         Field getField();
         AccessRights getAccessRights();
     }
 
-    public interface ChannelFieldGroupListener {
+    interface ChannelFieldGroupListener {
         void accessRightsChange(Channel channel,ChannelField channelField);
     }
 
-    public interface ChannelFieldGroup {
+    interface ChannelFieldGroup {
         void addChannelField(ChannelField channelField);
         void removeChannelField(ChannelField channelField);
-        public List&lt;ChannelField&gt; getList();
+        List&lt;ChannelField&gt; getList();
     }
 
-    public class ChannelFactory {
-        public static Channel createChannel(
-            String name,ChannelStateListener listener);
-        public static void registerLocalChannelAccess(
+    class ChannelFactory {
+        static Channel createChannel(
+            String name,ChannelStateListener listener,boolean mustBeLocal);
+        static void registerLocalChannelAccess(
             ChannelAccess channelAccess);
-        public static void registerRemoteChannelAccess(
+        static void registerRemoteChannelAccess(
             ChannelAccess channelAccess);
     }
 
-    public interface ChannelAccess {
+    interface ChannelAccess {
         Channel createChannel(String name,ChannelStateListener listener);
     }</pre>
 
@@ -380,44 +393,43 @@ PutGet</h2>
 <hr />
 
 <h3 id="Definition1">Definitions</h3>
-<pre>    public interface ChannelProcess {
+<pre>    interface ChannelProcess {
         boolean process();
     }
 
-    public interface ChannelProcessRequestor extends Requestor {
+    interface ChannelProcessRequestor extends Requestor {
             void processDone(RequestResult requestResult);
     }
 
-    public interface ChannelGet {
-        boolean get(ChannelFieldGroup fieldGroup);
+    interface ChannelGet {
+        boolean get();
         void getDelayed(PVField pvField);
     }
 
-    public interface ChannelGetRequestor extends Requestor {
+    interface ChannelGetRequestor extends Requestor {
         boolean nextGetData(ChannelField field,PVField pvField);
         boolean nextDelayedGetData(PVField pvField);
         void getDone(RequestResult requestResult);
     }
 
-    public interface ChannelPut {
-        boolean put(ChannelFieldGroup fieldGroup);
+    interface ChannelPut {
+        boolean put();
         void putDelayed(PVField pvField);
     }
 
-    public interface ChannelPutRequestor extends Requestor {
+    interface ChannelPutRequestor extends Requestor {
         boolean nextPutData(ChannelField field,PVField pvField);
         boolean nextDelayedPutData(PVField pvField);
         void putDone(RequestResult requestResult);
     }
 
-    public interface ChannelPutGet {
-        boolean putGet(
-            ChannelFieldGroup putFieldGroup,ChannelFieldGroup getFieldGroup);
+    interface ChannelPutGet {
+        boolean putGet();
         void putDelayed(PVField pvField);
         void getDelayed(PVField pvField);
     }
 
-    public interface ChannelPutGetRequestor extends
+    interface ChannelPutGetRequestor extends
         ChannelPutRequestor,ChannelGetRequestor {}</pre>
 
 <h3 id="ChannelPro">ChannelProcess</h3>
@@ -432,7 +444,7 @@ PutGet</h2>
       connected.</dd>
 </dl>
 
-<p>ChannelProcessRequestor has the methods:</p>
+<p>ChannelProcessRequestor has the method:</p>
 <dl>
   <dt style="font-family: courier;">getRequestorName</dt>
     <dd>Determined by the requestor.</dd>
@@ -580,7 +592,7 @@ client request to:</p>
 <p>NOTE: ChannelData is described in the next section.</p>
 
 <h3 id="Definition2">Definitions</h3>
-<pre>    public interface ChannelMonitor {
+<pre>    interface ChannelMonitor {
         void lookForChange(ChannelField channelField,boolean causeMonitor);
         void lookForAbsoluteChange(ChannelField channelField,double value);
         void lookForPercentageChange(ChannelField channelField,double value);
@@ -591,12 +603,12 @@ client request to:</p>
         void stop();
     }
     
-    public interface ChannelMonitorRequestor extends Requestor{
+    interface ChannelMonitorRequestor extends Requestor{
         void monitorData(ChannelData channelData);
         void dataOverrun(int number);
     }
     
-    public interface ChannelMonitorNotifyRequestor extends Requestor {
+    interface ChannelMonitorNotifyRequestor extends Requestor {
         void monitorEvent();
     }</pre>
 
@@ -656,89 +668,66 @@ client request to:</p>
     channelData over the network.</li>
 </ol>
 
-<h3 id="Definition3">Definitions</h3>
-<pre>    public interface ChannelDataPV {
-        ChannelData getChannelData();
-        ChannelField getChannelField();
-        PVField getPVField();
-        boolean isInitial();
-        boolean enumIndexChange();
-        boolean enumChoicesChange();
-        boolean supportNameChange();
-        boolean configurationStructureChange();
-    }
+<p>A ChannelData is associated a channel and channelFieldGroup. When a
+channelData is created via a call to ChannelDataFactory.createData it
+automatically creates a CDRecord and associated subfields, which are
+cdescribed in the next section.</p>
 
-    public interface ChannelData {
+<h3 id="ChannelDat">ChannelData Definitions</h3>
+<pre>    interface ChannelData {
+        Channel getChannel();
         ChannelFieldGroup getChannelFieldGroup();
-        void clear();
-        void initData(ChannelField channelField,PVField pvField);
-        void dataPut(PVField pvField);
-        void enumIndexPut(PVEnum pvEnum);
-        void enumChoicesPut(PVEnum pvEnum);
-        void supportNamePut(PVField pvField);
-        void configurationStructurePut(PVLink pvLink);
-        void beginPut(PVStructure pvStructure);
-        void endPut(PVStructure pvStructure);
-        void dataPut(PVStructure pvStructure,PVField pvField);
-        void enumIndexPut(PVStructure pvStructure,PVEnum pvEnum);
-        void enumChoicesPut(PVStructure pvStructure,PVEnum pvEnum);
-        void supportNamePut(PVStructure pvStructure,PVField pvField);
-        void configurationStructurePut(PVStructure pvStructure,PVLink pvLink);
-        List&lt;ChannelDataPV&gt; getChannelDataPVList();
-        ChannelField[] getChannelFields();
-        PVField[] getPVFields();
+        CDRecord getCDRecord();
+        int getMaxPutsToField();
+        void clearNumPuts();
+        void dataPut(PVField targetPVField);
+        void enumIndexPut(PVEnum targetPVEnum);
+        void enumChoicesPut(PVEnum targetPVEnum);
+        void supportNamePut(PVField targetPVField);
+        void configurationStructurePut(PVLink targetPVLink);
+        void beginPut(PVStructure targetPVStructure);
+        void endPut(PVStructure targetPVStructure);
+        void dataPut(PVField requested,PVField targetPVField);
+        void enumIndexPut(PVField requested,PVEnum targetPVEnum);
+        void enumChoicesPut(PVField requested,PVEnum targetPVEnum);
+        void supportNamePut(PVField requested,PVField targetPVField);
+        void configurationStructurePut(PVField requested,PVLink targetPVLink);
     }
 
-    public interface ChannelDataQueue {
+    interface ChannelDataQueue {
         int getNumberFree();
         int capacity();
         ChannelData getFree(boolean forceFree);
+        void setInUse(ChannelData channelData);
         ChannelData getNext();
         int getNumberMissed();
         void releaseNext(ChannelData channelData);
     }
 
-    public class ChannelDataFactory {
-         public static ChannelData createData(
+    class ChannelDataFactory {
+         static ChannelData createData(
              Channel channel,ChannelFieldGroup channelFieldGroup);
-         public static ChannelDataQueue createQueue(
+         static ChannelDataQueue createQueue(
              int queueSize,Channel channel,ChannelFieldGroup channelFieldGroup);
-    }</pre>
+    }
 
-<h3 id="ChannelDat">ChannelDataPV</h3>
-
-<p>ChannelDataPV has the following methods:</p>
-<dl>
-  <dt style="font-family: courier;">getChannelData</dt>
-    <dd>Get the ChannelData for this monitor.</dd>
-  <dt style="font-family: courier;">getChannelField</dt>
-    <dd>Get the ChannelField for this monitor.</dd>
-  <dt style="font-family: courier;">getPVField</dt>
-    <dd>Get the PVField.</dd>
-  <dt style="font-family: courier;">isInitial</dt>
-    <dd>This is true when a connection is first made. It allows the client to
-      get the initial data values.</dd>
-  <dt style="font-family: courier;">enumIndexChange</dt>
-    <dd>The PVField is an enum or menu and a put was made to the index.</dd>
-  <dt style="font-family: courier;">enumChoicesChange</dt>
-    <dd>The PVField is an enum put was made to the choices.</dd>
-  <dt style="font-family: courier;">supportNameChange</dt>
-    <dd>The supportName was changed.</dd>
-  <dt style="font-family: courier;">configurationStructureChange</dt>
-    <dd>PVField is a link and the configuration structure was changed.</dd>
-</dl>
+    class BaseChannelData { ... }
+    class BaseChannelDataQueue { ... }</pre>
 
 <h3 id="ChannelDat1">ChannelData</h3>
 
 <p>ChannelData has the following methods:</p>
 <dl>
+  <dt style="font-family: courier;">getChannel</dt>
+    <dd>Get the channel to which this channelFieldGroup belongs.</dd>
   <dt style="font-family: courier;">getChannelFieldGroup</dt>
     <dd>Get the ChannelFieldGroup for this ChannelData.</dd>
-  <dt style="font-family: courier;">clear</dt>
+  <dt style="font-family: courier;">getCDRecord</dt>
+    <dd>Get the CDRecord that holds the data.</dd>
+  <dt style="font-family: courier;">getMaxPutsToField</dt>
+    <dd>Get the maxNumPuts to any field.</dd>
+  <dt style="font-family: courier;">clearNumPuts</dt>
     <dd>Clear the internal list of items that have been added.</dd>
-  <dt style="font-family: courier;">initData</dt>
-    <dd>When a connection is made this is called for each ChannelField the
-      ChannelData contains.</dd>
   <dt style="font-family: courier;">dataPut</dt>
     <dd>The PVField has been modified. Two versions are provided. One is if a
       ChannelField is connected to the PVField itself and the other if the
@@ -754,17 +743,12 @@ client request to:</p>
     <dd>The PVField is a link and the configuration structure has been
       modified.</dd>
   <dt style="font-family: courier;">beginPut</dt>
-    <dd>A set of puts to the fields of a structure is starting.
-    </dd>
+    <dd>A set of puts to the fields of a structure is starting.</dd>
   <dt style="font-family: courier;">endPut</dt>
     <dd>The set of puts to a structure is done.</dd>
   <dt style="font-family: courier;">getChannelDataPVList</dt>
     <dd>Get the list of all ChannelDataPVs that have been added since the
       last clear request.</dd>
-  <dt style="font-family: courier;">getChannelFields</dt>
-    <dd>Get the array of ChannelDataFields that ChannelData contains.</dd>
-  <dt style="font-family: courier;">getPVFields</dt>
-    <dd>Get the array of getPVFields that ChannelData contains.</dd>
 </dl>
 
 <p>A ChannelData is allocated as follows:</p>
@@ -775,7 +759,7 @@ client request to:</p>
 storage for all pvTypes. For Array types, the initial size and capacity is 0.
 The arrays will grow as data is placed in them but will not be released.</p>
 
-<p>A new set of data is colllected as follows:</p>
+<p>A new set of data is collected as follows:</p>
 <ul>
   <li>The requestor calls channelData.clear</li>
   <li>The data source, which is NOT allowed to block a record, does the
@@ -806,6 +790,10 @@ The arrays will grow as data is placed in them but will not be released.</p>
       elements numberMissed is incremented. If forceFree is true the oldest
       used element is reused. If no free element is available then null is
       returned.</dd>
+  <dt style="font-family: courier;">setInUse</dt>
+    <dd>Sets the ChannelData in use. This must be called for each channelData
+      returned by getFree. The caller can make changes to the ChannelData
+      before it is set in use.</dd>
   <dt style="font-family: courier;">getNext</dt>
     <dd>Get the next channelData element that has new data in it. Return null
       if there are no more elements.</dd>
@@ -836,18 +824,275 @@ monitoring a fieldGroup of an IOC database record.</p>
 </dl>
 <hr />
 
+<h2 style="text-align: center" id="Channel4">CD - Channel Data Fields</h2>
+<hr />
+
+<p>Each channelData provides a set of interfaces for accessing the data
+values. The data is stored in PVField objects. The complete set of PVFields
+form a PVRecord, Each CD interface provides access to it's corresponding PV
+interface. The CD interfaces provide additional methods that allow the client
+to determine how often each PVField was written.</p>
+
+<h3 id="Definition3">CD Definitions</h3>
+<pre>    interface CDRecord {
+        PVRecord getPVRecord();
+        CDStructure getCDStructure();
+        FieldCreate getFieldCreate();
+        PVDataCreate getPVDataCreate();
+        Field createField(Field oldField);
+    }
+
+    interface CDField {
+        CDField getParent();
+        CDRecord getCDRecord();
+        PVField getPVField();
+        void replacePVField(PVField newPVField);
+        int getNumPuts();
+        void incrementNumPuts();
+        int getMaxNumPuts();
+        void setMaxNumPuts(int numPuts);
+        int getNumSupportNamePuts();
+        void clearNumPuts();
+        void dataPut(PVField targetPVField);
+        void supportNamePut(PVField targetPVField);
+        boolean dataPut(PVField requested,PVField targetPVField);
+        boolean enumIndexPut(PVField requested,PVEnum targetPVEnum);
+        boolean enumChoicesPut(PVField requested,PVEnum targetPVEnum);
+        boolean supportNamePut(PVField requested,PVField targetPVField);
+        boolean configurationStructurePut(PVField requested,PVLink targetPVLink);
+        String toString();
+        String toString(int indentLevel);
+    }
+    
+    interface CDEnum extends CDField{
+        void enumIndexPut(PVEnum targetPVEnum);
+        void enumChoicesPut(PVEnum targetPVEnum);
+        int getNumIndexPuts();
+        int getNumChoicesPut();
+        PVEnum getPVEnum();
+    }
+    
+    interface CDMenu extends CDEnum {
+        PVMenu getPVMenu();
+    }
+    
+    interface CDLink extends CDField{
+        void configurationStructurePut(PVLink targetPVLink);
+        int getNumConfigurationStructurePuts();
+        PVLink getPVLink();
+    }
+    
+    interface CDStructure extends CDField {
+        CDField[] getFieldCDFields();
+        void replacePVStructure();
+        PVStructure getPVStructure();
+    }
+    
+    interface CDEnumArray extends CDField {
+        CDEnum[] getElementCDEnums();
+        void replacePVEnumArray();
+        void dataPut(PVEnumArray targetPVEnumArray);
+        boolean dataPut(PVField requested,PVField targetPVField);
+        boolean enumIndexPut(PVField requested,PVEnum targetPVEnum);
+        boolean enumChoicesPut(PVField requested,PVEnum targetPVEnum);
+        boolean supportNamePut(PVField requested,PVField targetPVField);
+    }
+    
+    interface CDMenuArray extends CDField {
+        CDMenu[] getElementCDMenus();
+        void replacePVMenuArray();
+        void dataPut(PVMenuArray targetPVMenuArray);
+        boolean dataPut(PVField requested,PVField targetPVField);
+        boolean enumIndexPut(PVField requested,PVEnum targetPVEnum);
+        boolean supportNamePut(PVField requested,PVField targetPVField);
+    }
+
+    interface CDNonScalarArray extends CDField {
+        CDField[] getElementCDFields();
+        void replacePVArray();
+    }
+
+    class BaseCDRecord { ... }
+    class BaseCDField { ... }
+    class BaseCDEnum { ... }
+    class BaseCDMenu { ... }
+    class BaseCDLink { ... }
+    class BaseCDStructure { ... }
+    class BaseCDEnumArray { ... }
+    class BaseCDMenuArray { ... }
+    class BaseCDLinkArray { ... }
+    class BaseCDStructureArray { ... }
+    class BaseCDArrayArray { ... }</pre>
+
+<h3 id="CDRecord">CDRecord</h3>
+
+<p>CDRecord is for the channel itself, i.e. for the actual record instance to
+which the channel is connected. It has the methods:</p>
+<dl>
+  <dt style="font-family: courier;">getPVRecord</dt>
+    <dd>Get the PVRecord interface. This PVRecord will have a recordName
+      which is the channelName, which is he name of the record to which the
+      channel is connected.</dd>
+  <dt style="font-family: courier;">getCDStructure</dt>
+    <dd>Get the CDStructure for the CDRecord itself. The CDStructure will
+      have a subfield for each member of the channelFieldGroup that the
+      channelData describes. Each subfield describes the data for it's
+      ChannelField.</dd>
+  <dt style="font-family: courier;">getFieldCreate</dt>
+    <dd>This is used by the code that creates CD interfaces. It returns a
+      factory to create Field objects. The code creates Field definition that
+      are just like the Field definition in the target field but always has
+      no properties.</dd>
+  <dt style="font-family: courier;">getPVDataCreate</dt>
+    <dd>This is used by the code that creates CD interfaces. It returns a
+      factory to create PVDat objects.</dd>
+  <dt style="font-family: courier;">createField</dt>
+    <dd>This creates a Field that are just like oldField except that it has
+      no properties.</dd>
+</dl>
+
+<h3 id="CDField">CDField</h3>
+
+<p>Each field in the PVRecord associated with CDRecord has an associated
+CDField or an extension. CDField has the methods:</p>
+<dl>
+  <dt style="font-family: courier;">getParent</dt>
+    <dd>Get the parent of this field. If CDField is the CDStructure for the
+      fieldGroup than the parent is null.</dd>
+  <dt style="font-family: courier;">getCDRecord</dt>
+    <dd>Get the CDRecord to which this CDField belongs.</dd>
+  <dt style="font-family: courier;">getPVField</dt>
+    <dd>Get the PVField associated with this CDField.</dd>
+  <dt style="font-family: courier;">replacePVField</dt>
+    <dd>Replace the PVField associated with this CDField.</dd>
+  <dt style="font-family: courier;">getNumPuts</dt>
+    <dd>Get the number of dataPuts to this field.</dd>
+  <dt style="font-family: courier;">incrementNumPuts</dt>
+    <dd>Increment the number of dataPuts to this field. This is called by
+      extensions to CDField.</dd>
+  <dt style="font-family: courier;">getMaxNumPuts</dt>
+    <dd>Get the maximum number of puts since the last clearNumPuts. This is
+      the maximum number of puts to any particular element of the associated
+      PVField, i.e. dataPut, supportNamePut, enumIndexPut, enumChoicePut,
+      etc. If PVField is a scalar or an array of scalars then this is either
+      the number of calls to dataPut or to supportNamePut, whichever is
+      greater.</dd>
+  <dt style="font-family: courier;">setMaxNumPuts</dt>
+    <dd>Set the maximum number of puts. This is called by derived
+    classes.</dd>
+  <dt style="font-family: courier;">clearNumPuts</dt>
+    <dd>Set all number of puts to 0.</dd>
+  <dt style="font-family: courier;">dataPut(PVField targetPVField)</dt>
+    <dd>The target data has been modified.</dd>
+  <dt style="font-family: courier;">supportNamePut(PVField targetPVField)</dt>
+    <dd>The support name has been modified.</dd>
+  <dt style="font-family: courier;">dataPut(PVField requested,PVField
+  targetPVField)</dt>
+    <dd>The data has been modified.</dd>
+  <dt style="font-family: courier;">enumIndexPut(PVField requested,PVEnum
+  targetPVEnum)</dt>
+    <dd>A put to an enum subfield has occured. The enum index has been
+      modified.</dd>
+  <dt style="font-family: courier;">enumChoicesPut(PVField requested,PVEnum
+  targetPVEnum)</dt>
+    <dd>A put to an enum subfield has occured. The enum choices has been
+      modified.</dd>
+  <dt style="font-family: courier;">supportNamePut(PVField requested,PVField
+  targetPVField)</dt>
+    <dd>A put to the supportName of a subfield has occured.</dd>
+  <dt style="font-family: courier;">configurationStructurePut(PVField
+  requested,PVLink targetPVLink)</dt>
+    <dd>A put to the configurationStructure of a pvLink subfield has
+    occured.</dd>
+</dl>
+
+<h3 id="CDEnum">CDEnum</h3>
+
+<p>CDEnum is associated with a PVEnum. It has the methods:</p>
+<dl>
+  <dt style="font-family: courier;">enumIndexPut</dt>
+    <dd>The index has been modified.</dd>
+  <dt style="font-family: courier;">enumChoicesPut</dt>
+    <dd>The choices has been modified.</dd>
+  <dt style="font-family: courier;">getNumIndexPuts</dt>
+    <dd>Get he number of index puts since the last clearNumPuts</dd>
+  <dt style="font-family: courier;">getNumChoicesPut</dt>
+    <dd>Get the number of choices puts since the last clearNumPuts</dd>
+  <dt style="font-family: courier;">getPVEnum</dt>
+    <dd>Get the PVEnum.</dd>
+</dl>
+
+<h3 id="CDMenu">CDMenu</h3>
+
+<p>CDMenu is associated with a PVMenu. It has the method:</p>
+<dl>
+  <dt style="font-family: courier;">getPVMenu</dt>
+    <dd>Get the PVMenu.</dd>
+</dl>
+
+<h3 id="CDLink">CDLink</h3>
+
+<p>CDLink is associated with a PVLink. It has the methods:</p>
+<dl>
+  <dt style="font-family: courier;">configurationStructurePut</dt>
+    <dd>The link configration structure has been modified.</dd>
+  <dt style="font-family: courier;">getNumConfigurationStructurePuts</dt>
+    <dd>Get the number times configurationStructurePut has been called since
+      the last call to clearNumPuts.</dd>
+  <dt style="font-family: courier;">getPVLink</dt>
+    <dd>Get the PVLink.</dd>
+</dl>
+
+<h3 id="CDStructur">CDStructure</h3>
+
+<p>CDStructure is associated with a PVStructure. It has the methods:</p>
+<dl>
+  <dt style="font-family: courier;">getFieldCDFields</dt>
+    <dd>Get the CDField array for the fields of the structure.</dd>
+  <dt style="font-family: courier;">replacePVStructure</dt>
+    <dd>Replace the PVStructure.</dd>
+  <dt style="font-family: courier;">getPVStructure</dt>
+    <dd>Get the PVStructure.</dd>
+</dl>
+
+<h3 id="CDNonScala">CDNonScalarArray</h3>
+
+<p>CDNonScalarArray is associated with a PVArray with non-scalar elements,
+i.e. PVEnumArray, PVMenuArray, PVLinkArray, PVArrayArray, or
+PVStructureArray.</p>
+<dl>
+  <dt style="font-family: courier;">getElementCDFields</dt>
+    <dd>Get the CDField array.</dd>
+  <dt style="font-family: courier;">replacePVArray</dt>
+    <dd>Replace the current PVArray.</dd>
+</dl>
+
+<h3 id="Base">Base CD Classes</h3>
+
+<p>The BaseCD classes, i.e. <span
+style="font-family: courier;">BaseCDRecord</span> ... <span
+style="font-family: courier;">BaseCDArrayArray</span>, provide
+implementations of the CD interraces. These provide complete imnplementations
+and should rarely need to be extended. Not that a separate implementation is
+provided for each of the CDNonScalarArray types.</p>
+<hr />
+
 <h2 style="text-align: center;" id="Local">Local Channel Access</h2>
 <hr />
 
 <p>An implementation of a channel access client for accessing records in the
-IOC database is provided. This is created automatically by
-ChannelAccessLocalFactory . The factory creates a single instance of an
-implementation of a channel access client for accessing local records. This
-is used by link support. ChannelAccessLocalFactory has only one public
-method.</p>
+IOC database is provided. This is created automatically by <span
+style="font-family: courier;">ChannelAccessLocalFactory</span> . The factory
+creates a single instance of an implementation of a channel access client for
+accessing local records. This is used by link support. <span
+style="font-family: courier;">ChannelAccessLocalFactory</span> has only one
+public method.</p>
 <pre>    public class ChannelAccessLocalFactory  {
-        static public void setIOCDB(IOCDB iocdb);
+        static public void register();
     }</pre>
+
+<p>This method is called by ChannelFactory when it is called before a local
+Channel Access is registered.</p>
 <hr />
 
 <h2 style="text-align: center" id="Example">Example For ChannelData</h2>
@@ -933,30 +1178,33 @@ longer locked.</p>
 
         }
 
-        ChannelFieldGroup init() {
+        private ChannelFieldGroup init() {
             channelFieldGroup = channel.createFieldGroup(this);
             ChannelFindFieldResult result;
             result = channel.findField(fieldName);
             if(result!=ChannelFindFieldResult.thisChannel) {
-                System.out.printf("PutGet:set returned %s%n", result.toString());
+                System.out.printf("findField returned %s%n", result.toString());
                 return null;
             }
             valueField = channel.getChannelField();
             channelFieldGroup.addChannelField(valueField);
-            channel.findField(valueField);
-            result = channel.findField("status");
+            String newFieldName = fieldName + ".status";
+            channel.findField(null);
+            result = channel.findField(newFieldName);
             if(result==ChannelFindFieldResult.thisChannel) {
                 statusField = channel.getChannelField();
                 channelFieldGroup.addChannelField(statusField);
             }
-            channel.findField(valueField);
-            result = channel.findField("severity");
+            newFieldName = fieldName + ".severity";
+            channel.findField(null);
+            result = channel.findField(newFieldName);
             if(result==ChannelFindFieldResult.thisChannel) {
                 severityField = channel.getChannelField();
                 channelFieldGroup.addChannelField(severityField);
             }
-            channel.findField(valueField);
-            result = channel.findField("timeStamp");
+            newFieldName = fieldName + ".timeStamp";
+            channel.findField(null);
+            result = channel.findField(newFieldName);
             if(result==ChannelFindFieldResult.thisChannel) {
                 timeStampField = channel.getChannelField();
                 channelFieldGroup.addChannelField(timeStampField);
@@ -964,45 +1212,62 @@ longer locked.</p>
             return channelFieldGroup;
         }
 
-        String printResults(ChannelData channelData) {
+
+       private String printResults(ChannelData channelData) {
             StringBuilder builder = new StringBuilder();
-            List&lt;ChannelDataPV&gt; channelDataPVList = channelData.getChannelDataPVList();
-            Iterator&lt;ChannelDataPV&gt; iter = channelDataPVList.iterator();
-            while(iter.hasNext()) {
-                ChannelDataPV channelDataPV = iter.next();
-                builder.append(String.format("%n    %s",channelDataPV.toString()));
-                PVField pvField = channelDataPV.getPVField();
-                ChannelField field = channelDataPV.getChannelField();
-                if(channelDataPV.isInitial()) {
-                    builder.append(String.format("%n    initialValue %s%n",
-                       pvField.toString(2)));
-                } else if(field==valueField) {
-                    builder.append(String.format("value %s", pvField.toString(2)));
-                } else if (field==severityField) {
+            ChannelFieldGroup channelFieldGroup = channelData.getChannelFieldGroup();
+            List&lt;ChannelField&gt; channelFieldList = channelFieldGroup.getList();
+            CDStructure cdStructure = channelData.getCDRecord().getCDStructure();
+            CDField[] cdbDatas = cdStructure.getFieldCDFields();
+            int maxNumPuts = channelData.getMaxPutsToField();
+            if(maxNumPuts!=1) {
+                builder.append(String.format(
+                    " maxNumPuts %d ",maxNumPuts));
+            }
+            for(int i=0;i&lt;cdbDatas.length; i++) {
+                CDField cdField = cdbDatas[i];
+                maxNumPuts = cdField.getMaxNumPuts();
+                if(maxNumPuts&lt;=0) continue;
+                if(maxNumPuts!=1) {
+                    builder.append(String.format(
+                        " maxNumPuts %d ",maxNumPuts));
+                }
+                PVField pvField = cdField.getPVField();
+                ChannelField channelField = channelFieldList.get(i);
+                if(channelField==valueField) {
+                    builder.append(String.format(
+                        "value %s ",
+                        pvField.toString(2)));
+                } else if (channelField==severityField) {
                     PVEnum pvEnum = (PVEnum)pvField;
                     int index = pvEnum.getIndex();
                     builder.append(String.format(
-                        " severity %s",AlarmSeverity.getSeverity(index).toString()));
-                } else if(field==statusField) {
+                        " severity %s",
+                        AlarmSeverity.getSeverity(index).toString()));
+                } else if(channelField==statusField) {
                     PVString pvString = (PVString)pvField;
                     String value = pvString.get();
-                    builder.append(" status " + value);
-                } else if(field==timeStampField) {
-                    // wait for nanoSecond to change.
-                    if(pvField.getField().getFieldName().equals("nanoSeconds")) {
-                        PVTimeStamp pvTimeStamp = PVTimeStamp.create(pvField.getParent());
-                        TimeStamp timeStamp = new TimeStamp();
-                        pvTimeStamp.get(timeStamp);
-                        long seconds = timeStamp.secondsPastEpoch;
-                        int nano = timeStamp.nanoSeconds;
-                        long now = nano/1000000 + seconds*1000;
-                        Date date = new Date(now);
-                        builder.append(String.format(" time %s",date.toLocaleString()));
-                    }
+                    builder.append(String.format(" status %s",
+                        value));
+                } else if(channelField==timeStampField) {
+                    PVTimeStamp pvTimeStamp = PVTimeStamp.create(pvField);
+                    TimeStamp timeStamp = new TimeStamp();
+                    pvTimeStamp.get(timeStamp);
+                    long seconds = timeStamp.secondsPastEpoch;
+                    int nano = timeStamp.nanoSeconds;
+                    long now = nano/1000000 + seconds*1000;
+                    Date date = new Date(now);
+                    builder.append(String.format(" time %s",
+                        date.toLocaleString()));
+                }
+                if(cdField.getNumSupportNamePuts()&gt;0) {
+                    builder.append(String.format("supportName %s numSupportNamePuts %d%n",
+                        pvField.getSupportName(),cdField.getNumSupportNamePuts()));
                 }
             }
             return builder.toString();
-        }</pre>
+        }
+    }</pre>
 <hr />
 
 <h2 style="text-align: center" id="Process">Process Example</h2>

@@ -8,6 +8,7 @@ package org.epics.ioc.ca;
 import org.epics.ioc.pv.*;
 
 /**
+ * Base class for a CDStructure (Channel Data Structure).
  * @author mrk
  *
  */
@@ -16,6 +17,12 @@ public class BaseCDStructure extends BaseCDField implements CDStructure {
     private PVStructure pvStructure;
     private CDRecord cdRecord;
     
+    /**
+     * Constructor.
+     * @param parent The parent cdField.
+     * @param cdRecord The cdRecord that contains this field.
+     * @param pvStructure The pvStructure that this CDField references.
+     */
     public BaseCDStructure(
         CDField parent,CDRecord cdRecord,
         PVStructure pvStructure)
@@ -28,13 +35,12 @@ public class BaseCDStructure extends BaseCDField implements CDStructure {
     /* (non-Javadoc)
      * @see org.epics.ioc.ca.BaseCDField#clearNumPuts()
      */
-    @Override
     public void clearNumPuts() {
         for(CDField cdField : cdFields) cdField.clearNumPuts();
         super.clearNumPuts();
     }
     /* (non-Javadoc)
-     * @see org.epics.ioc.ca.CDStructure#getFieldChannelDatas()
+     * @see org.epics.ioc.ca.CDStructure#getFieldCDFields()
      */
     public CDField[] getFieldCDFields() {
         return cdFields;
@@ -52,23 +58,21 @@ public class BaseCDStructure extends BaseCDField implements CDStructure {
         this.pvStructure = (PVStructure)super.getPVField();
         createFields();
     }
-    
     /* (non-Javadoc)
      * @see org.epics.ioc.ca.BaseCDField#dataPut(org.epics.ioc.pv.PVField)
      */
-    @Override
-    public void fieldPut(PVField target) {
+    public void dataPut(PVField target) {
         PVStructure targetPVStructure = (PVStructure)target;
         PVField[] targetPVFields = targetPVStructure.getFieldPVFields();
         for(int i=0; i<targetPVFields.length; i++) {
             PVField targetPVField = targetPVFields[i];
             CDField cdField = cdFields[i];
-            cdField.fieldPut(targetPVField);
+            cdField.dataPut(targetPVField);
         }
         super.incrementNumPuts();
     }
     /* (non-Javadoc)
-     * @see org.epics.ioc.ca.CDField#configurationStructurePut(org.epics.ioc.pv.PVField, org.epics.ioc.pv.PVLink)
+     * @see org.epics.ioc.ca.BaseCDField#configurationStructurePut(org.epics.ioc.pv.PVField, org.epics.ioc.pv.PVLink)
      */
     public boolean configurationStructurePut(PVField requested, PVLink target) {
         PVStructure targetPVStructure = (PVStructure)requested;
@@ -96,21 +100,21 @@ public class BaseCDStructure extends BaseCDField implements CDStructure {
             } else if(type!=Type.pvStructure) {
                 throw new IllegalStateException("Logic error.");
             }
-            if(cdField.fieldPut(targetPVField, target)) return true;
+            if(cdField.dataPut(targetPVField, target)) return true;
         }
         return false;
     }
     /* (non-Javadoc)
      * @see org.epics.ioc.ca.CDField#dataPut(org.epics.ioc.pv.PVField, org.epics.ioc.pv.PVField)
      */
-    public boolean fieldPut(PVField requested, PVField target) {
+    public boolean dataPut(PVField requested, PVField target) {
         PVStructure targetPVStructure = (PVStructure)requested;
         PVField[] targetPVFields = targetPVStructure.getFieldPVFields();
         for(int i=0; i<targetPVFields.length; i++) {
             PVField targetPVField = targetPVFields[i];
             if(targetPVField==target) {
                 CDField cdField = cdFields[i];
-                cdField.fieldPut(target);
+                cdField.dataPut(target);
                 return true;
             }
         }
@@ -125,11 +129,11 @@ public class BaseCDStructure extends BaseCDField implements CDStructure {
                 Array array = (Array)field;
                 Type elementType = array.getElementType();
                 if(elementType.isScalar()) continue;
-                if(!cdField.fieldPut(targetPVField, target))continue;
+                if(!cdField.dataPut(targetPVField, target))continue;
             } else if(type!=Type.pvStructure) {
                 throw new IllegalStateException("Logic error.");
             }
-            if(cdField.fieldPut(targetPVField, target)) return true;
+            if(cdField.dataPut(targetPVField, target)) return true;
         }
         return false;
     }
@@ -162,7 +166,7 @@ public class BaseCDStructure extends BaseCDField implements CDStructure {
             } else if(type!=Type.pvStructure) {
                 throw new IllegalStateException("Logic error.");
             }
-            if(cdField.fieldPut(targetPVField, target)) return true;
+            if(cdField.dataPut(targetPVField, target)) return true;
         }
         return false;
     }
@@ -195,7 +199,7 @@ public class BaseCDStructure extends BaseCDField implements CDStructure {
             } else if(type!=Type.pvStructure) {
                 throw new IllegalStateException("Logic error.");
             }
-            if(cdField.fieldPut(targetPVField, target)) return true;
+            if(cdField.dataPut(targetPVField, target)) return true;
         }
         return false;
     }
@@ -228,10 +232,11 @@ public class BaseCDStructure extends BaseCDField implements CDStructure {
             } else if(type!=Type.pvStructure) {
                 throw new IllegalStateException("Logic error.");
             }
-            if(cdField.fieldPut(targetPVField, target)) return true;
+            if(cdField.dataPut(targetPVField, target)) return true;
         }
         return false;
     }
+    
     private void createFields() {
         PVField[] pvFields = pvStructure.getFieldPVFields();
         int length = pvFields.length;

@@ -33,7 +33,8 @@ public class BaseDBStructure extends BaseDBField implements DBStructure
     
     /**
      * Constructor for record instance classes.
-     * @param dbdRecordType The reflection interface for the record type.
+     * @param dbRecord The dbRecord that contains this DBStructure.
+     * @param pvRecord The PVRecord interface.
      */
     public BaseDBStructure(DBRecord dbRecord,PVRecord pvRecord) {
         super(null,dbRecord,pvRecord);

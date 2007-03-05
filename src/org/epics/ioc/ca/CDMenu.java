@@ -8,7 +8,7 @@ package org.epics.ioc.ca;
 import org.epics.ioc.pv.PVMenu;
 
 /**
- * ChannelDataBaseMenu - A CDRecord field that holds a PVMenu.
+ * CDMenu - A CDRecord field that holds a PVMenu.
  * @author mrk
  *
  */

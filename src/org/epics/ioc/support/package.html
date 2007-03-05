@@ -10,7 +10,7 @@
 <body>
 <h1 style="text-align: center">EPICS JavaIOC: support<br />
 package: org.epics.ioc.support<br />
-2007.02.02</h1>
+2007.03.05</h1>
 CONTENTS
 
 <div class="toc">
@@ -19,6 +19,7 @@ CONTENTS
   <li><a href="#Link">Link Support Factory</a></li>
   <li><a href="#Link1">Link Array Support Factory</a></li>
   <li><a href="#Scan">Scan Support Factory</a></li>
+  <li><a href="#Noop">Noop Factory</a></li>
   <li><a href="#Linear">Linear Convert Input Factory</a></li>
 </ul>
 </div>
@@ -37,6 +38,9 @@ CONTENTS
     types</dd>
   <dt>ScanSupportFactory</dt>
     <dd>Support for the scan field.</dd>
+  <dt>NoopFactory</dt>
+    <dd>A record support that does nothing except acts as though everything
+      works.</dd>
   <dt>LinearConvertInputFactory</dt>
     <dd>Support for converting a raw value to engineering units. NOT
       IMPLEMENTED.</dd>
@@ -125,6 +129,13 @@ Many other possibilities are possible.</p>
 
 <p>This provides support for the scan field of any record. It is called by
 RecordProcess.</p>
+<hr />
+
+<h2 style="text-align: center;" id="Noop">Noop Factory</h2>
+<hr />
+
+<p>This can be used for record types that just hold data or can be used as a
+template for creating new record support modules.</p>
 <hr />
 
 <h2 style="text-align: center;" id="Linear">Linear Convert Input Factory</h2>

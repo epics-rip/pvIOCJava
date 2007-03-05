@@ -9,6 +9,7 @@ import org.epics.ioc.pv.*;
 import org.epics.ioc.pv.Enum;
 
 /**
+ * Base class for a CDRecord (Channel Data Record).
  * @author mrk
  *
  */
@@ -18,6 +19,14 @@ public class BaseCDRecord implements CDRecord {
     private PVRecord pvRecord;
     private CDStructure cdStructure;
     
+    /**
+     * Constructor.
+     * @param fieldCreate Factory to create Field introspection objects.
+     * @param pvDataCreate Factory to create PVField objects.
+     * @param targetFields The array of Field interfaces for the target.
+     * @param recordName The record, i.e. channel name.
+     * @param structureName The structure name for the PVStructure for the PVRecord.
+     */
     public BaseCDRecord(FieldCreate fieldCreate,PVDataCreate pvDataCreate,
         Field[] targetFields,String recordName,String structureName)
     {
@@ -34,7 +43,9 @@ public class BaseCDRecord implements CDRecord {
             recordName, structure);
         cdStructure = new BaseCDStructure(null,this,pvRecord);
     }
-    
+    /* (non-Javadoc)
+     * @see org.epics.ioc.ca.CDRecord#createField(org.epics.ioc.pv.Field)
+     */
     public Field createField(Field oldField) {
         Field newField = null;
         Type type = oldField.getType();

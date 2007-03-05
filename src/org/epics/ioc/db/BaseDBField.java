@@ -223,7 +223,7 @@ public class BaseDBField implements DBField{
         while(iter.hasNext()) {
             RecordListener listener = iter.next();
             DBListener dbListener = listener.getDBListener();
-            dbListener.fieldPut(this);
+            dbListener.dataPut(this);
         }
         DBField dbField = parent;
         while(dbField!=null) {
@@ -231,7 +231,7 @@ public class BaseDBField implements DBField{
             while(iter.hasNext()) {
                 RecordListener listener = iter.next();
                 DBListener dbListener = listener.getDBListener();
-                dbListener.fieldPut(dbField, this);
+                dbListener.dataPut(dbField, this);
             }
             dbField = dbField.getParent();
         }

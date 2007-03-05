@@ -8,7 +8,7 @@ package org.epics.ioc.ca;
 import org.epics.ioc.pv.*;
 
 /**
- * ChannelDataBaseRecord - A record that holds a PVRecord.
+ * CDRecord - A record that holds a PVRecord.
  * @author mrk
  *
  */
