@@ -90,8 +90,7 @@ public class LinkSupportFactory {
             super(processLinkSupportName,dbLink);
             this.dbLink = dbLink;
             pvLink = dbLink.getPVLink();
-            channelRequestorName = 
-                pvLink.getPVRecord().getRecordName() + pvLink.getFullFieldName();
+            channelRequestorName = pvLink.getFullName();
         }               
         /* (non-Javadoc)
          * @see org.epics.ioc.util.Requestor#getRequestorName()
@@ -441,7 +440,7 @@ public class LinkSupportFactory {
             this.dbLink = dbLink;
             pvLink = dbLink.getPVLink();
             channelRequestorName = 
-                pvLink.getPVRecord().getRecordName() + pvLink.getFullFieldName();
+                pvLink.getFullName();
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.util.Requestor#getRequestorName()
@@ -956,7 +955,7 @@ public class LinkSupportFactory {
             this.dbLink = dbLink;
             pvLink = dbLink.getPVLink();
             channelRequestorName = 
-                pvLink.getPVRecord().getRecordName() + pvLink.getFullFieldName();
+                pvLink.getFullName();
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.util.Requestor#getRequestorName()
@@ -1489,7 +1488,7 @@ public class LinkSupportFactory {
             pvLink = dbLink.getPVLink();
             dbRecord = dbLink.getDBRecord();
             channelRequestorName = 
-                pvLink.getPVRecord().getRecordName() + pvLink.getFullFieldName();
+                pvLink.getFullName();
         }       
         /* (non-Javadoc)
          * @see org.epics.ioc.util.Requestor#getRequestorName()
@@ -1678,7 +1677,7 @@ public class LinkSupportFactory {
                     channelMonitor.lookForPercentageChange(dataField, deadband); break;
                 }
             }
-            String threadName = pvLink.getPVRecord().getRecordName() + pvLink.getFullFieldName();
+            String threadName = pvLink.getFullName();
             channelMonitor.start((ChannelMonitorNotifyRequestor)this, threadName, ScanPriority.low);
         }
     }
@@ -1735,8 +1734,7 @@ public class LinkSupportFactory {
             super(monitorLinkSupportName,dbLink);
             pvLink = dbLink.getPVLink();
             dbRecord = dbLink.getDBRecord();
-            channelRequestorName = 
-                pvLink.getPVRecord().getRecordName() + pvLink.getFullFieldName();
+            channelRequestorName = pvLink.getFullName();
         }       
         /* (non-Javadoc)
          * @see org.epics.ioc.util.Requestor#getRequestorName()
@@ -2111,7 +2109,7 @@ public class LinkSupportFactory {
                     severityField = null;
                 }
             }
-            String threadName = pvLink.getPVRecord().getRecordName() + pvLink.getFullFieldName();
+            String threadName = pvLink.getFullName();
             channelMonitor.start((ChannelMonitorRequestor)this, queueSize, threadName, ScanPriority.low);
         }
     }

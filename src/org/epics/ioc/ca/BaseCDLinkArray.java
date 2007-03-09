@@ -39,6 +39,8 @@ public class BaseCDLinkArray extends BaseCDField implements CDNonScalarArray{
      * @see org.epics.ioc.ca.BaseCDField#dataPut(org.epics.ioc.pv.PVField)
      */
     public void dataPut(PVField targetPVField) {
+        String supportName = targetPVField.getSupportName();
+        if(supportName!=null) super.supportNamePut(targetPVField);
         PVLinkArray targetPVLinkArray = (PVLinkArray)targetPVField;
         if(checkPVLinkArray(targetPVLinkArray)) {
             super.incrementNumPuts();

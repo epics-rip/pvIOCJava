@@ -41,6 +41,8 @@ public class BaseCDEnumArray extends BaseCDField implements CDNonScalarArray {
      * @see org.epics.ioc.ca.BaseCDField#dataPut(org.epics.ioc.pv.PVField)
      */
     public void dataPut(PVField targetPVField) {
+        String supportName = targetPVField.getSupportName();
+        if(supportName!=null) super.supportNamePut(targetPVField);
         PVEnumArray targetPVEnumArray = (PVEnumArray)targetPVField;
         if(checkPVEnumArray(targetPVEnumArray)) {
             super.incrementNumPuts();

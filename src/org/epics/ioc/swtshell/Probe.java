@@ -4,6 +4,7 @@
  * in file LICENSE that is included with this distribution.
  */
 package org.epics.ioc.swtshell;
+
 import java.util.concurrent.locks.*;
 
 import org.eclipse.swt.*;
@@ -23,18 +24,20 @@ import org.epics.ioc.process.*;
 public class Probe {
     static private IOCDB iocdb = IOCDBFactory.getMaster();
     static private Convert convert = ConvertFactory.getConvert();
+    private static IOCExecutor iocExecutor = IOCExecutorFactory.create("swtshell:Probe");
+    private static ScanPriority scanPriority = ScanPriority.lower;
     public static void init(Display display) {
-        Introspect introspect = new Introspect(display);
-        introspect.start();
+        ProbeImpl probeImpl = new ProbeImpl(display);
+        probeImpl.start();
     }
     
-    private static class Introspect  implements Requestor{
+    private static class ProbeImpl  implements Requestor{
         private Display display;
         private Shell shell;
         private PVShell pvShell;
-        private Text showText;
+        private Text consoleText;
         
-        private Introspect(Display display) {
+        private ProbeImpl(Display display) {
             this.display = display;
         }
         
@@ -45,6 +48,8 @@ public class Probe {
             gridLayout.numColumns = 1;
             shell.setLayout(gridLayout);
             Composite composite = new Composite(shell,SWT.BORDER);
+            GridData compositeGridData = new GridData(GridData.FILL_BOTH);
+            composite.setLayoutData(compositeGridData);
             gridLayout = new GridLayout();
             gridLayout.numColumns = 1;
             composite.setLayout(gridLayout);
@@ -52,30 +57,27 @@ public class Probe {
             new ProcessShell(composite,this);
             new GetShell(composite,this);
             new PutShell(composite,this);
-            Composite showComposite = new Composite(composite,SWT.BORDER);
+            Composite consoleComposite = new Composite(composite,SWT.BORDER);
             gridLayout = new GridLayout();
             gridLayout.numColumns = 1;
-            showComposite.setLayout(gridLayout);
-            Button clearItem = new Button(showComposite,SWT.PUSH);
+            consoleComposite.setLayout(gridLayout);
+            GridData consoleCompositeGridData = new GridData(GridData.FILL_BOTH);
+            consoleComposite.setLayoutData(consoleCompositeGridData);
+            Button clearItem = new Button(consoleComposite,SWT.PUSH);
             clearItem.setText("&Clear");
             clearItem.addSelectionListener(new SelectionListener() {
                 public void widgetDefaultSelected(SelectionEvent arg0) {
                     widgetSelected(arg0);
                 }
                 public void widgetSelected(SelectionEvent arg0) {
-                    showText.selectAll();
-                    showText.clearSelection();
-                    showText.setText("");
+                    consoleText.selectAll();
+                    consoleText.clearSelection();
+                    consoleText.setText("");
                 }
             });
-            showText = new Text(showComposite,SWT.BORDER|SWT.WRAP|SWT.V_SCROLL|SWT.READ_ONLY);
-            //showText.setSize(sizeX,sizeY); DOES NOT WORK
-            Swtshell.makeBlanks(showText,20,100);
-            shell.pack();
-            pvShell.start();
-            showText.selectAll();
-            showText.clearSelection();
-            showText.setText("");
+            consoleText = new Text(consoleComposite,SWT.BORDER|SWT.H_SCROLL|SWT.V_SCROLL|SWT.READ_ONLY);
+            GridData textGridData = new GridData(GridData.FILL_BOTH);
+            consoleText.setLayoutData(textGridData);
             shell.open();
         }
         
@@ -92,7 +94,7 @@ public class Probe {
         public void message(final String message, MessageType messageType) {
             display.syncExec( new Runnable() {
                 public void run() {
-                    showText.append(String.format("%s%n",message));
+                    consoleText.append(String.format("%s%n",message));
                 }
                 
             });
@@ -181,7 +183,6 @@ public class Probe {
                 private Channel channel;
                 final private Requestor requestor;
                 private ChannelProcess channelProcess;
-                private ChannelExecutor channelExecutor;
                 
                 private Process(Channel channel,Requestor requestor) {
                     this.channel = channel;
@@ -191,9 +192,8 @@ public class Probe {
                 private void process() {
                     channelProcess = channel.createChannelProcess(this);
                     if(channelProcess==null) return;
-                    channelExecutor = new ChannelExecutor(requestor,channel);
                     allDone = false;
-                    channelExecutor.request(this);
+                    iocExecutor.execute(this, scanPriority);
                 }
                 /* (non-Javadoc)
                  * @see java.lang.Runnable#run()
@@ -212,12 +212,10 @@ public class Probe {
                     }
                     display.syncExec( new Runnable() {
                         public void run() {
-                            showText.append(String.format("process complete%n"));
+                            consoleText.append(String.format("process complete%n"));
                         }      
                     });
                     channel.destroy(channelProcess);
-                    channelExecutor = null;
-                    channelProcess = null;
                 }
                 /* (non-Javadoc)
                  * @see org.epics.ioc.util.Requestor#getRequestorName()
@@ -323,6 +321,8 @@ public class Probe {
                 Get get = new Get(channel,requestor,process);
                 ChannelData channelData = get.get(channelField, properties);
                 if(channelData==null) return;
+                CDRecordPrint cdRecordPrint = new CDRecordPrint(channelData.getCDRecord(),consoleText);
+                cdRecordPrint.print();
             }
         }
                 
@@ -386,7 +386,6 @@ public class Probe {
             final private Requestor requestor;
             private boolean process;
             private ChannelGet channelGet;
-            private ChannelExecutor channelExecutor;
             private ChannelFieldGroup getFieldGroup;
             private ChannelData channelData;
             
@@ -397,8 +396,6 @@ public class Probe {
             }
             
             private ChannelData get(ChannelField channelField,Property[] properties) {
-                channelGet = channel.createChannelGet(null, this, process);
-                channelExecutor = new ChannelExecutor(requestor,channel);
                 getFieldGroup = channel.createFieldGroup(this);
                 getFieldGroup.addChannelField(channelField);
                 if(properties!=null && properties.length>0) {
@@ -416,12 +413,26 @@ public class Probe {
                         getFieldGroup.addChannelField(propertyField);
                     }
                 }
+                channelGet = channel.createChannelGet(getFieldGroup, this, process);
+                if(channelGet==null) {
+                    channelGet = channel.createChannelGet(getFieldGroup, this,false);
+                }
+                if(channelGet==null) return null;
                 allDone = false;
                 channelData = ChannelDataFactory.createChannelData(channel,getFieldGroup);
                 if(channelData==null) {
                     requestor.message("ChannelDataFactory.createData failed",MessageType.error);
                 } else {
-                    channelExecutor.request(this);
+                    iocExecutor.execute(this, scanPriority);
+                    lock.lock();
+                    try {
+                        if(!allDone) {                       
+                            waitDone.await();
+                        }
+                    } catch (InterruptedException ie) {
+                    } finally {
+                        lock.unlock();
+                    }
                 }
                 return channelData;
             }
@@ -430,30 +441,6 @@ public class Probe {
              */
             public void run() {
                 channelGet.get();
-                lock.lock();
-                try {
-                    if(!allDone) {                       
-                        waitDone.await();
-                    }
-                } catch (InterruptedException ie) {
-                    return;
-                } finally {
-                    lock.unlock();
-                }
-                display.syncExec( new Runnable() {
-                    public void run() {
-                        showText.append(String.format("%s%n",channel.getChannelName()));
-                        CDStructure cdStructure = channelData.getCDRecord().getCDStructure();
-                        CDField[] cdbDatas= cdStructure.getFieldCDFields();
-                        int length = cdbDatas.length;
-                        for(int i=0; i<length; i++) {
-                            PVField pvField = cdbDatas[i].getPVField();
-                            showText.append(String.format("    %s %s%n",
-                                pvField.getFullFieldName(),Swtshell.pvFieldToString(pvField)));
-                        }
-                    }
-                    
-                });
                 channel.destroy(channelGet);
             }
 
@@ -535,10 +522,8 @@ public class Probe {
             final private Requestor requestor;
             private boolean process;
             private ChannelPut channelPut;
-            private ChannelExecutor channelExecutor;
             private ChannelFieldGroup putFieldGroup;
             private ChannelData channelData;
-            private ChannelField[] channelFields;
             private PVField[] pvFields;
             
             private Put(Channel channel,Requestor requestor,boolean process) {
@@ -548,38 +533,23 @@ public class Probe {
             }
             
             private void put(ChannelField channelField) {
-                channelPut = channel.createChannelPut(null, this, process);
-                channelExecutor = new ChannelExecutor(requestor,channel);
                 putFieldGroup = channel.createFieldGroup(this);
                 putFieldGroup.addChannelField(channelField);
+                channelPut = channel.createChannelPut(putFieldGroup, this, process);
                 allDone = false;
                 // get the current values
-                Get get = new Get(channel,requestor,process);
+                Get get = new Get(channel,requestor,false);
                 channelData = get.get(channelField, null);
                 if(channelData==null) {
                     requestor.message("ChannelDataFactory.createData failed",MessageType.error);
                     return;
                 }
-                CDStructure cdStructure = channelData.getCDRecord().getCDStructure();
-                CDField[] cdbDatas= cdStructure.getFieldCDFields();
-                int length = cdbDatas.length;
-                pvFields = new PVField[length];
-                for(int i=0; i<length; i++) {
-                    pvFields[i] = cdbDatas[i].getPVField();
-                }
-                channelExecutor.request(this);
-            }
-            /* (non-Javadoc)
-             * @see java.lang.Runnable#run()
-             */
-            public void run() {
-                display.syncExec( new Runnable() {
-                    public void run() {
-                        GetValue getValue = new GetValue(shell,requestor);
-                        getValue.getValue(channelData);
-                    }      
-                });
-                channelPut.put();
+                PVRecord pvRecord = channelData.getCDRecord().getPVRecord();
+                GetValue getValue = new GetValue(shell);
+                getValue.getValue(pvRecord);
+                pvFields = pvRecord.getFieldPVFields();
+requestor.message(String.format("%s%n",pvFields[0].toString()), MessageType.info);
+                iocExecutor.execute(this, scanPriority);
                 lock.lock();
                 try {
                     if(!allDone) {                       
@@ -590,6 +560,12 @@ public class Probe {
                 } finally {
                     lock.unlock();
                 }
+            }
+            /* (non-Javadoc)
+             * @see java.lang.Runnable#run()
+             */
+            public void run() {
+                channelPut.put();
                 channel.destroy(channelPut);
             }
             /* (non-Javadoc)
@@ -619,8 +595,10 @@ public class Probe {
              * @see org.epics.ioc.ca.ChannelPutRequestor#nextPutData(org.epics.ioc.ca.Channel, org.epics.ioc.ca.ChannelField, org.epics.ioc.pvAccess.PVData)
              */
             public boolean nextPutField(ChannelField channelField, PVField pvField) {
-                for(int i=0; i<channelFields.length; i++) {
-                    ChannelField cField = channelFields[i];
+                java.util.List<ChannelField> channelFieldList = putFieldGroup.getList();
+                
+                for(int i=0; i<channelFieldList.size(); i++) {
+                    ChannelField cField = channelFieldList.get(i);
                     if(channelField!=cField) continue;
                     PVField pField = pvFields[i];
                     Type type = channelField.getField().getType();
@@ -656,7 +634,7 @@ public class Probe {
                 lock.lock();
                 try {
                     allDone = true;
-                        waitDone.signal();
+                    waitDone.signal();
                 } finally {
                     lock.unlock();
                 }
@@ -685,23 +663,19 @@ public class Probe {
         }
                            
         private class GetValue extends Dialog implements SelectionListener {
-            private Requestor requestor;
             private Shell shell;
             private Label label;
             private Button done;
             private Button next;
             private Text text;
             private PVField[] pvFields;
-            private int index = -1;
-            private boolean more = true;
-            private boolean started = false;
+            private int index = 0;
             
-            public GetValue(Shell parent,Requestor requestor) {
+            public GetValue(Shell parent) {
                 super(parent,SWT.DIALOG_TRIM|SWT.NONE);
-                this.requestor = requestor;
             }
             
-            public void getValue(ChannelData channelData) {
+            public void getValue(PVRecord pvRecord) {
                 shell = new Shell(getParent(),getStyle());
                 shell.setText("putValue");
                 GridLayout gridLayout = new GridLayout();
@@ -711,41 +685,36 @@ public class Probe {
                 gridLayout = new GridLayout();
                 gridLayout.numColumns = 1;
                 composite.setLayout(gridLayout);
-                CDStructure cdStructure = channelData.getCDRecord().getCDStructure();
-                CDField[] cdbDatas= cdStructure.getFieldCDFields();
-                int length = cdbDatas.length;
-                pvFields = new PVField[length];
-                for(int i=0; i<length; i++) {
-                    pvFields[i] = cdbDatas[i].getPVField();
-                }
+                GridData compositeGridData = new GridData(GridData.FILL_HORIZONTAL);
+                composite.setLayoutData(compositeGridData);
+                pvFields = pvRecord.getFieldPVFields();
                 label = new Label(composite,SWT.LEFT);
-                Swtshell.makeBlanks(label, 80);
+                GridData labelGridData = new GridData(GridData.FILL_HORIZONTAL);
+                label.setLayoutData(labelGridData);
                 Composite buttons = new Composite(composite,SWT.NONE);
                 GridLayout buttonLayout = new GridLayout();
                 buttonLayout.numColumns = 3;
                 buttons.setLayout(buttonLayout);
+                GridData buttonsGridData = new GridData(GridData.FILL_HORIZONTAL);
+                buttons.setLayoutData(buttonsGridData);
                 done = new Button(buttons,SWT.NONE);
                 done.setText("done");
                 next = new Button(buttons,SWT.NONE);
                 next.setText("next");
                 text = new Text(composite,SWT.SINGLE|SWT.BORDER|SWT.LEFT);
-                Swtshell.makeBlanks(text, 1, 80);
-                shell.pack();
-                label.setText("");
-                text.selectAll();
-                text.clearSelection();
-                text.setText("");
+                GridData textGridData = new GridData(GridData.FILL_HORIZONTAL);
+                text.setLayoutData(textGridData);
                 done.addSelectionListener(this);
                 next.addSelectionListener(this);
                 text.addSelectionListener(this);
                 shell.open();
-                started = true;
                 Display display = getParent().getDisplay();
                 while(!shell.isDisposed()) {
                     if(!display.readAndDispatch()) {
                         display.sleep();
                     }
                 }
+                shell.dispose();
             }
             public void widgetDefaultSelected(SelectionEvent arg0) {
                 widgetSelected(arg0);
@@ -762,14 +731,15 @@ public class Probe {
                     PVField pvField = pvFields[index];
                     label.setText(pvField.getFullFieldName());
                 } if(arg0.getSource()==text) {
-                    if(index==-1) index = 0;
                     if(index>=pvFields.length) {
                         shell.close();
                         return;
                     }
                     PVField pvField = pvFields[index];
-requestor.message("text is " + text.getText(), MessageType.info);
-                    convert.fromString(pvField, text.getText());
+                    String value = text.getText();
+                    if(value!=null && value.length()>0) {
+                        convert.fromString(pvField, value);
+                    }
                 }
             }
                 

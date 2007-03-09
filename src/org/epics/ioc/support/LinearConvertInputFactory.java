@@ -23,11 +23,11 @@ public class LinearConvertInputFactory {
      * @param dbField The field to support.
      * @return The Support interface.
      */
-    public static Support create(DBField dbField) {
+    public static Support create(DBStructure dbStructure) {
         Support support = null;
-        String supportName = dbField.getSupportName();
+        String supportName = dbStructure.getSupportName();
         if(supportName.equals(supportName)) {
-            support = new LinearConvert(dbField);
+            support = new LinearConvert(dbStructure);
         }
         return support;
     }
@@ -36,11 +36,11 @@ public class LinearConvertInputFactory {
     
     private static class LinearConvert extends AbstractSupport {
         
-        private DBField dbField = null;
+        private DBStructure dbStructure = null;
         
-        private LinearConvert(DBField dbField) {
-            super(supportName,dbField);
-            this.dbField = dbField;
+        private LinearConvert(DBStructure dbStructure) {
+            super(supportName,dbStructure);
+            this.dbStructure = dbStructure;
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.process.AbstractSupport#getRequestorName()

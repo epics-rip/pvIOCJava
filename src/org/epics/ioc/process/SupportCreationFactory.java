@@ -239,10 +239,8 @@ public class SupportCreationFactory {
     }
     
     private static void printError(Requestor requestor,PVField pvField,String message) {
-        String name = pvField.getFullFieldName();
-        name = pvField.getPVRecord().getRecordName() + name;
         requestor.message(
-                name + " " + message,
+                pvField.getFullName() + " " + message,
                 MessageType.error);
     }
     

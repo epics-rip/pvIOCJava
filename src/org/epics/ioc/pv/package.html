@@ -441,6 +441,7 @@ record.</p>
 
     interface PVField extends Requestor {
         String getFullFieldName();
+        String getFullName();
         Field getField();
         PVField getParent();
         PVRecord getPVRecord();
@@ -476,7 +477,9 @@ where
   </li>
   <li>getFullFieldName<br />
     Get the full field name. This returns a name in the form
-  ".name.name".</li>
+  "name.name ...".</li>
+  <li>getFullName<br />
+    Get the full name. This returns a name in the form "recordName.name ...".</li>
   <li>getField<br />
     Get the reflection interface for the data.</li>
   <li>getParent<br />

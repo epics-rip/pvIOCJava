@@ -61,8 +61,8 @@ public class BaseCDLink extends BaseCDField implements CDLink {
      * @see org.epics.ioc.ca.BaseCDField#dataPut(org.epics.ioc.pv.PVField)
      */
     public void dataPut(PVField targetPVField) {
+        String supportName = targetPVField.getSupportName();
+        if(supportName!=null) super.supportNamePut(targetPVField);
         configurationStructurePut((PVLink)targetPVField);
-        numConfigurationStructurePuts++;
-        super.incrementNumPuts();
     }
 }

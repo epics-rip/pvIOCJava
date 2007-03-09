@@ -61,13 +61,15 @@ public class BaseCDStructure extends BaseCDField implements CDStructure {
     /* (non-Javadoc)
      * @see org.epics.ioc.ca.BaseCDField#dataPut(org.epics.ioc.pv.PVField)
      */
-    public void dataPut(PVField target) {
-        PVStructure targetPVStructure = (PVStructure)target;
+    public void dataPut(PVField targetPVField) {
+        String supportName = targetPVField.getSupportName();
+        if(supportName!=null) super.supportNamePut(targetPVField);
+        PVStructure targetPVStructure = (PVStructure)targetPVField;
         PVField[] targetPVFields = targetPVStructure.getFieldPVFields();
         for(int i=0; i<targetPVFields.length; i++) {
-            PVField targetPVField = targetPVFields[i];
+            PVField target = targetPVFields[i];
             CDField cdField = cdFields[i];
-            cdField.dataPut(targetPVField);
+            cdField.dataPut(target);
         }
         super.incrementNumPuts();
     }

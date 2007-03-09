@@ -15,7 +15,7 @@ import org.epics.ioc.util.MessageType;
  */
 public abstract class AbstractPVField implements PVField{
     private String fullFieldName = "";
-    private String requestorName = "";
+    private String fullName = "";
     private Field field;
     private PVField parent;
     private PVRecord record;
@@ -84,7 +84,7 @@ public abstract class AbstractPVField implements PVField{
      * @see org.epics.ioc.util.Requestor#getRequestorName()
      */
     public String getRequestorName() {
-        return requestorName;
+        return getFullName();
     }
     /* (non-Javadoc)
      * @see org.epics.ioc.util.Requestor#message(java.lang.String, org.epics.ioc.util.MessageType)
@@ -104,6 +104,13 @@ public abstract class AbstractPVField implements PVField{
         return fullFieldName;
     } 
     
+    /* (non-Javadoc)
+     * @see org.epics.ioc.pv.PVField#getFullName()
+     */
+    public String getFullName() {
+        return fullName;
+    }
+
     /* (non-Javadoc)
      * @see org.epics.ioc.pv.PVField#getField()
      */
@@ -147,23 +154,21 @@ public abstract class AbstractPVField implements PVField{
     
     private void createFullFieldAndRequestorNames() {
         if(this==record) {
-            fullFieldName = "";
+            fullFieldName = fullName = "";
             return;
         }
         StringBuilder fieldName = new StringBuilder();
-        fieldName.insert(0,getField().getFieldName());
-        if(parent.getField().getType()!=Type.pvArray) fieldName.insert(0,".");
+        fieldName.append(getField().getFieldName());
+        if(parent.getField().getType()!=Type.pvArray) fieldName.insert(0, ".");
         PVField parent = getParent();
-        while(parent!=null && parent!=this.record) {
-            PVField now = parent;
-            fieldName.insert(0,now.getField().getFieldName());
-            if(now.getParent()==null
-            || now.getParent().getField().getType()!=Type.pvArray) fieldName.insert(0,".");
-            parent = now.getParent();
+        while(parent!=this.record) {
+            fieldName.insert(0,parent.getField().getFieldName());
+            parent = parent.getParent();
+            if(parent!=null && parent.getField().getType()!=Type.pvArray) fieldName.insert(0, ".");
         }
-        fullFieldName = fieldName.toString();
+        fullFieldName = fieldName.substring(1); //remove leading "."
         if(record!=null) {
-            requestorName = record.getRecordName() + fullFieldName;
+            fullName = record.getRecordName() + "." + fullFieldName;
         }
     }
 }

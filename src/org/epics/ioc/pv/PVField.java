@@ -15,10 +15,15 @@ import org.epics.ioc.util.*;
  */
 public interface PVField extends Requestor {
     /**
-     * Get the full field name, i.e. the complete hierarchy.
+     * Get the fullFieldName, i.e. the complete hierarchy.
      * @return The name.
      */
     String getFullFieldName();
+    /**
+     * Get the full name, which is the recordName plus the fullFieldName
+     * @return The name.
+     */
+    String getFullName();
     /**
      * Get the <i>Field</i> that describes the field.
      * @return Field, which is the reflection interface.

@@ -412,12 +412,6 @@ public class XMLToIOCDBFactory {
             }
             PVField pvField = pvStructure.getFieldPVFields()[fieldIndex];
             String supportName = attributes.get("supportName");
-            if(supportName==null) {
-                DBDStructure dbdStructure = dbd.getStructure(structure.getStructureName());
-                if(dbdStructure!=null) {
-                    supportName = dbdStructure.getSupportName();
-                }
-            }
             if(supportName!=null) {
                 pvField.setSupportName(supportName);
             }
@@ -474,7 +468,14 @@ public class XMLToIOCDBFactory {
                 structureState.pvStructure = (PVStructure)pvField;
                 structureState.fieldName = qName;
                 state = State.structure;
-                supportName = attributes.get("supportName");
+                if(supportName==null) {
+                    Structure fieldStructure = (Structure)pvField.getField();
+                    DBDStructure dbdStructure = dbd.getStructure(
+                            fieldStructure.getStructureName());
+                    if(dbdStructure!=null) {
+                        supportName = dbdStructure.getSupportName();
+                    }
+                }
                 if(supportName!=null) {
                     pvField.setSupportName(supportName);
                 }

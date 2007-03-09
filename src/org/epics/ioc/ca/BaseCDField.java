@@ -112,6 +112,12 @@ public class BaseCDField implements CDField {
         if(type!=targetPVField.getField().getType()) {
             throw new IllegalStateException("Logic error.");
         }
+        String supportName = targetPVField.getSupportName();
+        if(supportName!=null && supportName.length()>0) {
+            pvField.setSupportName(supportName);
+            numSupportNamePuts++;
+            setMaxNumPuts(numSupportNamePuts);
+        }
         if(type.isScalar()) {
             convert.copyScalar(targetPVField, pvField);
         } else if(type==Type.pvArray) {
@@ -136,6 +142,7 @@ public class BaseCDField implements CDField {
         PVField toPVField = this.getPVField();
         toPVField.setSupportName(targetPVField.getSupportName());
         numSupportNamePuts++;
+        setMaxNumPuts(numSupportNamePuts);
     }
     /* (non-Javadoc)
      * @see org.epics.ioc.ca.CDField#configurationStructurePut(org.epics.ioc.pv.PVField, org.epics.ioc.pv.PVLink)

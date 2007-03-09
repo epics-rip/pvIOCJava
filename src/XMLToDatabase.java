@@ -59,6 +59,7 @@ public class XMLToDatabase {
                     state = State.dbFile;
                 } else if(arg.equals("swtshell")) {
                     Swtshell.swtshell();
+                    return;
                 } else {
                     System.out.println("-dbd DatabaseDefinitionList"
                             + " -db InstanceList -dumpDBD -dumpDB ... -swtshell");
@@ -69,7 +70,6 @@ public class XMLToDatabase {
                 parseDB(dbd,iocdb,arg,iocRequestor);
             }
         }
-        Swtshell.swtshell();
     }
         
     static void dumpDBD(DBD dbd) {

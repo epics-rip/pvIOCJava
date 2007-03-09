@@ -6,4 +6,7 @@
 <include href = "examplePowerSupplyDB.xml" />
 <include href = "examplePowerSupplyArrayDB.xml" />
 <include href = "exampleInputDB.xml" />
+<include addPath = "src/org/epics/ioc/process/test" />
+<include href = "exampleDB.xml" />
+<include href = "scanDB.xml" />
 </IOCDatabase>

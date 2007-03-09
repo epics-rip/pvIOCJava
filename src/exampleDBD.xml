@@ -7,5 +7,8 @@
 <include href = "aiDBD.xml" />
 <include href = "powerSupplyDBD.xml" />
 <include href = "allTypesDBD.xml" />
+<include addPath = "src/org/epics/ioc/process/test" />
+<include href = "exampleDBD.xml" />
+
 
 </DBDefinition>

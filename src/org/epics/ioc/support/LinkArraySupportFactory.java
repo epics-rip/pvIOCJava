@@ -63,8 +63,7 @@ public class LinkArraySupportFactory {
         private StructureArray(DBField dbField) {
             super(supportName,dbField);
             PVField pvField = dbField.getPVField();
-            processRequestorName = 
-                pvField.getPVRecord().getRecordName() + pvField.getFullFieldName();
+            processRequestorName = pvField.getFullName();
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.process.SupportProcessRequestor#getProcessRequestorName()
@@ -79,9 +78,7 @@ public class LinkArraySupportFactory {
             if(!super.checkSupportState(SupportState.readyForInitialize,supportName)) return;
             DBNonScalarArray dbNonScalarArray = (DBNonScalarArray)super.getDBField();
             pvStructureArray = (PVStructureArray)dbNonScalarArray.getPVField();
-            processRequestorName = 
-                pvStructureArray.getPVRecord().getRecordName()
-                + pvStructureArray.getFullFieldName();
+            processRequestorName = pvStructureArray.getFullName();
             SupportState supportState = SupportState.readyForStart;
             int n = pvStructureArray.getLength();
             StructureArrayData structureArrayData = new StructureArrayData();

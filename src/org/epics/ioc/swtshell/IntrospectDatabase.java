@@ -8,27 +8,34 @@ package org.epics.ioc.swtshell;
 import java.util.*;
 
 import org.eclipse.swt.*;
+import org.eclipse.swt.layout.*;
 import org.eclipse.swt.events.*;
 import org.eclipse.swt.widgets.*;
-import org.eclipse.swt.layout.*;
 
+import org.epics.ioc.db.*;
 import org.epics.ioc.dbd.*;
+
 /**
  * @author mrk
  *
  */
-public class IntrospectDBD {
-    static private DBD dbd = DBDFactory.getMasterDBD();
+public class IntrospectDatabase {
+    static private IOCDB iocdb = IOCDBFactory.getMaster();
     
     public static void init(Display display) {
         Introspect introspect = new Introspect(display);
         introspect.start();
     }
     
-    private static class Introspect {
+    private static class Introspect implements SelectionListener{
+        static private DBD dbd = DBDFactory.getMasterDBD();
+        private Map<String,DBRecord> recordMap = iocdb.getRecordMap();
         private Display display;
         private Shell shell;
-        private Text text;
+        private Text recordSelectText;
+        private Button clearButton;
+        private Text consoleText;
+        private SelectRecord selectRecord;
         
         private Introspect(Display display) {
             this.display = display;
@@ -36,67 +43,99 @@ public class IntrospectDBD {
         
         public void start() {
             shell = new Shell(display);
-            shell.setText("introspectDBD");
+            shell.setText("introspectDB");
+            GridLayout layout = new GridLayout();
+            layout.numColumns = 1;
+            shell.setLayout(layout);
             Menu menuBar = new Menu(shell,SWT.BAR);
-            MenuItem fileMenuHeader = new MenuItem(menuBar,SWT.CASCADE);
-            fileMenuHeader.setText("&File");
-            Menu fileMenu = new Menu(shell,SWT.DROP_DOWN);
-            fileMenuHeader.setMenu(fileMenu);
-            MenuItem dbdMenuItem = new MenuItem(fileMenu,SWT.CASCADE);
-            dbdMenuItem.setText("menu");
-            new MenuDBD(dbdMenuItem);
-            MenuItem dbdStructureItem = new MenuItem(fileMenu,SWT.CASCADE);
-            dbdStructureItem.setText("structure");
-            new StructureDBD(dbdStructureItem);
-            MenuItem dbdRecordTypeItem = new MenuItem(fileMenu,SWT.CASCADE);
-            dbdRecordTypeItem.setText("recordType");
-            new RecordTypeDBD(dbdRecordTypeItem);
-            MenuItem dbdSupportItem = new MenuItem(fileMenu,SWT.CASCADE);
-            dbdSupportItem.setText("support");
-            new SupportDBD(dbdSupportItem);
-            MenuItem dbdLinkSupportItem = new MenuItem(fileMenu,SWT.CASCADE);
-            dbdLinkSupportItem.setText("linkSupport");
-            new LinkSupportDBD(dbdLinkSupportItem);
-            MenuItem exitItem = new MenuItem(fileMenu,SWT.PUSH);
-            exitItem.setText("Exit");
-            exitItem.addSelectionListener(new SelectionListener() {
-                public void widgetDefaultSelected(SelectionEvent arg0) {
-                    shell.dispose();
-                }
-                public void widgetSelected(SelectionEvent arg0) {
-                    shell.dispose();
-                }
-            });
             shell.setMenuBar(menuBar);
-            GridLayout gridLayout = new GridLayout();
-            gridLayout.numColumns = 1;
-            shell.setLayout(gridLayout);
-            Composite composite = new Composite(shell,SWT.BORDER);
-            gridLayout = new GridLayout();
-            gridLayout.numColumns = 1;
-            composite.setLayout(gridLayout);
-            Button clearItem = new Button(composite,SWT.PUSH);
-            clearItem.setText("&Clear");
-            clearItem.addSelectionListener(new SelectionListener() {
-                public void widgetDefaultSelected(SelectionEvent arg0) {
-                    widgetSelected(arg0);
-                }
-                public void widgetSelected(SelectionEvent arg0) {
-                    text.selectAll();
-                    text.clearSelection();
-                    text.setText("");
+            MenuItem dbdMenu = new MenuItem(menuBar,SWT.CASCADE);
+            dbdMenu.setText("menu");
+            new MenuDBD(dbdMenu);
+            MenuItem dbdStructureMenu = new MenuItem(menuBar,SWT.CASCADE);
+            dbdStructureMenu.setText("structure");
+            new StructureDBD(dbdStructureMenu);
+            MenuItem dbdRecordTypeMenu = new MenuItem(menuBar,SWT.CASCADE);
+            dbdRecordTypeMenu.setText("recordType");
+            new RecordTypeDBD(dbdRecordTypeMenu);
+            MenuItem dbdSupportMenu = new MenuItem(menuBar,SWT.CASCADE);
+            dbdSupportMenu.setText("support");
+            new SupportDBD(dbdSupportMenu);
+            MenuItem dbdLinkSupportMenu = new MenuItem(menuBar,SWT.CASCADE);
+            dbdLinkSupportMenu.setText("linkSupport");
+            new LinkSupportDBD(dbdLinkSupportMenu);
+            Composite recordSelectComposite = new Composite(shell,SWT.BORDER);
+            GridData gridData = new GridData(GridData.FILL_HORIZONTAL);
+            recordSelectComposite.setLayoutData(gridData);
+            layout = new GridLayout();
+            layout.numColumns = 3;
+            recordSelectComposite.setLayout(layout);
+            new Label(recordSelectComposite,SWT.NONE).setText("recordName");
+            Button recordSelectButton = new Button(recordSelectComposite,SWT.PUSH);
+            recordSelectButton.setText("select");
+            selectRecord = new SelectRecord(shell);
+            recordSelectText = new Text(recordSelectComposite,SWT.SINGLE);
+            gridData = new GridData(GridData.FILL_HORIZONTAL);
+            recordSelectText.setLayoutData(gridData);
+            recordSelectText.addSelectionListener(this);            
+            Composite consoleComposite = new Composite(shell,SWT.BORDER);
+            layout = new GridLayout();
+            layout.numColumns = 1;
+            consoleComposite.setLayout(layout);
+            gridData = new GridData(GridData.FILL_BOTH);
+            consoleComposite.setLayoutData(gridData);
+            clearButton = new Button(consoleComposite,SWT.PUSH);
+            clearButton.setText("&Clear");
+            clearButton.addSelectionListener(this);
+            consoleText = new Text(consoleComposite,SWT.BORDER|SWT.H_SCROLL|SWT.V_SCROLL|SWT.READ_ONLY);
+            gridData = new GridData(GridData.FILL_BOTH);
+            consoleText.setLayoutData(gridData);
+            recordSelectButton.addSelectionListener( new SelectionAdapter() {
+                public void widgetSelected(SelectionEvent e) {
+                    String name = selectRecord.getRecordName();
+                    if(name!=null) {
+                        DBRecord dbRecord = recordMap.get(name);
+                        if(dbRecord!=null) {
+                            consoleText.append(dbRecord.toString());
+                        } else {
+                            consoleText.append("record not found");
+                        }
+                    }
                 }
             });
-            text = new Text(composite,SWT.BORDER|SWT.WRAP|SWT.V_SCROLL|SWT.READ_ONLY);
-            //text.setSize(sizeX,sizeY); DOES NOT WORK
-            Swtshell.makeBlanks(text,20,120);
-            shell.pack();
-            text.selectAll();
-            text.clearSelection();
-            text.setText("");
             shell.open();
         }
         
+        /* (non-Javadoc)
+         * @see org.eclipse.swt.events.SelectionListener#widgetDefaultSelected(org.eclipse.swt.events.SelectionEvent)
+         */
+        public void widgetDefaultSelected(SelectionEvent e) {
+            widgetSelected(e);
+        }
+
+        /* (non-Javadoc)
+         * @see org.eclipse.swt.events.SelectionListener#widgetSelected(org.eclipse.swt.events.SelectionEvent)
+         */
+        public void widgetSelected(SelectionEvent e) {
+            if(e.getSource()==recordSelectText) {
+                String name = recordSelectText.getText();
+                if(name!=null) {
+                    DBRecord dbRecord = recordMap.get(name);
+                    if(dbRecord!=null) {
+                        consoleText.append(dbRecord.toString());
+                    } else {
+                        consoleText.append("record not found");
+                    }
+                }
+                return;
+            }
+            if(e.getSource()==clearButton) {
+                consoleText.selectAll();
+                consoleText.clearSelection();
+                consoleText.setText("");
+                return;
+            }
+        }
         private class MenuDBD implements SelectionListener {
             private Map<String,DBDMenu> menuMap;
             
@@ -129,13 +168,13 @@ public class IntrospectDBD {
                 String key = choice.getText();
                 if(!key.equals("all")) {
                     DBDMenu value = (DBDMenu)menuMap.get(key);
-                    text.append(value.toString());
+                    consoleText.append(value.toString());
                     return;
                 }
                 Set<String> keys = menuMap.keySet();
                 for(String next: keys) {
                     DBDMenu value = menuMap.get(next);
-                    text.append(value.toString());
+                    consoleText.append(value.toString());
                 }
             }
             
@@ -173,13 +212,13 @@ public class IntrospectDBD {
                 String key = choice.getText();
                 if(!key.equals("all")) {
                     DBDStructure value = (DBDStructure)structureMap.get(key);
-                    text.append(value.toString());
+                    consoleText.append(value.toString());
                     return;
                 }
                 Set<String> keys = structureMap.keySet();
                 for(String next: keys) {
                     DBDStructure value = structureMap.get(next);
-                    text.append(value.toString());
+                    consoleText.append(value.toString());
                 }
             }
             
@@ -217,13 +256,13 @@ public class IntrospectDBD {
                 String key = choice.getText();
                 if(!key.equals("all")) {
                     DBDRecordType value = (DBDRecordType)recordTypeMap.get(key);
-                    text.append(value.toString());
+                    consoleText.append(value.toString());
                     return;
                 }
                 Set<String> keys = recordTypeMap.keySet();
                 for(String next: keys) {
                     DBDRecordType value = recordTypeMap.get(next);
-                    text.append(value.toString());
+                    consoleText.append(value.toString());
                 }
             }
             
@@ -261,13 +300,13 @@ public class IntrospectDBD {
                 String key = choice.getText();
                 if(!key.equals("all")) {
                     DBDSupport value = (DBDSupport)supportMap.get(key);
-                    text.append(value.toString());
+                    consoleText.append(value.toString());
                     return;
                 }
                 Set<String> keys = supportMap.keySet();
                 for(String next: keys) {
                     DBDSupport value = supportMap.get(next);
-                    text.append(value.toString());
+                    consoleText.append(value.toString());
                 }
             }
         }
@@ -305,13 +344,13 @@ public class IntrospectDBD {
                 String key = choice.getText();
                 if(!key.equals("all")) {
                     DBDLinkSupport value = (DBDLinkSupport)linkSupportMap.get(key);
-                    text.append(value.toString());
+                    consoleText.append(value.toString());
                     return;
                 }
                 Set<String> keys = linkSupportMap.keySet();
                 for(String next: keys) {
                     DBDLinkSupport value = linkSupportMap.get(next);
-                    text.append(value.toString());
+                    consoleText.append(value.toString());
                 }
             }
         }

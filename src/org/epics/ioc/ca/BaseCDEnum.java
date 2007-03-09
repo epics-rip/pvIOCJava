@@ -76,6 +76,8 @@ public class BaseCDEnum extends BaseCDField implements CDEnum {
      * @see org.epics.ioc.ca.BaseCDField#dataPut(org.epics.ioc.pv.PVField)
      */
     public void dataPut(PVField targetPVField) {
+        String supportName = targetPVField.getSupportName();
+        if(supportName!=null) super.supportNamePut(targetPVField);
         PVEnum targetPVEnum = (PVEnum)targetPVField;
         pvEnum.setIndex(targetPVEnum.getIndex());
         numIndexPuts++;
