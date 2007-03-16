@@ -76,9 +76,9 @@ public class LinkSupportFactory {
         private AlarmSeverity alarmSeverity = AlarmSeverity.none;
         
         private TimeStamp timeStamp = new TimeStamp();
-        private DBRecord linkDBRecord = null;
-        private RecordProcess linkRecordProcess = null;
-        private PVEnum pvSeverity = null;
+        private DBRecord targetDBRecord = null;
+        private RecordProcess targetRecordProcess = null;
+        private PVEnum targetPVSeverity = null;
       
         private Channel channel = null;
         private ChannelProcess channelProcess = null;
@@ -139,22 +139,22 @@ public class LinkSupportFactory {
             String[]pvname = periodPattern.split(name,2);
             String recordName = pvname[0];
             IOCDB iocdb = IOCDBFactory.getMaster();
-            linkDBRecord = iocdb.findRecord(recordName);
-            if(linkDBRecord!=null) {
+            targetDBRecord = iocdb.findRecord(recordName);
+            if(targetDBRecord!=null) {
                 if(inheritSeverity) {
-                    PVAccess pvAccess = PVAccessFactory.createPVAccess(linkDBRecord.getPVRecord());
+                    PVAccess pvAccess = PVAccessFactory.createPVAccess(targetDBRecord.getPVRecord());
                     if(pvAccess.findField("severity")==AccessSetResult.thisRecord) {
-                        pvSeverity = (PVEnum)pvAccess.getField();
+                        targetPVSeverity = (PVEnum)pvAccess.getField();
                     } else {
                         pvLink.message("severity field not found",MessageType.error);
                         return;
                     }
                 }
-                linkRecordProcess = linkDBRecord.getRecordProcess();
-                boolean result = linkRecordProcess.setRecordProcessRequestor(this);
+                targetRecordProcess = targetDBRecord.getRecordProcess();
+                boolean result = targetRecordProcess.setRecordProcessRequestor(this);
                 if(!result) {
                     pvLink.message("record already has processor", MessageType.error);
-                    linkDBRecord = null;
+                    targetDBRecord = null;
                     return;
                 }
                 isLocal = true;
@@ -192,9 +192,9 @@ public class LinkSupportFactory {
         public void stop() {
             if(super.getSupportState()!=SupportState.ready) return;
             if(isLocal) {
-                linkRecordProcess.releaseRecordProcessRequestor(this);
-                linkDBRecord = null;
-                linkRecordProcess = null;
+                targetRecordProcess.releaseRecordProcessRequestor(this);
+                targetDBRecord = null;
+                targetRecordProcess = null;
             } else {
                 channelProcess = null;
                 channelGet = null;
@@ -235,7 +235,7 @@ public class LinkSupportFactory {
          */
         public void processCallback() {
             if(isLocal) {
-                linkRecordProcess.process(this, false,timeStamp);               
+                targetRecordProcess.process(this, false,timeStamp);               
             } else {
                 if(inheritSeverity) {
                     channelGet.get();
@@ -251,7 +251,7 @@ public class LinkSupportFactory {
             this.requestResult = requestResult;
             if(inheritSeverity) {
                 if(requestResult==RequestResult.success) {
-                    int index = pvSeverity.getIndex();
+                    int index = targetPVSeverity.getIndex();
                     alarmSeverity = AlarmSeverity.getSeverity(index);
                 } else {
                     alarmSeverity = AlarmSeverity.invalid;
@@ -420,10 +420,10 @@ public class LinkSupportFactory {
         private AlarmSeverity alarmSeverity = AlarmSeverity.none;
              
         private TimeStamp timeStamp = new TimeStamp();
-        private DBRecord linkDBRecord;
-        private RecordProcess linkRecordProcess;
-        private PVField pvField;
-        private PVEnum pvSeverity;
+        private DBRecord targetDBRecord;
+        private RecordProcess targetRecordProcess;
+        private PVField targetPVField;
+        private PVEnum targetPVSeverity;
         
         
         private String valueFieldName;
@@ -509,7 +509,7 @@ public class LinkSupportFactory {
             while(true) {
                 DBRecord dbRecord = iocdb.findRecord(recordName);
                 if(dbRecord==null) {
-                    linkDBRecord = null;
+                    targetDBRecord = null;
                     break;
                 }
                 PVAccess pvAccess = PVAccessFactory.createPVAccess(dbRecord.getPVRecord());
@@ -519,18 +519,18 @@ public class LinkSupportFactory {
                     fieldName = pvAccess.getOtherField();
                     break;
                 case thisRecord:
-                    linkDBRecord = iocdb.findRecord(recordName);
-                    if(linkDBRecord==null) {
+                    targetDBRecord = iocdb.findRecord(recordName);
+                    if(targetDBRecord==null) {
                         throw new IllegalStateException(channelRequestorName + "logic error?"); 
                     }
-                    pvField = pvAccess.getField();
-                    if(pvField==null) {
+                    targetPVField = pvAccess.getField();
+                    if(targetPVField==null) {
                         throw new IllegalStateException(channelRequestorName + "logic error?"); 
                     }
                     if(inheritSeverity) {
                         pvAccess.findField("");
                         if(pvAccess.findField("severity")==AccessSetResult.thisRecord) {
-                            pvSeverity = (PVEnum)pvAccess.getField();
+                            targetPVSeverity = (PVEnum)pvAccess.getField();
                         } else {
                             pvLink.message("severity field not found",MessageType.error);
                             return;
@@ -538,22 +538,22 @@ public class LinkSupportFactory {
                     }
                     break forever;
                 case notFound:
-                    linkDBRecord = null;
+                    targetDBRecord = null;
                     break forever;
                 }
             }
-            if(linkDBRecord!=null) {
+            if(targetDBRecord!=null) {
                 if(process) {
-                    linkRecordProcess = linkDBRecord.getRecordProcess();
-                    boolean result = linkRecordProcess.setRecordProcessRequestor(this);
+                    targetRecordProcess = targetDBRecord.getRecordProcess();
+                    boolean result = targetRecordProcess.setRecordProcessRequestor(this);
                     if(!result) {
                         pvLink.message("record already has processor", MessageType.error);
-                        linkDBRecord = null;
+                        targetDBRecord = null;
                         return;
                     }
                 }
-                if(!checkCompatibility(pvField.getField())) {
-                    linkDBRecord = null;
+                if(!checkCompatibility(targetPVField.getField())) {
+                    targetDBRecord = null;
                     return;
                 }
                 isLocal = true;
@@ -587,9 +587,9 @@ public class LinkSupportFactory {
         public void stop() {
             if(super.getSupportState()!=SupportState.ready) return;
             if(isLocal) {
-                if(process) linkRecordProcess.releaseRecordProcessRequestor(this);
-                linkDBRecord = null;
-                linkRecordProcess = null;
+                if(process) targetRecordProcess.releaseRecordProcessRequestor(this);
+                targetDBRecord = null;
+                targetRecordProcess = null;
             } else {
                 channelGet = null;
                 severityField = null;
@@ -621,11 +621,11 @@ public class LinkSupportFactory {
             this.supportProcessRequestor = supportProcessRequestor;
             if(isConnected) {
                 if(isLocal && !process) {
-                    dbRecord.lockOtherRecord(linkDBRecord);
+                    dbRecord.lockOtherRecord(targetDBRecord);
                     try {
                         getLocalData();
                     } finally {
-                        linkDBRecord.unlock();
+                        targetDBRecord.unlock();
                     }
                     supportProcessRequestor.supportProcessDone(RequestResult.success);
                     return;
@@ -644,7 +644,7 @@ public class LinkSupportFactory {
          */
         public void processCallback() {
             if(isLocal) {
-                linkRecordProcess.process(this, false,timeStamp);
+                targetRecordProcess.process(this, false,timeStamp);
             } else {
                 arrayLength = -1;
                 channelGet.get();
@@ -677,7 +677,7 @@ public class LinkSupportFactory {
          */
         public void recordProcessResult(RequestResult requestResult) {
             this.requestResult = requestResult;
-            linkDBRecord.lockOtherRecord(dbRecord);
+            targetDBRecord.lockOtherRecord(dbRecord);
             try {
                 getLocalData();
             } finally {
@@ -742,33 +742,33 @@ public class LinkSupportFactory {
                     "Logic error in InputLink field!=valueChannelField",
                     MessageType.fatalError);
             }
-            Type linkType = data.getField().getType();
+            Type targetType = data.getField().getType();
             PVField pvField = valueDBField.getPVField();
             Field valueField = pvField.getField();
             Type valueType = valueField.getType();
-            if(valueType.isScalar() && linkType.isScalar()) {
+            if(valueType.isScalar() && targetType.isScalar()) {
                 convert.copyScalar(data,pvField);
                 valueDBField.postPut();
                 return false;
             }
-            if(linkType==Type.pvArray && valueType==Type.pvArray) {
-                PVArray linkArrayData = (PVArray)data;
-                PVArray recordArrayData = (PVArray)valueDBField;
+            if(targetType==Type.pvArray && valueType==Type.pvArray) {
+                PVArray targetPVArray = (PVArray)data;
+                PVArray valuePVArray = (PVArray)valueDBField;
                 if(arrayLength<0) {
-                    arrayLength = linkArrayData.getLength();
+                    arrayLength = targetPVArray.getLength();
                     arrayOffset = 0;
                 }
-                int num = convert.copyArray(linkArrayData,arrayOffset,
-                    recordArrayData,arrayOffset,arrayLength-arrayOffset);
+                int num = convert.copyArray(targetPVArray,arrayOffset,
+                    valuePVArray,arrayOffset,arrayLength-arrayOffset);
                 arrayOffset += num;
                 if(arrayOffset<arrayLength) return true;
                 valueDBField.postPut();
                 return false;
             }
-            if(linkType==Type.pvStructure && valueType==Type.pvStructure) {
-                PVStructure linkStructureData = (PVStructure)data;
-                PVStructure recordStructureData = (PVStructure)valueDBField;
-                convert.copyStructure(linkStructureData,recordStructureData);
+            if(targetType==Type.pvStructure && valueType==Type.pvStructure) {
+                PVStructure targetPVStructure = (PVStructure)data;
+                PVStructure valuePVStructure = (PVStructure)valueDBField;
+                convert.copyStructure(targetPVStructure,valuePVStructure);
                 valueDBField.postPut();
                 return false;
             }
@@ -811,33 +811,33 @@ public class LinkSupportFactory {
         }
         
         private void getLocalData() {
-            dbRecord.lockOtherRecord(linkDBRecord);
+            dbRecord.lockOtherRecord(targetDBRecord);
             try {
                 if(inheritSeverity) {
-                    int index = pvSeverity.getIndex();
+                    int index = targetPVSeverity.getIndex();
                     alarmSeverity = AlarmSeverity.getSeverity(index);
                 }
-                Type linkType = pvField.getField().getType();
+                Type targetType = targetPVField.getField().getType();
                 PVField valuePVField = valueDBField.getPVField();
                 Field valueField = valuePVField.getField();
                 Type valueType = valueField.getType();
-                if(valueType.isScalar() && linkType.isScalar()) {
-                    convert.copyScalar(pvField,valuePVField);
+                if(valueType.isScalar() && targetType.isScalar()) {
+                    convert.copyScalar(targetPVField,valuePVField);
                     valueDBField.postPut();
                     return;
                 }
-                if(linkType==Type.pvArray && valueType==Type.pvArray) {
-                    PVArray linkArrayData = (PVArray)pvField;
-                    PVArray recordArrayData = (PVArray)valueDBField.getPVField();
-                    convert.copyArray(linkArrayData,0,
-                        recordArrayData,0,linkArrayData.getLength());
+                if(targetType==Type.pvArray && valueType==Type.pvArray) {
+                    PVArray targetPVArray = (PVArray)targetPVField;
+                    PVArray valuePVArray = (PVArray)valueDBField.getPVField();
+                    convert.copyArray(targetPVArray,0,
+                        valuePVArray,0,targetPVArray.getLength());
                     valueDBField.postPut();
                     return;
                 }
-                if(linkType==Type.pvStructure && valueType==Type.pvStructure) {
-                    PVStructure linkStructureData = (PVStructure)pvField;
-                    PVStructure recordStructureData = (PVStructure)valueDBField.getPVField();
-                    convert.copyStructure(linkStructureData,recordStructureData);
+                if(targetType==Type.pvStructure && valueType==Type.pvStructure) {
+                    PVStructure targetPVStructure = (PVStructure)targetPVField;
+                    PVStructure valuePVStructure = (PVStructure)valueDBField.getPVField();
+                    convert.copyStructure(targetPVStructure,valuePVStructure);
                     valueDBField.postPut();
                     return;
                 }
@@ -845,7 +845,7 @@ public class LinkSupportFactory {
                         "Logic error in InputLink: unsupported type",
                         MessageType.fatalError);
             } finally {
-                linkDBRecord.unlock();
+                targetDBRecord.unlock();
             }
         }
         
@@ -885,20 +885,20 @@ public class LinkSupportFactory {
         
         
         
-        private boolean checkCompatibility(Field linkField) {
-            Type linkType = linkField.getType();
+        private boolean checkCompatibility(Field targetField) {
+            Type targetType = targetField.getType();
             Field valueField = valueDBField.getPVField().getField();
             Type valueType = valueField.getType();
-            if(valueType.isScalar() && linkType.isScalar()) {
-                if(convert.isCopyScalarCompatible(linkField,valueField)) return true;
-            } else if(linkType==Type.pvArray && valueType==Type.pvArray) {
-                Array linkArray = (Array)linkField;
-                Array recordArray = (Array)valueField;
-                if(convert.isCopyArrayCompatible(linkArray,recordArray)) return true;
-            } else if(linkType==Type.pvStructure && valueType==Type.pvStructure) {
-                Structure linkStructure = (Structure)linkField;
-                Structure recordStructure = (Structure)valueField;
-                if(convert.isCopyStructureCompatible(linkStructure,recordStructure)) return true;
+            if(valueType.isScalar() && targetType.isScalar()) {
+                if(convert.isCopyScalarCompatible(targetField,valueField)) return true;
+            } else if(targetType==Type.pvArray && valueType==Type.pvArray) {
+                Array targetArray = (Array)targetField;
+                Array valueArray = (Array)valueField;
+                if(convert.isCopyArrayCompatible(targetArray,valueArray)) return true;
+            } else if(targetType==Type.pvStructure && valueType==Type.pvStructure) {
+                Structure targetStructure = (Structure)targetField;
+                Structure valueStructure = (Structure)valueField;
+                if(convert.isCopyStructureCompatible(targetStructure,valueStructure)) return true;
             }
             message("is not compatible with pvname " + pvnameAccess.get(),MessageType.error);
             return false;
@@ -933,10 +933,11 @@ public class LinkSupportFactory {
         private AlarmSeverity alarmSeverity = AlarmSeverity.none;
              
         private TimeStamp timeStamp = new TimeStamp();
-        private DBRecord linkDBRecord = null;
-        private RecordProcess linkRecordProcess = null;
-        private PVField pvField = null;
-        private PVEnum pvSeverity = null;
+        private DBRecord targetDBRecord = null;
+        private RecordProcess targetRecordProcess = null;
+        private PVField targetPVField = null;
+        private DBField targetDBField = null;
+        private PVEnum targetPVSeverity = null;
         
         
         private String valueFieldName = null;
@@ -1025,28 +1026,32 @@ public class LinkSupportFactory {
             while(true) {
                 DBRecord dbRecord = iocdb.findRecord(recordName);
                 if(dbRecord==null) {
-                    linkDBRecord = null;
+                    targetDBRecord = null;
                     break;
                 }
-                PVAccess dbAccess = PVAccessFactory.createPVAccess(dbRecord.getPVRecord());
-                switch(dbAccess.findField(fieldName)) {
+                PVAccess pvAccess = PVAccessFactory.createPVAccess(dbRecord.getPVRecord());
+                switch(pvAccess.findField(fieldName)) {
                 case otherRecord:
-                    recordName = dbAccess.getOtherRecord();
-                    fieldName = dbAccess.getOtherField();
+                    recordName = pvAccess.getOtherRecord();
+                    fieldName = pvAccess.getOtherField();
                     break;
                 case thisRecord:
-                    linkDBRecord = iocdb.findRecord(recordName);
-                    if(linkDBRecord==null) {
-                        throw new IllegalStateException(channelRequestorName + "logic error?"); 
+                    targetDBRecord = iocdb.findRecord(recordName);
+                    if(targetDBRecord==null) {
+                        throw new IllegalStateException(channelRequestorName + " logic error?"); 
                     }
-                    pvField = dbAccess.getField();
-                    if(pvField==null) {
-                        throw new IllegalStateException(channelRequestorName + "logic error?"); 
+                    targetPVField = pvAccess.getField();
+                    if(targetPVField==null) {
+                        throw new IllegalStateException(channelRequestorName + " logic error?"); 
+                    }
+                    targetDBField = targetDBRecord.findDBField(targetPVField);
+                    if(targetPVField==null) {
+                        throw new IllegalStateException(channelRequestorName + " logic error?");
                     }
                     if(inheritSeverity) {
-                        dbAccess.findField("");
-                        if(dbAccess.findField("severity")==AccessSetResult.thisRecord) {
-                            pvSeverity = (PVEnum)dbAccess.getField();
+                        pvAccess.findField("");
+                        if(pvAccess.findField("severity")==AccessSetResult.thisRecord) {
+                            targetPVSeverity = (PVEnum)pvAccess.getField();
                         } else {
                             pvLink.message("severity field not found",MessageType.error);
                             return;
@@ -1054,22 +1059,22 @@ public class LinkSupportFactory {
                     }
                     break forever;
                 case notFound:
-                    linkDBRecord = null;
+                    targetDBRecord = null;
                     break forever;
                 }
             }
-            if(linkDBRecord!=null) {
+            if(targetDBRecord!=null) {
                 if(process) {
-                    linkRecordProcess = linkDBRecord.getRecordProcess();
-                    boolean result = linkRecordProcess.setRecordProcessRequestor(this);
+                    targetRecordProcess = targetDBRecord.getRecordProcess();
+                    boolean result = targetRecordProcess.setRecordProcessRequestor(this);
                     if(!result) {
                         pvLink.message("record already has processor", MessageType.error);
-                        linkDBRecord = null;
+                        targetDBRecord = null;
                         return;
                     }
                 }
-                if(!checkCompatibility(pvField.getField())) {
-                    linkDBRecord = null;
+                if(!checkCompatibility(targetPVField.getField())) {
+                    targetDBRecord = null;
                     return;
                 }
                 isLocal = true;
@@ -1103,9 +1108,9 @@ public class LinkSupportFactory {
         public void stop() {
             if(super.getSupportState()!=SupportState.ready) return;
             if(isLocal) {
-                if(process) linkRecordProcess.releaseRecordProcessRequestor(this);
-                linkDBRecord = null;
-                linkRecordProcess = null;
+                if(process) targetRecordProcess.releaseRecordProcessRequestor(this);
+                targetDBRecord = null;
+                targetRecordProcess = null;
             } else {
                 channelPut = null;
                 severityField = null;
@@ -1138,11 +1143,11 @@ public class LinkSupportFactory {
             this.supportProcessRequestor = supportProcessRequestor;
             if(isConnected) {
                 if(isLocal && !process) {
-                    dbRecord.lockOtherRecord(linkDBRecord);
+                    dbRecord.lockOtherRecord(targetDBRecord);
                     try {
                         putLocalData();
                     } finally {
-                        linkDBRecord.unlock();
+                        targetDBRecord.unlock();
                     }
                     supportProcessRequestor.supportProcessDone(RequestResult.success);
                     return;
@@ -1161,9 +1166,9 @@ public class LinkSupportFactory {
          */
         public void processCallback() {
             if(isLocal) {
-                linkRecordProcess.setActive(this);
+                targetRecordProcess.setActive(this);
                 putLocalData();
-                linkRecordProcess.process(this, false, timeStamp);
+                targetRecordProcess.process(this, false, timeStamp);
             } else {
                 arrayLength = -1;
                 if(inheritSeverity) {
@@ -1196,7 +1201,7 @@ public class LinkSupportFactory {
             this.requestResult = requestResult;
             if(inheritSeverity) {
                 if(requestResult==RequestResult.success) {
-                    int index = pvSeverity.getIndex();
+                    int index = targetPVSeverity.getIndex();
                     alarmSeverity = AlarmSeverity.getSeverity(index);
                 } else {
                     alarmSeverity = AlarmSeverity.invalid;
@@ -1261,32 +1266,32 @@ public class LinkSupportFactory {
                     "Logic error in InputLink field!=valueChannelField",
                     MessageType.fatalError);
             }
-            Type linkType = data.getField().getType();
+            Type targetType = data.getField().getType();
             PVField valuePVField = valueDBField.getPVField();
             Field valueField = valuePVField.getField();
             Type valueType = valueField.getType();
-            if(valueType.isScalar() && linkType.isScalar()) {
+            if(valueType.isScalar() && targetType.isScalar()) {
                 convert.copyScalar(valuePVField,data);
                 return false;
             }
-            if(linkType==Type.pvArray && valueType==Type.pvArray) {
-                PVArray linkArrayData = (PVArray)data;
-                PVArray recordArrayData = (PVArray)valuePVField;
+            if(targetType==Type.pvArray && valueType==Type.pvArray) {
+                PVArray targetPVArray = (PVArray)data;
+                PVArray valuePVArray = (PVArray)valuePVField;
                 if(arrayLength<0) {
-                    arrayLength = linkArrayData.getLength();
+                    arrayLength = targetPVArray.getLength();
                     arrayOffset = 0;
-                    linkArrayData.setLength(arrayLength);
+                    targetPVArray.setLength(arrayLength);
                 }
-                int num = convert.copyArray(recordArrayData,arrayOffset,
-                    linkArrayData,arrayOffset,arrayLength-arrayOffset);
+                int num = convert.copyArray(valuePVArray,arrayOffset,
+                    targetPVArray,arrayOffset,arrayLength-arrayOffset);
                 arrayOffset += num;
                 if(arrayOffset<arrayLength) return true;
                 return false;
             }
-            if(linkType==Type.pvStructure && valueType==Type.pvStructure) {
-                PVStructure linkStructureData = (PVStructure)data;
-                PVStructure recordStructureData = (PVStructure)valuePVField;
-                convert.copyStructure(recordStructureData,linkStructureData);
+            if(targetType==Type.pvStructure && valueType==Type.pvStructure) {
+                PVStructure targetPVStructure = (PVStructure)data;
+                PVStructure valuePVStructure = (PVStructure)valuePVField;
+                convert.copyStructure(valuePVStructure,targetPVStructure);
                 return false;
             }
             pvLink.message(
@@ -1352,37 +1357,37 @@ public class LinkSupportFactory {
         }
         
         private void putLocalData() {
-            dbRecord.lockOtherRecord(linkDBRecord);
+            dbRecord.lockOtherRecord(targetDBRecord);
             try {
-                Type linkType = pvField.getField().getType();
+                Type targetType = targetPVField.getField().getType();
                 PVField valuePVField = valueDBField.getPVField();
                 Field valueField = valuePVField.getField();
                 Type valueType = valueField.getType();
-                if(valueType.isScalar() && linkType.isScalar()) {
-                    convert.copyScalar(valuePVField,pvField);
-                    valueDBField.postPut();
+                if(valueType.isScalar() && targetType.isScalar()) {
+                    convert.copyScalar(valuePVField,targetPVField);
+                    targetDBField.postPut();
                     return;
                 }
-                if(linkType==Type.pvArray && valueType==Type.pvArray) {
-                    PVArray linkArrayData = (PVArray)pvField;
-                    PVArray recordArrayData = (PVArray)valuePVField;
-                    convert.copyArray(recordArrayData,0,
-                        linkArrayData,0,recordArrayData.getLength());
-                    valueDBField.postPut();
+                if(targetType==Type.pvArray && valueType==Type.pvArray) {
+                    PVArray targetPVArray = (PVArray)targetPVField;
+                    PVArray valuePVArray = (PVArray)valuePVField;
+                    convert.copyArray(valuePVArray,0,
+                        targetPVArray,0,valuePVArray.getLength());
+                    targetDBField.postPut();
                     return;
                 }
-                if(linkType==Type.pvStructure && valueType==Type.pvStructure) {
-                    PVStructure linkStructureData = (PVStructure)pvField;
-                    PVStructure recordStructureData = (PVStructure)valuePVField;
-                    convert.copyStructure(recordStructureData,linkStructureData);
-                    valueDBField.postPut();
+                if(targetType==Type.pvStructure && valueType==Type.pvStructure) {
+                    PVStructure targetPVStructure = (PVStructure)targetPVField;
+                    PVStructure valuePVStructure = (PVStructure)valuePVField;
+                    convert.copyStructure(valuePVStructure,targetPVStructure);
+                    targetDBField.postPut();
                     return;
                 }
                 pvLink.message(
                         "Logic error in OutputLink: unsupported type",
                         MessageType.fatalError);
             } finally {
-                linkDBRecord.unlock();
+                targetDBRecord.unlock();
             }
         }
         
@@ -1427,21 +1432,21 @@ public class LinkSupportFactory {
             return true;
         }
               
-        private boolean checkCompatibility(Field linkField) {
-            Type linkType = linkField.getType();
+        private boolean checkCompatibility(Field targetField) {
+            Type targetType = targetField.getType();
             PVField valuePVField = valueDBField.getPVField();
             Field valueField = valuePVField.getField();
             Type valueType = valueField.getType();
-            if(valueType.isScalar() && linkType.isScalar()) {
-                if(convert.isCopyScalarCompatible(linkField,valueField)) return true;
-            } else if(linkType==Type.pvArray && valueType==Type.pvArray) {
-                Array linkArray = (Array)linkField;
-                Array recordArray = (Array)valueField;
-                if(convert.isCopyArrayCompatible(linkArray,recordArray)) return true;
-            } else if(linkType==Type.pvStructure && valueType==Type.pvStructure) {
-                Structure linkStructure = (Structure)linkField;
-                Structure recordStructure = (Structure)valueField;
-                if(convert.isCopyStructureCompatible(linkStructure,recordStructure)) return true;
+            if(valueType.isScalar() && targetType.isScalar()) {
+                if(convert.isCopyScalarCompatible(targetField,valueField)) return true;
+            } else if(targetType==Type.pvArray && valueType==Type.pvArray) {
+                Array targetArray = (Array)targetField;
+                Array valueArray = (Array)valueField;
+                if(convert.isCopyArrayCompatible(targetArray,valueArray)) return true;
+            } else if(targetType==Type.pvStructure && valueType==Type.pvStructure) {
+                Structure targetStructure = (Structure)targetField;
+                Structure valueStructure = (Structure)valueField;
+                if(convert.isCopyStructureCompatible(targetStructure,valueStructure)) return true;
             }
             message("is not compatible with pvname " + pvnameAccess.get(),MessageType.error);
             return false;
@@ -1565,7 +1570,7 @@ public class LinkSupportFactory {
             monitorType = MonitorType.valueOf(type);
             deadband = deadbandAccess.get();
             onlyWhileProcessing = onlyWhileProcessingAccess.get();
-            channelMonitor = channel.createChannelMonitor(onlyWhileProcessing);
+            channelMonitor = channel.createChannelMonitor(onlyWhileProcessing,false);
             if(channel.isConnected()) {
                 channelStart();
             }
@@ -1718,10 +1723,10 @@ public class LinkSupportFactory {
               
         private Channel channel = null;
         private boolean isLocal = false;
-        private DBRecord linkDBRecord = null;
+        private DBRecord targetDBRecord = null;
         private ChannelMonitor channelMonitor = null;
-        private ChannelField dataField = null;
-        private ChannelField severityField = null;
+        private ChannelField targetChannelField = null;
+        private ChannelField severityChannelField = null;
         private ChannelFieldGroup channelFieldGroup = null;
         
         private AlarmSeverity alarmSeverity = AlarmSeverity.none;
@@ -1817,8 +1822,8 @@ public class LinkSupportFactory {
             isLocal = channel.isLocal();
             if(isLocal) {
                 IOCDB iocdb = IOCDBFactory.getMaster();
-                linkDBRecord = iocdb.findRecord(recordName);
-                if(linkDBRecord==null) {
+                targetDBRecord = iocdb.findRecord(recordName);
+                if(targetDBRecord==null) {
                     throw new IllegalStateException("logic error"); 
                 }
             }
@@ -1849,7 +1854,7 @@ public class LinkSupportFactory {
                 configStructure.message("inheritSeverity ignored", MessageType.warning);
                 inheritSeverity = false;
             }
-            channelMonitor = channel.createChannelMonitor(onlyWhileProcessing);
+            channelMonitor = channel.createChannelMonitor(onlyWhileProcessing,false);
             if(channel.isConnected()) {
                 channelStart();
             }
@@ -1906,8 +1911,8 @@ public class LinkSupportFactory {
             dbRecord.lock();
             try {
                 if(!channel.isConnected()) {
-                    severityField = null;
-                    dataField = null;
+                    severityChannelField = null;
+                    targetChannelField = null;
                     channelFieldGroup = null;
                     return;
                 }
@@ -1959,7 +1964,7 @@ public class LinkSupportFactory {
          */
         public void monitorData(ChannelData channelData) {
             if(isLocal) {
-                linkDBRecord.lockOtherRecord(dbRecord);
+                targetDBRecord.lockOtherRecord(dbRecord);
             } else {
                 dbRecord.lock();
             }
@@ -1970,40 +1975,40 @@ public class LinkSupportFactory {
                 CDField[] cdbFields = cdStructure.getFieldCDFields();
                 for(int i=0;i<cdbFields.length; i++) {
                     CDField cdField = cdbFields[i];
-                    PVField pvField = cdField.getPVField();
+                    PVField targetPVField = cdField.getPVField();
                     ChannelField channelField = channelFieldList.get(i);
-                    if(channelField==severityField) {
-                        PVEnum pvEnum = (PVEnum)pvField;
-                        alarmSeverity = AlarmSeverity.getSeverity(pvEnum.getIndex());
+                    if(channelField==severityChannelField) {
+                        PVEnum targetPVEnum = (PVEnum)targetPVField;
+                        alarmSeverity = AlarmSeverity.getSeverity(targetPVEnum.getIndex());
                         continue;
                     }
-                    if(channelField!=dataField) {
+                    if(channelField!=targetChannelField) {
                         pvLink.message(
                                 "Logic error",
                                 MessageType.fatalError);
                         continue;
                     }
-                    Type linkType = channelField.getField().getType();
+                    Type targetType = channelField.getField().getType();
                     PVField valuePVField = valueDBField.getPVField();
                     Field valueField = valuePVField.getField();
                     Type valueType = valueField.getType();
-                    if(valueType.isScalar() && linkType.isScalar()) {
-                        convert.copyScalar(pvField,valuePVField);
+                    if(valueType.isScalar() && targetType.isScalar()) {
+                        convert.copyScalar(targetPVField,valuePVField);
                         valueDBField.postPut();
                         continue;
                     }
-                    if(linkType==Type.pvArray && valueType==Type.pvArray) {
-                        PVArray linkArrayData = (PVArray)pvField;
-                        PVArray recordArrayData = (PVArray)valuePVField;
-                        convert.copyArray(linkArrayData,0,
-                            recordArrayData,0,linkArrayData.getLength());
+                    if(targetType==Type.pvArray && valueType==Type.pvArray) {
+                        PVArray targetPVArray = (PVArray)targetPVField;
+                        PVArray valuePVArray = (PVArray)valuePVField;
+                        convert.copyArray(targetPVArray,0,
+                            valuePVArray,0,targetPVArray.getLength());
                         valueDBField.postPut();
                         continue;
                     }
-                    if(linkType==Type.pvStructure && valueType==Type.pvStructure) {
-                        PVStructure linkStructureData = (PVStructure)pvField;
-                        PVStructure recordStructureData = (PVStructure)valuePVField;
-                        convert.copyStructure(linkStructureData,recordStructureData);
+                    if(targetType==Type.pvStructure && valueType==Type.pvStructure) {
+                        PVStructure targetPVStructure = (PVStructure)targetPVField;
+                        PVStructure valuePVStructure = (PVStructure)valuePVField;
+                        convert.copyStructure(targetPVStructure,valuePVStructure);
                         valueDBField.postPut();
                         continue;
                     }
@@ -2023,7 +2028,7 @@ public class LinkSupportFactory {
                 try {
                     processLock.lock();
                     try {
-                        if(!processDone) processCondition.await();
+                        while(!processDone) processCondition.await();
                     }finally {
                         processLock.unlock();
                     }
@@ -2036,6 +2041,7 @@ public class LinkSupportFactory {
         public void recordProcessComplete() {
             processLock.lock();
             try {
+                processDone = true;
                 processCondition.signal();
             } finally {
                 processLock.unlock();
@@ -2045,24 +2051,24 @@ public class LinkSupportFactory {
          * @see org.epics.ioc.process.RecordProcessRequestor#recordProcessResult(org.epics.ioc.util.AlarmSeverity, java.lang.String, org.epics.ioc.util.TimeStamp)
          */
         public void recordProcessResult(RequestResult requestResult) {
-            processDone = true;
+            // nothing to do
         }
         
         private String checkCompatibility() {
-            Type linkType = dataField.getField().getType();
+            Type targetType = targetChannelField.getField().getType();
             PVField valuePVField = valueDBField.getPVField();
             Field valueField = valuePVField.getField();
             Type valueType = valueField.getType();
-            if(valueType.isScalar() && linkType.isScalar()) {
-                if(convert.isCopyScalarCompatible(dataField.getField(),valueField)) return null;
-            } else if(linkType==Type.pvArray && valueType==Type.pvArray) {
-                Array linkArray = (Array)dataField;
-                Array recordArray = (Array)valueField;
-                if(convert.isCopyArrayCompatible(linkArray,recordArray)) return null;
-            } else if(linkType==Type.pvStructure && valueType==Type.pvStructure) {
-                Structure linkStructure = (Structure)dataField;
-                Structure recordStructure = (Structure)valueField;
-                if(convert.isCopyStructureCompatible(linkStructure,recordStructure)) return null;
+            if(valueType.isScalar() && targetType.isScalar()) {
+                if(convert.isCopyScalarCompatible(targetChannelField.getField(),valueField)) return null;
+            } else if(targetType==Type.pvArray && valueType==Type.pvArray) {
+                Array targetArray = (Array)targetChannelField;
+                Array valueArray = (Array)valueField;
+                if(convert.isCopyArrayCompatible(targetArray,valueArray)) return null;
+            } else if(targetType==Type.pvStructure && valueType==Type.pvStructure) {
+                Structure targetStructure = (Structure)targetChannelField;
+                Structure valueStructure = (Structure)valueField;
+                if(convert.isCopyStructureCompatible(targetStructure,valueStructure)) return null;
             }
             String errorMessage = 
                 "is not compatible with pvname " + pvnameAccess.get();
@@ -2079,34 +2085,34 @@ public class LinkSupportFactory {
                     MessageType.error);
                 return;
             }
-            dataField = channel.getChannelField();
+            targetChannelField = channel.getChannelField();
             String errorMessage = checkCompatibility();
             if(errorMessage!=null) {
                 pvLink.message(errorMessage,MessageType.error);
                 return;
             }
             channelFieldGroup = channel.createFieldGroup(this);
-            channelFieldGroup.addChannelField(dataField);
-            if(!dataField.getField().getType().isNumeric()) {
-                channelMonitor.lookForChange(dataField, true);
+            channelFieldGroup.addChannelField(targetChannelField);
+            if(!targetChannelField.getField().getType().isNumeric()) {
+                channelMonitor.lookForChange(targetChannelField, true);
             } else {
                 switch(monitorType) {
                 case change:
-                    channelMonitor.lookForChange(dataField, true); break;
+                    channelMonitor.lookForChange(targetChannelField, true); break;
                 case deltaChange:
-                    channelMonitor.lookForAbsoluteChange(dataField, deadband); break;
+                    channelMonitor.lookForAbsoluteChange(targetChannelField, deadband); break;
                 case percentageChange:
-                    channelMonitor.lookForPercentageChange(dataField, deadband); break;
+                    channelMonitor.lookForPercentageChange(targetChannelField, deadband); break;
                 }
             }
             if(inheritSeverityAccess.get()) {
                 result = channel.findField("severity");
                 if(result==ChannelFindFieldResult.thisChannel) {
-                    severityField = channel.getChannelField();
-                    channelFieldGroup.addChannelField(severityField);
-                    channelMonitor.lookForChange(severityField, true);
+                    severityChannelField = channel.getChannelField();
+                    channelFieldGroup.addChannelField(severityChannelField);
+                    channelMonitor.lookForChange(severityChannelField, true);
                 } else {
-                    severityField = null;
+                    severityChannelField = null;
                 }
             }
             String threadName = pvLink.getFullName();

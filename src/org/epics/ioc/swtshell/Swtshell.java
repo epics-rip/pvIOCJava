@@ -141,6 +141,13 @@ public class Swtshell {
                     IntrospectDatabase.init(display);
                 }
             });
+            Button monitorDB = new Button(shell,SWT.PUSH);
+            monitorDB.setText("monitor");
+            monitorDB.addSelectionListener( new SelectionAdapter() {
+                public void widgetSelected(SelectionEvent e) {
+                    Monitor.init(display);
+                }
+            });
             shell.pack();
             shell.open();
             while(!shell.isDisposed()) {

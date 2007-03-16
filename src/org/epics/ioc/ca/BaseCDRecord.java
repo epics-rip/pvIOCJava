@@ -14,6 +14,7 @@ import org.epics.ioc.pv.Enum;
  *
  */
 public class BaseCDRecord implements CDRecord {
+    private boolean supportAlso;
     private FieldCreate fieldCreate;
     private PVDataCreate pvDataCreate;
     private PVRecord pvRecord;
@@ -26,9 +27,10 @@ public class BaseCDRecord implements CDRecord {
      * @param targetFields The array of Field interfaces for the target.
      * @param recordName The record, i.e. channel name.
      * @param structureName The structure name for the PVStructure for the PVRecord.
+     * @param supportAlso Should support be read/written?
      */
     public BaseCDRecord(FieldCreate fieldCreate,PVDataCreate pvDataCreate,
-        Field[] targetFields,String recordName,String structureName)
+        Field[] targetFields,String recordName,String structureName,boolean supportAlso)
     {
         this.fieldCreate = fieldCreate;
         this.pvDataCreate = pvDataCreate;
@@ -41,7 +43,7 @@ public class BaseCDRecord implements CDRecord {
             structureName, structureName, newFields);
         pvRecord = pvDataCreate.createPVRecord(
             recordName, structure);
-        cdStructure = new BaseCDStructure(null,this,pvRecord);
+        cdStructure = new BaseCDStructure(null,this,pvRecord,supportAlso);
     }
     /* (non-Javadoc)
      * @see org.epics.ioc.ca.CDRecord#createField(org.epics.ioc.pv.Field)

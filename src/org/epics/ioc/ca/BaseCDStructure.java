@@ -13,6 +13,7 @@ import org.epics.ioc.pv.*;
  *
  */
 public class BaseCDStructure extends BaseCDField implements CDStructure {
+    private boolean supportAlso;
     private CDField[] cdFields;
     private PVStructure pvStructure;
     private CDRecord cdRecord;
@@ -22,12 +23,14 @@ public class BaseCDStructure extends BaseCDField implements CDStructure {
      * @param parent The parent cdField.
      * @param cdRecord The cdRecord that contains this field.
      * @param pvStructure The pvStructure that this CDField references.
+     * @param supportAlso Should support be read/written?
      */
     public BaseCDStructure(
         CDField parent,CDRecord cdRecord,
-        PVStructure pvStructure)
+        PVStructure pvStructure,boolean supportAlso)
     {
-        super(parent,cdRecord,pvStructure);
+        super(parent,cdRecord,pvStructure,supportAlso);
+        this.supportAlso = supportAlso;
         this.pvStructure = pvStructure;
         this.cdRecord = cdRecord;
         createFields();        
@@ -62,8 +65,10 @@ public class BaseCDStructure extends BaseCDField implements CDStructure {
      * @see org.epics.ioc.ca.BaseCDField#dataPut(org.epics.ioc.pv.PVField)
      */
     public void dataPut(PVField targetPVField) {
-        String supportName = targetPVField.getSupportName();
-        if(supportName!=null) super.supportNamePut(targetPVField);
+        if(supportAlso) {
+            String supportName = targetPVField.getSupportName();
+            if(supportName!=null) super.supportNamePut(targetPVField.getSupportName());
+        }
         PVStructure targetPVStructure = (PVStructure)targetPVField;
         PVField[] targetPVFields = targetPVStructure.getFieldPVFields();
         for(int i=0; i<targetPVFields.length; i++) {
@@ -77,13 +82,14 @@ public class BaseCDStructure extends BaseCDField implements CDStructure {
      * @see org.epics.ioc.ca.BaseCDField#configurationStructurePut(org.epics.ioc.pv.PVField, org.epics.ioc.pv.PVLink)
      */
     public boolean configurationStructurePut(PVField requested, PVLink target) {
+        if(!supportAlso) return false;
         PVStructure targetPVStructure = (PVStructure)requested;
         PVField[] targetPVFields = targetPVStructure.getFieldPVFields();
         for(int i=0; i<targetPVFields.length; i++) {
             PVField targetPVField = targetPVFields[i];
             if(targetPVField==target) {
                 CDLink cdLink = (CDLink)cdFields[i];
-                cdLink.configurationStructurePut(target);
+                cdLink.configurationStructurePut(target.getConfigurationStructure());
                 return true;
             }
         }
@@ -98,11 +104,10 @@ public class BaseCDStructure extends BaseCDField implements CDStructure {
                 Array array = (Array)field;
                 Type elementType = array.getElementType();
                 if(elementType.isScalar()) continue;
-                if(!cdField.configurationStructurePut(targetPVField, target)) continue;
-            } else if(type!=Type.pvStructure) {
-                throw new IllegalStateException("Logic error.");
+                if(cdField.configurationStructurePut(targetPVField, target)) return true;
+            } else if(type==Type.pvStructure) {
+                if(cdField.configurationStructurePut(targetPVField, target)) return true;
             }
-            if(cdField.dataPut(targetPVField, target)) return true;
         }
         return false;
     }
@@ -131,11 +136,10 @@ public class BaseCDStructure extends BaseCDField implements CDStructure {
                 Array array = (Array)field;
                 Type elementType = array.getElementType();
                 if(elementType.isScalar()) continue;
-                if(!cdField.dataPut(targetPVField, target))continue;
-            } else if(type!=Type.pvStructure) {
-                throw new IllegalStateException("Logic error.");
+                if(cdField.dataPut(targetPVField, target)) return true;
+            } else if(type==Type.pvStructure) {
+                if(cdField.dataPut(targetPVField, target)) return true;
             }
-            if(cdField.dataPut(targetPVField, target)) return true;
         }
         return false;
     }
@@ -149,7 +153,7 @@ public class BaseCDStructure extends BaseCDField implements CDStructure {
             PVField targetPVField = targetPVFields[i];
             if(targetPVField==target) {
                 CDEnum cdEnum = (CDEnum)cdFields[i];
-                cdEnum.enumChoicesPut(target);
+                cdEnum.enumChoicesPut(target.getChoices());
                 return true;
             }
         }
@@ -164,11 +168,10 @@ public class BaseCDStructure extends BaseCDField implements CDStructure {
                 Array array = (Array)field;
                 Type elementType = array.getElementType();
                 if(elementType.isScalar()) continue;
-                if(!cdField.enumChoicesPut(targetPVField, target)) continue;
-            } else if(type!=Type.pvStructure) {
-                throw new IllegalStateException("Logic error.");
+                if(cdField.enumChoicesPut(targetPVField, target)) return true;
+            } else if(type==Type.pvStructure) {
+                if(cdField.enumChoicesPut(targetPVField, target)) return true;
             }
-            if(cdField.dataPut(targetPVField, target)) return true;
         }
         return false;
     }
@@ -182,7 +185,7 @@ public class BaseCDStructure extends BaseCDField implements CDStructure {
             PVField targetPVField = targetPVFields[i];
             if(targetPVField==target) {
                 CDEnum cdEnum = (CDEnum)cdFields[i];
-                cdEnum.enumIndexPut(target);
+                cdEnum.enumIndexPut(target.getIndex());
                 return true;
             }
         }
@@ -197,11 +200,10 @@ public class BaseCDStructure extends BaseCDField implements CDStructure {
                 Array array = (Array)field;
                 Type elementType = array.getElementType();
                 if(elementType.isScalar()) continue;
-                if(!cdField.enumChoicesPut(targetPVField, target)) continue;
-            } else if(type!=Type.pvStructure) {
-                throw new IllegalStateException("Logic error.");
+                if(cdField.enumIndexPut(targetPVField, target)) return true;
+            } else if(type==Type.pvStructure) {
+                if(cdField.enumIndexPut(targetPVField, target)) return true;
             }
-            if(cdField.dataPut(targetPVField, target)) return true;
         }
         return false;
     }
@@ -215,7 +217,7 @@ public class BaseCDStructure extends BaseCDField implements CDStructure {
             PVField targetPVField = targetPVFields[i];
             if(targetPVField==target) {
                 CDField cdField = cdFields[i];
-                cdField.supportNamePut(target);
+                cdField.supportNamePut(target.getSupportName());
                 return true;
             }
         }
@@ -230,11 +232,10 @@ public class BaseCDStructure extends BaseCDField implements CDStructure {
                 Array array = (Array)field;
                 Type elementType = array.getElementType();
                 if(elementType.isScalar()) continue;
-                if(!cdField.supportNamePut(targetPVField, target)) continue;
-            } else if(type!=Type.pvStructure) {
-                throw new IllegalStateException("Logic error.");
+                if(cdField.supportNamePut(targetPVField, target)) return true;
+            } else if(type==Type.pvStructure) {
+                if(cdField.supportNamePut(targetPVField, target)) return true;
             }
-            if(cdField.dataPut(targetPVField, target)) return true;
         }
         return false;
     }
@@ -248,47 +249,47 @@ public class BaseCDStructure extends BaseCDField implements CDStructure {
             Field field = pvField.getField();
             Type type = field.getType();
             if(type.isScalar()) {
-                cdFields[i] = new BaseCDField(this,cdRecord,pvField);
+                cdFields[i] = new BaseCDField(this,cdRecord,pvField,supportAlso);
                 continue;
             }
             switch(type) {
             case pvEnum:
-                cdFields[i] = new BaseCDEnum(this,cdRecord,pvField);
+                cdFields[i] = new BaseCDEnum(this,cdRecord,pvField,supportAlso);
                 break;
             case pvMenu:
-                cdFields[i] = new BaseCDMenu(this,cdRecord,pvField);
+                cdFields[i] = new BaseCDMenu(this,cdRecord,pvField,supportAlso);
                 break;
             case pvLink:
-                cdFields[i] = new BaseCDLink(this,cdRecord,pvField);
+                cdFields[i] = new BaseCDLink(this,cdRecord,pvField,supportAlso);
                 break;
             case pvArray: {
                 Array array = (Array)field;
                 Type elementType = array.getElementType();
                 switch(elementType) {
                 case pvArray:
-                    cdFields[i] = new BaseCDArrayArray(this,cdRecord,(PVArrayArray)pvField);
+                    cdFields[i] = new BaseCDArrayArray(this,cdRecord,(PVArrayArray)pvField,supportAlso);
                     break;
                 case pvEnum:
-                    cdFields[i] = new BaseCDEnumArray(this,cdRecord,(PVEnumArray)pvField);
+                    cdFields[i] = new BaseCDEnumArray(this,cdRecord,(PVEnumArray)pvField,supportAlso);
                     break;
                 case pvMenu:
-                    cdFields[i] = new BaseCDMenuArray(this,cdRecord,(PVMenuArray)pvField);
+                    cdFields[i] = new BaseCDMenuArray(this,cdRecord,(PVMenuArray)pvField,supportAlso);
                     break;
                 case pvLink:
-                    cdFields[i] = new BaseCDLinkArray(this,cdRecord,(PVLinkArray)pvField);
+                    cdFields[i] = new BaseCDLinkArray(this,cdRecord,(PVLinkArray)pvField,supportAlso);
                     break;
                 case pvStructure:
-                    cdFields[i] = new BaseCDStructureArray(this,cdRecord,(PVStructureArray)pvField);
+                    cdFields[i] = new BaseCDStructureArray(this,cdRecord,(PVStructureArray)pvField,supportAlso);
                     break;
                 default:
-                    cdFields[i] = new BaseCDField(this,cdRecord,pvField);
+                    cdFields[i] = new BaseCDField(this,cdRecord,pvField,supportAlso);
                     break;
                 }
                 break;
             }
             case pvStructure:
                 cdFields[i] = new BaseCDStructure(
-                    this,cdRecord,(PVStructure)pvField);
+                    this,cdRecord,(PVStructure)pvField,supportAlso);
                 break;
             default:
                 throw new IllegalStateException("Logic error");

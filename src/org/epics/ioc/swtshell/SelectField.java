@@ -12,15 +12,18 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.*;
 
 import org.epics.ioc.pv.*;
+import org.epics.ioc.util.*;
 /**
  * @author mrk
  *
  */
 public class SelectField {
     private Shell parent;
+    private Requestor requestor;
     
-    public SelectField(Shell parent) {
+    public SelectField(Shell parent,Requestor requestor) {
         this.parent = parent;
+        this.requestor = requestor;
     }
     
     public String getFieldName(PVRecord pvRecord) {
@@ -54,7 +57,7 @@ public class SelectField {
             doneButton = new Button(composite,SWT.PUSH);
             doneButton.setText("Done");
             doneButton.addSelectionListener(this);
-            tree = new Tree(composite,SWT.SINGLE|SWT.BORDER|SWT.CHECK);
+            tree = new Tree(composite,SWT.SINGLE|SWT.BORDER);
             GridData treeGridData = new GridData(GridData.FILL_BOTH);
             tree.setLayoutData(treeGridData);
             TreeItem treeItem = new TreeItem(tree,SWT.NONE);
@@ -107,6 +110,8 @@ public class SelectField {
                                 break;
                             }
                         }
+                    } else if(object==null) {
+                        requestor.message("property is illegal selection",MessageType.error);
                     }
                 }
                 shell.close();

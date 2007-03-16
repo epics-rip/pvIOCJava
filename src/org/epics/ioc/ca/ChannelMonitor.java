@@ -55,4 +55,9 @@ public interface ChannelMonitor {
      * Stop monitoring.
      */
     void stop();
+    /**
+     * Is a monitor active.
+     * @return (false,true) in the monitor (is not, is) started.
+     */
+    boolean isStarted();
 }

@@ -395,7 +395,7 @@ public class PowerSupplyTest extends TestCase {
             valueData = new ValueData(channel);
             fieldGroup = valueData.init(fieldName);
             if(fieldGroup==null) return false;
-            channelMonitor = channel.createChannelMonitor(false);
+            channelMonitor = channel.createChannelMonitor(false,true);
             return true;   
         }
         
@@ -504,7 +504,7 @@ public class PowerSupplyTest extends TestCase {
                 channelFieldGroup.addChannelField(timeStampField);
                 channel.findField(null);
             }
-            channelData = ChannelDataFactory.createChannelData(channel,channelFieldGroup);
+            channelData = ChannelDataFactory.createChannelData(channel,channelFieldGroup,true);
             if(channelData==null) {
                 System.out.printf("ChannelDataFactory.createData failed");
                 return null;

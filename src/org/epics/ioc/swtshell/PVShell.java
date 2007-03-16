@@ -18,9 +18,9 @@ import org.epics.ioc.db.*;
  * @author mrk
  *
  */
-public class PVShell {
+public class PVShell implements DisposeListener{
     static private IOCDB iocdb = IOCDBFactory.getMaster();
-    private Composite parentWidget;
+    private Composite parent;
     private Requestor requestor;
     private String recordName = null;
     private String fieldName = null;
@@ -28,12 +28,20 @@ public class PVShell {
     private ChannelField channelField = null;
     
     public PVShell(Composite parentWidget,Requestor requestor) {
-        this.parentWidget = parentWidget;
+        this.parent = parentWidget;
         this.requestor = requestor;
+        parent.addDisposeListener(this);
         new RecordShell();
         new FieldShell();
     }
      
+    /* (non-Javadoc)
+     * @see org.eclipse.swt.events.DisposeListener#widgetDisposed(org.eclipse.swt.events.DisposeEvent)
+     */
+    public void widgetDisposed(DisposeEvent e) {
+        if(channel!=null) channel.destroy();
+    }
+
     public Channel getChannel() {
         return channel;
     }
@@ -82,31 +90,27 @@ public class PVShell {
     }
     
     private class RecordShell extends ShellBase {
-        private Composite recordWidget;
+        private Composite composite;
         private Button selectButton;
-        private Button propertyButton;
         private Text text;
         private SelectRecord selectRecord;
         
         private RecordShell() {
-            recordWidget = new Composite(parentWidget,SWT.BORDER);
+            composite = new Composite(parent,SWT.BORDER);
             GridLayout gridLayout = new GridLayout();
             gridLayout.numColumns = 4;
-            recordWidget.setLayout(gridLayout);
-            GridData recordWidgetGridData = new GridData(GridData.FILL_HORIZONTAL);
-            recordWidget.setLayoutData(recordWidgetGridData);
-            Label label = new Label(recordWidget,SWT.NONE);
+            composite.setLayout(gridLayout);
+            GridData gridData = new GridData(GridData.FILL_HORIZONTAL);
+            composite.setLayoutData(gridData);
+            Label label = new Label(composite,SWT.NONE);
             label.setText("record");
-            selectButton = new Button(recordWidget,SWT.NONE);
+            selectButton = new Button(composite,SWT.NONE);
             selectButton.setText("select");
-            selectRecord = new SelectRecord(parentWidget.getShell());
+            selectRecord = new SelectRecord(parent.getShell(),requestor);
             selectButton.addSelectionListener(this);
-            propertyButton = new Button(recordWidget,SWT.NONE);
-            propertyButton.setText("properties");
-            propertyButton.addSelectionListener(this);
-            text = new Text(recordWidget,SWT.BORDER);
-            GridData textGridData = new GridData(GridData.FILL_HORIZONTAL);
-            text.setLayoutData(textGridData);
+            text = new Text(composite,SWT.BORDER);
+            gridData = new GridData(GridData.FILL_HORIZONTAL);
+            text.setLayoutData(gridData);
             text.addSelectionListener(this);
         }
 
@@ -114,49 +118,28 @@ public class PVShell {
          * @see org.eclipse.swt.events.SelectionListener#widgetSelected(org.eclipse.swt.events.SelectionEvent)
          */
         public void widgetSelected(SelectionEvent arg0) {
-            if(arg0.getSource()==propertyButton) {
-                if(channel==null) {
-                    requestor.message(String.format(
-                            "no record selected%n"),MessageType.error);
-                    return;
-                }
-                channel.findField(null);
-                ChannelField channelField = channel.getChannelField();
-                Field field = channelField.getField();
-                requestor.message(String.format(
-                        "recordType %s",field.getFieldName()),MessageType.info);
-                Property[] properties = field.getPropertys();
-                if(properties.length==0) {
-                    requestor.message(String.format(
-                            "no properties"),MessageType.info);
-                } else {
-                    for(Property property: properties) {
-                        requestor.message(String.format(
-                        "%s",property.toString()),MessageType.info);
-                    }
-                }
-                return;
+            if(channel!=null) {
+                channel.destroy();
             }
-            if(arg0.getSource()==selectButton || arg0.getSource()==text) {
-                recordName = null;
-                if(arg0.getSource()==selectButton) {
-                    recordName = selectRecord.getRecordName();
-                    text.selectAll();
-                    text.clearSelection();
+            Object object = arg0.getSource();
+            if(object==selectButton) {
+                text.selectAll();
+                text.clearSelection();
+                recordName = selectRecord.getRecordName();
+                if(recordName!=null) {
                     text.setText(recordName);
-                } else if(arg0.getSource()==text) {
-                    recordName = text.getText();
                 }
-                if(recordName==null) {
-                    requestor.message("fieldName is null", MessageType.error);
-                }
-                fieldName = null;
-                channel = ChannelFactory.createChannel(recordName, this, false);
-                if(channel==null) {
-                    requestor.message(String.format(
-                        "pvname %s not found%n",recordName),MessageType.error);
-                }
-                return;
+            } else if(object==text) {
+                recordName = text.getText();
+            }
+            if(recordName==null) {
+                requestor.message("recordName is null", MessageType.error);
+            }
+            fieldName = null;
+            channel = ChannelFactory.createChannel(recordName, this, false);
+            if(channel==null) {
+                requestor.message(String.format(
+                    "pvname %s not found%n",recordName),MessageType.error);
             }
         }
     }
@@ -165,12 +148,11 @@ public class PVShell {
     private class FieldShell extends ShellBase {
         private Composite fieldWidget;
         private Button selectButton;
-        private Button propertyButton;
         private Text text;
         private SelectField selectField;
         
         private FieldShell() {
-            fieldWidget = new Composite(parentWidget,SWT.BORDER);
+            fieldWidget = new Composite(parent,SWT.BORDER);
             GridLayout gridLayout = new GridLayout();
             gridLayout.numColumns = 4;
             fieldWidget.setLayout(gridLayout);
@@ -180,11 +162,8 @@ public class PVShell {
             label.setText(" field");
             selectButton = new Button(fieldWidget,SWT.NONE);
             selectButton.setText("select");
-            selectField = new SelectField(parentWidget.getShell());
+            selectField = new SelectField(parent.getShell(),requestor);
             selectButton.addSelectionListener(this);
-            propertyButton = new Button(fieldWidget,SWT.NONE);
-            propertyButton.setText("properties");
-            propertyButton.addSelectionListener(this);
             text = new Text(fieldWidget,SWT.BORDER);
             GridData textGridData = new GridData(GridData.FILL_HORIZONTAL);
             text.setLayoutData(textGridData);
@@ -194,78 +173,55 @@ public class PVShell {
          * @see org.eclipse.swt.events.SelectionListener#widgetSelected(org.eclipse.swt.events.SelectionEvent)
          */
         public void widgetSelected(SelectionEvent arg0) {
-            if(arg0.getSource()==propertyButton) {
-                if(channel==null || channelField==null) {
-                    requestor.message(String.format(
-                            "no field selected"),MessageType.error);
-                    return;
-                }
-                channel.findField(null);
-                Field field = channelField.getField();
+            Object object = arg0.getSource();
+            if(channel==null) {
                 requestor.message(String.format(
-                        "field %s",field.getFieldName()),MessageType.info);
-                Property[] properties = field.getPropertys();
-                if(properties.length==0) {
-                    requestor.message(String.format(
-                            "no properties"),MessageType.info);
-                } else {
-                    for(Property property: properties) {
-                        requestor.message(String.format(
-                        "%s",property.toString()),MessageType.info);
-                    }
-                }
+                        "not connected%n"),MessageType.error);
                 return;
             }
-            if(arg0.getSource()==selectButton || arg0.getSource()==text){
-                if(channel==null) {
-                    requestor.message(String.format(
-                            "not connected%n"),MessageType.error);
+            if(object==selectButton) {
+                DBRecord dbRecord = iocdb.findRecord(recordName);
+                if(dbRecord==null) return;
+                fieldName = selectField.getFieldName(dbRecord.getPVRecord());
+                if(fieldName==null) {
+                    requestor.message("fieldName is null", MessageType.error);
                     return;
                 }
-                if(arg0.getSource()==selectButton) {
-                    DBRecord dbRecord = iocdb.findRecord(recordName);
-                    if(dbRecord==null) return;
-                    fieldName = selectField.getFieldName(dbRecord.getPVRecord());
-                    if(fieldName==null) {
-                        requestor.message("fieldName is null", MessageType.error);
-                        return;
-                    }
-                    text.selectAll();
-                    text.clearSelection();
-                    text.setText(fieldName);
-            
-                } else if(arg0.getSource()==text) {
-                    fieldName = text.getText();
-                }
-                channelField = null;
-                outer:
-                while(true) {
-                    channel.findField(null);
-                    ChannelFindFieldResult result = channel.findField(fieldName);
-                    switch(result) {
-                    case otherChannel:
-                        recordName = text.getText();
-                        channel = ChannelFactory.createChannel(recordName, this, false);
-                        if(channel==null) {
-                            requestor.message(String.format(
+                text.selectAll();
+                text.clearSelection();
+                text.setText(fieldName);
+
+            } else if(object==text) {
+                fieldName = text.getText();
+            }
+            channelField = null;
+            outer:
+            while(true) {
+                channel.findField(null);
+                ChannelFindFieldResult result = channel.findField(fieldName);
+                switch(result) {
+                case otherChannel:
+                    recordName = text.getText();
+                    channel = ChannelFactory.createChannel(recordName, this, false);
+                    if(channel==null) {
+                        requestor.message(String.format(
                                 "%s not found%n",recordName),MessageType.error);
-                            return;
-                        }
-                        continue outer;
-                    case thisChannel:
-                        channelField =channel.getChannelField();
-                        return;
-                    case notFound:
-                        requestor.message(String.format(
-                        "field %s not found%n",fieldName),MessageType.error);
-                        return;
-                    case failure:
-                        requestor.message(String.format(
-                        "Logic Error: findField failed.%n"),MessageType.error);
                         return;
                     }
+                    continue outer;
+                case thisChannel:
+                    channelField =channel.getChannelField();
+                    return;
+                case notFound:
+                    requestor.message(String.format(
+                            "field %s not found%n",fieldName),MessageType.error);
+                    return;
+                case failure:
+                    requestor.message(String.format(
+                    "Logic Error: findField failed.%n"),MessageType.error);
+                    return;
                 }
-            }   
-        }
+            }
+        }   
     }
 }

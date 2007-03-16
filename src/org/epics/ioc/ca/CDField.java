@@ -73,9 +73,9 @@ public interface CDField {
     void dataPut(PVField targetPVField);
     /**
      * The support name has been modified.
-     * @param targetPVField The pvField to which the channel is connected.
+     * @param supportName The pvField to which the channel is connected.
      */
-    void supportNamePut(PVField targetPVField);
+    void supportNamePut(String supportName);
     /**
      * A put to a subfield has occured. 
      * @param requested The target field that has targetPVField as a subfield.

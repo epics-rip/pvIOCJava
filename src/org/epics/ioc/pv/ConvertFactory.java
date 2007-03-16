@@ -11,6 +11,7 @@ package org.epics.ioc.pv;
  *
  */
 public final class ConvertFactory {
+    private static PVDataCreate pvDataCreate = PVDataFactory.getPVDataCreate();
     /**
      * Implements <i>Convert</i>.
      * The implementation ensures that a single instance is created.
@@ -224,47 +225,159 @@ public final class ConvertFactory {
                 case pvEnum: {
                         PVEnumArray fromArray = (PVEnumArray)from;
                         PVEnumArray toArray = (PVEnumArray)to;
-                        EnumArrayData enumArrayData = new EnumArrayData();
-                        int length = fromArray.get(offset, len, enumArrayData);
-                        PVEnum[] data = enumArrayData.data;
-                        int result = toArray.put(toOffset, length, data, 0);
-                        return result;
+                        EnumArrayData arrayData = new EnumArrayData();
+                        int fromLength = fromArray.get(offset, len, arrayData);
+                        PVEnum[] fromDatas = arrayData.data;
+                        int toLength = toArray.get(toOffset, len, arrayData);
+                        PVEnum[] toDatas = null;
+                        if(toLength>0) {
+                            toDatas = arrayData.data;
+                        } else {
+                            toDatas = new PVEnum[fromLength];
+                            for(int i=0; i<toLength; i++) toDatas[i] = null;
+                        }
+                        for(int i=0; i<fromLength; i++) {
+                            PVEnum fromData = fromDatas[i];
+                            if(fromData==null) continue;
+                            PVEnum toData = null;
+                            if(i<toLength) toData = toDatas[i];
+                            if(toData==null) {
+                                toData = (PVEnum)pvDataCreate.createPVField(to, fromData.getField());
+                                toDatas[0] = toData;
+                                toArray.put(0, 1, toDatas, 0);
+                                
+                            }
+                            toData.setChoices(fromData.getChoices());
+                            toData.setIndex(fromData.getIndex());
+                        }
+                        return fromLength;
                     }
                 case pvMenu: {
-                    PVMenuArray fromArray = (PVMenuArray)from;
-                    PVMenuArray toArray = (PVMenuArray)to;
-                    MenuArrayData menuArrayData = new MenuArrayData();
-                    int length = fromArray.get(offset, len, menuArrayData);
-                    PVMenu[] data = menuArrayData.data;
-                    int result = toArray.put(toOffset, length, data, 0);
-                    return result;
+                        PVMenuArray fromArray = (PVMenuArray)from;
+                        PVMenuArray toArray = (PVMenuArray)to;
+                        MenuArrayData arrayData = new MenuArrayData();
+                        int fromLength = fromArray.get(offset, len, arrayData);
+                        PVMenu[] fromDatas = arrayData.data;
+                        int toLength = toArray.get(toOffset, len, arrayData);
+                        PVMenu[] toDatas = null;
+                        if(toLength>0) {
+                            toDatas = arrayData.data;
+                        } else {
+                            toDatas = new PVMenu[fromLength];
+                            for(int i=0; i<toLength; i++) toDatas[i] = null;
+                        }
+                        for(int i=0; i<fromLength; i++) {
+                            PVMenu fromData = fromDatas[i];
+                            if(fromData==null) continue;
+                            PVMenu toData = null;
+                            if(i<toLength) toData = toDatas[i];
+                            if(toData==null) {
+                                toData = (PVMenu)pvDataCreate.createPVField(to, fromData.getField());
+                                toDatas[0] = toData;
+                                toArray.put(0, 1, toDatas, 0);
+                                
+                            }
+                            toData.setIndex(fromData.getIndex());
+                        }
+                        return fromLength;
                     }
                 case pvLink: {
-                    PVLinkArray fromArray = (PVLinkArray)from;
-                    PVLinkArray toArray = (PVLinkArray)to;
-                    LinkArrayData linkArrayData = new LinkArrayData();
-                    int length = fromArray.get(offset, len, linkArrayData);
-                    PVLink[] data = linkArrayData.data;
-                    int result = toArray.put(toOffset, length, data, 0);
-                    return result;
+                        PVLinkArray fromArray = (PVLinkArray)from;
+                        PVLinkArray toArray = (PVLinkArray)to;
+                        LinkArrayData arrayData = new LinkArrayData();
+                        int fromLength = fromArray.get(offset, len, arrayData);
+                        PVLink[] fromDatas = arrayData.data;
+                        int toLength = toArray.get(toOffset, len, arrayData);
+                        PVLink[] toDatas = null;
+                        if(toLength>0) {
+                            toDatas = arrayData.data;
+                        } else {
+                            toDatas = new PVLink[fromLength];
+                            for(int i=0; i<toLength; i++) toDatas[i] = null;
+                        }
+                        for(int i=0; i<fromLength; i++) {
+                            PVLink fromData = fromDatas[i];
+                            if(fromData==null) continue;
+                            PVLink toData = null;
+                            if(i<toLength) toData = toDatas[i];
+                            if(toData==null) {
+                                toData = (PVLink)pvDataCreate.createPVField(to, fromData.getField());
+                                toDatas[0] = toData;
+                                toArray.put(0, 1, toDatas, 0);
+                                
+                            }
+                            PVStructure fromConfigStructure = fromData.getConfigurationStructure();
+                            PVStructure toConfigStructure = toData.getConfigurationStructure();
+                            if(fromConfigStructure==null || toConfigStructure==null) continue;
+                            if(!isCopyStructureCompatible(
+                                (Structure)fromConfigStructure.getField(),
+                                (Structure)toConfigStructure.getField())) continue;
+                            copyStructure(fromConfigStructure,toConfigStructure);
+                        }
+                        return fromLength;
                     }
                 case pvArray: {
-                    PVArrayArray fromArray = (PVArrayArray)from;
-                    PVArrayArray toArray = (PVArrayArray)to;
-                    ArrayArrayData arrayArrayData = new ArrayArrayData();
-                    int length = fromArray.get(offset, len, arrayArrayData);
-                    PVArray[] data = arrayArrayData.data;
-                    int result = toArray.put(toOffset, length, data, 0);
-                    return result;
+                        PVArrayArray fromArray = (PVArrayArray)from;
+                        PVArrayArray toArray = (PVArrayArray)to;
+                        ArrayArrayData arrayData = new ArrayArrayData();
+                        int fromLength = fromArray.get(offset, len, arrayData);
+                        PVArray[] fromDatas = arrayData.data;
+                        int toLength = toArray.get(toOffset, len, arrayData);
+                        PVArray[] toDatas = null;
+                        if(toLength>0) {
+                            toDatas = arrayData.data;
+                        } else {
+                            toDatas = new PVArray[fromLength];
+                            for(int i=0; i<toLength; i++) toDatas[i] = null;
+                        }
+                        for(int i=0; i<fromLength; i++) {
+                            PVArray fromData = fromDatas[i];
+                            if(fromData==null) continue;
+                            PVArray toData = null;
+                            if(i<toLength) toData = toDatas[i];
+                            if(toData==null) {
+                                toData = (PVArray)pvDataCreate.createPVArray(
+                                        to, fromData.getField(),fromData.getLength(), true);
+                                toDatas[0] = toData;
+                                toArray.put(0, 1, toDatas, 0);
+                                
+                            }
+                            if(isCopyArrayCompatible((Array)fromData.getField(),(Array)toData.getField())) {
+                                copyArray(fromData,0,toData,0,fromData.getLength());
+                            }
+                        }
+                        return fromLength;
                     }
                 case pvStructure: {
-                    PVStructureArray fromArray = (PVStructureArray)from;
-                    PVStructureArray toArray = (PVStructureArray)to;
-                    StructureArrayData structureArrayData = new StructureArrayData();
-                    int length = fromArray.get(offset, len, structureArrayData);
-                    PVStructure[] data = structureArrayData.data;
-                    int result = toArray.put(toOffset, length, data, 0);
-                    return result;
+                        PVStructureArray fromArray = (PVStructureArray)from;
+                        PVStructureArray toArray = (PVStructureArray)to;
+                        StructureArrayData arrayData = new StructureArrayData();
+                        int fromLength = fromArray.get(offset, len, arrayData);
+                        PVStructure[] fromDatas = arrayData.data;
+                        int toLength = toArray.get(toOffset, len, arrayData);
+                        PVStructure[] toDatas = null;
+                        if(toLength>0) {
+                            toDatas = arrayData.data;
+                        } else {
+                            toDatas = new PVStructure[fromLength];
+                            for(int i=0; i<toLength; i++) toDatas[i] = null;
+                        }
+                        for(int i=0; i<fromLength; i++) {
+                            PVStructure fromData = fromDatas[i];
+                            if(fromData==null) continue;
+                            PVStructure toData = null;
+                            if(i<toLength) toData = toDatas[i];
+                            if(toData==null) {
+                                toData = (PVStructure)pvDataCreate.createPVField(to, fromData.getField());
+                                toDatas[0] = toData;
+                                toArray.put(0, 1, toDatas, 0);
+                                
+                            }
+                            if(isCopyStructureCompatible((Structure)fromData.getField(),(Structure)toData.getField())) {
+                                copyStructure(fromData,toData);
+                            }
+                        }
+                        return fromLength;
                     }
                 default: break;
                 }
@@ -351,7 +464,16 @@ public final class ConvertFactory {
                 if(type.isScalar()) {
                     copyScalar(fromField,toField);
                 } else if(type==Type.pvLink) {
-                    // do nothing
+                    PVLink fromLink = (PVLink)fromField;
+                    PVLink toLink = (PVLink)toField;
+                    PVStructure fromConfigStructure = fromLink.getConfigurationStructure();
+                    PVStructure toConfigStructure = toLink.getConfigurationStructure();
+                    if(fromConfigStructure==null || toConfigStructure==null) continue;
+                    if(!isCopyStructureCompatible(
+                        (Structure)fromConfigStructure.getField(),
+                        (Structure)toConfigStructure.getField())) continue;
+                    copyStructure(fromConfigStructure,toConfigStructure);
+                    
                 } else if(type==Type.pvArray) {
                     Array fromElementArray = (Array)fromField.getField();
                     Array toElementArray = (Array)toField.getField();

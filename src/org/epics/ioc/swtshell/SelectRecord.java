@@ -15,6 +15,7 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.*;
 
 import org.epics.ioc.db.*;
+import org.epics.ioc.util.*;
 /**
  * @author mrk
  *
@@ -23,21 +24,23 @@ public class SelectRecord {
     private Shell parent;
     private IOCDB iocdb = IOCDBFactory.getMaster();
     private Map<String,DBRecord> recordMap;
+    private Requestor requestor;
     
-    public SelectRecord(Shell parent) {
+    public SelectRecord(Shell parent,Requestor requestor) {
         this.parent = parent;
+        this.requestor = requestor;
     }
     
     public String getRecordName() {
         RecordShell recordShell = new RecordShell(parent);
         return recordShell.getRecordName();
     }
-        
+    
     private class RecordShell extends Dialog implements SelectionListener {
         private Shell shell;
         private List list;
-        private String recordName = null;
         private int ntimes = 0;
+        private String recordName = null;
         
         private RecordShell(Shell parent){
             super(parent,SWT.DIALOG_TRIM|SWT.NONE);
@@ -57,6 +60,13 @@ public class SelectRecord {
             GridData listGridData = new GridData(GridData.FILL_BOTH);
             list.setLayoutData(listGridData);
             recordMap = iocdb.getRecordMap();
+            if(recordMap.isEmpty()) {
+                requestor.message(String.format(
+                    "iocdb %s has no records",
+                    iocdb.getName()),
+                    MessageType.error);
+                return null;
+            }
             Iterator<String> iter = recordMap.keySet().iterator();
             for(int i=0; i< recordMap.size(); i++) {
                 list.add(iter.next());

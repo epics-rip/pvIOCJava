@@ -10,7 +10,7 @@
 <body>
 <h1 style="text-align: center">EPICS JavaIOC: util<br />
 package: org.epics.ioc.util<br />
-2007.03.02</h1>
+2007.03.16</h1>
 CONTENTS
 
 <div class="toc">
@@ -22,6 +22,7 @@ CONTENTS
       <li><a href="#Requestor">Requestor</a></li>
       <li><a href="#MessageTyp">MessageType</a></li>
       <li><a href="#RequestRes">RequestResult</a></li>
+      <li><a href="#MessageQue">MessageQueue</a></li>
     </ul>
   </li>
   <li><a href="#Time">Time Stamp Support</a>
@@ -32,7 +33,7 @@ CONTENTS
       <li><a href="#PVTimeStam">PVTimeStamp</a></li>
     </ul>
   </li>
-  <li><a href="#Alarm">Alarm Sverity Support</a></li>
+  <li><a href="#Alarm">Alarm Severity Support</a></li>
   <li><a href="#Scan">Scan Field Support</a>
     <ul>
       <li><a href="#Definition2">Definitions</a></li>
@@ -114,6 +115,27 @@ CONTENTS
         zombie,
         success,
         failure
+    }
+
+    public class MessageNode {
+        public String message;
+        public MessageType messageType;
+    }
+
+    public interface MessageQueue {
+        void lock();
+        void unlock();
+        MessageNode get();
+        boolean put(String message,MessageType messageType);
+        boolean isEmpty();
+        boolean isFull();
+        void replaceFirst(String message,MessageType messageType);
+        void replaceLast(String message,MessageType messageType);
+        int getClearOverrun();
+    }
+    
+    public class MessageQueueFactory {
+        public static MessageQueue create(int size);
     }</pre>
 
 <h3 id="Requestor">Requestor</h3>
@@ -121,9 +143,9 @@ CONTENTS
 <p>Many javaIOC interfaces extend interface Requestor, which has just two
 methods:</p>
 <dl>
-  <dt>getRequestorName</dt>
+  <dt style="font-family: courier;">getRequestorName</dt>
     <dd>Returns the name of the requestor.</dd>
-  <dt>message</dt>
+  <dt style="font-family: courier;">message</dt>
     <dd>This is for passing messages to a requestor.</dd>
 </dl>
 
@@ -131,13 +153,13 @@ methods:</p>
 
 <p>Each message has a message type argument. The type is one of:</p>
 <dl>
-  <dt>info</dt>
+  <dt style="font-family: courier;">info</dt>
     <dd>The message is informational only.</dd>
-  <dt>warning</dt>
+  <dt style="font-family: courier;">warning</dt>
     <dd>A problem is possible/</dd>
-  <dt>error</dt>
+  <dt style="font-family: courier;">error</dt>
     <dd>An error has occured.</dd>
-  <dt>fatal</dt>
+  <dt style="font-family: courier;">fatal</dt>
     <dd>The support can not implement the request.</dd>
 </dl>
 
@@ -146,15 +168,97 @@ methods:</p>
 <p>Both recordProcess and support code report a result by passing a
 RequestResult to the requestor. The result is one of:</p>
 <dl>
-  <dt>zombie</dt>
+  <dt style="font-family: courier;">zombie</dt>
     <dd>The support has been asked to destroy itself. Thus the requestor
       should disconnect from the support.</dd>
-  <dt>success</dt>
+  <dt style="font-family: courier;">success</dt>
     <dd>The request was successful.</dd>
-  <dt>failure</dt>
+  <dt style="font-family: courier;">failure</dt>
     <dd>The request failed. In this case requester.message is called to
       report the reason for the failure.</dd>
 </dl>
+
+<h3 id="MessageQue">MessageQueue</h3>
+
+<p>This is for use by code that wants to handle messages without blocking
+higher priority threads.</p>
+
+<p>A messageNode is a class with two public data members:</p>
+<dl>
+  <dt style="font-family: courier;">message</dt>
+    <dd>The message.</dd>
+  <dt style="font-family: courier;">messageType</dt>
+    <dd>The message type.</dd>
+</dl>
+
+<p>A messageQueue is an interface with methods:</p>
+<dl>
+  <dt style="font-family: courier;">lock</dt>
+  <dt style="font-family: courier;">unlock</dt>
+    <dd>lock/unlock must surround all calls to the other methods.</dd>
+  <dt style="font-family: courier;">put</dt>
+    <dd>Put a new message into the queue. This will trow an exception if the
+      queue is full. This isFull should be called before this method is
+      called.</dd>
+  <dt style="font-family: courier;">isEmpty</dt>
+    <dd>Is the queue empty?</dd>
+  <dt style="font-family: courier;">isFull</dt>
+    <dd>Is the queue full?</dd>
+  <dt style="font-family: courier;">replaceFirst</dt>
+    <dd>Replace the oldest member in the queue.</dd>
+  <dt style="font-family: courier;">replaceLast</dt>
+    <dd>Replace the newest member in the queue.</dd>
+  <dt style="font-family: courier;">getClearOverrun</dt>
+    <dd>Get the number of times replaceFirst or replaceLast have been called
+      since the last call to getClearOverrun. The internal counter is reset
+      to 0.</dd>
+</dl>
+
+<p>MessageQueueFactory provides the public method:</p>
+<dl>
+  <dt style="font-family: courier;">create</dt>
+    <dd>Create a MessageQueue and return the interface.</dd>
+</dl>
+
+<p>An example is:</p>
+<pre>    public void message(final String message, MessageType messageType) {
+        boolean syncExec = false;
+        messageQueue.lock();
+        try {
+            if(messageQueue.isEmpty()) syncExec = true;
+            if(messageQueue.isFull()) {
+                messageQueue.replaceLast(message, messageType);
+            } else {
+                messageQueue.put(message, messageType);
+            }
+        } finally {
+            messageQueue.unlock();
+        }
+        if(syncExec) {
+            display.syncExec(this);
+        }
+    }
+    ...
+    
+    while(true) {
+        String message = null;
+        int numOverrun = 0;
+        messageQueue.lock();
+        try {
+            MessageNode messageNode = messageQueue.get();
+            numOverrun = messageQueue.getClearOverrun();
+            if(messageNode==null &amp;&amp; numOverrun==0) break;
+            message = messageNode.message;
+        } finally {
+            messageQueue.unlock();
+        }
+        if(numOverrun&gt;0) {
+            consoleText.append(String.format("%n%d missed messages&amp;n", numOverrun));
+        }
+        if(message!=null) {
+           consoleText.append(String.format("%s%n",message));
+        }
+    }</pre>
 <hr />
 
 <h2 style="text-align: center;" id="Time">Time Stamp Support</h2>
@@ -178,6 +282,7 @@ RequestResult to the requestor. The result is one of:</p>
     }
     
     public class PVTimeStamp {
+        public static PVTimeStamp create(DBField dbField);
         public static TimeStampField create(PVField pvField);
         public void get(TimeStamp timeStamp);
         public void put(TimeStamp timeStamp);
@@ -187,10 +292,10 @@ RequestResult to the requestor. The result is one of:</p>
 
 <p>This is a class that has two public data fields and no methods:</p>
 <dl>
-  <dt>secondsPastEpoch</dt>
+  <dt style="font-family: courier;">secondsPastEpoch</dt>
     <dd>This is the number of seconds since January 1, 1970 UTC, which is the
       same as what Java POSIX uses.</dd>
-  <dt>nanoSeconds</dt>
+  <dt style="font-family: courier;">nanoSeconds</dt>
     <dd>The number of nanoseconds within the second.</dd>
 </dl>
 
@@ -198,9 +303,9 @@ RequestResult to the requestor. The result is one of:</p>
 
 <p>This is a class with the following static members:</p>
 <dl>
-  <dt>getMillis</dt>
+  <dt style="font-family: courier;">getMillis</dt>
     <dd>This converts the time stamp to milliseconds.</dd>
-  <dt>set</dt>
+  <dt style="font-family: courier;">set</dt>
     <dd>This converts milliseconds to a time stamp.</dd>
 </dl>
 
@@ -208,19 +313,19 @@ RequestResult to the requestor. The result is one of:</p>
 
 <p>This has the following methods:</p>
 <dl>
-  <dt>create</dt>
-    <dd>A static factory methods to create a PVTimeStamp from a PVField. If
-      the PVField does not reference a timeStamp structure a null is
-    returned.</dd>
-  <dt>get</dt>
+  <dt style="font-family: courier;">create</dt>
+    <dd>A static factory methods to create a PVTimeStamp from a PVField or a
+      DBField. If the PVField does not reference a timeStamp structure a null
+      is returned.</dd>
+  <dt style="font-family: courier;">get</dt>
     <dd>Reads the PVField into the timeStamp provided by the caller.</dd>
-  <dt>put</dt>
+  <dt style="font-family: courier;">put</dt>
     <dd>Takes the timeStamp supplied by the caller and puts it into the
       PVField.</dd>
 </dl>
 <hr />
 
-<h2 style="text-align: center;" id="Alarm">Alarm Sverity Support</h2>
+<h2 style="text-align: center;" id="Alarm">Alarm Severity Support</h2>
 <hr />
 
 <p>The following defines alarm severities:</p>
@@ -273,13 +378,13 @@ RequestResult to the requestor. The result is one of:</p>
 <p>ScanField is a convenience interface for accessing the scan field of a
 record. It has the methods:</p>
 <dl>
-  <dt>getPriority</dt>
+  <dt style="font-family: courier;">getPriority</dt>
     <dd>Get the priority as a Java enum.</dd>
-  <dt>getScanType</dt>
+  <dt style="font-family: courier;">getScanType</dt>
     <dd>Get the scan type as a Java enum</dd>
-  <dt>getRate</dt>
+  <dt style="font-family: courier;">getRate</dt>
     <dd>Get the scan rate for periodically scanned records.</dd>
-  <dt>getEventName</dt>
+  <dt style="font-family: courier;">getEventName</dt>
     <dd>Get the event name for event scanned records.</dd>
 </dl>
 
@@ -292,16 +397,16 @@ event or periodically scanned records.</p>
 
 <p>This is a Java enum which defines the scan types:</p>
 <dl>
-  <dt>passive</dt>
+  <dt style="font-family: courier;">passive</dt>
     <dd>This is a record that is not periodically or event scanned. It can be
       processed by another requestor. For example database links can request
       processing and Channel Access clients can also request processing.</dd>
-  <dt>event</dt>
+  <dt style="font-family: courier;">event</dt>
     <dd>A record can be event scanned. If so the record also has an eventName
       assigned to it. An event announcer, defined below, can declare and
       event. This makes all records with the associated eventName
     process.</dd>
-  <dt>periodic</dt>
+  <dt style="font-family: courier;">periodic</dt>
     <dd>The record is periodically scanned. A peridically scanned record has
       a rate assigned it it.</dd>
 </dl>
@@ -311,12 +416,12 @@ event or periodically scanned records.</p>
 <p>This is a factory for creating a ScanField and some additionaly
 convenience methods.</p>
 <dl>
-  <dt>create</dt>
+  <dt style="font-family: courier;">create</dt>
     <dd>Create a ScanField.</dd>
-  <dt>isScanMenu</dt>
+  <dt style="font-family: courier;">isScanMenu</dt>
     <dd>Checks to see if a menu is a valid scanMenu, i.e. has the correct
       menu name and choices.</dd>
-  <dt>isPriorityMenu</dt>
+  <dt style="font-family: courier;">isPriorityMenu</dt>
     <dd>Checks to see if a menu is a valid priorityMenu, i.e. has the correct
       menu name and choices.</dd>
 </dl>
@@ -365,15 +470,15 @@ announcer then just calls:</p>
 <p>This is the interface for the event scanning facility implemented by
 ScannerFactory. It implements the methods:</p>
 <dl>
-  <dt>addRecord</dt>
+  <dt style="font-family: courier;">addRecord</dt>
     <dd>Add an event scanned record.</dd>
-  <dt>removeRecord</dt>
+  <dt style="font-family: courier;">removeRecord</dt>
     <dd>Remove a record from being event scanned.</dd>
-  <dt>addEventAnnouncer</dt>
+  <dt style="font-family: courier;">addEventAnnouncer</dt>
     <dd>Add an event announcer.</dd>
-  <dt>removeEventAnnouncer</dt>
+  <dt style="font-family: courier;">removeEventAnnouncer</dt>
     <dd>Remove an event announcer.</dd>
-  <dt>show</dt>
+  <dt style="font-family: courier;">show</dt>
     <dd>report announcers and event scanned records</dd>
 </dl>
 
@@ -382,11 +487,11 @@ ScannerFactory. It implements the methods:</p>
 <p>This is the interface for the periodic scanning facility implemented by
 ScannerFactory. It implements the methods:</p>
 <dl>
-  <dt>schedule</dt>
+  <dt style="font-family: courier;">schedule</dt>
     <dd>Add a new record to a periodically scanned list.</dd>
-  <dt>unschedule</dt>
+  <dt style="font-family: courier;">unschedule</dt>
     <dd>Remove a record from being periodically scanned.</dd>
-  <dt>show</dt>
+  <dt style="font-family: courier;">show</dt>
     <dd>Show periodically scanned records.</dd>
 </dl>
 <hr />
@@ -401,9 +506,9 @@ ScannerFactory. It implements the methods:</p>
 
 <p>where</p>
 <dl>
-  <dt>dbFile</dt>
+  <dt style="font-family: courier;">dbFile</dt>
     <dd>A file containing xml record instance definitions.</dd>
-  <dt>requestor</dt>
+  <dt style="font-family: courier;">requestor</dt>
     <dd>A listener for any messages generated while initDatabase is
     executing.</dd>
 </dl>

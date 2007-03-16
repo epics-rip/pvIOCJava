@@ -67,10 +67,9 @@ public class LocalChannelAccessTest extends TestCase {
         getDouble02.get();
         Put counterPut;
         counterPut = new Put("counter",true);
-        if(counterPut!=null) {
-            System.out.println("should have failed because already has registered requestor");
-            counterPut.destroy();
-        }
+        if(!counterPut.connect()) return;
+        System.out.println("expected message: already has registered requestor");
+        counterPut.destroy();
         counterProcess.destroy();
         counterPut = new Put("counter",true);
         if(!counterPut.connect()) return;
@@ -626,7 +625,7 @@ public class LocalChannelAccessTest extends TestCase {
             }
             timeStampField = channel.getChannelField();
             channelFieldGroup.addChannelField(timeStampField);
-            channelData = ChannelDataFactory.createChannelData(channel,channelFieldGroup);
+            channelData = ChannelDataFactory.createChannelData(channel,channelFieldGroup,false);
             if(channelData==null) {
                 System.out.printf("ChannelDataFactory.createData failed");
                 return null;

@@ -105,6 +105,23 @@ public interface Channel {
      */
     void destroy(ChannelPut channelPut);
     /**
+     * Create a ChannelDataPut.
+     * @param channelFieldGroup The chanelFieldGroup describing the data to put.
+     * @param channelDataPutRequestor The channelDataPutRequestor
+     * @param process Should record be processed after put.
+     * @param supportAlso Should support be read/written?
+     * @return An interface for the ChannelPut.
+     */
+    ChannelDataPut createChannelDataPut(
+            ChannelFieldGroup channelFieldGroup,
+            ChannelDataPutRequestor channelDataPutRequestor, boolean process,boolean supportAlso);
+    /**
+     * Destroy a channelDataPut.
+     * If a request is active it will complete but no new requestes will be accepted.
+     * @param channelDataPut The channelDataPut
+     */
+    void destroy(ChannelDataPut channelDataPut);
+    /**
      * Create a ChannelPutGet.
      * @param putFieldGroup The fieldGroup describing the data to put.
      * @param getFieldGroup The fieldGroup describing the data to get.
@@ -124,9 +141,10 @@ public interface Channel {
     /**
      * Create a ChannelMonitor.
      * @param onlyWhileProcessing Monitor only while processing?
+     * @param supportAlso Should support be read?
      * @return An interface for the ChannelMonitor.
      */
-    ChannelMonitor createChannelMonitor(boolean onlyWhileProcessing);
+    ChannelMonitor createChannelMonitor(boolean onlyWhileProcessing,boolean supportAlso);
     /**
      * Destroy a channelMonitor.
      * @param channelMonitor The channelMonitor.

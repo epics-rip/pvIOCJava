@@ -25,7 +25,7 @@ public class BasePVMenu extends BasePVEnum implements PVMenu
     /* (non-Javadoc)
      * @see org.epics.ioc.pv.BasePVEnum#setChoices(java.lang.String[])
      */
-    public boolean setChoices(String[] choice) {
+    public boolean setChoices(String[] choices) {
         throw new UnsupportedOperationException(
             "Menu choices can not be modified");
     }    

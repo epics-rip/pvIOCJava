@@ -10,7 +10,7 @@
 <body>
 <h1 style="text-align: center">EPICS JavaIOC: channel Access<br />
 package: org.epics.ioc.ca<br />
-2007.03.05</h1>
+2007.03.16</h1>
 CONTENTS
 
 <div class="toc">
@@ -30,12 +30,13 @@ CONTENTS
       <li><a href="#ChannelAcc">ChannelAccess</a></li>
     </ul>
   </li>
-  <li><a href="#Channel2">Channel Process, Get, Put, PutGet</a>
+  <li><a href="#Channel2">Channel Process, Get, Put, DataPut, and PutGet</a>
     <ul>
       <li><a href="#Definition1">Definitions</a></li>
       <li><a href="#ChannelPro">ChannelProcess</a></li>
       <li><a href="#ChannelGet">ChannelGet</a></li>
       <li><a href="#ChannelPut">ChannelPut</a></li>
+      <li><a href="#ChannelDat">ChannelDataPut</a></li>
       <li><a href="#ChannelPut1">ChannelPutGet</a></li>
     </ul>
   </li>
@@ -47,10 +48,10 @@ CONTENTS
   </li>
   <li><a href="#Channel3">Channel Data</a>
     <ul>
-      <li><a href="#ChannelDat">ChannelData Definitions</a></li>
-      <li><a href="#ChannelDat1">ChannelData</a></li>
-      <li><a href="#ChannelDat2">ChannelDataQueue</a></li>
-      <li><a href="#ChannelDat3">ChannelDataFactory</a></li>
+      <li><a href="#ChannelDat1">ChannelData Definitions</a></li>
+      <li><a href="#ChannelDat2">ChannelData</a></li>
+      <li><a href="#ChannelDat3">ChannelDataQueue</a></li>
+      <li><a href="#ChannelDat4">ChannelDataFactory</a></li>
     </ul>
   </li>
   <li><a href="#Channel4">CD - Channel Data Fields</a>
@@ -138,6 +139,11 @@ accessing a channel are defined in later sections.</p>
         ChannelPut createChannelPut(ChannelFieldGroup channelFieldGroup,
             ChannelPutRequestor channelPutRequestor,boolean process);
         void destroy(ChannelPut channelPut);
+        ChannelDataPut createChannelDataPut(
+            ChannelFieldGroup channelFieldGroup,
+            ChannelDataPutRequestor channelDataPutRequestor,
+            boolean process,boolean supportAlso);
+        void destroy(ChannelDataPut channelDataPut);
         ChannelPutGet createChannelPutGet(
             channelFieldGroup putFieldGroup,ChannelFieldGroup getFieldGroup,
             ChannelPutGetRequestor channelPutGetRequestor,boolean process);
@@ -389,7 +395,7 @@ channel access. It is called by ChannelFactory. It has onl one method</p>
 <hr />
 
 <h2 style="text-align: center" id="Channel2">Channel Process, Get, Put,
-PutGet</h2>
+DataPut, and PutGet</h2>
 <hr />
 
 <h3 id="Definition1">Definitions</h3>
@@ -423,6 +429,17 @@ PutGet</h2>
         void putDone(RequestResult requestResult);
     }
 
+    interface ChannelDataPut {
+        ChannelData getChannelData();
+        boolean get();
+        boolean put();
+    }
+    
+    public interface ChannelDataPutRequestor extends Requestor{
+        void getDone();
+        void putDone(RequestResult requestResult);
+    }
+
     interface ChannelPutGet {
         boolean putGet();
         void putDelayed(PVField pvField);
@@ -433,6 +450,10 @@ PutGet</h2>
         ChannelPutRequestor,ChannelGetRequestor {}</pre>
 
 <h3 id="ChannelPro">ChannelProcess</h3>
+<dl>
+  <dt style="font-family: courier;">getDone</dt>
+  <dt style="font-family: courier;">putDone</dt>
+</dl>
 
 <p>ChannelProcess has the single method:</p>
 <dl>
@@ -573,6 +594,36 @@ methods:</p>
 <p>Like delayed gets delayed puts are used by servers that need to block. For
 example servers that transfer data from the network to an IOC database.</p>
 
+<h3 id="ChannelDat">ChannelDataPut</h3>
+
+<p>This is a put that uses a ChannelData to hold the data. The caller puts
+data into the ChannelData before calling ChannelDataPut.put().</p>
+
+<p><span style="font-family: courier;">ChannelDataPut</span> has the
+methods:</p>
+<dl>
+  <dt style="font-family: courier;">getChannelData</dt>
+    <dd>Get the interface to the ChannelData created when the ChannelDataPut
+      was created.</dd>
+  <dt style="font-family: courier;">get</dt>
+    <dd>Get the latest target data and put it into channelData. The target
+      record is not processed.</dd>
+  <dt style="font-family: courier;">put</dt>
+    <dd>Put the data currently residing in channelData and put it to the
+      target. If process is requested than the record is set active before
+      the data is put.</dd>
+</dl>
+
+<p><span style="font-family: courier;">ChannelDataPutRequestor</span> has the
+methods:</p>
+<dl>
+  <dt style="font-family: courier;">getDone</dt>
+    <dd>The get request is done and the data is in channelData.</dd>
+  <dt style="font-family: courier;">putDone</dt>
+    <dd>The put request is finished. The result of record processing, if
+      specified, is returned.</dd>
+</dl>
+
 <h3 id="ChannelPut1">ChannelPutGet</h3>
 
 <p>This is a combination of <span
@@ -601,6 +652,7 @@ client request to:</p>
         boolean start(ChannelMonitorRequestor channelMonitorRequestor,
             int queueSize, String threadName, ScanPriority scanPriority);
         void stop();
+        boolean isStarted();
     }
     
     interface ChannelMonitorRequestor extends Requestor{
@@ -632,6 +684,8 @@ client request to:</p>
     <dd>When data changes send it the the requestor.</dd>
   <dt style="font-family: courier;">stop</dt>
     <dd>Stop monitoring.</dd>
+  <dt style="font-family: courier;">isStarted</dt>
+    <dd>Has the monitor been started.</dd>
 </dl>
 
 <p>ChannelMonitorRequestor has the methods:</p>
@@ -673,7 +727,7 @@ channelData is created via a call to ChannelDataFactory.createData it
 automatically creates a CDRecord and associated subfields, which are
 cdescribed in the next section.</p>
 
-<h3 id="ChannelDat">ChannelData Definitions</h3>
+<h3 id="ChannelDat1">ChannelData Definitions</h3>
 <pre>    interface ChannelData {
         Channel getChannel();
         ChannelFieldGroup getChannelFieldGroup();
@@ -706,15 +760,16 @@ cdescribed in the next section.</p>
 
     class ChannelDataFactory {
          static ChannelData createData(
-             Channel channel,ChannelFieldGroup channelFieldGroup);
+             Channel channel,ChannelFieldGroup channelFieldGroup,boolean supportAlso);
          static ChannelDataQueue createQueue(
-             int queueSize,Channel channel,ChannelFieldGroup channelFieldGroup);
+             int queueSize,Channel channel,ChannelFieldGroup channelFieldGroup,
+             boolean supportAlso);
     }
 
     class BaseChannelData { ... }
     class BaseChannelDataQueue { ... }</pre>
 
-<h3 id="ChannelDat1">ChannelData</h3>
+<h3 id="ChannelDat2">ChannelData</h3>
 
 <p>ChannelData has the following methods:</p>
 <dl>
@@ -753,7 +808,7 @@ cdescribed in the next section.</p>
 
 <p>A ChannelData is allocated as follows:</p>
 <pre>    ChannelData channelData = ChannelDataFactory.createData(
-        channel,channelFieldGroup);</pre>
+        channel,channelFieldGroup,supportAlso);</pre>
 
 <p>This creates storage for each element of the field group. It can create
 storage for all pvTypes. For Array types, the initial size and capacity is 0.
@@ -777,7 +832,7 @@ The arrays will grow as data is placed in them but will not be released.</p>
     data source, e.g. a data base record, is not locked.</li>
 </ul>
 
-<h3 id="ChannelDat2">ChannelDataQueue</h3>
+<h3 id="ChannelDat3">ChannelDataQueue</h3>
 
 <p>ChannelDataQueue has the following methods:</p>
 <dl>
@@ -813,7 +868,7 @@ style="font-family: courier;">channelFieldGroup</span>s and a queue to manage
 them. As an example of how a queue is used consider a channel access server
 monitoring a fieldGroup of an IOC database record.</p>
 
-<h3 id="ChannelDat3">ChannelDataFactory</h3>
+<h3 id="ChannelDat4">ChannelDataFactory</h3>
 
 <p>ChannelDataFactory has the following methods:</p>
 <dl>
@@ -865,8 +920,8 @@ to determine how often each PVField was written.</p>
     }
     
     interface CDEnum extends CDField{
-        void enumIndexPut(PVEnum targetPVEnum);
-        void enumChoicesPut(PVEnum targetPVEnum);
+        void enumIndexPut(int index);
+        void enumChoicesPut(String[] choices);
         int getNumIndexPuts();
         int getNumChoicesPut();
         PVEnum getPVEnum();
@@ -877,7 +932,7 @@ to determine how often each PVField was written.</p>
     }
     
     interface CDLink extends CDField{
-        void configurationStructurePut(PVLink targetPVLink);
+        void configurationStructurePut(PVStructure pvStructure);
         int getNumConfigurationStructurePuts();
         PVLink getPVLink();
     }

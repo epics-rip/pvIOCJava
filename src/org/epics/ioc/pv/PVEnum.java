@@ -30,10 +30,10 @@ public interface PVEnum extends PVField{
     String[] getChoices();
     /**
      * Set the choice values. 
-     * @param choice a String[] specifying the choices.
+     * @param choices a String[] specifying the choices.
      * @return (true,false) if the choices were modified.
      * A value of false normally means the choice strings were readonly.
      * @throws UnsupportedOperationException if the choices are not mutable.
      */
-    boolean setChoices(String[] choice);
+    boolean setChoices(String[] choices);
 }

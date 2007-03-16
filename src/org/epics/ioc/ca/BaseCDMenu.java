@@ -20,11 +20,12 @@ public class BaseCDMenu extends BaseCDEnum implements CDMenu{
      * @param parent The parent cdField.
      * @param cdRecord The cdRecord that contains this field.
      * @param pvField The pvField that this CDField references.
+     * @param supportAlso Should support be read/written?
      */
     public BaseCDMenu(
-        CDField parent,CDRecord cdRecord,PVField pvField)
+        CDField parent,CDRecord cdRecord,PVField pvField,boolean supportAlso)
     {
-        super(parent,cdRecord,pvField);
+        super(parent,cdRecord,pvField,supportAlso);
         pvMenu= (PVMenu)pvField;
     }
     /* (non-Javadoc)

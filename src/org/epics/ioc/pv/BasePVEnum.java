@@ -42,9 +42,9 @@ public class BasePVEnum extends AbstractPVField implements PVEnum {
     /* (non-Javadoc)
      * @see org.epics.ioc.pv.PVEnum#setChoices(java.lang.String[])
      */
-    public boolean setChoices(String[] choice) {
+    public boolean setChoices(String[] choices) {
         if(super.getField().isMutable()) {
-            this.choice = choice;
+            this.choice = choices;
             return true;
         }
         return false;

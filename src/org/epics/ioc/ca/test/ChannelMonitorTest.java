@@ -113,7 +113,7 @@ public class ChannelMonitorTest extends TestCase {
             valueData = new ValueData(channel,fieldName);
             fieldGroup = valueData.init();
             if(fieldGroup==null) return false;
-            channelMonitor = channel.createChannelMonitor(false);
+            channelMonitor = channel.createChannelMonitor(false,true);
             return true;   
         }
         
@@ -209,7 +209,7 @@ public class ChannelMonitorTest extends TestCase {
             valueData = new ValueData(channel,fieldName);
             fieldGroup = valueData.init();
             if(fieldGroup==null) return false;
-            channelMonitor = channel.createChannelMonitor(false);
+            channelMonitor = channel.createChannelMonitor(false,true);
             return true;   
         }
         

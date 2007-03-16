@@ -98,10 +98,12 @@ public class CDRecordPrint {
     }
     private void printEnum(CDEnum cdEnum, int indentLevel,boolean printAll) {
         if(checkNumPuts(cdEnum)) printAll = true;
+        PVEnum pvEnum = cdEnum.getPVEnum();
+        String[] choices = pvEnum.getChoices();
+        int index = pvEnum.getIndex();
         int numChoicesPut = cdEnum.getNumChoicesPut();
         if(numChoicesPut>0||printAll) {
             if(numChoicesPut>1) text.append(String.format(" numChoicesPuts %d", numChoicesPut));
-            String[] choices = cdEnum.getPVEnum().getChoices();
             text.append(" choices = {");
             for(String choice : choices) {
                 newLine(indentLevel+1);
@@ -112,15 +114,18 @@ public class CDRecordPrint {
         int numIndexPuts = cdEnum.getNumIndexPuts();
         if(numIndexPuts>0||printAll) {
             if(numIndexPuts>1) text.append(String.format(" numIndexPuts %d", numIndexPuts));
-            text.append(String.format(" index = %d",numIndexPuts));
+            text.append(String.format(" %s",choices[index]));
         }
     }
     private void printMenu(CDMenu cdMenu, int indentLevel,boolean printAll) {
         if(checkNumPuts(cdMenu)) printAll = true;
+        PVMenu pvMenu = cdMenu.getPVMenu();
+        String[] choices = pvMenu.getChoices();
+        int index = pvMenu.getIndex();
         int numIndexPuts = cdMenu.getNumIndexPuts();
         if(numIndexPuts>0||printAll) {
             if(numIndexPuts>1) text.append(String.format(" numIndexPuts %d", numIndexPuts));
-            text.append(String.format(" index = %d",numIndexPuts));
+            text.append(String.format(" %s",choices[index]));
         }
     }
     private void printLink(CDLink cdLink, int indentLevel,boolean printAll) {

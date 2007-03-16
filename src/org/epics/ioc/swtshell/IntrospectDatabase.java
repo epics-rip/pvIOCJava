@@ -14,6 +14,7 @@ import org.eclipse.swt.widgets.*;
 
 import org.epics.ioc.db.*;
 import org.epics.ioc.dbd.*;
+import org.epics.ioc.util.*;;
 
 /**
  * @author mrk
@@ -27,7 +28,7 @@ public class IntrospectDatabase {
         introspect.start();
     }
     
-    private static class Introspect implements SelectionListener{
+    private static class Introspect implements SelectionListener, Requestor{
         static private DBD dbd = DBDFactory.getMasterDBD();
         private Map<String,DBRecord> recordMap = iocdb.getRecordMap();
         private Display display;
@@ -73,7 +74,7 @@ public class IntrospectDatabase {
             new Label(recordSelectComposite,SWT.NONE).setText("recordName");
             Button recordSelectButton = new Button(recordSelectComposite,SWT.PUSH);
             recordSelectButton.setText("select");
-            selectRecord = new SelectRecord(shell);
+            selectRecord = new SelectRecord(shell,this);
             recordSelectText = new Text(recordSelectComposite,SWT.SINGLE);
             gridData = new GridData(GridData.FILL_HORIZONTAL);
             recordSelectText.setLayoutData(gridData);
@@ -136,6 +137,19 @@ public class IntrospectDatabase {
                 return;
             }
         }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.util.Requestor#getRequestorName()
+         */
+        public String getRequestorName() {
+            return "introspectDatabase";
+        }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.util.Requestor#message(java.lang.String, org.epics.ioc.util.MessageType)
+         */
+        public void message(String message, MessageType messageType) {
+            consoleText.setText(message);
+        }
+
         private class MenuDBD implements SelectionListener {
             private Map<String,DBDMenu> menuMap;
             

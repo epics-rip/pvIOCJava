@@ -11,6 +11,7 @@ import org.epics.ioc.pv.*;
  *
  */
 public class BaseCDArrayArray extends BaseCDField implements CDNonScalarArray{
+    private boolean supportAlso;
     private PVArrayArray pvArrayArray;
     private CDField[] elementCDFields;
     private ArrayArrayData arrayArrayData = new ArrayArrayData();
@@ -20,11 +21,13 @@ public class BaseCDArrayArray extends BaseCDField implements CDNonScalarArray{
      * @param parent The parent cdField.
      * @param cdRecord The cdRecord that contains this field.
      * @param pvArrayArray The pvArrayArray that this CDField references.
+     * @param supportAlso Should support be read/written?
      */
     public BaseCDArrayArray(
-        CDField parent,CDRecord cdRecord,PVArrayArray pvArrayArray)
+        CDField parent,CDRecord cdRecord,PVArrayArray pvArrayArray,boolean supportAlso)
     {
-        super(parent,cdRecord,pvArrayArray);
+        super(parent,cdRecord,pvArrayArray,supportAlso);
+        this.supportAlso = supportAlso;
         this.pvArrayArray = pvArrayArray;
         createElementCDBArrays();
     }
@@ -39,8 +42,10 @@ public class BaseCDArrayArray extends BaseCDField implements CDNonScalarArray{
      * @see org.epics.ioc.ca.BaseCDField#dataPut(org.epics.ioc.pv.PVField)
      */
     public void dataPut(PVField targetPVField) {
-        String supportName = targetPVField.getSupportName();
-        if(supportName!=null) super.supportNamePut(targetPVField);
+        if(supportAlso) {
+            String supportName = targetPVField.getSupportName();
+            if(supportName!=null) super.supportNamePut(targetPVField.getSupportName());
+        }
         PVArrayArray targetPVArrayArray = (PVArrayArray)targetPVField;
         if(checkPVArrayArray(targetPVArrayArray)) {
             super.incrementNumPuts();
@@ -161,6 +166,7 @@ public class BaseCDArrayArray extends BaseCDField implements CDNonScalarArray{
      * @see org.epics.ioc.ca.BaseCDField#supportNamePut(org.epics.ioc.pv.PVField, org.epics.ioc.pv.PVField)
      */
     public boolean supportNamePut(PVField requested,PVField targetPVField) {
+        if(!supportAlso) return false;
         PVArrayArray targetPVArrayArray = (PVArrayArray)requested;
         checkPVArrayArray(targetPVArrayArray);
         int length = pvArrayArray.getLength();
@@ -179,6 +185,7 @@ public class BaseCDArrayArray extends BaseCDField implements CDNonScalarArray{
      * @see org.epics.ioc.ca.BaseCDField#configurationStructurePut(org.epics.ioc.pv.PVField, org.epics.ioc.pv.PVLink)
      */
     public boolean configurationStructurePut(PVField requested,PVLink targetPVLink) {
+        if(!supportAlso) return false;
         PVArrayArray targetPVArrayArray = (PVArrayArray)requested;
         checkPVArrayArray(targetPVArrayArray);
         int length = pvArrayArray.getLength();
@@ -221,24 +228,24 @@ public class BaseCDArrayArray extends BaseCDField implements CDNonScalarArray{
                 Array array = (Array)pvArray.getField();
                 Type elementType = array.getElementType();
                 if(elementType.isScalar()) {
-                    elementCDFields[i] = new BaseCDField(this,cdRecord,pvArray);
+                    elementCDFields[i] = new BaseCDField(this,cdRecord,pvArray,supportAlso);
                     continue;
                 }
                 switch(elementType) {
                 case pvArray:
-                    elementCDFields[i] = new BaseCDArrayArray(this,cdRecord,(PVArrayArray)pvArray);
+                    elementCDFields[i] = new BaseCDArrayArray(this,cdRecord,(PVArrayArray)pvArray,supportAlso);
                     continue;
                 case pvEnum:
-                    elementCDFields[i] = new BaseCDEnumArray(this,cdRecord,(PVEnumArray)pvArray);
+                    elementCDFields[i] = new BaseCDEnumArray(this,cdRecord,(PVEnumArray)pvArray,supportAlso);
                     continue;
                 case pvMenu:
-                    elementCDFields[i] = new BaseCDMenuArray(this,cdRecord,(PVMenuArray)pvArray);
+                    elementCDFields[i] = new BaseCDMenuArray(this,cdRecord,(PVMenuArray)pvArray,supportAlso);
                     continue;
                 case pvLink:
-                    elementCDFields[i] = new BaseCDLinkArray(this,cdRecord,(PVLinkArray)pvArray);
+                    elementCDFields[i] = new BaseCDLinkArray(this,cdRecord,(PVLinkArray)pvArray,supportAlso);
                     continue;
                 case pvStructure:
-                    elementCDFields[i] = new BaseCDStructureArray(this,cdRecord,(PVStructureArray)pvArray);
+                    elementCDFields[i] = new BaseCDStructureArray(this,cdRecord,(PVStructureArray)pvArray,supportAlso);
                     continue;
                 default:
                     throw new IllegalStateException("Logic error");
@@ -282,30 +289,30 @@ public class BaseCDArrayArray extends BaseCDField implements CDNonScalarArray{
                 Array array = (Array)targetPVArray.getField();
                 Type elementType = array.getElementType();
                 if(elementType.isScalar()) {
-                    elementCDFields[i] = new BaseCDField(this,cdRecord,newArray);
+                    elementCDFields[i] = new BaseCDField(this,cdRecord,newArray,supportAlso);
                     break;
                 }
                 switch(elementType) {
                 case pvArray:
-                    elementCDFields[i] = new BaseCDArrayArray(this,cdRecord,(PVArrayArray)newArray);
+                    elementCDFields[i] = new BaseCDArrayArray(this,cdRecord,(PVArrayArray)newArray,supportAlso);
                     break;
                 case pvEnum:
-                    elementCDFields[i] = new BaseCDEnumArray(this,cdRecord,(PVEnumArray)newArray);
+                    elementCDFields[i] = new BaseCDEnumArray(this,cdRecord,(PVEnumArray)newArray,supportAlso);
                     break;
                 case pvMenu:
-                    elementCDFields[i] = new BaseCDMenuArray(this,cdRecord,(PVMenuArray)newArray);
+                    elementCDFields[i] = new BaseCDMenuArray(this,cdRecord,(PVMenuArray)newArray,supportAlso);
                     break;
                 case pvLink:
-                    elementCDFields[i] = new BaseCDLinkArray(this,cdRecord,(PVLinkArray)newArray);
+                    elementCDFields[i] = new BaseCDLinkArray(this,cdRecord,(PVLinkArray)newArray,supportAlso);
                     break;
                 case pvStructure:
-                    elementCDFields[i] = new BaseCDStructureArray(this,cdRecord,(PVStructureArray)newArray);
+                    elementCDFields[i] = new BaseCDStructureArray(this,cdRecord,(PVStructureArray)newArray,supportAlso);
                     break;
                 default:
                     throw new IllegalStateException("Logic error");
                 }
                 elementCDFields[i].dataPut(targetPVArray);
-                elementCDFields[i].supportNamePut(targetPVArray);
+                elementCDFields[i].supportNamePut(targetPVArray.getSupportName());
             }
         }
         if(madeChanges) {

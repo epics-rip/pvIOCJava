@@ -11,6 +11,7 @@ import org.epics.ioc.pv.*;
  *
  */
 public class BaseCDMenuArray extends BaseCDField implements CDNonScalarArray{
+    private boolean supportAlso;
     private PVMenuArray pvMenuArray;
     private CDMenu[] elementCDMenus;
     private MenuArrayData menuArrayData = new MenuArrayData();
@@ -20,11 +21,13 @@ public class BaseCDMenuArray extends BaseCDField implements CDNonScalarArray{
      * @param parent The parent cdField.
      * @param cdRecord The cdRecord that contains this field.
      * @param pvMenuArray The pvMenuArray that this CDField references.
+     * @param supportAlso Should support be read/written?
      */
     public BaseCDMenuArray(
-        CDField parent,CDRecord cdRecord,PVMenuArray pvMenuArray)
+        CDField parent,CDRecord cdRecord,PVMenuArray pvMenuArray,boolean supportAlso)
     {
-        super(parent,cdRecord,pvMenuArray);
+        super(parent,cdRecord,pvMenuArray,supportAlso);
+        this.supportAlso = supportAlso;
         this.pvMenuArray = pvMenuArray;
         createElementCDBMenus();
     }
@@ -39,8 +42,10 @@ public class BaseCDMenuArray extends BaseCDField implements CDNonScalarArray{
      * @see org.epics.ioc.ca.BaseCDField#dataPut(org.epics.ioc.pv.PVField)
      */
     public void dataPut(PVField targetPVField) {
-        String supportName = targetPVField.getSupportName();
-        if(supportName!=null) super.supportNamePut(targetPVField);
+        if(supportAlso) {
+            String supportName = targetPVField.getSupportName();
+            if(supportName!=null) super.supportNamePut(targetPVField.getSupportName());
+        }
         PVMenuArray targetPVMenuArray = (PVMenuArray)targetPVField;
         if(checkPVMenuArray(targetPVMenuArray)) {
             super.incrementNumPuts();
@@ -70,10 +75,10 @@ public class BaseCDMenuArray extends BaseCDField implements CDNonScalarArray{
                 Field newField = cdRecord.createField(targetPVMenu.getField());
                 PVMenu newMenu = (PVMenu)pvDataCreate.createPVField(pvMenuArray, newField);
                 pvMenus[i] = newMenu;
-                elementCDMenus[i] = new BaseCDMenu(this,cdRecord,newMenu);
+                elementCDMenus[i] = new BaseCDMenu(this,cdRecord,newMenu,supportAlso);
             }
             CDMenu cdMenu = elementCDMenus[i];   
-            cdMenu.enumIndexPut(targetPVMenu);
+            cdMenu.enumIndexPut(targetPVMenu.getIndex());
         }
         pvMenuArray.put(0, pvMenus.length, pvMenus, 0);
         super.incrementNumPuts();
@@ -123,7 +128,7 @@ public class BaseCDMenuArray extends BaseCDField implements CDNonScalarArray{
             PVMenu targetMenu = targetMenus[i];
             if(targetMenu==targetPVEnum) {
                 CDMenu cdMenu = elementCDMenus[i];
-                cdMenu.enumIndexPut(targetPVEnum);
+                cdMenu.enumIndexPut(targetPVEnum.getIndex());
                 return true;
             }
         }
@@ -133,6 +138,7 @@ public class BaseCDMenuArray extends BaseCDField implements CDNonScalarArray{
      * @see org.epics.ioc.ca.BaseCDField#supportNamePut(org.epics.ioc.pv.PVField, org.epics.ioc.pv.PVField)
      */
     public boolean supportNamePut(PVField requested,PVField targetPVField) {
+        if(!supportAlso) return false;
         PVMenuArray targetPVMenuArray = (PVMenuArray)requested;
         checkPVMenuArray(targetPVMenuArray);
         int length = targetPVMenuArray.getLength();
@@ -142,7 +148,7 @@ public class BaseCDMenuArray extends BaseCDField implements CDNonScalarArray{
             PVMenu targetMenu = targetMenus[i];
             if(targetMenu==targetPVField) {
                 CDMenu cdMenu = elementCDMenus[i];
-                cdMenu.supportNamePut(targetPVField);
+                cdMenu.supportNamePut(targetPVField.getSupportName());
                 return true;
             }
         }
@@ -160,7 +166,7 @@ public class BaseCDMenuArray extends BaseCDField implements CDNonScalarArray{
             if(pvMenu==null) {
                 elementCDMenus[i] = null;
             } else {
-                elementCDMenus[i] = new BaseCDMenu(this,dbRecord,pvMenu);
+                elementCDMenus[i] = new BaseCDMenu(this,dbRecord,pvMenu,supportAlso);
             }
         }
     }
@@ -197,10 +203,10 @@ public class BaseCDMenuArray extends BaseCDField implements CDNonScalarArray{
                 Field newField = cdRecord.createField(targetPVMenu.getField());
                 PVMenu newMenu = (PVMenu)pvDataCreate.createPVField(pvMenuArray, newField);
                 pvMenus[i] = newMenu;
-                elementCDMenus[i] = new BaseCDMenu(this,cdRecord,newMenu);
+                elementCDMenus[i] = new BaseCDMenu(this,cdRecord,newMenu,supportAlso);
                 CDMenu cdMenu = elementCDMenus[i];
-                cdMenu.enumIndexPut(targetPVMenu);
-                cdMenu.supportNamePut(targetPVMenu);
+                cdMenu.enumIndexPut(targetPVMenu.getIndex());
+                cdMenu.supportNamePut(targetPVMenu.getSupportName());
             }
         }
         if(madeChanges) {

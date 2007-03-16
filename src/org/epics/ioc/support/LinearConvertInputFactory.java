@@ -5,10 +5,8 @@
  */
 package org.epics.ioc.support;
 
-import org.epics.ioc.pv.*;
 import org.epics.ioc.db.*;
 import org.epics.ioc.process.*;
-import org.epics.ioc.util.MessageType;
 import org.epics.ioc.util.RequestResult;
 
 
@@ -20,7 +18,7 @@ import org.epics.ioc.util.RequestResult;
 public class LinearConvertInputFactory {
     /**
      * Factory creation method.
-     * @param dbField The field to support.
+     * @param dbStructure The field to support.
      * @return The Support interface.
      */
     public static Support create(DBStructure dbStructure) {

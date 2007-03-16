@@ -19,6 +19,7 @@ public class BaseChannelData implements ChannelData
 {
     private Channel channel;
     private ChannelFieldGroup channelFieldGroup;
+    private boolean supportAlso;
     private CDRecord cdRecord;
     private CDStructure cdStructure;
     private CDField[] cdFields;
@@ -30,11 +31,13 @@ public class BaseChannelData implements ChannelData
      * @param channelFieldGroup The channelFieldGroup for whicg to cobstruct a CDRecord.
      * @param fieldCreate Factory to create Field introspection objects.
      * @param pvDataCreate Factory to create PVField objects.
+     * @param supportAlso Should support be read/written?
      */
     public BaseChannelData(Channel channel,ChannelFieldGroup channelFieldGroup,
-            FieldCreate fieldCreate,PVDataCreate pvDataCreate)
+            FieldCreate fieldCreate,PVDataCreate pvDataCreate,boolean supportAlso)
     {
         this.channel = channel;
+        this.supportAlso = supportAlso;
         this.channelFieldGroup = channelFieldGroup;
         List<ChannelField> channelFieldList = channelFieldGroup.getList();
         int length = channelFieldList.size();
@@ -43,7 +46,7 @@ public class BaseChannelData implements ChannelData
             targetFields[i] = channelFieldList.get(i).getField();
         }
         cdRecord = new BaseCDRecord(fieldCreate,pvDataCreate,
-            targetFields,channel.getChannelName(),"channelData");
+            targetFields,channel.getChannelName(),"channelData",supportAlso);
         cdStructure = cdRecord.getCDStructure();
         cdFields = cdStructure.getFieldCDFields();
     }
@@ -77,6 +80,7 @@ public class BaseChannelData implements ChannelData
     public void clearNumPuts() {
         cdRecord.getCDStructure().clearNumPuts();
     }
+
     /* (non-Javadoc)
      * @see org.epics.ioc.ca.ChannelData#dataPut(org.epics.ioc.pv.PVField)
      */
@@ -98,28 +102,29 @@ public class BaseChannelData implements ChannelData
      */
     public void enumIndexPut(PVEnum targetPVEnum) {
         CDEnum cdEnum  = (CDEnum)findCDField(targetPVEnum);
-        cdEnum.enumIndexPut(targetPVEnum);
+        cdEnum.enumIndexPut(targetPVEnum.getIndex());
     }   
     /* (non-Javadoc)
      * @see org.epics.ioc.ca.ChannelData#enumChoicesPut(org.epics.ioc.pv.PVEnum)
      */
     public void enumChoicesPut(PVEnum targetPVEnum) {
         CDEnum cdEnum  = (CDEnum)findCDField(targetPVEnum);
-        cdEnum.enumChoicesPut(targetPVEnum);
+        cdEnum.enumChoicesPut(targetPVEnum.getChoices());
     }   
     public void supportNamePut(PVField targetPVField) {
         CDField cdField = findCDField(targetPVField);
-        cdField.supportNamePut(targetPVField);
+        cdField.supportNamePut(targetPVField.getSupportName());
     }   
     /* (non-Javadoc)
      * @see org.epics.ioc.ca.ChannelData#configurationStructurePut(org.epics.ioc.pv.PVLink)
      */
     public void configurationStructurePut(PVLink targetPVLink) {
+        if(!supportAlso) return;
         CDLink cdLink = (CDLink)findCDField(targetPVLink);
         if(cdLink==null) {
             throw new IllegalStateException("Logic error.");
         }
-        cdLink.configurationStructurePut(targetPVLink);
+        cdLink.configurationStructurePut(targetPVLink.getConfigurationStructure());
     }  
     /* (non-Javadoc)
      * @see org.epics.ioc.ca.ChannelData#beginPut(org.epics.ioc.pv.PVStructure)
@@ -155,6 +160,7 @@ public class BaseChannelData implements ChannelData
      * @see org.epics.ioc.ca.ChannelData#supportNamePut(org.epics.ioc.pv.PVField, org.epics.ioc.pv.PVField)
      */
     public void supportNamePut(PVField requested,PVField targetPVField) {
+        if(!supportAlso) return;
         CDField cdField = findCDField(requested);
         cdField.supportNamePut(requested, targetPVField);
     }    
@@ -162,6 +168,7 @@ public class BaseChannelData implements ChannelData
      * @see org.epics.ioc.ca.ChannelData#configurationStructurePut(org.epics.ioc.pv.PVField, org.epics.ioc.pv.PVLink)
      */
     public void configurationStructurePut(PVField requested,PVLink targetPVLink) {
+        if(!supportAlso) return;
         CDField cdField = findCDField(requested);
         cdField.configurationStructurePut(requested, targetPVLink);
     }

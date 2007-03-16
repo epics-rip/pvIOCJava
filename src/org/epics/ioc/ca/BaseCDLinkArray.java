@@ -11,6 +11,7 @@ import org.epics.ioc.pv.*;
  *
  */
 public class BaseCDLinkArray extends BaseCDField implements CDNonScalarArray{
+    private boolean supportAlso;
     private PVLinkArray pvLinkArray;
     private CDLink[] elementCDLinks;
     private LinkArrayData linkArrayData = new LinkArrayData();
@@ -20,11 +21,13 @@ public class BaseCDLinkArray extends BaseCDField implements CDNonScalarArray{
      * @param parent The parent cdField.
      * @param cdRecord The cdRecord that contains this field.
      * @param pvLinkArray The pvLinkArray that this CDField references.
+     * @param supportAlso Should support be read/written?
      */
     public BaseCDLinkArray(
-        CDField parent,CDRecord cdRecord,PVLinkArray pvLinkArray)
+        CDField parent,CDRecord cdRecord,PVLinkArray pvLinkArray,boolean supportAlso)
     {
-        super(parent,cdRecord,pvLinkArray);
+        super(parent,cdRecord,pvLinkArray,supportAlso);
+        this.supportAlso = supportAlso;
         this.pvLinkArray = pvLinkArray;
         createElementCDBLinks();
     }
@@ -39,8 +42,9 @@ public class BaseCDLinkArray extends BaseCDField implements CDNonScalarArray{
      * @see org.epics.ioc.ca.BaseCDField#dataPut(org.epics.ioc.pv.PVField)
      */
     public void dataPut(PVField targetPVField) {
+        if(!supportAlso) return;
         String supportName = targetPVField.getSupportName();
-        if(supportName!=null) super.supportNamePut(targetPVField);
+        if(supportName!=null) super.supportNamePut(targetPVField.getSupportName());
         PVLinkArray targetPVLinkArray = (PVLinkArray)targetPVField;
         if(checkPVLinkArray(targetPVLinkArray)) {
             super.incrementNumPuts();
@@ -77,6 +81,7 @@ public class BaseCDLinkArray extends BaseCDField implements CDNonScalarArray{
      * @see org.epics.ioc.ca.BaseCDField#dataPut(org.epics.ioc.pv.PVField, org.epics.ioc.pv.PVField)
      */
     public boolean dataPut(PVField requested,PVField targetPVField) {
+        if(!supportAlso) return false;
         PVLinkArray targetPVLinkArray = (PVLinkArray)requested;
         checkPVLinkArray(targetPVLinkArray);
         int length = targetPVLinkArray.getLength();
@@ -96,6 +101,7 @@ public class BaseCDLinkArray extends BaseCDField implements CDNonScalarArray{
      * @see org.epics.ioc.ca.BaseCDField#supportNamePut(org.epics.ioc.pv.PVField, org.epics.ioc.pv.PVField)
      */
     public boolean supportNamePut(PVField requested,PVField targetPVField) {
+        if(!supportAlso) return false;
         PVLinkArray targetPVLinkArray = (PVLinkArray)requested;
         checkPVLinkArray(targetPVLinkArray);
         int length = targetPVLinkArray.getLength();
@@ -105,7 +111,7 @@ public class BaseCDLinkArray extends BaseCDField implements CDNonScalarArray{
             PVLink targetLink = targetLinks[i];
             if(targetLink==targetPVField) {
                 CDLink cdLink = elementCDLinks[i];
-                cdLink.supportNamePut(targetPVField);
+                cdLink.supportNamePut(targetPVField.getSupportName());
                 return true;
             }
         }
@@ -115,6 +121,7 @@ public class BaseCDLinkArray extends BaseCDField implements CDNonScalarArray{
      * @see org.epics.ioc.ca.BaseCDField#configurationStructurePut(org.epics.ioc.pv.PVField, org.epics.ioc.pv.PVLink)
      */
     public boolean configurationStructurePut(PVField requested,PVLink targetPVLink) {
+        if(!supportAlso) return false;
         PVLinkArray targetPVLinkArray = (PVLinkArray)requested;
         checkPVLinkArray(targetPVLinkArray);
         int length = targetPVLinkArray.getLength();
@@ -124,7 +131,7 @@ public class BaseCDLinkArray extends BaseCDField implements CDNonScalarArray{
             PVLink targetLink = targetLinks[i];
             if(targetLink==targetPVLink) {
                 CDLink cdLink = elementCDLinks[i];
-                cdLink.configurationStructurePut(targetPVLink);
+                cdLink.configurationStructurePut(targetPVLink.getConfigurationStructure());
                 return true;
             }
         }
@@ -142,7 +149,7 @@ public class BaseCDLinkArray extends BaseCDField implements CDNonScalarArray{
             if(pvLink==null) {
                 elementCDLinks[i] = null;
             } else {
-                elementCDLinks[i] = new BaseCDLink(this,dbRecord,pvLink);
+                elementCDLinks[i] = new BaseCDLink(this,dbRecord,pvLink,supportAlso);
             }
         }
     }
@@ -180,10 +187,10 @@ public class BaseCDLinkArray extends BaseCDField implements CDNonScalarArray{
                 Field newField = cdRecord.createField(targetPVLink.getField());
                 PVLink newLink = (PVLink)pvDataCreate.createPVField(pvLinkArray, newField);
                 pvLinks[i] = newLink;
-                elementCDLinks[i] = new BaseCDLink(this,cdRecord,newLink);
+                elementCDLinks[i] = new BaseCDLink(this,cdRecord,newLink,supportAlso);
                 CDLink cdLink = elementCDLinks[i];
-                cdLink.configurationStructurePut(targetPVLink);
-                cdLink.supportNamePut(targetPVLink);
+                cdLink.supportNamePut(targetPVLink.getSupportName());
+                cdLink.configurationStructurePut(targetPVLink.getConfigurationStructure());
             }
         }
         if(madeChanges) {

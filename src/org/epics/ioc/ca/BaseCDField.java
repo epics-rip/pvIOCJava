@@ -14,6 +14,7 @@ import org.epics.ioc.pv.*;
  */
 public class BaseCDField implements CDField {
     private static Convert convert = ConvertFactory.getConvert();
+    private boolean supportAlso;
     private CDField parent;
     private CDRecord cdRecord;
     private PVField pvField;
@@ -26,10 +27,12 @@ public class BaseCDField implements CDField {
      * @param parent The parent cdField.
      * @param cdRecord The cdRecord that contains this field.
      * @param pvField The pvField that this CDField references.
+     * @param supportAlso Should support be read/written?
      */
     public BaseCDField(
-        CDField parent,CDRecord cdRecord,PVField pvField)
+        CDField parent,CDRecord cdRecord,PVField pvField,boolean supportAlso)
     {
+        this.supportAlso = supportAlso;
         this.parent = parent;
         this.cdRecord = cdRecord;
         this.pvField = pvField;
@@ -112,11 +115,13 @@ public class BaseCDField implements CDField {
         if(type!=targetPVField.getField().getType()) {
             throw new IllegalStateException("Logic error.");
         }
-        String supportName = targetPVField.getSupportName();
-        if(supportName!=null && supportName.length()>0) {
-            pvField.setSupportName(supportName);
-            numSupportNamePuts++;
-            setMaxNumPuts(numSupportNamePuts);
+        if(supportAlso) {
+            String supportName = targetPVField.getSupportName();
+            if(supportName!=null && supportName.length()>0) {
+                pvField.setSupportName(supportName);
+                numSupportNamePuts++;
+                setMaxNumPuts(numSupportNamePuts);
+            }
         }
         if(type.isScalar()) {
             convert.copyScalar(targetPVField, pvField);
@@ -138,9 +143,10 @@ public class BaseCDField implements CDField {
     /* (non-Javadoc)
      * @see org.epics.ioc.ca.CDField#supportNamePut(org.epics.ioc.pv.PVField)
      */
-    public void supportNamePut(PVField targetPVField) {
+    public void supportNamePut(String supportName) {
+        if(!supportAlso) return;
         PVField toPVField = this.getPVField();
-        toPVField.setSupportName(targetPVField.getSupportName());
+        toPVField.setSupportName(supportName);
         numSupportNamePuts++;
         setMaxNumPuts(numSupportNamePuts);
     }

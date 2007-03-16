@@ -13,6 +13,7 @@ import org.epics.ioc.pv.*;
  *
  */
 public class BaseCDEnumArray extends BaseCDField implements CDNonScalarArray {
+    private boolean supportAlso;
     private PVEnumArray pvEnumArray;
     private CDEnum[] elementCDEnums;
     private EnumArrayData enumArrayData = new EnumArrayData();
@@ -22,11 +23,13 @@ public class BaseCDEnumArray extends BaseCDField implements CDNonScalarArray {
      * @param parent The parent cdField.
      * @param cdRecord The cdRecord that contains this field.
      * @param pvEnumArray The pvEnumArray that this CDField references.
+     * @param supportAlso Should support be read/written?
      */
     public BaseCDEnumArray(
-        CDField parent,CDRecord cdRecord,PVEnumArray pvEnumArray)
+        CDField parent,CDRecord cdRecord,PVEnumArray pvEnumArray,boolean supportAlso)
     {
-        super(parent,cdRecord,pvEnumArray);
+        super(parent,cdRecord,pvEnumArray,supportAlso);
+        this.supportAlso = supportAlso;
         this.pvEnumArray = pvEnumArray;
         createElementCDBEnums();
     }
@@ -41,8 +44,10 @@ public class BaseCDEnumArray extends BaseCDField implements CDNonScalarArray {
      * @see org.epics.ioc.ca.BaseCDField#dataPut(org.epics.ioc.pv.PVField)
      */
     public void dataPut(PVField targetPVField) {
-        String supportName = targetPVField.getSupportName();
-        if(supportName!=null) super.supportNamePut(targetPVField);
+        if(supportAlso) {
+            String supportName = targetPVField.getSupportName();
+            if(supportName!=null) super.supportNamePut(supportName);
+        }
         PVEnumArray targetPVEnumArray = (PVEnumArray)targetPVField;
         if(checkPVEnumArray(targetPVEnumArray)) {
             super.incrementNumPuts();
@@ -57,8 +62,8 @@ public class BaseCDEnumArray extends BaseCDField implements CDNonScalarArray {
             PVEnum targetPVEnum = targetEnums[i];
             if(targetPVEnum==null) continue;
             CDEnum cdEnum = elementCDEnums[i];
-            cdEnum.enumChoicesPut(targetPVEnum);
-            cdEnum.enumIndexPut(targetPVEnum);
+            cdEnum.enumChoicesPut(targetPVEnum.getChoices());
+            cdEnum.enumIndexPut(targetPVEnum.getIndex());
         }
         pvEnumArray.put(0, pvEnums.length, pvEnums, 0);
         super.incrementNumPuts();
@@ -108,7 +113,7 @@ public class BaseCDEnumArray extends BaseCDField implements CDNonScalarArray {
             PVEnum targetEnum = targetEnums[i];
             if(targetEnum==targetPVEnum) {
                 CDEnum cdEnum = elementCDEnums[i];
-                cdEnum.enumIndexPut(targetPVEnum);
+                cdEnum.enumIndexPut(targetPVEnum.getIndex());
                 return true;
             }
         }
@@ -127,7 +132,7 @@ public class BaseCDEnumArray extends BaseCDField implements CDNonScalarArray {
             PVEnum targetEnum = targetEnums[i];
             if(targetEnum==targetPVEnum) {
                 CDEnum cdEnum = elementCDEnums[i];
-                cdEnum.enumChoicesPut(targetPVEnum);
+                cdEnum.enumChoicesPut(targetPVEnum.getChoices());
                 return true;
             }
         }
@@ -137,6 +142,7 @@ public class BaseCDEnumArray extends BaseCDField implements CDNonScalarArray {
      * @see org.epics.ioc.ca.BaseCDField#supportNamePut(org.epics.ioc.pv.PVField, org.epics.ioc.pv.PVField)
      */
     public boolean supportNamePut(PVField requested,PVField targetPVField) {
+        if(!supportAlso) return false;
         PVEnumArray targetPVEnumArray = (PVEnumArray)requested;
         checkPVEnumArray(targetPVEnumArray);
         int length = targetPVEnumArray.getLength();
@@ -146,7 +152,7 @@ public class BaseCDEnumArray extends BaseCDField implements CDNonScalarArray {
             PVEnum targetEnum = targetEnums[i];
             if(targetEnum==targetPVField) {
                 CDEnum cdEnum = elementCDEnums[i];
-                cdEnum.supportNamePut(targetPVField);
+                cdEnum.supportNamePut(targetPVField.getSupportName());
                 return true;
             }
         }
@@ -164,7 +170,7 @@ public class BaseCDEnumArray extends BaseCDField implements CDNonScalarArray {
             if(pvEnum==null) {
                 elementCDEnums[i] = null;
             } else {
-                elementCDEnums[i] = new BaseCDEnum(this,dbRecord,pvEnum);
+                elementCDEnums[i] = new BaseCDEnum(this,dbRecord,pvEnum,supportAlso);
             }
         }
     }
@@ -201,11 +207,11 @@ public class BaseCDEnumArray extends BaseCDField implements CDNonScalarArray {
                 Field newField = cdRecord.createField(targetPVEnum.getField());
                 PVEnum newEnum = (PVEnum)pvDataCreate.createPVField(pvEnumArray, newField);
                 pvEnums[i] = newEnum;
-                elementCDEnums[i] = new BaseCDEnum(this,cdRecord,newEnum);
+                elementCDEnums[i] = new BaseCDEnum(this,cdRecord,newEnum,supportAlso);
                 CDEnum cdEnum = elementCDEnums[i];
-                cdEnum.enumChoicesPut(targetPVEnum);
-                cdEnum.enumIndexPut(targetPVEnum);
-                cdEnum.supportNamePut(targetPVEnum);
+                cdEnum.enumChoicesPut(targetPVEnum.getChoices());
+                cdEnum.enumIndexPut(targetPVEnum.getIndex());
+                cdEnum.supportNamePut(targetPVEnum.getSupportName());
             }
         }
         if(madeChanges) {
