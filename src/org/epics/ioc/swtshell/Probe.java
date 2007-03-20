@@ -24,7 +24,7 @@ import org.epics.ioc.process.*;
 public class Probe {
     static private IOCDB iocdb = IOCDBFactory.getMaster();
     private static IOCExecutor iocExecutor = IOCExecutorFactory.create("swtshell:Probe");
-    private static ScanPriority scanPriority = ScanPriority.lower;
+    private static ScanPriority scanPriority = ScanPriority.higher;
     public static void init(Display display) {
         ProbeImpl probeImpl = new ProbeImpl(display);
         probeImpl.start();
@@ -237,18 +237,27 @@ public class Probe {
                  * @see java.lang.Runnable#run()
                  */
                 public void run() {
-                    channelProcess.process();
-                    lock.lock();
-                    try {
-                        while(!allDone) {                       
-                            waitDone.await();
+                    boolean result = channelProcess.process();
+                    if(result) {
+                        lock.lock();
+                        try {
+                            while(!allDone) {                       
+                                waitDone.await();
+                            }
+                        } catch (InterruptedException ie) {
+                            return;
+                        } finally {
+                            lock.unlock();
                         }
-                    } catch (InterruptedException ie) {
-                        return;
-                    } finally {
-                        lock.unlock();
+                        requestor.message("processComplete", MessageType.info);
+                    } else {
+                        result = channelProcess.processSelf();
+                        if(result) {
+                            requestor.message("processSelf", MessageType.info);
+                        } else {
+                            requestor.message("record could not be processed", MessageType.info);
+                        }
                     }
-                    requestor.message("processComplete", MessageType.info);
                     channel.destroy(channelProcess);
                 }
                 /* (non-Javadoc)

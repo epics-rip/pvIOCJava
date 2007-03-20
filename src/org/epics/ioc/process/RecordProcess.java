@@ -101,6 +101,17 @@ public interface RecordProcess {
      */
     String getRecordProcessRequestorName();
     /**
+     * Can the record process itself?
+     * @return (false,true) if the record (can not, can) process itself.
+     */
+    boolean canProcessSelf();
+    /**
+     * Request that record process itself.
+     * This will only be successful of scan.selfScan is true and the record is not active.
+     * @return (false,true) if the record started processing.
+     */
+    boolean processSelf();
+    /**
      * Prepare for processing a record but do not call record support.
      * A typical use of this method is when the processor wants to modify fields
      * of the record before it is processed.
@@ -125,7 +136,8 @@ public interface RecordProcess {
      * If null the initial timeStamp will be the current time.
      * @return (false,true) if the record (is not,is) ready for processing.
      */
-    boolean process(RecordProcessRequestor recordProcessRequestor, boolean leaveActive, TimeStamp timeStamp); 
+    boolean process(RecordProcessRequestor recordProcessRequestor,
+        boolean leaveActive, TimeStamp timeStamp);
     /**
      * Call by the recordProcessRequestor when it has called process with leaveActive
      * true and is done.

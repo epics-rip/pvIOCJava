@@ -20,8 +20,7 @@ public class ScanFieldFactory {
      * Create a ScanField.
      * The record instance must have a top level field named "scan"
      * that must be a "scan" structure as defined in the
-     * menuStructureSupportDBD.xml file that appears in package
-     * org.epics.ioc.support.
+     * menuStructureSupportDBD.xml file that appears in javaIOC/dbd.
      * ScanFieldFactory does no locking so code that uses it must be thread safe.
      * In general this means that the record instance must be locked when any method is called. 
      * @param pvRecord The record instance.
@@ -103,7 +102,18 @@ public class ScanFieldFactory {
             return null;
         }
         PVString eventNameField = (PVString)field;
-        return new ScanFieldInstance(priorityField,scanField,rateField,eventNameField);
+        index = structure.getFieldIndex("scanSelf");
+        if(index<0) {
+            pvField.message("does not have a field scanSelf", MessageType.fatalError);
+            return null;
+        }
+        field = datas[index];
+        if(field.getField().getType()!=Type.pvBoolean) {
+            ((PVField)field).message("is not a boolean", MessageType.fatalError);
+            return null;
+        }
+        PVBoolean scanSelfField = (PVBoolean)field;
+        return new ScanFieldInstance(priorityField,scanField,rateField,eventNameField,scanSelfField);
     }
     
     /**
@@ -150,25 +160,48 @@ public class ScanFieldFactory {
         private PVMenu scan;
         private PVDouble rate;
         private PVString eventName;
+        private PVBoolean scanSelfField;
         
-        private ScanFieldInstance(PVMenu priority, PVMenu scan, PVDouble rate, PVString eventName) {
+        private ScanFieldInstance(PVMenu priority, PVMenu scan,
+            PVDouble rate, PVString eventName, PVBoolean scanSelfField)
+        {
             super();
             this.priority = priority;
             this.scan = scan;
             this.rate = rate;
             this.eventName = eventName;
+            this.scanSelfField = scanSelfField;
         }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.util.ScanField#getEventName()
+         */
         public String getEventName() {
             return eventName.get();
         }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.util.ScanField#getPriority()
+         */
         public ScanPriority getPriority() {
             return ScanPriority.valueOf(priority.getChoices()[priority.getIndex()]);
         }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.util.ScanField#getRate()
+         */
         public double getRate() {
             return rate.get();
         }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.util.ScanField#getScanType()
+         */
         public ScanType getScanType() {
             return ScanType.valueOf(scan.getChoices()[scan.getIndex()]);
         }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.util.ScanField#getScanSelf()
+         */
+        public boolean getScanSelf() {
+            return scanSelfField.get();
+        }
+        
     }
 }

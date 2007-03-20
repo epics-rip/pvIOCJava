@@ -21,7 +21,7 @@ public class RecordProcessFactory {
     /**
      * Create RecordProcess for a record instance.
      * @param dbRecord The record instance.
-     * @return The interrace for the newly created RecordProcess.
+     * @return The interface for the newly created RecordProcess.
      */
     static public RecordProcess createRecordProcess(DBRecord dbRecord) {
         return new ProcessInstance(dbRecord);
@@ -35,7 +35,7 @@ public class RecordProcessFactory {
         private String recordProcessSupportName;
         private boolean disabled = false;
         private Support recordSupport = null;
-        private Support scanSupport = null;
+        private ScanSupport scanSupport = null;
         
         private boolean active = false;
         private boolean setActiveBySetActive = false;
@@ -99,7 +99,7 @@ public class RecordProcessFactory {
             if(index>=0) {
                 pvField = pvFields[index];
                 if(pvField.getField().getType()==Type.pvStructure) {
-                    scanSupport = dbFields[index].getSupport();
+                    scanSupport = (ScanSupport)dbFields[index].getSupport();
                 }
             }
         }
@@ -313,7 +313,18 @@ public class RecordProcessFactory {
             }
             return isStarted;
         }
-        
+        /* (non-Javadoc)
+         * @see org.epics.ioc.process.RecordProcess#canProcessSelf()
+         */
+        public boolean canProcessSelf() {
+            return scanSupport.canScanSelf();
+        }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.process.RecordProcess#processSelf()
+         */
+        public boolean processSelf() {
+            return scanSupport.scanSelf();
+        }
         /* (non-Javadoc)
          * @see org.epics.ioc.process.RecordProcess#process(org.epics.ioc.process.RecordProcessRequestor, boolean, org.epics.ioc.util.TimeStamp)
          */

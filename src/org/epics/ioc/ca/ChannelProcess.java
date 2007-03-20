@@ -18,4 +18,9 @@ public interface ChannelProcess {
      * This fails if the request can not be satisfied.
      */
     boolean process();
+    /**
+     * Ask the channel to process itself.
+     * @return (false,true) if the request (is not, is) successful.
+     */
+    boolean processSelf();
 }

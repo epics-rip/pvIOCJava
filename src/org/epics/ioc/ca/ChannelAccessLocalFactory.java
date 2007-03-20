@@ -91,7 +91,7 @@ public class ChannelAccessLocalFactory  {
         private LinkedList<ChannelMonitorImpl> monitorList = 
             new LinkedList<ChannelMonitorImpl>();
         
-        ChannelImpl(DBRecord record,ChannelStateListener listener) {
+        private ChannelImpl(DBRecord record,ChannelStateListener listener) {
             stateListener = listener;
             dbRecord = record;
             pvRecord = record.getPVRecord();
@@ -99,15 +99,13 @@ public class ChannelAccessLocalFactory  {
             if(pvAccess==null) {
                 throw new IllegalStateException("ChannelLink createAccess failed. Why?");
             }
-        }
-        
+        }       
         /* (non-Javadoc)
          * @see org.epics.ioc.ca.Channel#getChannelName()
          */
         public String getChannelName() {
             return pvRecord.getRecordName();
         }
-
         /* (non-Javadoc)
          * @see org.epics.ioc.util.Requestor#getRequestorName()
          */
@@ -602,20 +600,26 @@ public class ChannelAccessLocalFactory  {
             private String requestorName;
             private ChannelProcessRequestor channelProcessRequestor = null;
             private RecordProcess recordProcess = null;
+            private boolean isRequestor = false;
+            private boolean canScanSelf = false;
             
             private RequestResult requestResult = null;
                  
-            ChannelProcessImpl(ChannelProcessRequestor channelRequestor)
+            private ChannelProcessImpl(ChannelProcessRequestor channelProcessRequestor)
             {
-                this.channelProcessRequestor = channelRequestor;
+                this.channelProcessRequestor = channelProcessRequestor;
                 recordProcess = dbRecord.getRecordProcess();
-                boolean isRequestor = recordProcess.setRecordProcessRequestor(this);
+                isRequestor = recordProcess.setRecordProcessRequestor(this);
                 if(!isRequestor) {
-                    throw new IllegalStateException("record already has recordProcessRequestor"); 
+                    canScanSelf = recordProcess.canProcessSelf();
+                    if(!canScanSelf) {
+                        channelProcessRequestor.message("record can not scanSelf",
+                                MessageType.warning);
+                    }
                 }
-                requestorName = "ChannelProcess:" + channelRequestor.getRequestorName();
+                requestorName = "ChannelProcess:" + channelProcessRequestor.getRequestorName();
             }           
-            void destroy() {
+            private void destroy() {
                 recordProcess.releaseRecordProcessRequestor(this);
             }
             /* (non-Javadoc)
@@ -627,9 +631,17 @@ public class ChannelAccessLocalFactory  {
                         "channel is not connected",MessageType.info);
                     return false;
                 }
-                return recordProcess.process(this, false, null);
-                
+                if(isRequestor) {
+                    return recordProcess.process(this, false, null);
+                }
+                return false;
             }    
+            /* (non-Javadoc)
+             * @see org.epics.ioc.ca.ChannelProcess#processSelf()
+             */
+            public boolean processSelf() {
+                return recordProcess.processSelf();
+            }
             /* (non-Javadoc)
              * @see org.epics.ioc.util.Requestor#getRequestorName()
              */
@@ -675,7 +687,7 @@ public class ChannelAccessLocalFactory  {
             private Iterator<ChannelField> channelFieldListIter;
             private PVField pvField;
             
-            ChannelGetImpl(ChannelFieldGroup channelFieldGroup,
+            private ChannelGetImpl(ChannelFieldGroup channelFieldGroup,
                 ChannelGetRequestor channelGetRequestor,boolean process)
             {
                 if(channelFieldGroup==null) {
@@ -695,7 +707,7 @@ public class ChannelAccessLocalFactory  {
                 }
             }
             
-            void destroy() {
+            private void destroy() {
                 if(isRecordProcessRequestor) recordProcess.releaseRecordProcessRequestor(this);
             }
             /* (non-Javadoc)
@@ -748,14 +760,14 @@ public class ChannelAccessLocalFactory  {
                 this.requestResult = requestResult;
             }
             
-            void startGetData() {
+            private void startGetData() {
                 channelFieldList = fieldGroup.getList();
                 channelFieldListIter = channelFieldList.iterator();
                 pvField = null;
                 getData();
             }
             
-            void getData() {
+            private void getData() {
                 boolean more;
                 while(true) {
                     if(pvField==null) {
@@ -804,7 +816,7 @@ public class ChannelAccessLocalFactory  {
             private PVField pvField;
             private ChannelFieldImpl field;
             
-            ChannelPutImpl(ChannelFieldGroup channelFieldGroup,
+            private ChannelPutImpl(ChannelFieldGroup channelFieldGroup,
                 ChannelPutRequestor channelPutRequestor, boolean process)
             {
                 if(channelFieldGroup==null) {
@@ -823,7 +835,7 @@ public class ChannelAccessLocalFactory  {
                 requestorName = "ChannelPut:" + channelPutRequestor.getRequestorName();
             } 
             
-            void destroy() {
+            private void destroy() {
                 if(isRecordProcessRequestor) recordProcess.releaseRecordProcessRequestor(this);
             }
             /* (non-Javadoc)
@@ -879,14 +891,14 @@ public class ChannelAccessLocalFactory  {
                 channelPutRequestor.message(message, messageType);
             }
             
-            void startPutData() {
+            private void startPutData() {
                 channelFieldList = fieldGroup.getList();
                 channelFieldListIter = channelFieldList.iterator();
                 pvField = null;
                 putData();
             }
             
-            void putData() {
+            private void putData() {
                 boolean more;
                 while(true) {
                     if(pvField==null) {
@@ -939,7 +951,7 @@ public class ChannelAccessLocalFactory  {
             
             
             
-            ChannelDataPutImpl(Channel channel,ChannelFieldGroup channelFieldGroup,
+            private ChannelDataPutImpl(Channel channel,ChannelFieldGroup channelFieldGroup,
                 ChannelDataPutRequestor channelDataPutRequestor, boolean process,boolean supportAlso)
             {
                 if(channelFieldGroup==null) {
@@ -961,7 +973,7 @@ public class ChannelAccessLocalFactory  {
                 requestorName = "ChannelPut:" + channelDataPutRequestor.getRequestorName();
             } 
             
-            void destroy() {
+            private void destroy() {
                 if(isRecordProcessRequestor) recordProcess.releaseRecordProcessRequestor(this);
             }
             /* (non-Javadoc)
@@ -1185,7 +1197,7 @@ public class ChannelAccessLocalFactory  {
             private PVField pvField;
             
             
-            ChannelPutGetImpl(
+            private ChannelPutGetImpl(
                 ChannelFieldGroup putFieldGroup,ChannelFieldGroup getFieldGroup,
                 ChannelPutGetRequestor channelPutGetRequestor,boolean process)
             {
@@ -1202,7 +1214,7 @@ public class ChannelAccessLocalFactory  {
                 }
             }
             
-            void destroy() {
+            private void destroy() {
                 if(isRecordProcessRequestor)recordProcess.releaseRecordProcessRequestor(this);
             }
             /* (non-Javadoc)
@@ -1256,14 +1268,14 @@ public class ChannelAccessLocalFactory  {
                 channelPutGetRequestor.message(message, messageType);
             }
             
-            void startPutData() {
+            private void startPutData() {
                 channelFieldList = putFieldGroup.getList();
                 channelFieldListIter = channelFieldList.iterator();
                 pvField = null;
                 putData();
             }
             
-            void putData() {
+            private void putData() {
                 boolean more;
                 while(true) {
                     if(pvField==null) {
@@ -1300,14 +1312,14 @@ public class ChannelAccessLocalFactory  {
                 
             }
             
-            void startGetData() {
+            private void startGetData() {
                 channelFieldList = getFieldGroup.getList();
                 channelFieldListIter = channelFieldList.iterator();
                 pvField = null;
                 getData();
             }
            
-            void getData() {
+            private void getData() {
                 boolean more;
                 while(true) {
                     if(pvField==null) {
@@ -1360,7 +1372,7 @@ public class ChannelAccessLocalFactory  {
             private ChannelData channelData = null;
             private boolean monitorOccured = false;
             
-            ChannelMonitorImpl(
+            private ChannelMonitorImpl(
                 boolean onlyWhileProcesing,boolean supportAlso,
                 Channel channel,Requestor requestor)
             {
@@ -1384,7 +1396,7 @@ public class ChannelAccessLocalFactory  {
                 requestor.message(message, messageType);
             }
 
-            void destroy() {
+            private void destroy() {
                 stop();
             }
             /* (non-Javadoc)
@@ -1703,7 +1715,7 @@ public class ChannelAccessLocalFactory  {
                 if(channelData!=null) channelData.configurationStructurePut(requested.getPVField(),dbLink.getPVLink());
             }
 
-            void notifyRequestor() {
+            private void notifyRequestor() {
                 List<MonitorField> list = monitor.getMonitorFieldList();
                 for(MonitorField field : list) {
                     if(field.monitorOccured()) {
@@ -1739,7 +1751,7 @@ public class ChannelAccessLocalFactory  {
             }
         }
         
-        enum MonitorType {
+        private enum MonitorType {
             onPut,
             absoluteChange,
             percentageChange
@@ -1754,12 +1766,12 @@ public class ChannelAccessLocalFactory  {
             private double deadband;
             private double lastMonitorValue = 0.0;
     
-            MonitorField(MonitorType monitorType,boolean causeMonitor) {
+            private MonitorField(MonitorType monitorType,boolean causeMonitor) {
                 this.causeMonitor = causeMonitor;
                 this.monitorType = monitorType;
                 this.causeMonitor = causeMonitor;
             }
-            MonitorField(MonitorType monitorType, Type type, double deadband) {
+            private MonitorField(MonitorType monitorType, Type type, double deadband) {
                 causeMonitor = true;
                 this.monitorType = monitorType;
                 this.type = type;
@@ -1852,7 +1864,7 @@ public class ChannelAccessLocalFactory  {
             private ArrayList<ChannelFieldImpl> channelFieldList
                 = new ArrayList<ChannelFieldImpl>();
             
-            Monitor(Requestor requestor) {
+            private Monitor(Requestor requestor) {
                 this.requestor = requestor;
             }
             public List<MonitorField> getMonitorFieldList() {
@@ -1919,7 +1931,7 @@ public class ChannelAccessLocalFactory  {
             private ReentrantLock lock = new ReentrantLock();
             private Condition moreWork = lock.newCondition();
 
-            MonitorThread(
+            private MonitorThread(
             String name,int priority,
             ChannelMonitorRequestor channelMonitorRequestor,
             ChannelDataQueue channelDataQueue)
@@ -1931,7 +1943,8 @@ public class ChannelAccessLocalFactory  {
                 thread.setPriority(priority);
                 thread.start();
             } 
-            MonitorThread(
+            
+            private MonitorThread(
             String name,int priority,
             ChannelMonitorNotifyRequestor channelMonitorNotifyRequestor)
             {

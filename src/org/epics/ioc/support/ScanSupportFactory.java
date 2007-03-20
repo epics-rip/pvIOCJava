@@ -47,105 +47,133 @@ public class ScanSupportFactory {
         }  
     }
     
-    private static class ScanFieldSupport extends AbstractSupport implements IOCDBMergeListener {
+    private static class ScanFieldSupport extends AbstractSupport
+    implements ScanSupport, IOCDBMergeListener
+    {
         
         private boolean isMerged = false;
         private DBRecord dbRecord = null;
-        private PVRecord pvRecord;
-        private String recordName = null;
         private ScanType scanType;
         private ScanPriority priority;
         private String eventName = null;
         private double rate = 0.0;
+        private PVScanSelf pvScanSelf;
         
-        private ScanFieldSupport(DBStructure dbStructure) {
-            super(supportName,dbStructure);
-            String fieldName;
-            PVField oldField;
-            int index;
+        private ScanFieldSupport(DBStructure dbScan) {
+            super(supportName,dbScan);
+            dbRecord = dbScan.getDBRecord();
+            PVRecord pvRecord = dbRecord.getPVRecord();
+            String recordName = pvRecord.getRecordName();
+            PVStructure pvScan = dbScan.getPVStructure();
+            Structure scanStructure = (Structure)pvScan.getField();
+            DBField[] scanDBFields = dbScan.getFieldDBFields();
+            PVField[] scanPVFields = pvScan.getFieldPVFields();
+            
+            String fullFieldName = null;
+            PVField pvField = null;
+            DBField dbField = null;
+            int index; 
+            int choiceIndex;
             String choice;
+            String[] choices;
             Menu menu;
+            PVMenu pvMenu;
             PVMenu newMenu;
-            dbRecord = dbStructure.getDBRecord();
-            pvRecord = dbRecord.getPVRecord();
-            recordName = pvRecord.getRecordName();
-            PVAccess pvAccess = PVAccessFactory.createPVAccess(pvRecord);           
-            pvAccess.findField("");
-            fieldName = "scan.scan";
-            if(pvAccess.findField(fieldName)!=AccessSetResult.thisRecord){
-                throw new IllegalStateException(recordName + "." + fieldName + " not in record ");
+            
+            fullFieldName = pvScan.getFullFieldName() + ".scan";
+            index = scanStructure.getFieldIndex("scan");
+            if(index<0) {
+                throw new IllegalStateException(recordName + "." + fullFieldName + " not in record");
             }
-            oldField = pvAccess.getField();
-            if(oldField.getField().getType()!=Type.pvMenu) {
-                throw new IllegalStateException(recordName + "." + fieldName + " is not a menu field ");
+            pvField = scanPVFields[index];
+            if(pvField.getField().getType()!=Type.pvMenu) {
+                throw new IllegalStateException(recordName + "." + fullFieldName + " is not type menu");
             }
-            PVMenu scanMenu = (PVMenu)oldField;
-            if(!ScanFieldFactory.isScanMenu(scanMenu)) {
-                throw new IllegalStateException(recordName + "." + fieldName + " is not a menuScan ");
+            pvMenu = (PVMenu)pvField;
+            if(!ScanFieldFactory.isScanMenu(pvMenu)) {
+                throw new IllegalStateException(recordName + "." + fullFieldName + " is not a menuScan ");
             }
-            index = scanMenu.getIndex();
-            String[] choices = scanMenu.getChoices();
-            choice = choices[index];
+            dbField = scanDBFields[index];
+            choices = pvMenu.getChoices();
+            choiceIndex = pvMenu.getIndex();
+            choice = choices[choiceIndex];
             scanType = ScanType.valueOf(choice);
-            menu = (Menu)oldField.getField();
-            newMenu = new DBScan(this,(DBField)dbStructure,menu);
-            newMenu.setIndex(index);
-            DBField dbField = dbRecord.findDBField(oldField);
+            menu = (Menu)pvField.getField();
+            newMenu = new DBScan(this,dbField,menu);
+            newMenu.setIndex(choiceIndex);
             dbField.replacePVField(newMenu);
             
-            pvAccess.findField("");
-            fieldName = "scan.rate";
-            if(pvAccess.findField(fieldName)!=AccessSetResult.thisRecord){
-                throw new IllegalStateException(recordName + "." + fieldName + " not in record ");
+            fullFieldName = pvScan.getFullFieldName() + ".rate";
+            index = scanStructure.getFieldIndex("rate");
+            if(index<0) {
+                throw new IllegalStateException(recordName + "." + fullFieldName + " not in record");
             }
-            oldField = pvAccess.getField();
-            if(oldField.getField().getType()!=Type.pvDouble) {
-                throw new IllegalStateException(recordName + "." + fieldName + " is not a double field ");
+            pvField = scanPVFields[index];
+            if(pvField.getField().getType()!=Type.pvDouble) {
+                throw new IllegalStateException(recordName + "." + fullFieldName + " is not type double");
             }
-            PVDouble oldRate = (PVDouble)oldField;
+            dbField = scanDBFields[index];
+            PVDouble oldRate = (PVDouble)pvField;
             rate = oldRate.get();
-            PVDouble newRate = new DBRate(this,(DBField)dbStructure,oldField.getField());
+            PVDouble newRate = new DBRate(this,dbField,pvField.getField());
             newRate.put(rate);
-            dbField = dbRecord.findDBField(oldField);
             dbField.replacePVField(newRate);
             
-            pvAccess.findField("");
-            fieldName = "scan.eventName";
-            if(pvAccess.findField(fieldName)!=AccessSetResult.thisRecord){
-                throw new IllegalStateException(recordName + "." + fieldName + " not in record ");
+            fullFieldName = pvScan.getFullFieldName() + ".eventName";
+            index = scanStructure.getFieldIndex("eventName");
+            if(index<0) {
+                throw new IllegalStateException(recordName + "." + fullFieldName + " not in record");
             }
-            oldField = pvAccess.getField();
-            if(oldField.getField().getType()!=Type.pvString) {
-                throw new IllegalStateException(recordName + "." + fieldName + " is not a string field ");
+            pvField = scanPVFields[index];
+            if(pvField.getField().getType()!=Type.pvString) {
+                throw new IllegalStateException(recordName + "." + fullFieldName + " is not type string");
             }
-            PVString oldEventName = (PVString)oldField;
+            dbField = scanDBFields[index];
+            PVString oldEventName = (PVString)pvField;
             eventName = oldEventName.get();
-            PVString newEventName = new DBEventName(this,(DBField)dbStructure,oldField.getField());
+            PVString newEventName = new DBEventName(this,dbField,pvField.getField());
             newEventName.put(eventName);
-            dbField = dbRecord.findDBField(oldField);
             dbField.replacePVField(newEventName);
             
-            pvAccess.findField("");
-            fieldName = "scan.priority";
-            if(pvAccess.findField(fieldName)!=AccessSetResult.thisRecord){
-                throw new IllegalStateException(recordName + "." + fieldName + " not found");
+            fullFieldName = pvScan.getFullFieldName() + ".priority";
+            index = scanStructure.getFieldIndex("priority");
+            if(index<0) {
+                throw new IllegalStateException(recordName + "." + fullFieldName + " not in record");
             }
-            oldField = pvAccess.getField();
-            if(oldField.getField().getType()!=Type.pvMenu) {
-                throw new IllegalStateException(recordName + "." + fieldName + " is not a menu field ");
+            pvField = scanPVFields[index];
+            if(pvField.getField().getType()!=Type.pvMenu) {
+                throw new IllegalStateException(recordName + "." + fullFieldName + " is not type menu");
             }
-            PVMenu priorityMenu = (PVMenu)oldField;
-            if(!ScanFieldFactory.isPriorityMenu(priorityMenu)) {
-                throw new IllegalStateException(recordName + "." + fieldName + " is not a menuPriority ");
+            pvMenu = (PVMenu)pvField;
+            if(!ScanFieldFactory.isPriorityMenu(pvMenu)) {
+                throw new IllegalStateException(recordName + "." + fullFieldName + " is not a menuPriority ");
             }
-            index = priorityMenu.getIndex();
-            choice = priorityMenu.getChoices()[index];
+            dbField = scanDBFields[index];
+            choices = pvMenu.getChoices();
+            choiceIndex = pvMenu.getIndex();
+            choice = choices[choiceIndex];
             priority = ScanPriority.valueOf(choice);
-            menu = (Menu)oldField.getField();
-            newMenu = new DBPriority(this,(DBField)dbStructure,menu);
-            newMenu.setIndex(index);
-            dbField = dbRecord.findDBField(oldField);
+            menu = (Menu)pvField.getField();
+            newMenu = new DBPriority(this,dbField,menu);
+            newMenu.setIndex(choiceIndex);
             dbField.replacePVField(newMenu);
+            
+            fullFieldName = pvScan.getFullFieldName() + ".scanSelf";
+            index = scanStructure.getFieldIndex("scanSelf");
+            if(index<0) {
+                throw new IllegalStateException(recordName + "." + fullFieldName + " not in record");
+            }
+            pvField = scanPVFields[index];
+            if(pvField.getField().getType()!=Type.pvBoolean) {
+                throw new IllegalStateException(recordName + "." + fullFieldName + " is not type boolean");
+            }
+            dbField = scanDBFields[index];
+            PVBoolean oldScanSelf = (PVBoolean)pvField;
+            boolean scanSelf = oldScanSelf.get();
+            pvScanSelf = new PVScanSelf(this,dbField,pvField.getField());
+            pvScanSelf.put(scanSelf);
+            dbField.replacePVField(pvScanSelf);
+            
             dbRecord.getIOCDB().addIOCDBMergeListener(this);
         }       
         /* (non-Javadoc)
@@ -158,6 +186,7 @@ public class ScanSupportFactory {
          * @see org.epics.ioc.process.AbstractSupport#initialize(org.epics.ioc.process.SupportCreation)
          */
         public void initialize() {
+            pvScanSelf.initialize();
             setSupportState(SupportState.readyForStart);
         }
         /* (non-Javadoc)
@@ -205,6 +234,18 @@ public class ScanSupportFactory {
             dbRecord.getPVRecord().message("processContinue is being called. Why?", MessageType.error);
         }
         /* (non-Javadoc)
+         * @see org.epics.ioc.process.ScanSupport#isScanSelf()
+         */
+        public boolean canScanSelf() {
+            return pvScanSelf.get();
+        }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.process.ScanSupport#scanSelf()
+         */
+        public boolean scanSelf() {
+            return pvScanSelf.scanSelf();
+        }
+        /* (non-Javadoc)
          * @see org.epics.ioc.dbAccess.IOCDBMergeListener#merged()
          */
         public void merged() {
@@ -228,6 +269,7 @@ public class ScanSupportFactory {
                 break;
             }
         }
+        
         private void putPriority(ScanPriority value) {
             if(value==priority) return;
             boolean isStarted = this.isMerged;
@@ -235,6 +277,7 @@ public class ScanSupportFactory {
             priority = value;
             if(isStarted) start();
         }
+        
         private void putScanType(ScanType type) {
             if(type==scanType) return;
             boolean isStarted = this.isMerged;
@@ -242,6 +285,7 @@ public class ScanSupportFactory {
             scanType = type;
             if(isStarted) start();
         }
+        
         private void putEventName(String name) {
             if(name==null && eventName==null) return;
             if(name!=null && name.equals(eventName)) return;
@@ -250,21 +294,21 @@ public class ScanSupportFactory {
             eventName = name;
             if(isStarted && scanType==ScanType.event) start();
         }
+        
         private void putRate(double rate) {
             if(rate==this.rate) return;
             boolean isStarted = this.isMerged;
             if(isStarted && scanType==ScanType.periodic) stop();
             this.rate = rate;
             if(isStarted && scanType==ScanType.periodic) start();
-        }
-        
+        }        
     }
     
     private static class DBPriority extends BasePVMenu {
         private ScanFieldSupport scanFieldSupport;
         
-        private DBPriority(ScanFieldSupport scanFieldSupport,DBField parent,Menu menu) {
-            super(parent.getPVField(),menu);
+        private DBPriority(ScanFieldSupport scanFieldSupport,DBField dbField,Menu menu) {
+            super(dbField.getParent().getPVField(),menu);
             this.scanFieldSupport = scanFieldSupport;
         }      
         /* (non-Javadoc)
@@ -282,8 +326,8 @@ public class ScanSupportFactory {
     private static class DBScan extends BasePVMenu {
         private ScanFieldSupport scanFieldSupport;
         
-        private DBScan(ScanFieldSupport scanFieldSupport,DBField parent,Menu menu) {
-            super(parent.getPVField(),menu);
+        private DBScan(ScanFieldSupport scanFieldSupport,DBField dbField,Menu menu) {
+            super(dbField.getParent().getPVField(),menu);
             this.scanFieldSupport = scanFieldSupport;
         }
         /* (non-Javadoc)
@@ -302,8 +346,8 @@ public class ScanSupportFactory {
         private double value;
         private ScanFieldSupport scanFieldSupport;
         
-        private DBRate(ScanFieldSupport scanFieldSupport,DBField parent,Field field) {
-            super(parent.getPVField(),field);
+        private DBRate(ScanFieldSupport scanFieldSupport,DBField dbField,Field field) {
+            super(dbField.getParent().getPVField(),field);
             value = 0;
             this.scanFieldSupport = scanFieldSupport;
             String defaultValue = field.getFieldAttribute().getDefault();
@@ -325,6 +369,7 @@ public class ScanSupportFactory {
                 double oldValue = this.value;
                 this.value = value;
                 if(oldValue==value) return;
+                //dbField.postPut();
                 scanFieldSupport.putRate(value);
                 return ;
             }
@@ -350,8 +395,8 @@ public class ScanSupportFactory {
         private String value;
         private ScanFieldSupport scanFieldSupport;
         
-        private DBEventName(ScanFieldSupport scanFieldSupport,DBField parent,Field field) {
-            super(parent.getPVField(),field);
+        private DBEventName(ScanFieldSupport scanFieldSupport,DBField dbField,Field field) {
+            super(dbField.getParent().getPVField(),field);
             value = null;
             this.scanFieldSupport = scanFieldSupport;
             String defaultValue = field.getFieldAttribute().getDefault();
@@ -374,11 +419,99 @@ public class ScanSupportFactory {
                 this.value = value;
                 if(oldValue==null && value==null) return;
                 if(oldValue!=null && oldValue.equals(value)) return;
+                //dbField.postPut();
                 scanFieldSupport.putEventName(value);
                 return ;
             }
             throw new IllegalStateException("PVField.isMutable is false");
         }       
+        /* (non-Javadoc)
+         * @see java.lang.Object#toString()
+         */
+        public String toString() {
+            return toString(0);
+        }       
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pv.AbstractPVField#toString(int)
+         */
+        public String toString(int indentLevel) {
+            return convert.getString(this, indentLevel)
+            + super.toString(indentLevel);
+        }
+    }
+    
+    private static class PVScanSelf extends AbstractPVField
+    implements PVBoolean,RecordProcessRequestor
+    {
+        private DBField dbField;
+        private boolean isScanSelf;
+        private RecordProcess recordProcess = null;
+        private boolean isActive = false;
+        
+        private PVScanSelf(ScanFieldSupport scanFieldSupport,DBField dbField,Field field) {
+            super(dbField.getParent().getPVField(),field);
+            this.dbField = dbField;
+            isScanSelf = false;
+            String defaultValue = field.getFieldAttribute().getDefault();
+            if(defaultValue!=null && defaultValue.length()>0) {
+                isScanSelf = Boolean.valueOf(defaultValue);
+            }
+            dbField.replacePVField(this);
+        }
+        private void initialize() {
+            if(recordProcess!=null) return;
+            recordProcess = dbField.getDBRecord().getRecordProcess();
+            if(isScanSelf) {
+                if(!recordProcess.setRecordProcessRequestor(this)) {
+                    dbField.getPVField().message(
+                       "scanSelf not possible because setRecordProcessor failed",
+                       MessageType.warning);
+                    isScanSelf = false;
+                }
+            }
+        }
+        private boolean scanSelf() {
+            if(!isScanSelf) return false;
+            if(isActive) return false;
+            isActive = true;
+            recordProcess.process(this, false, null);
+            return true;
+        }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pv.PVBoolean#get()
+         */
+        public boolean get() {
+            return isScanSelf;
+        }       
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pv.PVBoolean#put(boolean)
+         */
+        public void put(boolean value) {
+            if(getField().isMutable()) {
+                if(isScanSelf) {
+                    recordProcess.releaseRecordProcessRequestor(this);
+                    isScanSelf = false;
+                }
+                if(value) {
+                    isScanSelf = recordProcess.setRecordProcessRequestor(this);
+                }
+                //dbField.postPut();
+                return;
+            }
+            throw new IllegalStateException("PVField.isMutable is false");
+        }       
+        /* (non-Javadoc)
+         * @see org.epics.ioc.process.RecordProcessRequestor#recordProcessComplete()
+         */
+        public void recordProcessComplete() {
+            isActive = false;
+        }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.process.RecordProcessRequestor#recordProcessResult(org.epics.ioc.util.RequestResult)
+         */
+        public void recordProcessResult(RequestResult requestResult) {
+            // nothing to do
+        }
         /* (non-Javadoc)
          * @see java.lang.Object#toString()
          */
