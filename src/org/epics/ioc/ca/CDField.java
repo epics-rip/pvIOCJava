@@ -8,7 +8,7 @@ package org.epics.ioc.ca;
 import org.epics.ioc.pv.*;
 
 /**
- * CDField - Data for a field of a CDRecord (ChannelData Record)
+ * CDField - Data for a field of a CDRecord (Channel Data Record)
  * @author mrk
  *
  */

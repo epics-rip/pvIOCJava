@@ -28,4 +28,9 @@
     <choice>percentageChange</choice>
 </menu>
 
+<menu name = "outputMode">
+    <choice>supervisory</choice>
+    <choice>closedLoop</choice>
+</menu>
+
 </DBDefinition>

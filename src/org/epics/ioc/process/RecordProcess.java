@@ -116,27 +116,29 @@ public interface RecordProcess {
      * A typical use of this method is when the processor wants to modify fields
      * of the record before it is processed.
      * If successful the record is active but unlocked.
+     * If not successful recordProcessRequestor.recordProcessResult
+     * and recordProcessComplete are called before setActive returns.
      * @param recordProcessRequestor The recordProcessRequestor.
      * @return (false,true) if the record (is not,is) ready for processing.
      * The call can fail for a number of reasons. If false is returned the caller
      * must not modify or process the record.
      */
-    boolean setActive(RecordProcessRequestor recordProcessRequestor);
+    void setActive(RecordProcessRequestor recordProcessRequestor);
     /**
      * Process the record instance.
      * Unless the record was activated by setActive,
      * the record is prepared for processing just like for setActive.
-     * If the record is successfully prepared recordSupport.process is called.
      * All results of record processing are reported
      * via the RecordProcessRequestor methods.
+     * If not successful recordProcessRequestor.recordProcessResult
+     * and recordProcessComplete are called before setActive returns.
      * @param recordProcessRequestor The recordProcessRequestor.
      * @param leaveActive Leave the record active when process is done.
      * The requestor must call setInactive.
      * @param timeStamp The initial timeStamp for record procsssing.
      * If null the initial timeStamp will be the current time.
-     * @return (false,true) if the record (is not,is) ready for processing.
      */
-    boolean process(RecordProcessRequestor recordProcessRequestor,
+    void process(RecordProcessRequestor recordProcessRequestor,
         boolean leaveActive, TimeStamp timeStamp);
     /**
      * Call by the recordProcessRequestor when it has called process with leaveActive
@@ -159,39 +161,6 @@ public interface RecordProcess {
      * @param processCallbackRequestor The listener to call.
      */
     void requestProcessCallback(ProcessCallbackRequestor processCallbackRequestor);
-    /**
-     * Set the status and severity for the record.
-     * This must only be called by code running as a result of process, preProcess, or processContinue. 
-     * The algorithm is to maxamize the severity, i.e. if the requested severity is greater than the current
-     * severity than the status and severity are set to the requested values. When a recvord starts processing the
-     * status is set to null and the alarmSeverity is set the "not defined". This the first call with a severity of
-     * none will set the status and severity.
-     * @param status The status
-     * @param alarmSeverity The severity
-     * @return (false, true) if the status and severity (were not, were) set the requested values.
-     */
-    boolean setStatusSeverity(String status, AlarmSeverity alarmSeverity);
-    /**
-     * Set the status for the record.
-     * This must only be called by code running as a result of process, preProcess, or processContinue. 
-     * The status will be changed only is the current alarmSeverity is none.
-     * @param status The new status.
-     * @return (false,true) if the status (was not, was) changed.
-     */
-    boolean setStatus(String status);
-    /**
-     * Get the current status.
-     * This must only be called by code running as a result of process, preProcess, or processContinue. 
-     * or RecordProcessRequestor.processComplete.
-     * @return The status. If the record does not have a status field null will be returned.
-     */
-    String getStatus();
-    /**
-     * Get the current alarm severity.
-     * This must only be called by code running as a result of process, preProcess, or processContinue.  
-     * @return The severity. If the record does not have an alarmSeverity field null is returned.
-     */
-    AlarmSeverity getAlarmSeverity();
     /**
      * Set the timeStamp for the record.
      * This must only be called by code running as a result of process, preProcess, or processContinue. 

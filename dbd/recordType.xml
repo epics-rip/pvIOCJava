@@ -1,0 +1,12 @@
+<?xml version="1.0" ?>
+<DBDefinition>
+
+<include href = "calcRecord.xml" />
+<include href = "intRecord.xml" />
+<include href = "eventRecord.xml" />
+<include href = "doubleRecord.xml" />
+<include href = "aiDoubleRecord.xml" />
+<include href = "aoDoubleRecord.xml" />
+<include href = "powerSupplyRecord.xml" />
+
+</DBDefinition>

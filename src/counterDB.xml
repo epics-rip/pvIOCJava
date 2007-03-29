@@ -1,0 +1,135 @@
+<?xml version="1.0" ?>
+<IOCDatabase>
+<record name = "counterCounter" type = "calc">
+    <calcArgArray>
+        <value structureName = "calcArg">
+            <value>0.0</value>
+            <name>min</name>
+        </value>
+        <value structureName = "calcArg">
+            <value>10.0</value>
+            <name>max</name>
+        </value>
+        <value structureName = "calcArg">
+            <value>1.0</value>
+            <name>inc</name>
+        </value>
+    </calcArgArray>
+    <calculator supportName = "counterCalculator" />
+    <linkArray>
+        <value structureName = "linkArrayElement">
+            <wait>true</wait>
+            <link  supportName = "processLink" >
+                <configure structureName = "processLink">
+                    <pvname>double01FromCounter</pvname>
+                </configure>
+            </link>
+        </value>
+        <value structureName = "linkArrayElement">
+            <wait>false</wait>
+            <link  supportName = "outputLink" >
+                <configure structureName = "outputLink">
+                    <pvname>double02FromCounter</pvname>
+                    <process>true</process>
+                </configure>
+            </link>
+        </value>
+        <value structureName = "linkArrayElement">
+            <wait>false</wait>
+            <link  supportName = "processLink" >
+                <configure structureName = "processLink">
+                    <pvname>double03FromCounter</pvname>
+                </configure>
+            </link>
+        </value>
+    </linkArray>
+    <doubleAlarm>
+        <configure structureName = "doubleAlarm">
+          <active>true</active>
+          <hystersis>0.1</hystersis>
+          <highMajor>8.0</highMajor>
+          <highMinor>6.0</highMinor>
+          <lowMinor>4.0</lowMinor>
+          <lowMajor>2.0</lowMajor>
+        </configure>
+    </doubleAlarm>
+    <units>counts</units>
+    <displayLimit>
+        <low>0.0</low>
+        <high>10.0</high>
+    </displayLimit>
+    <scan>
+        <scan>periodic</scan>
+        <rate>1.0</rate>
+    </scan>
+</record>
+
+<record name = "double01FromCounter" type = "double">
+    <input supportName = "inputLink" >
+        <configure structureName = "inputLink">
+            <pvname>counterCounter</pvname>
+            <process>false</process>
+        </configure>
+    </input>
+    <units>volts</units>
+    <doubleAlarm>
+        <configure structureName = "doubleAlarm">
+          <active>true</active>
+          <hystersis>0.1</hystersis>
+          <highMajor>8.0</highMajor>
+          <highMinor>6.0</highMinor>
+          <lowMinor>4.0</lowMinor>
+          <lowMajor>2.0</lowMajor>
+        </configure>
+    </doubleAlarm>
+    <displayLimit>
+        <low>0.0</low>
+        <high>10.0</high>
+    </displayLimit>
+</record>
+<record name = "double02FromCounter" type = "double">
+    <units>volts</units>
+    <doubleAlarm>
+        <configure structureName = "doubleAlarm">
+          <active>true</active>
+          <hystersis>0.1</hystersis>
+          <highMajor>8.0</highMajor>
+          <highMinor>6.0</highMinor>
+          <lowMinor>4.0</lowMinor>
+          <lowMajor>2.0</lowMajor>
+        </configure>
+    </doubleAlarm>
+    <displayLimit>
+        <low>0.0</low>
+        <high>10.0</high>
+    </displayLimit>
+</record>
+
+<record name = "double03FromCounter" type = "double">
+    <input supportName = "inputLink" >
+        <configure structureName = "inputLink">
+            <pvname>counterCounter</pvname>
+            <process>false</process>
+        </configure>
+    </input>
+    <units>volts</units>
+    <doubleAlarm>
+        <configure structureName = "doubleAlarm">
+          <active>true</active>
+          <hystersis>0.1</hystersis>
+          <highMajor>8.0</highMajor>
+          <highMinor>6.0</highMinor>
+          <lowMinor>4.0</lowMinor>
+          <lowMajor>2.0</lowMajor>
+        </configure>
+    </doubleAlarm>
+    <displayLimit>
+        <low>0.0</low>
+        <high>10.0</high>
+    </displayLimit>
+    <scan>
+        <scanSelf>true</scanSelf>
+    </scan>
+</record>
+
+</IOCDatabase>

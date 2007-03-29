@@ -14,7 +14,6 @@ import org.epics.ioc.pv.Enum;
  *
  */
 public class BaseCDRecord implements CDRecord {
-    private boolean supportAlso;
     private FieldCreate fieldCreate;
     private PVDataCreate pvDataCreate;
     private PVRecord pvRecord;

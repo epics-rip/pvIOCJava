@@ -2,6 +2,8 @@
 <DBDefinition>
 <include addPath = "dbd" />
 <include href = "menuStructureSupport.xml" />
+<include href = "recordType.xml" />
+<!-- 
 <include addPath = "src/org/epics/ioc/db/test" />
 <include href = "analogDBD.xml" />
 <include href = "aiDBD.xml" />
@@ -9,6 +11,6 @@
 <include href = "allTypesDBD.xml" />
 <include addPath = "src/org/epics/ioc/process/test" />
 <include href = "exampleDBD.xml" />
-
+-->
 
 </DBDefinition>

@@ -121,20 +121,51 @@ public class ScannerFactory {
             lock.lock();
             try {                
                 if(listModified) {
+                    outer:
                     for(int i=0; i< recordExecutors.length; i++) {
                         RecordExecutor recordExecutor = recordExecutors[i];
                         RecordProcess recordProcess = recordExecutor.recordProcess;
+                        DBRecord dbRecord =recordProcess.getRecord();
+                        ListIterator<RecordProcess> iter = processList.listIterator();
+                        while(iter.hasNext()) {
+                            RecordProcess next = iter.next();
+                            if(next.getRecord()==dbRecord) continue outer;
+                        }
                         recordProcess.releaseRecordProcessRequestor(recordExecutor);
+                        recordExecutors[i] = null;
                     }
-                    recordExecutors = new RecordExecutor[processList.size()];
+                    RecordExecutor[] executors = new RecordExecutor[processList.size()];
                     int nextGood = 0;
-                    for(int i=0; i< recordExecutors.length; i++) {
-                        RecordProcess recordProcess = processList.get(i);
-                        RecordExecutor recordExecutor = new RecordExecutor(name,recordProcess);
-                        if(recordProcess.setRecordProcessRequestor(recordExecutor)) {
-                            recordExecutors[nextGood++] = recordExecutor;
+                    for(RecordExecutor executor: recordExecutors) {
+                         if(executor!=null) executors[nextGood++] = executor;
+                    }
+                    ListIterator<RecordProcess> iter = processList.listIterator();
+                    outer1:
+                    while(iter.hasNext()) {
+                        RecordProcess next = iter.next();
+                        for(int j=0; j<nextGood; j++) {
+                            if(executors[j].recordProcess.getRecord()==next.getRecord()) continue outer1;
+                        }
+                        RecordExecutor recordExecutor = new RecordExecutor(name,next);
+                        if(next.setRecordProcessRequestor(recordExecutor)) {
+                            executors[nextGood++] = recordExecutor;
+                        } else {
+                            // set scan.scan to passive
+                            PVRecord pvRecord = next.getRecord().getPVRecord();
+                            Structure structure = (Structure)pvRecord.getField();
+                            PVField[] pvFields = pvRecord.getFieldPVFields();
+                            int index = structure.getFieldIndex("scan");
+                            PVStructure pvStructure = (PVStructure)pvFields[index];
+                            structure = (Structure)pvStructure.getField();
+                            pvFields = pvStructure.getFieldPVFields();
+                            index = structure.getFieldIndex("scan");
+                            PVMenu pvMenu = (PVMenu)pvFields[index];
+                            pvMenu.setIndex(0);
+                            pvRecord.message(
+                                "failed to become recordProcessor", MessageType.error);
                         }
                     }
+                    recordExecutors = executors;
                     if(nextGood<recordExecutors.length) {
                         RecordExecutor[] temp = new RecordExecutor[nextGood];
                         processList.clear();
@@ -258,39 +289,39 @@ public class ScannerFactory {
                 + "," + String.valueOf(priority) + ")";
                 PeriodiocExecutor executor = null;
                 outer:
-                    while(iter.hasNext()) {
-                        PeriodiocExecutor executorNext = iter.next();
-                        long executorPeriod = executorNext.getPeriod();
-                        if(period>executorPeriod) continue;
-                        if(period<executorPeriod) {
-                            executor = new PeriodiocExecutor(name,period,priority);
-                            iter.previous();
-                            iter.add(executor);
-                            break;
-                        }
-                        // found correct period. Now look for priority
+                while(iter.hasNext()) {
+                    PeriodiocExecutor executorNext = iter.next();
+                    long executorPeriod = executorNext.getPeriod();
+                    if(period>executorPeriod) continue;
+                    if(period<executorPeriod) {
+                        executor = new PeriodiocExecutor(name,period,priority);
                         iter.previous();
-                        while(iter.hasNext()) {
-                            executorNext = iter.next();
-                            executorPeriod = executorNext.getPeriod();
-                            if(period<executorPeriod) {
-                                executor = new PeriodiocExecutor(name,period,priority);
-                                iter.previous();
-                                iter.add(executor);
-                                break;
-                            }
-                            int executorPriority = executorNext.getThread().getPriority();
-                            if(priority>executorPriority) continue;
-                            if(priority==executorPriority) {
-                                executor = executorNext;
-                                break outer;
-                            }
+                        iter.add(executor);
+                        break outer;
+                    }
+                    // found correct period. Now look for priority
+                    iter.previous();
+                    while(iter.hasNext()) {
+                        executorNext = iter.next();
+                        executorPeriod = executorNext.getPeriod();
+                        if(period<executorPeriod) {
                             executor = new PeriodiocExecutor(name,period,priority);
                             iter.previous();
                             iter.add(executor);
                             break outer;
                         }
+                        int executorPriority = executorNext.getThread().getPriority();
+                        if(priority>executorPriority) continue;
+                        if(priority==executorPriority) {
+                            executor = executorNext;
+                            break outer;
+                        }
+                        executor = new PeriodiocExecutor(name,period,priority);
+                        iter.previous();
+                        iter.add(executor);
+                        break outer;
                     }
+                }
                 if(executor==null) {
                     executor = new PeriodiocExecutor(name,period,priority);
                     executorList.add(executor);
@@ -323,7 +354,12 @@ public class ScannerFactory {
                         break;
                     }
                 }
-                if(executor==null) return;
+                if(executor==null) {
+                    dbRecord.getPVRecord().message(
+                          "PeriodicScanner.unschedule but not in list",
+                          MessageType.error);
+                    return;
+                }
                 RecordProcess recordProcess = dbRecord.getRecordProcess();
                 ArrayList<RecordProcess> processList = executor.getList();
                 processList.remove(recordProcess);

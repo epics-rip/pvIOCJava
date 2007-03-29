@@ -29,40 +29,48 @@ public class Probe {
         ProbeImpl probeImpl = new ProbeImpl(display);
         probeImpl.start();
     }
-    
+
+    private enum ConnectState {connected,disconnected}
+
     private static class ProbeImpl  implements Requestor, Runnable{
         private Display display;
         private Shell shell;
-        private PVShell pvShell;
+        private GetChannelShell getChannelShell;
         private Text consoleText;
         private MessageQueue messageQueue = MessageQueueFactory.create(3);
-        
+
         private ProbeImpl(Display display) {
             this.display = display;
         }
-        
+
         public void start() {
             shell = new Shell(display);
             shell.setText("probe");
             GridLayout gridLayout = new GridLayout();
             gridLayout.numColumns = 1;
             shell.setLayout(gridLayout);
-            Composite shellComposite = new Composite(shell,SWT.BORDER);
+            Composite shellComposite = new Composite(shell,SWT.NONE);
             gridLayout = new GridLayout();
             gridLayout.numColumns = 1;
             shellComposite.setLayout(gridLayout);
             GridData gridData = new GridData(GridData.FILL_BOTH);
             shellComposite.setLayoutData(gridData);   
-            pvShell = new PVShell(shellComposite,this);
-            Composite actionComposite = new Composite(shellComposite,SWT.NONE);
+            getChannelShell = new GetChannelShell(shellComposite,this);
+            Composite processComposite = new Composite(shellComposite,SWT.NONE);
             gridLayout = new GridLayout();
-            gridLayout.numColumns = 3;
-            actionComposite.setLayout(gridLayout);
+            gridLayout.numColumns = 1;
+            processComposite.setLayout(gridLayout);
             gridData = new GridData(GridData.FILL_HORIZONTAL);
-            actionComposite.setLayoutData(gridData);
-            new ProcessShell(actionComposite,this);
-            new GetShell(actionComposite,this);
-            new PutShell(actionComposite,this);
+            processComposite.setLayoutData(gridData);
+            new ProcessShell(processComposite,this);
+            Composite getPutComposite = new Composite(shellComposite,SWT.NONE);
+            gridLayout = new GridLayout();
+            gridLayout.numColumns = 2;
+            getPutComposite.setLayout(gridLayout);
+            gridData = new GridData(GridData.FILL_HORIZONTAL);
+            getPutComposite.setLayoutData(gridData);
+            new GetShell(getPutComposite,this);
+            new PutShell(getPutComposite,this);
             Composite consoleComposite = new Composite(shellComposite,SWT.BORDER);
             gridLayout = new GridLayout();
             gridLayout.numColumns = 1;
@@ -86,7 +94,7 @@ public class Probe {
             consoleText.setLayoutData(gridData);
             shell.open();
         }
-        
+
         /* (non-Javadoc)
          * @see org.epics.ioc.util.Requestor#getRequestorName()
          */
@@ -114,7 +122,7 @@ public class Probe {
                 display.syncExec(this);
             }
         }
-        
+
         public void run() {
             while(true) {
                 String message = null;
@@ -132,33 +140,53 @@ public class Probe {
                     consoleText.append(String.format("%n%d missed messages&n", numOverrun));
                 }
                 if(message!=null) {
-                   consoleText.append(String.format("%s%n",message));
+                    consoleText.append(String.format("%s%n",message));
                 }
             }
         }
-        
-        private class ProcessShell implements SelectionListener {
+
+        private class ProcessShell implements SelectionListener, DisposeListener {
             private Requestor requestor;
-            private Composite processWidget;
+            private Composite processorWidget;
+            private Button connectButton;
             private Button processButton;
             private Button showProcessorButton;
             private Button releaseProcessorButton;
-            
+            private Button showThreadsButton;
+            private Process process = null;
+            private ConnectState connectState = ConnectState.disconnected;
+            private String[] connectStateText = {"connect    ","disconnect"};
+
             private ProcessShell(Composite parentWidget,Requestor requestor) {
                 this.requestor = requestor;
-                processWidget = new Composite(parentWidget,SWT.BORDER);
+                Composite rowWidget = new Composite(parentWidget,SWT.BORDER);
                 GridLayout gridLayout = new GridLayout();
-                gridLayout.numColumns = 3;
+                gridLayout.numColumns = 5;
+                rowWidget.setLayout(gridLayout);
+                Composite processWidget = new Composite(rowWidget,SWT.BORDER);
+                gridLayout = new GridLayout();
+                gridLayout.numColumns = 2;
                 processWidget.setLayout(gridLayout);
+                connectButton = new Button(processWidget,SWT.PUSH);
+                connectButton.setText(connectStateText[0]);
+                connectButton.addSelectionListener(this);
                 processButton = new Button(processWidget,SWT.PUSH);
                 processButton.setText("process");
-                processButton.addSelectionListener(this);
-                showProcessorButton = new Button(processWidget,SWT.PUSH);
+                processButton.addSelectionListener(this);               
+                showProcessorButton = new Button(rowWidget,SWT.PUSH);
                 showProcessorButton.setText("showProcessor");
                 showProcessorButton.addSelectionListener(this);
-                releaseProcessorButton = new Button(processWidget,SWT.PUSH);
+                processorWidget = new Composite(rowWidget,SWT.NONE);
+                gridLayout = new GridLayout();
+                gridLayout.numColumns = 1;
+                processorWidget.setLayout(gridLayout);
+                releaseProcessorButton = new Button(processorWidget,SWT.PUSH);
                 releaseProcessorButton.setText("releaseProcessor");
                 releaseProcessorButton.addSelectionListener(this);
+                showThreadsButton = new Button(rowWidget,SWT.PUSH);
+                showThreadsButton.setText("showThreads");
+                showThreadsButton.addSelectionListener(this);
+                processWidget.addDisposeListener(this);
             }
 
             /* (non-Javadoc)
@@ -172,36 +200,83 @@ public class Probe {
              * @see org.eclipse.swt.events.SelectionListener#widgetSelected(org.eclipse.swt.events.SelectionEvent)
              */
             public void widgetSelected(SelectionEvent arg0) {
-                Object object = arg0.getSource();
-                Channel channel = pvShell.getChannel();
-                if(channel==null) {
-                    requestor.message(String.format("no record selected%n"),MessageType.error);
-                    return;
+                Object object = arg0.getSource(); 
+                if(object==connectButton) {
+                    switch(connectState) {
+                    case disconnected:
+                        Channel channel = getChannelShell.getChannel();
+                        if(channel==null) {
+                            requestor.message(String.format("no record selected%n"),MessageType.error);
+                            return;
+                        }
+                        process = new Process(channel,requestor);
+                        boolean result = process.connect();
+                        if(result) {
+                            connectState = ConnectState.connected;
+                            requestor.message(String.format("connected%n"),MessageType.info);
+                            connectButton.setText(connectStateText[1]);
+                        } else {
+                            requestor.message(String.format("not connected%n"),MessageType.info);
+                            process = null;
+                        }
+                        return;
+                    case connected:
+                        process.disconnect();
+                        process = null;
+                        connectState = ConnectState.disconnected;
+                        connectButton.setText(connectStateText[0]);
+                        return;
+                    }
                 }
                 if(object==processButton) {
-                    Process process = new Process(channel,requestor);
+                    if(process==null) {
+                        requestor.message(String.format("not connected%n"),MessageType.error);
+                        return;
+                    }
                     process.process();
                     return;
                 }
-                String recordName = channel.getChannelName();
-                DBRecord dbRecord = iocdb.findRecord(recordName);
-                if(dbRecord==null) {
-                    requestor.message("channel is not local", MessageType.error);
-                    return;
-                }
-                RecordProcess recordProcess = dbRecord.getRecordProcess();
-                if(recordProcess==null) {
-                    requestor.message("recordProcess is null", MessageType.error);
-                    return;
-                }
+
                 if(object==showProcessorButton) {
+                    Channel channel = getChannelShell.getChannel();
+                    if(channel==null) {
+                        requestor.message(String.format("no record selected%n"),MessageType.error);
+                        return;
+                    }
+                    String recordName = channel.getChannelName();
+                    DBRecord dbRecord = iocdb.findRecord(recordName);
+                    if(dbRecord==null) {
+                        requestor.message("channel is not local", MessageType.error);
+                        return;
+                    }
+                    RecordProcess recordProcess = dbRecord.getRecordProcess();
+                    if(recordProcess==null) {
+                        requestor.message("recordProcess is null", MessageType.error);
+                        return;
+                    }
                     String name = recordProcess.getRecordProcessRequestorName();
                     requestor.message("recordProcessor " + name, MessageType.info);
                     return;
                 }
                 if(object==releaseProcessorButton) {
+                    Channel channel = getChannelShell.getChannel();
+                    if(channel==null) {
+                        requestor.message(String.format("no record selected%n"),MessageType.error);
+                        return;
+                    }
+                    String recordName = channel.getChannelName();
+                    DBRecord dbRecord = iocdb.findRecord(recordName);
+                    if(dbRecord==null) {
+                        requestor.message("channel is not local", MessageType.error);
+                        return;
+                    }
+                    RecordProcess recordProcess = dbRecord.getRecordProcess();
+                    if(recordProcess==null) {
+                        requestor.message("recordProcess is null", MessageType.error);
+                        return;
+                    }
                     MessageBox mb = new MessageBox(
-                        processWidget.getShell(),SWT.ICON_WARNING|SWT.YES|SWT.NO);
+                            processorWidget.getShell(),SWT.ICON_WARNING|SWT.YES|SWT.NO);
                     mb.setMessage("VERY DANGEROUS. DO YOU WANT TO PROCEED?");
                     int rc = mb.open();
                     if(rc==SWT.YES) {
@@ -209,117 +284,42 @@ public class Probe {
                     }
                     return;
                 }
+                if(object==showThreadsButton) {
+                    PeriodicScanner periodicScanner = ScannerFactory.getPeriodicScanner();
+                    EventScanner eventScanner = ScannerFactory.getEventScanner();
+                    requestor.message(periodicScanner.toString(), MessageType.info);
+                    requestor.message(eventScanner.toString(), MessageType.info);
+                    return;
+                }
             }
 
-            private class Process implements
-            Runnable,
-            ChannelProcessRequestor,ChannelStateListener
-            {   
-                private Lock lock = new ReentrantLock();
-                private Condition waitDone = lock.newCondition();
-                private boolean allDone = false;
-                private Channel channel;
-                final private Requestor requestor;
-                private ChannelProcess channelProcess;
-                
-                private Process(Channel channel,Requestor requestor) {
-                    this.channel = channel;
-                    this.requestor = requestor;
-                }
-                
-                private void process() {
-                    channelProcess = channel.createChannelProcess(this);
-                    if(channelProcess==null) return;
-                    allDone = false;
-                    iocExecutor.execute(this, scanPriority);
-                }
-                /* (non-Javadoc)
-                 * @see java.lang.Runnable#run()
-                 */
-                public void run() {
-                    boolean result = channelProcess.process();
-                    if(result) {
-                        lock.lock();
-                        try {
-                            while(!allDone) {                       
-                                waitDone.await();
-                            }
-                        } catch (InterruptedException ie) {
-                            return;
-                        } finally {
-                            lock.unlock();
-                        }
-                        requestor.message("processComplete", MessageType.info);
-                    } else {
-                        result = channelProcess.processSelf();
-                        if(result) {
-                            requestor.message("processSelf", MessageType.info);
-                        } else {
-                            requestor.message("record could not be processed", MessageType.info);
-                        }
-                    }
-                    channel.destroy(channelProcess);
-                }
-                /* (non-Javadoc)
-                 * @see org.epics.ioc.util.Requestor#getRequestorName()
-                 */
-                public String getRequestorName() {
-                    return requestor.getRequestorName();
-                }
-                /* (non-Javadoc)
-                 * @see org.epics.ioc.util.Requestor#message(java.lang.String, org.epics.ioc.util.MessageType)
-                 */
-                public void message(final String message, final MessageType messageType) {
-                    requestor.message(message, MessageType.info);
-                }
-                /* (non-Javadoc)
-                 * @see org.epics.ioc.ca.ChannelProcessRequestor#processDone(org.epics.ioc.util.RequestResult)
-                 */
-                public void processDone(RequestResult requestResult) {
-                    lock.lock();
-                    try {
-                        allDone = true;
-                            waitDone.signal();
-                    } finally {
-                        lock.unlock();
-                    }
-                }
-                /* (non-Javadoc)
-                 * @see org.epics.ioc.ca.ChannelStateListener#channelStateChange(org.epics.ioc.ca.Channel, boolean)
-                 */
-                public void channelStateChange(Channel c, boolean isConnected) {
-                    // TODO Auto-generated method stub
-                    
-                }
-                /* (non-Javadoc)
-                 * @see org.epics.ioc.ca.ChannelStateListener#disconnect(org.epics.ioc.ca.Channel)
-                 */
-                public void disconnect(Channel c) {
-                    // TODO Auto-generated method stub
-                    
-                }
-                /* (non-Javadoc)
-                 * @see org.epics.ioc.ca.ChannelFieldGroupListener#accessRightsChange(org.epics.ioc.ca.Channel, org.epics.ioc.ca.ChannelField)
-                 */
-                public void accessRightsChange(Channel channel, ChannelField channelField) {
-                    // TODO Auto-generated method stub
-                    
-                }
+            /* (non-Javadoc)
+             * @see org.eclipse.swt.events.DisposeListener#widgetDisposed(org.eclipse.swt.events.DisposeEvent)
+             */
+            public void widgetDisposed(DisposeEvent e) {
+                if(process!=null) process.disconnect();
             }
         }
-        
+
         private class GetShell implements SelectionListener {
             private Requestor requestor;
+            private Button connectButton;
             private Button getButton;
             private Button processButton;
             private Button propertyButton;
-            
+            private ConnectState connectState = ConnectState.disconnected;
+            private String[] connectStateText = {"connect    ","disconnect"};
+            private Get get = null;
+
             private GetShell(Composite parentWidget,Requestor requestor) {
                 this.requestor = requestor;
                 Composite getWidget = new Composite(parentWidget,SWT.BORDER);
                 GridLayout gridLayout = new GridLayout();
-                gridLayout.numColumns = 3;
+                gridLayout.numColumns = 4;
                 getWidget.setLayout(gridLayout);
+                connectButton = new Button(getWidget,SWT.PUSH);
+                connectButton.setText(connectStateText[0]);
+                connectButton.addSelectionListener(this);
                 getButton = new Button(getWidget,SWT.NONE);
                 getButton.setText("get");
                 getButton.addSelectionListener(this);
@@ -342,57 +342,93 @@ public class Probe {
              * @see org.eclipse.swt.events.SelectionListener#widgetSelected(org.eclipse.swt.events.SelectionEvent)
              */
             public void widgetSelected(SelectionEvent arg0) {
-                Channel channel = pvShell.getChannel();
-                if(channel==null) {
-                    requestor.message(String.format("no record selected%n"),MessageType.error);
-                    return;
-                }
-                ChannelField channelField = pvShell.getChannelField();
-                if(channelField==null) {
-                    requestor.message(String.format("no field selected%n"),MessageType.error);
-                    return;
-                }
-                boolean process = processButton.getSelection();
-                Property[] properties = null;
-                Field field = channelField.getField();
-                Type type = field.getType();
-                boolean propertysOK = true;
-                if(type==Type.pvStructure) {
-                    propertysOK = false;
-                } else if(type==Type.pvArray){
-                    Array array= (Array)field;
-                    Type elementType = array.getElementType();
-                    if(elementType==Type.pvArray || elementType==Type.pvStructure) {
-                        propertysOK = false;
+                Object object = arg0.getSource(); 
+                if(object==connectButton) {
+                    switch(connectState) {
+                    case disconnected:
+                        Channel channel = getChannelShell.getChannel();
+                        if(channel==null) {
+                            requestor.message(String.format("no record selected%n"),MessageType.error);
+                            return;
+                        }
+                        ChannelField channelField = getChannelShell.getChannelField();
+                        if(channelField==null) {
+                            requestor.message(String.format("no field selected%n"),MessageType.error);
+                            return;
+                        }
+                        boolean process = processButton.getSelection();
+                        Property[] properties = null;
+                        Field field = channelField.getField();
+                        Type type = field.getType();
+                        boolean propertysOK = true;
+                        if(type==Type.pvStructure) {
+                            propertysOK = false;
+                        } else if(type==Type.pvArray){
+                            Array array= (Array)field;
+                            Type elementType = array.getElementType();
+                            if(elementType==Type.pvArray || elementType==Type.pvStructure) {
+                                propertysOK = false;
+                            }
+                        }
+                        if(!propertysOK) {
+                            propertyButton.setSelection(false);
+                            propertyButton.setEnabled(false);
+                        } else {
+                            propertyButton.setEnabled(true);
+                        }
+                        boolean getProperties = propertyButton.getSelection();
+                        if(getProperties) properties = getChannelShell.getPropertys();
+                        get = new Get(channel,requestor,process);
+                        boolean result = get.connect(channelField, properties);
+                        if(result) {
+                            connectState = ConnectState.connected;
+                            requestor.message(String.format("connected%n"),MessageType.info);
+                            connectButton.setText(connectStateText[1]);
+                        } else {
+                            requestor.message(String.format("not connected%n"),MessageType.info);
+                            get = null;
+                        }
+                        return;
+                    case connected:
+                        get.disconnect();
+                        get = null;
+                        connectState = ConnectState.disconnected;
+                        connectButton.setText(connectStateText[0]);
+                        return;
                     }
                 }
-                if(!propertysOK) {
-                    propertyButton.setSelection(false);
-                    propertyButton.setEnabled(false);
-                } else {
-                    propertyButton.setEnabled(true);
+                if(object==getButton) {
+                    if(get==null) {
+                        requestor.message(String.format("not connected%n"),MessageType.info);
+                        return;
+                    }
+                    CD cD = get.get();
+                    if(cD==null) return;
+                    CDRecordPrint cdRecordPrint = new CDRecordPrint(cD.getCDRecord(),consoleText);
+                    cdRecordPrint.print();
+                    return;
                 }
-                boolean getProperties = propertyButton.getSelection();
-                if(getProperties) properties = pvShell.getPropertys();
-                Get get = new Get(channel,requestor,process);
-                ChannelData channelData = get.get(channelField, properties);
-                if(channelData==null) return;
-                CDRecordPrint cdRecordPrint = new CDRecordPrint(channelData.getCDRecord(),consoleText);
-                cdRecordPrint.print();
             }
         }
-                
+
         private class PutShell implements SelectionListener {
             private Requestor requestor;
+            private Button connectButton;
             private Button putButton;
             private Button processButton;
-            
+            private ConnectState connectState = ConnectState.disconnected;
+            private String[] connectStateText = {"connect    ","disconnect"};
+            private Put put = null;
+
             private PutShell(Composite parentWidput,Requestor requestor) {
                 this.requestor = requestor;
                 Composite putComposite = new Composite(parentWidput,SWT.BORDER);
                 GridLayout gridLayout = new GridLayout();
                 gridLayout.numColumns = 3;
                 putComposite.setLayout(gridLayout);
+                connectButton = new Button(putComposite,SWT.PUSH);
+                connectButton.setText(connectStateText[0]);
+                connectButton.addSelectionListener(this);
                 putButton = new Button(putComposite,SWT.NONE);
                 putButton.setText("put");
                 putButton.addSelectionListener(this);
@@ -412,99 +448,102 @@ public class Probe {
              * @see org.eclipse.swt.events.SelectionListener#widgetSelected(org.eclipse.swt.events.SelectionEvent)
              */
             public void widgetSelected(SelectionEvent arg0) {
-                Channel channel = pvShell.getChannel();
-                if(channel==null) {
-                    requestor.message(String.format("no record selected%n"),MessageType.error);
+                Object object = arg0.getSource(); 
+                if(object==connectButton) {
+                    switch(connectState) {
+                    case disconnected:
+                        Channel channel = getChannelShell.getChannel();
+                        if(channel==null) {
+                            requestor.message(String.format("no record selected%n"),MessageType.error);
+                            return;
+                        }
+                        ChannelField channelField = getChannelShell.getChannelField();
+                        if(channelField==null) {
+                            requestor.message(String.format("no field selected%n"),MessageType.error);
+                            return;
+                        }
+                        boolean process = processButton.getSelection();
+                        put = new Put(channel,requestor,process);
+                        boolean result = put.connect(channelField);
+                        if(result) {
+                            connectState = ConnectState.connected;
+                            requestor.message(String.format("connected%n"),MessageType.info);
+                            connectButton.setText(connectStateText[1]);
+                        } else {
+                            requestor.message(String.format("not connected%n"),MessageType.info);
+                            put = null;
+                        }
+                        return;
+                    case connected:
+                        put.disconnect();
+                        put = null;
+                        connectState = ConnectState.disconnected;
+                        connectButton.setText(connectStateText[0]);
+                        return;
+                    }
                     return;
                 }
-                ChannelField channelField = pvShell.getChannelField();
-                if(channelField==null) {
-                    requestor.message(String.format("no field selected%n"),MessageType.error);
+                if(object==putButton) {
+                    if(put==null) {
+                        requestor.message(String.format("not connected%n"),MessageType.info);
+                        return;
+                    }
+                    put.put();
                     return;
                 }
-                boolean process = processButton.getSelection();
-                Put put = new Put(channel,requestor,process);
-                put.put(channelField);
             }
-
-
         }
         
-        private class Get implements
+        private class Process implements
         Runnable,
-        ChannelGetRequestor,
-        ChannelStateListener, ChannelFieldGroupListener
-        {
+        ChannelProcessRequestor,ChannelStateListener
+        {   
             private Lock lock = new ReentrantLock();
             private Condition waitDone = lock.newCondition();
             private boolean allDone = false;
             private Channel channel;
             final private Requestor requestor;
-            private boolean process;
-            private ChannelGet channelGet;
-            private ChannelFieldGroup getFieldGroup;
-            private ChannelData channelData;
-            
-            private Get(Channel channel,Requestor requestor,boolean process) {
+            private ChannelProcess channelProcess;
+
+            private Process(Channel channel,Requestor requestor) {
                 this.channel = channel;
                 this.requestor = requestor;
-                this.process = process;
             }
-            
-            private ChannelData get(ChannelField channelField,Property[] properties) {
-                getFieldGroup = channel.createFieldGroup(this);
-                getFieldGroup.addChannelField(channelField);
-                if(properties!=null && properties.length>0) {
-                    for(Property property: properties) {
-                        ChannelFindFieldResult result;
-                        channel.findField(null);
-                        String propertyName = property.getPropertyName();
-                        result = channel.findField(propertyName);
-                        if(result!=ChannelFindFieldResult.thisChannel) {
-                            requestor.message(String.format(
-                                "property %s%n", propertyName),MessageType.error);
-                            continue;
-                        }
-                        ChannelField propertyField = channel.getChannelField();
-                        getFieldGroup.addChannelField(propertyField);
-                    }
+
+            private boolean connect() {
+                channelProcess = channel.createChannelProcess(this);
+                if(channelProcess==null) return false;
+                return true;
+            }
+
+            private void disconnect() {
+                channel.destroy(channelProcess);
+            }
+
+            private void process() {
+                if(channelProcess==null) {
+                    requestor.message("not connected", MessageType.info);
                 }
-                channelGet = channel.createChannelGet(getFieldGroup, this, process);
-                if(channelGet==null) {
-                    channelGet = channel.createChannelGet(getFieldGroup, this,false);
-                }
-                if(channelGet==null) return null;
                 allDone = false;
-                channelData = ChannelDataFactory.createChannelData(channel,getFieldGroup,true);
-                if(channelData==null) {
-                    requestor.message("ChannelDataFactory.createData failed",MessageType.error);
-                } else {
-                    iocExecutor.execute(this, scanPriority);
-                    lock.lock();
-                    try {
-                        while(!allDone) {                       
-                            waitDone.await();
-                        }
-                    } catch (InterruptedException ie) {
-                    } finally {
-                        lock.unlock();
-                    }
-                }
-                return channelData;
+                iocExecutor.execute(this, scanPriority);
             }
             /* (non-Javadoc)
              * @see java.lang.Runnable#run()
              */
             public void run() {
-                channelGet.get();
-                channel.destroy(channelGet);
-            }
-
-            /* (non-Javadoc)
-             * @see org.epics.ioc.ca.ChannelGetRequestor#nextDelayedGetData(org.epics.ioc.pvAccess.PVData)
-             */
-            public boolean nextDelayedGetField(PVField pvField) {
-                return false;
+                allDone = false;
+                channelProcess.process();
+                lock.lock();
+                try {
+                    while(!allDone) {                       
+                        waitDone.await();
+                    }
+                } catch (InterruptedException ie) {
+                    return;
+                } finally {
+                    lock.unlock();
+                }
+                requestor.message("processComplete", MessageType.info);
             }
             /* (non-Javadoc)
              * @see org.epics.ioc.util.Requestor#getRequestorName()
@@ -519,21 +558,13 @@ public class Probe {
                 requestor.message(message, MessageType.info);
             }
             /* (non-Javadoc)
-             * @see org.epics.ioc.ca.ChannelGetRequestor#nextGetData(org.epics.ioc.ca.Channel, org.epics.ioc.ca.ChannelField, org.epics.ioc.pvAccess.PVData)
+             * @see org.epics.ioc.ca.ChannelProcessRequestor#processDone(org.epics.ioc.util.RequestResult)
              */
-            public boolean nextGetField(ChannelField channelField, PVField pvField) {
-                channelData.dataPut(pvField);
-                return false;
-            }
-            
-            /* (non-Javadoc)
-             * @see org.epics.ioc.ca.ChannelGetRequestor#getDone(org.epics.ioc.util.RequestResult)
-             */
-            public void getDone(RequestResult requestResult) {
+            public void processDone(RequestResult requestResult) {
                 lock.lock();
                 try {
                     allDone = true;
-                        waitDone.signal();
+                    waitDone.signal();
                 } finally {
                     lock.unlock();
                 }
@@ -543,58 +574,179 @@ public class Probe {
              */
             public void channelStateChange(Channel c, boolean isConnected) {
                 // TODO Auto-generated method stub
-                
+
             }
             /* (non-Javadoc)
              * @see org.epics.ioc.ca.ChannelStateListener#disconnect(org.epics.ioc.ca.Channel)
              */
             public void disconnect(Channel c) {
                 // TODO Auto-generated method stub
-                
+
             }
             /* (non-Javadoc)
              * @see org.epics.ioc.ca.ChannelFieldGroupListener#accessRightsChange(org.epics.ioc.ca.Channel, org.epics.ioc.ca.ChannelField)
              */
             public void accessRightsChange(Channel channel, ChannelField channelField) {
                 // TODO Auto-generated method stub
-                
+
             }
         }
         
-        private static boolean supportAlso = false;
-        
+        private class Get implements
+        Runnable,
+        ChannelCDGetRequestor,
+        ChannelStateListener, ChannelFieldGroupListener
+        {
+            private Lock lock = new ReentrantLock();
+            private Condition waitDone = lock.newCondition();
+            private boolean allDone = false;
+            private Channel channel;
+            final private Requestor requestor;
+            private boolean process;
+            private ChannelCDGet channelCDGet;
+
+            private Get(Channel channel,Requestor requestor,boolean process) {
+                this.channel = channel;
+                this.requestor = requestor;
+                this.process = process;
+            }
+
+            private boolean connect(ChannelField channelField,Property[] properties) {
+                ChannelFieldGroup getFieldGroup = channel.createFieldGroup(this);
+                getFieldGroup.addChannelField(channelField);
+                if(properties!=null && properties.length>0) {
+                    for(Property property: properties) {
+                        ChannelFindFieldResult result;
+                        channel.findField(null);
+                        String propertyName = property.getPropertyName();
+                        result = channel.findField(propertyName);
+                        if(result!=ChannelFindFieldResult.thisChannel) {
+                            requestor.message(String.format(
+                                    "property %s%n", propertyName),MessageType.error);
+                            continue;
+                        }
+                        ChannelField propertyField = channel.getChannelField();
+                        getFieldGroup.addChannelField(propertyField);
+                    }
+                }
+                channelCDGet = channel.createChannelCDGet(getFieldGroup, this, process,true);
+                if(channelCDGet==null) {
+                    channelCDGet = channel.createChannelCDGet(getFieldGroup, this,false,true);
+                }
+                if(channelCDGet==null) return false;
+                return true;
+            }
+
+            private void disconnect() {
+                channel.destroy(channelCDGet);
+            }
+
+            private CD get() {                
+                allDone = false;               
+                iocExecutor.execute(this, scanPriority);
+                lock.lock();
+                try {
+                    while(!allDone) {                       
+                        waitDone.await();
+                    }
+                } catch (InterruptedException ie) {
+                } finally {
+                    lock.unlock();
+                }
+
+                return channelCDGet.getCD();
+            }
+            /* (non-Javadoc)
+             * @see java.lang.Runnable#run()
+             */
+            public void run() {
+                channelCDGet.get();
+            }
+            /* (non-Javadoc)
+             * @see org.epics.ioc.util.Requestor#getRequestorName()
+             */
+            public String getRequestorName() {
+                return requestor.getRequestorName();
+            }
+            /* (non-Javadoc)
+             * @see org.epics.ioc.util.Requestor#message(java.lang.String, org.epics.ioc.util.MessageType)
+             */
+            public void message(final String message, final MessageType messageType) {
+                requestor.message(message, MessageType.info);
+            }           
+            /* (non-Javadoc)
+             * @see org.epics.ioc.ca.ChannelCDGetRequestor#getDone(org.epics.ioc.util.RequestResult)
+             */
+            public void getDone(RequestResult requestResult) {
+                lock.lock();
+                try {
+                    allDone = true;
+                    waitDone.signal();
+                } finally {
+                    lock.unlock();
+                }
+            }
+            /* (non-Javadoc)
+             * @see org.epics.ioc.ca.ChannelStateListener#channelStateChange(org.epics.ioc.ca.Channel, boolean)
+             */
+            public void channelStateChange(Channel c, boolean isConnected) {
+                // TODO Auto-generated method stub
+
+            }
+            /* (non-Javadoc)
+             * @see org.epics.ioc.ca.ChannelStateListener#disconnect(org.epics.ioc.ca.Channel)
+             */
+            public void disconnect(Channel c) {
+                // TODO Auto-generated method stub
+
+            }
+            /* (non-Javadoc)
+             * @see org.epics.ioc.ca.ChannelFieldGroupListener#accessRightsChange(org.epics.ioc.ca.Channel, org.epics.ioc.ca.ChannelField)
+             */
+            public void accessRightsChange(Channel channel, ChannelField channelField) {
+                // TODO Auto-generated method stub
+
+            }
+        }
+
+        private static final boolean supportAlso = false;
+
         private class Put implements
         Runnable,
-        ChannelDataPutRequestor,
+        ChannelCDPutRequestor,
         ChannelFieldGroupListener
         {
-            
             private Lock lock = new ReentrantLock();
             private Condition waitDone = lock.newCondition();
             private Channel channel;
             final private Requestor requestor;
             private boolean process;
             private boolean allDone = false;
-            
-            private ChannelDataPut channelDataPut;
-            
+            private RequestResult requestResult;
+
+            private ChannelCDPut channelCDPut;
+
             private Put(Channel channel,Requestor requestor,boolean process) {
                 this.channel = channel;
                 this.requestor = requestor;
                 this.process = process;
             }
-            
-            private void put(ChannelField channelField) {
+
+            private boolean connect(ChannelField channelField) {
                 ChannelFieldGroup putFieldGroup = channel.createFieldGroup(this);
                 putFieldGroup.addChannelField(channelField);
-                channelDataPut = channel.createChannelDataPut(putFieldGroup, this, process, supportAlso);
+                channelCDPut = channel.createChannelCDPut(putFieldGroup, this, process, supportAlso);
+                if(channelCDPut==null) return false;
+                return true;
+            }
+
+            private void disconnect() {
+                channel.destroy(channelCDPut);
+            }
+
+            private void put() {
                 allDone = false;
-                boolean result = channelDataPut.get();
-                if(!result) {
-                    requestor.message("channelDataPut.get failed", MessageType.error);
-                    channel.destroy(channelDataPut);
-                    return;
-                }
+                channelCDPut.get();
                 lock.lock();
                 try {
                     while(!allDone) {                       
@@ -605,10 +757,13 @@ public class Probe {
                 } finally {
                     lock.unlock();
                 }
+                if(requestResult!=RequestResult.success) {
+                    requestor.message("get failed", MessageType.error);
+                }
                 allDone = false;
-                ChannelData channelData = channelDataPut.getChannelData();
-                channelData.clearNumPuts();
-                CDRecord cdRecord = channelData.getCDRecord();
+                CD cD = channelCDPut.getCD();
+                cD.clearNumPuts();
+                CDRecord cdRecord = cD.getCDRecord();
                 GetCDValue getCDValue = new GetCDValue(shell);
                 getCDValue.getValue(cdRecord);
                 iocExecutor.execute(this, scanPriority);
@@ -622,13 +777,15 @@ public class Probe {
                 } finally {
                     lock.unlock();
                 }
-                channel.destroy(channelDataPut);
+                if(requestResult!=RequestResult.success) {
+                    requestor.message("get failed", MessageType.error);
+                }
             }
             /* (non-Javadoc)
              * @see java.lang.Runnable#run()
              */
             public void run() {
-                channelDataPut.put();
+                channelCDPut.put();
             }
             /* (non-Javadoc)
              * @see org.epics.ioc.util.Requestor#putRequestorName()
@@ -643,11 +800,12 @@ public class Probe {
                 requestor.message(message, MessageType.info);
             }
             /* (non-Javadoc)
-             * @see org.epics.ioc.ca.ChannelDataPutRequestor#getDone()
+             * @see org.epics.ioc.ca.ChannelCDPutRequestor#getDone(org.epics.ioc.util.RequestResult)
              */
-            public void getDone() {
+            public void getDone(RequestResult requestResult) {
                 lock.lock();
                 try {
+                    this.requestResult = requestResult;
                     allDone = true;
                     waitDone.signal();
                 } finally {
@@ -656,11 +814,12 @@ public class Probe {
             }
 
             /* (non-Javadoc)
-             * @see org.epics.ioc.ca.ChannelDataPutRequestor#putDone(org.epics.ioc.util.RequestResult)
+             * @see org.epics.ioc.ca.ChannelCDPutRequestor#putDone(org.epics.ioc.util.RequestResult)
              */
             public void putDone(RequestResult requestResult) {
                 lock.lock();
                 try {
+                    this.requestResult = requestResult;
                     allDone = true;
                     waitDone.signal();
                 } finally {
@@ -672,7 +831,7 @@ public class Probe {
              */
             public void accessRightsChange(Channel channel, ChannelField channelField) {
                 // TODO Auto-generated method stub
-                
+
             }
         }
     }

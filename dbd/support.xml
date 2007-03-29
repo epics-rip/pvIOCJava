@@ -5,6 +5,10 @@
     factoryName = "org.epics.ioc.support.NoopFactory"
 />
 
+<support name = "link"
+    factoryName = "org.epics.ioc.support.LinkFactory"
+/>
+
 <linkSupport name = "noop"
     factoryName = "org.epics.ioc.support.NoopFactory"
 />
@@ -13,35 +17,72 @@
     factoryName = "org.epics.ioc.support.LinearConvertInputFactory"
 />
 
-<support name = "linkArray"
-    factoryName = "org.epics.ioc.support.LinkArraySupportFactory"
+<support name = "linearConvertOutput"
+    factoryName = "org.epics.ioc.support.LinearConvertOutputFactory"
 />
+
+<support name = "linkArray"
+    factoryName = "org.epics.ioc.support.LinkArrayFactory"
+/>
+
 <support name = "scan"
-    factoryName = "org.epics.ioc.support.ScanSupportFactory"
+    factoryName = "org.epics.ioc.support.ScanFactory"
+/>
+
+<support name = "alarm"
+    factoryName = "org.epics.ioc.support.AlarmFactory"
 />
 
 <linkSupport name = "processLink"
     configurationStructureName = "processLink" 
-    factoryName = "org.epics.ioc.support.LinkSupportFactory"
+    factoryName = "org.epics.ioc.support.CALinkFactory"
 />
 <linkSupport name = "monitorLink"
     configurationStructureName = "monitorLink"
-    factoryName = "org.epics.ioc.support.LinkSupportFactory"
+    factoryName = "org.epics.ioc.support.CALinkFactory"
 />
 <linkSupport name = "monitorNotifyLink"
     configurationStructureName = "monitorNotifyLink"
-    factoryName = "org.epics.ioc.support.LinkSupportFactory"
+    factoryName = "org.epics.ioc.support.CALinkFactory"
 />
 <linkSupport name = "inputLink"
     configurationStructureName = "inputLink"
-    factoryName = "org.epics.ioc.support.LinkSupportFactory"
+    factoryName = "org.epics.ioc.support.CALinkFactory"
 />
 <linkSupport name = "outputLink"
     configurationStructureName = "outputLink"
-    factoryName = "org.epics.ioc.support.LinkSupportFactory"
+    factoryName = "org.epics.ioc.support.CALinkFactory"
 />
 <linkSupport name = "asynLink"
     configurationStructureName = "asynLink" 
-    factoryName = "org.epics.ioc.support.LinkSupportFactory"
+    factoryName = "org.epics.ioc.support.CALinkFactory"
 />
+
+
+<support name = "calcArgArray"
+   factoryName = "org.epics.ioc.support.CalcArgArrayFactory" />
+
+<!-- counter is an example calculator -->
+
+<linkSupport name = "counterCalculator"
+   factoryName = "org.epics.ioc.support.CounterCalculatorFactory" />
+
+<linkSupport name = "doubleAlarm"
+    configurationStructureName = "doubleAlarm" 
+   factoryName = "org.epics.ioc.support.DoubleAlarmFactory" />
+
+<linkSupport name = "intAlarm"
+    configurationStructureName = "intAlarm" 
+   factoryName = "org.epics.ioc.support.IntAlarmFactory" />
+
+<linkSupport name = "booleanAlarm"
+    configurationStructureName = "booleanAlarm" 
+   factoryName = "org.epics.ioc.support.BooleanAlarmFactory" />
+
+<linkSupport name = "delayLink"
+    configurationStructureName = "delayLink"
+    factoryName = "org.epics.ioc.support.DelayLinkFactory"
+/>
+
+
 </DBDefinition>

@@ -14,13 +14,8 @@ package org.epics.ioc.ca;
 public interface ChannelProcess {
     /**
      * Issue a process request.
-     * @return (false,true) if the request (is not, is) started.
      * This fails if the request can not be satisfied.
+     * If it fails the channelProcessRequestor.processDone is called before process returns.
      */
-    boolean process();
-    /**
-     * Ask the channel to process itself.
-     * @return (false,true) if the request (is not, is) successful.
-     */
-    boolean processSelf();
+    void process();
 }

@@ -414,9 +414,9 @@ public class PowerSupplyTest extends TestCase {
         /* (non-Javadoc)
          * @see org.epics.ioc.ca.ChannelMonitorRequestor#monitorData(java.util.List, java.util.List)
          */
-        public void monitorData(ChannelData channelData) {
+        public void monitorCD(CD cD) {
             System.out.printf("%s %s %s%n",
-                requestorName,pvName,valueData.printResults(channelData));
+                requestorName,pvName,valueData.printResults(cD));
         }
 
         /* (non-Javadoc)
@@ -454,7 +454,7 @@ public class PowerSupplyTest extends TestCase {
     
     private static class ValueData implements ChannelFieldGroupListener{
         private Channel channel;
-        private ChannelData channelData;
+        private CD cD;
         private ChannelFieldGroup channelFieldGroup;
         private String fieldName;
         private ChannelField valueField;
@@ -504,9 +504,9 @@ public class PowerSupplyTest extends TestCase {
                 channelFieldGroup.addChannelField(timeStampField);
                 channel.findField(null);
             }
-            channelData = ChannelDataFactory.createChannelData(channel,channelFieldGroup,true);
-            if(channelData==null) {
-                System.out.printf("ChannelDataFactory.createData failed");
+            cD = CDFactory.createCD(channel,channelFieldGroup,true);
+            if(cD==null) {
+                System.out.printf("CDFactory.createData failed");
                 return null;
             }
             return channelFieldGroup;
@@ -520,17 +520,17 @@ public class PowerSupplyTest extends TestCase {
         }
         
         private void clear() {
-            channelData.clearNumPuts();
+            cD.clearNumPuts();
         }
         private boolean nextGetField(Channel channel, ChannelField channelField, PVField pvField) {
-            channelData.dataPut(pvField);
+            cD.dataPut(pvField);
             return false;
         }
         
         private void printResults() {
-            ChannelFieldGroup channelFieldGroup = channelData.getChannelFieldGroup();
+            ChannelFieldGroup channelFieldGroup = cD.getChannelFieldGroup();
             List<ChannelField> channelFieldList = channelFieldGroup.getList();
-            CDStructure cdStructure = channelData.getCDRecord().getCDStructure();
+            CDStructure cdStructure = cD.getCDRecord().getCDStructure();
             CDField[] cdbDatas = cdStructure.getFieldCDFields();
             System.out.println(channel.getChannelName() + "." + fieldName);
             for(int i=0;i<cdbDatas.length; i++) {
@@ -569,13 +569,13 @@ public class PowerSupplyTest extends TestCase {
             cdStructure.clearNumPuts();
         }
         
-        private String printResults(ChannelData channelData) {
+        private String printResults(CD cD) {
             StringBuilder builder = new StringBuilder();
-            ChannelFieldGroup channelFieldGroup = channelData.getChannelFieldGroup();
+            ChannelFieldGroup channelFieldGroup = cD.getChannelFieldGroup();
             List<ChannelField> channelFieldList = channelFieldGroup.getList();
-            CDStructure cdStructure = channelData.getCDRecord().getCDStructure();
+            CDStructure cdStructure = cD.getCDRecord().getCDStructure();
             CDField[] cdbDatas = cdStructure.getFieldCDFields();
-            int maxNumPuts = channelData.getMaxPutsToField();
+            int maxNumPuts = cD.getMaxPutsToField();
             if(maxNumPuts!=1) {
                 builder.append(String.format(
                     " maxNumPuts %d ",maxNumPuts));

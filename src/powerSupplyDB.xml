@@ -1,0 +1,9 @@
+<?xml version="1.0" ?>
+<IOCDatabase>
+
+<record name = "psSimple" type = "powerSupply" >
+    <voltage>10.0</voltage>
+</record>
+
+
+</IOCDatabase>

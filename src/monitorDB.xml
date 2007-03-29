@@ -1,0 +1,221 @@
+<?xml version="1.0" ?>
+<IOCDatabase>
+
+<record name = "monitorCounter" type = "calc">
+    <calcArgArray>
+        <value structureName = "calcArg">
+            <value>0.0</value>
+            <name>min</name>
+        </value>
+        <value structureName = "calcArg">
+            <value>10.0</value>
+            <name>max</name>
+        </value>
+        <value structureName = "calcArg">
+            <value>1.0</value>
+            <name>inc</name>
+        </value>
+    </calcArgArray>
+    <calculator supportName = "counterCalculator" />
+    <doubleAlarm>
+        <configure structureName = "doubleAlarm">
+          <active>true</active>
+          <hystersis>0.1</hystersis>
+          <highMajor>8.0</highMajor>
+          <highMinor>6.0</highMinor>
+          <lowMinor>4.0</lowMinor>
+          <lowMajor>2.0</lowMajor>
+        </configure>
+    </doubleAlarm>
+    <units>counts</units>
+    <displayLimit>
+        <low>0.0</low>
+        <high>10.0</high>
+    </displayLimit>
+    <scan>
+        <scan>periodic</scan>
+        <rate>1.0</rate>
+    </scan>
+</record>
+
+<record name = "monitorChange" type = "double">
+    <input supportName = "monitorLink" >
+        <configure structureName = "monitorLink">
+            <pvname>monitorCounter</pvname>
+            <process>true</process>
+        </configure>
+    </input>
+    <units>volts</units>
+    <displayLimit>
+        <low>0.0</low>
+        <high>10.0</high>
+    </displayLimit>
+    <linkArray>
+        <value structureName = "linkArrayElement">
+            <link  supportName = "delayLink" >
+                <configure structureName = "delayLink">
+                    <min>100</min>
+                    <max>1000</max>
+                    <inc>100</inc>
+                </configure>
+            </link>
+        </value>
+    </linkArray>
+</record>
+
+<record name = "monitorDeltaChange" type = "double">
+    <input supportName = "monitorLink" >
+        <configure structureName = "monitorLink">
+            <pvname>monitorCounter</pvname>
+            <type>deltaChange</type>
+            <deadband>1.001</deadband>
+            <process>true</process>
+        </configure>
+    </input>
+    <units>volts</units>
+    <displayLimit>
+        <low>0.0</low>
+        <high>10.0</high>
+    </displayLimit>
+    <linkArray>
+        <value structureName = "linkArrayElement">
+            <link  supportName = "delayLink" >
+                <configure structureName = "delayLink">
+                    <min>100</min>
+                    <max>1000</max>
+                    <inc>100</inc>
+                </configure>
+            </link>
+        </value>
+    </linkArray>
+</record>
+
+<record name = "monitorPercentageChange" type = "double">
+    <input supportName = "monitorLink" >
+        <configure structureName = "monitorLink">
+            <pvname>monitorCounter</pvname>
+            <type>percentageChange</type>
+            <deadband>10.0</deadband>
+            <process>true</process>
+        </configure>
+    </input>
+    <units>volts</units>
+    <displayLimit>
+        <low>0.0</low>
+        <high>10.0</high>
+    </displayLimit>
+    <linkArray>
+        <value structureName = "linkArrayElement">
+            <link  supportName = "delayLink" >
+                <configure structureName = "delayLink">
+                    <min>100</min>
+                    <max>1000</max>
+                    <inc>100</inc>
+                </configure>
+            </link>
+        </value>
+    </linkArray>
+</record>
+
+<record name = "notifyChange" type = "double">
+    <input supportName = "inputLink" >
+        <configure structureName = "inputLink">
+            <pvname>monitorCounter</pvname>
+            <process>false</process>
+        </configure>
+    </input>
+    <units>volts</units>
+    <displayLimit>
+        <low>0.0</low>
+        <high>10.0</high>
+    </displayLimit>
+    <linkArray>
+        <value structureName = "linkArrayElement">
+            <link  supportName = "monitorNotifyLink" >
+                <configure structureName = "monitorNotifyLink">
+                    <pvname>monitorCounter</pvname>
+                </configure>
+            </link>
+        </value>
+        <value structureName = "linkArrayElement">
+            <link  supportName = "delayLink" >
+                <configure structureName = "delayLink">
+                    <min>100</min>
+                    <max>1000</max>
+                    <inc>100</inc>
+                </configure>
+            </link>
+        </value>
+    </linkArray>
+</record>
+
+<record name = "notifyDeltaChange" type = "double">
+    <input supportName = "inputLink" >
+        <configure structureName = "inputLink">
+            <pvname>monitorCounter</pvname>
+            <process>false</process>
+        </configure>
+    </input>
+    <units>volts</units>
+    <displayLimit>
+        <low>0.0</low>
+        <high>10.0</high>
+    </displayLimit>
+    <linkArray>
+        <value structureName = "linkArrayElement">
+            <link  supportName = "monitorNotifyLink" >
+                <configure structureName = "monitorNotifyLink">
+                    <pvname>monitorCounter</pvname>
+                    <type>deltaChange</type>
+                    <deadband>1.001</deadband>
+                </configure>
+            </link>
+        </value>
+        <value structureName = "linkArrayElement">
+            <link  supportName = "delayLink" >
+                <configure structureName = "delayLink">
+                    <min>100</min>
+                    <max>1000</max>
+                    <inc>100</inc>
+                </configure>
+            </link>
+        </value>
+    </linkArray>
+</record>
+
+<record name = "notifyPercentageChange" type = "double">
+    <input supportName = "inputLink" >
+        <configure structureName = "inputLink">
+            <pvname>monitorCounter</pvname>
+            <process>false</process>
+        </configure>
+    </input>
+    <units>volts</units>
+    <displayLimit>
+        <low>0.0</low>
+        <high>10.0</high>
+    </displayLimit>
+    <linkArray>
+        <value structureName = "linkArrayElement">
+            <link  supportName = "monitorNotifyLink" >
+                <configure structureName = "monitorNotifyLink">
+                    <pvname>monitorCounter</pvname>
+                    <type>percentageChange</type>
+                    <deadband>10.0</deadband>
+                </configure>
+            </link>
+        </value>
+        <value structureName = "linkArrayElement">
+            <link  supportName = "delayLink" >
+                <configure structureName = "delayLink">
+                    <min>100</min>
+                    <max>1000</max>
+                    <inc>100</inc>
+                </configure>
+            </link>
+        </value>
+    </linkArray>
+</record>
+
+
+</IOCDatabase>

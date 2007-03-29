@@ -10,7 +10,7 @@
 <body>
 <h1 style="text-align: center">EPICS JavaIOC: util<br />
 package: org.epics.ioc.util<br />
-2007.03.16</h1>
+2007.03.20</h1>
 CONTENTS
 
 <div class="toc">
@@ -347,6 +347,7 @@ higher priority threads.</p>
         ScanType getScanType();
         double getRate();
         String getEventName();
+        boolean getScanSelf();
     }
     
     public enum ScanPriority {
@@ -386,6 +387,10 @@ record. It has the methods:</p>
     <dd>Get the scan rate for periodically scanned records.</dd>
   <dt style="font-family: courier;">getEventName</dt>
     <dd>Get the event name for event scanned records.</dd>
+  <dt style="font-family: courier;">getScanSelf</dt>
+    <dd>Can the record be self scanned? If the wnswer is yes then a call to
+      ScanSupport.scanSelf will process the record. recordProcess.processSelf
+      calls ScanSupport.scanSelf.</dd>
 </dl>
 
 <h3 id="ScanPriori">ScanPriority</h3>

@@ -16,69 +16,36 @@ import org.epics.ioc.util.RequestResult;
  */
 public class NoopFactory {
     /**
-     * Factory creation method.
+     * Create noop support for a DBStructure.
      * @param dbStructure The structure to support.
      * @return The Support interface.
      */
     public static Support create(DBStructure dbStructure) {
         return new Noop(dbStructure);
-    }
-    
+    }    
+    /**
+     * Create noop Support for a DBField.
+     * @param dbField The field to support.
+     * @return The Support interface.
+     */
     public static Support create(DBField dbField) {
         return new Noop(dbField);
-    }
-    
+    }    
+    /**
+     * Create noop LinkSupport for a DBLink.
+     * @param dbLink The field to support;
+     * @return The LinkSupport interfaace.
+     */
     public static LinkSupport create(DBLink dbLink) {
         return new Noop(dbLink);
     }
     
-    private static class Noop extends AbstractSupport implements LinkSupport {
+    private static class Noop extends AbstractLinkSupport {
         private static String supportName = "noop";
         
         private Noop(DBField dbField) {
             super(supportName,dbField);
         }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.process.AbstractSupport#getRequestorName()
-         */
-        public String getRequestorName() {
-            return supportName;
-        }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.process.AbstractSupport#initialize()
-         */
-        public void initialize() {
-            super.setSupportState(SupportState.readyForStart);
-        }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.process.AbstractSupport#uninitialize()
-         */
-        public void uninitialize() {
-            super.setSupportState(SupportState.readyForInitialize);
-        }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.process.AbstractSupport#start()
-         */
-        public void start() {
-            super.setSupportState(SupportState.ready);
-        }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.process.AbstractSupport#stop()
-         */
-        public void stop() {
-            super.setSupportState(SupportState.readyForStart);
-        }      
-        /* (non-Javadoc)
-         * @see org.epics.ioc.process.AbstractSupport#process(org.epics.ioc.process.SupportProcessRequestor)
-         */
-        public void process(SupportProcessRequestor supportProcessRequestor) {
-            supportProcessRequestor.supportProcessDone(RequestResult.success);
-        }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.process.LinkSupport#setField(org.epics.ioc.db.DBField)
-         */
-        public void setField(DBField dbField) {
-            // nothing to do
-        }
+        // The AbstractLinkSupport methods provide semantics
     }
 }

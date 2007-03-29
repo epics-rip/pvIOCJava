@@ -10,7 +10,7 @@
 <body>
 <h1 style="text-align: center">EPICS JavaIOC: channel Access<br />
 package: org.epics.ioc.ca<br />
-2007.03.16</h1>
+2007.03.29</h1>
 CONTENTS
 
 <div class="toc">
@@ -30,13 +30,15 @@ CONTENTS
       <li><a href="#ChannelAcc">ChannelAccess</a></li>
     </ul>
   </li>
-  <li><a href="#Channel2">Channel Process, Get, Put, DataPut, and PutGet</a>
+  <li><a href="#Channel2">Channel Process, Get, CDGet, Put, CDPut, and
+    PutGet</a>
     <ul>
       <li><a href="#Definition1">Definitions</a></li>
       <li><a href="#ChannelPro">ChannelProcess</a></li>
       <li><a href="#ChannelGet">ChannelGet</a></li>
+      <li><a href="#ChannelCDG">ChannelCDGet</a></li>
       <li><a href="#ChannelPut">ChannelPut</a></li>
-      <li><a href="#ChannelDat">ChannelDataPut</a></li>
+      <li><a href="#ChannelCDP">ChannelCDPut</a></li>
       <li><a href="#ChannelPut1">ChannelPutGet</a></li>
     </ul>
   </li>
@@ -46,17 +48,17 @@ CONTENTS
       <li><a href="#ChannelMon1">ChannelMonitor</a></li>
     </ul>
   </li>
-  <li><a href="#Channel3">Channel Data</a>
+  <li><a href="#Channel3">CD - Channel Data</a>
     <ul>
-      <li><a href="#ChannelDat1">ChannelData Definitions</a></li>
-      <li><a href="#ChannelDat2">ChannelData</a></li>
-      <li><a href="#ChannelDat3">ChannelDataQueue</a></li>
-      <li><a href="#ChannelDat4">ChannelDataFactory</a></li>
+      <li><a href="#Definition3">CD Definitions</a></li>
+      <li><a href="#CD">CD</a></li>
+      <li><a href="#CDQueue">CDQueue</a></li>
+      <li><a href="#CDFactory">CDFactory</a></li>
     </ul>
   </li>
   <li><a href="#Channel4">CD - Channel Data Fields</a>
     <ul>
-      <li><a href="#Definition3">CD Definitions</a></li>
+      <li><a href="#Definition4">CD Definitions</a></li>
       <li><a href="#CDRecord">CDRecord</a></li>
       <li><a href="#CDField">CDField</a></li>
       <li><a href="#CDEnum">CDEnum</a></li>
@@ -68,7 +70,7 @@ CONTENTS
     </ul>
   </li>
   <li><a href="#Local">Local Channel Access</a></li>
-  <li><a href="#Example">Example For ChannelData</a>
+  <li><a href="#Example">Example For CD</a>
     <ul>
       <li><a href="#Discussion">Discussion</a></li>
       <li><a href="#Implementa">Implementation</a></li>
@@ -136,14 +138,18 @@ accessing a channel are defined in later sections.</p>
         ChannelGet createChannelGet(ChannelFieldGroup channelFieldGroup,
             ChannelGetRequestor channelGetRequestor,boolean process);
         void destroy(ChannelGet channelGet);
+        ChannelCDGet createChannelCDGet(
+            ChannelFieldGroup channelFieldGroup,
+            ChannelCDGetRequestor channelCDGetRequestor, boolean process,boolean supportAlso);
+        void destroy(ChannelCDGet channelCDGet);
         ChannelPut createChannelPut(ChannelFieldGroup channelFieldGroup,
             ChannelPutRequestor channelPutRequestor,boolean process);
         void destroy(ChannelPut channelPut);
-        ChannelDataPut createChannelDataPut(
+        ChannelCDPut createChannelCDPut(
             ChannelFieldGroup channelFieldGroup,
-            ChannelDataPutRequestor channelDataPutRequestor,
+            ChannelCDPutRequestor cdPutRequestor,
             boolean process,boolean supportAlso);
-        void destroy(ChannelDataPut channelDataPut);
+        void destroy(ChannelCDPut cdPut);
         ChannelPutGet createChannelPutGet(
             channelFieldGroup putFieldGroup,ChannelFieldGroup getFieldGroup,
             ChannelPutGetRequestor channelPutGetRequestor,boolean process);
@@ -394,8 +400,8 @@ channel access. It is called by ChannelFactory. It has onl one method</p>
 </dl>
 <hr />
 
-<h2 style="text-align: center" id="Channel2">Channel Process, Get, Put,
-DataPut, and PutGet</h2>
+<h2 style="text-align: center" id="Channel2">Channel Process, Get, CDGet,
+Put, CDPut, and PutGet</h2>
 <hr />
 
 <h3 id="Definition1">Definitions</h3>
@@ -413,8 +419,18 @@ DataPut, and PutGet</h2>
     }
 
     interface ChannelGetRequestor extends Requestor {
-        boolean nextGetData(ChannelField field,PVField pvField);
-        boolean nextDelayedGetData(PVField pvField);
+        boolean nextGetField(ChannelField field,PVField pvField);
+        boolean nextDelayedGetField(PVField pvField);
+        void getDone(RequestResult requestResult);
+    }
+
+    public interface ChannelCDGet {
+        CD getCD();
+        void get();
+    }
+    
+    
+    public interface ChannelCDGetRequestor extends Requestor{
         void getDone(RequestResult requestResult);
     }
 
@@ -424,18 +440,18 @@ DataPut, and PutGet</h2>
     }
 
     interface ChannelPutRequestor extends Requestor {
-        boolean nextPutData(ChannelField field,PVField pvField);
-        boolean nextDelayedPutData(PVField pvField);
+        boolean nextPutField(ChannelField field,PVField pvField);
+        boolean nextDelayedPutField(PVField pvField);
         void putDone(RequestResult requestResult);
     }
 
-    interface ChannelDataPut {
-        ChannelData getChannelData();
+    interface ChannelCDPut {
+        CD getCD();
         boolean get();
         boolean put();
     }
     
-    public interface ChannelDataPutRequestor extends Requestor{
+    public interface ChannelCDPutRequestor extends Requestor{
         void getDone();
         void putDone(RequestResult requestResult);
     }
@@ -450,22 +466,18 @@ DataPut, and PutGet</h2>
         ChannelPutRequestor,ChannelGetRequestor {}</pre>
 
 <h3 id="ChannelPro">ChannelProcess</h3>
-<dl>
-  <dt style="font-family: courier;">getDone</dt>
-  <dt style="font-family: courier;">putDone</dt>
-</dl>
 
-<p>ChannelProcess has the single method:</p>
+<p>ChannelProcess has the method:</p>
 <dl>
   <dt style="font-family: courier;">process</dt>
-    <dd>Process the channel. For example if the channel is a database record,
-      process the record. <span style="font-family: courier;">process</span>
-      returns (false, true) if the request (can not, can) be done. Normally
-      true is returned. A false value probably means that the channel is not
-      connected.</dd>
+    <dd>Process the channel. If the channel is a database record, process the
+      record. <span style="font-family: courier;">process</span> returns
+      (false, true) if the request (can not, can) be done. Normally true is
+      returned. A false value probably means that the channel is not
+      connected or channelProcess is not the requestor.</dd>
 </dl>
 
-<p>ChannelProcessRequestor has the method:</p>
+<p>ChannelProcessRequestor has the methods:</p>
 <dl>
   <dt style="font-family: courier;">getRequestorName</dt>
     <dd>Determined by the requestor.</dd>
@@ -502,7 +514,7 @@ called when the channel completes processing.</p>
       channelGetRequestor.</dd>
   <dt style="font-family: courier;">getDelayed</dt>
     <dd>If <span
-      style="font-family: courier;">channelGetRequestor.nextGetData</span>
+      style="font-family: courier;">channelGetRequestor.nextGetField</span>
       returns true, meaning the requestor is not done retrieving the data,
       then the requestor calls <span
       style="font-family: courier;">getDelayed</span> to retrieve the
@@ -512,17 +524,17 @@ called when the channel completes processing.</p>
 <p><span style="font-family: courier;">ChannelGetRequestor</span> has the
 methods:</p>
 <dl>
-  <dt style="font-family: courier;">nextGetData</dt>
+  <dt style="font-family: courier;">nextGetField</dt>
     <dd>The next pvField in the fieldGroup. The requestor returns false if it
       is done with the data and true otherwise. If true is returned the the
       requestor calls <span
       style="font-family: courier;">channelGet.getDelayed</span> when it is
       ready.</dd>
-  <dt style="font-family: courier;">nextDelayedGetData</dt>
+  <dt style="font-family: courier;">nextDelayedGetField</dt>
     <dd>When the requestor calls <span
       style="font-family: courier;">channelGet.getDelayed</span> the data is
       returned via a call to <span
-      style="font-family: courier;">nextDelayedGetData</span></dd>
+      style="font-family: courier;">nextDelayedGetField</span></dd>
   <dt style="font-family: courier;">getDone</dt>
     <dd>The request is done.</dd>
 </dl>
@@ -536,7 +548,7 @@ like:</p>
 <pre>    PVArray pvArray;
     int size,offset;
 
-    boolean nextGetData(Channel channel,ChannelField field,PVField pvField) {
+    boolean nextGetField(Channel channel,ChannelField field,PVField pvField) {
         // recognize that data is actually an array
         pvArray = (PVArray)pvField;
         size = pvArray.getLength();
@@ -551,12 +563,30 @@ like:</p>
        if(offset&gt;=size) break; // all done
     }
     ...
-    boolean nextDelayedGetData(PVField pvField) {
+    boolean nextDelayedGetField(PVField pvField) {
         // transfer data to network buffer
         // update offset
         if(offset&lt;size) return true // getDelayed will again be called
         return false // all done
     }</pre>
+
+<h3 id="ChannelCDG">ChannelCDGet</h3>
+
+<p><span style="font-family: courier;">ChannelCDGet</span> has the
+methods:</p>
+<dl>
+  <dt style="font-family: courier;">getCD</dt>
+    <dd>Get the CD (ChannelData) that is automatically created.</dd>
+  <dt style="font-family: courier;">get</dt>
+    <dd>Get data and put it into the CD.</dd>
+</dl>
+
+<p><span style="font-family: courier;">ChannelCDGetRequestor</span> has the
+methods:</p>
+<dl>
+  <dt style="font-family: courier;">getDone</dt>
+    <dd>The get has finished. If successful the data is in the CD.</dd>
+</dl>
 
 <h3 id="ChannelPut">ChannelPut</h3>
 
@@ -567,7 +597,7 @@ like:</p>
       <span style="font-family: courier;">channelPutRequestor.</span></dd>
   <dt style="font-family: courier;">putDelayed</dt>
     <dd>If <span
-      style="font-family: courier;">channelPutRequestor.nextPutData</span>
+      style="font-family: courier;">channelPutRequestor.nextPutField</span>
       returns true, meaning the requestor has not put the data, then the
       requestor calls <span style="font-family: courier;">putDelayed</span>
       when it is ready to put the data.</dd>
@@ -576,17 +606,17 @@ like:</p>
 <p><span style="font-family: courier;">ChannelPutRequestor</span> has the
 methods:</p>
 <dl>
-  <dt style="font-family: courier;">nextPutData</dt>
+  <dt style="font-family: courier;">nextPutField</dt>
     <dd>The next pvField in the fieldGroup. The requestor returns false if it
       is done with that data and true if it is not ready to put the data. If
       true is returned the the requestor calls <span
       style="font-family: courier;">channelPut.putDelayed</span> when it is
       ready.</dd>
-  <dt style="font-family: courier;">nextDelayedPutData</dt>
+  <dt style="font-family: courier;">nextDelayedPutField</dt>
     <dd>When the requestor calls <span
       style="font-family: courier;">channelPut.putDelayed</span> the data is
       put via a call to <span
-      style="font-family: courier;">nextDelayedPutData</span></dd>
+      style="font-family: courier;">nextDelayedPutField</span></dd>
   <dt style="font-family: courier;">putDone</dt>
     <dd>The put request is complete.</dd>
 </dl>
@@ -594,31 +624,31 @@ methods:</p>
 <p>Like delayed gets delayed puts are used by servers that need to block. For
 example servers that transfer data from the network to an IOC database.</p>
 
-<h3 id="ChannelDat">ChannelDataPut</h3>
+<h3 id="ChannelCDP">ChannelCDPut</h3>
 
-<p>This is a put that uses a ChannelData to hold the data. The caller puts
-data into the ChannelData before calling ChannelDataPut.put().</p>
+<p>This is a put that uses a CD to hold the data. The caller puts data into
+the CD before calling ChannelCDPut.put().</p>
 
-<p><span style="font-family: courier;">ChannelDataPut</span> has the
+<p><span style="font-family: courier;">ChannelCDPut</span> has the
 methods:</p>
 <dl>
-  <dt style="font-family: courier;">getChannelData</dt>
-    <dd>Get the interface to the ChannelData created when the ChannelDataPut
-      was created.</dd>
+  <dt style="font-family: courier;">getCD</dt>
+    <dd>Get the interface to the CD created when the ChannelCDPut was
+    created.</dd>
   <dt style="font-family: courier;">get</dt>
-    <dd>Get the latest target data and put it into channelData. The target
-      record is not processed.</dd>
+    <dd>Get the latest target data and put it into cd. The target record is
+      not processed.</dd>
   <dt style="font-family: courier;">put</dt>
-    <dd>Put the data currently residing in channelData and put it to the
-      target. If process is requested than the record is set active before
-      the data is put.</dd>
+    <dd>Put the data currently residing in cd and put it to the target. If
+      process is requested than the record is set active before the data is
+      put.</dd>
 </dl>
 
-<p><span style="font-family: courier;">ChannelDataPutRequestor</span> has the
+<p><span style="font-family: courier;">ChannelCDPutRequestor</span> has the
 methods:</p>
 <dl>
   <dt style="font-family: courier;">getDone</dt>
-    <dd>The get request is done and the data is in channelData.</dd>
+    <dd>The get request is done and the data is in cd.</dd>
   <dt style="font-family: courier;">putDone</dt>
     <dd>The put request is finished. The result of record processing, if
       specified, is returned.</dd>
@@ -640,7 +670,7 @@ client request to:</p>
 <h2 style="text-align: center" id="ChannelMon">ChannelMonitor</h2>
 <hr />
 
-<p>NOTE: ChannelData is described in the next section.</p>
+<p>NOTE: CD is described in the next section.</p>
 
 <h3 id="Definition2">Definitions</h3>
 <pre>    interface ChannelMonitor {
@@ -656,7 +686,7 @@ client request to:</p>
     }
     
     interface ChannelMonitorRequestor extends Requestor{
-        void monitorData(ChannelData channelData);
+        void monitorData(CD cd);
         void dataOverrun(int number);
     }
     
@@ -703,32 +733,30 @@ client request to:</p>
 </dl>
 <hr />
 
-<h2 style="text-align: center" id="Channel3">Channel Data</h2>
+<h2 style="text-align: center" id="Channel3">CD - Channel Data</h2>
 <hr />
 
-<p>ChannelData helps solve two problems:</p>
+<p>A CD (ChannelData) is the interface to data for a Channel Field Group. CD
+helps solve two problems:</p>
 <ol>
   <li>Blocking with a record locked.<br />
     An example is a channel access server. Instead of pre allocating network
-    buffers for a fieldGroup it can create a channelData, transfer data from
-    a record to the channelData, and then transfer the channeldData to a
-    network buffer. In the case of a large array multiple network buffers
-    will be required.</li>
+    buffers for a fieldGroup it can create a cd, transfer data from a record
+    to the cd, and then transfer the channeldData to a network buffer. In the
+    case of a large array multiple network buffers will be required.</li>
   <li>Data repository for database monitoring.<br />
-    For database monitoring a queue of channelDatas can be created. When a
-    monitored record changes, a channelData can be taken from the queue, and
-    the data values stored in the channelData. This can be done without
-    blocking. When the server is ready it can empty the queue and send the
-    channelData over the network.</li>
+    For database monitoring a queue of cds can be created. When a monitored
+    record changes, a cd can be taken from the queue, and the data values
+    stored in the cd. This can be done without blocking. When the server is
+    ready it can empty the queue and send the cd over the network.</li>
 </ol>
 
-<p>A ChannelData is associated a channel and channelFieldGroup. When a
-channelData is created via a call to ChannelDataFactory.createData it
-automatically creates a CDRecord and associated subfields, which are
-cdescribed in the next section.</p>
+<p>A CD is associated with a channel and channelFieldGroup. When a cd is
+created via a call to CDFactory.createCD it automatically creates a CDRecord
+and associated subfields, which are cdescribed in the next section.</p>
 
-<h3 id="ChannelDat1">ChannelData Definitions</h3>
-<pre>    interface ChannelData {
+<h3 id="Definition3">CD Definitions</h3>
+<pre>    interface CD {
         Channel getChannel();
         ChannelFieldGroup getChannelFieldGroup();
         CDRecord getCDRecord();
@@ -748,35 +776,35 @@ cdescribed in the next section.</p>
         void configurationStructurePut(PVField requested,PVLink targetPVLink);
     }
 
-    interface ChannelDataQueue {
+    interface CDQueue {
         int getNumberFree();
         int capacity();
-        ChannelData getFree(boolean forceFree);
-        void setInUse(ChannelData channelData);
-        ChannelData getNext();
+        CD getFree(boolean forceFree);
+        void setInUse(CD cd);
+        CD getNext();
         int getNumberMissed();
-        void releaseNext(ChannelData channelData);
+        void releaseNext(CD cd);
     }
 
-    class ChannelDataFactory {
-         static ChannelData createData(
+    class CDFactory {
+         static CD createCD(
              Channel channel,ChannelFieldGroup channelFieldGroup,boolean supportAlso);
-         static ChannelDataQueue createQueue(
+         static CDQueue createQueue(
              int queueSize,Channel channel,ChannelFieldGroup channelFieldGroup,
              boolean supportAlso);
     }
 
-    class BaseChannelData { ... }
-    class BaseChannelDataQueue { ... }</pre>
+    class BaseCD { ... }
+    class BaseCDQueue { ... }</pre>
 
-<h3 id="ChannelDat2">ChannelData</h3>
+<h3 id="CD">CD</h3>
 
-<p>ChannelData has the following methods:</p>
+<p>CD has the following methods:</p>
 <dl>
   <dt style="font-family: courier;">getChannel</dt>
     <dd>Get the channel to which this channelFieldGroup belongs.</dd>
   <dt style="font-family: courier;">getChannelFieldGroup</dt>
-    <dd>Get the ChannelFieldGroup for this ChannelData.</dd>
+    <dd>Get the ChannelFieldGroup for this CD.</dd>
   <dt style="font-family: courier;">getCDRecord</dt>
     <dd>Get the CDRecord that holds the data.</dd>
   <dt style="font-family: courier;">getMaxPutsToField</dt>
@@ -801,13 +829,10 @@ cdescribed in the next section.</p>
     <dd>A set of puts to the fields of a structure is starting.</dd>
   <dt style="font-family: courier;">endPut</dt>
     <dd>The set of puts to a structure is done.</dd>
-  <dt style="font-family: courier;">getChannelDataPVList</dt>
-    <dd>Get the list of all ChannelDataPVs that have been added since the
-      last clear request.</dd>
 </dl>
 
-<p>A ChannelData is allocated as follows:</p>
-<pre>    ChannelData channelData = ChannelDataFactory.createData(
+<p>A CD is allocated as follows:</p>
+<pre>    CD cd = CDFactory.createData(
         channel,channelFieldGroup,supportAlso);</pre>
 
 <p>This creates storage for each element of the field group. It can create
@@ -816,42 +841,42 @@ The arrays will grow as data is placed in them but will not be released.</p>
 
 <p>A new set of data is collected as follows:</p>
 <ul>
-  <li>The requestor calls channelData.clear</li>
+  <li>The requestor calls cd.clear</li>
   <li>The data source, which is NOT allowed to block a record, does the
     following:
     <ul>
       <li>Wait until data is not available.</li>
       <li>When one or more pvField items are available, with the data source
-        (for example a record) locked, call channelData.add.</li>
-      <li>When the last pvField has been copied to channelData notify the
-        requestor.</li>
+        (for example a record) locked, call cd.add.</li>
+      <li>When the last pvField has been copied to cd notify the
+      requestor.</li>
     </ul>
   </li>
-  <li>The requestor calls channelData.getPVFieldList and
-    channelData.getPVFieldList. It can block if necessary because the actual
-    data source, e.g. a data base record, is not locked.</li>
+  <li>The requestor calls cd.getPVFieldList and cd.getPVFieldList. It can
+    block if necessary because the actual data source, e.g. a data base
+    record, is not locked.</li>
 </ul>
 
-<h3 id="ChannelDat3">ChannelDataQueue</h3>
+<h3 id="CDQueue">CDQueue</h3>
 
-<p>ChannelDataQueue has the following methods:</p>
+<p>CDQueue has the following methods:</p>
 <dl>
   <dt style="font-family: courier;">getNumberFree</dt>
-    <dd>Get the number of unused channelData elements in the queue.</dd>
+    <dd>Get the number of unused cd elements in the queue.</dd>
   <dt style="font-family: courier;">capacity</dt>
-    <dd>Get the number of channelData elements in the queue.</dd>
+    <dd>Get the number of cd elements in the queue.</dd>
   <dt style="font-family: courier;">getFree</dt>
-    <dd>Get a channelData element from the queue. If there are no more free
-      elements numberMissed is incremented. If forceFree is true the oldest
-      used element is reused. If no free element is available then null is
+    <dd>Get a cd element from the queue. If there are no more free elements
+      numberMissed is incremented. If forceFree is true the oldest used
+      element is reused. If no free element is available then null is
       returned.</dd>
   <dt style="font-family: courier;">setInUse</dt>
-    <dd>Sets the ChannelData in use. This must be called for each channelData
-      returned by getFree. The caller can make changes to the ChannelData
-      before it is set in use.</dd>
+    <dd>Sets the CD in use. This must be called for each cd returned by
+      getFree. The caller can make changes to the CD before it is set in
+    use.</dd>
   <dt style="font-family: courier;">getNext</dt>
-    <dd>Get the next channelData element that has new data in it. Return null
-      if there are no more elements.</dd>
+    <dd>Get the next cd element that has new data in it. Return null if there
+      are no more elements.</dd>
   <dt style="font-family: courier;">getNumberMissed</dt>
     <dd>Get the number of times getGree has been called since the last call
       to releaseNext.</dd>
@@ -859,8 +884,8 @@ The arrays will grow as data is placed in them but will not be released.</p>
     <dd>Release the element returned by getNext.</dd>
 </dl>
 
-<p>A ChannelDataQueue is created as follows:</p>
-<pre>    ChannelDataQueue channelDataQueue = ChannelDataFactory.createQueue(
+<p>A CDQueue is created as follows:</p>
+<pre>    CDQueue cdQueue = CDFactory.createQueue(
          queueSize,channel,channelFieldGroup);</pre>
 
 <p>This creates <span style="font-family: courier;">queueSize</span> <span
@@ -868,27 +893,27 @@ style="font-family: courier;">channelFieldGroup</span>s and a queue to manage
 them. As an example of how a queue is used consider a channel access server
 monitoring a fieldGroup of an IOC database record.</p>
 
-<h3 id="ChannelDat4">ChannelDataFactory</h3>
+<h3 id="CDFactory">CDFactory</h3>
 
-<p>ChannelDataFactory has the following methods:</p>
+<p>CDFactory has the following methods:</p>
 <dl>
   <dt style="font-family: courier;">createData</dt>
-    <dd>Create a ChannelData.</dd>
+    <dd>Create a CD.</dd>
   <dt style="font-family: courier;">createQueue</dt>
-    <dd>Create a ChannelDataQueue.</dd>
+    <dd>Create a CDQueue.</dd>
 </dl>
 <hr />
 
 <h2 style="text-align: center" id="Channel4">CD - Channel Data Fields</h2>
 <hr />
 
-<p>Each channelData provides a set of interfaces for accessing the data
-values. The data is stored in PVField objects. The complete set of PVFields
-form a PVRecord, Each CD interface provides access to it's corresponding PV
+<p>Each cd provides a set of interfaces for accessing the data values. The
+data is stored in PVField objects. The complete set of PVFields form a
+PVRecord, Each CD interface provides access to it's corresponding PV
 interface. The CD interfaces provide additional methods that allow the client
 to determine how often each PVField was written.</p>
 
-<h3 id="Definition3">CD Definitions</h3>
+<h3 id="Definition4">CD Definitions</h3>
 <pre>    interface CDRecord {
         PVRecord getPVRecord();
         CDStructure getCDStructure();
@@ -990,9 +1015,8 @@ which the channel is connected. It has the methods:</p>
       channel is connected.</dd>
   <dt style="font-family: courier;">getCDStructure</dt>
     <dd>Get the CDStructure for the CDRecord itself. The CDStructure will
-      have a subfield for each member of the channelFieldGroup that the
-      channelData describes. Each subfield describes the data for it's
-      ChannelField.</dd>
+      have a subfield for each member of the channelFieldGroup that the cd
+      describes. Each subfield describes the data for it's ChannelField.</dd>
   <dt style="font-family: courier;">getFieldCreate</dt>
     <dd>This is used by the code that creates CD interfaces. It returns a
       factory to create Field objects. The code creates Field definition that
@@ -1150,13 +1174,12 @@ public method.</p>
 Channel Access is registered.</p>
 <hr />
 
-<h2 style="text-align: center" id="Example">Example For ChannelData</h2>
+<h2 style="text-align: center" id="Example">Example For CD</h2>
 <hr />
 
 <h3 id="Discussion">Discussion</h3>
 
-<p>This example creates a ChannelData for a fieldGroup that has the
-following:</p>
+<p>This example creates a CD for a fieldGroup that has the following:</p>
 <ul>
   <li>value<br />
   </li>
@@ -1170,9 +1193,9 @@ following:</p>
         ValueData(Channel channel);
         ChannelFieldGroup init();
         void clear();
-            channelData.clear();
+            cd.clear();
         }
-        boolean nextGetData(Channel channel, ChannelField field, PVField pvField);
+        boolean nextGetField(Channel channel, ChannelField field, PVField pvField);
         void printResults();
     }</pre>
 where
@@ -1183,8 +1206,8 @@ where
     <dd>creates everthing it needs. Returns null if anything fails.</dd>
   <dt style="font-family: courier;">clear</dt>
     <dd>Prepares to accept a new set of data for the fieldGroup</dd>
-  <dt style="font-family: courier;">nextGetData</dt>
-    <dd>Adds the data to the channelData list.</dd>
+  <dt style="font-family: courier;">nextGetField</dt>
+    <dd>Adds the data to the cd list.</dd>
   <dt style="font-family: courier;">prinntResults</dt>
     <dd>Prints all data received since last clear.</dd>
 </dl>
@@ -1268,13 +1291,13 @@ longer locked.</p>
         }
 
 
-       private String printResults(ChannelData channelData) {
+       private String printResults(CD cd) {
             StringBuilder builder = new StringBuilder();
-            ChannelFieldGroup channelFieldGroup = channelData.getChannelFieldGroup();
+            ChannelFieldGroup channelFieldGroup = cd.getChannelFieldGroup();
             List&lt;ChannelField&gt; channelFieldList = channelFieldGroup.getList();
-            CDStructure cdStructure = channelData.getCDRecord().getCDStructure();
+            CDStructure cdStructure = cd.getCDRecord().getCDStructure();
             CDField[] cdbDatas = cdStructure.getFieldCDFields();
-            int maxNumPuts = channelData.getMaxPutsToField();
+            int maxNumPuts = cd.getMaxPutsToField();
             if(maxNumPuts!=1) {
                 builder.append(String.format(
                     " maxNumPuts %d ",maxNumPuts));
@@ -1450,7 +1473,7 @@ longer locked.</p>
             valueData.printResults();
         }
 
-        public boolean nextDelayedGetData(PVField pvField) {
+        public boolean nextDelayedGetField(PVField pvField) {
             //nothing to do
         }
 
@@ -1462,8 +1485,8 @@ longer locked.</p>
             message(channel,message,messageType);
         }
 
-        public boolean nextGetData(Channel channel, ChannelField field, PVField pvField) {
-            valueData.nextGetData(channel, field, pvField);
+        public boolean nextGetField(Channel channel, ChannelField field, PVField pvField) {
+            valueData.nextGetField(channel, field, pvField);
             return false;
         }
 
@@ -1518,7 +1541,7 @@ longer locked.</p>
             channelPut = channel.createChannelPut(this, process);
         }
 
-        public boolean nextDelayedPutData(PVField pvField) {
+        public boolean nextDelayedPutField(PVField pvField) {
             // nothing to do
             return false;
         }
@@ -1562,7 +1585,7 @@ longer locked.</p>
             message(channel,message,messageType);
         }
 
-        public boolean nextPutData(Channel channel, ChannelField field, PVField pvField) {
+        public boolean nextPutField(Channel channel, ChannelField field, PVField pvField) {
             PVDouble pvDouble = (PVDouble)pvField;
             pvDouble.put(value);
             return false;
@@ -1623,12 +1646,12 @@ timeStamp.</p>
             channelPutGet = channel.createChannelPutGet(this, process);
         }
 
-        public boolean nextDelayedPutData(PVField pvField) {
+        public boolean nextDelayedPutField(PVField pvField) {
             // Nothing to do
             return false;
         }
 
-        public boolean nextDelayedGetData(PVField pvField) {
+        public boolean nextDelayedGetField(PVField pvField) {
             // Nothing to do
             return false;
         }
@@ -1679,12 +1702,12 @@ timeStamp.</p>
             message(channel,message,messageType);
         }
 
-        public boolean nextGetData(Channel channel, ChannelField field, PVField pvField) {
-            valueData.nextGetData(channel, field, pvField);
+        public boolean nextGetField(Channel channel, ChannelField field, PVField pvField) {
+            valueData.nextGetField(channel, field, pvField);
             return false;
         }
 
-        public boolean nextPutData(Channel channel, ChannelField field, PVField pvField) {
+        public boolean nextPutField(Channel channel, ChannelField field, PVField pvField) {
             PVDouble pvDouble = (PVDouble)pvField;
             pvDouble.put(value);
             return false;

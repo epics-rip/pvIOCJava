@@ -1,0 +1,12 @@
+<?xml version="1.0" ?>
+<IOCDatabase>
+<include addPath = "src" />
+<!--
+<include href = "xxx.xml" />
+-->
+<include href = "powerSupplyDB.xml" />
+<include href = "aiDB.xml" />
+<include href = "aoDB.xml" />
+<include href = "monitorDB.xml" />
+<include href = "counterDB.xml" />
+</IOCDatabase>

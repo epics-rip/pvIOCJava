@@ -3,6 +3,52 @@
 
 <!-- structure null is created automatically -->
 
+<!-- this is for use by linkSupport -->
+<structure name = "link" supportName = "link" >
+    <field name = "link" type = "link" />
+</structure>
+
+<structure name = "alarm">
+    <field name = "severity" type = "menu" menuName = "alarmSeverity" />
+    <field name = "message" type = "string" />
+</structure>
+
+<structure name = "doubleAlarm">
+    <field name = "active" type = "boolean" />
+    <field name = "highMajor" type = "double" />
+    <field name = "highMinor" type = "double" />
+    <field name = "lowMinor" type = "double" />
+    <field name = "lowMajor" type = "double" />
+    <field name = "hystersis" type = "double" />
+</structure>
+
+<structure name = "intAlarm">
+    <field name = "active" type = "boolean" />
+    <field name = "highMajor" type = "int" />
+    <field name = "highMinor" type = "int" />
+    <field name = "lowMinor" type = "int" />
+    <field name = "lowMajor" type = "int" />
+    <field name = "hystersis" type = "int" />
+</structure>
+
+<structure name = "booleanAlarm" >
+    <field name = "active" type = "boolean" />
+    <field name = "falseAlarm" type = "menu" menuName = "alarmSeverity" />
+    <field name = "trueAlarm" type = "menu" menuName = "alarmSeverity" />
+    <field name = "ChangeStateAlarm" type = "menu" menuName = "alarmSeverity" />
+</structure>
+
+
+<!-- delayLink is for delay link support -->
+
+<structure name = "delayLink">
+    <!-- min, max, inc are delay in milliseconds -->
+    <field name = "min" type = "long" />
+    <field name = "max" type = "long" />
+    <field name = "inc" type = "long" />
+</structure>
+
+
 <structure name = "timeStamp">
     <field name = "secondsPastEpoch" type = "long" />
     <field name = "nanoSeconds" type = "int" />
@@ -76,25 +122,25 @@
 </structure>
 
 
-<structure name = "displayLimit">
+<structure name = "doubleLimit">
     <field name = "low" type = "double" />
     <field name = "high" type = "double" />
 </structure>
 
-<structure name = "linearConvertInput"
-         supportName = "linearConvertInput">
+<structure name = "linearConvert" >
     <field name = "engUnitsLow" type = "double" />
     <field name = "engUnitsHigh" type = "double" />
+    <field name = "deviceHigh" type = "int" />
+    <field name = "deviceLow" type = "int" />
     <field name = "slope" type = "double" />
     <field name = "intercept" type = "double" />
 </structure>
 
-<structure name = "linearConvertOutput"
-         supportName = "linearConvertOutput">
-    <field name = "engUnitsLow" type = "double" />
-    <field name = "engUnitsHigh" type = "double" />
-    <field name = "slope" type = "double" />
-    <field name = "intercept" type = "double" />
+<structure name = "calcArg" >
+    <field name = "value" type = "double" />
+    <field name = "name" type = "string" />
+    <field name = "input" type = "link" />
 </structure>
+
 
 </DBDefinition>

@@ -141,9 +141,9 @@ public class ChannelMonitorTest extends TestCase {
         /* (non-Javadoc)
          * @see org.epics.ioc.ca.ChannelMonitorRequestor#monitorData(java.util.List, java.util.List)
          */
-        public void monitorData(ChannelData channelData) {
+        public void monitorCD(CD cD) {
             System.out.printf("%s %s %s%n",
-                requestorName,pvName,valueData.printResults(channelData));
+                requestorName,pvName,valueData.printResults(cD));
         }
 
         /* (non-Javadoc)
@@ -341,13 +341,13 @@ public class ChannelMonitorTest extends TestCase {
             return channelFieldGroup;
         }
 
-        private String printResults(ChannelData channelData) {
+        private String printResults(CD cD) {
             StringBuilder builder = new StringBuilder();
-            ChannelFieldGroup channelFieldGroup = channelData.getChannelFieldGroup();
+            ChannelFieldGroup channelFieldGroup = cD.getChannelFieldGroup();
             List<ChannelField> channelFieldList = channelFieldGroup.getList();
-            CDStructure cdStructure = channelData.getCDRecord().getCDStructure();
+            CDStructure cdStructure = cD.getCDRecord().getCDStructure();
             CDField[] cdbDatas = cdStructure.getFieldCDFields();
-            int maxNumPuts = channelData.getMaxPutsToField();
+            int maxNumPuts = cD.getMaxPutsToField();
             if(maxNumPuts!=1) {
                 builder.append(String.format(
                     " maxNumPuts %d ",maxNumPuts));

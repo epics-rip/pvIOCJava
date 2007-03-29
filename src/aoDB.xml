@@ -1,0 +1,76 @@
+<?xml version="1.0" ?>
+<IOCDatabase>
+
+
+<record name = "aoCounter" type = "calc">
+    <calcArgArray>
+        <value structureName = "calcArg">
+            <value>0.0</value>
+            <name>min</name>
+        </value>
+        <value structureName = "calcArg">
+            <value>10.0</value>
+            <name>max</name>
+        </value>
+        <value structureName = "calcArg">
+            <value>0.1</value>
+            <name>inc</name>
+        </value>
+    </calcArgArray>
+    <calculator supportName = "counterCalculator" />
+    <units>counts</units>
+    <scan>
+        <scan>periodic</scan>
+        <rate>1.0</rate>
+    </scan>
+    <linkArray>
+        <value structureName = "linkArrayElement">
+            <wait>false</wait>
+            <link  supportName = "outputLink" >
+                <configure structureName = "outputLink">
+                    <pvname>ao</pvname>
+                    <process>true</process>
+                </configure>
+            </link>
+        </value>
+    </linkArray>
+
+</record>
+
+<record name = "ao" type = "aoDouble" >
+    <output>
+        <linearConvert>
+            <deviceHigh>2047</deviceHigh>
+            <deviceLow>-2048</deviceLow>
+            <engUnitsLow>0.0</engUnitsLow>
+            <engUnitsHigh>10.0</engUnitsHigh>
+        </linearConvert>
+        <output supportName = "outputLink" >
+            <configure structureName = "outputLink">
+                <pvname>aoRaw</pvname>
+                <process>true</process>
+            </configure>
+        </output>
+
+    </output>
+    <doubleAlarm>
+        <configure structureName = "doubleAlarm">
+          <active>true</active>
+          <hystersis>0.1</hystersis>
+          <highMajor>8.0</highMajor>
+          <highMinor>6.0</highMinor>
+          <lowMinor>4.0</lowMinor>
+          <lowMajor>2.0</lowMajor>
+        </configure>
+    </doubleAlarm>
+    <displayLimit>
+        <low>0.0</low>
+        <high>10.0</high>
+    </displayLimit>
+</record>
+
+<record name = "aoRaw" type = "int">
+</record>
+
+
+</IOCDatabase>

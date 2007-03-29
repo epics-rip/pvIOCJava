@@ -5,9 +5,10 @@
  */
 package org.epics.ioc.support;
 
+import org.epics.ioc.pv.*;
 import org.epics.ioc.db.*;
 import org.epics.ioc.process.*;
-import org.epics.ioc.util.RequestResult;
+import org.epics.ioc.util.*;
 
 
 /**
@@ -22,60 +23,173 @@ public class LinearConvertInputFactory {
      * @return The Support interface.
      */
     public static Support create(DBStructure dbStructure) {
-        Support support = null;
         String supportName = dbStructure.getSupportName();
-        if(supportName.equals(supportName)) {
-            support = new LinearConvert(dbStructure);
+        if(!supportName.equals(supportName)) {
+            dbStructure.getPVStructure().message(
+                "does not have support " + supportName,MessageType.error);
+            return null;
         }
-        return support;
+        return new LinearConvertImpl(dbStructure);
     }
     
     private static final String supportName = "linearConvertInput";
     
-    private static class LinearConvert extends AbstractSupport {
+    private static class LinearConvertImpl extends AbstractSupport
+    implements SupportProcessRequestor
+    {
         
         private DBStructure dbStructure = null;
+        private DBField dbValue = null;
+        private PVDouble pvValue = null;
         
-        private LinearConvert(DBStructure dbStructure) {
+        private DBField dbRawValue = null;
+        private PVInt pvRawValue;
+        private DBField dbDeviceHigh;
+        private PVInt pvDeviceHigh;
+        private DBField dbDeviceLow;
+        private PVInt pvDeviceLow;
+        
+        private Support inputSupport;
+        private PVDouble pvEngUnitsLow;
+        private PVDouble pvEngUnitsHigh;
+        private PVDouble pvSlope;
+        private DBField dbSlope;
+        private PVDouble pvIntercept;
+        private DBField dbIntercept;
+        
+        private double slope;
+        private double intercept;
+        
+        private SupportProcessRequestor supportProcessRequestor;
+        
+        private LinearConvertImpl(DBStructure dbStructure) {
             super(supportName,dbStructure);
             this.dbStructure = dbStructure;
         }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.process.AbstractSupport#getRequestorName()
-         */
-        public String getRequestorName() {
-            return supportName;
-        }
+        
         /* (non-Javadoc)
          * @see org.epics.ioc.process.AbstractSupport#initialize()
          */
         public void initialize() {
-            System.out.printf("%s.initialize entered\n",supportName);
+            if(!super.checkSupportState(SupportState.readyForInitialize,supportName)) return;
+            if(dbValue==null) {
+                super.message("setField was not called", MessageType.error);
+                return;
+            }
+            DBField[] dbFields = dbStructure.getFieldDBFields();
+            PVStructure pvStructure = dbStructure.getPVStructure();
+            PVField[] pvFields = pvStructure.getFieldPVFields();
+            Structure structure = (Structure)pvStructure.getField();
+            int index;
+            
+            index = structure.getFieldIndex("rawValue");
+            dbRawValue = dbFields[index];
+            pvRawValue = (PVInt)pvFields[index];
+                       
+            index = structure.getFieldIndex("input");
+            inputSupport = dbFields[index].getSupport();
+            inputSupport.setField(dbRawValue);
+            index = structure.getFieldIndex("linearConvert");
+            DBStructure dbLinearConvert = (DBStructure)dbFields[index];
+            PVStructure linearConvert = (PVStructure)pvFields[index];
+            structure = (Structure)linearConvert.getField();
+            dbFields = dbLinearConvert.getFieldDBFields();
+            pvFields = linearConvert.getFieldPVFields();
+            index = structure.getFieldIndex("engUnitsLow");
+            pvEngUnitsLow = (PVDouble)pvFields[index];
+            index = structure.getFieldIndex("engUnitsHigh");
+            pvEngUnitsHigh = (PVDouble)pvFields[index];
+            index = structure.getFieldIndex("deviceLow");
+            dbDeviceLow = dbFields[index];
+            pvDeviceLow = (PVInt)pvFields[index];
+            index = structure.getFieldIndex("deviceHigh");
+            dbDeviceHigh = dbFields[index];
+            pvDeviceHigh = (PVInt)pvFields[index];
+            index = structure.getFieldIndex("slope");
+            pvSlope = (PVDouble)pvFields[index];
+            dbSlope = dbFields[index];
+            index = structure.getFieldIndex("intercept");
+            pvIntercept = (PVDouble)pvFields[index];
+            dbIntercept = dbFields[index];
+            inputSupport.initialize();
+            super.setSupportState(inputSupport.getSupportState());
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.process.AbstractSupport#uninitialize()
          */
         public void uninitialize() {
-            System.out.printf("%s.uninitialize entered\n",supportName);
+            inputSupport.uninitialize();
+            super.setSupportState(inputSupport.getSupportState());
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.process.AbstractSupport#start()
          */
         public void start() {
-            System.out.printf("%s.start entered\n",supportName);
+            inputSupport.start();
+            if(inputSupport instanceof DeviceLimit) {
+                ((DeviceLimit)inputSupport).get(dbDeviceLow, dbDeviceHigh);
+            }
+            slope = pvSlope.get();
+            intercept = pvIntercept.get();
+            if(slope==0.0) {
+                double engUnitsLow = pvEngUnitsLow.get();
+                double engUnitsHigh = pvEngUnitsHigh.get();
+                if(engUnitsLow==engUnitsHigh) {
+                    super.message("can't compute slope", MessageType.error);
+                    return;
+                }
+                double deviceLow = (double)pvDeviceLow.get();
+                double deviceHigh = (double)pvDeviceHigh.get();
+                if(deviceLow==deviceHigh) {
+                    super.message("can't compute slope", MessageType.error);
+                    return;
+                }
+                slope = (engUnitsHigh - engUnitsLow)/(deviceHigh - deviceLow);
+                intercept = (deviceHigh*engUnitsLow - deviceLow*engUnitsHigh)
+                    /(deviceHigh - deviceLow);
+                pvSlope.put(slope);
+                dbSlope.postPut();
+                pvIntercept.put(intercept);
+                dbIntercept.postPut();
+            }
+            super.setSupportState(inputSupport.getSupportState());
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.process.AbstractSupport#stop()
          */
         public void stop() {
-            System.out.printf("%s.stop entered\n",supportName);
+            inputSupport.stop();
+            super.setSupportState(inputSupport.getSupportState());
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.process.AbstractSupport#process(org.epics.ioc.process.SupportProcessRequestor)
          */
         public void process(SupportProcessRequestor supportProcessRequestor) {
-            System.out.printf("%s.process entered\n",supportName);
-            supportProcessRequestor.supportProcessDone(RequestResult.failure);
+            this.supportProcessRequestor = supportProcessRequestor;
+            inputSupport.process(this);
+        }
+
+        /* (non-Javadoc)
+         * @see org.epics.ioc.support.AbstractSupport#setField(org.epics.ioc.db.DBField)
+         */
+        public void setField(DBField dbField) {
+            if(dbField.getPVField().getField().getType()!=Type.pvDouble) {
+                super.message("setField illegal argument. Must have type double", MessageType.error);
+                return;
+            }
+            dbValue = dbField;
+            pvValue = (PVDouble)dbField.getPVField();
+        }
+
+        /* (non-Javadoc)
+         * @see org.epics.ioc.process.SupportProcessRequestor#supportProcessDone(org.epics.ioc.util.RequestResult)
+         */
+        public void supportProcessDone(RequestResult requestResult) {
+            double rawValue = (double)pvRawValue.get();
+            double value = rawValue*slope + intercept;
+            pvValue.put(value);
+            dbValue.postPut();
+            supportProcessRequestor.supportProcessDone(requestResult);
         }
     }
 }

@@ -187,14 +187,17 @@ public class GetCDValue extends Dialog implements SelectionListener {
             gridLayout = new GridLayout();
             gridLayout.numColumns = 1;
             composite.setLayout(gridLayout);
+            PVMenu pvMenu = cdMenu.getPVMenu();
+            int index = pvMenu.getIndex();
             Menu menu = (Menu)cdMenu.getPVField().getField();
             choices = menu.getMenuChoices();
             numChoices = choices.length;
             choiceButtons = new Button[numChoices];
             for(int i=0; i<numChoices; i++) {
-                choiceButtons[i] = new Button(composite,SWT.RADIO);
-                choiceButtons[i].setText(choices[i]);
-                
+                Button button = new Button(composite,SWT.RADIO);
+                choiceButtons[i] = button;
+                button.setText(choices[i]);
+                if(index==i) button.setSelection(true);
             }
             shell.pack();
             shell.open();

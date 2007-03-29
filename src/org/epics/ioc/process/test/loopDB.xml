@@ -24,7 +24,7 @@
         </value>
     </linkArray>
 </record>
-<record name = "other01" type = "doubleRecord">
+<record name = "other01" type = "double">
     <input supportName = "inputLink" >
         <configure structureName = "inputLink">
             <pvname>root</pvname>
@@ -37,7 +37,7 @@
         <high>10.0</high>
     </displayLimit>
 </record>
-<record name = "other02" type = "doubleRecord">
+<record name = "other02" type = "double">
     <units>volts</units>
     <displayLimit>
         <low>0.0</low>
@@ -54,7 +54,7 @@
         </value>
     </linkArray>
 </record>
-<record name = "other03" type = "doubleRecord">
+<record name = "other03" type = "double">
     <input supportName = "inputLink" >
         <configure structureName = "inputLink">
             <pvname>root</pvname>

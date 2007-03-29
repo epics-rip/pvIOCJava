@@ -46,7 +46,7 @@ public class Monitor {
 
         public void start() {
             shell = new Shell(display);
-            shell.setText("probe");
+            shell.setText("monitor");
             GridLayout gridLayout = new GridLayout();
             gridLayout.numColumns = 1;
             shell.setLayout(gridLayout);
@@ -382,14 +382,14 @@ public class Monitor {
             }
 
             /* (non-Javadoc)
-             * @see org.epics.ioc.ca.ChannelMonitorRequestor#monitorData(org.epics.ioc.ca.ChannelData)
+             * @see org.epics.ioc.ca.ChannelMonitorRequestor#monitorData(org.epics.ioc.ca.CD)
              */
-            public void monitorData(final ChannelData channelData) {
+            public void monitorCD(final CD cD) {
                 allDone = false;
                 display.syncExec( new Runnable() {
                     public void run() {
                         CDRecordPrint cdRecordPrint = 
-                            new CDRecordPrint(channelData.getCDRecord(),consoleText); 
+                            new CDRecordPrint(cD.getCDRecord(),consoleText); 
                         cdRecordPrint.print();
                         lock.lock();
                         try {

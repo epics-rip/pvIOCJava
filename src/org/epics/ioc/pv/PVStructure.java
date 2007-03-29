@@ -24,4 +24,88 @@ public interface PVStructure extends PVField {
      * @return (false,true) if the field (was not,was) replaced.
      */
     boolean replaceStructureField(String fieldName,Structure structure);
+    /**
+     * Find a boolean subfield with the specified fieldName.
+     * The fieldName is of the form name.name...
+     * @param fieldName The field name to find
+     * @return The interface if the field of the correct type is found or null if not found.
+     */
+    PVBoolean getBooleanField(String fieldName);
+    /**
+     * Find a byte subfield with the specified fieldName.
+     * The fieldName is of the form name.name...
+     * @param fieldName The field name to find
+     * @return The interface if the field of the correct type is found or null if not found.
+     */
+    PVByte getByteField(String fieldName);
+    /**
+     * Find a short subfield with the specified fieldName.
+     * The fieldName is of the form name.name...
+     * @param fieldName The field name to find
+     * @return The interface if the field of the correct type is found or null if not found.
+     */
+    PVShort getShortField(String fieldName);
+    /**
+     * Find an int subfield with the specified fieldName.
+     * The fieldName is of the form name.name...
+     * @param fieldName The field name to find
+     * @return The interface if the field of the correct type is found or null if not found.
+     */
+    PVInt getIntField(String fieldName);
+    /**
+     * Find a long subfield with the specified fieldName.
+     * The fieldName is of the form name.name...
+     * @param fieldName The field name to find
+     * @return The interface if the field of the correct type is found or null if not found.
+     */
+    PVLong getLongField(String fieldName);
+    /**
+     * Find a float subfield with the specified fieldName.
+     * The fieldName is of the form name.name...
+     * @param fieldName The field name to find
+     * @return The interface if the field of the correct type is found or null if not found.
+     */
+    PVFloat getFloatField(String fieldName);
+    /**
+     * Find a double subfield with the specified fieldName.
+     * The fieldName is of the form name.name...
+     * @param fieldName The field name to find
+     * @return The interface if the field of the correct type is found or null if not found.
+     */
+    PVDouble getDoubleField(String fieldName);
+    /**
+     * Find a string subfield with the specified fieldName.
+     * The fieldName is of the form name.name...
+     * @param fieldName The field name to find
+     * @return The interface if the field of the correct type is found or null if not found.
+     */
+    PVString getStringField(String fieldName);
+    /**
+     * Find an int subfield with the specified fieldName.
+     * The fieldName is of the form name.name...
+     * @param fieldName The field name to find
+     * @return The interface if the field of the correct type is found or null if not found.
+     */
+    PVEnum getEnumField(String fieldName);
+    /**
+     * Find a menu subfield with the specified fieldName and specified menuName. 
+     * The fieldName is of the form name.name...
+     * @param fieldName The field name to find
+     * @return The interface if the field of the correct type is found or null if not found.
+     */
+    PVMenu getMenuField(String fieldName,String menuName);
+    /**
+     * Find a structure subfield with the specified fieldName and specified structureName.
+     * The fieldName is of the form name.name...
+     * @param fieldName The field name to find
+     * @return The interface if the field of the correct type is found or null if not found.
+     */
+    PVStructure getStructureField(String fieldName,String structureName);
+    /**
+     * Find an array subfield with the specified fieldName and elementType.
+     * The fieldName is of the form name.name...
+     * @param fieldName The field name to find
+     * @return The interface if the field of the correct type is found or null if not found.
+     */
+    PVArray getArrayField(String fieldName,Type elementType);
 }

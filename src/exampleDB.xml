@@ -1,5 +1,7 @@
 <?xml version="1.0" ?>
 <IOCDatabase>
+<include addPath = "src" />
+<include href = "counterDB.xml" />
 <include addPath = "src/org/epics/ioc/db/test" />
 <include href = "exampleAnalogDB.xml" />
 <include href = "exampleAiDB.xml" />

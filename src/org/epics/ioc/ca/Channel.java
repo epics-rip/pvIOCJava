@@ -90,11 +90,28 @@ public interface Channel {
      */
     void destroy(ChannelGet channelGet);
     /**
+     * Create a ChannelCDGet.
+     * @param channelFieldGroup The chanelFieldGroup describing the data to get.
+     * @param channelCDGetRequestor The channelDataGetRequestor
+     * @param process Should record be processed before get.
+     * @param supportAlso Should support be read/written?
+     * @return An interface for the ChannelCDGet.
+     */
+    ChannelCDGet createChannelCDGet(
+            ChannelFieldGroup channelFieldGroup,
+            ChannelCDGetRequestor channelCDGetRequestor, boolean process,boolean supportAlso);
+    /**
+     * Destroy a channelDataGet.
+     * If a request is active it will complete but no new requestes will be accepted.
+     * @param channelCDGet The channelCDGet
+     */
+    void destroy(ChannelCDGet channelCDGet);
+    /**
      * Create a ChannelPut.
      * @param channelFieldGroup The chanelFieldGroup describing the data to put.
      * @param channelPutRequestor The channelPutRequestor.
      * @param process Should record be processed after put.
-     * @return An interface for the ChannelPut.
+     * @return An interface for the ChannelCDPut.
      */
     ChannelPut createChannelPut(
         ChannelFieldGroup channelFieldGroup,ChannelPutRequestor channelPutRequestor, boolean process);
@@ -105,22 +122,22 @@ public interface Channel {
      */
     void destroy(ChannelPut channelPut);
     /**
-     * Create a ChannelDataPut.
+     * Create a ChannelCDPut.
      * @param channelFieldGroup The chanelFieldGroup describing the data to put.
-     * @param channelDataPutRequestor The channelDataPutRequestor
+     * @param channelCDPutRequestor The channelDataPutRequestor
      * @param process Should record be processed after put.
      * @param supportAlso Should support be read/written?
      * @return An interface for the ChannelPut.
      */
-    ChannelDataPut createChannelDataPut(
+    ChannelCDPut createChannelCDPut(
             ChannelFieldGroup channelFieldGroup,
-            ChannelDataPutRequestor channelDataPutRequestor, boolean process,boolean supportAlso);
+            ChannelCDPutRequestor channelCDPutRequestor, boolean process,boolean supportAlso);
     /**
      * Destroy a channelDataPut.
      * If a request is active it will complete but no new requestes will be accepted.
-     * @param channelDataPut The channelDataPut
+     * @param channelCDPut The channelCDPut
      */
-    void destroy(ChannelDataPut channelDataPut);
+    void destroy(ChannelCDPut channelCDPut);
     /**
      * Create a ChannelPutGet.
      * @param putFieldGroup The fieldGroup describing the data to put.

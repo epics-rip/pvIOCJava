@@ -572,7 +572,7 @@ public class LocalChannelAccessTest extends TestCase {
     
     private static class ValueData implements ChannelFieldGroupListener{
         private Channel channel;
-        private ChannelData channelData;
+        private CD cD;
         private ChannelFieldGroup channelFieldGroup;
         private ChannelField valueField;
         private ChannelField statusField;
@@ -625,28 +625,28 @@ public class LocalChannelAccessTest extends TestCase {
             }
             timeStampField = channel.getChannelField();
             channelFieldGroup.addChannelField(timeStampField);
-            channelData = ChannelDataFactory.createChannelData(channel,channelFieldGroup,false);
-            if(channelData==null) {
-                System.out.printf("ChannelDataFactory.createData failed");
+            cD = CDFactory.createCD(channel,channelFieldGroup,false);
+            if(cD==null) {
+                System.out.printf("CDFactory.createData failed");
                 return null;
             }
             return channelFieldGroup;
         }
         
         private void clear() {
-            channelData.clearNumPuts();
+            cD.clearNumPuts();
         }
         private boolean nextGetField(Channel channel, ChannelField channelField, PVField pvField) {
-            channelData.dataPut(pvField);
+            cD.dataPut(pvField);
             return false;
         }
         
         private void printResults() {
-            ChannelFieldGroup channelFieldGroup = channelData.getChannelFieldGroup();
+            ChannelFieldGroup channelFieldGroup = cD.getChannelFieldGroup();
             List<ChannelField> channelFieldList = channelFieldGroup.getList();
-            CDStructure cdStructure = channelData.getCDRecord().getCDStructure();
+            CDStructure cdStructure = cD.getCDRecord().getCDStructure();
             CDField[] cdbDatas = cdStructure.getFieldCDFields();
-            System.out.printf(" maxNumPuts %d ",channelData.getMaxPutsToField());
+            System.out.printf(" maxNumPuts %d ",cD.getMaxPutsToField());
             for(int i=0;i<cdbDatas.length; i++) {
                 CDField cdField = cdbDatas[i];
                 PVField pvField = cdField.getPVField();

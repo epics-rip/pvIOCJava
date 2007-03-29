@@ -90,7 +90,9 @@ public class IOCDBFactory {
          * @see org.epics.ioc.db.IOCDB#addIOCDBMergeListener(org.epics.ioc.db.IOCDBMergeListener)
          */
         public void addIOCDBMergeListener(IOCDBMergeListener listener) {
-            if(this!=master) {
+            if(this==master) {
+                listener.merged();
+            } else {
                 rwLock.writeLock().lock();
                 try {
                     mergeListenerList.add(listener);

@@ -10,7 +10,7 @@
 <body>
 <h1 style="text-align: center">EPICS JavaIOC: pv<br />
 package: org.epics.ioc.pv<br />
-2007.03.05</h1>
+2007.03.29</h1>
 CONTENTS
 
 <div class="toc">
@@ -610,8 +610,18 @@ assumes that the client has permission to change the support:</p>
 <pre>    interface PVStructure extends PVField {
         PVField[] getFieldPVFields();
         boolean replaceStructureField(String fieldName,String structureName)
-        void beginPut();
-        void endPut();
+        PVBoolean getBooleanField(String fieldName);
+        PVByte getByteField(String fieldName);
+        PVShort getShortField(String fieldName);
+        PVInt getIntField(String fieldName);
+        PVLong getLongField(String fieldName);
+        PVFloat getFloatField(String fieldName);
+        PVDouble getDoubleField(String fieldName);
+        PVString getStringField(String fieldName);
+        PVEnum getEnumField(String fieldName);
+        PVMenu getMenuField(String fieldName,String menuName);
+        PVStructure getStructureField(String fieldName,String structureName);
+        PVArray getArrayField(String fieldName,Type elementType);
     }</pre>
 
 <p>where</p>
@@ -624,9 +634,30 @@ assumes that the client has permission to change the support:</p>
       reflection interface for structureName and how to create a PVStructure
       for the subfield. In addition it must create a new Structure reflection
       interface for itself.</dd>
-  <dt>beginPut endPut</dt>
-    <dd>Code that puts to multiple fields of a structure should call beginPut
-      before the first put and endPut after the last put.</dd>
+  <dt>getBooleanField</dt>
+     <dd>Look for fieldName. If found and it has the correct type return the interface.</dd>
+  <dt>getByteField</dt>
+     <dd>Look for fieldName. If found and it has the correct type return the interface.</dd>
+  <dt>getShortField</dt>
+     <dd>Look for fieldName. If found and it has the correct type return the interface.</dd>
+  <dt>getIntField</dt>
+     <dd>Look for fieldName. If found and it has the correct type return the interface.</dd>
+  <dt>getLongField</dt>
+     <dd>Look for fieldName. If found and it has the correct type return the interface.</dd>
+  <dt>getFloatField</dt>
+     <dd>Look for fieldName. If found and it has the correct type return the interface.</dd>
+  <dt>getDoubleField</dt>
+     <dd>Look for fieldName. If found and it has the correct type return the interface.</dd>
+  <dt>getStringField</dt>
+     <dd>Look for fieldName. If found and it has the correct type return the interface.</dd>
+  <dt>getEnumField</dt>
+     <dd>Look for fieldName. If found and it has the correct type return the interface.</dd>
+  <dt>getMenuField</dt>
+     <dd>Look for fieldName. If found and it has the correct type return the interface.</dd>
+  <dt>getStructureField</dt>
+     <dd>Look for fieldName. If found and it has the correct type return the interface.</dd>
+  <dt>getArrayField</dt>
+     <dd>Look for fieldName. If found and it has the correct type return the interface.</dd>
 </dl>
 
 <h3 id="PVRecord">PVRecord</h3>

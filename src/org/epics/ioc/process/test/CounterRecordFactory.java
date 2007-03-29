@@ -8,6 +8,9 @@ package org.epics.ioc.process.test;
 import org.epics.ioc.pv.*;
 import org.epics.ioc.db.*;
 import org.epics.ioc.process.*;
+import org.epics.ioc.support.AbstractSupport;
+import org.epics.ioc.support.LinkSupport;
+import org.epics.ioc.support.Support;
 import org.epics.ioc.util.*;
 
 /**
@@ -40,7 +43,7 @@ public class CounterRecordFactory {
         private DBField dbValue;
         private DBField dbLinkArray;
         
-        private LinkSupport linkArraySupport = null;
+        private Support linkArraySupport = null;
         
         private CounterRecord(DBStructure dbStructure) {
             super(supportName,dbStructure);
@@ -87,7 +90,7 @@ public class CounterRecordFactory {
             index = structure.getFieldIndex("linkArray");
             if(index<0) throw new IllegalStateException("field linkArray does not exist");
             dbLinkArray = dbDatas[index];
-            linkArraySupport = (LinkSupport)dbLinkArray.getSupport();
+            linkArraySupport = dbLinkArray.getSupport();
             if(linkArraySupport!=null) {
                 linkArraySupport.setField(dbValue);
                 linkArraySupport.initialize();

@@ -16,9 +16,9 @@ import org.epics.ioc.util.*;
 public interface ChannelMonitorRequestor extends Requestor{
     /**
      * New subscribe data value.
-     * @param channelData The channelData.
+     * @param cD The channelData.
      */
-    void monitorData(ChannelData channelData);
+    void monitorCD(CD cD);
     /**
      * Monitor event have been missed.
      * @param number Number of missed monitor events.

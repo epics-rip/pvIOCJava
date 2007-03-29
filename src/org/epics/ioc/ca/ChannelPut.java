@@ -16,10 +16,10 @@ import org.epics.ioc.pv.PVField;
 public interface ChannelPut {
     /**
      * Put data to a channel.
-     * @return (false,true) if the request (is not, is) started.
      * This fails if the request can not be satisfied.
+     * If it fails ChannelPutRequestor.putDone is called before put returns.
      */
-    boolean put();
+    void put();
     /**
      * If ChannelPutRequestor.nextPutData or ChannelPutRequestor.nextDelayedPutData returns true
      * this is the call to ask again for the data. The result is that the underlying database

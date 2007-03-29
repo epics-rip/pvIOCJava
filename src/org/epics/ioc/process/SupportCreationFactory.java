@@ -13,6 +13,7 @@ import org.epics.ioc.pv.Type;
 import org.epics.ioc.pv.Array;
 import org.epics.ioc.db.*;
 import org.epics.ioc.dbd.*;
+import org.epics.ioc.support.Support;
 import org.epics.ioc.util.*;
 
 /**
@@ -55,21 +56,26 @@ public class SupportCreationFactory {
          */
         public boolean createSupport() {
             boolean result = true;
-            Iterator<DBRecord> iter = records.iterator();
+            Iterator<DBRecord> iter;
+            iter = records.iterator();
+            while(iter.hasNext()) {
+                DBRecord record = iter.next();
+                if(!createRecordSupport(record)) {
+                    printError(requestor,record.getPVRecord(),
+                    " no record support");
+                    result = false;
+                } else {
+                    if(record.getRecordProcess()!=null) continue;
+                    RecordProcess recordProcess =
+                        RecordProcessFactory.createRecordProcess(record);
+                    record.setRecordProcess(recordProcess);
+                }
+            }
+            iter = records.iterator();
             while(iter.hasNext()) {
                 DBRecord record = iter.next();
                 DBStructure dbStructure = record.getDBStructure();
                 if(!createStructureSupport(dbStructure)) result = false;
-                if(!createRecordSupport(record)) result = false;
-            }
-            if(!result) return result;
-            iter = records.iterator();
-            while(iter.hasNext()) {
-                DBRecord record = iter.next();
-                if(record.getRecordProcess()!=null) continue;
-                RecordProcess recordProcess =
-                    RecordProcessFactory.createRecordProcess(record);
-                record.setRecordProcess(recordProcess);
             }
             return result;
         }

@@ -2,22 +2,6 @@
 <DBDefinition>
 <include addPath = "dbd" />
 
-<recordType name = "doubleRecord" supportName = "doubleRecord" >
-    <include href = "common.xml" />
-    <field name = "value" type = "double" >
-        <property name = "status" associatedField = "status" />
-        <property name = "severity" associatedField = "severity" />
-        <property name = "units" associatedField = "units" />
-        <property name = "displayLimit" associatedField = "displayLimit" />
-        <property name = "timeStamp" associatedField = "/timeStamp" />
-    </field>
-    <field name = "input" type = "link" />
-    <field name = "units" type = "string" />
-    <field name = "displayLimit"
-         type = "structure" structureName = "displayLimit" />
-    <field name = "linkArray" type = "array" 
-         elementType = "structure" supportName = "linkArray" />
-</recordType>
 
 <recordType name = "counterRecord" supportName = "counterRecord">
     <include href = "common.xml" />
@@ -33,38 +17,7 @@
          elementType = "structure" supportName = "linkArray" />
 </recordType>
 
-<recordType name = "eventRecord" supportName = "eventRecord">
-    <include href = "common.xml" />
-    <field name = "value" type = "string"/>
-</recordType>
-
-<recordType name = "monitorNotifyRecord" supportName = "monitorNotifyRecord" >
-    <include href = "common.xml" />
-    <field name = "inputArray" type = "array" 
-         elementType = "structure" supportName = "linkArray" />
-    <field name = "notify" type = "boolean" />
-    <field name = "outputArray" type = "array" 
-         elementType = "structure" supportName = "linkArray" />
-</recordType>
-
-<support name = "doubleRecord"
-   factoryName = "org.epics.ioc.process.test.DoubleRecordFactory" />
 <support name = "counterRecord"
    factoryName = "org.epics.ioc.process.test.CounterRecordFactory" />
-<support name = "eventRecord"
-   factoryName = "org.epics.ioc.process.test.EventRecordFactory" />
-<support name = "monitorNotifyRecord"
-   factoryName = "org.epics.ioc.process.test.MonitorNotifyRecordFactory" />
-
-<structure name = "delayLink">
-    <!-- min, max, inc are delay in milliseconds -->
-    <field name = "min" type = "long" />
-    <field name = "max" type = "long" />
-    <field name = "inc" type = "long" />
-</structure>
-<linkSupport name = "delayLink"
-    configurationStructureName = "delayLink"
-    factoryName = "org.epics.ioc.process.test.DelayLinkFactory"
-/>
 
 </DBDefinition>

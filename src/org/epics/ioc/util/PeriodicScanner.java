@@ -57,7 +57,7 @@ public interface PeriodicScanner {
     String show(double rate);
     /**
      * Show a list of all records being scanned at the specified rate and
-     * with the spscified priority.
+     * with the specified priority.
      * @param rate The rate.
      * @param priority The priority.
      * @return The list.

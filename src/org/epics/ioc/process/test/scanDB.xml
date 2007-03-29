@@ -101,18 +101,18 @@
         <rate>0.2</rate>
     </scan>
 </record>
-<record name = "doubleReceive00" type = "doubleRecord"> </record>
-<record name = "doubleReceive01" type = "doubleRecord"> </record>
-<record name = "doubleReceive02" type = "doubleRecord"> </record>
-<record name = "doubleReceive03" type = "doubleRecord"> </record>
-<record name = "doubleReceive04" type = "doubleRecord"> </record>
-<record name = "doubleReceive05" type = "doubleRecord"> </record>
-<record name = "doubleReceive06" type = "doubleRecord"> </record>
-<record name = "doubleReceive07" type = "doubleRecord"> </record>
-<record name = "doubleReceive08" type = "doubleRecord"> </record>
-<record name = "doubleReceive09" type = "doubleRecord"> </record>
+<record name = "doubleReceive00" type = "double"> </record>
+<record name = "doubleReceive01" type = "double"> </record>
+<record name = "doubleReceive02" type = "double"> </record>
+<record name = "doubleReceive03" type = "double"> </record>
+<record name = "doubleReceive04" type = "double"> </record>
+<record name = "doubleReceive05" type = "double"> </record>
+<record name = "doubleReceive06" type = "double"> </record>
+<record name = "doubleReceive07" type = "double"> </record>
+<record name = "doubleReceive08" type = "double"> </record>
+<record name = "doubleReceive09" type = "double"> </record>
 
-<record name = "event" type = "eventRecord">
+<record name = "event" type = "event">
     <value>eventOne</value>
     <scan>
         <scan>periodic</scan>
