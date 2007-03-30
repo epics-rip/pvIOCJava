@@ -29,15 +29,11 @@ public class Monitor {
         monitorImpl.start();
     }
 
-    private static class MonitorImpl  implements SelectionListener,Requestor,Runnable {
+    private static class MonitorImpl  implements Requestor,Runnable {
         private Display display;
         private MessageQueue messageQueue = MessageQueueFactory.create(3);
         private Shell shell;
-        private String channelName;
-        private Text channelNameText;
-        private String fieldName;
-        private Text fieldNameText;
-        private MonitorChannel monitorChannel;
+        private GetChannelShell getChannelShell;
         private Text consoleText;
 
         private MonitorImpl(Display display) {
@@ -56,27 +52,8 @@ public class Monitor {
             shellComposite.setLayout(gridLayout);
             GridData gridData = new GridData(GridData.FILL_BOTH);
             shellComposite.setLayoutData(gridData);
-            
-            Composite nameComposite = new Composite(shellComposite,SWT.BORDER);
-            gridLayout = new GridLayout();
-            gridLayout.numColumns = 2;
-            nameComposite.setLayout(gridLayout);
-            gridData = new GridData(GridData.FILL_HORIZONTAL);
-            nameComposite.setLayoutData(gridData);                
-            new Label(nameComposite,SWT.NONE).setText("channelName");
-            channelNameText = new Text(nameComposite,SWT.BORDER);
-            gridData = new GridData(GridData.FILL_HORIZONTAL);
-            channelNameText.setLayoutData(gridData);
-            channelNameText.addSelectionListener(this);
-            
-            
-            new Label(nameComposite,SWT.NONE).setText("fieldName");
-            fieldNameText = new Text(nameComposite,SWT.BORDER);
-            gridData = new GridData(GridData.FILL_HORIZONTAL);
-            fieldNameText.setLayoutData(gridData);
-            fieldNameText.addSelectionListener(this);
-            
-            monitorChannel = new MonitorChannel(shellComposite,this);
+            getChannelShell = new GetChannelShell(shellComposite,this);
+            new MonitorChannel(shellComposite,this);
             Composite consoleComposite = new Composite(shellComposite,SWT.BORDER);
             gridLayout = new GridLayout();
             gridLayout.numColumns = 1;
@@ -99,26 +76,6 @@ public class Monitor {
             GridData textGridData = new GridData(GridData.FILL_BOTH);
             consoleText.setLayoutData(textGridData);
             shell.open();
-        }
-        /* (non-Javadoc)
-         * @see org.eclipse.swt.events.SelectionListener#widgetDefaultSelected(org.eclipse.swt.events.SelectionEvent)
-         */
-        public void widgetDefaultSelected(SelectionEvent arg0) {
-            widgetSelected(arg0);
-        }
-        /* (non-Javadoc)
-         * @see org.eclipse.swt.events.SelectionListener#widgetSelected(org.eclipse.swt.events.SelectionEvent)
-         */
-        public void widgetSelected(SelectionEvent arg0) {
-            Object object = arg0.getSource();
-            if(object==channelNameText) {   
-                channelName = channelNameText.getText();
-            }
-            if(object==fieldNameText) {
-                fieldName = fieldNameText.getText();
-                if(fieldName.length()==0) fieldName = null;
-                monitorChannel.connect(channelName,fieldName);
-            }
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.util.Requestor#getRequestorName()
@@ -171,41 +128,40 @@ public class Monitor {
         }
 
         private static enum MonitorType{ change, absolute, percentage }
+        private enum ConnectState {connected,disconnected}
         
         private class MonitorChannel implements
-        DisposeListener,
         SelectionListener,
-        ChannelFieldGroupListener,
         ChannelMonitorRequestor,
-        ChannelStateListener
+        ChannelFieldGroupListener
         {
             private int queueSize = 3;
             private MonitorType monitorType = MonitorType.change;
             private double deadband = 0.0;
             private Requestor requestor;
-            private Button startButton;
-            private Button stopButton;
-            private Button propertyButton;
-            
+            private Button connectButton;          
+            private Button propertyButton;          
             private Button changeButton;
             private Button absoluteButton;
             private Button percentageButton;
+            private Button startStopButton;
             private Text text;
             
-            private Channel channel = null;
             private ChannelField valueField;
             private boolean propertysOK = false;
             private ChannelFieldGroup channelFieldGroup;
             private String[] propertyNames = null;
             private ChannelMonitor channelMonitor = null;
+            private boolean isMonitoring = false;
             
             private Lock lock = new ReentrantLock();
             private Condition waitDone = lock.newCondition();
             private boolean allDone = false;
+            private ConnectState connectState = ConnectState.disconnected;
+            private String[] connectStateText = {"connect    ","disconnect"};
 
             public MonitorChannel(Composite parent,Requestor requestor) {
                 this.requestor = requestor;
-                parent.addDisposeListener(this);
                 Composite monitorComposite = new Composite(parent,SWT.BORDER);
                 GridLayout gridLayout = new GridLayout();
                 gridLayout.numColumns = 1;
@@ -215,21 +171,27 @@ public class Monitor {
                 
                 Composite monitorTypeComposite = new Composite(monitorComposite,SWT.BORDER);
                 gridLayout = new GridLayout();
-                gridLayout.numColumns = 5;
+                gridLayout.numColumns = 6;
                 monitorTypeComposite.setLayout(gridLayout);
                 gridData = new GridData(GridData.FILL_HORIZONTAL);
                 monitorTypeComposite.setLayoutData(gridData);
+                connectButton = new Button(monitorTypeComposite,SWT.PUSH);                
+                connectButton.addSelectionListener(this);
                 propertyButton = new Button(monitorTypeComposite,SWT.PUSH);
                 propertyButton.setText("property");
                 propertyButton.addSelectionListener(this);
-                changeButton = new Button(monitorTypeComposite,SWT.RADIO);
+                Composite changeComposite = new Composite(monitorTypeComposite,SWT.BORDER);
+                gridLayout = new GridLayout();
+                gridLayout.numColumns = 3;
+                changeComposite.setLayout(gridLayout);
+                changeButton = new Button(changeComposite,SWT.RADIO);
                 changeButton.setText("onChange");
                 changeButton.addSelectionListener(this);
                 changeButton.setSelection(true);
-                absoluteButton = new Button(monitorTypeComposite,SWT.RADIO);
+                absoluteButton = new Button(changeComposite,SWT.RADIO);
                 absoluteButton.setText("onAbsolute");
                 absoluteButton.addSelectionListener(this);
-                percentageButton = new Button(monitorTypeComposite,SWT.RADIO);
+                percentageButton = new Button(changeComposite,SWT.RADIO);
                 percentageButton.setText("onPercentage");
                 changeButton.addSelectionListener(this);
                 Composite deadbandComposite = new Composite(monitorTypeComposite,SWT.BORDER);
@@ -246,21 +208,13 @@ public class Monitor {
                                
                 Composite startStopComposite = new Composite(monitorComposite,SWT.BORDER);
                 gridLayout = new GridLayout();
-                gridLayout.numColumns = 3;
+                gridLayout.numColumns = 1;
                 startStopComposite.setLayout(gridLayout);
-                startButton = new Button(startStopComposite,SWT.RADIO);
-                startButton.setText("startMonitor");
-                startButton.addSelectionListener(this);
-                stopButton = new Button(startStopComposite,SWT.RADIO);
-                stopButton.setText("stopMonitor");
-                stopButton.addSelectionListener(this);
+                startStopButton = new Button(startStopComposite,SWT.PUSH);
+                startStopButton.setText("startMonitor");
+                startStopButton.addSelectionListener(this);
+                setConnectState(ConnectState.disconnected);
                 
-            }
-            /* (non-Javadoc)
-             * @see org.eclipse.swt.events.DisposeListener#widgetDisposed(org.eclipse.swt.events.DisposeEvent)
-             */
-            public void widgetDisposed(DisposeEvent e) {
-                if(channel!=null) channel.destroy();
             }
             /* (non-Javadoc)
              * @see org.eclipse.swt.events.SelectionListener#widgetDefaultSelected(org.eclipse.swt.events.SelectionEvent)
@@ -269,84 +223,53 @@ public class Monitor {
                 widgetSelected(arg0);
             }
             
-            public void connect(String channelName,String fieldName) {
-                if(channel!=null) channel.destroy();
-                propertyNames = null;
-                channel = ChannelFactory.createChannel(channelName, this, false);
-                if(channel==null) {
-                    requestor.message("not connected to a channel", MessageType.error);
-                    return;
-                }
-                channelMonitor = null;
-                channelFieldGroup = channel.createFieldGroup(this);
-                ChannelFindFieldResult result;
-                result = channel.findField(fieldName);
-                if(result!=ChannelFindFieldResult.thisChannel) {
-                    requestor.message(String.format(
-                        "findField returned %s%n",
-                        result.toString()),
-                        MessageType.error);
-                    return;
-                }
-                valueField = channel.getChannelField();
-                channelFieldGroup.addChannelField(valueField);
-                Field field = valueField.getField();
-                Type type = field.getType();
-                propertysOK = true;
-                if(type==Type.pvStructure) {
-                    propertysOK = false;
-                } else if(type==Type.pvArray){
-                    Array array= (Array)field;
-                    Type elementType = array.getElementType();
-                    if(elementType==Type.pvArray || elementType==Type.pvStructure) {
-                        propertysOK = false;
-                    }
-                }
-                if(!type.isNumeric()) {
-                    monitorType = MonitorType.change;
-                    changeButton.setSelection(true);
-                }
-                propertyButton.setEnabled(propertysOK);
-            }
-            
             /* (non-Javadoc)
              * @see org.eclipse.swt.events.SelectionListener#widgetSelected(org.eclipse.swt.events.SelectionEvent)
              */
             public void widgetSelected(SelectionEvent arg0) {
                 Object object = arg0.getSource();
+                if(object==connectButton) {
+                    switch(connectState) {
+                    case disconnected:
+                        Channel channel = getChannelShell.getChannel();
+                        if(channel==null) {
+                            requestor.message(String.format("no record selected%n"),MessageType.error);
+                            return;
+                        }
+                        setConnectState(ConnectState.connected);
+                        valueField = getChannelShell.getChannelField();
+                        channelMonitor = null;
+                        channelFieldGroup = channel.createFieldGroup(this);
+                        channelFieldGroup.addChannelField(valueField);
+                        Field field = valueField.getField();
+                        Type type = field.getType();
+                        propertysOK = true;
+                        if(type==Type.pvStructure) {
+                            propertysOK = false;
+                        } else if(type==Type.pvArray){
+                            Array array= (Array)field;
+                            Type elementType = array.getElementType();
+                            if(elementType==Type.pvArray || elementType==Type.pvStructure) {
+                                propertysOK = false;
+                            }
+                        }
+                        if(!type.isNumeric()) {
+                            monitorType = MonitorType.change;
+                            changeButton.setSelection(true);
+                        }
+                        propertyButton.setEnabled(propertysOK);
+                        propertyNames = null;
+                        return;
+                    case connected:                        
+                        setConnectState(ConnectState.disconnected);
+                        return;
+                    }
+                }
                 if(object==propertyButton) {
                     if(propertysOK) {
                         GetProperty getProperty = new GetProperty(shell);
                         propertyNames = getProperty.open(valueField.getField());
                     }
-                }
-                if(object==startButton) {
-                    if(!startButton.getSelection()) return;
-                    if(channelMonitor==null) createMonitor();
-                    if(channelMonitor==null) {
-                        message("no channelMonitor", MessageType.error);
-                        startButton.setSelection(false);
-                        return;
-                    }
-                    if(channelMonitor.isStarted()) {
-                        message("already started", MessageType.error);
-                        return;
-                    }
-                    channelMonitor.start(
-                            this,queueSize,requestor.getRequestorName(),ScanPriority.low);
-                    return;
-                }
-                if(object==stopButton) {
-                    if(!stopButton.getSelection()) return;
-                    if(channelMonitor==null) {
-                        message("no channelMonitor", MessageType.error);
-                        return;
-                    }
-                    if(!channelMonitor.isStarted()) {
-                        message("not started", MessageType.error);
-                        return;
-                    }
-                    channelMonitor.stop();
                 }
                 if(object==changeButton) {
                     if(!changeButton.getSelection()) return;
@@ -370,6 +293,24 @@ public class Monitor {
                     } catch (NumberFormatException e) {
                         requestor.message("Illegal value", MessageType.error);
                     }
+                }
+                if(object==startStopButton) {
+                    if(isMonitoring) {
+                        isMonitoring = false;
+                        channelMonitor.stop();
+                        startStopButton.setText("startMonitor");
+                        return;
+                    }
+                    if(channelMonitor==null) createMonitor();
+                    if(channelMonitor==null) {
+                        message("no channelMonitor", MessageType.error);
+                        return;
+                    }
+                    isMonitoring = true;
+                    startStopButton.setText("stopMonitor");
+                    channelMonitor.start(
+                            this,queueSize,requestor.getRequestorName(),ScanPriority.low);
+                    return;
                 }
             }
 
@@ -430,25 +371,34 @@ public class Monitor {
             public void accessRightsChange(Channel channel, ChannelField channelField) {
                 // Nothing to do
             }
-            /* (non-Javadoc)
-             * @see org.epics.ioc.ca.ChannelStateListener#channelStateChange(org.epics.ioc.ca.Channel, boolean)
-             */
-            public void channelStateChange(Channel c, boolean isConnected) {
-                if(!isConnected&&channel!=null) {
-                    channel.destroy();
-                    channel = null;
-                    startButton.setSelection(false);
-                    message("channel disconnected",MessageType.error);
+            
+            private void setConnectState(ConnectState newState) {
+                connectState = newState;
+                boolean state;
+                if(connectState==ConnectState.connected) {
+                    state = true;
+                    connectButton.setText(connectStateText[1]);
+                } else {
+                    if(channelMonitor!=null) {
+                        Channel channel = getChannelShell.getChannel();
+                        channel.destroy(channelMonitor);
+                    }
+                    channelMonitor = null;
+                    state = false;
+                    connectButton.setText(connectStateText[0]);
+                    isMonitoring = false;
                 }
-            }
-            /* (non-Javadoc)
-             * @see org.epics.ioc.ca.ChannelStateListener#disconnect(org.epics.ioc.ca.Channel)
-             */
-            public void disconnect(Channel c) {
-                channelStateChange(c,false);
+                startStopButton.setText("startMonitor");
+                propertyButton.setEnabled(state);
+                changeButton.setEnabled(state);
+                absoluteButton.setEnabled(state);
+                percentageButton.setEnabled(state);
+                startStopButton.setEnabled(state);
+                text.setEnabled(state);
             }
             
             private void createMonitor() {
+                Channel channel = getChannelShell.getChannel();
                 if(propertyNames!=null) {
                     for(String fieldName: propertyNames) {
                         channel.findField(null);
@@ -477,7 +427,7 @@ public class Monitor {
                 }
                 for(int i = 1; i<channelFieldList.size(); i++) {
                     channelField = channelFieldList.get(i);
-                    channelMonitor.lookForChange(channelField, true);
+                    channelMonitor.lookForChange(channelField, false);
                 }
             }
             

@@ -906,6 +906,7 @@ public class ChannelAccessLocalFactory  {
                         "channel is not connected",MessageType.info);
                     channelCDGetRequestor.getDone(RequestResult.failure);
                 }
+                cD.clearNumPuts();
                 requestResult = RequestResult.success;
                 if(process) {
                     if(isRecordProcessRequestor) {
@@ -1086,19 +1087,9 @@ public class ChannelAccessLocalFactory  {
                         "channel is not connected",MessageType.info);
                     channelPutRequestor.putDone(RequestResult.failure);
                 }
-                if(process) {
-                    if(isRecordProcessRequestor) {
-                        recordProcess.setActive(this);
-                        return;
-                    }
-                }
+                if(process&&isRecordProcessRequestor) recordProcess.setActive(this);
                 startPutData();
-                if(process) {
-                    if(!recordProcess.processSelf()) {
-                        channelPutRequestor.message("process failed", MessageType.warning);
-                    }
-                }
-                channelPutRequestor.putDone(RequestResult.success);
+                return;
             }        
             /* (non-Javadoc)
              * @see org.epics.ioc.ca.ChannelPut#putDelayed(org.epics.ioc.pv.PVField)
@@ -1149,6 +1140,11 @@ public class ChannelAccessLocalFactory  {
                             if(isRecordProcessRequestor) {
                                 recordProcess.process(this, false, null);
                             } else {
+                                if(process) {
+                                    if(!recordProcess.processSelf()) {
+                                        channelPutRequestor.message("process failed", MessageType.warning);
+                                    }
+                                }
                                 channelPutRequestor.putDone(requestResult);
                             }
                             return;
@@ -1272,15 +1268,16 @@ public class ChannelAccessLocalFactory  {
                     channelCDPutRequestor.putDone(RequestResult.failure);
                     return;
                 }
-                if(process && isRecordProcessRequestor) {
-                    recordProcess.setActive(this);
-                    return;
-                }
+                if(process && isRecordProcessRequestor) recordProcess.setActive(this);
                 dbRecord.lock();
                 try {
                     putData();
                 } finally {
                     dbRecord.unlock();
+                }
+                if(process && isRecordProcessRequestor) {
+                    recordProcess.process(this, false, null);
+                    return;
                 }
                 if(process) {
                     if(!recordProcess.processSelf()) {

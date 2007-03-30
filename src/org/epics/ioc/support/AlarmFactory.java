@@ -12,7 +12,7 @@ import org.epics.ioc.pv.*;
 import org.epics.ioc.util.*;
 
 /**
- * Support for scan field.
+ * Support for alarm field.
  * @author mrk
  *
  */
@@ -21,7 +21,7 @@ public class AlarmFactory {
     private static final String alarmSupportName = "alarm";
     /**
      * Create support for an alarm field.
-     * @param dbAlarm The interface to the scan field.
+     * @param dbStructure The interface to the alarm field.
      * @return The support or null if the alarm field is improperly defined.
      */
     public static Support create(DBStructure dbStructure) {

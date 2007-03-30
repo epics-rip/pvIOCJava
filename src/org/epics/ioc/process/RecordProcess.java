@@ -119,9 +119,6 @@ public interface RecordProcess {
      * If not successful recordProcessRequestor.recordProcessResult
      * and recordProcessComplete are called before setActive returns.
      * @param recordProcessRequestor The recordProcessRequestor.
-     * @return (false,true) if the record (is not,is) ready for processing.
-     * The call can fail for a number of reasons. If false is returned the caller
-     * must not modify or process the record.
      */
     void setActive(RecordProcessRequestor recordProcessRequestor);
     /**

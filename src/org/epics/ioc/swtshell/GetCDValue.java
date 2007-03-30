@@ -22,9 +22,23 @@ public class GetCDValue extends Dialog implements SelectionListener {
     
     public GetCDValue(Shell parent) {
         super(parent,SWT.DIALOG_TRIM|SWT.NONE);
+        this.parent = parent;
     }
     
+    
     public void getValue(CDRecord cdRecord) {
+        cdRecord.getCDStructure().clearNumPuts();
+        CDField[] cdFields = cdRecord.getCDStructure().getFieldCDFields();
+        if(cdFields.length==1) {
+            CDField cdField = cdFields[0];
+            Field field = cdField.getPVField().getField();
+            Type type = field.getType();
+            if(type.isScalar()) {
+                GetCDSimple getCDSimple = new GetCDSimple(parent,cdField);
+                getCDSimple.get();
+                return;
+            }
+        }
         shell = new Shell(parent);
         shell.setText("getFieldName");
         GridLayout gridLayout = new GridLayout();
@@ -114,9 +128,15 @@ public class GetCDValue extends Dialog implements SelectionListener {
                 textMessage("no field was selected");
             } else {
                 PVField pvField = cdField.getPVField();
+                try {
                 convert.fromString(pvField, text.getText());
+                }catch (NumberFormatException e) {
+                    textMessage("exception " + e.getMessage());
+                    return;
+                }
                 cdField.incrementNumPuts();
             }
+            return;
         }
     }
     private void createStructureTreeItem(TreeItem tree,CDStructure cdStructure) {
@@ -158,6 +178,79 @@ public class GetCDValue extends Dialog implements SelectionListener {
             } else {
                 treeItem.setData(cdField);
             }
+        }
+    }
+    
+    private static class GetCDSimple extends Dialog implements SelectionListener{
+        private CDField cdField;
+        private Shell shell;
+        private Button doneButton;
+        private Text text;
+        private String value = null;
+        
+        private GetCDSimple(Shell parent,CDField cdField) {
+            super(parent,SWT.DIALOG_TRIM|SWT.NONE);
+            this.cdField = cdField;
+        }
+        
+        private void get() {
+            shell = new Shell(super.getParent());
+            shell.setText("value");
+            GridLayout gridLayout = new GridLayout();
+            gridLayout.numColumns = 2;
+            shell.setLayout(gridLayout);
+            doneButton = new Button(shell,SWT.PUSH);
+            doneButton.setText("done");
+            doneButton.addSelectionListener(this);
+            text = new Text(shell,SWT.BORDER);
+            GridData gridData = new GridData(GridData.FILL_HORIZONTAL);
+            gridData.minimumWidth = 100;
+            text.setLayoutData(gridData);
+            text.addSelectionListener(this);
+            shell.pack();
+            shell.open();
+            Display display = shell.getDisplay();
+            while(!shell.isDisposed()) {
+                if(!display.readAndDispatch()) {
+                    display.sleep();
+                }
+            }
+            shell.dispose();
+        }
+
+        /* (non-Javadoc)
+         * @see org.eclipse.swt.events.SelectionListener#widgetDefaultSelected(org.eclipse.swt.events.SelectionEvent)
+         */
+        public void widgetDefaultSelected(SelectionEvent e) {
+            widgetSelected(e);
+        }
+
+        /* (non-Javadoc)
+         * @see org.eclipse.swt.events.SelectionListener#widgetSelected(org.eclipse.swt.events.SelectionEvent)
+         */
+        public void widgetSelected(SelectionEvent e) {
+            Object object = e.getSource();
+            if(object==doneButton) {
+                shell.close();
+                return;
+            }
+            if(object==text) {               
+                PVField pvField = cdField.getPVField();
+                try {
+                convert.fromString(pvField, text.getText());
+                }catch (NumberFormatException ex) {
+                    textMessage("exception " + ex.getMessage());
+                    return;
+                }
+                cdField.incrementNumPuts();
+                return;
+            }
+        }
+        
+        private void textMessage(String message) {
+            text.selectAll();
+            text.clearSelection();
+            text.setText(message);
         }
     }
     

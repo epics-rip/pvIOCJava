@@ -20,7 +20,7 @@ public class CalcFactory {
     /**
      * Create support for a CalcRecord.
      * @param dbStructure
-     * @return
+     * @return The Support interface.
      */
     public static Support create(DBStructure dbStructure) {
         return new CalcImpl(dbStructure);

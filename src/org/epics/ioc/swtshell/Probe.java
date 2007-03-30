@@ -58,11 +58,12 @@ public class Probe {
             getChannelShell = new GetChannelShell(shellComposite,this);
             Composite processComposite = new Composite(shellComposite,SWT.NONE);
             gridLayout = new GridLayout();
-            gridLayout.numColumns = 1;
+            gridLayout.numColumns = 2;
             processComposite.setLayout(gridLayout);
             gridData = new GridData(GridData.FILL_HORIZONTAL);
-            processComposite.setLayoutData(gridData);
+            processComposite.setLayoutData(gridData);      
             new ProcessShell(processComposite,this);
+            new ProcessorShell(processComposite,this);
             Composite getPutComposite = new Composite(shellComposite,SWT.NONE);
             gridLayout = new GridLayout();
             gridLayout.numColumns = 2;
@@ -147,24 +148,17 @@ public class Probe {
 
         private class ProcessShell implements SelectionListener, DisposeListener {
             private Requestor requestor;
-            private Composite processorWidget;
             private Button connectButton;
             private Button processButton;
-            private Button showProcessorButton;
-            private Button releaseProcessorButton;
-            private Button showThreadsButton;
             private Process process = null;
+            private Channel channel = null;
             private ConnectState connectState = ConnectState.disconnected;
             private String[] connectStateText = {"connect    ","disconnect"};
 
             private ProcessShell(Composite parentWidget,Requestor requestor) {
                 this.requestor = requestor;
-                Composite rowWidget = new Composite(parentWidget,SWT.BORDER);
+                Composite processWidget = new Composite(parentWidget,SWT.BORDER);
                 GridLayout gridLayout = new GridLayout();
-                gridLayout.numColumns = 5;
-                rowWidget.setLayout(gridLayout);
-                Composite processWidget = new Composite(rowWidget,SWT.BORDER);
-                gridLayout = new GridLayout();
                 gridLayout.numColumns = 2;
                 processWidget.setLayout(gridLayout);
                 connectButton = new Button(processWidget,SWT.PUSH);
@@ -173,20 +167,8 @@ public class Probe {
                 processButton = new Button(processWidget,SWT.PUSH);
                 processButton.setText("process");
                 processButton.addSelectionListener(this);               
-                showProcessorButton = new Button(rowWidget,SWT.PUSH);
-                showProcessorButton.setText("showProcessor");
-                showProcessorButton.addSelectionListener(this);
-                processorWidget = new Composite(rowWidget,SWT.NONE);
-                gridLayout = new GridLayout();
-                gridLayout.numColumns = 1;
-                processorWidget.setLayout(gridLayout);
-                releaseProcessorButton = new Button(processorWidget,SWT.PUSH);
-                releaseProcessorButton.setText("releaseProcessor");
-                releaseProcessorButton.addSelectionListener(this);
-                showThreadsButton = new Button(rowWidget,SWT.PUSH);
-                showThreadsButton.setText("showThreads");
-                showThreadsButton.addSelectionListener(this);
                 processWidget.addDisposeListener(this);
+                processButton.setEnabled(false);
             }
 
             /* (non-Javadoc)
@@ -204,7 +186,7 @@ public class Probe {
                 if(object==connectButton) {
                     switch(connectState) {
                     case disconnected:
-                        Channel channel = getChannelShell.getChannel();
+                        channel = getChannelShell.getChannel();
                         if(channel==null) {
                             requestor.message(String.format("no record selected%n"),MessageType.error);
                             return;
@@ -215,6 +197,7 @@ public class Probe {
                             connectState = ConnectState.connected;
                             requestor.message(String.format("connected%n"),MessageType.info);
                             connectButton.setText(connectStateText[1]);
+                            processButton.setEnabled(true);
                         } else {
                             requestor.message(String.format("not connected%n"),MessageType.info);
                             process = null;
@@ -225,6 +208,7 @@ public class Probe {
                         process = null;
                         connectState = ConnectState.disconnected;
                         connectButton.setText(connectStateText[0]);
+                        processButton.setEnabled(false);
                         return;
                     }
                 }
@@ -236,13 +220,86 @@ public class Probe {
                     process.process();
                     return;
                 }
+            }
 
-                if(object==showProcessorButton) {
-                    Channel channel = getChannelShell.getChannel();
-                    if(channel==null) {
-                        requestor.message(String.format("no record selected%n"),MessageType.error);
+            /* (non-Javadoc)
+             * @see org.eclipse.swt.events.DisposeListener#widgetDisposed(org.eclipse.swt.events.DisposeEvent)
+             */
+            public void widgetDisposed(DisposeEvent e) {
+                if(process!=null) process.disconnect();
+            }
+        }
+        
+        private class ProcessorShell implements SelectionListener {
+            private Requestor requestor;
+            private Composite rowWidget;
+            private Button connectButton;
+            private Button showProcessorButton;
+            private Button releaseProcessorButton;
+            private Button showThreadsButton;
+            private ConnectState connectState = ConnectState.disconnected;
+            private String[] connectStateText = {"connect    ","disconnect"};
+            
+            private Channel channel = null;
+
+            private ProcessorShell(Composite parentWidget,Requestor requestor) {
+                this.requestor = requestor;
+                rowWidget = new Composite(parentWidget,SWT.BORDER);
+                GridLayout gridLayout = new GridLayout();
+                gridLayout.numColumns = 4;
+                rowWidget.setLayout(gridLayout);
+                connectButton = new Button(rowWidget,SWT.PUSH);
+                connectButton.setText(connectStateText[0]);
+                connectButton.addSelectionListener(this);         
+                showProcessorButton = new Button(rowWidget,SWT.PUSH);
+                showProcessorButton.setText("showProcessor");
+                showProcessorButton.addSelectionListener(this);
+                releaseProcessorButton = new Button(rowWidget,SWT.PUSH);
+                releaseProcessorButton.setText("releaseProcessor");
+                releaseProcessorButton.addSelectionListener(this);
+                showThreadsButton = new Button(rowWidget,SWT.PUSH);
+                showThreadsButton.setText("showThreads");
+                showThreadsButton.addSelectionListener(this);
+                showProcessorButton.setEnabled(false);
+                releaseProcessorButton.setEnabled(false);
+            }
+
+            /* (non-Javadoc)
+             * @see org.eclipse.swt.events.SelectionListener#widgetDefaultSelected(org.eclipse.swt.events.SelectionEvent)
+             */
+            public void widgetDefaultSelected(SelectionEvent arg0) {
+                widgetSelected(arg0);
+            }
+
+            /* (non-Javadoc)
+             * @see org.eclipse.swt.events.SelectionListener#widgetSelected(org.eclipse.swt.events.SelectionEvent)
+             */
+            public void widgetSelected(SelectionEvent arg0) {
+                Object object = arg0.getSource(); 
+                if(object==connectButton) {
+                    switch(connectState) {
+                    case disconnected:
+                        channel = getChannelShell.getChannel();
+                        if(channel==null) {
+                            requestor.message(String.format("no record selected%n"),MessageType.error);
+                            return;
+                        }
+
+                        connectState = ConnectState.connected;
+                        requestor.message(String.format("connected%n"),MessageType.info);
+                        connectButton.setText(connectStateText[1]);
+                        showProcessorButton.setEnabled(true);
+                        releaseProcessorButton.setEnabled(true);
+                        return;
+                    case connected:
+                        connectState = ConnectState.disconnected;
+                        connectButton.setText(connectStateText[0]);
+                        showProcessorButton.setEnabled(false);
+                        releaseProcessorButton.setEnabled(false);
                         return;
                     }
+                }
+                if(object==showProcessorButton) {
                     String recordName = channel.getChannelName();
                     DBRecord dbRecord = iocdb.findRecord(recordName);
                     if(dbRecord==null) {
@@ -259,7 +316,6 @@ public class Probe {
                     return;
                 }
                 if(object==releaseProcessorButton) {
-                    Channel channel = getChannelShell.getChannel();
                     if(channel==null) {
                         requestor.message(String.format("no record selected%n"),MessageType.error);
                         return;
@@ -276,7 +332,7 @@ public class Probe {
                         return;
                     }
                     MessageBox mb = new MessageBox(
-                            processorWidget.getShell(),SWT.ICON_WARNING|SWT.YES|SWT.NO);
+                            rowWidget.getShell(),SWT.ICON_WARNING|SWT.YES|SWT.NO);
                     mb.setMessage("VERY DANGEROUS. DO YOU WANT TO PROCEED?");
                     int rc = mb.open();
                     if(rc==SWT.YES) {
@@ -292,15 +348,8 @@ public class Probe {
                     return;
                 }
             }
-
-            /* (non-Javadoc)
-             * @see org.eclipse.swt.events.DisposeListener#widgetDisposed(org.eclipse.swt.events.DisposeEvent)
-             */
-            public void widgetDisposed(DisposeEvent e) {
-                if(process!=null) process.disconnect();
-            }
         }
-
+        
         private class GetShell implements SelectionListener {
             private Requestor requestor;
             private Button connectButton;
@@ -309,6 +358,7 @@ public class Probe {
             private Button propertyButton;
             private ConnectState connectState = ConnectState.disconnected;
             private String[] connectStateText = {"connect    ","disconnect"};
+            private Channel channel = null;
             private Get get = null;
 
             private GetShell(Composite parentWidget,Requestor requestor) {
@@ -329,6 +379,9 @@ public class Probe {
                 propertyButton = new Button(getWidget,SWT.CHECK);
                 propertyButton.setText("properties");
                 propertyButton.setSelection(true);
+                getButton.setEnabled(false);
+                processButton.setEnabled(true);
+                propertyButton.setEnabled(true);
             }
 
             /* (non-Javadoc)
@@ -346,7 +399,7 @@ public class Probe {
                 if(object==connectButton) {
                     switch(connectState) {
                     case disconnected:
-                        Channel channel = getChannelShell.getChannel();
+                        channel = getChannelShell.getChannel();
                         if(channel==null) {
                             requestor.message(String.format("no record selected%n"),MessageType.error);
                             return;
@@ -370,17 +423,16 @@ public class Probe {
                                 propertysOK = false;
                             }
                         }
-                        if(!propertysOK) {
-                            propertyButton.setSelection(false);
-                            propertyButton.setEnabled(false);
-                        } else {
-                            propertyButton.setEnabled(true);
-                        }
+                        
+                        if(!propertysOK) propertyButton.setSelection(false);
                         boolean getProperties = propertyButton.getSelection();
                         if(getProperties) properties = getChannelShell.getPropertys();
                         get = new Get(channel,requestor,process);
                         boolean result = get.connect(channelField, properties);
                         if(result) {
+                            getButton.setEnabled(true);
+                            processButton.setEnabled(false);
+                            propertyButton.setEnabled(false);
                             connectState = ConnectState.connected;
                             requestor.message(String.format("connected%n"),MessageType.info);
                             connectButton.setText(connectStateText[1]);
@@ -394,6 +446,9 @@ public class Probe {
                         get = null;
                         connectState = ConnectState.disconnected;
                         connectButton.setText(connectStateText[0]);
+                        getButton.setEnabled(false);
+                        processButton.setEnabled(true);
+                        propertyButton.setEnabled(true);
                         return;
                     }
                 }
@@ -418,6 +473,7 @@ public class Probe {
             private Button processButton;
             private ConnectState connectState = ConnectState.disconnected;
             private String[] connectStateText = {"connect    ","disconnect"};
+            private Channel channel;
             private Put put = null;
 
             private PutShell(Composite parentWidput,Requestor requestor) {
@@ -435,6 +491,8 @@ public class Probe {
                 processButton = new Button(putComposite,SWT.CHECK);
                 processButton.setText("process");
                 processButton.setSelection(false);
+                putButton.setEnabled(false);
+                processButton.setEnabled(true);
             }
 
             /* (non-Javadoc)
@@ -452,7 +510,7 @@ public class Probe {
                 if(object==connectButton) {
                     switch(connectState) {
                     case disconnected:
-                        Channel channel = getChannelShell.getChannel();
+                        channel = getChannelShell.getChannel();
                         if(channel==null) {
                             requestor.message(String.format("no record selected%n"),MessageType.error);
                             return;
@@ -469,6 +527,8 @@ public class Probe {
                             connectState = ConnectState.connected;
                             requestor.message(String.format("connected%n"),MessageType.info);
                             connectButton.setText(connectStateText[1]);
+                            putButton.setEnabled(true);
+                            processButton.setEnabled(false);
                         } else {
                             requestor.message(String.format("not connected%n"),MessageType.info);
                             put = null;
@@ -479,6 +539,8 @@ public class Probe {
                         put = null;
                         connectState = ConnectState.disconnected;
                         connectButton.setText(connectStateText[0]);
+                        putButton.setEnabled(false);
+                        processButton.setEnabled(true);
                         return;
                     }
                     return;
