@@ -157,7 +157,7 @@ public class PowerSupplyTest extends TestCase {
             }
             valueField = channel.getChannelField();
             putFieldGroup.addChannelField(valueField);
-            channelPut = channel.createChannelPut(putFieldGroup, this, process);
+            channelPut = channel.createChannelPut(putFieldGroup, this, process,false);
             return true;   
         }
         
@@ -258,7 +258,7 @@ public class PowerSupplyTest extends TestCase {
             valueData = new ValueData(channel);
             getFieldGroup = valueData.init(fieldName);
             if(getFieldGroup==null) return false;
-            channelGet = channel.createChannelGet(getFieldGroup, this, process);
+            channelGet = channel.createChannelGet(getFieldGroup, this, process,false);
             return true;   
         }
         

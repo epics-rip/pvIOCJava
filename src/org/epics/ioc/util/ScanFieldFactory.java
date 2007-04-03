@@ -102,9 +102,9 @@ public class ScanFieldFactory {
             return null;
         }
         PVString eventNameField = (PVString)field;
-        index = structure.getFieldIndex("scanSelf");
+        index = structure.getFieldIndex("processSelf");
         if(index<0) {
-            pvField.message("does not have a field scanSelf", MessageType.fatalError);
+            pvField.message("does not have a field processSelf", MessageType.fatalError);
             return null;
         }
         field = datas[index];
@@ -112,8 +112,8 @@ public class ScanFieldFactory {
             ((PVField)field).message("is not a boolean", MessageType.fatalError);
             return null;
         }
-        PVBoolean scanSelfField = (PVBoolean)field;
-        return new ScanFieldInstance(priorityField,scanField,rateField,eventNameField,scanSelfField);
+        PVBoolean processSelfField = (PVBoolean)field;
+        return new ScanFieldInstance(priorityField,scanField,rateField,eventNameField,processSelfField);
     }
     
     /**
@@ -160,17 +160,17 @@ public class ScanFieldFactory {
         private PVMenu scan;
         private PVDouble rate;
         private PVString eventName;
-        private PVBoolean scanSelfField;
+        private PVBoolean processSelfField;
         
         private ScanFieldInstance(PVMenu priority, PVMenu scan,
-            PVDouble rate, PVString eventName, PVBoolean scanSelfField)
+            PVDouble rate, PVString eventName, PVBoolean processSelfField)
         {
             super();
             this.priority = priority;
             this.scan = scan;
             this.rate = rate;
             this.eventName = eventName;
-            this.scanSelfField = scanSelfField;
+            this.processSelfField = processSelfField;
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.util.ScanField#getEventName()
@@ -197,10 +197,10 @@ public class ScanFieldFactory {
             return ScanType.valueOf(scan.getChoices()[scan.getIndex()]);
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.util.ScanField#getScanSelf()
+         * @see org.epics.ioc.util.ScanField#getProcessSelf()
          */
-        public boolean getScanSelf() {
-            return scanSelfField.get();
+        public boolean getProcessSelf() {
+            return processSelfField.get();
         }
         
     }

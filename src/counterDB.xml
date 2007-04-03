@@ -128,7 +128,7 @@
         <high>10.0</high>
     </displayLimit>
     <scan>
-        <scanSelf>true</scanSelf>
+        <processSelf>true</processSelf>
     </scan>
 </record>
 

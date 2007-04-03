@@ -410,9 +410,11 @@ public class ChannelAccessLocalFactory  {
             }
         }       
         /* (non-Javadoc)
-         * @see org.epics.ioc.ca.Channel#createChannelProcess()
+         * @see org.epics.ioc.ca.Channel#createChannelProcess(org.epics.ioc.ca.ChannelProcessRequestor, boolean)
          */
-        public ChannelProcess createChannelProcess(ChannelProcessRequestor channelProcessRequestor) {
+        public ChannelProcess createChannelProcess(ChannelProcessRequestor channelProcessRequestor,
+            boolean processSelfOK)
+        {
             lock.lock();
             try {
                 if(isDestroyed) {
@@ -422,7 +424,7 @@ public class ChannelAccessLocalFactory  {
                 } else {
                     ChannelProcessImpl channelProcess;
                     try {
-                        channelProcess = new ChannelProcessImpl(channelProcessRequestor);
+                        channelProcess = new ChannelProcessImpl(channelProcessRequestor,processSelfOK);
                         channelProcessList.add(channelProcess);
                     } catch(IllegalStateException e) {
                         channelProcessRequestor.message(
@@ -434,12 +436,20 @@ public class ChannelAccessLocalFactory  {
             } finally {
                 lock.unlock();
             }
-        }
+        }       
         /* (non-Javadoc)
-         * @see org.epics.ioc.ca.Channel#createChannelGet(org.epics.ioc.ca.ChannelGetRequestor, org.epics.ioc.ca.ChannelProcessRequestor)
+         * @see org.epics.ioc.ca.Channel#createChannelGet(org.epics.ioc.ca.ChannelFieldGroup, org.epics.ioc.ca.ChannelGetRequestor)
          */
         public ChannelGet createChannelGet(
-            ChannelFieldGroup channelFieldGroup,ChannelGetRequestor channelGetRequestor, boolean process)
+            ChannelFieldGroup channelFieldGroup,ChannelGetRequestor channelGetRequestor)
+        {
+            return createChannelGet(channelFieldGroup,channelGetRequestor,false,false);
+        }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.ca.Channel#createChannelGet(org.epics.ioc.ca.ChannelFieldGroup, org.epics.ioc.ca.ChannelGetRequestor, boolean, boolean)
+         */
+        public ChannelGet createChannelGet(ChannelFieldGroup channelFieldGroup,
+            ChannelGetRequestor channelGetRequestor, boolean process, boolean processSelfOK)
         {
             lock.lock();
             try {
@@ -447,7 +457,7 @@ public class ChannelAccessLocalFactory  {
                     return null;
                 } else {
                     ChannelGetImpl channelGet = 
-                            new ChannelGetImpl(channelFieldGroup,channelGetRequestor,process);
+                            new ChannelGetImpl(channelFieldGroup,channelGetRequestor,process,processSelfOK);
                     channelGetList.add(channelGet);
                     return channelGet;
                 }
@@ -456,16 +466,28 @@ public class ChannelAccessLocalFactory  {
             }
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.ca.Channel#createChannelCDGet(org.epics.ioc.ca.ChannelFieldGroup, org.epics.ioc.ca.ChannelCDGetRequestor, boolean, boolean)
+         * @see org.epics.ioc.ca.Channel#createChannelCDGet(org.epics.ioc.ca.ChannelFieldGroup, org.epics.ioc.ca.ChannelCDGetRequestor, boolean)
          */
-        public ChannelCDGet createChannelCDGet(ChannelFieldGroup channelFieldGroup, ChannelCDGetRequestor channelCDGetRequestor, boolean process, boolean supportAlso) {
+        public ChannelCDGet createChannelCDGet(ChannelFieldGroup channelFieldGroup,
+            ChannelCDGetRequestor channelCDGetRequestor,boolean supportAlso)
+        {
+            return createChannelCDGet(channelFieldGroup,channelCDGetRequestor,supportAlso,false,false);
+        }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.ca.Channel#createChannelCDGet(org.epics.ioc.ca.ChannelFieldGroup, org.epics.ioc.ca.ChannelCDGetRequestor, boolean, boolean, boolean)
+         */
+        public ChannelCDGet createChannelCDGet(ChannelFieldGroup channelFieldGroup,
+            ChannelCDGetRequestor channelCDGetRequestor,
+            boolean supportAlso, boolean process, boolean processSelfOK)
+        {
             lock.lock();
             try {
                 if(isDestroyed) {
                     return null;
                 } else {
                     ChannelCDGetImpl channelDataGet = 
-                        new ChannelCDGetImpl(this,channelFieldGroup,channelCDGetRequestor,process,supportAlso);
+                        new ChannelCDGetImpl(this,channelFieldGroup,channelCDGetRequestor,supportAlso,
+                                process,processSelfOK);
                     channelCDGetList.add(channelDataGet);
                     return channelDataGet;
                 }
@@ -474,10 +496,18 @@ public class ChannelAccessLocalFactory  {
             }
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.ca.Channel#createChannelPut(org.epics.ioc.ca.ChannelPutRequestor, org.epics.ioc.ca.ChannelProcessRequestor)
+         * @see org.epics.ioc.ca.Channel#createChannelPut(org.epics.ioc.ca.ChannelFieldGroup, org.epics.ioc.ca.ChannelPutRequestor)
          */
         public ChannelPut createChannelPut(
-            ChannelFieldGroup channelFieldGroup,ChannelPutRequestor channelPutRequestor, boolean process)
+            ChannelFieldGroup channelFieldGroup,ChannelPutRequestor channelPutRequestor)
+        {
+            return createChannelPut(channelFieldGroup,channelPutRequestor,false,false);
+        }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.ca.Channel#createChannelPut(org.epics.ioc.ca.ChannelFieldGroup, org.epics.ioc.ca.ChannelPutRequestor, boolean, boolean)
+         */
+        public ChannelPut createChannelPut(ChannelFieldGroup channelFieldGroup,
+            ChannelPutRequestor channelPutRequestor, boolean process, boolean processSelfOK)
         {
             lock.lock();
             try {
@@ -485,7 +515,7 @@ public class ChannelAccessLocalFactory  {
                     return null;
                 } else {
                     ChannelPutImpl channelPut = 
-                        new ChannelPutImpl(channelFieldGroup,channelPutRequestor,process);
+                        new ChannelPutImpl(channelFieldGroup,channelPutRequestor,process,processSelfOK);
                     channelPutList.add(channelPut);
                     return channelPut;
                 }
@@ -494,10 +524,20 @@ public class ChannelAccessLocalFactory  {
             }
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.ca.Channel#createDataChannelPut(org.epics.ioc.ca.ChannelFieldGroup, org.epics.ioc.ca.ChannelCDPutRequestor, boolean)
+         * @see org.epics.ioc.ca.Channel#createChannelCDPut(org.epics.ioc.ca.ChannelFieldGroup, org.epics.ioc.ca.ChannelCDPutRequestor, boolean)
          */
         public ChannelCDPut createChannelCDPut(ChannelFieldGroup channelFieldGroup,
-                ChannelCDPutRequestor channelCDPutRequestor, boolean process,boolean supportAlso)
+                ChannelCDPutRequestor channelCDPutRequestor,boolean supportAlso)
+        {
+            return createChannelCDPut(channelFieldGroup,channelCDPutRequestor,supportAlso,false,false);
+        }
+
+        /* (non-Javadoc)
+         * @see org.epics.ioc.ca.Channel#createChannelCDPut(org.epics.ioc.ca.ChannelFieldGroup, org.epics.ioc.ca.ChannelCDPutRequestor, boolean, boolean, boolean)
+         */
+        public ChannelCDPut createChannelCDPut(ChannelFieldGroup channelFieldGroup,
+            ChannelCDPutRequestor channelCDPutRequestor,
+            boolean supportAlso, boolean process, boolean processSelfOK)
         {
             lock.lock();
             try {
@@ -505,21 +545,30 @@ public class ChannelAccessLocalFactory  {
                     return null;
                 } else {
                     ChannelCDPutImpl channelDataPut = 
-                        new ChannelCDPutImpl(this,channelFieldGroup,channelCDPutRequestor,process,supportAlso);
+                        new ChannelCDPutImpl(this,channelFieldGroup,channelCDPutRequestor,
+                                supportAlso,process,processSelfOK);
                     channelCDPutList.add(channelDataPut);
                     return channelDataPut;
                 }
             } finally {
                 lock.unlock();
             }
-        }
-
+        }       
         /* (non-Javadoc)
-         * @see org.epics.ioc.ca.Channel#createChannelPutGet(org.epics.ioc.ca.ChannelPutGetRequestor, org.epics.ioc.ca.ChannelProcessRequestor)
+         * @see org.epics.ioc.ca.Channel#createChannelPutGet(org.epics.ioc.ca.ChannelFieldGroup, org.epics.ioc.ca.ChannelFieldGroup, org.epics.ioc.ca.ChannelPutGetRequestor)
          */
         public ChannelPutGet createChannelPutGet(
             ChannelFieldGroup putFieldGroup,ChannelFieldGroup getFieldGroup,
-            ChannelPutGetRequestor channelPutGetRequestor, boolean process)
+            ChannelPutGetRequestor channelPutGetRequestor)
+        {
+            return createChannelPutGet(putFieldGroup,getFieldGroup,channelPutGetRequestor,false,false);
+        }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.ca.Channel#createChannelPutGet(org.epics.ioc.ca.ChannelFieldGroup, org.epics.ioc.ca.ChannelFieldGroup, org.epics.ioc.ca.ChannelPutGetRequestor, boolean, boolean)
+         */
+        public ChannelPutGet createChannelPutGet(ChannelFieldGroup putFieldGroup,
+            ChannelFieldGroup getFieldGroup, ChannelPutGetRequestor channelPutGetRequestor,
+            boolean process, boolean processSelfOK)
         {
             lock.lock();
             try {
@@ -528,7 +577,7 @@ public class ChannelAccessLocalFactory  {
                 } else {
                     ChannelPutGetImpl channelPutGet = 
                         new ChannelPutGetImpl(putFieldGroup,getFieldGroup,
-                                channelPutGetRequestor,process);
+                                channelPutGetRequestor,process,processSelfOK);
                     channelPutGetList.add(channelPutGet);
                     return channelPutGet;
                 }
@@ -645,15 +694,18 @@ public class ChannelAccessLocalFactory  {
             
             private RequestResult requestResult = null;
                  
-            private ChannelProcessImpl(ChannelProcessRequestor channelProcessRequestor)
+            private ChannelProcessImpl(ChannelProcessRequestor channelProcessRequestor,boolean processSelfOK)
             {
                 this.channelProcessRequestor = channelProcessRequestor;
                 recordProcess = dbRecord.getRecordProcess();
                 isRecordProcessRequestor = recordProcess.setRecordProcessRequestor(this);
                 if(!isRecordProcessRequestor) {
+                    if(!processSelfOK) {
+                        throw new IllegalStateException("already has process requestor");
+                    }
                     if(!recordProcess.canProcessSelf()) {
-                        channelProcessRequestor.message("process may fail",
-                                MessageType.warning);
+                        throw new IllegalStateException(
+                            "already has process requestor other than self");
                     }
                 }
                 requestorName = "ChannelProcess:" + channelProcessRequestor.getRequestorName();
@@ -669,7 +721,7 @@ public class ChannelAccessLocalFactory  {
                 if(isDestroyed) return;
                 if(!isConnected()) {
                     channelProcessRequestor.message(
-                        "channel is not connected",MessageType.info);
+                            "channel is not connected",MessageType.info);
                     channelProcessRequestor.processDone(RequestResult.failure);
                     return;
                 }
@@ -677,11 +729,13 @@ public class ChannelAccessLocalFactory  {
                     recordProcess.process(this, false, null);
                     return;
                 }
-                if(recordProcess.processSelf()) {
-                    channelProcessRequestor.processDone(RequestResult.success);
-                } else {
-                    channelProcessRequestor.processDone(RequestResult.failure);
+                if(recordProcess.processSelfRequest(this)) {
+                    recordProcess.processSelfProcess(this, false);
+                    return;
                 }
+                channelProcessRequestor.message(
+                        "processSelfRequest failed",MessageType.error);
+                channelProcessRequestor.processDone(RequestResult.failure);
             }    
             /* (non-Javadoc)
              * @see org.epics.ioc.util.Requestor#getRequestorName()
@@ -731,7 +785,7 @@ public class ChannelAccessLocalFactory  {
             private PVField pvField;
             
             private ChannelGetImpl(ChannelFieldGroup channelFieldGroup,
-                ChannelGetRequestor channelGetRequestor,boolean process)
+                ChannelGetRequestor channelGetRequestor,boolean process,boolean processSelfOK)
             {
                 if(channelFieldGroup==null) {
                     throw new IllegalStateException("no field group");
@@ -745,9 +799,12 @@ public class ChannelAccessLocalFactory  {
                     recordProcess = dbRecord.getRecordProcess();
                     isRecordProcessRequestor = recordProcess.setRecordProcessRequestor(this);
                     if(!isRecordProcessRequestor) {
+                        if(!processSelfOK) {
+                            throw new IllegalStateException("already has process requestor");
+                        }
                         if(!recordProcess.canProcessSelf()) {
-                            channelGetRequestor.message("record can not scanSelf",
-                                    MessageType.warning);
+                            throw new IllegalStateException(
+                                "already has process requestor other than self");
                         }
                     }
                 }
@@ -773,13 +830,16 @@ public class ChannelAccessLocalFactory  {
                         recordProcess.process(this, true, null);
                         return;
                     } else {
-                        if(!recordProcess.processSelf()) {
-                            channelGetRequestor.message("process failed", MessageType.warning);
+                        if(recordProcess.processSelfRequest(this)) {
+                            recordProcess.processSelfProcess(this, true);
+                            return;
                         }
+                        channelGetRequestor.message("process failed", MessageType.warning);
+                        requestResult = RequestResult.failure;
                     }
                 }
                 startGetData();
-                channelGetRequestor.getDone(RequestResult.success);
+                channelGetRequestor.getDone(requestResult);
             }                
             /* (non-Javadoc)
              * @see org.epics.ioc.ca.ChannelGet#getDelayed(org.epics.ioc.pv.PVField)
@@ -807,6 +867,13 @@ public class ChannelAccessLocalFactory  {
              */
             public void recordProcessComplete() {
                 startGetData();
+                if(process) {
+                    if(isRecordProcessRequestor) {
+                        recordProcess.setInactive(this);
+                    } else {
+                        recordProcess.processSelfSetInactive(this);
+                    }
+                }
                 channelGetRequestor.getDone(RequestResult.success);
             }
             /* (non-Javadoc)
@@ -871,7 +938,8 @@ public class ChannelAccessLocalFactory  {
             private RequestResult requestResult = null;
             
             private ChannelCDGetImpl(Channel channel,ChannelFieldGroup channelFieldGroup,
-                ChannelCDGetRequestor channelCDGetRequestor, boolean process,boolean supportAlso)
+                ChannelCDGetRequestor channelCDGetRequestor,boolean supportAlso,
+                boolean process,boolean processSelfOK)
             {
                 if(channelFieldGroup==null) {
                     throw new IllegalStateException("no field group");
@@ -885,9 +953,12 @@ public class ChannelAccessLocalFactory  {
                     recordProcess = dbRecord.getRecordProcess();
                     isRecordProcessRequestor = recordProcess.setRecordProcessRequestor(this);
                     if(!isRecordProcessRequestor) {
+                        if(!processSelfOK) {
+                            throw new IllegalStateException("already has process requestor");
+                        }
                         if(!recordProcess.canProcessSelf()) {
-                            channelCDGetRequestor.message("record can not scanSelf",
-                                    MessageType.warning);
+                            throw new IllegalStateException(
+                                "already has process requestor other than self");
                         }
                     }
                 }
@@ -910,16 +981,19 @@ public class ChannelAccessLocalFactory  {
                 requestResult = RequestResult.success;
                 if(process) {
                     if(isRecordProcessRequestor) {
-                        recordProcess.process(this, false, null);
+                        recordProcess.process(this, true, null);
                         return;
                     } else {
-                        if(!recordProcess.processSelf()) {
-                            channelCDGetRequestor.message("process failed", MessageType.warning);
+                        if(recordProcess.processSelfRequest(this)) {
+                            recordProcess.processSelfProcess(this, true);
+                            return;
                         }
+                        channelCDGetRequestor.message("process failed", MessageType.warning);
+                        requestResult = RequestResult.failure;
                     }                   
                 }
                 getData();
-                channelCDGetRequestor.getDone(RequestResult.success);
+                channelCDGetRequestor.getDone(requestResult);
             }
             /* (non-Javadoc)
              * @see org.epics.ioc.ca.ChannelCDGet#getChannelData()
@@ -931,14 +1005,21 @@ public class ChannelAccessLocalFactory  {
              * @see org.epics.ioc.process.RecordProcessRequestor#recordProcessComplete()
              */
             public void recordProcessComplete() {
+                getData();
+                if(process) {
+                    if(isRecordProcessRequestor) {
+                        recordProcess.setInactive(this);
+                    } else {
+                        recordProcess.processSelfSetInactive(this);
+                    }
+                }
                 channelCDGetRequestor.getDone(requestResult);
             }
             /* (non-Javadoc)
              * @see org.epics.ioc.process.RecordProcessRequestor#recordProcessResult(org.epics.ioc.util.RequestResult)
              */
             public void recordProcessResult(RequestResult requestResult) {
-                getData();
-                channelCDGetRequestor.getDone(requestResult);
+                this.requestResult = requestResult;
             }
             /* (non-Javadoc)
              * @see org.epics.ioc.util.Requestor#getRequestorName()
@@ -1051,7 +1132,7 @@ public class ChannelAccessLocalFactory  {
             private ChannelFieldImpl field;
             
             private ChannelPutImpl(ChannelFieldGroup channelFieldGroup,
-                ChannelPutRequestor channelPutRequestor, boolean process)
+                ChannelPutRequestor channelPutRequestor, boolean process,boolean processSelfOK)
             {
                 if(channelFieldGroup==null) {
                     throw new IllegalStateException("no field group");
@@ -1063,9 +1144,12 @@ public class ChannelAccessLocalFactory  {
                     recordProcess = dbRecord.getRecordProcess();
                     isRecordProcessRequestor = recordProcess.setRecordProcessRequestor(this);
                     if(!isRecordProcessRequestor) {
+                        if(!processSelfOK) {
+                            throw new IllegalStateException("already has process requestor");
+                        }
                         if(!recordProcess.canProcessSelf()) {
-                            channelPutRequestor.message("record can not scanSelf",
-                                    MessageType.warning);
+                            throw new IllegalStateException(
+                                "already has process requestor other than self");
                         }
                     }
                 }
@@ -1081,13 +1165,27 @@ public class ChannelAccessLocalFactory  {
             public void put() {
                 if(isDestroyed) {
                     channelPutRequestor.putDone(RequestResult.failure);
+                    return;
                 }
                 if(!isConnected()) {
                     channelPutRequestor.message(
                         "channel is not connected",MessageType.info);
                     channelPutRequestor.putDone(RequestResult.failure);
+                    return;
                 }
-                if(process&&isRecordProcessRequestor) recordProcess.setActive(this);
+                if(process) {
+                    if(isRecordProcessRequestor) {
+                        recordProcess.setActive(this);
+                    } else {
+                        if(!recordProcess.processSelfRequest(this)) {
+                            channelPutRequestor.message(
+                                    "could not process record",MessageType.info);
+                            channelPutRequestor.putDone(RequestResult.failure);
+                            return;
+                        }
+                        recordProcess.processSelfSetActive(this);
+                    }
+                }
                 startPutData();
                 return;
             }        
@@ -1139,13 +1237,8 @@ public class ChannelAccessLocalFactory  {
                         if(!channelFieldListIter.hasNext()) {
                             if(isRecordProcessRequestor) {
                                 recordProcess.process(this, false, null);
-                            } else {
-                                if(process) {
-                                    if(!recordProcess.processSelf()) {
-                                        channelPutRequestor.message("process failed", MessageType.warning);
-                                    }
-                                }
-                                channelPutRequestor.putDone(requestResult);
+                            } else if(process) {
+                                recordProcess.processSelfProcess(this, false);
                             }
                             return;
                         }
@@ -1193,7 +1286,8 @@ public class ChannelAccessLocalFactory  {
             
             
             private ChannelCDPutImpl(Channel channel,ChannelFieldGroup channelFieldGroup,
-                ChannelCDPutRequestor channelCDPutRequestor, boolean process,boolean supportAlso)
+                ChannelCDPutRequestor channelCDPutRequestor,boolean supportAlso,
+                boolean process, boolean processSelfOK)
             {
                 if(channelFieldGroup==null) {
                     throw new IllegalStateException("no field group");
@@ -1209,9 +1303,12 @@ public class ChannelAccessLocalFactory  {
                     recordProcess = dbRecord.getRecordProcess();
                     isRecordProcessRequestor = recordProcess.setRecordProcessRequestor(this);
                     if(!isRecordProcessRequestor) {
+                        if(!processSelfOK) {
+                            throw new IllegalStateException("already has process requestor");
+                        }
                         if(!recordProcess.canProcessSelf()) {
-                            channelCDPutRequestor.message("record can not scanSelf",
-                                    MessageType.warning);
+                            throw new IllegalStateException(
+                                "already has process requestor other than self");
                         }
                     }
                 }
@@ -1268,24 +1365,35 @@ public class ChannelAccessLocalFactory  {
                     channelCDPutRequestor.putDone(RequestResult.failure);
                     return;
                 }
-                if(process && isRecordProcessRequestor) recordProcess.setActive(this);
+                requestResult = RequestResult.success;
+                if(process) {
+                    if(isRecordProcessRequestor) {
+                        recordProcess.setActive(this);
+                    } else {
+                        if(!recordProcess.processSelfRequest(this)){
+                            channelCDPutRequestor.message(
+                                    "could not process record",MessageType.warning);
+                            channelCDPutRequestor.putDone(RequestResult.failure);
+                            return;
+                        }
+                        recordProcess.processSelfSetActive(this);
+                    }
+                }
                 dbRecord.lock();
                 try {
                     putData();
                 } finally {
                     dbRecord.unlock();
                 }
-                if(process && isRecordProcessRequestor) {
-                    recordProcess.process(this, false, null);
+                if(process) {
+                    if(isRecordProcessRequestor) {
+                        recordProcess.process(this, false, null);
+                    } else {
+                        recordProcess.processSelfProcess(this, false);
+                    }
                     return;
                 }
-                if(process) {
-                    if(!recordProcess.processSelf()) {
-                        channelCDPutRequestor.message(
-                                "did not process",MessageType.info);
-                    }
-                }
-                channelCDPutRequestor.putDone(RequestResult.success);
+                channelCDPutRequestor.putDone(requestResult);
             }        
             /* (non-Javadoc)
              * @see org.epics.ioc.process.RecordProcessRequestor#recordProcessComplete()
@@ -1460,7 +1568,7 @@ public class ChannelAccessLocalFactory  {
             
             private ChannelPutGetImpl(
                 ChannelFieldGroup putFieldGroup,ChannelFieldGroup getFieldGroup,
-                ChannelPutGetRequestor channelPutGetRequestor,boolean process)
+                ChannelPutGetRequestor channelPutGetRequestor,boolean process,boolean processSelfOK)
             {
                 this.putFieldGroup = putFieldGroup;
                 this.getFieldGroup = getFieldGroup;
@@ -1471,9 +1579,12 @@ public class ChannelAccessLocalFactory  {
                     recordProcess = dbRecord.getRecordProcess();
                     isRecordProcessRequestor = recordProcess.setRecordProcessRequestor(this);
                     if(!isRecordProcessRequestor) {
+                        if(!processSelfOK) {
+                            throw new IllegalStateException("already has process requestor");
+                        }
                         if(!recordProcess.canProcessSelf()) {
-                            channelPutGetRequestor.message("record can not scanSelf",
-                                    MessageType.warning);
+                            throw new IllegalStateException(
+                                "already has process requestor other than self");
                         }
                     }
                 }
@@ -1499,17 +1610,29 @@ public class ChannelAccessLocalFactory  {
                     return;
                 }
                 requestResult = RequestResult.success;
-                if(process && isRecordProcessRequestor) {
-                    recordProcess.setActive(this);
-                    return;
+                if(process) {
+                    if(isRecordProcessRequestor) {
+                        recordProcess.setActive(this);
+                    } else {
+                        if(!recordProcess.processSelfRequest(this)) {
+                            channelPutGetRequestor.message(
+                                    "could not process record",MessageType.warning);
+                                channelPutGetRequestor.putDone(RequestResult.failure);
+                                channelPutGetRequestor.getDone(RequestResult.failure);
+                                return;
+                        }
+                        recordProcess.processSelfSetActive(this);
+                    }
                 }
                 startPutData();
                 channelPutGetRequestor.putDone(RequestResult.success);
                 if(process) {
-                    if(!recordProcess.processSelf()) {
-                        channelPutGetRequestor.message(
-                                "did not process",MessageType.info);
+                    if(isRecordProcessRequestor) {
+                        recordProcess.process(this, true, null);
+                    } else {
+                        recordProcess.processSelfProcess(this, true);
                     }
+                    return;
                 }
                 startGetData();
                 channelPutGetRequestor.getDone(RequestResult.failure);
@@ -1531,6 +1654,12 @@ public class ChannelAccessLocalFactory  {
              */
             public void recordProcessComplete() {
                 startGetData();
+                channelPutGetRequestor.getDone(requestResult);
+                if(isRecordProcessRequestor) {
+                    recordProcess.setInactive(this);
+                } else {
+                    recordProcess.processSelfSetInactive(this);
+                }
             }
             /* (non-Javadoc)
              * @see org.epics.ioc.process.RecordProcessRequestor#recordProcessResult(org.epics.ioc.util.RequestResult)
@@ -1607,7 +1736,13 @@ public class ChannelAccessLocalFactory  {
                 while(true) {
                     if(pvField==null) {
                         if(!channelFieldListIter.hasNext()) {
-                            if(isRecordProcessRequestor) recordProcess.setInactive(this);
+                            if(process) {
+                                if(isRecordProcessRequestor) {
+                                    recordProcess.setInactive(this);
+                                } else {
+                                    recordProcess.processSelfSetInactive(this);
+                                }
+                            }
                             channelPutGetRequestor.getDone(requestResult);
                             return;
                         }

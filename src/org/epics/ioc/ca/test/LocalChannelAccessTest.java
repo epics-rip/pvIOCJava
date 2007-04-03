@@ -116,7 +116,7 @@ public class LocalChannelAccessTest extends TestCase {
         private Process(String pvname) {
             this.pvname = pvname;
             channel = ChannelFactory.createChannel(pvname, this, false);            
-            channelProcess = channel.createChannelProcess(this);
+            channelProcess = channel.createChannelProcess(this,false);
         }
         private void destroy() {
             channel.destroy();
@@ -234,7 +234,7 @@ public class LocalChannelAccessTest extends TestCase {
             valueData = new ValueData(channel);
             getFieldGroup = valueData.init();
             if(getFieldGroup==null) return false;
-            channelPutGet = channel.createChannelPutGet(putFieldGroup,getFieldGroup , this, process);
+            channelPutGet = channel.createChannelPutGet(putFieldGroup,getFieldGroup , this, process,false);
             return true;   
         }
         
@@ -369,7 +369,7 @@ public class LocalChannelAccessTest extends TestCase {
             }
             valueField = channel.getChannelField();
             putFieldGroup.addChannelField(valueField);
-            channelPut = channel.createChannelPut(putFieldGroup, this, process);
+            channelPut = channel.createChannelPut(putFieldGroup, this, process,false);
             if(channelPut==null) return false;
             return true;   
         }
@@ -471,7 +471,7 @@ public class LocalChannelAccessTest extends TestCase {
             valueData = new ValueData(channel);
             getFieldGroup = valueData.init();
             if(getFieldGroup==null) return false;
-            channelGet = channel.createChannelGet(getFieldGroup, this, process);
+            channelGet = channel.createChannelGet(getFieldGroup, this, process,false);
             return true;   
         }
         

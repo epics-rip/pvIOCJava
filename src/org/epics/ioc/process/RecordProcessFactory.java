@@ -309,13 +309,46 @@ public class RecordProcessFactory {
          * @see org.epics.ioc.process.RecordProcess#canProcessSelf()
          */
         public boolean canProcessSelf() {
-            return scanSupport.canScanSelf();
+            dbRecord.lock();
+            try {
+                return scanSupport.canProcessSelf();
+            } finally {
+                dbRecord.unlock();
+            }
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.process.RecordProcess#processSelf()
+         * @see org.epics.ioc.process.RecordProcess#processSelf(org.epics.ioc.process.RecordProcessRequestor)
          */
-        public boolean processSelf() {
-            return scanSupport.scanSelf();
+        public boolean processSelfRequest(RecordProcessRequestor recordProcessRequestor) {
+            boolean result = false;
+            dbRecord.lock();
+            try {
+                if(!scanSupport.canProcessSelf()) return false;
+                result = scanSupport.processSelfRequest(recordProcessRequestor);
+                if(!result) return false;
+                
+            } finally {
+                dbRecord.unlock();
+            }
+            return true;
+        }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.process.RecordProcess#processSelfSetActive()
+         */
+        public void processSelfSetActive(RecordProcessRequestor recordProcessRequestor) {
+            scanSupport.processSelfSetActive(recordProcessRequestor);
+        }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.process.RecordProcess#processSelfProcess()
+         */
+        public void processSelfProcess(RecordProcessRequestor recordProcessRequestor, boolean leaveActive) {
+            scanSupport.processSelfProcess(recordProcessRequestor, leaveActive);
+        }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.process.RecordProcess#processSelfSetInactive()
+         */
+        public void processSelfSetInactive(RecordProcessRequestor recordProcessRequestor) {
+            scanSupport.processSelfSetInactive(recordProcessRequestor);
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.process.RecordProcess#process(org.epics.ioc.process.RecordProcessRequestor, boolean, org.epics.ioc.util.TimeStamp)

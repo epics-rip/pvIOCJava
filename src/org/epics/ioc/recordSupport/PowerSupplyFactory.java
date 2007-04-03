@@ -317,7 +317,7 @@ public class PowerSupplyFactory {
         }
         private void computeCurrent() {
             power = powerPVField.get();
-            voltage = powerPVField.get();
+            voltage = voltagePVField.get();
             if(voltage==0.0) {
                 current = 0.0;
             } else {

@@ -529,7 +529,11 @@ try {
         void releaseRecordProcessRequestor();
         String getRecordProcessRequestorName();
         boolean canProcessSelf();
-        boolean processSelf();
+        boolean processSelfRequest(RecordProcessRequestor recordProcessRequestor);
+        void processSelfSetActive(RecordProcessRequestor recordProcessRequestor);
+        void processSelfProcess(RecordProcessRequestor recordProcessRequestor,
+            boolean leaveActive);
+        void processSelfSetInactive(RecordProcessRequestor recordProcessRequestor);
         void setActive(RecordProcessRequestor recordProcessRequestor);
         void process(RecordProcessRequestor recordProcessRequestor,
             boolean leaveActive, TimeStamp timeStamp);
@@ -624,12 +628,9 @@ falls into one of the following classes:</p>
 <p>These are methods called by code that wants a record processed.</p>
 <dl>
   <dt style="font-family: courier;">canProcessSelf</dt>
-    <dd>Can the record process itself? This is true if scan.scanSelf is true.
+    <dd>Can the record process itself? This is true if scan.processSelf is true.
       In this case scanSupport, itself, is the recordProcessRequestor and
-      processes the record when the next method (processSelf) is called.</dd>
-  <dt style="font-family: courier;">processSelf</dt>
-    <dd>Process the record. scanSupport, if scan.scanSelf is true, processes
-      the record.</dd>
+      processes the record when method (processSelfRequest) is called.</dd>
   <dt style="font-family: courier;">setRecordProcessRequestor</dt>
     <dd>Request to be the record processor. Each record instance can have
       only one record process requestor. If a requester is already registered
@@ -683,6 +684,17 @@ falls into one of the following classes:</p>
       style="font-family: courier;">leaveActive</span> true and then calling
       setInactive allows the requestor to communicated with other code after
       the record is unlocked but before it becomes inactive.</dd>
+  <dt style="font-family: courier;">processSelfRequest</dt>
+    <dd>Ask that the record process itself.
+       This request will succeed only if scan.processSelf is true and the record is not active.
+       The caller must be prepared for a false return, which means the following methods
+       can not be called.</dd>
+  <dt style="font-family: courier;">processSelfSetActive</dt>
+     <dd>Set the record active.</dd>
+  <dt style="font-family: courier;">processSelfProcess</dt>
+      <dd>Process the record.</dd>
+  <dt style="font-family: courier;">processSelfSetInactive</dt>
+      <dd>Set the record inactive.</dd>
 </dl>
 
 <h3 id="RecordProc3">RecordProcess - Support Processing methods.</h3>

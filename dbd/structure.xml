@@ -59,7 +59,7 @@
     <field name = "scan" type = "menu" menuName = "scan" default = "passive" />
     <field name = "rate" type = "double"  default = "1.0" />
     <field name = "eventName" type = "string" />
-    <field name = "scanSelf" type = "boolean" />
+    <field name = "processSelf" type = "boolean" />
 </structure>
 <structure name = "processLink">
     <field name = "pvname" type = "string" link = "true" />

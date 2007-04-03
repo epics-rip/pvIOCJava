@@ -1,3 +1,8 @@
+/**
+ * Copyright - See the COPYRIGHT that is included with this distribution.
+ * EPICS JavaIOC is distributed subject to a Software License Agreement found
+ * in file LICENSE that is included with this distribution.
+ */
 package org.epics.ioc.swtshell;
 
 import org.eclipse.swt.SWT;
@@ -10,6 +15,11 @@ import org.epics.ioc.pv.*;
 import org.epics.ioc.pv.Menu;
 import org.epics.ioc.ca.*;
 
+/**
+ * Get values and put the result in a CDRecord (Channel Data Record)
+ * @author mrk
+ *
+ */
 public class GetCDValue extends Dialog implements SelectionListener {
     private static Convert convert = ConvertFactory.getConvert();
     private Shell parent;
@@ -20,12 +30,18 @@ public class GetCDValue extends Dialog implements SelectionListener {
     private Tree tree;
     private CDField cdField = null;
     
+    /**
+     * Constructor.
+     * @param parent The parent shell.
+     */
     public GetCDValue(Shell parent) {
         super(parent,SWT.DIALOG_TRIM|SWT.NONE);
         this.parent = parent;
     }
-    
-    
+    /**
+     * Get values from the operator and put them in CDRecord.
+     * @param cdRecord The CDRecord that holds the data.
+     */
     public void getValue(CDRecord cdRecord) {
         cdRecord.getCDStructure().clearNumPuts();
         CDField[] cdFields = cdRecord.getCDStructure().getFieldCDFields();
@@ -81,15 +97,15 @@ public class GetCDValue extends Dialog implements SelectionListener {
         }
         shell.dispose();
     }
+    /* (non-Javadoc)
+     * @see org.eclipse.swt.events.SelectionListener#widgetDefaultSelected(org.eclipse.swt.events.SelectionEvent)
+     */
     public void widgetDefaultSelected(SelectionEvent arg0) {
         widgetSelected(arg0);
     }
-    
-    private void textMessage(String message) {
-        text.selectAll();
-        text.clearSelection();
-        text.setText(message);
-    }
+    /* (non-Javadoc)
+     * @see org.eclipse.swt.events.SelectionListener#widgetSelected(org.eclipse.swt.events.SelectionEvent)
+     */
     public void widgetSelected(SelectionEvent arg0) {
         Object object = arg0.getSource();
         if(object==doneButton) {
@@ -138,7 +154,14 @@ public class GetCDValue extends Dialog implements SelectionListener {
             }
             return;
         }
+    }  
+    
+    private void textMessage(String message) {
+        text.selectAll();
+        text.clearSelection();
+        text.setText(message);
     }
+    
     private void createStructureTreeItem(TreeItem tree,CDStructure cdStructure) {
         CDField[] cdFields = cdStructure.getFieldCDFields();
         for(CDField cdField : cdFields) {
@@ -186,7 +209,6 @@ public class GetCDValue extends Dialog implements SelectionListener {
         private Shell shell;
         private Button doneButton;
         private Text text;
-        private String value = null;
         
         private GetCDSimple(Shell parent,CDField cdField) {
             super(parent,SWT.DIALOG_TRIM|SWT.NONE);
@@ -302,15 +324,12 @@ public class GetCDValue extends Dialog implements SelectionListener {
             }
             shell.dispose();
         }
-
         /* (non-Javadoc)
          * @see org.eclipse.swt.events.SelectionListener#widgetDefaultSelected(org.eclipse.swt.events.SelectionEvent)
          */
         public void widgetDefaultSelected(SelectionEvent e) {
-            // TODO Auto-generated method stub
-            
+            // TODO Auto-generated method stub           
         }
-
         /* (non-Javadoc)
          * @see org.eclipse.swt.events.SelectionListener#widgetSelected(org.eclipse.swt.events.SelectionEvent)
          */

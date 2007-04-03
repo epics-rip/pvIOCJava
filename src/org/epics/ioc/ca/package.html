@@ -10,7 +10,7 @@
 <body>
 <h1 style="text-align: center">EPICS JavaIOC: channel Access<br />
 package: org.epics.ioc.ca<br />
-2007.03.29</h1>
+2007.04.03</h1>
 CONTENTS
 
 <div class="toc">
@@ -122,7 +122,7 @@ channel and creating interfaces for accessing a channel. The interfaces for
 accessing a channel are defined in later sections.</p>
 
 <h3 id="Definition">Definitions</h3>
-<pre>    Channel {
+<pre>    interface Channel {
         String getChannelName();
         void message(String message, MessageType messageType);
         void destroy();
@@ -133,17 +133,27 @@ accessing a channel are defined in later sections.</p>
         ChannelField getChannelField();
         ChannelFieldGroup createFieldGroup(ChannelFieldGroupListener listener);
         ChannelProcess createChannelProcess(
-            ChannelProcessRequestor channelProcessRequestor);
+            ChannelProcessRequestor channelProcessRequestor, boolean processSelfOK);
         void destroy(ChannelProcess channelProcess);
         ChannelGet createChannelGet(ChannelFieldGroup channelFieldGroup,
-            ChannelGetRequestor channelGetRequestor,boolean process);
+            ChannelGetRequestor channelGetRequestorprocess);
+        ChannelGet createChannelGet(ChannelFieldGroup channelFieldGroup,
+            ChannelGetRequestor channelGetRequestor,
+            boolean process,boolean processSelfOK);
         void destroy(ChannelGet channelGet);
         ChannelCDGet createChannelCDGet(
             ChannelFieldGroup channelFieldGroup,
-            ChannelCDGetRequestor channelCDGetRequestor, boolean process,boolean supportAlso);
+            ChannelCDGetRequestor channelCDGetRequestor,boolean supportAlso);
+        ChannelCDGet createChannelCDGet(
+            ChannelFieldGroup channelFieldGroup,
+            ChannelCDGetRequestor channelCDGetRequestor,boolean supportAlso,
+            boolean process,boolean processSelfOK);
         void destroy(ChannelCDGet channelCDGet);
         ChannelPut createChannelPut(ChannelFieldGroup channelFieldGroup,
-            ChannelPutRequestor channelPutRequestor,boolean process);
+            ChannelPutRequestor channelPutRequestor);
+        ChannelPut createChannelPut(ChannelFieldGroup channelFieldGroup,
+            ChannelPutRequestor channelPutRequestor,
+            boolean process,boolean processSelfOK);
         void destroy(ChannelPut channelPut);
         ChannelCDPut createChannelCDPut(
             ChannelFieldGroup channelFieldGroup,
@@ -152,7 +162,11 @@ accessing a channel are defined in later sections.</p>
         void destroy(ChannelCDPut cdPut);
         ChannelPutGet createChannelPutGet(
             channelFieldGroup putFieldGroup,ChannelFieldGroup getFieldGroup,
-            ChannelPutGetRequestor channelPutGetRequestor,boolean process);
+            ChannelPutGetRequestor channelPutGetRequestor);
+        ChannelPutGet createChannelPutGet(
+            channelFieldGroup putFieldGroup,ChannelFieldGroup getFieldGroup,
+            ChannelPutGetRequestor channelPutGetRequestor,
+            boolean process,boolean processSelfOK);
         void destroy(ChannelPutGet channelPutGet);
         ChannelMonitor createChannelMonitor(boolean onlyWhileProcessing);
         void destroy(ChannelMonitor channelMonitor);

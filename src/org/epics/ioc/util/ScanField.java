@@ -33,9 +33,9 @@ public interface ScanField {
      */
     String getEventName();
     /**
-     * Get scanSelf.
-     * If scanSelf is true then the record can be processed by calling scanSelf.
-     * @return The current value of scan.scanSelf.
+     * Get processSelf.
+     * If processSelf is true then the record can be processed by calling processSelf.
+     * @return The current value of scan.processSelf.
      */
-    boolean getScanSelf();
+    boolean getProcessSelf();
 }

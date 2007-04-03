@@ -108,9 +108,27 @@ public interface RecordProcess {
     /**
      * Request that record process itself.
      * This will only be successful of scan.selfScan is true and the record is not active.
+     * @param recordProcessRequestor The requestor to call if the request is successful.
      * @return (false,true) if the record started processing.
      */
-    boolean processSelf();
+    boolean processSelfRequest(RecordProcessRequestor recordProcessRequestor);
+    /**
+     * Set the record active.
+     * @param recordProcessRequestor The recordProcessRequestor.
+     */
+    void processSelfSetActive(RecordProcessRequestor recordProcessRequestor);
+    /**
+     * Start processing.
+     * @param recordProcessRequestor The recordProcessRequestor.
+     * @param leaveActive Leave the record active when process is done.
+     * The requestor must call setInactive.
+     */
+    void processSelfProcess(RecordProcessRequestor recordProcessRequestor, boolean leaveActive);
+    /**
+     * Called by the recordProcessRequestor when it called processSelfProcess with leaveActive true.
+     * @param recordProcessRequestor The recordProcessRequestor.
+     */
+    void processSelfSetInactive(RecordProcessRequestor recordProcessRequestor);
     /**
      * Prepare for processing a record but do not call record support.
      * A typical use of this method is when the processor wants to modify fields
@@ -138,7 +156,7 @@ public interface RecordProcess {
     void process(RecordProcessRequestor recordProcessRequestor,
         boolean leaveActive, TimeStamp timeStamp);
     /**
-     * Call by the recordProcessRequestor when it has called process with leaveActive
+     * Called by the recordProcessRequestor when it has called process with leaveActive
      * true and is done.
      * @param recordProcessRequestor
      */
