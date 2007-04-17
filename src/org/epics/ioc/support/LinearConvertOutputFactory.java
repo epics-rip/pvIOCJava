@@ -35,7 +35,7 @@ public class LinearConvertOutputFactory {
     private static final String supportName = "linearConvertOutput";
     
     private static class LinearConvertImpl extends AbstractSupport
-    implements SupportProcessRequestor
+    implements SupportProcessRequester
     {
         
         private DBStructure dbStructure = null;
@@ -60,7 +60,7 @@ public class LinearConvertOutputFactory {
         private double slope;
         private double intercept;
         
-        private SupportProcessRequestor supportProcessRequestor;
+        private SupportProcessRequester supportProcessRequester;
         
         private LinearConvertImpl(DBStructure dbStructure) {
             super(supportName,dbStructure);
@@ -162,10 +162,10 @@ public class LinearConvertOutputFactory {
             super.setSupportState(outputSupport.getSupportState());
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.process.AbstractSupport#process(org.epics.ioc.process.SupportProcessRequestor)
+         * @see org.epics.ioc.process.AbstractSupport#process(org.epics.ioc.process.SupportProcessRequester)
          */
-        public void process(SupportProcessRequestor supportProcessRequestor) {
-            this.supportProcessRequestor = supportProcessRequestor;
+        public void process(SupportProcessRequester supportProcessRequester) {
+            this.supportProcessRequester = supportProcessRequester;
             double value = pvValue.get();
             double rawValue = (value -intercept)/slope;
             pvRawValue.put((int)rawValue);
@@ -186,10 +186,10 @@ public class LinearConvertOutputFactory {
         }
 
         /* (non-Javadoc)
-         * @see org.epics.ioc.process.SupportProcessRequestor#supportProcessDone(org.epics.ioc.util.RequestResult)
+         * @see org.epics.ioc.process.SupportProcessRequester#supportProcessDone(org.epics.ioc.util.RequestResult)
          */
         public void supportProcessDone(RequestResult requestResult) {
-            supportProcessRequestor.supportProcessDone(requestResult);
+            supportProcessRequester.supportProcessDone(requestResult);
         }
     }
 }

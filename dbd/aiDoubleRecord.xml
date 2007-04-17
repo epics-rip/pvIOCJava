@@ -1,27 +1,14 @@
 <?xml version="1.0" ?>
 <DBDefinition>
 
-<structure name = "linearConvertInput" supportName = "linearConvertInput">
-    <field name = "rawValue" type = "int" />
-    <field name = "linearConvert" type = "structure" structureName = "linearConvert" />
-    <field name = "input" type = "link" />
+<structure name = "aiDouble" supportName = "doubleRecord" >
+    <include href = "aiDoubleCommon.xml" />
 </structure>
+
 
 <recordType name = "aiDouble" supportName = "doubleRecord" >
     <include href = "common.xml" />
-    <field name = "value" type = "double" >
-        <property name = "alarm" associatedField = "alarm" />
-        <property name = "units" associatedField = "units" />
-        <property name = "displayLimit" associatedField = "displayLimit" />
-        <property name = "timeStamp" associatedField = "/timeStamp" />
-    </field>
-    <field name = "input" type = "structure" structureName = "linearConvertInput"/>
-    <field name = "units" type = "string" />
-    <field name = "doubleAlarm" type = "link" supportName = "doubleAlarm" />
-    <field name = "displayLimit"
-         type = "structure" structureName = "doubleLimit" />
-    <field name = "linkArray" type = "array"
-         elementType = "structure" supportName = "linkArray" />
+    <include href = "aiDoubleCommon.xml" />
 </recordType>
 
 </DBDefinition>

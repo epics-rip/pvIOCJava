@@ -1,0 +1,105 @@
+<?xml version="1.0" ?>
+<IOCDatabase>
+
+<record name = "adcVoltageLinked" type = "int">
+    <linkArray>
+        <value structureName = "linkArrayElement">
+            <wait>true</wait>
+            <link  supportName = "processLink" >
+                <configure structureName = "processLink">
+                    <pvname>voltage</pvname>
+                </configure>
+            </link>
+        </value>
+   </linkArray>
+</record>
+
+<record name = "voltage" type = "aiDouble" >
+    <input>
+        <linearConvert>
+            <deviceHigh>4095</deviceHigh>
+            <deviceLow>0</deviceLow>
+            <engUnitsLow>0.0</engUnitsLow>
+            <engUnitsHigh>10.0</engUnitsHigh>
+        </linearConvert>
+        <input supportName = "inputLink" >
+            <configure structureName = "inputLink">
+                <pvname>adcVoltageLinked</pvname>
+                <process>false</process>
+            </configure>
+        </input>
+
+    </input>
+    <doubleAlarm>
+        <configure structureName = "doubleAlarm">
+          <active>true</active>
+          <hystersis>0.1</hystersis>
+          <highMajor>8.0</highMajor>
+          <highMinor>6.0</highMinor>
+          <lowMinor>4.0</lowMinor>
+          <lowMajor>2.0</lowMajor>
+        </configure>
+    </doubleAlarm>
+    <displayLimit>
+        <low>0.0</low>
+        <high>10.0</high>
+    </displayLimit>
+</record>
+
+
+
+<record name = "psLinked" type = "powerSupply" >
+    <voltageInput>
+        <link supportName = "inputLink">
+            <configure structureName = "inputLink">
+                <pvname>voltage</pvname>
+                <process>false</process>
+            </configure>
+        </link>
+    </voltageInput>
+    <currentOutput>
+        <link supportName = "outputLink">
+            <configure structureName = "outputLink">
+                <pvname>current</pvname>
+                <process>true</process>
+            </configure>
+        </link>
+    </currentOutput>
+</record>
+
+<record name = "current" type = "aoDouble" >
+    <output>
+        <linearConvert>
+            <deviceHigh>4095</deviceHigh>
+            <deviceLow>0</deviceLow>
+            <engUnitsLow>0.0</engUnitsLow>
+            <engUnitsHigh>10.0</engUnitsHigh>
+        </linearConvert>
+        <output supportName = "outputLink" >
+            <configure structureName = "outputLink">
+                <pvname>dacCurrentLinked</pvname>
+                <process>true</process>
+            </configure>
+        </output>
+
+    </output>
+    <doubleAlarm>
+        <configure structureName = "doubleAlarm">
+          <active>true</active>
+          <hystersis>0.1</hystersis>
+          <highMajor>8.0</highMajor>
+          <highMinor>6.0</highMinor>
+          <lowMinor>4.0</lowMinor>
+          <lowMajor>2.0</lowMajor>
+        </configure>
+    </doubleAlarm>
+    <displayLimit>
+        <low>0.0</low>
+        <high>10.0</high>
+    </displayLimit>
+</record>
+
+<record name = "dacCurrentLinked" type = "int">
+</record>
+
+</IOCDatabase>

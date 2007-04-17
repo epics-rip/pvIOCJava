@@ -10,7 +10,7 @@
 <body>
 <h1 style="text-align: center">EPICS JavaIOC: util<br />
 package: org.epics.ioc.util<br />
-2007.03.20</h1>
+2007.04.11</h1>
 CONTENTS
 
 <div class="toc">
@@ -19,7 +19,7 @@ CONTENTS
   <li><a href="#Message">Message Support</a>
     <ul>
       <li><a href="#Definition">Definitions</a></li>
-      <li><a href="#Requestor">Requestor</a></li>
+      <li><a href="#Requester">Requester</a></li>
       <li><a href="#MessageTyp">MessageType</a></li>
       <li><a href="#RequestRes">RequestResult</a></li>
       <li><a href="#MessageQue">MessageQueue</a></li>
@@ -72,7 +72,7 @@ CONTENTS
 <p>This package provides utility code for a javaIOC:</p>
 <dl>
   <dt>Message Support</dt>
-    <dd>This is an interface for passing messages to a requestor of many
+    <dd>This is an interface for passing messages to a requester of many
       services.</dd>
   <dt>Time Stamp Support</dt>
     <dd>Support is provided to make it easier to work with time stamps.</dd>
@@ -99,8 +99,8 @@ CONTENTS
 <hr />
 
 <h3 id="Definition">Definitions</h3>
-<pre>    public interface Requestor {
-        String getRequestorName();
+<pre>    public interface Requester {
+        String getRequesterName();
         void message(String message, MessageType messageType);
     }
     
@@ -138,15 +138,15 @@ CONTENTS
         public static MessageQueue create(int size);
     }</pre>
 
-<h3 id="Requestor">Requestor</h3>
+<h3 id="Requester">Requester</h3>
 
-<p>Many javaIOC interfaces extend interface Requestor, which has just two
+<p>Many javaIOC interfaces extend interface Requester, which has just two
 methods:</p>
 <dl>
-  <dt style="font-family: courier;">getRequestorName</dt>
-    <dd>Returns the name of the requestor.</dd>
+  <dt style="font-family: courier;">getRequesterName</dt>
+    <dd>Returns the name of the requester.</dd>
   <dt style="font-family: courier;">message</dt>
-    <dd>This is for passing messages to a requestor.</dd>
+    <dd>This is for passing messages to a requester.</dd>
 </dl>
 
 <h3 id="MessageTyp">MessageType</h3>
@@ -166,10 +166,10 @@ methods:</p>
 <h3 id="RequestRes">RequestResult</h3>
 
 <p>Both recordProcess and support code report a result by passing a
-RequestResult to the requestor. The result is one of:</p>
+RequestResult to the requester. The result is one of:</p>
 <dl>
   <dt style="font-family: courier;">zombie</dt>
-    <dd>The support has been asked to destroy itself. Thus the requestor
+    <dd>The support has been asked to destroy itself. Thus the requester
       should disconnect from the support.</dd>
   <dt style="font-family: courier;">success</dt>
     <dd>The request was successful.</dd>
@@ -335,7 +335,13 @@ higher priority threads.</p>
        major,
        invalid;
        public static AlarmSeverity getSeverity(int value);
-    }</pre>
+    }
+
+    public class AlarmStamp {
+        public AlarmSeverity severity;
+        public String message;
+    }
+</pre>
 <hr />
 
 <h2 style="text-align: center;" id="Scan">Scan Field Support</h2>
@@ -404,7 +410,7 @@ event or periodically scanned records.</p>
 <dl>
   <dt style="font-family: courier;">passive</dt>
     <dd>This is a record that is not periodically or event scanned. It can be
-      processed by another requestor. For example database links can request
+      processed by another requester. For example database links can request
       processing and Channel Access clients can also request processing.</dd>
   <dt style="font-family: courier;">event</dt>
     <dd>A record can be event scanned. If so the record also has an eventName
@@ -506,14 +512,14 @@ ScannerFactory. It implements the methods:</p>
 
 <p>This has the definition:</p>
 <pre>    public class IOCFactory {
-        public static boolean initDatabase(String dbFile,Requestor requestor) {
+        public static boolean initDatabase(String dbFile,Requester requester) {
     }</pre>
 
 <p>where</p>
 <dl>
   <dt style="font-family: courier;">dbFile</dt>
     <dd>A file containing xml record instance definitions.</dd>
-  <dt style="font-family: courier;">requestor</dt>
+  <dt style="font-family: courier;">requester</dt>
     <dd>A listener for any messages generated while initDatabase is
     executing.</dd>
 </dl>

@@ -9,7 +9,7 @@ import junit.framework.TestCase;
 
 import org.epics.ioc.dbd.*;
 import org.epics.ioc.db.*;
-import org.epics.ioc.util.Requestor;
+import org.epics.ioc.util.Requester;
 import org.epics.ioc.util.MessageType;
 
 import java.util.*;
@@ -32,17 +32,17 @@ public class XMLAllTypesTest extends TestCase {
         Set<String> keys;
         DBD dbd = DBDFactory.getMasterDBD();
         System.out.printf("reading menuStructureSupport%n");
-        Requestor iocRequestor = new Listener();
+        Requester iocRequester = new Listener();
         XMLToDBDFactory.convert(dbd,
-                 "dbd/menuStructureSupport.xml",iocRequestor);
+                 "dbd/menuStructureSupport.xml",iocRequester);
         System.out.printf("reading allTypesDBD%n");
         XMLToDBDFactory.convert(dbd,
-                 "src/org/epics/ioc/db/test/allTypesDBD.xml",iocRequestor);
+                 "src/org/epics/ioc/db/test/allTypesDBD.xml",iocRequester);
         IOCDB iocdb = IOCDBFactory.create("testIOCDatabase");
         System.out.printf("reading exampleAllTypeDB%n");
         try {
             XMLToIOCDBFactory.convert(dbd,iocdb,
-                 "src/org/epics/ioc/db/test/exampleAllTypeDB.xml",iocRequestor);
+                 "src/org/epics/ioc/db/test/exampleAllTypeDB.xml",iocRequester);
         } catch (IllegalStateException e) {
             System.out.println("IllegalStateException: " + e);
         }
@@ -60,16 +60,16 @@ public class XMLAllTypesTest extends TestCase {
         }
     }
 
-    private static class Listener implements Requestor {
+    private static class Listener implements Requester {
         /* (non-Javadoc)
-         * @see org.epics.ioc.util.Requestor#getRequestorName()
+         * @see org.epics.ioc.util.Requester#getRequestorName()
          */
-        public String getRequestorName() {
+        public String getRequesterName() {
             return "XMLAllTypesTest";
         }
 
         /* (non-Javadoc)
-         * @see org.epics.ioc.util.Requestor#message(java.lang.String, org.epics.ioc.util.MessageType)
+         * @see org.epics.ioc.util.Requester#message(java.lang.String, org.epics.ioc.util.MessageType)
          */
         public void message(String message, MessageType messageType) {
             System.out.println(message);

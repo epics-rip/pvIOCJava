@@ -31,24 +31,24 @@ public class DoubleFactory {
     }
     
     static private class DoubleImpl extends AbstractSupport
-    implements SupportProcessRequestor
+    implements SupportProcessRequester
     {
         private static String supportName = "doubleRecord";
-        private DBRecord dbRecord;
-        private PVRecord pvRecord;
+        private DBStructure dbStructure;
+        private PVStructure pvStructure;
         private DBField valueDBField = null;
         private Support inputSupport = null;
         private Support doubleAlarmSupport = null;
         private Support outputSupport = null;
         private Support linkArraySupport = null;
-        private SupportProcessRequestor supportProcessRequestor = null;
+        private SupportProcessRequester supportProcessRequester = null;
         private ProcessState processState = ProcessState.inputSupport;
         private RequestResult finalResult = RequestResult.success;
         
         private DoubleImpl(DBStructure dbStructure) {
             super(supportName,dbStructure);
-            dbRecord = dbStructure.getDBRecord();
-            pvRecord = dbRecord.getPVRecord();
+            this.dbStructure = dbStructure;
+            pvStructure = dbStructure.getPVStructure();
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.process.Support#initialize()
@@ -56,8 +56,8 @@ public class DoubleFactory {
         public void initialize() {
             if(!super.checkSupportState(SupportState.readyForInitialize,supportName)) return;
             SupportState supportState = SupportState.readyForStart;
-            Structure structure = (Structure)pvRecord.getField();
-            DBField[] dbFields = dbRecord.getDBStructure().getFieldDBFields();
+            Structure structure = (Structure)pvStructure.getField();
+            DBField[] dbFields = dbStructure.getFieldDBFields();
             int index;
             if(valueDBField==null) {
                 index = structure.getFieldIndex("value");
@@ -184,17 +184,17 @@ public class DoubleFactory {
             setSupportState(SupportState.readyForInitialize);
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.process.Support#process(org.epics.ioc.process.RecordProcessRequestor)
+         * @see org.epics.ioc.process.Support#process(org.epics.ioc.process.RecordProcessRequester)
          */
-        public void process(SupportProcessRequestor supportProcessRequestor) {
+        public void process(SupportProcessRequester supportProcessRequester) {
             if(!super.checkSupportState(SupportState.ready,"process")) {
-                supportProcessRequestor.supportProcessDone(RequestResult.failure);
+                supportProcessRequester.supportProcessDone(RequestResult.failure);
                 return;
             }
-            if(supportProcessRequestor==null) {
-                throw new IllegalStateException("supportProcessRequestor is null");
+            if(supportProcessRequester==null) {
+                throw new IllegalStateException("supportProcessRequester is null");
             }
-            this.supportProcessRequestor = supportProcessRequestor;
+            this.supportProcessRequester = supportProcessRequester;
             finalResult = RequestResult.success;
             if(inputSupport!=null) {
                 processState = ProcessState.inputSupport;
@@ -209,7 +209,7 @@ public class DoubleFactory {
                 processState = ProcessState.linkArraySupport;
                 linkArraySupport.process(this);           
             } else {
-                supportProcessRequestor.supportProcessDone(RequestResult.success);
+                supportProcessRequester.supportProcessDone(RequestResult.success);
             }
         }
         /* (non-Javadoc)
@@ -219,7 +219,7 @@ public class DoubleFactory {
             valueDBField = dbField;
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.process.SupportProcessRequestor#supportProcessDone(org.epics.ioc.util.RequestResult)
+         * @see org.epics.ioc.process.SupportProcessRequester#supportProcessDone(org.epics.ioc.util.RequestResult)
          */
         public void supportProcessDone(RequestResult requestResult) {
             if(requestResult.compareTo(finalResult)>0) {
@@ -245,7 +245,7 @@ public class DoubleFactory {
                     return;
                 }
             case linkArraySupport:
-                supportProcessRequestor.supportProcessDone(finalResult);
+                supportProcessRequester.supportProcessDone(finalResult);
                 return;
             }
         }

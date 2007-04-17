@@ -23,7 +23,7 @@ public class DBDTest extends TestCase {
         test.doit();
     }
     
-    private static class Test implements Requestor {
+    private static class Test implements Requester {
         
         private void doit () {
         
@@ -82,14 +82,14 @@ public class DBDTest extends TestCase {
             System.out.printf("%n****support%n%s%n",dbd.supportToString(null));
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.util.Requestor#getRequestorName()
+         * @see org.epics.ioc.util.Requester#getRequestorName()
          */
-        public String getRequestorName() {
+        public String getRequesterName() {
             return "DBDTest";
         }
 
         /* (non-Javadoc)
-         * @see org.epics.ioc.util.Requestor#message(java.lang.String, org.epics.ioc.util.MessageType)
+         * @see org.epics.ioc.util.Requester#message(java.lang.String, org.epics.ioc.util.MessageType)
          */
         public void message(String message, MessageType messageType) {
             System.out.println(message);

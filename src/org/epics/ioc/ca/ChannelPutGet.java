@@ -18,20 +18,20 @@ public interface ChannelPutGet {
     /**
      * Issue a put/get request.
      * This fails if the request can not be satisfied.
-     * If it fails ChannelPutGetRequestor.putDone is called before putGet returns.
+     * If it fails ChannelPutGetRequester.putDone is called before putGet returns.
      */
     void putGet();
     /**
-     * If ChannelPutGetRequestor.nextPutData or ChannelPutGetRequestor.nextDelayedPutData returns true
+     * If ChannelPutGetRequester.nextPutData or ChannelPutGetRequester.nextDelayedPutData returns true
      * this is the call to ask again for the data. The result is that the underlying database
-     * is locked and ChannelPutGetRequestor.nextDelayedPutData is called.
+     * is locked and ChannelPutGetRequester.nextDelayedPutData is called.
      * @param pvField The pvField to put.
      */
     void putDelayed(PVField pvField);
     /**
-     * If ChannelPutGetRequestor.nextGetData or ChannelPutGetRequestor.nextDelayedGetData returns true
+     * If ChannelPutGetRequester.nextGetData or ChannelPutGetRequester.nextDelayedGetData returns true
      * this is the call to ask again for the data. The result is that the underlying database
-     * is locked and ChannelPutGetRequestor.nextDelayedGetData is called.
+     * is locked and ChannelPutGetRequester.nextDelayedGetData is called.
      * @param pvField The pvField to get.
      */
     void getDelayed(PVField pvField);

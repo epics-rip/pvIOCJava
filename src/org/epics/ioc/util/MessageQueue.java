@@ -6,7 +6,7 @@
 package org.epics.ioc.util;
 
 /**
- * A queue for Requestor messages.
+ * A queue for Requester messages.
  * @author mrk
  *
  */

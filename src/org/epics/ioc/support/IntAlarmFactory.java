@@ -45,7 +45,6 @@ public class IntAlarmFactory {
         private PVInt pvHighMinor;
         private PVInt pvLowMinor;
         private PVInt pvLowMajor;
-        private PVInt pvHystersis;
         
         private PVInt pvValue;
         private double lalm;
@@ -82,8 +81,7 @@ public class IntAlarmFactory {
             pvHighMajor = configStructure.getIntField("highMajor");
             pvHighMinor = configStructure.getIntField("highMinor");
             pvLowMinor = configStructure.getIntField("lowMinor");
-            pvLowMajor = configStructure.getIntField("lowMajor");
-            pvHystersis = configStructure.getIntField("hystersis");            
+            pvLowMajor = configStructure.getIntField("lowMajor");        
             setSupportState(supportState);
         }
         /* (non-Javadoc)
@@ -119,48 +117,46 @@ public class IntAlarmFactory {
             pvHighMinor = null;
             pvLowMinor = null;
             pvLowMajor = null;
-            pvHystersis = null;
             setSupportState(SupportState.readyForInitialize);
         }       
         /* (non-Javadoc)
-         * @see org.epics.ioc.process.Support#process(org.epics.ioc.process.RecordProcessRequestor)
+         * @see org.epics.ioc.process.Support#process(org.epics.ioc.process.RecordProcessRequester)
          */
-        public void process(SupportProcessRequestor supportProcessRequestor) {
+        public void process(SupportProcessRequester supportProcessRequester) {
             if(noop) {
-                supportProcessRequestor.supportProcessDone(RequestResult.success);
+                supportProcessRequester.supportProcessDone(RequestResult.success);
                 return;
             }
             boolean active = pvActive.get();
             if(!active) return;
-            double  val = pvValue.get();
-            double  hyst = pvHystersis.get();
-            double hihi = pvHighMajor.get();
-            double high = pvHighMinor.get();
-            double low = pvLowMinor.get();
-            double lolo = pvLowMajor.get();
+            int  val = pvValue.get();
+            int hihi = pvHighMajor.get();
+            int high = pvHighMinor.get();
+            int low = pvLowMinor.get();
+            int lolo = pvLowMajor.get();
             
-            if ((val >= hihi || ((lalm==hihi) && (val >= hihi-hyst)))){
+            if ((val >= hihi)){
                 String message = pvLink.getFullFieldName() + " high ";
                 if (alarmSupport.setAlarm(message, AlarmSeverity.major)) lalm = hihi; 
-            } else if ((val <= lolo || ((lalm==lolo) && (val <= lolo+hyst)))){
+            } else if ((val <= lolo)){
                 String message = pvLink.getFullFieldName() + " low ";
                 if (alarmSupport.setAlarm(message, AlarmSeverity.major)) lalm = lolo;
-                supportProcessRequestor.supportProcessDone(RequestResult.success);
+                supportProcessRequester.supportProcessDone(RequestResult.success);
                 return;
-            } else if ((val >= high || ((lalm==high) && (val >= high-hyst)))){
+            } else if ((val >= high )){
                 String message = pvLink.getFullFieldName() + " high ";
                 if (alarmSupport.setAlarm(message, AlarmSeverity.minor)) lalm = high;
-                supportProcessRequestor.supportProcessDone(RequestResult.success);
+                supportProcessRequester.supportProcessDone(RequestResult.success);
                 return;
-            } else if ((val <= low || ((lalm==low) && (val <= low+hyst)))){
+            } else if ((val <= low)){
                 String message = pvLink.getFullFieldName() + " low ";
                 if (alarmSupport.setAlarm(message, AlarmSeverity.minor)) lalm = low;
-                supportProcessRequestor.supportProcessDone(RequestResult.success);
+                supportProcessRequester.supportProcessDone(RequestResult.success);
                 return;
             } else {
                 lalm = val;
             }
-            supportProcessRequestor.supportProcessDone(RequestResult.success);
+            supportProcessRequester.supportProcessDone(RequestResult.success);
         }                
         /* (non-Javadoc)
          * @see org.epics.ioc.process.LinkSupport#setField(org.epics.ioc.db.DBField)

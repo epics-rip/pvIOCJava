@@ -115,11 +115,11 @@ public class DoubleAlarmFactory {
             setSupportState(SupportState.readyForInitialize);
         }       
         /* (non-Javadoc)
-         * @see org.epics.ioc.process.Support#process(org.epics.ioc.process.RecordProcessRequestor)
+         * @see org.epics.ioc.process.Support#process(org.epics.ioc.process.RecordProcessRequester)
          */
-        public void process(SupportProcessRequestor supportProcessRequestor) {
+        public void process(SupportProcessRequester supportProcessRequester) {
             if(noop) {
-                supportProcessRequestor.supportProcessDone(RequestResult.success);
+                supportProcessRequester.supportProcessDone(RequestResult.success);
                 return;
             }
             boolean active = pvActive.get();
@@ -137,22 +137,22 @@ public class DoubleAlarmFactory {
             } else if ((val <= lolo || ((lalm==lolo) && (val <= lolo+hyst)))){
                 String message = pvLink.getFullFieldName() + " low ";
                 if (alarmSupport.setAlarm(message, AlarmSeverity.major)) lalm = lolo;
-                supportProcessRequestor.supportProcessDone(RequestResult.success);
+                supportProcessRequester.supportProcessDone(RequestResult.success);
                 return;
             } else if ((val >= high || ((lalm==high) && (val >= high-hyst)))){
                 String message = pvLink.getFullFieldName() + " high ";
                 if (alarmSupport.setAlarm(message, AlarmSeverity.minor)) lalm = high;
-                supportProcessRequestor.supportProcessDone(RequestResult.success);
+                supportProcessRequester.supportProcessDone(RequestResult.success);
                 return;
             } else if ((val <= low || ((lalm==low) && (val <= low+hyst)))){
                 String message = pvLink.getFullFieldName() + " low ";
                 if (alarmSupport.setAlarm(message, AlarmSeverity.minor)) lalm = low;
-                supportProcessRequestor.supportProcessDone(RequestResult.success);
+                supportProcessRequester.supportProcessDone(RequestResult.success);
                 return;
             } else {
                 lalm = val;
             }
-            supportProcessRequestor.supportProcessDone(RequestResult.success);
+            supportProcessRequester.supportProcessDone(RequestResult.success);
         }                
         /* (non-Javadoc)
          * @see org.epics.ioc.process.LinkSupport#setField(org.epics.ioc.db.DBField)

@@ -1,5 +1,6 @@
 <?xml version="1.0" ?>
 <DBDefinition>
+<include addPath = "dbd" />
 
 <recordType name = "powerSupply" supportName = "powerSupplyRecord" >
     <property name = "value" associatedField = "power" />

@@ -18,17 +18,19 @@
         <property name = "status" associatedField = "status" />
         <property name = "severity" associatedField = "severity" />
         <property name = "units" associatedField = "units" />
-        <property name = "displayLimit" associatedField = "displayLimit" />
+        <property name = "doubleLimit" associatedField = "doubleLimit" />
         <property name = "timeStamp" associatedField = "/timeStamp" />
     </field>
     <field name = "status" type = "string" />
     <field name = "severity" type = "menu" menuName = "alarmSeverity" />
     <field name = "units" type = "string" />
-    <field name = "displayLimit"
-         type = "structure" structureName = "displayLimit" />
+    <field name = "doubleLimit"
+         type = "structure" structureName = "doubleLimit" />
     <field name = "aiRaw" type = "structure" structureName = "aiRaw"/>
     <field name = "linearConvert"
-        type = "structure" structureName = "linearConvertInput" />
+        type = "structure"
+        structureName = "linearConvert" 
+        supportName = "linearConvertInput" />
 </structure>
 
 <recordType name = "aiRecord" supportName = "noop">

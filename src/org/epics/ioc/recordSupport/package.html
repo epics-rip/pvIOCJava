@@ -1,0 +1,277 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+       "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta http-equiv="content-type" content="text/html; charset=iso-8859-1" />
+  <title>EPICS JavaIOC: Record Support</title>
+</head>
+
+<body>
+<h1 style="text-align: center">EPICS JavaIOC: Record Support<br />
+package: org.epics.ioc.support<br />
+2007.04.16</h1>
+CONTENTS
+
+<div class="toc">
+<ul>
+  <li><a href="#Overview">Overview</a></li>
+  <li><a href="#DoubleFact">DoubleFactory</a></li>
+  <li><a href="#Incrementa">IncrementalDoubleFactory</a></li>
+  <li><a href="#IntFactory">IntFactory</a></li>
+  <li><a href="#EventFacto">EventFactory</a></li>
+  <li><a href="#CalcFactor">CalcFactory</a></li>
+  <li><a href="#PowerSuppl">PowerSupplyFactory</a></li>
+  <li><a href="#Incrementa1">IncrementalSupport Interface</a></li>
+</ul>
+</div>
+<hr />
+
+<h2 style="text-align: center" id="Overview">Overview</h2>
+<hr />
+
+<p>This package provides the following support factories:</p>
+<dl>
+  <dt style="font-family: courier;">DoubleFactory</dt>
+    <dd>Supports structure and recordType double. It can also be used for
+      other structure or recordTypes that have some combination of the
+      supported fields.</dd>
+  <dt style="font-family: courier;">IncrementalDoubleFactory</dt>
+    <dd>In addition to what DoubleFactory provides this support provides
+      support for incremental output and limits.</dd>
+  <dt style="font-family: courier;">IntFactory</dt>
+    <dd>Supports structure and recordType int. It can also be used for other
+      structure or recordTypes that have some combination of the supported
+      fields.</dd>
+  <dt style="font-family: courier;">EventFactory</dt>
+    <dd>Supports recordType event. It can also be used by other structure or
+      recordTypes that have the required fields.</dd>
+  <dt style="font-family: courier;">CalcFactory</dt>
+    <dd>Supports structure or recordTypes that have fields appropriate for
+      perform calculations.</dd>
+  <dt style="font-family: courier;">PowerSupplyFactory</dt>
+    <dd>An example of support for a complex device.</dd>
+</dl>
+<hr />
+
+<h2 style="text-align: center" id="DoubleFact">DoubleFactory</h2>
+<hr />
+
+<p>DoubleFactory implements record or structure support for the following
+fields:</p>
+<dl>
+  <dt style="font-family: courier;">value</dt>
+    <dd>This must be a double field. It can either be a field named "value"
+      in the record or structure being supported or it can be a field passed
+      as an argument to the double support setField method.</dd>
+  <dt style="font-family: courier;">input</dt>
+    <dd>This is optional. If the record/structure has a field named "input"
+      and, if that field has associated support, the support is called. The
+      value field is passed to support.setField. The input support must
+      complete processing before doubleAlarm support is called.</dd>
+  <dt style="font-family: courier;">doubleAlarm</dt>
+    <dd>This is optional. If the record/structure has a field named
+      "doubleAlarm" and, if that field has associated support, the support is
+      called. The value field is passed to support.setField. The doubleAlarm
+      support must complete processing before output support is called.</dd>
+  <dt style="font-family: courier;">output</dt>
+    <dd>This is optional. If the record/structure has a field named "output"
+      and, if that field has associated support, the support is called. The
+      value field is passed to support.setField. The output support must
+      complete processing before linkArray support is called.</dd>
+  <dt style="font-family: courier;">linkArray</dt>
+    <dd>This is optional. If the record/structure has a field named
+      "linkArray" and, if that field has associated support, the support is
+      called. The value field is passed to support.setField. When linkArray
+      support completes double support completes processing.</dd>
+</dl>
+
+<p>By supporting the above fields this support can be used for record types
+double, aiDouble, and aoDouble. It can also be used for embeded structure
+fields that have some combination of the above fields. For example a
+powerSupply record can use this support for voltage input and for current
+output.</p>
+<hr />
+
+<h2 style="text-align: center" id="Incrementa">IncrementalDoubleFactory</h2>
+<hr />
+
+<p>This supports that same fields as Double and also supports fields:</p>
+<dl>
+  <dt style="font-family: courier;">desiredValue</dt>
+    <dd>This must be a double field. It can either be a field named
+      "desiredValue" in the record or structure being supported or it can be
+      a field passed as an argument to the double support setDesiredField
+      method. When this field changes the support changes the value field
+      until it has the desired value. If control limits are specified then
+      the desired value is forced to be within the control limits. If
+      incrementalOutput is true then each time the record is processed the
+      value field is changed by rateOfChange until the desired value is
+      reached.</dd>
+  <dt style="font-family: courier;">controlLimit</dt>
+    <dd>This field is optional. If present it must be a structure that has
+      two double fields named "low" and "high". If the low value is strictly
+      less that the high value then limits are enforced, i.e. the desired
+      value is forced to be within the control limits.</dd>
+  <dt style="font-family: courier;">incrementalOutput</dt>
+    <dd>This field is optional. If the record/structure has a field named
+      "incrementalOutput" then it must be have type boolean. If not present
+      the default is true. If this has the value true the output is adjusted
+      by rateOfChange otherwise the value field is changed in one step to the
+      desired value.</dd>
+  <dt style="font-family: courier;">rateOfChange</dt>
+    <dd>If incrementalOutput is true this is the amount the value will change
+      each time the record is processed.</dd>
+</dl>
+<hr />
+
+<h2 style="text-align: center" id="IntFactory">IntFactory</h2>
+<hr />
+
+<p>IntFactory implements record or structure support for the following
+fields:</p>
+<dl>
+  <dt style="font-family: courier;">value</dt>
+    <dd>This must be a int field. It can either be a field named "value" in
+      the record or structure being supported or it can be a field passed as
+      an argument to the int support setField method.</dd>
+  <dt style="font-family: courier;">input</dt>
+    <dd>This is optional. If the record/structure has a field named "input"
+      and, if that field has associated support, the support is called. The
+      value field is passed to support.setField. The input support must
+      complete processing before intAlarm support is called.</dd>
+  <dt style="font-family: courier;">intAlarm</dt>
+    <dd>This is optional. If the record/structure has a field named
+      "intAlarm" and, if that field has associated support, the support is
+      called. The value field is passed to support.setField. The intAlarm
+      support must complete processing before output support is called.</dd>
+  <dt style="font-family: courier;">output</dt>
+    <dd>This is optional. If the record/structure has a field named "output"
+      and, if that field has associated support, the support is called. The
+      value field is passed to support.setField. The output support must
+      complete processing before linkArray support is called.</dd>
+  <dt style="font-family: courier;">linkArray</dt>
+    <dd>This is optional. If the record/structure has a field named
+      "linkArray" and, if that field has associated support, the support is
+      called. The value field is passed to support.setField. When linkArray
+      support completes int support completes processing.</dd>
+</dl>
+<hr />
+
+<h2 style="text-align: center" id="EventFacto">EventFactory</h2>
+<hr />
+
+<p>EventFactory implements record or structure support for announcing a scan
+event. The event name is given in the field:</p>
+<dl>
+  <dt style="font-family: courier;">value</dt>
+    <dd>This must be a string field. It can either be a field named "value"
+      in the record or structure being supported or it can be a field passed
+      as an argument to the event support setField method.</dd>
+</dl>
+
+<p>Whenever the record is processed eventScanner.announce is called, i.e. the
+support announces an event. All event scanned records with the event name
+associated with the value field are processed. Each time process is called,
+the event support checks to see if the event name has changed.</p>
+<hr />
+
+<h2 style="text-align: center" id="CalcFactor">CalcFactory</h2>
+<hr />
+
+<p>CalcFactory implements record or structure support for performing
+calculations that produce a double value. Currently there is no generic
+calculation support similar to calcPerform.c that is part of EPICS V3. A
+calculation support module could be implemented that provides similar
+functionality. CalcFactory implements record or structure support for the
+following fields:</p>
+<dl>
+  <dt style="font-family: courier;">value</dt>
+    <dd>This must be a double field. It can either be a field named "value"
+      in the record or structure being supported or it can be a field passed
+      as an argument to the int support setField method.</dd>
+  <dt style="font-family: courier;">calcArgArray</dt>
+    <dd>The calcArgArray field is normally an array of structures with each
+      element being a calcArg structure and the support for calcArgArray is
+      the calcArgArray support described in
+      org.epics.ioc.support.CalcArgArraySupport. This field must be present
+      and must have support. The support must complete before the support for
+      calculator is called.</dd>
+  <dt style="font-family: courier;">calculator</dt>
+    <dd>This field is normally a link that has support that implements the
+      calculation. org.epics.ioc.support.CounterCalculationFactory provides
+      an example. This field must be present and must have support. The
+      support must complete before the support for doubleAlarm is called.</dd>
+  <dt style="font-family: courier;">doubleAlarm</dt>
+    <dd>This is optional. If the record/structure has a field named
+      "doubleAlarm" and, if that field has associated support, the support is
+      called. The value field is passed to support.setField. The doubleAlarm
+      support must complete processing before output support is called.</dd>
+  <dt style="font-family: courier;">linkArray</dt>
+    <dd>This is optional. If the record/structure has a field named
+      "linkArray" and, if that field has associated support, the support is
+      called. The value field is passed to support.setField. When linkArray
+      support completes double support completes processing.</dd>
+</dl>
+<hr />
+
+<h2 style="text-align: center" id="PowerSuppl">PowerSupplyFactory</h2>
+<hr />
+
+<p>This is an example of support for a "device". Given a voltage and power to
+computes the current. It supports fields for reading the voltage and for
+writing the current. The complete set of fields it suppports are:</p>
+<dl>
+  <dt style="font-family: courier;">voltage</dt>
+    <dd>This is required. The record/structure must have a field named
+      "voltage" and the field type must be double.</dd>
+  <dt style="font-family: courier;">current</dt>
+    <dd>This is required. The record/structure must have a field named
+      "current" and the field type must be double.</dd>
+  <dt style="font-family: courier;">power</dt>
+    <dd>This is required. The record/structure must have a field named
+      "power" and the field type must be double.</dd>
+  <dt style="font-family: courier;">input</dt>
+    <dd>This is optional. If the record/structure has a field named "input"
+      and, if that field has associated support, the support is called. The
+      power field is passed to support.setField. The input support must
+      complete processing before the power is computed.</dd>
+  <dt style="font-family: courier;">voltageInput</dt>
+    <dd>This is optional. If the record/structure has a field named
+      "voltageInput" and, if that field has associated support, the support
+      is called. The voltage field is passed to support.setField. The support
+      must complete processing before the power is computed.</dd>
+  <dt style="font-family: courier;">doubleAlarm</dt>
+    <dd>This is optional. If the record/structure has a field named
+      "doubleAlarm" and, if that field has associated support, the support is
+      called after the power is computed. The power field is passed to
+      support.setField. The doubleAlarm support must complete processing
+      before currentOutput support is called.</dd>
+  <dt style="font-family: courier;">currentOutput</dt>
+    <dd>This is optional. If the record/structure has a field named
+      "currentOutput" and, if that field has associated support, the support
+      is called. The current field is passed to support.setField. The support
+      must complete processing before linkArray support is called.</dd>
+  <dt style="font-family: courier;">linkArray</dt>
+    <dd>This is optional. If the record/structure has a field named
+      "linkArray" and, if that field has associated support, the support is
+      called. The value field is passed to support.setField. When linkArray
+      support completes double support completes processing.</dd>
+</dl>
+<hr />
+
+<h2 style="text-align: center" id="Incrementa1">IncrementalSupport
+Interface</h2>
+<hr />
+<pre>    interface IncrementalSupport extends Support{
+        void setDesiredField(DBField dbField);
+    }</pre>
+
+<p>This is the interface which must be implemented by any support that
+support incremental output support. It adds the method:</p>
+<dl>
+  <dt>setDesiredField</dt>
+    <dd>Specify the field that holds the desired value.</dd>
+</dl>
+</body>
+</html>

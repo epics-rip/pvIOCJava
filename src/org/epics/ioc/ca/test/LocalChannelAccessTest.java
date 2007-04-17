@@ -26,15 +26,15 @@ public class LocalChannelAccessTest extends TestCase {
      */
     public static void testLocalChannelAccess() {
         DBD dbd = DBDFactory.getMasterDBD();
-        Requestor iocRequestor = new Listener();
+        Requester iocRequester = new Listener();
         XMLToDBDFactory.convert(dbd,
                  "dbd/menuStructureSupport.xml",
-                 iocRequestor);
+                 iocRequester);
         XMLToDBDFactory.convert(dbd,
                  "src/org/epics/ioc/process/test/exampleDBD.xml",
-                 iocRequestor);        
+                 iocRequester);        
         boolean initOK = IOCFactory.initDatabase(
-            "src/org/epics/ioc/process/test/localLinkDB.xml",iocRequestor);
+            "src/org/epics/ioc/process/test/localLinkDB.xml",iocRequester);
         if(!initOK) return;
         PutGet counter = new PutGet("counter",true);
         Get getDouble01 = new Get("double01",false);
@@ -68,7 +68,7 @@ public class LocalChannelAccessTest extends TestCase {
         Put counterPut;
         counterPut = new Put("counter",true);
         if(!counterPut.connect()) return;
-        System.out.println("expected message: already has registered requestor");
+        System.out.println("expected message: already has registered requester");
         counterPut.destroy();
         counterProcess.destroy();
         counterPut = new Put("counter",true);
@@ -104,7 +104,7 @@ public class LocalChannelAccessTest extends TestCase {
     }
     
     private static class Process implements
-    ChannelProcessRequestor,ChannelStateListener
+    ChannelProcessRequester,ChannelStateListener
     {
         private Lock lock = new ReentrantLock();
         private Condition waitDone = lock.newCondition();
@@ -136,19 +136,19 @@ public class LocalChannelAccessTest extends TestCase {
             }
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.util.Requestor#getRequestorName()
+         * @see org.epics.ioc.util.Requester#getRequestorName()
          */
-        public String getRequestorName() {
+        public String getRequesterName() {
             return "Put:" + pvname;
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.util.Requestor#message(java.lang.String, org.epics.ioc.util.MessageType)
+         * @see org.epics.ioc.util.Requester#message(java.lang.String, org.epics.ioc.util.MessageType)
          */
         public void message(String message, MessageType messageType) {
             System.out.printf("putGet.massage %s%n", message);
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.ca.ChannelProcessRequestor#processDone(org.epics.ioc.util.RequestResult)
+         * @see org.epics.ioc.ca.ChannelProcessRequester#processDone(org.epics.ioc.util.RequestResult)
          */
         public void processDone(RequestResult requestResult) {
             lock.lock();
@@ -183,7 +183,7 @@ public class LocalChannelAccessTest extends TestCase {
     }
     
     private static class PutGet implements
-    ChannelPutGetRequestor,
+    ChannelPutGetRequester,
     ChannelStateListener, ChannelFieldGroupListener
     {
         private Lock lock = new ReentrantLock();
@@ -206,7 +206,7 @@ public class LocalChannelAccessTest extends TestCase {
         }
         
         /* (non-Javadoc)
-         * @see org.epics.ioc.ca.ChannelPutRequestor#nextDelayedPutData(org.epics.ioc.pvAccess.PVData)
+         * @see org.epics.ioc.ca.ChannelPutRequester#nextDelayedPutData(org.epics.ioc.pvAccess.PVData)
          */
         public boolean nextDelayedPutField(PVField field) {
             // TODO Auto-generated method stub
@@ -214,7 +214,7 @@ public class LocalChannelAccessTest extends TestCase {
         }
 
         /* (non-Javadoc)
-         * @see org.epics.ioc.ca.ChannelGetRequestor#nextDelayedGetData(org.epics.ioc.pvAccess.PVData)
+         * @see org.epics.ioc.ca.ChannelGetRequester#nextDelayedGetData(org.epics.ioc.pvAccess.PVData)
          */
         public boolean nextDelayedGetField(PVField pvField) {
             // TODO Auto-generated method stub
@@ -260,26 +260,26 @@ public class LocalChannelAccessTest extends TestCase {
             valueData.printResults();
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.util.Requestor#getRequestorName()
+         * @see org.epics.ioc.util.Requester#getRequestorName()
          */
-        public String getRequestorName() {
+        public String getRequesterName() {
             return "PutGet:" + pvname;
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.util.Requestor#message(java.lang.String, org.epics.ioc.util.MessageType)
+         * @see org.epics.ioc.util.Requester#message(java.lang.String, org.epics.ioc.util.MessageType)
          */
         public void message(String message, MessageType messageType) {
             System.out.printf("putGet.massage %s%n", message);
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.ca.ChannelGetRequestor#nextGetData(org.epics.ioc.ca.Channel, org.epics.ioc.ca.ChannelField, org.epics.ioc.pvAccess.PVData)
+         * @see org.epics.ioc.ca.ChannelGetRequester#nextGetData(org.epics.ioc.ca.Channel, org.epics.ioc.ca.ChannelField, org.epics.ioc.pvAccess.PVData)
          */
         public boolean nextGetField(ChannelField channelField, PVField pvField) {
             valueData.nextGetField(channel, channelField, pvField);
             return false;
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.ca.ChannelPutRequestor#nextPutData(org.epics.ioc.ca.Channel, org.epics.ioc.ca.ChannelField, org.epics.ioc.pvAccess.PVData)
+         * @see org.epics.ioc.ca.ChannelPutRequester#nextPutData(org.epics.ioc.ca.Channel, org.epics.ioc.ca.ChannelField, org.epics.ioc.pvAccess.PVData)
          */
         public boolean nextPutField(ChannelField channelField, PVField pvField) {
             PVDouble pvDouble = (PVDouble)pvField;
@@ -288,14 +288,14 @@ public class LocalChannelAccessTest extends TestCase {
         }
         
         /* (non-Javadoc)
-         * @see org.epics.ioc.ca.ChannelPutRequestor#putDone(org.epics.ioc.util.RequestResult)
+         * @see org.epics.ioc.ca.ChannelPutRequester#putDone(org.epics.ioc.util.RequestResult)
          */
         public void putDone(RequestResult requestResult) {
             // nothing to do
         }
         
         /* (non-Javadoc)
-         * @see org.epics.ioc.ca.ChannelGetRequestor#getDone(org.epics.ioc.util.RequestResult)
+         * @see org.epics.ioc.ca.ChannelGetRequester#getDone(org.epics.ioc.util.RequestResult)
          */
         public void getDone(RequestResult requestResult) {
             lock.lock();
@@ -330,7 +330,7 @@ public class LocalChannelAccessTest extends TestCase {
     }
     
     private static class Put implements
-    ChannelPutRequestor,
+    ChannelPutRequester,
     ChannelStateListener, ChannelFieldGroupListener
     {
         private Lock lock = new ReentrantLock();
@@ -350,7 +350,7 @@ public class LocalChannelAccessTest extends TestCase {
             channel = ChannelFactory.createChannel(pvname, this, false);
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.ca.ChannelPutRequestor#nextDelayedPutData(org.epics.ioc.pvAccess.PVData)
+         * @see org.epics.ioc.ca.ChannelPutRequester#nextDelayedPutData(org.epics.ioc.pvAccess.PVData)
          */
         public boolean nextDelayedPutField(PVField field) {
             // TODO Auto-generated method stub
@@ -390,19 +390,19 @@ public class LocalChannelAccessTest extends TestCase {
             }
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.util.Requestor#getRequestorName()
+         * @see org.epics.ioc.util.Requester#getRequestorName()
          */
-        public String getRequestorName() {
+        public String getRequesterName() {
             return "Put:" + pvname;
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.util.Requestor#message(java.lang.String, org.epics.ioc.util.MessageType)
+         * @see org.epics.ioc.util.Requester#message(java.lang.String, org.epics.ioc.util.MessageType)
          */
         public void message(String message, MessageType messageType) {
             System.out.printf("put.massage %s%n", message);
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.ca.ChannelPutRequestor#nextPutData(org.epics.ioc.ca.Channel, org.epics.ioc.ca.ChannelField, org.epics.ioc.pvAccess.PVData)
+         * @see org.epics.ioc.ca.ChannelPutRequester#nextPutData(org.epics.ioc.ca.Channel, org.epics.ioc.ca.ChannelField, org.epics.ioc.pvAccess.PVData)
          */
         public boolean nextPutField(ChannelField channelField, PVField pvField) {
             PVDouble pvDouble = (PVDouble)pvField;
@@ -445,7 +445,7 @@ public class LocalChannelAccessTest extends TestCase {
     }
     
     private static class Get implements
-    ChannelGetRequestor,
+    ChannelGetRequester,
     ChannelStateListener, ChannelFieldGroupListener
     {
         private Lock lock = new ReentrantLock();
@@ -492,26 +492,26 @@ public class LocalChannelAccessTest extends TestCase {
             valueData.printResults();
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.ca.ChannelGetRequestor#nextDelayedGetData(org.epics.ioc.pvAccess.PVData)
+         * @see org.epics.ioc.ca.ChannelGetRequester#nextDelayedGetData(org.epics.ioc.pvAccess.PVData)
          */
         public boolean nextDelayedGetField(PVField pvField) {
             // TODO Auto-generated method stub
             return false;
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.util.Requestor#getRequestorName()
+         * @see org.epics.ioc.util.Requester#getRequestorName()
          */
-        public String getRequestorName() {
+        public String getRequesterName() {
             return "PutGet:" + pvname;
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.util.Requestor#message(java.lang.String, org.epics.ioc.util.MessageType)
+         * @see org.epics.ioc.util.Requester#message(java.lang.String, org.epics.ioc.util.MessageType)
          */
         public void message(String message, MessageType messageType) {
             System.out.printf("putGet.massage %s%n", message);
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.ca.ChannelGetRequestor#nextGetData(org.epics.ioc.ca.Channel, org.epics.ioc.ca.ChannelField, org.epics.ioc.pvAccess.PVData)
+         * @see org.epics.ioc.ca.ChannelGetRequester#nextGetData(org.epics.ioc.ca.Channel, org.epics.ioc.ca.ChannelField, org.epics.ioc.pvAccess.PVData)
          */
         public boolean nextGetField(ChannelField channelField, PVField pvField) {
             valueData.nextGetField(channel, channelField, pvField);
@@ -519,7 +519,7 @@ public class LocalChannelAccessTest extends TestCase {
         }
         
         /* (non-Javadoc)
-         * @see org.epics.ioc.ca.ChannelGetRequestor#getDone(org.epics.ioc.util.RequestResult)
+         * @see org.epics.ioc.ca.ChannelGetRequester#getDone(org.epics.ioc.util.RequestResult)
          */
         public void getDone(RequestResult requestResult) {
             lock.lock();
@@ -553,16 +553,16 @@ public class LocalChannelAccessTest extends TestCase {
         }
     }
     
-    private static class Listener implements Requestor {
+    private static class Listener implements Requester {
         /* (non-Javadoc)
-         * @see org.epics.ioc.util.Requestor#getRequestorName()
+         * @see org.epics.ioc.util.Requester#getRequestorName()
          */
-        public String getRequestorName() {
+        public String getRequesterName() {
             return "LocalChannelAccessTest";
         }
 
         /* (non-Javadoc)
-         * @see org.epics.ioc.util.Requestor#message(java.lang.String, org.epics.ioc.util.MessageType)
+         * @see org.epics.ioc.util.Requester#message(java.lang.String, org.epics.ioc.util.MessageType)
          */
         public void message(String message, MessageType messageType) {
             System.out.println(message);

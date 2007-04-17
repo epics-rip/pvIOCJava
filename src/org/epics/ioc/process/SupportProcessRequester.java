@@ -12,7 +12,7 @@ import org.epics.ioc.util.*;
  * @author mrk
  *
  */
-public interface SupportProcessRequestor {
+public interface SupportProcessRequester {
     /**
      * The asynchronous process request is finished.
      * This must be called with the record locked.

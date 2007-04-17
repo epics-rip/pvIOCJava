@@ -10,7 +10,7 @@ import junit.framework.TestCase;
 import org.epics.ioc.pv.*;
 import org.epics.ioc.dbd.*;
 import org.epics.ioc.db.*;
-import org.epics.ioc.util.Requestor;
+import org.epics.ioc.util.Requester;
 import org.epics.ioc.util.MessageType;
 
 /**
@@ -27,9 +27,9 @@ public class ParentTest extends TestCase {
     public static void testParent() {
         DBD dbd = DBDFactory.getMasterDBD();
         IOCDB iocdb = IOCDBFactory.create("testIOCDatabase");
-        Requestor iocRequestor = new Listener();
+        Requester iocRequester = new Listener();
         XMLToDBDFactory.convert(dbd,
-                 "src/org/epics/ioc/db/test/parentDBD.xml",iocRequestor);
+                 "src/org/epics/ioc/db/test/parentDBD.xml",iocRequester);
         
         //System.out.printf("%n%nstructures");
         //Map<String,DBDStructure> structureMap = dbd.getStructureMap();
@@ -47,7 +47,7 @@ public class ParentTest extends TestCase {
         //}
 
         XMLToIOCDBFactory.convert(dbd,iocdb,
-                 "src/org/epics/ioc/db/test/parentDB.xml",iocRequestor);
+                 "src/org/epics/ioc/db/test/parentDB.xml",iocRequester);
         
 //        System.out.printf("%nrecords%n");
 //        Map<String,DBRecord> recordMap = iocdb.getRecordMap();
@@ -159,16 +159,16 @@ public class ParentTest extends TestCase {
         
     }
     
-    private static class Listener implements Requestor {
+    private static class Listener implements Requester {
         /* (non-Javadoc)
-         * @see org.epics.ioc.util.Requestor#getRequestorName()
+         * @see org.epics.ioc.util.Requester#getRequestorName()
          */
-        public String getRequestorName() {
+        public String getRequesterName() {
             return "ParentTest";
         }
 
         /* (non-Javadoc)
-         * @see org.epics.ioc.util.Requestor#message(java.lang.String, org.epics.ioc.util.MessageType)
+         * @see org.epics.ioc.util.Requester#message(java.lang.String, org.epics.ioc.util.MessageType)
          */
         public void message(String message, MessageType messageType) {
             System.out.println(message);

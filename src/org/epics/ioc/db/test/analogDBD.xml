@@ -7,19 +7,21 @@
         <property name = "severity" associatedField = "severity" />
         <property name = "timeStamp" associatedField = "timeStamp" />
         <property name = "units" associatedField = "units" />
-        <property name = "displayLimit" associatedField = "displayLimit" />
+        <property name = "doubleLimit" associatedField = "doubleLimit" />
     </field>
     <field name = "priority" type = "menu" menuName = "priority" />
     <field name = "units" type = "string" />
     <field name = "status" type = "string" />
     <field name = "severity" type = "menu" menuName = "alarmSeverity" />
     <field name = "timeStamp" type = "structure" structureName = "timeStamp" />
-    <field name = "displayLimit"
-         type = "structure" structureName = "displayLimit" />
+    <field name = "doubleLimit"
+         type = "structure" structureName = "doubleLimit" />
     <field name = "input" type = "link" />
     <field name = "rawValue" type = "int" />
     <field name = "linearConvert"
-        type = "structure" structureName = "linearConvertInput" />
+        type = "structure"
+        structureName = "linearConvert" 
+        supportName = "linearConvertInput" />
 </recordType>
 
 </DBDefinition>

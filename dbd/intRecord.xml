@@ -1,22 +1,13 @@
 <?xml version="1.0" ?>
 <DBDefinition>
 
+<structure name = "int" supportName = "intRecord" >
+    <include href = "intCommon.xml" />
+</structure>
+
 <recordType name = "int" supportName = "intRecord" >
     <include href = "common.xml" />
-    <field name = "value" type = "int" >
-        <property name = "alarm" associatedField = "alarm" />
-        <property name = "units" associatedField = "units" />
-        <property name = "displayLimit" associatedField = "displayLimit" />
-        <property name = "timeStamp" associatedField = "/timeStamp" />
-    </field>
-    <field name = "input" type = "link" />
-    <field name = "intAlarm" type = "link" supportName = "intAlarm" />
-    <field name = "output" type = "link" />
-    <field name = "linkArray" type = "array"
-         elementType = "structure" supportName = "linkArray" />
-    <field name = "units" type = "string" />
-    <field name = "displayLimit"
-         type = "structure" structureName = "doubleLimit" />
+    <include href = "intCommon.xml" />
 </recordType>
 
 <support name = "intRecord"

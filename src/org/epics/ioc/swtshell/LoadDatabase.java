@@ -26,7 +26,7 @@ public class LoadDatabase {
         load.start();
     }
     
-    private static class Load implements SelectionListener,  Requestor{
+    private static class Load implements SelectionListener,  Requester{
         private Display display;
         private Shell shell;
         private Button findButton;
@@ -168,13 +168,13 @@ public class LoadDatabase {
         }
         
         /* (non-Javadoc)
-         * @see org.epics.ioc.util.Requestor#getRequestorName()
+         * @see org.epics.ioc.util.Requester#getRequesterName()
          */
-        public String getRequestorName() {
+        public String getRequesterName() {
             return "swtshell.loadDBD";
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.util.Requestor#message(java.lang.String, org.epics.ioc.util.MessageType)
+         * @see org.epics.ioc.util.Requester#message(java.lang.String, org.epics.ioc.util.MessageType)
          */
         public void message(String message, MessageType messageType) {
             consoleText.append(String.format("%s %s %n",messageType.toString(),message));

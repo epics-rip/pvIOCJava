@@ -1,0 +1,13 @@
+<?xml version="1.0" ?>
+<DBDefinition>
+
+<structure name = "aoIncrementalDouble" supportName = "incrementalDoubleRecord" >
+    <include href = "aoIncrementalDoubleCommon.xml" />
+</structure>
+
+<recordType name = "aoIncrementalDouble" supportName = "incrementalDoubleRecord" >
+    <include href = "common.xml" />
+    <include href = "aoIncrementalDoubleCommon.xml" />
+</recordType>
+
+</DBDefinition>

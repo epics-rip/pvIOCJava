@@ -10,17 +10,51 @@
 <body>
 <h1 style="text-align: center">EPICS JavaIOC: support<br />
 package: org.epics.ioc.support<br />
-2007.03.05</h1>
+2007.04.17</h1>
 CONTENTS
 
 <div class="toc">
 <ul>
   <li><a href="#Overview">Overview</a></li>
-  <li><a href="#Link">Link Support Factory</a></li>
-  <li><a href="#Link1">Link Array Support Factory</a></li>
-  <li><a href="#Scan">Scan Support Factory</a></li>
-  <li><a href="#Noop">Noop Factory</a></li>
-  <li><a href="#Linear">Linear Convert Input Factory</a></li>
+  <li><a href="#Support">Support</a>
+    <ul>
+      <li><a href="#Definition">Definitions</a></li>
+      <li><a href="#SupportSta">SupportState</a></li>
+      <li><a href="#Support1">Support</a></li>
+      <li><a href="#LinkSuppor">LinkSupport</a></li>
+      <li><a href="#AbstractSu">AbstractSupport</a></li>
+    </ul>
+  </li>
+  <li><a href="#Scan">Scan Support</a></li>
+  <li><a href="#Alarm">Alarm Support</a>
+    <ul>
+      <li><a href="#Alarm1">Alarm Support</a></li>
+      <li><a href="#BooleanAla">BooleanAlarmFactory</a></li>
+      <li><a href="#DoubleAlar">DoubleAlarmFactory</a></li>
+      <li><a href="#IntAlarmFa">IntAlarmFactory</a></li>
+    </ul>
+  </li>
+  <li><a href="#Linear">Linear Conversion</a>
+    <ul>
+      <li><a href="#linearConv">linearConversion</a></li>
+      <li><a href="#LinearConv">LinearConvertInputFactory</a></li>
+      <li><a href="#LinearConv1">LinearConvertOutputFactory</a></li>
+      <li><a href="#DeviceLimi">DeviceLimit</a></li>
+    </ul>
+  </li>
+  <li><a href="#NoopFactor">Noop Support</a></li>
+  <li><a href="#Calculatio">Calculation Support</a>
+    <ul>
+      <li><a href="#Performing">Performing Calculations</a></li>
+      <li><a href="#calcArgArr">calcArgArray</a></li>
+      <li><a href="#Calculator">Calculator</a></li>
+      <li><a href="#Calc">Calc</a></li>
+    </ul>
+  </li>
+  <li><a href="#CALink">CALink Support</a></li>
+  <li><a href="#LinkArray">LinkArray Support</a></li>
+  <li><a href="#Link">Link Support</a></li>
+  <li><a href="#DelayLink">DelayLink Support</a></li>
 </ul>
 </div>
 <hr />
@@ -28,39 +62,789 @@ CONTENTS
 <h2 style="text-align: center" id="Overview">Overview</h2>
 <hr />
 
-<p>This package provides standard support for the following:</p>
+<p>This package provides interfaces and classes for processing fields of IOC
+database records. It defines the following interfaces: the following
+interfaces:</p>
 <dl>
-  <dt>LinkSupportFactory</dt>
-    <dd>Support for the following link types: processLink, inputLink,
-      outputLink, and monitorLink.</dd>
-  <dt>LinkArraySupportFactory</dt>
-    <dd>Support for an array of links. This can be used by most record
-    types</dd>
-  <dt>ScanSupportFactory</dt>
-    <dd>Support for the scan field.</dd>
-  <dt>NoopFactory</dt>
-    <dd>A record support that does nothing except acts as though everything
-      works.</dd>
-  <dt>LinearConvertInputFactory</dt>
-    <dd>Support for converting a raw value to engineering units. NOT
-      IMPLEMENTED.</dd>
+  <dt>Support</dt>
+    <dd>The interfaces and classes that provide the core for support.</dd>
+  <dt>Scan Support</dt>
+    <dd>An extension of Support for field scan.</dd>
+  <dt>Alarm Support</dt>
+    <dd>An extension of Support for field alarm and for calculation
+    alarms.</dd>
+  <dt>Linear Conversion</dt>
+    <dd>An extension of Support for Linear conversions.</dd>
+  <dt>Noop Support</dt>
+    <dd>Support that does nothing except complete normally.</dd>
+  <dt>Calculation Support</dt>
+    <dd>An extension of Support for field calculation of a calc record or
+      structure.</dd>
+  <dt>CALinkFactory</dt>
+    <dd>Support for links to other records.</dd>
+  <dt>LinkArrayFactory</dt>
+    <dd>Support for an array of links.</dd>
+  <dt>LinkFactory</dt>
+    <dd>Support for a structure that has a single field which is a link</dd>
+  <dt>DelayLinkFactory</dt>
+    <dd>Support that simulates asynchronous support</dd>
 </dl>
 
-<p>In addition a file that does not have an implementation is present.
-Something like this will be part of the standard set of record types provided
-by javaIOC. It will most likely be moved to a different package perhaps:
-<span style="font-family: courier;">org.epics.ioc.recordType.</span></p>
+<p>In addition the following classes are provided:</p>
 <dl>
-  <dt>AnalogInputFactory</dt>
-    <dd>A record type that has an input link which provides a raw value,
-      converts the raw value to engineering units, and uses linkArray support
-      that can have processLink and/or outputLink elements. It will use
-      LinearConvertInput to do the conversion.</dd>
+  <dt>AbstractSupport</dt>
+    <dd>A base class that is extended by most support code. It implements all
+      of the Support methods.</dd>
 </dl>
 <hr />
 
-<h2 style="text-align: center" id="Link">Link Support Factory</h2>
+<h2 style="text-align: center" id="Support">Support</h2>
 <hr />
+
+<p>This section describes the interfaces and abstract base class involved
+with support for fields of an IOC record. This also applys to the support for
+the record itself.</p>
+
+<h3 id="Definition">Definitions</h3>
+
+<p>The following are used by support code, i.e. record support, link support,
+and any other support code that is involved with record processing:</p>
+<pre>    // SupportState is defined in org.epics.ioc.process
+    public enum SupportState {
+        readyForInitialize,
+        readyForStart,
+        ready,
+        zombie;
+    }
+
+    public interface Support extends Requester {
+        SupportState getSupportState();
+        DBField getDBField();
+        void initialize();
+        void start();
+        void stop();
+        void uninitialize();
+        void process(SupportProcessRequester supportProcessRequester);
+        void setField(DBField dbField);
+    }
+
+    public interface LinkSupport extends Support {
+        PVStructure getConfigStructure(String structureName, boolean reportFailure);
+    }
+
+
+    public abstract class AbstractSupport implements Support {
+        protected AbstractSupport(String name,DBField dbField);
+        // methods from Requester
+        public String getRequesterName();
+        public void message(String message, MessageType messageType);
+        // methods that are rarely overridden
+        public SupportState getSupportState();
+        public DBField getDBField();
+        // following normally overridden
+        public void initialize();
+        public void start();
+        public void stop();
+        public void uninitialize();
+        public void process(SupportProcessRequester supportProcessRequester);
+        public void setField(DBField dbField);
+        // following must always be called when support state changes
+        protected void setSupportState(SupportState state);
+        // following is for use by support code
+        protected boolean checkSupportState(
+            SupportState expectedState,String message);
+    }
+
+    public class AbstractLinkSupport extends AbstractSupport implements LinkSupport{
+        protected AbstractLinkSupport(String name,DBField dbField);
+        public PVStructure getConfigStructure(String structureName, boolean reportFailure);
+    }</pre>
+
+<h3 id="SupportSta">SupportState</h3>
+
+<p><span style="font-family: courier;">SupportState</span> has the following
+values:</p>
+<dl>
+  <dt style="font-family: courier;">readyForInitialize</dt>
+    <dd>Initial state for support. It has been created but has not done
+    much.</dd>
+  <dt style="font-family: courier;">readyForStart</dt>
+    <dd>Support has done any initialization that does not involve connecting
+      to other records and/or support.</dd>
+  <dt style="font-family: courier;">ready</dt>
+    <dd>Support is ready for processing.</dd>
+  <dt style="font-family: courier;">zombie</dt>
+    <dd>Support is going away.</dd>
+</dl>
+
+<h3 id="Support1">Support</h3>
+
+<p><span style="font-family: courier;">Support</span> has the methods:</p>
+<dl>
+  <dt style="font-family: courier;">getRequesterName</dt>
+    <dd>A requester method to get the name of the support.</dd>
+  <dt style="font-family: courier;">message</dt>
+    <dd>A Requester method. This is called to pass messages to the
+    support.</dd>
+  <dt style="font-family: courier;">getSupportState</dt>
+    <dd>Get the support state.</dd>
+  <dt style="font-family: courier;">getDBField</dt>
+    <dd>Get the <span style="font-family: courier;">DBField</span> interface
+      for the field that is being supported. For record support this will be
+      the record itself. <span style="font-family: courier;"></span></dd>
+  <dt style="font-family: courier;">initialize</dt>
+    <dd>Perform initialization that does not involve accessing other records
+      and/or support.</dd>
+  <dt style="font-family: courier;">start</dt>
+    <dd>Connect to other records and/or support.</dd>
+  <dt style="font-family: courier;">stop</dt>
+    <dd>Disconnect from other records and/or support and be ready to again
+      start.</dd>
+  <dt style="font-family: courier;">uninitialize</dt>
+    <dd>Remove all internal state are prepare to again initialize.</dd>
+  <dt style="font-family: courier;">process</dt>
+    <dd>Process.</dd>
+  <dt style="font-family: courier;">setField</dt>
+    <dd>This specifies the field in the record to/from the support will
+      put/get data.</dd>
+</dl>
+
+<h3 id="LinkSuppor">LinkSupport</h3>
+
+<p><span style="font-family: courier;">LinkSupport</span> extends <span
+style="font-family: courier;">Support</span> with the method:</p>
+<dl>
+  <dt style="font-family: courier;">getConfigStructure</dt>
+    <dd>This gets the interface for the configuration structure for the
+    link.</dd>
+</dl>
+
+<h3 id="AbstractSu">AbstractSupport</h3>
+
+<p>All support code should extend AbstractSupport. Abstract Support
+implements all Support methods. Thus support code only has to override the
+methods it needs.</p>
+<dl>
+  <dt style="font-family: courier;">AbstractSupport</dt>
+    <dd>The constructor which must be called by the derived support
+      constructor.</dd>
+  <dt style="font-family: courier;">getRequesterName</dt>
+    <dd>The returns the name passed to constructor.</dd>
+  <dt style="font-family: courier;">message</dt>
+    <dd>Calls dbField.message.</dd>
+  <dt style="font-family: courier;">getSupportState</dt>
+    <dd>Gets the current support state.</dd>
+  <dt style="font-family: courier;">getDBField</dt>
+    <dd>Returns dbField.</dd>
+  <dt style="font-family: courier;">initialize</dt>
+    <dd>Normally overridden. The default version always succeeds, i.e. enters
+      state readyForStart.</dd>
+  <dt style="font-family: courier;">start</dt>
+    <dd>Normally overridden. The default version always succeeds, i.e. enters
+      state ready.</dd>
+  <dt style="font-family: courier;">stop</dt>
+    <dd>Normally overridden. The default version always succeeds, i.e. enters
+      state readyForStart.</dd>
+  <dt style="font-family: courier;">unintialize</dt>
+    <dd>Normally overridden. The default version always succeeds, i.e. enters
+      state readyForInitialize.</dd>
+  <dt style="font-family: courier;">process</dt>
+    <dd>Normally overridden. The default version just calls
+      supportProcessRequester.supportProcessDone(RequestResult.success);</dd>
+  <dt style="font-family: courier;">setField</dt>
+    <dd>Does nothing.</dd>
+  <dt style="font-family: courier;">setSupportState</dt>
+    <dd>This must be called by support whenever it changes state.</dd>
+  <dt style="font-family: courier;">checkSupportState</dt>
+    <dd>Checks that the state is the expected state and generates an error
+      message if it isn't.</dd>
+</dl>
+<hr />
+
+<h2 style="text-align: center" id="Scan">Scan Support</h2>
+<hr />
+
+<p>Support is provided for the scan field. This support is called by
+recordProcess. The support handles all the fields in structure scan:</p>
+<pre>&lt;structure name = "scan"&gt;
+    &lt;field name = "priority" type = "menu" menuName = "priority" default = "middle" /&gt;
+    &lt;field name = "scan" type = "menu" menuName = "scan" default = "passive" /&gt;
+    &lt;field name = "rate" type = "double"  default = "1.0" /&gt;
+    &lt;field name = "eventName" type = "string" /&gt;
+    &lt;field name = "processSelf" type = "boolean" /&gt;
+&lt;/structure&gt;</pre>
+
+<p>At initialization and whenever the scan, priority, rate, or eventName
+fields are modified, the support interacts with the appropriate scanners to
+add or remove the record from the scanner. If processSelf is set true, the
+support implements ScanSupport.</p>
+
+<p>IMPORTANT: RecordProcess provides the same methods as ScanSupport. Support
+code must call the RecordProcess methods rather than calling the ScanSupport
+methods.</p>
+
+<p>The following definitions are provided:</p>
+<pre>    public interface ScanSupport extends Support {
+        boolean canProcessSelf();
+        boolean processSelfRequest(RecordProcessRequester recordProcessRequester);
+        void processSelfSetActive(RecordProcessRequester recordProcessRequester);
+        void processSelfProcess(RecordProcessRequester recordProcessRequester,
+            boolean leaveActive);
+        void processSelfSetInactive(RecordProcessRequester recordProcessRequester);
+    }
+    public class ScanFactory {
+        public static Support create(DBStructure dbStructure);
+    }</pre>
+
+<p><span style="font-family: courier;">ScanSupport</span>, which MUST only be
+called by recordProcess, extends <span
+style="font-family: courier;">Support</span> with the methods:</p>
+<dl>
+  <dt style="font-family: courier;">canScanSelf</dt>
+    <dd>Can the record scan itself? This is true if scan.scanSelf is true. In
+      this case scanSupport itself owns and processes the record.</dd>
+  <dt style="font-family: courier;">processSelfRequest</dt>
+    <dd>Request to process the record. This returns true if scanSupport is
+      the record processor and the record is not active.</dd>
+  <dt style="font-family: courier;">processSelfSetActive</dt>
+    <dd>If processSelfRequest returns true this can be called to set the
+      record active. This is called when user code wants to modify data in
+      the record before calling processSelfProcess.</dd>
+  <dt style="font-family: courier;">processSelfProcess</dt>
+    <dd>If processSelfRequest returns true this can be called to process the
+      record.</dd>
+  <dt style="font-family: courier;">processSelfSetInactive</dt>
+    <dd>If the call to processSelfProcess said to leave the record active,
+      this is called to set the record inactive. This is done if the caller
+      wants to read data from the record after processing.</dd>
+</dl>
+<hr />
+
+<h2 style="text-align: center" id="Alarm">Alarm Support</h2>
+<hr />
+
+<p>Support is provided for the alarm field itself and alarm calculation for
+boolean, int, and double fields. The following xml definiotions are involved
+with alarms.</p>
+<pre>&lt;structure name = "alarm"&gt;
+    &lt;field name = "severity" type = "menu" menuName = "alarmSeverity" /&gt;
+    &lt;field name = "message" type = "string" /&gt;
+&lt;/structure&gt;
+
+&lt;structure name = "doubleAlarm"&gt;
+    &lt;field name = "active" type = "boolean" /&gt;
+    &lt;field name = "highMajor" type = "double" /&gt;
+    &lt;field name = "highMinor" type = "double" /&gt;
+    &lt;field name = "lowMinor" type = "double" /&gt;
+    &lt;field name = "lowMajor" type = "double" /&gt;
+    &lt;field name = "hystersis" type = "double" /&gt;
+&lt;/structure&gt;
+
+&lt;structure name = "intAlarm"&gt;
+    &lt;field name = "active" type = "boolean" /&gt;
+    &lt;field name = "highMajor" type = "int" /&gt;
+    &lt;field name = "highMinor" type = "int" /&gt;
+    &lt;field name = "lowMinor" type = "int" /&gt;
+    &lt;field name = "lowMajor" type = "int" /&gt;
+&lt;/structure&gt;
+
+&lt;structure name = "booleanAlarm" &gt;
+    &lt;field name = "active" type = "boolean" /&gt;
+    &lt;field name = "falseAlarm" type = "menu" menuName = "alarmSeverity" /&gt;
+    &lt;field name = "trueAlarm" type = "menu" menuName = "alarmSeverity" /&gt;
+    &lt;field name = "changeStateAlarm" type = "menu" menuName = "alarmSeverity" /&gt;
+&lt;/structure&gt;
+
+&lt;support name = "alarm"
+    factoryName = "org.epics.ioc.support.AlarmFactory"
+/&gt;
+&lt;linkSupport name = "booleanAlarm"
+    configurationStructureName = "booleanAlarm"
+   factoryName = "org.epics.ioc.support.BooleanAlarmFactory" /&gt;
+&lt;linkSupport name = "intAlarm"
+    configurationStructureName = "intAlarm"
+   factoryName = "org.epics.ioc.support.IntAlarmFactory" /&gt;
+
+&lt;linkSupport name = "doubleAlarm"
+    configurationStructureName = "doubleAlarm"
+   factoryName = "org.epics.ioc.support.DoubleAlarmFactory" /&gt;</pre>
+
+<p>The field alarm is defined in common.xml and this is in every record. the
+definition is:</p>
+<pre>&lt;field name = "alarm" type = "structure" structureName = "alarm"
+          supportName = "alarm" /&gt;</pre>
+
+<p>Records or structures that support alarm processing for double fields
+contain the definition:</p>
+<pre>&lt;field name = "doubleAlarm" type = "link" supportName = "doubleAlarm" /&gt;</pre>
+
+<h3 id="Alarm1">Alarm Support</h3>
+
+<p>AlarmSupport is support for a field names "alarm" which must have type
+structure and the structure must be an alarm structure. Within the structure
+hierarchy of a record multiple alarm fields can exist. RecordProcess calls
+the support for the alarm field defined in the top level structure (defined
+in common.xml). If other alarm fields are present AlarmSupport calls itself,
+i.e. no code except RecordProcess and AlarmSupport should call the Support
+methods of AlarmSupport. If multiple alarm fields reside in a record then the
+top level alarm field, which is what the outside world normally accesses has
+a severity at least as great as any of the lower level alarms.</p>
+<pre>    interface AlarmSupport extends Support{
+        void beginProcess();
+        void endProcess();
+        boolean setAlarm(String message, AlarmSeverity severity);
+        void getAlarmStamp(AlarmStamp alarmStamp);
+        String getMessage();
+        AlarmSeverity getSeverity();
+    }
+
+    class AlarmFactory {
+        public static Support create(DBStructure dbStructure);
+        public static AlarmSupport findAlarmSupport(DBField startDBField);
+    }</pre>
+
+<p>AlarmSupport provides the methods:</p>
+<dl>
+  <dt style="font-family: courier;">Support</dt>
+    <dd>As mentioned above only RecordProcess and AlarmSupport call the
+      Support methods implemented by AlarmSupport.</dd>
+  <dt style="font-family: courier;">beginProces</dt>
+    <dd>This also is only called by RecordProcess or AlarmSupport. It is
+      called when a record begins processing. It saves the current message
+      and severity and initialize the new severity to no alarm and the new
+      message to null.</dd>
+  <dt style="font-family: courier;">endProces</dt>
+    <dd>This also is only called by RecordProcess or AlarmSupport. It is
+      called when a record finishes processing. If the new alarm severity
+      and/or message are different than what they were when the record
+      started processing, the alarm massage and severity are changed and the
+      alarm field posted so that monitors are issued.</dd>
+  <dt style="font-family: courier;">setAlarm</dt>
+    <dd>While a record is processing and code, normally one of the support
+      modules described below, can call setAlarm. This method changes the new
+      message and severity only if the severity passed to setAlarm is greater
+      than the current new severity or if this is the first call since the
+      record started processing.</dd>
+  <dt style="font-family: courier;">getAlarmStamp</dt>
+    <dd>Sets the alarmStamp to the current new severity and message.</dd>
+  <dt style="font-family: courier;">getMessage</dt>
+    <dd>Returns the current new message.</dd>
+  <dt style="font-family: courier;">getSeverity</dt>
+    <dd>Returns the current new severity.</dd>
+</dl>
+
+<p>AlarmFactory provides the static methods:</p>
+<dl>
+  <dt style="font-family: courier;">create</dt>
+    <dd>Create support for a alarm field. This is called by
+    SupportCreation.</dd>
+  <dt style="font-family: courier;">findAlarmSupport</dt>
+    <dd>Find an alarm field looking up the structure hierarchy. Return it or
+      retrurn null if none is found.</dd>
+</dl>
+
+<h3 id="BooleanAla">BooleanAlarmFactory</h3>
+<pre>    public class BooleanAlarmFactory {
+        public static Support create(DBLink dbLink);
+    }</pre>
+
+<p>This provides support for reporting alarms for boolean fields. The
+configurationStructure must be a structure booleanAlarm, which has the
+fields:</p>
+<dl>
+  <dt style="font-family: courier;">active</dt>
+    <dd>A boolean field. If (false,true) then alarm conditions (are not,are)
+      checked.</dd>
+  <dt style="font-family: courier;">falseAlarm</dt>
+    <dd>An alarmSeverity menu. This specifies the severity if the value field
+      is false.</dd>
+  <dt style="font-family: courier;">trueAlarm</dt>
+    <dd>An alarmSeverity menu. This specifies the severity if the value field
+      is true.</dd>
+  <dt style="font-family: courier;">changeStateAlarm</dt>
+    <dd>An alarmSeverity menu. This specifies the severity if the value field
+      changes.</dd>
+</dl>
+
+<h3 id="DoubleAlar">DoubleAlarmFactory</h3>
+<pre>    public class DoubleAlarmFactory {
+        public static Support create(DBLink dbLink);
+    }</pre>
+
+<p>This provides support for reporting alarms for double fields. The
+configurationStructure must be a structure doubleAlarm, which has the
+fields:</p>
+<dl>
+  <dt style="font-family: courier;">active</dt>
+    <dd>A boolean field. If (false,true) then alarm conditions (are not,are)
+      checked.</dd>
+  <dt style="font-family: courier;">highMajor</dt>
+    <dd>A double. If the value field is greater than or equal to this value
+      the alarm severity will be major.</dd>
+  <dt style="font-family: courier;">highMinor</dt>
+    <dd>A double. If the value field is greater than or equal to this value
+      the alarm severity will be minor.</dd>
+  <dt style="font-family: courier;">lowMinor</dt>
+    <dd>A double. If the value field is less than or equal to this value the
+      alarm severity will be minor.</dd>
+  <dt style="font-family: courier;">lowMajor</dt>
+    <dd>A double. If the value field is less than or equal to this value the
+      alarm severity will be major.</dd>
+  <dt style="font-family: courier;">hystersis</dt>
+    <dd>If value goes into alarm this is the amount it must come out of alarm
+      before the alarm severity is modified. This prevents alarm
+    "chatter".</dd>
+</dl>
+
+<h3 id="IntAlarmFa">IntAlarmFactory</h3>
+<pre>    public class IntAlarmFactory {
+        public static Support create(DBLink dbLink);
+    }</pre>
+
+<p>This provides support for reporting alarms for int fields. The
+configurationStructure must be a structure intAlarm, which has the fields:</p>
+<dl>
+  <dt style="font-family: courier;">active</dt>
+    <dd>A boolean field. If (false,true) then alarm conditions (are not,are)
+      checked.</dd>
+  <dt style="font-family: courier;">highMajor</dt>
+    <dd>A int. If the value field is greater than or equal to this value the
+      alarm severity will be major.</dd>
+  <dt style="font-family: courier;">highMinor</dt>
+    <dd>A int. If the value field is greater than or equal to this value the
+      alarm severity will be minor.</dd>
+  <dt style="font-family: courier;">lowMinor</dt>
+    <dd>A int. If the value field is less than or equal to this value the
+      alarm severity will be minor.</dd>
+  <dt style="font-family: courier;">lowMajor</dt>
+    <dd>A int. If the value field is less than or equal to this value the
+      alarm severity will be major.</dd>
+</dl>
+<hr />
+
+<h2 style="text-align: center" id="Linear">Linear Conversion</h2>
+<hr />
+
+<p>Support is available for input and output linear conversions. The xml
+definitions for linear conversions are:</p>
+<pre>&lt;structure name = "linearConvert" &gt;
+    &lt;field name = "engUnitsLow" type = "double" /&gt;
+    &lt;field name = "engUnitsHigh" type = "double" /&gt;
+    &lt;field name = "deviceHigh" type = "int" /&gt;
+    &lt;field name = "deviceLow" type = "int" /&gt;
+    &lt;field name = "slope" type = "double" /&gt;
+    &lt;field name = "intercept" type = "double" /&gt;
+&lt;/structure&gt;
+  
+
+&lt;structure name = "linearConvertInput" supportName = "linearConvertInput"&gt;
+    &lt;field name = "rawValue" type = "int" /&gt;
+    &lt;field name = "linearConvert" type = "structure" structureName = "linearConvert" /&gt;
+    &lt;field name = "input" type = "link" /&gt;
+&lt;/structure&gt;
+
+&lt;structure name = "linearConvertOutput" supportName = "linearConvertOutput"&gt;
+    &lt;field name = "rawValue" type = "int" /&gt;
+    &lt;field name = "linearConvert" type = "structure" structureName = "linearConvert" /&gt;
+    &lt;field name = "output" type = "link" /&gt;
+&lt;/structure&gt;
+
+&lt;support name = "linearConvertInput"
+    factoryName = "org.epics.ioc.support.LinearConvertInputFactory"
+/&gt;
+
+&lt;support name = "linearConvertOutput"
+    factoryName = "org.epics.ioc.support.LinearConvertOutputFactory"
+/&gt;</pre>
+
+<p>A structure or recordType that implemnts linear conversion for input must
+define a field as follows:</p>
+<pre>&lt;field name = "input" type = "structure" structureName = "linearConvertInput"/&gt;</pre>
+
+<p>A structure or recordType that implemnts linear conversion for output must
+define a field as follows:</p>
+<pre>&lt;field name = "output" type = "structure" structureName = "linearConvertOutput"/&gt;</pre>
+
+<h3 id="linearConv">linearConversion</h3>
+
+<p>The structure linearConversion defines the fields used for linear
+conversions. The fields slope and intercept are the values used to convert a
+rawValue to engineering units. The rawValue is an integer value usually read
+from an ADC (Analog to Digital Convertor). The slope and intercept can be
+specified directly of calculated from the low and high engineering and device
+values. If the later method is chosen the engUnitsLow and engUnitsHigh must
+be provided. deviceLow and deviceHigh are either provided automatically by
+support of must be provided. The following are the fields in structure
+lineraConversion:</p>
+<dl>
+  <dt style="font-family: courier;">engUnitsLow</dt>
+    <dd>A double equal to the engineering units value corresponding to the
+      value for deviceHigh.</dd>
+  <dt style="font-family: courier;">engUnitsHigh</dt>
+    <dd>A double equal to the engineering units value corresponding to the
+      value for deviceLow.</dd>
+  <dt style="font-family: courier;">deviceHigh</dt>
+    <dd>An int equal to the maximum value for the rawValue.</dd>
+  <dt style="font-family: courier;">deviceLow</dt>
+    <dd>An int equal to the minimum value for the rawValue.</dd>
+  <dt style="font-family: courier;">slope</dt>
+    <dd>The slope for the linear conversion.</dd>
+  <dt style="font-family: courier;">intercept</dt>
+    <dd>The intercept for the linear conversion.</dd>
+</dl>
+
+<h3 id="LinearConv">LinearConvertInputFactory</h3>
+<pre>    public class LinearConvertInputFactory {
+        public static Support create(DBStructure dbStructure);
+    }</pre>
+
+<p>This is the factory that implements linear input conversion, i.e. it
+converts a rawValue to engineering units. A field for linear conversion for
+input is a structure containing the following fields:</p>
+<dl>
+  <dt style="font-family: courier;">rawValue</dt>
+    <dd>The raw value which is obtained via the support attached to the input
+      field or by a put to this field.</dd>
+  <dt style="font-family: courier;">linearConvert</dt>
+    <dd>The structure providing the conversion parameters.</dd>
+  <dt style="font-family: courier;">input</dt>
+    <dd>The link for reading the rawValue. If a field named "input" is
+      defined and has support the support is called.</dd>
+</dl>
+
+<h3 id="LinearConv1">LinearConvertOutputFactory</h3>
+<pre>    public class LinearConvertOutputFactory {
+        public static Support create(DBStructure dbStructure);
+    }</pre>
+
+<p>This is the factory that implements linear output conversion, i.e. it
+converts a value in engineering units to a rawValue. A field for linear
+conversion for output is a structure containing the following fields:</p>
+<dl>
+  <dt style="font-family: courier;">rawValue</dt>
+    <dd>The raw value which is obtained via the support attached to the input
+      field or by a put to this field.</dd>
+  <dt style="font-family: courier;">linearConvert</dt>
+    <dd>The structure providing the conversion parameters.</dd>
+  <dt style="font-family: courier;">output</dt>
+    <dd>The link for reading the rawValue. If a field named "output" is
+      defined and has support the support is called.</dd>
+</dl>
+
+<h3 id="DeviceLimi">DeviceLimit</h3>
+<pre>    public interface DeviceLimit {
+        void get(DBField low, DBField high);
+    }</pre>
+
+<p>This is a convience class for accessing a structure that has two fields:
+"low" and "high".</p>
+<hr />
+
+<h2 style="text-align: center" id="NoopFactor">Noop Support</h2>
+<hr />
+<pre>    public class NoopFactory {
+        public static Support create(DBStructure dbStructure);
+        public static Support create(DBField dbField);
+        public static LinkSupport create(DBLink dbLink);
+    }</pre>
+
+<p>This can be used for record types that just hold data. It can also be used
+to provide support for any field. The support acts as though it is
+synchronous. All Support or LinkSupport methods are implemented by just
+extending AbstractSupport or AbstractLinkSupport without overriding any
+methods.</p>
+<hr />
+
+<h2 style="text-align: center" id="Calculatio">Calculation Support</h2>
+<hr />
+
+<p>This is support for use with the calc record or structure. File
+calcCommon.xml defines the fields:</p>
+<pre>&lt;DBDefinition&gt;
+    &lt;field name = "value" type = "double" &gt;
+        &lt;property name = "alarm" associatedField = "alarm" /&gt;
+        &lt;property name = "units" associatedField = "units" /&gt;
+        &lt;property name = "displayLimit" associatedField = "displayLimit" /&gt;
+        &lt;property name = "timeStamp" associatedField = "/timeStamp" /&gt;
+    &lt;/field&gt;
+    &lt;field name = "calcArgArray" type = "array"
+         elementType = "structure" supportName = "calcArgArray" /&gt;
+    &lt;field name = "calculator" type = "link" /&gt;
+    &lt;field name = "doubleAlarm" type = "link" supportName = "doubleAlarm" /&gt;
+    &lt;field name = "linkArray" type = "array"
+         elementType = "structure" supportName = "linkArray" /&gt;
+    &lt;field name = "units" type = "string" /&gt;
+    &lt;field name = "displayLimit"
+         type = "structure" structureName = "doubleLimit" /&gt;
+&lt;/DBDefinition&gt;</pre>
+
+<p>Field calcRecord.xml defines:</p>
+<pre>&lt;structure name = "calcArg" &gt;
+    &lt;field name = "value" type = "double" /&gt;
+    &lt;field name = "name" type = "string" /&gt;
+    &lt;field name = "input" type = "link" /&gt;
+&lt;/structure&gt;
+
+&lt;structure name = "calc" supportName = "calcRecord" &gt;
+    &lt;include href = "calcCommon.xml" /&gt;
+&lt;/structure&gt;
+
+&lt;recordType name = "calc" supportName = "calcRecord" &gt;
+    &lt;include href = "common.xml" /&gt;
+    &lt;include href = "calcCommon.xml" /&gt;
+&lt;/recordType&gt;
+
+&lt;support name = "calcRecord"
+   factoryName = "org.epics.ioc.recordSupport.CalcFactory" /&gt;</pre>
+
+<p>The following support is defined in support.xml</p>
+<pre>&lt;support name = "calcArgArray"
+   factoryName = "org.epics.ioc.support.CalcArgArrayFactory" /&gt;</pre>
+
+<h3 id="Performing">Performing Calculations</h3>
+
+<p>A calculation is performed by a calculation link support. The following is
+done. When the calcRecord support is called it calls the calcArgArray support
+and when it completes the calculation link support. For each element if the
+calcArgArray, the calcArgArray support calls the input link support (if it is
+specified) to get the calcArg value. The calculation support uses the
+calcArgArray values to compute the calculated value. At present generic
+calculation support is not implemented. It is envisioned that it will allow
+the user to enter expressions like "voltage*current". The calcArgArray would
+have two elements with calcArg.name set to "voltage" and "current".</p>
+
+<h3 id="calcArgArr">calcArgArray</h3>
+
+<p>The support for a calcArgArray implements support for an array of calcArg
+structures, which has the fields:</p>
+<dl>
+  <dt style="font-family: courier;">value</dt>
+    <dd>A double value for this argument.</dd>
+  <dt style="font-family: courier;">name</dt>
+    <dd>A string which provides a name for the argument.</dd>
+  <dt style="font-family: courier;">input</dt>
+    <dd>A link for obtaining the value for this argument. Note that if no
+      support is specified then no input is read and the value field can just
+      be set by the user.</dd>
+</dl>
+
+<p>calcArgArray uses the following definitions:</p>
+<pre>    public interface CalcArgArraySupport extends Support{
+        PVDouble getPVDouble(String argName);
+    }
+
+    public class CalcArgArrayFactory {
+        public static Support create(DBField dbField);
+    }</pre>
+
+<p>CalcArgArraySupport extends Support to provide the method:</p>
+<dl>
+  <dt style="font-family: courier;">getPVDouble</dt>
+    <dd>This is a convience metod for calculator support. It looks in the
+      calcArgArray for a field with the specified name and returns it's
+      interface.</dd>
+</dl>
+
+<h3 id="Calculator">Calculator</h3>
+
+<p>Support for a calculation field, which is a link, must implement:</p>
+<pre>    public interface CalculatorSupport extends LinkSupport {
+        void setCalcArgArraySupport(CalcArgArraySupport calcArgArraySupport);
+    }</pre>
+
+<p>CalculatorSupport extends LinkSupport to add the method:</p>
+<dl>
+  <dt style="font-family: courier;">setCalcArgArraySupport</dt>
+    <dd>This is called by calcRecord support.</dd>
+</dl>
+
+<p>An example calculation support is provided as part of javaIOC. It is:</p>
+<pre>public class CounterCalculatorFactory {
+
+    public static LinkSupport create(DBLink dbLink) {
+        return new CounterCalculatorImpl(dbLink);
+    }
+
+    private static String supportName = "counterCalculator";
+
+    private static class CounterCalculatorImpl extends AbstractLinkSupport
+    implements CalculatorSupport
+    {
+        private PVLink pvLink;
+        private CalcArgArraySupport calcArgArraySupport = null;
+        private DBField valueDBField;
+        private PVDouble valuePVField= null;;
+        private PVDouble minPVField = null;
+        private PVDouble maxPVField = null;
+        private PVDouble incPVField = null;
+
+        private CounterCalculatorImpl(DBLink dbLink) {
+            super(supportName,dbLink);
+            pvLink = dbLink.getPVLink();
+        }
+
+        public void initialize() {
+            if(!super.checkSupportState(SupportState.readyForInitialize,supportName)) return;
+            minPVField = calcArgArraySupport.getPVDouble("min");
+            if(minPVField==null) {
+                pvLink.message("min not found", MessageType.error);
+                return;
+            }
+            maxPVField = calcArgArraySupport.getPVDouble("max");
+            if(maxPVField==null) {
+                pvLink.message("max not found", MessageType.error);
+                return;
+            }
+            incPVField = calcArgArraySupport.getPVDouble("inc");
+            if(incPVField==null) {
+                pvLink.message("inc not found", MessageType.error);
+                return;
+            }
+            setSupportState(SupportState.readyForStart);
+        }
+
+        public void process(SupportProcessRequester supportProcessRequester) {
+            double value = valuePVField.get();
+            double min = minPVField.get();
+            double max = maxPVField.get();
+            double inc = incPVField.get();
+            value += inc;
+            if(inc&gt;0) {
+                if(value&gt;max) value = min;
+                if(value&lt;min) value = min;
+            } else {
+                if(value&lt;min) value = max;
+                if(value&gt;max) value = max;
+            }
+            valuePVField.put(value);
+            valueDBField.postPut();
+            supportProcessRequester.supportProcessDone(RequestResult.success);
+        }
+
+        public void setField(DBField dbField) {
+            valueDBField = dbField;
+            valuePVField = (PVDouble)dbField.getPVField();
+        }
+
+        public void setCalcArgArraySupport(CalcArgArraySupport calcArgArraySupport) {
+            this.calcArgArraySupport = calcArgArraySupport;
+        }
+    }
+}</pre>
+
+<h3 id="Calc">Calc</h3>
+<pre>    public class CalcFactory {
+        public static Support create(DBStructure dbStructure);
+    }</pre>
+
+<p>The calcRecord support is implemented in org.epics.ioc.recordSupport:</p>
+<hr />
+
+<h2 style="text-align: center" id="CALink">CALink Support</h2>
+<hr />
+<pre>    public class CALinkFactory {
+        public static LinkSupport create(DBLink dbLink);
+    }</pre>
 
 <p>This is a factory that provides an implementation of link support for the
 following:</p>
@@ -78,7 +862,8 @@ following:</p>
   <dt>monitorLink</dt>
     <dd>Support for monitoring another record. A monitor returns data.</dd>
   <dt>monitorNotifyLink</dt>
-    <dd>Support for monitoring another record. A monitor does not return data.</dd>
+    <dd>Support for monitoring another record. A monitor does not return
+    data.</dd>
 </dl>
 
 <p>Each requires that other support code, e.g. record support knows how to
@@ -105,15 +890,13 @@ linkSupport.setField for inputLink, outputLink, and monitorLink.</p>
 
 <p>Look at the menu and structure definitions in menuStructureSupportDBD for
 a description of how the various links are defined.</p>
-<dl>
-  <dt></dt>
-</dl>
-
-<p></p>
 <hr />
 
-<h2 style="text-align: center;" id="Link1">Link Array Support Factory</h2>
+<h2 style="text-align: center;" id="LinkArray">LinkArray Support</h2>
 <hr />
+<pre>    public class LinkArrayFactory {
+        public static Support create(DBField dbField);
+    }</pre>
 
 <p>This is a factory that provides support for an array of links. The
 supportName is linkArray. Each array element, which must have element type
@@ -126,25 +909,47 @@ process. Support for an output record would allow process and output links.
 Many other possibilities are possible.</p>
 <hr />
 
-<h2 style="text-align: center;" id="Scan">Scan Support Factory</h2>
+<h2 style="text-align: center;" id="Link">Link Support</h2>
+<hr />
+<pre>    public class LinkFactory {
+        public static Support create(DBStructure dbStructure);
+    }</pre>
+
+<p>This is support for a structure that has a single field which must be a
+link. It's purpose is the allow link support to be attached to a field that
+can be a structure but in a record instance only a link is desired.</p>
 <hr />
 
-<p>This provides support for the scan field of any record. It is called by
-RecordProcess.</p>
+<h2 style="text-align: center;" id="DelayLink">DelayLink Support</h2>
 <hr />
 
-<h2 style="text-align: center;" id="Noop">Noop Factory</h2>
-<hr />
+<p>This is link support that simulates asynchronous support. It uses a
+configStructure that has the definition:</p>
+<pre>&lt;structure name = "delayLink"&gt;
+    &lt;!-- min, max, inc are delay in milliseconds --&gt;
+    &lt;field name = "min" type = "long" /&gt;
+    &lt;field name = "max" type = "long" /&gt;
+    &lt;field name = "inc" type = "long" /&gt;
+&lt;/structure&gt;</pre>
 
-<p>This can be used for record types that just hold data or can be used as a
-template for creating new record support modules.</p>
-<hr />
+<p>where</p>
+<dl>
+  <dt style="font-family: courier;">min</dt>
+    <dd>The minimum delay</dd>
+  <dt style="font-family: courier;">max</dt>
+    <dd>The maximum delay</dd>
+  <dt style="font-family: courier;">inc</dt>
+    <dd>The delay increment between process requests</dd>
+</dl>
 
-<h2 style="text-align: center;" id="Linear">Linear Convert Input Factory</h2>
-<hr />
+<p>Each time process is called it delays a number of milliseconds determined
+by min,max, and inc. It starts with a delay on min. Each time it proceses it
+increases the delay by inc until it reaches max. It then goes back to a delay
+of min.</p>
 
-<p>Not implemented but it will be support that takes a raw value and converts
-it to engineering units.</p>
-<hr />
+<p>The factory definition is:</p>
+<pre>    public class DelayLinkFactory {
+        public static LinkSupport create(DBLink dbLink);
+    }</pre>
 </body>
 </html>

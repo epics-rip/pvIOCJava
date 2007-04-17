@@ -31,12 +31,11 @@ public class PowerSupplyFactory {
     }
     
     static private class PowerSupplyImpl extends AbstractSupport
-    implements SupportProcessRequestor
+    implements SupportProcessRequester
     {
         private static String supportName = "doubleRecord";
+        private DBStructure dbStructure;
         private PVStructure pvStructure;
-        private DBRecord dbRecord;
-        private PVRecord pvRecord;
         private DBField powerDBField = null;
         private PVDouble powerPVField = null;
         private Support inputSupport = null;
@@ -52,7 +51,7 @@ public class PowerSupplyFactory {
         private Support doubleAlarmSupport = null;
         private Support outputSupport = null;
         private Support linkArraySupport = null;
-        private SupportProcessRequestor supportProcessRequestor = null;
+        private SupportProcessRequester supportProcessRequester = null;
         private ProcessState processState = ProcessState.inputSupport;
         private RequestResult finalResult = RequestResult.success;
         
@@ -62,9 +61,8 @@ public class PowerSupplyFactory {
         
         private PowerSupplyImpl(DBStructure dbStructure) {
             super(supportName,dbStructure);
+            this.dbStructure = dbStructure;
             pvStructure = dbStructure.getPVStructure();
-            dbRecord = dbStructure.getDBRecord();
-            pvRecord = dbRecord.getPVRecord();
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.process.Support#initialize()
@@ -72,15 +70,37 @@ public class PowerSupplyFactory {
         public void initialize() {
             if(!super.checkSupportState(SupportState.readyForInitialize,supportName)) return;
             SupportState supportState = SupportState.readyForStart;
-            powerPVField = pvStructure.getDoubleField("power");
-            powerDBField = dbRecord.findDBField(powerPVField);
-            currentPVField = pvStructure.getDoubleField("current");
-            currentDBField = dbRecord.findDBField(currentPVField);
-            voltagePVField = pvStructure.getDoubleField("voltage");
-            voltageDBField = dbRecord.findDBField(voltagePVField);
-            Structure structure = (Structure)pvRecord.getField();
-            DBField[] dbFields = dbRecord.getDBStructure().getFieldDBFields();
             int index;
+            Structure structure = (Structure)pvStructure.getField();
+            DBField[] dbFields = dbStructure.getFieldDBFields();
+            PVField[] pvFields = pvStructure.getFieldPVFields();
+            index = structure.getFieldIndex("power");
+            if(index<0) {
+                if(index<0) {
+                    super.message("no power field", MessageType.error);
+                    return;
+                }
+            }
+            powerDBField = dbFields[index];
+            powerPVField = (PVDouble)pvFields[index];
+            index = structure.getFieldIndex("current");
+            if(index<0) {
+                if(index<0) {
+                    super.message("no current field", MessageType.error);
+                    return;
+                }
+            }
+            currentDBField = dbFields[index];
+            currentPVField = (PVDouble)pvFields[index];
+            index = structure.getFieldIndex("voltage");
+            if(index<0) {
+                if(index<0) {
+                    super.message("no voltage field", MessageType.error);
+                    return;
+                }
+            }
+            voltageDBField = dbFields[index];
+            voltagePVField = (PVDouble)pvFields[index];
             index = structure.getFieldIndex("input");
             if(index>=0) {
                 inputSupport = dbFields[index].getSupport();
@@ -228,17 +248,17 @@ public class PowerSupplyFactory {
             setSupportState(SupportState.readyForInitialize);
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.process.Support#process(org.epics.ioc.process.RecordProcessRequestor)
+         * @see org.epics.ioc.process.Support#process(org.epics.ioc.process.RecordProcessRequester)
          */
-        public void process(SupportProcessRequestor supportProcessRequestor) {
+        public void process(SupportProcessRequester supportProcessRequester) {
             if(!super.checkSupportState(SupportState.ready,"process")) {
-                supportProcessRequestor.supportProcessDone(RequestResult.failure);
+                supportProcessRequester.supportProcessDone(RequestResult.failure);
                 return;
             }
-            if(supportProcessRequestor==null) {
-                throw new IllegalStateException("supportProcessRequestor is null");
+            if(supportProcessRequester==null) {
+                throw new IllegalStateException("supportProcessRequester is null");
             }
-            this.supportProcessRequestor = supportProcessRequestor;
+            this.supportProcessRequester = supportProcessRequester;
             finalResult = RequestResult.success;
             if(inputSupport!=null) {
                 processState = ProcessState.inputSupport;
@@ -261,7 +281,7 @@ public class PowerSupplyFactory {
                     processState = ProcessState.linkArraySupport;
                     linkArraySupport.process(this);           
                 } else {
-                    supportProcessRequestor.supportProcessDone(RequestResult.success);
+                    supportProcessRequester.supportProcessDone(RequestResult.success);
                 }
             }
         }
@@ -272,7 +292,7 @@ public class PowerSupplyFactory {
             // nothing to do
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.process.SupportProcessRequestor#supportProcessDone(org.epics.ioc.util.RequestResult)
+         * @see org.epics.ioc.process.SupportProcessRequester#supportProcessDone(org.epics.ioc.util.RequestResult)
          */
         public void supportProcessDone(RequestResult requestResult) {
             if(requestResult.compareTo(finalResult)>0) {
@@ -311,7 +331,7 @@ public class PowerSupplyFactory {
                     return;
                 }
             case linkArraySupport:
-                supportProcessRequestor.supportProcessDone(finalResult);
+                supportProcessRequester.supportProcessDone(finalResult);
                 return;
             }
         }

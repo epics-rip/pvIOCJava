@@ -31,7 +31,7 @@ public class XMLToDBDTest extends TestCase {
         test.doit();
     }
     
-    private static class Test implements Requestor {
+    private static class Test implements Requester {
         
         private void doit () {
             DBD dbd = XMLToDBDFactory.create("add",
@@ -78,14 +78,14 @@ public class XMLToDBDTest extends TestCase {
         }
 
         /* (non-Javadoc)
-         * @see org.epics.ioc.util.Requestor#getRequestorName()
+         * @see org.epics.ioc.util.Requester#getRequestorName()
          */
-        public String getRequestorName() {
+        public String getRequesterName() {
             return "XMLToDBDTEST";
         }
 
         /* (non-Javadoc)
-         * @see org.epics.ioc.util.Requestor#message(java.lang.String, org.epics.ioc.util.MessageType)
+         * @see org.epics.ioc.util.Requester#message(java.lang.String, org.epics.ioc.util.MessageType)
          */
         public void message(String message, MessageType messageType) {
             System.out.println(message);

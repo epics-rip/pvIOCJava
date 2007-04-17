@@ -67,7 +67,7 @@ public class ScanFactory {
         /* (non-Javadoc)
          * @see org.epics.ioc.process.AbstractSupport#getName()
          */
-        public String getRequestorName() {
+        public String getRequesterName() {
             return supportName;
         }       
         /* (non-Javadoc)
@@ -208,11 +208,11 @@ public class ScanFactory {
             setSupportState(SupportState.readyForStart);
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.process.AbstractSupport#process(org.epics.ioc.process.RecordProcessRequestor)
+         * @see org.epics.ioc.process.AbstractSupport#process(org.epics.ioc.process.RecordProcessRequester)
          */
-        public void process(SupportProcessRequestor supportProcessRequestor) {
+        public void process(SupportProcessRequester supportProcessRequester) {
             dbRecord.getPVRecord().message("process is being called. Why?", MessageType.error);
-            supportProcessRequestor.supportProcessDone(RequestResult.failure);
+            supportProcessRequester.supportProcessDone(RequestResult.failure);
         }       
         /* (non-Javadoc)
          * @see org.epics.ioc.support.ScanSupport#canProcessSelf()
@@ -221,30 +221,30 @@ public class ScanFactory {
             return scanField.getProcessSelf();
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.support.ScanSupport#processSelfRequest(org.epics.ioc.process.RecordProcessRequestor)
+         * @see org.epics.ioc.support.ScanSupport#processSelfRequest(org.epics.ioc.process.RecordProcessRequester)
          */
-        public boolean processSelfRequest(RecordProcessRequestor recordProcessRequestor) {
-            return pvProcessSelf.processSelf(recordProcessRequestor);
+        public boolean processSelfRequest(RecordProcessRequester recordProcessRequester) {
+            return pvProcessSelf.processSelf(recordProcessRequester);
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.support.ScanSupport#processSelfSetActive()
          */
-        public void processSelfSetActive(RecordProcessRequestor recordProcessRequestor) {
-            pvProcessSelf.processSelfSetActive(recordProcessRequestor);
+        public void processSelfSetActive(RecordProcessRequester recordProcessRequester) {
+            pvProcessSelf.processSelfSetActive(recordProcessRequester);
             
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.support.ScanSupport#processSelfProcess(boolean)
          */
-        public void processSelfProcess(RecordProcessRequestor recordProcessRequestor, boolean leaveActive) {
-            pvProcessSelf.startScan(recordProcessRequestor,leaveActive);
+        public void processSelfProcess(RecordProcessRequester recordProcessRequester, boolean leaveActive) {
+            pvProcessSelf.startScan(recordProcessRequester,leaveActive);
             
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.support.ScanSupport#processSelfSetInactive()
          */
-        public void processSelfSetInactive(RecordProcessRequestor recordProcessRequestor) {
-            pvProcessSelf.setInactive(recordProcessRequestor);
+        public void processSelfSetInactive(RecordProcessRequester recordProcessRequester) {
+            pvProcessSelf.setInactive(recordProcessRequester);
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.dbAccess.IOCDBMergeListener#merged()
@@ -428,12 +428,12 @@ public class ScanFactory {
     }
     
     private static class PVProcessSelf extends AbstractPVField
-    implements PVBoolean,RecordProcessRequestor
+    implements PVBoolean,RecordProcessRequester
     {
         private boolean isProcessSelf = false;
         private RecordProcess recordProcess = null;
         private boolean isActive = false;
-        private RecordProcessRequestor recordProcessRequestor = null;
+        private RecordProcessRequester recordProcessRequester = null;
         
         private PVProcessSelf(ScanImpl scanImpl,DBField dbField,Field field) {
             super(dbField.getParent().getPVField(),field);
@@ -446,31 +446,31 @@ public class ScanFactory {
             dbField.replacePVField(this);
         }
         
-        private boolean processSelf(RecordProcessRequestor recordProcessRequestor) {
+        private boolean processSelf(RecordProcessRequester recordProcessRequester) {
             if(!isProcessSelf) return false;
             if(isActive) return false;
             isActive = true;
-            this.recordProcessRequestor = recordProcessRequestor;
+            this.recordProcessRequester = recordProcessRequester;
             return true;
         }
         
-        private void processSelfSetActive(RecordProcessRequestor recordProcessRequestor) {
-            if(recordProcessRequestor==null || recordProcessRequestor!=this.recordProcessRequestor) {
-                throw new IllegalStateException("not the recordProcessRequestor");
+        private void processSelfSetActive(RecordProcessRequester recordProcessRequester) {
+            if(recordProcessRequester==null || recordProcessRequester!=this.recordProcessRequester) {
+                throw new IllegalStateException("not the recordProcessRequester");
             }
             recordProcess.setActive(this);
         }
         
-        private void startScan(RecordProcessRequestor recordProcessRequestor,boolean leaveActive) {
-            if(recordProcessRequestor==null || recordProcessRequestor!=this.recordProcessRequestor) {
-                throw new IllegalStateException("not the recordProcessRequestor");
+        private void startScan(RecordProcessRequester recordProcessRequester,boolean leaveActive) {
+            if(recordProcessRequester==null || recordProcessRequester!=this.recordProcessRequester) {
+                throw new IllegalStateException("not the recordProcessRequester");
             }
             recordProcess.process(this, leaveActive, null);
         }
         
-        private void setInactive(RecordProcessRequestor recordProcessRequestor) {
-            if(recordProcessRequestor==null || recordProcessRequestor!=this.recordProcessRequestor) {
-                throw new IllegalStateException("not the recordProcessRequestor");
+        private void setInactive(RecordProcessRequester recordProcessRequester) {
+            if(recordProcessRequester==null || recordProcessRequester!=this.recordProcessRequester) {
+                throw new IllegalStateException("not the recordProcessRequester");
             }
             recordProcess.setInactive(this);
         }
@@ -486,30 +486,30 @@ public class ScanFactory {
         public void put(boolean value) {
             if(getField().isMutable()) {
                 if(isProcessSelf) {
-                    recordProcess.releaseRecordProcessRequestor(this);
+                    recordProcess.releaseRecordProcessRequester(this);
                     isProcessSelf = false;
                 }
                 if(value) {
-                    isProcessSelf = recordProcess.setRecordProcessRequestor(this);
+                    isProcessSelf = recordProcess.setRecordProcessRequester(this);
                 }
                 return;
             }
             throw new IllegalStateException("PVField.isMutable is false");
         }       
         /* (non-Javadoc)
-         * @see org.epics.ioc.process.RecordProcessRequestor#recordProcessComplete()
+         * @see org.epics.ioc.process.RecordProcessRequester#recordProcessComplete()
          */
         public void recordProcessComplete() {
             isActive = false;
-            RecordProcessRequestor recordProcessRequestor = this.recordProcessRequestor;
-            this.recordProcessRequestor = null;
-            recordProcessRequestor.recordProcessComplete();
+            RecordProcessRequester recordProcessRequester = this.recordProcessRequester;
+            this.recordProcessRequester = null;
+            recordProcessRequester.recordProcessComplete();
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.process.RecordProcessRequestor#recordProcessResult(org.epics.ioc.util.RequestResult)
+         * @see org.epics.ioc.process.RecordProcessRequester#recordProcessResult(org.epics.ioc.util.RequestResult)
          */
         public void recordProcessResult(RequestResult requestResult) {
-            recordProcessRequestor.recordProcessResult(requestResult);
+            recordProcessRequester.recordProcessResult(requestResult);
         }
         /* (non-Javadoc)
          * @see java.lang.Object#toString()

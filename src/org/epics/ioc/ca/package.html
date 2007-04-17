@@ -133,39 +133,39 @@ accessing a channel are defined in later sections.</p>
         ChannelField getChannelField();
         ChannelFieldGroup createFieldGroup(ChannelFieldGroupListener listener);
         ChannelProcess createChannelProcess(
-            ChannelProcessRequestor channelProcessRequestor, boolean processSelfOK);
+            ChannelProcessRequester channelProcessRequester, boolean processSelfOK);
         void destroy(ChannelProcess channelProcess);
         ChannelGet createChannelGet(ChannelFieldGroup channelFieldGroup,
-            ChannelGetRequestor channelGetRequestorprocess);
+            ChannelGetRequester channelGetRequesterprocess);
         ChannelGet createChannelGet(ChannelFieldGroup channelFieldGroup,
-            ChannelGetRequestor channelGetRequestor,
+            ChannelGetRequester channelGetRequester,
             boolean process,boolean processSelfOK);
         void destroy(ChannelGet channelGet);
         ChannelCDGet createChannelCDGet(
             ChannelFieldGroup channelFieldGroup,
-            ChannelCDGetRequestor channelCDGetRequestor,boolean supportAlso);
+            ChannelCDGetRequester channelCDGetRequester,boolean supportAlso);
         ChannelCDGet createChannelCDGet(
             ChannelFieldGroup channelFieldGroup,
-            ChannelCDGetRequestor channelCDGetRequestor,boolean supportAlso,
+            ChannelCDGetRequester channelCDGetRequester,boolean supportAlso,
             boolean process,boolean processSelfOK);
         void destroy(ChannelCDGet channelCDGet);
         ChannelPut createChannelPut(ChannelFieldGroup channelFieldGroup,
-            ChannelPutRequestor channelPutRequestor);
+            ChannelPutRequester channelPutRequester);
         ChannelPut createChannelPut(ChannelFieldGroup channelFieldGroup,
-            ChannelPutRequestor channelPutRequestor,
+            ChannelPutRequester channelPutRequester,
             boolean process,boolean processSelfOK);
         void destroy(ChannelPut channelPut);
         ChannelCDPut createChannelCDPut(
             ChannelFieldGroup channelFieldGroup,
-            ChannelCDPutRequestor cdPutRequestor,
+            ChannelCDPutRequester cdPutRequester,
             boolean process,boolean supportAlso);
         void destroy(ChannelCDPut cdPut);
         ChannelPutGet createChannelPutGet(
             channelFieldGroup putFieldGroup,ChannelFieldGroup getFieldGroup,
-            ChannelPutGetRequestor channelPutGetRequestor);
+            ChannelPutGetRequester channelPutGetRequester);
         ChannelPutGet createChannelPutGet(
             channelFieldGroup putFieldGroup,ChannelFieldGroup getFieldGroup,
-            ChannelPutGetRequestor channelPutGetRequestor,
+            ChannelPutGetRequester channelPutGetRequester,
             boolean process,boolean processSelfOK);
         void destroy(ChannelPutGet channelPutGet);
         ChannelMonitor createChannelMonitor(boolean onlyWhileProcessing);
@@ -423,7 +423,7 @@ Put, CDPut, and PutGet</h2>
         boolean process();
     }
 
-    interface ChannelProcessRequestor extends Requestor {
+    interface ChannelProcessRequester extends Requester {
             void processDone(RequestResult requestResult);
     }
 
@@ -432,7 +432,7 @@ Put, CDPut, and PutGet</h2>
         void getDelayed(PVField pvField);
     }
 
-    interface ChannelGetRequestor extends Requestor {
+    interface ChannelGetRequester extends Requester {
         boolean nextGetField(ChannelField field,PVField pvField);
         boolean nextDelayedGetField(PVField pvField);
         void getDone(RequestResult requestResult);
@@ -444,7 +444,7 @@ Put, CDPut, and PutGet</h2>
     }
     
     
-    public interface ChannelCDGetRequestor extends Requestor{
+    public interface ChannelCDGetRequester extends Requester{
         void getDone(RequestResult requestResult);
     }
 
@@ -453,7 +453,7 @@ Put, CDPut, and PutGet</h2>
         void putDelayed(PVField pvField);
     }
 
-    interface ChannelPutRequestor extends Requestor {
+    interface ChannelPutRequester extends Requester {
         boolean nextPutField(ChannelField field,PVField pvField);
         boolean nextDelayedPutField(PVField pvField);
         void putDone(RequestResult requestResult);
@@ -465,7 +465,7 @@ Put, CDPut, and PutGet</h2>
         boolean put();
     }
     
-    public interface ChannelCDPutRequestor extends Requestor{
+    public interface ChannelCDPutRequester extends Requester{
         void getDone();
         void putDone(RequestResult requestResult);
     }
@@ -476,8 +476,8 @@ Put, CDPut, and PutGet</h2>
         void getDelayed(PVField pvField);
     }
 
-    interface ChannelPutGetRequestor extends
-        ChannelPutRequestor,ChannelGetRequestor {}</pre>
+    interface ChannelPutGetRequester extends
+        ChannelPutRequester,ChannelGetRequester {}</pre>
 
 <h3 id="ChannelPro">ChannelProcess</h3>
 
@@ -488,13 +488,13 @@ Put, CDPut, and PutGet</h2>
       record. <span style="font-family: courier;">process</span> returns
       (false, true) if the request (can not, can) be done. Normally true is
       returned. A false value probably means that the channel is not
-      connected or channelProcess is not the requestor.</dd>
+      connected or channelProcess is not the requester.</dd>
 </dl>
 
-<p>ChannelProcessRequestor has the methods:</p>
+<p>ChannelProcessRequester has the methods:</p>
 <dl>
-  <dt style="font-family: courier;">getRequestorName</dt>
-    <dd>Determined by the requestor.</dd>
+  <dt style="font-family: courier;">getRequesterName</dt>
+    <dd>Determined by the requester.</dd>
   <dt style="font-family: courier;">message</dt>
     <dd>Called for error or informational messages.</dd>
   <dt style="font-family: courier;">processDone</dt>
@@ -505,18 +505,18 @@ Put, CDPut, and PutGet</h2>
 <p>A ChannelProcess is created via a call:</p>
 <pre>    ChannelProcess channelProcess = channel.createChannelProcess(this).</pre>
 
-<p>The requestor must implement interface <span
-style="font-family: courier;">ChannelProcessRequestor</span>. <span
-style="font-family: courier;">null</span> is returned if the requestor is not
+<p>The requester must implement interface <span
+style="font-family: courier;">ChannelProcessRequester</span>. <span
+style="font-family: courier;">null</span> is returned if the requester is not
 allowed to process the channel. For example the channel is connected to a
 record, that already has an assigned record processor.</p>
 
 <p>If <span style="font-family: courier;">createChannelProcess</span> or
 <span style="font-family: courier;">process</span> itself fails, <span
-style="font-family: courier;">channelProcessRequestor.message</span> is
+style="font-family: courier;">channelProcessRequester.message</span> is
 called. If <span style="font-family: courier;">process</span> returns true,
 then <span
-style="font-family: courier;">channelProcessRequestor.requestDone</span> is
+style="font-family: courier;">channelProcessRequester.requestDone</span> is
 called when the channel completes processing.</p>
 
 <h3 id="ChannelGet">ChannelGet</h3>
@@ -525,27 +525,27 @@ called when the channel completes processing.</p>
 <dl>
   <dt style="font-family: courier;">get</dt>
     <dd>Get all data for the fieldGroup. The data is returned via calls to
-      channelGetRequestor.</dd>
+      channelGetRequester.</dd>
   <dt style="font-family: courier;">getDelayed</dt>
     <dd>If <span
-      style="font-family: courier;">channelGetRequestor.nextGetField</span>
-      returns true, meaning the requestor is not done retrieving the data,
-      then the requestor calls <span
+      style="font-family: courier;">channelGetRequester.nextGetField</span>
+      returns true, meaning the requester is not done retrieving the data,
+      then the requester calls <span
       style="font-family: courier;">getDelayed</span> to retrieve the
     data.</dd>
 </dl>
 
-<p><span style="font-family: courier;">ChannelGetRequestor</span> has the
+<p><span style="font-family: courier;">ChannelGetRequester</span> has the
 methods:</p>
 <dl>
   <dt style="font-family: courier;">nextGetField</dt>
-    <dd>The next pvField in the fieldGroup. The requestor returns false if it
+    <dd>The next pvField in the fieldGroup. The requester returns false if it
       is done with the data and true otherwise. If true is returned the the
-      requestor calls <span
+      requester calls <span
       style="font-family: courier;">channelGet.getDelayed</span> when it is
       ready.</dd>
   <dt style="font-family: courier;">nextDelayedGetField</dt>
-    <dd>When the requestor calls <span
+    <dd>When the requester calls <span
       style="font-family: courier;">channelGet.getDelayed</span> the data is
       returned via a call to <span
       style="font-family: courier;">nextDelayedGetField</span></dd>
@@ -595,7 +595,7 @@ methods:</p>
     <dd>Get data and put it into the CD.</dd>
 </dl>
 
-<p><span style="font-family: courier;">ChannelCDGetRequestor</span> has the
+<p><span style="font-family: courier;">ChannelCDGetRequester</span> has the
 methods:</p>
 <dl>
   <dt style="font-family: courier;">getDone</dt>
@@ -608,26 +608,26 @@ methods:</p>
 <dl>
   <dt style="font-family: courier;">put</dt>
     <dd>Put all data for the fieldGroup. The data is fetched via calls to
-      <span style="font-family: courier;">channelPutRequestor.</span></dd>
+      <span style="font-family: courier;">channelPutRequester.</span></dd>
   <dt style="font-family: courier;">putDelayed</dt>
     <dd>If <span
-      style="font-family: courier;">channelPutRequestor.nextPutField</span>
-      returns true, meaning the requestor has not put the data, then the
-      requestor calls <span style="font-family: courier;">putDelayed</span>
+      style="font-family: courier;">channelPutRequester.nextPutField</span>
+      returns true, meaning the requester has not put the data, then the
+      requester calls <span style="font-family: courier;">putDelayed</span>
       when it is ready to put the data.</dd>
 </dl>
 
-<p><span style="font-family: courier;">ChannelPutRequestor</span> has the
+<p><span style="font-family: courier;">ChannelPutRequester</span> has the
 methods:</p>
 <dl>
   <dt style="font-family: courier;">nextPutField</dt>
-    <dd>The next pvField in the fieldGroup. The requestor returns false if it
+    <dd>The next pvField in the fieldGroup. The requester returns false if it
       is done with that data and true if it is not ready to put the data. If
-      true is returned the the requestor calls <span
+      true is returned the the requester calls <span
       style="font-family: courier;">channelPut.putDelayed</span> when it is
       ready.</dd>
   <dt style="font-family: courier;">nextDelayedPutField</dt>
-    <dd>When the requestor calls <span
+    <dd>When the requester calls <span
       style="font-family: courier;">channelPut.putDelayed</span> the data is
       put via a call to <span
       style="font-family: courier;">nextDelayedPutField</span></dd>
@@ -658,7 +658,7 @@ methods:</p>
       put.</dd>
 </dl>
 
-<p><span style="font-family: courier;">ChannelCDPutRequestor</span> has the
+<p><span style="font-family: courier;">ChannelCDPutRequester</span> has the
 methods:</p>
 <dl>
   <dt style="font-family: courier;">getDone</dt>
@@ -691,20 +691,20 @@ client request to:</p>
         void lookForChange(ChannelField channelField,boolean causeMonitor);
         void lookForAbsoluteChange(ChannelField channelField,double value);
         void lookForPercentageChange(ChannelField channelField,double value);
-        boolean start(ChannelMonitorNotifyRequestor channelMonitorNotifyRequestor,
+        boolean start(ChannelMonitorNotifyRequester channelMonitorNotifyRequester,
             String threadName, ScanPriority scanPriority);
-        boolean start(ChannelMonitorRequestor channelMonitorRequestor,
+        boolean start(ChannelMonitorRequester channelMonitorRequester,
             int queueSize, String threadName, ScanPriority scanPriority);
         void stop();
         boolean isStarted();
     }
     
-    interface ChannelMonitorRequestor extends Requestor{
+    interface ChannelMonitorRequester extends Requester{
         void monitorData(CD cd);
         void dataOverrun(int number);
     }
     
-    interface ChannelMonitorNotifyRequestor extends Requestor {
+    interface ChannelMonitorNotifyRequester extends Requester {
         void monitorEvent();
     }</pre>
 
@@ -725,14 +725,14 @@ client request to:</p>
     <dd>Notify when a change occurs but do not send data. The caller can
       issue a get request to retrieve the data.</dd>
   <dt style="font-family: courier;">start - Monitor</dt>
-    <dd>When data changes send it the the requestor.</dd>
+    <dd>When data changes send it the the requester.</dd>
   <dt style="font-family: courier;">stop</dt>
     <dd>Stop monitoring.</dd>
   <dt style="font-family: courier;">isStarted</dt>
     <dd>Has the monitor been started.</dd>
 </dl>
 
-<p>ChannelMonitorRequestor has the methods:</p>
+<p>ChannelMonitorRequester has the methods:</p>
 <dl>
   <dt style="font-family: courier;">monitorData</dt>
     <dd>The modified data.</dd>
@@ -740,7 +740,7 @@ client request to:</p>
     <dd>The number of missed monitors.</dd>
 </dl>
 
-<p>ChannelMonitorNotifyRequestor has the methods:</p>
+<p>ChannelMonitorNotifyRequester has the methods:</p>
 <dl>
   <dt style="font-family: courier;">monitorEvent</dt>
     <dd>Data has been modified.</dd>
@@ -855,7 +855,7 @@ The arrays will grow as data is placed in them but will not be released.</p>
 
 <p>A new set of data is collected as follows:</p>
 <ul>
-  <li>The requestor calls cd.clear</li>
+  <li>The requester calls cd.clear</li>
   <li>The data source, which is NOT allowed to block a record, does the
     following:
     <ul>
@@ -863,10 +863,10 @@ The arrays will grow as data is placed in them but will not be released.</p>
       <li>When one or more pvField items are available, with the data source
         (for example a record) locked, call cd.add.</li>
       <li>When the last pvField has been copied to cd notify the
-      requestor.</li>
+      requester.</li>
     </ul>
   </li>
-  <li>The requestor calls cd.getPVFieldList and cd.getPVFieldList. It can
+  <li>The requester calls cd.getPVFieldList and cd.getPVFieldList. It can
     block if necessary because the actual data source, e.g. a data base
     record, is not locked.</li>
 </ul>
@@ -1370,7 +1370,7 @@ longer locked.</p>
 <p>This example shows how to implement a process request.</p>
 
 <h3 id="Implementa1">Implementation</h3>
-<pre>    static class Process implements ChannelProcessRequestor,ChannelStateListener
+<pre>    static class Process implements ChannelProcessRequester,ChannelStateListener
     {
         private Lock lock = new ReentrantLock();
         private Condition waitDone = lock.newCondition();
@@ -1403,7 +1403,7 @@ longer locked.</p>
             }
         }
 
-        public String getRequestorName() {
+        public String getRequesterName() {
             return "Put:" + pvname;
         }
 
@@ -1442,7 +1442,7 @@ longer locked.</p>
 
 <h3 id="Implementa2">Implementation</h3>
 <pre>    static class Get implements
-    ChannelGetRequestor,
+    ChannelGetRequester,
     ChannelStateListener, ChannelFieldGroupListener
     {
         private Lock lock = new ReentrantLock();
@@ -1491,7 +1491,7 @@ longer locked.</p>
             //nothing to do
         }
 
-        public String getRequestorName() {
+        public String getRequesterName() {
             return "PutGet:" + pvname;
         }
 
@@ -1535,7 +1535,7 @@ longer locked.</p>
 
 <h3 id="Implementa3">Implementation</h3>
 <pre>    static class Put implements
-    ChannelPutRequestor,
+    ChannelPutRequester,
     ChannelStateListener, ChannelFieldGroupListener
     {
         private Lock lock = new ReentrantLock();
@@ -1591,7 +1591,7 @@ longer locked.</p>
             }
         }
 
-        public String getRequestorName() {
+        public String getRequesterName() {
             return "Put:" + pvname;
         }
 
@@ -1639,7 +1639,7 @@ timeStamp.</p>
 
 <h3 id="Implementa4">Implementation</h3>
 <pre>    static class PutGet implements
-    ChannelPutGetRequestor,
+    ChannelPutGetRequester,
     ChannelStateListener, ChannelFieldGroupListener
     {
         private Lock lock = new ReentrantLock();
@@ -1708,7 +1708,7 @@ timeStamp.</p>
             valueData.printResults();
         }
 
-        public String getRequestorName() {
+        public String getRequesterName() {
             return "PutGet:" + pvname;
         }
 

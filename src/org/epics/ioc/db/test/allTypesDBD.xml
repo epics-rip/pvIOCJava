@@ -23,8 +23,8 @@
     <field name = "string" type = "string" />
     <field name = "enum" type = "enum" />
     <field name = "menu" type = "menu" menuName = "priority" />
-    <field name = "displayLimit"
-         type = "structure" structureName = "displayLimit" />
+    <field name = "doubleLimit"
+         type = "structure" structureName = "doubleLimit" />
     <field name = "link" type = "link" />
     <field name = "booleanArray" type = "array" elementType = "boolean" />
     <field name = "byteArray" type = "array" elementType = "byte" />
@@ -52,8 +52,8 @@
     <field name = "string" type = "string" />
     <field name = "enum" type = "enum" />
     <field name = "menu" type = "menu" menuName = "priority" />
-    <field name = "displayLimit"
-         type = "structure" structureName = "displayLimit" />
+    <field name = "doubleLimit"
+         type = "structure" structureName = "doubleLimit" />
     <field name = "link" type = "link" />
     <field name = "booleanArray" type = "array" elementType = "boolean" />
     <field name = "byteArray" type = "array" elementType = "byte" />

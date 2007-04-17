@@ -26,11 +26,11 @@ public class EventFactory {
     static private class EventImpl extends AbstractSupport
     {
         /* (non-Javadoc)
-         * @see org.epics.ioc.process.RecordSupport#processRecord(org.epics.ioc.process.RecordProcessRequestor)
+         * @see org.epics.ioc.process.RecordSupport#processRecord(org.epics.ioc.process.RecordProcessRequester)
          */
         private static String supportName = "event";
         private SupportState supportState = SupportState.readyForInitialize;
-        private DBRecord dbRecord;
+        private PVStructure pvStructure;
         private PVRecord pvRecord;
         private PVString pvEventName = null;
         private EventScanner eventScanner = null;
@@ -39,8 +39,8 @@ public class EventFactory {
         
         private EventImpl(DBStructure dbStructure) {
             super(supportName,dbStructure);
-            dbRecord = dbStructure.getDBRecord();
-            pvRecord = dbRecord.getPVRecord();
+            pvStructure = dbStructure.getPVStructure();
+            pvRecord = pvStructure.getPVRecord();
             eventScanner = ScannerFactory.getEventScanner();
         }
         /* (non-Javadoc)
@@ -48,8 +48,8 @@ public class EventFactory {
          */
         public void initialize() {
             if(pvEventName==null) {
-                PVField[] pvFields = pvRecord.getFieldPVFields();
-                Structure structure = (Structure)pvRecord.getField();
+                PVField[] pvFields = pvStructure.getFieldPVFields();
+                Structure structure = (Structure)pvStructure.getField();
                 int index;
                 index = structure.getFieldIndex("value");
                 if(index<0) {
@@ -98,15 +98,15 @@ public class EventFactory {
             setSupportState(SupportState.readyForInitialize);
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.process.Support#process(org.epics.ioc.process.RecordProcessRequestor)
+         * @see org.epics.ioc.process.Support#process(org.epics.ioc.process.RecordProcessRequester)
          */
-        public void process(SupportProcessRequestor supportProcessRequestor) {
+        public void process(SupportProcessRequester supportProcessRequester) {
             if(supportState!=SupportState.ready) {
                 super.message(
                         "process called but supportState is "
                         + supportState.toString(),
                         MessageType.error);
-                supportProcessRequestor.supportProcessDone(RequestResult.failure);
+                supportProcessRequester.supportProcessDone(RequestResult.failure);
             }
             String newName = pvEventName.get();
             if(newName!=eventName) {
@@ -118,7 +118,7 @@ public class EventFactory {
                 }
             }
             if(eventAnnounce!=null) eventAnnounce.announce();
-            supportProcessRequestor.supportProcessDone(RequestResult.success);
+            supportProcessRequester.supportProcessDone(RequestResult.success);
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.support.AbstractSupport#setField(org.epics.ioc.db.DBField)

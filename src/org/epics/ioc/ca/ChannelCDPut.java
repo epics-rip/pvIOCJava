@@ -18,12 +18,12 @@ public interface ChannelCDPut {
     CD getCD();
     /**
      * Get the latest value of the target data. The record will NOT be processed before the data is read.
-     * If the request fails then ChannelCDPutRequestor.getDone is called before get returns.
+     * If the request fails then ChannelCDPutRequester.getDone is called before get returns.
      */
     void get();
     /**
      * Get the latest value of the target data.
-     * If the request fails then ChannelCDPutRequestor.putDone is called before put returns.
+     * If the request fails then ChannelCDPutRequester.putDone is called before put returns.
      */
     void put();
 }

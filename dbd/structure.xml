@@ -28,14 +28,13 @@
     <field name = "highMinor" type = "int" />
     <field name = "lowMinor" type = "int" />
     <field name = "lowMajor" type = "int" />
-    <field name = "hystersis" type = "int" />
 </structure>
 
 <structure name = "booleanAlarm" >
     <field name = "active" type = "boolean" />
     <field name = "falseAlarm" type = "menu" menuName = "alarmSeverity" />
     <field name = "trueAlarm" type = "menu" menuName = "alarmSeverity" />
-    <field name = "ChangeStateAlarm" type = "menu" menuName = "alarmSeverity" />
+    <field name = "changeStateAlarm" type = "menu" menuName = "alarmSeverity" />
 </structure>
 
 
@@ -135,12 +134,5 @@
     <field name = "slope" type = "double" />
     <field name = "intercept" type = "double" />
 </structure>
-
-<structure name = "calcArg" >
-    <field name = "value" type = "double" />
-    <field name = "name" type = "string" />
-    <field name = "input" type = "link" />
-</structure>
-
 
 </DBDefinition>

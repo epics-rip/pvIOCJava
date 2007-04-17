@@ -16,10 +16,10 @@
          choice1
     </enum>
     <menu>middle</menu>
-    <displayLimit>
+    <doubleLimit>
         <low>0.0</low>
         <high>10.0</high>
-    </displayLimit>
+    </doubleLimit>
     <link supportName = "processLink" >
         <configure structureName = "processLink">
             <pvname>xxxxxx</pvname>
@@ -80,7 +80,7 @@
         </value>
     </linkArray>
     <structArray>
-        <value structureName = "displayLimit">
+        <value structureName = "doubleLimit">
              <low>0.0</low>
              <high>10.0</high>
         </value>
@@ -113,10 +113,10 @@
              choice1
         </enum>
         <menu>middle</menu>
-        <displayLimit>
+        <doubleLimit>
             <low>0.0</low>
             <high>10.0</high>
-        </displayLimit>
+        </doubleLimit>
         <link supportName = "processLink" >
             <configure structureName = "processLink">
                 <pvname>xxxxxx</pvname>
@@ -177,7 +177,7 @@
             </value>
         </linkArray>
         <structArray>
-            <value structureName = "displayLimit">
+            <value structureName = "doubleLimit">
                  <low>0.0</low>
                  <high>10.0</high>
             </value>

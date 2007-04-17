@@ -11,7 +11,7 @@ import org.epics.ioc.process.*;
 import org.epics.ioc.util.*;
 
 /**
- * This is a support that does nothing except act like it connects, etc.
+ * This is a support for a structure that consists of a single link
  * @author mrk
  *
  */
@@ -31,14 +31,14 @@ public class LinkFactory {
         return new LinkImpl(dbStructure);
     }    
     
-    private static class LinkImpl extends AbstractLinkSupport implements SupportProcessRequestor {
+    private static class LinkImpl extends AbstractLinkSupport implements SupportProcessRequester {
         private static String supportName = "link";
         private DBStructure dbStructure;
         private PVStructure pvStructure;
         private boolean noop;
         private LinkSupport linkSupport;
         private DBField dbField = null;
-        private SupportProcessRequestor supportProcessRequestor;
+        private SupportProcessRequester supportProcessRequester;
         
         
         private LinkImpl(DBStructure dbStructure) {
@@ -95,14 +95,14 @@ public class LinkFactory {
             super.setSupportState(SupportState.readyForStart);
         }      
         /* (non-Javadoc)
-         * @see org.epics.ioc.process.AbstractSupport#process(org.epics.ioc.process.SupportProcessRequestor)
+         * @see org.epics.ioc.process.AbstractSupport#process(org.epics.ioc.process.SupportProcessRequester)
          */
-        public void process(SupportProcessRequestor supportProcessRequestor) {
+        public void process(SupportProcessRequester supportProcessRequester) {
             if(noop) {
-                supportProcessRequestor.supportProcessDone(RequestResult.success);
+                supportProcessRequester.supportProcessDone(RequestResult.success);
             }
-            this.supportProcessRequestor = supportProcessRequestor;
-            linkSupport.process(supportProcessRequestor);
+            this.supportProcessRequester = supportProcessRequester;
+            linkSupport.process(supportProcessRequester);
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.process.LinkSupport#setField(org.epics.ioc.db.DBField)
@@ -112,10 +112,10 @@ public class LinkFactory {
         }
 
         /* (non-Javadoc)
-         * @see org.epics.ioc.process.SupportProcessRequestor#supportProcessDone(org.epics.ioc.util.RequestResult)
+         * @see org.epics.ioc.process.SupportProcessRequester#supportProcessDone(org.epics.ioc.util.RequestResult)
          */
         public void supportProcessDone(RequestResult requestResult) {
-            supportProcessRequestor.supportProcessDone(requestResult);
+            supportProcessRequester.supportProcessDone(requestResult);
         }
     }
 }

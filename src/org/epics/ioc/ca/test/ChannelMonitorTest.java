@@ -29,15 +29,15 @@ public class ChannelMonitorTest extends TestCase {
     
     public static void testChannelData() {
         DBD dbd = DBDFactory.getMasterDBD();
-        Requestor iocRequestor = new Listener();
+        Requester iocRequester = new Listener();
         XMLToDBDFactory.convert(dbd,
                  "dbd/menuStructureSupport.xml",
-                 iocRequestor);
+                 iocRequester);
         XMLToDBDFactory.convert(dbd,
                  "src/org/epics/ioc/process/test/exampleDBD.xml",
-                 iocRequestor);        
+                 iocRequester);        
         boolean initOK = IOCFactory.initDatabase(
-            "src/org/epics/ioc/process/test/monitorDB.xml",iocRequestor);
+            "src/org/epics/ioc/process/test/monitorDB.xml",iocRequester);
         if(!initOK) return;
         Monitor monitor;
         monitor =new Monitor("onChange","counter");
@@ -76,7 +76,7 @@ public class ChannelMonitorTest extends TestCase {
     }
     
     private static class Monitor implements
-    ChannelMonitorRequestor,ChannelStateListener {
+    ChannelMonitorRequester,ChannelStateListener {
         private String requestorName;
         private String pvName;
         private String fieldName = null;
@@ -132,14 +132,14 @@ public class ChannelMonitorTest extends TestCase {
             channelMonitor.start(this, queueSize, null, ScanPriority.low);
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.ca.ChannelMonitorRequestor#dataOverrun(int)
+         * @see org.epics.ioc.ca.ChannelMonitorRequester#dataOverrun(int)
          */
         public void dataOverrun(int number) {
             System.out.printf("%s %s overrun %d%n",requestorName,pvName,number);
         }
 
         /* (non-Javadoc)
-         * @see org.epics.ioc.ca.ChannelMonitorRequestor#monitorData(java.util.List, java.util.List)
+         * @see org.epics.ioc.ca.ChannelMonitorRequester#monitorData(java.util.List, java.util.List)
          */
         public void monitorCD(CD cD) {
             System.out.printf("%s %s %s%n",
@@ -147,14 +147,14 @@ public class ChannelMonitorTest extends TestCase {
         }
 
         /* (non-Javadoc)
-         * @see org.epics.ioc.util.Requestor#getRequestorName()
+         * @see org.epics.ioc.util.Requester#getRequestorName()
          */
-        public String getRequestorName() {
+        public String getRequesterName() {
             return requestorName;
         }
 
         /* (non-Javadoc)
-         * @see org.epics.ioc.util.Requestor#message(java.lang.String, org.epics.ioc.util.MessageType)
+         * @see org.epics.ioc.util.Requester#message(java.lang.String, org.epics.ioc.util.MessageType)
          */
         public void message(String message, MessageType messageType) {
             // TODO Auto-generated method stub
@@ -180,7 +180,7 @@ public class ChannelMonitorTest extends TestCase {
     }
     
     private static class MonitorNotify implements
-    ChannelMonitorNotifyRequestor,ChannelStateListener {
+    ChannelMonitorNotifyRequester,ChannelStateListener {
         private String requestorName;
         private String pvName;
         private String fieldName = null;
@@ -228,22 +228,22 @@ public class ChannelMonitorTest extends TestCase {
             channelMonitor.start(this, null, ScanPriority.low);
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.ca.ChannelMonitorNotifyRequestor#monitorEvent()
+         * @see org.epics.ioc.ca.ChannelMonitorNotifyRequester#monitorEvent()
          */
         public void monitorEvent() {
             System.out.printf("%s %s monitorEvent%n",requestorName,pvName);
         }
 
         /* (non-Javadoc)
-         * @see org.epics.ioc.util.Requestor#getRequestorName()
+         * @see org.epics.ioc.util.Requester#getRequestorName()
          */
-        public String getRequestorName() {
+        public String getRequesterName() {
             // TODO Auto-generated method stub
             return requestorName;
         }
 
         /* (non-Javadoc)
-         * @see org.epics.ioc.util.Requestor#message(java.lang.String, org.epics.ioc.util.MessageType)
+         * @see org.epics.ioc.util.Requester#message(java.lang.String, org.epics.ioc.util.MessageType)
          */
         public void message(String message, MessageType messageType) {
             System.out.printf("%s %s %s",messageType.toString(),requestorName,message);
@@ -397,16 +397,16 @@ public class ChannelMonitorTest extends TestCase {
         }
     }
     
-    private static class Listener implements Requestor {
+    private static class Listener implements Requester {
         /* (non-Javadoc)
-         * @see org.epics.ioc.util.Requestor#getRequestorName()
+         * @see org.epics.ioc.util.Requester#getRequestorName()
          */
-        public String getRequestorName() {
+        public String getRequesterName() {
             return "LocalChannelAccessTest";
         }
 
         /* (non-Javadoc)
-         * @see org.epics.ioc.util.Requestor#message(java.lang.String, org.epics.ioc.util.MessageType)
+         * @see org.epics.ioc.util.Requester#message(java.lang.String, org.epics.ioc.util.MessageType)
          */
         public void message(String message, MessageType messageType) {
             System.out.println(message);

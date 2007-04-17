@@ -1,0 +1,76 @@
+<?xml version="1.0" ?>
+<IOCDatabase>
+
+<record name = "adcVoltageEmbeded" type = "int">
+    <value>2048</value>
+</record>
+
+<record name = "psEmbeded" type = "powerSupply" >
+    <voltageInput structureName = "aiDouble" >
+        <input>
+            <linearConvert>
+                <deviceHigh>4095</deviceHigh>
+                <deviceLow>0</deviceLow>
+                <engUnitsLow>0.0</engUnitsLow>
+                <engUnitsHigh>10.0</engUnitsHigh>
+            </linearConvert>
+            <input supportName = "inputLink" >
+                <configure structureName = "inputLink">
+                    <pvname>adcVoltageEmbeded</pvname>
+                    <process>false</process>
+                </configure>
+            </input>
+    
+        </input>
+        <doubleAlarm>
+            <configure structureName = "doubleAlarm">
+              <active>true</active>
+              <hystersis>0.1</hystersis>
+              <highMajor>8.0</highMajor>
+              <highMinor>6.0</highMinor>
+              <lowMinor>4.0</lowMinor>
+              <lowMajor>2.0</lowMajor>
+            </configure>
+        </doubleAlarm>
+        <displayLimit>
+            <low>0.0</low>
+            <high>10.0</high>
+        </displayLimit>
+    </voltageInput>
+    <currentOutput structureName = "aoDouble" >
+        <output>
+            <linearConvert>
+                <deviceHigh>4095</deviceHigh>
+                <deviceLow>0</deviceLow>
+                <engUnitsLow>0.0</engUnitsLow>
+                <engUnitsHigh>10.0</engUnitsHigh>
+            </linearConvert>
+            <output supportName = "outputLink" >
+                <configure structureName = "outputLink">
+                    <pvname>dacCurrentEmbeded</pvname>
+                    <process>true</process>
+                </configure>
+            </output>
+    
+        </output>
+        <doubleAlarm>
+            <configure structureName = "doubleAlarm">
+              <active>true</active>
+              <hystersis>0.1</hystersis>
+              <highMajor>8.0</highMajor>
+              <highMinor>6.0</highMinor>
+              <lowMinor>4.0</lowMinor>
+              <lowMajor>2.0</lowMajor>
+            </configure>
+        </doubleAlarm>
+        <displayLimit>
+            <low>0.0</low>
+            <high>10.0</high>
+        </displayLimit>
+    </currentOutput>
+</record>
+
+<record name = "dacCurrentEmbeded" type = "int">
+</record>
+
+</IOCDatabase>

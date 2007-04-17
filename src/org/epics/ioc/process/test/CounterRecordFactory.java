@@ -28,14 +28,14 @@ public class CounterRecordFactory {
         return new CounterRecord(dbStructure);
     }
     
-    private static class CounterRecord extends AbstractSupport implements SupportProcessRequestor
+    private static class CounterRecord extends AbstractSupport implements SupportProcessRequester
     {
         private static String supportName = "counterRecord";
         private DBStructure dbStructure;
         private PVStructure pvStructure;
         private DBRecord dbRecord;
         private PVRecord pvRecord;
-        private SupportProcessRequestor supportProcessRequestor;
+        private SupportProcessRequester supportProcessRequester;
         private PVDouble pvMin;
         private PVDouble pvMax;
         private PVDouble pvInc;
@@ -53,13 +53,13 @@ public class CounterRecordFactory {
             pvRecord = dbRecord.getPVRecord();
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.process.SupportProcessRequestor#getProcessRequestorName()
+         * @see org.epics.ioc.process.SupportProcessRequester#getProcessRequestorName()
          */
-        public String getRequestorName() {
+        public String getRequesterName() {
             return pvRecord.getRecordName();
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.util.Requestor#message(java.lang.String, org.epics.ioc.util.MessageType)
+         * @see org.epics.ioc.util.Requester#message(java.lang.String, org.epics.ioc.util.MessageType)
          */
         public void message(String message, MessageType messageType) {
             pvStructure.message(message, messageType);
@@ -134,15 +134,15 @@ public class CounterRecordFactory {
         /* (non-Javadoc)
          * @see org.epics.ioc.dbLinkArray.Support#process(org.epics.ioc.dbLinkArray.ProcessRequestListener)
          */
-        public void process(SupportProcessRequestor supportProcessRequestor) {
+        public void process(SupportProcessRequester supportProcessRequester) {
             if(!super.checkSupportState(SupportState.ready,"process")) {
-                supportProcessRequestor.supportProcessDone(RequestResult.failure);
+                supportProcessRequester.supportProcessDone(RequestResult.failure);
                 return;
             }
-            if(supportProcessRequestor==null) {
-                throw new IllegalStateException("supportProcessRequestor is null");
+            if(supportProcessRequester==null) {
+                throw new IllegalStateException("supportProcessRequester is null");
             }
-            this.supportProcessRequestor = supportProcessRequestor;
+            this.supportProcessRequester = supportProcessRequester;
             double min = pvMin.get();
             double max = pvMax.get();
             double inc = pvInc.get();
@@ -154,14 +154,14 @@ public class CounterRecordFactory {
             if(linkArraySupport!=null) {
                 linkArraySupport.process(this);
             } else {
-                supportProcessRequestor.supportProcessDone(RequestResult.success);
+                supportProcessRequester.supportProcessDone(RequestResult.success);
             }
         }      
         /* (non-Javadoc)
-         * @see org.epics.ioc.process.SupportProcessRequestor#supportProcessDone(org.epics.ioc.util.RequestResult)
+         * @see org.epics.ioc.process.SupportProcessRequester#supportProcessDone(org.epics.ioc.util.RequestResult)
          */
         public void supportProcessDone(RequestResult requestResult) {
-            supportProcessRequestor.supportProcessDone(requestResult);
+            supportProcessRequester.supportProcessDone(requestResult);
         }
     }
 }

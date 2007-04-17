@@ -22,24 +22,24 @@ public class XMLToDBDFactory {
     // For use by all private classes
     private static DBD dbd;
     private static FieldCreate fieldCreate = FieldFactory.getFieldCreate();
-    private static Requestor requestor;
+    private static Requester requester;
     private static IOCXMLReader iocxmlReader;
     /**
      * Convert an xml file to Database definitions and put
      * the definitions in a database.
      * @param dbd a Database Definition Database
      * @param fileName the name of the xml file.
-     * @param requestor The requestor.
+     * @param requester The requester.
      */
-    public static void convert(DBD dbd, String fileName,Requestor requestor)
+    public static void convert(DBD dbd, String fileName,Requester requester)
     {
         boolean gotIt = isInUse.compareAndSet(false,true);
         if(!gotIt) {
-            requestor.message("XMLToDBDFactory is already active",MessageType.fatalError);
+            requester.message("XMLToDBDFactory is already active",MessageType.fatalError);
         }
         try {
             XMLToDBDFactory.dbd = dbd;
-            XMLToDBDFactory.requestor = requestor;
+            XMLToDBDFactory.requester = requester;
             IOCXMLListener listener = new Listener();
             iocxmlReader = IOCXMLReaderFactory.getReader();
             iocxmlReader.parse("DBDefinition",fileName,listener);
@@ -54,26 +54,26 @@ public class XMLToDBDFactory {
      * @param dbdName The name for the database.
      * This name will not appear in the map returned by DBDFactory.getDBDMap.
      * @param fileName The XML file containing database definitions.
-     * @param requestor A listener for error messages.
+     * @param requester A listener for error messages.
      * @return a DBD or null. If not null than the definitions are not in the master DBD.
      * The caller must call DBD.mergeIntoMaster to put the definitions into the master.
      */
-    public static DBD create(String dbdName,String fileName,Requestor requestor) {
+    public static DBD create(String dbdName,String fileName,Requester requester) {
         boolean gotIt = isInUse.compareAndSet(false,true);
         if(!gotIt) {
-            requestor.message("XMLToDBDFactory is already active",MessageType.error);
+            requester.message("XMLToDBDFactory is already active",MessageType.error);
             return null;
         }
         try {
             DBD dbd  = DBDFactory.create(dbdName);
             if(dbd==null) {
-                requestor.message(
+                requester.message(
                     "XMLToDBDFactory failed to create DBD " + dbdName,
                     MessageType.error);
                 return null;
             }
             XMLToDBDFactory.dbd = dbd;
-            XMLToDBDFactory.requestor = requestor;
+            XMLToDBDFactory.requester = requester;
             IOCXMLListener listener = new Listener();
             iocxmlReader = IOCXMLReaderFactory.getReader();
             iocxmlReader.parse("DBDefinition",fileName,listener);
@@ -210,7 +210,7 @@ public class XMLToDBDFactory {
         }
 
         public void message(String message,MessageType messageType) {
-            requestor.message(message, messageType);
+            requester.message(message, messageType);
         }
     }
 

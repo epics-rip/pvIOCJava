@@ -35,7 +35,7 @@ public class LinearConvertInputFactory {
     private static final String supportName = "linearConvertInput";
     
     private static class LinearConvertImpl extends AbstractSupport
-    implements SupportProcessRequestor
+    implements SupportProcessRequester
     {
         
         private DBStructure dbStructure = null;
@@ -60,7 +60,7 @@ public class LinearConvertInputFactory {
         private double slope;
         private double intercept;
         
-        private SupportProcessRequestor supportProcessRequestor;
+        private SupportProcessRequester supportProcessRequester;
         
         private LinearConvertImpl(DBStructure dbStructure) {
             super(supportName,dbStructure);
@@ -162,10 +162,10 @@ public class LinearConvertInputFactory {
             super.setSupportState(inputSupport.getSupportState());
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.process.AbstractSupport#process(org.epics.ioc.process.SupportProcessRequestor)
+         * @see org.epics.ioc.process.AbstractSupport#process(org.epics.ioc.process.SupportProcessRequester)
          */
-        public void process(SupportProcessRequestor supportProcessRequestor) {
-            this.supportProcessRequestor = supportProcessRequestor;
+        public void process(SupportProcessRequester supportProcessRequester) {
+            this.supportProcessRequester = supportProcessRequester;
             inputSupport.process(this);
         }
 
@@ -182,14 +182,14 @@ public class LinearConvertInputFactory {
         }
 
         /* (non-Javadoc)
-         * @see org.epics.ioc.process.SupportProcessRequestor#supportProcessDone(org.epics.ioc.util.RequestResult)
+         * @see org.epics.ioc.process.SupportProcessRequester#supportProcessDone(org.epics.ioc.util.RequestResult)
          */
         public void supportProcessDone(RequestResult requestResult) {
             double rawValue = (double)pvRawValue.get();
             double value = rawValue*slope + intercept;
             pvValue.put(value);
             dbValue.postPut();
-            supportProcessRequestor.supportProcessDone(requestResult);
+            supportProcessRequester.supportProcessDone(requestResult);
         }
     }
 }

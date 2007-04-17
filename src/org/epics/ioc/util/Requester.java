@@ -6,16 +6,16 @@
 package org.epics.ioc.util;
 
 /**
- * Base interface for requestors.
+ * Base interface for requesters.
  * @author mrk
  *
  */
-public interface Requestor {
+public interface Requester {
     /**
-     * Get the name of the requestor.
+     * Get the name of the requester.
      * @return The name.
      */
-    String getRequestorName();
+    String getRequesterName();
     /**
      * Report a message.
      * @param message The message.

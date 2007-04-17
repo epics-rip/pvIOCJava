@@ -29,7 +29,7 @@ public class Monitor {
         monitorImpl.start();
     }
 
-    private static class MonitorImpl  implements Requestor,Runnable {
+    private static class MonitorImpl  implements Requester,Runnable {
         private Display display;
         private MessageQueue messageQueue = MessageQueueFactory.create(3);
         private Shell shell;
@@ -76,14 +76,14 @@ public class Monitor {
             shell.open();
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.util.Requestor#getRequestorName()
+         * @see org.epics.ioc.util.Requester#getRequesterName()
          */
-        public String getRequestorName() {
+        public String getRequesterName() {
             return "swtshell.monitor";
         }
 
         /* (non-Javadoc)
-         * @see org.epics.ioc.util.Requestor#message(java.lang.String, org.epics.ioc.util.MessageType)
+         * @see org.epics.ioc.util.Requester#message(java.lang.String, org.epics.ioc.util.MessageType)
          */
         public void message(final String message, MessageType messageType) {
             boolean syncExec = false;
@@ -132,13 +132,13 @@ public class Monitor {
         ChannelStateListener,
         DisposeListener,
         SelectionListener,
-        ChannelMonitorRequestor,
+        ChannelMonitorRequester,
         ChannelFieldGroupListener
         {
             private int queueSize = 3;
             private MonitorType monitorType = MonitorType.change;
             private double deadband = 0.0;
-            private Requestor requestor;
+            private Requester requester;
             private Button connectButton;          
             private Button propertyButton;          
             private Button changeButton;
@@ -161,8 +161,8 @@ public class Monitor {
             private ConnectState connectState = ConnectState.disconnected;
             private String[] connectStateText = {"connect    ","disconnect"};
 
-            public MonitorChannel(Composite parent,Requestor requestor) {
-                this.requestor = requestor;
+            public MonitorChannel(Composite parent,Requester requester) {
+                this.requester = requester;
                 Composite monitorTypeComposite = new Composite(parent,SWT.BORDER);
                 GridLayout gridLayout = new GridLayout();
                 gridLayout.numColumns = 6;
@@ -244,16 +244,16 @@ public class Monitor {
                 if(object==connectButton) {
                     switch(connectState) {
                     case disconnected:
-                        GetChannel getChannel = new GetChannel(shell,requestor,this);
+                        GetChannel getChannel = new GetChannel(shell,requester,this);
                         channel = getChannel.getChannel();
                         if(channel==null) {
-                            requestor.message(String.format("no record selected%n"),MessageType.error);
+                            requester.message(String.format("no record selected%n"),MessageType.error);
                             return;
                         }
-                        GetChannelField getChannelField = new GetChannelField(shell,requestor,channel);
+                        GetChannelField getChannelField = new GetChannelField(shell,requester,channel);
                         valueField = getChannelField.getChannelField(channel);
                         if(valueField==null) {
-                            requestor.message(String.format("no field selected%n"),MessageType.error);
+                            requester.message(String.format("no field selected%n"),MessageType.error);
                             return;
                         }
                         setConnectState(ConnectState.connected);
@@ -310,7 +310,7 @@ public class Monitor {
                     try {
                         deadband = Double.parseDouble(value);
                     } catch (NumberFormatException e) {
-                        requestor.message("Illegal value", MessageType.error);
+                        requester.message("Illegal value", MessageType.error);
                     }
                 }
                 if(object==startStopButton) {
@@ -328,21 +328,21 @@ public class Monitor {
                     isMonitoring = true;
                     startStopButton.setText("stopMonitor");
                     channelMonitor.start(
-                            this,queueSize,requestor.getRequestorName(),ScanPriority.low);
+                            this,queueSize,requester.getRequesterName(),ScanPriority.low);
                     return;
                 }
             }
 
             /* (non-Javadoc)
-             * @see org.epics.ioc.ca.ChannelMonitorRequestor#dataOverrun(int)
+             * @see org.epics.ioc.ca.ChannelMonitorRequester#dataOverrun(int)
              */
             public void dataOverrun(int number) {
-                requestor.message(
+                requester.message(
                     String.format("dataOverrun number = %d", number), MessageType.info);
             }
 
             /* (non-Javadoc)
-             * @see org.epics.ioc.ca.ChannelMonitorRequestor#monitorData(org.epics.ioc.ca.CD)
+             * @see org.epics.ioc.ca.ChannelMonitorRequester#monitorData(org.epics.ioc.ca.CD)
              */
             public void monitorCD(final CD cD) {
                 allDone = false;
@@ -373,16 +373,16 @@ public class Monitor {
                 }
             }
             /* (non-Javadoc)
-             * @see org.epics.ioc.util.Requestor#getRequestorName()
+             * @see org.epics.ioc.util.Requester#getRequesterName()
              */
-            public String getRequestorName() {
-                return requestor.getRequestorName();
+            public String getRequesterName() {
+                return requester.getRequesterName();
             }
             /* (non-Javadoc)
-             * @see org.epics.ioc.util.Requestor#message(java.lang.String, org.epics.ioc.util.MessageType)
+             * @see org.epics.ioc.util.Requester#message(java.lang.String, org.epics.ioc.util.MessageType)
              */
             public void message(String message, MessageType messageType) {
-                requestor.message(message, messageType);   
+                requester.message(message, messageType);   
             }
             /* (non-Javadoc)
              * @see org.epics.ioc.ca.ChannelFieldGroupListener#accessRightsChange(org.epics.ioc.ca.Channel, org.epics.ioc.ca.ChannelField)
@@ -423,7 +423,7 @@ public class Monitor {
                         if(result==ChannelFindFieldResult.thisChannel) {
                             channelFieldGroup.addChannelField(channel.getChannelField());
                         } else {
-                            requestor.message(
+                            requester.message(
                                     "monitor remote property not implemented", MessageType.info);
                         }
                     }

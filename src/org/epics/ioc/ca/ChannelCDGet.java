@@ -18,7 +18,7 @@ public interface ChannelCDGet {
     CD getCD();
     /**
      * Get the target data at put it into the CD.
-     * If the request fails then ChannelCDGetRequestor.getDone is called before get returns..
+     * If the request fails then ChannelCDGetRequester.getDone is called before get returns..
      */
     void get();
 }

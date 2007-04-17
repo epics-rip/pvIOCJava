@@ -17,13 +17,13 @@ public interface ChannelPut {
     /**
      * Put data to a channel.
      * This fails if the request can not be satisfied.
-     * If it fails ChannelPutRequestor.putDone is called before put returns.
+     * If it fails ChannelPutRequester.putDone is called before put returns.
      */
     void put();
     /**
-     * If ChannelPutRequestor.nextPutData or ChannelPutRequestor.nextDelayedPutData returns true
+     * If ChannelPutRequester.nextPutData or ChannelPutRequester.nextDelayedPutData returns true
      * this is the call to ask again for the data. The result is that the underlying database
-     * is locked and ChannelPutRequestor.nextDelayedPutData is called.
+     * is locked and ChannelPutRequester.nextDelayedPutData is called.
      * @param pvField The pvField to put.
      */
     void putDelayed(PVField pvField);

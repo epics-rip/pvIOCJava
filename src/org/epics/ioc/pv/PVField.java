@@ -13,7 +13,7 @@ import org.epics.ioc.util.*;
  * @author mrk
  *
  */
-public interface PVField extends Requestor {
+public interface PVField extends Requester {
     /**
      * Get the fullFieldName, i.e. the complete hierarchy.
      * @return The name.

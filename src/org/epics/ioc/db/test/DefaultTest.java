@@ -9,7 +9,7 @@ import junit.framework.TestCase;
 
 import org.epics.ioc.dbd.*;
 import org.epics.ioc.db.*;
-import org.epics.ioc.util.Requestor;
+import org.epics.ioc.util.Requester;
 import org.epics.ioc.util.MessageType;
 
 import java.util.*;
@@ -25,15 +25,15 @@ public class DefaultTest extends TestCase {
      */
     public static void testDefault() {
         DBD dbd = DBDFactory.getMasterDBD();
-        Requestor iocRequestor = new Listener();
+        Requester iocRequester = new Listener();
         System.out.printf("reading menuStructureSupport%n");
         XMLToDBDFactory.convert(dbd,
-                 "dbd/menuStructureSupport.xml",iocRequestor);
+                 "dbd/menuStructureSupport.xml",iocRequester);
         XMLToDBDFactory.convert(dbd,
-                 "src/org/epics/ioc/db/test/defaultDBD.xml",iocRequestor);
+                 "src/org/epics/ioc/db/test/defaultDBD.xml",iocRequester);
         IOCDB iocdb = IOCDBFactory.create("testIOCDatabase");
         XMLToIOCDBFactory.convert(dbd,iocdb,
-                 "src/org/epics/ioc/db/test/defaultDB.xml",iocRequestor);
+                 "src/org/epics/ioc/db/test/defaultDB.xml",iocRequester);
         Map<String,DBRecord> recordMap = iocdb.getRecordMap();
         Set<String> keys = recordMap.keySet();
         System.out.printf("%n%nrecord list%n");
@@ -47,16 +47,16 @@ public class DefaultTest extends TestCase {
             System.out.print(record.toString());
         }
     }
-    private static class Listener implements Requestor {
+    private static class Listener implements Requester {
         /* (non-Javadoc)
-         * @see org.epics.ioc.util.Requestor#getRequestorName()
+         * @see org.epics.ioc.util.Requester#getRequestorName()
          */
-        public String getRequestorName() {
+        public String getRequesterName() {
             return "DEfaultTest";
         }
 
         /* (non-Javadoc)
-         * @see org.epics.ioc.util.Requestor#message(java.lang.String, org.epics.ioc.util.MessageType)
+         * @see org.epics.ioc.util.Requester#message(java.lang.String, org.epics.ioc.util.MessageType)
          */
         public void message(String message, MessageType messageType) {
             System.out.println(message);

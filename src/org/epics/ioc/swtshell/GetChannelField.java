@@ -18,18 +18,17 @@ import org.epics.ioc.ca.*;
  */    
 public class GetChannelField extends Dialog implements SelectionListener {
     
-    private Requestor requestor;
+    private Requester requester;
     private Channel channel;
     private Shell shell;
     private Button selectButton;
-    private Button doneButton;
     private Text text;
     private SelectFieldName selectFieldName;
     private String fieldName = null;
 
-    public GetChannelField(Shell parent,Requestor requestor,Channel channel) {
+    public GetChannelField(Shell parent,Requester requester,Channel channel) {
         super(parent,SWT.DIALOG_TRIM|SWT.NONE);
-        this.requestor = requestor;
+        this.requester = requester;
         this.channel = channel;
     }
     
@@ -37,17 +36,14 @@ public class GetChannelField extends Dialog implements SelectionListener {
         shell = new Shell(getParent(),getStyle());
         shell.setText("getChannelField");      
         GridLayout gridLayout = new GridLayout();
-        gridLayout.numColumns = 3;
+        gridLayout.numColumns = 2;
         shell.setLayout(gridLayout);
         GridData gridData = new GridData(GridData.FILL_HORIZONTAL);
         shell.setLayoutData(gridData);
         selectButton = new Button(shell,SWT.NONE);
         selectButton.setText("select");
-        selectFieldName = new SelectFieldName(shell,requestor);
+        selectFieldName = new SelectFieldName(shell,requester);
         selectButton.addSelectionListener(this);
-        doneButton = new Button(shell,SWT.NONE);
-        doneButton.setText("done");
-        doneButton.addSelectionListener(this);
         text = new Text(shell,SWT.BORDER);
         gridData = new GridData(GridData.FILL_HORIZONTAL);
         gridData.minimumWidth = 500;
@@ -67,7 +63,7 @@ public class GetChannelField extends Dialog implements SelectionListener {
         ChannelFindFieldResult result = channel.findField(fieldName);
         switch(result) {
         case otherChannel:
-            requestor.message(String.format(
+            requester.message(String.format(
                     "field %s i located via channelName %s and fieldName %s",
                     fieldName,channel.getOtherChannel(),channel.getOtherField()),
                     MessageType.info);
@@ -76,11 +72,11 @@ public class GetChannelField extends Dialog implements SelectionListener {
             channelField =channel.getChannelField();
             break;
         case notFound:
-            requestor.message(String.format(
+            requester.message(String.format(
                     "field %s not found%n",fieldName),MessageType.error);
             return null;
         case failure:
-            requestor.message(String.format(
+            requester.message(String.format(
                     "Logic Error: findField failed.%n"),MessageType.error);
             return null;
         }
@@ -104,12 +100,13 @@ public class GetChannelField extends Dialog implements SelectionListener {
             boolean result = selectFieldName.selectFieldName(channel.getChannelName());
             if(result) {
                 fieldName = selectFieldName.getFieldName();
-                text.setText(fieldName);
+                if(fieldName!=null) {
+                    shell.close();
+                }
             }
             return;
         } else if(object==text) {
             fieldName = text.getText();
-        } else if(object==doneButton) {
             shell.close();
         }
     }

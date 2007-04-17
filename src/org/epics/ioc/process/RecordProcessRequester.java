@@ -12,7 +12,7 @@ import org.epics.ioc.util.*;
  * @author mrk
  *
  */
-public interface RecordProcessRequestor extends Requestor{
+public interface RecordProcessRequester extends Requester{
     /**
      * The result of the process request.
      * This is called with the record still active and locked.

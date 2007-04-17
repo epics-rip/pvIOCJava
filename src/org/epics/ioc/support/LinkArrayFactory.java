@@ -46,16 +46,16 @@ public class LinkArrayFactory {
     
     private static String supportName = "linkArray";
     
-    private static class LinkArrayImpl extends AbstractSupport implements SupportProcessRequestor
+    private static class LinkArrayImpl extends AbstractSupport implements SupportProcessRequester
     {
         private DBField dbField;
         private PVField pvField;
-        private String processRequestorName = null;
+        private String processRequesterName = null;
         private PVBoolean[] pvWaits = null;
         private LinkSupport[] linkSupports = null;
         
         private DBField valueField = null;        
-        private SupportProcessRequestor supportProcessRequestor;
+        private SupportProcessRequester supportProcessRequester;
         private int nextLink;
         private int numberWait;
         private RequestResult finalResult;
@@ -64,13 +64,13 @@ public class LinkArrayFactory {
             super(supportName,dbField);
             this.dbField = dbField;
             pvField = dbField.getPVField();
-            processRequestorName = pvField.getFullName();
+            processRequesterName = pvField.getFullName();
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.process.SupportProcessRequestor#getProcessRequestorName()
+         * @see org.epics.ioc.process.SupportProcessRequester#getProcessRequesterName()
          */
-        public String getRequestorName() {
-            return processRequestorName;
+        public String getRequesterName() {
+            return processRequesterName;
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.process.Support#initialize()
@@ -79,7 +79,7 @@ public class LinkArrayFactory {
             if(!super.checkSupportState(SupportState.readyForInitialize,supportName)) return;
             DBNonScalarArray dbNonScalarArray = (DBNonScalarArray)dbField;
             PVStructureArray pvStructureArray = (PVStructureArray)dbField.getPVField();
-            processRequestorName = pvStructureArray.getFullName();
+            processRequesterName = pvStructureArray.getFullName();
             SupportState supportState = SupportState.readyForStart;
             DBField[] datas = dbNonScalarArray.getElementDBFields();
             int n = datas.length;
@@ -180,21 +180,21 @@ public class LinkArrayFactory {
             setSupportState(SupportState.readyForInitialize);
         }       
         /* (non-Javadoc)
-         * @see org.epics.ioc.process.Support#process(org.epics.ioc.process.RecordProcessRequestor)
+         * @see org.epics.ioc.process.Support#process(org.epics.ioc.process.RecordProcessRequester)
          */
-        public void process(SupportProcessRequestor supportProcessRequestor) {
-            if(supportProcessRequestor==null) {
+        public void process(SupportProcessRequester supportProcessRequester) {
+            if(supportProcessRequester==null) {
                 throw new IllegalStateException("no processRequestListener");
             }
             if(!super.checkSupportState(SupportState.ready,supportName + ".process")) {
-                supportProcessRequestor.supportProcessDone(RequestResult.failure);
+                supportProcessRequester.supportProcessDone(RequestResult.failure);
                 return;
             }
             if(linkSupports.length<=0) {
-                supportProcessRequestor.supportProcessDone(RequestResult.success);
+                supportProcessRequester.supportProcessDone(RequestResult.success);
                 return;
             }
-            this.supportProcessRequestor = supportProcessRequestor;
+            this.supportProcessRequester = supportProcessRequester;
             nextLink = 0;
             finalResult = RequestResult.success;
             callLinkSupport();
@@ -206,7 +206,7 @@ public class LinkArrayFactory {
             valueField = dbField;
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.process.SupportProcessRequestor#supportProcessDone(org.epics.ioc.util.RequestResult)
+         * @see org.epics.ioc.process.SupportProcessRequester#supportProcessDone(org.epics.ioc.util.RequestResult)
          */
         public void supportProcessDone(RequestResult requestResult) {
             if(requestResult!=RequestResult.success) {
@@ -219,7 +219,7 @@ public class LinkArrayFactory {
             if(nextLink<linkSupports.length) {
                 callLinkSupport();
             } else {
-                supportProcessRequestor.supportProcessDone(finalResult);
+                supportProcessRequester.supportProcessDone(finalResult);
             }
         }
         

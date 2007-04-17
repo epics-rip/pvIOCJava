@@ -3,10 +3,10 @@
 <record name = "exampleAnalog" type = "analog">
     <value>10.0</value>
     <units>volts</units>
-    <displayLimit>
+    <doubleLimit>
         <low>0.0</low>
         <high>10.0</high>
-    </displayLimit>
+    </doubleLimit>
     <input supportName = "processLink">
         <configure structureName = "processLink">
             <pvname>xxxxxx</pvname>

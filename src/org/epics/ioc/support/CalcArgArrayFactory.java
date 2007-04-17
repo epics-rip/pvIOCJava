@@ -46,24 +46,24 @@ public class CalcArgArrayFactory {
     private static String supportName = "calcArgArray";
     
     private static class CalcArgArrayImpl extends AbstractSupport
-    implements CalcArgArraySupport,SupportProcessRequestor
+    implements CalcArgArraySupport,SupportProcessRequester
     {
         private PVField pvField;
-        private String processRequestorName = null;
+        private String processRequesterName = null;
         private DBNonScalarArray calcArgArrayDBField;
         private DBField[] valueDBFields;
         private DBField[] nameDBFields;
         private LinkSupport[] linkSupports = null;
         private int numLinkSupports = 0;
               
-        private SupportProcessRequestor supportProcessRequestor;
+        private SupportProcessRequester supportProcessRequester;
         private int numberWait;
         private RequestResult finalResult;
        
         private CalcArgArrayImpl(DBNonScalarArray dbNonScalarArray) {
             super(supportName,dbNonScalarArray);
             pvField = dbNonScalarArray.getPVField();
-            processRequestorName = pvField.getFullName();
+            processRequesterName = pvField.getFullName();
             calcArgArrayDBField = dbNonScalarArray; 
         }
         /* (non-Javadoc)
@@ -80,10 +80,10 @@ public class CalcArgArrayFactory {
             return null;
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.process.SupportProcessRequestor#getProcessRequestorName()
+         * @see org.epics.ioc.process.SupportProcessRequester#getProcessRequesterName()
          */
-        public String getRequestorName() {
-            return processRequestorName;
+        public String getRequesterName() {
+            return processRequesterName;
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.process.Support#initialize()
@@ -159,21 +159,21 @@ public class CalcArgArrayFactory {
             setSupportState(SupportState.readyForInitialize);
         }       
         /* (non-Javadoc)
-         * @see org.epics.ioc.process.Support#process(org.epics.ioc.process.RecordProcessRequestor)
+         * @see org.epics.ioc.process.Support#process(org.epics.ioc.process.RecordProcessRequester)
          */
-        public void process(SupportProcessRequestor supportProcessRequestor) {
-            if(supportProcessRequestor==null) {
+        public void process(SupportProcessRequester supportProcessRequester) {
+            if(supportProcessRequester==null) {
                 throw new IllegalStateException("no processRequestListener");
             }
             if(!super.checkSupportState(SupportState.ready,supportName + ".process")) {
-                supportProcessRequestor.supportProcessDone(RequestResult.failure);
+                supportProcessRequester.supportProcessDone(RequestResult.failure);
                 return;
             }
             if(numLinkSupports<=0) {
-                supportProcessRequestor.supportProcessDone(RequestResult.success);
+                supportProcessRequester.supportProcessDone(RequestResult.success);
                 return;
             }
-            this.supportProcessRequestor = supportProcessRequestor;
+            this.supportProcessRequester = supportProcessRequester;
             numberWait = numLinkSupports;
             finalResult = RequestResult.success;
             for(LinkSupport linkSupport: linkSupports) {
@@ -181,7 +181,7 @@ public class CalcArgArrayFactory {
             }
         }                
         /* (non-Javadoc)
-         * @see org.epics.ioc.process.SupportProcessRequestor#supportProcessDone(org.epics.ioc.util.RequestResult)
+         * @see org.epics.ioc.process.SupportProcessRequester#supportProcessDone(org.epics.ioc.util.RequestResult)
          */
         public void supportProcessDone(RequestResult requestResult) {
             if(requestResult!=RequestResult.success) {
@@ -191,7 +191,7 @@ public class CalcArgArrayFactory {
             }
             numberWait--;
             if(numberWait>0) return;
-            supportProcessRequestor.supportProcessDone(finalResult);
+            supportProcessRequester.supportProcessDone(finalResult);
         }
     }
 }

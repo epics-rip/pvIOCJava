@@ -6,7 +6,7 @@
 package org.epics.ioc.support;
 
 import org.epics.ioc.db.*;
-import org.epics.ioc.process.SupportProcessRequestor;
+import org.epics.ioc.process.SupportProcessRequester;
 import org.epics.ioc.process.SupportState;
 import org.epics.ioc.pv.*;
 import org.epics.ioc.util.*;
@@ -37,15 +37,14 @@ public abstract class AbstractSupport implements Support {
         this.dbField = dbField;
         pvField = dbField.getPVField();
     } 
-    
     /* (non-Javadoc)
-     * @see org.epics.ioc.process.Support#getName()
+     * @see org.epics.ioc.util.Requester#getRequesterName()
      */
-    public String getRequestorName() {
+    public String getRequesterName() {
         return name;
     }
     /* (non-Javadoc)
-     * @see org.epics.ioc.util.Requestor#message(java.lang.String, org.epics.ioc.util.MessageType)
+     * @see org.epics.ioc.util.Requester#message(java.lang.String, org.epics.ioc.util.MessageType)
      */
     public void message(String message, MessageType messageType) {
         pvField.message(message, messageType);
@@ -87,10 +86,10 @@ public abstract class AbstractSupport implements Support {
         setSupportState(SupportState.readyForInitialize);
     }
     /* (non-Javadoc)
-     * @see org.epics.ioc.process.Support#process(org.epics.ioc.process.RecordProcessRequestor)
+     * @see org.epics.ioc.process.Support#process(org.epics.ioc.process.RecordProcessRequester)
      */
-    public void process(SupportProcessRequestor supportProcessRequestor) {
-        supportProcessRequestor.supportProcessDone(RequestResult.success);
+    public void process(SupportProcessRequester supportProcessRequester) {
+        supportProcessRequester.supportProcessDone(RequestResult.success);
     } 
     /* (non-Javadoc)
      * @see org.epics.ioc.support.Support#setField(org.epics.ioc.db.DBField)
@@ -98,7 +97,6 @@ public abstract class AbstractSupport implements Support {
     public void setField(DBField dbField) {
         // nothing to do
     }
-
     /**
      * This must be called whenever the supports changes state.
      * @param state The new state.

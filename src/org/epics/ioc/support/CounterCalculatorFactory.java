@@ -59,9 +59,9 @@ public class CounterCalculatorFactory {
             setSupportState(SupportState.readyForStart);
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.process.AbstractSupport#process(org.epics.ioc.process.SupportProcessRequestor)
+         * @see org.epics.ioc.process.AbstractSupport#process(org.epics.ioc.process.SupportProcessRequester)
          */
-        public void process(SupportProcessRequestor supportProcessRequestor) {
+        public void process(SupportProcessRequester supportProcessRequester) {
             double value = valuePVField.get();
             double min = minPVField.get();
             double max = maxPVField.get();
@@ -76,7 +76,7 @@ public class CounterCalculatorFactory {
             }
             valuePVField.put(value);
             valueDBField.postPut();
-            supportProcessRequestor.supportProcessDone(RequestResult.success);
+            supportProcessRequester.supportProcessDone(RequestResult.success);
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.process.LinkSupport#setField(org.epics.ioc.pvAccess.PVData)

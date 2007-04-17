@@ -33,25 +33,25 @@ public class CalcFactory {
         linkArraySupport
     }
     
-    static private class CalcImpl extends AbstractSupport implements SupportProcessRequestor
+    static private class CalcImpl extends AbstractSupport implements SupportProcessRequester
     {
         private static String supportName = "calcRecord";
-        private DBRecord dbRecord;
-        private PVRecord pvRecord;
+        private DBStructure dbStructure;
+        private PVStructure pvStructure;
         private DBField valueDBField = null;
         private CalcArgArraySupport calcArgArraySupport = null;
-        private LinkSupport doubleAlarmSupport = null;
+        private Support doubleAlarmSupport = null;
         private CalculatorSupport calculatorSupport = null;
         private Support linkArraySupport = null;
-        private SupportProcessRequestor supportProcessRequestor = null;
+        private SupportProcessRequester supportProcessRequester = null;
         private RequestResult finalResult = RequestResult.success;
         private ProcessState processState = ProcessState.calcArgArraySupport;
         
         
         private CalcImpl(DBStructure dbStructure) {
             super(supportName,dbStructure);
-            dbRecord = dbStructure.getDBRecord();
-            pvRecord = dbRecord.getPVRecord();
+            this.dbStructure = dbStructure;
+            pvStructure = dbStructure.getPVStructure();
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.process.Support#initialize()
@@ -59,8 +59,8 @@ public class CalcFactory {
         public void initialize() {
             if(!super.checkSupportState(SupportState.readyForInitialize,supportName)) return;
             SupportState supportState = SupportState.readyForStart;
-            Structure structure = (Structure)pvRecord.getField();
-            DBField[] dbFields = dbRecord.getDBStructure().getFieldDBFields();
+            Structure structure = (Structure)pvStructure.getField();
+            DBField[] dbFields = dbStructure.getFieldDBFields();
             int index;
             if(valueDBField==null) {
                 index = structure.getFieldIndex("value");
@@ -93,19 +93,15 @@ public class CalcFactory {
                 return;
             }
             index = structure.getFieldIndex("doubleAlarm");
-            if(index<0) {
-                super.message("record does not have field doubleAlarm", MessageType.error);
-                return;
+            if(index>=0) {
+                DBLink doubleAlarmDBField = (DBLink)dbFields[index];
+                doubleAlarmSupport = (LinkSupport)doubleAlarmDBField.getSupport();
             }
-            DBLink doubleAlarmDBField = (DBLink)dbFields[index];
-            doubleAlarmSupport = (LinkSupport)doubleAlarmDBField.getSupport();
             index = structure.getFieldIndex("linkArray");
-            if(index<0) {
-                super.message("record does not have linkArray field", MessageType.error);
-                return;
+            if(index>=0) {
+                DBNonScalarArray linkArrayDBField = (DBNonScalarArray)dbFields[index];
+                linkArraySupport = linkArrayDBField.getSupport();
             }
-            DBNonScalarArray linkArrayDBField = (DBNonScalarArray)dbFields[index];
-            linkArraySupport = linkArrayDBField.getSupport();
             calcArgArraySupport.initialize();
             supportState = calcArgArraySupport.getSupportState();
             if(supportState!=SupportState.readyForStart) return;
@@ -181,7 +177,7 @@ public class CalcFactory {
             if(super.getSupportState()!=SupportState.ready) return;
             calcArgArraySupport.stop();
             calculatorSupport.stop();
-            doubleAlarmSupport.stop();
+            if(doubleAlarmSupport!=null) doubleAlarmSupport.stop();
             if(calcArgArraySupport!=null) calcArgArraySupport.stop();
             setSupportState(SupportState.readyForStart);
         }
@@ -191,7 +187,7 @@ public class CalcFactory {
         public void uninitialize() {
             calcArgArraySupport.uninitialize();
             calculatorSupport.uninitialize();
-            doubleAlarmSupport.uninitialize();
+            if(doubleAlarmSupport!=null) doubleAlarmSupport.uninitialize();
             if(calcArgArraySupport!=null) calcArgArraySupport.uninitialize();
             calcArgArraySupport = null;
             calculatorSupport = null;
@@ -201,14 +197,14 @@ public class CalcFactory {
             setSupportState(SupportState.readyForInitialize);
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.process.Support#process(org.epics.ioc.process.RecordProcessRequestor)
+         * @see org.epics.ioc.process.Support#process(org.epics.ioc.process.RecordProcessRequester)
          */
-        public void process(SupportProcessRequestor supportProcessRequestor) {
+        public void process(SupportProcessRequester supportProcessRequester) {
             if(!super.checkSupportState(SupportState.ready,"process")) {
-                supportProcessRequestor.supportProcessDone(RequestResult.failure);
+                supportProcessRequester.supportProcessDone(RequestResult.failure);
                 return;
             }
-            this.supportProcessRequestor = supportProcessRequestor;
+            this.supportProcessRequester = supportProcessRequester;
             processState = ProcessState.calcArgArraySupport;
             finalResult = RequestResult.success;
             calcArgArraySupport.process(this);
@@ -221,7 +217,7 @@ public class CalcFactory {
             valueDBField = dbField;
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.process.SupportProcessRequestor#supportProcessDone(org.epics.ioc.util.RequestResult)
+         * @see org.epics.ioc.process.SupportProcessRequester#supportProcessDone(org.epics.ioc.util.RequestResult)
          */
         public void supportProcessDone(RequestResult requestResult) {
             if(requestResult.compareTo(finalResult)>0) {
@@ -233,15 +229,19 @@ public class CalcFactory {
                 calculatorSupport.process(this);
                 return;
             case calculatorSupport:
-                processState = ProcessState.doubleAlarmSupport;
-                doubleAlarmSupport.process(this);
-                return;
+                if(doubleAlarmSupport!=null) {
+                    processState = ProcessState.doubleAlarmSupport;
+                    doubleAlarmSupport.process(this);
+                    return;
+                }
             case doubleAlarmSupport:
-                processState = ProcessState.linkArraySupport;
-                linkArraySupport.process(this);
-                return;
+                if(linkArraySupport!=null) {
+                    processState = ProcessState.linkArraySupport;
+                    linkArraySupport.process(this);
+                    return;
+                }
             case linkArraySupport:
-                supportProcessRequestor.supportProcessDone(finalResult);
+                supportProcessRequester.supportProcessDone(finalResult);
                 return;
             }
         }

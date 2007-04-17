@@ -18,10 +18,10 @@
          choice1
     </enum>
     <menu>middle</menu>
-    <displayLimit supportName = "dummy">
+    <doubleLimit supportName = "dummy">
         <low>0.0</low>
         <high>10.0</high>
-    </displayLimit>
+    </doubleLimit>
     <link supportName = "inputLink">
         <configure structureName = "inputLink">
             <pvname>xxxxxx</pvname>
@@ -82,11 +82,11 @@
         </value>
     </linkArray>
     <structArray>
-        <value structureName = "displayLimit">
+        <value structureName = "doubleLimit">
              <low>0.0</low>
              <high>10.0</high>
         </value>
-        <value structureName = "linearConvertInput">
+        <value structureName = "linearConvert">
              <engUnitsLow>0.0</engUnitsLow>
              <engUnitsHigh>100.0</engUnitsHigh>
         </value>
@@ -115,10 +115,10 @@
              choice1
         </enum>
         <menu>middle</menu>
-        <displayLimit>
+        <doubleLimit>
             <low>0.0</low>
             <high>10.0</high>
-        </displayLimit>
+        </doubleLimit>
         <link supportName = "processLink">
             <configure structureName = "processLink">
                 <pvname>xxxxxx</pvname>
@@ -179,11 +179,11 @@
             </value>
         </linkArray>
         <structArray>
-            <value structureName = "displayLimit">
+            <value structureName = "doubleLimit">
                  <low>0.0</low>
                  <high>10.0</high>
             </value>
-            <value structureName = "linearConvertInput">
+            <value structureName = "linearConvert">
                  <engUnitsLow>0.0</engUnitsLow>
                  <engUnitsHigh>100.0</engUnitsHigh>
             </value>

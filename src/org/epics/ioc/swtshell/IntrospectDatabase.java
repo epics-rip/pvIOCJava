@@ -28,7 +28,7 @@ public class IntrospectDatabase {
         introspect.start();
     }
     
-    private static class Introspect implements SelectionListener, Requestor{
+    private static class Introspect implements SelectionListener, Requester{
         static private DBD dbd = DBDFactory.getMasterDBD();
         private Map<String,DBRecord> recordMap = iocdb.getRecordMap();
         private Display display;
@@ -138,13 +138,13 @@ public class IntrospectDatabase {
             }
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.util.Requestor#getRequestorName()
+         * @see org.epics.ioc.util.Requester#getRequesterName()
          */
-        public String getRequestorName() {
+        public String getRequesterName() {
             return "introspectDatabase";
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.util.Requestor#message(java.lang.String, org.epics.ioc.util.MessageType)
+         * @see org.epics.ioc.util.Requester#message(java.lang.String, org.epics.ioc.util.MessageType)
          */
         public void message(String message, MessageType messageType) {
             consoleText.setText(message);

@@ -16,13 +16,13 @@ public interface ChannelGet {
     /**
      * Get data from the channel.
      * This fails if the request can not be satisfied.
-     * If it fails ChannelGetRequestor.getDone is called before get returns.
+     * If it fails ChannelGetRequester.getDone is called before get returns.
      */
     void get();
     /**
-     * If ChannelGetRequestor.nextGetData or ChannelGetRequestor.nextDelayedGetData returns true
+     * If ChannelGetRequester.nextGetData or ChannelGetRequester.nextDelayedGetData returns true
      * this is the call to ask again for the data. The result is that the underlying database
-     * is locked and ChannelGetRequestor.nextDelayedGetData is called.
+     * is locked and ChannelGetRequester.nextDelayedGetData is called.
      * @param pvField The pvField to get.
      */
     void getDelayed(PVField pvField);

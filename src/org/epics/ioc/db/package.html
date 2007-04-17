@@ -469,18 +469,18 @@ IOCDB unless all support initializes and starts correctly.</p>
 puts them into an IOCDB.</p>
 <pre>    public class XMLToIOCDBFactory {
         public static void convert(DBD dbd, IOCDB iocdb, String fileName,
-            Requestor requestor);
+            Requester requester);
         public static IOCDB convert(String iocdbName,String fileName,
-            Requestor requestor);
+            Requester requester);
     }
   </pre>
 <dl>
   <dt style="font-family: courier;">convert(DBD dbd, IOCDB iocdb, String
-  fileName, Requestor requestor)</dt>
+  fileName, Requester requester)</dt>
     <dd>Parse an xml file conaining record instance definitions and put the
       resulting record instances into an IOC database.</dd>
   <dt style="font-family: courier;">convert(String iocdbName,String fileName,
-  Requestor requestor)</dt>
+  Requester requester)</dt>
     <dd>Create an IOC Database (IOCDB) with name iocdbName and populate it
       with definitions from an XML file. The definitions are not added to the
       master IOCDB but the caller can call IOCDB.mergeIntoMaster to add them
@@ -498,7 +498,7 @@ puts them into an IOCDB.</p>
   <dt style="font-family: courier;">fileName</dt>
     <dd>The filename relative to the current working directory that contains
       the Database Definitions.</dd>
-  <dt style="font-family: courier;">requestor</dt>
+  <dt style="font-family: courier;">requester</dt>
     <dd>A listener for all messages generated while the method is
     execuiting.</dd>
   <dt style="font-family: courier;">iocdbName</dt>
@@ -919,8 +919,8 @@ ReadWrite locks are used to implement thread safety.</p>
         boolean removeRecord(DBRecord record);
         Map&lt;String,DBRecord&gt; getRecordMap();
         void message(String message, MessageType messageType);
-        void addRequestor(Requestor requestor);
-        void removeRequestor(Requestor requestor);
+        void addRequester(Requester requester);
+        void removeRequester(Requester requester);
         String recordList(String regularExpression);
         String recordToString(String regularExpression);
     }

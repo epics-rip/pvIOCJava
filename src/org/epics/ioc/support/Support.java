@@ -6,16 +6,16 @@
 package org.epics.ioc.support;
 
 import org.epics.ioc.db.*;
-import org.epics.ioc.process.SupportProcessRequestor;
+import org.epics.ioc.process.SupportProcessRequester;
 import org.epics.ioc.process.SupportState;
 import org.epics.ioc.util.*;
 
 /**
- * interface that must be implemented by record support.
+ * Interface that must be implemented by IOC support.
  * @author mrk
  *
  */
-public interface Support extends Requestor{
+public interface Support extends Requester{
     /**
      * Get the support state.
      * @return The state.
@@ -46,9 +46,9 @@ public interface Support extends Requestor{
     void uninitialize();
     /**
      * Perform support processing.
-     * @param supportProcessRequestor The process requestor.
+     * @param supportProcessRequester The process requester.
      */
-    void process(SupportProcessRequestor supportProcessRequestor);
+    void process(SupportProcessRequester supportProcessRequester);
     /**
      * Set the field for which the link support should get/put data.
      * This is called by processDB.createSupport(DBField dbField) when it is called for a link field. 

@@ -17,18 +17,17 @@ import org.epics.ioc.ca.*;
  *
  */    
 public class GetChannel extends Dialog implements SelectionListener {
-    private Requestor requestor;
+    private Requester requester;
     private ChannelStateListener channelStateListener;
     private Shell shell;
     private Button selectButton;
-    private Button doneButton;
     private Text text;
     private SelectRecord selectRecord;
     private String recordName = null;
 
-    public GetChannel(Shell parent,Requestor requestor,ChannelStateListener channelStateListener) {
+    public GetChannel(Shell parent,Requester requester,ChannelStateListener channelStateListener) {
         super(parent,SWT.DIALOG_TRIM|SWT.NONE);
-        this.requestor = requestor;
+        this.requester = requester;
         this.channelStateListener = channelStateListener;
     }
     
@@ -36,17 +35,14 @@ public class GetChannel extends Dialog implements SelectionListener {
         shell = new Shell(getParent(),getStyle());
         shell.setText("getChannel");      
         GridLayout gridLayout = new GridLayout();
-        gridLayout.numColumns = 3;
+        gridLayout.numColumns = 2;
         shell.setLayout(gridLayout);
         GridData gridData = new GridData(GridData.FILL_HORIZONTAL);
         shell.setLayoutData(gridData);
         selectButton = new Button(shell,SWT.NONE);
         selectButton.setText("select");
-        selectRecord = new SelectRecord(shell,requestor);
+        selectRecord = new SelectRecord(shell,requester);
         selectButton.addSelectionListener(this);
-        doneButton = new Button(shell,SWT.NONE);
-        doneButton.setText("done");
-        doneButton.addSelectionListener(this);
         text = new Text(shell,SWT.BORDER);
         gridData = new GridData(GridData.FILL_HORIZONTAL);
         gridData.minimumWidth = 500;
@@ -63,7 +59,7 @@ public class GetChannel extends Dialog implements SelectionListener {
         shell.dispose();
         Channel channel = ChannelFactory.createChannel(recordName, channelStateListener, false);
         if(channel==null) {
-            requestor.message(String.format(
+            requester.message(String.format(
                     "pvname %s not found%n",recordName),MessageType.error);
         }
         return channel;
@@ -85,13 +81,15 @@ public class GetChannel extends Dialog implements SelectionListener {
             text.clearSelection();
             recordName = selectRecord.getRecordName();
             if(recordName!=null) {
-                text.setText(recordName);
+                shell.close();
             }
             return;
         } else if(object==text) {
             recordName = text.getText();
-        } else if(object==doneButton) {
-            shell.close();
+            if(recordName!=null) {
+                shell.close();
+            }
+            return;
         }
     }
 }

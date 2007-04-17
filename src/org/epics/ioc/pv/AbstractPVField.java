@@ -32,7 +32,7 @@ public abstract class AbstractPVField implements PVField{
         supportName = field.getSupportName();
         if(parent==null) return;
         record = parent.getPVRecord();
-        createFullFieldAndRequestorNames();
+        createFullFieldAndRequesterNames();
     }
     
     /**
@@ -48,7 +48,7 @@ public abstract class AbstractPVField implements PVField{
      */
     public void setRecord(PVRecord record) {
         this.record = record;
-        createFullFieldAndRequestorNames();
+        createFullFieldAndRequesterNames();
     }
     /* (non-Javadoc)
      * @see org.epics.ioc.pv.PVField#replacePVField(org.epics.ioc.pv.PVField)
@@ -81,13 +81,13 @@ public abstract class AbstractPVField implements PVField{
         throw new IllegalArgumentException("oldField not found in parent");
     }
     /* (non-Javadoc)
-     * @see org.epics.ioc.util.Requestor#getRequestorName()
+     * @see org.epics.ioc.util.Requester#getRequesterName()
      */
-    public String getRequestorName() {
+    public String getRequesterName() {
         return getFullName();
     }
     /* (non-Javadoc)
-     * @see org.epics.ioc.util.Requestor#message(java.lang.String, org.epics.ioc.util.MessageType)
+     * @see org.epics.ioc.util.Requester#message(java.lang.String, org.epics.ioc.util.MessageType)
      */
     public void message(String message, MessageType messageType) {
         if(record==null) {
@@ -152,7 +152,7 @@ public abstract class AbstractPVField implements PVField{
         return "";
     }
     
-    private void createFullFieldAndRequestorNames() {
+    private void createFullFieldAndRequesterNames() {
         if(this==record) {
             fullFieldName = fullName = "";
             return;

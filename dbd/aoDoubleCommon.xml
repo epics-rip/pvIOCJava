@@ -1,0 +1,18 @@
+<?xml version="1.0" ?>
+<DBDefinition>
+    <field name = "value" type = "double" >
+        <property name = "alarm" associatedField = "alarm" />
+        <property name = "units" associatedField = "units" />
+        <property name = "displayLimit" associatedField = "displayLimit" />
+        <property name = "controlLimit" associatedField = "controlLimit" />
+        <property name = "timeStamp" associatedField = "/timeStamp" />
+    </field>
+    <field name = "input" type = "link" />
+    <field name = "output" type = "structure" structureName = "linearConvertOutput"/>
+    <field name = "units" type = "string" />
+    <field name = "doubleAlarm" type = "link" supportName = "doubleAlarm" />
+    <field name = "displayLimit"
+         type = "structure" structureName = "doubleLimit" />
+    <field name = "linkArray" type = "array"
+         elementType = "structure" supportName = "linkArray" />
+</DBDefinition>

@@ -5,12 +5,12 @@
     factoryName = "org.epics.ioc.support.NoopFactory"
 />
 
-<support name = "link"
-    factoryName = "org.epics.ioc.support.LinkFactory"
-/>
-
 <linkSupport name = "noop"
     factoryName = "org.epics.ioc.support.NoopFactory"
+/>
+
+<support name = "link"
+    factoryName = "org.epics.ioc.support.LinkFactory"
 />
 
 <support name = "linearConvertInput"
@@ -57,6 +57,18 @@
     configurationStructureName = "asynLink" 
     factoryName = "org.epics.ioc.support.CALinkFactory"
 />
+
+<structure name = "linearConvertInput" supportName = "linearConvertInput">
+    <field name = "rawValue" type = "int" />
+    <field name = "linearConvert" type = "structure" structureName = "linearConvert" />
+    <field name = "input" type = "link" />
+</structure>
+
+<structure name = "linearConvertOutput" supportName = "linearConvertOutput">
+    <field name = "rawValue" type = "int" />
+    <field name = "linearConvert" type = "structure" structureName = "linearConvert" />
+    <field name = "output" type = "link" />
+</structure>
 
 
 <support name = "calcArgArray"

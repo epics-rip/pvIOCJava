@@ -8,11 +8,11 @@ package org.epics.ioc.ca;
 import org.epics.ioc.util.*;
 
 /**
- * Requestor that monitors a channel without requesting data.
+ * Requester that monitors a channel without requesting data.
  * @author mrk
  *
  */
-public interface ChannelMonitorNotifyRequestor extends Requestor {
+public interface ChannelMonitorNotifyRequester extends Requester {
     /**
      * A monitor event has occured.
      */

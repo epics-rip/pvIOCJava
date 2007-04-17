@@ -34,7 +34,7 @@
     </displayLimit>
     <scan>
         <scan>periodic</scan>
-        <rate>1.0</rate>
+        <rate>2.0</rate>
     </scan>
 </record>
 

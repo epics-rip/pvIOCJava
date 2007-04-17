@@ -4,10 +4,10 @@
 <record name = "examplePowerSupply" type = "powerSupplyRecord">
     <powerSupply>
         <units>watts</units>
-        <displayLimit>
+        <doubleLimit>
             <low>0.0</low>
             <high>100.0</high>
-        </displayLimit>
+        </doubleLimit>
         <currentInput>
             <aiRaw>
                 <input supportName = "inputLink">
@@ -17,10 +17,10 @@
                 </input>
             </aiRaw>
             <units>amps</units>
-            <displayLimit>
+            <doubleLimit>
                 <low>0.0</low>
                 <high>10.0</high>
-            </displayLimit>
+            </doubleLimit>
             <linearConvert>
                 <engUnitsLow>0.0</engUnitsLow>
                 <engUnitsHigh>10.0</engUnitsHigh>
@@ -35,10 +35,10 @@
                 </input>
             </aiRaw>
             <units>volts</units>
-            <displayLimit>
+            <doubleLimit>
                 <low>0.0</low>
                 <high>2.0</high>
-            </displayLimit>
+            </doubleLimit>
             <linearConvert>
                 <engUnitsLow>0.0</engUnitsLow>
                 <engUnitsHigh>2.0</engUnitsHigh>

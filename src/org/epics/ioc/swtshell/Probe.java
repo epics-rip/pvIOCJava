@@ -32,7 +32,7 @@ public class Probe {
 
     private enum ConnectState {connected,disconnected}
 
-    private static class ProbeImpl  implements Requestor, Runnable{
+    private static class ProbeImpl  implements Requester, Runnable{
         private Display display;
         private Shell shell;
         private Text consoleText;
@@ -95,14 +95,14 @@ public class Probe {
         }
 
         /* (non-Javadoc)
-         * @see org.epics.ioc.util.Requestor#getRequestorName()
+         * @see org.epics.ioc.util.Requester#getRequesterName()
          */
-        public String getRequestorName() {
+        public String getRequesterName() {
             return "swtshell.probe";
         }
 
         /* (non-Javadoc)
-         * @see org.epics.ioc.util.Requestor#message(java.lang.String, org.epics.ioc.util.MessageType)
+         * @see org.epics.ioc.util.Requester#message(java.lang.String, org.epics.ioc.util.MessageType)
          */
         public void message(final String message, MessageType messageType) {
             boolean syncExec = false;
@@ -146,10 +146,10 @@ public class Probe {
         
         private abstract class ShellBase implements SelectionListener,ChannelStateListener,DisposeListener {
             protected Channel channel = null;
-            protected Requestor requestor;
+            protected Requester requester;
             
-            protected ShellBase(Requestor requestor) {
-                this.requestor = requestor;
+            protected ShellBase(Requester requester) {
+                this.requester = requester;
             }
             /* (non-Javadoc)
              * @see org.eclipse.swt.events.SelectionListener#widgetDefaultSelected(org.eclipse.swt.events.SelectionEvent)
@@ -171,16 +171,16 @@ public class Probe {
                 // TODO 
             }
             /* (non-Javadoc)
-             * @see org.epics.ioc.util.Requestor#getRequestorName()
+             * @see org.epics.ioc.util.Requester#getRequesterName()
              */
-            public String getRequestorName() {
-                return requestor.getRequestorName();
+            public String getRequesterName() {
+                return requester.getRequesterName();
             }
             /* (non-Javadoc)
-             * @see org.epics.ioc.util.Requestor#message(java.lang.String, org.epics.ioc.util.MessageType)
+             * @see org.epics.ioc.util.Requester#message(java.lang.String, org.epics.ioc.util.MessageType)
              */
             public void message(String message, MessageType messageType) {
-                requestor.message(message, messageType);
+                requester.message(message, messageType);
             }
             /* (non-Javadoc)
              * @see org.eclipse.swt.events.DisposeListener#widgetDisposed(org.eclipse.swt.events.DisposeEvent)
@@ -199,8 +199,8 @@ public class Probe {
             private ConnectState connectState = ConnectState.disconnected;
             private String[] connectStateText = {"connect    ","disconnect"};
 
-            private ProcessShell(Composite parentWidget,Requestor requestor) {
-                super(requestor);
+            private ProcessShell(Composite parentWidget,Requester requester) {
+                super(requester);
                 Composite processWidget = new Composite(parentWidget,SWT.BORDER);
                 GridLayout gridLayout = new GridLayout();
                 gridLayout.numColumns = 3;
@@ -224,21 +224,21 @@ public class Probe {
                 if(object==connectButton) {
                     switch(connectState) {
                     case disconnected:
-                        GetChannel getChannel = new GetChannel(shell,requestor,this);
+                        GetChannel getChannel = new GetChannel(shell,requester,this);
                         channel = getChannel.getChannel();
                         if(channel==null) {
-                            requestor.message(String.format("no record selected%n"),MessageType.error);
+                            requester.message(String.format("no record selected%n"),MessageType.error);
                             return;
                         }
-                        process = new Process(channel,requestor);
+                        process = new Process(channel,requester);
                         boolean result = process.connect();
                         if(result) {
                             connectState = ConnectState.connected;
-                            requestor.message(String.format("connected%n"),MessageType.info);
+                            requester.message(String.format("connected%n"),MessageType.info);
                             connectButton.setText(connectStateText[1]);
                             processButton.setEnabled(true);
                         } else {
-                            requestor.message(String.format("not connected%n"),MessageType.info);
+                            requester.message(String.format("not connected%n"),MessageType.info);
                             process = null;
                         }
                         return;
@@ -253,7 +253,7 @@ public class Probe {
                 }
                 if(object==processButton) {
                     if(process==null) {
-                        requestor.message(String.format("not connected%n"),MessageType.error);
+                        requester.message(String.format("not connected%n"),MessageType.error);
                         return;
                     }
                     process.process();
@@ -273,8 +273,8 @@ public class Probe {
             
             private Channel channel = null;
 
-            private ProcessorShell(Composite parentWidget,Requestor requestor) {
-                super(requestor);
+            private ProcessorShell(Composite parentWidget,Requester requester) {
+                super(requester);
                 rowWidget = new Composite(parentWidget,SWT.BORDER);
                 GridLayout gridLayout = new GridLayout();
                 gridLayout.numColumns = 5;
@@ -304,14 +304,14 @@ public class Probe {
                 if(object==connectButton) {
                     switch(connectState) {
                     case disconnected:
-                        GetChannel getChannel = new GetChannel(shell,requestor,this);
+                        GetChannel getChannel = new GetChannel(shell,requester,this);
                         channel = getChannel.getChannel();
                         if(channel==null) {
-                            requestor.message(String.format("no record selected%n"),MessageType.error);
+                            requester.message(String.format("no record selected%n"),MessageType.error);
                             return;
                         }
                         connectState = ConnectState.connected;
-                        requestor.message(String.format("connected%n"),MessageType.info);
+                        requester.message(String.format("connected%n"),MessageType.info);
                         connectButton.setText(connectStateText[1]);
                         showProcessorButton.setEnabled(true);
                         releaseProcessorButton.setEnabled(true);
@@ -328,32 +328,32 @@ public class Probe {
                     String recordName = channel.getChannelName();
                     DBRecord dbRecord = iocdb.findRecord(recordName);
                     if(dbRecord==null) {
-                        requestor.message("channel is not local", MessageType.error);
+                        requester.message("channel is not local", MessageType.error);
                         return;
                     }
                     RecordProcess recordProcess = dbRecord.getRecordProcess();
                     if(recordProcess==null) {
-                        requestor.message("recordProcess is null", MessageType.error);
+                        requester.message("recordProcess is null", MessageType.error);
                         return;
                     }
-                    String name = recordProcess.getRecordProcessRequestorName();
-                    requestor.message("recordProcessor " + name, MessageType.info);
+                    String name = recordProcess.getRecordProcessRequesterName();
+                    requester.message("recordProcessor " + name, MessageType.info);
                     return;
                 }
                 if(object==releaseProcessorButton) {
                     if(channel==null) {
-                        requestor.message(String.format("no record selected%n"),MessageType.error);
+                        requester.message(String.format("no record selected%n"),MessageType.error);
                         return;
                     }
                     String recordName = channel.getChannelName();
                     DBRecord dbRecord = iocdb.findRecord(recordName);
                     if(dbRecord==null) {
-                        requestor.message("channel is not local", MessageType.error);
+                        requester.message("channel is not local", MessageType.error);
                         return;
                     }
                     RecordProcess recordProcess = dbRecord.getRecordProcess();
                     if(recordProcess==null) {
-                        requestor.message("recordProcess is null", MessageType.error);
+                        requester.message("recordProcess is null", MessageType.error);
                         return;
                     }
                     MessageBox mb = new MessageBox(
@@ -361,15 +361,15 @@ public class Probe {
                     mb.setMessage("VERY DANGEROUS. DO YOU WANT TO PROCEED?");
                     int rc = mb.open();
                     if(rc==SWT.YES) {
-                        recordProcess.releaseRecordProcessRequestor();
+                        recordProcess.releaseRecordProcessRequester();
                     }
                     return;
                 }
                 if(object==showThreadsButton) {
                     PeriodicScanner periodicScanner = ScannerFactory.getPeriodicScanner();
                     EventScanner eventScanner = ScannerFactory.getEventScanner();
-                    requestor.message(periodicScanner.toString(), MessageType.info);
-                    requestor.message(eventScanner.toString(), MessageType.info);
+                    requester.message(periodicScanner.toString(), MessageType.info);
+                    requester.message(eventScanner.toString(), MessageType.info);
                     return;
                 }
             }
@@ -385,8 +385,8 @@ public class Probe {
             private Channel channel = null;
             private Get get = null;
 
-            private GetShell(Composite parentWidget,Requestor requestor) {
-                super(requestor);
+            private GetShell(Composite parentWidget,Requester requester) {
+                super(requester);
                 Composite getWidget = new Composite(parentWidget,SWT.BORDER);
                 GridLayout gridLayout = new GridLayout();
                 gridLayout.numColumns = 5;
@@ -417,16 +417,16 @@ public class Probe {
                 if(object==connectButton) {
                     switch(connectState) {
                     case disconnected:
-                        GetChannel getChannel = new GetChannel(shell,requestor,this);
+                        GetChannel getChannel = new GetChannel(shell,requester,this);
                         channel = getChannel.getChannel();
                         if(channel==null) {
-                            requestor.message(String.format("no record selected%n"),MessageType.error);
+                            requester.message(String.format("no record selected%n"),MessageType.error);
                             return;
                         }
-                        GetChannelField getChannelField = new GetChannelField(shell,requestor,channel);
+                        GetChannelField getChannelField = new GetChannelField(shell,requester,channel);
                         ChannelField channelField = getChannelField.getChannelField(channel);
                         if(channelField==null) {
-                            requestor.message(String.format("no field selected%n"),MessageType.error);
+                            requester.message(String.format("no field selected%n"),MessageType.error);
                             return;
                         }
                         boolean process = processButton.getSelection();
@@ -447,17 +447,17 @@ public class Probe {
                         if(!propertysOK) propertyButton.setSelection(false);
                         boolean getProperties = propertyButton.getSelection();
                         if(getProperties) properties = channelField.getField().getPropertys();
-                        get = new Get(channel,requestor,process);
+                        get = new Get(channel,requester,process);
                         boolean result = get.connect(channelField, properties);
                         if(result) {
                             getButton.setEnabled(true);
                             processButton.setEnabled(false);
                             propertyButton.setEnabled(false);
                             connectState = ConnectState.connected;
-                            requestor.message(String.format("connected%n"),MessageType.info);
+                            requester.message(String.format("connected%n"),MessageType.info);
                             connectButton.setText(connectStateText[1]);
                         } else {
-                            requestor.message(String.format("not connected%n"),MessageType.info);
+                            requester.message(String.format("not connected%n"),MessageType.info);
                             get = null;
                         }
                         return;
@@ -474,7 +474,7 @@ public class Probe {
                 }
                 if(object==getButton) {
                     if(get==null) {
-                        requestor.message(String.format("not connected%n"),MessageType.info);
+                        requester.message(String.format("not connected%n"),MessageType.info);
                         return;
                     }
                     CD cD = get.get();
@@ -495,8 +495,8 @@ public class Probe {
             private Channel channel;
             private Put put = null;
 
-            private PutShell(Composite parentWidput,Requestor requestor) {
-                super(requestor);
+            private PutShell(Composite parentWidput,Requester requester) {
+                super(requester);
                 Composite putComposite = new Composite(parentWidput,SWT.BORDER);
                 GridLayout gridLayout = new GridLayout();
                 gridLayout.numColumns = 4;
@@ -523,29 +523,29 @@ public class Probe {
                 if(object==connectButton) {
                     switch(connectState) {
                     case disconnected:
-                        GetChannel getChannel = new GetChannel(shell,requestor,this);
+                        GetChannel getChannel = new GetChannel(shell,requester,this);
                         channel = getChannel.getChannel();
                         if(channel==null) {
-                            requestor.message(String.format("no record selected%n"),MessageType.error);
+                            requester.message(String.format("no record selected%n"),MessageType.error);
                             return;
                         }
-                        GetChannelField getChannelField = new GetChannelField(shell,requestor,channel);
+                        GetChannelField getChannelField = new GetChannelField(shell,requester,channel);
                         ChannelField channelField = getChannelField.getChannelField(channel);
                         if(channelField==null) {
-                            requestor.message(String.format("no field selected%n"),MessageType.error);
+                            requester.message(String.format("no field selected%n"),MessageType.error);
                             return;
                         }
                         boolean process = processButton.getSelection();
-                        put = new Put(channel,requestor,process);
+                        put = new Put(channel,requester,process);
                         boolean result = put.connect(channelField);
                         if(result) {
                             connectState = ConnectState.connected;
-                            requestor.message(String.format("connected%n"),MessageType.info);
+                            requester.message(String.format("connected%n"),MessageType.info);
                             connectButton.setText(connectStateText[1]);
                             putButton.setEnabled(true);
                             processButton.setEnabled(false);
                         } else {
-                            requestor.message(String.format("not connected%n"),MessageType.info);
+                            requester.message(String.format("not connected%n"),MessageType.info);
                             put = null;
                         }
                         return;
@@ -562,7 +562,7 @@ public class Probe {
                 }
                 if(object==putButton) {
                     if(put==null) {
-                        requestor.message(String.format("not connected%n"),MessageType.info);
+                        requester.message(String.format("not connected%n"),MessageType.info);
                         return;
                     }
                     put.put();
@@ -573,18 +573,18 @@ public class Probe {
         
         private class Process implements
         Runnable,
-        ChannelProcessRequestor,ChannelStateListener
+        ChannelProcessRequester,ChannelStateListener
         {   
             private Lock lock = new ReentrantLock();
             private Condition waitDone = lock.newCondition();
             private boolean allDone = false;
             private Channel channel;
-            final private Requestor requestor;
+            final private Requester requester;
             private ChannelProcess channelProcess;
 
-            private Process(Channel channel,Requestor requestor) {
+            private Process(Channel channel,Requester requester) {
                 this.channel = channel;
-                this.requestor = requestor;
+                this.requester = requester;
             }
 
             private boolean connect() {
@@ -599,7 +599,7 @@ public class Probe {
 
             private void process() {
                 if(channelProcess==null) {
-                    requestor.message("not connected", MessageType.info);
+                    requester.message("not connected", MessageType.info);
                 }
                 allDone = false;
                 iocExecutor.execute(this, scanPriority);
@@ -620,22 +620,22 @@ public class Probe {
                 } finally {
                     lock.unlock();
                 }
-                requestor.message("processComplete", MessageType.info);
+                requester.message("processComplete", MessageType.info);
             }
             /* (non-Javadoc)
-             * @see org.epics.ioc.util.Requestor#getRequestorName()
+             * @see org.epics.ioc.util.Requester#getRequesterName()
              */
-            public String getRequestorName() {
-                return requestor.getRequestorName();
+            public String getRequesterName() {
+                return requester.getRequesterName();
             }
             /* (non-Javadoc)
-             * @see org.epics.ioc.util.Requestor#message(java.lang.String, org.epics.ioc.util.MessageType)
+             * @see org.epics.ioc.util.Requester#message(java.lang.String, org.epics.ioc.util.MessageType)
              */
             public void message(final String message, final MessageType messageType) {
-                requestor.message(message, MessageType.info);
+                requester.message(message, MessageType.info);
             }
             /* (non-Javadoc)
-             * @see org.epics.ioc.ca.ChannelProcessRequestor#processDone(org.epics.ioc.util.RequestResult)
+             * @see org.epics.ioc.ca.ChannelProcessRequester#processDone(org.epics.ioc.util.RequestResult)
              */
             public void processDone(RequestResult requestResult) {
                 lock.lock();
@@ -671,20 +671,20 @@ public class Probe {
         
         private class Get implements
         Runnable,
-        ChannelCDGetRequestor,
+        ChannelCDGetRequester,
         ChannelStateListener, ChannelFieldGroupListener
         {
             private Lock lock = new ReentrantLock();
             private Condition waitDone = lock.newCondition();
             private boolean allDone = false;
             private Channel channel;
-            final private Requestor requestor;
+            final private Requester requester;
             private boolean process;
             private ChannelCDGet channelCDGet;
 
-            private Get(Channel channel,Requestor requestor,boolean process) {
+            private Get(Channel channel,Requester requester,boolean process) {
                 this.channel = channel;
-                this.requestor = requestor;
+                this.requester = requester;
                 this.process = process;
             }
 
@@ -698,7 +698,7 @@ public class Probe {
                         String propertyName = property.getPropertyName();
                         result = channel.findField(propertyName);
                         if(result!=ChannelFindFieldResult.thisChannel) {
-                            requestor.message(String.format(
+                            requester.message(String.format(
                                     "property %s%n", propertyName),MessageType.error);
                             continue;
                         }
@@ -740,19 +740,19 @@ public class Probe {
                 channelCDGet.get();
             }
             /* (non-Javadoc)
-             * @see org.epics.ioc.util.Requestor#getRequestorName()
+             * @see org.epics.ioc.util.Requester#getRequesterName()
              */
-            public String getRequestorName() {
-                return requestor.getRequestorName();
+            public String getRequesterName() {
+                return requester.getRequesterName();
             }
             /* (non-Javadoc)
-             * @see org.epics.ioc.util.Requestor#message(java.lang.String, org.epics.ioc.util.MessageType)
+             * @see org.epics.ioc.util.Requester#message(java.lang.String, org.epics.ioc.util.MessageType)
              */
             public void message(final String message, final MessageType messageType) {
-                requestor.message(message, MessageType.info);
+                requester.message(message, MessageType.info);
             }           
             /* (non-Javadoc)
-             * @see org.epics.ioc.ca.ChannelCDGetRequestor#getDone(org.epics.ioc.util.RequestResult)
+             * @see org.epics.ioc.ca.ChannelCDGetRequester#getDone(org.epics.ioc.util.RequestResult)
              */
             public void getDone(RequestResult requestResult) {
                 lock.lock();
@@ -790,22 +790,22 @@ public class Probe {
 
         private class Put implements
         Runnable,
-        ChannelCDPutRequestor,
+        ChannelCDPutRequester,
         ChannelFieldGroupListener
         {
             private Lock lock = new ReentrantLock();
             private Condition waitDone = lock.newCondition();
             private Channel channel;
-            final private Requestor requestor;
+            final private Requester requester;
             private boolean process;
             private boolean allDone = false;
             private RequestResult requestResult;
 
             private ChannelCDPut channelCDPut;
 
-            private Put(Channel channel,Requestor requestor,boolean process) {
+            private Put(Channel channel,Requester requester,boolean process) {
                 this.channel = channel;
-                this.requestor = requestor;
+                this.requester = requester;
                 this.process = process;
             }
 
@@ -835,7 +835,7 @@ public class Probe {
                     lock.unlock();
                 }
                 if(requestResult!=RequestResult.success) {
-                    requestor.message("get failed", MessageType.error);
+                    requester.message("get failed", MessageType.error);
                 }
                 allDone = false;
                 CD cD = channelCDPut.getCD();
@@ -855,7 +855,7 @@ public class Probe {
                     lock.unlock();
                 }
                 if(requestResult!=RequestResult.success) {
-                    requestor.message("get failed", MessageType.error);
+                    requester.message("get failed", MessageType.error);
                 }
             }
             /* (non-Javadoc)
@@ -865,19 +865,19 @@ public class Probe {
                 channelCDPut.put();
             }
             /* (non-Javadoc)
-             * @see org.epics.ioc.util.Requestor#putRequestorName()
+             * @see org.epics.ioc.util.Requester#putRequesterName()
              */
-            public String getRequestorName() {
-                return requestor.getRequestorName();
+            public String getRequesterName() {
+                return requester.getRequesterName();
             }
             /* (non-Javadoc)
-             * @see org.epics.ioc.util.Requestor#message(java.lang.String, org.epics.ioc.util.MessageType)
+             * @see org.epics.ioc.util.Requester#message(java.lang.String, org.epics.ioc.util.MessageType)
              */
             public void message(final String message, final MessageType messageType) {
-                requestor.message(message, MessageType.info);
+                requester.message(message, MessageType.info);
             }
             /* (non-Javadoc)
-             * @see org.epics.ioc.ca.ChannelCDPutRequestor#getDone(org.epics.ioc.util.RequestResult)
+             * @see org.epics.ioc.ca.ChannelCDPutRequester#getDone(org.epics.ioc.util.RequestResult)
              */
             public void getDone(RequestResult requestResult) {
                 lock.lock();
@@ -891,7 +891,7 @@ public class Probe {
             }
 
             /* (non-Javadoc)
-             * @see org.epics.ioc.ca.ChannelCDPutRequestor#putDone(org.epics.ioc.util.RequestResult)
+             * @see org.epics.ioc.ca.ChannelCDPutRequester#putDone(org.epics.ioc.util.RequestResult)
              */
             public void putDone(RequestResult requestResult) {
                 lock.lock();

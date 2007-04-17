@@ -79,7 +79,7 @@ license</a> described at the end of this document.</p>
   <li><a href="#Record2">Record Processing: Brief Theory of Operation</a>
     <ul>
       <li><a href="#Definition">Definitions</a></li>
-      <li><a href="#Requestor">Requestor Examples</a></li>
+      <li><a href="#Requester">Requester Examples</a></li>
     </ul>
   </li>
   <li><a href="#Support">Support</a></li>
@@ -192,7 +192,7 @@ puts them into an IOC Database (IOCCB).</p>
 This package provides utility code for a javaIOC:
 <dl>
   <dt>Message Support</dt>
-    <dd>This is an interface for passing messages to a requestor of many
+    <dd>This is an interface for passing messages to a requester of many
       services.</dd>
   <dt>Time Stamp support</dt>
     <dd>Support is provided to make it easier to work with time stamps.</dd>
@@ -334,8 +334,8 @@ implemented, are required before a usable javaIOC exists.</p>
     </ul>
   </li>
   <li>messageServer<br />
-    JavaIOC interfaces provide methods for sending messages to requestors.
-    Currently the requestors just write the messages to System.out. A message
+    JavaIOC interfaces provide methods for sending messages to requesters.
+    Currently the requesters just write the messages to System.out. A message
     server facility similar to the V3 logMessage facility needs to be
     implemented. Once in place it will be easy to modify the existing code to
     use the message server.</li>
@@ -1076,11 +1076,11 @@ record processing.</p>
     <dd>Every record instance has an implementation of an object that
       coordinates record processing. RecordProcess is the name of the
       interface implemented by record processing.</dd>
-  <dt>process requestor</dt>
+  <dt>process requester</dt>
     <dd>Code that asks recordProcess to process a record. Code must register
-      to be the requestor and only one requestor is allow to request
-      processing. Thus a registration request fails if a requestor is already
-      attached to a record. If code that is not the requestor attempts to
+      to be the requester and only one requester is allow to request
+      processing. Thus a registration request fails if a requester is already
+      attached to a record. If code that is not the requester attempts to
       process a record an exception is thrown.</dd>
   <dt>active</dt>
     <dd>A record instance is active while a process request is active. A
@@ -1092,7 +1092,7 @@ record processing.</p>
       code must be implemented carefully.</dd>
 </dl>
 
-<h3 id="Requestor">Requestor Examples</h3>
+<h3 id="Requester">Requester Examples</h3>
 <dl>
   <dt>Local Channel Access</dt>
     <dd>An example is a channel access server that is accessing IOC database.

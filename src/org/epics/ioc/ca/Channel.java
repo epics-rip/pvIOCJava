@@ -65,12 +65,12 @@ public interface Channel {
     ChannelFieldGroup createFieldGroup(ChannelFieldGroupListener listener);
     /**
      * Create a ChannelProcess.
-     * @param channelProcessRequestor The interface for notifying when channel completes processing.
+     * @param channelProcessRequester The interface for notifying when channel completes processing.
      * @param processSelfOK If record is self processed should ChannelProcess be created?
      * @return An interface for the ChannelProcess or null if the caller can't process the record.
      */
     ChannelProcess createChannelProcess(
-        ChannelProcessRequestor channelProcessRequestor,boolean processSelfOK);
+        ChannelProcessRequester channelProcessRequester,boolean processSelfOK);
     /**
      * Destroy a channelProcess.
      * If a request is active it will complete but no new requestes will be accepted.
@@ -81,22 +81,22 @@ public interface Channel {
      * Create a ChannelGet.
      * The channel will not be processed before data is read.
      * @param channelFieldGroup The fieldGroup describing the data to get.
-     * @param channelGetRequestor The channelGetRequestor.
+     * @param channelGetRequester The channelGetRequester.
      * @return An interface for the ChannelGet.
      */
     ChannelGet createChannelGet(
-        ChannelFieldGroup channelFieldGroup,ChannelGetRequestor channelGetRequestor);
+        ChannelFieldGroup channelFieldGroup,ChannelGetRequester channelGetRequester);
     /**
      * Create a ChannelGet.
      * The channel will be processed before reading data.
      * @param channelFieldGroup The fieldGroup describing the data to get.
-     * @param channelGetRequestor The channelGetRequestor.
+     * @param channelGetRequester The channelGetRequester.
      * @param process Process before getting data.
      * @param processSelfOK If record is self processed should ChannelGet be created?
      * @return An interface for the ChannelGet or null if the caller can't process the record.
      */
     ChannelGet createChannelGet(
-        ChannelFieldGroup channelFieldGroup,ChannelGetRequestor channelGetRequestor,
+        ChannelFieldGroup channelFieldGroup,ChannelGetRequester channelGetRequester,
         boolean process,boolean processSelfOK);
     /**
      * Destroy a channelGet.
@@ -107,17 +107,17 @@ public interface Channel {
     /**
      * Create a ChannelCDGet.
      * @param channelFieldGroup The chanelFieldGroup describing the data to get.
-     * @param channelCDGetRequestor The channelDataGetRequestor
+     * @param channelCDGetRequester The channelDataGetRequester
      * @param supportAlso Should support be read/written?
      * @return An interface for the ChannelCDGet.
      */
     ChannelCDGet createChannelCDGet(
             ChannelFieldGroup channelFieldGroup,
-            ChannelCDGetRequestor channelCDGetRequestor,boolean supportAlso);
+            ChannelCDGetRequester channelCDGetRequester,boolean supportAlso);
     /**
      * Create a ChannelCDGet.
      * @param channelFieldGroup The chanelFieldGroup describing the data to get.
-     * @param channelCDGetRequestor The channelDataGetRequestor
+     * @param channelCDGetRequester The channelDataGetRequester
      * @param supportAlso Should support be read/written?
      * @param process Process before getting data.
      * @param processSelfOK If record is self processed should ChannelCDGet be created?
@@ -125,7 +125,7 @@ public interface Channel {
      */
     ChannelCDGet createChannelCDGet(
             ChannelFieldGroup channelFieldGroup,
-            ChannelCDGetRequestor channelCDGetRequestor,boolean supportAlso,
+            ChannelCDGetRequester channelCDGetRequester,boolean supportAlso,
             boolean process,boolean processSelfOK);
     /**
      * Destroy a channelDataGet.
@@ -136,21 +136,21 @@ public interface Channel {
     /**
      * Create a ChannelPut.
      * @param channelFieldGroup The chanelFieldGroup describing the data to put.
-     * @param channelPutRequestor The channelPutRequestor.
+     * @param channelPutRequester The channelPutRequester.
      * @return An interface for the ChannelCDPut.
      */
     ChannelPut createChannelPut(
-        ChannelFieldGroup channelFieldGroup,ChannelPutRequestor channelPutRequestor);
+        ChannelFieldGroup channelFieldGroup,ChannelPutRequester channelPutRequester);
     /**
      * Create a ChannelPut.
      * @param channelFieldGroup The chanelFieldGroup describing the data to put.
-     * @param channelPutRequestor The channelPutRequestor.
+     * @param channelPutRequester The channelPutRequester.
      * @param process Should record be processed after put.
      * @param processSelfOK If record is self processed should ChannelPut be created?
      * @return An interface for the ChannelCDPut or null if the caller can't process the record.
      */
     ChannelPut createChannelPut(
-        ChannelFieldGroup channelFieldGroup,ChannelPutRequestor channelPutRequestor,
+        ChannelFieldGroup channelFieldGroup,ChannelPutRequester channelPutRequester,
         boolean process,boolean processSelfOK);
     /**
      * Destroy a channelPut.
@@ -161,17 +161,17 @@ public interface Channel {
     /**
      * Create a ChannelCDPut.
      * @param channelFieldGroup The chanelFieldGroup describing the data to put.
-     * @param channelCDPutRequestor The channelDataPutRequestor
+     * @param channelCDPutRequester The channelDataPutRequester
      * @param supportAlso Should support be read/written?
      * @return An interface for the ChannelPut.
      */
     ChannelCDPut createChannelCDPut(
             ChannelFieldGroup channelFieldGroup,
-            ChannelCDPutRequestor channelCDPutRequestor,boolean supportAlso);
+            ChannelCDPutRequester channelCDPutRequester,boolean supportAlso);
     /**
      * Create a ChannelCDPut.
      * @param channelFieldGroup The chanelFieldGroup describing the data to put.
-     * @param channelCDPutRequestor The channelDataPutRequestor
+     * @param channelCDPutRequester The channelDataPutRequester
      * @param supportAlso Should support be read/written?
      * @param process Should record be processed after put.
      * @param processSelfOK If record is self processed should ChannelCDPut be created?
@@ -179,7 +179,7 @@ public interface Channel {
      */
     ChannelCDPut createChannelCDPut(
             ChannelFieldGroup channelFieldGroup,
-            ChannelCDPutRequestor channelCDPutRequestor,boolean supportAlso,
+            ChannelCDPutRequester channelCDPutRequester,boolean supportAlso,
             boolean process,boolean processSelfOK);
     /**
      * Destroy a channelDataPut.
@@ -191,24 +191,24 @@ public interface Channel {
      * Create a ChannelPutGet.
      * @param putFieldGroup The fieldGroup describing the data to put.
      * @param getFieldGroup The fieldGroup describing the data to get.
-     * @param channelPutGetRequestor The channelPutGetRequestor.
+     * @param channelPutGetRequester The channelPutGetRequester.
      * @return An interface for the ChannelPutGet.
      */
     ChannelPutGet createChannelPutGet(
         ChannelFieldGroup putFieldGroup,ChannelFieldGroup getFieldGroup,
-        ChannelPutGetRequestor channelPutGetRequestor);
+        ChannelPutGetRequester channelPutGetRequester);
     /**
      * Create a ChannelPutGet.
      * @param putFieldGroup The fieldGroup describing the data to put.
      * @param getFieldGroup The fieldGroup describing the data to get.
-     * @param channelPutGetRequestor The channelPutGetRequestor.
+     * @param channelPutGetRequester The channelPutGetRequester.
      * @param process Process after put and before get.
      * @param processSelfOK If record is self processed should ChannelPutGet be created?
      * @return An interface for the ChannelPutGet or null if the caller can't process the record.
      */
     ChannelPutGet createChannelPutGet(
         ChannelFieldGroup putFieldGroup,ChannelFieldGroup getFieldGroup,
-        ChannelPutGetRequestor channelPutGetRequestor,
+        ChannelPutGetRequester channelPutGetRequester,
         boolean process,boolean processSelfOK);
     /**
      * Destroy a channelPut.

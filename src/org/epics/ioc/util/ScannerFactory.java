@@ -41,7 +41,7 @@ public class ScannerFactory {
     private static String lineBreak = System.getProperty("line.separator");
     private static final int maxNumberConsecutiveActive = 10;
 
-    private static class RecordExecutor implements RecordProcessRequestor {
+    private static class RecordExecutor implements RecordProcessRequester {
         private String name;
         private RecordProcess recordProcess;
         private DBRecord dbRecord;
@@ -72,33 +72,33 @@ public class ScannerFactory {
             }
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.process.RecordProcessRequestor#getRecordProcessRequestorName()
+         * @see org.epics.ioc.process.RecordProcessRequester#getRecordProcessRequesterName()
          */
-        public String getRequestorName() {
+        public String getRequesterName() {
             return name;
         }
 
         /* (non-Javadoc)
-         * @see org.epics.ioc.util.Requestor#message(java.lang.String, org.epics.ioc.util.MessageType)
+         * @see org.epics.ioc.util.Requester#message(java.lang.String, org.epics.ioc.util.MessageType)
          */
         public void message(String message, MessageType messageType) {
             pvRecord.message(message, messageType);
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.process.RecordProcessRequestor#recordProcessComplete(org.epics.ioc.process.RequestResult)
+         * @see org.epics.ioc.process.RecordProcessRequester#recordProcessComplete(org.epics.ioc.process.RequestResult)
          */
         public void recordProcessComplete() {
             isActive = false;
         }
 
         /* (non-Javadoc)
-         * @see org.epics.ioc.process.RecordProcessRequestor#recordProcessResult(org.epics.ioc.util.AlarmSeverity, java.lang.String, org.epics.ioc.util.TimeStamp)
+         * @see org.epics.ioc.process.RecordProcessRequester#recordProcessResult(org.epics.ioc.util.AlarmSeverity, java.lang.String, org.epics.ioc.util.TimeStamp)
          */
         public void recordProcessResult(RequestResult requestResult) {
             // nothing to do.    
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.process.RecordProcessRequestor#ready()
+         * @see org.epics.ioc.process.RecordProcessRequester#ready()
          */
         public RequestResult ready() {
             throw new IllegalStateException("Why was this called?"); 
@@ -131,7 +131,7 @@ public class ScannerFactory {
                             RecordProcess next = iter.next();
                             if(next.getRecord()==dbRecord) continue outer;
                         }
-                        recordProcess.releaseRecordProcessRequestor(recordExecutor);
+                        recordProcess.releaseRecordProcessRequester(recordExecutor);
                         recordExecutors[i] = null;
                     }
                     RecordExecutor[] executors = new RecordExecutor[processList.size()];
@@ -147,7 +147,7 @@ public class ScannerFactory {
                             if(executors[j].recordProcess.getRecord()==next.getRecord()) continue outer1;
                         }
                         RecordExecutor recordExecutor = new RecordExecutor(name,next);
-                        if(next.setRecordProcessRequestor(recordExecutor)) {
+                        if(next.setRecordProcessRequester(recordExecutor)) {
                             executors[nextGood++] = recordExecutor;
                         } else {
                             // set scan.scan to passive

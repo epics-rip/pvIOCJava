@@ -20,15 +20,15 @@ import org.epics.ioc.util.*;
  */        
 public class SelectFieldName extends Dialog implements SelectionListener {
     static private IOCDB iocdb = IOCDBFactory.getMaster();
-    private Requestor requestor;
+    private Requester requester;
     private Shell shell;
     private Button doneButton;
     private Tree tree;
     private String fieldName = null;
 
-    public SelectFieldName(Shell parent,Requestor requestor){
+    public SelectFieldName(Shell parent,Requester requester){
         super(parent,SWT.DIALOG_TRIM|SWT.NONE);
-        this.requestor = requestor;
+        this.requester = requester;
     }
     
     public String getFieldName() {
@@ -38,7 +38,7 @@ public class SelectFieldName extends Dialog implements SelectionListener {
     public boolean selectFieldName(String recordName) {
         DBRecord dbRecord = iocdb.findRecord(recordName);
         if(dbRecord==null) {
-            requestor.message("recordName " + recordName + " not found",
+            requester.message("recordName " + recordName + " not found",
                 MessageType.error);
             return false;
         }
@@ -112,7 +112,7 @@ public class SelectFieldName extends Dialog implements SelectionListener {
                         }
                     }
                 } else if(object==null) {
-                    requestor.message("property is illegal selection",MessageType.error);
+                    requester.message("property is illegal selection",MessageType.error);
                 }
             }
             shell.close();

@@ -34,7 +34,7 @@ public class XMLToDatabase {
         }
         DBD dbd = DBDFactory.getMasterDBD();
         IOCDB iocdb = IOCDBFactory.create("master");
-        Requestor iocRequestor = new Listener();
+        Requester iocRequester = new Listener();
         int nextArg = 0;
         State state = State.dbdFile;
         while(nextArg<args.length) {
@@ -65,9 +65,9 @@ public class XMLToDatabase {
                             + " -db InstanceList -dumpDBD -dumpDB ... -swtshell");
                 }
             } else if(state==State.dbdFile) {
-                parseDBD(dbd,arg,iocRequestor);
+                parseDBD(dbd,arg,iocRequester);
             } else {
-                parseDB(dbd,iocdb,arg,iocRequestor);
+                parseDB(dbd,iocdb,arg,iocRequester);
             }
         }
     }
@@ -114,19 +114,19 @@ public class XMLToDatabase {
         }           
     }
         
-    static void parseDBD(DBD dbd, String fileName,Requestor iocRequestor) {
+    static void parseDBD(DBD dbd, String fileName,Requester iocRequester) {
         System.out.printf("\nparsing DBD file %s\n",fileName);
         try {
-            XMLToDBDFactory.convert(dbd,fileName,iocRequestor);
+            XMLToDBDFactory.convert(dbd,fileName,iocRequester);
         } catch (IllegalStateException e) {
             System.out.println("IllegalStateException: " + e);
         }
     }
 
-    static void parseDB(DBD dbd, IOCDB iocdb,String fileName,Requestor iocRequestor) {
+    static void parseDB(DBD dbd, IOCDB iocdb,String fileName,Requester iocRequester) {
         System.out.printf("\nparsing DB file %s\n",fileName);
         try {
-            XMLToIOCDBFactory.convert(dbd,iocdb,fileName,iocRequestor);
+            XMLToIOCDBFactory.convert(dbd,iocdb,fileName,iocRequester);
         }  catch (IllegalStateException e) {
             System.out.println("IllegalStateException: " + e);
         }
@@ -142,16 +142,16 @@ public class XMLToDatabase {
         }
     }
     
-    private static class Listener implements Requestor {
+    private static class Listener implements Requester {
         /* (non-Javadoc)
-         * @see org.epics.ioc.util.Requestor#getRequestorName()
+         * @see org.epics.ioc.util.Requester#getRequestorName()
          */
-        public String getRequestorName() {
+        public String getRequesterName() {
             return "XMLTODatabase";
         }
 
         /* (non-Javadoc)
-         * @see org.epics.ioc.util.Requestor#message(java.lang.String, org.epics.ioc.util.MessageType)
+         * @see org.epics.ioc.util.Requester#message(java.lang.String, org.epics.ioc.util.MessageType)
          */
         public void message(String message, MessageType messageType) {
             System.out.println(message);

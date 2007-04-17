@@ -23,33 +23,33 @@ public class XMLToIOCDBFactory {
     private static PVDataCreate pvDataCreate = PVDataFactory.getPVDataCreate();
     private static FieldCreate fieldCreate = FieldFactory.getFieldCreate();
     private static AtomicBoolean isInUse = new AtomicBoolean(false);
-//  for use by private classes
+    //  for use by private classes
     private static Convert convert = ConvertFactory.getConvert();
     private static Pattern primitivePattern = Pattern.compile("[, ]");
     private static Pattern stringPattern = Pattern.compile("\\s*,\\s*");
     private static DBD dbd;
     private static IOCDB iocdb;
     private static IOCDB iocdbMaster;
-    private static Requestor requestor;
+    private static Requester requester;
     private static IOCXMLReader iocxmlReader;
     /**
      * Convert an xml file to IOCDatabase definitions and put the definitions in a database.
      * @param dbdin the reflection database.
      * @param iocdbin IOC database.
      * @param fileName The name of the file containing xml record instance definitions.
-     * @param requestor The requestor.
+     * @param requester The requester.
      */
-    public static void convert(DBD dbdin, IOCDB iocdbin, String fileName,Requestor requestor)
+    public static void convert(DBD dbdin, IOCDB iocdbin, String fileName,Requester requester)
     {
         boolean gotIt = isInUse.compareAndSet(false,true);
         if(!gotIt) {
-            requestor.message("XMLToIOCDBFactory.convert is already active",MessageType.fatalError);
+            requester.message("XMLToIOCDBFactory.convert is already active",MessageType.fatalError);
         }
         try {
             dbd = dbdin;
             iocdb = iocdbin;
             iocdbMaster = null;
-            XMLToIOCDBFactory.requestor = requestor;
+            XMLToIOCDBFactory.requester = requester;
             IOCXMLListener listener = new Listener();
             iocxmlReader = IOCXMLReaderFactory.getReader();
             iocxmlReader.parse("IOCDatabase",fileName,listener);
@@ -71,7 +71,7 @@ public class XMLToIOCDBFactory {
      * @param messageListener A listener for error messages.
      * @return An IOC Database that has the newly created record instances.
      */
-    public static IOCDB convert(String iocdbName,String fileName,Requestor messageListener) {
+    public static IOCDB convert(String iocdbName,String fileName,Requester messageListener) {
         boolean gotIt = isInUse.compareAndSet(false,true);
         if(!gotIt) {
             messageListener.message("XMLToIOCDBFactory is already active", MessageType.error);
@@ -81,7 +81,7 @@ public class XMLToIOCDBFactory {
             iocdb =IOCDBFactory.create(iocdbName);           
             dbd = DBDFactory.getMasterDBD();
             iocdbMaster = IOCDBFactory.getMaster();
-            requestor = messageListener;
+            requester = messageListener;
             IOCXMLListener listener = new Listener();
             iocxmlReader = IOCXMLReaderFactory.getReader();
             iocxmlReader.parse("IOCDatabase",fileName,listener);
@@ -153,7 +153,7 @@ public class XMLToIOCDBFactory {
         }
         
         public void message(String message,MessageType messageType) {
-            requestor.message(message, messageType);
+            requester.message(message, messageType);
         }
     }
 
@@ -221,7 +221,7 @@ public class XMLToIOCDBFactory {
         private ArrayState arrayState = new ArrayState();
         private Stack<ArrayState> arrayStack = new Stack<ArrayState>();
         
-        RecordHandler(String qName, Map<String,String> attributes) {
+        private RecordHandler(String qName, Map<String,String> attributes) {
             String recordName = attributes.get("name");
             String recordTypeName = attributes.get("type");
             if(recordName==null) {
@@ -280,22 +280,20 @@ public class XMLToIOCDBFactory {
             state = State.structure;
         }
         
-        void endRecord() {
+        private void endRecord() {
             if(state==State.idle) return;
             dbRecord = DBRecordFactory.create(pvRecord);
-            boolean result = iocdb.addRecord(dbRecord);
-            if(!result) {
+            if(!iocdb.addRecord(dbRecord)) {
                 iocxmlReader.message(
-                        "failed to add record to iocdb???",
-                        MessageType.fatalError);
-                return;
+                        "failed to add record to iocdb",
+                        MessageType.info);
             }
             dbRecord.setIOCDB(iocdb);
             dbRecord.setDBD(dbd);
-            dbRecord.getPVRecord().addRequestor(iocdb);
+            dbRecord.getPVRecord().addRequester(iocdb);
         }
         
-        void startElement(String qName, Map<String,String> attributes) {
+        private void startElement(String qName, Map<String,String> attributes) {
             switch(state) {
             case idle: 
                 idleStack.push(idleState);
@@ -323,7 +321,7 @@ public class XMLToIOCDBFactory {
             }
         }
         
-        void characters(char[] ch, int start, int length)  {
+        private void characters(char[] ch, int start, int length)  {
             switch(state) {
             case idle: break;
             case structure: break;
@@ -343,7 +341,7 @@ public class XMLToIOCDBFactory {
             }
         }
         
-        void endElement(String qName)  {
+        private void endElement(String qName)  {
             switch(state) {
             case idle: 
                 state = idleState.prevState;
@@ -649,7 +647,6 @@ public class XMLToIOCDBFactory {
                 return; 
             }
             pvLink.setSupportName(supportName);
-            
             PVStructure pvStructure = (PVStructure)pvDataCreate.createPVField(pvLink, structure);
             if(pvStructure==null) {
                 iocxmlReader.message(

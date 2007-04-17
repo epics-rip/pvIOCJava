@@ -15,7 +15,7 @@ public interface ChannelProcess {
     /**
      * Issue a process request.
      * This fails if the request can not be satisfied.
-     * If it fails the channelProcessRequestor.processDone is called before process returns.
+     * If it fails the channelProcessRequester.processDone is called before process returns.
      */
     void process();
 }

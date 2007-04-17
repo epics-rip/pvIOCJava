@@ -16,7 +16,7 @@ import org.epics.ioc.util.*;
  */
 public class BasePVRecord extends BasePVStructure implements PVRecord {
     private String recordName;
-    private List<Requestor> requestorList = new ArrayList<Requestor>();
+    private List<Requester> requesterList = new ArrayList<Requester>();
     
     /**
      * Constructor.
@@ -41,19 +41,19 @@ public class BasePVRecord extends BasePVStructure implements PVRecord {
     public void message(String message, MessageType messageType) {
         if(message!=null && message.charAt(0)!='.') message = " " + message;
         message = recordName + message;
-        for (Requestor requestor : requestorList) requestor.message(message, messageType);
+        for (Requester requester : requesterList) requester.message(message, messageType);
     }
     /* (non-Javadoc)
-     * @see org.epics.ioc.pv.PVRecord#addRequestor(org.epics.ioc.util.Requestor)
+     * @see org.epics.ioc.pv.PVRecord#addRequester(org.epics.ioc.util.Requester)
      */
-    public void addRequestor(Requestor requestor) {
-        requestorList.add(requestor);
+    public void addRequester(Requester requester) {
+        requesterList.add(requester);
     }
     /* (non-Javadoc)
-     * @see org.epics.ioc.pv.PVRecord#removeRequestor(org.epics.ioc.util.Requestor)
+     * @see org.epics.ioc.pv.PVRecord#removeRequester(org.epics.ioc.util.Requester)
      */
-    public void removeRequestor(Requestor requestor) {
-        requestorList.remove(requestor);
+    public void removeRequester(Requester requester) {
+        requesterList.remove(requester);
     }
     /* (non-Javadoc)
      * @see java.lang.Object#toString()

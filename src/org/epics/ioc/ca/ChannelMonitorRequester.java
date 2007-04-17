@@ -9,11 +9,11 @@ import org.epics.ioc.util.*;
 
 
 /**
- * Requestor that monitors a channel and wants data returned when a monitor event occurs.
+ * Requester that monitors a channel and wants data returned when a monitor event occurs.
  * @author mrk
  *
  */
-public interface ChannelMonitorRequestor extends Requestor{
+public interface ChannelMonitorRequester extends Requester{
     /**
      * New subscribe data value.
      * @param cD The channelData.

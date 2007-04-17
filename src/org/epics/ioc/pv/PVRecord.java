@@ -26,13 +26,13 @@ public interface PVRecord extends PVStructure {
      */
     void message(String message, MessageType messageType);
     /**
-     * Add a requestor to receive messages.
-     * @param requestor The requestor to add.
+     * Add a requester to receive messages.
+     * @param requester The requester to add.
      */
-    void addRequestor(Requestor requestor);
+    void addRequester(Requester requester);
     /**
-     * Remove a message requestor.
-     * @param requestor The requestor to remove.
+     * Remove a message requester.
+     * @param requester The requester to remove.
      */
-    void removeRequestor(Requestor requestor);
+    void removeRequester(Requester requester);
 }

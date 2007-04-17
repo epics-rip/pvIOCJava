@@ -30,7 +30,7 @@ public class DelayLinkFactory {
     private static Timer timer = new Timer("delayLinkTimer");
     private static String supportName = "delayLink";
     
-    private static class DelayLink extends AbstractLinkSupport implements ProcessContinueRequestor
+    private static class DelayLink extends AbstractLinkSupport implements ProcessContinueRequester
     {       
         private TimerTask timerTask = null;
         private DBLink dbLink = null;
@@ -42,7 +42,7 @@ public class DelayLinkFactory {
         private long min,max,inc;
         
         private long delay = 0;
-        private SupportProcessRequestor supportProcessRequestor = null;
+        private SupportProcessRequester supportProcessRequester = null;
 
         private DelayLink(DBLink dbLink) {
             super(supportName,dbLink);
@@ -99,20 +99,20 @@ public class DelayLinkFactory {
             setSupportState(SupportState.readyForStart);
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.process.AbstractSupport#process(org.epics.ioc.process.SupportProcessRequestor)
+         * @see org.epics.ioc.process.AbstractSupport#process(org.epics.ioc.process.SupportProcessRequester)
          */
-        public void process(SupportProcessRequestor supportProcessRequestor) {
-            this.supportProcessRequestor = supportProcessRequestor;
+        public void process(SupportProcessRequester supportProcessRequester) {
+            this.supportProcessRequester = supportProcessRequester;
             timerTask = new DelayTask(this);
             timer.schedule(timerTask, delay);
             delay += inc;
             if(delay>max) delay = min;
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.process.ProcessContinueRequestor#processContinue()
+         * @see org.epics.ioc.process.ProcessContinueRequester#processContinue()
          */
         public void processContinue() {
-            supportProcessRequestor.supportProcessDone(RequestResult.success);
+            supportProcessRequester.supportProcessDone(RequestResult.success);
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.process.LinkSupport#setField(org.epics.ioc.pvAccess.PVData)

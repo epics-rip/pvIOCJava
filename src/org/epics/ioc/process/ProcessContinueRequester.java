@@ -3,11 +3,16 @@
  * EPICS JavaIOC is distributed subject to a Software License Agreement found
  * in file LICENSE that is included with this distribution.
  */
-package org.epics.ioc.ca;
+package org.epics.ioc.process;
 
 /**
- * Requestor for a putGet request.
  * @author mrk
  *
  */
-public interface ChannelPutGetRequestor extends ChannelPutRequestor,ChannelGetRequestor {}
+public interface ProcessContinueRequester {
+    /**
+     * Continue processing.
+     * This is called by RecordProcess.processContinue with the record locked.
+     */
+    void processContinue();
+}

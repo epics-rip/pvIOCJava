@@ -15,7 +15,7 @@ import java.util.*;
  * @author mrk
  *
  */
-public interface IOCDB extends Requestor{
+public interface IOCDB extends Requester{
     /**
      * Get the master IOCDB.
      * @return The master IOCDB.
@@ -70,15 +70,15 @@ public interface IOCDB extends Requestor{
      */
     void message(String message, MessageType messageType);
     /**
-     * Add a message requestor.
-     * @param requestor The requestor.
+     * Add a message requester.
+     * @param requester The requester.
      */
-    void addRequestor(Requestor requestor);
+    void addRequester(Requester requester);
     /**
-     * Remove a message requestor.
-     * @param requestor The requestor.
+     * Remove a message requester.
+     * @param requester The requester.
      */
-    void removeRequestor(Requestor requestor);
+    void removeRequester(Requester requester);
     /**
      * Generate a list of record instance with names that match the regular expression.
      * @param regularExpression The regular expression.

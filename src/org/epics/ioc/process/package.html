@@ -10,7 +10,7 @@
 <body>
 <h1 style="text-align: center">EPICS JavaIOC: process<br />
 package: org.epics.ioc.process<br />
-2007.03.29</h1>
+2007.04.16</h1>
 CONTENTS
 
 <div class="toc">
@@ -19,7 +19,7 @@ CONTENTS
   <li><a href="#Record">Record Processing: Theory of Operation</a>
     <ul>
       <li><a href="#Definition">Definitions</a></li>
-      <li><a href="#Requestor">Requestor Examples</a></li>
+      <li><a href="#Requester">Requester Examples</a></li>
       <li><a href="#Overview1">Overview</a></li>
       <li><a href="#Local">Local Channel Access Example</a></li>
       <li><a href="#Link">Link Support Example</a></li>
@@ -34,31 +34,21 @@ CONTENTS
       Methods</a></li>
       <li><a href="#RecordProc1">RecordProcess - Record Lifetime
       Methods.</a></li>
-      <li><a href="#RecordProc2">RecordProcess - Record Process Requestor
+      <li><a href="#RecordProc2">RecordProcess - Record Process Requester
         Methods</a></li>
       <li><a href="#RecordProc3">RecordProcess - Support Processing
         methods.</a></li>
-      <li><a href="#RecordProc4">RecordProcessRequestor</a></li>
-      <li><a href="#ProcessCal">ProcessCallbackRequestor</a></li>
-      <li><a href="#ProcessCon">ProcessContinueRequestor</a></li>
-      <li><a href="#SupportPro">SupportProcessRequestor</a></li>
+      <li><a href="#RecordProc4">RecordProcessRequester</a></li>
+      <li><a href="#ProcessCal">ProcessCallbackRequester</a></li>
+      <li><a href="#ProcessCon">ProcessContinueRequester</a></li>
+      <li><a href="#SupportPro">SupportProcessRequester</a></li>
       <li><a href="#RecordProc5">RecordProcessFactory</a></li>
     </ul>
   </li>
-  <li><a href="#Support1">Support</a>
+  <li><a href="#Support1">Support Creation</a>
     <ul>
-      <li><a href="#Definition2">Definitions</a></li>
-      <li><a href="#Support2">Support</a></li>
-      <li><a href="#SupportSta">SupportState</a></li>
-      <li><a href="#LinkSuppor">LinkSupport</a></li>
-      <li><a href="#ScanSuppor">ScanSupport</a></li>
-      <li><a href="#AbstractSu">AbstractSupport</a></li>
-    </ul>
-  </li>
-  <li><a href="#Support3">Support Creation</a>
-    <ul>
-      <li><a href="#Definition3">Definitions:</a></li>
-      <li><a href="#Support4">Support Creation</a></li>
+      <li><a href="#Definition2">Definitions:</a></li>
+      <li><a href="#Support2">Support Creation</a></li>
       <li><a href="#Factory">Factory</a></li>
     </ul>
   </li>
@@ -69,22 +59,12 @@ CONTENTS
 <h2 style="text-align: center" id="Overview">Overview</h2>
 <hr />
 
-<p>This package provides support for processing IOC database records. It has
-the following interfaces:</p>
+<p>This package provides support for processing IOC database records. It
+defines the following interfaces:</p>
 <dl>
   <dt>RecordProcess</dt>
     <dd>An instance is created for each IOC record. It has methods for use by
       any code interested in record processing.</dd>
-  <dt>Support</dt>
-    <dd>Methods implemented by support code. A record instance can have one
-      or more support modules. Each instance must have a record support
-      modules and each field can optionally have a field support module. All
-      support modules must implement interface Support. Most will extend
-      AbstractSupport</dd>
-  <dt>LinkSupport</dt>
-    <dd>An extension of Support for link fields.</dd>
-  <dt>ScanSupport</dt>
-    <dd>An extension of Support for field scan.</dd>
   <dt>SupportCreation</dt>
     <dd>An interface for creating and initializing all support for a set of
       record instances.</dd>
@@ -93,14 +73,14 @@ the following interfaces:</p>
 <p>It also has a number of interfaces implement by code that requests to be
 notified about process or support events:</p>
 <dl>
-  <dt>RecordProcessRequestor.</dt>
+  <dt>RecordProcessRequester.</dt>
     <dd>Implemented by code that calls recordProcess.process..</dd>
-  <dt>SupportProcessRequestor</dt>
+  <dt>SupportProcessRequester</dt>
     <dd>Implemented by code that calls support.process.</dd>
-  <dt>ProcessCallbackRequestor</dt>
+  <dt>ProcessCallbackRequester</dt>
     <dd>Implemented by code that calls
     recordProcess.requestProcessCallback.</dd>
-  <dt>ProcessContinueRequestor</dt>
+  <dt>ProcessContinueRequester</dt>
     <dd>Implemented by code that call recordProcess.processContinue.</dd>
 </dl>
 
@@ -113,9 +93,6 @@ notified about process or support events:</p>
 
 <p>In addition the following classes are provided:</p>
 <dl>
-  <dt>AbstractSupport</dt>
-    <dd>A base class that can be extended by most support code. It implements
-      a number of the Support methods.</dd>
   <dt>RecordProcessFactory</dt>
     <dd>Implements RecordProcess.</dd>
   <dt>SupportCreationFactory</dt>
@@ -148,11 +125,11 @@ Operation</h2>
     <dd>Every record instance has an implementation of an object that
       coordinates record processing. RecordProcess is the name of the
       interface implemented by record processing.</dd>
-  <dt>process requestor</dt>
+  <dt>process requester</dt>
     <dd>Code that asks recordProcess to process a record. Code must register
-      to be the requestor and only one requestor is allow to request
-      processing. Thus a registration request fails if a requestor is already
-      attached to a record. If code that is not the requestor attempts to
+      to be the requester and only one requester is allow to request
+      processing. Thus a registration request fails if a requester is already
+      attached to a record. If code that is not the requester attempts to
       process a record an exception is thrown.</dd>
   <dt>active</dt>
     <dd>A record instance is active while a process request is active. A
@@ -164,7 +141,7 @@ Operation</h2>
       code must be implemented carefully.</dd>
 </dl>
 
-<h3 id="Requestor">Requestor Examples</h3>
+<h3 id="Requester">Requester Examples</h3>
 <dl>
   <dt>Local Channel Access</dt>
     <dd>An example is a channel access server that is accessing IOC database.
@@ -227,8 +204,8 @@ subfield of the record.</p>
     communication between support code or between support code and
     RecordProcess.</p>
   </li>
-  <li>RecordProcsssRequestor
-    <p>A record can have only a single process requestor. A requestor must
+  <li>RecordProcsssRequester
+    <p>A record can have only a single process requester. A requester must
     register before it can request processing.</p>
   </li>
   <li>RecordProcess
@@ -248,23 +225,23 @@ subfield of the record.</p>
       <li>process
         <p>If the record has not been made active via a call to setActive it
         is set active. recordSupport.process is called. The results of
-        processing are sent to the requestor via the RecordProcessRequestor
-        methods. The requestor can request the record be left active when
+        processing are sent to the requester via the RecordProcessRequester
+        methods. The requester can request the record be left active when
         processing completes.</p>
       </li>
       <li>setInactive
-        <p>Must be called if the requestor asked that the record be left
+        <p>Must be called if the requester asked that the record be left
         active when processing completes.</p>
       </li>
       <li>processContinue
         <p>Called by asynchronous support when it is ready to continue
         processing. The record is locked and
-        processContinueRequestor.processContinue is called..</p>
+        processContinueRequester.processContinue is called..</p>
       </li>
       <li>requestProcessCallback
         <p>Any support code called directly or indirectly by process or
         processContinue can call this method.
-        processRequestRequestor.processCallback is called with the record
+        processRequestRequester.processCallback is called with the record
         unlocked. Support code that processes other records must only issue
         the process requests via this method or deadlocks can occur.</p>
       </li>
@@ -272,14 +249,14 @@ subfield of the record.</p>
   </li>
   <li>Support
     <ul>
-      <li>process(SupportProcessRequestor supportProcessRequestor)
+      <li>process(SupportProcessRequester supportProcessRequester)
         <p>This is a method that must be implemented by all support modules.
-        When the support is done it calls the supportProcessRequestor to
+        When the support is done it calls the supportProcessRequester to
         report completion.</p>
       </li>
     </ul>
   </li>
-  <li>RecordProcessRequestor
+  <li>RecordProcessRequester
     <ul>
       <li>recordProcessResult(RequestResult requestResult)
         <p>Called with the record locked and all processing is complete.</p>
@@ -289,7 +266,7 @@ subfield of the record.</p>
       </li>
     </ul>
   </li>
-  <li>SupportProcessRequestor
+  <li>SupportProcessRequester
     <ul>
       <li>supportProcessDone(RequestResult requestResult)
         <p>called by whoever calls support.process. In particular
@@ -297,14 +274,14 @@ subfield of the record.</p>
       </li>
     </ul>
   </li>
-  <li>ProcessCallbackRequestor
+  <li>ProcessCallbackRequester
     <ul>
       <li>processCallback()
         <p>called by recordProcess with record unlocked.</p>
       </li>
     </ul>
   </li>
-  <li>ProcessContinueRequestor
+  <li>ProcessContinueRequester
     <ul>
       <li>processContinue()
         <p>called by recordProcess with record unlocked.</p>
@@ -435,9 +412,9 @@ following happens:</p>
   <li>doubleRecord calls recordProcess.supportProcessDone</li>
   <li>recordProcess completes record processing
     <ul>
-      <li>calls recordProcessRequestor.recordProcessResult</li>
+      <li>calls recordProcessRequester.recordProcessResult</li>
       <li>unlocks the record and sets the record inactive.</li>
-      <li>calls recordProcessRequestor.recordProcessComplete.</li>
+      <li>calls recordProcessRequester.recordProcessComplete.</li>
     </ul>
   </li>
 </ul>
@@ -516,33 +493,34 @@ try {
         boolean isActive();
         DBRecord getRecord();
         boolean setTrace(boolean value);
+        SupportState getSupportState();
         // support lifecycle methods
         void initialize();
         void start();
         void stop();
         void uninitialize();
-        // record process requestor methods
-        boolean setRecordProcessRequestor(
-            RecordProcessRequestor recordProcessRequestor);
-        boolean releaseRecordProcessRequestor(
-            RecordProcessRequestor recordProcessRequestor);
-        void releaseRecordProcessRequestor();
-        String getRecordProcessRequestorName();
+        // record process requester methods
+        boolean setRecordProcessRequester(
+            RecordProcessRequester recordProcessRequester);
+        boolean releaseRecordProcessRequester(
+            RecordProcessRequester recordProcessRequester);
+        void releaseRecordProcessRequester();
+        String getRecordProcessRequesterName();
         boolean canProcessSelf();
-        boolean processSelfRequest(RecordProcessRequestor recordProcessRequestor);
-        void processSelfSetActive(RecordProcessRequestor recordProcessRequestor);
-        void processSelfProcess(RecordProcessRequestor recordProcessRequestor,
+        boolean processSelfRequest(RecordProcessRequester recordProcessRequester);
+        void processSelfSetActive(RecordProcessRequester recordProcessRequester);
+        void processSelfProcess(RecordProcessRequester recordProcessRequester,
             boolean leaveActive);
-        void processSelfSetInactive(RecordProcessRequestor recordProcessRequestor);
-        void setActive(RecordProcessRequestor recordProcessRequestor);
-        void process(RecordProcessRequestor recordProcessRequestor,
+        void processSelfSetInactive(RecordProcessRequester recordProcessRequester);
+        void setActive(RecordProcessRequester recordProcessRequester);
+        void process(RecordProcessRequester recordProcessRequester,
             boolean leaveActive, TimeStamp timeStamp);
-        void setInactive(RecordProcessRequestor recordProcessRequestor);
+        void setInactive(RecordProcessRequester recordProcessRequester);
         // support processing methods
         void processContinue(
-            ProcessContinueRequestor processContinueRequestor);
+            ProcessContinueRequester processContinueRequester);
         void requestProcessCallback(
-            ProcessCallbackRequestor processCallbackRequestor);
+            ProcessCallbackRequester processCallbackRequester);
         boolean setStatusSeverity(String status, AlarmSeverity alarmSeverity);
         boolean setStatus(String status);
         String getStatus();
@@ -551,20 +529,20 @@ try {
         void getTimeStamp(TimeStamp timeStamp);
     }
 
-    public interface RecordProcessRequestor extends Requestor{
+    public interface RecordProcessRequester extends Requester{
         void recordProcessResult(RequestResult requestResult);
         void recordProcessComplete();
     }
     
-    public interface ProcessCallbackRequestor extends Requestor{
+    public interface ProcessCallbackRequester extends Requester{
         void processCallback();
     }
 
-    public interface ProcessContinueRequestor {
+    public interface ProcessContinueRequester {
         void processContinue();
     }
     
-    public interface SupportProcessRequestor {
+    public interface SupportProcessRequester {
         void supportProcessDone(RequestResult requestResult);
     }</pre>
 
@@ -575,7 +553,7 @@ falls into one of the following classes:</p>
     necessary a method locks the record while performing its action and
     unlocks before returning.</li>
   <li>Record Support Lifetime. Initialize,start,stop,ininitialize.</li>
-  <li>Record Process Requestor: These are methods for code that requests
+  <li>Record Process Requester: These are methods for code that requests
     record processing.</li>
   <li>Support Processing. These are methods for use by support code, i.e.
     code that implements record processing.</li>
@@ -596,6 +574,8 @@ falls into one of the following classes:</p>
   <dt style="font-family: courier;">setTrace</dt>
     <dd>Set tracing on or off. When true info messages are sent to
       dbRecord.message whenever any processing related method is called.</dd>
+  <dt style="font-family: courier;">getSupportState</dt>
+    <dd>Get the current support state.</dd>
 </dl>
 
 <h3 id="RecordProc1">RecordProcess - Record Lifetime Methods.</h3>
@@ -623,29 +603,30 @@ falls into one of the following classes:</p>
       style="font-family: courier;">SupportState.readyForInitialize.</span></dd>
 </dl>
 
-<h3 id="RecordProc2">RecordProcess - Record Process Requestor Methods</h3>
+<h3 id="RecordProc2">RecordProcess - Record Process Requester Methods</h3>
 
 <p>These are methods called by code that wants a record processed.</p>
 <dl>
   <dt style="font-family: courier;">canProcessSelf</dt>
-    <dd>Can the record process itself? This is true if scan.processSelf is true.
-      In this case scanSupport, itself, is the recordProcessRequestor and
-      processes the record when method (processSelfRequest) is called.</dd>
-  <dt style="font-family: courier;">setRecordProcessRequestor</dt>
+    <dd>Can the record process itself? This is true if scan.processSelf is
+      true. In this case scanSupport, itself, is the recordProcessRequester
+      and processes the record when method (processSelfRequest) is
+    called.</dd>
+  <dt style="font-family: courier;">setRecordProcessRequester</dt>
     <dd>Request to be the record processor. Each record instance can have
-      only one record process requestor. If a requester is already registered
-      a message is sent to the requestor and false is returned.</dd>
-  <dt style="font-family: courier;">releaseRecordProcessRequestor</dt>
-    <dd>Release the requestor. Normally a requestor passes itself to this
-      method when it no longer wishes to be the requestor. the method without
-      an argument is for use if a requestor crashes without calling
+      only one record process requester. If a requester is already registered
+      a message is sent to the requester and false is returned.</dd>
+  <dt style="font-family: courier;">releaseRecordProcessRequester</dt>
+    <dd>Release the requester. Normally a requester passes itself to this
+      method when it no longer wishes to be the requester. the method without
+      an argument is for use if a requester crashes without calling
     release.</dd>
-  <dt style="font-family: courier;">getRecordProcessRequestorName</dt>
-    <dd>Get the name of the recordProcessRequestor.</dd>
+  <dt style="font-family: courier;">getRecordProcessRequesterName</dt>
+    <dd>Get the name of the recordProcessRequester.</dd>
   <dt style="font-family: courier;">setActive</dt>
     <dd>Prepare the record for processing but do not call record support. The
-      caller must be the registered requestor. If the request fails a message
-      is sent to the requestor and false is returned. If the request is
+      caller must be the registered requester. If the request fails a message
+      is sent to the requester and false is returned. If the request is
       successful than the caller can access the record and when ready call
       process. If successful the record is set active and another request to
       setActive will fail.</dd>
@@ -653,7 +634,7 @@ falls into one of the following classes:</p>
     <dd>Request that the record be processed. If the caller has not called
       setActive the record is prepared for processing. In either case if the
       record is ready record support process is called. If true is returned
-      the methods implemented by the recordProcessRequestor are called to
+      the methods implemented by the recordProcessRequester are called to
       show the results of the process request. If <span
       style="font-family: courier;">leaveActive</span> is true than when the
       record completes processing it is left active until setInActive is
@@ -666,7 +647,7 @@ falls into one of the following classes:</p>
           value for listener it will be added to a list of listeners to call
           when the record completes processing. The return value will be
           alreadyActive.</li>
-        <li>The caller is not the registered process requestor. If this case
+        <li>The caller is not the registered process requester. If this case
           an exception is thrown.</li>
         <li>The record state is not RecordState.constructed. The return value
           is failure. This can happen if the changes are being made to the
@@ -679,22 +660,22 @@ falls into one of the following classes:</p>
       </ul>
     </dd>
   <dt style="font-family: courier;">setInActive</dt>
-    <dd>Call by the record process requestor when it is done with processing.
+    <dd>Call by the record process requester when it is done with processing.
       Calling process with <span
       style="font-family: courier;">leaveActive</span> true and then calling
-      setInactive allows the requestor to communicated with other code after
+      setInactive allows the requester to communicated with other code after
       the record is unlocked but before it becomes inactive.</dd>
   <dt style="font-family: courier;">processSelfRequest</dt>
-    <dd>Ask that the record process itself.
-       This request will succeed only if scan.processSelf is true and the record is not active.
-       The caller must be prepared for a false return, which means the following methods
-       can not be called.</dd>
+    <dd>Ask that the record process itself. This request will succeed only if
+      scan.processSelf is true and the record is not active. The caller must
+      be prepared for a false return, which means the following methods can
+      not be called.</dd>
   <dt style="font-family: courier;">processSelfSetActive</dt>
-     <dd>Set the record active.</dd>
+    <dd>Set the record active.</dd>
   <dt style="font-family: courier;">processSelfProcess</dt>
-      <dd>Process the record.</dd>
+    <dd>Process the record.</dd>
   <dt style="font-family: courier;">processSelfSetInactive</dt>
-      <dd>Set the record inactive.</dd>
+    <dd>Set the record inactive.</dd>
 </dl>
 
 <h3 id="RecordProc3">RecordProcess - Support Processing methods.</h3>
@@ -736,23 +717,23 @@ style="font-family: courier;">processContinue</span> is running.</p>
       style="font-family: courier;">setTimeStamp</span></dd>
 </dl>
 
-<h3 id="RecordProc4">RecordProcessRequestor</h3>
+<h3 id="RecordProc4">RecordProcessRequester</h3>
 
 <p>Methods implemented by code that requests that a record be processed.</p>
 <dl>
   <dt style="font-family: courier;">recordProcessResult</dt>
     <dd>The results of record processing. This is called with the record
-      locked so that the process requestor can access data from the
+      locked so that the process requester can access data from the
     record.</dd>
   <dt style="font-family: courier;">recordProcessComplete</dt>
     <dd>Processing is complete. This is called with the record unlocked. If
-      the process requestor called process with <span
+      the process requester called process with <span
       style="font-family: courier;">leaveActive</span> <span
-      style="font-family: courier;">true</span> then the requestor must call
+      style="font-family: courier;">true</span> then the requester must call
       <span style="font-family: courier;">setInactive.</span></dd>
 </dl>
 
-<h3 id="ProcessCal">ProcessCallbackRequestor</h3>
+<h3 id="ProcessCal">ProcessCallbackRequester</h3>
 
 <p>The method implemented by code that calls requestProcessCallback.</p>
 <dl>
@@ -763,7 +744,7 @@ style="font-family: courier;">processContinue</span> is running.</p>
       unlocked.</dd>
 </dl>
 
-<h3 id="ProcessCon">ProcessContinueRequestor</h3>
+<h3 id="ProcessCon">ProcessContinueRequester</h3>
 
 <p>The method implemented by code that calls processContinue.</p>
 <dl>
@@ -772,7 +753,7 @@ style="font-family: courier;">processContinue</span> is running.</p>
       way asynchronous support should continue processing.</dd>
 </dl>
 
-<h3 id="SupportPro">SupportProcessRequestor</h3>
+<h3 id="SupportPro">SupportProcessRequester</h3>
 
 <p>The method implemented by code that calls the process method of any
 support code.</p>
@@ -793,221 +774,13 @@ instance. It has the method:</p>
 }</pre>
 <hr />
 
-<h2 style="text-align: center;" id="Support1">Support</h2>
-<hr />
-
-<h3 id="Definition2">Definitions</h3>
-
-<p>The following are used by support code, i.e. record support, link support,
-and any other support code that is involved with record processing:</p>
-<pre>   public interface Support extends Requestor{
-        SupportState getSupportState();
-        DBField getDBField();
-        void initialize();
-        void start();
-        void stop();
-        void uninitialize();
-        void process(SupportProcessRequestor supportProcessRequestor);
-    }
-
-    public enum SupportState {
-        readyForInitialize,
-        readyForStart,
-        ready,
-        zombie;
-    }
-
-    public interface LinkSupport extends Support {
-        void setField(DBField dbField);
-    }
-
-    public interface ScanSupport extends Support {
-        boolean canScanSelf();
-        boolean scanSelf();
-    }
-
-    public abstract class AbstractSupport implements Support {
-        protected AbstractSupport(String name,DBField dbField);
-        // methods from Requestor
-        public String getRequestorName();
-        public void message(String message, MessageType messageType);
-        // methods that are rarely overridden
-        public SupportState getSupportState();
-        public DBField getDBField();
-        // following normally overridden
-        public void initialize();
-        public void start();
-        public void stop();
-        public void uninitialize();
-        public void process(SupportProcessRequestor supportProcessRequestor);
-        // following must always be called when support state changes
-        protected void setSupportState(SupportState state);
-        // following are for use by support code
-        protected boolean checkSupportState(
-            SupportState expectedState,String message);
-        protected DBStructure getConfigStructure(String structureName);
-        protected static PVBoolean getBoolean(
-            DBStructure configStructure,String fieldName)
-        protected static PVByte getByte(
-            DBStructure configStructure,String fieldName)
-        protected static PVInt getInt(
-            DBStructure configStructure,String fieldName)
-        protected static PVLong getLong(
-            DBStructure configStructure,String fieldName)
-        protected static PVFloat getFloat(
-            DBStructure configStructure,String fieldName)
-        protected static PVDouble getDouble(
-            DBStructure configStructure,String fieldName)
-        protected static PVString getString(
-            DBStructure configStructure,String fieldName)
-    }</pre>
-
-<h3 id="Support2">Support</h3>
-
-<p><span style="font-family: courier;">Support</span> has the methods:</p>
-<dl>
-  <dt style="font-family: courier;">getRequestorName</dt>
-    <dd>A requestor method to get the name of the support.</dd>
-  <dt style="font-family: courier;">message</dt>
-    <dd>A Requestor method. This is called to pass messages to the
-    support.</dd>
-  <dt style="font-family: courier;">getSupportState</dt>
-    <dd>Get the support state.</dd>
-  <dt style="font-family: courier;">getDBField</dt>
-    <dd>Get the <span style="font-family: courier;">DBField</span> interface
-      for the field that is being supported. For record support this will be
-      the record itself. <span style="font-family: courier;"></span></dd>
-  <dt style="font-family: courier;">initialize</dt>
-    <dd>Perform initialization that does not involve accessing other records
-      and/or support.</dd>
-  <dt style="font-family: courier;">start</dt>
-    <dd>Connect to other records and/or support.</dd>
-  <dt style="font-family: courier;">stop</dt>
-    <dd>Disconnect from other records and/or support and be ready to again
-      start.</dd>
-  <dt style="font-family: courier;">uninitialize</dt>
-    <dd>Remove all internal state are prepare to again initialize.</dd>
-  <dt style="font-family: courier;">process</dt>
-    <dd>Process.</dd>
-</dl>
-
-<h3 id="SupportSta">SupportState</h3>
-
-<p><span style="font-family: courier;">SupportState</span> has the following
-values:</p>
-<dl>
-  <dt style="font-family: courier;">readyForInitialize</dt>
-    <dd>Initial state for support. It has been created but has not done
-    much.</dd>
-  <dt style="font-family: courier;">readyForStart</dt>
-    <dd>Support has done any initialization that does not involve connecting
-      to other records and/or support.</dd>
-  <dt style="font-family: courier;">ready</dt>
-    <dd>Support is ready for processing.</dd>
-  <dt style="font-family: courier;">zombie</dt>
-    <dd>Support is going away.</dd>
-</dl>
-
-<h3 id="LinkSuppor">LinkSupport</h3>
-
-<p><span style="font-family: courier;">LinkSupport</span> extends <span
-style="font-family: courier;">Support</span> with the method:</p>
-<dl>
-  <dt style="font-family: courier;">setField</dt>
-    <dd>This specifies the field in the record to/from the support will
-      put/get data.</dd>
-</dl>
-
-<h3 id="ScanSuppor">ScanSupport</h3>
-
-<p><span style="font-family: courier;">ScanSupport</span> extends <span
-style="font-family: courier;">Support</span> with the methods:</p>
-<dl>
-  <dt style="font-family: courier;">canScanSelf</dt>
-    <dd>Can the record scan itself? This is true if scan.scanSelf is true. In
-      this case scanSupport itself owns and processes the record.</dd>
-  <dt style="font-family: courier;">scanSelf</dt>
-    <dd>Process the record. This returns true if scanSupport is the record
-      processor and the record is not active.</dd>
-</dl>
-
-<h3 id="AbstractSu">AbstractSupport</h3>
-
-<p>All support code should extend AbstractSupport.</p>
-<dl>
-  <dt style="font-family: courier;">AbstractSupport</dt>
-    <dd>The constructor which must be called by the derived support
-      constructor.</dd>
-  <dt style="font-family: courier;">getRequestorName</dt>
-    <dd>The returns the name passed to constructor.</dd>
-  <dt style="font-family: courier;">message</dt>
-    <dd>Calls dbField.message.</dd>
-  <dt style="font-family: courier;">getSupportState</dt>
-    <dd>Gets the current support state.</dd>
-  <dt style="font-family: courier;">getDBField</dt>
-    <dd>Returns dbField.</dd>
-  <dt style="font-family: courier;">initialize</dt>
-    <dd>Normally overridden. The default version always succeeds, i.e. enters
-      state readyForStart.</dd>
-  <dt style="font-family: courier;">start</dt>
-    <dd>Normally overridden. The default version always succeeds, i.e. enters
-      state ready.</dd>
-  <dt style="font-family: courier;">stop</dt>
-    <dd>Normally overridden. The default version always succeeds, i.e. enters
-      state readyForStart.</dd>
-  <dt style="font-family: courier;">unintialize</dt>
-    <dd>Normally overridden. The default version always succeeds, i.e. enters
-      state readyForInitialize.</dd>
-  <dt style="font-family: courier;">process</dt>
-    <dd>Normally overridden. The default version sends a message to dbField
-      and calls supportProcessRequestor with a failure result.</dd>
-  <dt style="font-family: courier;">setSupportState</dt>
-    <dd>This must be called by support whenever it changes state.</dd>
-  <dt style="font-family: courier;">checkSupportState</dt>
-    <dd>Checks that the state is the expected state and generates an error
-      message if it isn't.</dd>
-  <dt style="font-family: courier;">getConfigStructure</dt>
-    <dd>Get the configuration structure for the field. <span
-      style="font-family: courier;">null</span> is returned if no
-      configuration structure exists.</dd>
-  <dt style="font-family: courier;">getBoolean</dt>
-    <dd>Get the interface for a <span
-      style="font-family: courier;">boolean</span> field of the configuration
-      structure.</dd>
-  <dt style="font-family: courier;">getByte</dt>
-    <dd>Get the interface for a <span
-      style="font-family: courier;">byte</span> field of the configuration
-      structure.</dd>
-  <dt style="font-family: courier;">getInt</dt>
-    <dd>Get the interface for a <span
-      style="font-family: courier;">integer</span> field of the configuration
-      structure.</dd>
-  <dt style="font-family: courier;">getLong</dt>
-    <dd>Get the interface for a <span
-      style="font-family: courier;">long</span> field of the configuration
-      structure.</dd>
-  <dt style="font-family: courier;">getFloat</dt>
-    <dd>Get the interface for a <span
-      style="font-family: courier;">float</span> field of the configuration
-      structure.</dd>
-  <dt style="font-family: courier;">getDouble</dt>
-    <dd>Get the interface for a <span
-      style="font-family: courier;">double</span> field of the configuration
-      structure.</dd>
-  <dt style="font-family: courier;">getString</dt>
-    <dd>Get the interface for a <span
-      style="font-family: courier;">string</span> field of the configuration
-      structure.</dd>
-</dl>
-<hr />
-
-<h2 style="text-align: center;" id="Support3">Support Creation</h2>
+<h2 style="text-align: center;" id="Support1">Support Creation</h2>
 <hr />
 
 <p>This is called to create all support for all fields of all records in the
 IOC database passed to createSupportCreation.</p>
 
-<h3 id="Definition3">Definitions:</h3>
+<h3 id="Definition2">Definitions:</h3>
 <pre>    public interface SupportCreation {
         boolean createSupport();
         boolean initializeSupport();
@@ -1018,11 +791,11 @@ IOC database passed to createSupportCreation.</p>
 
     public class SupportCreationFactory
         static public SupportCreation createSupportCreation(
-            IOCDB iocdb,Requestor requestor);
+            IOCDB iocdb,Requester requester);
         static public boolean createSupport(DBField dbField);
     }</pre>
 
-<h3 id="Support4">Support Creation</h3>
+<h3 id="Support2">Support Creation</h3>
 
 <p>SupportCreation has the methods:</p>
 <dl>

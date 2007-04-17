@@ -34,22 +34,22 @@ public interface ChannelMonitor {
     void lookForPercentageChange(ChannelField channelField,double value);
     /**
      * Start monitoring for changes and send notification of changes but not the data.
-     * @param channelMonitorNotifyRequestor The requestor.
+     * @param channelMonitorNotifyRequester The requester.
      * @param threadName Name of notification thread.
      * @param scanPriority Priority of notification thread.
      * @return (false,true) if the monitor (has not, has) started.
      */
-    boolean start(ChannelMonitorNotifyRequestor channelMonitorNotifyRequestor,
+    boolean start(ChannelMonitorNotifyRequester channelMonitorNotifyRequester,
         String threadName, ScanPriority scanPriority);
     /**
      * Start monitoring for changes and send the data that has changed..
-     * @param channelMonitorRequestor The requestor.
+     * @param channelMonitorRequester The requester.
      * @param queueSize The size for a data queue.
      * @param threadName Name of notification thread.
      * @param scanPriority Priority of notification thread.
      * @return (false,true) if the monitor (has not, has) started.
      */
-    boolean start(ChannelMonitorRequestor channelMonitorRequestor,
+    boolean start(ChannelMonitorRequester channelMonitorRequester,
         int queueSize, String threadName, ScanPriority scanPriority);
     /**
      * Stop monitoring.

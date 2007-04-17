@@ -764,15 +764,15 @@ and link support definitions and adds the definitions to a database
 definition database.</p>
 <pre>    public class XMLToDBDFactory {
         public static void convert(DBD dbd, String fileName,
-            Requestor requestor);
+            Requester requester);
         public static DBD create(String dbdName,String fileName,
-            Requestor requestor);
+            Requester requester);
     }</pre>
 <dl>
   <dt style="font-family: courier;">convert</dt>
     <dd>Convert the xml DBD definitions in file fileName and put the
       definitions into dbd. When generating definitions for an IOC use
-      addToMaster instead of this. The Requestor interface is described in
+      addToMaster instead of this. The Requester interface is described in
       package org.epics.ioc.util.</dd>
   <dt style="font-family: courier;">create</dt>
     <dd>Create a DBD with the specified name and put the definitions obtained
@@ -784,7 +784,7 @@ definition database.</p>
       already appear in master or if they are defined more than once. A
       general rule is that the new definitions should not be added to master
       if any messages with message type greater than info are passed to the
-      requestor. In any case the caller should remove all references to the
+      requester. In any case the caller should remove all references to the
       new DBD after it decides not to merge or after the merge.</dd>
 </dl>
 
@@ -795,7 +795,7 @@ definition database.</p>
   <dt style="font-family: courier;">fileName</dt>
     <dd>The filename relative to the current working directory that contains
       the Database Definitions.</dd>
-  <dt style="font-family: courier;">requestor</dt>
+  <dt style="font-family: courier;">requester</dt>
     <dd>A listener for all messages generated while the method is
     execuiting.</dd>
   <dt style="font-family: courier;">dbdName</dt>

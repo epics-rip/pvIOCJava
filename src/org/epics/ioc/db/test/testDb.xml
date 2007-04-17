@@ -3,10 +3,10 @@
 <record name = "exampleAi" type = "ai">
     <value>10.0</value>
     <units>volts</units>
-    <displayLimit>
+    <doubleLimit>
         <low>0.0</low>
         <high>10.0</high>
-    </displayLimit>
+    </doubleLimit>
     <input linkSupportName = "processLink" configStructureName = "processLink">
         <pvname>xxxxxx</pvname>
         <wait>true</wait>
@@ -33,10 +33,10 @@
          choice1
     </enum>
     <menu>middle</menu>
-    <displayLimit>
+    <doubleLimit>
         <low>0.0</low>
         <high>10.0</high>
-    </displayLimit>
+    </doubleLimit>
     <link linkSupportName = "processLink" configStructureName = "processLink">
         <pvname>xxxxxx</pvname>
         <wait>true</wait>
@@ -94,7 +94,7 @@
         </value>
     </linkArray>
     <structArray>
-        <value structureName = "displayLimit">
+        <value structureName = "doubleLimit">
              <low>0.0</low>
              <high>10.0</high>
         </value>
@@ -127,10 +127,10 @@
              choice1
         </enum>
         <menu>middle</menu>
-        <displayLimit>
+        <doubleLimit>
             <low>0.0</low>
             <high>10.0</high>
-        </displayLimit>
+        </doubleLimit>
         <link linkSupportName = "processLink" configStructureName = "processLink">
             <pvname>xxxxxx</pvname>
             <wait>true</wait>
@@ -188,7 +188,7 @@
             </value>
         </linkArray>
         <structArray>
-            <value structureName = "displayLimit">
+            <value structureName = "doubleLimit">
                  <low>0.0</low>
                  <high>10.0</high>
             </value>

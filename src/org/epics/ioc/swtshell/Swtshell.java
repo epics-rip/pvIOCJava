@@ -44,7 +44,7 @@ public class Swtshell {
         } catch(InterruptedException e) {}
     }
 
-    private static class SupportCreate implements Requestor{
+    private static class SupportCreate implements Requester{
         
         private SupportCreate() {}
         
@@ -72,14 +72,14 @@ public class Swtshell {
             return true;
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.util.Requestor#getRequestorName()
+         * @see org.epics.ioc.util.Requester#getRequesterName()
          */
-        public String getRequestorName() {
+        public String getRequesterName() {
             return "swtshell";
         }
 
         /* (non-Javadoc)
-         * @see org.epics.ioc.util.Requestor#message(java.lang.String, org.epics.ioc.util.MessageType)
+         * @see org.epics.ioc.util.Requester#message(java.lang.String, org.epics.ioc.util.MessageType)
          */
         public void message(String message, MessageType messageType) {
             System.out.println("swtshell " + message);

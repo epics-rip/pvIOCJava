@@ -41,10 +41,10 @@
 
 <record name = "examplePowerSupplyLinked" type = "powerSupplyLinkedRecord">
     <units>watts</units>
-    <displayLimit>
+    <doubleLimit>
         <low>0.0</low>
         <high>100.0</high>
-    </displayLimit>
+    </doubleLimit>
     <currentInput supportName = "inputLink">
         <configure structureName = "inputLink">
             <pvname>current.value</pvname>

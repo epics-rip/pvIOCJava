@@ -79,27 +79,27 @@ public interface RecordProcess {
     void uninitialize();
     /**
      * Attempt to become the record processor, i.e. the code that can call process and preProcess.
-     * @param recordProcessRequestor The interface implemented by the record processor.
+     * @param recordProcessRequester The interface implemented by the record processor.
      * @return (false,true) if the caller (is not, is) has become the record processor.
      */
-    boolean setRecordProcessRequestor(RecordProcessRequestor recordProcessRequestor);
+    boolean setRecordProcessRequester(RecordProcessRequester recordProcessRequester);
     /**
      * Release the current record processor.
-     * @param recordProcessRequestor The current record processor.
+     * @param recordProcessRequester The current record processor.
      * @return (false,true) if the caller (is not, is) has been released as the record processor.
      * This should only fail if the caller was not the record processor.
      */
-    boolean releaseRecordProcessRequestor(RecordProcessRequestor recordProcessRequestor);
+    boolean releaseRecordProcessRequester(RecordProcessRequester recordProcessRequester);
     /**
      * Release the record processor unconditionally.
      * This should only be used if a record processor failed without calling releaseRecordProcessor.
      */
-    void releaseRecordProcessRequestor();
+    void releaseRecordProcessRequester();
     /**
      * Get the name of the current record processor.
      * @return The name of the current record processor or null if no record processor is registered.
      */
-    String getRecordProcessRequestorName();
+    String getRecordProcessRequesterName();
     /**
      * Can the record process itself?
      * @return (false,true) if the record (can not, can) process itself.
@@ -108,74 +108,74 @@ public interface RecordProcess {
     /**
      * Request that record process itself.
      * This will only be successful of scan.selfScan is true and the record is not active.
-     * @param recordProcessRequestor The requestor to call if the request is successful.
+     * @param recordProcessRequester The requester to call if the request is successful.
      * @return (false,true) if the record started processing.
      */
-    boolean processSelfRequest(RecordProcessRequestor recordProcessRequestor);
+    boolean processSelfRequest(RecordProcessRequester recordProcessRequester);
     /**
      * Set the record active.
-     * @param recordProcessRequestor The recordProcessRequestor.
+     * @param recordProcessRequester The recordProcessRequester.
      */
-    void processSelfSetActive(RecordProcessRequestor recordProcessRequestor);
+    void processSelfSetActive(RecordProcessRequester recordProcessRequester);
     /**
      * Start processing.
-     * @param recordProcessRequestor The recordProcessRequestor.
+     * @param recordProcessRequester The recordProcessRequester.
      * @param leaveActive Leave the record active when process is done.
-     * The requestor must call setInactive.
+     * The requester must call setInactive.
      */
-    void processSelfProcess(RecordProcessRequestor recordProcessRequestor, boolean leaveActive);
+    void processSelfProcess(RecordProcessRequester recordProcessRequester, boolean leaveActive);
     /**
-     * Called by the recordProcessRequestor when it called processSelfProcess with leaveActive true.
-     * @param recordProcessRequestor The recordProcessRequestor.
+     * Called by the recordProcessRequester when it called processSelfProcess with leaveActive true.
+     * @param recordProcessRequester The recordProcessRequester.
      */
-    void processSelfSetInactive(RecordProcessRequestor recordProcessRequestor);
+    void processSelfSetInactive(RecordProcessRequester recordProcessRequester);
     /**
      * Prepare for processing a record but do not call record support.
      * A typical use of this method is when the processor wants to modify fields
      * of the record before it is processed.
      * If successful the record is active but unlocked.
-     * If not successful recordProcessRequestor.recordProcessResult
+     * If not successful recordProcessRequester.recordProcessResult
      * and recordProcessComplete are called before setActive returns.
-     * @param recordProcessRequestor The recordProcessRequestor.
+     * @param recordProcessRequester The recordProcessRequester.
      */
-    void setActive(RecordProcessRequestor recordProcessRequestor);
+    void setActive(RecordProcessRequester recordProcessRequester);
     /**
      * Process the record instance.
      * Unless the record was activated by setActive,
      * the record is prepared for processing just like for setActive.
      * All results of record processing are reported
-     * via the RecordProcessRequestor methods.
-     * If not successful recordProcessRequestor.recordProcessResult
+     * via the RecordProcessRequester methods.
+     * If not successful recordProcessRequester.recordProcessResult
      * and recordProcessComplete are called before setActive returns.
-     * @param recordProcessRequestor The recordProcessRequestor.
+     * @param recordProcessRequester The recordProcessRequester.
      * @param leaveActive Leave the record active when process is done.
-     * The requestor must call setInactive.
+     * The requester must call setInactive.
      * @param timeStamp The initial timeStamp for record procsssing.
      * If null the initial timeStamp will be the current time.
      */
-    void process(RecordProcessRequestor recordProcessRequestor,
+    void process(RecordProcessRequester recordProcessRequester,
         boolean leaveActive, TimeStamp timeStamp);
     /**
-     * Called by the recordProcessRequestor when it has called process with leaveActive
+     * Called by the recordProcessRequester when it has called process with leaveActive
      * true and is done.
-     * @param recordProcessRequestor
+     * @param recordProcessRequester
      */
-    void setInactive(RecordProcessRequestor recordProcessRequestor);
+    void setInactive(RecordProcessRequester recordProcessRequester);
     /**
      * Ask recordProcess to continue processing.
      * This is called with the record unlocked.
      * Only valid if the record is active.
-     * @param processContinueRequestor The requestor to call.
+     * @param processContinueRequester The requester to call.
      */
-    void processContinue(ProcessContinueRequestor processContinueRequestor);
+    void processContinue(ProcessContinueRequester processContinueRequester);
     /**
      * Request to be called back after process or processContinue
      * has called support but before it returns.
      * This must only be called by code running as a result of process, preProcess, or processContinue. 
      * The callback will be called with the record unlocked.
-     * @param processCallbackRequestor The listener to call.
+     * @param processCallbackRequester The listener to call.
      */
-    void requestProcessCallback(ProcessCallbackRequestor processCallbackRequestor);
+    void requestProcessCallback(ProcessCallbackRequester processCallbackRequester);
     /**
      * Set the timeStamp for the record.
      * This must only be called by code running as a result of process, preProcess, or processContinue. 

@@ -44,11 +44,11 @@ public class IOCDBFactory {
             new LinkedHashMap<String,DBRecord>();
         private ReentrantReadWriteLock rwLock = 
             new ReentrantReadWriteLock();
-        private boolean workingRequestorListModified = false;
-        private ArrayList<Requestor> workingRequestorList =
-            new ArrayList<Requestor>();
-        private ArrayList<Requestor> messageListenerList =
-            new ArrayList<Requestor>();
+        private boolean workingRequesterListModified = false;
+        private ArrayList<Requester> workingRequesterList =
+            new ArrayList<Requester>();
+        private ArrayList<Requester> messageListenerList =
+            new ArrayList<Requester>();
         
         private IOCDBInstance(String name) {
             this.name = name;
@@ -137,8 +137,14 @@ public class IOCDBFactory {
             rwLock.writeLock().lock();
             try {
                 String key = record.getPVRecord().getRecordName();
-                if(recordMap.containsKey(key)) return false;
-                if(this!=master && master.findRecord(key)!=null) return false;
+                if(recordMap.containsKey(key)) {
+                    message("record already exists",MessageType.warning);
+                    return false;
+                }
+                if(this!=master && master.findRecord(key)!=null) {
+                    message("record already exists in master",MessageType.warning);
+                    return false;
+                }
                 recordMap.put(key,record);
                 record.setIOCDB(this);
                 return true;
@@ -171,9 +177,9 @@ public class IOCDBFactory {
             }
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.util.Requestor#getRequestorName()
+         * @see org.epics.ioc.util.Requester#getRequesterName()
          */
-        public String getRequestorName() {
+        public String getRequesterName() {
             return name;
         }
         /* (non-Javadoc)
@@ -182,42 +188,42 @@ public class IOCDBFactory {
         public void message(String message, MessageType messageType) {
             rwLock.writeLock().lock();
             try {                
-                if(workingRequestorListModified) {
-                    workingRequestorList = (ArrayList<Requestor>)messageListenerList.clone();
-                    workingRequestorListModified = false;
+                if(workingRequesterListModified) {
+                    workingRequesterList = (ArrayList<Requester>)messageListenerList.clone();
+                    workingRequesterListModified = false;
                 }
             } finally {
                 rwLock.writeLock().unlock();
             }
-            if(workingRequestorList.size()<=0) {
+            if(workingRequesterList.size()<=0) {
                 System.out.println(messageType.toString() + " " + message);
                 return;
             }
-            Iterator<Requestor> iter = workingRequestorList.iterator();
+            Iterator<Requester> iter = workingRequesterList.iterator();
             while(iter.hasNext()) {
                 iter.next().message(message, messageType);
             }
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.db.IOCDB#addRequestor(org.epics.ioc.util.Requestor)
+         * @see org.epics.ioc.db.IOCDB#addRequester(org.epics.ioc.util.Requester)
          */
-        public void addRequestor(Requestor requestor) {
+        public void addRequester(Requester requester) {
             rwLock.writeLock().lock();
             try {
-                workingRequestorList.add(requestor);
-                workingRequestorListModified = true;
+                workingRequesterList.add(requester);
+                workingRequesterListModified = true;
             } finally {
                 rwLock.writeLock().unlock();
             }
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.db.IOCDB#removeRequestor(org.epics.ioc.util.Requestor)
+         * @see org.epics.ioc.db.IOCDB#removeRequester(org.epics.ioc.util.Requester)
          */
-        public void removeRequestor(Requestor requestor) {
+        public void removeRequester(Requester requester) {
             rwLock.writeLock().lock();
             try {
-                workingRequestorList.remove(requestor);
-                workingRequestorListModified = true;
+                workingRequesterList.remove(requester);
+                workingRequesterListModified = true;
             } finally {
                 rwLock.writeLock().unlock();
             }

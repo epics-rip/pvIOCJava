@@ -21,7 +21,7 @@ import org.epics.ioc.util.*;
  *
  */ 
 public class SelectRecord extends Dialog implements SelectionListener {
-    private Requestor requestor;
+    private Requester requester;
     private IOCDB iocdb = IOCDBFactory.getMaster();
     private Map<String,DBRecord> recordMap;        
     private Shell shell;
@@ -29,9 +29,9 @@ public class SelectRecord extends Dialog implements SelectionListener {
     private int ntimes = 0;
     private String recordName = null;
 
-    public SelectRecord(Shell parent,Requestor requestor){
+    public SelectRecord(Shell parent,Requester requester){
         super(parent,SWT.DIALOG_TRIM|SWT.NONE);
-        this.requestor = requestor;
+        this.requester = requester;
     }
 
     public String getRecordName() {
@@ -49,7 +49,7 @@ public class SelectRecord extends Dialog implements SelectionListener {
         list.setLayoutData(listGridData);
         recordMap = iocdb.getRecordMap();
         if(recordMap.isEmpty()) {
-            requestor.message(String.format(
+            requester.message(String.format(
                     "iocdb %s has no records",
                     iocdb.getName()),
                     MessageType.error);
@@ -68,6 +68,7 @@ public class SelectRecord extends Dialog implements SelectionListener {
             }
         }
         shell.dispose();
+        ntimes = 0;
         return recordName;
     }       
     /* (non-Javadoc)

@@ -5,7 +5,7 @@
  */
 package org.epics.ioc.support;
 
-import org.epics.ioc.process.RecordProcessRequestor;
+import org.epics.ioc.process.RecordProcessRequester;
 
 
 /**
@@ -24,25 +24,25 @@ public interface ScanSupport extends Support {
      * Ask the record to scan itself.
      * This is called with the record locked.
      * If the request returns true then startScan must be called with the record unlocked.
-     * @param recordProcessRequestor The requestor to notify if the record did start processing.
+     * @param recordProcessRequester The requester to notify if the record did start processing.
      * @return (false,true) if the record is ready to processing.
      */
-    boolean processSelfRequest(RecordProcessRequestor recordProcessRequestor);
+    boolean processSelfRequest(RecordProcessRequester recordProcessRequester);
     /**
      * Set the record active.
-     * @param recordProcessRequestor The recordProcessRequestor.
+     * @param recordProcessRequester The recordProcessRequester.
      */
-    void processSelfSetActive(RecordProcessRequestor recordProcessRequestor);
+    void processSelfSetActive(RecordProcessRequester recordProcessRequester);
     /**
      * start processing.
      * this can only be called after processSelfRequest returns true. 
-     * @param recordProcessRequestor The recordProcessRequestor.
+     * @param recordProcessRequester The recordProcessRequester.
      * @param leaveActive Leave the record active when process is done.
      */
-    void processSelfProcess(RecordProcessRequestor recordProcessRequestor, boolean leaveActive);
+    void processSelfProcess(RecordProcessRequester recordProcessRequester, boolean leaveActive);
     /**
-     * Called by the recordProcessRequestor when it called processSelfProcess with leaveActive true.
-     * @param recordProcessRequestor The recordProcessRequestor.
+     * Called by the recordProcessRequester when it called processSelfProcess with leaveActive true.
+     * @param recordProcessRequester The recordProcessRequester.
      */
-    void processSelfSetInactive(RecordProcessRequestor recordProcessRequestor);
+    void processSelfSetInactive(RecordProcessRequester recordProcessRequester);
 }

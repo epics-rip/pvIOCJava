@@ -46,9 +46,9 @@ public class CDRecordPrint {
         if(numSupportNamePuts>1) {
                 text.append(String.format(" numSupportNamePuts %d",numSupportNamePuts));
         }
-        text.append(String.format(
-            " supportName(%s)",
-            cdField.getPVField().getSupportName()));
+        String supportName = cdField.getPVField().getSupportName();
+        if(supportName==null) return;
+        text.append(" supportName " + supportName);
     }
     
     //return (false,true) if (0, not 0)
@@ -82,10 +82,6 @@ public class CDRecordPrint {
             Field field = pvField.getField();
             newLine(indentLevel);
             text.append(field.getFieldName());
-            if(maxNumPuts>1) {
-                text.append(String.format(" maxNumPuts %d",maxNumPuts));
-            }
-            checkNumSupportNamePuts(cdField);
             switch(field.getType()) {
             case pvEnum: printEnum((CDEnum)cdField,indentLevel+1,printAll); break;
             case pvMenu: printMenu((CDMenu)cdField,indentLevel+1,printAll); break;
@@ -94,6 +90,7 @@ public class CDRecordPrint {
             case pvStructure: printStructure((CDStructure)cdField,indentLevel+1,printAll); break;
             default: printScalar(cdField,indentLevel+1,printAll); break;
             }
+            checkNumSupportNamePuts(cdField);
         }
     }
     private void printEnum(CDEnum cdEnum, int indentLevel,boolean printAll) {

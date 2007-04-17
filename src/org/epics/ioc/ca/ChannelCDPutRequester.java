@@ -6,14 +6,14 @@
 package org.epics.ioc.ca;
 
 import org.epics.ioc.util.RequestResult;
-import org.epics.ioc.util.Requestor;
+import org.epics.ioc.util.Requester;
 
 /**
- * The methods implemented by the requestor for a ChannelCDPut.
+ * The methods implemented by the requester for a ChannelCDPut.
  * @author mrk
  *
  */
-public interface ChannelCDPutRequestor extends Requestor{
+public interface ChannelCDPutRequester extends Requester{
     /**
      * The get request has completed.
      * The data resides in the CD.

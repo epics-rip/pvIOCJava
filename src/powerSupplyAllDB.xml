@@ -1,0 +1,7 @@
+<?xml version="1.0" ?>
+<IOCDatabase>
+<include addPath = "src" />
+<include href = "powerSupplyDB.xml" />
+<include href = "powerSupplyLinkedDB.xml" />
+<include href = "powerSupplyEmbededDB.xml" />
+</IOCDatabase>

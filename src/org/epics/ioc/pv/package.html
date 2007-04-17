@@ -434,12 +434,12 @@ record.</p>
 <p>The following is the base interface for accessing data.</p>
 <pre>    enum MessageType {info,warning,error,fatalError}
 
-    interface Requestor {
-        String getRequestorName();
+    interface Requester {
+        String getRequesterName();
         void message(String message, MessageType messageType);
     }
 
-    interface PVField extends Requestor {
+    interface PVField extends Requester {
         String getFullFieldName();
         String getFullName();
         Field getField();
@@ -455,11 +455,11 @@ where
 <ul>
   <li>MessageType<br />
     This is defined in org.epics.ioc.util.</li>
-  <li>Requestor<br />
-    Requestor is also defined in org.epics.ioc.util. For an IOC database the
+  <li>Requester<br />
+    Requester is also defined in org.epics.ioc.util. For an IOC database the
     methods are implemented as follows:
     <ul>
-      <li>getRequestorName<br />
+      <li>getRequesterName<br />
         This is the full field name concatenated to the record name.</li>
       <li>message<br />
 
@@ -666,8 +666,8 @@ assumes that the client has permission to change the support:</p>
 <pre>    interface PVRecord extends PVStructure
         String getRecordName();
         void message(String message, MessageType messageType);
-        void addRequestor(Requestor requestor);
-        void removeRequestor(Requestor requestor);
+        void addRequester(Requester requester);
+        void removeRequester(Requester requester);
     }</pre>
 
 <p>where</p>
@@ -679,10 +679,10 @@ assumes that the client has permission to change the support:</p>
       The implementation should prepend the record name to the message and
       then call a more generic message handler. For example package
       org.epics.ioc.db calls iocdb.message.</dd>
-  <dt>addRequestor</dt>
-    <dd>Add a requestor to receive messages.</dd>
-  <dt>removeRequestor</dt>
-    <dd>Remove a message requestor</dd>
+  <dt>addRequester</dt>
+    <dd>Add a requester to receive messages.</dd>
+  <dt>removeRequester</dt>
+    <dd>Remove a message requester</dd>
 </dl>
 
 <h3 id="PVArray">PVArray</h3>
@@ -1088,7 +1088,7 @@ interfaces:</p>
     protected void replaceField(Field field);
     public void replacePVField(PVField newPVField);
     public void setRecord(PVRecord record);
-    public String getRequestorName();
+    public String getRequesterName();
     public void message(String message, MessageType messageType);
     public String getFullFieldName();
     public Field getField();
@@ -1177,8 +1177,8 @@ interfaces:</p>
     public void message(String message, MessageType messageType);
     public String getRecordName();
     public String toString(int indentLevel);
-    void addRequestor(Requestor requestor);
-    void removeRequestor(Requestor requestor);
+    void addRequester(Requester requester);
+    void removeRequester(Requester requester);
 }</pre>
 <hr />
 

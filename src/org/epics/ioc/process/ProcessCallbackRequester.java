@@ -20,7 +20,7 @@ import org.epics.ioc.util.*;
  * @author mrk
  *
  */
-public interface ProcessCallbackRequestor extends Requestor{
+public interface ProcessCallbackRequester extends Requester{
     /**
      * The callback to call after recordSupport.process returns.
      * The callback is called with the record unlocked but still active.

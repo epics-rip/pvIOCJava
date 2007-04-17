@@ -56,22 +56,24 @@ public class BasePVStructure extends AbstractPVField implements PVStructure
     public boolean replaceStructureField(String fieldName, Structure structure) {
         Structure oldStructure = (Structure)super.getField();
         int index = oldStructure.getFieldIndex(fieldName);
-        PVField newField = pvDataCreate.createPVField(this, structure);
+        Structure fieldStructure = fieldCreate.createStructure(
+            fieldName, structure.getStructureName(), structure.getFields());
+        PVField newField = pvDataCreate.createPVField(this, fieldStructure);
         pvFields[index] = newField;
         // Must create and replace the Structure for this structure.
         Field[] oldFields = oldStructure.getFields();
         int length = oldFields.length;
         Field[] newFields = new Field[length];
         for(int i=0; i<length; i++) newFields[i] = oldFields[i];
-        newFields[index] = structure;
+        newFields[index] = fieldStructure;
         Structure newStructure = fieldCreate.createStructure(
             oldStructure.getFieldName(),
             oldStructure.getStructureName(),
             newFields,
             oldStructure.getPropertys(),
             oldStructure.getFieldAttribute());
+        newStructure.setSupportName(oldStructure.getSupportName());
         super.replaceField(newStructure);
-        super.setSupportName(oldStructure.getSupportName());
         return true;
     }
     /* (non-Javadoc)

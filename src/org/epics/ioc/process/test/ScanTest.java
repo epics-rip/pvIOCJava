@@ -18,22 +18,25 @@ import org.epics.ioc.util.*;
  *
  */
 public class ScanTest extends TestCase {
-    private static Requestor iocRequestor = null;
+    private static Requester iocRequester = null;
     /**
      * test scan.
      */
     private static MessageType maxError = MessageType.info;
     public static void testScan() {
-        iocRequestor = new Listener();
+        iocRequester = new Listener();
         DBD dbd = DBDFactory.getMasterDBD();
         XMLToDBDFactory.convert(dbd,
                 "dbd/menuStructureSupport.xml",
-                iocRequestor);
+                iocRequester);
+        XMLToDBDFactory.convert(dbd,
+                "dbd/recordType.xml",
+                iocRequester);
         XMLToDBDFactory.convert(dbd,
                 "src/org/epics/ioc/process/test/exampleDBD.xml",
-                iocRequestor);
+                iocRequester);
         IOCDB iocdbMaster = IOCDBFactory.getMaster();
-        boolean initOK = IOCFactory.initDatabase("src/org/epics/ioc/process/test/scanDB.xml",iocRequestor);
+        boolean initOK = IOCFactory.initDatabase("src/org/epics/ioc/process/test/scanDB.xml",iocRequester);
         if(!initOK) return;
         
 //        Map<String,DBRecord> recordMap  recordMap = iocdbAdd.getRecordMap();
@@ -87,11 +90,11 @@ public class ScanTest extends TestCase {
             } catch (InterruptedException e) {
             }
         }
-        initOK = IOCFactory.initDatabase("src/org/epics/ioc/process/test/scanDB.xml",iocRequestor);
+        initOK = IOCFactory.initDatabase("src/org/epics/ioc/process/test/scanDB.xml",iocRequester);
         if(!initOK) {
             System.out.println("IOCFactory.initDatabase failed");
         }
-        initOK = IOCFactory.initDatabase("src/org/epics/ioc/process/test/scanAddDB.xml",iocRequestor);
+        initOK = IOCFactory.initDatabase("src/org/epics/ioc/process/test/scanAddDB.xml",iocRequester);
         if(!initOK) {
             System.out.println("IOCFactory.initDatabase failed");
         }
@@ -136,16 +139,16 @@ public class ScanTest extends TestCase {
         }
     }
        
-    private static class Listener implements Requestor {
+    private static class Listener implements Requester {
         /* (non-Javadoc)
-         * @see org.epics.ioc.util.Requestor#getRequestorName()
+         * @see org.epics.ioc.util.Requester#getRequestorName()
          */
-        public String getRequestorName() {
+        public String getRequesterName() {
             return "ScanTest";
         }
 
         /* (non-Javadoc)
-         * @see org.epics.ioc.util.Requestor#message(java.lang.String, org.epics.ioc.util.MessageType)
+         * @see org.epics.ioc.util.Requester#message(java.lang.String, org.epics.ioc.util.MessageType)
          */
         public void message(String message, MessageType messageType) {
             System.out.println(message);

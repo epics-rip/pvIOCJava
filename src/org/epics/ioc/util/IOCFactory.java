@@ -30,55 +30,55 @@ public class IOCFactory {
      * i.e. enter the readyForStart state or else the request fails.
      * If all records initialize the records are merged into the master IOCDB
      * and then started.
-     * @param requestor A listener for any messages generated while initDatabase is executing.
+     * @param requester A listener for any messages generated while initDatabase is executing.
      * @return (false,true) if the request (failed,succeeded)
      */
-    public static boolean initDatabase(String dbFile,Requestor requestor) {
+    public static boolean initDatabase(String dbFile,Requester requester) {
         boolean gotIt = isInUse.compareAndSet(false,true);
         if(!gotIt) {
-            requestor.message("XMLToIOCDBFactory.convert is already active",
+            requester.message("XMLToIOCDBFactory.convert is already active",
                 MessageType.fatalError);
             return false;
         }
         try {
             maxError = MessageType.info;
             DBD dbd = DBDFactory.getMasterDBD(); 
-            IOCDB iocdbAdd = XMLToIOCDBFactory.convert("add",dbFile,requestor);
+            IOCDB iocdbAdd = XMLToIOCDBFactory.convert("add",dbFile,requester);
             if(maxError!=MessageType.info) {
-                requestor.message("iocInit failed because of xml errors.",
+                requester.message("iocInit failed because of xml errors.",
                         MessageType.fatalError);
                 return false;
             }
             SupportCreation supportCreation = SupportCreationFactory.createSupportCreation(
-                iocdbAdd,requestor);
+                iocdbAdd,requester);
             boolean gotSupport = supportCreation.createSupport();
             if(!gotSupport) {
-                requestor.message("Did not find all support.",MessageType.fatalError);
-                requestor.message("nrecords",MessageType.info);
+                requester.message("Did not find all support.",MessageType.fatalError);
+                requester.message("nrecords",MessageType.info);
                 Map<String,DBRecord> recordMap = iocdbAdd.getRecordMap();
                 Set<String> keys = recordMap.keySet();
                 for(String key: keys) {
                     DBRecord record = recordMap.get(key);
-                    requestor.message(record.toString(),MessageType.info);
+                    requester.message(record.toString(),MessageType.info);
                 }
-                requestor.message("support",MessageType.info);
+                requester.message("support",MessageType.info);
                 Map<String,DBDSupport> supportMap = dbd.getSupportMap();
                 keys = supportMap.keySet();
                 for(String key: keys) {
                     DBDSupport dbdSupport = supportMap.get(key);
-                    requestor.message(dbdSupport.toString(),MessageType.info);
+                    requester.message(dbdSupport.toString(),MessageType.info);
                 }
                 return false;
             }
             boolean readyForStart = supportCreation.initializeSupport();
             if(!readyForStart) {
-                requestor.message("initializeSupport failed",MessageType.fatalError);
+                requester.message("initializeSupport failed",MessageType.fatalError);
                 return false;
             }
             iocdbAdd.mergeIntoMaster();
             boolean ready = supportCreation.startSupport();
             if(!ready) {
-                requestor.message("startSupport failed",MessageType.fatalError);
+                requester.message("startSupport failed",MessageType.fatalError);
                 return false;
             }
             supportCreation = null;

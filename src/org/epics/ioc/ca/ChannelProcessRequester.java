@@ -12,7 +12,7 @@ import org.epics.ioc.util.*;
  * @author mrk
  *
  */
-public interface ChannelProcessRequestor extends Requestor {
+public interface ChannelProcessRequester extends Requester {
     /**
      * The process request is done. This is always called with no locks held.
      * @param requestResult The result of the request.

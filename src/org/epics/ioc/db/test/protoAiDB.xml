@@ -10,10 +10,10 @@
             </input>
         </aiRaw>
         <units>volts</units>
-        <displayLimit>
-            <low>${displayLow}</low>
-            <high>${displayHigh}</high>
-        </displayLimit>
+        <doubleLimit>
+            <low>${doubleLow}</low>
+            <high>${doubleHigh}</high>
+        </doubleLimit>
         <linearConvert>
             <engUnitsLow>${engUnitsLow}</engUnitsLow>
             <engUnitsHigh>${engUnitsHigh}</engUnitsHigh>
