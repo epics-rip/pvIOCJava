@@ -145,8 +145,9 @@ public class CALinkFactory {
             if(targetDBRecord!=null) {
                 if(inheritSeverity) {
                     PVAccess pvAccess = PVAccessFactory.createPVAccess(targetDBRecord.getPVRecord());
-                    if(pvAccess.findField("severity")==AccessSetResult.thisRecord) {
-                        targetPVSeverity = (PVEnum)pvAccess.getField();
+                    PVField pvField = pvAccess.findField("severity");
+                    if(pvField!=null) {
+                        targetPVSeverity = (PVEnum)pvField;
                     } else {
                         pvLink.message("severity field not found",MessageType.error);
                         return;
@@ -390,12 +391,11 @@ public class CALinkFactory {
         }
         
         private boolean prepareForInput() {
-            ChannelFindFieldResult result = channel.findField("severity");
-            if(result!=ChannelFindFieldResult.thisChannel) {
+            severityField =  channel.findField("severity");
+            if(severityField==null) {
                 message("field severity does not exist",MessageType.error);
                 return false;
             }
-            severityField = channel.getChannelField();
             Type type = severityField.getField().getType();
             if(type!=Type.pvEnum) {
                 severityField = null;
@@ -522,44 +522,14 @@ public class CALinkFactory {
                 fieldName = "value";
             }           
             IOCDB iocdb = IOCDBFactory.getMaster();
-            forever:
-            while(true) {
-                DBRecord dbRecord = iocdb.findRecord(recordName);
-                if(dbRecord==null) {
-                    targetDBRecord = null;
-                    break;
-                }
-                PVAccess pvAccess = PVAccessFactory.createPVAccess(dbRecord.getPVRecord());
-                switch(pvAccess.findField(fieldName)) {
-                case otherRecord:
-                    recordName = pvAccess.getOtherRecord();
-                    fieldName = pvAccess.getOtherField();
-                    break;
-                case thisRecord:
-                    targetDBRecord = iocdb.findRecord(recordName);
-                    if(targetDBRecord==null) {
-                        throw new IllegalStateException(channelRequesterName + "logic error?"); 
-                    }
-                    targetPVField = pvAccess.getField();
-                    if(targetPVField==null) {
-                        throw new IllegalStateException(channelRequesterName + "logic error?"); 
-                    }
-                    if(inheritSeverity) {
-                        pvAccess.findField("");
-                        if(pvAccess.findField("severity")==AccessSetResult.thisRecord) {
-                            targetPVSeverity = (PVEnum)pvAccess.getField();
-                        } else {
-                            pvLink.message("severity field not found",MessageType.error);
-                            return;
-                        }
-                    }
-                    break forever;
-                case notFound:
-                    targetDBRecord = null;
-                    break forever;
-                }
-            }
+            targetDBRecord = iocdb.findRecord(recordName);
             if(targetDBRecord!=null) {
+                PVAccess pvAccess = PVAccessFactory.createPVAccess(targetDBRecord.getPVRecord());
+                targetPVField = pvAccess.findField(fieldName);
+                if(targetPVField==null) {
+                    pvLink.message("field " + fieldName + " not found", MessageType.error);
+                    return;
+                }
                 if(process) {
                     targetRecordProcess = targetDBRecord.getRecordProcess();
                     isRecordProcessRequester = targetRecordProcess.setRecordProcessRequester(this);
@@ -882,12 +852,11 @@ public class CALinkFactory {
         }
         
         private boolean prepareForInput() {
-            ChannelFindFieldResult result = channel.findField(valueFieldName);
-            if(result!=ChannelFindFieldResult.thisChannel) {
+            valueChannelField = channel.findField(valueFieldName);
+            if(valueChannelField==null) {
                 message(valueFieldName + " does not exist ",MessageType.error);
                 return false;
             }
-            valueChannelField = channel.getChannelField();
             if(!checkCompatibility(valueChannelField.getField())) {
                 valueChannelField = null;
                 return false;
@@ -895,14 +864,13 @@ public class CALinkFactory {
             channelFieldGroup = channel.createFieldGroup(this);
             channelFieldGroup.addChannelField(valueChannelField);
             if(inheritSeverity) {
-                result = channel.findField("severity");
-                if(result!=ChannelFindFieldResult.thisChannel) {
+                severityField = channel.findField("severity");
+                if(severityField==null) {
                     channelFieldGroup = null;
                     valueChannelField = null;
                     message(" severity does not exist ",MessageType.error);
                     return false;
                 }
-                severityField = channel.getChannelField();
                 Type type = severityField.getField().getType();
                 if(type!=Type.pvEnum) {
                     channelFieldGroup = null;
@@ -1056,48 +1024,15 @@ public class CALinkFactory {
                 fieldName = "value";
             }           
             IOCDB iocdb = IOCDBFactory.getMaster();
-            forever:
-            while(true) {
-                DBRecord dbRecord = iocdb.findRecord(recordName);
-                if(dbRecord==null) {
-                    targetDBRecord = null;
-                    break;
+            targetDBRecord = iocdb.findRecord(recordName);
+            if(targetDBRecord!=null) {        
+                PVAccess pvAccess = PVAccessFactory.createPVAccess(targetDBRecord.getPVRecord());
+                targetPVField = pvAccess.findField(fieldName);
+                if(targetPVField==null) {
+                    pvLink.message("field " + fieldName + " not found", MessageType.error);
+                    return;
                 }
-                PVAccess pvAccess = PVAccessFactory.createPVAccess(dbRecord.getPVRecord());
-                switch(pvAccess.findField(fieldName)) {
-                case otherRecord:
-                    recordName = pvAccess.getOtherRecord();
-                    fieldName = pvAccess.getOtherField();
-                    break;
-                case thisRecord:
-                    targetDBRecord = iocdb.findRecord(recordName);
-                    if(targetDBRecord==null) {
-                        throw new IllegalStateException(channelRequesterName + " logic error?"); 
-                    }
-                    targetPVField = pvAccess.getField();
-                    if(targetPVField==null) {
-                        throw new IllegalStateException(channelRequesterName + " logic error?"); 
-                    }
-                    targetDBField = targetDBRecord.findDBField(targetPVField);
-                    if(targetPVField==null) {
-                        throw new IllegalStateException(channelRequesterName + " logic error?");
-                    }
-                    if(inheritSeverity) {
-                        pvAccess.findField("");
-                        if(pvAccess.findField("severity")==AccessSetResult.thisRecord) {
-                            targetPVSeverity = (PVEnum)pvAccess.getField();
-                        } else {
-                            pvLink.message("severity field not found",MessageType.error);
-                            return;
-                        }
-                    }
-                    break forever;
-                case notFound:
-                    targetDBRecord = null;
-                    break forever;
-                }
-            }
-            if(targetDBRecord!=null) {
+                targetDBField = targetDBRecord.findDBField(targetPVField);
                 if(process) {
                     targetRecordProcess = targetDBRecord.getRecordProcess();
                     isRecordProcessRequester = targetRecordProcess.setRecordProcessRequester(this);
@@ -1443,12 +1378,11 @@ public class CALinkFactory {
         }
         
         private boolean prepareForOutput() {
-            ChannelFindFieldResult result = channel.findField(valueFieldName);
-            if(result!=ChannelFindFieldResult.thisChannel) {
+            valueChannelField = channel.findField(valueFieldName);
+            if(valueChannelField==null) {
                 message(valueFieldName + " does not exist ",MessageType.error);
                 return false;
             }
-            valueChannelField = channel.getChannelField();
             if(!checkCompatibility(valueChannelField.getField())) {
                 valueChannelField = null;
                 return false;
@@ -1457,14 +1391,13 @@ public class CALinkFactory {
             putFieldGroup.addChannelField(valueChannelField);
             if(inheritSeverity) {
                 channel.findField("");
-                result = channel.findField("severity");
-                if(result!=ChannelFindFieldResult.thisChannel) {
+                severityField = channel.findField("severity");
+                if(severityField==null) {
                     putFieldGroup = null;
                     valueChannelField = null;
                     message(" severity does not exist ",MessageType.error);
                     return false;
                 }
-                severityField = channel.getChannelField();
                 Type type = severityField.getField().getType();
                 if(type!=Type.pvEnum) {
                     putFieldGroup = null;
@@ -1715,15 +1648,14 @@ public class CALinkFactory {
         } 
         
         private void channelStart() {
-            ChannelFindFieldResult result = channel.findField(fieldName);
-            if(result!=ChannelFindFieldResult.thisChannel) {
+            dataField = channel.findField(fieldName);
+            if(dataField==null) {
                 pvLink.message(
                     "fieldName " + fieldName
                     + " is not in record " + recordName,
                     MessageType.error);
                 return;
             }
-            dataField = channel.getChannelField();
             if(!dataField.getField().getType().isNumeric()) {
                 channelMonitor.lookForChange(dataField, true);
             } else {
@@ -2132,15 +2064,14 @@ public class CALinkFactory {
         }
         
         private void channelStart() {
-            ChannelFindFieldResult result = channel.findField(fieldName);
-            if(result!=ChannelFindFieldResult.thisChannel) {
+            targetChannelField = channel.findField(fieldName);
+            if(targetChannelField==null) {
                 pvLink.message(
                     "fieldName " + fieldName
                     + " is not in record " + recordName,
                     MessageType.error);
                 return;
             }
-            targetChannelField = channel.getChannelField();
             String errorMessage = checkCompatibility();
             if(errorMessage!=null) {
                 pvLink.message(errorMessage,MessageType.error);
@@ -2161,9 +2092,8 @@ public class CALinkFactory {
                 }
             }
             if(inheritSeverityAccess.get()) {
-                result = channel.findField("severity");
-                if(result==ChannelFindFieldResult.thisChannel) {
-                    severityChannelField = channel.getChannelField();
+                severityChannelField = channel.findField("severity");
+                if(severityChannelField!=null) {
                     channelFieldGroup.addChannelField(severityChannelField);
                     channelMonitor.lookForChange(severityChannelField, true);
                 } else {

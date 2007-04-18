@@ -43,7 +43,7 @@ public class LoadDatabase {
         
         public void start() {
             shell = new Shell(display);
-            shell.setText("loadDBD");
+            shell.setText("loadDatabase");
             GridLayout gridLayout = new GridLayout();
             gridLayout.numColumns = 1;
             shell.setLayout(gridLayout);

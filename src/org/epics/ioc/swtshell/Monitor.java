@@ -419,12 +419,11 @@ public class Monitor {
                 if(propertyNames!=null) {
                     for(String fieldName: propertyNames) {
                         channel.findField(null);
-                        ChannelFindFieldResult result = channel.findField(fieldName);
-                        if(result==ChannelFindFieldResult.thisChannel) {
-                            channelFieldGroup.addChannelField(channel.getChannelField());
+                        ChannelField propChannelField = channel.findField(fieldName);
+                        if(propChannelField!=null) {
+                            channelFieldGroup.addChannelField(propChannelField);
                         } else {
-                            requester.message(
-                                    "monitor remote property not implemented", MessageType.info);
+                            message("fieldName " + fieldName + " not found",MessageType.warning);
                         }
                     }
                 }

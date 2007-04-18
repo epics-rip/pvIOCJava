@@ -138,11 +138,11 @@ public class ParentTest extends TestCase {
             return;
         }
         PVAccess pvAccess = PVAccessFactory.createPVAccess(pvRecord);
-        if(pvAccess.findField(fieldName)!=AccessSetResult.thisRecord){
+        PVField pvField = pvAccess.findField(fieldName);
+        if(pvField==null){
             System.out.printf("field %s not in record %s%n",fieldName,recordName);
             return;
         }
-        PVField pvField = pvAccess.getField();
         PVRecord record = pvField.getPVRecord();
         System.out.printf("fieldName %s actualField %s record %s fullName %s%n",
             fieldName,

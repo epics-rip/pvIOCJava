@@ -104,11 +104,12 @@ public class ListenerTest extends TestCase {
             return;
         }
         PVAccess pvAccess = PVAccessFactory.createPVAccess(pvRecord);
-        if(pvAccess.findField(fieldName)!=AccessSetResult.thisRecord){
+        PVField pvField = pvAccess.findField(fieldName);
+        if(pvField==null){
             System.out.printf("%nfield %s not in record %s%n",fieldName,recordName);
             return;
         }
-        PVField pvField = pvAccess.getField();
+        
         DBField dbField = dbRecord.findDBField(pvField);
         Type type = pvField.getField().getType();
         if(type.isNumeric()) {

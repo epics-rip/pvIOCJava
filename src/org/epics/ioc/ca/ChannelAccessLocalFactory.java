@@ -74,8 +74,6 @@ public class ChannelAccessLocalFactory  {
         private PVRecord pvRecord;
         private PVAccess pvAccess;
         private PVField currentField = null;
-        private String otherChannel = null;
-        private String otherField = null;
         private LinkedList<FieldGroupImpl> fieldGroupList = 
             new LinkedList<FieldGroupImpl>();
         private LinkedList<ChannelProcessImpl> channelProcessList =
@@ -323,75 +321,17 @@ public class ChannelAccessLocalFactory  {
         /* (non-Javadoc)
          * @see org.epics.ioc.ca.Channel#setField(java.lang.String)
          */
-        public ChannelFindFieldResult findField(String name) {
+        public ChannelField findField(String name) {
             lock.lock();
-            try {
-                if(isDestroyed) return ChannelFindFieldResult.failure;
-                AccessSetResult result = pvAccess.findField(name);
-                if(result==AccessSetResult.notFound) return ChannelFindFieldResult.notFound;
-                if(result==AccessSetResult.otherRecord) {
-                    otherChannel = pvAccess.getOtherRecord();
-                    otherField = pvAccess.getOtherField();
-                    currentField = null;
-                    return ChannelFindFieldResult.otherChannel;
-                }
-                if(result==AccessSetResult.thisRecord) {
-                    currentField = pvAccess.getField();
-                    otherChannel = null;
-                    otherField = null;
-                    return ChannelFindFieldResult.thisChannel;
-                }
-                throw new IllegalStateException(
-                    "ChannelAccessLocal logic error unknown AccessSetResult value");
+            try { //ChannelFieldImpl(dbRecord.findDBField(currentField))
+                if(isDestroyed) return null;
+                currentField = pvAccess.findField(name);
+                return new ChannelFieldImpl(dbRecord.findDBField(currentField));
+                
             } finally {
                 lock.unlock();
             }
         }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.ca.Channel#getOtherChannel()
-         */
-        public String getOtherChannel() {
-            lock.lock();
-            try {
-                if(isDestroyed) {
-                    return null;
-                } else {
-                    return otherChannel;
-                }
-            } finally {
-                lock.unlock();
-            }
-        }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.ca.Channel#getOtherField()
-         */
-        public String getOtherField() {
-            lock.lock();
-            try {
-                if(isDestroyed) {
-                    return null;
-                } else {
-                    return otherField;
-                }
-            } finally {
-                lock.unlock();
-            }
-        }        
-        /* (non-Javadoc)
-         * @see org.epics.ioc.ca.Channel#getChannelField()
-         */
-        public ChannelField getChannelField() {
-            lock.lock();
-            try {
-                if(isDestroyed) {
-                    return null;
-                } else {
-                    return new ChannelFieldImpl(dbRecord.findDBField(currentField));
-                }
-            } finally {
-                lock.unlock();
-            }
-        }       
         /* (non-Javadoc)
          * @see org.epics.ioc.ca.Channel#createFieldGroup(org.epics.ioc.ca.ChannelFieldGroupListener)
          */

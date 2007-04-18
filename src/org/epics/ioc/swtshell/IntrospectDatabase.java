@@ -44,7 +44,7 @@ public class IntrospectDatabase {
         
         public void start() {
             shell = new Shell(display);
-            shell.setText("introspectDB");
+            shell.setText("introspectDatabase");
             GridLayout layout = new GridLayout();
             layout.numColumns = 1;
             shell.setLayout(layout);

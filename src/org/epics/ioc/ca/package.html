@@ -10,7 +10,7 @@
 <body>
 <h1 style="text-align: center">EPICS JavaIOC: channel Access<br />
 package: org.epics.ioc.ca<br />
-2007.04.03</h1>
+2007.04.17</h1>
 CONTENTS
 
 <div class="toc">
@@ -20,7 +20,6 @@ CONTENTS
     <ul>
       <li><a href="#Definition">Definitions</a></li>
       <li><a href="#Channel1">Channel</a></li>
-      <li><a href="#ChannelFin">ChannelFindFieldResult</a></li>
       <li><a href="#ChannelSta">ChannelStateListener</a></li>
       <li><a href="#AccessRigh">AccessRights</a></li>
       <li><a href="#ChannelFie">ChannelField</a></li>
@@ -127,10 +126,7 @@ accessing a channel are defined in later sections.</p>
         void message(String message, MessageType messageType);
         void destroy();
         boolean isConnected();
-        ChannelFindFieldResult findField(String name);
-        String getOtherChannel();
-        String getOtherField();
-        ChannelField getChannelField();
+        ChannelField findField(String name);
         ChannelFieldGroup createFieldGroup(ChannelFieldGroupListener listener);
         ChannelProcess createChannelProcess(
             ChannelProcessRequester channelProcessRequester, boolean processSelfOK);
@@ -171,13 +167,6 @@ accessing a channel are defined in later sections.</p>
         ChannelMonitor createChannelMonitor(boolean onlyWhileProcessing);
         void destroy(ChannelMonitor channelMonitor);
         boolean isLocal();
-    }
-
-    enum ChannelFindFieldResult {
-        otherChannel,
-        thisChannel,
-        notFound,
-        failure
     }
 
     interface ChannelStateListener {
@@ -235,25 +224,8 @@ of fields in the record. The methods are:</p>
   <dt style="font-family: courier;">isConnected</dt>
     <dd>Is the channel connected?</dd>
   <dt style="font-family: courier;">findField</dt>
-    <dd>Locate the field, The result of the request is returned. Depending on
-      the result the following three methods provide more information.</dd>
-  <dt style="font-family: courier;">getOtherChannel</dt>
-    <dd>If <span style="font-family: courier;">findField</span> returned
-      <span style="font-family: courier;">otherChannel</span>, this returns
-      the name of the channel that has the data. In order to access the data
-      a new channel must be created</dd>
-  <dt style="font-family: courier;">getOtherField</dt>
-    <dd>If <span style="font-family: courier;">findField</span> returned
-      <span style="font-family: courier;">otherChannel</span>, this returns
-      the name of the field that has the data. <span
-      style="font-family: courier;">getOtherChannel</span> and <span
-      style="font-family: courier;">getOtherField</span> provide all the
-      information needed to connect to the other channel.</dd>
-  <dt style="font-family: courier;">getChannelField</dt>
-    <dd>If <span style="font-family: courier;">findField</span> returned
-      <span style="font-family: courier;">thisChannel</span>, this returns a
-      <span style="font-family: courier;">channelField</span> that can be
-      added to a <span style="font-family: courier;">fieldGroup.</span></dd>
+    <dd>Locate the field. If the field is found an interface to the
+      ChannelField is returned. If not found null is returned.</dd>
   <dt style="font-family: courier;">createFieldGroup</dt>
     <dd>get, put, putGet, and monitor all use fieldGroup to specify the data
       to get/put from/to a channel.</dd>
@@ -286,28 +258,6 @@ of fields in the record. The methods are:</p>
       is destroyed.</dd>
   <dt style="font-family: courier;">isLocal</dt>
     <dd>Is the channel local or remote.</dd>
-</dl>
-
-<h3 id="ChannelFin">ChannelFindFieldResult</h3>
-
-<p><span style="font-family: courier;">findField</span> returns <span
-style="font-family: courier;">ChannelFindFieldResult</span>. This has the
-values:</p>
-<dl>
-  <dt style="font-family: courier;">otherChannel</dt>
-    <dd>The data resides in another channel. <span
-      style="font-family: courier;">getOtherChannel</span> and <span
-      style="font-family: courier;">getOtherField</span> can be called to get
-      the information needed to create and access the other channel.</dd>
-  <dt style="font-family: courier;">thisChannel</dt>
-    <dd>The data resides in this channel. <span
-      style="font-family: courier;">getChannelField</span> can be called to
-      get an interface for accessing the field.</dd>
-  <dt style="font-family: courier;">notFound</dt>
-    <dd>The requested field does not exist in this channel.</dd>
-  <dt style="font-family: courier;">failure</dt>
-    <dd>The request failed. This will happen if the channel has been
-      destroyed or disconnected.</dd>
 </dl>
 
 <h3 id="ChannelSta">ChannelStateListener</h3>
@@ -1272,35 +1222,24 @@ longer locked.</p>
 
         private ChannelFieldGroup init() {
             channelFieldGroup = channel.createFieldGroup(this);
-            ChannelFindFieldResult result;
-            result = channel.findField(fieldName);
-            if(result!=ChannelFindFieldResult.thisChannel) {
+            valueField = channel.findField(fieldName);
+            if(valueField==null) {
                 System.out.printf("findField returned %s%n", result.toString());
                 return null;
             }
-            valueField = channel.getChannelField();
             channelFieldGroup.addChannelField(valueField);
             String newFieldName = fieldName + ".status";
             channel.findField(null);
-            result = channel.findField(newFieldName);
-            if(result==ChannelFindFieldResult.thisChannel) {
-                statusField = channel.getChannelField();
-                channelFieldGroup.addChannelField(statusField);
-            }
+            statusField = channel.findField(newFieldName);
+            if(statusField!=null) channelFieldGroup.addChannelField(statusField);
             newFieldName = fieldName + ".severity";
             channel.findField(null);
-            result = channel.findField(newFieldName);
-            if(result==ChannelFindFieldResult.thisChannel) {
-                severityField = channel.getChannelField();
-                channelFieldGroup.addChannelField(severityField);
-            }
+            severityField  = channel.findField(newFieldName);
+            if(severityField!=null) channelFieldGroup.addChannelField(severityField);
             newFieldName = fieldName + ".timeStamp";
             channel.findField(null);
-            result = channel.findField(newFieldName);
-            if(result==ChannelFindFieldResult.thisChannel) {
-                timeStampField = channel.getChannelField();
-                channelFieldGroup.addChannelField(timeStampField);
-            }
+            timeStampField = channel.findField(newFieldName);
+            if(timeStampField!=null) channelFieldGroup.addChannelField(timeStampField);
             return channelFieldGroup;
         }
 
@@ -1564,13 +1503,11 @@ longer locked.</p>
         }
         boolean connect() {
             putFieldGroup = channel.createFieldGroup(this);
-            ChannelFindFieldResult result;
-            result = channel.findField("value");
-            if(result!=ChannelFindFieldResult.thisChannel) {
-                System.out.printf("PutGet:set returned %s%n", result.toString());
+            valueField = channel.findField("value");
+            if(valueField==null) {
+                System.out.println("PutGet:set value not found");
                 return false;
             }
-            valueField = channel.getChannelField();
             putFieldGroup.addChannelField(valueField);
             return true;
         }
@@ -1672,13 +1609,11 @@ timeStamp.</p>
 
         boolean connect() {
             putFieldGroup = channel.createFieldGroup(this);
-            ChannelFindFieldResult result;
-            result = channel.findField("value");
-            if(result!=ChannelFindFieldResult.thisChannel) {
-                System.out.printf("PutGet:set returned %s%n", result.toString());
+            valueField = channel.findField("value");
+            if(valueField==null) {
+                System.out.println("PutGet:set value not found");
                 return false;
             }
-            valueField = channel.getChannelField();
             putFieldGroup.addChannelField(valueField);
             valueData = new ValueData(channel);
             getFieldGroup = valueData.init();

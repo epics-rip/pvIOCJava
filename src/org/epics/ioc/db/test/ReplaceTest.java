@@ -214,12 +214,13 @@ public class ReplaceTest extends TestCase {
             return;
         }
         PVAccess pvAccess = PVAccessFactory.createPVAccess(pvRecord);
-        if(pvAccess.findField(fieldName)!=AccessSetResult.thisRecord){
+        PVField pvField = pvAccess.findField(fieldName);
+        if(pvField==null){
             System.out.printf("field %s not in record %s%n",
                 fieldName,recordName);
             return;
         }
-        PVField pvField = pvAccess.getField();
+        
         DBField dbField = dbRecord.findDBField(pvField);
         Type type = pvField.getField().getType();
         if(type.isNumeric()) {
@@ -261,12 +262,12 @@ public class ReplaceTest extends TestCase {
             return;
         }
         PVAccess pvAccess = PVAccessFactory.createPVAccess(pvRecord);
-        if(pvAccess.findField(fieldName)!=AccessSetResult.thisRecord){
+        PVField pvField = pvAccess.findField(fieldName);
+        if(pvField==null) {
             System.out.printf("field %s not in record %s%n",
                 fieldName,recordName);
             return;
         }
-        PVField pvField = pvAccess.getField();
         Type type = pvField.getField().getType();
         if(type!=Type.pvArray) {
             System.out.printf("%ntestPutArray recordName %s fieldName %s no an array%n",
@@ -300,12 +301,12 @@ public class ReplaceTest extends TestCase {
             return;
         }
         PVAccess pvAccess = PVAccessFactory.createPVAccess(pvRecord);
-        if(pvAccess.findField(fieldName)!=AccessSetResult.thisRecord){
+        PVField pvField = pvAccess.findField(fieldName);
+        if(pvField==null) {
             System.out.printf("field %s not in record %s%n",
                 fieldName,recordName);
             return;
         }
-        PVField pvField = pvAccess.getField();
         DBField dbField = dbRecord.findDBField(pvField);
         Type type = pvField.getField().getType();
         if(type==Type.pvBoolean) {
@@ -328,12 +329,12 @@ public class ReplaceTest extends TestCase {
             return;
         }
         PVAccess pvAccess = PVAccessFactory.createPVAccess(pvRecord);
-        if(pvAccess.findField(fieldName)!=AccessSetResult.thisRecord){
+        PVField pvField = pvAccess.findField(fieldName);
+        if(pvField==null) {
             System.out.printf("field %s not in record %s%n",
                 fieldName,recordName);
             return;
         }
-        PVField pvField = pvAccess.getField();
         DBField dbField = dbRecord.findDBField(pvField);
         Type type = pvField.getField().getType();
         if(type==Type.pvString) {
@@ -356,12 +357,12 @@ public class ReplaceTest extends TestCase {
             return;
         }
         PVAccess pvAccess = PVAccessFactory.createPVAccess(pvRecord);
-        if(pvAccess.findField(fieldName)!=AccessSetResult.thisRecord){
+        PVField oldField = pvAccess.findField(fieldName);
+        if(oldField==null) {
             System.out.printf("field %s not in record %s%n",
                 fieldName,recordName);
             return;
         }
-        PVField oldField = pvAccess.getField();
         PVField parent = oldField.getParent();
         Field field = oldField.getField();
         Type type = field.getType();

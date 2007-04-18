@@ -150,20 +150,7 @@ public class AccessTest extends TestCase {
             System.out.printf("record %s not found%n",recordName);
             return;
         }
-        AccessSetResult result = pvAccess.findField(fieldName);
-        if(result==AccessSetResult.notFound) {
-            System.out.printf("field %s of record %s not found%n",fieldName,recordName);
-            return;
-        }
-        if(result==AccessSetResult.otherRecord) {
-            String otherRecord = pvAccess.getOtherRecord();
-            String otherField = pvAccess.getOtherField();
-            System.out.printf("field %s is in other record with name %s field %s%n",
-                fieldName,otherRecord,otherField);
-            testAccess(iocdb,otherRecord,otherField);
-            return;
-        }
-        PVField pvField = pvAccess.getField();
+        PVField pvField = pvAccess.findField(fieldName);
         if(pvField==null) {
             System.out.printf("field %s of record %s not found%n",fieldName,recordName);
             return;
@@ -185,11 +172,11 @@ public class AccessTest extends TestCase {
                 String propertyName = prop.getPropertyName();
                 System.out.printf("        name %s field %s%n",propertyName,prop.getAssociatedFieldName());
                 pvAccess.setPVField(pvField);
-                if(pvAccess.findField(propertyName)!=AccessSetResult.thisRecord){
+                PVField propField = pvAccess.findField(propertyName);
+                if(propField==null){
                     System.out.printf("name %s not in record %s%n",propertyName,recordName);
                     System.out.printf("%s\n",pvAccess.getPVRecord().toString());
                 } else {
-                    PVField propField = pvAccess.getField();
                     System.out.printf("            value %s%n",propField.toString(3));
                 }
             }

@@ -693,17 +693,15 @@ public class Probe {
                 getFieldGroup.addChannelField(channelField);
                 if(properties!=null && properties.length>0) {
                     for(Property property: properties) {
-                        ChannelFindFieldResult result;
                         channel.findField(null);
                         String propertyName = property.getPropertyName();
-                        result = channel.findField(propertyName);
-                        if(result!=ChannelFindFieldResult.thisChannel) {
+                        ChannelField propChannelField = channel.findField(propertyName);
+                        if(propChannelField==null) {
                             requester.message(String.format(
-                                    "property %s%n", propertyName),MessageType.error);
+                                    "property %s not found%n", propertyName),MessageType.error);
                             continue;
                         }
-                        ChannelField propertyField = channel.getChannelField();
-                        getFieldGroup.addChannelField(propertyField);
+                        getFieldGroup.addChannelField(propChannelField);
                     }
                 }
                 channelCDGet = channel.createChannelCDGet(getFieldGroup, this,true, process,true);

@@ -5,8 +5,6 @@
  */
 package org.epics.ioc.pv;
 
-import org.epics.ioc.pv.*;
-
 /**
  * Interface for accessing fields of a record instance.
  * @author mrk
@@ -21,7 +19,7 @@ public interface PVAccess {
     /**
      * Specify a field to access.
      * The search is relative to the field located
-     * by the last call to setField that returned AccessSetResult.local.
+     * by the last call to setField.
      * If this is the first call to setField the search begins at the record instance.
      * @param name The field name.
      * A null or empty string resets to the record itself being accessed.
@@ -39,25 +37,9 @@ public interface PVAccess {
      * subfield name with [index].
      * If the associatedField starts with "/" then the search for
      * the propertyName starts at the record itself.
-     * @return otherRecord, thisRecord, or notFound.
-     * If otherRecord is returned it is not found getOtherRecord and getOtherField can be used to
-     * create another PVAccess for accessing the data.
-     * If thisRecord is returned then getField can be used to get the interface for accessing the field.
-     * If notFound is returned then the call makes no change to the internal state of the PVAccess.
+     * @return The PVField interface or null if the field is not found.
      */
-    AccessSetResult findField(String name);
-    /**
-     * Return the name of the record set by the last call to setField that returned otherRecord.
-     * @return the name of the other record.
-     * The record may be located in a different IOC.
-     * Thu Channel Access not PVAccess should be used to connect to the other record.
-     */
-    String getOtherRecord();
-    /**
-     * Return the name of the field set by the last call to setField that returned otherRecord.
-     * @return the field within the other record.
-     */
-    String getOtherField();
+    PVField findField(String name);
     /**
      * Set field.
      * @param pvField A field of the record instance.
@@ -65,12 +47,4 @@ public interface PVAccess {
      * @throws IllegalArgumentException If pvData is not in the record instance.
      */
     void setPVField(PVField pvField);
-    
-    /**
-     * Get the interface for the current field.
-     * This returns the field found by setField when it returns AccessSetResult.thisRecord.
-     * @return The interface for the field.
-     * If setField was never called or the last call failed then null is returned.
-     */
-    PVField getField();
 }

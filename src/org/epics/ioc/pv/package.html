@@ -10,7 +10,7 @@
 <body>
 <h1 style="text-align: center">EPICS JavaIOC: pv<br />
 package: org.epics.ioc.pv<br />
-2007.03.29</h1>
+2007.04.17</h1>
 CONTENTS
 
 <div class="toc">
@@ -476,10 +476,11 @@ where
     </ul>
   </li>
   <li>getFullFieldName<br />
-    Get the full field name. This returns a name in the form
-  "name.name ...".</li>
+    Get the full field name. This returns a name in the form "name.name
+  ...".</li>
   <li>getFullName<br />
-    Get the full name. This returns a name in the form "recordName.name ...".</li>
+    Get the full name. This returns a name in the form "recordName.name
+  ...".</li>
   <li>getField<br />
     Get the reflection interface for the data.</li>
   <li>getParent<br />
@@ -635,29 +636,41 @@ assumes that the client has permission to change the support:</p>
       for the subfield. In addition it must create a new Structure reflection
       interface for itself.</dd>
   <dt>getBooleanField</dt>
-     <dd>Look for fieldName. If found and it has the correct type return the interface.</dd>
+    <dd>Look for fieldName. If found and it has the correct type return the
+      interface.</dd>
   <dt>getByteField</dt>
-     <dd>Look for fieldName. If found and it has the correct type return the interface.</dd>
+    <dd>Look for fieldName. If found and it has the correct type return the
+      interface.</dd>
   <dt>getShortField</dt>
-     <dd>Look for fieldName. If found and it has the correct type return the interface.</dd>
+    <dd>Look for fieldName. If found and it has the correct type return the
+      interface.</dd>
   <dt>getIntField</dt>
-     <dd>Look for fieldName. If found and it has the correct type return the interface.</dd>
+    <dd>Look for fieldName. If found and it has the correct type return the
+      interface.</dd>
   <dt>getLongField</dt>
-     <dd>Look for fieldName. If found and it has the correct type return the interface.</dd>
+    <dd>Look for fieldName. If found and it has the correct type return the
+      interface.</dd>
   <dt>getFloatField</dt>
-     <dd>Look for fieldName. If found and it has the correct type return the interface.</dd>
+    <dd>Look for fieldName. If found and it has the correct type return the
+      interface.</dd>
   <dt>getDoubleField</dt>
-     <dd>Look for fieldName. If found and it has the correct type return the interface.</dd>
+    <dd>Look for fieldName. If found and it has the correct type return the
+      interface.</dd>
   <dt>getStringField</dt>
-     <dd>Look for fieldName. If found and it has the correct type return the interface.</dd>
+    <dd>Look for fieldName. If found and it has the correct type return the
+      interface.</dd>
   <dt>getEnumField</dt>
-     <dd>Look for fieldName. If found and it has the correct type return the interface.</dd>
+    <dd>Look for fieldName. If found and it has the correct type return the
+      interface.</dd>
   <dt>getMenuField</dt>
-     <dd>Look for fieldName. If found and it has the correct type return the interface.</dd>
+    <dd>Look for fieldName. If found and it has the correct type return the
+      interface.</dd>
   <dt>getStructureField</dt>
-     <dd>Look for fieldName. If found and it has the correct type return the interface.</dd>
+    <dd>Look for fieldName. If found and it has the correct type return the
+      interface.</dd>
   <dt>getArrayField</dt>
-     <dd>Look for fieldName. If found and it has the correct type return the interface.</dd>
+    <dd>Look for fieldName. If found and it has the correct type return the
+      interface.</dd>
 </dl>
 
 <h3 id="PVRecord">PVRecord</h3>
@@ -1300,37 +1313,25 @@ records, e.g. a "powerSupply" record.</p>
 
 <p>If a powerSupply record type is properly defined then the following are
 valid names.</p>
-<pre>    current
-    current.status
-    current.rawValue
-    voltage
-    voltage.rawValue</pre>
+<pre>    power
+    power.current
+    power.voltage
+    power.status</pre>
 
 <p>In addition PVAccess provides access to structure arrays. For example if a
 record type implements an array of power supplies then the following are
 valid names.</p>
 <pre>    powerSupply[0].power
-    powerSupply[0].current
-    powerSupply[0].current.status</pre>
-
-<p>The javaIOC unnamed package provides more complete examples.</p>
+    powerSupply[0].power.current
+    powerSupply[0].power.voltage</pre>
 
 <h3 id="Definition">Definition</h3>
 
 <p>The definition of PVAccess is:</p>
-<pre>    public enum AccessSetResult {
-        otherRecord,
-        thisRecord,
-        notFound
-    }
-
-    interface PVAccess {
+<pre>    interface PVAccess {
         PVRecord getPVRecord();
-        AccessSetResult findField(String name);
-        String getOtherRecord();
-        String getOtherField();
+        PVField findField(String name);
         void setPVField(PVField pvData);
-        PVField getField();
     }
 
     public class PVAccessFactory {
@@ -1339,52 +1340,28 @@ valid names.</p>
 
 <p>where</p>
 <dl>
-  <dt>AccessSetResult</dt>
-    <dd>The result of calling PVAccess.findField.
-      <dl>
-        <dt>otherRecord</dt>
-          <dd>The requested field is located in another record instance.
-            getOtherRecord and getOtherField can be called to get the record
-            and field that has the data. A new PVAccess must be created to
-            access the other record.</dd>
-        <dt>thisRecord</dt>
-          <dd>The requested record is located in this record. getField can be
-            called to get the interface for accessing the data.</dd>
-        <dt>notFound</dt>
-          <dd>The requested field could not be found.</dd>
-      </dl>
-    </dd>
-  <dt>PVAccess</dt>
+  <dt style="font-family: courier;">PVAccess</dt>
     <dd>The interface for locating data fields within a record instance.
       <dl>
-        <dt>getPVRecord</dt>
+        <dt style="font-family: courier;">getPVRecord</dt>
           <dd>Get the record instance interface this PVAccess accesses.</dd>
-        <dt>findField</dt>
-          <dd>Look for a data field. See below for the semantics for the
-            name. See AccessSetResult for the results. The search starts at
-            the current internal location, which initially is the record
-            itself. A null or empty name sets the internal location to the
-            record instance itself.</dd>
-        <dt>getOtherRecord</dt>
-          <dd>Get the name of the record instance is findField returned
-            AccessSetResult.otherRecord.</dd>
-        <dt>getOtherField</dt>
-          <dd>Get the name of the field in the other record instance is
-            findField returned AccessSetResult.otherRecord. This is the name
-            that can be given to setField in a new PVAccess for the other
-            record.</dd>
-        <dt>setPVField</dt>
+        <dt style="font-family: courier;">findField</dt>
+          <dd>Look for a data field. An interface to the ChannelField is
+            returned, which is null if the field is not found. See below for
+            the semantics for the name.The search starts at the current
+            internal location, which initially is the record itself. A null
+            or empty name sets the internal location to the record instance
+            itself.</dd>
+        <dt style="font-family: courier;">setPVField</dt>
           <dd>Set the internal location in PVAccess so that the next request
             to findField is relative to this field. The argument must either
             be null or a value returned by getField. A null value sets the
             internal location to the record itself.</dd>
-        <dt>getField</dt>
-          <dd>Get the interface for the data field located by findField when
-            it returns AccessSetResult.thisRecord.</dd>
       </dl>
     </dd>
-  <dt>PVAccessFactory</dt>
-    <dd>A factory for creating PVAccess</dd>
+  <dt style="font-family: courier;">PVAccessFactory</dt>
+    <dd>A factory for creating <span
+      style="font-family: courier;">PVAccess</span></dd>
 </dl>
 
 <h3 id="findField">findField Examples</h3>
@@ -1397,33 +1374,29 @@ and if the search fails than for properties.</p>
 instance. As the first example assume that a PVAccess has just been created,
 which means it is connected to a record. The following will locate the
 interfaces for a field named "value" and all properties of this field.</p>
-<pre>     // Assume pvRecord has been located
-     PVAccess pvAccess = PVAccessFactory.createPVAccess(pvRecord);
-     AccessSetResult setResult;
-     setResult = pvAccess.findField("value");
-     if(setResult!=AccessSetResult.thisRecord) { /*take some action*/}
-     PVField value = pvAccess.getField();
-     Property[] properties = value.getField.getPropertys();
-     while(Property property: properties) {
-         pvAccess.setField(value);
-         setResult = pvAccess.findField(property.getPropertyName());
-         if(setResult!=AccessSetResult.thisRecord) { /*take some action*/}
-         PVField propData = pvAccess.getField();
-         // do something with propData
+<pre>    // Assume pvRecord has been located
+    PVAccess pvAccess = PVAccessFactory.createPVAccess(pvRecord);
+    PVField value = pvAccess.findField("value");
+    if(value==null) { /*take some action*/}
+    Property[] properties = value.getField.getPropertys();
+    while(Property property: properties) {
+        pvAccess.setField(value);
+        PVField propField = pvAccess.findField(property.getPropertyName());
+        if(propField!=null) {
+            // do something with propData
+        }
     }</pre>
 
 <p>Assume that a powerSupply array instance record defines an array of
 structures which each access a powerSupply:</p>
 <pre>    //Locate the current for the first powerSupply
-    setResult = pvAccess.findField("powerSupply[0].current");
-    if(setResult==AccessSetResult.thisRecord) {
-       // it is local
-    } else if(setResult==AccessSetResult.otherRecord) {
-       // it is remote. Must create a new PVAccess for it.
+    PVField pvField = pvAccess.findField("powerSupply[0].current");
+    if(pvField!=null) {
+        // found it
     }
     //Locate the rawValue for the current for the third power supply
     pvAccess.findField(null); // set internal location to the record itself
-    setResult = pvAccess.findField("powerSupply[2].current.rawValue");
+    pvField = pvAccess.findField("powerSupply[2].current.rawValue");
     ...</pre>
 </body>
 </html>

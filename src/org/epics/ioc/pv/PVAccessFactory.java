@@ -9,8 +9,6 @@ import java.util.regex.Pattern;
 
 import org.epics.ioc.util.*;
 
-
-
 /**
  * Factory for creating PVAccess instances.
  * @author mrk
@@ -30,9 +28,6 @@ public class PVAccessFactory {
         private PVRecord pvRecord;
         private PVField pvFieldSetField;
         static private Pattern periodPattern = Pattern.compile("[.]");
-        //following are for setName(String name)
-        private String otherRecord = null;
-        private String otherField = null;
 
         
         private Access(PVRecord pvRecord) {
@@ -46,23 +41,16 @@ public class PVAccessFactory {
             return pvRecord;
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.pv.PVAccess#getField()
-         */
-        public PVField getField() {
-            return pvFieldSetField;
-        }   
-        /* (non-Javadoc)
          * @see org.epics.ioc.pv.PVAccess#setField(java.lang.String)
          */
-        public AccessSetResult findField(String fieldName) {
+        public PVField findField(String fieldName) {
             if(fieldName==null || fieldName.length()==0) {
                 pvFieldSetField = pvRecord;
-                return AccessSetResult.thisRecord;
+                return pvFieldSetField;
             }
-            otherRecord = null;
             String[] names = periodPattern.split(fieldName,2);
             if(names.length<=0) {
-                return AccessSetResult.notFound;
+                return null;
             }
             PVField currentField = pvFieldSetField;
             if(currentField==null) currentField = pvRecord;
@@ -158,27 +146,14 @@ public class PVAccessFactory {
                     }
                 }
                 if(currentField==null) break;
-                if(currentField.getField().getType()==Type.pvLink) {
-                    if(otherRecord!=null) {
-                        if(names.length>1) otherField += "." + names[1];
-                        currentField = null;
-                        break;
-                    }
-                    if(names.length<=1) break;
-                    PVLink pvLink = (PVLink)currentField;
-                    lookForRemote(pvLink,names[1]);
-                    currentField = null;
-                    break;
-                }
                 if(names.length<=1) break;
                 names = periodPattern.split(names[1],2);
             }
             if(currentField==null) {
-                if(otherRecord==null) return AccessSetResult.notFound;
-                return AccessSetResult.otherRecord;
+                return null;
             }
             pvFieldSetField = currentField;
-            return AccessSetResult.thisRecord;
+            return pvFieldSetField;
         }                
         /* (non-Javadoc)
          * @see org.epics.ioc.pv.PVAccess#setField(org.epics.ioc.pv.PVField)
@@ -192,18 +167,6 @@ public class PVAccessFactory {
                 throw new IllegalArgumentException (
                     "field is not in this record instance");
             pvFieldSetField = (PVField)pvField;
-        }        
-        /* (non-Javadoc)
-         * @see org.epics.ioc.pv.PVAccess#getOtherField()
-         */
-        public String getOtherField() {
-            return otherField;
-        }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.pv.PVAccess#getOtherRecord()
-         */
-        public String getOtherRecord() {
-            return otherRecord;
         }        
        
         private PVField findField(PVField pvField,String name) {
@@ -254,11 +217,6 @@ public class PVAccessFactory {
             if(pvField==null) return null;
             if(length==2) {
                 Type type = pvField.getField().getType();
-                if(type==Type.pvLink) {
-                    PVLink pvLink = (PVLink)pvField;
-                    lookForRemote(pvLink,names[1]);
-                    return pvField;
-                }
                 if(type==Type.pvStructure) {
                     newField = getPVStructureField(pvField,names[1]);
                 } else {
@@ -286,30 +244,6 @@ public class PVAccessFactory {
                 return (PVField)pvDatas[dataIndex];
             }
             return null;
-        }
-        
-        private void lookForRemote(PVLink pvLink,String fieldName)
-        {
-            PVStructure config = pvLink.getConfigurationStructure();
-            if(config==null) return;
-            PVString pvname = null;
-            for(PVField pvdata: config.getFieldPVFields()) {
-                FieldAttribute attribute = pvdata.getField().getFieldAttribute();
-                if(attribute.isLink()) {
-                    if(pvdata.getField().getType()==Type.pvString) {
-                        pvname = (PVString)pvdata;
-                        break;
-                    }
-                }
-            }
-            if(pvname==null) return;
-            String[] subFields = periodPattern.split(pvname.get(),2);
-            otherRecord = subFields[0];
-            if(subFields.length>1) {
-                otherField = subFields[1];
-            } else {   
-                otherField = fieldName;
-            }
         }
     }
 }

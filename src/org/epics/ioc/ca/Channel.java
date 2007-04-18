@@ -37,26 +37,11 @@ public interface Channel {
      */
     boolean isConnected();
     /**
-     * Specify a field to access. See package org.epics.ioc.pv for how IOC database fields are accessed.
+     * Specify a field to access.
      * @param name The name.
-     * @return The result.
+     * @return The ChannelField or null if the field was not found.
      */
-    ChannelFindFieldResult findField(String name);
-    /**
-     * If the result of findField was otherChannel, This returns the name of the other channel.
-     * @return the name or null if findField did not return otherChannel.
-     */
-    String getOtherChannel();
-    /**
-     * If the result of findField was other otherChannel, This returns the name of the field in the other channel.
-     * @return The name of the field or null if findField did not return otherChannel.
-     */
-    String getOtherField();
-    /**
-     * If findField returned thisChannel get the interface for the field.
-     * @return The interface for the field or null if findField did not return otherChannel.
-     */
-    ChannelField getChannelField();
+    ChannelField findField(String name);
     /**
      * Create a field group.
      * @param listener The listener to call if the field group is deleted.

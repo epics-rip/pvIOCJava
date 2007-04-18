@@ -36,12 +36,12 @@ public class DBListenerForTesting implements DBListener{
         if(pvName==null || pvName.length()==0) {
             pvField = pvAccess.getPVRecord();
         } else {
-            if(pvAccess.findField(pvName)!=AccessSetResult.thisRecord){
+            pvField = pvAccess.findField(pvName);
+            if(pvField==null){
                 System.out.printf("name %s not in record %s%n",pvName,recordName);
                 System.out.printf("%s\n",pvAccess.getPVRecord().toString());
                 return;
             }
-            pvField = pvAccess.getField();
         }
         actualFieldName = pvField.getField().getFieldName();
         fullName = pvField.getPVRecord().getRecordName() + pvField.getFullFieldName();
@@ -54,11 +54,12 @@ public class DBListenerForTesting implements DBListener{
                 DBField propertyField;
                 for(Property prop : property) {
                     pvAccess.setPVField(pvField);
-                    if(pvAccess.findField(prop.getPropertyName())!=AccessSetResult.thisRecord){
+                    PVField propPVField = pvAccess.findField(prop.getPropertyName());
+                    if(propPVField==null){
                         System.out.printf("name %s not in record %s%n",pvName,recordName);
                         System.out.printf("%s\n",pvAccess.getPVRecord().toString());
                     } else {
-                        propertyField = (DBField)dbRecord.findDBField(pvAccess.getField());
+                        propertyField = (DBField)dbRecord.findDBField(propPVField);
                         propertyField.addListener(listener);
                     }
                 }
