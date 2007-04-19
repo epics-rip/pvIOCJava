@@ -24,6 +24,9 @@ import org.epics.ioc.util.*;
  */
 public class Swtshell {
     
+    /**
+     * 
+     */
     public static void swtshell() {
         SupportCreate supportCreate = new SupportCreate();
         if(!supportCreate.create()) {

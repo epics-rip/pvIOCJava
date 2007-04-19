@@ -12,7 +12,7 @@
 
 <h1 style="text-align: center">EPICS JavaIoc: Database Access <br />
 package: org.epics.ioc.dbAcess <br />
-2007.03.05</h1>
+2007.04.19</h1>
 CONTENTS
 
 <div class="toc">
@@ -56,7 +56,7 @@ CONTENTS
       <li><a href="#DBStructur">DBStructure</a></li>
       <li><a href="#DBNonScala">DBNonScalarArray</a></li>
       <li><a href="#DBRecord">DBRecord</a></li>
-      <li><a href="#DBREcordFa">DBREcordFactory</a></li>
+      <li><a href="#DBREcordFa">DBRecordFactory</a></li>
     </ul>
   </li>
   <li><a href="#IOCDB">IOCDB: IOC Database</a></li>
@@ -79,13 +79,9 @@ instances. The following is discussed:</p>
   <li>An XML to database converter.<br />
     Parses xml record instance files, creates record instances, and puts them
     in an IOC database.</li>
-  <li>Record Instance Access<br />
-    Interfaces for accessing data in record instances.</li>
-  <li>Data Factory<br />
-    A factory for creating support for database fields. It can create support
-    for all types of fields.</li>
-  <li>Base Classes<br />
-    A set of base classes for implementing DBField interfaces.</li>
+  <li>Database Access<br />
+    Interfaces for accessing database records and support.<br />
+  </li>
   <li>IOC Database<br />
     Interface and factory for a database containing the record instances</li>
   <li>Listen Support<br />
@@ -883,7 +879,7 @@ structure.</p>
       after record initialization.</dd>
 </dl>
 
-<h3 id="DBREcordFa">DBREcordFactory</h3>
+<h3 id="DBREcordFa">DBRecordFactory</h3>
 
 <p>A factory is available that implements the DBField interfaces for record
 instance fields.</p>
@@ -1057,12 +1053,12 @@ all properties of the field.</p>
         if(pvName==null || pvName.length()==0) {
             pvField = pvAccess.getPVRecord();
         } else {
-            if(pvAccess.findField(pvName)!=AccessSetResult.thisRecord){
+            pvField = pvAccess.findField(pvName);
+            if(pvField==null){
                 System.out.printf("name %s not in record %s%n",pvName,recordName);
                 System.out.printf("%s\n",pvAccess.getPVRecord().toString());
                 return;
             }
-            pvField = pvAccess.getField();
         }
         actualFieldName = pvField.getField().getFieldName();
         fullName = pvField.getPVRecord().getRecordName() + pvField.getFullFieldName();
@@ -1229,13 +1225,12 @@ all properties of the field.</p>
     }
     public void unlisten(RecordListener listener) {
         // Nothing to do.
-    }
-</pre>
+    }</pre>
 
 <p>In order for the listen support to work support that implements the
 DBRecord interface must extend AbstractDBRecord and support that implements
-any other DB field interface must extend AbstractDBdata. In addition any code
-that implements a put methods must call</p>
+any other DB field interface must extend AbstractDBField. In addition any
+code that implements a put methods must call</p>
 <pre>    postPut();</pre>
 
 <p>whenever the put method is called. It must call postPut whenever if

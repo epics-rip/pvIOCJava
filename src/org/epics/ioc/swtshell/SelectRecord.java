@@ -17,6 +17,7 @@ import org.eclipse.swt.widgets.*;
 import org.epics.ioc.db.*;
 import org.epics.ioc.util.*;
 /**
+ * Select the name of a record in the local JavaIOC.
  * @author mrk
  *
  */ 
@@ -29,11 +30,20 @@ public class SelectRecord extends Dialog implements SelectionListener {
     private int ntimes = 0;
     private String recordName = null;
 
+    /**
+     * Constructor
+     * @param parent The parent shell.
+     * @param requester The requestor.
+     */
     public SelectRecord(Shell parent,Requester requester){
         super(parent,SWT.DIALOG_TRIM|SWT.NONE);
         this.requester = requester;
     }
 
+    /**
+     * Select and return the name of the selected record.
+     * @return The name or null if no record was selected.
+     */
     public String getRecordName() {
         shell = new Shell(getParent(),getStyle());
         shell.setText("getRecord");

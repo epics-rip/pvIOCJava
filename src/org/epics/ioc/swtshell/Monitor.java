@@ -19,17 +19,67 @@ import org.epics.ioc.pv.*;
 import org.epics.ioc.util.*;
 import org.epics.ioc.ca.*;
 /**
+ * Monitor a channelField.
+ * The controls in the first row are:
+ * <ul>
+ *     <li>connect<br />
+ *     Clicking this brings up a small window that allows the user to connect to a channel.
+ *     The window has two controls:
+ *     <ul>
+ *        <li>select<br />
+ *        Clicking this brings up a list of the names of all the records in the local JavaIOC.
+ *        Selecting a name determines the channel.
+ *        </li>
+ *        <li>text widget< />
+ *        A channel name followed by the enter key selects a channel.
+ *        </li>
+ *        </ul>
+ *     </ul>
+ *     Assuming a channel has been selected. Another small window is presented that allows the
+ *     user to select a field of the channel. It also has two controls:
+ *     <ul>
+ *        <li>select<br />
+ *        Clicking this brings up a tree showing all the fields in the channel.
+ *        The user can select a field, which determines the channelField.
+ *        </li>
+ *        <li>text widget< />
+ *        A name followed by the enter key selects a field. Entering a null field name selects all
+ *        the fields in the channel.
+ *        </li>
+ *        </ul>
+ *     </ul>
+ *     </li>
+ *     <li>property<br />
+ *     This allows the user to select properties to be displayed.
+ *     </li>
+ *     <li>radio button selection<br />
+ *     This allows the user to select three modes for monitoring: onChange, onAbsolute, and onPercentage.
+ *     obAbsolute and onPercentage are only valid if the channelField has a scalar numeric type.
+ *     </li>
+ *     <li>deadband<br />
+ *     This is the deadband for onAbsolute and onPercertage.
+ *     </li>
+ *  </ul>
+ *  When connected the "connect" button changes to a "disconnect" button. Clicking it disconnects.
+ *  The second row has just one control "startMonitor". Clicking it starts monitoring.
+ *  When monitoring starts the "startMonitor" button changes to a "stopMonitor" button.
  * @author mrk
  *
  */
 public class Monitor {
 
+    /**
+     * Called by SwtShell after the default constructor has been called.
+     * @param display The display.
+     */
     public static void init(Display display) {
         MonitorImpl monitorImpl = new MonitorImpl(display);
         monitorImpl.start();
     }
 
-    private static class MonitorImpl  implements Requester,Runnable {
+    private static class MonitorImpl
+    implements Requester,Runnable
+    {
         private Display display;
         private MessageQueue messageQueue = MessageQueueFactory.create(3);
         private Shell shell;
@@ -39,7 +89,7 @@ public class Monitor {
             this.display = display;
         }
 
-        public void start() {
+        private void start() {
             shell = new Shell(display);
             shell.setText("monitor");
             GridLayout gridLayout = new GridLayout();
@@ -81,7 +131,6 @@ public class Monitor {
         public String getRequesterName() {
             return "swtshell.monitor";
         }
-
         /* (non-Javadoc)
          * @see org.epics.ioc.util.Requester#message(java.lang.String, org.epics.ioc.util.MessageType)
          */
@@ -102,7 +151,9 @@ public class Monitor {
                 display.syncExec(this);
             }
         }
-        
+        /* (non-Javadoc)
+         * @see java.lang.Runnable#run()
+         */
         public void run() {
             while(true) {
                 String message = null;
@@ -161,7 +212,7 @@ public class Monitor {
             private ConnectState connectState = ConnectState.disconnected;
             private String[] connectStateText = {"connect    ","disconnect"};
 
-            public MonitorChannel(Composite parent,Requester requester) {
+            private MonitorChannel(Composite parent,Requester requester) {
                 this.requester = requester;
                 Composite monitorTypeComposite = new Composite(parent,SWT.BORDER);
                 GridLayout gridLayout = new GridLayout();
@@ -208,14 +259,15 @@ public class Monitor {
                 startStopButton.setText("startMonitor");
                 startStopButton.addSelectionListener(this);
                 setConnectState(ConnectState.disconnected);
-                
+                shell.addDisposeListener(this);
             }
             /* (non-Javadoc)
              * @see org.eclipse.swt.events.DisposeListener#widgetDisposed(org.eclipse.swt.events.DisposeEvent)
              */
             public void widgetDisposed(DisposeEvent e) {
-                if(channel!=null) channel.destroy()
-;            }
+                if(channel!=null) channel.destroy();
+                channel = null;
+            }
             /* (non-Javadoc)
              * @see org.epics.ioc.ca.ChannelStateListener#channelStateChange(org.epics.ioc.ca.Channel, boolean)
              */
@@ -251,7 +303,7 @@ public class Monitor {
                             return;
                         }
                         GetChannelField getChannelField = new GetChannelField(shell,requester,channel);
-                        valueField = getChannelField.getChannelField(channel);
+                        valueField = getChannelField.getChannelField();
                         if(valueField==null) {
                             requester.message(String.format("no field selected%n"),MessageType.error);
                             return;
@@ -332,7 +384,6 @@ public class Monitor {
                     return;
                 }
             }
-
             /* (non-Javadoc)
              * @see org.epics.ioc.ca.ChannelMonitorRequester#dataOverrun(int)
              */
@@ -340,7 +391,6 @@ public class Monitor {
                 requester.message(
                     String.format("dataOverrun number = %d", number), MessageType.info);
             }
-
             /* (non-Javadoc)
              * @see org.epics.ioc.ca.ChannelMonitorRequester#monitorData(org.epics.ioc.ca.CD)
              */
@@ -450,6 +500,7 @@ public class Monitor {
             
         }
     }
+    
     private static class GetProperty extends Dialog implements SelectionListener {
         private Button doneButton;
         private Button[] propertyButtons;
@@ -459,7 +510,7 @@ public class Monitor {
         private GetProperty(Shell parent) {
             super(parent,SWT.PRIMARY_MODAL|SWT.DIALOG_TRIM);
         }
-        public String[] open(Field field) {
+        private String[] open(Field field) {
             Property[] propertys = field.getPropertys();
             int length = propertys.length;
             if(length==0) return null;
@@ -486,8 +537,7 @@ public class Monitor {
                 }
             }
             return propertyNames;
-        }
-        
+        }      
         /* (non-Javadoc)
          * @see org.eclipse.swt.events.SelectionListener#widgetDefaultSelected(org.eclipse.swt.events.SelectionEvent)
          */

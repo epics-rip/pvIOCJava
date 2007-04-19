@@ -207,7 +207,6 @@ public class GetCDValue extends Dialog implements SelectionListener {
     private static class GetCDSimple extends Dialog implements SelectionListener{
         private CDField cdField;
         private Shell shell;
-        private Button doneButton;
         private Text text;
         
         private GetCDSimple(Shell parent,CDField cdField) {
@@ -219,11 +218,8 @@ public class GetCDValue extends Dialog implements SelectionListener {
             shell = new Shell(super.getParent());
             shell.setText("value");
             GridLayout gridLayout = new GridLayout();
-            gridLayout.numColumns = 2;
+            gridLayout.numColumns = 1;
             shell.setLayout(gridLayout);
-            doneButton = new Button(shell,SWT.PUSH);
-            doneButton.setText("done");
-            doneButton.addSelectionListener(this);
             text = new Text(shell,SWT.BORDER);
             GridData gridData = new GridData(GridData.FILL_HORIZONTAL);
             gridData.minimumWidth = 100;
@@ -252,10 +248,6 @@ public class GetCDValue extends Dialog implements SelectionListener {
          */
         public void widgetSelected(SelectionEvent e) {
             Object object = e.getSource();
-            if(object==doneButton) {
-                shell.close();
-                return;
-            }
             if(object==text) {               
                 PVField pvField = cdField.getPVField();
                 try {
@@ -265,6 +257,7 @@ public class GetCDValue extends Dialog implements SelectionListener {
                     return;
                 }
                 cdField.incrementNumPuts();
+                shell.close();
                 return;
             }
         }
@@ -284,12 +277,12 @@ public class GetCDValue extends Dialog implements SelectionListener {
         Button[] choiceButtons;
         int numChoices;
         
-        GetCDMenu(Shell parent,CDMenu cdMenu) {
+        private GetCDMenu(Shell parent,CDMenu cdMenu) {
             super(parent,SWT.DIALOG_TRIM|SWT.NONE);
             this.cdMenu = cdMenu;
         }
         
-        void get() {
+        private void get() {
             shell = new Shell(super.getParent());
             shell.setText("getFieldName");
             GridLayout gridLayout = new GridLayout();

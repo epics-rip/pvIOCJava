@@ -13,6 +13,12 @@ import org.eclipse.swt.widgets.*;
 import org.epics.ioc.util.*;
 import org.epics.ioc.ca.*;
 /**
+ * Get a channel.
+ * The user is presented with a window that has two controls: a select button and a text window.
+ * The user can enter a channel name in the text window and press the enter key to determine the channel.
+ * The use can also click the select button.
+ * This displays a list of the names of the records in the local IOC.
+ * The name selected determines the channel.
  * @author mrk
  *
  */    
@@ -25,12 +31,21 @@ public class GetChannel extends Dialog implements SelectionListener {
     private SelectRecord selectRecord;
     private String recordName = null;
 
+    /**The constructor.
+     * @param parent The parent shell.
+     * @param requester The requestor.
+     * @param channelStateListener The channel state listener.
+     */
     public GetChannel(Shell parent,Requester requester,ChannelStateListener channelStateListener) {
         super(parent,SWT.DIALOG_TRIM|SWT.NONE);
         this.requester = requester;
         this.channelStateListener = channelStateListener;
     }
     
+    /**
+     * Get the channel.
+     * @return The channel or null if not found.
+     */
     public Channel getChannel() {
         shell = new Shell(getParent(),getStyle());
         shell.setText("getChannel");      

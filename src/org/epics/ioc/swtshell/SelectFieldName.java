@@ -15,6 +15,7 @@ import org.epics.ioc.db.*;
 import org.epics.ioc.pv.*;
 import org.epics.ioc.util.*;
 /**
+ * Given a record name this selects the name of a field within the record.
  * @author mrk
  *
  */        
@@ -26,15 +27,29 @@ public class SelectFieldName extends Dialog implements SelectionListener {
     private Tree tree;
     private String fieldName = null;
 
+    /**
+     * Constructor
+     * @param parent The parent shell.
+     * @param requester The requestor.
+     */
     public SelectFieldName(Shell parent,Requester requester){
         super(parent,SWT.DIALOG_TRIM|SWT.NONE);
         this.requester = requester;
     }
-    
+
+    /**
+     * Return the name of the selected field.
+     * @return The name or null of no name was selected.
+     */
     public String getFieldName() {
         return fieldName;
     }
 
+    /**
+     * Select the field name.
+     * @param recordName The record name.
+     * @return (false,true) if a name (was not, was) selected.
+     */
     public boolean selectFieldName(String recordName) {
         DBRecord dbRecord = iocdb.findRecord(recordName);
         if(dbRecord==null) {

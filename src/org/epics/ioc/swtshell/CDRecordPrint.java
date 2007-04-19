@@ -14,6 +14,7 @@ import org.epics.ioc.util.*;
 import org.eclipse.swt.widgets.*;
 
 /**
+ * Display all modified field in a CDRecord.
  * @author mrk
  *
  */
@@ -21,10 +22,18 @@ public class CDRecordPrint {
     private CDRecord cdRecord;
     private Text text;
     
+    /**
+     * Constructor.
+     * @param cdRecord - The CDRecord to display.
+     * @param text The SWT Text widget.
+     */
     public CDRecordPrint(CDRecord cdRecord,Text text) {
         this.cdRecord = cdRecord;
         this.text = text;
     }
+    /**
+     * Print on the text widget all the fields of CDRecord that have been modified.
+     */
     public void print() {
         text.append(cdRecord.getPVRecord().getRecordName());
         CDStructure cdStructure = cdRecord.getCDStructure();

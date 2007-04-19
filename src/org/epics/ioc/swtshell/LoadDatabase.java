@@ -16,11 +16,40 @@ import org.epics.ioc.dbd.*;
 import org.epics.ioc.util.*;
 
 /**
+ * Load a new Database Definition or Record Instance into a running JavaIOC.
+ * The new definition is added only if no errors occur.
+ * New record instances are only added if they are now records and initialize properly.
+ * The controls are:
+ * <ul>
+ *    <li>find<br />
+ *       Clicking this button brings up a file dialog window.
+ *       The selected file appears in the text window at the end of the controls row.
+ *    </li>
+ *    <li>show<br />
+ *      Clicking this lists the currently selected file.
+ *    </li>
+ *    <li>loadDBD<br />
+ *    Clicking this loads the currently selected Database Definition file.
+ *    If any errors are reported in the test window after the clear button.
+ *    </li>
+ *    <li>loadDB<br />
+ *    Clicking this loads the currently selected record instance file.
+ *    If any errors are reported in the test window after the clear button.
+ *    </li>
+ *    <li>text input window<br />
+ *    A file name followed by the enter key can be used to specify a file name.
+ *    </li>
+ * </ul>
+ *       
  * @author mrk
  *
  */
 public class LoadDatabase {
     
+    /**
+     * Called by SwtShell after the default constructor has been called.
+     * @param display The display.
+     */
     public static void init(Display display) {
         Load load = new Load(display);
         load.start();
@@ -41,7 +70,7 @@ public class LoadDatabase {
             this.display = display;
         }
         
-        public void start() {
+        private void start() {
             shell = new Shell(display);
             shell.setText("loadDatabase");
             GridLayout gridLayout = new GridLayout();
@@ -165,8 +194,7 @@ public class LoadDatabase {
                 consoleText.setText("");
                 return;
             }
-        }
-        
+        }       
         /* (non-Javadoc)
          * @see org.epics.ioc.util.Requester#getRequesterName()
          */

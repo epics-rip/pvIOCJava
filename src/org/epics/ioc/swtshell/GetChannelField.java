@@ -13,6 +13,16 @@ import org.eclipse.swt.widgets.*;
 import org.epics.ioc.util.*;
 import org.epics.ioc.ca.*;
 /**
+ * Get a field of a channel.
+ * The user is presented with a window that has two controls: a select button and a text window.
+ * The user can enter a field name in the text window
+ * and press the enter key to determine the channelField.
+ * If the user just enters a null name all fields of the channel (actually the record to which the channel
+ * is connected) are selected.
+ * The use can also click the select button.
+ * This displays a tree showing the structure for the channel.
+ * The user can select one node of the tree.
+ * The name selected determines the channelField.
  * @author mrk
  *
  */    
@@ -26,13 +36,23 @@ public class GetChannelField extends Dialog implements SelectionListener {
     private SelectFieldName selectFieldName;
     private String fieldName = null;
 
+    /**
+     * Constructor.
+     * @param parent The parent shell.
+     * @param requester The requestor.
+     * @param channel The channel.
+     */
     public GetChannelField(Shell parent,Requester requester,Channel channel) {
         super(parent,SWT.DIALOG_TRIM|SWT.NONE);
         this.requester = requester;
         this.channel = channel;
     }
     
-    public ChannelField getChannelField(Channel channel) {
+    /**
+     * Get a channelField.
+     * @return The channelField or null if no fields were selected.
+     */
+    public ChannelField getChannelField() {
         shell = new Shell(getParent(),getStyle());
         shell.setText("getChannelField");      
         GridLayout gridLayout = new GridLayout();

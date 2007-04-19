@@ -10,7 +10,7 @@
 <body>
 <h1 style="text-align: center">EPICS JavaIOC: channel Access<br />
 package: org.epics.ioc.ca<br />
-2007.04.17</h1>
+2007.04.19</h1>
 CONTENTS
 
 <div class="toc">
@@ -294,8 +294,8 @@ Note that access rights are not currently implemented.</p>
 specific field in a channel.</p>
 <dl>
   <dt style="font-family: courier;">getField</dt>
-    <dd>Returns the Field that describes the field. See pvAccess for
-    details.</dd>
+    <dd>Returns the Field that describes the field. See package
+      org.epics.ioc.pv for details.</dd>
   <dt style="font-family: courier;">getAccessRights</dt>
     <dd>Get the access rights for the field.</dd>
 </dl>
@@ -318,8 +318,8 @@ method is:</p>
 methods:</p>
 <dl>
   <dt style="font-family: courier;">addChannelField</dt>
-    <dd>Add a channelField to the group. Note that getChannelField returns a
-      channelField.</dd>
+    <dd>Add a channelField to the group. Note that channel.findField returns
+      a channelField.</dd>
   <dt style="font-family: courier;">removeChannelField</dt>
     <dd>Remove a channelField from the group.</dd>
   <dt style="font-family: courier;">getList</dt>
@@ -356,7 +356,7 @@ support for remote access.</p>
 <h3 id="ChannelAcc">ChannelAccess</h3>
 
 <p>This is an interface that must be implemented by code that implements
-channel access. It is called by ChannelFactory. It has onl one method</p>
+channel access. It is called by ChannelFactory. It has only one method</p>
 <dl>
   <dt style="font-family: courier;">createChannel</dt>
     <dd>ChannelFactory calls this first for local channel access and if the
@@ -459,7 +459,7 @@ Put, CDPut, and PutGet</h2>
 style="font-family: courier;">ChannelProcessRequester</span>. <span
 style="font-family: courier;">null</span> is returned if the requester is not
 allowed to process the channel. For example the channel is connected to a
-record, that already has an assigned record processor.</p>
+record that already has an assigned record processor.</p>
 
 <p>If <span style="font-family: courier;">createChannelProcess</span> or
 <span style="font-family: courier;">process</span> itself fails, <span
@@ -634,7 +634,11 @@ client request to:</p>
 <h2 style="text-align: center" id="ChannelMon">ChannelMonitor</h2>
 <hr />
 
-<p>NOTE: CD is described in the next section.</p>
+<p>NOTES:</p>
+<ul>
+  <li>CD is described in the next section</li>
+  <li>Periodic monitors should be defined and implemented.</li>
+</ul>
 
 <h3 id="Definition2">Definitions</h3>
 <pre>    interface ChannelMonitor {
@@ -705,19 +709,19 @@ helps solve two problems:</p>
 <ol>
   <li>Blocking with a record locked.<br />
     An example is a channel access server. Instead of pre allocating network
-    buffers for a fieldGroup it can create a cd, transfer data from a record
-    to the cd, and then transfer the channeldData to a network buffer. In the
-    case of a large array multiple network buffers will be required.</li>
+    buffers for a fieldGroup it can create a CD, transfer data from a record
+    to the CD, and then transfer the CD to a network buffer. In the case of a
+    large array multiple network buffers will be required.</li>
   <li>Data repository for database monitoring.<br />
-    For database monitoring a queue of cds can be created. When a monitored
-    record changes, a cd can be taken from the queue, and the data values
-    stored in the cd. This can be done without blocking. When the server is
-    ready it can empty the queue and send the cd over the network.</li>
+    For database monitoring a queue of CDs can be created. When a monitored
+    record changes, a CD can be taken from the queue, and the data values
+    stored in the CD. This can be done without blocking. When the server is
+    ready it can empty the queue and send the CDs over the network.</li>
 </ol>
 
-<p>A CD is associated with a channel and channelFieldGroup. When a cd is
+<p>A CD is associated with a channel and channelFieldGroup. When a VD is
 created via a call to CDFactory.createCD it automatically creates a CDRecord
-and associated subfields, which are cdescribed in the next section.</p>
+and associated subfields, which are described in the next section.</p>
 
 <h3 id="Definition3">CD Definitions</h3>
 <pre>    interface CD {
@@ -1157,8 +1161,6 @@ Channel Access is registered.</p>
         ValueData(Channel channel);
         ChannelFieldGroup init();
         void clear();
-            cd.clear();
-        }
         boolean nextGetField(Channel channel, ChannelField field, PVField pvField);
         void printResults();
     }</pre>
@@ -1172,13 +1174,12 @@ where
     <dd>Prepares to accept a new set of data for the fieldGroup</dd>
   <dt style="font-family: courier;">nextGetField</dt>
     <dd>Adds the data to the cd list.</dd>
-  <dt style="font-family: courier;">prinntResults</dt>
+  <dt style="font-family: courier;">printResults</dt>
     <dd>Prints all data received since last clear.</dd>
 </dl>
 
-<p>What it provides for later examples is the ability to dump everthing the
-examples gets from a record and displaying the results after the record is no
-longer locked.</p>
+<p>What it provides for later examples is the ability to dump everthing an
+example gets from a record after the record is no longer locked.</p>
 
 <h3 id="Implementa">Implementation</h3>
 <pre>    class ValueData implements ChannelFieldGroupListener{
@@ -1569,7 +1570,7 @@ longer locked.</p>
 
 <h3 id="Discussion4">Discussion</h3>
 
-<p>This example shows how to implement a putGet request. When it;s put method
+<p>This example shows how to implement a putGet request. When the put method
 is called, it puts a double value to a field named value, optionally
 processes the record, and retrieves the value, status, severity, and
 timeStamp.</p>

@@ -17,16 +17,28 @@ import org.epics.ioc.dbd.*;
 import org.epics.ioc.util.*;;
 
 /**
+ * Introspect a JavaIOC Database.
+ * The menubar at the top of the display provides access to the DBD (Database Definition Database).
+ * The recordName row provides access to record instances. It provides two controls: a select
+ * button and a text entry widget.
+ * A record name can be entered in the text window followed by the enter key.
+ * If the select button is pressed, a list of all record instances is displayed.
+ * The user can select a name.
  * @author mrk
  *
  */
 public class IntrospectDatabase {
     static private IOCDB iocdb = IOCDBFactory.getMaster();
     
+    /**
+     * Called by SwtShell after the default constructor has been called.
+     * @param display The display.
+     */
     public static void init(Display display) {
         Introspect introspect = new Introspect(display);
         introspect.start();
     }
+    
     
     private static class Introspect implements SelectionListener, Requester{
         static private DBD dbd = DBDFactory.getMasterDBD();
@@ -42,7 +54,7 @@ public class IntrospectDatabase {
             this.display = display;
         }
         
-        public void start() {
+        private void start() {
             shell = new Shell(display);
             shell.setText("introspectDatabase");
             GridLayout layout = new GridLayout();
@@ -105,15 +117,13 @@ public class IntrospectDatabase {
                 }
             });
             shell.open();
-        }
-        
+        }       
         /* (non-Javadoc)
          * @see org.eclipse.swt.events.SelectionListener#widgetDefaultSelected(org.eclipse.swt.events.SelectionEvent)
          */
         public void widgetDefaultSelected(SelectionEvent e) {
             widgetSelected(e);
         }
-
         /* (non-Javadoc)
          * @see org.eclipse.swt.events.SelectionListener#widgetSelected(org.eclipse.swt.events.SelectionEvent)
          */
@@ -173,7 +183,6 @@ public class IntrospectDatabase {
             public void widgetDefaultSelected(SelectionEvent arg0) {
                 widgetSelected(arg0);
             }
-
             /* (non-Javadoc)
              * @see org.eclipse.swt.events.SelectionListener#widgetSelected(org.eclipse.swt.events.SelectionEvent)
              */
@@ -217,7 +226,6 @@ public class IntrospectDatabase {
             public void widgetDefaultSelected(SelectionEvent arg0) {
                 widgetSelected(arg0);
             }
-
             /* (non-Javadoc)
              * @see org.eclipse.swt.events.SelectionListener#widgetSelected(org.eclipse.swt.events.SelectionEvent)
              */
@@ -261,7 +269,6 @@ public class IntrospectDatabase {
             public void widgetDefaultSelected(SelectionEvent arg0) {
                 widgetSelected(arg0);
             }
-
             /* (non-Javadoc)
              * @see org.eclipse.swt.events.SelectionListener#widgetSelected(org.eclipse.swt.events.SelectionEvent)
              */
@@ -305,7 +312,6 @@ public class IntrospectDatabase {
             public void widgetDefaultSelected(SelectionEvent arg0) {
                 widgetSelected(arg0);
             }
-
             /* (non-Javadoc)
              * @see org.eclipse.swt.events.SelectionListener#widgetSelected(org.eclipse.swt.events.SelectionEvent)
              */
@@ -349,7 +355,6 @@ public class IntrospectDatabase {
             public void widgetDefaultSelected(SelectionEvent arg0) {
                 widgetSelected(arg0);
             }
-
             /* (non-Javadoc)
              * @see org.eclipse.swt.events.SelectionListener#widgetSelected(org.eclipse.swt.events.SelectionEvent)
              */

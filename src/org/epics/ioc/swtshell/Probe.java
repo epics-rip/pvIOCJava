@@ -18,6 +18,15 @@ import org.epics.ioc.ca.*;
 import org.epics.ioc.db.*;
 import org.epics.ioc.process.*;
 /**
+ * Provides the following sets of controls:
+ * <ul>
+ *    <li>Processor - Shows and releases the current record processor.
+ *    Also show all scan threads.</li>
+ *    <li>Process - Can connect to a channel and process the channel.</li>
+ *    <li>Get - Can connect to a field of a channel and get the current values.</li>
+ *    <li>Put - Can connect to a field of a channel an put new values.</li>
+ * </ul>
+ * For both get an put a null field selects a complete record instance.
  * @author mrk
  *
  */
@@ -25,6 +34,11 @@ public class Probe {
     static private IOCDB iocdb = IOCDBFactory.getMaster();
     private static IOCExecutor iocExecutor = IOCExecutorFactory.create("swtshell:Probe");
     private static ScanPriority scanPriority = ScanPriority.higher;
+    
+    /**
+     * Called by SwtShell after the default constructor has been called.
+     * @param display The display.
+     */
     public static void init(Display display) {
         ProbeImpl probeImpl = new ProbeImpl(display);
         probeImpl.start();
@@ -42,7 +56,7 @@ public class Probe {
             this.display = display;
         }
 
-        public void start() {
+        private void start() {
             shell = new Shell(display);
             shell.setText("probe");
             GridLayout gridLayout = new GridLayout();
@@ -93,14 +107,12 @@ public class Probe {
             consoleText.setLayoutData(gridData);
             shell.open();
         }
-
         /* (non-Javadoc)
          * @see org.epics.ioc.util.Requester#getRequesterName()
          */
         public String getRequesterName() {
             return "swtshell.probe";
         }
-
         /* (non-Javadoc)
          * @see org.epics.ioc.util.Requester#message(java.lang.String, org.epics.ioc.util.MessageType)
          */
@@ -121,7 +133,9 @@ public class Probe {
                 display.syncExec(this);
             }
         }
-
+        /* (non-Javadoc)
+         * @see java.lang.Runnable#run()
+         */
         public void run() {
             while(true) {
                 String message = null;
@@ -187,6 +201,7 @@ public class Probe {
              */
             public void widgetDisposed(DisposeEvent e) {
                 if(channel!=null) channel.destroy();
+                channel = null;
             }
         }
 
@@ -424,7 +439,7 @@ public class Probe {
                             return;
                         }
                         GetChannelField getChannelField = new GetChannelField(shell,requester,channel);
-                        ChannelField channelField = getChannelField.getChannelField(channel);
+                        ChannelField channelField = getChannelField.getChannelField();
                         if(channelField==null) {
                             requester.message(String.format("no field selected%n"),MessageType.error);
                             return;
@@ -530,7 +545,7 @@ public class Probe {
                             return;
                         }
                         GetChannelField getChannelField = new GetChannelField(shell,requester,channel);
-                        ChannelField channelField = getChannelField.getChannelField(channel);
+                        ChannelField channelField = getChannelField.getChannelField();
                         if(channelField==null) {
                             requester.message(String.format("no field selected%n"),MessageType.error);
                             return;
