@@ -151,6 +151,13 @@ public class Swtshell {
                     Monitor.init(display);
                 }
             });
+            Button v3iocshellDB = new Button(shell,SWT.PUSH);
+            v3iocshellDB.setText("v3iocshell");
+            v3iocshellDB.addSelectionListener( new SelectionAdapter() {
+                public void widgetSelected(SelectionEvent e) {
+                    V3iocshell.init(display);
+                }
+            });
             shell.pack();
             shell.open();
             while(!shell.isDisposed()) {

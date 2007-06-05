@@ -215,7 +215,7 @@ public class CALinkFactory {
          * @see org.epics.ioc.process.AbstractSupport#process(org.epics.ioc.process.RecordProcessRequester)
          */
         public void process(SupportProcessRequester supportProcessRequester) {
-            if(!super.checkSupportState(SupportState.ready,processLinkSupportName + ".process")) {
+            if(!super.checkSupportState(SupportState.ready,processLinkSupportName)) {
                 if(alarmSupport!=null) alarmSupport.setAlarm(
                         pvLink.getFullFieldName() + " not ready",
                         AlarmSeverity.major);

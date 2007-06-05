@@ -524,6 +524,8 @@ public final class ConvertFactory {
                     {PVFloat value = (PVFloat)pv; value.put((float)from); return;}
                 case pvDouble :
                     {PVDouble value = (PVDouble)pv; value.put((double)from); return;}
+                case pvString :
+                    {PVString value = (PVString)pv; value.put(String.valueOf(from)); return;}
                 default:
                     throw new IllegalArgumentException(
                       "Illegal PVType. Must be numeric but it is "
@@ -557,6 +559,8 @@ public final class ConvertFactory {
                     {PVFloat value = (PVFloat)pv; value.put((float)from); return;}
                 case pvDouble :
                     {PVDouble value = (PVDouble)pv; value.put((double)from); return;}
+                case pvString :
+                    {PVString value = (PVString)pv; value.put(String.valueOf(from)); return;}
                 default:
                     throw new IllegalArgumentException(
                       "Illegal PVType. Must be numeric but it is "
@@ -590,6 +594,8 @@ public final class ConvertFactory {
                     {PVFloat value = (PVFloat)pv; value.put((float)from); return;}
                 case pvDouble :
                     {PVDouble value = (PVDouble)pv; value.put((double)from); return;}
+                case pvString :
+                    {PVString value = (PVString)pv; value.put(String.valueOf(from)); return;}
                 default:
                     throw new IllegalArgumentException(
                       "Illegal PVType. Must be numeric but it is "
@@ -623,6 +629,8 @@ public final class ConvertFactory {
                     {PVFloat value = (PVFloat)pv; value.put((float)from); return;}
                 case pvDouble :
                     {PVDouble value = (PVDouble)pv; value.put((double)from); return;}
+                case pvString :
+                    {PVString value = (PVString)pv; value.put(String.valueOf(from)); return;}
                 default:
                     throw new IllegalArgumentException(
                       "Illegal PVType. Must be numeric but it is "
@@ -656,6 +664,8 @@ public final class ConvertFactory {
                     {PVFloat value = (PVFloat)pv; value.put((float)from); return;}
                 case pvDouble :
                     {PVDouble value = (PVDouble)pv; value.put((double)from); return;}
+                case pvString :
+                    {PVString value = (PVString)pv; value.put(String.valueOf(from)); return;}
                 default:
                     throw new IllegalArgumentException(
                       "Illegal PVType. Must be numeric but it is "
@@ -689,6 +699,8 @@ public final class ConvertFactory {
                     {PVFloat value = (PVFloat)pv; value.put((float)from); return;}
                 case pvDouble :
                     {PVDouble value = (PVDouble)pv; value.put((double)from); return;}
+                case pvString :
+                    {PVString value = (PVString)pv; value.put(String.valueOf(from)); return;}
                 default:
                     throw new IllegalArgumentException(
                       "Illegal PVType. Must be numeric but it is "

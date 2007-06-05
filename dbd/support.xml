@@ -53,9 +53,13 @@
     configurationStructureName = "outputLink"
     factoryName = "org.epics.ioc.support.CALinkFactory"
 />
-<linkSupport name = "asynLink"
-    configurationStructureName = "asynLink" 
-    factoryName = "org.epics.ioc.support.CALinkFactory"
+<linkSupport name = "pdrvOctetInput"
+    configurationStructureName = "pdrvLink" 
+    factoryName = "org.epics.ioc.pdrv.devEpics.LinkFactory"
+/>
+<linkSupport name = "pdrvOctetOutput"
+    configurationStructureName = "pdrvLink" 
+    factoryName = "org.epics.ioc.pdrv.devEpics.LinkFactory"
 />
 
 <structure name = "linearConvertInput" supportName = "linearConvertInput">
@@ -95,6 +99,5 @@
     configurationStructureName = "delayLink"
     factoryName = "org.epics.ioc.support.DelayLinkFactory"
 />
-
 
 </DBDefinition>

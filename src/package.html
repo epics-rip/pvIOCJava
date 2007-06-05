@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-       "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+      "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
   <meta http-equiv="content-type" content="text/html; charset=iso-8859-1" />
@@ -10,7 +10,7 @@
 <body>
 <h1 style="text-align: center">EPICS JavaIOC: Java Input/Output Controller<br
 />
-2007.04.18</h1>
+2007.04.30</h1>
 
 <p>This product is available via the <a href="#LicenseAgreement">open source
 license</a> described at the end of this document.</p>
@@ -19,13 +19,13 @@ license</a> described at the end of this document.</p>
 
 <div class="toc">
 <ul>
-  <li><a href="#Overview">Overview</a>
+  <li><a href="#Overview">Overview</a> 
     <ul>
       <li><a href="#Getting">Getting Started</a></li>
       <li><a href="#Status">Status and Remaining Tasks</a></li>
     </ul>
   </li>
-  <li><a href="#Package">Package Summary</a>
+  <li><a href="#Package">Package Summary</a> 
     <ul>
       <li><a href="#default">default</a></li>
       <li><a href="#org.epics.">org.epics.ioc.pv</a></li>
@@ -40,15 +40,15 @@ license</a> described at the end of this document.</p>
       <li><a href="#javaIOC">javaIOC/dbd</a></li>
     </ul>
   </li>
-  <li><a href="#Database">Database Syntax</a>
+  <li><a href="#Database">Database Syntax</a> 
     <ul>
-      <li><a href="#Include">Include and Macro Substitution</a>
+      <li><a href="#Include">Include and Macro Substitution</a> 
         <ul>
           <li><a href="#Syntax">Syntax</a></li>
           <li><a href="#Example">Example</a></li>
         </ul>
       </li>
-      <li><a href="#Database1">Database Definition</a>
+      <li><a href="#Database1">Database Definition</a> 
         <ul>
           <li><a href="#Basic">Basic Syntax</a></li>
           <li><a href="#Field">Field Syntax</a></li>
@@ -58,7 +58,7 @@ license</a> described at the end of this document.</p>
           <li><a href="#Record">Record Type Examples</a></li>
         </ul>
       </li>
-      <li><a href="#Record1">Record Instance Definition</a>
+      <li><a href="#Record1">Record Instance Definition</a> 
         <ul>
           <li><a href="#Syntax1">Syntax</a></li>
           <li><a href="#Example2">Example</a></li>
@@ -66,7 +66,7 @@ license</a> described at the end of this document.</p>
       </li>
     </ul>
   </li>
-  <li><a href="#PVData">PVData</a>
+  <li><a href="#PVData">PVData</a> 
     <ul>
       <li><a href="#Field1">Field Types</a></li>
       <li><a href="#PVData1">PVData Reflection</a></li>
@@ -78,9 +78,9 @@ license</a> described at the end of this document.</p>
   <li><a href="#DBData">DBData Interfaces</a></li>
   <li><a href="#Record2">Record Processing</a></li>
   <li><a href="#Channel">Channel Access</a></li>
-  <li><a href="#Generic">Generic Device Support</a>
+  <li><a href="#Generic">Generic Device Support</a> 
     <ul>
-      <li><a href="#Database2">Database Definitions</a>
+      <li><a href="#Database2">Database Definitions</a> 
         <ul>
           <li><a href="#doubleComm">doubleCommon</a></li>
           <li><a href="#doubleReco">doubleRecord</a></li>
@@ -92,7 +92,7 @@ license</a> described at the end of this document.</p>
         </ul>
       </li>
       <li><a href="#Support">Support Implementation</a></li>
-      <li><a href="#Record3">Record Instance Examples</a>
+      <li><a href="#Record3">Record Instance Examples</a> 
         <ul>
           <li><a href="#doubleInpu">doubleInput</a></li>
           <li><a href="#doubleOutp">doubleOutput</a></li>
@@ -182,24 +182,24 @@ dumps the database definitions and record instances.</p>
 (Standard Widget Toolkit) shell running an ioc. Just try it. After swshell
 starts do the following:</p>
 <ul>
-  <li>click the monitor button and a new window appears
+  <li>click the monitor button and a new window appears 
     <ul>
-      <li>click connect button and a small window "getChannel" appears
+      <li>click connect button and a small window "getChannel" appears 
         <ul>
           <li>click select and choose channel "ai". A small window
-            "getChannelField" appears
+            "getChannelField" appears 
             <ul>
               <li>enter "value" and press enter</li>
             </ul>
           </li>
         </ul>
       </li>
-      <li>click property button. a window offering choices appears
+      <li>click property button. a window offering choices appears 
         <ul>
           <li>select all choices and click done button</li>
         </ul>
       </li>
-      <li>click startMonitor button
+      <li>click startMonitor button 
         <ul>
           <li>after awhile click "stopMonitor" and "disconnect" buttons</li>
         </ul>
@@ -208,16 +208,16 @@ starts do the following:</p>
     <p></p>
   </li>
   <li>on swtshell window click introspectDatabase button and a new window
-    appears
+    appears 
     <ul>
       <li>The menu bar at the top provides access to Database Definitions for
-        menu, structure, recordType, support, and linkSupport
+        menu, structure, recordType, support, and linkSupport 
         <ul>
           <li>select and look at the various definitions.</li>
         </ul>
       </li>
       <li>the recordName row provides access to record instances. Click the
-        select button and select record "ai"
+        select button and select record "ai" 
         <ul>
           <li>The current value of all fields in record ai are shown</li>
         </ul>
@@ -225,7 +225,7 @@ starts do the following:</p>
     </ul>
   </li>
   <li>on swtshell window click on loadDatabase button and a new window
-    appears. Now on-line add powerSupply records
+    appears. Now on-line add powerSupply records 
     <ul>
       <li>click find button and select dbd/powerSupplyRecordDBD.xml</li>
       <li>click show button and the file contents are displayed</li>
@@ -237,9 +237,9 @@ starts do the following:</p>
         database.</li>
     </ul>
   </li>
-  <li>on monitor window
+  <li>on monitor window 
     <ul>
-      <li>monitor record "psEmbeded" field "power" and all properties.
+      <li>monitor record "psEmbeded" field "power" and all properties. 
         <ul>
           <li>The initial vale timeStamp shows that the record was never
             processed.</li>
@@ -248,14 +248,14 @@ starts do the following:</p>
       </li>
     </ul>
   </li>
-  <li>on swtshell window click probe button. A new window appears
+  <li>on swtshell window click probe button. A new window appears 
     <ul>
-      <li>In Put control
+      <li>In Put control 
         <ul>
           <li>set process choice to selected</li>
           <li>click connect button and choose record "psEmbeded" and field
             "power"</li>
-          <li>click put button
+          <li>click put button 
             <ul>
               <li>enter "1.0" and press enter key</li>
             </ul>
@@ -293,7 +293,7 @@ implemented, are required before a usable javaIOC exists.</p>
     This requires both client and server. This could wait until after a beta
     release of JavaIOC is announced.</li>
   <li>V3 Channel Access<br />
-    Two things are required:
+    Two things are required: 
     <ul>
       <li>JavaIOC to V3 server<br />
         This allows javaIOC records to have links to V3 IOCs.</li>
@@ -398,7 +398,7 @@ puts them into an IOC Database (IOCDB).</p>
 <p>This package is Channel Access for a javaIOC.</p>
 
 <h3 id="org.epics.4">org.epics.ioc.util</h3>
-This package provides utility code for a javaIOC:
+This package provides utility code for a javaIOC: 
 <dl>
   <dt>Message Support</dt>
     <dd>This is an interface for passing messages to a requester of many
@@ -692,15 +692,15 @@ example linkSupport definition is:</p>
 
 <p>A support definition consists of:</p>
 <ul>
-  <li>name
+  <li>name 
     <p>Provides a way to match support to a structure, recordType, or a field
     of a structure.</p>
   </li>
-  <li>configurationStructureName
+  <li>configurationStructureName 
     <p>linkSupport only. The name of a structure definition. The structure
     provides configuration information for the support.</p>
   </li>
-  <li>factoryName
+  <li>factoryName 
     <p>The name of a factory that creates support instances.</p>
   </li>
 </ul>
@@ -734,7 +734,7 @@ record instance.</p>
 definitions. A field definition has the format:</p>
 <pre>    &lt;field name = "value" type = "type"  ...&gt;</pre>
 where supportName is optional and "..." represents other attributes. The
-complete set of attributes are:
+complete set of attributes are: 
 <dl>
   <dt style="font-family: courier;">name</dt>
     <dd>the field name. This must be defined.</dd>
@@ -775,16 +775,16 @@ complete set of attributes are:
 
 <h4 id="Property">Property Syntax</h4>
 A structure, recordType, and field can have properties. A property is defined
-as:
+as: 
 <pre>    &lt;property name = "name" associatedField = "field name" /&gt;</pre>
-where
+where 
 <dl>
   <dt>name</dt>
     <dd>The name of the property</dd>
   <dt>associatedField</dt>
     <dd>The name of a field that has the value for the property. Examples are
       given later in this document. An associatedField must be one of the
-      following:
+      following: 
       <dl>
         <dt>/name</dt>
           <dd>If the associatedField value starts with '/' then the search
@@ -1103,7 +1103,7 @@ contains.</p>
 
 <h3 id="Example3">Example: Database Access via Reflection</h3>
 An interface IOCDB provides a method that locates the interface for a record
-instance. For example, to locate the ai record the call is:
+instance. For example, to locate the ai record the call is: 
 <pre>    DBRecord dbRecord = iocdb.findRecord("ai");</pre>
 
 <p>Starting with this the data in the value field can be read as follows:</p>
@@ -1138,7 +1138,7 @@ field.</p>
 <p>PVAccess is an interface for locating PVField interfaces. A PVAccess can
 be created via:</p>
 <pre>    PVAccess pvAccess = PVAccessFactory.create(instanceName);</pre>
-Where instanceName is a Java String. For example:
+Where instanceName is a Java String. For example: 
 <pre>    PVAccess pvAccess = PVAccessFactory.create("ai");</pre>
 
 <p>PVAccess provides the following methods:</p>
@@ -1155,7 +1155,7 @@ Where instanceName is a Java String. For example:
 <p>The argument to findField(name) has the form:</p>
 <pre>    name.name...</pre>
 Each <span style="font-family: courier;">name</span> is the name of a
-property or a field. For example:
+property or a field. For example: 
 <pre>    PVAccess pvAccess = PVAccessFactory.create("ai");
     ChannelField channelField = pvAccess.findField("value.status");</pre>
 
@@ -1504,49 +1504,53 @@ support "powerSupplyRecord".</p>
 <p>The example uses the following support</p>
 <ul>
   <li>doubleRecord</li>
-  <dl>
-      <dd>This is used by record types double, aiDouble, and aoDouble. It is
-        also used by the embeded powerSupply example for voltageInput and
-        currentOutput. It works for all these types because the only thing it
-        does is:
-        <ul>
-          <li>Have access to a value field. It can have access either by some
-            other support calling it's setField method or by locating a field
-            named "value"</li>
-          <li>looks for support for fields named "input", "doubleAlarm",
-            "output", and "linkArray". If a field does not exist or does not
-            have support the field is ignored. If it does exist and has
-            support, the support is called. Thus doubleRecord is generic.</li>
-        </ul>
-      </dd>
-  </dl>
-  <li>powerSupplyRecord</li>
-  <dl>
-      <dd>Requires fields power, voltage, and current. If a field named
-        "voltageInput" has support it is called. If a field names
-        "currentOutput" has support it is called. When it processes it
-        computes current from power and voltage.</dd>
-  </dl>
-  <li>linearConvertInput</li>
-  <dl>
-      <dd>Implements linear conversion from a rawValue to engineering
-      units.</dd>
-  </dl>
-  <li>linearConvertOutput</li>
-  <dl>
-      <dd>Implements linear conversion from engineering units to a
-      rawValue.</dd>
-  </dl>
-  <li>CALinkSupport</li>
-  <dl>
-      <dd>JaveIOC implements channel access links between records.</dd>
-  </dl>
-  <li>asyn Support</li>
-  <dl>
-      <dd>This is not implemented but will be asynDriver converted to the
-        JavaIOC.</dd>
-  </dl>
+  This is used by record types double, aiDouble, and aoDouble. It is also
+  used by the embeded powerSupply example for voltageInput and currentOutput.
+  It works for all these types because the only thing it does is: 
+  <li>Have access to a value field. It can have access either by some other
+    support calling it's setField method or by locating a field named
+  "value"</li>
+  <li>looks for support for fields named "input", "doubleAlarm", "output",
+    and "linkArray". If a field does not exist or does not have support the
+    field is ignored. If it does exist and has support, the support is
+    called. Thus doubleRecord is generic.</li>
 </ul>
+<ul>
+  <li>powerSupplyRecord</li>
+</ul>
+<dl>
+    <dd>Requires fields power, voltage, and current. If a field named
+      "voltageInput" has support it is called. If a field names
+      "currentOutput" has support it is called. When it processes it computes
+      current from power and voltage.</dd>
+</dl>
+<ul>
+  <li>linearConvertInput</li>
+</ul>
+<dl>
+    <dd>Implements linear conversion from a rawValue to engineering
+    units.</dd>
+</dl>
+<ul>
+  <li>linearConvertOutput</li>
+</ul>
+<dl>
+    <dd>Implements linear conversion from engineering units to a
+    rawValue.</dd>
+</dl>
+<ul>
+  <li>CALinkSupport</li>
+</ul>
+<dl>
+    <dd>JaveIOC implements channel access links between records.</dd>
+</dl>
+<ul>
+  <li>asyn Support</li>
+</ul>
+<dl>
+    <dd>This is not implemented but will be asynDriver converted to the
+      JavaIOC.</dd>
+</dl>
 
 <h3 style="text-align: center" id="Record3">Record Instance Examples</h3>
 

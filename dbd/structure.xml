@@ -108,10 +108,12 @@
            type = "menu" menuName = "alarmSeverity" />
 </structure>
 
-<structure name = "asynLink">
+<structure name = "pdrvLink">
     <field name = "portName" type = "string" />
     <field name = "addr" type = "int" />
+    <field name = "mask" type = "int" />
     <field name = "timeout" type = "double" />
+    <field name = "drvParams" type = "string" />
 </structure>
 
 <structure name = "linkArrayElement">

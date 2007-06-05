@@ -8,6 +8,8 @@
 <include href = "aiDoubleRecord.xml" />
 <include href = "aoDoubleRecord.xml" />
 <include href = "incrementalDoubleRecord.xml" />
+<include href = "portRecord.xml" />
+<include href = "stringRecord.xml" />
 <!--
 <include href = "powerSupplyRecord.xml" />
 -->

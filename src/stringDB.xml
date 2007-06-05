@@ -1,0 +1,93 @@
+<?xml version="1.0" ?>
+<IOCDatabase>
+
+<record name = "echoDriverPort" type = "port">
+    <factoryName>org.epics.ioc.pdrv.drivers.EchoDriverFactory</factoryName>
+    <portName>echoDriver</portName>
+    <driverParameters structureName = "echoDriver" >
+        <multiDevice>true</multiDevice>
+        <delay>.5</delay>
+    </driverParameters>
+</record>
+
+<record name = "stringCounter" type = "calc">
+    <calcArgArray>
+        <value structureName = "calcArg">
+            <value>0.0</value>
+            <name>min</name>
+        </value>
+        <value structureName = "calcArg">
+            <value>10.0</value>
+            <name>max</name>
+        </value>
+        <value structureName = "calcArg">
+            <value>1.0</value>
+            <name>inc</name>
+        </value>
+    </calcArgArray>
+    <calculator supportName = "counterCalculator" />
+    <doubleAlarm>
+        <configure structureName = "doubleAlarm">
+          <active>true</active>
+          <hystersis>0.1</hystersis>
+          <highMajor>8.0</highMajor>
+          <highMinor>6.0</highMinor>
+          <lowMinor>4.0</lowMinor>
+          <lowMajor>2.0</lowMajor>
+        </configure>
+    </doubleAlarm>
+    <units>counts</units>
+    <displayLimit>
+        <low>0.0</low>
+        <high>10.0</high>
+    </displayLimit>
+    <scan>
+        <scan>periodic</scan>
+        <rate>2.0</rate>
+    </scan>
+    <linkArray>
+        <value structureName = "linkArrayElement">
+            <wait>false</wait>
+            <link  supportName = "outputLink" >
+                <configure structureName = "outputLink">
+                    <pvname>stringOut</pvname>
+                    <process>true</process>
+                </configure>
+            </link>
+        </value>
+    </linkArray>
+</record>
+
+<record name = "stringOut" type = "string">
+    <output supportName = "pdrvOctetOutput" >
+        <configure structureName = "pdrvLink">
+            <portName>echoDriver</portName>
+            <addr>0</addr>
+            <timeout>.1</timeout>
+        </configure>
+    </output>
+    <linkArray>
+        <value structureName = "linkArrayElement">
+            <wait>false</wait>
+            <link  supportName = "outputLink" >
+                <configure structureName = "outputLink">
+                    <pvname>stringIn</pvname>
+                    <process>true</process>
+                </configure>
+            </link>
+        </value>
+    </linkArray>
+</record>
+
+<record name = "stringIn" type = "string">
+    <input supportName = "pdrvOctetInput" >
+        <configure structureName = "pdrvLink">
+            <portName>echoDriver</portName>
+            <addr>0</addr>
+            <timeout>.1</timeout>
+        </configure>
+    </input>
+</record>
+
+
+</IOCDatabase>
