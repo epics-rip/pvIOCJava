@@ -340,7 +340,7 @@ public class Factory {
                 portThread = new PortThread(this,priority);
             }
         }
-        private static ReentrantLock portLock = new ReentrantLock();
+        private ReentrantLock portLock = new ReentrantLock();
         private String portName;
         private PortDriver portDriver;
         private String driverName;
@@ -932,7 +932,7 @@ public class Factory {
             }
         }
         
-        private static ReentrantLock deviceLock = new ReentrantLock();
+        private ReentrantLock deviceLock = new ReentrantLock();
         private Port port;
         private String portName;
         private int addr;
@@ -1242,76 +1242,176 @@ public class Factory {
         
         private static final int DEFAULT_TRACE_TRUNCATE_SIZE = 80;
         
+        private ReentrantLock traceLock = new ReentrantLock();
         private Writer file = new BufferedWriter(new OutputStreamWriter(System.out));
         private TimeStamp timeStamp = new TimeStamp();
         private int mask = Trace.ERROR;
         private int iomask = Trace.IO_NODATA;
         private int truncateSize = DEFAULT_TRACE_TRUNCATE_SIZE;
         
+        private List<TraceOptionChangeListener> optionChangeListenerList = new LinkedList<TraceOptionChangeListener>();
+        private List<TraceOptionChangeListener> optionChangeListenerListNew = null;
+        private boolean optionChangeActive = true;
+        
         /* (non-Javadoc)
          * @see org.epics.ioc.asyn.Trace#getTraceFile()
          */
-        public synchronized Writer getTraceFile() {
-            return file;
+        public Writer getFile() {
+            traceLock.lock();
+            try {
+                return file;
+            } finally {
+                traceLock.unlock();
+            }
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.asyn.Trace#getTraceIOMask()
          */
-        public synchronized int getTraceIOMask() {
-            return iomask;
+        public int getIOMask() {
+            traceLock.lock();
+            try {
+                return iomask;
+            } finally {
+                traceLock.unlock();
+            }
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.asyn.Trace#getTraceIOTruncateSize()
          */
-        public synchronized int getTraceIOTruncateSize() {
-            return truncateSize;
+        public int getIOTruncateSize() {
+            traceLock.lock();
+            try {
+                return truncateSize;
+            } finally {
+                traceLock.unlock();
+            }
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.asyn.Trace#getTraceMask()
          */
-        public synchronized int getTraceMask() {
-            return mask;
+        public int getMask() {
+            traceLock.lock();
+            try {
+                return mask;
+            } finally {
+                traceLock.unlock();
+            }
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.asyn.Trace#setTraceFile(java.io.Writer)
          */
-        public synchronized void setTraceFile(Writer file) {
-            this.file = file;
+        public void setFile(Writer file) {
+            traceLock.lock();
+            try {
+                this.file = file;
+                raiseException();
+            } finally {
+                traceLock.unlock();
+            }
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.asyn.Trace#setTraceIOMask(int)
          */
-        public synchronized void setTraceIOMask(int mask) {
-            iomask = mask;
+        public void setIOMask(int mask) {
+            traceLock.lock();
+            try {
+                iomask = mask;
+                raiseException();
+            } finally {
+                traceLock.unlock();
+            }
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.asyn.Trace#setTraceIOTruncateSize(long)
          */
-        public synchronized void setTraceIOTruncateSize(int size) {
-            truncateSize = size;
+        public void setIOTruncateSize(int size) {
+            traceLock.lock();
+            try {
+                truncateSize = size;
+            } finally {
+                traceLock.unlock();
+            }
+            raiseException();
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.asyn.Trace#setTraceMask(int)
          */
-        public synchronized void setTraceMask(int mask) {
-            this.mask = mask;
+        public void setMask(int mask) {
+            traceLock.lock();
+            try {
+                this.mask = mask;
+            } finally {
+                traceLock.unlock();
+            }
+            raiseException();
+        }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pdrv.Trace#optionChangeListenerAdd(org.epics.ioc.pdrv.TraceOptionChangeListener)
+         */
+        public void optionChangeListenerAdd(TraceOptionChangeListener traceOptionChangeListener) {
+            traceLock.lock();
+            try {
+                if(!optionChangeActive) {   
+                    if(!optionChangeListenerList.add(traceOptionChangeListener)) {
+                        throw new IllegalStateException("add failed");
+                    }
+                    return;
+                }
+                if(optionChangeListenerListNew==null) {
+                    optionChangeListenerListNew =
+                        new LinkedList<TraceOptionChangeListener>(optionChangeListenerList);
+                }
+                if(!optionChangeListenerListNew.add(traceOptionChangeListener)) {
+                    throw new IllegalStateException("add failed");
+                }
+            } finally {
+                traceLock.unlock();
+            }
+        }
+
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pdrv.Trace#optionChangeListenerRemove(org.epics.ioc.pdrv.TraceOptionChangeListener)
+         */
+        public void optionChangeListenerRemove(TraceOptionChangeListener traceOptionChangeListener) {
+            traceLock.lock();
+            try {
+                if(!optionChangeActive) {   
+                    if(!optionChangeListenerList.remove(traceOptionChangeListener)) {
+                        throw new IllegalStateException("add failed");
+                    }
+                    return;
+                }
+                if(optionChangeListenerListNew==null) {
+                    optionChangeListenerListNew =
+                        new LinkedList<TraceOptionChangeListener>(optionChangeListenerList);
+                }
+                if(!optionChangeListenerListNew.remove(traceOptionChangeListener)) {
+                    throw new IllegalStateException("add failed");
+                }
+            } finally {
+                traceLock.unlock();
+            }
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.asyn.Trace#print(int, java.lang.String, java.lang.Object[])
          */
-        public synchronized void print(int reason, String format, Object... args) {
+        public void print(int reason, String format, Object... args) {
             if((reason&mask)==0) return;
+            traceLock.lock();
             try {
                 file.write(getTime() + String.format(format, args));
             }catch (IOException e) {
                 System.err.println(e.getMessage());
+            } finally {
+                traceLock.unlock();
             }
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.asyn.Trace#printIO(int, byte[], long, java.lang.String, java.lang.Object[])
          */
-        public synchronized void printIO(int reason, byte[] buffer, long len, String format, Object... args) {
+        public void printIO(int reason, byte[] buffer, long len, String format, Object... args) {
             if((reason&mask)==0) return;
+            traceLock.lock();
             try {
                 file.write(getTime() + String.format(format, args));
                 if(iomask==0)return;
@@ -1334,6 +1434,32 @@ public class Factory {
                 }
             }catch (IOException e) {
                 System.err.println(e.getMessage());
+            }  finally {
+                traceLock.unlock();
+            }
+        }
+
+        private void raiseException() {
+            traceLock.lock();
+            try {
+                optionChangeActive = true; 
+            } finally {
+                traceLock.unlock();
+            }
+            ListIterator<TraceOptionChangeListener> iter =  optionChangeListenerList.listIterator();
+            while(iter.hasNext()) {
+                TraceOptionChangeListener asynOptionChangeListener = iter.next();
+                asynOptionChangeListener.optionChange();
+            }
+            traceLock.lock();
+            try {
+                if(optionChangeListenerListNew!=null) {
+                    optionChangeListenerList = optionChangeListenerListNew;
+                    optionChangeListenerListNew = null;
+                }
+                optionChangeActive = false; 
+            } finally {
+                traceLock.unlock();
             }
         }
         
