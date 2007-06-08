@@ -57,43 +57,53 @@ public interface Trace {
      * @param mask The mask.
      * It must be some combination of ERROR|IO_SUPPORT|IO_INTERPOSE|IO_DRIVER
      */
-    void setTraceMask(int mask);
+    void setMask(int mask);
     /**
      * Get the trace mask.
      * @return The mask.
      */
-    int getTraceMask();
+    int getMask();
     /**
      * Set the IO trace mask.
      * @param mask The mask.
      * It must be some combination of IO_NODATA|IO_ASCII|IO_ESCAPE|IO_HEX
      */
-    void setTraceIOMask(int mask);
+    void setIOMask(int mask);
     /**
      * Get the IO trace mask.
      * @return The mask.
      */
-    int getTraceIOMask();
+    int getIOMask();
     /**
      * Set the trace field.
      * @param file The Writer interface.
      */
-    void setTraceFile(Writer file);
+    void setFile(Writer file);
     /**
      * Get the trace file.
      * @return The Writer interface.
      */
-    Writer getTraceFile();
+    Writer getFile();
     /**
      * Set the size for truncating data output for printIO requests.
      * @param size The size in bytes.
      */
-    void setTraceIOTruncateSize(int size);
+    void setIOTruncateSize(int size);
     /**
      * Get the size for truncating data output for printIO requests.
      * @return The size in bytes.
      */
-    int getTraceIOTruncateSize();
+    int getIOTruncateSize();
+    /**
+     * Add a listener for change of any trace option.
+     * @param traceOptionChangeListener The listener.
+     */
+    void optionChangeListenerAdd(TraceOptionChangeListener traceOptionChangeListener);
+    /**
+     * Remove a listener for change of any trace option.
+     * @param traceOptionChangeListener The listener.
+     */
+    void optionChangeListenerRemove(TraceOptionChangeListener traceOptionChangeListener);
     /**
      * Generate a trace message.
      * @param reason One of ERROR|IO_SUPPORT|IO_INTERPOSE|IO_DRIVER.
