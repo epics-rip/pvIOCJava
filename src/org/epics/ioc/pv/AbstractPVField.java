@@ -5,6 +5,11 @@
  */
 package org.epics.ioc.pv;
 
+import java.util.LinkedList;
+import java.util.List;
+import java.util.ListIterator;
+import java.util.concurrent.locks.ReentrantLock;
+
 import org.epics.ioc.util.MessageType;
 
 /**
@@ -20,6 +25,12 @@ public abstract class AbstractPVField implements PVField{
     private PVField parent;
     private PVRecord record;
     private String supportName = null;
+    
+    private ReentrantLock asynLock = new ReentrantLock();
+    private List<AsynAccessListener> asynAccessListenerList = new LinkedList<AsynAccessListener>();
+    private List<AsynAccessListener> asynAccessListenerListNew = null;
+    private boolean callingListenerActive = true;
+    private Object asynModifier = null;
        
     /**
      * Constructor that must be called by derived classes.
@@ -141,6 +152,105 @@ public abstract class AbstractPVField implements PVField{
      */
     public void setSupportName(String name) {
         supportName = name;
+    }
+    /* (non-Javadoc)
+     * @see org.epics.ioc.pv.PVField#asynAccessListenerAdd(org.epics.ioc.pv.AsynAccessListener)
+     */
+    public void asynAccessListenerAdd(AsynAccessListener asynAccessListener) {
+        asynLock.lock();
+        try {
+            if(!callingListenerActive) {   
+                if(!asynAccessListenerList.add(asynAccessListener)) {
+                    throw new IllegalStateException("add failed");
+                }
+                return;
+            }
+            if(asynAccessListenerListNew==null) {
+                asynAccessListenerListNew =
+                    new LinkedList<AsynAccessListener>(asynAccessListenerList);
+            }
+            if(!asynAccessListenerListNew.add(asynAccessListener)) {
+                throw new IllegalStateException("add failed");
+            }
+        } finally {
+            asynLock.unlock();
+        }
+    }
+    /* (non-Javadoc)
+     * @see org.epics.ioc.pv.PVField#asynAccessListenerRemove(org.epics.ioc.pv.AsynAccessListener)
+     */
+    public void asynAccessListenerRemove(AsynAccessListener asynAccessListener) {
+        asynLock.lock();
+        try {
+            if(!callingListenerActive) {   
+                if(!asynAccessListenerList.remove(asynAccessListener)) {
+                    throw new IllegalStateException("add failed");
+                }
+                return;
+            }
+            if(asynAccessListenerListNew==null) {
+                asynAccessListenerListNew =
+                    new LinkedList<AsynAccessListener>(asynAccessListenerList);
+            }
+            if(!asynAccessListenerListNew.remove(asynAccessListener)) {
+                throw new IllegalStateException("add failed");
+            }
+        } finally {
+            asynLock.unlock();
+        }
+    }
+    /* (non-Javadoc)
+     * @see org.epics.ioc.pv.PVField#asynAccessCallListeners(boolean)
+     */
+    public void asynAccessCallListeners(boolean begin) {
+        asynLock.lock();
+        try {
+            callingListenerActive = true;
+        } finally {
+            asynLock.unlock();
+        }
+        ListIterator<AsynAccessListener> iter =  asynAccessListenerList.listIterator();
+        while(iter.hasNext()) {
+            AsynAccessListener asynAccessListener = iter.next();
+            if(begin) {
+                asynAccessListener.beginSyncAccess();
+            } else {
+                asynAccessListener.endSyncAccess();
+            }
+        }
+        asynLock.lock();
+        try {
+            if(asynAccessListenerListNew!=null) {
+                asynAccessListenerList = asynAccessListenerListNew;
+                asynAccessListenerListNew = null;
+            }
+            callingListenerActive = false; 
+        } finally {
+            asynLock.unlock();
+        }
+    }
+    /* (non-Javadoc)
+     * @see org.epics.ioc.pv.PVField#asynModifyEnd(java.lang.Object)
+     */
+    public void asynModifyEnd(Object asynModifier) {
+        if(asynModifier==null || asynModifier!=this.asynModifier) {
+            throw new IllegalStateException("not the modifier");
+        }
+        this.asynModifier = null;
+    }
+    /* (non-Javadoc)
+     * @see org.epics.ioc.pv.PVField#asynModifyStart(java.lang.Object)
+     */
+    public boolean asynModifyStart(Object asynModifier) {
+        if(this.asynModifier!=null) return false;
+        this.asynModifier = asynModifier;
+        return true;
+    }
+    /* (non-Javadoc)
+     * @see org.epics.ioc.pv.PVField#isAsynModifyActive()
+     */
+    public boolean isAsynModifyActive() {
+        return (asynModifier==null) ? false : true;
     }
     /* (non-Javadoc)
      * @see org.epics.ioc.pv.PVField#toString(int)

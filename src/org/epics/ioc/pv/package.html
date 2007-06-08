@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-       "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+      "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
   <meta http-equiv="content-type" content="text/html; charset=iso-8859-1" />
@@ -10,8 +10,8 @@
 <body>
 <h1 style="text-align: center">EPICS JavaIOC: pv<br />
 package: org.epics.ioc.pv<br />
-2007.04.17</h1>
-CONTENTS
+2007.06.08</h1>
+CONTENTS 
 
 <div class="toc">
 <ul>
@@ -26,6 +26,7 @@ CONTENTS
   <li><a href="#Reflection">Reflection</a></li>
   <li><a href="#PVField">PVField Interfaces</a>
     <ul>
+      <li><a href="#AsynAccess">AsynAccessListener</a></li>
       <li><a href="#PVField1">PVField</a></li>
       <li><a href="#Primitive">Primitive PVField types</a></li>
       <li><a href="#PVString">PVString</a></li>
@@ -331,11 +332,11 @@ separation is especially important for arrays and structures.</p>
 
 <p>The above definitions support the following:</p>
 <ul>
-  <li>Property
+  <li>Property 
     <ul>
       <li>A property has a name.</li>
       <li>A property has an associated field that holds the data. The
-        associated field must be one of the following:
+        associated field must be one of the following: 
         <dl>
           <dt>name</dt>
             <dd>If the field is a structure and name is a subfield of the
@@ -361,7 +362,7 @@ separation is especially important for arrays and structures.</p>
         </dl>
       </li>
       <li>A property can be converted to a string.</li>
-      <li>Properties can be used for two purposes:
+      <li>Properties can be used for two purposes: 
         <ol>
           <li>Reference other fields related to a field. For example the
             "value" field of many record types will have properties with
@@ -373,7 +374,7 @@ separation is especially important for arrays and structures.</p>
     </ul>
   </li>
   <li>FieldAttribute<br />
-    Each field has the following attributes:
+    Each field has the following attributes: 
     <ul>
       <li>default<br />
         A string default value, which can be null.</li>
@@ -389,7 +390,7 @@ separation is especially important for arrays and structures.</p>
       implemented.</li>
     </ul>
   </li>
-  <li>Field
+  <li>Field 
     <ul>
       <li>A field has a name.</li>
       <li>A field can have an arbitrary number of associated properties
@@ -402,18 +403,18 @@ separation is especially important for arrays and structures.</p>
       <li>A field can be converted to a string.</li>
     </ul>
   </li>
-  <li>Enum
+  <li>Enum 
     <ul>
       <li>A enum is a field that can have mutable or immutable choices.</li>
     </ul>
   </li>
-  <li>Menu
+  <li>Menu 
     <ul>
       <li>A menu is an enum that has immutable choices and also has a
         menuName.</li>
     </ul>
   </li>
-  <li>Structure
+  <li>Structure 
     <ul>
       <li>Has a name.</li>
       <li>Has fields that can be any of the supported types.</li>
@@ -428,6 +429,32 @@ separation is especially important for arrays and structures.</p>
 
 <p>This section defines the Java Interfaces for accessing fields within a PV
 record.</p>
+
+<h3 id="AsynAccess">AsynAccessListener</h3>
+
+<p>This is provided for asynchronous support. For example support that inputs
+an array may have to get the array in chunks while blocking between chunks.
+While a chunk is being changed the record must be locked to prevent other
+code from accessing the field. The support code can implement the following
+interface so that it can lock and unlock the record while the field is being
+modified.</p>
+<pre>    public interface AsynAccessListener {
+        void beginSyncAccess();
+        void endSyncAccess();
+    }
+where
+<ul>
+   
+  <li>beginSyncAccess<br />
+        Begin synchronous update of field.
+     </li>
+
+   
+  <li>endSyncAccess<br />
+        End synchronous update of the field.
+     </li>
+</ul>
+</pre>
 
 <h3 id="PVField1">PVField</h3>
 
@@ -448,16 +475,22 @@ record.</p>
         void replacePVField(PVField newPVField);
         String getSupportName();
         String setSupportName(String name);
+        void asynAccessListenerAdd(AsynAccessListener asynAccessListener);
+        void asynAccessListenerRemove(AsynAccessListener asynAccessListener);
+        void asynAccessCallListeners(boolean begin);
+        boolean asynModifyStart(Object asynModifier);
+        void asynModifyEnd(Object asynModifier);
+        boolean isAsynModifyActive();
         String toString();
         String toString(int indentLevel);
     }</pre>
-where
+where 
 <ul>
   <li>MessageType<br />
     This is defined in org.epics.ioc.util.</li>
   <li>Requester<br />
     Requester is also defined in org.epics.ioc.util. For an IOC database the
-    methods are implemented as follows:
+    methods are implemented as follows: 
     <ul>
       <li>getRequesterName<br />
         This is the full field name concatenated to the record name.</li>
@@ -500,6 +533,26 @@ where
     available so that support can be changed remotely. For an IOC database
     only PVLink fields allow the support to be modified after record
     initialization.</li>
+  <li>asynAccessListenerAdd<br />
+    Add a listener for the beginning and end of synchronous field
+    modification. This is only applicable when a field is asynchronously
+    modified, i.e. the modifier needs to block between synchronous
+    modifications. </li>
+  <li>asynAccessListenerRemove<br />
+    Remove a listener for the beginning and end of synchronous field
+    modification. </li>
+  <li>asynAccessCallListeners<br />
+    Call the listeners. Each time a synchronous modification is made this is
+    called before any modification and after all modifications are complete.
+    The caller must not block between the two calls i.e. the modification
+    must be synchronous. </li>
+  <li>asynModifyStart<br />
+    Register to be the asynchronous modifier of the field. The return value
+    is false if another modifier has already registered. </li>
+  <li>asynModifyEnd<br />
+    End asynchronous modification of the field. </li>
+  <li>isAsynModifyActive<br />
+    Is an asynchronous modifier registered? </li>
   <li>toString<br />
     Converts the field data to a string. This is mostly for debugging
     purposes.</li>
@@ -555,6 +608,7 @@ where
 
 <p>The interface for enum is:</p>
 <pre>    interface PVEnum extends PVField{
+        Enum getEnum();
         int getIndex();
         void setIndex(int index);
         String[] getChoices();
@@ -563,6 +617,8 @@ where
 
 <p>where</p>
 <dl>
+  <dt>getEnum</dt>
+    <dd>Get the introspection interface.</dd>
   <dt>getIndex</dt>
     <dd>Get the index of the currently selected choice.</dd>
   <dt>setIndex</dt>
@@ -575,7 +631,13 @@ where
 <h3 id="PVMenu">PVMenu</h3>
 
 <p>The interface for a menu is:</p>
-<pre>    interface PVMenu extends PVEnum {}</pre>
+<pre>    interface PVMenu extends PVEnum {
+         Menu getMenu();
+    }</pre>
+<dl>
+  <dt>getMenu</dt>
+    <dd>Get the introspection interface.</dd>
+</dl>
 
 <p>The difference from an enum is that the reflection interface provides a
 menuName and the choices can not be modified.</p>
@@ -609,6 +671,7 @@ assumes that the client has permission to change the support:</p>
 
 <p>The interface for structure is:</p>
 <pre>    interface PVStructure extends PVField {
+        Structure getStructure();
         PVField[] getFieldPVFields();
         boolean replaceStructureField(String fieldName,String structureName)
         PVBoolean getBooleanField(String fieldName);
@@ -627,6 +690,8 @@ assumes that the client has permission to change the support:</p>
 
 <p>where</p>
 <dl>
+  <dt>getStructure</dt>
+    <dd>Get the introspection interface for the structure.</dd>
   <dt>getFieldPVFields</dt>
     <dd>Returns the array of subfields. The set of subfields must all have
       different field names.</dd>
@@ -707,6 +772,7 @@ getMaxCapacity. setMaxCapacity can have tight access security.</p>
 
 <p>The interfaces for array are:</p>
 <pre>    interface PVArray extends PVField {
+        Array getArray();
         int getLength();
         void setLength(int len);
         int getCapacity();
@@ -1010,7 +1076,7 @@ instance definitions.</p>
     public class PVDataFactory {
         public static PVDataCreate getPVDataCreate();
     }</pre>
-where
+where 
 <dl>
   <dt style="font-family: courier;">createData</dt>
     <dd>Creates an instance of any type of field except array fields, or a
@@ -1109,6 +1175,12 @@ interfaces:</p>
     public PVRecord getPVRecord();
     public String getSupportName();
     public String setSupportName(String name);
+    void asynAccessListenerAdd(AsynAccessListener asynAccessListener);
+    void asynAccessListenerRemove(AsynAccessListener asynAccessListener);
+    void asynAccessCallListeners(boolean begin);
+    boolean asynModifyStart(Object asynModifier);
+    void asynModifyEnd(Object asynModifier);
+    boolean isAsynModifyActive();
     public String toString(int indentLevel);
 }</pre>
 
@@ -1137,7 +1209,9 @@ interfaces:</p>
 
 <p>The following is a abstract class for creating array fields.</p>
 <pre>public abstract class AbstractPVArray extends AbstractPVField implements PVArray{
-    public AbstractPVArray(PVField parent,Array array,int capacity,boolean capacityMutable);
+    public AbstractPVArray(PVField parent,Array array,
+        int capacity,boolean capacityMutable);
+    public Array getArray();
     public boolean isCapacityMutable();
     public int getCapacity();
     public int getLength();
@@ -1149,6 +1223,7 @@ interfaces:</p>
 <h3 id="BasePVEnum">BasePVEnum</h3>
 <pre>public class BasePVEnum extends AbstractPVField implements PVEnum {
     public BasePVEnum(PVField parent,Enum enumField);
+    public Enum getEnum();
     public String[] getChoices();
     public int getIndex();
     public boolean setChoices(String[] choice);
@@ -1160,6 +1235,7 @@ interfaces:</p>
 <h3 id="BasePVMenu">BasePVMenu</h3>
 <pre>public class BasePVMenu extends BasePVEnum implements PVMenu
     public BasePVMenu(PVField parent,Menu menu) {
+    public Menu getMenu();
     public boolean setChoices(String[] choice) {
     public String toString() { return getString(0);}
     public String toString(int indentLevel) {
@@ -1176,7 +1252,9 @@ interfaces:</p>
 
 <h3 id="BasePVStru">BasePVStructure</h3>
 <pre>public class BasePVStructure extends AbstractPVField implements PVStructure
+    public Structure getStructure();
     public BasePVStructure(PVField parent, Structure structure);
+    public Structure getStructure();
     public void setRecord(PVRecord record);
     public boolean replaceStructureField(String fieldName, Structure structure);
     public PVField[] getFieldPVFields();
@@ -1204,7 +1282,7 @@ interfaces:</p>
     megabyte array to be converted to a string expect a lot of output.</li>
   <li>Conversion from a string to a scalar type.</li>
   <li>Conversion from an array of strings to an array of scalar types.</li>
-  <li>Copy between the following types of scalar PVs
+  <li>Copy between the following types of scalar PVs 
     <ul>
       <li>Numeric type to another numeric type</li>
       <li>Both have the same type.</li>
@@ -1212,7 +1290,7 @@ interfaces:</p>
     </ul>
   </li>
   <li>Copy between PVArrays with element type that are scalar and satisfy one
-    of the following.
+    of the following. 
     <ul>
       <li>Numeric to numeric</li>
       <li>Both have the same type.</li>
@@ -1341,7 +1419,7 @@ valid names.</p>
 <p>where</p>
 <dl>
   <dt style="font-family: courier;">PVAccess</dt>
-    <dd>The interface for locating data fields within a record instance.
+    <dd>The interface for locating data fields within a record instance. 
       <dl>
         <dt style="font-family: courier;">getPVRecord</dt>
           <dd>Get the record instance interface this PVAccess accesses.</dd>

@@ -12,6 +12,7 @@ import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 
 import org.epics.ioc.pdrv.*;
+import org.epics.ioc.pv.*;
 
 
 
@@ -31,7 +32,7 @@ import org.epics.ioc.pdrv.*;
  * @author mrk
  *
  */
-public abstract class Int32ArrayBase implements Int32Array {
+public abstract class Int32ArrayBase extends AbstractPVArray implements Int32Array {
     private Trace asynTrace;
     private String interfaceName;
     private Port port;
@@ -44,8 +45,6 @@ public abstract class Int32ArrayBase implements Int32Array {
     private boolean interruptActive = true;
     private boolean interruptListenerListModified = false;
     private Interrupt interrupt = new Interrupt();
-    private int[] interruptData = null;
-    private int length = 0;
     
     /**
      * Constructor.
@@ -53,7 +52,10 @@ public abstract class Int32ArrayBase implements Int32Array {
      * @param device The device
      * @param interfaceName The interface.
      */
-    protected Int32ArrayBase(Device device,String interfaceName) {
+    protected Int32ArrayBase(PVField parent,Array array,int capacity,boolean capacityMutable,
+        Device device,String interfaceName)
+    {
+        super(parent,array,capacity,capacityMutable);
         asynTrace = device.getTrace();
         port = device.getPort();
         portName = port.getPortName();
@@ -71,18 +73,8 @@ public abstract class Int32ArrayBase implements Int32Array {
                     portName);
             return;
         }
-        interruptData = data;
-        this.length = length;
         interrupt.interrupt();
     }
-    /* (non-Javadoc)
-     * @see org.epics.ioc.pdrv.interfaces.Int32Array#read(org.epics.ioc.pdrv.User, int[], int)
-     */
-    public abstract Status read(User user, int[] value, int length);
-    /* (non-Javadoc)
-     * @see org.epics.ioc.pdrv.interfaces.Int32Array#write(org.epics.ioc.pdrv.User, int[], int)
-     */
-    public abstract Status write(User user, int[] value, int length);
     /* (non-Javadoc)
      * @see org.epics.ioc.pdrv.Interface#getInterfaceName()
      */
@@ -160,7 +152,7 @@ public abstract class Int32ArrayBase implements Int32Array {
         ListIterator<Int32ArrayInterruptListener> iter = interruptlistenerList.listIterator();
         while(iter.hasNext()) {
             Int32ArrayInterruptListener listener = iter.next();
-            listener.interrupt(interruptData,length);
+            listener.interrupt(this);
         }
         lock.lock();
         try {

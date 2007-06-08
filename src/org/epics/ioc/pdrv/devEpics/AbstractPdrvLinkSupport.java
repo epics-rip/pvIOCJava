@@ -41,8 +41,7 @@ ProcessContinueRequester,QueueRequestCallback
         pvRecord = dbRecord.getPVRecord();
         recordName = pvRecord.getRecordName();
         recordProcess = dbRecord.getRecordProcess();
-    }
-    
+    }    
     /* (non-Javadoc)
      * @see org.epics.ioc.support.AbstractSupport#initialize()
      */
@@ -59,11 +58,6 @@ ProcessContinueRequester,QueueRequestCallback
      * @see org.epics.ioc.support.AbstractSupport#stop()
      */
     abstract public void stop();
-    
-    /* (non-Javadoc)
-     * @see org.epics.ioc.process.ProcessContinueRequester#processContinue()
-     */
-    abstract public void processContinue();
     /**
      * A method that must be implemented by derived support.
      * It is called from a queueRequest callback.
@@ -81,17 +75,12 @@ ProcessContinueRequester,QueueRequestCallback
     protected String fullName = null;
     protected RecordProcess recordProcess = null;
     
-    /**
-     * 
-     */
     protected AlarmSupport alarmSupport = null;
-    /**
-     * 
-     */
     protected PVStructure configStructure = null;;
     protected PVString pvPortName = null;
     protected PVInt pvAddr = null;
     protected PVInt pvMask = null;
+    protected PVInt pvSize = null;
     protected PVDouble pvTimeout = null;
     protected PVString pvDrvParams = null;
     
@@ -123,6 +112,8 @@ ProcessContinueRequester,QueueRequestCallback
         if(pvAddr==null) return false;
         pvMask = configStructure.getIntField("mask");
         if(pvMask==null) return false;
+        pvSize = configStructure.getIntField("size");
+        if(pvSize==null) return false;
         pvTimeout = configStructure.getDoubleField("timeout");
         if(pvTimeout==null) return false;
         pvDrvParams = configStructure.getStringField("drvParams");
@@ -232,7 +223,12 @@ ProcessContinueRequester,QueueRequestCallback
             dbRecord.unlock();
         }
     }
-
+    /* (non-Javadoc)
+     * @see org.epics.ioc.process.ProcessContinueRequester#processContinue()
+     */
+    public void processContinue() {
+        supportProcessRequester.supportProcessDone(RequestResult.success);
+    }
     /* (non-Javadoc)
      * @see org.epics.ioc.asyn.AsynQueueRequestCallback#callback(org.epics.ioc.asyn.AsynUser)
      */

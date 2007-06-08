@@ -5,6 +5,8 @@
  */
 package org.epics.ioc.pdrv.interfaces;
 
+import org.epics.ioc.pv.PVDoubleArray;
+
 /**
  * Interface implemented by an Float64ArrayInterruptListener.
  * @author mrk
@@ -13,8 +15,7 @@ package org.epics.ioc.pdrv.interfaces;
 public interface Float64ArrayInterruptListener{
     /**
      * An interrupt has occured.
-     * @param data The data array.
-     * @param length The number of elements in the array.
+     * @param pvDoubleArray The array.
      */
-    void interrupt(double[] data,int length);
+    void interrupt(PVDoubleArray pvDoubleArray);
 }

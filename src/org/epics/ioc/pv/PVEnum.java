@@ -13,6 +13,11 @@ package org.epics.ioc.pv;
  */
 public interface PVEnum extends PVField{
     /**
+     * Get the Enum introspection interface.
+     * @return The introspection interface.
+     */
+    Enum getEnum();
+    /**
      * Get the index of the current selected choice.
      * @return index of current choice.
      */

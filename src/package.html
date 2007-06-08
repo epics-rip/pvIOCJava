@@ -1055,6 +1055,12 @@ contains.</p>
          void replacePVField(PVField newPVField);
          String getSupportName();
          String setSupportName(String name);
+         void asynAccessListenerAdd(AsynAccessListener asynAccessListener);
+         void asynAccessListenerRemove(AsynAccessListener asynAccessListener);
+         void asynAccessCallListeners(boolean begin);
+         boolean asynModifyStart(Object asynModifier);
+         void asynModifyEnd(Object asynModifier);
+         boolean isAsynModifyActive();
          String toString();
          String toString(int indentLevel);
     }
@@ -1068,20 +1074,25 @@ contains.</p>
         void put(String value);
     }
     interface PVEnum extends PVField{
+        Enum getEnum();
         int getIndex();
         void setIndex(int index);
         String[] getChoices();
         boolean setChoices(String[] choice);
     }
     interface PVStructure extends PVField {
+        Structure getStructure();
         PVField[] getFieldPVFields();
     }
-    public interface PVMenu extends PVEnum {}
+    public interface PVMenu extends PVEnum {
+        Menu getMenu();
+    }
     public interface PVLink extends PVField {
         PVStructure getConfigurationStructure();
         boolean setConfigurationStructure(PVStructure pvStructure);
     }
     interface PVArray extends PVField{
+        Array getArray();
         int getLength();
         void setLength(int len);
         int getCapacity();

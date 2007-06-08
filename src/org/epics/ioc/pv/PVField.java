@@ -56,6 +56,41 @@ public interface PVField extends Requester {
      */
     void setSupportName(String name);
     /**
+     * Add a listener for asynchronous access of the field.
+     * @param asynAccessListener The listener.
+     */
+    void asynAccessListenerAdd(AsynAccessListener asynAccessListener);
+    /**
+     * Remove a listener for asynchronous access of the field.
+     * @param asynAccessListener The listener.
+     */
+    void asynAccessListenerRemove(AsynAccessListener asynAccessListener);
+    /**
+     * Call the asynchronous listeners.
+     * Each time a synchronous modification is made this is called before
+     * any modification and after all modifications are complete.
+     * The caller must not block between the two calls, i.e. the modification must be synchronous.
+     */
+    void asynAccessCallListeners(boolean begin);
+    /**
+     * Register to be the asynchronous modifier of the field.
+     * @param asynModifier  The modifier.
+     * @return (false,true) if caller (is not, is) allowed to modify the field.
+     * The value will be false if another modifier has registered.
+     */
+    boolean asynModifyStart(Object asynModifier);
+    /**
+     * /**
+     * End asynchronous modification of the field.
+     * @param asynModifier  The modifier.
+     */
+    void asynModifyEnd(Object asynModifier);
+    /**
+     * Is an asynchronous modifier registered?
+     * @return (false,true) if the field (is not, is) being asynchronously modified.
+     */
+    boolean isAsynModifyActive();
+    /**
      * Convert the PVField to a string.
      * @return The string.
      */

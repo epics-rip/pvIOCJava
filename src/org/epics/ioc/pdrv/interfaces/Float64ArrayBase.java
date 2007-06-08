@@ -12,6 +12,7 @@ import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 
 import org.epics.ioc.pdrv.*;
+import org.epics.ioc.pv.*;
 
 
 
@@ -31,7 +32,7 @@ import org.epics.ioc.pdrv.*;
  * @author mrk
  *
  */
-public abstract class Float64ArrayBase implements Float64Array {
+public abstract class Float64ArrayBase extends AbstractPVArray implements Float64Array {
     private Trace asynTrace;
     private String interfaceName;
     private Port port;
@@ -44,8 +45,6 @@ public abstract class Float64ArrayBase implements Float64Array {
     private boolean interruptActive = true;
     private boolean interruptListenerListModified = false;
     private Interrupt interrupt = new Interrupt();
-    private double[] interruptData = null;
-    private int length = 0;
     
     /**
      * Constructor.
@@ -53,7 +52,10 @@ public abstract class Float64ArrayBase implements Float64Array {
      * @param device The device
      * @param interfaceName The interface.
      */
-    protected Float64ArrayBase(Device device,String interfaceName) {
+    protected Float64ArrayBase(PVField parent,Array array,int capacity,boolean capacityMutable,
+        Device device,String interfaceName)
+    {
+        super(parent,array,capacity,capacityMutable);
         asynTrace = device.getTrace();
         port = device.getPort();
         portName = port.getPortName();
@@ -64,25 +66,15 @@ public abstract class Float64ArrayBase implements Float64Array {
      * Announce an interrupt.
      * @param data The new data.
      */
-    protected void interruptOccured(double[] data,int length) {
+    protected void interruptOccured() {
         if(interruptActive) {
             asynTrace.print(Trace.FLOW ,
                     "%s new interrupt while interruptActive",
                     portName);
             return;
         }
-        interruptData = data;
-        this.length = length;
         interrupt.interrupt();
     }
-    /* (non-Javadoc)
-     * @see org.epics.ioc.pdrv.interfaces.Float64Array#read(org.epics.ioc.pdrv.User, double[], int)
-     */
-    public abstract Status read(User user, double[] value, int length);
-    /* (non-Javadoc)
-     * @see org.epics.ioc.pdrv.interfaces.Float64Array#write(org.epics.ioc.pdrv.User, double[], int)
-     */
-    public abstract Status write(User user, double[] value, int length);
     /* (non-Javadoc)
      * @see org.epics.ioc.pdrv.Interface#getInterfaceName()
      */
@@ -160,7 +152,7 @@ public abstract class Float64ArrayBase implements Float64Array {
         ListIterator<Float64ArrayInterruptListener> iter = interruptlistenerList.listIterator();
         while(iter.hasNext()) {
             Float64ArrayInterruptListener listener = iter.next();
-            listener.interrupt(interruptData,length);
+            listener.interrupt(this);
         }
         lock.lock();
         try {

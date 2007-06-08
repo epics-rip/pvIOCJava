@@ -23,6 +23,12 @@ public class BasePVMenu extends BasePVEnum implements PVMenu
         super.setChoices(menu.getMenuChoices());
     }
     /* (non-Javadoc)
+     * @see org.epics.ioc.pv.PVMenu#getMenu()
+     */
+    public Menu getMenu() {
+        return (Menu)getField();
+    }
+    /* (non-Javadoc)
      * @see org.epics.ioc.pv.BasePVEnum#setChoices(java.lang.String[])
      */
     public boolean setChoices(String[] choices) {

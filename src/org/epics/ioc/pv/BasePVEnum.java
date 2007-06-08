@@ -28,6 +28,12 @@ public class BasePVEnum extends AbstractPVField implements PVEnum {
         choice = EMPTY_STRING_ARRAY;
     }
     /* (non-Javadoc)
+     * @see org.epics.ioc.pv.PVEnum#getEnum()
+     */
+    public Enum getEnum() {
+        return (Enum)getField();
+    }
+    /* (non-Javadoc)
      * @see org.epics.ioc.pv.PVEnum#getChoices()
      */
     public String[] getChoices() {

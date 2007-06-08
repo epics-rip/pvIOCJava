@@ -11,4 +11,10 @@ package org.epics.ioc.pv;
  * @author mrk
  *
  */
-public interface PVMenu extends PVEnum {}
+public interface PVMenu extends PVEnum {
+    /**
+     * Get the Menu introspection interface.
+     * @return The introspection interface.
+     */
+    Menu getMenu();
+}

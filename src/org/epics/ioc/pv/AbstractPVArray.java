@@ -15,6 +15,7 @@ public abstract class AbstractPVArray extends AbstractPVField implements PVArray
     protected int length = 0;
     protected int capacity;
     protected boolean capacityMutable = true;
+    
     /**
      * Constructer that derived classes must call.
      * @param parent The parent interface.
@@ -22,10 +23,16 @@ public abstract class AbstractPVArray extends AbstractPVField implements PVArray
      * @param capacity The default capacity.
      * @param capacityMutable Is the capacity mutable.
      */
-    public AbstractPVArray(PVField parent,Array array,int capacity,boolean capacityMutable) {
+    protected AbstractPVArray(PVField parent,Array array,int capacity,boolean capacityMutable) {
         super(parent,array);
         this.capacity = capacity;
         this.capacityMutable = capacityMutable;
+    }
+    /* (non-Javadoc)
+     * @see org.epics.ioc.pv.PVArray#getArray()
+     */
+    public Array getArray() {
+        return (Array)getField();
     }
     /* (non-Javadoc)
      * @see org.epics.ioc.pv.PVArray#isCapacityMutable()
@@ -58,6 +65,7 @@ public abstract class AbstractPVArray extends AbstractPVField implements PVArray
         if(len>capacity) setCapacity(len);
         length = len;
     }
+
     /* (non-Javadoc)
      * @see java.lang.Object#toString()
      */

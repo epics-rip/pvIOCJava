@@ -829,7 +829,7 @@ public class ReplaceTest extends TestCase {
 
     }
     
-    private static abstract class AbstractDBArray extends AbstractPVField implements PVArray{
+    private static abstract class AbstractDBArray extends AbstractPVArray implements PVArray{
         protected int length = 0;
         protected int capacity;
         protected boolean capacityMutable = true;
@@ -839,7 +839,7 @@ public class ReplaceTest extends TestCase {
          * @param dbdArrayField The reflection interface for the DBArray data.
          */
         protected AbstractDBArray(PVField parent,Array array) {
-            super(parent,array);
+            super(parent,array,0,true);
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.pv.PVArray#isCapacityMutable()
