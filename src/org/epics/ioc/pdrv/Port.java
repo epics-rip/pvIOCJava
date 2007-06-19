@@ -5,6 +5,8 @@
  */
 package org.epics.ioc.pdrv;
 
+import org.epics.ioc.pdrv.interfaces.Interface;
+
 /**
  * Interface for a port.
  * If a method must be called with the port owned by the caller then it must be called
@@ -23,73 +25,110 @@ package org.epics.ioc.pdrv;
 public interface Port {
     /**
      * Generate a report for this port.
-     * This should be called without owning the port even though some report
-     * results may be bad. It can cause unnecessary delays if it is called with the port locked.
+     * This should be called without owning the port.
+     * It can cause unnecessary delays if it is called with the port locked.
      * @param reportDevices Also report all devices connected to the report.
      * @param details How much to report.
      * @return A String that is the report.
      */
     String report(boolean reportDevices,int details);
     /**
+     * Get an array of the port devices.
+     * This can be called without owning the port.
+     * @return The array of devices.
+     */
+    Device[] getDevices();
+    /**
+     * Get an array of the port interfaces.
+     * This can be called without owning the port.
+     * @return The array of interfaces.
+     */
+    Interface[] getInterfaces();
+    /**
      * Get the Trace object for this port.
+     * This can be called without owning the port.
      * @return The interface.
      */
     Trace getTrace();
     /**
      * Get the driverName.
+     * This can be called without owning the port.
      * @return The name.
      */
     String getDriverName();
     /**
      * Get the portName.
+     * This can be called without owning the port.
      * @return The name.
      */
-    String getPortName(); 
-    /**
-     * Block other users.
-     * Must be called with the port owned by the caller.
-     * No queueRequestCallback.callback for any other user will be called until
-     * until unblockOtherUsers is called.
-     * @param user The user making the request.
-     * @return The status. The request will fail if another user has the port blocked.
-     */
-    Status blockOtherUsers(User user);
-    /**
-     * Unblock other users.
-     * Must be called with the port owned by the caller.
-     * @param user The user that called blockOtherUsers.
-     */
-    void unblockOtherUsers(User user);
-    /**
-     * Is the port blocked by someone other than the caller.
-     * Must be called with the port owned by the caller.
-     * @param user The user.
-     * @return (false,true) if the port (is not, is) blocked.
-     */
-    boolean isBlockedByUser(User user);
+    String getPortName();
     /**
      * Does this port support multiple devices.
+     * This can be called without owning the port.
      * @return (false,true) is it (does not, does) support multiple devices.
      */
     boolean isMultiDevicePort();
     /**
      * Can this port block while performing I/O.
+     * This can be called without owning the port.
      * @return (false,true) if it is (synchronous,asynchronous)
      */
     boolean canBlock();
     /**
+     * Set the enable state.
+     * This can be called without owning the port.
+     * @param trueFalse The new state.
+     */
+    void enable(boolean trueFalse);
+    /**
+     * Set the autoConnect state.
+     * This can be called without owning the port.
+     * @param trueFalse The new state.
+     */
+    void autoConnect(boolean trueFalse);
+    /**
+     * Get the device for the specified address.
+     * This can be called without owning the port.
+     * If a device at the specified address does not exist than the
+     * portDriver is asked to create one.
+     * @param user The user.
+     * @param addr The address.
+     * @return The Device interface or null if no device is available for the
+     * specified  addrsss.
+     */
+    Device getDevice(User user, int addr);
+    /**
+     * Attempt to connect.
+     * This must be called without owning the port.
+     * @param User The requestor.
+     * @return Result. Status.success means that the attempt was successful.
+     * If the attempt fails user.getMessage() describes why the request failed.
+     */
+    Status connect(User user);
+    /**
+     * Attempt to disconnect.
+     * This must be called without owning the port.
+     * @param user The requestor.
+     * @return Result. Status.success means that the attempt was successful.
+     * If the attempt fails user.getMessage() describes why the request failed.
+     */
+    Status disconnect(User user);
+    /**
      * Is the port connected to hardware.
+     * This can be called without owning the port.
      * @return (false,true) is it (is not, is connected)
      */
     boolean isConnected();
     /**
      * Is the port enabled.
+     * This can be called without owning the port.
      * If it is not enabled nothing will be taken from the queue and lockPort will fail.
      * @return (false,true) if the port (is not, is) enabled,
      */
     boolean isEnabled();
     /**
      * Is autoConnect active.
+     * This can be called without owning the port.
      * If it is than when the queue is scanned or when lockPort is called and the port
      * is not connected, port.connect is called.
      * @return (false,true) if autoConnect (is not, is) active.
@@ -97,81 +136,75 @@ public interface Port {
     boolean isAutoConnect();
     /**
      * Add a listener for connect/disconnect events.
+     * This can be called without owning the port.
      * @param connectExceptionListener The listener interface.
      */
     void exceptionListenerAdd(ConnectExceptionListener connectExceptionListener);
     /**
      * Remove a listener for connect/disconnect events.
+     * This can be called without owning the port.
      * @param connectExceptionListener The listener interface.
      */
     void exceptionListenerRemove(ConnectExceptionListener connectExceptionListener);
     /**
      * Find an interface for the port.
+     * This can be called without owning the port.
      * @param user The user.
      * @param interfaceName The name of the interface.
      * @param interposeInterfaceOK Can an interpose interface be returned.
-     * If not then only an intrerface implemented by the portDriver will be returned.
+     * If not then only an interface implemented by the portDriver will be returned.
      * @return The interface or null if an interface with this name does not exist.
      */
     Interface findInterface(User user,String interfaceName,boolean interposeInterfaceOK);
     /**
-     * Queue a request for the port.
-     * @param user The user.
-     * @return status. If the request failed user.getMessage() provides the reason.
-     */
-    Status queuePortRequest(User user);
-    /**
-     * Queue a request for a device connected to the port.
+     * Queue a request for a port.
      * @param user The user.
      * @param queuePriority The priority.
-     * @return status. If the request failed user.getMessage() provides the reason.
      */
-    Status queueDeviceRequest(User user,QueuePriority queuePriority);
-    /**
-     * Scan the queues.
-     */
-    void scanQueues();
+    void queueRequest(User user,QueuePriority queuePriority);
     /**
      * Cancel a queueRequest.
+     * This must be called with the port unlocked.
      * @param user
      */
     void cancelRequest(User user);
     /**
-     * Lock the port.
-     * @param user The user.
-     */
-    void lockPort(User user);
-    /**
      * lockPort with permission to perform IO.
-     * It will attempt to connect of autoConnect is true. 
+     * The request will fail for any of the following reasons:
+     * <ul>
+     *    <li>The port is not enabled</li>
+     *    <li>The port is blocked by another user</li>
+     *    <li>The port is not connected.
+     * </ul>
+     * It will attempt to connect if autoConnect is true. 
      * @param user The user.
      * @return Status.sucess if the port is connected, enabled, and not blocked by another user.
      */
-    Status lockPortForIO(User user);
+    Status lockPort(User user);
     /**
      * Unlock the port.
      * @param user The user that called lockPort.
      */
     void unlockPort(User user);
     /**
-     * Register to receive notice when lockPort, unLock port are called.
-     * @param lockPortNotify The notification interface.
+     * Scan the queues.
+     * Can be called without owning the port.
      */
-    void registerLockPortNotify(LockPortNotify lockPortNotify);
+    void scanQueues();
+    /**
+     * Register to receive notice when lockPort, unLock port are called.
+     * Caller must call lockPort before calling this method.
+     * @param user The user.
+     * @param lockPortNotify The notification interface.
+     * @return TODO
+     */
+    boolean registerLockPortNotify(User user, LockPortNotify lockPortNotify);
     /**
      * Unregister to receive notice when lockPort, unLock port are called.
+     * Caller must call lockPort before calling this method.
+     * @param user The user.
      */
-    void unregisterLockPortNotify();
-    /**
-     * Set the enable state.
-     * @param trueFalse The new state.
-     */
-    void enable(boolean trueFalse);
-    /**
-     * Set the autoConnect state.
-     * @param trueFalse The new state.
-     */
-    void autoConnect(boolean trueFalse);
+    void unregisterLockPortNotify(User user);
     /**
      * Called by driver to create a new device. Normally it is called as
      * a result of a call to PortDriver.createDevice, which is called with the port locked.
@@ -198,12 +231,12 @@ public interface Port {
     Interface interposeInterface(Interface iface);
     /**
      * A connect exception. This is called by the portDriver.
-     * This must be called with no locks held and without owning the port.
+     * It is normally called as a result of Port calling portDriver.connect.
      */
     void exceptionConnect();
     /**
      * A disconnect exception.This is called by the portDriver.
-     * This must be called with no locks held and without owning the port.
+     * It is normally called as a result of Port calling portDriver.disconnect.
      */
     void exceptionDisconnect(); 
 }

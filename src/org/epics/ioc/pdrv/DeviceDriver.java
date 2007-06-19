@@ -6,7 +6,17 @@
 package org.epics.ioc.pdrv;
 
 
+/**
+ * This is implemented by a driver and is only called by org.epics.ioc.pdrv.Factory.
+ * @author mrk
+ *
+ */
 public interface DeviceDriver {
+    /**
+     * Report device specific information.
+     * @param details How much detail.
+     * @return The report.
+     */
     String report(int details);
     /**
      * Attempt to connect.

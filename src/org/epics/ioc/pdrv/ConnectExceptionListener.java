@@ -12,6 +12,7 @@ package org.epics.ioc.pdrv;
 public interface ConnectExceptionListener {
     /**
      * A connection exception has occured.
+     * This is normally called with the port owned by another user.
      * @param connectException The type of exception.
      */
     void exception(ConnectException connectException);

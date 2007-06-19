@@ -766,142 +766,154 @@ following steps:
 <hr />
 
 <center>
-<h2 style="text-align: center">portDriver Structures and Interfaces</h2>
+<h2 style="text-align: center">port and device access</h2>
 </center>
 
-<p>portDriver.h describes the following:</p>
-<ul>
-  <li>asynStatus - An enum that describes the status returned by many
-  methods.</li>
-  <li>asynException - An enum that describes exceptions.</li>
-  <li>asynQueuePriority - An enum that describes the queue priorities.</li>
-  <li>asynUser - A struture that contains generic information and is the
-    "handle" for calling most methods.</li>
-  <li>asynInterface - a structure that describes an interface.</li>
-  <li>asynManager - An interface for communicating with portDriver.</li>
-  <li>asynCommon - An interface providing methods that must be implemented by
-    all low level drivers.</li>
-  <li>asynTrace - An interface plus associated functions and definitions that
-    implement the trace facility.</li>
-</ul>
-
-<h3>asynStatus</h3>
-
-<p>Defines the status returned by most methods. If a method returns a status
-other than asynSuccess, and one of the arguments to the method is pasynUser,
-then the method is expected to write a message into
-pasynUser-&gt;errorMessage.</p>
+<h3>enum definitions</h3>
 <pre>
-public enum Status {success,timeout,overflow,error}
-</pre>
+    public enum Status {
+        success,
+        timeout,
+        overflow,
+        error
+    }
 
-<table border="1">
-  <caption>Status</caption>
-  <tbody>
-    <tr>
-      <td>success</td>
-      <td>The request was successful.</td>
-    </tr>
-    <tr>
-      <td>timeout</td>
-      <td>The request failed with a timeout.</td>
-    </tr>
-    <tr>
-      <td>overflow</td>
-      <td>The driver has lost input data. This can happen if an internal
+    public enum QueuePriority {
+        low,
+        medium,
+        high
+    }
+    
+    public enum ConnectException {
+        connect,
+        enable,
+        autoConnect
+    }   
+</pre>
+<h4>Status</h4>
+<p>Status is the status returned by many methods. If a method returns a status
+other than success, and one of the arguments to the method is User,
+then the method is expected to write a message via user.setMessage();
+</p>
+<dl>
+  <dt style="font-family: courier;">success</dt>
+    <dd>The request was successful</dd>
+  <dt style="font-family: courier;">timeout</dt>
+    <dd>The request failed because of a timeout</dd>
+  <dt style="font-family: courier;">overflow</dt>
+      <dd>The driver has lost input data. This can happen if an internal
         buffer or the user supplied buffer is too small. Whenever possible,
         low level drivers should be written so that the user can read input
-        in small pieces.</td>
-    </tr>
-    <tr>
-      <td>error</td>
-      <td>Some other error occured.</td>
-    </tr>
-  </tbody>
-</table>
+        in small pieces.</dd>
+  <dt style="font-family: courier;">error</dt>
+    <dd>The request failed</dd>
+</dl>
+<p>If a User is associated with the request and status is not Status.success,
+than user.GetMessage() returns the reason why the request failed.</p>
+<h4>QueuePriority</h4>
+<p>This is the priority for a queuerequest.
+Each port that can block has an associated thread
+that handles the queueRequests. It keeps a queue for each priority.
+All high priority requests are processes before any middle priority
+and all middle priority requests before any low priority request.</p>
+<h4>ConnectException</h4>
+<p>This specifies the type of connect exception that is passed to
+a ConnectExceptionListener. The types are:</p>
+<dl>
+  <dt style="font-family: courier;">connect</dt>
+    <dd>A connect or disconnect exception has occured. The listener can
+     call Port.isConnected() to find the state.</dd>
+  <dt style="font-family: courier;">autoConnect</dt>
+    <dd>The autoConnect state has changed. The listener can
+     call Port.isAutoConnected() to find the state.</dd>
+  <dt style="font-family: courier;">enable</dt>
+    <dd>The enable state has changed. The listener can
+     call Port.isEnabled() to find the state.</dd>
+</dl>
 
-<h3>asynException</h3>
 
-<p>Defines the exceptions for method exceptionOccurred</p>
-<pre>typedef enum {
-    asynExceptionConnect,asynExceptionEnable,asynExceptionAutoConnect,
-    asynExceptionTraceMask,asynExceptionTraceIOMask,
-    asynExceptionTraceFile,asynExceptionTraceIOTruncateSize
-} asynException;</pre>
-
-<table border="1">
-  <caption>asynException</caption>
-  <tbody>
-    <tr>
-      <td>asynExceptionConnect</td>
-      <td>The connection state of the port or device has changed.</td>
-    </tr>
-    <tr>
-      <td>asynExceptionEnable</td>
-      <td>The enable state of the port or device has changed.</td>
-    </tr>
-    <tr>
-      <td>asynExceptionAutoConnect</td>
-      <td>The autoConnect state of the port or device has changed.</td>
-    </tr>
-    <tr>
-      <td>asynExceptionTraceMask</td>
-      <td>The traceMask for the port or device has changed.</td>
-    </tr>
-    <tr>
-      <td>asynExceptionTraceIOMask</td>
-      <td>The traceIOMask for the port or device has changed.</td>
-    </tr>
-    <tr>
-      <td>asynExceptionTraceFile</td>
-      <td>The trace file for the port or device has changed.</td>
-    </tr>
-    <tr>
-      <td>asynExceptionTraceIOTruncateSize</td>
-      <td>The traceIOTruncateSize for the port or device has changed.</td>
-    </tr>
-  </tbody>
-</table>
-
-<h3>asynQueuePriority</h3>
-
-<p>This defines the priority passed to queueRequest.</p>
-<pre>typedef enum {
-    asynQueuePriorityLow,asynQueuePriorityMedium,asynQueuePriorityHigh,
-    asynQueuePriorityConnect
-}asynQueuePriority;</pre>
-
-<table border="1">
-  <caption>asynQueuePriority</caption>
-  <tbody>
-    <tr>
-      <td>asynQueuePriorityLow</td>
-      <td>Lowest queue priority.</td>
-    </tr>
-    <tr>
-      <td>asynQueuePriorityMedium</td>
-      <td>Medium queue priority.</td>
-    </tr>
-    <tr>
-      <td>asynQueuePriorityHigh</td>
-      <td>High queue priority.</td>
-    </tr>
-    <tr>
-      <td>asynQueuePriorityConnect</td>
-      <td>Queue a connect or disconnect request. This priority must be used
-        for and only for connect/disconnect requests.</td>
-    </tr>
-  </tbody>
-</table>
-
-<h3>User</h3>
-
-<p>Describes a structure that user code passes to most asynManager and driver
-methods. Code must allocate and free an asynUser by calling
-asynManager:createAsynUser (or asynManager:dupliateAsynUser) and
-asynManager:freeAsynUser.</p>
+<h3>User listeners and callbacks</h3>
 <pre>
-public interface User {
+interface QueueRequestCallback {
+    void callback(Status status,User user);
+}
+
+interface ConnectExceptionListener {
+    void exception(ConnectException connectException);
+}
+
+interface TraceOptionChangeListener {
+    void optionChange();
+}
+
+interface LockPortNotify {
+    void lock(User user);
+    void unlock();
+}
+</pre>
+<h4>QueueRequestCallback</h4>
+<p>This is the method that is called as a result of calling
+method port.QueueRequest. If the port is non-blocking, the use callback is
+called by queueRequest itself and if the port can block it is called
+by the port thread. This interface has a single method:</p>
+<dl>
+  <dt style="font-family: courier;">callback</dt>
+    <dd>The callback. It is passed two arguments: status and user.
+    The user is passed a a confience so that a single callback implementation
+    can handle multiple users. If the status is Status.success then the
+    user has exclusive access to the interfaces implemented by the
+    device driver. The user can make an arbitrary number of calls to
+    the driver. If the status is anything else that the user must NOT
+    make any calls to the driver. Also user.getMessage() can be called
+    to get a reason for the failure.</dd>
+</dl>
+<h4>ConnectExceptionListener</h4>
+<p>This is the method that is called as a result of calling
+method port.exceptionListenerAdd or
+device.exceptionListenerAdd.
+This interface has a single method:</p>
+<dl>
+  <dt style="font-family: courier;">exception</dt>
+   <dd>A connection related exception has occured. The argument
+    identifies the type of exception.</dd>
+</dl>
+<h4>TraceOptionChangeListener</h4>
+<p>A user can request that it be notified of a change of trace option by
+calling trace.optionChangeListenerAdd. This interface has a single method:<p>
+<dl>
+  <dt style="font-family: courier;">optionChange</dt>
+   <dd>A option has changed. The caller can call trace methods to find
+   the current value of each option.</dd>
+</dl>
+<h4>LockPortNotify</h4>
+<p>This interface is implemented by a port driver that is a user of
+another port. For example a multi-drop serial driver can be implemented by
+using a standard serial driver for actually sending and receiving characters.
+This interface is an argument to port.registerLockPortNotify. The interface
+has two methods:</p>
+<dl>
+  <dt style="font-family: courier;">lock</dt>
+    <dd>This is called when the port is locked for a user.
+    This is dne whenever a user gets control of a port either because
+    a queueRequest is satisfied or because of a call to lockPort.
+    For example a multiport driver will be called when a user gets control
+   of the multiport driver. The multiport driver can in turn call lockPort
+   for the standard serial port driver.</dd>
+  <dt style="font-family: courier;">unlock</dt>
+    <dd>This is called when the port is unlocked for a user.
+    This is done whenever a user relinquishes control of a port either because
+    a queueRequest is done or because of a call to unlockPort.
+    For example a multiport driver will be called when a user relinquishes
+    control of the multiport driver.
+    The multiport driver can in turn call unlockPort
+   for the standard serial port driver.</dd>
+</dl>
+<h3>User</h3>
+<p>This is the interface for a portDriver user. It can only be created
+by calling Factory.createUser(). This is the interface used for queuing
+and locking, i.e. only one user at a time has control of a port.</p>
+<pre>
+interface User {
     public static final int REASON_SIGNAL = -1;
     
     User duplicateUser(User user,QueueRequestCallback queueRequestCallback);
@@ -910,16 +922,15 @@ public interface User {
     Port getPort();
     Device connectDevice(int addr);
     void disconnectDevice();
-    Device getDevice();
-
+    Device getDevice();   
     void setMessage(String message);
     String getMessage();
     void setTimeout(double timeout);
     double getTimeout();
-    void setPortDriverUserPvt(Object portDriverUserPvt);
-    Object getPortDriverUserPvt();
-    void setDeviceDriverUserPvt(Object deviceDriverUserPvt);
-    Object getDeviceDriverUserPvt();
+    void setPortDriverPvt(Object portDriverPvt);
+    Object getPortDriverPvt();
+    void setDeviceDriverPvt(Object deviceDriverPvt);
+    Object getDeviceDriverPvt();
     void setUserPvt(Object userPvt);
     Object getUserPvt();
     void setReason(int reason);
@@ -934,748 +945,180 @@ public interface User {
     String getString();
 }
 </pre>
+<dl>
+  <dt style="font-family: courier;">REASON_SIGNAL</dt>
+    <dd>This is common reason that can be passed to user.setReason.</dd>
+  <dt style="font-family: courier;">duplicateUser</dt>
+    <dd>Creates a new User that is connected to the same port
+    and device as the argument. It also has the same reason and timeout
+    as the argument.</dd>
+  <dt style="font-family: courier;">connectPort</dt>
+    <dd>Connect to a port. If it fails a null is returned and
+     user.getMessage() returns the reason why the request failed.</dd>
+  <dt style="font-family: courier;">disconnectPort</dt>
+    <dd>Calls disconnectDevice and disconnects from the port.</dd>
+  <dt style="font-family: courier;">connectDevice</dt>
+    <dd>Connect to a device connected to a port.
+     If it fails a null is returned and
+     user.getMessage() returns the reason why the request failed.</dd>
+  <dt style="font-family: courier;">disconnectDevice</dt>
+    <dd>If a request is queued it is canceled and then the user
+     is disconnected from the device.</dd>
+  <dt style="font-family: courier;">getDevice</dt>
+    <dd>Get the Device to which the user is connected. May be null.</dd>
+  <dt style="font-family: courier;">setMessage</dt>
+    <dd>Set a message for the user. This can ba called by any code that
+   has a reference to this user. For example drivers call it to
+report errors.</dd>
+  <dt style="font-family: courier;">getMessage</dt>
+     <dd>Get the message set by the last call to setMessage.</dd>
+  <dt style="font-family: courier;">setTimeout</dt>
+     <dd>Set a timeout value. The units are seconds. Normally called
+     by user support code.</dd>
+  <dt style="font-family: courier;">getTimeout</dt>
+     <dd>Get the current timneout value. Normally called by low
+     level drivers that block. It then becomes the longest time
+     a driver will wait for a single blocking request.</dd>
+  <dt style="font-family: courier;">setPortDriverPvt</dt>
+     <dd>For use by a port driver that implements the DriverUser
+     interface. When DriverUser.create is called the driver can allocate
+     an object for the user and call setPortDriverPvt to save a reference
+     to the object. Each time it gets a request from the user it can call
+     getPortDriverPvt to retrieve the saved value.</dd>
+  <dt style="font-family: courier;">getPortDriverPvt</dt>
+     <dd>For use by a port driver that implements the DriverUser interface.</dd>
+  <dt style="font-family: courier;">setDeviceDriverPvt</dt>
+     <dd>For use by a device driver that implements the DriverUser
+     interface. When DriverUser.create is called the driver can allocate
+     an object for the user and call setDeviceDriverPvt to save a reference
+     to the object. Each time it gets a request from the user it can call
+     getDeviceDriverPvt to retrieve the saved value.</dd>
+  <dt style="font-family: courier;">getDeviceDriverPvt</dt>
+     <dd>For use by a device driver that implements
+      the DriverUser interface.</dd>
+  <dt style="font-family: courier;">setUserPvt.getUserPvt</dt>
+    <dd>For use by the user.</dd>
+  <dt style="font-family: courier;">setReason/getReason</dt>
+    <dd>For use by a user and a driver for private communication.
+     Both must understand how to use reason and what it means.</dd>
+  <dt style="font-family: courier;">setAuxStatus/getAuxStatus</dt>
+    <dd>For use by a user and a driver for private communication.
+     Both must understand how to use auxStatus and what it means.</dd>
+  <dt style="font-family: courier;">setInt/getInt</dt>
+     <dd>Can be used to pass an integer value between a user
+     and a driver. For example interface Octet uses this to
+     tell the user how many octets were transfered.</dd>
+  <dt style="font-family: courier;">setDouble/getDouble</dt>
+     <dd>Can be used to pass an double value between a user and driver.</dd>
+  <dt style="font-family: courier;">setString/getDouble</dt>
+     <dd>Can be used to pass an string value between a user and driver.</dd>
+</dl>
 
-<table border="1">
-  <caption>asynUser</caption>
-  <tbody>
-    <tr>
-      <td>errorMessage</td>
-      <td>When a method returns asynError it should put an error message into
-        errorMessage via a call to: 
-        <pre>epicsSnprintf(pasynUser-&gt;errorMessage,pasynUser-&gt;errorMessageSize,</pre>
-        <pre>              "&lt;format&gt;",...)</pre>
-      </td>
-    </tr>
-    <tr>
-      <td>errorMessageSize</td>
-      <td>The size of errorMessage. The user can not change this value.</td>
-    </tr>
-    <tr>
-      <td>timeout</td>
-      <td>The number of seconds before timeout for I/O requests. This is set
-        by the user and can be changed between calls to a driver. If a call
-        to a low level driver results in the driver making many I/O requests
-        this is the time for each I/O request. 
-
-        <p>The meaning is as follows:</p>
-
-        <p>&gt; 0.0 Wait for up to timeout seconds for the I/O to complete</p>
-
-        <p>= 0.0 Peform any I/O that can be done without blocking. Return
-        timeout error if no I/O can be done without blocking.</p>
-
-        <p>&lt; 0.0 Infinite timeout. Wait forever for I/O to complete.</p>
-      </td>
-    </tr>
-    <tr>
-      <td>userPvt</td>
-      <td>For use by the user. The user should set this immediately after the
-        call to pasynManager-&gt;createAsynUser. 
-
-        <p>If this is changed while asynUser is queued, the results are
-        undefined, e.g. it could cause a crash.</p>
-      </td>
-    </tr>
-    <tr>
-      <td>userData</td>
-      <td>Also for use by the user.</td>
-    </tr>
-    <tr>
-      <td>drvUser</td>
-      <td>A driver can use this to hold asynUser specific data. The
-        asynDrvUser interface is used for communication between asynUser and
-        the driver.</td>
-    </tr>
-    <tr>
-      <td>reason</td>
-      <td>Drivers and asynUsers can use this as a general purpose field. By
-        convention it is used to determine what "command" is being sent over
-        a particular interface. For example an A/D driver implementing the
-        asynInt32 interface might define reason=0 to mean "return the A/D
-        conversion", while reason=1 might mean "return the amplifier gain".
-        Typically drivers implement the asynDrvUser interface, and use this
-        to convert from descriptive strings for commands (e.g. "DATA" or
-        "GAIN" in this example) to the enum "reason". A driver that is
-        calling an interrupt users often uses reason to decide if the users
-        callback should be called. Values of reason less than 0 are reserved
-        for standard meanings. For example ASYN_REASON_SIGNAL is used to mean
-        "out of band" request. The devGpib support uses this to report
-      SRQs.</td>
-    </tr>
-    <tr>
-      <td>auxStatus</td>
-      <td>Any method can provide additional return information in auxStatus.
-        The meaning is determined by the method.</td>
-    </tr>
-  </tbody>
-</table>
-
-<h3>Interface</h3>
-
-<p>This defines an interface registered with asynPortManager:registerPort or
-asynManager:interposeInterface.</p>
+<h3>Port</h3>
 <pre>
-public interface Interface {
-    String getInterfaceName();
+interface Port {
+    String report(boolean reportDevices,int details);
+    Device[] getDevices();
+    Interface[] getInterfaces();
+    Trace getTrace();
+    String getDriverName();
+    String getPortName();
+    boolean isMultiDevicePort();
+    boolean canBlock();
+    void enable(boolean trueFalse);
+    Status connect(User user);
+    Status disconnect(User user);
+    boolean isConnected();
+    boolean isEnabled();
+    boolean isAutoConnect();
+    void exceptionListenerAdd(
+        ConnectExceptionListener connectExceptionListener);
+    void exceptionListenerRemove(
+        ConnectExceptionListener connectExceptionListener);
+    Device getDevice(User user,int addr);
+    Interface findInterface(User user,String interfaceName,
+        boolean interposeInterfaceOK);
+    void queueRequest(User user,QueuePriority queuePriority);
+    void cancelRequest(User user);
+    Status lockPort(User user);
+    void unlockPort(User user);
+    void scanQueues();
+    boolean registerLockPortNotify(LockPortNotify lockPortNotify);
+    void unregisterLockPortNotify();
+    Device createDevice(DeviceDriver deviceDriver, int addr);
+    void registerInterface(Interface iface);
+    Interface interposeInterface(Interface iface);
+    void exceptionConnect();
+    void exceptionDisconnect();
+    void autoConnect(boolean trueFalse);
+</pre>
+
+<h3>Device</h3>
+<pre>
+interface Device {
+    String report(int details);
+    Interface[] getInterfaces();
+    int getAddr();
+    Port getPort();
+    Trace getTrace();
+    void enable(boolean trueFalse);
+    void autoConnect(boolean trueFalse);
+    Status connect(User user);
+    Status disconnect(User user);
+    boolean isConnected();
+    boolean isEnabled();
+    boolean isAutoConnect();
+    void exceptionListenerAdd(
+        ConnectExceptionListener connectExceptionListener);
+    void exceptionListenerRemove(
+        ConnectExceptionListener connectExceptionListener);
+    Interface findInterface(User user,String interfaceName,
+        boolean interposeInterfaceOK);
+    Status lockDevice(User user);
+    void unlockDevice(User user);
+    Status blockOtherUsers(User user);
+    void unblockOtherUsers(User user);
+    boolean isBlockedByOtherUser(User user);
+    void registerInterface(Interface iface);
+    Interface interposeInterface(Interface iface);
+    void exceptionConnect();
+    void exceptionDisconnect();
 }
 </pre>
 
-<table border="1">
-  <caption>asynInterface</caption>
-  <tbody>
-    <tr>
-      <td>interfaceType</td>
-      <td>A character string describing the interface.</td>
-    </tr>
-    <tr>
-      <td>pinterface</td>
-      <td>A pointer to the interface. The user must cast this to the correct
-        type.</td>
-    </tr>
-    <tr>
-      <td>drvPvt</td>
-      <td>For the exclusive use of the code that called registerPort or
-        interposeInterface.</td>
-    </tr>
-  </tbody>
-</table>
+<h3>Driver interfaces</h3>
+<pre>
+interface PortDriver {
+    String report(int details);
+    Device createDevice(User user, int addr);
+    Status connect(User user);
+    Status disconnect(User user);
+}
+
+interface DeviceDriver {
+    String report(int details);
+    Status connect(User user);
+    Status disconnect(User user);
+}
+</pre>
 
 
-<h3>asynManager</h3>
-
-<p>This is the main interface for communicating with portDriver.</p>
-<pre>/*registerPort attributes*/
-#define ASYN_MULTIDEVICE  0x0001
-#define ASYN_CANBLOCK     0x0002
-
-/*standard values for asynUser.reason*/
-#define ASYN_REASON_SIGNAL -1
-
-typedef struct interruptNode{
-    ELLNODE node;
-    void    *drvPvt;
-}interruptNode;
-
-typedef struct asynManager {
-    void      (*report)(FILE *fp,int details,const char*portName);
-    asynUser  *(*createAsynUser)(userCallback process,userCallback timeout);
-    asynUser  *(*duplicateAsynUser)(asynUser *pasynUser,
-                                 userCallback queue,userCallback timeout);
-    asynStatus (*freeAsynUser)(asynUser *pasynUser);
-    void       *(*memMalloc)(size_t size);
-    void       (*memFree)(void *pmem,size_t size);
-    asynStatus (*isMultiDevice)(asynUser *pasynUser,
-                                const char *portName,int *yesNo);
-    /* addr = (-1,&gt;=0) =&gt; connect to (port,device) */
-    asynStatus (*connectDevice)(asynUser *pasynUser,
-                                const char *portName,int addr);
-    asynStatus (*disconnect)(asynUser *pasynUser);
-    asynStatus (*exceptionCallbackAdd)(asynUser *pasynUser,
-                                       exceptionCallback callback);
-    asynStatus (*exceptionCallbackRemove)(asynUser *pasynUser);
-    asynInterface *(*findInterface)(asynUser *pasynUser,
-                            const char *interfaceType,int interposeInterfaceOK);
-    asynStatus (*queueRequest)(asynUser *pasynUser,
-                              asynQueuePriority priority,double timeout);
-    asynStatus (*cancelRequest)(asynUser *pasynUser,int *wasQueued);
-    asynStatus (*canBlock)(asynUser *pasynUser,int *yesNo);
-    asynStatus (*blockProcessCallback)(asynUser *pasynUser, int allDevices);
-    asynStatus (*unblockProcessCallback)(asynUser *pasynUser, int allDevices);
-    asynStatus (*lockPort)(asynUser *pasynUser);
-    asynStatus (*unlockPort)(asynUser *pasynUser);
-    asynStatus (*getAddr)(asynUser *pasynUser,int *addr);
-    asynStatus (*getPortName)(asynUser *pasynUser,const char **pportName);
-    /* drivers call the following*/
-    asynStatus (*registerPort)(const char *portName,
-                              int attributes,int autoConnect,
-                              unsigned int priority,unsigned int stackSize);
-    asynStatus (*registerInterface)(const char *portName,
-                              asynInterface *pasynInterface);
-    asynStatus (*exceptionConnect)(asynUser *pasynUser);
-    asynStatus (*exceptionDisconnect)(asynUser *pasynUser);
-    /*any code can call the following*/
-    asynStatus (*interposeInterface)(const char *portName, int addr,
-                              asynInterface *pasynInterface,
-                              asynInterface **ppPrev);
-    asynStatus (*enable)(asynUser *pasynUser,int yesNo);
-    asynStatus (*autoConnect)(asynUser *pasynUser,int yesNo);
-    asynStatus (*isConnected)(asynUser *pasynUser,int *yesNo);
-    asynStatus (*isEnabled)(asynUser *pasynUser,int *yesNo);
-    asynStatus (*isAutoConnect)(asynUser *pasynUser,int *yesNo);
-    /*The following are methods for interrupts*/
-    asynStatus (*registerInterruptSource)(const char *portName,
-                               asynInterface *pasynInterface, void **pasynPvt);
-    asynStatus (*getInterruptPvt)(asynUser *pasynUser,
-                               const char *interfaceType, void **pasynPvt);
-    interruptNode *(*createInterruptNode)(void *pasynPvt);
-    asynStatus (*freeInterruptNode)(asynUser *pasynUser,interruptNode *pnode);
-    asynStatus (*addInterruptUser)(asynUser *pasynUser,
-                                  interruptNode*pinterruptNode);
-    asynStatus (*removeInterruptUser)(asynUser *pasynUser,
-                                  interruptNode*pinterruptNode);
-    asynStatus (*interruptStart)(void *pasynPvt,ELLLIST **plist);
-    asynStatus (*interruptEnd)(void *pasynPvt);
-}asynManager;
-epicsShareExtern asynManager *pasynManager;</pre>
-
-<table border="1">
-  <caption>asynManager</caption>
-  <tbody>
-    <tr>
-      <td>report</td>
-      <td>Reports status about the asynPortManager. If portName is non-NULL
-        it reports for a specific port. If portName is NULL then it reports
-        for each registered port. It also calls asynCommon:report for each
-        port being reported.</td>
-    </tr>
-    <tr>
-      <td>createAsynUser</td>
-      <td>Creates an asynUser. The caller specifies two callbacks, process
-        and timeout. These callback are only called as a result of a
-        queueRequest. The timeout callback is optional. errorMessageSize
-        characters are allocated for errorMessage. The amount of storage can
-        not be changed. This method doesn't return if it is unable to
-        allocate the storage.</td>
-    </tr>
-    <tr>
-      <td>duplicateAsynUser</td>
-      <td>Creates an asynUser by calling createAsynUser. It then initializes
-        the new asynUser as follows: The fields timeout, userPvt, userData,
-        and drvUser are initialized with values taken from pasynUser. Its
-        connectDevice state is the same as that for pasynUser.</td>
-    </tr>
-    <tr>
-      <td>freeAsynUser</td>
-      <td>Free an asynUser. The user must free an asynUser only via this
-        call. If the asynUser is connected to a port, disconnect is called.
-        If the disconnect fails, this call will also fail. The storage for
-        the asynUser is saved on a free list and will be reused in later
-        calls to createAsynUser or duplicateAsynUser. Thus continually
-        calling createAsynUser (or duplicateAsynUser) and freeAsynUser is
-        efficient.</td>
-    </tr>
-    <tr>
-      <td>memMalloc 
-
-        <p>memFree</p>
-      </td>
-      <td>Allocate/Free memory. memMalloc/memFree maintain a set of freelists
-        of different sizes. Thus any application that needs storage for a
-        short time can use memMalloc/memFree to allocate and free the storage
-        without causing memory fragmentation. The size passed to memFree MUST
-        be the same as the value specified in the call to memMalloc.</td>
-    </tr>
-    <tr>
-      <td>isMultiDevice</td>
-      <td>Answers the question "Does the port support multiple devices?" This
-        method can be called before calling connectDevice.</td>
-    </tr>
-    <tr>
-      <td>connectDevice</td>
-      <td>Connect to a device specified by portName, addr.. The port Name is
-        the same as that specified in a call to registerPort. The call will
-        fail if the asynUser is already connected. If the port does not
-        support multiple devices, than addr is ignored. The call will fail if
-        the asynUser is already connected to a device. connectDevice only
-        connects a user to the port driver for the portName,addr. The port
-        driver may or may not be connected to the actual device. Thus,
-        connectDevice and asynCommon:connect are completely different. 
-
-        <p>See the Theory of Operation section for a description of the
-        difference between single and multi-device port drivers.</p>
-      </td>
-    </tr>
-    <tr>
-      <td>disconnect</td>
-      <td>Disconnect from the port,addr to which connectDevice is connected.
-        The call will fail if the asynUser is queued or locked, or has a
-        callback registered via exceptionCallbackAdd. Note that
-        asynManager:disconnect and asynCommon:disconnect are completely
-        different.</td>
-    </tr>
-    <tr>
-      <td>exceptionCallbackAdd</td>
-      <td>Callback will be called whenever one of the exceptions defined by
-        asynException occurs. The callback can call isConnected, isEnabled,
-        or isAutoConnect to find the connection state. asynTrace provides
-        methods to find out the current trace settings.</td>
-    </tr>
-    <tr>
-      <td>exceptionCallbackRemove</td>
-      <td>Callback is removed. This must be called before disconnect.</td>
-    </tr>
-    <tr>
-      <td>findInterface</td>
-      <td>Find a driver interface. If interposeInterfaceOK is true, then
-        findInterface returns the last interface registered or interposed.
-        Otherwise, the interface registered by registerPort is returned. It
-        returns 0 if the interfaceType is not supported. 
-
-        <p>The user needs the address of the driver's interface and of
-        pdrvPvt so that calls can be made to the driver. For example:</p>
-        <pre>asynInterface *pasynInterface;
-asynOctet *pasynOctet;
-void *pasynOctetPvt;
-...
-pasynInterface = pasynManager-&gt;findInterface(
-        pasynUser,asynOctetType,1);
-if(!pasynInterface) { /*error do something*/}
-pasynOctet = (asynOctet *)pasynInterface-&gt;pinterface;
-pasynOctetPvt = pasynInterface-&gt;pdrvPvt;
-...
-/* The following call must be made from a callback */
-pasynOctet-&gt;read(pasynOctetPvt,pasynUser,...
-        </pre>
-      </td>
-    </tr>
-    <tr>
-      <td>queueRequest</td>
-      <td><p>When registerPort is called, the caller must specify if it can
-        block, i.e. attribute bit ASYN_CANBLOCK is set or cleared. If the
-        port has been registered with ASYN_CANBLOCK true then the request is
-        put on a queue for the thread associated with the queue. If the port
-        has been registered with ASYN_CANBLOCK false then queueRequest locks
-        the port and calls the process callback. In either case the process
-        callback specified in the call to createAsynUser is called.</p>
-
-        <p>If the asynUser is already on a queue, asynError is returned. The
-        timeout starts when the request is queued. A value less than or equal
-        to 0.0 means no timeout. The request is removed from the queue before
-        the callback is called. Callbacks are allowed to make requests to
-        asynManager such as queueRequest, blockProcessCallback, etc. It is
-        even permissible to call freeAsynUser from a callback but the request
-        will be delayed until after the callback completes.</p>
-
-        <p>The priority asynQueuePriorityConnect must be used for
-        asynCommon:connect and asynCommon:disconnect calls, and must NOT be
-        used for any other calls.</p>
-
-        <p>If a timeout callback was not passed to createAsynUser and a
-        queueRequest with a non-zero timeout is requested, the request
-        fails.</p>
-      </td>
-    </tr>
-    <tr>
-      <td>cancelRequest</td>
-      <td>If a asynUser is queued, remove it from the queue. If either the
-        process or timeout callback is active when cancelRequest is called
-        than cancelRequest will not return until the callback completes.</td>
-    </tr>
-    <tr>
-      <td>blockProcessCallback 
-
-        <p>unblockProcessCallback</p>
-      </td>
-      <td>blockProcessCallback is a request to prevent acccess to a device or
-        port by other asynUsers between queueRequests. blockProcessCallback
-        can be called from a processCallback or when the asynUser has no
-        request queued. When called from processCallback blocking starts
-        immediately, otherwise blocking starts the next time processCallback
-        is called. Blocking means that no other asynUser's processCallback
-        will be called until unblockProcessCallback is called. Note the
-        following restrictions for blockProcessCallback: 
-        <ul>
-          <li>blockProcessCallback only works with drivers that can block and
-            an error is returned if it is called for non-blocking
-          drivers.</li>
-          <li>queueRequests that specify a priority of
-            asynQueuePriorityConnect are not blocked.</li>
-        </ul>
-        It is permissible to simultaneously block allDevices and also the
-        device to which the asynUser is connected.</td>
-    </tr>
-    <tr>
-      <td>lockPort/unlockPort</td>
-      <td>Lock access to a port driver. This is used by code that is willing
-        toj block while making calls to a port driver. The code can call
-        lockPort, make an arbitrary number of calls to the port driver, and
-        than call unlockPort. Other code that calls queueRequest and/or
-        lockPort will be delayed between the calls to lockPort and
-      unlockPort.</td>
-    </tr>
-    <tr>
-      <td>canBlock</td>
-      <td>yesNo is set to (0,1), i.e. (false,true) if calls to the low level
-        driver can block. The value is determined by the attributes passed to
-        registerPort.</td>
-    </tr>
-    <tr>
-      <td>getAddr</td>
-      <td>*addr is set equal to the address which the user specified in the
-        call to connectDevice or -1 if the port does not support multiple
-        devices. 
-
-        <p>See the Theory of Operation section for a description of the
-        difference between single and multi-device port drivers.</p>
-      </td>
-    </tr>
-    <tr>
-      <td>getPortName</td>
-      <td>*pportName is set equal to the name of the port to which the user
-        is connected.</td>
-    </tr>
-    <tr>
-      <td>registerPort</td>
-      <td>This method is called by drivers. A call is made for each port
-        instance. Attributes is a set of bits. Currently two bits are
-        defined: ASYN_MULTIDEVICE and ASYN_CANBLOCK. The driver must specify
-        these properly. autoConnect, which is (0,1) for (no,yes), provides
-        the initial value for the port and all devices connected to the port.
-        If priority is 0, then a default will be assigned. If stackSize is 0,
-        a default is assigned. The portName argument specifies the name by
-        which the upper levels of the asyn code will refer to this
-        communication interface instance. The registerPort method makes an
-        internal copy of the string to which the name argument points.</td>
-    </tr>
-    <tr>
-      <td>registerInterface</td>
-      <td>This is called by port drivers for each supported interface. This
-        method <em>does not</em> make a copy of the asynInterface to which
-        the pasynInterface argument points. Callers must store the
-        asynInteface in a location which is retained for the lifetime of the
-        port. This is commonly done by placing the asynInterface structure in
-        the 'driver private' structure.</td>
-    </tr>
-    <tr>
-      <td>exceptionConnect</td>
-      <td>This method must be called by the driver when and only when it
-        connects to a port or device.</td>
-    </tr>
-    <tr>
-      <td>exceptionDisconnect</td>
-      <td>This method must be called by the driver when and only when it
-        disconnects from a port or device.</td>
-    </tr>
-    <tr>
-      <td>interposeInterface</td>
-      <td>This is called by a software layer between client code and the port
-        driver. For example, if a device echos writes then a software module
-        that issues a read after each write could be created and call
-        interposeInterface for interface asynOctet. 
-
-        <p>Multiple interposeInterface calls for a port/addr/interface can be
-        issued. *ppPrev is set to the address of the previous asynInterface.
-        Thus the software module that last called interposeInterface is
-        called by user code. It in turn can call the software module that was
-        the second to last to call interposeInterface. This continues until
-        the actual port driver is called.</p>
-
-        <p>interposeInterface can also be called with an asynInterface that
-        has not been previously registered or replaced. In this case *ppPrev
-        will be null. Thus, new interfaces that are unknown to the low level
-        driver can be implemented.</p>
-      </td>
-    </tr>
-    <tr>
-      <td>enable</td>
-      <td>If enable is set yes, then queueRequests are not dequeued unless
-        their queue timeout occurs.</td>
-    </tr>
-    <tr>
-      <td>autoConnect</td>
-      <td>If autoConnect is true and the port or device is not connected when
-        a user callback is scheduled to be called, asynManager calls
-        pasynCommon-&gt;connect. See the discussion of Flow of Control below
-        for details.</td>
-    </tr>
-    <tr>
-      <td>isConnected</td>
-      <td>*yesNo is set to (0,1) if the port or device (is not, is)
-      connected.</td>
-    </tr>
-    <tr>
-      <td>isEnabled</td>
-      <td>*yesNo is set to (0,1) if the port or device (is not, is)
-      enabled.</td>
-    </tr>
-    <tr>
-      <td>isAutoConnect</td>
-      <td>*yesNo is set to (0,1) if the portThread (will not, will)
-        autoConnect for the port or device.</td>
-    </tr>
-    <tr>
-      <td>registerInterruptSource</td>
-      <td>If a low level driver supports interrupts it must call this for
-        each interface that supports interrupts. pasynPvt must be the address
-        of a void * that will be given a value by registerInterruptSource.
-        This argument is passed interruptStart and interruptEnd.</td>
-    </tr>
-    <tr>
-      <td>getInterruptPvt</td>
-      <td>Any code that wants to call createInterruptNode but does not know
-        the adresss of pasynPvt can find it via this method.. The caller must
-        be connected to a device, i.e. must have called connectDevice. If the
-        caller is not connected, getInterruptPvt returns asynError.</td>
-    </tr>
-    <tr>
-      <td>createInterruptNode 
-
-        <p>freeInterruptNode</p>
-      </td>
-      <td>These methods are the only way a user can allocate and free an
-        interruptNode. pasynPvt is the value obtained from getInterruptPvt.
-        createInterruptNode/freeInterruptNode are separate methods rather
-        than being done automatically by addInterruptUser/removeInterruptUser
-        so that addInterruptUser/removeInterruptUser can be efficient.</td>
-    </tr>
-    <tr>
-      <td>addInterruptUser 
-
-        <p>removeInterruptUser</p>
-      </td>
-      <td>Code that implements registerInterruptUser/cancelInterruptUser must
-        call addInterruptUser/removeInterruptUser to add and remove users
-        from the list or else calls to interruptStart/interruptEnd will not
-        work. This is an efficient operation so that a user can repeatedly
-        call registerInterruptUser/cancelInterruptUser. If either of these is
-        called while a interrupt is being processed, i.e. between calls to
-        interruptStart/interruptEnd, the call will block until interruptEnd
-        is called. The process callback for the asynUser specified in the
-        call to addInterruptUser must not call removeInterruptUser or it will
-        block forever.</td>
-    </tr>
-    <tr>
-      <td>interruptStart 
-
-        <p>interruptEnd</p>
-      </td>
-      <td>The code that implements interrupts is interface dependent. The
-        only service asynManager provides is a thread-safe implemention of
-        the user list. When the code wants to call the callback specified in
-        the calls to registerInterruptUser, it calls interruptStart to obtain
-        the list of callbacks. When it is done it calls interruptEnd. If any
-        requests are made to addInterruptUser/removeInterruptUser between the
-        calls to interruptStart and interruptEnd, asynManager delays the
-        requests until interruptEnd is called.</td>
-    </tr>
-  </tbody>
-</table>
-
-<h3>asynCommon</h3>
-
-<p>asynCommon describes the methods that must be implemented by drivers.</p>
-<pre>/* Device Interface supported by ALL asyn drivers*/
-#define asynCommonType "asynCommon"
-typedef struct  asynCommon {
-    void       (*report)(void *drvPvt,FILE *fp,int details);
-    /*following are to connect/disconnect to/from hardware*/
-    asynStatus (*connect)(void *drvPvt,asynUser *pasynUser);
-    asynStatus (*disconnect)(void *drvPvt,asynUser *pasynUser);
-}asynCommon;</pre>
-
-<table border="1">
-  <caption>asynCommon</caption>
-  <tbody>
-    <tr>
-      <td>report</td>
-      <td>Generates a report about the hardware device. This is the only
-        asynCommon method that does not have to be called by the queueRequest
-        callback or between calls to lockPort/unlockPort.</td>
-    </tr>
-    <tr>
-      <td>connect</td>
-      <td>Connect to the hardware device or communication path. The
-        queueRequest must specify priority asynQueuePriorityConnect.</td>
-    </tr>
-    <tr>
-      <td>disconnect</td>
-      <td>Disconnect from the hardware device or communication path. The
-        queueRequest must specify priority asynQueuePriorityConnect.</td>
-    </tr>
-  </tbody>
-</table>
-
-<h3>asynCommonSyncIO</h3>
-
-<p>asynCommonSyncIO provides a convenient interface for software that needs
-to perform "synchronous" operations to an asyn device, i.e. that blocks while
-waiting for the port to be available and for the operation to complete. The
-code does not need to handle callbacks or understand the details of the
-asynManager and asynCommon interfaces.</p>
-<pre>typedef struct asynCommonSyncIO {
-    asynStatus (*connect)(const char *port, int addr, 
-                          asynUser **ppasynUser, const char *drvInfo);
-    asynStatus (*disconnect)(asynUser *pasynUser);
-    asynStatus (*connectDevice)(asynUser *pasynUser);
-    asynStatus (*disconnectDevice)(asynUser *pasynUser);
-    asynStatus (*report)(asynUser *pasynUser, FILE *fd, int details);
-} asynCommonSyncIO;
-epicsShareExtern asynCommonSyncIO *pasynCommonSyncIO;</pre>
-Note that there is a potential for confusion in the connect* and disconnect*
-function names of this interface. For consistency with the other SyncIO
-interfaces, connect calls pasynManager-&gt;connectDevice, disconnect calls
-pasynManager-&gt;disconnect, connectDevice calls asynCommon-&gt;connect, and
-disconnectDevice calls asynCommon-&gt;disconnect. 
-
-<h3>asynDrvUser</h3>
-
-<p>asynDrvUser provides methods that allow an asynUser to communicate user
-specific information to/from a port driver</p>
-<pre>#define asynDrvUserType "asynDrvUser"
-typedef struct  asynDrvUser {
-    /*The following do not have to be called via queueRequest callback*/
-    asynStatus (*create)(void *drvPvt,asynUser *pasynUser,
-        const char *drvInfo, const char **pptypeName,size_t *psize);
-    asynStatus (*getType)(void *drvPvt,asynUser *pasynUser,
-        const char **pptypeName,size_t *psize);
-    asynStatus (*destroy)(void *drvPvt,asynUser *pasynUser);
-}asynDrvUser;</pre>
-
-<table border="1">
-  <caption>asynDrvUser</caption>
-  <tbody>
-    <tr>
-      <td>create</td>
-      <td>The user, i.e. device support calls create. The driver can create
-        any resources it needs. It can use pasynUser-&gt;drvUser to provide
-        access to the resources. If the asynUser and the driver both know how
-        to access the resources they must agree about the name for the
-        resource and a size. If pptypeName is not null the driver can give a
-        value to *pptypeName. If psize is not null the driver can give a
-        value to *psize. Unless asynUser receives a typeName and size that it
-        recognizes it must not access asynUser.drvUser.</td>
-    </tr>
-    <tr>
-      <td>getType</td>
-      <td>If other code, e.g. an interposeInterface wants to access
-        asynUser.drvUser it must call this and verify that typeName and size
-        are what it expects.</td>
-    </tr>
-    <tr>
-      <td>destroy</td>
-      <td>Destroy the resources created by create and set asynUser.drvUser
-        null.</td>
-    </tr>
-  </tbody>
-</table>
-
-<h3>asynLockPortNotify</h3>
-
-<p>This is provided for port drivers that are an asynUser of another port
-driver. For example a serial bus driver can be implemented by connecting to a
-standard serial port to perform the actual I/O. When the serial bus port is
-locked, either by the requester calling lockPort or because a queueRequest
-was dequeued, then the serial bus driver needs to lock the associated serial
-port.</p>
-
-<p>The serial bus driver registers interface asynLockPortNotify. Whenever the
-serial bus port is locked, asynManager calls pasynLockPortNotify.lock. The
-serial bus driver calls asynManager.lockPort for the serial port to which it
-is connected. Similarly for unlockPort. Thus while the serial bus port is
-locked, the serial bus is also locked.</p>
-
-<p>asynLockPortNotify is used only by asynManager itself. It is not put in
-the list of interfaces for the port.</p>
-
-<p>asynLockPortNotify is:</p>
-<pre>#define asynLockPortNotifyType "asynLockPortNotify"
-typedef struct  asynLockPortNotify {
-    asynStatus (*lock)(void *drvPvt,asynUser *pasynUser);
-    asynStatus (*unlock)(void *drvPvt,asynUser *pasynUser);
-}asynLockPortNotify;</pre>
-
-<table border="1">
-  <caption>asynDrvUser</caption>
-  <tbody>
-    <tr>
-      <td>lock</td>
-      <td>Called when asynManager.lockPort is called. The driver normally
-        calls asynManager.lockPort for the port to which it is connected.</td>
-    </tr>
-    <tr>
-      <td>unlock</td>
-      <td>Called when asynManager.unlockPort is called. The driver normally
-        calls asynManager.unlockPort for the port to which it is
-      connected.</td>
-    </tr>
-  </tbody>
-</table>
-
-<h3>asynOption</h3>
-
-<p>asynOption provides a generic way of setting driver specific options. For
-example the serial port driver uses this to specify baud rate, stop bits,
-etc.</p>
-<pre>#define asynOptionType "asynOption"
-/*The following are generic methods to set/get device options*/
-typedef struct asynOption {
-    asynStatus (*setOption)(void *drvPvt, asynUser *pasynUser,
-                                const char *key, const char *val);
-    asynStatus (*getOption)(void *drvPvt, asynUser *pasynUser,
-                                const char *key, char *val, int sizeval);
-}asynOption;</pre>
-
-<table border="1">
-  <caption>asynOption</caption>
-  <tbody>
-    <tr>
-      <td>setOption</td>
-      <td>Set value associated with key.</td>
-    </tr>
-    <tr>
-      <td>getOption</td>
-      <td>Get value associated with key.</td>
-    </tr>
-  </tbody>
-</table>
-
-<h3>Trace Interface</h3>
-<pre>/*asynTrace is implemented by asynManager*/
-/*All asynTrace methods can be called from any thread*/
-/* traceMask definitions*/
-#define ASYN_TRACE_ERROR     0x0001
-#define ASYN_TRACEIO_DEVICE  0x0002
-#define ASYN_TRACEIO_FILTER  0x0004
-#define ASYN_TRACEIO_DRIVER  0x0008
-#define ASYN_TRACE_FLOW      0x0010
-
-/* traceIO mask definitions*/
-#define ASYN_TRACEIO_NODATA 0x0000
-#define ASYN_TRACEIO_ASCII  0x0001
-#define ASYN_TRACEIO_ESCAPE 0x0002
-#define ASYN_TRACEIO_HEX    0x0004
-/* asynPrint and asynPrintIO are macros that act like
-   int asynPrint(asynUser *pasynUser,int reason, const char *format, ... );
-   int asynPrintIO(asynUser *pasynUser,int reason,
-        const char *buffer, size_t len, const char *format, ... );
-*/
-typedef struct asynTrace {
-    /* lock/unlock are only necessary if caller performs I/O other then*/
-    /* by calling asynTrace methods                                    */
-    asynStatus (*lock)(asynUser *pasynUser);
-    asynStatus (*unlock)(asynUser *pasynUser);
-    asynStatus (*setTraceMask)(asynUser *pasynUser,int mask);
-    int        (*getTraceMask)(asynUser *pasynUser);
-    asynStatus (*setTraceIOMask)(asynUser *pasynUser,int mask);
-    int        (*getTraceIOMask)(asynUser *pasynUser);
-    asynStatus (*setTraceFile)(asynUser *pasynUser,FILE *fp);
-    FILE       *(*getTraceFile)(asynUser *pasynUser);
-    asynStatus (*setTraceIOTruncateSize)(asynUser *pasynUser,size_t size);
-    size_t     (*getTraceIOTruncateSize)(asynUser *pasynUser);
-    int        (*print)(asynUser *pasynUser,int reason, const char *pformat, ...);
-    int        (*printIO)(asynUser *pasynUser,int reason,
-               const char *buffer, size_t len,const char *pformat, ...);
-}asynTrace;
-epicsShareExtern asynTrace *pasynTrace;</pre>
-
-<h3>asynTrace</h3>
+<h3>Trace</h3>
 
 <p>portDriver provides a trace facility with the following attributes:</p>
 <ul>
-  <li>Tracing is turned on/off for individual devices, i.e. a portName,
-  addr.</li>
-  <li>Trace has a global trace mask for asynUsers not connected to a port or
-    port, addr.</li>
+  <li>Tracing can turned on/off for a port and for individual devices
+   connected to a port.</li>
   <li>The output is sent to a file or to stdout or to errlog.</li>
   <li>A mask determines the type of information that can be displayed. The
     various choices can be ORed together. 
     <ul>
-      <li>ASYN_TRACE_ERROR Run time errors are reported, e.g. timeouts.</li>
-      <li>ASYN_TRACEIO_DEVICE Device support reports I/O activity.</li>
-      <li>ASYN_TRACEIO_FILTER Any layer between device support and the low
-        level driver reports any filtering it does on I/O.</li>
-      <li>ASYN_TRACEIO_DRIVER Low level driver reports I/O activity.</li>
-      <li>ASYN_TRACE_FLOW Report logic flow. Device support should report all
+      <li>ERROR Run time errors are reported, e.g. timeouts.</li>
+      <li>DEVICE Device support reports.</li>
+      <li>FILTER Any layer between device support and the low
+        level driver reports any filtering it does.</li>
+      <li>DRIVER Low level driver reports.</li>
+      <li>FLOW Report logic flow. Report all
         queue requests, callbacks entered, and all calls to drivers. Layers
         between device support and low level drivers should report all calls
         they make to lower level drivers. Low level drivers report calls they
@@ -1685,42 +1128,86 @@ epicsShareExtern asynTrace *pasynTrace;</pre>
   <li>Another mask determines how message buffers are printed. The various
     choices can be ORed together. 
     <ul>
-      <li>ASYN_TRACEIO_NODATA Don't print any data from the message
+      <li>IO_NODATA Don't print any data from the message
       buffers.</li>
-      <li>ASYN_TRACEIO_ASCII Print with a "%s" style format.</li>
-      <li>ASYN_TRACEIO_ESCAPE Call epicsStrPrintEscaped.</li>
-      <li>ASYN_TRACEIO_HEX Print each byte with " %2.2x".</li>
+      <li>IO_ASCII Print with a "%s" style format.</li>
+      <li>IO_ESCAPE Call epicsStrPrintEscaped.</li>
+      <li>IO_HEX Print each byte with " %2.2x".</li>
     </ul>
   </li>
 </ul>
 
 <p>In order for the trace facility to perform properly; device support and
 all drivers must use the trace facility. Device and driver support can
-directly call the asynTrace methods. The asynPrint and asynPrintIO macros are
-provided so that it is easier for device/driver support. Support can have
-calls like:</p>
-<pre>    asynPrint(pasynUser,ASYN_TRACE_FLOW,"%s Calling queueRequest\n",
+directly call the Trace methods.
+Support can have calls like:</p>
+<pre>    trace.print(user,Trace.FLOW,"%s calling queueRequest\n",
         someName);</pre>
 
-<p>The asynPrintIO call is designed for device support or drivers that issue
+<p>The printIO call is designed for device support or drivers that issue
 read or write requests. They make calls like:</p>
-<pre>    asynPrintIO(pasynUser,ASYN_TRACEIO_DRIVER,data,nchars,"%s nchars %d",</pre>
+<pre>    trace.printIO(user,Trace.DRIVER,data,nchars,"%s nchars %d",</pre>
 <pre>                someName,nchars);</pre>
 
-<p>The asynTrace methods are implemented by asynManager. These methods can be
-used by any code that has created an asynUser and is connected to a device.
-All methods can be called by any thread. That is, an application thread
-and/or a portThread. If a thread performs all I/O via calls to print or
-printIO, then it does not have to call lock or unlock. If it does want to do
-its own I/O, it must lock before any I/O and unlock after. For example:</p>
-<pre>    pasynTrace-&gt;lock(pasynUser);
-    fd = pasynTrace-&gt;getTraceFILE(pasynUser);
-    /*perform I/O to fd */
-    pasynTrace-&gt;unlock(pasynUser);</pre>
+<pre>
+public interface Trace { 
+    public static final int ERROR = 0x0001;
+    public static final int SUPPORT = 0x0002;
+    public static final int INTERPOSE = 0x0004;
+    public static final int DRIVER = 0x0008;
+    public static final int FLOW = 0x0010;
+    
+    public static final int IO_NODATA = 0x0000;
+    public static final int IO_ASCII = 0x0001;
+    public static final int IO_ESCAPE = 0x0002;
+    public static final int IO_HEX = 0x0004;
 
-<p>If the asynUser is not connected to a port, i.e.
-pasynManager-&gt;connectDevice has not been called, then a "global" device is
-assumed. This is useful when asynPrint is called before connectDevice.</p>
+    void setMask(int mask);
+    int getMask();
+    void setIOMask(int mask);
+    int getIOMask();
+    void setFile(Writer file);
+    Writer getFile();
+    void setIOTruncateSize(int size);
+    int getIOTruncateSize();
+    void optionChangeListenerAdd(
+        TraceOptionChangeListener traceOptionChangeListener);
+    void optionChangeListenerRemove(
+        TraceOptionChangeListener traceOptionChangeListener);
+    void print(int reason,String format, Object... args);
+    void printIO(int reason, byte[] buffer,long len,
+        String format,Object... args);
+}
+</pre>
+<h3>Factory</h3>
+<pre>
+public class Factory {
+    public static User createUser(
+        QueueRequestCallback asynQueueRequestCallback) {
+    public static Port createPort(
+        String portName,PortDriver portDriver,String driverName,
+        boolean isMultiDevicePort,boolean canBlock,
+        boolean autoConnect,ScanPriority priority);
+    public static String[] getPortNames();
+}
+</pre>
+
+
+<center>
+<h2 style="text-align: center">Standard interfaces for device access</h2>
+</center>
+
+<h3>Interface</h3>
+<pre>
+interface Interface {
+    String getInterfaceName();
+}
+</pre>
+
+
+
+
+<h3>asynTrace</h3>
 
 <table border="1">
   <caption>asynTrace</caption>
@@ -1780,7 +1267,7 @@ assumed. This is useful when asynPrint is called before connectDevice.</p>
       <td>Determines how much data is printed by printIO. In all cases it
         determines how many bytes of the buffer are displayed. The actual
         number of characters printed depends on the traceIO mask. For example
-        ASYN_TRACEIO_HEX results in 3 characters being printed for each byte.
+        IO_HEX results in 3 characters being printed for each byte.
         Normally set by the user requesting it via a shell command or the
         devTrace device support.</td>
     </tr>
@@ -3538,24 +3025,24 @@ static void queueCallback(asynUser *pasynUser) {
     int        writeBytes,readBytes;
     int        eomReason;
 
-    asynPrint(pasynUser,ASYN_TRACE_FLOW,"queueCallback entered\n");
+    asynPrint(pasynUser,FLOW,"queueCallback entered\n");
     status = pasynOctet-&gt;write(drvPvt,pasynUser,pmydata-&gt;buffer,
               strlen(pmydata-&gt;buffer),&amp;writeBytes);
     if(status!=asynSuccess) {
-        asynPrint(pasynUser,ASYN_TRACE_ERROR,
+        asynPrint(pasynUser,ERROR,
             "queueCallback write failed %s\n",pasynUser-&gt;errorMessage);
     } else {
-        asynPrintIO(pasynUser,ASYN_TRACEIO_DEVICE,
+        asynPrintIO(pasynUser,IO_DEVICE,
             pmydata-&gt;buffer,strlen(pmydata-&gt;buffer),
             "queueCallback write sent %d bytes\n",writeBytes);
     }
     status = pasynOctet-&gt;read(drvPvt,pasynUser,pmydata-&gt;buffer,
          BUFFER_SIZE,&amp;readBytes,&amp;eomReason);
     if(status!=asynSuccess) {
-        asynPrint(pasynUser,ASYN_TRACE_ERROR,
+        asynPrint(pasynUser,ERROR,
             "queueCallback read failed %s\n",pasynUser-&gt;errorMessage);
     } else {
-        asynPrintIO(pasynUser,ASYN_TRACEIO_DEVICE,
+        asynPrintIO(pasynUser,IO_DEVICE,
             pmydata-&gt;buffer,BUFFER_SIZE,
             "queueCallback read returned: retlen %d eomReason 0x%x data %s\n",
             readBytes,eomReason,pmydata-&gt;buffer);
@@ -3591,13 +3078,13 @@ static void asynExample(const char *port,int addr,const char *message)
     pmyData-&gt;done = epicsEventCreate(epicsEventEmpty);
     status = pasynManager-&gt;queueRequest(pasynUser,asynQueuePriorityLow, 0.0);
     if(status) {
-        asynPrint(pasynUser,ASYN_TRACE_ERROR,
+        asynPrint(pasynUser,ERROR,
             "queueRequest failed %s\n",pasynUser-&gt;errorMessage);
     }
     epicsEventWait(pmyData-&gt;done);
     status = pasynManager-&gt;freeAsynUser(pasynUser);
     if(status) {
-        asynPrint(pasynUser,ASYN_TRACE_ERROR,
+        asynPrint(pasynUser,ERROR,
             "freeAsynUser failed %s\n",pasynUser-&gt;errorMessage);
     }
     epicsEventDestroy(pmyData-&gt;done);
