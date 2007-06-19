@@ -6,8 +6,11 @@
 package org.epics.ioc.pdrv;
 
 /**
- * An interface for making pdrv requests and for communication between driver
+ * An interface for making pdrv (Port Driver) requests and for communication between driver
  * and user.
+ * The pdrv rules ensure that at any given time at most one user is the "owner" of a port.
+ * Only the owner is allow to call the I/O interfaces implemented by the port/device driver.
+ * While owner a user can make an arbitrary number of calls to the port/device interfaces.
  * Each pdrv user must create a User instance by calling Factory.createUser.
  * Locking rules:
  * <ul>
@@ -41,6 +44,11 @@ public interface User {
      */
     public static final int REASON_SIGNAL = -1;
     
+    /**
+     * Get the QueueRequestCallback for this user.
+     * @return The QueueRequestCallback interface;
+     */
+    QueueRequestCallback getQueueRequestCallback();
     /**
      * Create a new User that is connected to the same port and device.
      * The new user will also have the same reason and timeout as the orginal.
@@ -79,8 +87,7 @@ public interface User {
      * Get the device to which this user is connected.
      * @return The device or null if the user is not connected to a device.
      */
-    Device getDevice();
-    
+    Device getDevice();   
     /**
      * Called by pdrv methods to report errors to a user.
      * @param message The message.
@@ -102,25 +109,29 @@ public interface User {
      */
     double getTimeout();
     /**
-     * Set a reference to a portDriverUserPrivate object.
-     * @param portDriverUserPvt The object.
+     * Set a reference to a portDriverPrivate object.
+     * A driver must never keep information about a user within the driver.
+     * Instead it should use setPortDriverPvt and getPortDriverPvt.
+     * @param portDriverPvt The object.
      */
-    void setPortDriverUserPvt(Object portDriverUserPvt);
+    void setPortDriverPvt(Object portDriverPvt);
     /**
-     * Get the reference to the portDriverUserPvt object.
-     * @return Return a reference to portDriverUserPvt object.
+     * Get the reference to the portDriverPvt object.
+     * @return Return a reference to portDriverPvt object.
      */
-    Object getPortDriverUserPvt();
+    Object getPortDriverPvt();
     /**
-     * Set a reference to a deviceDriverUserPrivate object.
-     * @param deviceDriverUserPvt The object.
+     * Set a reference to a deviceDriverPrivate object.
+     * A driver must never keep information about a user within the driver.
+     * Instead it should use setDeviceDriverPvt and getDeviceDriverPvt.
+     * @param deviceDriverPvt The object.
      */
-    void setDeviceDriverUserPvt(Object deviceDriverUserPvt);
+    void setDeviceDriverPvt(Object deviceDriverPvt);
     /**
      * Get the reference to the deviceDriverUserPvt object.
      * @return Return a reference to deviceDriverUserPvt object.
      */
-    Object getDeviceDriverUserPvt();
+    Object getDeviceDriverPvt();
     /**
      * Set a reference to a user private object.
      * @param userPvt The userPvt object.

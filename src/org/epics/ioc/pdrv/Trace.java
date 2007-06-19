@@ -18,17 +18,17 @@ public interface Trace {
      */
     public static final int ERROR = 0x0001;
     /**
-     * An IOC record support message.
+     * A support message. Normally associated with a particular User.
      */
-    public static final int IO_SUPPORT = 0x0002;
+    public static final int SUPPORT = 0x0002;
     /**
      * An interpose interface MESSAGE.
      */
-    public static final int IO_INTERPOSE = 0x0004;
+    public static final int INTERPOSE = 0x0004;
     /**
      * A port or device driver message.
      */
-    public static final int IO_DRIVER = 0x0008;
+    public static final int DRIVER = 0x0008;
     /**
      * A flow of control message.
      */
@@ -55,7 +55,7 @@ public interface Trace {
     /**
      * Set the traceMask.
      * @param mask The mask.
-     * It must be some combination of ERROR|IO_SUPPORT|IO_INTERPOSE|IO_DRIVER
+     * It must be some combination of ERROR|SUPPORT|INTERPOSE|DRIVER
      */
     void setMask(int mask);
     /**
@@ -106,14 +106,14 @@ public interface Trace {
     void optionChangeListenerRemove(TraceOptionChangeListener traceOptionChangeListener);
     /**
      * Generate a trace message.
-     * @param reason One of ERROR|IO_SUPPORT|IO_INTERPOSE|IO_DRIVER.
+     * @param reason One of ERROR|SUPPORT|INTERPOSE|DRIVER.
      * @param format A format.
      * @param args The data associated with the format.
      */
     void print(int reason,String format, Object... args);
     /**
      * Generate a trace message and also show data values.
-     * @param reason One of ERROR|IO_SUPPORT|IO_INTERPOSE|IO_DRIVER.
+     * @param reason One of ERROR|SUPPORT|INTERPOSE|DRIVER.
      * @param buffer The data array.
      * @param len The number of data items.
      * @param format A format.

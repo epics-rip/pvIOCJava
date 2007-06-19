@@ -6,6 +6,7 @@
 package org.epics.ioc.pdrv;
 
 /**
+ * This is implemented by a driver and is only called by org.epics.ioc.prev.Factory.
  * @author mrk
  *
  */
@@ -13,7 +14,7 @@ public interface PortDriver {
     /**
      * Report port specific information.
      * @param details How much detail.
-     * @return
+     * @return The report.
      */
     String report(int details);
     /**
