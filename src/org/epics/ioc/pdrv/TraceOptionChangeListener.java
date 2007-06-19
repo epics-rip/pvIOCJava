@@ -6,6 +6,7 @@
 package org.epics.ioc.pdrv;
 
 /**
+ * Interface implemented by code that calls trace.optionChangeListenerAdd.
  * @author mrk
  *
  */
