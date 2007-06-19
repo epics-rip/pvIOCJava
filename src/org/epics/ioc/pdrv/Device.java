@@ -5,6 +5,8 @@
  */
 package org.epics.ioc.pdrv;
 
+import org.epics.ioc.pdrv.interfaces.Interface;
+
 public interface Device {
     /**
      * Report about the device.
@@ -14,6 +16,12 @@ public interface Device {
      * @return A String containing the report.
      */
     String report(int details);
+    /**
+     * Get an array of the device interfaces.
+     * This can be called without owning the port.
+     * @return The array of interfaces.
+     */
+    Interface[] getInterfaces();
     /**
      * Get the device address.
      * @return The address.
@@ -25,30 +33,37 @@ public interface Device {
      */
     Port getPort();
     /**
-     * Get the interface for I/O tracing.
+     * Get the interface for tracing.
      * @return The Trace interface.
      */
     Trace getTrace();
     /**
-     * Block all other users from accessing the device.
-     * Must be called with the port owned by the caller.
-     * @param user The user that is making the block request.
-     * @return The status of the request.
+     * Enable or disable a device. If a device is disabled than any active request will complete at an
+     * unknown time in the future.
+     * @param trueFalse (false,true) means to (disable,enable) the device.
      */
-    Status blockOtherUsers(User user);
+    void enable(boolean trueFalse);
     /**
-     * Allow other users to again use the device.
-     * Must be called with the port owned by the caller.
-     * @param user The user that called blockOtherUsers.
+     * Set the autoConnect state for the device.
+     * @param trueFalse The autoConnect state.
      */
-    void unblockOtherUsers(User user);
+    void autoConnect(boolean trueFalse);
     /**
-     * Is the device blocked by someone other than the caller.
-     * Must be called with the port owned by the caller.
-     * @param user The user.
-     * @return (false,true) if the device (is not, is) blocked.
+     * Attempt to connect.
+     * This must be called without owning the port.
+     * @param user The requestor.
+     * @return Result. Status.success means that the attempt was successful.
+     * If the attempt fails user.getMessage describes why the request failed.
      */
-    boolean isBlockedByUser(User user);
+    Status connect(User user);
+    /**
+     * Attempt to disconnect.
+     * This must be called without owning the port.
+     * @param user The requestor.
+     * @return Result. Status.success means that the attempt was successful.
+     * If the attempt fails user.getMessage describes why the request failed.
+     */
+    Status disconnect(User user);
     /**
      * Is the device connected to it's I/O.
      * @return (false,true) if it (is not, is) connected.
@@ -85,16 +100,40 @@ public interface Device {
      */
     Interface findInterface(User user,String interfaceName,boolean interposeInterfaceOK);
     /**
-     * Enable or disable a device. If a device is disabled than any active request will complete at an
-     * unknown time in the future.
-     * @param trueFalse (false,true) means to (disable,enable) the device.
+     * lockPort with permission to perform I/O.
+     * This calls port.lockPort and in addition checks the state of the device.
+     * The request will fail for any of the following reasons:
+     * <ul>
+     *    <li>port.lockPort fails.
+     *    <li>The device is not enabled</li>
+     *    <li>The device is blocked by another user</li>
+     *    <li>The device is not connected.
+     * </ul>
+     * It will attempt to connect to the device if autoConnect is true. 
+     * @param user The user.
+     * @return Status.sucess if the port and device are connected, enabled, and not blocked by another user.
      */
-    void enable(boolean trueFalse);
+    Status lockPort(User user);
+;    /**
+     * Block all other users from accessing the device.
+     * Must be called with the port owned by the caller.
+     * @param user The user that is making the block request.
+     * @return The status of the request.
+     */
+    Status blockOtherUsers(User user);
     /**
-     * Set the autoConnect state for the device.
-     * @param trueFalse The autoConnect state.
+     * Allow other users to again use the device.
+     * Must be called with the port owned by the caller.
+     * @param user The user that called blockOtherUsers.
      */
-    void autoConnect(boolean trueFalse);
+    void unblockOtherUsers(User user);
+    /**
+     * Is the device blocked by someone other than the caller.
+     * Must be called with the port owned by the caller.
+     * @param user The user.
+     * @return (false,true) if the device (is not, is) blocked.
+     */
+    boolean isBlockedByOtherUser(User user);
     /**
      * Register an interface for accessing the device.
      * Called by deviceDriver to register an interface.
