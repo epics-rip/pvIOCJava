@@ -6,6 +6,9 @@
 package org.epics.ioc.pdrv;
 
 /**
+ * Status returned by many PDRV (Port Driver) methods.
+ * If the return value is anything except Status.success, the method must
+ * provide a message by calling user.setMessage.
  * @author mrk
  *
  */
