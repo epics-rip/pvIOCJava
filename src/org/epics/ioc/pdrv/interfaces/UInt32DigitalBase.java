@@ -128,7 +128,7 @@ public abstract class UInt32DigitalBase implements UInt32Digital {
      * @see org.epics.ioc.pdrv.interfaces.UInt32Digital#write(org.epics.ioc.pdrv.User, int, int)
      */
     public Status write(User user, int value, int mask) {
-        asynTrace.print(Trace.IO_DRIVER,"%s write",portName);
+        asynTrace.print(Trace.DRIVER,"%s write",portName);
         int newValue = -1 & this.value & ~mask;
         newValue |= (value&mask);
         interruptOccured(newValue);
@@ -146,7 +146,7 @@ public abstract class UInt32DigitalBase implements UInt32Digital {
             userPvt.mask = mask;
             userPvt.user = user;
             userPvt.listener = uint32DigitalInterruptListener;
-            user.setDeviceDriverUserPvt(userPvt);
+            user.setDeviceDriverPvt(userPvt);
             if(interruptActive) {
                 interruptListenerListModified = true;
                 if(interruptlistenerListNew==null) {
@@ -176,8 +176,8 @@ public abstract class UInt32DigitalBase implements UInt32Digital {
     {
         lock.lock();
         try {
-            UserPvt userPvt = (UserPvt)user.getDeviceDriverUserPvt();
-            user.setPortDriverUserPvt(null);
+            UserPvt userPvt = (UserPvt)user.getDeviceDriverPvt();
+            user.setPortDriverPvt(null);
             if(interruptActive) {
                 interruptListenerListModified = true;
                 if(interruptlistenerListNew==null) {

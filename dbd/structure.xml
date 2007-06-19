@@ -13,21 +13,27 @@
     <field name = "message" type = "string" />
 </structure>
 
+<structure name = "doubleAlarmInterval">
+    <field name = "value" type = "double" />
+    <field name = "severity" type = "menu" menuName = "alarmSeverity" />
+</structure>
+
+<structure name = "intAlarmInterval">
+    <field name = "value" type = "int" />
+    <field name = "severity" type = "menu" menuName = "alarmSeverity" />
+</structure>
+
 <structure name = "doubleAlarm">
     <field name = "active" type = "boolean" />
-    <field name = "highMajor" type = "double" />
-    <field name = "highMinor" type = "double" />
-    <field name = "lowMinor" type = "double" />
-    <field name = "lowMajor" type = "double" />
+    <field name = "interval" type = "array" elementType = "structure" />
+    <field name = "outOfRange" type = "menu" menuName = "alarmSeverity" />
     <field name = "hystersis" type = "double" />
 </structure>
 
 <structure name = "intAlarm">
     <field name = "active" type = "boolean" />
-    <field name = "highMajor" type = "int" />
-    <field name = "highMinor" type = "int" />
-    <field name = "lowMinor" type = "int" />
-    <field name = "lowMajor" type = "int" />
+    <field name = "interval" type = "array" elementType = "structure" />
+    <field name = "outOfRange" type = "menu" menuName = "alarmSeverity" />
 </structure>
 
 <structure name = "booleanAlarm" >
@@ -106,14 +112,6 @@
     <field name = "link" type = "link" />
     <field name = "disableAlarmSeverity"
            type = "menu" menuName = "alarmSeverity" />
-</structure>
-
-<structure name = "pdrvLink">
-    <field name = "portName" type = "string" />
-    <field name = "addr" type = "int" />
-    <field name = "mask" type = "int" />
-    <field name = "timeout" type = "double" />
-    <field name = "drvParams" type = "string" />
 </structure>
 
 <structure name = "linkArrayElement">

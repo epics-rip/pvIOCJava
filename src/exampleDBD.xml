@@ -3,6 +3,5 @@
 <include addPath = "dbd" />
 <include href = "menuStructureSupport.xml" />
 <include href = "recordType.xml" />
-<include addPath = "src/org/epics/ioc/pdrv/drivers" />
-<include href = "echoDriver.xml" />
+<include href = "pdrv.xml" />
 </DBDefinition>

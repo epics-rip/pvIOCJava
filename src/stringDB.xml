@@ -2,7 +2,7 @@
 <IOCDatabase>
 
 <record name = "echoDriverPort" type = "port">
-    <factoryName>org.epics.ioc.pdrv.drivers.EchoDriverFactory</factoryName>
+    <factoryName>org.epics.ioc.pdrv.testDriver.EchoDriverFactory</factoryName>
     <portName>echoDriver</portName>
     <driverParameters structureName = "echoDriver" >
         <multiDevice>true</multiDevice>
@@ -29,11 +29,30 @@
     <doubleAlarm>
         <configure structureName = "doubleAlarm">
           <active>true</active>
+          <interval>
+              <value structureName = "doubleAlarmInterval">
+                  <value>2.0</value>
+                  <severity>major</severity>
+              </value>
+              <value structureName = "doubleAlarmInterval">
+                  <value>4.0</value>
+                  <severity>minor</severity>
+              </value>
+              <value structureName = "doubleAlarmInterval">
+                  <value>6.0</value>
+                  <severity>none</severity>
+              </value>
+              <value structureName = "doubleAlarmInterval">
+                  <value>8.0</value>
+                  <severity>minor</severity>
+              </value>
+              <value structureName = "doubleAlarmInterval">
+                  <value>10.0</value>
+                  <severity>major</severity>
+              </value>
+          </interval>
+          <outOfRange>invalid</outOfRange>
           <hystersis>0.1</hystersis>
-          <highMajor>8.0</highMajor>
-          <highMinor>6.0</highMinor>
-          <lowMinor>4.0</lowMinor>
-          <lowMajor>2.0</lowMajor>
         </configure>
     </doubleAlarm>
     <units>counts</units>
