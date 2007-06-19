@@ -6,6 +6,7 @@
 package org.epics.ioc.pdrv;
 
 /**
+ * Connection exception type.
  * @author mrk
  *
  */
