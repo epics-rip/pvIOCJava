@@ -23,9 +23,5 @@ public enum QueuePriority {
     /**
      * Priority high
      */
-    high,
-    /**
-     * Priority connect. This must only be used for connect/discconnect requests.
-     */
-    connect
+    high
 }
