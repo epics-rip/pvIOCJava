@@ -1,0 +1,162 @@
+<?xml version="1.0" ?>
+<IOCDatabase>
+<record name = "doubleCounter" type = "calc">
+    <calcArgArray>
+        <value structureName = "calcArg">
+            <value>0.0</value>
+            <name>min</name>
+        </value>
+        <value structureName = "calcArg">
+            <value>11.0</value>
+            <name>max</name>
+        </value>
+        <value structureName = "calcArg">
+            <value>0.2</value>
+            <name>inc</name>
+        </value>
+    </calcArgArray>
+    <calculator supportName = "counterCalculator" />
+    <linkArray>
+        <value structureName = "linkArrayElement">
+            <wait>true</wait>
+            <link  supportName = "processLink" >
+                <configure structureName = "processLink">
+                    <pvname>doubleRecord</pvname>
+                </configure>
+            </link>
+        </value>
+    </linkArray>
+    <units>counts</units>
+    <displayLimit>
+        <low>0.0</low>
+        <high>11.0</high>
+    </displayLimit>
+    <scan>
+        <scan>periodic</scan>
+        <rate>1.0</rate>
+    </scan>
+</record>
+
+<record name = "doubleRecord" type = "double">
+    <input supportName = "inputLink" >
+        <configure structureName = "inputLink">
+            <pvname>doubleCounter</pvname>
+            <process>false</process>
+        </configure>
+    </input>
+    <units>volts</units>
+    <doubleAlarm>
+        <configure structureName = "doubleAlarm">
+          <active>true</active>
+          <interval>
+              <value structureName = "doubleAlarmInterval">
+                  <value>2.0</value>
+                  <severity>major</severity>
+              </value>
+              <value structureName = "doubleAlarmInterval">
+                  <value>4.0</value>
+                  <severity>minor</severity>
+              </value>
+              <value structureName = "doubleAlarmInterval">
+                  <value>6.0</value>
+                  <severity>none</severity>
+              </value>
+              <value structureName = "doubleAlarmInterval">
+                  <value>8.0</value>
+                  <severity>minor</severity>
+              </value>
+              <value structureName = "doubleAlarmInterval">
+                  <value>10.0</value>
+                  <severity>major</severity>
+              </value>
+          </interval>
+          <outOfRange>invalid</outOfRange>
+          <hystersis>0.3</hystersis>
+        </configure>
+    </doubleAlarm>
+    <displayLimit>
+        <low>0.0</low>
+        <high>10.0</high>
+    </displayLimit>
+</record>
+
+<record name = "intCounter" type = "calc">
+    <calcArgArray>
+        <value structureName = "calcArg">
+            <value>0.0</value>
+            <name>min</name>
+        </value>
+        <value structureName = "calcArg">
+            <value>11.0</value>
+            <name>max</name>
+        </value>
+        <value structureName = "calcArg">
+            <value>1.0</value>
+            <name>inc</name>
+        </value>
+    </calcArgArray>
+    <calculator supportName = "counterCalculator" />
+    <linkArray>
+        <value structureName = "linkArrayElement">
+            <wait>true</wait>
+            <link  supportName = "processLink" >
+                <configure structureName = "processLink">
+                    <pvname>intRecord</pvname>
+                </configure>
+            </link>
+        </value>
+    </linkArray>
+    <units>counts</units>
+    <displayLimit>
+        <low>0.0</low>
+        <high>11.0</high>
+    </displayLimit>
+    <scan>
+        <scan>periodic</scan>
+        <rate>1.0</rate>
+    </scan>
+</record>
+
+<record name = "intRecord" type = "int">
+    <input supportName = "inputLink" >
+        <configure structureName = "inputLink">
+            <pvname>intCounter</pvname>
+            <process>false</process>
+        </configure>
+    </input>
+    <units>volts</units>
+    <intAlarm>
+        <configure structureName = "intAlarm">
+          <active>true</active>
+          <interval>
+              <value structureName = "intAlarmInterval">
+                  <value>2</value>
+                  <severity>major</severity>
+              </value>
+              <value structureName = "intAlarmInterval">
+                  <value>4</value>
+                  <severity>minor</severity>
+              </value>
+              <value structureName = "intAlarmInterval">
+                  <value>6</value>
+                  <severity>none</severity>
+              </value>
+              <value structureName = "intAlarmInterval">
+                  <value>8</value>
+                  <severity>minor</severity>
+              </value>
+              <value structureName = "intAlarmInterval">
+                  <value>10</value>
+                  <severity>major</severity>
+              </value>
+          </interval>
+          <outOfRange>invalid</outOfRange>
+        </configure>
+    </intAlarm>
+    <displayLimit>
+        <low>0.0</low>
+        <high>10.0</high>
+    </displayLimit>
+</record>
+
+</IOCDatabase>

@@ -6,7 +6,6 @@
 package org.epics.ioc.pdrv.recordSupport;
 
 import java.lang.reflect.*;
-import java.lang.reflect.Type;
 
 import org.epics.ioc.pv.*;
 import org.epics.ioc.db.*;

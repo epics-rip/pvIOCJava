@@ -3,7 +3,7 @@
  * EPICS JavaIOC is distributed subject to a Software License Agreement found
  * in file LICENSE that is included with this distribution.
  */
-package org.epics.ioc.pdrv.devEpics;
+package org.epics.ioc.pdrv.support;
 
 import org.epics.ioc.pdrv.*;
 import org.epics.ioc.db.*;
@@ -86,7 +86,6 @@ ProcessContinueRequester,QueueRequestCallback
     
     protected PdrvLink pdrvLink = new PdrvLink();
     
-    protected Object drvUser = null;
     protected User user = null;
     protected Port port = null;
     protected Device device = null;
@@ -97,6 +96,8 @@ ProcessContinueRequester,QueueRequestCallback
     protected DriverUser driverUser = null;
     
     protected SupportProcessRequester supportProcessRequester = null;
+    
+    private String alarmMessage = null;
     
     protected boolean initBase() {
         if(!super.checkSupportState(SupportState.readyForInitialize,supportName)) return false;
@@ -161,7 +162,7 @@ ProcessContinueRequester,QueueRequestCallback
         Interface iface = device.findInterface(user, "driverUser", true);
         if(iface!=null) {
             driverUser = (DriverUser)iface;
-            drvUser = driverUser.create(user, pdrvLink.drvParams);
+            driverUser.create(user, pdrvLink.drvParams);
         }
         setSupportState(SupportState.ready);
         return true;
@@ -173,7 +174,6 @@ ProcessContinueRequester,QueueRequestCallback
         if(driverUser!=null) {
             driverUser.dispose(user);
         }
-        drvUser = null;
         driverUser = null;
         device = null;
         deviceTrace = null;
@@ -198,12 +198,8 @@ ProcessContinueRequester,QueueRequestCallback
             throw new IllegalStateException("supportProcessRequester is null");
         }
         this.supportProcessRequester = supportProcessRequester;
-        if(!port.canBlock()) {
-            this.queueCallback();
-            this.processContinue();
-        } else {
-            port.queueDeviceRequest(user, QueuePriority.medium);
-        }
+        alarmMessage = null;
+        port.queueRequest(user, QueuePriority.medium);
     }   
     /* (non-Javadoc)
      * @see org.epics.ioc.support.AbstractSupport#setField(org.epics.ioc.db.DBField)
@@ -227,13 +223,20 @@ ProcessContinueRequester,QueueRequestCallback
      * @see org.epics.ioc.process.ProcessContinueRequester#processContinue()
      */
     public void processContinue() {
+        if(alarmMessage!=null) {
+            if(alarmSupport!=null) alarmSupport.setAlarm(alarmMessage,AlarmSeverity.major);
+        }
         supportProcessRequester.supportProcessDone(RequestResult.success);
     }
     /* (non-Javadoc)
-     * @see org.epics.ioc.asyn.AsynQueueRequestCallback#callback(org.epics.ioc.asyn.AsynUser)
+     * @see org.epics.ioc.pdrv.QueueRequestCallback#callback(org.epics.ioc.pdrv.Status, org.epics.ioc.pdrv.User)
      */
-    public void callback(User user) {
-        this.queueCallback();
+    public void callback(Status status, User user) {
+        if(status==Status.success) {
+            this.queueCallback();
+        } else {
+            alarmMessage = pvLink.getFullFieldName() + " " + user.getMessage();
+        }
         recordProcess.processContinue(this);
     }
     

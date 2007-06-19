@@ -1,0 +1,185 @@
+/**
+ * Copyright - See the COPYRIGHT that is included with this distribution.
+ * EPICS JavaIOC is distributed subject to a Software License Agreement found
+ * in file LICENSE that is included with this distribution.
+ */
+package org.epics.ioc.pdrv.testDriver;
+
+import org.epics.ioc.pdrv.*;
+import org.epics.ioc.pdrv.interfaces.*;
+import org.epics.ioc.pv.*;
+import org.epics.ioc.util.*;
+/**
+ * The factory for echoDriver.
+ * uint32DigitalDriver is a portDriver for testing the uint32Digital support in org.epics.ioc.pdrv.support.
+ * It requires the uint32DigitalDriver structure, which holds the following configuration parameters:
+ * <ul>
+ *    <li>numberRegisters<br/>
+ *       The number of uint32Digital registers to simulate.
+ *     </li>
+ * </ul>
+ * uint32DigitalDriver implements interface uint32Digital by keeping an internal int[] array
+ * that simulates digital I/O registers.
+ * A write request sets a value and a read request reads the current value.
+ * @author mrk
+ *
+ */
+public class UInt32DigitalDriverFactory {
+    
+    /**
+     * Create a new instance of echoDriver.
+     * @param portName The portName.
+     * @param autoConnect Initial value for autoConnect.
+     * @param priority The thread priority if asynchronous, i.e. delay > 0.0.
+     * @param pvStructure The interface for structure echoDriver.
+     */
+    static public void create(
+        String portName,boolean autoConnect,ScanPriority priority,PVStructure pvStructure)
+    {
+        PVField[] pvFields = pvStructure.getFieldPVFields();
+        Structure structure = (Structure)pvStructure.getField();
+        int index = structure.getFieldIndex("numberRegisters");
+        if(index<0) {
+            throw new IllegalStateException("field numberRegisters not found");
+        }
+        PVInt pvInt = (PVInt)pvFields[index];
+        int numberRegisters = pvInt.get();
+        new UInt32DigitalDriver(portName,autoConnect,priority,numberRegisters);
+    }
+    
+    static private class UInt32DigitalDriver implements PortDriver {
+        private int[] register;
+        private Port port;
+        private Trace trace;
+        
+        private UInt32DigitalDriver(String portName,boolean autoConnect,ScanPriority priority,
+            int numberRegisters)
+        {
+            register = new int[numberRegisters];
+            boolean isMultiDevicePort = (numberRegisters==1) ? false : true;
+            port = Factory.createPort(portName, this, "uint32DigitalDriver",
+                isMultiDevicePort, false, autoConnect,priority);
+            trace = port.getTrace();
+        }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pdrv.PortDriver#report(boolean, int)
+         */
+        public String report(int details) {
+            return null;
+        }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pdrv.PortDriver#connect(org.epics.ioc.pdrv.User)
+         */
+        public Status connect(User user) {
+            trace.print(Trace.FLOW ,"connect");
+            if(port.isConnected()) {
+                user.setMessage("already connected");
+                trace.print(Trace.ERROR ,"already connected");
+                return Status.error;
+            }
+            port.exceptionConnect();
+            return Status.success;
+        }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pdrv.PortDriver#createDevice(org.epics.ioc.pdrv.User, int)
+         */
+        public Device createDevice(User user, int addr) {
+            if(addr>=register.length) {
+                user.setMessage("illegal address");
+                return null;
+            }
+            UInt32DigitalDevice intDevice = new UInt32DigitalDevice(addr);
+            Device device = port.createDevice(intDevice, addr);
+            intDevice.init(device);
+            return device;
+        }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pdrv.PortDriver#disconnect(org.epics.ioc.pdrv.User)
+         */
+        public Status disconnect(User user) {
+            trace.print(Trace.FLOW ,"disconnect");
+            if(!port.isConnected()) {
+                user.setMessage("not connected");
+                trace.print(Trace.ERROR ,"not connected");
+                return Status.error;
+            }
+            port.exceptionDisconnect();
+            return Status.success;
+        }
+        private class UInt32DigitalDevice implements DeviceDriver {   
+            private int addr;
+            private Device device;
+            private Trace trace;
+            
+            private UInt32DigitalDevice(int addr) {
+                this.addr = addr;
+            }
+            
+            private void init(Device device) {
+                this.device = device;
+                trace = device.getTrace();
+                new UInt32DigitalInterface();
+            }
+            /* (non-Javadoc)
+             * @see org.epics.ioc.pdrv.DeviceDriver#report(int)
+             */
+            public String report(int details) {
+                return null;
+            }
+            /* (non-Javadoc)
+             * @see org.epics.ioc.pdrv.DeviceDriver#connect(org.epics.ioc.pdrv.User)
+             */
+            public Status connect(User user) {
+                trace.print(Trace.FLOW ,"connect");
+                if(device.isConnected()) {
+                    user.setMessage("already connected");
+                    trace.print(Trace.ERROR ,"already connected");
+                    return Status.error;
+                }
+                device.exceptionConnect();
+                return Status.success;
+            }
+            /* (non-Javadoc)
+             * @see org.epics.ioc.pdrv.DeviceDriver#disconnect(org.epics.ioc.pdrv.User)
+             */
+            public Status disconnect(User user) {
+                trace.print(Trace.FLOW ,"disconnect");
+                if(!device.isConnected()) {
+                    user.setMessage("not connected");
+                    trace.print(Trace.ERROR ,"not connected");
+                    return Status.error;
+                }
+                device.exceptionDisconnect();
+                return Status.success;
+            }
+            
+            private class UInt32DigitalInterface extends  UInt32DigitalBase{
+                
+                private UInt32DigitalInterface() {
+                    super(device,"uint32Digital");
+                }               
+                /* (non-Javadoc)
+                 * @see org.epics.ioc.pdrv.interfaces.UInt32DigitalBase#read(org.epics.ioc.pdrv.User, int)
+                 */
+                public Status read(User user, int mask) {
+                    int value = register[addr]&mask;
+                    user.setInt(value);
+                    trace.print(Trace.DRIVER,"read value = " + value);
+                    return Status.success;
+                }
+                /* (non-Javadoc)
+                 * @see org.epics.ioc.pdrv.interfaces.UInt32DigitalBase#write(org.epics.ioc.pdrv.User, int, int)
+                 */
+                public Status write(User user, int value, int mask) {
+                    int newValue = register[addr]&~mask;
+                    newValue |= value&mask;
+                    register[addr] = newValue;
+                    trace.print(Trace.DRIVER,"write value = " + register[addr]);
+                    super.interruptOccured(newValue);
+                    return Status.success;
+                }
+            }
+        }
+    }
+}
+

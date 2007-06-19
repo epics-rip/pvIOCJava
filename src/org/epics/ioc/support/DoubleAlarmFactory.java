@@ -37,18 +37,22 @@ public class DoubleAlarmFactory {
     {
         private DBLink dbLink;
         private PVLink pvLink;
+        
         private boolean noop;
         private AlarmSupport alarmSupport;
         
+        private StructureArrayData structureArrayData = new StructureArrayData();
+        private PVStructureArray intervalPVArray;
+        private PVMenu outOfRangePVMenu;
         private PVBoolean pvActive;
-        private PVDouble pvHighMajor;
-        private PVDouble pvHighMinor;
-        private PVDouble pvLowMinor;
-        private PVDouble pvLowMajor;
         private PVDouble pvHystersis;
         
+        private PVDouble[] pvAlarmIntervalValue = null;
+        private PVMenu[] pvAlarmIntervalSeverity = null;
+        
         private PVDouble pvValue;
-        private double lalm;
+        private double lastAlarmIntervalValue;
+        private int lastAlarmSeverityIndex;
        
         private DoubleAlarmImpl(DBLink dbLink) {
             super(supportName,dbLink);
@@ -59,8 +63,8 @@ public class DoubleAlarmFactory {
          * @see org.epics.ioc.process.Support#initialize()
          */
         public void initialize() {
-            SupportState supportState = SupportState.readyForStart;
             if(!super.checkSupportState(SupportState.readyForInitialize,supportName)) return;
+            SupportState supportState = SupportState.readyForStart;
             noop = false;
             if(pvValue==null) {
                 super.message("setField was not called with a double field", MessageType.error);
@@ -76,15 +80,19 @@ public class DoubleAlarmFactory {
             alarmSupport = AlarmFactory.findAlarmSupport(dbLink);
             if(alarmSupport==null) {
                 super.message("no alarmSupport", MessageType.error);
+                noop = true;
+                setSupportState(supportState);
                 return;
             }
             pvActive = configStructure.getBooleanField("active");
-            pvHighMajor = configStructure.getDoubleField("highMajor");
-            pvHighMinor = configStructure.getDoubleField("highMinor");
-            pvLowMinor = configStructure.getDoubleField("lowMinor");
-            pvLowMajor = configStructure.getDoubleField("lowMajor");
+            if(pvActive==null) return;
+            intervalPVArray = (PVStructureArray)configStructure.getArrayField(
+                "interval", Type.pvStructure);
+            if(intervalPVArray==null) return;
+            outOfRangePVMenu = configStructure.getMenuField("outOfRange", "alarmSeverity");
+            if(outOfRangePVMenu==null) return;
             pvHystersis = configStructure.getDoubleField("hystersis");
-            lalm =pvValue.get();
+            if(pvHystersis==null) return;
             setSupportState(supportState);
         }
         /* (non-Javadoc)
@@ -92,13 +100,71 @@ public class DoubleAlarmFactory {
          */
         public void start() {
             if(!super.checkSupportState(SupportState.readyForStart,supportName)) return;
-            setSupportState(SupportState.ready);
+            SupportState supportState = SupportState.ready;
+            if(noop) {
+                setSupportState(supportState);
+                return;
+            }
+            int size = intervalPVArray.getLength();
+            if(size<=0) {
+                super.message("invalid interval", MessageType.error);
+                return;
+            }
+            pvAlarmIntervalValue = new PVDouble[size];
+            pvAlarmIntervalSeverity = new PVMenu[size];
+            int num = intervalPVArray.get(0, size, structureArrayData);
+            if(num!=size) {
+                super.message("intervalPVArray num != size", MessageType.error);
+                return;
+            }
+            PVStructure[] pvStructures = structureArrayData.data;
+            for(int i=0; i<size; i++) {
+                PVStructure pvStructure = pvStructures[i];
+                if(pvStructure==null) {
+                    super.message("invalid interval is null", MessageType.error);
+                    return;
+                }
+                Structure structure = pvStructure.getStructure();
+                PVField[] pvFields = pvStructure.getFieldPVFields();
+                Field[] fields = structure.getFields();
+                int index = structure.getFieldIndex("value");
+                if(index<0) {
+                    super.message("invalid interval no value field", MessageType.error);
+                    return;
+                }
+                Field field = fields[index];
+                if(field.getType()!=Type.pvDouble) {
+                    super.message("invalid interval value field is not double", MessageType.error);
+                    return;
+                }
+                pvAlarmIntervalValue[i] = (PVDouble)pvFields[index];
+                index = structure.getFieldIndex("severity");
+                if(index<0) {
+                    super.message("invalid interval no severity field", MessageType.error);
+                    return;
+                }
+                field = fields[index];
+                if(field.getType()!=Type.pvMenu) {
+                    super.message("invalid interval severity field is not a menu", MessageType.error);
+                    return;
+                }
+                Menu menu = (Menu)field;
+                if(!menu.getMenuName().equals("alarmSeverity")) {
+                    super.message("invalid interval severity field is not an alarmSeverity menu", MessageType.error);
+                    return;
+                }
+                pvAlarmIntervalSeverity[i] = (PVMenu)pvFields[index];
+            }
+            lastAlarmSeverityIndex = 0;
+            setSupportState(supportState);
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.process.Support#stop()
          */
         public void stop() {
             if(super.getSupportState()!=SupportState.ready) return;
+            pvAlarmIntervalValue = null;
+            pvAlarmIntervalSeverity = null;
             setSupportState(SupportState.readyForStart);
         }
         /* (non-Javadoc)
@@ -107,51 +173,16 @@ public class DoubleAlarmFactory {
         public void uninitialize() {
             if(super.getSupportState()!=SupportState.ready) return;
             pvActive = null;
-            pvHighMajor = null;
-            pvHighMinor = null;
-            pvLowMinor = null;
-            pvLowMajor = null;
+            outOfRangePVMenu = null;
+            intervalPVArray = null;
             pvHystersis = null;
             setSupportState(SupportState.readyForInitialize);
-        }       
+        }
         /* (non-Javadoc)
          * @see org.epics.ioc.process.Support#process(org.epics.ioc.process.RecordProcessRequester)
          */
         public void process(SupportProcessRequester supportProcessRequester) {
-            if(noop) {
-                supportProcessRequester.supportProcessDone(RequestResult.success);
-                return;
-            }
-            boolean active = pvActive.get();
-            if(!active) return;
-            double  val = pvValue.get();
-            double  hyst = pvHystersis.get();
-            double hihi = pvHighMajor.get();
-            double high = pvHighMinor.get();
-            double low = pvLowMinor.get();
-            double lolo = pvLowMajor.get();
-            
-            if ((val >= hihi || ((lalm==hihi) && (val >= hihi-hyst)))){
-                String message = pvLink.getFullFieldName() + " high ";
-                if (alarmSupport.setAlarm(message, AlarmSeverity.major)) lalm = hihi; 
-            } else if ((val <= lolo || ((lalm==lolo) && (val <= lolo+hyst)))){
-                String message = pvLink.getFullFieldName() + " low ";
-                if (alarmSupport.setAlarm(message, AlarmSeverity.major)) lalm = lolo;
-                supportProcessRequester.supportProcessDone(RequestResult.success);
-                return;
-            } else if ((val >= high || ((lalm==high) && (val >= high-hyst)))){
-                String message = pvLink.getFullFieldName() + " high ";
-                if (alarmSupport.setAlarm(message, AlarmSeverity.minor)) lalm = high;
-                supportProcessRequester.supportProcessDone(RequestResult.success);
-                return;
-            } else if ((val <= low || ((lalm==low) && (val <= low+hyst)))){
-                String message = pvLink.getFullFieldName() + " low ";
-                if (alarmSupport.setAlarm(message, AlarmSeverity.minor)) lalm = low;
-                supportProcessRequester.supportProcessDone(RequestResult.success);
-                return;
-            } else {
-                lalm = val;
-            }
+            if(!noop && pvActive.get()) checkAlarm();
             supportProcessRequester.supportProcessDone(RequestResult.success);
         }                
         /* (non-Javadoc)
@@ -164,6 +195,45 @@ public class DoubleAlarmFactory {
                 return;
             }
             pvValue = (PVDouble)pvField;
+        }
+
+        private void checkAlarm() {
+            boolean active = pvActive.get();
+            if(!active) return;
+            double  val = pvValue.get();
+            int len = pvAlarmIntervalValue.length;
+            double intervalValue = 0.0;
+            for(int i=0; i<len; i++) {
+                intervalValue = pvAlarmIntervalValue[i].get();
+                if(val<=intervalValue) {
+                    int sevIndex = pvAlarmIntervalSeverity[i].getIndex();
+                    raiseAlarm(intervalValue,val,sevIndex);
+                    return;
+                }
+            }
+            int outOfRange = outOfRangePVMenu.getIndex();
+            // intervalValue is pvAlarmIntervalValue[len-1].get();
+            raiseAlarm(intervalValue,val,outOfRange);
+        }
+        
+        private void raiseAlarm(double intervalValue,double val,int severityIndex) {
+            AlarmSeverity alarmSeverity = AlarmSeverity.getSeverity(severityIndex);
+            if(severityIndex<lastAlarmSeverityIndex) {
+                double diff = lastAlarmIntervalValue - val;
+                if(diff<0.0) diff = -diff;
+                if(diff<pvHystersis.get()) {
+                    alarmSeverity = AlarmSeverity.getSeverity(lastAlarmSeverityIndex);
+                    intervalValue = lastAlarmIntervalValue;
+                }
+            }
+            if(alarmSeverity==AlarmSeverity.none) {
+                lastAlarmSeverityIndex = severityIndex;
+                return;
+            }
+            String message = pvLink.getFullFieldName() + " " + alarmSeverity.toString();
+            alarmSupport.setAlarm(message, alarmSeverity);
+            lastAlarmIntervalValue = intervalValue;
+            lastAlarmSeverityIndex = severityIndex;
         }
     }
 }

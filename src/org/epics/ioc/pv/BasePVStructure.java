@@ -252,12 +252,6 @@ public class BasePVStructure extends AbstractPVField implements PVStructure
     public PVStructure getStructureField(String fieldName, String structureName) {
         PVField pvField = findSubField(fieldName,this);
         if(pvField==null) return null;
-        if(pvField.getField().getType()!=Type.pvBoolean) {
-            super.message(
-                "fieldName " + fieldName + " does not have type boolean ",
-                MessageType.error);
-            return null;
-        }
         Field field = pvField.getField();
         Type type = field.getType();
         if(type!=Type.pvStructure) {
@@ -281,12 +275,6 @@ public class BasePVStructure extends AbstractPVField implements PVStructure
     public PVArray getArrayField(String fieldName, Type elementType) {
         PVField pvField = findSubField(fieldName,this);
         if(pvField==null) return null;
-        if(pvField.getField().getType()!=Type.pvBoolean) {
-            super.message(
-                "fieldName " + fieldName + " does not have type boolean ",
-                MessageType.error);
-            return null;
-        }
         Field field = pvField.getField();
         Type type = field.getType();
         if(type!=Type.pvArray) {

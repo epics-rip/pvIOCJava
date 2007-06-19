@@ -3,7 +3,7 @@
  * EPICS JavaIOC is distributed subject to a Software License Agreement found
  * in file LICENSE that is included with this distribution.
  */
-package org.epics.ioc.pdrv.devEpics;
+package org.epics.ioc.pdrv.support;
 
 import org.epics.ioc.pdrv.*;
 import org.epics.ioc.db.*;
@@ -84,7 +84,7 @@ public class LinkFactory {
         private Status status = Status.success;
         
         /* (non-Javadoc)
-         * @see org.epics.ioc.pdrv.devEpics.AbstractPdrvLinkSupport#initialize()
+         * @see org.epics.ioc.pdrv.support.AbstractPdrvLinkSupport#initialize()
          */
         public void initialize() {
             if(!super.initBase()) return;
@@ -113,13 +113,13 @@ public class LinkFactory {
             }
         }      
         /* (non-Javadoc)
-         * @see org.epics.ioc.pdrv.devEpics.AbstractPdrvLinkSupport#uninitialize()
+         * @see org.epics.ioc.pdrv.support.AbstractPdrvLinkSupport#uninitialize()
          */
         public void uninitialize() {
             super.uninitBase();
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.pdrv.devEpics.AbstractPdrvLinkSupport#start()
+         * @see org.epics.ioc.pdrv.support.AbstractPdrvLinkSupport#start()
          */
         public void start() {
             if(!super.startBase()) return;
@@ -135,7 +135,7 @@ public class LinkFactory {
             octet = (Octet)iface;
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.pdrv.devEpics.AbstractPdrvLinkSupport#stop()
+         * @see org.epics.ioc.pdrv.support.AbstractPdrvLinkSupport#stop()
          */
         public void stop() {
             super.stopBase();
@@ -143,7 +143,7 @@ public class LinkFactory {
             charArray = null;
         }            
         /* (non-Javadoc)
-         * @see org.epics.ioc.pdrv.devEpics.AbstractPdrvLinkSupport#processContinue()
+         * @see org.epics.ioc.pdrv.support.AbstractPdrvLinkSupport#processContinue()
          */
         public void processContinue() {
             if(status==Status.success) {
@@ -161,7 +161,7 @@ public class LinkFactory {
             supportProcessRequester.supportProcessDone(RequestResult.success);
         }        
         /* (non-Javadoc)
-         * @see org.epics.ioc.pdrv.devEpics.AbstractPdrvLinkSupport#queueCallback()
+         * @see org.epics.ioc.pdrv.support.AbstractPdrvLinkSupport#queueCallback()
          */
         public void queueCallback() {
             status = octet.read(user, octetArray, size);
@@ -170,7 +170,7 @@ public class LinkFactory {
                 return;
             }
             nbytes = user.getInt();
-            deviceTrace.printIO(Trace.IO_SUPPORT, octetArray, user.getInt(), "%s", fullName);
+            deviceTrace.printIO(Trace.SUPPORT, octetArray, user.getInt(), "%s", fullName);
         }
     }
     
@@ -189,7 +189,7 @@ public class LinkFactory {
         private Status status = Status.success;
         
         /* (non-Javadoc)
-         * @see org.epics.ioc.pdrv.devEpics.AbstractPdrvLinkSupport#initialize()
+         * @see org.epics.ioc.pdrv.support.AbstractPdrvLinkSupport#initialize()
          */
         public void initialize() {
             if(!super.initBase()) return;
@@ -218,13 +218,13 @@ public class LinkFactory {
             }
         }      
         /* (non-Javadoc)
-         * @see org.epics.ioc.pdrv.devEpics.AbstractPdrvLinkSupport#uninitialize()
+         * @see org.epics.ioc.pdrv.support.AbstractPdrvLinkSupport#uninitialize()
          */
         public void uninitialize() {
             super.uninitBase();
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.pdrv.devEpics.AbstractPdrvLinkSupport#start()
+         * @see org.epics.ioc.pdrv.support.AbstractPdrvLinkSupport#start()
          */
         public void start() {
             if(!super.startBase()) return;
@@ -239,14 +239,14 @@ public class LinkFactory {
             octet = (Octet)iface;
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.pdrv.devEpics.AbstractPdrvLinkSupport#stop()
+         * @see org.epics.ioc.pdrv.support.AbstractPdrvLinkSupport#stop()
          */
         public void stop() {
             super.stopBase();
             octetArray = null;
         } 
         /* (non-Javadoc)
-         * @see org.epics.ioc.pdrv.devEpics.AbstractPdrvLinkSupport#process(org.epics.ioc.process.SupportProcessRequester)
+         * @see org.epics.ioc.pdrv.support.AbstractPdrvLinkSupport#process(org.epics.ioc.process.SupportProcessRequester)
          */
         public void process(SupportProcessRequester supportProcessRequester) {
             if(octetValueType==OctetValueType.array) {
@@ -266,7 +266,7 @@ public class LinkFactory {
             super.process(supportProcessRequester);
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.pdrv.devEpics.AbstractPdrvLinkSupport#processContinue()
+         * @see org.epics.ioc.pdrv.support.AbstractPdrvLinkSupport#processContinue()
          */
         public void processContinue() {
             if(status!=Status.success) {
@@ -275,7 +275,7 @@ public class LinkFactory {
             supportProcessRequester.supportProcessDone(RequestResult.success);
         }        
         /* (non-Javadoc)
-         * @see org.epics.ioc.pdrv.devEpics.AbstractPdrvLinkSupport#queueCallback()
+         * @see org.epics.ioc.pdrv.support.AbstractPdrvLinkSupport#queueCallback()
          */
         public void queueCallback() {
             status = octet.write(user, octetArray, size);
@@ -283,7 +283,7 @@ public class LinkFactory {
                 alarmSupport.setAlarm(user.getMessage(), AlarmSeverity.invalid);
                 return;
             }
-            deviceTrace.printIO(Trace.IO_SUPPORT, octetArray, user.getInt(), "%s", fullName);
+            deviceTrace.printIO(Trace.SUPPORT, octetArray, user.getInt(), "%s", fullName);
         }
     }
     
@@ -298,7 +298,7 @@ public class LinkFactory {
         private int value;
         private Status status = Status.success;
         /* (non-Javadoc)
-         * @see org.epics.ioc.pdrv.devEpics.AbstractPdrvLinkSupport#initialize()
+         * @see org.epics.ioc.pdrv.support.AbstractPdrvLinkSupport#initialize()
          */
         public void initialize() {
             if(!super.initBase()) return;
@@ -313,14 +313,14 @@ public class LinkFactory {
             return;
         }      
         /* (non-Javadoc)
-         * @see org.epics.ioc.pdrv.devEpics.AbstractPdrvLinkSupport#uninitialize()
+         * @see org.epics.ioc.pdrv.support.AbstractPdrvLinkSupport#uninitialize()
          */
         public void uninitialize() {
             super.uninitBase();
             valuePVField = null;
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.pdrv.devEpics.AbstractPdrvLinkSupport#start()
+         * @see org.epics.ioc.pdrv.support.AbstractPdrvLinkSupport#start()
          */
         public void start() {
             if(!super.startBase()) return;
@@ -334,14 +334,14 @@ public class LinkFactory {
             int32 = (Int32)iface;
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.pdrv.devEpics.AbstractPdrvLinkSupport#stop()
+         * @see org.epics.ioc.pdrv.support.AbstractPdrvLinkSupport#stop()
          */
         public void stop() {
             super.stopBase();
             int32 = null;
         }            
         /* (non-Javadoc)
-         * @see org.epics.ioc.pdrv.devEpics.AbstractPdrvLinkSupport#processContinue()
+         * @see org.epics.ioc.pdrv.support.AbstractPdrvLinkSupport#processContinue()
          */
         public void processContinue() {
             if(status==Status.success) {
@@ -353,12 +353,12 @@ public class LinkFactory {
             supportProcessRequester.supportProcessDone(RequestResult.success);
         }        
         /* (non-Javadoc)
-         * @see org.epics.ioc.pdrv.devEpics.AbstractPdrvLinkSupport#queueCallback()
+         * @see org.epics.ioc.pdrv.support.AbstractPdrvLinkSupport#queueCallback()
          */
         public void queueCallback() {
             Status status = int32.read(user);
             if(status==Status.success) value = user.getInt();
-            deviceTrace.print(Trace.IO_SUPPORT, "%s value = %d", fullName,value);
+            deviceTrace.print(Trace.SUPPORT, "%s value = %d", fullName,value);
         }
     }
     
@@ -373,7 +373,7 @@ public class LinkFactory {
         private int value;
         private Status status = Status.success;
         /* (non-Javadoc)
-         * @see org.epics.ioc.pdrv.devEpics.AbstractPdrvLinkSupport#initialize()
+         * @see org.epics.ioc.pdrv.support.AbstractPdrvLinkSupport#initialize()
          */
         public void initialize() {
             if(!super.initBase()) return;
@@ -388,14 +388,14 @@ public class LinkFactory {
             return;
         }      
         /* (non-Javadoc)
-         * @see org.epics.ioc.pdrv.devEpics.AbstractPdrvLinkSupport#uninitialize()
+         * @see org.epics.ioc.pdrv.support.AbstractPdrvLinkSupport#uninitialize()
          */
         public void uninitialize() {
             super.uninitBase();
             valuePVField = null;
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.pdrv.devEpics.AbstractPdrvLinkSupport#start()
+         * @see org.epics.ioc.pdrv.support.AbstractPdrvLinkSupport#start()
          */
         public void start() {
             if(!super.startBase()) return;
@@ -409,21 +409,21 @@ public class LinkFactory {
             int32 = (Int32)iface;
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.pdrv.devEpics.AbstractPdrvLinkSupport#stop()
+         * @see org.epics.ioc.pdrv.support.AbstractPdrvLinkSupport#stop()
          */
         public void stop() {
             super.stopBase();
             int32 = null;
         }            
         /* (non-Javadoc)
-         * @see org.epics.ioc.pdrv.devEpics.AbstractPdrvLinkSupport#process(org.epics.ioc.process.SupportProcessRequester)
+         * @see org.epics.ioc.pdrv.support.AbstractPdrvLinkSupport#process(org.epics.ioc.process.SupportProcessRequester)
          */
         public void process(SupportProcessRequester supportProcessRequester) {
             value = convert.toInt(valuePVField);
             super.process(supportProcessRequester);
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.pdrv.devEpics.AbstractPdrvLinkSupport#processContinue()
+         * @see org.epics.ioc.pdrv.support.AbstractPdrvLinkSupport#processContinue()
          */
         public void processContinue() {
             if(status!=Status.success) {
@@ -432,10 +432,10 @@ public class LinkFactory {
             supportProcessRequester.supportProcessDone(RequestResult.success);
         }        
         /* (non-Javadoc)
-         * @see org.epics.ioc.pdrv.devEpics.AbstractPdrvLinkSupport#queueCallback()
+         * @see org.epics.ioc.pdrv.support.AbstractPdrvLinkSupport#queueCallback()
          */
         public void queueCallback() {
-            deviceTrace.print(Trace.IO_SUPPORT, "%s value = %d", fullName,value);
+            deviceTrace.print(Trace.SUPPORT, "%s value = %d", fullName,value);
             status = int32.write(user, value);
         }
     }
@@ -450,7 +450,7 @@ public class LinkFactory {
         private PVArray valuePVArray = null;
         private Int32Array int32Array = null;
         /* (non-Javadoc)
-         * @see org.epics.ioc.pdrv.devEpics.AbstractPdrvLinkSupport#initialize()
+         * @see org.epics.ioc.pdrv.support.AbstractPdrvLinkSupport#initialize()
          */
         public void initialize() {
             if(!super.initBase()) return;
@@ -473,14 +473,14 @@ public class LinkFactory {
             return;
         }      
         /* (non-Javadoc)
-         * @see org.epics.ioc.pdrv.devEpics.AbstractPdrvLinkSupport#uninitialize()
+         * @see org.epics.ioc.pdrv.support.AbstractPdrvLinkSupport#uninitialize()
          */
         public void uninitialize() {
             super.uninitBase();
             valuePVArray = null;
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.pdrv.devEpics.AbstractPdrvLinkSupport#start()
+         * @see org.epics.ioc.pdrv.support.AbstractPdrvLinkSupport#start()
          */
         public void start() {
             if(!super.startBase()) return;
@@ -495,7 +495,7 @@ public class LinkFactory {
             int32Array.asynAccessListenerAdd(this);
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.pdrv.devEpics.AbstractPdrvLinkSupport#stop()
+         * @see org.epics.ioc.pdrv.support.AbstractPdrvLinkSupport#stop()
          */
         public void stop() {
             super.stopBase();
@@ -503,14 +503,14 @@ public class LinkFactory {
             int32Array = null;
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.pdrv.devEpics.AbstractPdrvLinkSupport#process(org.epics.ioc.process.SupportProcessRequester)
+         * @see org.epics.ioc.pdrv.support.AbstractPdrvLinkSupport#process(org.epics.ioc.process.SupportProcessRequester)
          */
         public void process(SupportProcessRequester supportProcessRequester) {
             valuePVArray.asynModifyStart(this);
             super.process(supportProcessRequester);
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.pdrv.devEpics.AbstractPdrvLinkSupport#processContinue()
+         * @see org.epics.ioc.pdrv.support.AbstractPdrvLinkSupport#processContinue()
          */
         public void processContinue() {
             valuePVArray.asynModifyEnd(this);
@@ -518,11 +518,11 @@ public class LinkFactory {
             supportProcessRequester.supportProcessDone(RequestResult.success);
         }        
         /* (non-Javadoc)
-         * @see org.epics.ioc.pdrv.devEpics.AbstractPdrvLinkSupport#queueCallback()
+         * @see org.epics.ioc.pdrv.support.AbstractPdrvLinkSupport#queueCallback()
          */
         public void queueCallback() {
             convert.copyArray(int32Array, 0, valuePVArray, 0, int32Array.getLength());
-            deviceTrace.print(Trace.IO_SUPPORT, "%s", fullName);
+            deviceTrace.print(Trace.SUPPORT, "%s", fullName);
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.pv.AsynAccessListener#beginSyncAccess()
@@ -548,7 +548,7 @@ public class LinkFactory {
         private PVArray valuePVArray = null;
         private Int32Array int32Array = null;
         /* (non-Javadoc)
-         * @see org.epics.ioc.pdrv.devEpics.AbstractPdrvLinkSupport#initialize()
+         * @see org.epics.ioc.pdrv.support.AbstractPdrvLinkSupport#initialize()
          */
         public void initialize() {
             if(!super.initBase()) return;
@@ -571,14 +571,14 @@ public class LinkFactory {
             return;
         }      
         /* (non-Javadoc)
-         * @see org.epics.ioc.pdrv.devEpics.AbstractPdrvLinkSupport#uninitialize()
+         * @see org.epics.ioc.pdrv.support.AbstractPdrvLinkSupport#uninitialize()
          */
         public void uninitialize() {
             super.uninitBase();
             valuePVArray = null;
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.pdrv.devEpics.AbstractPdrvLinkSupport#start()
+         * @see org.epics.ioc.pdrv.support.AbstractPdrvLinkSupport#start()
          */
         public void start() {
             if(!super.startBase()) return;
@@ -593,7 +593,7 @@ public class LinkFactory {
             int32Array.asynAccessListenerAdd(this);
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.pdrv.devEpics.AbstractPdrvLinkSupport#stop()
+         * @see org.epics.ioc.pdrv.support.AbstractPdrvLinkSupport#stop()
          */
         public void stop() {
             super.stopBase();
@@ -601,23 +601,23 @@ public class LinkFactory {
             int32Array = null;
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.pdrv.devEpics.AbstractPdrvLinkSupport#process(org.epics.ioc.process.SupportProcessRequester)
+         * @see org.epics.ioc.pdrv.support.AbstractPdrvLinkSupport#process(org.epics.ioc.process.SupportProcessRequester)
          */
         public void process(SupportProcessRequester supportProcessRequester) {
             super.process(supportProcessRequester);
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.pdrv.devEpics.AbstractPdrvLinkSupport#processContinue()
+         * @see org.epics.ioc.pdrv.support.AbstractPdrvLinkSupport#processContinue()
          */
         public void processContinue() {
             supportProcessRequester.supportProcessDone(RequestResult.success);
         }        
         /* (non-Javadoc)
-         * @see org.epics.ioc.pdrv.devEpics.AbstractPdrvLinkSupport#queueCallback()
+         * @see org.epics.ioc.pdrv.support.AbstractPdrvLinkSupport#queueCallback()
          */
         public void queueCallback() {
             convert.copyArray(valuePVArray, 0, int32Array, 0, valuePVArray.getLength());
-            deviceTrace.print(Trace.IO_SUPPORT, "%s", fullName);
+            deviceTrace.print(Trace.SUPPORT, "%s", fullName);
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.pv.AsynAccessListener#beginSyncAccess()
@@ -644,7 +644,7 @@ public class LinkFactory {
         private int value;
         private int mask;
         /* (non-Javadoc)
-         * @see org.epics.ioc.pdrv.devEpics.AbstractPdrvLinkSupport#initialize()
+         * @see org.epics.ioc.pdrv.support.AbstractPdrvLinkSupport#initialize()
          */
         public void initialize() {
             if(!super.initBase()) return;
@@ -659,14 +659,14 @@ public class LinkFactory {
             return;
         }      
         /* (non-Javadoc)
-         * @see org.epics.ioc.pdrv.devEpics.AbstractPdrvLinkSupport#uninitialize()
+         * @see org.epics.ioc.pdrv.support.AbstractPdrvLinkSupport#uninitialize()
          */
         public void uninitialize() {
             super.uninitBase();
             valuePVField = null;
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.pdrv.devEpics.AbstractPdrvLinkSupport#start()
+         * @see org.epics.ioc.pdrv.support.AbstractPdrvLinkSupport#start()
          */
         public void start() {
             if(!super.startBase()) return;
@@ -680,21 +680,21 @@ public class LinkFactory {
             uint32Digital = (UInt32Digital)iface;
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.pdrv.devEpics.AbstractPdrvLinkSupport#stop()
+         * @see org.epics.ioc.pdrv.support.AbstractPdrvLinkSupport#stop()
          */
         public void stop() {
             super.stopBase();
             uint32Digital = null;
         } 
         /* (non-Javadoc)
-         * @see org.epics.ioc.pdrv.devEpics.AbstractPdrvLinkSupport#process(org.epics.ioc.process.SupportProcessRequester)
+         * @see org.epics.ioc.pdrv.support.AbstractPdrvLinkSupport#process(org.epics.ioc.process.SupportProcessRequester)
          */
         public void process(SupportProcessRequester supportProcessRequester) {
             mask = pvMask.get();
             super.process(supportProcessRequester);
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.pdrv.devEpics.AbstractPdrvLinkSupport#processContinue()
+         * @see org.epics.ioc.pdrv.support.AbstractPdrvLinkSupport#processContinue()
          */
         public void processContinue() {
             convert.fromInt(valuePVField, value);
@@ -702,7 +702,7 @@ public class LinkFactory {
             supportProcessRequester.supportProcessDone(RequestResult.success);
         }        
         /* (non-Javadoc)
-         * @see org.epics.ioc.pdrv.devEpics.AbstractPdrvLinkSupport#queueCallback()
+         * @see org.epics.ioc.pdrv.support.AbstractPdrvLinkSupport#queueCallback()
          */
         public void queueCallback() {
             Status status = uint32Digital.read(user,mask);
@@ -711,7 +711,7 @@ public class LinkFactory {
                 return;
             }
             value = user.getInt();
-            deviceTrace.print(Trace.IO_SUPPORT, "%s value = %d", fullName,value);
+            deviceTrace.print(Trace.SUPPORT, "%s value = %d", fullName,value);
         }
     }
     
@@ -726,7 +726,7 @@ public class LinkFactory {
         private int value;
         private int mask;
         /* (non-Javadoc)
-         * @see org.epics.ioc.pdrv.devEpics.AbstractPdrvLinkSupport#initialize()
+         * @see org.epics.ioc.pdrv.support.AbstractPdrvLinkSupport#initialize()
          */
         public void initialize() {
             if(!super.initBase()) return;
@@ -741,14 +741,14 @@ public class LinkFactory {
             return;
         }      
         /* (non-Javadoc)
-         * @see org.epics.ioc.pdrv.devEpics.AbstractPdrvLinkSupport#uninitialize()
+         * @see org.epics.ioc.pdrv.support.AbstractPdrvLinkSupport#uninitialize()
          */
         public void uninitialize() {
             super.uninitBase();
             valuePVField = null;
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.pdrv.devEpics.AbstractPdrvLinkSupport#start()
+         * @see org.epics.ioc.pdrv.support.AbstractPdrvLinkSupport#start()
          */
         public void start() {
             if(!super.startBase()) return;
@@ -762,14 +762,14 @@ public class LinkFactory {
             uint32Digital = (UInt32Digital)iface;
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.pdrv.devEpics.AbstractPdrvLinkSupport#stop()
+         * @see org.epics.ioc.pdrv.support.AbstractPdrvLinkSupport#stop()
          */
         public void stop() {
             super.stopBase();
             uint32Digital = null;
         }            
         /* (non-Javadoc)
-         * @see org.epics.ioc.pdrv.devEpics.AbstractPdrvLinkSupport#process(org.epics.ioc.process.SupportProcessRequester)
+         * @see org.epics.ioc.pdrv.support.AbstractPdrvLinkSupport#process(org.epics.ioc.process.SupportProcessRequester)
          */
         public void process(SupportProcessRequester supportProcessRequester) {
             value = convert.toInt(valuePVField);
@@ -777,7 +777,7 @@ public class LinkFactory {
             super.process(supportProcessRequester);
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.pdrv.devEpics.AbstractPdrvLinkSupport#queueCallback()
+         * @see org.epics.ioc.pdrv.support.AbstractPdrvLinkSupport#queueCallback()
          */
         public void queueCallback() {
             Status status = uint32Digital.write(user, value,mask);
@@ -785,7 +785,7 @@ public class LinkFactory {
                 alarmSupport.setAlarm(user.getMessage(), AlarmSeverity.invalid);
                 return;
             }
-            deviceTrace.print(Trace.IO_SUPPORT, "%s value = %d", fullName,value);
+            deviceTrace.print(Trace.SUPPORT, "%s value = %d", fullName,value);
         }
     }
     
@@ -800,7 +800,7 @@ public class LinkFactory {
         private int value;
         private Status status = Status.success;
         /* (non-Javadoc)
-         * @see org.epics.ioc.pdrv.devEpics.AbstractPdrvLinkSupport#initialize()
+         * @see org.epics.ioc.pdrv.support.AbstractPdrvLinkSupport#initialize()
          */
         public void initialize() {
             if(!super.initBase()) return;
@@ -815,14 +815,14 @@ public class LinkFactory {
             return;
         }      
         /* (non-Javadoc)
-         * @see org.epics.ioc.pdrv.devEpics.AbstractPdrvLinkSupport#uninitialize()
+         * @see org.epics.ioc.pdrv.support.AbstractPdrvLinkSupport#uninitialize()
          */
         public void uninitialize() {
             super.uninitBase();
             valuePVField = null;
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.pdrv.devEpics.AbstractPdrvLinkSupport#start()
+         * @see org.epics.ioc.pdrv.support.AbstractPdrvLinkSupport#start()
          */
         public void start() {
             if(!super.startBase()) return;
@@ -836,14 +836,14 @@ public class LinkFactory {
             float64 = (Float64)iface;
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.pdrv.devEpics.AbstractPdrvLinkSupport#stop()
+         * @see org.epics.ioc.pdrv.support.AbstractPdrvLinkSupport#stop()
          */
         public void stop() {
             super.stopBase();
             float64 = null;
         }            
         /* (non-Javadoc)
-         * @see org.epics.ioc.pdrv.devEpics.AbstractPdrvLinkSupport#processContinue()
+         * @see org.epics.ioc.pdrv.support.AbstractPdrvLinkSupport#processContinue()
          */
         public void processContinue() {
             if(status==Status.success) {
@@ -855,12 +855,12 @@ public class LinkFactory {
             supportProcessRequester.supportProcessDone(RequestResult.success);
         }        
         /* (non-Javadoc)
-         * @see org.epics.ioc.pdrv.devEpics.AbstractPdrvLinkSupport#queueCallback()
+         * @see org.epics.ioc.pdrv.support.AbstractPdrvLinkSupport#queueCallback()
          */
         public void queueCallback() {
             Status status = float64.read(user);
             if(status==Status.success) value = user.getInt();
-            deviceTrace.print(Trace.IO_SUPPORT, "%s value = %d", fullName,value);
+            deviceTrace.print(Trace.SUPPORT, "%s value = %d", fullName,value);
         }
     }
     
@@ -875,7 +875,7 @@ public class LinkFactory {
         private int value;
         private Status status = Status.success;
         /* (non-Javadoc)
-         * @see org.epics.ioc.pdrv.devEpics.AbstractPdrvLinkSupport#initialize()
+         * @see org.epics.ioc.pdrv.support.AbstractPdrvLinkSupport#initialize()
          */
         public void initialize() {
             if(!super.initBase()) return;
@@ -890,14 +890,14 @@ public class LinkFactory {
             return;
         }      
         /* (non-Javadoc)
-         * @see org.epics.ioc.pdrv.devEpics.AbstractPdrvLinkSupport#uninitialize()
+         * @see org.epics.ioc.pdrv.support.AbstractPdrvLinkSupport#uninitialize()
          */
         public void uninitialize() {
             super.uninitBase();
             valuePVField = null;
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.pdrv.devEpics.AbstractPdrvLinkSupport#start()
+         * @see org.epics.ioc.pdrv.support.AbstractPdrvLinkSupport#start()
          */
         public void start() {
             if(!super.startBase()) return;
@@ -911,21 +911,21 @@ public class LinkFactory {
             float64 = (Float64)iface;
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.pdrv.devEpics.AbstractPdrvLinkSupport#stop()
+         * @see org.epics.ioc.pdrv.support.AbstractPdrvLinkSupport#stop()
          */
         public void stop() {
             super.stopBase();
             float64 = null;
         }            
         /* (non-Javadoc)
-         * @see org.epics.ioc.pdrv.devEpics.AbstractPdrvLinkSupport#process(org.epics.ioc.process.SupportProcessRequester)
+         * @see org.epics.ioc.pdrv.support.AbstractPdrvLinkSupport#process(org.epics.ioc.process.SupportProcessRequester)
          */
         public void process(SupportProcessRequester supportProcessRequester) {
             value = convert.toInt(valuePVField);
             super.process(supportProcessRequester);
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.pdrv.devEpics.AbstractPdrvLinkSupport#processContinue()
+         * @see org.epics.ioc.pdrv.support.AbstractPdrvLinkSupport#processContinue()
          */
         public void processContinue() {
             if(status!=Status.success) {
@@ -934,10 +934,10 @@ public class LinkFactory {
             supportProcessRequester.supportProcessDone(RequestResult.success);
         }        
         /* (non-Javadoc)
-         * @see org.epics.ioc.pdrv.devEpics.AbstractPdrvLinkSupport#queueCallback()
+         * @see org.epics.ioc.pdrv.support.AbstractPdrvLinkSupport#queueCallback()
          */
         public void queueCallback() {
-            deviceTrace.print(Trace.IO_SUPPORT, "%s value = %d", fullName,value);
+            deviceTrace.print(Trace.SUPPORT, "%s value = %d", fullName,value);
             status = float64.write(user, value);
         }
     }
@@ -952,7 +952,7 @@ public class LinkFactory {
         private PVArray valuePVArray = null;
         private Float64Array float64Array = null;
         /* (non-Javadoc)
-         * @see org.epics.ioc.pdrv.devEpics.AbstractPdrvLinkSupport#initialize()
+         * @see org.epics.ioc.pdrv.support.AbstractPdrvLinkSupport#initialize()
          */
         public void initialize() {
             if(!super.initBase()) return;
@@ -975,14 +975,14 @@ public class LinkFactory {
             return;
         }      
         /* (non-Javadoc)
-         * @see org.epics.ioc.pdrv.devEpics.AbstractPdrvLinkSupport#uninitialize()
+         * @see org.epics.ioc.pdrv.support.AbstractPdrvLinkSupport#uninitialize()
          */
         public void uninitialize() {
             super.uninitBase();
             valuePVArray = null;
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.pdrv.devEpics.AbstractPdrvLinkSupport#start()
+         * @see org.epics.ioc.pdrv.support.AbstractPdrvLinkSupport#start()
          */
         public void start() {
             if(!super.startBase()) return;
@@ -997,7 +997,7 @@ public class LinkFactory {
             float64Array.asynAccessListenerAdd(this);
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.pdrv.devEpics.AbstractPdrvLinkSupport#stop()
+         * @see org.epics.ioc.pdrv.support.AbstractPdrvLinkSupport#stop()
          */
         public void stop() {
             super.stopBase();
@@ -1005,14 +1005,14 @@ public class LinkFactory {
             float64Array = null;
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.pdrv.devEpics.AbstractPdrvLinkSupport#process(org.epics.ioc.process.SupportProcessRequester)
+         * @see org.epics.ioc.pdrv.support.AbstractPdrvLinkSupport#process(org.epics.ioc.process.SupportProcessRequester)
          */
         public void process(SupportProcessRequester supportProcessRequester) {
             valuePVArray.asynModifyStart(this);
             super.process(supportProcessRequester);
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.pdrv.devEpics.AbstractPdrvLinkSupport#processContinue()
+         * @see org.epics.ioc.pdrv.support.AbstractPdrvLinkSupport#processContinue()
          */
         public void processContinue() {
             valuePVArray.asynModifyEnd(this);
@@ -1020,11 +1020,11 @@ public class LinkFactory {
             supportProcessRequester.supportProcessDone(RequestResult.success);
         }        
         /* (non-Javadoc)
-         * @see org.epics.ioc.pdrv.devEpics.AbstractPdrvLinkSupport#queueCallback()
+         * @see org.epics.ioc.pdrv.support.AbstractPdrvLinkSupport#queueCallback()
          */
         public void queueCallback() {
             convert.copyArray(float64Array, 0, valuePVArray, 0, float64Array.getLength());
-            deviceTrace.print(Trace.IO_SUPPORT, "%s", fullName);
+            deviceTrace.print(Trace.SUPPORT, "%s", fullName);
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.pv.AsynAccessListener#beginSyncAccess()
@@ -1050,7 +1050,7 @@ public class LinkFactory {
         private PVArray valuePVArray = null;
         private Float64Array float64Array = null;
         /* (non-Javadoc)
-         * @see org.epics.ioc.pdrv.devEpics.AbstractPdrvLinkSupport#initialize()
+         * @see org.epics.ioc.pdrv.support.AbstractPdrvLinkSupport#initialize()
          */
         public void initialize() {
             if(!super.initBase()) return;
@@ -1073,14 +1073,14 @@ public class LinkFactory {
             return;
         }      
         /* (non-Javadoc)
-         * @see org.epics.ioc.pdrv.devEpics.AbstractPdrvLinkSupport#uninitialize()
+         * @see org.epics.ioc.pdrv.support.AbstractPdrvLinkSupport#uninitialize()
          */
         public void uninitialize() {
             super.uninitBase();
             valuePVArray = null;
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.pdrv.devEpics.AbstractPdrvLinkSupport#start()
+         * @see org.epics.ioc.pdrv.support.AbstractPdrvLinkSupport#start()
          */
         public void start() {
             if(!super.startBase()) return;
@@ -1095,7 +1095,7 @@ public class LinkFactory {
             float64Array.asynAccessListenerAdd(this);
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.pdrv.devEpics.AbstractPdrvLinkSupport#stop()
+         * @see org.epics.ioc.pdrv.support.AbstractPdrvLinkSupport#stop()
          */
         public void stop() {
             super.stopBase();
@@ -1103,23 +1103,23 @@ public class LinkFactory {
             float64Array = null;
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.pdrv.devEpics.AbstractPdrvLinkSupport#process(org.epics.ioc.process.SupportProcessRequester)
+         * @see org.epics.ioc.pdrv.support.AbstractPdrvLinkSupport#process(org.epics.ioc.process.SupportProcessRequester)
          */
         public void process(SupportProcessRequester supportProcessRequester) {
             super.process(supportProcessRequester);
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.pdrv.devEpics.AbstractPdrvLinkSupport#processContinue()
+         * @see org.epics.ioc.pdrv.support.AbstractPdrvLinkSupport#processContinue()
          */
         public void processContinue() {
             supportProcessRequester.supportProcessDone(RequestResult.success);
         }        
         /* (non-Javadoc)
-         * @see org.epics.ioc.pdrv.devEpics.AbstractPdrvLinkSupport#queueCallback()
+         * @see org.epics.ioc.pdrv.support.AbstractPdrvLinkSupport#queueCallback()
          */
         public void queueCallback() {
             convert.copyArray(valuePVArray, 0, float64Array, 0, valuePVArray.getLength());
-            deviceTrace.print(Trace.IO_SUPPORT, "%s", fullName);
+            deviceTrace.print(Trace.SUPPORT, "%s", fullName);
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.pv.AsynAccessListener#beginSyncAccess()

@@ -5,7 +5,6 @@
  */
 package org.epics.ioc.pdrv.interfaces;
 
-import org.epics.ioc.pdrv.Interface;
 import org.epics.ioc.pdrv.Status;
 import org.epics.ioc.pdrv.User;
 

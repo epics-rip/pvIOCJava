@@ -41,7 +41,7 @@ public abstract class OctetBase implements Octet {
     private List<OctetInterruptListener> interruptlistenerList =
         new LinkedList<OctetInterruptListener>();
     private List<OctetInterruptListener> interruptlistenerListNew = null;
-    private boolean interruptActive = true;
+    private boolean interruptActive = false;
     private boolean interruptListenerListModified = false;
     private Interrupt interrupt = new Interrupt();
     private byte[] interruptData = null;

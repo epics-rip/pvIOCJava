@@ -3,7 +3,7 @@
  * EPICS JavaIOC is distributed subject to a Software License Agreement found
  * in file LICENSE that is included with this distribution.
  */
-package org.epics.ioc.pdrv.drivers;
+package org.epics.ioc.pdrv.testDriver;
 
 import org.epics.ioc.pdrv.*;
 import org.epics.ioc.pdrv.interfaces.*;
@@ -62,6 +62,7 @@ public class EchoDriverFactory {
     
     static private class EchoDriver implements PortDriver {
         private double delay;
+        private String portName;
         private Port port;
         private Trace trace;
         
@@ -69,6 +70,7 @@ public class EchoDriverFactory {
             boolean autoConnect,boolean canBlock,ScanPriority priority,double delay)
         {
             this.delay = delay;
+            this.portName = portName;
             port = Factory.createPort(portName, this, "echoDriver",
                 isMultiDevicePort, canBlock, autoConnect, priority);
             trace = port.getTrace();
@@ -84,10 +86,10 @@ public class EchoDriverFactory {
          * @see org.epics.ioc.pdrv.PortDriver#connect(org.epics.ioc.pdrv.User)
          */
         public Status connect(User user) {
-            trace.print(Trace.FLOW ,"connect");
+            trace.print(Trace.FLOW ,portName + " connect");
             if(port.isConnected()) {
                 user.setMessage("already connected");
-                trace.print(Trace.ERROR ,"already connected");
+                trace.print(Trace.ERROR ,portName + " already connected");
                 return Status.error;
             }
             port.exceptionConnect();
@@ -106,10 +108,10 @@ public class EchoDriverFactory {
          * @see org.epics.ioc.pdrv.PortDriver#disconnect(org.epics.ioc.pdrv.User)
          */
         public Status disconnect(User user) {
-            trace.print(Trace.FLOW ,"disconnect");
+            trace.print(Trace.FLOW ,portName + " disconnect");
             if(!port.isConnected()) {
                 user.setMessage("not connected");
-                trace.print(Trace.ERROR ,"not connected");
+                trace.print(Trace.ERROR ,portName + " not connected");
                 return Status.error;
             }
             port.exceptionDisconnect();
@@ -122,6 +124,7 @@ public class EchoDriverFactory {
         private double delay;
         private Device device;
         private Trace trace;
+        private String deviceName;
         
         private EchoDevice(int addr,double delay) {
             this.delay = delay;
@@ -129,6 +132,7 @@ public class EchoDriverFactory {
         
         private void init(Device device) {
             this.device = device;
+            deviceName = device.getPort().getPortName() + ":" + device.getAddr();
             trace = device.getTrace();
             new EchoOctet();
         }
@@ -142,10 +146,10 @@ public class EchoDriverFactory {
          * @see org.epics.ioc.pdrv.DeviceDriver#connect(org.epics.ioc.pdrv.User)
          */
         public Status connect(User user) {
-            trace.print(Trace.FLOW ,"connect");
+            trace.print(Trace.FLOW ,deviceName + " connect");
             if(device.isConnected()) {
                 user.setMessage("already connected");
-                trace.print(Trace.ERROR ,"already connected");
+                trace.print(Trace.ERROR ,deviceName + " already connected");
                 return Status.error;
             }
             device.exceptionConnect();
@@ -155,10 +159,10 @@ public class EchoDriverFactory {
          * @see org.epics.ioc.pdrv.DeviceDriver#disconnect(org.epics.ioc.pdrv.User)
          */
         public Status disconnect(User user) {
-            trace.print(Trace.FLOW ,"disconnect");
+            trace.print(Trace.FLOW ,deviceName + " disconnect");
             if(!device.isConnected()) {
                 user.setMessage("not connected");
-                trace.print(Trace.ERROR ,"not connected");
+                trace.print(Trace.ERROR ,deviceName + " not connected");
                 return Status.error;
             }
             device.exceptionDisconnect();
@@ -184,7 +188,7 @@ public class EchoDriverFactory {
              */
             public Status flush(User user) {
                 if(!device.isConnected()) {
-                    trace.print(Trace.ERROR ,"flush but not connected");
+                    trace.print(Trace.ERROR ,deviceName + " flush but not connected");
                     user.setMessage("not connected");
                     return Status.error;
                 }
@@ -197,7 +201,7 @@ public class EchoDriverFactory {
              */
             public Status getInputEos(User user, byte[] eos) {
                 if(!device.isConnected()) {
-                    trace.print(Trace.ERROR,"getInputEos but not connected");
+                    trace.print(Trace.ERROR,deviceName +  " getInputEos but not connected");
                     user.setMessage("not connected");
                     return Status.error;
                 }
@@ -206,7 +210,7 @@ public class EchoDriverFactory {
                 eos[1] = eosInput[1];
                 trace.printIO(Trace.FLOW ,
                         eosInput,eosLenInput,
-                        "getInputEos");
+                        deviceName +  " getInputEos");
                 return Status.success;
             }
             /* (non-Javadoc)
@@ -214,7 +218,7 @@ public class EchoDriverFactory {
              */
             public Status getOutputEos(User user, byte[] eos) {
                 if(!device.isConnected()) {
-                    trace.print(Trace.ERROR ,"getOutputEos but not connected");
+                    trace.print(Trace.ERROR ,deviceName +  " getOutputEos but not connected");
                     user.setMessage("not connected");
                     return Status.error;
                 }
@@ -223,7 +227,7 @@ public class EchoDriverFactory {
                 eos[1] = eosOutput[1];
                 trace.printIO(Trace.FLOW ,
                         eosOutput,eosLenOutput,
-                        "getOutputEos");
+                        deviceName + " getOutputEos");
                 return Status.success;
             }
             /* (non-Javadoc)
@@ -231,7 +235,7 @@ public class EchoDriverFactory {
              */
             public Status read(User user, byte[] data, int nbytes) {
                 if(!device.isConnected()) {
-                    trace.print(Trace.ERROR ,"read but not connected");
+                    trace.print(Trace.ERROR ,deviceName +  " read but not connected");
                     user.setMessage("not connected");
                     return Status.error;
                 }
@@ -265,6 +269,7 @@ public class EchoDriverFactory {
                 }
                 if(n>nbytes) {
                     status = Status.overflow;
+                    user.setMessage("overflow");
                     n = nbytes;
                     user.setAuxStatus(nbytes - nbytes);
                 }
@@ -272,7 +277,7 @@ public class EchoDriverFactory {
                 for(int i=0; i<n; i++) {
                     data[i] = buffer[i];
                 }
-                trace.printIO(Trace.IO_DRIVER ,data,n,"read");
+                trace.printIO(Trace.DRIVER ,data,n,deviceName + " read");
                 size = 0;
                 return status;
             }
@@ -281,7 +286,7 @@ public class EchoDriverFactory {
              */
             public Status readRaw(User user, byte[] data, int nbytes) {
                 if(!device.isConnected()) {
-                    trace.print(Trace.ERROR ,"readRaw but not connected");
+                    trace.print(Trace.ERROR ,deviceName +  " readRaw but not connected");
                     user.setMessage("not connected");
                     return Status.error;
                 }
@@ -310,7 +315,7 @@ public class EchoDriverFactory {
                 for(int i=0; i<n; i++) {
                     data[i] = buffer[i];
                 }
-                trace.printIO(Trace.IO_DRIVER ,data,n,"readRaw");
+                trace.printIO(Trace.DRIVER ,data,n,deviceName +  " readRaw");
                 size = 0;
                 return status;
             }
@@ -319,7 +324,7 @@ public class EchoDriverFactory {
              */
             public Status setInputEos(User user, byte[] eos, int eosLen) {
                 if(!device.isConnected()) {
-                    trace.print(Trace.ERROR ,"setInputEos but not connected");
+                    trace.print(Trace.ERROR ,deviceName + " setInputEos but not connected");
                     user.setMessage("not connected");
                     return Status.error;
                 }
@@ -329,7 +334,7 @@ public class EchoDriverFactory {
                 }
                 eosLenInput = eosLen;
                 for(int i=0; i<eosLen; i++) eosInput[i] = eos[i];
-                trace.printIO(Trace.FLOW ,eosInput,eosLenInput,"setInputEos");
+                trace.printIO(Trace.FLOW ,eosInput,eosLenInput,deviceName + " setInputEos");
                 return Status.success;
             }
             /* (non-Javadoc)
@@ -337,7 +342,7 @@ public class EchoDriverFactory {
              */
             public Status setOutputEos(User user, byte[] eos, int eosLen) {
                 if(!device.isConnected()) {
-                    trace.print(Trace.ERROR ,"setOutputEos but not connected");
+                    trace.print(Trace.ERROR ,deviceName + " setOutputEos but not connected");
                     user.setMessage("not connected");
                     return Status.error;
                 }
@@ -347,7 +352,7 @@ public class EchoDriverFactory {
                 }
                 eosLenOutput = eosLen;
                 for(int i=0; i<eosLen; i++) eosOutput[i] = eos[i];
-                trace.printIO(Trace.FLOW ,eosOutput,eosLenOutput,"setOutputEos");
+                trace.printIO(Trace.FLOW ,eosOutput,eosLenOutput,deviceName + " setOutputEos");
                 return Status.success;
             }
             /* (non-Javadoc)
@@ -355,7 +360,7 @@ public class EchoDriverFactory {
              */
             public Status write(User user, byte[] data, int nbytes) {
                 if(!device.isConnected()) {
-                    trace.print(Trace.ERROR ,"write but not connected");
+                    trace.print(Trace.ERROR ,deviceName + " write but not connected");
                     user.setMessage("not connected");
                     return Status.error;
                 }
@@ -396,7 +401,7 @@ public class EchoDriverFactory {
                     buffer[i] = data[i];
                 }
                 user.setInt(n);
-                trace.printIO(Trace.IO_DRIVER ,data,n,"write");
+                trace.printIO(Trace.DRIVER ,data,n,deviceName + " write");
                 super.interruptOccured(buffer, nbytes);
                 return status;
             }
@@ -405,7 +410,7 @@ public class EchoDriverFactory {
              */
             public Status writeRaw(User user, byte[] data, int nbytes) {
                 if(!device.isConnected()) {
-                    trace.print(Trace.ERROR ,"writeRaw but not connected");
+                    trace.print(Trace.ERROR ,deviceName + " writeRaw but not connected");
                     user.setMessage("not connected");
                     return Status.error;
                 }
@@ -435,7 +440,7 @@ public class EchoDriverFactory {
                     buffer[i] = data[i];
                 }
                 user.setInt(size);
-                trace.printIO(Trace.IO_DRIVER ,data,n,"writeRaw");
+                trace.printIO(Trace.DRIVER ,data,n,deviceName + " writeRaw");
                 super.interruptOccured(buffer, nbytes);
                 return status;
             }

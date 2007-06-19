@@ -37,17 +37,19 @@ public class IntAlarmFactory {
     {
         private DBLink dbLink;
         private PVLink pvLink;
+        
         private boolean noop;
         private AlarmSupport alarmSupport;
         
+        private StructureArrayData structureArrayData = new StructureArrayData();
+        private PVStructureArray intervalPVArray;
+        private PVMenu outOfRangePVMenu;
         private PVBoolean pvActive;
-        private PVInt pvHighMajor;
-        private PVInt pvHighMinor;
-        private PVInt pvLowMinor;
-        private PVInt pvLowMajor;
+        
+        private PVInt[] pvAlarmIntervalValue = null;
+        private PVMenu[] pvAlarmIntervalSeverity = null;
         
         private PVInt pvValue;
-        private double lalm;
        
         private IntAlarmImpl(DBLink dbLink) {
             super(supportName,dbLink);
@@ -58,15 +60,15 @@ public class IntAlarmFactory {
          * @see org.epics.ioc.process.Support#initialize()
          */
         public void initialize() {
-            SupportState supportState = SupportState.readyForStart;
             if(!super.checkSupportState(SupportState.readyForInitialize,supportName)) return;
+            SupportState supportState = SupportState.readyForStart;
             noop = false;
             if(pvValue==null) {
-                super.message("setField was not called with an int field", MessageType.error);
+                super.message("setField was not called with a double field", MessageType.error);
                 noop = true;
                 return;
             }
-            PVStructure configStructure = super.getConfigStructure("doubleAlarm", false);
+            PVStructure configStructure = super.getConfigStructure("intAlarm", false);
             if(configStructure==null) {
                 noop = true;
                 setSupportState(supportState);
@@ -75,13 +77,17 @@ public class IntAlarmFactory {
             alarmSupport = AlarmFactory.findAlarmSupport(dbLink);
             if(alarmSupport==null) {
                 super.message("no alarmSupport", MessageType.error);
+                noop = true;
+                setSupportState(supportState);
                 return;
             }
             pvActive = configStructure.getBooleanField("active");
-            pvHighMajor = configStructure.getIntField("highMajor");
-            pvHighMinor = configStructure.getIntField("highMinor");
-            pvLowMinor = configStructure.getIntField("lowMinor");
-            pvLowMajor = configStructure.getIntField("lowMajor");        
+            if(pvActive==null) return;
+            intervalPVArray = (PVStructureArray)configStructure.getArrayField(
+                "interval", Type.pvStructure);
+            if(intervalPVArray==null) return;
+            outOfRangePVMenu = configStructure.getMenuField("outOfRange", "alarmSeverity");
+            if(outOfRangePVMenu==null) return;
             setSupportState(supportState);
         }
         /* (non-Javadoc)
@@ -89,18 +95,70 @@ public class IntAlarmFactory {
          */
         public void start() {
             if(!super.checkSupportState(SupportState.readyForStart,supportName)) return;
+            SupportState supportState = SupportState.ready;
             if(noop) {
-                setSupportState(SupportState.ready);
+                setSupportState(supportState);
                 return;
             }
-            lalm =pvValue.get();
-            setSupportState(SupportState.ready);
+            int size = intervalPVArray.getLength();
+            if(size<=0) {
+                super.message("invalid interval", MessageType.error);
+                return;
+            }
+            pvAlarmIntervalValue = new PVInt[size];
+            pvAlarmIntervalSeverity = new PVMenu[size];
+            int num = intervalPVArray.get(0, size, structureArrayData);
+            if(num!=size) {
+                super.message("intervalPVArray num != size", MessageType.error);
+                return;
+            }
+            PVStructure[] pvStructures = structureArrayData.data;
+            for(int i=0; i<size; i++) {
+                PVStructure pvStructure = pvStructures[i];
+                if(pvStructure==null) {
+                    super.message("invalid interval is null", MessageType.error);
+                    return;
+                }
+                Structure structure = pvStructure.getStructure();
+                PVField[] pvFields = pvStructure.getFieldPVFields();
+                Field[] fields = structure.getFields();
+                int index = structure.getFieldIndex("value");
+                if(index<0) {
+                    super.message("invalid interval no value field", MessageType.error);
+                    return;
+                }
+                Field field = fields[index];
+                if(field.getType()!=Type.pvInt) {
+                    super.message("invalid interval value field is not int", MessageType.error);
+                    return;
+                }
+                pvAlarmIntervalValue[i] = (PVInt)pvFields[index];
+                index = structure.getFieldIndex("severity");
+                if(index<0) {
+                    super.message("invalid interval no severity field", MessageType.error);
+                    return;
+                }
+                field = fields[index];
+                if(field.getType()!=Type.pvMenu) {
+                    super.message("invalid interval severity field is not a menu", MessageType.error);
+                    return;
+                }
+                Menu menu = (Menu)field;
+                if(!menu.getMenuName().equals("alarmSeverity")) {
+                    super.message("invalid interval severity field is not an alarmSeverity menu", MessageType.error);
+                    return;
+                }
+                pvAlarmIntervalSeverity[i] = (PVMenu)pvFields[index];
+            }
+            setSupportState(supportState);
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.process.Support#stop()
          */
         public void stop() {
             if(super.getSupportState()!=SupportState.ready) return;
+            pvAlarmIntervalValue = null;
+            pvAlarmIntervalSeverity = null;
             setSupportState(SupportState.readyForStart);
         }
         /* (non-Javadoc)
@@ -108,54 +166,16 @@ public class IntAlarmFactory {
          */
         public void uninitialize() {
             if(super.getSupportState()!=SupportState.ready) return;
-            if(noop) {
-                setSupportState(SupportState.readyForInitialize);
-                return;
-            }
             pvActive = null;
-            pvHighMajor = null;
-            pvHighMinor = null;
-            pvLowMinor = null;
-            pvLowMajor = null;
+            outOfRangePVMenu = null;
+            intervalPVArray = null;
             setSupportState(SupportState.readyForInitialize);
-        }       
+        }
         /* (non-Javadoc)
          * @see org.epics.ioc.process.Support#process(org.epics.ioc.process.RecordProcessRequester)
          */
         public void process(SupportProcessRequester supportProcessRequester) {
-            if(noop) {
-                supportProcessRequester.supportProcessDone(RequestResult.success);
-                return;
-            }
-            boolean active = pvActive.get();
-            if(!active) return;
-            int  val = pvValue.get();
-            int hihi = pvHighMajor.get();
-            int high = pvHighMinor.get();
-            int low = pvLowMinor.get();
-            int lolo = pvLowMajor.get();
-            
-            if ((val >= hihi)){
-                String message = pvLink.getFullFieldName() + " high ";
-                if (alarmSupport.setAlarm(message, AlarmSeverity.major)) lalm = hihi; 
-            } else if ((val <= lolo)){
-                String message = pvLink.getFullFieldName() + " low ";
-                if (alarmSupport.setAlarm(message, AlarmSeverity.major)) lalm = lolo;
-                supportProcessRequester.supportProcessDone(RequestResult.success);
-                return;
-            } else if ((val >= high )){
-                String message = pvLink.getFullFieldName() + " high ";
-                if (alarmSupport.setAlarm(message, AlarmSeverity.minor)) lalm = high;
-                supportProcessRequester.supportProcessDone(RequestResult.success);
-                return;
-            } else if ((val <= low)){
-                String message = pvLink.getFullFieldName() + " low ";
-                if (alarmSupport.setAlarm(message, AlarmSeverity.minor)) lalm = low;
-                supportProcessRequester.supportProcessDone(RequestResult.success);
-                return;
-            } else {
-                lalm = val;
-            }
+            if(!noop && pvActive.get()) checkAlarm();
             supportProcessRequester.supportProcessDone(RequestResult.success);
         }                
         /* (non-Javadoc)
@@ -164,10 +184,35 @@ public class IntAlarmFactory {
         public void setField(DBField dbField) {
             PVField pvField = dbField.getPVField();
             if(pvField.getField().getType()!=Type.pvInt) {
-                super.message("setField: field type is not double", MessageType.error);
+                super.message("setField: field type is not int", MessageType.error);
                 return;
             }
             pvValue = (PVInt)pvField;
+        }
+
+        private void checkAlarm() {
+            boolean active = pvActive.get();
+            if(!active) return;
+            double  val = pvValue.get();
+            int len = pvAlarmIntervalValue.length;
+            double intervalValue = 0.0;
+            for(int i=0; i<len; i++) {
+                intervalValue = pvAlarmIntervalValue[i].get();
+                if(val<=intervalValue) {
+                    int sevIndex = pvAlarmIntervalSeverity[i].getIndex();
+                    raiseAlarm(intervalValue,val,sevIndex);
+                    return;
+                }
+            }
+            int outOfRange = outOfRangePVMenu.getIndex();
+            // intervalValue is pvAlarmIntervalValue[len-1].get();
+            raiseAlarm(intervalValue,val,outOfRange);
+        }
+        
+        private void raiseAlarm(double intervalValue,double val,int severityIndex) {
+            AlarmSeverity alarmSeverity = AlarmSeverity.getSeverity(severityIndex); 
+            String message = pvLink.getFullFieldName() + " " + alarmSeverity.toString();
+            alarmSupport.setAlarm(message, alarmSeverity);
         }
     }
 }

@@ -15,13 +15,16 @@ import org.epics.ioc.pdrv.*;
 public interface DriverUser {
     /**
      * Create data for the user.
-     * Warning. If a user calls create than the user MUST call dispose before
-     * calling user.disconnrectPort or user.disconnectDevice.
+     * The driver should use the User methods setPortDriverUserPvt/getPortDriverUserPvt
+     * or setDeviceDriverUserPvt/getDeviceDriverUserPvt to store and private data it allocates
+     * for the user.
+     * Warning. If a user calls create than the user should call dispose before
+     * calling user.disconnectPort or user.disconnectDevice.
      * @param user The user.
      * @param drvParams The drvParams from the PdrvLink.
      * @return The created object or nulll if no object was created.
      */
-    Object create(User user,String drvParams);
+    void create(User user,String drvParams);
     /**
      * Dispose of the data for this user.
      * @param user The user.
