@@ -41,7 +41,7 @@ public abstract class Int32Base implements Int32 {
     private List<Int32InterruptListener> interruptlistenerList =
         new LinkedList<Int32InterruptListener>();
     private List<Int32InterruptListener> interruptlistenerListNew = null;
-    private boolean interruptActive = true;
+    private boolean interruptActive = false;
     private boolean interruptListenerListModified = false;
     private Interrupt interrupt = new Interrupt();
     private int interruptData = 0;

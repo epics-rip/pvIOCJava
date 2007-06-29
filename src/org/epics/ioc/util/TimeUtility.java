@@ -26,6 +26,6 @@ public class TimeUtility {
      */
     public static void set(TimeStamp timeStamp,long millis) {
         timeStamp.secondsPastEpoch = millis/1000;
-        timeStamp.nanoSeconds = ((int)(timeStamp.secondsPastEpoch%1000))*1000000;
+        timeStamp.nanoSeconds = ((int)(millis%1000))*1000000;
     }
 }

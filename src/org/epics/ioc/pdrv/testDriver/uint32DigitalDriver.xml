@@ -2,6 +2,7 @@
 <DBDefinition>
 
 <structure name = "uint32DigitalDriver">
+     <field name = "delay" type = "double" />
     <field name = "numberRegisters" type = "int" default = "1" />
 </structure>
 

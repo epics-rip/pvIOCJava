@@ -23,6 +23,10 @@ import org.epics.ioc.util.*;
  *      <li>high<br/>
  *       The high adc range to simulate.
  *      </li>
+ *      <li>delay<br/>
+ *       If 0.0 then echoDriver is synchronous.
+ *       If > 0.0 echoDriver is asynchronous and delays delay seconds after each read/write request.
+ *      </li>
  * </ul>
  * int32Driver implements interface int32 by keeping an internal int[] array
  * that simulates adc registers.
@@ -62,25 +66,34 @@ public class Int32DriverFactory {
         }
         pvInt = (PVInt)pvFields[index];
         int high = pvInt.get();
-        new Int32Driver(portName,autoConnect,priority,numberRegisters,low,high);
+        index = structure.getFieldIndex("delay");
+        if(index<0) {
+            throw new IllegalStateException("field delay not found");
+        }
+        PVDouble pvDelay = (PVDouble)pvFields[index];
+        double delay = pvDelay.get();
+        boolean canBlock = ((delay>0.0) ? true : false);
+        new Int32Driver(portName,autoConnect,priority,numberRegisters,low,high,canBlock,delay);
     }
     
     static private class Int32Driver implements PortDriver {
         private int[] register;
         private int low;
         private int high;
+        private double delay;
         private Port port;
         private Trace trace;
         
         private Int32Driver(String portName,boolean autoConnect,ScanPriority priority,
-            int numberRegisters,int low,int high)
+            int numberRegisters,int low,int high,boolean canBlock,double delay)
         {
             register = new int[numberRegisters];
             this.low = low;
             this.high = high;
+            this.delay = delay;
             boolean isMultiDevicePort = (numberRegisters==1) ? false : true;
             port = Factory.createPort(portName, this, "int32Driver",
-                isMultiDevicePort, false, autoConnect,priority);
+                isMultiDevicePort, canBlock, autoConnect,priority);
             trace = port.getTrace();
         }
         /* (non-Javadoc)
@@ -177,9 +190,10 @@ public class Int32DriverFactory {
             }
             
             private class Int32Interface extends  Int32Base{
-                
+                private long milliseconds;
                 private Int32Interface() {
                     super(device,"int32");
+                    milliseconds = (long)(delay * 1000.0);
                 }
 
                 /* (non-Javadoc)
@@ -195,6 +209,18 @@ public class Int32DriverFactory {
                  * @see org.epics.ioc.pdrv.interfaces.Int32Base#read(org.epics.ioc.pdrv.User)
                  */
                 public Status read(User user) {
+                    double timeout = user.getTimeout();
+                    if(timeout>0.0 && delay>timeout) {
+                        user.setMessage("timeout");
+                        return Status.timeout;
+                    }
+                    if(delay>0.0) {
+                        try {
+                        Thread.sleep(milliseconds);
+                        } catch (InterruptedException ie) {
+                            
+                        }
+                    }
                     user.setInt(register[addr]);
                     trace.print(Trace.DRIVER,"read value = " + register[addr]);
                     return Status.success;
@@ -203,6 +229,18 @@ public class Int32DriverFactory {
                  * @see org.epics.ioc.pdrv.interfaces.Int32Base#write(org.epics.ioc.pdrv.User, int)
                  */
                 public Status write(User user, int value) {
+                    double timeout = user.getTimeout();
+                    if(timeout>0.0 && delay>timeout) {
+                        user.setMessage("timeout");
+                        return Status.timeout;
+                    }
+                    if(delay>0.0) {
+                        try {
+                        Thread.sleep(milliseconds);
+                        } catch (InterruptedException ie) {
+                            
+                        }
+                    }
                     if(value<low || value>high) {
                         trace.print(Trace.ERROR, "value out of bounds");
                         user.setMessage("value out of bounds");

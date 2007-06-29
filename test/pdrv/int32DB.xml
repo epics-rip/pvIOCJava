@@ -1,36 +1,34 @@
 <?xml version="1.0" ?>
 <IOCDatabase>
 
-<record name = "syncEchoDriver" type = "port">
-    <factoryName>org.epics.ioc.pdrv.testDriver.EchoDriverFactory</factoryName>
-    <portName>syncEchoDriver</portName>
-    <driverParameters structureName = "echoDriver" >
-        <multiDevice>true</multiDevice>
+<record name = "syncInt32Driver" type = "port">
+    <factoryName>org.epics.ioc.pdrv.testDriver.Int32DriverFactory</factoryName>
+    <portName>syncInt32Driver</portName>
+    <driverParameters structureName = "int32Driver" >
         <delay>0.0</delay>
+        <numberRegisters>2</numberRegisters>
+        <low>-2048</low>
+        <high>2047</high>
     </driverParameters>
 </record>
 
-<record name = "syncStringCounter" type = "calc">
+<record name = "syncInt32Counter" type = "calc">
     <calcArgArray>
         <value structureName = "calcArg">
-            <value>0.0</value>
+            <value>-2100</value>
             <name>min</name>
         </value>
         <value structureName = "calcArg">
-            <value>10.0</value>
+            <value>2100</value>
             <name>max</name>
         </value>
         <value structureName = "calcArg">
-            <value>1.0</value>
+            <value>100</value>
             <name>inc</name>
         </value>
     </calcArgArray>
     <calculator supportName = "counterCalculator" />
     <units>counts</units>
-    <displayLimit>
-        <low>0.0</low>
-        <high>10.0</high>
-    </displayLimit>
     <scan>
         <scan>periodic</scan>
         <rate>0.5</rate>
@@ -40,7 +38,7 @@
             <wait>false</wait>
             <link  supportName = "outputLink" >
                 <configure structureName = "outputLink">
-                    <pvname>syncStringOut</pvname>
+                    <pvname>syncInt32Out</pvname>
                     <process>true</process>
                 </configure>
             </link>
@@ -48,10 +46,10 @@
     </linkArray>
 </record>
 
-<record name = "syncStringOut" type = "string">
-    <output supportName = "pdrvOctetOutput" >
+<record name = "syncInt32Out" type = "double">
+    <output supportName = "pdrvInt32Output" >
         <configure structureName = "pdrvLink">
-            <portName>syncEchoDriver</portName>
+            <portName>syncInt32Driver</portName>
             <addr>0</addr>
             <timeout>.2</timeout>
         </configure>
@@ -61,17 +59,17 @@
             <wait>false</wait>
             <link  supportName = "processLink" >
                 <configure structureName = "processLink">
-                    <pvname>syncStringIn</pvname>
+                    <pvname>syncInt32In</pvname>
                 </configure>
             </link>
         </value>
     </linkArray>
 </record>
 
-<record name = "syncStringIn" type = "string">
-    <input supportName = "pdrvOctetInput" >
+<record name = "syncInt32In" type = "double">
+    <input supportName = "pdrvInt32Input" >
         <configure structureName = "pdrvLink">
-            <portName>syncEchoDriver</portName>
+            <portName>syncInt32Driver</portName>
             <addr>0</addr>
             <timeout>.2</timeout>
             <size>20</size>
@@ -79,10 +77,10 @@
     </input>
 </record>
 
-<record name = "syncStringInInterrupt" type = "string">
-    <input supportName = "pdrvOctetInterruptInput" >
+<record name = "syncInt32InInterrupt" type = "double">
+    <input supportName = "pdrvInt32InterruptInput" >
         <configure structureName = "pdrvLink">
-            <portName>syncEchoDriver</portName>
+            <portName>syncInt32Driver</portName>
             <addr>0</addr>
             <process>true</process>
             <size>20</size>
@@ -90,36 +88,48 @@
     </input>
 </record>
 
-<record name = "asynEchoDriver" type = "port">
-    <factoryName>org.epics.ioc.pdrv.testDriver.EchoDriverFactory</factoryName>
-    <portName>asynEchoDriver</portName>
-    <driverParameters structureName = "echoDriver" >
-        <multiDevice>true</multiDevice>
+<record name = "syncInt32InAverage" type = "double">
+    <input supportName = "pdrvInt32AverageInput" >
+        <configure structureName = "pdrvLink">
+            <portName>syncInt32Driver</portName>
+            <addr>0</addr>
+            <size>20</size>
+        </configure>
+    </input>
+    <scan>
+        <scan>periodic</scan>
+        <rate>5.0</rate>
+    </scan>
+</record>
+
+<record name = "asynInt32Driver" type = "port">
+    <factoryName>org.epics.ioc.pdrv.testDriver.Int32DriverFactory</factoryName>
+    <portName>asynInt32Driver</portName>
+    <driverParameters structureName = "int32Driver" >
         <delay>0.1</delay>
+        <numberRegisters>2</numberRegisters>
+        <low>0</low>
+        <high>4095</high>
     </driverParameters>
 </record>
 
-<record name = "asynStringCounter" type = "calc">
+<record name = "asynInt32Counter" type = "calc">
     <calcArgArray>
         <value structureName = "calcArg">
-            <value>0.0</value>
+            <value>-100</value>
             <name>min</name>
         </value>
         <value structureName = "calcArg">
-            <value>10.0</value>
+            <value>4100</value>
             <name>max</name>
         </value>
         <value structureName = "calcArg">
-            <value>1.0</value>
+            <value>100</value>
             <name>inc</name>
         </value>
     </calcArgArray>
     <calculator supportName = "counterCalculator" />
     <units>counts</units>
-    <displayLimit>
-        <low>0.0</low>
-        <high>10.0</high>
-    </displayLimit>
     <scan>
         <scan>periodic</scan>
         <rate>0.5</rate>
@@ -129,7 +139,7 @@
             <wait>false</wait>
             <link  supportName = "outputLink" >
                 <configure structureName = "outputLink">
-                    <pvname>asynStringOut</pvname>
+                    <pvname>asynInt32Out</pvname>
                     <process>true</process>
                 </configure>
             </link>
@@ -137,10 +147,10 @@
     </linkArray>
 </record>
 
-<record name = "asynStringOut" type = "string">
-    <output supportName = "pdrvOctetOutput" >
+<record name = "asynInt32Out" type = "double">
+    <output supportName = "pdrvInt32Output" >
         <configure structureName = "pdrvLink">
-            <portName>asynEchoDriver</portName>
+            <portName>asynInt32Driver</portName>
             <addr>0</addr>
             <timeout>.2</timeout>
         </configure>
@@ -150,17 +160,17 @@
             <wait>false</wait>
             <link  supportName = "processLink" >
                 <configure structureName = "processLink">
-                    <pvname>asynStringIn</pvname>
+                    <pvname>asynInt32In</pvname>
                 </configure>
             </link>
         </value>
     </linkArray>
 </record>
 
-<record name = "asynStringIn" type = "string">
-    <input supportName = "pdrvOctetInput" >
+<record name = "asynInt32In" type = "double">
+    <input supportName = "pdrvInt32Input" >
         <configure structureName = "pdrvLink">
-            <portName>asynEchoDriver</portName>
+            <portName>asynInt32Driver</portName>
             <addr>0</addr>
             <timeout>.2</timeout>
             <size>20</size>
@@ -168,15 +178,29 @@
     </input>
 </record>
 
-<record name = "asynStringInInterrupt" type = "string">
-    <input supportName = "pdrvOctetInterruptInput" >
+<record name = "asynInt32InInterrupt" type = "double">
+    <input supportName = "pdrvInt32InterruptInput" >
         <configure structureName = "pdrvLink">
-            <portName>asynEchoDriver</portName>
+            <portName>asynInt32Driver</portName>
             <addr>0</addr>
             <process>true</process>
             <size>20</size>
         </configure>
     </input>
+</record>
+
+<record name = "asynInt32InAverage" type = "double">
+    <input supportName = "pdrvInt32AverageInput" >
+        <configure structureName = "pdrvLink">
+            <portName>asynInt32Driver</portName>
+            <addr>0</addr>
+            <size>20</size>
+        </configure>
+    </input>
+    <scan>
+        <scan>periodic</scan>
+        <rate>5.0</rate>
+    </scan>
 </record>
 
 <!--

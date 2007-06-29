@@ -17,6 +17,10 @@ import org.epics.ioc.util.*;
  *    <li>numberRegisters<br/>
  *       The number of uint32Digital registers to simulate.
  *     </li>
+ *     <li>delay<br/>
+ *       If 0.0 then echoDriver is synchronous.
+ *       If > 0.0 echoDriver is asynchronous and delays delay seconds after each read/write request.
+ *      </li>
  * </ul>
  * uint32DigitalDriver implements interface uint32Digital by keeping an internal int[] array
  * that simulates digital I/O registers.
@@ -44,21 +48,30 @@ public class UInt32DigitalDriverFactory {
         }
         PVInt pvInt = (PVInt)pvFields[index];
         int numberRegisters = pvInt.get();
-        new UInt32DigitalDriver(portName,autoConnect,priority,numberRegisters);
+        index = structure.getFieldIndex("delay");
+        if(index<0) {
+            throw new IllegalStateException("field delay not found");
+        }
+        PVDouble pvDelay = (PVDouble)pvFields[index];
+        double delay = pvDelay.get();
+        boolean canBlock = ((delay>0.0) ? true : false);
+        new UInt32DigitalDriver(portName,autoConnect,priority,numberRegisters,canBlock,delay);
     }
     
     static private class UInt32DigitalDriver implements PortDriver {
         private int[] register;
+        private double delay;
         private Port port;
         private Trace trace;
         
         private UInt32DigitalDriver(String portName,boolean autoConnect,ScanPriority priority,
-            int numberRegisters)
+            int numberRegisters,boolean canBlock,double delay)
         {
             register = new int[numberRegisters];
+            this.delay = delay;
             boolean isMultiDevicePort = (numberRegisters==1) ? false : true;
             port = Factory.createPort(portName, this, "uint32DigitalDriver",
-                isMultiDevicePort, false, autoConnect,priority);
+                isMultiDevicePort, canBlock, autoConnect,priority);
             trace = port.getTrace();
         }
         /* (non-Javadoc)
@@ -154,14 +167,27 @@ public class UInt32DigitalDriverFactory {
             }
             
             private class UInt32DigitalInterface extends  UInt32DigitalBase{
-                
+                private long milliseconds;
                 private UInt32DigitalInterface() {
                     super(device,"uint32Digital");
+                    milliseconds = (long)(delay * 1000.0);
                 }               
                 /* (non-Javadoc)
                  * @see org.epics.ioc.pdrv.interfaces.UInt32DigitalBase#read(org.epics.ioc.pdrv.User, int)
                  */
                 public Status read(User user, int mask) {
+                    double timeout = user.getTimeout();
+                    if(timeout>0.0 && delay>timeout) {
+                        user.setMessage("timeout");
+                        return Status.timeout;
+                    }
+                    if(delay>0.0) {
+                        try {
+                        Thread.sleep(milliseconds);
+                        } catch (InterruptedException ie) {
+                            
+                        }
+                    }
                     int value = register[addr]&mask;
                     user.setInt(value);
                     trace.print(Trace.DRIVER,"read value = " + value);
@@ -171,6 +197,18 @@ public class UInt32DigitalDriverFactory {
                  * @see org.epics.ioc.pdrv.interfaces.UInt32DigitalBase#write(org.epics.ioc.pdrv.User, int, int)
                  */
                 public Status write(User user, int value, int mask) {
+                    double timeout = user.getTimeout();
+                    if(timeout>0.0 && delay>timeout) {
+                        user.setMessage("timeout");
+                        return Status.timeout;
+                    }
+                    if(delay>0.0) {
+                        try {
+                        Thread.sleep(milliseconds);
+                        } catch (InterruptedException ie) {
+                            
+                        }
+                    }
                     int newValue = register[addr]&~mask;
                     newValue |= value&mask;
                     register[addr] = newValue;

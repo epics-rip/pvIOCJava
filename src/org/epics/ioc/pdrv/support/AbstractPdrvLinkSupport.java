@@ -24,7 +24,9 @@ import org.epics.ioc.util.*;
  *
  */
 public abstract class AbstractPdrvLinkSupport extends AbstractLinkSupport implements
-ProcessContinueRequester,QueueRequestCallback
+ProcessContinueRequester,QueueRequestCallback,
+PdrvLinkSupport,
+RecordProcessRequester
 {
     /**
      * Constructor for derived support.
@@ -41,28 +43,7 @@ ProcessContinueRequester,QueueRequestCallback
         pvRecord = dbRecord.getPVRecord();
         recordName = pvRecord.getRecordName();
         recordProcess = dbRecord.getRecordProcess();
-    }    
-    /* (non-Javadoc)
-     * @see org.epics.ioc.support.AbstractSupport#initialize()
-     */
-    abstract public void initialize();
-    /* (non-Javadoc)
-     * @see org.epics.ioc.support.AbstractSupport#uninitialize()
-     */
-    abstract public void uninitialize();
-    /* (non-Javadoc)
-     * @see org.epics.ioc.support.AbstractSupport#start()
-     */
-    abstract public void start();
-    /* (non-Javadoc)
-     * @see org.epics.ioc.support.AbstractSupport#stop()
-     */
-    abstract public void stop();
-    /**
-     * A method that must be implemented by derived support.
-     * It is called from a queueRequest callback.
-     */
-    abstract public void queueCallback();
+    }      
     
     protected String supportName;
     protected DBLink dbLink;
@@ -82,9 +63,8 @@ ProcessContinueRequester,QueueRequestCallback
     protected PVInt pvMask = null;
     protected PVInt pvSize = null;
     protected PVDouble pvTimeout = null;
+    protected PVBoolean pvProcess = null;
     protected PVString pvDrvParams = null;
-    
-    protected PdrvLink pdrvLink = new PdrvLink();
     
     protected User user = null;
     protected Port port = null;
@@ -92,42 +72,44 @@ ProcessContinueRequester,QueueRequestCallback
     protected Trace portTrace = null;
     protected Trace deviceTrace = null;
     
-    
     protected DriverUser driverUser = null;
     
     protected SupportProcessRequester supportProcessRequester = null;
     
     private String alarmMessage = null;
+    private boolean isProcess = false;
     
-    protected boolean initBase() {
-        if(!super.checkSupportState(SupportState.readyForInitialize,supportName)) return false;
-        if(valueDBField!=null) {
-            valuePVField = valueDBField.getPVField();
+    public void initialize() {
+        if(!super.checkSupportState(SupportState.readyForInitialize,supportName)) return;
+        if(valueDBField==null) {
+            pvLink.message("setField was not called", MessageType.error);
+            return;
         }
+        valuePVField = valueDBField.getPVField();
         alarmSupport = AlarmFactory.findAlarmSupport(dbLink);
         configStructure = super.getConfigStructure("pdrvLink", true);
-        if(configStructure==null) return false;
+        if(configStructure==null) return;
         pvPortName = configStructure.getStringField("portName");
-        if(pvPortName==null) return false;
+        if(pvPortName==null) return;
         pvAddr = configStructure.getIntField("addr");
-        if(pvAddr==null) return false;
+        if(pvAddr==null) return;
         pvMask = configStructure.getIntField("mask");
-        if(pvMask==null) return false;
+        if(pvMask==null) return;
         pvSize = configStructure.getIntField("size");
-        if(pvSize==null) return false;
+        if(pvSize==null) return;
         pvTimeout = configStructure.getDoubleField("timeout");
-        if(pvTimeout==null) return false;
+        if(pvTimeout==null) return;
         pvDrvParams = configStructure.getStringField("drvParams");
-        if(pvDrvParams==null) return false;
+        if(pvDrvParams==null) return;
+        pvProcess = configStructure.getBooleanField("process");
         setSupportState(SupportState.readyForStart);
-        return true;
     }
     
-    protected boolean uninitBase() {
+    public void uninitialize() {
         if(super.getSupportState()==SupportState.ready) {
             stop();
         }
-        if(super.getSupportState()!=SupportState.readyForStart) return false;
+        if(super.getSupportState()!=SupportState.readyForStart) return;
         pvDrvParams = null;
         pvTimeout = null;
         pvAddr = null;
@@ -135,41 +117,40 @@ ProcessContinueRequester,QueueRequestCallback
         configStructure = null;
         alarmSupport = null;
         setSupportState(SupportState.readyForInitialize);
-        return true;
     }
     
-    protected boolean startBase() {
-        if(!super.checkSupportState(SupportState.readyForStart,supportName)) return false;
+    public void start() {
+        if(!super.checkSupportState(SupportState.readyForStart,supportName)) return;
         user = Factory.createUser(this);
-        pdrvLink.portName = pvPortName.get();
-        pdrvLink.addr = pvAddr.get();
-        pdrvLink.mask = pvMask.get();
-        pdrvLink.timeout = pvTimeout.get();
-        user.setTimeout(pdrvLink.timeout);
-        pdrvLink.drvParams = pvDrvParams.get();
-        port = user.connectPort(pdrvLink.portName);
+        user.setTimeout(pvTimeout.get());
+        port = user.connectPort(pvPortName.get());
         if(port==null) {
             pvLink.message(user.getMessage(),MessageType.error);
-            return false;
+            return;
         }
         portTrace = port.getTrace();
-        device = user.connectDevice(pdrvLink.addr);
+        device = user.connectDevice(pvAddr.get());
         if(device==null) {
             pvLink.message(user.getMessage(),MessageType.error);
-            return false;
+            return;
         }
         deviceTrace = device.getTrace();
         Interface iface = device.findInterface(user, "driverUser", true);
         if(iface!=null) {
             driverUser = (DriverUser)iface;
-            driverUser.create(user, pdrvLink.drvParams);
+            driverUser.create(user,pvDrvParams.get() );
+        }
+        if(pvProcess!=null) {
+            boolean interrupt = pvProcess.get();
+            if(interrupt) {
+                isProcess =recordProcess.setRecordProcessRequester(this);
+            }
         }
         setSupportState(SupportState.ready);
-        return true;
     }
     
-    protected boolean stopBase() {
-        if(super.getSupportState()!=SupportState.ready) return false ;
+    public void stop() {
+        if(super.getSupportState()!=SupportState.ready) return;
         user.disconnectPort();
         if(driverUser!=null) {
             driverUser.dispose(user);
@@ -181,7 +162,6 @@ ProcessContinueRequester,QueueRequestCallback
         portTrace = null;
         user = null;
         setSupportState(SupportState.readyForStart);
-        return true;
     }   
     /* (non-Javadoc)
      * @see org.epics.ioc.support.AbstractSupport#process(org.epics.ioc.process.SupportProcessRequester)
@@ -189,7 +169,7 @@ ProcessContinueRequester,QueueRequestCallback
     public void process(SupportProcessRequester supportProcessRequester) {
         if(!super.checkSupportState(SupportState.ready,supportName)) {
             if(alarmSupport!=null) alarmSupport.setAlarm(
-                    pvLink.getFullFieldName() + " not ready",
+                    fullName + " not ready",
                     AlarmSeverity.major);
             supportProcessRequester.supportProcessDone(RequestResult.failure);
             return;
@@ -199,14 +179,22 @@ ProcessContinueRequester,QueueRequestCallback
         }
         this.supportProcessRequester = supportProcessRequester;
         alarmMessage = null;
-        port.queueRequest(user, QueuePriority.medium);
+        if(isProcess) {
+            deviceTrace.print(Trace.FLOW,
+                "%s:%s process calling processContinue", fullName,supportName);
+            processContinue();
+        } else {
+            deviceTrace.print(Trace.FLOW,
+                    "%s:%s process calling queueRequest", fullName,supportName);
+            port.queueRequest(user, QueuePriority.medium);
+        }
+        deviceTrace.print(Trace.FLOW,"%s:%s process done", fullName,supportName);
     }   
     /* (non-Javadoc)
      * @see org.epics.ioc.support.AbstractSupport#setField(org.epics.ioc.db.DBField)
      */
     public void setField(DBField dbField) {
         valueDBField = dbField;
-        valuePVField = valueDBField.getPVField();
     }    
     /* (non-Javadoc)
      * @see org.epics.ioc.support.AbstractSupport#message(java.lang.String, org.epics.ioc.util.MessageType)
@@ -226,18 +214,56 @@ ProcessContinueRequester,QueueRequestCallback
         if(alarmMessage!=null) {
             if(alarmSupport!=null) alarmSupport.setAlarm(alarmMessage,AlarmSeverity.major);
         }
+        deviceTrace.print(Trace.FLOW,
+            "%s:%s processContinue calling supportProcessDone",
+            fullName,supportName);
         supportProcessRequester.supportProcessDone(RequestResult.success);
     }
     /* (non-Javadoc)
      * @see org.epics.ioc.pdrv.QueueRequestCallback#callback(org.epics.ioc.pdrv.Status, org.epics.ioc.pdrv.User)
      */
     public void callback(Status status, User user) {
+        deviceTrace.print(Trace.FLOW,
+            "%s:%s callback status %s",
+            fullName,supportName,status.toString());
         if(status==Status.success) {
+            deviceTrace.print(Trace.FLOW,
+                    "%s:%s callback calling queueCallback", fullName,supportName);
             this.queueCallback();
         } else {
-            alarmMessage = pvLink.getFullFieldName() + " " + user.getMessage();
+            alarmMessage = fullName + " " + user.getMessage();
         }
+        deviceTrace.print(Trace.FLOW,
+                "%s:%s callback calling processContinue", fullName,supportName);
         recordProcess.processContinue(this);
+    }
+    /* (non-Javadoc)
+     * @see org.epics.ioc.pdrv.support.PdrvLinkSupport#isInterrupt()
+     */
+    public boolean isProcess() {
+        return isProcess;
+    }
+    /* (non-Javadoc)
+     * @see org.epics.ioc.pdrv.support.PdrvLinkSupport#queueCallback()
+     */
+    public void queueCallback() {
+        deviceTrace.print(Trace.ERROR,
+                "%s:%s queueCallback not implemented", fullName,supportName);
+    }
+    /* (non-Javadoc)
+     * @see org.epics.ioc.process.RecordProcessRequester#recordProcessComplete()
+     */
+    public void recordProcessComplete() {
+        deviceTrace.print(Trace.FLOW,
+                "%s:%s recordProcessComplete", fullName,supportName);
+    }
+    /* (non-Javadoc)
+     * @see org.epics.ioc.process.RecordProcessRequester#recordProcessResult(org.epics.ioc.util.RequestResult)
+     */
+    public void recordProcessResult(RequestResult requestResult) {
+        deviceTrace.print(Trace.FLOW,
+                "%s:%s recordProcessResult %s",
+                fullName,supportName,requestResult.toString());
     }
     
 }

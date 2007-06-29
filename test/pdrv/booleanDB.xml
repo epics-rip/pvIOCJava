@@ -1,0 +1,236 @@
+<?xml version="1.0" ?>
+<IOCDatabase>
+
+<record name = "syncBooleanDriver" type = "port">
+    <factoryName>org.epics.ioc.pdrv.testDriver.UInt32DigitalDriverFactory</factoryName>
+    <portName>syncUInt32DigitalDriver</portName>
+    <driverParameters structureName = "uint32DigitalDriver" >
+        <delay>0.0</delay>
+        <numberRegisters>2</numberRegisters>
+    </driverParameters>
+</record>
+
+<record name = "syncBooleanCounter" type = "calc">
+    <calcArgArray>
+        <value structureName = "calcArg">
+            <value>0</value>
+            <name>min</name>
+        </value>
+        <value structureName = "calcArg">
+            <value>32767</value>
+            <name>max</name>
+        </value>
+        <value structureName = "calcArg">
+            <value>1</value>
+            <name>inc</name>
+        </value>
+    </calcArgArray>
+    <calculator supportName = "counterCalculator" />
+    <units>counts</units>
+    <scan>
+        <scan>periodic</scan>
+        <rate>0.5</rate>
+    </scan>
+    <linkArray>
+        <value structureName = "linkArrayElement">
+            <wait>false</wait>
+            <link  supportName = "outputLink" >
+                <configure structureName = "outputLink">
+                    <pvname>syncBooleanOut</pvname>
+                    <process>true</process>
+                </configure>
+            </link>
+        </value>
+    </linkArray>
+</record>
+
+<record name = "syncBooleanOut" type = "int">
+    <output supportName = "pdrvUInt32DigitalOutput" >
+        <configure structureName = "pdrvLink">
+            <portName>syncUInt32DigitalDriver</portName>
+            <addr>0</addr>
+            <mask>32767</mask>
+            <timeout>.2</timeout>
+        </configure>
+    </output>
+    <linkArray>
+        <value structureName = "linkArrayElement">
+            <wait>false</wait>
+            <link  supportName = "processLink" >
+                <configure structureName = "processLink">
+                    <pvname>syncBooleanIn1</pvname>
+                </configure>
+            </link>
+        </value>
+        <value structureName = "linkArrayElement">
+            <wait>false</wait>
+            <link  supportName = "processLink" >
+                <configure structureName = "processLink">
+                    <pvname>syncBooleanIn2</pvname>
+                </configure>
+            </link>
+        </value>
+        <value structureName = "linkArrayElement">
+            <wait>false</wait>
+            <link  supportName = "processLink" >
+                <configure structureName = "processLink">
+                    <pvname>syncBooleanIn3</pvname>
+                </configure>
+            </link>
+        </value>
+
+    </linkArray>
+</record>
+
+<record name = "syncBooleanIn1" type = "boolean">
+    <input supportName = "pdrvUInt32DigitalInput" >
+        <configure structureName = "pdrvLink">
+            <portName>syncUInt32DigitalDriver</portName>
+            <addr>0</addr>
+            <mask>0x1</mask>
+            <timeout>.2</timeout>
+        </configure>
+    </input>
+</record>
+
+<record name = "syncBooleanIn2" type = "boolean">
+    <input supportName = "pdrvUInt32DigitalInput" >
+        <configure structureName = "pdrvLink">
+            <portName>syncUInt32DigitalDriver</portName>
+            <addr>0</addr>
+            <mask>0x2</mask>
+            <timeout>.2</timeout>
+        </configure>
+    </input>
+</record>
+
+<record name = "syncBooleanIn3" type = "boolean">
+    <input supportName = "pdrvUInt32DigitalInput" >
+        <configure structureName = "pdrvLink">
+            <portName>syncUInt32DigitalDriver</portName>
+            <addr>0</addr>
+            <mask>0x4</mask>
+            <timeout>.2</timeout>
+        </configure>
+    </input>
+</record>
+
+<record name = "asynBooleanDriver" type = "port">
+    <factoryName>org.epics.ioc.pdrv.testDriver.UInt32DigitalDriverFactory</factoryName>
+    <portName>asynUInt32DigitalDriver</portName>
+    <driverParameters structureName = "uint32DigitalDriver" >
+        <delay>0.1</delay>
+        <numberRegisters>2</numberRegisters>
+    </driverParameters>
+</record>
+
+<record name = "asynBooleanCounter" type = "calc">
+    <calcArgArray>
+        <value structureName = "calcArg">
+            <value>-100</value>
+            <name>min</name>
+        </value>
+        <value structureName = "calcArg">
+            <value>4100</value>
+            <name>max</name>
+        </value>
+        <value structureName = "calcArg">
+            <value>100</value>
+            <name>inc</name>
+        </value>
+    </calcArgArray>
+    <calculator supportName = "counterCalculator" />
+    <units>counts</units>
+    <scan>
+        <scan>periodic</scan>
+        <rate>0.5</rate>
+    </scan>
+    <linkArray>
+        <value structureName = "linkArrayElement">
+            <wait>false</wait>
+            <link  supportName = "outputLink" >
+                <configure structureName = "outputLink">
+                    <pvname>asynBooleanOut</pvname>
+                    <process>true</process>
+                </configure>
+            </link>
+        </value>
+    </linkArray>
+</record>
+
+<record name = "asynBooleanOut" type = "int">
+    <output supportName = "pdrvUInt32DigitalOutput" >
+        <configure structureName = "pdrvLink">
+            <portName>asynUInt32DigitalDriver</portName>
+            <addr>0</addr>
+            <mask>32767</mask>
+            <timeout>.2</timeout>
+        </configure>
+    </output>
+    <linkArray>
+        <value structureName = "linkArrayElement">
+            <wait>false</wait>
+            <link  supportName = "processLink" >
+                <configure structureName = "processLink">
+                    <pvname>asynBooleanIn1</pvname>
+                </configure>
+            </link>
+        </value>
+        <value structureName = "linkArrayElement">
+            <wait>false</wait>
+            <link  supportName = "processLink" >
+                <configure structureName = "processLink">
+                    <pvname>asynBooleanIn2</pvname>
+                </configure>
+            </link>
+        </value>
+        <value structureName = "linkArrayElement">
+            <wait>false</wait>
+            <link  supportName = "processLink" >
+                <configure structureName = "processLink">
+                    <pvname>asynBooleanIn3</pvname>
+                </configure>
+            </link>
+        </value>
+
+
+    </linkArray>
+</record>
+
+<record name = "asynBooleanIn1" type = "boolean">
+    <input supportName = "pdrvUInt32DigitalInput" >
+        <configure structureName = "pdrvLink">
+            <portName>asynUInt32DigitalDriver</portName>
+            <addr>0</addr>
+            <mask>0x1</mask>
+            <timeout>.2</timeout>
+        </configure>
+    </input>
+</record>
+
+<record name = "asynBooleanIn2" type = "boolean">
+    <input supportName = "pdrvUInt32DigitalInput" >
+        <configure structureName = "pdrvLink">
+            <portName>asynUInt32DigitalDriver</portName>
+            <addr>0</addr>
+            <mask>0x2</mask>
+            <timeout>.2</timeout>
+        </configure>
+    </input>
+</record>
+<record name = "asynBooleanIn3" type = "boolean">
+    <input supportName = "pdrvUInt32DigitalInput" >
+        <configure structureName = "pdrvLink">
+            <portName>asynUInt32DigitalDriver</portName>
+            <addr>0</addr>
+            <mask>0x4</mask>
+            <timeout>.2</timeout>
+        </configure>
+    </input>
+</record>
+
+<!--
+-->
+
+
+</IOCDatabase>

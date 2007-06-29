@@ -2,6 +2,7 @@
 <DBDefinition>
 
 <structure name = "int32Driver">
+    <field name = "delay" type = "double" />
     <field name = "numberRegisters" type = "int" default = "1" />
     <!-- low and high adc range -->
     <field name = "low" type = "int" />

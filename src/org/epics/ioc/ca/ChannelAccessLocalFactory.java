@@ -1115,7 +1115,7 @@ public class ChannelAccessLocalFactory  {
                 }
                 if(process) {
                     if(isRecordProcessRequester) {
-                        recordProcess.setActive(this);
+                        if(!recordProcess.setActive(this)) return;
                     } else {
                         if(!recordProcess.processSelfRequest(this)) {
                             channelPutRequester.message(
@@ -1308,7 +1308,7 @@ public class ChannelAccessLocalFactory  {
                 requestResult = RequestResult.success;
                 if(process) {
                     if(isRecordProcessRequester) {
-                        recordProcess.setActive(this);
+                        if(!recordProcess.setActive(this)) return;
                     } else {
                         if(!recordProcess.processSelfRequest(this)){
                             channelCDPutRequester.message(
@@ -1552,7 +1552,7 @@ public class ChannelAccessLocalFactory  {
                 requestResult = RequestResult.success;
                 if(process) {
                     if(isRecordProcessRequester) {
-                        recordProcess.setActive(this);
+                        if(!recordProcess.setActive(this)) return;
                     } else {
                         if(!recordProcess.processSelfRequest(this)) {
                             channelPutGetRequester.message(

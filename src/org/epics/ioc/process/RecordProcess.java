@@ -134,26 +134,30 @@ public interface RecordProcess {
      * A typical use of this method is when the processor wants to modify fields
      * of the record before it is processed.
      * If successful the record is active but unlocked.
-     * If not successful recordProcessRequester.recordProcessResult
-     * and recordProcessComplete are called before setActive returns.
      * @param recordProcessRequester The recordProcessRequester.
+     * @return (false,true) if the request was successful.
+     * If false is returned then recordProcessRequester.message is called to report
+     * the reason.
+     * @throws IllegalStateException if recordProcessRequester is null.
      */
-    void setActive(RecordProcessRequester recordProcessRequester);
+    boolean setActive(RecordProcessRequester recordProcessRequester);
     /**
      * Process the record instance.
      * Unless the record was activated by setActive,
      * the record is prepared for processing just like for setActive.
      * All results of record processing are reported
      * via the RecordProcessRequester methods.
-     * If not successful recordProcessRequester.recordProcessResult
-     * and recordProcessComplete are called before setActive returns.
      * @param recordProcessRequester The recordProcessRequester.
      * @param leaveActive Leave the record active when process is done.
      * The requester must call setInactive.
      * @param timeStamp The initial timeStamp for record procsssing.
      * If null the initial timeStamp will be the current time.
+     * @return (false,true) if the request was successful.
+     * If false is returned then recordProcessRequester.message is called to report
+     * the reason.
+     * @throws IllegalStateException if recordProcessRequester is null.
      */
-    void process(RecordProcessRequester recordProcessRequester,
+    boolean process(RecordProcessRequester recordProcessRequester,
         boolean leaveActive, TimeStamp timeStamp);
     /**
      * Called by the recordProcessRequester when it has called process with leaveActive

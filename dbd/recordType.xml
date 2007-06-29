@@ -1,8 +1,10 @@
 <?xml version="1.0" ?>
 <DBDefinition>
 <include addPath = "dbd" />
+<include href = "booleanRecord.xml" />
 <include href = "calcRecord.xml" />
 <include href = "intRecord.xml" />
+<include href = "digitalRecord.xml" />
 <include href = "eventRecord.xml" />
 <include href = "doubleRecord.xml" />
 <include href = "aiDoubleRecord.xml" />

@@ -43,6 +43,19 @@
     <field name = "changeStateAlarm" type = "menu" menuName = "alarmSeverity" />
 </structure>
 
+<structure name = "digitalAlarm" >
+    <field name = "active" type = "boolean" />
+     <!-- each array element must have menuName  alarmSeverity -->
+    <field name = "stateSeverity" type = "array" elementType = "menu" design = "false" />
+    <field name = "changeStateAlarm" type = "menu" menuName = "alarmSeverity" />
+</structure>
+
+<structure name = "digitalState">
+    <field name = "name" type = "string" />
+    <field name = "value" type = "int" />
+    <field name = "severity" type = "menu" menuName = "alarmSeverity" />
+</structure>
+
 
 <!-- delayLink is for delay link support -->
 

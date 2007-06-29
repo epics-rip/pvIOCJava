@@ -512,8 +512,8 @@ try {
         void processSelfProcess(RecordProcessRequester recordProcessRequester,
             boolean leaveActive);
         void processSelfSetInactive(RecordProcessRequester recordProcessRequester);
-        void setActive(RecordProcessRequester recordProcessRequester);
-        void process(RecordProcessRequester recordProcessRequester,
+        boolean setActive(RecordProcessRequester recordProcessRequester);
+        boolean process(RecordProcessRequester recordProcessRequester,
             boolean leaveActive, TimeStamp timeStamp);
         void setInactive(RecordProcessRequester recordProcessRequester);
         // support processing methods
@@ -641,23 +641,9 @@ falls into one of the following classes:</p>
       called. Until the record becomes inactive another request to process
       the record will fail. Record support is called with the record
       locked.<br />
-      The request will fail for the following reasons:
-      <ul>
-        <li>The record is already active. Unless the caller passed a null
-          value for listener it will be added to a list of listeners to call
-          when the record completes processing. The return value will be
-          alreadyActive.</li>
-        <li>The caller is not the registered process requester. If this case
-          an exception is thrown.</li>
-        <li>The record state is not RecordState.constructed. The return value
-          is failure. This can happen if the changes are being made to the
-          the definitions of any of the fields in the record instance, i.e.
-          on-line add/delete is in process for the record.</li>
-        <li>The record is disabled. The return value is failure.</li>
-        <li>The support state is not SupportState.ready. This can happen if
-          online add/delete is in process or if support has failed to start
-          successfully. The return value is failure.</li>
-      </ul>
+      If false is returned the request has failed
+      and recordProcessRequester.message is called to provide the reason.
+      If recordProcessRequester is null an IllegalStateException is thrown.
     </dd>
   <dt style="font-family: courier;">setInActive</dt>
     <dd>Call by the record process requester when it is done with processing.

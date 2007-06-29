@@ -87,6 +87,10 @@
     configurationStructureName = "booleanAlarm" 
    factoryName = "org.epics.ioc.support.BooleanAlarmFactory" />
 
+<linkSupport name = "digitalAlarm"
+    configurationStructureName = "digitalAlarm" 
+   factoryName = "org.epics.ioc.support.DigitalAlarmFactory" />
+
 <linkSupport name = "delayLink"
     configurationStructureName = "delayLink"
     factoryName = "org.epics.ioc.support.DelayLinkFactory"

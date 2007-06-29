@@ -1,0 +1,290 @@
+<?xml version="1.0" ?>
+<IOCDatabase>
+
+<record name = "syncDigitalDriver" type = "port">
+    <factoryName>org.epics.ioc.pdrv.testDriver.UInt32DigitalDriverFactory</factoryName>
+    <portName>syncUInt32DigitalDriver</portName>
+    <driverParameters structureName = "uint32DigitalDriver" >
+        <delay>0.0</delay>
+        <numberRegisters>2</numberRegisters>
+    </driverParameters>
+</record>
+
+<record name = "syncDigitalCounter" type = "calc">
+    <calcArgArray>
+        <value structureName = "calcArg">
+            <value>0</value>
+            <name>min</name>
+        </value>
+        <value structureName = "calcArg">
+            <value>15</value>
+            <name>max</name>
+        </value>
+        <value structureName = "calcArg">
+            <value>1</value>
+            <name>inc</name>
+        </value>
+    </calcArgArray>
+    <calculator supportName = "counterCalculator" />
+    <units>counts</units>
+    <scan>
+        <scan>periodic</scan>
+        <rate>0.5</rate>
+    </scan>
+    <linkArray>
+        <value structureName = "linkArrayElement">
+            <wait>false</wait>
+            <link  supportName = "outputLink" >
+                <configure structureName = "outputLink">
+                    <pvname>syncDigitalOut</pvname>
+                    <process>true</process>
+                </configure>
+            </link>
+        </value>
+    </linkArray>
+</record>
+
+<record name = "syncDigitalOut" type = "int">
+    <output supportName = "pdrvUInt32DigitalOutput" >
+        <configure structureName = "pdrvLink">
+            <portName>syncUInt32DigitalDriver</portName>
+            <addr>0</addr>
+            <mask>15</mask>
+            <timeout>.2</timeout>
+        </configure>
+    </output>
+    <linkArray>
+        <value structureName = "linkArrayElement">
+            <wait>false</wait>
+            <link  supportName = "processLink" >
+                <configure structureName = "processLink">
+                    <pvname>syncDigitalIn1</pvname>
+                </configure>
+            </link>
+        </value>
+        <value structureName = "linkArrayElement">
+            <wait>false</wait>
+            <link  supportName = "processLink" >
+                <configure structureName = "processLink">
+                    <pvname>syncDigitalIn2</pvname>
+                </configure>
+            </link>
+        </value>
+        <value structureName = "linkArrayElement">
+            <wait>false</wait>
+            <link  supportName = "processLink" >
+                <configure structureName = "processLink">
+                    <pvname>syncDigitalIn3</pvname>
+                </configure>
+            </link>
+        </value>
+        <value structureName = "linkArrayElement">
+            <wait>false</wait>
+            <link  supportName = "processLink" >
+                <configure structureName = "processLink">
+                    <pvname>syncDigitalIn4</pvname>
+                </configure>
+            </link>
+        </value>
+        <value structureName = "linkArrayElement">
+            <wait>false</wait>
+            <link  supportName = "processLink" >
+                <configure structureName = "processLink">
+                    <pvname>syncDigitalIn5</pvname>
+                </configure>
+            </link>
+        </value>
+    </linkArray>
+</record>
+
+<record name = "syncDigitalIn1" type = "digital">
+    <input supportName = "pdrvUInt32DigitalInput" >
+        <configure structureName = "pdrvLink">
+            <portName>syncUInt32DigitalDriver</portName>
+            <addr>0</addr>
+            <mask>0x1</mask>
+            <timeout>.2</timeout>
+        </configure>
+    </input>
+    <states>
+         <value structureName = "digitalState">
+             <name>off</name>
+             <value>0</value>
+             <severity>none</severity>
+         </value>
+         <value structureName = "digitalState">
+             <name>on</name>
+             <value>1</value>
+             <severity>minor</severity>
+         </value>
+    </states>
+    <numberOfBits>1</numberOfBits>
+    <digitalAlarm>
+        <configure structureName = "digitalAlarm">
+            <active>true</active>
+            <changeStateAlarm>none</changeStateAlarm>
+        </configure>
+    </digitalAlarm>
+</record>
+
+<record name = "syncDigitalIn2" type = "digital">
+    <input supportName = "pdrvUInt32DigitalInput" >
+        <configure structureName = "pdrvLink">
+            <portName>syncUInt32DigitalDriver</portName>
+            <addr>0</addr>
+            <mask>0x2</mask>
+            <timeout>.2</timeout>
+        </configure>
+    </input>
+    <states>
+         <value structureName = "digitalState">
+             <name>off</name>
+             <value>0</value>
+             <severity>none</severity>
+         </value>
+         <value structureName = "digitalState">
+             <name>on</name>
+             <value>1</value>
+             <severity>major</severity>
+         </value>
+    </states>
+    <numberOfBits>1</numberOfBits>
+    <digitalAlarm>
+        <configure structureName = "digitalAlarm">
+            <active>true</active>
+            <changeStateAlarm>minor</changeStateAlarm>
+        </configure>
+    </digitalAlarm>
+</record>
+
+<record name = "syncDigitalIn3" type = "digital">
+    <input supportName = "pdrvUInt32DigitalInput" >
+        <configure structureName = "pdrvLink">
+            <portName>syncUInt32DigitalDriver</portName>
+            <addr>0</addr>
+            <mask>0x3</mask>
+            <timeout>.2</timeout>
+        </configure>
+    </input>
+    <states>
+         <value structureName = "digitalState">
+             <name>zero</name>
+             <value>0x0</value>
+             <severity>none</severity>
+         </value>
+         <value structureName = "digitalState">
+             <name>one</name>
+             <value>0x1</value>
+             <severity>minor</severity>
+         </value>
+         <value structureName = "digitalState">
+             <name>two</name>
+             <value>0x2</value>
+             <severity>major</severity>
+         </value>
+         <value structureName = "digitalState">
+             <name>three</name>
+             <value>0x3</value>
+             <severity>none</severity>
+         </value>
+    </states>
+    <numberOfBits>2</numberOfBits>
+    <digitalAlarm>
+        <configure structureName = "digitalAlarm">
+            <active>true</active>
+            <changeStateAlarm>none</changeStateAlarm>
+        </configure>
+    </digitalAlarm>
+</record>
+
+<record name = "syncDigitalIn4" type = "digital">
+    <input supportName = "pdrvUInt32DigitalInput" >
+        <configure structureName = "pdrvLink">
+            <portName>syncUInt32DigitalDriver</portName>
+            <addr>0</addr>
+            <mask>0xc</mask>
+            <timeout>.2</timeout>
+        </configure>
+    </input>
+    <states>
+         <value structureName = "digitalState">
+             <name>zero</name>
+             <value>0x0</value>
+             <severity>none</severity>
+         </value>
+         <value structureName = "digitalState">
+             <name>one</name>
+             <value>0x1</value>
+             <severity>minor</severity>
+         </value>
+         <value structureName = "digitalState">
+             <name>two</name>
+             <value>0x2</value>
+             <severity>major</severity>
+         </value>
+         <value structureName = "digitalState">
+             <name>three</name>
+             <value>0x3</value>
+             <severity>major</severity>
+         </value>
+    </states>
+    <numberOfBits>2</numberOfBits>
+    <digitalAlarm>
+        <configure structureName = "digitalAlarm">
+            <active>true</active>
+            <changeStateAlarm>major</changeStateAlarm>
+        </configure>
+    </digitalAlarm>
+</record>
+
+
+<record name = "syncDigitalIn5" type = "digital">
+    <input supportName = "pdrvUInt32DigitalInput" >
+        <configure structureName = "pdrvLink">
+            <portName>syncUInt32DigitalDriver</portName>
+            <addr>0</addr>
+            <mask>0xf</mask>
+            <timeout>.2</timeout>
+        </configure>
+    </input>
+    <states>
+         <value structureName = "digitalState">
+             <name>zero</name>
+             <value>0x0</value>
+             <severity>none</severity>
+         </value>
+         <value structureName = "digitalState">
+             <name>one</name>
+             <value>0x1</value>
+             <severity>minor</severity>
+         </value>
+         <value structureName = "digitalState">
+             <name>two</name>
+             <value>0x2</value>
+             <severity>major</severity>
+         </value>
+         <value structureName = "digitalState">
+             <name>four</name>
+             <value>0x4</value>
+             <severity>major</severity>
+         </value>
+         <value structureName = "digitalState">
+             <name>eight</name>
+             <value>8</value>
+             <severity>none</severity>
+         </value>
+    </states>
+    <numberOfBits>4</numberOfBits>
+    <digitalAlarm>
+        <configure structureName = "digitalAlarm">
+            <active>true</active>
+            <changeStateAlarm>major</changeStateAlarm>
+        </configure>
+    </digitalAlarm>
+</record>
+
+<!--
+-->
+
+
+</IOCDatabase>

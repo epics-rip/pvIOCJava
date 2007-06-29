@@ -1394,8 +1394,8 @@ public class Factory {
         private ReentrantLock traceLock = new ReentrantLock();
         private Writer file = new BufferedWriter(new OutputStreamWriter(System.out));
         private TimeStamp timeStamp = new TimeStamp();
-        private int mask = Trace.ERROR|Trace.SUPPORT|Trace.FLOW|Trace.DRIVER;
-        private int iomask = Trace.IO_NODATA|Trace.IO_ASCII;
+        private int mask = Trace.ERROR;//|Trace.SUPPORT|Trace.FLOW|Trace.DRIVER;
+        private int iomask = Trace.IO_NODATA;//|Trace.IO_ASCII;
         private int truncateSize = DEFAULT_TRACE_TRUNCATE_SIZE;
         
         private List<TraceOptionChangeListener> optionChangeListenerList = new LinkedList<TraceOptionChangeListener>();

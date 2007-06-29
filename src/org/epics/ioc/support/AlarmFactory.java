@@ -39,7 +39,12 @@ public class AlarmFactory {
     }
     
     public static AlarmSupport findAlarmSupport(DBField startDBField) {
-        DBField parentDBField = startDBField.getParent();
+        DBField parentDBField;
+        if(startDBField instanceof DBStructure) {
+            parentDBField = startDBField;
+        } else {
+            parentDBField = startDBField.getParent();
+        }
         while(parentDBField!=null) {
             if(parentDBField instanceof DBStructure) {
                 DBStructure parentDBStructure = (DBStructure)parentDBField;

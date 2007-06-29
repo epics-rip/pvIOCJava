@@ -38,7 +38,7 @@ public interface EventScanner {
      */
     void removeRecord(DBRecord dbRecord);
     /**
-     * Addd an event announcer.
+     * Add an event announcer.
      * @param eventName The event name.
      * @param announcer The name of the announcer.
      * @return The EventAnnounce interface that the announcer calls.

@@ -493,11 +493,12 @@ public class Monitor {
                 }
                 for(int i = 1; i<channelFieldList.size(); i++) {
                     channelField = channelFieldList.get(i);
-                    channelMonitor.lookForChange(channelField, false);
+                    String fieldName = channelField.getField().getFieldName();
+                    boolean causeMonitor = true;
+                    if(fieldName.equals("timeStamp")) causeMonitor = false;
+                    channelMonitor.lookForChange(channelField, causeMonitor);
                 }
             }
-            
-            
         }
     }
     
