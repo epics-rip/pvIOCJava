@@ -54,9 +54,8 @@ public class SelectRecord extends Dialog implements SelectionListener {
         gridLayout = new GridLayout();
         gridLayout.numColumns = 1;
         composite.setLayout(gridLayout);
-        list = new List(composite,SWT.SINGLE|SWT.V_SCROLL|SWT.H_SCROLL);
-        GridData listGridData = new GridData(GridData.FILL_BOTH);
-        list.setLayoutData(listGridData);
+        
+        list = new List(composite,SWT.SINGLE|SWT.V_SCROLL);        
         recordMap = iocdb.getRecordMap();
         if(recordMap.isEmpty()) {
             requester.message(String.format(
@@ -70,7 +69,12 @@ public class SelectRecord extends Dialog implements SelectionListener {
             list.add(iter.next());
         }
         list.addSelectionListener(this);
+        GridData listGridData = new GridData();
+        listGridData.heightHint = 600;
+        listGridData.widthHint = 200;
+        list.setLayoutData(listGridData);
         Display display = shell.getDisplay();
+        shell.pack();
         shell.open();
         while(!shell.isDisposed()) {
             if(!display.readAndDispatch()) {
