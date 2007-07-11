@@ -83,7 +83,7 @@ public class BaseDBEnum extends BaseDBField implements DBEnum {
      * @see org.epics.ioc.db.DBEnum#setIndex(int)
      */
     public void setIndex(int index) {
-        if(pvEnum.getField().isMutable()) {
+        if(pvEnum.isMutable()) {
             pvEnum.setIndex(index);
             Iterator<RecordListener> iter;
             iter = super.getRecordListenerList().iterator();

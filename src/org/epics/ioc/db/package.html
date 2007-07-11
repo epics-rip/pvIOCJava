@@ -326,7 +326,7 @@ field is being created. The syntax is:</p>
 
 <h3 id="array">array</h3>
 The syntax for an array initializer is:
-<pre>    &lt;fieldName capacity = "capacity" supportName = "supportName" &gt;
+<pre>    &lt;fieldName capacity = "capacity" capacityMutable = "trueFalse" length = "length" supportName = "supportName" &gt;
         &lt;value offset = "offset"&gt;value&lt;/value&gt;
         &lt;value offset = "offset"&gt;valueList&lt;/value&gt;
         ...
@@ -338,7 +338,14 @@ The syntax for an array initializer is:
     <dd>Optional support.</dd>
   <dt style="font-family: courier;">capacity</dt>
     <dd>The amount of storage to allocate for the array. This is optional and
-      the capacity will be equal to the number of elements initialized.</dd>
+      the capacity will be equal to the number of elements initialized.
+      If the capacity is given a value > 0 and capacityMutable is not specified
+      then capacityMutable is set to true.
+     </dd>
+  <dt style="font-family: courier;">capacityMutable</dt>
+     <dd>Can the capacity be changed?</dd>
+  <dt style="font-family: courier;">length</dt>
+      <dd>The initial length for the array.</dd>
   <dt style="font-family: courier;">offset</dt>
     <dd>offset for the next value. If not specified it starts at 0 and is
       incremented by one as each new value is defined.</dd>

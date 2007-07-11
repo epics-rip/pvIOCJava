@@ -197,6 +197,7 @@ public class XMLToIOCDBFactory {
         private Stack<EnumState> enumStack = new Stack<EnumState>();
         
         private static class ArrayState {
+            private boolean valueActive = false;
             private State prevState = null;
             private String fieldName = null;
             private PVArray pvArray = null;
@@ -384,7 +385,7 @@ public class XMLToIOCDBFactory {
                 }
                 break;
             case array:
-                if(qName.equals(arrayState.fieldName)) {
+                if(!arrayState.valueActive && qName.equals(arrayState.fieldName)) {
                     state = arrayState.prevState;
                     if(state==State.array) {
                         arrayState = arrayStack.pop();
@@ -711,6 +712,14 @@ public class XMLToIOCDBFactory {
             if(supportName!=null) pvArray.setSupportName(supportName);
             String value = attributes.get("capacity");
             if(value!=null) pvArray.setCapacity(Integer.parseInt(value));
+            value = attributes.get("capacityMutable");
+            if(value!=null) {
+                pvArray.setCapacityMutable(Boolean.parseBoolean(value));
+            } else {
+                if(pvArray.getCapacity()>0) {
+                    pvArray.setCapacityMutable(false);
+                }
+            }
             value = attributes.get("length");
             if(value!=null) pvArray.setLength(Integer.parseInt(value));
             if (arrayElementType.isScalar()) return;
@@ -745,6 +754,7 @@ public class XMLToIOCDBFactory {
                         "arrayStartElement Logic error: expected value",
                         MessageType.error);
             }
+            arrayState.valueActive = true;
             String offset = attributes.get("offset");
             if(offset!=null) arrayState.arrayOffset = Integer.parseInt(offset);
             int arrayOffset = arrayState.arrayOffset;
@@ -909,6 +919,7 @@ public class XMLToIOCDBFactory {
                         "arrayEndElement Logic error: expected value",
                         MessageType.error);
             }
+            arrayState.valueActive = false;
             int arrayOffset = arrayState.arrayOffset;
             PVArray pvArray = arrayState.pvArray;
             Type type = arrayState.arrayElementType;
