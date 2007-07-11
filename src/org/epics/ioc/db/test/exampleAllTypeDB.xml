@@ -27,7 +27,7 @@
             <pvname>xxxxxx</pvname>
         </configure>
     </link>
-    <booleanArray capacity = "3" length = "3">
+    <booleanArray capacity = "3" capacityMutable = "false" length = "3">
         <value>false true</value>
     </booleanArray>
     <byteArray capacity = "3">
