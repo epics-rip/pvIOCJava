@@ -568,7 +568,7 @@ public class ChannelAccessLocalFactory  {
              */
             public AccessRights getAccessRights() {
                 // OK until access security is implemented
-                if(pvField.getField().isMutable()) {
+                if(pvField.isMutable()) {
                     return AccessRights.readWrite;
                 } else {
                     return AccessRights.read;
@@ -666,15 +666,13 @@ public class ChannelAccessLocalFactory  {
                     return;
                 }
                 if(isRecordProcessRequester) {
-                    recordProcess.process(this, false, null);
-                    return;
-                }
-                if(recordProcess.processSelfRequest(this)) {
+                    if(recordProcess.process(this, false, null)) return;
+                } else if(recordProcess.processSelfRequest(this)) {
                     recordProcess.processSelfProcess(this, false);
                     return;
                 }
                 channelProcessRequester.message(
-                        "processSelfRequest failed",MessageType.error);
+                        "could not process record",MessageType.error);
                 channelProcessRequester.processDone(RequestResult.failure);
             }    
             /* (non-Javadoc)
@@ -767,16 +765,15 @@ public class ChannelAccessLocalFactory  {
                 requestResult = RequestResult.success;
                 if(process) {
                     if(isRecordProcessRequester) {
-                        recordProcess.process(this, true, null);
-                        return;
+                        if(recordProcess.process(this, true, null)) return;
                     } else {
                         if(recordProcess.processSelfRequest(this)) {
                             recordProcess.processSelfProcess(this, true);
                             return;
                         }
-                        channelGetRequester.message("process failed", MessageType.warning);
-                        requestResult = RequestResult.failure;
                     }
+                    channelGetRequester.message("process failed", MessageType.warning);
+                    requestResult = RequestResult.failure;
                 }
                 startGetData();
                 channelGetRequester.getDone(requestResult);
@@ -921,16 +918,15 @@ public class ChannelAccessLocalFactory  {
                 requestResult = RequestResult.success;
                 if(process) {
                     if(isRecordProcessRequester) {
-                        recordProcess.process(this, true, null);
-                        return;
+                        if(recordProcess.process(this, true, null)) return;
                     } else {
                         if(recordProcess.processSelfRequest(this)) {
                             recordProcess.processSelfProcess(this, true);
                             return;
                         }
-                        channelCDGetRequester.message("process failed", MessageType.warning);
-                        requestResult = RequestResult.failure;
-                    }                   
+                    } 
+                    channelCDGetRequester.message("process failed", MessageType.warning);
+                    requestResult = RequestResult.failure;
                 }
                 getData();
                 channelCDGetRequester.getDone(requestResult);
@@ -1108,23 +1104,22 @@ public class ChannelAccessLocalFactory  {
                     return;
                 }
                 if(!isConnected()) {
-                    channelPutRequester.message(
-                        "channel is not connected",MessageType.info);
+                    message("channel is not connected",MessageType.info);
                     channelPutRequester.putDone(RequestResult.failure);
                     return;
                 }
                 if(process) {
                     if(isRecordProcessRequester) {
-                        if(!recordProcess.setActive(this)) return;
+                        if(recordProcess.setActive(this)) return;
                     } else {
-                        if(!recordProcess.processSelfRequest(this)) {
-                            channelPutRequester.message(
-                                    "could not process record",MessageType.info);
-                            channelPutRequester.putDone(RequestResult.failure);
+                        if(recordProcess.processSelfRequest(this)) {   
+                            recordProcess.processSelfSetActive(this);
                             return;
                         }
-                        recordProcess.processSelfSetActive(this);
                     }
+                    message("could not process record",MessageType.info);
+                    channelPutRequester.putDone(RequestResult.failure);
+                    return;
                 }
                 startPutData();
                 return;
@@ -1300,24 +1295,22 @@ public class ChannelAccessLocalFactory  {
                     channelCDPutRequester.putDone(RequestResult.failure);
                 }
                 if(!isConnected()) {
-                    channelCDPutRequester.message(
-                        "channel is not connected",MessageType.info);
+                    message("channel is not connected",MessageType.info);
                     channelCDPutRequester.putDone(RequestResult.failure);
                     return;
                 }
                 requestResult = RequestResult.success;
                 if(process) {
                     if(isRecordProcessRequester) {
-                        if(!recordProcess.setActive(this)) return;
+                        if(recordProcess.setActive(this)) return;
                     } else {
-                        if(!recordProcess.processSelfRequest(this)){
-                            channelCDPutRequester.message(
-                                    "could not process record",MessageType.warning);
-                            channelCDPutRequester.putDone(RequestResult.failure);
+                        if(recordProcess.processSelfRequest(this)){
+                            recordProcess.processSelfSetActive(this);
                             return;
-                        }
-                        recordProcess.processSelfSetActive(this);
+                        }  
                     }
+                    message("could not process record",MessageType.warning);
+                    channelCDPutRequester.putDone(RequestResult.failure);
                 }
                 dbRecord.lock();
                 try {
