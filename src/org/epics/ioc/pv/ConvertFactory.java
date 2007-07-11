@@ -210,7 +210,7 @@ public final class ConvertFactory {
             if(!fromType.isScalar() || !toType.isScalar()) return false;
             if(fromType.isNumeric() && toType.isNumeric()) return true;
             if(toType==Type.pvString) return true;
-            if(toType==Type.pvString) return true;
+            if(fromType==Type.pvString) return true;
             return false;
         }
         /* (non-Javadoc)

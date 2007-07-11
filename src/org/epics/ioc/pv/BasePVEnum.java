@@ -49,7 +49,7 @@ public class BasePVEnum extends AbstractPVField implements PVEnum {
      * @see org.epics.ioc.pv.PVEnum#setChoices(java.lang.String[])
      */
     public boolean setChoices(String[] choices) {
-        if(super.getField().isMutable()) {
+        if(super.isMutable()) {
             this.choice = choices;
             return true;
         }
@@ -59,7 +59,7 @@ public class BasePVEnum extends AbstractPVField implements PVEnum {
      * @see org.epics.ioc.pv.PVEnum#setIndex(int)
      */
     public void setIndex(int index) {
-        if(super.getField().isMutable()) {
+        if(super.isMutable()) {
             this.index = index;       
             return;
         }

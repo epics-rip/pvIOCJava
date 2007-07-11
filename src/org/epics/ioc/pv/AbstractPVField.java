@@ -5,11 +5,6 @@
  */
 package org.epics.ioc.pv;
 
-import java.util.LinkedList;
-import java.util.List;
-import java.util.ListIterator;
-import java.util.concurrent.locks.ReentrantLock;
-
 import org.epics.ioc.util.MessageType;
 
 /**
@@ -19,6 +14,7 @@ import org.epics.ioc.util.MessageType;
  *
  */
 public abstract class AbstractPVField implements PVField{
+    private boolean isMutable = true;
     private String fullFieldName = "";
     private String fullName = "";
     private Field field;
@@ -26,11 +22,7 @@ public abstract class AbstractPVField implements PVField{
     private PVRecord record;
     private String supportName = null;
     
-    private ReentrantLock asynLock = new ReentrantLock();
-    private List<AsynAccessListener> asynAccessListenerList = new LinkedList<AsynAccessListener>();
-    private List<AsynAccessListener> asynAccessListenerListNew = null;
-    private boolean callingListenerActive = true;
-    private Object asynModifier = null;
+    private AsynAccessListener asynAccessListener = null;
        
     /**
      * Constructor that must be called by derived classes.
@@ -45,7 +37,6 @@ public abstract class AbstractPVField implements PVField{
         record = parent.getPVRecord();
         createFullFieldAndRequesterNames();
     }
-    
     /**
      * Called by derived classes to replace a field.
      * @param field The new field.
@@ -57,39 +48,9 @@ public abstract class AbstractPVField implements PVField{
      * Called by derived class to specify the PVRecord interface.
      * @param record The PVRecord interface.
      */
-    public void setRecord(PVRecord record) {
+    protected void setRecord(PVRecord record) {
         this.record = record;
         createFullFieldAndRequesterNames();
-    }
-    /* (non-Javadoc)
-     * @see org.epics.ioc.pv.PVField#replacePVField(org.epics.ioc.pv.PVField)
-     */
-    public void replacePVField(PVField newPVField) {
-        if(this.getField().getType()!=newPVField.getField().getType()) {
-            throw new IllegalArgumentException(
-                "newField is not same type as oldField");
-        }
-        if(this.getField().getType()!=newPVField.getField().getType()) {
-            throw new IllegalArgumentException(
-                "newField is not same type as oldField");
-        }
-        if(!(newPVField instanceof PVField)) {
-            throw new IllegalArgumentException(
-            "newField is not a PVField");
-        }
-        PVField parent = getParent();
-        if(parent==null) throw new IllegalArgumentException("no parent");
-        Type parentType = parent.getField().getType();
-        if(parentType==Type.pvStructure) {
-            PVField[] fields = ((PVStructure)parent).getFieldPVFields();
-            for(int i=0; i<fields.length; i++) {
-                if(fields[i]==this) {
-                    fields[i] = newPVField;
-                    return;
-                }
-            }
-        }
-        throw new IllegalArgumentException("oldField not found in parent");
     }
     /* (non-Javadoc)
      * @see org.epics.ioc.util.Requester#getRequesterName()
@@ -107,6 +68,19 @@ public abstract class AbstractPVField implements PVField{
         } else {
             record.message(fullFieldName + " " + message, messageType);
         }
+    }
+    /* (non-Javadoc)
+     * @see org.epics.ioc.pv.PVField#isMutable()
+     */
+    public boolean isMutable() {
+        return(isMutable);
+    }
+    /* (non-Javadoc)
+     * @see org.epics.ioc.pv.PVField#setMutable(boolean)
+     */
+    public void setMutable(boolean value) {
+        isMutable = value;
+        
     }
     /* (non-Javadoc)
      * @see org.epics.ioc.pv.PVField#getFullFieldName()
@@ -141,6 +115,36 @@ public abstract class AbstractPVField implements PVField{
        return record;
     }
     /* (non-Javadoc)
+     * @see org.epics.ioc.pv.PVField#replacePVField(org.epics.ioc.pv.PVField)
+     */
+    public void replacePVField(PVField newPVField) {
+        if(this.getField().getType()!=newPVField.getField().getType()) {
+            throw new IllegalArgumentException(
+                "newField is not same type as oldField");
+        }
+        if(this.getField().getType()!=newPVField.getField().getType()) {
+            throw new IllegalArgumentException(
+                "newField is not same type as oldField");
+        }
+        if(!(newPVField instanceof PVField)) {
+            throw new IllegalArgumentException(
+            "newField is not a PVField");
+        }
+        PVField parent = getParent();
+        if(parent==null) throw new IllegalArgumentException("no parent");
+        Type parentType = parent.getField().getType();
+        if(parentType==Type.pvStructure) {
+            PVField[] fields = ((PVStructure)parent).getFieldPVFields();
+            for(int i=0; i<fields.length; i++) {
+                if(fields[i]==this) {
+                    fields[i] = newPVField;
+                    return;
+                }
+            }
+        }
+        throw new IllegalArgumentException("oldField not found in parent");
+    }
+    /* (non-Javadoc)
      * @see org.epics.ioc.pv.PVField#getSupportName()
      */
     public String getSupportName() {
@@ -154,103 +158,38 @@ public abstract class AbstractPVField implements PVField{
         supportName = name;
     }
     /* (non-Javadoc)
-     * @see org.epics.ioc.pv.PVField#asynAccessListenerAdd(org.epics.ioc.pv.AsynAccessListener)
+     * @see org.epics.ioc.pv.PVField#asynAccessCallListener(boolean)
      */
-    public void asynAccessListenerAdd(AsynAccessListener asynAccessListener) {
-        asynLock.lock();
-        try {
-            if(!callingListenerActive) {   
-                if(!asynAccessListenerList.add(asynAccessListener)) {
-                    throw new IllegalStateException("add failed");
-                }
-                return;
-            }
-            if(asynAccessListenerListNew==null) {
-                asynAccessListenerListNew =
-                    new LinkedList<AsynAccessListener>(asynAccessListenerList);
-            }
-            if(!asynAccessListenerListNew.add(asynAccessListener)) {
-                throw new IllegalStateException("add failed");
-            }
-        } finally {
-            asynLock.unlock();
+    public void asynAccessCallListener(boolean begin) {
+        if(asynAccessListener==null) return;       
+        if(begin) {
+            asynAccessListener.beginSyncAccess();
+        } else {
+            asynAccessListener.endSyncAccess();
         }
     }
     /* (non-Javadoc)
-     * @see org.epics.ioc.pv.PVField#asynAccessListenerRemove(org.epics.ioc.pv.AsynAccessListener)
+     * @see org.epics.ioc.pv.PVField#asynModifyEnd(org.epics.ioc.pv.AsynAccessListener)
      */
-    public void asynAccessListenerRemove(AsynAccessListener asynAccessListener) {
-        asynLock.lock();
-        try {
-            if(!callingListenerActive) {   
-                if(!asynAccessListenerList.remove(asynAccessListener)) {
-                    throw new IllegalStateException("add failed");
-                }
-                return;
-            }
-            if(asynAccessListenerListNew==null) {
-                asynAccessListenerListNew =
-                    new LinkedList<AsynAccessListener>(asynAccessListenerList);
-            }
-            if(!asynAccessListenerListNew.remove(asynAccessListener)) {
-                throw new IllegalStateException("add failed");
-            }
-        } finally {
-            asynLock.unlock();
+    public void asynAccessEnd(AsynAccessListener asynAccessListener) {
+        if(asynAccessListener==null || asynAccessListener!=this.asynAccessListener) {
+            throw new IllegalStateException("not the accessListener");
         }
+        this.asynAccessListener = null;
     }
     /* (non-Javadoc)
-     * @see org.epics.ioc.pv.PVField#asynAccessCallListeners(boolean)
+     * @see org.epics.ioc.pv.PVField#asynModifyStart(org.epics.ioc.pv.AsynAccessListener)
      */
-    public void asynAccessCallListeners(boolean begin) {
-        asynLock.lock();
-        try {
-            callingListenerActive = true;
-        } finally {
-            asynLock.unlock();
-        }
-        ListIterator<AsynAccessListener> iter =  asynAccessListenerList.listIterator();
-        while(iter.hasNext()) {
-            AsynAccessListener asynAccessListener = iter.next();
-            if(begin) {
-                asynAccessListener.beginSyncAccess();
-            } else {
-                asynAccessListener.endSyncAccess();
-            }
-        }
-        asynLock.lock();
-        try {
-            if(asynAccessListenerListNew!=null) {
-                asynAccessListenerList = asynAccessListenerListNew;
-                asynAccessListenerListNew = null;
-            }
-            callingListenerActive = false; 
-        } finally {
-            asynLock.unlock();
-        }
-    }
-    /* (non-Javadoc)
-     * @see org.epics.ioc.pv.PVField#asynModifyEnd(java.lang.Object)
-     */
-    public void asynModifyEnd(Object asynModifier) {
-        if(asynModifier==null || asynModifier!=this.asynModifier) {
-            throw new IllegalStateException("not the modifier");
-        }
-        this.asynModifier = null;
-    }
-    /* (non-Javadoc)
-     * @see org.epics.ioc.pv.PVField#asynModifyStart(java.lang.Object)
-     */
-    public boolean asynModifyStart(Object asynModifier) {
-        if(this.asynModifier!=null) return false;
-        this.asynModifier = asynModifier;
+    public boolean asynAccessStart(AsynAccessListener asynAccessListener) {
+        if(this.asynAccessListener!=null) return false;
+        this.asynAccessListener = asynAccessListener;
         return true;
     }
     /* (non-Javadoc)
      * @see org.epics.ioc.pv.PVField#isAsynModifyActive()
      */
-    public boolean isAsynModifyActive() {
-        return (asynModifier==null) ? false : true;
+    public boolean isAsynAccessActive() {
+        return (asynAccessListener==null) ? false : true;
     }
     /* (non-Javadoc)
      * @see org.epics.ioc.pv.PVField#toString(int)

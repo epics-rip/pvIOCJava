@@ -84,19 +84,6 @@ public class BaseField implements Field
         this.supportName = name;
     }
     /* (non-Javadoc)
-     * @see org.epics.ioc.pv.Field#isMutable()
-     */
-    public boolean isMutable() {
-        return(isMutable);
-    }
-    /* (non-Javadoc)
-     * @see org.epics.ioc.pv.Field#setMutable(boolean)
-     */
-    public void setMutable(boolean value) {
-        isMutable = value;
-        
-    }
-    /* (non-Javadoc)
      * @see org.epics.ioc.pv.Field#getFieldAttribute()
      */
     public FieldAttribute getFieldAttribute() {

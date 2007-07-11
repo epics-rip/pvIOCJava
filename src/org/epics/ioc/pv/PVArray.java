@@ -45,4 +45,9 @@ public interface PVArray extends PVField{
      * @return If it can be modified.
      */
     boolean isCapacityMutable();
+    /**
+     * Set capacityMutable.
+     * @param isMutable New value for capacityMutable.
+     */
+    void setCapacityMutable(boolean isMutable);
 }

@@ -6,10 +6,10 @@
 package org.epics.ioc.pv;
 
 /**
- * A listener for asynchronous modification of a field.
- * The listener is called at the beginning and end of a synchronous modification.
+ * A listener for asynchronous access of a field.
+ * The listener is called at the beginning and end of a synchronous access.
  * The listener can take whatever actions are necessary to protect the field from other
- * code accessing the field while a modification is in progress.
+ * code accessing the field while an access is in progress.
  * For example device support for a field of a javaIOC record can call
  * dbRecord.lock() and dbRecord.unlock(); 
  * @author mrk
@@ -17,11 +17,11 @@ package org.epics.ioc.pv;
  */
 public interface AsynAccessListener {
     /**
-     * Begin of a synchronous modification.
+     * Begin of a synchronous access.
      */
     void beginSyncAccess();
     /**
-     * End of a synchronous modification.
+     * End of a synchronous access.
      */
     void endSyncAccess();
 }

@@ -45,16 +45,6 @@ public interface Field {
      */
     void setSupportName(String name);
     /**
-     * Can the data for the field be modified?
-     * @return If it can be modified
-     */
-    boolean isMutable();
-    /**
-     * Specify if the data for the field can be modified
-     * @param value (false,true) if the data (can not, can) be modified
-     */
-    void setMutable(boolean value);
-    /**
      * Convert to a string
      * @return The field as a string
      */

@@ -10,7 +10,7 @@
 <body>
 <h1 style="text-align: center">EPICS JavaIOC: pv<br />
 package: org.epics.ioc.pv<br />
-2007.06.08</h1>
+2007.07.11</h1>
 CONTENTS 
 
 <div class="toc">
@@ -302,8 +302,6 @@ separation is especially important for arrays and structures.</p>
         Type getType();
         String getSupportName();
         void setSupportName(String name);
-        boolean isMutable();
-        void setMutable();
         FieldAttribute getFieldAttribute();
         String toString();
         String toString(int indentLevel);
@@ -442,19 +440,19 @@ modified.</p>
         void beginSyncAccess();
         void endSyncAccess();
     }
+</pre>
 where
 <ul>
    
   <li>beginSyncAccess<br />
-        Begin synchronous update of field.
+        Begin synchronous access of field.
      </li>
 
    
   <li>endSyncAccess<br />
-        End synchronous update of the field.
+        End synchronous access of the field.
      </li>
 </ul>
-</pre>
 
 <h3 id="PVField1">PVField</h3>
 
@@ -467,6 +465,8 @@ where
     }
 
     interface PVField extends Requester {
+        boolean isMutable();
+        void setMutable(boolean value);
         String getFullFieldName();
         String getFullName();
         Field getField();
@@ -475,12 +475,10 @@ where
         void replacePVField(PVField newPVField);
         String getSupportName();
         String setSupportName(String name);
-        void asynAccessListenerAdd(AsynAccessListener asynAccessListener);
-        void asynAccessListenerRemove(AsynAccessListener asynAccessListener);
-        void asynAccessCallListeners(boolean begin);
-        boolean asynModifyStart(Object asynModifier);
-        void asynModifyEnd(Object asynModifier);
-        boolean isAsynModifyActive();
+        void asynAccessCallListener(boolean begin);
+        boolean asynAccessStart(AsynAccessListener asynAccessListener);
+        void asynAccessEnd(AsynAccessListener asynAccessListener);
+        boolean isAsynAccessActive();
         String toString();
         String toString(int indentLevel);
     }</pre>
@@ -508,6 +506,10 @@ where
       </li>
     </ul>
   </li>
+  <li>isMutable<br />
+    Can the field be changed.</li>
+  <li>setMutable<br />
+    Specify if the field be changed.</li>
   <li>getFullFieldName<br />
     Get the full field name. This returns a name in the form "name.name
   ...".</li>
@@ -533,26 +535,18 @@ where
     available so that support can be changed remotely. For an IOC database
     only PVLink fields allow the support to be modified after record
     initialization.</li>
-  <li>asynAccessListenerAdd<br />
-    Add a listener for the beginning and end of synchronous field
-    modification. This is only applicable when a field is asynchronously
-    modified, i.e. the modifier needs to block between synchronous
-    modifications. </li>
-  <li>asynAccessListenerRemove<br />
-    Remove a listener for the beginning and end of synchronous field
-    modification. </li>
-  <li>asynAccessCallListeners<br />
+  <li>asynAccessCallListener<br />
     Call the listeners. Each time a synchronous modification is made this is
     called before any modification and after all modifications are complete.
     The caller must not block between the two calls i.e. the modification
     must be synchronous. </li>
-  <li>asynModifyStart<br />
-    Register to be the asynchronous modifier of the field. The return value
-    is false if another modifier has already registered. </li>
-  <li>asynModifyEnd<br />
-    End asynchronous modification of the field. </li>
-  <li>isAsynModifyActive<br />
-    Is an asynchronous modifier registered? </li>
+  <li>asynAccessStart<br />
+    Register to be the asynchronous accessor of the field. The return value
+    is false if another accessor has already registered. </li>
+  <li>asynAccessEnd<br />
+    End asynchronous accessor of the field. </li>
+  <li>isAsynAccessActive<br />
+    Is an asynchronous accessor registered? </li>
   <li>toString<br />
     Converts the field data to a string. This is mostly for debugging
     purposes.</li>
@@ -765,11 +759,6 @@ assumes that the client has permission to change the support:</p>
 
 <h3 id="PVArray">PVArray</h3>
 
-<p>PROBLEM: If the capacity is mutable then there is no maximum capacity. A
-channel access client could disable an ioc by sending very large arrays.
-Perhaps PVArray should have two additional methods: setMaxCapacity and
-getMaxCapacity. setMaxCapacity can have tight access security.</p>
-
 <p>The interfaces for array are:</p>
 <pre>    interface PVArray extends PVField {
         Array getArray();
@@ -778,6 +767,7 @@ getMaxCapacity. setMaxCapacity can have tight access security.</p>
         int getCapacity();
         void setCapacity(int len);
         boolean isCapacityMutable();
+        void setCapacityMutable(boolean isMutable);
     }
 
     public class BooleanArrayData {
@@ -1104,8 +1094,6 @@ introspection implementation but they could be extended if necessary.</p>
         public Type getType();
         public String getSupportName();
         public void setSupportName(String name);
-        public boolean isMutable();
-        public void setMutable(boolean value);
         public String toString();
         public String toString(int indentLevel);
     }
@@ -1165,22 +1153,24 @@ interfaces:</p>
 <pre>public abstract class AbstractPVField implements PVField{
     protected AbstractPVField(PVField parent, Field field);
     protected void replaceField(Field field);
-    public void replacePVField(PVField newPVField);
-    public void setRecord(PVRecord record);
+    protected void setRecord(PVRecord record);
     public String getRequesterName();
     public void message(String message, MessageType messageType);
+    public boolean isMutable();
+    public void setMutable(boolean value);
     public String getFullFieldName();
+    public String getFullName();
     public Field getField();
     public PVField getParent();
     public PVRecord getPVRecord();
+    public void replacePVField(PVField newPVField);
     public String getSupportName();
     public String setSupportName(String name);
-    void asynAccessListenerAdd(AsynAccessListener asynAccessListener);
-    void asynAccessListenerRemove(AsynAccessListener asynAccessListener);
-    void asynAccessCallListeners(boolean begin);
-    boolean asynModifyStart(Object asynModifier);
-    void asynModifyEnd(Object asynModifier);
-    boolean isAsynModifyActive();
+    public void asynAccessCallListener(boolean begin);
+    public boolean asynAccessStart(AsynAccessListener asynAccessListener);
+    public void asynAccessEnd(AsynAccessListener asynAccessListener);
+    public boolean isAsynAccessActive();
+    public String toString();
     public String toString(int indentLevel);
 }</pre>
 
@@ -1196,7 +1186,7 @@ interfaces:</p>
   <dt>setRecord</dt>
     <dd>This is called a derived PVStructure implementation to specify the
       record containing the field.</dd>
-  <dt>getFullFieldName,...,getPVRecord</dt>
+  <dt>getRequestorName,...,replacePVField asynAccessCallListener,...,isAsynAccessActive</dt>
     <dd>The implementation should be sufficient for all derived classes.</dd>
   <dt>getSupportName and setSupportName</dt>
     <dd>With the exception of PVLink the implementation should be sufficient
@@ -1209,14 +1199,15 @@ interfaces:</p>
 
 <p>The following is a abstract class for creating array fields.</p>
 <pre>public abstract class AbstractPVArray extends AbstractPVField implements PVArray{
-    public AbstractPVArray(PVField parent,Array array,
+    protected AbstractPVArray(PVField parent,Array array,
         int capacity,boolean capacityMutable);
     public Array getArray();
-    public boolean isCapacityMutable();
-    public int getCapacity();
     public int getLength();
-    abstract public void setCapacity(int capacity);
     public void setLength(int len);
+    public int getCapacity();
+    abstract public void setCapacity(int capacity);
+    public boolean isCapacityMutable();
+    public void setCapacityMutable(boolean isMutable);
     public String toString();
 }</pre>
 

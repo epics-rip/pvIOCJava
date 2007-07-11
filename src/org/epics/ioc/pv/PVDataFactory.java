@@ -8,6 +8,7 @@ package org.epics.ioc.pv;
 import java.util.regex.Pattern;
 
 import org.epics.ioc.pv.Enum;
+import org.epics.ioc.util.MessageType;
 
 
 /**
@@ -128,11 +129,11 @@ public class PVDataFactory {
          * @see org.epics.ioc.pv.PVBoolean#put(boolean)
          */
         public void put(boolean value) {
-            if(getField().isMutable()) {
+            if(super.isMutable()) {
                 this.value = value;
                 return ;
             }
-            throw new IllegalStateException("PVField.isMutable is false");
+            super.message("not isMutable", MessageType.error);
         }       
         /* (non-Javadoc)
          * @see java.lang.Object#toString()
@@ -169,11 +170,11 @@ public class PVDataFactory {
          * @see org.epics.ioc.pv.PVByte#put(byte)
          */
         public void put(byte value) {
-            if(getField().isMutable()) {
+            if(super.isMutable()) {
                 this.value = value;
                 return ;
             }
-            throw new IllegalStateException("PVField.isMutable is false");
+            super.message("not isMutable", MessageType.error);
         }
         /* (non-Javadoc)
          * @see java.lang.Object#toString()
@@ -210,11 +211,11 @@ public class PVDataFactory {
          * @see org.epics.ioc.pv.PVShort#put(short)
          */
         public void put(short value) {
-            if(getField().isMutable()) {
+            if(super.isMutable()) {
                 this.value = value;
                 return ;
             }
-            throw new IllegalStateException("PVField.isMutable is false");
+            super.message("not isMutable", MessageType.error);
         }
         /* (non-Javadoc)
          * @see java.lang.Object#toString()
@@ -251,11 +252,11 @@ public class PVDataFactory {
          * @see org.epics.ioc.pv.PVInt#put(int)
          */
         public void put(int value) {
-            if(getField().isMutable()) {
+            if(super.isMutable()) {
                 this.value = value;
                 return ;
             }
-            throw new IllegalStateException("PVField.isMutable is false");
+            super.message("not isMutable", MessageType.error);
         }
         /* (non-Javadoc)
          * @see java.lang.Object#toString()
@@ -292,11 +293,11 @@ public class PVDataFactory {
          * @see org.epics.ioc.pv.PVLong#put(long)
          */
         public void put(long value) {
-            if(getField().isMutable()) {
+            if(super.isMutable()) {
                 this.value = value;
                 return ;
             }
-            throw new IllegalStateException("PVField.isMutable is false");
+            super.message("not isMutable", MessageType.error);
         }
         /* (non-Javadoc)
          * @see java.lang.Object#toString()
@@ -333,11 +334,11 @@ public class PVDataFactory {
          * @see org.epics.ioc.pv.PVFloat#put(float)
          */
         public void put(float value) {
-            if(getField().isMutable()) {
+            if(super.isMutable()) {
                 this.value = value;
                 return ;
             }
-            throw new IllegalStateException("PVField.isMutable is false");
+            super.message("not isMutable", MessageType.error);
         }
         /* (non-Javadoc)
          * @see java.lang.Object#toString()
@@ -374,11 +375,11 @@ public class PVDataFactory {
          * @see org.epics.ioc.pv.PVDouble#put(double)
          */
         public void put(double value) {
-            if(getField().isMutable()) {
+            if(super.isMutable()) {
                 this.value = value;
                 return ;
             }
-            throw new IllegalStateException("PVField.isMutable is false");
+            super.message("not isMutable", MessageType.error);
         }        
         /* (non-Javadoc)
          * @see java.lang.Object#toString()
@@ -415,11 +416,11 @@ public class PVDataFactory {
          * @see org.epics.ioc.pv.PVString#put(java.lang.String)
          */
         public void put(String value) {
-            if(getField().isMutable()) {
+            if(super.isMutable()) {
                 this.value = value;
                 return ;
             }
-            throw new IllegalStateException("PVField.isMutable is false");
+            super.message("not isMutable", MessageType.error);
         }
         /* (non-Javadoc)
          * @see java.lang.Object#toString()
@@ -463,35 +464,61 @@ public class PVDataFactory {
          * @see org.epics.ioc.db.AbstractPVArray#setCapacity(int)
          */
         public void setCapacity(int len) {
-            if(!capacityMutable)
-                throw new IllegalStateException("capacity is immutable");
-            if(length>len) length = len;
-            boolean[]newarray = new boolean[len];
-            if(length>0) System.arraycopy(value,0,newarray,0,length);
-            value = newarray;
-            capacity = len;
+            if(!capacityMutable) {
+                super.message("not capacityMutable", MessageType.error);
+                return;
+            }
+            super.asynAccessCallListener(true);
+            try {
+                if(length>len) length = len;
+                boolean[]newarray = new boolean[len];
+                if(length>0) System.arraycopy(value,0,newarray,0,length);
+                value = newarray;
+                capacity = len;
+            } finally {
+                super.asynAccessCallListener(false);
+            }
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.pv.PVBooleanArray#get(int, int, org.epics.ioc.pv.BooleanArrayData)
          */
         public int get(int offset, int len, BooleanArrayData data) {
-            int n = len;
-            if(offset+len > length) n = length;
-            data.data = value;
-            data.offset = offset;
-            return n;
+            super.asynAccessCallListener(true);
+            try {
+                int n = len;
+                if(offset+len > length) n = length;
+                data.data = value;
+                data.offset = offset;
+                return n;
+            } finally {
+                super.asynAccessCallListener(false);
+            }
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.pv.PVBooleanArray#put(int, int, boolean[], int)
          */
         public int put(int offset, int len, boolean[]from, int fromOffset) {
-            if(offset+len > length) {
-                 int newlength = offset + len;
-                 if(newlength>capacity) setCapacity(newlength);
-                 length = newlength;
+            if(!super.isMutable()) {
+                super.message("not isMutable", MessageType.error);
+                return 0;
             }
-            System.arraycopy(from,fromOffset,value,offset,len);
-            return len;
+            super.asynAccessCallListener(true);
+            try {
+                if(offset+len > length) {
+                    int newlength = offset + len;
+                    if(newlength>capacity) {
+                        setCapacity(newlength);
+                        newlength = capacity;
+                        len = newlength - offset;
+                        if(len<=0) return 0;
+                    }
+                    length = newlength;
+                }
+                System.arraycopy(from,fromOffset,value,offset,len);
+                return len;
+            } finally {
+                super.asynAccessCallListener(false);
+            }            
         }
     }
 
@@ -503,8 +530,6 @@ public class PVDataFactory {
             int capacity,boolean capacityMutable,String defaultValue)
         {
             super(parent,array,capacity,capacityMutable);
-            this.capacity = capacity;
-            this.capacityMutable = capacityMutable;
             value = new byte[capacity];
             if(defaultValue!=null && defaultValue.length()>0) {
                 String[] values = primitivePattern.split(defaultValue);
@@ -525,35 +550,61 @@ public class PVDataFactory {
          * @see org.epics.ioc.db.AbstractPVArray#setCapacity(int)
          */
         public void setCapacity(int len) {
-            if(!capacityMutable)
-                throw new IllegalStateException("capacity is immutable");
-            if(length>len) length = len;
-            byte[]newarray = new byte[len];
-            if(length>0) System.arraycopy(value,0,newarray,0,length);
-            value = newarray;
-            capacity = len;
+            if(!capacityMutable) {
+                super.message("not capacityMutable", MessageType.error);
+                return;
+            }
+            super.asynAccessCallListener(true);
+            try {
+                if(length>len) length = len;
+                byte[]newarray = new byte[len];
+                if(length>0) System.arraycopy(value,0,newarray,0,length);
+                value = newarray;
+                capacity = len;
+            } finally {
+                super.asynAccessCallListener(false);
+            }
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.pv.PVByteArray#get(int, int, org.epics.ioc.pv.ByteArrayData)
          */
         public int get(int offset, int len, ByteArrayData data) {
-            int n = len;
-            if(offset+len > length) n = length;
-            data.data = value;
-            data.offset = offset;
-            return n;
+            super.asynAccessCallListener(true);
+            try {
+                int n = len;
+                if(offset+len > length) n = length - offset;
+                data.data = value;
+                data.offset = offset;
+                return n;
+            } finally {
+                super.asynAccessCallListener(false);
+            }
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.pv.PVByteArray#put(int, int, byte[], int)
          */
         public int put(int offset, int len, byte[]from, int fromOffset) {
-            if(offset+len > length) {
-                 int newlength = offset + len;
-                 if(newlength>capacity) setCapacity(newlength);
-                 length = newlength;
+            if(!super.isMutable()) {
+                super.message("not isMutable", MessageType.error);
+                return 0;
             }
-            System.arraycopy(from,fromOffset,value,offset,len);
-            return len;
+            super.asynAccessCallListener(true);
+            try {
+                if(offset+len > length) {
+                    int newlength = offset + len;
+                    if(newlength>capacity) {
+                        setCapacity(newlength);
+                        newlength = capacity;
+                        len = newlength - offset;
+                        if(len<=0) return 0;
+                    }
+                    length = newlength;
+                }
+                System.arraycopy(from,fromOffset,value,offset,len);
+                return len;
+            } finally {
+                super.asynAccessCallListener(false);
+            }           
         }
     }
 
@@ -565,8 +616,6 @@ public class PVDataFactory {
             int capacity,boolean capacityMutable,String defaultValue)
         {
             super(parent,array,capacity,capacityMutable);
-            this.capacity = capacity;
-            this.capacityMutable = capacityMutable;
             value = new short[capacity];
             if(defaultValue!=null && defaultValue.length()>0) {
                 String[] values = primitivePattern.split(defaultValue);
@@ -587,35 +636,61 @@ public class PVDataFactory {
          * @see org.epics.ioc.db.AbstractPVArray#setCapacity(int)
          */
         public void setCapacity(int len) {
-            if(!capacityMutable)
-                throw new IllegalStateException("capacity is immutable");
-            if(length>len) length = len;
-            short[]newarray = new short[len];
-            if(length>0) System.arraycopy(value,0,newarray,0,length);
-            value = newarray;
-            capacity = len;
+            if(!capacityMutable) {
+                super.message("not capacityMutable", MessageType.error);
+                return;
+            }
+            super.asynAccessCallListener(true);
+            try {
+                if(length>len) length = len;
+                short[]newarray = new short[len];
+                if(length>0) System.arraycopy(value,0,newarray,0,length);
+                value = newarray;
+                capacity = len;
+            } finally {
+                super.asynAccessCallListener(false);
+            }
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.pv.PVShortArray#get(int, int, org.epics.ioc.pv.ShortArrayData)
          */
         public int get(int offset, int len, ShortArrayData data) {
-            int n = len;
-            if(offset+len > length) n = length;
-            data.data = value;
-            data.offset = offset;
-            return n;
+            super.asynAccessCallListener(true);
+            try {
+                int n = len;
+                if(offset+len > length) n = length - offset;
+                data.data = value;
+                data.offset = offset;
+                return n;
+            } finally {
+                super.asynAccessCallListener(false);
+            }           
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.pv.PVShortArray#put(int, int, short[], int)
          */
         public int put(int offset, int len, short[]from, int fromOffset) {
-            if(offset+len > length) {
-                 int newlength = offset + len;
-                 if(newlength>capacity) setCapacity(newlength);
-                 length = newlength;
+            if(!super.isMutable()) {
+                super.message("not isMutable", MessageType.error);
+                return 0;
             }
-            System.arraycopy(from,fromOffset,value,offset,len);
-            return len;
+            super.asynAccessCallListener(true);
+            try {
+                if(offset+len > length) {
+                    int newlength = offset + len;
+                    if(newlength>capacity) {
+                        setCapacity(newlength);
+                        newlength = capacity;
+                        len = newlength - offset;
+                        if(len<=0) return 0;
+                    }
+                    length = newlength;
+                }
+                System.arraycopy(from,fromOffset,value,offset,len);
+                return len;
+            } finally {
+                super.asynAccessCallListener(false);
+            }
         }
     }
 
@@ -627,8 +702,6 @@ public class PVDataFactory {
             int capacity,boolean capacityMutable,String defaultValue)
         {
             super(parent,array,capacity,capacityMutable);
-            this.capacity = capacity;
-            this.capacityMutable = capacityMutable;
             value = new int[capacity];
             if(defaultValue!=null && defaultValue.length()>0) {
                 String[] values = primitivePattern.split(defaultValue);
@@ -649,35 +722,61 @@ public class PVDataFactory {
          * @see org.epics.ioc.db.AbstractPVArray#setCapacity(int)
          */
         public void setCapacity(int len) {
-            if(!capacityMutable)
-                throw new IllegalStateException("capacity is immutable");
-            if(length>len) length = len;
-            int[]newarray = new int[len];
-            if(length>0) System.arraycopy(value,0,newarray,0,length);
-            value = newarray;
-            capacity = len;
+            if(!capacityMutable) {
+                super.message("not capacityMutable", MessageType.error);
+                return;
+            }
+            super.asynAccessCallListener(true);
+            try {
+                if(length>len) length = len;
+                int[]newarray = new int[len];
+                if(length>0) System.arraycopy(value,0,newarray,0,length);
+                value = newarray;
+                capacity = len;
+            } finally {
+                super.asynAccessCallListener(false);
+            }
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.pv.PVIntArray#get(int, int, org.epics.ioc.pv.IntArrayData)
          */
         public int get(int offset, int len, IntArrayData data) {
-            int n = len;
-            if(offset+len > length) n = length;
-            data.data = value;
-            data.offset = offset;
-            return n;
+            super.asynAccessCallListener(true);
+            try {
+                int n = len;
+                if(offset+len > length) n = length - offset;
+                data.data = value;
+                data.offset = offset;
+                return n;
+            } finally {
+                super.asynAccessCallListener(false);
+            }
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.pv.PVIntArray#put(int, int, int[], int)
          */
         public int put(int offset, int len, int[]from, int fromOffset) {
-            if(offset+len > length) {
-                 int newlength = offset + len;
-                 if(newlength>capacity) setCapacity(newlength);
-                 length = newlength;
+            if(!super.isMutable()) {
+                super.message("not isMutable", MessageType.error);
+                return 0;
             }
-            System.arraycopy(from,fromOffset,value,offset,len);
-            return len;
+            super.asynAccessCallListener(true);
+            try {
+                if(offset+len > length) {
+                    int newlength = offset + len;
+                    if(newlength>capacity) {
+                        setCapacity(newlength);
+                        newlength = capacity;
+                        len = newlength - offset;
+                        if(len<=0) return 0;
+                    }
+                    length = newlength;
+                }
+                System.arraycopy(from,fromOffset,value,offset,len);
+                return len;
+            } finally {
+                super.asynAccessCallListener(false);
+            }
         }
     }
 
@@ -689,8 +788,6 @@ public class PVDataFactory {
             int capacity,boolean capacityMutable,String defaultValue)
         {
             super(parent,array,capacity,capacityMutable);
-            this.capacity = capacity;
-            this.capacityMutable = capacityMutable;
             value = new long[capacity];
             if(defaultValue!=null && defaultValue.length()>0) {
                 String[] values = primitivePattern.split(defaultValue);
@@ -711,35 +808,60 @@ public class PVDataFactory {
          * @see org.epics.ioc.db.AbstractPVArray#setCapacity(int)
          */
         public void setCapacity(int len) {
-            if(!capacityMutable)
-                throw new IllegalStateException("capacity is immutable");
-            if(length>len) length = len;
-            long[]newarray = new long[len];
-            if(length>0) System.arraycopy(value,0,newarray,0,length);
-            value = newarray;
-            capacity = len;
+            if(!capacityMutable) {
+                super.message("not capacityMutable", MessageType.error);
+                return;
+            }
+            super.asynAccessCallListener(true);
+            try {
+                if(length>len) length = len;
+                long[]newarray = new long[len];
+                if(length>0) System.arraycopy(value,0,newarray,0,length);
+                value = newarray;
+                capacity = len;
+            } finally {
+                super.asynAccessCallListener(false);
+            }
         }      
         /* (non-Javadoc)
          * @see org.epics.ioc.pv.PVLongArray#get(int, int, org.epics.ioc.pv.LongArrayData)
          */
         public int get(int offset, int len, LongArrayData data) {
-            int n = len;
-            if(offset+len > length) n = length;
-            data.data = value;
-            data.offset = offset;
-            return n;
+            super.asynAccessCallListener(true);
+            try {
+                int n = len;
+                if(offset+len > length) n = length - offset;
+                data.data = value;
+                data.offset = offset;
+                return n;
+            } finally {
+                super.asynAccessCallListener(false);}
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.pv.PVLongArray#put(int, int, long[], int)
          */
         public int put(int offset, int len, long[]from, int fromOffset) {
-            if(offset+len > length) {
-                 int newlength = offset + len;
-                 if(newlength>capacity) setCapacity(newlength);
-                 length = newlength;
+            if(!super.isMutable()) {
+                super.message("not isMutable", MessageType.error);
+                return 0;
             }
-            System.arraycopy(from,fromOffset,value,offset,len);
-            return len;
+            super.asynAccessCallListener(true);
+            try {
+                if(offset+len > length) {
+                    int newlength = offset + len;
+                    if(newlength>capacity) {
+                        setCapacity(newlength);
+                        newlength = capacity;
+                        len = newlength - offset;
+                        if(len<=0) return 0;
+                    }
+                    length = newlength;
+                }
+                System.arraycopy(from,fromOffset,value,offset,len);
+                return len;
+            } finally {
+                super.asynAccessCallListener(false);
+            }            
         }
     }
 
@@ -751,8 +873,6 @@ public class PVDataFactory {
             int capacity,boolean capacityMutable,String defaultValue)
         {
             super(parent,array,capacity,capacityMutable);
-            this.capacity = capacity;
-            this.capacityMutable = capacityMutable;
             value = new float[capacity];
             if(defaultValue!=null && defaultValue.length()>0) {
                 String[] values = primitivePattern.split(defaultValue);
@@ -773,35 +893,60 @@ public class PVDataFactory {
          * @see org.epics.ioc.db.AbstractPVArray#setCapacity(int)
          */
         public void setCapacity(int len) {
-            if(!capacityMutable)
-                throw new IllegalStateException("capacity is immutable");
-            if(length>len) length = len;
-            float[]newarray = new float[len];
-            if(length>0) System.arraycopy(value,0,newarray,0,length);
-            value = newarray;
-            capacity = len;
+            if(!capacityMutable) {
+                super.message("not capacityMutable", MessageType.error);
+                return;
+            }
+            super.asynAccessCallListener(true);
+            try {
+                if(length>len) length = len;
+                float[]newarray = new float[len];
+                if(length>0) System.arraycopy(value,0,newarray,0,length);
+                value = newarray;
+                capacity = len;
+            } finally {
+                super.asynAccessCallListener(false);
+            }
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.pv.PVFloatArray#get(int, int, org.epics.ioc.pv.FloatArrayData)
          */
         public int get(int offset, int len, FloatArrayData data) {
-            int n = len;
-            if(offset+len > length) n = length;
-            data.data = value;
-            data.offset = offset;
-            return n;
+            super.asynAccessCallListener(true);
+            try {
+                int n = len;
+                if(offset+len > length) n = length - offset;
+                data.data = value;
+                data.offset = offset;
+                return n;
+            } finally {
+                super.asynAccessCallListener(false);}            
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.pv.PVFloatArray#put(int, int, float[], int)
          */
         public int put(int offset, int len, float[]from, int fromOffset) {
-            if(offset+len > length) {
-                 int newlength = offset + len;
-                 if(newlength>capacity) setCapacity(newlength);
-                 length = newlength;
+            if(!super.isMutable()) {
+                super.message("not isMutable", MessageType.error);
+                return 0;
             }
-            System.arraycopy(from,fromOffset,value,offset,len);
-            return len;
+            super.asynAccessCallListener(true);
+            try {
+                if(offset+len > length) {
+                    int newlength = offset + len;
+                    if(newlength>capacity) {
+                        setCapacity(newlength);
+                        newlength = capacity;
+                        len = newlength - offset;
+                        if(len<=0) return 0;
+                    }
+                    length = newlength;
+                }
+                System.arraycopy(from,fromOffset,value,offset,len);
+                return len;
+            } finally {
+                super.asynAccessCallListener(false);
+            }            
         }
     }
 
@@ -813,8 +958,6 @@ public class PVDataFactory {
             int capacity,boolean capacityMutable,String defaultValue)
         {
             super(parent,array,capacity,capacityMutable);
-            this.capacity = capacity;
-            this.capacityMutable = capacityMutable;
             value = new double[capacity];
             if(defaultValue!=null && defaultValue.length()>0) {
                 String[] values = primitivePattern.split(defaultValue);
@@ -835,35 +978,61 @@ public class PVDataFactory {
          * @see org.epics.ioc.db.AbstractPVArray#setCapacity(int)
          */
         public void setCapacity(int len) {
-            if(!capacityMutable)
-                throw new IllegalStateException("capacity is immutable");
-            if(length>len) length = len;
-            double[]newarray = new double[len];
-            if(length>0) System.arraycopy(value,0,newarray,0,length);
-            value = newarray;
-            capacity = len;
+            if(!capacityMutable) {
+                super.message("not capacityMutable", MessageType.error);
+                return;
+            }
+            super.asynAccessCallListener(true);
+            try {
+                if(length>len) length = len;
+                double[]newarray = new double[len];
+                if(length>0) System.arraycopy(value,0,newarray,0,length);
+                value = newarray;
+                capacity = len;
+            } finally {
+                super.asynAccessCallListener(false);
+            }
         }       
         /* (non-Javadoc)
          * @see org.epics.ioc.pv.PVDoubleArray#get(int, int, org.epics.ioc.pv.DoubleArrayData)
          */
         public int get(int offset, int len, DoubleArrayData data) {
-            int n = len;
-            if(offset+len > length) n = length;
-            data.data = value;
-            data.offset = offset;
-            return n;
+            super.asynAccessCallListener(true);
+            try {
+                int n = len;
+                if(offset+len > length) n = length - offset;
+                data.data = value;
+                data.offset = offset;
+                return n;
+            } finally {
+                super.asynAccessCallListener(false);
+            }
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.pv.PVDoubleArray#put(int, int, double[], int)
          */
         public int put(int offset, int len, double[]from, int fromOffset) {
-            if(offset+len > length) {
-                 int newlength = offset + len;
-                 if(newlength>capacity) setCapacity(newlength);
-                 length = newlength;
+            if(!super.isMutable()) {
+                super.message("not isMutable", MessageType.error);
+                return 0;
             }
-            System.arraycopy(from,fromOffset,value,offset,len);
-            return len;
+            super.asynAccessCallListener(true);
+            try {
+                if(offset+len > length) {
+                    int newlength = offset + len;
+                    if(newlength>capacity) {
+                        setCapacity(newlength);
+                        newlength = capacity;
+                        len = newlength - offset;
+                        if(len<=0) return 0;
+                    }
+                    length = newlength;
+                }
+                System.arraycopy(from,fromOffset,value,offset,len);
+                return len;
+            } finally {
+                super.asynAccessCallListener(false);
+            }            
         }     
     }
 
@@ -876,8 +1045,6 @@ public class PVDataFactory {
             int capacity,boolean capacityMutable,String defaultValue)
         {
             super(parent,array,capacity,capacityMutable);
-            this.capacity = capacity;
-            this.capacityMutable = capacityMutable;
             value = new String[capacity];
             if(defaultValue!=null && defaultValue.length()>0) {
                 String[] values = primitivePattern.split(defaultValue);
@@ -898,35 +1065,61 @@ public class PVDataFactory {
          * @see org.epics.ioc.db.AbstractPVArray#setCapacity(int)
          */
         public void setCapacity(int len) {
-            if(!capacityMutable)
-                throw new IllegalStateException("capacity is immutable");
-            if(length>len) length = len;
-            String[]newarray = new String[len];
-            if(length>0) System.arraycopy(value,0,newarray,0,length);
-            value = newarray;
-            capacity = len;
+            if(!capacityMutable) {
+                super.message("not capacityMutable", MessageType.error);
+                return;
+            }
+            super.asynAccessCallListener(true);
+            try {
+                if(length>len) length = len;
+                String[]newarray = new String[len];
+                if(length>0) System.arraycopy(value,0,newarray,0,length);
+                value = newarray;
+                capacity = len;
+            } finally {
+                super.asynAccessCallListener(false);
+            }
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.pv.PVStringArray#get(int, int, org.epics.ioc.pv.StringArrayData)
          */
         public int get(int offset, int len, StringArrayData data) {
-            int n = len;
-            if(offset+len > length) n = length;
-            data.data = value;
-            data.offset = offset;
-            return n;
+            super.asynAccessCallListener(true);
+            try {
+                int n = len;
+                if(offset+len > length) n = length - offset;
+                data.data = value;
+                data.offset = offset;
+                return n;
+            } finally {
+                super.asynAccessCallListener(false);
+            }           
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.pv.PVStringArray#put(int, int, java.lang.String[], int)
          */
         public int put(int offset, int len, String[]from, int fromOffset) {
-            if(offset+len > length) {
-                 int newlength = offset + len;
-                 if(newlength>capacity) setCapacity(newlength);
-                 length = newlength;
+            if(!super.isMutable()) {
+                super.message("not isMutable", MessageType.error);
+                return 0;
             }
-            System.arraycopy(from,fromOffset,value,offset,len);
-            return len;
+            super.asynAccessCallListener(true);
+            try {
+                if(offset+len > length) {
+                    int newlength = offset + len;
+                    if(newlength>capacity) {
+                        setCapacity(newlength);
+                        newlength = capacity;
+                        len = newlength - offset;
+                        if(len<=0) return 0;
+                    }
+                    length = newlength;
+                }
+                System.arraycopy(from,fromOffset,value,offset,len);
+                return len;
+            } finally {
+                super.asynAccessCallListener(false);
+            }            
         }
     }
 
@@ -939,8 +1132,6 @@ public class PVDataFactory {
             int capacity,boolean capacityMutable)
         {
             super(parent,array,capacity,capacityMutable);
-            this.capacity = capacity;
-            this.capacityMutable = capacityMutable;
             value = new PVEnum[capacity];
         }
         /* (non-Javadoc)
@@ -955,36 +1146,61 @@ public class PVDataFactory {
          * @see org.epics.ioc.db.AbstractPVArray#setCapacity(int)
          */
         public void setCapacity(int len) {
-            if(!capacityMutable)
-                throw new IllegalStateException("capacity is immutable");
-            if(length>len) length = len;
-            PVEnum[]newarray = new PVEnum[len];
-            if(length>0) System.arraycopy(value,0,newarray,0,length);
-            value = newarray;
-            capacity = len;
+            if(!capacityMutable) {
+                super.message("not capacityMutable", MessageType.error);
+                return;
+            }
+            super.asynAccessCallListener(true);
+            try {
+                if(length>len) length = len;
+                PVEnum[]newarray = new PVEnum[len];
+                if(length>0) System.arraycopy(value,0,newarray,0,length);
+                value = newarray;
+                capacity = len;
+            } finally {
+                super.asynAccessCallListener(false);
+            }
         }
-
         /* (non-Javadoc)
          * @see org.epics.ioc.pv.PVEnumArray#get(int, int, org.epics.ioc.pv.EnumArrayData)
          */
         public int get(int offset, int len, EnumArrayData data) {
-            int n = len;
-            if(offset+len > length) n = length;
-            data.data = value;
-            data.offset = offset;
-            return n;
+            super.asynAccessCallListener(true);
+            try {
+                int n = len;
+                if(offset+len > length) n = length - offset;
+                data.data = value;
+                data.offset = offset;
+                return n;
+            } finally {
+                super.asynAccessCallListener(false);
+            }
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.pv.PVEnumArray#put(int, int, org.epics.ioc.pv.PVEnum[], int)
          */
         public int put(int offset, int len, PVEnum[]from, int fromOffset) {
-            if(offset+len > length) {
-                 int newlength = offset + len;
-                 if(newlength>capacity) setCapacity(newlength);
-                 length = newlength;
+            if(!super.isMutable()) {
+                super.message("not isMutable", MessageType.error);
+                return 0;
             }
-            System.arraycopy(from,fromOffset,value,offset,len);
-            return len;
+            super.asynAccessCallListener(true);
+            try {
+                if(offset+len > length) {
+                    int newlength = offset + len;
+                    if(newlength>capacity) {
+                        setCapacity(newlength);
+                        newlength = capacity;
+                        len = newlength - offset;
+                        if(len<=0) return 0;
+                    }
+                    length = newlength;
+                }
+                System.arraycopy(from,fromOffset,value,offset,len);
+                return len;
+            } finally {
+                super.asynAccessCallListener(false);
+            }
         }
     }
 
@@ -996,8 +1212,6 @@ public class PVDataFactory {
             int capacity,boolean capacityMutable)
         {
             super(parent,array,capacity,capacityMutable);
-            this.capacity = capacity;
-            this.capacityMutable = capacityMutable;
             value = new PVMenu[capacity];
         }
         /* (non-Javadoc)
@@ -1011,35 +1225,61 @@ public class PVDataFactory {
          * @see org.epics.ioc.db.AbstractPVArray#setCapacity(int)
          */
         public void setCapacity(int len) {
-            if(!capacityMutable)
-                throw new IllegalStateException("capacity is immutable");
-            if(length>len) length = len;
-            PVMenu[]newarray = new PVMenu[len];
-            if(length>0) System.arraycopy(value,0,newarray,0,length);
-            value = newarray;
-            capacity = len;
+            if(!capacityMutable) {
+                super.message("not capacityMutable", MessageType.error);
+                return;
+            }
+            super.asynAccessCallListener(true);
+            try {
+                if(length>len) length = len;
+                PVMenu[]newarray = new PVMenu[len];
+                if(length>0) System.arraycopy(value,0,newarray,0,length);
+                value = newarray;
+                capacity = len;
+            } finally {
+                super.asynAccessCallListener(false);
+            }
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.pv.PVMenuArray#get(int, int, org.epics.ioc.pv.MenuArrayData)
          */
         public int get(int offset, int len, MenuArrayData data) {
-            int n = len;
-            if(offset+len > length) n = length;
-            data.data = value;
-            data.offset = offset;
-            return n;
+            super.asynAccessCallListener(true);
+            try {
+                int n = len;
+                if(offset+len > length) n = length - offset;
+                data.data = value;
+                data.offset = offset;
+                return n;
+            } finally {
+                super.asynAccessCallListener(false);
+            }
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.pv.PVMenuArray#put(int, int, org.epics.ioc.pv.PVMenu[], int)
          */
         public int put(int offset, int len, PVMenu[]from, int fromOffset) {
-            if(offset+len > length) {
-                 int newlength = offset + len;
-                 if(newlength>capacity) setCapacity(newlength);
-                 length = newlength;
+            if(!super.isMutable()) {
+                super.message("not isMutable", MessageType.error);
+                return 0;
             }
-            System.arraycopy(from,fromOffset,value,offset,len);
-            return len;
+            super.asynAccessCallListener(true);
+            try {
+                if(offset+len > length) {
+                    int newlength = offset + len;
+                    if(newlength>capacity) {
+                        setCapacity(newlength);
+                        newlength = capacity;
+                        len = newlength - offset;
+                        if(len<=0) return 0;
+                    }
+                    length = newlength;
+                }
+                System.arraycopy(from,fromOffset,value,offset,len);
+                return len;
+            } finally {
+                super.asynAccessCallListener(false);
+            }
         }
         
         private String getString(int indentLevel) {
@@ -1068,8 +1308,6 @@ public class PVDataFactory {
             int capacity,boolean capacityMutable)
         {
             super(parent,array,capacity,capacityMutable);
-            this.capacity = capacity;
-            this.capacityMutable = capacityMutable;
             value = new PVStructure[capacity];
         }
         /* (non-Javadoc)
@@ -1083,35 +1321,61 @@ public class PVDataFactory {
          * @see org.epics.ioc.db.AbstractPVArray#setCapacity(int)
          */
         public void setCapacity(int len) {
-            if(!capacityMutable)
-                throw new IllegalStateException("capacity is immutable");
-            if(length>len) length = len;
-            PVStructure[]newarray = new PVStructure[len];
-            if(length>0) System.arraycopy(value,0,newarray,0,length);
-            value = newarray;
-            capacity = len;
+            if(!capacityMutable) {
+                super.message("not capacityMutable", MessageType.error);
+                return;
+            }
+            super.asynAccessCallListener(true);
+            try {
+                if(length>len) length = len;
+                PVStructure[]newarray = new PVStructure[len];
+                if(length>0) System.arraycopy(value,0,newarray,0,length);
+                value = newarray;
+                capacity = len;
+            } finally {
+                super.asynAccessCallListener(false);
+            }
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.pv.PVStructureArray#get(int, int, org.epics.ioc.pv.StructureArrayData)
          */
         public int get(int offset, int len, StructureArrayData data) {
-            int n = len;
-            if(offset+len > length) n = length;
-            data.data = value;
-            data.offset = offset;
-            return n;
+            super.asynAccessCallListener(true);
+            try {
+                int n = len;
+                if(offset+len > length) n = length - offset;
+                data.data = value;
+                data.offset = offset;
+                return n;
+            } finally {
+                super.asynAccessCallListener(false);
+            }
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.pv.PVStructureArray#put(int, int, org.epics.ioc.pv.PVStructure[], int)
          */
         public int put(int offset, int len, PVStructure[]from, int fromOffset) {
-            if(offset+len > length) {
-                 int newlength = offset + len;
-                 if(newlength>capacity) setCapacity(newlength);
-                 length = newlength;
+            if(!super.isMutable()) {
+                super.message("not isMutable", MessageType.error);
+                return 0;
             }
-            System.arraycopy(from,fromOffset,value,offset,len);
-            return len;
+            super.asynAccessCallListener(true);
+            try {
+                if(offset+len > length) {
+                    int newlength = offset + len;
+                    if(newlength>capacity) {
+                        setCapacity(newlength);
+                        newlength = capacity;
+                        len = newlength - offset;
+                        if(len<=0) return 0;
+                    }
+                    length = newlength;
+                }
+                System.arraycopy(from,fromOffset,value,offset,len);
+                return len;
+            } finally {
+                super.asynAccessCallListener(false);
+            }
         }
         
         private String getString(int indentLevel) {
@@ -1139,8 +1403,6 @@ public class PVDataFactory {
             int capacity,boolean capacityMutable)
         {
             super(parent,array,capacity,capacityMutable);
-            this.capacity = capacity;
-            this.capacityMutable = capacityMutable;
             value = new PVArray[capacity];
         }
         /* (non-Javadoc)
@@ -1154,35 +1416,61 @@ public class PVDataFactory {
          * @see org.epics.ioc.db.AbstractPVArray#setCapacity(int)
          */
         public void setCapacity(int len) {
-            if(!capacityMutable)
-                throw new IllegalStateException("capacity is immutable");
-            if(length>len) length = len;
-            PVArray[]newarray = new PVArray[len];
-            if(length>0) System.arraycopy(value,0,newarray,0,length);
-            value = newarray;
-            capacity = len;
+            if(!capacityMutable) {
+                super.message("not capacityMutable", MessageType.error);
+                return;
+            }
+            super.asynAccessCallListener(true);
+            try {
+                if(length>len) length = len;
+                PVArray[]newarray = new PVArray[len];
+                if(length>0) System.arraycopy(value,0,newarray,0,length);
+                value = newarray;
+                capacity = len;
+            } finally {
+                super.asynAccessCallListener(false);
+            }
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.pv.PVArrayArray#get(int, int, org.epics.ioc.pv.ArrayArrayData)
          */
         public int get(int offset, int len, ArrayArrayData data) {
-            int n = len;
-            if(offset+len > length) n = length;
-            data.data = value;
-            data.offset = offset;
-            return n;
+            super.asynAccessCallListener(true);
+            try {
+                int n = len;
+                if(offset+len > length) n = length - offset;
+                data.data = value;
+                data.offset = offset;
+                return n;
+            } finally {
+                super.asynAccessCallListener(false);
+            }
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.pv.PVArrayArray#put(int, int, org.epics.ioc.pv.PVArray[], int)
          */
         public int put(int offset, int len, PVArray[]from, int fromOffset) {
-            if(offset+len > length) {
-                 int newlength = offset + len;
-                 if(newlength>capacity) setCapacity(newlength);
-                 length = newlength;
+            if(!super.isMutable()) {
+                super.message("not isMutable", MessageType.error);
+                return 0;
             }
-            System.arraycopy(from,fromOffset,value,offset,len);
-            return len;
+            super.asynAccessCallListener(true);
+            try {
+                if(offset+len > length) {
+                    int newlength = offset + len;
+                    if(newlength>capacity) {
+                        setCapacity(newlength);
+                        newlength = capacity;
+                        len = newlength - offset;
+                        if(len<=0) return 0;
+                    }
+                    length = newlength;
+                }
+                System.arraycopy(from,fromOffset,value,offset,len);
+                return len;
+            } finally {
+                super.asynAccessCallListener(false);
+            }
         }
         
         private String getString(int indentLevel) {
@@ -1211,8 +1499,6 @@ public class PVDataFactory {
             int capacity,boolean capacityMutable)
         {
             super(parent,array,capacity,capacityMutable);
-            this.capacity = capacity;
-            this.capacityMutable = capacityMutable;
             value = new PVLink[capacity];
         }
         /* (non-Javadoc)
@@ -1226,35 +1512,61 @@ public class PVDataFactory {
          * @see org.epics.ioc.db.AbstractPVArray#setCapacity(int)
          */
         public void setCapacity(int len) {
-            if(!capacityMutable)
-                throw new IllegalStateException("capacity is immutable");
-            if(length>len) length = len;
-            PVLink[]newarray = new PVLink[len];
-            if(length>0) System.arraycopy(value,0,newarray,0,length);
-            value = newarray;
-            capacity = len;
+            if(!capacityMutable) {
+                super.message("not capacityMutable", MessageType.error);
+                return;
+            }
+            super.asynAccessCallListener(true);
+            try {
+                if(length>len) length = len;
+                PVLink[]newarray = new PVLink[len];
+                if(length>0) System.arraycopy(value,0,newarray,0,length);
+                value = newarray;
+                capacity = len;
+            } finally {
+                super.asynAccessCallListener(false);
+            }
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.pv.PVLinkArray#get(int, int, org.epics.ioc.pv.LinkArrayData)
          */
         public int get(int offset, int len, LinkArrayData data) {
-            int n = len;
-            if(offset+len > length) n = length;
-            data.data = value;
-            data.offset = offset;
-            return n;
+            super.asynAccessCallListener(true);
+            try {
+                int n = len;
+                if(offset+len > length) n = length - offset;
+                data.data = value;
+                data.offset = offset;
+                return n;
+            } finally {
+                super.asynAccessCallListener(false);
+            }
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.pv.PVLinkArray#put(int, int, org.epics.ioc.pv.PVLink[], int)
          */
         public int put(int offset, int len, PVLink[]from, int fromOffset) {
-            if(offset+len > length) {
-                 int newlength = offset + len;
-                 if(newlength>capacity) setCapacity(newlength);
-                 length = newlength;
+            if(!super.isMutable()) {
+                super.message("not isMutable", MessageType.error);
+                return 0;
             }
-            System.arraycopy(from,fromOffset,value,offset,len);
-            return len;
+            super.asynAccessCallListener(true);
+            try {
+                if(offset+len > length) {
+                    int newlength = offset + len;
+                    if(newlength>capacity) {
+                        setCapacity(newlength);
+                        newlength = capacity;
+                        len = newlength - offset;
+                        if(len<=0) return 0;
+                    }
+                    length = newlength;
+                }
+                System.arraycopy(from,fromOffset,value,offset,len);
+                return len;
+            } finally {
+                super.asynAccessCallListener(false);
+            }
         }
         
         private String getString(int indentLevel) {

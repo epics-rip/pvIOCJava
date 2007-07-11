@@ -41,6 +41,12 @@ public abstract class AbstractPVArray extends AbstractPVField implements PVArray
         return capacityMutable;
     }
     /* (non-Javadoc)
+     * @see org.epics.ioc.pv.PVArray#setCapacityMutable(boolean)
+     */
+    public void setCapacityMutable(boolean isMutable) {
+        capacityMutable = isMutable;
+    }
+    /* (non-Javadoc)
      * @see org.epics.ioc.pv.PVArray#getCapacity()
      */
     public int getCapacity() {
@@ -60,7 +66,7 @@ public abstract class AbstractPVArray extends AbstractPVField implements PVArray
      * @see org.epics.ioc.pv.PVArray#setLength(int)
      */
     public void setLength(int len) {
-        if(!super.getField().isMutable())
+        if(!super.isMutable())
             throw new IllegalStateException("PVField.isMutable is false");
         if(len>capacity) setCapacity(len);
         length = len;
