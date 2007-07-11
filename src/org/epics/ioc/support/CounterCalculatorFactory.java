@@ -41,21 +41,36 @@ public class CounterCalculatorFactory {
          */
         public void initialize() {
             if(!super.checkSupportState(SupportState.readyForInitialize,supportName)) return;
-            minPVField = calcArgArraySupport.getPVDouble("min");
-            if(minPVField==null) {
-                pvLink.message("min not found", MessageType.error);
+            PVField pvField = calcArgArraySupport.getPVField("min");
+            if(pvField==null) {
+                pvLink.message("field min not found", MessageType.error);
                 return;
             }
-            maxPVField = calcArgArraySupport.getPVDouble("max");
-            if(maxPVField==null) {
-                pvLink.message("max not found", MessageType.error);
+            if(pvField.getField().getType()!=Type.pvDouble) {
+                pvLink.message("field min is not double", MessageType.error);
                 return;
             }
-            incPVField = calcArgArraySupport.getPVDouble("inc");
-            if(incPVField==null) {
-                pvLink.message("inc not found", MessageType.error);
+            minPVField = (PVDouble)pvField;
+            pvField = calcArgArraySupport.getPVField("max");
+            if(pvField==null) {
+                pvLink.message("field max not found", MessageType.error);
                 return;
             }
+            if(pvField.getField().getType()!=Type.pvDouble) {
+                pvLink.message("field max is not double", MessageType.error);
+                return;
+            }
+            maxPVField = (PVDouble)pvField;
+            pvField = calcArgArraySupport.getPVField("inc");
+            if(pvField==null) {
+                pvLink.message("field inc not found", MessageType.error);
+                return;
+            }
+            if(pvField.getField().getType()!=Type.pvDouble) {
+                pvLink.message("field inc is not double", MessageType.error);
+                return;
+            }
+            incPVField = (PVDouble)pvField;
             setSupportState(SupportState.readyForStart);
         }
         /* (non-Javadoc)

@@ -241,16 +241,21 @@ public class CALinkFactory {
         public void processCallback() {
             if(isLocal) {
                 if(isRecordProcessRequester) {
-                    targetRecordProcess.process(this, false,timeStamp);
+                    if(!targetRecordProcess.process(this, false,timeStamp)) {
+                        if(alarmSupport!=null) alarmSupport.setAlarm(
+                                pvLink.getFullFieldName() + "could not process record",
+                                AlarmSeverity.major);
+                        supportProcessRequester.supportProcessDone(RequestResult.failure);
+                        return;
+                    }
                 } else {
-                    if(targetRecordProcess.processSelfRequest(this)) {
-                        targetRecordProcess.processSelfProcess(this, false);
-                    } else {
+                    if(!targetRecordProcess.processSelfRequest(this)) {
                         if(alarmSupport!=null) alarmSupport.setAlarm(
                                 pvLink.getFullFieldName() + "could not process record",
                                 AlarmSeverity.major);
                         supportProcessRequester.supportProcessDone(RequestResult.failure);
                     }
+                    targetRecordProcess.processSelfProcess(this, false);
                 }
             } else {
                 if(inheritSeverity) {
@@ -636,18 +641,25 @@ public class CALinkFactory {
         public void processCallback() {
             if(isLocal) {
                 if(isRecordProcessRequester){
-                    targetRecordProcess.process(this, false,timeStamp);
-                } else {
-                    if(targetRecordProcess.processSelfRequest(this)) {
-                        targetRecordProcess.processSelfProcess(this, false);
-                    } else {
+                    if(!targetRecordProcess.process(this, false,timeStamp)) {
                         if(alarmSupport!=null) alarmSupport.setAlarm(
                                 pvLink.getFullFieldName() + "could not process record",
                                 AlarmSeverity.major);
-                        getLocalData();
                         supportProcessRequester.supportProcessDone(RequestResult.failure);
                     }
+                } else if(process){
+                    if(!targetRecordProcess.processSelfRequest(this)) {
+                        if(alarmSupport!=null) alarmSupport.setAlarm(
+                                pvLink.getFullFieldName() + "could not process record",
+                                AlarmSeverity.major);
+                        supportProcessRequester.supportProcessDone(RequestResult.failure);
+                        return;
+                    }
+                    targetRecordProcess.processSelfProcess(this, false);
+                    return;
                 }
+                getLocalData();
+                supportProcessRequester.supportProcessDone(RequestResult.failure);
                 return;
             } else {
                 arrayLength = -1;
@@ -969,7 +981,7 @@ public class CALinkFactory {
          * @see org.epics.ioc.process.Support#initialize()
          */
         public void initialize() {
-            if(!super.checkSupportState(SupportState.readyForInitialize,inputLinkSupportName)) return;
+            if(!super.checkSupportState(SupportState.readyForInitialize,outputLinkSupportName)) return;
             dbRecord = dbLink.getDBRecord();
             recordProcess = dbRecord.getRecordProcess();
             alarmSupport = AlarmFactory.findAlarmSupport(dbLink);
@@ -998,7 +1010,7 @@ public class CALinkFactory {
          * @see org.epics.ioc.process.Support#start()
          */
         public void start() {
-            if(!super.checkSupportState(SupportState.readyForStart,inputLinkSupportName)) return;
+            if(!super.checkSupportState(SupportState.readyForStart,outputLinkSupportName)) return;
             isConnected = false;
             if(valueDBField==null) {
                 pvLink.message(
@@ -1101,7 +1113,7 @@ public class CALinkFactory {
          * @see org.epics.ioc.process.AbstractSupport#process(org.epics.ioc.process.SupportProcessRequester)
          */
         public void process(SupportProcessRequester supportProcessRequester) {
-            if(!super.checkSupportState(SupportState.ready,inputLinkSupportName + ".process")) {
+            if(!super.checkSupportState(SupportState.ready,outputLinkSupportName + ".process")) {
                 if(alarmSupport!=null) alarmSupport.setAlarm(
                         pvLink.getFullFieldName() + " not ready",
                         AlarmSeverity.major);
@@ -1136,23 +1148,27 @@ public class CALinkFactory {
         public void processCallback() {
             if(isLocal) {
                 if(isRecordProcessRequester) {
-                    targetRecordProcess.setActive(this);
-                } else {
-                    if(targetRecordProcess.processSelfRequest(this)) {
-                        targetRecordProcess.processSelfSetActive(this);
-                    } else {
+                    if(!targetRecordProcess.setActive(this)) {
                         if(alarmSupport!=null) alarmSupport.setAlarm(
                                 pvLink.getFullFieldName() + "could not process record",
                                 AlarmSeverity.major);
-                        putLocalData();
                         supportProcessRequester.supportProcessDone(RequestResult.failure);
                         return;
                     }
+                } else if(process){
+                    if(!targetRecordProcess.processSelfRequest(this)) {
+                        if(alarmSupport!=null) alarmSupport.setAlarm(
+                                pvLink.getFullFieldName() + "could not process record",
+                                AlarmSeverity.major);
+                        supportProcessRequester.supportProcessDone(RequestResult.failure);
+                        return;
+                    }
+                    targetRecordProcess.processSelfSetActive(this);
                 }
                 putLocalData();
                 if(isRecordProcessRequester) {
                     targetRecordProcess.process(this, false, timeStamp);
-                } else {
+                } else if(process){
                     targetRecordProcess.processSelfProcess(this, false);
                 }
             } else {
@@ -2049,7 +2065,7 @@ public class CALinkFactory {
             if(valueType.isScalar() && targetType.isScalar()) {
                 if(convert.isCopyScalarCompatible(targetChannelField.getField(),valueField)) return null;
             } else if(targetType==Type.pvArray && valueType==Type.pvArray) {
-                Array targetArray = (Array)targetChannelField;
+                Array targetArray = (Array)targetChannelField.getField();
                 Array valueArray = (Array)valueField;
                 if(convert.isCopyArrayCompatible(targetArray,valueArray)) return null;
             } else if(targetType==Type.pvStructure && valueType==Type.pvStructure) {

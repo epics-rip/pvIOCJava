@@ -18,5 +18,5 @@ public interface CalcArgArraySupport extends Support{
      * @param argName The name of the calcArg.
      * @return The interface for the value field or null if no calcArg has name argName.
      */
-    PVDouble getPVDouble(String argName);
+    PVField getPVField(String argName);
 }

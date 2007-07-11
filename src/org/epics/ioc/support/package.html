@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-       "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+      "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
   <meta http-equiv="content-type" content="text/html; charset=iso-8859-1" />
@@ -10,8 +10,8 @@
 <body>
 <h1 style="text-align: center">EPICS JavaIOC: support<br />
 package: org.epics.ioc.support<br />
-2007.04.17</h1>
-CONTENTS
+2007.07.11</h1>
+CONTENTS 
 
 <div class="toc">
 <ul>
@@ -25,13 +25,17 @@ CONTENTS
       <li><a href="#AbstractSu">AbstractSupport</a></li>
     </ul>
   </li>
-  <li><a href="#Scan">Scan Support</a></li>
+  <li><a href="#ScanSuppor">ScanSupport</a></li>
   <li><a href="#Alarm">Alarm Support</a>
     <ul>
       <li><a href="#Alarm1">Alarm Support</a></li>
-      <li><a href="#BooleanAla">BooleanAlarmFactory</a></li>
-      <li><a href="#DoubleAlar">DoubleAlarmFactory</a></li>
-      <li><a href="#IntAlarmFa">IntAlarmFactory</a></li>
+      <li><a href="#Value">Value Alarms</a>
+        <ul>
+          <li><a href="#Boolean">Boolean Alarms</a></li>
+          <li><a href="#Numeric">Numeric Alarms</a></li>
+          <li><a href="#Digital">Digital Alarms</a></li>
+        </ul>
+      </li>
     </ul>
   </li>
   <li><a href="#Linear">Linear Conversion</a>
@@ -42,19 +46,20 @@ CONTENTS
       <li><a href="#DeviceLimi">DeviceLimit</a></li>
     </ul>
   </li>
-  <li><a href="#NoopFactor">Noop Support</a></li>
-  <li><a href="#Calculatio">Calculation Support</a>
-    <ul>
-      <li><a href="#Performing">Performing Calculations</a></li>
-      <li><a href="#calcArgArr">calcArgArray</a></li>
-      <li><a href="#Calculator">Calculator</a></li>
-      <li><a href="#Calc">Calc</a></li>
-    </ul>
-  </li>
+  <li><a href="#Noop">Noop Support</a></li>
   <li><a href="#CALink">CALink Support</a></li>
   <li><a href="#LinkArray">LinkArray Support</a></li>
   <li><a href="#Link">Link Support</a></li>
   <li><a href="#DelayLink">DelayLink Support</a></li>
+  <li><a href="#Double">Double Calculation Support</a>
+    <ul>
+      <li><a href="#Performing">Performing Calculations</a></li>
+      <li><a href="#calcArgArr">calcArgArray</a></li>
+      <li><a href="#Calculator">Calculator</a></li>
+    </ul>
+  </li>
+  <li><a href="#ArrayIncre">ArrayIncrementCalculatorFactory</a></li>
+  <li><a href="#BooleanArr">BooleanArrayToggleCalculatorFactory</a></li>
 </ul>
 </div>
 <hr />
@@ -67,35 +72,78 @@ database records. It defines the following interfaces:</p>
 <dl>
   <dt>Support</dt>
     <dd>The interfaces and classes that provide the core for support.</dd>
-  <dt>Scan Support</dt>
+  <dt>LinkSupport</dt>
+    <dd>An extension of Support for link fields.</dd>
+  <dt>ScanSupport</dt>
     <dd>An extension of Support for field scan.</dd>
-  <dt>Alarm Support</dt>
-    <dd>An extension of Support for field alarm and for calculation
-    alarms.</dd>
-  <dt>Linear Conversion</dt>
-    <dd>An extension of Support for Linear conversions.</dd>
-  <dt>Noop Support</dt>
-    <dd>Support that does nothing except complete normally.</dd>
-  <dt>Calculation Support</dt>
-    <dd>An extension of Support for field calculation of a calc record or
-      structure.</dd>
-  <dt>CALinkFactory</dt>
-    <dd>Support for links to other records.</dd>
-  <dt>LinkArrayFactory</dt>
-    <dd>Support for an array of links.</dd>
-  <dt>LinkFactory</dt>
-    <dd>Support for a structure that has a single field which is a link</dd>
-  <dt>DelayLinkFactory</dt>
-    <dd>Support that simulates asynchronous support</dd>
+  <dt>AlarmSupport</dt>
+    <dd>An extension of Support for field alarm.</dd>
+  <dt>CalculatorSupport</dt>
+    <dd>An extension of Support for field calculations.</dd>
+  <dt>CalcArgArraySupport</dt>
+    <dd>An extension of Support for the arguments for calculations;</dd>
+  <dt>DeviceLimit</dt>
+    <dd>defines a method implemented by support for analog I/O.</dd>
 </dl>
 
-<p>In addition the following classes are provided:</p>
+<p>The following abstract classes are provided for implementing support:</p>
 <dl>
   <dt>AbstractSupport</dt>
     <dd>A base class that is extended by most support code. It implements all
       of the Support methods.</dd>
   <dt>AbstractLinkSupport</dt>
-    <dd>A base class that extends AbstractSupport to also implement LinkSupport.</dd>
+    <dd>A base class that extends AbstractSupport to also implement
+      LinkSupport.</dd>
+</dl>
+
+<p>The following factories are provided:</p>
+<dl>
+  <dt>ScanFactory</dt>
+    <dd>Complete support for the scan field.</dd>
+  <dt>AlarmFactory</dt>
+    <dd>Complete support for an alarm field.</dd>
+  <dt>BooleanAlarmFactory</dt>
+    <dd>Alarm support for boolean fields.</dd>
+  <dt>ByteAlarmFactory</dt>
+    <dd>Alarm support for byte fields.</dd>
+  <dt>ShortAlarmFactory</dt>
+    <dd>Alarm support for short fields.</dd>
+  <dt>IntAlarmFactory</dt>
+    <dd>Alarm support for int fields.</dd>
+  <dt>LongAlarmFactory</dt>
+    <dd>Alarm support for long fields.</dd>
+  <dt>FloatAlarmFactory</dt>
+    <dd>Alarm support for float fields.</dd>
+  <dt>DoubleAlarmFactory</dt>
+    <dd>Alarm support for double fields.</dd>
+  <dt>DigitalAlarmFactory</dt>
+    <dd>Alarm support for enum fields.</dd>
+  <dt>CALinkFactory</dt>
+    <dd>Support for channel access links.</dd>
+  <dt>LinearConvertInputFactory</dt>
+    <dd>Support for linear conversion of input fields.</dd>
+  <dt>LinearConvertOutputFactory</dt>
+    <dd>Support for linear conversion of output fields.</dd>
+  <dt>ArrayIncrementCalculatorFactory</dt>
+    <dd>Support for testing array fields.</dd>
+  <dt>LinkArrayFactory</dt>
+    <dd>Support for an array of links.</dd>
+  <dt>CalcArgArrayFactory</dt>
+    <dd>Support for an array of arguments for calculation records.</dd>
+  <dt>LinkFactory</dt>
+    <dd>Support for a structure that consists of a single link.</dd>
+  <dt>NoopFactory</dt>
+    <dd>Support for all fields that just acts like it always succeeds
+      successfully.</dd>
+  <dt>DelayLinkFactory</dt>
+    <dd>Support for testing. It just causes an asynchronous delay before
+      completing successfully.</dd>
+  <dt>BooleanArrayToggleCalculatorFactory</dt>
+    <dd>Test support for a boolean array.</dd>
+  <dt>CounterCalculatorFactory</dt>
+    <dd>Test code for a numeric field.</dd>
+  <dt>ArrayIncrementCalculatorFactory</dt>
+    <dd>Test code for numeric array fields.</dd>
 </dl>
 <hr />
 
@@ -262,7 +310,7 @@ methods it needs.</p>
 </dl>
 <hr />
 
-<h2 style="text-align: center" id="Scan">Scan Support</h2>
+<h2 style="text-align: center" id="ScanSuppor">ScanSupport</h2>
 <hr />
 
 <p>Support is provided for the scan field. This support is called by
@@ -332,21 +380,66 @@ with alarms.</p>
     &lt;field name = "message" type = "string" /&gt;
 &lt;/structure&gt;
 
-&lt;structure name = "doubleAlarm"&gt;
+&lt;structure name = "byteAlarmInterval"&gt;
+    &lt;field name = "value" type = "byte" /&gt;
+    &lt;field name = "severity" type = "menu" menuName = "alarmSeverity" /&gt;
+&lt;/structure&gt;
+&lt;structure name = "byteAlarm"&gt;
     &lt;field name = "active" type = "boolean" /&gt;
-    &lt;field name = "highMajor" type = "double" /&gt;
-    &lt;field name = "highMinor" type = "double" /&gt;
-    &lt;field name = "lowMinor" type = "double" /&gt;
-    &lt;field name = "lowMajor" type = "double" /&gt;
-    &lt;field name = "hystersis" type = "double" /&gt;
+    &lt;field name = "interval" type = "array" elementType = "structure" /&gt;
+    &lt;field name = "outOfRange" type = "menu" menuName = "alarmSeverity" /&gt;
 &lt;/structure&gt;
 
+&lt;structure name = "shortAlarmInterval"&gt;
+    &lt;field name = "value" type = "short" /&gt;
+    &lt;field name = "severity" type = "menu" menuName = "alarmSeverity" /&gt;
+&lt;/structure&gt;
+&lt;structure name = "shortAlarm"&gt;
+    &lt;field name = "active" type = "boolean" /&gt;
+    &lt;field name = "interval" type = "array" elementType = "structure" /&gt;
+    &lt;field name = "outOfRange" type = "menu" menuName = "alarmSeverity" /&gt;
+&lt;/structure&gt;
+
+&lt;structure name = "intAlarmInterval"&gt;
+    &lt;field name = "value" type = "int" /&gt;
+    &lt;field name = "severity" type = "menu" menuName = "alarmSeverity" /&gt;
+&lt;/structure&gt;
 &lt;structure name = "intAlarm"&gt;
     &lt;field name = "active" type = "boolean" /&gt;
-    &lt;field name = "highMajor" type = "int" /&gt;
-    &lt;field name = "highMinor" type = "int" /&gt;
-    &lt;field name = "lowMinor" type = "int" /&gt;
-    &lt;field name = "lowMajor" type = "int" /&gt;
+    &lt;field name = "interval" type = "array" elementType = "structure" /&gt;
+    &lt;field name = "outOfRange" type = "menu" menuName = "alarmSeverity" /&gt;
+&lt;/structure&gt;
+
+&lt;structure name = "longAlarmInterval"&gt;
+    &lt;field name = "value" type = "long" /&gt;
+    &lt;field name = "severity" type = "menu" menuName = "alarmSeverity" /&gt;
+&lt;/structure&gt;
+&lt;structure name = "longAlarm"&gt;
+    &lt;field name = "active" type = "boolean" /&gt;
+    &lt;field name = "interval" type = "array" elementType = "structure" /&gt;
+    &lt;field name = "outOfRange" type = "menu" menuName = "alarmSeverity" /&gt;
+&lt;/structure&gt;
+
+&lt;structure name = "floatAlarmInterval"&gt;
+    &lt;field name = "value" type = "float" /&gt;
+    &lt;field name = "severity" type = "menu" menuName = "alarmSeverity" /&gt;
+&lt;/structure&gt;
+&lt;structure name = "floatAlarm"&gt;
+    &lt;field name = "active" type = "boolean" /&gt;
+    &lt;field name = "interval" type = "array" elementType = "structure" /&gt;
+    &lt;field name = "outOfRange" type = "menu" menuName = "alarmSeverity" /&gt;
+    &lt;field name = "hystersis" type = "float" /&gt;
+&lt;/structure&gt;
+
+&lt;structure name = "doubleAlarmInterval"&gt;
+    &lt;field name = "value" type = "double" /&gt;
+    &lt;field name = "severity" type = "menu" menuName = "alarmSeverity" /&gt;
+&lt;/structure&gt;
+&lt;structure name = "doubleAlarm"&gt;
+    &lt;field name = "active" type = "boolean" /&gt;
+    &lt;field name = "interval" type = "array" elementType = "structure" /&gt;
+    &lt;field name = "outOfRange" type = "menu" menuName = "alarmSeverity" /&gt;
+    &lt;field name = "hystersis" type = "double" /&gt;
 &lt;/structure&gt;
 
 &lt;structure name = "booleanAlarm" &gt;
@@ -356,19 +449,55 @@ with alarms.</p>
     &lt;field name = "changeStateAlarm" type = "menu" menuName = "alarmSeverity" /&gt;
 &lt;/structure&gt;
 
+&lt;structure name = "digitalAlarm" &gt;
+    &lt;field name = "active" type = "boolean" /&gt;
+     &lt;!-- each array element must have menuName  alarmSeverity --&gt;
+    &lt;field name = "stateSeverity" type = "array" elementType = "menu" design = "false" /&gt;
+    &lt;field name = "changeStateAlarm" type = "menu" menuName = "alarmSeverity" /&gt;
+&lt;/structure&gt;
+
+&lt;structure name = "digitalState"&gt;
+    &lt;field name = "name" type = "string" /&gt;
+    &lt;field name = "value" type = "int" /&gt;
+    &lt;field name = "severity" type = "menu" menuName = "alarmSeverity" /&gt;
+&lt;/structure&gt;
+
+
 &lt;support name = "alarm"
     factoryName = "org.epics.ioc.support.AlarmFactory"
 /&gt;
+
 &lt;linkSupport name = "booleanAlarm"
     configurationStructureName = "booleanAlarm"
    factoryName = "org.epics.ioc.support.BooleanAlarmFactory" /&gt;
+
+&lt;linkSupport name = "byteAlarm"
+    configurationStructureName = "byteAlarm"
+   factoryName = "org.epics.ioc.support.ByteAlarmFactory" /&gt;
+
+&lt;linkSupport name = "shortAlarm"
+    configurationStructureName = "shortAlarm"
+   factoryName = "org.epics.ioc.support.ShortAlarmFactory" /&gt;
+
 &lt;linkSupport name = "intAlarm"
     configurationStructureName = "intAlarm"
    factoryName = "org.epics.ioc.support.IntAlarmFactory" /&gt;
 
+&lt;linkSupport name = "longAlarm"
+    configurationStructureName = "longAlarm"
+   factoryName = "org.epics.ioc.support.LongAlarmFactory" /&gt;
+
+&lt;linkSupport name = "floatAlarm"
+    configurationStructureName = "floatAlarm"
+   factoryName = "org.epics.ioc.support.FloatAlarmFactory" /&gt;
+
 &lt;linkSupport name = "doubleAlarm"
     configurationStructureName = "doubleAlarm"
-   factoryName = "org.epics.ioc.support.DoubleAlarmFactory" /&gt;</pre>
+   factoryName = "org.epics.ioc.support.DoubleAlarmFactory" /&gt;
+
+&lt;linkSupport name = "digitalAlarm"
+    configurationStructureName = "digitalAlarm"
+   factoryName = "org.epics.ioc.support.DigitalAlarmFactory" /&gt;</pre>
 
 <p>The field alarm is defined in common.xml and this is in every record. the
 definition is:</p>
@@ -377,7 +506,7 @@ definition is:</p>
 
 <p>Records or structures that support alarm processing for double fields
 contain the definition:</p>
-<pre>&lt;field name = "doubleAlarm" type = "link" supportName = "doubleAlarm" /&gt;</pre>
+<pre>&lt;field name = "valueAlarm" type = "link" supportName = "doubleAlarm" /&gt;</pre>
 
 <h3 id="Alarm1">Alarm Support</h3>
 
@@ -409,12 +538,12 @@ a severity at least as great as any of the lower level alarms.</p>
   <dt style="font-family: courier;">Support</dt>
     <dd>As mentioned above only RecordProcess and AlarmSupport call the
       Support methods implemented by AlarmSupport.</dd>
-  <dt style="font-family: courier;">beginProces</dt>
+  <dt style="font-family: courier;">beginProcess</dt>
     <dd>This also is only called by RecordProcess or AlarmSupport. It is
       called when a record begins processing. It saves the current message
       and severity and initialize the new severity to no alarm and the new
       message to null.</dd>
-  <dt style="font-family: courier;">endProces</dt>
+  <dt style="font-family: courier;">endProcess</dt>
     <dd>This also is only called by RecordProcess or AlarmSupport. It is
       called when a record finishes processing. If the new alarm severity
       and/or message are different than what they were when the record
@@ -444,7 +573,12 @@ a severity at least as great as any of the lower level alarms.</p>
       retrurn null if none is found.</dd>
 </dl>
 
-<h3 id="BooleanAla">BooleanAlarmFactory</h3>
+<h3 id="Value">Value Alarms</h3>
+
+<p>Support is provided for alarms for the following types of fields: boolean,
+numeric, and digital.</p>
+
+<h4 id="Boolean">Boolean Alarms</h4>
 <pre>    public class BooleanAlarmFactory {
         public static Support create(DBLink dbLink);
     }</pre>
@@ -467,59 +601,96 @@ fields:</p>
       changes.</dd>
 </dl>
 
-<h3 id="DoubleAlar">DoubleAlarmFactory</h3>
-<pre>    public class DoubleAlarmFactory {
+<h4 id="Numeric">Numeric Alarms</h4>
+<pre>    public class ByteAlarmFactory {
+        public static Support create(DBLink dbLink);
+    }
+    public class ShortAlarmFactory {
+        public static Support create(DBLink dbLink);
+    }
+    public class IntAlarmFactory {
+        public static Support create(DBLink dbLink);
+    }
+    public class LongAlarmFactory {
+        public static Support create(DBLink dbLink);
+    }
+    public class FloatAlarmFactory {
+        public static Support create(DBLink dbLink);
+    }
+    public class DoubleAlarmFactory {
         public static Support create(DBLink dbLink);
     }</pre>
 
-<p>This provides support for reporting alarms for double fields. The
-configurationStructure must be a structure doubleAlarm, which has the
+<p>The above factories provide alarm support for the associated type of
+field, e.g. FloatAlarmFactory provides alarm support for a field of type
+float. The support for each type except that float and double also support
+hystersis, which is described below. Each has two associated xml structure
+definitions. For example the definitions for double are:</p>
+<pre>&lt;structure name = "doubleAlarmInterval"&gt;
+    &lt;field name = "value" type = "double" /&gt;
+    &lt;field name = "severity" type = "menu" menuName = "alarmSeverity" /&gt;
+&lt;/structure&gt;
+&lt;structure name = "doubleAlarm"&gt;
+    &lt;field name = "active" type = "boolean" /&gt;
+    &lt;field name = "interval" type = "array" elementType = "structure" /&gt;
+    &lt;field name = "outOfRange" type = "menu" menuName = "alarmSeverity" /&gt;
+    &lt;field name = "hystersis" type = "double" /&gt;
+&lt;/structure&gt;</pre>
+
+<p>The first structure defines an interval for alarm checking. It has the
 fields:</p>
 <dl>
-  <dt style="font-family: courier;">active</dt>
-    <dd>A boolean field. If (false,true) then alarm conditions (are not,are)
-      checked.</dd>
-  <dt style="font-family: courier;">highMajor</dt>
-    <dd>A double. If the value field is greater than or equal to this value
-      the alarm severity will be major.</dd>
-  <dt style="font-family: courier;">highMinor</dt>
-    <dd>A double. If the value field is greater than or equal to this value
-      the alarm severity will be minor.</dd>
-  <dt style="font-family: courier;">lowMinor</dt>
-    <dd>A double. If the value field is less than or equal to this value the
-      alarm severity will be minor.</dd>
-  <dt style="font-family: courier;">lowMajor</dt>
-    <dd>A double. If the value field is less than or equal to this value the
-      alarm severity will be major.</dd>
-  <dt style="font-family: courier;">hystersis</dt>
-    <dd>If value goes into alarm this is the amount it must come out of alarm
-      before the alarm severity is modified. This prevents alarm
-    "chatter".</dd>
+  <dt style="font-family: courier;">value</dt>
+    <dd>The upper bound for a value.</dd>
+  <dt style="font-family: courier;">severity</dt>
+    <dd>The alarm severity for a value that falls into this interval.</dd>
 </dl>
 
-<h3 id="IntAlarmFa">IntAlarmFactory</h3>
-<pre>    public class IntAlarmFactory {
-        public static Support create(DBLink dbLink);
-    }</pre>
-
-<p>This provides support for reporting alarms for int fields. The
-configurationStructure must be a structure intAlarm, which has the fields:</p>
+<p>The second structure has the following fields:</p>
 <dl>
   <dt style="font-family: courier;">active</dt>
     <dd>A boolean field. If (false,true) then alarm conditions (are not,are)
       checked.</dd>
-  <dt style="font-family: courier;">highMajor</dt>
-    <dd>A int. If the value field is greater than or equal to this value the
-      alarm severity will be major.</dd>
-  <dt style="font-family: courier;">highMinor</dt>
-    <dd>A int. If the value field is greater than or equal to this value the
-      alarm severity will be minor.</dd>
-  <dt style="font-family: courier;">lowMinor</dt>
-    <dd>A int. If the value field is less than or equal to this value the
-      alarm severity will be minor.</dd>
-  <dt style="font-family: courier;">lowMajor</dt>
-    <dd>A int. If the value field is less than or equal to this value the
-      alarm severity will be major.</dd>
+  <dt style="font-family: courier;">interval</dt>
+    <dd>A array of intervals. When the process method of value alarm support
+      is called it looks for the interval for the current value. It starts
+      with the first interval and continues until it finds an interval such
+      that value&lt;=interval.value. This determines the alarm severity.</dd>
+  <dt style="font-family: courier;">outOfRange</dt>
+    <dd>The alarm severity if no interval is found.</dd>
+  <dt style="font-family: courier;">hystersis</dt>
+    <dd>Only present for float and double. If value goes into alarm this is
+      the amount it must come out of alarm before the alarm severity is
+      modified. This prevents alarm "chatter".</dd>
+</dl>
+
+<h4 id="Digital">Digital Alarms</h4>
+<pre>    public class DigitalAlarmFactory {
+        public static Support create(DBLink dbLink);
+    }</pre>
+
+<p>The above factory provides support for an enum field. It has a associated
+xml structure:</p>
+<pre>&lt;structure name = "digitalAlarm" &gt;
+    &lt;field name = "active" type = "boolean" /&gt;
+     &lt;!-- each array element must have menuName  alarmSeverity --&gt;
+    &lt;field name = "stateSeverity" type = "array" elementType = "menu" design = "false" /&gt;
+    &lt;field name = "changeStateAlarm" type = "menu" menuName = "alarmSeverity" /&gt;
+&lt;/structure&gt;</pre>
+
+<p>The structure has the following fields:</p>
+<dl>
+  <dt style="font-family: courier;">active</dt>
+    <dd>A boolean field. If (false,true) then alarm conditions (are not,are)
+      checked.</dd>
+  <dt style="font-family: courier;">stateSeverity</dt>
+    <dd>An array of stateSeverity alarmSeverity menu definitions. When the
+      process method is called the value field is the index for this array.
+      The corresponding alarmSeverity menu is found and it determines the
+      alarm severity.</dd>
+  <dt style="font-family: courier;">changeStateAlarm</dt>
+    <dd>An alarmSeverity menu. This specifies the severity if the value field
+      changes.</dd>
 </dl>
 <hr />
 
@@ -637,11 +808,11 @@ conversion for output is a structure containing the following fields:</p>
         void get(DBField low, DBField high);
     }</pre>
 
-<p>This is a convience class for accessing a structure that has two fields:
+<p>This is a convenience class for accessing a structure that has two fields:
 "low" and "high".</p>
 <hr />
 
-<h2 style="text-align: center" id="NoopFactor">Noop Support</h2>
+<h2 style="text-align: center" id="Noop">Noop Support</h2>
 <hr />
 <pre>    public class NoopFactory {
         public static Support create(DBStructure dbStructure);
@@ -654,191 +825,6 @@ to provide support for any field. The support acts as though it is
 synchronous. All Support or LinkSupport methods are implemented by just
 extending AbstractSupport or AbstractLinkSupport without overriding any
 methods.</p>
-<hr />
-
-<h2 style="text-align: center" id="Calculatio">Calculation Support</h2>
-<hr />
-
-<p>This is support for use with the calc record or structure. File
-calcCommon.xml defines the fields:</p>
-<pre>&lt;DBDefinition&gt;
-    &lt;field name = "value" type = "double" &gt;
-        &lt;property name = "alarm" associatedField = "alarm" /&gt;
-        &lt;property name = "units" associatedField = "units" /&gt;
-        &lt;property name = "displayLimit" associatedField = "displayLimit" /&gt;
-        &lt;property name = "timeStamp" associatedField = "/timeStamp" /&gt;
-    &lt;/field&gt;
-    &lt;field name = "calcArgArray" type = "array"
-         elementType = "structure" supportName = "calcArgArray" /&gt;
-    &lt;field name = "calculator" type = "link" /&gt;
-    &lt;field name = "doubleAlarm" type = "link" supportName = "doubleAlarm" /&gt;
-    &lt;field name = "linkArray" type = "array"
-         elementType = "structure" supportName = "linkArray" /&gt;
-    &lt;field name = "units" type = "string" /&gt;
-    &lt;field name = "displayLimit"
-         type = "structure" structureName = "doubleLimit" /&gt;
-&lt;/DBDefinition&gt;</pre>
-
-<p>Field calcRecord.xml defines:</p>
-<pre>&lt;structure name = "calcArg" &gt;
-    &lt;field name = "value" type = "double" /&gt;
-    &lt;field name = "name" type = "string" /&gt;
-    &lt;field name = "input" type = "link" /&gt;
-&lt;/structure&gt;
-
-&lt;structure name = "calc" supportName = "calcRecord" &gt;
-    &lt;include href = "calcCommon.xml" /&gt;
-&lt;/structure&gt;
-
-&lt;recordType name = "calc" supportName = "calcRecord" &gt;
-    &lt;include href = "common.xml" /&gt;
-    &lt;include href = "calcCommon.xml" /&gt;
-&lt;/recordType&gt;
-
-&lt;support name = "calcRecord"
-   factoryName = "org.epics.ioc.recordSupport.CalcFactory" /&gt;</pre>
-
-<p>The following support is defined in support.xml</p>
-<pre>&lt;support name = "calcArgArray"
-   factoryName = "org.epics.ioc.support.CalcArgArrayFactory" /&gt;</pre>
-
-<h3 id="Performing">Performing Calculations</h3>
-
-<p>A calculation is performed by a calculation link support. The following is
-done. When the calcRecord support is called it calls the calcArgArray support
-and when it completes the calculation link support. For each element if the
-calcArgArray, the calcArgArray support calls the input link support (if it is
-specified) to get the calcArg value. The calculation support uses the
-calcArgArray values to compute the calculated value. At present generic
-calculation support is not implemented. It is envisioned that it will allow
-the user to enter expressions like "voltage*current". The calcArgArray would
-have two elements with calcArg.name set to "voltage" and "current".</p>
-
-<h3 id="calcArgArr">calcArgArray</h3>
-
-<p>The support for a calcArgArray implements support for an array of calcArg
-structures, which has the fields:</p>
-<dl>
-  <dt style="font-family: courier;">value</dt>
-    <dd>A double value for this argument.</dd>
-  <dt style="font-family: courier;">name</dt>
-    <dd>A string which provides a name for the argument.</dd>
-  <dt style="font-family: courier;">input</dt>
-    <dd>A link for obtaining the value for this argument. Note that if no
-      support is specified then no input is read and the value field can just
-      be set by the user.</dd>
-</dl>
-
-<p>calcArgArray uses the following definitions:</p>
-<pre>    public interface CalcArgArraySupport extends Support{
-        PVDouble getPVDouble(String argName);
-    }
-
-    public class CalcArgArrayFactory {
-        public static Support create(DBField dbField);
-    }</pre>
-
-<p>CalcArgArraySupport extends Support to provide the method:</p>
-<dl>
-  <dt style="font-family: courier;">getPVDouble</dt>
-    <dd>This is a convience metod for calculator support. It looks in the
-      calcArgArray for a field with the specified name and returns it's
-      interface.</dd>
-</dl>
-
-<h3 id="Calculator">Calculator</h3>
-
-<p>Support for a calculation field, which is a link, must implement:</p>
-<pre>    public interface CalculatorSupport extends LinkSupport {
-        void setCalcArgArraySupport(CalcArgArraySupport calcArgArraySupport);
-    }</pre>
-
-<p>CalculatorSupport extends LinkSupport to add the method:</p>
-<dl>
-  <dt style="font-family: courier;">setCalcArgArraySupport</dt>
-    <dd>This is called by calcRecord support.</dd>
-</dl>
-
-<p>An example calculation support is provided as part of javaIOC. It is:</p>
-<pre>public class CounterCalculatorFactory {
-
-    public static LinkSupport create(DBLink dbLink) {
-        return new CounterCalculatorImpl(dbLink);
-    }
-
-    private static String supportName = "counterCalculator";
-
-    private static class CounterCalculatorImpl extends AbstractLinkSupport
-    implements CalculatorSupport
-    {
-        private PVLink pvLink;
-        private CalcArgArraySupport calcArgArraySupport = null;
-        private DBField valueDBField;
-        private PVDouble valuePVField= null;;
-        private PVDouble minPVField = null;
-        private PVDouble maxPVField = null;
-        private PVDouble incPVField = null;
-
-        private CounterCalculatorImpl(DBLink dbLink) {
-            super(supportName,dbLink);
-            pvLink = dbLink.getPVLink();
-        }
-
-        public void initialize() {
-            if(!super.checkSupportState(SupportState.readyForInitialize,supportName)) return;
-            minPVField = calcArgArraySupport.getPVDouble("min");
-            if(minPVField==null) {
-                pvLink.message("min not found", MessageType.error);
-                return;
-            }
-            maxPVField = calcArgArraySupport.getPVDouble("max");
-            if(maxPVField==null) {
-                pvLink.message("max not found", MessageType.error);
-                return;
-            }
-            incPVField = calcArgArraySupport.getPVDouble("inc");
-            if(incPVField==null) {
-                pvLink.message("inc not found", MessageType.error);
-                return;
-            }
-            setSupportState(SupportState.readyForStart);
-        }
-
-        public void process(SupportProcessRequester supportProcessRequester) {
-            double value = valuePVField.get();
-            double min = minPVField.get();
-            double max = maxPVField.get();
-            double inc = incPVField.get();
-            value += inc;
-            if(inc&gt;0) {
-                if(value&gt;max) value = min;
-                if(value&lt;min) value = min;
-            } else {
-                if(value&lt;min) value = max;
-                if(value&gt;max) value = max;
-            }
-            valuePVField.put(value);
-            valueDBField.postPut();
-            supportProcessRequester.supportProcessDone(RequestResult.success);
-        }
-
-        public void setField(DBField dbField) {
-            valueDBField = dbField;
-            valuePVField = (PVDouble)dbField.getPVField();
-        }
-
-        public void setCalcArgArraySupport(CalcArgArraySupport calcArgArraySupport) {
-            this.calcArgArraySupport = calcArgArraySupport;
-        }
-    }
-}</pre>
-
-<h3 id="Calc">Calc</h3>
-<pre>    public class CalcFactory {
-        public static Support create(DBStructure dbStructure);
-    }</pre>
-
-<p>The calcRecord support is implemented in org.epics.ioc.recordSupport:</p>
 <hr />
 
 <h2 style="text-align: center" id="CALink">CALink Support</h2>
@@ -953,4 +939,199 @@ of min.</p>
         public static LinkSupport create(DBLink dbLink);
     }</pre>
 </body>
+<hr />
+
+<h2 style="text-align: center" id="Double">Double Calculation Support</h2>
+<hr />
+
+<p>This is support for use with the calcDouble record or structure. File
+calcDoubleCommon.xml defines the fields:</p>
+<pre>&lt;DBDefinition&gt;
+    &lt;field name = "value" type = "double" &gt;
+        &lt;property name = "alarm" associatedField = "alarm" /&gt;
+        &lt;property name = "units" associatedField = "units" /&gt;
+        &lt;property name = "displayLimit" associatedField = "displayLimit" /&gt;
+        &lt;property name = "timeStamp" associatedField = "/timeStamp" /&gt;
+    &lt;/field&gt;
+    &lt;field name = "calcArgArray" type = "array"
+         elementType = "structure" supportName = "calcArgArray" /&gt;
+    &lt;field name = "calculator" type = "link" /&gt;
+    &lt;field name = "doubleAlarm" type = "link" supportName = "doubleAlarm" /&gt;
+    &lt;field name = "linkArray" type = "array"
+         elementType = "structure" supportName = "linkArray" /&gt;
+    &lt;field name = "units" type = "string" /&gt;
+    &lt;field name = "displayLimit"
+         type = "structure" structureName = "doubleLimit" /&gt;
+&lt;/DBDefinition&gt;</pre>
+
+<p>Field calcDoubleRecord.xml defines:</p>
+<pre>&lt;structure name = "calcArg" &gt;
+    &lt;field name = "value" type = "double" /&gt;
+    &lt;field name = "name" type = "string" /&gt;
+    &lt;field name = "input" type = "link" /&gt;
+&lt;/structure&gt;
+
+&lt;structure name = "calcDouble" supportName = "calcDoubleRecord" &gt;
+    &lt;include href = "calcDoubleCommon.xml" /&gt;
+&lt;/structure&gt;
+
+&lt;recordType name = "calcDouble" supportName = "calcDoubleRecord" &gt;
+    &lt;include href = "common.xml" /&gt;
+    &lt;include href = "calcDoubleCommon.xml" /&gt;
+&lt;/recordType&gt;
+
+&lt;support name = "calcDoubleRecord"
+   factoryName = "org.epics.ioc.recordSupport.CalcDoubleFactory" /&gt;</pre>
+
+<p>The following support is defined in support.xml</p>
+<pre>&lt;support name = "calcArgArray"
+   factoryName = "org.epics.ioc.support.CalcArgArrayFactory" /&gt;</pre>
+
+<h3 id="Performing">Performing Calculations</h3>
+
+<p>A calculation is performed by a calculation link support. The following is
+done. When the calcRecord support is called it calls the calcArgArray support
+and when it completes the calculation link support. For each element if the
+calcArgArray, the calcArgArray support calls the input link support (if it is
+specified) to get the calcArg value. The calculation support uses the
+calcArgArray values to compute the calculated value. At present generic
+calculation support is not implemented. It is envisioned that it will allow
+the user to enter expressions like "voltage*current". The calcArgArray would
+have two elements with calcArg.name set to "voltage" and "current".</p>
+
+<h3 id="calcArgArr">calcArgArray</h3>
+
+<p>The support for a calcArgArray implements support for an array of calcArg
+structures, which has the fields:</p>
+<dl>
+  <dt style="font-family: courier;">value</dt>
+    <dd>A double value for this argument.</dd>
+  <dt style="font-family: courier;">name</dt>
+    <dd>A string which provides a name for the argument.</dd>
+  <dt style="font-family: courier;">input</dt>
+    <dd>A link for obtaining the value for this argument. Note that if no
+      support is specified then no input is read and the value field can just
+      be set by the user.</dd>
+</dl>
+
+<p>calcArgArray uses the following definitions:</p>
+<pre>    public interface CalcArgArraySupport extends Support{
+        PVDouble getPVDouble(String argName);
+    }
+
+    public class CalcArgArrayFactory {
+        public static Support create(DBField dbField);
+    }</pre>
+
+<p>CalcArgArraySupport extends Support to provide the method:</p>
+<dl>
+  <dt style="font-family: courier;">getPVDouble</dt>
+    <dd>This is a convience metod for calculator support. It looks in the
+      calcArgArray for a field with the specified name and returns it's
+      interface.</dd>
+</dl>
+
+<h3 id="Calculator">Calculator</h3>
+
+<p>Support for a calculation field, which is a link, must implement:</p>
+<pre>    public interface CalculatorSupport extends LinkSupport {
+        void setCalcArgArraySupport(CalcArgArraySupport calcArgArraySupport);
+    }</pre>
+
+<p>CalculatorSupport extends LinkSupport to add the method:</p>
+<dl>
+  <dt style="font-family: courier;">setCalcArgArraySupport</dt>
+    <dd>This is called by calcDoubleRecord support.</dd>
+</dl>
+
+<p>An example calculation support is provided as part of javaIOC. It is:</p>
+<pre>public class CounterCalculatorFactory {
+
+    public static LinkSupport create(DBLink dbLink) {
+        return new CounterCalculatorImpl(dbLink);
+    }
+
+    private static String supportName = "counterCalculator";
+
+    private static class CounterCalculatorImpl extends AbstractLinkSupport
+    implements CalculatorSupport
+    {
+        private PVLink pvLink;
+        private CalcArgArraySupport calcArgArraySupport = null;
+        private DBField valueDBField;
+        private PVDouble valuePVField= null;;
+        private PVDouble minPVField = null;
+        private PVDouble maxPVField = null;
+        private PVDouble incPVField = null;
+
+        private CounterCalculatorImpl(DBLink dbLink) {
+            super(supportName,dbLink);
+            pvLink = dbLink.getPVLink();
+        }
+
+        public void initialize() {
+            if(!super.checkSupportState(SupportState.readyForInitialize,supportName)) return;
+            minPVField = calcArgArraySupport.getPVDouble("min");
+            if(minPVField==null) {
+                pvLink.message("min not found", MessageType.error);
+                return;
+            }
+            maxPVField = calcArgArraySupport.getPVDouble("max");
+            if(maxPVField==null) {
+                pvLink.message("max not found", MessageType.error);
+                return;
+            }
+            incPVField = calcArgArraySupport.getPVDouble("inc");
+            if(incPVField==null) {
+                pvLink.message("inc not found", MessageType.error);
+                return;
+            }
+            setSupportState(SupportState.readyForStart);
+        }
+
+        public void process(SupportProcessRequester supportProcessRequester) {
+            double value = valuePVField.get();
+            double min = minPVField.get();
+            double max = maxPVField.get();
+            double inc = incPVField.get();
+            value += inc;
+            if(inc&gt;0) {
+                if(value&gt;max) value = min;
+                if(value&lt;min) value = min;
+            } else {
+                if(value&lt;min) value = max;
+                if(value&gt;max) value = max;
+            }
+            valuePVField.put(value);
+            valueDBField.postPut();
+            supportProcessRequester.supportProcessDone(RequestResult.success);
+        }
+
+        public void setField(DBField dbField) {
+            valueDBField = dbField;
+            valuePVField = (PVDouble)dbField.getPVField();
+        }
+
+        public void setCalcArgArraySupport(CalcArgArraySupport calcArgArraySupport) {
+            this.calcArgArraySupport = calcArgArraySupport;
+        }
+    }
+}</pre>
+<hr />
+
+<h2 style="text-align: center"
+id="ArrayIncre">ArrayIncrementCalculatorFactory</h2>
+<hr />
+
+<p>This is support for testing. It supports numeric array fields. Each time
+process is called it just incrememnts each element of the array.</p>
+<hr />
+
+<h2 style="text-align: center"
+id="BooleanArr">BooleanArrayToggleCalculatorFactory</h2>
+<hr />
+
+<p>This is support for testing. It supports boolean array fields. Each time
+process is called it just toggles each element of the array, if the value us
+false it becomes true and if true becomes false.</p>
 </html>

@@ -11,15 +11,15 @@ import org.epics.ioc.pv.*;
 import org.epics.ioc.util.*;
 
 /**
- * Support for an intAlarm link.
+ * Support for an byteAlarm link.
  * @author mrk
  *
  */
-public class IntAlarmFactory {
+public class ByteAlarmFactory {
     /**
-     * Create support for an intAlarm link.
+     * Create support for an byteAlarm link.
      * @param dbLink The link.
-     * @return An interface to the support or null if the supportName was not "intArray".
+     * @return An interface to the support or null if the supportName was not "byteArray".
      */
     public static Support create(DBLink dbLink) {
         PVLink pvLink = dbLink.getPVLink();
@@ -28,12 +28,12 @@ public class IntAlarmFactory {
             pvLink.message("does not have support " + supportName,MessageType.error);
             return null;
         }
-        return new IntAlarmImpl(dbLink);
+        return new ByteAlarmImpl(dbLink);
     }
     
-    private static String supportName = "intAlarm";
+    private static String supportName = "byteAlarm";
     
-    private static class IntAlarmImpl extends AbstractLinkSupport
+    private static class ByteAlarmImpl extends AbstractLinkSupport
     {
         private DBLink dbLink;
         private PVLink pvLink;
@@ -46,12 +46,12 @@ public class IntAlarmFactory {
         private PVMenu outOfRangePVMenu;
         private PVBoolean pvActive;
         
-        private PVInt[] pvAlarmIntervalValue = null;
+        private PVByte[] pvAlarmIntervalValue = null;
         private PVMenu[] pvAlarmIntervalSeverity = null;
         
-        private PVInt pvValue;
+        private PVByte pvValue;
        
-        private IntAlarmImpl(DBLink dbLink) {
+        private ByteAlarmImpl(DBLink dbLink) {
             super(supportName,dbLink);
             this.dbLink = dbLink;
             pvLink = dbLink.getPVLink();
@@ -64,11 +64,11 @@ public class IntAlarmFactory {
             SupportState supportState = SupportState.readyForStart;
             noop = false;
             if(pvValue==null) {
-                super.message("setField was not called with a int field", MessageType.error);
+                super.message("setField was not called with a byte field", MessageType.error);
                 noop = true;
                 return;
             }
-            PVStructure configStructure = super.getConfigStructure("intAlarm", false);
+            PVStructure configStructure = super.getConfigStructure("byteAlarm", false);
             if(configStructure==null) {
                 noop = true;
                 setSupportState(supportState);
@@ -105,7 +105,7 @@ public class IntAlarmFactory {
                 super.message("invalid interval", MessageType.error);
                 return;
             }
-            pvAlarmIntervalValue = new PVInt[size];
+            pvAlarmIntervalValue = new PVByte[size];
             pvAlarmIntervalSeverity = new PVMenu[size];
             int num = intervalPVArray.get(0, size, structureArrayData);
             if(num!=size) {
@@ -128,11 +128,11 @@ public class IntAlarmFactory {
                     return;
                 }
                 Field field = fields[index];
-                if(field.getType()!=Type.pvInt) {
-                    super.message("invalid interval value field is not int", MessageType.error);
+                if(field.getType()!=Type.pvByte) {
+                    super.message("invalid interval value field is not byte", MessageType.error);
                     return;
                 }
-                pvAlarmIntervalValue[i] = (PVInt)pvFields[index];
+                pvAlarmIntervalValue[i] = (PVByte)pvFields[index];
                 index = structure.getFieldIndex("severity");
                 if(index<0) {
                     super.message("invalid interval no severity field", MessageType.error);
@@ -183,19 +183,19 @@ public class IntAlarmFactory {
          */
         public void setField(DBField dbField) {
             PVField pvField = dbField.getPVField();
-            if(pvField.getField().getType()!=Type.pvInt) {
-                super.message("setField: field type is not int", MessageType.error);
+            if(pvField.getField().getType()!=Type.pvByte) {
+                super.message("setField: field type is not byte", MessageType.error);
                 return;
             }
-            pvValue = (PVInt)pvField;
+            pvValue = (PVByte)pvField;
         }
 
         private void checkAlarm() {
             boolean active = pvActive.get();
             if(!active) return;
-            int  val = pvValue.get();
+            byte  val = pvValue.get();
             int len = pvAlarmIntervalValue.length;
-            int intervalValue = 0;
+            byte intervalValue = 0;
             for(int i=0; i<len; i++) {
                 intervalValue = pvAlarmIntervalValue[i].get();
                 if(val<=intervalValue) {

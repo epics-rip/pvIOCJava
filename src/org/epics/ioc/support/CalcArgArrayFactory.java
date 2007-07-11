@@ -67,14 +67,14 @@ public class CalcArgArrayFactory {
             calcArgArrayDBField = dbNonScalarArray; 
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.recordSupport.CalcArgArraySupport#getPVDouble(java.lang.String)
+         * @see org.epics.ioc.support.CalcArgArraySupport#getPVField(java.lang.String)
          */
-        public PVDouble getPVDouble(String argName) {
+        public PVField getPVField(String argName) {
             for(int i=0; i<nameDBFields.length; i++) {
                 PVString pvString = (PVString)nameDBFields[i].getPVField();
                 String name = pvString.get();
                 if(name.equals(argName)) {
-                    return (PVDouble)valueDBFields[i].getPVField();
+                    return valueDBFields[i].getPVField();
                 }
             }
             return null;

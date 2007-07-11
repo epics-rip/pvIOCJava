@@ -349,7 +349,7 @@ public class ScanFactory {
          * @see org.epics.ioc.pv.PVDouble#put(double)
          */
         public void put(double value) {
-            if(getField().isMutable()) {
+            if(super.isMutable()) {
                 double oldValue = this.value;
                 if(oldValue!=value) scanImpl.stopScanner();
                 this.value = value;
@@ -397,7 +397,7 @@ public class ScanFactory {
          * @see org.epics.ioc.pv.PVString#put(java.lang.String)
          */
         public void put(String value) {
-            if(getField().isMutable()) {
+            if(super.isMutable()) {
                 String oldValue = this.value;
                 boolean modified = false;
                 if(oldValue!=null) {
@@ -484,7 +484,7 @@ public class ScanFactory {
          * @see org.epics.ioc.pv.PVBoolean#put(boolean)
          */
         public void put(boolean value) {
-            if(getField().isMutable()) {
+            if(super.isMutable()) {
                 if(isProcessSelf) {
                     recordProcess.releaseRecordProcessRequester(this);
                     isProcessSelf = false;
