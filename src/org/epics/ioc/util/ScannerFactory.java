@@ -39,7 +39,7 @@ public class ScannerFactory {
     }
      
     private static String lineBreak = System.getProperty("line.separator");
-    private static final int maxNumberConsecutiveActive = 10;
+    private static final int maxNumberConsecutiveActive = 1;
 
     private static class RecordExecutor implements RecordProcessRequester {
         private String name;
