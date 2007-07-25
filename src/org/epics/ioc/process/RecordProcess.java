@@ -78,6 +78,10 @@ public interface RecordProcess {
      */
     void uninitialize();
     /**
+     * All support in the database being loaded has started.
+     */
+    void allSupportStarted();
+    /**
      * Attempt to become the record processor, i.e. the code that can call process and preProcess.
      * @param recordProcessRequester The interface implemented by the record processor.
      * @return (false,true) if the caller (is not, is) has become the record processor.

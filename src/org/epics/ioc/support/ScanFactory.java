@@ -48,10 +48,9 @@ public class ScanFactory {
     }
     
     private static class ScanImpl extends AbstractSupport
-    implements ScanSupport, IOCDBMergeListener
+    implements ScanSupport
     {
         private DBStructure dbScan;
-        private boolean isMerged = false;
         private DBRecord dbRecord = null;
         private ScanField scanField;
         private PVProcessSelf pvProcessSelf;
@@ -61,7 +60,6 @@ public class ScanFactory {
             super(supportName,dbScan);
             this.dbScan = dbScan;
             dbRecord = dbScan.getDBRecord();
-            dbRecord.getIOCDB().addIOCDBMergeListener(this);
 
         }       
         /* (non-Javadoc)
@@ -191,21 +189,25 @@ public class ScanFactory {
          * @see org.epics.ioc.process.AbstractSupport#start()
          */
         public void start() {
-            if(isMerged) {
-                isActive = true;
-                startScanner();
-            }
             setSupportState(SupportState.ready);
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.process.AbstractSupport#stop()
          */
         public void stop() {
-            if(isMerged) {
+            if(isActive) {
                 stopScanner();
                 isActive = false;
             }
             setSupportState(SupportState.readyForStart);
+        }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.support.AbstractSupport#allSupportStarted()
+         */
+        @Override
+        public void allSupportStarted() {
+            isActive = true;
+            startScanner();
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.process.AbstractSupport#process(org.epics.ioc.process.RecordProcessRequester)
@@ -245,18 +247,6 @@ public class ScanFactory {
          */
         public void processSelfSetInactive(RecordProcessRequester recordProcessRequester) {
             pvProcessSelf.setInactive(recordProcessRequester);
-        }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.dbAccess.IOCDBMergeListener#merged()
-         */
-        public void merged() {
-            dbRecord.lock();
-            try {
-                if(super.getSupportState()==SupportState.ready) startScanner();
-                isMerged = true;
-            } finally {
-                dbRecord.unlock();
-            }
         }
         
         private void startScanner() {

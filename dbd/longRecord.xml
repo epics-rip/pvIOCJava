@@ -1,0 +1,13 @@
+<?xml version="1.0" ?>
+<DBDefinition>
+
+<structure name = "long" supportName = "generic" >
+    <include href = "longCommon.xml" />
+</structure>
+
+<recordType name = "long" supportName = "generic" >
+    <include href = "common.xml" />
+    <include href = "longCommon.xml" />
+</recordType>
+
+</DBDefinition>

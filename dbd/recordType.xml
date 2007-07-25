@@ -2,17 +2,31 @@
 <DBDefinition>
 <include addPath = "dbd" />
 <include href = "booleanRecord.xml" />
-<include href = "calcRecord.xml" />
+<include href = "calcDoubleRecord.xml" />
+<include href = "calcDoubleArrayRecord.xml" />
+<include href = "calcBooleanArrayRecord.xml" />
+<include href = "byteRecord.xml" />
+<include href = "shortRecord.xml" />
 <include href = "intRecord.xml" />
+<include href = "longRecord.xml" />
+<include href = "floatRecord.xml" />
+<include href = "doubleRecord.xml" />
 <include href = "digitalRecord.xml" />
 <include href = "eventRecord.xml" />
-<include href = "doubleRecord.xml" />
 <include href = "aiDoubleRecord.xml" />
 <include href = "aoDoubleRecord.xml" />
-<include href = "incrementalDoubleRecord.xml" />
+<include href = "aoIncrementalDoubleRecord.xml" />
 <include href = "stringRecord.xml" />
-<!--
+<include href = "booleanArrayRecord.xml" />
+<include href = "byteArrayRecord.xml" />
+<include href = "shortArrayRecord.xml" />
+<include href = "intArrayRecord.xml" />
+<include href = "longArrayRecord.xml" />
+<include href = "floatArrayRecord.xml" />
+<include href = "doubleArrayRecord.xml" />
+<include href = "stringArrayRecord.xml" />
 <include href = "powerSupplyRecord.xml" />
+<!--
 -->
 
 </DBDefinition>

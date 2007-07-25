@@ -1,0 +1,52 @@
+<?xml version="1.0" ?>
+<IOCDatabase>
+<record name = "booleanArrayToggle" type = "calcBooleanArray">
+    <value capacity = "3">
+        <value>false true false</value>
+    </value>
+    <calculator supportName = "booleanArrayToggleCalculator" />
+    <linkArray>
+        <value structureName = "linkArrayElement">
+            <wait>true</wait>
+            <link  supportName = "processLink" >
+                <configure structureName = "processLink">
+                    <pvname>booleanArray1FromToggle</pvname>
+                </configure>
+            </link>
+        </value>
+        <value structureName = "linkArrayElement">
+            <wait>false</wait>
+            <link  supportName = "outputLink" >
+                <configure structureName = "outputLink">
+                    <pvname>booleanArray2FromToggle</pvname>
+                    <process>true</process>
+                </configure>
+            </link>
+        </value>
+    </linkArray>
+    <scan>
+        <scan>periodic</scan>
+        <rate>1.0</rate>
+    </scan>
+</record>
+
+<record name = "booleanArray1FromToggle" type = "booleanArray" >
+    <input supportName = "inputLink" >
+        <configure structureName = "inputLink">
+            <pvname>booleanArrayToggle</pvname>
+            <process>false</process>
+        </configure>
+    </input>
+</record>
+<record name = "booleanArray2FromToggle" type = "booleanArray" >
+</record>
+<record name = "booleanArray3FromToggle" type = "booleanArray" >
+    <input supportName = "monitorLink" >
+        <configure structureName = "monitorLink">
+            <pvname>booleanArrayToggle</pvname>
+            <process>true</process>
+        </configure>
+    </input>
+</record>
+
+</IOCDatabase>

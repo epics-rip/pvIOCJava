@@ -1,0 +1,967 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+      "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html>
+<head>
+  <meta http-equiv="content-type" content="text/html; charset=iso-8859-1" />
+  <title>EPICS JavaIOC: portDriver Interfaces</title>
+</head>
+
+<body>
+<h1 style="text-align: center">EPICS JavaIOC: portDriver Interfaces<br />
+package: org.epics.ioc.pdrv.interfaces<br />
+2007.07.18</h1>
+CONTENTS
+
+<div class="toc">
+<ul>
+  <li><a href="#Overview">Overview</a></li>
+  <li><a href="#miscellane">miscellaneous</a>
+    <ul>
+      <li><a href="#Interface">Interface</a></li>
+      <li><a href="#Option">Option</a></li>
+      <li><a href="#DriverUser">DriverUser</a></li>
+    </ul>
+  </li>
+  <li><a href="#octet">octet</a>
+    <ul>
+      <li><a href="#OctetInter">OctetInterruptListener</a></li>
+      <li><a href="#Octet">Octet</a></li>
+      <li><a href="#AbstractOc">AbstractOctet</a></li>
+      <li><a href="#OctetInter1">OctetInterposeBase</a></li>
+    </ul>
+  </li>
+  <li><a href="#uint32Digi">uint32Digital</a>
+    <ul>
+      <li><a href="#DigitalInt">DigitalInterruptReason</a></li>
+      <li><a href="#UInt32Digi">UInt32DigitalInterruptListener</a></li>
+      <li><a href="#UInt32Digi1">UInt32Digital</a></li>
+      <li><a href="#AbstractUI">AbstractUInt32Digital</a></li>
+      <li><a href="#UInt32Digi2">UInt32DigitalInterposeBase</a></li>
+    </ul>
+  </li>
+  <li><a href="#int32">int32</a>
+    <ul>
+      <li><a href="#Int32Inter">Int32InterruptListener</a></li>
+      <li><a href="#Int32">Int32</a></li>
+      <li><a href="#AbstractIn">AbstractInt32</a></li>
+      <li><a href="#Int32Inter1">Int32InterposeBase</a></li>
+    </ul>
+  </li>
+  <li><a href="#int32Array">int32Array</a>
+    <ul>
+      <li><a href="#Int32Array">Int32ArrayInterruptListener</a></li>
+      <li><a href="#Int32Array1">Int32Array</a></li>
+      <li><a href="#AbstractIn1">AbstractInt32Array</a></li>
+      <li><a href="#Int32Array2">Int32ArrayInterposeBase</a></li>
+    </ul>
+  </li>
+  <li><a href="#float64">float64</a>
+    <ul>
+      <li><a href="#Float64Int">Float64InterruptListener</a></li>
+      <li><a href="#Float64">Float64</a></li>
+      <li><a href="#AbstractFl">AbstractFloat64</a></li>
+      <li><a href="#Float64Int1">Float64InterposeBase</a></li>
+    </ul>
+  </li>
+  <li><a href="#float64Arr">float64Array</a>
+    <ul>
+      <li><a href="#Float64Arr">Float64ArrayInterruptListener</a></li>
+      <li><a href="#Float64Arr1">Float64Array</a></li>
+      <li><a href="#AbstractFl1">AbstractFloat64Array</a></li>
+      <li><a href="#Float64Arr2">Float64ArrayInterposeBase</a></li>
+    </ul>
+  </li>
+</ul>
+</div>
+
+<p> </p>
+<hr />
+
+<h2 style="text-align: center" id="Overview">Overview</h2>
+<hr />
+
+<p>This package contains portDriver interfaces for communication with a port
+or device. A driver implements one or more of these interfaces and a user
+calls interface methods to communicate with a device..</p>
+
+<p>For each interface, this package defines four components:</p>
+<ol>
+  <li>The interface itself.</li>
+  <li>An interrupt listener interface<br />
+    This is the interface implemented by a user that registers itself as an
+    interrupt listener.</li>
+  <li>An abstract base class that implements the interface.<br />
+    This is used by drivers that implement the interface. The base class
+    handles the interrupt listeners. It also provides a method
+    interruptOccured, which is called by the driver when an interrupt event
+    occurs.</li>
+  <li>An interpose base class.<br />
+    This is for use by interpose implementations. This class implements all
+    interface methods by just calling the method of the implementation it
+    interposes. Thus the implementation need only implement the methods it
+    wants to override.</li>
+</ol>
+
+<p>This package overview has the following sections:</p>
+<ul>
+  <li>miscellaneous<br />
+    Discusses some interfaces used by the other interfaces.</li>
+  <li>octet<br />
+    An interface for serial communication.</li>
+  <li>uint32Digital<br />
+    An interface for a Digital I/O register.</li>
+  <li>int32<br />
+    An interface for an integer register. For example ADC devices implement
+    this interface.</li>
+  <li>int32Array<br />
+    An interface for an array of 32 bit integers.</li>
+  <li>float64<br />
+    An interface for double value.</li>
+  <li>float64Array<br />
+    An interface for an array of doubles.</li>
+</ul>
+<hr />
+
+<h2 style="text-align: center" id="miscellane">miscellaneous</h2>
+<hr />
+
+<h3 id="Interface">Interface</h3>
+
+<p><span style="font-family: courier;">Interface</span> is the base interface
+for all portDriver interfaces.</p>
+<pre>public interface Interface {
+    String getInterfaceName();
+}</pre>
+
+<p>where</p>
+<dl>
+  <dt style="font-family: courier;">getInterfaceName</dt>
+    <dd>Returns the name of the interface.</dd>
+</dl>
+
+<h3 id="Option">Option</h3>
+
+<p><span style="font-family: courier;">Option</span> is for drivers that
+accept run time options.</p>
+<pre>public interface Option extends Interface{
+    Status setOption(User user,String key, String value);
+    String getOption(User user,String key);
+}</pre>
+
+<p>It extends <span style="font-family: courier;">Interface</span> to include
+the methods:</p>
+<dl>
+  <dt style="font-family: courier;">setOption</dt>
+    <dd>Set an option. Each option is identified by a key and has an
+      associated value.</dd>
+  <dt style="font-family: courier;">getOption</dt>
+    <dd>Get the option for the specified key.</dd>
+</dl>
+
+<h3 id="DriverUser">DriverUser</h3>
+
+<p><span style="font-family: courier;">DriverUser</span> is an interface for
+drivers that require per-user information. A user calls create when it
+connects to the port or device and calls dispose when the user disconnects.
+The driver can keep private data for each user.</p>
+<pre>public interface DriverUser {
+    void create(User user,String drvParams);
+    void dispose(User user);
+}</pre>
+
+<p>where</p>
+<dl>
+  <dt style="font-family: courier;">create</dt>
+    <dd>Called by a user when it connects to a port or device.</dd>
+  <dt style="font-family: courier;">dispose</dt>
+    <dd>Called by a user when it disconnects from a port or device.</dd>
+</dl>
+<hr />
+
+<h2 style="text-align: center" id="octet">octet</h2>
+<hr />
+
+<p>This is the interface for serial communication. It supports I/O of 8 bit
+bytes and also has support for control characters that terminate serial
+messages.</p>
+
+<h3 id="OctetInter">OctetInterruptListener</h3>
+
+<p>The interface implemented by a user that calls addInterruptListener.</p>
+<pre>public interface OctetInterruptListener {
+    void interrupt(byte[] data,int nbytes);
+}</pre>
+
+<p>where</p>
+<dl>
+  <dt style="font-family: courier;">interrupt</dt>
+    <dd>The new message is provided when an interrupt occurs.</dd>
+</dl>
+
+<h3 id="Octet">Octet</h3>
+
+<p>The interface methods are:</p>
+<pre>public interface Octet extends Interface {
+    public static final int EOM_CNT = 0x0001;
+    public static final int EOM_EOS = 0x0002; 
+    public static final int EOM_END = 0x0004; 
+    Status write(User user,byte[] data,int nbytes);
+    Status writeRaw(User user,byte[] data,int nbytes);
+    Status read(User user,byte[] data,int nbytes);
+    Status readRaw(User user,byte[] data,int nbytes);
+    Status flush(User user);
+    Status setInputEos(User user,byte[] eos,int eosLen);
+    Status getInputEos(User user,byte[] eos);
+    Status setOutputEos(User user,byte[] eos,int eosLen);
+    Status getOutputEos(User user,byte[] eos);
+    Status addInterruptUser(User user,
+        OctetInterruptListener octetInterruptListener);
+    Status removeInterruptUser(User user,
+        OctetInterruptListener octetInterruptListener);
+}</pre>
+
+<p>where</p>
+<dl>
+  <dt style="font-family: courier;">EOM_CNT</dt>
+    <dd>auxStatus that means the read/write terminated because the the number
+      of bytes requested was transfered.</dd>
+  <dt style="font-family: courier;">EOM_EOS</dt>
+    <dd>auxStatus that means the read/write terminated with the EOS (End Of
+      String).</dd>
+  <dt style="font-family: courier;">EOM_END</dt>
+    <dd>auxStatus that means the read/write terminated because the the end of
+      a message occured.</dd>
+  <dt style="font-family: courier;">write</dt>
+    <dd>Write a new value. This must be implemented by the driver. If
+      setOutputEos has provided end of string characters they are written
+      after the requested bytes are written. A driver should normally call
+      interruptOccured after writing a value. On a successful operation
+      user.setInt is called to provide the number of bytes transfered and
+      setAuxStatus gives the reason why the transfer terminated. The call to
+      setInt does NOT include any eos characters. If Status.overflow is
+      returned than auxStatus provides the number of bytes not transfered.
+    </dd>
+  <dt style="font-family: courier;">writeRaw</dt>
+    <dd>Write a new value. This must be implemented by the driver. Any
+      setOutputEos characters are ignored. A driver should normally call
+      interruptOccured after writing a value. On a successful operation
+      user.setInt is called to provide the number of bytes transfered and
+      setAuxStatus gives the reason why the transfer terminated. If
+      Status.overflow is returned than auxStatus provides the number of bytes
+      not transfered. </dd>
+  <dt style="font-family: courier;">read</dt>
+    <dd>Read the current value. This must be implemented by the driver. If
+      setInputEos has provided an end of string sequence then the EOS
+      terminates the input if it is detected. On a successful operation
+      user.setInt is called to provide the number of bytes transfered and
+      setAuxStatus gives the reason why the transfer terminated. The call to
+      setInt does NOT include the eos characters. If Status.overflow is
+      returned than auxStatus provides the number of bytes not transfered.
+    </dd>
+  <dt style="font-family: courier;">readRaw</dt>
+    <dd>Read the current value. This must be implemented by the driver. Any
+      setInputEos characters are ignored. On a successful operation
+      user.setInt is called to provide the number of bytes transfered and
+      setAuxStatus gives the reason why the transfer terminated. The call to
+      setInt does NOT include any eos characters. If Status.overflow is
+      returned than auxStatus provides the number of bytes not transfered.
+    </dd>
+  <dt style="font-family: courier;">flush</dt>
+    <dd>Flush any characters residing in the input buffer.</dd>
+  <dt style="font-family: courier;">setInputEos</dt>
+    <dd>Provide end of string sequence for read requests.</dd>
+  <dt style="font-family: courier;">getInputEos</dt>
+    <dd>Get the input end of string sequence.</dd>
+  <dt style="font-family: courier;">setOutputEos</dt>
+    <dd>Provide end of string sequence for write requests.</dd>
+  <dt style="font-family: courier;">getOutputEos</dt>
+    <dd>Get the output end of string sequence.</dd>
+  <dt style="font-family: courier;">addInterruptUser</dt>
+    <dd>Add an interrupt listener. A driver class should not implement this
+      method.</dd>
+  <dt style="font-family: courier;">removeInterruptUser</dt>
+    <dd>Remove an interrupt listener. A driver should not implement this
+      method.</dd>
+</dl>
+
+<h3 id="AbstractOc">AbstractOctet</h3>
+<pre>public abstract class AbstractOctet implements Octet {
+    protected AbstractOctet(Device device,String interfaceName);
+    protected void interruptOccured(byte[] data,int nbytes);
+    public String getInterfaceName();
+    public Status addInterruptUser(User user,
+            OctetInterruptListener octetInterruptListener);
+    public Status removeInterruptUser(User user,
+            OctetInterruptListener octetInterruptListener);
+    public Status write(User user,byte[] data,int nbytes);
+    public abstract Status writeRaw(User user,byte[] data,int nbytes);
+    public Status read(User user,byte[] data,int nbytes);
+    public abstract Status readRaw(User user,byte[] data,int nbytes);
+    public abstract Status flush(User user) ;
+    public Status setInputEos(User user,byte[] eos,int eosLen);
+    public Status getInputEos(User user,byte[] eos);
+    public Status setOutputEos(User user,byte[] eos,int eosLen);
+    public Status getOutputEos(User user,byte[] eos);
+}</pre>
+
+<p>where</p>
+<dl>
+  <dt style="font-family: courier;">AbstractOctet</dt>
+    <dd>The constructor that must be called by the derived class.</dd>
+  <dt style="font-family: courier;">interruptOccured</dt>
+    <dd>Call all registered interrupt listeners. Called by the derived
+    class.</dd>
+  <dt style="font-family: courier;">getInterfaceName</dt>
+    <dd>Get the name of the interface, i.e. "int32". The derived class should
+      not implement this method.</dd>
+  <dt style="font-family: courier;">addInterruptUser</dt>
+    <dd>Add a listener to call when interruptOccured is called. The derived
+      class should not implement this method.</dd>
+  <dt style="font-family: courier;">removeInterruptUser</dt>
+    <dd>Remove an interrupt listener. The derived class should not implement
+      this method.</dd>
+  <dt style="font-family: courier;">write</dt>
+    <dd>Calls writeRaw.</dd>
+  <dt style="font-family: courier;">read</dt>
+    <dd>Calls readRaw.</dd>
+  <dt style="font-family: courier;">setInputEos</dt>
+    <dd>returns Status.error with a not supported message.</dd>
+  <dt style="font-family: courier;">getInputEos</dt>
+    <dd>Returns Status.success and auxStatus = 0.</dd>
+  <dt style="font-family: courier;">setOutputEos</dt>
+    <dd>returns Status.error with a not supported message.</dd>
+  <dt style="font-family: courier;">getOutputEos</dt>
+    <dd>Returns Status.success an auxStatus = 0.</dd>
+</dl>
+
+<h3 id="OctetInter1">OctetInterposeBase</h3>
+
+<p>An interpose implementation implements octet by extending the
+following:</p>
+<pre>public abstract class OctetInterposeBase implements Octet
+{
+    protected OctetInterposeBase(Octet octet);
+    // all octet merthods
+}</pre>
+
+<p>where</p>
+<dl>
+  <dt style="font-family: courier;">OctetInterposeBase</dt>
+    <dd>Constructor for the interpose base class. The argument is the object
+      that is being interposed. </dd>
+  <dt>other methods</dt>
+    <dd>Just call the interposed method. This an interpose implementation
+      only needs to implement the methods it wants to override.</dd>
+</dl>
+<hr />
+
+<h2 style="text-align: center" id="uint32Digi">uint32Digital</h2>
+<hr />
+
+<h3 id="DigitalInt">DigitalInterruptReason</h3>
+
+<p>The reason why an interrupt occured.</p>
+<pre>public enum DigitalInterruptReason {
+    zeroToOne,
+    oneToZero,
+    transition
+}</pre>
+
+<p>where</p>
+<dl>
+  <dt style="font-family: courier;">zeroToOne</dt>
+    <dd>A zero to one transition occured. This is used for devices that can
+      detect such a transition.</dd>
+  <dt style="font-family: courier;">oneToZero</dt>
+    <dd>A one to zero transition occured. This is used for devices that can
+      detect such a transition.</dd>
+  <dt style="font-family: courier;">transition</dt>
+    <dd>One or more mask bits have changed.</dd>
+</dl>
+
+<h3 id="UInt32Digi">UInt32DigitalInterruptListener</h3>
+
+<p>The interface implemented by a user that calls addInterruptListener.</p>
+<pre>public interface UInt32DigitalInterruptListener {
+    void interrupt(int value);
+}</pre>
+
+<p>where</p>
+<dl>
+  <dt style="font-family: courier;">interrupt</dt>
+    <dd>The new value is provided when an interrupt occurs.</dd>
+</dl>
+
+<h3 id="UInt32Digi1">UInt32Digital</h3>
+
+<p>The interface methods are:</p>
+<pre>public interface UInt32Digital extends Interface{
+    Status write(User user, int value, int mask);
+    Status read(User user, int mask);
+    Status setInterrupt(User user, int mask, DigitalInterruptReason reason);
+    Status getInterrupt(User user, int mask, DigitalInterruptReason reason);
+    Status clearInterrupt(User user,int mask);
+    Status addInterruptUser(User user,
+        UInt32DigitalInterruptListener uint32DigitalInterruptListener,int mask);
+    Status removeInterruptUser(User user,
+        UInt32DigitalInterruptListener uint32DigitalInterruptListener);
+}</pre>
+
+<p>where</p>
+<dl>
+  <dt style="font-family: courier;">write</dt>
+    <dd>Write a new value. This must be implemented by the driver. A driver
+      should normally call interruptOccured after writing a value. The mask
+      bits specify the bits to change. All other bits must not be
+    modified.</dd>
+  <dt style="font-family: courier;">read</dt>
+    <dd>Read the current value. This must be implemented by the driver. Only
+      bits from mask are set. All other bits must be set to 0 .</dd>
+  <dt style="font-family: courier;">setInterrupt</dt>
+    <dd>Allow interrupts for the specified bits. The reason states the
+      condition under which an interrupt is raised,</dd>
+  <dt style="font-family: courier;">getInterrupt</dt>
+    <dd>Get which bits can cause an interrupt for thew specified reason.</dd>
+  <dt style="font-family: courier;">clearInterrupt</dt>
+    <dd>Disallow interrupts for the specified bits.</dd>
+  <dt style="font-family: courier;">addInterruptUser</dt>
+    <dd>Add an interrupt listener. A driver class should not implement this
+      method.</dd>
+  <dt style="font-family: courier;">removeInterruptUser</dt>
+    <dd>Remove an interrupt listener. A driver should not implement this
+      method.</dd>
+</dl>
+
+<h3 id="AbstractUI">AbstractUInt32Digital</h3>
+<pre>public abstract class AbstractUInt32Digital implements UInt32Digital {
+    protected AbstractUInt32Digital(Device device,String interfaceName);
+    protected void interruptOccured(int data,DigitalInterruptReason reason);
+    public String getInterfaceName();
+    public Status setInterrupt(User user, DigitalInterruptReason reason);
+    public Status addInterruptUser(User user,
+        UInt32DigitalInterruptListener uint32DigitalInterruptListener,int mask);
+    public Status removeInterruptUser(User user,
+        UInt32DigitalInterruptListener uint32DigitalInterruptListener);
+    public Status addInterruptUser(User user,
+            UInt32DigitalInterruptListener uint32DigitalInterruptListener,int mask);
+    public Status removeInterruptUser(User user,
+            UInt32DigitalInterruptListener uint32DigitalInterruptListener);
+    public Status setInterrupt(User user, int mask, DigitalInterruptReason reason);
+    public Status getInterrupt(User user, int mask, DigitalInterruptReason reason);
+    public Status clearInterrupt(User user,int mask);
+    abstract public Status read(User user, int mask);
+    abstract public Status write(User user, int value, int mask);
+}</pre>
+
+<p>where</p>
+<dl>
+  <dt style="font-family: courier;">AbstractUInt32Digital</dt>
+    <dd>The constructor that must be called by the derived class.</dd>
+  <dt style="font-family: courier;">interruptOccured</dt>
+    <dd>Call all registered interrupt listeners. Called by the derived
+    class.</dd>
+  <dt style="font-family: courier;">getInterfaceName</dt>
+    <dd>Get the name of the interface, i.e. "uint32Digital". The derived
+      class should not implement this method.</dd>
+  <dt style="font-family: courier;">addInterruptUser</dt>
+    <dd>Add a listener to call when interruptOccured is called. The derived
+      class should not implement this method.</dd>
+  <dt style="font-family: courier;">removeInterruptUser</dt>
+    <dd>Remove an interrupt listener. The derived class should not implement
+      this method.</dd>
+  <dt style="font-family: courier;">setInterrupt</dt>
+    <dd>returns Status.error with a not supported message.</dd>
+  <dt style="font-family: courier;">getInterrupt</dt>
+    <dd>returns Status.error with a not supported message.</dd>
+  <dt style="font-family: courier;">clearInterrupt</dt>
+    <dd>returns Status.error with a not supported message.</dd>
+</dl>
+
+<h3 id="UInt32Digi2">UInt32DigitalInterposeBase</h3>
+
+<p>An interpose implementation implements uint32Digital by extending the
+following:</p>
+<pre>public abstract class UInt32DigitalInterposeBase implements UInt32Digital {
+    protected UInt32DigitalInterposeBase(UInt32Digital uint32Digital);
+    // all uint32Digital methods
+}</pre>
+
+<p>where</p>
+<dl>
+  <dt style="font-family: courier;">UInt32DigitalInterposeBase</dt>
+    <dd>Constructor for the interpose base class. The argument is the object
+      that is being interposed. </dd>
+  <dt>other methods</dt>
+    <dd>Just call the interposed method. This an interpose implementation
+      only needs to implement the methods it wants to override.</dd>
+</dl>
+<hr />
+
+<h2 style="text-align: center" id="int32">int32</h2>
+<hr />
+
+<p><span style="font-family: courier;">int32</span> is implemented by a
+driver that supports a 32 bit integer. An example is a driver for an ADC
+(Analog to Digital Converter). Unless it is more than a 32 bit ADC it can
+support this interface by using the low order bits and sign extending the
+high order bits..</p>
+
+<h3 id="Int32Inter">Int32InterruptListener</h3>
+
+<p>The interface implemented by a user that calls addInterruptListener.</p>
+<pre>public interface Int32InterruptListener {
+    void interrupt(int value);
+}</pre>
+
+<p>where</p>
+<dl>
+  <dt style="font-family: courier;">interrupt</dt>
+    <dd>The new value is provided when an interrupt occurs.</dd>
+</dl>
+
+<h3 id="Int32">Int32</h3>
+
+<p>The interface methods are:</p>
+<pre>public interface Int32 extends Interface {
+    Status write(User user, int value);
+    Status read(User user);
+    Status getBounds(User user, int[]bounds);
+    Status addInterruptUser(User user,
+               Int32InterruptListener int32InterruptListener);
+    Status removeInterruptUser(User user,
+               Int32InterruptListener int32InterruptListener);
+}</pre>
+
+<p>where</p>
+<dl>
+  <dt style="font-family: courier;">write</dt>
+    <dd>Write a new value. This must be implemented by the driver. A driver
+      should normally call interruptOccured after writing a value. </dd>
+  <dt style="font-family: courier;">read</dt>
+    <dd>Read the current value. This must be implemented by the driver.</dd>
+  <dt style="font-family: courier;">getBounds</dt>
+    <dd>This is implemented by a driver if it knows the bounds. For example a
+      12 bit unipolor adc would set the bounds as: 
+      <pre>    bounds[0] = 0; bounds[1] = 4095;</pre>
+    </dd>
+  <dt style="font-family: courier;">addInterruptUser</dt>
+    <dd>Add an interrupt listener. A driver class should not implement this
+      method.</dd>
+  <dt style="font-family: courier;">removeInterruptUser</dt>
+    <dd>Remove an interrupt listener. A driver should not implement this
+      method.</dd>
+</dl>
+
+<h3 id="AbstractIn">AbstractInt32</h3>
+
+<p>A driver implements int32 by extending the following abstract base
+class:</p>
+<pre>public abstract class AbstractInt32 implements Int32 {
+    protected AbstractInt32(Device device,String interfaceName);
+    protected void interruptOccured(int data);
+    public String getInterfaceName();
+    public Status addInterruptUser(User user,
+            Int32InterruptListener int32InterruptListener);
+    public Status removeInterruptUser(User user,
+            Int32InterruptListener int32InterruptListener);
+    public Status getBounds(User user, int[] bounds);
+    public abstract Status read(User user);
+    public abstract Status write(User user, int value);
+}</pre>
+
+<p>where</p>
+<dl>
+  <dt style="font-family: courier;">AbstractInt32</dt>
+    <dd>The constructor that must be called by the derived class.</dd>
+  <dt style="font-family: courier;">interruptOccured</dt>
+    <dd>Call all registered interrupt listeners. Called by the derived
+    class.</dd>
+  <dt style="font-family: courier;">getInterfaceName</dt>
+    <dd>Get the name of the interface, i.e. "int32". The derived class should
+      not implement this method.</dd>
+  <dt style="font-family: courier;">addInterruptUser</dt>
+    <dd>Add a listener to call when interruptOccured is called. The derived
+      class should not implement this method.</dd>
+  <dt style="font-family: courier;">removeInterruptUser</dt>
+    <dd>Remove an interrupt listener. The derived class should not implement
+      this method.</dd>
+  <dt style="font-family: courier;">getBounds</dt>
+    <dd>Calls <span style="font-family: courier;">user.setMessage</span> and
+      returns <span style="font-family: courier;">Status.error</span>.</dd>
+</dl>
+
+<h3 id="Int32Inter1">Int32InterposeBase</h3>
+
+<p>An interpose implementation implements int32 by extending the
+following:</p>
+<pre>public class Int32InterposeBase implements Int32 {
+    protected Int32InterposeBase(Int32 int32);
+    // all Int32 methods
+}</pre>
+
+<p>where</p>
+<dl>
+  <dt style="font-family: courier;">Int32InterposeBase</dt>
+    <dd>Constructor for the interpose base class. The argument is the object
+      that is being interposed. </dd>
+  <dt>other methods</dt>
+    <dd>Just call the interposed method. This an interpose implementation
+      only needs to implement the methods it wants to override.</dd>
+</dl>
+<hr />
+
+<h2 style="text-align: center" id="int32Array">int32Array</h2>
+<hr />
+
+<p><span style="font-family: courier;">int32Array</span> is implemented by a
+driver that supports a array of 32 bit integers.</p>
+
+<h3 id="Int32Array">Int32ArrayInterruptListener</h3>
+
+<p>The interface implemented by a user that calls addInterruptListener.</p>
+<pre>public interface Int32ArrayInterruptListener{
+    void interrupt(Int32Array int32Array);
+}</pre>
+
+<p>where</p>
+<dl>
+  <dt style="font-family: courier;">interrupt</dt>
+    <dd>The new value is provided when an interrupt occurs.</dd>
+</dl>
+
+<h3 id="Int32Array1">Int32Array</h3>
+
+<p>The implementation must implement PVIntArray, which is used for all I/O.
+In addition the following methods are implemented:</p>
+<pre>public interface Int32Array extends Interface, PVIntArray{
+    Status startRead(User user);
+    Status endRead(User user);
+    Status startWrite(User user);
+    Status endWrite(User user);
+    Status addInterruptUser(User user,
+        Int32ArrayInterruptListener int32ArrayListener);
+    Status removeInterruptUser(User user,
+        Int32ArrayInterruptListener int32ArrayListener);
+}</pre>
+
+<p>where</p>
+<dl>
+  <dt style="font-family: courier;">startRead</dt>
+    <dd>This is called each time the user starts reading. The driver
+      implements this method so that it can save a reference to the user
+      while the user is performing I/O via the PVIntArray methods, which do
+      not have a user argument.</dd>
+  <dt style="font-family: courier;">endRead</dt>
+    <dd>The user calls this when it is done using the PVIntArray methods. The
+      driver should remove the reference to the user.</dd>
+  <dt style="font-family: courier;">startWrite</dt>
+    <dd>This is called each time the user starts writing. The driver
+      implements this method so that it can save a reference to the user
+      while the user is performing I/O via the PVIntArray methods, which do
+      not have a user argument.</dd>
+  <dt style="font-family: courier;">endWrite</dt>
+    <dd>The user calls this when it is done using the PVIntArray methods. The
+      driver should remove the reference to the user.</dd>
+  <dt style="font-family: courier;">addInterruptUser</dt>
+    <dd>Add an interrupt listener. A driver class should not implement this
+      method.</dd>
+  <dt style="font-family: courier;">removeInterruptUser</dt>
+    <dd>Remove an interrupt listener. A driver should not implement this
+      method.</dd>
+</dl>
+
+<h3 id="AbstractIn1">AbstractInt32Array</h3>
+
+<p>A driver implements int32Array by extending the following abstract base
+class:</p>
+<pre>public abstract class AbstractInt32Array extends AbstractPVArray implements Int32Array{
+    protected AbstractInt32Array(
+            PVField parent,Array array,int capacity,boolean capacityMutable,
+            Device device,String interfaceName);
+    public void interruptOccured();
+    public String getInterfaceName();
+    public Status addInterruptUser(User user,
+            Int32ArrayInterruptListener int32ArrayInterruptListener);
+    public Status removeInterruptUser(User user,
+            Int32ArrayInterruptListener int32ArrayInterruptListener);
+    public Status startRead(User user);
+    public Status endRead(User user);
+    public Status startWrite(User user);
+    public Status endWrite(User user);
+}</pre>
+
+<p>where</p>
+<dl>
+  <dt style="font-family: courier;">AbstractInt32Array</dt>
+    <dd>The constructor that must be called by the derived class.</dd>
+  <dt style="font-family: courier;">interruptOccured</dt>
+    <dd>Call all registered interrupt listeners. Called by the derived
+    class.</dd>
+  <dt style="font-family: courier;">getInterfaceName</dt>
+    <dd>Get the name of the interface, i.e. "int32Array". The derived class
+      should not implement this method.</dd>
+  <dt style="font-family: courier;">addInterruptUser</dt>
+    <dd>Add a listener to call when interruptOccured is called. The derived
+      class should not implement this method.</dd>
+  <dt style="font-family: courier;">removeInterruptUser</dt>
+    <dd>Remove an interrupt listener. The derived class should not implement
+      this method.</dd>
+  <dt style="font-family: courier;">startRead</dt>
+    <dd>Returns Status.success.</dd>
+  <dt style="font-family: courier;">endRead</dt>
+    <dd>Returns Status.success.</dd>
+  <dt style="font-family: courier;">startWrite</dt>
+    <dd>Returns Status.success.</dd>
+  <dt style="font-family: courier;">endWrite</dt>
+    <dd>Returns Status.success.</dd>
+</dl>
+
+<h3 id="Int32Array2">Int32ArrayInterposeBase</h3>
+
+<p>An interpose implementation implements int32Array by extending the
+following:</p>
+<pre>public class Int32ArrayInterposeBase extends AbstractPVArray implements Int32Array {
+    protected Int32ArrayInterposeBase(Int32Array arg);
+    // all int32Array methods
+}</pre>
+
+<p>where</p>
+<dl>
+  <dt style="font-family: courier;">Int32ArrayInterposeBase</dt>
+    <dd>Constructor for the interpose base class. The argument is the object
+      that is being interposed. </dd>
+  <dt>other methods</dt>
+    <dd>Just call the interposed method. This an interpose implementation
+      only needs to implement the methods it wants to override.</dd>
+</dl>
+<hr />
+
+<h2 style="text-align: center" id="float64">float64</h2>
+<hr />
+
+<p><span style="font-family: courier;">float64</span> is implemented by
+drivers that support a double value.</p>
+
+<h3 id="Float64Int">Float64InterruptListener</h3>
+
+<p>The interface implemented by a user that calls addInterruptListener.</p>
+<pre>public interface Float64InterruptListener {
+    void interrupt(double value);
+}</pre>
+
+<p>where</p>
+<dl>
+  <dt style="font-family: courier;">interrupt</dt>
+    <dd>The new value is provided when an interrupt occurs.</dd>
+</dl>
+
+<h3 id="Float64">Float64</h3>
+
+<p>The interface methods are:</p>
+<pre>public interface Float64 extends Interface {
+    Status write(User user, double value);
+    Status read(User user);
+    Status addInterruptUser(User user,
+        Float64InterruptListener float64InterruptListener);
+    Status removeInterruptUser(User user,
+        Float64InterruptListener float64InterruptListener);
+}</pre>
+
+<p>where</p>
+<dl>
+  <dt style="font-family: courier;">write</dt>
+    <dd>Write a new value. This must be implemented by the driver. A driver
+      should normally call interruptOccured after writing a value. </dd>
+  <dt style="font-family: courier;">read</dt>
+    <dd>Read the current value. This must be implemented by the driver.</dd>
+  <dt style="font-family: courier;">addInterruptUser</dt>
+    <dd>Add an interrupt listener. A driver class should not implement this
+      method.</dd>
+  <dt style="font-family: courier;">removeInterruptUser</dt>
+    <dd>Remove an interrupt listener. A driver should not implement this
+      method.</dd>
+</dl>
+
+<h3 id="AbstractFl">AbstractFloat64</h3>
+
+<p>A driver implements int32Array by extending the following abstract base
+class:</p>
+<pre>public abstract class AbstractFloat64 implements Float64 {
+    protected AbstractFloat64(Device device,String interfaceName);
+    protected void interruptOccured(double data);
+    public String getInterfaceName();
+    public Status addInterruptUser(User user,
+            Float64InterruptListener float64InterruptListener);
+    public Status removeInterruptUser(User user,
+            Float64InterruptListener float64InterruptListener);
+    public abstract Status read(User user);
+    public abstract Status write(User user, double value) ;
+}</pre>
+
+<p>where</p>
+<dl>
+  <dt style="font-family: courier;">AbstractFloat64</dt>
+    <dd>The constructor that must be called by the derived class.</dd>
+  <dt style="font-family: courier;">interruptOccured</dt>
+    <dd>Call all registered interrupt listeners. Called by the derived
+    class.</dd>
+  <dt style="font-family: courier;">getInterfaceName</dt>
+    <dd>Get the name of the interface, i.e. "float64". The derived class
+      should not implement this method.</dd>
+  <dt style="font-family: courier;">addInterruptUser</dt>
+    <dd>Add a listener to call when interruptOccured is called. The derived
+      class should not implement this method.</dd>
+  <dt style="font-family: courier;">removeInterruptUser</dt>
+    <dd>Remove an interrupt listener. The derived class should not implement
+      this method.</dd>
+</dl>
+
+<h3 id="Float64Int1">Float64InterposeBase</h3>
+
+<p>An interpose implementation implements float64 by extending the
+following:</p>
+<pre>public class Float64InterposeBase implements Float64 {
+    protected Float64InterposeBase(Float64 float64);
+    // all float64 methods
+}</pre>
+
+<p>where</p>
+<dl>
+  <dt style="font-family: courier;">Float64InterposeBase</dt>
+    <dd>Constructor for the interpose base class. The argument is the object
+      that is being interposed. </dd>
+  <dt>other methods</dt>
+    <dd>Just call the interposed method. This an interpose implementation
+      only needs to implement the methods it wants to override.</dd>
+</dl>
+<hr />
+
+<h2 style="text-align: center" id="float64Arr">float64Array</h2>
+<hr />
+
+<p><span style="font-family: courier;">float64Array</span> is implemented by
+a driver that supports a array of doubles.</p>
+
+<h3 id="Float64Arr">Float64ArrayInterruptListener</h3>
+
+<p>The interface implemented by a user that calls addInterruptListener.</p>
+<pre>public interface Float64ArrayInterruptListener{
+    void interrupt(Float64Array float64Array);
+}</pre>
+
+<p>where</p>
+<dl>
+  <dt style="font-family: courier;">interrupt</dt>
+    <dd>The new value is provided when an interrupt occurs.</dd>
+</dl>
+
+<h3 id="Float64Arr1">Float64Array</h3>
+
+<p>The implementation must implement PVDoubleArray, which is used for all
+I/O. In addition the following methods are implemented:</p>
+<pre>public interface Float64Array extends Interface, PVDoubleArray{
+    Status startRead(User user);
+    Status endRead(User user);
+    Status startWrite(User user);
+    Status endWrite(User user);
+    Status addInterruptUser(User user,
+        Float64ArrayInterruptListener float64ArrayListener);
+    Status removeInterruptUser(User user,
+        Float64ArrayInterruptListener float64ArrayListener);
+}</pre>
+
+<p>where</p>
+<dl>
+  <dt style="font-family: courier;">startRead</dt>
+    <dd>This is called each time the user starts reading. The driver
+      implements this method so that it can save a reference to the user
+      while the user is performing I/O via the PVDoubleArray methods, which
+      do not have a user argument.</dd>
+  <dt style="font-family: courier;">endRead</dt>
+    <dd>The user calls this when it is done using the PVDoubleArray methods.
+      The driver should remove the reference to the user.</dd>
+  <dt style="font-family: courier;">startWrite</dt>
+    <dd>This is called each time the user starts writing. The driver
+      implements this method so that it can save a reference to the user
+      while the user is performing I/O via the PVDoubleArray methods, which
+      do not have a user argument.</dd>
+  <dt style="font-family: courier;">endWrite</dt>
+    <dd>The user calls this when it is done using the PVDoubleArray methods.
+      The driver should remove the reference to the user.</dd>
+  <dt style="font-family: courier;">addInterruptUser</dt>
+    <dd>Add an interrupt listener. A driver class should not implement this
+      method.</dd>
+  <dt style="font-family: courier;">removeInterruptUser</dt>
+    <dd>Remove an interrupt listener. A driver should not implement this
+      method.</dd>
+</dl>
+
+<h3 id="AbstractFl1">AbstractFloat64Array</h3>
+
+<p>A driver implements float64Array by extending the following abstract base
+class:</p>
+<pre>public abstract class AbstractFloat64Array
+extends AbstractPVArray implements Float64Array
+{
+    protected AbstractFloat64Array(
+            PVField parent,Array array,int capacity,boolean capacityMutable,
+            Device device,String interfaceName);
+    public Status endRead(User user);
+    public Status endWrite(User user);
+    public Status startRead(User user);
+    public Status startWrite(User user);
+    public void interruptOccured();
+    public String getInterfaceName();
+    public Status addInterruptUser(User user,
+        Float64ArrayInterruptListener float64ArrayInterruptListener);
+    public Status removeInterruptUser(User user,
+        Float64ArrayInterruptListener float64ArrayInterruptListener);
+}</pre>
+
+<p>where</p>
+<dl>
+  <dt style="font-family: courier;">AbstractInt32Array</dt>
+    <dd>The constructor that must be called by the derived class.</dd>
+  <dt style="font-family: courier;">interruptOccured</dt>
+    <dd>Call all registered interrupt listeners. Called by the derived
+    class.</dd>
+  <dt style="font-family: courier;">getInterfaceName</dt>
+    <dd>Get the name of the interface, i.e. "float64Array". The derived class
+      should not implement this method.</dd>
+  <dt style="font-family: courier;">addInterruptUser</dt>
+    <dd>Add a listener to call when interruptOccured is called. The derived
+      class should not implement this method.</dd>
+  <dt style="font-family: courier;">removeInterruptUser</dt>
+    <dd>Remove an interrupt listener. The derived class should not implement
+      this method.</dd>
+  <dt style="font-family: courier;">startRead</dt>
+    <dd>Returns Status.success.</dd>
+  <dt style="font-family: courier;">endRead</dt>
+    <dd>Returns Status.success.</dd>
+  <dt style="font-family: courier;">startWrite</dt>
+    <dd>Returns Status.success.</dd>
+  <dt style="font-family: courier;">endWrite</dt>
+    <dd>Returns Status.success.</dd>
+</dl>
+
+<h3 id="Float64Arr2">Float64ArrayInterposeBase</h3>
+
+<p>An interpose implementation implements float64Array by extending the
+following:</p>
+<pre>public class Float64ArrayInterposeBase extends AbstractPVArray implements Float64Array {
+    protected Float64ArrayInterposeBase(Float64Array arg);
+    // all float64Array methods
+}</pre>
+
+<p>where</p>
+<dl>
+  <dt style="font-family: courier;">Float64ArrayInterposeBase</dt>
+    <dd>Constructor for the interpose base class. The argument is the object
+      that is being interposed. </dd>
+  <dt>other methods</dt>
+    <dd>Just call the interposed method. This an interpose implementation
+      only needs to implement the methods it wants to override.</dd>
+</dl>
+</body>
+</html>

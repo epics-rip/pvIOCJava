@@ -1,17 +1,13 @@
 <?xml version="1.0" ?>
 <DBDefinition>
 
-<structure name = "digital" supportName = "digitalRecord" >
+<structure name = "digital" supportName = "generic" >
     <include href = "digitalCommon.xml" />
 </structure>
 
-<recordType name = "digital" supportName = "digitalRecord" >
+<recordType name = "digital" supportName = "generic" >
     <include href = "common.xml" />
     <include href = "digitalCommon.xml" />
 </recordType>
-
-<support name = "digitalRecord"
-   factoryName = "org.epics.ioc.recordSupport.DigitalFactory" />
-
 
 </DBDefinition>

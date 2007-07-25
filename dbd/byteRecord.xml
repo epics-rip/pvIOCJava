@@ -1,0 +1,13 @@
+<?xml version="1.0" ?>
+<DBDefinition>
+
+<structure name = "byte" supportName = "generic" >
+    <include href = "byteCommon.xml" />
+</structure>
+
+<recordType name = "byte" supportName = "generic" >
+    <include href = "common.xml" />
+    <include href = "byteCommon.xml" />
+</recordType>
+
+</DBDefinition>

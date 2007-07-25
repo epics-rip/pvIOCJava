@@ -1,0 +1,13 @@
+<?xml version="1.0" ?>
+<DBDefinition>
+
+<structure name = "longArray" supportName = "generic" >
+    <include href = "longArrayCommon.xml" />
+</structure>
+
+<recordType name = "longArray" supportName = "generic" >
+    <include href = "common.xml" />
+    <include href = "longArrayCommon.xml" />
+</recordType>
+
+</DBDefinition>

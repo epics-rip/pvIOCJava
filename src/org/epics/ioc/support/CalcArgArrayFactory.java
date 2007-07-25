@@ -45,6 +45,7 @@ public class CalcArgArrayFactory {
     
     private static String supportName = "calcArgArray";
     
+    
     private static class CalcArgArrayImpl extends AbstractSupport
     implements CalcArgArraySupport,SupportProcessRequester
     {
@@ -66,6 +67,7 @@ public class CalcArgArrayFactory {
             processRequesterName = pvField.getFullName();
             calcArgArrayDBField = dbNonScalarArray; 
         }
+        
         /* (non-Javadoc)
          * @see org.epics.ioc.support.CalcArgArraySupport#getPVField(java.lang.String)
          */
@@ -90,6 +92,7 @@ public class CalcArgArrayFactory {
          */
         public void initialize() {
             if(!super.checkSupportState(SupportState.readyForInitialize,supportName)) return;
+            if(!initCalculator()) return;
             SupportState supportState = SupportState.readyForStart;
             DBField[] dbFields = calcArgArrayDBField.getElementDBFields();
             int length = dbFields.length;
@@ -192,6 +195,37 @@ public class CalcArgArrayFactory {
             numberWait--;
             if(numberWait>0) return;
             supportProcessRequester.supportProcessDone(finalResult);
+        }
+        
+        // must call calculatorSupport.setCalcArgArraySupport
+        private boolean initCalculator() {
+            if(pvField.getParent().getField().getType()!=Type.pvStructure) {
+                pvField.message("parent is not a structure",MessageType.error);
+                return false;
+            }
+            DBStructure dbStructure = (DBStructure)calcArgArrayDBField.getParent();
+            PVStructure pvStructure = dbStructure.getPVStructure();
+            Structure structure = pvStructure.getStructure();
+            DBField[] dbFields = dbStructure.getFieldDBFields();
+            int index;
+            Support support = null;            
+            index = structure.getFieldIndex("calculator");
+            if(index<0) {
+                pvStructure.message("field calculator does not exist", MessageType.error);
+                return false;
+            }
+            support = dbFields[index].getSupport();
+            if(support==null) {
+                pvStructure.message("field calculator does not have support", MessageType.error);
+                return false;
+            }           
+            if(!(support instanceof CalculatorSupport)) {
+                pvStructure.message("field calculator does not have calculatorSupport", MessageType.error);
+                return false;
+            }
+            CalculatorSupport calculatorSupport = (CalculatorSupport)support;
+            calculatorSupport.setCalcArgArraySupport(this);
+            return true;
         }
     }
 }

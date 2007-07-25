@@ -2,17 +2,17 @@
 <IOCDatabase>
 
 
-<record name = "aiRawCounter" type = "calc">
+<record name = "aiRawCounter" type = "calcDouble">
     <calcArgArray>
-        <value structureName = "calcArg">
+        <value structureName = "calcDoubleArg">
             <value>-2048.0</value>
             <name>min</name>
         </value>
-        <value structureName = "calcArg">
+        <value structureName = "calcDoubleArg">
             <value>2047.0</value>
             <name>max</name>
         </value>
-        <value structureName = "calcArg">
+        <value structureName = "calcDoubleArg">
             <value>100.0</value>
             <name>inc</name>
         </value>
@@ -66,7 +66,7 @@
         </input>
 
     </input>
-    <doubleAlarm>
+    <valueAlarm>
         <configure structureName = "doubleAlarm">
           <active>true</active>
           <interval>
@@ -94,7 +94,7 @@
           <outOfRange>invalid</outOfRange>
           <hystersis>0.1</hystersis>
         </configure>
-    </doubleAlarm>
+    </valueAlarm>
     <displayLimit>
         <low>0.0</low>
         <high>10.0</high>

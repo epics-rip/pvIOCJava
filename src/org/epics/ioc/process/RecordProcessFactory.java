@@ -28,7 +28,8 @@ public class RecordProcessFactory {
         return new ProcessInstance(dbRecord);
     }
     
-    static private class ProcessInstance implements RecordProcess,SupportProcessRequester
+    static private class ProcessInstance implements
+        RecordProcess,RecordProcessRequester,SupportProcessRequester
     {
         private boolean trace = false;
         private DBRecord dbRecord;
@@ -37,7 +38,7 @@ public class RecordProcessFactory {
         private boolean disabled = false;
         private Support recordSupport = null;
         private ScanSupport scanSupport = null;
-        private AlarmSupport alarmSupport = null;
+        private PVBoolean pvProcessAfterStart = null;
         
         private boolean active = false;
         private boolean setActiveBySetActive = false;
@@ -150,15 +151,17 @@ public class RecordProcessFactory {
                 DBField[] dbFields = dbStructure.getFieldDBFields();
                 PVField pvField;
                 Structure structure = (Structure)pvRecord.getField();
-                int index = structure.getFieldIndex("alarm");
-                if(index>=0) {
-                    pvField = pvFields[index];
-                    if(pvField.getField().getType()==Type.pvStructure)
-                        alarmSupport = (AlarmSupport)dbFields[index].getSupport();
-                }
+                int index;
                 index = structure.getFieldIndex("timeStamp");
                 if(index>=0) {
                     pvTimeStamp = PVTimeStamp.create(dbFields[index]);
+                }
+                index = structure.getFieldIndex("processAfterStart");
+                if(index>=0) {
+                    pvField = pvFields[index];
+                    if(pvField.getField().getType()==Type.pvBoolean) {
+                        pvProcessAfterStart = (PVBoolean)pvField;
+                    }
                 }
                 index = structure.getFieldIndex("scan");
                 if(index>=0) {
@@ -221,6 +224,53 @@ public class RecordProcessFactory {
             } finally {
                 dbRecord.unlock();
             }
+        }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.process.RecordProcess#allSupportStarted()
+         */
+        public void allSupportStarted() {
+            dbRecord.lock();
+            try {
+                if(trace) traceMessage("allSupportStarted");
+                recordSupport.allSupportStarted();
+                if(scanSupport!=null) scanSupport.allSupportStarted();
+                if(pvProcessAfterStart!=null) {
+                    boolean process = pvProcessAfterStart.get();
+                    if(process) {
+                        if(recordProcessRequester==null) {
+                            recordProcessRequester = this;
+                            process(this,false,null);
+                        } else if(!processSelfRequest(this)) {
+                            pvRecord.message(" processAfterStart failed", MessageType.warning);
+                        }
+                    }
+                }
+            } finally {
+                dbRecord.unlock();
+            }
+        }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.process.RecordProcessRequester#recordProcessComplete()
+         */
+        public void recordProcessComplete() {
+            dbRecord.lock();
+            try {
+                recordProcessRequester = null;  
+            } finally {
+                dbRecord.unlock();
+            }
+        }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.process.RecordProcessRequester#recordProcessResult(org.epics.ioc.util.RequestResult)
+         */
+        public void recordProcessResult(RequestResult requestResult) {
+            // nothing to do
+        }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.util.Requester#message(java.lang.String, org.epics.ioc.util.MessageType)
+         */
+        public void message(String message, MessageType messageType) {
+            pvRecord.message(message, messageType);
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.process.RecordProcess#setRecordProcessRequester(org.epics.ioc.process.RecordProcessRequester)
@@ -563,7 +613,6 @@ public class RecordProcessFactory {
                 recordProcessRequester.message("record support is not ready",MessageType.error);
                 return false;
             }
-            if(alarmSupport!=null) alarmSupport.beginProcess();
             active = true;
             processIsComplete = false;
             processCompleteDone = false;
@@ -594,7 +643,6 @@ public class RecordProcessFactory {
                     "completing processing but ProcessCallbackRequesters are still present",
                     MessageType.fatalError);
             }
-            if(alarmSupport!=null) alarmSupport.endProcess();
             if(pvTimeStamp!=null) {
                 pvTimeStamp.put(timeStamp);
             }

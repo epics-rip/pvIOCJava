@@ -10,6 +10,7 @@ import java.util.*;
 import org.epics.ioc.db.*;
 import org.epics.ioc.pv.*;
 import org.epics.ioc.util.*;
+import org.epics.ioc.process.*;
 
 /**
  * Support for alarm field.
@@ -39,6 +40,7 @@ public class AlarmFactory {
     }
     
     public static AlarmSupport findAlarmSupport(DBField startDBField) {
+        if(startDBField==null) return null;
         DBField parentDBField;
         if(startDBField instanceof DBStructure) {
             parentDBField = startDBField;
@@ -108,6 +110,7 @@ public class AlarmFactory {
                 parentAlarmSupport = (AlarmImpl)parent;
                 parentAlarmSupport.addChildAlarm(this);
             }
+            super.setSupportState(SupportState.readyForStart);
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.process.AbstractSupport#uninitialize()
@@ -115,6 +118,7 @@ public class AlarmFactory {
         public void uninitialize() {
             childAlarmList.clear();
             parentAlarmSupport = null;
+            super.setSupportState(SupportState.readyForInitialize);
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.support.AlarmSupport#beginProcess()

@@ -1,17 +1,13 @@
 <?xml version="1.0" ?>
 <DBDefinition>
 
-<structure name = "boolean" supportName = "booleanRecord" >
+<structure name = "boolean" supportName = "generic" >
     <include href = "booleanCommon.xml" />
 </structure>
 
-<recordType name = "boolean" supportName = "booleanRecord" >
+<recordType name = "boolean" supportName = "generic" >
     <include href = "common.xml" />
     <include href = "booleanCommon.xml" />
 </recordType>
-
-<support name = "booleanRecord"
-   factoryName = "org.epics.ioc.recordSupport.BooleanFactory" />
-
 
 </DBDefinition>

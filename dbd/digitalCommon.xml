@@ -1,15 +1,11 @@
 <?xml version="1.0" ?>
 <DBDefinition>
-    <field name = "value" type = "enum" design = "false" >
+    <field name = "value" type = "enum" design = "false">
         <property name = "alarm" associatedField = "alarm" />
         <property name = "timeStamp" associatedField = "/timeStamp" />
     </field>
-    <!-- structureName must be digitalState -->
-    <field name = "states" type = "array" elementType = "structure" />
-    <field name = "numberOfBits" type = "int" />
-    <field name = "rawValue" type = "int" design = "false" />
-    <field name = "input" type = "link" />
-    <field name = "digitalAlarm" type = "link" supportName = "digitalAlarm" />
+    <field name = "digitalIO" type = "structure"
+        structureName = "digitalIO" supportName = "digital" />
     <field name = "output" type = "link" />
     <field name = "linkArray" type = "array"
          elementType = "structure" supportName = "linkArray" />

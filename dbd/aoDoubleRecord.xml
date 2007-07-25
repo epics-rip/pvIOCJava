@@ -1,11 +1,11 @@
 <?xml version="1.0" ?>
 <DBDefinition>
 
-<structure name = "aoDouble" supportName = "doubleRecord" >
+<structure name = "aoDouble" supportName = "generic" >
     <include href = "aoDoubleCommon.xml" />
 </structure>
 
-<recordType name = "aoDouble" supportName = "doubleRecord" >
+<recordType name = "aoDouble" supportName = "generic" >
     <include href = "common.xml" />
     <include href = "aoDoubleCommon.xml" />
 </recordType>

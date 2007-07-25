@@ -203,7 +203,7 @@ public abstract class AbstractPVField implements PVField{
     
     private void createFullFieldAndRequesterNames() {
         if(this==record) {
-            fullFieldName = fullName = "";
+            fullFieldName = fullName = record.getRecordName();
             return;
         }
         StringBuilder fieldName = new StringBuilder();

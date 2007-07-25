@@ -38,8 +38,6 @@ public class IOCDBFactory {
     private static class IOCDBInstance implements IOCDB
     {
         private String name;
-        private ArrayList<IOCDBMergeListener> mergeListenerList =
-            new ArrayList<IOCDBMergeListener>();
         private LinkedHashMap<String,DBRecord> recordMap = 
             new LinkedHashMap<String,DBRecord>();
         private ReentrantReadWriteLock rwLock = 
@@ -70,37 +68,15 @@ public class IOCDBFactory {
          */
         public void mergeIntoMaster() {
             if(this==master) return;
-            ArrayList<IOCDBMergeListener> mergeListenerList = null;
             rwLock.writeLock().lock();
             try {
                 master.merge(recordMap);
                 recordMap.clear();
-                mergeListenerList = (ArrayList<IOCDBMergeListener>)(this.mergeListenerList.clone());
-                this.mergeListenerList.clear();
             } finally {
                 rwLock.writeLock().unlock();
             }
-            Iterator<IOCDBMergeListener> iter = mergeListenerList.iterator();
-            while(iter.hasNext()) {
-                iter.next().merged();
-                iter.remove();
-            }
         }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.db.IOCDB#addIOCDBMergeListener(org.epics.ioc.db.IOCDBMergeListener)
-         */
-        public void addIOCDBMergeListener(IOCDBMergeListener listener) {
-            if(this==master) {
-                listener.merged();
-            } else {
-                rwLock.writeLock().lock();
-                try {
-                    mergeListenerList.add(listener);
-                } finally {
-                    rwLock.writeLock().unlock();
-                }
-            }
-        }
+        
         // merge allows master to be locked once instead of for each record instance
         private void merge(LinkedHashMap<String,DBRecord> from) {
             Set<String> keys;

@@ -30,7 +30,7 @@
         </input>
 
     </input>
-    <doubleAlarm>
+    <valueAlarm>
         <configure structureName = "doubleAlarm">
           <active>true</active>
           <interval>
@@ -58,7 +58,7 @@
           <outOfRange>invalid</outOfRange>
           <hystersis>0.1</hystersis>
         </configure>
-    </doubleAlarm>
+    </valueAlarm>
     <displayLimit>
         <low>0.0</low>
         <high>10.0</high>
@@ -102,7 +102,7 @@
         </output>
 
     </output>
-    <doubleAlarm>
+    <valueAlarm>
         <configure structureName = "doubleAlarm">
           <active>true</active>
           <interval>
@@ -130,7 +130,7 @@
           <outOfRange>invalid</outOfRange>
           <hystersis>0.1</hystersis>
         </configure>
-    </doubleAlarm>
+    </valueAlarm>
     <displayLimit>
         <low>0.0</low>
         <high>10.0</high>

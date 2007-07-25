@@ -1,0 +1,206 @@
+<?xml version="1.0" ?>
+<IOCDatabase>
+
+<record name = "syncFloat64Driver" type = "portCreate">
+    <factoryName>org.epics.ioc.pdrv.testDriver.Float64DriverFactory</factoryName>
+    <portName>syncFloat64Driver</portName>
+    <driverParameters structureName = "float64Driver" >
+        <delay>0.0</delay>
+        <numberRegisters>2</numberRegisters>
+    </driverParameters>
+</record>
+
+<record name = "syncFloat64Counter" type = "calcDouble">
+    <calcArgArray>
+        <value structureName = "calcDoubleArg">
+            <value>-2100</value>
+            <name>min</name>
+        </value>
+        <value structureName = "calcDoubleArg">
+            <value>2100</value>
+            <name>max</name>
+        </value>
+        <value structureName = "calcDoubleArg">
+            <value>100</value>
+            <name>inc</name>
+        </value>
+    </calcArgArray>
+    <calculator supportName = "counterCalculator" />
+    <units>counts</units>
+    <scan>
+        <scan>periodic</scan>
+        <rate>0.5</rate>
+    </scan>
+    <linkArray>
+        <value structureName = "linkArrayElement">
+            <wait>false</wait>
+            <link  supportName = "outputLink" >
+                <configure structureName = "outputLink">
+                    <pvname>syncFloat64Out</pvname>
+                    <process>true</process>
+                </configure>
+            </link>
+        </value>
+    </linkArray>
+</record>
+
+<record name = "syncFloat64Out" type = "double">
+    <output supportName = "pdrvFloat64Output" >
+        <configure structureName = "pdrvLink">
+            <portName>syncFloat64Driver</portName>
+            <addr>0</addr>
+            <timeout>.2</timeout>
+        </configure>
+    </output>
+    <linkArray>
+        <value structureName = "linkArrayElement">
+            <wait>false</wait>
+            <link  supportName = "processLink" >
+                <configure structureName = "processLink">
+                    <pvname>syncFloat64In</pvname>
+                </configure>
+            </link>
+        </value>
+    </linkArray>
+</record>
+
+<record name = "syncFloat64In" type = "double">
+    <input supportName = "pdrvFloat64Input" >
+        <configure structureName = "pdrvLink">
+            <portName>syncFloat64Driver</portName>
+            <addr>0</addr>
+            <timeout>.2</timeout>
+            <size>20</size>
+        </configure>
+    </input>
+</record>
+
+<record name = "syncFloat64InInterrupt" type = "double">
+    <input supportName = "pdrvFloat64InterruptInput" >
+        <configure structureName = "pdrvLink">
+            <portName>syncFloat64Driver</portName>
+            <addr>0</addr>
+            <process>true</process>
+            <size>20</size>
+        </configure>
+    </input>
+</record>
+
+<record name = "syncFloat64InAverage" type = "double">
+    <input supportName = "pdrvFloat64AverageInput" >
+        <configure structureName = "pdrvLink">
+            <portName>syncFloat64Driver</portName>
+            <addr>0</addr>
+            <size>20</size>
+        </configure>
+    </input>
+    <scan>
+        <scan>periodic</scan>
+        <rate>5.0</rate>
+    </scan>
+</record>
+
+<record name = "asynFloat64Driver" type = "portCreate">
+    <factoryName>org.epics.ioc.pdrv.testDriver.Float64DriverFactory</factoryName>
+    <portName>asynFloat64Driver</portName>
+    <driverParameters structureName = "float64Driver" >
+        <delay>0.1</delay>
+        <numberRegisters>2</numberRegisters>
+    </driverParameters>
+</record>
+
+<record name = "asynFloat64Counter" type = "calcDouble">
+    <calcArgArray>
+        <value structureName = "calcDoubleArg">
+            <value>-100</value>
+            <name>min</name>
+        </value>
+        <value structureName = "calcDoubleArg">
+            <value>4100</value>
+            <name>max</name>
+        </value>
+        <value structureName = "calcDoubleArg">
+            <value>100</value>
+            <name>inc</name>
+        </value>
+    </calcArgArray>
+    <calculator supportName = "counterCalculator" />
+    <units>counts</units>
+    <scan>
+        <scan>periodic</scan>
+        <rate>0.5</rate>
+    </scan>
+    <linkArray>
+        <value structureName = "linkArrayElement">
+            <wait>false</wait>
+            <link  supportName = "outputLink" >
+                <configure structureName = "outputLink">
+                    <pvname>asynFloat64Out</pvname>
+                    <process>true</process>
+                </configure>
+            </link>
+        </value>
+    </linkArray>
+</record>
+
+<record name = "asynFloat64Out" type = "double">
+    <output supportName = "pdrvFloat64Output" >
+        <configure structureName = "pdrvLink">
+            <portName>asynFloat64Driver</portName>
+            <addr>0</addr>
+            <timeout>.2</timeout>
+        </configure>
+    </output>
+    <linkArray>
+        <value structureName = "linkArrayElement">
+            <wait>false</wait>
+            <link  supportName = "processLink" >
+                <configure structureName = "processLink">
+                    <pvname>asynFloat64In</pvname>
+                </configure>
+            </link>
+        </value>
+    </linkArray>
+</record>
+
+<record name = "asynFloat64In" type = "double">
+    <input supportName = "pdrvFloat64Input" >
+        <configure structureName = "pdrvLink">
+            <portName>asynFloat64Driver</portName>
+            <addr>0</addr>
+            <timeout>.2</timeout>
+            <size>20</size>
+        </configure>
+    </input>
+</record>
+
+<record name = "asynFloat64InInterrupt" type = "double">
+    <input supportName = "pdrvFloat64InterruptInput" >
+        <configure structureName = "pdrvLink">
+            <portName>asynFloat64Driver</portName>
+            <addr>0</addr>
+            <process>true</process>
+            <size>20</size>
+        </configure>
+    </input>
+</record>
+
+<record name = "asynFloat64InAverage" type = "double">
+    <input supportName = "pdrvFloat64AverageInput" >
+        <configure structureName = "pdrvLink">
+            <portName>asynFloat64Driver</portName>
+            <addr>0</addr>
+            <size>20</size>
+        </configure>
+    </input>
+    <scan>
+        <scan>periodic</scan>
+        <rate>5.0</rate>
+    </scan>
+</record>
+
+<!--
+-->
+
+
+</IOCDatabase>

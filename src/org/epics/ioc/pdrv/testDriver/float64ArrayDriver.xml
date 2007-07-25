@@ -1,0 +1,9 @@
+<?xml version="1.0" ?>
+<DBDefinition>
+
+<structure name = "float64ArrayDriver">
+    <field name = "delay" type = "double" />
+    <field name = "maxSegmentSize" type = "int" />
+</structure>
+
+</DBDefinition>

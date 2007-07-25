@@ -1,0 +1,626 @@
+<center>
+<h2 style="text-align: center">Purpose</h2>
+</center>
+
+<p><b>portDriver</b> is a general purpose facility for interfacing 
+support code to low level drivers. Devices are accessed via a port.
+portDriver allows non-blocking device support that works with both blocking
+and non-blocking drivers.</p>
+
+<p>A primary target for portDriver is support for fields of JavaIOC records.
+However much of it is independent of EPICS.</p>
+
+<p>portDriver has the following key concepts:</p>
+<ul>
+  <li>A driver must implement interfaces PortDriver and
+  DeviceDriver.</li>
+  <li>For the port and for each device a driver implements some set of
+   interfaces.</li>
+  <li>Support communicates with drivers via the driver's interfaces.
+    <p>Drivers take care of the details of how to communicate with a device
+    and implement interfaces for use by support. Interfaces are
+    defined for both message and register based devices.</p>
+  </li>
+  <li>A port provides access to device instances 
+    <p>A port, which has a portName, identifies a communication path to one
+    or more device instances. For example a GPIB port can have up to 15
+    devices connected to it. An RS232 port communicates with a single device.
+    Drivers register a port. Support connects to a port.</p>
+  </li>
+  <li>An interface Port controls access to a port 
+    <p>Port provides exclusive access to a
+    driver via calls to queueRequest or lockPort/unlockPort. Once
+    support has access, it can make an arbitrary number of calls to the
+    driver knowing that no other support can call the driver. Support and
+    drivers do not need to implement queues or semaphores since
+    Port does this for them.</p>
+  </li>
+  <li>Trace provides a general purpose diagnostic facility 
+    <p>Rules are defined for providing diagnostic messages. Provided support
+    and drivers follow the rules, a user can obtain several levels of
+    diagnostic information that can be displayed on the console, written to a
+    file, or sent to an error logging facility.</p>
+  </li>
+  <li>pdrvRecord - Generic access to an device/port <br />
+     NOT IMPLEMENTED.
+  </li>
+  <li>Extensive Serial Support - NOT IMPLEMENTED
+    <p>portDriver provides many facilities for communicating with RS232,
+    RS485, GPIB, and ethernet.</p>
+  </li>
+</ul>
+<hr />
+
+<center>
+<h2 style="text-align: center">Status</h2>
+</center>
+
+<p>This version provides</p>
+<ul>
+  <li>Factory: Implementations of User, Port, Device, and Trace.</li>
+  <li>standard interfaces: Standard message and register based interfaces are
+    defined. Low Level Drivers implement standard interfaces. Support
+    communicates with low level drivers via standard interfaces.</li>
+  <li>PdrvLinkSupport: Generic support for javaIOC records.</li>
+</ul>
+
+<p>The following are some of the existing EPICS general purpose device
+support systems that should be converted to Java and used by portDriver.</p>
+<ul>
+  <li>STREAMS is the protocol file-based support for serial/GPIB/CAN from
+    Dirk Zimoch.</li>
+</ul>
+<hr />
+
+<center>
+<h2 style="text-align: center">Acknowledgments</h2>
+</center>
+
+<p>portDriver is modeled after asynDriver.</p>
+<hr />
+
+<center>
+<h2 style="text-align: center">Overview of portDriver</h2>
+</center>
+
+<h3>Definitions</h3>
+
+<p>portDriver is a software layer between device specific code and drivers
+that communicate with devices. It supports both blocking and non-blocking
+communication and can be used with both register and message based devices.
+portDriver uses the following terminology:</p>
+<ul>
+  <li>interface <br />
+    All communication between software layers is done via Java interfaces.
+  </li>
+  <li>port <br />
+    A physical or logical entity which provides access to a device. A port
+    provides access to one or more devices.
+  </li>
+  <li>portDriver 
+    <p>Code that communicates with a port.</p>
+  </li>
+  <li>portThread 
+    <p>If a portDriver can block, a thread is created for each port, and all
+    I/O to the portDriver is done via this thread.</p>
+  </li>
+  <li>device 
+    <p>A device (instrument) connected to a port. For example a GPIB
+    interface can have up to 15 devices connected to it. Other ports, e.g.
+    EIA232 serial ports, only support a single device. Whenever this document
+    uses the word device without a qualifier, it means something that is
+    connected to a port.</p>
+  </li>
+  <li>device support 
+    <p>Code that interacts with a device.</p>
+  </li>
+  <li>synchronous 
+    <p>Support that does not voluntarily give up control of the CPU.</p>
+  </li>
+  <li>asynchronous 
+    <p>Support that is not synchronous. Some examples of asynchronous
+    operations are epicsThreadSleep, epicsEventWait, and stdio operations.
+    Calls to epicsMutexTake are considered to be synchronous operations, i.e.
+    they are permitted in synchronous support.</p>
+  </li>
+  <li>portDriver 
+    <p>The name for the support described in this manual. It is also the name
+    of the header file that describes the core interfaces.</p>
+  </li>
+  <li>asynManager 
+    <p>An interface and the code which implements the methods for interfaces
+    asynManager and asynTrace.</p>
+  </li>
+  <li>asynchronous Driver 
+    <p>A driver that blocks while communicating with a device. Typical
+    examples are serial, gpib, and network based drivers.</p>
+  </li>
+  <li>synchronous Driver 
+    <p>A driver that does not block while communicating with a device.
+    Typical examples are VME register based devices.</p>
+  </li>
+  <li>Message Based Interfaces 
+    <p>Interfaces that use octet arrays for read/write operations.</p>
+  </li>
+  <li>Register Based Interfaces 
+    <p>Interfaces that use integers or floats for read/write operations.</p>
+  </li>
+  <li>interrupt 
+    <p>As implemented by asynManager, interrupt just means "I have a new
+    value for port, address".</p>
+  </li>
+</ul>
+
+<p>Synchronous/asynchronous and message/register are orthogonal concepts. For
+example a register based driver can be either synchronous or asynchronous.
+The terminology register vs message is adapted from VXI.</p>
+
+<p>Standard interfaces are defined so that device specific code can
+communicate with multiple port drivers. For example if device support does
+all its communication via reads and writes consisting of 8 bit bytes
+(octets), then it should work with all port drivers that support octet
+messages. If device support requires more complicated support, then the types
+of ports will be more limited. Standard interfaces are also defined for
+drivers that accept 32 bit integers or 64 bit floats. Additional interfaces
+can be defined, and it is expected that additional standard interfaces will
+be defined.</p>
+
+<p>One or more devices can be attached to a port. For example, only one
+device can be attached to an RS-232 port, but up to 15 devices can be
+attached to a GPIB port.</p>
+
+<p>Multiple layers can exist between device specific code and a port driver.
+A software layer calls interposeInterface in order to be placed between
+device specific code and drivers. For more complicated protocols, additional
+layers can be created. For example, GPIB support is implemented as an
+asynGpib interface which is called by user code, and an asynGpibPort
+interface which is called by asynGpib.</p>
+
+<p>A driver normally implements multiple interfaces. For example asynGpib
+implements asynCommon, asynOctet, and asynGpib.</p>
+
+<p>asynManager uses the Operating System Independent features of EPICS base.
+It is, however, independent of record/device support. Thus, it can be used by
+other code, e.g. a sequence program.</p>
+
+<h3>Interfaces</h3>
+
+<p>These are interfaces provided by asynManager or interfaces implemented by
+all or most port drivers.</p>
+
+<p>The interfaces are:</p>
+
+<p><span style="font-weight: bold">asynManager</span> provides services for
+communicating with a device connected to a port.</p>
+
+<p><span style="font-weight: bold">asynCommon</span> is an interface that
+must be implemented by all low level drivers. The methods are:</p>
+<ul>
+  <li>report - Report status of port.</li>
+  <li>connect - Connect to the port or device.</li>
+  <li>disconnect - Disconnect from the port or device.</li>
+</ul>
+
+<p><span style="font-weight: bold">asynTrace</span> is an interface for
+generating diagnostic messages.</p>
+
+<p><span style="font-weight: bold">asynLockPortNotify</span> is an interface
+that is implemented by a driver which is an asynUser of another driver. An
+example is a serial bus driver that uses standard serial support. asynManager
+calls asynLockPortNotify whenever it locks or unlocks the port.</p>
+
+<p><span style="font-weight: bold">asynDrvUser</span> is an interface for
+communicating information from device support to a driver without the device
+support knowing any details about what is passed.</p>
+
+<h3>Generic Interfaces</h3>
+
+<p>In addition to <span style="font-weight: bold">asynCommon</span> and
+optionally <span style="font-weight: bold">asynDrvUser</span>, port drivers
+can implement one or more of the following message and/or register based
+interfaces.</p>
+
+<p><span style="font-weight: bold">asynOctet</span> methods for message based
+devices</p>
+
+<p><span style="font-weight: bold">asynFloat64</span> methods for devices
+that read/write IEEE float values</p>
+
+<p><span style="font-weight: bold">asynFloat64Array</span> methods for
+devices that read/write arrays of IEEE float values</p>
+
+<p><span style="font-weight: bold">asynInt32</span> methods for devices that
+read/write integer values. Many analog I/O drivers can use this interface.</p>
+
+<p><span style="font-weight: bold">asynInt32Array</span> methods for devices
+that read/write arrays of integer values</p>
+
+<p><span style="font-weight: bold">asynUInt32Digital</span> methods for
+devices that read/write arrays of digital values. This interface provides a
+mask to address individual bits within registers.</p>
+
+<h3>asynManager</h3>
+
+<p>asynManager is an interface and associated code. It is the "heart" of
+portDriver since it manages the interactions between device support code and
+drivers. It provides the following services:</p>
+<ul>
+  <li>reporting 
+    <p>Method: report</p>
+  </li>
+  <li>asynUser creation 
+    <p>Methods: createAsynUser, duplicateAsynUser, freeAsynUser</p>
+    <p>An asynUser is a "handle" for accessing asynManager services and for
+    calling interfaces implemented by drivers. An asynUser must only be
+    created via a call to createAsynUser or duplicateAsynUser since
+    asynManager keeps private information for each asynUser. freeAsynUser
+    puts the asynUser on a free list rather than calling free. Clients can
+    continually create and free asynUsers quickly and without fragmenting
+    memory.</p>
+    <p>The call to createAsynUser specifies a processCallback and a
+    timeoutCallback. These are the callbacks that will be called as a result
+    of a queueRequest.</p>
+    <p>An asynUser should not be shared between parts of code that can
+    simultaneously access a driver. For example device support for standard
+    EPICS records should create an asynUser for each record instance.</p>
+  </li>
+  <li>Basic asynUser services 
+    <p>Methods: connectDevice, disconnect, findInterface</p>
+    <p>These methods should only be called by the code that created the
+    asynUser.</p>
+    <p>After an asynUser is created the user calls connectDevice. The user is
+    connected to a port driver that can communicate with a device.
+    findInterface is called for each interface the user requires. disconnect
+    is called when the user is done with the device.</p>
+  </li>
+  <li>Queuing services 
+    <p>Methods: queueRequest, cancelRequest, lockPort, unlockPort,
+    blockProcessCallback, unblockProcessCallback</p>
+    <p>queueRequest is a request to call the processCallback specified in the
+    call to createAsynUser. Most interface methods must only be called from
+    processCallback via a call to queueRequest or between calls to
+    lockPort/unlockPort.. Exceptions to this rule must be clearly documented
+    ( a common exception are methods
+    registerInterruptUser/cancelInterruptUser).</p>
+    <p>queueRequest semantics differ for ports that can block and ports that
+    do not block</p>
+    <p>When registerPort is called by a driver that can block, a thread is
+    created for the port. A set of queues, based on priority, is created for
+    the thread. queueRequest puts the request on one of the queues. The port
+    thread takes the requests from the queues and calls the associated
+    callback. Only one callback is active at a time.</p>
+    <p>When registerPort is called by a driver that does not block, a mutex
+    is created for the port. queueRequest takes the mutex, calls the
+    callback, and releases the mutex. The mutex guarantees that two callbacks
+    to a port are not active at the same time.</p>
+    <p>lockPort is a request to lock all access to low level drivers until
+    unlockPort is called. If the port blocks then lockPort and all calls to
+    the port driver may block. lockPort/unlockPort are provided for use by
+    code that is willing to block or for communication with synchronous
+    ports. A call to lockPort locks all addresses associated with a
+    multi-address port.</p>
+    <p>blockProcessCallback is a request to prevent acccess to a device or
+    port by other asynUsers between queueRequests. blockProcessCallback can
+    be called from a processCallback or when the asynUser has no request
+    queued. When called from processCallback blocking starts immediately,
+    otherwise blocking starts the next time processCallback is called.
+    Blocking means that no other asynUser's processCallback will be called
+    until unblockProcessCallback is called. blockProcessCallback only works
+    with drivers that can block and an error is returned if it is called for
+    non-blocking drivers.</p>
+  </li>
+  <li>Basic Driver services 
+    <p>Methods: registerPort,registerInterface</p>
+    <p>registerPort is called by a portDriver. registerInterface is called by
+    a portDriver or an interposeInterface.</p>
+    <p>Each port driver provides a configuration command that is executed for
+    each port instance. The configuration command performs port specific
+    initializations, calls registerPort, and registerInterface for each
+    interface it implements.</p>
+  </li>
+  <li>Attribute Retrieval 
+    <p>Methods: isMultiDevice, canBlock, getAddr, getPortName, isConnected,
+    isEnabled, isAutoConnect</p>
+    <p>These methods can be called by any code that has access to the
+    asynUser</p>
+  </li>
+  <li>Connection services 
+    <p>Methods: enable,autoConnect</p>
+    <p>These methods can be called by any code that has access to the
+    asynUser.</p>
+    <p>These methods can be called to set the enable and autoConnect settings
+    for a port and/or device. queueManager implements autoConnect by calling
+    asynCommon:connect just before it calls processCallback. It does this if
+    autoConnect is true and a port/device is enabled but not connected.</p>
+  </li>
+  <li>Exception services 
+    <p>Methods: exceptionCallbackAdd, exceptionCallbackRemove,
+    exceptionConnect, exceptionDisconnect</p>
+    <p>Device support code calls exceptionCallbackAdd and
+    exceptionCallbackRemove. The complete list of exceptions is defined in
+    portDriver.h as "enum asynException".</p>
+    <p>Whenever a port driver connects or disconnects, normally as a result
+    of a call to asynCommon:connect or asynCommon:disconnect, it must also
+    call exceptionConnect or exceptionDisconnect.</p>
+  </li>
+  <li>Interrupt services 
+    <p>Methods: registerInterruptSource, getInterruptPvt,
+    createInterruptNode, freeInterruptNode, addInterruptUser,
+    removeInterruptUser, interruptStart, interruptEnd</p>
+    <p>Interrupt just means: "I have a new value." Many asyn interfaces, e.g.
+    asynInt32, provide interrupt support. These interfaces provide methods
+    addInterruptUser and removeInterruptUser. Device support calls
+    addInterruptUser if it wants to be called whenever an interrupt occurs.
+    Drivers or other code that implements the interface calls the registered
+    users when it has new data. asynManager provides services that help
+    drivers implement thread-safe support for interrupts.</p>
+    <p>A driver that supports interrupts calls registerInterruptSource for
+    each interface that has associated interrupts. It calls interruptStart to
+    obtain a list of all registered users and interruptEnd after it calls the
+    registered users. The driver is also responsible for calling
+    addInterruptUser and removeInterruptUser.</p>
+    <p>If any calls are made to addInterruptUser or removeInterruptUser
+    between the calls to interruptStart and interruptEnd, asynManager puts
+    the request on a list and processes the request after interruptEnd is
+    called.</p>
+    <p>Many standard interfaces, e.g. asynInt32, provide methods
+    registerInterruptUser, cancelInterruptUser. These interfaces also provide
+    an auxilliary interface, e.g. asynInt32Base, and code which implements
+    registerInterruptUser and cancelInterruptUser.</p>
+  </li>
+  <li>Interpose service 
+    <p>Method: interposeInterface</p>
+    <p>Code that calls interposeInterface implements an interface which is
+    either not supported by a port driver or that is "interposed" between the
+    caller and the port driver. For example asynInterposeEos interposes
+    asynOctet. It performs end of string processing for port drivers that do
+    not support it.</p>
+    <p>interposeInterface is recursive, i.e. an arbitrary number of interpose
+    layers can exist above a single port,addr.</p>
+  </li>
+</ul>
+
+<h3>Multiple Device vs Single Device Port Drivers</h3>
+
+<p>When a low level driver calls registerPort, it declares if it handles
+multiple devices. This determines how the addr argument to connectDevice is
+handled and what getAddr returns.</p>
+<ul>
+  <li>multiDevice false 
+    <p>The addr argument to connectDevice is ignored and getAddr always
+    returns -1</p>
+  </li>
+  <li>multiDevice true 
+    <p>If connectDevice is called with addr&lt;0, the connection is to the
+    port and getAddr always returns -1. If addr&gt;=0, then the caller is
+    connected to the device at the specified address. getAddr will return
+    this address. An asynUser connected to the port can issue requests that
+    affect all address on the port. For example disabling access to the port
+    prevents access to all addresses on the port.</p>
+  </li>
+</ul>
+
+<h3>Connection Management</h3>
+
+<p>asynManager keeps track of the following states:</p>
+<ul>
+  <li>connection 
+    <p>Is the port or device connected? This state is initialized to
+    disconnected.</p>
+  </li>
+  <li>enabled 
+    <p>Is the port or device enabled? This state is initialized to
+    enabled.</p>
+  </li>
+  <li>autoConnect 
+    <p>Does asynManager call connect if it finds the port or device
+    disconnected? This is initialized to the state specified in the call to
+    registerPort.</p>
+  </li>
+</ul>
+
+<p>If the port does not support multiple devices, then port and device status
+are the same. If the port does support multiple devices, then asynManager
+keeps track of the states for the port and for every device connected to the
+port.</p>
+
+<p>Whenever any of the states change for a port or device, then all users
+that previously called exceptionCallbackAdd for that port or device are
+called.</p>
+
+<p>Low level drivers must call pasynManager:exceptionConnect whenever they
+connect to a port or port,addr and exceptionDisconnect whenever they
+disconnect.</p>
+
+<h3>Protecting a Thread from Blocking</h3>
+
+<p>The methods asynManager:report and asynCommon:report can be called by any
+thread, but the caller is blocked until the report finishes. lockPort,
+unlockPort and most port methods may block. The other asynManager methods can
+be called by any thread including portThread. None of these methods block.</p>
+
+<p>Unless stated otherwise the methods for other interfaces must only be
+called by processCallback or by calls between lockPort/unlockPort.</p>
+
+<p>Interface methods registerInterruptUser and cancelInterruptUser must never
+block. The registerInterruptUser callback must not block because it could be
+called by a non blocking driver.</p>
+
+<h3>portThread</h3>
+
+<p>If a driver calls asynManager:registerPort with the ASYN_CANBLOCK
+attributes bit set, then asynManager creates a thread for the port. Each
+portThread has its own set of queues for the calls to queueRequest. Four
+queues are maintained. One queue is used only for asynCommon:connect and
+asynCommon:disconnect requests. The other queues provide different
+priorities: low, medium, and high. portThread runs forever implementing the
+following algorithm:</p>
+<ol>
+  <li>Wait for work by calling epicsEventMustWait. Other code such as
+    queueRequest call epicsEventSignal.</li>
+  <li>If the port is disabled, go back to 1.</li>
+  <li>For every element in queue, asynQueuePriorityConnect: 
+    <ul>
+      <li>Removes the element from the queue.</li>
+      <li>Calls the user's callback</li>
+    </ul>
+  </li>
+  <li>If the port is not connected and autoConnect is true for the port, then
+    attempt to connect to the port.</li>
+  <li>If the port is still not connected, go back to 1.</li>
+  <li>For each element of the queues asynQueuePriorityHigh,
+    ...,asynQueuePriorityLow. 
+    <ul>
+      <li>If disabled, skip this element.</li>
+      <li>If not connected and autoConnect is true for the device, then
+        attempt to connect to the device.</li>
+      <li>If not connected, skip this element.</li>
+      <li>If blocked by another thread, skip this element.</li>
+      <li>If not blocked and user has requested blocking, then blocked.</li>
+      <li>Remove from queue and: 
+        <ul>
+          <li>lockPort</li>
+          <li>call user callback</li>
+          <li>unlockPort</li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+</ol>
+
+<p>The actual code is more complicated because it unlocks before it calls
+code outside asynManager. This means that the queues can be modified and
+exceptions may occur.</p>
+<hr />
+
+<center>
+<h2 style="text-align: center">Theory of Operation</h2>
+</center>
+
+<h3>Initialization</h3>
+
+<p>During initialization, port drivers register each communication port as
+well as all supported interfaces.</p>
+
+<p>User code creates an asynUser, which is a "handle" for accessing
+portDriver facilities, by calling</p>
+<pre>    pasynManager-&gt;createAsynUser(processCallback,timeoutCallback);</pre>
+An asynUser has the following features: 
+<ul>
+  <li>An asynUser is the means by which asynManager manages multiple requests
+    for accessing a port.</li>
+  <li>processCallback,which is used by queueRequest described below, is the
+    addresss of a user supplied callback routine.</li>
+  <li>timeoutCallback is the address of caller supplied callback that will be
+    called if a queueRequest remains on the queue too long.</li>
+  <li>Device support code should create an asynUser for each "atomic" access
+    to low level drivers, i.e. a set of calls that must not be interlaced
+    with other calls to the low level drivers. For example device support for
+    EPICS record support should create an asynUser for each record
+  instance.</li>
+  <li>Device support code should NOT try to share an asynUser between
+    multiple sources of requests for access to a port. If this is done then
+    device support must itself handle contention issues that are already
+    handled by asynManager.</li>
+</ul>
+
+<p>User code connects to a low level driver via a call to</p>
+<pre>    status = pasynManager-&gt;connectDevice(pasynUser,portName,addr);</pre>
+This call must specify the name of the port and the address of the device. It
+then calls findInterface to locate the interfaces with which it calls the
+driver. For example: 
+<pre>     pasynInterface = pasynManager-&gt;findInterface(pasynUser,asynOctetType,1);</pre>
+
+<h3>Requesting access to a port</h3>
+
+<p>User code can request access to a port by two methods:</p>
+<ul>
+  <li>queueRequest - 
+    <p>The processCallback passed to createAsynUser makes calls to the port
+    interfaces.</p>
+  </li>
+  <li>lockPort/unlockPort - 
+    <p>The caller can make calls to the port interfaces while the lock is
+    held. These calls and calls to the port may block and thus should NOT be
+    used by code that should not block, e.g. synchronous device support for
+    EPICS records.</p>
+  </li>
+</ul>
+
+<h3>queueRequest - Flow of Control</h3>
+
+<p>User code requests access to a port by calling:</p>
+<pre>    status = pasynManager-&gt;queueRequest(pasynUser,priority,timeout);</pre>
+This results in either processCallback or timeoutCallback being called. Most
+requests to a port must be made from processCallback. queueRequest does not
+block. If queueRequest is called for a port that can block the request is
+queued to a thread dedicated to the port. If queueRequest is called for a
+port does not block it just calls processCallback. In either case multiple
+threads do not simultaneously call a low level driver. This guarantee is
+valid only if low level drivers are only accessed by calling queueRequest
+and/or lockPort/unlockPort 
+
+<p>The following examples are based on EPICS IOC record/device support.</p>
+
+<p>The first example shows access to a port that can block.</p>
+
+<p></p>
+
+<center>
+<img src="AsynFlow.jpg" alt="AsynFlow" border="1" /> 
+
+<p></p>
+
+<p>Figure 1: Asynchronous Control Flow</p>
+</center>
+The sequence of record device support events that occurs starting with an
+application thread is pictured above in Figure 1, and explained below in the
+following steps: 
+<ol>
+  <li>Record processing calls device support with PACT 0 (Processing is not
+    active).</li>
+  <li>Device support calls queueRequest.</li>
+  <li>queueRequest places the request on the driver work queue. The
+    application thread is now able to go on and perform other operations.
+    Subsequent operations for this I/O request are handled in the port driver
+    thread.</li>
+  <li>The portThread removes the I/O request from the work queue.</li>
+  <li>The portThread calls the processCallback located in Record device
+    support.</li>
+  <li>processCallback calls the low-level driver. The low-level driver read
+    or write routine blocks until the I/O completes or until a timeout
+    occurs. The low-level driver routine returns the results of the I/O
+    operation to processCallback.</li>
+  <li>processCallback requests that the record be processed. NOTE: The
+    process request will be made by one of the standard callback requests
+    rather than the port thread.</li>
+  <li>Record support calls device support again, this time with PACT
+    1(processing is active). Device support updates fields in the record and
+    returns to record support which completes record processing.</li>
+</ol>
+
+<p>The second example shows access to a port that cannot block.</p>
+
+<p></p>
+
+<center>
+<img src="AsynSynFlow.jpg" alt="AsynSynFlow" border="1" /> 
+
+<p>Figure 2: Synchronous Control Flow</p>
+</center>
+The sequence of record device support events that occurs starting with an
+application thread is pictured above in Figure 2, and explained below in the
+following steps: 
+<ol>
+  <li>Record processing calls device support.</li>
+  <li>Device support calls queueRequest.</li>
+  <li>Since the port is synchronous, i.e. can not block, queueRequest calls
+    lockPort and than the processCallback.</li>
+  <li>processCallback calls the low-level driver read or write routine. The
+    low-level driver routine returns the results of the I/O operation to
+    processCallback.</li>
+  <li>processCallback returns to queueRequest, which calls unlockPort and
+    returns to device support, which returns to record support, which
+    completes record processing.</li>
+</ol>
+<hr />

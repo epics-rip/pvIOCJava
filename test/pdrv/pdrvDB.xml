@@ -1,0 +1,16 @@
+<?xml version="1.0" ?>
+<IOCDatabase>
+<record name = "portDeviceControl" type = "portDeviceControl" />
+
+<include addPath = "test/pdrv" />
+<include href = "digitalDB.xml" />
+<include href = "booleanDB.xml" />
+<include href = "int32DB.xml" />
+<include href = "float64DB.xml" />
+<include href = "stringDB.xml" />
+<include href = "int32ArrayDB.xml" />
+<include href = "float64ArrayDB.xml" />
+<!--
+-->
+</IOCDatabase>
+

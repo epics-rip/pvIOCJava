@@ -124,6 +124,14 @@ public class SupportCreationFactory {
                     result = false;
                 }
             }
+            if(result) {
+                iter = records.iterator();
+                while(iter.hasNext()) {
+                    DBRecord record = iter.next();
+                    RecordProcess process = record.getRecordProcess();
+                    process.allSupportStarted();
+                }
+            }
             return result;
             
         }

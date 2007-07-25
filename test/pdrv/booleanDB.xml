@@ -1,7 +1,7 @@
 <?xml version="1.0" ?>
 <IOCDatabase>
 
-<record name = "syncBooleanDriver" type = "port">
+<record name = "syncBooleanDriver" type = "portCreate">
     <factoryName>org.epics.ioc.pdrv.testDriver.UInt32DigitalDriverFactory</factoryName>
     <portName>syncUInt32DigitalDriver</portName>
     <driverParameters structureName = "uint32DigitalDriver" >
@@ -10,17 +10,17 @@
     </driverParameters>
 </record>
 
-<record name = "syncBooleanCounter" type = "calc">
+<record name = "syncBooleanCounter" type = "calcDouble">
     <calcArgArray>
-        <value structureName = "calcArg">
+        <value structureName = "calcDoubleArg">
             <value>0</value>
             <name>min</name>
         </value>
-        <value structureName = "calcArg">
+        <value structureName = "calcDoubleArg">
             <value>32767</value>
             <name>max</name>
         </value>
-        <value structureName = "calcArg">
+        <value structureName = "calcDoubleArg">
             <value>1</value>
             <name>inc</name>
         </value>
@@ -91,6 +91,13 @@
             <timeout>.2</timeout>
         </configure>
     </input>
+    <valueAlarm>
+        <configure structureName = "booleanAlarm">
+          <active>true</active>
+          <falseAlarm>minor</falseAlarm>
+          <trueAlarm>major</trueAlarm>
+        </configure>
+    </valueAlarm>
 </record>
 
 <record name = "syncBooleanIn2" type = "boolean">
@@ -113,9 +120,16 @@
             <timeout>.2</timeout>
         </configure>
     </input>
+    <valueAlarm>
+        <configure structureName = "booleanAlarm">
+          <active>true</active>
+          <changeStateAlarm>minor</changeStateAlarm>
+          <trueAlarm>major</trueAlarm>
+        </configure>
+    </valueAlarm>
 </record>
 
-<record name = "asynBooleanDriver" type = "port">
+<record name = "asynBooleanDriver" type = "portCreate">
     <factoryName>org.epics.ioc.pdrv.testDriver.UInt32DigitalDriverFactory</factoryName>
     <portName>asynUInt32DigitalDriver</portName>
     <driverParameters structureName = "uint32DigitalDriver" >
@@ -124,18 +138,18 @@
     </driverParameters>
 </record>
 
-<record name = "asynBooleanCounter" type = "calc">
+<record name = "asynBooleanCounter" type = "calcDouble">
     <calcArgArray>
-        <value structureName = "calcArg">
-            <value>-100</value>
+        <value structureName = "calcDoubleArg">
+            <value>0</value>
             <name>min</name>
         </value>
-        <value structureName = "calcArg">
-            <value>4100</value>
+        <value structureName = "calcDoubleArg">
+            <value>7</value>
             <name>max</name>
         </value>
-        <value structureName = "calcArg">
-            <value>100</value>
+        <value structureName = "calcDoubleArg">
+            <value>1</value>
             <name>inc</name>
         </value>
     </calcArgArray>

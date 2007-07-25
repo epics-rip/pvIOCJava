@@ -1,26 +1,26 @@
 <?xml version="1.0" ?>
 <IOCDatabase>
 
-<record name = "syncEchoDriver" type = "port">
-    <factoryName>org.epics.ioc.pdrv.testDriver.EchoDriverFactory</factoryName>
-    <portName>syncEchoDriver</portName>
-    <driverParameters structureName = "echoDriver" >
+<record name = "syncOctetDriver" type = "portCreate">
+    <factoryName>org.epics.ioc.pdrv.testDriver.OctetDriverFactory</factoryName>
+    <portName>syncOctetDriver</portName>
+    <driverParameters structureName = "octetDriver" >
         <multiDevice>true</multiDevice>
         <delay>0.0</delay>
     </driverParameters>
 </record>
 
-<record name = "syncStringCounter" type = "calc">
+<record name = "syncStringCounter" type = "calcDouble">
     <calcArgArray>
-        <value structureName = "calcArg">
+        <value structureName = "calcDoubleArg">
             <value>0.0</value>
             <name>min</name>
         </value>
-        <value structureName = "calcArg">
+        <value structureName = "calcDoubleArg">
             <value>10.0</value>
             <name>max</name>
         </value>
-        <value structureName = "calcArg">
+        <value structureName = "calcDoubleArg">
             <value>1.0</value>
             <name>inc</name>
         </value>
@@ -51,7 +51,7 @@
 <record name = "syncStringOut" type = "string">
     <output supportName = "pdrvOctetOutput" >
         <configure structureName = "pdrvLink">
-            <portName>syncEchoDriver</portName>
+            <portName>syncOctetDriver</portName>
             <addr>0</addr>
             <timeout>.2</timeout>
         </configure>
@@ -71,7 +71,7 @@
 <record name = "syncStringIn" type = "string">
     <input supportName = "pdrvOctetInput" >
         <configure structureName = "pdrvLink">
-            <portName>syncEchoDriver</portName>
+            <portName>syncOctetDriver</portName>
             <addr>0</addr>
             <timeout>.2</timeout>
             <size>20</size>
@@ -82,7 +82,7 @@
 <record name = "syncStringInInterrupt" type = "string">
     <input supportName = "pdrvOctetInterruptInput" >
         <configure structureName = "pdrvLink">
-            <portName>syncEchoDriver</portName>
+            <portName>syncOctetDriver</portName>
             <addr>0</addr>
             <process>true</process>
             <size>20</size>
@@ -90,26 +90,26 @@
     </input>
 </record>
 
-<record name = "asynEchoDriver" type = "port">
-    <factoryName>org.epics.ioc.pdrv.testDriver.EchoDriverFactory</factoryName>
-    <portName>asynEchoDriver</portName>
-    <driverParameters structureName = "echoDriver" >
+<record name = "asynOctetDriver" type = "portCreate">
+    <factoryName>org.epics.ioc.pdrv.testDriver.OctetDriverFactory</factoryName>
+    <portName>asynOctetDriver</portName>
+    <driverParameters structureName = "octetDriver" >
         <multiDevice>true</multiDevice>
         <delay>0.1</delay>
     </driverParameters>
 </record>
 
-<record name = "asynStringCounter" type = "calc">
+<record name = "asynStringCounter" type = "calcDouble">
     <calcArgArray>
-        <value structureName = "calcArg">
+        <value structureName = "calcDoubleArg">
             <value>0.0</value>
             <name>min</name>
         </value>
-        <value structureName = "calcArg">
+        <value structureName = "calcDoubleArg">
             <value>10.0</value>
             <name>max</name>
         </value>
-        <value structureName = "calcArg">
+        <value structureName = "calcDoubleArg">
             <value>1.0</value>
             <name>inc</name>
         </value>
@@ -140,7 +140,7 @@
 <record name = "asynStringOut" type = "string">
     <output supportName = "pdrvOctetOutput" >
         <configure structureName = "pdrvLink">
-            <portName>asynEchoDriver</portName>
+            <portName>asynOctetDriver</portName>
             <addr>0</addr>
             <timeout>.2</timeout>
         </configure>
@@ -160,7 +160,7 @@
 <record name = "asynStringIn" type = "string">
     <input supportName = "pdrvOctetInput" >
         <configure structureName = "pdrvLink">
-            <portName>asynEchoDriver</portName>
+            <portName>asynOctetDriver</portName>
             <addr>0</addr>
             <timeout>.2</timeout>
             <size>20</size>
@@ -171,7 +171,7 @@
 <record name = "asynStringInInterrupt" type = "string">
     <input supportName = "pdrvOctetInterruptInput" >
         <configure structureName = "pdrvLink">
-            <portName>asynEchoDriver</portName>
+            <portName>asynOctetDriver</portName>
             <addr>0</addr>
             <process>true</process>
             <size>20</size>

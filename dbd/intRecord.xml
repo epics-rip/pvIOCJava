@@ -1,17 +1,13 @@
 <?xml version="1.0" ?>
 <DBDefinition>
 
-<structure name = "int" supportName = "intRecord" >
+<structure name = "int" supportName = "generic" >
     <include href = "intCommon.xml" />
 </structure>
 
-<recordType name = "int" supportName = "intRecord" >
+<recordType name = "int" supportName = "generic" >
     <include href = "common.xml" />
     <include href = "intCommon.xml" />
 </recordType>
-
-<support name = "intRecord"
-   factoryName = "org.epics.ioc.recordSupport.IntFactory" />
-
 
 </DBDefinition>

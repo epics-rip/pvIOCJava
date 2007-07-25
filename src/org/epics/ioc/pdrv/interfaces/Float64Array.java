@@ -17,6 +17,30 @@ import org.epics.ioc.pv.PVDoubleArray;
  */
 public interface Float64Array extends Interface, PVDoubleArray{
     /**
+     * Start a read.
+     * @param user The user
+     * @return If not Status.success then status.getMessage shows the reason the request failed.
+     */
+    Status startRead(User user);
+    /**
+     * End a read.
+     * @param user The user
+     * @return If not Status.success then status.getMessage shows the reason the request failed.
+     */
+    Status endRead(User user);
+    /**
+     * Start a write.
+     * @param user The user
+     * @return If not Status.success then status.getMessage shows the reason the request failed.
+     */
+    Status startWrite(User user);
+    /**
+     * End a write.
+     * @param user The user
+     * @return If not Status.success then status.getMessage shows the reason the request failed.
+     */
+    Status endWrite(User user);
+    /**
      * Register an interrupt listener.
      * @param user The user.
      * @param float64ArrayListener The listener interface.

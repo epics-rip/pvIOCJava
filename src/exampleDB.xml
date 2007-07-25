@@ -1,9 +1,17 @@
 <?xml version="1.0" ?>
 <IOCDatabase>
 <include addPath = "src" />
+<include href = "stringDB.xml" />
 <include href = "aiDB.xml" />
 <include href = "aoDB.xml" />
+<include href = "aoIncrementalDB.xml" />
 <include href = "monitorDB.xml" />
 <include href = "counterDB.xml" />
-<include href = "incrementalDouble.xml" />
+<include href = "arrayDB.xml" />
+<include href = "scalarDB.xml" />
+<include href = "booleanArrayDB.xml" />
+<include href = "powerSupplyAllDB.xml" />
+<include href = "eventDB.xml" />
+<!--
+-->
 </IOCDatabase>

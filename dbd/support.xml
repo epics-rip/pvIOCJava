@@ -70,22 +70,34 @@
 <support name = "calcArgArray"
    factoryName = "org.epics.ioc.support.CalcArgArrayFactory" />
 
-<!-- counter is an example calculator -->
 
-<linkSupport name = "counterCalculator"
-   factoryName = "org.epics.ioc.support.CounterCalculatorFactory" />
+<linkSupport name = "booleanAlarm"
+    configurationStructureName = "booleanAlarm" 
+   factoryName = "org.epics.ioc.support.BooleanAlarmFactory" />
 
-<linkSupport name = "doubleAlarm"
-    configurationStructureName = "doubleAlarm" 
-   factoryName = "org.epics.ioc.support.DoubleAlarmFactory" />
+<linkSupport name = "byteAlarm"
+    configurationStructureName = "byteAlarm" 
+   factoryName = "org.epics.ioc.support.ByteAlarmFactory" />
+
+<linkSupport name = "shortAlarm"
+    configurationStructureName = "shortAlarm" 
+   factoryName = "org.epics.ioc.support.ShortAlarmFactory" />
 
 <linkSupport name = "intAlarm"
     configurationStructureName = "intAlarm" 
    factoryName = "org.epics.ioc.support.IntAlarmFactory" />
 
-<linkSupport name = "booleanAlarm"
-    configurationStructureName = "booleanAlarm" 
-   factoryName = "org.epics.ioc.support.BooleanAlarmFactory" />
+<linkSupport name = "longAlarm"
+    configurationStructureName = "longAlarm" 
+   factoryName = "org.epics.ioc.support.LongAlarmFactory" />
+
+<linkSupport name = "floatAlarm"
+    configurationStructureName = "floatAlarm" 
+   factoryName = "org.epics.ioc.support.FloatAlarmFactory" />
+
+<linkSupport name = "doubleAlarm"
+    configurationStructureName = "doubleAlarm" 
+   factoryName = "org.epics.ioc.support.DoubleAlarmFactory" />
 
 <linkSupport name = "digitalAlarm"
     configurationStructureName = "digitalAlarm" 
@@ -95,5 +107,30 @@
     configurationStructureName = "delayLink"
     factoryName = "org.epics.ioc.support.DelayLinkFactory"
 />
+
+
+<support name = "generic"
+   factoryName = "org.epics.ioc.support.GenericFactory" />
+
+<support name = "event"
+   factoryName = "org.epics.ioc.support.EventFactory" />
+
+<support name = "digital"
+   factoryName = "org.epics.ioc.support.DigitalFactory" />
+
+<support name = "incremental"
+   factoryName = "org.epics.ioc.support.IncrementalFactory" />
+
+
+<!-- example calculators -->
+
+<linkSupport name = "counterCalculator"
+   factoryName = "org.epics.ioc.support.CounterCalculatorFactory" />
+
+<linkSupport name = "arrayIncrementCalculator"
+   factoryName = "org.epics.ioc.support.ArrayIncrementCalculatorFactory" />
+
+<linkSupport name = "booleanArrayToggleCalculator"
+   factoryName = "org.epics.ioc.support.BooleanArrayToggleCalculatorFactory" />
 
 </DBDefinition>

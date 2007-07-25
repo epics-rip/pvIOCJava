@@ -46,6 +46,6 @@ public class NoopFactory {
         private Noop(DBField dbField) {
             super(supportName,dbField);
         }
-        // The AbstractPdrvLinkSupport methods provide semantics
+        // The AbstractPDRVLinkSupport methods provide semantics
     }
 }

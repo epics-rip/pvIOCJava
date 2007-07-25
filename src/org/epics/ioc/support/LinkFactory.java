@@ -11,7 +11,7 @@ import org.epics.ioc.process.*;
 import org.epics.ioc.util.*;
 
 /**
- * This is a support for a structure that consists of a single link
+ * This is a support for a structure named link which must have a field named link.
  * @author mrk
  *
  */

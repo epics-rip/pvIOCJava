@@ -1,13 +1,13 @@
 <?xml version="1.0" ?>
 <DBDefinition>
 
-<recordType name = "event" supportName = "eventRecord">
+<structure name = "event" supportName = "generic" >
+    <include href = "eventCommon.xml" />
+</structure>
+
+<recordType name = "event" supportName = "generic" >
     <include href = "common.xml" />
-    <field name = "value" type = "string"/>
+    <include href = "eventCommon.xml" />
 </recordType>
-
-
-<support name = "eventRecord"
-   factoryName = "org.epics.ioc.recordSupport.EventFactory" />
 
 </DBDefinition>

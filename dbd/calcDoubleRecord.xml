@@ -1,0 +1,19 @@
+<?xml version="1.0" ?>
+<DBDefinition>
+
+<structure name = "calcDoubleArg" >
+    <field name = "value" type = "double" />
+    <field name = "name" type = "string" />
+    <field name = "input" type = "link" />
+</structure>
+
+<structure name = "calcDouble" supportName = "generic" >
+    <include href = "calcDoubleCommon.xml" />
+</structure>
+
+<recordType name = "calcDouble" supportName = "generic" >
+    <include href = "common.xml" />
+    <include href = "calcDoubleCommon.xml" />
+</recordType>
+
+</DBDefinition>

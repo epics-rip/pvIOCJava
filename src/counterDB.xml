@@ -1,16 +1,16 @@
 <?xml version="1.0" ?>
 <IOCDatabase>
-<record name = "counterCounter" type = "calc">
+<record name = "counterCounter" type = "calcDouble">
     <calcArgArray>
-        <value structureName = "calcArg">
+        <value structureName = "calcDoubleArg">
             <value>0.0</value>
             <name>min</name>
         </value>
-        <value structureName = "calcArg">
+        <value structureName = "calcDoubleArg">
             <value>10.0</value>
             <name>max</name>
         </value>
-        <value structureName = "calcArg">
+        <value structureName = "calcDoubleArg">
             <value>1.0</value>
             <name>inc</name>
         </value>
@@ -43,7 +43,7 @@
             </link>
         </value>
     </linkArray>
-    <doubleAlarm>
+    <valueAlarm>
         <configure structureName = "doubleAlarm">
           <active>true</active>
           <interval>
@@ -71,7 +71,7 @@
           <outOfRange>invalid</outOfRange>
           <hystersis>0.1</hystersis>
         </configure>
-    </doubleAlarm>
+    </valueAlarm>
     <units>counts</units>
     <displayLimit>
         <low>0.0</low>
@@ -91,7 +91,7 @@
         </configure>
     </input>
     <units>volts</units>
-    <doubleAlarm>
+    <valueAlarm>
         <configure structureName = "doubleAlarm">
           <active>true</active>
           <interval>
@@ -119,7 +119,7 @@
           <outOfRange>invalid</outOfRange>
           <hystersis>0.1</hystersis>
         </configure>
-    </doubleAlarm>
+    </valueAlarm>
     <displayLimit>
         <low>0.0</low>
         <high>10.0</high>
@@ -127,7 +127,7 @@
 </record>
 <record name = "double02FromCounter" type = "double">
     <units>volts</units>
-    <doubleAlarm>
+    <valueAlarm>
         <configure structureName = "doubleAlarm">
           <active>true</active>
           <interval>
@@ -155,7 +155,7 @@
           <outOfRange>invalid</outOfRange>
           <hystersis>0.1</hystersis>
         </configure>
-    </doubleAlarm>
+    </valueAlarm>
     <displayLimit>
         <low>0.0</low>
         <high>10.0</high>
@@ -170,7 +170,7 @@
         </configure>
     </input>
     <units>volts</units>
-    <doubleAlarm>
+    <valueAlarm>
         <configure structureName = "doubleAlarm">
           <active>true</active>
           <interval>
@@ -198,7 +198,7 @@
           <outOfRange>invalid</outOfRange>
           <hystersis>0.1</hystersis>
         </configure>
-    </doubleAlarm>
+    </valueAlarm>
     <displayLimit>
         <low>0.0</low>
         <high>10.0</high>

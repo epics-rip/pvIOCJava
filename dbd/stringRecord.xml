@@ -1,17 +1,13 @@
 <?xml version="1.0" ?>
 <DBDefinition>
 
-<structure name = "string" supportName = "stringRecord" >
+<structure name = "string" supportName = "generic" >
     <include href = "stringCommon.xml" />
 </structure>
 
-<recordType name = "string" supportName = "stringRecord" >
+<recordType name = "string" supportName = "generic" >
     <include href = "common.xml" />
     <include href = "stringCommon.xml" />
 </recordType>
-
-<support name = "stringRecord"
-   factoryName = "org.epics.ioc.recordSupport.StringFactory" />
-
 
 </DBDefinition>

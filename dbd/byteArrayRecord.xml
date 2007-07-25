@@ -1,0 +1,13 @@
+<?xml version="1.0" ?>
+<DBDefinition>
+
+<structure name = "byteArray" supportName = "generic" >
+    <include href = "byteArrayCommon.xml" />
+</structure>
+
+<recordType name = "byteArray" supportName = "generic" >
+    <include href = "common.xml" />
+    <include href = "byteArrayCommon.xml" />
+</recordType>
+
+</DBDefinition>

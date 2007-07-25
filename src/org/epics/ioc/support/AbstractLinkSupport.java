@@ -11,6 +11,7 @@ import org.epics.ioc.util.*;
 
 
 /**
+ * Extends AbstractSupport to implement getConfigStructure.
  * @author mrk
  *
  */

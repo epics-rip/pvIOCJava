@@ -10,7 +10,7 @@ import org.epics.ioc.pdrv.interfaces.*;
 import org.epics.ioc.pv.*;
 import org.epics.ioc.util.*;
 /**
- * The factory for echoDriver.
+ * The factory for uint32DigitalDriver.
  * uint32DigitalDriver is a portDriver for testing the uint32Digital support in org.epics.ioc.pdrv.support.
  * It requires the uint32DigitalDriver structure, which holds the following configuration parameters:
  * <ul>
@@ -18,8 +18,8 @@ import org.epics.ioc.util.*;
  *       The number of uint32Digital registers to simulate.
  *     </li>
  *     <li>delay<br/>
- *       If 0.0 then echoDriver is synchronous.
- *       If > 0.0 echoDriver is asynchronous and delays delay seconds after each read/write request.
+ *       If 0.0 then uint32DigitalDriver is synchronous.
+ *       If > 0.0 uint32DigitalDriver is asynchronous and delays delay seconds after each read/write request.
  *      </li>
  * </ul>
  * uint32DigitalDriver implements interface uint32Digital by keeping an internal int[] array
@@ -31,11 +31,11 @@ import org.epics.ioc.util.*;
 public class UInt32DigitalDriverFactory {
     
     /**
-     * Create a new instance of echoDriver.
+     * Create a new instance of uint32DigitalDriver.
      * @param portName The portName.
      * @param autoConnect Initial value for autoConnect.
      * @param priority The thread priority if asynchronous, i.e. delay > 0.0.
-     * @param pvStructure The interface for structure echoDriver.
+     * @param pvStructure The interface for structure uint32DigitalDriver.
      */
     static public void create(
         String portName,boolean autoConnect,ScanPriority priority,PVStructure pvStructure)
@@ -62,6 +62,7 @@ public class UInt32DigitalDriverFactory {
         private int[] register;
         private double delay;
         private Port port;
+        private String portName;
         private Trace trace;
         
         private UInt32DigitalDriver(String portName,boolean autoConnect,ScanPriority priority,
@@ -72,6 +73,7 @@ public class UInt32DigitalDriverFactory {
             boolean isMultiDevicePort = (numberRegisters==1) ? false : true;
             port = Factory.createPort(portName, this, "uint32DigitalDriver",
                 isMultiDevicePort, canBlock, autoConnect,priority);
+            portName = port.getPortName();
             trace = port.getTrace();
         }
         /* (non-Javadoc)
@@ -84,10 +86,10 @@ public class UInt32DigitalDriverFactory {
          * @see org.epics.ioc.pdrv.PortDriver#connect(org.epics.ioc.pdrv.User)
          */
         public Status connect(User user) {
-            trace.print(Trace.FLOW ,"connect");
+            trace.print(Trace.FLOW ,portName + " connect");
             if(port.isConnected()) {
                 user.setMessage("already connected");
-                trace.print(Trace.ERROR ,"already connected");
+                trace.print(Trace.ERROR ,portName + " already connected");
                 return Status.error;
             }
             port.exceptionConnect();
@@ -110,10 +112,10 @@ public class UInt32DigitalDriverFactory {
          * @see org.epics.ioc.pdrv.PortDriver#disconnect(org.epics.ioc.pdrv.User)
          */
         public Status disconnect(User user) {
-            trace.print(Trace.FLOW ,"disconnect");
+            trace.print(Trace.FLOW ,portName + " disconnect");
             if(!port.isConnected()) {
                 user.setMessage("not connected");
-                trace.print(Trace.ERROR ,"not connected");
+                trace.print(Trace.ERROR ,portName + " not connected");
                 return Status.error;
             }
             port.exceptionDisconnect();
@@ -123,6 +125,7 @@ public class UInt32DigitalDriverFactory {
             private int addr;
             private Device device;
             private Trace trace;
+            private String deviceName;
             
             private UInt32DigitalDevice(int addr) {
                 this.addr = addr;
@@ -130,6 +133,7 @@ public class UInt32DigitalDriverFactory {
             
             private void init(Device device) {
                 this.device = device;
+                deviceName = device.getPort().getPortName() + ":" + device.getAddr();
                 trace = device.getTrace();
                 new UInt32DigitalInterface();
             }
@@ -143,10 +147,10 @@ public class UInt32DigitalDriverFactory {
              * @see org.epics.ioc.pdrv.DeviceDriver#connect(org.epics.ioc.pdrv.User)
              */
             public Status connect(User user) {
-                trace.print(Trace.FLOW ,"connect");
+                trace.print(Trace.FLOW ,deviceName + " connect");
                 if(device.isConnected()) {
                     user.setMessage("already connected");
-                    trace.print(Trace.ERROR ,"already connected");
+                    trace.print(Trace.ERROR ,deviceName + " already connected");
                     return Status.error;
                 }
                 device.exceptionConnect();
@@ -156,24 +160,24 @@ public class UInt32DigitalDriverFactory {
              * @see org.epics.ioc.pdrv.DeviceDriver#disconnect(org.epics.ioc.pdrv.User)
              */
             public Status disconnect(User user) {
-                trace.print(Trace.FLOW ,"disconnect");
+                trace.print(Trace.FLOW ,deviceName + " disconnect");
                 if(!device.isConnected()) {
                     user.setMessage("not connected");
-                    trace.print(Trace.ERROR ,"not connected");
+                    trace.print(Trace.ERROR ,deviceName + " not connected");
                     return Status.error;
                 }
                 device.exceptionDisconnect();
                 return Status.success;
             }
             
-            private class UInt32DigitalInterface extends  UInt32DigitalBase{
+            private class UInt32DigitalInterface extends  AbstractUInt32Digital{
                 private long milliseconds;
                 private UInt32DigitalInterface() {
                     super(device,"uint32Digital");
                     milliseconds = (long)(delay * 1000.0);
                 }               
                 /* (non-Javadoc)
-                 * @see org.epics.ioc.pdrv.interfaces.UInt32DigitalBase#read(org.epics.ioc.pdrv.User, int)
+                 * @see org.epics.ioc.pdrv.interfaces.AbstractUInt32Digital#read(org.epics.ioc.pdrv.User, int)
                  */
                 public Status read(User user, int mask) {
                     double timeout = user.getTimeout();
@@ -190,11 +194,11 @@ public class UInt32DigitalDriverFactory {
                     }
                     int value = register[addr]&mask;
                     user.setInt(value);
-                    trace.print(Trace.DRIVER,"read value = " + value);
+                    trace.print(Trace.DRIVER,deviceName + " read value = " + value);
                     return Status.success;
                 }
                 /* (non-Javadoc)
-                 * @see org.epics.ioc.pdrv.interfaces.UInt32DigitalBase#write(org.epics.ioc.pdrv.User, int, int)
+                 * @see org.epics.ioc.pdrv.interfaces.AbstractUInt32Digital#write(org.epics.ioc.pdrv.User, int, int)
                  */
                 public Status write(User user, int value, int mask) {
                     double timeout = user.getTimeout();
@@ -212,7 +216,7 @@ public class UInt32DigitalDriverFactory {
                     int newValue = register[addr]&~mask;
                     newValue |= value&mask;
                     register[addr] = newValue;
-                    trace.print(Trace.DRIVER,"write value = " + register[addr]);
+                    trace.print(Trace.DRIVER,deviceName + " write value = " + register[addr]);
                     super.interruptOccured(newValue);
                     return Status.success;
                 }

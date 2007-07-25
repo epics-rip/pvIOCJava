@@ -1,0 +1,147 @@
+<?xml version="1.0" ?>
+<IOCDatabase>
+
+<record name = "syncInt32ArrayDriver" type = "portCreate">
+    <factoryName>org.epics.ioc.pdrv.testDriver.Int32ArrayDriverFactory</factoryName>
+    <portName>syncInt32ArrayDriver</portName>
+    <driverParameters structureName = "int32ArrayDriver" >
+        <delay>0.0</delay>
+        <maxSegmentSize>2</maxSegmentSize>
+    </driverParameters>
+</record>
+
+<record name = "syncInt32ArrayIncrementer" type = "calcDoubleArray">
+    <value capacity = "7">
+        <value>0.0 1.0 2.0 3.0 4.0 5.0 6.0</value>
+    </value>
+    <calculator supportName = "arrayIncrementCalculator" />
+    <linkArray>
+        <value structureName = "linkArrayElement">
+            <wait>false</wait>
+            <link  supportName = "outputLink" >
+                <configure structureName = "outputLink">
+                    <pvname>syncInt32ArrayOutput</pvname>
+                    <process>true</process>
+                </configure>
+            </link>
+        </value>
+    </linkArray>
+    <scan>
+        <scan>periodic</scan> 
+        <rate>1.0</rate>
+    </scan>
+</record>
+
+<record name = "syncInt32ArrayOutput" type = "doubleArray" >
+    <output supportName = "pdrvInt32ArrayOutput" >
+        <configure structureName = "pdrvLink">
+            <portName>syncInt32ArrayDriver</portName>
+            <addr>0</addr>
+            <timeout>1.0</timeout>
+        </configure>
+    </output>
+    <linkArray>
+        <value structureName = "linkArrayElement">
+            <wait>false</wait>
+            <link  supportName = "processLink" >
+                <configure structureName = "processLink">
+                    <pvname>syncInt32ArrayInput</pvname>
+                </configure>
+            </link>
+        </value>
+    </linkArray>
+</record>
+<record name = "syncInt32ArrayInput" type = "doubleArray" >
+    <input supportName = "pdrvInt32ArrayInput" >
+        <configure structureName = "pdrvLink">
+            <portName>syncInt32ArrayDriver</portName>
+            <addr>0</addr>
+            <timeout>1.0</timeout>
+            <size>20</size>
+        </configure>
+    </input>
+</record>
+<record name = "syncInt32ArrayInputInterrupt" type = "doubleArray" >
+    <input supportName = "pdrvInt32ArrayInterruptInput" >
+        <configure structureName = "pdrvLink">
+            <portName>syncInt32ArrayDriver</portName>
+            <addr>0</addr>
+            <process>true</process>
+            <size>20</size>
+        </configure>
+    </input>
+</record>
+
+<record name = "asynInt32ArrayDriver" type = "portCreate">
+    <factoryName>org.epics.ioc.pdrv.testDriver.Int32ArrayDriverFactory</factoryName>
+    <portName>asynInt32ArrayDriver</portName>
+    <driverParameters structureName = "int32ArrayDriver" >
+        <delay>0.1</delay>
+        <maxSegmentSize>0</maxSegmentSize>
+    </driverParameters>
+</record>
+
+<record name = "asynInt32ArrayIncrementer" type = "calcDoubleArray">
+    <value capacity = "7">
+        <value>0.0 1.0 2.0 3.0 4.0 5.0 6.0</value>
+    </value>
+    <calculator supportName = "arrayIncrementCalculator" />
+    <linkArray>
+        <value structureName = "linkArrayElement">
+            <wait>false</wait>
+            <link  supportName = "outputLink" >
+                <configure structureName = "outputLink">
+                    <pvname>asynInt32ArrayOutput</pvname>
+                    <process>true</process>
+                </configure>
+            </link>
+        </value>
+    </linkArray>
+    <scan>
+        <scan>periodic</scan> 
+        <rate>1.0</rate>
+    </scan>
+</record>
+
+<record name = "asynInt32ArrayOutput" type = "doubleArray" >
+    <output supportName = "pdrvInt32ArrayOutput" >
+        <configure structureName = "pdrvLink">
+            <portName>asynInt32ArrayDriver</portName>
+            <addr>0</addr>
+            <timeout>1.0</timeout>
+        </configure>
+    </output>
+    <linkArray>
+        <value structureName = "linkArrayElement">
+            <wait>false</wait>
+            <link  supportName = "processLink" >
+                <configure structureName = "processLink">
+                    <pvname>asynInt32ArrayInput</pvname>
+                </configure>
+            </link>
+        </value>
+    </linkArray>
+</record>
+<record name = "asynInt32ArrayInput" type = "doubleArray" >
+    <input supportName = "pdrvInt32ArrayInput" >
+        <configure structureName = "pdrvLink">
+            <portName>asynInt32ArrayDriver</portName>
+            <addr>0</addr>
+            <timeout>1.0</timeout>
+            <size>20</size>
+        </configure>
+    </input>
+</record>
+<record name = "asynInt32ArrayInputInterrupt" type = "doubleArray" >
+    <input supportName = "pdrvInt32ArrayInterruptInput" >
+        <configure structureName = "pdrvLink">
+            <portName>asynInt32ArrayDriver</portName>
+            <addr>0</addr>
+            <process>true</process>
+            <size>20</size>
+        </configure>
+    </input>
+</record>
+
+</IOCDatabase>
+

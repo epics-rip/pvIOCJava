@@ -2,7 +2,7 @@
 <DBDefinition>
 <include addPath = "dbd" />
 
-<recordType name = "powerSupply" supportName = "powerSupplyRecord" >
+<recordType name = "powerSupply" supportName = "powerSupply" >
     <property name = "value" associatedField = "power" />
     <include href = "common.xml" />
     <field name = "power" type = "double" >
@@ -27,8 +27,7 @@
          type = "structure" structureName = "doubleLimit" />
 </recordType>
 
-<support name = "powerSupplyRecord"
-   factoryName = "org.epics.ioc.recordSupport.PowerSupplyFactory" />
-
+<support name = "powerSupply"
+   factoryName = "org.epics.ioc.support.PowerSupplyFactory" />
 
 </DBDefinition>

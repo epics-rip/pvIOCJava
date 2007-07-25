@@ -1,32 +1,32 @@
 <?xml version="1.0" ?>
 <IOCDatabase>
 
-<record name = "echoDriverPort" type = "port">
-    <factoryName>org.epics.ioc.pdrv.testDriver.EchoDriverFactory</factoryName>
-    <portName>echoDriver</portName>
-    <driverParameters structureName = "echoDriver" >
+<record name = "syncStringDriver" type = "port">
+    <factoryName>org.epics.ioc.pdrv.testDriver.OctetDriverFactory</factoryName>
+    <portName>syncOctetDriver</portName>
+    <driverParameters structureName = "octetDriver" >
         <multiDevice>true</multiDevice>
-        <delay>.5</delay>
+        <delay>0.0</delay>
     </driverParameters>
 </record>
 
-<record name = "stringCounter" type = "calc">
+<record name = "stringCounter" type = "calcDouble">
     <calcArgArray>
-        <value structureName = "calcArg">
+        <value structureName = "calcDoubleArg">
             <value>0.0</value>
             <name>min</name>
         </value>
-        <value structureName = "calcArg">
+        <value structureName = "calcDoubleArg">
             <value>10.0</value>
             <name>max</name>
         </value>
-        <value structureName = "calcArg">
+        <value structureName = "calcDoubleArg">
             <value>1.0</value>
             <name>inc</name>
         </value>
     </calcArgArray>
     <calculator supportName = "counterCalculator" />
-    <doubleAlarm>
+    <valueAlarm>
         <configure structureName = "doubleAlarm">
           <active>true</active>
           <interval>
@@ -54,7 +54,7 @@
           <outOfRange>invalid</outOfRange>
           <hystersis>0.1</hystersis>
         </configure>
-    </doubleAlarm>
+    </valueAlarm>
     <units>counts</units>
     <displayLimit>
         <low>0.0</low>
@@ -80,7 +80,7 @@
 <record name = "stringOut" type = "string">
     <output supportName = "pdrvOctetOutput" >
         <configure structureName = "pdrvLink">
-            <portName>echoDriver</portName>
+            <portName>syncOctetDriver</portName>
             <addr>0</addr>
             <timeout>.1</timeout>
         </configure>
@@ -101,7 +101,7 @@
 <record name = "stringIn" type = "string">
     <input supportName = "pdrvOctetInput" >
         <configure structureName = "pdrvLink">
-            <portName>echoDriver</portName>
+            <portName>syncOctetDriver</portName>
             <addr>0</addr>
             <timeout>.1</timeout>
         </configure>

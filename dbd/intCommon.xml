@@ -7,7 +7,7 @@
         <property name = "timeStamp" associatedField = "/timeStamp" />
     </field>
     <field name = "input" type = "link" />
-    <field name = "intAlarm" type = "link" supportName = "intAlarm" />
+    <field name = "valueAlarm" type = "link" supportName = "intAlarm" />
     <field name = "output" type = "link" />
     <field name = "linkArray" type = "array"
          elementType = "structure" supportName = "linkArray" />

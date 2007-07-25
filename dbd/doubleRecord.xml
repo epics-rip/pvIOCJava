@@ -1,17 +1,13 @@
 <?xml version="1.0" ?>
 <DBDefinition>
 
-<structure name = "double" supportName = "doubleRecord" >
+<structure name = "double" supportName = "generic" >
     <include href = "doubleCommon.xml" />
 </structure>
 
-<recordType name = "double" supportName = "doubleRecord" >
+<recordType name = "double" supportName = "generic" >
     <include href = "common.xml" />
     <include href = "doubleCommon.xml" />
 </recordType>
-
-<support name = "doubleRecord"
-   factoryName = "org.epics.ioc.recordSupport.DoubleFactory" />
-
 
 </DBDefinition>

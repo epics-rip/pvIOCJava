@@ -1,12 +1,12 @@
 <?xml version="1.0" ?>
 <DBDefinition>
 
-<structure name = "aiDouble" supportName = "doubleRecord" >
+<structure name = "aiDouble" supportName = "generic" >
     <include href = "aiDoubleCommon.xml" />
 </structure>
 
 
-<recordType name = "aiDouble" supportName = "doubleRecord" >
+<recordType name = "aiDouble" supportName = "generic" >
     <include href = "common.xml" />
     <include href = "aiDoubleCommon.xml" />
 </recordType>

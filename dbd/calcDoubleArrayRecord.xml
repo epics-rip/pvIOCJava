@@ -1,0 +1,19 @@
+<?xml version="1.0" ?>
+<DBDefinition>
+
+<structure name = "calcDoubleArrayArg" >
+    <field name = "value" type = "array"  elementType = "double" />
+    <field name = "name" type = "string" />
+    <field name = "input" type = "link" />
+</structure>
+
+<structure name = "calcDoubleArray" supportName = "generic" >
+    <include href = "calcDoubleArrayCommon.xml" />
+</structure>
+
+<recordType name = "calcDoubleArray" supportName = "generic" >
+    <include href = "common.xml" />
+    <include href = "calcDoubleArrayCommon.xml" />
+</recordType>
+
+</DBDefinition>

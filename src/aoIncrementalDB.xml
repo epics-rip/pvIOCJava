@@ -1,0 +1,28 @@
+<?xml version="1.0" ?>
+<IOCDatabase>
+
+<record name = "aoIncremental" type = "aoIncrementalDouble" >
+    <scan>
+        <scan>periodic</scan>
+        <rate>0.2</rate>
+    </scan>
+    <incremental>
+        <rateOfChange>.02</rateOfChange>
+        <incrementalOutput>true</incrementalOutput>
+        <controlLimit>
+            <low>0.0</low>
+            <high>8.0</high>
+        </controlLimit>
+        <displayLimit>
+            <low>0.0</low>
+            <high>10.0</high>
+        </displayLimit>
+    </incremental>
+    <displayLimit>
+        <low>0.0</low>
+        <high>10.0</high>
+    </displayLimit>
+</record>
+
+
+</IOCDatabase>

@@ -81,7 +81,7 @@ public interface PVField extends Requester {
     boolean asynAccessStart(AsynAccessListener asynAccessListener);
     /**
      * End asynchronous access of the field.
-     * @param asynModifier asynAccessListener The interface for notifying of synchronous accesses.
+     * @param asynAccessListener The interface for notifying of synchronous accesses.
      */
     void asynAccessEnd(AsynAccessListener asynAccessListener);
     /**

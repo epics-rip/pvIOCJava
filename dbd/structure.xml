@@ -13,27 +13,66 @@
     <field name = "message" type = "string" />
 </structure>
 
-<structure name = "doubleAlarmInterval">
-    <field name = "value" type = "double" />
+<structure name = "byteAlarmInterval">
+    <field name = "value" type = "byte" />
     <field name = "severity" type = "menu" menuName = "alarmSeverity" />
+</structure>
+<structure name = "byteAlarm">
+    <field name = "active" type = "boolean" />
+    <field name = "interval" type = "array" elementType = "structure" />
+    <field name = "outOfRange" type = "menu" menuName = "alarmSeverity" />
+</structure>
+
+<structure name = "shortAlarmInterval">
+    <field name = "value" type = "short" />
+    <field name = "severity" type = "menu" menuName = "alarmSeverity" />
+</structure>
+<structure name = "shortAlarm">
+    <field name = "active" type = "boolean" />
+    <field name = "interval" type = "array" elementType = "structure" />
+    <field name = "outOfRange" type = "menu" menuName = "alarmSeverity" />
 </structure>
 
 <structure name = "intAlarmInterval">
     <field name = "value" type = "int" />
     <field name = "severity" type = "menu" menuName = "alarmSeverity" />
 </structure>
+<structure name = "intAlarm">
+    <field name = "active" type = "boolean" />
+    <field name = "interval" type = "array" elementType = "structure" />
+    <field name = "outOfRange" type = "menu" menuName = "alarmSeverity" />
+</structure>
 
+<structure name = "longAlarmInterval">
+    <field name = "value" type = "long" />
+    <field name = "severity" type = "menu" menuName = "alarmSeverity" />
+</structure>
+<structure name = "longAlarm">
+    <field name = "active" type = "boolean" />
+    <field name = "interval" type = "array" elementType = "structure" />
+    <field name = "outOfRange" type = "menu" menuName = "alarmSeverity" />
+</structure>
+
+<structure name = "floatAlarmInterval">
+    <field name = "value" type = "float" />
+    <field name = "severity" type = "menu" menuName = "alarmSeverity" />
+</structure>
+<structure name = "floatAlarm">
+    <field name = "active" type = "boolean" />
+    <field name = "interval" type = "array" elementType = "structure" />
+    <field name = "outOfRange" type = "menu" menuName = "alarmSeverity" />
+    <field name = "hystersis" type = "float" />
+</structure>
+
+<structure name = "doubleAlarmInterval">
+    <field name = "value" type = "double" />
+    <field name = "severity" type = "menu" menuName = "alarmSeverity" />
+</structure>
 <structure name = "doubleAlarm">
     <field name = "active" type = "boolean" />
     <field name = "interval" type = "array" elementType = "structure" />
     <field name = "outOfRange" type = "menu" menuName = "alarmSeverity" />
     <field name = "hystersis" type = "double" />
-</structure>
-
-<structure name = "intAlarm">
-    <field name = "active" type = "boolean" />
-    <field name = "interval" type = "array" elementType = "structure" />
-    <field name = "outOfRange" type = "menu" menuName = "alarmSeverity" />
 </structure>
 
 <structure name = "booleanAlarm" >
@@ -56,6 +95,15 @@
     <field name = "severity" type = "menu" menuName = "alarmSeverity" />
 </structure>
 
+<structure name = "digitalIO" supportName = "digital">
+    <!-- structureName must be digitalState -->
+    <field name = "states" type = "array" elementType = "structure" />
+    <field name = "numberOfBits" type = "int" />
+    <field name = "rawValue" type = "int" design = "false" />
+    <field name = "input" type = "link" />
+    <field name = "valueAlarm" type = "link" supportName = "digitalAlarm" />
+    <field name = "output" type = "link" />
+</structure>
 
 <!-- delayLink is for delay link support -->
 
@@ -133,6 +181,30 @@
     <field name = "name" type = "string" />
 </structure>
 
+<structure name = "byteLimit">
+    <field name = "low" type = "byte" />
+    <field name = "high" type = "byte" />
+</structure>
+
+<structure name = "shortLimit">
+    <field name = "low" type = "short" />
+    <field name = "high" type = "short" />
+</structure>
+
+<structure name = "intLimit">
+    <field name = "low" type = "int" />
+    <field name = "high" type = "int" />
+</structure>
+
+<structure name = "longLimit">
+    <field name = "low" type = "long" />
+    <field name = "high" type = "long" />
+</structure>
+
+<structure name = "floatLimit">
+    <field name = "low" type = "float" />
+    <field name = "high" type = "float" />
+</structure>
 
 <structure name = "doubleLimit">
     <field name = "low" type = "double" />

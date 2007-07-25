@@ -1,23 +1,23 @@
 <?xml version="1.0" ?>
 <IOCDatabase>
 
-<record name = "monitorCounter" type = "calc">
+<record name = "monitorCounter" type = "calcDouble">
     <calcArgArray>
-        <value structureName = "calcArg">
+        <value structureName = "calcDoubleArg">
             <value>0.0</value>
             <name>min</name>
         </value>
-        <value structureName = "calcArg">
+        <value structureName = "calcDoubleArg">
             <value>10.0</value>
             <name>max</name>
         </value>
-        <value structureName = "calcArg">
+        <value structureName = "calcDoubleArg">
             <value>1.0</value>
             <name>inc</name>
         </value>
     </calcArgArray>
     <calculator supportName = "counterCalculator" />
-    <doubleAlarm>
+    <valueAlarm>
         <configure structureName = "doubleAlarm">
           <active>true</active>
           <interval>
@@ -45,7 +45,7 @@
           <outOfRange>invalid</outOfRange>
           <hystersis>0.1</hystersis>
         </configure>
-    </doubleAlarm>
+    </valueAlarm>
     <units>counts</units>
     <displayLimit>
         <low>0.0</low>

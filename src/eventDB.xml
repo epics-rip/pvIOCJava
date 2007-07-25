@@ -1,0 +1,33 @@
+<?xml version="1.0" ?>
+<IOCDatabase>
+<record name = "eventCounter" type = "calcDouble">
+    <calcArgArray>
+        <value structureName = "calcDoubleArg">
+            <value>0.0</value>
+            <name>min</name>
+        </value>
+        <value structureName = "calcDoubleArg">
+            <value>10.0</value>
+            <name>max</name>
+        </value>
+        <value structureName = "calcDoubleArg">
+            <value>1.0</value>
+            <name>inc</name>
+        </value>
+    </calcArgArray>
+    <calculator supportName = "counterCalculator" />
+    <scan>
+        <scan>event</scan>
+        <eventName>eventTest</eventName>
+    </scan>
+</record>
+
+<record name = "event" type = "event">
+    <value>eventTest</value>
+    <scan>
+        <scan>periodic</scan>
+        <rate>1.0</rate>
+    </scan>
+</record>
+
+</IOCDatabase>

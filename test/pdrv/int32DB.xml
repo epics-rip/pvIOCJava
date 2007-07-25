@@ -1,7 +1,7 @@
 <?xml version="1.0" ?>
 <IOCDatabase>
 
-<record name = "syncInt32Driver" type = "port">
+<record name = "syncInt32Driver" type = "portCreate">
     <factoryName>org.epics.ioc.pdrv.testDriver.Int32DriverFactory</factoryName>
     <portName>syncInt32Driver</portName>
     <driverParameters structureName = "int32Driver" >
@@ -12,17 +12,17 @@
     </driverParameters>
 </record>
 
-<record name = "syncInt32Counter" type = "calc">
+<record name = "syncInt32Counter" type = "calcDouble">
     <calcArgArray>
-        <value structureName = "calcArg">
-            <value>-2100</value>
+        <value structureName = "calcDoubleArg">
+            <value>-2048</value>
             <name>min</name>
         </value>
-        <value structureName = "calcArg">
-            <value>2100</value>
+        <value structureName = "calcDoubleArg">
+            <value>2047</value>
             <name>max</name>
         </value>
-        <value structureName = "calcArg">
+        <value structureName = "calcDoubleArg">
             <value>100</value>
             <name>inc</name>
         </value>
@@ -102,7 +102,7 @@
     </scan>
 </record>
 
-<record name = "asynInt32Driver" type = "port">
+<record name = "asynInt32Driver" type = "portCreate">
     <factoryName>org.epics.ioc.pdrv.testDriver.Int32DriverFactory</factoryName>
     <portName>asynInt32Driver</portName>
     <driverParameters structureName = "int32Driver" >
@@ -113,17 +113,17 @@
     </driverParameters>
 </record>
 
-<record name = "asynInt32Counter" type = "calc">
+<record name = "asynInt32Counter" type = "calcDouble">
     <calcArgArray>
-        <value structureName = "calcArg">
+        <value structureName = "calcDoubleArg">
             <value>-100</value>
             <name>min</name>
         </value>
-        <value structureName = "calcArg">
+        <value structureName = "calcDoubleArg">
             <value>4100</value>
             <name>max</name>
         </value>
-        <value structureName = "calcArg">
+        <value structureName = "calcDoubleArg">
             <value>100</value>
             <name>inc</name>
         </value>

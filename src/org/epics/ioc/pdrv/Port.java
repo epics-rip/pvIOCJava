@@ -100,7 +100,7 @@ public interface Port {
     /**
      * Attempt to connect.
      * This must be called without owning the port.
-     * @param User The requestor.
+     * @param user The user.
      * @return Result. Status.success means that the attempt was successful.
      * If the attempt fails user.getMessage() describes why the request failed.
      */
@@ -157,54 +157,21 @@ public interface Port {
      */
     Interface findInterface(User user,String interfaceName,boolean interposeInterfaceOK);
     /**
-     * Queue a request for a port.
-     * @param user The user.
-     * @param queuePriority The priority.
-     */
-    void queueRequest(User user,QueuePriority queuePriority);
-    /**
-     * Cancel a queueRequest.
-     * This must be called with the port unlocked.
-     * @param user
-     */
-    void cancelRequest(User user);
-    /**
-     * lockPort with permission to perform IO.
-     * The request will fail for any of the following reasons:
-     * <ul>
-     *    <li>The port is not enabled</li>
-     *    <li>The port is blocked by another user</li>
-     *    <li>The port is not connected.
-     * </ul>
-     * It will attempt to connect if autoConnect is true. 
-     * @param user The user.
-     * @return Status.sucess if the port is connected, enabled, and not blocked by another user.
-     */
-    Status lockPort(User user);
-    /**
-     * Unlock the port.
-     * @param user The user that called lockPort.
-     */
-    void unlockPort(User user);
-    /**
      * Scan the queues.
      * Can be called without owning the port.
      */
     void scanQueues();
     /**
      * Register to receive notice when lockPort, unLock port are called.
-     * Caller must call lockPort before calling this method.
-     * @param user The user.
+     * This should only be called by a driver.
      * @param lockPortNotify The notification interface.
-     * @return TODO
      */
-    boolean registerLockPortNotify(User user, LockPortNotify lockPortNotify);
+    void registerLockPortNotify(LockPortNotify lockPortNotify);
     /**
      * Unregister to receive notice when lockPort, unLock port are called.
      * Caller must call lockPort before calling this method.
-     * @param user The user.
      */
-    void unregisterLockPortNotify(User user);
+    void unregisterLockPortNotify();
     /**
      * Called by driver to create a new device. Normally it is called as
      * a result of a call to PortDriver.createDevice, which is called with the port locked.

@@ -99,21 +99,6 @@ public interface Device {
      * @return The Interface or null if the interface is not registered.
      */
     Interface findInterface(User user,String interfaceName,boolean interposeInterfaceOK);
-    /**
-     * lockPort with permission to perform I/O.
-     * This calls port.lockPort and in addition checks the state of the device.
-     * The request will fail for any of the following reasons:
-     * <ul>
-     *    <li>port.lockPort fails.
-     *    <li>The device is not enabled</li>
-     *    <li>The device is blocked by another user</li>
-     *    <li>The device is not connected.
-     * </ul>
-     * It will attempt to connect to the device if autoConnect is true. 
-     * @param user The user.
-     * @return Status.sucess if the port and device are connected, enabled, and not blocked by another user.
-     */
-    Status lockPort(User user);
 ;    /**
      * Block all other users from accessing the device.
      * Must be called with the port owned by the caller.

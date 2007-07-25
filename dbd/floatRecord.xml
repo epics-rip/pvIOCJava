@@ -1,0 +1,13 @@
+<?xml version="1.0" ?>
+<DBDefinition>
+
+<structure name = "float" supportName = "generic" >
+    <include href = "floatCommon.xml" />
+</structure>
+
+<recordType name = "float" supportName = "generic" >
+    <include href = "common.xml" />
+    <include href = "floatCommon.xml" />
+</recordType>
+
+</DBDefinition>

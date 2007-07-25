@@ -1,0 +1,13 @@
+<?xml version="1.0" ?>
+<DBDefinition>
+
+<structure name = "stringArray" supportName = "generic" >
+    <include href = "stringArrayCommon.xml" />
+</structure>
+
+<recordType name = "stringArray" supportName = "generic" >
+    <include href = "common.xml" />
+    <include href = "stringArrayCommon.xml" />
+</recordType>
+
+</DBDefinition>

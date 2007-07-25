@@ -65,7 +65,7 @@ public class BooleanAlarmFactory {
                 noop = true;
                 return;
             }
-            PVStructure configStructure = super.getConfigStructure("doubleAlarm", false);
+            PVStructure configStructure = super.getConfigStructure("booleanAlarm", false);
             if(configStructure==null) {
                 noop = true;
                 setSupportState(supportState);

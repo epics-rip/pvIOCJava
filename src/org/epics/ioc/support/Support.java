@@ -45,6 +45,10 @@ public interface Support extends Requester{
      */
     void uninitialize();
     /**
+     * All support in the database being loaded has started.
+     */
+    void allSupportStarted();
+    /**
      * Perform support processing.
      * @param supportProcessRequester The process requester.
      */

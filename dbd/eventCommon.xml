@@ -1,0 +1,11 @@
+<?xml version="1.0" ?>
+<DBDefinition>
+    <field name = "input" type = "link" />
+    <field name = "value" type = "string" supportName = "event" >
+        <property name = "alarm" associatedField = "alarm" />
+        <property name = "timeStamp" associatedField = "/timeStamp" />
+    </field>
+    <field name = "output" type = "link" />
+    <field name = "linkArray" type = "array"
+         elementType = "structure" supportName = "linkArray" />
+</DBDefinition>

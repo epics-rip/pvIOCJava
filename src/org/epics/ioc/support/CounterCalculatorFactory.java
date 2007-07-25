@@ -41,6 +41,10 @@ public class CounterCalculatorFactory {
          */
         public void initialize() {
             if(!super.checkSupportState(SupportState.readyForInitialize,supportName)) return;
+            if(valuePVField==null) {
+                pvLink.message("setField was not called", MessageType.error);
+                return;
+            }
             PVField pvField = calcArgArraySupport.getPVField("min");
             if(pvField==null) {
                 pvLink.message("field min not found", MessageType.error);

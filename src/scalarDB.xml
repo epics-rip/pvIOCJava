@@ -1,0 +1,780 @@
+<?xml version="1.0" ?>
+<IOCDatabase>
+<record name = "scalarCounter" type = "calcDouble">
+    <calcArgArray>
+        <value structureName = "calcDoubleArg">
+            <value>0.0</value>
+            <name>min</name>
+        </value>
+        <value structureName = "calcDoubleArg">
+            <value>10.0</value>
+            <name>max</name>
+        </value>
+        <value structureName = "calcDoubleArg">
+            <value>1.0</value>
+            <name>inc</name>
+        </value>
+    </calcArgArray>
+    <calculator supportName = "counterCalculator" />
+    <linkArray>
+        <value structureName = "linkArrayElement">
+            <wait>true</wait>
+            <link  supportName = "processLink" >
+                <configure structureName = "processLink">
+                    <pvname>scalarDouble1FromCounter</pvname>
+                </configure>
+            </link>
+        </value>
+        <value structureName = "linkArrayElement">
+            <wait>false</wait>
+            <link  supportName = "outputLink" >
+                <configure structureName = "outputLink">
+                    <pvname>scalarDouble2FromCounter</pvname>
+                    <process>true</process>
+                </configure>
+            </link>
+        </value>
+        <value structureName = "linkArrayElement">
+            <wait>true</wait>
+            <link  supportName = "processLink" >
+                <configure structureName = "processLink">
+                    <pvname>scalarByte1FromCounter</pvname>
+                </configure>
+            </link>
+        </value>
+        <value structureName = "linkArrayElement">
+            <wait>false</wait>
+            <link  supportName = "outputLink" >
+                <configure structureName = "outputLink">
+                    <pvname>scalarByte2FromCounter</pvname>
+                    <process>true</process>
+                </configure>
+            </link>
+        </value>
+    </linkArray>
+    <units>counts</units>
+    <displayLimit>
+        <low>0.0</low>
+        <high>10.0</high>
+    </displayLimit>
+    <scan>
+        <scan>periodic</scan>
+        <rate>1.0</rate>
+    </scan>
+</record>
+
+<record name = "scalarByte1FromCounter" type = "byte">
+    <input supportName = "inputLink" >
+        <configure structureName = "inputLink">
+            <pvname>scalarCounter</pvname>
+            <process>false</process>
+        </configure>
+    </input>
+    <units>volts</units>
+    <valueAlarm>
+        <configure structureName = "byteAlarm">
+          <active>true</active>
+          <interval>
+              <value structureName = "byteAlarmInterval">
+                  <value>2</value>
+                  <severity>major</severity>
+              </value>
+              <value structureName = "byteAlarmInterval">
+                  <value>4</value>
+                  <severity>minor</severity>
+              </value>
+              <value structureName = "byteAlarmInterval">
+                  <value>6</value>
+                  <severity>none</severity>
+              </value>
+              <value structureName = "byteAlarmInterval">
+                  <value>8</value>
+                  <severity>minor</severity>
+              </value>
+              <value structureName = "byteAlarmInterval">
+                  <value>10</value>
+                  <severity>major</severity>
+              </value>
+          </interval>
+          <outOfRange>invalid</outOfRange>
+        </configure>
+    </valueAlarm>
+    <displayLimit>
+        <low>0</low>
+        <high>10</high>
+    </displayLimit>
+</record>
+<record name = "scalarByte2FromCounter" type = "byte">
+    <units>volts</units>
+    <valueAlarm>
+        <configure structureName = "byteAlarm">
+          <active>true</active>
+          <interval>
+              <value structureName = "byteAlarmInterval">
+                  <value>2</value>
+                  <severity>major</severity>
+              </value>
+              <value structureName = "byteAlarmInterval">
+                  <value>4</value>
+                  <severity>minor</severity>
+              </value>
+              <value structureName = "byteAlarmInterval">
+                  <value>6</value>
+                  <severity>none</severity>
+              </value>
+              <value structureName = "byteAlarmInterval">
+                  <value>8</value>
+                  <severity>minor</severity>
+              </value>
+              <value structureName = "byteAlarmInterval">
+                  <value>10</value>
+                  <severity>major</severity>
+              </value>
+          </interval>
+          <outOfRange>invalid</outOfRange>
+        </configure>
+    </valueAlarm>
+    <displayLimit>
+        <low>0</low>
+        <high>10</high>
+    </displayLimit>
+</record>
+<record name = "scalarByte3FromCounter" type = "byte">
+    <input supportName = "monitorLink" >
+        <configure structureName = "monitorLink">
+            <pvname>scalarCounter</pvname>
+            <process>true</process>
+        </configure>
+    </input>
+    <units>volts</units>
+    <valueAlarm>
+        <configure structureName = "byteAlarm">
+          <active>true</active>
+          <interval>
+              <value structureName = "byteAlarmInterval">
+                  <value>2</value>
+                  <severity>major</severity>
+              </value>
+              <value structureName = "byteAlarmInterval">
+                  <value>4</value>
+                  <severity>minor</severity>
+              </value>
+              <value structureName = "byteAlarmInterval">
+                  <value>6</value>
+                  <severity>none</severity>
+              </value>
+              <value structureName = "byteAlarmInterval">
+                  <value>8</value>
+                  <severity>minor</severity>
+              </value>
+              <value structureName = "byteAlarmInterval">
+                  <value>10</value>
+                  <severity>major</severity>
+              </value>
+          </interval>
+          <outOfRange>invalid</outOfRange>
+        </configure>
+    </valueAlarm>
+    <displayLimit>
+        <low>0</low>
+        <high>10</high>
+    </displayLimit>
+</record>
+
+<record name = "scalarShort1FromCounter" type = "short">
+    <input supportName = "inputLink" >
+        <configure structureName = "inputLink">
+            <pvname>scalarCounter</pvname>
+            <process>false</process>
+        </configure>
+    </input>
+    <units>volts</units>
+    <valueAlarm>
+        <configure structureName = "shortAlarm">
+          <active>true</active>
+          <interval>
+              <value structureName = "shortAlarmInterval">
+                  <value>2</value>
+                  <severity>major</severity>
+              </value>
+              <value structureName = "shortAlarmInterval">
+                  <value>4</value>
+                  <severity>minor</severity>
+              </value>
+              <value structureName = "shortAlarmInterval">
+                  <value>6</value>
+                  <severity>none</severity>
+              </value>
+              <value structureName = "shortAlarmInterval">
+                  <value>8</value>
+                  <severity>minor</severity>
+              </value>
+              <value structureName = "shortAlarmInterval">
+                  <value>10</value>
+                  <severity>major</severity>
+              </value>
+          </interval>
+          <outOfRange>invalid</outOfRange>
+        </configure>
+    </valueAlarm>
+    <displayLimit>
+        <low>0</low>
+        <high>10</high>
+    </displayLimit>
+</record>
+<record name = "scalarShort2FromCounter" type = "short">
+    <units>volts</units>
+    <valueAlarm>
+        <configure structureName = "shortAlarm">
+          <active>true</active>
+          <interval>
+              <value structureName = "shortAlarmInterval">
+                  <value>2</value>
+                  <severity>major</severity>
+              </value>
+              <value structureName = "shortAlarmInterval">
+                  <value>4</value>
+                  <severity>minor</severity>
+              </value>
+              <value structureName = "shortAlarmInterval">
+                  <value>6</value>
+                  <severity>none</severity>
+              </value>
+              <value structureName = "shortAlarmInterval">
+                  <value>8</value>
+                  <severity>minor</severity>
+              </value>
+              <value structureName = "shortAlarmInterval">
+                  <value>10</value>
+                  <severity>major</severity>
+              </value>
+          </interval>
+          <outOfRange>invalid</outOfRange>
+        </configure>
+    </valueAlarm>
+    <displayLimit>
+        <low>0</low>
+        <high>10</high>
+    </displayLimit>
+</record>
+<record name = "scalarShort3FromCounter" type = "short">
+    <input supportName = "monitorLink" >
+        <configure structureName = "monitorLink">
+            <pvname>scalarCounter</pvname>
+            <process>true</process>
+        </configure>
+    </input>
+    <units>volts</units>
+    <valueAlarm>
+        <configure structureName = "shortAlarm">
+          <active>true</active>
+          <interval>
+              <value structureName = "shortAlarmInterval">
+                  <value>2</value>
+                  <severity>major</severity>
+              </value>
+              <value structureName = "shortAlarmInterval">
+                  <value>4</value>
+                  <severity>minor</severity>
+              </value>
+              <value structureName = "shortAlarmInterval">
+                  <value>6</value>
+                  <severity>none</severity>
+              </value>
+              <value structureName = "shortAlarmInterval">
+                  <value>8</value>
+                  <severity>minor</severity>
+              </value>
+              <value structureName = "shortAlarmInterval">
+                  <value>10</value>
+                  <severity>major</severity>
+              </value>
+          </interval>
+          <outOfRange>invalid</outOfRange>
+        </configure>
+    </valueAlarm>
+    <displayLimit>
+        <low>0</low>
+        <high>10</high>
+    </displayLimit>
+</record>
+
+<record name = "scalarInt1FromCounter" type = "int">
+    <input supportName = "inputLink" >
+        <configure structureName = "inputLink">
+            <pvname>scalarCounter</pvname>
+            <process>false</process>
+        </configure>
+    </input>
+    <units>volts</units>
+    <valueAlarm>
+        <configure structureName = "intAlarm">
+          <active>true</active>
+          <interval>
+              <value structureName = "intAlarmInterval">
+                  <value>2</value>
+                  <severity>major</severity>
+              </value>
+              <value structureName = "intAlarmInterval">
+                  <value>4</value>
+                  <severity>minor</severity>
+              </value>
+              <value structureName = "intAlarmInterval">
+                  <value>6</value>
+                  <severity>none</severity>
+              </value>
+              <value structureName = "intAlarmInterval">
+                  <value>8</value>
+                  <severity>minor</severity>
+              </value>
+              <value structureName = "intAlarmInterval">
+                  <value>10</value>
+                  <severity>major</severity>
+              </value>
+          </interval>
+          <outOfRange>invalid</outOfRange>
+        </configure>
+    </valueAlarm>
+    <displayLimit>
+        <low>0</low>
+        <high>10</high>
+    </displayLimit>
+</record>
+<record name = "scalarInt2FromCounter" type = "int">
+    <units>volts</units>
+    <valueAlarm>
+        <configure structureName = "intAlarm">
+          <active>true</active>
+          <interval>
+              <value structureName = "intAlarmInterval">
+                  <value>2</value>
+                  <severity>major</severity>
+              </value>
+              <value structureName = "intAlarmInterval">
+                  <value>4</value>
+                  <severity>minor</severity>
+              </value>
+              <value structureName = "intAlarmInterval">
+                  <value>6</value>
+                  <severity>none</severity>
+              </value>
+              <value structureName = "intAlarmInterval">
+                  <value>8</value>
+                  <severity>minor</severity>
+              </value>
+              <value structureName = "intAlarmInterval">
+                  <value>10</value>
+                  <severity>major</severity>
+              </value>
+          </interval>
+          <outOfRange>invalid</outOfRange>
+        </configure>
+    </valueAlarm>
+    <displayLimit>
+        <low>0</low>
+        <high>10</high>
+    </displayLimit>
+</record>
+<record name = "scalarInt3FromCounter" type = "int">
+    <input supportName = "monitorLink" >
+        <configure structureName = "monitorLink">
+            <pvname>scalarCounter</pvname>
+            <process>true</process>
+        </configure>
+    </input>
+    <units>volts</units>
+    <valueAlarm>
+        <configure structureName = "intAlarm">
+          <active>true</active>
+          <interval>
+              <value structureName = "intAlarmInterval">
+                  <value>2</value>
+                  <severity>major</severity>
+              </value>
+              <value structureName = "intAlarmInterval">
+                  <value>4</value>
+                  <severity>minor</severity>
+              </value>
+              <value structureName = "intAlarmInterval">
+                  <value>6</value>
+                  <severity>none</severity>
+              </value>
+              <value structureName = "intAlarmInterval">
+                  <value>8</value>
+                  <severity>minor</severity>
+              </value>
+              <value structureName = "intAlarmInterval">
+                  <value>10</value>
+                  <severity>major</severity>
+              </value>
+          </interval>
+          <outOfRange>invalid</outOfRange>
+        </configure>
+    </valueAlarm>
+    <displayLimit>
+        <low>0</low>
+        <high>10</high>
+    </displayLimit>
+</record>
+
+<record name = "scalarLong1FromCounter" type = "long">
+    <input supportName = "inputLink" >
+        <configure structureName = "inputLink">
+            <pvname>scalarCounter</pvname>
+            <process>false</process>
+        </configure>
+    </input>
+    <units>volts</units>
+    <valueAlarm>
+        <configure structureName = "longAlarm">
+          <active>true</active>
+          <interval>
+              <value structureName = "longAlarmInterval">
+                  <value>2</value>
+                  <severity>major</severity>
+              </value>
+              <value structureName = "longAlarmInterval">
+                  <value>4</value>
+                  <severity>minor</severity>
+              </value>
+              <value structureName = "longAlarmInterval">
+                  <value>6</value>
+                  <severity>none</severity>
+              </value>
+              <value structureName = "longAlarmInterval">
+                  <value>8</value>
+                  <severity>minor</severity>
+              </value>
+              <value structureName = "longAlarmInterval">
+                  <value>10</value>
+                  <severity>major</severity>
+              </value>
+          </interval>
+          <outOfRange>invalid</outOfRange>
+        </configure>
+    </valueAlarm>
+    <displayLimit>
+        <low>0</low>
+        <high>10</high>
+    </displayLimit>
+</record>
+<record name = "scalarLong2FromCounter" type = "long">
+    <units>volts</units>
+    <valueAlarm>
+        <configure structureName = "longAlarm">
+          <active>true</active>
+          <interval>
+              <value structureName = "longAlarmInterval">
+                  <value>2</value>
+                  <severity>major</severity>
+              </value>
+              <value structureName = "longAlarmInterval">
+                  <value>4</value>
+                  <severity>minor</severity>
+              </value>
+              <value structureName = "longAlarmInterval">
+                  <value>6</value>
+                  <severity>none</severity>
+              </value>
+              <value structureName = "longAlarmInterval">
+                  <value>8</value>
+                  <severity>minor</severity>
+              </value>
+              <value structureName = "longAlarmInterval">
+                  <value>10</value>
+                  <severity>major</severity>
+              </value>
+          </interval>
+          <outOfRange>invalid</outOfRange>
+        </configure>
+    </valueAlarm>
+    <displayLimit>
+        <low>0</low>
+        <high>10</high>
+    </displayLimit>
+</record>
+<record name = "scalarLong3FromCounter" type = "long">
+    <input supportName = "monitorLink" >
+        <configure structureName = "monitorLink">
+            <pvname>scalarCounter</pvname>
+            <process>true</process>
+        </configure>
+    </input>
+    <units>volts</units>
+    <valueAlarm>
+        <configure structureName = "longAlarm">
+          <active>true</active>
+          <interval>
+              <value structureName = "longAlarmInterval">
+                  <value>2</value>
+                  <severity>major</severity>
+              </value>
+              <value structureName = "longAlarmInterval">
+                  <value>4</value>
+                  <severity>minor</severity>
+              </value>
+              <value structureName = "longAlarmInterval">
+                  <value>6</value>
+                  <severity>none</severity>
+              </value>
+              <value structureName = "longAlarmInterval">
+                  <value>8</value>
+                  <severity>minor</severity>
+              </value>
+              <value structureName = "longAlarmInterval">
+                  <value>10</value>
+                  <severity>major</severity>
+              </value>
+          </interval>
+          <outOfRange>invalid</outOfRange>
+        </configure>
+    </valueAlarm>
+    <displayLimit>
+        <low>0</low>
+        <high>10</high>
+    </displayLimit>
+</record>
+
+<record name = "scalarFloat1FromCounter" type = "float">
+    <input supportName = "inputLink" >
+        <configure structureName = "inputLink">
+            <pvname>scalarCounter</pvname>
+            <process>false</process>
+        </configure>
+    </input>
+    <units>volts</units>
+    <valueAlarm>
+        <configure structureName = "floatAlarm">
+          <active>true</active>
+          <interval>
+              <value structureName = "floatAlarmInterval">
+                  <value>2.0</value>
+                  <severity>major</severity>
+              </value>
+              <value structureName = "floatAlarmInterval">
+                  <value>4.0</value>
+                  <severity>minor</severity>
+              </value>
+              <value structureName = "floatAlarmInterval">
+                  <value>6.0</value>
+                  <severity>none</severity>
+              </value>
+              <value structureName = "floatAlarmInterval">
+                  <value>8.0</value>
+                  <severity>minor</severity>
+              </value>
+              <value structureName = "floatAlarmInterval">
+                  <value>10.0</value>
+                  <severity>major</severity>
+              </value>
+          </interval>
+          <outOfRange>invalid</outOfRange>
+          <hystersis>0.1</hystersis>
+        </configure>
+    </valueAlarm>
+    <displayLimit>
+        <low>0.0</low>
+        <high>10.0</high>
+    </displayLimit>
+</record>
+<record name = "scalarFloat2FromCounter" type = "float">
+    <units>volts</units>
+    <valueAlarm>
+        <configure structureName = "floatAlarm">
+          <active>true</active>
+          <interval>
+              <value structureName = "floatAlarmInterval">
+                  <value>2.0</value>
+                  <severity>major</severity>
+              </value>
+              <value structureName = "floatAlarmInterval">
+                  <value>4.0</value>
+                  <severity>minor</severity>
+              </value>
+              <value structureName = "floatAlarmInterval">
+                  <value>6.0</value>
+                  <severity>none</severity>
+              </value>
+              <value structureName = "floatAlarmInterval">
+                  <value>8.0</value>
+                  <severity>minor</severity>
+              </value>
+              <value structureName = "floatAlarmInterval">
+                  <value>10.0</value>
+                  <severity>major</severity>
+              </value>
+          </interval>
+          <outOfRange>invalid</outOfRange>
+          <hystersis>0.1</hystersis>
+        </configure>
+    </valueAlarm>
+    <displayLimit>
+        <low>0.0</low>
+        <high>10.0</high>
+    </displayLimit>
+</record>
+<record name = "scalarFloat3FromCounter" type = "float">
+    <input supportName = "monitorLink" >
+        <configure structureName = "monitorLink">
+            <pvname>scalarCounter</pvname>
+            <process>true</process>
+        </configure>
+    </input>
+    <units>volts</units>
+    <valueAlarm>
+        <configure structureName = "floatAlarm">
+          <active>true</active>
+          <interval>
+              <value structureName = "floatAlarmInterval">
+                  <value>2.0</value>
+                  <severity>major</severity>
+              </value>
+              <value structureName = "floatAlarmInterval">
+                  <value>4.0</value>
+                  <severity>minor</severity>
+              </value>
+              <value structureName = "floatAlarmInterval">
+                  <value>6.0</value>
+                  <severity>none</severity>
+              </value>
+              <value structureName = "floatAlarmInterval">
+                  <value>8.0</value>
+                  <severity>minor</severity>
+              </value>
+              <value structureName = "floatAlarmInterval">
+                  <value>10.0</value>
+                  <severity>major</severity>
+              </value>
+          </interval>
+          <outOfRange>invalid</outOfRange>
+          <hystersis>0.1</hystersis>
+        </configure>
+    </valueAlarm>
+    <displayLimit>
+        <low>0.0</low>
+        <high>10.0</high>
+    </displayLimit>
+</record>
+
+<record name = "scalarDouble1FromCounter" type = "double">
+    <input supportName = "inputLink" >
+        <configure structureName = "inputLink">
+            <pvname>scalarCounter</pvname>
+            <process>false</process>
+        </configure>
+    </input>
+    <units>volts</units>
+    <valueAlarm>
+        <configure structureName = "doubleAlarm">
+          <active>true</active>
+          <interval>
+              <value structureName = "doubleAlarmInterval">
+                  <value>2.0</value>
+                  <severity>major</severity>
+              </value>
+              <value structureName = "doubleAlarmInterval">
+                  <value>4.0</value>
+                  <severity>minor</severity>
+              </value>
+              <value structureName = "doubleAlarmInterval">
+                  <value>6.0</value>
+                  <severity>none</severity>
+              </value>
+              <value structureName = "doubleAlarmInterval">
+                  <value>8.0</value>
+                  <severity>minor</severity>
+              </value>
+              <value structureName = "doubleAlarmInterval">
+                  <value>10.0</value>
+                  <severity>major</severity>
+              </value>
+          </interval>
+          <outOfRange>invalid</outOfRange>
+          <hystersis>0.1</hystersis>
+        </configure>
+    </valueAlarm>
+    <displayLimit>
+        <low>0.0</low>
+        <high>10.0</high>
+    </displayLimit>
+</record>
+<record name = "scalarDouble2FromCounter" type = "double">
+    <units>volts</units>
+    <valueAlarm>
+        <configure structureName = "doubleAlarm">
+          <active>true</active>
+          <interval>
+              <value structureName = "doubleAlarmInterval">
+                  <value>2.0</value>
+                  <severity>major</severity>
+              </value>
+              <value structureName = "doubleAlarmInterval">
+                  <value>4.0</value>
+                  <severity>minor</severity>
+              </value>
+              <value structureName = "doubleAlarmInterval">
+                  <value>6.0</value>
+                  <severity>none</severity>
+              </value>
+              <value structureName = "doubleAlarmInterval">
+                  <value>8.0</value>
+                  <severity>minor</severity>
+              </value>
+              <value structureName = "doubleAlarmInterval">
+                  <value>10.0</value>
+                  <severity>major</severity>
+              </value>
+          </interval>
+          <outOfRange>invalid</outOfRange>
+          <hystersis>0.1</hystersis>
+        </configure>
+    </valueAlarm>
+    <displayLimit>
+        <low>0.0</low>
+        <high>10.0</high>
+    </displayLimit>
+</record>
+<record name = "scalarDouble3FromCounter" type = "double">
+    <input supportName = "monitorLink" >
+        <configure structureName = "monitorLink">
+            <pvname>scalarCounter</pvname>
+            <process>true</process>
+        </configure>
+    </input>
+    <units>volts</units>
+    <valueAlarm>
+        <configure structureName = "doubleAlarm">
+          <active>true</active>
+          <interval>
+              <value structureName = "doubleAlarmInterval">
+                  <value>2.0</value>
+                  <severity>major</severity>
+              </value>
+              <value structureName = "doubleAlarmInterval">
+                  <value>4.0</value>
+                  <severity>minor</severity>
+              </value>
+              <value structureName = "doubleAlarmInterval">
+                  <value>6.0</value>
+                  <severity>none</severity>
+              </value>
+              <value structureName = "doubleAlarmInterval">
+                  <value>8.0</value>
+                  <severity>minor</severity>
+              </value>
+              <value structureName = "doubleAlarmInterval">
+                  <value>10.0</value>
+                  <severity>major</severity>
+              </value>
+          </interval>
+          <outOfRange>invalid</outOfRange>
+          <hystersis>0.1</hystersis>
+        </configure>
+    </valueAlarm>
+    <displayLimit>
+        <low>0.0</low>
+        <high>10.0</high>
+    </displayLimit>
+</record>
+
+</IOCDatabase>

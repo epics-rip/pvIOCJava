@@ -27,8 +27,8 @@ public interface PortDriver {
     Device createDevice(User user, int addr);
     /**
      * Attempt to connect.
-     * @param User The requestor.
-     * @return Result. Status.success means that the attempt was successful.
+     * @param user The user.
+     * @return Status. Status.success means that the attempt was successful.
      * If the attempt fails user.getMessage() describes why the request failed.
      */
     Status connect(User user);

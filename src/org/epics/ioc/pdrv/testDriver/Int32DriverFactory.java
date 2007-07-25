@@ -10,7 +10,7 @@ import org.epics.ioc.pdrv.interfaces.*;
 import org.epics.ioc.pv.*;
 import org.epics.ioc.util.*;
 /**
- * The factory for echoDriver.
+ * The factory for int32Driver.
  * int32Driver is a portDriver for testing the int32 support in org.epics.ioc.pdrv.support.
  * It requires the int32Driver structure, which holds the following configuration parameters:
  * <ul>
@@ -24,8 +24,8 @@ import org.epics.ioc.util.*;
  *       The high adc range to simulate.
  *      </li>
  *      <li>delay<br/>
- *       If 0.0 then echoDriver is synchronous.
- *       If > 0.0 echoDriver is asynchronous and delays delay seconds after each read/write request.
+ *       If 0.0 then int32Driver is synchronous.
+ *       If > 0.0 int32Driver is asynchronous and delays delay seconds after each read/write request.
  *      </li>
  * </ul>
  * int32Driver implements interface int32 by keeping an internal int[] array
@@ -37,11 +37,11 @@ import org.epics.ioc.util.*;
 public class Int32DriverFactory {
     
     /**
-     * Create a new instance of echoDriver.
+     * Create a new instance of int32Driver.
      * @param portName The portName.
      * @param autoConnect Initial value for autoConnect.
      * @param priority The thread priority if asynchronous, i.e. delay > 0.0.
-     * @param pvStructure The interface for structure echoDriver.
+     * @param pvStructure The interface for structure int32Driver.
      */
     static public void create(
         String portName,boolean autoConnect,ScanPriority priority,PVStructure pvStructure)
@@ -107,10 +107,10 @@ public class Int32DriverFactory {
          * @see org.epics.ioc.pdrv.PortDriver#connect(org.epics.ioc.pdrv.User)
          */
         public Status connect(User user) {
-            trace.print(Trace.FLOW ,"connect");
+            trace.print(Trace.FLOW ,port.getPortName() + " connect");
             if(port.isConnected()) {
                 user.setMessage("already connected");
-                trace.print(Trace.ERROR ,"already connected");
+                trace.print(Trace.ERROR ,port.getPortName() + " already connected");
                 return Status.error;
             }
             port.exceptionConnect();
@@ -133,10 +133,10 @@ public class Int32DriverFactory {
          * @see org.epics.ioc.pdrv.PortDriver#disconnect(org.epics.ioc.pdrv.User)
          */
         public Status disconnect(User user) {
-            trace.print(Trace.FLOW ,"disconnect");
+            trace.print(Trace.FLOW ,port.getPortName() + " disconnect");
             if(!port.isConnected()) {
                 user.setMessage("not connected");
-                trace.print(Trace.ERROR ,"not connected");
+                trace.print(Trace.ERROR ,port.getPortName() + " not connected");
                 return Status.error;
             }
             port.exceptionDisconnect();
@@ -146,14 +146,17 @@ public class Int32DriverFactory {
             private int addr;
             private Device device;
             private Trace trace;
+            private String deviceName = null;
             
             private Int32Device(int addr) {
                 this.addr = addr;
+                
             }
             
             private void init(Device device) {
                 this.device = device;
                 trace = device.getTrace();
+                deviceName = device.getPort().getPortName() + ":" + device.getAddr();
                 new Int32Interface();
             }
             /* (non-Javadoc)
@@ -166,10 +169,10 @@ public class Int32DriverFactory {
              * @see org.epics.ioc.pdrv.DeviceDriver#connect(org.epics.ioc.pdrv.User)
              */
             public Status connect(User user) {
-                trace.print(Trace.FLOW ,"connect");
+                trace.print(Trace.FLOW ,deviceName + " connect");
                 if(device.isConnected()) {
                     user.setMessage("already connected");
-                    trace.print(Trace.ERROR ,"already connected");
+                    trace.print(Trace.ERROR ,deviceName + " already connected");
                     return Status.error;
                 }
                 device.exceptionConnect();
@@ -179,17 +182,17 @@ public class Int32DriverFactory {
              * @see org.epics.ioc.pdrv.DeviceDriver#disconnect(org.epics.ioc.pdrv.User)
              */
             public Status disconnect(User user) {
-                trace.print(Trace.FLOW ,"disconnect");
+                trace.print(Trace.FLOW ,deviceName + " disconnect");
                 if(!device.isConnected()) {
                     user.setMessage("not connected");
-                    trace.print(Trace.ERROR ,"not connected");
+                    trace.print(Trace.ERROR ,deviceName + " not connected");
                     return Status.error;
                 }
                 device.exceptionDisconnect();
                 return Status.success;
             }
             
-            private class Int32Interface extends  Int32Base{
+            private class Int32Interface extends  AbstractInt32{
                 private long milliseconds;
                 private Int32Interface() {
                     super(device,"int32");
@@ -197,7 +200,7 @@ public class Int32DriverFactory {
                 }
 
                 /* (non-Javadoc)
-                 * @see org.epics.ioc.pdrv.interfaces.Int32Base#getBounds(org.epics.ioc.pdrv.User, int[])
+                 * @see org.epics.ioc.pdrv.interfaces.AbstractInt32#getBounds(org.epics.ioc.pdrv.User, int[])
                  */
                 public Status getBounds(User user, int[] bounds) {
                     bounds[0] = low;
@@ -206,7 +209,7 @@ public class Int32DriverFactory {
                 }
 
                 /* (non-Javadoc)
-                 * @see org.epics.ioc.pdrv.interfaces.Int32Base#read(org.epics.ioc.pdrv.User)
+                 * @see org.epics.ioc.pdrv.interfaces.AbstractInt32#read(org.epics.ioc.pdrv.User)
                  */
                 public Status read(User user) {
                     double timeout = user.getTimeout();
@@ -222,11 +225,11 @@ public class Int32DriverFactory {
                         }
                     }
                     user.setInt(register[addr]);
-                    trace.print(Trace.DRIVER,"read value = " + register[addr]);
+                    trace.print(Trace.DRIVER,deviceName + " read value = " + register[addr]);
                     return Status.success;
                 }
                 /* (non-Javadoc)
-                 * @see org.epics.ioc.pdrv.interfaces.Int32Base#write(org.epics.ioc.pdrv.User, int)
+                 * @see org.epics.ioc.pdrv.interfaces.AbstractInt32#write(org.epics.ioc.pdrv.User, int)
                  */
                 public Status write(User user, int value) {
                     double timeout = user.getTimeout();
@@ -242,12 +245,12 @@ public class Int32DriverFactory {
                         }
                     }
                     if(value<low || value>high) {
-                        trace.print(Trace.ERROR, "value out of bounds");
+                        trace.print(Trace.ERROR, deviceName + " value " + value + " out of bounds");
                         user.setMessage("value out of bounds");
                         return Status.error;
                     }
                     register[addr] = value;
-                    trace.print(Trace.DRIVER,"write value = " + register[addr]);
+                    trace.print(Trace.DRIVER,deviceName + " write value = " + register[addr]);
                     super.interruptOccured(value);
                     return Status.success;
                 }

@@ -48,45 +48,51 @@ public abstract class AbstractSupport implements Support {
      */
     public void message(String message, MessageType messageType) {
         pvField.message(message, messageType);
-    }
+    }    
     /* (non-Javadoc)
-     * @see org.epics.ioc.process.Support#getSupportState()
+     * @see org.epics.ioc.support.Support#getSupportState()
      */
     public SupportState getSupportState() {
         return supportState;
     }
     /* (non-Javadoc)
-     * @see org.epics.ioc.process.Support#getDBField()
+     * @see org.epics.ioc.support.Support#getDBField()
      */
     public DBField getDBField() {
         return dbField;
     } 
     /* (non-Javadoc)
-     * @see org.epics.ioc.process.Support#initialize()
+     * @see org.epics.ioc.support.Support#initialize()
      */
     public void initialize() {
         setSupportState(SupportState.readyForStart);
     }
     /* (non-Javadoc)
-     * @see org.epics.ioc.process.Support#start()
+     * @see org.epics.ioc.support.Support#start()
      */
     public void start() {
         setSupportState(SupportState.ready);
     }
     /* (non-Javadoc)
-     * @see org.epics.ioc.process.Support#stop()
+     * @see org.epics.ioc.support.Support#stop()
      */
     public void stop() {
         setSupportState(SupportState.readyForStart);
     }
     /* (non-Javadoc)
-     * @see org.epics.ioc.process.Support#uninitialize()
+     * @see org.epics.ioc.support.Support#uninitialize()
      */
     public void uninitialize() {
         setSupportState(SupportState.readyForInitialize);
     }
     /* (non-Javadoc)
-     * @see org.epics.ioc.process.Support#process(org.epics.ioc.process.RecordProcessRequester)
+     * @see org.epics.ioc.support.Support#allSupportStarted()
+     */
+    public void allSupportStarted() {
+        // nothing to do
+    }
+    /* (non-Javadoc)
+     * @see org.epics.ioc.support.Support#process(org.epics.ioc.process.SupportProcessRequester)
      */
     public void process(SupportProcessRequester supportProcessRequester) {
         supportProcessRequester.supportProcessDone(RequestResult.success);

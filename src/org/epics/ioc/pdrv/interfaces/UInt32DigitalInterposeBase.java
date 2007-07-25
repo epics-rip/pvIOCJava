@@ -33,8 +33,14 @@ public abstract class UInt32DigitalInterposeBase implements UInt32Digital {
     /* (non-Javadoc)
      * @see org.epics.ioc.pdrv.interfaces.UInt32Digital#getInterrupt(org.epics.ioc.pdrv.User, org.epics.ioc.pdrv.interfaces.DigitalInterruptReason)
      */
-    public Status getInterruptMask(User user, DigitalInterruptReason reason) {
-        return uint32Digital.getInterruptMask(user, reason);
+    public Status getInterrupt(User user, int mask, DigitalInterruptReason reason) {
+        return uint32Digital.getInterrupt(user, mask, reason);
+    }
+    /* (non-Javadoc)
+     * @see org.epics.ioc.pdrv.interfaces.UInt32Digital#clearInterrupt(org.epics.ioc.pdrv.User, int)
+     */
+    public Status clearInterrupt(User user, int mask) {
+        return uint32Digital.clearInterrupt(user, mask);
     }
     /* (non-Javadoc)
      * @see org.epics.ioc.pdrv.interfaces.UInt32Digital#read(org.epics.ioc.pdrv.User, int)
@@ -51,8 +57,8 @@ public abstract class UInt32DigitalInterposeBase implements UInt32Digital {
     /* (non-Javadoc)
      * @see org.epics.ioc.pdrv.interfaces.UInt32Digital#setInterrupt(org.epics.ioc.pdrv.User, int, org.epics.ioc.pdrv.interfaces.DigitalInterruptReason)
      */
-    public Status setInterruptMask(User user, int value, DigitalInterruptReason reason) {
-        return uint32Digital.setInterruptMask(user, value, reason);
+    public Status setInterrupt(User user, int value, DigitalInterruptReason reason) {
+        return uint32Digital.setInterrupt(user, value, reason);
     }
     /* (non-Javadoc)
      * @see org.epics.ioc.pdrv.interfaces.UInt32Digital#write(org.epics.ioc.pdrv.User, int, int)

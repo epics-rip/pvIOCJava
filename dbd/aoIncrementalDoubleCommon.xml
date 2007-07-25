@@ -1,12 +1,5 @@
 <?xml version="1.0" ?>
 <DBDefinition>
-    <field name = "desiredValue" type = "double" >
-        <property name = "alarm" associatedField = "alarm" />
-        <property name = "units" associatedField = "units" />
-        <property name = "displayLimit" associatedField = "displayLimit" />
-        <property name = "controlLimit" associatedField = "controlLimit" />
-        <property name = "timeStamp" associatedField = "/timeStamp" />
-    </field>
     <field name = "value" type = "double" >
         <property name = "alarm" associatedField = "alarm" />
         <property name = "units" associatedField = "units" />
@@ -14,12 +7,10 @@
         <property name = "controlLimit" associatedField = "controlLimit" />
         <property name = "timeStamp" associatedField = "/timeStamp" />
     </field>
-    <field name = "input" type = "link" />
-    <field name = "incrementalOutput" type = "boolean" />
-    <field name = "rateOfChange" type = "double" />
+    <field name = "incremental" type = "structure" structureName = "incrementalDouble" supportName = "incremental" />
     <field name = "output" type = "structure" structureName = "linearConvertOutput"/>
     <field name = "units" type = "string" />
-    <field name = "doubleAlarm" type = "link" supportName = "doubleAlarm" />
+    <field name = "valueAlarm" type = "link" supportName = "doubleAlarm" />
     <field name = "displayLimit"
          type = "structure" structureName = "doubleLimit" />
     <field name = "controlLimit"

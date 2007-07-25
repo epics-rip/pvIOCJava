@@ -45,18 +45,12 @@ public interface User {
     public static final int REASON_SIGNAL = -1;
     
     /**
-     * Get the QueueRequestCallback for this user.
-     * @return The QueueRequestCallback interface;
-     */
-    QueueRequestCallback getQueueRequestCallback();
-    /**
      * Create a new User that is connected to the same port and device.
      * The new user will also have the same reason and timeout as the orginal.
-     * @param user An existing user.
      * @param queueRequestCallback The callback for queueRequest.
      * @return The new User.
      */
-    User duplicateUser(User user,QueueRequestCallback queueRequestCallback);
+    User duplicateUser(QueueRequestCallback queueRequestCallback);
     /**
      * Connect the user to a port.
      * @param portName The portName.
@@ -75,7 +69,7 @@ public interface User {
     Port getPort();
     /**
      * Connect the user to a device.
-     * @param deviceName The deviceName.
+     * @param addr The device address.
      * @return An interface to the device or null if the device does not exist.
      */
     Device connectDevice(int addr);
@@ -87,7 +81,33 @@ public interface User {
      * Get the device to which this user is connected.
      * @return The device or null if the user is not connected to a device.
      */
-    Device getDevice();   
+    Device getDevice(); 
+    /**
+     * Queue a request for a port.
+     * @param queuePriority The priority.
+     */
+    void queueRequest(QueuePriority queuePriority);
+    /**
+     * Cancel a queueRequest.
+     * This must be called with the port unlocked.
+     */
+    void cancelRequest();
+    /**
+     * lockPort with permission to perform IO.
+     * The request will fail for any of the following reasons:
+     * <ul>
+     *    <li>The port and/or device is not enabled</li>
+     *    <li>The device is blocked by another user</li>
+     *    <li>The port and/or device is not connected.
+     * </ul>
+     * It will attempt to connect if autoConnect is true. 
+     * @return Status.sucess if the port is connected, enabled, and not blocked by another user.
+     */
+    Status lockPort();
+    /**
+     * Unlock the port.
+     */
+    void unlockPort();
     /**
      * Called by pdrv methods to report errors to a user.
      * @param message The message.
