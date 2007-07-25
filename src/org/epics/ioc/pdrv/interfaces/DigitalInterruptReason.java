@@ -11,7 +11,16 @@ package org.epics.ioc.pdrv.interfaces;
  *
  */
 public enum DigitalInterruptReason {
+    /**
+     * Interrupt on zero to one transition.
+     */
     zeroToOne,
+    /**
+     * Interrupt on one to zero transition
+     */
     oneToZero,
+    /**
+     * Interrupt on any bit transition
+     */
     transition
 }
