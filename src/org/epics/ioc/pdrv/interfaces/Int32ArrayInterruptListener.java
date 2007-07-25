@@ -5,7 +5,6 @@
  */
 package org.epics.ioc.pdrv.interfaces;
 
-import org.epics.ioc.pv.PVIntArray;
 
 /**
  * Interface implemented by an Int32ArrayInterruptListener.
@@ -15,7 +14,7 @@ import org.epics.ioc.pv.PVIntArray;
 public interface Int32ArrayInterruptListener{
     /**
      * An interrupt has occured.
-     * @param pvIntArray The array.
+     * @param int32Array The array.
      */
-    void interrupt(PVIntArray pvIntArray);
+    void interrupt(Int32Array int32Array);
 }

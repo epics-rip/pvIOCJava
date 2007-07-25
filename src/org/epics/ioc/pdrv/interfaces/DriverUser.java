@@ -22,7 +22,6 @@ public interface DriverUser {
      * calling user.disconnectPort or user.disconnectDevice.
      * @param user The user.
      * @param drvParams The drvParams from the PdrvLink.
-     * @return The created object or nulll if no object was created.
      */
     void create(User user,String drvParams);
     /**

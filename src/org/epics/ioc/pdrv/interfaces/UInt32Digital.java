@@ -37,17 +37,25 @@ public interface UInt32Digital extends Interface{
      * @param reason The reason for raising an interrupt.
      * @return The status.
      */
-    Status setInterruptMask(User user, int mask, DigitalInterruptReason reason);
+    Status setInterrupt(User user, int mask, DigitalInterruptReason reason);
     /**
      * Get each bit that is set for reason.
      * @param user The user.
+     * @param mask The bits which can cause an interrupt.
      * @param reason The reason for raising an interrupt.
      * @return The status.
      * If the status is not Status.success or Status.timeout
      * than user.message() describes the problem.
      * If successful user.getInt() returns the interrupt mask.
      */
-    Status getInterruptMask(User user, DigitalInterruptReason reason);
+    Status getInterrupt(User user, int mask, DigitalInterruptReason reason);
+    /**
+     * Clear outstanding interrupts.
+     * @param user The user.
+     * @param mask The bits that may have caused an interrupt.
+     * @return The status.
+     */
+    Status clearInterrupt(User user,int mask);
     /**
      * Register a listener for value changes.
      * @param user The user.

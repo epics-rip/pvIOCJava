@@ -1,6 +1,5 @@
-<?xml version="1.0" encoding=""?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-       "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+      "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html>
 <head>
   <meta http-equiv="content-type" content="" />
@@ -12,8 +11,8 @@
 
 <h1 style="text-align: center">EPICS JavaIoc: Database Access <br />
 package: org.epics.ioc.dbAcess <br />
-2007.04.19</h1>
-CONTENTS
+2007.07.25</h1>
+CONTENTS 
 
 <div class="toc">
 <ul>
@@ -56,7 +55,7 @@ CONTENTS
       <li><a href="#DBStructur">DBStructure</a></li>
       <li><a href="#DBNonScala">DBNonScalarArray</a></li>
       <li><a href="#DBRecord">DBRecord</a></li>
-      <li><a href="#DBREcordFa">DBRecordFactory</a></li>
+      <li><a href="#DBRecordFa">DBRecordFactory</a></li>
     </ul>
   </li>
   <li><a href="#IOCDB">IOCDB: IOC Database</a></li>
@@ -92,7 +91,7 @@ instances. The following is discussed:</p>
 
 <h2 style="text-align: center" id="Record">Record Instance Syntax</h2>
 <hr />
-A Record Instance file must be an XML file with a root tag of IOCDatabase:
+A Record Instance file must be an XML file with a root tag of IOCDatabase: 
 <pre>    &lt;?xml version="1.0" ?&gt;
     &lt;IOCDatabase&gt;
       &lt;?-- valid Record Instance Definitions --&gt;
@@ -101,12 +100,12 @@ A Record Instance file must be an XML file with a root tag of IOCDatabase:
 <h3 id="General">General Statements</h3>
 
 <h4 id="namespace">namespace</h4>
-At this time namespaces are not used.
+At this time namespaces are not used. 
 
 <h4 id="Include">Include</h4>
 The XML file can include other files also containing Record Instance
 Definitions. An included file must also be a valid XML Record Instance
-Definitions. Included files can also include other files. The syntax is:
+Definitions. Included files can also include other files. The syntax is: 
 <pre>    
 &lt;include addPath = "path" removePath = "path" href = "filename" /&gt;</pre>
 
@@ -278,7 +277,7 @@ instance.</p>
 <p>For primitive types the initializer has the same format as the Java
 constants for the type. For example if the type for field value is double:</p>
 <pre>    &lt;value supportName = "supportName" &gt;.98&lt;/value&gt;</pre>
-Notes:
+Notes: 
 <ul>
   <li>supportName is optional</li>
   <li>Byte.decode, Short.decode, Integer.decide, and Long.decode are used to
@@ -325,7 +324,7 @@ field is being created. The syntax is:</p>
 <pre>    &lt;fieldName structureName = "structureName" &gt;</pre>
 
 <h3 id="array">array</h3>
-The syntax for an array initializer is:
+The syntax for an array initializer is: 
 <pre>    &lt;fieldName capacity = "capacity" capacityMutable = "trueFalse" length = "length" supportName = "supportName" &gt;
         &lt;value offset = "offset"&gt;value&lt;/value&gt;
         &lt;value offset = "offset"&gt;valueList&lt;/value&gt;
@@ -338,14 +337,13 @@ The syntax for an array initializer is:
     <dd>Optional support.</dd>
   <dt style="font-family: courier;">capacity</dt>
     <dd>The amount of storage to allocate for the array. This is optional and
-      the capacity will be equal to the number of elements initialized.
-      If the capacity is given a value > 0 and capacityMutable is not specified
-      then capacityMutable is set to true.
-     </dd>
+      the capacity will be equal to the number of elements initialized. If
+      the capacity is given a value &gt; 0 and capacityMutable is not
+      specified then capacityMutable is set to true. </dd>
   <dt style="font-family: courier;">capacityMutable</dt>
-     <dd>Can the capacity be changed?</dd>
+    <dd>Can the capacity be changed?</dd>
   <dt style="font-family: courier;">length</dt>
-      <dd>The initial length for the array.</dd>
+    <dd>The initial length for the array.</dd>
   <dt style="font-family: courier;">offset</dt>
     <dd>offset for the next value. If not specified it starts at 0 and is
       incremented by one as each new value is defined.</dd>
@@ -403,7 +401,7 @@ style="font-family: courier;">structArray</span></p>
 
 <p>A menu field is initialized as follows:</p>
 <pre>    &lt;fieldName supportName = "supportName" &gt;stringValue&lt;/fieldName&gt;</pre>
-where stringValue is one of the allowed values for the menu.
+where stringValue is one of the allowed values for the menu. 
 
 <p>For example:</p>
 <pre>    &lt;scan&gt;periodic&lt;/scan&gt;</pre>
@@ -437,7 +435,7 @@ where stringValue is one of the allowed values for the menu.
     &lt;/enumExample&gt;</pre>
 
 <h3 id="link">link</h3>
-A link field is initialized as follows:
+A link field is initialized as follows: 
 <pre>    &lt;fieldName supportName = "supportName" &gt;
         &lt;configure structureName = "supportStructureName"&gt;
             &lt;fieldName&gt;fieldValue&lt;/fieldName&gt;
@@ -578,7 +576,7 @@ value.</p>
         void endProcess();
         void unlisten(RecordListener listener);
     }</pre>
-where
+where 
 <dl>
   <dt style="font-family: courier;">dataPut</dt>
     <dd>A data put has occured. This will not be called for enum, menu, or
@@ -886,7 +884,7 @@ structure.</p>
       after record initialization.</dd>
 </dl>
 
-<h3 id="DBREcordFa">DBRecordFactory</h3>
+<h3 id="DBRecordFa">DBRecordFactory</h3>
 
 <p>A factory is available that implements the DBField interfaces for record
 instance fields.</p>
@@ -908,15 +906,10 @@ replace the PV associated with a DB.</p>
 <p>An IOCDB is a database for a java IOC. All methods IOCDBFactory are thread
 safe. The instances of IOCDB created by IOCDBFactory are also thread safe.
 ReadWrite locks are used to implement thread safety.</p>
-<pre>    public interface IOCDBMergeListener {
-        void merged();
-    }
-
-    public interface IOCDB {
+<pre>    public interface IOCDB {
         IOCDB getMaster();
         String getName();
         void mergeIntoMaster();
-        void addIOCDBMergeListener(IOCDBMergeListener listener);
         DBRecord findRecord(String recordName);
         boolean addRecord(DBRecord record);
         boolean removeRecord(DBRecord record);
@@ -946,10 +939,6 @@ ReadWrite locks are used to implement thread safety.</p>
   <dt style="font-family: courier;">mergeIntoMaster</dt>
     <dd>Merge the record instances from this database into the master
       database.</dd>
-  <dt style="font-family: courier;">addIOCDBMergeListener</dt>
-    <dd>Add a listener to call after this database has been merged into the
-      master IOC database. If this is the master than the listener is called
-      immediately.</dd>
   <dt style="font-family: courier;">findRecord</dt>
     <dd>Return the interface for the record with name recordName or null if
       the record is not found. A search is made this database. If not found
@@ -1015,7 +1004,7 @@ interface by calling dbRecord..createListener:</p>
 <p>The support provides the following features:</p>
 <ul>
   <li>The client can ask to listen at any level of a record instance
-    hierarchy.
+    hierarchy. 
     <p>For example the client could ask to listen for changes to a scalar
     field or a field that is an array with the element type being a scalar.
     In this case the client will be called whenever the put methods of the
@@ -1248,7 +1237,7 @@ new value is the same as the old value.</p>
 <h2 style="text-align: center" id="Thread">Thread Safety</h2>
 <hr />
 The dbAccess components are designed to be used in an IOC, which is a
-multithreaded environment. The design includes:
+multithreaded environment. The design includes: 
 <dl>
   <dt>XMLToIOCDBFactory</dt>
     <dd>This is thread safe because only one user at a time can be using it.

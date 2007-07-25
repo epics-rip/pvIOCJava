@@ -6,7 +6,7 @@
 package org.epics.ioc.pdrv.interfaces;
 
 /**
- * Base port and device interface.
+ * Base for an interface to a port or device.
  * @author mrk
  *
  */

@@ -32,12 +32,6 @@ public interface IOCDB extends Requester{
      */
     void mergeIntoMaster();
     /**
-     * Add a listener to call after the IOCDB is merged into the master.
-     * If this is the master the listener will be called immediately.
-     * @param listener The listener.
-     */
-    void addIOCDBMergeListener(IOCDBMergeListener listener);
-    /**
      * Find the interface for a record instance.
      * It will be returned if it resides in this IOCDB or in the master IOCDB.
      * @param recordName The instance name.

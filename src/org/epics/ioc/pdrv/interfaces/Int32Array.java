@@ -7,7 +7,6 @@ package org.epics.ioc.pdrv.interfaces;
 
 import org.epics.ioc.pdrv.Status;
 import org.epics.ioc.pdrv.User;
-
 import org.epics.ioc.pv.PVIntArray;
 
 /**
@@ -16,6 +15,30 @@ import org.epics.ioc.pv.PVIntArray;
  *
  */
 public interface Int32Array extends Interface, PVIntArray{
+    /**
+     * Start a read.
+     * @param user The user
+     * @return If not Status.success then status.getMessage shows the reason the request failed.
+     */
+    Status startRead(User user);
+    /**
+     * End a read.
+     * @param user The user
+     * @return If not Status.success then status.getMessage shows the reason the request failed.
+     */
+    Status endRead(User user);
+    /**
+     * Start a write.
+     * @param user The user
+     * @return If not Status.success then status.getMessage shows the reason the request failed.
+     */
+    Status startWrite(User user);
+    /**
+     * End a write.
+     * @param user The user
+     * @return If not Status.success then status.getMessage shows the reason the request failed.
+     */
+    Status endWrite(User user);
     /**
      * Register an interrupt listener.
      * @param user The user.
