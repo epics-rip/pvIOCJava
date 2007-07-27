@@ -1,11 +1,7 @@
 <?xml version="1.0" ?>
 <DBDefinition>
-    <field name = "value" type = "array" elementType = "double" >
-        <property name = "alarm" associatedField = "alarm" />
-        <property name = "units" associatedField = "units" />
-        <property name = "displayLimit" associatedField = "displayLimit" />
-        <property name = "timeStamp" associatedField = "/timeStamp" />
-    </field>
+    <field name = "alarm" type = "structure" structureName = "alarm"
+          supportName = "alarm" />
     <field name = "input" type = "link" />
     <field name = "output" type = "link" />
     <field name = "linkArray" type = "array"

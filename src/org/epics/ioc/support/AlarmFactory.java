@@ -5,8 +5,6 @@
  */
 package org.epics.ioc.support;
 
-import java.util.*;
-
 import org.epics.ioc.db.*;
 import org.epics.ioc.pv.*;
 import org.epics.ioc.util.*;
@@ -86,7 +84,6 @@ public class AlarmFactory {
         private boolean active = false;
         
         private AlarmImpl parentAlarmSupport = null;
-        private List<AlarmImpl> childAlarmList = new ArrayList<AlarmImpl>();
         
         private AlarmImpl(DBStructure dbAlarm) {
             super(alarmSupportName,dbAlarm);
@@ -108,7 +105,6 @@ public class AlarmFactory {
             AlarmSupport parent = AlarmFactory.findAlarmSupport(dbAlarm.getParent().getParent());
             if(parent!=null) {
                 parentAlarmSupport = (AlarmImpl)parent;
-                parentAlarmSupport.addChildAlarm(this);
             }
             super.setSupportState(SupportState.readyForStart);
         }
@@ -116,7 +112,6 @@ public class AlarmFactory {
          * @see org.epics.ioc.process.AbstractSupport#uninitialize()
          */
         public void uninitialize() {
-            childAlarmList.clear();
             parentAlarmSupport = null;
             super.setSupportState(SupportState.readyForInitialize);
         }
@@ -129,22 +124,12 @@ public class AlarmFactory {
             prevIndex = pvSeverity.getIndex();
             newMessage = null;
             newIndex = 0;
-            ListIterator<AlarmImpl> iter = childAlarmList.listIterator();
-            while(iter.hasNext()) {
-                AlarmImpl alarm = iter.next();
-                alarm.beginProcess();
-            }
             active = true;
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.support.AlarmSupport#endProcess()
          */
         public void endProcess() {
-            ListIterator<AlarmImpl> iter = childAlarmList.listIterator();
-            while(iter.hasNext()) {
-                AlarmImpl alarm = iter.next();
-                alarm.endProcess();
-            }
             active = false;
             if(!isNew) {
                 int index = pvSeverity.getIndex();
@@ -195,10 +180,6 @@ public class AlarmFactory {
                 return true;
             }
             return false;
-        }
-        
-        private void addChildAlarm(AlarmImpl alarm) {
-            childAlarmList.add(alarm);
         }
         
         private void checkForIllegalRequest() {

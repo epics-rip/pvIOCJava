@@ -5,6 +5,8 @@
 <recordType name = "powerSupply" supportName = "powerSupply" >
     <property name = "value" associatedField = "power" />
     <include href = "common.xml" />
+    <field name = "alarm" type = "structure" structureName = "alarm"
+          supportName = "alarm" />
     <field name = "power" type = "double" >
         <property name = "voltage" associatedField = "voltage" />
         <property name = "current" associatedField = "current" />

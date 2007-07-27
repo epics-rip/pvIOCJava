@@ -55,13 +55,13 @@
 />
 
 <structure name = "linearConvertInput" supportName = "linearConvertInput">
-    <field name = "rawValue" type = "int" />
+    <field name = "value" type = "int" />
     <field name = "linearConvert" type = "structure" structureName = "linearConvert" />
     <field name = "input" type = "link" />
 </structure>
 
 <structure name = "linearConvertOutput" supportName = "linearConvertOutput">
-    <field name = "rawValue" type = "int" />
+    <field name = "value" type = "int" />
     <field name = "linearConvert" type = "structure" structureName = "linearConvert" />
     <field name = "output" type = "link" />
 </structure>

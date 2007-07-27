@@ -14,7 +14,7 @@ import org.epics.ioc.util.*;
  * Record that has the following fields:
  * <ul>
  *    <li>value which must be an enum. If value is not present then setField must have an enum field.</li>
- *    <li>rawValue which must be an int.</li>
+ *    <li>registerValue which must be an int.</li>
  *    <li>numberOfBits which must be an int.</li>
  *    <li>states which must be an array of digitalState structures.</li>
  * </ul>
@@ -46,8 +46,8 @@ public class DigitalFactory {
         private PVStructure pvStructure;
         private DBEnum dbValue = null;
         private PVEnum pvValue = null;
-        private DBField dbRawValue = null;
-        private PVInt pvRawValue = null;
+        private DBField dbRegisterValue = null;
+        private PVInt pvRegisterValue = null;
         private DBNonScalarArray dbStates = null;
         private int[] values = null;
         private int numberOfBits = 0;
@@ -62,7 +62,7 @@ public class DigitalFactory {
         private RequestResult finalResult = RequestResult.success;
         
         private int prevValueIndex;
-        private int prevRawValue;
+        private int prevRegisterValue;
         
         
         private DigitalImpl(DBStructure dbStructure) {
@@ -95,9 +95,9 @@ public class DigitalFactory {
                 dbValue = (DBEnum)dbFields[index];                
             }
             pvValue = dbValue.getPVEnum();
-            index = structure.getFieldIndex("rawValue");
+            index = structure.getFieldIndex("registerValue");
             if(index<0) {
-                super.message("no rawValue field", MessageType.error);
+                super.message("no registerValue field", MessageType.error);
                 return;
             }
             dbField = dbFields[index];
@@ -105,8 +105,8 @@ public class DigitalFactory {
                 super.message("value is not an int", MessageType.error);
                 return;
             }
-            dbRawValue = dbFields[index];
-            pvRawValue = (PVInt)dbRawValue.getPVField();
+            dbRegisterValue = dbFields[index];
+            pvRegisterValue = (PVInt)dbRegisterValue.getPVField();
             index = structure.getFieldIndex("numberOfBits");
             if(index<0) {
                 super.message("no numberOfBits field", MessageType.error);
@@ -170,13 +170,13 @@ public class DigitalFactory {
             }
             if(!initFields()) return;
             if(inputSupport!=null) {
-                inputSupport.setField(dbRawValue);
+                inputSupport.setField(dbRegisterValue);
                 inputSupport.initialize();
                 supportState = inputSupport.getSupportState();
                 if(supportState!=SupportState.readyForStart) return;
             }
             if(outputSupport!=null) {
-                outputSupport.setField(dbRawValue);
+                outputSupport.setField(dbRegisterValue);
                 outputSupport.initialize();
                 supportState = outputSupport.getSupportState();
                 if(supportState!=SupportState.readyForStart) {
@@ -202,7 +202,7 @@ public class DigitalFactory {
         public void start() {
             if(!super.checkSupportState(SupportState.readyForStart,supportName)) return;
             SupportState supportState = SupportState.ready;
-            prevRawValue = pvRawValue.get();
+            prevRegisterValue = pvRegisterValue.get();
             prevValueIndex = pvValue.getIndex();
             if(inputSupport!=null) {
                 inputSupport.start();
@@ -268,14 +268,14 @@ public class DigitalFactory {
             } else {
                 int value = pvValue.getIndex();
                 if(prevValueIndex!=value) {
-                    prevRawValue = values[prevValueIndex];
-                    pvRawValue.put(prevRawValue);
-                    dbRawValue.postPut();
+                    prevRegisterValue = values[prevValueIndex];
+                    pvRegisterValue.put(prevRegisterValue);
+                    dbRegisterValue.postPut();
                 }
             }
-            int newValue = pvRawValue.get();
-            if(newValue!=prevRawValue) {
-                prevRawValue = newValue;
+            int newValue = pvRegisterValue.get();
+            if(newValue!=prevRegisterValue) {
+                prevRegisterValue = newValue;
                 newValue &= mask;
                 for(int i=0; i< values.length; i++) {
                     if(values[i]==newValue) {
@@ -317,9 +317,9 @@ public class DigitalFactory {
             switch(processState) {
             case inputSupport: 
                 {
-                    int newValue = pvRawValue.get();
-                    if(newValue!=prevRawValue) {
-                        prevRawValue = newValue;
+                    int newValue = pvRegisterValue.get();
+                    if(newValue!=prevRegisterValue) {
+                        prevRegisterValue = newValue;
                         newValue &= mask;
                         for(int i=0; i< values.length; i++) {
                             if(values[i]==newValue) {

@@ -7,6 +7,10 @@
 
 <recordType name = "booleanArray" supportName = "generic" >
     <include href = "common.xml" />
+    <field name = "value" type = "array" elementType = "boolean" >
+        <property name = "alarm" associatedField = "alarm" />
+        <property name = "timeStamp" associatedField = "/timeStamp" />
+    </field>
     <include href = "booleanArrayCommon.xml" />
 </recordType>
 

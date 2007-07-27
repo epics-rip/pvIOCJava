@@ -13,6 +13,12 @@
 
 <recordType name = "calcDouble" supportName = "generic" >
     <include href = "common.xml" />
+    <field name = "value" type = "double" >
+        <property name = "alarm" associatedField = "alarm" />
+        <property name = "units" associatedField = "units" />
+        <property name = "displayLimit" associatedField = "displayLimit" />
+        <property name = "timeStamp" associatedField = "/timeStamp" />
+    </field>
     <include href = "calcDoubleCommon.xml" />
 </recordType>
 

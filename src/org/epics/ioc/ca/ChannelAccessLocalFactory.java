@@ -1302,15 +1302,20 @@ public class ChannelAccessLocalFactory  {
                 requestResult = RequestResult.success;
                 if(process) {
                     if(isRecordProcessRequester) {
-                        if(recordProcess.setActive(this)) return;
+                        if(!recordProcess.setActive(this)) {
+                            message("could not process record",MessageType.warning);
+                            channelCDPutRequester.putDone(RequestResult.failure);
+                            return;
+                        }
                     } else {
                         if(recordProcess.processSelfRequest(this)){
                             recordProcess.processSelfSetActive(this);
+                        }  else {
+                            message("could not process record",MessageType.warning);
+                            channelCDPutRequester.putDone(RequestResult.failure);
                             return;
-                        }  
+                        }
                     }
-                    message("could not process record",MessageType.warning);
-                    channelCDPutRequester.putDone(RequestResult.failure);
                 }
                 dbRecord.lock();
                 try {

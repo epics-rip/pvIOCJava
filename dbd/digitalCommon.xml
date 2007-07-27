@@ -1,9 +1,7 @@
 <?xml version="1.0" ?>
 <DBDefinition>
-    <field name = "value" type = "enum" design = "false">
-        <property name = "alarm" associatedField = "alarm" />
-        <property name = "timeStamp" associatedField = "/timeStamp" />
-    </field>
+    <field name = "alarm" type = "structure" structureName = "alarm"
+          supportName = "alarm" />
     <field name = "digitalIO" type = "structure"
         structureName = "digitalIO" supportName = "digital" />
     <field name = "output" type = "link" />

@@ -13,6 +13,12 @@
 
 <recordType name = "calcDoubleArray" supportName = "generic" >
     <include href = "common.xml" />
+    <field name = "value" type = "array" elementType = "double"  >
+        <property name = "alarm" associatedField = "alarm" />
+        <property name = "units" associatedField = "units" />
+        <property name = "displayLimit" associatedField = "displayLimit" />
+        <property name = "timeStamp" associatedField = "/timeStamp" />
+    </field>
     <include href = "calcDoubleArrayCommon.xml" />
 </recordType>
 

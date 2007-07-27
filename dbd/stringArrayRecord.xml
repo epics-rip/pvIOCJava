@@ -7,6 +7,11 @@
 
 <recordType name = "stringArray" supportName = "generic" >
     <include href = "common.xml" />
+    <field name = "value" type = "array" elementType = "string" >
+        <property name = "alarm" associatedField = "alarm" />
+        <property name = "units" associatedField = "units" />
+        <property name = "timeStamp" associatedField = "/timeStamp" />
+    </field>
     <include href = "stringArrayCommon.xml" />
 </recordType>
 

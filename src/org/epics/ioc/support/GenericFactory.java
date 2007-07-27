@@ -36,7 +36,7 @@ public class GenericFactory {
         private static String supportName = "generic";
         private DBStructure dbStructure;
         private PVStructure pvStructure;
-        private DBField setFieldDBField = null;
+        private DBField valueDBField = null;
         
         private AlarmSupport alarmSupport = null;
         private int numberSupports = 0;
@@ -61,35 +61,22 @@ public class GenericFactory {
             Structure structure = (Structure)pvStructure.getField();
             DBField[] dbFields = dbStructure.getFieldDBFields();
             Field[] fields = structure.getFields();
-            boolean lookForValue = (setFieldDBField==null) ? true : false;
-            DBField rawValueDBField = null;
-            DBField valueDBField = null;
             int indexValue = 0;
             numberSupports = 0;
             for(int i=0; i<dbFields.length; i++) {
                 String fieldName = fields[i].getFieldName();
                 if(fieldName.equals("scan")) continue;
+                if(fieldName.equals("timeStamp")) continue;                   
+                if(fieldName.equals("value") && valueDBField==null) {
+                    valueDBField = dbFields[i];
+
+                }
                 if(fieldName.equals("alarm")) {
                     Support support = dbFields[i].getSupport();
                     if(support!=null && support instanceof AlarmSupport) {
                         alarmSupport = (AlarmSupport)support;
-                        alarmSupport.initialize();
-                        if(alarmSupport.getSupportState()!=SupportState.readyForStart) {
-                            return;
-                        }
                     }
                     continue;
-                }
-                if(fieldName.equals("timeStamp")) continue;
-                if(lookForValue) {                   
-                    if(fieldName.equals("rawValue")) {
-                        rawValueDBField = dbFields[i];
-                    }
-                    if(fieldName.equals("value")) {
-                        valueDBField = dbFields[i];
-                        indexValue = numberSupports;
-                        if(dbFields[i].getSupport()!=null) indexValue++;
-                    }
                 }
                 if(dbFields[i].getSupport()==null) continue;
                 numberSupports++;
@@ -105,19 +92,18 @@ public class GenericFactory {
                 if(support==null) continue;
                 supports[next++] = support;
             }
+            if(alarmSupport!=null) {
+                if(valueDBField!=null) {
+                    alarmSupport.setField(valueDBField);
+                }
+                alarmSupport.initialize();
+                if(alarmSupport.getSupportState()!=SupportState.readyForStart) {
+                    return;
+                }
+            }
             for(int i=0; i<supports.length; i++) {
                 Support support = supports[i];
-                if(setFieldDBField!=null) {
-                    support.setField(setFieldDBField);
-                } else if(rawValueDBField!=null && valueDBField!=null) {
-                    if(i>=indexValue) {
-                        support.setField(valueDBField);
-                    } else {
-                        support.setField(rawValueDBField);
-                    }
-                } else if(rawValueDBField!=null) {
-                    support.setField(rawValueDBField);
-                } else if(valueDBField!=null) {
+                if(valueDBField!=null) {
                     support.setField(valueDBField);
                 }
                 support.initialize();
@@ -206,7 +192,7 @@ public class GenericFactory {
          * @see org.epics.ioc.support.AbstractSupport#setField(org.epics.ioc.db.DBField)
          */
         public void setField(DBField dbField) {
-            setFieldDBField = dbField;
+            valueDBField = dbField;
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.process.SupportProcessRequester#supportProcessDone(org.epics.ioc.util.RequestResult)

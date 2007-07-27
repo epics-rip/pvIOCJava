@@ -7,6 +7,10 @@
 
 <recordType name = "event" supportName = "generic" >
     <include href = "common.xml" />
+    <field name = "value" type = "string" supportName = "event" >
+        <property name = "alarm" associatedField = "alarm" />
+        <property name = "timeStamp" associatedField = "/timeStamp" />
+    </field>
     <include href = "eventCommon.xml" />
 </recordType>
 

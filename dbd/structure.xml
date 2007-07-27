@@ -8,6 +8,36 @@
     <field name = "link" type = "link" />
 </structure>
 
+<structure name = "byteLimit">
+    <field name = "low" type = "byte" />
+    <field name = "high" type = "byte" />
+</structure>
+
+<structure name = "shortLimit">
+    <field name = "low" type = "short" />
+    <field name = "high" type = "short" />
+</structure>
+
+<structure name = "intLimit">
+    <field name = "low" type = "int" />
+    <field name = "high" type = "int" />
+</structure>
+
+<structure name = "longLimit">
+    <field name = "low" type = "long" />
+    <field name = "high" type = "long" />
+</structure>
+
+<structure name = "floatLimit">
+    <field name = "low" type = "float" />
+    <field name = "high" type = "float" />
+</structure>
+
+<structure name = "doubleLimit">
+    <field name = "low" type = "double" />
+    <field name = "high" type = "double" />
+</structure>
+
 <structure name = "alarm">
     <field name = "severity" type = "menu" menuName = "alarmSeverity" />
     <field name = "message" type = "string" />
@@ -95,11 +125,29 @@
     <field name = "severity" type = "menu" menuName = "alarmSeverity" />
 </structure>
 
+<structure name = "incrementalDouble" supportName = "incremental" >
+    <field name = "desiredValue" type = "double" >
+        <property name = "alarm" associatedField = "alarm" />
+        <property name = "units" associatedField = "units" />
+        <property name = "displayLimit" associatedField = "displayLimit" />
+        <property name = "controlLimit" associatedField = "controlLimit" />
+        <property name = "timeStamp" associatedField = "/timeStamp" />
+    </field>
+    <field name = "input" type = "link" />
+    <field name = "incrementalOutput" type = "boolean" />
+    <field name = "rateOfChange" type = "double" />
+    <field name = "units" type = "string" />
+    <field name = "displayLimit"
+         type = "structure" structureName = "doubleLimit" />
+    <field name = "controlLimit"
+         type = "structure" structureName = "doubleLimit" />
+</structure>
+
 <structure name = "digitalIO" supportName = "digital">
     <!-- structureName must be digitalState -->
     <field name = "states" type = "array" elementType = "structure" />
     <field name = "numberOfBits" type = "int" />
-    <field name = "rawValue" type = "int" design = "false" />
+    <field name = "registerValue" type = "int" design = "false" />
     <field name = "input" type = "link" />
     <field name = "valueAlarm" type = "link" supportName = "digitalAlarm" />
     <field name = "output" type = "link" />
@@ -179,36 +227,6 @@
     <field name = "wait" type = "boolean" />
     <field name = "link" type = "link" />
     <field name = "name" type = "string" />
-</structure>
-
-<structure name = "byteLimit">
-    <field name = "low" type = "byte" />
-    <field name = "high" type = "byte" />
-</structure>
-
-<structure name = "shortLimit">
-    <field name = "low" type = "short" />
-    <field name = "high" type = "short" />
-</structure>
-
-<structure name = "intLimit">
-    <field name = "low" type = "int" />
-    <field name = "high" type = "int" />
-</structure>
-
-<structure name = "longLimit">
-    <field name = "low" type = "long" />
-    <field name = "high" type = "long" />
-</structure>
-
-<structure name = "floatLimit">
-    <field name = "low" type = "float" />
-    <field name = "high" type = "float" />
-</structure>
-
-<structure name = "doubleLimit">
-    <field name = "low" type = "double" />
-    <field name = "high" type = "double" />
 </structure>
 
 <structure name = "linearConvert" >

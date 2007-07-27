@@ -2,8 +2,6 @@
 <DBDefinition>
     <field name = "scan" type = "structure" structureName = "scan"
          supportName = "scan" />
-    <field name = "alarm" type = "structure" structureName = "alarm"
-          supportName = "alarm" />
     <field name = "timeStamp" type = "structure" structureName = "timeStamp"/>
     <field name = "processAfterStart" type = "boolean" default = "false" />
 </DBDefinition>

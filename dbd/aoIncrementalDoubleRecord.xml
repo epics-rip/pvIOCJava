@@ -1,30 +1,19 @@
 <?xml version="1.0" ?>
 <DBDefinition>
 
-<structure name = "incrementalDouble" supportName = "incremental" >
-    <field name = "desiredValue" type = "double" >
-        <property name = "alarm" associatedField = "alarm" />
-        <property name = "units" associatedField = "units" />
-        <property name = "displayLimit" associatedField = "displayLimit" />
-        <property name = "controlLimit" associatedField = "controlLimit" />
-        <property name = "timeStamp" associatedField = "/timeStamp" />
-    </field>
-    <field name = "input" type = "link" />
-    <field name = "incrementalOutput" type = "boolean" />
-    <field name = "rateOfChange" type = "double" />
-    <field name = "units" type = "string" />
-    <field name = "displayLimit"
-         type = "structure" structureName = "doubleLimit" />
-    <field name = "controlLimit"
-         type = "structure" structureName = "doubleLimit" />
-</structure>
-
 <structure name = "aoIncrementalDouble" supportName = "generic" >
     <include href = "aoIncrementalDoubleCommon.xml" />
 </structure>
 
 <recordType name = "aoIncrementalDouble" supportName = "generic" >
     <include href = "common.xml" />
+    <field name = "value" type = "double" >
+        <property name = "alarm" associatedField = "alarm" />
+        <property name = "units" associatedField = "units" />
+        <property name = "displayLimit" associatedField = "displayLimit" />
+        <property name = "controlLimit" associatedField = "controlLimit" />
+        <property name = "timeStamp" associatedField = "/timeStamp" />
+    </field>
     <include href = "aoIncrementalDoubleCommon.xml" />
 </recordType>
 

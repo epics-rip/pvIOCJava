@@ -82,7 +82,7 @@ public class LinearConvertInputFactory {
             Structure structure = (Structure)pvStructure.getField();
             int index;
             
-            index = structure.getFieldIndex("rawValue");
+            index = structure.getFieldIndex("value");
             dbRawValue = dbFields[index];
             pvRawValue = (PVInt)pvFields[index];
                        

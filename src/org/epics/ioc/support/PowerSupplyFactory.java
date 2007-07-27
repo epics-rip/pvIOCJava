@@ -81,7 +81,7 @@ public class PowerSupplyFactory {
             DBField[] dbFields = dbStructure.getFieldDBFields();
             PVField[] pvFields = pvStructure.getFieldPVFields();
             index = structure.getFieldIndex("alarm");
-            if(index<0) {
+            if(index>0) {
                 Support support = dbFields[index].getSupport();
                 if(support!=null && (support instanceof AlarmSupport)) {
                     alarmSupport = (AlarmSupport)support;

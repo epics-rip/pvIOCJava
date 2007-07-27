@@ -1,7 +1,7 @@
 <?xml version="1.0" ?>
 <IOCDatabase>
 
-<record name = "syncStringDriver" type = "port">
+<record name = "syncStringDriver" type = "portCreate">
     <factoryName>org.epics.ioc.pdrv.testDriver.OctetDriverFactory</factoryName>
     <portName>syncOctetDriver</portName>
     <driverParameters structureName = "octetDriver" >
