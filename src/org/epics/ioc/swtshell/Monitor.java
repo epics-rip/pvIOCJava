@@ -176,7 +176,7 @@ public class Monitor {
             }
         }
 
-        private static enum MonitorType{ change, absolute, percentage }
+        private static enum MonitorType{ put, change, absolute, percentage }
         private enum ConnectState {connected,disconnected}
         
         private class MonitorChannel implements
@@ -187,11 +187,12 @@ public class Monitor {
         ChannelFieldGroupListener
         {
             private int queueSize = 3;
-            private MonitorType monitorType = MonitorType.change;
+            private MonitorType monitorType = MonitorType.put;
             private double deadband = 0.0;
             private Requester requester;
             private Button connectButton;          
             private Button propertyButton;          
+            private Button putButton;
             private Button changeButton;
             private Button absoluteButton;
             private Button percentageButton;
@@ -214,32 +215,35 @@ public class Monitor {
 
             private MonitorChannel(Composite parent,Requester requester) {
                 this.requester = requester;
-                Composite monitorTypeComposite = new Composite(parent,SWT.BORDER);
+                Composite rowComposite = new Composite(parent,SWT.BORDER);
                 GridLayout gridLayout = new GridLayout();
                 gridLayout.numColumns = 6;
-                monitorTypeComposite.setLayout(gridLayout);
+                rowComposite.setLayout(gridLayout);
                 GridData gridData = new GridData(GridData.FILL_HORIZONTAL);
-                monitorTypeComposite.setLayoutData(gridData);
-                connectButton = new Button(monitorTypeComposite,SWT.PUSH);                
+                rowComposite.setLayoutData(gridData);
+                connectButton = new Button(rowComposite,SWT.PUSH);                
                 connectButton.addSelectionListener(this);
-                propertyButton = new Button(monitorTypeComposite,SWT.PUSH);
+                propertyButton = new Button(rowComposite,SWT.PUSH);
                 propertyButton.setText("property");
                 propertyButton.addSelectionListener(this);
-                Composite changeComposite = new Composite(monitorTypeComposite,SWT.BORDER);
+                Composite monitorTypeComposite = new Composite(rowComposite,SWT.BORDER);
                 gridLayout = new GridLayout();
-                gridLayout.numColumns = 3;
-                changeComposite.setLayout(gridLayout);
-                changeButton = new Button(changeComposite,SWT.RADIO);
+                gridLayout.numColumns = 4;
+                monitorTypeComposite.setLayout(gridLayout);
+                putButton = new Button(monitorTypeComposite,SWT.RADIO);
+                putButton.setText("onPut");
+                putButton.addSelectionListener(this);
+                putButton.setSelection(true);
+                changeButton = new Button(monitorTypeComposite,SWT.RADIO);
                 changeButton.setText("onChange");
                 changeButton.addSelectionListener(this);
-                changeButton.setSelection(true);
-                absoluteButton = new Button(changeComposite,SWT.RADIO);
+                absoluteButton = new Button(monitorTypeComposite,SWT.RADIO);
                 absoluteButton.setText("onAbsolute");
                 absoluteButton.addSelectionListener(this);
-                percentageButton = new Button(changeComposite,SWT.RADIO);
+                percentageButton = new Button(monitorTypeComposite,SWT.RADIO);
                 percentageButton.setText("onPercentage");
-                changeButton.addSelectionListener(this);
-                Composite deadbandComposite = new Composite(monitorTypeComposite,SWT.BORDER);
+                percentageButton.addSelectionListener(this);
+                Composite deadbandComposite = new Composite(rowComposite,SWT.BORDER);
                 gridLayout = new GridLayout();
                 gridLayout.numColumns = 2;
                 deadbandComposite.setLayout(gridLayout);
@@ -325,8 +329,8 @@ public class Monitor {
                             }
                         }
                         if(!type.isNumeric()) {
-                            monitorType = MonitorType.change;
-                            changeButton.setSelection(true);
+                            monitorType = MonitorType.put;
+                            putButton.setSelection(true);
                         }
                         propertyButton.setEnabled(propertysOK);
                         propertyNames = null;
@@ -341,6 +345,11 @@ public class Monitor {
                         GetProperty getProperty = new GetProperty(shell);
                         propertyNames = getProperty.open(valueField.getField());
                     }
+                }
+                if(object==putButton) {
+                    if(!putButton.getSelection()) return;
+                    monitorType = MonitorType.put;
+                    return;
                 }
                 if(object==changeButton) {
                     if(!changeButton.getSelection()) return;
@@ -458,6 +467,7 @@ public class Monitor {
                 }
                 startStopButton.setText("startMonitor");
                 propertyButton.setEnabled(state);
+                putButton.setEnabled(state);
                 changeButton.setEnabled(state);
                 absoluteButton.setEnabled(state);
                 percentageButton.setEnabled(state);
@@ -481,6 +491,9 @@ public class Monitor {
                 List<ChannelField> channelFieldList = channelFieldGroup.getList();
                 ChannelField channelField = channelFieldList.get(0);
                 switch(monitorType) {
+                case put:
+                    channelMonitor.lookForPut(channelField, true);
+                    break;
                 case change:
                     channelMonitor.lookForChange(channelField, true);
                     break;
@@ -496,7 +509,7 @@ public class Monitor {
                     String fieldName = channelField.getField().getFieldName();
                     boolean causeMonitor = true;
                     if(fieldName.equals("timeStamp")) causeMonitor = false;
-                    channelMonitor.lookForChange(channelField, causeMonitor);
+                    channelMonitor.lookForPut(channelField, causeMonitor);
                 }
             }
         }

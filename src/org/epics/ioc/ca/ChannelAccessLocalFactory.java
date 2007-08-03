@@ -1707,9 +1707,7 @@ public class ChannelAccessLocalFactory  {
                 }
             }
         }
-        
-        
-              
+                     
         private class ChannelMonitorImpl implements
         ChannelFieldGroupListener,ChannelMonitor,DBListener,Requester
         {
@@ -1762,6 +1760,44 @@ public class ChannelAccessLocalFactory  {
                 // nothing to do for now
             }
             /* (non-Javadoc)
+             * @see org.epics.ioc.ca.ChannelMonitor#lookForChange(org.epics.ioc.ca.ChannelField)
+             */
+            public void lookForPut(ChannelField channelField, boolean causeMonitor) {
+                lock.lock();
+                try {
+                    if(isDestroyed) {
+                        message("channel has been destroyed",MessageType.fatalError);
+                    } else if(isStarted) {
+                        throw new IllegalStateException("illegal request. monitor active");
+                    } else {
+                        if(isDestroyed) return;
+                        ChannelFieldImpl impl = (ChannelFieldImpl)channelField;
+                        monitor.onPut(impl,causeMonitor);
+                    }
+                } finally {
+                    lock.unlock();
+                }
+            }
+            /* (non-Javadoc)
+             * @see org.epics.ioc.ca.ChannelMonitor#lookForChange(org.epics.ioc.ca.ChannelField, boolean)
+             */
+            public void lookForChange(ChannelField channelField, boolean causeMonitor) {
+                lock.lock();
+                try {
+                    if(isDestroyed) {
+                        message("channel has been destroyed",MessageType.fatalError);
+                    } else if(isStarted) {
+                        throw new IllegalStateException("illegal request. monitor active");
+                    } else {
+                        if(isDestroyed) return;
+                        ChannelFieldImpl impl = (ChannelFieldImpl)channelField;
+                        monitor.onChange(impl,causeMonitor);
+                    }
+                } finally {
+                    lock.unlock();
+                }
+            }
+            /* (non-Javadoc)
              * @see org.epics.ioc.ca.ChannelMonitor#lookForAbsoluteChange(org.epics.ioc.ca.ChannelField, double)
              */
             public void lookForAbsoluteChange(ChannelField channelField, double value) {
@@ -1774,25 +1810,6 @@ public class ChannelAccessLocalFactory  {
                     } else {
                         ChannelFieldImpl impl = (ChannelFieldImpl)channelField;
                         monitor.onAbsoluteChange(impl, value);
-                    }
-                } finally {
-                    lock.unlock();
-                }
-            }
-            /* (non-Javadoc)
-             * @see org.epics.ioc.ca.ChannelMonitor#lookForChange(org.epics.ioc.ca.ChannelField)
-             */
-            public void lookForChange(ChannelField channelField, boolean causeMonitor) {
-                lock.lock();
-                try {
-                    if(isDestroyed) {
-                        message("channel has been destroyed",MessageType.fatalError);
-                    } else if(isStarted) {
-                        throw new IllegalStateException("illegal request. monitor active");
-                    } else {
-                        if(isDestroyed) return;
-                        ChannelFieldImpl impl = (ChannelFieldImpl)channelField;
-                        monitor.onPut(impl,causeMonitor);
                     }
                 } finally {
                     lock.unlock();
@@ -1832,7 +1849,6 @@ public class ChannelAccessLocalFactory  {
                         throw new IllegalStateException("illegal request. monitor active");
                     } else {
                         channelMonitorRequester = null;
-                        monitor.start();
                         recordListener = dbRecord.createRecordListener(this);
                         List<ChannelFieldImpl> channelFieldList = monitor.getChannelFieldList();
                         if(threadName==null) threadName =
@@ -1842,8 +1858,11 @@ public class ChannelAccessLocalFactory  {
                              threadName,priority,channelMonitorNotifyRequester);
                         for(ChannelFieldImpl channelField: channelFieldList) {
                             DBField dbField = channelField.getDBField();
+                            PVField pvField = dbField.getPVField();
+                            monitor.initField(pvField);
                             dbField.addListener(recordListener);
                         }
+                        monitor.start();
                         isStarted = true;
                         processActive = false;
                         monitorOccured = false;
@@ -1865,7 +1884,8 @@ public class ChannelAccessLocalFactory  {
                         message("channel has been destroyed",MessageType.fatalError);
                         return false;
                     } else if(isStarted) {
-                        throw new IllegalStateException("illegal request. monitor active");
+                        message("alreadt started",MessageType.fatalError);
+                        return false;
                     } else {
                         this.channelMonitorRequester = channelMonitorRequester;
                         channelFieldGroup = channel.createFieldGroup(this);
@@ -1879,16 +1899,18 @@ public class ChannelAccessLocalFactory  {
                             channelMonitorRequester.getRequesterName() + "NotifyThread";
                         int priority = scanPriority.getJavaPriority();
                         monitorThread = new MonitorThread(
-                            threadName,priority,channelMonitorRequester,cDQueue);
-                        monitor.start();
+                            threadName,priority,channelMonitorRequester,cDQueue);                        
                         recordListener = dbRecord.createRecordListener(this);
                         CD initialData = cDQueue.getFree(true);
                         initialData.clearNumPuts();
                         // give the initial data to the user
                         for(ChannelFieldImpl channelField: channelFieldList) {
                             DBField dbField = channelField.getDBField();
-                            initialData.dataPut(dbField.getPVField());
+                            PVField pvField = dbField.getPVField();
+                            initialData.dataPut(pvField);
+                            monitor.initField(pvField);
                         }
+                        monitor.start();
                         cD = cDQueue.getFree(true);
                         CDField[] initialDatas = initialData.getCDRecord().getCDStructure().getFieldCDFields();
                         CDField[] channelDatas = cD.getCDRecord().getCDStructure().getFieldCDFields();
@@ -2109,6 +2131,7 @@ public class ChannelAccessLocalFactory  {
         
         private enum MonitorType {
             onPut,
+            onChange,
             absoluteChange,
             percentageChange
         }
@@ -2118,13 +2141,27 @@ public class ChannelAccessLocalFactory  {
             private Type type = null;
             private boolean causeMonitor;
             private boolean monitorOccured = false;
-            private boolean firstMonitor = true;
+            
+            private boolean lastBooleanValue;
+            private byte lastByteValue;
+            private short lastShortValue;
+            private int lastIntValue;
+            private long lastLongValue;
+            private float lastFloatValue;
+            private double lastDoubleValue;
+            private String lastStringValue;
+            private int lastIndexValue;
+            
             private double deadband;
             private double lastMonitorValue = 0.0;
     
-            private MonitorField(MonitorType monitorType,boolean causeMonitor) {
+            private MonitorField(boolean causeMonitor) {
+                this.monitorType = MonitorType.onPut;
                 this.causeMonitor = causeMonitor;
-                this.monitorType = monitorType;
+            }
+            private MonitorField(Type type,boolean causeMonitor) {
+                this.monitorType = MonitorType.onChange;
+                this.type = type;
                 this.causeMonitor = causeMonitor;
             }
             private MonitorField(MonitorType monitorType, Type type, double deadband) {
@@ -2134,23 +2171,169 @@ public class ChannelAccessLocalFactory  {
                 this.deadband = deadband;
             }
             
-            public void start() {
-                clearMonitor();
-                firstMonitor = true;
+            private void initField(PVField pvField) {
+                if(monitorType==MonitorType.onPut) return;
+                if(monitorType==MonitorType.onChange) {
+                    switch(type) {
+                    case pvBoolean: {
+                            PVBoolean data= (PVBoolean)pvField;
+                            lastBooleanValue = data.get();
+                            return;
+                        }
+                    case pvByte: {
+                            PVByte data= (PVByte)pvField;
+                            lastByteValue = data.get();
+                            return;
+                        }
+                    case pvShort: {
+                            PVShort data= (PVShort)pvField;
+                            lastShortValue = data.get();
+                            return;
+                        }
+                    case pvInt: {
+                            PVInt data= (PVInt)pvField;
+                            lastIntValue = data.get();
+                            return;
+                        }
+                    case pvLong: {
+                            PVLong data= (PVLong)pvField;
+                            lastLongValue = data.get();
+                            return;
+                        }
+                    case pvFloat: {
+                            PVFloat data= (PVFloat)pvField;
+                            lastFloatValue = data.get();
+                            return;
+                        }
+                    case pvDouble: {
+                            PVDouble data= (PVDouble)pvField;
+                            lastDoubleValue = data.get();
+                            return;
+                        }
+                    case pvString : {
+                        PVString data= (PVString)pvField;
+                        lastStringValue = data.get();
+                        return;
+                    }                       
+                    case pvMenu: {
+                        PVMenu data= (PVMenu)pvField;
+                        lastIndexValue = data.getIndex();
+                        return;
+                    }
+                    case pvEnum: {
+                        PVEnum data= (PVEnum)pvField;
+                        lastIndexValue = data.getIndex();
+                        return;
+                    }
+                    default:
+                        throw new IllegalStateException("Logic error. Why is type not numeric?");      
+                    }
+                }
+                lastMonitorValue = convert.toDouble(pvField);
             }
-            public void clearMonitor() {
+            private void start() {
+                clearMonitor();
+            }
+            private void clearMonitor() {
                 monitorOccured = false;
             }
-            public boolean monitorOccured() {
+            private boolean monitorOccured() {
                 return monitorOccured;
             }
-            public boolean causeMonitor() {
+            private boolean causeMonitor() {
                 return causeMonitor;
             }
-            public boolean newField(PVField pvField) {
+            private boolean newField(PVField pvField) {
                 if(monitorType==MonitorType.onPut) {
                     monitorOccured = true;
                     return true;
+                }
+                if(monitorType==MonitorType.onChange) {
+                    switch(type) {
+                    case pvBoolean: {
+                            PVBoolean pvData= (PVBoolean)pvField;
+                            boolean data = pvData.get();
+                            if(data==lastBooleanValue) return false;
+                            lastBooleanValue = data;
+                            monitorOccured = true;
+                            return true;
+                        }
+                    case pvByte: {
+                            PVByte pvData= (PVByte)pvField;
+                            byte data = pvData.get();
+                            if(data==lastByteValue) return false;
+                            lastByteValue = data;
+                            monitorOccured = true;
+                            return true;
+                        }
+                    case pvShort: {
+                            PVShort pvData= (PVShort)pvField;
+                            short data = pvData.get();
+                            if(data==lastShortValue) return false;
+                            lastShortValue = data;
+                            monitorOccured = true;
+                            return true;
+                        }
+                    case pvInt: {
+                            PVInt pvData= (PVInt)pvField;
+                            int data = pvData.get();
+                            if(data==lastIntValue) return false;
+                            lastIntValue = data;
+                            monitorOccured = true;
+                            return true;
+                        }
+                    case pvLong: {
+                            PVLong pvData= (PVLong)pvField;
+                            long data = pvData.get();
+                            if(data==lastLongValue) return false;
+                            lastLongValue = data;
+                            monitorOccured = true;
+                            return true;
+                        }
+                    case pvFloat: {
+                            PVFloat pvData= (PVFloat)pvField;
+                            float data = pvData.get();
+                            if(data==lastFloatValue) return false;
+                            lastFloatValue = data;
+                            monitorOccured = true;
+                            return true;
+                        }
+                    case pvDouble: {
+                            PVDouble pvData= (PVDouble)pvField;
+                            double data = pvData.get();
+                            if(data==lastDoubleValue) return false;
+                            lastDoubleValue = data;
+                            monitorOccured = true;
+                            return true;
+                        }
+                    case pvString : {
+                            PVString pvData= (PVString)pvField;
+                            String data = pvData.get();
+                            if(data==lastStringValue) return false;
+                            if(data.equals(lastStringValue)) return false;
+                            lastStringValue = data;
+                            monitorOccured = true;
+                            return true;
+                        }                       
+                    case pvMenu: {
+                        PVMenu pvData= (PVMenu)pvField;
+                        int data = pvData.getIndex();
+                        if(data==lastIndexValue) return false;
+                        lastIndexValue = data;
+                        monitorOccured = true;
+                        return true;
+                    }
+                    case pvEnum: {
+                        PVEnum pvData= (PVEnum)pvField;
+                        int data = pvData.getIndex();
+                        if(data==lastIndexValue) return false;
+                        lastIndexValue = data;
+                        monitorOccured = true;
+                        return true;
+                    }
+                    default:
+                        throw new IllegalStateException("Logic error. Why is type invalid?");      
+                    }
                 }
                 double newValue;
                 switch(type) {
@@ -2187,12 +2370,6 @@ public class ChannelAccessLocalFactory  {
                 default:
                     throw new IllegalStateException("Logic error. Why is type not numeric?");      
                 } 
-                if(firstMonitor) {
-                    firstMonitor = false;
-                    lastMonitorValue = newValue;
-                    monitorOccured = true;
-                    return true;
-                }
                 double diff = newValue - lastMonitorValue;
                 if(monitorType==MonitorType.absoluteChange) {
                     if(Math.abs(diff) >= deadband) {
@@ -2223,48 +2400,72 @@ public class ChannelAccessLocalFactory  {
             private Monitor(Requester requester) {
                 this.requester = requester;
             }
-            public List<MonitorField> getMonitorFieldList() {
+            private List<MonitorField> getMonitorFieldList() {
                 return monitorFieldList;
             }
-            public List<ChannelFieldImpl> getChannelFieldList() {
+            private List<ChannelFieldImpl> getChannelFieldList() {
                 return channelFieldList;
             }
-            public boolean onAbsoluteChange(ChannelFieldImpl channelField, double value) {
+            
+            private void onPut(ChannelFieldImpl channelField,boolean causeMonitor) {
+                MonitorField monitorField = new MonitorField(causeMonitor);
+                monitorFieldList.add(monitorField);
+                channelFieldList.add(channelField);
+            }
+            private void onChange(ChannelFieldImpl channelField,boolean causeMonitor) {
+                Type type = channelField.getField().getType();
+                if(!type.isPrimitive() && !(type==Type.pvEnum) && !(type==Type.pvMenu)) {
+                    requester.message("field is not primitive or enum or menu", MessageType.error);
+                    onPut(channelField,true);
+                    return;
+                }
+                MonitorField monitorField = new MonitorField(type,causeMonitor);
+                monitorFieldList.add(monitorField);
+                channelFieldList.add(channelField);
+            }
+            private void onAbsoluteChange(ChannelFieldImpl channelField, double value) {
                 Type type = channelField.getField().getType();
                 if(!type.isNumeric()) {
                     requester.message("field is not a numeric scalar", MessageType.error);
-                    return false;
+                    onPut(channelField,true);
+                    return;
                 }
                 MonitorField monitorField
                     = new MonitorField(MonitorType.absoluteChange,type,value);
                 monitorFieldList.add(monitorField);
                 channelFieldList.add(channelField);
-                return true;
             }         
-            public void onPut(ChannelFieldImpl channelField,boolean causeMonitor) {
-                MonitorField monitorField = new MonitorField(MonitorType.onPut,causeMonitor);
-                monitorFieldList.add(monitorField);
-                channelFieldList.add(channelField);
-            }
-            public boolean onPercentageChange(ChannelFieldImpl channelField, double value) {
+            private void onPercentageChange(ChannelFieldImpl channelField, double value) {
                 Type type = channelField.getField().getType();
                 if(!type.isNumeric()) {
                     requester.message("field is not a numeric scalar", MessageType.error);
-                    return false;
+                    onPut(channelField,true);
+                    return;
                 }
                 MonitorField monitorField
                     = new MonitorField(MonitorType.percentageChange,type,value);
                 monitorFieldList.add(monitorField);
                 channelFieldList.add(channelField);
-                return true;
             }
-            public void start() {
+            private void start() {
                 for(MonitorField monitorField: monitorFieldList) {
                     monitorField.start();
                 }
             }
             
-            public ChannelField newField(PVField pvField) {
+            private ChannelField initField(PVField pvField) {
+                for(int i=0; i < channelFieldList.size(); i++) {
+                    ChannelFieldImpl channelField = channelFieldList.get(i);
+                    PVField data = channelField.getPVField();
+                    if(data==pvField) {
+                        MonitorField monitorField = monitorFieldList.get(i);
+                        monitorField.initField(pvField);
+                        return null;
+                    }
+                }
+                return null;
+            }
+            private ChannelField newField(PVField pvField) {
                 for(int i=0; i < channelFieldList.size(); i++) {
                     ChannelFieldImpl channelField = channelFieldList.get(i);
                     PVField data = channelField.getPVField();
@@ -2344,7 +2545,7 @@ public class ChannelAccessLocalFactory  {
                     
                 }
             }
-            public void signal() {
+            private void signal() {
                 lock.lock();
                 try {
                     moreWork.signal();
@@ -2352,7 +2553,7 @@ public class ChannelAccessLocalFactory  {
                     lock.unlock();
                 }
             }
-            public void stop() {
+            private void stop() {
                 thread.interrupt();
             }
         }

@@ -150,7 +150,7 @@ public class DigitalAlarmFactory {
                 prevIndex = value;
                 index = pvChangeOfStateMenu.getIndex();
                 if(index>0) alarmSupport.setAlarm(
-                        message + " change of state alarm",
+                        message + " put of state alarm",
                         AlarmSeverity.getSeverity(index));
             }
             supportProcessRequester.supportProcessDone(RequestResult.success);

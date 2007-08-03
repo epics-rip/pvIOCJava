@@ -23,8 +23,9 @@
 </menu>
 
 <menu name = "monitorType">
+    <choice>put</choice>
     <choice>change</choice>
-    <choice>deltaChange</choice>
+    <choice>absoluteChange</choice>
     <choice>percentageChange</choice>
 </menu>
 

@@ -144,7 +144,7 @@ public class ListenerTest extends TestCase {
                     recordName,fieldName,value);
             DBLink dbLink = (DBLink)dbField;
             PVStructure configStructure = dbLink.getConfigurationStructure();
-            System.out.println("change supportName");
+            System.out.println("put supportName");
             String supportName = dbLink.getSupportName();
             String result = dbLink.setSupportName(supportName);
             if(result!=null) {

@@ -13,7 +13,7 @@ import org.epics.ioc.util.*;
  */
 public interface ChannelStateListener extends Requester {
     /**
-     * The channel has change connection state.
+     * The channel has put connection state.
      * @param c The channel.
      * @param isConnected (false,true) if new state (is not, is) connected.
      */

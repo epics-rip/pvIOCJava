@@ -82,11 +82,11 @@
     </linkArray>
 </record>
 
-<record name = "monitorDeltaChange" type = "double">
+<record name = "monitorAbsoluteChange" type = "double">
     <input supportName = "monitorLink" >
         <configure structureName = "monitorLink">
             <pvname>monitorCounter</pvname>
-            <type>deltaChange</type>
+            <type>absoluteChange</type>
             <deadband>1.001</deadband>
             <process>true</process>
         </configure>
@@ -168,7 +168,7 @@
     </linkArray>
 </record>
 
-<record name = "notifyDeltaChange" type = "double">
+<record name = "notifyAbsoluteChange" type = "double">
     <input supportName = "inputLink" >
         <configure structureName = "inputLink">
             <pvname>monitorCounter</pvname>
@@ -185,7 +185,7 @@
             <link  supportName = "monitorNotifyLink" >
                 <configure structureName = "monitorNotifyLink">
                     <pvname>monitorCounter</pvname>
-                    <type>deltaChange</type>
+                    <type>absoluteChange</type>
                     <deadband>1.001</deadband>
                 </configure>
             </link>

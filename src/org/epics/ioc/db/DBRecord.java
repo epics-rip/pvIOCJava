@@ -111,14 +111,14 @@ public interface DBRecord {
     void setDBD(DBD dbd);
     /**
      * Get the IOCDB to which this record belongs.
-     * This can change so user code should never save the return value.
+     * This can put so user code should never save the return value.
      * @return The current IOC database.
      */
     IOCDB getIOCDB();
     /**
      * Set the IOCDB.
      * @param iocdb The iocdb to which this record belongs.
-     * This is called after an IOCDB is merged into the master to change it to the master.
+     * This is called after an IOCDB is merged into the master to put it to the master.
      */
     void setIOCDB(IOCDB iocdb);
     /**

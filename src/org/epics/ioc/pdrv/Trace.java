@@ -95,12 +95,12 @@ public interface Trace {
      */
     int getIOTruncateSize();
     /**
-     * Add a listener for change of any trace option.
+     * Add a listener for put of any trace option.
      * @param traceOptionChangeListener The listener.
      */
     void optionChangeListenerAdd(TraceOptionChangeListener traceOptionChangeListener);
     /**
-     * Remove a listener for change of any trace option.
+     * Remove a listener for put of any trace option.
      * @param traceOptionChangeListener The listener.
      */
     void optionChangeListenerRemove(TraceOptionChangeListener traceOptionChangeListener);

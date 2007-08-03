@@ -182,7 +182,7 @@
 
 <structure name = "monitorLink">
     <field name = "pvname" type = "string" link = "true" />
-    <field name = "type" type = "menu" menuName = "monitorType" default = "change" />
+    <field name = "type" type = "menu" menuName = "monitorType" default = "put" />
     <field name = "deadband" type = "double" />
     <field name = "onlyWhileProcessing" type = "boolean" />
     <field name = "queueSize" type = "int"  default = "3" />

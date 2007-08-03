@@ -14,20 +14,28 @@ import org.epics.ioc.util.ScanPriority;
  */
 public interface ChannelMonitor {
     /**
-     * Look for any change to a channelField, i.e. a put to the field.
+     * Look for any put to a channelField.
+     * @param channelField The channelField to monitor.
+     * @param causeMonitor If true this will cause monitor even if no other changes occur.
+     */
+    void lookForPut(ChannelField channelField, boolean causeMonitor);
+    /**
+     * Look for any put to a channelField.
+     * This is only valid for the following types of field:
+     * boolean, numeric, and string. It is also valid for the index of a menu or enum field.
      * @param channelField The channelField to monitor.
      * @param causeMonitor If true this will cause monitor even if no other changes occur.
      */
     void lookForChange(ChannelField channelField, boolean causeMonitor);
     /**
-     * Look for a change in the value of the field.
+     * Look for a put in the value of the field.
      * This can only be used for scalar numeric field.
      * @param channelField The channelField to monitor.
      * @param value The deadband value for changes.
      */
     void lookForAbsoluteChange(ChannelField channelField,double value);
     /**
-     * Look for a percentage change in the value of the field.
+     * Look for a percentage put in the value of the field.
      * @param channelField The channelField to monitor.
      * @param value The deadband value for changes.
      */

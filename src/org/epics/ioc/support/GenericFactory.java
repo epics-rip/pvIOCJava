@@ -61,7 +61,6 @@ public class GenericFactory {
             Structure structure = (Structure)pvStructure.getField();
             DBField[] dbFields = dbStructure.getFieldDBFields();
             Field[] fields = structure.getFields();
-            int indexValue = 0;
             numberSupports = 0;
             for(int i=0; i<dbFields.length; i++) {
                 String fieldName = fields[i].getFieldName();

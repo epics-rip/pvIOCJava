@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-       "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+      "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
   <meta http-equiv="content-type" content="text/html; charset=iso-8859-1" />
@@ -10,13 +10,13 @@
 <body>
 <h1 style="text-align: center">EPICS JavaIOC: channel Access<br />
 package: org.epics.ioc.ca<br />
-2007.04.19</h1>
-CONTENTS
+2007.08.02</h1>
+CONTENTS 
 
 <div class="toc">
 <ul>
   <li><a href="#Overview">Overview</a></li>
-  <li><a href="#Channel">Channel Definitions</a>
+  <li><a href="#Channel">Channel Definitions</a> 
     <ul>
       <li><a href="#Definition">Definitions</a></li>
       <li><a href="#Channel1">Channel</a></li>
@@ -30,7 +30,7 @@ CONTENTS
     </ul>
   </li>
   <li><a href="#Channel2">Channel Process, Get, CDGet, Put, CDPut, and
-    PutGet</a>
+    PutGet</a> 
     <ul>
       <li><a href="#Definition1">Definitions</a></li>
       <li><a href="#ChannelPro">ChannelProcess</a></li>
@@ -41,13 +41,13 @@ CONTENTS
       <li><a href="#ChannelPut1">ChannelPutGet</a></li>
     </ul>
   </li>
-  <li><a href="#ChannelMon">ChannelMonitor</a>
+  <li><a href="#ChannelMon">ChannelMonitor</a> 
     <ul>
       <li><a href="#Definition2">Definitions</a></li>
       <li><a href="#ChannelMon1">ChannelMonitor</a></li>
     </ul>
   </li>
-  <li><a href="#Channel3">CD - Channel Data</a>
+  <li><a href="#Channel3">CD - Channel Data</a> 
     <ul>
       <li><a href="#Definition3">CD Definitions</a></li>
       <li><a href="#CD">CD</a></li>
@@ -55,7 +55,7 @@ CONTENTS
       <li><a href="#CDFactory">CDFactory</a></li>
     </ul>
   </li>
-  <li><a href="#Channel4">CD - Channel Data Fields</a>
+  <li><a href="#Channel4">CD - Channel Data Fields</a> 
     <ul>
       <li><a href="#Definition4">CD Definitions</a></li>
       <li><a href="#CDRecord">CDRecord</a></li>
@@ -69,31 +69,31 @@ CONTENTS
     </ul>
   </li>
   <li><a href="#Local">Local Channel Access</a></li>
-  <li><a href="#Example">Example For CD</a>
+  <li><a href="#Example">Example For CD</a> 
     <ul>
       <li><a href="#Discussion">Discussion</a></li>
       <li><a href="#Implementa">Implementation</a></li>
     </ul>
   </li>
-  <li><a href="#Process">Process Example</a>
+  <li><a href="#Process">Process Example</a> 
     <ul>
       <li><a href="#Discussion1">Discussion</a></li>
       <li><a href="#Implementa1">Implementation</a></li>
     </ul>
   </li>
-  <li><a href="#Example1">Get Example</a>
+  <li><a href="#Example1">Get Example</a> 
     <ul>
       <li><a href="#Discussion2">Discussion</a></li>
       <li><a href="#Implementa2">Implementation</a></li>
     </ul>
   </li>
-  <li><a href="#Example2">Put Example</a>
+  <li><a href="#Example2">Put Example</a> 
     <ul>
       <li><a href="#Discussion3">Discussion</a></li>
       <li><a href="#Implementa3">Implementation</a></li>
     </ul>
   </li>
-  <li><a href="#PutGet">PutGet Example</a>
+  <li><a href="#PutGet">PutGet Example</a> 
     <ul>
       <li><a href="#Discussion4">Discussion</a></li>
       <li><a href="#Implementa4">Implementation</a></li>
@@ -642,6 +642,7 @@ client request to:</p>
 
 <h3 id="Definition2">Definitions</h3>
 <pre>    interface ChannelMonitor {
+        void lookForPut(ChannelField channelField,boolean causeMonitor);
         void lookForChange(ChannelField channelField,boolean causeMonitor);
         void lookForAbsoluteChange(ChannelField channelField,double value);
         void lookForPercentageChange(ChannelField channelField,double value);
@@ -666,9 +667,12 @@ client request to:</p>
 
 <p>ChannelMonitor has the methods:</p>
 <dl>
+  <dt style="font-family: courier;">lookForPut</dt>
+    <dd>Look for a put. If the ChannelField is a structure then look for a
+      put to any subfield of the structure.</dd>
   <dt style="font-family: courier;">lookForChange</dt>
-    <dd>Look for a change. If the ChannelField is a structure then look for a
-      change in any subfield of the structure.</dd>
+    <dd>Look for a change in a data value. This is only valid for a primitive
+      field or for a change of index to a menu or enum field.</dd>
   <dt style="font-family: courier;">lookForAbsoluteChange</dt>
     <dd>Look for an absolute change in the data. The argument value is the
       deadband. This is only valid if ChannelField is a numeric scalar.</dd>
@@ -811,7 +815,7 @@ The arrays will grow as data is placed in them but will not be released.</p>
 <ul>
   <li>The requester calls cd.clear</li>
   <li>The data source, which is NOT allowed to block a record, does the
-    following:
+    following: 
     <ul>
       <li>Wait until data is not available.</li>
       <li>When one or more pvField items are available, with the data source
@@ -1164,7 +1168,7 @@ Channel Access is registered.</p>
         boolean nextGetField(Channel channel, ChannelField field, PVField pvField);
         void printResults();
     }</pre>
-where
+where 
 <dl>
   <dt style="font-family: courier;">ValueData</dt>
     <dd>The constructor</dd>

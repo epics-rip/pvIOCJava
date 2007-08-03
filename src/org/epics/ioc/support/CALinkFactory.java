@@ -1456,8 +1456,9 @@ public class CALinkFactory {
     }
     
     private enum MonitorType {
+        put,
         change,
-        deltaChange,
+        absoluteChange,
         percentageChange
     }
     
@@ -1524,10 +1525,11 @@ public class CALinkFactory {
             monitorTypeAccess = configStructure.getEnumField("type");
             if(monitorTypeAccess==null) return;
             String[] choices = monitorTypeAccess.getChoices();
-            if(choices.length!=3
-            || !choices[0].equals("change")
-            || !choices[1].equals("deltaChange")
-            || !choices[2].equals("percentageChange") ) {
+            if(choices.length!=4
+            || !choices[0].equals("put")
+            || !choices[1].equals("change")
+            || !choices[2].equals("absoluteChange")
+            || !choices[3].equals("percentageChange") ) {
                 pvLink.message("field type is not a valid enum", MessageType.error);
                 return;
             }
@@ -1671,18 +1673,16 @@ public class CALinkFactory {
                     + " is not in record " + recordName,
                     MessageType.error);
                 return;
-            }
-            if(!dataField.getField().getType().isNumeric()) {
-                channelMonitor.lookForChange(dataField, true);
-            } else {
-                switch(monitorType) {
-                case change:
-                    channelMonitor.lookForChange(dataField, true); break;
-                case deltaChange:
-                    channelMonitor.lookForAbsoluteChange(dataField, deadband); break;
-                case percentageChange:
-                    channelMonitor.lookForPercentageChange(dataField, deadband); break;
-                }
+            }            
+            switch(monitorType) {
+            case put:
+                channelMonitor.lookForPut(dataField, true); break;
+            case change:
+                channelMonitor.lookForChange(dataField, true); break;
+            case absoluteChange:
+                channelMonitor.lookForAbsoluteChange(dataField, deadband); break;
+            case percentageChange:
+                channelMonitor.lookForPercentageChange(dataField, deadband); break;
             }
             String threadName = pvLink.getFullName();
             channelMonitor.start((ChannelMonitorNotifyRequester)this, threadName, ScanPriority.low);
@@ -1832,7 +1832,7 @@ public class CALinkFactory {
             onlyWhileProcessing = onlyWhileProcessingAccess.get();
             queueSize = queueSizeAccess.get();
             if(queueSize<=1) {
-                pvLink.message("queueSize being change to 2", MessageType.warning);
+                pvLink.message("queueSize being put to 2", MessageType.warning);
                 queueSize = 2;
             }
             reportOverrun = reportOverrunAccess.get();
@@ -2094,24 +2094,22 @@ public class CALinkFactory {
                 return;
             }
             channelFieldGroup = channel.createFieldGroup(this);
-            channelFieldGroup.addChannelField(targetChannelField);
-            if(!targetChannelField.getField().getType().isNumeric()) {
-                channelMonitor.lookForChange(targetChannelField, true);
-            } else {
-                switch(monitorType) {
-                case change:
-                    channelMonitor.lookForChange(targetChannelField, true); break;
-                case deltaChange:
-                    channelMonitor.lookForAbsoluteChange(targetChannelField, deadband); break;
-                case percentageChange:
-                    channelMonitor.lookForPercentageChange(targetChannelField, deadband); break;
-                }
+            channelFieldGroup.addChannelField(targetChannelField);           
+            switch(monitorType) {
+            case put:
+                channelMonitor.lookForPut(targetChannelField, true); break;
+            case change:
+                channelMonitor.lookForChange(targetChannelField, true); break;
+            case absoluteChange:
+                channelMonitor.lookForAbsoluteChange(targetChannelField, deadband); break;
+            case percentageChange:
+                channelMonitor.lookForPercentageChange(targetChannelField, deadband); break;
             }
             if(inheritSeverityAccess.get()) {
                 severityChannelField = channel.findField("severity");
                 if(severityChannelField!=null) {
                     channelFieldGroup.addChannelField(severityChannelField);
-                    channelMonitor.lookForChange(severityChannelField, true);
+                    channelMonitor.lookForPut(severityChannelField, true);
                 } else {
                     severityChannelField = null;
                 }
