@@ -1,0 +1,19 @@
+<?xml version="1.0" ?>
+<DBDefinition>
+
+<structure name = "longArray" supportName = "generic" >
+    <include href = "longArrayCommon.xml" />
+</structure>
+
+<recordType name = "longArray" supportName = "generic" >
+    <include href = "common.xml" />
+    <field name = "value" type = "array" elementType = "long" >
+        <property name = "alarm" associatedField = "alarm" />
+        <property name = "units" associatedField = "units" />
+        <property name = "displayLimit" associatedField = "displayLimit" />
+        <property name = "timeStamp" associatedField = "/timeStamp" />
+    </field>
+    <include href = "longArrayCommon.xml" />
+</recordType>
+
+</DBDefinition>

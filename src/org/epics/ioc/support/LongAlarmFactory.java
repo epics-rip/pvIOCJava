@@ -45,11 +45,14 @@ public class LongAlarmFactory {
         private PVStructureArray intervalPVArray;
         private PVMenu outOfRangePVMenu;
         private PVBoolean pvActive;
+        private PVLong pvHystersis;
         
         private PVLong[] pvAlarmIntervalValue = null;
         private PVMenu[] pvAlarmIntervalSeverity = null;
         
         private PVLong pvValue;
+        private long lastAlarmIntervalValue;
+        private int lastAlarmSeverityIndex;
        
         private LongAlarmImpl(DBLink dbLink) {
             super(supportName,dbLink);
@@ -88,6 +91,8 @@ public class LongAlarmFactory {
             if(intervalPVArray==null) return;
             outOfRangePVMenu = configStructure.getMenuField("outOfRange", "alarmSeverity");
             if(outOfRangePVMenu==null) return;
+            pvHystersis = configStructure.getLongField("hystersis");
+            if(pvHystersis==null) return;
             setSupportState(supportState);
         }
         /* (non-Javadoc)
@@ -150,6 +155,7 @@ public class LongAlarmFactory {
                 }
                 pvAlarmIntervalSeverity[i] = (PVMenu)pvFields[index];
             }
+            lastAlarmSeverityIndex = 0;
             setSupportState(supportState);
         }
         /* (non-Javadoc)
@@ -169,6 +175,7 @@ public class LongAlarmFactory {
             pvActive = null;
             outOfRangePVMenu = null;
             intervalPVArray = null;
+            pvHystersis = null;
             setSupportState(SupportState.readyForInitialize);
         }
         /* (non-Javadoc)
@@ -200,19 +207,33 @@ public class LongAlarmFactory {
                 intervalValue = pvAlarmIntervalValue[i].get();
                 if(val<=intervalValue) {
                     int sevIndex = pvAlarmIntervalSeverity[i].getIndex();
-                    raiseAlarm(sevIndex);
+                    raiseAlarm(intervalValue,val,sevIndex);
                     return;
                 }
             }
             int outOfRange = outOfRangePVMenu.getIndex();
             // intervalValue is pvAlarmIntervalValue[len-1].get();
-            raiseAlarm(outOfRange);
+            raiseAlarm(intervalValue,val,outOfRange);
         }
         
-        private void raiseAlarm(int severityIndex) {
-            AlarmSeverity alarmSeverity = AlarmSeverity.getSeverity(severityIndex); 
+        private void raiseAlarm(long intervalValue,long val,int severityIndex) {
+            AlarmSeverity alarmSeverity = AlarmSeverity.getSeverity(severityIndex);
+            if(severityIndex<lastAlarmSeverityIndex) {
+                long diff = lastAlarmIntervalValue - val;
+                if(diff<0) diff = -diff;
+                if(diff<pvHystersis.get()) {
+                    alarmSeverity = AlarmSeverity.getSeverity(lastAlarmSeverityIndex);
+                    intervalValue = lastAlarmIntervalValue;
+                }
+            }
+            if(alarmSeverity==AlarmSeverity.none) {
+                lastAlarmSeverityIndex = severityIndex;
+                return;
+            }
             String message = pvLink.getFullFieldName() + " " + alarmSeverity.toString();
             alarmSupport.setAlarm(message, alarmSeverity);
+            lastAlarmIntervalValue = intervalValue;
+            lastAlarmSeverityIndex = severityIndex;
         }
     }
 }

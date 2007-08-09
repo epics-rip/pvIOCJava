@@ -1,22 +1,16 @@
 <?xml version="1.0" ?>
 <DBDefinition>
-<include addPath = "dbd" />
+<include addPath = "dbd/recordType/primitive" />
 <include href = "booleanRecord.xml" />
-<include href = "calcDoubleRecord.xml" />
-<include href = "calcDoubleArrayRecord.xml" />
-<include href = "calcBooleanArrayRecord.xml" />
 <include href = "byteRecord.xml" />
 <include href = "shortRecord.xml" />
 <include href = "intRecord.xml" />
 <include href = "longRecord.xml" />
 <include href = "floatRecord.xml" />
 <include href = "doubleRecord.xml" />
-<include href = "digitalRecord.xml" />
-<include href = "eventRecord.xml" />
-<include href = "aiDoubleRecord.xml" />
-<include href = "aoDoubleRecord.xml" />
-<include href = "aoIncrementalDoubleRecord.xml" />
 <include href = "stringRecord.xml" />
+<include removePath = "dbd/recordType/primitive" />
+<include addPath = "dbd/recordType/primitiveArray" />
 <include href = "booleanArrayRecord.xml" />
 <include href = "byteArrayRecord.xml" />
 <include href = "shortArrayRecord.xml" />
@@ -25,8 +19,30 @@
 <include href = "floatArrayRecord.xml" />
 <include href = "doubleArrayRecord.xml" />
 <include href = "stringArrayRecord.xml" />
-<include href = "powerSupplyRecord.xml" />
+<include removePath = "dbd/recordType/primitiveArray" />
+<include addPath = "dbd/recordType/analog" />
+<include href = "aiDoubleRecord.xml" />
+<include href = "aoDoubleRecord.xml" />
+<include href = "aoIncrementalDoubleRecord.xml" />
+<include removePath = "dbd/recordType/analog" />
+<include addPath = "dbd/recordType/digital" />
+<include href = "digitalRecord.xml" />
+<include removePath = "dbd/recordType/digital" />
+<include addPath = "dbd/recordType/event" />
+<include href = "eventRecord.xml" />
+<include removePath = "dbd/recordType/event" />
+<include addPath = "dbd/recordType/calc" />
+<include href = "calcDoubleRecord.xml" />
+<include href = "calcDoubleArrayRecord.xml" />
+<include href = "calcBooleanArrayRecord.xml" />
+<include removePath = "dbd/recordType/calc" />
+<include addPath = "dbd/recordType/portDriver" />
+<include href = "portDriver.xml" />
+<include removePath = "dbd/recordType/portDriver" />
 <!--
+<include addPath = "dbd/recordType/powerSupply" />
+<include href = "powerSupplyRecord.xml" />
+<include removePath = "dbd/recordType/powerSupply" />
 -->
 
 </DBDefinition>

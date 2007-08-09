@@ -1,16 +1,95 @@
 <?xml version="1.0" ?>
 <IOCDatabase>
-<record name = "doubleCounter" type = "calc">
+<record name = "floatCounter" type = "calcDouble">
     <calcArgArray>
-        <value structureName = "calcArg">
+        <value structureName = "calcDoubleArg">
             <value>0.0</value>
             <name>min</name>
         </value>
-        <value structureName = "calcArg">
+        <value structureName = "calcDoubleArg">
             <value>11.0</value>
             <name>max</name>
         </value>
-        <value structureName = "calcArg">
+        <value structureName = "calcDoubleArg">
+            <value>0.2</value>
+            <name>inc</name>
+        </value>
+    </calcArgArray>
+    <calculator supportName = "counterCalculator" />
+    <linkArray>
+        <value structureName = "linkArrayElement">
+            <wait>true</wait>
+            <link  supportName = "processLink" >
+                <configure structureName = "processLink">
+                    <pvname>floatRecord</pvname>
+                </configure>
+            </link>
+        </value>
+    </linkArray>
+    <units>counts</units>
+    <displayLimit>
+        <low>0.0</low>
+        <high>11.0</high>
+    </displayLimit>
+    <scan>
+        <scan>periodic</scan>
+        <rate>1.0</rate>
+    </scan>
+</record>
+
+<record name = "floatRecord" type = "float">
+    <input supportName = "inputLink" >
+        <configure structureName = "inputLink">
+            <pvname>floatCounter</pvname>
+            <process>false</process>
+        </configure>
+    </input>
+    <units>volts</units>
+    <valueAlarm>
+        <configure structureName = "floatAlarm">
+          <active>true</active>
+          <interval>
+              <value structureName = "floatAlarmInterval">
+                  <value>2.0</value>
+                  <severity>major</severity>
+              </value>
+              <value structureName = "floatAlarmInterval">
+                  <value>4.0</value>
+                  <severity>minor</severity>
+              </value>
+              <value structureName = "floatAlarmInterval">
+                  <value>6.0</value>
+                  <severity>none</severity>
+              </value>
+              <value structureName = "floatAlarmInterval">
+                  <value>8.0</value>
+                  <severity>minor</severity>
+              </value>
+              <value structureName = "floatAlarmInterval">
+                  <value>10.0</value>
+                  <severity>major</severity>
+              </value>
+          </interval>
+          <outOfRange>invalid</outOfRange>
+          <hystersis>0.3</hystersis>
+        </configure>
+    </valueAlarm>
+    <displayLimit>
+        <low>0.0</low>
+        <high>10.0</high>
+    </displayLimit>
+</record>
+<record name = "doubleCounter" type = "calcDouble">
+    <calcArgArray>
+        <value structureName = "calcDoubleArg">
+            <value>0.0</value>
+            <name>min</name>
+        </value>
+        <value structureName = "calcDoubleArg">
+            <value>11.0</value>
+            <name>max</name>
+        </value>
+        <value structureName = "calcDoubleArg">
             <value>0.2</value>
             <name>inc</name>
         </value>
@@ -45,7 +124,7 @@
         </configure>
     </input>
     <units>volts</units>
-    <doubleAlarm>
+    <valueAlarm>
         <configure structureName = "doubleAlarm">
           <active>true</active>
           <interval>
@@ -73,24 +152,184 @@
           <outOfRange>invalid</outOfRange>
           <hystersis>0.3</hystersis>
         </configure>
-    </doubleAlarm>
+    </valueAlarm>
     <displayLimit>
         <low>0.0</low>
         <high>10.0</high>
     </displayLimit>
 </record>
 
-<record name = "intCounter" type = "calc">
+<record name = "byteCounter" type = "calcDouble">
     <calcArgArray>
-        <value structureName = "calcArg">
+        <value structureName = "calcDoubleArg">
             <value>0.0</value>
             <name>min</name>
         </value>
-        <value structureName = "calcArg">
+        <value structureName = "calcDoubleArg">
             <value>11.0</value>
             <name>max</name>
         </value>
-        <value structureName = "calcArg">
+        <value structureName = "calcDoubleArg">
+            <value>1.0</value>
+            <name>inc</name>
+        </value>
+    </calcArgArray>
+    <calculator supportName = "counterCalculator" />
+    <linkArray>
+        <value structureName = "linkArrayElement">
+            <wait>true</wait>
+            <link  supportName = "processLink" >
+                <configure structureName = "processLink">
+                    <pvname>byteRecord</pvname>
+                </configure>
+            </link>
+        </value>
+    </linkArray>
+    <units>counts</units>
+    <displayLimit>
+        <low>0.0</low>
+        <high>11.0</high>
+    </displayLimit>
+    <scan>
+        <scan>periodic</scan>
+        <rate>1.0</rate>
+    </scan>
+</record>
+
+<record name = "byteRecord" type = "byte">
+    <input supportName = "inputLink" >
+        <configure structureName = "inputLink">
+            <pvname>byteCounter</pvname>
+            <process>false</process>
+        </configure>
+    </input>
+    <units>volts</units>
+    <valueAlarm>
+        <configure structureName = "byteAlarm">
+          <active>true</active>
+          <interval>
+              <value structureName = "byteAlarmInterval">
+                  <value>2</value>
+                  <severity>major</severity>
+              </value>
+              <value structureName = "byteAlarmInterval">
+                  <value>4</value>
+                  <severity>minor</severity>
+              </value>
+              <value structureName = "byteAlarmInterval">
+                  <value>6</value>
+                  <severity>none</severity>
+              </value>
+              <value structureName = "byteAlarmInterval">
+                  <value>8</value>
+                  <severity>minor</severity>
+              </value>
+              <value structureName = "byteAlarmInterval">
+                  <value>10</value>
+                  <severity>major</severity>
+              </value>
+          </interval>
+          <outOfRange>invalid</outOfRange>
+          <hystersis>2</hystersis>
+        </configure>
+    </valueAlarm>
+    <displayLimit>
+        <low>0</low>
+        <high>10</high>
+    </displayLimit>
+</record>
+
+<record name = "shortCounter" type = "calcDouble">
+    <calcArgArray>
+        <value structureName = "calcDoubleArg">
+            <value>0.0</value>
+            <name>min</name>
+        </value>
+        <value structureName = "calcDoubleArg">
+            <value>11.0</value>
+            <name>max</name>
+        </value>
+        <value structureName = "calcDoubleArg">
+            <value>1.0</value>
+            <name>inc</name>
+        </value>
+    </calcArgArray>
+    <calculator supportName = "counterCalculator" />
+    <linkArray>
+        <value structureName = "linkArrayElement">
+            <wait>true</wait>
+            <link  supportName = "processLink" >
+                <configure structureName = "processLink">
+                    <pvname>shortRecord</pvname>
+                </configure>
+            </link>
+        </value>
+    </linkArray>
+    <units>counts</units>
+    <displayLimit>
+        <low>0.0</low>
+        <high>11.0</high>
+    </displayLimit>
+    <scan>
+        <scan>periodic</scan>
+        <rate>1.0</rate>
+    </scan>
+</record>
+
+<record name = "shortRecord" type = "short">
+    <input supportName = "inputLink" >
+        <configure structureName = "inputLink">
+            <pvname>shortCounter</pvname>
+            <process>false</process>
+        </configure>
+    </input>
+    <units>volts</units>
+    <valueAlarm>
+        <configure structureName = "shortAlarm">
+          <active>true</active>
+          <interval>
+              <value structureName = "shortAlarmInterval">
+                  <value>2</value>
+                  <severity>major</severity>
+              </value>
+              <value structureName = "shortAlarmInterval">
+                  <value>4</value>
+                  <severity>minor</severity>
+              </value>
+              <value structureName = "shortAlarmInterval">
+                  <value>6</value>
+                  <severity>none</severity>
+              </value>
+              <value structureName = "shortAlarmInterval">
+                  <value>8</value>
+                  <severity>minor</severity>
+              </value>
+              <value structureName = "shortAlarmInterval">
+                  <value>10</value>
+                  <severity>major</severity>
+              </value>
+          </interval>
+          <outOfRange>invalid</outOfRange>
+          <hystersis>2</hystersis>
+        </configure>
+    </valueAlarm>
+    <displayLimit>
+        <low>0</low>
+        <high>10</high>
+    </displayLimit>
+</record>
+
+<record name = "intCounter" type = "calcDouble">
+    <calcArgArray>
+        <value structureName = "calcDoubleArg">
+            <value>0.0</value>
+            <name>min</name>
+        </value>
+        <value structureName = "calcDoubleArg">
+            <value>11.0</value>
+            <name>max</name>
+        </value>
+        <value structureName = "calcDoubleArg">
             <value>1.0</value>
             <name>inc</name>
         </value>
@@ -125,7 +364,7 @@
         </configure>
     </input>
     <units>volts</units>
-    <intAlarm>
+    <valueAlarm>
         <configure structureName = "intAlarm">
           <active>true</active>
           <interval>
@@ -151,11 +390,92 @@
               </value>
           </interval>
           <outOfRange>invalid</outOfRange>
+          <hystersis>2</hystersis>
         </configure>
-    </intAlarm>
+    </valueAlarm>
+    <displayLimit>
+        <low>0</low>
+        <high>10</high>
+    </displayLimit>
+</record>
+
+<record name = "longCounter" type = "calcDouble">
+    <calcArgArray>
+        <value structureName = "calcDoubleArg">
+            <value>0.0</value>
+            <name>min</name>
+        </value>
+        <value structureName = "calcDoubleArg">
+            <value>11.0</value>
+            <name>max</name>
+        </value>
+        <value structureName = "calcDoubleArg">
+            <value>1.0</value>
+            <name>inc</name>
+        </value>
+    </calcArgArray>
+    <calculator supportName = "counterCalculator" />
+    <linkArray>
+        <value structureName = "linkArrayElement">
+            <wait>true</wait>
+            <link  supportName = "processLink" >
+                <configure structureName = "processLink">
+                    <pvname>longRecord</pvname>
+                </configure>
+            </link>
+        </value>
+    </linkArray>
+    <units>counts</units>
     <displayLimit>
         <low>0.0</low>
-        <high>10.0</high>
+        <high>11.0</high>
+    </displayLimit>
+    <scan>
+        <scan>periodic</scan>
+        <rate>1.0</rate>
+    </scan>
+</record>
+
+<record name = "longRecord" type = "long">
+    <input supportName = "inputLink" >
+        <configure structureName = "inputLink">
+            <pvname>longCounter</pvname>
+            <process>false</process>
+        </configure>
+    </input>
+    <units>volts</units>
+    <valueAlarm>
+        <configure structureName = "longAlarm">
+          <active>true</active>
+          <interval>
+              <value structureName = "longAlarmInterval">
+                  <value>2</value>
+                  <severity>major</severity>
+              </value>
+              <value structureName = "longAlarmInterval">
+                  <value>4</value>
+                  <severity>minor</severity>
+              </value>
+              <value structureName = "longAlarmInterval">
+                  <value>6</value>
+                  <severity>none</severity>
+              </value>
+              <value structureName = "longAlarmInterval">
+                  <value>8</value>
+                  <severity>minor</severity>
+              </value>
+              <value structureName = "longAlarmInterval">
+                  <value>10</value>
+                  <severity>major</severity>
+              </value>
+          </interval>
+          <outOfRange>invalid</outOfRange>
+          <hystersis>2</hystersis>
+        </configure>
+    </valueAlarm>
+    <displayLimit>
+        <low>0</low>
+        <high>10</high>
     </displayLimit>
 </record>
 

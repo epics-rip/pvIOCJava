@@ -1,7 +1,7 @@
 <?xml version="1.0" ?>
 <DBDefinition>
 <include addPath = "dbd" />
-<include href = "menuStructureSupport.xml" />
+<include href = "support.xml" />
 <include href = "recordType.xml" />
-<include href = "pdrv.xml" />
+<include removePath = "dbd" />
 </DBDefinition>

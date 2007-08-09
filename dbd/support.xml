@@ -1,136 +1,21 @@
 <?xml version="1.0" ?>
 <DBDefinition>
-
-<support name = "noop"
-    factoryName = "org.epics.ioc.support.NoopFactory"
-/>
-
-<linkSupport name = "noop"
-    factoryName = "org.epics.ioc.support.NoopFactory"
-/>
-
-<support name = "link"
-    factoryName = "org.epics.ioc.support.LinkFactory"
-/>
-
-<support name = "linearConvertInput"
-    factoryName = "org.epics.ioc.support.LinearConvertInputFactory"
-/>
-
-<support name = "linearConvertOutput"
-    factoryName = "org.epics.ioc.support.LinearConvertOutputFactory"
-/>
-
-<support name = "linkArray"
-    factoryName = "org.epics.ioc.support.LinkArrayFactory"
-/>
-
-<support name = "scan"
-    factoryName = "org.epics.ioc.support.ScanFactory"
-/>
-
-<support name = "alarm"
-    factoryName = "org.epics.ioc.support.AlarmFactory"
-/>
-
-<linkSupport name = "processLink"
-    configurationStructureName = "processLink" 
-    factoryName = "org.epics.ioc.support.CALinkFactory"
-/>
-<linkSupport name = "monitorLink"
-    configurationStructureName = "monitorLink"
-    factoryName = "org.epics.ioc.support.CALinkFactory"
-/>
-<linkSupport name = "monitorNotifyLink"
-    configurationStructureName = "monitorNotifyLink"
-    factoryName = "org.epics.ioc.support.CALinkFactory"
-/>
-<linkSupport name = "inputLink"
-    configurationStructureName = "inputLink"
-    factoryName = "org.epics.ioc.support.CALinkFactory"
-/>
-<linkSupport name = "outputLink"
-    configurationStructureName = "outputLink"
-    factoryName = "org.epics.ioc.support.CALinkFactory"
-/>
-
-<structure name = "linearConvertInput" supportName = "linearConvertInput">
-    <field name = "value" type = "int" />
-    <field name = "linearConvert" type = "structure" structureName = "linearConvert" />
-    <field name = "input" type = "link" />
-</structure>
-
-<structure name = "linearConvertOutput" supportName = "linearConvertOutput">
-    <field name = "value" type = "int" />
-    <field name = "linearConvert" type = "structure" structureName = "linearConvert" />
-    <field name = "output" type = "link" />
-</structure>
-
-
-<support name = "calcArgArray"
-   factoryName = "org.epics.ioc.support.CalcArgArrayFactory" />
-
-
-<linkSupport name = "booleanAlarm"
-    configurationStructureName = "booleanAlarm" 
-   factoryName = "org.epics.ioc.support.BooleanAlarmFactory" />
-
-<linkSupport name = "byteAlarm"
-    configurationStructureName = "byteAlarm" 
-   factoryName = "org.epics.ioc.support.ByteAlarmFactory" />
-
-<linkSupport name = "shortAlarm"
-    configurationStructureName = "shortAlarm" 
-   factoryName = "org.epics.ioc.support.ShortAlarmFactory" />
-
-<linkSupport name = "intAlarm"
-    configurationStructureName = "intAlarm" 
-   factoryName = "org.epics.ioc.support.IntAlarmFactory" />
-
-<linkSupport name = "longAlarm"
-    configurationStructureName = "longAlarm" 
-   factoryName = "org.epics.ioc.support.LongAlarmFactory" />
-
-<linkSupport name = "floatAlarm"
-    configurationStructureName = "floatAlarm" 
-   factoryName = "org.epics.ioc.support.FloatAlarmFactory" />
-
-<linkSupport name = "doubleAlarm"
-    configurationStructureName = "doubleAlarm" 
-   factoryName = "org.epics.ioc.support.DoubleAlarmFactory" />
-
-<linkSupport name = "digitalAlarm"
-    configurationStructureName = "digitalAlarm" 
-   factoryName = "org.epics.ioc.support.DigitalAlarmFactory" />
-
-<linkSupport name = "delayLink"
-    configurationStructureName = "delayLink"
-    factoryName = "org.epics.ioc.support.DelayLinkFactory"
-/>
-
-
-<support name = "generic"
-   factoryName = "org.epics.ioc.support.GenericFactory" />
-
-<support name = "event"
-   factoryName = "org.epics.ioc.support.EventFactory" />
-
-<support name = "digital"
-   factoryName = "org.epics.ioc.support.DigitalFactory" />
-
-<support name = "incremental"
-   factoryName = "org.epics.ioc.support.IncrementalFactory" />
-
-
-<!-- example calculators -->
-
-<linkSupport name = "counterCalculator"
-   factoryName = "org.epics.ioc.support.CounterCalculatorFactory" />
-
-<linkSupport name = "arrayIncrementCalculator"
-   factoryName = "org.epics.ioc.support.ArrayIncrementCalculatorFactory" />
-
-<linkSupport name = "booleanArrayToggleCalculator"
-   factoryName = "org.epics.ioc.support.BooleanArrayToggleCalculatorFactory" />
+<include href = "limit.xml" />
+<include addPath = "dbd/support" />
+<include href = "commonFields.xml" />
+<include href = "alarm.xml" />
+<include href = "noop.xml" />
+<include href = "generic.xml" />
+<include href = "linkArray.xml" />
+<include href = "structureLink.xml" />
+<include href = "channelAccess.xml" />
+<include href = "analog.xml" />
+<include href = "digital.xml" />
+<include href = "event.xml" />
+<include href = "calc.xml" />
+<include href = "disable.xml" />
+<include href = "delay.xml" />
+<include href = "portDriver.xml" />
+<include removePath = "dbd/support" />
 
 </DBDefinition>

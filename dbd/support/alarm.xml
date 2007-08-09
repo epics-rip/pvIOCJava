@@ -1,0 +1,131 @@
+<?xml version="1.0" ?>
+<DBDefinition>
+
+<menu name = "alarmSeverity">
+    <choice>none</choice>
+    <choice>minor</choice>
+    <choice>major</choice>
+    <choice>invalid</choice>
+</menu>
+
+<structure name = "alarm">
+    <field name = "severity" type = "menu" menuName = "alarmSeverity" />
+    <field name = "message" type = "string" />
+</structure>
+
+<structure name = "byteAlarmInterval">
+    <field name = "value" type = "byte" />
+    <field name = "severity" type = "menu" menuName = "alarmSeverity" />
+</structure>
+<structure name = "byteAlarm">
+    <field name = "active" type = "boolean" />
+    <field name = "interval" type = "array" elementType = "structure" />
+    <field name = "outOfRange" type = "menu" menuName = "alarmSeverity" />
+    <field name = "hystersis" type = "byte" />
+</structure>
+
+<structure name = "shortAlarmInterval">
+    <field name = "value" type = "short" />
+    <field name = "severity" type = "menu" menuName = "alarmSeverity" />
+</structure>
+<structure name = "shortAlarm">
+    <field name = "active" type = "boolean" />
+    <field name = "interval" type = "array" elementType = "structure" />
+    <field name = "outOfRange" type = "menu" menuName = "alarmSeverity" />
+    <field name = "hystersis" type = "short" />
+</structure>
+
+<structure name = "intAlarmInterval">
+    <field name = "value" type = "int" />
+    <field name = "severity" type = "menu" menuName = "alarmSeverity" />
+</structure>
+<structure name = "intAlarm">
+    <field name = "active" type = "boolean" />
+    <field name = "interval" type = "array" elementType = "structure" />
+    <field name = "outOfRange" type = "menu" menuName = "alarmSeverity" />
+    <field name = "hystersis" type = "int" />
+</structure>
+
+<structure name = "longAlarmInterval">
+    <field name = "value" type = "long" />
+    <field name = "severity" type = "menu" menuName = "alarmSeverity" />
+</structure>
+<structure name = "longAlarm">
+    <field name = "active" type = "boolean" />
+    <field name = "interval" type = "array" elementType = "structure" />
+    <field name = "outOfRange" type = "menu" menuName = "alarmSeverity" />
+    <field name = "hystersis" type = "long" />
+</structure>
+
+<structure name = "floatAlarmInterval">
+    <field name = "value" type = "float" />
+    <field name = "severity" type = "menu" menuName = "alarmSeverity" />
+</structure>
+<structure name = "floatAlarm">
+    <field name = "active" type = "boolean" />
+    <field name = "interval" type = "array" elementType = "structure" />
+    <field name = "outOfRange" type = "menu" menuName = "alarmSeverity" />
+    <field name = "hystersis" type = "float" />
+</structure>
+
+<structure name = "doubleAlarmInterval">
+    <field name = "value" type = "double" />
+    <field name = "severity" type = "menu" menuName = "alarmSeverity" />
+</structure>
+<structure name = "doubleAlarm">
+    <field name = "active" type = "boolean" />
+    <field name = "interval" type = "array" elementType = "structure" />
+    <field name = "outOfRange" type = "menu" menuName = "alarmSeverity" />
+    <field name = "hystersis" type = "double" />
+</structure>
+
+<structure name = "booleanAlarm" >
+    <field name = "active" type = "boolean" />
+    <field name = "falseAlarm" type = "menu" menuName = "alarmSeverity" />
+    <field name = "trueAlarm" type = "menu" menuName = "alarmSeverity" />
+    <field name = "changeStateAlarm" type = "menu" menuName = "alarmSeverity" />
+</structure>
+
+<structure name = "digitalAlarm" >
+    <field name = "active" type = "boolean" />
+     <!-- each array element must have menuName  alarmSeverity -->
+    <field name = "stateSeverity" type = "array" elementType = "menu" design = "false" />
+    <field name = "changeStateAlarm" type = "menu" menuName = "alarmSeverity" />
+</structure>
+
+<support name = "alarm"
+    factoryName = "org.epics.ioc.support.AlarmFactory" />
+
+<linkSupport name = "booleanAlarm"
+    configurationStructureName = "booleanAlarm" 
+   factoryName = "org.epics.ioc.support.BooleanAlarmFactory" />
+
+<linkSupport name = "byteAlarm"
+    configurationStructureName = "byteAlarm" 
+   factoryName = "org.epics.ioc.support.ByteAlarmFactory" />
+
+<linkSupport name = "shortAlarm"
+    configurationStructureName = "shortAlarm" 
+   factoryName = "org.epics.ioc.support.ShortAlarmFactory" />
+
+<linkSupport name = "intAlarm"
+    configurationStructureName = "intAlarm" 
+   factoryName = "org.epics.ioc.support.IntAlarmFactory" />
+
+<linkSupport name = "longAlarm"
+    configurationStructureName = "longAlarm" 
+   factoryName = "org.epics.ioc.support.LongAlarmFactory" />
+
+<linkSupport name = "floatAlarm"
+    configurationStructureName = "floatAlarm" 
+   factoryName = "org.epics.ioc.support.FloatAlarmFactory" />
+
+<linkSupport name = "doubleAlarm"
+    configurationStructureName = "doubleAlarm" 
+   factoryName = "org.epics.ioc.support.DoubleAlarmFactory" />
+
+<linkSupport name = "digitalAlarm"
+    configurationStructureName = "digitalAlarm" 
+   factoryName = "org.epics.ioc.support.DigitalAlarmFactory" />
+
+</DBDefinition>

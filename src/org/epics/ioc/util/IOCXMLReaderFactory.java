@@ -372,9 +372,26 @@ public class IOCXMLReaderFactory {
             
         }
         
+        private String convertSeparator(String original) {
+            if(File.separator.equals("/")) return original;
+            String convertedString = "";
+            String subString = original;
+            while(subString.length()>0) {
+                int index = subString.indexOf('/');
+                if(index<0) {
+                    convertedString += subString;
+                    break;
+                }
+                convertedString += subString.substring(0, index) + File.separator;
+                subString = subString.substring(index+1);
+            }
+            return convertedString;
+        }
+        
         private void includeElement(Attributes atts) {
             String removePath = atts.getValue("removePath");
             if(removePath!=null) {
+                removePath = convertSeparator(removePath);
                 if(!pathList.remove(removePath)) {
                     message("path " + removePath + " not in pathList",
                             MessageType.warning);
@@ -382,20 +399,30 @@ public class IOCXMLReaderFactory {
             }
             String addPath = atts.getValue("addPath");
             if(addPath!=null) {
-                pathList.add(0,addPath);
+                addPath = convertSeparator(addPath);
+                pathList.add(addPath);
             }
             String href = atts.getValue("href");
             if(href==null) {
                 if(removePath==null && addPath==null) {
-                    message("no attribute was recognized",
-                            MessageType.warning);
+                    message("no attribute was recognized",MessageType.warning);
                 }
                 return;
             }
-            if(pathList.size()>0) {
-                href = pathList.get(0) + File.separator + href; 
+            String fileName = href;
+      outer:
+            while(true) {
+                File file = new File(fileName);
+                if(file.exists()) break;
+                for(int index = 0; index<pathList.size(); index++) {
+                    fileName = pathList.get(index) + File.separator + href;
+                    file = new File(fileName);
+                    if(file.exists()) break outer;
+                }
+                message("file " + href + " not found",MessageType.error);
+                return;
             }
-            iocReader.create(this,href);
+            iocReader.create(this,fileName);
             return;
         }
         

@@ -85,15 +85,6 @@ public class BaseCD implements CD
      */
     public void dataPut(PVField targetPVField) {
         CDField cdField = findCDField(targetPVField);
-        Field field = targetPVField.getField();
-        Type type = field.getType();
-        if(type==Type.pvArray) {
-            Array array = (Array)field;
-            Type elementType = array.getElementType();
-            if(!elementType.isScalar()) {
-                
-            }
-        }
         cdField.dataPut(targetPVField);
     }    
     /* (non-Javadoc)

@@ -10,7 +10,7 @@
 <body>
 <h1 style="text-align: center">EPICS JavaIOC: support<br />
 package: org.epics.ioc.support<br />
-2007.07.25</h1>
+2007.08.08</h1>
 CONTENTS 
 
 <div class="toc">
@@ -22,7 +22,6 @@ CONTENTS
       <li><a href="#SupportSta">SupportState</a></li>
       <li><a href="#Support1">Support</a></li>
       <li><a href="#LinkSuppor">LinkSupport</a></li>
-      <li><a href="#Incrementa">IncrementalSupport Interface</a></li>
       <li><a href="#AbstractSu">AbstractSupport</a></li>
       <li><a href="#AbstractLi">AbstractLinkSupport</a></li>
     </ul>
@@ -49,11 +48,16 @@ CONTENTS
       <li><a href="#DeviceLimi">DeviceLimit</a></li>
     </ul>
   </li>
-  <li><a href="#Digital1">Digital Support</a></li>
-  <li><a href="#Incrementa1">Incremental Support</a></li>
+  <li><a href="#Digital1">Digital Support</a>
+    <ul>
+      <li><a href="#Database">Database Definitions</a></li>
+      <li><a href="#Java">Java Definitions</a></li>
+    </ul>
+  </li>
+  <li><a href="#Incrementa">Incremental Support</a></li>
   <li><a href="#Calculatio">Calculation Support</a>
     <ul>
-      <li><a href="#Database">Database Definitions for Calculations</a></li>
+      <li><a href="#Database1">Database Definitions for Calculations</a></li>
       <li><a href="#Performing">Performing Calculations</a></li>
       <li><a href="#calcArgArr">calcArgArray</a></li>
       <li><a href="#Calculator">Calculator</a></li>
@@ -70,7 +74,7 @@ CONTENTS
   <li><a href="#DelayLink">DelayLink Support</a></li>
   <li><a href="#Port">Port Driver Support</a>
     <ul>
-      <li><a href="#Java">Java Definitions</a></li>
+      <li><a href="#Java1">Java Definitions</a></li>
       <li><a href="#PDRVLinkSu">PDRVLinkSupport</a></li>
       <li><a href="#AbstractPD">AbstractPDRVLinkSupport</a></li>
       <li><a href="#PDRVLinkFa">PDRVLinkFactory</a></li>
@@ -95,7 +99,9 @@ records, i.e. complex records that have the appearence of having embeded
 records.</p>
 
 <p>This package provides interfaces and classes for processing fields of IOC
-database records. It defines the following interfaces:</p>
+database records. </p>
+
+<p>The following interfaces are available:</p>
 <dl>
   <dt>Support</dt>
     <dd>The interfaces and classes that provide the core for support.</dd>
@@ -259,10 +265,6 @@ and any other support code that is involved with record processing:</p>
         PVStructure getConfigStructure(String structureName, boolean reportFailure);
     }
 
-    public interface IncrementalSupport extends Support{
-        void setDesiredField(DBField dbField);
-    }
-
     public abstract class AbstractSupport implements Support {
         protected AbstractSupport(String name,DBField dbField);
         // methods from Requester
@@ -353,15 +355,6 @@ style="font-family: courier;">Support</span> with the method:</p>
     link.</dd>
 </dl>
 
-<h3 id="Incrementa">IncrementalSupport Interface</h3>
-
-<p>This is the interface which must be implemented by any support that
-support incremental output support. It adds the method:</p>
-<dl>
-  <dt>setDesiredField</dt>
-    <dd>Specify the field that holds the desired value.</dd>
-</dl>
-
 <h3 id="AbstractSu">AbstractSupport</h3>
 
 <p>All support code should extend AbstractSupport. Abstract Support
@@ -421,17 +414,18 @@ where:
 
 <h2 style="text-align: center" id="Generic">Generic Support</h2>
 <hr />
+<pre>    public class GenericFactory {
+        public static Support create(DBStructure dbStructure);
+    }</pre>
 
 <p>Generic Support is used for many record/structure definitions including:
 </p>
 <ul>
-  <li>aiDouble, aoDouble, boolean, byte, short, int, long, float, double,
-    string.</li>
+  <li>boolean, byte, short, int, long, float, double, string.</li>
   <li>Arrays of the previous types.</li>
+  <li>aiDouble. aoDouble, aoIncrementalDouble.</li>
   <li>digital - a record with an enum value.</li>
   <li>event - a record that announces events.</li>
-  <li>incrementalDouble - an analog type record that limits how fast an
-    output can change.</li>
 </ul>
 It can be used for all of these because it just looks for fields that have
 associated support and calls the support. It also has a few conventions so
@@ -443,19 +437,16 @@ in the order that the fields are defined in the Database Definition File. It
 uses the following semantics:</p>
 <dl>
   <dt>common</dt>
-    <dd>It does not call the support for fields scan, alarm, and timeStamp.
-      These are the fields that appear in commom.xml</dd>
-  <dt style="font-family: courier;">rawValue,value</dt>
-    <dd>If setField is called then the field passed to
-      genericSupport.setField is passed to the setField method of the support
-      for each field. If setField is not called then the following is done.
-      As it is looking for fields with attached support it also looks for
-      fields named "rawValue" and "value". If it finds a field named rawValue
-      then this field is passed to the support fot all fields after the
-      rawValue field until a field named "value" is found. When a field named
-      "value" is found then it is passed to the support for all fields that
-      appear after the value field.</dd>
-  <dt>non-common fields with associated support.</dt>
+    <dd>It does not call the support for fields scan, timeStamp, and
+      processAfterStart. These are the fields that appear in commom.xml</dd>
+  <dt style="font-family: courier;">value</dt>
+    <dd>If setField is called then that field becomes the value field.. If
+      setField is not called then it looks for a field named "value". The
+      value field is passed to the setField method of each support.</dd>
+  <dt style="font-family: courier;">alarm</dt>
+    <dd>If field alarm is present and has AlarmSupport then it is handled
+      properly.</dd>
+  <dt>fields with associated support.</dt>
     <dd>For all fields with support, except the fields in common, the support
       methods are called, i.e. initialize,start,stop,uninitialize, and
       process. For each support process must complete before process for the
@@ -474,12 +465,12 @@ fields:</p>
       to any of the following fields.</dd>
   <dt style="font-family: courier;">input</dt>
     <dd>This is a link field. If support is defined then the record instance
-      normally becomes an input record. The support gets a value and puts it
-      into the value field.</dd>
+      becomes an input record. The support gets a value and puts it into the
+      value field.</dd>
   <dt style="font-family: courier;">output</dt>
     <dd>This is a link field. If support is defined then the record instance
-      normally becoimes an output record. The support gets data from the
-      value field and sends it somewhere.</dd>
+      becomes an output record. The support gets data from the value field
+      and sends it somewhere.</dd>
   <dt style="font-family: courier;">valueAlarm</dt>
     <dd>This is a link field. If support is defined it is expected to check
       the value field for alarm conditions.</dd>
@@ -488,14 +479,8 @@ fields:</p>
   <dt style="font-family: courier;">units</dt>
     <dd>This normally has no support.</dd>
   <dt style="font-family: courier;">displayLimit</dt>
-    <dd>This normally has no support.</dd>
+    <dd>This normally has no support. </dd>
 </dl>
-
-<p>aoDouble (either the structure or the recordType) is just like the double
-field except that the output field is a linearConvert structure field and has
-supportName linearConvert. When a record instance is created the structure is
-configured with support to get a rawValle and to do the linear conversion.
-</p>
 
 <p>The generic support does not force the support for input to do input, the
 support for output to do output, etc. The generic support merely calls
@@ -707,13 +692,12 @@ contain the definition:</p>
 
 <p>AlarmSupport is support for a field named "alarm" which must have type
 structure and the structure must be an alarm structure. Within the structure
-hierarchy of a record multiple alarm fields can exist. RecordProcess calls
-the support for the alarm field defined in the top level structure (defined
-in common.xml). If other alarm fields are present AlarmSupport calls itself,
-i.e. no code except RecordProcess and AlarmSupport should call the Support
-methods of AlarmSupport. If multiple alarm fields reside in a record then the
-top level alarm field, which is what the outside world normally accesses has
-a severity at least as great as any of the lower level alarms.</p>
+hierarchy of a record multiple alarm fields can exist. Some support, e.g.
+generic, calls the support for the alarm field defined in the top level
+structure (defined in common.xml). If multiple alarm fields reside in a
+record then the top level alarm field, which is what the outside world
+normally accesses has a severity at least as great as any of the lower level
+alarms.</p>
 <pre>    interface AlarmSupport extends Support{
         void beginProcess();
         void endProcess();
@@ -731,19 +715,16 @@ a severity at least as great as any of the lower level alarms.</p>
 <p>AlarmSupport provides the methods:</p>
 <dl>
   <dt style="font-family: courier;">Support</dt>
-    <dd>As mentioned above only RecordProcess and AlarmSupport call the
-      Support methods implemented by AlarmSupport.</dd>
+    <dd>Standard support methods..</dd>
   <dt style="font-family: courier;">beginProcess</dt>
-    <dd>This also is only called by RecordProcess or AlarmSupport. It is
-      called when a record begins processing. It saves the current message
-      and severity and initialize the new severity to no alarm and the new
-      message to null.</dd>
+    <dd>This is called when a record begins processing. It saves the current
+      message and severity and initialize the new severity to no alarm and
+      the new message to null.</dd>
   <dt style="font-family: courier;">endProcess</dt>
-    <dd>This also is only called by RecordProcess or AlarmSupport. It is
-      called when a record finishes processing. If the new alarm severity
-      and/or message are different than what they were when the record
-      started processing, the alarm massage and severity are changed and the
-      alarm field posted so that monitors are issued.</dd>
+    <dd>This is called when a record finishes processing. If the new alarm
+      severity and/or message are different than what they were when the
+      record started processing, the alarm massage and severity are changed
+      and the alarm field posted so that monitors are issued.</dd>
   <dt style="font-family: courier;">setAlarm</dt>
     <dd>While a record is processing and code, normally one of the support
       modules described below, can call setAlarm. This method changes the new
@@ -854,9 +835,9 @@ fields:</p>
   <dt style="font-family: courier;">outOfRange</dt>
     <dd>The alarm severity if no interval is found.</dd>
   <dt style="font-family: courier;">hystersis</dt>
-    <dd>Only present for float and double. If value goes into alarm this is
-      the amount it must come out of alarm before the alarm severity is
-      modified. This prevents alarm "chatter".</dd>
+    <dd>If value goes into alarm this is the amount it must come out of alarm
+      before the alarm severity is modified. This prevents alarm
+    "chatter".</dd>
 </dl>
 
 <h4 id="Digital">Digital Alarms</h4>
@@ -1012,46 +993,70 @@ conversion for output is a structure containing the following fields:</p>
 
 <p>This is support for a record or structure that supports digital I/O, i.e.
 a set of states, an integer register, and a mask that selects bits from the
-register. The associated structure must have the following fields:</p>
-<dl>
-  <dt style="font-family: courier;">value</dt>
-    <dd>This must be a enum field. During initialization the support
-      automatically creates the enum choices from field states.</dd>
-  <dt style="font-family: courier;">rawValue</dt>
-    <dd>This must be an int field. From the numberOfBits field a mask with
-      the same number of bits is created. Whenever a raw value is read it is
-      anded with the mask. The resulting value is expected to match one of
-      the values in the array of states.</dd>
-  <dt style="font-family: courier;">numberOfBits</dt>
-    <dd>An int field which contains the number of bits for the mask.</dd>
-  <dt style="font-family: courier;">states</dt>
-    <dd>An array of digitalState structures.</dd>
-  <dt style="font-family: courier;">valueAlarm</dt>
-    <dd>An option field. If defined it must have type link and supportName
-      digitalAlarm</dd>
-</dl>
+register.</p>
 
-<p>A digitalState structure has the definition:</p>
+<h3 id="Database">Database Definitions</h3>
+
+<p>The support uses the following definitions:</p>
 <pre>    &lt;structure name=digitalState&gt;
         &lt;field name=name type=string /&gt;
         &lt;field name=value type=int /&gt;
         &lt;field name=severity type=menu menuName=alarmSeverity /&gt;
+    &lt;/structure&gt;
+
+    &lt;structure name = "digitalIO" supportName = "digital"&gt;
+        &lt;!-- structureName must be digitalState --&gt;
+        &lt;field name = "states" type = "array" elementType = "structure" /&gt;
+        &lt;field name = "numberOfBits" type = "int" /&gt;
+        &lt;field name = "registerValue" type = "int" design = "false" /&gt;
+        &lt;field name = "input" type = "link" /&gt;
+        &lt;field name = "valueAlarm" type = "link" supportName = "digitalAlarm" /&gt;
+        &lt;field name = "output" type = "link" /&gt;
     &lt;/structure&gt;</pre>
+
+<p>In addition a value field which must be an enum must be defined.</p>
+
+<h3 id="Java">Java Definitions</h3>
+<pre>    public class DigitalFactory {
+        public static Support create(DBStructure dbStructure);
+    }</pre>
+
+<p>During initialization it sets the array of choices for the value field. It
+uses the name fields in the states array to create the choices.</p>
 
 <p>When the process method is called it does the following:</p>
 <ul>
-  <li>Gets a new value from the rawValue field.</li>
-  <li>The value is anded with the mask.</li>
+  <li>If input has support it is called to put a new value in
+  registerValue.</li>
+  <li>Gets a new value from the registerValue field.</li>
+  <li>The value is anded with the mask created from the low order
+    numberOfBits of the registerValue.</li>
   <li>It compares the new value with the values in the array of states. If a
     match occurs it determines the new index for the value field.</li>
+  <li>Calls support for valueAlarm.</li>
+  <li>Calls support for output.</li>
 </ul>
 <hr />
 
-<h2 style="text-align: center" id="Incrementa1">Incremental Support</h2>
+<h2 style="text-align: center" id="Incrementa">Incremental Support</h2>
 <hr />
 
-<p>This supports that same fields as Double and also supports fields:</p>
+<p>This is support for incremental outputs.For example it supports the
+aoIncrementalOutut record.</p>
+
+<p>This uses the Java definitions:</p>
+<pre>    public interface IncrementalSupport extends Support{
+        void setDesiredField(DBField dbField);
+    }
+
+    public class IncrementalFactory {
+        public static Support create(DBStructure dbStructure);
+    }</pre>
+
+<p>This supports the following fields:</p>
 <dl>
+  <dt style="font-family: courier;">value</dt>
+    <dd>The value field.</dd>
   <dt style="font-family: courier;">desiredValue</dt>
     <dd>This must be a double field. It can either be a field named
       "desiredValue" in the record or structure being supported or it can be
@@ -1062,6 +1067,9 @@ register. The associated structure must have the following fields:</p>
       incrementalOutput is true then each time the record is processed the
       value field is changed by rateOfChange until the desired value is
       reached.</dd>
+  <dt style="font-family: courier;">input</dt>
+    <dd>If this field exists and has support it is called to get the
+      desiredValue.</dd>
   <dt style="font-family: courier;">controlLimit</dt>
     <dd>This field is optional. If present it must be a structure that has
       two double fields named "low" and "high". If the low value is strictly
@@ -1108,7 +1116,7 @@ structure that supports calculations normally has the fields:</p>
       support must complete before the support for valueAlarm is called.</dd>
 </dl>
 
-<h3 id="Database">Database Definitions for Calculations</h3>
+<h3 id="Database1">Database Definitions for Calculations</h3>
 
 <p>This is example support for use with the calcDouble record or structure.
 File calcDoubleCommon.xml defines the fields:</p>
@@ -1182,7 +1190,7 @@ structures, which has the fields:</p>
 
 <p>calcArgArray uses the following definitions:</p>
 <pre>    public interface CalcArgArraySupport extends Support{
-        PVDouble getPVDouble(String argName);
+        PVField getPVField(String argName);
     }
 
     public class CalcArgArrayFactory {
@@ -1191,7 +1199,7 @@ structures, which has the fields:</p>
 
 <p>CalcArgArraySupport extends Support to provide the method:</p>
 <dl>
-  <dt style="font-family: courier;">getPVDouble</dt>
+  <dt style="font-family: courier;">getPVField</dt>
     <dd>This is a convience metod for calculator support. It looks in the
       calcArgArray for a field with the specified name and returns it's
       interface.</dd>
@@ -1239,22 +1247,42 @@ structures, which has the fields:</p>
 
         public void initialize() {
             if(!super.checkSupportState(SupportState.readyForInitialize,supportName)) return;
-            minPVField = calcArgArraySupport.getPVDouble("min");
-            if(minPVField==null) {
-                pvLink.message("min not found", MessageType.error);
+            if(valuePVField==null) {
+                pvLink.message("setField was not called", MessageType.error);
                 return;
             }
-            maxPVField = calcArgArraySupport.getPVDouble("max");
-            if(maxPVField==null) {
-                pvLink.message("max not found", MessageType.error);
+            PVField pvField = calcArgArraySupport.getPVField("min");
+            if(pvField==null) {
+                pvLink.message("field min not found", MessageType.error);
                 return;
             }
-            incPVField = calcArgArraySupport.getPVDouble("inc");
-            if(incPVField==null) {
-                pvLink.message("inc not found", MessageType.error);
+            if(pvField.getField().getType()!=Type.pvDouble) {
+                pvLink.message("field min is not double", MessageType.error);
                 return;
             }
+            minPVField = (PVDouble)pvField;
+            pvField = calcArgArraySupport.getPVField("max");
+            if(pvField==null) {
+                pvLink.message("field max not found", MessageType.error);
+                return;
+            }
+            if(pvField.getField().getType()!=Type.pvDouble) {
+                pvLink.message("field max is not double", MessageType.error);
+                return;
+            }
+            maxPVField = (PVDouble)pvField;
+            pvField = calcArgArraySupport.getPVField("inc");
+            if(pvField==null) {
+                pvLink.message("field inc not found", MessageType.error);
+                return;
+            }
+            if(pvField.getField().getType()!=Type.pvDouble) {
+                pvLink.message("field inc is not double", MessageType.error);
+                return;
+            }
+            incPVField = (PVDouble)pvField;
             setSupportState(SupportState.readyForStart);
+
         }
 
         public void process(SupportProcessRequester supportProcessRequester) {
@@ -1287,11 +1315,17 @@ structures, which has the fields:</p>
 }</pre>
 
 <h3 id="ArrayIncre">ArrayIncrementCalculatorFactory</h3>
+<pre>    public class ArrayIncrementCalculatorFactory {
+        `public static LinkSupport create(DBLink dbLink);
+    }</pre>
 
 <p>This is support for testing. It supports numeric array fields. Each time
 process is called it just incrememnts each element of the array.</p>
 
 <h3 id="BooleanArr">BooleanArrayToggleCalculatorFactory</h3>
+<pre>    public class BooleanArrayToggleCalculatorFactory {
+        public static LinkSupport create(DBLink dbLink);
+    };</pre>
 
 <p>This is support for testing. It supports boolean array fields. Each time
 process is called it just toggles each element of the array, if the value us
@@ -1300,6 +1334,9 @@ false it becomes true and if true becomes false.</p>
 
 <h2 style="text-align: center" id="Event">Event Support</h2>
 <hr />
+<pre>    public class EventFactory {
+        public static Support create(DBField dbField);
+    }</pre>
 
 <p>EventFactory implements record or structure support for announcing a scan
 event. The event name is given in the field:</p>
@@ -1450,13 +1487,17 @@ of min.</p>
 <p>This section describes the support for connecting database fields to
 portDriver.</p>
 
-<h3 id="Java">Java Definitions</h3>
+<h3 id="Java1">Java Definitions</h3>
 
-<p>The following are the interface and the abstract support that is used by
-portDriver link support.</p>
+<p>The following are the interface, abstract support, and factories for
+portDriver support..</p>
 <pre>    public interface PDRVLinkSupport extends LinkSupport {
         boolean isProcess();
         abstract void queueCallback();
+    }
+
+    public class PDRVLinkFactory {
+        public static LinkSupport create(DBLink dbLink);
     }
     
     public abstract class AbstractPDRVLinkSupport extends AbstractLinkSupport implements
@@ -1508,6 +1549,14 @@ portDriver link support.</p>
         public void queueCallback();
         public void recordProcessComplete();
         public void recordProcessResult(RequestResult requestResult)
+    }
+
+    public class PDRVPortCreateFactory {
+        public static Support create(DBStructure dbStructure);
+    }
+
+    public class PDRVPortDeviceControlFactory {
+        public static Support create(DBStructure dbStructure)
     }</pre>
 
 <h3 id="PDRVLinkSu">PDRVLinkSupport</h3>
@@ -1649,12 +1698,14 @@ definition:</p>
 &lt;/recordType&gt;
 
 &lt;support name = "portDeviceControl"
-   factoryName = "org.epics.ioc.support.PDRVPortDeviceControlFactory" /&gt;
-</pre>
+   factoryName = "org.epics.ioc.support.PDRVPortDeviceControlFactory" /&gt;</pre>
 <hr />
 
 <h2 style="text-align: center" id="Power">Power Supply Support</h2>
 <hr />
+<pre>    public class PowerSupplyFactory {
+        public static Support create(DBStructure dbStructure);
+    }</pre>
 
 <p>This is an example of support for a "device". Given a voltage and power to
 computes the current. It supports fields for reading the voltage and for

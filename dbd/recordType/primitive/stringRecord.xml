@@ -1,0 +1,17 @@
+<?xml version="1.0" ?>
+<DBDefinition>
+
+<structure name = "string" supportName = "generic" >
+    <include href = "stringCommon.xml" />
+</structure>
+
+<recordType name = "string" supportName = "generic" >
+    <include href = "common.xml" />
+    <field name = "value" type = "string" >
+        <property name = "alarm" associatedField = "alarm" />
+        <property name = "timeStamp" associatedField = "/timeStamp" />
+    </field>
+    <include href = "stringCommon.xml" />
+</recordType>
+
+</DBDefinition>

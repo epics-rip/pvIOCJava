@@ -1,0 +1,11 @@
+<?xml version="1.0" ?>
+<DBDefinition>
+
+<structure name = "link" supportName = "link" >
+    <field name = "link" type = "link" />
+</structure>
+
+<support name = "link"
+    factoryName = "org.epics.ioc.support.LinkFactory" />
+
+</DBDefinition>

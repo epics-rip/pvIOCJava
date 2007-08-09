@@ -17,7 +17,8 @@ import org.epics.ioc.util.*;
  */
 public class LinkFactory {
     /**
-     * Create noop support for a DBStructure.
+     * Create support for a structure
+     * that has a single field which must be a named "link" and must be a link..
      * @param dbStructure The structure to support.
      * @return The Support interface.
      */

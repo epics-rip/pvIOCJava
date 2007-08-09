@@ -1,0 +1,15 @@
+<?xml version="1.0" ?>
+<DBDefinition>
+
+<structure name = "disableLink">
+    <field name = "disabled" type = "boolean" />
+    <field name = "value" type = "short" default = "1" />
+    <field name = "input" type = "short" />
+    <field name = "link" type = "link" />
+    <field name = "disableAlarmSeverity"
+           type = "menu" menuName = "alarmSeverity" />
+</structure>
+
+<!-- support not implemented -->
+
+</DBDefinition>

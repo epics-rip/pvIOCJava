@@ -1,0 +1,66 @@
+<?xml version="1.0" ?>
+<DBDefinition>
+
+<menu name = "monitorType">
+    <choice>put</choice>
+    <choice>change</choice>
+    <choice>absoluteChange</choice>
+    <choice>percentageChange</choice>
+</menu>
+
+<structure name = "processLink">
+    <field name = "pvname" type = "string" link = "true" />
+    <field name = "inheritSeverity" type = "boolean" />
+</structure>
+
+<structure name = "monitorLink">
+    <field name = "pvname" type = "string" link = "true" />
+    <field name = "type" type = "menu" menuName = "monitorType" default = "put" />
+    <field name = "deadband" type = "double" />
+    <field name = "onlyWhileProcessing" type = "boolean" />
+    <field name = "queueSize" type = "int"  default = "3" />
+    <field name = "reportOverrun" type = "boolean" />
+    <field name = "process" type = "boolean">
+        <!-- process this record when monitor occurs -->
+    </field>
+    <field name = "inheritSeverity" type = "boolean" >
+        <!-- only applicable if process is true -->
+    </field>
+</structure>
+
+<structure name = "monitorNotifyLink">
+    <field name = "pvname" type = "string" link = "true" />
+    <field name = "type" type = "menu" menuName = "monitorType" default = "change" />
+    <field name = "deadband" type = "double" />
+    <field name = "onlyWhileProcessing" type = "boolean" />
+</structure>
+
+<structure name = "inputLink">
+    <field name = "pvname" type = "string" link = "true" />
+    <field name = "process" type = "boolean" />
+    <field name = "inheritSeverity" type = "boolean" />
+</structure>
+
+<structure name = "outputLink">
+    <field name = "pvname" type = "string" link = "true" />
+    <field name = "process" type = "boolean" />
+    <field name = "inheritSeverity" type = "boolean" />
+</structure>
+
+<linkSupport name = "processLink"
+    configurationStructureName = "processLink" 
+    factoryName = "org.epics.ioc.support.CALinkFactory" />
+<linkSupport name = "monitorLink"
+    configurationStructureName = "monitorLink"
+    factoryName = "org.epics.ioc.support.CALinkFactory" />
+<linkSupport name = "monitorNotifyLink"
+    configurationStructureName = "monitorNotifyLink"
+    factoryName = "org.epics.ioc.support.CALinkFactory" />
+<linkSupport name = "inputLink"
+    configurationStructureName = "inputLink"
+    factoryName = "org.epics.ioc.support.CALinkFactory" />
+<linkSupport name = "outputLink"
+    configurationStructureName = "outputLink"
+    factoryName = "org.epics.ioc.support.CALinkFactory" />
+
+</DBDefinition>

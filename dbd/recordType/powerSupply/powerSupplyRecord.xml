@@ -1,0 +1,35 @@
+<?xml version="1.0" ?>
+<DBDefinition>
+<include addPath = "dbd" />
+
+<recordType name = "powerSupply" supportName = "powerSupply" >
+    <property name = "value" associatedField = "power" />
+    <include href = "common.xml" />
+    <field name = "alarm" type = "structure" structureName = "alarm"
+          supportName = "alarm" />
+    <field name = "power" type = "double" >
+        <property name = "voltage" associatedField = "voltage" />
+        <property name = "current" associatedField = "current" />
+        <property name = "alarm" associatedField = "alarm" />
+        <property name = "units" associatedField = "units" />
+        <property name = "displayLimit" associatedField = "displayLimit" />
+        <property name = "timeStamp" associatedField = "/timeStamp" />
+    </field>
+    <field name = "input" type = "link" />
+    <field name = "doubleAlarm" type = "link" supportName = "doubleAlarm" />
+    <field name = "voltage" type = "double" />
+    <field name = "voltageInput" type = "structure" structureName = "link" />
+    <field name = "current" type = "double" />
+    <field name = "currentOutput" type = "structure" structureName = "link" />
+    <field name = "output" type = "link" />
+    <field name = "linkArray" type = "array"
+         elementType = "structure" supportName = "linkArray" />
+    <field name = "units" type = "string" />
+    <field name = "displayLimit"
+         type = "structure" structureName = "doubleLimit" />
+</recordType>
+
+<support name = "powerSupply"
+   factoryName = "org.epics.ioc.support.PowerSupplyFactory" />
+
+</DBDefinition>

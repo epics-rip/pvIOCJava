@@ -10,7 +10,7 @@ import java.util.*;
 import org.epics.ioc.pv.*;
 
 /**
- * DBD (DatabaseDefinition) is the interface for locating interfaces for
+ * DBD (DataBase Definition) is the interface for locating interfaces for
  * menu, structure, record, and linkSupport definitions.
  * @author mrk
  *

@@ -1,0 +1,25 @@
+<?xml version="1.0" ?>
+<DBDefinition>
+
+<structure name = "calcBooleanArrayArg" >
+    <field name = "value" type = "array"  elementType = "boolean" />
+    <field name = "name" type = "string" />
+    <field name = "input" type = "link" />
+</structure>
+
+<structure name = "calcBooleanArray" supportName = "generic" >
+    <include href = "calcBooleanArrayCommon.xml" />
+</structure>
+
+<recordType name = "calcBooleanArray" supportName = "generic" >
+    <include href = "common.xml" />
+    <field name = "value" type = "array" elementType = "boolean"  >
+        <property name = "alarm" associatedField = "alarm" />
+        <property name = "units" associatedField = "units" />
+        <property name = "displayLimit" associatedField = "displayLimit" />
+        <property name = "timeStamp" associatedField = "/timeStamp" />
+    </field>
+    <include href = "calcBooleanArrayCommon.xml" />
+</recordType>
+
+</DBDefinition>

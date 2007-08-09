@@ -1,0 +1,24 @@
+<?xml version="1.0" ?>
+<DBDefinition>
+
+<structure name = "digitalState">
+    <field name = "name" type = "string" />
+    <field name = "value" type = "int" />
+    <field name = "severity" type = "menu" menuName = "alarmSeverity" />
+</structure>
+
+<structure name = "digitalIO" supportName = "digital">
+    <!-- structureName must be digitalState -->
+    <field name = "states" type = "array" elementType = "structure" />
+    <field name = "numberOfBits" type = "int" />
+    <field name = "registerValue" type = "int" design = "false" />
+    <field name = "input" type = "link" />
+    <field name = "valueAlarm" type = "link" supportName = "digitalAlarm" />
+    <field name = "output" type = "link" />
+</structure>
+
+<support name = "digital"
+   factoryName = "org.epics.ioc.support.DigitalFactory" />
+
+
+</DBDefinition>

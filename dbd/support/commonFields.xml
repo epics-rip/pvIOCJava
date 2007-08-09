@@ -1,0 +1,35 @@
+<?xml version="1.0" ?>
+<DBDefinition>
+
+<menu name = "priority">
+    <choice>lowest</choice>
+    <choice>lower</choice>
+    <choice>low</choice>
+    <choice>middle</choice>
+    <choice>high</choice>
+    <choice>higher</choice>
+    <choice>highest</choice>
+</menu>
+<menu name = "scan">
+    <choice>passive</choice>
+    <choice>event</choice>
+    <choice>periodic</choice>
+</menu>
+
+<structure name = "timeStamp">
+    <field name = "secondsPastEpoch" type = "long" />
+    <field name = "nanoSeconds" type = "int" />
+</structure>
+
+<structure name = "scan">
+    <field name = "priority" type = "menu" menuName = "priority" default = "middle" />
+    <field name = "scan" type = "menu" menuName = "scan" default = "passive" />
+    <field name = "rate" type = "double"  default = "1.0" />
+    <field name = "eventName" type = "string" />
+    <field name = "processSelf" type = "boolean" />
+</structure>
+
+<support name = "scan"
+    factoryName = "org.epics.ioc.support.ScanFactory" />
+
+</DBDefinition>

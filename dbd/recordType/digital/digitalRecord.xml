@@ -1,0 +1,17 @@
+<?xml version="1.0" ?>
+<DBDefinition>
+
+<structure name = "digital" supportName = "generic" >
+    <include href = "digitalCommon.xml" />
+</structure>
+
+<recordType name = "digital" supportName = "generic" >
+    <include href = "common.xml" />
+    <field name = "value" type = "enum" design = "false">
+        <property name = "alarm" associatedField = "alarm" />
+        <property name = "timeStamp" associatedField = "/timeStamp" />
+    </field>
+    <include href = "digitalCommon.xml" />
+</recordType>
+
+</DBDefinition>
