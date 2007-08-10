@@ -702,9 +702,6 @@ alarms.</p>
         void beginProcess();
         void endProcess();
         boolean setAlarm(String message, AlarmSeverity severity);
-        void getAlarmStamp(AlarmStamp alarmStamp);
-        String getMessage();
-        AlarmSeverity getSeverity();
     }
 
     class AlarmFactory {
@@ -717,26 +714,19 @@ alarms.</p>
   <dt style="font-family: courier;">Support</dt>
     <dd>Standard support methods..</dd>
   <dt style="font-family: courier;">beginProcess</dt>
-    <dd>This is called when a record begins processing. It saves the current
-      message and severity and initialize the new severity to no alarm and
-      the new message to null.</dd>
+    <dd>This is called when a record begins processing.</dd>
   <dt style="font-family: courier;">endProcess</dt>
-    <dd>This is called when a record finishes processing. If the new alarm
-      severity and/or message are different than what they were when the
-      record started processing, the alarm massage and severity are changed
-      and the alarm field posted so that monitors are issued.</dd>
+    <dd>This is called when a record finishes processing.
+      If setAlarm was not called since beginProcess was called than
+      it makes sure that the severity is noAlarm. If the severity 
+      and/or message was
+      changed during record processing it calls postPut.</dd>
   <dt style="font-family: courier;">setAlarm</dt>
     <dd>While a record is processing and code, normally one of the support
       modules described below, can call setAlarm. This method changes the new
       message and severity only if the severity passed to setAlarm is greater
       than the current new severity or if this is the first call since the
       record started processing.</dd>
-  <dt style="font-family: courier;">getAlarmStamp</dt>
-    <dd>Sets the alarmStamp to the current new severity and message.</dd>
-  <dt style="font-family: courier;">getMessage</dt>
-    <dd>Returns the current new message.</dd>
-  <dt style="font-family: courier;">getSeverity</dt>
-    <dd>Returns the current new severity.</dd>
 </dl>
 
 <p>AlarmFactory provides the static methods:</p>

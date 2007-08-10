@@ -54,8 +54,7 @@ public class CALinkFactory {
     
     private static class ProcessLink extends AbstractLinkSupport implements
     RecordProcessRequester,ProcessCallbackRequester,ProcessContinueRequester,
-    ChannelProcessRequester,
-    ChannelGetRequester,ChannelStateListener,ChannelFieldGroupListener
+    ChannelProcessRequester,ChannelStateListener,ChannelFieldGroupListener
     {
         private DBLink dbLink;
         private PVLink pvLink;
@@ -65,27 +64,20 @@ public class CALinkFactory {
         private AlarmSupport alarmSupport;
         private PVStructure configStructure;
         private PVString pvnameAccess;
-        private PVBoolean inheritSeverityAccess;
         
-        private boolean inheritSeverity = false;
         private boolean isLocal;
         private boolean isConnected = false;
 
         private SupportProcessRequester supportProcessRequester = null;
         private RequestResult requestResult = null;
-        private AlarmSeverity alarmSeverity = AlarmSeverity.none;
         
         private boolean isRecordProcessRequester = false;
         private TimeStamp timeStamp = new TimeStamp();
         private DBRecord targetDBRecord = null;
         private RecordProcess targetRecordProcess = null;
-        private PVEnum targetPVSeverity = null;
       
         private Channel channel = null;
         private ChannelProcess channelProcess = null;
-        private ChannelGet channelGet = null;
-        private ChannelField severityField = null;
-        private ChannelFieldGroup channelFieldGroup = null;
 
         private ProcessLink(DBLink dbLink) {
             super(processLinkSupportName,dbLink);
@@ -111,8 +103,6 @@ public class CALinkFactory {
             if(configStructure==null) return;
             pvnameAccess = configStructure.getStringField("pvname");
             if(pvnameAccess==null) return;
-            inheritSeverityAccess = configStructure.getBooleanField("inheritSeverity");
-            if(inheritSeverityAccess==null) return;
             setSupportState(SupportState.readyForStart);
         }
         /* (non-Javadoc)
@@ -131,7 +121,6 @@ public class CALinkFactory {
         public void start() {
             if(!super.checkSupportState(SupportState.readyForStart,processLinkSupportName)) return;
             isConnected = false;
-            inheritSeverity = inheritSeverityAccess.get();
             // split pvname into record name and rest of name
             String name = pvnameAccess.get();
             if(name==null) {
@@ -143,16 +132,6 @@ public class CALinkFactory {
             IOCDB iocdb = IOCDBFactory.getMaster();
             targetDBRecord = iocdb.findRecord(recordName);
             if(targetDBRecord!=null) {
-                if(inheritSeverity) {
-                    PVAccess pvAccess = PVAccessFactory.createPVAccess(targetDBRecord.getPVRecord());
-                    PVField pvField = pvAccess.findField("severity");
-                    if(pvField!=null) {
-                        targetPVSeverity = (PVEnum)pvField;
-                    } else {
-                        pvLink.message("severity field not found",MessageType.error);
-                        return;
-                    }
-                }
                 targetRecordProcess = targetDBRecord.getRecordProcess();
                 isRecordProcessRequester = targetRecordProcess.setRecordProcessRequester(this);
                 if(!isRecordProcessRequester) {
@@ -171,22 +150,8 @@ public class CALinkFactory {
                         "Failed to create channel for " + recordName,
                         MessageType.error);
                     return;
-                }
-                if(inheritSeverity) {
-                    channelGet = channel.createChannelGet(null, this, true, true);
-                    if(channel.isConnected()) {
-                        boolean prepareReturn = prepareForInput();
-                        if(prepareReturn) {
-                            isConnected = true;
-                        } else {
-                            isConnected = false;
-                        }
-                    } else {
-                        isConnected = false;
-                    }
-                } else {
-                    channelProcess = channel.createChannelProcess(this,true);
-                }
+                } 
+                channelProcess = channel.createChannelProcess(this,true);
             }
             setSupportState(SupportState.ready);
         }
@@ -203,9 +168,6 @@ public class CALinkFactory {
                 targetRecordProcess = null;
             } else {
                 channelProcess = null;
-                channelGet = null;
-                severityField = null;
-                channelFieldGroup = null;
                 channel.destroy();
                 channel = null;
             }
@@ -254,15 +216,12 @@ public class CALinkFactory {
                                 pvLink.getFullFieldName() + "could not process record",
                                 AlarmSeverity.major);
                         supportProcessRequester.supportProcessDone(RequestResult.failure);
+                        return;
                     }
                     targetRecordProcess.processSelfProcess(this, false);
                 }
             } else {
-                if(inheritSeverity) {
-                    channelGet.get();
-                } else {
-                    channelProcess.process();
-                }
+                channelProcess.process();
             }
         }
         /* (non-Javadoc)
@@ -270,14 +229,6 @@ public class CALinkFactory {
          */
         public void recordProcessResult(RequestResult requestResult) {
             this.requestResult = requestResult;
-            if(inheritSeverity) {
-                if(requestResult==RequestResult.success) {
-                    int index = targetPVSeverity.getIndex();
-                    alarmSeverity = AlarmSeverity.getSeverity(index);
-                } else {
-                    alarmSeverity = AlarmSeverity.invalid;
-                }
-            }
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.process.RecordProcessRequester#recordProcessComplete()
@@ -289,10 +240,6 @@ public class CALinkFactory {
          * @see org.epics.ioc.process.ProcessContinueRequester#processContinue()
          */
         public void processContinue() {
-            if(inheritSeverity && alarmSeverity!=AlarmSeverity.none) {
-               if(alarmSupport!=null) alarmSupport.setAlarm("linkAlarm", alarmSeverity);
-               alarmSeverity = AlarmSeverity.none;
-            }
             supportProcessRequester.supportProcessDone(requestResult);
         }        
         /* (non-Javadoc)
@@ -301,33 +248,6 @@ public class CALinkFactory {
         public void setField(DBField dbField) {
             // nothing to do
         }  
-        /* (non-Javadoc)
-         * @see org.epics.ioc.ca.ChannelGetRequester#nextGetField(org.epics.ioc.ca.ChannelField, org.epics.ioc.pv.PVField)
-         */
-        public boolean nextGetField(ChannelField channelField, PVField pvField) {
-            if(channelField!=severityField) {
-                throw new IllegalStateException(channelRequesterName + "Logic error");  
-            }
-            PVEnum pvEnum = (PVEnum)channelField;
-            int index = pvEnum.getIndex();
-            alarmSeverity = AlarmSeverity.getSeverity(index);
-            return false;
-        }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.ca.ChannelGetRequester#nextDelayedGetField(org.epics.ioc.pv.PVField)
-         */
-        public boolean nextDelayedGetField(PVField pvField) {
-            // Nothing to do.
-            return false;
-        }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.ca.ChannelGetRequester#getDone(org.epics.ioc.util.RequestResult)
-         */
-        public void getDone(RequestResult requestResult) {
-            this.requestResult = requestResult;
-            recordProcess.processContinue(this);
-        }
-        
         /* (non-Javadoc)
          * @see org.epics.ioc.ca.ChannelProcessRequester#processDone(org.epics.ioc.util.RequestResult)
          */
@@ -353,23 +273,7 @@ public class CALinkFactory {
         public void channelStateChange(Channel c,boolean isConnected) {
             dbRecord.lock();
             try {
-                if(isConnected==this.isConnected) return;
-                this.isConnected = false;
-            } finally {
-                dbRecord.unlock();
-            }
-            boolean prepareReturn = true;
-            if(isConnected) {
-                prepareReturn = prepareForInput();
-            }
-            dbRecord.lock();
-            try {
-                if(isConnected&&!prepareReturn) isConnected = false;
                 this.isConnected = isConnected;
-                if(!isConnected) {
-                    severityField = null;
-                    channelFieldGroup = null;
-                }
             } finally {
                 dbRecord.unlock();
             }
@@ -393,23 +297,6 @@ public class CALinkFactory {
          */
         public void accessRightsChange(Channel channel, ChannelField channelField) {
             // nothing to do         
-        }
-        
-        private boolean prepareForInput() {
-            severityField =  channel.findField("severity");
-            if(severityField==null) {
-                message("field severity does not exist",MessageType.error);
-                return false;
-            }
-            Type type = severityField.getField().getType();
-            if(type!=Type.pvEnum) {
-                severityField = null;
-                message("field severity is not an enum",MessageType.error);
-                return false;
-            }
-            channelFieldGroup = channel.createFieldGroup(this);
-            channelFieldGroup.addChannelField(severityField);
-            return true;
         }
     }
     
@@ -535,6 +422,15 @@ public class CALinkFactory {
                     pvLink.message("field " + fieldName + " not found", MessageType.error);
                     return;
                 }
+                if(inheritSeverity) {
+                    PVField pvField = pvAccess.findField("alarm.severity");
+                    if(pvField!=null) {
+                        targetPVSeverity = (PVEnum)pvField;
+                    } else {
+                        pvLink.message("severity field not found",MessageType.error);
+                        return;
+                    }
+                }
                 if(process) {
                     targetRecordProcess = targetDBRecord.getRecordProcess();
                     isRecordProcessRequester = targetRecordProcess.setRecordProcessRequester(this);
@@ -615,6 +511,7 @@ public class CALinkFactory {
                 throw new IllegalStateException("supportProcessRequester is null");
             }
             this.supportProcessRequester = supportProcessRequester;
+            requestResult = RequestResult.success;
             if(!isLocal) {
                 if(!isConnected) {
                     if(alarmSupport!=null) alarmSupport.setAlarm(
@@ -628,7 +525,7 @@ public class CALinkFactory {
             }
             if(isLocal&& !process) {
                 getLocalData();
-                supportProcessRequester.supportProcessDone(RequestResult.success);
+                processContinue();
                 return;
             }
             if(isRecordProcessRequester) recordProcess.getTimeStamp(timeStamp);
@@ -876,7 +773,7 @@ public class CALinkFactory {
             channelFieldGroup = channel.createFieldGroup(this);
             channelFieldGroup.addChannelField(valueChannelField);
             if(inheritSeverity) {
-                severityField = channel.findField("severity");
+                severityField = channel.findField("alarm.severity");
                 if(severityField==null) {
                     channelFieldGroup = null;
                     valueChannelField = null;
@@ -919,7 +816,7 @@ public class CALinkFactory {
         
     private static class OutputLink extends AbstractLinkSupport implements
     RecordProcessRequester,ProcessCallbackRequester,ProcessContinueRequester,
-    ChannelPutGetRequester,
+    ChannelPutRequester,
     ChannelFieldGroupListener,ChannelStateListener
     {
         private DBLink dbLink;
@@ -931,18 +828,15 @@ public class CALinkFactory {
         private PVStructure configStructure = null;
         private PVString pvnameAccess = null;
         private PVBoolean processAccess = null;
-        private PVBoolean inheritSeverityAccess = null;
         
         private DBField valueDBField = null;
         
         private boolean process = false;
-        private boolean inheritSeverity = false;
         private boolean isLocal;
         private boolean isConnected = false;
         
         private SupportProcessRequester supportProcessRequester = null;
         private RequestResult requestResult = null;   
-        private AlarmSeverity alarmSeverity = AlarmSeverity.none;
              
         private TimeStamp timeStamp = new TimeStamp();
         private DBRecord targetDBRecord = null;
@@ -950,17 +844,13 @@ public class CALinkFactory {
         private RecordProcess targetRecordProcess = null;
         private PVField targetPVField = null;
         private DBField targetDBField = null;
-        private PVEnum targetPVSeverity = null;
         
         
         private String valueFieldName = null;
         private Channel channel = null;
         private ChannelPut channelPut = null;
-        private ChannelPutGet channelPutGet = null;
         private ChannelField valueChannelField = null;
-        private ChannelField severityField = null;
         private ChannelFieldGroup putFieldGroup = null;
-        private ChannelFieldGroup getFieldGroup = null;
         private int arrayLength = 0;
         private int arrayOffset = 0;
         
@@ -991,8 +881,6 @@ public class CALinkFactory {
             if(pvnameAccess==null) return;
             processAccess = configStructure.getBooleanField("process");
             if(processAccess==null) return;
-            inheritSeverityAccess = configStructure.getBooleanField("inheritSeverity");
-            if(inheritSeverityAccess==null) return;
             setSupportState(SupportState.readyForStart);
         }
         
@@ -1019,7 +907,6 @@ public class CALinkFactory {
                 setSupportState(SupportState.zombie);
                 return;
             }
-            inheritSeverity = inheritSeverityAccess.get();
             process = processAccess.get();
             // split pvname into record name and rest of name
             String name = pvnameAccess.get();
@@ -1049,7 +936,7 @@ public class CALinkFactory {
                     targetRecordProcess = targetDBRecord.getRecordProcess();
                     isRecordProcessRequester = targetRecordProcess.setRecordProcessRequester(this);
                     if(!isRecordProcessRequester) {
-                        if(!recordProcess.canProcessSelf()) {
+                        if(!targetRecordProcess.canProcessSelf()) {
                             pvLink.message("can not process",MessageType.warning);
                             return;
                         }
@@ -1095,9 +982,7 @@ public class CALinkFactory {
                 targetRecordProcess = null;
             } else {
                 channelPut = null;
-                severityField = null;
                 putFieldGroup = null;
-                getFieldGroup = null;
                 channel.destroy();
                 channel = null;
             }
@@ -1173,21 +1058,13 @@ public class CALinkFactory {
                 }
             } else {
                 arrayLength = -1;
-                if(inheritSeverity) {
-                    channelPutGet.putGet();
-                } else {
-                    channelPut.put();
-                }
+                channelPut.put();
             }
         }   
         /* (non-Javadoc)
          * @see org.epics.ioc.process.ProcessContinueRequester#processContinue()
          */
         public void processContinue() {
-            if(inheritSeverity && alarmSeverity!=AlarmSeverity.none) {
-                if(alarmSupport!=null) alarmSupport.setAlarm("linkAlarm", alarmSeverity);
-                alarmSeverity = AlarmSeverity.none;
-             }
              supportProcessRequester.supportProcessDone(requestResult);
         }        
         /* (non-Javadoc)
@@ -1201,14 +1078,6 @@ public class CALinkFactory {
          */
         public void recordProcessResult(RequestResult requestResult) {
             this.requestResult = requestResult;
-            if(inheritSeverity) {
-                if(requestResult==RequestResult.success) {
-                    int index = targetPVSeverity.getIndex();
-                    alarmSeverity = AlarmSeverity.getSeverity(index);
-                } else {
-                    alarmSeverity = AlarmSeverity.invalid;
-                }
-            }
         }       
         /* (non-Javadoc)
          * @see org.epics.ioc.ca.ChannelStateListener#channelStateChange(org.epics.ioc.ca.Channel)
@@ -1231,9 +1100,7 @@ public class CALinkFactory {
                 this.isConnected = isConnected;
                 if(!isConnected) {
                     valueChannelField = null;
-                    severityField = null;
                     putFieldGroup = null;
-                    getFieldGroup = null;
                 }
             } finally {
                 dbRecord.unlock();
@@ -1257,12 +1124,6 @@ public class CALinkFactory {
          * @see org.epics.ioc.ca.ChannelPutRequester#nextPutField(org.epics.ioc.ca.ChannelField, org.epics.ioc.pv.PVField)
          */
         public boolean nextPutField(ChannelField channelField,PVField data) {
-            if(channelField==severityField) {
-                PVEnum pvEnum = (PVEnum)data;
-                int index = pvEnum.getIndex();
-                alarmSeverity = AlarmSeverity.getSeverity(index);
-                return false;
-            }
             if(channelField!=valueChannelField) {
                 pvLink.message(
                     "Logic error in InputLink field!=valueChannelField",
@@ -1302,38 +1163,12 @@ public class CALinkFactory {
             return false;
         }       
         /* (non-Javadoc)
-         * @see org.epics.ioc.ca.ChannelGetRequester#nextGetField(org.epics.ioc.ca.ChannelField, org.epics.ioc.pv.PVField)
-         */
-        public boolean nextGetField(ChannelField channelField, PVField pvField) {
-            if(channelField!=severityField) {
-                throw new IllegalStateException(channelRequesterName + "Logic error");  
-            }
-            PVEnum pvEnum = (PVEnum)channelField;
-            int index = pvEnum.getIndex();
-            alarmSeverity = AlarmSeverity.getSeverity(index);
-            return false;
-        }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.ca.ChannelGetRequester#nextDelayedGetField(org.epics.ioc.pv.PVField)
-         */
-        public boolean nextDelayedGetField(PVField pvField) {
-            // nothing to do
-            return false;
-        }
-        /* (non-Javadoc)
          * @see org.epics.ioc.ca.ChannelPutRequester#nextDelayedPutField(org.epics.ioc.pv.PVField)
          */
         public boolean nextDelayedPutField(PVField field) {
             // nothing to do
             return false;
         }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.ca.ChannelGetRequester#getDone(org.epics.ioc.util.RequestResult)
-         */
-        public void getDone(RequestResult requestResult) {
-            this.requestResult = requestResult;
-            recordProcess.processContinue(this);
-        }      
         /* (non-Javadoc)
          * @see org.epics.ioc.ca.ChannelPutRequester#putDone(org.epics.ioc.util.RequestResult)
          */
@@ -1404,33 +1239,8 @@ public class CALinkFactory {
                 return false;
             }
             putFieldGroup = channel.createFieldGroup(this);
-            putFieldGroup.addChannelField(valueChannelField);
-            if(inheritSeverity) {
-                channel.findField("");
-                severityField = channel.findField("severity");
-                if(severityField==null) {
-                    putFieldGroup = null;
-                    valueChannelField = null;
-                    message(" severity does not exist ",MessageType.error);
-                    return false;
-                }
-                Type type = severityField.getField().getType();
-                if(type!=Type.pvEnum) {
-                    putFieldGroup = null;
-                    valueChannelField = null;
-                    message(" severity is not an enum ",MessageType.error);
-                    return false;
-                }
-                getFieldGroup = channel.createFieldGroup(this);
-                getFieldGroup.addChannelField(severityField);
-            }
-            if(inheritSeverity) {
-                channelPutGet = channel.createChannelPutGet(
-                    putFieldGroup, getFieldGroup, this, process,true);
-            } else {
-                channelPut = channel.createChannelPut(
-                    putFieldGroup,this, process,true);
-            }
+            putFieldGroup.addChannelField(valueChannelField);            
+            channelPut = channel.createChannelPut(putFieldGroup,this, process,true);
             return true;
         }
               
@@ -1724,6 +1534,7 @@ public class CALinkFactory {
         private boolean isRecordProcessRequester = false;
         private boolean process = false;
         private boolean inheritSeverity = false;
+        private boolean valueChanged = false;
               
         private Channel channel = null;
         private boolean isLocal = false;
@@ -1893,6 +1704,7 @@ public class CALinkFactory {
                 supportProcessRequester.supportProcessDone(RequestResult.success);
                 return;
             }
+            if(valueChanged) valueDBField.postPut();
             if(alarmSeverity!=AlarmSeverity.none) {
                 if(alarmSupport!=null) alarmSupport.setAlarm("link Alarm", alarmSeverity);
                 alarmSeverity = AlarmSeverity.none;
@@ -1970,6 +1782,7 @@ public class CALinkFactory {
                 dbRecord.lock();
             }
             try {
+                boolean valueChanged = false;
                 ChannelFieldGroup channelFieldGroup = cD.getChannelFieldGroup();
                 List<ChannelField> channelFieldList = channelFieldGroup.getList();
                 CDStructure cdStructure = cD.getCDRecord().getCDStructure();
@@ -1995,7 +1808,7 @@ public class CALinkFactory {
                     Type valueType = valueField.getType();
                     if(valueType.isScalar() && targetType.isScalar()) {
                         convert.copyScalar(targetPVField,valuePVField);
-                        valueDBField.postPut();
+                        valueChanged = true;
                         continue;
                     }
                     if(targetType==Type.pvArray && valueType==Type.pvArray) {
@@ -2003,14 +1816,14 @@ public class CALinkFactory {
                         PVArray valuePVArray = (PVArray)valuePVField;
                         convert.copyArray(targetPVArray,0,
                             valuePVArray,0,targetPVArray.getLength());
-                        valueDBField.postPut();
+                        valueChanged = true;
                         continue;
                     }
                     if(targetType==Type.pvStructure && valueType==Type.pvStructure) {
                         PVStructure targetPVStructure = (PVStructure)targetPVField;
                         PVStructure valuePVStructure = (PVStructure)valuePVField;
                         convert.copyStructure(targetPVStructure,valuePVStructure);
-                        valueDBField.postPut();
+                        valueChanged = true;
                         continue;
                     }
                     pvLink.message(
@@ -2018,10 +1831,13 @@ public class CALinkFactory {
                             MessageType.fatalError);
                 }
                 if(process) {
+                    if(valueChanged) this.valueChanged = valueChanged;
                     if(isRecordProcessRequester) {
                         processDone = false;
                         recordProcess.process(this, false, null);
                     }
+                } else if(valueChanged){
+                    valueDBField.postPut();
                 }
             } finally {
                 dbRecord.unlock();
@@ -2106,7 +1922,7 @@ public class CALinkFactory {
                 channelMonitor.lookForPercentageChange(targetChannelField, deadband); break;
             }
             if(inheritSeverityAccess.get()) {
-                severityChannelField = channel.findField("severity");
+                severityChannelField = channel.findField("alarm.severity");
                 if(severityChannelField!=null) {
                     channelFieldGroup.addChannelField(severityChannelField);
                     channelMonitor.lookForPut(severityChannelField, true);

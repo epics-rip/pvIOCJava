@@ -5,7 +5,6 @@
 <include href = "aiDB.xml" />
 <include href = "aoDB.xml" />
 <include href = "aoIncrementalDB.xml" />
-<include href = "monitorDB.xml" />
 <include href = "counterDB.xml" />
 <include href = "arrayDB.xml" />
 <include href = "scalarDB.xml" />

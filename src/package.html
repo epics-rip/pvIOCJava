@@ -1045,7 +1045,6 @@ taken from menuStructureSupport.xml which resides in javaIOC/dbd:</p>
 and channel access links:</p>
 <pre>&lt;structure name = "processLink"&gt;
     &lt;field name = "pvname" type = "string" link = "true" /&gt;
-    &lt;field name = "inheritSeverity" type = "boolean" /&gt;
 &lt;/structure&gt;
 
 &lt;structure name = "inputLink"&gt;
@@ -1057,7 +1056,6 @@ and channel access links:</p>
 &lt;structure name = "outputLink"&gt;
     &lt;field name = "pvname" type = "string" link = "true" /&gt;
     &lt;field name = "process" type = "boolean" /&gt;
-    &lt;field name = "inheritSeverity" type = "boolean" /&gt;
 &lt;/structure&gt;
 
 &lt;structure name = "monitorLink"&gt;
@@ -2683,7 +2681,6 @@ org.epics.ioc.support for details.</p>
 
 &lt;structure name = "processLink"&gt;
     &lt;field name = "pvname" type = "string" link = "true" /&gt;
-    &lt;field name = "inheritSeverity" type = "boolean" /&gt;
 &lt;/structure&gt;
 
 &lt;structure name = "monitorLink"&gt;
@@ -2717,7 +2714,6 @@ org.epics.ioc.support for details.</p>
 &lt;structure name = "outputLink"&gt;
     &lt;field name = "pvname" type = "string" link = "true" /&gt;
     &lt;field name = "process" type = "boolean" /&gt;
-    &lt;field name = "inheritSeverity" type = "boolean" /&gt;
 &lt;/structure&gt;
 
 &lt;linkSupport name = "processLink"
@@ -2744,9 +2740,6 @@ org.epics.ioc.support for details.</p>
 <dl>
   <dt>pvname</dt>
     <dd>recordName.fieldName of link</dd>
-  <dt>inheritSeverity</dt>
-    <dd>Should this record be put in alarm if the linked record is in
-    alarm?</dd>
 </dl>
 
 <h3 id="monitorLin">monitorLink</h3>
@@ -2811,9 +2804,6 @@ org.epics.ioc.support for details.</p>
     <dd>recordName.fieldName of link</dd>
   <dt>process</dt>
     <dd>Should the linked record be processed after putting data?</dd>
-  <dt>inheritSeverity</dt>
-    <dd>Should this record be put in alarm if the linked record is in
-    alarm?</dd>
 </dl>
 <hr />
 

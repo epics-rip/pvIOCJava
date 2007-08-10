@@ -1,0 +1,98 @@
+<?xml version="1.0" ?>
+<IOCDatabase>
+<record name = "getPutCounter" type = "calcDouble">
+    <calcArgArray>
+        <value structureName = "calcDoubleArg">
+            <value>0.0</value>
+            <name>min</name>
+        </value>
+        <value structureName = "calcDoubleArg">
+            <value>10.0</value>
+            <name>max</name>
+        </value>
+        <value structureName = "calcDoubleArg">
+            <value>1.0</value>
+            <name>inc</name>
+        </value>
+    </calcArgArray>
+    <calculator supportName = "counterCalculator" />
+    <linkArray>
+        <value structureName = "linkArrayElement">
+            <wait>true</wait>
+            <link  supportName = "processLink" >
+                <configure structureName = "processLink">
+                    <pvname>getFromCounter</pvname>
+                </configure>
+            </link>
+        </value>
+        <value structureName = "linkArrayElement">
+            <wait>false</wait>
+            <link  supportName = "outputLink" >
+                <configure structureName = "outputLink">
+                    <pvname>putFromCounter</pvname>
+                    <process>true</process>
+                </configure>
+            </link>
+        </value>
+    </linkArray>
+    <valueAlarm>
+        <configure structureName = "doubleAlarm">
+          <active>true</active>
+          <interval>
+              <value structureName = "doubleAlarmInterval">
+                  <value>2.0</value>
+                  <severity>major</severity>
+              </value>
+              <value structureName = "doubleAlarmInterval">
+                  <value>4.0</value>
+                  <severity>minor</severity>
+              </value>
+              <value structureName = "doubleAlarmInterval">
+                  <value>6.0</value>
+                  <severity>none</severity>
+              </value>
+              <value structureName = "doubleAlarmInterval">
+                  <value>8.0</value>
+                  <severity>minor</severity>
+              </value>
+              <value structureName = "doubleAlarmInterval">
+                  <value>10.0</value>
+                  <severity>major</severity>
+              </value>
+          </interval>
+          <outOfRange>invalid</outOfRange>
+          <hystersis>0.1</hystersis>
+        </configure>
+    </valueAlarm>
+    <displayLimit>
+        <low>0.0</low>
+        <high>10.0</high>
+    </displayLimit>
+    <scan>
+        <scan>periodic</scan>
+        <rate>1.0</rate>
+    </scan>
+</record>
+
+<record name = "getFromCounter" type = "double">
+    <input supportName = "inputLink" >
+        <configure structureName = "inputLink">
+            <pvname>getPutCounter</pvname>
+            <process>false</process>
+            <inheritSeverity>true</inheritSeverity>
+        </configure>
+    </input>
+    <displayLimit>
+        <low>0.0</low>
+        <high>10.0</high>
+    </displayLimit>
+</record>
+<record name = "putFromCounter" type = "double">
+    <displayLimit>
+        <low>0.0</low>
+        <high>10.0</high>
+    </displayLimit>
+</record>
+
+
+</IOCDatabase>

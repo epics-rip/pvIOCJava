@@ -8,7 +8,7 @@
             <name>min</name>
         </value>
         <value structureName = "calcDoubleArg">
-            <value>10.0</value>
+            <value>20.0</value>
             <name>max</name>
         </value>
         <value structureName = "calcDoubleArg">
@@ -26,19 +26,19 @@
                   <severity>major</severity>
               </value>
               <value structureName = "doubleAlarmInterval">
-                  <value>4.0</value>
+                  <value>5.0</value>
                   <severity>minor</severity>
               </value>
               <value structureName = "doubleAlarmInterval">
-                  <value>6.0</value>
+                  <value>14.0</value>
                   <severity>none</severity>
               </value>
               <value structureName = "doubleAlarmInterval">
-                  <value>8.0</value>
+                  <value>17.0</value>
                   <severity>minor</severity>
               </value>
               <value structureName = "doubleAlarmInterval">
-                  <value>10.0</value>
+                  <value>20.0</value>
                   <severity>major</severity>
               </value>
           </interval>
@@ -46,10 +46,9 @@
           <hystersis>0.1</hystersis>
         </configure>
     </valueAlarm>
-    <units>counts</units>
     <displayLimit>
         <low>0.0</low>
-        <high>10.0</high>
+        <high>20.0</high>
     </displayLimit>
     <scan>
         <scan>periodic</scan>
@@ -57,17 +56,73 @@
     </scan>
 </record>
 
-<record name = "monitorChange" type = "double">
+<record name = "monitorPut" type = "double">
     <input supportName = "monitorLink" >
         <configure structureName = "monitorLink">
             <pvname>monitorCounter</pvname>
+            <type>put</type>
+            <process>true</process>
+            <inheritSeverity>true</inheritSeverity>
+        </configure>
+    </input>
+    <displayLimit>
+        <low>0.0</low>
+        <high>20.0</high>
+    </displayLimit>
+    <linkArray>
+        <value structureName = "linkArrayElement">
+            <wait>true</wait>
+            <link  supportName = "outputLink" >
+                <configure structureName = "outputLink">
+                    <pvname>cachePut</pvname>
+                    <process>true</process>
+                </configure>
+            </link>
+        </value>
+        <!-- do it twice -->
+        <value structureName = "linkArrayElement">
+            <wait>true</wait>
+            <link  supportName = "outputLink" >
+                <configure structureName = "outputLink">
+                    <pvname>cachePut</pvname>
+                    <process>true</process>
+                </configure>
+            </link>
+        </value>
+        <value structureName = "linkArrayElement">
+            <link  supportName = "delayLink" >
+                <configure structureName = "delayLink">
+                    <min>100</min>
+                    <max>1000</max>
+                    <inc>100</inc>
+                </configure>
+            </link>
+        </value>
+    </linkArray>
+</record>
+
+<record name = "cachePut" type = "double">
+    <displayLimit>
+        <low>0.0</low>
+        <high>20.0</high>
+    </displayLimit>
+    <scan>
+        <processSelf>true</processSelf> 
+    </scan>
+</record>
+
+
+<record name = "monitorChange" type = "double">
+    <input supportName = "monitorLink" >
+        <configure structureName = "monitorLink">
+            <pvname>cachePut</pvname>
+            <type>change</type>
             <process>true</process>
         </configure>
     </input>
-    <units>volts</units>
     <displayLimit>
         <low>0.0</low>
-        <high>10.0</high>
+        <high>20.0</high>
     </displayLimit>
     <linkArray>
         <value structureName = "linkArrayElement">
@@ -89,12 +144,12 @@
             <type>absoluteChange</type>
             <deadband>1.001</deadband>
             <process>true</process>
+            <inheritSeverity>true</inheritSeverity>
         </configure>
     </input>
-    <units>volts</units>
     <displayLimit>
         <low>0.0</low>
-        <high>10.0</high>
+        <high>20.0</high>
     </displayLimit>
     <linkArray>
         <value structureName = "linkArrayElement">
@@ -114,14 +169,14 @@
         <configure structureName = "monitorLink">
             <pvname>monitorCounter</pvname>
             <type>percentageChange</type>
-            <deadband>10.0</deadband>
+            <deadband>20.0</deadband>
             <process>true</process>
+            <inheritSeverity>true</inheritSeverity>
         </configure>
     </input>
-    <units>volts</units>
     <displayLimit>
         <low>0.0</low>
-        <high>10.0</high>
+        <high>20.0</high>
     </displayLimit>
     <linkArray>
         <value structureName = "linkArrayElement">
@@ -136,23 +191,57 @@
     </linkArray>
 </record>
 
-<record name = "notifyChange" type = "double">
-    <input supportName = "inputLink" >
-        <configure structureName = "inputLink">
+<record name = "notifyPut" type = "double">
+    <input supportName = "monitorNotifyLink" >
+        <configure structureName = "monitorNotifyLink">
             <pvname>monitorCounter</pvname>
-            <process>false</process>
+            <type>put</type>
         </configure>
     </input>
-    <units>volts</units>
     <displayLimit>
         <low>0.0</low>
-        <high>10.0</high>
+        <high>20.0</high>
     </displayLimit>
     <linkArray>
         <value structureName = "linkArrayElement">
-            <link  supportName = "monitorNotifyLink" >
-                <configure structureName = "monitorNotifyLink">
+            <link  supportName = "inputLink" >
+                <configure structureName = "inputLink">
                     <pvname>monitorCounter</pvname>
+                    <process>false</process>
+                    <inheritSeverity>true</inheritSeverity>
+                </configure>
+            </link>
+        </value>
+        <value structureName = "linkArrayElement">
+            <link  supportName = "delayLink" >
+                <configure structureName = "delayLink">
+                    <min>100</min>
+                    <max>1000</max>
+                    <inc>100</inc>
+                </configure>
+            </link>
+        </value>
+    </linkArray>
+</record>
+
+<record name = "notifyChange" type = "double">
+    <input supportName = "monitorNotifyLink" >
+        <configure structureName = "monitorNotifyLink">
+            <pvname>monitorCounter</pvname>
+            <type>change</type>
+        </configure>
+    </input>
+    <displayLimit>
+        <low>0.0</low>
+        <high>20.0</high>
+    </displayLimit>
+    <linkArray>
+        <value structureName = "linkArrayElement">
+            <link  supportName = "inputLink" >
+                <configure structureName = "inputLink">
+                    <pvname>monitorCounter</pvname>
+                    <process>false</process>
+                    <inheritSeverity>true</inheritSeverity>
                 </configure>
             </link>
         </value>
@@ -169,24 +258,23 @@
 </record>
 
 <record name = "notifyAbsoluteChange" type = "double">
-    <input supportName = "inputLink" >
-        <configure structureName = "inputLink">
+    <input supportName = "monitorNotifyLink" >
+        <configure structureName = "monitorNotifyLink">
             <pvname>monitorCounter</pvname>
-            <process>false</process>
+            <deadband>1.001</deadband>
         </configure>
     </input>
-    <units>volts</units>
     <displayLimit>
         <low>0.0</low>
-        <high>10.0</high>
+        <high>20.0</high>
     </displayLimit>
     <linkArray>
         <value structureName = "linkArrayElement">
-            <link  supportName = "monitorNotifyLink" >
-                <configure structureName = "monitorNotifyLink">
+            <link  supportName = "inputLink" >
+                <configure structureName = "inputLink">
                     <pvname>monitorCounter</pvname>
-                    <type>absoluteChange</type>
-                    <deadband>1.001</deadband>
+                    <process>false</process>
+                    <inheritSeverity>true</inheritSeverity>
                 </configure>
             </link>
         </value>
@@ -203,24 +291,24 @@
 </record>
 
 <record name = "notifyPercentageChange" type = "double">
-    <input supportName = "inputLink" >
-        <configure structureName = "inputLink">
+    <input supportName = "monitorNotifyLink" >
+        <configure structureName = "monitorNotifyLink">
             <pvname>monitorCounter</pvname>
-            <process>false</process>
+            <type>percentageChange</type>
+            <deadband>20.0</deadband>
         </configure>
     </input>
-    <units>volts</units>
     <displayLimit>
         <low>0.0</low>
-        <high>10.0</high>
+        <high>20.0</high>
     </displayLimit>
     <linkArray>
         <value structureName = "linkArrayElement">
-            <link  supportName = "monitorNotifyLink" >
-                <configure structureName = "monitorNotifyLink">
+            <link  supportName = "inputLink" >
+                <configure structureName = "inputLink">
                     <pvname>monitorCounter</pvname>
-                    <type>percentageChange</type>
-                    <deadband>10.0</deadband>
+                    <inheritSeverity>true</inheritSeverity>
+                    <process>false</process>
                 </configure>
             </link>
         </value>

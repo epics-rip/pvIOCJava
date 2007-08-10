@@ -7,6 +7,7 @@ package org.epics.ioc.support;
 
 import org.epics.ioc.db.*;
 import org.epics.ioc.pv.*;
+import org.epics.ioc.pv.Enum;
 import org.epics.ioc.util.*;
 import org.epics.ioc.process.*;
 
@@ -74,25 +75,25 @@ public class AlarmFactory {
         private PVStructure pvAlarm;
         
         private PVMenu pvSeverity = null;
+        private DBField dbSeverity = null;
         private PVString pvMessage = null;
-        private boolean isNew;
-        private String prevMessage;
-        private int prevIndex;
-        private String newMessage;
-        private int newIndex;
         
+        private boolean gotAlarm;
         private boolean active = false;
+        private int beginIndex = 0;
         
         private AlarmImpl parentAlarmSupport = null;
         
         private AlarmImpl(DBStructure dbAlarm) {
             super(alarmSupportName,dbAlarm);
             this.dbAlarm = dbAlarm;
+            DBField[] dbFields = dbAlarm.getFieldDBFields();
             pvAlarm = dbAlarm.getPVStructure();
             PVField[] pvFields = pvAlarm.getFieldPVFields();
             Structure structure = (Structure)pvAlarm.getField();
             int index = structure.getFieldIndex("severity");
             pvSeverity = (PVMenu)pvFields[index];
+            dbSeverity = dbFields[index];
             index = structure.getFieldIndex("message");
             pvMessage = (PVString)pvFields[index];
         }  
@@ -119,63 +120,38 @@ public class AlarmFactory {
          * @see org.epics.ioc.support.AlarmSupport#beginProcess()
          */
         public void beginProcess() {
-            isNew = false;
-            prevMessage = pvMessage.get();
-            prevIndex = pvSeverity.getIndex();
-            newMessage = null;
-            newIndex = 0;
+            gotAlarm = false;
             active = true;
+            beginIndex = pvSeverity.getIndex();
+            if(beginIndex!=0)  {
+                pvSeverity.setIndex(0);
+                pvMessage.put(null);
+            }
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.support.AlarmSupport#endProcess()
          */
         public void endProcess() {
-            active = false;
-            if(!isNew) {
-                int index = pvSeverity.getIndex();
-                String message = pvMessage.get();
-                if(index==0 && (message==null || message.length()==0)) return;
+            active = false;         
+            int currentIndex = pvSeverity.getIndex();
+            if(currentIndex!=beginIndex) {
+                dbSeverity.postPut();
             }
-            if(prevIndex!=newIndex || !prevMessage.equals(newMessage)) {
-                pvSeverity.setIndex(newIndex);                
-                pvMessage.put(newMessage);                
-                dbAlarm.postPut();
-            }
-            active = false;
         }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.support.AlarmSupport#getAlarmStamp(org.epics.ioc.util.AlarmStamp)
-         */
-        public void getAlarmStamp(AlarmStamp alarmStamp) {
-            checkForIllegalRequest();
-            alarmStamp.message = getMessage();
-            alarmStamp.severity = getSeverity();
-        }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.support.AlarmSupport#getSeverity()
-         */
-        public AlarmSeverity getSeverity() {
-            checkForIllegalRequest();
-            return AlarmSeverity.getSeverity(newIndex);
-        }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.support.AlarmSupport#getStatus()
-         */
-        public String getMessage() {
-            checkForIllegalRequest();
-            return newMessage;
-        }
+        
         /* (non-Javadoc)
          * @see org.epics.ioc.support.AlarmSupport#setStatusSeverity(java.lang.String, org.epics.ioc.util.AlarmSeverity)
          */
         public boolean setAlarm(String message, AlarmSeverity severity) {
             checkForIllegalRequest();
-            if(!isNew || severity.ordinal()>newIndex) {  
-                isNew = true;
-                newMessage = message;
-                newIndex = severity.ordinal();
+            int newIndex = severity.ordinal();
+            int currentIndex = pvSeverity.getIndex();
+            if(!gotAlarm || newIndex>currentIndex) {
+                pvSeverity.setIndex(newIndex);
+                pvMessage.put(message);
+                gotAlarm = true;
                 if(parentAlarmSupport!=null) {
-                    parentAlarmSupport.setAlarm(newMessage, severity);
+                    parentAlarmSupport.setAlarm(message, severity);
                 }
                 return true;
             }

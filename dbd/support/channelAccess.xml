@@ -10,7 +10,6 @@
 
 <structure name = "processLink">
     <field name = "pvname" type = "string" link = "true" />
-    <field name = "inheritSeverity" type = "boolean" />
 </structure>
 
 <structure name = "monitorLink">
@@ -44,7 +43,6 @@
 <structure name = "outputLink">
     <field name = "pvname" type = "string" link = "true" />
     <field name = "process" type = "boolean" />
-    <field name = "inheritSeverity" type = "boolean" />
 </structure>
 
 <linkSupport name = "processLink"

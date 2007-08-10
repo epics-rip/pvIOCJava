@@ -33,19 +33,4 @@ public interface AlarmSupport extends Support{
      * @return (false,true) if the request (was not, was) successfull.
      */
     boolean setAlarm(String message, AlarmSeverity severity);
-    /**
-     * Put the current message are severity into the alarmStamp.
-     * @param alarmStamp The alarmStamp.
-     */
-    void getAlarmStamp(AlarmStamp alarmStamp);
-    /**
-     * Get the current message.
-     * @return The message.
-     */
-    String getMessage();
-    /**
-     * Get the current severity.
-     * @return The severity.
-     */
-    AlarmSeverity getSeverity();
 }

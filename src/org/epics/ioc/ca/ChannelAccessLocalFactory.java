@@ -317,17 +317,17 @@ public class ChannelAccessLocalFactory  {
             } finally {
                 lock.unlock();
             }
-        }       
+        }               
         /* (non-Javadoc)
-         * @see org.epics.ioc.ca.Channel#setField(java.lang.String)
+         * @see org.epics.ioc.ca.Channel#findField(java.lang.String)
          */
         public ChannelField findField(String name) {
             lock.lock();
             try { //ChannelFieldImpl(dbRecord.findDBField(currentField))
                 if(isDestroyed) return null;
                 currentField = pvAccess.findField(name);
-                return new ChannelFieldImpl(dbRecord.findDBField(currentField));
-                
+                if(currentField==null) return null;
+                return new ChannelFieldImpl(dbRecord.findDBField(currentField));               
             } finally {
                 lock.unlock();
             }
