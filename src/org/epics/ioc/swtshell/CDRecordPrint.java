@@ -92,9 +92,6 @@ public class CDRecordPrint {
             newLine(indentLevel);
             text.append(field.getFieldName());
             switch(field.getType()) {
-            case pvEnum: printEnum((CDEnum)cdField,indentLevel+1,printAll); break;
-            case pvMenu: printMenu((CDMenu)cdField,indentLevel+1,printAll); break;
-            case pvLink: printLink((CDLink)cdField,indentLevel+1,printAll); break;
             case pvArray: printArray(cdField,indentLevel+1,printAll); break;
             case pvStructure: printStructure((CDStructure)cdField,indentLevel+1,printAll); break;
             default: printScalar(cdField,indentLevel+1,printAll); break;
@@ -102,52 +99,7 @@ public class CDRecordPrint {
             checkNumSupportNamePuts(cdField);
         }
     }
-    private void printEnum(CDEnum cdEnum, int indentLevel,boolean printAll) {
-        if(checkNumPuts(cdEnum)) printAll = true;
-        PVEnum pvEnum = cdEnum.getPVEnum();
-        String[] choices = pvEnum.getChoices();
-        int index = pvEnum.getIndex();
-        int numChoicesPut = cdEnum.getNumChoicesPut();
-        if(numChoicesPut>0||printAll) {
-            if(numChoicesPut>1) text.append(String.format(" numChoicesPuts %d", numChoicesPut));
-            text.append(" choices = {");
-            for(String choice : choices) {
-                newLine(indentLevel+1);
-                text.append(choice);
-            }
-            text.append(" }");
-        }
-        int numIndexPuts = cdEnum.getNumIndexPuts();
-        if(numIndexPuts>0||printAll) {
-            if(numIndexPuts>1) text.append(String.format(" numIndexPuts %d", numIndexPuts));
-            text.append(String.format(" %s",choices[index]));
-        }
-    }
-    private void printMenu(CDMenu cdMenu, int indentLevel,boolean printAll) {
-        if(checkNumPuts(cdMenu)) printAll = true;
-        PVMenu pvMenu = cdMenu.getPVMenu();
-        String[] choices = pvMenu.getChoices();
-        int index = pvMenu.getIndex();
-        int numIndexPuts = cdMenu.getNumIndexPuts();
-        if(numIndexPuts>0||printAll) {
-            if(numIndexPuts>1) text.append(String.format(" numIndexPuts %d", numIndexPuts));
-            text.append(String.format(" %s",choices[index]));
-        }
-    }
-    private void printLink(CDLink cdLink, int indentLevel,boolean printAll) {
-        if(checkNumPuts(cdLink)) printAll = true;
-        int numConfigurationStructurePuts = cdLink.getNumConfigurationStructurePuts();
-        if(numConfigurationStructurePuts==0 && !printAll) return;
-        if(numConfigurationStructurePuts>1) {
-            text.append(String.format(" numConfigurationStructurePuts %d",numConfigurationStructurePuts));
-        }
-        PVStructure pvStructure = cdLink.getPVLink().getConfigurationStructure();
-        if(pvStructure==null) {
-            text.append(" no configurationStructure");
-            return;
-        }
-        text.append(" configurationStructure " + pvStructure.toString(indentLevel + 1));
-    }
+
     
     private void printArray(CDField cdField, int indentLevel,boolean printAll) {
         if(checkNumPuts(cdField)) printAll = true;
@@ -174,9 +126,6 @@ public class CDRecordPrint {
                 text.append(String.format(" maxNumPuts %d",maxNumPuts));
             }
             switch(elementType) {
-            case pvEnum: printEnum((CDEnum)elementCDField,indentLevel+1,printAll); break;
-            case pvMenu: printMenu((CDMenu)elementCDField,indentLevel+1,printAll); break;
-            case pvLink: printLink((CDLink)elementCDField,indentLevel+1,printAll); break;
             case pvArray: printArray(elementCDField,indentLevel+1,printAll); break;
             case pvStructure: printStructure((CDStructure)elementCDField,indentLevel+1,printAll); break;
             default:

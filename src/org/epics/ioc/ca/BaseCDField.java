@@ -151,27 +151,9 @@ public class BaseCDField implements CDField {
         setMaxNumPuts(numSupportNamePuts);
     }
     /* (non-Javadoc)
-     * @see org.epics.ioc.ca.CDField#configurationStructurePut(org.epics.ioc.pv.PVField, org.epics.ioc.pv.PVLink)
-     */
-    public boolean configurationStructurePut(PVField requested, PVLink targetPVLink) {
-        throw new IllegalStateException("Logic error.");
-    }
-    /* (non-Javadoc)
      * @see org.epics.ioc.ca.CDField#dataPut(org.epics.ioc.pv.PVField, org.epics.ioc.pv.PVField)
      */
     public boolean dataPut(PVField requested, PVField targetPVField) {
-        throw new IllegalStateException("Logic error.");
-    }
-    /* (non-Javadoc)
-     * @see org.epics.ioc.ca.CDField#enumChoicesPut(org.epics.ioc.pv.PVField, org.epics.ioc.pv.PVEnum)
-     */
-    public boolean enumChoicesPut(PVField requested, PVEnum targetPVEnum) {
-        throw new IllegalStateException("Logic error.");
-    }
-    /* (non-Javadoc)
-     * @see org.epics.ioc.ca.CDField#enumIndexPut(org.epics.ioc.pv.PVField, org.epics.ioc.pv.PVEnum)
-     */
-    public boolean enumIndexPut(PVField requested, PVEnum targetPVEnum) {
         throw new IllegalStateException("Logic error.");
     }
     /* (non-Javadoc)

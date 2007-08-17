@@ -150,7 +150,6 @@ public abstract class AbstractPVField implements PVField{
     public String getSupportName() {
         return supportName;
     }
-
     /* (non-Javadoc)
      * @see org.epics.ioc.pv.PVField#setSupportName(java.lang.String)
      */
@@ -195,10 +194,15 @@ public abstract class AbstractPVField implements PVField{
      * @see org.epics.ioc.pv.PVField#toString(int)
      */
     public String toString(int indentLevel) {
+        String returnValue = "";
         if(supportName!=null) {
-            return " supportName " + supportName;
+            returnValue = " supportName " + supportName;
         }
-        return "";
+        String createName = field.getCreateName();
+        if(createName!=null) {
+            returnValue += " createName " + createName;
+        }
+        return returnValue;
     }
     
     private void createFullFieldAndRequesterNames() {

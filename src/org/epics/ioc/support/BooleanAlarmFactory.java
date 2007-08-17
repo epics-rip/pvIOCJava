@@ -6,6 +6,7 @@
 package org.epics.ioc.support;
 
 import org.epics.ioc.db.*;
+import org.epics.ioc.create.*;
 import org.epics.ioc.process.*;
 import org.epics.ioc.pv.*;
 import org.epics.ioc.util.*;
@@ -17,41 +18,41 @@ import org.epics.ioc.util.*;
  */
 public class BooleanAlarmFactory {
     /**
-     * Create support for a booleanAlarm link.
-     * @param dbLink The link.
+     * Create support for a booleanAlarm structure.
+     * @param dbStructure The structure.
      * @return An interface to the support or null if the supportName was not "booleanAlarm".
      */
-    public static Support create(DBLink dbLink) {
-        PVLink pvLink = dbLink.getPVLink();
-        String supportName = pvLink.getSupportName();
+    public static Support create(DBStructure dbStructure) {
+        PVStructure pvStructure = dbStructure.getPVStructure();
+        String supportName = pvStructure.getSupportName();
         if(supportName==null || !supportName.equals(supportName)) {
-            pvLink.message("does not have support " + supportName,MessageType.error);
+            pvStructure.message("does not have support " + supportName,MessageType.error);
             return null;
         }
-        return new BooleanAlarmImpl(dbLink);
+        return new BooleanAlarmImpl(dbStructure);
     }
     
     private static String supportName = "booleanAlarm";
     
-    private static class BooleanAlarmImpl extends AbstractLinkSupport
+    private static class BooleanAlarmImpl extends AbstractSupport
     {
-        private DBLink dbLink;
-        private PVLink pvLink;
+        private DBStructure dbStructure;
+        private PVStructure pvStructure;
         private boolean noop;
         private AlarmSupport alarmSupport;
         
         private PVBoolean pvActive;
-        private PVMenu pvFalseAlarm;
-        private PVMenu pvTrueAlarm;
-        private PVMenu pvChangeStateAlarm;
+        private PVInt pvFalseAlarm;
+        private PVInt pvTrueAlarm;
+        private PVInt pvChangeStateAlarm;
         
         private PVBoolean pvValue;
         boolean prevValue;
        
-        private BooleanAlarmImpl(DBLink dbLink) {
-            super(supportName,dbLink);
-            this.dbLink = dbLink;
-            pvLink = dbLink.getPVLink();
+        private BooleanAlarmImpl(DBStructure dbStructure) {
+            super(supportName,dbStructure);
+            this.dbStructure = dbStructure;
+            pvStructure = dbStructure.getPVStructure();
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.process.Support#initialize()
@@ -65,21 +66,42 @@ public class BooleanAlarmFactory {
                 noop = true;
                 return;
             }
-            PVStructure configStructure = super.getConfigStructure("booleanAlarm", false);
-            if(configStructure==null) {
-                noop = true;
-                setSupportState(supportState);
-                return;
-            }
-            alarmSupport = AlarmFactory.findAlarmSupport(dbLink);
+            alarmSupport = AlarmFactory.findAlarmSupport(dbStructure);
             if(alarmSupport==null) {
                 super.message("no alarmSupport", MessageType.error);
                 return;
             }
-            pvActive = configStructure.getBooleanField("active");
-            pvFalseAlarm = configStructure.getMenuField("falseAlarm", "alarmSeverity");
-            pvTrueAlarm = configStructure.getMenuField("trueAlarm", "alarmSeverity");
-            pvChangeStateAlarm = configStructure.getMenuField("changeStateAlarm", "alarmSeverity");
+            pvActive = pvStructure.getBooleanField("active");
+            
+            DBField[] dbFields = dbStructure.getFieldDBFields();
+            Structure structure = dbStructure.getPVStructure().getStructure();
+            int index = structure.getFieldIndex("falseAlarm");
+            if(index<0) {
+                super.message("falseAlarm does not exist", MessageType.error);
+                return;
+            }
+            Enumerated enumerated = AlarmSeverity.getAlarmSeverity(dbFields[index]);
+            if(enumerated==null) return;
+            pvFalseAlarm = enumerated.getIndexField();
+            
+            index = structure.getFieldIndex("trueAlarm");
+            if(index<0) {
+                super.message("trueAlarm does not exist", MessageType.error);
+                return;
+            }
+            enumerated = AlarmSeverity.getAlarmSeverity(dbFields[index]);
+            if(enumerated==null) return;
+            pvTrueAlarm = enumerated.getIndexField();
+
+            index = structure.getFieldIndex("changeStateAlarm");
+            if(index<0) {
+                super.message("changeStateAlarm does not exist", MessageType.error);
+                return;
+            }
+            enumerated = AlarmSeverity.getAlarmSeverity(dbFields[index]);
+            if(enumerated==null) return;
+            pvChangeStateAlarm = enumerated.getIndexField();
+          
             setSupportState(supportState);
         }
         /* (non-Javadoc)
@@ -127,22 +149,22 @@ public class BooleanAlarmFactory {
             boolean active = pvActive.get();
             if(!active) return;
             int index;
-            String message = pvLink.getFullFieldName();
+            String message = pvStructure.getFullFieldName();
             boolean  value = pvValue.get();
             if(value!=prevValue) {
                 prevValue = value;
-                index = pvChangeStateAlarm.getIndex();
+                index = pvChangeStateAlarm.get();
                 if(index>0) alarmSupport.setAlarm(
                     message + " changeState",
                     AlarmSeverity.getSeverity(index));
             }
             if(value) {
-                index = pvTrueAlarm.getIndex();
+                index = pvTrueAlarm.get();
                 if(index>0) alarmSupport.setAlarm(
                     message + " true ",
                     AlarmSeverity.getSeverity(index));
             } else {
-                index = pvFalseAlarm.getIndex();
+                index = pvFalseAlarm.get();
                 if(index>0) alarmSupport.setAlarm(
                     message + " false ",
                     AlarmSeverity.getSeverity(index));
@@ -150,7 +172,7 @@ public class BooleanAlarmFactory {
             supportProcessRequester.supportProcessDone(RequestResult.success);
         }                
         /* (non-Javadoc)
-         * @see org.epics.ioc.process.LinkSupport#setField(org.epics.ioc.db.DBField)
+         * @see org.epics.ioc.process.StructureSupport#setField(org.epics.ioc.db.DBField)
          */
         public void setField(DBField dbField) {
             PVField pvField = dbField.getPVField();

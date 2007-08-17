@@ -28,104 +28,84 @@
     <calculator supportName = "counterCalculator" />
     <units>counts</units>
     <scan>
-        <scan>periodic</scan>
+        <type><choice>periodic</choice></type>
         <rate>0.5</rate>
     </scan>
-    <linkArray>
-        <value structureName = "linkArrayElement">
+    <supportArray>
+        <value structureName = "supportArrayElement">
             <wait>false</wait>
-            <link  supportName = "outputLink" >
-                <configure structureName = "outputLink">
-                    <pvname>syncBooleanOut</pvname>
-                    <process>true</process>
-                </configure>
+            <link  supportName = "outputSupport" structureName = "outputSupport">
+                <pvname>syncBooleanOut</pvname>
+                <process>true</process>
             </link>
         </value>
-    </linkArray>
+    </supportArray>
 </record>
 
 <record name = "syncBooleanOut" type = "int">
-    <output supportName = "pdrvUInt32DigitalOutput" >
-        <configure structureName = "pdrvLink">
-            <portName>syncUInt32DigitalDriver</portName>
-            <addr>0</addr>
-            <mask>32767</mask>
-            <timeout>.2</timeout>
-        </configure>
+    <output supportName = "pdrvUInt32DigitalOutput" structureName = "pdrvSupport">
+        <portName>syncUInt32DigitalDriver</portName>
+        <addr>0</addr>
+        <mask>32767</mask>
+        <timeout>.2</timeout>
     </output>
-    <linkArray>
-        <value structureName = "linkArrayElement">
+    <supportArray>
+        <value structureName = "supportArrayElement">
             <wait>false</wait>
-            <link  supportName = "processLink" >
-                <configure structureName = "processLink">
-                    <pvname>syncBooleanIn1</pvname>
-                </configure>
+            <link  supportName = "processSupport" structureName = "processSupport">
+                <pvname>syncBooleanIn1</pvname>
             </link>
         </value>
-        <value structureName = "linkArrayElement">
+        <value structureName = "supportArrayElement">
             <wait>false</wait>
-            <link  supportName = "processLink" >
-                <configure structureName = "processLink">
-                    <pvname>syncBooleanIn2</pvname>
-                </configure>
+            <link  supportName = "processSupport" structureName = "processSupport">
+                <pvname>syncBooleanIn2</pvname>
             </link>
         </value>
-        <value structureName = "linkArrayElement">
+        <value structureName = "supportArrayElement">
             <wait>false</wait>
-            <link  supportName = "processLink" >
-                <configure structureName = "processLink">
-                    <pvname>syncBooleanIn3</pvname>
-                </configure>
+            <link  supportName = "processSupport" structureName = "processSupport">
+                <pvname>syncBooleanIn3</pvname>
             </link>
         </value>
 
-    </linkArray>
+    </supportArray>
 </record>
 
 <record name = "syncBooleanIn1" type = "boolean">
-    <input supportName = "pdrvUInt32DigitalInput" >
-        <configure structureName = "pdrvLink">
-            <portName>syncUInt32DigitalDriver</portName>
-            <addr>0</addr>
-            <mask>0x1</mask>
-            <timeout>.2</timeout>
-        </configure>
+    <input supportName = "pdrvUInt32DigitalInput" structureName = "pdrvSupport">
+        <portName>syncUInt32DigitalDriver</portName>
+        <addr>0</addr>
+        <mask>0x1</mask>
+        <timeout>.2</timeout>
     </input>
-    <valueAlarm>
-        <configure structureName = "booleanAlarm">
-          <active>true</active>
-          <falseAlarm>minor</falseAlarm>
-          <trueAlarm>major</trueAlarm>
-        </configure>
+    <valueAlarm structureName = "booleanAlarm">
+      <active>true</active>
+      <falseAlarm>minor</falseAlarm>
+      <trueAlarm>major</trueAlarm>
     </valueAlarm>
 </record>
 
 <record name = "syncBooleanIn2" type = "boolean">
-    <input supportName = "pdrvUInt32DigitalInput" >
-        <configure structureName = "pdrvLink">
-            <portName>syncUInt32DigitalDriver</portName>
-            <addr>0</addr>
-            <mask>0x2</mask>
-            <timeout>.2</timeout>
-        </configure>
+    <input supportName = "pdrvUInt32DigitalInput" structureName = "pdrvSupport">
+        <portName>syncUInt32DigitalDriver</portName>
+        <addr>0</addr>
+        <mask>0x2</mask>
+        <timeout>.2</timeout>
     </input>
 </record>
 
 <record name = "syncBooleanIn3" type = "boolean">
-    <input supportName = "pdrvUInt32DigitalInput" >
-        <configure structureName = "pdrvLink">
-            <portName>syncUInt32DigitalDriver</portName>
-            <addr>0</addr>
-            <mask>0x4</mask>
-            <timeout>.2</timeout>
-        </configure>
+    <input supportName = "pdrvUInt32DigitalInput" structureName = "pdrvSupport">
+        <portName>syncUInt32DigitalDriver</portName>
+        <addr>0</addr>
+        <mask>0x4</mask>
+        <timeout>.2</timeout>
     </input>
-    <valueAlarm>
-        <configure structureName = "booleanAlarm">
-          <active>true</active>
-          <changeStateAlarm>minor</changeStateAlarm>
-          <trueAlarm>major</trueAlarm>
-        </configure>
+    <valueAlarm structureName = "booleanAlarm">
+      <active>true</active>
+      <changeStateAlarm>minor</changeStateAlarm>
+      <trueAlarm>major</trueAlarm>
     </valueAlarm>
 </record>
 
@@ -156,90 +136,74 @@
     <calculator supportName = "counterCalculator" />
     <units>counts</units>
     <scan>
-        <scan>periodic</scan>
+        <type><choice>periodic</choice></type>
         <rate>0.5</rate>
     </scan>
-    <linkArray>
-        <value structureName = "linkArrayElement">
+    <supportArray>
+        <value structureName = "supportArrayElement">
             <wait>false</wait>
-            <link  supportName = "outputLink" >
-                <configure structureName = "outputLink">
-                    <pvname>asynBooleanOut</pvname>
-                    <process>true</process>
-                </configure>
+            <link  supportName = "outputSupport" structureName = "outputSupport">
+                <pvname>asynBooleanOut</pvname>
+                <process>true</process>
             </link>
         </value>
-    </linkArray>
+    </supportArray>
 </record>
 
 <record name = "asynBooleanOut" type = "int">
-    <output supportName = "pdrvUInt32DigitalOutput" >
-        <configure structureName = "pdrvLink">
-            <portName>asynUInt32DigitalDriver</portName>
-            <addr>0</addr>
-            <mask>32767</mask>
-            <timeout>.2</timeout>
-        </configure>
+    <output supportName = "pdrvUInt32DigitalOutput" structureName = "pdrvSupport">
+        <portName>asynUInt32DigitalDriver</portName>
+        <addr>0</addr>
+        <mask>32767</mask>
+        <timeout>.2</timeout>
     </output>
-    <linkArray>
-        <value structureName = "linkArrayElement">
+    <supportArray>
+        <value structureName = "supportArrayElement">
             <wait>false</wait>
-            <link  supportName = "processLink" >
-                <configure structureName = "processLink">
-                    <pvname>asynBooleanIn1</pvname>
-                </configure>
+            <link  supportName = "processSupport" structureName = "processSupport">
+                <pvname>asynBooleanIn1</pvname>
             </link>
         </value>
-        <value structureName = "linkArrayElement">
+        <value structureName = "supportArrayElement">
             <wait>false</wait>
-            <link  supportName = "processLink" >
-                <configure structureName = "processLink">
-                    <pvname>asynBooleanIn2</pvname>
-                </configure>
+            <link  supportName = "processSupport" structureName = "processSupport">
+                <pvname>asynBooleanIn2</pvname>
             </link>
         </value>
-        <value structureName = "linkArrayElement">
+        <value structureName = "supportArrayElement">
             <wait>false</wait>
-            <link  supportName = "processLink" >
-                <configure structureName = "processLink">
-                    <pvname>asynBooleanIn3</pvname>
-                </configure>
+            <link  supportName = "processSupport" structureName = "processSupport">
+                <pvname>asynBooleanIn3</pvname>
             </link>
         </value>
 
 
-    </linkArray>
+    </supportArray>
 </record>
 
 <record name = "asynBooleanIn1" type = "boolean">
-    <input supportName = "pdrvUInt32DigitalInput" >
-        <configure structureName = "pdrvLink">
-            <portName>asynUInt32DigitalDriver</portName>
-            <addr>0</addr>
-            <mask>0x1</mask>
-            <timeout>.2</timeout>
-        </configure>
+    <input supportName = "pdrvUInt32DigitalInput" structureName = "pdrvSupport">
+        <portName>asynUInt32DigitalDriver</portName>
+        <addr>0</addr>
+        <mask>0x1</mask>
+        <timeout>.2</timeout>
     </input>
 </record>
 
 <record name = "asynBooleanIn2" type = "boolean">
-    <input supportName = "pdrvUInt32DigitalInput" >
-        <configure structureName = "pdrvLink">
-            <portName>asynUInt32DigitalDriver</portName>
-            <addr>0</addr>
-            <mask>0x2</mask>
-            <timeout>.2</timeout>
-        </configure>
+    <input supportName = "pdrvUInt32DigitalInput" structureName = "pdrvSupport">
+        <portName>asynUInt32DigitalDriver</portName>
+        <addr>0</addr>
+        <mask>0x2</mask>
+        <timeout>.2</timeout>
     </input>
 </record>
 <record name = "asynBooleanIn3" type = "boolean">
-    <input supportName = "pdrvUInt32DigitalInput" >
-        <configure structureName = "pdrvLink">
-            <portName>asynUInt32DigitalDriver</portName>
-            <addr>0</addr>
-            <mask>0x4</mask>
-            <timeout>.2</timeout>
-        </configure>
+    <input supportName = "pdrvUInt32DigitalInput" structureName = "pdrvSupport">
+        <portName>asynUInt32DigitalDriver</portName>
+        <addr>0</addr>
+        <mask>0x4</mask>
+        <timeout>.2</timeout>
     </input>
 </record>
 

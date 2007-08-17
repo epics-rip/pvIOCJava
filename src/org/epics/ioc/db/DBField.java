@@ -7,6 +7,7 @@ package org.epics.ioc.db;
 import java.util.List;
 
 import org.epics.ioc.pv.*;
+import org.epics.ioc.create.Create;
 import org.epics.ioc.support.Support;
 
 
@@ -31,7 +32,7 @@ public interface DBField {
      *   <ol>
      *      <li>pvStructure</li>
      *      <li>pvArray</li>
-     *      <li>pvLink></li>
+     *      <li>pvStructure></li>
      *   </ol></li>
      * </ol>
      * If this is the DBStructure for the record itself <i>null</i> is returned.
@@ -59,6 +60,16 @@ public interface DBField {
      * @return <i>null</i> if the supportName was changed or the reason why the request failed.
      */
     String setSupportName(String name);
+    /**
+     * Get the Create interface for this field.
+     * @return The interface or null if no create exists.
+     */
+    Create getCreate();
+    /**
+     * Set the Create interface.
+     * @param create The interface.
+     */
+    void setCreate(Create create);
     /**
      * Get the Support for the field.
      * @return The support or null if no support exists.

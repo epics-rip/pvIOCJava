@@ -7,7 +7,6 @@ package org.epics.ioc.pv.test;
 
 import junit.framework.TestCase;
 import org.epics.ioc.pv.*;
-import org.epics.ioc.pv.Enum;
 
 /**
  * JUnit test for pvAccess.
@@ -250,27 +249,6 @@ public class DatabaseExampleTest extends TestCase {
             	stringData.get(),
                 stringData.toString());
         assertEquals(field.getPropertys().length,0);
-    }
-
-    /**
-     * test enum.
-     */
-    public static void testEnum() {
-        DatabaseExample database = new DatabaseExample("test");
-        PVEnum enumData = database.createEnumData("enum",true,null);
-        String[] choice = new String[] {"state0","state1"};
-        enumData.setChoices(choice);
-        Field field = enumData.getField();
-        assertEquals(field.getFieldName(),"enum");
-        assertEquals(field.getType(),Type.pvEnum);
-        String[] readback = enumData.getChoices();
-        assertEquals(readback[0],choice[0]);
-        assertEquals(readback[1],choice[1]);
-        enumData.setIndex(1);
-        assertEquals(1,enumData.getIndex());
-        System.out.printf("%s%nvalue %s%n",
-            	field.toString(),
-                enumData.toString());
     }
 
     /**
@@ -814,37 +792,6 @@ public class DatabaseExampleTest extends TestCase {
     }
 
     /**
-     * test array of enum.
-     */
-    public static void testEnumArray() {
-        DatabaseExample database = new DatabaseExample("test");
-        PVEnumArray enumArrayData = (PVEnumArray)
-            database.createArrayData("enumArray",Type.pvEnum,null);
-        int len;
-        PVEnum[] arrayValue = new PVEnum[3];
-        arrayValue[0] = database.createEnumData("enum0",true,null);
-        String[]choice = new String[] {"state0Choice0","state0Choice1"};
-        arrayValue[0].setChoices(choice);
-        arrayValue[2] = database.createEnumData("enum2",true,null);
-        choice = new String[] {"state2Choice0","state2Choice1"};
-        arrayValue[2].setChoices(choice);
-        int nput = enumArrayData.put(0,arrayValue.length,arrayValue,0);
-        assertEquals(nput,arrayValue.length);
-        len = enumArrayData.getLength();
-        assertEquals(len,arrayValue.length);
-        assertEquals(enumArrayData.getCapacity(),arrayValue.length);
-        Field field = enumArrayData.getField();
-        assertEquals(field.getFieldName(),"enumArray");
-        assertEquals(field.getType(),Type.pvArray);
-        Array array = (Array)field;
-        assertEquals(array.getElementType(),Type.pvEnum);
-        System.out.printf("%s%nvalue %s%n",
-                array.toString(),
-                enumArrayData.toString());
-        assertEquals(field.getPropertys().length,0);
-    }
-
-    /**
      * test array of structure.
      */
     public static void testStructureArray() {
@@ -1359,17 +1306,6 @@ public class DatabaseExampleTest extends TestCase {
             Structure structure = fieldCreate.createStructure(name, name, fields);
             PVRecord pvRecord = dataCreate.createPVRecord(name, structure);
             return pvRecord.getFieldPVFields()[0];
-        }
-
-        public PVEnum createEnumData(String name,
-        boolean choicesMutable, Property[] property)
-        {
-            FieldAttribute fieldAttribute = fieldCreate.createFieldAttribute();
-            Enum field = fieldCreate.createEnum(name,choicesMutable,property,fieldAttribute);
-            Field[] fields = new Field[]{field};
-            Structure structure = fieldCreate.createStructure(name, name, fields);
-            PVRecord pvRecord = dataCreate.createPVRecord(name, structure);
-            return (PVEnum)pvRecord.getFieldPVFields()[0];
         }
 
         public PVStructure createStructureData(String name, String structureName,

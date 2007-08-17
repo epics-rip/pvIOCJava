@@ -5,9 +5,9 @@
  */
 package org.epics.ioc.support;
 
+import org.epics.ioc.create.*;
 import org.epics.ioc.db.*;
 import org.epics.ioc.pv.*;
-import org.epics.ioc.pv.Enum;
 import org.epics.ioc.util.*;
 import org.epics.ioc.process.*;
 
@@ -74,13 +74,16 @@ public class AlarmFactory {
         private DBStructure dbAlarm;
         private PVStructure pvAlarm;
         
-        private PVMenu pvSeverity = null;
         private DBField dbSeverity = null;
+        private PVInt pvSeverity = null;
+        private DBField dbMessage = null;
         private PVString pvMessage = null;
         
         private boolean gotAlarm;
         private boolean active = false;
         private int beginIndex = 0;
+        private int currentIndex = 0;
+        private String currentMessage = null;
         
         private AlarmImpl parentAlarmSupport = null;
         
@@ -90,14 +93,36 @@ public class AlarmFactory {
             DBField[] dbFields = dbAlarm.getFieldDBFields();
             pvAlarm = dbAlarm.getPVStructure();
             PVField[] pvFields = pvAlarm.getFieldPVFields();
-            Structure structure = (Structure)pvAlarm.getField();
-            int index = structure.getFieldIndex("severity");
-            pvSeverity = (PVMenu)pvFields[index];
-            dbSeverity = dbFields[index];
-            index = structure.getFieldIndex("message");
+            Structure structure = pvAlarm.getStructure();
+            int index = structure.getFieldIndex("message");
+            if(index<0) {
+                pvAlarm.message("field message does not exist", MessageType.error);
+                return;
+            }
             pvMessage = (PVString)pvFields[index];
+            dbMessage = dbFields[index];
+            index = structure.getFieldIndex("severity");
+            if(index<0) {
+                pvAlarm.message("field severity does not exist", MessageType.error);
+                return;
+            }
+            PVField pvField = pvFields[index];
+            if(pvField.getField().getType()!=Type.pvStructure) {
+                pvAlarm.message("field severity is not a structure", MessageType.error);
+                return;
+            }
+            DBStructure dbStructure = (DBStructure)dbFields[index];
+            dbFields = dbStructure.getFieldDBFields();
+            PVStructure pvStructure = (PVStructure)pvFields[index];
+            pvFields = pvStructure.getFieldPVFields();
+            structure = pvStructure.getStructure();
+            index = structure.getFieldIndex("index");
+            if(index<0) {
+                pvStructure.message("field index does not exist", MessageType.error);
+            }
+            dbSeverity = dbFields[index];
+            pvSeverity = (PVInt)pvFields[index];
         }  
-        
         /* (non-Javadoc)
          * @see org.epics.ioc.process.AbstractSupport#initialize(org.epics.ioc.process.SupportCreation)
          */
@@ -122,20 +147,20 @@ public class AlarmFactory {
         public void beginProcess() {
             gotAlarm = false;
             active = true;
-            beginIndex = pvSeverity.getIndex();
-            if(beginIndex!=0)  {
-                pvSeverity.setIndex(0);
-                pvMessage.put(null);
-            }
+            beginIndex = pvSeverity.get();
+            currentIndex = 0;
+            currentMessage = null;
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.support.AlarmSupport#endProcess()
          */
         public void endProcess() {
             active = false;         
-            int currentIndex = pvSeverity.getIndex();
             if(currentIndex!=beginIndex) {
+                pvSeverity.put(currentIndex);                
+                pvMessage.put(currentMessage);
                 dbSeverity.postPut();
+                dbMessage.postPut();
             }
         }
         
@@ -145,10 +170,9 @@ public class AlarmFactory {
         public boolean setAlarm(String message, AlarmSeverity severity) {
             checkForIllegalRequest();
             int newIndex = severity.ordinal();
-            int currentIndex = pvSeverity.getIndex();
             if(!gotAlarm || newIndex>currentIndex) {
-                pvSeverity.setIndex(newIndex);
-                pvMessage.put(message);
+                currentIndex = newIndex;
+                currentMessage = message;
                 gotAlarm = true;
                 if(parentAlarmSupport!=null) {
                     parentAlarmSupport.setAlarm(message, severity);

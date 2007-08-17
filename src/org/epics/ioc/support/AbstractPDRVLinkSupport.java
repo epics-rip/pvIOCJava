@@ -22,31 +22,31 @@ import org.epics.ioc.util.*;
  * @author mrk
  *
  */
-public abstract class AbstractPDRVLinkSupport extends AbstractLinkSupport implements
+public abstract class AbstractPDRVLinkSupport extends AbstractSupport implements
 ProcessContinueRequester,QueueRequestCallback,
-PDRVLinkSupport,
+PDRVSupport,
 RecordProcessRequester
 {
     /**
      * Constructor for derived support.
      * @param supportName The support name.
-     * @param dbLink The link interface.
+     * @param dbStructure The link interface.
      */
-    protected AbstractPDRVLinkSupport(String supportName,DBLink dbLink) {
-        super(supportName,dbLink);
+    protected AbstractPDRVLinkSupport(String supportName,DBStructure dbStructure) {
+        super(supportName,dbStructure);
         this.supportName = supportName;
-        this.dbLink = dbLink;
-        pvLink = dbLink.getPVLink();
-        fullName = pvLink.getFullName();
-        dbRecord = dbLink.getDBRecord();
+        this.dbStructure = dbStructure;
+        pvStructure = dbStructure.getPVStructure();
+        fullName = pvStructure.getFullName();
+        dbRecord = dbStructure.getDBRecord();
         pvRecord = dbRecord.getPVRecord();
         recordName = pvRecord.getRecordName();
         recordProcess = dbRecord.getRecordProcess();
     }      
     
     protected String supportName;
-    protected DBLink dbLink;
-    protected PVLink pvLink;
+    protected DBStructure dbStructure;
+    protected PVStructure pvStructure;
     protected DBField valueDBField = null;
     protected PVField valuePVField = null;
     protected DBRecord dbRecord = null;
@@ -56,7 +56,6 @@ RecordProcessRequester
     protected RecordProcess recordProcess = null;
     
     protected AlarmSupport alarmSupport = null;
-    protected PVStructure configStructure = null;;
     protected PVString pvPortName = null;
     protected PVInt pvAddr = null;
     protected PVInt pvMask = null;
@@ -81,26 +80,24 @@ RecordProcessRequester
     public void initialize() {
         if(!super.checkSupportState(SupportState.readyForInitialize,supportName)) return;
         if(valueDBField==null) {
-            pvLink.message("setField was not called", MessageType.error);
+            pvStructure.message("setField was not called", MessageType.error);
             return;
         }
         valuePVField = valueDBField.getPVField();
-        alarmSupport = AlarmFactory.findAlarmSupport(dbLink);
-        configStructure = super.getConfigStructure("pdrvLink", true);
-        if(configStructure==null) return;
-        pvPortName = configStructure.getStringField("portName");
+        alarmSupport = AlarmFactory.findAlarmSupport(dbStructure);
+        pvPortName = pvStructure.getStringField("portName");
         if(pvPortName==null) return;
-        pvAddr = configStructure.getIntField("addr");
+        pvAddr = pvStructure.getIntField("addr");
         if(pvAddr==null) return;
-        pvMask = configStructure.getIntField("mask");
+        pvMask = pvStructure.getIntField("mask");
         if(pvMask==null) return;
-        pvSize = configStructure.getIntField("size");
+        pvSize = pvStructure.getIntField("size");
         if(pvSize==null) return;
-        pvTimeout = configStructure.getDoubleField("timeout");
+        pvTimeout = pvStructure.getDoubleField("timeout");
         if(pvTimeout==null) return;
-        pvDrvParams = configStructure.getStringField("drvParams");
+        pvDrvParams = pvStructure.getStringField("drvParams");
         if(pvDrvParams==null) return;
-        pvProcess = configStructure.getBooleanField("process");
+        pvProcess = pvStructure.getBooleanField("process");
         setSupportState(SupportState.readyForStart);
     }
     
@@ -113,7 +110,7 @@ RecordProcessRequester
         pvTimeout = null;
         pvAddr = null;
         pvPortName = null;
-        configStructure = null;
+        pvStructure = null;
         alarmSupport = null;
         setSupportState(SupportState.readyForInitialize);
     }
@@ -124,13 +121,13 @@ RecordProcessRequester
         user.setTimeout(pvTimeout.get());
         port = user.connectPort(pvPortName.get());
         if(port==null) {
-            pvLink.message(user.getMessage(),MessageType.error);
+            pvStructure.message(user.getMessage(),MessageType.error);
             return;
         }
         portTrace = port.getTrace();
         device = user.connectDevice(pvAddr.get());
         if(device==null) {
-            pvLink.message(user.getMessage(),MessageType.error);
+            pvStructure.message(user.getMessage(),MessageType.error);
             return;
         }
         deviceTrace = device.getTrace();
@@ -201,7 +198,7 @@ RecordProcessRequester
     public void message(String message,MessageType messageType) {
         dbRecord.lock();
         try {
-            pvLink.message(message, messageType);
+            pvStructure.message(message, messageType);
         } finally {
             dbRecord.unlock();
         }

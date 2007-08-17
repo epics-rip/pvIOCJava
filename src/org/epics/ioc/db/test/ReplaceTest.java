@@ -392,12 +392,6 @@ public class ReplaceTest extends TestCase {
         case pvString:
              newField = new StringData(parent,field);
              break;
-        case pvEnum:
-             System.out.printf("pvEnum not supported.%n");
-             return;
-        case pvMenu:
-             System.out.printf("dbMenu not supported.%n");
-             return;
         case pvStructure:
              System.out.printf("dbStructure not supported.%n");
              return;
@@ -437,14 +431,6 @@ public class ReplaceTest extends TestCase {
                   newField = new StringArray(parent,
                     array, 0, true);
                   break;
-             case pvEnum:
-                  newField = new EnumArray(parent,
-                    array, 0, true);
-                  break;
-             case pvMenu:
-                 newField = new MenuArray(parent,
-                     array, 0, true);
-                 break;
              case pvStructure:
                  newField = new StructureArray(parent,
                      array, 0, true);
@@ -453,15 +439,8 @@ public class ReplaceTest extends TestCase {
                  newField = new ArrayArray(parent,
                      array, 0, true);
                  break;
-             case pvLink:
-                 newField = new LinkArray(parent,
-                     array, 0, true);
-                 break;
              }
              break;
-        case pvLink:
-             System.out.printf("dbLink not supported.%n");
-             return;
         }
         DBField dbField = dbRecord.findDBField(oldField);
         dbField.replacePVField(newField);
@@ -1356,144 +1335,6 @@ public class ReplaceTest extends TestCase {
         private String[] value;
     }
 
-    private static class EnumArray extends AbstractDBArray implements PVEnumArray
-    {
-        /* (non-Javadoc)
-         * @see org.epics.ioc.pv.PVField#toString(int)
-         */
-        public String toString(int indentLevel) {
-            return convert.getString(this, indentLevel);
-        }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.pv.PVEnumArray#get(int, int, org.epics.ioc.pv.EnumArrayData)
-         */
-        public int get(int offset, int len, EnumArrayData data) {
-            System.out.printf("%n    **%s.get**",getField().getType().toString());
-            int n = len;
-            if(offset+len > length) n = length;
-            data.data = value;
-            data.offset = offset;
-            return n;
-        }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.pv.PVEnumArray#put(int, int, org.epics.ioc.pv.PVEnum[], int)
-         */
-        public int put(int offset, int len, PVEnum[]from, int fromOffset) {
-            System.out.printf("%n    **%s.put**",getField().getType().toString());
-            if(!super.isMutable())
-                throw new IllegalStateException("PVField.isMutable is false");
-            if(offset+len > length) {
-                 int newlength = offset + len;
-                 if(newlength>capacity) setCapacity(newlength);
-                 length = newlength;
-            }
-            System.arraycopy(from,fromOffset,value,offset,len);
-            return len;
-        }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.pv.PVArray#setCapacity(int)
-         */
-        public void setCapacity(int len) {
-            if(!capacityMutable)
-                throw new IllegalStateException("capacity is immutable");
-            if(length>len) length = len;
-            PVEnum[]newarray = new PVEnum[len];
-            if(length>0) System.arraycopy(value,0,newarray,0,length);
-            value = newarray;
-            capacity = len;
-        }
-
-        private EnumArray(PVField parent,Array array,
-            int capacity,boolean capacityMutable)
-        {
-            super(parent,array);
-            this.capacity = capacity;
-            this.capacityMutable = capacityMutable;
-            value = new PVEnum[capacity];
-        }
-        
-        private PVEnum[] value;
-        int length = 0;
-        int capacity;
-        boolean capacityMutable;
-    }
-
-    private static class MenuArray extends AbstractDBArray implements PVMenuArray
-    {
-        /* (non-Javadoc)
-         * @see org.epics.ioc.pv.PVField#toString(int)
-         */
-        public String toString(int indentLevel) {
-            return getString(indentLevel);
-        }
-
-        private String getString(int indentLevel) {
-            StringBuilder builder = new StringBuilder();
-            convert.newLine(builder,indentLevel);
-            builder.append("{");
-            for(int i=0; i < length; i++) {
-                if(value[i]==null) {
-                    convert.newLine(builder,indentLevel+1);
-                    builder.append("{}");
-                } else {
-                    builder.append(value[i].toString(indentLevel+1));
-                }
-            }
-            convert.newLine(builder,indentLevel);
-            builder.append("}");
-            return builder.toString();
-        }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.pv.PVMenuArray#get(int, int, org.epics.ioc.pv.MenuArrayData)
-         */
-        public int get(int offset, int len, MenuArrayData data) {
-            System.out.printf("%n    **%s.get**",getField().getType().toString());
-            int n = len;
-            if(offset+len > length) n = length;
-            data.data = value;
-            data.offset = offset;
-            return n;
-        }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.pv.PVMenuArray#put(int, int, org.epics.ioc.pv.DBMenu[], int)
-         */
-        public int put(int offset, int len, PVMenu[]from, int fromOffset) {
-            System.out.printf("%n    **%s.put**",getField().getType().toString());
-            if(!super.isMutable())
-                throw new IllegalStateException("PVField.isMutable is false");
-            if(offset+len > length) {
-                 int newlength = offset + len;
-                 if(newlength>capacity) setCapacity(newlength);
-                 length = newlength;
-            }
-            System.arraycopy(from,fromOffset,value,offset,len);
-            return len;
-        }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.pv.PVArray#setCapacity(int)
-         */
-        public void setCapacity(int len) {
-            if(!capacityMutable)
-                throw new IllegalStateException("capacity is immutable");
-            if(length>len) length = len;
-            PVMenu[]newarray = new PVMenu[len];
-            if(length>0) System.arraycopy(value,0,newarray,0,length);
-            value = newarray;
-            capacity = len;
-        }
-
-        private MenuArray(PVField parent,Array array,
-            int capacity,boolean capacityMutable)
-        {
-            super(parent,array);
-            this.capacity = capacity;
-            this.capacityMutable = capacityMutable;
-            value = new PVMenu[capacity];
-        }
-        
-        private PVMenu[] value;
-    }
-
     private static class StructureArray extends AbstractDBArray implements PVStructureArray
     {
         /* (non-Javadoc)
@@ -1645,83 +1486,6 @@ public class ReplaceTest extends TestCase {
         }
         
         private PVArray[] value;
-    }
-
-    private static class LinkArray extends AbstractDBArray implements PVLinkArray
-    {
-        /* (non-Javadoc)
-         * @see org.epics.ioc.pv.PVField#toString(int)
-         */
-        public String toString(int indentLevel) {
-            return getString(indentLevel);
-        }
-
-        private String getString(int indentLevel) {
-            StringBuilder builder = new StringBuilder();
-            convert.newLine(builder,indentLevel);
-            builder.append("{");
-            for(int i=0; i < length; i++) {
-                if(value[i]==null) {
-                    
-                    builder.append("{}");
-                } else {
-                    builder.append(value[i].toString(indentLevel+1));
-                }
-                if(i<length-1) convert.newLine(builder,indentLevel + 1);
-            }
-            convert.newLine(builder,indentLevel);
-            builder.append("}");
-            return builder.toString() + super.toString(indentLevel);
-        }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.pv.PVLinkArray#get(int, int, org.epics.ioc.pv.LinkArrayData)
-         */
-        public int get(int offset, int len, LinkArrayData data) {
-            System.out.printf("%n    **%s.get**",getField().getType().toString());
-            int n = len;
-            if(offset+len > length) n = length;
-            data.data = value;
-            data.offset = offset;
-            return n;
-        }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.pv.PVLinkArray#put(int, int, org.epics.ioc.pv.PVLink[], int)
-         */
-        public int put(int offset, int len, PVLink[]from ,int fromOffset) {
-            System.out.printf("%n    **%s.put**",getField().getType().toString());
-            if(!super.isMutable())
-                throw new IllegalStateException("PVField.isMutable is false");
-            if(offset+len > length) {
-                 int newlength = offset + len;
-                 if(newlength>capacity) setCapacity(newlength);
-                 length = newlength;
-            }
-            System.arraycopy(from,fromOffset,value,offset,len);
-            return len;
-        }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.pv.PVArray#setCapacity(int)
-         */
-        public void setCapacity(int len) {
-            if(!capacityMutable)
-                throw new IllegalStateException("capacity is immutable");
-            if(length>len) length = len;
-            PVLink[]newarray = new PVLink[len];
-            if(length>0) System.arraycopy(value,0,newarray,0,length);
-            value = newarray;
-            capacity = len;
-        }
-
-        private LinkArray(PVField parent,Array array,
-            int capacity,boolean capacityMutable)
-        {
-            super(parent,array);
-            this.capacity = capacity;
-            this.capacityMutable = capacityMutable;
-            value = new PVLink[capacity];
-        }
-        
-        private PVLink[] value;
     }
     
     private static Convert convert = ConvertFactory.getConvert();

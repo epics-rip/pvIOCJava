@@ -1,29 +1,49 @@
 <?xml version="1.0" ?>
 <DBDefinition>
 
+<structure name = "enum">
+    <field name = "index" type = "int" />
+    <field name = "choice" type = "string" />
+    <field name = "choices" type = "array" elementType = "string" />
+</structure>
+    
+<structure name = "scanType">
+    <field name = "index" type = "int"/>
+    <field name = "choice" type = "string"/>
+    <field name = "choices" type = "array" elementType = "string"
+        default = "passive event periodic" />
+</structure>
+
+<structure name = "alarmSeverity">
+    <field name = "index" type = "int"/>
+    <field name = "choice" type = "string"/>
+    <field name = "choices" type = "array" elementType = "string"
+        default = "none minor major link" />
+</structure>
+
 <structure name = "timeStamp">
     <field name = "secondsPastEpoch" type = "long" />
     <field name = "nanoSeconds" type = "int" />
 </structure>
 
 <structure name = "scan">
-    <field name = "scan" type = "menu" menuName = "menuScan" />
+    <field name = "scan" type = "structure" structureName = "scanType" />
     <field name = "rate" type = "double" />
     <field name = "phase" type = "int" />
 </structure>
 <structure name = "event">
     <field name = "eventNumber" type = "short" />
     <field name = "timeStampEvent" type = "int" />
-    <field name = "timeStampLink" type = "link" />
+    <field name = "timeStampLink" type = "structure" />
 </structure>
 
 <structure name = "disableLink" supportName = "disableSupport" >
     <field name = "disabled" type = "boolean" />
     <field name = "value" type = "short" default = "1" />
     <field name = "input" type = "short" />
-    <field name = "link" type = "link" supportName = "disableLinkSupport" />
+    <field name = "link" type = "structure" supportName = "disableLinkSupport" />
     <field name = "disableAlarmSeverity"
-           type = "menu" menuName = "menuAlarmSevr" />
+           type = "structure" structureName = "alarmSeverity" />
 </structure>
 <structure name = "processLink">
     <field name = "pvname" type = "string" link = "true" />

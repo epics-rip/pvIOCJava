@@ -2,12 +2,12 @@
 <DBDefinition>
 
 <structure name = "disableLink">
-    <field name = "disabled" type = "boolean" />
-    <field name = "value" type = "short" default = "1" />
-    <field name = "input" type = "short" />
-    <field name = "link" type = "link" />
-    <field name = "disableAlarmSeverity"
-           type = "menu" menuName = "alarmSeverity" />
+  <field name = "disabled" type = "boolean" />
+  <field name = "value" type = "short" default = "1" />
+  <field name = "input" type = "short" />
+  <field name = "link" type = "structure" structureName = "null" />
+  <field name = "disableAlarmSeverity"
+     type = "structure" structureName = "alarmSeverity" />
 </structure>
 
 <!-- support not implemented -->

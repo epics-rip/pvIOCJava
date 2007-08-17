@@ -10,7 +10,7 @@ package org.epics.ioc.support;
  * @author mrk
  *
  */
-public interface CalculatorSupport extends LinkSupport {
+public interface CalculatorSupport extends Support {
     /**
      * Specify the support for the calcArgArray which contains the definitions
      * of the arguments for the calculation.

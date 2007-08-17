@@ -1,10 +1,10 @@
 <?xml version="1.0" ?>
 <DBDefinition>
-    <field name = "alarm" type = "structure" structureName = "alarm"
-          supportName = "alarm" />
-    <field name = "calcArgArray" type = "array"
-         elementType = "structure" supportName = "calcArgArray" />
-    <field name = "calculator" type = "link" />
-    <field name = "linkArray" type = "array"
-         elementType = "structure" supportName = "linkArray" />
+  <field name = "alarm" type = "structure" structureName = "alarm"
+      supportName = "alarm" />
+  <field name = "calcArgArray" type = "array"
+     elementType = "structure" supportName = "calcArgArray" />
+  <field name = "calculator" type = "structure" structureName = "null" />
+  <field name = "supportArray" type = "array"
+     elementType = "structure" supportName = "supportArray" />
 </DBDefinition>

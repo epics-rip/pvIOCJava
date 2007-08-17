@@ -217,22 +217,6 @@ public class SupportCreationFactory {
                     }
                     nsofar += n; offset += n;
                 }
-            } else if(elementType==Type.pvLink) {
-                PVLinkArray pvLinkArray = (PVLinkArray)dbField.getPVField();
-                int len = pvLinkArray.getLength();
-                LinkArrayData data = new LinkArrayData();
-                int nsofar = 0;
-                int offset = 0;
-                while(nsofar<len) {
-                    int n = pvLinkArray.get(offset,len-nsofar,data);
-                    if(n<=0) break;
-                    PVLink[] pvLink = data.data;
-                    for(int i=0; i<n; i++) {
-                        if(pvLink[i]==null) continue;
-                        if(!SupportCreationFactory.createSupportPvt(requester,dbFields[i])) result = false;
-                    }
-                    nsofar += n; offset += n;
-                }
             } else if(elementType==Type.pvArray) {
                 PVArrayArray pvArrayArray = (PVArrayArray)dbField.getPVField();
                 int len = pvArrayArray.getLength();
@@ -265,29 +249,16 @@ public class SupportCreationFactory {
         if(supportName==null) return true;
         String factoryName = null;
         PVField pvField = dbField.getPVField();
-        DBD dbd = DBDFactory.getMasterDBD();
-        if(pvField.getField().getType()==Type.pvLink) {
-            DBDLinkSupport dbdLinkSupport = dbd.getLinkSupport(supportName);
-            if(dbdLinkSupport==null) {
-                printError(requester,pvField,"linkSupport " + supportName + " does not exist");
-                return false;
-            }
-            factoryName = dbdLinkSupport.getFactoryName();
-            if(factoryName==null) {
-                printError(requester,pvField,"linkSupport " + supportName + " does not define a factory name");
-                return false;
-            }
-        } else {
-            DBDSupport dbdSupport = dbd.getSupport(supportName);
-            if(dbdSupport==null) {
-                printError(requester,pvField,"support " + supportName + " does not exist");
-                return false;
-            }
-            factoryName = dbdSupport.getFactoryName();
-            if(factoryName==null) {
-                printError(requester,pvField,"support " + supportName + " does not define a factory name");
-                return false;
-            }
+        DBD dbd = DBDFactory.getMasterDBD();       
+        DBDSupport dbdSupport = dbd.getSupport(supportName);
+        if(dbdSupport==null) {
+            printError(requester,pvField,"support " + supportName + " does not exist");
+            return false;
+        }
+        factoryName = dbdSupport.getFactoryName();
+        if(factoryName==null) {
+            printError(requester,pvField,"support " + supportName + " does not define a factory name");
+            return false;
         }
         Class supportClass;
         Support support = null;
@@ -303,9 +274,7 @@ public class SupportCreationFactory {
         }
         String data = null;
         Type type = pvField.getField().getType();
-        if (type==Type.pvLink) {
-            data = "DBLink";
-        } else if (type==Type.pvStructure) {
+        if (type==Type.pvStructure) {
             data = "DBStructure";
         } else {
             data = "DBField";

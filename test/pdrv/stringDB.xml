@@ -32,61 +32,51 @@
         <high>10.0</high>
     </displayLimit>
     <scan>
-        <scan>periodic</scan>
+        <type><choice>periodic</choice></type>
         <rate>0.5</rate>
     </scan>
-    <linkArray>
-        <value structureName = "linkArrayElement">
+    <supportArray>
+        <value structureName = "supportArrayElement">
             <wait>false</wait>
-            <link  supportName = "outputLink" >
-                <configure structureName = "outputLink">
-                    <pvname>syncStringOut</pvname>
-                    <process>true</process>
-                </configure>
+            <link  supportName = "outputSupport" structureName = "outputSupport">
+                <pvname>syncStringOut</pvname>
+                <process>true</process>
             </link>
         </value>
-    </linkArray>
+    </supportArray>
 </record>
 
 <record name = "syncStringOut" type = "string">
-    <output supportName = "pdrvOctetOutput" >
-        <configure structureName = "pdrvLink">
-            <portName>syncOctetDriver</portName>
-            <addr>0</addr>
-            <timeout>.2</timeout>
-        </configure>
+    <output supportName = "pdrvOctetOutput" structureName = "pdrvSupport">
+        <portName>syncOctetDriver</portName>
+        <addr>0</addr>
+        <timeout>.2</timeout>
     </output>
-    <linkArray>
-        <value structureName = "linkArrayElement">
+    <supportArray>
+        <value structureName = "supportArrayElement">
             <wait>false</wait>
-            <link  supportName = "processLink" >
-                <configure structureName = "processLink">
-                    <pvname>syncStringIn</pvname>
-                </configure>
+            <link  supportName = "processSupport" structureName = "processSupport">
+                <pvname>syncStringIn</pvname>
             </link>
         </value>
-    </linkArray>
+    </supportArray>
 </record>
 
 <record name = "syncStringIn" type = "string">
-    <input supportName = "pdrvOctetInput" >
-        <configure structureName = "pdrvLink">
-            <portName>syncOctetDriver</portName>
-            <addr>0</addr>
-            <timeout>.2</timeout>
-            <size>20</size>
-        </configure>
+    <input supportName = "pdrvOctetInput" structureName = "pdrvSupport">
+        <portName>syncOctetDriver</portName>
+        <addr>0</addr>
+        <timeout>.2</timeout>
+        <size>20</size>
     </input>
 </record>
 
 <record name = "syncStringInInterrupt" type = "string">
-    <input supportName = "pdrvOctetInterruptInput" >
-        <configure structureName = "pdrvLink">
-            <portName>syncOctetDriver</portName>
-            <addr>0</addr>
-            <process>true</process>
-            <size>20</size>
-        </configure>
+    <input supportName = "pdrvOctetInterruptInput" structureName = "pdrvSupport">
+        <portName>syncOctetDriver</portName>
+        <addr>0</addr>
+        <process>true</process>
+        <size>20</size>
     </input>
 </record>
 
@@ -121,61 +111,51 @@
         <high>10.0</high>
     </displayLimit>
     <scan>
-        <scan>periodic</scan>
+        <type><choice>periodic</choice></type>
         <rate>0.5</rate>
     </scan>
-    <linkArray>
-        <value structureName = "linkArrayElement">
+    <supportArray>
+        <value structureName = "supportArrayElement">
             <wait>false</wait>
-            <link  supportName = "outputLink" >
-                <configure structureName = "outputLink">
-                    <pvname>asynStringOut</pvname>
-                    <process>true</process>
-                </configure>
+            <link  supportName = "outputSupport" structureName = "outputSupport">
+                <pvname>asynStringOut</pvname>
+                <process>true</process>
             </link>
         </value>
-    </linkArray>
+    </supportArray>
 </record>
 
 <record name = "asynStringOut" type = "string">
-    <output supportName = "pdrvOctetOutput" >
-        <configure structureName = "pdrvLink">
-            <portName>asynOctetDriver</portName>
-            <addr>0</addr>
-            <timeout>.2</timeout>
-        </configure>
+    <output supportName = "pdrvOctetOutput" structureName = "pdrvSupport">
+        <portName>asynOctetDriver</portName>
+        <addr>0</addr>
+        <timeout>.2</timeout>
     </output>
-    <linkArray>
-        <value structureName = "linkArrayElement">
+    <supportArray>
+        <value structureName = "supportArrayElement">
             <wait>false</wait>
-            <link  supportName = "processLink" >
-                <configure structureName = "processLink">
-                    <pvname>asynStringIn</pvname>
-                </configure>
+            <link  supportName = "processSupport" structureName = "processSupport">
+                <pvname>asynStringIn</pvname>
             </link>
         </value>
-    </linkArray>
+    </supportArray>
 </record>
 
 <record name = "asynStringIn" type = "string">
-    <input supportName = "pdrvOctetInput" >
-        <configure structureName = "pdrvLink">
-            <portName>asynOctetDriver</portName>
-            <addr>0</addr>
-            <timeout>.2</timeout>
-            <size>20</size>
-        </configure>
+    <input supportName = "pdrvOctetInput" structureName = "pdrvSupport">
+        <portName>asynOctetDriver</portName>
+        <addr>0</addr>
+        <timeout>.2</timeout>
+        <size>20</size>
     </input>
 </record>
 
 <record name = "asynStringInInterrupt" type = "string">
-    <input supportName = "pdrvOctetInterruptInput" >
-        <configure structureName = "pdrvLink">
-            <portName>asynOctetDriver</portName>
-            <addr>0</addr>
-            <process>true</process>
-            <size>20</size>
-        </configure>
+    <input supportName = "pdrvOctetInterruptInput" structureName = "pdrvSupport">
+        <portName>asynOctetDriver</portName>
+        <addr>0</addr>
+        <process>true</process>
+        <size>20</size>
     </input>
 </record>
 

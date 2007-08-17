@@ -868,7 +868,7 @@ support name. A linkSupport can also specify a configuration structure. An
 example linkSupport definition is:</p>
 <pre>    &lt;linkSupport name = "processLink"
          configurationStructureName = "processLink" 
-         factoryName = "org.epics.ioc.support.CALinkFactory"/&gt;</pre>
+         factoryName = "org.epics.ioc.support.CASupportFactory"/&gt;</pre>
 
 <p>A support definition consists of:</p>
 <ul>
@@ -1096,7 +1096,7 @@ style disable link:</p>
 &lt;/structure&gt;
 &lt;linkSupport name = "pdrvOctetInput" configStructureName = "pdrvLink"
     configurationStructureName = "pdrvLink"
-    factoryName = "org.epics.ioc.support.PDRVLinkFactory" /&gt;
+    factoryName = "org.epics.ioc.support.PDRVSupportFactory" /&gt;
 &lt;!-- many many more linkSupport definitions --&gt;</pre>
 
 <h4 id="Record">Record Type Examples</h4>
@@ -2616,7 +2616,7 @@ types. See org.epics.ioc.support for details.</p>
 &lt;/structure&gt;
 
 &lt;support name = "linkArray"
-    factoryName = "org.epics.ioc.support.LinkArrayFactory" /&gt;
+    factoryName = "org.epics.ioc.support.SupportArrayFactory" /&gt;
 
 &lt;/DBDefinition&gt;</pre>
 <dl>
@@ -2718,19 +2718,19 @@ org.epics.ioc.support for details.</p>
 
 &lt;linkSupport name = "processLink"
     configurationStructureName = "processLink"
-    factoryName = "org.epics.ioc.support.CALinkFactory" /&gt;
+    factoryName = "org.epics.ioc.support.CASupportFactory" /&gt;
 &lt;linkSupport name = "monitorLink"
     configurationStructureName = "monitorLink"
-    factoryName = "org.epics.ioc.support.CALinkFactory" /&gt;
+    factoryName = "org.epics.ioc.support.CASupportFactory" /&gt;
 &lt;linkSupport name = "monitorNotifyLink"
     configurationStructureName = "monitorNotifyLink"
-    factoryName = "org.epics.ioc.support.CALinkFactory" /&gt;
+    factoryName = "org.epics.ioc.support.CASupportFactory" /&gt;
 &lt;linkSupport name = "inputLink"
     configurationStructureName = "inputLink"
-    factoryName = "org.epics.ioc.support.CALinkFactory" /&gt;
+    factoryName = "org.epics.ioc.support.CASupportFactory" /&gt;
 &lt;linkSupport name = "outputLink"
     configurationStructureName = "outputLink"
-    factoryName = "org.epics.ioc.support.CALinkFactory" /&gt;
+    factoryName = "org.epics.ioc.support.CASupportFactory" /&gt;
 
 &lt;/DBDefinition&gt;</pre>
 
@@ -3085,7 +3085,7 @@ See org.epics.ioc.support for details.</p>
 
 &lt;linkSupport name = "delayLink"
     configurationStructureName = "delayLink"
-    factoryName = "org.epics.ioc.support.DelayLinkFactory" /&gt;
+    factoryName = "org.epics.ioc.support.DelaySupportFactory" /&gt;
 
 &lt;/DBDefinition&gt;</pre>
 <hr />
@@ -3109,67 +3109,67 @@ org.epics.ioc.portDriver for details.</p>
 
 &lt;linkSupport name = "pdrvOctetInput"
     configurationStructureName = "pdrvLink"
-    factoryName = "org.epics.ioc.support.PDRVLinkFactory" /&gt;
+    factoryName = "org.epics.ioc.support.PDRVSupportFactory" /&gt;
 &lt;linkSupport name = "pdrvOctetInterruptInput"
     configurationStructureName = "pdrvLink"
-    factoryName = "org.epics.ioc.support.PDRVLinkFactory" /&gt;
+    factoryName = "org.epics.ioc.support.PDRVSupportFactory" /&gt;
 &lt;linkSupport name = "pdrvOctetOutput"
     configurationStructureName = "pdrvLink"
-    factoryName = "org.epics.ioc.support.PDRVLinkFactory" /&gt;
+    factoryName = "org.epics.ioc.support.PDRVSupportFactory" /&gt;
 
 &lt;linkSupport name = "pdrvInt32Input"
     configurationStructureName = "pdrvLink"
-    factoryName = "org.epics.ioc.support.PDRVLinkFactory" /&gt;
+    factoryName = "org.epics.ioc.support.PDRVSupportFactory" /&gt;
 &lt;linkSupport name = "pdrvInt32InterruptInput"
     configurationStructureName = "pdrvLink"
-    factoryName = "org.epics.ioc.support.PDRVLinkFactory" /&gt;
+    factoryName = "org.epics.ioc.support.PDRVSupportFactory" /&gt;
 &lt;linkSupport name = "pdrvInt32AverageInput"
     configurationStructureName = "pdrvLink"
-    factoryName = "org.epics.ioc.support.PDRVLinkFactory" /&gt;
+    factoryName = "org.epics.ioc.support.PDRVSupportFactory" /&gt;
 &lt;linkSupport name = "pdrvInt32Output"
     configurationStructureName = "pdrvLink"
-    factoryName = "org.epics.ioc.support.PDRVLinkFactory" /&gt;
+    factoryName = "org.epics.ioc.support.PDRVSupportFactory" /&gt;
 &lt;linkSupport name = "pdrvInt32ArrayInput"
     configurationStructureName = "pdrvLink"
-    factoryName = "org.epics.ioc.support.PDRVLinkFactory" /&gt;
+    factoryName = "org.epics.ioc.support.PDRVSupportFactory" /&gt;
 &lt;linkSupport name = "pdrvInt32ArrayInterruptInput"
     configurationStructureName = "pdrvLink"
-    factoryName = "org.epics.ioc.support.PDRVLinkFactory" /&gt;
+    factoryName = "org.epics.ioc.support.PDRVSupportFactory" /&gt;
 &lt;linkSupport name = "pdrvInt32ArrayOutput"
     configurationStructureName = "pdrvLink"
-    factoryName = "org.epics.ioc.support.PDRVLinkFactory" /&gt;
+    factoryName = "org.epics.ioc.support.PDRVSupportFactory" /&gt;
 
 &lt;linkSupport name = "pdrvFloat64Input"
     configurationStructureName = "pdrvLink"
-    factoryName = "org.epics.ioc.support.PDRVLinkFactory" /&gt;
+    factoryName = "org.epics.ioc.support.PDRVSupportFactory" /&gt;
 &lt;linkSupport name = "pdrvFloat64InterruptInput"
     configurationStructureName = "pdrvLink"
-    factoryName = "org.epics.ioc.support.PDRVLinkFactory" /&gt;
+    factoryName = "org.epics.ioc.support.PDRVSupportFactory" /&gt;
 &lt;linkSupport name = "pdrvFloat64AverageInput"
     configurationStructureName = "pdrvLink"
-    factoryName = "org.epics.ioc.support.PDRVLinkFactory" /&gt;
+    factoryName = "org.epics.ioc.support.PDRVSupportFactory" /&gt;
 &lt;linkSupport name = "pdrvFloat64Output"
     configurationStructureName = "pdrvLink"
-    factoryName = "org.epics.ioc.support.PDRVLinkFactory" /&gt;
+    factoryName = "org.epics.ioc.support.PDRVSupportFactory" /&gt;
 
 &lt;linkSupport name = "pdrvFloat64ArrayInput"
     configurationStructureName = "pdrvLink"
-    factoryName = "org.epics.ioc.support.PDRVLinkFactory" /&gt;
+    factoryName = "org.epics.ioc.support.PDRVSupportFactory" /&gt;
 &lt;linkSupport name = "pdrvFloat64ArrayInterruptInput"
     configurationStructureName = "pdrvLink"
-    factoryName = "org.epics.ioc.support.PDRVLinkFactory" /&gt;
+    factoryName = "org.epics.ioc.support.PDRVSupportFactory" /&gt;
 &lt;linkSupport name = "pdrvFloat64ArrayOutput"
     configurationStructureName = "pdrvLink"
-    factoryName = "org.epics.ioc.support.PDRVLinkFactory" /&gt;
+    factoryName = "org.epics.ioc.support.PDRVSupportFactory" /&gt;
 &lt;linkSupport name = "pdrvUInt32DigitalInput"
     configurationStructureName = "pdrvLink"
-    factoryName = "org.epics.ioc.support.PDRVLinkFactory" /&gt;
+    factoryName = "org.epics.ioc.support.PDRVSupportFactory" /&gt;
 &lt;linkSupport name = "pdrvUInt32DigitalInterruptInput"
     configurationStructureName = "pdrvLink"
-    factoryName = "org.epics.ioc.support.PDRVLinkFactory" /&gt;
+    factoryName = "org.epics.ioc.support.PDRVSupportFactory" /&gt;
 &lt;linkSupport name = "pdrvUInt32DigitalOutput"
     configurationStructureName = "pdrvLink"
-    factoryName = "org.epics.ioc.support.PDRVLinkFactory" /&gt;</pre>
+    factoryName = "org.epics.ioc.support.PDRVSupportFactory" /&gt;</pre>
 
 <h3 id="pdrvLink">pdrvLink</h3>
 

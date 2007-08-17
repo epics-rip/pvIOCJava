@@ -119,46 +119,6 @@ public class ListenerTest extends TestCase {
             dbField.postPut();
             return;
         }
-        if(type==Type.pvEnum) {
-            System.out.printf("%ntestPut enum index recordName %s fieldName %s value %f%n",
-                    recordName,fieldName,value);
-            int index = (int)value;
-            DBEnum dbEnum = (DBEnum)dbField;
-            dbEnum.setIndex(index);
-            System.out.printf("%ntestPut enum choices recordName %s fieldName %s value %f%n",
-                    recordName,fieldName,value);
-            String[] choice = dbEnum.getChoices();
-            dbEnum.setChoices(choice);
-            return;
-        }
-        if(type==Type.pvMenu) {
-            System.out.printf("%ntestPut menu index recordName %s fieldName %s value %f%n",
-                    recordName,fieldName,value);
-            int index = (int)value;
-            DBMenu dbMenu = (DBMenu)dbField;
-            dbMenu.setIndex(index);
-            return;
-        }
-        if(type==Type.pvLink) {
-            System.out.printf("%ntestPut link configurationStructure recordName %s fieldName %s value %f%n",
-                    recordName,fieldName,value);
-            DBLink dbLink = (DBLink)dbField;
-            PVStructure configStructure = dbLink.getConfigurationStructure();
-            System.out.println("put supportName");
-            String supportName = dbLink.getSupportName();
-            String result = dbLink.setSupportName(supportName);
-            if(result!=null) {
-                System.out.println("setSupportName failed " + result);
-                return;
-            }
-            System.out.println("setConfigurationStructure");
-            result = dbLink.setConfigurationStructure(configStructure);
-            if(result!=null) {
-                System.out.println("setConfigurationStructure failed " + result);
-                return;
-            }
-            return;
-        }
         if(type!=Type.pvStructure) {
             System.out.printf("%ntestPut recordName %s fieldName %s cant handle%n",
                 fieldName,recordName);

@@ -3,16 +3,12 @@
  * EPICS JavaIOC is distributed subject to a Software License Agreement found
  * in file LICENSE that is included with this distribution.
  */
-package org.epics.ioc.dbd;
+package org.epics.ioc.util;
 
 /**
  * @author mrk
  *
  */
-public interface DBDLinkSupport extends DBDSupport {
-    /**
-     * Get the name of the configuration structure.
-     * @return The name.
-     */
-    String getConfigurationStructureName();
+public interface ScanFieldModifyListener {
+    void modified();
 }

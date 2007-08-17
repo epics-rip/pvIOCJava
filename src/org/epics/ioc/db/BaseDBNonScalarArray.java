@@ -55,20 +55,6 @@ public class BaseDBNonScalarArray extends BaseDBField implements DBNonScalarArra
         Type elementType = ((Array)pvArray.getField()).getElementType();
         DBRecord dbRecord = super.getDBRecord();
         switch(elementType) {
-        case pvEnum:
-            PVEnumArray pvEnumArray = (PVEnumArray)pvArray;
-            EnumArrayData enumArrayData = new EnumArrayData();
-            pvEnumArray.get(0, length, enumArrayData);
-            PVEnum[] pvEnums = enumArrayData.data;
-            for(int i=0; i<length; i++) {
-                PVEnum pvEnum = pvEnums[i];
-                if(pvEnum==null) {
-                    elementDBFields[i] = null;
-                } else {
-                    elementDBFields[i] = new BaseDBEnum(this,dbRecord,pvEnum);
-                }
-            }
-            return;
         case pvStructure:
             PVStructureArray pvStructureArray = (PVStructureArray)pvArray;
             StructureArrayData structureArrayData = new StructureArrayData();
@@ -98,34 +84,6 @@ public class BaseDBNonScalarArray extends BaseDBField implements DBNonScalarArra
                     } else {
                         elementDBFields[i] = new BaseDBNonScalarArray(this,dbRecord,elementArray);
                     }
-                }
-            }
-            return;
-        case pvMenu:
-            PVMenuArray pvMenuArray = (PVMenuArray)pvArray;
-            MenuArrayData menuArrayData = new MenuArrayData();
-            pvMenuArray.get(0, length, menuArrayData);
-            PVMenu[] pvMenus = menuArrayData.data;
-            for(int i=0; i<length; i++) {
-                PVMenu pvMenu = pvMenus[i];
-                if(pvMenu==null) {
-                    elementDBFields[i] = null;
-                } else {
-                    elementDBFields[i] = new BaseDBMenu(this,dbRecord,pvMenu);
-                }
-            }
-            return;
-        case pvLink:
-            PVLinkArray pvLinkArray = (PVLinkArray)pvArray;
-            LinkArrayData linkArrayData = new LinkArrayData();
-            pvLinkArray.get(0, length, linkArrayData);
-            PVLink[] pvLinks = linkArrayData.data;
-            for(int i=0; i<length; i++) {
-                PVLink pvLink = pvLinks[i];
-                if(pvLink==null) {
-                    elementDBFields[i] = null;
-                } else {
-                    elementDBFields[i] = new BaseDBLink(this,dbRecord,pvLink);
                 }
             }
             return;

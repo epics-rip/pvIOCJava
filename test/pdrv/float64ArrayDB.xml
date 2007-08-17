@@ -15,60 +15,50 @@
         <value>0.0 1.0 2.0 3.0 4.0 5.0 6.0</value>
     </value>
     <calculator supportName = "arrayIncrementCalculator" />
-    <linkArray>
-        <value structureName = "linkArrayElement">
+    <supportArray>
+        <value structureName = "supportArrayElement">
             <wait>false</wait>
-            <link  supportName = "outputLink" >
-                <configure structureName = "outputLink">
-                    <pvname>syncFloat64ArrayOutput</pvname>
-                    <process>true</process>
-                </configure>
+            <link  supportName = "outputSupport" structureName = "outputSupport">
+                <pvname>syncFloat64ArrayOutput</pvname>
+                <process>true</process>
             </link>
         </value>
-    </linkArray>
+    </supportArray>
     <scan>
-        <scan>periodic</scan> 
+        <type><choice>periodic</choice></type> 
         <rate>1.0</rate>
     </scan>
 </record>
 
 <record name = "syncFloat64ArrayOutput" type = "doubleArray" >
-    <output supportName = "pdrvFloat64ArrayOutput" >
-        <configure structureName = "pdrvLink">
-            <portName>syncFloat64ArrayDriver</portName>
-            <addr>0</addr>
-            <timeout>1.0</timeout>
-        </configure>
+    <output supportName = "pdrvFloat64ArrayOutput" structureName = "pdrvSupport">
+        <portName>syncFloat64ArrayDriver</portName>
+        <addr>0</addr>
+        <timeout>1.0</timeout>
     </output>
-    <linkArray>
-        <value structureName = "linkArrayElement">
+    <supportArray>
+        <value structureName = "supportArrayElement">
             <wait>false</wait>
-            <link  supportName = "processLink" >
-                <configure structureName = "processLink">
-                    <pvname>syncFloat64ArrayInput</pvname>
-                </configure>
+            <link  supportName = "processSupport" structureName = "processSupport">
+                <pvname>syncFloat64ArrayInput</pvname>
             </link>
         </value>
-    </linkArray>
+    </supportArray>
 </record>
 <record name = "syncFloat64ArrayInput" type = "doubleArray" >
-    <input supportName = "pdrvFloat64ArrayInput" >
-        <configure structureName = "pdrvLink">
-            <portName>syncFloat64ArrayDriver</portName>
-            <addr>0</addr>
-            <timeout>1.0</timeout>
-            <size>20</size>
-        </configure>
+    <input supportName = "pdrvFloat64ArrayInput" structureName = "pdrvSupport">
+        <portName>syncFloat64ArrayDriver</portName>
+        <addr>0</addr>
+        <timeout>1.0</timeout>
+        <size>20</size>
     </input>
 </record>
 <record name = "syncFloat64ArrayInputInterrupt" type = "doubleArray" >
-    <input supportName = "pdrvFloat64ArrayInterruptInput" >
-        <configure structureName = "pdrvLink">
-            <portName>syncFloat64ArrayDriver</portName>
-            <addr>0</addr>
-            <process>true</process>
-            <size>20</size>
-        </configure>
+    <input supportName = "pdrvFloat64ArrayInterruptInput" structureName = "pdrvSupport">
+        <portName>syncFloat64ArrayDriver</portName>
+        <addr>0</addr>
+        <process>true</process>
+        <size>20</size>
     </input>
 </record>
 
@@ -86,60 +76,50 @@
         <value>0.0 1.0 2.0 3.0 4.0 5.0 6.0</value>
     </value>
     <calculator supportName = "arrayIncrementCalculator" />
-    <linkArray>
-        <value structureName = "linkArrayElement">
+    <supportArray>
+        <value structureName = "supportArrayElement">
             <wait>false</wait>
-            <link  supportName = "outputLink" >
-                <configure structureName = "outputLink">
-                    <pvname>asynFloat64ArrayOutput</pvname>
-                    <process>true</process>
-                </configure>
+            <link  supportName = "outputSupport" structureName = "outputSupport">
+                <pvname>asynFloat64ArrayOutput</pvname>
+                <process>true</process>
             </link>
         </value>
-    </linkArray>
+    </supportArray>
     <scan>
-        <scan>periodic</scan> 
+        <type><choice>periodic</choice></type> 
         <rate>1.0</rate>
     </scan>
 </record>
 
 <record name = "asynFloat64ArrayOutput" type = "doubleArray" >
-    <output supportName = "pdrvFloat64ArrayOutput" >
-        <configure structureName = "pdrvLink">
-            <portName>asynFloat64ArrayDriver</portName>
-            <addr>0</addr>
-            <timeout>1.0</timeout>
-        </configure>
+    <output supportName = "pdrvFloat64ArrayOutput" structureName = "pdrvSupport">
+        <portName>asynFloat64ArrayDriver</portName>
+        <addr>0</addr>
+        <timeout>1.0</timeout>
     </output>
-    <linkArray>
-        <value structureName = "linkArrayElement">
+    <supportArray>
+        <value structureName = "supportArrayElement">
             <wait>false</wait>
-            <link  supportName = "processLink" >
-                <configure structureName = "processLink">
-                    <pvname>asynFloat64ArrayInput</pvname>
-                </configure>
+            <link  supportName = "processSupport" structureName = "processSupport">
+                <pvname>asynFloat64ArrayInput</pvname>
             </link>
         </value>
-    </linkArray>
+    </supportArray>
 </record>
 <record name = "asynFloat64ArrayInput" type = "doubleArray" >
-    <input supportName = "pdrvFloat64ArrayInput" >
-        <configure structureName = "pdrvLink">
-            <portName>asynFloat64ArrayDriver</portName>
-            <addr>0</addr>
-            <timeout>1.0</timeout>
-            <size>20</size>
-        </configure>
+    <input supportName = "pdrvFloat64ArrayInput" structureName = "pdrvSupport">
+        <portName>asynFloat64ArrayDriver</portName>
+        <addr>0</addr>
+        <timeout>1.0</timeout>
+        <size>20</size>
     </input>
 </record>
 <record name = "asynFloat64ArrayInputInterrupt" type = "doubleArray" >
-    <input supportName = "pdrvFloat64ArrayInterruptInput" >
-        <configure structureName = "pdrvLink">
-            <portName>asynFloat64ArrayDriver</portName>
-            <addr>0</addr>
-            <process>true</process>
-            <size>20</size>
-        </configure>
+    <input supportName = "pdrvFloat64ArrayInterruptInput" structureName = "pdrvSupport">
+        <portName>asynFloat64ArrayDriver</portName>
+        <addr>0</addr>
+        <process>true</process>
+        <size>20</size>
     </input>
 </record>
 

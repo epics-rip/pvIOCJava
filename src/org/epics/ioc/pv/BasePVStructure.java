@@ -200,53 +200,6 @@ public class BasePVStructure extends AbstractPVField implements PVStructure
         return (PVString)pvField;
     }
     /* (non-Javadoc)
-     * @see org.epics.ioc.pv.PVStructure#getEnumField(java.lang.String)
-     */
-    public PVEnum getEnumField(String fieldName) {
-        PVField pvField = findSubField(fieldName,this);
-        if(pvField==null) return null;
-        Type type = pvField.getField().getType();
-        if(type!=Type.pvEnum && type!=Type.pvMenu) {
-            super.message(
-                " fieldName " + fieldName + " does not have type enum ",
-                MessageType.error);
-            return null;
-        }
-        return (PVEnum)pvField;
-    }
-    
-
-    /* (non-Javadoc)
-     * @see org.epics.ioc.pv.PVStructure#getMenuField(java.lang.String, java.lang.String)
-     */
-    public PVMenu getMenuField(String fieldName, String menuName) {
-        PVField pvField = findSubField(fieldName,this);
-        if(pvField==null) return null;
-        if(pvField.getField().getType()!=Type.pvMenu) {
-            super.message(
-                "fieldName " + fieldName + " does not have type menu",
-                MessageType.error);
-            return null;
-        }
-        Field field = pvField.getField();
-        Type type = field.getType();
-        if(type!=Type.pvMenu) {
-            super.message(
-                "fieldName " + fieldName + " does not have type menu ",
-                MessageType.error);
-            return null;
-        }
-        Menu menu = (Menu)field;
-        if(!menu.getMenuName().equals(menuName)) {
-            super.message(
-                    "fieldName " + fieldName + " is not menu " + menuName,
-                    MessageType.error);
-                return null;
-        }
-        return (PVMenu)pvField;
-    }
-    
-    /* (non-Javadoc)
      * @see org.epics.ioc.pv.PVStructure#getStructureField(java.lang.String, java.lang.String)
      */
     public PVStructure getStructureField(String fieldName, String structureName) {
@@ -318,7 +271,10 @@ public class BasePVStructure extends AbstractPVField implements PVStructure
         PVField[] subFields = pvStructure.getFieldPVFields();
         Structure structure = (Structure)pvStructure.getField();
         int index = structure.getFieldIndex(names[0]);
-        if(index<0) return null;
+        if(index<0) {
+            pvStructure.message(" fieldName " + fieldName + " not found", MessageType.error);
+            return null;
+        }
         PVField pvField = subFields[index];
         if(names.length==1) return pvField;
         if(pvField.getField().getType()!=Type.pvStructure) return null;

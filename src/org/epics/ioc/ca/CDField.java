@@ -85,24 +85,6 @@ public interface CDField {
      */
     boolean dataPut(PVField requested,PVField targetPVField);
     /**
-     * A put to an enum subfield has occured. 
-     * The enum index has been modified.
-     * @param requested The target field that has targetPVEnum as a subfield.
-     * @param targetPVEnum The enum interface.
-     * @return (false,true) if the associated PVField is modified.
-     * The return value can be false of the requested field is an array of structures or an array of arrays.
-     */
-    boolean enumIndexPut(PVField requested,PVEnum targetPVEnum);
-    /**
-     * A put to an enum subfield has occured. 
-     * The enum choices has been modified.
-     * @param requested The target field that has targetPVEnum as a subfield.
-     * @param targetPVEnum The enum interface.
-     * @return (false,true) if the associated PVField is modified.
-     * The return value can be false of the requested field is an array of structures or an array of arrays.
-     */
-    boolean enumChoicesPut(PVField requested,PVEnum targetPVEnum);
-    /**
      * A put to the supportName of a subfield has occured. 
      * @param requested The target field that has targetPVField as a subfield.
      * @param targetPVField The pvField in the structure.
@@ -110,14 +92,6 @@ public interface CDField {
      * The return value can be false of the requested field is an array of structures or an array of arrays.
      */
     boolean supportNamePut(PVField requested,PVField targetPVField);
-    /**
-     * A put to the configurationStructure of a pvLink subfield has occured. 
-     * @param requested The target field that has targetPVLink as a subfield.
-     * @param targetPVLink The link interface.
-     * @return (false,true) if the associated PVField is modified.
-     * The return value can be false of the requested field is an array of structures or an array of arrays.
-     */
-    boolean configurationStructurePut(PVField requested,PVLink targetPVLink);
     /**
      * Report current state.
      * @return A String describing the state.

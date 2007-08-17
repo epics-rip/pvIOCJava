@@ -16,15 +16,15 @@ import org.epics.ioc.util.*;
  */
 public class CounterCalculatorFactory {
     
-    public static LinkSupport create(DBLink dbLink) {
-        return new CounterCalculatorImpl(dbLink);
+    public static Support create(DBStructure dbStructure) {
+        return new CounterCalculatorImpl(dbStructure);
     }
     
     private static String supportName = "counterCalculator";
     
-    private static class CounterCalculatorImpl extends AbstractLinkSupport implements CalculatorSupport
+    private static class CounterCalculatorImpl extends AbstractSupport implements CalculatorSupport
     {
-        private PVLink pvLink;
+        private PVStructure pvStructure;
         private CalcArgArraySupport calcArgArraySupport = null;
         private DBField valueDBField;
         private PVDouble valuePVField= null;;
@@ -32,9 +32,9 @@ public class CounterCalculatorFactory {
         private PVDouble maxPVField = null;
         private PVDouble incPVField = null;
 
-        private CounterCalculatorImpl(DBLink dbLink) {
-            super(supportName,dbLink);
-            pvLink = dbLink.getPVLink();
+        private CounterCalculatorImpl(DBStructure dbStructure) {
+            super(supportName,dbStructure);
+            pvStructure = dbStructure.getPVStructure();
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.process.AbstractSupport#initialize()
@@ -42,36 +42,36 @@ public class CounterCalculatorFactory {
         public void initialize() {
             if(!super.checkSupportState(SupportState.readyForInitialize,supportName)) return;
             if(valuePVField==null) {
-                pvLink.message("setField was not called", MessageType.error);
+                pvStructure.message("setField was not called", MessageType.error);
                 return;
             }
             PVField pvField = calcArgArraySupport.getPVField("min");
             if(pvField==null) {
-                pvLink.message("field min not found", MessageType.error);
+                pvStructure.message("field min not found", MessageType.error);
                 return;
             }
             if(pvField.getField().getType()!=Type.pvDouble) {
-                pvLink.message("field min is not double", MessageType.error);
+                pvStructure.message("field min is not double", MessageType.error);
                 return;
             }
             minPVField = (PVDouble)pvField;
             pvField = calcArgArraySupport.getPVField("max");
             if(pvField==null) {
-                pvLink.message("field max not found", MessageType.error);
+                pvStructure.message("field max not found", MessageType.error);
                 return;
             }
             if(pvField.getField().getType()!=Type.pvDouble) {
-                pvLink.message("field max is not double", MessageType.error);
+                pvStructure.message("field max is not double", MessageType.error);
                 return;
             }
             maxPVField = (PVDouble)pvField;
             pvField = calcArgArraySupport.getPVField("inc");
             if(pvField==null) {
-                pvLink.message("field inc not found", MessageType.error);
+                pvStructure.message("field inc not found", MessageType.error);
                 return;
             }
             if(pvField.getField().getType()!=Type.pvDouble) {
-                pvLink.message("field inc is not double", MessageType.error);
+                pvStructure.message("field inc is not double", MessageType.error);
                 return;
             }
             incPVField = (PVDouble)pvField;
@@ -98,7 +98,7 @@ public class CounterCalculatorFactory {
             supportProcessRequester.supportProcessDone(RequestResult.success);
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.process.LinkSupport#setField(org.epics.ioc.pvAccess.PVData)
+         * @see org.epics.ioc.process.Support#setField(org.epics.ioc.pvAccess.PVData)
          */
         public void setField(DBField dbField) {
             valueDBField = dbField;

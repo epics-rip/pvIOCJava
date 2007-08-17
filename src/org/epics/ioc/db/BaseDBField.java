@@ -9,13 +9,13 @@ import java.util.*;
 
 import org.epics.ioc.dbd.DBD;
 import org.epics.ioc.dbd.DBDFactory;
-import org.epics.ioc.dbd.DBDLinkSupport;
 import org.epics.ioc.dbd.DBDStructure;
 import org.epics.ioc.dbd.DBDSupport;
 import org.epics.ioc.process.SupportCreationFactory;
 import org.epics.ioc.process.SupportState;
 import org.epics.ioc.pv.*;
 import org.epics.ioc.support.Support;
+import org.epics.ioc.create.Create;
 
 
 /**
@@ -29,6 +29,7 @@ public class BaseDBField implements DBField{
     private DBRecord dbRecord;
     private PVField pvField;
     private Support support = null;
+    private Create create = null;
     private LinkedList<RecordListener> recordListenerList
         = new LinkedList<RecordListener>();
     
@@ -72,15 +73,6 @@ public class BaseDBField implements DBField{
         if(type==Type.pvStructure) {
             DBStructure dbStructure = (DBStructure)this;
             dbStructure.replacePVStructure();
-        } else if(type==Type.pvEnum) {
-            DBEnum dbEnum = (DBEnum)this;
-            dbEnum.replacePVEnum();
-        } else if(type==Type.pvMenu) {
-            DBMenu dbMenu = (DBMenu)this;
-            dbMenu.replacePVMenu();
-        } else if(type==Type.pvLink) {
-            DBLink dbLink = (DBLink)this;
-            dbLink.replacePVLink();
         } else if(type==Type.pvArray) {
             Array array = (Array)field;
             if(!array.getElementType().isScalar()) {
@@ -100,106 +92,37 @@ public class BaseDBField implements DBField{
     /* (non-Javadoc)
      * @see org.epics.ioc.db.DBField#setSupportName(java.lang.String)
      */
-    public String setSupportName(String name) { 
+    public String setSupportName(String name) {
+        if(support!=null) {
+            if(support.getSupportState()!=SupportState.readyForInitialize) {
+                return "!SupportState.readyForInitialize";
+            }
+        }
         DBD dbd = dbRecord.getDBD();
         if(dbd==null) return "DBD was not set";
-        DBDLinkSupport dbdLinkSupport = null;
-        DBDSupport dbdSupport = null;
-        String configurationStructureName = null;
+        DBDSupport dbdSupport = dbd.getSupport(name);
+        if(dbdSupport==null) return "support " + name + " not defined";
         Type type = pvField.getField().getType();
-        if(name!=null && type==Type.pvLink) {
-            PVLink pvLink = (PVLink)pvField;
-            dbdLinkSupport = dbd.getLinkSupport(name);
-            if(dbdLinkSupport==null) {
-                dbd = DBDFactory.getMasterDBD();
-                dbdLinkSupport = dbd.getLinkSupport(name);
-            }
-            if(dbdLinkSupport==null) {
-                return "linkSupport " + name + " not defined";
-            }
-            configurationStructureName = dbdLinkSupport.getConfigurationStructureName();
-            PVStructure configurationStructure = null;
-            if(configurationStructureName!=null) {
-                DBDStructure dbdStructure = dbd.getStructure(configurationStructureName);
+        if(type==Type.pvStructure) {
+            String structureName = dbdSupport.getStructureName();
+            if(structureName!=null) {
+                DBDStructure dbdStructure= dbd.getStructure(structureName);        
                 if(dbdStructure==null) {
-                    return "configurationStructure " + configurationStructureName
-                        + " for support " + name
-                        + " does not exist";
+                    return "structure " + structureName
+                    + " for support " + name
+                    + " does not exist";
                 }
                 FieldCreate fieldCreate = FieldFactory.getFieldCreate();
                 Field[] fields = dbdStructure.getFields();
                 Structure structure = fieldCreate.createStructure(
-                    "configuration",
-                    dbdStructure.getStructureName(),
-                    fields);
+                        pvField.getField().getFieldName(),
+                        dbdStructure.getStructureName(),
+                        fields);
                 PVDataCreate pvDataCreate = PVDataFactory.getPVDataCreate();
-                configurationStructure = (PVStructure)pvDataCreate.createPVField(pvLink, structure);
-            }
-            pvLink.setConfigurationStructure(configurationStructure);
-        } else if(name!=null) {
-            dbdSupport = dbd.getSupport(name);
-            if(dbdSupport==null) {
-                dbd = DBDFactory.getMasterDBD();
-                dbdSupport = dbd.getSupport(name);
-            }
-            if(dbdSupport==null) {
-                return "support " + name + " not defined";
+                pvField = pvDataCreate.createPVField(parent.getPVField(), structure);
             }
         }
         pvField.setSupportName(name);
-        if(support==null) {
-            // Wait until SupportCreation has been run
-            return null;
-        }
-        SupportState supportState = support.getSupportState();
-        if(supportState!=SupportState.readyForInitialize) {
-            support.uninitialize();
-        }
-        support = null;        
-        Iterator<RecordListener> iter;
-        iter = recordListenerList.iterator();
-        while(iter.hasNext()) {
-            RecordListener listener = iter.next();
-            DBListener dbListener = listener.getDBListener();
-            dbListener.supportNamePut(this);
-        }
-        DBField dbField = parent;
-        while(dbField!=null) {
-            iter = dbField.getRecordListenerList().iterator();
-            while(iter.hasNext()) {
-                RecordListener listener = iter.next();
-                DBListener dbListener = listener.getDBListener();
-                dbListener.supportNamePut(dbField, this);
-            }
-            dbField = dbField.getParent();
-        }
-        if(name==null) return null;
-        if(!SupportCreationFactory.createSupport(this)) {
-            return "could not create support";
-        }
-        if(support==null) {
-            return "support does not exist";
-        }
-        // if configurationStructure then wait for it to be initialized before changing state.
-        if(type==Type.pvLink) {
-            if(configurationStructureName!=null) return null;
-        }
-        DBStructure dbStructure = dbRecord.getDBStructure();
-        if(this==dbStructure) return "dbRecord has no support";
-        supportState = dbStructure.getSupport().getSupportState();
-        switch(supportState) {
-        case readyForInitialize:
-            break;
-        case readyForStart:
-            support.initialize();
-            break;
-        case ready:
-            support.initialize();
-            if(support.getSupportState()!=SupportState.readyForStart) break;
-            support.start();
-            break;
-        default:
-        }
         return null;
     }
 /* (non-Javadoc)
@@ -213,6 +136,18 @@ public class BaseDBField implements DBField{
      */
     public void setSupport(Support support) {
         this.support = support;
+    }
+    /* (non-Javadoc)
+     * @see org.epics.ioc.db.DBField#getCreate()
+     */
+    public Create getCreate() {
+        return create;
+    }
+    /* (non-Javadoc)
+     * @see org.epics.ioc.db.DBField#setCreate(org.epics.ioc.create.Create)
+     */
+    public void setCreate(Create create) {
+        this.create = create;
     }
     /* (non-Javadoc)
      * @see org.epics.ioc.db.DBField#postPut()

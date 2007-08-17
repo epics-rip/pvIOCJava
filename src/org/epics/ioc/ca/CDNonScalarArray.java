@@ -7,7 +7,7 @@ package org.epics.ioc.ca;
 
 /**
  * CDNonScalarArray - A CRRecord array field that contains non-scalar elements.
- * This means the elementType is pvArray, pvEnum, pvMenu, pvLink, or pvStructure.
+ * This means the elementType is pvArray, pvEnum, pvMenu, pvStructure, or pvStructure.
  * @author mrk
  *
  */

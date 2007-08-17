@@ -2,19 +2,18 @@
 <DBDefinition>
 
 <support name = "calcArgArray"
-   factoryName = "org.epics.ioc.support.CalcArgArrayFactory" />
+ factoryName = "org.epics.ioc.support.CalcArgArrayFactory" />
 
 
 <!-- example calculators -->
 
-<linkSupport name = "counterCalculator"
-   factoryName = "org.epics.ioc.support.CounterCalculatorFactory" />
+<support name = "counterCalculator"
+ factoryName = "org.epics.ioc.support.CounterCalculatorFactory" />
 
-<linkSupport name = "arrayIncrementCalculator"
-   factoryName = "org.epics.ioc.support.ArrayIncrementCalculatorFactory" />
+<support name = "arrayIncrementCalculator"
+ factoryName = "org.epics.ioc.support.ArrayIncrementCalculatorFactory" />
 
-<linkSupport name = "booleanArrayToggleCalculator"
-   factoryName = "org.epics.ioc.support.BooleanArrayToggleCalculatorFactory" />
-
+<support name = "booleanArrayToggleCalculator"
+ factoryName = "org.epics.ioc.support.BooleanArrayToggleCalculatorFactory" />
 
 </DBDefinition>

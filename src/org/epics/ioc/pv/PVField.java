@@ -61,7 +61,7 @@ public interface PVField extends Requester {
      */
     String getSupportName();
     /**
-     * Set the name of the support or null to specify no support.
+     * Set the support name or null to specify no support.
      * @param name The name.
      */
     void setSupportName(String name);

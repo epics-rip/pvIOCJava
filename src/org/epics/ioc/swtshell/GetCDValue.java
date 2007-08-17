@@ -12,7 +12,6 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.*;
 import org.epics.ioc.pv.*;
-import org.epics.ioc.pv.Menu;
 import org.epics.ioc.ca.*;
 
 /**
@@ -125,9 +124,6 @@ public class GetCDValue extends Dialog implements SelectionListener {
                     Type type = pvField.getField().getType();
                     if(type.isScalar()) {
                         textMessage(cdField.getPVField().toString());
-                    } else if(type==Type.pvMenu) {
-                        new GetCDMenu(shell,(CDMenu)cdField).get();
-                        cdField = null;
                     } else {
                         textMessage("cant handle type");
                         cdField = null;
@@ -266,78 +262,6 @@ public class GetCDValue extends Dialog implements SelectionListener {
             text.selectAll();
             text.clearSelection();
             text.setText(message);
-        }
-    }
-    
-    private static class GetCDMenu extends Dialog implements SelectionListener{
-        CDMenu cdMenu;
-        Shell shell;
-        Button doneButton;
-        String[] choices;
-        Button[] choiceButtons;
-        int numChoices;
-        
-        private GetCDMenu(Shell parent,CDMenu cdMenu) {
-            super(parent,SWT.DIALOG_TRIM|SWT.NONE);
-            this.cdMenu = cdMenu;
-        }
-        
-        private void get() {
-            shell = new Shell(super.getParent());
-            shell.setText("getFieldName");
-            GridLayout gridLayout = new GridLayout();
-            gridLayout.numColumns = 1;
-            shell.setLayout(gridLayout);
-            doneButton = new Button(shell,SWT.PUSH);
-            doneButton.setText("Done");
-            doneButton.addSelectionListener(this);
-            Composite composite = new Composite(shell,SWT.BORDER);
-            gridLayout = new GridLayout();
-            gridLayout.numColumns = 1;
-            composite.setLayout(gridLayout);
-            PVMenu pvMenu = cdMenu.getPVMenu();
-            int index = pvMenu.getIndex();
-            Menu menu = (Menu)cdMenu.getPVField().getField();
-            choices = menu.getMenuChoices();
-            numChoices = choices.length;
-            choiceButtons = new Button[numChoices];
-            for(int i=0; i<numChoices; i++) {
-                Button button = new Button(composite,SWT.RADIO);
-                choiceButtons[i] = button;
-                button.setText(choices[i]);
-                if(index==i) button.setSelection(true);
-            }
-            shell.pack();
-            shell.open();
-            Display display = shell.getDisplay();
-            while(!shell.isDisposed()) {
-                if(!display.readAndDispatch()) {
-                    display.sleep();
-                }
-            }
-            shell.dispose();
-        }
-        /* (non-Javadoc)
-         * @see org.eclipse.swt.events.SelectionListener#widgetDefaultSelected(org.eclipse.swt.events.SelectionEvent)
-         */
-        public void widgetDefaultSelected(SelectionEvent e) {
-            // TODO Auto-generated method stub           
-        }
-        /* (non-Javadoc)
-         * @see org.eclipse.swt.events.SelectionListener#widgetSelected(org.eclipse.swt.events.SelectionEvent)
-         */
-        public void widgetSelected(SelectionEvent e) {
-            Object object = e.getSource();
-            if(object==doneButton) {
-                for(int i=0; i<numChoices; i++) {
-                    if(choiceButtons[i].getSelection()) {
-                        cdMenu.enumIndexPut(i);
-                        break;
-                    }
-                }
-                shell.close();
-                return;
-            }
         }
     }
 }

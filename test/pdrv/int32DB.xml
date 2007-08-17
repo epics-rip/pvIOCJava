@@ -30,74 +30,62 @@
     <calculator supportName = "counterCalculator" />
     <units>counts</units>
     <scan>
-        <scan>periodic</scan>
+        <type><choice>periodic</choice></type>
         <rate>0.5</rate>
     </scan>
-    <linkArray>
-        <value structureName = "linkArrayElement">
+    <supportArray>
+        <value structureName = "supportArrayElement">
             <wait>false</wait>
-            <link  supportName = "outputLink" >
-                <configure structureName = "outputLink">
-                    <pvname>syncInt32Out</pvname>
-                    <process>true</process>
-                </configure>
+            <link  supportName = "outputSupport" structureName = "outputSupport">
+                <pvname>syncInt32Out</pvname>
+                <process>true</process>
             </link>
         </value>
-    </linkArray>
+    </supportArray>
 </record>
 
 <record name = "syncInt32Out" type = "double">
-    <output supportName = "pdrvInt32Output" >
-        <configure structureName = "pdrvLink">
-            <portName>syncInt32Driver</portName>
-            <addr>0</addr>
-            <timeout>.2</timeout>
-        </configure>
+    <output supportName = "pdrvInt32Output" structureName = "pdrvSupport">
+        <portName>syncInt32Driver</portName>
+        <addr>0</addr>
+        <timeout>.2</timeout>
     </output>
-    <linkArray>
-        <value structureName = "linkArrayElement">
+    <supportArray>
+        <value structureName = "supportArrayElement">
             <wait>false</wait>
-            <link  supportName = "processLink" >
-                <configure structureName = "processLink">
-                    <pvname>syncInt32In</pvname>
-                </configure>
+            <link  supportName = "processSupport" structureName = "processSupport">
+                <pvname>syncInt32In</pvname>
             </link>
         </value>
-    </linkArray>
+    </supportArray>
 </record>
 
 <record name = "syncInt32In" type = "double">
-    <input supportName = "pdrvInt32Input" >
-        <configure structureName = "pdrvLink">
-            <portName>syncInt32Driver</portName>
-            <addr>0</addr>
-            <timeout>.2</timeout>
-            <size>20</size>
-        </configure>
+    <input supportName = "pdrvInt32Input" structureName = "pdrvSupport">
+        <portName>syncInt32Driver</portName>
+        <addr>0</addr>
+        <timeout>.2</timeout>
+        <size>20</size>
     </input>
 </record>
 
 <record name = "syncInt32InInterrupt" type = "double">
-    <input supportName = "pdrvInt32InterruptInput" >
-        <configure structureName = "pdrvLink">
-            <portName>syncInt32Driver</portName>
-            <addr>0</addr>
-            <process>true</process>
-            <size>20</size>
-        </configure>
+    <input supportName = "pdrvInt32InterruptInput" structureName = "pdrvSupport">
+        <portName>syncInt32Driver</portName>
+        <addr>0</addr>
+        <process>true</process>
+        <size>20</size>
     </input>
 </record>
 
 <record name = "syncInt32InAverage" type = "double">
-    <input supportName = "pdrvInt32AverageInput" >
-        <configure structureName = "pdrvLink">
-            <portName>syncInt32Driver</portName>
-            <addr>0</addr>
-            <size>20</size>
-        </configure>
+    <input supportName = "pdrvInt32AverageInput" structureName = "pdrvSupport">
+        <portName>syncInt32Driver</portName>
+        <addr>0</addr>
+        <size>20</size>
     </input>
     <scan>
-        <scan>periodic</scan>
+        <type><choice>periodic</choice></type>
         <rate>5.0</rate>
     </scan>
 </record>
@@ -131,74 +119,62 @@
     <calculator supportName = "counterCalculator" />
     <units>counts</units>
     <scan>
-        <scan>periodic</scan>
+        <type><choice>periodic</choice></type>
         <rate>0.5</rate>
     </scan>
-    <linkArray>
-        <value structureName = "linkArrayElement">
+    <supportArray>
+        <value structureName = "supportArrayElement">
             <wait>false</wait>
-            <link  supportName = "outputLink" >
-                <configure structureName = "outputLink">
-                    <pvname>asynInt32Out</pvname>
-                    <process>true</process>
-                </configure>
+            <link  supportName = "outputSupport" structureName = "outputSupport">
+                <pvname>asynInt32Out</pvname>
+                <process>true</process>
             </link>
         </value>
-    </linkArray>
+    </supportArray>
 </record>
 
 <record name = "asynInt32Out" type = "double">
-    <output supportName = "pdrvInt32Output" >
-        <configure structureName = "pdrvLink">
-            <portName>asynInt32Driver</portName>
-            <addr>0</addr>
-            <timeout>.2</timeout>
-        </configure>
+    <output supportName = "pdrvInt32Output" structureName = "pdrvSupport">
+        <portName>asynInt32Driver</portName>
+        <addr>0</addr>
+        <timeout>.2</timeout>
     </output>
-    <linkArray>
-        <value structureName = "linkArrayElement">
+    <supportArray>
+        <value structureName = "supportArrayElement">
             <wait>false</wait>
-            <link  supportName = "processLink" >
-                <configure structureName = "processLink">
-                    <pvname>asynInt32In</pvname>
-                </configure>
+            <link  supportName = "processSupport" structureName = "processSupport">
+                <pvname>asynInt32In</pvname>
             </link>
         </value>
-    </linkArray>
+    </supportArray>
 </record>
 
 <record name = "asynInt32In" type = "double">
-    <input supportName = "pdrvInt32Input" >
-        <configure structureName = "pdrvLink">
-            <portName>asynInt32Driver</portName>
-            <addr>0</addr>
-            <timeout>.2</timeout>
-            <size>20</size>
-        </configure>
+    <input supportName = "pdrvInt32Input" structureName = "pdrvSupport">
+        <portName>asynInt32Driver</portName>
+        <addr>0</addr>
+        <timeout>.2</timeout>
+        <size>20</size>
     </input>
 </record>
 
 <record name = "asynInt32InInterrupt" type = "double">
-    <input supportName = "pdrvInt32InterruptInput" >
-        <configure structureName = "pdrvLink">
-            <portName>asynInt32Driver</portName>
-            <addr>0</addr>
-            <process>true</process>
-            <size>20</size>
-        </configure>
+    <input supportName = "pdrvInt32InterruptInput" structureName = "pdrvSupport">
+        <portName>asynInt32Driver</portName>
+        <addr>0</addr>
+        <process>true</process>
+        <size>20</size>
     </input>
 </record>
 
 <record name = "asynInt32InAverage" type = "double">
-    <input supportName = "pdrvInt32AverageInput" >
-        <configure structureName = "pdrvLink">
-            <portName>asynInt32Driver</portName>
-            <addr>0</addr>
-            <size>20</size>
-        </configure>
+    <input supportName = "pdrvInt32AverageInput" structureName = "pdrvSupport">
+        <portName>asynInt32Driver</portName>
+        <addr>0</addr>
+        <size>20</size>
     </input>
     <scan>
-        <scan>periodic</scan>
+        <type><choice>periodic</choice></type>
         <rate>5.0</rate>
     </scan>
 </record>

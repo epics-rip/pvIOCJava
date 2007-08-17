@@ -46,7 +46,7 @@ public class BaseArray extends BaseField implements Array {
     private String getString(int indentLevel) {
         StringBuilder builder = new StringBuilder();
         builder.append(super.toString(indentLevel));
-        builder.append("elementType " + elementType.toString());
+        builder.append(" elementType " + elementType.toString());
         return builder.toString();
     }
 

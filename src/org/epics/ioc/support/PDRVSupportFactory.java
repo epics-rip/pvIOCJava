@@ -17,60 +17,60 @@ import org.epics.ioc.util.*;
  * @author mrk
  *
  */
-public class PDRVLinkFactory {
+public class PDRVSupportFactory {
     /**
-     * Create link support for Channel Access links.
-     * @param dbLink The field for which to create support.
+     * Create support for portDriver.
+     * @param dbStructure The field for which to create support.
      * @return A LinkSupport interface or null failure.
      */
-    public static LinkSupport create(DBLink dbLink) {
-        String supportName = dbLink.getSupportName();
-        PVStructure pvStructure = dbLink.getPVLink().getConfigurationStructure();
+    public static Support create(DBStructure dbStructure) {
+        String supportName = dbStructure.getSupportName();
+        PVStructure pvStructure = dbStructure.getPVStructure();
         Structure structure = (Structure)pvStructure.getField();
         if(!structure.getStructureName().equals("pdrvLink")) {
             throw new IllegalStateException("configurationStructure is not pdrvLink");
         }
         if(supportName.equals(pdrvOctetInputSupportName))
-            return new OctetInput(dbLink,pdrvOctetInputSupportName);
+            return new OctetInput(dbStructure,pdrvOctetInputSupportName);
         if(supportName.equals(pdrvOctetInterruptInputSupportName))
-            return new OctetInterruptInput(dbLink,pdrvOctetInterruptInputSupportName);
+            return new OctetInterruptInput(dbStructure,pdrvOctetInterruptInputSupportName);
         if(supportName.equals(pdrvOctetOutputSupportName))
-            return new OctetOutput(dbLink,pdrvOctetOutputSupportName);
+            return new OctetOutput(dbStructure,pdrvOctetOutputSupportName);
         if(supportName.equals(pdrvInt32InputSupportName))
-            return new Int32Input(dbLink,pdrvInt32InputSupportName);
+            return new Int32Input(dbStructure,pdrvInt32InputSupportName);
         if(supportName.equals(pdrvInt32InterruptInputSupportName))
-            return new Int32InterruptInput(dbLink,pdrvInt32InterruptInputSupportName);
+            return new Int32InterruptInput(dbStructure,pdrvInt32InterruptInputSupportName);
         if(supportName.equals(pdrvInt32AverageInputSupportName))
-            return new Int32AverageInput(dbLink,pdrvInt32AverageInputSupportName);
+            return new Int32AverageInput(dbStructure,pdrvInt32AverageInputSupportName);
         if(supportName.equals(pdrvInt32OutputSupportName))
-            return new Int32Output(dbLink,pdrvInt32OutputSupportName);
+            return new Int32Output(dbStructure,pdrvInt32OutputSupportName);
         if(supportName.equals(pdrvInt32ArrayInputSupportName))
-            return new Int32ArrayInput(dbLink,pdrvInt32ArrayInputSupportName);
+            return new Int32ArrayInput(dbStructure,pdrvInt32ArrayInputSupportName);
         if(supportName.equals(pdrvInt32ArrayInterruptInputSupportName))
-            return new Int32ArrayInterruptInput(dbLink,pdrvInt32ArrayInterruptInputSupportName);
+            return new Int32ArrayInterruptInput(dbStructure,pdrvInt32ArrayInterruptInputSupportName);
         if(supportName.equals(pdrvInt32ArrayOutputSupportName))
-            return new Int32ArrayOutput(dbLink,pdrvInt32ArrayOutputSupportName);
+            return new Int32ArrayOutput(dbStructure,pdrvInt32ArrayOutputSupportName);
         if(supportName.equals(pdrvFloat64InputSupportName))
-            return new Float64Input(dbLink,pdrvFloat64InputSupportName);
+            return new Float64Input(dbStructure,pdrvFloat64InputSupportName);
         if(supportName.equals(pdrvFloat64InterruptInputSupportName))
-            return new Float64InterruptInput(dbLink,pdrvFloat64InterruptInputSupportName);
+            return new Float64InterruptInput(dbStructure,pdrvFloat64InterruptInputSupportName);
         if(supportName.equals(pdrvFloat64AverageInputSupportName))
-            return new Float64AverageInput(dbLink,pdrvFloat64AverageInputSupportName);
+            return new Float64AverageInput(dbStructure,pdrvFloat64AverageInputSupportName);
         if(supportName.equals(pdrvFloat64OutputSupportName))
-            return new Float64Output(dbLink,pdrvFloat64OutputSupportName);
+            return new Float64Output(dbStructure,pdrvFloat64OutputSupportName);
         if(supportName.equals(pdrvFloat64ArrayInputSupportName))
-            return new Float64ArrayInput(dbLink,pdrvFloat64ArrayInputSupportName);
+            return new Float64ArrayInput(dbStructure,pdrvFloat64ArrayInputSupportName);
         if(supportName.equals(pdrvFloat64ArrayInterruptInputSupportName))
-            return new Float64ArrayInterruptInput(dbLink,pdrvFloat64ArrayInterruptInputSupportName);
+            return new Float64ArrayInterruptInput(dbStructure,pdrvFloat64ArrayInterruptInputSupportName);
         if(supportName.equals(pdrvFloat64ArrayOutputSupportName))
-            return new Float64ArrayOutput(dbLink,pdrvFloat64ArrayOutputSupportName);
+            return new Float64ArrayOutput(dbStructure,pdrvFloat64ArrayOutputSupportName);
         if(supportName.equals(pdrvUInt32DigitalInputSupportName))
-            return new UInt32DigitalInput(dbLink,pdrvUInt32DigitalInputSupportName);
+            return new UInt32DigitalInput(dbStructure,pdrvUInt32DigitalInputSupportName);
         if(supportName.equals(pdrvUInt32DigitalInterruptInputSupportName))
-            return new UInt32DigitalInterruptInput(dbLink,pdrvUInt32DigitalInterruptInputSupportName);
+            return new UInt32DigitalInterruptInput(dbStructure,pdrvUInt32DigitalInterruptInputSupportName);
         if(supportName.equals(pdrvUInt32DigitalOutputSupportName))
-            return new UInt32DigitalOutput(dbLink,pdrvUInt32DigitalOutputSupportName);
-        dbLink.getPVLink().message("no support for " + supportName, MessageType.fatalError);
+            return new UInt32DigitalOutput(dbStructure,pdrvUInt32DigitalOutputSupportName);
+        pvStructure.message("no support for " + supportName, MessageType.fatalError);
         return null;
     }
     private static final String pdrvOctetInputSupportName = "pdrvOctetInput";
@@ -105,8 +105,8 @@ public class PDRVLinkFactory {
     
     private static class OctetInput extends AbstractPDRVLinkSupport
     {
-        private OctetInput(DBLink dbLink,String supportName) {
-            super(supportName,dbLink);
+        private OctetInput(DBStructure dbStructure,String supportName) {
+            super(supportName,dbStructure);
         }
         
         private OctetValueType octetValueType;
@@ -137,13 +137,13 @@ public class PDRVLinkFactory {
                 Array array = (Array)field;
                 Type elementType = array.getElementType();
                 if(!elementType.isNumeric()) {
-                    pvLink.message("value field is not a supported type", MessageType.fatalError);
+                    pvStructure.message("value field is not a supported type", MessageType.fatalError);
                     super.uninitialize();
                     return;
                 }
                 octetValueType = OctetValueType.array;
             } else {
-                pvLink.message("value field is not a supported type", MessageType.fatalError);
+                pvStructure.message("value field is not a supported type", MessageType.fatalError);
                 super.uninitialize();
                 return;
             }
@@ -165,7 +165,7 @@ public class PDRVLinkFactory {
             if(octetValueType!=OctetValueType.array) charArray = new char[size];
             Interface iface = device.findInterface(user, "octet", true);
             if(iface==null) {
-                pvLink.message("interface octet not supported", MessageType.fatalError);
+                pvStructure.message("interface octet not supported", MessageType.fatalError);
                 super.stop();
                 return;
             }
@@ -223,8 +223,8 @@ public class PDRVLinkFactory {
     private static class OctetInterruptInput extends AbstractPDRVLinkSupport
     implements OctetInterruptListener
     {
-        private OctetInterruptInput(DBLink dbLink,String supportName) {
-            super(supportName,dbLink);
+        private OctetInterruptInput(DBStructure dbStructure,String supportName) {
+            super(supportName,dbStructure);
         }
         
         private OctetValueType octetValueType;
@@ -255,13 +255,13 @@ public class PDRVLinkFactory {
                 Array array = (Array)field;
                 Type elementType = array.getElementType();
                 if(!elementType.isNumeric()) {
-                    pvLink.message("value field is not a supported type", MessageType.fatalError);
+                    pvStructure.message("value field is not a supported type", MessageType.fatalError);
                     super.uninitialize();
                     return;
                 }
                 octetValueType = OctetValueType.array;
             } else {
-                pvLink.message("value field is not a supported type", MessageType.fatalError);
+                pvStructure.message("value field is not a supported type", MessageType.fatalError);
                 super.uninitialize();
                 return;
             }
@@ -283,7 +283,7 @@ public class PDRVLinkFactory {
             if(octetValueType!=OctetValueType.array) charArray = new char[size];
             Interface iface = device.findInterface(user, "octet", true);
             if(iface==null) {
-                pvLink.message("interface octet not supported", MessageType.fatalError);
+                pvStructure.message("interface octet not supported", MessageType.fatalError);
                 super.stop();
                 return;
             }
@@ -352,8 +352,8 @@ public class PDRVLinkFactory {
     
     private static class OctetOutput extends AbstractPDRVLinkSupport
     {
-        private OctetOutput(DBLink dbLink,String supportName) {
-            super(supportName,dbLink);
+        private OctetOutput(DBStructure dbStructure,String supportName) {
+            super(supportName,dbStructure);
         }
         
         private OctetValueType octetValueType;
@@ -383,13 +383,13 @@ public class PDRVLinkFactory {
                 Array array = (Array)field;
                 Type elementType = array.getElementType();
                 if(!elementType.isNumeric()) {
-                    pvLink.message("value field is not a supported type", MessageType.fatalError);
+                    pvStructure.message("value field is not a supported type", MessageType.fatalError);
                     super.uninitialize();
                     return;
                 }
                 octetValueType = OctetValueType.array;
             } else {
-                pvLink.message("value field is not a supported type", MessageType.fatalError);
+                pvStructure.message("value field is not a supported type", MessageType.fatalError);
                 super.uninitialize();
                 return;
             }
@@ -410,7 +410,7 @@ public class PDRVLinkFactory {
             octetArray = new byte[size];
             Interface iface = device.findInterface(user, "octet", true);
             if(iface==null) {
-                pvLink.message("interface octet not supported", MessageType.fatalError);
+                pvStructure.message("interface octet not supported", MessageType.fatalError);
                 super.stop();
                 return;
             }
@@ -475,8 +475,8 @@ public class PDRVLinkFactory {
     
     private static class Int32Input extends AbstractPDRVLinkSupport
     {
-        private Int32Input(DBLink dbLink,String supportName) {
-            super(supportName,dbLink);
+        private Int32Input(DBStructure dbStructure,String supportName) {
+            super(supportName,dbStructure);
         }
 
         private PVField valuePVField = null;
@@ -496,7 +496,7 @@ public class PDRVLinkFactory {
                 return;
             }
             super.uninitialize();
-            pvLink.message("value field is not a scalar type", MessageType.fatalError);
+            pvStructure.message("value field is not a scalar type", MessageType.fatalError);
             return;
         }      
         /* (non-Javadoc)
@@ -514,7 +514,7 @@ public class PDRVLinkFactory {
             if(!super.checkSupportState(SupportState.ready,supportName)) return;
             Interface iface = device.findInterface(user, "int32", true);
             if(iface==null) {
-                pvLink.message("interface int32 not supported", MessageType.fatalError);
+                pvStructure.message("interface int32 not supported", MessageType.fatalError);
                 super.stop();
                 return;
             }
@@ -552,8 +552,8 @@ public class PDRVLinkFactory {
     private static class Int32InterruptInput extends AbstractPDRVLinkSupport
     implements Int32InterruptListener
     {
-        private Int32InterruptInput(DBLink dbLink,String supportName) {
-            super(supportName,dbLink);
+        private Int32InterruptInput(DBStructure dbStructure,String supportName) {
+            super(supportName,dbStructure);
         }
 
         private PVField valuePVField = null;
@@ -573,7 +573,7 @@ public class PDRVLinkFactory {
                 return;
             }
             super.uninitialize();
-            pvLink.message("value field is not a scalar type", MessageType.fatalError);
+            pvStructure.message("value field is not a scalar type", MessageType.fatalError);
             return;
         }      
         /* (non-Javadoc)
@@ -591,7 +591,7 @@ public class PDRVLinkFactory {
             if(!super.checkSupportState(SupportState.ready,supportName)) return;
             Interface iface = device.findInterface(user, "int32", true);
             if(iface==null) {
-                pvLink.message("interface int32 not supported", MessageType.fatalError);
+                pvStructure.message("interface int32 not supported", MessageType.fatalError);
                 super.stop();
                 return;
             }
@@ -656,8 +656,8 @@ public class PDRVLinkFactory {
     private static class Int32AverageInput extends AbstractPDRVLinkSupport
     implements Int32InterruptListener
     {
-        private Int32AverageInput(DBLink dbLink,String supportName) {
-            super(supportName,dbLink);
+        private Int32AverageInput(DBStructure dbStructure,String supportName) {
+            super(supportName,dbStructure);
         }
 
         private PVField valuePVField = null;
@@ -677,7 +677,7 @@ public class PDRVLinkFactory {
                 return;
             }
             super.uninitialize();
-            pvLink.message("value field is not a scalar type", MessageType.fatalError);
+            pvStructure.message("value field is not a scalar type", MessageType.fatalError);
             return;
         }      
         /* (non-Javadoc)
@@ -695,7 +695,7 @@ public class PDRVLinkFactory {
             if(!super.checkSupportState(SupportState.ready,supportName)) return;
             Interface iface = device.findInterface(user, "int32", true);
             if(iface==null) {
-                pvLink.message("interface int32 not supported", MessageType.fatalError);
+                pvStructure.message("interface int32 not supported", MessageType.fatalError);
                 super.stop();
                 return;
             }
@@ -751,8 +751,8 @@ public class PDRVLinkFactory {
     
     private static class Int32Output extends AbstractPDRVLinkSupport
     {
-        private Int32Output(DBLink dbLink,String supportName) {
-            super(supportName,dbLink);
+        private Int32Output(DBStructure dbStructure,String supportName) {
+            super(supportName,dbStructure);
         }
 
         private PVField valuePVField = null;
@@ -772,7 +772,7 @@ public class PDRVLinkFactory {
                 return;
             }
             super.uninitialize();
-            pvLink.message("value field is not a scalar type", MessageType.fatalError);
+            pvStructure.message("value field is not a scalar type", MessageType.fatalError);
             return;
         }      
         /* (non-Javadoc)
@@ -790,7 +790,7 @@ public class PDRVLinkFactory {
             if(!super.checkSupportState(SupportState.ready,supportName)) return;
             Interface iface = device.findInterface(user, "int32", true);
             if(iface==null) {
-                pvLink.message("interface int32 not supported", MessageType.fatalError);
+                pvStructure.message("interface int32 not supported", MessageType.fatalError);
                 super.stop();
                 return;
             }
@@ -831,8 +831,8 @@ public class PDRVLinkFactory {
     private static class Int32ArrayInput extends AbstractPDRVLinkSupport
     implements AsynAccessListener
     {
-        private Int32ArrayInput(DBLink dbLink,String supportName) {
-            super(supportName,dbLink);
+        private Int32ArrayInput(DBStructure dbStructure,String supportName) {
+            super(supportName,dbStructure);
         }
 
         private PVArray valuePVArray = null;
@@ -848,7 +848,7 @@ public class PDRVLinkFactory {
             Type type = field.getType();
             if(type!=Type.pvArray) {
                 super.uninitialize();
-                pvLink.message("value field is not an array", MessageType.fatalError);
+                pvStructure.message("value field is not an array", MessageType.fatalError);
                 return;
             }
             Array array = (Array)field;
@@ -858,7 +858,7 @@ public class PDRVLinkFactory {
                 return;
             }
             super.uninitialize();
-            pvLink.message("value field is not an array with numeric elements", MessageType.fatalError);
+            pvStructure.message("value field is not an array with numeric elements", MessageType.fatalError);
             return;
         }      
         /* (non-Javadoc)
@@ -876,7 +876,7 @@ public class PDRVLinkFactory {
             if(!super.checkSupportState(SupportState.ready,supportName)) return;
             Interface iface = device.findInterface(user, "int32Array", true);
             if(iface==null) {
-                pvLink.message("interface int32Array not supported", MessageType.fatalError);
+                pvStructure.message("interface int32Array not supported", MessageType.fatalError);
                 super.stop();
                 return;
             }
@@ -935,8 +935,8 @@ public class PDRVLinkFactory {
     private static class Int32ArrayInterruptInput extends AbstractPDRVLinkSupport
     implements Int32ArrayInterruptListener,AsynAccessListener
     {
-        private Int32ArrayInterruptInput(DBLink dbLink,String supportName) {
-            super(supportName,dbLink);
+        private Int32ArrayInterruptInput(DBStructure dbStructure,String supportName) {
+            super(supportName,dbStructure);
         }
 
         private PVArray valuePVArray = null;
@@ -952,7 +952,7 @@ public class PDRVLinkFactory {
             Type type = field.getType();
             if(type!=Type.pvArray) {
                 super.uninitialize();
-                pvLink.message("value field is not an array", MessageType.fatalError);
+                pvStructure.message("value field is not an array", MessageType.fatalError);
                 return;
             }
             Array array = (Array)field;
@@ -962,7 +962,7 @@ public class PDRVLinkFactory {
                 return;
             }
             super.uninitialize();
-            pvLink.message("value field is not an array with numeric elements", MessageType.fatalError);
+            pvStructure.message("value field is not an array with numeric elements", MessageType.fatalError);
             return;
         }      
         /* (non-Javadoc)
@@ -980,7 +980,7 @@ public class PDRVLinkFactory {
             if(!super.checkSupportState(SupportState.ready,supportName)) return;
             Interface iface = device.findInterface(user, "int32Array", true);
             if(iface==null) {
-                pvLink.message("interface int32Array not supported", MessageType.fatalError);
+                pvStructure.message("interface int32Array not supported", MessageType.fatalError);
                 super.stop();
                 return;
             }
@@ -1091,8 +1091,8 @@ public class PDRVLinkFactory {
     
     private static class Int32ArrayOutput extends AbstractPDRVLinkSupport
     {
-        private Int32ArrayOutput(DBLink dbLink,String supportName) {
-            super(supportName,dbLink);
+        private Int32ArrayOutput(DBStructure dbStructure,String supportName) {
+            super(supportName,dbStructure);
         }
 
         private PVArray valuePVArray = null;
@@ -1108,7 +1108,7 @@ public class PDRVLinkFactory {
             Type type = field.getType();
             if(type!=Type.pvArray) {
                 super.uninitialize();
-                pvLink.message("value field is not an array", MessageType.fatalError);
+                pvStructure.message("value field is not an array", MessageType.fatalError);
                 return;
             }
             Array array = (Array)field;
@@ -1118,7 +1118,7 @@ public class PDRVLinkFactory {
                 return;
             }
             super.uninitialize();
-            pvLink.message("value field is not an array with numeric elements", MessageType.fatalError);
+            pvStructure.message("value field is not an array with numeric elements", MessageType.fatalError);
             return;
         }      
         /* (non-Javadoc)
@@ -1136,7 +1136,7 @@ public class PDRVLinkFactory {
             if(!super.checkSupportState(SupportState.ready,supportName)) return;
             Interface iface = device.findInterface(user, "int32Array", true);
             if(iface==null) {
-                pvLink.message("interface int32Array not supported", MessageType.fatalError);
+                pvStructure.message("interface int32Array not supported", MessageType.fatalError);
                 super.stop();
                 return;
             }
@@ -1174,14 +1174,29 @@ public class PDRVLinkFactory {
         }
     }
     
+    private static DBField getEnumIndex(DBField dbField) {
+        if(dbField.getPVField().getField().getType()!=Type.pvStructure) return null;
+        DBStructure dbStructure = (DBStructure)dbField;
+        PVStructure pvStructure = dbStructure.getPVStructure();
+        Structure structure = pvStructure.getStructure();
+        DBField[] dbFields = dbStructure.getFieldDBFields();
+        int index;
+        index = structure.getFieldIndex("index");
+        if(index<0) return null;
+        DBField dbIndex = dbFields[index];
+        if(dbIndex.getPVField().getField().getType()!=Type.pvInt) return null;
+        return dbIndex;
+    }
     private static class UInt32DigitalInput extends AbstractPDRVLinkSupport
     {
-        private UInt32DigitalInput(DBLink dbLink,String supportName) {
-            super(supportName,dbLink);
+        private UInt32DigitalInput(DBStructure dbStructure,String supportName) {
+            super(supportName,dbStructure);
         }
 
         private PVBoolean valuePVBoolean = null;
-        private PVEnum valuePVEnum = null;
+        
+        private DBField dbIndex = null;
+        private PVInt pvIndex = null;
         private UInt32Digital uint32Digital = null;
         private int value;
         private int mask;
@@ -1199,16 +1214,13 @@ public class PDRVLinkFactory {
                 valuePVBoolean = (PVBoolean)valuePVField;
                 return;
             }
-            if(type==Type.pvEnum) {
-                valuePVEnum = (PVEnum)pvField;
-                return;
-            }
-            if(type.isScalar()) {
-                valuePVField = pvField;
+            dbIndex = getEnumIndex(valueDBField);
+            if(dbIndex!=null) {
+                pvIndex = (PVInt)dbIndex.getPVField();
                 return;
             }
             super.uninitialize();
-            pvLink.message("value field is not a scalar type", MessageType.fatalError);
+            pvStructure.message("value field is not a valid type", MessageType.fatalError);
             return;
         }      
         /* (non-Javadoc)
@@ -1216,9 +1228,9 @@ public class PDRVLinkFactory {
          */
         public void uninitialize() {
             super.uninitialize();
-            valuePVField = null;
             valuePVBoolean = null;
-            valuePVEnum = null;
+            dbIndex = null;
+            pvIndex = null;
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.pdrv.support.AbstractPDRVLinkSupport#start()
@@ -1228,13 +1240,13 @@ public class PDRVLinkFactory {
             if(!super.checkSupportState(SupportState.ready,supportName)) return;
             Interface iface = device.findInterface(user, "uint32Digital", true);
             if(iface==null) {
-                pvLink.message("interface uint32Digital not supported", MessageType.fatalError);
+                pvStructure.message("interface uint32Digital not supported", MessageType.fatalError);
                 super.stop();
                 return;
             }
             mask = pvMask.get();
             if(mask==0) {
-                pvLink.message("mask is 0", MessageType.fatalError);
+                pvStructure.message("mask is 0", MessageType.fatalError);
                 super.stop();
                 return;
             }
@@ -1261,12 +1273,13 @@ public class PDRVLinkFactory {
             value >>>= shift;
             if(valuePVBoolean!=null) {
                 valuePVBoolean.put((value==0) ? false : true);
-            } else if(valuePVEnum!=null)  {
-                valuePVEnum.setIndex(value);
+                valueDBField.postPut();
+            } else if(pvIndex!=null)  {
+                pvIndex.put(value);
+                dbIndex.postPut();
             } else {
-                convert.fromInt(valuePVField, value);
+                pvStructure.message(" logic error", MessageType.fatalError);
             }
-            valueDBField.postPut();
             supportProcessRequester.supportProcessDone(RequestResult.success);
         }        
         /* (non-Javadoc)
@@ -1286,13 +1299,13 @@ public class PDRVLinkFactory {
     private static class UInt32DigitalInterruptInput
     extends AbstractPDRVLinkSupport implements UInt32DigitalInterruptListener
     {
-        private UInt32DigitalInterruptInput(DBLink dbLink,String supportName) {
-            super(supportName,dbLink);
+        private UInt32DigitalInterruptInput(DBStructure dbStructure,String supportName) {
+            super(supportName,dbStructure);
         }
 
-        private PVField valuePVField = null;
         private PVBoolean valuePVBoolean = null;
-        private PVEnum valuePVEnum = null;
+        private DBField dbIndex = null;
+        private PVInt pvIndex = null;
         private UInt32Digital uint32Digital = null;
         private int value;
         private int mask;
@@ -1310,16 +1323,13 @@ public class PDRVLinkFactory {
                 valuePVBoolean = (PVBoolean)valuePVField;
                 return;
             }
-            if(type==Type.pvEnum) {
-                valuePVEnum = (PVEnum)pvField;
-                return;
-            }
-            if(type.isScalar()) {
-                valuePVField = pvField;
+            dbIndex = getEnumIndex(valueDBField);
+            if(dbIndex!=null) {
+                pvIndex = (PVInt)dbIndex.getPVField();
                 return;
             }
             super.uninitialize();
-            pvLink.message("value field is not a scalar type", MessageType.fatalError);
+            pvStructure.message("value field is not a scalar type", MessageType.fatalError);
             return;
         }      
         /* (non-Javadoc)
@@ -1327,9 +1337,9 @@ public class PDRVLinkFactory {
          */
         public void uninitialize() {
             super.uninitialize();
-            valuePVField = null;
             valuePVBoolean = null;
-            valuePVEnum = null;
+            dbIndex = null;
+            pvIndex = null;
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.pdrv.support.AbstractPDRVLinkSupport#start()
@@ -1339,13 +1349,13 @@ public class PDRVLinkFactory {
             if(!super.checkSupportState(SupportState.ready,supportName)) return;
             Interface iface = device.findInterface(user, "uint32Digital", true);
             if(iface==null) {
-                pvLink.message("interface uint32Digital not supported", MessageType.fatalError);
+                pvStructure.message("interface uint32Digital not supported", MessageType.fatalError);
                 super.stop();
                 return;
             }
             mask = pvMask.get();
             if(mask==0) {
-                pvLink.message("mask is 0", MessageType.fatalError);
+                pvStructure.message("mask is 0", MessageType.fatalError);
                 super.stop();
                 return;
             }
@@ -1416,10 +1426,11 @@ public class PDRVLinkFactory {
             value >>>= shift;
             if(valuePVBoolean!=null) {
                 valuePVBoolean.put((value==0) ? false : true);
-            } else if(valuePVEnum!=null)  {
-                valuePVEnum.setIndex(value);
+            } else if(pvIndex!=null)  {
+                pvIndex.put(value);
+                dbIndex.postPut();
             } else {
-                convert.fromInt(valuePVField, value);
+                pvStructure.message(" logic error", MessageType.fatalError);
             }
             deviceTrace.print(Trace.FLOW,
                     "%s:%s putData and  calling postPut",fullName,supportName);
@@ -1429,13 +1440,12 @@ public class PDRVLinkFactory {
     
     private static class UInt32DigitalOutput extends AbstractPDRVLinkSupport
     {
-        private UInt32DigitalOutput(DBLink dbLink,String supportName) {
-            super(supportName,dbLink);
+        private UInt32DigitalOutput(DBStructure dbStructure,String supportName) {
+            super(supportName,dbStructure);
         }
 
-        private PVField valuePVField = null;
         private PVBoolean valuePVBoolean = null;
-        private PVEnum valuePVEnum = null;
+        private PVInt pvIndex = null;
         private UInt32Digital uint32Digital = null;
         private int value;
         private int mask;
@@ -1453,16 +1463,13 @@ public class PDRVLinkFactory {
                 valuePVBoolean = (PVBoolean)valuePVField;
                 return;
             }
-            if(type==Type.pvEnum) {
-                valuePVEnum = (PVEnum)pvField;
-                return;
-            }
-            if(type.isScalar()) {
-                valuePVField = pvField;
+            DBField dbIndex = getEnumIndex(valueDBField);
+            if(dbIndex!=null) {
+                pvIndex = (PVInt)dbIndex.getPVField();
                 return;
             }
             super.uninitialize();
-            pvLink.message("value field is not a scalar type", MessageType.fatalError);
+            pvStructure.message("value field is not a scalar type", MessageType.fatalError);
             return;
         }      
         /* (non-Javadoc)
@@ -1470,9 +1477,8 @@ public class PDRVLinkFactory {
          */
         public void uninitialize() {
             super.uninitialize();
-            valuePVField = null;
             valuePVBoolean = null;
-            valuePVEnum = null;
+            pvIndex = null;
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.pdrv.support.AbstractPDRVLinkSupport#start()
@@ -1482,13 +1488,13 @@ public class PDRVLinkFactory {
             if(!super.checkSupportState(SupportState.ready,supportName)) return;
             Interface iface = device.findInterface(user, "uint32Digital", true);
             if(iface==null) {
-                pvLink.message("interface uint32Digital not supported", MessageType.fatalError);
+                pvStructure.message("interface uint32Digital not supported", MessageType.fatalError);
                 super.stop();
                 return;
             }
             mask = pvMask.get();
             if(mask==0) {
-                pvLink.message("mask is 0", MessageType.fatalError);
+                pvStructure.message("mask is 0", MessageType.fatalError);
                 super.stop();
                 return;
             }
@@ -1513,10 +1519,10 @@ public class PDRVLinkFactory {
         public void process(SupportProcessRequester supportProcessRequester) {
             if(valuePVBoolean!=null) {
                 value = valuePVBoolean.get() ? 1 : 0;
-            } else if(valuePVEnum!=null)  {
-                value = valuePVEnum.getIndex();
+            } else if(pvIndex!=null)  {
+                value = pvIndex.get();
             } else {
-                value = convert.toInt(valuePVField);
+                pvStructure.message(" logic error", MessageType.fatalError);
             }
             value <<= shift;
             super.process(supportProcessRequester);
@@ -1536,8 +1542,8 @@ public class PDRVLinkFactory {
     
     private static class Float64Input extends AbstractPDRVLinkSupport
     {
-        private Float64Input(DBLink dbLink,String supportName) {
-            super(supportName,dbLink);
+        private Float64Input(DBStructure dbStructure,String supportName) {
+            super(supportName,dbStructure);
         }
 
         private PVField valuePVField = null;
@@ -1557,7 +1563,7 @@ public class PDRVLinkFactory {
                 return;
             }
             super.uninitialize();
-            pvLink.message("value field is not a scalar type", MessageType.fatalError);
+            pvStructure.message("value field is not a scalar type", MessageType.fatalError);
             return;
         }      
         /* (non-Javadoc)
@@ -1575,7 +1581,7 @@ public class PDRVLinkFactory {
             if(!super.checkSupportState(SupportState.ready,supportName)) return;
             Interface iface = device.findInterface(user, "float64", true);
             if(iface==null) {
-                pvLink.message("interface float64 not supported", MessageType.fatalError);
+                pvStructure.message("interface float64 not supported", MessageType.fatalError);
                 super.stop();
                 return;
             }
@@ -1612,8 +1618,8 @@ public class PDRVLinkFactory {
     
     private static class Float64InterruptInput extends AbstractPDRVLinkSupport implements Float64InterruptListener
     {
-        private Float64InterruptInput(DBLink dbLink,String supportName) {
-            super(supportName,dbLink);
+        private Float64InterruptInput(DBStructure dbStructure,String supportName) {
+            super(supportName,dbStructure);
         }
 
         private PVField valuePVField = null;
@@ -1633,7 +1639,7 @@ public class PDRVLinkFactory {
                 return;
             }
             super.uninitialize();
-            pvLink.message("value field is not a scalar type", MessageType.fatalError);
+            pvStructure.message("value field is not a scalar type", MessageType.fatalError);
             return;
         }      
         /* (non-Javadoc)
@@ -1651,7 +1657,7 @@ public class PDRVLinkFactory {
             if(!super.checkSupportState(SupportState.ready,supportName)) return;
             Interface iface = device.findInterface(user, "float64", true);
             if(iface==null) {
-                pvLink.message("interface float64 not supported", MessageType.fatalError);
+                pvStructure.message("interface float64 not supported", MessageType.fatalError);
                 super.stop();
                 return;
             }
@@ -1715,8 +1721,8 @@ public class PDRVLinkFactory {
     
     private static class Float64AverageInput extends AbstractPDRVLinkSupport implements Float64InterruptListener
     {
-        private Float64AverageInput(DBLink dbLink,String supportName) {
-            super(supportName,dbLink);
+        private Float64AverageInput(DBStructure dbStructure,String supportName) {
+            super(supportName,dbStructure);
         }
 
         private PVField valuePVField = null;
@@ -1736,7 +1742,7 @@ public class PDRVLinkFactory {
                 return;
             }
             super.uninitialize();
-            pvLink.message("value field is not a scalar type", MessageType.fatalError);
+            pvStructure.message("value field is not a scalar type", MessageType.fatalError);
             return;
         }      
         /* (non-Javadoc)
@@ -1754,7 +1760,7 @@ public class PDRVLinkFactory {
             if(!super.checkSupportState(SupportState.ready,supportName)) return;
             Interface iface = device.findInterface(user, "float64", true);
             if(iface==null) {
-                pvLink.message("interface float64 not supported", MessageType.fatalError);
+                pvStructure.message("interface float64 not supported", MessageType.fatalError);
                 super.stop();
                 return;
             }
@@ -1809,8 +1815,8 @@ public class PDRVLinkFactory {
     
     private static class Float64Output extends AbstractPDRVLinkSupport
     {
-        private Float64Output(DBLink dbLink,String supportName) {
-            super(supportName,dbLink);
+        private Float64Output(DBStructure dbStructure,String supportName) {
+            super(supportName,dbStructure);
         }
 
         private PVField valuePVField = null;
@@ -1830,7 +1836,7 @@ public class PDRVLinkFactory {
                 return;
             }
             super.uninitialize();
-            pvLink.message("value field is not a scalar type", MessageType.fatalError);
+            pvStructure.message("value field is not a scalar type", MessageType.fatalError);
             return;
         }      
         /* (non-Javadoc)
@@ -1848,7 +1854,7 @@ public class PDRVLinkFactory {
             if(!super.checkSupportState(SupportState.ready,supportName)) return;
             Interface iface = device.findInterface(user, "float64", true);
             if(iface==null) {
-                pvLink.message("interface float64 not supported", MessageType.fatalError);
+                pvStructure.message("interface float64 not supported", MessageType.fatalError);
                 super.stop();
                 return;
             }
@@ -1889,8 +1895,8 @@ public class PDRVLinkFactory {
     private static class Float64ArrayInput extends AbstractPDRVLinkSupport
     implements AsynAccessListener
     {
-        private Float64ArrayInput(DBLink dbLink,String supportName) {
-            super(supportName,dbLink);
+        private Float64ArrayInput(DBStructure dbStructure,String supportName) {
+            super(supportName,dbStructure);
         }
 
         private PVArray valuePVArray = null;
@@ -1906,7 +1912,7 @@ public class PDRVLinkFactory {
             Type type = field.getType();
             if(type!=Type.pvArray) {
                 super.uninitialize();
-                pvLink.message("value field is not an array", MessageType.fatalError);
+                pvStructure.message("value field is not an array", MessageType.fatalError);
                 return;
             }
             Array array = (Array)field;
@@ -1916,7 +1922,7 @@ public class PDRVLinkFactory {
                 return;
             }
             super.uninitialize();
-            pvLink.message("value field is not an array with numeric elements", MessageType.fatalError);
+            pvStructure.message("value field is not an array with numeric elements", MessageType.fatalError);
             return;
         }      
         /* (non-Javadoc)
@@ -1934,7 +1940,7 @@ public class PDRVLinkFactory {
             if(!super.checkSupportState(SupportState.ready,supportName)) return;
             Interface iface = device.findInterface(user, "float64Array", true);
             if(iface==null) {
-                pvLink.message("interface float64Array not supported", MessageType.fatalError);
+                pvStructure.message("interface float64Array not supported", MessageType.fatalError);
                 super.stop();
                 return;
             }
@@ -1993,8 +1999,8 @@ public class PDRVLinkFactory {
     private static class Float64ArrayInterruptInput extends AbstractPDRVLinkSupport
     implements Float64ArrayInterruptListener,AsynAccessListener
     {
-        private Float64ArrayInterruptInput(DBLink dbLink,String supportName) {
-            super(supportName,dbLink);
+        private Float64ArrayInterruptInput(DBStructure dbStructure,String supportName) {
+            super(supportName,dbStructure);
         }
 
         private PVArray valuePVArray = null;
@@ -2010,7 +2016,7 @@ public class PDRVLinkFactory {
             Type type = field.getType();
             if(type!=Type.pvArray) {
                 super.uninitialize();
-                pvLink.message("value field is not an array", MessageType.fatalError);
+                pvStructure.message("value field is not an array", MessageType.fatalError);
                 return;
             }
             Array array = (Array)field;
@@ -2020,7 +2026,7 @@ public class PDRVLinkFactory {
                 return;
             }
             super.uninitialize();
-            pvLink.message("value field is not an array with numeric elements", MessageType.fatalError);
+            pvStructure.message("value field is not an array with numeric elements", MessageType.fatalError);
             return;
         }      
         /* (non-Javadoc)
@@ -2038,7 +2044,7 @@ public class PDRVLinkFactory {
             if(!super.checkSupportState(SupportState.ready,supportName)) return;
             Interface iface = device.findInterface(user, "float64Array", true);
             if(iface==null) {
-                pvLink.message("interface float64Array not supported", MessageType.fatalError);
+                pvStructure.message("interface float64Array not supported", MessageType.fatalError);
                 super.stop();
                 return;
             }
@@ -2150,8 +2156,8 @@ public class PDRVLinkFactory {
     
     private static class Float64ArrayOutput extends AbstractPDRVLinkSupport
     {
-        private Float64ArrayOutput(DBLink dbLink,String supportName) {
-            super(supportName,dbLink);
+        private Float64ArrayOutput(DBStructure dbStructure,String supportName) {
+            super(supportName,dbStructure);
         }
 
         private PVArray valuePVArray = null;
@@ -2167,7 +2173,7 @@ public class PDRVLinkFactory {
             Type type = field.getType();
             if(type!=Type.pvArray) {
                 super.uninitialize();
-                pvLink.message("value field is not an array", MessageType.fatalError);
+                pvStructure.message("value field is not an array", MessageType.fatalError);
                 return;
             }
             Array array = (Array)field;
@@ -2177,7 +2183,7 @@ public class PDRVLinkFactory {
                 return;
             }
             super.uninitialize();
-            pvLink.message("value field is not an array with numeric elements", MessageType.fatalError);
+            pvStructure.message("value field is not an array with numeric elements", MessageType.fatalError);
             return;
         }      
         /* (non-Javadoc)
@@ -2195,7 +2201,7 @@ public class PDRVLinkFactory {
             if(!super.checkSupportState(SupportState.ready,supportName)) return;
             Interface iface = device.findInterface(user, "float64Array", true);
             if(iface==null) {
-                pvLink.message("interface float64Array not supported", MessageType.fatalError);
+                pvStructure.message("interface float64Array not supported", MessageType.fatalError);
                 super.stop();
                 return;
             }

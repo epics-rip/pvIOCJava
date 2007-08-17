@@ -29,12 +29,6 @@ public class DBDTest extends TestCase {
         
             DBD master = DBDFactory.create("master");
             listAll(master,"before reading anything");
-            XMLToDBDFactory.convert(master,"src/org/epics/ioc/dbd/test/menu.xml",this);
-            listAll(master,"after reading menus");
-            String[] list = master.menuList(".*[S].*");
-            System.out.print("menuList with S in name:");
-            for(String item : list) System.out.print(" " + item);
-            System.out.println();
             DBD add = DBDFactory.create("add");
             XMLToDBDFactory.convert(add,"src/org/epics/ioc/dbd/test/structure.xml",this);
             XMLToDBDFactory.convert(add,"src/org/epics/ioc/dbd/test/support.xml",this);
@@ -56,9 +50,6 @@ public class DBDTest extends TestCase {
         private static void listAll(DBD dbd,String message) {
             String[] list;
             System.out.printf("%nDBD %s %s%n",dbd.getName(),message);
-            list = dbd.menuList(null);
-            System.out.print("menuList:");
-            for(String item : list) System.out.print(" " + item);
             System.out.println();
             list = dbd.structureList(null);
             System.out.print("structureList:");
@@ -76,7 +67,6 @@ public class DBDTest extends TestCase {
         
         private static void dumpAll(DBD dbd,String message) {
             System.out.printf("%n****DBD %s %s%n",dbd.getName(),message);
-            System.out.printf("%n****menu%n%s%n",dbd.menuToString(null));
             System.out.printf("%n****structure%n %s%n",dbd.structureToString(null));
             System.out.printf("%n****recordType%n%s%n",dbd.recordTypeToString(null));
             System.out.printf("%n****support%n%s%n",dbd.supportToString(null));

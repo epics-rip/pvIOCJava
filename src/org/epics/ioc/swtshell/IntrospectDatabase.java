@@ -62,21 +62,18 @@ public class IntrospectDatabase {
             shell.setLayout(layout);
             Menu menuBar = new Menu(shell,SWT.BAR);
             shell.setMenuBar(menuBar);
-            MenuItem dbdMenu = new MenuItem(menuBar,SWT.CASCADE);
-            dbdMenu.setText("menu");
-            new MenuDBD(dbdMenu);
             MenuItem dbdStructureMenu = new MenuItem(menuBar,SWT.CASCADE);
             dbdStructureMenu.setText("structure");
             new StructureDBD(dbdStructureMenu);
             MenuItem dbdRecordTypeMenu = new MenuItem(menuBar,SWT.CASCADE);
             dbdRecordTypeMenu.setText("recordType");
             new RecordTypeDBD(dbdRecordTypeMenu);
+            MenuItem dbdCreateMenu = new MenuItem(menuBar,SWT.CASCADE);
+            dbdCreateMenu.setText("create");
+            new CreateDBD(dbdCreateMenu);
             MenuItem dbdSupportMenu = new MenuItem(menuBar,SWT.CASCADE);
             dbdSupportMenu.setText("support");
             new SupportDBD(dbdSupportMenu);
-            MenuItem dbdLinkSupportMenu = new MenuItem(menuBar,SWT.CASCADE);
-            dbdLinkSupportMenu.setText("linkSupport");
-            new LinkSupportDBD(dbdLinkSupportMenu);
             Composite recordSelectComposite = new Composite(shell,SWT.BORDER);
             GridData gridData = new GridData(GridData.FILL_HORIZONTAL);
             recordSelectComposite.setLayoutData(gridData);
@@ -158,49 +155,6 @@ public class IntrospectDatabase {
          */
         public void message(String message, MessageType messageType) {
             consoleText.setText(message);
-        }
-
-        private class MenuDBD implements SelectionListener {
-            private Map<String,DBDMenu> menuMap;
-            
-            private MenuDBD(MenuItem menuItem) {
-                Menu menuMenu = new Menu(shell,SWT.DROP_DOWN);
-                menuItem.setMenu(menuMenu);
-                MenuItem choiceAll = new MenuItem(menuMenu,SWT.DEFAULT|SWT.PUSH);
-                choiceAll.setText("all");
-                choiceAll.addSelectionListener(this);
-                menuMap = dbd.getMenuMap();
-                Iterator<String> iter = menuMap.keySet().iterator();
-                for(int i=0; i< menuMap.size(); i++) {
-                    MenuItem choiceItem = new MenuItem(menuMenu,SWT.PUSH);
-                    choiceItem.setText(iter.next());
-                    choiceItem.addSelectionListener(this);
-                }
-            }
-            /* (non-Javadoc)
-             * @see org.eclipse.swt.events.SelectionListener#widgetDefaultSelected(org.eclipse.swt.events.SelectionEvent)
-             */
-            public void widgetDefaultSelected(SelectionEvent arg0) {
-                widgetSelected(arg0);
-            }
-            /* (non-Javadoc)
-             * @see org.eclipse.swt.events.SelectionListener#widgetSelected(org.eclipse.swt.events.SelectionEvent)
-             */
-            public void widgetSelected(SelectionEvent arg0) {
-                MenuItem choice = (MenuItem)arg0.getSource();
-                String key = choice.getText();
-                if(!key.equals("all")) {
-                    DBDMenu value = (DBDMenu)menuMap.get(key);
-                    consoleText.append(value.toString());
-                    return;
-                }
-                Set<String> keys = menuMap.keySet();
-                for(String next: keys) {
-                    DBDMenu value = menuMap.get(next);
-                    consoleText.append(value.toString());
-                }
-            }
-            
         }
         
         private class StructureDBD implements SelectionListener {
@@ -289,6 +243,49 @@ public class IntrospectDatabase {
             
         }
         
+        private class CreateDBD implements SelectionListener {
+            private Map<String,DBDCreate> createMap;
+            
+            private CreateDBD(MenuItem menuItem) {
+                Menu menuCreate = new Menu(shell,SWT.DROP_DOWN);
+                menuItem.setMenu(menuCreate);
+                MenuItem choiceAll = new MenuItem(menuCreate,SWT.DEFAULT|SWT.PUSH);
+                choiceAll.setText("all");
+                choiceAll.addSelectionListener(this);
+                createMap = dbd.getCreateMap();
+                Iterator<String> iter = createMap.keySet().iterator();
+                for(int i=0; i< createMap.size(); i++) {
+                    MenuItem choiceItem = new MenuItem(menuCreate,SWT.PUSH);
+                    choiceItem.setText(iter.next());
+                    choiceItem.addSelectionListener(this);
+                }
+            }
+            /* (non-Javadoc)
+             * @see org.eclipse.swt.events.SelectionListener#widgetDefaultSelected(org.eclipse.swt.events.SelectionEvent)
+             */
+            public void widgetDefaultSelected(SelectionEvent arg0) {
+                widgetSelected(arg0);
+            }
+            /* (non-Javadoc)
+             * @see org.eclipse.swt.events.SelectionListener#widgetSelected(org.eclipse.swt.events.SelectionEvent)
+             */
+            public void widgetSelected(SelectionEvent arg0) {
+                MenuItem choice = (MenuItem)arg0.getSource();
+                String key = choice.getText();
+                if(!key.equals("all")) {
+                    DBDCreate value = (DBDCreate)createMap.get(key);
+                    consoleText.append(value.toString());
+                    return;
+                }
+                Set<String> keys = createMap.keySet();
+                for(String next: keys) {
+                    DBDCreate value = createMap.get(next);
+                    consoleText.append(value.toString());
+                }
+            }
+        }
+        
+        
         private class SupportDBD implements SelectionListener {
             private Map<String,DBDSupport> supportMap;
             
@@ -326,49 +323,6 @@ public class IntrospectDatabase {
                 Set<String> keys = supportMap.keySet();
                 for(String next: keys) {
                     DBDSupport value = supportMap.get(next);
-                    consoleText.append(value.toString());
-                }
-            }
-        }
-        
-        
-        private class LinkSupportDBD implements SelectionListener {
-            private Map<String,DBDLinkSupport> linkSupportMap;
-            
-            private LinkSupportDBD(MenuItem menuItem) {
-                Menu menuLinkSupport = new Menu(shell,SWT.DROP_DOWN);
-                menuItem.setMenu(menuLinkSupport);
-                MenuItem choiceAll = new MenuItem(menuLinkSupport,SWT.DEFAULT|SWT.PUSH);
-                choiceAll.setText("all");
-                choiceAll.addSelectionListener(this);
-                linkSupportMap = dbd.getLinkSupportMap();
-                Iterator<String> iter = linkSupportMap.keySet().iterator();
-                for(int i=0; i< linkSupportMap.size(); i++) {
-                    MenuItem choiceItem = new MenuItem(menuLinkSupport,SWT.PUSH);
-                    choiceItem.setText(iter.next());
-                    choiceItem.addSelectionListener(this);
-                }
-            }
-            /* (non-Javadoc)
-             * @see org.eclipse.swt.events.SelectionListener#widgetDefaultSelected(org.eclipse.swt.events.SelectionEvent)
-             */
-            public void widgetDefaultSelected(SelectionEvent arg0) {
-                widgetSelected(arg0);
-            }
-            /* (non-Javadoc)
-             * @see org.eclipse.swt.events.SelectionListener#widgetSelected(org.eclipse.swt.events.SelectionEvent)
-             */
-            public void widgetSelected(SelectionEvent arg0) {
-                MenuItem choice = (MenuItem)arg0.getSource();
-                String key = choice.getText();
-                if(!key.equals("all")) {
-                    DBDLinkSupport value = (DBDLinkSupport)linkSupportMap.get(key);
-                    consoleText.append(value.toString());
-                    return;
-                }
-                Set<String> keys = linkSupportMap.keySet();
-                for(String next: keys) {
-                    DBDLinkSupport value = linkSupportMap.get(next);
                     consoleText.append(value.toString());
                 }
             }

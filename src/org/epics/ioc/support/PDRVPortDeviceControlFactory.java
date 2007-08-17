@@ -9,6 +9,7 @@ import java.lang.reflect.*;
 
 import org.epics.ioc.pv.*;
 import org.epics.ioc.pv.Field;
+import org.epics.ioc.pv.Type;
 import org.epics.ioc.db.*;
 import org.epics.ioc.util.*;
 import org.epics.ioc.pdrv.*;
@@ -76,7 +77,6 @@ public class PDRVPortDeviceControlFactory {
         PVString pvPortDevice = new PortDeviceData(pvStructure,field,support,dbField);        
         dbField.replacePVField(pvPortDevice);
         if(portDevice!=null) pvPortDevice.put(portDevice);
-        
         index = structure.getFieldIndex("connect");
         if(index<0) {
             pvStructure.message("structure does not have field connect",MessageType.fatalError);
@@ -86,21 +86,12 @@ public class PDRVPortDeviceControlFactory {
         pvField = pvFields[index];
         field = pvField.getField();
         type = field.getType();
-        if(type!=org.epics.ioc.pv.Type.pvMenu) {
-            pvStructure.message("field connect is not a menu",MessageType.fatalError);
+        if(type!=org.epics.ioc.pv.Type.pvBoolean) {
+            pvStructure.message("field connect is not a boolean",MessageType.fatalError);
             return null;
         }
-        Menu menu = (Menu)field;
-        if(!menu.getMenuName().equals("connectDisconnect")) {
-            pvStructure.message("field connect is not a menu connectDisconnect",MessageType.fatalError);
-            return null;
-        }
-        PVMenu pvMenu = (PVMenu)pvField;
-        int menuIndex = pvMenu.getIndex();
-        PVMenu pvConnectDisconnectData = new ConnectDisconnectData(pvStructure,menu,support,dbField);
-        dbField.replacePVField(pvConnectDisconnectData);
-        pvConnectDisconnectData.setIndex(menuIndex);
-        
+        PVBoolean pvConnectDisconnectData = new ConnectDisconnectData(pvStructure,field,support,dbField);
+        dbField.replacePVField(pvConnectDisconnectData);       
         index = structure.getFieldIndex("enable");
         if(index<0) {
             pvStructure.message("structure does not have field enable",MessageType.fatalError);
@@ -110,21 +101,12 @@ public class PDRVPortDeviceControlFactory {
         pvField = pvFields[index];
         field = pvField.getField();
         type = field.getType();
-        if(type!=org.epics.ioc.pv.Type.pvMenu) {
-            pvStructure.message("field enable is not a menu",MessageType.fatalError);
+        if(type!=org.epics.ioc.pv.Type.pvBoolean) {
+            pvStructure.message("field enable is not a boolean",MessageType.fatalError);
             return null;
-        }
-        menu = (Menu)field;
-        if(!menu.getMenuName().equals("enableDisable")) {
-            pvStructure.message("field enable is not a menu enableDisable",MessageType.fatalError);
-            return null;
-        }
-        pvMenu = (PVMenu)pvField;
-        menuIndex = pvMenu.getIndex();
-        PVMenu pvEnableDisableData = new EnableDisableData(pvStructure,menu,support,dbField);
-        dbField.replacePVField(pvEnableDisableData);
-        pvEnableDisableData.setIndex(menuIndex);
-        
+        }        
+        PVBoolean pvEnableDisableData = new EnableDisableData(pvStructure,field,support,dbField);
+        dbField.replacePVField(pvEnableDisableData);       
         index = structure.getFieldIndex("autoConnect");
         if(index<0) {
             pvStructure.message("structure does not have field autoConnect",MessageType.fatalError);
@@ -380,62 +362,60 @@ public class PDRVPortDeviceControlFactory {
         }
     }
     
-    private static class ConnectDisconnectData extends BasePVMenu {
+    private static class ConnectDisconnectData extends AbstractPVField implements PVBoolean {
         private PortDeviceControl portDeviceControl;
         private DBField dbField;
-        private int index;
+        private boolean value;
         
-        private ConnectDisconnectData(PVField parent,Menu menu,
+        private ConnectDisconnectData(PVField parent,Field field,
             PortDeviceControl portDeviceControl,DBField dbField)
         {
-            super(parent,menu);
+            super(parent,field);
             this.portDeviceControl = portDeviceControl;
             this.dbField = dbField;
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.pv.BasePVEnum#getIndex()
+         * @see org.epics.ioc.pv.PVBoolean#get()
          */
-        public int getIndex() {
-            return index;
+        public boolean get() {
+            return value;
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.pv.BasePVEnum#setIndex(int)
+         * @see org.epics.ioc.pv.PVBoolean#put(boolean)
          */
-        public void setIndex(int index) {
-            boolean value = (index==0) ? false : true;
+        public void put(boolean value) {
             boolean result =portDeviceControl.connect(value);
             if(result) {
-                this.index = index;
+                this.value = value;
                 dbField.postPut();
             }
         }
     }
     
-    private static class EnableDisableData extends BasePVMenu {
+    private static class EnableDisableData extends AbstractPVField implements PVBoolean {
         private PortDeviceControl portDeviceControl = null;
         private DBField dbField;
-        private int index = 0;
+        private boolean value = false;
         
-        private EnableDisableData(PVField parent,Menu menu,
+        private EnableDisableData(PVField parent,Field field,
             PortDeviceControl portDeviceControl,DBField dbField)
         {
-            super(parent,menu);
+            super(parent,field);
             this.portDeviceControl = portDeviceControl;
             this.dbField = dbField;
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.pv.BasePVEnum#getIndex()
+         * @see org.epics.ioc.pv.PVBoolean#get()
          */
-        public int getIndex() {
-            return index;
+        public boolean get() {
+            return value;
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.pv.BasePVEnum#setIndex(int)
+         * @see org.epics.ioc.pv.PVBoolean#put(boolean)
          */
-        public void setIndex(int index) {
-            boolean value = (index==0) ? false : true;
+        public void put(boolean value) {
             portDeviceControl.enable(value);
-            this.index = index;
+            this.value = value;
             dbField.postPut();
         }
     }
@@ -550,5 +530,32 @@ public class PDRVPortDeviceControlFactory {
             this.value = value;
             dbField.postPut();
         }
+    }
+    
+    private static PVString getChoiceField(PVStructure pvStructure,String fieldName) {
+        Structure structure = pvStructure.getStructure();
+        PVField[] pvFields = pvStructure.getFieldPVFields();
+        int index = structure.getFieldIndex(fieldName);
+        if(index<0) {
+            pvStructure.message("field " + fieldName + " does not exist", MessageType.error);
+            return null;
+        }
+        PVField pvField = pvFields[index];
+        if(pvField.getField().getType()!=Type.pvStructure) {
+            pvField.message("field is not a structure", MessageType.error);
+            return null;
+        }
+        pvStructure = (PVStructure)pvField;
+        index = structure.getFieldIndex("choice");
+        if(index<0) {
+            pvStructure.message("field index does not exist", MessageType.error);
+            return null;
+        }
+        pvField = pvFields[index];
+        if(pvField.getField().getType()!=Type.pvString) {
+            pvField.message("field is not a string", MessageType.error);
+            return null;
+        }
+        return (PVString)pvField;
     }
 }

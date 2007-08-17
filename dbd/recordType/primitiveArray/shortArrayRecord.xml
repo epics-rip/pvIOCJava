@@ -2,18 +2,18 @@
 <DBDefinition>
 
 <structure name = "shortArray" supportName = "generic" >
-    <include href = "shortArrayCommon.xml" />
+  <include href = "shortArrayCommon.xml" />
 </structure>
 
 <recordType name = "shortArray" supportName = "generic" >
-    <include href = "common.xml" />
-    <field name = "value" type = "array" elementType = "short" >
-        <property name = "alarm" associatedField = "alarm" />
-        <property name = "units" associatedField = "units" />
-        <property name = "displayLimit" associatedField = "displayLimit" />
-        <property name = "timeStamp" associatedField = "/timeStamp" />
-    </field>
-    <include href = "shortArrayCommon.xml" />
+  <include href = "common.xml" />
+  <field name = "value" type = "array" elementType = "short" >
+    <property name = "alarm" associatedField = "alarm" />
+    <property name = "units" associatedField = "units" />
+    <property name = "displayLimit" associatedField = "displayLimit" />
+    <property name = "timeStamp" associatedField = "/timeStamp" />
+  </field>
+  <include href = "shortArrayCommon.xml" />
 </recordType>
 
 </DBDefinition>

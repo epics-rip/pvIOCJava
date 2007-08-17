@@ -4,9 +4,6 @@
 <!-- structure null is created automatically -->
 
 <support name = "noop"
-    factoryName = "org.epics.ioc.support.NoopFactory" />
-
-<linkSupport name = "noop"
-    factoryName = "org.epics.ioc.support.NoopFactory" />
+  factoryName = "org.epics.ioc.support.NoopFactory" />
 
 </DBDefinition>

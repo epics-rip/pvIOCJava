@@ -1,14 +1,15 @@
 <?xml version="1.0" ?>
 <DBDefinition>
-    <field name = "alarm" type = "structure" structureName = "alarm"
-          supportName = "alarm" />
-    <field name = "incremental" type = "structure"
-          structureName = "incrementalDouble" supportName = "incremental" />
-    <field name = "output" type = "structure" structureName = "linearConvertOutput"/>
-    <field name = "units" type = "string" />
-    <field name = "valueAlarm" type = "link" supportName = "doubleAlarm" />
-    <field name = "displayLimit"
-         type = "structure" structureName = "doubleLimit" />
-    <field name = "linkArray" type = "array"
-         elementType = "structure" supportName = "linkArray" />
+  <field name = "alarm" type = "structure" structureName = "alarm"
+      supportName = "alarm" />
+  <field name = "incremental" type = "structure"
+      structureName = "incrementalDouble" supportName = "incremental" />
+  <field name = "output" type = "structure"
+      structureName = "linearConvertOutput" />
+  <field name = "units" type = "string" />
+  <field name = "valueAlarm" type = "structure" supportName = "doubleAlarm" />
+  <field name = "displayLimit"
+     type = "structure" structureName = "doubleLimit" />
+  <field name = "supportArray" type = "array"
+     elementType = "structure" supportName = "supportArray" />
 </DBDefinition>

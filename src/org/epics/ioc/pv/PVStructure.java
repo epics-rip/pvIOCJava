@@ -86,20 +86,6 @@ public interface PVStructure extends PVField {
      */
     PVString getStringField(String fieldName);
     /**
-     * Find an int subfield with the specified fieldName.
-     * The fieldName is of the form name.name...
-     * @param fieldName The field name to find
-     * @return The interface if the field of the correct type is found or null if not found.
-     */
-    PVEnum getEnumField(String fieldName);
-    /**
-     * Find a menu subfield with the specified fieldName and specified menuName. 
-     * The fieldName is of the form name.name...
-     * @param fieldName The field name to find
-     * @return The interface if the field of the correct type is found or null if not found.
-     */
-    PVMenu getMenuField(String fieldName,String menuName);
-    /**
      * Find a structure subfield with the specified fieldName and specified structureName.
      * The fieldName is of the form name.name...
      * @param fieldName The field name to find

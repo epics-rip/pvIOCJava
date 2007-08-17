@@ -18,6 +18,7 @@ public class BaseField implements Field
     private Property[] property;
     private Type type;
     private String supportName = null;
+    private String createName = null;
     private FieldAttribute fieldAttribute;
     private static Convert convert = ConvertFactory.getConvert();
 
@@ -84,6 +85,18 @@ public class BaseField implements Field
         this.supportName = name;
     }
     /* (non-Javadoc)
+     * @see org.epics.ioc.pv.Field#getCreateName()
+     */
+    public String getCreateName() {
+        return createName;
+    }
+    /* (non-Javadoc)
+     * @see org.epics.ioc.pv.Field#setCreateName(java.lang.String)
+     */
+    public void setCreateName(String name) {
+        createName = name;
+    }
+    /* (non-Javadoc)
      * @see org.epics.ioc.pv.Field#getFieldAttribute()
      */
     public FieldAttribute getFieldAttribute() {
@@ -107,6 +120,9 @@ public class BaseField implements Field
                 fieldName,type.toString(),isMutable));
         if(supportName!=null) {
             builder.append("supportName " + supportName + " ");
+        }
+        if(createName!=null) {
+            builder.append("createName " + createName + " ");
         }
         builder.append(" " + fieldAttribute.toString(indentLevel));
         if(property.length>0) {

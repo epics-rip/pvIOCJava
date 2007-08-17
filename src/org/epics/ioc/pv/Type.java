@@ -44,11 +44,6 @@ public enum Type {
      */
     pvString,
     /**
-     * Value has a <i>String[]</i> of choices and an index
-     * that selects a choice.
-     */
-    pvEnum,
-    /**
      * Value provides access to structure.
      */
     pvStructure,
@@ -56,18 +51,7 @@ public enum Type {
      * Value provides access to an array of values all of the same type.
      * arrays of any Type are allowed.
      */
-    pvArray,
-    /**
-     * Value is a enum with immutable choices.
-     * A menu also has a menuName.
-     */
-    pvMenu,
-    /**
-     * No value.
-     * It provides a field that has support but no data.
-     */
-    pvLink;
-
+    pvArray;
     /**
      * Is this a Java numeric type?
      * @return Returns true if the type is a Java numeric type.

@@ -88,34 +88,12 @@ public class BaseCD implements CD
         cdField.dataPut(targetPVField);
     }    
     /* (non-Javadoc)
-     * @see org.epics.ioc.ca.CD#enumIndexPut(org.epics.ioc.pv.PVEnum)
+     * @see org.epics.ioc.ca.CD#supportNamePut(org.epics.ioc.pv.PVField)
      */
-    public void enumIndexPut(PVEnum targetPVEnum) {
-        CDEnum cdEnum  = (CDEnum)findCDField(targetPVEnum);
-        cdEnum.enumIndexPut(targetPVEnum.getIndex());
-    }   
-    /* (non-Javadoc)
-     * @see org.epics.ioc.ca.CD#enumChoicesPut(org.epics.ioc.pv.PVEnum)
-     */
-    public void enumChoicesPut(PVEnum targetPVEnum) {
-        CDEnum cdEnum  = (CDEnum)findCDField(targetPVEnum);
-        cdEnum.enumChoicesPut(targetPVEnum.getChoices());
-    }   
     public void supportNamePut(PVField targetPVField) {
         CDField cdField = findCDField(targetPVField);
         cdField.supportNamePut(targetPVField.getSupportName());
     }   
-    /* (non-Javadoc)
-     * @see org.epics.ioc.ca.CD#configurationStructurePut(org.epics.ioc.pv.PVLink)
-     */
-    public void configurationStructurePut(PVLink targetPVLink) {
-        if(!supportAlso) return;
-        CDLink cdLink = (CDLink)findCDField(targetPVLink);
-        if(cdLink==null) {
-            throw new IllegalStateException("Logic error.");
-        }
-        cdLink.configurationStructurePut(targetPVLink.getConfigurationStructure());
-    }  
     /* (non-Javadoc)
      * @see org.epics.ioc.ca.CD#beginPut(org.epics.ioc.pv.PVStructure)
      */
@@ -133,20 +111,6 @@ public class BaseCD implements CD
         cdField.dataPut(requested, targetPVField);
     }    
     /* (non-Javadoc)
-     * @see org.epics.ioc.ca.CD#enumIndexPut(org.epics.ioc.pv.PVField, org.epics.ioc.pv.PVEnum)
-     */
-    public void enumIndexPut(PVField requested,PVEnum targetPVEnum) {
-        CDField cdField = findCDField(requested);
-        cdField.enumIndexPut(requested, targetPVEnum);
-    }    
-    /* (non-Javadoc)
-     * @see org.epics.ioc.ca.CD#enumChoicesPut(org.epics.ioc.pv.PVField, org.epics.ioc.pv.PVEnum)
-     */
-    public void enumChoicesPut(PVField requested,PVEnum targetPVEnum) {
-        CDField cdField = findCDField(requested);
-        cdField.enumChoicesPut(requested, targetPVEnum);
-    }    
-    /* (non-Javadoc)
      * @see org.epics.ioc.ca.CD#supportNamePut(org.epics.ioc.pv.PVField, org.epics.ioc.pv.PVField)
      */
     public void supportNamePut(PVField requested,PVField targetPVField) {
@@ -154,14 +118,6 @@ public class BaseCD implements CD
         CDField cdField = findCDField(requested);
         cdField.supportNamePut(requested, targetPVField);
     }    
-    /* (non-Javadoc)
-     * @see org.epics.ioc.ca.CD#configurationStructurePut(org.epics.ioc.pv.PVField, org.epics.ioc.pv.PVLink)
-     */
-    public void configurationStructurePut(PVField requested,PVLink targetPVLink) {
-        if(!supportAlso) return;
-        CDField cdField = findCDField(requested);
-        cdField.configurationStructurePut(requested, targetPVLink);
-    }
     
     private CDField findCDField(PVField targetPVField) {
         Field targetField = targetPVField.getField();

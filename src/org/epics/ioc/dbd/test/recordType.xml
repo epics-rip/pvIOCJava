@@ -9,14 +9,13 @@
         <property name = "units" associatedField = "units" />
         <property name = "displayLimit" associatedField = "displayLimit" />
     </field>
-    <field name = "priority" type = "menu" menuName = "menuPriority" />
     <field name = "units" type = "string" />
     <field name = "status" type = "string" />
-    <field name = "severity" type = "menu" menuName = "menuAlarmSevr" />
+    <field name = "severity" type = "structure" structureName = "alarmSeverity" />
     <field name = "timeStamp" type = "structure" structureName = "timeStamp" />
     <field name = "displayLimit"
          type = "structure" structureName = "displayLimit" />
-    <field name = "input" type = "link" />
+    <field name = "input" type = "structure" />
     <field name = "rawValue" type = "int" />
     <field name = "linearConvert"
         type = "structure" structureName = "linearConvertInput" />
@@ -30,7 +29,7 @@
         <property name = "timeStamp" associatedField = ".." />
     </field>
     <field name = "status" type = "string" />
-    <field name = "severity" type = "menu" menuName = "menuAlarmSevr" />
+    <field name = "severity" type = "structure" structureName = "alarmSeverity" />
     <field name = "input" type = "link" />
 </structure>
 
@@ -44,7 +43,7 @@
         <property name = "timeStamp" associatedField = ".." />
     </field>
     <field name = "status" type = "string" />
-    <field name = "severity" type = "menu" menuName = "menuAlarmSevr" />
+    <field name = "severity" type = "structure" menuName = "alarmSeverity" />
     <field name = "units" type = "string" />
     <field name = "displayLimit"
          type = "structure" structureName = "displayLimit" />
@@ -62,7 +61,6 @@
     <field name = "aiLinear" type = "structure" structureName = "aiLinear" >
         <property name = "timeStamp" associatedField = "timeStamp" />
     </field>
-    <field name = "priority" type = "menu" menuName = "menuPriority" />
     <field name = "timeStamp" type = "structure" structureName = "timeStamp"/>
     <field name = "scan" type = "structure" structureName = "scan"/>
 </recordType>
@@ -76,7 +74,6 @@
     <field name = "input" type = "structure" structureName = "null" >
         <property name = "timeStamp" associatedField = "timeStamp" />
     </field>
-    <field name = "priority" type = "menu" menuName = "menuPriority" />
     <field name = "timeStamp" type = "structure" structureName = "timeStamp"/>
     <field name = "scan" type = "structure" structureName = "scan"/>
 </recordType>
@@ -91,8 +88,6 @@
     <field name = "float" type = "float" supportName = "floatSupport" />
     <field name = "double" type = "double" supportName = "doubleSupport" />
     <field name = "string" type = "string" supportName = "stringSupport" />
-    <field name = "enum" type = "enum" />
-    <field name = "link" type = "link" supportName = "linkSupport" />
     <field name = "displayLimit"
          type = "structure" structureName = "displayLimit" supportName = "structSupport" />
     <field name = "booleanArray" type = "array" elementType = "boolean"
@@ -111,8 +106,6 @@
          supportName = "doubleArraySupport" />
     <field name = "stringArray" type = "array" elementType = "string"
          supportName = "stringArraySupport" />
-    <field name = "linkArray" type = "array" elementType = "link"
-         supportName = "linkArraySupport" />
     <field name = "structArray" type = "array" elementType = "structure"
          supportName = "structArraySupport" />
 </recordType>

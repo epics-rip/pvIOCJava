@@ -22,6 +22,10 @@ public interface DBDSupport {
      */
     String getFactoryName();
     /**
+     * @return
+     */
+    String getStructureName();
+    /**
      * convert to a string
      * @return the field as a string
      */

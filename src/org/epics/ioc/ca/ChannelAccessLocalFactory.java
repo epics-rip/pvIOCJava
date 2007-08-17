@@ -992,27 +992,6 @@ public class ChannelAccessLocalFactory  {
                     cdField.dataPut(fromPVField);
                     return;
                 }
-                if(type==Type.pvEnum) {
-                    CDEnum cdEnum = (CDEnum)cdField;
-                    PVEnum from = (PVEnum)fromPVField;
-                    cdEnum.enumIndexPut(from.getIndex());
-                    cdEnum.enumChoicesPut(from.getChoices());
-                    return;
-                }
-                if(type==Type.pvMenu) {
-                    PVMenu from = (PVMenu)fromPVField;
-                    CDMenu cdMenu = (CDMenu)cdField;
-                    cdMenu.enumIndexPut(from.getIndex());
-                    return;
-                }
-                if(type==Type.pvLink) {
-                    PVLink from = (PVLink)fromPVField;
-                    CDLink cdLink = (CDLink)cdField;
-                    if(supportAlso) {
-                        cdLink.configurationStructurePut(from.getConfigurationStructure());
-                    }
-                    return;
-                }
                 if(type==Type.pvStructure) {
                     CDStructure cdStructure = (CDStructure)cdField;
                     CDField[] cdFields = cdStructure.getFieldCDFields();
@@ -1387,37 +1366,6 @@ public class ChannelAccessLocalFactory  {
                     if(post) dbField.postPut();
                     return;
                 }
-                if(type==Type.pvEnum) {
-                    CDEnum cdEnum = (CDEnum)cdField;
-                    PVEnum from = (PVEnum)fromPVField;
-                    DBEnum dbEnum = (DBEnum)dbField;
-                    if(cdEnum.getNumIndexPuts()>0) {
-                        dbEnum.setIndex(from.getIndex());
-                    }
-                    if(cdEnum.getNumChoicesPut()>0) {
-                        dbEnum.setChoices(from.getChoices());
-                    }
-                    
-                    return;
-                }
-                if(type==Type.pvMenu) {
-                    CDMenu cdMenu = (CDMenu)cdField;
-                    PVMenu from = (PVMenu)fromPVField;
-                    DBMenu dbMenu = (DBMenu)dbField;
-                    if(cdMenu.getNumIndexPuts()>0) {
-                        dbMenu.setIndex(from.getIndex());
-                    }
-                    return;
-                }
-                if(type==Type.pvLink) {
-                    CDLink cdLink = (CDLink)cdField;
-                    PVLink from = (PVLink)fromPVField;
-                    DBLink dbLink = (DBLink)dbField;
-                    if(supportAlso && cdLink.getNumConfigurationStructurePuts()>0) {
-                        dbLink.setConfigurationStructure(from.getConfigurationStructure());
-                    }
-                    return;
-                }
                 if(type==Type.pvStructure) {
                     CDStructure cdStructure = (CDStructure)cdField;
                     CDField[] cdFields = cdStructure.getFieldCDFields();
@@ -1469,12 +1417,6 @@ public class ChannelAccessLocalFactory  {
                         }
                         DBRecord dbRecord = dbArray.getDBRecord();
                         switch(elementType) {
-                        case pvEnum:
-                            dbField = new BaseDBEnum(dbArray,dbRecord,pvNew); break;
-                        case pvMenu:
-                            dbField = new BaseDBMenu(dbArray,dbRecord,pvNew); break;
-                        case pvLink:
-                            dbField = new BaseDBMenu(dbArray,dbRecord,pvNew); break;
                         case pvStructure:
                             dbField = new BaseDBStructure(dbArray,dbRecord,pvNew); break;
                         case pvArray:
@@ -2009,26 +1951,6 @@ public class ChannelAccessLocalFactory  {
                 if(!processActive) notifyRequester();
             }
             /* (non-Javadoc)
-             * @see org.epics.ioc.db.DBListener#enumChoicesPut(org.epics.ioc.db.DBEnum)
-             */
-            public void enumChoicesPut(DBEnum dbEnum) {
-                if(!isStarted) return;
-                if(onlyWhileProcesing && !processActive) return;
-                monitorOccured = true;
-                if(cD!=null) cD.enumChoicesPut(dbEnum.getPVEnum());
-                if(!processActive) notifyRequester();
-            }
-            /* (non-Javadoc)
-             * @see org.epics.ioc.db.DBListener#enumIndexPut(org.epics.ioc.db.DBEnum)
-             */
-            public void enumIndexPut(DBEnum dbEnum) {
-                if(!isStarted) return;
-                if(onlyWhileProcesing && !processActive) return;
-                monitorOccured = true;
-                if(cD!=null) cD.enumIndexPut(dbEnum.getPVEnum());
-                if(!processActive) notifyRequester();
-            }
-            /* (non-Javadoc)
              * @see org.epics.ioc.db.DBListener#supportNamePut(org.epics.ioc.db.DBField)
              */
             public void supportNamePut(DBField dbField) {
@@ -2037,13 +1959,6 @@ public class ChannelAccessLocalFactory  {
                 monitorOccured = true;
                 if(cD!=null) cD.supportNamePut(dbField.getPVField());
                 if(!processActive) notifyRequester();
-            }
-            /* (non-Javadoc)
-             * @see org.epics.ioc.db.DBListener#configurationStructurePut(org.epics.ioc.db.DBLink)
-             */
-            public void configurationStructurePut(DBLink dbLink) {
-                monitorOccured = true;
-                cD.configurationStructurePut(dbLink.getPVLink());
             }
             /* (non-Javadoc)
              * @see org.epics.ioc.db.DBListener#dataPut(org.epics.ioc.db.DBField, org.epics.ioc.db.DBField)
@@ -2056,26 +1971,6 @@ public class ChannelAccessLocalFactory  {
                 if(!processActive) notifyRequester();
             }
             /* (non-Javadoc)
-             * @see org.epics.ioc.db.DBListener#enumChoicesPut(org.epics.ioc.db.DBField, org.epics.ioc.db.DBEnum)
-             */
-            public void enumChoicesPut(DBField requested,DBEnum dbEnum) {
-                if(!isStarted) return;
-                if(onlyWhileProcesing && !processActive) return;
-                monitorOccured = true;
-                if(cD!=null) cD.enumChoicesPut(requested.getPVField(),dbEnum.getPVEnum());
-                if(!processActive) notifyRequester();
-            }
-            /* (non-Javadoc)
-             * @see org.epics.ioc.db.DBListener#enumIndexPut(org.epics.ioc.db.DBField, org.epics.ioc.db.DBEnum)
-             */
-            public void enumIndexPut(DBField requested,DBEnum dbEnum) {
-                if(!isStarted) return;
-                if(onlyWhileProcesing && !processActive) return;
-                monitorOccured = true;
-                if(cD!=null) cD.enumIndexPut(requested.getPVField(),dbEnum.getPVEnum());
-                if(!processActive) notifyRequester();
-            }           
-            /* (non-Javadoc)
              * @see org.epics.ioc.db.DBListener#supportNamePut(org.epics.ioc.db.DBField, org.epics.ioc.db.DBField)
              */
             public void supportNamePut(DBField requested,DBField dbField) {
@@ -2084,13 +1979,6 @@ public class ChannelAccessLocalFactory  {
                 monitorOccured = true;
                 if(cD!=null) cD.supportNamePut(requested.getPVField(),dbField.getPVField());
                 if(!processActive) notifyRequester();
-            }
-            /* (non-Javadoc)
-             * @see org.epics.ioc.db.DBListener#configurationStructurePut(org.epics.ioc.db.DBField, org.epics.ioc.db.DBLink)
-             */
-            public void configurationStructurePut(DBField requested,DBLink dbLink) {
-                monitorOccured = true;
-                if(cD!=null) cD.configurationStructurePut(requested.getPVField(),dbLink.getPVLink());
             }
 
             private void notifyRequester() {
@@ -2215,16 +2103,6 @@ public class ChannelAccessLocalFactory  {
                         lastStringValue = data.get();
                         return;
                     }                       
-                    case pvMenu: {
-                        PVMenu data= (PVMenu)pvField;
-                        lastIndexValue = data.getIndex();
-                        return;
-                    }
-                    case pvEnum: {
-                        PVEnum data= (PVEnum)pvField;
-                        lastIndexValue = data.getIndex();
-                        return;
-                    }
                     default:
                         throw new IllegalStateException("Logic error. Why is type not numeric?");      
                     }
@@ -2315,22 +2193,6 @@ public class ChannelAccessLocalFactory  {
                             monitorOccured = true;
                             return true;
                         }                       
-                    case pvMenu: {
-                        PVMenu pvData= (PVMenu)pvField;
-                        int data = pvData.getIndex();
-                        if(data==lastIndexValue) return false;
-                        lastIndexValue = data;
-                        monitorOccured = true;
-                        return true;
-                    }
-                    case pvEnum: {
-                        PVEnum pvData= (PVEnum)pvField;
-                        int data = pvData.getIndex();
-                        if(data==lastIndexValue) return false;
-                        lastIndexValue = data;
-                        monitorOccured = true;
-                        return true;
-                    }
                     default:
                         throw new IllegalStateException("Logic error. Why is type invalid?");      
                     }
@@ -2414,8 +2276,8 @@ public class ChannelAccessLocalFactory  {
             }
             private void onChange(ChannelFieldImpl channelField,boolean causeMonitor) {
                 Type type = channelField.getField().getType();
-                if(!type.isPrimitive() && !(type==Type.pvEnum) && !(type==Type.pvMenu)) {
-                    requester.message("field is not primitive or enum or menu", MessageType.error);
+                if(!type.isPrimitive()) {
+                    requester.message("field is not primitive", MessageType.error);
                     onPut(channelField,true);
                     return;
                 }

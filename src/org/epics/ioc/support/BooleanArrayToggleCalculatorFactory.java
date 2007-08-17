@@ -16,20 +16,20 @@ import org.epics.ioc.util.*;
  */
 public class BooleanArrayToggleCalculatorFactory {
     
-    public static LinkSupport create(DBLink dbLink) {
-        return new ArrayIncrementCalculatorImpl(dbLink);
+    public static Support create(DBStructure dbStructure) {
+        return new ArrayIncrementCalculatorImpl(dbStructure);
     }
     
     private static String supportName = "booleanArrayToggleCalculator";
     
-    private static class ArrayIncrementCalculatorImpl extends AbstractLinkSupport implements CalculatorSupport
+    private static class ArrayIncrementCalculatorImpl extends AbstractSupport implements CalculatorSupport
     {
         private DBField valueDBField = null;
         private PVBooleanArray valuePVField= null;
         private BooleanArrayData booleanArrayData = new BooleanArrayData();
 
-        private ArrayIncrementCalculatorImpl(DBLink dbLink) {
-            super(supportName,dbLink);
+        private ArrayIncrementCalculatorImpl(DBStructure dbStructure) {
+            super(supportName,dbStructure);
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.process.AbstractSupport#initialize()
@@ -57,7 +57,7 @@ public class BooleanArrayToggleCalculatorFactory {
             supportProcessRequester.supportProcessDone(RequestResult.success);
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.process.LinkSupport#setField(org.epics.ioc.pvAccess.PVData)
+         * @see org.epics.ioc.process.Support#setField(org.epics.ioc.pvAccess.PVData)
          */
         public void setField(DBField dbField) {
             PVField pvField = dbField.getPVField();

@@ -2,18 +2,18 @@
 <DBDefinition>
 
 <structure name = "short" supportName = "generic" >
-    <include href = "shortCommon.xml" />
+  <include href = "shortCommon.xml" />
 </structure>
 
 <recordType name = "short" supportName = "generic" >
-    <include href = "common.xml" />
-    <field name = "value" type = "short" >
-        <property name = "alarm" associatedField = "alarm" />
-        <property name = "units" associatedField = "units" />
-        <property name = "displayLimit" associatedField = "displayLimit" />
-        <property name = "timeStamp" associatedField = "/timeStamp" />
-    </field>
-    <include href = "shortCommon.xml" />
+  <include href = "common.xml" />
+  <field name = "value" type = "short" >
+    <property name = "alarm" associatedField = "alarm" />
+    <property name = "units" associatedField = "units" />
+    <property name = "displayLimit" associatedField = "displayLimit" />
+    <property name = "timeStamp" associatedField = "/timeStamp" />
+  </field>
+  <include href = "shortCommon.xml" />
 </recordType>
 
 </DBDefinition>

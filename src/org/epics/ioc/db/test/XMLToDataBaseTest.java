@@ -48,10 +48,6 @@ public class XMLToDataBaseTest extends TestCase {
             addDBD.mergeIntoMaster();
             DBD masterDBD = DBDFactory.getMasterDBD();
             assertNotNull(masterDBD);
-            list = masterDBD.menuList(".*");
-            System.out.print("masterDBD menus: "); printList(list);
-            list = addDBD.menuList(".*");
-            System.out.print("addDBD menus: "); printList(list);
             list = masterDBD.structureList(".*");
             System.out.print("masterDBD structures: "); printList(list);
             list = addDBD.structureList(".*");
@@ -62,12 +58,12 @@ public class XMLToDataBaseTest extends TestCase {
             System.out.print("addDBD recordTypes: "); printList(list);
             list = masterDBD.supportList(".*");
             System.out.print("masterDBD supports: "); printList(list);
-            list = masterDBD.linkSupportList(".*");
-            System.out.print("masterDBD link supports: "); printList(list);
             list = addDBD.supportList(".*");
-            System.out.print("addDBD supports: "); printList(list);
-            list = addDBD.linkSupportList(".*");
-            System.out.print("addDBDlink  supports: "); printList(list);
+            System.out.print("addDBD creates: "); printList(list);
+            list = masterDBD.createList(".*");
+            System.out.print("masterDBD creates: "); printList(list);
+            list = addDBD.createList(".*");
+            System.out.print("addDBD creates: "); printList(list);
             System.out.println();
             addDBD = null;
             maxMessageType = MessageType.info;

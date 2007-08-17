@@ -51,11 +51,10 @@ public class DBDFactory {
     
     private static class DBDInstance implements DBD {
         private String name;
-        private TreeMap<String,DBDMenu> menuMap = new TreeMap<String,DBDMenu>();
         private TreeMap<String,DBDStructure> structureMap = new TreeMap<String,DBDStructure>();
         private TreeMap<String,DBDRecordType> recordTypeMap = new TreeMap<String,DBDRecordType>();
+        private TreeMap<String,DBDCreate> createMap = new TreeMap<String,DBDCreate>();
         private TreeMap<String,DBDSupport> supportMap = new TreeMap<String,DBDSupport>();
-        private TreeMap<String,DBDLinkSupport> linkSupportMap = new TreeMap<String,DBDLinkSupport>();
         private ReentrantReadWriteLock rwLock = new ReentrantReadWriteLock();
         
         private DBDInstance(String name) {
@@ -80,28 +79,34 @@ public class DBDFactory {
             if(getMasterDBD()==this) return;
             rwLock.writeLock().lock();
             try {
-                masterDBD.merge(menuMap,structureMap,recordTypeMap,supportMap,linkSupportMap);
-                menuMap.clear();
+                masterDBD.merge(structureMap,recordTypeMap,createMap,supportMap);
                 structureMap.clear();
                 recordTypeMap.clear();
+                createMap.clear();
                 supportMap.clear();
             } finally {
                 rwLock.writeLock().unlock();
             }
+        }       
+        /* (non-Javadoc)
+         * @see org.epics.ioc.dbd.DBD#createCreate(java.lang.String, java.lang.String)
+         */
+        public DBDCreate createCreate(String createName, String factoryName) {
+            return new CreateInstance(createName,factoryName);
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.dbd.DBD#createLinkSupport(java.lang.String, java.lang.String, java.lang.String)
+         * @see org.epics.ioc.dbd.DBD#createSupport(java.lang.String, java.lang.String)
          */
-        public DBDLinkSupport createLinkSupport(String supportName, String factoryName,
-                String configurationStructureName)
+        public DBDSupport createSupport(String supportName, String factoryName) {
+            return new SupportInstance(supportName,factoryName,null);
+        }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.dbd.DBD#createSupport(java.lang.String, java.lang.String, java.lang.String)
+         */
+        public DBDSupport createSupport(String supportName, String factoryName,
+                String structureName)
         {
-            return new LinkSupportInstance(supportName,factoryName,configurationStructureName);
-        }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.dbd.DBD#createMenu(java.lang.String, java.lang.String[])
-         */
-        public DBDMenu createMenu(String menuName, String[] choices) {
-            return new MenuInstance(menuName,choices);
+            return new SupportInstance(supportName,factoryName,structureName);
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.dbd.DBD#createRecordType(java.lang.String, org.epics.ioc.pv.Field[], org.epics.ioc.pv.Property[], org.epics.ioc.pv.FieldAttribute)
@@ -119,26 +124,17 @@ public class DBDFactory {
         {
             return new StructureInstance(name,field,property,fieldAttribute);
         }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.dbd.DBD#createSupport(java.lang.String, java.lang.String)
-         */
-        public DBDSupport createSupport(String supportName, String factoryName) {
-            return new SupportInstance(supportName,factoryName);
-        }
+        
         // merge allows master to be locked once
-        private void merge(TreeMap<String,DBDMenu> menu,
+        private void merge(
                 TreeMap<String,DBDStructure> structure,
                 TreeMap<String,DBDRecordType> recordType,
-                TreeMap<String,DBDSupport> support,
-                TreeMap<String,DBDLinkSupport> linkSupport)
+                TreeMap<String,DBDCreate> create,
+                TreeMap<String,DBDSupport> support)
         {
             Set<String> keys;
             rwLock.writeLock().lock();
             try {
-                keys = menu.keySet();
-                for(String key: keys) {
-                    menuMap.put(key,menu.get(key));
-                }
                 keys = structure.keySet();
                 for(String key: keys) {
                     structureMap.put(key,structure.get(key));
@@ -147,56 +143,16 @@ public class DBDFactory {
                 for(String key: keys) {
                     recordTypeMap.put(key,recordType.get(key));
                 }
+                keys = create.keySet();
+                for(String key: keys) {
+                    createMap.put(key,create.get(key));
+                }
                 keys = support.keySet();
                 for(String key: keys) {
                     supportMap.put(key,support.get(key));
                 }
-                keys = linkSupport.keySet();
-                for(String key: keys) {
-                    linkSupportMap.put(key,linkSupport.get(key));
-                }
             } finally {
                 rwLock.writeLock().unlock();
-            }
-        }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.dbd.DBD#addMenu(org.epics.ioc.dbDefinition.DBDMenu)
-         */
-        public boolean addMenu(DBDMenu menu) {
-            rwLock.writeLock().lock();
-            try {
-                String key = menu.getMenuName();
-                if(menuMap.containsKey(key)) return false;
-                if(this!=masterDBD && masterDBD.getMenu(key)!=null) return false;
-                menuMap.put(key,menu);
-                return true;
-            } finally {
-                rwLock.writeLock().unlock();
-            }
-        }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.dbd.DBD#getMenu(java.lang.String)
-         */
-        public DBDMenu getMenu(String menuName) {
-            rwLock.readLock().lock();
-            try {
-                DBDMenu dbdMenu = null;
-                dbdMenu = menuMap.get(menuName);
-                if(dbdMenu==null && this!=masterDBD) dbdMenu = masterDBD.getMenu(menuName);
-                return dbdMenu;
-            } finally {
-                rwLock.readLock().unlock();
-            }
-         }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.dbd.DBD#getMenuMap()
-         */
-        public Map<String, DBDMenu> getMenuMap() {
-            rwLock.readLock().lock();
-            try {
-                return (Map<String, DBDMenu>)menuMap.clone();
-            } finally {
-                rwLock.readLock().unlock();
             }
         }
         /* (non-Javadoc)
@@ -280,6 +236,46 @@ public class DBDFactory {
             }
         }
         /* (non-Javadoc)
+         * @see org.epics.ioc.dbd.DBD#addCreate(org.epics.ioc.dbd.DBDCreate)
+         */
+        public boolean addCreate(DBDCreate create) {
+            rwLock.writeLock().lock();
+            try {
+                String key = create.getCreateName();
+                if(createMap.containsKey(key)) return false;
+                if(this!=masterDBD && masterDBD.getCreate(key)!=null) return false;
+                createMap.put(key,create);
+                return true;
+            } finally {
+                rwLock.writeLock().unlock();
+            }
+        }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.dbd.DBD#getCreate(java.lang.String)
+         */
+        public DBDCreate getCreate(String createName) {
+            rwLock.readLock().lock();
+            try {
+                DBDCreate dbdCreate = null;
+                dbdCreate = createMap.get(createName);
+                if(dbdCreate==null && this!=masterDBD) dbdCreate = masterDBD.getCreate(createName);
+                return dbdCreate;
+            } finally {
+                rwLock.readLock().unlock();
+            }
+        }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.dbd.DBD#getCreateMap()
+         */
+        public Map<String, DBDCreate> getCreateMap() {
+            rwLock.readLock().lock();
+            try {
+                return (Map<String, DBDCreate>)createMap.clone();
+            } finally {
+                rwLock.readLock().unlock();
+            }
+        }
+        /* (non-Javadoc)
          * @see org.epics.ioc.dbd.DBD#getSupport(java.lang.String)
          */
         public DBDSupport getSupport(String supportName) {
@@ -315,104 +311,6 @@ public class DBDFactory {
             rwLock.readLock().lock();
             try {
                 return (Map<String, DBDSupport>)supportMap.clone();
-            } finally {
-                rwLock.readLock().unlock();
-            }
-        }
-        
-        
-        /* (non-Javadoc)
-         * @see org.epics.ioc.dbd.DBD#getLinkSupport(java.lang.String)
-         */
-        public DBDLinkSupport getLinkSupport(String supportName) {
-            rwLock.readLock().lock();
-            try {
-                DBDLinkSupport dbdLinkSupport = null;
-                dbdLinkSupport = linkSupportMap.get(supportName);
-                if(dbdLinkSupport==null && this!=masterDBD) dbdLinkSupport = masterDBD.getLinkSupport(supportName);
-                return dbdLinkSupport;
-            } finally {
-                rwLock.readLock().unlock();
-            }
-        }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.dbd.DBD#addLinkSupport(org.epics.ioc.dbDefinition.DBDLinkSupport)
-         */
-        public boolean addLinkSupport(DBDLinkSupport linkSupport) {
-            rwLock.writeLock().lock();
-            try {
-                String key = linkSupport.getSupportName();
-                if(linkSupportMap.containsKey(key)) return false;
-                if(this!=masterDBD && masterDBD.getLinkSupport(key)!=null) return false;
-                linkSupportMap.put(key,linkSupport);
-                return true;
-            } finally {
-                rwLock.writeLock().unlock();
-            }
-        }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.dbd.DBD#getLinkSupportMap()
-         */
-        public Map<String,DBDLinkSupport> getLinkSupportMap() {
-            rwLock.readLock().lock();
-            try {
-                return (Map<String, DBDLinkSupport>)linkSupportMap.clone();
-            } finally {
-                rwLock.readLock().unlock();
-            }
-        }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.dbd.DBD#menuList(java.lang.String)
-         */
-        public String[] menuList(String regularExpression) {
-            ArrayList<String> list = new ArrayList<String>();
-            if(regularExpression==null) regularExpression = ".*";
-            Pattern pattern;
-            try {
-                pattern = Pattern.compile(regularExpression);
-            } catch (PatternSyntaxException e) {
-                return new String[0];
-            }
-            rwLock.readLock().lock();
-            try {
-                Set<String> keys = menuMap.keySet();
-                for(String key: keys) {
-                    DBDMenu dbdMenu = menuMap.get(key);
-                    String name = dbdMenu.getMenuName();
-                    if(pattern.matcher(name).matches()) {
-                        list.add(name);
-                    }
-                }
-                String[] result = new String[list.size()];
-                for(int i=0; i< list.size(); i++) result[i] = list.get(i);
-                return result;
-            } finally {
-                rwLock.readLock().unlock();
-            }
-        }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.dbd.DBD#menuToString(java.lang.String)
-         */
-        public String menuToString(String regularExpression) {
-            StringBuilder result = new StringBuilder();
-            if(regularExpression==null) regularExpression = ".*";
-            Pattern pattern;
-            try {
-                pattern = Pattern.compile(regularExpression);
-            } catch (PatternSyntaxException e) {
-                return "PatternSyntaxException: " + e;
-            }
-            rwLock.readLock().lock();
-            try {
-                Set<String> keys = menuMap.keySet();
-                for(String key: keys) {
-                    DBDMenu dbdMenu = menuMap.get(key);
-                    String name = dbdMenu.getMenuName();
-                    if(pattern.matcher(name).matches()) {
-                        result.append(" " + dbdMenu.toString());
-                    }
-                }
-                return result.toString();
             } finally {
                 rwLock.readLock().unlock();
             }
@@ -586,9 +484,9 @@ public class DBDFactory {
             }
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.dbd.DBD#linkSupportList(java.lang.String)
+         * @see org.epics.ioc.dbd.DBD#createList(java.lang.String)
          */
-        public String[] linkSupportList(String regularExpression) {
+        public String[] createList(String regularExpression) {
             ArrayList<String> list = new ArrayList<String>();
             if(regularExpression==null) regularExpression = ".*";
             Pattern pattern;
@@ -599,10 +497,10 @@ public class DBDFactory {
             }
             rwLock.readLock().lock();
             try {
-                Set<String> keys = linkSupportMap.keySet();
+                Set<String> keys = createMap.keySet();
                 for(String key: keys) {
-                    DBDLinkSupport dbdLinkSupport = linkSupportMap.get(key);
-                    String name = dbdLinkSupport.getSupportName();
+                    DBDCreate dbdCreate = createMap.get(key);
+                    String name = dbdCreate.getCreateName();
                     if(pattern.matcher(name).matches()) {
                         list.add(name);
                     }
@@ -615,9 +513,9 @@ public class DBDFactory {
             }
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.dbd.DBD#linkSupportToString(java.lang.String)
+         * @see org.epics.ioc.dbd.DBD#createToString(java.lang.String)
          */
-        public String linkSupportToString(String regularExpression) {
+        public String createToString(String regularExpression) {
             StringBuilder result = new StringBuilder();
             if(regularExpression==null) regularExpression = ".*";
             Pattern pattern;
@@ -628,63 +526,18 @@ public class DBDFactory {
             }
             rwLock.readLock().lock();
             try {
-                Set<String> keys = linkSupportMap.keySet();
+                Set<String> keys = createMap.keySet();
                 for(String key: keys) {
-                    DBDLinkSupport dbdLinkSupport = linkSupportMap.get(key);
-                    String name = dbdLinkSupport.getSupportName();
+                    DBDCreate dbdCreate = createMap.get(key);
+                    String name = dbdCreate.getCreateName();
                     if(pattern.matcher(name).matches()) {
-                        result.append(" " + dbdLinkSupport.toString());
+                        result.append(" " + dbdCreate.toString());
                     }
                 }
                 return result.toString();
             } finally {
                 rwLock.readLock().unlock();
             }
-        }
-    }
-    static private class MenuInstance implements DBDMenu
-    {
-
-        private String menuName;
-        private String[] choices;
-
-        private MenuInstance(String menuName, String[] choices)
-        {
-            this.menuName = menuName;
-            this.choices = choices;
-        } 
-        /* (non-Javadoc)
-         * @see org.epics.ioc.dbDefinition.DBDMenu#getChoices()
-         */
-        public String[] getChoices() {
-            return choices;
-        }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.dbDefinition.DBDMenu#getName()
-         */
-        public String getMenuName() {
-            return menuName;
-        }        
-        /* (non-Javadoc)
-         * @see java.lang.Object#toString()
-         */
-        public String toString() { return getString(0);}
-        /* (non-Javadoc)
-         * @see org.epics.ioc.dbDefinition.DBDMenu#toString(int)
-         */
-        public String toString(int indentLevel) {
-            return getString(indentLevel);
-        }
-
-        private String getString(int indentLevel) {
-            StringBuilder builder = new StringBuilder();
-            convert.newLine(builder,indentLevel);
-            builder.append(String.format("menu %s { ",menuName));
-            for(String value: choices) {
-                builder.append(String.format("\"%s\" ",value));
-            }
-            builder.append("}");
-            return builder.toString();
         }
     }
     
@@ -706,17 +559,62 @@ public class DBDFactory {
         }
     }
     
+    static private class CreateInstance implements DBDCreate
+    {
+        private String createName;
+        private String factoryName;
+
+        private CreateInstance(String createName, String factoryName)
+        {
+            this.createName = createName;
+            this.factoryName = factoryName;
+        }      
+        /* (non-Javadoc)
+         * @see org.epics.ioc.dbd.DBDCreate#getCreateName()
+         */
+        public String getCreateName() {
+            return createName;
+        }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.dbDefinition.DBDCreate#getFactoryName()
+         */
+        public String getFactoryName() {
+            return factoryName;
+        }
+        /* (non-Javadoc)
+         * @see java.lang.Object#toString()
+         */
+        public String toString() { return getString(0);}
+        
+        /* (non-Javadoc)
+         * @see org.epics.ioc.dbd.DBDCreate#toString(int)
+         */
+        public String toString(int indentLevel) {
+            return getString(indentLevel);
+        }
+        
+        private String getString(int indentLevel) {
+            StringBuilder builder = new StringBuilder();
+            convert.newLine(builder,indentLevel);
+            builder.append(String.format(
+                    "createName %s factoryName %s",
+                    createName,factoryName));
+            return builder.toString();
+        }
+    }
+    
     static private class SupportInstance implements DBDSupport
     {
         private String supportName;
         private String factoryName;
+        private String structureName = null;
 
-        private SupportInstance(String supportName, String factoryName)
+        private SupportInstance(String supportName, String factoryName,String structureName)
         {
             this.supportName = supportName;
             this.factoryName = factoryName;
-        }
-        
+            this.structureName = structureName;
+        }      
         /* (non-Javadoc)
          * @see org.epics.ioc.dbd.DBDSupport#getSupportName()
          */
@@ -728,6 +626,9 @@ public class DBDFactory {
          */
         public String getFactoryName() {
             return factoryName;
+        }
+        public String getStructureName() {
+            return structureName;
         }
         /* (non-Javadoc)
          * @see java.lang.Object#toString()
@@ -747,32 +648,11 @@ public class DBDFactory {
             builder.append(String.format(
                     "supportName %s factoryName %s",
                     supportName,factoryName));
+            if(structureName!=null) {
+                builder.append(" structureName " + structureName);
+            }
             return builder.toString();
         }
     }
-    
-    static private class LinkSupportInstance extends SupportInstance implements DBDLinkSupport {
-        private String configurationStructureName;
-        
-        private LinkSupportInstance(String supportName, String factoryName,
-                String configurationStructureName)
-        {
-            super(supportName,factoryName);
-            this.configurationStructureName = configurationStructureName;
-        }
-
-        /* (non-Javadoc)
-         * @see org.epics.ioc.dbd.DBDLinkSupport#getConfigurationStructureName()
-         */
-        public String getConfigurationStructureName() {
-            return configurationStructureName;
-        }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.dbd.DBDSupport#toString(int)
-         */
-        public String toString(int indentLevel) {
-            return super.getString(indentLevel) +
-                " configurationStructureName " + configurationStructureName;
-        }
-    }
 }
+

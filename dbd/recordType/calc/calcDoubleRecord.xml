@@ -2,24 +2,24 @@
 <DBDefinition>
 
 <structure name = "calcDoubleArg" >
-    <field name = "value" type = "double" />
-    <field name = "name" type = "string" />
-    <field name = "input" type = "link" />
+  <field name = "value" type = "double" />
+  <field name = "name" type = "string" />
+  <field name = "input" type = "structure" />
 </structure>
 
 <structure name = "calcDouble" supportName = "generic" >
-    <include href = "calcDoubleCommon.xml" />
+  <include href = "calcDoubleCommon.xml" />
 </structure>
 
 <recordType name = "calcDouble" supportName = "generic" >
-    <include href = "common.xml" />
-    <field name = "value" type = "double" >
-        <property name = "alarm" associatedField = "alarm" />
-        <property name = "units" associatedField = "units" />
-        <property name = "displayLimit" associatedField = "displayLimit" />
-        <property name = "timeStamp" associatedField = "/timeStamp" />
-    </field>
-    <include href = "calcDoubleCommon.xml" />
+  <include href = "common.xml" />
+  <field name = "value" type = "double" >
+    <property name = "alarm" associatedField = "alarm" />
+    <property name = "units" associatedField = "units" />
+    <property name = "displayLimit" associatedField = "displayLimit" />
+    <property name = "timeStamp" associatedField = "/timeStamp" />
+  </field>
+  <include href = "calcDoubleCommon.xml" />
 </recordType>
 
 </DBDefinition>

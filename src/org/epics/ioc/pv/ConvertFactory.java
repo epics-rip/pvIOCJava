@@ -222,100 +222,6 @@ public final class ConvertFactory {
             Type toElementType = ((Array)to.getField()).getElementType();
             if(fromElementType==toElementType) {
                 switch(fromElementType) {
-                case pvEnum: {
-                        PVEnumArray fromArray = (PVEnumArray)from;
-                        PVEnumArray toArray = (PVEnumArray)to;
-                        EnumArrayData arrayData = new EnumArrayData();
-                        int fromLength = fromArray.get(offset, len, arrayData);
-                        PVEnum[] fromDatas = arrayData.data;
-                        int toLength = toArray.get(toOffset, len, arrayData);
-                        PVEnum[] toDatas = null;
-                        if(toLength>0) {
-                            toDatas = arrayData.data;
-                        } else {
-                            toDatas = new PVEnum[fromLength];
-                            for(int i=0; i<toLength; i++) toDatas[i] = null;
-                        }
-                        for(int i=0; i<fromLength; i++) {
-                            PVEnum fromData = fromDatas[i];
-                            if(fromData==null) continue;
-                            PVEnum toData = null;
-                            if(i<toLength) toData = toDatas[i];
-                            if(toData==null) {
-                                toData = (PVEnum)pvDataCreate.createPVField(to, fromData.getField());
-                                toDatas[0] = toData;
-                                toArray.put(0, 1, toDatas, 0);
-                                
-                            }
-                            toData.setChoices(fromData.getChoices());
-                            toData.setIndex(fromData.getIndex());
-                        }
-                        return fromLength;
-                    }
-                case pvMenu: {
-                        PVMenuArray fromArray = (PVMenuArray)from;
-                        PVMenuArray toArray = (PVMenuArray)to;
-                        MenuArrayData arrayData = new MenuArrayData();
-                        int fromLength = fromArray.get(offset, len, arrayData);
-                        PVMenu[] fromDatas = arrayData.data;
-                        int toLength = toArray.get(toOffset, len, arrayData);
-                        PVMenu[] toDatas = null;
-                        if(toLength>0) {
-                            toDatas = arrayData.data;
-                        } else {
-                            toDatas = new PVMenu[fromLength];
-                            for(int i=0; i<toLength; i++) toDatas[i] = null;
-                        }
-                        for(int i=0; i<fromLength; i++) {
-                            PVMenu fromData = fromDatas[i];
-                            if(fromData==null) continue;
-                            PVMenu toData = null;
-                            if(i<toLength) toData = toDatas[i];
-                            if(toData==null) {
-                                toData = (PVMenu)pvDataCreate.createPVField(to, fromData.getField());
-                                toDatas[0] = toData;
-                                toArray.put(0, 1, toDatas, 0);
-                                
-                            }
-                            toData.setIndex(fromData.getIndex());
-                        }
-                        return fromLength;
-                    }
-                case pvLink: {
-                        PVLinkArray fromArray = (PVLinkArray)from;
-                        PVLinkArray toArray = (PVLinkArray)to;
-                        LinkArrayData arrayData = new LinkArrayData();
-                        int fromLength = fromArray.get(offset, len, arrayData);
-                        PVLink[] fromDatas = arrayData.data;
-                        int toLength = toArray.get(toOffset, len, arrayData);
-                        PVLink[] toDatas = null;
-                        if(toLength>0) {
-                            toDatas = arrayData.data;
-                        } else {
-                            toDatas = new PVLink[fromLength];
-                            for(int i=0; i<toLength; i++) toDatas[i] = null;
-                        }
-                        for(int i=0; i<fromLength; i++) {
-                            PVLink fromData = fromDatas[i];
-                            if(fromData==null) continue;
-                            PVLink toData = null;
-                            if(i<toLength) toData = toDatas[i];
-                            if(toData==null) {
-                                toData = (PVLink)pvDataCreate.createPVField(to, fromData.getField());
-                                toDatas[0] = toData;
-                                toArray.put(0, 1, toDatas, 0);
-                                
-                            }
-                            PVStructure fromConfigStructure = fromData.getConfigurationStructure();
-                            PVStructure toConfigStructure = toData.getConfigurationStructure();
-                            if(fromConfigStructure==null || toConfigStructure==null) continue;
-                            if(!isCopyStructureCompatible(
-                                (Structure)fromConfigStructure.getField(),
-                                (Structure)toConfigStructure.getField())) continue;
-                            copyStructure(fromConfigStructure,toConfigStructure);
-                        }
-                        return fromLength;
-                    }
                 case pvArray: {
                         PVArrayArray fromArray = (PVArrayArray)from;
                         PVArrayArray toArray = (PVArrayArray)to;
@@ -463,39 +369,12 @@ public final class ConvertFactory {
                 Type type = fromField.getField().getType();
                 if(type.isScalar()) {
                     copyScalar(fromField,toField);
-                } else if(type==Type.pvLink) {
-                    PVLink fromLink = (PVLink)fromField;
-                    PVLink toLink = (PVLink)toField;
-                    PVStructure fromConfigStructure = fromLink.getConfigurationStructure();
-                    PVStructure toConfigStructure = toLink.getConfigurationStructure();
-                    if(fromConfigStructure==null || toConfigStructure==null) continue;
-                    if(!isCopyStructureCompatible(
-                        (Structure)fromConfigStructure.getField(),
-                        (Structure)toConfigStructure.getField())) continue;
-                    copyStructure(fromConfigStructure,toConfigStructure);
-                    
                 } else if(type==Type.pvArray) {
                     Array fromElementArray = (Array)fromField.getField();
                     Array toElementArray = (Array)toField.getField();
                     if(isCopyArrayCompatible(fromElementArray,toElementArray)) {
                         int len = ((PVArray)fromField).getLength();
                         copyArray((PVArray)fromField,0,(PVArray)toField,0,len);
-                    }
-                } else if(type==Type.pvEnum) {
-                    PVEnum fromEnum = (PVEnum)fromField;
-                    PVEnum toEnum = (PVEnum)toField;
-                    String[] choices = fromEnum.getChoices();
-                    int index = fromEnum.getIndex();
-                    toEnum.setChoices(choices);
-                    toEnum.setIndex(index);
-                } else if(type==Type.pvMenu) {
-                    PVMenu fromMenu = (PVMenu)fromField;
-                    PVMenu toMenu = (PVMenu)toField;
-                    Menu toMenuType = (Menu)fromMenu.getField();
-                    Menu fromMenuType = (Menu)toMenu.getField();
-                    if(toMenuType.getMenuName().equals(fromMenuType.getMenuName())) {
-                        int index = fromMenu.getIndex();
-                        toMenu.setIndex(index);
                     }
                 } else if(type==Type.pvStructure) {
                     Structure fromElementStructure = (Structure)fromField.getField();
@@ -2097,10 +1976,6 @@ public final class ConvertFactory {
             if(ncopy>len) ncopy = len;
             int num = ncopy;
             switch(elementType) {
-            case pvLink: {
-                    for(int i=0; i<num; i++) to[toOffset+i] = "isLink";
-                }
-                break;
             case pvBoolean: {
                     PVBooleanArray pvdata = (PVBooleanArray)pv;
                     BooleanArrayData data = new BooleanArrayData();
@@ -2212,32 +2087,6 @@ public final class ConvertFactory {
                     }
                 }
                 break;
-            case pvEnum: {
-                    PVEnumArray pvdata = (PVEnumArray)pv;
-                    EnumArrayData data = new EnumArrayData();
-                    for(int i=0; i<num; i++) {
-                        if(pvdata.get(offset+i,1,data)==1) {
-                            PVEnum[] dataArray = data.data;
-                            to[toOffset+i] = dataArray[data.offset].toString();
-                        } else {
-                            to[toOffset+i] = "bad pv";
-                        }
-                    }
-                }
-                break;
-            case pvMenu: {
-                    PVMenuArray pvdata = (PVMenuArray)pv;
-                    MenuArrayData data = new MenuArrayData();
-                    for(int i=0; i<num; i++) {
-                        if(pvdata.get(offset+i,1,data)==1) {
-                            PVMenu[] dataArray = data.data;
-                            to[toOffset+i] = dataArray[data.offset].toString();
-                        } else {
-                            to[toOffset+i] = "bad pv";
-                        }
-                    }
-                }
-            break;
             case pvStructure: {
                     PVStructureArray pvdata = (PVStructureArray)pv;
                     StructureArrayData data = new StructureArrayData();
@@ -2296,9 +2145,6 @@ public final class ConvertFactory {
         private String ConvertToString(PVField pv,int indentLevel) {
             Field field = pv.getField();
             switch(field.getType()) {
-            case pvLink:{
-                return "isLink";
-            }
             case pvBoolean: {
                     PVBoolean data = (PVBoolean)pv;
                     boolean value = data.get();
@@ -2336,45 +2182,11 @@ public final class ConvertFactory {
                     PVString data = (PVString)pv;
                     return data.get();
                 }
-            case pvEnum: return convertEnum(pv);
-            case pvMenu: return convertMenu(pv);
             case pvStructure: return convertStructure(pv,indentLevel);
             case pvArray: return convertArray(pv,indentLevel);
             default:
                 return "unknown PVType";
             }
-        }
-    
-        private String convertEnum(PVField pv) {
-            PVEnum data = (PVEnum)pv;
-            StringBuilder builder = new StringBuilder();
-            int index = data.getIndex();
-            String[] choices = data.getChoices();
-            builder.append(String.format(
-                "{index = %d choices = {",index));
-            if(choices!=null) for(String choice : choices) {
-                 builder.append("\"");
-                 if(choice!=null) builder.append(choice);
-                 builder.append("\" ");
-            }
-            builder.append( "}}");
-            return builder.toString();
-        }
-        
-        private String convertMenu(PVField pv) {
-            PVMenu data = (PVMenu)pv;
-            StringBuilder builder = new StringBuilder();
-            int index = data.getIndex();
-            String[] choices = data.getChoices();
-            builder.append(String.format(
-                "{index = %d choices = {",index));
-            if(choices!=null) for(String choice : choices) {
-                 builder.append("\"");
-                 if(choice!=null) builder.append(choice);
-                 builder.append("\" ");
-            }
-            builder.append( "}}");
-            return builder.toString();
         }
     
         private String convertStructure(PVField pv,int indentLevel) {
@@ -2401,10 +2213,6 @@ public final class ConvertFactory {
             Type type = array.getElementType();
             StringBuilder builder = new StringBuilder();
             switch(type) {
-            case pvLink :{
-                    builder.append("{}");
-                    break;
-                }
             case pvBoolean: {
                     PVBooleanArray pvdata = (PVBooleanArray)pv;
                     BooleanArrayData data = new BooleanArrayData();
@@ -2536,46 +2344,6 @@ public final class ConvertFactory {
                              builder.append("null ");
                         }
                     }
-                    builder.append("}");
-                    break;
-                }
-            case pvEnum: {
-                    PVEnumArray pvdata = (PVEnumArray)pv;
-                    EnumArrayData data = new EnumArrayData();
-                    newLine(builder,indentLevel);
-                    builder.append("{");
-                    for(int i=0; i < pvdata.getLength(); i++) {
-                        newLine(builder,indentLevel);
-                        builder.append(indentString);
-                        int num = pvdata.get(i,1,data);
-                        PVEnum[] value = data.data;
-                        if(num==1 && value[data.offset]!=null) {
-                            builder.append(convertEnum(value[data.offset]));
-                        } else {
-                             builder.append("{} ");
-                        }
-                    }
-                    newLine(builder,indentLevel);
-                    builder.append("}");
-                    break;
-                }
-            case pvMenu: {
-                    PVMenuArray pvdata = (PVMenuArray)pv;
-                    MenuArrayData data = new MenuArrayData();
-                    newLine(builder,indentLevel);
-                    builder.append("{");
-                    for(int i=0; i < pvdata.getLength(); i++) {
-                        newLine(builder,indentLevel);
-                        builder.append(indentString);
-                        int num = pvdata.get(i,1,data);
-                        PVMenu[] value = data.data;
-                        if(num==1 && value[data.offset]!=null) {
-                            builder.append(convertMenu(value[data.offset]));
-                        } else {
-                             builder.append("{} ");
-                        }
-                    }
-                    newLine(builder,indentLevel);
                     builder.append("}");
                     break;
                 }

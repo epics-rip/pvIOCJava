@@ -2,18 +2,18 @@
 <DBDefinition>
 
 <structure name = "double" supportName = "generic" >
-    <include href = "doubleCommon.xml" />
+  <include href = "doubleCommon.xml" />
 </structure>
 
 <recordType name = "double" supportName = "generic" >
-    <include href = "common.xml" />
-    <field name = "value" type = "double" >
-        <property name = "alarm" associatedField = "alarm" />
-        <property name = "units" associatedField = "units" />
-        <property name = "displayLimit" associatedField = "displayLimit" />
-        <property name = "timeStamp" associatedField = "/timeStamp" />
-    </field>
-    <include href = "doubleCommon.xml" />
+  <include href = "common.xml" />
+  <field name = "value" type = "double" >
+    <property name = "alarm" associatedField = "alarm" />
+    <property name = "units" associatedField = "units" />
+    <property name = "displayLimit" associatedField = "displayLimit" />
+    <property name = "timeStamp" associatedField = "/timeStamp" />
+  </field>
+  <include href = "doubleCommon.xml" />
 </recordType>
 
 </DBDefinition>

@@ -6,8 +6,16 @@
 package org.epics.ioc.db;
 
 import java.util.Iterator;
+import java.lang.reflect.*;
 
 import org.epics.ioc.pv.*;
+import org.epics.ioc.pv.Type;
+import org.epics.ioc.pv.Field;
+import org.epics.ioc.pv.Array;
+import org.epics.ioc.create.Create;
+
+import org.epics.ioc.dbd.*;
+import org.epics.ioc.util.*;
 
 /**
  * Base class for a DBStructure.
@@ -87,19 +95,11 @@ public class BaseDBStructure extends BaseDBField implements DBStructure
         dbFields = new DBField[length];
         for(int i=0; i<length; i++) {
             PVField pvField = pvFields[i];
-            Type type = pvField.getField().getType();
+            Field field = pvField.getField();
+            Type type = field.getType();
             DBRecord dbRecord = super.getDBRecord();
             BaseDBField dbField = null;
             switch(type) {
-            case pvEnum:
-                dbField = new BaseDBEnum(this,dbRecord,pvField);
-                break;
-            case pvMenu:
-                dbField = new BaseDBMenu(this,dbRecord,pvField);
-                break;
-            case pvLink:
-                dbField = new BaseDBLink(this,dbRecord,pvField);
-                break;
             case pvStructure:
                 dbField = new BaseDBStructure(this,dbRecord,pvField);
                 break;
@@ -116,6 +116,60 @@ public class BaseDBStructure extends BaseDBField implements DBStructure
                 break;
             }
             dbFields[i] = dbField;
+            String message = callCreate(dbField);
+            if(message!=null) pvField.message(message, MessageType.error);
         }
-    }  
+    }
+    
+    private String callCreate(DBField dbField) {
+        PVField pvField = dbField.getPVField();
+        Field field = pvField.getField();
+        String createName = field.getCreateName();
+        if(createName==null) return null;
+        DBD dbd = super.getDBRecord().getDBD();
+        if(dbd==null) dbd = DBDFactory.getMasterDBD();
+        DBDCreate dbdCreate = dbd.getCreate(createName);
+        if(dbdCreate==null) {
+            return "create " + createName + " not found";
+        }
+        String factoryName = dbdCreate.getFactoryName();
+        Class supportClass;
+        Method method = null;
+        Create create = null;
+        try {
+            supportClass = Class.forName(factoryName);
+        }catch (ClassNotFoundException e) {
+            return "factory " + factoryName 
+            + " " + e.getLocalizedMessage();
+        }
+        try {
+            method = supportClass.getDeclaredMethod("create",
+                    Class.forName("org.epics.ioc.db.DBField"));
+            
+        } catch (NoSuchMethodException e) {
+
+        } catch (ClassNotFoundException e) {
+            return "factory " + factoryName 
+            + " " + e.getLocalizedMessage();
+        }
+        if(!Modifier.isStatic(method.getModifiers())) {
+            return "factory " + factoryName 
+            + " create is not a static method ";
+        }
+        try {
+            create = (Create)method.invoke(null,dbField);
+            if(create!=null) super.setCreate(create);
+            return null;
+        } catch(IllegalAccessException e) {
+            return "factory " + factoryName 
+            + " " + e.getLocalizedMessage();
+        } catch(IllegalArgumentException e) {
+            return "factory " + factoryName 
+            + " " + e.getLocalizedMessage();
+        } catch(InvocationTargetException e) {
+            return "factory " + factoryName 
+            + " " + e.getLocalizedMessage();
+        }
+    }
+    
 }

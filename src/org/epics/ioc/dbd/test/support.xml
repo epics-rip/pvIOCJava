@@ -4,13 +4,13 @@
 <support name = "disableSupport" 
     factoryName = "org.epics.ioc.support.SupportFactory" />
 
-<linkSupport name = "processLink" configurationStructureName = "processLink"
+<support name = "processLink" configurationStructureName = "processLink"
     factoryName = "org.epics.ioc.support.LinkSupportFactory" />
-<linkSupport name = "monitorLink" configurationStructureName = "monitorLink"
+<support name = "monitorLink" configurationStructureName = "monitorLink"
     factoryName = "org.epics.ioc.support.LinkSupportFactory" />
-<linkSupport name = "inputLink" configurationStructureName = "inputLink"
+<support name = "inputLink" configurationStructureName = "inputLink"
     factoryName = "org.epics.ioc.support.LinkSupportFactory" />
-<linkSupport name = "outputLink" configurationStructureName = "outputLink"
+<support name = "outputLink" configurationStructureName = "outputLink"
     factoryName = "org.epics.ioc.support.LinkSupportFactory" />
 
 </DBDefinition>

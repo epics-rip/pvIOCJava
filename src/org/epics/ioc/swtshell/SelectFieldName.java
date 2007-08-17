@@ -179,39 +179,7 @@ public class SelectFieldName extends Dialog implements SelectionListener {
         Type elementType = array.getElementType();
         if(elementType.isScalar()) return;
         int length = pvArray.getLength();
-        if(elementType==Type.pvEnum) {
-            PVEnumArray pvEnumArray = (PVEnumArray)pvArray;
-            EnumArrayData enumArrayData = new EnumArrayData();
-            pvEnumArray.get(0, length, enumArrayData);
-            PVEnum[] pvEnums = enumArrayData.data;
-            for(PVEnum pvEnum : pvEnums) {
-                if(pvEnum==null) continue;
-                TreeItem treeItem = new TreeItem(tree,SWT.NONE);
-                Field field = pvEnum.getField();
-                treeItem.setText(field.getFieldName());
-                treeItem.setData(pvEnum);
-                propertys = field.getPropertys();
-                if(propertys!=null&&propertys.length>0) {
-                    createPropertyTreeItem(treeItem,propertys);
-                }
-            }
-        } else if(elementType==Type.pvMenu) {
-            PVMenuArray pvMenuArray = (PVMenuArray)pvArray;
-            MenuArrayData menuArrayData = new MenuArrayData();
-            pvMenuArray.get(0, length, menuArrayData);
-            PVMenu[] pvMenus = menuArrayData.data;
-            for(PVMenu pvMenu : pvMenus) {
-                if(pvMenu==null) continue;
-                TreeItem treeItem = new TreeItem(tree,SWT.NONE);
-                Field field = pvMenu.getField();
-                treeItem.setText(field.getFieldName());
-                treeItem.setData(pvMenu);
-                propertys = field.getPropertys();
-                if(propertys!=null&&propertys.length>0) {
-                    createPropertyTreeItem(treeItem,propertys);
-                }
-            }
-        } else if(elementType==Type.pvArray) {
+        if(elementType==Type.pvArray) {
             PVArrayArray pvArrayArray = (PVArrayArray)pvArray;
             ArrayArrayData arrayArrayData = new ArrayArrayData();
             pvArrayArray.get(0, length, arrayArrayData);

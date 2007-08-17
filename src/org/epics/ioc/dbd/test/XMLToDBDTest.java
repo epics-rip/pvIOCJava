@@ -38,16 +38,9 @@ public class XMLToDBDTest extends TestCase {
                 "src/org/epics/ioc/dbd/test/test.xml",this);
             dbd.mergeIntoMaster();
             dbd = DBDFactory.getMasterDBD();
-            System.out.printf("%nmenus");
-            Map<String,DBDMenu> menuMap = dbd.getMenuMap();
-            Set<String> keys = menuMap.keySet();
-            for(String key: keys) {
-                DBDMenu dbdMenu = menuMap.get(key);
-                System.out.printf("%n%s",dbdMenu.toString());
-            }
             System.out.printf("%n%nstructures");
             Map<String,DBDStructure> structureMap = dbd.getStructureMap();
-            keys = structureMap.keySet();
+            Set<String> keys = structureMap.keySet();
             for(String key: keys) {
                 DBDStructure dbdStructure = structureMap.get(key);
                 String structureName = dbdStructure.getStructureName();
@@ -59,13 +52,6 @@ public class XMLToDBDTest extends TestCase {
             for(String key: keys) {
                 DBDSupport dbdSupport = supportMap.get(key);
                 System.out.printf("%n%s",dbdSupport.toString());
-            }
-            System.out.printf("%n%nlinkSupport");
-            Map<String,DBDLinkSupport> linkSupportMap = dbd.getLinkSupportMap();
-            keys = linkSupportMap.keySet();
-            for(String key: keys) {
-                DBDLinkSupport dbdLinkSupport = linkSupportMap.get(key);
-                System.out.printf("%n%s",dbdLinkSupport.toString());
             }
             System.out.printf("%n%nrecordTypes");
             Map<String,DBDRecordType> recordTypeMap = dbd.getRecordTypeMap();

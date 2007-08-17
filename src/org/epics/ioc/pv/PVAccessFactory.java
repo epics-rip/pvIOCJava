@@ -101,45 +101,6 @@ public class PVAccessFactory {
                         }
                         currentField = (PVField)arrayArray[offset];
                         break;
-                    } else if(elementType==Type.pvLink) {
-                        PVLinkArray pvLinkArray = (PVLinkArray)currentField;
-                        if(arrayIndex>=pvLinkArray.getLength()) break;
-                        LinkArrayData data = new LinkArrayData();
-                        int n = pvLinkArray.get(arrayIndex,1,data);
-                        PVLink[] linkArray = data.data;
-                        int offset = data.offset;
-                        if(n<1 || linkArray[offset]==null) {
-                            currentField = null;
-                            break;
-                        }
-                        currentField = (PVField)linkArray[offset];
-                        break;
-                    } else if(elementType==Type.pvMenu) {
-                        PVMenuArray pvMenuArray = (PVMenuArray)currentField;
-                        if(arrayIndex>=pvMenuArray.getLength()) break;
-                        MenuArrayData data = new MenuArrayData();
-                        int n = pvMenuArray.get(arrayIndex,1,data);
-                        PVMenu[] menuArray = data.data;
-                        int offset = data.offset;
-                        if(n<1 || menuArray[offset]==null) {
-                            currentField = null;
-                            break;
-                        }
-                        currentField = (PVField)menuArray[offset];
-                        break;
-                    } else if(elementType==Type.pvEnum){
-                        PVEnumArray pvEnumArray = (PVEnumArray)currentField;
-                        if(arrayIndex>=pvEnumArray.getLength()) break;
-                        EnumArrayData data = new EnumArrayData();
-                        int n = pvEnumArray.get(arrayIndex,1,data);
-                        PVEnum[] enumArray = data.data;
-                        int offset = data.offset;
-                        if(n<1 || enumArray[offset]==null) {
-                            currentField = null;
-                            break;
-                        }
-                        currentField = (PVField)enumArray[offset];
-                        break;
                     } else {
                         currentField = null;
                         break;

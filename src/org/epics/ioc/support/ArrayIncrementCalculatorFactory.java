@@ -16,29 +16,28 @@ import org.epics.ioc.util.*;
  */
 public class ArrayIncrementCalculatorFactory {
     
-    public static LinkSupport create(DBLink dbLink) {
-        return new ArrayIncrementCalculatorImpl(dbLink);
+    public static Support create(DBStructure dbStructure) {
+        return new ArrayIncrementCalculatorImpl(dbStructure);
     }
     
     private static String supportName = "arrayIncrementCalculator";
     
-    private static class ArrayIncrementCalculatorImpl extends AbstractLinkSupport implements CalculatorSupport
+    private static class ArrayIncrementCalculatorImpl extends AbstractSupport implements CalculatorSupport
     {
         private static Convert convert = ConvertFactory.getConvert();
         private static FieldCreate fieldCreate = FieldFactory.getFieldCreate();
         private static PVDataCreate pvDataCreate = PVDataFactory.getPVDataCreate();
-        private PVLink pvLink;
-        private CalcArgArraySupport calcArgArraySupport = null;
+        private PVStructure pvStructure;
         private DBField valueDBField;
         private PVArray valuePVField= null;
         private PVDoubleArray pvDoubleArray = null;
         private DoubleArrayData doubleArrayData = new DoubleArrayData();
 
-        private ArrayIncrementCalculatorImpl(DBLink dbLink) {
-            super(supportName,dbLink);
-            pvLink = dbLink.getPVLink();
+        private ArrayIncrementCalculatorImpl(DBStructure dbStructure) {
+            super(supportName,dbStructure);
+            pvStructure = dbStructure.getPVStructure();
             Array array = fieldCreate.createArray("private", Type.pvDouble);
-            pvDoubleArray = (PVDoubleArray)pvDataCreate.createPVArray(pvLink, array, 0, true);
+            pvDoubleArray = (PVDoubleArray)pvDataCreate.createPVArray(pvStructure, array, 0, true);
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.process.AbstractSupport#initialize()
@@ -74,7 +73,7 @@ public class ArrayIncrementCalculatorFactory {
          * @see org.epics.ioc.recordSupport.CalculatorSupport#setCalcArgSupport(org.epics.ioc.recordSupport.CalcArgArraySupport)
          */
         public void setCalcArgArraySupport(CalcArgArraySupport calcArgArraySupport) {
-            this.calcArgArraySupport = calcArgArraySupport;
+            // nothing to do
         }
     }
 }

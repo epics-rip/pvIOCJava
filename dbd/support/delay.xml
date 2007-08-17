@@ -1,15 +1,15 @@
 <?xml version="1.0" ?>
 <DBDefinition>
 
-<structure name = "delayLink">
-    <!-- min, max, inc are delay in milliseconds -->
-    <field name = "min" type = "long" />
-    <field name = "max" type = "long" />
-    <field name = "inc" type = "long" />
+<structure name = "delaySupport">
+  <!-- min, max, inc are delay in milliseconds -->
+  <field name = "min" type = "long" />
+  <field name = "max" type = "long" />
+  <field name = "inc" type = "long" />
 </structure>
 
-<linkSupport name = "delayLink"
-    configurationStructureName = "delayLink"
-    factoryName = "org.epics.ioc.support.DelayLinkFactory" />
+<support name = "delaySupport"
+  structureName = "delaySupport"
+  factoryName = "org.epics.ioc.support.DelaySupportFactory" />
 
 </DBDefinition>

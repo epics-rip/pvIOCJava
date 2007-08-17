@@ -2,47 +2,49 @@
 <DBDefinition>
 
 <structure name = "linearConvert" >
-    <field name = "engUnitsLow" type = "double" />
-    <field name = "engUnitsHigh" type = "double" />
-    <field name = "deviceHigh" type = "int" />
-    <field name = "deviceLow" type = "int" />
-    <field name = "slope" type = "double" />
-    <field name = "intercept" type = "double" />
+  <field name = "engUnitsLow" type = "double" />
+  <field name = "engUnitsHigh" type = "double" />
+  <field name = "deviceHigh" type = "int" />
+  <field name = "deviceLow" type = "int" />
+  <field name = "slope" type = "double" />
+  <field name = "intercept" type = "double" />
 </structure>
 
 <structure name = "linearConvertInput" supportName = "linearConvertInput">
-    <field name = "value" type = "int" />
-    <field name = "linearConvert" type = "structure" structureName = "linearConvert" />
-    <field name = "input" type = "link" />
+  <field name = "value" type = "int" />
+  <field name = "linearConvert" type = "structure"
+     structureName = "linearConvert" />
+  <field name = "input" type = "structure" structureName = "null" />
 </structure>
 
 <structure name = "linearConvertOutput" supportName = "linearConvertOutput">
-    <field name = "value" type = "int" />
-    <field name = "linearConvert" type = "structure" structureName = "linearConvert" />
-    <field name = "output" type = "link" />
+  <field name = "value" type = "int" />
+  <field name = "linearConvert" type = "structure"
+     structureName = "linearConvert" />
+  <field name = "output" type = "structure" structureName = "null"  />
 </structure>
 
 <structure name = "incrementalDouble" supportName = "incremental" >
-    <field name = "desiredValue" type = "double" >
-        <property name = "alarm" associatedField = "alarm" />
-        <property name = "units" associatedField = "units" />
-        <property name = "displayLimit" associatedField = "displayLimit" />
-        <property name = "controlLimit" associatedField = "controlLimit" />
-        <property name = "timeStamp" associatedField = "/timeStamp" />
-    </field>
-    <field name = "input" type = "link" />
-    <field name = "incrementalOutput" type = "boolean" />
-    <field name = "rateOfChange" type = "double" />
-    <field name = "units" type = "string" />
-    <field name = "controlLimit"
-         type = "structure" structureName = "doubleLimit" />
+  <field name = "desiredValue" type = "double" >
+    <property name = "alarm" associatedField = "alarm" />
+    <property name = "units" associatedField = "units" />
+    <property name = "displayLimit" associatedField = "displayLimit" />
+    <property name = "controlLimit" associatedField = "controlLimit" />
+    <property name = "timeStamp" associatedField = "/timeStamp" />
+  </field>
+  <field name = "input" type = "structure" structureName = "null" />
+  <field name = "incrementalOutput" type = "boolean" />
+  <field name = "rateOfChange" type = "double" />
+  <field name = "units" type = "string" />
+  <field name = "controlLimit"
+     type = "structure" structureName = "doubleLimit" />
 </structure>
 
 <support name = "linearConvertInput"
-    factoryName = "org.epics.ioc.support.LinearConvertInputFactory" />
+  factoryName = "org.epics.ioc.support.LinearConvertInputFactory" />
 
 <support name = "linearConvertOutput"
-    factoryName = "org.epics.ioc.support.LinearConvertOutputFactory" />
+  factoryName = "org.epics.ioc.support.LinearConvertOutputFactory" />
 
 <support name = "incremental"
    factoryName = "org.epics.ioc.support.IncrementalFactory" />

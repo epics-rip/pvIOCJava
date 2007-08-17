@@ -2,18 +2,18 @@
 <DBDefinition>
 
 <structure name = "intArray" supportName = "generic" >
-    <include href = "intArrayCommon.xml" />
+  <include href = "intArrayCommon.xml" />
 </structure>
 
 <recordType name = "intArray" supportName = "generic" >
-    <include href = "common.xml" />
-    <field name = "value" type = "array" elementType = "int" >
-        <property name = "alarm" associatedField = "alarm" />
-        <property name = "units" associatedField = "units" />
-        <property name = "displayLimit" associatedField = "displayLimit" />
-        <property name = "timeStamp" associatedField = "/timeStamp" />
-    </field>
-    <include href = "intArrayCommon.xml" />
+  <include href = "common.xml" />
+  <field name = "value" type = "array" elementType = "int" >
+    <property name = "alarm" associatedField = "alarm" />
+    <property name = "units" associatedField = "units" />
+    <property name = "displayLimit" associatedField = "displayLimit" />
+    <property name = "timeStamp" associatedField = "/timeStamp" />
+  </field>
+  <include href = "intArrayCommon.xml" />
 </recordType>
 
 </DBDefinition>

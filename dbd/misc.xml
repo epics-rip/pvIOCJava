@@ -31,4 +31,14 @@
     <field name = "high" type = "double" />
 </structure>
 
+<structure name = "enumerated" createName = "enumerated" >
+  <field name = "index" type = "int" />
+  <field name = "choice" type = "string" />
+  <field name = "choices" type = "array" elementType = "string" />
+</structure>
+
+<create name = "enumerated"
+  factoryName = "org.epics.ioc.create.EnumeratedFactory" />
+
+
 </DBDefinition>

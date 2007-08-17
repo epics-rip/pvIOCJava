@@ -1,79 +1,79 @@
 <?xml version="1.0" ?>
 <DBDefinition>
-<structure name = "pdrvLink">
-    <field name = "portName" type = "string" />
-    <field name = "addr" type = "int" />
-    <field name = "timeout" type = "double" />
-    <field name = "mask" type = "int" />
-    <field name = "size" type = "int" />
-    <field name = "process" type = "boolean" default = "false" />
-    <field name = "drvParams" type = "string" />
+<structure name = "pdrvSupport">
+  <field name = "portName" type = "string" />
+  <field name = "addr" type = "int" />
+  <field name = "timeout" type = "double" />
+  <field name = "mask" type = "int" />
+  <field name = "size" type = "int" />
+  <field name = "process" type = "boolean" default = "false" />
+  <field name = "drvParams" type = "string" />
 </structure>
 
-<linkSupport name = "pdrvOctetInput"
-    configurationStructureName = "pdrvLink" 
-    factoryName = "org.epics.ioc.support.PDRVLinkFactory" />
-<linkSupport name = "pdrvOctetInterruptInput"
-    configurationStructureName = "pdrvLink" 
-    factoryName = "org.epics.ioc.support.PDRVLinkFactory" />
-<linkSupport name = "pdrvOctetOutput"
-    configurationStructureName = "pdrvLink" 
-    factoryName = "org.epics.ioc.support.PDRVLinkFactory" />
+<support name = "pdrvOctetInput"
+  structureName = "pdrvSupport" 
+  factoryName = "org.epics.ioc.support.PDRVSupportFactory" />
+<support name = "pdrvOctetInterruptInput"
+  structureName = "pdrvSupport" 
+  factoryName = "org.epics.ioc.support.PDRVSupportFactory" />
+<support name = "pdrvOctetOutput"
+  structureName = "pdrvSupport" 
+  factoryName = "org.epics.ioc.support.PDRVSupportFactory" />
 
-<linkSupport name = "pdrvInt32Input"
-    configurationStructureName = "pdrvLink" 
-    factoryName = "org.epics.ioc.support.PDRVLinkFactory" />
-<linkSupport name = "pdrvInt32InterruptInput"
-    configurationStructureName = "pdrvLink" 
-    factoryName = "org.epics.ioc.support.PDRVLinkFactory" />
-<linkSupport name = "pdrvInt32AverageInput"
-    configurationStructureName = "pdrvLink" 
-    factoryName = "org.epics.ioc.support.PDRVLinkFactory" />
-<linkSupport name = "pdrvInt32Output"
-    configurationStructureName = "pdrvLink" 
-    factoryName = "org.epics.ioc.support.PDRVLinkFactory" />
+<support name = "pdrvInt32Input"
+  structureName = "pdrvSupport" 
+  factoryName = "org.epics.ioc.support.PDRVSupportFactory" />
+<support name = "pdrvInt32InterruptInput"
+  structureName = "pdrvSupport" 
+  factoryName = "org.epics.ioc.support.PDRVSupportFactory" />
+<support name = "pdrvInt32AverageInput"
+  structureName = "pdrvSupport" 
+  factoryName = "org.epics.ioc.support.PDRVSupportFactory" />
+<support name = "pdrvInt32Output"
+  structureName = "pdrvSupport" 
+  factoryName = "org.epics.ioc.support.PDRVSupportFactory" />
 
-<linkSupport name = "pdrvInt32ArrayInput"
-    configurationStructureName = "pdrvLink" 
-    factoryName = "org.epics.ioc.support.PDRVLinkFactory" />
-<linkSupport name = "pdrvInt32ArrayInterruptInput"
-    configurationStructureName = "pdrvLink" 
-    factoryName = "org.epics.ioc.support.PDRVLinkFactory" />
-<linkSupport name = "pdrvInt32ArrayOutput"
-    configurationStructureName = "pdrvLink" 
-    factoryName = "org.epics.ioc.support.PDRVLinkFactory" />
+<support name = "pdrvInt32ArrayInput"
+  structureName = "pdrvSupport" 
+  factoryName = "org.epics.ioc.support.PDRVSupportFactory" />
+<support name = "pdrvInt32ArrayInterruptInput"
+  structureName = "pdrvSupport" 
+  factoryName = "org.epics.ioc.support.PDRVSupportFactory" />
+<support name = "pdrvInt32ArrayOutput"
+  structureName = "pdrvSupport" 
+  factoryName = "org.epics.ioc.support.PDRVSupportFactory" />
 
-<linkSupport name = "pdrvFloat64Input"
-    configurationStructureName = "pdrvLink" 
-    factoryName = "org.epics.ioc.support.PDRVLinkFactory" />
-<linkSupport name = "pdrvFloat64InterruptInput"
-    configurationStructureName = "pdrvLink" 
-    factoryName = "org.epics.ioc.support.PDRVLinkFactory" />
-<linkSupport name = "pdrvFloat64AverageInput"
-    configurationStructureName = "pdrvLink" 
-    factoryName = "org.epics.ioc.support.PDRVLinkFactory" />
-<linkSupport name = "pdrvFloat64Output"
-    configurationStructureName = "pdrvLink" 
-    factoryName = "org.epics.ioc.support.PDRVLinkFactory" />
+<support name = "pdrvFloat64Input"
+  structureName = "pdrvSupport" 
+  factoryName = "org.epics.ioc.support.PDRVSupportFactory" />
+<support name = "pdrvFloat64InterruptInput"
+  structureName = "pdrvSupport" 
+  factoryName = "org.epics.ioc.support.PDRVSupportFactory" />
+<support name = "pdrvFloat64AverageInput"
+  structureName = "pdrvSupport" 
+  factoryName = "org.epics.ioc.support.PDRVSupportFactory" />
+<support name = "pdrvFloat64Output"
+  structureName = "pdrvSupport" 
+  factoryName = "org.epics.ioc.support.PDRVSupportFactory" />
 
-<linkSupport name = "pdrvFloat64ArrayInput"
-    configurationStructureName = "pdrvLink" 
-    factoryName = "org.epics.ioc.support.PDRVLinkFactory" />
-<linkSupport name = "pdrvFloat64ArrayInterruptInput"
-    configurationStructureName = "pdrvLink" 
-    factoryName = "org.epics.ioc.support.PDRVLinkFactory" />
-<linkSupport name = "pdrvFloat64ArrayOutput"
-    configurationStructureName = "pdrvLink" 
-    factoryName = "org.epics.ioc.support.PDRVLinkFactory" />
+<support name = "pdrvFloat64ArrayInput"
+  structureName = "pdrvSupport" 
+  factoryName = "org.epics.ioc.support.PDRVSupportFactory" />
+<support name = "pdrvFloat64ArrayInterruptInput"
+  structureName = "pdrvSupport" 
+  factoryName = "org.epics.ioc.support.PDRVSupportFactory" />
+<support name = "pdrvFloat64ArrayOutput"
+  structureName = "pdrvSupport" 
+  factoryName = "org.epics.ioc.support.PDRVSupportFactory" />
 
-<linkSupport name = "pdrvUInt32DigitalInput"
-    configurationStructureName = "pdrvLink" 
-    factoryName = "org.epics.ioc.support.PDRVLinkFactory" />
-<linkSupport name = "pdrvUInt32DigitalInterruptInput"
-    configurationStructureName = "pdrvLink" 
-    factoryName = "org.epics.ioc.support.PDRVLinkFactory" />
-<linkSupport name = "pdrvUInt32DigitalOutput"
-    configurationStructureName = "pdrvLink" 
-    factoryName = "org.epics.ioc.support.PDRVLinkFactory" />
+<support name = "pdrvUInt32DigitalInput"
+  structureName = "pdrvSupport" 
+  factoryName = "org.epics.ioc.support.PDRVSupportFactory" />
+<support name = "pdrvUInt32DigitalInterruptInput"
+  structureName = "pdrvSupport" 
+  factoryName = "org.epics.ioc.support.PDRVSupportFactory" />
+<support name = "pdrvUInt32DigitalOutput"
+  structureName = "pdrvSupport" 
+  factoryName = "org.epics.ioc.support.PDRVSupportFactory" />
 
 </DBDefinition>

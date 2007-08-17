@@ -158,9 +158,13 @@ public class ScannerFactory {
                             PVStructure pvStructure = (PVStructure)pvFields[index];
                             structure = (Structure)pvStructure.getField();
                             pvFields = pvStructure.getFieldPVFields();
-                            index = structure.getFieldIndex("scan");
-                            PVMenu pvMenu = (PVMenu)pvFields[index];
-                            pvMenu.setIndex(0);
+                            index = structure.getFieldIndex("type");
+                            pvStructure = (PVStructure)pvFields[index];
+                            structure = (Structure)pvStructure.getField();
+                            pvFields = pvStructure.getFieldPVFields();
+                            index = structure.getFieldIndex("index");
+                            PVInt pvIndex = (PVInt)pvFields[index];
+                            pvIndex.put(0);
                             pvRecord.message(
                                 "failed to become recordProcessor", MessageType.error);
                         }
@@ -271,7 +275,7 @@ public class ScannerFactory {
          * @see org.epics.ioc.util.PeriodicScanner#schedule(org.epics.ioc.db.DBRecord)
          */
         public void schedule(DBRecord dbRecord) {
-            ScanField scanField = ScanFieldFactory.create(dbRecord.getPVRecord());
+            ScanField scanField = ScanFieldFactory.create(dbRecord);
             PVRecord pvRecord = dbRecord.getPVRecord();
             if(scanField==null) {
                 pvRecord.message(
@@ -337,7 +341,7 @@ public class ScannerFactory {
          * @see org.epics.ioc.util.PeriodicScanner#unschedule(org.epics.ioc.db.DBRecord)
          */
         public void unschedule(DBRecord dbRecord) {
-            ScanField scanField = ScanFieldFactory.create(dbRecord.getPVRecord());
+            ScanField scanField = ScanFieldFactory.create(dbRecord);
             double rate = scanField.getRate();
             int priority = scanField.getPriority().getJavaPriority();
             long period = rateToPeriod(rate);
@@ -680,7 +684,7 @@ public class ScannerFactory {
         public void addRecord(DBRecord dbRecord) {
             lock.lock();
             try {
-                ScanField scanField = ScanFieldFactory.create(dbRecord.getPVRecord());
+                ScanField scanField = ScanFieldFactory.create(dbRecord);
                 int priority = scanField.getPriority().getJavaPriority();
                 String eventName = scanField.getEventName();
                 String threadName = "event(" + eventName + "," + String.valueOf(priority) + ")";
@@ -733,7 +737,7 @@ public class ScannerFactory {
         public void removeRecord(DBRecord dbRecord) {
             lock.lock();
             try {
-                ScanField scanField = ScanFieldFactory.create(dbRecord.getPVRecord());
+                ScanField scanField = ScanFieldFactory.create(dbRecord);
                 int priority = scanField.getPriority().getJavaPriority();
                 String eventName = scanField.getEventName();
                 Announce announce = getAnnounce(eventName);

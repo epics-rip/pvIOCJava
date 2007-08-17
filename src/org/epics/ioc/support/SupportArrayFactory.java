@@ -11,16 +11,16 @@ import org.epics.ioc.pv.*;
 import org.epics.ioc.util.*;
 
 /**
- * Support for an array of links.
+ * Support for an array of fields that have support.
  * The links can be process, input, or output.
  * @author mrk
  *
  */
-public class LinkArrayFactory {
+public class SupportArrayFactory {
     /**
      * Create support for an array of links.
      * @param dbField The array which must be an array of links.
-     * @return An interface to the support or null if the supportName was not "linkArray".
+     * @return An interface to the support or null if the supportName was not "supportArray".
      */
     public static Support create(DBField dbField) {
         PVField pvField = dbField.getPVField();
@@ -41,18 +41,18 @@ public class LinkArrayFactory {
             pvField.message("does not have support " + supportName,MessageType.error);
             return null;
         }
-        return new LinkArrayImpl(dbField);
+        return new SupportArrayImpl(dbField);
     }
     
-    private static String supportName = "linkArray";
+    private static String supportName = "supportArray";
     
-    private static class LinkArrayImpl extends AbstractSupport implements SupportProcessRequester
+    private static class SupportArrayImpl extends AbstractSupport implements SupportProcessRequester
     {
         private DBField dbField;
         private PVField pvField;
         private String processRequesterName = null;
         private PVBoolean[] pvWaits = null;
-        private LinkSupport[] linkSupports = null;
+        private Support[] supports = null;
         
         private DBField valueField = null;        
         private SupportProcessRequester supportProcessRequester;
@@ -60,7 +60,7 @@ public class LinkArrayFactory {
         private int numberWait;
         private RequestResult finalResult;
        
-        private LinkArrayImpl(DBField dbField) {
+        private SupportArrayImpl(DBField dbField) {
             super(supportName,dbField);
             this.dbField = dbField;
             pvField = dbField.getPVField();
@@ -84,18 +84,18 @@ public class LinkArrayFactory {
             DBField[] datas = dbNonScalarArray.getElementDBFields();
             int n = datas.length;
             pvWaits = new PVBoolean[n];
-            linkSupports = new LinkSupport[n];
+            supports = new Support[n];
             for(int i=0; i< n; i++) {
                 pvWaits[i] = null;
-                linkSupports[i] = null;
+                supports[i] = null;
                 DBStructure dbStructure = (DBStructure)datas[i];
                 if(dbStructure==null) continue;
                 PVStructure pvStructure = dbStructure.getPVStructure();
                 DBField[] dbFields = dbStructure.getFieldDBFields();
                 Structure structure = (Structure)pvStructure.getField();
                 String structureName = structure.getStructureName();
-                if(!structureName.equals("linkArrayElement")) {
-                    pvStructure.message(structureName + " not linkArrayElement", MessageType.fatalError);
+                if(!structureName.equals("supportArrayElement")) {
+                    pvStructure.message(structureName + " not supportArrayElement", MessageType.fatalError);
                     continue;
                 }
                 PVField[] pvdatas = pvStructure.getFieldPVFields();
@@ -116,25 +116,21 @@ public class LinkArrayFactory {
                     continue;
                 }
                 pvField = pvdatas[index];
-                if(pvField.getField().getType()!=Type.pvLink) {
+                Support support = (Support)dbFields[index].getSupport();
+                if(support==null) {
                     pvStructure.message("field link is not a link", MessageType.fatalError);
                     continue;
                 }
-                LinkSupport linkSupport = (LinkSupport)dbFields[index].getSupport();
-                if(linkSupport==null) {
-                    pvStructure.message("field link is not a link", MessageType.fatalError);
-                    continue;
-                }
-                linkSupport.initialize();
-                linkSupport.setField(valueField);
-                if(linkSupport.getSupportState()!=SupportState.readyForStart) {
+                support.initialize();
+                support.setField(valueField);
+                if(support.getSupportState()!=SupportState.readyForStart) {
                     supportState = SupportState.readyForInitialize;
                     for(int j=0; j<i; j++) {
-                        if(linkSupports[j]!=null) linkSupports[j].uninitialize();
+                        if(supports[j]!=null) supports[j].uninitialize();
                     }
                     break;
                 }
-                linkSupports[i] = linkSupport;
+                supports[i] = support;
             }
             setSupportState(supportState);
         }
@@ -144,9 +140,9 @@ public class LinkArrayFactory {
         public void start() {
             if(!super.checkSupportState(SupportState.readyForStart,supportName)) return;
             SupportState supportState = SupportState.ready;
-            int n = linkSupports.length;
+            int n = supports.length;
             for(int i=0; i< n; i++) {
-                LinkSupport processLink = linkSupports[i];
+                Support processLink = supports[i];
                 if(processLink==null) continue;
                 processLink.start();
             }
@@ -157,9 +153,9 @@ public class LinkArrayFactory {
          */
         public void stop() {
             if(super.getSupportState()!=SupportState.ready) return;
-            int n = linkSupports.length;
+            int n = supports.length;
             for(int i=0; i< n; i++) {
-                LinkSupport processLink = linkSupports[i];
+                Support processLink = supports[i];
                 if(processLink==null) continue;
                 processLink.stop();
             }
@@ -173,7 +169,7 @@ public class LinkArrayFactory {
                 stop();
             }
             if(super.getSupportState()!=SupportState.readyForStart) return;
-            if(linkSupports!=null) for(LinkSupport processLink: linkSupports) {
+            if(supports!=null) for(Support processLink: supports) {
                 if(processLink==null) continue;
                 processLink.uninitialize();
             }
@@ -190,17 +186,17 @@ public class LinkArrayFactory {
                 supportProcessRequester.supportProcessDone(RequestResult.failure);
                 return;
             }
-            if(linkSupports.length<=0) {
+            if(supports.length<=0) {
                 supportProcessRequester.supportProcessDone(RequestResult.success);
                 return;
             }
             this.supportProcessRequester = supportProcessRequester;
             nextLink = 0;
             finalResult = RequestResult.success;
-            callLinkSupport();
+            callSupport();
         }                
         /* (non-Javadoc)
-         * @see org.epics.ioc.process.LinkSupport#setField(org.epics.ioc.db.DBField)
+         * @see org.epics.ioc.process.Support#setField(org.epics.ioc.db.DBField)
          */
         public void setField(DBField dbField) {
             valueField = dbField;
@@ -216,19 +212,19 @@ public class LinkArrayFactory {
             }
             numberWait--;
             if(numberWait>0) return;
-            if(nextLink<linkSupports.length) {
-                callLinkSupport();
+            if(nextLink<supports.length) {
+                callSupport();
             } else {
                 supportProcessRequester.supportProcessDone(finalResult);
             }
         }
         
-        private void callLinkSupport() {
+        private void callSupport() {
             if(!super.checkSupportState(SupportState.ready,supportName + ".processContinue")) {
                 throw new IllegalStateException("processContinue but not ready");
             }
-            while(nextLink<linkSupports.length) {    
-                LinkSupport processLink = linkSupports[nextLink];
+            while(nextLink<supports.length) {    
+                Support processLink = supports[nextLink];
                 if(processLink==null) {
                     nextLink++;
                     continue;

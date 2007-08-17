@@ -37,13 +37,6 @@ public interface DBD {
      */
     void mergeIntoMaster();
     /**
-     * Create a DBDMenu.
-     * @param menuName The name of the menu.
-     * @param choices The menu choices.
-     * @return The menu or null if it already existed.
-     */
-    public DBDMenu createMenu(String menuName, String[] choices);
-    /**
      * Create a DBDStructure.
      * @param name The name of the structure.
      * @param field An array of Field for the fields of the structure.
@@ -62,6 +55,13 @@ public interface DBD {
     public DBDRecordType createRecordType(String name,
         Field[] field,Property[] property,FieldAttribute fieldAttribute);
     /**
+     * Create a DBDCreate.
+     * @param createName The create name.
+     * @param factoryName The name of the create factory.
+     * @return the DBDCreate or null if it does not exist.
+     */
+    public DBDCreate createCreate(String createName,String factoryName);
+    /**
      * Create a DBDSupport.
      * @param supportName The name of the support.
      * @param factoryName The name of the factory for creating support instances.
@@ -72,30 +72,11 @@ public interface DBD {
      * Create a DBDLinkSupport.
      * @param supportName The name of the support.
      * @param factoryName The name of the factory for creating support instances.
-     * @param configurationStructureName The name of the configuration structure.
+     * @param structureName The name of the configuration structure.
      * @return the DBDSupport or null if it already existed.
      */
-    public DBDLinkSupport createLinkSupport(
-        String supportName,String factoryName,String configurationStructureName);
-    /**
-     * Get the DBDMenu for the specified name.
-     * It will be returned if it resides in this DBD or in the master DBD.
-     * @param menuName The menu to retrieve.
-     * @return The DBDMenu or null if the menu does not exist.
-     */
-    DBDMenu getMenu(String menuName);
-    /**
-     * Add a menu definition.
-     * @param menu The DBDMenu to add.
-     * @return (true,false) if the menu (was not, was) added.
-     * If it is already present in either this DBD or in the master DBD it is not added.
-     */
-    boolean addMenu(DBDMenu menu);
-    /**
-     * Get a Map of all menus in this DBD.
-     * @return The Map.
-     */
-    Map<String, DBDMenu> getMenuMap();
+    public DBDSupport createSupport(
+        String supportName,String factoryName,String structureName);
     /**
      * Get the DBDStructure for the specified name.
      * It will be returned if it resides in this DBD or in the master DBD.
@@ -135,6 +116,25 @@ public interface DBD {
      */
     Map<String,DBDRecordType> getRecordTypeMap();
     /**
+     * Get a create.
+     * It will be returned if it resides in this DBD or in the master DBD.
+     * @param createName The name of the create desired.
+     * @return The DBDCreate or null if it does not exist.
+     */
+    DBDCreate getCreate(String createName);
+    /**
+     * Add a create definition.
+     * @param create The create to add.
+     * @return  (true,false) if the create (was not, was) added.
+     * If it is already present in either this DBD or in the master DBD it is not added.
+     */
+    boolean addCreate(DBDCreate create);
+    /**
+     * Get a Map of all the creates in this DBD.
+     * @return The Map.
+     */
+    Map<String,DBDCreate> getCreateMap();
+    /**
      * Get a support.
      * It will be returned if it resides in this DBD or in the master DBD.
      * @param supportName The name of the support desired.
@@ -153,37 +153,6 @@ public interface DBD {
      * @return The Map.
      */
     Map<String,DBDSupport> getSupportMap();
-    /**
-     * Get a link support.
-     * It will be returned if it resides in this DBD or in the master DBD.
-     * @param linkSupportName The name of the support desired.
-     * @return The DBDSupport or null if it does not exist.
-     */
-    DBDLinkSupport getLinkSupport(String linkSupportName);
-    /**
-     * Add a link support definition.
-     * @param support The support to add.
-     * @return  (true,false) if the support (was not, was) added.
-     * If it is already present in either this DBD or in the master DBD it is not added.
-     */
-    boolean addLinkSupport(DBDLinkSupport support);
-    /**
-     * Get a Map of all the supports in this DBD.
-     * @return The Map.
-     */
-    Map<String,DBDLinkSupport> getLinkSupportMap();
-    /**
-     * Generate a list of menu definitions with menu names that match the regular expression.
-     * @param regularExpression The regular expression.
-     * @return A string array containing the list.
-     */
-    String[] menuList(String regularExpression);
-    /**
-     * Dump all the menu definitions with menu names that match the regular expression.
-     * @param regularExpression The regular expression.
-     * @return A string containing the dump.
-     */
-    String menuToString(String regularExpression);
     /**
      * Generate a list of structure definitions with structure names that match the regular expression.
      * @param regularExpression The regular expression.
@@ -221,15 +190,16 @@ public interface DBD {
      */
     String supportToString(String regularExpression);
     /**
-     * Generate a list of link support definitions with support names that match the regular expression.
+     * Generate a list of create definitions with names that match the regular expression.
      * @param regularExpression The regular expression.
      * @return A string array containing the list.
      */
-    String[] linkSupportList(String regularExpression);
+    String[] createList(String regularExpression);
     /**
-     * Dump all the link support definitions with support names that match the regular expression.
+     * Dump all the create definitions with names that match the regular expression.
      * @param regularExpression The regular expression.
      * @return A string containing the dump.
      */
-    String linkSupportToString(String regularExpression);
+    String createToString(String regularExpression);
+    
 }

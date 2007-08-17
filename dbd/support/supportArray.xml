@@ -1,0 +1,12 @@
+<?xml version="1.0" ?>
+<DBDefinition>
+
+<structure name = "supportArrayElement">
+  <field name = "wait" type = "boolean" />
+  <field name = "link" type = "structure" structureName = "null" />
+</structure>
+
+<support name = "supportArray"
+  factoryName = "org.epics.ioc.support.SupportArrayFactory" />
+
+</DBDefinition>

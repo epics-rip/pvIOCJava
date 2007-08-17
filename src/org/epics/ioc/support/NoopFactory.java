@@ -6,8 +6,6 @@
 package org.epics.ioc.support;
 
 import org.epics.ioc.db.*;
-import org.epics.ioc.process.*;
-import org.epics.ioc.util.RequestResult;
 
 /**
  * This is a support that does nothing except act like it connects, etc.
@@ -31,16 +29,8 @@ public class NoopFactory {
     public static Support create(DBField dbField) {
         return new Noop(dbField);
     }    
-    /**
-     * Create noop LinkSupport for a DBLink.
-     * @param dbLink The field to support;
-     * @return The LinkSupport interfaace.
-     */
-    public static LinkSupport create(DBLink dbLink) {
-        return new Noop(dbLink);
-    }
     
-    private static class Noop extends AbstractLinkSupport {
+    private static class Noop extends AbstractSupport {
         private static String supportName = "noop";
         
         private Noop(DBField dbField) {

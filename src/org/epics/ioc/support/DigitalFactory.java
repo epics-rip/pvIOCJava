@@ -6,6 +6,8 @@
 package org.epics.ioc.support;
 
 import org.epics.ioc.pv.*;
+import org.epics.ioc.create.Create;
+import org.epics.ioc.create.Enumerated;
 import org.epics.ioc.db.*;
 import org.epics.ioc.process.*;
 import org.epics.ioc.util.*;
@@ -44,8 +46,12 @@ public class DigitalFactory {
         private static String supportName = "digital";
         private DBStructure dbStructure;
         private PVStructure pvStructure;
-        private DBEnum dbValue = null;
-        private PVEnum pvValue = null;
+        
+        private DBField dbValue = null;
+        private PVStringArray pvValueChoices = null;
+        private DBField dbValueIndex = null;
+        private PVInt pvValueIndex = null;
+        
         private DBField dbRegisterValue = null;
         private PVInt pvRegisterValue = null;
         private DBNonScalarArray dbStates = null;
@@ -54,8 +60,9 @@ public class DigitalFactory {
         private int mask = 0;
         private Support inputSupport = null;
         private Support outputSupport = null;
+        
         private Support valueAlarmSupport = null;
-        private PVMenuArray pvStateSeverityArray = null;
+        private PVStructureArray pvStateSeverityArray = null;
         
         private SupportProcessRequester supportProcessRequester = null;
         private ProcessState processState = ProcessState.inputSupport;
@@ -70,6 +77,7 @@ public class DigitalFactory {
             this.dbStructure = dbStructure;
             pvStructure = dbStructure.getPVStructure();
         }
+
 
         /* (non-Javadoc)
          * @see org.epics.ioc.process.Support#initialize()
@@ -87,14 +95,13 @@ public class DigitalFactory {
                     super.message("no value field", MessageType.error);
                     return;
                 }
-                dbField = dbFields[index];
-                if(dbField.getPVField().getField().getType()!=Type.pvEnum) {
-                    super.message("value is not an enum", MessageType.error);
-                    return;
-                }
-                dbValue = (DBEnum)dbFields[index];                
+                setField(dbFields[index]);         
             }
-            pvValue = dbValue.getPVEnum();
+            if(!initValue()) return;
+            if(dbValue==null) {
+                super.message("no value field", MessageType.error);
+                return;
+            }
             index = structure.getFieldIndex("registerValue");
             if(index<0) {
                 super.message("no registerValue field", MessageType.error);
@@ -147,27 +154,18 @@ public class DigitalFactory {
             dbStates = (DBNonScalarArray)dbFields[index];
             index = structure.getFieldIndex("input");
             if(index>=0) {
-                inputSupport = (LinkSupport)dbFields[index].getSupport();
+                inputSupport = dbFields[index].getSupport();
             }
             index = structure.getFieldIndex("output");
             if(index>=0) {
-                outputSupport = (LinkSupport)dbFields[index].getSupport();
+                outputSupport = dbFields[index].getSupport();
             }            
             index = structure.getFieldIndex("valueAlarm");
-            PVStructure configStructure = null;
-            if(index>0) {
-                dbField = dbFields[index];
-                Support support = dbField.getSupport();
-                if(support!=null)  {
-                    valueAlarmSupport = support;
-                    if(support instanceof LinkSupport) {
-                        LinkSupport linkSupport = (LinkSupport)support;
-                        configStructure = linkSupport.getConfigStructure("digitalAlarm",false);
-                        pvStateSeverityArray = (PVMenuArray)configStructure.getArrayField(
-                                "stateSeverity", Type.pvMenu);
-                    }
-                }
+            if(index<0) {
+                super.message("valueAlarm does not exist", MessageType.error);
+                return;
             }
+            if(!initValueAlarm(dbFields[index])) return;
             if(!initFields()) return;
             if(inputSupport!=null) {
                 inputSupport.setField(dbRegisterValue);
@@ -203,7 +201,7 @@ public class DigitalFactory {
             if(!super.checkSupportState(SupportState.readyForStart,supportName)) return;
             SupportState supportState = SupportState.ready;
             prevRegisterValue = pvRegisterValue.get();
-            prevValueIndex = pvValue.getIndex();
+            prevValueIndex = pvValueIndex.get();
             if(inputSupport!=null) {
                 inputSupport.start();
                 supportState = inputSupport.getSupportState();
@@ -266,7 +264,7 @@ public class DigitalFactory {
                 inputSupport.process(this);
                 return;
             } else {
-                int value = pvValue.getIndex();
+                int value = pvValueIndex.get();
                 if(prevValueIndex!=value) {
                     prevRegisterValue = values[prevValueIndex];
                     pvRegisterValue.put(prevRegisterValue);
@@ -279,7 +277,8 @@ public class DigitalFactory {
                 newValue &= mask;
                 for(int i=0; i< values.length; i++) {
                     if(values[i]==newValue) {
-                        dbValue.setIndex(i);
+                        pvValueIndex.put(i);
+                        dbValueIndex.postPut();
                         prevValueIndex = i;
                         break;
                     }
@@ -301,11 +300,12 @@ public class DigitalFactory {
          * @see org.epics.ioc.support.AbstractSupport#setField(org.epics.ioc.db.DBField)
          */
         public void setField(DBField dbField) {
-            if(dbField.getPVField().getField().getType()!=Type.pvEnum) {
-                super.message("setField: field type is not enum", MessageType.error);
+            Create create = dbField.getCreate();
+            if(create==null || !(create instanceof Enumerated)) {
+                dbField.getPVField().message("value is not an enumerated structure", MessageType.error);
                 return;
             }
-            dbValue = (DBEnum)dbField;  
+            dbValue = dbField;
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.process.SupportProcessRequester#supportProcessDone(org.epics.ioc.util.RequestResult)
@@ -323,7 +323,8 @@ public class DigitalFactory {
                         newValue &= mask;
                         for(int i=0; i< values.length; i++) {
                             if(values[i]==newValue) {
-                                dbValue.setIndex(i);
+                                pvValueIndex.put(i);
+                                dbValueIndex.postPut();
                                 break;
                             }
                         }
@@ -348,17 +349,83 @@ public class DigitalFactory {
             }
             
         }
+        private boolean initValue() {
+            if(dbValue==null) {
+                super.message("no value field", MessageType.error);
+                return false;
+            }
+            DBStructure dbStructure = (DBStructure)dbValue;
+            PVStructure pvStructure = dbStructure.getPVStructure();
+            Structure structure = pvStructure.getStructure();
+            DBField[] dbFields = dbStructure.getFieldDBFields();
+            PVField[] pvFields = dbStructure.getPVStructure().getFieldPVFields();
+            int index;
+            index = structure.getFieldIndex("index");
+            if(index<0) {
+                super.message("value does not have an index field. Why???", MessageType.error);
+                return false;
+            }
+            dbValueIndex = dbFields[index];
+            PVField pvField = pvFields[index];
+            if(pvField.getField().getType()!=Type.pvInt) {
+                super.message("value.index is not an integer. Why???", MessageType.error);
+                return false;
+            }
+            pvValueIndex = (PVInt)pvFields[index];
+            index = structure.getFieldIndex("choices");
+            if(index<0) {
+                super.message("value does not have a choices field. Why???", MessageType.error);
+                return false;
+            }
+            pvField = pvFields[index];
+            if(pvField.getField().getType()!=Type.pvArray) {
+                super.message("value.choices is not an array. Why???", MessageType.error);
+                return false;
+            }
+            PVArray pvArray = (PVArray)pvField;
+            if(pvArray.getArray().getElementType()!=Type.pvString) {
+                super.message("value.choices is not an array of string. Why???", MessageType.error);
+                return false;
+            }
+            pvValueChoices = (PVStringArray)pvArray;
+            return true;
+        }
+        
+        private boolean initValueAlarm(DBField dbValueAlarm) {
+            DBStructure dbStructure = (DBStructure)dbValueAlarm;
+            PVStructure pvStructure = dbStructure.getPVStructure();
+            Structure structure = pvStructure.getStructure();
+            PVField[] pvFields = dbStructure.getPVStructure().getFieldPVFields();
+            int index;
+            index = structure.getFieldIndex("stateSeverity");
+            if(index<0) {
+                super.message("valueAlarm does not have a stateSeverity field. Why???", MessageType.error);
+                return false;
+            }
+            PVField pvField = pvFields[index];
+            if(pvField.getField().getType()!=Type.pvArray) {
+                super.message("valueAlarm.stateSeverity is not an array. Why???", MessageType.error);
+                return false;
+            }
+            PVArray pvArray = (PVArray)pvField;
+            if(pvArray.getArray().getElementType()!=Type.pvStructure) {
+                super.message("valueAlarm.stateSeverity is not an array of structures. Why???", MessageType.error);
+                return false;
+            }
+            pvStateSeverityArray = (PVStructureArray)pvArray;
+            return true;
+        }
         
         private boolean initFields() {
-            DBField[] dbFields = dbStates.getElementDBFields();
-            int nstates = dbFields.length;
+            DBField[] dbStatesFields = dbStates.getElementDBFields();
+            int nstates = dbStatesFields.length;
             if(nstates<1) return false;
             String[] names = new String[nstates];
-            PVMenu[] menus = new PVMenu[nstates];
+            PVStructure[] pvSeverities = new PVStructure[nstates];
             values = new int[nstates];
             for(int indState=0; indState<nstates; indState++) {
-                DBField dbField = dbFields[indState];
-                if(dbFields==null) {
+                DBField dbField = dbStatesFields[indState];
+                if(dbField==null) {
                     super.message(
                         "states has a null element. index " + indState,
                         MessageType.error);
@@ -371,8 +438,10 @@ public class DigitalFactory {
                         MessageType.error);
                     return false;
                 }
-                Structure structure = (Structure)field;
+                DBNonScalarArray dbStateSeverity = (DBNonScalarArray)dbField;                
+                DBField[] dbStateFields = dbStateSeverity.getElementDBFields();
                 PVStructure pvStructure = (PVStructure)dbField.getPVField();
+                Structure structure = pvStructure.getStructure();
                 PVField[] pvFields = pvStructure.getFieldPVFields();
                 int indField = structure.getFieldIndex("name");
                 if(indField<0) {
@@ -413,27 +482,18 @@ public class DigitalFactory {
                             MessageType.error);
                     return false;
                 }
-                pvField = pvFields[indField];
-                if(pvField.getField().getType()!=Type.pvMenu) {
+                Enumerated enumerated;
+                enumerated = AlarmSeverity.getAlarmSeverity(dbStateFields[indField]);
+                if(enumerated==null) {
                     super.message(
-                            "states index " + indState + " field name is not a menu",
+                            "states index " + indState + " field name is not an alarmSeverity",
                             MessageType.error);
                     return false;
                 }
-                Menu menu = (Menu)pvField.getField();
-                if(!menu.getMenuName().equals("alarmSeverity")) {
-                    super.message(
-                            "states index " + indState + " field name is not an alarmSeverity menu",
-                            MessageType.error);
-                    return false;
-                }
-                menus[indState] = (PVMenu)pvField;
+                pvSeverities[indState] = (PVStructure)pvField;
             }
-            PVEnum pvEnum = dbValue.getPVEnum();
-            pvEnum.setChoices(names);
-            if(pvStateSeverityArray!=null) {
-                pvStateSeverityArray.put(0, nstates, menus, 0);
-            }
+            pvValueChoices.put(0, names.length, names, 0);
+            pvStateSeverityArray.put(0, pvSeverities.length, pvSeverities, 0);
             return true;
         } 
     }

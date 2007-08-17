@@ -1,0 +1,8 @@
+<?xml version="1.0" ?>
+<IOCDatabase>
+<include addPath = "src" />
+<include href = "counterDB.xml" />
+<include removePath = "src" />
+<!--
+-->
+</IOCDatabase>

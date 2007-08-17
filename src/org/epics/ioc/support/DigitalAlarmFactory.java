@@ -5,6 +5,8 @@
  */
 package org.epics.ioc.support;
 
+import org.epics.ioc.create.Create;
+import org.epics.ioc.create.Enumerated;
 import org.epics.ioc.db.*;
 import org.epics.ioc.process.*;
 import org.epics.ioc.pv.*;
@@ -21,38 +23,38 @@ public class DigitalAlarmFactory {
      * @param dbLink The link.
      * @return An interface to the support or null if the supportName was not "digitalAlarm".
      */
-    public static Support create(DBLink dbLink) {
-        PVLink pvLink = dbLink.getPVLink();
-        String supportName = pvLink.getSupportName();
+    public static Support create(DBStructure dbStructure) {
+        PVStructure pvStructure = dbStructure.getPVStructure();
+        String supportName = pvStructure.getSupportName();
         if(supportName==null || !supportName.equals(supportName)) {
-            pvLink.message("does not have support " + supportName,MessageType.error);
+            pvStructure.message("does not have support " + supportName,MessageType.error);
             return null;
         }
-        return new DigitalAlarmImpl(dbLink);
+        return new DigitalAlarmImpl(dbStructure);
     }
     
     private static String supportName = "digitalAlarm";
     
-    private static class DigitalAlarmImpl extends AbstractLinkSupport
+    private static class DigitalAlarmImpl extends AbstractSupport
     {
-        private DBLink dbLink;
-        private PVLink pvLink;
+        private DBStructure dbStructure;
+        private PVStructure pvStructure;
         private boolean noop;
         private AlarmSupport alarmSupport;
         
         private PVBoolean pvActive;
-        private MenuArrayData menuArrayData = new MenuArrayData();
-        private PVMenuArray pvMenuArray = null;
-        private PVMenu pvChangeOfStateMenu = null;
         
-        private PVEnum pvValue;
+        private PVInt[] pvInts = null;
+        private PVInt pvChangeStateAlarm;
         
-        private int prevIndex = 0;
+        private PVInt pvValue;
+        
+        private int prevValue = 0;
        
-        private DigitalAlarmImpl(DBLink dbLink) {
-            super(supportName,dbLink);
-            this.dbLink = dbLink;
-            pvLink = dbLink.getPVLink();
+        private DigitalAlarmImpl(DBStructure dbStructure) {
+            super(supportName,dbStructure);
+            this.dbStructure = dbStructure;
+            pvStructure = dbStructure.getPVStructure();
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.process.Support#initialize()
@@ -62,27 +64,77 @@ public class DigitalAlarmFactory {
             if(!super.checkSupportState(SupportState.readyForInitialize,supportName)) return;
             noop = false;
             if(pvValue==null) {
-                super.message("setField was not called with an enum field", MessageType.error);
+                super.message("setField was not called with an enumerated structure field",
+                    MessageType.error);
                 noop = true;
                 return;
             }
-            PVStructure configStructure = super.getConfigStructure("digitalAlarm", false);
-            if(configStructure==null) {
-                noop = true;
-                setSupportState(supportState);
-                return;
-            }
-            alarmSupport = AlarmFactory.findAlarmSupport(dbLink);
+            alarmSupport = AlarmFactory.findAlarmSupport(dbStructure);
             if(alarmSupport==null) {
                 super.message("no alarmSupport", MessageType.error);
                 return;
             }
-            pvActive = configStructure.getBooleanField("active");
+            pvActive = pvStructure.getBooleanField("active");
             if(pvActive==null) return;
-            pvMenuArray = (PVMenuArray)configStructure.getArrayField("stateSeverity", Type.pvMenu);
-            if(pvMenuArray==null) return;
-            pvChangeOfStateMenu = configStructure.getMenuField("changeStateAlarm","alarmSeverity");
-            if(pvChangeOfStateMenu==null) return;
+            
+            DBField[] dbFields = dbStructure.getFieldDBFields();
+            Structure structure = dbStructure.getPVStructure().getStructure();
+            int index;
+            Enumerated enumerated;
+            
+            index = structure.getFieldIndex("stateSeverity");
+            if(index<0) {
+                super.message("stateSeverity does not exist", MessageType.error);
+                return;
+            }
+            DBField dbField = dbFields[index];
+            PVField pvField = dbField.getPVField();
+            Field field = pvField.getField();
+            if(field.getType()!=Type.pvArray) {
+                super.message("stateSeverity is not an array", MessageType.error);
+                return;
+            }
+            Array array = (Array)field;
+            if(array.getElementType()!=Type.pvStructure) {
+                super.message("stateSeverity is not a structure array", MessageType.error);
+                return;
+            }
+            pvField.setMutable(false);
+            DBNonScalarArray dbStateSeverity = (DBNonScalarArray)dbFields[index];
+            DBField[] dbStateSeverityFields = dbStateSeverity.getElementDBFields();
+            int length = dbStateSeverityFields.length;
+            for(int i=length-1; i>=0; i-- ) {
+                if(dbStateSeverityFields[i]==null) {
+                    length--;
+                } else {
+                    break;
+                }
+            }
+            if(length==0) {
+                noop = true;
+                return;
+            }
+            pvInts = new PVInt[length];
+            for(int i=0; i< length; i++) {
+                dbField = dbStateSeverityFields[i];
+                if(dbField==null ||
+                        (enumerated = AlarmSeverity.getAlarmSeverity(dbFields[index]))==null) {
+                    super.message("stateSeverity has an element that is not an enumerated structure",
+                        MessageType.error);
+                    return;
+                }
+                pvInts[i] = enumerated.getIndexField();
+                dbField.getPVField().setMutable(false);
+            }
+            
+            index = structure.getFieldIndex("changeStateAlarm");
+            if(index<0) {
+                super.message("changeStateAlarm does not exist", MessageType.error);
+                return;
+            }
+            enumerated = AlarmSeverity.getAlarmSeverity(dbFields[index]);
+            if(enumerated==null) return;
+            pvChangeStateAlarm = enumerated.getIndexField();
             setSupportState(supportState);
         }
         /* (non-Javadoc)
@@ -94,7 +146,7 @@ public class DigitalAlarmFactory {
                 setSupportState(SupportState.ready);
                 return;
             }
-            prevIndex = pvValue.getIndex();
+            prevValue = pvValue.get();
             setSupportState(SupportState.ready);
         }
         /* (non-Javadoc)
@@ -114,7 +166,9 @@ public class DigitalAlarmFactory {
                 return;
             }
             pvActive = null;
-            pvMenuArray = null;
+            pvInts = null;
+            pvChangeStateAlarm = null;
+            pvValue = null;
             setSupportState(SupportState.readyForInitialize);
         }       
         /* (non-Javadoc)
@@ -128,43 +182,47 @@ public class DigitalAlarmFactory {
             boolean active = pvActive.get();
             if(!active) return;
             int index;
-            String message = pvLink.getFullFieldName();
-            int  value = pvValue.getIndex();
-            if(value<pvMenuArray.getLength()) {
-                pvMenuArray.get(value, 1, menuArrayData);
-                PVMenu pvMenu = menuArrayData.data[menuArrayData.offset];
-                if(pvMenu!=null) {
-                    if(pvMenu.getMenu().getMenuName().equals("alarmSeverity")) {
-                        index = pvMenu.getIndex();
-                        if(index>0) alarmSupport.setAlarm(
-                                message + " state alarm",
-                                AlarmSeverity.getSeverity(index));
-                    }
+            String message = pvStructure.getFullFieldName();
+            int  value = pvValue.get();
+            if(value<pvInts.length) {
+                PVInt pvInt = pvInts[value];
+                int alarmValue = pvInt.get();
+                if(alarmValue>0) {
+                    alarmSupport.setAlarm(
+                            message + " state alarm",
+                            AlarmSeverity.getSeverity(alarmValue));
                 }
             } else {
                 alarmSupport.setAlarm(
-                        message + ":alarmSupport value out of bounds",
+                        message + "alarmSupport: value out of bounds",
                         AlarmSeverity.major);
             }
-            if(prevIndex!=value) {
-                prevIndex = value;
-                index = pvChangeOfStateMenu.getIndex();
+            if(prevValue!=value) {
+                prevValue = value;
+                index = pvChangeStateAlarm.get();
                 if(index>0) alarmSupport.setAlarm(
-                        message + " put of state alarm",
+                        message + " changeOfState alarm",
                         AlarmSeverity.getSeverity(index));
             }
             supportProcessRequester.supportProcessDone(RequestResult.success);
         }                
         /* (non-Javadoc)
-         * @see org.epics.ioc.process.LinkSupport#setField(org.epics.ioc.db.DBField)
+         * @see org.epics.ioc.process.Support#setField(org.epics.ioc.db.DBField)
          */
         public void setField(DBField dbField) {
             PVField pvField = dbField.getPVField();
-            if(pvField.getField().getType()!=Type.pvEnum) {
-                super.message("setField: field type is not enum", MessageType.error);
+            if(pvField.getField().getType()!=Type.pvStructure) {
+                pvField.message("field is not an alarmSeverity structure", MessageType.error);
                 return;
             }
-            pvValue = (PVEnum)pvField;
+            DBStructure dbStructure = (DBStructure)dbField;
+            Create create = dbStructure.getCreate();
+            if(create==null || !(create instanceof Enumerated)) {
+                pvField.message("interface Enumerated not found", MessageType.error);
+                return;
+            }
+            Enumerated enumerated = (Enumerated)create;
+            pvValue = enumerated.getIndexField();
         }
     }
 }

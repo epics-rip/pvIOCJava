@@ -43,25 +43,10 @@ public interface CD {
      */
     void dataPut(PVField targetPVField);
     /**
-     * The enum index has been modified.
-     * @param targetPVEnum The enum interface.
-     */
-    void enumIndexPut(PVEnum targetPVEnum);
-    /**
-     * The enum choices has been modified.
-     * @param targetPVEnum The enum interface.
-     */
-    void enumChoicesPut(PVEnum targetPVEnum);
-    /**
      * The supportName has been modified.
      * @param targetPVField The pvField.
      */
     void supportNamePut(PVField targetPVField);
-    /**
-     * The link configration structure has been modified.
-     * @param targetPVLink The link interface.
-     */
-    void configurationStructurePut(PVLink targetPVLink);
     /**
      * Start of a structure modification.
      * @param targetPVStructure The structure.
@@ -79,31 +64,10 @@ public interface CD {
      */
     void dataPut(PVField requested,PVField targetPVField);
     /**
-     * A put to an enum subfield of a structure has occured. 
-     * The enum index has been modified.
-     * @param requested The target field that has targetPVEnum as a subfield.
-     * @param targetPVEnum The enum interface.
-     */
-    void enumIndexPut(PVField requested,PVEnum targetPVEnum);
-    /**
-     * A put to an enum subfield of a structure has occured. 
-     * The enum choices has been modified.
-     * @param requested The target field that has targetPVEnum as a subfield.
-     * @param targetPVEnum The enum interface.
-     */
-    void enumChoicesPut(PVField requested,PVEnum targetPVEnum);
-    /**
      * A put to the supportName of a subfield of a structure has occured. 
      * The supportName has been modified.
      * @param requested The target field that has targetPVField as a subfield.
      * @param targetPVField The pvField in the structure.
      */
     void supportNamePut(PVField requested,PVField targetPVField);
-    /**
-     * A put to the configurationStructure of a pvLink subfield of a structure has occured. 
-     * The link configration structure has been modified.
-     * @param requested The target field that has targetPVLink as a subfield.
-     * @param targetPVLink The link interface.
-     */
-    void configurationStructurePut(PVField requested,PVLink targetPVLink);
 }

@@ -2,19 +2,20 @@
 <DBDefinition>
 
 <structure name = "digitalState">
-    <field name = "name" type = "string" />
-    <field name = "value" type = "int" />
-    <field name = "severity" type = "menu" menuName = "alarmSeverity" />
+  <field name = "name" type = "string" />
+  <field name = "value" type = "int" />
+  <field name = "severity" type = "structure" structureName = "alarmSeverity" />
 </structure>
 
 <structure name = "digitalIO" supportName = "digital">
-    <!-- structureName must be digitalState -->
-    <field name = "states" type = "array" elementType = "structure" />
-    <field name = "numberOfBits" type = "int" />
-    <field name = "registerValue" type = "int" design = "false" />
-    <field name = "input" type = "link" />
-    <field name = "valueAlarm" type = "link" supportName = "digitalAlarm" />
-    <field name = "output" type = "link" />
+  <!-- structureName must be digitalState -->
+  <field name = "states" type = "array" elementType = "structure" />
+  <field name = "numberOfBits" type = "int" />
+  <field name = "registerValue" type = "int" design = "false" />
+  <field name = "input" type = "structure" structureName = "null" />
+  <field name = "valueAlarm" type = "structure" structureName = "null"
+     supportName = "digitalAlarm" />
+  <field name = "output" type = "structure" structureName = "null" />
 </structure>
 
 <support name = "digital"

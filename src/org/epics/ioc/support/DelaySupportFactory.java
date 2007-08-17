@@ -15,25 +15,25 @@ import org.epics.ioc.util.*;
  * @author mrk
  *
  */
-public class DelayLinkFactory {
+public class DelaySupportFactory {
     
-    public static LinkSupport create(DBLink dbLink) {
-        PVLink pvLink = dbLink.getPVLink();
-        String supportName = pvLink.getSupportName();
+    public static Support create(DBStructure dbStructure) {
+        PVStructure pvStructure = dbStructure.getPVStructure();
+        String supportName = pvStructure.getSupportName();
         if(supportName==null || !supportName.equals(supportName)) {
-            pvLink.message("does not have support " + supportName,MessageType.error);
+            pvStructure.message("does not have support " + supportName,MessageType.error);
             return null;
         }
-        return new DelayLink(dbLink);
+        return new DelaySupport(dbStructure);
     }
     
-    private static Timer timer = new Timer("delayLinkTimer");
-    private static String supportName = "delayLink";
+    private static Timer timer = new Timer("delaySupportTimer");
+    private static String supportName = "delaySupport";
     
-    private static class DelayLink extends AbstractLinkSupport implements ProcessContinueRequester
+    private static class DelaySupport extends AbstractSupport implements ProcessContinueRequester
     {       
         private TimerTask timerTask = null;
-        private DBLink dbLink = null;
+        private DBStructure dbStructure = null;
         private DBRecord dbRecord = null;
         private RecordProcess recordProcess = null;
         private PVLong minAccess = null;
@@ -44,24 +44,23 @@ public class DelayLinkFactory {
         private long delay = 0;
         private SupportProcessRequester supportProcessRequester = null;
 
-        private DelayLink(DBLink dbLink) {
-            super(supportName,dbLink);
-            this.dbLink = dbLink;
+        private DelaySupport(DBStructure dbStructure) {
+            super(supportName,dbStructure);
+            this.dbStructure = dbStructure;
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.process.AbstractSupport#initialize()
          */
         public void initialize() {
             if(!super.checkSupportState(SupportState.readyForInitialize,supportName)) return;
-            dbRecord = dbLink.getDBRecord();
+            PVStructure pvStructure = dbStructure.getPVStructure();
+            dbRecord = dbStructure.getDBRecord();
             recordProcess = dbRecord.getRecordProcess();
-            PVStructure configStructure = super.getConfigStructure("delayLink", true);
-            if(configStructure==null) return;
-            minAccess = configStructure.getLongField("min");
+            minAccess = pvStructure.getLongField("min");
             if(minAccess==null) return;
-            maxAccess = configStructure.getLongField("max");
+            maxAccess = pvStructure.getLongField("max");
             if(maxAccess==null) return;
-            incAccess = configStructure.getLongField("inc");
+            incAccess = pvStructure.getLongField("inc");
             if(incAccess==null) return;
             setSupportState(SupportState.readyForStart);
         }
@@ -115,7 +114,7 @@ public class DelayLinkFactory {
             supportProcessRequester.supportProcessDone(RequestResult.success);
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.process.LinkSupport#setField(org.epics.ioc.pvAccess.PVData)
+         * @see org.epics.ioc.process.Support#setField(org.epics.ioc.pvAccess.PVData)
          */
         public void setField(DBField dbField) {
             // nothing to do
@@ -128,17 +127,17 @@ public class DelayLinkFactory {
     }
     
     private static class DelayTask extends TimerTask {
-        DelayLink delayLink;
+        DelaySupport delaySupport;
         
-        private DelayTask(DelayLink delayLink) {
-            this.delayLink = delayLink;
+        private DelayTask(DelaySupport delaySupport) {
+            this.delaySupport = delaySupport;
         }
 
         /* (non-Javadoc)
          * @see java.lang.Runnable#run()
          */
         public void run() {
-            delayLink.delayDone();
+            delaySupport.delayDone();
         }
     }
 }

@@ -87,18 +87,16 @@ public class XMLToDBDFactory {
           
         private enum State {
             idle,
-            menu,
             structure,
             recordType,
             support,
-            linkSupport
+            create
         } 
         private State state = State.idle;
 
-        private DBDXMLHandler menuHandler = new DBDXMLMenuHandler();
         private DBDXMLHandler structureHandler = new DBDXMLStructureHandler();
         private DBDXMLHandler supportHandler = new DBDXMLSupportHandler();
-        private DBDXMLHandler linkSupportHandler = new DBDXMLLinkSupportHandler();
+        private DBDXMLHandler createHandler = new DBDXMLCreateHandler();
         
         public void endDocument(){}       
 
@@ -106,10 +104,7 @@ public class XMLToDBDFactory {
         {
             switch(state) {
             case idle:
-                if(qName.equals("menu")) {
-                    state = State.menu;
-                    menuHandler.start(qName,attributes);
-                } else if(qName.equals("structure")) {
+                if(qName.equals("structure")) {
                     state = State.structure;
                     structureHandler.start(qName,attributes);
                 } else if(qName.equals("recordType")) {
@@ -118,16 +113,13 @@ public class XMLToDBDFactory {
                 } else if(qName.equals("support")) {
                     state = State.support;
                     supportHandler.start(qName,attributes);
-                } else if(qName.equals("linkSupport")) {
-                    state = State.linkSupport;
-                    linkSupportHandler.start(qName,attributes);
+                } else if(qName.equals("create")) {
+                    state = State.create;
+                    createHandler.start(qName,attributes);
                 } else {
                     iocxmlReader.message("startElement " + qName + " not understood",
                             MessageType.error);
                 }
-                break;
-            case menu: 
-                menuHandler.startElement(qName,attributes);
                 break;
             case structure:
                 // no break. structure and recordType handled by structureHandler
@@ -137,8 +129,8 @@ public class XMLToDBDFactory {
             case support:
                 supportHandler.startElement(qName,attributes);
                 break;
-            case linkSupport:
-                linkSupportHandler.startElement(qName,attributes);
+            case create:
+                createHandler.startElement(qName,attributes);
                 break;
             }
         }
@@ -150,14 +142,6 @@ public class XMLToDBDFactory {
                 iocxmlReader.message(
                     "endElement " + qName + " not understood",
                     MessageType.error);
-                break;
-            case menu: 
-                if(qName.equals("menu")) {
-                    menuHandler.end(qName);
-                    state = State.idle;
-                } else {
-                    menuHandler.endElement(qName);
-                }
                 break;
             case structure:
             case recordType:
@@ -177,12 +161,12 @@ public class XMLToDBDFactory {
                     supportHandler.endElement(qName);
                 }
                 break;
-            case linkSupport:
-                if(qName.equals("linkSupport")) {
-                    linkSupportHandler.end(qName);
+            case create:
+                if(qName.equals("create")) {
+                    createHandler.end(qName);
                     state = State.idle;
                 } else {
-                    linkSupportHandler.endElement(qName);
+                    createHandler.endElement(qName);
                 }
                 break;
             }
@@ -193,9 +177,6 @@ public class XMLToDBDFactory {
             switch(state) {
             case idle:
                 break;
-            case menu: 
-                menuHandler.characters(ch,start,length);
-                break;
             case structure:
             case recordType:
                 structureHandler.characters(ch,start,length);
@@ -203,8 +184,8 @@ public class XMLToDBDFactory {
             case support:
                 supportHandler.characters(ch,start,length);
                 break;
-            case linkSupport:
-                linkSupportHandler.characters(ch,start,length);
+            case create:
+                createHandler.characters(ch,start,length);
                 break;
             }
         }
@@ -223,113 +204,6 @@ public class XMLToDBDFactory {
         void endElement(String qName);
     }
 
-    private static class DBDXMLMenuHandler implements DBDXMLHandler{
-        private State state = State.idle;
-        private String menuName;
-        private LinkedList<String> choiceList;
-        private StringBuilder choiceBuilder = new StringBuilder();
-        private enum State {idle, nextChoice, getChoice}
-        
-        public void start(String qName, Map<String,String> attributes) {
-            menuName = attributes.get("name");
-            if(menuName==null) {
-                iocxmlReader.message("attribute name not specified",
-                        MessageType.error);
-                state = State.idle;
-            }
-            if(dbd.getMenu(menuName)!=null) {
-                iocxmlReader.message(
-                    "menu " + menuName + " ignored because it already exists",
-                    MessageType.warning);
-                state = State.idle;
-            } else {
-                choiceList = new LinkedList<String>();
-                state = State.nextChoice;
-            }
-        }
-    
-        public void end(String qName){
-            if(state==State.idle) return;
-            if(state!=State.nextChoice) {
-                iocxmlReader.message(
-                    "Logic error in DBDXMLMenuHandler.end"
-                    + " state should be nextChoice",
-                    MessageType.error);
-                state = State.idle;
-                return;
-            }
-            if(menuName==null || menuName.length()==0
-            || choiceList==null || choiceList.size()==0) {
-                iocxmlReader.message(
-                        "menu definition is not complete",
-                        MessageType.error);
-            } else {
-                String[] choice = new String[choiceList.size()];
-                ListIterator<String> iter = choiceList.listIterator();
-                for(int i=0; i<choice.length; i++) {
-                    choice[i] = iter.next();
-                }
-                choiceList = null;
-                DBDMenu dbdMenu = dbd.createMenu(
-                    menuName,choice);
-                dbd.addMenu(dbdMenu);
-            }
-            state= State.idle;
-        }
-    
-        public void startElement(String qName, Map<String,String> attributes) {
-            if(state==State.idle) return;
-            if(state!=State.nextChoice) {
-                iocxmlReader.message(
-                        "Logic error in DBDXMLMenuHandler.startElement"
-                        + "state should be nextChoice",
-                        MessageType.error);
-                state = State.idle;
-                return;
-            }
-            if(!qName.equals("choice")) {
-                iocxmlReader.message(
-                        "illegal element. only choice is allowed",
-                        MessageType.error);
-                state = State.idle;
-                return;
-            }
-            state = State.getChoice;
-            choiceBuilder.setLength(0);
-        }
-    
-        public void endElement(String qName){
-            if(state==State.idle) return;
-            if(state!=State.getChoice) {
-                iocxmlReader.message(
-                        "Logic error in DBDXMLMenuHandler.startElement"
-                        + "state should be nextChoice",
-                        MessageType.error);
-                state = State.idle;
-                return;
-            }
-            String newChoice = choiceBuilder.toString();
-            if(newChoice.length()<=0) {
-                iocxmlReader.message("illegal choice",
-                        MessageType.error);
-                    state = State.idle;
-                    return;
-            }
-            choiceList.add(choiceBuilder.toString());
-            state = State.nextChoice;
-        }
-    
-        public void characters(char[] ch, int start, int length){
-            if(state!=State.getChoice) return;
-            while(start<ch.length && length>0 && ch[start]==' ') {
-                start++; length--;
-            }
-            while(length>0 && ch[start+ length-1]==' ') length--;
-            if(length<=0) return;
-            choiceBuilder.append(ch,start,length);
-        }
-    }
-
     private static class DBDXMLStructureHandler implements DBDXMLHandler
     {
  
@@ -339,13 +213,13 @@ public class XMLToDBDFactory {
         private String structureName;
         private boolean isRecordType;
         private String structureSupportName = null;
+        private String structureCreateName = null;
         private String fieldSupportName = null;
+        private String fieldCreateName = null;
         private LinkedList<Property> structurePropertyList;
         private LinkedList<Field> fieldList;
         // remaining are for field elements
         private String fieldName;
-        private String menuName;
-        private DBDMenu dbdMenu;
         private DBDStructure fieldStructure;
         private Type type;
         private Type elementType;
@@ -374,6 +248,7 @@ public class XMLToDBDFactory {
                 return;
             }
             structureSupportName = attributes.get("supportName");
+            structureCreateName = attributes.get("createName");
             if(qName.equals("recordType")) {
                 if(dbd.getRecordType(structureName)!=null) {
                     iocxmlReader.message(
@@ -433,6 +308,9 @@ public class XMLToDBDFactory {
                 if(structureSupportName!=null) {
                     dbdRecordType.setSupportName(structureSupportName);
                 }
+                if(structureCreateName!=null) {
+                    dbdRecordType.setCreateName(structureCreateName);
+                }
             } else {
                 DBDStructure dbdStructure = dbd.createStructure(
                         structureName,field,property,structureAttribute);
@@ -445,6 +323,9 @@ public class XMLToDBDFactory {
                 if(structureSupportName!=null) {
                     dbdStructure.setSupportName(structureSupportName);
                 }
+                if(structureCreateName!=null) {
+                    dbdStructure.setCreateName(structureCreateName);
+                }
             }
             structurePropertyList = null;
             fieldList = null;
@@ -455,6 +336,8 @@ public class XMLToDBDFactory {
             if(state==State.idle) return;
             if(qName.equals("field")) {
                 assert(state==State.structure);
+                fieldSupportName = null;
+                fieldCreateName = null;
                 fieldAttribute = fieldCreate.createFieldAttribute(attributes);
                 fieldName = attributes.get("name");
                 if(fieldName==null) {
@@ -470,37 +353,20 @@ public class XMLToDBDFactory {
                     state= State.idle;
                     return;
                 }
-                if(type==Type.pvMenu) {
-                    menuName = attributes.get("menuName");
-                    if(menuName==null) {
-                        iocxmlReader.message("menuName not specified",
-                                MessageType.error);
-                        state= State.idle;
-                        return;
-                    }
-                    dbdMenu = dbd.getMenu(menuName);
-                    if(dbdMenu==null) {
-                        iocxmlReader.message("menuName not found in DBD database",
-                                MessageType.error);
-                        state= State.idle;
-                        return;
-                    }
-                }
                 if(type==Type.pvStructure) {
                     String fieldStructureName = attributes.get("structureName");
-                    if(fieldStructureName==null) {
-                        iocxmlReader.message("structureName not specified",
-                                MessageType.error);
-                        state= State.idle;
-                        return;
-                    }
+                    if(fieldStructureName==null) fieldStructureName = "null";
                     fieldStructure = dbd.getStructure(fieldStructureName);
                     if(fieldStructure==null) {
-                        iocxmlReader.message("structureName not found in DBD database",
+                        iocxmlReader.message("structure " + fieldStructureName + " not found in DBD database",
                                 MessageType.error);
                         state= State.idle;
                         return;
                     }
+                    fieldSupportName = attributes.get("supportName");
+                    if(fieldSupportName==null) fieldSupportName = fieldStructure.getSupportName();
+                    fieldCreateName = attributes.get("createName");
+                    if(fieldCreateName==null) fieldCreateName = fieldStructure.getCreateName();
                 }
                 if(type==Type.pvArray) {
                     elementType = fieldCreate.getElementType(attributes);
@@ -511,7 +377,8 @@ public class XMLToDBDFactory {
                         return;
                     }
                 }
-                fieldSupportName = attributes.get("supportName");
+                if(fieldSupportName==null) fieldSupportName = attributes.get("supportName");
+                if(fieldCreateName==null) fieldCreateName = attributes.get("createName");
                 fieldPropertyList =  new  LinkedList<Property>();
                 state = State.field;
             } else if(qName.equals("property")) {
@@ -554,10 +421,6 @@ public class XMLToDBDFactory {
             }
             Field field = null;
             switch(type) {
-            case pvMenu:
-                field = fieldCreate.createMenu(fieldName,menuName,dbdMenu.getChoices(),
-                    property, fieldAttribute);
-                break;
             case pvStructure:
                 // Combine the current properties with the dbdStructure properties
                 DBDStructure dbdStructure = dbd.getStructure(fieldStructure.getStructureName());
@@ -585,10 +448,6 @@ public class XMLToDBDFactory {
                 field = fieldCreate.createArray(fieldName,elementType,
                     property,fieldAttribute);
                 break;
-            case pvEnum:
-                field = fieldCreate.createEnum(fieldName, true,
-                    property,fieldAttribute);
-                break;
             default:
                 field = fieldCreate.createField(fieldName,type,
                         property,fieldAttribute);
@@ -601,6 +460,9 @@ public class XMLToDBDFactory {
             fieldPropertyList = null;
             if(fieldSupportName!=null) {
                 field.setSupportName(fieldSupportName);
+            }
+            if(fieldCreateName!=null) {
+                field.setCreateName(fieldCreateName);
             }
             return;
         }
@@ -625,6 +487,7 @@ public class XMLToDBDFactory {
                     MessageType.warning);
                     return;
             }
+            String structureName = attributes.get("structureName");
             String factoryName = attributes.get("factoryName");
             if(factoryName==null||factoryName.length()==0) {
                 iocxmlReader.message(
@@ -633,7 +496,7 @@ public class XMLToDBDFactory {
                 return;
             }
             support = dbd.createSupport(
-                name,factoryName);
+                name,factoryName,structureName);
             if(support==null) {
                 iocxmlReader.message(
                     "failed to create support " + qName,
@@ -658,7 +521,7 @@ public class XMLToDBDFactory {
         
     }
     
-private static class DBDXMLLinkSupportHandler implements DBDXMLHandler{
+    private static class DBDXMLCreateHandler implements DBDXMLHandler{
         
         public void start(String qName, Map<String,String> attributes) {
             String name = attributes.get("name");
@@ -668,15 +531,13 @@ private static class DBDXMLLinkSupportHandler implements DBDXMLHandler{
                     MessageType.error);
                 return;
             }
-            DBDLinkSupport support = dbd.getLinkSupport(name);
-            if(support!=null) {
+            DBDCreate create = dbd.getCreate(name);
+            if(create!=null) {
                 iocxmlReader.message(
-                    "support " + name  + " already exists",
+                    "create " + name  + " already exists",
                     MessageType.warning);
                     return;
             }
-            String configurationStructureName =
-                attributes.get("configurationStructureName");
             String factoryName = attributes.get("factoryName");
             if(factoryName==null||factoryName.length()==0) {
                 iocxmlReader.message(
@@ -684,17 +545,17 @@ private static class DBDXMLLinkSupportHandler implements DBDXMLHandler{
                     MessageType.error);
                 return;
             }
-            support = dbd.createLinkSupport(
-                name,factoryName,configurationStructureName);
-            if(support==null) {
+            create = dbd.createCreate(
+                name,factoryName);
+            if(create==null) {
                 iocxmlReader.message(
-                    "failed to create support " + qName,
+                    "failed to create create " + qName,
                     MessageType.error);
                     return;
             }
-            if(!dbd.addLinkSupport(support)) {
+            if(!dbd.addCreate(create)) {
                 iocxmlReader.message(
-                    "support " + qName + " already exists",
+                    "create " + qName + " already exists",
                     MessageType.warning);
                 return;
             }
@@ -709,5 +570,4 @@ private static class DBDXMLLinkSupportHandler implements DBDXMLHandler{
         public void characters(char[] ch, int start, int length) {}
         
     }
-    
 }

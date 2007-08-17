@@ -7,7 +7,6 @@ package org.epics.ioc.pv;
 
 import java.util.regex.Pattern;
 
-import org.epics.ioc.pv.Enum;
 import org.epics.ioc.util.MessageType;
 
 
@@ -56,17 +55,14 @@ public class PVDataFactory {
             case pvFloat:   return new FloatData(parent,field,defaultValue);
             case pvDouble:  return new DoubleData(parent,field,defaultValue);
             case pvString:  return new StringData(parent,field,defaultValue);
-            case pvEnum:    return new BasePVEnum(parent,(Enum)field);
-            case pvMenu:    return new BasePVMenu(parent,(Menu)field);
             case pvStructure: {
                     Structure structure = (Structure)field;
                     return new BasePVStructure(parent,structure);
                 }
             case pvArray: return (PVField)createPVArray(parent,field,0,true);
-            case pvLink: return new BasePVLink(parent,field);
             }
             throw new IllegalArgumentException(
-                "Illegal Type. Must be pvBoolean,...,pvLink");
+                "Illegal Type. Must be pvBoolean,...,pvStructure");
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.db.PVDataCreate#createArrayData(org.epics.ioc.db.PVData, org.epics.ioc.pv.Field, int, boolean)
@@ -87,11 +83,8 @@ public class PVDataFactory {
             case pvFloat:   return new FloatArray(parent,array,capacity,capacityMutable,defaultValue);
             case pvDouble:  return new DoubleArray(parent,array,capacity,capacityMutable,defaultValue);
             case pvString:  return new StringArray(parent,array,capacity,capacityMutable,defaultValue);
-            case pvEnum:    return new EnumArray(parent,array, capacity, capacityMutable);
-            case pvMenu:    return new MenuArray(parent,array, capacity, capacityMutable);
             case pvStructure: return new StructureArray(parent,array, capacity, capacityMutable);
             case pvArray:   return new ArrayArray(parent,array, capacity, capacityMutable);
-            case pvLink:    return new LinkArray(parent,array, capacity, capacityMutable);
             }
             throw new IllegalArgumentException("Illegal Type. Logic error");
         }    
@@ -1123,183 +1116,6 @@ public class PVDataFactory {
         }
     }
 
-    private static class EnumArray extends AbstractPVArray implements PVEnumArray
-    {
-
-        private PVEnum[] value;
-        
-        private EnumArray(PVField parent,Array array,
-            int capacity,boolean capacityMutable)
-        {
-            super(parent,array,capacity,capacityMutable);
-            value = new PVEnum[capacity];
-        }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.pv.AbstractPVField#toString(int)
-         */
-        public String toString(int indentLevel) {
-            return convert.getString(this, indentLevel)
-            + super.toString(indentLevel);
-        }
-        
-        /* (non-Javadoc)
-         * @see org.epics.ioc.db.AbstractPVArray#setCapacity(int)
-         */
-        public void setCapacity(int len) {
-            if(!capacityMutable) {
-                super.message("not capacityMutable", MessageType.error);
-                return;
-            }
-            super.asynAccessCallListener(true);
-            try {
-                if(length>len) length = len;
-                PVEnum[]newarray = new PVEnum[len];
-                if(length>0) System.arraycopy(value,0,newarray,0,length);
-                value = newarray;
-                capacity = len;
-            } finally {
-                super.asynAccessCallListener(false);
-            }
-        }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.pv.PVEnumArray#get(int, int, org.epics.ioc.pv.EnumArrayData)
-         */
-        public int get(int offset, int len, EnumArrayData data) {
-            super.asynAccessCallListener(true);
-            try {
-                int n = len;
-                if(offset+len > length) n = length - offset;
-                data.data = value;
-                data.offset = offset;
-                return n;
-            } finally {
-                super.asynAccessCallListener(false);
-            }
-        }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.pv.PVEnumArray#put(int, int, org.epics.ioc.pv.PVEnum[], int)
-         */
-        public int put(int offset, int len, PVEnum[]from, int fromOffset) {
-            if(!super.isMutable()) {
-                super.message("not isMutable", MessageType.error);
-                return 0;
-            }
-            super.asynAccessCallListener(true);
-            try {
-                if(offset+len > length) {
-                    int newlength = offset + len;
-                    if(newlength>capacity) {
-                        setCapacity(newlength);
-                        newlength = capacity;
-                        len = newlength - offset;
-                        if(len<=0) return 0;
-                    }
-                    length = newlength;
-                }
-                System.arraycopy(from,fromOffset,value,offset,len);
-                return len;
-            } finally {
-                super.asynAccessCallListener(false);
-            }
-        }
-    }
-
-    private static class MenuArray extends AbstractPVArray implements PVMenuArray
-    {
-        private PVMenu[] value;
-        
-        private MenuArray(PVField parent,Array array,
-            int capacity,boolean capacityMutable)
-        {
-            super(parent,array,capacity,capacityMutable);
-            value = new PVMenu[capacity];
-        }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.pv.AbstractPVField#toString(int)
-         */
-        public String toString(int indentLevel) {
-            return getString(indentLevel)
-            + super.toString(indentLevel);
-        }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.db.AbstractPVArray#setCapacity(int)
-         */
-        public void setCapacity(int len) {
-            if(!capacityMutable) {
-                super.message("not capacityMutable", MessageType.error);
-                return;
-            }
-            super.asynAccessCallListener(true);
-            try {
-                if(length>len) length = len;
-                PVMenu[]newarray = new PVMenu[len];
-                if(length>0) System.arraycopy(value,0,newarray,0,length);
-                value = newarray;
-                capacity = len;
-            } finally {
-                super.asynAccessCallListener(false);
-            }
-        }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.pv.PVMenuArray#get(int, int, org.epics.ioc.pv.MenuArrayData)
-         */
-        public int get(int offset, int len, MenuArrayData data) {
-            super.asynAccessCallListener(true);
-            try {
-                int n = len;
-                if(offset+len > length) n = length - offset;
-                data.data = value;
-                data.offset = offset;
-                return n;
-            } finally {
-                super.asynAccessCallListener(false);
-            }
-        }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.pv.PVMenuArray#put(int, int, org.epics.ioc.pv.PVMenu[], int)
-         */
-        public int put(int offset, int len, PVMenu[]from, int fromOffset) {
-            if(!super.isMutable()) {
-                super.message("not isMutable", MessageType.error);
-                return 0;
-            }
-            super.asynAccessCallListener(true);
-            try {
-                if(offset+len > length) {
-                    int newlength = offset + len;
-                    if(newlength>capacity) {
-                        setCapacity(newlength);
-                        newlength = capacity;
-                        len = newlength - offset;
-                        if(len<=0) return 0;
-                    }
-                    length = newlength;
-                }
-                System.arraycopy(from,fromOffset,value,offset,len);
-                return len;
-            } finally {
-                super.asynAccessCallListener(false);
-            }
-        }
-        
-        private String getString(int indentLevel) {
-            StringBuilder builder = new StringBuilder();
-            convert.newLine(builder,indentLevel);
-            builder.append("{");
-            for(int i=0; i < length; i++) {
-                if(value[i]==null) {
-                    convert.newLine(builder,indentLevel+1);
-                    builder.append("{}");
-                } else {
-                    builder.append(value[i].toString(indentLevel+1));
-                }
-            }
-            convert.newLine(builder,indentLevel);
-            builder.append("}");
-            return builder.toString();
-        }       
-    }
-
     private static class StructureArray extends AbstractPVArray implements PVStructureArray
     {
         private PVStructure[] value;
@@ -1484,103 +1300,6 @@ public class PVDataFactory {
                 } else {
                     builder.append(value[i].toString(indentLevel+1));
                 }
-            }
-            convert.newLine(builder,indentLevel);
-            builder.append("}");
-            return builder.toString();
-        }
-    }
-
-    private static class LinkArray extends AbstractPVArray implements PVLinkArray
-    {
-        private PVLink[] value;
-        
-        private LinkArray(PVField parent,Array array,
-            int capacity,boolean capacityMutable)
-        {
-            super(parent,array,capacity,capacityMutable);
-            value = new PVLink[capacity];
-        }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.pv.AbstractPVField#toString(int)
-         */
-        public String toString(int indentLevel) {
-            return getString(indentLevel)
-            + super.toString(indentLevel);
-        }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.db.AbstractPVArray#setCapacity(int)
-         */
-        public void setCapacity(int len) {
-            if(!capacityMutable) {
-                super.message("not capacityMutable", MessageType.error);
-                return;
-            }
-            super.asynAccessCallListener(true);
-            try {
-                if(length>len) length = len;
-                PVLink[]newarray = new PVLink[len];
-                if(length>0) System.arraycopy(value,0,newarray,0,length);
-                value = newarray;
-                capacity = len;
-            } finally {
-                super.asynAccessCallListener(false);
-            }
-        }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.pv.PVLinkArray#get(int, int, org.epics.ioc.pv.LinkArrayData)
-         */
-        public int get(int offset, int len, LinkArrayData data) {
-            super.asynAccessCallListener(true);
-            try {
-                int n = len;
-                if(offset+len > length) n = length - offset;
-                data.data = value;
-                data.offset = offset;
-                return n;
-            } finally {
-                super.asynAccessCallListener(false);
-            }
-        }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.pv.PVLinkArray#put(int, int, org.epics.ioc.pv.PVLink[], int)
-         */
-        public int put(int offset, int len, PVLink[]from, int fromOffset) {
-            if(!super.isMutable()) {
-                super.message("not isMutable", MessageType.error);
-                return 0;
-            }
-            super.asynAccessCallListener(true);
-            try {
-                if(offset+len > length) {
-                    int newlength = offset + len;
-                    if(newlength>capacity) {
-                        setCapacity(newlength);
-                        newlength = capacity;
-                        len = newlength - offset;
-                        if(len<=0) return 0;
-                    }
-                    length = newlength;
-                }
-                System.arraycopy(from,fromOffset,value,offset,len);
-                return len;
-            } finally {
-                super.asynAccessCallListener(false);
-            }
-        }
-        
-        private String getString(int indentLevel) {
-            StringBuilder builder = new StringBuilder();
-            convert.newLine(builder,indentLevel);
-            builder.append("{");
-            for(int i=0; i < length; i++) {
-                if(value[i]==null) {
-                    
-                    builder.append("{}");
-                } else {
-                    builder.append(value[i].toString(indentLevel+1));
-                }
-                if(i<length-1) convert.newLine(builder,indentLevel + 1);
             }
             convert.newLine(builder,indentLevel);
             builder.append("}");

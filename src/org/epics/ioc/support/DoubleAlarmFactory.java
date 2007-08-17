@@ -5,6 +5,7 @@
  */
 package org.epics.ioc.support;
 
+import org.epics.ioc.create.Enumerated;
 import org.epics.ioc.db.*;
 import org.epics.ioc.process.*;
 import org.epics.ioc.pv.*;
@@ -17,47 +18,47 @@ import org.epics.ioc.util.*;
  */
 public class DoubleAlarmFactory {
     /**
-     * Create support for a doubleAlarm link.
-     * @param dbLink The link.
+     * Create support for a doubleAlarm structure.
+     * @param dbStructure The structure.
      * @return An interface to the support or null if the supportName was not "doubleAlarm".
      */
-    public static Support create(DBLink dbLink) {
-        PVLink pvLink = dbLink.getPVLink();
-        String supportName = pvLink.getSupportName();
+    public static Support create(DBStructure dbStructure) {
+        PVStructure pvStructure = dbStructure.getPVStructure();
+        String supportName = pvStructure.getSupportName();
         if(supportName==null || !supportName.equals(supportName)) {
-            pvLink.message("does not have support " + supportName,MessageType.error);
+            pvStructure.message("does not have support " + supportName,MessageType.error);
             return null;
         }
-        return new DoubleAlarmImpl(dbLink);
+        return new DoubleAlarmImpl(dbStructure);
     }
     
     private static String supportName = "doubleAlarm";
     
-    private static class DoubleAlarmImpl extends AbstractLinkSupport
+    private static class DoubleAlarmImpl extends AbstractSupport
     {
-        private DBLink dbLink;
-        private PVLink pvLink;
+        private DBStructure dbStructure;
+        private PVStructure pvStructure;
         
         private boolean noop;
         private AlarmSupport alarmSupport;
         
-        private StructureArrayData structureArrayData = new StructureArrayData();
         private PVStructureArray intervalPVArray;
-        private PVMenu outOfRangePVMenu;
+        private PVInt pvOutOfRange;
         private PVBoolean pvActive;
         private PVDouble pvHystersis;
         
+        private DBNonScalarArray dbAlarmIntervalArray = null;
         private PVDouble[] pvAlarmIntervalValue = null;
-        private PVMenu[] pvAlarmIntervalSeverity = null;
+        private PVInt[] pvAlarmIntervalSeverity = null;
         
         private PVDouble pvValue;
         private double lastAlarmIntervalValue;
         private int lastAlarmSeverityIndex;
        
-        private DoubleAlarmImpl(DBLink dbLink) {
-            super(supportName,dbLink);
-            this.dbLink = dbLink;
-            pvLink = dbLink.getPVLink();
+        private DoubleAlarmImpl(DBStructure dbStructure) {
+            super(supportName,dbStructure);
+            this.dbStructure = dbStructure;
+            pvStructure = dbStructure.getPVStructure();
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.process.Support#initialize()
@@ -71,27 +72,38 @@ public class DoubleAlarmFactory {
                 noop = true;
                 return;
             }
-            PVStructure configStructure = super.getConfigStructure("doubleAlarm", false);
-            if(configStructure==null) {
-                noop = true;
-                setSupportState(supportState);
-                return;
-            }
-            alarmSupport = AlarmFactory.findAlarmSupport(dbLink);
+            alarmSupport = AlarmFactory.findAlarmSupport(dbStructure);
             if(alarmSupport==null) {
                 super.message("no alarmSupport", MessageType.error);
                 noop = true;
                 setSupportState(supportState);
                 return;
             }
-            pvActive = configStructure.getBooleanField("active");
+            DBField[] dbFields = dbStructure.getFieldDBFields();
+            if(dbFields.length==0) {
+                noop = true;
+                setSupportState(supportState);
+                return;
+            }
+            Structure structure = dbStructure.getPVStructure().getStructure();
+            pvActive = pvStructure.getBooleanField("active");
             if(pvActive==null) return;
-            intervalPVArray = (PVStructureArray)configStructure.getArrayField(
+            
+            intervalPVArray = (PVStructureArray)pvStructure.getArrayField(
                 "interval", Type.pvStructure);
             if(intervalPVArray==null) return;
-            outOfRangePVMenu = configStructure.getMenuField("outOfRange", "alarmSeverity");
-            if(outOfRangePVMenu==null) return;
-            pvHystersis = configStructure.getDoubleField("hystersis");
+            int index = structure.getFieldIndex("interval");
+            dbAlarmIntervalArray = (DBNonScalarArray)dbFields[index];
+            index = structure.getFieldIndex("outOfRange");
+            if(index<0) {
+                super.message("outOfRange does not exist", MessageType.error);
+                return;
+            }
+            Enumerated enumerated = AlarmSeverity.getAlarmSeverity(dbFields[index]);
+            if(enumerated==null) return;
+            pvOutOfRange = enumerated.getIndexField();
+            if(pvOutOfRange==null) return;
+            pvHystersis = pvStructure.getDoubleField("hystersis");
             if(pvHystersis==null) return;
             setSupportState(supportState);
         }
@@ -110,20 +122,13 @@ public class DoubleAlarmFactory {
                 super.message("invalid interval", MessageType.error);
                 return;
             }
+            DBField[] dbFields = dbAlarmIntervalArray.getElementDBFields();
             pvAlarmIntervalValue = new PVDouble[size];
-            pvAlarmIntervalSeverity = new PVMenu[size];
-            int num = intervalPVArray.get(0, size, structureArrayData);
-            if(num!=size) {
-                super.message("intervalPVArray num != size", MessageType.error);
-                return;
-            }
-            PVStructure[] pvStructures = structureArrayData.data;
+            pvAlarmIntervalSeverity = new PVInt[size];
+            
             for(int i=0; i<size; i++) {
-                PVStructure pvStructure = pvStructures[i];
-                if(pvStructure==null) {
-                    super.message("invalid interval is null", MessageType.error);
-                    return;
-                }
+                DBStructure dbStructure = (DBStructure)dbFields[i];
+                PVStructure pvStructure = dbStructure.getPVStructure();
                 Structure structure = pvStructure.getStructure();
                 PVField[] pvFields = pvStructure.getFieldPVFields();
                 Field[] fields = structure.getFields();
@@ -143,17 +148,13 @@ public class DoubleAlarmFactory {
                     super.message("invalid interval no severity field", MessageType.error);
                     return;
                 }
-                field = fields[index];
-                if(field.getType()!=Type.pvMenu) {
-                    super.message("invalid interval severity field is not a menu", MessageType.error);
+                Enumerated enumerated = AlarmSeverity.getAlarmSeverity(
+                        dbStructure.getFieldDBFields()[index]);
+                if(enumerated==null) {
+                    super.message("invalid interval severity field is not alarmSeverity", MessageType.error);
                     return;
                 }
-                Menu menu = (Menu)field;
-                if(!menu.getMenuName().equals("alarmSeverity")) {
-                    super.message("invalid interval severity field is not an alarmSeverity menu", MessageType.error);
-                    return;
-                }
-                pvAlarmIntervalSeverity[i] = (PVMenu)pvFields[index];
+                pvAlarmIntervalSeverity[i] = enumerated.getIndexField();
             }
             lastAlarmSeverityIndex = 0;
             setSupportState(supportState);
@@ -173,7 +174,7 @@ public class DoubleAlarmFactory {
         public void uninitialize() {
             if(super.getSupportState()!=SupportState.ready) return;
             pvActive = null;
-            outOfRangePVMenu = null;
+            pvOutOfRange = null;
             intervalPVArray = null;
             pvHystersis = null;
             setSupportState(SupportState.readyForInitialize);
@@ -186,7 +187,7 @@ public class DoubleAlarmFactory {
             supportProcessRequester.supportProcessDone(RequestResult.success);
         }                
         /* (non-Javadoc)
-         * @see org.epics.ioc.process.LinkSupport#setField(org.epics.ioc.db.DBField)
+         * @see org.epics.ioc.process.Support#setField(org.epics.ioc.db.DBField)
          */
         public void setField(DBField dbField) {
             PVField pvField = dbField.getPVField();
@@ -206,12 +207,12 @@ public class DoubleAlarmFactory {
             for(int i=0; i<len; i++) {
                 intervalValue = pvAlarmIntervalValue[i].get();
                 if(val<=intervalValue) {
-                    int sevIndex = pvAlarmIntervalSeverity[i].getIndex();
+                    int sevIndex = pvAlarmIntervalSeverity[i].get();
                     raiseAlarm(intervalValue,val,sevIndex);
                     return;
                 }
             }
-            int outOfRange = outOfRangePVMenu.getIndex();
+            int outOfRange = pvOutOfRange.get();
             // intervalValue is pvAlarmIntervalValue[len-1].get();
             raiseAlarm(intervalValue,val,outOfRange);
         }
@@ -230,7 +231,7 @@ public class DoubleAlarmFactory {
                 lastAlarmSeverityIndex = severityIndex;
                 return;
             }
-            String message = pvLink.getFullFieldName() + " " + alarmSeverity.toString();
+            String message = pvStructure.getFullFieldName() + " " + alarmSeverity.toString();
             alarmSupport.setAlarm(message, alarmSeverity);
             lastAlarmIntervalValue = intervalValue;
             lastAlarmSeverityIndex = severityIndex;

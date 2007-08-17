@@ -68,11 +68,8 @@ public final class FieldFactory {
             if(value.equals("float")) return Type.pvFloat;
             if(value.equals("double")) return Type.pvDouble;
             if(value.equals("string")) return Type.pvString;
-            if(value.equals("enum")) return Type.pvEnum;
-            if(value.equals("menu")) return Type.pvMenu;
             if(value.equals("structure")) return Type.pvStructure;
             if(value.equals("array")) return Type.pvArray;
-            if(value.equals("link")) return Type.pvLink;
             return null;
         }
         /* (non-Javadoc)
@@ -92,30 +89,13 @@ public final class FieldFactory {
         public Array createArray(String fieldName, Type elementType) {
             return createArray(fieldName,elementType,null,null);
         }
-
-        /* (non-Javadoc)
-         * @see org.epics.ioc.pv.FieldCreate#createEnumField(java.lang.String, boolean, org.epics.ioc.pv.Property[], org.epics.ioc.pv.FieldAttribute)
-         */
-        public Enum createEnum(String fieldName, boolean choicesMutable,
-            Property[] property, FieldAttribute fieldAttribute)
-        {
-            if(property==null) property = new Property[0];
-            if(fieldAttribute==null) fieldAttribute = createFieldAttribute();
-            return new BaseEnum(fieldName,choicesMutable,property,fieldAttribute);
-        }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.pv.FieldCreate#createEnumField(java.lang.String, boolean)
-         */
-        public Enum createEnum(String fieldName, boolean choicesMutable) {
-            return createEnum(fieldName,choicesMutable,null,null);
-        }
         /* (non-Javadoc)
          * @see org.epics.ioc.pv.FieldCreate#createField(java.lang.String, org.epics.ioc.pv.Type, org.epics.ioc.pv.Property[], org.epics.ioc.pv.FieldAttribute)
          */
         public Field createField(String fieldName, Type type,
              Property[] property, FieldAttribute fieldAttribute)
         {
-            if(!type.isScalar() && type!=Type.pvLink) throw new IllegalArgumentException(
+            if(!type.isScalar()) throw new IllegalArgumentException(
                     "Illegal PVType. Must be scalar but it is " + type.toString() );
             if(property==null) property = new Property[0];
             if(fieldAttribute==null) fieldAttribute = createFieldAttribute();
@@ -154,22 +134,6 @@ public final class FieldFactory {
             if(value!=null) isReadOnly = Boolean.parseBoolean(value);
             return new FieldAttributeImpl(asl,defaultValue,isDesign,isLink,isReadOnly);
             
-        }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.pv.FieldCreate#createMenuField(java.lang.String, java.lang.String, org.epics.ioc.pv.Property[], org.epics.ioc.pv.FieldAttribute)
-         */
-        public Menu createMenu(String fieldName, String menuName, String[] menuChoices,
-        Property[] property, FieldAttribute fieldAttribute)
-        {
-            if(property==null) property = new Property[0];
-            if(fieldAttribute==null) fieldAttribute = createFieldAttribute();
-            return new BaseMenu(fieldName,menuName,menuChoices,property,fieldAttribute);
-        }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.pv.FieldCreate#createMenuField(java.lang.String, java.lang.String)
-         */
-        public Menu createMenu(String fieldName, String menuName, String[] menuChoices) {
-            return createMenu(fieldName,menuName,menuChoices,null, null);
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.pv.FieldCreate#createProperty(java.lang.String, java.lang.String)
@@ -245,9 +209,13 @@ public final class FieldFactory {
              * @see org.epics.ioc.pv.FieldAttribute#toString(int)
              */
             public String toString(int indentLevel) {
-                return String.format(
+                String result = String.format(
                     " asl %d design %b link %b readOnly %b",
                     asl,isDesign,isLink,isReadOnly);
+                if(defaultValue!=null) {
+                    result += " default " + "\"" + defaultValue + "\"";
+                }
+                return result;
             }
         }
         

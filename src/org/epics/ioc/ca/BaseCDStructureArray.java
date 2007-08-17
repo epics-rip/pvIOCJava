@@ -114,40 +114,6 @@ public class BaseCDStructureArray extends BaseCDField implements CDNonScalarArra
         return false;
     }   
     /* (non-Javadoc)
-     * @see org.epics.ioc.ca.BaseCDField#enumIndexPut(org.epics.ioc.pv.PVField, org.epics.ioc.pv.PVEnum)
-     */
-    public boolean enumIndexPut(PVField requested,PVEnum targetPVEnum) {
-        PVStructureArray targetPVStructureArray = (PVStructureArray)requested;
-        checkPVStructureArray(targetPVStructureArray);
-        int length = pvStructureArray.getLength();
-        pvStructureArray.get(0, length, structureArrayData);
-        targetPVStructureArray.get(0, length, structureArrayData);
-        PVStructure[] targetStructures = structureArrayData.data;
-        for(int i=0; i<length; i++) {
-            CDStructure cdStructure = elementCDStructures[i];
-            PVStructure targetStructure = targetStructures[i];
-            if(cdStructure.enumIndexPut(targetStructure, targetPVEnum)) return true;
-        }
-        return false;
-    }    
-    /* (non-Javadoc)
-     * @see org.epics.ioc.ca.BaseCDField#enumChoicesPut(org.epics.ioc.pv.PVField, org.epics.ioc.pv.PVEnum)
-     */
-    public boolean enumChoicesPut(PVField requested,PVEnum targetPVEnum) {
-        PVStructureArray targetPVStructureArray = (PVStructureArray)requested;
-        checkPVStructureArray(targetPVStructureArray);
-        int length = pvStructureArray.getLength();
-        pvStructureArray.get(0, length, structureArrayData);
-        targetPVStructureArray.get(0, length, structureArrayData);
-        PVStructure[] targetStructures = structureArrayData.data;
-        for(int i=0; i<length; i++) {
-            CDStructure cdStructure = elementCDStructures[i];
-            PVStructure targetStructure = targetStructures[i];
-            if(cdStructure.enumChoicesPut(targetStructure, targetPVEnum)) return true;
-        }
-        return false;
-    }   
-    /* (non-Javadoc)
      * @see org.epics.ioc.ca.BaseCDField#supportNamePut(org.epics.ioc.pv.PVField, org.epics.ioc.pv.PVField)
      */
     public boolean supportNamePut(PVField requested,PVField targetPVField) {
@@ -164,24 +130,6 @@ public class BaseCDStructureArray extends BaseCDField implements CDNonScalarArra
         }
         return false;
     }    
-    /* (non-Javadoc)
-     * @see org.epics.ioc.ca.BaseCDField#configurationStructurePut(org.epics.ioc.pv.PVField, org.epics.ioc.pv.PVLink)
-     */
-    public boolean configurationStructurePut(PVField requested,PVLink targetPVLink) {
-        if(!supportAlso) return false;
-        PVStructureArray targetPVStructureArray = (PVStructureArray)requested;
-        checkPVStructureArray(targetPVStructureArray);
-        int length = pvStructureArray.getLength();
-        pvStructureArray.get(0, length, structureArrayData);
-        targetPVStructureArray.get(0, length, structureArrayData);
-        PVStructure[] targetStructures = structureArrayData.data;
-        for(int i=0; i<length; i++) {
-            CDStructure cdStructure = elementCDStructures[i];
-            PVStructure targetStructure = targetStructures[i];
-            if(cdStructure.configurationStructurePut(targetStructure, targetPVLink)) return true;
-        }
-        return false;
-    }
     
     private void createElementCDBStructures() {
         int length = pvStructureArray.getLength();

@@ -6,7 +6,6 @@
 package org.epics.ioc.ca;
 
 import org.epics.ioc.pv.*;
-import org.epics.ioc.pv.Enum;
 
 /**
  * Base class for a CDRecord (Channel Data Record).
@@ -57,16 +56,6 @@ public class BaseCDRecord implements CDRecord {
             newField = fieldCreate.createArray(
                 fieldName,((Array)oldField).getElementType(),
                 property,fieldAttribute);
-        } else if(type==Type.pvEnum) {
-            Enum enumField = (Enum)oldField;
-            newField = fieldCreate.createEnum(
-                fieldName, enumField.isChoicesMutable(),
-                property,fieldAttribute);
-        } else if(type==Type.pvMenu) {
-            Menu menu = (Menu)oldField;
-            newField = fieldCreate.createMenu(
-                fieldName, menu.getMenuName(),
-                menu.getMenuChoices(),property, fieldAttribute);
         } else if(type==Type.pvStructure) {
             Structure structure = (Structure)oldField;
             Field[] oldFields = structure.getFields();

@@ -9,6 +9,7 @@ import java.lang.reflect.*;
 
 import org.epics.ioc.pv.*;
 import org.epics.ioc.pv.Field;
+import org.epics.ioc.pv.Type;
 import org.epics.ioc.db.*;
 import org.epics.ioc.util.*;
 import org.epics.ioc.pdrv.*;
@@ -69,18 +70,9 @@ public class PDRVPortCreateFactory {
         }
         PVBoolean pvBoolean= (PVBoolean)pvField;
         boolean autoConnect = pvBoolean.get();
-        index = structure.getFieldIndex("priority");
-        if(index<0) {
-            throw new IllegalStateException("structure does not have field priority");
-        }
-        pvField = pvFields[index];
-        field = pvField.getField();
-        if(field.getType()!=org.epics.ioc.pv.Type.pvMenu) {
-            throw new IllegalStateException("field portName is not type menu");
-        }
-        PVMenu pvMenu= (PVMenu)pvField;
-        String[] choices = pvMenu.getChoices();
-        ScanPriority scanPriority = ScanPriority.valueOf(choices[pvMenu.getIndex()]);
+        PVString pvPriority = getChoiceField(pvStructure,"priority");
+        if(pvPriority==null) return null;
+        ScanPriority scanPriority = ScanPriority.valueOf(pvPriority.get());
         index = structure.getFieldIndex("driverParameters");
         if(index<0) {
             throw new IllegalStateException("structure does not have field driverParameters");
@@ -143,5 +135,32 @@ public class PDRVPortCreateFactory {
                 
         }
         // nothing to do
+    }
+    
+    private static PVString getChoiceField(PVStructure pvStructure,String fieldName) {
+        Structure structure = pvStructure.getStructure();
+        PVField[] pvFields = pvStructure.getFieldPVFields();
+        int index = structure.getFieldIndex(fieldName);
+        if(index<0) {
+            pvStructure.message("field " + fieldName + " does not exist", MessageType.error);
+            return null;
+        }
+        PVField pvField = pvFields[index];
+        if(pvField.getField().getType()!=Type.pvStructure) {
+            pvField.message("field is not a structure", MessageType.error);
+            return null;
+        }
+        pvStructure = (PVStructure)pvField;
+        index = structure.getFieldIndex("choice");
+        if(index<0) {
+            pvStructure.message("field index does not exist", MessageType.error);
+            return null;
+        }
+        pvField = pvFields[index];
+        if(pvField.getField().getType()!=Type.pvString) {
+            pvField.message("field is not a string", MessageType.error);
+            return null;
+        }
+        return (PVString)pvField;
     }
 }

@@ -54,8 +54,8 @@ public class CalcArgArrayFactory {
         private DBNonScalarArray calcArgArrayDBField;
         private DBField[] valueDBFields;
         private DBField[] nameDBFields;
-        private LinkSupport[] linkSupports = null;
-        private int numLinkSupports = 0;
+        private Support[] supports = null;
+        private int numSupports = 0;
               
         private SupportProcessRequester supportProcessRequester;
         private int numberWait;
@@ -98,8 +98,8 @@ public class CalcArgArrayFactory {
             int length = dbFields.length;
             valueDBFields = new DBField[length];
             nameDBFields = new DBField[length];
-            linkSupports = new LinkSupport[length];
-            numLinkSupports = 0;
+            supports = new Support[length];
+            numSupports = 0;
             for(int i=0; i< length; i++) {
                 DBStructure elementDBStructure = (DBStructure)dbFields[i];
                 PVStructure elementPVStructure = elementDBStructure.getPVStructure();
@@ -111,17 +111,17 @@ public class CalcArgArrayFactory {
                 index = elementStructure.getFieldIndex("name");
                 nameDBFields[i] = elementDBFields[index];
                 index = elementStructure.getFieldIndex("input");
-                DBLink dbLink = (DBLink)elementDBFields[index];
-                LinkSupport linkSupport = (LinkSupport)dbLink.getSupport();
-                linkSupports[i] = linkSupport;
-                if(linkSupport==null) continue;
-                numLinkSupports++;
-                linkSupport.initialize();
-                linkSupport.setField(valueDBFields[i]);
-                if(linkSupport.getSupportState()!=SupportState.readyForStart) {
+                DBField dbField = elementDBFields[index];
+                Support support = dbField.getSupport();
+                supports[i] = support;
+                if(support==null) continue;
+                numSupports++;
+                support.initialize();
+                support.setField(valueDBFields[i]);
+                if(support.getSupportState()!=SupportState.readyForStart) {
                     supportState = SupportState.readyForInitialize;
                     for(int j=0; j<i; j++) {
-                        if(linkSupports[j]!=null) linkSupports[j].uninitialize();
+                        if(supports[j]!=null) supports[j].uninitialize();
                     }
                     break;
                 }
@@ -133,8 +133,8 @@ public class CalcArgArrayFactory {
          */
         public void start() {
             if(!super.checkSupportState(SupportState.readyForStart,supportName)) return;
-            for(LinkSupport linkSupport: linkSupports) {
-                if(linkSupport!=null) linkSupport.start();
+            for(Support support: supports) {
+                if(support!=null) support.start();
             }
             setSupportState(SupportState.ready);
         }
@@ -143,8 +143,8 @@ public class CalcArgArrayFactory {
          */
         public void stop() {
             if(super.getSupportState()!=SupportState.ready) return;
-            for(LinkSupport linkSupport: linkSupports) {
-                if(linkSupport!=null) linkSupport.stop();
+            for(Support support: supports) {
+                if(support!=null) support.stop();
             }
             setSupportState(SupportState.readyForStart);
         }
@@ -156,8 +156,8 @@ public class CalcArgArrayFactory {
                 stop();
             }
             if(super.getSupportState()!=SupportState.readyForStart) return;
-            for(LinkSupport linkSupport: linkSupports) {
-                if(linkSupport!=null) linkSupport.stop();
+            for(Support support: supports) {
+                if(support!=null) support.stop();
             }
             setSupportState(SupportState.readyForInitialize);
         }       
@@ -172,15 +172,15 @@ public class CalcArgArrayFactory {
                 supportProcessRequester.supportProcessDone(RequestResult.failure);
                 return;
             }
-            if(numLinkSupports<=0) {
+            if(numSupports<=0) {
                 supportProcessRequester.supportProcessDone(RequestResult.success);
                 return;
             }
             this.supportProcessRequester = supportProcessRequester;
-            numberWait = numLinkSupports;
+            numberWait = numSupports;
             finalResult = RequestResult.success;
-            for(LinkSupport linkSupport: linkSupports) {
-                if(linkSupport!=null) linkSupport.process(this);
+            for(Support support: supports) {
+                if(support!=null) support.process(this);
             }
         }                
         /* (non-Javadoc)

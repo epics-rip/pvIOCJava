@@ -38,4 +38,6 @@ public interface ScanField {
      * @return The current value of scan.processSelf.
      */
     boolean getProcessSelf();
+    void addModifyListener(ScanFieldModifyListener modifyListener);
+    void removeModifyListener(ScanFieldModifyListener modifyListener);
 }

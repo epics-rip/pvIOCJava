@@ -35,15 +35,25 @@ public interface Field {
      */
     Type getType();
     /**
-     * Get the name of support for this field.
-     * @return The name of the support.
+     * Set the create name for this field.
+     * @param name The create name.
      */
-    String getSupportName();
+    void setCreateName(String name);
+    /**
+     * Get the create name for this field.
+     * @return The createname.
+     */
+    String getCreateName();
     /**
      * Set the support name for this field.
      * @param name The name of the support.
      */
     void setSupportName(String name);
+    /**
+     * Get the name of support for this field.
+     * @return The name of the support.
+     */
+    String getSupportName();
     /**
      * Convert to a string
      * @return The field as a string

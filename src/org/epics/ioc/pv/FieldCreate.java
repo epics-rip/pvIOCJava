@@ -101,52 +101,6 @@ public interface FieldCreate {
     public Array createArray(String fieldName,Type elementType,
         Property[] property,FieldAttribute fieldAttribute);
     /**
-     * Create an <i>Enum</i> field with no properties and default attributes.
-     * @param fieldName The field name
-     * @param choicesMutable Can the choices be modified?
-     * If no then <i>Enum.isChoicesMutable</i> will return <i>false</i>
-     * and an implementation of <i>PVEnum</i> must
-     * not allow a caller to modify the choices. 
-     * @return An <i>Enum</i> interface for the newly created object.
-     */
-    public Enum createEnum(String fieldName,boolean choicesMutable);
-    /**
-     * Create an <i>Enum</i> field.
-     * @param fieldName The field name
-     * @param choicesMutable Can the choices be modified?
-     * If no then <i>Enum.isChoicesMutable</i> will return <i>false</i>
-     * and an implementation of <i>PVEnum</i> must
-     * not allow a caller to modify the choices. 
-     * @param property The field properties.
-     * If <i>null</i> then a null array of properties is created.
-     * @param fieldAttribute The attributes for the field.
-     * If <i>null</i> then a default set of attributes is created.
-     * @return An <i>Enum</i> interface for the newly created object.
-     */
-    public Enum createEnum(String fieldName,boolean choicesMutable,
-        Property[] property,FieldAttribute fieldAttribute);
-    /**
-     * Create a <i>Menu</i> field with no properties and default attributes.
-     * @param fieldName The field name.
-     * @param menuName The menu name.
-     * @param menuChoices The menu choices.
-     * @return A <i>Menu</i> interface for the newly created object.
-     */
-    public Menu createMenu(String fieldName,String menuName, String[] menuChoices);
-    /**
-     * Create a <i>Menu</i> field.
-     * @param fieldName The field name.
-     * @param menuName The menu name.
-     * @param menuChoices The menu choices.
-     * @param property The field properties.
-     * If <i>null</i> then a null array of properties is created.
-     * @param fieldAttribute The attributes for the field.
-     * If <i>null</i> then a default set of attributes is created.
-     * @return A <i>Menu</i> interface for the newly created object.
-     */
-    public Menu createMenu(String fieldName,String menuName,
-        String[] menuChoices,Property[]property, FieldAttribute fieldAttribute);
-    /**
      * Create a <i>Structure</i> field with no properties and default attributes.
      * @param fieldName The field name
      * @param structureName The structure name

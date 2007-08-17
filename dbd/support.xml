@@ -1,13 +1,12 @@
 <?xml version="1.0" ?>
 <DBDefinition>
-<include href = "limit.xml" />
+<include href = "misc.xml" />
 <include addPath = "dbd/support" />
 <include href = "commonFields.xml" />
 <include href = "alarm.xml" />
 <include href = "noop.xml" />
 <include href = "generic.xml" />
-<include href = "linkArray.xml" />
-<include href = "structureLink.xml" />
+<include href = "supportArray.xml" />
 <include href = "channelAccess.xml" />
 <include href = "analog.xml" />
 <include href = "digital.xml" />

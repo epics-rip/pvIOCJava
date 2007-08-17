@@ -11,7 +11,7 @@ package org.epics.ioc.support;
  * @author mrk
  *
  */
-public interface PDRVLinkSupport extends LinkSupport {
+public interface PDRVSupport extends Support {
     /**
      * If the support is interrupt driver should it process the record.
      * The answer will be true only if:

@@ -16,61 +16,47 @@
         </value>
     </calcArgArray>
     <calculator supportName = "counterCalculator" />
-    <linkArray>
-        <value structureName = "linkArrayElement">
+    <supportArray>
+        <value structureName = "supportArrayElement">
             <wait>true</wait>
-            <link  supportName = "processLink" >
-                <configure structureName = "processLink">
-                    <pvname>double01FromCounter</pvname>
-                </configure>
+            <link  supportName = "processSupport"  structureName = "processSupport">
+                <pvname>double01FromCounter</pvname>
             </link>
         </value>
-        <value structureName = "linkArrayElement">
+        <value structureName = "supportArrayElement">
             <wait>false</wait>
-            <link  supportName = "outputLink" >
-                <configure structureName = "outputLink">
-                    <pvname>double02FromCounter</pvname>
-                    <process>true</process>
-                </configure>
+            <link  supportName = "outputSupport" structureName = "outputSupport">
+                <pvname>double02FromCounter</pvname>
+                <process>true</process>
             </link>
         </value>
-        <value structureName = "linkArrayElement">
-            <wait>false</wait>
-            <link  supportName = "processLink" >
-                <configure structureName = "processLink">
-                    <pvname>double03FromCounter</pvname>
-                </configure>
-            </link>
-        </value>
-    </linkArray>
-    <valueAlarm>
-        <configure structureName = "doubleAlarm">
+    </supportArray>
+    <valueAlarm structureName = "doubleAlarm">
           <active>true</active>
           <interval>
               <value structureName = "doubleAlarmInterval">
                   <value>2.0</value>
-                  <severity>major</severity>
+                  <severity><choice>major</choice></severity>
               </value>
               <value structureName = "doubleAlarmInterval">
                   <value>4.0</value>
-                  <severity>minor</severity>
+                  <severity><choice>minor</choice></severity>
               </value>
               <value structureName = "doubleAlarmInterval">
                   <value>6.0</value>
-                  <severity>none</severity>
+                  <severity><choice>none</choice></severity>
               </value>
               <value structureName = "doubleAlarmInterval">
                   <value>8.0</value>
-                  <severity>minor</severity>
+                  <severity><choice>minor</choice></severity>
               </value>
               <value structureName = "doubleAlarmInterval">
                   <value>10.0</value>
-                  <severity>major</severity>
+                  <severity><choice>major</choice></severity>
               </value>
           </interval>
-          <outOfRange>invalid</outOfRange>
+          <outOfRange><choice>invalid</choice></outOfRange>
           <hystersis>0.1</hystersis>
-        </configure>
     </valueAlarm>
     <units>counts</units>
     <displayLimit>
@@ -78,48 +64,44 @@
         <high>10.0</high>
     </displayLimit>
     <scan>
-        <scan>periodic</scan>
+        <type><choice>periodic</choice></type>
         <rate>1.0</rate>
     </scan>
 </record>
 
 <record name = "double01FromCounter" type = "double">
-    <input supportName = "inputLink" >
-        <configure structureName = "inputLink">
-            <pvname>counterCounter</pvname>
-            <process>false</process>
-        </configure>
+    <input supportName = "inputSupport" structureName = "inputSupport">
+        <pvname>counterCounter</pvname>
+        <process>false</process>
     </input>
-    <units>volts</units>
-    <valueAlarm>
-        <configure structureName = "doubleAlarm">
+    <valueAlarm structureName = "doubleAlarm">
           <active>true</active>
           <interval>
               <value structureName = "doubleAlarmInterval">
                   <value>2.0</value>
-                  <severity>major</severity>
+                  <severity><choice>major</choice></severity>
               </value>
               <value structureName = "doubleAlarmInterval">
                   <value>4.0</value>
-                  <severity>minor</severity>
+                  <severity><choice>minor</choice></severity>
               </value>
               <value structureName = "doubleAlarmInterval">
                   <value>6.0</value>
-                  <severity>none</severity>
+                  <severity><choice>none</choice></severity>
               </value>
               <value structureName = "doubleAlarmInterval">
                   <value>8.0</value>
-                  <severity>minor</severity>
+                  <severity><choice>minor</choice></severity>
               </value>
               <value structureName = "doubleAlarmInterval">
                   <value>10.0</value>
-                  <severity>major</severity>
+                  <severity><choice>major</choice></severity>
               </value>
           </interval>
-          <outOfRange>invalid</outOfRange>
+          <outOfRange><choice>invalid</choice></outOfRange>
           <hystersis>0.1</hystersis>
-        </configure>
     </valueAlarm>
+    <units>volts</units>
     <displayLimit>
         <low>0.0</low>
         <high>10.0</high>
@@ -127,34 +109,32 @@
 </record>
 <record name = "double02FromCounter" type = "double">
     <units>volts</units>
-    <valueAlarm>
-        <configure structureName = "doubleAlarm">
+    <valueAlarm structureName = "doubleAlarm">
           <active>true</active>
           <interval>
               <value structureName = "doubleAlarmInterval">
                   <value>2.0</value>
-                  <severity>major</severity>
+                  <severity><choice>major</choice></severity>
               </value>
               <value structureName = "doubleAlarmInterval">
                   <value>4.0</value>
-                  <severity>minor</severity>
+                  <severity><choice>minor</choice></severity>
               </value>
               <value structureName = "doubleAlarmInterval">
                   <value>6.0</value>
-                  <severity>none</severity>
+                  <severity><choice>none</choice></severity>
               </value>
               <value structureName = "doubleAlarmInterval">
                   <value>8.0</value>
-                  <severity>minor</severity>
+                  <severity><choice>minor</choice></severity>
               </value>
               <value structureName = "doubleAlarmInterval">
                   <value>10.0</value>
-                  <severity>major</severity>
+                  <severity><choice>major</choice></severity>
               </value>
           </interval>
-          <outOfRange>invalid</outOfRange>
+          <outOfRange><choice>invalid</choice></outOfRange>
           <hystersis>0.1</hystersis>
-        </configure>
     </valueAlarm>
     <displayLimit>
         <low>0.0</low>
@@ -162,50 +142,5 @@
     </displayLimit>
 </record>
 
-<record name = "double03FromCounter" type = "double">
-    <input supportName = "inputLink" >
-        <configure structureName = "inputLink">
-            <pvname>counterCounter</pvname>
-            <process>false</process>
-        </configure>
-    </input>
-    <units>volts</units>
-    <valueAlarm>
-        <configure structureName = "doubleAlarm">
-          <active>true</active>
-          <interval>
-              <value structureName = "doubleAlarmInterval">
-                  <value>2.0</value>
-                  <severity>major</severity>
-              </value>
-              <value structureName = "doubleAlarmInterval">
-                  <value>4.0</value>
-                  <severity>minor</severity>
-              </value>
-              <value structureName = "doubleAlarmInterval">
-                  <value>6.0</value>
-                  <severity>none</severity>
-              </value>
-              <value structureName = "doubleAlarmInterval">
-                  <value>8.0</value>
-                  <severity>minor</severity>
-              </value>
-              <value structureName = "doubleAlarmInterval">
-                  <value>10.0</value>
-                  <severity>major</severity>
-              </value>
-          </interval>
-          <outOfRange>invalid</outOfRange>
-          <hystersis>0.1</hystersis>
-        </configure>
-    </valueAlarm>
-    <displayLimit>
-        <low>0.0</low>
-        <high>10.0</high>
-    </displayLimit>
-    <scan>
-        <processSelf>true</processSelf>
-    </scan>
-</record>
 
 </IOCDatabase>

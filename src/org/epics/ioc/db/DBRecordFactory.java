@@ -108,22 +108,6 @@ public class DBRecordFactory {
             DBNonScalarArray dbNonScalarArray = (DBNonScalarArray)dbField;
             DBField[] dbFields = dbNonScalarArray.getElementDBFields();
             switch(arrayElementType) {
-            case pvEnum:
-                PVEnumArray pvEnumArray = (PVEnumArray)pvArray;
-                EnumArrayData enumArrayData = new EnumArrayData();
-                pvEnumArray.get(0, size, enumArrayData);
-                PVEnum[] pvEnums = enumArrayData.data;
-                for(int i=0; i<size; i++) {
-                    PVEnum pvEnum = pvEnums[i];
-                    if(pvEnum==null) continue;
-                    if(pvEnum==pvField) {
-                        if(pvEnum==dbFields[i].getPVField()) {
-                            return dbFields[i];
-                        }
-                        throw new IllegalStateException("Logic error");
-                    }
-                }
-                throw new IllegalStateException("Logic error");
             case pvStructure:
                 PVStructureArray pvStructureArray = (PVStructureArray)pvArray;
                 StructureArrayData structureArrayData = new StructureArrayData();
@@ -158,34 +142,6 @@ public class DBRecordFactory {
                             throw new IllegalStateException("Logic error");
                         }
                         return findArrayField(pvField,pvFieldFind,index+1,dbFields[i],elementArray);
-                    }
-                }
-                throw new IllegalStateException("Logic error");
-            case pvMenu:
-                PVMenuArray pvMenuArray = (PVMenuArray)pvArray;
-                MenuArrayData menuArrayData = new MenuArrayData();
-                pvMenuArray.get(0, size, menuArrayData);
-                PVMenu[] pvMenus = menuArrayData.data;
-                for(int i=0; i<size; i++) {
-                    PVMenu pvMenu = pvMenus[i];
-                    if(pvMenu==null) continue;
-                    if(pvMenu==pvField) {
-                        if(pvMenu==dbFields[i].getPVField()) return dbFields[i];
-                        throw new IllegalStateException("Logic error");
-                    }
-                }
-                throw new IllegalStateException("Logic error");
-            case pvLink:
-                PVLinkArray pvLinkArray = (PVLinkArray)pvArray;
-                LinkArrayData linkArrayData = new LinkArrayData();
-                pvLinkArray.get(0, size, linkArrayData);
-                PVLink[] pvLinks = linkArrayData.data;
-                for(int i=0; i<size; i++) {
-                    PVLink pvLink = pvLinks[i];
-                    if(pvLink==null) continue;
-                    if(pvLink==pvField) {
-                        if(pvLink==dbFields[i].getPVField()) return dbFields[i];
-                        throw new IllegalStateException("Logic error");
                     }
                 }
                 throw new IllegalStateException("Logic error");

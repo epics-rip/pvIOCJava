@@ -1,64 +1,66 @@
 <?xml version="1.0" ?>
 <DBDefinition>
 
-<menu name = "monitorType">
-    <choice>put</choice>
-    <choice>change</choice>
-    <choice>absoluteChange</choice>
-    <choice>percentageChange</choice>
-</menu>
-
-<structure name = "processLink">
-    <field name = "pvname" type = "string" link = "true" />
+<structure name = "monitorType" createName = "enumerated" >
+  <field name = "index" type = "int" />
+  <field name = "choice" type = "string" />
+  <file name = "choices" type = "array" elementType = "string"
+   default = "put change absoluteChange percentageChange" /> 
 </structure>
 
-<structure name = "monitorLink">
-    <field name = "pvname" type = "string" link = "true" />
-    <field name = "type" type = "menu" menuName = "monitorType" default = "put" />
-    <field name = "deadband" type = "double" />
-    <field name = "onlyWhileProcessing" type = "boolean" />
-    <field name = "queueSize" type = "int"  default = "3" />
-    <field name = "reportOverrun" type = "boolean" />
-    <field name = "process" type = "boolean">
-        <!-- process this record when monitor occurs -->
-    </field>
-    <field name = "inheritSeverity" type = "boolean" >
-        <!-- only applicable if process is true -->
-    </field>
+<structure name = "processSupport">
+  <field name = "pvname" type = "string" link = "true" />
 </structure>
 
-<structure name = "monitorNotifyLink">
-    <field name = "pvname" type = "string" link = "true" />
-    <field name = "type" type = "menu" menuName = "monitorType" default = "change" />
-    <field name = "deadband" type = "double" />
-    <field name = "onlyWhileProcessing" type = "boolean" />
+<structure name = "monitorSupport">
+  <field name = "pvname" type = "string" link = "true" />
+  <field name = "type" type = "structure" structureName = "monitorType"
+     default = "put" />
+  <field name = "deadband" type = "double" />
+  <field name = "onlyWhileProcessing" type = "boolean" />
+  <field name = "queueSize" type = "int"  default = "3" />
+  <field name = "reportOverrun" type = "boolean" />
+  <field name = "process" type = "boolean">
+      <!-- process this record when monitor occurs -->
+  </field>
+  <field name = "inheritSeverity" type = "boolean" >
+      <!-- only applicable if process is true -->
+  </field>
 </structure>
 
-<structure name = "inputLink">
-    <field name = "pvname" type = "string" link = "true" />
-    <field name = "process" type = "boolean" />
-    <field name = "inheritSeverity" type = "boolean" />
+<structure name = "monitorNotifySupport">
+  <field name = "pvname" type = "string" link = "true" />
+  <field name = "type" type = "structure" structureName = "monitorType"
+     default = "change" />
+  <field name = "deadband" type = "double" />
+  <field name = "onlyWhileProcessing" type = "boolean" />
 </structure>
 
-<structure name = "outputLink">
-    <field name = "pvname" type = "string" link = "true" />
-    <field name = "process" type = "boolean" />
+<structure name = "inputSupport">
+  <field name = "pvname" type = "string" link = "true" />
+  <field name = "process" type = "boolean" />
+  <field name = "inheritSeverity" type = "boolean" />
 </structure>
 
-<linkSupport name = "processLink"
-    configurationStructureName = "processLink" 
-    factoryName = "org.epics.ioc.support.CALinkFactory" />
-<linkSupport name = "monitorLink"
-    configurationStructureName = "monitorLink"
-    factoryName = "org.epics.ioc.support.CALinkFactory" />
-<linkSupport name = "monitorNotifyLink"
-    configurationStructureName = "monitorNotifyLink"
-    factoryName = "org.epics.ioc.support.CALinkFactory" />
-<linkSupport name = "inputLink"
-    configurationStructureName = "inputLink"
-    factoryName = "org.epics.ioc.support.CALinkFactory" />
-<linkSupport name = "outputLink"
-    configurationStructureName = "outputLink"
-    factoryName = "org.epics.ioc.support.CALinkFactory" />
+<structure name = "outputSupport">
+  <field name = "pvname" type = "string" link = "true" />
+  <field name = "process" type = "boolean" />
+</structure>
+
+<support name = "processSupport"
+  structureName = "processSupport" 
+  factoryName = "org.epics.ioc.support.CASupportFactory" />
+<support name = "monitorSupport"
+  structureName = "monitorSupport"
+  factoryName = "org.epics.ioc.support.CASupportFactory" />
+<support name = "monitorNotifySupport"
+  structureName = "monitorNotifySupport"
+  factoryName = "org.epics.ioc.support.CASupportFactory" />
+<support name = "inputSupport"
+  structureName = "inputSupport"
+  factoryName = "org.epics.ioc.support.CASupportFactory" />
+<support name = "outputSupport"
+  structureName = "outputSupport"
+  factoryName = "org.epics.ioc.support.CASupportFactory" />
 
 </DBDefinition>

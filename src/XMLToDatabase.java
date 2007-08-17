@@ -73,15 +73,7 @@ public class XMLToDatabase {
     }
         
     static void dumpDBD(DBD dbd) {
-        Map<String,DBDMenu> menuMap = dbd.getMenuMap();
-        Set<String> keys = menuMap.keySet();
-        if(keys.size()>0) {
-            System.out.printf("\n\nmenus");
-            for(String key: keys) {
-                DBDMenu dbdMenu = menuMap.get(key);
-                System.out.print(dbdMenu.toString());
-            }
-        }
+        Set<String> keys = null;
         Map<String,DBDStructure> structureMap = dbd.getStructureMap();
         keys = structureMap.keySet();
         if(keys.size()>0) {
@@ -95,13 +87,22 @@ public class XMLToDatabase {
         Map<String,DBDSupport> supportMap = dbd.getSupportMap();
         keys = supportMap.keySet();
         if(keys.size()>0) {
-            System.out.printf("\n\nlinkSupport");
+            System.out.printf("\n\nsupport");
             for(String key: keys) {
                 DBDSupport dbdSupport = supportMap.get(key);
                 System.out.print(dbdSupport.toString());
             }
         }
         
+        Map<String,DBDCreate> createMap = dbd.getCreateMap();
+        keys = createMap.keySet();
+        if(keys.size()>0) {
+            System.out.printf("\n\ncreate");
+            for(String key: keys) {
+                DBDCreate dbdCreate = createMap.get(key);
+                System.out.print(dbdCreate.toString());
+            }
+        }
         
         Map<String,DBDRecordType> recordTypeMap = dbd.getRecordTypeMap();
         keys = recordTypeMap.keySet();
