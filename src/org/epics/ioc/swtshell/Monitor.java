@@ -517,15 +517,16 @@ public class Monitor {
     
     private static class GetProperty extends Dialog implements SelectionListener {
         private Button doneButton;
+        private Property[] propertys = null;
         private Button[] propertyButtons;
-        private String[] propertyNames = null;
+        String[] associatedNames = null;
         private Shell shell;
         
         private GetProperty(Shell parent) {
             super(parent,SWT.PRIMARY_MODAL|SWT.DIALOG_TRIM);
         }
         private String[] open(Field field) {
-            Property[] propertys = field.getPropertys();
+            propertys = field.getPropertys();
             int length = propertys.length;
             if(length==0) return null;
             shell = new Shell(getParent(),getStyle());
@@ -550,7 +551,7 @@ public class Monitor {
                     display.sleep();
                 }
             }
-            return propertyNames;
+            return associatedNames;
         }      
         /* (non-Javadoc)
          * @see org.eclipse.swt.events.SelectionListener#widgetDefaultSelected(org.eclipse.swt.events.SelectionEvent)
@@ -568,14 +569,15 @@ public class Monitor {
                 for(Button button : propertyButtons) {
                     if(button.getSelection()) numSelected++;
                 }
-                if(numSelected==0) {
-                    propertyNames = null;
-                } else {
-                    propertyNames = new String[numSelected];
+                
+                if(numSelected>0) {
+                    associatedNames = new String[numSelected];
                     int next = 0;
-                    for(Button button : propertyButtons) {
+                    for(int i=0; i<propertys.length; i++) {
+                        Button button = propertyButtons[i];
                         if(button.getSelection()) {
-                            propertyNames[next++] = button.getText();
+                            associatedNames[next] = propertys[i].getAssociatedFieldName();
+                            next++;
                         }
                     }
                 }

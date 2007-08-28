@@ -7,12 +7,9 @@
 
 <recordType name = "digital" supportName = "generic" >
   <include href = "common.xml" />
-  <field name = "value" type = "structure" structureName = "enumerated"
-       design = "false">
-    <property name = "alarm" associatedField = "alarm" />
-    <property name = "timeStamp" associatedField = "/timeStamp" />
-  </field>
   <include href = "digitalCommon.xml" />
+  <field name = "supportArray" type = "array"
+    elementType = "structure" supportName = "supportArray" />
 </recordType>
 
 </DBDefinition>

@@ -26,8 +26,7 @@
         </value>
     </calcArgArray>
     <calculator supportName = "counterCalculator" />
-    <valueAlarm>
-        <configure structureName = "doubleAlarm">
+    <valueAlarm structureName = "doubleAlarm">
           <active>true</active>
           <interval>
               <value structureName = "doubleAlarmInterval">
@@ -53,58 +52,51 @@
           </interval>
           <outOfRange>invalid</outOfRange>
           <hystersis>0.1</hystersis>
-        </configure>
     </valueAlarm>
-    <units>counts</units>
-    <displayLimit>
-        <low>0.0</low>
-        <high>10.0</high>
-    </displayLimit>
+    <displayCharacteristics structureName = "doubleDisplayCharacteristics" >
+        <units>volts</units>
+        <limit>
+            <low>0.0</low>
+            <high>10.0</high>
+        </limit>
+    </displayCharacteristics>
     <scan>
-        <scan>periodic</scan>
-        <rate>2.0</rate>
+        <type><choice>periodic</choice></type>
+        <rate>1.0</rate>
     </scan>
-    <linkArray>
-        <value structureName = "linkArrayElement">
+    <supportArray>
+        <value structureName = "supportArrayElement">
             <wait>false</wait>
-            <link  supportName = "outputLink" >
-                <configure structureName = "outputLink">
+            <link  supportName = "outputSupport" structureName = "outputSupport">
                     <pvname>stringOut</pvname>
                     <process>true</process>
-                </configure>
             </link>
         </value>
-    </linkArray>
+    </supportArray>
 </record>
 
 <record name = "stringOut" type = "string">
-    <output supportName = "pdrvOctetOutput" >
-        <configure structureName = "pdrvLink">
+    <output supportName = "pdrvOctetOutput" structureName = "pdrvSupport">
             <portName>syncOctetDriver</portName>
             <addr>0</addr>
             <timeout>.1</timeout>
-        </configure>
     </output>
-    <linkArray>
-        <value structureName = "linkArrayElement">
+    <supportArray>
+        <value structureName = "supportArrayElement">
             <wait>false</wait>
-            <link  supportName = "outputLink" >
-                <configure structureName = "outputLink">
+            <link  supportName = "processSupport" structureName = "processSupport">
                     <pvname>stringIn</pvname>
-                    <process>true</process>
-                </configure>
             </link>
         </value>
-    </linkArray>
+    </supportArray>
 </record>
 
 <record name = "stringIn" type = "string">
-    <input supportName = "pdrvOctetInput" >
-        <configure structureName = "pdrvLink">
+    <input supportName = "pdrvOctetInput" structureName = "pdrvSupport">
             <portName>syncOctetDriver</portName>
             <addr>0</addr>
             <timeout>.1</timeout>
-        </configure>
+            <size>20</size>
     </input>
 </record>
 

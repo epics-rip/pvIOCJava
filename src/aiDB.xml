@@ -18,56 +18,48 @@
         </value>
     </calcArgArray>
     <calculator supportName = "counterCalculator" />
-    <units>counts</units>
     <scan>
-        <scan>periodic</scan>
+        <type><choice>periodic</choice></type>
         <rate>1.0</rate>
     </scan>
-    <linkArray>
-        <value structureName = "linkArrayElement">
+    <supportArray>
+        <value structureName = "supportArrayElement">
             <wait>false</wait>
-            <link  supportName = "outputLink" >
-                <configure structureName = "outputLink">
+            <link  supportName = "outputSupport" structureName = "outputSupport">
                     <pvname>aiRaw</pvname>
                     <process>true</process>
-                </configure>
             </link>
         </value>
-    </linkArray>
+    </supportArray>
 
 </record>
 
 <record name = "aiRaw" type = "int">
-    <linkArray>
-        <value structureName = "linkArrayElement">
+    <supportArray>
+        <value structureName = "supportArrayElement">
             <wait>true</wait>
-            <link  supportName = "processLink" >
-                <configure structureName = "processLink">
+            <link  supportName = "processSupport" structureName = "processSupport">
                     <pvname>ai</pvname>
-                </configure>
             </link>
         </value>
-   </linkArray>
+   </supportArray>
 </record>
 
-<record name = "ai" type = "aiDouble" >
-    <input>
+<record name = "ai" type = "double" >
+    <input structureName = "linearConvertInput">
         <linearConvert>
             <deviceHigh>2047</deviceHigh>
             <deviceLow>-2048</deviceLow>
             <engUnitsLow>0.0</engUnitsLow>
             <engUnitsHigh>10.0</engUnitsHigh>
         </linearConvert>
-        <input supportName = "inputLink" >
-            <configure structureName = "inputLink">
+        <input supportName = "inputSupport" structureName = "inputSupport">
                 <pvname>aiRaw</pvname>
                 <process>false</process>
-            </configure>
         </input>
 
     </input>
-    <valueAlarm>
-        <configure structureName = "doubleAlarm">
+    <valueAlarm structureName = "doubleAlarm">
           <active>true</active>
           <interval>
               <value structureName = "doubleAlarmInterval">
@@ -93,12 +85,14 @@
           </interval>
           <outOfRange>invalid</outOfRange>
           <hystersis>0.1</hystersis>
-        </configure>
     </valueAlarm>
-    <displayLimit>
-        <low>0.0</low>
-        <high>10.0</high>
-    </displayLimit>
+    <displayCharacteristics structureName = "doubleDisplayCharacteristics" >
+        <units>volts</units>
+        <limit>
+            <low>0.0</low>
+            <high>10.0</high>
+        </limit>
+    </displayCharacteristics>
 </record>
 
 

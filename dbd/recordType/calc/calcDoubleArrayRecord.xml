@@ -12,14 +12,10 @@
 </structure>
 
 <recordType name = "calcDoubleArray" supportName = "generic" >
-  <include href = "common.xml" />
-  <field name = "value" type = "array" elementType = "double"  >
-    <property name = "alarm" associatedField = "alarm" />
-    <property name = "units" associatedField = "units" />
-    <property name = "displayLimit" associatedField = "displayLimit" />
-    <property name = "timeStamp" associatedField = "/timeStamp" />
-  </field>
+  <include href = "common.xml" />  
   <include href = "calcDoubleArrayCommon.xml" />
+  <field name = "supportArray" type = "array"
+     elementType = "structure" supportName = "supportArray" />
 </recordType>
 
 </DBDefinition>

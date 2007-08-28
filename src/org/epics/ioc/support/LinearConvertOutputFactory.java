@@ -83,12 +83,22 @@ public class LinearConvertOutputFactory {
             int index;
             
             index = structure.getFieldIndex("value");
+            if(index<0) {
+                super.message("value field does not exist", MessageType.error);
+                return;
+            }
             dbRawValue = dbFields[index];
             pvRawValue = (PVInt)pvFields[index];
                        
             index = structure.getFieldIndex("output");
+            if(index<0) {
+                super.message("output field does not exist", MessageType.error);
+                return;
+            }
             outputSupport = dbFields[index].getSupport();
-            outputSupport.setField(dbRawValue);
+            if(outputSupport!=null) {
+                outputSupport.setField(dbRawValue);
+            }
             index = structure.getFieldIndex("linearConvert");
             DBStructure dbLinearConvert = (DBStructure)dbFields[index];
             PVStructure linearConvert = (PVStructure)pvFields[index];
@@ -111,23 +121,33 @@ public class LinearConvertOutputFactory {
             index = structure.getFieldIndex("intercept");
             pvIntercept = (PVDouble)pvFields[index];
             dbIntercept = dbFields[index];
-            outputSupport.initialize();
-            super.setSupportState(outputSupport.getSupportState());
+            if(outputSupport!=null) {
+                outputSupport.initialize();
+                super.setSupportState(outputSupport.getSupportState());
+            } else {
+                super.setSupportState(SupportState.readyForStart);
+            }
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.process.AbstractSupport#uninitialize()
          */
         public void uninitialize() {
-            outputSupport.uninitialize();
-            super.setSupportState(outputSupport.getSupportState());
+            if(outputSupport!=null) {
+                outputSupport.uninitialize();
+                super.setSupportState(outputSupport.getSupportState());
+            } else {
+                super.setSupportState(SupportState.readyForInitialize);
+            }
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.process.AbstractSupport#start()
          */
         public void start() {
-            outputSupport.start();
-            if(outputSupport instanceof DeviceLimit) {
-                ((DeviceLimit)outputSupport).get(dbDeviceLow, dbDeviceHigh);
+            if(outputSupport!=null) {
+                outputSupport.start();
+                if(outputSupport instanceof DeviceLimit) {
+                    ((DeviceLimit)outputSupport).get(dbDeviceLow, dbDeviceHigh);
+                }
             }
             slope = pvSlope.get();
             intercept = pvIntercept.get();
@@ -152,14 +172,22 @@ public class LinearConvertOutputFactory {
                 pvIntercept.put(intercept);
                 dbIntercept.postPut();
             }
-            super.setSupportState(outputSupport.getSupportState());
+            if(outputSupport!=null) {
+                super.setSupportState(outputSupport.getSupportState());
+            } else {
+                super.setSupportState(SupportState.ready);
+            }
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.process.AbstractSupport#stop()
          */
         public void stop() {
-            outputSupport.stop();
-            super.setSupportState(outputSupport.getSupportState());
+            if(outputSupport!=null) {
+                outputSupport.stop();
+                super.setSupportState(outputSupport.getSupportState());
+            } else {
+                super.setSupportState(SupportState.readyForStart);
+            }
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.process.AbstractSupport#process(org.epics.ioc.process.SupportProcessRequester)
@@ -170,7 +198,11 @@ public class LinearConvertOutputFactory {
             double rawValue = (value -intercept)/slope;
             pvRawValue.put((int)rawValue);
             dbRawValue.postPut();
-            outputSupport.process(this);
+            if(outputSupport!=null) {
+                outputSupport.process(this);
+                return;
+            }
+            supportProcessRequester.supportProcessDone(RequestResult.success);
         }
 
         /* (non-Javadoc)

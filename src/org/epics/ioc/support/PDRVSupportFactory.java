@@ -27,7 +27,7 @@ public class PDRVSupportFactory {
         String supportName = dbStructure.getSupportName();
         PVStructure pvStructure = dbStructure.getPVStructure();
         Structure structure = (Structure)pvStructure.getField();
-        if(!structure.getStructureName().equals("pdrvLink")) {
+        if(!structure.getStructureName().equals("pdrvSupport")) {
             throw new IllegalStateException("configurationStructure is not pdrvLink");
         }
         if(supportName.equals(pdrvOctetInputSupportName))
@@ -1194,9 +1194,7 @@ public class PDRVSupportFactory {
         }
 
         private PVBoolean valuePVBoolean = null;
-        
-        private DBField dbIndex = null;
-        private PVInt pvIndex = null;
+        private PVInt valuePVInt = null;
         private UInt32Digital uint32Digital = null;
         private int value;
         private int mask;
@@ -1214,13 +1212,12 @@ public class PDRVSupportFactory {
                 valuePVBoolean = (PVBoolean)valuePVField;
                 return;
             }
-            dbIndex = getEnumIndex(valueDBField);
-            if(dbIndex!=null) {
-                pvIndex = (PVInt)dbIndex.getPVField();
+            if(type==Type.pvInt) {
+                valuePVInt = (PVInt)valuePVField;
                 return;
-            }
-            super.uninitialize();
+            }       
             pvStructure.message("value field is not a valid type", MessageType.fatalError);
+            super.uninitialize();
             return;
         }      
         /* (non-Javadoc)
@@ -1229,8 +1226,7 @@ public class PDRVSupportFactory {
         public void uninitialize() {
             super.uninitialize();
             valuePVBoolean = null;
-            dbIndex = null;
-            pvIndex = null;
+            valuePVInt = null;
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.pdrv.support.AbstractPDRVLinkSupport#start()
@@ -1272,11 +1268,15 @@ public class PDRVSupportFactory {
             value = value&mask;
             value >>>= shift;
             if(valuePVBoolean!=null) {
-                valuePVBoolean.put((value==0) ? false : true);
+                boolean oldValue = valuePVBoolean.get();
+                boolean newValue = ((value==0) ? false : true);
+                if(oldValue!=newValue) {
+                    valuePVBoolean.put(newValue);
+                    valueDBField.postPut();
+                }
+            } else if(valuePVInt!=null)  {
+                valuePVInt.put(value);
                 valueDBField.postPut();
-            } else if(pvIndex!=null)  {
-                pvIndex.put(value);
-                dbIndex.postPut();
             } else {
                 pvStructure.message(" logic error", MessageType.fatalError);
             }
@@ -1445,7 +1445,7 @@ public class PDRVSupportFactory {
         }
 
         private PVBoolean valuePVBoolean = null;
-        private PVInt pvIndex = null;
+        private PVInt valuePvInt = null;
         private UInt32Digital uint32Digital = null;
         private int value;
         private int mask;
@@ -1463,13 +1463,17 @@ public class PDRVSupportFactory {
                 valuePVBoolean = (PVBoolean)valuePVField;
                 return;
             }
-            DBField dbIndex = getEnumIndex(valueDBField);
-            if(dbIndex!=null) {
-                pvIndex = (PVInt)dbIndex.getPVField();
+            if(type==Type.pvInt) {
+                valuePvInt = (PVInt)valuePVField;
                 return;
             }
-            super.uninitialize();
+            DBField dbIndex = getEnumIndex(valueDBField);
+            if(dbIndex!=null) {
+                valuePvInt = (PVInt)dbIndex.getPVField();
+                return;
+            } 
             pvStructure.message("value field is not a scalar type", MessageType.fatalError);
+            super.uninitialize();
             return;
         }      
         /* (non-Javadoc)
@@ -1478,7 +1482,7 @@ public class PDRVSupportFactory {
         public void uninitialize() {
             super.uninitialize();
             valuePVBoolean = null;
-            pvIndex = null;
+            valuePvInt = null;
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.pdrv.support.AbstractPDRVLinkSupport#start()
@@ -1519,8 +1523,8 @@ public class PDRVSupportFactory {
         public void process(SupportProcessRequester supportProcessRequester) {
             if(valuePVBoolean!=null) {
                 value = valuePVBoolean.get() ? 1 : 0;
-            } else if(pvIndex!=null)  {
-                value = pvIndex.get();
+            } else if(valuePvInt!=null)  {
+                value = valuePvInt.get();
             } else {
                 pvStructure.message(" logic error", MessageType.fatalError);
             }

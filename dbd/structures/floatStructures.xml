@@ -1,0 +1,21 @@
+<?xml version="1.0" ?>
+<DBDefinition>
+
+<structure name = "floatDisplayCharacteristics">
+    <field name = "description" type = "string" />
+    <field name = "format" type = "string" />
+    <field name = "units" type = "string" />
+    <field name = "resolution" type = "int" />
+    <field name = "limit" type = "structure" structureName = "floatLimit" />
+    <field name = "minStep" type = "float" />
+</structure>
+
+
+<structure name = "floatHistory" supportName = "history" >
+    <field name = "timeStamp" type = "structure" structureName = "timeStamp" />
+    <field name = "value" type = "float" />
+    <field name = "alarm" type = "structure"
+         structureName = "alarm" supportName = "null" />
+</structure>
+
+</DBDefinition>

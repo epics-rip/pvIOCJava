@@ -1,7 +1,16 @@
 <?xml version="1.0" ?>
 <DBDefinition>
-<include addPath = "dbd/support" />
+<include addPath = "dbd/structures" />
+<include href = "limits.xml" />
+<include href = "enumerated.xml" />
+<include href = "commonFields.xml" />
 <include href = "alarm.xml" />
+<include href = "byteStructures.xml" />
+<include href = "shortStructures.xml" />
+<include href = "intStructures.xml" />
+<include href = "longStructures.xml" />
+<include href = "floatStructures.xml" />
+<include href = "doubleStructures.xml" />
 <include href = "noop.xml" />
 <include href = "generic.xml" />
 <include href = "supportArray.xml" />
@@ -13,6 +22,6 @@
 <include href = "disable.xml" />
 <include href = "delay.xml" />
 <include href = "portDriver.xml" />
-<include removePath = "dbd/support" />
-
+<include removePath = "dbd/structures" />
 </DBDefinition>
+

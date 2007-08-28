@@ -7,11 +7,9 @@
 
 <recordType name = "boolean" supportName = "generic" >
   <include href = "common.xml" />
-  <field name = "value" type = "boolean" >
-      <property name = "alarm" associatedField = "alarm" />
-      <property name = "timeStamp" associatedField = "/timeStamp" />
-  </field>
   <include href = "booleanCommon.xml" />
+  <field name = "supportArray" type = "array"
+     elementType = "structure" supportName = "supportArray" />
 </recordType>
 
 </DBDefinition>

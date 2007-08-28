@@ -1,0 +1,52 @@
+<?xml version="1.0" ?>
+<DBDefinition>
+
+<structure name = "DoubleProperty">
+    <field name = "display" type = "structure"
+         structureName = "doubleDisplayCharacteristics" />
+    <field name = "limit" type = "structure" structureName = "doubleLimit" />
+    <field name = "monitor" type = "structure"
+         structureName = "doubleMonitorCharacteristics" />
+    <field name = "value" type = "double" read-only="false">
+        <!-- put all the "properties" here that can trigger on-change monitor -->
+    </field>
+    
+    <!-- array of structures -->
+    <field name = "history" type = "structure" />
+    <field name = "alarm" type = "structure" />
+    <field name = "event" type = "structure" />
+</structure>
+
+<structure name = "doubleDisplayCharacteristics">
+    <field name = "description" type = "string" />
+    <field name = "format" type = "string" />
+    <field name = "units" type = "string" />
+    <field name = "resolution" type = "long" />
+    
+    <!-- for double property -->
+    <field name = "limit" type = "structure" structureName = "doubleLimit" />
+    <field name = "defaultValue" type = "double" />
+    <field name = "minStep" type = "double" />
+</structure>
+
+<structure name = "doubleMonitorCharacteristics">
+    <!-- double in seconds -->
+    <field name = "defaultTimerTrigger" type = "double" />
+    <field name = "minTimerTrigger" type = "double" />
+
+    <!-- for double property -->
+    <field name = "minValueTrigger" type = "double" />
+</structure>
+
+
+<structure name = "doubleMonitorInstance">
+    <field name = "startTime" type = "structure" />
+    <field name = "timerTrigger" type = "double" />
+    <field name = "valueTrigger" type = "double" />
+    <field name = "valueTriggerEnable" type = "boolean" />
+</structure>
+
+<support name = "incremental"
+   factoryName = "org.epics.ioc.support.IncrementalFactory" />
+
+</DBDefinition>

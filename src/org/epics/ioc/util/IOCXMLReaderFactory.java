@@ -102,15 +102,14 @@ public class IOCXMLReaderFactory {
                 // nothing to do. ErrorHandler reports errors.
             } catch (IOException e) {
                 String message = String.format(
-                        "IOCXMLReader.convert terminating with IOException %n%s%n",
-                        e.getMessage());
+                    "IOCXMLReader.convert terminating with IOException: %s%n%s%n",
+                    e.getMessage(),handler.showLocation());
                 listener.message(message, MessageType.fatalError);
             } catch (IllegalArgumentException e) {
-                throw new IllegalStateException(
-                    String.format("%n")
-                    + "IOCXMLReader.convert terminating with IllegalArgumentException"
-                    + String.format("%n")
-                    + e.getMessage());
+                String message = String.format(
+                    "Illegal Argument Exception: %s%n%s%n",
+                    e.getMessage(), handler.showLocation());
+                listener.message(message,MessageType.fatalError);
             }
             return handler;
         }
@@ -131,11 +130,13 @@ public class IOCXMLReaderFactory {
         }
         
         private String showLocation() {
-            String result;
-            result = String.format("line %d column %d in %s%n",
-                locator.getLineNumber(),
-                locator.getColumnNumber(),
-                locator.getSystemId());
+            String result = "";
+            if(locator!=null) {
+                result = String.format("line %d column %d in %s%n",
+                        locator.getLineNumber(),
+                        locator.getColumnNumber(),
+                        locator.getSystemId());
+            }
             if(parent!=null) result += parent.showLocation();
             return result;
         }

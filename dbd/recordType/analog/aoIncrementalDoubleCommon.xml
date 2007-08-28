@@ -1,15 +1,25 @@
 <?xml version="1.0" ?>
 <DBDefinition>
+<field name = "value" type = "double" >
+    <property name = "alarm" associatedField = "alarm" />
+    <property name = "displayChararacteristics" associatedField = "displayCharacteristics" />
+    <property name = "controlLimit" associatedField = "controlLimit" />
+    <property name = "timeStamp" associatedField = "timeStamp" />
+  </field>
   <field name = "alarm" type = "structure" structureName = "alarm"
       supportName = "alarm" />
   <field name = "incremental" type = "structure"
       structureName = "incrementalDouble" supportName = "incremental" />
   <field name = "output" type = "structure"
       structureName = "linearConvertOutput" />
-  <field name = "units" type = "string" />
   <field name = "valueAlarm" type = "structure" supportName = "doubleAlarm" />
-  <field name = "displayLimit"
+  <field name = "controlLimit"
      type = "structure" structureName = "doubleLimit" />
-  <field name = "supportArray" type = "array"
-     elementType = "structure" supportName = "supportArray" />
+     <!-- instance can set
+     structureName = "doubleDisplayCharacteristics" -->
+  <field name = "displayCharacteristics" type = "structure" />
+  <!-- instance can set
+     structureName = "doubleHistory" supportName = "history" -->
+  <field name = "history" type = "structure" />
+  
 </DBDefinition>

@@ -40,12 +40,6 @@ public interface FieldCreate {
      */
     public FieldAttribute createFieldAttribute();
     /**
-     * Create a FieldAttribute from a map of attribute values.
-     * @param attributes The map of attributes.
-     * @return The FieldAttributes.
-     */
-    public FieldAttribute createFieldAttribute(Map<String,String> attributes);
-    /**
      * Create a <i>Property</i>
      * @param propertyName the property name
      * @param fieldName the associated field

@@ -8,11 +8,9 @@ package org.epics.ioc.support;
 import java.lang.reflect.*;
 
 import org.epics.ioc.pv.*;
-import org.epics.ioc.pv.Field;
 import org.epics.ioc.pv.Type;
 import org.epics.ioc.db.*;
 import org.epics.ioc.util.*;
-import org.epics.ioc.pdrv.*;
 
 /**
  * Record Support for starting a port driver.
@@ -151,6 +149,8 @@ public class PDRVPortCreateFactory {
             return null;
         }
         pvStructure = (PVStructure)pvField;
+        pvFields = pvStructure.getFieldPVFields();
+        structure = pvStructure.getStructure();
         index = structure.getFieldIndex("choice");
         if(index<0) {
             pvStructure.message("field index does not exist", MessageType.error);

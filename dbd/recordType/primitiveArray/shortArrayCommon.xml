@@ -1,12 +1,18 @@
 <?xml version="1.0" ?>
 <DBDefinition>
+  <field name = "value" type = "array" elementType = "short" >
+    <property name = "alarm" associatedField = "alarm" />
+    <property name = "displayChararacteristics" associatedField = "displayCharacteristics" />
+    <property name = "timeStamp" associatedField = "timeStamp" />
+  </field>
   <field name = "alarm" type = "structure" structureName = "alarm"
       supportName = "alarm" />
   <field name = "input" type = "structure" />
   <field name = "output" type = "structure" />
-  <field name = "supportArray" type = "array"
-     elementType = "structure" supportName = "supportArray" />
-  <field name = "units" type = "string" />
-  <field name = "displayLimit"
-     type = "structure" structureName = "shortLimit" />
+  <!-- instance can set
+     structureName = "shortDisplayCharacteristics" -->
+  <field name = "displayCharacteristics" type = "structure" />
+  <!-- instance can set
+     structureName = "shortHistory" supportName = "history" -->
+  <field name = "history" type = "structure" />
 </DBDefinition>

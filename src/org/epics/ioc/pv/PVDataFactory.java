@@ -44,7 +44,7 @@ public class PVDataFactory {
         public PVField createPVField(PVField parent,Field field)
         {
             if(parent==null) throw new IllegalArgumentException("Illegal parent is null");
-            String defaultValue = field.getFieldAttribute().getDefault();
+            String defaultValue = field.getFieldAttribute().getAttribute("default");
             Type type = field.getType();
             switch(type) {
             case pvBoolean: return new BooleanData(parent,field,defaultValue);
@@ -73,7 +73,7 @@ public class PVDataFactory {
             if(parent==null) throw new IllegalArgumentException("Illegal parent is null");
             Array array = (Array)field;
             Type elementType= array.getElementType();
-            String defaultValue = field.getFieldAttribute().getDefault();
+            String defaultValue = field.getFieldAttribute().getAttribute("default");
             switch(elementType) {
             case pvBoolean: return new BooleanArray(parent,array,capacity,capacityMutable,defaultValue);
             case pvByte:    return new ByteArray(parent,array,capacity,capacityMutable,defaultValue);

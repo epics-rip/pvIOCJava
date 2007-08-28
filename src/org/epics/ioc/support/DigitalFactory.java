@@ -438,8 +438,8 @@ public class DigitalFactory {
                         MessageType.error);
                     return false;
                 }
-                DBNonScalarArray dbStateSeverity = (DBNonScalarArray)dbField;                
-                DBField[] dbStateFields = dbStateSeverity.getElementDBFields();
+                DBStructure dbStateSeverity = (DBStructure)dbField;                
+                DBField[] dbStateFields = dbStateSeverity.getFieldDBFields();
                 PVStructure pvStructure = (PVStructure)dbField.getPVField();
                 Structure structure = pvStructure.getStructure();
                 PVField[] pvFields = pvStructure.getFieldPVFields();
@@ -482,6 +482,7 @@ public class DigitalFactory {
                             MessageType.error);
                     return false;
                 }
+                pvField = pvFields[indField];
                 Enumerated enumerated;
                 enumerated = AlarmSeverity.getAlarmSeverity(dbStateFields[indField]);
                 if(enumerated==null) {

@@ -7,14 +7,10 @@
 
 <recordType name = "aoIncrementalDouble" supportName = "generic" >
   <include href = "common.xml" />
-  <field name = "value" type = "double" >
-    <property name = "alarm" associatedField = "alarm" />
-    <property name = "units" associatedField = "units" />
-    <property name = "displayLimit" associatedField = "displayLimit" />
-    <property name = "controlLimit" associatedField = "controlLimit" />
-    <property name = "timeStamp" associatedField = "/timeStamp" />
-  </field>
+  
   <include href = "aoIncrementalDoubleCommon.xml" />
+  <field name = "supportArray" type = "array"
+     elementType = "structure" supportName = "supportArray" />
 </recordType>
 
 </DBDefinition>

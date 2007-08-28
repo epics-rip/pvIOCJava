@@ -66,6 +66,8 @@ public class CASupportFactory {
             return null;
         }
         pvStructure = (PVStructure)pvField;
+        pvFields = pvStructure.getFieldPVFields();
+        structure = pvStructure.getStructure();
         index = structure.getFieldIndex("index");
         if(index<0) {
             pvStructure.message("field index does not exist", MessageType.error);

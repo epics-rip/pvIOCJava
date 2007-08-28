@@ -26,11 +26,6 @@
         </value>
     </calcArgArray>
     <calculator supportName = "counterCalculator" />
-    <units>counts</units>
-    <displayLimit>
-        <low>0.0</low>
-        <high>10.0</high>
-    </displayLimit>
     <scan>
         <type><choice>periodic</choice></type>
         <rate>0.5</rate>
@@ -105,11 +100,6 @@
         </value>
     </calcArgArray>
     <calculator supportName = "counterCalculator" />
-    <units>counts</units>
-    <displayLimit>
-        <low>0.0</low>
-        <high>10.0</high>
-    </displayLimit>
     <scan>
         <type><choice>periodic</choice></type>
         <rate>0.5</rate>

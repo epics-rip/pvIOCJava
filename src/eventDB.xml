@@ -17,7 +17,7 @@
     </calcArgArray>
     <calculator supportName = "counterCalculator" />
     <scan>
-        <scan>event</scan>
+        <type><choice>event</choice></type>
         <eventName>eventTest</eventName>
     </scan>
 </record>
@@ -25,7 +25,7 @@
 <record name = "event" type = "event">
     <value>eventTest</value>
     <scan>
-        <scan>periodic</scan>
+        <type><choice>periodic</choice></type>
         <rate>1.0</rate>
     </scan>
 </record>

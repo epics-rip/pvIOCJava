@@ -7,13 +7,9 @@
 
 <recordType name = "short" supportName = "generic" >
   <include href = "common.xml" />
-  <field name = "value" type = "short" >
-    <property name = "alarm" associatedField = "alarm" />
-    <property name = "units" associatedField = "units" />
-    <property name = "displayLimit" associatedField = "displayLimit" />
-    <property name = "timeStamp" associatedField = "/timeStamp" />
-  </field>
   <include href = "shortCommon.xml" />
+  <field name = "supportArray" type = "array"
+     elementType = "structure" supportName = "supportArray" />
 </recordType>
 
 </DBDefinition>

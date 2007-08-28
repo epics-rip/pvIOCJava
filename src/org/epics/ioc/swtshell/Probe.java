@@ -709,11 +709,11 @@ public class Probe {
                 if(properties!=null && properties.length>0) {
                     for(Property property: properties) {
                         channel.findField(null);
-                        String propertyName = property.getPropertyName();
-                        ChannelField propChannelField = channel.findField(propertyName);
+                        String associatedField = property.getAssociatedFieldName();
+                        ChannelField propChannelField = channel.findField(associatedField);
                         if(propChannelField==null) {
                             requester.message(String.format(
-                                    "property %s not found%n", propertyName),MessageType.error);
+                                    "property %s not found%n", associatedField),MessageType.error);
                             continue;
                         }
                         getFieldGroup.addChannelField(propChannelField);

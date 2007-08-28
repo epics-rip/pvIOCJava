@@ -1,13 +1,21 @@
 <?xml version="1.0" ?>
 <DBDefinition>
+  <field name = "value" type = "byte" >
+    <property name = "alarm" associatedField = "alarm" />
+    <property name = "displayChararacteristics" associatedField = "displayCharacteristics" />
+    <property name = "timeStamp" associatedField = "timeStamp" />
+  </field>
   <field name = "alarm" type = "structure" structureName = "alarm"
       supportName = "alarm" />
   <field name = "input" type = "structure" />
-  <field name = "valueAlarm" type = "structure" supportName = "byteAlarm" />
+  <!-- instance can set
+     structureName = "byteAlarm" supportName = "byteAlarm" -->
+  <field name = "valueAlarm" type = "structure" />
   <field name = "output" type = "structure" />
-  <field name = "supportArray" type = "array"
-     elementType = "structure" supportName = "supportArray" />
-  <field name = "units" type = "string" />
-  <field name = "displayLimit"
-     type = "structure" structureName = "byteLimit" />
+  <!-- instance can set
+     structureName = "byteDisplayCharacteristics" -->
+  <field name = "displayCharacteristics" type = "structure" />
+  <!-- instance can set
+     structureName = "byteHistory" supportName = "history" -->
+  <field name = "history" type = "structure" />
 </DBDefinition>

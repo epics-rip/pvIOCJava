@@ -206,6 +206,9 @@ public class XMLToDBDFactory {
 
     private static class DBDXMLStructureHandler implements DBDXMLHandler
     {
+        static final String[] excludeString = {
+            "name","supportName","createName","associatedField",
+            "type","elementType","structureName","factoryName"};
  
         private enum State {idle, structure, field}      
         
@@ -274,7 +277,8 @@ public class XMLToDBDFactory {
                 state = State.idle;
                 return;
             }
-            structureAttribute = fieldCreate.createFieldAttribute(attributes);
+            structureAttribute = fieldCreate.createFieldAttribute();
+            structureAttribute.setAttributes(attributes,excludeString);
             structurePropertyList = new LinkedList<Property>();
             fieldList = new LinkedList<Field>();
             state = State.structure;
@@ -338,7 +342,8 @@ public class XMLToDBDFactory {
                 assert(state==State.structure);
                 fieldSupportName = null;
                 fieldCreateName = null;
-                fieldAttribute = fieldCreate.createFieldAttribute(attributes);
+                fieldAttribute = fieldCreate.createFieldAttribute();
+                fieldAttribute.setAttributes(attributes, excludeString);
                 fieldName = attributes.get("name");
                 if(fieldName==null) {
                     iocxmlReader.message("name not specified",

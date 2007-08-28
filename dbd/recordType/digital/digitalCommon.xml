@@ -1,9 +1,11 @@
 <?xml version="1.0" ?>
 <DBDefinition>
+  <field name = "value" type = "structure" structureName = "enumerated">
+    <property name = "alarm" associatedField = "alarm" />
+    <property name = "timeStamp" associatedField = "timeStamp" />
+  </field>
   <field name = "alarm" type = "structure" structureName = "alarm"
     supportName = "alarm" />
   <field name = "digitalIO" type = "structure"
     structureName = "digitalIO" supportName = "digital" />
-  <field name = "supportArray" type = "array"
-    elementType = "structure" supportName = "supportArray" />
 </DBDefinition>

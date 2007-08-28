@@ -5,37 +5,18 @@
  */
 package org.epics.ioc.pv;
 
+import java.util.Map;
+
 /**
  * Reflection interface for field attributes.
  * @author mrk
  *
  */
 public interface FieldAttribute {
-    /**
-     * Get the default value for the field as a String.
-     * @return The default.
-     */
-    String getDefault();
-    /**
-     * Is the field readonly .
-     * @return (false,true) if it (is not, is) readonly.
-     */
-    boolean isReadOnly();
-    /**
-     * Can this field be configurable by Database Configuration Tools.
-     * @return (false,true) if it (can't, can) be configured.
-     */
-    boolean isDesign();
-    /**
-     * Is this field a link to another record.
-     * @return (false,true) if it (is not, is) a link to another record.
-     */
-    boolean isLink();
-    /**
-     * Get the Access Security Level for this field.
-     * @return The level.
-     */
-    int getAsl();
+    void setAttributes(Map<String,String> attributes,String[] exclude);
+    String setAttribute(String key,String value);
+    Map<String,String> getAttributes();
+    String getAttribute(String key);
     /**
      * Generate a string describing the attributes.
      * @return The string describing the attributes.

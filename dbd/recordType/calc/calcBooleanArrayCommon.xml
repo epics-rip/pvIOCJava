@@ -1,10 +1,19 @@
 <?xml version="1.0" ?>
 <DBDefinition>
+  <field name = "value" type = "array" elementType = "boolean"  >
+    <property name = "alarm" associatedField = "alarm" />
+    <property name = "timeStamp" associatedField = "timeStamp" />
+  </field>
   <field name = "alarm" type = "structure" structureName = "alarm"
       supportName = "alarm" />
-  <field name = "calcArgArray" type = "array"
+      <field name = "calcArgArray" type = "array"
      elementType = "structure" supportName = "calcArgArray" />
   <field name = "calculator" type = "structure" structureName = "null" />
-  <field name = "supportArray" type = "array"
-     elementType = "structure" supportName = "supportArray" />
+  <!-- instance can set
+     structureName = "booleanAlarm" supportName = "booleanAlarm" -->
+  <field name = "valueAlarm" type = "structure" />
+  <field name = "output" type = "structure" />
+  <!-- instance can set
+     structureName = "booleanHistory" supportName = "history" -->
+  <field name = "history" type = "structure" />
 </DBDefinition>

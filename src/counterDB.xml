@@ -11,7 +11,7 @@
             <name>max</name>
         </value>
         <value structureName = "calcDoubleArg">
-            <value>1.0</value>
+            <value>0.5</value>
             <name>inc</name>
         </value>
     </calcArgArray>
@@ -56,13 +56,15 @@
               </value>
           </interval>
           <outOfRange><choice>invalid</choice></outOfRange>
-          <hystersis>0.1</hystersis>
+          <hystersis>0.6</hystersis>
     </valueAlarm>
-    <units>counts</units>
-    <displayLimit>
-        <low>0.0</low>
-        <high>10.0</high>
-    </displayLimit>
+    <displayCharacteristics structureName = "doubleDisplayCharacteristics" >
+        <units>volts</units>
+        <limit>
+            <low>0.0</low>
+            <high>10.0</high>
+        </limit>
+    </displayCharacteristics>
     <scan>
         <type><choice>periodic</choice></type>
         <rate>1.0</rate>
@@ -101,14 +103,15 @@
           <outOfRange><choice>invalid</choice></outOfRange>
           <hystersis>0.1</hystersis>
     </valueAlarm>
-    <units>volts</units>
-    <displayLimit>
-        <low>0.0</low>
-        <high>10.0</high>
-    </displayLimit>
+    <displayCharacteristics structureName = "doubleDisplayCharacteristics" >
+        <units>volts</units>
+        <limit>
+            <low>0.0</low>
+            <high>10.0</high>
+        </limit>
+    </displayCharacteristics>
 </record>
 <record name = "double02FromCounter" type = "double">
-    <units>volts</units>
     <valueAlarm structureName = "doubleAlarm">
           <active>true</active>
           <interval>
@@ -136,10 +139,17 @@
           <outOfRange><choice>invalid</choice></outOfRange>
           <hystersis>0.1</hystersis>
     </valueAlarm>
-    <displayLimit>
-        <low>0.0</low>
-        <high>10.0</high>
-    </displayLimit>
+    <displayCharacteristics structureName = "doubleDisplayCharacteristics" >
+        <description>Sample Description</description>
+        <format>%f</format>
+        <resolution>1</resolution>
+        <minStep>.1</minStep>
+        <units>volts</units>
+        <limit>
+            <low>0.0</low>
+            <high>10.0</high>
+        </limit>
+    </displayCharacteristics>
 </record>
 
 

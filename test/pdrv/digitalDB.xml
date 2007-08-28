@@ -26,7 +26,6 @@
         </value>
     </calcArgArray>
     <calculator supportName = "counterCalculator" />
-    <units>counts</units>
     <scan>
         <type><choice>periodic</choice></type> 
         <rate>0.5</rate>
@@ -41,6 +40,13 @@
             </link>
         </value>
     </supportArray>
+    <displayCharacteristics structureName = "doubleDisplayCharacteristics" >
+        <units>counts</units>
+        <limit>
+            <low>0.0</low>
+            <high>15.0</high>
+        </limit>
+    </displayCharacteristics>
 </record>
 
 <record name = "syncDigitalOut" type = "int">

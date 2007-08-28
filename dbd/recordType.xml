@@ -21,8 +21,6 @@
 <include href = "stringArrayRecord.xml" />
 <include removePath = "dbd/recordType/primitiveArray" />
 <include addPath = "dbd/recordType/analog" />
-<include href = "aiDoubleRecord.xml" />
-<include href = "aoDoubleRecord.xml" />
 <include href = "aoIncrementalDoubleRecord.xml" />
 <include removePath = "dbd/recordType/analog" />
 <include addPath = "dbd/recordType/digital" />

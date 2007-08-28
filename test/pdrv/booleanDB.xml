@@ -26,7 +26,6 @@
         </value>
     </calcArgArray>
     <calculator supportName = "counterCalculator" />
-    <units>counts</units>
     <scan>
         <type><choice>periodic</choice></type>
         <rate>0.5</rate>
@@ -81,8 +80,8 @@
     </input>
     <valueAlarm structureName = "booleanAlarm">
       <active>true</active>
-      <falseAlarm>minor</falseAlarm>
-      <trueAlarm>major</trueAlarm>
+      <falseAlarm><choice>minor</choice></falseAlarm>
+      <trueAlarm><choice>major</choice></trueAlarm>
     </valueAlarm>
 </record>
 
@@ -104,8 +103,8 @@
     </input>
     <valueAlarm structureName = "booleanAlarm">
       <active>true</active>
-      <changeStateAlarm>minor</changeStateAlarm>
-      <trueAlarm>major</trueAlarm>
+      <changeStateAlarm><choice>minor</choice></changeStateAlarm>
+      <trueAlarm><choice>major</choice></trueAlarm>
     </valueAlarm>
 </record>
 
@@ -134,7 +133,6 @@
         </value>
     </calcArgArray>
     <calculator supportName = "counterCalculator" />
-    <units>counts</units>
     <scan>
         <type><choice>periodic</choice></type>
         <rate>0.5</rate>

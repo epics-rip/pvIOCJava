@@ -6,6 +6,8 @@
 package org.epics.ioc.pv;
 
 import java.util.Map;
+import java.util.Set;
+import java.util.TreeMap;
 
 
 /**
@@ -111,29 +113,7 @@ public final class FieldFactory {
          * @see org.epics.ioc.pv.FieldCreate#createFieldAttribute()
          */
         public FieldAttribute createFieldAttribute() {
-            return new FieldAttributeImpl(1,null,true,false,false);
-        }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.pv.FieldCreate#createFieldAttribute(java.util.Map)
-         */
-        public FieldAttribute createFieldAttribute(Map<String, String> attributes) {
-            int asl = 1;
-            String defaultValue = null;
-            boolean isDesign = true;
-            boolean isLink = false;
-            boolean isReadOnly = false;
-            String value = attributes.get("default");
-            if(value!=null) defaultValue = value;
-            value = attributes.get("asl");
-            if(value!=null) asl = Integer.parseInt(value);
-            value = attributes.get("design");
-            if(value!=null) isDesign = Boolean.parseBoolean(value);
-            value = attributes.get("link");
-            if(value!=null) isLink = Boolean.parseBoolean(value);
-            value = attributes.get("readonly");
-            if(value!=null) isReadOnly = Boolean.parseBoolean(value);
-            return new FieldAttributeImpl(asl,defaultValue,isDesign,isLink,isReadOnly);
-            
+            return new FieldAttributeImpl();
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.pv.FieldCreate#createProperty(java.lang.String, java.lang.String)
@@ -159,61 +139,53 @@ public final class FieldFactory {
         }
                 
         private static class FieldAttributeImpl implements FieldAttribute {
-            private int asl = 1;
-            private String defaultValue = null;
-            private boolean isDesign = true;
-            private boolean isLink = false;
-            private boolean isReadOnly = false;
-            
-            private FieldAttributeImpl(int asl, String defaultValue,
-                boolean isDesign, boolean isLink, boolean isReadOnly)
-            {
-                super();
-                this.asl = asl;
-                this.defaultValue = defaultValue;
-                this.isDesign = isDesign;
-                this.isLink = isLink;
-                this.isReadOnly = isReadOnly;
-            }
+            private TreeMap<String,String> attributeMap = new TreeMap<String,String>();
+            private FieldAttributeImpl(){}
+
             /* (non-Javadoc)
-             * @see org.epics.ioc.pv.FieldAttribute#getAsl()
+             * @see org.epics.ioc.pv.FieldAttribute#getAttribute(java.lang.String)
              */
-            public int getAsl() {
-                return asl;
+            public synchronized String getAttribute(String key) {
+                return attributeMap.get(key);
             }
+
             /* (non-Javadoc)
-             * @see org.epics.ioc.pv.FieldAttribute#getDefault()
+             * @see org.epics.ioc.pv.FieldAttribute#getAttributes()
              */
-            public String getDefault() {
-                return defaultValue;
+            public synchronized Map<String, String> getAttributes() {
+                return attributeMap;
             }
+
             /* (non-Javadoc)
-             * @see org.epics.ioc.pv.FieldAttribute#isDesign()
+             * @see org.epics.ioc.pv.FieldAttribute#setAttribute(java.lang.String, java.lang.String)
              */
-            public boolean isDesign() {
-                return isDesign;
+            public synchronized String setAttribute(String key, String value) {
+                return attributeMap.put(key, value);
             }
+
             /* (non-Javadoc)
-             * @see org.epics.ioc.pv.FieldAttribute#isLink()
+             * @see org.epics.ioc.pv.FieldAttribute#setAttributes(java.util.Map, java.lang.String[])
              */
-            public boolean isLink() {
-                return isLink;
+            public synchronized void setAttributes(Map<String, String> attributes, String[] exclude) {
+                Set<String> keys;
+                keys = attributes.keySet();
+                outer:
+                for(String key: keys) {
+                     for(String excludeKey: exclude) {
+                         if(excludeKey.equals(key)) continue outer;
+                     }
+                    attributeMap.put(key,attributes.get(key));
+                }
             }
-            /* (non-Javadoc)
-             * @see org.epics.ioc.pv.FieldAttribute#isReadOnly()
-             */
-            public boolean isReadOnly() {
-                return isReadOnly;
-            }
+
             /* (non-Javadoc)
              * @see org.epics.ioc.pv.FieldAttribute#toString(int)
              */
-            public String toString(int indentLevel) {
-                String result = String.format(
-                    " asl %d design %b link %b readOnly %b",
-                    asl,isDesign,isLink,isReadOnly);
-                if(defaultValue!=null) {
-                    result += " default " + "\"" + defaultValue + "\"";
+            public synchronized String toString(int indentLevel) {
+                String result = "";
+                Set<String> keys = attributeMap.keySet();
+                for(String key : keys) {
+                    result += " " + key + "=" + attributeMap.get(key);
                 }
                 return result;
             }

@@ -26,7 +26,6 @@
         </value>
     </calcArgArray>
     <calculator supportName = "counterCalculator" />
-    <units>counts</units>
     <scan>
         <type><choice>periodic</choice></type>
         <rate>0.5</rate>
@@ -113,7 +112,6 @@
         </value>
     </calcArgArray>
     <calculator supportName = "counterCalculator" />
-    <units>counts</units>
     <scan>
         <type><choice>periodic</choice></type>
         <rate>0.5</rate>

@@ -5,47 +5,39 @@
         <value>false true false</value>
     </value>
     <calculator supportName = "booleanArrayToggleCalculator" />
-    <linkArray>
-        <value structureName = "linkArrayElement">
+    <supportArray>
+        <value structureName = "supportArrayElement">
             <wait>true</wait>
-            <link  supportName = "processLink" >
-                <configure structureName = "processLink">
+            <link  supportName = "processSupport" structureName = "processSupport">
                     <pvname>booleanArray1FromToggle</pvname>
-                </configure>
             </link>
         </value>
-        <value structureName = "linkArrayElement">
+        <value structureName = "supportArrayElement">
             <wait>false</wait>
-            <link  supportName = "outputLink" >
-                <configure structureName = "outputLink">
+            <link  supportName = "outputSupport" structureName = "outputSupport">
                     <pvname>booleanArray2FromToggle</pvname>
                     <process>true</process>
-                </configure>
             </link>
         </value>
-    </linkArray>
+    </supportArray>
     <scan>
-        <scan>periodic</scan>
+        <type><choice>periodic</choice></type>
         <rate>1.0</rate>
     </scan>
 </record>
 
 <record name = "booleanArray1FromToggle" type = "booleanArray" >
-    <input supportName = "inputLink" >
-        <configure structureName = "inputLink">
+    <input supportName = "inputSupport" structureName = "inputSupport">
             <pvname>booleanArrayToggle</pvname>
             <process>false</process>
-        </configure>
     </input>
 </record>
 <record name = "booleanArray2FromToggle" type = "booleanArray" >
 </record>
 <record name = "booleanArray3FromToggle" type = "booleanArray" >
-    <input supportName = "monitorLink" >
-        <configure structureName = "monitorLink">
+    <input supportName = "monitorSupport" structureName = "monitorSupport">
             <pvname>booleanArrayToggle</pvname>
             <process>true</process>
-        </configure>
     </input>
 </record>
 
