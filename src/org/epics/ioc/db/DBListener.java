@@ -62,7 +62,7 @@ public interface DBListener {
      *     </ol>
      *     </li>
      * </ol>
-     * @param dbEnum The enum interface.
+     * @param dbField The field interface.
      */
     void supportNamePut(DBField requested,DBField dbField);
     /**

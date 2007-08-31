@@ -10,7 +10,7 @@
 <body>
 <h1 style="text-align: center">EPICS JavaIOC: process<br />
 package: org.epics.ioc.process<br />
-2007.08.08</h1>
+2007.08.30</h1>
 CONTENTS 
 
 <div class="toc">
@@ -353,32 +353,26 @@ fields:</p>
 
 <p>Assume a record instance is defined as follows:</p>
 <pre>&lt;record name = "double01" type = "doubleRecord"&gt;
-    &lt;input supportName = "inputLink" &gt;
-        &lt;configure structureName = "inputLink"&gt;
+    &lt;input supportName = "inputSupport" structureName = "inputSupport"&gt;
             &lt;pvname&gt;recordForInput&lt;/pvname&gt;
             &lt;process&gt;false&lt;/process&gt;
-        &lt;/configure&gt;
     &lt;/input&gt;
 
-    &lt;linkArray&gt;
-        &lt;value structureName = "linkArrayElement"&gt;
+    &lt;supportArray&gt;
+        &lt;value structureName = "supportArrayElement"&gt;
             &lt;wait&gt;false&lt;/wait&gt;
-            &lt;link  supportName = "processLink" &gt;
-                &lt;configure structureName = "processLink"&gt;
-                    &lt;pvname&gt;processRecord&lt;/pvname&gt;
-                &lt;/configure&gt;
+            &lt;link  supportName = "processSupport" structureName = "processSupport"&gt;
+                &lt;pvname&gt;processRecord&lt;/pvname&gt;
             &lt;/link&gt;
         &lt;/value&gt;
-        &lt;value structureName = "linkArrayElement"&gt;
+        &lt;value structureName = "supportArrayElement"&gt;
             &lt;wait&gt;false&lt;/wait&gt;
-            &lt;link  supportName = "outputLink" &gt;
-                &lt;configure structureName = "outputLink"&gt;
-                    &lt;pvname&gt;outputRecord&lt;/pvname&gt;
-                    &lt;process&gt;true&lt;/process&gt;
-                &lt;/configure&gt;
+            &lt;link  supportName = "outputSupport" structureName = "outputSupport"&gt;
+                &lt;pvname&gt;outputRecord&lt;/pvname&gt;
+                &lt;process&gt;true&lt;/process&gt;
             &lt;/link&gt;
         &lt;/value&gt;
-    &lt;/linkArray&gt;
+    &lt;/supportArray&gt;
 
 &lt;/record&gt;</pre>
 
@@ -389,9 +383,9 @@ following happens:</p>
     active. The record will remain active until the record is completely
     processed.</li>
   <li>recordProcess calls doubleRecord.process</li>
-  <li>doubleRecord calls the inputLink.process</li>
+  <li>doubleRecord calls inputSupport.process.</li>
   <li>Assuming the recordForInput is local and since process is false, the
-    inputLink support just: 
+    input support just: 
     <ul>
       <li>locks the linked record</li>
       <li>transfers data from the linked record to the double record.</li>
@@ -399,16 +393,16 @@ following happens:</p>
       <li>notifys doubleRecord that it has completed.</li>
     </ul>
   </li>
-  <li>doubleRecord call linkArray.process.</li>
-  <li>linkArray calls recordProcess.requestProcessCallback.</li>
+  <li>doubleRecord calls supportArray.process.</li>
+  <li>supportArray calls recordProcess.requestProcessCallback.</li>
   <li>doubleRecord returns.</li>
-  <li>recordProcess unlocks the record and calls linkArray.processCallback.
-    linkArray performs whatever action is required to process the
-    recordToProcess and to put data into and process record
-    recordToPutAndProcess.</li>
-  <li>linkArray, when done, calls recordSupport.processContinue.</li>
-  <li>recordSupport calls linkArray.processContinue</li>
-  <li>linkArray call doubleRecord.supportProcessDone.</li>
+  <li>recordProcess unlocks the record and calls
+    supportArray.processCallback. supportArray performs whatever action is
+    required to process the processRecord and to put data into and process
+    record outputRecord.</li>
+  <li>supportArray, when done, calls recordSupport.processContinue.</li>
+  <li>recordSupport calls supportArray.processContinue</li>
+  <li>supportArray calls doubleRecord.supportProcessDone.</li>
   <li>doubleRecord calls recordProcess.supportProcessDone</li>
   <li>recordProcess completes record processing 
     <ul>
@@ -426,17 +420,15 @@ on-line add and delete is supported. Thus it is possible to dynamically
 redefine link fields, array fields, etc. Unless a support module is in the
 ready state it's process method should not be called and if it is it should
 just report failure.</p>
-
-<pre>
-    public enum SupportState {
+<pre>    public enum SupportState {
         readyForInitialize,
         readyForStart,
         ready,
         zombie;
-    }
-</pre>
-<p>NOTE: zombie is for support that is being removed
-and can never again process.</p>
+    }</pre>
+
+<p>NOTE: zombie is for support that is being removed and can never again
+process.</p>
 
 <p>Every Support module must implement the methods initialize, start, stop,
 and uninitialize. Initialize performs initialization related to the record

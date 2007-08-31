@@ -22,7 +22,7 @@ import org.epics.ioc.util.*;
  * @author mrk
  *
  */
-public abstract class AbstractPDRVLinkSupport extends AbstractSupport implements
+public abstract class AbstractPDRVSupport extends AbstractSupport implements
 ProcessContinueRequester,QueueRequestCallback,
 PDRVSupport,
 RecordProcessRequester
@@ -32,7 +32,7 @@ RecordProcessRequester
      * @param supportName The support name.
      * @param dbStructure The link interface.
      */
-    protected AbstractPDRVLinkSupport(String supportName,DBStructure dbStructure) {
+    protected AbstractPDRVSupport(String supportName,DBStructure dbStructure) {
         super(supportName,dbStructure);
         this.supportName = supportName;
         this.dbStructure = dbStructure;

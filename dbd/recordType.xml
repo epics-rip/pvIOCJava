@@ -37,10 +37,10 @@
 <include addPath = "dbd/recordType/portDriver" />
 <include href = "portDriver.xml" />
 <include removePath = "dbd/recordType/portDriver" />
-<!--
 <include addPath = "dbd/recordType/powerSupply" />
 <include href = "powerSupplyRecord.xml" />
 <include removePath = "dbd/recordType/powerSupply" />
+<!--
 -->
 
 </DBDefinition>

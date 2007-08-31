@@ -13,9 +13,29 @@ import java.util.Map;
  *
  */
 public interface FieldAttribute {
+    /**
+     * Add a set of attributes to the map.
+     * @param attributes A map containing the attributes to add.
+     * @param exclude An array of key names that will not be added.
+     */
     void setAttributes(Map<String,String> attributes,String[] exclude);
+    /**
+     * At a single attribute to the map.
+     * @param key The key.
+     * @param value The value.
+     * @return The previous value for the key or null if none existed.
+     */
     String setAttribute(String key,String value);
+    /**
+     * Get a map of the current attributes.
+     * @return The map.
+     */
     Map<String,String> getAttributes();
+    /**
+     * Get a single atttribute value.
+     * @param key The key.
+     * @return The value or null of the key does not exist.
+     */
     String getAttribute(String key);
     /**
      * Generate a string describing the attributes.

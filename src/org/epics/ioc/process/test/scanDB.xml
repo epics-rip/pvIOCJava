@@ -1,103 +1,95 @@
 <?xml version="1.0" ?>
 <IOCDatabase>
-<record name = "counterPush" type = "counterRecord">
-    <min>0.0</min>
-    <max>1e9</max>
-    <inc>1.0</inc>
-    <linkArray>
-        <value structureName = "linkArrayElement">
+<record name = "counterPush" type = "calcDouble">
+    <calcArgArray>
+        <value structureName = "calcDoubleArg">
+            <value>0</value>
+            <name>min</name>
+        </value>
+        <value structureName = "calcDoubleArg">
+            <value>1e9</value>
+            <name>max</name>
+        </value>
+        <value structureName = "calcDoubleArg">
+            <value>100.0</value>
+            <name>inc</name>
+        </value>
+    </calcArgArray>
+    <calculator supportName = "counterCalculator" />
+    <supportArray>
+        <value structureName = "supportArrayElement">
             <wait>false</wait>
-            <link  supportName = "outputLink" >
-                <configure structureName = "outputLink">
+            <link  supportName = "outputSupport" structureName = "outputSupport">
                     <pvname>doubleReceive00</pvname>
                     <process>true</process>
-                </configure>
             </link>
         </value>
-        <value structureName = "linkArrayElement">
+        <value structureName = "supportArrayElement">
             <wait>false</wait>
-            <link  supportName = "outputLink" >
-                <configure structureName = "outputLink">
+            <link  supportName = "outputSupport" structureName = "outputSupport">
                     <pvname>doubleReceive01</pvname>
                     <process>true</process>
-                </configure>
             </link>
         </value>
-        <value structureName = "linkArrayElement">
+        <value structureName = "supportArrayElement">
             <wait>false</wait>
-            <link  supportName = "outputLink" >
-                <configure structureName = "outputLink">
+            <link  supportName = "outputSupport" structureName = "outputSupport">
                     <pvname>doubleReceive02</pvname>
                     <process>true</process>
-                </configure>
             </link>
         </value>
-        <value structureName = "linkArrayElement">
+        <value structureName = "supportArrayElement">
             <wait>false</wait>
-            <link  supportName = "outputLink" >
-                <configure structureName = "outputLink">
+            <link  supportName = "outputSupport" structureName = "outputSupport">
                     <pvname>doubleReceive03</pvname>
                     <process>true</process>
-                </configure>
             </link>
         </value>
-        <value structureName = "linkArrayElement">
+        <value structureName = "supportArrayElement">
             <wait>false</wait>
-            <link  supportName = "outputLink" >
-                <configure structureName = "outputLink">
+            <link  supportName = "outputSupport" structureName = "outputSupport">
                     <pvname>doubleReceive04</pvname>
                     <process>true</process>
-                </configure>
             </link>
         </value>
-        <value structureName = "linkArrayElement">
+        <value structureName = "supportArrayElement">
             <wait>false</wait>
-            <link  supportName = "outputLink" >
-                <configure structureName = "outputLink">
+            <link  supportName = "outputSupport" structureName = "outputSupport">
                     <pvname>doubleReceive05</pvname>
                     <process>true</process>
-                </configure>
             </link>
         </value>
-        <value structureName = "linkArrayElement">
+        <value structureName = "supportArrayElement">
             <wait>false</wait>
-            <link  supportName = "outputLink" >
-                <configure structureName = "outputLink">
+            <link  supportName = "outputSupport" structureName = "outputSupport">
                     <pvname>doubleReceive06</pvname>
                     <process>true</process>
-                </configure>
             </link>
         </value>
-        <value structureName = "linkArrayElement">
+        <value structureName = "supportArrayElement">
             <wait>false</wait>
-            <link  supportName = "outputLink" >
-                <configure structureName = "outputLink">
+            <link  supportName = "outputSupport" structureName = "outputSupport">
                     <pvname>doubleReceive07</pvname>
                     <process>true</process>
-                </configure>
             </link>
         </value>
-        <value structureName = "linkArrayElement">
+        <value structureName = "supportArrayElement">
             <wait>false</wait>
-            <link  supportName = "outputLink" >
-                <configure structureName = "outputLink">
+            <link  supportName = "outputSupport" structureName = "outputSupport">
                     <pvname>doubleReceive08</pvname>
                     <process>true</process>
-                </configure>
             </link>
         </value>
-        <value structureName = "linkArrayElement">
+        <value structureName = "supportArrayElement">
             <wait>false</wait>
-            <link  supportName = "outputLink" >
-                <configure structureName = "outputLink">
+            <link  supportName = "outputSupport" structureName = "outputSupport">
                     <pvname>doubleReceive09</pvname>
                     <process>true</process>
-                </configure>
             </link>
         </value>
-    </linkArray>
+    </supportArray>
     <scan>
-        <scan>periodic</scan>
+        <type><choice>periodic</choice></type>
         <rate>0.2</rate>
     </scan>
 </record>
@@ -114,27 +106,51 @@
 
 <record name = "event" type = "event">
     <value>eventOne</value>
-    <scan>
-        <scan>periodic</scan>
+     <scan>
+        <type><choice>periodic</choice></type>
         <rate>0.1</rate>
     </scan>
 </record>
 
-<record name = "counterEvent0" type = "counterRecord">
-    <min>0.0</min>
-    <max>1e9</max>
-    <inc>1.0</inc>
+<record name = "counterEvent0" type = "calcDouble">
+    <calcArgArray>
+        <value structureName = "calcDoubleArg">
+            <value>0</value>
+            <name>min</name>
+        </value>
+        <value structureName = "calcDoubleArg">
+            <value>1e9</value>
+            <name>max</name>
+        </value>
+        <value structureName = "calcDoubleArg">
+            <value>100.0</value>
+            <name>inc</name>
+        </value>
+    </calcArgArray>
+    <calculator supportName = "counterCalculator" />
     <scan>
-        <scan>event</scan>
+        <type><choice>event</choice></type>
         <eventName>eventOne</eventName>
     </scan>
 </record>
-<record name = "counterEvent1" type = "counterRecord">
-    <min>0.0</min>
-    <max>1e9</max>
-    <inc>1.0</inc>
+<record name = "counterEvent1" type = "calcDouble">
+    <calcArgArray>
+        <value structureName = "calcDoubleArg">
+            <value>0</value>
+            <name>min</name>
+        </value>
+        <value structureName = "calcDoubleArg">
+            <value>1e9</value>
+            <name>max</name>
+        </value>
+        <value structureName = "calcDoubleArg">
+            <value>100.0</value>
+            <name>inc</name>
+        </value>
+    </calcArgArray>
+    <calculator supportName = "counterCalculator" />
     <scan>
-        <scan>event</scan>
+        <type><choice>event</choice></type>
         <eventName>eventOne</eventName>
     <priority>middle</priority>
     </scan>

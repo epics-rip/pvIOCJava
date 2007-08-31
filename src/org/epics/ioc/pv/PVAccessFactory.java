@@ -131,11 +131,18 @@ public class PVAccessFactory {
         }        
        
         private PVField findField(PVField pvField,String name) {
-            PVField newField = getPVStructureField(pvField,name);
-            if(newField!=null) return newField;
+            PVField pvStructureField = getPVStructureField(pvField,name);
+            if(pvStructureField!=null) return pvStructureField;
             Property property = pvField.getField().getProperty(name);
-            return findPropertyField(pvField,property);
-            
+            PVField pvPropertyField = findPropertyField(pvField,property);
+            if(pvPropertyField!=null) return pvPropertyField;
+            PVField pvParent = pvField.getParent();
+            while(pvParent!=null) {
+                pvStructureField = getPVStructureField(pvParent,name);
+                if(pvStructureField!=null) return pvStructureField;
+                pvParent = pvParent.getParent();
+            }
+            return null;
         }
         
         private PVField  findPropertyField(PVField pvField,

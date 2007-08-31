@@ -1,48 +1,44 @@
 <?xml version="1.0" ?>
 <IOCDatabase>
-<record name = "counter" type = "counterRecord">
-    <min>0.0</min>
-    <max>1e9</max>
-    <inc>1.0</inc>
-    <linkArray>
-        <value structureName = "linkArrayElement">
+<record name = "counter" type = "calcDouble">
+    <calcArgArray>
+        <value structureName = "calcDoubleArg">
+            <value>0</value>
+            <name>min</name>
+        </value>
+        <value structureName = "calcDoubleArg">
+            <value>1e9</value>
+            <name>max</name>
+        </value>
+        <value structureName = "calcDoubleArg">
+            <value>100.0</value>
+            <name>inc</name>
+        </value>
+    </calcArgArray>
+    <calculator supportName = "counterCalculator" />
+    <supportArray>
+        <value structureName = "supportArrayElement">
             <wait>true</wait>
-            <link  supportName = "processLink" >
-                <configure structureName = "processLink">
+            <link  supportName = "processSupport" structureName = "processSupport">
                     <pvname>double01</pvname>
-                </configure>
             </link>
         </value>
-        <value structureName = "linkArrayElement">
+        <value structureName = "supportArrayElement">
             <wait>false</wait>
-            <link  supportName = "outputLink" >
-                <configure structureName = "outputLink">
+            <link  supportName = "outputSupport" structureName = "outputSupport">
                     <pvname>double02</pvname>
                     <process>true</process>
-                </configure>
             </link>
         </value>
-    </linkArray>
+    </supportArray>
 </record>
 <record name = "double01" type = "double">
-    <input supportName = "inputLink" >
-        <configure structureName = "inputLink">
+    <input supportName = "inputSupport" structureName = "inputSupport">
             <pvname>counter</pvname>
             <process>false</process>
-        </configure>
     </input>
-    <units>volts</units>
-    <displayLimit>
-        <low>0.0</low>
-        <high>10.0</high>
-    </displayLimit>
 </record>
 <record name = "double02" type = "double">
-    <units>volts</units>
-    <displayLimit>
-        <low>0.0</low>
-        <high>10.0</high>
-    </displayLimit>
 </record>
 
 </IOCDatabase>

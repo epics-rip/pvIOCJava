@@ -19,8 +19,8 @@ import org.epics.ioc.util.*;
  */
 public class DigitalAlarmFactory {
     /**
-     * Create support for a digitalAlarm link.
-     * @param dbLink The link.
+     * Create support for a digitalAlarm structure.
+     * @param dbStructure The structure.
      * @return An interface to the support or null if the supportName was not "digitalAlarm".
      */
     public static Support create(DBStructure dbStructure) {

@@ -1,6 +1,5 @@
-<?xml version="1.0" encoding=""?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-       "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+      "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html>
 <head>
   <meta http-equiv="content-type" content="" />
@@ -12,9 +11,9 @@
 
 <h1 style="text-align: center">EPICS JavaIoc: Database Definition <br />
 package: org.epics.ioc.dbd<br />
-2007.01.09</h1>
+2007.08.28</h1>
 <hr />
-CONTENTS:
+CONTENTS: 
 
 <div class="toc">
 <ul>
@@ -28,21 +27,18 @@ CONTENTS:
           <li><a href="#Macro">Macro Substitution</a></li>
         </ul>
       </li>
-      <li><a href="#Menu">Menu</a></li>
       <li><a href="#Structure">Structure and Record Type</a></li>
       <li><a href="#field">field</a>
         <ul>
           <li><a href="#Primitive">Primitive Types</a></li>
           <li><a href="#string">string</a></li>
-          <li><a href="#enumerated">enumerated</a></li>
           <li><a href="#structure">structure</a></li>
           <li><a href="#array">array</a></li>
-          <li><a href="#menu">menu</a></li>
-          <li><a href="#link">link</a></li>
         </ul>
       </li>
       <li><a href="#field1">field attribute</a></li>
       <li><a href="#property">property</a></li>
+      <li><a href="#Create">Create</a></li>
       <li><a href="#Support">Support</a></li>
     </ul>
   </li>
@@ -50,9 +46,9 @@ CONTENTS:
     Definition</a></li>
   <li><a href="#Introspect">Introspection of Database Definitions</a>
     <ul>
-      <li><a href="#Menu1">Menu</a></li>
       <li><a href="#Structure1">Structure and RecordType</a></li>
-      <li><a href="#Support1">Support and LinkSupport</a></li>
+      <li><a href="#Create1">Create and SupportSupport</a></li>
+      <li><a href="#Support1">Support</a></li>
     </ul>
   </li>
   <li><a href="#Accessing">Accessing Database Definitions</a>
@@ -104,7 +100,7 @@ to implement database reflection.</p>
 <h2 style="text-align: center" id="Database">Database Definition Syntax</h2>
 <hr />
 A Database Definition file must be an XML file with a root tag of
-DBDDefinition:
+DBDDefinition: 
 <pre>&lt;?xml version="1.0" ?&gt;
 &lt;DBDefinition&gt;
   &lt;?-- valid Database Definition elements --&gt;
@@ -113,13 +109,13 @@ DBDDefinition:
 <h3 id="General">General Statements</h3>
 
 <h4 id="namespace">namespace</h4>
-At this time namespaces are not used.
+At this time namespaces are not used. 
 
 <h4 id="Include">Include</h4>
 An XML file containing Database Definitions can include other files also
 containing Database Definitions. An included file must also be a valid XML
 Database Definition. Included files can also include other files. The syntax
-is:
+is: 
 <pre>    
 &lt;include addPath = "path" removePath = "path" href = "filename" /&gt;</pre>
 
@@ -141,25 +137,8 @@ is:
 <h4 id="Macro">Macro Substitution</h4>
 
 <p>Macro substitution is not very usefull for Database Definition but it is
-support just like for Database Instance files. See package org.epics.ioc.db
+supported just like for Database Instance files. See package org.epics.ioc.db
 for details about how macro substitution works.</p>
-
-<h3 id="Menu">Menu</h3>
-A menu is an enumerated type, defined below, where the choice strings are
-defined once for each IOC. The syntax is:
-<pre>    
-&lt;menu name = "name"&gt;
-    &lt;choice&gt;choice&lt;/choice&gt;
-    ...
-&lt;/menu&gt;</pre>
-Example:
-<pre>    
-&lt;menu name = "scan"&gt;
-     &lt;choice&gt;passive&lt;/choice&gt;
-     &lt;choice&gt;event&lt;/choice&gt;
-     &lt;choice&gt;interrupt&lt;/choice&gt;
-     &lt;choice&gt;periodic&lt;/choice&gt;
-&lt;/menu&gt;</pre>
 
 <h3 id="Structure">Structure and Record Type</h3>
 
@@ -213,7 +192,7 @@ field of a record.</p>
 
 <h3 id="field">field</h3>
 The syntax for <span style="font-family: courier">fieldType</span> depends on
-the field type.
+the field type. 
 
 <h4 id="Primitive">Primitive Types</h4>
 Primitive types are the same as the Java primitive types, i.e. <span
@@ -225,7 +204,7 @@ style="font-family: courier">long</span>, <span
 style="font-family: courier">float</span>, <span
 style="font-family: courier">double</span>. Primitive field types are just
 defined as <span style="font-family: courier;">&lt;type /&gt;</span> For
-example
+example 
 <pre>     
     &lt;field name = "value", type = "double" /&gt;
     &lt;field name = "rawValue" type = "int" /&gt;</pre>
@@ -234,19 +213,14 @@ example
 A <span style="font-family: courier">string</span> is a Java <span
 style="font-family: courier;">String</span>. A <span
 style="font-family: courier;">string</span> field type is just defined as
-<span style="font-family: courier;">string</span>. For example:
+<span style="font-family: courier;">string</span>. For example: 
 <pre>     &lt;field name = "description" type = "string" /&gt;</pre>
 
-<h4 id="enumerated">enumerated</h4>
-
-<p>An enumerated field type specified as enum For example:</p>
-<pre>    &lt;field name = "value" type = "enum" /&gt;</pre>
-
 <h4 id="structure">structure</h4>
-A structure field is declared as
+A structure field is declared as 
 <pre>    &lt;field name = "value" type = "structure" structureName = "name" /&gt;</pre>
 <span style="font-family: courier;">structureName</span> is the name of a
-structure which must have been previously defined. Example:
+structure which must have been previously defined. Example: 
 <pre>   &lt;structure name = "point"&gt;
        &lt;field name = "x" type = "double" /&gt;
        &lt;field name = "y"&gt; type = "double" /&gt;
@@ -266,9 +240,9 @@ instance must define the structureName.</p>
 can be supported via a <span style="font-family: courier;">structure</span>
 definition with fields describing the number of dimensions and the attributes
 of each dimension.</p>
-An array is defined as follows:
+An array is defined as follows: 
 <pre>    &lt;field name = "value" type = "array" elementType = "type" capacity = "capacity" /&gt;</pre>
-where
+where 
 <dl>
   <dt style="font-family: courier;">elementType</dt>
     <dd>The type must be a valid type, i.e. boolean, byte, short, int, long,
@@ -279,43 +253,20 @@ where
     <dd>The number of array elements. If not specified the capacity is
       determined at record initialization</dd>
 </dl>
-Examples:
+Examples: 
 <pre>     &lt;field name = "doubleArray" type = "array" elementType = "double" capacity = "3" /&gt;
      &lt;field name = "value" type = "array"  elementType = "double" /&gt;
      &lt;field name = "rectangle" type = "array" elementType = "structure" capacity = "2" /&gt;</pre>
 
-<h4 id="menu">menu</h4>
-A menu field is defined as:
-<pre>     &lt;field name = "name" type = "menu" nameName = "menuName" /&gt;</pre>
-where <span style="font-family: courierfont-family: courier;">menuName</span>
-is the name of the menu. <br />
-Example:
-<pre>    &lt;field name = "scan" type = "menu" menuName = "menuScan" /&gt;</pre>
-
-<p>To the database, a menu field is presented just like an enumerated field
-with constant choices. The choices are taken from the menu definition.</p>
-
-<h4 id="link">link</h4>
-This field type can get/put data from/to a location outside the record. When
-a record instance is created, the link choices come from <span
-style="font-family: courier;">support</span> definitions which are defined
-below. A <span style="font-family: courier;">link</span> can be a link to
-another database record, to hardware device support, or something else. The
-syntax is:
-<pre>     &lt;field name = "name" type = "link" /&gt;</pre>
-Examples:
-<pre>     &lt;field name = "disableLink" type = "link" /&gt;
-     &lt;field name = "input" type = "link" /&gt;</pre>
-
 <h3 id="field1">field attribute</h3>
 
 <p>A field can have additional attributes which are specified via xml
-attributes. The additional attributes are:</p>
+attributes. Any xml key,value attribute that is not handled by the
+XMLToDBDFactory becomse a field attribute. Two attributes that are recognized
+by the javaIOC database are: </p>
 <pre>     default = "stringValue"
      readonly = "booleanValue"
-     design = "booleanValue"
-     link = "booleanValue"
-     asl = "intValue"</pre>
+ </pre>
 
 <p>The attribute parameter values have the following meanings:</p>
 <dl>
@@ -328,25 +279,15 @@ attributes. The additional attributes are:</p>
     <dd>Can this field be modified via channel access? If not the fields is
       not modifable at run time or is handled by database access. Takes the
       value false if not specified.</dd>
-  <dt><span style="font-family: courier">design</span></dt>
-    <dd>Should a Database Configuration Tool allow the field to be configured
-      at design time? Takes the value true if not specified.</dd>
-  <dt><span style="font-family: courier">link</span></dt>
-    <dd>This is only valid for string fields. If true the field is the name
-      of a channel, i.e. a link to record. This is for use by Database
-      Configuration Tools. Takes the value false if not specified.</dd>
-  <dt><span style="font-family: courier">asl</span></dt>
-    <dd>Channel Access security level for this field, 0 or 1. Takes the value
-      1 if not specified.</dd>
 </dl>
-The following examples show how attributes are defined:
+The following examples show how attributes are defined: 
 <pre>    &lt;recordType name = "example"&gt;
         ...
         &lt;field name = "status" type = "string" readonly "true" /&gt;
         &lt;field name = "displayLimit" type = "structure"
                 structureName = "displayLimit" readonly = "true" /&gt;
         ...
-        &lt;field name = "value" type = "double" asl value = "0" /&gt;
+        &lt;field name = "value" type = "double" /&gt;
        ...
     &lt;/recordType&gt;</pre>
 <br />
@@ -354,9 +295,9 @@ The following examples show how attributes are defined:
 
 <h3 id="property">property</h3>
 A structure, recordType, and field can have properties. A property is defined
-as:
+as: 
 <pre>    &lt;property name = "name" associatedField = "field name" /&gt;</pre>
-where
+where 
 <dl>
   <dt style="font-family: courier;">name</dt>
     <dd>The name of the property</dd>
@@ -371,9 +312,26 @@ where
         &lt;property name = "status" associatedField = "status" /&gt;
         &lt;property name = "severity" associatedField = "severity" /&gt;
         &lt;property name = "timeStamp" associatedField = "timeStamp" /&gt;
-        &lt;property name = "units" associatedField = "units" /&gt;
-        &lt;property name = "displayLimit" associatedField = "displayLimit" /&gt;
+        &lt;property name = "displayCharacteristics" 
+                   associatedField = "displayCharacteristics" /&gt;
     &lt;/field&gt;</pre>
+
+<h3 id="Create">Create</h3>
+
+<p>Create can be associated with any field of a record instance when it is
+created. See package org.epics.ioc.db for details. The syntax for a Create
+definition is:</p>
+<pre>    &lt;create name = "createName" factoryName = "factoryName" /&gt;</pre>
+where 
+<dl>
+  <dt><span style="font-family: courier">create</span></dt>
+    <dd>The tag.</dd>
+  <dt><span style="font-family: courier">createName</span></dt>
+    <dd>string that describes the create</dd>
+  <dt><span style="font-family: courier">factoryName</span></dt>
+    <dd>The name of a Java factory class that creates create instances. See
+      package org.epics.ioc.db for details,</dd>
+</dl>
 
 <h3 id="Support">Support</h3>
 
@@ -382,74 +340,16 @@ created. See package org.epics.ioc.db for details. Record types and
 structures can have default support as shown above. The syntax for a support
 definition is:</p>
 <pre>    &lt;support name = "supportName" factoryName = "factoryName" /&gt;</pre>
-where
+where 
 <dl>
   <dt><span style="font-family: courier">support</span></dt>
-    <dd>Support for a non-link field of a record.</dd>
+    <dd>The tag.</dd>
   <dt><span style="font-family: courier">supportName</span></dt>
     <dd>string that describes the choice</dd>
   <dt><span style="font-family: courier">factoryName</span></dt>
     <dd>The name of a Java factory class that creates support instances. See
       package org.epics.ioc.process for details,</dd>
 </dl>
-
-<p>link fields have linkSupport, which is an extension of support that also
-supports configuration information. Each link support can optionally have an
-associated structure for configuration information.The syntax is:</p>
-<pre>    &lt;structure name = "configurationStructureName"&gt;
-        ...
-    &lt;/structure&gt;
-    ...
-    &lt;linkSupport name = "supportName"
-         configurationStructureName = "configurationStructureName"
-         factoryName = "factoryName" /&gt;</pre>
-where
-<dl>
-  <dt><span style="font-family: courier">linkSupport</span></dt>
-    <dd>Support for a link field of a record.</dd>
-  <dt><span style="font-family: courier">supportName</span></dt>
-    <dd>string that describes the choice</dd>
-  <dt><span
-  style="font-family: courier">configurationStructureName</span></dt>
-    <dd>The name of a structure containing configuration information for the
-      support. Database configuration tools prompt the user to assign values
-      to the structure. This is optional.</dd>
-  <dt><span style="font-family: courier">factoryName</span></dt>
-    <dd>The name of a Java factory class that creates support instances. See
-      package org.epics.ioc.dbProcess for details,</dd>
-</dl>
-
-<p>When a record instance is created the supportName selects the support to
-attach to a record link field.</p>
-<br />
-Examples of support:
-<pre>     &lt;structure name = "processLink"&gt;
-         &lt;field name = "pvname" type = "string" link = "true" /&gt;
-         &lt;field name = "wait" type = "boolean" /&gt;
-         &lt;field name = "timeout" type = "double" /&gt;
-         &lt;field name = "forceLocal" type = "boolean"&gt;
-             &lt;!-- if true pvname must be in local IOC --&gt;
-         &lt;/field&gt;
-     &lt;/structure&gt;
-
-     &lt;structure name = "monitorLink"&gt;
-         &lt;field name = "pvname" type = "string" link = "true" /&gt;
-         &lt;field name = "process" type = "boolean"&gt;
-             &lt;!-- process this record when monitor occurs --&gt;
-         &lt;/field&gt;
-         &lt;field name = "monitorOnly" type = "boolean"&gt;
-             &lt;!-- monitor only or data also --&gt;
-         &lt;/field&gt;
-         &lt;field name = "inheritSeverity" type = "boolean" /&gt;
-         &lt;field name = "forceLocal" type = "boolean"&gt;
-             &lt;!-- if true pvname must be in local IOC --&gt;
-         &lt;/field&gt;
-     &lt;/structure&gt;
-
-     &lt;linkSupport name = "processLink" configurationStructureName = "processLink"
-        factoryName = "org.epics.ioc.support.CASupportFactory" /&gt;
-     &lt;linkSupport name = "monitorLink" configurationStructureName = "monitorLink"
-        factoryName = "org.epics.ioc.support.CASupportFactory" /&gt;</pre>
 <hr />
 
 <h2 style="text-align: center" id="Overview1">Overview of Java Support For
@@ -466,16 +366,14 @@ and the database itself.</p>
 
 <p>Reflection interfaces are available for the following XML definitions</p>
 <dl>
-  <dt>DBDMenu</dt>
-    <dd>This is for introspecting the XML menu definitions</dd>
   <dt>DBDStructure</dt>
     <dd>This is for introspecting the XML structure definitions.</dd>
   <dt>DBDRecordType</dt>
     <dd>This is for introspecting the XML recordType definitions.</dd>
+  <dt>DBDCreate</dt>
+    <dd>This is for introspecting the XML create definitions.</dd>
   <dt>DBDSupport</dt>
     <dd>This is for introspecting the XML support definitions.</dd>
-  <dt>DBDLinkSupport</dt>
-    <dd>This is for introspecting the XML linkSupport definitions.</dd>
 </dl>
 <hr />
 
@@ -487,36 +385,6 @@ Definitions</h2>
 recordType, support, and linkSupport, i.e. everything defined in Database
 Definition files except record instances. Reflection for fields of a
 structure or recordType is discussed in the next section.</p>
-
-<h3 id="Menu1">Menu</h3>
-
-<p>The interface is:</p>
-<pre>    interface DBDMenu{
-        String getName();
-        String[] getChoices();
-        String toString(int indentLevel);
-    }</pre>
-
-<p>where</p>
-<dl>
-  <dt style="font-family: courier;">getName</dt>
-    <dd>The menu name.</dd>
-  <dt style="font-family: courier;">getChoices</dt>
-    <dd>The array of choices for the menu.</dd>
-  <dt style="font-family: courier;">toString</dt>
-    <dd>Dumps the menu definition.</dd>
-</dl>
-
-<p>For example the following dumps a menu</p>
-<pre>    void dumpMenu(DBDMenu menu) {
-        String[] choices = menu.getChoices();
-        System.out.printf("menu %s {\n",menu.getName();
-        for(choice: choices) System.out.printf("    %s\n",choice);
-        System.out.printf("}\n");
-    }</pre>
-
-<p>A shorter way is:</p>
-<pre>    void dumpMenu(DBDMenu menu) {System.out.println(menu.toString());}</pre>
 
 <h3 id="Structure1">Structure and RecordType</h3>
 
@@ -539,7 +407,28 @@ structure or recordType is discussed in the next section.</p>
 <p>A shorter way is:</p>
 <pre>    void dumpStructure(DBDStructure structure) {System.out.println(structure.toString);}</pre>
 
-<h3 id="Support1">Support and LinkSupport</h3>
+<h3 id="Create1">Create and SupportSupport</h3>
+
+<p>The following interfaces is provided for accessing support.</p>
+<pre>    interface DBDCreate {
+        String getCreateName();
+        String getFactoryName();
+        String toString();
+        String toString(int indentLevel);
+    }</pre>
+
+<p>where</p>
+<dl>
+  <dt style="font-family: courier;">getCreateName</dt>
+    <dd>Get the create name.</dd>
+  <dt style="font-family: courier;">getFactoryName</dt>
+    <dd>Get the factory name. This must be the complete java package + method
+      name of a Factory that creates support for the field. See package
+      org.epics.ioc.create for details about create and create
+    factories.</dd>
+</dl>
+
+<h3 id="Support1">Support</h3>
 
 <p>The following interfaces is provided for accessing support.</p>
 <pre>    interface DBDSupport {
@@ -547,10 +436,6 @@ structure or recordType is discussed in the next section.</p>
         String getFactoryName();
         String toString();
         String toString(int indentLevel);
-    }
-
-    interface DBDLinkSupport extends DBDSupport {
-        String getConfigurationStructureName();
     }</pre>
 
 <p>where</p>
@@ -562,12 +447,7 @@ structure or recordType is discussed in the next section.</p>
       name of a Factory that creates support for the field. See package
       org.epics.ioc.dbProcess for details about support and support
     factories.</dd>
-  <dt style="font-family: courier;">getConfigurationStructureName</dt>
-    <dd>Get the configuration structire name. A null is returned if none was
-      defined in the linkSupport definition. This means the linkSupport does
-      not require configuration information.</dd>
 </dl>
-<hr />
 <hr />
 
 <h2 style="text-align: center" id="Accessing">Accessing Database
@@ -583,39 +463,32 @@ addition a number of "convenience" methods are provided.</p>
     String getName();
     DBD getMasterDBD();
     void mergeIntoMaster();
-    DBDMenu createMenu(String menuName, String[] choices);
     DBDStructure createStructure(String name,
         Field[] field,Property[] property,FieldAttribute fieldAttribute);
     DBDRecordType createRecordType(String name,
         Field[] field,Property[] property,FieldAttribute fieldAttribute);
+    DBDCreate createCreate(String createName,String factoryName);
     DBDSupport createSupport(String supportName,String factoryName);
-    DBDLinkSupport createLinkSupport(
-        String supportName,String factoryName,String configurationStructureName);
-    DBDMenu getMenu(String menuName);
-    boolean addMenu(DBDMenu menu);
-    Map&lt;String,DBDMenu&gt; getMenuMap();
     DBDStructure getStructure(String structureName);
     boolean addStructure(DBDStructure structure);
     Map&lt;String,DBDStructure&gt; getStructureMap();
     DBDRecordType getRecordType(String recordTypeName);
     boolean addRecordType(DBDRecordType recordType);
+    DBDCreate getCreate(String createName);
+    boolean addCreate(DBDCreate create);
+    Map&lt;String,DBDCreate&gt; getCreateMap();
     Map&lt;String,DBDRecordType&gt; getRecordTypeMap();
     DBDSupport getSupport(String supportName);
     boolean addSupport(DBDSupport support);
     Map&lt;String,DBDSupport&gt; getSupportMap();
-    DBDLinkSupport getLinkSupport(String supportName);
-    boolean addLinkSupport(DBDLinkSupport support);
-    Map&lt;String,DBDLinkSupport&gt; getLinkSupportMap();
-    String[] menuList(String regularExpression);
-    String menuToString(String regularExpression);
     String[] structureList(String regularExpression);
     String structureToString(String regularExpression);
     String[] recordTypeList(String regularExpression);
     String recordTypeToString(String regularExpression);
+    String[] createList(String regularExpression);
+    String createToString(String regularExpression);
     String[] supportList(String regularExpression);
     String supportToString(String regularExpression);
-    String[] linkSupportList(String regularExpression);
-    String linkSupportToString(String regularExpression);
 }</pre>
 
 <p>where</p>
@@ -628,24 +501,14 @@ addition a number of "convenience" methods are provided.</p>
   <dt style="font-family: courier;">mergeIntoMaster</dt>
     <dd>Merge this DBD into the master DBD. After merging into master the
       compoments are removed from this database.</dd>
-  <dt style="font-family: courier;">createMenu</dt>
-    <dd>Create a DBDMenu.</dd>
   <dt style="font-family: courier;">createStructure</dt>
     <dd>Create a DBDStructure.</dd>
   <dt style="font-family: courier;">createRecordType</dt>
     <dd>Create a DBDRecordType.</dd>
+  <dt style="font-family: courier;">createCreate</dt>
+    <dd>Create a DBDCreate.</dd>
   <dt style="font-family: courier;">createSupport</dt>
     <dd>Create a DBDSupport.</dd>
-  <dt style="font-family: courier;">createLinkSupport</dt>
-    <dd>Create a DBDLinkSupport.</dd>
-  <dt style="font-family: courier;">getMenu</dt>
-    <dd>Get the DBDMenu that describes menuName.</dd>
-  <dt style="font-family: courier;">addMenu</dt>
-    <dd>Add a menu definition and return true. If the definition already
-      exists the request fails and false is returned.</dd>
-  <dt style="font-family: courier;">getMenuMap</dt>
-    <dd>Get a map of all the menu definitions. A shallow copy of the map is
-      returned.</dd>
   <dt style="font-family: courier;">getStructure</dt>
     <dd>Get the DBDStructure that describes the structureName</dd>
   <dt style="font-family: courier;">addStructure</dt>
@@ -662,6 +525,14 @@ addition a number of "convenience" methods are provided.</p>
   <dt style="font-family: courier;">getRecordTypeMap</dt>
     <dd>Get a map of all the recordType definitions. A shallow copy of the
       map is returned.</dd>
+  <dt style="font-family: courier;">getCreate</dt>
+    <dd>Get the DBDCreate that describes createName.</dd>
+  <dt style="font-family: courier;">addCreate</dt>
+    <dd>Add a create definition and return true. If the definition already
+      exists the request fails and false is returned.</dd>
+  <dt style="font-family: courier;">getCreateMap</dt>
+    <dd>Get a map of all the create definitions. A shallow copy of the map is
+      returned.</dd>
   <dt style="font-family: courier;">getSupport</dt>
     <dd>Get the DBDSupport that describes supportName.</dd>
   <dt style="font-family: courier;">addSupport</dt>
@@ -670,26 +541,12 @@ addition a number of "convenience" methods are provided.</p>
   <dt style="font-family: courier;">getSupportMap</dt>
     <dd>Get a map of all the support definitions. A shallow copy of the map
       is returned.</dd>
-  <dt style="font-family: courier;">getLinkSupport</dt>
-    <dd>Get the DBDLinkSupport that describes supportName.</dd>
-  <dt style="font-family: courier;">addLinkSupport</dt>
-    <dd>Add a support definition and return true. If the definition already
-      exists the request fails and false is returned.</dd>
-  <dt style="font-family: courier;">getLinkSupportMap</dt>
-    <dd>Get a map of all the support definitions. A shallow copy of the map
-      is returned.</dd>
 </dl>
 The remaining methods are convenience methods. Each convenience method
 produces a string that lists or dumps all components with names that match a
 regular expression. The java.util.regex facility is used. Consult it for a
-definition of regular expressions.
+definition of regular expressions. 
 <dl>
-  <dt style="font-family: courier;">menuList</dt>
-    <dd>Return an array of strings that is the list of menu names that match
-      a regular expression</dd>
-  <dt style="font-family: courier;">menuToString</dt>
-    <dd>Get a dump of all the DBDMenu definitions with names that match a
-      regular expression.</dd>
   <dt style="font-family: courier;">structureList</dt>
     <dd>Return an array of strings that is the list of structure names that
       match a regular expression</dd>
@@ -702,29 +559,29 @@ definition of regular expressions.
   <dt style="font-family: courier;">recordTypeToString</dt>
     <dd>Get a dump of all the DBDRecordType definitions with names that match
       a regular expression.</dd>
+  <dt style="font-family: courier;">createList</dt>
+    <dd>Return an array of strings that is the list of create names that
+      match a regular expression.</dd>
+  <dt style="font-family: courier;">createToString</dt>
+    <dd>Get a dump of all the DBDCreate definitions with names that match a
+      regular expression.</dd>
   <dt style="font-family: courier;">supportList</dt>
     <dd>Return an array of strings that is the list of support names that
       match a regular expression.</dd>
   <dt style="font-family: courier;">supportToString</dt>
     <dd>Get a dump of all the DBDSupport definitions with names that match a
       regular expression.</dd>
-  <dt style="font-family: courier;">linkSupportList</dt>
-    <dd>Return an array of strings that is the list of linkSupport names that
-      match a regular expression.</dd>
-  <dt style="font-family: courier;">linkSupportToString</dt>
-    <dd>Get a dump of all the DBDLinkSupport definitions with names that
-      match a regular expression.</dd>
 </dl>
-An example of using a convience method is:
+An example of using a convience method is: 
 <pre>    String[] list = master.menuList(".*[S].*");</pre>
 Produces a list of all menu definitions that have an 'S" somewhere in the
-menu name.
+menu name. 
 <hr />
 
 <h2 style="text-align: center" id="Creating">Creating Database
 Definitions</h2>
 <hr />
-Two classes are provided for creation of DBD Databases:
+Two classes are provided for creation of DBD Databases: 
 <ul>
   <li>DBDFactory<br />
     A factory to create and manage DBD databases.</li>
@@ -830,6 +687,5 @@ immediately.</p>
   <li>Database components can be added but not removed from a DBD.</li>
   <li>All getXXXMap methods return shallow copies of the internal map.</li>
 </ul>
-<hr />
 </body>
 </html>

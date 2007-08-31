@@ -19,7 +19,7 @@ import org.epics.ioc.util.*;
 public class LongAlarmFactory {
     /**
      * Create support for an longAlarm link.
-     * @param dbLink The link.
+     * @param dbStructure The structure.
      * @return An interface to the support or null if the supportName was not "longArray".
      */
     public static Support create(DBStructure dbStructure) {

@@ -24,11 +24,13 @@
             </link>
         </value>
     </supportArray>
-    <units>counts</units>
-    <displayLimit>
-        <low>0.0</low>
-        <high>11.0</high>
-    </displayLimit>
+    <displayCharacteristics structureName = "doubleDisplayCharacteristics" >
+        <units>counts</units>
+        <limit>
+            <low>0.0</low>
+            <high>11.0</high>
+        </limit>
+    </displayCharacteristics>
     <scan>
         <type><choice>periodic</choice></type>
         <rate>1.0</rate>
@@ -40,7 +42,6 @@
         <pvname>floatCounter</pvname>
         <process>false</process>
     </input>
-    <units>volts</units>
     <valueAlarm  structureName = "floatAlarm">
       <active>true</active>
       <interval>
@@ -65,13 +66,16 @@
               <severity><choice>major</choice></severity>
           </value>
       </interval>
-      <outOfRange>invalid</outOfRange>
+      <outOfRange><choice>invalid</choice></outOfRange>
       <hystersis>0.3</hystersis>
     </valueAlarm>
-    <displayLimit>
-        <low>0.0</low>
-        <high>10.0</high>
-    </displayLimit>
+    <displayCharacteristics structureName = "doubleDisplayCharacteristics" >
+        <units>counts</units>
+        <limit>
+            <low>0.0</low>
+            <high>10.0</high>
+        </limit>
+    </displayCharacteristics>
 </record>
 <record name = "doubleCounter" type = "calcDouble">
     <calcArgArray>
@@ -97,11 +101,13 @@
             </link>
         </value>
     </supportArray>
-    <units>counts</units>
-    <displayLimit>
-        <low>0.0</low>
-        <high>11.0</high>
-    </displayLimit>
+    <displayCharacteristics structureName = "doubleDisplayCharacteristics" >
+        <units>counts</units>
+        <limit>
+            <low>0.0</low>
+            <high>11.0</high>
+        </limit>
+    </displayCharacteristics>
     <scan>
         <type><choice>periodic</choice></type>
         <rate>1.0</rate>
@@ -113,7 +119,6 @@
         <pvname>doubleCounter</pvname>
         <process>false</process>
     </input>
-    <units>volts</units>
     <valueAlarm structureName = "doubleAlarm">
       <active>true</active>
       <interval>
@@ -138,13 +143,16 @@
               <severity><choice>major</choice></severity>
           </value>
       </interval>
-      <outOfRange>invalid</outOfRange>
+      <outOfRange><choice>invalid</choice></outOfRange>
       <hystersis>0.3</hystersis>
     </valueAlarm>
-    <displayLimit>
-        <low>0.0</low>
-        <high>10.0</high>
-    </displayLimit>
+    <displayCharacteristics structureName = "doubleDisplayCharacteristics" >
+        <units>counts</units>
+        <limit>
+            <low>0.0</low>
+            <high>10.0</high>
+        </limit>
+    </displayCharacteristics>
 </record>
 
 <record name = "byteCounter" type = "calcDouble">
@@ -171,11 +179,13 @@
             </link>
         </value>
     </supportArray>
-    <units>counts</units>
-    <displayLimit>
-        <low>0.0</low>
-        <high>11.0</high>
-    </displayLimit>
+    <displayCharacteristics structureName = "doubleDisplayCharacteristics" >
+        <units>counts</units>
+        <limit>
+            <low>0.0</low>
+            <high>11.0</high>
+        </limit>
+    </displayCharacteristics>
     <scan>
         <type><choice>periodic</choice></type>
         <rate>1.0</rate>
@@ -187,7 +197,6 @@
         <pvname>byteCounter</pvname>
         <process>false</process>
     </input>
-    <units>volts</units>
     <valueAlarm structureName = "byteAlarm">
       <active>true</active>
       <interval>
@@ -212,13 +221,16 @@
               <severity><choice>major</choice></severity>
           </value>
       </interval>
-      <outOfRange>invalid</outOfRange>
+      <outOfRange><choice>invalid</choice></outOfRange>
       <hystersis>2</hystersis>
     </valueAlarm>
-    <displayLimit>
-        <low>0</low>
-        <high>10</high>
-    </displayLimit>
+    <displayCharacteristics structureName = "doubleDisplayCharacteristics" >
+        <units>counts</units>
+        <limit>
+            <low>0.0</low>
+            <high>10.0</high>
+        </limit>
+    </displayCharacteristics>
 </record>
 
 <record name = "shortCounter" type = "calcDouble">
@@ -245,11 +257,13 @@
             </link>
         </value>
     </supportArray>
-    <units>counts</units>
-    <displayLimit>
-        <low>0.0</low>
-        <high>11.0</high>
-    </displayLimit>
+    <displayCharacteristics structureName = "doubleDisplayCharacteristics" >
+        <units>counts</units>
+        <limit>
+            <low>0.0</low>
+            <high>11.0</high>
+        </limit>
+    </displayCharacteristics>
     <scan>
         <type><choice>periodic</choice></type>
         <rate>1.0</rate>
@@ -261,7 +275,6 @@
         <pvname>shortCounter</pvname>
         <process>false</process>
     </input>
-    <units>volts</units>
     <valueAlarm structureName = "shortAlarm">
       <active>true</active>
       <interval>
@@ -286,13 +299,16 @@
               <severity><choice>major</choice></severity>
           </value>
       </interval>
-      <outOfRange>invalid</outOfRange>
+      <outOfRange><choice>invalid</choice></outOfRange>
       <hystersis>2</hystersis>
     </valueAlarm>
-    <displayLimit>
-        <low>0</low>
-        <high>10</high>
-    </displayLimit>
+    <displayCharacteristics structureName = "doubleDisplayCharacteristics" >
+        <units>counts</units>
+        <limit>
+            <low>0.0</low>
+            <high>10.0</high>
+        </limit>
+    </displayCharacteristics>
 </record>
 
 <record name = "intCounter" type = "calcDouble">
@@ -319,11 +335,13 @@
             </link>
         </value>
     </supportArray>
-    <units>counts</units>
-    <displayLimit>
-        <low>0.0</low>
-        <high>11.0</high>
-    </displayLimit>
+    <displayCharacteristics structureName = "doubleDisplayCharacteristics" >
+        <units>counts</units>
+        <limit>
+            <low>0.0</low>
+            <high>11.0</high>
+        </limit>
+    </displayCharacteristics>
     <scan>
         <type><choice>periodic</choice></type>
         <rate>1.0</rate>
@@ -335,7 +353,6 @@
         <pvname>intCounter</pvname>
         <process>false</process>
     </input>
-    <units>volts</units>
     <valueAlarm structureName = "intAlarm">
       <active>true</active>
       <interval>
@@ -360,13 +377,16 @@
               <severity><choice>major</choice></severity>
           </value>
       </interval>
-      <outOfRange>invalid</outOfRange>
+      <outOfRange><choice>invalid</choice></outOfRange>
       <hystersis>2</hystersis>
     </valueAlarm>
-    <displayLimit>
-        <low>0</low>
-        <high>10</high>
-    </displayLimit>
+    <displayCharacteristics structureName = "doubleDisplayCharacteristics" >
+        <units>counts</units>
+        <limit>
+            <low>0.0</low>
+            <high>10.0</high>
+        </limit>
+    </displayCharacteristics>
 </record>
 
 <record name = "longCounter" type = "calcDouble">
@@ -393,11 +413,13 @@
             </link>
         </value>
     </supportArray>
-    <units>counts</units>
-    <displayLimit>
-        <low>0.0</low>
-        <high>11.0</high>
-    </displayLimit>
+    <displayCharacteristics structureName = "doubleDisplayCharacteristics" >
+        <units>counts</units>
+        <limit>
+            <low>0.0</low>
+            <high>11.0</high>
+        </limit>
+    </displayCharacteristics>
     <scan>
         <type><choice>periodic</choice></type>
         <rate>1.0</rate>
@@ -409,7 +431,6 @@
         <pvname>longCounter</pvname>
         <process>false</process>
     </input>
-    <units>volts</units>
     <valueAlarm structureName = "longAlarm">
       <active>true</active>
       <interval>
@@ -434,13 +455,16 @@
               <severity><choice>major</choice></severity>
           </value>
       </interval>
-      <outOfRange>invalid</outOfRange>
+      <outOfRange><choice>invalid</choice></outOfRange>
       <hystersis>2</hystersis>
     </valueAlarm>
-    <displayLimit>
-        <low>0</low>
-        <high>10</high>
-    </displayLimit>
+    <displayCharacteristics structureName = "doubleDisplayCharacteristics" >
+        <units>counts</units>
+        <limit>
+            <low>0.0</low>
+            <high>10.0</high>
+        </limit>
+    </displayCharacteristics>
 </record>
 
 </IOCDatabase>

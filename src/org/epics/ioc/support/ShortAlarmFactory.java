@@ -18,8 +18,8 @@ import org.epics.ioc.util.*;
  */
 public class ShortAlarmFactory {
     /**
-     * Create support for an shortAlarm link.
-     * @param dbLink The link.
+     * Create support for an shortAlarm structure.
+     * @param dbStructure The structure.
      * @return An interface to the support or null if the supportName was not "shortArray".
      */
     public static Support create(DBStructure dbStructure) {

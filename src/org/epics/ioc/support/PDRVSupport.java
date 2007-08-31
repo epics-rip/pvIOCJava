@@ -16,7 +16,7 @@ public interface PDRVSupport extends Support {
      * If the support is interrupt driver should it process the record.
      * The answer will be true only if:
      * <ol>
-     *    <li>The constructor for AbstractPDRVLinkSupport is called with interruptOK true</li>
+     *    <li>The constructor for AbstractPDRVSupport is called with interruptOK true</li>
      *    <li>pdrvLink.interrupt is true.</li>
      *    <li>The support is the record processor.</li>
      * </ol>

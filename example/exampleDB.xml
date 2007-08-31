@@ -1,6 +1,6 @@
 <?xml version="1.0" ?>
 <IOCDatabase>
-<include addPath = "src" />
+<include addPath = "example" />
 <include href = "stringDB.xml" />
 <include href = "counterDB.xml" />
 <include href = "scalarDB.xml" />
@@ -10,7 +10,8 @@
 <include href = "aoIncrementalDB.xml" />
 <include href = "booleanArrayDB.xml" />
 <include href = "eventDB.xml" />
-<include removePath = "src" />
+<include href = "powerSupplyAllDB.xml" />
+<include removePath = "example" />
 <!--
 -->
 </IOCDatabase>

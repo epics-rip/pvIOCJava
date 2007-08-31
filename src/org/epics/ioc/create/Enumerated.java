@@ -10,11 +10,24 @@ import org.epics.ioc.pv.PVString;
 import org.epics.ioc.pv.PVStringArray;
 
 /**
+ * Interface for an enumerated structure.
  * @author mrk
  *
  */
 public interface Enumerated extends Create{
+    /**
+     * Get the index field of an enumerated structure.
+     * @return The interface.
+     */
     PVInt getIndexField();
+    /**
+     * Get the choice field of an enumerated structure.
+     * @return The interface.
+     */
     PVString getChoiceField();
+    /**
+     * * Get the choices field of an enumerated structure.
+     * @return The interface.
+     */
     PVStringArray getChoicesField();
 }

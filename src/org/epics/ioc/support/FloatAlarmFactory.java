@@ -18,8 +18,8 @@ import org.epics.ioc.util.*;
  */
 public class FloatAlarmFactory {
     /**
-     * Create support for a floatAlarm link.
-     * @param dbLink The link.
+     * Create support for a floatAlarm structure.
+     * @param dbStructure The structure.
      * @return An interface to the support or null if the supportName was not "floatAlarm".
      */
     public static Support create(DBStructure dbStructure) {

@@ -446,7 +446,6 @@ public class XMLToIOCDBFactory {
             PVField pvField = fieldState.pvField;
             Field field = pvField.getField();
             Type type = field.getType();
-           
             if(type.isScalar()) {
                 if(value!=null) {
                     try {

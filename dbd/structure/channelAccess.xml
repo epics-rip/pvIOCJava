@@ -4,8 +4,8 @@
 <structure name = "monitorType" createName = "enumerated" >
   <field name = "index" type = "int" />
   <field name = "choice" type = "string" />
-  <file name = "choices" type = "array" elementType = "string"
-   default = "put change absoluteChange percentageChange" /> 
+  <field name = "choices" type = "array" elementType = "string"
+     default = "put change absoluteChange percentageChange" /> 
 </structure>
 
 <structure name = "processSupport">

@@ -18,8 +18,8 @@ import org.epics.ioc.util.*;
  */
 public class SupportArrayFactory {
     /**
-     * Create support for an array of links.
-     * @param dbField The array which must be an array of links.
+     * Create support for an array of structures that have support.
+     * @param dbField The array which must be an array of structures.
      * @return An interface to the support or null if the supportName was not "supportArray".
      */
     public static Support create(DBField dbField) {

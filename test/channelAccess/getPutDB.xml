@@ -16,82 +16,62 @@
         </value>
     </calcArgArray>
     <calculator supportName = "counterCalculator" />
-    <linkArray>
-        <value structureName = "linkArrayElement">
+    <supportArray>
+        <value structureName = "supportArrayElement">
             <wait>true</wait>
-            <link  supportName = "processLink" >
-                <configure structureName = "processLink">
-                    <pvname>getFromCounter</pvname>
-                </configure>
+            <link  supportName = "processSupport" structureName = "processSupport">
+                <pvname>getFromCounter</pvname>
             </link>
         </value>
-        <value structureName = "linkArrayElement">
+        <value structureName = "supportArrayElement">
             <wait>false</wait>
-            <link  supportName = "outputLink" >
-                <configure structureName = "outputLink">
-                    <pvname>putFromCounter</pvname>
-                    <process>true</process>
-                </configure>
+            <link  supportName = "outputSupport" structureName = "outputSupport">
+                <pvname>putFromCounter</pvname>
+                <process>true</process>
             </link>
         </value>
-    </linkArray>
-    <valueAlarm>
-        <configure structureName = "doubleAlarm">
-          <active>true</active>
-          <interval>
-              <value structureName = "doubleAlarmInterval">
-                  <value>2.0</value>
-                  <severity>major</severity>
-              </value>
-              <value structureName = "doubleAlarmInterval">
-                  <value>4.0</value>
-                  <severity>minor</severity>
-              </value>
-              <value structureName = "doubleAlarmInterval">
-                  <value>6.0</value>
-                  <severity>none</severity>
-              </value>
-              <value structureName = "doubleAlarmInterval">
-                  <value>8.0</value>
-                  <severity>minor</severity>
-              </value>
-              <value structureName = "doubleAlarmInterval">
-                  <value>10.0</value>
-                  <severity>major</severity>
-              </value>
-          </interval>
-          <outOfRange>invalid</outOfRange>
-          <hystersis>0.1</hystersis>
-        </configure>
+    </supportArray>
+    <valueAlarm  structureName = "doubleAlarm">
+      <active>true</active>
+      <interval>
+          <value structureName = "doubleAlarmInterval">
+              <value>2.0</value>
+              <severity><choice>major</choice></severity>
+          </value>
+          <value structureName = "doubleAlarmInterval">
+              <value>4.0</value>
+              <severity><choice>minor</choice></severity>
+          </value>
+          <value structureName = "doubleAlarmInterval">
+              <value>6.0</value>
+              <severity><choice>none</choice></severity>
+          </value>
+          <value structureName = "doubleAlarmInterval">
+              <value>8.0</value>
+              <severity><choice>minor</choice></severity>
+          </value>
+          <value structureName = "doubleAlarmInterval">
+              <value>10.0</value>
+              <severity><choice>major</choice></severity>
+          </value>
+      </interval>
+      <outOfRange><choice>invalid</choice></outOfRange>
+      <hystersis>0.3</hystersis>
     </valueAlarm>
-    <displayLimit>
-        <low>0.0</low>
-        <high>10.0</high>
-    </displayLimit>
     <scan>
-        <scan>periodic</scan>
+        <type><choice>periodic</choice></type>
         <rate>1.0</rate>
     </scan>
 </record>
 
 <record name = "getFromCounter" type = "double">
-    <input supportName = "inputLink" >
-        <configure structureName = "inputLink">
-            <pvname>getPutCounter</pvname>
-            <process>false</process>
-            <inheritSeverity>true</inheritSeverity>
-        </configure>
+    <input supportName = "inputSupport" structureName = "inputSupport">
+        <pvname>getPutCounter</pvname>
+        <process>false</process>
+        <inheritSeverity>true</inheritSeverity>
     </input>
-    <displayLimit>
-        <low>0.0</low>
-        <high>10.0</high>
-    </displayLimit>
 </record>
 <record name = "putFromCounter" type = "double">
-    <displayLimit>
-        <low>0.0</low>
-        <high>10.0</high>
-    </displayLimit>
 </record>
 
 

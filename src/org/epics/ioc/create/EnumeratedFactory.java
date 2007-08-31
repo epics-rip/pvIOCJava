@@ -11,12 +11,18 @@ import org.epics.ioc.pv.*;
 import org.epics.ioc.util.MessageType;
 
 /**
+ * Factory for an enumerated structure.
  * @author mrk
  *
  */
 public class EnumeratedFactory {
 
-    public static Create create(DBField dbField) {
+    /**
+     * The create method.
+     * @param dbField The field, which must be an enumerated structure.
+     * @return The Create interface.
+     */
+    public static Enumerated create(DBField dbField) {
         PVField pvField = dbField.getPVField();
         if(pvField.getField().getType()!=Type.pvStructure) {
             pvField.message("field is not an enumerated structure", MessageType.error);

@@ -22,7 +22,7 @@ public interface DBDSupport {
      */
     String getFactoryName();
     /**
-     * @return
+     * @return The name.
      */
     String getStructureName();
     /**

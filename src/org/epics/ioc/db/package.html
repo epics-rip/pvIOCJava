@@ -11,7 +11,7 @@
 
 <h1 style="text-align: center">EPICS JavaIoc: Database Access <br />
 package: org.epics.ioc.dbAcess <br />
-2007.07.25</h1>
+2007.08.30</h1>
 CONTENTS 
 
 <div class="toc">
@@ -29,14 +29,10 @@ CONTENTS
         </ul>
       </li>
       <li><a href="#record">record</a></li>
-      <li><a href="#configure">configure</a></li>
       <li><a href="#Primitive">Primitive Types</a></li>
       <li><a href="#string">string</a></li>
       <li><a href="#structure">structure</a></li>
       <li><a href="#array">array</a></li>
-      <li><a href="#menu">menu</a></li>
-      <li><a href="#enumerated">enumerated</a></li>
-      <li><a href="#link">link</a></li>
     </ul>
   </li>
   <li><a href="#Database">XML to Database Converter</a></li>
@@ -49,9 +45,6 @@ CONTENTS
         </ul>
       </li>
       <li><a href="#DBField">DBField</a></li>
-      <li><a href="#DBEnum">DBEnum</a></li>
-      <li><a href="#DBMenu">DBMenu</a></li>
-      <li><a href="#DBLink">DBLink</a></li>
       <li><a href="#DBStructur">DBStructure</a></li>
       <li><a href="#DBNonScala">DBNonScalarArray</a></li>
       <li><a href="#DBRecord">DBRecord</a></li>
@@ -153,27 +146,24 @@ text. The syntax is:</p>
 <p>The following is a template file:</p>
 <pre>&lt;?xml version="1.0" ?&gt;
 &lt;IOCDatabase&gt;
-&lt;record name = "ai${recordExtension}Record" type = "aiRecord"&gt;
-    &lt;aiInput structureName = "aiLinear" &gt;
-        &lt;aiRaw&gt;
-            &lt;input supportName = "inputLink"&gt;
-                &lt;configure structureName = "inputLink"&gt;
-                    &lt;pvname&gt;${pvname}&lt;/pvname&gt;
-                    &lt;wait&gt;true&lt;/wait&gt;
-                &lt;/configure&gt;
-            &lt;/input&gt;
-        &lt;/aiRaw&gt;
-        &lt;units&gt;volts&lt;/units&gt;
-        &lt;displayLimit&gt;
-            &lt;low&gt;${displayLow}&lt;/low&gt;
-            &lt;high&gt;${displayHigh}&lt;/high&gt;
-        &lt;/displayLimit&gt;
+&lt;record name = "ai${recordExtension}Record" type = "double"&gt;
+    &lt;input structureName = "linearConvertInput" &gt;
+        &lt;input supportName = "inputSupport" structureName = "inputSupport"&gt;
+            &lt;pvname&gt;${pvname}&lt;/pvname&gt;
+            &lt;wait&gt;true&lt;/wait&gt;
+        &lt;/input&gt;
         &lt;linearConvert&gt;
             &lt;engUnitsLow&gt;${engUnitsLow}&lt;/engUnitsLow&gt;
             &lt;engUnitsHigh&gt;${engUnitsHigh}&lt;/engUnitsHigh&gt;
         &lt;/linearConvert&gt;
-    &lt;/aiInput&gt;
-    &lt;priority&gt;medium&lt;/priority&gt;
+    &lt;/input&gt;
+    &lt;doubleDisplayCharacteristics&gt;
+        &lt;units&gt;volts&lt;/units&gt;
+        &lt;limit&gt;
+            &lt;low&gt;${displayLow}&lt;/low&gt;
+            &lt;high&gt;${displayHigh}&lt;/high&gt;
+        &lt;/limit&gt;
+    &lt;/doubleDisplayCharacteristics&gt;
 &lt;/record&gt;
 &lt;/IOCDatabase&gt;</pre>
 
@@ -236,42 +226,6 @@ determines how the field is initialized.</p>
 <p>The syntax for the <span style="font-family: courier">initializer</span>
 depends on the field type.</p>
 
-<h3 id="configure">configure</h3>
-
-<p>If a supportName is defined for a record instance of for a field on a
-record instance and the support definition specifies a configuration
-structure then a configure XML element can be used to initialize the fields
-of the configuration structure. This configure element MUST appear
-immediately after the record instance or field instance definition.</p>
-
-<p>For example assume the following Database Definitions:</p>
-<pre>    &lt;structure name = "dummy"&gt;
-        &lt;field name = "xxx" type = "string" /&gt;
-        &lt;field name = "yyy" type = "int" /&gt;
-    &lt;/structure&gt;
-    
-    
-    &lt;support name = "exampleSupport" configurationStructureName = "dummy"
-        factoryName = "org.epics.ioc.support.Dummy" /&gt;</pre>
-
-<p>Then an instance of field <span style="font-family: courier;">link</span>
-can be initialized as follows:</p>
-<pre> &lt;value supportName = "exampleSupport"&gt;
-        &lt;configure structureName = "dummy"&gt;
-            &lt;xxx&gt;xxxxxx&lt;/xxx&gt;
-            &lt;yyy&gt;5&lt;/yyy&gt;
-        &lt;/configure&gt;
-        This is a string value
-    &lt;/value&gt;</pre>
-
-<p>This example was for a field that has type string but similar definitions
-can be given for any field that has associated support.</p>
-
-<p>If the support is for a structure field then the configuration must be
-given before any fields of the structure. If the support is for a record
-type, the configuration must be given before any fields of the record
-instance.</p>
-
 <h3 id="Primitive">Primitive Types</h3>
 
 <p>For primitive types the initializer has the same format as the Java
@@ -298,30 +252,31 @@ example:</p>
 <p>Structure fields are initialized via a recursive definition of field.</p>
 
 <p>Assume the following structure and recordType definitions:</p>
-<pre>    &lt;structure name = "displayLimit"&gt;
+<pre>    &lt;structure name = "limit"&gt;
         &lt;field name = "low"&gt;&lt;double/&gt;&lt;/field&gt;
         &lt;field name = "high"&gt;&lt;double /&gt;&lt;/field&gt;
    &lt;/structure&gt;
    ...
-   &lt;recordType name = "ai"&gt;
+   &lt;recordType name = "double"&gt;
    ...
-       &lt;field name = "displayLimit&gt;
-            &lt;structure name = "displayLimit" /&gt;
+       &lt;field name = "limit" type = "structure"&gt;
+            &lt;structure name = "limit" /&gt;
        &lt;field/&gt;
    ...</pre>
 
-<p>displayLimit is initilized as follows:.</p>
-<pre>    &lt;displayLimit&gt;
+<p>limit is initilized as follows:.</p>
+<pre>    &lt;limit&gt;
          &lt;low&gt;0.0&lt;/low&gt;
          &lt;high&gt;10.0&lt;/high&gt;
-    &lt;/displayLimit&gt;</pre>
+    &lt;/limit&gt;</pre>
 
-<p>Note that supportName can optionally be defined</p>
+<p>It is permissible, in a database definition, to define a field to be a
+structure without providing a structure name. In this case the default is
+"null" which is a structure with no fields and no support.</p>
 
-<p>It is permissible to define a field to be a structure without providing a
-structure name. In this case the structureName must be provided when the
-field is being created. The syntax is:</p>
-<pre>    &lt;fieldName structureName = "structureName" &gt;</pre>
+<p>The default structure and/or support can be overridden when a field
+instance is defined. The syntax is:</p>
+<pre>    &lt;fieldName structureName = "structureName" supportName = "supportName" &gt;</pre>
 
 <h3 id="array">array</h3>
 The syntax for an array initializer is: 
@@ -357,18 +312,8 @@ The syntax for an array initializer is:
 </dl>
 
 <p>Assume the following are part of a recordType definition:</p>
-<pre>    &lt;field name = "intArray"&gt;
-        &lt;array&gt;
-            &lt;type&gt;&lt;int /&gt;&lt;/type&gt;
-        &lt;/array&gt;
-    &lt;/field&gt;
-    &lt;field name = "structArray"&gt;
-        &lt;type&gt;
-            &lt;array&gt;
-                &lt;structure name = "DisplayLimit /&gt;
-            &lt;/array&gt;
-        &lt;/type&gt;
-    &lt;/field&gt;</pre>
+<pre>    &lt;field name = "intArray" type = "int" /&gt;
+    &lt;field name = "structArray" type = "structure" structureName = "doubleDisplayLimits" /&gt;</pre>
 
 <p>Then the following all perform the same initialization:</p>
 <pre>    &lt;intArray capacity = "3" &gt;
@@ -396,65 +341,6 @@ style="font-family: courier;">structArray</span></p>
             &lt;high&gt;10.0&lt;/high&gt;
         &lt;/value&gt;
     &lt;/structArray&gt;</pre>
-
-<h3 id="menu">menu</h3>
-
-<p>A menu field is initialized as follows:</p>
-<pre>    &lt;fieldName supportName = "supportName" &gt;stringValue&lt;/fieldName&gt;</pre>
-where stringValue is one of the allowed values for the menu. 
-
-<p>For example:</p>
-<pre>    &lt;scan&gt;periodic&lt;/scan&gt;</pre>
-
-<p>Again supportName is optional.</p>
-
-<h3 id="enumerated">enumerated</h3>
-
-<p>An enumerated field is initialized as follows:</p>
-<pre>    &lt;fieldName supportName = "supportName" &gt;
-        &lt;choice&gt;choice&lt;/choice&gt;
-        stringValue
-        ...
-    &lt;/fieldName&gt;</pre>
-
-<p>where</p>
-<dl>
-  <dt style="font-family: courier;">supportName</dt>
-    <dd>Optional support</dd>
-  <dt style="font-family: courier;">choice</dt>
-    <dd>A choice string. One of these must be specified for each choice.</dd>
-  <dt style="font-family: courier;">stringValue</dt>
-    <dd>one of the allowed values for the enum.</dd>
-</dl>
-
-<p>For example:</p>
-<pre>    &lt;enumExample&gt;
-         &lt;choice&gt;zeroState&lt;/choice&gt;
-         &lt;choics&gt;oneState&lt;/choice&gt;
-         oneState
-    &lt;/enumExample&gt;</pre>
-
-<h3 id="link">link</h3>
-A link field is initialized as follows: 
-<pre>    &lt;fieldName supportName = "supportName" &gt;
-        &lt;configure structureName = "supportStructureName"&gt;
-            &lt;fieldName&gt;fieldValue&lt;/fieldName&gt;
-            ...
-        &lt;/configure&gt;
-    &lt;/fieldName&gt;</pre>
-
-<p>where</p>
-<dl>
-  <dt style="font-family: courier;">supportName</dt>
-    <dd>The name of one of the <span
-      style="font-family: courier;">support</span> definitions</dd>
-  <dt style="font-family: courier;">supportName</dt>
-    <dd>The name of the support structure given with the support
-    definition</dd>
-  <dt style="font-family: courier;">fieldValue</dt>
-    <dd>The value for the structure field.<br />
-    </dd>
-</dl>
 <hr />
 
 <h2 style="text-align: center" id="Database">XML to Database Converter</h2>
@@ -518,8 +404,8 @@ safe.</p>
 <hr />
 
 <p>This section describes interfaces for acessing fields of record instances.
-These interfaces are of interest to the database, record support, link
-support, Channel Access, etc.</p>
+These interfaces are of interest to the database, support, Channel Access,
+etc.</p>
 
 <p>Each DBField interface provides access to a corrseponding PVField
 interface and in addition provide access to support and implement monitoring,
@@ -561,17 +447,11 @@ value.</p>
 <p>DBListener has the definition:</p>
 <pre>    public interface DBListener {
         void dataPut(DBField dbField);
-        void enumIndexPut(DBEnum dbEnum);
-        void enumChoicesPut(DBEnum dbEnum);
         void supportNamePut(DBField dbField);
-        void configurationStructurePut(DBLink dbLink);
         void beginPut(DBStructure dbStructure);
         void endPut(DBStructure dbStructure);
         void dataPut(DBField requested,DBField dbField);
-        void enumIndexPut(DBField requested,DBEnum dbEnum);
-        void enumChoicesPut(DBField requested,DBEnum dbEnum);
         void supportNamePut(DBField requested,DBField dbField);
-        void configurationStructurePut(DBField requested,DBLink dbLink);
         void beginProcess();
         void endProcess();
         void unlisten(RecordListener listener);
@@ -579,16 +459,9 @@ value.</p>
 where 
 <dl>
   <dt style="font-family: courier;">dataPut</dt>
-    <dd>A data put has occured. This will not be called for enum, menu, or
-      link fields.</dd>
-  <dt style="font-family: courier;">enumIndexPut</dt>
-    <dd>A put to the index field of an enum or menu has occured.</dd>
-  <dt style="font-family: courier;">enumChoicesPut</dt>
-    <dd>The put to the choices of an enum has occured.</dd>
+    <dd>A data put has occured.</dd>
   <dt style="font-family: courier;">supportNamePut</dt>
     <dd>The support name has been changed.</dd>
-  <dt style="font-family: courier;">configurationStructurePut</dt>
-    <dd>The configuration structure of a link field has been changed.</dd>
   <dt style="font-family: courier;">beginPut</dt>
     <dd>A series of puts to a structure is starting.</dd>
   <dt style="font-family: courier;">endPut</dt>
@@ -603,22 +476,21 @@ where
       should null the object reference returned by addListener.</dd>
 </dl>
 
-<p>For dataPut,...,configurationStructurePut two versions are provided. The
-first is called if the listener attaches directly the the field that is being
+<p>For dataPut and supportNamePut two versions are provided. The first is
+called if the listener attaches directly the the field that is being
 modified. The second version is called if the caller attaches to a structure
-that has the field located somewhere in it. The PVStructure argument is the
-structure to which the listener attached. Not in particular that the listener
-can listen to all changes in a record instance by attaching to the record
-instance itself, because it is also a PVStructure.</p>
+that has the field located somewhere in it. The first argument is the
+structure or array to which the listener attached. Not in particular that the
+listener can listen to all changes in a record instance by attaching to the
+record instance itself.</p>
 
-<p>Assume that a field named value has properties status and severity. Then
-when the record is processed and field value is written then the following
-calls might occur:</p>
+<p>Assume that a field named value has property alarm. Then when the record
+is processed and field value is written then the following calls might
+occur:</p>
 <ul>
   <li>beginProcess</li>
   <li>dataPut for value</li>
-  <li>dataPut for status</li>
-  <li>enumIndexPut for severity</li>
+  <li>dataPut for alarm</li>
   <li>endProcess</li>
 </ul>
 
@@ -645,6 +517,8 @@ instance.</p>
         void replacePVField(PVField newPVField);
         String getSupportName();
         String setSupportName(String name);
+        Create getCreate();
+        void setCreate(Create create);
         Support getSupport();
         void setSupport(Support support);
         void postPut();
@@ -659,112 +533,41 @@ instance.</p>
 
 <p>where</p>
 <dl>
-  <dt>getDBRecord</dt>
+  <dt style="font-family: courier;">getDBRecord</dt>
     <dd>Return the DBRecord interface for the record instance.</dd>
-  <dt>getParent</dt>
+  <dt style="font-family: courier;">getParent</dt>
     <dd>Return the DBField interface of the parent.</dd>
-  <dt>getPVField</dt>
+  <dt style="font-family: courier;">getPVField</dt>
     <dd>Get the PVField interface that hold the data for the field.</dd>
-  <dt>replacePVField</dt>
+  <dt style="font-family: courier;">replacePVField</dt>
     <dd>Replace the PVField.</dd>
-  <dt>getSupportName</dt>
+  <dt style="font-family: courier;">getSupportName</dt>
     <dd>Just gets the associated PVField bsupportName.</dd>
-  <dt>setSupportName</dt>
+  <dt style="font-family: courier;">setSupportName</dt>
     <dd>This connects the field to associated support and also handles
       support initialization.</dd>
-  <dt>getSupport</dt>
+  <dt style="font-family: courier;">getCreate</dt>
+    <dd>Get the create for this field. This returns null if no create
+    exists.</dd>
+  <dt style="font-family: courier;">setCreate</dt>
+    <dd>Set the create for the field. It can be null.</dd>
+  <dt style="font-family: courier;">getSupport</dt>
     <dd>Get the support for this field. This returns null if no support
       exists.</dd>
-  <dt>setSupport</dt>
+  <dt style="font-family: courier;">setSupport</dt>
     <dd>Set the support for the field. It can be null.</dd>
-  <dt>postPut</dt>
+  <dt style="font-family: courier;">postPut</dt>
     <dd>This is called by code that puts to the PVField associated with the
       field. It implements monitoring.</dd>
-  <dt>addListener</dt>
+  <dt style="font-family: courier;">addListener</dt>
     <dd>Add a monitor listener. The RecordListener interface must be created
       by calling DBRecord.createRecordListener. If the DBField is a structure
       field the listener will be called when any field in the structure is
       modified.</dd>
-  <dt>removeListener</dt>
+  <dt style="font-family: courier;">removeListener</dt>
     <dd>Remove a listener.</dd>
-  <dt>getRecordListenerList</dt>
+  <dt style="font-family: courier;">getRecordListenerList</dt>
     <dd>Get a list of all the record listeners.</dd>
-</dl>
-
-<h3 id="DBEnum">DBEnum</h3>
-<pre>    public interface DBEnum extends DBField {
-        PVEnum getPVEnum();
-        void replacePVEnum();
-        int getIndex();
-        void setIndex(int index);
-        String[] getChoices();
-        boolean setChoices(String[] choice);
-    }
-
-    public class BaseDBEnum extends BaseDBField implements DBEnum {...}</pre>
-
-<p>where</p>
-<dl>
-  <dt>getPVEnum</dt>
-    <dd>Get the PVEnum interface that hold the data.</dd>
-  <dt>replacePVEnum</dt>
-    <dd>Replace the PVEnum interface.</dd>
-  <dt>getIndex</dt>
-    <dd>Get the current index. This method calls the associated PVField
-      method.</dd>
-  <dt>setIndex</dt>
-    <dd>This method calls the associated PVField method AND also calls
-      dbListener.enumIndexPut for all registered listeners.</dd>
-  <dt>setChoices</dt>
-    <dd>Get the current choices. This method just calls the associated
-      PVField method.</dd>
-  <dt>setIndex</dt>
-    <dd>This method calls the associated PVField method AND also calls
-      dbListener.enumChoicesPut for all registered listeners.</dd>
-  <dt>getPVEnum</dt>
-    <dd>Get the associated PVEnum interface</dd>
-</dl>
-
-<h3 id="DBMenu">DBMenu</h3>
-<pre>    public interface DBMenu extends DBEnum {
-        PVMenu getPVMenu();
-        void replacePVMenu();
-    }
-
-    public class BaseDBMenu extends BaseDBEnum implements DBMenu{ ... }</pre>
-
-<p>This is like PVEnum except that it will not allow the choices to be
-modified.</p>
-
-<h3 id="DBLink">DBLink</h3>
-
-<p>A link is a field with no data but can have an associated configuration
-structure.</p>
-<pre>    public interface DBLink extends DBField{
-        PVLink getPVLink();
-        void replacePVLink();
-        PVStructure getConfigurationStructure();
-        boolean setConfigurationStructure(PVStructure pvStructure);
-    }
-
-    public class BaseDBLink extends BaseDBField implements DBLink { ... }</pre>
-
-<p>where</p>
-<dl>
-  <dt>getPVLink</dt>
-    <dd>Get the associated PVLink interface.</dd>
-  <dt>replacePVLink</dt>
-    <dd>Replace the PVLink interface.</dd>
-  <dt>getConfigurationStructure</dt>
-    <dd>Get the interface for the configuration structure.</dd>
-  <dt>setConfigurationStructure</dt>
-    <dd>In any support is already active the support is forced to state
-      readyForInitialize. Then the configuration structure is modified and an
-      attempt is made to put the link support in the same supportState as the
-      record itself.</dd>
-  <dt>newSupport</dt>
-    <dd>Stop existing support and connect and start the speecified
-    support.</dd>
 </dl>
 
 <h3 id="DBStructur">DBStructure</h3>
@@ -780,15 +583,15 @@ structure.</p>
 
 <p>where</p>
 <dl>
-  <dt>getPVStructure</dt>
+  <dt style="font-family: courier;">getPVStructure</dt>
     <dd>Get the associated PVStructure interface.</dd>
-  <dt>replacePVStructure</dt>
+  <dt style="font-family: courier;">replacePVStructure</dt>
     <dd>Replace the PVStructure interface.</dd>
-  <dt>getFieldDBFields</dt>
+  <dt style="font-family: courier;">getFieldDBFields</dt>
     <dd>Get the DBField array for the subfields.</dd>
-  <dt>beginPut</dt>
+  <dt style="font-family: courier;">beginPut</dt>
     <dd>Begin a set of puts to subfields of the structure.</dd>
-  <dt>endPut</dt>
+  <dt style="font-family: courier;">endPut</dt>
     <dd>End a set of puts to subfields of the structure.</dd>
 </dl>
 
@@ -802,9 +605,9 @@ structure.</p>
 
 <p>where</p>
 <dl>
-  <dt>replacePVArray</dt>
+  <dt style="font-family: courier;">replacePVArray</dt>
     <dd>Replace the PVArray interface.</dd>
-  <dt>getElementDBFields</dt>
+  <dt style="font-family: courier;">getElementDBFields</dt>
     <dd>Get the DBField array for the elements.</dd>
 </dl>
 
@@ -1135,34 +938,6 @@ all properties of the field.</p>
         System.out.printf("%s    %s = %s%n",
             common,name,dbField.toString(2));
     }
-    public void enumChoicesPut(DBEnum dbEnum) {
-        PVEnum pvEnum = dbEnum.getPVEnum();
-        String common = putCommon("enumChoicesPut");
-        if(!verbose) {
-            System.out.println(common + pvEnum.toString(1));
-            return;
-        }
-        String name = pvEnum.getPVRecord().getRecordName() + pvEnum.getFullFieldName();
-        if(!name.equals(fullName)) {
-            System.out.printf("%s %s NOT_EQUAL %s%n",common,name,fullName);
-        }
-        System.out.printf("%s    %s = %s%n",
-            common,name,pvEnum.toString(2));
-    }
-    public void enumIndexPut(DBEnum dbEnum) {
-        PVEnum pvEnum = dbEnum.getPVEnum();
-        String common = putCommon("enumChoicesPut");
-        if(!verbose) {
-            System.out.println(common + pvEnum.toString(1));
-            return;
-        }
-        String name = pvEnum.getPVRecord().getRecordName() + pvEnum.getFullFieldName();
-        if(!name.equals(fullName)) {
-            System.out.printf("%s %s NOT_EQUAL %s%n",common,name,fullName);
-        }
-        System.out.printf("%s    %s index = %d%n",
-            common,name,pvEnum.getIndex());
-    }
     public void supportNamePut(DBField dbField) {
         PVField pvField = dbField.getPVField();
         String common = putCommon("supportNamePut");
@@ -1173,11 +948,6 @@ all properties of the field.</p>
         System.out.printf("%s    %s = %s%n",
             common,name,pvField.getSupportName());
     }
-    public void configurationStructurePut(DBLink dbLink) {
-        PVLink pvLink = dbLink.getPVLink();
-        System.out.printf("configStructPut pvName %s actualField %s%s%n",
-            pvName,actualFieldName,pvLink.getConfigurationStructure().toString(2));
-    }
     public void dataPut(DBField requested, DBField dbField) {
         PVField pvRequested = requested.getPVField();
         PVField pvField = dbField.getPVField();
@@ -1187,24 +957,6 @@ all properties of the field.</p>
         String common = putCommon(structureName +" dataPut to field " + pvField.getFullFieldName());
         System.out.printf("%s    = %s%n",common,pvField.toString(2));
     }
-    public void enumChoicesPut(DBField requested,DBEnum dbEnum) {
-        PVField pvRequested = requested.getPVField();
-        PVEnum pvEnum = dbEnum.getPVEnum();
-        String structureName =
-            pvRequested.getPVRecord().getRecordName()
-            + pvRequested.getFullFieldName();
-        String common = putCommon(structureName +" enumChoicesPut to field " + pvEnum.getFullFieldName());
-        System.out.printf("%s    = %s%n",common,pvEnum.toString(2));
-    }
-    public void enumIndexPut(DBField requested,DBEnum dbEnum) {
-        PVField pvRequested = requested.getPVField();
-        PVEnum pvEnum = dbEnum.getPVEnum();
-        String structureName =
-            pvRequested.getPVRecord().getRecordName()
-            + pvRequested.getFullFieldName();
-        String common = putCommon(structureName +" enumIndexPut to field " + pvEnum.getFullFieldName());
-        System.out.printf("%s    index = %d%n",common,pvEnum.getIndex());
-    }
     public void supportNamePut(DBField requested,DBField dbField) {
         PVField pvRequested = requested.getPVField();
         PVField pvField = dbField.getPVField();
@@ -1213,11 +965,6 @@ all properties of the field.</p>
             + pvRequested.getFullFieldName();
         String common = putCommon(structureName +" supportNamePut to field " + pvField.getFullFieldName());
         System.out.printf("%s    = %s%n",common,pvField.getSupportName());
-    }
-    public void configurationStructurePut(DBField requested,DBLink dbLink) {
-        PVLink pvLink = dbLink.getPVLink();
-        System.out.printf("configStructPut pvName %s actualField %s%s%n",
-            pvName,actualFieldName,pvLink.getConfigurationStructure().toString(2));
     }
     public void unlisten(RecordListener listener) {
         // Nothing to do.

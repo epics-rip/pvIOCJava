@@ -17,95 +17,74 @@
         </value>
     </calcArgArray>
     <calculator supportName = "counterCalculator" />
-    <valueAlarm>
-        <configure structureName = "doubleAlarm">
+    <valueAlarm structureName = "doubleAlarm">
           <active>true</active>
           <interval>
               <value structureName = "doubleAlarmInterval">
                   <value>2.0</value>
-                  <severity>major</severity>
+                  <severity><choice>major</choice></severity>
               </value>
               <value structureName = "doubleAlarmInterval">
                   <value>5.0</value>
-                  <severity>minor</severity>
+                  <severity><choice>minor</choice></severity>
               </value>
               <value structureName = "doubleAlarmInterval">
                   <value>14.0</value>
-                  <severity>none</severity>
+                  <severity><choice>none</choice></severity>
               </value>
               <value structureName = "doubleAlarmInterval">
                   <value>17.0</value>
-                  <severity>minor</severity>
+                  <severity><choice>minor</choice></severity>
               </value>
               <value structureName = "doubleAlarmInterval">
                   <value>20.0</value>
-                  <severity>major</severity>
+                  <severity><choice>major</choice></severity>
               </value>
           </interval>
-          <outOfRange>invalid</outOfRange>
+          <outOfRange><choice>invalid</choice></outOfRange>
           <hystersis>0.1</hystersis>
-        </configure>
     </valueAlarm>
-    <displayLimit>
-        <low>0.0</low>
-        <high>20.0</high>
-    </displayLimit>
     <scan>
-        <scan>periodic</scan>
+        <type><choice>periodic</choice></type>
         <rate>2.0</rate>
     </scan>
 </record>
 
 <record name = "monitorPut" type = "double">
-    <input supportName = "monitorLink" >
-        <configure structureName = "monitorLink">
+    <input supportName = "monitorSupport" structureName = "monitorSupport">
             <pvname>monitorCounter</pvname>
-            <type>put</type>
+            <type><choice>put</choice></type>
             <process>true</process>
             <inheritSeverity>true</inheritSeverity>
-        </configure>
     </input>
-    <displayLimit>
-        <low>0.0</low>
-        <high>20.0</high>
-    </displayLimit>
-    <linkArray>
-        <value structureName = "linkArrayElement">
+    <supportArray>
+        <value structureName = "supportArrayElement">
             <wait>true</wait>
-            <link  supportName = "outputLink" >
-                <configure structureName = "outputLink">
+            <link  supportName = "outputSupport" structureName = "outputSupport">
                     <pvname>cachePut</pvname>
                     <process>true</process>
-                </configure>
             </link>
         </value>
-        <!-- do it twice -->
-        <value structureName = "linkArrayElement">
+<!-- do it twice fails WHY
+        <value structureName = "supportArrayElement">
             <wait>true</wait>
-            <link  supportName = "outputLink" >
-                <configure structureName = "outputLink">
+            <link  supportName = "outputSupport" structureName = "outputSupport">
                     <pvname>cachePut</pvname>
                     <process>true</process>
-                </configure>
             </link>
         </value>
-        <value structureName = "linkArrayElement">
-            <link  supportName = "delayLink" >
-                <configure structureName = "delayLink">
+-->
+        <value structureName = "supportArrayElement">
+            <link  supportName = "delaySupport" structureName = "delaySupport">
                     <min>100</min>
                     <max>1000</max>
                     <inc>100</inc>
-                </configure>
             </link>
         </value>
-    </linkArray>
+    </supportArray>
 </record>
 
 <record name = "cachePut" type = "double">
-    <displayLimit>
-        <low>0.0</low>
-        <high>20.0</high>
-    </displayLimit>
     <scan>
         <processSelf>true</processSelf> 
     </scan>
@@ -113,215 +92,152 @@
 
 
 <record name = "monitorChange" type = "double">
-    <input supportName = "monitorLink" >
-        <configure structureName = "monitorLink">
+    <input supportName = "monitorSupport" structureName = "monitorSupport">
             <pvname>cachePut</pvname>
-            <type>change</type>
+            <type><choice>change</choice></type>
             <process>true</process>
-        </configure>
     </input>
-    <displayLimit>
-        <low>0.0</low>
-        <high>20.0</high>
-    </displayLimit>
-    <linkArray>
-        <value structureName = "linkArrayElement">
-            <link  supportName = "delayLink" >
-                <configure structureName = "delayLink">
+    <supportArray>
+        <value structureName = "supportArrayElement">
+            <link  supportName = "delaySupport" structureName = "delaySupport">
                     <min>100</min>
                     <max>1000</max>
                     <inc>100</inc>
-                </configure>
             </link>
         </value>
-    </linkArray>
+    </supportArray>
 </record>
 
 <record name = "monitorAbsoluteChange" type = "double">
-    <input supportName = "monitorLink" >
-        <configure structureName = "monitorLink">
+    <input supportName = "monitorSupport" structureName = "monitorSupport">
             <pvname>monitorCounter</pvname>
-            <type>absoluteChange</type>
+            <type><choice>absoluteChange</choice></type>
             <deadband>1.001</deadband>
             <process>true</process>
             <inheritSeverity>true</inheritSeverity>
-        </configure>
     </input>
-    <displayLimit>
-        <low>0.0</low>
-        <high>20.0</high>
-    </displayLimit>
-    <linkArray>
-        <value structureName = "linkArrayElement">
-            <link  supportName = "delayLink" >
-                <configure structureName = "delayLink">
+    <supportArray>
+        <value structureName = "supportArrayElement">
+            <link  supportName = "delaySupport" structureName = "delaySupport">
                     <min>100</min>
                     <max>1000</max>
                     <inc>100</inc>
-                </configure>
             </link>
         </value>
-    </linkArray>
+    </supportArray>
 </record>
 
 <record name = "monitorPercentageChange" type = "double">
-    <input supportName = "monitorLink" >
-        <configure structureName = "monitorLink">
+    <input supportName = "monitorSupport" structureName = "monitorSupport">
             <pvname>monitorCounter</pvname>
-            <type>percentageChange</type>
+            <type><choice>percentageChange</choice></type>
             <deadband>20.0</deadband>
             <process>true</process>
             <inheritSeverity>true</inheritSeverity>
-        </configure>
     </input>
-    <displayLimit>
-        <low>0.0</low>
-        <high>20.0</high>
-    </displayLimit>
-    <linkArray>
-        <value structureName = "linkArrayElement">
-            <link  supportName = "delayLink" >
-                <configure structureName = "delayLink">
+    <supportArray>
+        <value structureName = "supportArrayElement">
+            <link  supportName = "delaySupport" structureName = "delaySupport">
                     <min>100</min>
                     <max>1000</max>
                     <inc>100</inc>
-                </configure>
             </link>
         </value>
-    </linkArray>
+    </supportArray>
 </record>
 
 <record name = "notifyPut" type = "double">
-    <input supportName = "monitorNotifyLink" >
-        <configure structureName = "monitorNotifyLink">
+    <input supportName = "monitorNotifySupport" structureName = "monitorNotifySupport">
             <pvname>monitorCounter</pvname>
-            <type>put</type>
-        </configure>
+            <type><choice>put</choice></type>
     </input>
-    <displayLimit>
-        <low>0.0</low>
-        <high>20.0</high>
-    </displayLimit>
-    <linkArray>
-        <value structureName = "linkArrayElement">
-            <link  supportName = "inputLink" >
-                <configure structureName = "inputLink">
+    <supportArray>
+        <value structureName = "supportArrayElement">
+            <link  supportName = "inputSupport" structureName = "inputSupport">
                     <pvname>monitorCounter</pvname>
                     <process>false</process>
                     <inheritSeverity>true</inheritSeverity>
-                </configure>
             </link>
         </value>
-        <value structureName = "linkArrayElement">
-            <link  supportName = "delayLink" >
-                <configure structureName = "delayLink">
+        <value structureName = "supportArrayElement">
+            <link  supportName = "delaySupport" structureName = "delaySupport">
                     <min>100</min>
                     <max>1000</max>
                     <inc>100</inc>
-                </configure>
             </link>
         </value>
-    </linkArray>
+    </supportArray>
 </record>
 
 <record name = "notifyChange" type = "double">
-    <input supportName = "monitorNotifyLink" >
-        <configure structureName = "monitorNotifyLink">
+    <input supportName = "monitorNotifySupport" structureName = "monitorNotifySupport">
             <pvname>monitorCounter</pvname>
-            <type>change</type>
-        </configure>
+            <type><choice>change</choice></type>
     </input>
-    <displayLimit>
-        <low>0.0</low>
-        <high>20.0</high>
-    </displayLimit>
-    <linkArray>
-        <value structureName = "linkArrayElement">
-            <link  supportName = "inputLink" >
-                <configure structureName = "inputLink">
+    <supportArray>
+        <value structureName = "supportArrayElement">
+            <link  supportName = "inputSupport" structureName = "inputSupport">
                     <pvname>monitorCounter</pvname>
                     <process>false</process>
                     <inheritSeverity>true</inheritSeverity>
-                </configure>
             </link>
         </value>
-        <value structureName = "linkArrayElement">
-            <link  supportName = "delayLink" >
-                <configure structureName = "delayLink">
+        <value structureName = "supportArrayElement">
+            <link  supportName = "delaySupport" structureName = "delaySupport">
                     <min>100</min>
                     <max>1000</max>
                     <inc>100</inc>
-                </configure>
             </link>
         </value>
-    </linkArray>
+    </supportArray>
 </record>
 
 <record name = "notifyAbsoluteChange" type = "double">
-    <input supportName = "monitorNotifyLink" >
-        <configure structureName = "monitorNotifyLink">
+    <input supportName = "monitorNotifySupport" structureName = "monitorNotifySupport">
             <pvname>monitorCounter</pvname>
+            <type><choice>absoluteChange</choice></type>
             <deadband>1.001</deadband>
-        </configure>
     </input>
-    <displayLimit>
-        <low>0.0</low>
-        <high>20.0</high>
-    </displayLimit>
-    <linkArray>
-        <value structureName = "linkArrayElement">
-            <link  supportName = "inputLink" >
-                <configure structureName = "inputLink">
+    <supportArray>
+        <value structureName = "supportArrayElement">
+            <link  supportName = "inputSupport" structureName = "inputSupport">
                     <pvname>monitorCounter</pvname>
                     <process>false</process>
                     <inheritSeverity>true</inheritSeverity>
-                </configure>
             </link>
         </value>
-        <value structureName = "linkArrayElement">
-            <link  supportName = "delayLink" >
-                <configure structureName = "delayLink">
+        <value structureName = "supportArrayElement">
+            <link  supportName = "delaySupport" structureName = "delaySupport">
                     <min>100</min>
                     <max>1000</max>
                     <inc>100</inc>
-                </configure>
             </link>
         </value>
-    </linkArray>
+    </supportArray>
 </record>
 
 <record name = "notifyPercentageChange" type = "double">
-    <input supportName = "monitorNotifyLink" >
-        <configure structureName = "monitorNotifyLink">
+    <input supportName = "monitorNotifySupport" structureName = "monitorNotifySupport">
             <pvname>monitorCounter</pvname>
-            <type>percentageChange</type>
+            <type><choice>percentageChange</choice></type>
             <deadband>20.0</deadband>
-        </configure>
     </input>
-    <displayLimit>
-        <low>0.0</low>
-        <high>20.0</high>
-    </displayLimit>
-    <linkArray>
-        <value structureName = "linkArrayElement">
-            <link  supportName = "inputLink" >
-                <configure structureName = "inputLink">
+    <supportArray>
+        <value structureName = "supportArrayElement">
+            <link  supportName = "inputSupport" structureName = "inputSupport">
                     <pvname>monitorCounter</pvname>
                     <inheritSeverity>true</inheritSeverity>
                     <process>false</process>
-                </configure>
             </link>
         </value>
-        <value structureName = "linkArrayElement">
-            <link  supportName = "delayLink" >
-                <configure structureName = "delayLink">
+        <value structureName = "supportArrayElement">
+            <link  supportName = "delaySupport" structureName = "delaySupport">
                     <min>100</min>
                     <max>1000</max>
                     <inc>100</inc>
-                </configure>
             </link>
         </value>
-    </linkArray>
+    </supportArray>
 </record>
 
 

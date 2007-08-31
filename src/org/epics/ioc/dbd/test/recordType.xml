@@ -30,7 +30,7 @@
     </field>
     <field name = "status" type = "string" />
     <field name = "severity" type = "structure" structureName = "alarmSeverity" />
-    <field name = "input" type = "link" />
+    <field name = "input" type = "structure" />
 </structure>
 
 <structure name = "aiLinear">

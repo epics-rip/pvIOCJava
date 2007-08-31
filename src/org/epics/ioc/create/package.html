@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+      "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html>
+<head>
+  <meta http-equiv="content-type" content="text/html; charset=iso-8859-1" />
+  <title>EPICS JavaIOC: create</title>
+</head>
+
+<body>
+<h1 style="text-align: center">EPICS JavaIOC: create<br />
+package: org.epics.ioc.create<br />
+2007.08.30</h1>
+CONTENTS 
+
+<div class="toc">
+<ul>
+  <li><a href="#Overview">Overview</a></li>
+  <li><a href="#Create">Create</a></li>
+  <li><a href="#Enumerated">Enumerated</a> 
+    <ul>
+      <li><a href="#Definition">Definitions</a></li>
+      <li><a href="#Discussion">Discussion</a></li>
+    </ul>
+  </li>
+</ul>
+</div>
+<hr />
+
+<h2 style="text-align: center" id="Overview">Overview</h2>
+<hr />
+
+<p>This package contains create code for javaIOC databases. Create code is
+called when a javaIOC database field is being created. The normal reason is
+to replace the PVData interface to provide additional capability.</p>
+
+<p>This package provides interfaces and classes for processing fields of IOC
+database records. </p>
+
+<p>The following interfaces are available:</p>
+<dl>
+  <dt><span style="font-family: courier;">Create</span></dt>
+    <dd>This is the base interface for Create. It has no methods.</dd>
+  <dt><span style="font-family: courier;">Enumerated</span></dt>
+    <dd>An interface for accessing enumerated structures, i.e. a structure
+      which has fields index, choice, and choices.</dd>
+</dl>
+
+<p>The following base classes are provided for implementing create:</p>
+<dl>
+  <dt><span style="font-family: courier;">BaseEnumerated</span></dt>
+    <dd>A base class for an enumerated structure.</dd>
+</dl>
+
+<p>The following factories are provided:</p>
+<dl>
+  <dt><span style="font-family: courier;">EnumeratedFactory</span></dt>
+    <dd>Support for an enumerated structure</dd>
+</dl>
+<hr />
+
+<h2 style="text-align: center" id="Create">Create</h2>
+<hr />
+
+<p>Create is defined as:</p>
+<pre>    public interface Create { }</pre>
+
+<p>This it is just an empty base class.</p>
+
+<p>A factory for a Create must have the form:</p>
+<pre>public class XXXFactory {
+    public static Create create(DBField dbField);
+}</pre>
+
+<p>A Database Definition like the following must exist:</p>
+<pre>create name = "enumerated"
+  factoryName = "org.epics.ioc.create.EnumeratedFactory" </pre>
+<hr />
+
+<h2 style="text-align: center" id="Enumerated">Enumerated</h2>
+<hr />
+
+<h3 id="Definition">Definitions</h3>
+<pre>interface Enumerated extends Create{
+    PVInt getIndexField();
+    PVString getChoiceField();
+    PVStringArray getChoicesField();
+}
+
+public class BaseEnumerated implements Enumerated{...}
+
+public class EnumeratedFactory {
+    public static Enumerated create(DBField dbField);
+}</pre>
+
+<h3 id="Discussion">Discussion</h3>
+
+<p>The enumerated support makes it easier for other code to access an
+enumerated structure. Code can just access the index or choice field rather
+than worring about the entire structure. For example if code issues a put to
+the index field the above support will make sure that the choice field is
+also updated.</p>
+
+<p>Note also that if a java enum is related to an enumerated structure
+definition than the java enum has a convience method that takes a DBField and
+checks to see if it is an enumerated structure with choices that match the
+java enum. If so it returns interface Enumerated.</p>
+
+<p>The following Database Definition are provided for enumerated:</p>
+<pre>&lt;structure name = "enumerated" createName = "enumerated" &gt;
+  &lt;field name = "index" type = "int" /&gt;
+  &lt;field name = "choice" type = "string" /&gt;
+  &lt;field name = "choices" type = "array" elementType = "string" /&gt;
+&lt;/structure&gt;
+
+&lt;create name = "enumerated"
+  factoryName = "org.epics.ioc.create.EnumeratedFactory" /&gt;
+</pre>
+
+<p>Other structure definitions can also define createName. For example
+alarmSeverity is defined as:</p>
+<pre>&lt;structure name = "alarmSeverity" createName = "enumerated" &gt;
+  &lt;field name = "index" type = "int" /&gt;
+  &lt;field name = "choice" type = "string" /&gt;
+  &lt;field name = "choices" type = "array" elementType = "string"
+    default = "none minor major invalid" /&gt;
+&lt;/structure&gt;
+</pre>
+
+<p>And AlarmSeverity.java implements the method:</p>
+<pre>public static Enumerated getAlarmSeverity(DBField dbField);</pre>
+</body>
+</html>

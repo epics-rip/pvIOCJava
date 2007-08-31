@@ -2,11 +2,11 @@
 <IOCDatabase>
 <include addPath = "src/org/epics/ioc/process/test" />
 <include href = "exampleDB.xml" />
-<record name = "counter" type = "counterRecord">
-<scan>
-    <scan>periodic</scan>
-    <rate>0.5</rate>
-</scan>
+<record name = "counter" type = "calcDouble">
+    <scan>
+        <type><choice>periodic</choice></type>
+        <rate>0.5</rate>
+    </scan>
 </record>
 
 </IOCDatabase>

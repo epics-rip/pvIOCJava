@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-       "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+      "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
   <meta http-equiv="content-type" content="text/html; charset=iso-8859-1" />
@@ -10,13 +10,13 @@
 <body>
 <h1 style="text-align: center">EPICS JavaIOC: util<br />
 package: org.epics.ioc.util<br />
-2007.04.11</h1>
-CONTENTS
+2007.08.30</h1>
+CONTENTS 
 
 <div class="toc">
 <ul>
   <li><a href="#Overview">Overview</a></li>
-  <li><a href="#Message">Message Support</a>
+  <li><a href="#Message">Message Support</a> 
     <ul>
       <li><a href="#Definition">Definitions</a></li>
       <li><a href="#Requester">Requester</a></li>
@@ -25,7 +25,7 @@ CONTENTS
       <li><a href="#MessageQue">MessageQueue</a></li>
     </ul>
   </li>
-  <li><a href="#Time">Time Stamp Support</a>
+  <li><a href="#Time">Time Stamp Support</a> 
     <ul>
       <li><a href="#Definition1">Definitions</a></li>
       <li><a href="#TimeStamp">TimeStamp</a></li>
@@ -34,7 +34,7 @@ CONTENTS
     </ul>
   </li>
   <li><a href="#Alarm">Alarm Severity Support</a></li>
-  <li><a href="#Scan">Scan Field Support</a>
+  <li><a href="#Scan">Scan Field Support</a> 
     <ul>
       <li><a href="#Definition2">Definitions</a></li>
       <li><a href="#ScanField">ScanField</a></li>
@@ -43,7 +43,7 @@ CONTENTS
       <li><a href="#ScanFieldF">ScanFieldFactory</a></li>
     </ul>
   </li>
-  <li><a href="#Periodic">Periodic and Event Scanners</a>
+  <li><a href="#Periodic">Periodic and Event Scanners</a> 
     <ul>
       <li><a href="#Definition3">Definitions</a></li>
       <li><a href="#EventAnnou">EventAnnounce</a></li>
@@ -52,7 +52,7 @@ CONTENTS
     </ul>
   </li>
   <li><a href="#IOCFactory">IOCFactory</a></li>
-  <li><a href="#Include">XML Include and Macro Substitution</a>
+  <li><a href="#Include">XML Include and Macro Substitution</a> 
     <ul>
       <li><a href="#Include1">Include and Substitution Syntax</a></li>
       <li><a href="#Example">Example Include and Macro Substitution
@@ -335,13 +335,18 @@ higher priority threads.</p>
        major,
        invalid;
        public static AlarmSeverity getSeverity(int value);
-    }
-
-    public class AlarmStamp {
-        public AlarmSeverity severity;
-        public String message;
-    }
-</pre>
+       public static Enumerated getAlarmSeverity(DBField dbField);
+    }</pre>
+<p>The methods are:</p>
+<dl>
+  <dt style="font-family: courier;">getSeverity</dt>
+    <dd>A static factory method that returns the AlarmSeverity for the specified
+      index. It throws an exception if value is illegal.</dd>
+  <dt style="font-family: courier;">getAlarmSeverity</dt>
+    <dd>If dbField has an Enumerated Create interface and if the choices
+      match the AlarmSeverity enum names than it returns the Enumerated interface.
+     Otherwise it returns null.</dd>
+</dl>
 <hr />
 
 <h2 style="text-align: center;" id="Scan">Scan Field Support</h2>
@@ -354,6 +359,8 @@ higher priority threads.</p>
         double getRate();
         String getEventName();
         boolean getScanSelf();
+        void addModifyListener(ScanFieldModifyListener modifyListener);
+        void removeModifyListener(ScanFieldModifyListener modifyListener);
     }
     
     public enum ScanPriority {
@@ -366,18 +373,18 @@ higher priority threads.</p>
         highest;
         public static final int[] javaPriority;
         public int getJavaPriority();
+        public static Enumerated getScanPriority(DBField dbField);
     }
     
     public enum ScanType {
         passive,
         event,
-        periodic
+        periodic;
+        public static Enumerated getScanType(DBField dbField);
     }
     
     public class ScanFieldFactory {
         public static ScanField create(PVRecord pvRecord);
-        public static boolean isScanMenu(PVMenu pvMenu);
-        public static boolean isPriorityMenu(PVMenu pvMenu);
     }</pre>
 
 <h3 id="ScanField">ScanField</h3>
@@ -394,15 +401,32 @@ record. It has the methods:</p>
   <dt style="font-family: courier;">getEventName</dt>
     <dd>Get the event name for event scanned records.</dd>
   <dt style="font-family: courier;">getScanSelf</dt>
-    <dd>Can the record be self scanned? If the wnswer is yes then a call to
-      ScanSupport.processSelf will process the record. recordProcess.processSelf
-      calls ScanSupport.processSelf.</dd>
+    <dd>Can the record be self scanned? If the answer is yes then a call to
+      ScanSupport.processSelf will process the record.
+      recordProcess.processSelf calls ScanSupport.processSelf.</dd>
+  <dt style="font-family: courier;">>addModifyListener</dt>
+    <dd>Add a listener for modification of any of the scan fields. This is
+      called by ScanSupport and is not of interest to other code.</dd>
+  <dt style="font-family: courier;">>removeModifyListener</dt>
+    <dd>Remove a modify listener.</dd>
 </dl>
 
 <h3 id="ScanPriori">ScanPriority</h3>
 
 <p>This is a Java enum that defines the priority of the thread that processes
 event or periodically scanned records.</p>
+<p>The methods are:</p>
+<dl>
+  <dt style="font-family: courier;">javaPriority</dt>
+    <dd>A static factory method that returns an array of int that
+      is the indexes corresponding to the priorities.</dd>
+  <dt style="font-family: courier;">getJavaPriority</dt>
+    <dd>Gets the index for the javaPriority.</dd>
+  <dt style="font-family: courier;">getScanPriority</dt>
+    <dd>If dbField has an Enumerated Create interface and if the choices
+      match the ScanPriority enum names than it returns the Enumerated interface.
+     Otherwise it returns null.</dd>
+</dl>
 
 <h3 id="ScanType">ScanType</h3>
 
@@ -421,6 +445,13 @@ event or periodically scanned records.</p>
     <dd>The record is periodically scanned. A peridically scanned record has
       a rate assigned it it.</dd>
 </dl>
+<p>The method is:</p>
+<dl>
+  <dt style="font-family: courier;">getScanType</dt>
+    <dd>If dbField has an Enumerated Create interface and if the choices
+      match the ScanType enum names than it returns the Enumerated interface.
+     Otherwise it returns null.</dd>
+</dl>
 
 <h3 id="ScanFieldF">ScanFieldFactory</h3>
 
@@ -429,12 +460,6 @@ convenience methods.</p>
 <dl>
   <dt style="font-family: courier;">create</dt>
     <dd>Create a ScanField.</dd>
-  <dt style="font-family: courier;">isScanMenu</dt>
-    <dd>Checks to see if a menu is a valid scanMenu, i.e. has the correct
-      menu name and choices.</dd>
-  <dt style="font-family: courier;">isPriorityMenu</dt>
-    <dd>Checks to see if a menu is a valid priorityMenu, i.e. has the correct
-      menu name and choices.</dd>
 </dl>
 <hr />
 
@@ -597,30 +622,25 @@ text. The syntax is:</p>
 <p>The following is a template file:</p>
 <pre>&lt;?xml version="1.0" ?&gt;
 &lt;IOCDatabase&gt;
-&lt;record name = "ai${recordExtension}Record" type = "aiRecord"&gt;
-    &lt;aiInput structureName = "aiLinear" &gt;
-        &lt;aiRaw&gt;
-            &lt;input supportName = "inputLink"&gt;
-                &lt;configure structureName = "inputLink"&gt;
-                    &lt;pvname&gt;${pvname}&lt;/pvname&gt;
-                    &lt;wait&gt;true&lt;/wait&gt;
-                &lt;/configure&gt;
-            &lt;/input&gt;
-        &lt;/aiRaw&gt;
-        &lt;units&gt;volts&lt;/units&gt;
-        &lt;displayLimit&gt;
-            &lt;low&gt;${displayLow}&lt;/low&gt;
-            &lt;high&gt;${displayHigh}&lt;/high&gt;
-        &lt;/displayLimit&gt;
+&lt;record name = "ai${recordExtension}Record" type = "double"&gt;
+    &lt;input structureName = "linearConvertInput" &gt;
+        &lt;input supportName = "inputSupport" structureName = "inputSupport"&gt;
+            &lt;pvname&gt;${pvname}&lt;/pvname&gt;
+            &lt;wait&gt;true&lt;/wait&gt;
+        &lt;/input&gt;
         &lt;linearConvert&gt;
             &lt;engUnitsLow&gt;${engUnitsLow}&lt;/engUnitsLow&gt;
             &lt;engUnitsHigh&gt;${engUnitsHigh}&lt;/engUnitsHigh&gt;
         &lt;/linearConvert&gt;
-    &lt;/aiInput&gt;
-    &lt;priority&gt;medium&lt;/priority&gt;
+    &lt;/input&gt;
+    &lt;doubleDisplayCharacteristics&gt;
+        &lt;units&gt;volts&lt;/units&gt;
+        &lt;limit&gt;
+            &lt;low&gt;${displayLow}&lt;/low&gt;
+            &lt;high&gt;${displayHigh}&lt;/high&gt;
+        &lt;/limit&gt;
+    &lt;/doubleDisplayCharacteristics&gt;
 &lt;/record&gt;
-
-
 &lt;/IOCDatabase&gt;</pre>
 
 <p>The following creates two instance files from the template:</p>
@@ -715,7 +735,7 @@ IOCXMLReader.</p>
       fincluded files have all been completely parsed.</dd>
   <dt style="font-family: courier;">startElement</dt>
     <dd>Called whenever a new xml element is detected exxept for an include
-      statement, which is handled automatically.
+      statement, which is handled automatically. 
       <ul>
         <li>name is the xml element name, i.e. the tag name.</li>
         <li>attributes is a map containing name,value pairs os each of the
@@ -747,7 +767,7 @@ IOCXMLReader.</p>
 <p>where</p>
 <dl>
   <dt style="font-family: courier;">parse</dt>
-    <dd>Parses fileName and calls the listener
+    <dd>Parses fileName and calls the listener 
       <ul>
         <li>rootElementName is the root xml element name. Any included files
           must also have the same root name.</li>

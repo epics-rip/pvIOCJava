@@ -53,26 +53,26 @@
           <interval>
               <value structureName = "doubleAlarmInterval">
                   <value>2.0</value>
-                  <severity>major</severity>
+                  <severity><choice>major</choice></severity>
               </value>
               <value structureName = "doubleAlarmInterval">
                   <value>4.0</value>
-                  <severity>minor</severity>
+                  <severity><choice>minor</choice></severity>
               </value>
               <value structureName = "doubleAlarmInterval">
                   <value>6.0</value>
-                  <severity>none</severity>
+                  <severity><choice>none</choice></severity>
               </value>
               <value structureName = "doubleAlarmInterval">
                   <value>8.0</value>
-                  <severity>minor</severity>
+                  <severity><choice>minor</choice></severity>
               </value>
               <value structureName = "doubleAlarmInterval">
                   <value>10.0</value>
-                  <severity>major</severity>
+                  <severity><choice>major</choice></severity>
               </value>
           </interval>
-          <outOfRange>invalid</outOfRange>
+          <outOfRange><choice>invalid</choice></outOfRange>
           <hystersis>0.1</hystersis>
     </valueAlarm>
     <displayCharacteristics structureName = "doubleDisplayCharacteristics" >

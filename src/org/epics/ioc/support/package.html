@@ -10,7 +10,7 @@
 <body>
 <h1 style="text-align: center">EPICS JavaIOC: support<br />
 package: org.epics.ioc.support<br />
-2007.08.08</h1>
+2007.08.30</h1>
 CONTENTS 
 
 <div class="toc">
@@ -21,9 +21,7 @@ CONTENTS
       <li><a href="#Definition">Definitions</a></li>
       <li><a href="#SupportSta">SupportState</a></li>
       <li><a href="#Support1">Support</a></li>
-      <li><a href="#LinkSuppor">LinkSupport</a></li>
       <li><a href="#AbstractSu">AbstractSupport</a></li>
-      <li><a href="#AbstractLi">AbstractLinkSupport</a></li>
     </ul>
   </li>
   <li><a href="#Generic">Generic Support</a></li>
@@ -67,17 +65,16 @@ CONTENTS
     </ul>
   </li>
   <li><a href="#Event">Event Support</a></li>
-  <li><a href="#CALink">CALink Support</a></li>
-  <li><a href="#LinkArray">LinkArray Support</a></li>
-  <li><a href="#Link">Link Support</a></li>
+  <li><a href="#CASupport">CASupport Support</a></li>
+  <li><a href="#SupportArr">SupportArray Support</a></li>
   <li><a href="#Noop">Noop Support</a></li>
-  <li><a href="#DelayLink">DelayLink Support</a></li>
+  <li><a href="#DelaySuppo">DelaySupport Support</a></li>
   <li><a href="#Port">Port Driver Support</a>
     <ul>
       <li><a href="#Java1">Java Definitions</a></li>
-      <li><a href="#PDRVLinkSu">PDRVLinkSupport</a></li>
-      <li><a href="#AbstractPD">AbstractPDRVLinkSupport</a></li>
-      <li><a href="#PDRVLinkFa">PDRVLinkFactory</a></li>
+      <li><a href="#PDRVSuppor">PDRVSupport</a></li>
+      <li><a href="#AbstractPD">AbstractPDRVSupport</a></li>
+      <li><a href="#PDRVSuppor1">PDRVSupportFactory</a></li>
       <li><a href="#PDRVPortCr">PDRVPortCreateFactory</a></li>
       <li><a href="#PDRVPortDe">PDRVPortDeviceControlFactory</a></li>
     </ul>
@@ -105,8 +102,6 @@ database records. </p>
 <dl>
   <dt>Support</dt>
     <dd>The interfaces and classes that provide the core for support.</dd>
-  <dt>LinkSupport</dt>
-    <dd>An extension for link fields.</dd>
   <dt>IncrementalSupport</dt>
     <dd>An extension for incremental output.</dd>
   <dt>ScanSupport</dt>
@@ -119,7 +114,7 @@ database records. </p>
     <dd>An extension for the arguments for calculations;</dd>
   <dt>DeviceLimit</dt>
     <dd>Defines a method implemented by support for analog I/O.</dd>
-  <dt>PDRVLinkSupport</dt>
+  <dt>PDRVSupport</dt>
     <dd>An extension for links to portDriver.</dd>
 </dl>
 
@@ -128,10 +123,7 @@ database records. </p>
   <dt>AbstractSupport</dt>
     <dd>A base class that is extended by most support code. It implements all
       of the Support methods.</dd>
-  <dt>AbstractLinkSupport</dt>
-    <dd>A base class that extends AbstractSupport to also implement
-      LinkSupport.</dd>
-  <dt>AbstractPDRVLinkSupport</dt>
+  <dt>AbstractPDRVSupport</dt>
     <dd>A base class for portDriver support.</dd>
 </dl>
 
@@ -199,22 +191,20 @@ database records. </p>
     </dd>
   <dt>EventFactory</dt>
     <dd>Support for a string field that is the name of an event.</dd>
-  <dt>CALinkFactory</dt>
+  <dt>CASupportFactory</dt>
     <dd>Support for channel access links.</dd>
-  <dt>LinkArrayFactory</dt>
-    <dd>Support for an array of links.</dd>
-  <dt>LinkFactory</dt>
-    <dd>Support for a structure that consists of a single link.</dd>
+  <dt>SupportArrayFactory</dt>
+    <dd>Support for an array of structures that have support.</dd>
   <dt>NoopFactory</dt>
     <dd>Support for all fields that just acts like it always succeeds
       successfully.</dd>
-  <dt>DelayLinkFactory</dt>
+  <dt>DelaySupportFactory</dt>
     <dd>Support for testing. It just causes an asynchronous delay before
       completing successfully.</dd>
   <dt>portDriver</dt>
     <dd>The following are for interfacing to portDriver. 
       <dl>
-        <dt>PDRVLinkFactory</dt>
+        <dt>PDRVSupportFactory</dt>
           <dd>Creates support for each of the portDriver interfaces.</dd>
         <dt>PDRVPortCreateFactory</dt>
           <dd>Creates a portDriver port.</dd>
@@ -261,10 +251,6 @@ and any other support code that is involved with record processing:</p>
         void setField(DBField dbField);
     }
 
-    public interface LinkSupport extends Support {
-        PVStructure getConfigStructure(String structureName, boolean reportFailure);
-    }
-
     public abstract class AbstractSupport implements Support {
         protected AbstractSupport(String name,DBField dbField);
         // methods from Requester
@@ -286,11 +272,6 @@ and any other support code that is involved with record processing:</p>
         // following is for use by support code
         protected boolean checkSupportState(
             SupportState expectedState,String message);
-    }
-
-    public class AbstractLinkSupport extends AbstractSupport implements LinkSupport{
-        protected AbstractLinkSupport(String name,DBField dbField);
-        public PVStructure getConfigStructure(String structureName, boolean reportFailure);
     }</pre>
 
 <h3 id="SupportSta">SupportState</h3>
@@ -345,16 +326,6 @@ values:</p>
       put/get data.</dd>
 </dl>
 
-<h3 id="LinkSuppor">LinkSupport</h3>
-
-<p><span style="font-family: courier;">LinkSupport</span> extends <span
-style="font-family: courier;">Support</span> with the method:</p>
-<dl>
-  <dt style="font-family: courier;">getConfigStructure</dt>
-    <dd>This gets the interface for the configuration structure for the
-    link.</dd>
-</dl>
-
 <h3 id="AbstractSu">AbstractSupport</h3>
 
 <p>All support code should extend AbstractSupport. Abstract Support
@@ -395,21 +366,6 @@ methods it needs.</p>
     <dd>Checks that the state is the expected state and generates an error
       message if it isn't.</dd>
 </dl>
-
-<h3 id="AbstractLi">AbstractLinkSupport</h3>
-
-<p>This extends AbstractSupport to provide method getConfigStructure; </p>
-<pre>    public class AbstractLinkSupport extends AbstractSupport implements LinkSupport{
-        protected AbstractLinkSupport(String name,DBField dbField);
-        public PVStructure getConfigStructure(String structureName, boolean reportFailure);
-    }</pre>
-where: 
-<dl>
-  <dt style="font-family: courier;">AbstractLinkSupport</dt>
-    <dd>The constructor vwhich must be called by derived classes.</dd>
-  <dt style="font-family: courier;">getConfigStructure</dt>
-    <dd>Returns the configuration structure for the link.</dd>
-</dl>
 <hr />
 
 <h2 style="text-align: center" id="Generic">Generic Support</h2>
@@ -423,7 +379,7 @@ where:
 <ul>
   <li>boolean, byte, short, int, long, float, double, string.</li>
   <li>Arrays of the previous types.</li>
-  <li>aiDouble. aoDouble, aoIncrementalDouble.</li>
+  <li>aoIncrementalDouble.</li>
   <li>digital - a record with an enum value.</li>
   <li>event - a record that announces events.</li>
 </ul>
@@ -454,11 +410,9 @@ uses the following semantics:</p>
 </dl>
 
 <p>The above rules allow the generic support to be used for many record types
-and embeded versions of these record types. Lets consider two examples:
-double and aoDouble.</p>
-
-<p>double (either the structure or the recordType) has the following
-fields:</p>
+and embeded versions of these record types. Lets consider an example. double
+(either the structure or the recordType) has the following fields which might
+have support.:</p>
 <dl>
   <dt style="font-family: courier;">value</dt>
     <dd>This field is passed to the setField method of and support attached
@@ -474,12 +428,8 @@ fields:</p>
   <dt style="font-family: courier;">valueAlarm</dt>
     <dd>This is a link field. If support is defined it is expected to check
       the value field for alarm conditions.</dd>
-  <dt style="font-family: courier;">linkArray</dt>
-    <dd>If the linkArray support is defined it is called.</dd>
-  <dt style="font-family: courier;">units</dt>
-    <dd>This normally has no support.</dd>
-  <dt style="font-family: courier;">displayLimit</dt>
-    <dd>This normally has no support. </dd>
+  <dt style="font-family: courier;">supportArray</dt>
+    <dd>If the supportArray support is defined it is called.</dd>
 </dl>
 
 <p>The generic support does not force the support for input to do input, the
@@ -647,36 +597,36 @@ with alarms.</p>
     factoryName = "org.epics.ioc.support.AlarmFactory"
 /&gt;
 
-&lt;linkSupport name = "booleanAlarm"
-    configurationStructureName = "booleanAlarm"
+&lt;support name = "booleanAlarm"
+    structureName = "booleanAlarm"
    factoryName = "org.epics.ioc.support.BooleanAlarmFactory" /&gt;
 
-&lt;linkSupport name = "byteAlarm"
-    configurationStructureName = "byteAlarm"
+&lt;support name = "byteAlarm"
+    structureName = "byteAlarm"
    factoryName = "org.epics.ioc.support.ByteAlarmFactory" /&gt;
 
-&lt;linkSupport name = "shortAlarm"
-    configurationStructureName = "shortAlarm"
+&lt;support name = "shortAlarm"
+    structureName = "shortAlarm"
    factoryName = "org.epics.ioc.support.ShortAlarmFactory" /&gt;
 
-&lt;linkSupport name = "intAlarm"
-    configurationStructureName = "intAlarm"
+&lt;support name = "intAlarm"
+    structureName = "intAlarm"
    factoryName = "org.epics.ioc.support.IntAlarmFactory" /&gt;
 
-&lt;linkSupport name = "longAlarm"
-    configurationStructureName = "longAlarm"
+&lt;support name = "longAlarm"
+    structureName = "longAlarm"
    factoryName = "org.epics.ioc.support.LongAlarmFactory" /&gt;
 
-&lt;linkSupport name = "floatAlarm"
-    configurationStructureName = "floatAlarm"
+&lt;support name = "floatAlarm"
+    structureName = "floatAlarm"
    factoryName = "org.epics.ioc.support.FloatAlarmFactory" /&gt;
 
-&lt;linkSupport name = "doubleAlarm"
-    configurationStructureName = "doubleAlarm"
+&lt;support name = "doubleAlarm"
+    structureName = "doubleAlarm"
    factoryName = "org.epics.ioc.support.DoubleAlarmFactory" /&gt;
 
-&lt;linkSupport name = "digitalAlarm"
-    configurationStructureName = "digitalAlarm"
+&lt;support name = "digitalAlarm"
+    structureName = "digitalAlarm"
    factoryName = "org.epics.ioc.support.DigitalAlarmFactory" /&gt;</pre>
 
 <p>The field alarm is defined in common.xml and thus is in every record. the
@@ -716,11 +666,10 @@ alarms.</p>
   <dt style="font-family: courier;">beginProcess</dt>
     <dd>This is called when a record begins processing.</dd>
   <dt style="font-family: courier;">endProcess</dt>
-    <dd>This is called when a record finishes processing.
-      If setAlarm was not called since beginProcess was called than
-      it makes sure that the severity is noAlarm. If the severity 
-      and/or message was
-      changed during record processing it calls postPut.</dd>
+    <dd>This is called when a record finishes processing. If setAlarm was not
+      called since beginProcess was called than it makes sure that the
+      severity is noAlarm. If the severity and/or message was changed during
+      record processing it calls postPut.</dd>
   <dt style="font-family: courier;">setAlarm</dt>
     <dd>While a record is processing and code, normally one of the support
       modules described below, can call setAlarm. This method changes the new
@@ -746,7 +695,7 @@ numeric, and digital.</p>
 
 <h4 id="Boolean">Boolean Alarms</h4>
 <pre>    public class BooleanAlarmFactory {
-        public static Support create(DBLink dbLink);
+        public static Support create(DBStructure dbStructure);
     }</pre>
 
 <p>This provides support for reporting alarms for boolean fields. The
@@ -769,22 +718,22 @@ fields:</p>
 
 <h4 id="Numeric">Numeric Alarms</h4>
 <pre>    public class ByteAlarmFactory {
-        public static Support create(DBLink dbLink);
+        public static Support create(DBStructure dbStructure);
     }
     public class ShortAlarmFactory {
-        public static Support create(DBLink dbLink);
+        public static Support create(DBStructure dbStructure);
     }
     public class IntAlarmFactory {
-        public static Support create(DBLink dbLink);
+        public static Support create(DBStructure dbStructure);
     }
     public class LongAlarmFactory {
-        public static Support create(DBLink dbLink);
+        public static Support create(DBStructure dbStructure);
     }
     public class FloatAlarmFactory {
-        public static Support create(DBLink dbLink);
+        public static Support create(DBStructure dbStructure);
     }
     public class DoubleAlarmFactory {
-        public static Support create(DBLink dbLink);
+        public static Support create(DBStructure dbStructure);
     }</pre>
 
 <p>The above factories provide alarm support for the associated type of
@@ -832,7 +781,7 @@ fields:</p>
 
 <h4 id="Digital">Digital Alarms</h4>
 <pre>    public class DigitalAlarmFactory {
-        public static Support create(DBLink dbLink);
+        public static Support create(DBStructure dbStructure);
     }</pre>
 
 <p>The above factory provides support for an enum field. It has a associated
@@ -1121,8 +1070,8 @@ File calcDoubleCommon.xml defines the fields:</p>
          elementType = "structure" supportName = "calcArgArray" /&gt;
     &lt;field name = "calculator" type = "link" /&gt;
     &lt;field name = "valueAlarm" type = "link" supportName = "doubleAlarm" /&gt;
-    &lt;field name = "linkArray" type = "array"
-         elementType = "structure" supportName = "linkArray" /&gt;
+    &lt;field name = "supportArray" type = "array"
+         elementType = "structure" supportName = "supportArray" /&gt;
     &lt;field name = "units" type = "string" /&gt;
     &lt;field name = "displayLimit"
          type = "structure" structureName = "doubleLimit" /&gt;
@@ -1198,11 +1147,11 @@ structures, which has the fields:</p>
 <h3 id="Calculator">Calculator</h3>
 
 <p>Support for a calculation field, which is a link, must implement:</p>
-<pre>    public interface CalculatorSupport extends LinkSupport {
+<pre>    public interface CalculatorSupport extends Support {
         void setCalcArgArraySupport(CalcArgArraySupport calcArgArraySupport);
     }</pre>
 
-<p>CalculatorSupport extends LinkSupport to add the method:</p>
+<p>CalculatorSupport extends Support to add the method:</p>
 <dl>
   <dt style="font-family: courier;">setCalcArgArraySupport</dt>
     <dd>This is called by calcDoubleRecord support.</dd>
@@ -1213,16 +1162,16 @@ structures, which has the fields:</p>
 <p>An example calculation support is provided as part of javaIOC. It is:</p>
 <pre>public class CounterCalculatorFactory {
 
-    public static LinkSupport create(DBLink dbLink) {
-        return new CounterCalculatorImpl(dbLink);
+    public static Support create(DBStructure dbStructure) {
+        return new CounterCalculatorImpl(dbStructure);
     }
 
     private static String supportName = "counterCalculator";
 
-    private static class CounterCalculatorImpl extends AbstractLinkSupport
+    private static class CounterCalculatorImpl extends AbstractSupport
     implements CalculatorSupport
     {
-        private PVLink pvLink;
+        private PVStructure pvStructure;
         private CalcArgArraySupport calcArgArraySupport = null;
         private DBField valueDBField;
         private PVDouble valuePVField= null;;
@@ -1230,44 +1179,44 @@ structures, which has the fields:</p>
         private PVDouble maxPVField = null;
         private PVDouble incPVField = null;
 
-        private CounterCalculatorImpl(DBLink dbLink) {
-            super(supportName,dbLink);
-            pvLink = dbLink.getPVLink();
+        private CounterCalculatorImpl(DBStructure dbStructure) {
+            super(supportName,dbStructure);
+            pvStructure = dbStructure.getPVStructure();
         }
 
         public void initialize() {
             if(!super.checkSupportState(SupportState.readyForInitialize,supportName)) return;
             if(valuePVField==null) {
-                pvLink.message("setField was not called", MessageType.error);
+                pvStructure.message("setField was not called", MessageType.error);
                 return;
             }
             PVField pvField = calcArgArraySupport.getPVField("min");
             if(pvField==null) {
-                pvLink.message("field min not found", MessageType.error);
+                pvStructure.message("field min not found", MessageType.error);
                 return;
             }
             if(pvField.getField().getType()!=Type.pvDouble) {
-                pvLink.message("field min is not double", MessageType.error);
+                pvStructure.message("field min is not double", MessageType.error);
                 return;
             }
             minPVField = (PVDouble)pvField;
             pvField = calcArgArraySupport.getPVField("max");
             if(pvField==null) {
-                pvLink.message("field max not found", MessageType.error);
+                pvStructure.message("field max not found", MessageType.error);
                 return;
             }
             if(pvField.getField().getType()!=Type.pvDouble) {
-                pvLink.message("field max is not double", MessageType.error);
+                pvStructure.message("field max is not double", MessageType.error);
                 return;
             }
             maxPVField = (PVDouble)pvField;
             pvField = calcArgArraySupport.getPVField("inc");
             if(pvField==null) {
-                pvLink.message("field inc not found", MessageType.error);
+                pvStructure.message("field inc not found", MessageType.error);
                 return;
             }
             if(pvField.getField().getType()!=Type.pvDouble) {
-                pvLink.message("field inc is not double", MessageType.error);
+                pvStructure.message("field inc is not double", MessageType.error);
                 return;
             }
             incPVField = (PVDouble)pvField;
@@ -1306,7 +1255,7 @@ structures, which has the fields:</p>
 
 <h3 id="ArrayIncre">ArrayIncrementCalculatorFactory</h3>
 <pre>    public class ArrayIncrementCalculatorFactory {
-        `public static LinkSupport create(DBLink dbLink);
+        `public static Support create(DBStructure dbStructure);
     }</pre>
 
 <p>This is support for testing. It supports numeric array fields. Each time
@@ -1314,7 +1263,7 @@ process is called it just incrememnts each element of the array.</p>
 
 <h3 id="BooleanArr">BooleanArrayToggleCalculatorFactory</h3>
 <pre>    public class BooleanArrayToggleCalculatorFactory {
-        public static LinkSupport create(DBLink dbLink);
+        public static Support create(DBStructure dbStructure);
     };</pre>
 
 <p>This is support for testing. It supports boolean array fields. Each time
@@ -1343,35 +1292,34 @@ associated with the value field are processed. Each time process is called,
 the event support checks to see if the event name has changed.</p>
 <hr />
 
-<h2 style="text-align: center" id="CALink">CALink Support</h2>
+<h2 style="text-align: center" id="CASupport">CASupport Support</h2>
 <hr />
-<pre>    public class CALinkFactory {
-        public static LinkSupport create(DBLink dbLink);
+<pre>    public class CASupportFactory {
+        public static Support create(DBStructure dbStructure);
     }</pre>
 
-<p>This is a factory that provides an implementation of link support for the
+<p>This is a factory that provides an implementation of support for the
 following:</p>
 <dl>
-  <dt>processLink</dt>
-    <dd>Support for a link that requests that another record process without
-      transfering any data.</dd>
-  <dt>inputLink</dt>
-    <dd>Support for a link that 1) optionally requests that another record
-      process, and 2) transfers data from the other record to the record
-      containing the link.</dd>
-  <dt>outputLink</dt>
-    <dd>Support for a link that 1) transfers data to another record, and 2)
-      optionally requests that the other record process.</dd>
-  <dt>monitorLink</dt>
+  <dt>processSupport</dt>
+    <dd>Support that requests that another record process without transfering
+      any data.</dd>
+  <dt>inputSupport</dt>
+    <dd>Support that 1) optionally requests that another record process, and
+      2) transfers data from the other record this record..</dd>
+  <dt>outputSupport</dt>
+    <dd>Support that 1) transfers data to another record, and 2) optionally
+      requests that the other record process.</dd>
+  <dt>monitorSupport</dt>
     <dd>Support for monitoring another record. A monitor returns data.</dd>
-  <dt>monitorNotifyLink</dt>
+  <dt>monitorNotifySupport</dt>
     <dd>Support for monitoring another record. A monitor does not return
     data.</dd>
 </dl>
 
 <p>Each requires that other support code, e.g. record support knows how to
-call them. In addition the code that calls them must call
-linkSupport.setField for inputLink, outputLink, and monitorLink.</p>
+call them. In addition the code that calls them must call support.setField
+for inputSupport, outputSupport, and monitorSupport.</p>
 
 <p>The types of data that can be transfered are.</p>
 <ul>
@@ -1388,62 +1336,44 @@ linkSupport.setField for inputLink, outputLink, and monitorLink.</p>
   <dt>valueType</dt>
     <dd>The Type for the value field.</dd>
   <dt>linkType</dt>
-    <dd>The Type for the link pvname.</dd>
+    <dd>The Type for the pvname.</dd>
 </dl>
 
-<p>Look at the menu and structure definitions in menuStructureSupportDBD for
-a description of how the various links are defined.</p>
+<p>Look at the structure definitions in
+javaIOC/dbd/structures/channelAccess.xml for a description of how the various
+structures are defined.</p>
 <hr />
 
-<h2 style="text-align: center;" id="LinkArray">LinkArray Support</h2>
+<h2 style="text-align: center;" id="SupportArr">SupportArray Support</h2>
 <hr />
-<pre>    public class LinkArrayFactory {
+<pre>    public class SupportArrayFactory {
         public static Support create(DBField dbField);
     }</pre>
 
-<p>This is a factory that provides support for an array of links. The
-supportName is linkArray. Each array element, which must have element type
-link, can be reference any support that implements LinkSupport.</p>
-
-<p>For example any record support could optionally support a field called
-process, which is an array of process links. When the record instance
-completes processing, it can request the the support for the process field
-process. Support for an output record would allow process and output links.
-Many other possibilities are possible.</p>
-<hr />
-
-<h2 style="text-align: center;" id="Link">Link Support</h2>
-<hr />
-<pre>    public class LinkFactory {
-        public static Support create(DBStructure dbStructure);
-    }</pre>
-
-<p>This is support for a structure that has a single field which must be a
-link. It's purpose is the allow link support to be attached to a field that
-can be a structure but in a record instance only a link is desired.</p>
+<p>This is a factory that provides support for an array of structures. The
+supportName is SupportArray. If any of the array elements has support, the
+support is called.</p>
 <hr />
 
 <h2 style="text-align: center" id="Noop">Noop Support</h2>
 <hr />
 <pre>    public class NoopFactory {
-        public static Support create(DBStructure dbStructure);
         public static Support create(DBField dbField);
-        public static LinkSupport create(DBLink dbLink);
+        public static Support create(DBStructure dbStructure);
     }</pre>
 
 <p>This can be used for record types that just hold data. It can also be used
 to provide support for any field. The support acts as though it is
-synchronous. All Support or LinkSupport methods are implemented by just
-extending AbstractSupport or AbstractLinkSupport without overriding any
-methods.</p>
+synchronous. All Support methods are implemented by just extending
+AbstractSupport without overriding any methods.</p>
 <hr />
 
-<h2 style="text-align: center;" id="DelayLink">DelayLink Support</h2>
+<h2 style="text-align: center;" id="DelaySuppo">DelaySupport Support</h2>
 <hr />
 
 <p>This is link support that simulates asynchronous support. It uses a
 configStructure that has the definition:</p>
-<pre>&lt;structure name = "delayLink"&gt;
+<pre>&lt;structure name = "delaySupport"&gt;
     &lt;!-- min, max, inc are delay in milliseconds --&gt;
     &lt;field name = "min" type = "long" /&gt;
     &lt;field name = "max" type = "long" /&gt;
@@ -1466,8 +1396,8 @@ increases the delay by inc until it reaches max. It then goes back to a delay
 of min.</p>
 
 <p>The factory definition is:</p>
-<pre>    public class DelayLinkFactory {
-        public static LinkSupport create(DBLink dbLink);
+<pre>    public class DelaySupportFactory {
+        public static Support create(DBStructure dbStructure);
     }</pre>
 <hr />
 
@@ -1480,25 +1410,25 @@ portDriver.</p>
 <h3 id="Java1">Java Definitions</h3>
 
 <p>The following are the interface, abstract support, and factories for
-portDriver support..</p>
-<pre>    public interface PDRVLinkSupport extends LinkSupport {
+portDriver support.</p>
+<pre>    public interface PDRVSupport extends Support {
         boolean isProcess();
         abstract void queueCallback();
     }
 
-    public class PDRVLinkFactory {
-        public static LinkSupport create(DBLink dbLink);
+    public class PDRVSupportFactory {
+        public static Support create(DBStructure dbStructure);
     }
     
-    public abstract class AbstractPDRVLinkSupport extends AbstractLinkSupport implements
+    public abstract class AbstractPDRVSupportSupport extends AbstractSupport implements
     ProcessContinueRequester,QueueRequestCallback,
-    PDRVLinkSupport,
+    PDRVSupportSupport,
     RecordProcessRequester
     {
-        protected AbstractPDRVLinkSupport(String supportName,DBLink dbLink);
+        protected AbstractPDRVSupportSupport(String supportName,DBStructure dbStructure);
         protected String supportName;
-        protected DBLink dbLink;
-        protected PVLink pvLink;
+        protected DBStructure dbStructure;
+        protected PVStructure pvStructure;
         protected DBField valueDBField = null;
         protected PVField valuePVField = null;
         protected DBRecord dbRecord = null;
@@ -1549,7 +1479,7 @@ portDriver support..</p>
         public static Support create(DBStructure dbStructure)
     }</pre>
 
-<h3 id="PDRVLinkSu">PDRVLinkSupport</h3>
+<h3 id="PDRVSuppor">PDRVSupport</h3>
 
 <p>This defines the two methods:</p>
 <dl>
@@ -1557,9 +1487,9 @@ portDriver support..</p>
     <dd>If the support is interrupt driver should it process the record. The
       answer will be true only if: 
       <ol>
-        <li>The constructor for AbstractPDRVLinkSupport is called with
+        <li>The constructor for AbstractPDRVSupportSupport is called with
           interruptOK true</li>
-        <li>pdrvLink.interrupt is true.</li>
+        <li>pdrvSupport.interrupt is true.</li>
         <li>The support is the record processor.</li>
       </ol>
     </dd>
@@ -1568,17 +1498,17 @@ portDriver support..</p>
       probably means all support except interrupt listeners. </dd>
 </dl>
 
-<h3 id="AbstractPD">AbstractPDRVLinkSupport</h3>
+<h3 id="AbstractPD">AbstractPDRVSupport</h3>
 
 <p>This implements muck of the work involved in connecting and managing the
-connection to a port and device. Look at some of the code in PDRVLinkFactory
-for how to use the abstract support.</p>
+connection to a port and device. Look at some of the code in
+PDRVSupportFactory for how to use the abstract support.</p>
 
-<h3 id="PDRVLinkFa">PDRVLinkFactory</h3>
+<h3 id="PDRVSuppor1">PDRVSupportFactory</h3>
 
-<p>This implements all of the link support defined in the dbd/pdrv.xml
-file.</p>
-<pre>&lt;structure name = "pdrvLink"&gt;
+<p>This implements all of the link support defined in .xml file
+javaIOC/dbd/structures/portDriver.xml.</p>
+<pre>&lt;structure name = "pdrvSupport"&gt;
     &lt;field name = "portName" type = "string" /&gt;
     &lt;field name = "addr" type = "int" /&gt;
     &lt;field name = "timeout" type = "double" /&gt;
@@ -1588,70 +1518,70 @@ file.</p>
     &lt;field name = "drvParams" type = "string" /&gt;
 &lt;/structure&gt;
 
-&lt;linkSupport name = "pdrvOctetInput"
-    configurationStructureName = "pdrvLink" 
+&lt;support name = "pdrvOctetInput"
+    structureName = "pdrvSupport" 
     factoryName = "org.epics.ioc.support.PDRVSupportFactory" /&gt;
-&lt;linkSupport name = "pdrvOctetInterruptInput"
-    configurationStructureName = "pdrvLink" 
+&lt;support name = "pdrvOctetInterruptInput"
+    structureName = "pdrvSupport" 
     factoryName = "org.epics.ioc.support.PDRVSupportFactory" /&gt;
-&lt;linkSupport name = "pdrvOctetOutput"
-    configurationStructureName = "pdrvLink" 
-    factoryName = "org.epics.ioc.support.PDRVSupportFactory" /&gt;
-
-&lt;linkSupport name = "pdrvInt32Input"
-    configurationStructureName = "pdrvLink" 
-    factoryName = "org.epics.ioc.support.PDRVSupportFactory" /&gt;
-&lt;linkSupport name = "pdrvInt32InterruptInput"
-    configurationStructureName = "pdrvLink" 
-    factoryName = "org.epics.ioc.support.PDRVSupportFactory" /&gt;
-&lt;linkSupport name = "pdrvInt32AverageInput"
-    configurationStructureName = "pdrvLink" 
-    factoryName = "org.epics.ioc.support.PDRVSupportFactory" /&gt;
-&lt;linkSupport name = "pdrvInt32Output"
-    configurationStructureName = "pdrvLink" 
+&lt;support name = "pdrvOctetOutput"
+    structureName = "pdrvSupport" 
     factoryName = "org.epics.ioc.support.PDRVSupportFactory" /&gt;
 
-&lt;linkSupport name = "pdrvInt32ArrayInput"
-    configurationStructureName = "pdrvLink" 
+&lt;support name = "pdrvInt32Input"
+    structureName = "pdrvSupport" 
     factoryName = "org.epics.ioc.support.PDRVSupportFactory" /&gt;
-&lt;linkSupport name = "pdrvInt32ArrayInterruptInput"
-    configurationStructureName = "pdrvLink" 
+&lt;support name = "pdrvInt32InterruptInput"
+    structureName = "pdrvSupport" 
     factoryName = "org.epics.ioc.support.PDRVSupportFactory" /&gt;
-&lt;linkSupport name = "pdrvInt32ArrayOutput"
-    configurationStructureName = "pdrvLink" 
+&lt;support name = "pdrvInt32AverageInput"
+    structureName = "pdrvSupport" 
     factoryName = "org.epics.ioc.support.PDRVSupportFactory" /&gt;
-
-&lt;linkSupport name = "pdrvFloat64Input"
-    configurationStructureName = "pdrvLink" 
-    factoryName = "org.epics.ioc.support.PDRVSupportFactory" /&gt;
-&lt;linkSupport name = "pdrvFloat64InterruptInput"
-    configurationStructureName = "pdrvLink" 
-    factoryName = "org.epics.ioc.support.PDRVSupportFactory" /&gt;
-&lt;linkSupport name = "pdrvFloat64AverageInput"
-    configurationStructureName = "pdrvLink" 
-    factoryName = "org.epics.ioc.support.PDRVSupportFactory" /&gt;
-&lt;linkSupport name = "pdrvFloat64Output"
-    configurationStructureName = "pdrvLink" 
+&lt;support name = "pdrvInt32Output"
+    structureName = "pdrvSupport" 
     factoryName = "org.epics.ioc.support.PDRVSupportFactory" /&gt;
 
-&lt;linkSupport name = "pdrvFloat64ArrayInput"
-    configurationStructureName = "pdrvLink" 
+&lt;support name = "pdrvInt32ArrayInput"
+    structureName = "pdrvSupport" 
     factoryName = "org.epics.ioc.support.PDRVSupportFactory" /&gt;
-&lt;linkSupport name = "pdrvFloat64ArrayInterruptInput"
-    configurationStructureName = "pdrvLink" 
+&lt;support name = "pdrvInt32ArrayInterruptInput"
+    structureName = "pdrvSupport" 
     factoryName = "org.epics.ioc.support.PDRVSupportFactory" /&gt;
-&lt;linkSupport name = "pdrvFloat64ArrayOutput"
-    configurationStructureName = "pdrvLink" 
+&lt;support name = "pdrvInt32ArrayOutput"
+    structureName = "pdrvSupport" 
     factoryName = "org.epics.ioc.support.PDRVSupportFactory" /&gt;
 
-&lt;linkSupport name = "pdrvUInt32DigitalInput"
-    configurationStructureName = "pdrvLink" 
+&lt;support name = "pdrvFloat64Input"
+    structureName = "pdrvSupport" 
     factoryName = "org.epics.ioc.support.PDRVSupportFactory" /&gt;
-&lt;linkSupport name = "pdrvUInt32DigitalInterruptInput"
-    configurationStructureName = "pdrvLink" 
+&lt;support name = "pdrvFloat64InterruptInput"
+    structureName = "pdrvSupport" 
     factoryName = "org.epics.ioc.support.PDRVSupportFactory" /&gt;
-&lt;linkSupport name = "pdrvUInt32DigitalOutput"
-    configurationStructureName = "pdrvLink" 
+&lt;support name = "pdrvFloat64AverageInput"
+    structureName = "pdrvSupport" 
+    factoryName = "org.epics.ioc.support.PDRVSupportFactory" /&gt;
+&lt;support name = "pdrvFloat64Output"
+    structureName = "pdrvSupport" 
+    factoryName = "org.epics.ioc.support.PDRVSupportFactory" /&gt;
+
+&lt;support name = "pdrvFloat64ArrayInput"
+    structureName = "pdrvSupport" 
+    factoryName = "org.epics.ioc.support.PDRVSupportFactory" /&gt;
+&lt;support name = "pdrvFloat64ArrayInterruptInput"
+    structureName = "pdrvSupport" 
+    factoryName = "org.epics.ioc.support.PDRVSupportFactory" /&gt;
+&lt;support name = "pdrvFloat64ArrayOutput"
+    structureName = "pdrvSupport" 
+    factoryName = "org.epics.ioc.support.PDRVSupportFactory" /&gt;
+
+&lt;support name = "pdrvUInt32DigitalInput"
+    structureName = "pdrvSupport" 
+    factoryName = "org.epics.ioc.support.PDRVSupportFactory" /&gt;
+&lt;support name = "pdrvUInt32DigitalInterruptInput"
+    structureName = "pdrvSupport" 
+    factoryName = "org.epics.ioc.support.PDRVSupportFactory" /&gt;
+&lt;support name = "pdrvUInt32DigitalOutput"
+    structureName = "pdrvSupport" 
     factoryName = "org.epics.ioc.support.PDRVSupportFactory" /&gt;</pre>
 
 <h3 id="PDRVPortCr">PDRVPortCreateFactory</h3>
@@ -1730,12 +1660,12 @@ writing the current. The complete set of fields it suppports are:</p>
     <dd>This is optional. If the record/structure has a field named
       "currentOutput" and, if that field has associated support, the support
       is called. The current field is passed to support.setField. The support
-      must complete processing before linkArray support is called.</dd>
-  <dt style="font-family: courier;">linkArray</dt>
+      must complete processing before SupportArray support is called.</dd>
+  <dt style="font-family: courier;">supportArray</dt>
     <dd>This is optional. If the record/structure has a field named
-      "linkArray" and, if that field has associated support, the support is
-      called. The value field is passed to support.setField. When linkArray
-      support completes double support completes processing.</dd>
+      "supportArray" and, if that field has associated support, the support
+      is called. The value field is passed to support.setField. When
+      supportArray support completes double support completes processing.</dd>
 </dl>
 </body>
 </html>

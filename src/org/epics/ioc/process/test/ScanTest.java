@@ -27,13 +27,7 @@ public class ScanTest extends TestCase {
         iocRequester = new Listener();
         DBD dbd = DBDFactory.getMasterDBD();
         XMLToDBDFactory.convert(dbd,
-                "dbd/menuStructureSupport.xml",
-                iocRequester);
-        XMLToDBDFactory.convert(dbd,
-                "dbd/recordType.xml",
-                iocRequester);
-        XMLToDBDFactory.convert(dbd,
-                "src/org/epics/ioc/process/test/exampleDBD.xml",
+                "example/exampleDBD.xml",
                 iocRequester);
         IOCDB iocdbMaster = IOCDBFactory.getMaster();
         boolean initOK = IOCFactory.initDatabase("src/org/epics/ioc/process/test/scanDB.xml",iocRequester);

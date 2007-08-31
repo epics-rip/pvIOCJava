@@ -27,7 +27,7 @@ public class ScanFieldFactory {
      * menuStructureSupportDBD.xml file that appears in javaIOC/dbd.
      * ScanFieldFactory does no locking so code that uses it must be thread safe.
      * In general this means that the record instance must be locked when any method is called. 
-     * @param pvRecord The record instance.
+     * @param dbRecord The record instance.
      * @return The ScanField interface or null of the record instance does not have
      * a valid pvType field.
      */

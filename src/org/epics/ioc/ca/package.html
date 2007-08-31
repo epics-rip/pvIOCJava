@@ -10,13 +10,13 @@
 <body>
 <h1 style="text-align: center">EPICS JavaIOC: channel Access<br />
 package: org.epics.ioc.ca<br />
-2007.08.02</h1>
+2007.08.30</h1>
 CONTENTS 
 
 <div class="toc">
 <ul>
   <li><a href="#Overview">Overview</a></li>
-  <li><a href="#Channel">Channel Definitions</a> 
+  <li><a href="#Channel">Channel Definitions</a>
     <ul>
       <li><a href="#Definition">Definitions</a></li>
       <li><a href="#Channel1">Channel</a></li>
@@ -30,7 +30,7 @@ CONTENTS
     </ul>
   </li>
   <li><a href="#Channel2">Channel Process, Get, CDGet, Put, CDPut, and
-    PutGet</a> 
+    PutGet</a>
     <ul>
       <li><a href="#Definition1">Definitions</a></li>
       <li><a href="#ChannelPro">ChannelProcess</a></li>
@@ -41,13 +41,13 @@ CONTENTS
       <li><a href="#ChannelPut1">ChannelPutGet</a></li>
     </ul>
   </li>
-  <li><a href="#ChannelMon">ChannelMonitor</a> 
+  <li><a href="#ChannelMon">ChannelMonitor</a>
     <ul>
       <li><a href="#Definition2">Definitions</a></li>
       <li><a href="#ChannelMon1">ChannelMonitor</a></li>
     </ul>
   </li>
-  <li><a href="#Channel3">CD - Channel Data</a> 
+  <li><a href="#Channel3">CD - Channel Data</a>
     <ul>
       <li><a href="#Definition3">CD Definitions</a></li>
       <li><a href="#CD">CD</a></li>
@@ -55,45 +55,42 @@ CONTENTS
       <li><a href="#CDFactory">CDFactory</a></li>
     </ul>
   </li>
-  <li><a href="#Channel4">CD - Channel Data Fields</a> 
+  <li><a href="#Channel4">CD - Channel Data Fields</a>
     <ul>
       <li><a href="#Definition4">CD Definitions</a></li>
       <li><a href="#CDRecord">CDRecord</a></li>
       <li><a href="#CDField">CDField</a></li>
-      <li><a href="#CDEnum">CDEnum</a></li>
-      <li><a href="#CDMenu">CDMenu</a></li>
-      <li><a href="#CDLink">CDLink</a></li>
       <li><a href="#CDStructur">CDStructure</a></li>
       <li><a href="#CDNonScala">CDNonScalarArray</a></li>
       <li><a href="#Base">Base CD Classes</a></li>
     </ul>
   </li>
   <li><a href="#Local">Local Channel Access</a></li>
-  <li><a href="#Example">Example For CD</a> 
+  <li><a href="#Example">Example For CD</a>
     <ul>
       <li><a href="#Discussion">Discussion</a></li>
       <li><a href="#Implementa">Implementation</a></li>
     </ul>
   </li>
-  <li><a href="#Process">Process Example</a> 
+  <li><a href="#Process">Process Example</a>
     <ul>
       <li><a href="#Discussion1">Discussion</a></li>
       <li><a href="#Implementa1">Implementation</a></li>
     </ul>
   </li>
-  <li><a href="#Example1">Get Example</a> 
+  <li><a href="#Example1">Get Example</a>
     <ul>
       <li><a href="#Discussion2">Discussion</a></li>
       <li><a href="#Implementa2">Implementation</a></li>
     </ul>
   </li>
-  <li><a href="#Example2">Put Example</a> 
+  <li><a href="#Example2">Put Example</a>
     <ul>
       <li><a href="#Discussion3">Discussion</a></li>
       <li><a href="#Implementa3">Implementation</a></li>
     </ul>
   </li>
-  <li><a href="#PutGet">PutGet Example</a> 
+  <li><a href="#PutGet">PutGet Example</a>
     <ul>
       <li><a href="#Discussion4">Discussion</a></li>
       <li><a href="#Implementa4">Implementation</a></li>
@@ -655,7 +652,7 @@ client request to:</p>
     }
     
     interface ChannelMonitorRequester extends Requester{
-        void monitorData(CD cd);
+        void monitorCD(CD cd);
         void dataOverrun(int number);
     }
     
@@ -672,7 +669,7 @@ client request to:</p>
       put to any subfield of the structure.</dd>
   <dt style="font-family: courier;">lookForChange</dt>
     <dd>Look for a change in a data value. This is only valid for a primitive
-      field or for a change of index to a menu or enum field.</dd>
+      field.</dd>
   <dt style="font-family: courier;">lookForAbsoluteChange</dt>
     <dd>Look for an absolute change in the data. The argument value is the
       deadband. This is only valid if ChannelField is a numeric scalar.</dd>
@@ -692,7 +689,7 @@ client request to:</p>
 
 <p>ChannelMonitorRequester has the methods:</p>
 <dl>
-  <dt style="font-family: courier;">monitorData</dt>
+  <dt style="font-family: courier;">monitorCD</dt>
     <dd>The modified data.</dd>
   <dt style="font-family: courier;">dataOverrun</dt>
     <dd>The number of missed monitors.</dd>
@@ -735,17 +732,11 @@ and associated subfields, which are described in the next section.</p>
         int getMaxPutsToField();
         void clearNumPuts();
         void dataPut(PVField targetPVField);
-        void enumIndexPut(PVEnum targetPVEnum);
-        void enumChoicesPut(PVEnum targetPVEnum);
         void supportNamePut(PVField targetPVField);
-        void configurationStructurePut(PVLink targetPVLink);
         void beginPut(PVStructure targetPVStructure);
         void endPut(PVStructure targetPVStructure);
         void dataPut(PVField requested,PVField targetPVField);
-        void enumIndexPut(PVField requested,PVEnum targetPVEnum);
-        void enumChoicesPut(PVField requested,PVEnum targetPVEnum);
         void supportNamePut(PVField requested,PVField targetPVField);
-        void configurationStructurePut(PVField requested,PVLink targetPVLink);
     }
 
     interface CDQueue {
@@ -788,15 +779,8 @@ and associated subfields, which are described in the next section.</p>
       ChannelField is connected to the PVField itself and the other if the
       PVField is a subfield of the PVStructure to which the ChannelField is
       connected.</dd>
-  <dt style="font-family: courier;">enumIndexPut</dt>
-    <dd>Like dataPut except for an enum or menu field.</dd>
-  <dt style="font-family: courier;">enumChoicesPut</dt>
-    <dd>Like dataPut except for a enum field.</dd>
   <dt style="font-family: courier;">supportNamePut</dt>
     <dd>The supportName has been modified.</dd>
-  <dt style="font-family: courier;">configurationStructurePut</dt>
-    <dd>The PVField is a link and the configuration structure has been
-      modified.</dd>
   <dt style="font-family: courier;">beginPut</dt>
     <dd>A set of puts to the fields of a structure is starting.</dd>
   <dt style="font-family: courier;">endPut</dt>
@@ -908,31 +892,11 @@ to determine how often each PVField was written.</p>
         void dataPut(PVField targetPVField);
         void supportNamePut(PVField targetPVField);
         boolean dataPut(PVField requested,PVField targetPVField);
-        boolean enumIndexPut(PVField requested,PVEnum targetPVEnum);
-        boolean enumChoicesPut(PVField requested,PVEnum targetPVEnum);
         boolean supportNamePut(PVField requested,PVField targetPVField);
-        boolean configurationStructurePut(PVField requested,PVLink targetPVLink);
         String toString();
         String toString(int indentLevel);
     }
     
-    interface CDEnum extends CDField{
-        void enumIndexPut(int index);
-        void enumChoicesPut(String[] choices);
-        int getNumIndexPuts();
-        int getNumChoicesPut();
-        PVEnum getPVEnum();
-    }
-    
-    interface CDMenu extends CDEnum {
-        PVMenu getPVMenu();
-    }
-    
-    interface CDLink extends CDField{
-        void configurationStructurePut(PVStructure pvStructure);
-        int getNumConfigurationStructurePuts();
-        PVLink getPVLink();
-    }
     
     interface CDStructure extends CDField {
         CDField[] getFieldCDFields();
@@ -940,25 +904,6 @@ to determine how often each PVField was written.</p>
         PVStructure getPVStructure();
     }
     
-    interface CDEnumArray extends CDField {
-        CDEnum[] getElementCDEnums();
-        void replacePVEnumArray();
-        void dataPut(PVEnumArray targetPVEnumArray);
-        boolean dataPut(PVField requested,PVField targetPVField);
-        boolean enumIndexPut(PVField requested,PVEnum targetPVEnum);
-        boolean enumChoicesPut(PVField requested,PVEnum targetPVEnum);
-        boolean supportNamePut(PVField requested,PVField targetPVField);
-    }
-    
-    interface CDMenuArray extends CDField {
-        CDMenu[] getElementCDMenus();
-        void replacePVMenuArray();
-        void dataPut(PVMenuArray targetPVMenuArray);
-        boolean dataPut(PVField requested,PVField targetPVField);
-        boolean enumIndexPut(PVField requested,PVEnum targetPVEnum);
-        boolean supportNamePut(PVField requested,PVField targetPVField);
-    }
-
     interface CDNonScalarArray extends CDField {
         CDField[] getElementCDFields();
         void replacePVArray();
@@ -966,13 +911,7 @@ to determine how often each PVField was written.</p>
 
     class BaseCDRecord { ... }
     class BaseCDField { ... }
-    class BaseCDEnum { ... }
-    class BaseCDMenu { ... }
-    class BaseCDLink { ... }
     class BaseCDStructure { ... }
-    class BaseCDEnumArray { ... }
-    class BaseCDMenuArray { ... }
-    class BaseCDLinkArray { ... }
     class BaseCDStructureArray { ... }
     class BaseCDArrayArray { ... }</pre>
 
@@ -1024,10 +963,9 @@ CDField or an extension. CDField has the methods:</p>
   <dt style="font-family: courier;">getMaxNumPuts</dt>
     <dd>Get the maximum number of puts since the last clearNumPuts. This is
       the maximum number of puts to any particular element of the associated
-      PVField, i.e. dataPut, supportNamePut, enumIndexPut, enumChoicePut,
-      etc. If PVField is a scalar or an array of scalars then this is either
-      the number of calls to dataPut or to supportNamePut, whichever is
-      greater.</dd>
+      PVField, i.e. dataPut, supportNamePut, etc. If PVField is a scalar or
+      an array of scalars then this is either the number of calls to dataPut
+      or to supportNamePut, whichever is greater.</dd>
   <dt style="font-family: courier;">setMaxNumPuts</dt>
     <dd>Set the maximum number of puts. This is called by derived
     classes.</dd>
@@ -1040,58 +978,9 @@ CDField or an extension. CDField has the methods:</p>
   <dt style="font-family: courier;">dataPut(PVField requested,PVField
   targetPVField)</dt>
     <dd>The data has been modified.</dd>
-  <dt style="font-family: courier;">enumIndexPut(PVField requested,PVEnum
-  targetPVEnum)</dt>
-    <dd>A put to an enum subfield has occured. The enum index has been
-      modified.</dd>
-  <dt style="font-family: courier;">enumChoicesPut(PVField requested,PVEnum
-  targetPVEnum)</dt>
-    <dd>A put to an enum subfield has occured. The enum choices has been
-      modified.</dd>
   <dt style="font-family: courier;">supportNamePut(PVField requested,PVField
   targetPVField)</dt>
     <dd>A put to the supportName of a subfield has occured.</dd>
-  <dt style="font-family: courier;">configurationStructurePut(PVField
-  requested,PVLink targetPVLink)</dt>
-    <dd>A put to the configurationStructure of a pvLink subfield has
-    occured.</dd>
-</dl>
-
-<h3 id="CDEnum">CDEnum</h3>
-
-<p>CDEnum is associated with a PVEnum. It has the methods:</p>
-<dl>
-  <dt style="font-family: courier;">enumIndexPut</dt>
-    <dd>The index has been modified.</dd>
-  <dt style="font-family: courier;">enumChoicesPut</dt>
-    <dd>The choices has been modified.</dd>
-  <dt style="font-family: courier;">getNumIndexPuts</dt>
-    <dd>Get he number of index puts since the last clearNumPuts</dd>
-  <dt style="font-family: courier;">getNumChoicesPut</dt>
-    <dd>Get the number of choices puts since the last clearNumPuts</dd>
-  <dt style="font-family: courier;">getPVEnum</dt>
-    <dd>Get the PVEnum.</dd>
-</dl>
-
-<h3 id="CDMenu">CDMenu</h3>
-
-<p>CDMenu is associated with a PVMenu. It has the method:</p>
-<dl>
-  <dt style="font-family: courier;">getPVMenu</dt>
-    <dd>Get the PVMenu.</dd>
-</dl>
-
-<h3 id="CDLink">CDLink</h3>
-
-<p>CDLink is associated with a PVLink. It has the methods:</p>
-<dl>
-  <dt style="font-family: courier;">configurationStructurePut</dt>
-    <dd>The link configration structure has been modified.</dd>
-  <dt style="font-family: courier;">getNumConfigurationStructurePuts</dt>
-    <dd>Get the number times configurationStructurePut has been called since
-      the last call to clearNumPuts.</dd>
-  <dt style="font-family: courier;">getPVLink</dt>
-    <dd>Get the PVLink.</dd>
 </dl>
 
 <h3 id="CDStructur">CDStructure</h3>
@@ -1109,8 +998,7 @@ CDField or an extension. CDField has the methods:</p>
 <h3 id="CDNonScala">CDNonScalarArray</h3>
 
 <p>CDNonScalarArray is associated with a PVArray with non-scalar elements,
-i.e. PVEnumArray, PVMenuArray, PVLinkArray, PVArrayArray, or
-PVStructureArray.</p>
+i.e. PVArrayArray or PVStructureArray.</p>
 <dl>
   <dt style="font-family: courier;">getElementCDFields</dt>
     <dd>Get the CDField array.</dd>
@@ -1155,8 +1043,7 @@ Channel Access is registered.</p>
 <ul>
   <li>value<br />
   </li>
-  <li>status - a property of value</li>
-  <li>severity - a property of value</li>
+  <li>alarm - a property of value</li>
   <li>timeStamp - a property of value</li>
 </ul>
 
@@ -1191,8 +1078,7 @@ example gets from a record after the record is no longer locked.</p>
         private String fieldName;
         private ChannelFieldGroup channelFieldGroup;
         private ChannelField valueField;
-        private ChannelField statusField = null;
-        private ChannelField severityField = null;
+        private ChannelField alarmField = null;
         private ChannelField timeStampField = null;
 
         ValueData(Channel channel,String fieldName) {
@@ -1202,8 +1088,7 @@ example gets from a record after the record is no longer locked.</p>
         }
 
         void lookForOther(ChannelMonitor channelMonitor) {
-            if(statusField!=null) channelMonitor.lookForChange(statusField, true);
-            if(severityField!=null) channelMonitor.lookForChange(severityField, true);
+            if(alarmField!=null) channelMonitor.lookForChange(alarmField, true);
             if(timeStampField!=null) channelMonitor.lookForChange(timeStampField, false);
         }
 
@@ -1233,14 +1118,10 @@ example gets from a record after the record is no longer locked.</p>
                 return null;
             }
             channelFieldGroup.addChannelField(valueField);
-            String newFieldName = fieldName + ".status";
+            String newFieldName = fieldName + ".alarm";
             channel.findField(null);
-            statusField = channel.findField(newFieldName);
-            if(statusField!=null) channelFieldGroup.addChannelField(statusField);
-            newFieldName = fieldName + ".severity";
-            channel.findField(null);
-            severityField  = channel.findField(newFieldName);
-            if(severityField!=null) channelFieldGroup.addChannelField(severityField);
+            alarmField = channel.findField(newFieldName);
+            if(alarmField!=null) channelFieldGroup.addChannelField(alarmField);
             newFieldName = fieldName + ".timeStamp";
             channel.findField(null);
             timeStampField = channel.findField(newFieldName);
@@ -1274,17 +1155,9 @@ example gets from a record after the record is no longer locked.</p>
                     builder.append(String.format(
                         "value %s ",
                         pvField.toString(2)));
-                } else if (channelField==severityField) {
-                    PVEnum pvEnum = (PVEnum)pvField;
-                    int index = pvEnum.getIndex();
-                    builder.append(String.format(
-                        " severity %s",
-                        AlarmSeverity.getSeverity(index).toString()));
-                } else if(channelField==statusField) {
-                    PVString pvString = (PVString)pvField;
-                    String value = pvString.get();
-                    builder.append(String.format(" status %s",
-                        value));
+                } else if(channelField==alarmField) {
+                    builder.append(String.format(" alarm %s",
+                        pvField.toString()));
                 } else if(channelField==timeStampField) {
                     PVTimeStamp pvTimeStamp = PVTimeStamp.create(pvField);
                     TimeStamp timeStamp = new TimeStamp();

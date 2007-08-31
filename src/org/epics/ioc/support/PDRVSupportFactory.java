@@ -103,7 +103,7 @@ public class PDRVSupportFactory {
         array
     }
     
-    private static class OctetInput extends AbstractPDRVLinkSupport
+    private static class OctetInput extends AbstractPDRVSupport
     {
         private OctetInput(DBStructure dbStructure,String supportName) {
             super(supportName,dbStructure);
@@ -220,7 +220,7 @@ public class PDRVSupportFactory {
         }
     }
     
-    private static class OctetInterruptInput extends AbstractPDRVLinkSupport
+    private static class OctetInterruptInput extends AbstractPDRVSupport
     implements OctetInterruptListener
     {
         private OctetInterruptInput(DBStructure dbStructure,String supportName) {
@@ -350,7 +350,7 @@ public class PDRVSupportFactory {
         }
     }
     
-    private static class OctetOutput extends AbstractPDRVLinkSupport
+    private static class OctetOutput extends AbstractPDRVSupport
     {
         private OctetOutput(DBStructure dbStructure,String supportName) {
             super(supportName,dbStructure);
@@ -473,7 +473,7 @@ public class PDRVSupportFactory {
         }
     }
     
-    private static class Int32Input extends AbstractPDRVLinkSupport
+    private static class Int32Input extends AbstractPDRVSupport
     {
         private Int32Input(DBStructure dbStructure,String supportName) {
             super(supportName,dbStructure);
@@ -549,7 +549,7 @@ public class PDRVSupportFactory {
         }
     }
     
-    private static class Int32InterruptInput extends AbstractPDRVLinkSupport
+    private static class Int32InterruptInput extends AbstractPDRVSupport
     implements Int32InterruptListener
     {
         private Int32InterruptInput(DBStructure dbStructure,String supportName) {
@@ -653,7 +653,7 @@ public class PDRVSupportFactory {
         }
     }
     
-    private static class Int32AverageInput extends AbstractPDRVLinkSupport
+    private static class Int32AverageInput extends AbstractPDRVSupport
     implements Int32InterruptListener
     {
         private Int32AverageInput(DBStructure dbStructure,String supportName) {
@@ -749,7 +749,7 @@ public class PDRVSupportFactory {
         }
     }
     
-    private static class Int32Output extends AbstractPDRVLinkSupport
+    private static class Int32Output extends AbstractPDRVSupport
     {
         private Int32Output(DBStructure dbStructure,String supportName) {
             super(supportName,dbStructure);
@@ -828,7 +828,7 @@ public class PDRVSupportFactory {
         }
     }
     
-    private static class Int32ArrayInput extends AbstractPDRVLinkSupport
+    private static class Int32ArrayInput extends AbstractPDRVSupport
     implements AsynAccessListener
     {
         private Int32ArrayInput(DBStructure dbStructure,String supportName) {
@@ -932,7 +932,7 @@ public class PDRVSupportFactory {
         }
     }
     
-    private static class Int32ArrayInterruptInput extends AbstractPDRVLinkSupport
+    private static class Int32ArrayInterruptInput extends AbstractPDRVSupport
     implements Int32ArrayInterruptListener,AsynAccessListener
     {
         private Int32ArrayInterruptInput(DBStructure dbStructure,String supportName) {
@@ -1089,7 +1089,7 @@ public class PDRVSupportFactory {
         }
     }
     
-    private static class Int32ArrayOutput extends AbstractPDRVLinkSupport
+    private static class Int32ArrayOutput extends AbstractPDRVSupport
     {
         private Int32ArrayOutput(DBStructure dbStructure,String supportName) {
             super(supportName,dbStructure);
@@ -1187,7 +1187,7 @@ public class PDRVSupportFactory {
         if(dbIndex.getPVField().getField().getType()!=Type.pvInt) return null;
         return dbIndex;
     }
-    private static class UInt32DigitalInput extends AbstractPDRVLinkSupport
+    private static class UInt32DigitalInput extends AbstractPDRVSupport
     {
         private UInt32DigitalInput(DBStructure dbStructure,String supportName) {
             super(supportName,dbStructure);
@@ -1297,7 +1297,7 @@ public class PDRVSupportFactory {
     }
     
     private static class UInt32DigitalInterruptInput
-    extends AbstractPDRVLinkSupport implements UInt32DigitalInterruptListener
+    extends AbstractPDRVSupport implements UInt32DigitalInterruptListener
     {
         private UInt32DigitalInterruptInput(DBStructure dbStructure,String supportName) {
             super(supportName,dbStructure);
@@ -1438,7 +1438,7 @@ public class PDRVSupportFactory {
         }
     }
     
-    private static class UInt32DigitalOutput extends AbstractPDRVLinkSupport
+    private static class UInt32DigitalOutput extends AbstractPDRVSupport
     {
         private UInt32DigitalOutput(DBStructure dbStructure,String supportName) {
             super(supportName,dbStructure);
@@ -1544,7 +1544,7 @@ public class PDRVSupportFactory {
         }
     }
     
-    private static class Float64Input extends AbstractPDRVLinkSupport
+    private static class Float64Input extends AbstractPDRVSupport
     {
         private Float64Input(DBStructure dbStructure,String supportName) {
             super(supportName,dbStructure);
@@ -1620,7 +1620,7 @@ public class PDRVSupportFactory {
         }
     }
     
-    private static class Float64InterruptInput extends AbstractPDRVLinkSupport implements Float64InterruptListener
+    private static class Float64InterruptInput extends AbstractPDRVSupport implements Float64InterruptListener
     {
         private Float64InterruptInput(DBStructure dbStructure,String supportName) {
             super(supportName,dbStructure);
@@ -1723,7 +1723,7 @@ public class PDRVSupportFactory {
         }
     }
     
-    private static class Float64AverageInput extends AbstractPDRVLinkSupport implements Float64InterruptListener
+    private static class Float64AverageInput extends AbstractPDRVSupport implements Float64InterruptListener
     {
         private Float64AverageInput(DBStructure dbStructure,String supportName) {
             super(supportName,dbStructure);
@@ -1817,7 +1817,7 @@ public class PDRVSupportFactory {
         }
     }
     
-    private static class Float64Output extends AbstractPDRVLinkSupport
+    private static class Float64Output extends AbstractPDRVSupport
     {
         private Float64Output(DBStructure dbStructure,String supportName) {
             super(supportName,dbStructure);
@@ -1896,7 +1896,7 @@ public class PDRVSupportFactory {
         }
     }
     
-    private static class Float64ArrayInput extends AbstractPDRVLinkSupport
+    private static class Float64ArrayInput extends AbstractPDRVSupport
     implements AsynAccessListener
     {
         private Float64ArrayInput(DBStructure dbStructure,String supportName) {
@@ -2000,7 +2000,7 @@ public class PDRVSupportFactory {
         }
     }
     
-    private static class Float64ArrayInterruptInput extends AbstractPDRVLinkSupport
+    private static class Float64ArrayInterruptInput extends AbstractPDRVSupport
     implements Float64ArrayInterruptListener,AsynAccessListener
     {
         private Float64ArrayInterruptInput(DBStructure dbStructure,String supportName) {
@@ -2158,7 +2158,7 @@ public class PDRVSupportFactory {
         }
     }
     
-    private static class Float64ArrayOutput extends AbstractPDRVLinkSupport
+    private static class Float64ArrayOutput extends AbstractPDRVSupport
     {
         private Float64ArrayOutput(DBStructure dbStructure,String supportName) {
             super(supportName,dbStructure);

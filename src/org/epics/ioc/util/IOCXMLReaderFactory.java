@@ -401,7 +401,7 @@ public class IOCXMLReaderFactory {
             String addPath = atts.getValue("addPath");
             if(addPath!=null) {
                 addPath = convertSeparator(addPath);
-                pathList.add(addPath);
+                pathList.add(0, addPath);
             }
             String href = atts.getValue("href");
             if(href==null) {

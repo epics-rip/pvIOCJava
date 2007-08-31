@@ -6,6 +6,7 @@
 package org.epics.ioc.create;
 
 /**
+ * Base interface for a Create.
  * @author mrk
  *
  */

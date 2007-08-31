@@ -1,0 +1,69 @@
+<?xml version="1.0" ?>
+<IOCDatabase>
+
+<record name = "adcVoltageEmbeded" type = "int">
+    <value>2048</value>
+</record>
+
+<record name = "psEmbeded" type = "powerSupply" >
+    <voltageInput structureName = "double" >
+        <input structureName = "linearConvertInput">
+            <linearConvert>
+                <deviceHigh>4095</deviceHigh>
+                <deviceLow>0</deviceLow>
+                <engUnitsLow>0.0</engUnitsLow>
+                <engUnitsHigh>10.0</engUnitsHigh>
+            </linearConvert>
+            <input supportName = "inputSupport" structureName = "inputSupport">
+                    <pvname>adcVoltageEmbeded</pvname>
+                    <process>false</process>
+            </input>
+        </input>
+    </voltageInput>
+    <currentOutput structureName = "double" >
+        <output structureName = "linearConvertOutput">
+            <linearConvert>
+                <deviceHigh>4095</deviceHigh>
+                <deviceLow>0</deviceLow>
+                <engUnitsLow>0.0</engUnitsLow>
+                <engUnitsHigh>10.0</engUnitsHigh>
+            </linearConvert>
+            <output supportName = "outputSupport" structureName = "outputSupport">
+                <pvname>dacCurrentEmbeded</pvname>
+                <process>true</process>
+            </output>
+        </output>
+        <valueAlarm structureName = "doubleAlarm">
+          <active>true</active>
+          <interval>
+              <value structureName = "doubleAlarmInterval">
+                  <value>2.0</value>
+                  <severity><choice>major</choice></severity>
+              </value>
+              <value structureName = "doubleAlarmInterval">
+                  <value>4.0</value>
+                  <severity><choice>minor</choice></severity>
+              </value>
+              <value structureName = "doubleAlarmInterval">
+                  <value>6.0</value>
+                  <severity><choice>none</choice></severity>
+              </value>
+              <value structureName = "doubleAlarmInterval">
+                  <value>8.0</value>
+                  <severity><choice>minor</choice></severity>
+              </value>
+              <value structureName = "doubleAlarmInterval">
+                  <value>10.0</value>
+                  <severity><choice>major</choice></severity>
+              </value>
+          </interval>
+          <outOfRange><choice>invalid</choice></outOfRange>
+          <hystersis>0.1</hystersis>
+        </valueAlarm>
+    </currentOutput>
+</record>
+
+<record name = "dacCurrentEmbeded" type = "int">
+</record>
+
+</IOCDatabase>

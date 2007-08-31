@@ -18,8 +18,8 @@ import org.epics.ioc.util.*;
  */
 public class IntAlarmFactory {
     /**
-     * Create support for an intAlarm link.
-     * @param dbLink The link.
+     * Create support for an intAlarm structure.
+     * @param dbStructure The structure.
      * @return An interface to the support or null if the supportName was not "intArray".
      */
     public static Support create(DBStructure dbStructure) {

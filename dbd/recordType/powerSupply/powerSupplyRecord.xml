@@ -11,22 +11,26 @@
     <property name = "voltage" associatedField = "voltage" />
     <property name = "current" associatedField = "current" />
     <property name = "alarm" associatedField = "alarm" />
-    <property name = "units" associatedField = "units" />
-    <property name = "displayLimit" associatedField = "displayLimit" />
-    <property name = "timeStamp" associatedField = "/timeStamp" />
+    <property name = "displayChararacteristics" associatedField = "displayCharacteristics" />
+    <property name = "timeStamp" associatedField = "timeStamp" />
   </field>
   <field name = "input" type = "structure" />
-  <field name = "doubleAlarm" type = "structure" supportName = "doubleAlarm" />
   <field name = "voltage" type = "double" />
   <field name = "voltageInput" type = "structure"  />
   <field name = "current" type = "double" />
   <field name = "currentOutput" type = "structure" />
+  <!-- instance can set
+     structureName = "doubleAlarm" supportName = "doubleAlarm" -->
+  <field name = "valueAlarm" type = "structure" />
   <field name = "output" type = "structure" />
+  <!-- instance can set
+     structureName = "doubleDisplayCharacteristics" -->
+  <field name = "displayCharacteristics" type = "structure" />
+  <!-- instance can set
+     structureName = "doubleHistory" supportName = "history" -->
+  <field name = "history" type = "structure" />
   <field name = "supportArray" type = "array"
      elementType = "structure" supportName = "supportArray" />
-  <field name = "units" type = "string" />
-  <field name = "displayLimit"
-     type = "structure" structureName = "doubleLimit" />
 </recordType>
 
 <support name = "powerSupply"

@@ -5,11 +5,16 @@
  */
 package org.epics.ioc.create;
 
-import org.epics.ioc.db.DBField;
+import org.epics.ioc.db.*;
 import org.epics.ioc.pv.*;
 import org.epics.ioc.util.MessageType;
 
 /**
+ * Base class for an enumerated structure, which is a structure that has an array of string choices
+ * and an index field and a choice field.
+ * The index an choice select one of the choices.
+ * A put to the index field will also update the choice field and a put to the choice will update the index.
+ * This class overrides the PVField implementation for all three fields.
  * @author mrk
  *
  */
@@ -19,15 +24,19 @@ public class BaseEnumerated implements Enumerated{
     private String[] choices;
     private DBField dbIndex;
     private DBField dbChoice;
-    private DBField dbChoices;
     private PVInt pvIndex;
     private PVString pvChoice;
     private PVStringArray pvChoices;
 
+    /**
+     * The constructor.
+     * @param dbIndex The DBField for the index.
+     * @param dbChoice The DBField for the choice.
+     * @param dbChoices The DBField for the choices.
+     */
     public BaseEnumerated(DBField dbIndex, DBField dbChoice, DBField dbChoices) {
         this.dbIndex = dbIndex;
-        this.dbChoice = dbChoice;
-        this.dbChoices = dbChoices;
+        this.dbChoice = dbChoice;            
         PVString pvChoice = (PVString)dbChoice.getPVField();
         PVStringArray pvChoices = (PVStringArray)dbChoices.getPVField();
         PVField pvParent = dbIndex.getParent().getPVField();

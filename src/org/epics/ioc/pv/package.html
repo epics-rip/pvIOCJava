@@ -10,7 +10,7 @@
 <body>
 <h1 style="text-align: center">EPICS JavaIOC: pv<br />
 package: org.epics.ioc.pv<br />
-2007.07.11</h1>
+2007.08.28</h1>
 CONTENTS 
 
 <div class="toc">
@@ -30,9 +30,6 @@ CONTENTS
       <li><a href="#PVField1">PVField</a></li>
       <li><a href="#Primitive">Primitive PVField types</a></li>
       <li><a href="#PVString">PVString</a></li>
-      <li><a href="#PVEnum">PVEnum</a></li>
-      <li><a href="#PVMenu">PVMenu</a></li>
-      <li><a href="#PVLink">PVLink</a></li>
       <li><a href="#PVStructur">PVStructure</a></li>
       <li><a href="#PVRecord">PVRecord</a></li>
       <li><a href="#PVArray">PVArray</a></li>
@@ -49,9 +46,6 @@ CONTENTS
     <ul>
       <li><a href="#AbstractPV">AbstractPVField</a></li>
       <li><a href="#AbstractPV1">AbstractPVArray</a></li>
-      <li><a href="#BasePVEnum">BasePVEnum</a></li>
-      <li><a href="#BasePVMenu">BasePVMenu</a></li>
-      <li><a href="#BasePVLink">BasePVLink</a></li>
       <li><a href="#BasePVStru">BasePVStructure</a></li>
       <li><a href="#BasePVReco">BasePVRecord</a></li>
     </ul>
@@ -89,20 +83,12 @@ of a database record, has one of the following types:</p>
   <dt>string</dt>
     <dd>A Java String. Primitive and string types are considered scalar
     types.</dd>
-  <dt>enum</dt>
-    <dd>A enum is an array of choices and an index that selects a choice.</dd>
-  <dt>menu</dt>
-    <dd>Like an enum except that it has a menuName and the array of choices
-      is immutable.</dd>
   <dt>structure</dt>
     <dd>A structure has a name and contains an array of fields of any
       supported type.</dd>
   <dt>array</dt>
     <dd>A one dimensional array. The element type is any of the supported
       types.</dd>
-  <dt>link</dt>
-    <dd>A link has no data but can have support and a configuration
-    structure.</dd>
 </dl>
 
 <p>In addition to the Java IOC, PV data is intended for use by 1) Channel
@@ -161,32 +147,28 @@ TINI, DOOCS, etc.</p>
     <dd>A property has a name and an associated field within the PV for the
       data.</dd>
   <dt>Attribute</dt>
-    <dd>Each field has a fixed set of attributes: default, isReadOnly,
-      isDesign, isLink, asl.</dd>
+    <dd>Each field can have a attributes, where an attribute is a key,value
+      pair. Both the key and value are a string.</dd>
 </dl>
 
 <p>Examples of fields are: value, rawValue.</p>
 
-<p>Examples of properties are: status, timeStamp, alarmSeverity,
-displayLimits, controlLimits, alarmLimits</p>
+<p>Examples of properties are: status, timeStamp, alarm,
+displayCharacteristics, etc.</p>
 
 <p>For example a PV could define properties for value and rawValue as
 follows:</p>
 <dl>
   <dt>value</dt>
-    <dd>status, timeStamp, alarmSeverity, displayLimits, controlLimits, and
-      alarmLimits.</dd>
+    <dd>status, timeStamp, alarm, and displayCharacteristics.</dd>
   <dt>rawValue</dt>
-    <dd>status, timeStamp, and alarmSeverity.</dd>
+    <dd>status, timeStamp, and alarm.</dd>
 </dl>
 
 <p>The associatedField of a property is is used to locate a field that has
 the value for the property. Examples are given later in this document. An
 associatedField must be one of the following:</p>
 <dl>
-  <dt>/name</dt>
-    <dd>If the associatedField value starts with '/' then the search will
-      start at the record not with the field that has the property.</dd>
   <dt>name</dt>
     <dd>The name of a structure field.</dd>
   <dt>name1.name2</dt>
@@ -222,19 +204,12 @@ powerSupply record type can be created that has properties like "current",
     </dd>
   <dt>string</dt>
     <dd>A Java String</dd>
-  <dt>enum</dt>
-    <dd>A String array of choices and an index selecting a choice.</dd>
-  <dt>menu</dt>
-    <dd>An enum with a menuName and immutable choices.</dd>
-  <dt>link</dt>
-    <dd>No data is associated with a link but each support can define a
-      structure that contains configuration information.</dd>
   <dt>structure</dt>
-    <dd>A struture with fields of type primitive, string, enum, menu,
-      structure, or array</dd>
+    <dd>A struture with fields of type primitive, string, structure, or
+    array</dd>
   <dt>array</dt>
-    <dd>a one dimensional array of type primitive, string,enum, structure, or
-      array</dd>
+    <dd>a one dimensional array of type primitive, string, structure, or
+    array</dd>
 </dl>
 
 <h3 id="Process2">Process Variable Reflection</h3>
@@ -258,11 +233,8 @@ separation is especially important for arrays and structures.</p>
         pvByte, pvShort, pvInt, pvLong,
         pvFloat,pvDouble,
         pvString,
-        pvEnum,
         pvStructure,
-        pvArray,
-        pvMenu,
-        pvLink;
+        pvArray;
 
         //Convenience methods
         boolean isNumeric();    // pvByte,...pvDouble
@@ -285,11 +257,10 @@ separation is especially important for arrays and structures.</p>
     }
 
     public interface FieldAttribute {
-        String getDefault();
-        boolean isReadOnly();
-        boolean isDesign();
-        boolean isLink();
-        int getAsl();
+        void setAttributes(Map&lt;String,String&gt; attributes,String[] exclude);
+        String setAttribute(String key,String value);
+        Map&lt;String,String&gt; getAttributes();
+        String getAttribute(String key);
         String toString();
         String toString(int indentLevel);
     }
@@ -300,21 +271,14 @@ separation is especially important for arrays and structures.</p>
         Property[] getPropertys();
         Property getProperty(String propertyName);
         Type getType();
+        String getCreateName();
+        void setCreateName(String name);
         String getSupportName();
         void setSupportName(String name);
         FieldAttribute getFieldAttribute();
         String toString();
         String toString(int indentLevel);
     } 
-
-    interface Enum extends Field {
-        boolean isChoicesMutable();
-    }
-
-    interface Menu extends Enum {
-        String getMenuName();
-        String[] getMenuChoices();
-    }
 
     interface Structure extends Field{
         String getStructureName();
@@ -351,12 +315,6 @@ separation is especially important for arrays and structures.</p>
               record. In the other record the field located by pvname acts
               just like name1 and name2 is handled just like it is for the
               local record.</dd>
-          <dt>/name</dt>
-            <dd>name must be a subfield of the record instance.</dd>
-          <dt>/name1.name2</dt>
-            <dd>This is like name1.name2 except that the search is relative
-              to the record instance itself instead if the field that has the
-              property.</dd>
         </dl>
       </li>
       <li>A property can be converted to a string.</li>
@@ -372,44 +330,21 @@ separation is especially important for arrays and structures.</p>
     </ul>
   </li>
   <li>FieldAttribute<br />
-    Each field has the following attributes: 
-    <ul>
-      <li>default<br />
-        A string default value, which can be null.</li>
-      <li>readOnly<br />
-        Can the data value be changed?</li>
-      <li>isDesign<br />
-        Can this field be configurable by Database Configuration Tools.</li>
-      <li>isLink<br />
-        Is this field a link to another record. The field type must be
-      string.</li>
-      <li>asl<br />
-        Access security level. Currently access security is not
-      implemented.</li>
-    </ul>
-  </li>
+    Each field can have have an arbitrary numbert of attributes. An attribute
+    is a key,value pair where bot key and value are a string.</li>
   <li>Field 
     <ul>
       <li>A field has a name.</li>
       <li>A field can have an arbitrary number of associated properties
         including none.</li>
       <li>A field has a Type.</li>
+      <li>A field can optionally have associated creation code identified via
+        a name.</li>
       <li>A field can optionally have support identified via a name.</li>
       <li>A field can be made immutable. This means that the data associated
         with the field is immutable.</li>
       <li>A field has attributes.</li>
       <li>A field can be converted to a string.</li>
-    </ul>
-  </li>
-  <li>Enum 
-    <ul>
-      <li>A enum is a field that can have mutable or immutable choices.</li>
-    </ul>
-  </li>
-  <li>Menu 
-    <ul>
-      <li>A menu is an enum that has immutable choices and also has a
-        menuName.</li>
     </ul>
   </li>
   <li>Structure 
@@ -439,19 +374,13 @@ modified.</p>
 <pre>    public interface AsynAccessListener {
         void beginSyncAccess();
         void endSyncAccess();
-    }
-</pre>
-where
+    }</pre>
+where 
 <ul>
-   
   <li>beginSyncAccess<br />
-        Begin synchronous access of field.
-     </li>
-
-   
+    Begin synchronous access of field. </li>
   <li>endSyncAccess<br />
-        End synchronous access of the field.
-     </li>
+    End synchronous access of the field. </li>
 </ul>
 
 <h3 id="PVField1">PVField</h3>
@@ -598,69 +527,6 @@ where
         void put(String value);
     }</pre>
 
-<h3 id="PVEnum">PVEnum</h3>
-
-<p>The interface for enum is:</p>
-<pre>    interface PVEnum extends PVField{
-        Enum getEnum();
-        int getIndex();
-        void setIndex(int index);
-        String[] getChoices();
-        boolean setChoices(String[] choice);
-    }</pre>
-
-<p>where</p>
-<dl>
-  <dt>getEnum</dt>
-    <dd>Get the introspection interface.</dd>
-  <dt>getIndex</dt>
-    <dd>Get the index of the currently selected choice.</dd>
-  <dt>setIndex</dt>
-    <dd>Select a choice</dd>
-  <dt>setChoices</dt>
-    <dd>Change the set of choices. This returns false if the choices can not
-      be changed</dd>
-</dl>
-
-<h3 id="PVMenu">PVMenu</h3>
-
-<p>The interface for a menu is:</p>
-<pre>    interface PVMenu extends PVEnum {
-         Menu getMenu();
-    }</pre>
-<dl>
-  <dt>getMenu</dt>
-    <dd>Get the introspection interface.</dd>
-</dl>
-
-<p>The difference from an enum is that the reflection interface provides a
-menuName and the choices can not be modified.</p>
-
-<h3 id="PVLink">PVLink</h3>
-
-<p>The interface for a link is:</p>
-<pre>    interface PVLink extends PVField {
-        PVStructure getConfigurationStructure();
-        boolean setConfigurationStructure(PVStructure pvStructure);
-    }</pre>
-
-<p>Packages db and process allow custom support code for any field of any
-record instance of an IOC database. A PVLink field can also have an
-associated structure that contains configuration information.. A Channel
-Access client can change the support for a PVLink field as follows. This
-assumes that the client has permission to change the support:</p>
-<ul>
-  <li>Call setSupportName</li>
-  <li>Call getSupportName. If the new name is what the client specified then
-    the client knows that it has successfully changed the support for the
-    field.</li>
-  <li>Call getConfigurationStructure. If a null is returned it means that the
-    support does not require any configuration. If access to a configuration
-    structure is returned the client can use it to provide the configuration
-    information.</li>
-  <li>Call setConfigurationStructure to set the new configuration.</li>
-</ul>
-
 <h3 id="PVStructur">PVStructure</h3>
 
 <p>The interface for structure is:</p>
@@ -676,8 +542,6 @@ assumes that the client has permission to change the support:</p>
         PVFloat getFloatField(String fieldName);
         PVDouble getDoubleField(String fieldName);
         PVString getStringField(String fieldName);
-        PVEnum getEnumField(String fieldName);
-        PVMenu getMenuField(String fieldName,String menuName);
         PVStructure getStructureField(String fieldName,String structureName);
         PVArray getArrayField(String fieldName,Type elementType);
     }</pre>
@@ -716,12 +580,6 @@ assumes that the client has permission to change the support:</p>
     <dd>Look for fieldName. If found and it has the correct type return the
       interface.</dd>
   <dt>getStringField</dt>
-    <dd>Look for fieldName. If found and it has the correct type return the
-      interface.</dd>
-  <dt>getEnumField</dt>
-    <dd>Look for fieldName. If found and it has the correct type return the
-      interface.</dd>
-  <dt>getMenuField</dt>
     <dd>Look for fieldName. If found and it has the correct type return the
       interface.</dd>
   <dt>getStructureField</dt>
@@ -842,33 +700,6 @@ assumes that the client has permission to change the support:</p>
         int put(int offset, int len, String[]from, int fromOffset);
     }
 
-    public class EnumArrayData {
-        public PVEnum[] data;
-        public int offset;
-    }
-    interface PVEnumArray extends PVArray {
-        int get(int offset, int len, EnumArrayData data);
-        int put(int offset, int len, PVEnum[]from, int fromOffset);
-    }
-
-    public class MenuArrayData {
-        public PVMenu[] data;
-        public int offset;
-    }
-    interface PVMenuArray extends PVArray {
-        int get(int offset, int len, MenuArrayData data);
-        int put(int offset, int len, PVMenu[]from, int fromOffset);
-    }
-
-    public class LinkArrayData {
-        public PVLink[] data;
-        public int offset;
-    }
-    interface PVLinkArray extends PVArray {
-        int get(int offset, int len, LinkArrayData data);
-        int put(int offset, int len, PVLink[]from, int fromOffset);
-    }
-
     public class ArrayArrayData {
         public PVArray[] data;
         public int offset;
@@ -957,8 +788,6 @@ introspection interfaces. The methods are:</p>
         public Type getType(String value);
 
         public static FieldAttribute createFieldAttribute();
-        public static FieldAttribute createFieldAttribute(
-            Map&lt;String,String&gt; attributes);
 
         public static Property createProperty(String name, String fieldName);
 
@@ -969,14 +798,6 @@ introspection interfaces. The methods are:</p>
         public static Array createArray(String fieldName,Type elementType);
         public static Array createArray(String fieldName,Type elementType,
             Property[] property,FieldAttribute fieldAttribute);
-
-        public static Enum createEnum(String fieldName,boolean choicesMutable);
-        public static Enum createEnum(String fieldName,boolean choicesMutable,
-            Property[] property,FieldAttribute fieldAttribute);
-
-        public static Menu createMenu(String fieldName,String menuName,String[] menuChoices);
-        public static Menu createMenu(String fieldName,String menuName,String[] menuChoices,
-            Property[]property,FieldAttribute fieldAttribute);
 
         public static Structure createStructure(String fieldName,
             String structureName, Field[] field);
@@ -1027,16 +848,6 @@ introspection interfaces. The methods are:</p>
   property,FieldAttribute fieldAttribute)</dt>
     <dd>create an Array with the specified elementType, properties, and
       attributes. The elementType can be any Type but must not be null.</dd>
-  <dt>createEnum(String fieldName,boolean choicesMutable)</dt>
-    <dd>create an Enum with no properties and default attributes.</dd>
-  <dt>createEnum(String fieldName,boolean choicesMutable,Property[]
-  property,FieldAttribute fieldAttribute)</dt>
-    <dd>create an Enum with properties and attributes.</dd>
-  <dt>createMenu(String fieldName,String menuName,String[] menuChoices)</dt>
-    <dd>create a Menu with no properties and default attributes.</dd>
-  <dt>createMenu(String fieldName,String menuName,String[]
-  menuChoices,Property[]property,FieldAttribute fieldAttribute)</dt>
-    <dd>create a Menu with properties and attributes.</dd>
   <dt>createStructure(String fieldName,String structureName, Field[]
   field)</dt>
     <dd>create a Structure with no properties and default attributes. The
@@ -1057,10 +868,10 @@ introspection interfaces. The methods are:</p>
 fields. The methods are called by XMLToIOCDBFactory when it is reading
 instance definitions.</p>
 <pre>    interface PVDataCreate {
-        PVField createData(PVField parent,Field field);
-        PVArray createArrayData(PVField parent,Field field,
+        PVField createPVField(PVField parent,Field field);
+        PVArray createPVArray(PVField parent,Field field,
             int capacity,boolean capacityMutable);
-        PVRecord createRecord(String recordName, Structure structure);
+        PVRecord createPVRecord(String recordName, Structure structure);
     }
 
     public class PVDataFactory {
@@ -1068,12 +879,12 @@ instance definitions.</p>
     }</pre>
 where 
 <dl>
-  <dt style="font-family: courier;">createData</dt>
+  <dt style="font-family: courier;">createPVField</dt>
     <dd>Creates an instance of any type of field except array fields, or a
       record instance itself.</dd>
-  <dt style="font-family: courier;">createArrayData</dt>
+  <dt style="font-family: courier;">createPVArray</dt>
     <dd>Create an array field instance.</dd>
-  <dt style="font-family: courier;">createRecord</dt>
+  <dt style="font-family: courier;">createPVRecord</dt>
     <dd>Create a record instance.</dd>
 </dl>
 <hr />
@@ -1092,26 +903,10 @@ introspection implementation but they could be extended if necessary.</p>
         public Property getProperty(String propertyName);
         public FieldAttribute getFieldAttribute();
         public Type getType();
+        public String getCreateName();
+        public void setCreateName(String name);
         public String getSupportName();
         public void setSupportName(String name);
-        public String toString();
-        public String toString(int indentLevel);
-    }
-    
-    public class BaseEnum extends BaseField implements Enum{
-        public BaseEnum(String fieldName,boolean choicesMutable,
-            Property[] property,FieldAttribute fieldAttribute);
-        public boolean isChoicesMutable();
-        public String toString();
-        public String toString(int indentLevel);
-    }
-    
-    public class BaseMenu extends BaseField implements Menu{
-        public BaseMenu(String fieldName,String menuName,String[] menuChoices,
-            Property[] property,FieldAttribute fieldAttribute);
-        public boolean isChoicesMutable();
-        public String getMenuName();
-        public String[] getMenuChoices();
         public String toString();
         public String toString(int indentLevel);
     }
@@ -1186,7 +981,8 @@ interfaces:</p>
   <dt>setRecord</dt>
     <dd>This is called a derived PVStructure implementation to specify the
       record containing the field.</dd>
-  <dt>getRequestorName,...,replacePVField asynAccessCallListener,...,isAsynAccessActive</dt>
+  <dt>getRequestorName,...,replacePVField
+  asynAccessCallListener,...,isAsynAccessActive</dt>
     <dd>The implementation should be sufficient for all derived classes.</dd>
   <dt>getSupportName and setSupportName</dt>
     <dd>With the exception of PVLink the implementation should be sufficient
@@ -1211,36 +1007,6 @@ interfaces:</p>
     public String toString();
 }</pre>
 
-<h3 id="BasePVEnum">BasePVEnum</h3>
-<pre>public class BasePVEnum extends AbstractPVField implements PVEnum {
-    public BasePVEnum(PVField parent,Enum enumField);
-    public Enum getEnum();
-    public String[] getChoices();
-    public int getIndex();
-    public boolean setChoices(String[] choice);
-    public void setIndex(int index);
-    public String toString();
-    public String toString(int indentLevel);
-}</pre>
-
-<h3 id="BasePVMenu">BasePVMenu</h3>
-<pre>public class BasePVMenu extends BasePVEnum implements PVMenu
-    public BasePVMenu(PVField parent,Menu menu) {
-    public Menu getMenu();
-    public boolean setChoices(String[] choice) {
-    public String toString() { return getString(0);}
-    public String toString(int indentLevel) {
-}</pre>
-
-<h3 id="BasePVLink">BasePVLink</h3>
-<pre>public class BasePVLink extends AbstractPVField implements PVLink {
-    public BasePVLink(PVField parent,Field field);
-    public PVStructure getConfigurationStructure();
-    public boolean setConfigurationStructure(PVStructure pvStructure);
-    public String toString();
-    public String toString(int indentLevel);
-}</pre>
-
 <h3 id="BasePVStru">BasePVStructure</h3>
 <pre>public class BasePVStructure extends AbstractPVField implements PVStructure
     public Structure getStructure();
@@ -1249,6 +1015,16 @@ interfaces:</p>
     public void setRecord(PVRecord record);
     public boolean replaceStructureField(String fieldName, Structure structure);
     public PVField[] getFieldPVFields();
+    public PVBoolean getBooleanField(String fieldName);
+    public PVByte getByteField(String fieldName);
+    public PVShort getShortField(String fieldName);
+    public PVInt getIntField(String fieldName);
+    public PVLong getLongField(String fieldName);
+    public PVFloat getFloatField(String fieldName);
+    public PVDouble getDoubleField(String fieldName);
+    public PVString getStringField(String fieldName);
+    public PVStructure getStructureField(String fieldName,String structureName);
+    public PVArray getArrayField(String fieldName,Type elementType);
     public String toString();
     public String toString(int indentLevel);
     protected String toString(String prefix,int indentLevel);

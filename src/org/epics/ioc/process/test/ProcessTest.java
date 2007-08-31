@@ -28,14 +28,8 @@ public class ProcessTest extends TestCase {
         IOCDB iocdbMaster = IOCDBFactory.getMaster();
         Requester iocRequester = new Listener();
         XMLToDBDFactory.convert(dbd,
-                 "dbd/menuStructureSupport.xml",
+                 "example/exampleDBD.xml",
                  iocRequester);
-        XMLToDBDFactory.convert(dbd,
-                "dbd/recordType.xml",
-                iocRequester);
-        XMLToDBDFactory.convert(dbd,
-                 "src/org/epics/ioc/process/test/exampleDBD.xml",
-                 iocRequester); 
         Map<String,DBRecord> recordMap = iocdbMaster.getRecordMap();
         Set<String> keys = recordMap.keySet();
         boolean initOK = IOCFactory.initDatabase(
