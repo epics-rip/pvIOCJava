@@ -72,8 +72,6 @@ public class ChannelAccessLocalFactory  {
         private ChannelStateListener stateListener = null;
         private DBRecord dbRecord;
         private PVRecord pvRecord;
-        private PVAccess pvAccess;
-        private PVField currentField = null;
         private LinkedList<FieldGroupImpl> fieldGroupList = 
             new LinkedList<FieldGroupImpl>();
         private LinkedList<ChannelProcessImpl> channelProcessList =
@@ -95,10 +93,6 @@ public class ChannelAccessLocalFactory  {
             stateListener = listener;
             dbRecord = record;
             pvRecord = record.getPVRecord();
-            pvAccess = PVAccessFactory.createPVAccess(pvRecord);
-            if(pvAccess==null) {
-                throw new IllegalStateException("ChannelLink createAccess failed. Why?");
-            }
         }       
         /* (non-Javadoc)
          * @see org.epics.ioc.ca.Channel#getChannelName()
@@ -325,9 +319,10 @@ public class ChannelAccessLocalFactory  {
             lock.lock();
             try { //ChannelFieldImpl(dbRecord.findDBField(currentField))
                 if(isDestroyed) return null;
-                currentField = pvAccess.findField(name);
-                if(currentField==null) return null;
-                return new ChannelFieldImpl(dbRecord.findDBField(currentField));               
+                if(name==null || name.length()<=0) return new ChannelFieldImpl(dbRecord.getDBStructure());
+                PVField pvField = pvRecord.findProperty(name);
+                if(pvField==null) return null;
+                return new ChannelFieldImpl(dbRecord.findDBField(pvField));               
             } finally {
                 lock.unlock();
             }
@@ -556,13 +551,35 @@ public class ChannelAccessLocalFactory  {
 
     
         private static class ChannelFieldImpl implements ChannelField {
-            private DBField dbField;
+            private DBField dbField = null;
             private PVField pvField;
             
             ChannelFieldImpl(DBField dbField) {
                 this.dbField = dbField;
                 pvField = dbField.getPVField();
             }        
+            /* (non-Javadoc)
+             * @see org.epics.ioc.ca.ChannelField#getPropertyNames()
+             */
+            public String[] getPropertyNames() {
+                PVField[] pvFields = pvField.getPropertys();
+                if(pvFields==null || pvFields.length==0) return null;
+                int length = pvFields.length;
+                String[] names = new String[length];
+                for(int i=0; i<length; i++) {
+                    names[i] = pvFields[i].getField().getFieldName();
+                }
+                return names;
+            }
+            /* (non-Javadoc)
+             * @see org.epics.ioc.ca.ChannelField#findProperty(java.lang.String)
+             */
+            public ChannelField findProperty(String propertyName) {
+                PVField pvf = pvField.findProperty(propertyName);
+                if(pvf==null) return null;
+                DBField dbf = dbField.getDBRecord().findDBField(pvf);
+                return new ChannelFieldImpl(dbf);
+            }
             /* (non-Javadoc)
              * @see org.epics.ioc.ca.ChannelField#getAccessRights()
              */
@@ -581,11 +598,11 @@ public class ChannelAccessLocalFactory  {
                 return pvField.getField();
             }
 
-            DBField getDBField() {
+            private DBField getDBField() {
                 return dbField;
             }
            
-            PVField getPVField() {
+            private PVField getPVField() {
                 return pvField;
             }
             /* (non-Javadoc)

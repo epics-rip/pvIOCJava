@@ -1,0 +1,17 @@
+<?xml version="1.0" ?>
+<DBDefinition>
+<structure name = "byteHistoryElement">
+    <field name = "timeStamp" type = "structure" structureName = "timeStamp" />
+    <field name = "value" type = "byte" />
+    <field name = "alarm" type = "structure" structureName = "alarm" supportName = "null" />
+</structure>
+
+<structure name = "byteHistory" supportName = "byteHistory" >
+    <field name = "size" type = "int" />
+    <!-- other fields are needed -->
+    <field name = "history" type = "array" elementType = "structure" />
+</structure>
+
+<support name = "byteHistory"
+  factoryName = "org.epics.ioc.support.HistoryFactory" />
+</DBDefinition>

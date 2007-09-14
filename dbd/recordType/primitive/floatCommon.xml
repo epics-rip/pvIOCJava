@@ -1,21 +1,14 @@
 <?xml version="1.0" ?>
 <DBDefinition>
-  <field name = "value" type = "float" >
-    <property name = "alarm" associatedField = "alarm" />
-    <property name = "displayChararacteristics" associatedField = "displayCharacteristics" />
-    <property name = "timeStamp" associatedField = "timeStamp" />
-  </field>
-  <field name = "alarm" type = "structure" structureName = "alarm"
-      supportName = "alarm" />
+  <field name = "value" type = "float" />
+  <field name = "alarm" type = "structure"/>
+  <field name = "timeStamp" type = "structure" />  
   <field name = "input" type = "structure" />
-  <!-- instance can set
-     structureName = "floatAlarm" supportName = "floatAlarm" -->
+  <!-- instance can set structureName = "floatAlarm" -->
   <field name = "valueAlarm" type = "structure" />
   <field name = "output" type = "structure" />
-  <!-- instance can set
-     structureName = "floatDisplayCharacteristics" -->
-  <field name = "displayCharacteristics" type = "structure" />
-  <!-- instance can set
-     structureName = "floatHistory" supportName = "history" -->
+  <field name = "display" type = "structure" />
+  <field name = "control" type = "structure" />
+  <!-- instance can set structureName = "floatHistory" -->
   <field name = "history" type = "structure" />
 </DBDefinition>

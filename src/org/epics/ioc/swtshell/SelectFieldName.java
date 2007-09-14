@@ -110,22 +110,6 @@ public class SelectFieldName extends Dialog implements SelectionListener {
                 if(object instanceof PVField) {
                     PVField pvField = (PVField) object;
                     fieldName = pvField.getFullFieldName();
-                } else if(object instanceof Property) {
-                    TreeItem itemParent = treeItem.getParentItem();
-                    PVField pvParent = (PVField)itemParent.getParentItem().getData();
-                    Property[] propertys = pvParent.getField().getPropertys();
-                    TreeItem[] childItems = itemParent.getItems();
-                    assert(propertys.length==childItems.length);
-                    for(int i=0; i<propertys.length; i++) {
-                        if(childItems[i]==treeItem) {
-                            fieldName = propertys[i].getPropertyName();
-                            String parentName = pvParent.getFullFieldName();
-                            if(parentName!=null && parentName.length()>0) {
-                                fieldName = pvParent.getFullFieldName() + "." + fieldName;
-                            }
-                            break;
-                        }
-                    }
                 } else if(object==null) {
                     requester.message("property is illegal selection",MessageType.error);
                 }
@@ -134,22 +118,7 @@ public class SelectFieldName extends Dialog implements SelectionListener {
         }
     }
 
-    private void createPropertyTreeItem(TreeItem tree,Property[] propertys) {
-        TreeItem treeItem = new TreeItem(tree,SWT.NONE);
-        treeItem.setText("property");
-        treeItem.setGrayed(true);
-        for(Property property : propertys) {
-            TreeItem propertyItem = new TreeItem(treeItem,SWT.NONE);
-            propertyItem.setText(property.getPropertyName());
-            propertyItem.setData(property);
-        }
-    }
-
     private void createStructureTreeItem(TreeItem tree,PVStructure pvStructure) {
-        Property[] propertys = pvStructure.getField().getPropertys();
-        if(propertys!=null&&propertys.length>0) {
-            createPropertyTreeItem(tree,propertys);
-        }
         PVField[] pvFields = pvStructure.getFieldPVFields();
         for(PVField pvField : pvFields) {
             Field field = pvField.getField();
@@ -161,21 +130,12 @@ public class SelectFieldName extends Dialog implements SelectionListener {
                 createStructureTreeItem(treeItem,(PVStructure)pvField);
             } else if(type==Type.pvArray) {
                 createArrayTreeItem(treeItem,(PVArray)pvField);
-            } else {
-                propertys = field.getPropertys();
-                if(propertys!=null&&propertys.length>0) {
-                    createPropertyTreeItem(treeItem,propertys);
-                }
             }
         }
     }
 
     private void createArrayTreeItem(TreeItem tree, PVArray pvArray) {
         Array array = (Array)pvArray.getField();
-        Property[] propertys = array.getPropertys();
-        if(propertys!=null&&propertys.length>0) {
-            createPropertyTreeItem(tree,propertys);
-        }
         Type elementType = array.getElementType();
         if(elementType.isScalar()) return;
         int length = pvArray.getLength();

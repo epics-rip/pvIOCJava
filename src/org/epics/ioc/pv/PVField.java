@@ -51,6 +51,39 @@ public interface PVField extends Requester {
      */
     PVRecord getPVRecord();
     /**
+     * This finds a property, i.e. a field related to this PVField.
+     * The fieldName is of the form item.item... where item is name or name[index].
+     * 
+     * The algorithm implemented by findProperty is:
+     * 1)Start with the leftmost item and find it.
+     * 2) find the next leftmost item and find it.
+     * 3) Continue until all items have been found or a search fails.
+     * 4) Return the interface for the last item or null if a search fails.
+     * 
+     *  An item is found as follows:
+     *  1) Find the name part of item. If no [index] is present then done
+     *  2) If [index] is present than field must be a structure with elementType structure or array.
+     *  If so then make sure the index element is found. If so it is the field
+     *  
+     *  A name is found as follows:
+     *  1) If the Field for the current PVField is named "value" back up one level in parent tree.
+     *  2) The current PV must be a structure.
+     *  3) If the current PVField is type structure with a fieldName=name then use it.
+     *  4) If the parent tree is null then fail.
+     *  5) Back up one level in the parent tree and go to 2).
+     *  
+     * @param propertyName A string of the form item.item... where item is name or name[index]
+     * @return The PVField interface for the property or null if not found. 
+     */
+    PVField findProperty(String propertyName);
+    /**
+     * Get all the propertys for this PVField.
+     * If this PVField is the value field the parent is the starting point and the propertys will
+     * not include the value field itself.
+     * @return The PVField array for the property fields.
+     */
+    PVField[] getPropertys();
+    /**
      * Replace the data implementation for a field.
      * @param newPVField The new implementation for this field.
      */

@@ -2,6 +2,8 @@
 <IOCDatabase>
 
 <record name = "adcVoltageSupported" type = "int">
+    <timeStamp structureName = "timeStamp" />
+    <alarm structureName = "alarm" />
     <supportArray>
         <value structureName = "supportArrayElement">
             <wait>true</wait>
@@ -13,6 +15,8 @@
 </record>
 
 <record name = "voltage" type = "double" >
+    <timeStamp structureName = "timeStamp" />
+    <alarm structureName = "alarm" />
     <input structureName = "linearConvertInput">
         <linearConvert>
             <deviceHigh>4095</deviceHigh>
@@ -24,30 +28,29 @@
                 <pvname>adcVoltageSupported</pvname>
                 <process>false</process>
         </input>
-
     </input>  
     <valueAlarm structureName = "doubleAlarm">
           <active>true</active>
           <interval>
               <value structureName = "doubleAlarmInterval">
                   <value>2.0</value>
-                  <severity>major</severity>
+                  <severity><choice>major</choice></severity>
               </value>
               <value structureName = "doubleAlarmInterval">
                   <value>4.0</value>
-                  <severity>minor</severity>
+                  <severity><choice>minor</choice></severity>
               </value>
               <value structureName = "doubleAlarmInterval">
                   <value>6.0</value>
-                  <severity>none</severity>
+                  <severity><choice>none</choice></severity>
               </value>
               <value structureName = "doubleAlarmInterval">
                   <value>8.0</value>
-                  <severity>minor</severity>
+                  <severity><choice>minor</choice></severity>
               </value>
               <value structureName = "doubleAlarmInterval">
                   <value>10.0</value>
-                  <severity>major</severity>
+                  <severity><choice>major</choice></severity>
               </value>
           </interval>
           <outOfRange><choice>invalid</choice></outOfRange>
@@ -58,17 +61,26 @@
 
 
 <record name = "psLinked" type = "powerSupply" >
-    <voltageInput supportName = "inputSupport" structureName = "inputSupport">
-        <pvname>voltage</pvname>
-        <process>false</process>
-    </voltageInput>
-    <currentOutput supportName = "outputSupport" structureName = "outputSupport">
-         <pvname>current</pvname>
-         <process>true</process>
-    </currentOutput>
+    <timeStamp structureName = "timeStamp" />
+    <alarm structureName = "alarm" />
+    <voltage>
+        <input  supportName = "inputSupport" structureName = "inputSupport">
+            <pvname>voltage</pvname>
+            <process>false</process>
+        </input>
+    </voltage>
+    <current>
+       <input supportName = "powerSupplyCurrent" />
+       <output supportName = "outputSupport" structureName = "outputSupport">
+          <pvname>current</pvname>
+          <process>true</process>
+       </output>
+    </current>
 </record>
 
 <record name = "current" type = "double" >
+    <timeStamp structureName = "timeStamp" />
+    <alarm structureName = "alarm" />
     <output structureName = "linearConvertOutput">
         <linearConvert>
             <deviceHigh>4095</deviceHigh>
@@ -87,23 +99,23 @@
           <interval>
               <value structureName = "doubleAlarmInterval">
                   <value>2.0</value>
-                  <severity>major</severity>
+                  <severity><choice>major</choice></severity>
               </value>
               <value structureName = "doubleAlarmInterval">
                   <value>4.0</value>
-                  <severity>minor</severity>
+                  <severity><choice>minor</choice></severity>
               </value>
               <value structureName = "doubleAlarmInterval">
                   <value>6.0</value>
-                  <severity>none</severity>
+                  <severity><choice>none</choice></severity>
               </value>
               <value structureName = "doubleAlarmInterval">
                   <value>8.0</value>
-                  <severity>minor</severity>
+                  <severity><choice>minor</choice></severity>
               </value>
               <value structureName = "doubleAlarmInterval">
                   <value>10.0</value>
-                  <severity>major</severity>
+                  <severity><choice>major</choice></severity>
               </value>
           </interval>
           <outOfRange><choice>invalid</choice></outOfRange>
@@ -112,6 +124,8 @@
 </record>
 
 <record name = "dacCurrentSupported" type = "int">
+    <timeStamp structureName = "timeStamp" />
+    <alarm structureName = "alarm" />
 </record>
 
 </IOCDatabase>

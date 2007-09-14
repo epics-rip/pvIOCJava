@@ -297,19 +297,23 @@ public class XMLToIOCDBFactory {
         }
         
         private void characters(char[] ch, int start, int length)  {
+            while(start<ch.length && length>0
+                    && Character.isWhitespace(ch[start])) {
+                        start++; length--;
+                    }
+            while(length>0 && Character.isWhitespace(ch[start+ length-1])) {
+                length--;
+            }
+            if(length<=0) return;
             switch(state) {
             case idle: break;
-            case structure: break;
+            case structure:
+                iocxmlReader.message(
+                        "unexpected characters",
+                        MessageType.warning);
+                break;
             case array:
             case field:
-                while(start<ch.length && length>0
-                && Character.isWhitespace(ch[start])) {
-                    start++; length--;
-                }
-                while(length>0 && Character.isWhitespace(ch[start+ length-1])) {
-                    length--;
-                }
-                if(length<=0) break;
                 stringBuilder.append(ch,start,length);
                 break;
             }
@@ -443,6 +447,7 @@ public class XMLToIOCDBFactory {
         private void endField()  {
             String value = stringBuilder.toString();
             stringBuilder.setLength(0);
+            if(value==null || value.length()<=0) return;
             PVField pvField = fieldState.pvField;
             Field field = pvField.getField();
             Type type = field.getType();
@@ -538,7 +543,6 @@ public class XMLToIOCDBFactory {
                         actualFieldName,
                         dbdStructure.getStructureName(),
                         dbdStructure.getFields(),
-                        dbdStructure.getPropertys(),
                         dbdStructure.getFieldAttribute());
                     PVStructureArray pvStructureArray = arrayState.pvStructureArray;
                     PVStructure[] structureData = arrayState.structureData;

@@ -75,7 +75,6 @@ public class BasePVStructure extends AbstractPVField implements PVStructure
             oldStructure.getFieldName(),
             oldStructure.getStructureName(),
             newFields,
-            oldStructure.getPropertys(),
             oldStructure.getFieldAttribute());
         newStructure.setSupportName(oldStructure.getSupportName());
         super.replaceField(newStructure);

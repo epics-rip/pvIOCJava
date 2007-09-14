@@ -32,19 +32,9 @@ public class BaseStructure extends BaseField implements Structure {
      * @param fieldAttribute The fields attributes.
      * @throws IllegalArgumentException if structureName is null;
      */
-    public BaseStructure(String fieldName,String structureName,Field[] field,
-            Property[] property,FieldAttribute fieldAttribute)
+    public BaseStructure(String fieldName,String structureName,Field[] field,FieldAttribute fieldAttribute)
     {
-        super(fieldName, Type.pvStructure,property,fieldAttribute);
-        if(property!=null) for(Property prop : property) {
-            for(Field fieldNow : field) {
-                if(fieldNow.getFieldName().equals(prop.getPropertyName())) {
-                    throw new IllegalArgumentException(
-                        "propertyName " + prop.getPropertyName()
-                        + " is the same as a fields name");
-                }
-            }
-        }
+        super(fieldName, Type.pvStructure,fieldAttribute);        
         if(field==null) field = new Field[0];
         this.fields = field;
         if(structureName==null) {

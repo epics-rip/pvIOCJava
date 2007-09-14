@@ -50,12 +50,11 @@ public class BaseCDRecord implements CDRecord {
         Field newField = null;
         Type type = oldField.getType();
         FieldAttribute fieldAttribute = oldField.getFieldAttribute();
-        Property[] property = new Property[0];
         String fieldName = oldField.getFieldName();
         if(type==Type.pvArray) {
             newField = fieldCreate.createArray(
                 fieldName,((Array)oldField).getElementType(),
-                property,fieldAttribute);
+                fieldAttribute);
         } else if(type==Type.pvStructure) {
             Structure structure = (Structure)oldField;
             Field[] oldFields = structure.getFields();
@@ -65,11 +64,10 @@ public class BaseCDRecord implements CDRecord {
             }
             newField = fieldCreate.createStructure(
                 fieldName, structure.getStructureName(),newFields,
-                property,fieldAttribute);
+                fieldAttribute);
         } else {
             newField = fieldCreate.createField(
-                fieldName, type,
-                property,fieldAttribute);
+                fieldName, type, fieldAttribute);
         }
         return newField;
     }

@@ -2,19 +2,24 @@
 <IOCDatabase>
 
 <record name = "aoIncremental" type = "aoIncrementalDouble" >
+    <timeStamp structureName = "timeStamp" />
+    <alarm structureName = "alarm" />
     <scan>
         <type><choice>periodic</choice></type>
         <rate>1.0</rate>
     </scan>
     <incremental>
+        <value createName = "controlLimit" />
         <rateOfChange>.02</rateOfChange>
-        <incrementalOutput>true</incrementalOutput>
-        <controlLimit>
-            <low>0.0</low>
-            <high>8.0</high>
-        </controlLimit>
+        <incremental>true</incremental>
+        <control structureName = "control" >
+            <limit>
+                <low>0.0</low>
+                <high>8.0</high>
+            </limit>
+        </control>
     </incremental>
-    <output>
+    <output structureName = "linearConvertOutput" >
         <linearConvert>
             <engUnitsLow>0.0</engUnitsLow>
             <engUnitsHigh>10.0</engUnitsHigh>
@@ -22,13 +27,13 @@
             <deviceHigh>4096</deviceHigh>
         </linearConvert>
     </output>
-    <displayCharacteristics structureName = "doubleDisplayCharacteristics" >
+    <display structureName = "display" >
         <units>volts</units>
         <limit>
             <low>0.0</low>
             <high>10.0</high>
         </limit>
-    </displayCharacteristics>
+    </display>
 </record>
 
 

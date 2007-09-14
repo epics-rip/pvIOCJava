@@ -439,14 +439,14 @@ public class CASupportFactory {
             IOCDB iocdb = IOCDBFactory.getMaster();
             targetDBRecord = iocdb.findRecord(recordName);
             if(targetDBRecord!=null) {
-                PVAccess pvAccess = PVAccessFactory.createPVAccess(targetDBRecord.getPVRecord());
-                targetPVField = pvAccess.findField(fieldName);
+                PVRecord pvRecord = targetDBRecord.getPVRecord();
+                targetPVField = pvRecord.findProperty(fieldName);
                 if(targetPVField==null) {
                     pvStructure.message("field " + fieldName + " not found", MessageType.error);
                     return;
                 }
                 if(inheritSeverity) {
-                    PVField pvField = pvAccess.findField("alarm.severity.index");
+                    PVField pvField = targetPVField.findProperty("alarm.severity.index");
                     if(pvField!=null) {
                         targetPVSeverity = (PVInt)pvField;
                     } else {
@@ -945,8 +945,8 @@ public class CASupportFactory {
             IOCDB iocdb = IOCDBFactory.getMaster();
             targetDBRecord = iocdb.findRecord(recordName);
             if(targetDBRecord!=null) {        
-                PVAccess pvAccess = PVAccessFactory.createPVAccess(targetDBRecord.getPVRecord());
-                targetPVField = pvAccess.findField(fieldName);
+                PVRecord targetPVRecord = targetDBRecord.getPVRecord();
+                targetPVField = targetPVRecord.findProperty(fieldName);
                 if(targetPVField==null) {
                     pvStructure.message("field " + fieldName + " not found", MessageType.error);
                     return;

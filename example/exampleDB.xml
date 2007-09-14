@@ -11,7 +11,6 @@
 <include href = "booleanArrayDB.xml" />
 <include href = "eventDB.xml" />
 <include href = "powerSupplyAllDB.xml" />
-<include removePath = "example" />
 <!--
 -->
 </IOCDatabase>

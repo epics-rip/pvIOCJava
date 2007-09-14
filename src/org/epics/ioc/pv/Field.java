@@ -17,19 +17,6 @@ public interface Field {
      */
     String getFieldName();
     /**
-     * Get the propertys for the field.
-     * @return A Property array.
-     * If null is returned then the field has no associated properties.
-     */
-    Property[] getPropertys();
-    /**
-     * Get a specific property
-     * @param propertyName the name of the desired property
-     * @return A Property interface.
-     * This is null if propertyName is not a property of the field.
-     */
-    Property getProperty(String propertyName);
-    /**
      * Get the field type.
      * @return The field type.
      */

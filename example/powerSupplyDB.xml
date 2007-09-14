@@ -2,8 +2,12 @@
 <IOCDatabase>
 
 <record name = "psSimple" type = "powerSupply" >
-    <voltage>10.0</voltage>
+    <timeStamp structureName = "timeStamp" />
+    <alarm structureName = "alarm" />
+    <voltage><value>10.0</value></voltage>
+    <current>
+        <input supportName = "powerSupplyCurrent" />
+    </current>
 </record>
-
-
+S
 </IOCDatabase>

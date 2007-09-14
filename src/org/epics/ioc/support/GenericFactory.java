@@ -128,7 +128,10 @@ public class GenericFactory {
                 supportState = alarmSupport.getSupportState();
                 if(supportState!=SupportState.ready) return;
             }
-            if(supports.length==0) return;
+            if(supports.length==0) {
+                setSupportState(supportState);
+                return;
+            }
             for(int i=0; i<supports.length; i++) {
                 Support support = supports[i];
                 support.start();

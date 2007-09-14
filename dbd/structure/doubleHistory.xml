@@ -1,0 +1,18 @@
+<?xml version="1.0" ?>
+<DBDefinition>
+
+<structure name = "doubleHistoryElement">
+    <field name = "timeStamp" type = "structure" structureName = "timeStamp" />
+    <field name = "value" type = "double" />
+    <field name = "alarm" type = "structure" structureName = "alarm" supportName = "null" />
+</structure>
+
+<structure name = "doubleHistory" supportName = "doubleHistory" >
+    <field name = "size" type = "int" />
+    <!-- other fields are needed -->
+    <field name = "history" type = "array" elementType = "structure" />
+</structure>
+
+<support name = "doubleHistory"
+  factoryName = "org.epics.ioc.support.HistoryFactory" />
+</DBDefinition>

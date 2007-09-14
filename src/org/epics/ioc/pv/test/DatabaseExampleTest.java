@@ -24,7 +24,7 @@ public class DatabaseExampleTest extends TestCase {
     public static void testBoolean() {
         DatabaseExample database = new DatabaseExample("test");
         PVBoolean booleanData = (PVBoolean)
-            database.createField("boolean",Type.pvBoolean,null);
+            database.createField("boolean",Type.pvBoolean);
         boolean booleanValue = true;
         booleanData.put(booleanValue);
         assertTrue(booleanData.get());
@@ -36,7 +36,6 @@ public class DatabaseExampleTest extends TestCase {
             	field.toString(),
             	booleanData.get(),
                 booleanData.toString());
-        assertEquals(field.getPropertys().length,0);
     }
         
     /**
@@ -46,7 +45,7 @@ public class DatabaseExampleTest extends TestCase {
         DatabaseExample database = new DatabaseExample("test");
         Convert convert = ConvertFactory.getConvert();
         PVByte byteData = (PVByte)
-            database.createField("byte",Type.pvByte,null);
+            database.createField("byte",Type.pvByte);
         byte byteValue = -128;
         byteData.put(byteValue);
         assertEquals(byteValue,byteData.get());
@@ -68,7 +67,6 @@ public class DatabaseExampleTest extends TestCase {
         assertEquals(floatValue,convert.toFloat(byteData));
         double doubleValue = byteValue;
         assertEquals(doubleValue,convert.toDouble(byteData));
-        assertEquals(field.getPropertys().length,0);
     }
 
     /**
@@ -78,7 +76,7 @@ public class DatabaseExampleTest extends TestCase {
         DatabaseExample database = new DatabaseExample("test");
         Convert convert = ConvertFactory.getConvert();
         PVShort shortData = (PVShort)
-            database.createField("short",Type.pvShort,null);
+            database.createField("short",Type.pvShort);
         short shortValue = 127;
         shortData.put(shortValue);
         assertEquals(shortValue,shortData.get());
@@ -100,7 +98,6 @@ public class DatabaseExampleTest extends TestCase {
         assertEquals(floatValue,convert.toFloat(shortData));
         double doubleValue = shortValue;
         assertEquals(doubleValue,convert.toDouble(shortData));
-        assertEquals(field.getPropertys().length,0);
     }
 
     /**
@@ -110,7 +107,7 @@ public class DatabaseExampleTest extends TestCase {
         DatabaseExample database = new DatabaseExample("test");
         Convert convert = ConvertFactory.getConvert();
         PVInt intData = (PVInt)
-            database.createField("int",Type.pvInt,null);
+            database.createField("int",Type.pvInt);
         int intValue = 64;
         intData.put(intValue);
         assertEquals(intValue,intData.get());
@@ -132,7 +129,6 @@ public class DatabaseExampleTest extends TestCase {
         assertEquals(floatValue,convert.toFloat(intData));
         double doubleValue = intValue;
         assertEquals(doubleValue,convert.toDouble(intData));
-        assertEquals(field.getPropertys().length,0);
     }
 
     /**
@@ -142,7 +138,7 @@ public class DatabaseExampleTest extends TestCase {
         DatabaseExample database = new DatabaseExample("test");
         Convert convert = ConvertFactory.getConvert();
         PVLong longData = (PVLong)
-            database.createField("long",Type.pvLong,null);
+            database.createField("long",Type.pvLong);
         long longValue = -64;
         longData.put(longValue);
         assertEquals(longValue,longData.get());
@@ -164,7 +160,6 @@ public class DatabaseExampleTest extends TestCase {
         assertEquals(floatValue,convert.toFloat(longData));
         double doubleValue = longValue;
         assertEquals(doubleValue,convert.toDouble(longData));
-        assertEquals(field.getPropertys().length,0);
     }
 
     /**
@@ -174,7 +169,7 @@ public class DatabaseExampleTest extends TestCase {
         DatabaseExample database = new DatabaseExample("test");
         Convert convert = ConvertFactory.getConvert();
         PVFloat floatData = (PVFloat)
-            database.createField("float",Type.pvFloat,null);
+            database.createField("float",Type.pvFloat);
         float floatValue = 32.0F;
         floatData.put(floatValue);
         assertEquals(floatValue,floatData.get());
@@ -196,7 +191,6 @@ public class DatabaseExampleTest extends TestCase {
         assertEquals(floatValue,convert.toFloat(floatData));
         double doubleValue = floatValue;
         assertEquals(doubleValue,convert.toDouble(floatData));
-        assertEquals(field.getPropertys().length,0);
     }
 
     /**
@@ -206,7 +200,7 @@ public class DatabaseExampleTest extends TestCase {
         DatabaseExample database = new DatabaseExample("test");
         Convert convert = ConvertFactory.getConvert();
         PVDouble doubleData = (PVDouble)
-            database.createField("double",Type.pvDouble,null);
+            database.createField("double",Type.pvDouble);
         double doubleValue = 32.0;
         doubleData.put(doubleValue);
         assertEquals(doubleValue,doubleData.get());
@@ -228,7 +222,6 @@ public class DatabaseExampleTest extends TestCase {
         float floatValue = (float)doubleValue;
         assertEquals(floatValue,convert.toFloat(doubleData));
         assertEquals(doubleValue,convert.toDouble(doubleData));
-        assertEquals(field.getPropertys().length,0);
     }
 
     /**
@@ -237,7 +230,7 @@ public class DatabaseExampleTest extends TestCase {
     public static void testString() {
         DatabaseExample database = new DatabaseExample("test");
         PVString stringData = (PVString)
-            database.createField("string",Type.pvString,null);
+            database.createField("string",Type.pvString);
         String stringValue = "string";
         stringData.put(stringValue);
         assertEquals(stringValue,stringData.get());
@@ -248,11 +241,10 @@ public class DatabaseExampleTest extends TestCase {
             	field.toString(),
             	stringData.get(),
                 stringData.toString());
-        assertEquals(field.getPropertys().length,0);
     }
 
     /**
-     * test structure and property.
+     * test structure.
      */
     public static void testStructureAndProperty() {
         DatabaseExample database = new DatabaseExample("test");
@@ -261,15 +253,10 @@ public class DatabaseExampleTest extends TestCase {
         Field highField = fieldCreate.createField("high", Type.pvDouble);
         Field[] fields = new Field[]{lowField,highField};
         PVStructure displayLimit = database.createStructureData(
-            "displayLimit","DisplayLimit",fields,null);
-        Property[] property = new Property[1];
-        property[0] = fieldCreate.createProperty("displayLimit",
-            "displayLimit");
-        
+            "displayLimit","DisplayLimit",fields);
         PVDouble valueData = (PVDouble)database.createField(
-            "value",Type.pvDouble,property);
+            "value",Type.pvDouble);
         // discard data now obtained via valueData
-        property = null;
         PVField[] structFieldData = displayLimit.getFieldPVFields();
         // set displayLimits
         assertTrue(structFieldData.length==2);
@@ -299,7 +286,7 @@ public class DatabaseExampleTest extends TestCase {
     public static void testBooleanArray() {
         DatabaseExample database = new DatabaseExample("test");
         PVBooleanArray booleanArrayData = (PVBooleanArray)
-            database.createArrayData("booleanArray",Type.pvBoolean,null);
+            database.createArrayData("booleanArray",Type.pvBoolean);
         int len;
         boolean[] arrayValue = new boolean[] {true,false,true};
         int nput = booleanArrayData.put(0,arrayValue.length,arrayValue,0);
@@ -315,7 +302,6 @@ public class DatabaseExampleTest extends TestCase {
         System.out.printf("%s%nvalue %s%n",
             	array.toString(),
                 booleanArrayData.toString());
-        assertEquals(field.getPropertys().length,0);
     }
 
     /**
@@ -325,7 +311,7 @@ public class DatabaseExampleTest extends TestCase {
         DatabaseExample database = new DatabaseExample("test");
         Convert convert = ConvertFactory.getConvert();
         PVByteArray byteArrayData = (PVByteArray)
-            database.createArrayData("byteArray",Type.pvByte,null);
+            database.createArrayData("byteArray",Type.pvByte);
         int len;
         byte[] arrayValue = new byte[] {3,4,5};
         int nput = byteArrayData.put(0,arrayValue.length,arrayValue,0);
@@ -349,7 +335,6 @@ public class DatabaseExampleTest extends TestCase {
         System.out.printf("%s%nvalue %s%n",
                 array.toString(),
                 byteArrayData.toString());
-        assertEquals(field.getPropertys().length,0);
 
         arrayValue[0] = 0; arrayValue[1] = 1; arrayValue[2] = 2;
         convert.fromByteArray(byteArrayData,0,len,arrayValue,0);
@@ -358,7 +343,7 @@ public class DatabaseExampleTest extends TestCase {
         assertTrue(arrayValue[0]==0 && arrayValue[1]==1 && arrayValue[2]==2);
 
         PVShortArray shortArrayData = (PVShortArray)
-            database.createArrayData("shortArray",Type.pvShort,null);
+            database.createArrayData("shortArray",Type.pvShort);
         arrayValue[0] = 0; arrayValue[1] = 1; arrayValue[2] = 2;
         convert.fromByteArray(shortArrayData,0,len,arrayValue,0);
         arrayValue[0] = 0; arrayValue[1] = 0; arrayValue[2] = 0;
@@ -366,7 +351,7 @@ public class DatabaseExampleTest extends TestCase {
         assertTrue(arrayValue[0]==0 && arrayValue[1]==1 && arrayValue[2]==2);
 
         PVIntArray intArrayData = (PVIntArray)
-            database.createArrayData("intArray",Type.pvInt,null);
+            database.createArrayData("intArray",Type.pvInt);
         arrayValue[0] = 0; arrayValue[1] = 1; arrayValue[2] = 2;
         convert.fromByteArray(intArrayData,0,len,arrayValue,0);
         arrayValue[0] = 0; arrayValue[1] = 0; arrayValue[2] = 0;
@@ -374,7 +359,7 @@ public class DatabaseExampleTest extends TestCase {
         assertTrue(arrayValue[0]==0 && arrayValue[1]==1 && arrayValue[2]==2);
 
         PVLongArray longArrayData = (PVLongArray)
-            database.createArrayData("longArray",Type.pvLong,null);
+            database.createArrayData("longArray",Type.pvLong);
         arrayValue[0] = 0; arrayValue[1] = 1; arrayValue[2] = 2;
         convert.fromByteArray(longArrayData,0,len,arrayValue,0);
         arrayValue[0] = 0; arrayValue[1] = 0; arrayValue[2] = 0;
@@ -382,7 +367,7 @@ public class DatabaseExampleTest extends TestCase {
         assertTrue(arrayValue[0]==0 && arrayValue[1]==1 && arrayValue[2]==2);
 
         PVFloatArray floatArrayData = (PVFloatArray)
-            database.createArrayData("floatArray",Type.pvFloat,null);
+            database.createArrayData("floatArray",Type.pvFloat);
         arrayValue[0] = 0; arrayValue[1] = 1; arrayValue[2] = 2;
         convert.fromByteArray(floatArrayData,0,len,arrayValue,0);
         arrayValue[0] = 0; arrayValue[1] = 0; arrayValue[2] = 0;
@@ -390,7 +375,7 @@ public class DatabaseExampleTest extends TestCase {
         assertTrue(arrayValue[0]==0 && arrayValue[1]==1 && arrayValue[2]==2);
 
         PVDoubleArray doubleArrayData = (PVDoubleArray)
-            database.createArrayData("doubleArray",Type.pvDouble,null);
+            database.createArrayData("doubleArray",Type.pvDouble);
         arrayValue[0] = 0; arrayValue[1] = 1; arrayValue[2] = 2;
         convert.fromByteArray(doubleArrayData,0,len,arrayValue,0);
         arrayValue[0] = 0; arrayValue[1] = 0; arrayValue[2] = 0;
@@ -405,7 +390,7 @@ public class DatabaseExampleTest extends TestCase {
         DatabaseExample database = new DatabaseExample("test");
         Convert convert = ConvertFactory.getConvert();
         PVShortArray shortArrayData = (PVShortArray)
-            database.createArrayData("shortArray",Type.pvShort,null);
+            database.createArrayData("shortArray",Type.pvShort);
         int len;
         short[] arrayValue = new short[] {3,4,5};
         int nput = shortArrayData.put(0,arrayValue.length,arrayValue,0);
@@ -421,10 +406,9 @@ public class DatabaseExampleTest extends TestCase {
         System.out.printf("%s%nvalue %s%n",
                 array.toString(),
                 shortArrayData.toString());
-        assertEquals(field.getPropertys().length,0);
 
         PVByteArray byteArrayData = (PVByteArray)
-            database.createArrayData("byteArray",Type.pvByte,null);
+            database.createArrayData("byteArray",Type.pvByte);
         arrayValue[0] = 0; arrayValue[1] = 1; arrayValue[2] = 2;
         convert.fromShortArray(byteArrayData,0,len,arrayValue,0);
         arrayValue[0] = 0; arrayValue[1] = 0; arrayValue[2] = 0;
@@ -438,7 +422,7 @@ public class DatabaseExampleTest extends TestCase {
         assertTrue(arrayValue[0]==0 && arrayValue[1]==1 && arrayValue[2]==2);
 
         PVIntArray intArrayData = (PVIntArray)
-            database.createArrayData("intArray",Type.pvInt,null);
+            database.createArrayData("intArray",Type.pvInt);
         arrayValue[0] = 0; arrayValue[1] = 1; arrayValue[2] = 2;
         convert.fromShortArray(intArrayData,0,len,arrayValue,0);
         arrayValue[0] = 0; arrayValue[1] = 0; arrayValue[2] = 0;
@@ -446,7 +430,7 @@ public class DatabaseExampleTest extends TestCase {
         assertTrue(arrayValue[0]==0 && arrayValue[1]==1 && arrayValue[2]==2);
 
         PVLongArray longArrayData = (PVLongArray)
-            database.createArrayData("longArray",Type.pvLong,null);
+            database.createArrayData("longArray",Type.pvLong);
         arrayValue[0] = 0; arrayValue[1] = 1; arrayValue[2] = 2;
         convert.fromShortArray(longArrayData,0,len,arrayValue,0);
         arrayValue[0] = 0; arrayValue[1] = 0; arrayValue[2] = 0;
@@ -454,7 +438,7 @@ public class DatabaseExampleTest extends TestCase {
         assertTrue(arrayValue[0]==0 && arrayValue[1]==1 && arrayValue[2]==2);
 
         PVFloatArray floatArrayData = (PVFloatArray)
-            database.createArrayData("floatArray",Type.pvFloat,null);
+            database.createArrayData("floatArray",Type.pvFloat);
         arrayValue[0] = 0; arrayValue[1] = 1; arrayValue[2] = 2;
         convert.fromShortArray(floatArrayData,0,len,arrayValue,0);
         arrayValue[0] = 0; arrayValue[1] = 0; arrayValue[2] = 0;
@@ -462,7 +446,7 @@ public class DatabaseExampleTest extends TestCase {
         assertTrue(arrayValue[0]==0 && arrayValue[1]==1 && arrayValue[2]==2);
 
         PVDoubleArray doubleArrayData = (PVDoubleArray)
-            database.createArrayData("doubleArray",Type.pvDouble,null);
+            database.createArrayData("doubleArray",Type.pvDouble);
         arrayValue[0] = 0; arrayValue[1] = 1; arrayValue[2] = 2;
         convert.fromShortArray(doubleArrayData,0,len,arrayValue,0);
         arrayValue[0] = 0; arrayValue[1] = 0; arrayValue[2] = 0;
@@ -477,7 +461,7 @@ public class DatabaseExampleTest extends TestCase {
         DatabaseExample database = new DatabaseExample("test");
         Convert convert = ConvertFactory.getConvert();
         PVIntArray intArrayData = (PVIntArray)
-            database.createArrayData("intArray",Type.pvInt,null);
+            database.createArrayData("intArray",Type.pvInt);
         int len;
         int[] arrayValue = new int[] {3,4,5};
         int nput = intArrayData.put(0,arrayValue.length,arrayValue,0);
@@ -493,10 +477,9 @@ public class DatabaseExampleTest extends TestCase {
         System.out.printf("%s%nvalue %s%n",
                 array.toString(),
                 intArrayData.toString());
-        assertEquals(field.getPropertys().length,0);
 
         PVByteArray byteArrayData = (PVByteArray)
-            database.createArrayData("byteArray",Type.pvByte,null);
+            database.createArrayData("byteArray",Type.pvByte);
         arrayValue[0] = 0; arrayValue[1] = 1; arrayValue[2] = 2;
         convert.fromIntArray(byteArrayData,0,len,arrayValue,0);
         arrayValue[0] = 0; arrayValue[1] = 0; arrayValue[2] = 0;
@@ -504,7 +487,7 @@ public class DatabaseExampleTest extends TestCase {
         assertTrue(arrayValue[0]==0 && arrayValue[1]==1 && arrayValue[2]==2);
 
         PVShortArray shortArrayData = (PVShortArray)
-            database.createArrayData("shortArray",Type.pvShort,null);
+            database.createArrayData("shortArray",Type.pvShort);
         arrayValue[0] = 0; arrayValue[1] = 1; arrayValue[2] = 2;
         convert.fromIntArray(shortArrayData,0,len,arrayValue,0);
         arrayValue[0] = 0; arrayValue[1] = 0; arrayValue[2] = 0;
@@ -518,7 +501,7 @@ public class DatabaseExampleTest extends TestCase {
         assertTrue(arrayValue[0]==0 && arrayValue[1]==1 && arrayValue[2]==2);
 
         PVLongArray longArrayData = (PVLongArray)
-            database.createArrayData("longArray",Type.pvLong,null);
+            database.createArrayData("longArray",Type.pvLong);
         arrayValue[0] = 0; arrayValue[1] = 1; arrayValue[2] = 2;
         convert.fromIntArray(longArrayData,0,len,arrayValue,0);
         arrayValue[0] = 0; arrayValue[1] = 0; arrayValue[2] = 0;
@@ -526,7 +509,7 @@ public class DatabaseExampleTest extends TestCase {
         assertTrue(arrayValue[0]==0 && arrayValue[1]==1 && arrayValue[2]==2);
 
         PVFloatArray floatArrayData = (PVFloatArray)
-            database.createArrayData("floatArray",Type.pvFloat,null);
+            database.createArrayData("floatArray",Type.pvFloat);
         arrayValue[0] = 0; arrayValue[1] = 1; arrayValue[2] = 2;
         convert.fromIntArray(floatArrayData,0,len,arrayValue,0);
         arrayValue[0] = 0; arrayValue[1] = 0; arrayValue[2] = 0;
@@ -534,7 +517,7 @@ public class DatabaseExampleTest extends TestCase {
         assertTrue(arrayValue[0]==0 && arrayValue[1]==1 && arrayValue[2]==2);
 
         PVDoubleArray doubleArrayData = (PVDoubleArray)
-            database.createArrayData("doubleArray",Type.pvDouble,null);
+            database.createArrayData("doubleArray",Type.pvDouble);
         arrayValue[0] = 0; arrayValue[1] = 1; arrayValue[2] = 2;
         convert.fromIntArray(doubleArrayData,0,len,arrayValue,0);
         arrayValue[0] = 0; arrayValue[1] = 0; arrayValue[2] = 0;
@@ -549,7 +532,7 @@ public class DatabaseExampleTest extends TestCase {
         DatabaseExample database = new DatabaseExample("test");
         Convert convert = ConvertFactory.getConvert();
         PVLongArray longArrayData = (PVLongArray)
-            database.createArrayData("longArray",Type.pvLong,null);
+            database.createArrayData("longArray",Type.pvLong);
         int len;
         long[] arrayValue = new long[] {3,4,5};
         int nput = longArrayData.put(0,arrayValue.length,arrayValue,0);
@@ -565,10 +548,9 @@ public class DatabaseExampleTest extends TestCase {
         System.out.printf("%s%nvalue %s%n",
                 array.toString(),
                 longArrayData.toString());
-        assertEquals(field.getPropertys().length,0);
 
         PVByteArray byteArrayData = (PVByteArray)
-            database.createArrayData("byteArray",Type.pvByte,null);
+            database.createArrayData("byteArray",Type.pvByte);
         arrayValue[0] = 0; arrayValue[1] = 1; arrayValue[2] = 2;
         convert.fromLongArray(byteArrayData,0,len,arrayValue,0);
         arrayValue[0] = 0; arrayValue[1] = 0; arrayValue[2] = 0;
@@ -576,7 +558,7 @@ public class DatabaseExampleTest extends TestCase {
         assertTrue(arrayValue[0]==0 && arrayValue[1]==1 && arrayValue[2]==2);
 
         PVShortArray shortArrayData = (PVShortArray)
-            database.createArrayData("shortArray",Type.pvShort,null);
+            database.createArrayData("shortArray",Type.pvShort);
         arrayValue[0] = 0; arrayValue[1] = 1; arrayValue[2] = 2;
         convert.fromLongArray(shortArrayData,0,len,arrayValue,0);
         arrayValue[0] = 0; arrayValue[1] = 0; arrayValue[2] = 0;
@@ -584,7 +566,7 @@ public class DatabaseExampleTest extends TestCase {
         assertTrue(arrayValue[0]==0 && arrayValue[1]==1 && arrayValue[2]==2);
 
         PVIntArray intArrayData = (PVIntArray)
-            database.createArrayData("intArray",Type.pvInt,null);
+            database.createArrayData("intArray",Type.pvInt);
         arrayValue[0] = 0; arrayValue[1] = 1; arrayValue[2] = 2;
         convert.fromLongArray(intArrayData,0,len,arrayValue,0);
         arrayValue[0] = 0; arrayValue[1] = 0; arrayValue[2] = 0;
@@ -598,7 +580,7 @@ public class DatabaseExampleTest extends TestCase {
         assertTrue(arrayValue[0]==0 && arrayValue[1]==1 && arrayValue[2]==2);
 
         PVFloatArray floatArrayData = (PVFloatArray)
-            database.createArrayData("floatArray",Type.pvFloat,null);
+            database.createArrayData("floatArray",Type.pvFloat);
         arrayValue[0] = 0; arrayValue[1] = 1; arrayValue[2] = 2;
         convert.fromLongArray(floatArrayData,0,len,arrayValue,0);
         arrayValue[0] = 0; arrayValue[1] = 0; arrayValue[2] = 0;
@@ -606,7 +588,7 @@ public class DatabaseExampleTest extends TestCase {
         assertTrue(arrayValue[0]==0 && arrayValue[1]==1 && arrayValue[2]==2);
 
         PVDoubleArray doubleArrayData = (PVDoubleArray)
-            database.createArrayData("doubleArray",Type.pvDouble,null);
+            database.createArrayData("doubleArray",Type.pvDouble);
         arrayValue[0] = 0; arrayValue[1] = 1; arrayValue[2] = 2;
         convert.fromLongArray(doubleArrayData,0,len,arrayValue,0);
         arrayValue[0] = 0; arrayValue[1] = 0; arrayValue[2] = 0;
@@ -621,7 +603,7 @@ public class DatabaseExampleTest extends TestCase {
         DatabaseExample database = new DatabaseExample("test");
         Convert convert = ConvertFactory.getConvert();
         PVFloatArray floatArrayData = (PVFloatArray)
-            database.createArrayData("floatArray",Type.pvFloat,null);
+            database.createArrayData("floatArray",Type.pvFloat);
         int len;
         float[] arrayValue = new float[] {3.0F,4.0F,5.0F};
         int nput = floatArrayData.put(0,arrayValue.length,arrayValue,0);
@@ -637,10 +619,9 @@ public class DatabaseExampleTest extends TestCase {
         System.out.printf("%s%nvalue %s%n",
                 array.toString(),
                 floatArrayData.toString());
-        assertEquals(field.getPropertys().length,0);
 
         PVByteArray byteArrayData = (PVByteArray)
-            database.createArrayData("byteArray",Type.pvByte,null);
+            database.createArrayData("byteArray",Type.pvByte);
         arrayValue[0] = 0.0F; arrayValue[1] = 1.0F; arrayValue[2] = 2.0F;
         convert.fromFloatArray(byteArrayData,0,len,arrayValue,0);
         arrayValue[0] = 0.0F; arrayValue[1] = 0.0F; arrayValue[2] = 0.0F;
@@ -648,7 +629,7 @@ public class DatabaseExampleTest extends TestCase {
         assertTrue(arrayValue[0]==0.0F && arrayValue[1]==1.0F && arrayValue[2]==2.0F);
 
         PVShortArray shortArrayData = (PVShortArray)
-            database.createArrayData("shortArray",Type.pvShort,null);
+            database.createArrayData("shortArray",Type.pvShort);
         arrayValue[0] = 0.0F; arrayValue[1] = 1.0F; arrayValue[2] = 2.0F;
         convert.fromFloatArray(shortArrayData,0,len,arrayValue,0);
         arrayValue[0] = 0.0F; arrayValue[1] = 0.0F; arrayValue[2] = 0.0F;
@@ -656,7 +637,7 @@ public class DatabaseExampleTest extends TestCase {
         assertTrue(arrayValue[0]==0.0F && arrayValue[1]==1.0F && arrayValue[2]==2.0F);
 
         PVIntArray intArrayData = (PVIntArray)
-            database.createArrayData("intArray",Type.pvInt,null);
+            database.createArrayData("intArray",Type.pvInt);
         arrayValue[0] = 0.0F; arrayValue[1] = 1.0F; arrayValue[2] = 2.0F;
         convert.fromFloatArray(intArrayData,0,len,arrayValue,0);
         arrayValue[0] = 0.0F; arrayValue[1] = 0.0F; arrayValue[2] = 0.0F;
@@ -664,7 +645,7 @@ public class DatabaseExampleTest extends TestCase {
         assertTrue(arrayValue[0]==0.0F && arrayValue[1]==1.0F && arrayValue[2]==2.0F);
 
         PVLongArray longArrayData = (PVLongArray)
-            database.createArrayData("longArray",Type.pvLong,null);
+            database.createArrayData("longArray",Type.pvLong);
         arrayValue[0] = 0.0F; arrayValue[1] = 1.0F; arrayValue[2] = 2.0F;
         convert.fromFloatArray(longArrayData,0,len,arrayValue,0);
         arrayValue[0] = 0.0F; arrayValue[1] = 0.0F; arrayValue[2] = 0.0F;
@@ -678,7 +659,7 @@ public class DatabaseExampleTest extends TestCase {
         assertTrue(arrayValue[0]==0.0F && arrayValue[1]==1.0F && arrayValue[2]==2.0F);
 
         PVDoubleArray doubleArrayData = (PVDoubleArray)
-            database.createArrayData("doubleArray",Type.pvDouble,null);
+            database.createArrayData("doubleArray",Type.pvDouble);
         arrayValue[0] = 0.0F; arrayValue[1] = 1.0F; arrayValue[2] = 2.0F;
         convert.fromFloatArray(doubleArrayData,0,len,arrayValue,0);
         arrayValue[0] = 0.0F; arrayValue[1] = 0.0F; arrayValue[2] = 0.0F;
@@ -693,7 +674,7 @@ public class DatabaseExampleTest extends TestCase {
         DatabaseExample database = new DatabaseExample("test");
         Convert convert = ConvertFactory.getConvert();
         PVDoubleArray doubleArrayData = (PVDoubleArray)
-            database.createArrayData("doubleArray",Type.pvDouble,null);
+            database.createArrayData("doubleArray",Type.pvDouble);
         int len;
         double[] arrayValue = new double[] {3.0,4.0,5.0};
         int nput = doubleArrayData.put(0,arrayValue.length,arrayValue,0);
@@ -709,10 +690,9 @@ public class DatabaseExampleTest extends TestCase {
         System.out.printf("%s%nvalue %s%n",
                 array.toString(),
                 doubleArrayData.toString());
-        assertEquals(field.getPropertys().length,0);
 
         PVByteArray byteArrayData = (PVByteArray)
-            database.createArrayData("byteArray",Type.pvByte,null);
+            database.createArrayData("byteArray",Type.pvByte);
         arrayValue[0] = 0.0; arrayValue[1] = 1.0; arrayValue[2] = 2.0;
         convert.fromDoubleArray(byteArrayData,0,len,arrayValue,0);
         arrayValue[0] = 0.0; arrayValue[1] = 0.0; arrayValue[2] = 0.0;
@@ -720,7 +700,7 @@ public class DatabaseExampleTest extends TestCase {
         assertTrue(arrayValue[0]==0.0 && arrayValue[1]==1.0 && arrayValue[2]==2.0);
 
         PVShortArray shortArrayData = (PVShortArray)
-            database.createArrayData("shortArray",Type.pvShort,null);
+            database.createArrayData("shortArray",Type.pvShort);
         arrayValue[0] = 0.0; arrayValue[1] = 1.0; arrayValue[2] = 2.0;
         convert.fromDoubleArray(shortArrayData,0,len,arrayValue,0);
         arrayValue[0] = 0.0; arrayValue[1] = 0.0; arrayValue[2] = 0.0;
@@ -728,7 +708,7 @@ public class DatabaseExampleTest extends TestCase {
         assertTrue(arrayValue[0]==0.0 && arrayValue[1]==1.0 && arrayValue[2]==2.0);
 
         PVIntArray intArrayData = (PVIntArray)
-            database.createArrayData("intArray",Type.pvInt,null);
+            database.createArrayData("intArray",Type.pvInt);
         arrayValue[0] = 0.0; arrayValue[1] = 1.0; arrayValue[2] = 2.0;
         convert.fromDoubleArray(intArrayData,0,len,arrayValue,0);
         arrayValue[0] = 0.0; arrayValue[1] = 0.0; arrayValue[2] = 0.0;
@@ -736,7 +716,7 @@ public class DatabaseExampleTest extends TestCase {
         assertTrue(arrayValue[0]==0.0 && arrayValue[1]==1.0 && arrayValue[2]==2.0);
 
         PVLongArray longArrayData = (PVLongArray)
-            database.createArrayData("longArray",Type.pvLong,null);
+            database.createArrayData("longArray",Type.pvLong);
         arrayValue[0] = 0.0; arrayValue[1] = 1.0; arrayValue[2] = 2.0;
         convert.fromDoubleArray(longArrayData,0,len,arrayValue,0);
         arrayValue[0] = 0.0; arrayValue[1] = 0.0; arrayValue[2] = 0.0;
@@ -744,7 +724,7 @@ public class DatabaseExampleTest extends TestCase {
         assertTrue(arrayValue[0]==0.0 && arrayValue[1]==1.0 && arrayValue[2]==2.0);
 
         PVFloatArray floatArrayData = (PVFloatArray)
-            database.createArrayData("floatArray",Type.pvFloat,null);
+            database.createArrayData("floatArray",Type.pvFloat);
         arrayValue[0] = 0.0; arrayValue[1] = 1.0; arrayValue[2] = 2.0;
         convert.fromDoubleArray(floatArrayData,0,len,arrayValue,0);
         arrayValue[0] = 0.0; arrayValue[1] = 0.0; arrayValue[2] = 0.0;
@@ -764,9 +744,9 @@ public class DatabaseExampleTest extends TestCase {
     public static void testStringArray() {
         DatabaseExample database = new DatabaseExample("test");
         PVStringArray stringArrayData = (PVStringArray)
-            database.createArrayData("stringArray",Type.pvString,null);
+            database.createArrayData("stringArray",Type.pvString);
         int len;
-        String[] arrayValue = new String[] {"string0",null,"string2"};
+        String[] arrayValue = new String[] {"string0","string2"};
         int nput = stringArrayData.put(0,arrayValue.length,arrayValue,0);
         assertEquals(nput,arrayValue.length);
         len = stringArrayData.getLength();
@@ -788,7 +768,6 @@ public class DatabaseExampleTest extends TestCase {
         System.out.printf("%s%nvalue %s%n",
                 array.toString(),
                 stringArrayData.toString());
-        assertEquals(field.getPropertys().length,0);
     }
 
     /**
@@ -797,7 +776,7 @@ public class DatabaseExampleTest extends TestCase {
     public static void testStructureArray() {
         DatabaseExample database = new DatabaseExample("test");
         PVStructureArray structureArrayData = (PVStructureArray)
-            database.createArrayData("structureArray",Type.pvStructure,null);
+            database.createArrayData("structureArray",Type.pvStructure);
         int len;
         PVStructure[] arrayValue = new PVStructure[3];
         for(int i = 0; i < arrayValue.length; i+=2) {
@@ -805,7 +784,7 @@ public class DatabaseExampleTest extends TestCase {
             Field highField = fieldCreate.createField("high", Type.pvDouble);
             Field[] fields = new Field[]{lowField,highField};
             arrayValue[i] = database.createStructureData(
-                "displayLimit","DisplayLimit",fields,null);
+                "displayLimit","DisplayLimit",fields);
             PVField[] datas = (PVField[])arrayValue[i].getFieldPVFields();
             ((PVDouble)datas[0]).put(0.0);
             ((PVDouble)datas[1]).put(10.0);
@@ -823,7 +802,6 @@ public class DatabaseExampleTest extends TestCase {
         System.out.printf("%s%nvalue %s%n",
                 array.toString(),
                 structureArrayData.toString());
-        assertEquals(field.getPropertys().length,0);
     }
 
     /**
@@ -832,12 +810,12 @@ public class DatabaseExampleTest extends TestCase {
     public static void testArrayArray() {
         DatabaseExample database = new DatabaseExample("test");
         PVArrayArray arrayArrayData = (PVArrayArray)
-            database.createArrayData("arrayArray",Type.pvArray,null);
+            database.createArrayData("arrayArray",Type.pvArray);
         int len;
         PVArray[] arrayValue = new PVArray[3];
         for(int i = 0; i < arrayValue.length; i+=2) {
             PVDoubleArray doubleArrayData = (PVDoubleArray)
-                database.createArrayData("doubleArray",Type.pvDouble,null);
+                database.createArrayData("doubleArray",Type.pvDouble);
             double[] value = new double[] {1.0*i,2.0*i,3.0*i};
             doubleArrayData.put(0,arrayValue.length,value,0);
             arrayValue[i] = doubleArrayData;
@@ -855,7 +833,6 @@ public class DatabaseExampleTest extends TestCase {
         System.out.printf("%s%nvalue %s%n",
                 array.toString(),
                 arrayArrayData.toString());
-        assertEquals(field.getPropertys().length,0);
     }
     
     /**
@@ -869,13 +846,13 @@ public class DatabaseExampleTest extends TestCase {
         Field highField = fieldCreate.createField("high", Type.pvDouble);
         Field[] fields = new Field[]{lowField,highField};
         PVStructure displayLimit = database.createStructureData(
-            "displayLimit","DisplayLimit",fields,null);
+            "displayLimit","DisplayLimit",fields);
         PVField[] datas = displayLimit.getFieldPVFields();
         ((PVDouble)datas[0]).put(-10.0);
         ((PVDouble)datas[1]).put(10.0);
         
         PVStructure displayLimit1 = database.createStructureData(
-                "displayLimit1","DisplayLimit1",fields,null);
+                "displayLimit1","DisplayLimit1",fields);
         convert.copyStructure(displayLimit,displayLimit1);
         System.out.printf("%ntestStructureCopy %s%s%n",
                 displayLimit.toString(),displayLimit1.toString());
@@ -888,14 +865,14 @@ public class DatabaseExampleTest extends TestCase {
         Convert convert = ConvertFactory.getConvert();
         DatabaseExample database = new DatabaseExample("test");
         PVBooleanArray sourceArray = (PVBooleanArray)
-            database.createArrayData("sourceArray",Type.pvBoolean,null);
+            database.createArrayData("sourceArray",Type.pvBoolean);
         boolean[] arrayValue = new boolean[] {true,false,true};
         int nput = sourceArray.put(0,arrayValue.length,arrayValue,0);
         System.out.printf("%ntestBooleanArrayCopy nput %d sourceArray %s%n",
             nput,sourceArray.toString());
         
         PVBooleanArray booleanArray = (PVBooleanArray)
-            database.createArrayData("booleanArray",Type.pvBoolean,null);
+            database.createArrayData("booleanArray",Type.pvBoolean);
         int ncopy = convert.copyArray(sourceArray,0,booleanArray,0,nput);
         System.out.printf("booleanArray ncopy %d %s%n",ncopy,booleanArray.toString());
     }
@@ -907,39 +884,39 @@ public class DatabaseExampleTest extends TestCase {
         Convert convert = ConvertFactory.getConvert();
         DatabaseExample database = new DatabaseExample("test");
         PVByteArray sourceArray = (PVByteArray)
-            database.createArrayData("sourceArray",Type.pvByte,null);
+            database.createArrayData("sourceArray",Type.pvByte);
         byte[] arrayValue = new byte[] {-127,0,127};
         int nput = sourceArray.put(0,arrayValue.length,arrayValue,0);
         System.out.printf("%ntestByteArrayCopy nput %d sourceArray %s%n",
             nput,sourceArray.toString());
         
         PVByteArray byteArray = (PVByteArray)
-            database.createArrayData("byteArray",Type.pvByte,null);
+            database.createArrayData("byteArray",Type.pvByte);
         int ncopy = convert.copyArray(sourceArray,0,byteArray,0,nput);
         System.out.printf("byteArray ncopy %d %s%n",ncopy,byteArray.toString());
     
         PVShortArray shortArray = (PVShortArray)
-            database.createArrayData("shortArray",Type.pvShort,null);
+            database.createArrayData("shortArray",Type.pvShort);
         ncopy = convert.copyArray(sourceArray,0,shortArray,0,nput);
         System.out.printf("shortArray ncopy %d %s%n",ncopy, shortArray.toString());
 
         PVIntArray intArray = (PVIntArray)
-        database.createArrayData("intArray",Type.pvInt,null);
+        database.createArrayData("intArray",Type.pvInt);
         ncopy = convert.copyArray(sourceArray,0,intArray,0,nput);
         System.out.printf("intArray ncopy %d %s%n",ncopy,intArray.toString()); 
         
         PVLongArray longArray = (PVLongArray)
-        database.createArrayData("longArray",Type.pvLong,null);
+        database.createArrayData("longArray",Type.pvLong);
         ncopy = convert.copyArray(sourceArray,0,longArray,0,nput);
         System.out.printf("longArray ncopy %d %s%n",ncopy,longArray.toString());
         
         PVFloatArray floatArray = (PVFloatArray)
-        database.createArrayData("floatArray",Type.pvFloat,null);
+        database.createArrayData("floatArray",Type.pvFloat);
         ncopy = convert.copyArray(sourceArray,0,floatArray,0,nput);
         System.out.printf("floatArray ncopy %d %s%n",ncopy,floatArray.toString());
         
         PVDoubleArray doubleArray = (PVDoubleArray)
-        database.createArrayData("doubleArray",Type.pvDouble,null);
+        database.createArrayData("doubleArray",Type.pvDouble);
         ncopy = convert.copyArray(sourceArray,0,doubleArray,0,nput);
         System.out.printf("doubleArray ncopy %d %s%n",ncopy,doubleArray.toString());        
     }
@@ -951,39 +928,39 @@ public class DatabaseExampleTest extends TestCase {
         Convert convert = ConvertFactory.getConvert();
         DatabaseExample database = new DatabaseExample("test");
         PVShortArray sourceArray = (PVShortArray)
-            database.createArrayData("sourceArray",Type.pvShort,null);
+            database.createArrayData("sourceArray",Type.pvShort);
         short[] arrayValue = new short[] {-32767,0,32767};
         int nput = sourceArray.put(0,arrayValue.length,arrayValue,0);
         System.out.printf("%ntestShortArrayCopy nput %d sourceArray %s%n",
             nput,sourceArray.toString());
         
         PVByteArray byteArray = (PVByteArray)
-            database.createArrayData("byteArray",Type.pvByte,null);
+            database.createArrayData("byteArray",Type.pvByte);
         int ncopy = convert.copyArray(sourceArray,0,byteArray,0,nput);
         System.out.printf("byteArray ncopy %d %s%n",ncopy,byteArray.toString());
     
         PVShortArray shortArray = (PVShortArray)
-            database.createArrayData("shortArray",Type.pvShort,null);
+            database.createArrayData("shortArray",Type.pvShort);
         ncopy = convert.copyArray(sourceArray,0,shortArray,0,nput);
         System.out.printf("shortArray ncopy %d %s%n",ncopy, shortArray.toString());
 
         PVIntArray intArray = (PVIntArray)
-        database.createArrayData("intArray",Type.pvInt,null);
+        database.createArrayData("intArray",Type.pvInt);
         ncopy = convert.copyArray(sourceArray,0,intArray,0,nput);
         System.out.printf("intArray ncopy %d %s%n",ncopy,intArray.toString()); 
         
         PVLongArray longArray = (PVLongArray)
-        database.createArrayData("longArray",Type.pvLong,null);
+        database.createArrayData("longArray",Type.pvLong);
         ncopy = convert.copyArray(sourceArray,0,longArray,0,nput);
         System.out.printf("longArray ncopy %d %s%n",ncopy,longArray.toString());
         
         PVFloatArray floatArray = (PVFloatArray)
-        database.createArrayData("floatArray",Type.pvFloat,null);
+        database.createArrayData("floatArray",Type.pvFloat);
         ncopy = convert.copyArray(sourceArray,0,floatArray,0,nput);
         System.out.printf("floatArray ncopy %d %s%n",ncopy,floatArray.toString());
         
         PVDoubleArray doubleArray = (PVDoubleArray)
-        database.createArrayData("doubleArray",Type.pvDouble,null);
+        database.createArrayData("doubleArray",Type.pvDouble);
         ncopy = convert.copyArray(sourceArray,0,doubleArray,0,nput);
         System.out.printf("doubleArray ncopy %d %s%n",ncopy,doubleArray.toString());        
     }
@@ -995,39 +972,39 @@ public class DatabaseExampleTest extends TestCase {
         Convert convert = ConvertFactory.getConvert();
         DatabaseExample database = new DatabaseExample("test");
         PVIntArray sourceArray = (PVIntArray)
-            database.createArrayData("sourceArray",Type.pvInt,null);
+            database.createArrayData("sourceArray",Type.pvInt);
         int[] arrayValue = new int[] {-100000,0,100000};
         int nput = sourceArray.put(0,arrayValue.length,arrayValue,0);
         System.out.printf("%ntestIntArrayCopy nput %d sourceArray %s%n",
             nput,sourceArray.toString());
         
         PVByteArray byteArray = (PVByteArray)
-            database.createArrayData("byteArray",Type.pvByte,null);
+            database.createArrayData("byteArray",Type.pvByte);
         int ncopy = convert.copyArray(sourceArray,0,byteArray,0,nput);
         System.out.printf("byteArray ncopy %d %s%n",ncopy,byteArray.toString());
     
         PVShortArray shortArray = (PVShortArray)
-            database.createArrayData("shortArray",Type.pvShort,null);
+            database.createArrayData("shortArray",Type.pvShort);
         ncopy = convert.copyArray(sourceArray,0,shortArray,0,nput);
         System.out.printf("shortArray ncopy %d %s%n",ncopy, shortArray.toString());
 
         PVIntArray intArray = (PVIntArray)
-        database.createArrayData("intArray",Type.pvInt,null);
+        database.createArrayData("intArray",Type.pvInt);
         ncopy = convert.copyArray(sourceArray,0,intArray,0,nput);
         System.out.printf("intArray ncopy %d %s%n",ncopy,intArray.toString()); 
         
         PVLongArray longArray = (PVLongArray)
-        database.createArrayData("longArray",Type.pvLong,null);
+        database.createArrayData("longArray",Type.pvLong);
         ncopy = convert.copyArray(sourceArray,0,longArray,0,nput);
         System.out.printf("longArray ncopy %d %s%n",ncopy,longArray.toString());
         
         PVFloatArray floatArray = (PVFloatArray)
-        database.createArrayData("floatArray",Type.pvFloat,null);
+        database.createArrayData("floatArray",Type.pvFloat);
         ncopy = convert.copyArray(sourceArray,0,floatArray,0,nput);
         System.out.printf("floatArray ncopy %d %s%n",ncopy,floatArray.toString());
         
         PVDoubleArray doubleArray = (PVDoubleArray)
-        database.createArrayData("doubleArray",Type.pvDouble,null);
+        database.createArrayData("doubleArray",Type.pvDouble);
         ncopy = convert.copyArray(sourceArray,0,doubleArray,0,nput);
         System.out.printf("doubleArray ncopy %d %s%n",ncopy,doubleArray.toString());        
     }
@@ -1039,39 +1016,39 @@ public class DatabaseExampleTest extends TestCase {
         Convert convert = ConvertFactory.getConvert();
         DatabaseExample database = new DatabaseExample("test");
         PVLongArray sourceArray = (PVLongArray)
-            database.createArrayData("sourceArray",Type.pvLong,null);
+            database.createArrayData("sourceArray",Type.pvLong);
         long[] arrayValue = new long[] {-100,0,100};
         int nput = sourceArray.put(0,arrayValue.length,arrayValue,0);
         System.out.printf("%ntestLongArrayCopy nput %d sourceArray %s%n",
             nput,sourceArray.toString());
         
         PVByteArray byteArray = (PVByteArray)
-            database.createArrayData("byteArray",Type.pvByte,null);
+            database.createArrayData("byteArray",Type.pvByte);
         int ncopy = convert.copyArray(sourceArray,0,byteArray,0,nput);
         System.out.printf("byteArray ncopy %d %s%n",ncopy,byteArray.toString());
     
         PVShortArray shortArray = (PVShortArray)
-            database.createArrayData("shortArray",Type.pvShort,null);
+            database.createArrayData("shortArray",Type.pvShort);
         ncopy = convert.copyArray(sourceArray,0,shortArray,0,nput);
         System.out.printf("shortArray ncopy %d %s%n",ncopy, shortArray.toString());
 
         PVIntArray intArray = (PVIntArray)
-        database.createArrayData("intArray",Type.pvInt,null);
+        database.createArrayData("intArray",Type.pvInt);
         ncopy = convert.copyArray(sourceArray,0,intArray,0,nput);
         System.out.printf("intArray ncopy %d %s%n",ncopy,intArray.toString()); 
         
         PVLongArray longArray = (PVLongArray)
-        database.createArrayData("longArray",Type.pvLong,null);
+        database.createArrayData("longArray",Type.pvLong);
         ncopy = convert.copyArray(sourceArray,0,longArray,0,nput);
         System.out.printf("longArray ncopy %d %s%n",ncopy,longArray.toString());
         
         PVFloatArray floatArray = (PVFloatArray)
-        database.createArrayData("floatArray",Type.pvFloat,null);
+        database.createArrayData("floatArray",Type.pvFloat);
         ncopy = convert.copyArray(sourceArray,0,floatArray,0,nput);
         System.out.printf("floatArray ncopy %d %s%n",ncopy,floatArray.toString());
         
         PVDoubleArray doubleArray = (PVDoubleArray)
-        database.createArrayData("doubleArray",Type.pvDouble,null);
+        database.createArrayData("doubleArray",Type.pvDouble);
         ncopy = convert.copyArray(sourceArray,0,doubleArray,0,nput);
         System.out.printf("doubleArray ncopy %d %s%n",ncopy,doubleArray.toString());        
     }
@@ -1083,39 +1060,39 @@ public class DatabaseExampleTest extends TestCase {
         Convert convert = ConvertFactory.getConvert();
         DatabaseExample database = new DatabaseExample("test");
         PVFloatArray sourceArray = (PVFloatArray)
-            database.createArrayData("sourceArray",Type.pvFloat,null);
+            database.createArrayData("sourceArray",Type.pvFloat);
         float[] arrayValue = new float[] {-127,0,127};
         int nput = sourceArray.put(0,arrayValue.length,arrayValue,0);
         System.out.printf("%ntestFloatArrayCopy nput %d sourceArray %s%n",
             nput,sourceArray.toString());
         
         PVByteArray byteArray = (PVByteArray)
-            database.createArrayData("byteArray",Type.pvByte,null);
+            database.createArrayData("byteArray",Type.pvByte);
         int ncopy = convert.copyArray(sourceArray,0,byteArray,0,nput);
         System.out.printf("byteArray ncopy %d %s%n",ncopy,byteArray.toString());
     
         PVShortArray shortArray = (PVShortArray)
-            database.createArrayData("shortArray",Type.pvShort,null);
+            database.createArrayData("shortArray",Type.pvShort);
         ncopy = convert.copyArray(sourceArray,0,shortArray,0,nput);
         System.out.printf("shortArray ncopy %d %s%n",ncopy, shortArray.toString());
 
         PVIntArray intArray = (PVIntArray)
-        database.createArrayData("intArray",Type.pvInt,null);
+        database.createArrayData("intArray",Type.pvInt);
         ncopy = convert.copyArray(sourceArray,0,intArray,0,nput);
         System.out.printf("intArray ncopy %d %s%n",ncopy,intArray.toString()); 
         
         PVLongArray longArray = (PVLongArray)
-        database.createArrayData("longArray",Type.pvLong,null);
+        database.createArrayData("longArray",Type.pvLong);
         ncopy = convert.copyArray(sourceArray,0,longArray,0,nput);
         System.out.printf("longArray ncopy %d %s%n",ncopy,longArray.toString());
         
         PVFloatArray floatArray = (PVFloatArray)
-        database.createArrayData("floatArray",Type.pvFloat,null);
+        database.createArrayData("floatArray",Type.pvFloat);
         ncopy = convert.copyArray(sourceArray,0,floatArray,0,nput);
         System.out.printf("floatArray ncopy %d %s%n",ncopy,floatArray.toString());
         
         PVDoubleArray doubleArray = (PVDoubleArray)
-        database.createArrayData("doubleArray",Type.pvDouble,null);
+        database.createArrayData("doubleArray",Type.pvDouble);
         ncopy = convert.copyArray(sourceArray,0,doubleArray,0,nput);
         System.out.printf("doubleArray ncopy %d %s%n",ncopy,doubleArray.toString());        
     }
@@ -1127,39 +1104,39 @@ public class DatabaseExampleTest extends TestCase {
         Convert convert = ConvertFactory.getConvert();
         DatabaseExample database = new DatabaseExample("test");
         PVDoubleArray sourceArray = (PVDoubleArray)
-            database.createArrayData("sourceArray",Type.pvDouble,null);
+            database.createArrayData("sourceArray",Type.pvDouble);
         double[] arrayValue = new double[] {-127,0,127};
         int nput = sourceArray.put(0,arrayValue.length,arrayValue,0);
         System.out.printf("%ntestDoubleArrayCopy nput %d sourceArray %s%n",
             nput,sourceArray.toString());
         
         PVByteArray byteArray = (PVByteArray)
-            database.createArrayData("byteArray",Type.pvByte,null);
+            database.createArrayData("byteArray",Type.pvByte);
         int ncopy = convert.copyArray(sourceArray,0,byteArray,0,nput);
         System.out.printf("byteArray ncopy %d %s%n",ncopy,byteArray.toString());
     
         PVShortArray shortArray = (PVShortArray)
-            database.createArrayData("shortArray",Type.pvShort,null);
+            database.createArrayData("shortArray",Type.pvShort);
         ncopy = convert.copyArray(sourceArray,0,shortArray,0,nput);
         System.out.printf("shortArray ncopy %d %s%n",ncopy, shortArray.toString());
 
         PVIntArray intArray = (PVIntArray)
-        database.createArrayData("intArray",Type.pvInt,null);
+        database.createArrayData("intArray",Type.pvInt);
         ncopy = convert.copyArray(sourceArray,0,intArray,0,nput);
         System.out.printf("intArray ncopy %d %s%n",ncopy,intArray.toString()); 
         
         PVLongArray longArray = (PVLongArray)
-        database.createArrayData("longArray",Type.pvLong,null);
+        database.createArrayData("longArray",Type.pvLong);
         ncopy = convert.copyArray(sourceArray,0,longArray,0,nput);
         System.out.printf("longArray ncopy %d %s%n",ncopy,longArray.toString());
         
         PVFloatArray floatArray = (PVFloatArray)
-        database.createArrayData("floatArray",Type.pvFloat,null);
+        database.createArrayData("floatArray",Type.pvFloat);
         ncopy = convert.copyArray(sourceArray,0,floatArray,0,nput);
         System.out.printf("floatArray ncopy %d %s%n",ncopy,floatArray.toString());
         
         PVDoubleArray doubleArray = (PVDoubleArray)
-        database.createArrayData("doubleArray",Type.pvDouble,null);
+        database.createArrayData("doubleArray",Type.pvDouble);
         ncopy = convert.copyArray(sourceArray,0,doubleArray,0,nput);
         System.out.printf("doubleArray ncopy %d %s%n",ncopy,doubleArray.toString());        
     }
@@ -1171,52 +1148,52 @@ public class DatabaseExampleTest extends TestCase {
         Convert convert = ConvertFactory.getConvert();
         DatabaseExample database = new DatabaseExample("test");
         PVStringArray sourceArray = (PVStringArray)
-            database.createArrayData("sourceArray",Type.pvString,null);
+            database.createArrayData("sourceArray",Type.pvString);
         String[] arrayValue = new String[] {"-127","0","127"};
         int nput = sourceArray.put(0,arrayValue.length,arrayValue,0);
         System.out.printf("%ntestStringArrayCopy nput %d sourceArray %s%n",
             nput,sourceArray.toString());
         
         PVStringArray stringArray = (PVStringArray)
-        database.createArrayData("stringArray",Type.pvString,null);
+        database.createArrayData("stringArray",Type.pvString);
         
         PVByteArray byteArray = (PVByteArray)
-            database.createArrayData("byteArray",Type.pvByte,null);
+            database.createArrayData("byteArray",Type.pvByte);
         int ncopy = convert.copyArray(sourceArray,0,byteArray,0,nput);
         System.out.printf("byteArray ncopy %d %s%n",ncopy,byteArray.toString());
         ncopy = convert.copyArray(byteArray,0,stringArray,0,nput);
         System.out.printf("stringArray ncopy %d %s%n",ncopy,stringArray.toString());
     
         PVShortArray shortArray = (PVShortArray)
-            database.createArrayData("shortArray",Type.pvShort,null);
+            database.createArrayData("shortArray",Type.pvShort);
         ncopy = convert.copyArray(sourceArray,0,shortArray,0,nput);
         System.out.printf("shortArray ncopy %d %s%n",ncopy, shortArray.toString());
         ncopy = convert.copyArray(shortArray,0,stringArray,0,nput);
         System.out.printf("stringArray ncopy %d %s%n",ncopy,stringArray.toString());
 
         PVIntArray intArray = (PVIntArray)
-        database.createArrayData("intArray",Type.pvInt,null);
+        database.createArrayData("intArray",Type.pvInt);
         ncopy = convert.copyArray(sourceArray,0,intArray,0,nput);
         System.out.printf("intArray ncopy %d %s%n",ncopy,intArray.toString()); 
         ncopy = convert.copyArray(intArray,0,stringArray,0,nput);
         System.out.printf("stringArray ncopy %d %s%n",ncopy,stringArray.toString());
         
         PVLongArray longArray = (PVLongArray)
-        database.createArrayData("longArray",Type.pvLong,null);
+        database.createArrayData("longArray",Type.pvLong);
         ncopy = convert.copyArray(sourceArray,0,longArray,0,nput);
         System.out.printf("longArray ncopy %d %s%n",ncopy,longArray.toString());
         ncopy = convert.copyArray(longArray,0,stringArray,0,nput);
         System.out.printf("stringArray ncopy %d %s%n",ncopy,stringArray.toString());
         
         PVFloatArray floatArray = (PVFloatArray)
-        database.createArrayData("floatArray",Type.pvFloat,null);
+        database.createArrayData("floatArray",Type.pvFloat);
         ncopy = convert.copyArray(sourceArray,0,floatArray,0,nput);
         System.out.printf("floatArray ncopy %d %s%n",ncopy,floatArray.toString());
         ncopy = convert.copyArray(floatArray,0,stringArray,0,nput);
         System.out.printf("stringArray ncopy %d %s%n",ncopy,stringArray.toString());
         
         PVDoubleArray doubleArray = (PVDoubleArray)
-        database.createArrayData("doubleArray",Type.pvDouble,null);
+        database.createArrayData("doubleArray",Type.pvDouble);
         ncopy = convert.copyArray(sourceArray,0,doubleArray,0,nput);
         System.out.printf("doubleArray ncopy %d %s%n",ncopy,doubleArray.toString());  
         ncopy = convert.copyArray(doubleArray,0,stringArray,0,nput);
@@ -1229,14 +1206,14 @@ public class DatabaseExampleTest extends TestCase {
         Convert convert = ConvertFactory.getConvert();
         DatabaseExample database = new DatabaseExample("test");
         PVStructureArray structureArray = (PVStructureArray)
-            database.createArrayData("structureArray",Type.pvStructure,null);
+            database.createArrayData("structureArray",Type.pvStructure);
         PVStructure[] arrayValue = new PVStructure[3];
         for(int i = 0; i < arrayValue.length; i+=2) {
             Field lowField = fieldCreate.createField("low", Type.pvDouble);
             Field highField = fieldCreate.createField("high", Type.pvDouble);
             Field[] fields = new Field[]{lowField,highField};
             PVStructure displayLimit = database.createStructureData(
-                "displayLimit","DisplayLimit",fields,null);
+                "displayLimit","DisplayLimit",fields);
             PVField[] datas = displayLimit.getFieldPVFields();
             ((PVDouble)datas[0]).put(-10.0);
             ((PVDouble)datas[1]).put(10.0);
@@ -1244,12 +1221,12 @@ public class DatabaseExampleTest extends TestCase {
         }
         int nput = structureArray.put(0,arrayValue.length,arrayValue,0);
         PVStructureArray structureArray1 = (PVStructureArray)
-            database.createArrayData("structureArray1",Type.pvStructure,null);
+            database.createArrayData("structureArray1",Type.pvStructure);
         int ncopy = convert.copyArray(structureArray,0,structureArray1,0,nput);
         System.out.printf("%ntestStructureArrayCopy ncopy %d %s%s%n",
             ncopy,structureArray.toString(),structureArray1.toString());
         PVStringArray stringArray = (PVStringArray) database.createArrayData(
-             "stringArray",Type.pvString,null);
+             "stringArray",Type.pvString);
         ncopy = convert.copyArray(structureArray,0,stringArray,0,nput);
         System.out.printf("stringArray ncopy %d%n%s%n",ncopy,stringArray.toString());
         
@@ -1261,23 +1238,23 @@ public class DatabaseExampleTest extends TestCase {
         Convert convert = ConvertFactory.getConvert();
         DatabaseExample database = new DatabaseExample("test");
         PVArrayArray arrayArray = (PVArrayArray)
-            database.createArrayData("arrayArray",Type.pvArray,null);
+            database.createArrayData("arrayArray",Type.pvArray);
         PVArray[] arrayValue = new PVArray[3];
         for(int i = 0; i < arrayValue.length; i+=2) {
             PVDoubleArray doubleArrayData = (PVDoubleArray)
-                database.createArrayData("doubleArray",Type.pvDouble,null);
+                database.createArrayData("doubleArray",Type.pvDouble);
             double[] value = new double[] {1.0*(i+1),2.0*(i+1),3.0*(i+1)};
             doubleArrayData.put(0,arrayValue.length,value,0);
             arrayValue[i] = doubleArrayData;
         }
         int nput = arrayArray.put(0,arrayValue.length,arrayValue,0);
         PVArrayArray arrayArray1 = (PVArrayArray)
-        database.createArrayData("arrayArray1",Type.pvArray,null);
+        database.createArrayData("arrayArray1",Type.pvArray);
         int ncopy = convert.copyArray(arrayArray,0,arrayArray1,0,nput);
         System.out.printf("%ntestArrayArrayCopy ncopy %d %s%s%n",
                 ncopy,arrayArray.toString(),arrayArray1.toString());
         PVStringArray stringArray = (PVStringArray) database.createArrayData(
-             "stringArray",Type.pvString,null);
+             "stringArray",Type.pvString);
         ncopy = convert.copyArray(arrayArray,0,stringArray,0,nput);
         System.out.printf("stringArray ncopy %d%n%s%n",ncopy,stringArray.toString());
         
@@ -1299,27 +1276,26 @@ public class DatabaseExampleTest extends TestCase {
             return name;
         }
 
-        public PVField createField(String name,Type type, Property[] property) {
+        public PVField createField(String name,Type type) {
             FieldAttribute fieldAttribute = fieldCreate.createFieldAttribute();
-            Field field = fieldCreate.createField(name,type,property,fieldAttribute);
+            Field field = fieldCreate.createField(name,type,fieldAttribute);
             Field[] fields = new Field[]{field};
             Structure structure = fieldCreate.createStructure(name, name, fields);
             PVRecord pvRecord = dataCreate.createPVRecord(name, structure);
             return pvRecord.getFieldPVFields()[0];
         }
 
-        public PVStructure createStructureData(String name, String structureName,
-                Field[] field, Property[] property)
+        public PVStructure createStructureData(String name, String structureName,Field[] field)
         {
             FieldAttribute fieldAttribute = fieldCreate.createFieldAttribute();
             Structure structure = fieldCreate.createStructure(
-                name,structureName,field,property,fieldAttribute);
+                name,structureName,field,fieldAttribute);
             return (PVStructure)dataCreate.createPVRecord(name, structure);
         }
         
-        public PVArray createArrayData(String name,Type type, Property[] property) {
+        public PVArray createArrayData(String name,Type type) {
             FieldAttribute fieldAttribute = fieldCreate.createFieldAttribute();
-            Field field = fieldCreate.createArray(name, type,property,fieldAttribute);
+            Field field = fieldCreate.createArray(name, type,fieldAttribute);
             Field[] fields = new Field[]{field};
             Structure structure = fieldCreate.createStructure(name, name, fields);
             PVRecord pvRecord = dataCreate.createPVRecord(name, structure);

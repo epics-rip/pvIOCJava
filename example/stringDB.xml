@@ -11,6 +11,8 @@
 </record>
 
 <record name = "stringCounter" type = "calcDouble">
+    <timeStamp structureName = "timeStamp" />
+    <alarm structureName = "alarm" />
     <calcArgArray>
         <value structureName = "calcDoubleArg">
             <value>0.0</value>
@@ -31,35 +33,35 @@
           <interval>
               <value structureName = "doubleAlarmInterval">
                   <value>2.0</value>
-                  <severity>major</severity>
+                  <severity><choice>major</choice></severity>
               </value>
               <value structureName = "doubleAlarmInterval">
                   <value>4.0</value>
-                  <severity>minor</severity>
+                  <severity><choice>minor</choice></severity>
               </value>
               <value structureName = "doubleAlarmInterval">
                   <value>6.0</value>
-                  <severity>none</severity>
+                  <severity><choice>none</choice></severity>
               </value>
               <value structureName = "doubleAlarmInterval">
                   <value>8.0</value>
-                  <severity>minor</severity>
+                  <severity><choice>minor</choice></severity>
               </value>
               <value structureName = "doubleAlarmInterval">
                   <value>10.0</value>
-                  <severity>major</severity>
+                  <severity><choice>major</choice></severity>
               </value>
           </interval>
-          <outOfRange>invalid</outOfRange>
+          <outOfRange><choice>invalid</choice></outOfRange>
           <hystersis>0.1</hystersis>
     </valueAlarm>
-    <displayCharacteristics structureName = "doubleDisplayCharacteristics" >
+    <display structureName = "display" >
         <units>volts</units>
         <limit>
             <low>0.0</low>
             <high>10.0</high>
         </limit>
-    </displayCharacteristics>
+    </display>
     <scan>
         <type><choice>periodic</choice></type>
         <rate>1.0</rate>
@@ -76,6 +78,7 @@
 </record>
 
 <record name = "stringOut" type = "string">
+    <timeStamp structureName = "timeStamp" />
     <output supportName = "pdrvOctetOutput" structureName = "pdrvSupport">
             <portName>syncOctetDriver</portName>
             <addr>0</addr>
@@ -92,6 +95,7 @@
 </record>
 
 <record name = "stringIn" type = "string">
+    <timeStamp structureName = "timeStamp" />
     <input supportName = "pdrvOctetInput" structureName = "pdrvSupport">
             <portName>syncOctetDriver</portName>
             <addr>0</addr>

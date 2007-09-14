@@ -1,6 +1,8 @@
 <?xml version="1.0" ?>
 <IOCDatabase>
 <record name = "counterCounter" type = "calcDouble">
+    <alarm structureName = "alarm" />
+    <timeStamp structureName = "timeStamp" />
     <calcArgArray>
         <value structureName = "calcDoubleArg">
             <value>0.0</value>
@@ -58,13 +60,13 @@
           <outOfRange><choice>invalid</choice></outOfRange>
           <hystersis>0.6</hystersis>
     </valueAlarm>
-    <displayCharacteristics structureName = "doubleDisplayCharacteristics" >
+    <display structureName = "display" >
         <units>volts</units>
         <limit>
             <low>0.0</low>
             <high>10.0</high>
         </limit>
-    </displayCharacteristics>
+    </display>
     <scan>
         <type><choice>periodic</choice></type>
         <rate>1.0</rate>
@@ -72,6 +74,8 @@
 </record>
 
 <record name = "double01FromCounter" type = "double">
+    <alarm structureName = "alarm" />
+    <timeStamp structureName = "timeStamp" />
     <input supportName = "inputSupport" structureName = "inputSupport">
         <pvname>counterCounter</pvname>
         <process>false</process>
@@ -103,15 +107,17 @@
           <outOfRange><choice>invalid</choice></outOfRange>
           <hystersis>0.1</hystersis>
     </valueAlarm>
-    <displayCharacteristics structureName = "doubleDisplayCharacteristics" >
+    <display structureName = "display" >
         <units>volts</units>
         <limit>
             <low>0.0</low>
             <high>10.0</high>
         </limit>
-    </displayCharacteristics>
+    </display>
 </record>
 <record name = "double02FromCounter" type = "double">
+    <alarm structureName = "alarm" />
+    <timeStamp structureName = "timeStamp" />
     <valueAlarm structureName = "doubleAlarm">
           <active>true</active>
           <interval>
@@ -139,17 +145,23 @@
           <outOfRange><choice>invalid</choice></outOfRange>
           <hystersis>0.1</hystersis>
     </valueAlarm>
-    <displayCharacteristics structureName = "doubleDisplayCharacteristics" >
+    <display structureName = "display" >
         <description>Sample Description</description>
         <format>%f</format>
         <resolution>1</resolution>
-        <minStep>.1</minStep>
         <units>volts</units>
         <limit>
             <low>0.0</low>
             <high>10.0</high>
         </limit>
-    </displayCharacteristics>
+    </display>
+    <control structureName = "control" >
+        <limit>
+            <low>0.0</low>
+            <high>10.0</high>
+        </limit>
+        <minStep>.1</minStep>
+    </control>
 </record>
 
 

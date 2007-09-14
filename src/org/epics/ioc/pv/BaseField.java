@@ -15,7 +15,6 @@ public class BaseField implements Field
 {
     private boolean isMutable;
     private String fieldName;
-    private Property[] property;
     private Type type;
     private String supportName = null;
     private String createName = null;
@@ -26,12 +25,10 @@ public class BaseField implements Field
      * Constructor for BaseField.
      * @param fieldName The field fieldName.
      * @param type The field type.
-     * @param property An array of properties for the field.
-     * If the argument is null then a null array of properties is created.
      * @param fieldAttribute The field attributes.
      * @throws IllegalArgumentException if type or fieldAttribute is null;
      */
-    public BaseField(String fieldName, Type type,Property[] property,FieldAttribute fieldAttribute) {
+    public BaseField(String fieldName, Type type,FieldAttribute fieldAttribute) {
         if(type==null) {
             throw new IllegalArgumentException("type is null");
         }
@@ -40,8 +37,6 @@ public class BaseField implements Field
         }
         this.fieldName = fieldName;
         this.type = type;
-        if(property==null) property = new Property[0];
-        this.property = property;
         this.fieldAttribute = fieldAttribute;
         isMutable = true;
     }   
@@ -50,21 +45,6 @@ public class BaseField implements Field
      */
     public String getFieldName() {
         return(fieldName);
-    }
-    /* (non-Javadoc)
-     * @see org.epics.ioc.pv.Field#getPropertys()
-     */
-    public Property[] getPropertys() {
-        return property;
-    }
-    /* (non-Javadoc)
-     * @see org.epics.ioc.pv.Field#getProperty(java.lang.String)
-     */
-    public Property getProperty(String propertyName) {
-        for(int i=0; i<property.length; i++) {
-            if(property[i].getPropertyName().equals(propertyName)) return property[i];
-        }
-        return null;
     }
     /* (non-Javadoc)
      * @see org.epics.ioc.pv.Field#getType()
@@ -125,15 +105,6 @@ public class BaseField implements Field
             builder.append("createName " + createName + " ");
         }
         builder.append(" " + fieldAttribute.toString(indentLevel));
-        if(property.length>0) {
-            convert.newLine(builder,indentLevel);
-            builder.append("property{");
-            for(Property prop : property) {
-                builder.append(prop.toString(indentLevel + 1));
-            }
-            convert.newLine(builder,indentLevel);
-            builder.append("}");
-        }
         return builder.toString();
     }
 }

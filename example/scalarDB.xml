@@ -1,6 +1,8 @@
 <?xml version="1.0" ?>
 <IOCDatabase>
 <record name = "scalarCounter" type = "calcDouble">
+    <timeStamp structureName = "timeStamp" />
+    <alarm structureName = "alarm" />
     <calcArgArray>
         <value structureName = "calcDoubleArg">
             <value>0.0</value>
@@ -123,13 +125,13 @@
             </link>
         </value>
     </supportArray>
-    <displayCharacteristics structureName = "doubleDisplayCharacteristics" >
+    <display structureName = "display" >
         <units>volts</units>
         <limit>
             <low>0</low>
             <high>10</high>
         </limit>
-    </displayCharacteristics>
+    </display>
     <scan>
         <type><choice>periodic</choice></type>
         <rate>1.0</rate>
@@ -137,6 +139,8 @@
 </record>
 
 <record name = "scalarByte1FromCounter" type = "byte">
+    <timeStamp structureName = "timeStamp" />
+    <alarm structureName = "alarm" />
     <input supportName = "inputSupport" structureName = "inputSupport">
         <pvname>scalarCounter</pvname>
         <process>false</process>
@@ -165,17 +169,19 @@
                   <severity><choice>major</choice></severity>
               </value>
           </interval>
-          <outOfRange>invalid</outOfRange>
+          <outOfRange><choice>invalid</choice></outOfRange>
     </valueAlarm>
-    <displayCharacteristics structureName = "byteDisplayCharacteristics" >
+    <display structureName = "display" >
         <units>volts</units>
         <limit>
             <low>0</low>
             <high>10</high>
         </limit>
-    </displayCharacteristics>
+    </display>
 </record>
 <record name = "scalarByte2FromCounter" type = "byte">
+    <timeStamp structureName = "timeStamp" />
+    <alarm structureName = "alarm" />
     <valueAlarm structureName = "byteAlarm">
           <active>true</active>
           <interval>
@@ -200,32 +206,35 @@
                   <severity><choice>major</choice></severity>
               </value>
           </interval>
-          <outOfRange>invalid</outOfRange>
+          <outOfRange><choice>invalid</choice></outOfRange>
     </valueAlarm>
-    <displayCharacteristics structureName = "byteDisplayCharacteristics" >
+    <display structureName = "display" >
         <units>volts</units>
         <limit>
             <low>0</low>
             <high>10</high>
         </limit>
-    </displayCharacteristics>
+    </display>
 </record>
 <record name = "scalarByte3FromCounter" type = "byte">
+    <timeStamp structureName = "timeStamp" />
     <input supportName = "monitorSupport" structureName = "monitorSupport">
             <pvname>scalarCounter</pvname>
             <process>true</process>
             <inheritSeverity>true</inheritSeverity>
     </input>
-    <displayCharacteristics structureName = "byteDisplayCharacteristics" >
+    <display structureName = "display" >
         <units>volts</units>
         <limit>
             <low>0</low>
             <high>10</high>
         </limit>
-    </displayCharacteristics>
+    </display>
 </record>
 
 <record name = "scalarShort1FromCounter" type = "short">
+    <timeStamp structureName = "timeStamp" />
+    <alarm structureName = "alarm" />
     <input supportName = "inputSupport" structureName = "inputSupport">
             <pvname>scalarCounter</pvname>
             <process>false</process>
@@ -254,17 +263,19 @@
                   <severity><choice>major</choice></severity>
               </value>
           </interval>
-          <outOfRange>invalid</outOfRange>
+          <outOfRange><choice>invalid</choice></outOfRange>
     </valueAlarm>
-    <displayCharacteristics structureName = "shortDisplayCharacteristics" >
+    <display structureName = "display" >
         <units>volts</units>
         <limit>
             <low>0</low>
             <high>10</high>
         </limit>
-    </displayCharacteristics>
+    </display>
 </record>
 <record name = "scalarShort2FromCounter" type = "short">
+    <timeStamp structureName = "timeStamp" />
+    <alarm structureName = "alarm" />
     <valueAlarm structureName = "shortAlarm">
           <active>true</active>
           <interval>
@@ -289,32 +300,35 @@
                   <severity><choice>major</choice></severity>
               </value>
           </interval>
-          <outOfRange>invalid</outOfRange>
+          <outOfRange><choice>invalid</choice></outOfRange>
     </valueAlarm>
-    <displayCharacteristics structureName = "shortDisplayCharacteristics" >
+    <display structureName = "display" >
         <units>volts</units>
         <limit>
             <low>0</low>
             <high>10</high>
         </limit>
-    </displayCharacteristics>
+    </display>
 </record>
 <record name = "scalarShort3FromCounter" type = "short">
+    <timeStamp structureName = "timeStamp" />
     <input supportName = "monitorSupport" structureName = "monitorSupport">
             <pvname>scalarCounter</pvname>
             <process>true</process>
             <inheritSeverity>true</inheritSeverity>
     </input>
-    <displayCharacteristics structureName = "shortDisplayCharacteristics" >
+    <display structureName = "display" >
         <units>volts</units>
         <limit>
             <low>0</low>
             <high>10</high>
         </limit>
-    </displayCharacteristics>
+    </display>
 </record>
 
 <record name = "scalarInt1FromCounter" type = "int">
+    <timeStamp structureName = "timeStamp" />
+    <alarm structureName = "alarm" />
     <input supportName = "inputSupport" structureName = "inputSupport">
             <pvname>scalarCounter</pvname>
             <process>false</process>
@@ -343,17 +357,19 @@
                   <severity><choice>major</choice></severity>
               </value>
           </interval>
-          <outOfRange>invalid</outOfRange>
+          <outOfRange><choice>invalid</choice></outOfRange>
     </valueAlarm>
-    <displayCharacteristics structureName = "intDisplayCharacteristics" >
+    <display structureName = "display" >
         <units>volts</units>
         <limit>
             <low>0</low>
             <high>10</high>
         </limit>
-    </displayCharacteristics>
+    </display>
 </record>
 <record name = "scalarInt2FromCounter" type = "int">
+    <timeStamp structureName = "timeStamp" />
+    <alarm structureName = "alarm" />
     <valueAlarm structureName = "intAlarm">
           <active>true</active>
           <interval>
@@ -378,32 +394,35 @@
                   <severity><choice>major</choice></severity>
               </value>
           </interval>
-          <outOfRange>invalid</outOfRange>
+          <outOfRange><choice>invalid</choice></outOfRange>
     </valueAlarm>
-    <displayCharacteristics structureName = "intDisplayCharacteristics" >
+    <display structureName = "display" >
         <units>volts</units>
         <limit>
             <low>0</low>
             <high>10</high>
         </limit>
-    </displayCharacteristics>
+    </display>
 </record>
 <record name = "scalarInt3FromCounter" type = "int">
+    <timeStamp structureName = "timeStamp" />
     <input supportName = "monitorSupport" structureName = "monitorSupport">
             <pvname>scalarCounter</pvname>
             <process>true</process>
             <inheritSeverity>true</inheritSeverity>
     </input>
-    <displayCharacteristics structureName = "intDisplayCharacteristics" >
+    <display structureName = "display" >
         <units>volts</units>
         <limit>
             <low>0</low>
             <high>10</high>
         </limit>
-    </displayCharacteristics>
+    </display>
 </record>
 
 <record name = "scalarLong1FromCounter" type = "long">
+    <timeStamp structureName = "timeStamp" />
+    <alarm structureName = "alarm" />
     <input supportName = "inputSupport" structureName = "inputSupport">
             <pvname>scalarCounter</pvname>
             <process>false</process>
@@ -432,17 +451,19 @@
                   <severity><choice>major</choice></severity>
               </value>
           </interval>
-          <outOfRange>invalid</outOfRange>
+          <outOfRange><choice>invalid</choice></outOfRange>
     </valueAlarm>
-    <displayCharacteristics structureName = "longDisplayCharacteristics" >
+    <display structureName = "display" >
         <units>volts</units>
         <limit>
             <low>0</low>
             <high>10</high>
         </limit>
-    </displayCharacteristics>
+    </display>
 </record>
 <record name = "scalarLong2FromCounter" type = "long">
+    <timeStamp structureName = "timeStamp" />
+    <alarm structureName = "alarm" />
     <valueAlarm structureName = "longAlarm">
           <active>true</active>
           <interval>
@@ -467,32 +488,35 @@
                   <severity><choice>major</choice></severity>
               </value>
           </interval>
-          <outOfRange>invalid</outOfRange>
+          <outOfRange><choice>invalid</choice></outOfRange>
     </valueAlarm>
-    <displayCharacteristics structureName = "longDisplayCharacteristics" >
+    <display structureName = "display" >
         <units>volts</units>
         <limit>
             <low>0</low>
             <high>10</high>
         </limit>
-    </displayCharacteristics>
+    </display>
 </record>
 <record name = "scalarLong3FromCounter" type = "long">
+    <timeStamp structureName = "timeStamp" />
     <input supportName = "monitorSupport" structureName = "monitorSupport">
             <pvname>scalarCounter</pvname>
             <process>true</process>
             <inheritSeverity>true</inheritSeverity>
     </input>
-    <displayCharacteristics structureName = "longDisplayCharacteristics" >
+    <display structureName = "display" >
         <units>volts</units>
         <limit>
             <low>0</low>
             <high>10</high>
         </limit>
-    </displayCharacteristics>
+    </display>
 </record>
 
 <record name = "scalarFloat1FromCounter" type = "float">
+    <timeStamp structureName = "timeStamp" />
+    <alarm structureName = "alarm" />
     <input supportName = "inputSupport" structureName = "inputSupport">
             <pvname>scalarCounter</pvname>
             <process>false</process>
@@ -521,18 +545,20 @@
                   <severity><choice>major</choice></severity>
               </value>
           </interval>
-          <outOfRange>invalid</outOfRange>
+          <outOfRange><choice>invalid</choice></outOfRange>
           <hystersis>0.1</hystersis>
     </valueAlarm>
-    <displayCharacteristics structureName = "floatDisplayCharacteristics" >
+    <display structureName = "display" >
         <units>volts</units>
         <limit>
             <low>0</low>
             <high>10</high>
         </limit>
-    </displayCharacteristics>
+    </display>
 </record>
 <record name = "scalarFloat2FromCounter" type = "float">
+    <timeStamp structureName = "timeStamp" />
+    <alarm structureName = "alarm" />
     <valueAlarm structureName = "floatAlarm">
           <active>true</active>
           <interval>
@@ -557,33 +583,36 @@
                   <severity><choice>major</choice></severity>
               </value>
           </interval>
-          <outOfRange>invalid</outOfRange>
+          <outOfRange><choice>invalid</choice></outOfRange>
           <hystersis>0.1</hystersis>
     </valueAlarm>
-    <displayCharacteristics structureName = "floatDisplayCharacteristics" >
+    <display structureName = "display" >
         <units>volts</units>
         <limit>
             <low>0</low>
             <high>10</high>
         </limit>
-    </displayCharacteristics>
+    </display>
 </record>
 <record name = "scalarFloat3FromCounter" type = "float">
+    <timeStamp structureName = "timeStamp" />
     <input supportName = "monitorSupport" structureName = "monitorSupport">
             <pvname>scalarCounter</pvname>
             <process>true</process>
             <inheritSeverity>true</inheritSeverity>
     </input>
-    <displayCharacteristics structureName = "floatDisplayCharacteristics" >
+    <display structureName = "display" >
         <units>volts</units>
         <limit>
             <low>0</low>
             <high>10</high>
         </limit>
-    </displayCharacteristics>
+    </display>
 </record>
 
 <record name = "scalarDouble1FromCounter" type = "double">
+    <timeStamp structureName = "timeStamp" />
+    <alarm structureName = "alarm" />
     <input supportName = "inputSupport" structureName = "inputSupport">
             <pvname>scalarCounter</pvname>
             <process>false</process>
@@ -612,18 +641,20 @@
                   <severity><choice>major</choice></severity>
               </value>
           </interval>
-          <outOfRange>invalid</outOfRange>
+          <outOfRange><choice>invalid</choice></outOfRange>
           <hystersis>0.1</hystersis>
     </valueAlarm>
-    <displayCharacteristics structureName = "doubleDisplayCharacteristics" >
+    <display structureName = "display" >
         <units>volts</units>
         <limit>
             <low>0</low>
             <high>10</high>
         </limit>
-    </displayCharacteristics>
+    </display>
 </record>
 <record name = "scalarDouble2FromCounter" type = "double">
+    <timeStamp structureName = "timeStamp" />
+    <alarm structureName = "alarm" />
     <valueAlarm structureName = "doubleAlarm">
           <active>true</active>
           <interval>
@@ -648,30 +679,31 @@
                   <severity><choice>major</choice></severity>
               </value>
           </interval>
-          <outOfRange>invalid</outOfRange>
+          <outOfRange><choice>invalid</choice></outOfRange>
           <hystersis>0.1</hystersis>
     </valueAlarm>
-    <displayCharacteristics structureName = "doubleDisplayCharacteristics" >
+    <display structureName = "display" >
         <units>volts</units>
         <limit>
             <low>0</low>
             <high>10</high>
         </limit>
-    </displayCharacteristics>
+    </display>
 </record>
 <record name = "scalarDouble3FromCounter" type = "double">
+    <timeStamp structureName = "timeStamp" />
     <input supportName = "monitorSupport"  structureName = "monitorSupport">
             <pvname>scalarCounter</pvname>
             <process>true</process>
             <inheritSeverity>true</inheritSeverity>
     </input>
-    <displayCharacteristics structureName = "doubleDisplayCharacteristics" >
+    <display structureName = "display" >
         <units>volts</units>
         <limit>
             <low>0</low>
             <high>10</high>
         </limit>
-    </displayCharacteristics>
+    </display>
 </record>
 
 </IOCDatabase>

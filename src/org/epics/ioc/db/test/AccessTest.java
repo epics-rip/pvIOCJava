@@ -145,12 +145,7 @@ public class AccessTest extends TestCase {
         //PVAccess dbAccess = iocdb.createAccess(recordName);
         DBRecord dbRecord = iocdb.findRecord(recordName);
         PVRecord pvRecord = dbRecord.getPVRecord();
-        PVAccess pvAccess = PVAccessFactory.createPVAccess(pvRecord);
-        if(pvAccess==null) {
-            System.out.printf("record %s not found%n",recordName);
-            return;
-        }
-        PVField pvField = pvAccess.findField(fieldName);
+        PVField pvField = pvRecord.findProperty(fieldName);
         if(pvField==null) {
             System.out.printf("field %s of record %s not found%n",fieldName,recordName);
             return;
@@ -165,23 +160,14 @@ public class AccessTest extends TestCase {
                 fieldName,field.getFieldName(),
                 parentName);
         System.out.printf("    value %s%n",pvField.toString(1));
-        Property[] property = field.getPropertys();
-        if(property.length>0) {
+        PVField[] pvFields = pvField.getPropertys();
+        if(pvFields==null) return;
             System.out.printf("    property {%n");
-            for(Property prop : property) {
-                String propertyName = prop.getPropertyName();
-                System.out.printf("        name %s field %s%n",propertyName,prop.getAssociatedFieldName());
-                pvAccess.setPVField(pvField);
-                PVField propField = pvAccess.findField(propertyName);
-                if(propField==null){
-                    System.out.printf("name %s not in record %s%n",propertyName,recordName);
-                    System.out.printf("%s\n",pvAccess.getPVRecord().toString());
-                } else {
-                    System.out.printf("            value %s%n",propField.toString(3));
-                }
+            for(PVField pvf: pvFields) {
+                String propertyName = pvf.getFullFieldName();
+                System.out.printf("        name %s field %s%n",propertyName,pvf.toString(3));
             }
             System.out.printf("        }%n");
-        }
     }
     
     private static class Listener implements Requester {

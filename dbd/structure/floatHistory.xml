@@ -1,0 +1,18 @@
+<?xml version="1.0" ?>
+<DBDefinition>
+
+<structure name = "floatHistoryElement">
+    <field name = "timeStamp" type = "structure" structureName = "timeStamp" />
+    <field name = "value" type = "float" />
+    <field name = "alarm" type = "structure" structureName = "alarm" supportName = "null" />
+</structure>
+
+<structure name = "floatHistory" supportName = "floatHistory" >
+    <field name = "size" type = "int" />
+    <!-- other fields are needed -->
+    <field name = "history" type = "array" elementType = "structure" />
+</structure>
+
+<support name = "floatHistory"
+  factoryName = "org.epics.ioc.support.HistoryFactory" />
+</DBDefinition>

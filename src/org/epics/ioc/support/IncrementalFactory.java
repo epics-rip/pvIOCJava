@@ -12,18 +12,12 @@ import org.epics.ioc.util.*;
 
 /**
  * Record that implements incremental outputs.
- * It requires fields value and desiredValue or a call to setField or setDesiredValue.
+ * The value field of the structure it supports is the desired value.
+ * It puts it's value into the field passed to setField.
  * It requires field rateOfChange which must be numeric.
- * It optionally supports the following fields:
- * <ul>
- *     <li>incrementalOutput <br />
- *       If present it must be a boolean.</li>
- *     <li>controlLimit <br />
- *      If present it must be a structure which has numeric fields named low and high.</li>
- * </ul>
- * If the support exists it calls the support for input, valueAlarm, output, and linkArray.
- * and an array of process or output links.
- * It provides alarm support.
+ * It optionally supports the following field incremental
+ * If present it must be a boolean.
+ * If the support exists it calls the support for input.
  * @author mrk
  *
  */
@@ -40,7 +34,7 @@ public class IncrementalFactory {
     private static Convert convert = ConvertFactory.getConvert();
     
     static private class IncrementalImpl extends AbstractSupport
-    implements IncrementalSupport, SupportProcessRequester
+    implements Support, SupportProcessRequester
     {
         private static String supportName = "incremental";
         private DBStructure dbStructure;
@@ -52,15 +46,11 @@ public class IncrementalFactory {
         private Support inputSupport = null;
         private PVBoolean incrementalOutputPVField = null;
         private PVField rateOfChangePVField = null;
-        private PVField lowLimitPVField = null;
-        private PVField highLimitPVField = null;
         
         private double desiredValue = 0.0;
         private double value = 0.0;
         private boolean incrementalOutput = true;
         private double rateOfChange = 0.0;
-        private double lowLimit = 0.0;
-        private double highLimit = 0.0;
         
         private SupportProcessRequester supportProcessRequester = null;
         
@@ -81,29 +71,23 @@ public class IncrementalFactory {
             int index;
             PVField pvField = null;
             if(valueDBField==null) {
-                index = structure.getFieldIndex("value");
-                if(index<0) {
-                    super.message("no value field", MessageType.error);
-                    return;
-                }
-                valueDBField = dbFields[index];                
+                super.message("setField was not called", MessageType.error);
+                return;           
             }
             valuePVField = valueDBField.getPVField();
             if(!valuePVField.getField().getType().isNumeric()){
                 super.message("value must be a numeric field", MessageType.error);
             }
-            if(desiredValueDBField==null) {
-                index = structure.getFieldIndex("desiredValue");
-                if(index<0) {
-                    super.message("no desiredValue field", MessageType.error);
-                    return;
-                }
-                desiredValueDBField = dbFields[index];
-                desiredValuePVField = desiredValueDBField.getPVField();
-                if(!desiredValuePVField.getField().getType().isNumeric()){
-                    super.message("desiredValue must be a numeric field", MessageType.error);
-                    return;
-                }
+            index = structure.getFieldIndex("value");
+            if(index<0) {
+                super.message("no desiredValue field", MessageType.error);
+                return;
+            }
+            desiredValueDBField = dbFields[index];
+            desiredValuePVField = desiredValueDBField.getPVField();
+            if(!desiredValuePVField.getField().getType().isNumeric()){
+                super.message("desiredValue must be a numeric field", MessageType.error);
+                return;
             }
             index = structure.getFieldIndex("rateOfChange");
             if(index<0) {
@@ -129,10 +113,6 @@ public class IncrementalFactory {
                 }
                 incrementalOutputPVField = (PVBoolean)pvField;
             }           
-            index = structure.getFieldIndex("controlLimit");
-            if(index>=0) {
-                if(!getControlLimits((PVStructure)dbFields[index].getPVField())) return;;
-            }
             if(inputSupport!=null) {
                 inputSupport.setField(desiredValueDBField);
                 inputSupport.initialize();
@@ -198,12 +178,6 @@ public class IncrementalFactory {
             valueDBField = dbField;
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.recordSupport.IncrementalSupport#setDesiredField(org.epics.ioc.db.DBField)
-         */
-        public void setDesiredField(DBField dbField) {
-            desiredValueDBField = dbField;
-        }
-        /* (non-Javadoc)
          * @see org.epics.ioc.process.SupportProcessRequester#supportProcessDone(org.epics.ioc.util.RequestResult)
          */
         public void supportProcessDone(RequestResult requestResult) {           
@@ -212,57 +186,15 @@ public class IncrementalFactory {
             return;
         }
         
-        private boolean getControlLimits(PVStructure pvStructure) {
-            PVField[] pvFields = pvStructure.getFieldPVFields();
-            Structure structure = pvStructure.getStructure();
-            Field[] fields = structure.getFields();
-            Field field;
-            int index;
-            index = structure.getFieldIndex("low");
-            if(index<0) {
-                super.message("controlLimit.low does not exist", MessageType.error);
-                return false;
-            }
-            field = fields[index];
-            if(!field.getType().isNumeric()) {
-                super.message("controlLimit.low is not a numeric field", MessageType.error);
-                return false;
-            }
-            lowLimitPVField = pvFields[index];
-            index = structure.getFieldIndex("high");
-            if(index<0) {
-                super.message("controlLimit.high does not exist", MessageType.error);
-                return false;
-            }
-            field = fields[index];
-            if(!field.getType().isNumeric()) {
-                super.message("controlLimit.high is not a numeric field", MessageType.error);
-                return false;
-            }
-            highLimitPVField = pvFields[index];
-            return true;
-        }
+        
         
         private void computeValue() {
             value = convert.toDouble(valuePVField);
             desiredValue = convert.toDouble(desiredValuePVField);
             if(incrementalOutputPVField!=null) incrementalOutput = incrementalOutputPVField.get();
             if(rateOfChangePVField!=null) rateOfChange = convert.toDouble(rateOfChangePVField);
-            if(lowLimitPVField!=null) lowLimit = convert.toDouble(lowLimitPVField);
-            if(highLimitPVField!=null) highLimit = convert.toDouble(highLimitPVField);
+            
             if(desiredValue==value) return;
-            if(lowLimit<highLimit) {
-                if(desiredValue<lowLimit) {
-                    desiredValue = lowLimit;
-                    convert.fromDouble(desiredValuePVField, lowLimit);
-                    desiredValueDBField.postPut();
-                }
-                if(desiredValue>highLimit) {
-                    desiredValue = highLimit;
-                    convert.fromDouble(desiredValuePVField, highLimit);
-                    desiredValueDBField.postPut();
-                }
-            }
             double newValue = desiredValue;
             if(incrementalOutput) {
                 double diff = desiredValue - value;

@@ -395,6 +395,8 @@ public class Probe {
             private Button getButton;
             private Button processButton;
             private Button propertyButton;
+            private ChannelField channelField = null;
+            private String[] propertyNames = null;
             private ConnectState connectState = ConnectState.disconnected;
             private String[] connectStateText = {"connect    ","disconnect"};
             private Channel channel = null;
@@ -417,12 +419,12 @@ public class Probe {
                 processButton = new Button(getWidget,SWT.CHECK);
                 processButton.setText("process");
                 processButton.setSelection(false);
-                propertyButton = new Button(getWidget,SWT.CHECK);
-                propertyButton.setText("properties");
-                propertyButton.setSelection(true);
+                propertyButton = new Button(getWidget,SWT.PUSH);
+                propertyButton.setText("property");
+                propertyButton.addSelectionListener(this);
                 getButton.setEnabled(false);
                 processButton.setEnabled(true);
-                propertyButton.setEnabled(true);
+                processButton.setEnabled(false);
             }
             /* (non-Javadoc)
              * @see org.eclipse.swt.events.SelectionListener#widgetSelected(org.eclipse.swt.events.SelectionEvent)
@@ -439,55 +441,44 @@ public class Probe {
                             return;
                         }
                         GetChannelField getChannelField = new GetChannelField(shell,requester,channel);
-                        ChannelField channelField = getChannelField.getChannelField();
+                        channelField = getChannelField.getChannelField();
                         if(channelField==null) {
                             requester.message(String.format("no field selected%n"),MessageType.error);
                             return;
                         }
-                        boolean process = processButton.getSelection();
-                        Property[] properties = null;
-                        Field field = channelField.getField();
-                        Type type = field.getType();
-                        boolean propertysOK = true;
-                        if(type==Type.pvStructure) {
-                            propertysOK = false;
-                        } else if(type==Type.pvArray){
-                            Array array= (Array)field;
-                            Type elementType = array.getElementType();
-                            if(elementType==Type.pvArray || elementType==Type.pvStructure) {
-                                propertysOK = false;
-                            }
-                        }
-                        
-                        if(!propertysOK) propertyButton.setSelection(false);
-                        boolean getProperties = propertyButton.getSelection();
-                        if(getProperties) properties = channelField.getField().getPropertys();
-                        get = new Get(channel,requester,process);
-                        boolean result = get.connect(channelField, properties);
-                        if(result) {
-                            getButton.setEnabled(true);
-                            processButton.setEnabled(false);
-                            propertyButton.setEnabled(false);
-                            connectState = ConnectState.connected;
-                            requester.message(String.format("connected%n"),MessageType.info);
-                            connectButton.setText(connectStateText[1]);
-                        } else {
-                            requester.message(String.format("not connected%n"),MessageType.info);
-                            get = null;
-                        }
-                        return;
-                    case connected:
-                        get.disconnect();
-                        get = null;
-                        connectState = ConnectState.disconnected;
-                        connectButton.setText(connectStateText[0]);
-                        getButton.setEnabled(false);
+                        getButton.setEnabled(true);
                         processButton.setEnabled(true);
                         propertyButton.setEnabled(true);
                         return;
+                    case connected:
+                        connectState = ConnectState.disconnected;
+                        connectButton.setText(connectStateText[0]);
+                        channel.destroy();
+                        getButton.setEnabled(false);
+                        processButton.setEnabled(false);
+                        propertyButton.setEnabled(false);
+                        return;
                     }
                 }
+                if(object==propertyButton) {
+                    GetProperty getProperty = new GetProperty(shell);
+                    propertyNames = getProperty.open(channelField);
+                }
                 if(object==getButton) {
+                    boolean process = processButton.getSelection();
+                    get = new Get(channel,requester,process);
+                    boolean result = get.connect(channelField, propertyNames);
+                    if(result) {
+                        getButton.setEnabled(true);
+                        processButton.setEnabled(false);
+                        propertyButton.setEnabled(false);
+                        connectState = ConnectState.connected;
+                        requester.message(String.format("connected%n"),MessageType.info);
+                        connectButton.setText(connectStateText[1]);
+                    } else {
+                        requester.message(String.format("not connected%n"),MessageType.info);
+                        get = null;
+                    }
                     if(get==null) {
                         requester.message(String.format("not connected%n"),MessageType.info);
                         return;
@@ -496,6 +487,8 @@ public class Probe {
                     if(cD==null) return;
                     CDRecordPrint cdRecordPrint = new CDRecordPrint(cD.getCDRecord(),consoleText);
                     cdRecordPrint.print();
+                    get.disconnect();
+                    get = null;
                     return;
                 }
             }
@@ -703,17 +696,18 @@ public class Probe {
                 this.process = process;
             }
 
-            private boolean connect(ChannelField channelField,Property[] properties) {
+            private boolean connect(ChannelField channelField,String[] propertyNames) {
                 ChannelFieldGroup getFieldGroup = channel.createFieldGroup(this);
-                getFieldGroup.addChannelField(channelField);
-                if(properties!=null && properties.length>0) {
-                    for(Property property: properties) {
-                        channel.findField(null);
-                        String associatedField = property.getAssociatedFieldName();
-                        ChannelField propChannelField = channel.findField(associatedField);
+                if(channelField.getField().getType()!=Type.pvStructure
+                || (propertyNames==null || propertyNames.length<=0)) {
+                    getFieldGroup.addChannelField(channelField);
+                }
+                if(propertyNames!=null && propertyNames.length>0) {
+                    for(String propertyName: propertyNames) {
+                        ChannelField propChannelField = channelField.findProperty(propertyName);
                         if(propChannelField==null) {
                             requester.message(String.format(
-                                    "property %s not found%n", associatedField),MessageType.error);
+                                    "property %s not found%n", propertyName),MessageType.error);
                             continue;
                         }
                         getFieldGroup.addChannelField(propChannelField);

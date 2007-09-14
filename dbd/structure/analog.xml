@@ -14,30 +14,40 @@
   <field name = "value" type = "int" />
   <field name = "linearConvert" type = "structure"
      structureName = "linearConvert" />
-  <field name = "input" type = "structure" structureName = "null" />
+  <field name = "alarm" type = "structure"/>
+  <field name = "timeStamp" type = "structure" />  
+  <field name = "input" type = "structure" />
+  <!-- instance can set structureName = "intAlarm" -->
+  <field name = "valueAlarm" type = "structure" />
+  <field name = "output" type = "structure" />
+  <field name = "display" type = "structure" />
+  <!-- instance can set structureName = "intHistory" -->
+  <field name = "history" type = "structure" />
 </structure>
 
 <structure name = "linearConvertOutput" supportName = "linearConvertOutput">
   <field name = "value" type = "int" />
   <field name = "linearConvert" type = "structure"
      structureName = "linearConvert" />
-  <field name = "output" type = "structure" structureName = "null"  />
+  <field name = "alarm" type = "structure"/>
+  <field name = "timeStamp" type = "structure" />  
+  <!-- instance can set structureName = "intAlarm" -->
+  <field name = "valueAlarm" type = "structure" />
+  <field name = "output" type = "structure" />
+  <field name = "display" type = "structure" />
+  <field name = "control" type = "structure" />
+  <!-- instance can set structureName = "intHistory" -->
+  <field name = "history" type = "structure" />
 </structure>
 
 <structure name = "incrementalDouble" supportName = "incremental" >
-  <field name = "desiredValue" type = "double" >
-    <property name = "alarm" associatedField = "alarm" />
-    <property name = "units" associatedField = "units" />
-    <property name = "displayLimit" associatedField = "displayLimit" />
-    <property name = "controlLimit" associatedField = "controlLimit" />
-    <property name = "timeStamp" associatedField = "/timeStamp" />
-  </field>
+  <field name = "value" type = "double" />
   <field name = "input" type = "structure" structureName = "null" />
-  <field name = "incrementalOutput" type = "boolean" />
+  <field name = "incremental" type = "boolean" />
   <field name = "rateOfChange" type = "double" />
-  <field name = "units" type = "string" />
-  <field name = "controlLimit"
-     type = "structure" structureName = "doubleLimit" />
+  <field name = "alarm" type = "structure"/>
+  <field name = "display" type = "structure" />
+  <field name = "control" type = "structure" />
 </structure>
 
 <support name = "linearConvertInput"

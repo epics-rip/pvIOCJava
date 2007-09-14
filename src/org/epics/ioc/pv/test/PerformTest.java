@@ -23,9 +23,9 @@ public class PerformTest extends TestCase {
      * test copy array of double.
      */
     public static void testDoubleArrayCopy() {
-        Field fieldFrom = fieldCreate.createArray("from",Type.pvDouble,null,null);
-        Field fieldTo = fieldCreate.createArray("to",Type.pvDouble,null,null);
-        Field fieldLong = fieldCreate.createArray("long",Type.pvLong,null,null);
+        Field fieldFrom = fieldCreate.createArray("from",Type.pvDouble,null);
+        Field fieldTo = fieldCreate.createArray("to",Type.pvDouble,null);
+        Field fieldLong = fieldCreate.createArray("long",Type.pvLong,null);
         Field[] fields = new Field[]{fieldFrom,fieldTo,fieldLong};
         Structure structure = fieldCreate.createStructure("test", "test", fields);
         PVRecord pvRecord = dataCreate.createPVRecord("test", structure);

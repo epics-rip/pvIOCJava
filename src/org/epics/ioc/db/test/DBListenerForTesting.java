@@ -31,15 +31,14 @@ public class DBListenerForTesting implements DBListener{
             System.out.printf("record %s not found%n",recordName);
             return;
         }
-        PVAccess pvAccess = PVAccessFactory.createPVAccess(pvRecord);
         PVField pvField;
         if(pvName==null || pvName.length()==0) {
-            pvField = pvAccess.getPVRecord();
+            pvField = pvRecord;
         } else {
-            pvField = pvAccess.findField(pvName);
+            pvField = pvRecord.findProperty(pvName);
             if(pvField==null){
                 System.out.printf("name %s not in record %s%n",pvName,recordName);
-                System.out.printf("%s\n",pvAccess.getPVRecord().toString());
+                System.out.printf("%s\n",pvRecord.toString());
                 return;
             }
         }
@@ -49,20 +48,10 @@ public class DBListenerForTesting implements DBListener{
         DBField dbField = dbRecord.findDBField(pvField);
         dbField.addListener(listener);
         if(monitorProperties) {
-            if(pvField.getField().getType()!=Type.pvStructure) {
-                Property[] property = pvField.getField().getPropertys();
-                DBField propertyField;
-                for(Property prop : property) {
-                    pvAccess.setPVField(pvField);
-                    PVField propPVField = pvAccess.findField(prop.getPropertyName());
-                    if(propPVField==null){
-                        System.out.printf("name %s not in record %s%n",pvName,recordName);
-                        System.out.printf("%s\n",pvAccess.getPVRecord().toString());
-                    } else {
-                        propertyField = (DBField)dbRecord.findDBField(propPVField);
-                        propertyField.addListener(listener);
-                    }
-                }
+            PVField[] pvFields = pvField.getPropertys();
+            for(PVField pvf : pvFields) {
+                DBField dbf = dbRecord.findDBField(pvf);
+                dbf.addListener(listener);
             }
         }
     }

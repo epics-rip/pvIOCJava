@@ -1,0 +1,12 @@
+<?xml version="1.0" ?>
+<DBDefinition>
+
+<structure name = "control">
+    <field name = "limit" type = "structure" structureName = "doubleLimit" />
+    <field name = "minStep" type = "double" />
+</structure>
+
+<!-- the following is for a value field with a parent that has a field named control that is a control-->
+<create name = "controlLimit"
+  factoryName = "org.epics.ioc.create.ControlLimitFactory" />
+</DBDefinition>

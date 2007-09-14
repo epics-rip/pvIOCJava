@@ -6,7 +6,9 @@
 </record>
 
 <record name = "psEmbeded" type = "powerSupply" >
-    <voltageInput structureName = "double" >
+    <timeStamp structureName = "timeStamp" />
+    <alarm structureName = "alarm" />
+    <voltage>
         <input structureName = "linearConvertInput">
             <linearConvert>
                 <deviceHigh>4095</deviceHigh>
@@ -19,8 +21,10 @@
                     <process>false</process>
             </input>
         </input>
-    </voltageInput>
-    <currentOutput structureName = "double" >
+    </voltage>
+    <current>
+        <alarm structureName = "alarm" />
+        <input supportName = "powerSupplyCurrent" />
         <output structureName = "linearConvertOutput">
             <linearConvert>
                 <deviceHigh>4095</deviceHigh>
@@ -60,10 +64,12 @@
           <outOfRange><choice>invalid</choice></outOfRange>
           <hystersis>0.1</hystersis>
         </valueAlarm>
-    </currentOutput>
+    </current>
 </record>
 
 <record name = "dacCurrentEmbeded" type = "int">
+    <timeStamp structureName = "timeStamp" />
+    <alarm structureName = "alarm" />
 </record>
 
 </IOCDatabase>

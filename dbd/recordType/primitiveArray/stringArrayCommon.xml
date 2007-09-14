@@ -1,11 +1,8 @@
 <?xml version="1.0" ?>
 <DBDefinition>
-<field name = "value" type = "array" elementType = "string" >
-    <property name = "alarm" associatedField = "alarm" />
-    <property name = "timeStamp" associatedField = "timeStamp" />
-  </field>
-  <field name = "alarm" type = "structure" structureName = "alarm"
-      supportName = "alarm" />
+  <field name = "value" type = "array" elementType = "string" />
+  <field name = "alarm" type = "structure"/>
+  <field name = "timeStamp" type = "structure" />  
   <field name = "input" type = "structure" />
   <field name = "output" type = "structure" />
 </DBDefinition>

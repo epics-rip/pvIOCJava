@@ -201,7 +201,6 @@ public class Monitor {
             
             private Channel channel = null;
             private ChannelField valueField;
-            private boolean propertysOK = false;
             private ChannelFieldGroup channelFieldGroup;
             private String[] propertyNames = null;
             private ChannelMonitor channelMonitor = null;
@@ -318,21 +317,11 @@ public class Monitor {
                         channelFieldGroup.addChannelField(valueField);
                         Field field = valueField.getField();
                         Type type = field.getType();
-                        propertysOK = true;
-                        if(type==Type.pvStructure) {
-                            propertysOK = false;
-                        } else if(type==Type.pvArray){
-                            Array array= (Array)field;
-                            Type elementType = array.getElementType();
-                            if(elementType==Type.pvArray || elementType==Type.pvStructure) {
-                                propertysOK = false;
-                            }
-                        }
                         if(!type.isNumeric()) {
                             monitorType = MonitorType.put;
                             putButton.setSelection(true);
                         }
-                        propertyButton.setEnabled(propertysOK);
+                        propertyButton.setEnabled(true);
                         propertyNames = null;
                         return;
                     case connected:                        
@@ -341,10 +330,8 @@ public class Monitor {
                     }
                 }
                 if(object==propertyButton) {
-                    if(propertysOK) {
-                        GetProperty getProperty = new GetProperty(shell);
-                        propertyNames = getProperty.open(valueField.getField());
-                    }
+                    GetProperty getProperty = new GetProperty(shell);
+                    propertyNames = getProperty.open(valueField);
                 }
                 if(object==putButton) {
                     if(!putButton.getSelection()) return;
@@ -511,78 +498,6 @@ public class Monitor {
                     if(fieldName.equals("timeStamp")) causeMonitor = false;
                     channelMonitor.lookForPut(channelField, causeMonitor);
                 }
-            }
-        }
-    }
-    
-    private static class GetProperty extends Dialog implements SelectionListener {
-        private Button doneButton;
-        private Property[] propertys = null;
-        private Button[] propertyButtons;
-        String[] associatedNames = null;
-        private Shell shell;
-        
-        private GetProperty(Shell parent) {
-            super(parent,SWT.PRIMARY_MODAL|SWT.DIALOG_TRIM);
-        }
-        private String[] open(Field field) {
-            propertys = field.getPropertys();
-            int length = propertys.length;
-            if(length==0) return null;
-            shell = new Shell(getParent(),getStyle());
-            shell.setText("getProperty");
-            GridLayout gridLayout = new GridLayout();
-            gridLayout.numColumns = 1;
-            shell.setLayout(gridLayout);
-            doneButton = new Button(shell,SWT.PUSH);
-            doneButton.setText("Done");
-            doneButton.addSelectionListener(this);
-            propertyButtons = new Button[length];
-            for(int i=0; i<length; i++) {
-                Button button = new Button(shell,SWT.CHECK);
-                button.setText(propertys[i].getPropertyName());
-                propertyButtons[i] = button;
-            }
-            shell.pack();
-            shell.open();
-            Display display = getParent().getDisplay();
-            while(!shell.isDisposed()) {
-                if(!display.readAndDispatch()) {
-                    display.sleep();
-                }
-            }
-            return associatedNames;
-        }      
-        /* (non-Javadoc)
-         * @see org.eclipse.swt.events.SelectionListener#widgetDefaultSelected(org.eclipse.swt.events.SelectionEvent)
-         */
-        public void widgetDefaultSelected(SelectionEvent arg0) {
-            widgetSelected(arg0);
-        }
-        /* (non-Javadoc)
-         * @see org.eclipse.swt.events.SelectionListener#widgetSelected(org.eclipse.swt.events.SelectionEvent)
-         */
-        public void widgetSelected(SelectionEvent arg0) {
-            Object object = arg0.getSource();
-            if(object==doneButton) {
-                int numSelected = 0;
-                for(Button button : propertyButtons) {
-                    if(button.getSelection()) numSelected++;
-                }
-                
-                if(numSelected>0) {
-                    associatedNames = new String[numSelected];
-                    int next = 0;
-                    for(int i=0; i<propertys.length; i++) {
-                        Button button = propertyButtons[i];
-                        if(button.getSelection()) {
-                            associatedNames[next] = propertys[i].getAssociatedFieldName();
-                            next++;
-                        }
-                    }
-                }
-                shell.close();
-                return;
             }
         }
     }

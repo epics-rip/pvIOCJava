@@ -29,7 +29,7 @@ public class DBDFactory {
         masterDBD = new DBDInstance("master");
         FieldCreate fieldCreate = FieldFactory.getFieldCreate();
         DBDStructure dbdStructure = masterDBD.createStructure(
-            "null", new Field[0],new Property[0], fieldCreate.createFieldAttribute());
+            "null", new Field[0], fieldCreate.createFieldAttribute());
         masterDBD.addStructure(dbdStructure);
     }
     /**
@@ -111,18 +111,16 @@ public class DBDFactory {
         /* (non-Javadoc)
          * @see org.epics.ioc.dbd.DBD#createRecordType(java.lang.String, org.epics.ioc.pv.Field[], org.epics.ioc.pv.Property[], org.epics.ioc.pv.FieldAttribute)
          */
-        public DBDRecordType createRecordType(String name, Field[] field,
-            Property[] property, FieldAttribute fieldAttribute)
+        public DBDRecordType createRecordType(String name, Field[] field,FieldAttribute fieldAttribute)
         {
-            return new RecordTypeInstance(name,field,property,fieldAttribute);
+            return new RecordTypeInstance(name,field,fieldAttribute);
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.dbd.DBD#createStructure(java.lang.String, org.epics.ioc.pv.Field[], org.epics.ioc.pv.Property[], org.epics.ioc.pv.FieldAttribute)
          */
-        public DBDStructure createStructure(String name, Field[] field,
-            Property[] property, FieldAttribute fieldAttribute)
+        public DBDStructure createStructure(String name, Field[] field,FieldAttribute fieldAttribute)
         {
-            return new StructureInstance(name,field,property,fieldAttribute);
+            return new StructureInstance(name,field,fieldAttribute);
         }
         
         // merge allows master to be locked once
@@ -543,19 +541,17 @@ public class DBDFactory {
     
     static private class StructureInstance extends BaseStructure implements DBDStructure
     {   
-        private StructureInstance(String name,
-            Field[] field,Property[] property,FieldAttribute fieldAttribute)
+        private StructureInstance(String name,Field[] field,FieldAttribute fieldAttribute)
         {
-            super(name,name,field,property,fieldAttribute);
+            super(name,name,field,fieldAttribute);
         }
     }
 
     static private class RecordTypeInstance extends StructureInstance implements DBDRecordType
     {   
-        private RecordTypeInstance(String name,
-            Field[] field,Property[] property,FieldAttribute fieldAttribute)
+        private RecordTypeInstance(String name,Field[] field,FieldAttribute fieldAttribute)
         {
-            super(name,field,property,fieldAttribute);
+            super(name,field,fieldAttribute);
         }
     }
     

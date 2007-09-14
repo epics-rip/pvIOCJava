@@ -1,11 +1,13 @@
 <?xml version="1.0" ?>
 <DBDefinition>
-  <field name = "value" type = "structure" structureName = "enumerated">
-    <property name = "alarm" associatedField = "alarm" />
-    <property name = "timeStamp" associatedField = "timeStamp" />
-  </field>
-  <field name = "alarm" type = "structure" structureName = "alarm"
-    supportName = "alarm" />
-  <field name = "digitalIO" type = "structure"
-    structureName = "digitalIO" supportName = "digital" />
+  <field name = "value" type = "structure" structureName = "enumerated" />
+  <field name = "alarm" type = "structure"/>
+  <field name = "timeStamp" type = "structure" />  
+  <field name = "digitalDef" type = "structure" structureName = "digitalDef"/>
+  <field name = "input" type = "structure" />
+  <!-- instance can set structureName = "digitalAlarm" -->
+  <field name = "valueAlarm" type = "structure"/>
+  <field name = "output" type = "structure" />
+  <!-- instance can set structureName = "enumeratedHistory" -->
+  <field name = "history" type = "structure" />
 </DBDefinition>

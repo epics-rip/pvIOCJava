@@ -219,7 +219,6 @@ public class XMLToDBDFactory {
         private String structureCreateName = null;
         private String fieldSupportName = null;
         private String fieldCreateName = null;
-        private LinkedList<Property> structurePropertyList;
         private LinkedList<Field> fieldList;
         // remaining are for field elements
         private String fieldName;
@@ -228,7 +227,6 @@ public class XMLToDBDFactory {
         private Type elementType;
         private FieldAttribute fieldAttribute;
         private FieldAttribute structureAttribute;
-        private LinkedList<Property> fieldPropertyList;
         
         DBDXMLStructureHandler()
         {
@@ -279,21 +277,14 @@ public class XMLToDBDFactory {
             }
             structureAttribute = fieldCreate.createFieldAttribute();
             structureAttribute.setAttributes(attributes,excludeString);
-            structurePropertyList = new LinkedList<Property>();
             fieldList = new LinkedList<Field>();
             state = State.structure;
         }
     
         public void end(String qName){
             if(state==State.idle) {
-                structurePropertyList = null;
                 fieldList = null;
                 return;
-            }
-            Property[] property = new Property[structurePropertyList.size()];
-            ListIterator<Property> iter = structurePropertyList.listIterator();
-            for(int i=0; i<property.length; i++) {
-                property[i] = iter.next();
             }
             Field[] field = new Field[fieldList.size()];
             ListIterator<Field> iter1 = fieldList.listIterator();
@@ -302,7 +293,7 @@ public class XMLToDBDFactory {
             }
             if(isRecordType) {
                 DBDRecordType dbdRecordType = dbd.createRecordType(
-                        structureName,field,property,structureAttribute);
+                        structureName,field,structureAttribute);
                 boolean result = dbd.addRecordType(dbdRecordType);
                 if(!result) {
                     iocxmlReader.message(
@@ -317,7 +308,7 @@ public class XMLToDBDFactory {
                 }
             } else {
                 DBDStructure dbdStructure = dbd.createStructure(
-                        structureName,field,property,structureAttribute);
+                        structureName,field,structureAttribute);
                 boolean result = dbd.addStructure(dbdStructure);
                 if(!result) {
                     iocxmlReader.message(
@@ -331,7 +322,6 @@ public class XMLToDBDFactory {
                     dbdStructure.setCreateName(structureCreateName);
                 }
             }
-            structurePropertyList = null;
             fieldList = null;
             state= State.idle;
         }
@@ -384,7 +374,6 @@ public class XMLToDBDFactory {
                 }
                 if(fieldSupportName==null) fieldSupportName = attributes.get("supportName");
                 if(fieldCreateName==null) fieldCreateName = attributes.get("createName");
-                fieldPropertyList =  new  LinkedList<Property>();
                 state = State.field;
             } else if(qName.equals("property")) {
                 String propertyName = attributes.get("name");
@@ -401,16 +390,6 @@ public class XMLToDBDFactory {
                             MessageType.error);
                     return;
                 }
-                Property property= fieldCreate.createProperty(
-                    propertyName,associatedName);
-                if(state==State.structure) {
-                    structurePropertyList.add(property);
-                } else if(state==State.field) {
-                    fieldPropertyList.add(property);
-                } else {
-                    iocxmlReader.message("logic error",
-                            MessageType.fatalError);
-                }
             }
         }
     
@@ -419,50 +398,26 @@ public class XMLToDBDFactory {
             if(!qName.equals("field")) return;
             assert(state==State.field);
             state = State.structure;
-            Property[] property = new Property[fieldPropertyList.size()];
-            ListIterator<Property> iter = fieldPropertyList.listIterator();
-            for(int i=0; i<property.length; i++) {
-                 property[i] = iter.next();
-            }
             Field field = null;
             switch(type) {
             case pvStructure:
                 // Combine the current properties with the dbdStructure properties
                 DBDStructure dbdStructure = dbd.getStructure(fieldStructure.getStructureName());
-                Property[] structPropertys = dbdStructure.getPropertys();
-                LinkedList<Property> combinedPropertyList = new  LinkedList<Property>();
-                for(Property newProperty: property) combinedPropertyList.add(newProperty);
-                outer:
-                for(Property structProperty: structPropertys) {
-                    String propertyName = structProperty.getPropertyName();
-                    for(Property combined: combinedPropertyList) {
-                        if(combined.getPropertyName().equals(propertyName)) continue outer;
-                    }
-                    combinedPropertyList.add(structProperty);
-                }
-                property = new Property[combinedPropertyList.size()];
-                iter = combinedPropertyList.listIterator();
-                for(int i=0; i<property.length; i++) {
-                     property[i] = iter.next();
-                }
+                
                 field = fieldCreate.createStructure(fieldName,
-                    fieldStructure.getStructureName(),fieldStructure.getFields(),
-                    property,fieldAttribute);
+                    fieldStructure.getStructureName(),fieldStructure.getFields(),fieldAttribute);
                 break;
             case pvArray:
-                field = fieldCreate.createArray(fieldName,elementType,
-                    property,fieldAttribute);
+                field = fieldCreate.createArray(fieldName,elementType,fieldAttribute);
                 break;
             default:
-                field = fieldCreate.createField(fieldName,type,
-                        property,fieldAttribute);
+                field = fieldCreate.createField(fieldName,type,fieldAttribute);
                     break;
             }
             if(field==null) {
                 throw new IllegalStateException("logic error");
             }
             fieldList.add(field);
-            fieldPropertyList = null;
             if(fieldSupportName!=null) {
                 field.setSupportName(fieldSupportName);
             }

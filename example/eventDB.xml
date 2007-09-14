@@ -1,6 +1,8 @@
 <?xml version="1.0" ?>
 <IOCDatabase>
 <record name = "eventCounter" type = "calcDouble">
+    <timeStamp structureName = "timeStamp" />
+    <alarm structureName = "alarm" />
     <calcArgArray>
         <value structureName = "calcDoubleArg">
             <value>0.0</value>
@@ -23,6 +25,8 @@
 </record>
 
 <record name = "event" type = "event">
+    <timeStamp structureName = "timeStamp" />
+    <alarm structureName = "alarm" />
     <value>eventTest</value>
     <scan>
         <type><choice>periodic</choice></type>

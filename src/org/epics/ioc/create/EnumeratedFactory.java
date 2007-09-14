@@ -32,10 +32,6 @@ public class EnumeratedFactory {
         PVStructure pvStructure = dbStructure.getPVStructure();
         Structure structure = pvStructure.getStructure();
         Field[] fields = structure.getFields();
-        if(fields.length!=3) {
-            pvStructure.message("structure is not proper enum", MessageType.error);
-            return null;
-        }
         Field field = fields[0];
         if(!field.getFieldName().equals("index") || field.getType()!=Type.pvInt) {
             pvStructure.message("structure does not have field index of type int", MessageType.error);

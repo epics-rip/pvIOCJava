@@ -3,6 +3,8 @@
 
 
 <record name = "aiRawCounter" type = "calcDouble">
+    <timeStamp structureName = "timeStamp" />
+    <alarm structureName = "alarm" />
     <calcArgArray>
         <value structureName = "calcDoubleArg">
             <value>-2048.0</value>
@@ -35,6 +37,8 @@
 </record>
 
 <record name = "aiRaw" type = "int">
+    <timeStamp structureName = "timeStamp" />
+    <alarm structureName = "alarm" />
     <supportArray>
         <value structureName = "supportArrayElement">
             <wait>true</wait>
@@ -46,6 +50,8 @@
 </record>
 
 <record name = "ai" type = "double" >
+    <timeStamp structureName = "timeStamp" />
+    <alarm structureName = "alarm" />
     <input structureName = "linearConvertInput">
         <linearConvert>
             <deviceHigh>2047</deviceHigh>
@@ -86,13 +92,13 @@
           <outOfRange><choice>invalid</choice></outOfRange>
           <hystersis>0.1</hystersis>
     </valueAlarm>
-    <displayCharacteristics structureName = "doubleDisplayCharacteristics" >
+    <display structureName = "display" >
         <units>volts</units>
         <limit>
             <low>0.0</low>
             <high>10.0</high>
         </limit>
-    </displayCharacteristics>
+    </display>
 </record>
 
 

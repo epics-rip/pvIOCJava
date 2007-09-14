@@ -2,15 +2,18 @@
 <DBDefinition>
 <include addPath = "dbd/structure" />
 <include href = "limit.xml" />
+<include href = "display.xml" />
+<include href = "control.xml" />
 <include href = "enumerated.xml" />
 <include href = "commonFields.xml" />
 <include href = "alarm.xml" />
-<include href = "byteStructures.xml" />
-<include href = "shortStructures.xml" />
-<include href = "intStructures.xml" />
-<include href = "longStructures.xml" />
-<include href = "floatStructures.xml" />
-<include href = "doubleStructures.xml" />
+<include href = "byteHistory.xml" />
+<include href = "shortHistory.xml" />
+<include href = "intHistory.xml" />
+<include href = "longHistory.xml" />
+<include href = "floatHistory.xml" />
+<include href = "doubleHistory.xml" />
+<include href = "stringHistory.xml" />
 <include href = "noop.xml" />
 <include href = "generic.xml" />
 <include href = "supportArray.xml" />

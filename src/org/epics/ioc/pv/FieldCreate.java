@@ -40,13 +40,6 @@ public interface FieldCreate {
      */
     public FieldAttribute createFieldAttribute();
     /**
-     * Create a <i>Property</i>
-     * @param propertyName the property name
-     * @param fieldName the associated field
-     * @return a <i>Property<i/> interface for the newly created object.
-     */
-    public Property createProperty(String propertyName, String fieldName);
-    /**
      * Create a <i>Field</i> with no properties and default attributes.
      * This must only be called for scalar types,
      * i.e. <i>pvBoolean</i>, ... , <i>pvString</i>
@@ -66,15 +59,12 @@ public interface FieldCreate {
      * the appropriate create method must be called.
      * @param fieldName The field name.
      * @param type The field type .
-     * @param property The field properties.
-     * If <i>null</i> then a null array of properties is created.
      * @param fieldAttribute The attributes for the field.
      * If <i>null</i> then a default set of attributes is created.
      * @return a <i>Field</i> interface for the newly created object.
      * @throws <i>IllegalArgumentException</i> if an illegal type is specified.
      */
-    public Field createField(String fieldName,Type type,
-        Property[] property,FieldAttribute fieldAttribute);
+    public Field createField(String fieldName,Type type,FieldAttribute fieldAttribute);
     /**
      * Create an <i>Array</i> field with no properties and default attributes.
      * @param fieldName The field name
@@ -86,14 +76,11 @@ public interface FieldCreate {
      * Create an <i>Array</i> field.
      * @param fieldName The field name
      * @param elementType The <i>Type</i> for array elements
-     * @param property The field properties.
-     * If <i>null</i> then a null array of properties is created.
      * @param fieldAttribute The attributes for the field.
      * If <i>null</i> then a default set of attributes is created.
      * @return An <i>Array</i> Interface for the newly created object.
      */
-    public Array createArray(String fieldName,Type elementType,
-        Property[] property,FieldAttribute fieldAttribute);
+    public Array createArray(String fieldName,Type elementType,FieldAttribute fieldAttribute);
     /**
      * Create a <i>Structure</i> field with no properties and default attributes.
      * @param fieldName The field name
@@ -108,13 +95,11 @@ public interface FieldCreate {
      * @param fieldName The field name
      * @param structureName The structure name
      * @param field The array of <i>Field</i> for the structure.
-     * @param property The field properties.
-     * If <i>null</i> then a null array of properties is created.
      * @param fieldAttribute The attributes for the field.
      * If <i>null</i> then a default set of attributes is created.
    
      * @return a <i>Structure</i> interface for the newly created object.
      */
     public Structure createStructure(String fieldName,String structureName, Field[] field,
-        Property[] property,FieldAttribute fieldAttribute);
+        FieldAttribute fieldAttribute);
 }

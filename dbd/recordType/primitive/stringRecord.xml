@@ -9,6 +9,8 @@
   <include href = "common.xml" />
   
   <include href = "stringCommon.xml" />
+  <field name = "supportArray" type = "array"
+     elementType = "structure" supportName = "supportArray" />
 </recordType>
 
 </DBDefinition>

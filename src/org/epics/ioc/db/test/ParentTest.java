@@ -137,8 +137,7 @@ public class ParentTest extends TestCase {
             System.out.printf("record %s not found%n",recordName);
             return;
         }
-        PVAccess pvAccess = PVAccessFactory.createPVAccess(pvRecord);
-        PVField pvField = pvAccess.findField(fieldName);
+        PVField pvField = pvRecord.findProperty(fieldName);
         if(pvField==null){
             System.out.printf("field %s not in record %s%n",fieldName,recordName);
             return;

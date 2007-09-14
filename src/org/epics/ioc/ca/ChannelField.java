@@ -19,6 +19,17 @@ public interface ChannelField {
      */
     Field getField();
     /**
+     * Find the channelField for propertyName.
+     * @param propertyName The name of the property.
+     * @return The ChannelField.
+     */
+    ChannelField findProperty(String propertyName);
+    /**
+     * Get the names of properties for this field.
+     * @return The array of names.
+     */
+    String[] getPropertyNames();
+    /**
      * Get the access rights for the field.
      * @return The access rights.
      */

@@ -1,0 +1,8 @@
+<?xml version="1.0" ?>
+<DBDefinition>
+  <field name = "power" type = "structure" structureName = "double" />
+  <field name = "voltage" type = "structure" structureName = "double" />
+  <field name = "current" type = "structure" structureName = "double" />
+  <field name = "alarm" type = "structure"/>
+  <field name = "timeStamp" type = "structure" />  
+</DBDefinition>

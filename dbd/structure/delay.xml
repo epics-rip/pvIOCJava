@@ -1,7 +1,7 @@
 <?xml version="1.0" ?>
 <DBDefinition>
 
-<structure name = "delaySupport">
+<structure name = "delay" supportName = "delaySupport">
   <!-- min, max, inc are delay in milliseconds -->
   <field name = "min" type = "long" />
   <field name = "max" type = "long" />

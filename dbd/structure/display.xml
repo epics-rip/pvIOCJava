@@ -1,0 +1,12 @@
+<?xml version="1.0" ?>
+<DBDefinition>
+
+<structure name = "display">
+    <field name = "description" type = "string" />
+    <field name = "format" type = "string" />
+    <field name = "units" type = "string" />
+    <field name = "resolution" type = "int" />
+    <field name = "limit" type = "structure" structureName = "doubleLimit" />
+</structure>
+
+</DBDefinition>

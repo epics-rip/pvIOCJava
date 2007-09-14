@@ -22,9 +22,7 @@ import java.util.TreeMap;
  */
 
 
-public final class FieldFactory {
-    private static Convert convert = ConvertFactory.getConvert();
-    
+public final class FieldFactory {   
     private FieldFactory(){} // dont create
     
     /**
@@ -77,37 +75,33 @@ public final class FieldFactory {
         /* (non-Javadoc)
          * @see org.epics.ioc.pv.FieldCreate#createArrayField(java.lang.String, org.epics.ioc.pv.Type, org.epics.ioc.pv.Property[], org.epics.ioc.pv.FieldAttribute)
          */
-        public Array createArray(String fieldName, Type elementType,
-                Property[] property, FieldAttribute fieldAttribute)
+        public Array createArray(String fieldName, Type elementType,FieldAttribute fieldAttribute)
         {
-            if(property==null) property = new Property[0];
             if(fieldAttribute==null) fieldAttribute = createFieldAttribute();
-            return new BaseArray(fieldName,elementType,property,fieldAttribute);
+            return new BaseArray(fieldName,elementType,fieldAttribute);
         }
 
         /* (non-Javadoc)
          * @see org.epics.ioc.pv.FieldCreate#createArrayField(java.lang.String, org.epics.ioc.pv.Type)
          */
         public Array createArray(String fieldName, Type elementType) {
-            return createArray(fieldName,elementType,null,null);
+            return createArray(fieldName,elementType,null);
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.pv.FieldCreate#createField(java.lang.String, org.epics.ioc.pv.Type, org.epics.ioc.pv.Property[], org.epics.ioc.pv.FieldAttribute)
          */
-        public Field createField(String fieldName, Type type,
-             Property[] property, FieldAttribute fieldAttribute)
+        public Field createField(String fieldName, Type type,FieldAttribute fieldAttribute)
         {
             if(!type.isScalar()) throw new IllegalArgumentException(
                     "Illegal PVType. Must be scalar but it is " + type.toString() );
-            if(property==null) property = new Property[0];
             if(fieldAttribute==null) fieldAttribute = createFieldAttribute();
-            return new BaseField(fieldName,type,property,fieldAttribute);
+            return new BaseField(fieldName,type,fieldAttribute);
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.pv.FieldCreate#createField(java.lang.String, org.epics.ioc.pv.Type)
          */
         public Field createField(String fieldName, Type type) {
-            return createField(fieldName,type,null,null);
+            return createField(fieldName,type,null);
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.pv.FieldCreate#createFieldAttribute()
@@ -116,26 +110,19 @@ public final class FieldFactory {
             return new FieldAttributeImpl();
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.pv.FieldCreate#createProperty(java.lang.String, java.lang.String)
-         */
-        public Property createProperty(String propertyName, String fieldName) {
-            return new PropertyInstance(propertyName,fieldName);
-        }
-        /* (non-Javadoc)
          * @see org.epics.ioc.pv.FieldCreate#createStructureField(java.lang.String, java.lang.String, org.epics.ioc.pv.Field[], org.epics.ioc.pv.Property[], org.epics.ioc.pv.FieldAttribute)
          */
         public Structure createStructure(String fieldName, String structureName, Field[] field,
-            Property[] property, FieldAttribute fieldAttribute)
+            FieldAttribute fieldAttribute)
         {
-            if(property==null) property = new Property[0];
             if(fieldAttribute==null) fieldAttribute = createFieldAttribute();
-            return new BaseStructure(fieldName,structureName,field,property,fieldAttribute);
+            return new BaseStructure(fieldName,structureName,field,fieldAttribute);
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.pv.FieldCreate#createStructureField(java.lang.String, java.lang.String, org.epics.ioc.pv.Field[])
          */
         public Structure createStructure(String fieldName, String structureName, Field[] field) {
-            return createStructure(fieldName,structureName,field,null,null);
+            return createStructure(fieldName,structureName,field,null);
         }
                 
         private static class FieldAttributeImpl implements FieldAttribute {
@@ -189,42 +176,6 @@ public final class FieldFactory {
                 }
                 return result;
             }
-        }
-        
-        private static class PropertyInstance implements Property {
-            private String fieldName;
-            private String name;
-        
-            private PropertyInstance(String name, String fieldName) {
-                this.name = name;
-                this.fieldName = fieldName;
-            }
-            /* (non-Javadoc)
-             * @see java.lang.Object#toString()
-             */
-            public String toString() { return getString(0);}
-            /* (non-Javadoc)
-             * @see org.epics.ioc.pv.Property#toString(int)
-             */
-            public String toString(int indentLevel) {
-                return getString(indentLevel);
-            }
-    
-            private String getString(int indentLevel) {
-                StringBuilder builder = new StringBuilder();
-                convert.newLine(builder,indentLevel);
-                builder.append(String.format("{name = %s field = %s}",
-                        name,fieldName));
-                return builder.toString();
-            }
-            /* (non-Javadoc)
-             * @see org.epics.ioc.pv.Property#getFieldName()
-             */
-            public String getAssociatedFieldName() { return fieldName;} 
-            /* (non-Javadoc)
-             * @see org.epics.ioc.pv.Property#getPropertyName()
-             */
-            public String getPropertyName() { return name;}
         }
     }
 }

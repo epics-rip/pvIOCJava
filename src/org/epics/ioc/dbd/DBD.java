@@ -40,20 +40,20 @@ public interface DBD {
      * Create a DBDStructure.
      * @param name The name of the structure.
      * @param field An array of Field for the fields of the structure.
-     * @param property An array of properties for the structure.
+     * @param fieldAttribute The fieldAttribute for the structure.
      * @return The interface for the newly created structure.
      */
     public DBDStructure createStructure(String name,
-        Field[] field,Property[] property,FieldAttribute fieldAttribute);
+        Field[] field,FieldAttribute fieldAttribute);
     /**
      * Create a DBDRecordType.
      * @param name The recordType name.
      * @param field An array of Field for the fields of the structure.
-     * @param property An array of properties for the structure.
+     * @param fieldAttribute The fieldAttribute for the structure.
      * @return interface The for the newly created structure.
      */
     public DBDRecordType createRecordType(String name,
-        Field[] field,Property[] property,FieldAttribute fieldAttribute);
+        Field[] field,FieldAttribute fieldAttribute);
     /**
      * Create a DBDCreate.
      * @param createName The create name.
