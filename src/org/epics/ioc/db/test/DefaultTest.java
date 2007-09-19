@@ -26,14 +26,12 @@ public class DefaultTest extends TestCase {
     public static void testDefault() {
         DBD dbd = DBDFactory.getMasterDBD();
         Requester iocRequester = new Listener();
-        System.out.printf("reading menuStructureSupport%n");
+        System.out.printf("reading Support%n");
         XMLToDBDFactory.convert(dbd,
-                 "dbd/menuStructureSupport.xml",iocRequester);
-        XMLToDBDFactory.convert(dbd,
-                 "src/org/epics/ioc/db/test/defaultDBD.xml",iocRequester);
+                 "example/exampleDBD.xml",iocRequester);
         IOCDB iocdb = IOCDBFactory.create("testIOCDatabase");
         XMLToIOCDBFactory.convert(dbd,iocdb,
-                 "src/org/epics/ioc/db/test/defaultDB.xml",iocRequester);
+                 "example/allTypesDB.xml",iocRequester);
         Map<String,DBRecord> recordMap = iocdb.getRecordMap();
         Set<String> keys = recordMap.keySet();
         System.out.printf("%n%nrecord list%n");

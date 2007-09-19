@@ -9,21 +9,16 @@ import org.epics.ioc.db.*;
 import org.epics.ioc.pv.*;
 
 /**
- * Base class for an enumerated structure, which is a structure that has an array of string choices
- * and an index field and a choice field.
- * The index an choice select one of the choices.
- * A put to the index field will also update the choice field and a put to the choice will update the index.
- * This class overrides the PVField implementation for all three fields.
+ * Base class for controlLimit. The PVField for the value fieldis replaced by an implemtation that enforces the control limits.
  * @author mrk
  *
  */
 public class BaseControlLimit implements Create{
     private static Convert convert = ConvertFactory.getConvert();
-    /**
-     * The constructor.
-     * @param dbIndex The DBField for the index.
-     * @param dbChoice The DBField for the choice.
-     * @param dbChoices The DBField for the choices.
+    /** Constructor.
+     * @param valueDBField The DBField interface for the value field.
+     * @param lowDBField The DBField interface for the low limit.
+     * @param highDBField The DBField interface for the high limit.
      */
     public BaseControlLimit(DBField valueDBField, DBField lowDBField, DBField highDBField) {
         PVField valuePVField = valueDBField.getPVField();

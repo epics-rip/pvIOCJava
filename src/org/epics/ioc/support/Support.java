@@ -53,10 +53,4 @@ public interface Support extends Requester{
      * @param supportProcessRequester The process requester.
      */
     void process(SupportProcessRequester supportProcessRequester);
-    /**
-     * Set the field for which the link support should get/put data.
-     * This is called by processDB.createSupport(DBField dbField) when it is called for a link field. 
-     * @param dbField The field.
-     */
-    void setField(DBField dbField);
 }

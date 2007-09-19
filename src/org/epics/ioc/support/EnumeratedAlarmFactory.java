@@ -13,11 +13,11 @@ import org.epics.ioc.pv.*;
 import org.epics.ioc.util.*;
 
 /**
- * Support for booleanAlarm link.
+ * Support for alarms for an enumerated value.
  * @author mrk
  *
  */
-public class DigitalAlarmFactory {
+public class EnumeratedAlarmFactory {
     /**
      * Create support for a digitalAlarm structure.
      * @param dbStructure The structure.
@@ -30,12 +30,12 @@ public class DigitalAlarmFactory {
             pvStructure.message("does not have support " + supportName,MessageType.error);
             return null;
         }
-        return new DigitalAlarmImpl(dbStructure);
+        return new EnumeratedAlarmImpl(dbStructure);
     }
     
-    private static String supportName = "digitalAlarm";
+    private static String supportName = "enumeratedAlarm";
     
-    private static class DigitalAlarmImpl extends AbstractSupport
+    private static class EnumeratedAlarmImpl extends AbstractSupport
     {
         private DBStructure dbStructure;
         private PVStructure pvStructure;
@@ -51,7 +51,7 @@ public class DigitalAlarmFactory {
         
         private int prevValue = 0;
        
-        private DigitalAlarmImpl(DBStructure dbStructure) {
+        private EnumeratedAlarmImpl(DBStructure dbStructure) {
             super(supportName,dbStructure);
             this.dbStructure = dbStructure;
             pvStructure = dbStructure.getPVStructure();
@@ -60,35 +60,47 @@ public class DigitalAlarmFactory {
          * @see org.epics.ioc.process.Support#initialize()
          */
         public void initialize() {
-            SupportState supportState = SupportState.readyForStart;
             if(!super.checkSupportState(SupportState.readyForInitialize,supportName)) return;
-            noop = false;
-            if(pvValue==null) {
-                super.message("setField was not called with an enumerated structure field",
-                    MessageType.error);
-                noop = true;
+            DBField dbParent = dbStructure.getParent();
+            PVField pvParent = dbParent.getPVField();
+            PVField pvField = pvParent.findProperty("value");
+            if(pvField==null) {
+                pvStructure.message("value field not found", MessageType.error);
                 return;
             }
+            
+            if(pvField.getField().getType()!=Type.pvStructure) {
+                pvField.message("field is not an alarmSeverity structure", MessageType.error);
+                return;
+            }
+            DBField dbField = dbStructure.getDBRecord().findDBField(pvField);
+            DBStructure dbStructure = (DBStructure)dbField;
+            Create create = dbStructure.getCreate();
+            if(create==null || !(create instanceof Enumerated)) {
+                pvField.message("interface Enumerated not found", MessageType.error);
+                return;
+            }
+            Enumerated enumerated = (Enumerated)create;
+            pvValue = enumerated.getIndexField();
+            noop = false;
             alarmSupport = AlarmFactory.findAlarmSupport(dbStructure);
             if(alarmSupport==null) {
                 super.message("no alarmSupport", MessageType.error);
                 return;
             }
             pvActive = pvStructure.getBooleanField("active");
-            if(pvActive==null) return;
-            
+            if(pvActive==null) return;            
+            dbStructure = this.dbStructure;
             DBField[] dbFields = dbStructure.getFieldDBFields();
             Structure structure = dbStructure.getPVStructure().getStructure();
             int index;
-            Enumerated enumerated;
-            
             index = structure.getFieldIndex("stateSeverity");
             if(index<0) {
                 super.message("stateSeverity does not exist", MessageType.error);
                 return;
             }
-            DBField dbField = dbFields[index];
-            PVField pvField = dbField.getPVField();
+            dbField = dbFields[index];
+            pvField = dbField.getPVField();
             Field field = pvField.getField();
             if(field.getType()!=Type.pvArray) {
                 super.message("stateSeverity is not an array", MessageType.error);
@@ -112,13 +124,14 @@ public class DigitalAlarmFactory {
             }
             if(length==0) {
                 noop = true;
+                setSupportState(SupportState.readyForStart);
                 return;
             }
             pvInts = new PVInt[length];
             for(int i=0; i< length; i++) {
                 dbField = dbStateSeverityFields[i];
                 if(dbField==null ||
-                        (enumerated = AlarmSeverity.getAlarmSeverity(dbFields[index]))==null) {
+                        (enumerated = AlarmSeverity.getAlarmSeverity(dbField))==null) {
                     super.message("stateSeverity has an element that is not an enumerated structure",
                         MessageType.error);
                     return;
@@ -135,7 +148,7 @@ public class DigitalAlarmFactory {
             enumerated = AlarmSeverity.getAlarmSeverity(dbFields[index]);
             if(enumerated==null) return;
             pvChangeStateAlarm = enumerated.getIndexField();
-            setSupportState(supportState);
+            setSupportState(SupportState.readyForStart);
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.process.Support#start()
@@ -206,23 +219,5 @@ public class DigitalAlarmFactory {
             }
             supportProcessRequester.supportProcessDone(RequestResult.success);
         }                
-        /* (non-Javadoc)
-         * @see org.epics.ioc.process.Support#setField(org.epics.ioc.db.DBField)
-         */
-        public void setField(DBField dbField) {
-            PVField pvField = dbField.getPVField();
-            if(pvField.getField().getType()!=Type.pvStructure) {
-                pvField.message("field is not an alarmSeverity structure", MessageType.error);
-                return;
-            }
-            DBStructure dbStructure = (DBStructure)dbField;
-            Create create = dbStructure.getCreate();
-            if(create==null || !(create instanceof Enumerated)) {
-                pvField.message("interface Enumerated not found", MessageType.error);
-                return;
-            }
-            Enumerated enumerated = (Enumerated)create;
-            pvValue = enumerated.getIndexField();
-        }
     }
 }

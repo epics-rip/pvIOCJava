@@ -10,23 +10,388 @@
 <body>
 <h1 style="text-align: center">EPICS JavaIOC: Java Input/Output Controller<br
 />
-2007.08.09</h1>
+2007.09.19</h1>
 
 <p>This product is available via the <a href="#LicenseAgreement">open source
 license</a> described at the end of this document.</p>
 
-<p>This document has two parts:</p>
+<p>This document has three parts:</p>
 <ul>
   <li>Part I is a brief description of the javaIOC.</li>
-  <li>Part II is a description of the Database Definitions that come with
+  <li>Part II describes the javaIOC Data Model. The model 1) supports general
+    purpose tools and 2) is used by the javaIOC support code.</li>
+  <li>Part III is a description of the Database Definitions that come with
     javaIOC.</li>
 </ul>
 
 <p>CONTENTS</p>
+
+<div class="toc">
+<ul>
+  <li><a href="#Part">Part I: javaIOC - Brief Description</a> 
+    <ul>
+      <li><a href="#Overview">Overview Of Part I</a> 
+        <ul>
+          <li><a href="#Getting">Getting Started</a></li>
+          <li><a href="#Status">Status and Remaining Tasks</a></li>
+        </ul>
+      </li>
+      <li><a href="#Package">Package Summary</a> 
+        <ul>
+          <li><a href="#default">default - javaIOC/src</a></li>
+          <li><a href="#javaIOC">javaIOC/dbd</a></li>
+          <li><a href="#javaIOC1">javaIOC/example</a></li>
+          <li><a href="#org.epics.">org.epics.ioc.pv</a></li>
+          <li><a href="#org.epics.1">org.epics.ioc.dbd</a></li>
+          <li><a href="#org.epics.2">org.epics.ioc.db</a></li>
+          <li><a href="#org.epics.3">org.epics.ioc.ca</a></li>
+          <li><a href="#org.epics.4">org.epics.ioc.util</a></li>
+          <li><a href="#org.epics.5">org.epics.ioc.process</a></li>
+          <li><a href="#org.epics.6">org.epics.ioc.create</a></li>
+          <li><a href="#org.epics.7">org.epics.ioc.support</a></li>
+          <li><a href="#org.epics.8">org.epics.ioc.pdrv<br />
+            org.epics.ioc.pdrv/interfaces<br />
+            org.epics.ioc.pdrv/testDriver<br />
+            </a></li>
+          <li><a href="#org.epics.9">org.epics.ioc.swtshell</a></li>
+        </ul>
+      </li>
+      <li><a href="#Database">Database Syntax</a> 
+        <ul>
+          <li><a href="#Include">Include and Macro Substitution</a> 
+            <ul>
+              <li><a href="#Syntax">Syntax</a></li>
+              <li><a href="#Example">Example</a></li>
+            </ul>
+          </li>
+          <li><a href="#Database1">Database Definition</a> 
+            <ul>
+              <li><a href="#Basic">Basic Syntax</a></li>
+              <li><a href="#Field">Field Syntax</a></li>
+              <li><a href="#Example1">Example Structure, recordType, create,
+                and Support Definitions</a></li>
+            </ul>
+          </li>
+          <li><a href="#Record">Record Instance Definition</a> 
+            <ul>
+              <li><a href="#Syntax1">Syntax</a></li>
+              <li><a href="#Example2">Example</a></li>
+            </ul>
+          </li>
+        </ul>
+      </li>
+      <li><a href="#PVData">PVData</a> 
+        <ul>
+          <li><a href="#Field1">Field Types</a></li>
+          <li><a href="#PVData1">PVData Reflection</a></li>
+          <li><a href="#PVData2">PVData Interfaces</a></li>
+          <li><a href="#Example3">Example: Database Access via
+          Reflection</a></li>
+        </ul>
+      </li>
+      <li><a href="#DBData">DBData</a></li>
+      <li><a href="#Channel">Channel Access</a></li>
+      <li><a href="#Record1">Record Processing</a></li>
+      <li><a href="#Database2">Database Examples</a> 
+        <ul>
+          <li><a href="#Database3">Database Definitions</a> 
+            <ul>
+              <li><a href="#doubleComm">doubleCommon</a></li>
+              <li><a href="#doubleReco">doubleRecord</a></li>
+              <li><a href="#powerSuppl">powerSupplyCommon</a></li>
+              <li><a href="#powerSuppl1">powerSupplyRecord</a></li>
+            </ul>
+          </li>
+          <li><a href="#Support">Support Implementation</a></li>
+          <li><a href="#Record2">Record Instance Examples</a> 
+            <ul>
+              <li><a href="#doubleInpu">doubleInput</a></li>
+              <li><a href="#doubleOutp">doubleOutput</a></li>
+              <li><a href="#ai">ai</a></li>
+              <li><a href="#ao">ao</a></li>
+              <li><a href="#psSimple">psSimple</a></li>
+              <li><a href="#psLinked">psLinked</a></li>
+              <li><a href="#psEmbeded">psEmbeded</a></li>
+            </ul>
+          </li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+  <li><a href="#Part1">Part II: javaIOC Data Model</a> 
+    <ul>
+      <li><a href="#Summary">Summary</a></li>
+      <li><a href="#JavaIOC">JavaIOC Data Model</a> 
+        <ul>
+          <li><a href="#Basic1">Basic Concept</a></li>
+          <li><a href="#structure">structure null</a></li>
+          <li><a href="#getPropety">getPropety</a></li>
+        </ul>
+      </li>
+      <li><a href="#Definition">Definitions for Standard Properties</a> 
+        <ul>
+          <li><a href="#timeStamp">timeStamp</a></li>
+          <li><a href="#alarm">alarm</a></li>
+          <li><a href="#display">display</a></li>
+          <li><a href="#control">control</a></li>
+          <li><a href="#history">history</a></li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+  <li><a href="#Part2">Part III: javaIOC - Database Definition</a> 
+    <ul>
+      <li><a href="#Overview1">Overview Of Part III</a></li>
+      <li><a href="#javaIOC2">javaIOC/dbd</a> 
+        <ul>
+          <li><a href="#common.xml">common.xml</a></li>
+          <li><a href="#structure.">structure.xml</a></li>
+          <li><a href="#recordType">recordType.xml</a></li>
+        </ul>
+      </li>
+      <li><a href="#structure1">dbd/structure/alarm.xml</a> 
+        <ul>
+          <li><a href="#numeric">numeric alarms</a></li>
+          <li><a href="#boolean">boolean alarms</a></li>
+          <li><a href="#enumerated">enumerated alarms</a></li>
+        </ul>
+      </li>
+      <li><a href="#structure2">dbd/structure/analog.xml</a> 
+        <ul>
+          <li><a href="#linearConv">linearConvert</a></li>
+          <li><a href="#linearConv1">linearConvertInput</a></li>
+          <li><a href="#linearConv2">linearConvertOutput</a></li>
+          <li><a href="#incrementa">incrementalDouble</a></li>
+        </ul>
+      </li>
+      <li><a href="#structure3">dbd/structure/limit.xml</a></li>
+      <li><a href="#structures">dbd/structures/display.xml</a></li>
+      <li><a href="#structures1">dbd/structures/doubleHistory.xml</a></li>
+      <li><a href="#structures2">dbd/structures/commonFields.xml</a></li>
+      <li><a href="#structure4">dbd/structure/noop.xml</a></li>
+      <li><a href="#structure5">dbd/structure/generic.xml</a></li>
+      <li><a href="#structure6">dbd/structure/supportArray.xml</a></li>
+      <li><a href="#support6">dbd/structure/channelAccess.xml</a> 
+        <ul>
+          <li><a href="#processSup">processSupport</a></li>
+          <li><a href="#monitorSup">monitorSupport</a></li>
+          <li><a href="#monitorNot">monitorNotifySupport</a></li>
+          <li><a href="#inputSuppo">inputSupport</a></li>
+          <li><a href="#outputSupp">outputSupport</a></li>
+        </ul>
+      </li>
+      <li><a href="#structure7">dbd/structure/digital.xml</a> 
+        <ul>
+          <li><a href="#digitalSta">digitalState</a></li>
+          <li><a href="#digital">digital</a></li>
+        </ul>
+      </li>
+      <li><a href="#structure8">dbd/structure/event.xml</a></li>
+      <li><a href="#structure9">dbd/structure/calc.xml</a></li>
+      <li><a href="#structure10">dbd/structure/disable.xml</a></li>
+      <li><a href="#structure11">dbd/structure/delay.xml</a></li>
+      <li><a href="#structure12">dbd/structure/enumerated.xml</a></li>
+      <li><a href="#structure13">dbd/structure/portDriver.xml</a> 
+        <ul>
+          <li><a href="#pdrvSuppor">pdrvSupport</a></li>
+        </ul>
+      </li>
+      <li><a href="#recordType1">dbd/recordType/primitive</a> 
+        <ul>
+          <li><a href="#Overview2">Overview</a></li>
+          <li><a href="#boolean1">boolean</a> 
+            <ul>
+              <li><a href="#booleanCom">booleanCommon.xml</a></li>
+              <li><a href="#booleanRec">booleanRecord.xml</a></li>
+            </ul>
+          </li>
+          <li><a href="#byte">byte</a> 
+            <ul>
+              <li><a href="#byteCommon">byteCommon.xml</a></li>
+              <li><a href="#byteRecord">byteRecord.xml</a></li>
+            </ul>
+          </li>
+          <li><a href="#short">short</a> 
+            <ul>
+              <li><a href="#shortCommo">shortCommon.xml</a></li>
+              <li><a href="#shortRecor">shortRecord.xml</a></li>
+            </ul>
+          </li>
+          <li><a href="#int">int</a> 
+            <ul>
+              <li><a href="#intCommon.">intCommon.xml</a></li>
+              <li><a href="#intRecord.">intRecord.xml</a></li>
+            </ul>
+          </li>
+          <li><a href="#long">long</a> 
+            <ul>
+              <li><a href="#longCommon">longCommon.xml</a></li>
+              <li><a href="#longRecord">longRecord.xml</a></li>
+            </ul>
+          </li>
+          <li><a href="#float">float</a> 
+            <ul>
+              <li><a href="#floatCommo">floatCommon.xml</a></li>
+              <li><a href="#floatRecor">floatRecord.xml</a></li>
+            </ul>
+          </li>
+          <li><a href="#double">double</a> 
+            <ul>
+              <li><a href="#doubleComm1">doubleCommon.xml</a></li>
+              <li><a href="#doubleReco1">doubleRecord.xml</a></li>
+            </ul>
+          </li>
+          <li><a href="#string">string</a> 
+            <ul>
+              <li><a href="#stringComm">stringCommon.xml</a></li>
+              <li><a href="#stringReco">stringRecord.xml</a></li>
+            </ul>
+          </li>
+        </ul>
+      </li>
+      <li><a href="#recordType2">dbd/recordType/primitiveArray</a> 
+        <ul>
+          <li><a href="#Overview3">Overview</a></li>
+          <li><a href="#booleanArr">booleanArray</a> 
+            <ul>
+              <li><a href="#booleanArr1">booleanArrayCommon.xml</a></li>
+              <li><a href="#booleanArr2">booleanArrayRecord.xml</a></li>
+            </ul>
+          </li>
+          <li><a href="#byteArray">byteArray</a> 
+            <ul>
+              <li><a href="#byteArrayC">byteArrayCommon.xml</a></li>
+              <li><a href="#byteArrayR">byteArrayRecord.xml</a></li>
+            </ul>
+          </li>
+          <li><a href="#shortArray">shortArray</a> 
+            <ul>
+              <li><a href="#shortArray1">shortArrayCommon.xml</a></li>
+              <li><a href="#shortArray2">shortArrayRecord.xml</a></li>
+            </ul>
+          </li>
+          <li><a href="#intArray">intArray</a> 
+            <ul>
+              <li><a href="#intArrayCo">intArrayCommon.xml</a></li>
+              <li><a href="#intArrayRe">intArrayRecord.xml</a></li>
+            </ul>
+          </li>
+          <li><a href="#longArray">longArray</a> 
+            <ul>
+              <li><a href="#longArrayC">longArrayCommon.xml</a></li>
+              <li><a href="#longArrayR">longArrayRecord.xml</a></li>
+            </ul>
+          </li>
+          <li><a href="#floatArray">floatArray</a> 
+            <ul>
+              <li><a href="#floatArray1">floatArrayCommon.xml</a></li>
+              <li><a href="#floatArray2">floatArrayRecord.xml</a></li>
+            </ul>
+          </li>
+          <li><a href="#doubleArra">doubleArray</a> 
+            <ul>
+              <li><a href="#doubleArra1">doubleArrayCommon.xml</a></li>
+              <li><a href="#doubleArra2">doubleArrayRecord.xml</a></li>
+            </ul>
+          </li>
+          <li><a href="#stringArra">stringArray</a> 
+            <ul>
+              <li><a href="#stringArra1">stringArrayCommon.xml</a></li>
+              <li><a href="#stringArra2">stringArrayRecord.xml</a></li>
+            </ul>
+          </li>
+        </ul>
+      </li>
+      <li><a href="#recordType3">dbd/recordType/analog</a> 
+        <ul>
+          <li><a href="#Overview4">Overview</a></li>
+          <li><a href="#aoIncremen">aoIncrementalDouble</a> 
+            <ul>
+              <li><a
+              href="#aoIncremen1">aoIncrementalDoubleCommon.xml</a></li>
+              <li><a
+              href="#aoIncremen2">aoIncrementalDoubleRecord.xml</a></li>
+            </ul>
+          </li>
+        </ul>
+      </li>
+      <li><a href="#recordType4">dbd/recordType/enumerated</a> 
+        <ul>
+          <li><a href="#Overview5">Overview</a></li>
+          <li><a href="#enumerated1">enumerated</a> 
+            <ul>
+              <li><a href="#enumerated2">enumeratedCommon.xml</a></li>
+              <li><a href="#enumerated3">enumeratedRecord.xml</a></li>
+            </ul>
+          </li>
+        </ul>
+      </li>
+      <li><a href="#recordType5">dbd/recordType/event</a> 
+        <ul>
+          <li><a href="#Overview6">Overview</a></li>
+          <li><a href="#event">event</a> 
+            <ul>
+              <li><a href="#eventCommo">eventCommon.xml</a></li>
+              <li><a href="#eventRecor">eventRecord.xml</a></li>
+            </ul>
+          </li>
+        </ul>
+      </li>
+      <li><a href="#recordType6">dbd/recordType/calc</a> 
+        <ul>
+          <li><a href="#Overview7">Overview</a></li>
+          <li><a href="#calcDouble">calcDouble</a> 
+            <ul>
+              <li><a href="#calcDouble1">calcDoubleCommon.xml</a></li>
+              <li><a href="#calcDouble2">calcDoubleRecord.xml</a></li>
+            </ul>
+          </li>
+          <li><a href="#calcDouble3">calcDoubleArray</a> 
+            <ul>
+              <li><a href="#calcDouble4">calcDoubleArrayCommon.xml</a></li>
+              <li><a href="#calcDouble5">calcDoubleArrayRecord.xml</a></li>
+            </ul>
+          </li>
+          <li><a href="#calcBoolea">calcBooleanArray</a> 
+            <ul>
+              <li><a href="#calcBoolea1">calcBooleanArrayCommon.xml</a></li>
+              <li><a href="#calcBoolea2">calcBooleanArrayRecord.xml</a></li>
+            </ul>
+          </li>
+        </ul>
+      </li>
+      <li><a href="#recordType7">dbd/recordType/portDriver</a> 
+        <ul>
+          <li><a href="#Overview8">Overview</a></li>
+          <li><a href="#portDriver">portDriver.xml</a></li>
+        </ul>
+      </li>
+      <li><a href="#recordType8">dbd/recordType/powerSupply</a> 
+        <ul>
+          <li><a href="#Overview9">Overview</a></li>
+          <li><a href="#powerSuppl2">powerSupplyCommon.xml</a></li>
+          <li><a href="#powerSuppl3">powerSupplyRecord.xml</a></li>
+          <li><a href="#powerSuppl4">powerSupplyArrayCommon.xml</a></li>
+          <li><a href="#powerSuppl5">powerSupplyArrayRecord.xml</a></li>
+        </ul>
+      </li>
+      <li><a href="#recordType9">dbd/recordType/allTypes</a> 
+        <ul>
+          <li><a href="#Overview10">Overview</a></li>
+          <li><a href="#allTypesCo">allTypesCommon.xml</a></li>
+          <li><a href="#allTypesRe">allTypesRecord.xml</a></li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+  <li><a href="#License">License Agreement</a></li>
+</ul>
+</div>
 <hr />
 <hr />
 
-<h2 style="text-align: center">Part I: javaIOC - Brief Description</h2>
+<h2 style="text-align: center" id="Part">Part I: javaIOC - Brief
+Description</h2>
 <hr />
 <hr />
 
@@ -34,7 +399,7 @@ license</a> described at the end of this document.</p>
 packages are provided with each package.</p>
 <hr />
 
-<h2 style="text-align: center">Overview Of Part I</h2>
+<h3 style="text-align: center" id="Overview">Overview Of Part I</h3>
 <hr />
 
 <p><a href="http://www.anl.gov/epics">EPICS</a> is a set of Open Source
@@ -60,7 +425,7 @@ pre-alpha:</p>
   <li>It has not been seriously tested and thus may have many bugs.</li>
 </ul>
 
-<h3>Getting Started</h3>
+<h4 id="Getting">Getting Started</h4>
 
 <p>JavaIOC is developed as an eclipse project. The following assumes that you
 have eclipse installed and have imported JavaIOC into a project named
@@ -120,7 +485,7 @@ starts do the following:</p>
       </li>
       <li>click property button. a window offering choices appears 
         <ul>
-          <li>select all choices and click done button</li>
+          <li>select alarm and timeStamp choices and click done button</li>
         </ul>
       </li>
       <li>click startMonitor button 
@@ -135,7 +500,7 @@ starts do the following:</p>
     appears 
     <ul>
       <li>The menu bar at the top provides access to Database Definitions for
-        menu, structure, recordType, support, and linkSupport 
+        menu, structure, recordType, create, and support. 
         <ul>
           <li>select and look at the various definitions.</li>
         </ul>
@@ -164,7 +529,8 @@ starts do the following:</p>
   </li>
   <li>on monitor window 
     <ul>
-      <li>monitor record "psEmbeded" field "power" and all properties. 
+      <li>monitor record "psEmbeded" field "power" and select alarm and
+        timeStamp properties.. 
         <ul>
           <li>The initial vale timeStamp shows that the record was never
             processed.</li>
@@ -205,7 +571,7 @@ starts do the following:</p>
   <li>Example database definitions and record instances.</li>
 </ul>
 
-<h3>Status and Remaining Tasks</h3>
+<h4 id="Status">Status and Remaining Tasks</h4>
 
 <p>With the exception of remote Channel Access, the basic functionality
 required for a javaIOC is now implemented. It is possible to create a running
@@ -269,14 +635,14 @@ other things are desirable:</p>
 </ul>
 <hr />
 
-<h2 style="text-align: center">Package Summary</h2>
+<h3 style="text-align: center" id="Package">Package Summary</h3>
 <hr />
 
 <p>Documentation is provided via javaDOC. Each package of the javaIOC project
 has a package.html overview document. The packages that currently exists
 are:</p>
 
-<h3>default - javaIOC/src</h3>
+<h4 id="default">default - javaIOC/src</h4>
 
 <p>This package contains:</p>
 <ul>
@@ -285,17 +651,17 @@ are:</p>
     getting started section.</li>
 </ul>
 
-<h3>javaIOC/dbd</h3>
+<h4 id="javaIOC">javaIOC/dbd</h4>
 
 <p>This directory and it's sub-directories, provides database definition
 files for the recordTypes and support supplied with the javaIOC. </p>
 
-<h3>javaIOC/example</h3>
+<h4 id="javaIOC1">javaIOC/example</h4>
 
 <p>This directory contains number of xml files that define instances of most
 of the record/structure types supported byn the javaIOC.</p>
 
-<h3>org.epics.ioc.pv</h3>
+<h4 id="org.epics.">org.epics.ioc.pv</h4>
 
 <p>A JavaIOC has a Process Variable (PV) Database, which is a "smart" real
 time database. It is smart because each record instance has processing
@@ -305,13 +671,13 @@ code.</p>
 is a combination of data and reflection interfaces. Read the package overview
 for details. A brief description appears below.</p>
 
-<h3>org.epics.ioc.dbd</h3>
+<h4 id="org.epics.1">org.epics.ioc.dbd</h4>
 
 <p>This directory an it's subdirectories have database definitions for all
 the support provided by the javaIOC. It is described in the second part of
 this document.</p>
 
-<h3>org.epics.ioc.db</h3>
+<h4 id="org.epics.2">org.epics.ioc.db</h4>
 
 <p>This package provides a factory for creating javaIOC databases. It defines
 a set data interfaces that contain references to PV Data and provides methods
@@ -325,12 +691,12 @@ so that:</p>
 <p>This package implements an XML parser that creates record instances and
 puts them into an IOC Database (IOCDB).</p>
 
-<h3>org.epics.ioc.ca</h3>
+<h4 id="org.epics.3">org.epics.ioc.ca</h4>
 
 <p>This package is Channel Access for a javaIOC. Currently only local access
 is implemented.</p>
 
-<h3>org.epics.ioc.util</h3>
+<h4 id="org.epics.4">org.epics.ioc.util</h4>
 This package provides utility code for a javaIOC: 
 <dl>
   <dt>Message Support</dt>
@@ -352,39 +718,39 @@ This package provides utility code for a javaIOC:
       implements macro substitution and include.</dd>
 </dl>
 
-<h3>org.epics.ioc.process</h3>
+<h4 id="org.epics.5">org.epics.ioc.process</h4>
 
 <p>This package provides support for processing IOC database records.</p>
 
-<h3>org.epics.ioc.create</h3>
+<h4 id="org.epics.6">org.epics.ioc.create</h4>
 
 <p>This package defines Create, which is an interface that is called if a
 field is declared to have a createName. Support that implements Create
 normally replaces the data interface for the field at the time the field is
 created.</p>
 
-<h3>org.epics.ioc.support</h3>
+<h4 id="org.epics.7">org.epics.ioc.support</h4>
 
 <p>Each record instance must have associated support and each field of a
 record instance can optionally have support.</p>
 
-<h3>org.epics.ioc.pdrv<br />
+<h4 id="org.epics.8">org.epics.ioc.pdrv<br />
 org.epics.ioc.pdrv/interfaces<br />
 org.epics.ioc.pdrv/testDriver<br />
-</h3>
+</h4>
 
 <p>These packages implement portDriver, which is support for accessing and
 controlling hardware. It is modeled after the EPICS asynDriver and thus
 provides support for synchronous and asynchronous devices. Each device is
 accessed via a port. Each port provides access to one or more devices.</p>
 
-<h3>org.epics.ioc.swtshell</h3>
+<h4 id="org.epics.9">org.epics.ioc.swtshell</h4>
 
 <p>This is a GUI shell for an ioc. It is implemented via the Standard Widget
 Toolkit. Getting Started explains how to invoke it.</p>
 <hr />
 
-<h2 style="text-align: center">Database Syntax</h2>
+<h3 style="text-align: center" id="Database">Database Syntax</h3>
 <hr />
 
 <p>The syntax for both Database Definitions (menu, structure, recordType,
@@ -401,9 +767,10 @@ provides XML support with the following features:</p>
     be used by other code.</li>
 </ul>
 
-<h3 style="text-align: center">Include and Macro Substitution</h3>
+<h4 style="text-align: center" id="Include">Include and Macro
+Substitution</h4>
 
-<h4>Syntax</h4>
+<h5 id="Syntax">Syntax</h5>
 
 <p>An xml file can include other xml files. All files must be valid xml files
 and must have the same root element name. An include statement has the
@@ -447,7 +814,7 @@ text. The syntax is:</p>
   <li>The content of any element definition.</li>
 </ol>
 
-<h4>Example</h4>
+<h5 id="Example">Example</h5>
 
 <p>The following is a template file:</p>
 <pre>&lt;?xml version="1.0" ?&gt;
@@ -488,12 +855,12 @@ text. The syntax is:</p>
 &lt;include href = "protoAiDB.xml" /&gt;
 &lt;/IOCDatabase&gt;</pre>
 
-<h3 style="text-align: center">Database Definition</h3>
+<h4 style="text-align: center" id="Database1">Database Definition</h4>
 
 <p>This section provides a brief description of database definitions. See
 package org.epics.ioc.dbd for complete details.</p>
 
-<h4>Basic Syntax</h4>
+<h5 id="Basic">Basic Syntax</h5>
 
 <p>Database definitions consist of the following definition types: <span
 style="font-family: courier;"></span> <span
@@ -511,11 +878,7 @@ style="font-family: courier;">support</span></p>
 <p>An example recordType definition is:</p>
 <pre>&lt;recordType name = "example" supportName = "generic" &gt;
   &lt;include href = "common.xml" /&gt;
-  &lt;field name = "value" type = "double" &gt;
-    &lt;property name = "alarm" associatedField = "alarm" /&gt;
-    &lt;property name = "displayCharacteristics" associatedField = "displayCharacteristics" /&gt;
-    &lt;property name = "timeStamp" associatedField = "/timeStamp" /&gt;
-  &lt;/field&gt;
+  &lt;field name = "value" type = "double" /&gt;
   &lt;field name = "alarm" type = "structure" structureName = "alarm"
       supportName = "alarm" /&gt;
   &lt;field name = "input" type = "structure" /&gt;
@@ -524,8 +887,8 @@ style="font-family: courier;">support</span></p>
   &lt;field name = "valueAlarm" type = "structure" /&gt;
   &lt;field name = "output" type = "structure" /&gt;
   &lt;!-- instance can set
-     structureName = "doubleDisplayCharacteristics" --&gt;
-  &lt;field name = "displayCharacteristics" type = "structure" /&gt;
+     structureName = "display" --&gt;
+  &lt;field name = "display" type = "structure" /&gt;
   &lt;!-- instance can set
      structureName = "doubleHistory" supportName = "history" --&gt;
   &lt;field name = "history" type = "structure" /&gt;
@@ -533,7 +896,7 @@ style="font-family: courier;">support</span></p>
 
 <p>A recordType is just the top level structure for a record instance.</p>
 
-<h4>Field Syntax</h4>
+<h5 id="Field">Field Syntax</h5>
 
 <p>Both structure and recordType definitions define a set of field
 definitions. A field definition has the format:</p>
@@ -574,42 +937,15 @@ for the field. The following are recognized by the javaIOC database.</p>
       value false if not specified.</dd>
 </dl>
 
-<h4>Property Syntax</h4>
-A structure, recordType, and field can have properties. A property is defined
-as: 
-<pre>    &lt;property name = "name" associatedField = "field name" /&gt;</pre>
-where 
-<dl>
-  <dt>name</dt>
-    <dd>The name of the property</dd>
-  <dt>associatedField</dt>
-    <dd>The name of a field that has the value for the property. Examples are
-      given later in this document. An associatedField must be one of the
-      following: 
-      <dl>
-        <dt>name</dt>
-          <dd>The name of a field.</dd>
-        <dt>name1.name2</dt>
-          <dd>name1 must be the name of a field. name2 must be a property or
-            field in a structure field.</dd>
-      </dl>
-    </dd>
-</dl>
-
-<p>For example:</p>
-<pre>    &lt;field name = "value" type = "double"&gt;
-        &lt;property name = "timeStamp" associatedField = "timeStamp" /&gt;
-        &lt;property name = "alarm" associatedField = "alarm" /&gt;
-    &lt;/field&gt;</pre>
-
-<h4>Example Structure, recordType, create, and Support Definitions</h4>
+<h5 id="Example1">Example Structure, recordType, create, and Support
+Definitions</h5>
 
 <p>The second part of this document provides the definition supported by the
 javaIOC. Look at it for example.</p>
 
-<h3 style="text-align: center">Record Instance Definition</h3>
+<h4 style="text-align: center" id="Record">Record Instance Definition</h4>
 
-<h4>Syntax</h4>
+<h5 id="Syntax1">Syntax</h5>
 
 <p>The syntax for a record instance is:</p>
 <pre>&lt;record type = "recordType" name = "recordName" supportName = "supportName"&gt;
@@ -625,7 +961,7 @@ format:</p>
         &lt;!-- initializer --&gt;
     &lt;/fieldName&gt;</pre>
 
-<h4>Example</h4>
+<h5 id="Example2">Example</h5>
 <pre>&lt;record name = "double01" type = "double"&gt;
     &lt;input supportName = "inputSupport" structureName = "inputSupport"&gt;
         &lt;pvname&gt;counterCounter&lt;/pvname&gt;
@@ -658,7 +994,7 @@ format:</p>
           &lt;outOfRange&gt;&lt;choice&gt;invalid&lt;/choice&gt;&lt;/outOfRange&gt;
           &lt;hystersis&gt;0.1&lt;/hystersis&gt;
     &lt;/valueAlarm&gt;
-    &lt;displayCharacteristics structureName = "doubleDisplayCharacteristics" &gt;
+    &lt;display structureName = "display" &gt;
         &lt;units&gt;volts&lt;/units&gt;
         &lt;limit&gt;
             &lt;low&gt;0.0&lt;/low&gt;
@@ -669,7 +1005,7 @@ format:</p>
 &lt;/record&gt;</pre>
 <hr />
 
-<h2 style="text-align: center">PVData</h2>
+<h3 style="text-align: center" id="PVData">PVData</h3>
 <hr />
 
 <p>JavaIOC data is stored in a PVData (Process Variable) Database, which is a
@@ -680,7 +1016,7 @@ and data (what does a field contain) interfaces. Each field has a type as
 defined in the next section. See the package overview for org.epics.ioc.pv
 for more information. This section just gives a brief summary.</p>
 
-<h3>Field Types</h3>
+<h4 id="Field1">Field Types</h4>
 
 <p>A Java enum defines the supported types.</p>
 <pre>    public enum Type {
@@ -696,22 +1032,15 @@ for more information. This section just gives a brief summary.</p>
         pvArray;
     }</pre>
 
-<h3>PVData Reflection</h3>
+<h4 id="PVData1">PVData Reflection</h4>
 
 <p>The reflection interfaces for PVData are:</p>
-<pre>    interface Property {
-        String getPropertyName();
-        String getAssociatedFieldName();
-        String toString();
-        String toString(int indentLevel);
-    }
-
+<pre>    
     public interface FieldAttribute {
-        String getDefault();
-        boolean isReadOnly();
-        boolean isDesign();
-        boolean isLink();
-        int getAsl();
+        void setAttributes(Map&lt;String,String&gt; attributes,String[] exclude);
+        String setAttribute(String key,String value);
+        Map&lt;String,String&gt; getAttributes();
+        String getAttribute(String key);
         String toString();
         String toString(int indentLevel);
     }
@@ -743,7 +1072,7 @@ for more information. This section just gives a brief summary.</p>
         Type getElementType();
     }</pre>
 
-<h3>PVData Interfaces</h3>
+<h4 id="PVData2">PVData Interfaces</h4>
 
 <p>The following describe the interfaces for accessing the data a field
 contains.</p>
@@ -754,6 +1083,8 @@ contains.</p>
          Field getField(); // get the reflection interface
          PVField getParent();
          PVRecord getPVRecord();
+         PVField findProperty(String fieldName);
+         PVField[] getPropertys();
          void replacePVField(PVField newPVField);
          String getSupportName();
          String setSupportName(String name);
@@ -800,7 +1131,7 @@ contains.</p>
         void message(String message, MessageType messageType);
     }</pre>
 
-<h3>Example: Database Access via Reflection</h3>
+<h4 id="Example3">Example: Database Access via Reflection</h4>
 An interface IOCDB provides a method that locates the interface for a record
 instance. For example, to locate the ai record the call is: 
 <pre>    DBRecord dbRecord = iocdb.findRecord("ai");</pre>
@@ -814,38 +1145,7 @@ instance. For example, to locate the ai record the call is:
     PVDouble valueData= (PVDouble)pvField[index];
     double value = valueData.get();</pre>
 
-<p>The next section provides an easier way to find the data interfaces for a
-field.</p>
-
-<h3>PVAccess</h3>
-
-<p>PVAccess is an interface for locating PVField interfaces. A PVAccess can
-be created via:</p>
-<pre>    PVAccess pvAccess = PVAccessFactory.create(instanceName);</pre>
-Where instanceName is a Java String. For example: 
-<pre>    PVAccess pvAccess = PVAccessFactory.create("ai");</pre>
-
-<p>PVAccess provides the following methods:</p>
-<pre>    interface PVAccess {
-        PVRecord getPVRecord();
-        PVField findField(String name);
-        void setPVField(PVField pvField);
-    }
-
-    public class PVAccessFactory {
-        public static PVAccess createPVAccess(PVRecord pvRecord);
-    }</pre>
-
-<p>The argument to findField(name) has the form:</p>
-<pre>    name.name...</pre>
-Each <span style="font-family: courier;">name</span> is the name of a
-property or a field. For example: 
-<pre>    PVAccess pvAccess = PVAccessFactory.create("ai");
-    PVField pvField = pvAccess.findField("value.status");</pre>
-
-<p>Locates the status property of the value field in record ai.</p>
-
-<h2 style="text-align: center">DBData</h2>
+<h3 style="text-align: center" id="DBData">DBData</h3>
 
 <p>See package org.epics.ioc.db for details about the interfaces shown in
 this section, which just shows the interfaces.</p>
@@ -933,7 +1233,7 @@ this section, which just shows the interfaces.</p>
     }</pre>
 <hr />
 
-<h2 style="text-align: center">Channel Access</h2>
+<h3 style="text-align: center" id="Channel">Channel Access</h3>
 <hr />
 
 <p>Package org.epics.ioc.ca describes Channel Access for a JavaIOC. See it
@@ -958,7 +1258,7 @@ for details. Some features are:</p>
 </ul>
 <hr />
 
-<h2 style="text-align: center">Record Processing</h2>
+<h3 style="text-align: center" id="Record1">Record Processing</h3>
 <hr />
 
 <p>Package org.epics.ioc.process describes and implements code directly
@@ -1011,7 +1311,6 @@ record can optionally have support.</p>
         void uninitialize();
         void allSupportStarted();
         void process(SupportProcessRequester supportProcessRequester);
-        void setField(DBField dbField);
     }</pre>
 
 <p>where</p>
@@ -1029,9 +1328,6 @@ record can optionally have support.</p>
     <dd>Remove any connection to the record.</dd>
   <dt>process</dt>
     <dd>Do whatever the support should do for record processing.</dd>
-  <dt>setField</dt>
-    <dd>Higher level support calls this to specify the value field the
-      support is supporting.</dd>
 </dl>
 
 <p>The primary purpose of a support module is to help with record processing.
@@ -1042,9 +1338,8 @@ field.</p>
 <p>Typical support code does the following core functions:</p>
 <ul>
   <li>initialize<br />
-    Determine the "value" field. If setField is called before initialize than
-    this specifies the "value" field. If setField is not called, than many
-    support modules look for a field named "value".<br />
+    Determine the "value" field. Most support modules look for a field named
+    "value".<br />
     Many support modules also provide support for other fields, which are
     identified by name. For example if a support module supports alarms it
     looks for a field "alarm".</li>
@@ -1076,7 +1371,7 @@ in the order the fields are defined in the recordType or structure. It waits
 for each support to finish before the next support is called. </p>
 <hr />
 
-<h2 style="text-align: center">Database Examples</h2>
+<h3 style="text-align: center" id="Database2">Database Examples</h3>
 <hr />
 
 <p>javaIOC/dbd and it's subdirectories has the database definitions for all
@@ -1085,7 +1380,7 @@ new database definitions and support. This section just gives a few example
 of using these database definitions. The complete set of definitions are
 described in the second part of this document.</p>
 
-<h3 style="text-align: center">Database Definitions</h3>
+<h4 style="text-align: center" id="Database3">Database Definitions</h4>
 
 <p>The example uses the following database definitions:</p>
 <dl>
@@ -1094,20 +1389,33 @@ described in the second part of this document.</p>
     "double"</dd>
   <dt>doubleRecord</dt>
     <dd>Defines structure "double" and recordType "double"</dd>
+  <dt>powerSupplyCommon</dt>
+    <dd>Defines fields common to structure "powerSupply" and recordType
+      "powerSupply"</dd>
   <dt>powerSupplyRecord</dt>
-    <dd>Defines recordType "powerSupply" and support "powerSupply"</dd>
+    <dd>Defines structure "powerSupply" and recordType "powerSupply"</dd>
 </dl>
 
-<h4>doubleCommon</h4>
+<h5 id="doubleComm">doubleCommon</h5>
 
 <p>The following defines the fields that are common to both recordType double
 and structure double.</p>
 <pre>&lt;?xml version="1.0" ?&gt;
 &lt;DBDefinition&gt;
-
+  &lt;field name = "value" type = "double" /&gt;
+  &lt;field name = "alarm" type = "structure"/&gt;
+  &lt;field name = "timeStamp" type = "structure" /&gt;
+  &lt;field name = "input" type = "structure" /&gt;
+  &lt;!-- instance can set structureName = "doubleAlarm" --&gt;
+  &lt;field name = "valueAlarm" type = "structure" /&gt;
+  &lt;field name = "output" type = "structure" /&gt;
+  &lt;field name = "display" type = "structure" /&gt;
+  &lt;field name = "control" type = "structure" /&gt;
+  &lt;!-- instance can set structureName = "doubleHistory" --&gt;
+  &lt;field name = "history" type = "structure" /&gt;
 &lt;/DBDefinition&gt;</pre>
 
-<h4>doubleRecord</h4>
+<h5 id="doubleReco">doubleRecord</h5>
 
 <p>The following defines both a recordType and a structure named "double". It
 also defines a support named "doubleRecord". The same support is the default
@@ -1127,46 +1435,42 @@ support for both the structure and for the recordType.</p>
 
 &lt;/DBDefinition&gt;</pre>
 
-<h4>powerSupply</h4>
+<h5 id="powerSuppl">powerSupplyCommon</h5>
 
-<p>The followig are definitions for a recordType named "powerSupply" and for
-support "powerSupply".</p>
+<p>The following defines both a recordType and a structure named "double". It
+also defines a support named "doubleRecord". The same support is the default
+support for both the structure and for the recordType.</p>
 <pre>&lt;?xml version="1.0" ?&gt;
 &lt;DBDefinition&gt;
-&lt;include addPath = "dbd" /&gt;
-&lt;recordType name = "powerSupply" supportName = "powerSupply" &gt;
-    &lt;property name = "value" associatedField = "power" /&gt;
-    &lt;include href = "common.xml" /&gt;
-    &lt;field name = "alarm" type = "structure" structureName = "alarm"
-          supportName = "alarm" /&gt;
-    &lt;field name = "power" type = "double" &gt;
-        &lt;property name = "voltage" associatedField = "voltage" /&gt;
-        &lt;property name = "current" associatedField = "current" /&gt;
-        &lt;property name = "alarm" associatedField = "alarm" /&gt;
-        &lt;property name = "units" associatedField = "units" /&gt;
-        &lt;property name = "displayLimit" associatedField = "displayLimit" /&gt;
-        &lt;property name = "timeStamp" associatedField = "/timeStamp" /&gt;
-    &lt;/field&gt;
-    &lt;field name = "input" type = "link" /&gt;
-    &lt;field name = "doubleAlarm" type = "link" supportName = "doubleAlarm" /&gt;
-    &lt;field name = "voltage" type = "double" /&gt;
-    &lt;field name = "voltageInput" type = "structure" structureName = "link" /&gt;
-    &lt;field name = "current" type = "double" /&gt;
-    &lt;field name = "currentOutput" type = "structure" structureName = "link" /&gt;
-    &lt;field name = "output" type = "link" /&gt;
-    &lt;field name = "supportArray" type = "array"
-         elementType = "structure" supportName = "supportArray" /&gt;
-    &lt;field name = "units" type = "string" /&gt;
-    &lt;field name = "displayLimit"
-         type = "structure" structureName = "doubleLimit" /&gt;
+&lt;structure name = "powerSupply" supportName = "generic" &gt;
+  &lt;include href = "powerSupplyCommon.xml" /&gt;
+&lt;/structure&gt;
+
+&lt;recordType name = "powerSupply" supportName = "generic" &gt;
+  &lt;include href = "common.xml" /&gt;
+  &lt;include href = "powerSupplyCommon.xml" /&gt;
+  &lt;field name = "supportArray" type = "array"
+     elementType = "structure" supportName = "supportArray" /&gt;
 &lt;/recordType&gt;
 
-&lt;support name = "powerSupply"
+&lt;support name = "powerSupplyCurrent"
    factoryName = "org.epics.ioc.support.PowerSupplyFactory" /&gt;
-
 &lt;/DBDefinition&gt;</pre>
 
-<h3 style="text-align: center">Support Implementation</h3>
+<h5 id="powerSuppl1">powerSupplyRecord</h5>
+
+<p>The following defines the fields that are common to both recordType double
+and structure double.</p>
+<pre>&lt;?xml version="1.0" ?&gt;
+&lt;DBDefinition&gt;
+  &lt;field name = "power" type = "structure" structureName = "double" /&gt;
+  &lt;field name = "voltage" type = "structure" structureName = "double" /&gt;
+  &lt;field name = "current" type = "structure" structureName = "double" /&gt;
+  &lt;field name = "alarm" type = "structure"/&gt;
+  &lt;field name = "timeStamp" type = "structure" /&gt;
+&lt;/DBDefinition&gt;</pre>
+
+<h4 style="text-align: center" id="Support">Support Implementation</h4>
 
 <p>The example uses the following support</p>
 <ul>
@@ -1208,9 +1512,9 @@ support "powerSupply".</p>
     <dd>portDriver provides access to hardware.</dd>
 </dl>
 
-<h3 style="text-align: center">Record Instance Examples</h3>
+<h4 style="text-align: center" id="Record2">Record Instance Examples</h4>
 
-<h4>doubleInput</h4>
+<h5 id="doubleInpu">doubleInput</h5>
 
 <p>The following creates a record instance of type double. It is an input
 record because input is initialized to a Channel Access inputLink.</p>
@@ -1223,7 +1527,7 @@ record because input is initialized to a Channel Access inputLink.</p>
     &lt;/input&gt;
 &lt;/record&gt;</pre>
 
-<h4>doubleOutput</h4>
+<h5 id="doubleOutp">doubleOutput</h5>
 
 <p>The following creates a record instance of type double. It is an output
 record because output is initialized to a Channel Access outputLink.</p>
@@ -1234,7 +1538,7 @@ record because output is initialized to a Channel Access outputLink.</p>
     &lt;/output&gt;
 &lt;/record&gt;</pre>
 
-<h4>ai</h4>
+<h5 id="ai">ai</h5>
 
 <p>The following creates an instance of an aiRecord. The raw ADC value is
 read via portDriver support and converted via linearConvertInput support.</p>
@@ -1289,7 +1593,7 @@ read via portDriver support and converted via linearConvertInput support.</p>
 
 &lt;/record&gt;</pre>
 
-<h4>ao</h4>
+<h5 id="ao">ao</h5>
 
 <p>The following creates an instance of an aoRecord. The value is converted
 via linearConvertOutput support to a rawValue which is written via portDriver
@@ -1310,86 +1614,335 @@ support.</p>
     &lt;/output&gt;
 &lt;/record&gt;</pre>
 
-<h4>psSimple</h4>
+<h5 id="psSimple">psSimple</h5>
 
 <p>The following creates a powerSupply instance that does no input or output.
 The voltage and power must be written via channel access.</p>
 <pre>&lt;record name = "psSimple" type = "powerSupply" &gt;
-    &lt;voltage&gt;10.0&lt;/voltage&gt;
-&lt;/record</pre>
+    &lt;timeStamp structureName = "timeStamp" /&gt;
+    &lt;alarm structureName = "alarm" /&gt;
+    &lt;voltage&gt;&lt;value&gt;10.0&lt;/value&gt;&lt;/voltage&gt;
+    &lt;current&gt;
+        &lt;input supportName = "powerSupplyCurrent" /&gt;
+    &lt;/current&gt;
+&lt;/record&gt;</pre>
 
-<h4>psLinked</h4>
+<h5 id="psLinked">psLinked</h5>
 
 <p>The following creates a powerSupply record that gets its voltage and
 writes its current via channel access.</p>
 <pre>&lt;record name = "psLinked" type = "powerSupply" &gt;
-    &lt;voltageInput&gt;
-        &lt;link supportName = "inputLink"&gt;
-            &lt;configure structureName = "inputLink"&gt;
-                &lt;pvname&gt;voltage&lt;/pvname&gt;
-                &lt;process&gt;false&lt;/process&gt;
-            &lt;/configure&gt;
-        &lt;/link&gt;
-    &lt;/voltageInput&gt;
-    &lt;currentOutput&gt;
-        &lt;link supportName = "outputLink"&gt;
-            &lt;configure structureName = "outputLink"&gt;
-                &lt;pvname&gt;current&lt;/pvname&gt;
-                &lt;process&gt;true&lt;/process&gt;
-            &lt;/configure&gt;
-        &lt;/link&gt;
-    &lt;/currentOutput&gt;
+    &lt;timeStamp structureName = "timeStamp" /&gt;
+    &lt;alarm structureName = "alarm" /&gt;
+    &lt;voltage&gt;
+        &lt;input  supportName = "inputSupport" structureName = "inputSupport"&gt;
+            &lt;pvname&gt;voltage&lt;/pvname&gt;
+            &lt;process&gt;false&lt;/process&gt;
+        &lt;/input&gt;
+    &lt;/voltage&gt;
+    &lt;current&gt;
+       &lt;input supportName = "powerSupplyCurrent" /&gt;
+       &lt;output supportName = "outputSupport" structureName = "outputSupport"&gt;
+          &lt;pvname&gt;current&lt;/pvname&gt;
+          &lt;process&gt;true&lt;/process&gt;
+       &lt;/output&gt;
+    &lt;/current&gt;
 &lt;/record&gt;</pre>
 
-<h4>psEmbeded</h4>
+<h5 id="psEmbeded">psEmbeded</h5>
 
 <p>The following creates a powerSupply record that gets its voltage and
 writes its current via embeded support.</p>
 <pre>&lt;record name = "psEmbeded" type = "powerSupply" &gt;
-    &lt;voltageInput structureName = "aiDouble" &gt;
-        &lt;input&gt;
+    &lt;timeStamp structureName = "timeStamp" /&gt;
+    &lt;alarm structureName = "alarm" /&gt;
+    &lt;voltage&gt;
+        &lt;input structureName = "linearConvertInput"&gt;
             &lt;linearConvert&gt;
                 &lt;deviceHigh&gt;4095&lt;/deviceHigh&gt;
                 &lt;deviceLow&gt;0&lt;/deviceLow&gt;
                 &lt;engUnitsLow&gt;0.0&lt;/engUnitsLow&gt;
                 &lt;engUnitsHigh&gt;10.0&lt;/engUnitsHigh&gt;
             &lt;/linearConvert&gt;
-            &lt;input supportName = "asynLink" &gt;
-                &lt;configure structureName = "asynLink"&gt;
-                    &lt;portName&gt;inputPort&lt;/portName&gt;
-                &lt;/configure&gt;
+            &lt;input supportName = "inputSupport" structureName = "inputSupport"&gt;
+                    &lt;pvname&gt;adcVoltageEmbeded&lt;/pvname&gt;
+                    &lt;process&gt;false&lt;/process&gt;
             &lt;/input&gt;
-
         &lt;/input&gt;
-    &lt;/voltageInput&gt;
-    &lt;currentOutput structureName = "aoDouble" &gt;
-        &lt;output&gt;
+    &lt;/voltage&gt;
+    &lt;current&gt;
+        &lt;alarm structureName = "alarm" /&gt;
+        &lt;input supportName = "powerSupplyCurrent" /&gt;
+        &lt;output structureName = "linearConvertOutput"&gt;
             &lt;linearConvert&gt;
                 &lt;deviceHigh&gt;4095&lt;/deviceHigh&gt;
                 &lt;deviceLow&gt;0&lt;/deviceLow&gt;
                 &lt;engUnitsLow&gt;0.0&lt;/engUnitsLow&gt;
                 &lt;engUnitsHigh&gt;10.0&lt;/engUnitsHigh&gt;
             &lt;/linearConvert&gt;
-            &lt;output supportName = "asynLink" &gt;
-                &lt;configure structureName = "asynLink"&gt;
-                    &lt;portName&gt;outputPort&lt;/portName&gt;
-                &lt;/configure&gt;
+            &lt;output supportName = "outputSupport" structureName = "outputSupport"&gt;
+                &lt;pvname&gt;dacCurrentEmbeded&lt;/pvname&gt;
+                &lt;process&gt;true&lt;/process&gt;
             &lt;/output&gt;
-
         &lt;/output&gt;
-    &lt;/currentOutput&gt;
+    &lt;/current&gt;
 &lt;/record&gt;</pre>
 <hr />
 <hr />
 
-<h2 style="text-align: center">Part II: javaIOC - Database Definition</h2>
+<h2 style="text-align: center" id="Part1">Part II: javaIOC Data Model</h2>
+<hr />
+<hr />
+<hr />
+
+<h3 style="text-align: center" id="Summary">Summary</h3>
+<hr />
+
+<p>The Data Model supports general purpose client tools. A set of structures
+are defined that support the data model. A recordType supports the data model
+if it follows a few simple guidelines.</p>
+
+<p>The model can briefly be described as follows: Clients access fields in a
+structure. A field meant for general purpose clients is considered a property
+and the field name is the property name. The structure normally has a field
+named "value". It is usually a data field, i.e. a scalar type or an array
+with the elementType being scalar. All other fields of the structure support
+the value. Typical property fields are timeStamp, alarm, display, control,
+and history.</p>
+<hr />
+
+<h3 style="text-align: center" id="JavaIOC">JavaIOC Data Model</h3>
+<hr />
+
+<h4 id="Basic1">Basic Concept</h4>
+
+<p>A javaIOC structure follows the javaIOC Data Model if it has a set of
+fields that have names and types that support the data model. It can have
+additional fields, that can also be considered properties. The following
+field names have special meaning, i.e. are properties for general purpose
+clients.</p>
+<dl>
+  <dt>value</dt>
+    <dd>This is normally defined since most general purpose clients expect
+      this property. All other fields in the structure support or describe
+      the value field. The type can any supported type but is usually one of
+      the following: 
+      <dl>
+        <dt>scalar</dt>
+          <dd>One of boolean, byte, short, int, long, float, double, or
+          string</dd>
+        <dt>scalar array</dt>
+          <dd>An array with the elementType being a scalar type</dd>
+        <dt>enumerated structure</dt>
+          <dd>A structure that includes fields named index, choice, and
+            choices. index is an int that selects a choice. choice is the
+            currently selected choice. choices is an array of strings that
+            defines the complete set of choices.</dd>
+        <dt>other</dt>
+          <dd>Other structure or array types can also be defined if clients
+            and support code agree on the meaning. Some examples are: 1) A
+            structure defining a 2D matrix, 2) A structure defining an image,
+            3) A structure that simulates a remote method, ...</dd>
+      </dl>
+    </dd>
+  <dt>timeStamp</dt>
+    <dd>The timeStamp. The type MUST be a timeStamp structure. Also if the
+      javaIOC structure does not have a timeStamp then a search up the parent
+      tree is made to find a timeStamp.</dd>
+  <dt>alarm</dt>
+    <dd>The alarm. The type MUST be an alarm structure. </dd>
+  <dt>display</dt>
+    <dd>A display structure as described below. It provides display
+      characteristics for the value field.</dd>
+  <dt>control</dt>
+    <dd>A control structure as described below. It provides control
+      characteristics for the value field.</dd>
+  <dt>history</dt>
+    <dd>A history structure as described below. It provides a history buffer
+      for the value field.</dd>
+  <dt>other</dt>
+    <dd>Other standard properties can be defined.</dd>
+</dl>
+
+<p>In addition the javaIOC structure can have additional fields that support
+the value field but are not recognized by most general purpose client tools.
+Typical examples are:</p>
+<dl>
+  <dt>input</dt>
+    <dd>A field with support that changes the value field. This can be
+      anything. It can be a channel access link. It can obtain a value from
+      hardware. Etc.</dd>
+  <dt>valueAlarm</dt>
+    <dd>A field with support that looks for alarm conditions based on the
+      value.</dd>
+  <dt>output</dt>
+    <dd>A field with support that reads the current value and sends it
+      somewhere else. This can be anything. It can be a channel access link.
+      It can write a value to hardware. Etc.</dd>
+</dl>
+
+<p>The model allows for device records. A device record has fields that are
+structures that support the javaIOC data model. For example a powerSupport
+record can have fields power, voltage, current that each support the javaIOC
+data model. </p>
+
+<h4 id="structure">structure null</h4>
+
+<p>A null structure, by definition, is a structure that has no fields and no
+support. It allows general purpose structures and record types to be defined.
+For example:</p>
+<pre>&lt;structure name = "example" &gt;
+  &lt;field name = "value" type = "double" /&gt;
+  &lt;field name = "alarm" type = "structure"/&gt;
+  &lt;field name = "timeStamp" type = "structure" /&gt;
+  &lt;field name = "input" type = "structure" /&gt;
+  &lt;!-- instance can set structureName = "doubleAlarm" --&gt;
+  &lt;field name = "valueAlarm" type = "structure" /&gt;
+  &lt;field name = "output" type = "structure" /&gt;
+  &lt;field name = "display" type = "structure" /&gt;
+  &lt;field name = "control" type = "structure" /&gt;
+  &lt;!-- instance can set structureName = "doubleHistory" --&gt;
+  &lt;field name = "history" type = "structure" /&gt;
+&lt;/structure&gt;</pre>
+
+<p>In the above definition Al fields except value are by default a null
+structure. If a record instance does not override the default than code must
+act as if the field does not exist. If a record instance does override the
+field than it must replace the structure with a structure that supports the
+data model.</p>
+
+<h4 id="getPropety">getPropety</h4>
+
+<p>Interface PVField has two methods that make it easy to locate fields of
+interest:</p>
+<pre>     PVField PVField.getProperty(String fieldName);
+     PVField[] PVField.getPropertys;</pre>
+
+<p>where</p>
+<dl>
+  <dt>getProperty</dt>
+    <dd>Locates a "property" associated with the PVField.</dd>
+  <dt>getPropertys</dt>
+    <dd>PVField is a value field than the value field itself will not be in
+      the PVField[].</dd>
+</dl>
+
+<p>getProperty locates a field relative to the PVField. It can search down
+the structure hierarchy and handles value and timeStamp as a special case.
+getProperty does the following:</p>
+<ul>
+  <li>The fieldName is of the form item.item... where item is a "name" or a
+    "name[index]". (Note multiple levels of index are allowed)</li>
+  <li>getPropertry locates each item starting from the left. If any item is
+    not found it returns null. It it finds all inems it returns the interface
+    to the last item. </li>
+  <li>For each item it locates name as follows: 
+    <ul>
+      <li>If the current item is a field is named "value" the current item
+        becomes the parent of value..</li>
+      <li>If the current item is a structure and the structure has a field
+        named "name" and the field is anything except a null structure it is
+        selected</li>
+      <li>If a field has not been found but "name" is timeStamp than a search
+        up the parent tree is made to locate a field named timeStamp.</li>
+      <li>If no field is found than getProperty returns null.</li>
+    </ul>
+  </li>
+  <li>If [index] is specified than the field found for name must be an array
+    with elementType array or structure. If the array has an element
+    corresponding to the index than that element becomes the current item. In
+    all other cases getProperty returns null.</li>
+</ul>
+
+<p>The following example assume that pvField is set to a structure or
+record.</p>
+<pre>    PVField valuePVField = pvField.getProperty("value");
+    if(valuePVField==null) { /* do something */ }
+    PVField timeStampPVField = valuePVField.getProperty("timeStamp");
+    PVField displayPVField = valuePVField.getProperty("display");</pre>
+
+<p>The following example assume that pvField is set to a powerSupply
+structure or record.</p>
+<pre>    PVField valuePVField = pvField.getProperty("power.value");
+    if(valuePVField==null) { /* do something */ }
+    PVField timeStampPVField = valuePVField.getProperty("timeStamp");
+    PVField displayPVField = valuePVField.getProperty("display");</pre>
+
+<p>The following example assume that pvField is a structure with a field
+named supply that is an array of powerSupply structures.</p>
+<pre>    PVField valuePVField = pvField.getProperty("supply[2].power.value");
+    if(valuePVField==null) { /* do something */ }
+    PVField timeStampPVField = valuePVField.getProperty("timeStamp");
+    PVField displayPVField = valuePVField.getProperty("display");</pre>
+<hr />
+
+<h3 style="text-align: center" id="Definition">Definitions for Standard
+Properties</h3>
+<hr />
+
+<p>The following are the proposed set of structures for standard properties
+for general purpose client tools. </p>
+
+<h4 id="timeStamp">timeStamp</h4>
+<pre>&lt;structure name = "timeStamp"&gt;
+  &lt;field name = "secondsPastEpoch" type = "long" /&gt;
+  &lt;field name = "nanoSeconds" type = "int" /&gt;
+&lt;/structure&gt;</pre>
+
+<h4 id="alarm">alarm</h4>
+<pre>&lt;structure name = "alarm" supportName = "alarm" &gt;
+  &lt;field name = "severity" type = "structure" structureName = "alarmSeverity" /&gt;
+  &lt;field name = "message" type = "string" /&gt;
+  &lt;field name = "ackTransient" type = "boolean" /&gt;
+  &lt;field name = "ackSeverity" type = "structure" structureName = "alarmSeverity" /&gt;
+  &lt;field name = "typeCode" type = "structure" /&gt;
+&lt;/structure&gt;</pre>
+
+<h4 id="display">display</h4>
+<pre>&lt;structure name = "display"&gt;
+    &lt;field name = "description" type = "string" /&gt;
+    &lt;field name = "format" type = "string" /&gt;
+    &lt;field name = "units" type = "string" /&gt;
+    &lt;field name = "resolution" type = "int" /&gt;
+    &lt;field name = "limit" type = "structure" structureName = "doubleLimit" /&gt;
+&lt;/structure&gt;</pre>
+
+<h4 id="control">control</h4>
+<pre>&lt;structure name = "control"&gt;
+    &lt;field name = "limit" type = "structure" structureName = "doubleLimit" /&gt;
+    &lt;field name = "minStep" type = "double" /&gt;
+&lt;/structure&gt;</pre>
+
+<h4 id="history">history</h4>
+
+<p>The following describes the structures for history for a double value
+field. Definitions will also appear for booleanHistory, byteHistory, ...,
+stringHistory.</p>
+<pre>&lt;structure name = "doubleHistory" &gt;
+    &lt;field name = "timeStamp" type = "structure" structureName = "timeStamp" /&gt;
+    &lt;field name = "value" type = "double" /&gt;
+    &lt;field name = "alarm" type = "structure"
+         structureName = "alarm" supportName = "null" /&gt;
+&lt;/structure&gt;
+
+&lt;structure name = "history" supportName = "doubleHistory" &gt;
+    &lt;field name = "size" type = "int" /&gt;
+    &lt;!-- other fields are needed. TODO --&gt;
+    &lt;!-- support will make this an array of doubleHistory structures --&gt;
+    &lt;field name = "data" type = "array" elementType = "structure" /&gt;
+&lt;/structure&gt;</pre>
 <hr />
 <hr />
 
-<p>Part II describes the Database Definitions provided with the javaIOC.</p>
+<h2 style="text-align: center" id="Part2">Part III: javaIOC - Database
+Definition</h2>
+<hr />
 <hr />
 
-<h2 style="text-align: center">Overview Of Part II</h2>
+<p>Part III describes the Database Definitions provided with the javaIOC.</p>
+<hr />
+
+<h3 style="text-align: center" id="Overview1">Overview Of Part III</h3>
 <hr />
 
 <p>The menu, structure, and support definitions required by the support
@@ -1421,22 +1974,28 @@ summary is:</p>
         <dt style="font-family: courier;">limit.xml</dt>
           <dd>Contains a structure definition for each numeric type. Each
             structure contains two fields: low and high.</dd>
-        <dt style="font-family: courier;">byteStructures.xml</dt>
-          <dd>Defines displayCharacteristics and history.</dd>
-        <dt style="font-family: courier;">shortStructures.xml</dt>
-          <dd>Defines displayCharacteristics and history.</dd>
-        <dt style="font-family: courier;">intStructures.xml</dt>
-          <dd>Defines displayCharacteristics and history.</dd>
-        <dt style="font-family: courier;">longStructures.xml</dt>
-          <dd>Defines displayCharacteristics and history.</dd>
-        <dt style="font-family: courier;">floatStructures.xml</dt>
-          <dd>Defines displayCharacteristics and history.</dd>
-        <dt style="font-family: courier;">doubleStructures.xml</dt>
-          <dd>Defines displayCharacteristics and history.</dd>
-        <dt style="font-family: courier;">alarm.xml</dt>
-          <dd>Defines displayCharacteristics and history.</dd>
+        <dt style="font-family: courier;">display.xml</dt>
+          <dd>Defines display characteristics.</dd>
+        <dt style="font-family: courier;">control.xml</dt>
+          <dd>Defines control characteristics.</dd>
         <dt style="font-family: courier;">alarm.xml</dt>
           <dd>Contains definitions related to alarms.</dd>
+        <dt style="font-family: courier;">booleanHistory.xml</dt>
+          <dd>Defines history for boolean data..</dd>
+        <dt style="font-family: courier;">byteHistory.xml</dt>
+          <dd>Defines history for byte data..</dd>
+        <dt style="font-family: courier;">shortHistory.xml</dt>
+          <dd>Defines history for short data..</dd>
+        <dt style="font-family: courier;">intHistory.xml</dt>
+          <dd>Defines history for int data..</dd>
+        <dt style="font-family: courier;">longHistory.xml</dt>
+          <dd>Defines history for long data..</dd>
+        <dt style="font-family: courier;">floatHistory.xml</dt>
+          <dd>Defines history for float data..</dd>
+        <dt style="font-family: courier;">doubleHistory.xml</dt>
+          <dd>Defines history for double data..</dd>
+        <dt style="font-family: courier;">stringHistory.xml</dt>
+          <dd>Defines history for string data..</dd>
         <dt style="font-family: courier;">analog.xml</dt>
           <dd>Support for analog I/O.</dd>
         <dt style="font-family: courier;">digital.xml</dt>
@@ -1493,14 +2052,13 @@ summary is:</p>
             string. Each can be used for input, output, or both. Each has a
             supportArray. Each uses generic support by default.</dd>
         <dt style="font-family: courier;">javaIOC/dbd/recordType/analog</dt>
-          <dd>This defines record types for aiDouble, aoDouble, and
-            aoIncrementalDouble. Each converts between an integer ADC or DAC
-            value and a double value in engineering units. The aoIncremental
-            support limits the rate at which the output changes.</dd>
-        <dt style="font-family: courier;">javaIOC/dbd/recordType/digital</dt>
-          <dd>A recordType for digital I/O. The value field is an enum. The
-            I/O is an integer value with a mask that selects bits from the
-            integer value.</dd>
+          <dd>This defines a recordType and structure for
+            aoIncrementalDouble. The incremental support limits the rate at
+            which the output changes.</dd>
+        <dt
+        style="font-family: courier;">javaIOC/dbd/recordType/enumerated</dt>
+          <dd>A recordType for enumerated values. The value field is an
+            enumerated structure.</dd>
         <dt style="font-family: courier;">javaIOC/dbd/recordType/event</dt>
           <dd>A record type that announces an event when it is processed.</dd>
         <dt style="font-family: courier;">javaIOC/dbd/recordType/calc</dt>
@@ -1528,17 +2086,16 @@ using the following xml file:</p>
 <p>This package overview does not discuss the algorithms implemented by the
 support implementations. See package org.epics.ioc.support for details.</p>
 
-<h2 style="text-align: center;">javaIOC/dbd</h2>
+<h3 style="text-align: center;" id="javaIOC2">javaIOC/dbd</h3>
 <hr />
 
-<h3>common.xml</h3>
+<h4 id="common.xml">common.xml</h4>
 
 <p>This has definitions for fields that are common to most record types.</p>
 <pre>&lt;?xml version="1.0" ?&gt;
 &lt;DBDefinition&gt;
     &lt;field name = "scan" type = "structure" structureName = "scan"
          supportName = "scan" /&gt;
-    &lt;field name = "timeStamp" type = "structure" structureName = "timeStamp"/&gt;
     &lt;field name = "processAfterStart" type = "boolean" default = "false" /&gt;
 &lt;/DBDefinition&gt;</pre>
 
@@ -1559,7 +2116,7 @@ true than recordProcess attempts to process the record immeriately after it
 becomes ready. The attempt is only successfull if no record processor is
 registered of if the record has been initialized to be processSelf.</p>
 
-<h3>structure.xml</h3>
+<h4 id="structure.">structure.xml</h4>
 
 <p>This file includes all definitions needed for the support provided by
 javaIOC.</p>
@@ -1590,11 +2147,12 @@ javaIOC.</p>
 &lt;include removePath = "dbd/structure" /&gt;
 &lt;/DBDefinition&gt;</pre>
 
-<h3>recordType.xml</h3>
+<h4 id="recordType">recordType.xml</h4>
 
 <p>This file includes for all the recordType (and associated structure)
 definitions provided by javaIOC.</p>
 <pre>&lt;?xml version="1.0" ?&gt;
+&lt;DBDefinition&gt;
 &lt;include addPath = "dbd/recordType/primitive" /&gt;
 &lt;include href = "booleanRecord.xml" /&gt;
 &lt;include href = "byteRecord.xml" /&gt;
@@ -1618,9 +2176,9 @@ definitions provided by javaIOC.</p>
 &lt;include addPath = "dbd/recordType/analog" /&gt;
 &lt;include href = "aoIncrementalDoubleRecord.xml" /&gt;
 &lt;include removePath = "dbd/recordType/analog" /&gt;
-&lt;include addPath = "dbd/recordType/digital" /&gt;
-&lt;include href = "digitalRecord.xml" /&gt;
-&lt;include removePath = "dbd/recordType/digital" /&gt;
+&lt;include addPath = "dbd/recordType/enumerated" /&gt;
+&lt;include href = "enumeratedRecord.xml" /&gt;
+&lt;include removePath = "dbd/recordType/enumerated" /&gt;
 &lt;include addPath = "dbd/recordType/event" /&gt;
 &lt;include href = "eventRecord.xml" /&gt;
 &lt;include removePath = "dbd/recordType/event" /&gt;
@@ -1632,15 +2190,19 @@ definitions provided by javaIOC.</p>
 &lt;include addPath = "dbd/recordType/portDriver" /&gt;
 &lt;include href = "portDriver.xml" /&gt;
 &lt;include removePath = "dbd/recordType/portDriver" /&gt;
-&lt;!--
 &lt;include addPath = "dbd/recordType/powerSupply" /&gt;
 &lt;include href = "powerSupplyRecord.xml" /&gt;
+&lt;include href = "powerSupplyArrayRecord.xml" /&gt;
 &lt;include removePath = "dbd/recordType/powerSupply" /&gt;
+&lt;include addPath = "dbd/recordType/allTypes" /&gt;
+&lt;include href = "allTypesRecord.xml" /&gt;
+&lt;include removePath = "dbd/recordType/allTypes" /&gt;
+&lt;!--
 --&gt;
 &lt;/DBDefinition&gt;</pre>
 <hr />
 
-<h2 style="text-align: center">dbd/structure/alarm.xml</h2>
+<h3 style="text-align: center" id="structure1">dbd/structure/alarm.xml</h3>
 <hr />
 
 <p>This file contains database definitions related to alarms.</p>
@@ -1661,7 +2223,7 @@ lower level alarms.</p>
 
 <p>The remaining definitions are for checking alarms for value fields.
 Definitions and support are available for the numeric types, boolean, and
-digital. </p>
+enumerated. </p>
 <pre>&lt;?xml version="1.0" ?&gt;
 &lt;DBDefinition&gt;
 &lt;structure name = "alarmSeverity" createName = "enumerated" &gt;
@@ -1749,7 +2311,7 @@ digital. </p>
   &lt;field name = "changeStateAlarm" type = "structure" structureName = "alarmSeverity" /&gt;
 &lt;/structure&gt;
 
-&lt;structure name = "digitalAlarm"  supportName = "digitalAlarm" &gt;
+&lt;structure name = "enumeratedAlarm"  supportName = "enumeratedAlarm" &gt;
   &lt;field name = "active" type = "boolean" /&gt;
    &lt;!-- each array element must have structureName  alarmSeverity --&gt;
   &lt;field name = "stateSeverity" type = "array" elementType = "structure" design = "false" /&gt;
@@ -1758,42 +2320,25 @@ digital. </p>
 
 &lt;support name = "alarm"
   factoryName = "org.epics.ioc.support.AlarmFactory" /&gt;
-
 &lt;support name = "booleanAlarm"
-  structureName = "booleanAlarm"
   factoryName = "org.epics.ioc.support.BooleanAlarmFactory" /&gt;
-
 &lt;support name = "byteAlarm"
-  structureName = "byteAlarm"
   factoryName = "org.epics.ioc.support.ByteAlarmFactory" /&gt;
-
 &lt;support name = "shortAlarm"
-  structureName = "shortAlarm"
   factoryName = "org.epics.ioc.support.ShortAlarmFactory" /&gt;
-
 &lt;support name = "intAlarm"
-  structureName = "intAlarm"
   factoryName = "org.epics.ioc.support.IntAlarmFactory" /&gt;
-
 &lt;support name = "longAlarm"
-  structureName = "longAlarm"
   factoryName = "org.epics.ioc.support.LongAlarmFactory" /&gt;
-
 &lt;support name = "floatAlarm"
-  structureName = "floatAlarm"
   factoryName = "org.epics.ioc.support.FloatAlarmFactory" /&gt;
-
 &lt;support name = "doubleAlarm"
-  structureName = "doubleAlarm"
   factoryName = "org.epics.ioc.support.DoubleAlarmFactory" /&gt;
-
-&lt;support name = "digitalAlarm"
-  structureName = "digitalAlarm"
-  factoryName = "org.epics.ioc.support.DigitalAlarmFactory" /&gt;
-
+&lt;support name = "enumeratedAlarm"
+  factoryName = "org.epics.ioc.support.EnumeratedAlarmFactory" /&gt;
 &lt;/DBDefinition&gt;</pre>
 
-<h3>numeric alarms</h3>
+<h4 id="numeric">numeric alarms</h4>
 
 <p>The definitions for byte, short, int, long, float, and double are all the
 same except for the data type. The following describes the fields for double.
@@ -1824,7 +2369,7 @@ Except for the data type it also is valid for the other types.</p>
       "chatter".</dd>
 </dl>
 
-<h3>boolean alarms</h3>
+<h4 id="boolean">boolean alarms</h4>
 
 <p>Structure booleanAlarm has the fields:</p>
 <dl>
@@ -1839,11 +2384,11 @@ Except for the data type it also is valid for the other types.</p>
     process.</dd>
 </dl>
 
-<h3>digital alarms</h3>
+<h4 id="enumerated">enumerated alarms</h4>
 
-<p>Digital alarms are for an enum data type.</p>
+<p>Enumerated alarms are for a data type that is an enumerated structure.</p>
 
-<p>Structure digitalAlarm has the fields:</p>
+<p>Structure enumeratedAlarm has the fields:</p>
 <dl>
   <dt>active</dt>
     <dd>If false than no alarm checking is done.</dd>
@@ -1854,7 +2399,7 @@ Except for the data type it also is valid for the other types.</p>
 </dl>
 <hr />
 
-<h2 style="text-align: center">dbd/structure/analog.xml</h2>
+<h3 style="text-align: center" id="structure2">dbd/structure/analog.xml</h3>
 <hr />
 
 <p>This is the support for analog I/O. See org.epics.ioc.support for
@@ -1870,48 +2415,63 @@ details.</p>
   &lt;field name = "intercept" type = "double" /&gt;
 &lt;/structure&gt;
 
-&lt;structure name = "linearConvertInput" supportName = "linearConvertInput"&gt;
+&lt;structure name = "linearConvertInput" supportName = "generic"&gt;
+  &lt;field name = "alarm" type = "structure"/&gt;
+  &lt;field name = "timeStamp" type = "structure" /&gt;
   &lt;field name = "value" type = "int" /&gt;
+  &lt;field name = "input" type = "structure" /&gt;
   &lt;field name = "linearConvert" type = "structure"
-     structureName = "linearConvert" /&gt;
-  &lt;field name = "input" type = "structure" structureName = "null" /&gt;
+     structureName = "linearConvert" supportName = "linearConvertInput" /&gt;
+  &lt;!-- instance can set structureName = "intAlarm" --&gt;
+  &lt;field name = "valueAlarm" type = "structure" /&gt;
+  &lt;field name = "output" type = "structure" /&gt;
+  &lt;field name = "display" type = "structure" /&gt;
+  &lt;!-- instance can set structureName = "intHistory" --&gt;
+  &lt;field name = "history" type = "structure" /&gt;
 &lt;/structure&gt;
 
-&lt;structure name = "linearConvertOutput" supportName = "linearConvertOutput"&gt;
+&lt;structure name = "linearConvertOutput" supportName = "generic"&gt;
   &lt;field name = "value" type = "int" /&gt;
   &lt;field name = "linearConvert" type = "structure"
-     structureName = "linearConvert" /&gt;
-  &lt;field name = "output" type = "structure" structureName = "null"  /&gt;
+     structureName = "linearConvert" supportName = "linearConvertOutput" /&gt;
+  &lt;field name = "alarm" type = "structure"/&gt;
+  &lt;field name = "timeStamp" type = "structure" /&gt;
+  &lt;!-- instance can set structureName = "intAlarm" --&gt;
+  &lt;field name = "valueAlarm" type = "structure" /&gt;
+  &lt;field name = "output" type = "structure" /&gt;
+  &lt;field name = "display" type = "structure" /&gt;
+  &lt;field name = "control" type = "structure" /&gt;
+  &lt;!-- instance can set structureName = "intHistory" --&gt;
+  &lt;field name = "history" type = "structure" /&gt;
 &lt;/structure&gt;
 
-&lt;structure name = "incrementalDouble" supportName = "incremental" &gt;
-  &lt;field name = "desiredValue" type = "double" &gt;
-    &lt;property name = "alarm" associatedField = "alarm" /&gt;
-    &lt;property name = "units" associatedField = "units" /&gt;
-    &lt;property name = "displayLimit" associatedField = "displayLimit" /&gt;
-    &lt;property name = "controlLimit" associatedField = "controlLimit" /&gt;
-    &lt;property name = "timeStamp" associatedField = "/timeStamp" /&gt;
-  &lt;/field&gt;
+&lt;structure name = "incrementalDouble" supportName = "generic" &gt;
+  &lt;field name = "value" type = "double" /&gt;
   &lt;field name = "input" type = "structure" structureName = "null" /&gt;
-  &lt;field name = "incrementalOutput" type = "boolean" /&gt;
+  &lt;field name = "incremental" type = "boolean" supportName = "incremental"/&gt;
   &lt;field name = "rateOfChange" type = "double" /&gt;
-  &lt;field name = "units" type = "string" /&gt;
-  &lt;field name = "controlLimit"
-     type = "structure" structureName = "doubleLimit" /&gt;
+  &lt;field name = "alarm" type = "structure"/&gt;
+  &lt;field name = "display" type = "structure" /&gt;
+  &lt;field name = "control" type = "structure" /&gt;
 &lt;/structure&gt;
-
 &lt;support name = "linearConvertInput"
-  factoryName = "org.epics.ioc.support.LinearConvertInputFactory" /&gt;
+  factoryName = "org.epics.ioc.support.LinearConvertFactory" /&gt;
 
 &lt;support name = "linearConvertOutput"
-  factoryName = "org.epics.ioc.support.LinearConvertOutputFactory" /&gt;
+  factoryName = "org.epics.ioc.support.LinearConvertFactory" /&gt;
+
+&lt;support name = "incremental"
+   factoryName = "org.epics.ioc.support.IncrementalFactory" /&gt;&lt;support name = "linearConvertInput"
+  factoryName = "org.epics.ioc.support.LinearConvertFactory" /&gt;
+
+&lt;support name = "linearConvertOutput"
+  factoryName = "org.epics.ioc.support.LinearConvertFactory" /&gt;
 
 &lt;support name = "incremental"
    factoryName = "org.epics.ioc.support.IncrementalFactory" /&gt;
-
 &lt;/DBDefinition&gt;</pre>
 
-<h3>linearConvert</h3>
+<h4 id="linearConv">linearConvert</h4>
 
 <p>Structure linearConvert is for linear conversions. The slope and intercept
 can be specified directly or can be computed from the other four fields.
@@ -1933,7 +2493,7 @@ also permitted. Structure linearConvert has the fields:</p>
     <dd>Intrercept for converting raw value to engineering units.</dd>
 </dl>
 
-<h3>linearConvertInput</h3>
+<h4 id="linearConv1">linearConvertInput</h4>
 
 <p>Structure linearConvertInput is for converting a raw value to an
 enginerering units value. It has the fields:</p>
@@ -1946,7 +2506,7 @@ enginerering units value. It has the fields:</p>
     <dd>A structure that inputs the raw value.</dd>
 </dl>
 
-<h3>linearConvertOutput</h3>
+<h4 id="linearConv2">linearConvertOutput</h4>
 
 <p>Structure linearConvertOutput is for converting a raw value to an
 enginerering units value. It has the fields:</p>
@@ -1959,7 +2519,7 @@ enginerering units value. It has the fields:</p>
     <dd>A structure that outputs the raw value.</dd>
 </dl>
 
-<h3>incrementalDouble</h3>
+<h4 id="incrementa">incrementalDouble</h4>
 
 <p>This is for rate limited output. The output value incrementally reaches
 the desired value. The structure has the fields:</p>
@@ -1981,7 +2541,7 @@ the desired value. The structure has the fields:</p>
 </dl>
 <hr />
 
-<h2 style="text-align: center">dbd/structure/limit.xml</h2>
+<h3 style="text-align: center" id="structure3">dbd/structure/limit.xml</h3>
 <hr />
 
 <p>This contains structure definitions for limits for each of the numeric
@@ -2023,22 +2583,27 @@ low and high.</p>
 &lt;/DBDefinition&gt;</pre>
 <hr />
 
-<h2 style="text-align: center">dbd/structures/doubleStructures.xml</h2>
+<h3 style="text-align: center" id="structures">dbd/structures/display.xml</h3>
 <hr />
 
-<p>This section defines display and history characteristics for a byte field.
-Similar definitions exist for byte, short, int, long, and float.</p>
-<pre>&lt;structure name = "doubleDisplayCharacteristics"&gt;
+<p>This section defines the history characteristics for display.</p>
+<pre>&lt;structure name = "display"&gt;
     &lt;field name = "description" type = "string" /&gt;
     &lt;field name = "format" type = "string" /&gt;
     &lt;field name = "units" type = "string" /&gt;
     &lt;field name = "resolution" type = "int" /&gt;
     &lt;field name = "limit" type = "structure" structureName = "doubleLimit" /&gt;
-    &lt;field name = "minStep" type = "double" /&gt;
-&lt;/structure&gt;
+&lt;/structure&gt;</pre>
+<hr />
 
+<h3 style="text-align: center"
+id="structures1">dbd/structures/doubleHistory.xml</h3>
+<hr />
 
-&lt;structure name = "doubleHistory" supportName = "history" &gt;
+<p>This section defines the history characteristics for a double field.
+Similar definitions exist for boolean, byte, short, int, long, float, and
+string.</p>
+<pre>&lt;structure name = "doubleHistory" supportName = "history" &gt;
     &lt;field name = "timeStamp" type = "structure" structureName = "timeStamp" /&gt;
     &lt;field name = "value" type = "double" /&gt;
     &lt;field name = "alarm" type = "structure"
@@ -2046,7 +2611,8 @@ Similar definitions exist for byte, short, int, long, and float.</p>
 &lt;/structure&gt;</pre>
 <hr />
 
-<h2 style="text-align: center">dbd/structures/commonFields.xml</h2>
+<h3 style="text-align: center"
+id="structures2">dbd/structures/commonFields.xml</h3>
 <hr />
 
 <p>This file contains database definitions for fields in common.xml, i.e.
@@ -2132,7 +2698,7 @@ fields alarm, scan, and timeStamp, which are present in most recordTypes.</p>
 </dl>
 <hr />
 
-<h2 style="text-align: center">dbd/structure/noop.xml</h2>
+<h3 style="text-align: center" id="structure4">dbd/structure/noop.xml</h3>
 <hr />
 
 <p>noop is support that implements each of the support methods by just
@@ -2148,7 +2714,7 @@ completing successfully. One use is for a record that just holds data.</p>
 &lt;/DBDefinition&gt;</pre>
 <hr />
 
-<h2 style="text-align: center">dbd/structure/generic.xml</h2>
+<h3 style="text-align: center" id="structure5">dbd/structure/generic.xml</h3>
 <hr />
 
 <p>Generic is the default support for many record types. It just calls the
@@ -2163,7 +2729,8 @@ details.</p>
 &lt;/DBDefinition&gt;</pre>
 <hr />
 
-<h2 style="text-align: center">dbd/structure/supportArray.xml</h2>
+<h3 style="text-align: center"
+id="structure6">dbd/structure/supportArray.xml</h3>
 <hr />
 
 <p>This is the support for an array of links, which is part of many record
@@ -2195,8 +2762,8 @@ types. See org.epics.ioc.support for details.</p>
 </dl>
 <hr />
 
-<h2 style="text-align: center"
-id="support6">dbd/structure/channelAccess.xml</h2>
+<h3 style="text-align: center"
+id="support6">dbd/structure/channelAccess.xml</h3>
 <hr />
 
 <p>This is the support for a links to other records. See
@@ -2250,24 +2817,19 @@ org.epics.ioc.support for details.</p>
 &lt;/structure&gt;
 
 &lt;support name = "processSupport"
-  structureName = "processSupport"
   factoryName = "org.epics.ioc.support.CASupportFactory" /&gt;
 &lt;support name = "monitorSupport"
-  structureName = "monitorSupport"
   factoryName = "org.epics.ioc.support.CASupportFactory" /&gt;
 &lt;support name = "monitorNotifySupport"
-  structureName = "monitorNotifySupport"
   factoryName = "org.epics.ioc.support.CASupportFactory" /&gt;
 &lt;support name = "inputSupport"
-  structureName = "inputSupport"
   factoryName = "org.epics.ioc.support.CASupportFactory" /&gt;
 &lt;support name = "outputSupport"
-  structureName = "outputSupport"
   factoryName = "org.epics.ioc.support.CASupportFactory" /&gt;
 
 &lt;/DBDefinition&gt;</pre>
 
-<h3>processSupport</h3>
+<h4 id="processSup">processSupport</h4>
 
 <p>Structure processSupport has the fields:</p>
 <dl>
@@ -2275,7 +2837,7 @@ org.epics.ioc.support for details.</p>
     <dd>recordName.fieldName of link</dd>
 </dl>
 
-<h3>monitorSupport</h3>
+<h4 id="monitorSup">monitorSupport</h4>
 
 <p>Structure monitorSupport has the fields:</p>
 <dl>
@@ -2301,7 +2863,7 @@ org.epics.ioc.support for details.</p>
     alarm?</dd>
 </dl>
 
-<h3>monitorNotifySupport</h3>
+<h4 id="monitorNot">monitorNotifySupport</h4>
 
 <p>Structure monitorNotifySupport has the fields:</p>
 <dl>
@@ -2316,7 +2878,7 @@ org.epics.ioc.support for details.</p>
     <dd>Look only for changes while record is being processed.</dd>
 </dl>
 
-<h3>inputSupport</h3>
+<h4 id="inputSuppo">inputSupport</h4>
 
 <p>Structure inputSupport has the fields:</p>
 <dl>
@@ -2329,7 +2891,7 @@ org.epics.ioc.support for details.</p>
     alarm?</dd>
 </dl>
 
-<h3>outputSupport</h3>
+<h4 id="outputSupp">outputSupport</h4>
 
 <p>Structure outputSupport has the fields:</p>
 <dl>
@@ -2340,7 +2902,7 @@ org.epics.ioc.support for details.</p>
 </dl>
 <hr />
 
-<h2 style="text-align: center">dbd/structure/digital.xml</h2>
+<h3 style="text-align: center" id="structure7">dbd/structure/digital.xml</h3>
 <hr />
 
 <p>This is the support for digital I/O. See org.epics.ioc.support for
@@ -2355,23 +2917,31 @@ numberOfBits of the registerValue. This value deterrmines the digitalState.
   &lt;field name = "severity" type = "structure" structureName = "alarmSeverity" /&gt;
 &lt;/structure&gt;
 
-&lt;structure name = "digitalIO" supportName = "digital"&gt;
-  &lt;!-- structureName must be digitalState --&gt;
+&lt;structure name = "digital" supportName = "generic" &gt;
+  &lt;field name = "value" type = "int" /&gt;
+  &lt;field name = "alarm" type = "structure"/&gt;
+  &lt;field name = "timeStamp" type = "structure" /&gt;
+  &lt;field name = "input" type = "structure" /&gt;
+  &lt;!-- each structureName must be digitalState --&gt;
+  &lt;!-- supportName can be digitalInput or digitalOutput --&gt;
   &lt;field name = "states" type = "array" elementType = "structure" /&gt;
-  &lt;field name = "numberOfBits" type = "int" /&gt;
-  &lt;field name = "registerValue" type = "int" design = "false" /&gt;
-  &lt;field name = "input" type = "structure" structureName = "null" /&gt;
-  &lt;field name = "valueAlarm" type = "structure" structureName = "null"
-     supportName = "digitalAlarm" /&gt;
-  &lt;field name = "output" type = "structure" structureName = "null" /&gt;
+  &lt;!-- instance can set structureName = "intAlarm" --&gt;
+  &lt;field name = "valueAlarm" type = "structure" /&gt;
+  &lt;field name = "output" type = "structure" /&gt;
+  &lt;field name = "display" type = "structure" /&gt;
+  &lt;!-- instance can set structureName = "intHistory" --&gt;
+  &lt;field name = "history" type = "structure" /&gt;
 &lt;/structure&gt;
 
-&lt;support name = "digital"
+&lt;support name = "digitalInput"
+   factoryName = "org.epics.ioc.support.DigitalFactory" /&gt;
+
+&lt;support name = "digitalOutput"
    factoryName = "org.epics.ioc.support.DigitalFactory" /&gt;
 
 &lt;/DBDefinition&gt;</pre>
 
-<h3>digitalState</h3>
+<h4 id="digitalSta">digitalState</h4>
 
 <p>This provides a name, value, and severity for a single digital state.</p>
 <dl>
@@ -2383,30 +2953,14 @@ numberOfBits of the registerValue. This value deterrmines the digitalState.
     <dd>Alarm severity for this state.</dd>
 </dl>
 
-<h3>digitalIO</h3>
+<h4 id="digital">digital</h4>
 
-<p>This is the structure required by the digital support. It has the
-fields:</p>
-<dl>
-  <dt>states</dt>
-    <dd>An array of digitalState structures. Note that the support uses this
-      to set the choices for the enum fields any also creates the
-      stateSeverity array in digitalAlarm.</dd>
-  <dt>numberOfBits</dt>
-    <dd>Determines the number of low order bits of the registerValue that
-      becomes the raw value for locating the current state from states.</dd>
-  <dt>registerValue</dt>
-    <dd>The registerValue.</dd>
-  <dt>input</dt>
-    <dd>A link for reading the registerValue</dd>
-  <dt>valueAlarm</dt>
-    <dd>Checks for alarms.</dd>
-  <dt>output</dt>
-    <dd>A link for writing the registerValue</dd>
-</dl>
+<p>This is the structure required by the digital support. The field states,
+which must be an array of digitalState structures, is the field that is
+supported by digitalInput or digitalOutput.</p>
 <hr />
 
-<h2 style="text-align: center">dbd/structure/event.xml</h2>
+<h3 style="text-align: center" id="structure8">dbd/structure/event.xml</h3>
 <hr />
 
 <p>This is the support for announcing events. See org.epics.ioc.support for
@@ -2420,7 +2974,7 @@ details.</p>
 &lt;/DBDefinition&gt;</pre>
 <hr />
 
-<h2 style="text-align: center">dbd/structure/calc.xml</h2>
+<h3 style="text-align: center" id="structure9">dbd/structure/calc.xml</h3>
 <hr />
 
 <p>This is the support for calculations. See org.epics.ioc.support for
@@ -2448,7 +3002,7 @@ EPICS calcPerform. </p>
 &lt;/DBDefinition&gt;</pre>
 <hr />
 
-<h2 style="text-align: center">dbd/structure/disable.xml</h2>
+<h3 style="text-align: center" id="structure10">dbd/structure/disable.xml</h3>
 <hr />
 
 <p>This is the support for disabling a record. NOT IMPLEMENTED.</p>
@@ -2469,7 +3023,7 @@ EPICS calcPerform. </p>
 &lt;/DBDefinition&gt;</pre>
 <hr />
 
-<h2 style="text-align: center">dbd/structure/delay.xml</h2>
+<h3 style="text-align: center" id="structure11">dbd/structure/delay.xml</h3>
 <hr />
 
 <p>This is the support that delays before completing. It is used for testing.
@@ -2477,21 +3031,21 @@ See org.epics.ioc.support for details.</p>
 <pre>&lt;?xml version="1.0" ?&gt;
 &lt;DBDefinition&gt;
 
-&lt;structure name = "delayLink"&gt;
+&lt;structure name = "delay"&gt;
     &lt;!-- min, max, inc are delay in milliseconds --&gt;
     &lt;field name = "min" type = "long" /&gt;
     &lt;field name = "max" type = "long" /&gt;
     &lt;field name = "inc" type = "long" /&gt;
 &lt;/structure&gt;
 
-&lt;linkSupport name = "delayLink"
-    configurationStructureName = "delayLink"
-    factoryName = "org.epics.ioc.support.DelaySupportFactory" /&gt;
+&lt;support name = "delay"
+    factoryName = "org.epics.ioc.support.DelayFactory" /&gt;
 
 &lt;/DBDefinition&gt;</pre>
 <hr />
 
-<h2 style="text-align: center">dbd/structure/enumerated.xml</h2>
+<h3 style="text-align: center"
+id="structure12">dbd/structure/enumerated.xml</h3>
 <hr />
 <pre>&lt;structure name = "enumerated" createName = "enumerated" &gt;
   &lt;field name = "index" type = "int" /&gt;
@@ -2503,7 +3057,8 @@ See org.epics.ioc.support for details.</p>
   factoryName = "org.epics.ioc.create.EnumeratedFactory" /&gt;</pre>
 <hr />
 
-<h2 style="text-align: center">dbd/structure/portDriver.xml</h2>
+<h3 style="text-align: center"
+id="structure13">dbd/structure/portDriver.xml</h3>
 <hr />
 
 <p>This is the support for portDriver. See org.epics.ioc.support and
@@ -2521,73 +3076,53 @@ org.epics.ioc.portDriver for details.</p>
 &lt;/structure&gt;
 
 &lt;support name = "pdrvOctetInput"
-  structureName = "pdrvSupport"
-  factoryName = "org.epics.ioc.support.PDRVSupportFactory" /&gt;
+  factoryName = "org.epics.ioc.support.PDRVSuppowerSupplyCurrentportFactory" /&gt;
 &lt;support name = "pdrvOctetInterruptInput"
-  structureName = "pdrvSupport"
   factoryName = "org.epics.ioc.support.PDRVSupportFactory" /&gt;
 &lt;support name = "pdrvOctetOutput"
-  structureName = "pdrvSupport"
   factoryName = "org.epics.ioc.support.PDRVSupportFactory" /&gt;
 
 &lt;support name = "pdrvInt32Input"
-  structureName = "pdrvSupport"
   factoryName = "org.epics.ioc.support.PDRVSupportFactory" /&gt;
 &lt;support name = "pdrvInt32InterruptInput"
-  structureName = "pdrvSupport"
   factoryName = "org.epics.ioc.support.PDRVSupportFactory" /&gt;
 &lt;support name = "pdrvInt32AverageInput"
-  structureName = "pdrvSupport"
   factoryName = "org.epics.ioc.support.PDRVSupportFactory" /&gt;
 &lt;support name = "pdrvInt32Output"
-  structureName = "pdrvSupport"
   factoryName = "org.epics.ioc.support.PDRVSupportFactory" /&gt;
 &lt;support name = "pdrvInt32ArrayInput"
-  structureName = "pdrvSupport"
   factoryName = "org.epics.ioc.support.PDRVSupportFactory" /&gt;
 &lt;support name = "pdrvInt32ArrayInterruptInput"
-  structureName = "pdrvSupport"
   factoryName = "org.epics.ioc.support.PDRVSupportFactory" /&gt;
 &lt;support name = "pdrvInt32ArrayOutput"
-  structureName = "pdrvSupport"
   factoryName = "org.epics.ioc.support.PDRVSupportFactory" /&gt;
 
 &lt;support name = "pdrvFloat64Input"
-  structureName = "pdrvSupport"
   factoryName = "org.epics.ioc.support.PDRVSupportFactory" /&gt;
 &lt;support name = "pdrvFloat64InterruptInput"
-  structureName = "pdrvSupport"
   factoryName = "org.epics.ioc.support.PDRVSupportFactory" /&gt;
 &lt;support name = "pdrvFloat64AverageInput"
-  structureName = "pdrvSupport"
   factoryName = "org.epics.ioc.support.PDRVSupportFactory" /&gt;
 &lt;support name = "pdrvFloat64Output"
-  structureName = "pdrvSupport"
   factoryName = "org.epics.ioc.support.PDRVSupportFactory" /&gt;
 
 &lt;support name = "pdrvFloat64ArrayInput"
-  structureName = "pdrvSupport"
   factoryName = "org.epics.ioc.support.PDRVSupportFactory" /&gt;
 &lt;support name = "pdrvFloat64ArrayInterruptInput"
-  structureName = "pdrvSupport"
   factoryName = "org.epics.ioc.support.PDRVSupportFactory" /&gt;
 &lt;support name = "pdrvFloat64ArrayOutput"
-  structureName = "pdrvSupport"
   factoryName = "org.epics.ioc.support.PDRVSupportFactory" /&gt;
 
 &lt;support name = "pdrvUInt32DigitalInput"
-  structureName = "pdrvSupport"
   factoryName = "org.epics.ioc.support.PDRVSupportFactory" /&gt;
 &lt;support name = "pdrvUInt32DigitalInterruptInput"
-  structureName = "pdrvSupport"
   factoryName = "org.epics.ioc.support.PDRVSupportFactory" /&gt;
 &lt;support name = "pdrvUInt32DigitalOutput"
-  structureName = "pdrvSupport"
   factoryName = "org.epics.ioc.support.PDRVSupportFactory" /&gt;
 
 &lt;/DBDefinition&gt;</pre>
 
-<h3>pdrvSupport</h3>
+<h4 id="pdrvSuppor">pdrvSupport</h4>
 
 <p>This structure has fields for connecting to a port.</p>
 <dl>
@@ -2609,10 +3144,10 @@ org.epics.ioc.portDriver for details.</p>
 </dl>
 <hr />
 
-<h2 style="text-align: center">dbd/recordType/primitive</h2>
+<h3 style="text-align: center" id="recordType1">dbd/recordType/primitive</h3>
 <hr />
 
-<h3>Overview</h3>
+<h4 id="Overview2">Overview</h4>
 
 <p>A recordType and a structure are defined for each of the primitive types
 including string. The structure is used to create "device" records. A device
@@ -2646,9 +3181,7 @@ structure and the recordType. </p>
       defines structureName</dd>
 </dl>
 
-<p>The Record file defines a structure that contains the fields in common.
-The support for the structure version expects the higher level support will
-call it's setField method, which becomes the value field.</p>
+<p>The Record file defines a structure that contains the fields in common.</p>
 
 <p>The Record file defines a recordType that has the fields from Comman as
 well as:</p>
@@ -2656,27 +3189,26 @@ well as:</p>
   <dt>common.xml</dt>
     <dd>The fields that are common to most recordTypes.</dd>
   <dt>supportArray</dt>
-    <dd>A array of links. The setField method of the support for each
-      elemenbt is called with the value field.</dd>
+    <dd>A array of fields that have support.</dd>
 </dl>
 
-<h3>boolean</h3>
+<h4 id="boolean1">boolean</h4>
 
-<h4>booleanCommon.xml</h4>
+<h5 id="booleanCom">booleanCommon.xml</h5>
 <pre>&lt;?xml version="1.0" ?&gt;
 &lt;DBDefinition&gt;
-    &lt;field name = "value" type = "boolean" &gt;
-      &lt;property name = "alarm" associatedField = "alarm" /&gt;
-      &lt;property name = "timeStamp" associatedField = "timeStamp" /&gt;
-  &lt;/field&gt;
-  &lt;field name = "alarm" type = "structure" structureName = "alarm"
-      supportName = "alarm" /&gt;
+  &lt;field name = "value" type = "boolean" /&gt;
+  &lt;field name = "alarm" type = "structure" /&gt;
+  &lt;field name = "timeStamp" type = "structure" /&gt;
   &lt;field name = "input" type = "structure" /&gt;
+  &lt;!-- instance can set structureName = "booleanAlarm" --&gt;
   &lt;field name = "valueAlarm" type = "structure" /&gt;
   &lt;field name = "output" type = "structure" /&gt;
+   &lt;!-- instance can set structureName = "booleanHistory" --&gt;
+  &lt;field name = "history" type = "structure" /&gt;
 &lt;/DBDefinition&gt;</pre>
 
-<h4>booleanRecord.xml</h4>
+<h5 id="booleanRec">booleanRecord.xml</h5>
 <pre>&lt;?xml version="1.0" ?&gt;
 &lt;DBDefinition&gt;
 &lt;structure name = "boolean" supportName = "generic" &gt;
@@ -2692,32 +3224,25 @@ well as:</p>
 
 &lt;/DBDefinition&gt;</pre>
 
-<h3>byte</h3>
+<h4 id="byte">byte</h4>
 
-<h4>byteCommon.xml</h4>
+<h5 id="byteCommon">byteCommon.xml</h5>
 <pre>&lt;?xml version="1.0" ?&gt;
 &lt;DBDefinition&gt;
-  &lt;field name = "value" type = "byte" &gt;
-    &lt;property name = "alarm" associatedField = "alarm" /&gt;
-    &lt;property name = "displayChararacteristics" associatedField = "displayCharacteristics" /&gt;
-    &lt;property name = "timeStamp" associatedField = "timeStamp" /&gt;
-  &lt;/field&gt;
-  &lt;field name = "alarm" type = "structure" structureName = "alarm"
-      supportName = "alarm" /&gt;
+  &lt;field name = "value" type = "byte" /&gt; 
+  &lt;field name = "alarm" type = "structure"/&gt;
+  &lt;field name = "timeStamp" type = "structure" /&gt;
   &lt;field name = "input" type = "structure" /&gt;
-  &lt;!-- instance can set
-     structureName = "byteAlarm" supportName = "byteAlarm" --&gt;
+  &lt;!-- instance can set structureName = "byteAlarm" --&gt;
   &lt;field name = "valueAlarm" type = "structure" /&gt;
   &lt;field name = "output" type = "structure" /&gt;
-  &lt;!-- instance can set
-     structureName = "byteDisplayCharacteristics" --&gt;
-  &lt;field name = "displayCharacteristics" type = "structure" /&gt;
-  &lt;!-- instance can set
-     structureName = "byteHistory" supportName = "history" --&gt;
+  &lt;field name = "display" type = "structure" /&gt;
+  &lt;field name = "control" type = "structure" /&gt;
+  &lt;!-- instance can set structureName = "byteHistory" --&gt;
   &lt;field name = "history" type = "structure" /&gt;
 &lt;/DBDefinition&gt;</pre>
 
-<h4>byteRecord.xml</h4>
+<h5 id="byteRecord">byteRecord.xml</h5>
 <pre>&lt;?xml version="1.0" ?&gt;
 &lt;DBDefinition&gt;
 &lt;structure name = "byte" supportName = "generic" &gt;
@@ -2732,32 +3257,25 @@ well as:</p>
 &lt;/recordType&gt;
 &lt;/DBDefinition&gt;</pre>
 
-<h3>short</h3>
+<h4 id="short">short</h4>
 
-<h4>shortCommon.xml</h4>
+<h5 id="shortCommo">shortCommon.xml</h5>
 <pre>&lt;?xml version="1.0" ?&gt;
 &lt;DBDefinition&gt;
-  &lt;field name = "value" type = "short" &gt;
-    &lt;property name = "alarm" associatedField = "alarm" /&gt;
-    &lt;property name = "displayChararacteristics" associatedField = "displayCharacteristics" /&gt;
-    &lt;property name = "timeStamp" associatedField = "timeStamp" /&gt;
-  &lt;/field&gt;
-  &lt;field name = "alarm" type = "structure" structureName = "alarm"
-      supportName = "alarm" /&gt;
+  &lt;field name = "value" type = "short" /&gt;
+  &lt;field name = "alarm" type = "structure"/&gt;
+  &lt;field name = "timeStamp" type = "structure" /&gt;
   &lt;field name = "input" type = "structure" /&gt;
-  &lt;!-- instance can set
-     structureName = "shortAlarm" supportName = "shortAlarm" --&gt;
+  &lt;!-- instance can set structureName = "shortAlarm" --&gt;
   &lt;field name = "valueAlarm" type = "structure" /&gt;
   &lt;field name = "output" type = "structure" /&gt;
-  &lt;!-- instance can set
-     structureName = "shortDisplayCharacteristics" --&gt;
-  &lt;field name = "displayCharacteristics" type = "structure" /&gt;
-  &lt;!-- instance can set
-     structureName = "shortHistory" supportName = "history" --&gt;
+  &lt;field name = "display" type = "structure" /&gt;
+  &lt;field name = "control" type = "structure" /&gt;
+  &lt;!-- instance can set structureName = "shortHistory" --&gt;
   &lt;field name = "history" type = "structure" /&gt;
 &lt;/DBDefinition&gt;</pre>
 
-<h4>shortRecord.xml</h4>
+<h5 id="shortRecor">shortRecord.xml</h5>
 <pre>&lt;?xml version="1.0" ?&gt;
 &lt;DBDefinition&gt;
 &lt;structure name = "short" supportName = "generic" &gt;
@@ -2772,32 +3290,25 @@ well as:</p>
 &lt;/recordType&gt;
 &lt;/DBDefinition&gt;</pre>
 
-<h3>int</h3>
+<h4 id="int">int</h4>
 
-<h4>intCommon.xml</h4>
+<h5 id="intCommon.">intCommon.xml</h5>
 <pre>&lt;?xml version="1.0" ?&gt;
 &lt;DBDefinition&gt;
-  &lt;field name = "value" type = "int" &gt;
-    &lt;property name = "alarm" associatedField = "alarm" /&gt;
-    &lt;property name = "displayChararacteristics" associatedField = "displayCharacteristics" /&gt;
-    &lt;property name = "timeStamp" associatedField = "timeStamp" /&gt;
-  &lt;/field&gt;
-  &lt;field name = "alarm" type = "structure" structureName = "alarm"
-      supportName = "alarm" /&gt;
+  &lt;field name = "value" type = "int" /&gt;
+  &lt;field name = "alarm" type = "structure"/&gt;
+  &lt;field name = "timeStamp" type = "structure" /&gt;
   &lt;field name = "input" type = "structure" /&gt;
-  &lt;!-- instance can set
-     structureName = "intAlarm" supportName = "intAlarm" --&gt;
+  &lt;!-- instance can set structureName = "intAlarm" --&gt;
   &lt;field name = "valueAlarm" type = "structure" /&gt;
   &lt;field name = "output" type = "structure" /&gt;
-  &lt;!-- instance can set
-     structureName = "intDisplayCharacteristics" --&gt;
-  &lt;field name = "displayCharacteristics" type = "structure" /&gt;
-  &lt;!-- instance can set
-     structureName = "intHistory" supportName = "history" --&gt;
+  &lt;field name = "display" type = "structure" /&gt;
+  &lt;field name = "control" type = "structure" /&gt;
+  &lt;!-- instance can set structureName = "intHistory" --&gt;
   &lt;field name = "history" type = "structure" /&gt;
 &lt;/DBDefinition&gt;</pre>
 
-<h4>intRecord.xml</h4>
+<h5 id="intRecord.">intRecord.xml</h5>
 <pre>&lt;?xml version="1.0" ?&gt;
 &lt;DBDefinition&gt;
 &lt;structure name = "int" supportName = "generic" &gt;
@@ -2812,32 +3323,25 @@ well as:</p>
 &lt;/recordType&gt;
 &lt;/DBDefinition&gt;</pre>
 
-<h3>long</h3>
+<h4 id="long">long</h4>
 
-<h4>longCommon.xml</h4>
+<h5 id="longCommon">longCommon.xml</h5>
 <pre>&lt;?xml version="1.0" ?&gt;
 &lt;DBDefinition&gt;
-  &lt;field name = "value" type = "long" &gt;
-    &lt;property name = "alarm" associatedField = "alarm" /&gt;
-    &lt;property name = "displayChararacteristics" associatedField = "displayCharacteristics" /&gt;
-    &lt;property name = "timeStamp" associatedField = "timeStamp" /&gt;
-  &lt;/field&gt;
-  &lt;field name = "alarm" type = "structure" structureName = "alarm"
-      supportName = "alarm" /&gt;
+  &lt;field name = "value" type = "long" /&gt;
+  &lt;field name = "alarm" type = "structure"/&gt;
+  &lt;field name = "timeStamp" type = "structure" /&gt;
   &lt;field name = "input" type = "structure" /&gt;
-  &lt;!-- instance can set
-     structureName = "longAlarm" supportName = "longAlarm" --&gt;
+  &lt;!-- instance can set structureName = "longAlarm" --&gt;
   &lt;field name = "valueAlarm" type = "structure" /&gt;
   &lt;field name = "output" type = "structure" /&gt;
-  &lt;!-- instance can set
-     structureName = "longDisplayCharacteristics" --&gt;
-  &lt;field name = "displayCharacteristics" type = "structure" /&gt;
-  &lt;!-- instance can set
-     structureName = "longHistory" supportName = "history" --&gt;
+  &lt;field name = "display" type = "structure" /&gt;
+  &lt;field name = "control" type = "structure" /&gt;
+  &lt;!-- instance can set structureName = "longHistory" --&gt;
   &lt;field name = "history" type = "structure" /&gt;
 &lt;/DBDefinition&gt;</pre>
 
-<h4>longRecord.xml</h4>
+<h5 id="longRecord">longRecord.xml</h5>
 <pre>&lt;?xml version="1.0" ?&gt;
 &lt;DBDefinition&gt;
 &lt;structure name = "long" supportName = "generic" &gt;
@@ -2852,32 +3356,25 @@ well as:</p>
 &lt;/recordType&gt;
 &lt;/DBDefinition&gt;</pre>
 
-<h3>float</h3>
+<h4 id="float">float</h4>
 
-<h4>floatCommon.xml</h4>
+<h5 id="floatCommo">floatCommon.xml</h5>
 <pre>&lt;?xml version="1.0" ?&gt;
 &lt;DBDefinition&gt;
-  &lt;field name = "value" type = "float" &gt;
-    &lt;property name = "alarm" associatedField = "alarm" /&gt;
-    &lt;property name = "displayChararacteristics" associatedField = "displayCharacteristics" /&gt;
-    &lt;property name = "timeStamp" associatedField = "timeStamp" /&gt;
-  &lt;/field&gt;
-  &lt;field name = "alarm" type = "structure" structureName = "alarm"
-      supportName = "alarm" /&gt;
+  &lt;field name = "value" type = "float" /&gt;
+  &lt;field name = "alarm" type = "structure"/&gt;
+  &lt;field name = "timeStamp" type = "structure" /&gt;
   &lt;field name = "input" type = "structure" /&gt;
-  &lt;!-- instance can set
-     structureName = "floatAlarm" supportName = "floatAlarm" --&gt;
+  &lt;!-- instance can set structureName = "floatAlarm" --&gt;
   &lt;field name = "valueAlarm" type = "structure" /&gt;
   &lt;field name = "output" type = "structure" /&gt;
-  &lt;!-- instance can set
-     structureName = "floatDisplayCharacteristics" --&gt;
-  &lt;field name = "displayCharacteristics" type = "structure" /&gt;
-  &lt;!-- instance can set
-     structureName = "floatHistory" supportName = "history" --&gt;
+  &lt;field name = "display" type = "structure" /&gt;
+  &lt;field name = "control" type = "structure" /&gt;
+  &lt;!-- instance can set structureName = "floatHistory" --&gt;
   &lt;field name = "history" type = "structure" /&gt;
 &lt;/DBDefinition&gt;</pre>
 
-<h4>floatRecord.xml</h4>
+<h5 id="floatRecor">floatRecord.xml</h5>
 <pre>&lt;?xml version="1.0" ?&gt;
 &lt;DBDefinition&gt;
 &lt;structure name = "float" supportName = "generic" &gt;
@@ -2892,32 +3389,25 @@ well as:</p>
 &lt;/recordType&gt;
 &lt;/DBDefinition&gt;</pre>
 
-<h3>double</h3>
+<h4 id="double">double</h4>
 
-<h4>doubleCommon.xml</h4>
+<h5 id="doubleComm1">doubleCommon.xml</h5>
 <pre>&lt;?xml version="1.0" ?&gt;
 &lt;DBDefinition&gt;
-  &lt;field name = "value" type = "double" &gt;
-    &lt;property name = "alarm" associatedField = "alarm" /&gt;
-    &lt;property name = "displayChararacteristics" associatedField = "displayCharacteristics" /&gt;
-    &lt;property name = "timeStamp" associatedField = "timeStamp" /&gt;
-  &lt;/field&gt;
-  &lt;field name = "alarm" type = "structure" structureName = "alarm"
-      supportName = "alarm" /&gt;
+  &lt;field name = "value" type = "double" /&gt;
+  &lt;field name = "alarm" type = "structure"/&gt;
+  &lt;field name = "timeStamp" type = "structure" /&gt;
   &lt;field name = "input" type = "structure" /&gt;
-  &lt;!-- instance can set
-     structureName = "doubleAlarm" supportName = "doubleAlarm" --&gt;
+  &lt;!-- instance can set structureName = "doubleAlarm" --&gt;
   &lt;field name = "valueAlarm" type = "structure" /&gt;
   &lt;field name = "output" type = "structure" /&gt;
-  &lt;!-- instance can set
-     structureName = "doubleDisplayCharacteristics" --&gt;
-  &lt;field name = "displayCharacteristics" type = "structure" /&gt;
-  &lt;!-- instance can set
-     structureName = "doubleHistory" supportName = "history" --&gt;
+  &lt;field name = "display" type = "structure" /&gt;
+  &lt;field name = "control" type = "structure" /&gt;
+  &lt;!-- instance can set structureName = "doubleHistory" --&gt;
   &lt;field name = "history" type = "structure" /&gt;
 &lt;/DBDefinition&gt;</pre>
 
-<h4>doubleRecord.xml</h4>
+<h5 id="doubleReco1">doubleRecord.xml</h5>
 <pre>&lt;?xml version="1.0" ?&gt;
 &lt;DBDefinition&gt;
 &lt;structure name = "double" supportName = "generic" &gt;
@@ -2932,24 +3422,21 @@ well as:</p>
 &lt;/recordType&gt;
 &lt;/DBDefinition&gt;</pre>
 
-<h3>string</h3>
+<h4 id="string">string</h4>
 
-<h4>stringCommon.xml</h4>
+<h5 id="stringComm">stringCommon.xml</h5>
 <pre>&lt;?xml version="1.0" ?&gt;
 &lt;DBDefinition&gt;
-  &lt;field name = "value" type = "string" &gt;
-    &lt;property name = "alarm" associatedField = "alarm" /&gt;
-    &lt;property name = "timeStamp" associatedField = "timeStamp" /&gt;
-  &lt;/field&gt;
-  &lt;field name = "alarm" type = "structure" structureName = "alarm"
-      supportName = "alarm" /&gt;
+  &lt;field name = "value" type = "string" /&gt;
+  &lt;field name = "alarm" type = "structure"/&gt;
+  &lt;field name = "timeStamp" type = "structure" /&gt;
   &lt;field name = "input" type = "structure" /&gt;
   &lt;field name = "output" type = "structure" /&gt;
-  &lt;field name = "supportArray" type = "array"
-     elementType = "structure" supportName = "supportArray" /&gt;
+  &lt;!-- instance can set structureName = "stringHistory" --&gt;
+  &lt;field name = "history" type = "structure" /&gt;
 &lt;/DBDefinition&gt;</pre>
 
-<h4>stringRecord.xml</h4>
+<h5 id="stringReco">stringRecord.xml</h5>
 <pre>&lt;?xml version="1.0" ?&gt;
 &lt;DBDefinition&gt;
 &lt;structure name = "string" supportName = "generic" &gt;
@@ -2964,11 +3451,11 @@ well as:</p>
 &lt;/DBDefinition&gt;</pre>
 <hr />
 
-<h2 style="text-align: center"
-id="recordType2">dbd/recordType/primitiveArray</h2>
+<h3 style="text-align: center"
+id="recordType2">dbd/recordType/primitiveArray</h3>
 <hr />
 
-<h3>Overview</h3>
+<h4 id="Overview3">Overview</h4>
 
 <p>A recordType and a structure are defined for an array of each of the
 primitive types including string. The structure is used to create "device"
@@ -3001,9 +3488,8 @@ the structure and the recordType. </p>
     <dd>History</dd>
 </dl>
 
-<p>The Record file defines a structure that contains the fields in common.
-The support for the structure version expects the higher level support will
-call it's setField method, which becomes the value field.</p>
+<p>The Record file defines a structure that contains the fields in
+common..</p>
 
 <p>The Record file defines a recordType that has the fields from Comman as
 well as:</p>
@@ -3011,26 +3497,23 @@ well as:</p>
   <dt>common.xml</dt>
     <dd>The fields that are common to most recordTypes.</dd>
   <dt>supportArray</dt>
-    <dd>A array of structures with support. The setField method of the
-      support for each element is called with the value field.</dd>
+    <dd>A array of structures with support.</dd>
 </dl>
 
-<h3>booleanArray</h3>
+<h4 id="booleanArr">booleanArray</h4>
 
-<h4>booleanArrayCommon.xml</h4>
+<h5 id="booleanArr1">booleanArrayCommon.xml</h5>
 <pre>&lt;?xml version="1.0" ?&gt;
 &lt;DBDefinition&gt;
-  &lt;field name = "value" type = "array" elementType = "boolean" &gt;
-    &lt;property name = "alarm" associatedField = "alarm" /&gt;
-    &lt;property name = "timeStamp" associatedField = "timeStamp" /&gt;
-  &lt;/field&gt;
-  &lt;field name = "alarm" type = "structure" structureName = "alarm"
-      supportName = "alarm" /&gt;
+  &lt;field name = "value" type = "array" elementType = "boolean" /&gt;
+  &lt;field name = "alarm" type = "structure"/&gt;
+  &lt;field name = "timeStamp" type = "structure" /&gt;
   &lt;field name = "input" type = "structure" /&gt;
   &lt;field name = "output" type = "structure" /&gt;
+  &lt;field name = "display" type = "structure" /&gt;
 &lt;/DBDefinition&gt;</pre>
 
-<h4>booleanArrayRecord.xml</h4>
+<h5 id="booleanArr2">booleanArrayRecord.xml</h5>
 <pre>&lt;?xml version="1.0" ?&gt;
 &lt;DBDefinition&gt;
 &lt;structure name = "booleanArray" supportName = "generic" &gt;
@@ -3045,29 +3528,20 @@ well as:</p>
 &lt;/recordType&gt;
 &lt;/DBDefinition&gt;</pre>
 
-<h3>byteArray</h3>
+<h4 id="byteArray">byteArray</h4>
 
-<h4>byteArrayCommon.xml</h4>
+<h5 id="byteArrayC">byteArrayCommon.xml</h5>
 <pre>&lt;?xml version="1.0" ?&gt;
 &lt;DBDefinition&gt;
-  &lt;field name = "value" type = "array" elementType = "byte" &gt;
-    &lt;property name = "alarm" associatedField = "alarm" /&gt;
-    &lt;property name = "displayChararacteristics" associatedField = "displayCharacteristics" /&gt;
-    &lt;property name = "timeStamp" associatedField = "timeStamp" /&gt;
-  &lt;/field&gt;
-  &lt;field name = "alarm" type = "structure" structureName = "alarm"
-      supportName = "alarm" /&gt;
+  &lt;field name = "value" type = "array" elementType = "byte" /&gt; 
+  &lt;field name = "alarm" type = "structure"/&gt;
+  &lt;field name = "timeStamp" type = "structure" /&gt;
   &lt;field name = "input" type = "structure" /&gt;
   &lt;field name = "output" type = "structure" /&gt;
-  &lt;!-- instance can set
-     structureName = "byteDisplayCharacteristics" --&gt;
-  &lt;field name = "displayCharacteristics" type = "structure" /&gt;
-  &lt;!-- instance can set
-     structureName = "byteHistory" supportName = "history" --&gt;
-  &lt;field name = "history" type = "structure" /&gt;
+  &lt;field name = "display" type = "structure" /&gt;
 &lt;/DBDefinition&gt;</pre>
 
-<h4>byteArrayRecord.xml</h4>
+<h5 id="byteArrayR">byteArrayRecord.xml</h5>
 <pre>&lt;?xml version="1.0" ?&gt;
 &lt;DBDefinition&gt;
 &lt;structure name = "byteArray" supportName = "generic" &gt;
@@ -3082,29 +3556,20 @@ well as:</p>
 &lt;/recordType&gt;
 &lt;/DBDefinition&gt;</pre>
 
-<h3>shortArray</h3>
+<h4 id="shortArray">shortArray</h4>
 
-<h4>shortArrayCommon.xml</h4>
+<h5 id="shortArray1">shortArrayCommon.xml</h5>
 <pre>&lt;?xml version="1.0" ?&gt;
 &lt;DBDefinition&gt;
-  &lt;field name = "value" type = "array" elementType = "short" &gt;
-    &lt;property name = "alarm" associatedField = "alarm" /&gt;
-    &lt;property name = "displayChararacteristics" associatedField = "displayCharacteristics" /&gt;
-    &lt;property name = "timeStamp" associatedField = "timeStamp" /&gt;
-  &lt;/field&gt;
-  &lt;field name = "alarm" type = "structure" structureName = "alarm"
-      supportName = "alarm" /&gt;
+  &lt;field name = "value" type = "array" elementType = "short" /&gt;
+  &lt;field name = "alarm" type = "structure"/&gt;
+  &lt;field name = "timeStamp" type = "structure" /&gt;
   &lt;field name = "input" type = "structure" /&gt;
   &lt;field name = "output" type = "structure" /&gt;
-  &lt;!-- instance can set
-     structureName = "shortDisplayCharacteristics" --&gt;
-  &lt;field name = "displayCharacteristics" type = "structure" /&gt;
-  &lt;!-- instance can set
-     structureName = "shortHistory" supportName = "history" --&gt;
-  &lt;field name = "history" type = "structure" /&gt;
+  &lt;field name = "display" type = "structure" /&gt;
 &lt;/DBDefinition&gt;</pre>
 
-<h4>shortArrayRecord.xml</h4>
+<h5 id="shortArray2">shortArrayRecord.xml</h5>
 <pre>&lt;?xml version="1.0" ?&gt;
 &lt;DBDefinition&gt;
 &lt;structure name = "shortArray" supportName = "generic" &gt;
@@ -3119,29 +3584,20 @@ well as:</p>
 &lt;/recordType&gt;
 &lt;/DBDefinition&gt;</pre>
 
-<h3>intArray</h3>
+<h4 id="intArray">intArray</h4>
 
-<h4>intArrayCommon.xml</h4>
+<h5 id="intArrayCo">intArrayCommon.xml</h5>
 <pre>&lt;?xml version="1.0" ?&gt;
 &lt;DBDefinition&gt;
-  &lt;field name = "value" type = "array" elementType = "int" &gt;
-    &lt;property name = "alarm" associatedField = "alarm" /&gt;
-    &lt;property name = "displayChararacteristics" associatedField = "displayCharacteristics" /&gt;
-    &lt;property name = "timeStamp" associatedField = "timeStamp" /&gt;
-  &lt;/field&gt;
-  &lt;field name = "alarm" type = "structure" structureName = "alarm"
-      supportName = "alarm" /&gt;
+  &lt;field name = "value" type = "array" elementType = "int" /&gt;
+  &lt;field name = "alarm" type = "structure"/&gt;
+  &lt;field name = "timeStamp" type = "structure" /&gt;
   &lt;field name = "input" type = "structure" /&gt;
   &lt;field name = "output" type = "structure" /&gt;
-  &lt;!-- instance can set
-     structureName = "intDisplayCharacteristics" --&gt;
-  &lt;field name = "displayCharacteristics" type = "structure" /&gt;
-  &lt;!-- instance can set
-     structureName = "intHistory" supportName = "history" --&gt;
-  &lt;field name = "history" type = "structure" /&gt;
+  &lt;field name = "display" type = "structure" /&gt;
 &lt;/DBDefinition&gt;</pre>
 
-<h4>intArrayRecord.xml</h4>
+<h5 id="intArrayRe">intArrayRecord.xml</h5>
 <pre>&lt;?xml version="1.0" ?&gt;
 &lt;DBDefinition&gt;
 &lt;structure name = "intArray" supportName = "generic" &gt; 
@@ -3156,29 +3612,20 @@ well as:</p>
 &lt;/recordType&gt;
 &lt;/DBDefinition&gt;</pre>
 
-<h3>longArray</h3>
+<h4 id="longArray">longArray</h4>
 
-<h4>longArrayCommon.xml</h4>
+<h5 id="longArrayC">longArrayCommon.xml</h5>
 <pre>&lt;?xml version="1.0" ?&gt;
 &lt;DBDefinition&gt;
-  &lt;field name = "value" type = "array" elementType = "long" &gt;
-    &lt;property name = "alarm" associatedField = "alarm" /&gt;
-    &lt;property name = "displayChararacteristics" associatedField = "displayCharacteristics" /&gt;
-    &lt;property name = "timeStamp" associatedField = "timeStamp" /&gt;
-  &lt;/field&gt;
-  &lt;field name = "alarm" type = "structure" structureName = "alarm"
-      supportName = "alarm" /&gt;
+  &lt;field name = "value" type = "array" elementType = "long" /&gt;
+  &lt;field name = "alarm" type = "structure"/&gt;
+  &lt;field name = "timeStamp" type = "structure" /&gt;
   &lt;field name = "input" type = "structure" /&gt;
   &lt;field name = "output" type = "structure" /&gt;
-  &lt;!-- instance can set
-     structureName = "longDisplayCharacteristics" --&gt;
-  &lt;field name = "displayCharacteristics" type = "structure" /&gt;
-  &lt;!-- instance can set
-     structureName = "longHistory" supportName = "history" --&gt;
-  &lt;field name = "history" type = "structure" /&gt;
+  &lt;field name = "display" type = "structure" /&gt;
 &lt;/DBDefinition&gt;</pre>
 
-<h4>longArrayRecord.xml</h4>
+<h5 id="longArrayR">longArrayRecord.xml</h5>
 <pre>&lt;?xml version="1.0" ?&gt;
 &lt;DBDefinition&gt;
 &lt;structure name = "longArray" supportName = "generic" &gt;
@@ -3193,29 +3640,20 @@ well as:</p>
 &lt;/recordType&gt;
 &lt;/DBDefinition&gt;</pre>
 
-<h3>floatArray</h3>
+<h4 id="floatArray">floatArray</h4>
 
-<h4>floatArrayCommon.xml</h4>
+<h5 id="floatArray1">floatArrayCommon.xml</h5>
 <pre>&lt;?xml version="1.0" ?&gt;
 &lt;DBDefinition&gt;
-  &lt;field name = "value" type = "array" elementType = "float" &gt;
-    &lt;property name = "alarm" associatedField = "alarm" /&gt;
-    &lt;property name = "displayChararacteristics" associatedField = "displayCharacteristics" /&gt;
-    &lt;property name = "timeStamp" associatedField = "timeStamp" /&gt;
-  &lt;/field&gt;
-  &lt;field name = "alarm" type = "structure" structureName = "alarm"
-      supportName = "alarm" /&gt;
+  &lt;field name = "value" type = "array" elementType = "float" /&gt;
+  &lt;field name = "alarm" type = "structure"/&gt;
+  &lt;field name = "timeStamp" type = "structure" /&gt;
   &lt;field name = "input" type = "structure" /&gt;
   &lt;field name = "output" type = "structure" /&gt;
-  &lt;!-- instance can set
-     structureName = "floatDisplayCharacteristics" --&gt;
-  &lt;field name = "displayCharacteristics" type = "structure" /&gt;
-  &lt;!-- instance can set
-     structureName = "floatHistory" supportName = "history" --&gt;
-  &lt;field name = "history" type = "structure" /&gt;
+  &lt;field name = "display" type = "structure" /&gt;
 &lt;/DBDefinition&gt;</pre>
 
-<h4>floatArrayRecord.xml</h4>
+<h5 id="floatArray2">floatArrayRecord.xml</h5>
 <pre>&lt;?xml version="1.0" ?&gt;
 &lt;DBDefinition&gt;
 &lt;structure name = "floatArray" supportName = "generic" &gt;
@@ -3230,29 +3668,20 @@ well as:</p>
 &lt;/recordType&gt;
 &lt;/DBDefinition&gt;</pre>
 
-<h3>doubleArray</h3>
+<h4 id="doubleArra">doubleArray</h4>
 
-<h4>doubleArrayCommon.xml</h4>
+<h5 id="doubleArra1">doubleArrayCommon.xml</h5>
 <pre>&lt;?xml version="1.0" ?&gt;
 &lt;DBDefinition&gt;
-  &lt;field name = "value" type = "array" elementType = "double" &gt;
-    &lt;property name = "alarm" associatedField = "alarm" /&gt;
-    &lt;property name = "displayChararacteristics" associatedField = "displayCharacteristics" /&gt;
-    &lt;property name = "timeStamp" associatedField = "timeStamp" /&gt;
-  &lt;/field&gt;
-  &lt;field name = "alarm" type = "structure" structureName = "alarm"
-      supportName = "alarm" /&gt;
+  &lt;field name = "value" type = "array" elementType = "double" /&gt;
+  &lt;field name = "alarm" type = "structure"/&gt;
+  &lt;field name = "timeStamp" type = "structure" /&gt;
   &lt;field name = "input" type = "structure" /&gt;
   &lt;field name = "output" type = "structure" /&gt;
-  &lt;!-- instance can set
-     structureName = "doubleDisplayCharacteristics" --&gt;
-  &lt;field name = "displayCharacteristics" type = "structure" /&gt;
-  &lt;!-- instance can set
-     structureName = "doubleHistory" supportName = "history" --&gt;
-  &lt;field name = "history" type = "structure" /&gt;
+  &lt;field name = "display" type = "structure" /&gt;
 &lt;/DBDefinition&gt;</pre>
 
-<h4>doubleArrayRecord.xml</h4>
+<h5 id="doubleArra2">doubleArrayRecord.xml</h5>
 <pre>&lt;?xml version="1.0" ?&gt;
 &lt;DBDefinition&gt;
 &lt;structure name = "doubleArray" supportName = "generic" &gt;
@@ -3267,22 +3696,19 @@ well as:</p>
 &lt;/recordType&gt;
 &lt;/DBDefinition&gt;</pre>
 
-<h3>stringArray</h3>
+<h4 id="stringArra">stringArray</h4>
 
-<h4>stringArrayCommon.xml</h4>
+<h5 id="stringArra1">stringArrayCommon.xml</h5>
 <pre>&lt;?xml version="1.0" ?&gt;
 &lt;DBDefinition&gt;
-  &lt;field name = "value" type = "array" elementType = "string" &gt;
-    &lt;property name = "alarm" associatedField = "alarm" /&gt;
-    &lt;property name = "timeStamp" associatedField = "timeStamp" /&gt;
-  &lt;/field&gt;
-  &lt;field name = "alarm" type = "structure" structureName = "alarm"
-      supportName = "alarm" /&gt;
+  &lt;field name = "value" type = "array" elementType = "string" /&gt;
+  &lt;field name = "alarm" type = "structure"/&gt;
+  &lt;field name = "timeStamp" type = "structure" /&gt;
   &lt;field name = "input" type = "structure" /&gt;
   &lt;field name = "output" type = "structure" /&gt;
 &lt;/DBDefinition&gt; </pre>
 
-<h4>stringArrayRecord.xml</h4>
+<h5 id="stringArra2">stringArrayRecord.xml</h5>
 <pre>&lt;?xml version="1.0" ?&gt;
 &lt;DBDefinition&gt;
 &lt;structure name = "stringArray" supportName = "generic" &gt;
@@ -3298,67 +3724,34 @@ well as:</p>
 &lt;/DBDefinition&gt;</pre>
 <hr />
 
-<h2 style="text-align: center">dbd/recordType/analog</h2>
+<h3 style="text-align: center" id="recordType3">dbd/recordType/analog</h3>
 <hr />
 
-<h3>Overview</h3>
+<h4 id="Overview4">Overview</h4>
 
 <p>Regular analog records can be created via the double structure and
 recordType. This section defines definitions for incremental analog
 output.</p>
 
-<h3>aoIncrementalDouble</h3>
+<h4 id="aoIncremen">aoIncrementalDouble</h4>
 
-<h4>aoIncrementalDoubleCommon.xml</h4>
+<h5 id="aoIncremen1">aoIncrementalDoubleCommon.xml</h5>
 <pre>&lt;?xml version="1.0" ?&gt;
 &lt;DBDefinition&gt;
-  &lt;field name = "value" type = "double" &gt;
-    &lt;property name = "alarm" associatedField = "alarm" /&gt;
-    &lt;property name = "displayChararacteristics" associatedField = "displayCharacteristics" /&gt;
-    &lt;property name = "controlLimit" associatedField = "controlLimit" /&gt;
-    &lt;property name = "timeStamp" associatedField = "timeStamp" /&gt;
-  &lt;/field&gt;
-  &lt;field name = "alarm" type = "structure" structureName = "alarm"
-      supportName = "alarm" /&gt;
-  &lt;field name = "incremental" type = "structure"
+  &lt;field name = "value" type = "double" /&gt;
+  &lt;field name = "desired" type = "structure"
       structureName = "incrementalDouble" supportName = "incremental" /&gt;
-  &lt;field name = "output" type = "structure"
-      structureName = "linearConvertOutput" /&gt;
-  &lt;field name = "valueAlarm" type = "structure" supportName = "doubleAlarm" /&gt;
-  &lt;field name = "controlLimit"
-     type = "structure" structureName = "doubleLimit" /&gt;
-     &lt;!-- instance can set
-     structureName = "doubleDisplayCharacteristics" --&gt;
-  &lt;field name = "displayCharacteristics" type = "structure" /&gt;
-  &lt;!-- instance can set
-     structureName = "doubleHistory" supportName = "history" --&gt;
+  &lt;field name = "alarm" type = "structure"/&gt;
+  &lt;field name = "timeStamp" type = "structure" /&gt;
+  &lt;!-- instance can set structureName = "byteAlarm" --&gt;
+  &lt;field name = "valueAlarm" type = "structure" /&gt;
+  &lt;field name = "output" type = "structure" /&gt;
+  &lt;field name = "display" type = "structure" /&gt;
+  &lt;!-- instance can set structureName = "byteHistory" --&gt;
   &lt;field name = "history" type = "structure" /&gt;
 &lt;/DBDefinition&gt;</pre>
 
-<p>where</p>
-<dl>
-  <dt>alarm</dt>
-    <dd>An alarm field. Note that since this appears in the structure
-      definition alarm hierarchiries are supported.</dd>
-  <dt>incremental</dt>
-    <dd>A structure and support that get a desired value and incrementally
-      changes the engineering units value until it reaches the desired
-    value.</dd>
-  <dt>output</dt>
-    <dd>A structure. The default structureName and support converts the
-      engineering units value to an integer and writes it.</dd>
-  <dt>units</dt>
-    <dd>units</dd>
-  <dt>valueAlarm</dt>
-    <dd>A field for checking for value alarms.</dd>
-  <dt>controlLimit</dt>
-    <dd>control limits</dd>
-  <dt>supportArray</dt>
-    <dd>A array of links. The setField method of the support for each element
-      is called with the value field.</dd>
-</dl>
-
-<h4>aoIncrementalDoubleRecord.xml</h4>
+<h5 id="aoIncremen2">aoIncrementalDoubleRecord.xml</h5>
 <pre>&lt;?xml version="1.0" ?&gt;
 &lt;DBDefinition&gt;
 &lt;structure name = "aoIncrementalDouble" supportName = "generic" &gt;
@@ -3378,57 +3771,41 @@ output.</p>
 the fields common to most recordTypes and a value field.</p>
 <hr />
 
-<h2 style="text-align: center">dbd/recordType/digital</h2>
+<h3 style="text-align: center" id="recordType4">dbd/recordType/enumerated</h3>
 <hr />
 
-<h3>Overview</h3>
+<h4 id="Overview5">Overview</h4>
 
-<p>This is support for digital I/O. The value field is an enum. Each enum
-state has an associated integer value as defined by the digitalIO structure.
-The digitalIO structure has a field states, which is an array of digitalState
-structures. The index for states is the same as the index for the enum. The
-value obtained from the digitalState determines the integer value associated
-with the state. This value is anded with a mask determined by
-digitalIO.numberOfBits. The mask has the low order bits 1 and all other bits
-0. The integer value can be read from or written to a digital I/O device.</p>
+<p>This is support for a value field that is an enumerated structure.</p>
 
-<h3>digital</h3>
+<h4 id="enumerated1">enumerated</h4>
 
-<h4>digitalCommon.xml</h4>
+<h5 id="enumerated2">enumeratedCommon.xml</h5>
 <pre>&lt;?xml version="1.0" ?&gt;
 &lt;DBDefinition&gt;
-  &lt;field name = "value" type = "structure" structureName = "enumerated"&gt;
-    &lt;property name = "alarm" associatedField = "alarm" /&gt;
-    &lt;property name = "timeStamp" associatedField = "timeStamp" /&gt;
-  &lt;/field&gt;
-  &lt;field name = "alarm" type = "structure" structureName = "alarm"
-    supportName = "alarm" /&gt;
-  &lt;field name = "digitalIO" type = "structure"
-    structureName = "digitalIO" supportName = "digital" /&gt;
+  &lt;field name = "value" type = "structure" structureName = "enumerated" /&gt;
+  &lt;field name = "alarm" type = "structure"/&gt;
+  &lt;field name = "timeStamp" type = "structure" /&gt;
+  &lt;field name = "input" type = "structure" /&gt;
+  &lt;!-- instance can set structureName = "enumeratedAlarm" --&gt;
+  &lt;field name = "valueAlarm" type = "structure"/&gt;
+  &lt;field name = "output" type = "structure" /&gt;
+  &lt;!-- instance can set structureName = "enumeratedHistory" --&gt;
+  &lt;field name = "history" type = "structure" /&gt;
 &lt;/DBDefinition&gt;</pre>
 
-<p>where</p>
-<dl>
-  <dt>alarm</dt>
-    <dd>The alarm field.</dd>
-  <dt>digitalIO</dt>
-    <dd>The structure and support for perforing a digital I/O operation.</dd>
-  <dt>supportArray</dt>
-    <dd>An array of links for the enum value field.</dd>
-</dl>
-
-<h4>digitalRecord.xml</h4>
+<h5 id="enumerated3">enumeratedRecord.xml</h5>
 <pre>&lt;?xml version="1.0" ?&gt;
 &lt;DBDefinition&gt;
-&lt;structure name = "digital" supportName = "generic" &gt;
-  &lt;include href = "digitalCommon.xml" /&gt;
+&lt;structure name = "enumeratedStruvture" supportName = "generic" &gt;
+  &lt;include href = "enumeratedCommon.xml" /&gt;
 &lt;/structure&gt;
   
-&lt;recordType name = "digital" supportName = "generic" &gt;
+&lt;recordType name = "enumerated" supportName = "generic" &gt;
   &lt;include href = "common.xml" /&gt;
-  &lt;include href = "digitalCommon.xml" /&gt;
+  &lt;include href = "enumeratedCommon.xml" /&gt;
   &lt;field name = "supportArray" type = "array"
-    elementType = "structure" supportName = "supportArray" /&gt;
+     elementType = "structure" supportName = "supportArray" /&gt;
 &lt;/recordType&gt;
 &lt;/DBDefinition&gt;</pre>
 
@@ -3436,30 +3813,29 @@ digitalIO.numberOfBits. The mask has the low order bits 1 and all other bits
 the fields common to most recordTypes and a value field.</p>
 <hr />
 
-<h2 style="text-align: center">dbd/recordType/event</h2>
+<h3 style="text-align: center" id="recordType5">dbd/recordType/event</h3>
 <hr />
 
-<h3>Overview</h3>
+<h4 id="Overview6">Overview</h4>
 
 <p>This is a record type that announces an event. The value field is a string
 the is the event name.</p>
 
-<h3>event</h3>
+<h4 id="event">event</h4>
 
-<h4>eventCommon.xml</h4>
+<h5 id="eventCommo">eventCommon.xml</h5>
 <pre>&lt;?xml version="1.0" ?&gt;
 &lt;DBDefinition&gt;
-  &lt;field name = "value" type = "string" supportName = "event" &gt;
-    &lt;property name = "alarm" associatedField = "alarm" /&gt;
-    &lt;property name = "timeStamp" associatedField = "timeStamp" /&gt;
-  &lt;/field&gt;
-  &lt;field name = "alarm" type = "structure" structureName = "alarm"
-      supportName = "alarm" /&gt;
+  &lt;field name = "value" type = "string" supportName = "event" /&gt;
+  &lt;field name = "alarm" type = "structure"/&gt;
+  &lt;field name = "timeStamp" type = "structure" /&gt;
   &lt;field name = "input" type = "structure" /&gt;
   &lt;field name = "output" type = "structure" /&gt;
+  &lt;!-- instance can set structureName = "stringHistory" --&gt;
+  &lt;field name = "history" type = "structure" /&gt;
 &lt;/DBDefinition&gt;</pre>
 
-<h4>eventRecord.xml</h4>
+<h5 id="eventRecor">eventRecord.xml</h5>
 <pre>&lt;?xml version="1.0" ?&gt;
 &lt;DBDefinition&gt;
 &lt;structure name = "event" supportName = "generic" &gt;
@@ -3475,9 +3851,9 @@ the is the event name.</p>
 &lt;/DBDefinition&gt;</pre>
 <hr />
 
-<h2 style="text-align: center">dbd/recordType/calc</h2>
+<h3 style="text-align: center" id="recordType6">dbd/recordType/calc</h3>
 
-<h3>Overview</h3>
+<h4 id="Overview7">Overview</h4>
 
 <p>This defines recordTypes and structures for calculations. Definitions are
 available for calculating a double, an array of doubles, and an array of
@@ -3509,31 +3885,27 @@ a PV interface for reading an argument value.:</p>
       calcArgArray calls it and has the support put the result in value.</dd>
 </dl>
 
-<h3>calcDouble</h3>
+<h4 id="calcDouble">calcDouble</h4>
 
-<h4>calcDoubleCommon.xml</h4>
+<h5 id="calcDouble1">calcDoubleCommon.xml</h5>
 <pre>&lt;?xml version="1.0" ?&gt;
 &lt;DBDefinition&gt;
-  &lt;field name = "value" type = "double" &gt;
-    &lt;property name = "alarm" associatedField = "alarm" /&gt;
-    &lt;property name = "displayChararacteristics" associatedField = "displayCharacteristics" /&gt;
-    &lt;property name = "timeStamp" associatedField = "timeStamp" /&gt;
-  &lt;/field&gt;
-  &lt;field name = "alarm" type = "structure" structureName = "alarm"
-     supportName = "alarm" /&gt;
+  &lt;field name = "value" type = "double" /&gt;
   &lt;field name = "calcArgArray" type = "array"
      elementType = "structure" supportName = "calcArgArray" /&gt;
   &lt;field name = "calculator" type = "structure" /&gt;
-  &lt;field name = "valueAlarm" type = "structure" supportName = "doubleAlarm" /&gt;
-  &lt;!-- instance can set
-     structureName = "doubleDisplayCharacteristics" --&gt;
-  &lt;field name = "displayCharacteristics" type = "structure" /&gt;
-  &lt;!-- instance can set
-     structureName = "doubleHistory" supportName = "history" --&gt;
+  &lt;field name = "alarm" type = "structure"/&gt;
+  &lt;field name = "timeStamp" type = "structure" /&gt;
+  &lt;field name = "input" type = "structure" /&gt;
+  &lt;!-- instance can set structureName = "doubleAlarm" --&gt;
+  &lt;field name = "valueAlarm" type = "structure" /&gt;
+  &lt;field name = "output" type = "structure" /&gt;
+  &lt;field name = "display" type = "structure" /&gt;
+  &lt;!-- instance can set structureName = "doubleHistory" --&gt;
   &lt;field name = "history" type = "structure" /&gt;
 &lt;/DBDefinition&gt;</pre>
 
-<h4>calcDoubleRecord.xml</h4>
+<h5 id="calcDouble2">calcDoubleRecord.xml</h5>
 <pre>&lt;?xml version="1.0" ?&gt;
 &lt;DBDefinition&gt;
 &lt;structure name = "calcDoubleArg" &gt;
@@ -3554,33 +3926,23 @@ a PV interface for reading an argument value.:</p>
 &lt;/recordType&gt;
 &lt;/DBDefinition&gt;</pre>
 
-<h3>calcDoubleArray</h3>
+<h4 id="calcDouble3">calcDoubleArray</h4>
 
-<h4>calcDoubleArrayCommon.xml</h4>
+<h5 id="calcDouble4">calcDoubleArrayCommon.xml</h5>
 <pre>&lt;?xml version="1.0" ?&gt;
 &lt;DBDefinition&gt;
-  &lt;field name = "value" type = "array" elementType = "double"  &gt;
-    &lt;property name = "alarm" associatedField = "alarm" /&gt;
-    &lt;property name = "displayChararacteristics" associatedField = "displayCharacteristics" /&gt; 
-    &lt;property name = "timeStamp" associatedField = "/timeStamp" /&gt;
-  &lt;/field&gt;
-  &lt;field name = "alarm" type = "structure" structureName = "alarm"
-     supportName = "alarm" /&gt;
+  &lt;field name = "value" type = "array" elementType = "double"  /&gt;
   &lt;field name = "calcArgArray" type = "array"
      elementType = "structure" supportName = "calcArgArray" /&gt;
   &lt;field name = "calculator" type = "structure" structureName = "null" /&gt;
-  &lt;!-- instance can set
-     structureName = "doubleAlarm" supportName = "doubleAlarm" --&gt;
-  &lt;field name = "valueAlarm" type = "structure" /&gt;
-  &lt;!-- instance can set
-     structureName = "doubleDisplayCharacteristics" --&gt;
-  &lt;field name = "displayCharacteristics" type = "structure" /&gt;
-  &lt;!-- instance can set
-     structureName = "doubleHistory" supportName = "history" --&gt;
-  &lt;field name = "history" type = "structure" /&gt;
+  &lt;field name = "alarm" type = "structure"/&gt;
+  &lt;field name = "timeStamp" type = "structure" /&gt;
+  &lt;field name = "input" type = "structure" /&gt;
+  &lt;field name = "output" type = "structure" /&gt;
+  &lt;field name = "display" type = "structure" /&gt;
 &lt;/DBDefinition&gt;</pre>
 
-<h4>calcDoubleArrayRecord.xml</h4>
+<h5 id="calcDouble5">calcDoubleArrayRecord.xml</h5>
 <pre>&lt;?xml version="1.0" ?&gt;
 &lt;DBDefinition&gt;
 &lt;structure name = "calcDoubleArrayArg" &gt;
@@ -3601,30 +3963,22 @@ a PV interface for reading an argument value.:</p>
 &lt;/recordType&gt; 
 &lt;/DBDefinition&gt;</pre>
 
-<h3>calcBooleanArray</h3>
+<h4 id="calcBoolea">calcBooleanArray</h4>
 
-<h4>calcBooleanArrayCommon.xml</h4>
+<h5 id="calcBoolea1">calcBooleanArrayCommon.xml</h5>
 <pre>&lt;?xml version="1.0" ?&gt;
 &lt;DBDefinition&gt;
-  &lt;field name = "value" type = "array" elementType = "boolean"  &gt;
-    &lt;property name = "alarm" associatedField = "alarm" /&gt;
-    &lt;property name = "timeStamp" associatedField = "timeStamp" /&gt; 
-  &lt;/field&gt;
-  &lt;field name = "alarm" type = "structure" structureName = "alarm"
-      supportName = "alarm" /&gt;
-      &lt;field name = "calcArgArray" type = "array"
+  &lt;field name = "value" type = "array" elementType = "boolean"  /&gt;
+  &lt;field name = "calcArgArray" type = "array"
      elementType = "structure" supportName = "calcArgArray" /&gt;
   &lt;field name = "calculator" type = "structure" structureName = "null" /&gt;
-  &lt;!-- instance can set
-     structureName = "booleanAlarm" supportName = "booleanAlarm" --&gt;
-  &lt;field name = "valueAlarm" type = "structure" /&gt; 
   &lt;field name = "output" type = "structure" /&gt;
-  &lt;!-- instance can set
-     structureName = "booleanHistory" supportName = "history" --&gt;
-  &lt;field name = "history" type = "structure" /&gt;
+  &lt;field name = "alarm" type = "structure"/&gt;
+  &lt;field name = "timeStamp" type = "structure" /&gt;
+  &lt;field name = "display" type = "structure" /&gt;
 &lt;/DBDefinition&gt;</pre>
 
-<h4>calcBooleanArrayRecord.xml</h4>
+<h5 id="calcBoolea2">calcBooleanArrayRecord.xml</h5>
 <pre>&lt;?xml version="1.0" ?&gt;
 &lt;DBDefinition&gt;
 &lt;structure name = "calcBooleanArrayArg" &gt;
@@ -3646,10 +4000,10 @@ a PV interface for reading an argument value.:</p>
 &lt;/DBDefinition&gt;</pre>
 <hr />
 
-<h2 style="text-align: center">dbd/recordType/portDriver</h2>
+<h3 style="text-align: center" id="recordType7">dbd/recordType/portDriver</h3>
 <hr />
 
-<h3>Overview</h3>
+<h4 id="Overview8">Overview</h4>
 
 <p>This defines everything required for performing I/O via portDriver. See
 portDriver for details.</p>
@@ -3659,9 +4013,8 @@ portDeviceControl. portCreate is a recordType for creating a port.
 portDeviceControl is a recordType for accessing the connect and trace
 features of portDriver.</p>
 
-<h3>portDriver.xml</h3>
-<pre>
-&lt;DBDefinition&gt;
+<h4 id="portDriver">portDriver.xml</h4>
+<pre>&lt;DBDefinition&gt;
 &lt;recordType name = "portCreate" supportName = "portCreate" &gt;
   &lt;field name = "factoryName" type = "string" /&gt;
   &lt;field name = "portName" type = "string" /&gt;
@@ -3701,11 +4054,11 @@ features of portDriver.</p>
 &lt;/DBDefinition&gt;</pre>
 <hr />
 
-<h2 style="text-align: center"
-id="recordType8">dbd/recordType/powerSupply</h2>
+<h3 style="text-align: center"
+id="recordType8">dbd/recordType/powerSupply</h3>
 <hr />
 
-<h3>Overview</h3>
+<h4 id="Overview9">Overview</h4>
 
 <p>This is an example of a device record. It can input the desired power. It
 has a structure for voltageInput and for currentOutput. Each record instance
@@ -3714,45 +4067,124 @@ could be configured to input the voltage via and ADC accessed using
 portDriver and ooutput the current to a DAC via portDriver. A structure could
 be configured to link to other records.</p>
 
-<h3>powerSupplyRecord.xml</h3>
+<p>A record that holds an array of powerSupplies is also defined.</p>
+
+<h4 id="powerSuppl2">powerSupplyCommon.xml</h4>
 <pre>&lt;?xml version="1.0" ?&gt;
 &lt;DBDefinition&gt;
-&lt;include addPath = "dbd" /&gt;
+  &lt;field name = "power" type = "structure" structureName = "double" /&gt;
+  &lt;field name = "voltage" type = "structure" structureName = "double" /&gt;
+  &lt;field name = "current" type = "structure" structureName = "double" /&gt;
+  &lt;field name = "alarm" type = "structure"/&gt;
+  &lt;field name = "timeStamp" type = "structure" /&gt;
+&lt;/DBDefinition&gt;</pre>
 
-&lt;recordType name = "powerSupply" supportName = "powerSupply" &gt;
-    &lt;property name = "value" associatedField = "power" /&gt;
-    &lt;include href = "common.xml" /&gt;
-    &lt;field name = "alarm" type = "structure" structureName = "alarm"
-          supportName = "alarm" /&gt;
-    &lt;field name = "power" type = "double" &gt;
-        &lt;property name = "voltage" associatedField = "voltage" /&gt;
-        &lt;property name = "current" associatedField = "current" /&gt;
-        &lt;property name = "alarm" associatedField = "alarm" /&gt;
-        &lt;property name = "units" associatedField = "units" /&gt;
-        &lt;property name = "displayLimit" associatedField = "displayLimit" /&gt;
-        &lt;property name = "timeStamp" associatedField = "/timeStamp" /&gt;
-    &lt;/field&gt;
-    &lt;field name = "input" type = "link" /&gt;
-    &lt;field name = "doubleAlarm" type = "link" supportName = "doubleAlarm" /&gt;
-    &lt;field name = "voltage" type = "double" /&gt;
-    &lt;field name = "voltageInput" type = "structure" structureName = "link" /&gt;
-    &lt;field name = "current" type = "double" /&gt;
-    &lt;field name = "currentOutput" type = "structure" structureName = "link" /&gt;
-    &lt;field name = "output" type = "link" /&gt;
-    &lt;field name = "supportArray" type = "array"
-         elementType = "structure" supportName = "supportArray" /&gt;
-    &lt;field name = "units" type = "string" /&gt;
-    &lt;field name = "displayLimit"
-         type = "structure" structureName = "doubleLimit" /&gt;
+<h4 id="powerSuppl3">powerSupplyRecord.xml</h4>
+<pre>&lt;?xml version="1.0" ?&gt;
+&lt;DBDefinition&gt;
+&lt;structure name = "powerSupply" supportName = "generic" &gt;
+  &lt;include href = "powerSupplyCommon.xml" /&gt; 
+&lt;/structure&gt;
+  
+&lt;recordType name = "powerSupply" supportName = "generic" &gt;
+  &lt;include href = "common.xml" /&gt;
+  &lt;include href = "powerSupplyCommon.xml" /&gt;
+  &lt;field name = "supportArray" type = "array"
+     elementType = "structure" supportName = "supportArray" /&gt;
 &lt;/recordType&gt;
 
-&lt;support name = "powerSupply"
+&lt;support name = "powerSupplyCurrent"
    factoryName = "org.epics.ioc.support.PowerSupplyFactory" /&gt;
+&lt;/DBDefinition&gt;</pre>
+
+<h4 id="powerSuppl4">powerSupplyArrayCommon.xml</h4>
+<pre>&lt;?xml version="1.0" ?&gt;
+&lt;DBDefinition&gt;
+  &lt;field name = "supply" type = "array" elementType = "structure" supportName = "supportArray"  /&gt;
+  &lt;field name = "alarm" type = "structure"/&gt;
+  &lt;field name = "timeStamp" type = "structure" /&gt;
+&lt;/DBDefinition&gt;</pre>
+
+<h4 id="powerSuppl5">powerSupplyArrayRecord.xml</h4>
+<pre>&lt;?xml version="1.0" ?&gt;
+&lt;DBDefinition&gt;
+
+&lt;structure name = "powerSupplyArray" supportName = "generic" &gt;
+  &lt;include href = "powerSupplyArrayCommon.xml" /&gt;
+&lt;/structure&gt;
+
+&lt;recordType name = "powerSupplyArray" supportName = "generic" &gt;
+  &lt;include href = "common.xml" /&gt;
+  &lt;include href = "powerSupplyArrayCommon.xml" /&gt;
+  &lt;field name = "supportArray" type = "array"
+     elementType = "structure" supportName = "supportArray" /&gt;
+&lt;/recordType&gt;
 
 &lt;/DBDefinition&gt;</pre>
 <hr />
 
-<h2 style="text-align: center;text-align: center;">License Agreement</h2>
+<h3 style="text-align: center" id="recordType9">dbd/recordType/allTypes</h3>
+<hr />
+
+<h4 id="Overview10">Overview</h4>
+
+<p>This is a structure and a recordType that has a field of each supported
+type. It is used as an example and for testing.</p>
+
+<h4 id="allTypesCo">allTypesCommon.xml</h4>
+<pre>&lt;?xml version="1.0" ?&gt;
+&lt;DBDefinition&gt;
+    &lt;field name = "boolean" type = "boolean" default = "true" /&gt;
+    &lt;field name = "byte" type = "byte"  default = "-0x7f" /&gt;
+    &lt;field name = "short" type = "short"  default = "101" /&gt;
+    &lt;field name = "int" type = "int"  default = "102" /&gt;
+    &lt;field name = "long" type = "long"  default = "103" /&gt;
+    &lt;field name = "float" type = "float"  default = "1.0" /&gt;
+    &lt;field name = "double" type = "double"  default = "2.0" /&gt;
+    &lt;field name = "string" type = "string"  default = "test string" /&gt;
+    &lt;field name = "doubleLimit"
+         type = "structure" structureName = "doubleLimit" /&gt;
+    &lt;field name = "booleanArray" type = "array" elementType = "boolean"
+         default = "false true false" /&gt;
+    &lt;field name = "byteArray" type = "array" elementType = "byte"
+         default = "1 2 3" /&gt;
+    &lt;field name = "shortArray" type = "array" elementType = "short"
+         default = "10 20 30" /&gt;
+    &lt;field name = "intArray" type = "array" elementType = "int"
+         default = "100 200 300" /&gt;
+    &lt;field name = "longArray" type = "array" elementType = "long"
+         default = "1000 2000 3000" /&gt;
+    &lt;field name = "floatArray" type = "array" elementType = "float"
+         default = "1.0 2.0 3.0" /&gt;
+    &lt;field name = "doubleArray" type = "array" elementType = "double"
+         default = "10.0 20.0 30.0" /&gt;
+    &lt;field name = "stringArray" type = "array" elementType = "string"
+         default = "one two three" /&gt;
+    &lt;field name = "structArray" type = "array" elementType = "structure" /&gt;
+    &lt;field name = "arrayArray" type = "array" elementType = "array" /&gt;
+
+&lt;/DBDefinition&gt;</pre>
+
+<h4 id="allTypesRe">allTypesRecord.xml</h4>
+<pre>&lt;?xml version="1.0" ?&gt;
+&lt;DBDefinition&gt;
+
+&lt;structure name = "allTypes" supportName = "generic" &gt;
+  &lt;include href = "allTypesCommon.xml" /&gt;
+&lt;/structure&gt;
+
+&lt;recordType name = "allTypes" supportName = "generic" &gt;
+  &lt;include href = "common.xml" /&gt;
+
+  &lt;include href = "allTypesCommon.xml" /&gt;
+  &lt;field name = "allTypes" type = "structure" structureName = "allTypes" /&gt;
+&lt;/recordType&gt;
+
+&lt;/DBDefinition&gt;</pre>
+<hr />
+
+<h2 style="text-align: center;text-align: center;" id="License">License
+Agreement</h2>
 <pre>Copyright (c) 2006 All rights reserved 
 The University of Chicago, as Operator of Argonne National Laboratory,
     (UofC) Chicago Ilinois, USA,

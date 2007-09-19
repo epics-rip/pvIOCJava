@@ -7,15 +7,26 @@
   <field name = "severity" type = "structure" structureName = "alarmSeverity" />
 </structure>
 
-<structure name = "digitalDef" supportName = "digital">
-  <!-- structureName must be digitalState -->
+<structure name = "digital" supportName = "generic" >
+  <field name = "value" type = "int" />
+  <field name = "alarm" type = "structure"/>
+  <field name = "timeStamp" type = "structure" />  
+  <field name = "input" type = "structure" />
+  <!-- each structureName must be digitalState -->
+  <!-- supportName can be digitalInput or digitalOutput -->
   <field name = "states" type = "array" elementType = "structure" />
-  <field name = "numberOfBits" type = "int" />
-  <field name = "registerValue" type = "int" design = "false" />
+  <!-- instance can set structureName = "intAlarm" -->
+  <field name = "valueAlarm" type = "structure" />
+  <field name = "output" type = "structure" />
+  <field name = "display" type = "structure" />
+  <!-- instance can set structureName = "intHistory" -->
+  <field name = "history" type = "structure" />
 </structure>
 
-<support name = "digital"
+<support name = "digitalInput"
    factoryName = "org.epics.ioc.support.DigitalFactory" />
 
+<support name = "digitalOutput"
+   factoryName = "org.epics.ioc.support.DigitalFactory" />
 
 </DBDefinition>

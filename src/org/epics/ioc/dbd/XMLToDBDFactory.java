@@ -401,9 +401,6 @@ public class XMLToDBDFactory {
             Field field = null;
             switch(type) {
             case pvStructure:
-                // Combine the current properties with the dbdStructure properties
-                DBDStructure dbdStructure = dbd.getStructure(fieldStructure.getStructureName());
-                
                 field = fieldCreate.createStructure(fieldName,
                     fieldStructure.getStructureName(),fieldStructure.getFields(),fieldAttribute);
                 break;
@@ -447,7 +444,6 @@ public class XMLToDBDFactory {
                     MessageType.warning);
                     return;
             }
-            String structureName = attributes.get("structureName");
             String factoryName = attributes.get("factoryName");
             if(factoryName==null||factoryName.length()==0) {
                 iocxmlReader.message(
@@ -455,8 +451,7 @@ public class XMLToDBDFactory {
                     MessageType.error);
                 return;
             }
-            support = dbd.createSupport(
-                name,factoryName,structureName);
+            support = dbd.createSupport(name,factoryName);
             if(support==null) {
                 iocxmlReader.message(
                     "failed to create support " + qName,

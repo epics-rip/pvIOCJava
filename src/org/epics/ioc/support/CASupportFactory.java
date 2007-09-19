@@ -269,12 +269,6 @@ public class CASupportFactory {
             supportProcessRequester.supportProcessDone(requestResult);
         }        
         /* (non-Javadoc)
-         * @see org.epics.ioc.process.Support#setField(org.epics.ioc.db.DBField)
-         */
-        public void setField(DBField dbField) {
-            // nothing to do
-        }  
-        /* (non-Javadoc)
          * @see org.epics.ioc.ca.ChannelProcessRequester#processDone(org.epics.ioc.util.RequestResult)
          */
         public void processDone(RequestResult requestResult) {
@@ -386,6 +380,19 @@ public class CASupportFactory {
          */
         public void initialize() {
             if(!super.checkSupportState(SupportState.readyForInitialize,inputSupportName)) return;
+            DBField dbParent = dbStructure.getParent();
+            PVField pvField = null;
+            while(dbParent!=null) {
+                PVField pvParent = dbParent.getPVField();
+                pvField = pvParent.findProperty("value");
+                if(pvField!=null) break;
+                dbParent = dbParent.getParent();
+            }
+            if(pvField==null) {
+                pvStructure.message("value field not found", MessageType.error);
+                return;
+            }
+            valueDBField = dbStructure.getDBRecord().findDBField(pvField);
             dbRecord = dbStructure.getDBRecord();
             recordProcess = dbRecord.getRecordProcess();
             alarmSupport = AlarmFactory.findAlarmSupport(dbStructure);
@@ -412,14 +419,7 @@ public class CASupportFactory {
          */
         public void start() {
             if(!super.checkSupportState(SupportState.readyForStart,inputSupportName)) return;
-            isConnected = false;
-            if(valueDBField==null) {
-                pvStructure.message(
-                    "Logic Error: InputSupport.start called before setField",
-                    MessageType.error);
-                setSupportState(SupportState.zombie);
-                return;
-            }
+            isConnected = false; 
             inheritSeverity = inheritSeverityAccess.get();
             process = processAccess.get();
             // split pvname into record name and rest of name
@@ -513,13 +513,7 @@ public class CASupportFactory {
                 channel = null;
             }
             setSupportState(SupportState.readyForStart);
-        }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.process.Support#setField(org.epics.ioc.db.DBField)
-         */
-        public void setField(DBField dbField) {
-            valueDBField = dbField;
-        }       
+        } 
         /* (non-Javadoc)
          * @see org.epics.ioc.process.AbstractSupport#process(org.epics.ioc.process.SupportProcessRequester)
          */
@@ -919,14 +913,20 @@ public class CASupportFactory {
          */
         public void start() {
             if(!super.checkSupportState(SupportState.readyForStart,outputSupportName)) return;
-            isConnected = false;
-            if(valueDBField==null) {
-                pvStructure.message(
-                    "Logic Error: InputSupport.start called before setField",
-                    MessageType.error);
-                setSupportState(SupportState.zombie);
+            DBField dbParent = dbStructure.getParent();
+            PVField pvField = null;
+            while(dbParent!=null) {
+                PVField pvParent = dbParent.getPVField();
+                pvField = pvParent.findProperty("value");
+                if(pvField!=null) break;
+                dbParent = dbParent.getParent();
+            }
+            if(pvField==null) {
+                pvStructure.message("value field not found", MessageType.error);
                 return;
             }
+            valueDBField = dbStructure.getDBRecord().findDBField(pvField);
+            isConnected = false;
             process = processAccess.get();
             // split pvname into record name and rest of name
             String name = pvnameAccess.get();
@@ -1008,12 +1008,6 @@ public class CASupportFactory {
             }
             setSupportState(SupportState.readyForStart);
         }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.process.Support#setField(org.epics.ioc.db.DBField)
-         */
-        public void setField(DBField dbField) {
-            valueDBField = dbField;
-        }       
         /* (non-Javadoc)
          * @see org.epics.ioc.process.AbstractSupport#process(org.epics.ioc.process.SupportProcessRequester)
          */
@@ -1425,12 +1419,6 @@ public class CASupportFactory {
             supportProcessRequester.supportProcessDone(RequestResult.success);
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.process.Support#setField(org.epics.ioc.db.DBField)
-         */
-        public void setField(DBField dbField) {
-            // nothing to do
-        }
-        /* (non-Javadoc)
          * @see org.epics.ioc.process.RecordProcessRequester#recordProcessComplete()
          */
         public void recordProcessComplete() {
@@ -1620,13 +1608,19 @@ public class CASupportFactory {
          */
         public void start() {
             if(!super.checkSupportState(SupportState.readyForStart,monitorSupportName)) return;
-            if(valueDBField==null) {
-                pvStructure.message(
-                        "Logic Error: MonitorSupport.start called before setField",
-                        MessageType.fatalError);
-                setSupportState(SupportState.zombie);
+            DBField dbParent = dbStructure.getParent();
+            PVField pvField = null;
+            while(dbParent!=null) {
+                PVField pvParent = dbParent.getPVField();
+                pvField = pvParent.findProperty("value");
+                if(pvField!=null) break;
+                dbParent = dbParent.getParent();
+            }
+            if(pvField==null) {
+                pvStructure.message("value field not found", MessageType.error);
                 return;
-            }           
+            }
+            valueDBField = dbStructure.getDBRecord().findDBField(pvField);
             // split pvname into record name and rest of name
             String[]pvname = periodPattern.split(pvnameAccess.get(),2);
             recordName = pvname[0];
@@ -1694,12 +1688,6 @@ public class CASupportFactory {
             if(channel!=null) channel.destroy();
             channel = null;
             setSupportState(SupportState.readyForStart);
-        }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.process.Support#setField(org.epics.ioc.db.DBField)
-         */
-        public void setField(DBField dbField) {
-            valueDBField = dbField;
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.process.Support#process(org.epics.ioc.process.SupportListener)

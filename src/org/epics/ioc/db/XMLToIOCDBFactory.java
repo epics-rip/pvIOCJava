@@ -350,14 +350,20 @@ public class XMLToIOCDBFactory {
                 }
                 break;
             case array:
+                if(arrayState.valueActive && qName.equals("value")) {
+                    endArrayElement(qName);
+                    break;
+                }
                 if(!arrayState.valueActive && qName.equals(arrayState.fieldName)) {
                     state = arrayState.prevState;
                     if(state==State.array) {
                         arrayState = arrayStack.pop();
                     }
-                } else {
-                    endArrayElement(qName);
+                    break;
                 }
+                iocxmlReader.message(
+                        "endElement error: expected value or " + arrayState.fieldName,
+                        MessageType.error);
                 break;
             }
         }
@@ -480,10 +486,6 @@ public class XMLToIOCDBFactory {
             value = attributes.get("capacityMutable");
             if(value!=null) {
                 pvArray.setCapacityMutable(Boolean.parseBoolean(value));
-            } else {
-                if(pvArray.getCapacity()>0) {
-                    pvArray.setCapacityMutable(false);
-                }
             }
             value = attributes.get("length");
             if(value!=null) pvArray.setLength(Integer.parseInt(value));
@@ -596,11 +598,13 @@ public class XMLToIOCDBFactory {
                     if(createName!=null) {
                         field.setCreateName(createName);
                     }
+                    arrayState.valueActive = false;
                     arrayStack.push(arrayState);
                     arrayState = new ArrayState();
                     arrayState.prevState = state;
                     arrayState.pvArray = arrayData[0];
                     arrayState.fieldName = fieldName;
+                    arrayState.valueActive = false;
                     state = State.array;
                     arrayStart(attributes);
                     return;

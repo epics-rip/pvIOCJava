@@ -15,7 +15,7 @@ import org.epics.ioc.util.*;
  * @author mrk
  *
  */
-public class DelaySupportFactory {
+public class DelayFactory {
     
     public static Support create(DBStructure dbStructure) {
         PVStructure pvStructure = dbStructure.getPVStructure();
@@ -24,13 +24,13 @@ public class DelaySupportFactory {
             pvStructure.message("does not have support " + supportName,MessageType.error);
             return null;
         }
-        return new DelaySupport(dbStructure);
+        return new DelayImpl(dbStructure);
     }
     
     private static Timer timer = new Timer("delaySupportTimer");
-    private static String supportName = "delaySupport";
+    private static String supportName = "delay";
     
-    private static class DelaySupport extends AbstractSupport implements ProcessContinueRequester
+    private static class DelayImpl extends AbstractSupport implements ProcessContinueRequester
     {       
         private TimerTask timerTask = null;
         private DBStructure dbStructure = null;
@@ -44,7 +44,7 @@ public class DelaySupportFactory {
         private long delay = 0;
         private SupportProcessRequester supportProcessRequester = null;
 
-        private DelaySupport(DBStructure dbStructure) {
+        private DelayImpl(DBStructure dbStructure) {
             super(supportName,dbStructure);
             this.dbStructure = dbStructure;
         }
@@ -113,13 +113,7 @@ public class DelaySupportFactory {
         public void processContinue() {
             supportProcessRequester.supportProcessDone(RequestResult.success);
         }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.process.Support#setField(org.epics.ioc.pvAccess.PVData)
-         */
-        public void setField(DBField dbField) {
-            // nothing to do
-        }
-
+        
         private void delayDone() {
             recordProcess.processContinue(this);
         }
@@ -127,17 +121,17 @@ public class DelaySupportFactory {
     }
     
     private static class DelayTask extends TimerTask {
-        DelaySupport delaySupport;
+        DelayImpl delayImpl;
         
-        private DelayTask(DelaySupport delaySupport) {
-            this.delaySupport = delaySupport;
+        private DelayTask(DelayImpl delayImpl) {
+            this.delayImpl = delayImpl;
         }
 
         /* (non-Javadoc)
          * @see java.lang.Runnable#run()
          */
         public void run() {
-            delaySupport.delayDone();
+            delayImpl.delayDone();
         }
     }
 }

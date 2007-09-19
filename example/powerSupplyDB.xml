@@ -9,5 +9,4 @@
         <input supportName = "powerSupplyCurrent" />
     </current>
 </record>
-S
 </IOCDatabase>

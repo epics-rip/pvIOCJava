@@ -60,12 +60,21 @@ public class BooleanAlarmFactory {
         public void initialize() {
             SupportState supportState = SupportState.readyForStart;
             if(!super.checkSupportState(SupportState.readyForInitialize,supportName)) return;
-            noop = false;
-            if(pvValue==null) {
-                super.message("setField was not called with a boolean field", MessageType.error);
-                noop = true;
+            DBField dbParent = dbStructure.getParent();
+            PVField pvParent = dbParent.getPVField();
+            PVField pvField = pvParent.findProperty("value");
+            if(pvField==null) {
+                pvStructure.message("value field not found", MessageType.error);
                 return;
             }
+            DBField valueDBField = dbStructure.getDBRecord().findDBField(pvField);
+            pvField = valueDBField.getPVField();
+            if(pvField.getField().getType()!=Type.pvBoolean) {
+                super.message("field type is not boolean", MessageType.error);
+                return;
+            }
+            pvValue = (PVBoolean)pvField;
+            noop = false;
             alarmSupport = AlarmFactory.findAlarmSupport(dbStructure);
             if(alarmSupport==null) {
                 super.message("no alarmSupport", MessageType.error);
@@ -171,16 +180,5 @@ public class BooleanAlarmFactory {
             }
             supportProcessRequester.supportProcessDone(RequestResult.success);
         }                
-        /* (non-Javadoc)
-         * @see org.epics.ioc.process.StructureSupport#setField(org.epics.ioc.db.DBField)
-         */
-        public void setField(DBField dbField) {
-            PVField pvField = dbField.getPVField();
-            if(pvField.getField().getType()!=Type.pvBoolean) {
-                super.message("setField: field type is not boolean", MessageType.error);
-                return;
-            }
-            pvValue = (PVBoolean)pvField;
-        }
     }
 }

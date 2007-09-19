@@ -1,0 +1,15 @@
+<?xml version="1.0" ?>
+<DBDefinition>
+
+<structure name = "allTypes" supportName = "generic" >
+  <include href = "allTypesCommon.xml" />
+</structure>
+
+<recordType name = "allTypes" supportName = "generic" >
+  <include href = "common.xml" />
+  
+  <include href = "allTypesCommon.xml" />
+  <field name = "allTypes" type = "structure" structureName = "allTypes" />
+</recordType>
+
+</DBDefinition>

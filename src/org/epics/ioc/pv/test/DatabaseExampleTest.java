@@ -764,7 +764,6 @@ public class DatabaseExampleTest extends TestCase {
         assertEquals(retLength,readback.length);
         assertEquals(readback[0],arrayValue[0]);
         assertEquals(readback[1],arrayValue[1]);
-        assertEquals(readback[2],arrayValue[2]);
         System.out.printf("%s%nvalue %s%n",
                 array.toString(),
                 stringArrayData.toString());

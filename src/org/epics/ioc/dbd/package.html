@@ -11,16 +11,16 @@
 
 <h1 style="text-align: center">EPICS JavaIoc: Database Definition <br />
 package: org.epics.ioc.dbd<br />
-2007.08.28</h1>
+2007.09.18</h1>
 <hr />
 CONTENTS: 
 
 <div class="toc">
 <ul>
   <li><a href="#Overview">Overview</a></li>
-  <li><a href="#Database">Database Definition Syntax</a>
+  <li><a href="#Database">Database Definition Syntax</a> 
     <ul>
-      <li><a href="#General">General Statements</a>
+      <li><a href="#General">General Statements</a> 
         <ul>
           <li><a href="#namespace">namespace</a></li>
           <li><a href="#Include">Include</a></li>
@@ -28,7 +28,7 @@ CONTENTS:
         </ul>
       </li>
       <li><a href="#Structure">Structure and Record Type</a></li>
-      <li><a href="#field">field</a>
+      <li><a href="#field">field</a> 
         <ul>
           <li><a href="#Primitive">Primitive Types</a></li>
           <li><a href="#string">string</a></li>
@@ -37,26 +37,25 @@ CONTENTS:
         </ul>
       </li>
       <li><a href="#field1">field attribute</a></li>
-      <li><a href="#property">property</a></li>
       <li><a href="#Create">Create</a></li>
       <li><a href="#Support">Support</a></li>
     </ul>
   </li>
   <li><a href="#Overview1">Overview of Java Support For Database
     Definition</a></li>
-  <li><a href="#Introspect">Introspection of Database Definitions</a>
+  <li><a href="#Introspect">Introspection of Database Definitions</a> 
     <ul>
       <li><a href="#Structure1">Structure and RecordType</a></li>
-      <li><a href="#Create1">Create and SupportSupport</a></li>
+      <li><a href="#Create1">Create and Support</a></li>
       <li><a href="#Support1">Support</a></li>
     </ul>
   </li>
-  <li><a href="#Accessing">Accessing Database Definitions</a>
+  <li><a href="#Accessing">Accessing Database Definitions</a> 
     <ul>
       <li><a href="#DBD">DBD</a></li>
     </ul>
   </li>
-  <li><a href="#Creating">Creating Database Definitions</a>
+  <li><a href="#Creating">Creating Database Definitions</a> 
     <ul>
       <li><a href="#DBDFactory">DBDFactory</a></li>
       <li><a href="#XMLToDBDFa">XMLToDBDFactory</a></li>
@@ -75,8 +74,8 @@ database has a set of "smart" records. Each record is an instance on a record
 of a particular type.</p>
 
 <p>This package describes support for Database Definitions, i.e. support for
-the following database components: menu, structure, recordType, support, and
-linkSupport. Included are factories for creating multiple DBD (Database
+the following database components: menu, structure, recordType, create, and
+support, Included are factories for creating multiple DBD (Database
 Definition) instances. A DBD provides reflection interfaces for all database
 components it contains. db, which implements a javaIOC database, uses a DBD
 to implement database reflection.</p>
@@ -136,7 +135,7 @@ is:
 
 <h4 id="Macro">Macro Substitution</h4>
 
-<p>Macro substitution is not very usefull for Database Definition but it is
+<p>Macro substitution might not be useful for Database Definition but it is
 supported just like for Database Instance files. See package org.epics.ioc.db
 for details about how macro substitution works.</p>
 
@@ -148,24 +147,13 @@ field of a record.</p>
 
 <p>A structure is defined as follows:</p>
 <pre>&lt;structure name = "structureName" supportName = "supportName" &gt;
-     &lt;property name = "propertyName" associatedField = "fieldName" /&gt;
-     ...
-     &lt;field name = "fieldName" supportName = "supportName" type = "fieldType" ... &gt;
-         &lt;property name = "propertyName" associatedField = "fieldName" /&gt;
-         ...
-
-    &lt;/field&gt;
+     &lt;field name = "fieldName" supportName = "supportName" type = "fieldType" ... /&gt;
      ...
 &lt;/structure&gt;</pre>
 
 <p>A record type is defined as follows:</p>
 <pre>&lt;recordType name = "recordtypeName" supportName = "supportName" &gt;
-    &lt;property name = "propertyName" associatedField = "fieldName" /&gt;
-    ...
-     &lt;field name = "fieldName"  supportName = "supportName" type = "fieldType" ... &gt;
-         &lt;property name = "propertyName" associatedField = "fieldName" /&gt;
-         ...
-     &lt;/field&gt;
+     &lt;field name = "fieldName"  supportName = "supportName" type = "fieldType" ... /&gt;
      ...
 &lt;/recordType&gt;</pre>
 
@@ -185,9 +173,6 @@ field of a record.</p>
     <dd>See fieldType below.</dd>
   <dt>...</dt>
     <dd>See field attribute below</dd>
-  <dt><span style="font-family: courier">propertyName and
-  associatedField</span></dt>
-    <dd>See property below.</dd>
 </dl>
 
 <h3 id="field">field</h3>
@@ -293,29 +278,6 @@ The following examples show how attributes are defined:
 <br />
 
 
-<h3 id="property">property</h3>
-A structure, recordType, and field can have properties. A property is defined
-as: 
-<pre>    &lt;property name = "name" associatedField = "field name" /&gt;</pre>
-where 
-<dl>
-  <dt style="font-family: courier;">name</dt>
-    <dd>The name of the property</dd>
-  <dt style="font-family: courier;">associatedField</dt>
-    <dd>The name of a field that has the value for the property. It can have
-      one of the following forms: "name", "name.name", "/name", or
-      "/name.name". See package org.epics.ioc.pv for details.</dd>
-</dl>
-
-<p>For example:</p>
-<pre>    &lt;field name = "value" type = "double"&gt;
-        &lt;property name = "status" associatedField = "status" /&gt;
-        &lt;property name = "severity" associatedField = "severity" /&gt;
-        &lt;property name = "timeStamp" associatedField = "timeStamp" /&gt;
-        &lt;property name = "displayCharacteristics" 
-                   associatedField = "displayCharacteristics" /&gt;
-    &lt;/field&gt;</pre>
-
 <h3 id="Create">Create</h3>
 
 <p>Create can be associated with any field of a record instance when it is
@@ -357,7 +319,7 @@ Database Definition</h2>
 <hr />
 
 <p>This following sections describes support for code that accessses Database
-Definitions: menu, structure, recordType, support, and, linkSupport..</p>
+Definitions: structure, recordType, create , and support.</p>
 
 <p>The interfaces support reflection for everything created from Database
 Definitions. The interfaces can be used by tools such as VDCT or on a running
@@ -381,10 +343,10 @@ and the database itself.</p>
 Definitions</h2>
 <hr />
 
-<p>This section describes interfaces for accessing menu, structure,
-recordType, support, and linkSupport, i.e. everything defined in Database
-Definition files except record instances. Reflection for fields of a
-structure or recordType is discussed in the next section.</p>
+<p>This section describes interfaces for accessing structure, recordType,
+create, and support, i.e. everything defined in Database Definition files
+except record instances. Reflection for fields of a structure or recordType
+is discussed in the next section.</p>
 
 <h3 id="Structure1">Structure and RecordType</h3>
 
@@ -407,7 +369,7 @@ structure or recordType is discussed in the next section.</p>
 <p>A shorter way is:</p>
 <pre>    void dumpStructure(DBDStructure structure) {System.out.println(structure.toString);}</pre>
 
-<h3 id="Create1">Create and SupportSupport</h3>
+<h3 id="Create1">Create and Support</h3>
 
 <p>The following interfaces is provided for accessing support.</p>
 <pre>    interface DBDCreate {
@@ -424,8 +386,7 @@ structure or recordType is discussed in the next section.</p>
   <dt style="font-family: courier;">getFactoryName</dt>
     <dd>Get the factory name. This must be the complete java package + method
       name of a Factory that creates support for the field. See package
-      org.epics.ioc.create for details about create and create
-    factories.</dd>
+      org.epics.ioc.create for details about create and create factories.</dd>
 </dl>
 
 <h3 id="Support1">Support</h3>
@@ -464,9 +425,9 @@ addition a number of "convenience" methods are provided.</p>
     DBD getMasterDBD();
     void mergeIntoMaster();
     DBDStructure createStructure(String name,
-        Field[] field,Property[] property,FieldAttribute fieldAttribute);
+        Field[] field,FieldAttribute fieldAttribute);
     DBDRecordType createRecordType(String name,
-        Field[] field,Property[] property,FieldAttribute fieldAttribute);
+        Field[] field,FieldAttribute fieldAttribute);
     DBDCreate createCreate(String createName,String factoryName);
     DBDSupport createSupport(String supportName,String factoryName);
     DBDStructure getStructure(String structureName);

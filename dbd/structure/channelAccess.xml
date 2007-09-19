@@ -48,19 +48,14 @@
 </structure>
 
 <support name = "processSupport"
-  structureName = "processSupport" 
   factoryName = "org.epics.ioc.support.CASupportFactory" />
 <support name = "monitorSupport"
-  structureName = "monitorSupport"
   factoryName = "org.epics.ioc.support.CASupportFactory" />
 <support name = "monitorNotifySupport"
-  structureName = "monitorNotifySupport"
   factoryName = "org.epics.ioc.support.CASupportFactory" />
 <support name = "inputSupport"
-  structureName = "inputSupport"
   factoryName = "org.epics.ioc.support.CASupportFactory" />
 <support name = "outputSupport"
-  structureName = "outputSupport"
   factoryName = "org.epics.ioc.support.CASupportFactory" />
 
 </DBDefinition>

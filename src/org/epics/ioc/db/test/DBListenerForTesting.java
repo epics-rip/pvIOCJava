@@ -43,13 +43,14 @@ public class DBListenerForTesting implements DBListener{
             }
         }
         actualFieldName = pvField.getField().getFieldName();
-        fullName = pvField.getPVRecord().getRecordName() + pvField.getFullFieldName();
+        fullName = pvField.getFullName();
         listener = dbRecord.createRecordListener(this);
         DBField dbField = dbRecord.findDBField(pvField);
         dbField.addListener(listener);
         if(monitorProperties) {
             PVField[] pvFields = pvField.getPropertys();
-            for(PVField pvf : pvFields) {
+            if(pvFields!=null) for(PVField pvf : pvFields) {
+                if(pvf.getFullName().equals(fullName)) continue;
                 DBField dbf = dbRecord.findDBField(pvf);
                 dbf.addListener(listener);
             }
@@ -113,7 +114,7 @@ public class DBListenerForTesting implements DBListener{
             System.out.println(common + dbField.toString(1));
             return;
         }
-        String name = pvField.getPVRecord().getRecordName() + pvField.getFullFieldName();
+        String name = pvField.getPVRecord().getRecordName() + "." + pvField.getFullFieldName();
         if(!name.equals(fullName)) {
             System.out.printf("%s%s NOT_EQUAL %s%n",common,name,fullName);
         }
@@ -141,9 +142,7 @@ public class DBListenerForTesting implements DBListener{
     public void dataPut(DBField requested, DBField dbField) {
         PVField pvRequested = requested.getPVField();
         PVField pvField = dbField.getPVField();
-        String structureName = 
-            pvRequested.getPVRecord().getRecordName()
-            + pvRequested.getFullFieldName();
+        String structureName = pvRequested.getFullName();
         String common = putCommon(structureName +" dataPut to field " + pvField.getFullFieldName());
         System.out.printf("%s    = %s%n",common,pvField.toString(2));
     }       

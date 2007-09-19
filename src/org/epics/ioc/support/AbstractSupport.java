@@ -97,12 +97,6 @@ public abstract class AbstractSupport implements Support {
     public void process(SupportProcessRequester supportProcessRequester) {
         supportProcessRequester.supportProcessDone(RequestResult.success);
     } 
-    /* (non-Javadoc)
-     * @see org.epics.ioc.support.Support#setField(org.epics.ioc.db.DBField)
-     */
-    public void setField(DBField dbField) {
-        // nothing to do
-    }
     /**
      * This must be called whenever the supports changes state.
      * @param state The new state.

@@ -1616,7 +1616,7 @@ public class PDRVSupportFactory {
         public void queueCallback() {
             Status status = float64.read(user);
             if(status==Status.success) value = user.getDouble();
-            deviceTrace.print(Trace.SUPPORT, "%s value = %d", fullName,value);
+            deviceTrace.print(Trace.SUPPORT, "%s value = %f", fullName,value);
         }
     }
     
@@ -1891,7 +1891,7 @@ public class PDRVSupportFactory {
          * @see org.epics.ioc.pdrv.support.AbstractPDRVLinkSupport#queueCallback()
          */
         public void queueCallback() {
-            deviceTrace.print(Trace.SUPPORT, "%s value = %d", fullName,value);
+            deviceTrace.print(Trace.SUPPORT, "%s value = %f", fullName,value);
             status = float64.write(user, value);
         }
     }

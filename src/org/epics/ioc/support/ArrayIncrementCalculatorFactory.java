@@ -27,6 +27,8 @@ public class ArrayIncrementCalculatorFactory {
         private static Convert convert = ConvertFactory.getConvert();
         private static FieldCreate fieldCreate = FieldFactory.getFieldCreate();
         private static PVDataCreate pvDataCreate = PVDataFactory.getPVDataCreate();
+        
+        private DBStructure dbStructure;
         private PVStructure pvStructure;
         private DBField valueDBField;
         private PVArray valuePVField= null;
@@ -35,15 +37,32 @@ public class ArrayIncrementCalculatorFactory {
 
         private ArrayIncrementCalculatorImpl(DBStructure dbStructure) {
             super(supportName,dbStructure);
+            this.dbStructure = dbStructure;
             pvStructure = dbStructure.getPVStructure();
             Array array = fieldCreate.createArray("private", Type.pvDouble);
             pvDoubleArray = (PVDoubleArray)pvDataCreate.createPVArray(pvStructure, array, 0, true);
+            
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.process.AbstractSupport#initialize()
          */
         public void initialize() {
             if(!super.checkSupportState(SupportState.readyForInitialize,supportName)) return;
+            DBField dbParent = dbStructure.getParent();
+            PVField pvParent = dbParent.getPVField();
+            PVField pvField = pvParent.findProperty("value");
+            if(pvField==null) {
+                pvStructure.message("value field not found", MessageType.error);
+                return;
+            }
+            Field field = pvField.getField();
+            Type type = field.getType();
+            if(type!=Type.pvArray) {
+                super.message(" field must be an array", MessageType.error);
+                return;
+            }
+            valueDBField = dbStructure.getDBRecord().findDBField(pvField);
+            valuePVField = (PVArray)pvField;
             setSupportState(SupportState.readyForStart);
         }
         /* (non-Javadoc)
@@ -60,13 +79,6 @@ public class ArrayIncrementCalculatorFactory {
             convert.copyArray(pvDoubleArray, 0, valuePVField, 0, length);
             valueDBField.postPut();
             supportProcessRequester.supportProcessDone(RequestResult.success);
-        }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.process.LinkSupport#setField(org.epics.ioc.pvAccess.PVData)
-         */
-        public void setField(DBField dbField) {
-            valueDBField = dbField;
-            valuePVField = (PVArray)dbField.getPVField();
         }
 
         /* (non-Javadoc)

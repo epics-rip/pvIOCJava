@@ -152,7 +152,7 @@
     <scan>
         <type><choice>event</choice></type>
         <eventName>eventOne</eventName>
-    <priority>middle</priority>
+    <priority><choice>middle</choice></priority>
     </scan>
 </record>
 

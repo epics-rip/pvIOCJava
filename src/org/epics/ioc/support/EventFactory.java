@@ -53,15 +53,19 @@ public class EventFactory {
          * @see org.epics.ioc.process.Support#initialize()
          */
         public void initialize() {
-            if(pvEventName==null) {
-                PVField pvField = dbField.getPVField();
-                if(pvField.getField().getType()!=Type.pvString) {
-                    super.message("field " + pvField.getFullName()
-                        + " is not a string",MessageType.error);
-                    return;
-                }
-                pvEventName = (PVString)pvField;
+            DBField dbParent = dbField.getParent();
+            PVField pvParent = dbParent.getPVField();
+            PVField pvField = pvParent.findProperty("value");
+            if(pvField==null) {
+                pvParent.message("value field not found", MessageType.error);
+                return;
             }
+            DBField valueDBField = dbField.getDBRecord().findDBField(pvField);
+            pvField = valueDBField.getPVField();
+            if(pvField.getField().getType()!=Type.pvString) {
+                super.message("illegal field type. Must be strinng", MessageType.error);
+            }
+            pvEventName = (PVString)pvField;
             supportState = SupportState.readyForStart;
             setSupportState(supportState);
         }
@@ -118,16 +122,6 @@ public class EventFactory {
             }
             if(eventAnnounce!=null) eventAnnounce.announce();
             supportProcessRequester.supportProcessDone(RequestResult.success);
-        }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.support.AbstractSupport#setField(org.epics.ioc.db.DBField)
-         */
-        public void setField(DBField dbField) {
-            PVField pvField = dbField.getPVField();
-            if(pvField.getField().getType()!=Type.pvString) {
-                super.message("illegal field type. Must be strinng", MessageType.error);
-            }
-            pvEventName = (PVString)pvField;
         }
     }
 }

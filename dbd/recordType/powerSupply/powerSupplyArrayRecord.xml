@@ -1,0 +1,15 @@
+<?xml version="1.0" ?>
+<DBDefinition>
+
+<structure name = "powerSupplyArray" supportName = "generic" >
+  <include href = "powerSupplyArrayCommon.xml" />
+</structure>
+
+<recordType name = "powerSupplyArray" supportName = "generic" >
+  <include href = "common.xml" />
+  <include href = "powerSupplyArrayCommon.xml" />
+  <field name = "supportArray" type = "array"
+     elementType = "structure" supportName = "supportArray" />
+</recordType>
+   
+</DBDefinition>

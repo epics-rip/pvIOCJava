@@ -3,14 +3,24 @@
 
 <record name = "syncBooleanDriver" type = "portCreate">
     <factoryName>org.epics.ioc.pdrv.testDriver.UInt32DigitalDriverFactory</factoryName>
-    <portName>syncUInt32DigitalDriver</portName>
+    <portName>syncBooleanDigitalDriver</portName>
     <driverParameters structureName = "uint32DigitalDriver" >
         <delay>0.0</delay>
         <numberRegisters>2</numberRegisters>
     </driverParameters>
 </record>
 
+<record name = "syncBooleanDriverControl" type = "portDeviceControl" >
+<!--
+    <portDevice>syncBooleanDigitalDriver[0]</portDevice>
+    <traceMask>0x0fff</traceMask>
+    <traceIOMask>0x0fff</traceIOMask>
+-->
+</record>
+
 <record name = "syncBooleanCounter" type = "calcDouble">
+    <alarm structureName = "alarm" />
+    <timeStamp structureName = "timeStamp" />
     <calcArgArray>
         <value structureName = "calcDoubleArg">
             <value>0</value>
@@ -42,8 +52,10 @@
 </record>
 
 <record name = "syncBooleanOut" type = "int">
+    <alarm structureName = "alarm" />
+    <timeStamp structureName = "timeStamp" />
     <output supportName = "pdrvUInt32DigitalOutput" structureName = "pdrvSupport">
-        <portName>syncUInt32DigitalDriver</portName>
+        <portName>syncBooleanDigitalDriver</portName>
         <addr>0</addr>
         <mask>32767</mask>
         <timeout>.2</timeout>
@@ -72,8 +84,10 @@
 </record>
 
 <record name = "syncBooleanIn1" type = "boolean">
+    <alarm structureName = "alarm" />
+    <timeStamp structureName = "timeStamp" />
     <input supportName = "pdrvUInt32DigitalInput" structureName = "pdrvSupport">
-        <portName>syncUInt32DigitalDriver</portName>
+        <portName>syncBooleanDigitalDriver</portName>
         <addr>0</addr>
         <mask>0x1</mask>
         <timeout>.2</timeout>
@@ -86,17 +100,26 @@
 </record>
 
 <record name = "syncBooleanIn2" type = "boolean">
+    <alarm structureName = "alarm" />
+    <timeStamp structureName = "timeStamp" />
     <input supportName = "pdrvUInt32DigitalInput" structureName = "pdrvSupport">
-        <portName>syncUInt32DigitalDriver</portName>
+        <portName>syncBooleanDigitalDriver</portName>
         <addr>0</addr>
         <mask>0x2</mask>
         <timeout>.2</timeout>
     </input>
+    <valueAlarm structureName = "booleanAlarm">
+      <active>true</active>
+      <changeStateAlarm><choice>minor</choice></changeStateAlarm>
+      <trueAlarm><choice>major</choice></trueAlarm>
+    </valueAlarm>
 </record>
 
 <record name = "syncBooleanIn3" type = "boolean">
+    <alarm structureName = "alarm" />
+    <timeStamp structureName = "timeStamp" />
     <input supportName = "pdrvUInt32DigitalInput" structureName = "pdrvSupport">
-        <portName>syncUInt32DigitalDriver</portName>
+        <portName>syncBooleanDigitalDriver</portName>
         <addr>0</addr>
         <mask>0x4</mask>
         <timeout>.2</timeout>
@@ -110,14 +133,24 @@
 
 <record name = "asynBooleanDriver" type = "portCreate">
     <factoryName>org.epics.ioc.pdrv.testDriver.UInt32DigitalDriverFactory</factoryName>
-    <portName>asynUInt32DigitalDriver</portName>
+    <portName>asynBooleanDigitalDriver</portName>
     <driverParameters structureName = "uint32DigitalDriver" >
         <delay>0.1</delay>
         <numberRegisters>2</numberRegisters>
     </driverParameters>
 </record>
 
+<record name = "asynBooleanDriverControl" type = "portDeviceControl" >
+<!--
+    <portDevice>syncBooleanDigitalDriver[0]</portDevice>
+    <traceMask>0x0fff</traceMask>
+    <traceIOMask>0x0fff</traceIOMask>
+-->
+</record>
+
 <record name = "asynBooleanCounter" type = "calcDouble">
+    <alarm structureName = "alarm" />
+    <timeStamp structureName = "timeStamp" />
     <calcArgArray>
         <value structureName = "calcDoubleArg">
             <value>0</value>
@@ -149,8 +182,10 @@
 </record>
 
 <record name = "asynBooleanOut" type = "int">
+    <alarm structureName = "alarm" />
+    <timeStamp structureName = "timeStamp" />
     <output supportName = "pdrvUInt32DigitalOutput" structureName = "pdrvSupport">
-        <portName>asynUInt32DigitalDriver</portName>
+        <portName>asynBooleanDigitalDriver</portName>
         <addr>0</addr>
         <mask>32767</mask>
         <timeout>.2</timeout>
@@ -180,29 +215,50 @@
 </record>
 
 <record name = "asynBooleanIn1" type = "boolean">
+    <alarm structureName = "alarm" />
+    <timeStamp structureName = "timeStamp" />
     <input supportName = "pdrvUInt32DigitalInput" structureName = "pdrvSupport">
-        <portName>asynUInt32DigitalDriver</portName>
+        <portName>asynBooleanDigitalDriver</portName>
         <addr>0</addr>
         <mask>0x1</mask>
         <timeout>.2</timeout>
     </input>
+    <valueAlarm structureName = "booleanAlarm">
+      <active>true</active>
+      <changeStateAlarm><choice>minor</choice></changeStateAlarm>
+      <trueAlarm><choice>major</choice></trueAlarm>
+    </valueAlarm>
 </record>
 
 <record name = "asynBooleanIn2" type = "boolean">
+    <alarm structureName = "alarm" />
+    <timeStamp structureName = "timeStamp" />
     <input supportName = "pdrvUInt32DigitalInput" structureName = "pdrvSupport">
-        <portName>asynUInt32DigitalDriver</portName>
+        <portName>asynBooleanDigitalDriver</portName>
         <addr>0</addr>
         <mask>0x2</mask>
         <timeout>.2</timeout>
     </input>
+    <valueAlarm structureName = "booleanAlarm">
+      <active>true</active>
+      <changeStateAlarm><choice>minor</choice></changeStateAlarm>
+      <trueAlarm><choice>major</choice></trueAlarm>
+    </valueAlarm>
 </record>
 <record name = "asynBooleanIn3" type = "boolean">
+    <alarm structureName = "alarm" />
+    <timeStamp structureName = "timeStamp" />
     <input supportName = "pdrvUInt32DigitalInput" structureName = "pdrvSupport">
-        <portName>asynUInt32DigitalDriver</portName>
+        <portName>asynBooleanDigitalDriver</portName>
         <addr>0</addr>
         <mask>0x4</mask>
         <timeout>.2</timeout>
     </input>
+    <valueAlarm structureName = "booleanAlarm">
+      <active>true</active>
+      <changeStateAlarm><choice>minor</choice></changeStateAlarm>
+      <trueAlarm><choice>major</choice></trueAlarm>
+    </valueAlarm>
 </record>
 
 <!--

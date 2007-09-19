@@ -3,9 +3,8 @@
   <field name = "value" type = "structure" structureName = "enumerated" />
   <field name = "alarm" type = "structure"/>
   <field name = "timeStamp" type = "structure" />  
-  <field name = "digitalDef" type = "structure" structureName = "digitalDef"/>
   <field name = "input" type = "structure" />
-  <!-- instance can set structureName = "digitalAlarm" -->
+  <!-- instance can set structureName = "enumeratedAlarm" -->
   <field name = "valueAlarm" type = "structure"/>
   <field name = "output" type = "structure" />
   <!-- instance can set structureName = "enumeratedHistory" -->

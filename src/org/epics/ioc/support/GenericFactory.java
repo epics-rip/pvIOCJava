@@ -36,7 +36,6 @@ public class GenericFactory {
         private static String supportName = "generic";
         private DBStructure dbStructure;
         private PVStructure pvStructure;
-        private DBField valueDBField = null;
         
         private AlarmSupport alarmSupport = null;
         private int numberSupports = 0;
@@ -66,10 +65,6 @@ public class GenericFactory {
                 String fieldName = fields[i].getFieldName();
                 if(fieldName.equals("scan")) continue;
                 if(fieldName.equals("timeStamp")) continue;                   
-                if(fieldName.equals("value") && valueDBField==null) {
-                    valueDBField = dbFields[i];
-
-                }
                 if(fieldName.equals("alarm")) {
                     Support support = dbFields[i].getSupport();
                     if(support!=null && support instanceof AlarmSupport) {
@@ -92,9 +87,6 @@ public class GenericFactory {
                 supports[next++] = support;
             }
             if(alarmSupport!=null) {
-                if(valueDBField!=null) {
-                    alarmSupport.setField(valueDBField);
-                }
                 alarmSupport.initialize();
                 if(alarmSupport.getSupportState()!=SupportState.readyForStart) {
                     return;
@@ -102,9 +94,6 @@ public class GenericFactory {
             }
             for(int i=0; i<supports.length; i++) {
                 Support support = supports[i];
-                if(valueDBField!=null) {
-                    support.setField(valueDBField);
-                }
                 support.initialize();
                 supportState = support.getSupportState();
                 if(supportState!=SupportState.readyForStart) {
@@ -189,12 +178,6 @@ public class GenericFactory {
             }
             nextSupport = 0;
             supports[nextSupport].process(this);
-        }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.support.AbstractSupport#setField(org.epics.ioc.db.DBField)
-         */
-        public void setField(DBField dbField) {
-            valueDBField = dbField;
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.process.SupportProcessRequester#supportProcessDone(org.epics.ioc.util.RequestResult)

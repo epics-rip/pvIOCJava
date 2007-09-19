@@ -98,15 +98,7 @@ public class DBDFactory {
          * @see org.epics.ioc.dbd.DBD#createSupport(java.lang.String, java.lang.String)
          */
         public DBDSupport createSupport(String supportName, String factoryName) {
-            return new SupportInstance(supportName,factoryName,null);
-        }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.dbd.DBD#createSupport(java.lang.String, java.lang.String, java.lang.String)
-         */
-        public DBDSupport createSupport(String supportName, String factoryName,
-                String structureName)
-        {
-            return new SupportInstance(supportName,factoryName,structureName);
+            return new SupportInstance(supportName,factoryName);
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.dbd.DBD#createRecordType(java.lang.String, org.epics.ioc.pv.Field[], org.epics.ioc.pv.Property[], org.epics.ioc.pv.FieldAttribute)
@@ -603,13 +595,11 @@ public class DBDFactory {
     {
         private String supportName;
         private String factoryName;
-        private String structureName = null;
 
-        private SupportInstance(String supportName, String factoryName,String structureName)
+        private SupportInstance(String supportName, String factoryName)
         {
             this.supportName = supportName;
             this.factoryName = factoryName;
-            this.structureName = structureName;
         }      
         /* (non-Javadoc)
          * @see org.epics.ioc.dbd.DBDSupport#getSupportName()
@@ -622,9 +612,6 @@ public class DBDFactory {
          */
         public String getFactoryName() {
             return factoryName;
-        }
-        public String getStructureName() {
-            return structureName;
         }
         /* (non-Javadoc)
          * @see java.lang.Object#toString()
@@ -644,9 +631,6 @@ public class DBDFactory {
             builder.append(String.format(
                     "supportName %s factoryName %s",
                     supportName,factoryName));
-            if(structureName!=null) {
-                builder.append(" structureName " + structureName);
-            }
             return builder.toString();
         }
     }

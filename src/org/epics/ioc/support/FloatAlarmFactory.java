@@ -66,12 +66,21 @@ public class FloatAlarmFactory {
         public void initialize() {
             if(!super.checkSupportState(SupportState.readyForInitialize,supportName)) return;
             SupportState supportState = SupportState.readyForStart;
-            noop = false;
-            if(pvValue==null) {
-                super.message("setField was not called with a float field", MessageType.error);
-                noop = true;
+            DBField dbParent = dbStructure.getParent();
+            PVField pvParent = dbParent.getPVField();
+            PVField pvField = pvParent.findProperty("value");
+            if(pvField==null) {
+                pvStructure.message("value field not found", MessageType.error);
                 return;
             }
+            DBField valueDBField = dbStructure.getDBRecord().findDBField(pvField);
+            pvField = valueDBField.getPVField();
+            if(pvField.getField().getType()!=Type.pvFloat) {
+                super.message(" field type is not float", MessageType.error);
+                return;
+            }
+            pvValue = (PVFloat)pvField;
+            noop = false;
             alarmSupport = AlarmFactory.findAlarmSupport(dbStructure);
             if(alarmSupport==null) {
                 super.message("no alarmSupport", MessageType.error);
@@ -186,17 +195,6 @@ public class FloatAlarmFactory {
             if(!noop && pvActive.get()) checkAlarm();
             supportProcessRequester.supportProcessDone(RequestResult.success);
         }                
-        /* (non-Javadoc)
-         * @see org.epics.ioc.process.Support#setField(org.epics.ioc.db.DBField)
-         */
-        public void setField(DBField dbField) {
-            PVField pvField = dbField.getPVField();
-            if(pvField.getField().getType()!=Type.pvFloat) {
-                super.message("setField: field type is not float", MessageType.error);
-                return;
-            }
-            pvValue = (PVFloat)pvField;
-        }
 
         private void checkAlarm() {
             boolean active = pvActive.get();

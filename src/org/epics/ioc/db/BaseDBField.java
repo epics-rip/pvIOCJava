@@ -102,26 +102,6 @@ public class BaseDBField implements DBField{
         if(dbd==null) return "DBD was not set";
         DBDSupport dbdSupport = dbd.getSupport(name);
         if(dbdSupport==null) return "support " + name + " not defined";
-        Type type = pvField.getField().getType();
-        if(type==Type.pvStructure) {
-            String structureName = dbdSupport.getStructureName();
-            if(structureName!=null) {
-                DBDStructure dbdStructure= dbd.getStructure(structureName);        
-                if(dbdStructure==null) {
-                    return "structure " + structureName
-                    + " for support " + name
-                    + " does not exist";
-                }
-                FieldCreate fieldCreate = FieldFactory.getFieldCreate();
-                Field[] fields = dbdStructure.getFields();
-                Structure structure = fieldCreate.createStructure(
-                        pvField.getField().getFieldName(),
-                        dbdStructure.getStructureName(),
-                        fields);
-                PVDataCreate pvDataCreate = PVDataFactory.getPVDataCreate();
-                pvField = pvDataCreate.createPVField(parent.getPVField(), structure);
-            }
-        }
         pvField.setSupportName(name);
         return null;
     }

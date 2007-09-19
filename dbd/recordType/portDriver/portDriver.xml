@@ -15,7 +15,7 @@
   <field name = "portDevice" type = "string" />
   <field name = "connect" type = "boolean" />
   <field name = "enable" type = "boolean"  />
-  <field name = "autoConnect" type = "boolean" />
+  <field name = "autoConnect" type = "boolean" default = "true"/>
   <field name = "traceMask" type = "int" />
   <field name = "traceIOMask" type = "int" />
   <field name = "report" type = "int" />

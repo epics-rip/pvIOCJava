@@ -1,7 +1,7 @@
 <?xml version="1.0" ?>
 <DBDefinition>
   <field name = "value" type = "double" />
-  <field name = "incremental" type = "structure"
+  <field name = "desired" type = "structure"
       structureName = "incrementalDouble" supportName = "incremental" />
   <field name = "alarm" type = "structure"/>
   <field name = "timeStamp" type = "structure" />  

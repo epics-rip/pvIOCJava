@@ -79,8 +79,8 @@ public class BaseDBNonScalarArray extends BaseDBField implements DBNonScalarArra
                 if(elementArray==null) {
                     elementDBFields[i] = null;
                 } else {
-                    if(((Array)elementArray.getField()).getElementType().isScalar()) {
-                        elementDBFields[i] = new BaseDBField(this,dbRecord,pvArray);
+                    if(elementArray.getArray().getElementType().isScalar()) {
+                        elementDBFields[i] = new BaseDBField(this,dbRecord,elementArray);
                     } else {
                         elementDBFields[i] = new BaseDBNonScalarArray(this,dbRecord,elementArray);
                     }

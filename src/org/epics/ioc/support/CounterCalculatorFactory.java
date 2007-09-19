@@ -24,6 +24,7 @@ public class CounterCalculatorFactory {
     
     private static class CounterCalculatorImpl extends AbstractSupport implements CalculatorSupport
     {
+        private DBStructure dbStructure;
         private PVStructure pvStructure;
         private CalcArgArraySupport calcArgArraySupport = null;
         private DBField valueDBField;
@@ -34,6 +35,7 @@ public class CounterCalculatorFactory {
 
         private CounterCalculatorImpl(DBStructure dbStructure) {
             super(supportName,dbStructure);
+            this.dbStructure = dbStructure;
             pvStructure = dbStructure.getPVStructure();
         }
         /* (non-Javadoc)
@@ -41,11 +43,16 @@ public class CounterCalculatorFactory {
          */
         public void initialize() {
             if(!super.checkSupportState(SupportState.readyForInitialize,supportName)) return;
-            if(valuePVField==null) {
-                pvStructure.message("setField was not called", MessageType.error);
+            DBField dbParent = dbStructure.getParent();
+            PVField pvParent = dbParent.getPVField();
+            PVField pvField = pvParent.findProperty("value");
+            if(pvField==null) {
+                pvStructure.message("value field not found", MessageType.error);
                 return;
             }
-            PVField pvField = calcArgArraySupport.getPVField("min");
+            valueDBField = dbStructure.getDBRecord().findDBField(pvField);
+            valuePVField = (PVDouble)valueDBField.getPVField();
+            pvField = calcArgArraySupport.getPVField("min");
             if(pvField==null) {
                 pvStructure.message("field min not found", MessageType.error);
                 return;
@@ -97,14 +104,6 @@ public class CounterCalculatorFactory {
             valueDBField.postPut();
             supportProcessRequester.supportProcessDone(RequestResult.success);
         }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.process.Support#setField(org.epics.ioc.pvAccess.PVData)
-         */
-        public void setField(DBField dbField) {
-            valueDBField = dbField;
-            valuePVField = (PVDouble)dbField.getPVField();
-        }
-
         /* (non-Javadoc)
          * @see org.epics.ioc.recordSupport.CalculatorSupport#setCalcArgSupport(org.epics.ioc.recordSupport.CalcArgArraySupport)
          */

@@ -200,7 +200,7 @@ public abstract class AbstractPVField implements PVField{
                     int offset = data.offset;
                     if(n<1 || arrayArray[offset]==null) return null;
                     currentField = (PVField)arrayArray[offset];
-                    if(nextBracket==null) return null;
+                    if(nextBracket==null) break;
                     startBracket = nextBracket.indexOf('[');
                     if(startBracket<0) return null;
                     String arrayIndexString = nextBracket.substring(startBracket+1);
@@ -230,11 +230,12 @@ public abstract class AbstractPVField implements PVField{
         PVField pvField = this;
         boolean skipValue = false;
         Field field = this.getField();
-        if(field.getType()!=Type.pvStructure)  {
-            if(!field.getFieldName().equals("value")) return null;
+        if(field.getFieldName().equals("value")) {
             pvField = this.parent;
             skipValue = true;
         }
+        field = pvField.getField();
+        if(field.getType()!=Type.pvStructure) return null;
         PVStructure pvStructure = (PVStructure)pvField;
         PVField[] pvFields = pvStructure.getFieldPVFields();
         int size = 0;
@@ -367,7 +368,7 @@ public abstract class AbstractPVField implements PVField{
             }
             if(notNullStructure) return pvf;
         }
-        if(!pvField.getField().getFieldName().equals("timeStamp")) return null;
+        if(!name.equals("timeStamp")) return null;
         pvField = pvField.getParent();
         if(pvField==null) return null;
         return findField(pvField,name);

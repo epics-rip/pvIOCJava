@@ -8,7 +8,7 @@
         <type><choice>periodic</choice></type>
         <rate>1.0</rate>
     </scan>
-    <incremental>
+    <desired>
         <value createName = "controlLimit" />
         <rateOfChange>.02</rateOfChange>
         <incremental>true</incremental>
@@ -18,7 +18,7 @@
                 <high>8.0</high>
             </limit>
         </control>
-    </incremental>
+    </desired>
     <output structureName = "linearConvertOutput" >
         <linearConvert>
             <engUnitsLow>0.0</engUnitsLow>

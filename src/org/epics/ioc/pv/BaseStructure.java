@@ -28,7 +28,6 @@ public class BaseStructure extends BaseField implements Structure {
      * @param fieldName The field name.
      * @param structureName The structure name.
      * @param field The array of fields definitions for the fields of the structure.
-     * @param property The fields properties.
      * @param fieldAttribute The fields attributes.
      * @throws IllegalArgumentException if structureName is null;
      */

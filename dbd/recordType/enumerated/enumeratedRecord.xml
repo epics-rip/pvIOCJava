@@ -1,0 +1,16 @@
+<?xml version="1.0" ?>
+<DBDefinition>
+
+
+<structure name = "enumeratedStruvture" supportName = "generic" >
+  <include href = "enumeratedCommon.xml" />
+</structure>
+
+<recordType name = "enumerated" supportName = "generic" >
+  <include href = "common.xml" />
+  <include href = "enumeratedCommon.xml" />
+  <field name = "supportArray" type = "array"
+     elementType = "structure" supportName = "supportArray" />
+</recordType>
+
+</DBDefinition>

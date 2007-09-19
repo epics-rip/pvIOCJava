@@ -28,7 +28,7 @@ public class ListenerTest extends TestCase {
         IOCDB iocdb = IOCDBFactory.create("testIOCDatabase");
         Requester iocRequester = new Listener();
         XMLToDBDFactory.convert(dbd,
-                 "src/org/epics/ioc/db/test/listenerDBD.xml",iocRequester);
+                 "example/exampleDBD.xml",iocRequester);
         
         //System.out.printf("%n%nstructures");
         //Map<String,DBDStructure> structureMap = dbd.getStructureMap();
@@ -45,7 +45,7 @@ public class ListenerTest extends TestCase {
         //System.out.print(dbdRecordType.toString());
         //}
         XMLToIOCDBFactory.convert(dbd,iocdb,
-                 "src/org/epics/ioc/db/test/listenerDB.xml",iocRequester);
+                 "example/exampleDB.xml",iocRequester);
         
 //        System.out.printf("%nrecords%n");
 //        Map<String,DBRecord> recordMap = iocdb.getRecordMap();
@@ -55,45 +55,37 @@ public class ListenerTest extends TestCase {
 //            System.out.print(record.toString());
 //        }
         System.out.printf("%ntest put and listen exampleAi%n");
-        new DBListenerForTesting(iocdb,"exampleAi","value");
-        new DBListenerForTesting(iocdb,"exampleAi","priority");
-        new DBListenerForTesting(iocdb,"exampleAi","input");
-        new DBListenerForTesting(iocdb,"exampleAi",null);
-        new DBListenerForTesting(iocdb,"exampleAi","input.aiRaw.input");
-        testPut(iocdb,"exampleAi","priority",2.0);
-        testPut(iocdb,"exampleAi","rawValue",2.0);
-        testPut(iocdb,"exampleAi","value",5.0);
-        testPut(iocdb,"exampleAi","timeStamp",100.0);
-        testPut(iocdb,"exampleAi","input.aiRaw.input",1.0);
+        new DBListenerForTesting(iocdb,"ai","scan",false,true);
+        new DBListenerForTesting(iocdb,"ai","value",true,true);
+        new DBListenerForTesting(iocdb,"ai","alarm.severity",false,true);
+        new DBListenerForTesting(iocdb,"ai","input.value",true,true);
+        new DBListenerForTesting(iocdb,"ai",null,false,true);
+        testPut(iocdb,"ai","scan.priority.index",2.0);
+        testPut(iocdb,"ai","value",5.0);
+        testPut(iocdb,"ai","input.value",2.0);
+        testPut(iocdb,"ai","timeStamp.secondsPastEpoch",100.0);
         System.out.printf("%ntest put and listen examplePowerSupply%n");
-        new DBListenerForTesting(iocdb,"examplePowerSupply","power");
-        new DBListenerForTesting(iocdb,"examplePowerSupply","current");
-        new DBListenerForTesting(iocdb,"examplePowerSupply","voltage");
-        new DBListenerForTesting(iocdb,"examplePowerSupply","powerSupply");
-        new DBListenerForTesting(iocdb,"examplePowerSupply",null);
-        testPut(iocdb,"examplePowerSupply","current",25.0);
-        testPut(iocdb,"examplePowerSupply","voltage",2.0);
-        testPut(iocdb,"examplePowerSupply","power",50.0);
-        testPut(iocdb,"examplePowerSupply","timeStamp",100.0);
-        System.out.printf("%ntest masterListener examplePowerSupply%n");
-        testPut(iocdb,"examplePowerSupply","powerSupply",0.5);
-        System.out.printf("%ntest put and listen examplePowerSupplyArray%n");
-        new DBListenerForTesting(iocdb,"examplePowerSupplyArray","powerSupply[0].power");
-        new DBListenerForTesting(iocdb,"examplePowerSupplyArray","powerSupply[0].current");
-        new DBListenerForTesting(iocdb,"examplePowerSupplyArray","powerSupply[0].voltage");
-        new DBListenerForTesting(iocdb,"examplePowerSupplyArray","powerSupply[0]");
-        new DBListenerForTesting(iocdb,"examplePowerSupplyArray","powerSupply[1].power");
-        new DBListenerForTesting(iocdb,"examplePowerSupplyArray","powerSupply[1].current");
-        new DBListenerForTesting(iocdb,"examplePowerSupplyArray","powerSupply[1].voltage");
-        new DBListenerForTesting(iocdb,"examplePowerSupplyArray","powerSupply[1]");
-        new DBListenerForTesting(iocdb,"examplePowerSupplyArray",null);
-        testPut(iocdb,"examplePowerSupplyArray","powerSupply[0].current",25.0);
-        testPut(iocdb,"examplePowerSupplyArray","powerSupply[0].voltage",2.0);
-        testPut(iocdb,"examplePowerSupplyArray","powerSupply[0].power",50.0);
-        testPut(iocdb,"examplePowerSupplyArray","powerSupply[1].current",2.50);
-        testPut(iocdb,"examplePowerSupplyArray","powerSupply[1].voltage",1.00);
-        testPut(iocdb,"examplePowerSupplyArray","powerSupply[1].power",2.50);
-        testPut(iocdb,"examplePowerSupplyArray","timeStamp",100.0);
+        new DBListenerForTesting(iocdb,"psSimple","power.value");
+        new DBListenerForTesting(iocdb,"psSimple","current.value");
+        new DBListenerForTesting(iocdb,"psSimple","voltage.value");
+        new DBListenerForTesting(iocdb,"psSimple",null);
+        testPut(iocdb,"psSimple","current.value",25.0);
+        testPut(iocdb,"psSimple","voltage.value",2.0);
+        testPut(iocdb,"psSimple","power.value",50.0);
+        System.out.printf("%ntest put and listen powerSupplyArray%n");
+        new DBListenerForTesting(iocdb,"powerSupplyArray","supply[0].power");
+        new DBListenerForTesting(iocdb,"powerSupplyArray","supply[0].current");
+        new DBListenerForTesting(iocdb,"powerSupplyArray","supply[0].voltage");
+        new DBListenerForTesting(iocdb,"powerSupplyArray","supply[1].power");
+        new DBListenerForTesting(iocdb,"powerSupplyArray","supply[1].current");
+        new DBListenerForTesting(iocdb,"powerSupplyArray","supply[1].voltage");
+        testPut(iocdb,"powerSupplyArray","supply[0].current.value",25.0);
+        testPut(iocdb,"powerSupplyArray","supply[0].voltage.value",2.0);
+        testPut(iocdb,"powerSupplyArray","supply[0].power.value",50.0);
+        testPut(iocdb,"powerSupplyArray","supply[1].current.value",2.50);
+        testPut(iocdb,"powerSupplyArray","supply[1].voltage.value",1.00);
+        testPut(iocdb,"powerSupplyArray","supply[1].power.value",2.50);
+        testPut(iocdb,"powerSupplyArray","timeStamp",100.0);
     }
     
     static void testPut(IOCDB iocdb,String recordName,String fieldName,double value) {

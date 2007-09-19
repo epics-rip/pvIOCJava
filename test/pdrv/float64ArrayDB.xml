@@ -10,7 +10,17 @@
     </driverParameters>
 </record>
 
+<record name = "syncFloat64ArrayDriverControl" type = "portDeviceControl" >
+<!--
+    <portDevice>syncFloat64ArrayDriver[0]</portDevice>
+    <traceMask>0x0fff</traceMask>
+    <traceIOMask>0x0fff</traceIOMask>
+-->
+</record>
+
 <record name = "syncFloat64ArrayIncrementer" type = "calcDoubleArray">
+    <alarm structureName = "alarm" />
+    <timeStamp structureName = "timeStamp" />
     <value capacity = "7">
         <value>0.0 1.0 2.0 3.0 4.0 5.0 6.0</value>
     </value>
@@ -31,6 +41,8 @@
 </record>
 
 <record name = "syncFloat64ArrayOutput" type = "doubleArray" >
+    <alarm structureName = "alarm" />
+    <timeStamp structureName = "timeStamp" />
     <output supportName = "pdrvFloat64ArrayOutput" structureName = "pdrvSupport">
         <portName>syncFloat64ArrayDriver</portName>
         <addr>0</addr>
@@ -46,6 +58,8 @@
     </supportArray>
 </record>
 <record name = "syncFloat64ArrayInput" type = "doubleArray" >
+    <alarm structureName = "alarm" />
+    <timeStamp structureName = "timeStamp" />
     <input supportName = "pdrvFloat64ArrayInput" structureName = "pdrvSupport">
         <portName>syncFloat64ArrayDriver</portName>
         <addr>0</addr>
@@ -54,6 +68,8 @@
     </input>
 </record>
 <record name = "syncFloat64ArrayInputInterrupt" type = "doubleArray" >
+    <alarm structureName = "alarm" />
+    <timeStamp structureName = "timeStamp" />
     <input supportName = "pdrvFloat64ArrayInterruptInput" structureName = "pdrvSupport">
         <portName>syncFloat64ArrayDriver</portName>
         <addr>0</addr>
@@ -71,7 +87,17 @@
     </driverParameters>
 </record>
 
+<record name = "asynFloat64ArrayDriverControl" type = "portDeviceControl" >
+<!--
+    <portDevice>asynFloat64ArrayDriver[0]</portDevice>
+    <traceMask>0x0fff</traceMask>
+    <traceIOMask>0x0fff</traceIOMask>
+-->
+</record>
+
 <record name = "asynFloat64ArrayIncrementer" type = "calcDoubleArray">
+    <alarm structureName = "alarm" />
+    <timeStamp structureName = "timeStamp" />
     <value capacity = "7">
         <value>0.0 1.0 2.0 3.0 4.0 5.0 6.0</value>
     </value>
@@ -92,6 +118,8 @@
 </record>
 
 <record name = "asynFloat64ArrayOutput" type = "doubleArray" >
+    <alarm structureName = "alarm" />
+    <timeStamp structureName = "timeStamp" />
     <output supportName = "pdrvFloat64ArrayOutput" structureName = "pdrvSupport">
         <portName>asynFloat64ArrayDriver</portName>
         <addr>0</addr>
@@ -107,6 +135,8 @@
     </supportArray>
 </record>
 <record name = "asynFloat64ArrayInput" type = "doubleArray" >
+    <alarm structureName = "alarm" />
+    <timeStamp structureName = "timeStamp" />
     <input supportName = "pdrvFloat64ArrayInput" structureName = "pdrvSupport">
         <portName>asynFloat64ArrayDriver</portName>
         <addr>0</addr>
@@ -115,6 +145,8 @@
     </input>
 </record>
 <record name = "asynFloat64ArrayInputInterrupt" type = "doubleArray" >
+    <alarm structureName = "alarm" />
+    <timeStamp structureName = "timeStamp" />
     <input supportName = "pdrvFloat64ArrayInterruptInput" structureName = "pdrvSupport">
         <portName>asynFloat64ArrayDriver</portName>
         <addr>0</addr>

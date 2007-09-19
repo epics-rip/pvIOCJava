@@ -20,9 +20,18 @@ public class ControlLimitFactory {
     /**
      * The create method.
      * @param dbField The field.
-     * It must be a numeric scalar field that has a parent which is structure that has a field named
+     * This assumes a structure of the form:
+     * <pre>
+     * someStructure
+     *     control
+     *         limit
+     *             low
+     *             high
+     *     value
+     * </pre>
+     * value must be a numeric scalar field that has a parent which is structure that has a field named
      * control. The control field must be a structure that has a field named limit.
-     * Field limit field must have two numeric scalar fields named low and high.
+     * The limit field must have two numeric scalar fields named low and high.
      * @return The Create interface.
      */
     public static Create create(DBField dbField) {

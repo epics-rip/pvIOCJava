@@ -22,11 +22,7 @@
 <!-- test for duplicate recordType -->
 
 <recordType name = "aiLinearRecord">
-    <field name = "value" type = "int" >
-        <property name = "status" associatedField = "status" />
-        <property name = "severity" associatedField = "severity" />
-        <property name = "timeStamp" associatedField = ".." />
-    </field>
+    <field name = "value" type = "int" />
     <field name = "status" type = "string" />
     <field name = "severity" type = "structure" structureName = "alarmSeverity" />
     <field name = "input" type = "structure" />

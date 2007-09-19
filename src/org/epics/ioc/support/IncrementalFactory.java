@@ -12,8 +12,13 @@ import org.epics.ioc.util.*;
 
 /**
  * Record that implements incremental outputs.
- * The value field of the structure it supports is the desired value.
- * It puts it's value into the field passed to setField.
+ * It requires the following:
+ * value double
+ *     desired
+ *         value double
+ *         input
+ *         incremental boolean supportName = incremental
+ *         rateOfChange
  * It requires field rateOfChange which must be numeric.
  * It optionally supports the following field incremental
  * If present it must be a boolean.
@@ -24,39 +29,39 @@ import org.epics.ioc.util.*;
 public class IncrementalFactory {
     /**
      * Create the support for the record or structure.
-     * @param dbStructure The struvture or record for which to create support.
+     * @param dbField The field for which to create support. It must have type boolean.
      * @return The support instance.
      */
-    public static Support create(DBStructure dbStructure) {
-        return new IncrementalImpl(dbStructure);
+    public static Support create(DBField dbField) {
+        PVField pvField = dbField.getPVField();
+        if(pvField.getField().getType()!=Type.pvBoolean) {
+            pvField.message("type is not boolean", MessageType.error);
+        }
+        return new IncrementalImpl(dbField);
     }
     
     private static Convert convert = ConvertFactory.getConvert();
     
     static private class IncrementalImpl extends AbstractSupport
-    implements Support, SupportProcessRequester
     {
         private static String supportName = "incremental";
         private DBStructure dbStructure;
         private PVStructure pvStructure;
-        private DBField valueDBField = null;
-        private PVField valuePVField = null;
-        private DBField desiredValueDBField = null;
-        private PVField desiredValuePVField = null;
-        private Support inputSupport = null;
-        private PVBoolean incrementalOutputPVField = null;
-        private PVField rateOfChangePVField = null;
+        private DBField dbValue = null;
+        private PVField pvValue = null;
+        private PVField pvDesiredValue = null;
+        private PVBoolean pvIncremental = null;
+        private PVField pvRateOfChange = null;
         
         private double desiredValue = 0.0;
         private double value = 0.0;
-        private boolean incrementalOutput = true;
+        private boolean incremental = true;
         private double rateOfChange = 0.0;
         
-        private SupportProcessRequester supportProcessRequester = null;
-        
-        private IncrementalImpl(DBStructure dbStructure) {
-            super(supportName,dbStructure);
-            this.dbStructure = dbStructure;
+        private IncrementalImpl(DBField dbField) {
+            super(supportName,dbField);
+            pvIncremental = (PVBoolean)dbField.getPVField();
+            dbStructure = (DBStructure)dbField.getParent();
             pvStructure = dbStructure.getPVStructure();
         }
         
@@ -65,138 +70,77 @@ public class IncrementalFactory {
          */
         public void initialize() {
             if(!super.checkSupportState(SupportState.readyForInitialize,supportName)) return;
-            SupportState supportState = SupportState.readyForStart;
-            Structure structure = (Structure)pvStructure.getField();
-            DBField[] dbFields = dbStructure.getFieldDBFields();
-            int index;
-            PVField pvField = null;
-            if(valueDBField==null) {
-                super.message("setField was not called", MessageType.error);
-                return;           
-            }
-            valuePVField = valueDBField.getPVField();
-            if(!valuePVField.getField().getType().isNumeric()){
-                super.message("value must be a numeric field", MessageType.error);
-            }
-            index = structure.getFieldIndex("value");
-            if(index<0) {
-                super.message("no desiredValue field", MessageType.error);
+            DBRecord dbRecord = dbStructure.getDBRecord();
+            DBField parentDBField = dbStructure;
+            PVField parentPVField = parentDBField.getPVField();
+            PVField pvField = parentPVField.findProperty("value");
+            if(pvField==null) {
+                super.message("parent does not have a value field", MessageType.error);
                 return;
             }
-            desiredValueDBField = dbFields[index];
-            desiredValuePVField = desiredValueDBField.getPVField();
-            if(!desiredValuePVField.getField().getType().isNumeric()){
-                super.message("desiredValue must be a numeric field", MessageType.error);
+            if(pvField.getField().getType()!=Type.pvDouble) {
+                super.message("the parent value field does not have type double", MessageType.error);
                 return;
             }
-            index = structure.getFieldIndex("rateOfChange");
-            if(index<0) {
-                super.message("rateOfChange does not exist", MessageType.error);
+            pvDesiredValue = (PVDouble)pvField;
+            parentDBField = parentDBField.getParent();
+            parentPVField = parentDBField.getPVField();
+            pvField = parentPVField.findProperty("value");
+            if(pvField==null) {
+                super.message("parent of parent does not have a value field", MessageType.error);
                 return;
             }
-            pvField = dbFields[index].getPVField();
-            if(!pvField.getField().getType().isNumeric()) {
+            if(pvField.getField().getType()!=Type.pvDouble) {
+                super.message("the parent of parent value field does not have type double", MessageType.error);
+                return;
+            }
+            pvValue = (PVDouble)pvField;
+            dbValue = dbRecord.findDBField(pvField);
+            pvRateOfChange = pvStructure.findProperty("rateOfChange");
+            if(pvRateOfChange==null) {
+                super.message("rateOfChange not found", MessageType.error);
+                return;
+            }
+            if(!pvRateOfChange.getField().getType().isNumeric()) {
                 super.message("rateOfChange must be a numeric field", MessageType.error);
                 return;
             }
-            rateOfChangePVField = pvField;
-            index = structure.getFieldIndex("input");
-            if(index>=0) {
-                inputSupport = dbFields[index].getSupport();
-            }
-            index = structure.getFieldIndex("incrementalOutput");
-            if(index>=0) {
-                pvField = dbFields[index].getPVField();
-                if(pvField.getField().getType()!=Type.pvBoolean) {
-                    super.message("incrementalOutput must be a boolean field", MessageType.error);
-                    return;
-                }
-                incrementalOutputPVField = (PVBoolean)pvField;
-            }           
-            if(inputSupport!=null) {
-                inputSupport.setField(desiredValueDBField);
-                inputSupport.initialize();
-                supportState = inputSupport.getSupportState();
-                if(supportState!=SupportState.readyForStart) return;
-            }
-            setSupportState(supportState);
+            super.setSupportState(SupportState.readyForStart); 
         }
         
         /* (non-Javadoc)
          * @see org.epics.ioc.process.Support#start()
          */
         public void start() {
-            if(!super.checkSupportState(SupportState.readyForStart,supportName)) return;
-            SupportState supportState = SupportState.ready;
-            if(inputSupport!=null) {
-                inputSupport.start();
-                supportState = inputSupport.getSupportState();
-                if(supportState!=SupportState.ready) return;
-            }
-            setSupportState(supportState);
+            super.setSupportState(SupportState.ready);
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.process.Support#stop()
          */
         public void stop() {
-            if(super.getSupportState()!=SupportState.ready) return;
-            if(inputSupport!=null) inputSupport.stop();
             setSupportState(SupportState.readyForStart);
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.process.Support#uninitialize()
          */
         public void uninitialize() {
-            if(inputSupport!=null) inputSupport.uninitialize();
-            inputSupport = null;
-            valueDBField = null;
+            dbValue = null;
             setSupportState(SupportState.readyForInitialize);
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.process.Support#process(org.epics.ioc.process.RecordProcessRequester)
          */
         public void process(SupportProcessRequester supportProcessRequester) {
-            if(!super.checkSupportState(SupportState.ready,"process")) {
-                supportProcessRequester.supportProcessDone(RequestResult.failure);
+            value = convert.toDouble(pvValue);
+            desiredValue = convert.toDouble(pvDesiredValue);
+            if(pvIncremental!=null) incremental = pvIncremental.get();
+            if(pvRateOfChange!=null) rateOfChange = convert.toDouble(pvRateOfChange);
+            if(desiredValue==value) {
+                supportProcessRequester.supportProcessDone(RequestResult.success);
                 return;
             }
-            if(supportProcessRequester==null) {
-                throw new IllegalStateException("supportProcessRequester is null");
-            }
-            this.supportProcessRequester = supportProcessRequester;
-            if(inputSupport!=null) {
-                inputSupport.process(this);
-                return;
-            }
-            computeValue();
-            supportProcessRequester.supportProcessDone(RequestResult.success);
-        }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.support.AbstractSupport#setField(org.epics.ioc.db.DBField)
-         */
-        public void setField(DBField dbField) {
-            valueDBField = dbField;
-        }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.process.SupportProcessRequester#supportProcessDone(org.epics.ioc.util.RequestResult)
-         */
-        public void supportProcessDone(RequestResult requestResult) {           
-            computeValue();                
-            supportProcessRequester.supportProcessDone(requestResult);
-            return;
-        }
-        
-        
-        
-        private void computeValue() {
-            value = convert.toDouble(valuePVField);
-            desiredValue = convert.toDouble(desiredValuePVField);
-            if(incrementalOutputPVField!=null) incrementalOutput = incrementalOutputPVField.get();
-            if(rateOfChangePVField!=null) rateOfChange = convert.toDouble(rateOfChangePVField);
-            
-            if(desiredValue==value) return;
             double newValue = desiredValue;
-            if(incrementalOutput) {
+            if(incremental) {
                 double diff = desiredValue - value;
                 if(diff<0.0) {
                     newValue = value - rateOfChange;
@@ -206,8 +150,9 @@ public class IncrementalFactory {
                     if(newValue>desiredValue) newValue = desiredValue;
                 }
             }
-            convert.fromDouble(valuePVField, newValue);
-            valueDBField.postPut();
+            convert.fromDouble(pvValue, newValue);
+            dbValue.postPut();
+            supportProcessRequester.supportProcessDone(RequestResult.success);
         }
     }
 }

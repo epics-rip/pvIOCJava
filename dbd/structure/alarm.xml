@@ -11,6 +11,9 @@
 <structure name = "alarm" supportName = "alarm" >
   <field name = "severity" type = "structure" structureName = "alarmSeverity" />
   <field name = "message" type = "string" />
+  <field name = "ackTransient" type = "boolean" />
+  <field name = "ackSeverity" type = "structure" structureName = "alarmSeverity" />
+  <field name = "typeCode" type = "structure" />
 </structure>
 
 <structure name = "byteAlarmInterval">
@@ -86,10 +89,10 @@
   <field name = "changeStateAlarm" type = "structure" structureName = "alarmSeverity" />
 </structure>
 
-<structure name = "digitalAlarm"  supportName = "digitalAlarm" >
+<structure name = "enumeratedAlarm"  supportName = "enumeratedAlarm" >
   <field name = "active" type = "boolean" />
    <!-- each array element must have structureName  alarmSeverity -->
-  <field name = "stateSeverity" type = "array" elementType = "structure" design = "false" />
+  <field name = "stateSeverity" type = "array" elementType = "structure" />
   <field name = "changeStateAlarm" type = "structure" structureName = "alarmSeverity" />
 </structure>
 
@@ -97,35 +100,27 @@
   factoryName = "org.epics.ioc.support.AlarmFactory" />
 
 <support name = "booleanAlarm"
-  structureName = "booleanAlarm" 
   factoryName = "org.epics.ioc.support.BooleanAlarmFactory" />
 
 <support name = "byteAlarm"
-  structureName = "byteAlarm" 
   factoryName = "org.epics.ioc.support.ByteAlarmFactory" />
 
 <support name = "shortAlarm"
-  structureName = "shortAlarm" 
   factoryName = "org.epics.ioc.support.ShortAlarmFactory" />
 
 <support name = "intAlarm"
-  structureName = "intAlarm" 
   factoryName = "org.epics.ioc.support.IntAlarmFactory" />
 
 <support name = "longAlarm"
-  structureName = "longAlarm" 
   factoryName = "org.epics.ioc.support.LongAlarmFactory" />
 
 <support name = "floatAlarm"
-  structureName = "floatAlarm" 
   factoryName = "org.epics.ioc.support.FloatAlarmFactory" />
 
 <support name = "doubleAlarm"
-  structureName = "doubleAlarm" 
   factoryName = "org.epics.ioc.support.DoubleAlarmFactory" />
 
-<support name = "digitalAlarm"
-  structureName = "digitalAlarm" 
-  factoryName = "org.epics.ioc.support.DigitalAlarmFactory" />
+<support name = "enumeratedAlarm"
+  factoryName = "org.epics.ioc.support.EnumeratedAlarmFactory" />
 
 </DBDefinition>

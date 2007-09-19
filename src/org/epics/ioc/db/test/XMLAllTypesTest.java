@@ -37,7 +37,7 @@ public class XMLAllTypesTest extends TestCase {
                  "dbd/menuStructureSupport.xml",iocRequester);
         System.out.printf("reading allTypesDBD%n");
         XMLToDBDFactory.convert(dbd,
-                 "src/org/epics/ioc/db/test/allTypesDBD.xml",iocRequester);
+                 "src/org/epics/ioc/db/test/testDBD.xml",iocRequester);
         IOCDB iocdb = IOCDBFactory.create("testIOCDatabase");
         System.out.printf("reading exampleAllTypeDB%n");
         try {

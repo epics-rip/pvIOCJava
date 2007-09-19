@@ -88,6 +88,7 @@ public class BaseEnumerated implements Enumerated{
          * @see org.epics.ioc.pv.PVInt#get()
          */
         public int get() {
+            if(index>=choices.length) return -1;
             return index;
         }
         /* (non-Javadoc)
@@ -131,6 +132,7 @@ public class BaseEnumerated implements Enumerated{
          * @see org.epics.ioc.pv.PVString#get()
          */
         public String get() {
+            if(index>=choices.length) return null;
             return choices[index];
         }
         /* (non-Javadoc)
@@ -209,6 +211,7 @@ public class BaseEnumerated implements Enumerated{
             try {
                 int n = len;
                 if(offset+len > length) n = length - offset;
+                if(n<=0) return 0;
                 data.data = choices;
                 data.offset = offset;
                 return n;

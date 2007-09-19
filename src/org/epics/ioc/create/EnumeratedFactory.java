@@ -19,7 +19,19 @@ public class EnumeratedFactory {
 
     /**
      * The create method.
-     * @param dbField The field, which must be an enumerated structure.
+     * @param dbField The field, which must be an enumerated structure,
+     * which is a structure that must have the following fields:
+     * <ul>
+     *    <li>index<br />
+     *        An int that is an index that selects one of the choices
+     *    </li>
+     *    <li>choice<br />
+     *        A string that is the choices[index] choice.
+     *    </li>
+     *    <li>choices<br />
+     *        A string array that defined the choices.
+     *    </li>
+     * </ul>
      * @return The Create interface.
      */
     public static Enumerated create(DBField dbField) {

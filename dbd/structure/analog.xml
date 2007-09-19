@@ -10,13 +10,13 @@
   <field name = "intercept" type = "double" />
 </structure>
 
-<structure name = "linearConvertInput" supportName = "linearConvertInput">
-  <field name = "value" type = "int" />
-  <field name = "linearConvert" type = "structure"
-     structureName = "linearConvert" />
+<structure name = "linearConvertInput" supportName = "generic">
   <field name = "alarm" type = "structure"/>
   <field name = "timeStamp" type = "structure" />  
+  <field name = "value" type = "int" />
   <field name = "input" type = "structure" />
+  <field name = "linearConvert" type = "structure"
+     structureName = "linearConvert" supportName = "linearConvertInput" />
   <!-- instance can set structureName = "intAlarm" -->
   <field name = "valueAlarm" type = "structure" />
   <field name = "output" type = "structure" />
@@ -25,10 +25,10 @@
   <field name = "history" type = "structure" />
 </structure>
 
-<structure name = "linearConvertOutput" supportName = "linearConvertOutput">
+<structure name = "linearConvertOutput" supportName = "generic">
   <field name = "value" type = "int" />
   <field name = "linearConvert" type = "structure"
-     structureName = "linearConvert" />
+     structureName = "linearConvert" supportName = "linearConvertOutput" />
   <field name = "alarm" type = "structure"/>
   <field name = "timeStamp" type = "structure" />  
   <!-- instance can set structureName = "intAlarm" -->
@@ -40,10 +40,10 @@
   <field name = "history" type = "structure" />
 </structure>
 
-<structure name = "incrementalDouble" supportName = "incremental" >
+<structure name = "incrementalDouble" supportName = "generic" >
   <field name = "value" type = "double" />
   <field name = "input" type = "structure" structureName = "null" />
-  <field name = "incremental" type = "boolean" />
+  <field name = "incremental" type = "boolean" supportName = "incremental"/>
   <field name = "rateOfChange" type = "double" />
   <field name = "alarm" type = "structure"/>
   <field name = "display" type = "structure" />
@@ -51,10 +51,10 @@
 </structure>
 
 <support name = "linearConvertInput"
-  factoryName = "org.epics.ioc.support.LinearConvertInputFactory" />
+  factoryName = "org.epics.ioc.support.LinearConvertFactory" />
 
 <support name = "linearConvertOutput"
-  factoryName = "org.epics.ioc.support.LinearConvertOutputFactory" />
+  factoryName = "org.epics.ioc.support.LinearConvertFactory" />
 
 <support name = "incremental"
    factoryName = "org.epics.ioc.support.IncrementalFactory" />

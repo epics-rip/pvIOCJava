@@ -12,7 +12,17 @@
     </driverParameters>
 </record>
 
+<record name = "syncInt32DriverControl" type = "portDeviceControl" >
+<!--
+    <portDevice>syncInt32Driver[0]</portDevice>
+    <traceMask>0x0fff</traceMask>
+    <traceIOMask>0x0fff</traceIOMask>
+-->
+</record>
+
 <record name = "syncInt32Counter" type = "calcDouble">
+    <alarm structureName = "alarm" />
+    <timeStamp structureName = "timeStamp" />
     <calcArgArray>
         <value structureName = "calcDoubleArg">
             <value>-2048</value>
@@ -44,6 +54,8 @@
 </record>
 
 <record name = "syncInt32Out" type = "double">
+    <alarm structureName = "alarm" />
+    <timeStamp structureName = "timeStamp" />
     <output supportName = "pdrvInt32Output" structureName = "pdrvSupport">
         <portName>syncInt32Driver</portName>
         <addr>0</addr>
@@ -60,6 +72,8 @@
 </record>
 
 <record name = "syncInt32In" type = "double">
+    <alarm structureName = "alarm" />
+    <timeStamp structureName = "timeStamp" />
     <input supportName = "pdrvInt32Input" structureName = "pdrvSupport">
         <portName>syncInt32Driver</portName>
         <addr>0</addr>
@@ -69,6 +83,8 @@
 </record>
 
 <record name = "syncInt32InInterrupt" type = "double">
+    <alarm structureName = "alarm" />
+    <timeStamp structureName = "timeStamp" />
     <input supportName = "pdrvInt32InterruptInput" structureName = "pdrvSupport">
         <portName>syncInt32Driver</portName>
         <addr>0</addr>
@@ -78,6 +94,8 @@
 </record>
 
 <record name = "syncInt32InAverage" type = "double">
+    <alarm structureName = "alarm" />
+    <timeStamp structureName = "timeStamp" />
     <input supportName = "pdrvInt32AverageInput" structureName = "pdrvSupport">
         <portName>syncInt32Driver</portName>
         <addr>0</addr>
@@ -100,7 +118,17 @@
     </driverParameters>
 </record>
 
+<record name = "asynInt32DriverControl" type = "portDeviceControl" >
+<!--
+    <portDevice>asynInt32Driver[0]</portDevice>
+    <traceMask>0x0fff</traceMask>
+    <traceIOMask>0x0fff</traceIOMask>
+-->
+</record>
+
 <record name = "asynInt32Counter" type = "calcDouble">
+    <alarm structureName = "alarm" />
+    <timeStamp structureName = "timeStamp" />
     <calcArgArray>
         <value structureName = "calcDoubleArg">
             <value>-100</value>
@@ -132,6 +160,8 @@
 </record>
 
 <record name = "asynInt32Out" type = "double">
+    <alarm structureName = "alarm" />
+    <timeStamp structureName = "timeStamp" />
     <output supportName = "pdrvInt32Output" structureName = "pdrvSupport">
         <portName>asynInt32Driver</portName>
         <addr>0</addr>
@@ -148,6 +178,8 @@
 </record>
 
 <record name = "asynInt32In" type = "double">
+    <alarm structureName = "alarm" />
+    <timeStamp structureName = "timeStamp" />
     <input supportName = "pdrvInt32Input" structureName = "pdrvSupport">
         <portName>asynInt32Driver</portName>
         <addr>0</addr>
@@ -157,6 +189,8 @@
 </record>
 
 <record name = "asynInt32InInterrupt" type = "double">
+    <alarm structureName = "alarm" />
+    <timeStamp structureName = "timeStamp" />
     <input supportName = "pdrvInt32InterruptInput" structureName = "pdrvSupport">
         <portName>asynInt32Driver</portName>
         <addr>0</addr>
@@ -166,6 +200,8 @@
 </record>
 
 <record name = "asynInt32InAverage" type = "double">
+    <alarm structureName = "alarm" />
+    <timeStamp structureName = "timeStamp" />
     <input supportName = "pdrvInt32AverageInput" structureName = "pdrvSupport">
         <portName>asynInt32Driver</portName>
         <addr>0</addr>

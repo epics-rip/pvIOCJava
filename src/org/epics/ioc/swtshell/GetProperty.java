@@ -32,6 +32,7 @@ public class GetProperty extends Dialog implements SelectionListener {
     }
     public String[] open(ChannelField channelField) {
         propertyNames = channelField.getPropertyNames();
+        if(propertyNames==null) return null;
         int length = propertyNames.length;
         if(length==0) return null;
         shell = new Shell(getParent(),getStyle());

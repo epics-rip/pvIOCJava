@@ -18,7 +18,7 @@ import org.epics.ioc.util.*;
  * It connects locates the interfaces for all the PDRV fields in the link structure.
  * For each of the lifetime methods it provides methods (initBase, startBase, stopBase, uninitBase)
  * than must be called by derived classes.
- * The process, setField, and message implementation should be sufficient for most derived support.
+ * The process and message implementation should be sufficient for most derived support.
  * @author mrk
  *
  */
@@ -75,14 +75,18 @@ RecordProcessRequester
     protected SupportProcessRequester supportProcessRequester = null;
     
     private String alarmMessage = null;
-    private boolean isProcess = false;
+    private boolean isProcessor = false;
     
     public void initialize() {
         if(!super.checkSupportState(SupportState.readyForInitialize,supportName)) return;
-        if(valueDBField==null) {
-            pvStructure.message("setField was not called", MessageType.error);
+        DBField dbParent = dbStructure.getParent();
+        PVField pvParent = dbParent.getPVField();
+        PVField pvField = pvParent.findProperty("value");
+        if(pvField==null) {
+            pvStructure.message("value field not found", MessageType.error);
             return;
         }
+        valueDBField = dbStructure.getDBRecord().findDBField(pvField);
         valuePVField = valueDBField.getPVField();
         alarmSupport = AlarmFactory.findAlarmSupport(dbStructure);
         pvPortName = pvStructure.getStringField("portName");
@@ -139,7 +143,7 @@ RecordProcessRequester
         if(pvProcess!=null) {
             boolean interrupt = pvProcess.get();
             if(interrupt) {
-                isProcess =recordProcess.setRecordProcessRequester(this);
+                isProcessor =recordProcess.setRecordProcessRequester(this);
             }
         }
         setSupportState(SupportState.ready);
@@ -175,7 +179,7 @@ RecordProcessRequester
         }
         this.supportProcessRequester = supportProcessRequester;
         alarmMessage = null;
-        if(isProcess) {
+        if(isProcessor) {
             deviceTrace.print(Trace.FLOW,
                 "%s:%s process calling processContinue", fullName,supportName);
             processContinue();
@@ -186,12 +190,6 @@ RecordProcessRequester
         }
         deviceTrace.print(Trace.FLOW,"%s:%s process done", fullName,supportName);
     }   
-    /* (non-Javadoc)
-     * @see org.epics.ioc.support.AbstractSupport#setField(org.epics.ioc.db.DBField)
-     */
-    public void setField(DBField dbField) {
-        valueDBField = dbField;
-    }    
     /* (non-Javadoc)
      * @see org.epics.ioc.support.AbstractSupport#message(java.lang.String, org.epics.ioc.util.MessageType)
      */
@@ -237,7 +235,7 @@ RecordProcessRequester
      * @see org.epics.ioc.pdrv.support.PDRVLinkSupport#isInterrupt()
      */
     public boolean isProcess() {
-        return isProcess;
+        return isProcessor;
     }
     /* (non-Javadoc)
      * @see org.epics.ioc.pdrv.support.PDRVLinkSupport#queueCallback()

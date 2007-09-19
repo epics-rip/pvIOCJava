@@ -10,7 +10,7 @@
 <body>
 <h1 style="text-align: center">EPICS JavaIOC: pv<br />
 package: org.epics.ioc.pv<br />
-2007.08.28</h1>
+2007.09.18</h1>
 CONTENTS 
 
 <div class="toc">
@@ -51,13 +51,6 @@ CONTENTS
     </ul>
   </li>
   <li><a href="#Convert">Convert</a></li>
-  <li><a href="#PVAccess">PVAccess</a>
-    <ul>
-      <li><a href="#Overview1">Overview</a></li>
-      <li><a href="#Definition">Definition</a></li>
-      <li><a href="#findField">findField Examples</a></li>
-    </ul>
-  </li>
 </ul>
 </div>
 <hr />
@@ -130,8 +123,6 @@ TINI, DOOCS, etc.</p>
   <dt>Convert Factory</dt>
     <dd>An object factory that provides an implementation of the conversion
       facility.</dd>
-  <dt>PVAccess</dt>
-    <dd>An interface for locating fields within a record instance.</dd>
 </dl>
 
 <h3 id="Process">Process Variable</h3>
@@ -143,42 +134,10 @@ TINI, DOOCS, etc.</p>
   <dt>Field</dt>
     <dd>A Field has a name and a type that is any of the supported types. It
       has attributes and can also have properties.</dd>
-  <dt>Property</dt>
-    <dd>A property has a name and an associated field within the PV for the
-      data.</dd>
   <dt>Attribute</dt>
     <dd>Each field can have a attributes, where an attribute is a key,value
       pair. Both the key and value are a string.</dd>
 </dl>
-
-<p>Examples of fields are: value, rawValue.</p>
-
-<p>Examples of properties are: status, timeStamp, alarm,
-displayCharacteristics, etc.</p>
-
-<p>For example a PV could define properties for value and rawValue as
-follows:</p>
-<dl>
-  <dt>value</dt>
-    <dd>status, timeStamp, alarm, and displayCharacteristics.</dd>
-  <dt>rawValue</dt>
-    <dd>status, timeStamp, and alarm.</dd>
-</dl>
-
-<p>The associatedField of a property is is used to locate a field that has
-the value for the property. Examples are given later in this document. An
-associatedField must be one of the following:</p>
-<dl>
-  <dt>name</dt>
-    <dd>The name of a structure field.</dd>
-  <dt>name1.name2</dt>
-    <dd>name1 must be the name of a structure field. name2 must be a property
-      or field in the structure field.</dd>
-</dl>
-
-<p>Properties can also be used to create "device" abstractions. For example a
-powerSupply record type can be created that has properties like "current",
-"voltage", and "power".</p>
 
 <h3 id="Process1">Process Variable Data Types</h3>
 
@@ -249,14 +208,7 @@ separation is especially important for arrays and structures.</p>
 <hr />
 
 <p>This section defines the complete set of Java PV reflection interfaces.</p>
-<pre>    interface Property {
-        String getPropertyName();
-        String getAssociatedFieldName();
-        String toString();
-        String toString(int indentLevel);
-    }
-
-    public interface FieldAttribute {
+<pre>    public interface FieldAttribute {
         void setAttributes(Map&lt;String,String&gt; attributes,String[] exclude);
         String setAttribute(String key,String value);
         Map&lt;String,String&gt; getAttributes();
@@ -268,8 +220,6 @@ separation is especially important for arrays and structures.</p>
 
     interface Field{
         String getFieldName();
-        Property[] getPropertys();
-        Property getProperty(String propertyName);
         Type getType();
         String getCreateName();
         void setCreateName(String name);
@@ -294,55 +244,16 @@ separation is especially important for arrays and structures.</p>
 
 <p>The above definitions support the following:</p>
 <ul>
-  <li>Property 
-    <ul>
-      <li>A property has a name.</li>
-      <li>A property has an associated field that holds the data. The
-        associated field must be one of the following: 
-        <dl>
-          <dt>name</dt>
-            <dd>If the field is a structure and name is a subfield of the
-              structure than it is the associated field. If field is not a
-              structure but name is a subfield of the parent structure it is
-              the associated field.</dd>
-          <dt>name1.name2</dt>
-            <dd>name1 is located just like name above. The meaning for name2
-              depends of the type of name 1. If name1 is a structure than
-              name2 must be a subfield of name1. If name 1 is a link than the
-              following is done: The link is assumed to have a configuration
-              structure that has a field with a "isLink" attribute (call this
-              field pvname). The pvname is the name of a field in another
-              record. In the other record the field located by pvname acts
-              just like name1 and name2 is handled just like it is for the
-              local record.</dd>
-        </dl>
-      </li>
-      <li>A property can be converted to a string.</li>
-      <li>Properties can be used for two purposes: 
-        <ol>
-          <li>Reference other fields related to a field. For example the
-            "value" field of many record types will have properties with
-            names "status", "severity", and "timeStamp".</li>
-          <li>"device" abstractions. For example a powerSupply record would
-            define properties "current", "voltage", and "Power".</li>
-        </ol>
-      </li>
-    </ul>
-  </li>
   <li>FieldAttribute<br />
     Each field can have have an arbitrary numbert of attributes. An attribute
     is a key,value pair where bot key and value are a string.</li>
   <li>Field 
     <ul>
       <li>A field has a name.</li>
-      <li>A field can have an arbitrary number of associated properties
-        including none.</li>
       <li>A field has a Type.</li>
       <li>A field can optionally have associated creation code identified via
         a name.</li>
       <li>A field can optionally have support identified via a name.</li>
-      <li>A field can be made immutable. This means that the data associated
-        with the field is immutable.</li>
       <li>A field has attributes.</li>
       <li>A field can be converted to a string.</li>
     </ul>
@@ -401,6 +312,8 @@ where
         Field getField();
         PVField getParent();
         PVRecord getPVRecord();
+        PVField findProperty(String propertyName);
+        PVField[] getPropertys();
         void replacePVField(PVField newPVField);
         String getSupportName();
         String setSupportName(String name);
@@ -452,6 +365,41 @@ where
   itself.</li>
   <li>getPVRecord<br />
     Get the interface for the record that contains this field.</li>
+  <li>findProperty<br />
+    Find a field that is a subfield or property of this PVField. The fieldName is
+    of the form item.item... where item is name or name[index]. The algorithm
+    implemented by findProperty is: 
+    <ul>
+      <li>Start with the leftmost item and find it.</li>
+      <li>find the next leftmost item and find it.</li>
+      <li>Continue until all items have been found or a search fails.</li>
+      <li>Return the interface for the last item or null if a search
+      fails.</li>
+    </ul>
+    An item is found as follows: 
+    <ul>
+      <li>Find the name part of item. If no [index] is present then fail.</li>
+      <li>If [index] is present than field must be a structure with
+        elementType structure or array. If so then make sure the index
+        element is found. If so it is the field.</li>
+      <li>fail</li>
+    </ul>
+    A name is found as follows: 
+    <ol>
+      <li>If the Field for the current PVField is named "value" back up one
+        level in parent tree.</li>
+      <li>The current PV must be a structure. If not fail.</li>
+      <li>If the current PVField is type structure with a fieldName=name then
+        use it.</li>
+      <li>If the fieldName is not timeStamp than fail.</li>
+      <li>If the parent tree is null then fail.</li>
+      <li>Back up one level in the parent tree and go to 2).</li>
+    </ol>
+  </li>
+  <li>getPropertys<br />
+    Get an array of PVField that is all the property fields of this PVField.
+    If this PVField is the value field the parent is the starting point and
+    the propertys will not include the value field itself. </li>
   <li>replacePVField<br />
     Replace this PVField. This is called by support code that wants to
     replace the default implementation of a data field with it;s own
@@ -789,21 +737,19 @@ introspection interfaces. The methods are:</p>
 
         public static FieldAttribute createFieldAttribute();
 
-        public static Property createProperty(String name, String fieldName);
-
         public static Field createField(String fieldName,Type type);
         public static Field createField(String fieldName,Type type,
-            Property[] property,FieldAttribute fieldAttribute);
+            FieldAttribute fieldAttribute);
 
         public static Array createArray(String fieldName,Type elementType);
         public static Array createArray(String fieldName,Type elementType,
-            Property[] property,FieldAttribute fieldAttribute);
+            FieldAttribute fieldAttribute);
 
         public static Structure createStructure(String fieldName,
             String structureName, Field[] field);
         public static Structure createStructure(String fieldName,
             String structureName, Field[] field,
-            Property[] property,FieldAttribute fieldAttribute);
+            FieldAttribute fieldAttribute);
     }
 
     public final class FieldFactory {
@@ -823,29 +769,20 @@ introspection interfaces. The methods are:</p>
       "structure", "array",or "link". If found the Type associated with the
       value is returned. If not found a null is returned.</dd>
   <dt>createFieldAttribute()</dt>
-    <dd>Create a default set of field attributes. The defaults are: asl = 1,
-      default = null, isDesign = true, isLink = false, isReadOnly =
-    false.</dd>
-  <dt>createFieldAttribute(Map&lt;String,String&gt; attributes)</dt>
-    <dd>Looks for keys that have the values: "default", "asl", "design",
-      "link", or "readonly". If a key is found than the value determines the
-      attribute value. And attributes not found are set the the default
-    value.</dd>
-  <dt>createProperty</dt>
-    <dd>Create a property.</dd>
+    <dd>Create a fieldAttrbute.</dd>
   <dt>createField(String fieldName,Type type)</dt>
     <dd>create a Field with the specified type, no properties, and default
       attributes. The type must be a scalar or a link.</dd>
-  <dt>createField(String fieldName,Type type,Property[]
-  property,FieldAttribute fieldAttribute)</dt>
+  <dt>createField(String fieldName,Type type,FieldAttribute
+  fieldAttribute)</dt>
     <dd>create a Field with the specified type, properties, and attributes.
       The type must be a scalar or a link.</dd>
   <dt>createArray(String fieldName,Type elementType)</dt>
     <dd>create an Array with the specified elementType, no properties, and
       default attributes. The elementType can be any Type but must not be
       null.</dd>
-  <dt>createArray(String fieldName,Type elementType,Property[]
-  property,FieldAttribute fieldAttribute)</dt>
+  <dt>createArray(String fieldName,Type elementType,FieldAttribute
+  fieldAttribute)</dt>
     <dd>create an Array with the specified elementType, properties, and
       attributes. The elementType can be any Type but must not be null.</dd>
   <dt>createStructure(String fieldName,String structureName, Field[]
@@ -854,7 +791,7 @@ introspection interfaces. The methods are:</p>
       structureName must not be null. It is permissible to have a Field[]
       with length 0.</dd>
   <dt>createStructure(String fieldName,String structureName, Field[]
-  field,Property[] property,FieldAttribute fieldAttribute)</dt>
+  field,FieldAttribute fieldAttribute)</dt>
     <dd>create a Structure with properties and attributes. The structureName
       must not be null. It is permissible to have a Field[] with length
     0.</dd>
@@ -896,11 +833,8 @@ where
 introspection objects. For many applications they provide a complete
 introspection implementation but they could be extended if necessary.</p>
 <pre>    public class BaseField implements Field {
-        public BaseField(String fieldName,
-            Type type,Property[] property,FieldAttribute fieldAttribute);
+        public BaseField(String fieldName, Type type,FieldAttribute fieldAttribute);
         public String getFieldName();
-        public Property[] getPropertys();
-        public Property getProperty(String propertyName);
         public FieldAttribute getFieldAttribute();
         public Type getType();
         public String getCreateName();
@@ -913,7 +847,7 @@ introspection implementation but they could be extended if necessary.</p>
     
     public class BaseStructure.java extends BaseField implements Structure {
         public BaseStructure.java(String fieldName,String structureName,Field[] field,
-             Property[] property,FieldAttribute fieldAttribute);
+             FieldAttribute fieldAttribute);
         public Field getField(String name);
         public int getFieldIndex(String name);
         public String[] getFieldNames();
@@ -924,8 +858,7 @@ introspection implementation but they could be extended if necessary.</p>
     }
 
     public class BaseArray extends BaseField implements Array {
-        public BaseArray(String fieldName,Type elementType,
-            Property[] property,FieldAttribute fieldAttribute);
+        public BaseArray(String fieldName,Type elementType,FieldAttribute fieldAttribute);
         public Type getElementType();
         public String toString();
         public String toString(int indentLevel);      
@@ -959,6 +892,8 @@ interfaces:</p>
     public PVField getParent();
     public PVRecord getPVRecord();
     public void replacePVField(PVField newPVField);
+    public PVField findProperty(String fieldName);
+    public PVField[] getPropertys();
     public String getSupportName();
     public String setSupportName(String name);
     public void asynAccessCallListener(boolean begin);
@@ -981,7 +916,7 @@ interfaces:</p>
   <dt>setRecord</dt>
     <dd>This is called a derived PVStructure implementation to specify the
       record containing the field.</dd>
-  <dt>getRequestorName,...,replacePVField
+  <dt>getRequestorName,...,getPropertys,
   asynAccessCallListener,...,isAsynAccessActive</dt>
     <dd>The implementation should be sufficient for all derived classes.</dd>
   <dt>getSupportName and setSupportName</dt>
@@ -1009,7 +944,6 @@ interfaces:</p>
 
 <h3 id="BasePVStru">BasePVStructure</h3>
 <pre>public class BasePVStructure extends AbstractPVField implements PVStructure
-    public Structure getStructure();
     public BasePVStructure(PVField parent, Structure structure);
     public Structure getStructure();
     public void setRecord(PVRecord record);
@@ -1136,112 +1070,5 @@ for code that implements <span style="font-family: courier;">toString</span>
 It generates a newline and inserts blanks at the beginning of the newline.</p>
 
 <p>ConvertFactory gets the single implementation of Convert.</p>
-<hr />
-
-<h2 style="text-align: center" id="PVAccess">PVAccess</h2>
-<hr />
-
-<h3 id="Overview1">Overview</h3>
-
-<p>PVAccess is an interface that makes it easier to locate data fields of a
-record. It also works with field properties to support "device" oriented
-records, e.g. a "powerSupply" record.</p>
-
-<p>The key method of PVAccess is:</p>
-<pre>    findField(String name)</pre>
-
-<p>name is a string that has an arbitray number of field names separated by
-".". Simple examples are:</p>
-<pre>    value
-    value.status
-    value.timeStamp</pre>
-
-<p>If a powerSupply record type is properly defined then the following are
-valid names.</p>
-<pre>    power
-    power.current
-    power.voltage
-    power.status</pre>
-
-<p>In addition PVAccess provides access to structure arrays. For example if a
-record type implements an array of power supplies then the following are
-valid names.</p>
-<pre>    powerSupply[0].power
-    powerSupply[0].power.current
-    powerSupply[0].power.voltage</pre>
-
-<h3 id="Definition">Definition</h3>
-
-<p>The definition of PVAccess is:</p>
-<pre>    interface PVAccess {
-        PVRecord getPVRecord();
-        PVField findField(String name);
-        void setPVField(PVField pvData);
-    }
-
-    public class PVAccessFactory {
-        public static PVAccess createPVAccess(PVRecord pvRecord);
-    }</pre>
-
-<p>where</p>
-<dl>
-  <dt style="font-family: courier;">PVAccess</dt>
-    <dd>The interface for locating data fields within a record instance. 
-      <dl>
-        <dt style="font-family: courier;">getPVRecord</dt>
-          <dd>Get the record instance interface this PVAccess accesses.</dd>
-        <dt style="font-family: courier;">findField</dt>
-          <dd>Look for a data field. An interface to the ChannelField is
-            returned, which is null if the field is not found. See below for
-            the semantics for the name.The search starts at the current
-            internal location, which initially is the record itself. A null
-            or empty name sets the internal location to the record instance
-            itself.</dd>
-        <dt style="font-family: courier;">setPVField</dt>
-          <dd>Set the internal location in PVAccess so that the next request
-            to findField is relative to this field. The argument must either
-            be null or a value returned by getField. A null value sets the
-            internal location to the record itself.</dd>
-      </dl>
-    </dd>
-  <dt style="font-family: courier;">PVAccessFactory</dt>
-    <dd>A factory for creating <span
-      style="font-family: courier;">PVAccess</span></dd>
-</dl>
-
-<h3 id="findField">findField Examples</h3>
-
-<p>The semantics allow searching down a structure hierarchy and for searching
-via properties. At a particular level the search is first made for subfields
-and if the search fails than for properties.</p>
-
-<p>Lets first consider some examples of locating fields within a record
-instance. As the first example assume that a PVAccess has just been created,
-which means it is connected to a record. The following will locate the
-interfaces for a field named "value" and all properties of this field.</p>
-<pre>    // Assume pvRecord has been located
-    PVAccess pvAccess = PVAccessFactory.createPVAccess(pvRecord);
-    PVField value = pvAccess.findField("value");
-    if(value==null) { /*take some action*/}
-    Property[] properties = value.getField.getPropertys();
-    while(Property property: properties) {
-        pvAccess.setField(value);
-        PVField propField = pvAccess.findField(property.getPropertyName());
-        if(propField!=null) {
-            // do something with propData
-        }
-    }</pre>
-
-<p>Assume that a powerSupply array instance record defines an array of
-structures which each access a powerSupply:</p>
-<pre>    //Locate the current for the first powerSupply
-    PVField pvField = pvAccess.findField("powerSupply[0].current");
-    if(pvField!=null) {
-        // found it
-    }
-    //Locate the rawValue for the current for the third power supply
-    pvAccess.findField(null); // set internal location to the record itself
-    pvField = pvAccess.findField("powerSupply[2].current.rawValue");
-    ...</pre>
 </body>
 </html>

@@ -10,7 +10,17 @@
     </driverParameters>
 </record>
 
+<record name = "syncFloat64DriverControl" type = "portDeviceControl" >
+<!--
+    <portDevice>syncFloat64Driver[0]</portDevice>
+    <traceMask>0x0fff</traceMask>
+    <traceIOMask>0x0fff</traceIOMask>
+-->
+</record>
+
 <record name = "syncFloat64Counter" type = "calcDouble">
+    <alarm structureName = "alarm" />
+    <timeStamp structureName = "timeStamp" />
     <calcArgArray>
         <value structureName = "calcDoubleArg">
             <value>-2100</value>
@@ -42,6 +52,8 @@
 </record>
 
 <record name = "syncFloat64Out" type = "double">
+    <alarm structureName = "alarm" />
+    <timeStamp structureName = "timeStamp" />
     <output supportName = "pdrvFloat64Output" structureName = "pdrvSupport">
         <portName>syncFloat64Driver</portName>
         <addr>0</addr>
@@ -58,6 +70,8 @@
 </record>
 
 <record name = "syncFloat64In" type = "double">
+    <alarm structureName = "alarm" />
+    <timeStamp structureName = "timeStamp" />
     <input supportName = "pdrvFloat64Input" structureName = "pdrvSupport">
         <portName>syncFloat64Driver</portName>
         <addr>0</addr>
@@ -67,6 +81,8 @@
 </record>
 
 <record name = "syncFloat64InInterrupt" type = "double">
+    <alarm structureName = "alarm" />
+    <timeStamp structureName = "timeStamp" />
     <input supportName = "pdrvFloat64InterruptInput" structureName = "pdrvSupport">
         <portName>syncFloat64Driver</portName>
         <addr>0</addr>
@@ -76,6 +92,8 @@
 </record>
 
 <record name = "syncFloat64InAverage" type = "double">
+    <alarm structureName = "alarm" />
+    <timeStamp structureName = "timeStamp" />
     <input supportName = "pdrvFloat64AverageInput" structureName = "pdrvSupport">
         <portName>syncFloat64Driver</portName>
         <addr>0</addr>
@@ -96,7 +114,17 @@
     </driverParameters>
 </record>
 
+<record name = "asynFloat64DriverControl" type = "portDeviceControl" >
+<!--
+    <portDevice>syncFloat64Driver[0]</portDevice>
+    <traceMask>0x0fff</traceMask>
+    <traceIOMask>0x0fff</traceIOMask>
+-->
+</record>
+
 <record name = "asynFloat64Counter" type = "calcDouble">
+    <alarm structureName = "alarm" />
+    <timeStamp structureName = "timeStamp" />
     <calcArgArray>
         <value structureName = "calcDoubleArg">
             <value>-100</value>
@@ -128,6 +156,8 @@
 </record>
 
 <record name = "asynFloat64Out" type = "double">
+    <alarm structureName = "alarm" />
+    <timeStamp structureName = "timeStamp" />
     <output supportName = "pdrvFloat64Output" structureName = "pdrvSupport">
         <portName>asynFloat64Driver</portName>
         <addr>0</addr>
@@ -144,6 +174,8 @@
 </record>
 
 <record name = "asynFloat64In" type = "double">
+    <alarm structureName = "alarm" />
+    <timeStamp structureName = "timeStamp" />
     <input supportName = "pdrvFloat64Input" structureName = "pdrvSupport">
         <portName>asynFloat64Driver</portName>
         <addr>0</addr>
@@ -153,6 +185,8 @@
 </record>
 
 <record name = "asynFloat64InInterrupt" type = "double">
+    <alarm structureName = "alarm" />
+    <timeStamp structureName = "timeStamp" />
     <input supportName = "pdrvFloat64InterruptInput" structureName = "pdrvSupport">
         <portName>asynFloat64Driver</portName>
         <addr>0</addr>
@@ -162,6 +196,8 @@
 </record>
 
 <record name = "asynFloat64InAverage" type = "double">
+    <alarm structureName = "alarm" />
+    <timeStamp structureName = "timeStamp" />
     <input supportName = "pdrvFloat64AverageInput" structureName = "pdrvSupport">
         <portName>asynFloat64Driver</portName>
         <addr>0</addr>
@@ -172,7 +208,6 @@
         <rate>5.0</rate>
     </scan>
 </record>
-
 <!--
 -->
 

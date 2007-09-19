@@ -69,15 +69,6 @@ public interface DBD {
      */
     public DBDSupport createSupport(String supportName,String factoryName);
     /**
-     * Create a DBDLinkSupport.
-     * @param supportName The name of the support.
-     * @param factoryName The name of the factory for creating support instances.
-     * @param structureName The name of the configuration structure.
-     * @return the DBDSupport or null if it already existed.
-     */
-    public DBDSupport createSupport(
-        String supportName,String factoryName,String structureName);
-    /**
      * Get the DBDStructure for the specified name.
      * It will be returned if it resides in this DBD or in the master DBD.
      * @param structureName The structure to retrieve.

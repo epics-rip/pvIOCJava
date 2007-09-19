@@ -16,7 +16,6 @@ import org.epics.ioc.util.*;
  *
  */
 public class ScanFactory {
-    private static Convert convert = ConvertFactory.getConvert();
     private static PeriodicScanner periodicScanner = ScannerFactory.getPeriodicScanner();
     private static EventScanner eventScanner = ScannerFactory.getEventScanner();
     private static final String supportName = "scan";

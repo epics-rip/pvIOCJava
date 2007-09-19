@@ -53,8 +53,7 @@ public class SupportArrayFactory {
         private String processRequesterName = null;
         private PVBoolean[] pvWaits = null;
         private Support[] supports = null;
-        
-        private DBField valueField = null;        
+               
         private SupportProcessRequester supportProcessRequester;
         private int nextLink;
         private int numberWait;
@@ -94,35 +93,35 @@ public class SupportArrayFactory {
                 DBField[] dbFields = dbStructure.getFieldDBFields();
                 Structure structure = (Structure)pvStructure.getField();
                 String structureName = structure.getStructureName();
+                Support support = null;
                 if(!structureName.equals("supportArrayElement")) {
-                    pvStructure.message(structureName + " not supportArrayElement", MessageType.fatalError);
-                    continue;
+                    support = dbStructure.getSupport();
+                } else {
+                    PVField[] pvdatas = pvStructure.getFieldPVFields();
+                    int index = structure.getFieldIndex("wait");
+                    if(index<0) {
+                        pvStructure.message("structure does not have field wait", MessageType.fatalError);
+                        continue;
+                    }
+                    PVField pvField = pvdatas[index];
+                    if(pvField.getField().getType()!=Type.pvBoolean) {
+                        pvStructure.message("field wait is not boolean", MessageType.fatalError);
+                        continue;
+                    }
+                    pvWaits[i] = (PVBoolean)pvField;
+                    index = structure.getFieldIndex("link");
+                    if(index<0) {
+                        pvStructure.message("structure does not have field link", MessageType.fatalError);
+                        continue;
+                    }
+                    pvField = pvdatas[index];
+                    support = dbFields[index].getSupport();
                 }
-                PVField[] pvdatas = pvStructure.getFieldPVFields();
-                int index = structure.getFieldIndex("wait");
-                if(index<0) {
-                    pvStructure.message("structure does not have field wait", MessageType.fatalError);
-                    continue;
-                }
-                PVField pvField = pvdatas[index];
-                if(pvField.getField().getType()!=Type.pvBoolean) {
-                    pvStructure.message("field wait is not boolean", MessageType.fatalError);
-                    continue;
-                }
-                pvWaits[i] = (PVBoolean)pvField;
-                index = structure.getFieldIndex("link");
-                if(index<0) {
-                    pvStructure.message("structure does not have field link", MessageType.fatalError);
-                    continue;
-                }
-                pvField = pvdatas[index];
-                Support support = (Support)dbFields[index].getSupport();
                 if(support==null) {
-                    pvStructure.message("field link is not a link", MessageType.fatalError);
+                    pvStructure.message("field does not have suport", MessageType.fatalError);
                     continue;
                 }
                 support.initialize();
-                support.setField(valueField);
                 if(support.getSupportState()!=SupportState.readyForStart) {
                     supportState = SupportState.readyForInitialize;
                     for(int j=0; j<i; j++) {
@@ -196,12 +195,6 @@ public class SupportArrayFactory {
             callSupport();
         }                
         /* (non-Javadoc)
-         * @see org.epics.ioc.process.Support#setField(org.epics.ioc.db.DBField)
-         */
-        public void setField(DBField dbField) {
-            valueField = dbField;
-        }
-        /* (non-Javadoc)
          * @see org.epics.ioc.process.SupportProcessRequester#supportProcessDone(org.epics.ioc.util.RequestResult)
          */
         public void supportProcessDone(RequestResult requestResult) {
@@ -229,7 +222,8 @@ public class SupportArrayFactory {
                     nextLink++;
                     continue;
                 }
-                boolean wait = pvWaits[nextLink].get(); 
+                boolean wait = true; 
+                if(pvWaits[nextLink]!=null) wait = pvWaits[nextLink].get();
                 nextLink++;
                 if(processLink.getSupportState()!=SupportState.ready) {
                     if(finalResult==RequestResult.success) {

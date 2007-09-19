@@ -1,6 +1,8 @@
 <?xml version="1.0" ?>
 <IOCDatabase>
 <record name = "floatCounter" type = "calcDouble">
+    <alarm structureName = "alarm" />
+    <timeStamp structureName = "timeStamp" />
     <calcArgArray>
         <value structureName = "calcDoubleArg">
             <value>0.0</value>
@@ -24,13 +26,13 @@
             </link>
         </value>
     </supportArray>
-    <displayCharacteristics structureName = "doubleDisplayCharacteristics" >
+    <display structureName = "display" >
         <units>counts</units>
         <limit>
             <low>0.0</low>
             <high>11.0</high>
         </limit>
-    </displayCharacteristics>
+    </display>
     <scan>
         <type><choice>periodic</choice></type>
         <rate>1.0</rate>
@@ -38,6 +40,8 @@
 </record>
 
 <record name = "floatRecord" type = "float">
+    <alarm structureName = "alarm" />
+    <timeStamp structureName = "timeStamp" />
     <input supportName = "inputSupport" structureName = "inputSupport">
         <pvname>floatCounter</pvname>
         <process>false</process>
@@ -69,15 +73,17 @@
       <outOfRange><choice>invalid</choice></outOfRange>
       <hystersis>0.3</hystersis>
     </valueAlarm>
-    <displayCharacteristics structureName = "doubleDisplayCharacteristics" >
+    <display structureName = "display" >
         <units>counts</units>
         <limit>
             <low>0.0</low>
             <high>10.0</high>
         </limit>
-    </displayCharacteristics>
+    </display>
 </record>
 <record name = "doubleCounter" type = "calcDouble">
+    <alarm structureName = "alarm" />
+    <timeStamp structureName = "timeStamp" />
     <calcArgArray>
         <value structureName = "calcDoubleArg">
             <value>0.0</value>
@@ -101,13 +107,13 @@
             </link>
         </value>
     </supportArray>
-    <displayCharacteristics structureName = "doubleDisplayCharacteristics" >
+    <display structureName = "display" >
         <units>counts</units>
         <limit>
             <low>0.0</low>
             <high>11.0</high>
         </limit>
-    </displayCharacteristics>
+    </display>
     <scan>
         <type><choice>periodic</choice></type>
         <rate>1.0</rate>
@@ -115,6 +121,8 @@
 </record>
 
 <record name = "doubleRecord" type = "double">
+    <alarm structureName = "alarm" />
+    <timeStamp structureName = "timeStamp" />
     <input supportName = "inputSupport" structureName = "inputSupport">
         <pvname>doubleCounter</pvname>
         <process>false</process>
@@ -146,16 +154,18 @@
       <outOfRange><choice>invalid</choice></outOfRange>
       <hystersis>0.3</hystersis>
     </valueAlarm>
-    <displayCharacteristics structureName = "doubleDisplayCharacteristics" >
+    <display structureName = "display" >
         <units>counts</units>
         <limit>
             <low>0.0</low>
             <high>10.0</high>
         </limit>
-    </displayCharacteristics>
+    </display>
 </record>
 
 <record name = "byteCounter" type = "calcDouble">
+    <alarm structureName = "alarm" />
+    <timeStamp structureName = "timeStamp" />
     <calcArgArray>
         <value structureName = "calcDoubleArg">
             <value>0.0</value>
@@ -179,13 +189,13 @@
             </link>
         </value>
     </supportArray>
-    <displayCharacteristics structureName = "doubleDisplayCharacteristics" >
+    <display structureName = "display" >
         <units>counts</units>
         <limit>
             <low>0.0</low>
             <high>11.0</high>
         </limit>
-    </displayCharacteristics>
+    </display>
     <scan>
         <type><choice>periodic</choice></type>
         <rate>1.0</rate>
@@ -193,6 +203,8 @@
 </record>
 
 <record name = "byteRecord" type = "byte">
+    <alarm structureName = "alarm" />
+    <timeStamp structureName = "timeStamp" />
     <input supportName = "inputSupport" structureName = "inputSupport">
         <pvname>byteCounter</pvname>
         <process>false</process>
@@ -224,16 +236,18 @@
       <outOfRange><choice>invalid</choice></outOfRange>
       <hystersis>2</hystersis>
     </valueAlarm>
-    <displayCharacteristics structureName = "doubleDisplayCharacteristics" >
+    <display structureName = "display" >
         <units>counts</units>
         <limit>
             <low>0.0</low>
             <high>10.0</high>
         </limit>
-    </displayCharacteristics>
+    </display>
 </record>
 
 <record name = "shortCounter" type = "calcDouble">
+    <alarm structureName = "alarm" />
+    <timeStamp structureName = "timeStamp" />
     <calcArgArray>
         <value structureName = "calcDoubleArg">
             <value>0.0</value>
@@ -257,13 +271,13 @@
             </link>
         </value>
     </supportArray>
-    <displayCharacteristics structureName = "doubleDisplayCharacteristics" >
+    <display structureName = "display" >
         <units>counts</units>
         <limit>
             <low>0.0</low>
             <high>11.0</high>
         </limit>
-    </displayCharacteristics>
+    </display>
     <scan>
         <type><choice>periodic</choice></type>
         <rate>1.0</rate>
@@ -271,6 +285,8 @@
 </record>
 
 <record name = "shortRecord" type = "short">
+    <alarm structureName = "alarm" />
+    <timeStamp structureName = "timeStamp" />
     <input supportName = "inputSupport" structureName = "inputSupport">
         <pvname>shortCounter</pvname>
         <process>false</process>
@@ -302,16 +318,18 @@
       <outOfRange><choice>invalid</choice></outOfRange>
       <hystersis>2</hystersis>
     </valueAlarm>
-    <displayCharacteristics structureName = "doubleDisplayCharacteristics" >
+    <display structureName = "display" >
         <units>counts</units>
         <limit>
             <low>0.0</low>
             <high>10.0</high>
         </limit>
-    </displayCharacteristics>
+    </display>
 </record>
 
 <record name = "intCounter" type = "calcDouble">
+    <alarm structureName = "alarm" />
+    <timeStamp structureName = "timeStamp" />
     <calcArgArray>
         <value structureName = "calcDoubleArg">
             <value>0.0</value>
@@ -335,13 +353,13 @@
             </link>
         </value>
     </supportArray>
-    <displayCharacteristics structureName = "doubleDisplayCharacteristics" >
+    <display structureName = "display" >
         <units>counts</units>
         <limit>
             <low>0.0</low>
             <high>11.0</high>
         </limit>
-    </displayCharacteristics>
+    </display>
     <scan>
         <type><choice>periodic</choice></type>
         <rate>1.0</rate>
@@ -349,6 +367,8 @@
 </record>
 
 <record name = "intRecord" type = "int">
+    <alarm structureName = "alarm" />
+    <timeStamp structureName = "timeStamp" />
     <input supportName = "inputSupport" structureName = "inputSupport">
         <pvname>intCounter</pvname>
         <process>false</process>
@@ -380,16 +400,18 @@
       <outOfRange><choice>invalid</choice></outOfRange>
       <hystersis>2</hystersis>
     </valueAlarm>
-    <displayCharacteristics structureName = "doubleDisplayCharacteristics" >
+    <display structureName = "display" >
         <units>counts</units>
         <limit>
             <low>0.0</low>
             <high>10.0</high>
         </limit>
-    </displayCharacteristics>
+    </display>
 </record>
 
 <record name = "longCounter" type = "calcDouble">
+    <alarm structureName = "alarm" />
+    <timeStamp structureName = "timeStamp" />
     <calcArgArray>
         <value structureName = "calcDoubleArg">
             <value>0.0</value>
@@ -413,13 +435,13 @@
             </link>
         </value>
     </supportArray>
-    <displayCharacteristics structureName = "doubleDisplayCharacteristics" >
+    <display structureName = "display" >
         <units>counts</units>
         <limit>
             <low>0.0</low>
             <high>11.0</high>
         </limit>
-    </displayCharacteristics>
+    </display>
     <scan>
         <type><choice>periodic</choice></type>
         <rate>1.0</rate>
@@ -427,6 +449,8 @@
 </record>
 
 <record name = "longRecord" type = "long">
+    <alarm structureName = "alarm" />
+    <timeStamp structureName = "timeStamp" />
     <input supportName = "inputSupport" structureName = "inputSupport">
         <pvname>longCounter</pvname>
         <process>false</process>
@@ -458,13 +482,13 @@
       <outOfRange><choice>invalid</choice></outOfRange>
       <hystersis>2</hystersis>
     </valueAlarm>
-    <displayCharacteristics structureName = "doubleDisplayCharacteristics" >
+    <display structureName = "display" >
         <units>counts</units>
         <limit>
             <low>0.0</low>
             <high>10.0</high>
         </limit>
-    </displayCharacteristics>
+    </display>
 </record>
 
 </IOCDatabase>

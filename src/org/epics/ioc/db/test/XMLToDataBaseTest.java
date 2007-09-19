@@ -40,7 +40,7 @@ public class XMLToDataBaseTest extends TestCase {
             Set<String> keys;
             String[] list = null;
             DBD addDBD = XMLToDBDFactory.create( "add",
-                "src/org/epics/ioc/db/test/xmlToDataBaseDBD.xml",this);
+                "src/org/epics/ioc/db/test/testDBD.xml",this);
             if(maxMessageType!=MessageType.info) {
                 System.out.printf("XMLToDBDFactory.convert reported errors");
                 return;

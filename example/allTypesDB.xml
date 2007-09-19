@@ -1,47 +1,24 @@
 <?xml version="1.0" ?>
 <IOCDatabase>
-<record name = "exampleAi" type = "ai">
-    <value>10.0</value>
-    <units>volts</units>
-    <doubleLimit>
-        <low>0.0</low>
-        <high>10.0</high>
-    </doubleLimit>
-    <input linkSupportName = "processLink" configStructureName = "processLink">
-        <pvname>xxxxxx</pvname>
-        <wait>true</wait>
-    </input>
-    <linearConvert>
-        <engUnitsLow>0.0</engUnitsLow>
-        <engUnitsHigh>10.0</engUnitsHigh>
-    </linearConvert>
-</record>
 
-<record name = "allTypes" type = "allTypes">
-    <boolean>true</boolean>
+<record name = "allTypesDefault" type = "allTypes" />
+
+<record name = "allTypesInitial" type = "allTypes">
+    <boolean supportName = "noop">true</boolean>
     <byte>0x7f</byte>
     <short>0x7fff</short>
     <int>0x7fffffff</int>
     <long>0x7fffffffffffffff</long>
     <float>1.0</float>
     <double>-1e-5</double>
-    <string>This is a string</string>
-    <enum>
-         <choice>choice0</choice>
-         <choice>choice1</choice>
-         <choice>choice2</choice>
-         choice1
-    </enum>
-    <menu>middle</menu>
-    <doubleLimit>
+    <string supportName = "noop">
+        This is a string
+    </string>
+    <doubleLimit supportName = "noop">
         <low>0.0</low>
         <high>10.0</high>
     </doubleLimit>
-    <link linkSupportName = "processLink" configStructureName = "processLink">
-        <pvname>xxxxxx</pvname>
-        <wait>true</wait>
-    </link>
-    <booleanArray capacity = "3" length = "3">
+    <booleanArray capacity = "3" capacityMutable = "false" length = "3">
         <value>false true</value>
     </booleanArray>
     <byteArray capacity = "3">
@@ -64,35 +41,8 @@
     <stringArray>
         <value>string1</value>
         <value>string 2</value>
-        <value>string 3,   string 4   </value>
+        <value>string 3,string 4</value>
     </stringArray>
-    <enumArray capacity = "4" length = "4">
-        <value offset = "1">
-            <choice>choice0</choice>
-            <choice>choice1</choice>
-            <choice>choice2</choice>
-            choice1
-        </value>
-        <value offset = "3">
-            <choice>off</choice>
-            <choice>on</choice>
-            on
-        </value>
-    </enumArray>
-    <menuArray>
-        <value menuName = "menuPriority">middle</value>
-        <value menuName = "menuScan">interrupt</value>
-    </menuArray>
-    <linkArray>
-        <value linkSupportName = "processLink" configStructureName = "processLink">
-            <pvname>xxxxxx</pvname>
-            <wait>true</wait>
-        </value>
-        <value linkSupportName = "inputLink" configStructureName = "inputLink">
-            <pvname>xxxxxx</pvname>
-            <process>true</process>
-        </value>
-    </linkArray>
     <structArray>
         <value structureName = "doubleLimit">
              <low>0.0</low>
@@ -108,7 +58,7 @@
             <value>1.0,2.0,3.0</value>
         </value>
         <value offset = "3" elementType = "string" capacity = "5" length = "5">
-            <value>string 1,  string 2   ,string 3 </value>
+            <value>string 1  ,string 2  ,string 3  </value>
         </value>
     </arrayArray>
     <allTypes>
@@ -120,21 +70,10 @@
         <float>1.0</float>
         <double>2.0</double>
         <string>This is a string</string>
-        <enum>
-             <choice>choice0</choice>
-             <choice>choice1</choice>
-             <choice>choice2</choice>
-             choice1
-        </enum>
-        <menu>middle</menu>
         <doubleLimit>
             <low>0.0</low>
             <high>10.0</high>
         </doubleLimit>
-        <link linkSupportName = "processLink" configStructureName = "processLink">
-            <pvname>xxxxxx</pvname>
-            <wait>true</wait>
-        </link>
         <booleanArray capacity = "3" length = "3">
             <value>false true</value>
         </booleanArray>
@@ -160,33 +99,6 @@
             <value>string 2</value>
             <value>string 3,   string 4   </value>
         </stringArray>
-        <enumArray capacity = "4" length = "4">
-            <value offset = "1">
-                <choice>choice0</choice>
-                <choice>choice1</choice>
-                <choice>choice2</choice>
-                choice1
-            </value>
-            <value offset = "3">
-                <choice>off</choice>
-                <choice>on</choice>
-                on
-            </value>
-        </enumArray>
-        <menuArray>
-            <value menuName = "menuPriority">middle</value>
-            <value menuName = "menuScan">interrupt</value>
-        </menuArray>
-        <linkArray>
-            <value linkSupportName = "processLink" configStructureName = "processLink">
-                <pvname>xxxxxx</pvname>
-                <wait>true</wait>
-            </value>
-            <value linkSupportName = "inputLink" configStructureName = "inputLink">
-                <pvname>xxxxxx</pvname>
-                <process>true</process>
-            </value>
-        </linkArray>
         <structArray>
             <value structureName = "doubleLimit">
                  <low>0.0</low>

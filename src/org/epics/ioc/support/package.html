@@ -10,7 +10,7 @@
 <body>
 <h1 style="text-align: center">EPICS JavaIOC: support<br />
 package: org.epics.ioc.support<br />
-2007.08.30</h1>
+2007.09.18</h1>
 CONTENTS 
 
 <div class="toc">
@@ -33,7 +33,7 @@ CONTENTS
         <ul>
           <li><a href="#Boolean">Boolean Alarms</a></li>
           <li><a href="#Numeric">Numeric Alarms</a></li>
-          <li><a href="#Digital">Digital Alarms</a></li>
+          <li><a href="#Enumerated">Enumerated Alarms</a></li>
         </ul>
       </li>
     </ul>
@@ -46,16 +46,15 @@ CONTENTS
       <li><a href="#DeviceLimi">DeviceLimit</a></li>
     </ul>
   </li>
-  <li><a href="#Digital1">Digital Support</a>
+  <li><a href="#Digital">Digital Support</a>
     <ul>
-      <li><a href="#Database">Database Definitions</a></li>
       <li><a href="#Java">Java Definitions</a></li>
     </ul>
   </li>
   <li><a href="#Incrementa">Incremental Support</a></li>
   <li><a href="#Calculatio">Calculation Support</a>
     <ul>
-      <li><a href="#Database1">Database Definitions for Calculations</a></li>
+      <li><a href="#Database">Database Definitions for Calculations</a></li>
       <li><a href="#Performing">Performing Calculations</a></li>
       <li><a href="#calcArgArr">calcArgArray</a></li>
       <li><a href="#Calculator">Calculator</a></li>
@@ -91,9 +90,8 @@ CONTENTS
 providing support for a particular record type each of the support modules
 provides support for one or more fields. Thus each support module is generic
 because it can support any structure or record type that contains the fields
-required by the support module. Much of the support can be used for "device"
-records, i.e. complex records that have the appearence of having embeded
-records.</p>
+required by the support module. Much of the support can be used for records,
+i.e. complex records that have the appearence of having embeded records.</p>
 
 <p>This package provides interfaces and classes for processing fields of IOC
 database records. </p>
@@ -153,7 +151,7 @@ database records. </p>
           <dd>Alarm support for float fields.</dd>
         <dt>DoubleAlarmFactory</dt>
           <dd>Alarm support for double fields.</dd>
-        <dt>DigitalAlarmFactory</dt>
+        <dt>EnumeratedAlarmFactory</dt>
           <dd>Alarm support for enum field..</dd>
       </dl>
     </dd>
@@ -248,7 +246,6 @@ and any other support code that is involved with record processing:</p>
         void uninitialize();
         void allSupportStarted();
         void process(SupportProcessRequester supportProcessRequester);
-        void setField(DBField dbField);
     }
 
     public abstract class AbstractSupport implements Support {
@@ -266,7 +263,6 @@ and any other support code that is involved with record processing:</p>
         public void uninitialize();
         public void allSupportStarted();
         public void process(SupportProcessRequester supportProcessRequester);
-        public void setField(DBField dbField);
         // following must always be called when support state changes
         protected void setSupportState(SupportState state);
         // following is for use by support code
@@ -321,9 +317,6 @@ values:</p>
       successfully started.</dd>
   <dt style="font-family: courier;">process</dt>
     <dd>Process.</dd>
-  <dt style="font-family: courier;">setField</dt>
-    <dd>This specifies the field in the record to/from the support will
-      put/get data.</dd>
 </dl>
 
 <h3 id="AbstractSu">AbstractSupport</h3>
@@ -358,8 +351,6 @@ methods it needs.</p>
   <dt style="font-family: courier;">process</dt>
     <dd>Normally overridden. The default version just calls
       supportProcessRequester.supportProcessDone(RequestResult.success);</dd>
-  <dt style="font-family: courier;">setField</dt>
-    <dd>Does nothing.</dd>
   <dt style="font-family: courier;">setSupportState</dt>
     <dd>This must be called by support whenever it changes state.</dd>
   <dt style="font-family: courier;">checkSupportState</dt>
@@ -380,7 +371,7 @@ methods it needs.</p>
   <li>boolean, byte, short, int, long, float, double, string.</li>
   <li>Arrays of the previous types.</li>
   <li>aoIncrementalDouble.</li>
-  <li>digital - a record with an enum value.</li>
+  <li>enumerated - a record with an enum value.</li>
   <li>event - a record that announces events.</li>
 </ul>
 It can be used for all of these because it just looks for fields that have
@@ -395,10 +386,6 @@ uses the following semantics:</p>
   <dt>common</dt>
     <dd>It does not call the support for fields scan, timeStamp, and
       processAfterStart. These are the fields that appear in commom.xml</dd>
-  <dt style="font-family: courier;">value</dt>
-    <dd>If setField is called then that field becomes the value field.. If
-      setField is not called then it looks for a field named "value". The
-      value field is passed to the setField method of each support.</dd>
   <dt style="font-family: courier;">alarm</dt>
     <dd>If field alarm is present and has AlarmSupport then it is handled
       properly.</dd>
@@ -414,9 +401,6 @@ and embeded versions of these record types. Lets consider an example. double
 (either the structure or the recordType) has the following fields which might
 have support.:</p>
 <dl>
-  <dt style="font-family: courier;">value</dt>
-    <dd>This field is passed to the setField method of and support attached
-      to any of the following fields.</dd>
   <dt style="font-family: courier;">input</dt>
     <dd>This is a link field. If support is defined then the record instance
       becomes an input record. The support gets a value and puts it into the
@@ -445,13 +429,6 @@ of support.</p>
 
 <p>Support is provided for the scan field. This support is called by
 recordProcess. The support handles all the fields in structure scan:</p>
-<pre>&lt;structure name = "scan"&gt;
-    &lt;field name = "priority" type = "menu" menuName = "priority" default = "middle" /&gt;
-    &lt;field name = "scan" type = "menu" menuName = "scan" default = "passive" /&gt;
-    &lt;field name = "rate" type = "double"  default = "1.0" /&gt;
-    &lt;field name = "eventName" type = "string" /&gt;
-    &lt;field name = "processSelf" type = "boolean" /&gt;
-&lt;/structure&gt;</pre>
 
 <p>At initialization and whenever the scan, priority, rate, or eventName
 fields are modified, the support interacts with the appropriate scanners to
@@ -503,151 +480,17 @@ style="font-family: courier;">Support</span> with the methods:</p>
 <hr />
 
 <p>Support is provided for the alarm field itself and alarm calculation for
-boolean, int, and double fields. The following xml definiotions are involved
-with alarms.</p>
-<pre>&lt;structure name = "alarm"&gt;
-    &lt;field name = "severity" type = "menu" menuName = "alarmSeverity" /&gt;
-    &lt;field name = "message" type = "string" /&gt;
-&lt;/structure&gt;
-
-&lt;structure name = "byteAlarmInterval"&gt;
-    &lt;field name = "value" type = "byte" /&gt;
-    &lt;field name = "severity" type = "menu" menuName = "alarmSeverity" /&gt;
-&lt;/structure&gt;
-&lt;structure name = "byteAlarm"&gt;
-    &lt;field name = "active" type = "boolean" /&gt;
-    &lt;field name = "interval" type = "array" elementType = "structure" /&gt;
-    &lt;field name = "outOfRange" type = "menu" menuName = "alarmSeverity" /&gt;
-&lt;/structure&gt;
-
-&lt;structure name = "shortAlarmInterval"&gt;
-    &lt;field name = "value" type = "short" /&gt;
-    &lt;field name = "severity" type = "menu" menuName = "alarmSeverity" /&gt;
-&lt;/structure&gt;
-&lt;structure name = "shortAlarm"&gt;
-    &lt;field name = "active" type = "boolean" /&gt;
-    &lt;field name = "interval" type = "array" elementType = "structure" /&gt;
-    &lt;field name = "outOfRange" type = "menu" menuName = "alarmSeverity" /&gt;
-&lt;/structure&gt;
-
-&lt;structure name = "intAlarmInterval"&gt;
-    &lt;field name = "value" type = "int" /&gt;
-    &lt;field name = "severity" type = "menu" menuName = "alarmSeverity" /&gt;
-&lt;/structure&gt;
-&lt;structure name = "intAlarm"&gt;
-    &lt;field name = "active" type = "boolean" /&gt;
-    &lt;field name = "interval" type = "array" elementType = "structure" /&gt;
-    &lt;field name = "outOfRange" type = "menu" menuName = "alarmSeverity" /&gt;
-&lt;/structure&gt;
-
-&lt;structure name = "longAlarmInterval"&gt;
-    &lt;field name = "value" type = "long" /&gt;
-    &lt;field name = "severity" type = "menu" menuName = "alarmSeverity" /&gt;
-&lt;/structure&gt;
-&lt;structure name = "longAlarm"&gt;
-    &lt;field name = "active" type = "boolean" /&gt;
-    &lt;field name = "interval" type = "array" elementType = "structure" /&gt;
-    &lt;field name = "outOfRange" type = "menu" menuName = "alarmSeverity" /&gt;
-&lt;/structure&gt;
-
-&lt;structure name = "floatAlarmInterval"&gt;
-    &lt;field name = "value" type = "float" /&gt;
-    &lt;field name = "severity" type = "menu" menuName = "alarmSeverity" /&gt;
-&lt;/structure&gt;
-&lt;structure name = "floatAlarm"&gt;
-    &lt;field name = "active" type = "boolean" /&gt;
-    &lt;field name = "interval" type = "array" elementType = "structure" /&gt;
-    &lt;field name = "outOfRange" type = "menu" menuName = "alarmSeverity" /&gt;
-    &lt;field name = "hystersis" type = "float" /&gt;
-&lt;/structure&gt;
-
-&lt;structure name = "doubleAlarmInterval"&gt;
-    &lt;field name = "value" type = "double" /&gt;
-    &lt;field name = "severity" type = "menu" menuName = "alarmSeverity" /&gt;
-&lt;/structure&gt;
-&lt;structure name = "doubleAlarm"&gt;
-    &lt;field name = "active" type = "boolean" /&gt;
-    &lt;field name = "interval" type = "array" elementType = "structure" /&gt;
-    &lt;field name = "outOfRange" type = "menu" menuName = "alarmSeverity" /&gt;
-    &lt;field name = "hystersis" type = "double" /&gt;
-&lt;/structure&gt;
-
-&lt;structure name = "booleanAlarm" &gt;
-    &lt;field name = "active" type = "boolean" /&gt;
-    &lt;field name = "falseAlarm" type = "menu" menuName = "alarmSeverity" /&gt;
-    &lt;field name = "trueAlarm" type = "menu" menuName = "alarmSeverity" /&gt;
-    &lt;field name = "changeStateAlarm" type = "menu" menuName = "alarmSeverity" /&gt;
-&lt;/structure&gt;
-
-&lt;structure name = "digitalAlarm" &gt;
-    &lt;field name = "active" type = "boolean" /&gt;
-     &lt;!-- each array element must have menuName  alarmSeverity --&gt;
-    &lt;field name = "stateSeverity" type = "array" elementType = "menu" design = "false" /&gt;
-    &lt;field name = "changeStateAlarm" type = "menu" menuName = "alarmSeverity" /&gt;
-&lt;/structure&gt;
-
-&lt;structure name = "digitalState"&gt;
-    &lt;field name = "name" type = "string" /&gt;
-    &lt;field name = "value" type = "int" /&gt;
-    &lt;field name = "severity" type = "menu" menuName = "alarmSeverity" /&gt;
-&lt;/structure&gt;
-
-
-&lt;support name = "alarm"
-    factoryName = "org.epics.ioc.support.AlarmFactory"
-/&gt;
-
-&lt;support name = "booleanAlarm"
-    structureName = "booleanAlarm"
-   factoryName = "org.epics.ioc.support.BooleanAlarmFactory" /&gt;
-
-&lt;support name = "byteAlarm"
-    structureName = "byteAlarm"
-   factoryName = "org.epics.ioc.support.ByteAlarmFactory" /&gt;
-
-&lt;support name = "shortAlarm"
-    structureName = "shortAlarm"
-   factoryName = "org.epics.ioc.support.ShortAlarmFactory" /&gt;
-
-&lt;support name = "intAlarm"
-    structureName = "intAlarm"
-   factoryName = "org.epics.ioc.support.IntAlarmFactory" /&gt;
-
-&lt;support name = "longAlarm"
-    structureName = "longAlarm"
-   factoryName = "org.epics.ioc.support.LongAlarmFactory" /&gt;
-
-&lt;support name = "floatAlarm"
-    structureName = "floatAlarm"
-   factoryName = "org.epics.ioc.support.FloatAlarmFactory" /&gt;
-
-&lt;support name = "doubleAlarm"
-    structureName = "doubleAlarm"
-   factoryName = "org.epics.ioc.support.DoubleAlarmFactory" /&gt;
-
-&lt;support name = "digitalAlarm"
-    structureName = "digitalAlarm"
-   factoryName = "org.epics.ioc.support.DigitalAlarmFactory" /&gt;</pre>
-
-<p>The field alarm is defined in common.xml and thus is in every record. the
-definition is:</p>
-<pre>&lt;field name = "alarm" type = "structure" structureName = "alarm"
-          supportName = "alarm" /&gt;</pre>
-
-<p>Records or structures that support alarm processing for double fields
-contain the definition:</p>
-<pre>&lt;field name = "valueAlarm" type = "link" supportName = "doubleAlarm" /&gt;</pre>
+the primitive types and for an enumerated structure.</p>
 
 <h3 id="Alarm1">Alarm Support</h3>
 
-<p>AlarmSupport is support for a field named "alarm" which must have type
-structure and the structure must be an alarm structure. Within the structure
-hierarchy of a record multiple alarm fields can exist. Some support, e.g.
-generic, calls the support for the alarm field defined in the top level
-structure (defined in common.xml). If multiple alarm fields reside in a
-record then the top level alarm field, which is what the outside world
-normally accesses has a severity at least as great as any of the lower level
-alarms.</p>
+<p>AlarmSupport is support for a field named which must have type structure
+and the structure must be an alarm structure. Within the structure hierarchy
+of a record multiple alarm fields can exist. Some support, e.g. generic,
+calls the support for the alarm field defined in the top level structure
+(defined in common.xml). If multiple alarm fields reside in a record then the
+top level alarm field, which is what the outside world normally accesses has
+a severity at least as great as any of the lower level alarms.</p>
 <pre>    interface AlarmSupport extends Support{
         void beginProcess();
         void endProcess();
@@ -691,7 +534,7 @@ alarms.</p>
 <h3 id="Value">Value Alarms</h3>
 
 <p>Support is provided for alarms for the following types of fields: boolean,
-numeric, and digital.</p>
+numeric, and enumerated.</p>
 
 <h4 id="Boolean">Boolean Alarms</h4>
 <pre>    public class BooleanAlarmFactory {
@@ -741,15 +584,15 @@ field, e.g. FloatAlarmFactory provides alarm support for a field of type
 float. The support for each type except that float and double also support
 hystersis, which is described below. Each has two associated xml structure
 definitions. For example the definitions for double are:</p>
-<pre>&lt;structure name = "doubleAlarmInterval"&gt;
-    &lt;field name = "value" type = "double" /&gt;
-    &lt;field name = "severity" type = "menu" menuName = "alarmSeverity" /&gt;
+<pre>&lt;structure name =&gt;
+    &lt;field name = /&gt;
+    &lt;field name = /&gt;
 &lt;/structure&gt;
-&lt;structure name = "doubleAlarm"&gt;
-    &lt;field name = "active" type = "boolean" /&gt;
-    &lt;field name = "interval" type = "array" elementType = "structure" /&gt;
-    &lt;field name = "outOfRange" type = "menu" menuName = "alarmSeverity" /&gt;
-    &lt;field name = "hystersis" type = "double" /&gt;
+&lt;structure name =&gt;
+    &lt;field name = /&gt;
+    &lt;field name = /&gt;
+    &lt;field name = /&gt;
+    &lt;field name = /&gt;
 &lt;/structure&gt;</pre>
 
 <p>The first structure defines an interval for alarm checking. It has the
@@ -775,25 +618,17 @@ fields:</p>
     <dd>The alarm severity if no interval is found.</dd>
   <dt style="font-family: courier;">hystersis</dt>
     <dd>If value goes into alarm this is the amount it must come out of alarm
-      before the alarm severity is modified. This prevents alarm
-    "chatter".</dd>
+      before the alarm severity is modified. This prevents alarm .</dd>
 </dl>
 
-<h4 id="Digital">Digital Alarms</h4>
-<pre>    public class DigitalAlarmFactory {
+<h4 id="Enumerated">Enumerated Alarms</h4>
+<pre>    public class EnumeratedAlarmFactory {
         public static Support create(DBStructure dbStructure);
     }</pre>
 
-<p>The above factory provides support for an enum field. It has a associated
-xml structure:</p>
-<pre>&lt;structure name = "digitalAlarm" &gt;
-    &lt;field name = "active" type = "boolean" /&gt;
-     &lt;!-- each array element must have menuName  alarmSeverity --&gt;
-    &lt;field name = "stateSeverity" type = "array" elementType = "menu" design = "false" /&gt;
-    &lt;field name = "changeStateAlarm" type = "menu" menuName = "alarmSeverity" /&gt;
-&lt;/structure&gt;</pre>
+<p>The above factory provides support for an enumerated structure field.</p>
 
-<p>The structure has the following fields:</p>
+<p>The enumeratedAlarm structure has the following fields:</p>
 <dl>
   <dt style="font-family: courier;">active</dt>
     <dd>A boolean field. If (false,true) then alarm conditions (are not,are)
@@ -814,43 +649,6 @@ xml structure:</p>
 
 <p>Support is available for input and output linear conversions. The xml
 definitions for linear conversions are:</p>
-<pre>&lt;structure name = "linearConvert" &gt;
-    &lt;field name = "engUnitsLow" type = "double" /&gt;
-    &lt;field name = "engUnitsHigh" type = "double" /&gt;
-    &lt;field name = "deviceHigh" type = "int" /&gt;
-    &lt;field name = "deviceLow" type = "int" /&gt;
-    &lt;field name = "slope" type = "double" /&gt;
-    &lt;field name = "intercept" type = "double" /&gt;
-&lt;/structure&gt;
-  
-
-&lt;structure name = "linearConvertInput" supportName = "linearConvertInput"&gt;
-    &lt;field name = "rawValue" type = "int" /&gt;
-    &lt;field name = "linearConvert" type = "structure" structureName = "linearConvert" /&gt;
-    &lt;field name = "input" type = "link" /&gt;
-&lt;/structure&gt;
-
-&lt;structure name = "linearConvertOutput" supportName = "linearConvertOutput"&gt;
-    &lt;field name = "rawValue" type = "int" /&gt;
-    &lt;field name = "linearConvert" type = "structure" structureName = "linearConvert" /&gt;
-    &lt;field name = "output" type = "link" /&gt;
-&lt;/structure&gt;
-
-&lt;support name = "linearConvertInput"
-    factoryName = "org.epics.ioc.support.LinearConvertInputFactory"
-/&gt;
-
-&lt;support name = "linearConvertOutput"
-    factoryName = "org.epics.ioc.support.LinearConvertOutputFactory"
-/&gt;</pre>
-
-<p>A structure or recordType that implemnts linear conversion for input must
-define a field as follows:</p>
-<pre>&lt;field name = "input" type = "structure" structureName = "linearConvertInput"/&gt;</pre>
-
-<p>A structure or recordType that implemnts linear conversion for output must
-define a field as follows:</p>
-<pre>&lt;field name = "output" type = "structure" structureName = "linearConvertOutput"/&gt;</pre>
 
 <h3 id="linearConv">linearConversion</h3>
 
@@ -895,8 +693,8 @@ input is a structure containing the following fields:</p>
   <dt style="font-family: courier;">linearConvert</dt>
     <dd>The structure providing the conversion parameters.</dd>
   <dt style="font-family: courier;">input</dt>
-    <dd>The link for reading the rawValue. If a field named "input" is
-      defined and has support the support is called.</dd>
+    <dd>The link for reading the rawValue. If a field named is defined and
+      has support the support is called.</dd>
 </dl>
 
 <h3 id="LinearConv1">LinearConvertOutputFactory</h3>
@@ -914,8 +712,8 @@ conversion for output is a structure containing the following fields:</p>
   <dt style="font-family: courier;">linearConvert</dt>
     <dd>The structure providing the conversion parameters.</dd>
   <dt style="font-family: courier;">output</dt>
-    <dd>The link for reading the rawValue. If a field named "output" is
-      defined and has support the support is called.</dd>
+    <dd>The link for reading the rawValue. If a field named is defined and
+      has support the support is called.</dd>
 </dl>
 
 <h3 id="DeviceLimi">DeviceLimit</h3>
@@ -924,57 +722,24 @@ conversion for output is a structure containing the following fields:</p>
     }</pre>
 
 <p>This is a convenience class for accessing a structure that has two fields:
-"low" and "high".</p>
+"low" and.</p>
 <hr />
 
-<h2 style="text-align: center" id="Digital1">Digital Support</h2>
+<h2 style="text-align: center" id="Digital">Digital Support</h2>
 <hr />
 
-<p>This is support for a record or structure that supports digital I/O, i.e.
-a set of states, an integer register, and a mask that selects bits from the
-register.</p>
-
-<h3 id="Database">Database Definitions</h3>
-
-<p>The support uses the following definitions:</p>
-<pre>    &lt;structure name=digitalState&gt;
-        &lt;field name=name type=string /&gt;
-        &lt;field name=value type=int /&gt;
-        &lt;field name=severity type=menu menuName=alarmSeverity /&gt;
-    &lt;/structure&gt;
-
-    &lt;structure name = "digitalIO" supportName = "digital"&gt;
-        &lt;!-- structureName must be digitalState --&gt;
-        &lt;field name = "states" type = "array" elementType = "structure" /&gt;
-        &lt;field name = "numberOfBits" type = "int" /&gt;
-        &lt;field name = "registerValue" type = "int" design = "false" /&gt;
-        &lt;field name = "input" type = "link" /&gt;
-        &lt;field name = "valueAlarm" type = "link" supportName = "digitalAlarm" /&gt;
-        &lt;field name = "output" type = "link" /&gt;
-    &lt;/structure&gt;</pre>
-
-<p>In addition a value field which must be an enum must be defined.</p>
+<p>This is support for a record or structure that supports digital I/O. </p>
 
 <h3 id="Java">Java Definitions</h3>
 <pre>    public class DigitalFactory {
-        public static Support create(DBStructure dbStructure);
+        public static Support create(DBField dbField);
     }</pre>
 
-<p>During initialization it sets the array of choices for the value field. It
-uses the name fields in the states array to create the choices.</p>
-
-<p>When the process method is called it does the following:</p>
-<ul>
-  <li>If input has support it is called to put a new value in
-  registerValue.</li>
-  <li>Gets a new value from the registerValue field.</li>
-  <li>The value is anded with the mask created from the low order
-    numberOfBits of the registerValue.</li>
-  <li>It compares the new value with the values in the array of states. If a
-    match occurs it determines the new index for the value field.</li>
-  <li>Calls support for valueAlarm.</li>
-  <li>Calls support for output.</li>
-</ul>
+<p>The dbField must be an array of digitalState structures. The enumerated
+value field must be in the parent of the parent of dbField. The register
+value must be in the parent of dbField. During initialization it sets the
+array of choices for the value field. It uses the name fields in the states
+array to create the choices.</p>
 <hr />
 
 <h2 style="text-align: center" id="Incrementa">Incremental Support</h2>
@@ -997,29 +762,28 @@ aoIncrementalOutut record.</p>
   <dt style="font-family: courier;">value</dt>
     <dd>The value field.</dd>
   <dt style="font-family: courier;">desiredValue</dt>
-    <dd>This must be a double field. It can either be a field named
-      "desiredValue" in the record or structure being supported or it can be
-      a field passed as an argument to the double support setDesiredField
-      method. When this field changes the support changes the value field
-      until it has the desired value. If control limits are specified then
-      the desired value is forced to be within the control limits. If
-      incrementalOutput is true then each time the record is processed the
-      value field is changed by rateOfChange until the desired value is
-      reached.</dd>
+    <dd>This must be a double field. It can either be a field named in the
+      record or structure being supported or it can be a field passed as an
+      argument to the double support setDesiredField method. When this field
+      changes the support changes the value field until it has the desired
+      value. If control limits are specified then the desired value is forced
+      to be within the control limits. If incrementalOutput is true then each
+      time the record is processed the value field is changed by rateOfChange
+      until the desired value is reached.</dd>
   <dt style="font-family: courier;">input</dt>
     <dd>If this field exists and has support it is called to get the
       desiredValue.</dd>
   <dt style="font-family: courier;">controlLimit</dt>
     <dd>This field is optional. If present it must be a structure that has
-      two double fields named "low" and "high". If the low value is strictly
-      less that the high value then limits are enforced, i.e. the desired
-      value is forced to be within the control limits.</dd>
+      two double fields named. If the low value is strictly less that the
+      high value then limits are enforced, i.e. the desired value is forced
+      to be within the control limits.</dd>
   <dt style="font-family: courier;">incrementalOutput</dt>
     <dd>This field is optional. If the record/structure has a field named
-      "incrementalOutput" then it must be have type boolean. If not present
-      the default is true. If this has the value true the output is adjusted
-      by rateOfChange otherwise the value field is changed in one step to the
-      desired value.</dd>
+      then it must be have type boolean. If not present the default is true.
+      If this has the value true the output is adjusted by rateOfChange
+      otherwise the value field is changed in one step to the desired
+    value.</dd>
   <dt style="font-family: courier;">rateOfChange</dt>
     <dd>If incrementalOutput is true this is the amount the value will change
       each time the record is processed.</dd>
@@ -1036,11 +800,9 @@ functionality. A support module is available for field calcArgArray. A
 structure that supports calculations normally has the fields:</p>
 <dl>
   <dt style="font-family: courier;">value</dt>
-    <dd>It can either be a field named "value" in the record or structure
-      being supported or it can be a field passed as an argument to the
-      support setField method. This field is assigned a value by the
-      calculation module and must have a type compatible with the calculator.
-    </dd>
+    <dd>It must be a field named in the parent of the calculation field. This
+      field is assigned a value by the calculation module and must have a
+      type compatible with the calculator. </dd>
   <dt style="font-family: courier;">calcArgArray</dt>
     <dd>The calcArgArray field is normally an array of structures with each
       element being a calcArg structure and the support for calcArgArray is
@@ -1055,50 +817,50 @@ structure that supports calculations normally has the fields:</p>
       support must complete before the support for valueAlarm is called.</dd>
 </dl>
 
-<h3 id="Database1">Database Definitions for Calculations</h3>
+<h3 id="Database">Database Definitions for Calculations</h3>
 
 <p>This is example support for use with the calcDouble record or structure.
 File calcDoubleCommon.xml defines the fields:</p>
 <pre>&lt;DBDefinition&gt;
-    &lt;field name = "value" type = "double" &gt;
-        &lt;property name = "alarm" associatedField = "alarm" /&gt;
-        &lt;property name = "units" associatedField = "units" /&gt;
-        &lt;property name = "displayLimit" associatedField = "displayLimit" /&gt;
-        &lt;property name = "timeStamp" associatedField = "/timeStamp" /&gt;
+    &lt;field name = &gt;
+        &lt;property name = /&gt;
+        &lt;property name = /&gt;
+        &lt;property name = /&gt;
+        &lt;property name = /&gt;
     &lt;/field&gt;
-    &lt;field name = "calcArgArray" type = "array"
-         elementType = "structure" supportName = "calcArgArray" /&gt;
-    &lt;field name = "calculator" type = "link" /&gt;
-    &lt;field name = "valueAlarm" type = "link" supportName = "doubleAlarm" /&gt;
-    &lt;field name = "supportArray" type = "array"
-         elementType = "structure" supportName = "supportArray" /&gt;
-    &lt;field name = "units" type = "string" /&gt;
-    &lt;field name = "displayLimit"
-         type = "structure" structureName = "doubleLimit" /&gt;
+    &lt;field name =
+         elementType = /&gt;
+    &lt;field name = /&gt;
+    &lt;field name = /&gt;
+    &lt;field name =
+         elementType = /&gt;
+    &lt;field name = /&gt;
+    &lt;field name =
+         type = /&gt;
 &lt;/DBDefinition&gt;</pre>
 
 <p>Field calcDoubleRecord.xml defines:</p>
-<pre>&lt;structure name = "calcArg" &gt;
-    &lt;field name = "value" type = "double" /&gt;
-    &lt;field name = "name" type = "string" /&gt;
-    &lt;field name = "input" type = "link" /&gt;
+<pre>&lt;structure name = &gt;
+    &lt;field name = /&gt;
+    &lt;field name = /&gt;
+    &lt;field name = /&gt;
 &lt;/structure&gt;
 
-&lt;structure name = "calcDouble" supportName = "calcDoubleRecord" &gt;
-    &lt;include href = "calcDoubleCommon.xml" /&gt;
+&lt;structure name = &gt;
+    &lt;include href = /&gt;
 &lt;/structure&gt;
 
-&lt;recordType name = "calcDouble" supportName = "calcDoubleRecord" &gt;
-    &lt;include href = "common.xml" /&gt;
-    &lt;include href = "calcDoubleCommon.xml" /&gt;
+&lt;recordType name = &gt;
+    &lt;include href = /&gt;
+    &lt;include href = /&gt;
 &lt;/recordType&gt;
 
-&lt;support name = "calcDoubleRecord"
-   factoryName = "org.epics.ioc.recordSupport.CalcDoubleFactory" /&gt;</pre>
+&lt;support name =
+   factoryName = /&gt;</pre>
 
 <p>The following support is defined in support.xml</p>
-<pre>&lt;support name = "calcArgArray"
-   factoryName = "org.epics.ioc.support.CalcArgArrayFactory" /&gt;</pre>
+<pre>&lt;support name =
+   factoryName = /&gt;</pre>
 
 <h3 id="Performing">Performing Calculations</h3>
 
@@ -1109,8 +871,8 @@ calcArgArray, the calcArgArray support calls the input link support (if it is
 specified) to get the calcArg value. The calculation support uses the
 calcArgArray values to compute the calculated value. At present generic
 calculation support is not implemented. It is envisioned that it will allow
-the user to enter expressions like "voltage*current". The calcArgArray would
-have two elements with calcArg.name set to "voltage" and "current".</p>
+the user to enter expressions like. The calcArgArray would have two elements
+with calcArg.name set to.</p>
 
 <h3 id="calcArgArr">calcArgArray</h3>
 
@@ -1166,7 +928,7 @@ structures, which has the fields:</p>
         return new CounterCalculatorImpl(dbStructure);
     }
 
-    private static String supportName = "counterCalculator";
+    private static String supportName =;
 
     private static class CounterCalculatorImpl extends AbstractSupport
     implements CalculatorSupport
@@ -1185,12 +947,18 @@ structures, which has the fields:</p>
         }
 
         public void initialize() {
-            if(!super.checkSupportState(SupportState.readyForInitialize,supportName)) return;
-            if(valuePVField==null) {
-                pvStructure.message("setField was not called", MessageType.error);
+            if(!super.checkSupportState(SupportState.readyForInitialize,supportName))
+                 return;
+            DBField dbParent = dbStructure.getParent();
+            PVField pvParent = dbParent.getPVField();
+            PVField pvField = pvParent.findProperty("value");
+            if(pvField==null) {
+                pvStructure.message("value field not found", MessageType.error);
                 return;
             }
-            PVField pvField = calcArgArraySupport.getPVField("min");
+            valueDBField = dbStructure.getDBRecord().findDBField(pvField);
+            valuePVField = (PVDouble)valueDBField.getPVField();
+            pvField = calcArgArraySupport.getPVField("min");
             if(pvField==null) {
                 pvStructure.message("field min not found", MessageType.error);
                 return;
@@ -1242,11 +1010,6 @@ structures, which has the fields:</p>
             supportProcessRequester.supportProcessDone(RequestResult.success);
         }
 
-        public void setField(DBField dbField) {
-            valueDBField = dbField;
-            valuePVField = (PVDouble)dbField.getPVField();
-        }
-
         public void setCalcArgArraySupport(CalcArgArraySupport calcArgArraySupport) {
             this.calcArgArraySupport = calcArgArraySupport;
         }
@@ -1281,9 +1044,8 @@ false it becomes true and if true becomes false.</p>
 event. The event name is given in the field:</p>
 <dl>
   <dt style="font-family: courier;">value</dt>
-    <dd>This must be a string field. It can either be a field named "value"
-      in the record or structure being supported or it can be a field passed
-      as an argument to the event support setField method.</dd>
+    <dd>This must be a string field named located in the parent of this
+      field, which is normally the value field itself.</dd>
 </dl>
 
 <p>Whenever the record is processed eventScanner.announce is called, i.e. the
@@ -1318,8 +1080,7 @@ following:</p>
 </dl>
 
 <p>Each requires that other support code, e.g. record support knows how to
-call them. In addition the code that calls them must call support.setField
-for inputSupport, outputSupport, and monitorSupport.</p>
+call them.</p>
 
 <p>The types of data that can be transfered are.</p>
 <ul>
@@ -1373,11 +1134,11 @@ AbstractSupport without overriding any methods.</p>
 
 <p>This is link support that simulates asynchronous support. It uses a
 configStructure that has the definition:</p>
-<pre>&lt;structure name = "delaySupport"&gt;
+<pre>&lt;structure name =&gt;
     &lt;!-- min, max, inc are delay in milliseconds --&gt;
-    &lt;field name = "min" type = "long" /&gt;
-    &lt;field name = "max" type = "long" /&gt;
-    &lt;field name = "inc" type = "long" /&gt;
+    &lt;field name = /&gt;
+    &lt;field name = /&gt;
+    &lt;field name = /&gt;
 &lt;/structure&gt;</pre>
 
 <p>where</p>
@@ -1461,7 +1222,6 @@ portDriver support.</p>
         public void start();
         public void stop();
         public void process(SupportProcessRequester supportProcessRequester);
-        public void setField(DBField dbField);
         public void message(String message,MessageType messageType);
         public void processContinue();
         public void callback(Status status, User user);
@@ -1508,96 +1268,96 @@ PDRVSupportFactory for how to use the abstract support.</p>
 
 <p>This implements all of the link support defined in .xml file
 javaIOC/dbd/structures/portDriver.xml.</p>
-<pre>&lt;structure name = "pdrvSupport"&gt;
-    &lt;field name = "portName" type = "string" /&gt;
-    &lt;field name = "addr" type = "int" /&gt;
-    &lt;field name = "timeout" type = "double" /&gt;
-    &lt;field name = "mask" type = "int" /&gt;
-    &lt;field name = "size" type = "int" /&gt;
-    &lt;field name = "process" type = "boolean" default = "false" /&gt;
-    &lt;field name = "drvParams" type = "string" /&gt;
+<pre>&lt;structure name =&gt;
+    &lt;field name = /&gt;
+    &lt;field name = /&gt;
+    &lt;field name = /&gt;
+    &lt;field name = /&gt;
+    &lt;field name = /&gt;
+    &lt;field name = /&gt;
+    &lt;field name = /&gt;
 &lt;/structure&gt;
 
-&lt;support name = "pdrvOctetInput"
-    structureName = "pdrvSupport" 
-    factoryName = "org.epics.ioc.support.PDRVSupportFactory" /&gt;
-&lt;support name = "pdrvOctetInterruptInput"
-    structureName = "pdrvSupport" 
-    factoryName = "org.epics.ioc.support.PDRVSupportFactory" /&gt;
-&lt;support name = "pdrvOctetOutput"
-    structureName = "pdrvSupport" 
-    factoryName = "org.epics.ioc.support.PDRVSupportFactory" /&gt;
+&lt;support name =
+    structureName = 
+    factoryName = /&gt;
+&lt;support name =
+    structureName = 
+    factoryName = /&gt;
+&lt;support name =
+    structureName = 
+    factoryName = /&gt;
 
-&lt;support name = "pdrvInt32Input"
-    structureName = "pdrvSupport" 
-    factoryName = "org.epics.ioc.support.PDRVSupportFactory" /&gt;
-&lt;support name = "pdrvInt32InterruptInput"
-    structureName = "pdrvSupport" 
-    factoryName = "org.epics.ioc.support.PDRVSupportFactory" /&gt;
-&lt;support name = "pdrvInt32AverageInput"
-    structureName = "pdrvSupport" 
-    factoryName = "org.epics.ioc.support.PDRVSupportFactory" /&gt;
-&lt;support name = "pdrvInt32Output"
-    structureName = "pdrvSupport" 
-    factoryName = "org.epics.ioc.support.PDRVSupportFactory" /&gt;
+&lt;support name =
+    structureName = 
+    factoryName = /&gt;
+&lt;support name =
+    structureName = 
+    factoryName = /&gt;
+&lt;support name =
+    structureName = 
+    factoryName = /&gt;
+&lt;support name =
+    structureName = 
+    factoryName = /&gt;
 
-&lt;support name = "pdrvInt32ArrayInput"
-    structureName = "pdrvSupport" 
-    factoryName = "org.epics.ioc.support.PDRVSupportFactory" /&gt;
-&lt;support name = "pdrvInt32ArrayInterruptInput"
-    structureName = "pdrvSupport" 
-    factoryName = "org.epics.ioc.support.PDRVSupportFactory" /&gt;
-&lt;support name = "pdrvInt32ArrayOutput"
-    structureName = "pdrvSupport" 
-    factoryName = "org.epics.ioc.support.PDRVSupportFactory" /&gt;
+&lt;support name =
+    structureName = 
+    factoryName = /&gt;
+&lt;support name =
+    structureName = 
+    factoryName = /&gt;
+&lt;support name =
+    structureName = 
+    factoryName = /&gt;
 
-&lt;support name = "pdrvFloat64Input"
-    structureName = "pdrvSupport" 
-    factoryName = "org.epics.ioc.support.PDRVSupportFactory" /&gt;
-&lt;support name = "pdrvFloat64InterruptInput"
-    structureName = "pdrvSupport" 
-    factoryName = "org.epics.ioc.support.PDRVSupportFactory" /&gt;
-&lt;support name = "pdrvFloat64AverageInput"
-    structureName = "pdrvSupport" 
-    factoryName = "org.epics.ioc.support.PDRVSupportFactory" /&gt;
-&lt;support name = "pdrvFloat64Output"
-    structureName = "pdrvSupport" 
-    factoryName = "org.epics.ioc.support.PDRVSupportFactory" /&gt;
+&lt;support name =
+    structureName = 
+    factoryName = /&gt;
+&lt;support name =
+    structureName = 
+    factoryName = /&gt;
+&lt;support name =
+    structureName = 
+    factoryName = /&gt;
+&lt;support name =
+    structureName = 
+    factoryName = /&gt;
 
-&lt;support name = "pdrvFloat64ArrayInput"
-    structureName = "pdrvSupport" 
-    factoryName = "org.epics.ioc.support.PDRVSupportFactory" /&gt;
-&lt;support name = "pdrvFloat64ArrayInterruptInput"
-    structureName = "pdrvSupport" 
-    factoryName = "org.epics.ioc.support.PDRVSupportFactory" /&gt;
-&lt;support name = "pdrvFloat64ArrayOutput"
-    structureName = "pdrvSupport" 
-    factoryName = "org.epics.ioc.support.PDRVSupportFactory" /&gt;
+&lt;support name =
+    structureName = 
+    factoryName = /&gt;
+&lt;support name =
+    structureName = 
+    factoryName = /&gt;
+&lt;support name =
+    structureName = 
+    factoryName = /&gt;
 
-&lt;support name = "pdrvUInt32DigitalInput"
-    structureName = "pdrvSupport" 
-    factoryName = "org.epics.ioc.support.PDRVSupportFactory" /&gt;
-&lt;support name = "pdrvUInt32DigitalInterruptInput"
-    structureName = "pdrvSupport" 
-    factoryName = "org.epics.ioc.support.PDRVSupportFactory" /&gt;
-&lt;support name = "pdrvUInt32DigitalOutput"
-    structureName = "pdrvSupport" 
-    factoryName = "org.epics.ioc.support.PDRVSupportFactory" /&gt;</pre>
+&lt;support name =
+    structureName = 
+    factoryName = /&gt;
+&lt;support name =
+    structureName = 
+    factoryName = /&gt;
+&lt;support name =
+    structureName = 
+    factoryName = /&gt;</pre>
 
 <h3 id="PDRVPortCr">PDRVPortCreateFactory</h3>
 
 <p>This implements support for the portRecord which has the definition:</p>
-<pre>&lt;recordType name = "port" supportName = "portRecord" &gt;
-    &lt;include href = "common.xml" /&gt;
-    &lt;field name = "factoryName" type = "string" /&gt;
-    &lt;field name = "portName" type = "string" /&gt;
-    &lt;field name = "autoConnect" type = "boolean" default = "true" /&gt;
-    &lt;field name = "priority" type = "menu" menuName = "priority" /&gt;
-    &lt;field name = "driverParameters" type = "structure" structureName = "null"/&gt;
+<pre>&lt;recordType name = &gt;
+    &lt;include href = /&gt;
+    &lt;field name = /&gt;
+    &lt;field name = /&gt;
+    &lt;field name = /&gt;
+    &lt;field name = /&gt;
+    &lt;field name =/&gt;
 &lt;/recordType&gt;
 
-&lt;support name = "portCreate"
-   factoryName = "org.epics.ioc.support.PDRVPortCreateFactory" /&gt;</pre>
+&lt;support name =
+   factoryName = /&gt;</pre>
 
 <p>This is support for a record or structure that initializes a portDriver
 port.</p>
@@ -1606,19 +1366,19 @@ port.</p>
 
 <p>This implements support for the portDeviceControl which has the
 definition:</p>
-<pre>&lt;recordType name = "portDeviceControl" supportName = "portDeviceControl" &gt;
-    &lt;field name = "message" type = "string" /&gt;
-    &lt;field name = "portDevice" type = "string" /&gt;
-    &lt;field name = "connect" type = "menu" menuName = "connectDisconnect" /&gt;
-    &lt;field name = "enable" type = "menu" menuName = "enableDisable" /&gt;
-    &lt;field name = "autoConnect" type = "boolean" /&gt;
-    &lt;field name = "traceMask" type = "int" /&gt;
-    &lt;field name = "traceIOMask" type = "int" /&gt;
-    &lt;field name = "report" type = "int" /&gt;
+<pre>&lt;recordType name = &gt;
+    &lt;field name = /&gt;
+    &lt;field name = /&gt;
+    &lt;field name = /&gt;
+    &lt;field name = /&gt;
+    &lt;field name = /&gt;
+    &lt;field name = /&gt;
+    &lt;field name = /&gt;
+    &lt;field name = /&gt;
 &lt;/recordType&gt;
 
-&lt;support name = "portDeviceControl"
-   factoryName = "org.epics.ioc.support.PDRVPortDeviceControlFactory" /&gt;</pre>
+&lt;support name =
+   factoryName = /&gt;</pre>
 <hr />
 
 <h2 style="text-align: center" id="Power">Power Supply Support</h2>
@@ -1627,45 +1387,20 @@ definition:</p>
         public static Support create(DBStructure dbStructure);
     }</pre>
 
-<p>This is an example of support for a "device". Given a voltage and power to
-computes the current. It supports fields for reading the voltage and for
-writing the current. The complete set of fields it suppports are:</p>
+<p>This is an example of support for a. Given a voltage and power to computes
+the current. It supports fields for reading the voltage and for writing the
+current. The complete set of fields it suppports are:</p>
 <dl>
   <dt style="font-family: courier;">voltage</dt>
-    <dd>This is required. The record/structure must have a field named
-      "voltage" and the field type must be double.</dd>
+    <dd>This is required. It must be a double structure.</dd>
   <dt style="font-family: courier;">current</dt>
-    <dd>This is required. The record/structure must have a field named
-      "current" and the field type must be double.</dd>
+    <dd>This is required. It must be a double structure.</dd>
   <dt style="font-family: courier;">power</dt>
-    <dd>This is required. The record/structure must have a field named
-      "power" and the field type must be double.</dd>
-  <dt style="font-family: courier;">input</dt>
-    <dd>This is optional. If the record/structure has a field named "input"
-      and, if that field has associated support, the support is called. The
-      power field is passed to support.setField. The input support must
-      complete processing before the power is computed.</dd>
-  <dt style="font-family: courier;">voltageInput</dt>
-    <dd>This is optional. If the record/structure has a field named
-      "voltageInput" and, if that field has associated support, the support
-      is called. The voltage field is passed to support.setField. The support
-      must complete processing before the power is computed.</dd>
-  <dt style="font-family: courier;">valueAlarm</dt>
-    <dd>This is optional. If the record/structure has a field named
-      "valueAlarm" and, if that field has associated support, the support is
-      called after the power is computed. The power field is passed to
-      support.setField. The valueAlarm support must complete processing
-      before currentOutput support is called.</dd>
-  <dt style="font-family: courier;">currentOutput</dt>
-    <dd>This is optional. If the record/structure has a field named
-      "currentOutput" and, if that field has associated support, the support
-      is called. The current field is passed to support.setField. The support
-      must complete processing before SupportArray support is called.</dd>
-  <dt style="font-family: courier;">supportArray</dt>
-    <dd>This is optional. If the record/structure has a field named
-      "supportArray" and, if that field has associated support, the support
-      is called. The value field is passed to support.setField. When
-      supportArray support completes double support completes processing.</dd>
+    <dd>This is required. It must be a double structure.</dd>
 </dl>
+
+<p>Currently PowerSupplyFactory only implements support named
+powerSupplyCurrent, which is attached to current.input. It computes
+current.value from power.value and voltage.value.</p>
 </body>
 </html>

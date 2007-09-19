@@ -1,0 +1,6 @@
+<?xml version="1.0" ?>
+<DBDefinition>
+  <field name = "supply" type = "array" elementType = "structure" supportName = "supportArray"  />
+  <field name = "alarm" type = "structure"/>
+  <field name = "timeStamp" type = "structure" />  
+</DBDefinition>

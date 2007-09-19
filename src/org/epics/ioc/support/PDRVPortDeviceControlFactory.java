@@ -5,11 +5,9 @@
  */
 package org.epics.ioc.support;
 
-import java.lang.reflect.*;
 
 import org.epics.ioc.pv.*;
 import org.epics.ioc.pv.Field;
-import org.epics.ioc.pv.Type;
 import org.epics.ioc.db.*;
 import org.epics.ioc.util.*;
 import org.epics.ioc.pdrv.*;
@@ -530,32 +528,5 @@ public class PDRVPortDeviceControlFactory {
             this.value = value;
             dbField.postPut();
         }
-    }
-    
-    private static PVString getChoiceField(PVStructure pvStructure,String fieldName) {
-        Structure structure = pvStructure.getStructure();
-        PVField[] pvFields = pvStructure.getFieldPVFields();
-        int index = structure.getFieldIndex(fieldName);
-        if(index<0) {
-            pvStructure.message("field " + fieldName + " does not exist", MessageType.error);
-            return null;
-        }
-        PVField pvField = pvFields[index];
-        if(pvField.getField().getType()!=Type.pvStructure) {
-            pvField.message("field is not a structure", MessageType.error);
-            return null;
-        }
-        pvStructure = (PVStructure)pvField;
-        index = structure.getFieldIndex("choice");
-        if(index<0) {
-            pvStructure.message("field index does not exist", MessageType.error);
-            return null;
-        }
-        pvField = pvFields[index];
-        if(pvField.getField().getType()!=Type.pvString) {
-            pvField.message("field is not a string", MessageType.error);
-            return null;
-        }
-        return (PVString)pvField;
     }
 }

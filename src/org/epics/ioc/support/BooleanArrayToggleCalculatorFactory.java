@@ -24,22 +24,43 @@ public class BooleanArrayToggleCalculatorFactory {
     
     private static class ArrayIncrementCalculatorImpl extends AbstractSupport implements CalculatorSupport
     {
+        private DBStructure dbStructure;
+        private PVStructure pvStructure;
+        
         private DBField valueDBField = null;
         private PVBooleanArray valuePVField= null;
         private BooleanArrayData booleanArrayData = new BooleanArrayData();
 
         private ArrayIncrementCalculatorImpl(DBStructure dbStructure) {
             super(supportName,dbStructure);
+            this.dbStructure = dbStructure;
+            pvStructure = dbStructure.getPVStructure();
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.process.AbstractSupport#initialize()
          */
         public void initialize() {
             if(!super.checkSupportState(SupportState.readyForInitialize,supportName)) return;
-            if(valuePVField==null) {
-                super.message("no value field", MessageType.error);
+            DBField dbParent = dbStructure.getParent();
+            PVField pvParent = dbParent.getPVField();
+            PVField pvField = pvParent.findProperty("value");
+            if(pvField==null) {
+                pvStructure.message("value field not found", MessageType.error);
                 return;
             }
+            Field field = pvField.getField();
+            Type type = field.getType();
+            if(type!=Type.pvArray) {
+                super.message(" field must be boolean array", MessageType.error);
+                return;
+            }
+            Array array = (Array)field;
+            if(array.getElementType()!=Type.pvBoolean) {
+                super.message(" field must be boolean array", MessageType.error);
+                return;
+            }
+            valueDBField = dbStructure.getDBRecord().findDBField(pvField);
+            valuePVField = (PVBooleanArray)pvField;
             setSupportState(SupportState.readyForStart);
         }
         /* (non-Javadoc)
@@ -55,25 +76,6 @@ public class BooleanArrayToggleCalculatorFactory {
             valuePVField.put(0, length, data, 0);
             valueDBField.postPut();
             supportProcessRequester.supportProcessDone(RequestResult.success);
-        }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.process.Support#setField(org.epics.ioc.pvAccess.PVData)
-         */
-        public void setField(DBField dbField) {
-            PVField pvField = dbField.getPVField();
-            Field field = pvField.getField();
-            Type type = field.getType();
-            if(type!=Type.pvArray) {
-                super.message(" field must be boolean array", MessageType.error);
-                return;
-            }
-            Array array = (Array)field;
-            if(array.getElementType()!=Type.pvBoolean) {
-                super.message(" field must be boolean array", MessageType.error);
-                return;
-            }
-            valueDBField = dbField;
-            valuePVField = (PVBooleanArray)pvField;
         }
 
         /* (non-Javadoc)

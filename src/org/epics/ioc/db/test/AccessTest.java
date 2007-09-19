@@ -27,7 +27,7 @@ public class AccessTest extends TestCase {
         IOCDB iocdb = IOCDBFactory.create("testIOCDatabase");
         Requester iocRequester = new Listener();
         XMLToDBDFactory.convert(dbd,
-                 "src/org/epics/ioc/db/test/accessDBD.xml",iocRequester);
+                 "example/exampleDBD.xml",iocRequester);
               
 //        System.out.printf("%n%nstructures");
 //        Map<String,DBDStructure> structureMap = dbd.getStructureMap();
@@ -45,7 +45,7 @@ public class AccessTest extends TestCase {
 //        }
         
           XMLToIOCDBFactory.convert(dbd,iocdb,
-                "src/org/epics/ioc/db/test/accessDB.xml",iocRequester);
+                "example/exampleDB.xml",iocRequester);
                
 //        System.out.printf("%nrecords%n");
 //        Map<String,DBRecord> recordMap = iocdb.getRecordMap();
@@ -55,95 +55,71 @@ public class AccessTest extends TestCase {
 //            System.out.print(record.toString());
 //        }
           
-        testAccess(iocdb,"exampleAi","status");
-        testAccess(iocdb,"exampleAi","priority");
-        testAccess(iocdb,"exampleAi","timeStamp");
-        testAccess(iocdb,"exampleAi","value");
-        testAccess(iocdb,"exampleAi","rawValue");
-        testAccess(iocdb,"exampleAi","input.aiRaw.value");
-        testAccess(iocdb,"exampleAi","input.aiRaw.status");
-        testAccess(iocdb,"exampleAi","input.aiRaw.input");
-        testAccess(iocdb,"exampleAi","input.timeStamp");
-        testAccess(iocdb,"exampleAi","input.rawValue");
+        testAccess(iocdb,"ai","value");
+        testAccess(iocdb,"ai","input.value");
         System.out.printf("%n");
-        testAccess(iocdb,"examplePowerSupply","power");
-        testAccess(iocdb,"examplePowerSupply","power.status");
-        testAccess(iocdb,"examplePowerSupply","power.timeStamp");
-        testAccess(iocdb,"examplePowerSupply","current");
-        testAccess(iocdb,"examplePowerSupply","current.status");
-        testAccess(iocdb,"examplePowerSupply","current.timeStamp");
-        testAccess(iocdb,"examplePowerSupply","voltage");
+        testAccess(iocdb,"psEmbeded","power.value");
+        testAccess(iocdb,"psEmbeded","current.value");
+        testAccess(iocdb,"psEmbeded","voltage.value");
         System.out.printf("%n");
-        testAccess(iocdb,"examplePowerSupplyLinked","power");
-        testAccess(iocdb,"examplePowerSupplyLinked","power.status");
-        testAccess(iocdb,"examplePowerSupplyLinked","power.timeStamp");
-        testAccess(iocdb,"examplePowerSupplyLinked","current");
-        testAccess(iocdb,"examplePowerSupplyLinked","current.status");
-        testAccess(iocdb,"examplePowerSupplyLinked","current.timeStamp");
-        testAccess(iocdb,"examplePowerSupplyLinked","current.rawValue");
-        testAccess(iocdb,"examplePowerSupplyLinked","current.rawValue.status");
-        testAccess(iocdb,"examplePowerSupplyLinked","voltage");
+        testAccess(iocdb,"psLinked","power.value");
+        testAccess(iocdb,"psLinked","current.value");
+        testAccess(iocdb,"psLinked","voltage.value");
         System.out.printf("%n");
-        testAccess(iocdb,"examplePowerSupplyArray","status");
-        testAccess(iocdb,"examplePowerSupplyArray","powerSupply[0].power");
-        testAccess(iocdb,"examplePowerSupplyArray","powerSupply[0].current");
-        testAccess(iocdb,"examplePowerSupplyArray","powerSupply[0].voltage");
+        testAccess(iocdb,"powerSupplyArray","alarm");
+        testAccess(iocdb,"powerSupplyArray","timeStamp");
+        testAccess(iocdb,"powerSupplyArray","supply[0].power.value");
+        testAccess(iocdb,"powerSupplyArray","supply[0].current.value");
+        testAccess(iocdb,"powerSupplyArray","supply[0].voltage.value");
+        testAccess(iocdb,"powerSupplyArray","supply[1].power.value");
+        testAccess(iocdb,"powerSupplyArray","supply[1].current.value");
+        testAccess(iocdb,"powerSupplyArray","supply[1].voltage.value");
         System.out.printf("%n");
-        testAccess(iocdb,"allTypes","boolean");
-        testAccess(iocdb,"allTypes","byte");
-        testAccess(iocdb,"allTypes","short");
-        testAccess(iocdb,"allTypes","int");
-        testAccess(iocdb,"allTypes","long");
-        testAccess(iocdb,"allTypes","float");
-        testAccess(iocdb,"allTypes","double");
-        testAccess(iocdb,"allTypes","string");
-        testAccess(iocdb,"allTypes","enum");
-        testAccess(iocdb,"allTypes","menu");
-        testAccess(iocdb,"allTypes","displayLimit");
-        testAccess(iocdb,"allTypes","link");
-        testAccess(iocdb,"allTypes","booleanArray");
-        testAccess(iocdb,"allTypes","byteArray");
-        testAccess(iocdb,"allTypes","shortArray");
-        testAccess(iocdb,"allTypes","intArray");
-        testAccess(iocdb,"allTypes","longArray");
-        testAccess(iocdb,"allTypes","floatArray");
-        testAccess(iocdb,"allTypes","doubleArray");
-        testAccess(iocdb,"allTypes","stringArray");
-        testAccess(iocdb,"allTypes","enumArray");
-        testAccess(iocdb,"allTypes","menuArray");
-        testAccess(iocdb,"allTypes","linkArray");
-        testAccess(iocdb,"allTypes","structArray");
-        testAccess(iocdb,"allTypes","arrayArray");
-        testAccess(iocdb,"allTypes","allTypes.boolean");
-        testAccess(iocdb,"allTypes","allTypes.byte");
-        testAccess(iocdb,"allTypes","allTypes.short");
-        testAccess(iocdb,"allTypes","allTypes.int");
-        testAccess(iocdb,"allTypes","allTypes.long");
-        testAccess(iocdb,"allTypes","allTypes.float");
-        testAccess(iocdb,"allTypes","allTypes.double");
-        testAccess(iocdb,"allTypes","allTypes.string");
-        testAccess(iocdb,"allTypes","allTypes.enum");
-        testAccess(iocdb,"allTypes","allTypes.menu");
-        testAccess(iocdb,"allTypes","allTypes.displayLimit");
-        testAccess(iocdb,"allTypes","allTypes.link");
-        testAccess(iocdb,"allTypes","allTypes.booleanArray");
-        testAccess(iocdb,"allTypes","allTypes.byteArray");
-        testAccess(iocdb,"allTypes","allTypes.shortArray");
-        testAccess(iocdb,"allTypes","allTypes.intArray");
-        testAccess(iocdb,"allTypes","allTypes.longArray");
-        testAccess(iocdb,"allTypes","allTypes.floatArray");
-        testAccess(iocdb,"allTypes","allTypes.doubleArray");
-        testAccess(iocdb,"allTypes","allTypes.stringArray");
-        testAccess(iocdb,"allTypes","allTypes.enumArray");
-        testAccess(iocdb,"allTypes","allTypes.menuArray");
-        testAccess(iocdb,"allTypes","allTypes.linkArray");
-        testAccess(iocdb,"allTypes","allTypes.structArray");
-        testAccess(iocdb,"allTypes","allTypes.arrayArray");
+        testAccess(iocdb,"allTypesInitial","boolean");
+        testAccess(iocdb,"allTypesInitial","byte");
+        testAccess(iocdb,"allTypesInitial","short");
+        testAccess(iocdb,"allTypesInitial","int");
+        testAccess(iocdb,"allTypesInitial","long");
+        testAccess(iocdb,"allTypesInitial","float");
+        testAccess(iocdb,"allTypesInitial","double");
+        testAccess(iocdb,"allTypesInitial","string");
+        testAccess(iocdb,"allTypesInitial","booleanArray");
+        testAccess(iocdb,"allTypesInitial","byteArray");
+        testAccess(iocdb,"allTypesInitial","shortArray");
+        testAccess(iocdb,"allTypesInitial","intArray");
+        testAccess(iocdb,"allTypesInitial","longArray");
+        testAccess(iocdb,"allTypesInitial","floatArray");
+        testAccess(iocdb,"allTypesInitial","doubleArray");
+        testAccess(iocdb,"allTypesInitial","stringArray");
+        testAccess(iocdb,"allTypesInitial","structArray");
+        testAccess(iocdb,"allTypesInitial","arrayArray");
+        testAccess(iocdb,"allTypesInitial","allTypes.boolean");
+        testAccess(iocdb,"allTypesInitial","allTypes.byte");
+        testAccess(iocdb,"allTypesInitial","allTypes.short");
+        testAccess(iocdb,"allTypesInitial","allTypes.int");
+        testAccess(iocdb,"allTypesInitial","allTypes.long");
+        testAccess(iocdb,"allTypesInitial","allTypes.float");
+        testAccess(iocdb,"allTypesInitial","allTypes.double");
+        testAccess(iocdb,"allTypesInitial","allTypes.string");
+        testAccess(iocdb,"allTypesInitial","allTypes.booleanArray");
+        testAccess(iocdb,"allTypesInitial","allTypes.byteArray");
+        testAccess(iocdb,"allTypesInitial","allTypes.shortArray");
+        testAccess(iocdb,"allTypesInitial","allTypes.intArray");
+        testAccess(iocdb,"allTypesInitial","allTypes.longArray");
+        testAccess(iocdb,"allTypesInitial","allTypes.floatArray");
+        testAccess(iocdb,"allTypesInitial","allTypes.doubleArray");
+        testAccess(iocdb,"allTypesInitial","allTypes.stringArray");
+        testAccess(iocdb,"allTypesInitial","allTypes.structArray");
+        testAccess(iocdb,"allTypesInitial","allTypes.arrayArray");
+        testAccess(iocdb,"allTypesInitial","allTypes.arrayArray[3]");
     }
     
     static void testAccess(IOCDB iocdb,String recordName,String fieldName) {
-        //PVAccess dbAccess = iocdb.createAccess(recordName);
         DBRecord dbRecord = iocdb.findRecord(recordName);
+        if(dbRecord==null) {
+            System.out.printf("record %s not found%n",recordName);
+            return;
+        }
         PVRecord pvRecord = dbRecord.getPVRecord();
         PVField pvField = pvRecord.findProperty(fieldName);
         if(pvField==null) {
@@ -154,7 +130,7 @@ public class AccessTest extends TestCase {
         PVRecord record = pvField.getPVRecord();
         String parentName = "none";
         Field field = pvField.getField();
-        if(parent!=null) parentName = ((Structure)parent.getField()).getStructureName();
+        if(parent!=null) parentName = parent.getFullFieldName();
         System.out.printf("record %s fieldRequested %s fieldActual %s parent %s%n",
                 record.getRecordName(),
                 fieldName,field.getFieldName(),

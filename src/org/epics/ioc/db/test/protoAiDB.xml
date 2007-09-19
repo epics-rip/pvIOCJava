@@ -1,25 +1,55 @@
 <?xml version="1.0" ?>
 <IOCDatabase>
-<record name = "ai${recordExtension}Record" type = "aiRecord">
-    <input >
-        <aiRaw>
-            <input supportName = "inputLink">
-                <configure structureName = "inputLink">
-                    <pvname>${pvname}</pvname>
-                </configure>
-            </input>
-        </aiRaw>
-        <units>volts</units>
-        <doubleLimit>
-            <low>${doubleLow}</low>
-            <high>${doubleHigh}</high>
-        </doubleLimit>
+<record name = "ai${recordExtension}Record" type = "double">
+    <value>10.0</value>
+    <timeStamp structureName = "timeStamp" />
+    <alarm structureName = "alarm" />
+    <input structureName = "linearConvertInput">
         <linearConvert>
+            <deviceHigh>2047</deviceHigh>
+            <deviceLow>-2048</deviceLow>
             <engUnitsLow>${engUnitsLow}</engUnitsLow>
             <engUnitsHigh>${engUnitsHigh}</engUnitsHigh>
         </linearConvert>
-    </input>
-    <priority>middle</priority>
-</record>
+        <input supportName = "inputSupport" structureName = "inputSupport">
+                <pvname>${pvname}</pvname>
+                <process>false</process>
+        </input>
 
+    </input>
+    <valueAlarm structureName = "doubleAlarm">
+          <active>true</active>
+          <interval>
+              <value structureName = "doubleAlarmInterval">
+                  <value>2.0</value>
+                  <severity><choice>major</choice></severity>
+              </value>
+              <value structureName = "doubleAlarmInterval">
+                  <value>4.0</value>
+                  <severity><choice>minor</choice></severity>
+              </value>
+              <value structureName = "doubleAlarmInterval">
+                  <value>6.0</value>
+                  <severity><choice>none</choice></severity>
+              </value>
+              <value structureName = "doubleAlarmInterval">
+                  <value>8.0</value>
+                  <severity><choice>minor</choice></severity>
+              </value>
+              <value structureName = "doubleAlarmInterval">
+                  <value>10.0</value>
+                  <severity><choice>major</choice></severity>
+              </value>
+          </interval>
+          <outOfRange><choice>invalid</choice></outOfRange>
+          <hystersis>0.1</hystersis>
+    </valueAlarm>
+    <display structureName = "display" >
+        <units>volts</units>
+        <limit>
+            <low>${doubleLow}</low>
+            <high>${doubleHigh}</high>
+        </limit>
+    </display>
+</record>
 </IOCDatabase>

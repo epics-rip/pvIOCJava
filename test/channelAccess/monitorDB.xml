@@ -2,6 +2,8 @@
 <IOCDatabase>
 
 <record name = "monitorCounter" type = "calcDouble">
+    <alarm structureName = "alarm" />
+    <timeStamp structureName = "timeStamp" />
     <calcArgArray>
         <value structureName = "calcDoubleArg">
             <value>0.0</value>
@@ -51,6 +53,8 @@
 </record>
 
 <record name = "monitorPut" type = "double">
+    <alarm structureName = "alarm" />
+    <timeStamp structureName = "timeStamp" />
     <input supportName = "monitorSupport" structureName = "monitorSupport">
             <pvname>monitorCounter</pvname>
             <type><choice>put</choice></type>
@@ -75,7 +79,7 @@
         </value>
 -->
         <value structureName = "supportArrayElement">
-            <link  supportName = "delaySupport" structureName = "delaySupport">
+            <link  supportName = "delay" structureName = "delay">
                     <min>100</min>
                     <max>1000</max>
                     <inc>100</inc>
@@ -85,6 +89,8 @@
 </record>
 
 <record name = "cachePut" type = "double">
+    <alarm structureName = "alarm" />
+    <timeStamp structureName = "timeStamp" />
     <scan>
         <processSelf>true</processSelf> 
     </scan>
@@ -92,6 +98,8 @@
 
 
 <record name = "monitorChange" type = "double">
+    <alarm structureName = "alarm" />
+    <timeStamp structureName = "timeStamp" />
     <input supportName = "monitorSupport" structureName = "monitorSupport">
             <pvname>cachePut</pvname>
             <type><choice>change</choice></type>
@@ -99,7 +107,7 @@
     </input>
     <supportArray>
         <value structureName = "supportArrayElement">
-            <link  supportName = "delaySupport" structureName = "delaySupport">
+            <link  supportName = "delay" structureName = "delay">
                     <min>100</min>
                     <max>1000</max>
                     <inc>100</inc>
@@ -109,6 +117,8 @@
 </record>
 
 <record name = "monitorAbsoluteChange" type = "double">
+    <alarm structureName = "alarm" />
+    <timeStamp structureName = "timeStamp" />
     <input supportName = "monitorSupport" structureName = "monitorSupport">
             <pvname>monitorCounter</pvname>
             <type><choice>absoluteChange</choice></type>
@@ -118,7 +128,7 @@
     </input>
     <supportArray>
         <value structureName = "supportArrayElement">
-            <link  supportName = "delaySupport" structureName = "delaySupport">
+            <link  supportName = "delay" structureName = "delay">
                     <min>100</min>
                     <max>1000</max>
                     <inc>100</inc>
@@ -128,6 +138,8 @@
 </record>
 
 <record name = "monitorPercentageChange" type = "double">
+    <alarm structureName = "alarm" />
+    <timeStamp structureName = "timeStamp" />
     <input supportName = "monitorSupport" structureName = "monitorSupport">
             <pvname>monitorCounter</pvname>
             <type><choice>percentageChange</choice></type>
@@ -137,7 +149,7 @@
     </input>
     <supportArray>
         <value structureName = "supportArrayElement">
-            <link  supportName = "delaySupport" structureName = "delaySupport">
+            <link  supportName = "delay" structureName = "delay">
                     <min>100</min>
                     <max>1000</max>
                     <inc>100</inc>
@@ -147,6 +159,8 @@
 </record>
 
 <record name = "notifyPut" type = "double">
+    <alarm structureName = "alarm" />
+    <timeStamp structureName = "timeStamp" />
     <input supportName = "monitorNotifySupport" structureName = "monitorNotifySupport">
             <pvname>monitorCounter</pvname>
             <type><choice>put</choice></type>
@@ -160,7 +174,7 @@
             </link>
         </value>
         <value structureName = "supportArrayElement">
-            <link  supportName = "delaySupport" structureName = "delaySupport">
+            <link  supportName = "delay" structureName = "delay">
                     <min>100</min>
                     <max>1000</max>
                     <inc>100</inc>
@@ -170,6 +184,8 @@
 </record>
 
 <record name = "notifyChange" type = "double">
+    <alarm structureName = "alarm" />
+    <timeStamp structureName = "timeStamp" />
     <input supportName = "monitorNotifySupport" structureName = "monitorNotifySupport">
             <pvname>monitorCounter</pvname>
             <type><choice>change</choice></type>
@@ -183,7 +199,7 @@
             </link>
         </value>
         <value structureName = "supportArrayElement">
-            <link  supportName = "delaySupport" structureName = "delaySupport">
+            <link  supportName = "delay" structureName = "delay">
                     <min>100</min>
                     <max>1000</max>
                     <inc>100</inc>
@@ -193,6 +209,8 @@
 </record>
 
 <record name = "notifyAbsoluteChange" type = "double">
+    <alarm structureName = "alarm" />
+    <timeStamp structureName = "timeStamp" />
     <input supportName = "monitorNotifySupport" structureName = "monitorNotifySupport">
             <pvname>monitorCounter</pvname>
             <type><choice>absoluteChange</choice></type>
@@ -207,7 +225,7 @@
             </link>
         </value>
         <value structureName = "supportArrayElement">
-            <link  supportName = "delaySupport" structureName = "delaySupport">
+            <link  supportName = "delay" structureName = "delay">
                     <min>100</min>
                     <max>1000</max>
                     <inc>100</inc>
@@ -217,6 +235,8 @@
 </record>
 
 <record name = "notifyPercentageChange" type = "double">
+    <alarm structureName = "alarm" />
+    <timeStamp structureName = "timeStamp" />
     <input supportName = "monitorNotifySupport" structureName = "monitorNotifySupport">
             <pvname>monitorCounter</pvname>
             <type><choice>percentageChange</choice></type>
@@ -231,7 +251,7 @@
             </link>
         </value>
         <value structureName = "supportArrayElement">
-            <link  supportName = "delaySupport" structureName = "delaySupport">
+            <link  supportName = "delay" structureName = "delay">
                     <min>100</min>
                     <max>1000</max>
                     <inc>100</inc>

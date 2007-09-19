@@ -23,9 +23,9 @@
 <include addPath = "dbd/recordType/analog" />
 <include href = "aoIncrementalDoubleRecord.xml" />
 <include removePath = "dbd/recordType/analog" />
-<include addPath = "dbd/recordType/digital" />
-<include href = "digitalRecord.xml" />
-<include removePath = "dbd/recordType/digital" />
+<include addPath = "dbd/recordType/enumerated" />
+<include href = "enumeratedRecord.xml" />
+<include removePath = "dbd/recordType/enumerated" />
 <include addPath = "dbd/recordType/event" />
 <include href = "eventRecord.xml" />
 <include removePath = "dbd/recordType/event" />
@@ -39,7 +39,11 @@
 <include removePath = "dbd/recordType/portDriver" />
 <include addPath = "dbd/recordType/powerSupply" />
 <include href = "powerSupplyRecord.xml" />
+<include href = "powerSupplyArrayRecord.xml" />
 <include removePath = "dbd/recordType/powerSupply" />
+<include addPath = "dbd/recordType/allTypes" />
+<include href = "allTypesRecord.xml" />
+<include removePath = "dbd/recordType/allTypes" />
 <!--
 -->
 

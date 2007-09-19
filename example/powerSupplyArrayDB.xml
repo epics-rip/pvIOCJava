@@ -1,0 +1,59 @@
+<?xml version="1.0" ?>
+<IOCDatabase>
+
+<record name = "voltage1" type = "double" >
+    <value>1.0</value>
+</record>
+
+<record name = "voltage2" type = "double" >
+    <value>2.0</value>
+</record>
+
+<record name = "current1" type = "double" />
+
+<record name = "current2" type = "double" />
+
+<record name = "powerSupplyArray" type = "powerSupplyArray" >
+    <timeStamp structureName = "timeStamp" />
+    <alarm structureName = "alarm" />
+    <supply capacity = "2">
+        <value  structureName = "powerSupply">
+            <alarm structureName = "alarm" />
+            <voltage>
+                 <alarm structureName = "alarm" />
+                 <input  supportName = "inputSupport" structureName = "inputSupport">
+                      <pvname>voltage1</pvname>
+                      <process>false</process>
+                 </input>
+            </voltage>
+            <current>
+                 <alarm structureName = "alarm" />
+                 <input supportName = "powerSupplyCurrent" />
+                 <output supportName = "outputSupport" structureName = "outputSupport">
+                     <pvname>current1</pvname>
+                     <process>true</process>
+                 </output>
+            </current>
+        </value>
+        <value  structureName = "powerSupply">
+            <alarm structureName = "alarm" />
+            <voltage>
+                 <alarm structureName = "alarm" />
+                 <input  supportName = "inputSupport" structureName = "inputSupport">
+                      <pvname>voltage2</pvname>
+                      <process>false</process>
+                 </input>
+            </voltage>
+            <current>
+                 <alarm structureName = "alarm" />
+                 <input supportName = "powerSupplyCurrent" />
+                 <output supportName = "outputSupport" structureName = "outputSupport">
+                     <pvname>current2</pvname>
+                     <process>true</process>
+                 </output>
+            </current>
+        </value>
+    </supply>
+</record>
+
+</IOCDatabase>

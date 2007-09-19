@@ -5,7 +5,6 @@
  */
 package org.epics.ioc.support;
 
-import org.epics.ioc.create.*;
 import org.epics.ioc.db.*;
 import org.epics.ioc.pv.*;
 import org.epics.ioc.util.*;

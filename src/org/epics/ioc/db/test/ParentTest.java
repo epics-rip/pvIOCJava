@@ -29,7 +29,7 @@ public class ParentTest extends TestCase {
         IOCDB iocdb = IOCDBFactory.create("testIOCDatabase");
         Requester iocRequester = new Listener();
         XMLToDBDFactory.convert(dbd,
-                 "src/org/epics/ioc/db/test/parentDBD.xml",iocRequester);
+                 "example/exampleDBD.xml",iocRequester);
         
         //System.out.printf("%n%nstructures");
         //Map<String,DBDStructure> structureMap = dbd.getStructureMap();
@@ -47,7 +47,7 @@ public class ParentTest extends TestCase {
         //}
 
         XMLToIOCDBFactory.convert(dbd,iocdb,
-                 "src/org/epics/ioc/db/test/parentDB.xml",iocRequester);
+                 "example/exampleDB.xml",iocRequester);
         
 //        System.out.printf("%nrecords%n");
 //        Map<String,DBRecord> recordMap = iocdb.getRecordMap();
@@ -56,87 +56,68 @@ public class ParentTest extends TestCase {
 //            DBRecord record = recordMap.get(key);
 //            System.out.print(record.toString());
 //        }
-        showParent(iocdb,"exampleAi","status");
-        showParent(iocdb,"exampleAi","timeStamp");
-        showParent(iocdb,"exampleAi","value");
-        showParent(iocdb,"exampleAi","rawValue");
-        showParent(iocdb,"exampleAi","input.aiRaw.value");
-        showParent(iocdb,"exampleAi","input.aiRaw.status");
-        showParent(iocdb,"exampleAi","input.aiRaw.input");
-        showParent(iocdb,"exampleAi","input.aiRaw.input.configurationStructureName");
+        showParent(iocdb,"ai","alarm.severity");
+        showParent(iocdb,"ai","timeStamp");
+        showParent(iocdb,"ai","value");
+        showParent(iocdb,"ai","input.value");
         System.out.printf("%n");
-        showParent(iocdb,"examplePowerSupply","power");
-        showParent(iocdb,"examplePowerSupply","current");
-        showParent(iocdb,"examplePowerSupply","voltage");
+        showParent(iocdb,"psEmbeded","power");
+        showParent(iocdb,"psEmbeded","current");
+        showParent(iocdb,"psEmbeded","voltage");
         System.out.printf("%n");
-        showParent(iocdb,"examplePowerSupplyArray","status");
-        showParent(iocdb,"examplePowerSupplyArray","powerSupply[0].power");
-        showParent(iocdb,"examplePowerSupplyArray","powerSupply[0].current");
-        showParent(iocdb,"examplePowerSupplyArray","powerSupply[0].voltage");
+        showParent(iocdb,"powerSupplyArray","alarm.severity");
+        showParent(iocdb,"powerSupplyArray","supply[0].power");
+        showParent(iocdb,"powerSupplyArray","supply[0].power.value");
+        showParent(iocdb,"powerSupplyArray","supply[0].current");
+        showParent(iocdb,"powerSupplyArray","supply[0].voltage");
+        showParent(iocdb,"powerSupplyArray","supply[0].voltage.input.value");
         System.out.printf("%n");
-        showParent(iocdb,"examplePowerSupplyArray","powerSupply[1]");
+        showParent(iocdb,"powerSupplyArray","supply[1]");
         System.out.printf("%n");
-        showParent(iocdb,"allTypes","boolean");
-        showParent(iocdb,"allTypes","byte");
-        showParent(iocdb,"allTypes","short");
-        showParent(iocdb,"allTypes","int");
-        showParent(iocdb,"allTypes","long");
-        showParent(iocdb,"allTypes","float");
-        showParent(iocdb,"allTypes","double");
-        showParent(iocdb,"allTypes","enum");
-        showParent(iocdb,"allTypes","menu");
-        showParent(iocdb,"allTypes","displayLimit");
-        showParent(iocdb,"allTypes","link");
-        showParent(iocdb,"allTypes","booleanArray");
-        showParent(iocdb,"allTypes","byteArray");
-        showParent(iocdb,"allTypes","shortArray");
-        showParent(iocdb,"allTypes","intArray");
-        showParent(iocdb,"allTypes","longArray");
-        showParent(iocdb,"allTypes","floatArray");
-        showParent(iocdb,"allTypes","doubleArray");
-        showParent(iocdb,"allTypes","enumArray");
-        showParent(iocdb,"allTypes","menuArray");
-        showParent(iocdb,"allTypes","linkArray");
-        showParent(iocdb,"allTypes","structArray");
-        showParent(iocdb,"allTypes","arrayArray");
-        showParent(iocdb,"allTypes","allTypes.boolean");
-        showParent(iocdb,"allTypes","allTypes.byte");
-        showParent(iocdb,"allTypes","allTypes.short");
-        showParent(iocdb,"allTypes","allTypes.int");
-        showParent(iocdb,"allTypes","allTypes.long");
-        showParent(iocdb,"allTypes","allTypes.float");
-        showParent(iocdb,"allTypes","allTypes.double");
-        showParent(iocdb,"allTypes","allTypes.enum");
-        showParent(iocdb,"allTypes","allTypes.menu");
-        showParent(iocdb,"allTypes","allTypes.displayLimit");
-        showParent(iocdb,"allTypes","allTypes.link");
-        showParent(iocdb,"allTypes","allTypes.booleanArray");
-        showParent(iocdb,"allTypes","allTypes.byteArray");
-        showParent(iocdb,"allTypes","allTypes.shortArray");
-        showParent(iocdb,"allTypes","allTypes.intArray");
-        showParent(iocdb,"allTypes","allTypes.longArray");
-        showParent(iocdb,"allTypes","allTypes.floatArray");
-        showParent(iocdb,"allTypes","allTypes.doubleArray");
-        showParent(iocdb,"allTypes","allTypes.enumArray");
-        showParent(iocdb,"allTypes","allTypes.enumArray[1]");
-        showParent(iocdb,"allTypes","allTypes.menuArray");
-        showParent(iocdb,"allTypes","allTypes.menuArray[0]");
-        showParent(iocdb,"allTypes","allTypes.linkArray");
-        showParent(iocdb,"allTypes","allTypes.linkArray[0]");
-        showParent(iocdb,"allTypes","allTypes.structArray");
-        showParent(iocdb,"allTypes","allTypes.structArray[0]");
-        showParent(iocdb,"allTypes","allTypes.structArray[0].low");
-        showParent(iocdb,"allTypes","allTypes.arrayArray");
-        showParent(iocdb,"allTypes","allTypes.arrayArray[0]");
+        showParent(iocdb,"allTypesInitial","boolean");
+        showParent(iocdb,"allTypesInitial","byte");
+        showParent(iocdb,"allTypesInitial","short");
+        showParent(iocdb,"allTypesInitial","int");
+        showParent(iocdb,"allTypesInitial","long");
+        showParent(iocdb,"allTypesInitial","float");
+        showParent(iocdb,"allTypesInitial","double");
+        showParent(iocdb,"allTypesInitial","booleanArray");
+        showParent(iocdb,"allTypesInitial","byteArray");
+        showParent(iocdb,"allTypesInitial","shortArray");
+        showParent(iocdb,"allTypesInitial","intArray");
+        showParent(iocdb,"allTypesInitial","longArray");
+        showParent(iocdb,"allTypesInitial","floatArray");
+        showParent(iocdb,"allTypesInitial","doubleArray");
+        showParent(iocdb,"allTypesInitial","structArray");
+        showParent(iocdb,"allTypesInitial","arrayArray");
+        showParent(iocdb,"allTypesInitial","allTypes.boolean");
+        showParent(iocdb,"allTypesInitial","allTypes.byte");
+        showParent(iocdb,"allTypesInitial","allTypes.short");
+        showParent(iocdb,"allTypesInitial","allTypes.int");
+        showParent(iocdb,"allTypesInitial","allTypes.long");
+        showParent(iocdb,"allTypesInitial","allTypes.float");
+        showParent(iocdb,"allTypesInitial","allTypes.double");
+        showParent(iocdb,"allTypesInitial","allTypes.booleanArray");
+        showParent(iocdb,"allTypesInitial","allTypes.byteArray");
+        showParent(iocdb,"allTypesInitial","allTypes.shortArray");
+        showParent(iocdb,"allTypesInitial","allTypes.intArray");
+        showParent(iocdb,"allTypesInitial","allTypes.longArray");
+        showParent(iocdb,"allTypesInitial","allTypes.floatArray");
+        showParent(iocdb,"allTypesInitial","allTypes.doubleArray");
+        showParent(iocdb,"allTypesInitial","allTypes.structArray");
+        showParent(iocdb,"allTypesInitial","allTypes.structArray[0]");
+        showParent(iocdb,"allTypesInitial","allTypes.structArray[0].low");
+        showParent(iocdb,"allTypesInitial","allTypes.arrayArray");
+        showParent(iocdb,"allTypesInitial","allTypes.arrayArray[0]");
     }
 
     static void showParent(IOCDB iocdb,String recordName,String fieldName) {
         DBRecord dbRecord = iocdb.findRecord(recordName);
-        PVRecord pvRecord = dbRecord.getPVRecord();
-        if(pvRecord==null) {
+        if(dbRecord==null) {
             System.out.printf("record %s not found%n",recordName);
             return;
         }
+        PVRecord pvRecord = dbRecord.getPVRecord();
         PVField pvField = pvRecord.findProperty(fieldName);
         if(pvField==null){
             System.out.printf("field %s not in record %s%n",fieldName,recordName);
@@ -151,8 +132,7 @@ public class ParentTest extends TestCase {
         PVField parent = pvField.getParent();
         while(parent!=null) {
             record = parent.getPVRecord();
-            System.out.printf("     parent %s record %s%n",
-                    parent.getField().getFieldName(),record.getRecordName());
+            System.out.printf("     parent %s\n",parent.getFullName());
             parent = parent.getParent();
         }
         

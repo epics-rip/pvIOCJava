@@ -117,7 +117,6 @@ public class CalcArgArrayFactory {
                 if(support==null) continue;
                 numSupports++;
                 support.initialize();
-                support.setField(valueDBFields[i]);
                 if(support.getSupportState()!=SupportState.readyForStart) {
                     supportState = SupportState.readyForInitialize;
                     for(int j=0; j<i; j++) {
