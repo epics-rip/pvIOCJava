@@ -176,7 +176,6 @@ public class XMLToIOCDBFactory {
             private PVField pvField = null;
         }
         private FieldState fieldState = new FieldState();
-        private Stack<FieldState> fieldStack = new Stack<FieldState>();
         
         private static class StructureState {
             private State prevState = null;
