@@ -57,7 +57,7 @@ public enum ScanPriority {
         Thread.MIN_PRIORITY + 1,
         Thread.NORM_PRIORITY - 1,
         Thread.NORM_PRIORITY,
-        Thread.MIN_PRIORITY + 1,
+        Thread.NORM_PRIORITY + 1,
         Thread.MAX_PRIORITY - 1,
         Thread.MAX_PRIORITY};
     

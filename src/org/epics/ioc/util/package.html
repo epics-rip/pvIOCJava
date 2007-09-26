@@ -10,7 +10,7 @@
 <body>
 <h1 style="text-align: center">EPICS JavaIOC: util<br />
 package: org.epics.ioc.util<br />
-2007.08.30</h1>
+2007.09.26</h1>
 CONTENTS 
 
 <div class="toc">
@@ -337,15 +337,16 @@ higher priority threads.</p>
        public static AlarmSeverity getSeverity(int value);
        public static Enumerated getAlarmSeverity(DBField dbField);
     }</pre>
+
 <p>The methods are:</p>
 <dl>
   <dt style="font-family: courier;">getSeverity</dt>
-    <dd>A static factory method that returns the AlarmSeverity for the specified
-      index. It throws an exception if value is illegal.</dd>
+    <dd>A static factory method that returns the AlarmSeverity for the
+      specified index. It throws an exception if value is illegal.</dd>
   <dt style="font-family: courier;">getAlarmSeverity</dt>
     <dd>If dbField has an Enumerated Create interface and if the choices
-      match the AlarmSeverity enum names than it returns the Enumerated interface.
-     Otherwise it returns null.</dd>
+      match the AlarmSeverity enum names than it returns the Enumerated
+      interface. Otherwise it returns null.</dd>
 </dl>
 <hr />
 
@@ -355,12 +356,15 @@ higher priority threads.</p>
 <h3 id="Definition2">Definitions</h3>
 <pre>    public interface ScanField {
         ScanPriority getPriority();
+        PVInt getPriorityIndexPV();
         ScanType getScanType();
+        PVInt getScanTypeIndexPV();
         double getRate();
+        PVDouble getRatePV();
         String getEventName();
+        PVString getEventNamePV();
         boolean getScanSelf();
-        void addModifyListener(ScanFieldModifyListener modifyListener);
-        void removeModifyListener(ScanFieldModifyListener modifyListener);
+        PVBoolean getProcessSelfPV();
     }
     
     public enum ScanPriority {
@@ -390,42 +394,24 @@ higher priority threads.</p>
 <h3 id="ScanField">ScanField</h3>
 
 <p>ScanField is a convenience interface for accessing the scan field of a
-record. It has the methods:</p>
-<dl>
-  <dt style="font-family: courier;">getPriority</dt>
-    <dd>Get the priority as a Java enum.</dd>
-  <dt style="font-family: courier;">getScanType</dt>
-    <dd>Get the scan type as a Java enum</dd>
-  <dt style="font-family: courier;">getRate</dt>
-    <dd>Get the scan rate for periodically scanned records.</dd>
-  <dt style="font-family: courier;">getEventName</dt>
-    <dd>Get the event name for event scanned records.</dd>
-  <dt style="font-family: courier;">getScanSelf</dt>
-    <dd>Can the record be self scanned? If the answer is yes then a call to
-      ScanSupport.processSelf will process the record.
-      recordProcess.processSelf calls ScanSupport.processSelf.</dd>
-  <dt style="font-family: courier;">>addModifyListener</dt>
-    <dd>Add a listener for modification of any of the scan fields. This is
-      called by ScanSupport and is not of interest to other code.</dd>
-  <dt style="font-family: courier;">>removeModifyListener</dt>
-    <dd>Remove a modify listener.</dd>
-</dl>
+record. </p>
 
 <h3 id="ScanPriori">ScanPriority</h3>
 
 <p>This is a Java enum that defines the priority of the thread that processes
 event or periodically scanned records.</p>
+
 <p>The methods are:</p>
 <dl>
   <dt style="font-family: courier;">javaPriority</dt>
-    <dd>A static factory method that returns an array of int that
-      is the indexes corresponding to the priorities.</dd>
+    <dd>A static factory method that returns an array of int that is the
+      indexes corresponding to the priorities.</dd>
   <dt style="font-family: courier;">getJavaPriority</dt>
     <dd>Gets the index for the javaPriority.</dd>
   <dt style="font-family: courier;">getScanPriority</dt>
     <dd>If dbField has an Enumerated Create interface and if the choices
-      match the ScanPriority enum names than it returns the Enumerated interface.
-     Otherwise it returns null.</dd>
+      match the ScanPriority enum names than it returns the Enumerated
+      interface. Otherwise it returns null.</dd>
 </dl>
 
 <h3 id="ScanType">ScanType</h3>
@@ -445,12 +431,13 @@ event or periodically scanned records.</p>
     <dd>The record is periodically scanned. A peridically scanned record has
       a rate assigned it it.</dd>
 </dl>
+
 <p>The method is:</p>
 <dl>
   <dt style="font-family: courier;">getScanType</dt>
     <dd>If dbField has an Enumerated Create interface and if the choices
       match the ScanType enum names than it returns the Enumerated interface.
-     Otherwise it returns null.</dd>
+      Otherwise it returns null.</dd>
 </dl>
 
 <h3 id="ScanFieldF">ScanFieldFactory</h3>
@@ -471,16 +458,16 @@ convenience methods.</p>
         void announce();
     }
     public interface EventScanner {
-        void addRecord(DBRecord dbRecord);
-        void removeRecord(DBRecord dbRecord);
+        boolean addRecord(DBRecord dbRecord);
+        boolean removeRecord(DBRecord dbRecord);
         EventAnnounce addEventAnnouncer(String eventName,String announcer);
         void removeEventAnnouncer(EventAnnounce eventAnnounce,String announcer);
         String show(String eventName);
     }
     
     public interface PeriodicScanner {
-        void schedule(DBRecord dbRecord);
-        void unschedule(DBRecord dbRecord);
+        boolean schedule(DBRecord dbRecord);
+        boolean unschedule(DBRecord dbRecord);
         String show(ScanPriority priority);
         String show(double rate);
         String show(double rate,ScanPriority priority);

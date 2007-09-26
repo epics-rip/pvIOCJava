@@ -30,14 +30,18 @@ public interface PeriodicScanner {
      * This is called by ScanField only after the record instance has been merged into
      * the master IOCDB and the record instance has been started.
      * @param dbRecord The record instance.
+     * @return false if the request failed or true if it was successful.
      */
-    void schedule(DBRecord dbRecord);
+    boolean schedule(DBRecord dbRecord);
     /**
      * Remove the record from it's periodic scan list.
      * This is called by ScanField whenever any of the scan fields are modified or ScanField.stop is called
      * @param dbRecord The record instance.
+     * @param rate The current scan rate.
+     * @param scanPriority The current priority.
+     * @return false if the request failed or true if it was successful.
      */
-    void unschedule(DBRecord dbRecord);
+    boolean unschedule(DBRecord dbRecord,double rate,ScanPriority scanPriority);
     /**
      * Show a list of all records being periodically scanned.
      * @return The list.

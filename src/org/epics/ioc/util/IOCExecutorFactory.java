@@ -55,14 +55,21 @@ public class IOCExecutorFactory {
         private List<Runnable> runList = new ArrayList<Runnable>();
         private ReentrantLock lock = new ReentrantLock();
         private Condition moreWork = lock.newCondition();
+        private boolean isRunning = false;
 
         private ThreadInstance(String name,int priority) {
             thread = new Thread(this,name);
             thread.setPriority(priority);
             thread.start();
+            while(!isRunning) {
+                try {
+                Thread.sleep(1);
+                } catch(InterruptedException e) {}
+            }
         } 
         
         public void run() {
+            isRunning = true;
             try {
                 while(true) {
                     Runnable runnable = null;

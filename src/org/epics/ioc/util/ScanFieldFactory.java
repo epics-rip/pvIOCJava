@@ -5,9 +5,6 @@
  */
 package org.epics.ioc.util;
 
-import java.util.Iterator;
-import java.util.LinkedList;
-
 import org.epics.ioc.pv.*;
 import org.epics.ioc.db.*;
 import org.epics.ioc.create.*;
@@ -117,16 +114,12 @@ public class ScanFieldFactory {
     }
     
     
-    private static class ScanFieldInstance implements ScanField ,DBListener{
+    private static class ScanFieldInstance implements ScanField{
         private PVInt pvPriority;
         private PVInt pvType;
         private PVDouble pvRate;
         private PVString pvEventName;
-        private PVBoolean pvProcessSelfField;
-        
-        private LinkedList<ScanFieldModifyListener> scanFieldModifyListenerList
-        = new LinkedList<ScanFieldModifyListener>();
-        
+        private PVBoolean pvProcessSelf;
         
         private ScanFieldInstance(DBField scanField,PVInt pvPriority, PVInt pvType,
             PVDouble pvRate, PVString pvEventName, PVBoolean pvProcessSelfField)
@@ -136,10 +129,8 @@ public class ScanFieldFactory {
             this.pvType = pvType;
             this.pvRate = pvRate;
             this.pvEventName = pvEventName;
-            this.pvProcessSelfField = pvProcessSelfField;
-            RecordListener recordListener = scanField.getDBRecord().createRecordListener(this);
-            scanField.addListener(recordListener);
-        }
+            this.pvProcessSelf = pvProcessSelfField;
+        }       
         /* (non-Javadoc)
          * @see org.epics.ioc.util.ScanField#getEventName()
          */
@@ -168,69 +159,37 @@ public class ScanFieldFactory {
          * @see org.epics.ioc.util.ScanField#getProcessSelf()
          */
         public boolean getProcessSelf() {
-            return pvProcessSelfField.get();
+            return pvProcessSelf.get();
+        }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.util.ScanField#getEventNamePV()
+         */
+        public PVString getEventNamePV() {
+            return pvEventName;
+        }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.util.ScanField#getPriorityPV()
+         */
+        public PVInt getPriorityIndexPV() {
+            return pvPriority;
+        }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.util.ScanField#getProcessSelfPV()
+         */
+        public PVBoolean getProcessSelfPV() {
+            return pvProcessSelf;
+        }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.util.ScanField#getRatePV()
+         */
+        public PVDouble getRatePV() {
+            return pvRate;
+        }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.util.ScanField#getScanTypePV()
+         */
+        public PVInt getScanTypeIndexPV() {
+            return pvType;
         }        
-        /* (non-Javadoc)
-         * @see org.epics.ioc.util.ScanField#addModifyListener(org.epics.ioc.util.ScanFieldModifyListener)
-         */
-        public void addModifyListener(ScanFieldModifyListener modifyListener) {
-            scanFieldModifyListenerList.add(modifyListener);
-        }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.util.ScanField#removeModifyListener(org.epics.ioc.util.ScanFieldModifyListener)
-         */
-        public void removeModifyListener(ScanFieldModifyListener modifyListener) {
-            scanFieldModifyListenerList.remove(modifyListener);
-        }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.db.DBListener#beginProcess()
-         */
-        public void beginProcess() {}
-        /* (non-Javadoc)
-         * @see org.epics.ioc.db.DBListener#beginPut(org.epics.ioc.db.DBStructure)
-         */
-        public void beginPut(DBStructure dbStructure) {}
-        /* (non-Javadoc)
-         * @see org.epics.ioc.db.DBListener#dataPut(org.epics.ioc.db.DBField, org.epics.ioc.db.DBField)
-         */
-        public void dataPut(DBField requested, DBField dbField) {
-            callListeners();
-        }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.db.DBListener#dataPut(org.epics.ioc.db.DBField)
-         */
-        public void dataPut(DBField dbField) {
-            callListeners();
-        }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.db.DBListener#endProcess()
-         */
-        public void endProcess() {}
-        /* (non-Javadoc)
-         * @see org.epics.ioc.db.DBListener#endPut(org.epics.ioc.db.DBStructure)
-         */
-        public void endPut(DBStructure dbStructure) {}
-        /* (non-Javadoc)
-         * @see org.epics.ioc.db.DBListener#supportNamePut(org.epics.ioc.db.DBField, org.epics.ioc.db.DBField)
-         */
-        public void supportNamePut(DBField requested, DBField dbField) {}
-        /* (non-Javadoc)
-         * @see org.epics.ioc.db.DBListener#supportNamePut(org.epics.ioc.db.DBField)
-         */
-        public void supportNamePut(DBField dbField) {}
-        /* (non-Javadoc)
-         * @see org.epics.ioc.db.DBListener#unlisten(org.epics.ioc.db.RecordListener)
-         */
-        public void unlisten(RecordListener listener) {}
-        
-        private void callListeners() {
-            Iterator<ScanFieldModifyListener> iter;
-            iter = scanFieldModifyListenerList.iterator();
-            while(iter.hasNext()) {
-                ScanFieldModifyListener listener = iter.next();
-                listener.modified();
-            }
-        }
-        
     }
 }

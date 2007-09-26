@@ -29,14 +29,18 @@ public interface EventScanner {
      * @param dbRecord The record instance.
      * This is called by ScanField only after the record instance has been merged into
      * the master IOCDB and the record instance has been started.
+     * @return false if the request failed or true if it was successful.
      */
-    void addRecord(DBRecord dbRecord);
+    boolean addRecord(DBRecord dbRecord);
     /**
      * Remove the record from it's event scanned list.
      * This is called by ScanField whenever any of the scan fields are modified or ScanField.stop is called.
      * @param dbRecord The record instance.
+     * @param eventName The current event name.
+     * @param scanPriority The current priority.
+     * @return false if the request failed or true if it was successful.
      */
-    void removeRecord(DBRecord dbRecord);
+    boolean removeRecord(DBRecord dbRecord,String eventName,ScanPriority scanPriority);
     /**
      * Add an event announcer.
      * @param eventName The event name.
