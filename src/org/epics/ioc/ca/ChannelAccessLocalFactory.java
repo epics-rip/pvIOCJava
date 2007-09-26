@@ -945,7 +945,12 @@ public class ChannelAccessLocalFactory  {
                     channelCDGetRequester.message("process failed", MessageType.warning);
                     requestResult = RequestResult.failure;
                 }
-                getData();
+                dbRecord.lock();
+                try {
+                    getData();
+                } finally {
+                    dbRecord.unlock();
+                }
                 channelCDGetRequester.getDone(requestResult);
             }
             /* (non-Javadoc)
@@ -1313,11 +1318,15 @@ public class ChannelAccessLocalFactory  {
                         }
                     }
                 }
-                dbRecord.lock();
-                try {
+                if(!process) {
+                    dbRecord.lock();
+                    try {
+                        putData();
+                    } finally {
+                        dbRecord.unlock();
+                    }
+                } else {
                     putData();
-                } finally {
-                    dbRecord.unlock();
                 }
                 if(process) {
                     if(isRecordProcessRequester) {
@@ -2055,7 +2064,6 @@ public class ChannelAccessLocalFactory  {
             private float lastFloatValue;
             private double lastDoubleValue;
             private String lastStringValue;
-            private int lastIndexValue;
             
             private double deadband;
             private double lastMonitorValue = 0.0;
@@ -2366,6 +2374,7 @@ public class ChannelAccessLocalFactory  {
             private Thread thread = null;
             private ReentrantLock lock = new ReentrantLock();
             private Condition moreWork = lock.newCondition();
+            private boolean isRunning = false;
 
             private MonitorThread(
             String name,int priority,
@@ -2378,6 +2387,11 @@ public class ChannelAccessLocalFactory  {
                 thread = new Thread(this,name);
                 thread.setPriority(priority);
                 thread.start();
+                while(!isRunning) {
+                    try {
+                    Thread.sleep(1);
+                    } catch(InterruptedException e) {}
+                }
             } 
             
             private MonitorThread(
@@ -2390,11 +2404,17 @@ public class ChannelAccessLocalFactory  {
                 thread = new Thread(this,name);
                 thread.setPriority(priority);
                 thread.start();
+                while(!isRunning) {
+                    try {
+                    Thread.sleep(1);
+                    } catch(InterruptedException e) {}
+                }
             }            
             /* (non-Javadoc)
              * @see java.lang.Runnable#run()
              */
             public void run() {
+                isRunning = true;
                 try {
                     while(true) {
                         CD cD = null;

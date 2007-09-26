@@ -81,7 +81,7 @@ public interface CDField {
      * @param requested The target field that has targetPVField as a subfield.
      * @param targetPVField The data that has been modified..
      * @return (false,true) if the associated PVField is modified.
-     * The return value can be false of the requested field is an array of structures or an array of arrays.
+     * The return value can be false if the requested field is an array of structures or an array of arrays.
      */
     boolean dataPut(PVField requested,PVField targetPVField);
     /**
