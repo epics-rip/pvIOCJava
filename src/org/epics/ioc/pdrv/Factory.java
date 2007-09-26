@@ -1682,6 +1682,7 @@ public class Factory {
         private ReentrantLock lock = new ReentrantLock();
         private Condition moreWork = lock.newCondition();
         private PortImpl port;
+        private boolean isRunning = false;
         
         private List<UserImpl>[] queueListArray = new ArrayList[numQueuePriorities];  
         private List<UserImpl> waitUnblockList = new ArrayList<UserImpl>();   
@@ -1693,6 +1694,11 @@ public class Factory {
             }
             thread.setPriority(scanPriority.getJavaPriority());
             thread.start();
+            while(!isRunning) {
+                try {
+                Thread.sleep(1);
+                } catch(InterruptedException e) {}
+            }
         }
         
         private void queueRequest(UserImpl user,QueuePriority asynQueuePriority)
@@ -1769,6 +1775,7 @@ public class Factory {
         }
         
         public void run() {
+            isRunning = true;
             try {
                 while(true) {
                     lock.lock();
