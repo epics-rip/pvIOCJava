@@ -5,6 +5,9 @@
  */
 package org.epics.ioc.support;
 
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.ReentrantLock;
+
 import org.epics.ioc.db.*;
 import org.epics.ioc.process.*;
 import org.epics.ioc.pv.*;
@@ -47,26 +50,91 @@ public class ScanFactory {
     }
     
     private static class ScanImpl extends AbstractSupport
-    implements ScanSupport,ScanFieldModifyListener
+    implements ScanSupport,DBListener
     {
+        private DBStructure dbScan;
         private ScanField scanField;
         private DBRecord dbRecord = null;
-        private boolean isActive = false;
         private PVProcessSelf pvProcessSelf;
+        private RecordListener recordListener;
+        
+        private boolean isActive = false;
+        private boolean isStarted = false;
+        
+        private PVInt pvScanTypeIndex;
+        private DBField dbScanTypeIndex;
+        private PVInt pvPriorityIndex;
+        private DBField dbPriorityIndex;
+        private PVDouble pvRate;
+        private DBField dbRate;
+        private PVString pvEventName;
+        private DBField dbEventName;
+        
+        private ScanType scanType = null;
+        private double scanRate;
+        private ScanPriority scanPriority = null;
+        private String eventName = null;
+        private ScanModify scanModify = null;
         
         private ScanImpl(DBStructure dbScan,ScanField scanField) {
             super(supportName,dbScan);
+            this.dbScan = dbScan;
             this.scanField = scanField;
             dbRecord = dbScan.getDBRecord();
             pvProcessSelf = new PVProcessSelf(this,dbRecord,scanField);
-        }       
-        /* (non-Javadoc)
-         * @see org.epics.ioc.util.ScanFieldModifyListener#modified()
-         */
-        public void modified() {
-            stopScanner();
-            startScanner();
+            recordListener = dbRecord.createRecordListener(this);
+            pvScanTypeIndex = scanField.getScanTypeIndexPV();
+            dbScanTypeIndex = dbRecord.findDBField(pvScanTypeIndex); 
+            pvPriorityIndex = scanField.getPriorityIndexPV();
+            dbPriorityIndex = dbRecord.findDBField(pvPriorityIndex); 
+            pvRate = scanField.getRatePV();
+            dbRate = dbRecord.findDBField(pvRate); 
+            pvEventName = scanField.getEventNamePV();
+            dbEventName = dbRecord.findDBField(pvEventName); 
         }
+        
+        /* (non-Javadoc)
+         * @see org.epics.ioc.db.DBListener#beginProcess()
+         */
+        public void beginProcess() {}
+        /* (non-Javadoc)
+         * @see org.epics.ioc.db.DBListener#beginPut(org.epics.ioc.db.DBStructure)
+         */
+        public void beginPut(DBStructure dbStructure) {}
+        /* (non-Javadoc)
+         * @see org.epics.ioc.db.DBListener#dataPut(org.epics.ioc.db.DBField, org.epics.ioc.db.DBField)
+         */
+        public void dataPut(DBField requested, DBField dbField) {}
+        /* (non-Javadoc)
+         * @see org.epics.ioc.db.DBListener#dataPut(org.epics.ioc.db.DBField)
+         */
+        public void dataPut(DBField dbField) {
+            if(!isStarted || !isActive) return;
+            if(dbField==dbEventName) {
+                if(scanType==ScanType.periodic) return;
+            }
+            callScanModify();
+        }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.db.DBListener#endProcess()
+         */
+        public void endProcess() {}
+        /* (non-Javadoc)
+         * @see org.epics.ioc.db.DBListener#endPut(org.epics.ioc.db.DBStructure)
+         */
+        public void endPut(DBStructure dbStructure) {}
+        /* (non-Javadoc)
+         * @see org.epics.ioc.db.DBListener#supportNamePut(org.epics.ioc.db.DBField, org.epics.ioc.db.DBField)
+         */
+        public void supportNamePut(DBField requested, DBField dbField) {}
+        /* (non-Javadoc)
+         * @see org.epics.ioc.db.DBListener#supportNamePut(org.epics.ioc.db.DBField)
+         */
+        public void supportNamePut(DBField dbField) {}
+        /* (non-Javadoc)
+         * @see org.epics.ioc.db.DBListener#unlisten(org.epics.ioc.db.RecordListener)
+         */
+        public void unlisten(RecordListener listener) {}
         /* (non-Javadoc)
          * @see org.epics.ioc.process.AbstractSupport#getName()
          */
@@ -90,27 +158,35 @@ public class ScanFactory {
          * @see org.epics.ioc.process.AbstractSupport#start()
          */
         public void start() {
-            scanField.addModifyListener(this);
             setSupportState(SupportState.ready);
+            isStarted = true;
+            if(isActive) {
+                addListeners();
+                callScanModify();
+            }
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.process.AbstractSupport#stop()
          */
         public void stop() {
-            if(isActive) {
-                stopScanner();
-                isActive = false;
-            }
-            scanField.removeModifyListener(this);
+            removeListeners();
+            isStarted = false;
             setSupportState(SupportState.readyForStart);
+            if(scanModify!=null) {
+                scanModify.modify();
+                scanModify = null;
+            }
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.support.AbstractSupport#allSupportStarted()
          */
         @Override
         public void allSupportStarted() {
-            isActive = true;
-            startScanner();
+            if(isStarted && !isActive) {
+                isActive = true;
+                addListeners();
+                callScanModify();
+            }
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.process.AbstractSupport#process(org.epics.ioc.process.RecordProcessRequester)
@@ -153,31 +229,131 @@ public class ScanFactory {
             pvProcessSelf.setInactive(recordProcessRequester);
         }
         
-        private void startScanner() {
-            if(!isActive) return;
-            ScanType scanType = scanField.getScanType();
-            switch (scanType) {
-            case passive: break;
-            case event:
-                eventScanner.addRecord(dbRecord);
-                break;
-            case periodic:
-                periodicScanner.schedule(dbRecord);
-                break;
-            }
+        private void addListeners() {
+            dbScanTypeIndex.addListener(recordListener);
+            dbPriorityIndex.addListener(recordListener);
+            dbRate.addListener(recordListener);
+            dbEventName.addListener(recordListener);
         }
         
-        private void stopScanner() {
-            if(!isActive) return;
-            ScanType scanType = scanField.getScanType();
-            switch (scanType) {
-            case passive: break;
-            case event:
-                eventScanner.removeRecord(dbRecord);
-                break;
-            case periodic:
-                periodicScanner.unschedule(dbRecord);
-                break;
+        private void removeListeners() {
+            dbScanTypeIndex.removeListener(recordListener);
+            dbPriorityIndex.removeListener(recordListener);
+            dbRate.removeListener(recordListener);
+            dbEventName.removeListener(recordListener);
+        }
+        
+        private void callScanModify() {
+            if(scanModify!=null) {
+                scanModify.modify();
+            } else {
+                scanType = scanField.getScanType();
+                scanRate = scanField.getRate();
+                scanPriority = scanField.getPriority();
+                eventName = scanField.getEventName();
+                if(scanType==ScanType.event || scanType==ScanType.periodic) {
+                    String name = dbScan.getPVField().getFullFieldName();
+                    int priority = ScanPriority.javaPriority[1];
+                    scanModify = new ScanModify(name,priority);
+                    scanModify.modify();
+                }
+            }
+        }
+          
+        private class ScanModify implements Runnable {
+            private Thread thread;
+            private ReentrantLock lock = new ReentrantLock();
+            private Condition waitForWork = lock.newCondition();
+            private boolean isPeriodic = false;
+            private boolean isEvent = false;
+            private boolean isRunning = false;
+            
+            private ScanModify(String name,int priority) {
+                thread = new Thread(this,name);
+                thread.setPriority(priority);
+                thread.start();
+                while(!isRunning) {
+                    try {
+                    Thread.sleep(1);
+                    } catch(InterruptedException e) {}
+                }
+            }
+
+            /* (non-Javadoc)
+             * @see java.lang.Runnable#run()
+             */
+            public void run() {
+                isRunning = true;
+                try {
+                    while(true) {
+                        lock.lock();
+                        try {
+                            waitForWork.await();
+                        } finally {
+                            lock.unlock();
+                        } 
+                        stopScanner();
+                        startScanner();
+                    } 
+                } catch(InterruptedException e) {}
+            }
+            
+            public void modify() {
+                lock.lock();
+                try {
+                    waitForWork.signal();
+                } finally {
+                    lock.unlock();
+                }
+            }
+            
+            
+            private void startScanner() {
+                boolean result = true;
+                switch (scanType) {
+                case passive: break;
+                case event:
+                    result = eventScanner.addRecord(dbRecord);
+                    if(result) isEvent = true;
+                    break;
+                case periodic:
+                    result = periodicScanner.schedule(dbRecord);
+                    if(result) isPeriodic = true;
+                    break;
+                }
+                update(!result);
+            }
+            
+            private void stopScanner() {
+                boolean result = true;
+                if(isEvent) {
+                    result = eventScanner.removeRecord(dbRecord, eventName, scanPriority);
+                    isEvent = false;
+                } else if(isPeriodic) {
+                    result = periodicScanner.unschedule(dbRecord, scanRate, scanPriority);
+                    isPeriodic = false;
+                }
+                if(!result && pvScanTypeIndex!=null) {
+                    pvScanTypeIndex.put(0);
+                    dbScanTypeIndex.postPut();
+                }
+                update(!result);
+            }
+            
+            private void update(boolean setPassive) {
+                dbRecord.lock();
+                try {
+                    if(setPassive) {
+                        pvScanTypeIndex.put(0);
+                        dbScanTypeIndex.postPut();
+                    }
+                    scanType = scanField.getScanType();
+                    scanRate = scanField.getRate();
+                    scanPriority = scanField.getPriority();
+                    eventName = scanField.getEventName();
+                } finally {
+                    dbRecord.unlock();
+                }
             }
         }
     }
@@ -198,16 +374,14 @@ public class ScanFactory {
          * @see org.epics.ioc.util.Requester#getRequesterName()
          */
         public String getRequesterName() {
-            // TODO Auto-generated method stub
-            return null;
+            return recordProcess.getRecord().getPVRecord().getRecordName();
         }
 
         /* (non-Javadoc)
          * @see org.epics.ioc.util.Requester#message(java.lang.String, org.epics.ioc.util.MessageType)
          */
         public void message(String message, MessageType messageType) {
-            // TODO Auto-generated method stub
-            
+            recordProcess.getRecord().getPVRecord().message(message, messageType);
         }
 
         private boolean processSelf(RecordProcessRequester recordProcessRequester) {

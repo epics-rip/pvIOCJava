@@ -187,7 +187,7 @@ public class GenericFactory {
                 finalResult = requestResult;
             }
             nextSupport++;
-            if(nextSupport>=numberSupports) {
+            if(nextSupport>=numberSupports || requestResult!=RequestResult.success) {
                 if(alarmSupport!=null) alarmSupport.endProcess();
                 supportProcessRequester.supportProcessDone(finalResult);
                 return;
