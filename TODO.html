@@ -9,7 +9,7 @@
 
 <body>
 <h1 style="text-align: center">EPICS JavaIOC: TODO<br />
-2007.09.19</h1>
+2007.09.26</h1>
 <ul>
   <li>alarm 
     <ul>
@@ -17,15 +17,42 @@
         Are these implemented?</li>
       <li>typeCode<br />
         What should this be? </li>
+      <li>should pvField.findProperty look up the parent tree until it find
+        an alarm? If no then should there be a new method
+      pvField.findAlarm?</li>
     </ul>
   </li>
   <li>DBNonScalarArray<br />
     Provide a method(s) to create a specified number of elements that have a
     specified array or structure. This is too complicated to leave to support
-    code. Look at Digital support for an example. </li>
+    code. Look at Digital support for an example. This should become
+    DBStructureArray and DBArrayArray</li>
   <li>Channel Access Monitors<br />
     Make generic instead of just onPut, onChange, onAbsoluteChange, and
     onPercentChange. </li>
+  <li>GenericFactory<br />
+    Generic should support an array of structures and an array of arrays.</li>
+  <li>support 
+    <ul>
+      <li>support for disable field.<br />
+      </li>
+    </ul>
+  </li>
+  <li>history<br />
+    Implement</li>
+  <li>on-line modify support<br />
+    Implement a recordType 
+    <ul>
+      <li>has a field that is the name of a field in a record instance that
+        has support</li>
+      <li>disables the record</li>
+      <li>unitialize the support</li>
+      <li>initialize and start the support</li>
+    </ul>
+    <p>This recordType is used by a client that changes support or support
+    configuration.<br />
+    </p>
+  </li>
 </ul>
 </body>
 </html>
