@@ -464,6 +464,9 @@ public class Monitor {
             
             private void createMonitor() {
                 if(propertyNames!=null) {
+                    if(!valueField.getField().getFieldName().equals("value")) {
+                        channelFieldGroup.removeChannelField(valueField);
+                    }
                     for(String fieldName: propertyNames) {
                         channel.findField(null);
                         ChannelField propChannelField = channel.findField(fieldName);
