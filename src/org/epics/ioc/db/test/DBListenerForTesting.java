@@ -48,11 +48,13 @@ public class DBListenerForTesting implements DBListener{
         DBField dbField = dbRecord.findDBField(pvField);
         dbField.addListener(listener);
         if(monitorProperties) {
-            PVField[] pvFields = pvField.getPropertys();
-            if(pvFields!=null) for(PVField pvf : pvFields) {
-                if(pvf.getFullName().equals(fullName)) continue;
-                DBField dbf = dbRecord.findDBField(pvf);
-                dbf.addListener(listener);
+            String[] propertyNames = pvField.getPropertyNames();
+            if(propertyNames!=null) {
+                for(String propertyName : propertyNames) {
+                    PVField pvf = pvField.findProperty(propertyName);
+                    DBField dbf = dbRecord.findDBField(pvf);
+                    dbf.addListener(listener);
+                }
             }
         }
     }

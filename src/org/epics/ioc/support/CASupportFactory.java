@@ -380,14 +380,7 @@ public class CASupportFactory {
          */
         public void initialize() {
             if(!super.checkSupportState(SupportState.readyForInitialize,inputSupportName)) return;
-            DBField dbParent = dbStructure.getParent();
-            PVField pvField = null;
-            while(dbParent!=null) {
-                PVField pvParent = dbParent.getPVField();
-                pvField = pvParent.findProperty("value");
-                if(pvField!=null) break;
-                dbParent = dbParent.getParent();
-            }
+            PVField pvField = pvStructure.findPropertyViaParent("value");
             if(pvField==null) {
                 pvStructure.message("value field not found", MessageType.error);
                 return;

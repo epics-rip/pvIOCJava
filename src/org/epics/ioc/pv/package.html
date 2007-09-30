@@ -313,7 +313,8 @@ where
         PVField getParent();
         PVRecord getPVRecord();
         PVField findProperty(String propertyName);
-        PVField[] getPropertys();
+        PVField findPropertyViaParent(String propertyName);
+        String[] getPropertyNames();
         void replacePVField(PVField newPVField);
         String getSupportName();
         String setSupportName(String name);
@@ -396,10 +397,13 @@ where
       <li>Back up one level in the parent tree and go to 2).</li>
     </ol>
   </li>
-  <li>getPropertys<br />
-    Get an array of PVField that is all the property fields of this PVField.
-    If this PVField is the value field the parent is the starting point and
-    the propertys will not include the value field itself. </li>
+  <li>findPropertyViaParent<br />
+    Find a property by searching up the parent tree.
+     The property nameis expected to match the name of a field. The return value is the
+    interface to the first field found that is not a null structure or null if not found.
+  <li>getPropertyNames<br />
+    Get a String array that holds the names of the properties for this field.
+    A property name is the field name. If this PVfield is a structure then every field except null structures is a property. If this PVField is the value field the parent is the starting point and the properties will not include the value field itself. In addition a search up the parent tree is made for the timeStamp.</li>
   <li>replacePVField<br />
     Replace this PVField. This is called by support code that wants to
     replace the default implementation of a data field with it;s own
@@ -893,7 +897,8 @@ interfaces:</p>
     public PVRecord getPVRecord();
     public void replacePVField(PVField newPVField);
     public PVField findProperty(String fieldName);
-    public PVField[] getPropertys();
+    PVField findPropertyViaParent(String propertyName);
+    public String[] getPropertyNames();
     public String getSupportName();
     public String setSupportName(String name);
     public void asynAccessCallListener(boolean begin);
@@ -916,7 +921,7 @@ interfaces:</p>
   <dt>setRecord</dt>
     <dd>This is called a derived PVStructure implementation to specify the
       record containing the field.</dd>
-  <dt>getRequestorName,...,getPropertys,
+  <dt>getRequestorName,...,getPropertyNames,
   asynAccessCallListener,...,isAsynAccessActive</dt>
     <dd>The implementation should be sufficient for all derived classes.</dd>
   <dt>getSupportName and setSupportName</dt>

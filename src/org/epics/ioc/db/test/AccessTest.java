@@ -136,14 +136,13 @@ public class AccessTest extends TestCase {
                 fieldName,field.getFieldName(),
                 parentName);
         System.out.printf("    value %s%n",pvField.toString(1));
-        PVField[] pvFields = pvField.getPropertys();
-        if(pvFields==null) return;
-            System.out.printf("    property {%n");
-            for(PVField pvf: pvFields) {
-                String propertyName = pvf.getFullFieldName();
-                System.out.printf("        name %s field %s%n",propertyName,pvf.toString(3));
+        String[] propertyNames = pvField.getPropertyNames();
+        if(propertyNames==null) return;
+            System.out.printf("    properties {");
+            for(String propertyName: propertyNames) {
+                System.out.printf("%s ",propertyName);
             }
-            System.out.printf("        }%n");
+            System.out.printf("}%n");
     }
     
     private static class Listener implements Requester {

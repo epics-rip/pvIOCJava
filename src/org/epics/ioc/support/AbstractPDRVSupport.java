@@ -79,15 +79,12 @@ RecordProcessRequester
     
     public void initialize() {
         if(!super.checkSupportState(SupportState.readyForInitialize,supportName)) return;
-        DBField dbParent = dbStructure.getParent();
-        PVField pvParent = dbParent.getPVField();
-        PVField pvField = pvParent.findProperty("value");
-        if(pvField==null) {
+        valuePVField = pvStructure.findPropertyViaParent("value");
+        if(valuePVField==null) {
             pvStructure.message("value field not found", MessageType.error);
             return;
         }
-        valueDBField = dbStructure.getDBRecord().findDBField(pvField);
-        valuePVField = valueDBField.getPVField();
+        valueDBField = dbStructure.getDBRecord().findDBField(valuePVField);
         alarmSupport = AlarmFactory.findAlarmSupport(dbStructure);
         pvPortName = pvStructure.getStringField("portName");
         if(pvPortName==null) return;

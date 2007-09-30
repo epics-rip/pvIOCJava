@@ -562,14 +562,7 @@ public class ChannelAccessLocalFactory  {
              * @see org.epics.ioc.ca.ChannelField#getPropertyNames()
              */
             public String[] getPropertyNames() {
-                PVField[] pvFields = pvField.getPropertys();
-                if(pvFields==null || pvFields.length==0) return null;
-                int length = pvFields.length;
-                String[] names = new String[length];
-                for(int i=0; i<length; i++) {
-                    names[i] = pvFields[i].getField().getFieldName();
-                }
-                return names;
+                return pvField.getPropertyNames();
             }
             /* (non-Javadoc)
              * @see org.epics.ioc.ca.ChannelField#findProperty(java.lang.String)

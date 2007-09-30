@@ -26,6 +26,7 @@
   <field name = "rate" type = "double"  default = "1.0" />
   <field name = "eventName" type = "string" />
   <field name = "processSelf" type = "boolean" />
+  <field name = "processAfterStart" type = "boolean" default = "false" />
 </structure>
 
 <support name = "scan"

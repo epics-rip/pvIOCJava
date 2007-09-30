@@ -39,8 +39,8 @@
     <scan>
         <type><choice>periodic</choice></type> 
         <rate>0.5</rate>
+        <processAfterStart>true</processAfterStart>
     </scan>
-    <processAfterStart>true</processAfterStart>
     <supportArray>
         <value structureName = "supportArrayElement">
             <wait>false</wait>

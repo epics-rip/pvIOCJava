@@ -8,5 +8,8 @@
     <current>
         <input supportName = "powerSupplyCurrent" />
     </current>
+    <scan>
+        <processAfterStart>true</processAfterStart>
+    </scan>
 </record>
 </IOCDatabase>

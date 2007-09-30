@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
       "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html>
+<html xmlns="http://www.w3.org/1999/xhtml">
 <head>
   <meta http-equiv="content-type" content="text/html; charset=iso-8859-1" />
   <title>EPICS JavaIOC: Java Input/Output Controller</title>
@@ -10,7 +10,7 @@
 <body>
 <h1 style="text-align: center">EPICS JavaIOC: Java Input/Output Controller<br
 />
-2007.09.19</h1>
+2007.09.30</h1>
 
 <p>This product is available via the <a href="#LicenseAgreement">open source
 license</a> described at the end of this document.</p>
@@ -1084,7 +1084,8 @@ contains.</p>
          PVField getParent();
          PVRecord getPVRecord();
          PVField findProperty(String fieldName);
-         PVField[] getPropertys();
+         PVField findPropertyViaParent(String propertyName);
+         String[] getPropertyNames();
          void replacePVField(PVField newPVField);
          String getSupportName();
          String setSupportName(String name);
@@ -1954,10 +1955,10 @@ summary is:</p>
     <dd>This directory has the following files. 
       <dl>
         <dt style="font-family: courier;">common.xml</dt>
-          <dd>Defines fields scan, timeStamp, and processAfterStart. These
-            are fields that are in most recordType definitions. Note that
-            this is not a valid structure definition. It can only be used by
-            including this file within a recordType definition. </dd>
+          <dd>Defines fields scan, and timeStamp. These are fields that are
+            in most recordType definitions. Note that this is not a valid
+            structure definition. It can only be used by including this file
+            within a recordType definition. </dd>
         <dt style="font-family: courier;">structure.xml</dt>
           <dd>Includes all the support definitions from dbd/structure.</dd>
         <dt style="font-family: courier;">recordType.xml</dt>
@@ -2096,7 +2097,6 @@ support implementations. See package org.epics.ioc.support for details.</p>
 &lt;DBDefinition&gt;
     &lt;field name = "scan" type = "structure" structureName = "scan"
          supportName = "scan" /&gt;
-    &lt;field name = "processAfterStart" type = "boolean" default = "false" /&gt;
 &lt;/DBDefinition&gt;</pre>
 
 <p>For example a record type for a double record starts with:</p>
@@ -2109,12 +2109,6 @@ event, that determines when a precord is processed.</p>
 
 <p>Each time a record is processed the time is recorded in field
 timeStamp.</p>
-
-<p>The field processAfterStart determines if the record instance should be
-processed one time after the record enters the ready state. If the value is
-true than recordProcess attempts to process the record immeriately after it
-becomes ready. The attempt is only successfull if no record processor is
-registered of if the record has been initialized to be processSelf.</p>
 
 <h4 id="structure.">structure.xml</h4>
 
@@ -2644,6 +2638,7 @@ fields alarm, scan, and timeStamp, which are present in most recordTypes.</p>
   &lt;field name = "rate" type = "double"  default = "1.0" /&gt;
   &lt;field name = "eventName" type = "string" /&gt;
   &lt;field name = "processSelf" type = "boolean" /&gt;
+    &lt;field name = "processAfterStart" type = "boolean" default = "false" /&gt;
 &lt;/structure&gt;
 
 &lt;support name = "scan"
@@ -2693,6 +2688,13 @@ fields alarm, scan, and timeStamp, which are present in most recordTypes.</p>
           <dd>The event name for event scanned records.</dd>
         <dt>processSelf</dt>
           <dd>Should the record process itself?</dd>
+        <dt>processAfterStart</dt>
+          <dd>determines if the record instance should be processed one time
+            after the record enters the ready state. If the value is true
+            than recordProcess attempts to process the record immeriately
+            after it becomes ready. The attempt is only successfull if no
+            record processor is registered of if the record has been
+            initialized to be processSelf.</dd>
       </dl>
     </dd>
 </dl>

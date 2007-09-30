@@ -156,18 +156,15 @@ public class RecordProcessFactory {
                 if(index>=0) {
                     pvTimeStamp = PVTimeStamp.create(dbFields[index]);
                 }
-                index = structure.getFieldIndex("processAfterStart");
-                if(index>=0) {
-                    pvField = pvFields[index];
-                    if(pvField.getField().getType()==Type.pvBoolean) {
-                        pvProcessAfterStart = (PVBoolean)pvField;
-                    }
-                }
                 index = structure.getFieldIndex("scan");
                 if(index>=0) {
                     pvField = pvFields[index];
                     if(pvField.getField().getType()==Type.pvStructure) {
                         scanSupport = (ScanSupport)dbFields[index].getSupport();
+                        PVField pvf = pvField.findProperty("processAfterStart");
+                        if(pvf!=null && pvf.getField().getType()==Type.pvBoolean) {
+                            pvProcessAfterStart = (PVBoolean)pvf;
+                        }
                     }
                 }
                 if(scanSupport!=null) scanSupport.initialize();

@@ -2,6 +2,5 @@
 <DBDefinition>
     <field name = "scan" type = "structure" structureName = "scan"
          supportName = "scan" />
-    <field name = "processAfterStart" type = "boolean" default = "false" />
 </DBDefinition>
 

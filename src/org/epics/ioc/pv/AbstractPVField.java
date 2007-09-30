@@ -224,9 +224,34 @@ public abstract class AbstractPVField implements PVField{
     }
 
     /* (non-Javadoc)
-     * @see org.epics.ioc.pv.PVField#getPropertys()
+     * @see org.epics.ioc.pv.PVField#findPropertyViaParent(java.lang.String)
      */
-    public PVField[] getPropertys() {
+    public PVField findPropertyViaParent(String propertyName) {
+        PVField currentPVField = this;
+        PVField parentPVField = currentPVField.getParent();
+        while(parentPVField!=null) {
+            if(parentPVField.getField().getType()==Type.pvStructure) {
+                PVStructure parentPVStructure = (PVStructure)parentPVField;
+                for(PVField pvField : parentPVStructure.getFieldPVFields()) {
+                    Field field = pvField.getField();
+                    if(field.getFieldName().equals(propertyName)) {
+                        if(field.getType()==Type.pvStructure) {
+                            PVStructure pvStructure = (PVStructure)pvField;
+                            if(pvStructure.getSupportName()==null
+                            && pvStructure.getStructure().getStructureName().equals("null")) break;
+                        }
+                        return pvField;
+                    }
+                }
+            }
+            parentPVField = parentPVField.getParent();
+        }
+        return null;
+    }
+    /* (non-Javadoc)
+     * @see org.epics.ioc.pv.PVField#getPropertyNames()
+     */
+    public String[] getPropertyNames() {
         PVField pvField = this;
         boolean skipValue = false;
         Field field = this.getField();
@@ -246,15 +271,17 @@ public abstract class AbstractPVField implements PVField{
             if(pvField.findProperty(fieldName)!=null) size++;
         }
         if(size==0) return null;
-        PVField[] pvPropertys = new PVField[size];
+        String[] propertyNames = new String[size];
         int index = 0;
         for(PVField pvf: pvFields) {
             field = pvf.getField();
             String fieldName = field.getFieldName();
             if(skipValue && fieldName.equals("value")) continue;
-            if(pvField.findProperty(fieldName)!=null) pvPropertys[index++] = pvf;
+            if(pvField.findProperty(fieldName)!=null) {
+                propertyNames[index++] = pvf.getField().getFieldName();
+            }
         }
-        return pvPropertys;
+        return propertyNames;
     }
     /* (non-Javadoc)
      * @see org.epics.ioc.pv.PVField#getSupportName()

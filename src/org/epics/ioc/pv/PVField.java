@@ -51,7 +51,7 @@ public interface PVField extends Requester {
      */
     PVRecord getPVRecord();
     /**
-     * Find a field that is a subfield ot a property of this field.
+     * Find a field that is a subfield or a property of this field.
      * The fieldName is of the form item.item... where item is name or name[index].
      * 
      * The algorithm implemented by findProperty is:
@@ -85,12 +85,20 @@ public interface PVField extends Requester {
      */
     PVField findProperty(String fieldName);
     /**
-     * Get all the propertys for this PVField.
-     * If this PVField is the value field the parent is the starting point and the propertys will
-     * not include the value field itself.
-     * @return The PVField array for the property fields.
+     * Find a property by searching up the parent tree.
+     * @param propertyName The property name which is expected to match the name of a field.
+     * @return The interface to the first field found that is not a null structure or null if not found.
      */
-    PVField[] getPropertys();
+    PVField findPropertyViaParent(String propertyName);
+    /**
+     * Get the names of all the properties for this PVField.
+     * A property name is the field name.
+     * If this PVfield is a structure then every field except null structures is a property.
+     * If this PVField is the value field the parent is the starting point and the properties will
+     * not include the value field itself. In addition a search up the parent tree is made for the timeStamp.
+     * @return The String array for the names of the properties.
+     */
+    String[] getPropertyNames();
     /**
      * Replace the data implementation for a field.
      * @param newPVField The new implementation for this field.
