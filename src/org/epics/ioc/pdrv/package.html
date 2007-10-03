@@ -812,7 +812,7 @@ keep data for each user. If a driver does than it must implement interface
 <span style="font-family: courier;">package
 org.epics.ioc.pdrv.interfaces.DriverUser</span> and the user must find and
 use it. It has the methods:</p>
-<pre>    void create(User user,String drvParams);
+<pre>    void create(User user,PVStructure drvParams);
     void dispose(User user);</pre>
 
 <p>After the user connects to a port or device that implement DriverUser it
@@ -1259,7 +1259,9 @@ facility.</p>
          TraceOptionChangeListener traceOptionChangeListener);
     void optionChangeListenerRemove(
          TraceOptionChangeListener traceOptionChangeListener);
+    void print(int reason,String message);
     void print(int reason,String format, Object... args);
+    void printIO(int reason, byte[] buffer,long len,String message);
     void printIO(int reason, byte[] buffer,long len,String format,Object... args);
 }</pre>
 
@@ -1373,8 +1375,12 @@ following:</p>
 <p><span style="font-family: courier;">print</span> is called to generate
 messages and <span style="font-family: courier;">printIO</span> to generate
 messages and also the value of octet data.</p>
-<pre>    void print(int reason,String format, Object... args);
-    void printIO(int reason, byte[] buffer,long len,String format,Object... args);</pre>
+<pre>
+    void print(int reason,String message);
+    void print(int reason,String format, Object... args);
+    void printIO(int reason, byte[] buffer,long len,String message);
+    void printIO(int reason, byte[] buffer,long len,String format,Object... args);
+</pre>
 
 <p>where</p>
 <dl>
@@ -1608,7 +1614,9 @@ public interface Trace {
          TraceOptionChangeListener traceOptionChangeListener);
     void optionChangeListenerRemove(
          TraceOptionChangeListener traceOptionChangeListener);
+    void print(int reason,String message);
     void print(int reason,String format, Object... args);
+    void printIO(int reason, byte[] buffer,long len,String message);
     void printIO(int reason, byte[] buffer,long len,String format,Object... args);
 }
 

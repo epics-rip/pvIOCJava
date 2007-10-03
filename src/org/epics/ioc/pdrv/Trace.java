@@ -106,14 +106,28 @@ public interface Trace {
     void optionChangeListenerRemove(TraceOptionChangeListener traceOptionChangeListener);
     /**
      * Generate a trace message.
-     * @param reason One of ERROR|SUPPORT|INTERPOSE|DRIVER.
+     * @param reason One of ERROR|SUPPORT|INTERPOSE|DRIVER|FLOW.
+     * @param message The message to print
+     */
+    void print(int reason,String message);
+    /**
+     * Generate a trace message.
+     * @param reason One of ERROR|SUPPORT|INTERPOSE|DRIVER|FLOW.
      * @param format A format.
      * @param args The data associated with the format.
      */
     void print(int reason,String format, Object... args);
     /**
      * Generate a trace message and also show data values.
-     * @param reason One of ERROR|SUPPORT|INTERPOSE|DRIVER.
+     * @param reason One of ERROR|SUPPORT|INTERPOSE|DRIVER|FLOW.
+     * @param buffer The data array.
+     * @param len The number of data items.
+     * @param message The message to print.
+     */
+    void printIO(int reason, byte[] buffer,long len,String message);
+    /**
+     * Generate a trace message and also show data values.
+     * @param reason One of ERROR|SUPPORT|INTERPOSE|DRIVER|FLOW.
      * @param buffer The data array.
      * @param len The number of data items.
      * @param format A format.

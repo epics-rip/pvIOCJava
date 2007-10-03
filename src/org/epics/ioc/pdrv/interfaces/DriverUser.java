@@ -6,6 +6,7 @@
 package org.epics.ioc.pdrv.interfaces;
 
 import org.epics.ioc.pdrv.*;
+import org.epics.ioc.pv.PVStructure;
 
 /**
  * Interface for attaching user specific data to a driver.
@@ -23,7 +24,7 @@ public interface DriverUser {
      * @param user The user.
      * @param drvParams The drvParams from the PdrvLink.
      */
-    void create(User user,String drvParams);
+    void create(User user,PVStructure drvParams);
     /**
      * Dispose of the data for this user.
      * @param user The user.

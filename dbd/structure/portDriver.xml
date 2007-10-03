@@ -7,7 +7,7 @@
   <field name = "mask" type = "int" />
   <field name = "size" type = "int" />
   <field name = "process" type = "boolean" default = "false" />
-  <field name = "drvParams" type = "string" />
+  <field name = "drvParams" type = "structure" />
 </structure>
 
 <support name = "pdrvOctetInput"

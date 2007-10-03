@@ -5,6 +5,7 @@
  */
 package org.epics.ioc.pdrv;
 
+
 /**
  * An interface for making pdrv (Port Driver) requests and for communication between driver
  * and user.
@@ -144,12 +145,12 @@ public interface User {
      * Set a reference to a deviceDriverPrivate object.
      * A driver must never keep information about a user within the driver.
      * Instead it should use setDeviceDriverPvt and getDeviceDriverPvt.
-     * @param deviceDriverPvt The object.
+     * @param deviceDriverPvt The deviceDriverPvt.
      */
     void setDeviceDriverPvt(Object deviceDriverPvt);
     /**
      * Get the reference to the deviceDriverUserPvt object.
-     * @return Return a reference to deviceDriverUserPvt object.
+     * @return Return a reference to deviceDriverUserPvt.
      */
     Object getDeviceDriverPvt();
     /**

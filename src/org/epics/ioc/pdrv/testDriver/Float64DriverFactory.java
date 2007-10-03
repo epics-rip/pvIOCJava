@@ -103,9 +103,9 @@ public class Float64DriverFactory {
                 user.setMessage("illegal address");
                 return null;
             }
-            Float64Device intDevice = new Float64Device(addr);
-            Device device = port.createDevice(intDevice, addr);
-            intDevice.init(device);
+            Float64Device float64Device = new Float64Device(addr);
+            Device device = port.createDevice(float64Device, addr);
+            float64Device.init(device);
             return device;
         }
         /* (non-Javadoc)

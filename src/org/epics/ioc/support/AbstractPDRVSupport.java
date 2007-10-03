@@ -62,7 +62,7 @@ RecordProcessRequester
     protected PVInt pvSize = null;
     protected PVDouble pvTimeout = null;
     protected PVBoolean pvProcess = null;
-    protected PVString pvDrvParams = null;
+    protected PVStructure pvDrvParams = null;
     
     protected User user = null;
     protected Port port = null;
@@ -96,8 +96,18 @@ RecordProcessRequester
         if(pvSize==null) return;
         pvTimeout = pvStructure.getDoubleField("timeout");
         if(pvTimeout==null) return;
-        pvDrvParams = pvStructure.getStringField("drvParams");
-        if(pvDrvParams==null) return;
+        PVField[] pvFields = pvStructure.getFieldPVFields();
+        Structure structure = pvStructure.getStructure();
+        int index = structure.getFieldIndex("drvParams");
+        PVField pvField = null;
+        if(index>=0) pvField = pvFields[index];
+        if(pvField!=null && pvField.getField().getType()==Type.pvStructure) {
+            pvDrvParams = (PVStructure)pvField;
+        }
+        if(pvDrvParams==null) {
+            pvStructure.message("drvParams does not exist", MessageType.error);
+            return;
+        }
         pvProcess = pvStructure.getBooleanField("process");
         setSupportState(SupportState.readyForStart);
     }
@@ -135,7 +145,7 @@ RecordProcessRequester
         Interface iface = device.findInterface(user, "driverUser", true);
         if(iface!=null) {
             driverUser = (DriverUser)iface;
-            driverUser.create(user,pvDrvParams.get() );
+            driverUser.create(user,pvDrvParams);
         }
         if(pvProcess!=null) {
             boolean interrupt = pvProcess.get();
