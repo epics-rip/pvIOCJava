@@ -423,7 +423,6 @@ public class Probe {
                 propertyButton.setText("property");
                 propertyButton.addSelectionListener(this);
                 getButton.setEnabled(false);
-                processButton.setEnabled(true);
                 processButton.setEnabled(false);
             }
             /* (non-Javadoc)
@@ -469,9 +468,6 @@ public class Probe {
                     get = new Get(channel,requester,process);
                     boolean result = get.connect(channelField, propertyNames);
                     if(result) {
-                        getButton.setEnabled(true);
-                        processButton.setEnabled(false);
-                        propertyButton.setEnabled(false);
                         connectState = ConnectState.connected;
                         requester.message(String.format("connected%n"),MessageType.info);
                         connectButton.setText(connectStateText[1]);
@@ -498,6 +494,7 @@ public class Probe {
             private Button connectButton;
             private Button putButton;
             private Button processButton;
+            private ChannelField channelField = null;
             private ConnectState connectState = ConnectState.disconnected;
             private String[] connectStateText = {"connect    ","disconnect"};
             private Channel channel;
@@ -521,7 +518,7 @@ public class Probe {
                 processButton.setText("process");
                 processButton.setSelection(false);
                 putButton.setEnabled(false);
-                processButton.setEnabled(true);
+                processButton.setEnabled(false);
             }
             /* (non-Javadoc)
              * @see org.eclipse.swt.events.SelectionListener#widgetSelected(org.eclipse.swt.events.SelectionEvent)
@@ -538,42 +535,44 @@ public class Probe {
                             return;
                         }
                         GetChannelField getChannelField = new GetChannelField(shell,requester,channel);
-                        ChannelField channelField = getChannelField.getChannelField();
+                        channelField = getChannelField.getChannelField();
                         if(channelField==null) {
                             requester.message(String.format("no field selected%n"),MessageType.error);
                             return;
                         }
-                        boolean process = processButton.getSelection();
-                        put = new Put(channel,requester,process);
-                        boolean result = put.connect(channelField);
-                        if(result) {
-                            connectState = ConnectState.connected;
-                            requester.message(String.format("connected%n"),MessageType.info);
-                            connectButton.setText(connectStateText[1]);
-                            putButton.setEnabled(true);
-                            processButton.setEnabled(false);
-                        } else {
-                            requester.message(String.format("not connected%n"),MessageType.info);
-                            put = null;
-                        }
+                        putButton.setEnabled(true);
+                        processButton.setEnabled(true);
                         return;
                     case connected:
-                        put.disconnect();
-                        put = null;
                         connectState = ConnectState.disconnected;
                         connectButton.setText(connectStateText[0]);
+                        channel.destroy();
                         putButton.setEnabled(false);
-                        processButton.setEnabled(true);
+                        processButton.setEnabled(false);
                         return;
                     }
                     return;
                 }
                 if(object==putButton) {
+                    boolean process = processButton.getSelection();
+                    put = new Put(channel,requester,process);
+                    boolean result = put.connect(channelField);
+                    if(result) {
+                        connectState = ConnectState.connected;
+                        requester.message(String.format("connected%n"),MessageType.info);
+                        connectButton.setText(connectStateText[1]);
+                        
+                    } else {
+                        requester.message(String.format("not connected%n"),MessageType.info);
+                        put = null;
+                    }
                     if(put==null) {
                         requester.message(String.format("not connected%n"),MessageType.info);
                         return;
                     }
                     put.put();
+                    put.disconnect();
+                    put = null;
                     return;
                 }
             }
