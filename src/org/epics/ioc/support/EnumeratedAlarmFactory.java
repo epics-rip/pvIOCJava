@@ -112,8 +112,8 @@ public class EnumeratedAlarmFactory {
                 return;
             }
             pvField.setMutable(false);
-            DBNonScalarArray dbStateSeverity = (DBNonScalarArray)dbFields[index];
-            DBField[] dbStateSeverityFields = dbStateSeverity.getElementDBFields();
+            DBStructureArray dbStateSeverity = (DBStructureArray)dbFields[index];
+            DBStructure[] dbStateSeverityFields = dbStateSeverity.getElementDBStructures();
             int length = dbStateSeverityFields.length;
             for(int i=length-1; i>=0; i-- ) {
                 if(dbStateSeverityFields[i]==null) {

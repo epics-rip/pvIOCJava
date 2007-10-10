@@ -199,10 +199,27 @@ public class SupportCreationFactory {
             Array array = (Array)pvArray.getField();
             Type elementType = array.getElementType();
             if(elementType.isScalar()) return result;
-            DBNonScalarArray dbNonScalayArray = (DBNonScalarArray)dbField;
-            DBField[] dbFields = dbNonScalayArray.getElementDBFields();
-            if(elementType==Type.pvStructure) {
-                PVStructureArray pvStructureArray = (PVStructureArray)dbField.getPVField();
+            if(elementType==Type.pvArray) {
+                DBArrayArray dbArrayArray = (DBArrayArray)dbField;
+                DBArray[] dbFields = dbArrayArray.getElementDBArrays();
+                PVArrayArray pvArrayArray = dbArrayArray.getPVArrayArray();
+                int len = pvArrayArray.getLength();
+                ArrayArrayData data = new ArrayArrayData();
+                int nsofar = 0;
+                int offset = 0;
+                while(nsofar<len) {
+                    int n = pvArrayArray.get(offset,len-nsofar,data);
+                    if(n<=0) break;
+                    for(int i=0; i<n; i++) {
+                        if(dbFields[i]==null) continue;
+                        if(!createArraySupport(dbFields[i])) result = false;
+                    }
+                    nsofar += n; offset += n;
+                }
+            } else if(elementType==Type.pvStructure) {
+                DBStructureArray dbStructureArray = (DBStructureArray)dbField;
+                DBStructure[] dbFields = dbStructureArray.getElementDBStructures();
+                PVStructureArray pvStructureArray = dbStructureArray.getPVStructureArray();
                 int len = pvStructureArray.getLength();
                 StructureArrayData data = new StructureArrayData();
                 int nsofar = 0;
@@ -214,21 +231,6 @@ public class SupportCreationFactory {
                     for(int i=0; i<n; i++) {
                         if(pvStructures[i]==null) continue;
                         if(!createStructureSupport(dbFields[i])) result = false;
-                    }
-                    nsofar += n; offset += n;
-                }
-            } else if(elementType==Type.pvArray) {
-                PVArrayArray pvArrayArray = (PVArrayArray)dbField.getPVField();
-                int len = pvArrayArray.getLength();
-                ArrayArrayData data = new ArrayArrayData();
-                int nsofar = 0;
-                int offset = 0;
-                while(nsofar<len) {
-                    int n = pvArrayArray.get(offset,len-nsofar,data);
-                    if(n<=0) break;
-                    for(int i=0; i<n; i++) {
-                        if(dbFields[i]==null) continue;
-                        if(!createArraySupport(dbFields[i])) result = false;
                     }
                     nsofar += n; offset += n;
                 }

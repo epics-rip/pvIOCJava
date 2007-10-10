@@ -119,7 +119,7 @@ public class SelectFieldName extends Dialog implements SelectionListener {
     }
 
     private void createStructureTreeItem(TreeItem tree,PVStructure pvStructure) {
-        PVField[] pvFields = pvStructure.getFieldPVFields();
+        PVField[] pvFields = pvStructure.getPVFields();
         for(PVField pvField : pvFields) {
             Field field = pvField.getField();
             TreeItem treeItem = new TreeItem(tree,SWT.NONE);

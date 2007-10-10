@@ -54,7 +54,7 @@ public class CASupportFactory {
     
     private static PVInt getIndexField(PVStructure pvStructure,String fieldName) {
         Structure structure = pvStructure.getStructure();
-        PVField[] pvFields = pvStructure.getFieldPVFields();
+        PVField[] pvFields = pvStructure.getPVFields();
         int index = structure.getFieldIndex(fieldName);
         if(index<0) {
             pvStructure.message("field " + fieldName + " does not exist", MessageType.error);
@@ -66,7 +66,7 @@ public class CASupportFactory {
             return null;
         }
         pvStructure = (PVStructure)pvField;
-        pvFields = pvStructure.getFieldPVFields();
+        pvFields = pvStructure.getPVFields();
         structure = pvStructure.getStructure();
         index = structure.getFieldIndex("index");
         if(index<0) {
@@ -1781,7 +1781,7 @@ public class CASupportFactory {
                 ChannelFieldGroup channelFieldGroup = cD.getChannelFieldGroup();
                 List<ChannelField> channelFieldList = channelFieldGroup.getList();
                 CDStructure cdStructure = cD.getCDRecord().getCDStructure();
-                CDField[] cdbFields = cdStructure.getFieldCDFields();
+                CDField[] cdbFields = cdStructure.getCDFields();
                 for(int i=0;i<cdbFields.length; i++) {
                     CDField cdField = cdbFields[i];
                     PVField targetPVField = cdField.getPVField();

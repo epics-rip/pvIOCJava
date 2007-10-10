@@ -4,19 +4,24 @@
  * in file LICENSE that is included with this distribution.
  */
 package org.epics.ioc.db;
+import org.epics.ioc.pv.PVStructureArray;
 
 /**
  * Interface for non scalar arrays.
  * @author mrk
  *
  */
-public interface DBNonScalarArray extends DBField{
+public interface DBStructureArray extends DBArray{
     /**
-     * Get the DBField array.
-     * @return The array of elements.
-     * An element is null if the corresponding pvArray element is null.
+     * Get the PVStructureArray for this field.
+     * @return The PVStructureArray interface.
      */
-    DBField[] getElementDBFields();
+    PVStructureArray getPVStructureArray();
+    /**
+     * Get the DBStructure array.
+     * @return The array of elements.
+     */
+    DBStructure[] getElementDBStructures();
     /**
      * Replace the current PVArray.
      */

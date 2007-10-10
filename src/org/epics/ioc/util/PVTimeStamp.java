@@ -40,7 +40,7 @@ public class PVTimeStamp {
     public static PVTimeStamp create(PVField pvField) {
         if(pvField.getField().getType()!=Type.pvStructure) return null;
         PVStructure timeStamp = (PVStructure)pvField;
-        PVField[] pvFields = timeStamp.getFieldPVFields();
+        PVField[] pvFields = timeStamp.getPVFields();
         if(pvFields.length!=2) return null;
         PVField fieldPvField = pvFields[0];
         Field field = fieldPvField.getField();

@@ -31,11 +31,11 @@ public class BaseDBStructure extends BaseDBField implements DBStructure
      * Constructor.
      * @param parent The parent.
      * @param record The DBRecord to which this field belongs.
-     * @param pvField The reflection interface.
+     * @param pvStructure The reflection interface.
      */
-    public BaseDBStructure(DBField parent,DBRecord record, PVField pvField) {
-        super(parent,record,pvField);
-        this.pvStructure = (PVStructure)pvField;
+    public BaseDBStructure(DBField parent,DBRecord record, PVStructure pvStructure) {
+        super(parent,record,pvStructure);
+        this.pvStructure = pvStructure;
         createFields();
     }
     
@@ -90,7 +90,7 @@ public class BaseDBStructure extends BaseDBField implements DBStructure
     }
     
     private void createFields() {
-        PVField[] pvFields = pvStructure.getFieldPVFields();
+        PVField[] pvFields = pvStructure.getPVFields();
         int length = pvFields.length;
         dbFields = new DBField[length];
         for(int i=0; i<length; i++) {
@@ -101,14 +101,20 @@ public class BaseDBStructure extends BaseDBField implements DBStructure
             BaseDBField dbField = null;
             switch(type) {
             case pvStructure:
-                dbField = new BaseDBStructure(this,dbRecord,pvField);
+                dbField = new BaseDBStructure(this,dbRecord,(PVStructure)pvField);
                 break;
             case pvArray:
                 PVArray pvArray = (PVArray)pvField;
-                if(((Array)pvArray.getField()).getElementType().isScalar()) {
+                Type elementType = ((Array)pvArray.getField()).getElementType();
+                if(elementType.isScalar()) {
                     dbField = new BaseDBField(this,dbRecord,pvArray);
+                } else if(elementType==Type.pvArray){
+                    dbField = new BaseDBArrayArray(this,dbRecord,(PVArrayArray)pvArray);
+                } else if(elementType==Type.pvStructure){
+                    dbField = new BaseDBStructureArray(this,dbRecord,(PVStructureArray)pvArray);
                 } else {
-                    dbField = new BaseDBNonScalarArray(this,dbRecord,pvArray);
+                    pvField.message("logic error unknown type", MessageType.fatalError);
+                    return;
                 }
                 break;
             default:

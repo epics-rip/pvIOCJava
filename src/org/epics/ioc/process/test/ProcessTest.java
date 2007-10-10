@@ -33,7 +33,7 @@ public class ProcessTest extends TestCase {
         Map<String,DBRecord> recordMap = iocdbMaster.getRecordMap();
         Set<String> keys = recordMap.keySet();
         boolean initOK = IOCFactory.initDatabase(
-            "src/org/epics/ioc/process/test/exampleDB.xml",iocRequester);
+            "src/org/epics/ioc/process/test/processTestDB.xml",iocRequester);
         if(!initOK) {
             System.out.printf("\nrecords\n");
             for(String key: keys) {
@@ -42,6 +42,10 @@ public class ProcessTest extends TestCase {
             }
             return;
         }
+        try {
+            Thread.sleep(1000);
+            System.out.println();
+        } catch (InterruptedException e) {}
         DBRecord dbRecord = iocdbMaster.findRecord("counter");
         assertNotNull(dbRecord);
         TestProcess testProcess = new TestProcess(dbRecord);

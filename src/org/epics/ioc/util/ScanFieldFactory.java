@@ -31,7 +31,7 @@ public class ScanFieldFactory {
     public static ScanField create(DBRecord dbRecord) {
         PVRecord pvRecord = dbRecord.getPVRecord();
         Structure recordStructure = (Structure)pvRecord.getField();
-        PVField[] pvFields = pvRecord.getFieldPVFields();
+        PVField[] pvFields = pvRecord.getPVFields();
         int index;
         PVField pvField;  
         index = recordStructure.getFieldIndex("scan");
@@ -53,7 +53,7 @@ public class ScanFieldFactory {
             pvScan.message("is not a scan structure", MessageType.fatalError);
             return null;
         }
-        pvFields = pvScan.getFieldPVFields(); 
+        pvFields = pvScan.getPVFields(); 
         index = structure.getFieldIndex("priority");
         if(index<0) {
             pvScan.message("does not have field priority", MessageType.fatalError);

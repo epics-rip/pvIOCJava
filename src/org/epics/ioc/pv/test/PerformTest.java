@@ -29,7 +29,7 @@ public class PerformTest extends TestCase {
         Field[] fields = new Field[]{fieldFrom,fieldTo,fieldLong};
         Structure structure = fieldCreate.createStructure("test", "test", fields);
         PVRecord pvRecord = dataCreate.createPVRecord("test", structure);
-        PVField[] pvDatas = pvRecord.getFieldPVFields();
+        PVField[] pvDatas = pvRecord.getPVFields();
         PVDoubleArray from = (PVDoubleArray)pvDatas[0];
         PVDoubleArray to = (PVDoubleArray)pvDatas[1];
         PVLongArray toLong = (PVLongArray)pvDatas[2];

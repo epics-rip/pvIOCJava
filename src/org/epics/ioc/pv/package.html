@@ -484,7 +484,7 @@ where
 <p>The interface for structure is:</p>
 <pre>    interface PVStructure extends PVField {
         Structure getStructure();
-        PVField[] getFieldPVFields();
+        PVField[] getPVFields();
         boolean replaceStructureField(String fieldName,String structureName)
         PVBoolean getBooleanField(String fieldName);
         PVByte getByteField(String fieldName);
@@ -502,7 +502,7 @@ where
 <dl>
   <dt>getStructure</dt>
     <dd>Get the introspection interface for the structure.</dd>
-  <dt>getFieldPVFields</dt>
+  <dt>getPVFields</dt>
     <dd>Returns the array of subfields. The set of subfields must all have
       different field names.</dd>
   <dt>replaceStructureField</dt>
@@ -953,7 +953,7 @@ interfaces:</p>
     public Structure getStructure();
     public void setRecord(PVRecord record);
     public boolean replaceStructureField(String fieldName, Structure structure);
-    public PVField[] getFieldPVFields();
+    public PVField[] getPVFields();
     public PVBoolean getBooleanField(String fieldName);
     public PVByte getByteField(String fieldName);
     public PVShort getShortField(String fieldName);

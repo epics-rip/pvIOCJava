@@ -96,7 +96,7 @@ RecordProcessRequester
         if(pvSize==null) return;
         pvTimeout = pvStructure.getDoubleField("timeout");
         if(pvTimeout==null) return;
-        PVField[] pvFields = pvStructure.getFieldPVFields();
+        PVField[] pvFields = pvStructure.getPVFields();
         Structure structure = pvStructure.getStructure();
         int index = structure.getFieldIndex("drvParams");
         PVField pvField = null;

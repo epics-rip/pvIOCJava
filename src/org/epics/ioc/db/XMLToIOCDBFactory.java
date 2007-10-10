@@ -379,7 +379,7 @@ public class XMLToIOCDBFactory {
                 state = State.idle;
                 return;
             }
-            PVField pvField = pvStructure.getFieldPVFields()[fieldIndex];
+            PVField pvField = pvStructure.getPVFields()[fieldIndex];
             String supportName = attributes.get("supportName");
             if(supportName!=null) {
                 pvField.setSupportName(supportName);
@@ -414,7 +414,7 @@ public class XMLToIOCDBFactory {
                             state = State.idle;
                             return;
                         }
-                        pvField = pvStructure.getFieldPVFields()[fieldIndex];
+                        pvField = pvStructure.getPVFields()[fieldIndex];
                     }
                 }
                 structureStack.push(structureState);

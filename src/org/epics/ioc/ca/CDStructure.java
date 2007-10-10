@@ -17,7 +17,7 @@ public interface CDStructure extends CDField {
      * Get the <i>CDField</i> array for the fields of the structure.
      * @return array of CDField. One for each field.
      */
-    CDField[] getFieldCDFields();
+    CDField[] getCDFields();
     /**
      * Replace the PVStructure.
      */

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
       "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html>
+<html xmlns="http://www.w3.org/1999/xhtml">
 <head>
   <meta http-equiv="content-type" content="text/html; charset=iso-8859-1" />
   <title>EPICS JavaIOC: TODO</title>
@@ -9,7 +9,7 @@
 
 <body>
 <h1 style="text-align: center">EPICS JavaIOC: TODO<br />
-2007.09.26</h1>
+2007.10.09</h1>
 <ul>
   <li>alarm 
     <ul>
@@ -23,10 +23,10 @@
     </ul>
   </li>
   <li>DBNonScalarArray<br />
-    Provide a method(s) to create a specified number of elements that have a
-    specified array or structure. This is too complicated to leave to support
-    code. Look at Digital support for an example. This should become
-    DBStructureArray and DBArrayArray</li>
+    This HAS been replaced by DBStructureArray and DBArrayArray. Provide a
+    method(s) to create a specified number of elements that have a specified
+    array or structure. This is too complicated to leave to support code.
+    Look at Digital support for an example.</li>
   <li>Channel Access Monitors<br />
     Make generic instead of just onPut, onChange, onAbsoluteChange, and
     onPercentChange. </li>
@@ -53,6 +53,11 @@
     configuration.<br />
     </p>
   </li>
+  <li>pv<br />
+    Get rid of asynAccessCallListener, ..., isAsynAccessActive. This is used
+    by PDRV so that PDRVSupport for arrays can call convert.copyArray and let
+    the driver deliver the array in chunks. Add something to PDRV so that
+    this can be done without adding something to PVField.</li>
 </ul>
 </body>
 </html>

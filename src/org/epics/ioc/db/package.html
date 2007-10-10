@@ -1,6 +1,6 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
       "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html>
+<html xmlns="http://www.w3.org/1999/xhtml">
 <head>
   <meta http-equiv="content-type" content="" />
   <title>EPICS JavaIoc: Database Access</title>
@@ -11,15 +11,15 @@
 
 <h1 style="text-align: center">EPICS JavaIoc: Database Access <br />
 package: org.epics.ioc.dbAcess <br />
-2007.09.18</h1>
+2007.10.10</h1>
 CONTENTS 
 
 <div class="toc">
 <ul>
   <li><a href="#Overview">Overview</a></li>
-  <li><a href="#Record">Record Instance Syntax</a> 
+  <li><a href="#Record">Record Instance Syntax</a>
     <ul>
-      <li><a href="#General">General Statements</a> 
+      <li><a href="#General">General Statements</a>
         <ul>
           <li><a href="#namespace">namespace</a></li>
           <li><a href="#Include">Include</a></li>
@@ -36,9 +36,9 @@ CONTENTS
     </ul>
   </li>
   <li><a href="#Database">XML to Database Converter</a></li>
-  <li><a href="#Database1">Database Access</a> 
+  <li><a href="#Database1">Database Access</a>
     <ul>
-      <li><a href="#Listener">Listener Interface</a> 
+      <li><a href="#Listener">Listener Interface</a>
         <ul>
           <li><a href="#DBListener">DBListener</a></li>
           <li><a href="#RecordList">RecordListener</a></li>
@@ -46,7 +46,9 @@ CONTENTS
       </li>
       <li><a href="#DBField">DBField</a></li>
       <li><a href="#DBStructur">DBStructure</a></li>
-      <li><a href="#DBNonScala">DBNonScalarArray</a></li>
+      <li><a href="#DBArray">DBArray</a></li>
+      <li><a href="#DBStructur1">DBStructureArray</a></li>
+      <li><a href="#DBArrayArr">DBArrayArray</a></li>
       <li><a href="#DBRecord">DBRecord</a></li>
       <li><a href="#DBRecordFa">DBRecordFactory</a></li>
     </ul>
@@ -595,20 +597,55 @@ instance.</p>
     <dd>End a set of puts to subfields of the structure.</dd>
 </dl>
 
-<h3 id="DBNonScala">DBNonScalarArray</h3>
-<pre>    public interface DBNonScalarArray extends DBField{
-        void replacePVArray();
-        DBField[] getElementDBFields();
+<h3 id="DBArray">DBArray</h3>
+<pre>    public interface DBArray extends DBField{
+        PVArray getPVArray();
     }
 
-    public class BaseDBNonScalarArray extends BaseDBField implements DBNonScalarArray{...}</pre>
+    public class BaseDBArray extends BaseDBField implements DBArray {...}</pre>
 
 <p>where</p>
 <dl>
+  <dt style="font-family: courier;">getPVArray</dt>
+    <dd>Get the PVArray associated with this DBArray.</dd>
+</dl>
+
+<h3 id="DBStructur1">DBStructureArray</h3>
+<pre>    public interface DBStructureArray extends DBArray {
+        PVStructureArray getPVStructureArray();
+        DBStructure[] getElementDBStructures();
+        void replacePVArray();
+    }
+
+    public class BaseDBStructureArray extends BaseDBArray implements DBStructureArray {...}</pre>
+
+<p>where</p>
+<dl>
+  <dt style="font-family: courier;">getPVStructureArray</dt>
+    <dd>Gert the PVStructureArray associated with the DBStructureArray.</dd>
+  <dt style="font-family: courier;">getElementDBStructures</dt>
+    <dd>Get the DBStructure array for the elements.</dd>
   <dt style="font-family: courier;">replacePVArray</dt>
     <dd>Replace the PVArray interface.</dd>
-  <dt style="font-family: courier;">getElementDBFields</dt>
-    <dd>Get the DBField array for the elements.</dd>
+</dl>
+
+<h3 id="DBArrayArr">DBArrayArray</h3>
+<pre>    public interface DBArrayArray extends DBArray {
+        PVArrayArray getPVArrayArray();
+        DBArray[] getElementDBArrays();
+        void replacePVArray();
+    }
+
+    public class BaseDBArrayArray extends BaseDBArray implements DBArrayArray {...}</pre>
+
+<p>where</p>
+<dl>
+  <dt style="font-family: courier;">getPVArrayArray</dt>
+    <dd>Gert the PVArrayArray associated with the DBArrayArray.</dd>
+  <dt style="font-family: courier;">getElementDBArrays</dt>
+    <dd>Get the DBArray array for the elements.</dd>
+  <dt style="font-family: courier;">replacePVArray</dt>
+    <dd>Replace the PVArray interface.</dd>
 </dl>
 
 <h3 id="DBRecord">DBRecord</h3>

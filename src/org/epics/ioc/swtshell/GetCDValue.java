@@ -43,7 +43,7 @@ public class GetCDValue extends Dialog implements SelectionListener {
      */
     public void getValue(CDRecord cdRecord) {
         cdRecord.getCDStructure().clearNumPuts();
-        CDField[] cdFields = cdRecord.getCDStructure().getFieldCDFields();
+        CDField[] cdFields = cdRecord.getCDStructure().getCDFields();
         if(cdFields.length==1) {
             CDField cdField = cdFields[0];
             Field field = cdField.getPVField().getField();
@@ -159,7 +159,7 @@ public class GetCDValue extends Dialog implements SelectionListener {
     }
     
     private void createStructureTreeItem(TreeItem tree,CDStructure cdStructure) {
-        CDField[] cdFields = cdStructure.getFieldCDFields();
+        CDField[] cdFields = cdStructure.getCDFields();
         for(CDField cdField : cdFields) {
             Field field = cdField.getPVField().getField();
             TreeItem treeItem = new TreeItem(tree,SWT.NONE);
@@ -183,9 +183,9 @@ public class GetCDValue extends Dialog implements SelectionListener {
             tree.setData(cdField);
             return;
         }
-        CDNonScalarArray cdArray = (CDNonScalarArray)cdField;
-        CDField[] cdFields = cdArray.getElementCDFields();
-        for(CDField cdf : cdFields) {
+        CDStructureArray cdArray = (CDStructureArray)cdField;
+        CDStructure[] cdFields = cdArray.getElementCDStructures();
+        for(CDStructure cdf : cdFields) {
             if(cdf==null) continue;
             TreeItem treeItem = new TreeItem(tree,SWT.NONE);
             Field field = cdf.getPVField().getField();
@@ -193,7 +193,7 @@ public class GetCDValue extends Dialog implements SelectionListener {
             if(elementType==Type.pvArray) {
                 createArrayTreeItem(treeItem,cdf);
             } else if(elementType==Type.pvStructure) {
-                createStructureTreeItem(treeItem,(CDStructure)cdf);
+                createStructureTreeItem(treeItem,cdf);
             } else {
                 treeItem.setData(cdField);
             }

@@ -10,7 +10,7 @@ import org.epics.ioc.pv.*;
  * @author mrk
  *
  */
-public class BaseCDStructureArray extends BaseCDField implements CDNonScalarArray{
+public class BaseCDStructureArray extends BaseCDArray implements CDStructureArray{
     private boolean supportAlso;
     private PVStructureArray pvStructureArray;
     private CDStructure[] elementCDStructures;
@@ -84,9 +84,9 @@ public class BaseCDStructureArray extends BaseCDField implements CDNonScalarArra
         super.incrementNumPuts();
     }
     /* (non-Javadoc)
-     * @see org.epics.ioc.ca.CDNonScalarArray#getElementCDFields()
+     * @see org.epics.ioc.ca.CDStructureArray#getElementCDStructures()
      */
-    public CDStructure[] getElementCDFields() {
+    public CDStructure[] getElementCDStructures() {
         return elementCDStructures;
     }
     /* (non-Javadoc)
@@ -130,7 +130,7 @@ public class BaseCDStructureArray extends BaseCDField implements CDNonScalarArra
         }
         return false;
     }    
-    
+   
     private void createElementCDBStructures() {
         int length = pvStructureArray.getLength();
         elementCDStructures = new CDStructure[length];

@@ -68,7 +68,7 @@ public class DBRecordFactory {
                 parent = parent.getParent();
             }
             DBField[] dbFields = dbStructure.getFieldDBFields();
-            PVField[] pvFields = pvRecord.getFieldPVFields();
+            PVField[] pvFields = pvRecord.getPVFields();
             return findDBField(pvField,pvFieldFind,0,dbFields,pvFields);
         }
         
@@ -87,7 +87,7 @@ public class DBRecordFactory {
                     DBStructure dbStructure = (DBStructure)dbFields[j];
                     dbFields = dbStructure.getFieldDBFields();
                     PVStructure pvStructure = (PVStructure)pvFields[j];
-                    pvFields = pvStructure.getFieldPVFields();
+                    pvFields = pvStructure.getPVFields();
                     index++;
                     return findDBField(pvField,pvFieldFind,index,dbFields,pvFields);
                 }
@@ -104,12 +104,12 @@ public class DBRecordFactory {
                 if(dbField.getPVField()==pvField) return dbField;
                 throw new IllegalStateException("Logic error");
             }
-            int size = pvArray.getLength();
-            DBNonScalarArray dbNonScalarArray = (DBNonScalarArray)dbField;
-            DBField[] dbFields = dbNonScalarArray.getElementDBFields();
+            int size = pvArray.getLength();           
             switch(arrayElementType) {
             case pvStructure:
-                PVStructureArray pvStructureArray = (PVStructureArray)pvArray;
+                DBStructureArray dbStructureArray = (DBStructureArray)dbField;
+                PVStructureArray pvStructureArray = dbStructureArray.getPVStructureArray();
+                DBStructure[] dbStructures = dbStructureArray.getElementDBStructures();
                 StructureArrayData structureArrayData = new StructureArrayData();
                 pvStructureArray.get(0, size, structureArrayData);
                 PVStructure[] pvStructures = structureArrayData.data;
@@ -117,18 +117,20 @@ public class DBRecordFactory {
                     PVStructure pvStructure = pvStructures[i];
                     if(pvStructure==null) continue;
                     if(pvStructure==pvFieldFind[index]) {
-                        DBStructure dbStructure = (DBStructure)dbFields[i];
+                        DBStructure dbStructure = dbStructures[i];
                         if(pvStructure==pvField) {
                             if(dbStructure.getPVField()==pvStructure) return dbStructure;
                             throw new IllegalStateException("Logic error");
                         }
                         return findDBField(pvField,pvFieldFind,index+1,
-                            dbStructure.getFieldDBFields(),pvStructure.getFieldPVFields());
+                            dbStructure.getFieldDBFields(),pvStructure.getPVFields());
                     }
                 }
                 throw new IllegalStateException("Logic error");
             case pvArray:
-                PVArrayArray pvArrayArray = (PVArrayArray)pvArray;
+                DBArrayArray dbArrayArray = (DBArrayArray)dbField;
+                PVArrayArray pvArrayArray = dbArrayArray.getPVArrayArray();
+                DBArray[] dbArrays = dbArrayArray.getElementDBArrays();
                 ArrayArrayData arrayArrayData = new ArrayArrayData();
                 pvArrayArray.get(0, size, arrayArrayData);
                 PVArray[] pvArrays = arrayArrayData.data;
@@ -138,10 +140,10 @@ public class DBRecordFactory {
                     if(elementArray==pvFieldFind[index]) {
                         Type elementType = ((Array)elementArray.getField()).getElementType();
                         if(elementType.isScalar()) {
-                            if(elementArray==pvField) return dbFields[i];
+                            if(elementArray==pvField) return dbArrays[i];
                             throw new IllegalStateException("Logic error");
                         }
-                        return findArrayField(pvField,pvFieldFind,index+1,dbFields[i],elementArray);
+                        return findArrayField(pvField,pvFieldFind,index+1,dbArrays[i],elementArray);
                     }
                 }
                 throw new IllegalStateException("Logic error");

@@ -40,7 +40,7 @@ public class Float64DriverFactory {
     static public void create(
         String portName,boolean autoConnect,ScanPriority priority,PVStructure pvStructure)
     {
-        PVField[] pvFields = pvStructure.getFieldPVFields();
+        PVField[] pvFields = pvStructure.getPVFields();
         Structure structure = (Structure)pvStructure.getField();
         int index = structure.getFieldIndex("numberRegisters");
         if(index<0) {

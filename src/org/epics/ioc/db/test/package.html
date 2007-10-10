@@ -17,12 +17,6 @@ package: org.epics.ioc.db.test<br />
 <p>This package is an eclipse JUnit test for org.epics.ioc.dbAccess. It
 contains The following JUnit tests:</p>
 <ul>
-  <li>XMLToDataBaseTest<br />
-    Reads a set of database definition files and a set of record instance
-    files. It dumps the record instances.</li>
-  <li>XMLAllTypesTest<br />
-    Reads a set of definitions that include all types.
-  </li>
   <li>DefaultTest<br />
     Reads a set of database definition files that have defaults for all
     fields that are allowed to have defualts. Creates an instance definition
@@ -50,46 +44,13 @@ and is an example of implementing a DBListener.</p>
 
 <p>The following database definition files are available:</p>
 <ul>
-  <li>accessDBD.xml<br />
-    Include statements for the files requires by AccessTest.
-  </li>
-  <li>aiDBD.xml
-    aiRaw, aiLinear, aiLinearRecord</li>
-  <li>aiLinkedDBD.xml<br />
-    Definitions for an ai record that links to an aiRaw record.
-  </li>
-  <li>allTypesDBD.xml<br />
-    A structure and recordType that has fields of every supported type.</li>
-  <li>analogDBD.xml<br />
-    A simple recordType definition.</li>
-  <li>defaultDBD.xml<br />
-    Like allTypesDBD.xml but assigns defaults to all fields that are allowed
-    to have defaults.</li>
-  <li>listenerDBD.xml<br />
-    Include statements for the files requires by ListenerTest.
-  </li>
-  <li>parentDBD.xml<br />
-    Include statements for the files requires by ParentTest.
-  </li>
-  <li>powerSupplyDBD.xml<br />
-    A simple power supply for power, current, and voltage.</li>
-  <li>powerSupplyLinkedDBD.xml<br />
-    A simple power supply that links to other records for current and voltage.
+  <li>protoAiDB.xml<br />
+    Used by ReplaceTest.
   </li>
   <li>replaceDBD.xml<br />
     Include statements for the files requires by ReplaceTest.
   </li>
-  <li>substituteDBD.xml<br />
-    Include statements for the files requires by SubstituteTest.
-  </li>
-  <li>xmlToDataBaseDBD.xml<br />
-    Include statements for the files requires by XMLToDataBaseTest.
-  </li>
 </ul>
 
-<p>The DB.xml files are read by the various tests.
-
-These database files and tests are good examples of the kinds of data a
-JavaIOC can hold.</p>
 </body>
 </html>

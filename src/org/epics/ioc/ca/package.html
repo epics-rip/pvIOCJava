@@ -61,7 +61,9 @@ CONTENTS
       <li><a href="#CDRecord">CDRecord</a></li>
       <li><a href="#CDField">CDField</a></li>
       <li><a href="#CDStructur">CDStructure</a></li>
-      <li><a href="#CDNonScala">CDNonScalarArray</a></li>
+      <li><a href="#CDArray">CDArray</a></li>
+      <li><a href="#CDStructur1">CDStructureArray</a></li>
+      <li><a href="#CDArrayArr">CDArrayArray</a></li>
       <li><a href="#Base">Base CD Classes</a></li>
     </ul>
   </li>
@@ -899,18 +901,28 @@ to determine how often each PVField was written.</p>
     
     
     interface CDStructure extends CDField {
-        CDField[] getFieldCDFields();
+        CDField[] getCDFields();
         void replacePVStructure();
         PVStructure getPVStructure();
     }
+
+    interface CDArray extends CDField{
+        PVArray getPVArray();
+    }
     
-    interface CDNonScalarArray extends CDField {
-        CDField[] getElementCDFields();
+    interface CDArrayArray extends CDArray {
+        CDArray[] getElementCDArrays();
+        void replacePVArray();
+    }
+
+    interface CDStructureArray extends CDArray {
+        CDStructure[] getElementCDStructures();
         void replacePVArray();
     }
 
     class BaseCDRecord { ... }
     class BaseCDField { ... }
+    class BaseCDArray { ... }
     class BaseCDStructure { ... }
     class BaseCDStructureArray { ... }
     class BaseCDArrayArray { ... }</pre>
@@ -987,7 +999,7 @@ CDField or an extension. CDField has the methods:</p>
 
 <p>CDStructure is associated with a PVStructure. It has the methods:</p>
 <dl>
-  <dt style="font-family: courier;">getFieldCDFields</dt>
+  <dt style="font-family: courier;">getCDFields</dt>
     <dd>Get the CDField array for the fields of the structure.</dd>
   <dt style="font-family: courier;">replacePVStructure</dt>
     <dd>Replace the PVStructure.</dd>
@@ -995,13 +1007,32 @@ CDField or an extension. CDField has the methods:</p>
     <dd>Get the PVStructure.</dd>
 </dl>
 
-<h3 id="CDNonScala">CDNonScalarArray</h3>
+<h3 id="CDArray">CDArray</h3>
 
-<p>CDNonScalarArray is associated with a PVArray with non-scalar elements,
-i.e. PVArrayArray or PVStructureArray.</p>
+<p>CDArray is associated with a PVArray. It has the method:</p>
 <dl>
-  <dt style="font-family: courier;">getElementCDFields</dt>
-    <dd>Get the CDField array.</dd>
+  <dt style="font-family: courier;">getPVArray</dt>
+    <dd>Get the PVArray for this array.</dd>
+</dl>
+
+<p>CDArray is associated with a PVArray. It has the method:</p>
+
+<h3 id="CDStructur1">CDStructureArray</h3>
+
+<p>CDStructureArray is associated with a PVArray with structure elements.</p>
+<dl>
+  <dt style="font-family: courier;">getElementCDStructures</dt>
+    <dd>Get the CDStructure array.</dd>
+  <dt style="font-family: courier;">replacePVArray</dt>
+    <dd>Replace the current PVArray.</dd>
+</dl>
+
+<h3 id="CDArrayArr">CDArrayArray</h3>
+
+<p>CDArrayArray is associated with a PVArray with array elements.</p>
+<dl>
+  <dt style="font-family: courier;">getElementCDArrays</dt>
+    <dd>Get the CDArray array.</dd>
   <dt style="font-family: courier;">replacePVArray</dt>
     <dd>Replace the current PVArray.</dd>
 </dl>
@@ -1012,8 +1043,7 @@ i.e. PVArrayArray or PVStructureArray.</p>
 style="font-family: courier;">BaseCDRecord</span> ... <span
 style="font-family: courier;">BaseCDArrayArray</span>, provide
 implementations of the CD interraces. These provide complete imnplementations
-and should rarely need to be extended. Not that a separate implementation is
-provided for each of the CDNonScalarArray types.</p>
+and should rarely need to be extended.</p>
 <hr />
 
 <h2 style="text-align: center;" id="Local">Local Channel Access</h2>
@@ -1135,7 +1165,7 @@ example gets from a record after the record is no longer locked.</p>
             ChannelFieldGroup channelFieldGroup = cd.getChannelFieldGroup();
             List&lt;ChannelField&gt; channelFieldList = channelFieldGroup.getList();
             CDStructure cdStructure = cd.getCDRecord().getCDStructure();
-            CDField[] cdbDatas = cdStructure.getFieldCDFields();
+            CDField[] cdbDatas = cdStructure.getCDFields();
             int maxNumPuts = cd.getMaxPutsToField();
             if(maxNumPuts!=1) {
                 builder.append(String.format(

@@ -170,7 +170,7 @@
         <input supportName = "pdrvUInt32DigitalInput" structureName = "pdrvSupport">
             <portName>syncDigitalDigitalDriver</portName>
             <addr>0</addr>
-            <mask>0x2</mask>
+            <mask>0x3</mask>
             <timeout>.2</timeout>
         </input>  
             <states supportName = "digitalInput" >

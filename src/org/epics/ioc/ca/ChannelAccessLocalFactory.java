@@ -988,7 +988,7 @@ public class ChannelAccessLocalFactory  {
             private void getData() {
                 Iterator<ChannelField> channelFieldListIter = channelFieldList.iterator();
                 CDStructure cdStructure = cD.getCDRecord().getCDStructure();
-                CDField[] cdFields = cdStructure.getFieldCDFields();
+                CDField[] cdFields = cdStructure.getCDFields();
                 for(CDField cdField : cdFields) {
                     ChannelFieldImpl field = (ChannelFieldImpl)channelFieldListIter.next();
                     copyChanges(field.getDBField(),cdField);
@@ -1009,7 +1009,7 @@ public class ChannelAccessLocalFactory  {
                 }
                 if(type==Type.pvStructure) {
                     CDStructure cdStructure = (CDStructure)cdField;
-                    CDField[] cdFields = cdStructure.getFieldCDFields();
+                    CDField[] cdFields = cdStructure.getCDFields();
                     DBStructure to = (DBStructure)dbField;
                     DBField[] dbFields = to.getFieldDBFields();
                     for(int i=0; i<cdFields.length; i++) {
@@ -1023,21 +1023,41 @@ public class ChannelAccessLocalFactory  {
                     if(elementType.isScalar()) {
                         cdField.dataPut(fromPVField);
                         return;
+                    } else if(elementType==Type.pvArray) {
+                       copyArrayArray((DBArrayArray)dbField,(CDArrayArray)cdField);
+                    } else if(elementType==Type.pvStructure) {
+                       copyStructureArray((DBStructureArray)dbField,(CDStructureArray)cdField);
                     }
-                    copyNonScalarArray((DBNonScalarArray)dbField,(CDNonScalarArray)cdField);
                 }
             }
-            private void copyNonScalarArray(DBNonScalarArray dbArray,CDNonScalarArray cdArray) {
+            private void copyArrayArray(DBArrayArray dbArray,CDArrayArray cdArray) {
                 PVArray pvArray = (PVArray)cdArray.getPVField();
                 int length = pvArray.getLength();
-                CDField[] cdFields = cdArray.getElementCDFields();
-                DBField[] dbFields = dbArray.getElementDBFields();
+                CDField[] cdFields = cdArray.getElementCDArrays();
+                DBField[] dbFields = dbArray.getElementDBArrays();
                 for(int i=0; i<length; i++) {
                     CDField cdField = cdFields[i];
                     DBField dbField = dbFields[i];
                     if(dbField==null) continue;
                     if(cdField==null) {
                         message("why is cdField null and dbField not null?",MessageType.error);
+                        continue;
+                    }
+                    copyChanges(dbField,cdField);
+                }
+            }
+            private void copyStructureArray(DBStructureArray dbArray,CDStructureArray cdArray) {
+                PVArray pvArray = (PVArray)cdArray.getPVField();
+                int length = pvArray.getLength();
+                CDField[] cdFields = cdArray.getElementCDStructures();
+                DBField[] dbFields = dbArray.getElementDBStructures();
+                for(int i=0; i<length; i++) {
+                    CDField cdField = cdFields[i];
+                    DBField dbField = dbFields[i];
+                    if(dbField==null) continue;
+                    if(cdField==null) {
+                        message("why is cdField null and dbField not null?",MessageType.error);
+                        continue;
                     }
                     copyChanges(dbField,cdField);
                 }
@@ -1359,7 +1379,7 @@ public class ChannelAccessLocalFactory  {
             private void putData() {
                 Iterator<ChannelField> channelFieldListIter = channelFieldList.iterator();
                 CDStructure cdStructure = cD.getCDRecord().getCDStructure();
-                CDField[] cdFields = cdStructure.getFieldCDFields();
+                CDField[] cdFields = cdStructure.getCDFields();
                 for(CDField cdField : cdFields) {
                     ChannelFieldImpl field = (ChannelFieldImpl)channelFieldListIter.next();
                     copyChanges(cdField, field.getDBField());
@@ -1387,7 +1407,7 @@ public class ChannelAccessLocalFactory  {
                 }
                 if(type==Type.pvStructure) {
                     CDStructure cdStructure = (CDStructure)cdField;
-                    CDField[] cdFields = cdStructure.getFieldCDFields();
+                    CDField[] cdFields = cdStructure.getCDFields();
                     DBStructure to = (DBStructure)dbField;
                     DBField[] dbFields = to.getFieldDBFields();
                     for(int i=0; i<cdFields.length; i++) {
@@ -1406,42 +1426,54 @@ public class ChannelAccessLocalFactory  {
                             dbField.postPut();
                         }
                         return;
+                    } else if(elementType==Type.pvArray) {
+                        copyArrayArray((CDArrayArray)cdField,(DBArrayArray)dbField);
+                    } else if(elementType==Type.pvStructure) {
+                        copyStructureArray((CDStructureArray)cdField,(DBStructureArray)dbField);
                     }
-                    copyNonScalarArray((CDNonScalarArray)cdField,(DBNonScalarArray)dbField);
                 }
             }
-            private void copyNonScalarArray(CDNonScalarArray cdArray,DBNonScalarArray dbArray) {
+            
+            private void copyArrayArray(CDArrayArray cdArray,DBArrayArray dbArray) {
                 PVArray pvArray = (PVArray)cdArray.getPVField();
                 int length = pvArray.getLength();
-                Array array = (Array)pvArray.getField();
-                Type elementType = array.getElementType();
-                CDField[] cdFields = cdArray.getElementCDFields();
-                DBField[] dbFields = dbArray.getElementDBFields();
+                CDArray[] cdArrays = cdArray.getElementCDArrays();
+                DBArray[] dbArrays = dbArray.getElementDBArrays();
                 for(int i=0; i<length; i++) {
-                    CDField cdField = cdFields[i];
-                    DBField dbField = dbFields[i];
+                    CDArray cdField = cdArrays[i];
+                    DBArray dbField = dbArrays[i];
                     if(cdField==null) continue;
                     if(cdField.getMaxNumPuts()==0) continue;
-                    PVField pvNew = null;
                     if(dbField==null) {
-                        PVField parent = dbArray.getPVField();
-                        PVField thisField = cdField.getPVField();
+                        PVArrayArray parent = dbArray.getPVArrayArray();
+                        PVArray thisField = cdField.getPVArray();
                         Field field = cdField.getPVField().getField();
-
-                        if(elementType==Type.pvArray) {
-                            int capacity = ((PVArray)thisField).getLength();
-                            pvNew = pvDataCreate.createPVArray(parent, field, capacity, true);
-                        } else {
-                            pvNew = pvDataCreate.createPVField(parent, field);
-                        }
-                        DBRecord dbRecord = dbArray.getDBRecord();
-                        switch(elementType) {
-                        case pvStructure:
-                            dbField = new BaseDBStructure(dbArray,dbRecord,pvNew); break;
-                        case pvArray:
-                            dbField = new BaseDBNonScalarArray(dbArray,dbRecord,(PVArray)pvNew); break;
-                        }
-                        dbFields[i] = dbField;
+                        int capacity = (thisField).getLength();
+                        PVArray pvNew = pvDataCreate.createPVArray(parent, field, capacity, true);
+                        DBRecord dbRecord = dbArray.getDBRecord();                  
+                        dbField = new BaseDBArray(dbArray,dbRecord,pvNew);
+                        dbArrays[i] = dbField;
+                    }
+                    copyChanges(cdField,dbField);
+                }
+            }
+            private void copyStructureArray(CDStructureArray cdArray,DBStructureArray dbArray) {
+                PVArray pvArray = (PVArray)cdArray.getPVField();
+                int length = pvArray.getLength();
+                CDStructure[] cdStructures = cdArray.getElementCDStructures();
+                DBStructure[] dbStructures = dbArray.getElementDBStructures();
+                for(int i=0; i<length; i++) {
+                    CDStructure cdField = cdStructures[i];
+                    DBStructure dbField = dbStructures[i];
+                    if(cdField==null) continue;
+                    if(cdField.getMaxNumPuts()==0) continue;
+                    if(dbField==null) {
+                        PVStructureArray parent = dbArray.getPVStructureArray();
+                        Field field = cdField.getPVField().getField();
+                        PVStructure pvNew = (PVStructure)pvDataCreate.createPVField(parent, field);
+                        DBRecord dbRecord = dbArray.getDBRecord();       
+                        dbField = new BaseDBStructure(dbArray,dbRecord,pvNew);
+                        dbStructures[i] = dbField;
                     }
                     copyChanges(cdField,dbField);
                 }
@@ -1873,8 +1905,8 @@ public class ChannelAccessLocalFactory  {
                         }
                         monitor.start();
                         cD = cDQueue.getFree(true);
-                        CDField[] initialDatas = initialData.getCDRecord().getCDStructure().getFieldCDFields();
-                        CDField[] channelDatas = cD.getCDRecord().getCDStructure().getFieldCDFields();
+                        CDField[] initialDatas = initialData.getCDRecord().getCDStructure().getCDFields();
+                        CDField[] channelDatas = cD.getCDRecord().getCDStructure().getCDFields();
                         for(int i=0; i<initialDatas.length; i++) {
                             channelDatas[i].dataPut(initialDatas[i].getPVField());
                         }
@@ -2014,8 +2046,8 @@ public class ChannelAccessLocalFactory  {
                     if(cD!=null) {
                         CD initialCD = cD;
                         cD = cDQueue.getFree(true);
-                        CDField[] initialDatas = initialCD.getCDRecord().getCDStructure().getFieldCDFields();
-                        CDField[] channelDatas = cD.getCDRecord().getCDStructure().getFieldCDFields();
+                        CDField[] initialDatas = initialCD.getCDRecord().getCDStructure().getCDFields();
+                        CDField[] channelDatas = cD.getCDRecord().getCDStructure().getCDFields();
                         for(int i=0; i<initialDatas.length; i++) {
                             channelDatas[i].dataPut(initialDatas[i].getPVField());
                         }

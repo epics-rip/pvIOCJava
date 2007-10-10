@@ -225,7 +225,7 @@ public class ReplaceTest extends TestCase {
         PVStructure structure = (PVStructure)pvField;
         DBStructure dbStructure = (DBStructure)dbField;
         dbStructure.beginPut();
-        PVField[] pvDatas = structure.getFieldPVFields();
+        PVField[] pvDatas = structure.getPVFields();
         DBField[] dbDatas = dbStructure.getFieldDBFields();
         for(int i=0; i<pvDatas.length; i++) {
             PVField field = pvDatas[i];
@@ -798,7 +798,7 @@ public class ReplaceTest extends TestCase {
         /**
          * Constructer that derived classes must call.
          * @param parent The parent interface.
-         * @param dbdArrayField The reflection interface for the DBArray data.
+         * @param dbdArrayField The reflection interface for the CDArray data.
          */
         protected AbstractDBArray(PVField parent,Array array) {
             super(parent,array,0,true);

@@ -10,10 +10,10 @@ import org.epics.ioc.pv.*;
  * @author mrk
  *
  */
-public class BaseCDArrayArray extends BaseCDField implements CDNonScalarArray{
+public class BaseCDArrayArray extends BaseCDArray implements CDArrayArray{
     private boolean supportAlso;
     private PVArrayArray pvArrayArray;
-    private CDField[] elementCDFields;
+    private CDArray[] elementCDArrays;
     private ArrayArrayData arrayArrayData = new ArrayArrayData();
     
     /**
@@ -35,7 +35,7 @@ public class BaseCDArrayArray extends BaseCDField implements CDNonScalarArray{
      * @see org.epics.ioc.ca.BaseCDField#clearNumPuts()
      */
     public void clearNumPuts() {
-        for(CDField cdField : elementCDFields) cdField.clearNumPuts();
+        for(CDField cdField : elementCDArrays) cdField.clearNumPuts();
         super.clearNumPuts();
     }
     /* (non-Javadoc)
@@ -59,17 +59,17 @@ public class BaseCDArrayArray extends BaseCDField implements CDNonScalarArray{
         for(int i=0; i<length; i++) {
             PVArray targetPVArray = targetArrays[i];
             if(targetPVArray==null) continue;
-            CDField cdField = elementCDFields[i];
+            CDField cdField = elementCDArrays[i];
             cdField.dataPut(targetPVArray);
         }
         pvArrayArray.put(0, pvArrays.length, pvArrays, 0);
         super.incrementNumPuts();
     }
     /* (non-Javadoc)
-     * @see org.epics.ioc.ca.CDNonScalarArray#getElementCDFields()
+     * @see org.epics.ioc.ca.CDArrayArray#getElementCDArrays()
      */
-    public CDField[] getElementCDFields() {
-        return elementCDFields;
+    public CDArray[] getElementCDArrays() {
+        return elementCDArrays;
     }
     /* (non-Javadoc)
      * @see org.epics.ioc.ca.CDNonScalarArray#replacePVArray()
@@ -91,7 +91,7 @@ public class BaseCDArrayArray extends BaseCDField implements CDNonScalarArray{
         for(int i=0; i<length; i++) {
             PVArray targetArray = targetArrays[i];
             if(targetArray==null) continue;
-            CDField cdField = elementCDFields[i];
+            CDField cdField = elementCDArrays[i];
             if(cdField.dataPut(targetArray, targetPVField)) {
                 super.setMaxNumPuts(cdField.getMaxNumPuts());
                 return true;
@@ -113,7 +113,7 @@ public class BaseCDArrayArray extends BaseCDField implements CDNonScalarArray{
         for(int i=0; i<length; i++) {
             PVArray targetArray = targetArrays[i];
             if(targetArray==null) continue;
-            CDField cdField = elementCDFields[i];
+            CDField cdField = elementCDArrays[i];
             if(cdField.supportNamePut(targetArray, targetPVField)) return true;
         }
         return false;
@@ -121,27 +121,27 @@ public class BaseCDArrayArray extends BaseCDField implements CDNonScalarArray{
     
     private void createElementCDBArrays() {
         int length = pvArrayArray.getLength();
-        elementCDFields = new CDField[length];
+        elementCDArrays = new CDArray[length];
         CDRecord cdRecord = super.getCDRecord();
         pvArrayArray.get(0, length, arrayArrayData);
         PVArray[] pvArrays = arrayArrayData.data;
         for(int i=0; i<length; i++) {
             PVArray pvArray = pvArrays[i];
             if(pvArray==null) {
-                elementCDFields[i] = null;
+                elementCDArrays[i] = null;
             } else {
                 Array array = (Array)pvArray.getField();
                 Type elementType = array.getElementType();
                 if(elementType.isScalar()) {
-                    elementCDFields[i] = new BaseCDField(this,cdRecord,pvArray,supportAlso);
+                    elementCDArrays[i] = new BaseCDArray(this,cdRecord,pvArray,supportAlso);
                     continue;
                 }
                 switch(elementType) {
                 case pvArray:
-                    elementCDFields[i] = new BaseCDArrayArray(this,cdRecord,(PVArrayArray)pvArray,supportAlso);
+                    elementCDArrays[i] = new BaseCDArrayArray(this,cdRecord,(PVArrayArray)pvArray,supportAlso);
                     continue;
                 case pvStructure:
-                    elementCDFields[i] = new BaseCDStructureArray(this,cdRecord,(PVStructureArray)pvArray,supportAlso);
+                    elementCDArrays[i] = new BaseCDStructureArray(this,cdRecord,(PVStructureArray)pvArray,supportAlso);
                     continue;
                 default:
                     throw new IllegalStateException("Logic error");
@@ -153,13 +153,13 @@ public class BaseCDArrayArray extends BaseCDField implements CDNonScalarArray{
     private boolean checkPVArrayArray(PVArrayArray targetPVArrayArray) {
         boolean madeChanges = false;
         int length = targetPVArrayArray.getLength();
-        if(elementCDFields.length<length) {
+        if(elementCDArrays.length<length) {
             madeChanges = true;
-            CDField[] newDatas = new CDField[length];
-            for(int i=0;i<elementCDFields.length; i++) {
-                newDatas[i] = elementCDFields[i];
+            CDArray[] newDatas = new CDArray[length];
+            for(int i=0;i<elementCDArrays.length; i++) {
+                newDatas[i] = elementCDArrays[i];
             }
-            elementCDFields = newDatas;
+            elementCDArrays = newDatas;
         }
         CDRecord cdRecord = super.getCDRecord();
         PVDataCreate pvDataCreate = cdRecord.getPVDataCreate();
@@ -173,11 +173,11 @@ public class BaseCDArrayArray extends BaseCDField implements CDNonScalarArray{
                 if(pvArrays[i]!=null) {
                     madeChanges = true;
                     pvArrays[i] = null;
-                    elementCDFields[i] = null;
+                    elementCDArrays[i] = null;
                 }
                 continue;
             }
-            if(elementCDFields[i]==null) {
+            if(elementCDArrays[i]==null) {
                 madeChanges = true;
                 Field newField = cdRecord.createField(targetPVArray.getField());
                 PVArray newArray = (PVArray)pvDataCreate.createPVField(pvArrayArray, newField);
@@ -185,21 +185,21 @@ public class BaseCDArrayArray extends BaseCDField implements CDNonScalarArray{
                 Array array = (Array)targetPVArray.getField();
                 Type elementType = array.getElementType();
                 if(elementType.isScalar()) {
-                    elementCDFields[i] = new BaseCDField(this,cdRecord,newArray,supportAlso);
+                    elementCDArrays[i] = new BaseCDArray(this,cdRecord,newArray,supportAlso);
                     break;
                 }
                 switch(elementType) {
                 case pvArray:
-                    elementCDFields[i] = new BaseCDArrayArray(this,cdRecord,(PVArrayArray)newArray,supportAlso);
+                    elementCDArrays[i] = new BaseCDArrayArray(this,cdRecord,(PVArrayArray)newArray,supportAlso);
                     break;
                 case pvStructure:
-                    elementCDFields[i] = new BaseCDStructureArray(this,cdRecord,(PVStructureArray)newArray,supportAlso);
+                    elementCDArrays[i] = new BaseCDStructureArray(this,cdRecord,(PVStructureArray)newArray,supportAlso);
                     break;
                 default:
                     throw new IllegalStateException("Logic error");
                 }
-                elementCDFields[i].dataPut(targetPVArray);
-                elementCDFields[i].supportNamePut(targetPVArray.getSupportName());
+                elementCDArrays[i].dataPut(targetPVArray);
+                elementCDArrays[i].supportNamePut(targetPVArray.getSupportName());
             }
         }
         if(madeChanges) {

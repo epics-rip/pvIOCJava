@@ -137,7 +137,7 @@ public abstract class AbstractPVField implements PVField{
         if(parent==null) throw new IllegalArgumentException("no parent");
         Type parentType = parent.getField().getType();
         if(parentType==Type.pvStructure) {
-            PVField[] fields = ((PVStructure)parent).getFieldPVFields();
+            PVField[] fields = ((PVStructure)parent).getPVFields();
             for(int i=0; i<fields.length; i++) {
                 if(fields[i]==this) {
                     fields[i] = newPVField;
@@ -232,7 +232,7 @@ public abstract class AbstractPVField implements PVField{
         while(parentPVField!=null) {
             if(parentPVField.getField().getType()==Type.pvStructure) {
                 PVStructure parentPVStructure = (PVStructure)parentPVField;
-                for(PVField pvField : parentPVStructure.getFieldPVFields()) {
+                for(PVField pvField : parentPVStructure.getPVFields()) {
                     Field field = pvField.getField();
                     if(field.getFieldName().equals(propertyName)) {
                         if(field.getType()==Type.pvStructure) {
@@ -262,7 +262,7 @@ public abstract class AbstractPVField implements PVField{
         field = pvField.getField();
         if(field.getType()!=Type.pvStructure) return null;
         PVStructure pvStructure = (PVStructure)pvField;
-        PVField[] pvFields = pvStructure.getFieldPVFields();
+        PVField[] pvFields = pvStructure.getPVFields();
         int size = 0;
         for(PVField pvf: pvFields) {
             field = pvf.getField();
@@ -373,7 +373,7 @@ public abstract class AbstractPVField implements PVField{
             return null;
         }
         PVStructure pvStructure = (PVStructure)pvField;
-        PVField[] pvFields = pvStructure.getFieldPVFields();
+        PVField[] pvFields = pvStructure.getPVFields();
         Structure structure = pvStructure.getStructure();
         int dataIndex = structure.getFieldIndex(name);
         if(dataIndex>=0) {
@@ -382,7 +382,7 @@ public abstract class AbstractPVField implements PVField{
             field = pvf.getField();
             if(field.getType()==Type.pvStructure)  {
                 pvStructure = (PVStructure)pvf;
-                pvFields = pvStructure.getFieldPVFields();
+                pvFields = pvStructure.getPVFields();
                 structure = pvStructure.getStructure();
                 String supportName = pvStructure.getSupportName();
                 if(supportName==null || supportName.length()<=0) {

@@ -257,7 +257,7 @@ public class DatabaseExampleTest extends TestCase {
         PVDouble valueData = (PVDouble)database.createField(
             "value",Type.pvDouble);
         // discard data now obtained via valueData
-        PVField[] structFieldData = displayLimit.getFieldPVFields();
+        PVField[] structFieldData = displayLimit.getPVFields();
         // set displayLimits
         assertTrue(structFieldData.length==2);
         double value = 0.0;
@@ -784,7 +784,7 @@ public class DatabaseExampleTest extends TestCase {
             Field[] fields = new Field[]{lowField,highField};
             arrayValue[i] = database.createStructureData(
                 "displayLimit","DisplayLimit",fields);
-            PVField[] datas = (PVField[])arrayValue[i].getFieldPVFields();
+            PVField[] datas = (PVField[])arrayValue[i].getPVFields();
             ((PVDouble)datas[0]).put(0.0);
             ((PVDouble)datas[1]).put(10.0);
         }
@@ -846,7 +846,7 @@ public class DatabaseExampleTest extends TestCase {
         Field[] fields = new Field[]{lowField,highField};
         PVStructure displayLimit = database.createStructureData(
             "displayLimit","DisplayLimit",fields);
-        PVField[] datas = displayLimit.getFieldPVFields();
+        PVField[] datas = displayLimit.getPVFields();
         ((PVDouble)datas[0]).put(-10.0);
         ((PVDouble)datas[1]).put(10.0);
         
@@ -1213,7 +1213,7 @@ public class DatabaseExampleTest extends TestCase {
             Field[] fields = new Field[]{lowField,highField};
             PVStructure displayLimit = database.createStructureData(
                 "displayLimit","DisplayLimit",fields);
-            PVField[] datas = displayLimit.getFieldPVFields();
+            PVField[] datas = displayLimit.getPVFields();
             ((PVDouble)datas[0]).put(-10.0);
             ((PVDouble)datas[1]).put(10.0);
             arrayValue[i] = displayLimit;
@@ -1281,7 +1281,7 @@ public class DatabaseExampleTest extends TestCase {
             Field[] fields = new Field[]{field};
             Structure structure = fieldCreate.createStructure(name, name, fields);
             PVRecord pvRecord = dataCreate.createPVRecord(name, structure);
-            return pvRecord.getFieldPVFields()[0];
+            return pvRecord.getPVFields()[0];
         }
 
         public PVStructure createStructureData(String name, String structureName,Field[] field)
@@ -1298,7 +1298,7 @@ public class DatabaseExampleTest extends TestCase {
             Field[] fields = new Field[]{field};
             Structure structure = fieldCreate.createStructure(name, name, fields);
             PVRecord pvRecord = dataCreate.createPVRecord(name, structure);
-            return (PVArray)pvRecord.getFieldPVFields()[0];
+            return (PVArray)pvRecord.getPVFields()[0];
         }
     }
 }

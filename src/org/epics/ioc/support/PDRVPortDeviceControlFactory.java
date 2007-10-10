@@ -36,7 +36,7 @@ public class PDRVPortDeviceControlFactory {
         DBField[] dbFields = dbStructure.getFieldDBFields();
         DBField dbField = null;
         PVStructure pvStructure = dbStructure.getPVStructure();
-        PVField[] pvFields = pvStructure.getFieldPVFields();
+        PVField[] pvFields = pvStructure.getPVFields();
         PVField pvField = null;
         Field field = null;
         org.epics.ioc.pv.Type type = null;

@@ -83,7 +83,7 @@ public class CDRecordPrint {
             text.append(String.format(" = %tF %tT.%tL", date,date,date));
             return;
         }
-        CDField[] cdFields = cdStructure.getFieldCDFields();
+        CDField[] cdFields = cdStructure.getCDFields();
         for(CDField cdField : cdFields) {
             int maxNumPuts = cdField.getMaxNumPuts();
             if(maxNumPuts==0 && !printAll) continue;
@@ -112,8 +112,8 @@ public class CDRecordPrint {
                     pvArray.toString(indentLevel+1)));
             return;
         }
-        CDNonScalarArray cdNonScalarArray = (CDNonScalarArray)cdField;
-        CDField[] cdFields = cdNonScalarArray.getElementCDFields();
+        CDStructureArray cdStructureArray = (CDStructureArray)cdField;
+        CDStructure[] cdFields = cdStructureArray.getElementCDStructures();
         for(CDField elementCDField : cdFields) {
             if(elementCDField==null) continue;
             int maxNumPuts = elementCDField.getMaxNumPuts();

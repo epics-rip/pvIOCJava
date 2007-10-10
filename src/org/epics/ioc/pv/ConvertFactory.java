@@ -361,8 +361,8 @@ public final class ConvertFactory {
                 throw new IllegalArgumentException(
                     "Convert.copyStructure from and to are not the same type of structure");
             }
-            PVField[] fromDatas = from.getFieldPVFields();
-            PVField[] toDatas = to.getFieldPVFields();
+            PVField[] fromDatas = from.getPVFields();
+            PVField[] toDatas = to.getPVFields();
             for(int i=0; i < fromDatas.length; i++) {
                 PVField fromField = fromDatas[i];
                 PVField toField = toDatas[i];
@@ -2196,7 +2196,7 @@ public final class ConvertFactory {
             newLine(builder,indentLevel);
             builder.append(String.format("structure %s{",
                 structure.getStructureName()));
-            PVField[] fieldsData = data.getFieldPVFields();
+            PVField[] fieldsData = data.getPVFields();
             if(fieldsData!=null) for(PVField fieldField : fieldsData) {
                 Field fieldnow = fieldField.getField();
                 newLine(builder,indentLevel+1);

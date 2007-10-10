@@ -11,13 +11,13 @@ package org.epics.ioc.ca;
  * @author mrk
  *
  */
-public interface CDNonScalarArray extends CDField {
+public interface CDStructureArray extends CDArray {
     /**
-     * Get the CDField array.
+     * Get the CDStructure array.
      * @return The array of elements.
      * An element is null if the corresponding pvArray element is null.
      */
-    CDField[] getElementCDFields();
+    CDStructure[] getElementCDStructures();
     /**
      * Replace the current PVArray.
      */

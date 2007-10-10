@@ -47,7 +47,7 @@ public class IntAlarmFactory {
         private PVBoolean pvActive;
         private PVInt pvHystersis;
         
-        private DBNonScalarArray dbAlarmIntervalArray = null;
+        private DBStructureArray dbAlarmIntervalArray = null;
         private PVInt[] pvAlarmIntervalValue = null;
         private PVInt[] pvAlarmIntervalSeverity = null;
         
@@ -102,7 +102,7 @@ public class IntAlarmFactory {
                 "interval", Type.pvStructure);
             if(intervalPVArray==null) return;
             int index = structure.getFieldIndex("interval");
-            dbAlarmIntervalArray = (DBNonScalarArray)dbFields[index];
+            dbAlarmIntervalArray = (DBStructureArray)dbFields[index];
             index = structure.getFieldIndex("outOfRange");
             if(index<0) {
                 super.message("outOfRange does not exist", MessageType.error);
@@ -131,15 +131,15 @@ public class IntAlarmFactory {
                 super.message("invalid interval", MessageType.error);
                 return;
             }
-            DBField[] dbFields = dbAlarmIntervalArray.getElementDBFields();
+            DBStructure[] dbFields = dbAlarmIntervalArray.getElementDBStructures();
             pvAlarmIntervalValue = new PVInt[size];
             pvAlarmIntervalSeverity = new PVInt[size];
             
             for(int i=0; i<size; i++) {
-                DBStructure dbStructure = (DBStructure)dbFields[i];
+                DBStructure dbStructure = dbFields[i];
                 PVStructure pvStructure = dbStructure.getPVStructure();
                 Structure structure = pvStructure.getStructure();
-                PVField[] pvFields = pvStructure.getFieldPVFields();
+                PVField[] pvFields = pvStructure.getPVFields();
                 Field[] fields = structure.getFields();
                 int index = structure.getFieldIndex("value");
                 if(index<0) {

@@ -20,7 +20,7 @@ public interface PVStructure extends PVField {
      * Get the <i>PVField</i> array for the fields of the structure.
      * @return array of PVField. One for each field.
      */
-    PVField[] getFieldPVFields();
+    PVField[] getPVFields();
     /**
      * Replace a field of the structure that is itself a structure.
      * For an ioc record. This should only be called when a record is in the readyForInitialization state.

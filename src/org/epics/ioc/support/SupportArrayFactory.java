@@ -76,18 +76,18 @@ public class SupportArrayFactory {
          */
         public void initialize() {
             if(!super.checkSupportState(SupportState.readyForInitialize,supportName)) return;
-            DBNonScalarArray dbNonScalarArray = (DBNonScalarArray)dbField;
-            PVStructureArray pvStructureArray = (PVStructureArray)dbField.getPVField();
+            DBStructureArray dbStructureArray = (DBStructureArray)dbField;
+            PVStructureArray pvStructureArray = dbStructureArray.getPVStructureArray();
             processRequesterName = pvStructureArray.getFullName();
             SupportState supportState = SupportState.readyForStart;
-            DBField[] datas = dbNonScalarArray.getElementDBFields();
+            DBStructure[] datas = dbStructureArray.getElementDBStructures();
             int n = datas.length;
             pvWaits = new PVBoolean[n];
             supports = new Support[n];
             for(int i=0; i< n; i++) {
                 pvWaits[i] = null;
                 supports[i] = null;
-                DBStructure dbStructure = (DBStructure)datas[i];
+                DBStructure dbStructure = datas[i];
                 if(dbStructure==null) continue;
                 PVStructure pvStructure = dbStructure.getPVStructure();
                 DBField[] dbFields = dbStructure.getFieldDBFields();
@@ -97,7 +97,7 @@ public class SupportArrayFactory {
                 if(!structureName.equals("supportArrayElement")) {
                     support = dbStructure.getSupport();
                 } else {
-                    PVField[] pvdatas = pvStructure.getFieldPVFields();
+                    PVField[] pvdatas = pvStructure.getPVFields();
                     int index = structure.getFieldIndex("wait");
                     if(index<0) {
                         pvStructure.message("structure does not have field wait", MessageType.fatalError);

@@ -52,25 +52,25 @@ public class ScanTest extends TestCase {
         assertNotNull(dbRecord);
         PVRecord pvRecord = dbRecord.getPVRecord();
         Structure structure = (Structure)pvRecord.getField();
-        PVField[] pvData = pvRecord.getFieldPVFields();        
+        PVField[] pvData = pvRecord.getPVFields();        
         int index = structure.getFieldIndex("value");
         PVField counterPushValue = pvData[index];
         dbRecord = iocdbMaster.findRecord("doubleReceive09");
         assertNotNull(dbRecord);
         pvRecord = dbRecord.getPVRecord();
-        pvData = pvRecord.getFieldPVFields();        
+        pvData = pvRecord.getPVFields();        
         index = structure.getFieldIndex("value");
         PVField doubleReceive09Value = pvData[index];
         dbRecord = iocdbMaster.findRecord("counterEvent0");
         assertNotNull(dbRecord);
         pvRecord = dbRecord.getPVRecord();
-        pvData = pvRecord.getFieldPVFields();        
+        pvData = pvRecord.getPVFields();        
         index = structure.getFieldIndex("value");
         PVField counterEvent0Value = pvData[index];
         dbRecord = iocdbMaster.findRecord("counterEvent1");
         assertNotNull(dbRecord);
         pvRecord = dbRecord.getPVRecord();
-        pvData = pvRecord.getFieldPVFields();        
+        pvData = pvRecord.getPVFields();        
         index = structure.getFieldIndex("value");
         PVField counterEvent1Value = pvData[index];
         for(int i=0; i<5; i++) {
@@ -83,10 +83,6 @@ public class ScanTest extends TestCase {
                 System.out.println();
             } catch (InterruptedException e) {
             }
-        }
-        initOK = IOCFactory.initDatabase("src/org/epics/ioc/process/test/scanDB.xml",iocRequester);
-        if(!initOK) {
-            System.out.println("IOCFactory.initDatabase failed");
         }
         initOK = IOCFactory.initDatabase("src/org/epics/ioc/process/test/scanAddDB.xml",iocRequester);
         if(!initOK) {
@@ -107,13 +103,13 @@ public class ScanTest extends TestCase {
         dbRecord = iocdbMaster.findRecord("counter");
         assertNotNull(dbRecord);
         pvRecord = dbRecord.getPVRecord();
-        pvData = pvRecord.getFieldPVFields();        
+        pvData = pvRecord.getPVFields();        
         index = structure.getFieldIndex("value");
         PVField counterValue = pvData[index];
         dbRecord = iocdbMaster.findRecord("double02");
         assertNotNull(dbRecord);
         pvRecord = dbRecord.getPVRecord();
-        pvData = pvRecord.getFieldPVFields();        
+        pvData = pvRecord.getPVFields();        
         index = structure.getFieldIndex("value");
         PVField double02Value = pvData[index];
         list = periodicScanner.toString();

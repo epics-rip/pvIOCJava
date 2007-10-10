@@ -71,11 +71,14 @@ public class BaseDBField implements DBField{
             dbStructure.replacePVStructure();
         } else if(type==Type.pvArray) {
             Array array = (Array)field;
-            if(!array.getElementType().isScalar()) {
-                DBNonScalarArray nonScalarArray = (DBNonScalarArray)this;
-                nonScalarArray.replacePVArray();
-            }
-            
+            Type elementType = array.getElementType();
+            if(elementType==Type.pvArray) {
+                DBArrayArray dbArrayArray = (DBArrayArray)this;
+                dbArrayArray.replacePVArray();
+            } else if(elementType==Type.pvStructure) {
+                DBStructureArray dbStructureArray = (DBStructureArray)this;
+                dbStructureArray.replacePVArray();
+            } 
         }
         
     }

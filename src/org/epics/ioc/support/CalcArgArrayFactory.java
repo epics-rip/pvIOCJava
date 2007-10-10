@@ -40,7 +40,7 @@ public class CalcArgArrayFactory {
             pvField.message("does not have support " + supportName,MessageType.error);
             return null;
         }
-        return new CalcArgArrayImpl((DBNonScalarArray)dbField);
+        return new CalcArgArrayImpl((DBStructureArray)dbField);
     }
     
     private static String supportName = "calcArgArray";
@@ -51,7 +51,7 @@ public class CalcArgArrayFactory {
     {
         private PVField pvField;
         private String processRequesterName = null;
-        private DBNonScalarArray calcArgArrayDBField;
+        private DBStructureArray calcArgArrayDBField;
         private DBField[] valueDBFields;
         private DBField[] nameDBFields;
         private Support[] supports = null;
@@ -61,7 +61,7 @@ public class CalcArgArrayFactory {
         private int numberWait;
         private RequestResult finalResult;
        
-        private CalcArgArrayImpl(DBNonScalarArray dbNonScalarArray) {
+        private CalcArgArrayImpl(DBStructureArray dbNonScalarArray) {
             super(supportName,dbNonScalarArray);
             pvField = dbNonScalarArray.getPVField();
             processRequesterName = pvField.getFullName();
@@ -94,14 +94,14 @@ public class CalcArgArrayFactory {
             if(!super.checkSupportState(SupportState.readyForInitialize,supportName)) return;
             if(!initCalculator()) return;
             SupportState supportState = SupportState.readyForStart;
-            DBField[] dbFields = calcArgArrayDBField.getElementDBFields();
+            DBStructure[] dbFields = calcArgArrayDBField.getElementDBStructures();
             int length = dbFields.length;
             valueDBFields = new DBField[length];
             nameDBFields = new DBField[length];
             supports = new Support[length];
             numSupports = 0;
             for(int i=0; i< length; i++) {
-                DBStructure elementDBStructure = (DBStructure)dbFields[i];
+                DBStructure elementDBStructure = dbFields[i];
                 PVStructure elementPVStructure = elementDBStructure.getPVStructure();
                 Structure elementStructure = (Structure)elementPVStructure.getField();
                 DBField[] elementDBFields = elementDBStructure.getFieldDBFields();

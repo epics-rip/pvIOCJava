@@ -28,7 +28,7 @@ public class Float64ArrayDriverFactory {
     static public void create(
         String portName,boolean autoConnect,ScanPriority priority,PVStructure pvStructure)
     {
-        PVField[] pvFields = pvStructure.getFieldPVFields();
+        PVField[] pvFields = pvStructure.getPVFields();
         Structure structure = (Structure)pvStructure.getField();
         int index = structure.getFieldIndex("delay");
         if(index<0) {

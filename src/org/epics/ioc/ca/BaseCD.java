@@ -48,7 +48,7 @@ public class BaseCD implements CD
         cdRecord = new BaseCDRecord(fieldCreate,pvDataCreate,
             targetFields,channel.getChannelName(),"channelData",supportAlso);
         cdStructure = cdRecord.getCDStructure();
-        cdFields = cdStructure.getFieldCDFields();
+        cdFields = cdStructure.getCDFields();
     }
     /* (non-Javadoc)
      * @see org.epics.ioc.ca.CD#getChannel()

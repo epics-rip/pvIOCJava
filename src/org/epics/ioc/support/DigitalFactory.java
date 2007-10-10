@@ -42,7 +42,7 @@ public class DigitalFactory {
             return null;
         }
         String supportName = dbField.getSupportName();
-        DBNonScalarArray dbArray = (DBNonScalarArray)dbField;
+        DBStructureArray dbArray = (DBStructureArray)dbField;
         if(supportName.equals(digitalInputName)) {
             return new DigitalInput(supportName,dbArray);
         } else if(supportName.equals(digitalOutputName)) {
@@ -63,7 +63,7 @@ public class DigitalFactory {
         protected static FieldCreate fieldCreate = FieldFactory.getFieldCreate();
         protected static Convert convert = ConvertFactory.getConvert();
         protected String supportName;
-        protected DBNonScalarArray dbStates = null;
+        protected DBStructureArray dbStates = null;
         protected PVField pvStates;
         
         protected DBField dbValue = null;
@@ -76,9 +76,9 @@ public class DigitalFactory {
         
         protected int[] values = null;
         
-        protected DBNonScalarArray dbStateSeverity = null;
+        protected DBStructureArray dbStateSeverity = null;
         
-        protected DigitalBase(String supportName,DBNonScalarArray dbArray) {
+        protected DigitalBase(String supportName,DBStructureArray dbArray) {
             super(supportName,dbArray);
             this.dbStates = dbArray;
             pvStates = dbArray.getPVField();
@@ -153,55 +153,27 @@ public class DigitalFactory {
                 super.message("no value field", MessageType.error);
                 return false;
             }
-            DBStructure dbStructure = (DBStructure)dbValue;
-            PVStructure pvStructure = dbStructure.getPVStructure();
-            Structure structure = pvStructure.getStructure();
-            DBField[] dbFields = dbStructure.getFieldDBFields();
-            PVField[] pvFields = dbStructure.getPVStructure().getFieldPVFields();
-            int index;
-            index = structure.getFieldIndex("index");
-            if(index<0) {
-                super.message("value does not have an index field. Why???", MessageType.error);
+            Create create = dbValue.getCreate();
+            if(create==null || !(create instanceof Enumerated)) {
+                super.message("value is not an enumerated structure", MessageType.error);
                 return false;
             }
-            dbValueIndex = dbFields[index];
-            PVField pvField = pvFields[index];
-            if(pvField.getField().getType()!=Type.pvInt) {
-                super.message("value.index is not an integer. Why???", MessageType.error);
-                return false;
-            }
-            pvValueIndex = (PVInt)pvFields[index];
-            index = structure.getFieldIndex("choices");
-            if(index<0) {
-                super.message("value does not have a choices field. Why???", MessageType.error);
-                return false;
-            }
-            pvField = pvFields[index];
-            if(pvField.getField().getType()!=Type.pvArray) {
-                super.message("value.choices is not an array. Why???", MessageType.error);
-                return false;
-            }
-            PVArray pvArray = (PVArray)pvField;
-            if(pvArray.getArray().getElementType()!=Type.pvString) {
-                super.message("value.choices is not an array of string. Why???", MessageType.error);
-                return false;
-            }
-            pvValueChoices = (PVStringArray)pvArray;
+            Enumerated enumerated = (Enumerated)create;
+            pvValueIndex = enumerated.getIndexField();
+            DBRecord dbRecord = super.getDBField().getDBRecord();
+            dbValueIndex = dbRecord.findDBField(pvValueIndex);
+            pvValueChoices = enumerated.getChoicesField();
             return true;
         }
         
         private boolean initValueAlarm(DBField dbValueAlarm) {
             DBStructure dbStructure = (DBStructure)dbValueAlarm;
             PVStructure pvStructure = dbStructure.getPVStructure();
-            Structure structure = pvStructure.getStructure();
-            PVField[] pvFields = dbStructure.getPVStructure().getFieldPVFields();
-            int index;
-            index = structure.getFieldIndex("stateSeverity");
-            if(index<0) {
+            PVField pvField = pvStructure.findProperty("stateSeverity");
+            if(pvField==null) {
                 super.message("valueAlarm does not have a stateSeverity field. Why???", MessageType.error);
                 return false;
             }
-            PVField pvField = pvFields[index];
             if(pvField.getField().getType()!=Type.pvArray) {
                 super.message("valueAlarm.stateSeverity is not an array. Why???", MessageType.error);
                 return false;
@@ -211,18 +183,18 @@ public class DigitalFactory {
                 super.message("valueAlarm.stateSeverity is not an array of structures. Why???", MessageType.error);
                 return false;
             }
-            dbStateSeverity = (DBNonScalarArray)dbStructure.getDBRecord().findDBField(pvArray);
+            dbStateSeverity = (DBStructureArray)dbStructure.getDBRecord().findDBField(pvArray);
             return true;
         }
         
         private boolean initFields() {
-            DBField[] dbStatesFields = dbStates.getElementDBFields();
+            DBStructure[] dbStatesFields = dbStates.getElementDBStructures();
             int nstates = dbStatesFields.length;
             if(nstates<1) return false;
             String[] names = new String[nstates];
             PVStructure[] pvSeverities = new PVStructure[nstates];
             values = new int[nstates];
-            PVStructureArray pvStateSeverityArray = (PVStructureArray)dbStateSeverity.getPVField();
+            PVStructureArray pvStateSeverityArray = dbStateSeverity.getPVStructureArray();
             pvStateSeverityArray.setCapacity(nstates);
             for(int indState=0; indState<nstates; indState++) {
                 DBField dbField = dbStatesFields[indState];
@@ -239,19 +211,15 @@ public class DigitalFactory {
                         MessageType.error);
                     return false;
                 }
-                DBStructure dbStateSeverity = (DBStructure)dbField;                
-                DBField[] dbStateFields = dbStateSeverity.getFieldDBFields();
-                PVStructure pvStructure = (PVStructure)dbField.getPVField();
-                Structure structure = pvStructure.getStructure();
-                PVField[] pvFields = pvStructure.getFieldPVFields();
-                int indField = structure.getFieldIndex("name");
-                if(indField<0) {
+                DBStructure dbStateSeverity = (DBStructure)dbField;
+                PVStructure pvStateSeverity = dbStateSeverity.getPVStructure();
+                PVField pvField = pvStateSeverity.findProperty("name");
+                if(pvField==null) {
                     super.message(
                             "states index " + indState + " does not have field name",
                             MessageType.error);
                     return false;
                 }
-                PVField pvField = pvFields[indField];
                 if(pvField.getField().getType()!=Type.pvString) {
                     super.message(
                             "states index " + indState + " field name is not a string",
@@ -260,14 +228,13 @@ public class DigitalFactory {
                 }
                 PVString pvName= (PVString)pvField;
                 names[indState] = pvName.get();
-                indField = structure.getFieldIndex("value");
-                if(indField<0) {
+                pvField = pvStateSeverity.findProperty("value");
+                if(pvField==null) {
                     super.message(
                             "states index " + indState + " does not have field value",
                             MessageType.error);
                     return false;
                 }
-                pvField = pvFields[indField];
                 if(pvField.getField().getType()!=Type.pvInt) {
                     super.message(
                             "states index " + indState + " field name is not an int",
@@ -276,16 +243,16 @@ public class DigitalFactory {
                 }
                 PVInt pvValue= (PVInt)pvField;
                 values[indState] = pvValue.get();
-                indField = structure.getFieldIndex("severity");
-                if(indField<0) {
+                pvField = pvStateSeverity.findProperty("severity");
+                if(pvField==null) {
                     super.message(
                             "states index " + indState + " does not have field severity",
                             MessageType.error);
                     return false;
                 }
-                pvField = pvFields[indField];
+                DBField dbSeverity = dbField.getDBRecord().findDBField(pvField);
                 Enumerated enumerated;
-                enumerated = AlarmSeverity.getAlarmSeverity(dbStateFields[indField]);
+                enumerated = AlarmSeverity.getAlarmSeverity(dbSeverity);
                 if(enumerated==null) {
                     super.message(
                             "states index " + indState + " field name is not an alarmSeverity",
@@ -300,15 +267,15 @@ public class DigitalFactory {
                         dbdStructure.getFields(),
                         dbdStructure.getFieldAttribute());
                 newField.setCreateName("enumerated");
-                PVStructure pvStateSeverity = (PVStructure)pvDataCreate.createPVField(
+                PVStructure pvNewStateSeverity = (PVStructure)pvDataCreate.createPVField(
                         pvStateSeverityArray,newField);
-                pvSeverities[indState] = pvStateSeverity;
-                convert.copyStructure((PVStructure)pvField, pvStateSeverity);
+                pvSeverities[indState] = pvNewStateSeverity;
+                convert.copyStructure((PVStructure)pvField, pvNewStateSeverity);
             }          
             pvValueChoices.put(0, nstates, names, 0);
             pvStateSeverityArray.put(0,nstates, pvSeverities, 0);
             dbStateSeverity.replacePVArray();
-            DBField[] dbFields = dbStateSeverity.getElementDBFields();
+            DBStructure[] dbFields = dbStateSeverity.getElementDBStructures();
             for(int indState=0; indState<nstates; indState++) {
                 EnumeratedFactory.create(dbFields[indState]);
             }
@@ -319,7 +286,7 @@ public class DigitalFactory {
     static private class DigitalInput extends DigitalBase {
         private int prevRegisterValue = 0;
         
-        private DigitalInput(String supportName,DBNonScalarArray dbArray) {
+        private DigitalInput(String supportName,DBStructureArray dbArray) {
             super(supportName,dbArray);
         }
         
@@ -342,7 +309,7 @@ public class DigitalFactory {
     
     static private class DigitalOutput extends DigitalBase {
         private int prevValueIndex = 0;
-        private DigitalOutput(String supportName,DBNonScalarArray dbArray) {
+        private DigitalOutput(String supportName,DBStructureArray dbArray) {
             super(supportName,dbArray);
         }
         

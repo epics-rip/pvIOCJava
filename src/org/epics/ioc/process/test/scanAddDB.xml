@@ -1,12 +1,48 @@
 <?xml version="1.0" ?>
 <IOCDatabase>
-<include addPath = "src/org/epics/ioc/process/test" />
-<include href = "exampleDB.xml" />
 <record name = "counter" type = "calcDouble">
     <scan>
         <type><choice>periodic</choice></type>
         <rate>0.5</rate>
     </scan>
+    <calcArgArray>
+        <value structureName = "calcDoubleArg">
+            <value>0</value>
+            <name>min</name>
+        </value>
+        <value structureName = "calcDoubleArg">
+            <value>1e9</value>
+            <name>max</name>
+        </value>
+        <value structureName = "calcDoubleArg">
+            <value>100.0</value>
+            <name>inc</name>
+        </value>
+    </calcArgArray>
+    <calculator supportName = "counterCalculator" />
+    <supportArray>
+        <value structureName = "supportArrayElement">
+            <wait>true</wait>
+            <link  supportName = "processSupport" structureName = "processSupport">
+                    <pvname>double01</pvname>
+            </link>
+        </value>
+        <value structureName = "supportArrayElement">
+            <wait>false</wait>
+            <link  supportName = "outputSupport" structureName = "outputSupport">
+                    <pvname>double02</pvname>
+                    <process>true</process>
+            </link>
+        </value>
+    </supportArray>
+</record>
+<record name = "double01" type = "double">
+    <input supportName = "inputSupport" structureName = "inputSupport">
+            <pvname>counter</pvname>
+            <process>false</process>
+    </input>
+</record>
+<record name = "double02" type = "double">
 </record>
 
 </IOCDatabase>

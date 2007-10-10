@@ -83,7 +83,7 @@ public class BasePVStructure extends AbstractPVField implements PVStructure
     /* (non-Javadoc)
      * @see org.epics.ioc.pv.PVStructure#getFieldPVFields()
      */
-    public PVField[] getFieldPVFields() {
+    public PVField[] getPVFields() {
         return pvFields;
     }
     /* (non-Javadoc)
@@ -267,7 +267,7 @@ public class BasePVStructure extends AbstractPVField implements PVStructure
     
     private PVField findSubField(String fieldName,PVStructure pvStructure) {
         String[] names = periodPattern.split(fieldName,2);
-        PVField[] subFields = pvStructure.getFieldPVFields();
+        PVField[] subFields = pvStructure.getPVFields();
         Structure structure = (Structure)pvStructure.getField();
         int index = structure.getFieldIndex(names[0]);
         if(index<0) {

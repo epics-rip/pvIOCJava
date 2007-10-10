@@ -91,7 +91,7 @@ public class AlarmFactory {
             this.dbAlarm = dbAlarm;
             DBField[] dbFields = dbAlarm.getFieldDBFields();
             pvAlarm = dbAlarm.getPVStructure();
-            PVField[] pvFields = pvAlarm.getFieldPVFields();
+            PVField[] pvFields = pvAlarm.getPVFields();
             Structure structure = pvAlarm.getStructure();
             int index = structure.getFieldIndex("message");
             if(index<0) {
@@ -113,7 +113,7 @@ public class AlarmFactory {
             DBStructure dbStructure = (DBStructure)dbFields[index];
             dbFields = dbStructure.getFieldDBFields();
             PVStructure pvStructure = (PVStructure)pvFields[index];
-            pvFields = pvStructure.getFieldPVFields();
+            pvFields = pvStructure.getPVFields();
             structure = pvStructure.getStructure();
             index = structure.getFieldIndex("index");
             if(index<0) {

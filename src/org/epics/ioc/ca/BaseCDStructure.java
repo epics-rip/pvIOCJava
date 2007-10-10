@@ -45,7 +45,7 @@ public class BaseCDStructure extends BaseCDField implements CDStructure {
     /* (non-Javadoc)
      * @see org.epics.ioc.ca.CDStructure#getFieldCDFields()
      */
-    public CDField[] getFieldCDFields() {
+    public CDField[] getCDFields() {
         return cdFields;
     }
     /* (non-Javadoc)
@@ -70,7 +70,7 @@ public class BaseCDStructure extends BaseCDField implements CDStructure {
             if(supportName!=null) super.supportNamePut(targetPVField.getSupportName());
         }
         PVStructure targetPVStructure = (PVStructure)targetPVField;
-        PVField[] targetPVFields = targetPVStructure.getFieldPVFields();
+        PVField[] targetPVFields = targetPVStructure.getPVFields();
         for(int i=0; i<targetPVFields.length; i++) {
             PVField target = targetPVFields[i];
             CDField cdField = cdFields[i];
@@ -83,7 +83,7 @@ public class BaseCDStructure extends BaseCDField implements CDStructure {
      */
     public boolean dataPut(PVField requested, PVField target) {
         PVStructure targetPVStructure = (PVStructure)requested;
-        PVField[] targetPVFields = targetPVStructure.getFieldPVFields();
+        PVField[] targetPVFields = targetPVStructure.getPVFields();
         for(int i=0; i<targetPVFields.length; i++) {
             PVField targetPVField = targetPVFields[i];
             if(targetPVField==target) {
@@ -115,7 +115,7 @@ public class BaseCDStructure extends BaseCDField implements CDStructure {
      */
     public boolean supportNamePut(PVField requested, PVField target) {
         PVStructure targetPVStructure = (PVStructure)requested;
-        PVField[] targetPVFields = targetPVStructure.getFieldPVFields();
+        PVField[] targetPVFields = targetPVStructure.getPVFields();
         for(int i=0; i<targetPVFields.length; i++) {
             PVField targetPVField = targetPVFields[i];
             if(targetPVField==target) {
@@ -144,7 +144,7 @@ public class BaseCDStructure extends BaseCDField implements CDStructure {
     }
     
     private void createFields() {
-        PVField[] pvFields = pvStructure.getFieldPVFields();
+        PVField[] pvFields = pvStructure.getPVFields();
         int length = pvFields.length;
         cdFields = new CDField[length];
         for(int i=0; i<length; i++) {

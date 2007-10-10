@@ -33,7 +33,7 @@ public class PDRVPortCreateFactory {
     
     private static Support portCreate(String supportName,DBStructure dbStructure) {
         PVStructure pvStructure = dbStructure.getPVStructure();
-        PVField[] pvFields = pvStructure.getFieldPVFields();
+        PVField[] pvFields = pvStructure.getPVFields();
         Structure structure = (Structure)pvStructure.getField();
         int index = structure.getFieldIndex("factoryName");
         if(index<0) {
@@ -137,7 +137,7 @@ public class PDRVPortCreateFactory {
     
     private static PVString getChoiceField(PVStructure pvStructure,String fieldName) {
         Structure structure = pvStructure.getStructure();
-        PVField[] pvFields = pvStructure.getFieldPVFields();
+        PVField[] pvFields = pvStructure.getPVFields();
         int index = structure.getFieldIndex(fieldName);
         if(index<0) {
             pvStructure.message("field " + fieldName + " does not exist", MessageType.error);
@@ -149,7 +149,7 @@ public class PDRVPortCreateFactory {
             return null;
         }
         pvStructure = (PVStructure)pvField;
-        pvFields = pvStructure.getFieldPVFields();
+        pvFields = pvStructure.getPVFields();
         structure = pvStructure.getStructure();
         index = structure.getFieldIndex("choice");
         if(index<0) {

@@ -147,7 +147,7 @@ public class RecordProcessFactory {
                     throw new IllegalStateException(
                         pvRecord.getRecordName() + " has no support");
                 }
-                PVField[] pvFields = pvRecord.getFieldPVFields();
+                PVField[] pvFields = pvRecord.getPVFields();
                 DBField[] dbFields = dbStructure.getFieldDBFields();
                 PVField pvField;
                 Structure structure = (Structure)pvRecord.getField();
