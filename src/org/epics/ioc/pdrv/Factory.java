@@ -11,7 +11,6 @@ import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 
 import org.epics.ioc.pdrv.interfaces.Interface;
-import org.epics.ioc.pv.PVStructure;
 import org.epics.ioc.util.*;
 
 /**
@@ -83,6 +82,10 @@ public class Factory {
             if(port.getPortName().equals(portName)) return port;
         }
         return null;
+    }
+    
+    public static Trace createTrace() {
+    	return new TraceImpl();
     }
     
     private static ReentrantLock globalLock = new ReentrantLock();
@@ -1224,14 +1227,12 @@ public class Factory {
                 while(iter.hasNext()) {
                     DeviceInterface iface = iter.next();
                     Interface asynInterface = iface.iface;
-                    int compare = interfaceName.compareTo(asynInterface.getInterfaceName());
-                    if(compare==0) {
+                    if(interfaceName.equals(asynInterface.getInterfaceName())) {
                         if(interposeInterfaceOK && iface.interposeInterface!=null) {
                             return iface.interposeInterface;
                         }
                         return asynInterface;
                     }
-                    if(compare<0) break;
                 }
                 user.setMessage("interface " + interfaceName + " not found");
                 return null;
@@ -1567,7 +1568,7 @@ public class Factory {
          * @see org.epics.ioc.pdrv.Trace#print(int, java.lang.String)
          */
         public void print(int reason, String message) {
-            print(reason,"%s",message);
+            print(reason," %s",message);
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.asyn.Trace#print(int, java.lang.String, java.lang.Object[])
@@ -1589,7 +1590,7 @@ public class Factory {
          * @see org.epics.ioc.pdrv.Trace#printIO(int, byte[], long, java.lang.String)
          */
         public void printIO(int reason, byte[] buffer, long len, String message) {
-            printIO(reason,buffer,len,"%s",message);
+        	printIO(reason,buffer,len,"%s",message);
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.asyn.Trace#printIO(int, byte[], long, java.lang.String, java.lang.Object[])
