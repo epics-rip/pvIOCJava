@@ -31,12 +31,7 @@ import org.epics.ioc.pdrv.*;
  * @author mrk
  *
  */
-public abstract class AbstractInt32 implements Int32 {
-    private Trace asynTrace;
-    private String interfaceName;
-    private Port port;
-    private String portName;
-    
+public abstract class AbstractInt32 extends AbstractInterface implements Int32 {
     private  ReentrantLock lock = new ReentrantLock();
     private List<Int32InterruptListener> interruptlistenerList =
         new LinkedList<Int32InterruptListener>();
@@ -50,14 +45,9 @@ public abstract class AbstractInt32 implements Int32 {
      * Constructor.
      * This registers the interface with the device.
      * @param device The device
-     * @param interfaceName The interface.
      */
-    protected AbstractInt32(Device device,String interfaceName) {
-        asynTrace = device.getTrace();
-        port = device.getPort();
-        portName = port.getPortName();
-        device.registerInterface(this);
-        this.interfaceName = interfaceName;
+    protected AbstractInt32(Device device) {
+    	super(device,"int32");
     }
     /**
      * Announce an interrupt.
@@ -65,21 +55,12 @@ public abstract class AbstractInt32 implements Int32 {
      */
     protected void interruptOccured(int data) {
         if(interruptActive) {
-            asynTrace.print(Trace.FLOW ,
-                    "%s new interrupt while interruptActive",
-                    portName);
+            super.print(Trace.FLOW ,"new interrupt while interruptActive");
             return;
         }
         interruptData = data;
         interrupt.interrupt();
     }
-    /* (non-Javadoc)
-     * @see org.epics.ioc.pdrv.Interface#getInterfaceName()
-     */
-    public String getInterfaceName() {
-        return interfaceName;
-    }
-    
     /* (non-Javadoc)
      * @see org.epics.ioc.pdrv.interfaces.Int32#getBounds(org.epics.ioc.pdrv.User, int[])
      */
@@ -110,16 +91,15 @@ public abstract class AbstractInt32 implements Int32 {
                         new LinkedList<Int32InterruptListener>(interruptlistenerList);
                 }
                 if(interruptlistenerListNew.add(int32InterruptListener)) {
-                    asynTrace.print(Trace.FLOW ,
-                            "%s addInterruptUser while interruptActive",
-                            portName);
+                    super.print(Trace.FLOW ,
+                            "addInterruptUser while interruptActive");
                     return Status.success;
                 }
             } else if(interruptlistenerList.add(int32InterruptListener)) {
-                asynTrace.print(Trace.FLOW ,"addInterruptUser");
+                super.print(Trace.FLOW ,"addInterruptUser");
                 return Status.success;
             }
-            asynTrace.print(Trace.ERROR,"addInterruptUser but already registered");
+            super.print(Trace.ERROR,"addInterruptUser but already registered");
             user.setMessage("add failed");
             return Status.error;
         } finally {
@@ -139,14 +119,14 @@ public abstract class AbstractInt32 implements Int32 {
                         new LinkedList<Int32InterruptListener>(interruptlistenerList);
                 }
                 if(interruptlistenerListNew.remove(int32InterruptListener)) {
-                    asynTrace.print(Trace.FLOW ,"removeInterruptUser while interruptActive");
+                    super.print(Trace.FLOW ,"removeInterruptUser while interruptActive");
                     return Status.success;
                 }
             } else if(interruptlistenerList.remove(int32InterruptListener)) {
-                asynTrace.print(Trace.FLOW ,"removeInterruptUser");
+                super.print(Trace.FLOW ,"removeInterruptUser");
                 return Status.success;
             }
-            asynTrace.print(Trace.ERROR,"removeInterruptUser but not registered");
+            super.print(Trace.ERROR,"removeInterruptUser but not registered");
             user.setMessage("remove failed");
             return Status.error;
         } finally {
@@ -158,8 +138,7 @@ public abstract class AbstractInt32 implements Int32 {
         lock.lock();
         try {
             interruptActive = true;
-            asynTrace.print(Trace.FLOW ,
-                    "%s begin calling interruptListeners",portName);
+            super.print(Trace.FLOW ,"begin calling interruptListeners");
         } finally {
             lock.unlock();
         }
@@ -176,7 +155,7 @@ public abstract class AbstractInt32 implements Int32 {
                 interruptListenerListModified = false;
             }
             interruptActive = false;
-            asynTrace.print(Trace.FLOW ,"%s end calling interruptListeners",portName);
+            super.print(Trace.FLOW ,"end calling interruptListeners");
         } finally {
             lock.unlock();
         }

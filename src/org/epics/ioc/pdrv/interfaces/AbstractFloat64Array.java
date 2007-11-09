@@ -32,12 +32,7 @@ import org.epics.ioc.pv.*;
  * @author mrk
  *
  */
-public abstract class AbstractFloat64Array extends AbstractPVArray implements Float64Array{
-    private Trace asynTrace;
-    private String interfaceName;
-    private Port port;
-    private String portName;
-    
+public abstract class AbstractFloat64Array extends AbstractArrayInterface implements Float64Array{
     private  ReentrantLock lock = new ReentrantLock();
     private List<Float64ArrayInterruptListener> interruptlistenerList =
         new LinkedList<Float64ArrayInterruptListener>();
@@ -57,14 +52,9 @@ public abstract class AbstractFloat64Array extends AbstractPVArray implements Fl
      */
     protected AbstractFloat64Array(
             PVField parent,Array array,int capacity,boolean capacityMutable,
-            Device device,String interfaceName)
+            Device device)
     {
-        super(parent,array,capacity,capacityMutable);
-        asynTrace = device.getTrace();
-        port = device.getPort();
-        portName = port.getPortName();
-        device.registerInterface(this);
-        this.interfaceName = interfaceName;
+        super(parent,array,capacity,capacityMutable,device,"float64Array");
     }
     /* (non-Javadoc)
      * @see org.epics.ioc.pdrv.interfaces.Float64Array#endRead(org.epics.ioc.pdrv.User)
@@ -96,18 +86,11 @@ public abstract class AbstractFloat64Array extends AbstractPVArray implements Fl
      */
     public void interruptOccured() {
         if(interruptActive) {
-            asynTrace.print(Trace.FLOW ,
-                    "%s new interrupt while interruptActive",
-                    portName);
+            super.print(Trace.FLOW ,
+                    "new interrupt while interruptActive");
             return;
         }
         interrupt.interrupt();
-    }
-    /* (non-Javadoc)
-     * @see org.epics.ioc.pdrv.Interface#getInterfaceName()
-     */
-    public String getInterfaceName() {
-        return interfaceName;
     }
     /* (non-Javadoc)
      * @see org.epics.ioc.pdrv.interfaces.Float64Array#addInterruptUser(org.epics.ioc.pdrv.User, org.epics.ioc.pdrv.interfaces.Float64ArrayInterruptListener)
@@ -124,16 +107,15 @@ public abstract class AbstractFloat64Array extends AbstractPVArray implements Fl
                         new LinkedList<Float64ArrayInterruptListener>(interruptlistenerList);
                 }
                 if(interruptlistenerListNew.add(float64ArrayInterruptListener)) {
-                    asynTrace.print(Trace.FLOW ,
-                            "%s addInterruptUser while interruptActive",
-                            portName);
+                    super.print(Trace.FLOW ,
+                            "addInterruptUser while interruptActive");
                     return Status.success;
                 }
             } else if(interruptlistenerList.add(float64ArrayInterruptListener)) {
-                asynTrace.print(Trace.FLOW ,"addInterruptUser");
+                super.print(Trace.FLOW ,"addInterruptUser");
                 return Status.success;
             }
-            asynTrace.print(Trace.ERROR,"addInterruptUser but already registered");
+            super.print(Trace.ERROR,"addInterruptUser but already registered");
             user.setMessage("add failed");
             return Status.error;
         } finally {
@@ -155,14 +137,14 @@ public abstract class AbstractFloat64Array extends AbstractPVArray implements Fl
                         new LinkedList<Float64ArrayInterruptListener>(interruptlistenerList);
                 }
                 if(interruptlistenerListNew.remove(float64ArrayInterruptListener)) {
-                    asynTrace.print(Trace.FLOW ,"removeInterruptUser while interruptActive");
+                    super.print(Trace.FLOW ,"removeInterruptUser while interruptActive");
                     return Status.success;
                 }
             } else if(interruptlistenerList.remove(float64ArrayInterruptListener)) {
-                asynTrace.print(Trace.FLOW ,"removeInterruptUser");
+                super.print(Trace.FLOW ,"removeInterruptUser");
                 return Status.success;
             }
-            asynTrace.print(Trace.ERROR,"removeInterruptUser but not registered");
+            super.print(Trace.ERROR,"removeInterruptUser but not registered");
             user.setMessage("remove failed");
             return Status.error;
         } finally {
@@ -174,8 +156,7 @@ public abstract class AbstractFloat64Array extends AbstractPVArray implements Fl
         lock.lock();
         try {
             interruptActive = true;
-            asynTrace.print(Trace.FLOW ,
-                "%s begin calling interruptListeners",portName);
+            super.print(Trace.FLOW ,"begin calling interruptListeners");
         } finally {
             lock.unlock();
         }
@@ -192,7 +173,7 @@ public abstract class AbstractFloat64Array extends AbstractPVArray implements Fl
                 interruptListenerListModified = false;
             }
             interruptActive = false;
-            asynTrace.print(Trace.FLOW ,"%s end calling interruptListeners",portName);
+            super.print(Trace.FLOW ,"end calling interruptListeners");
         } finally {
             lock.unlock();
         }
