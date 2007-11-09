@@ -13,72 +13,9 @@ package: org.epics.ioc.pdrv.interfaces<br />
 2007.07.18</h1>
 CONTENTS
 
-<div class="toc">
-<ul>
-  <li><a href="#Overview">Overview</a></li>
-  <li><a href="#miscellane">miscellaneous</a>
-    <ul>
-      <li><a href="#Interface">Interface</a></li>
-      <li><a href="#Option">Option</a></li>
-      <li><a href="#DriverUser">DriverUser</a></li>
-    </ul>
-  </li>
-  <li><a href="#octet">octet</a>
-    <ul>
-      <li><a href="#OctetInter">OctetInterruptListener</a></li>
-      <li><a href="#Octet">Octet</a></li>
-      <li><a href="#AbstractOc">AbstractOctet</a></li>
-      <li><a href="#OctetInter1">OctetInterposeBase</a></li>
-    </ul>
-  </li>
-  <li><a href="#uint32Digi">uint32Digital</a>
-    <ul>
-      <li><a href="#DigitalInt">DigitalInterruptReason</a></li>
-      <li><a href="#UInt32Digi">UInt32DigitalInterruptListener</a></li>
-      <li><a href="#UInt32Digi1">UInt32Digital</a></li>
-      <li><a href="#AbstractUI">AbstractUInt32Digital</a></li>
-      <li><a href="#UInt32Digi2">UInt32DigitalInterposeBase</a></li>
-    </ul>
-  </li>
-  <li><a href="#int32">int32</a>
-    <ul>
-      <li><a href="#Int32Inter">Int32InterruptListener</a></li>
-      <li><a href="#Int32">Int32</a></li>
-      <li><a href="#AbstractIn">AbstractInt32</a></li>
-      <li><a href="#Int32Inter1">Int32InterposeBase</a></li>
-    </ul>
-  </li>
-  <li><a href="#int32Array">int32Array</a>
-    <ul>
-      <li><a href="#Int32Array">Int32ArrayInterruptListener</a></li>
-      <li><a href="#Int32Array1">Int32Array</a></li>
-      <li><a href="#AbstractIn1">AbstractInt32Array</a></li>
-      <li><a href="#Int32Array2">Int32ArrayInterposeBase</a></li>
-    </ul>
-  </li>
-  <li><a href="#float64">float64</a>
-    <ul>
-      <li><a href="#Float64Int">Float64InterruptListener</a></li>
-      <li><a href="#Float64">Float64</a></li>
-      <li><a href="#AbstractFl">AbstractFloat64</a></li>
-      <li><a href="#Float64Int1">Float64InterposeBase</a></li>
-    </ul>
-  </li>
-  <li><a href="#float64Arr">float64Array</a>
-    <ul>
-      <li><a href="#Float64Arr">Float64ArrayInterruptListener</a></li>
-      <li><a href="#Float64Arr1">Float64Array</a></li>
-      <li><a href="#AbstractFl1">AbstractFloat64Array</a></li>
-      <li><a href="#Float64Arr2">Float64ArrayInterposeBase</a></li>
-    </ul>
-  </li>
-</ul>
-</div>
-
-<p> </p>
 <hr />
 
-<h2 style="text-align: center" id="Overview">Overview</h2>
+<h2 style="text-align: center">Overview</h2>
 <hr />
 
 <p>This package contains portDriver interfaces for communication with a port
@@ -123,10 +60,10 @@ calls interface methods to communicate with a device..</p>
 </ul>
 <hr />
 
-<h2 style="text-align: center" id="miscellane">miscellaneous</h2>
+<h2 style="text-align: center">miscellaneous</h2>
 <hr />
 
-<h3 id="Interface">Interface</h3>
+<h3>Interface</h3>
 
 <p><span style="font-family: courier;">Interface</span> is the base interface
 for all portDriver interfaces.</p>
@@ -140,7 +77,7 @@ for all portDriver interfaces.</p>
     <dd>Returns the name of the interface.</dd>
 </dl>
 
-<h3 id="Option">Option</h3>
+<h3>Option</h3>
 
 <p><span style="font-family: courier;">Option</span> is for drivers that
 accept run time options.</p>
@@ -159,7 +96,7 @@ the methods:</p>
     <dd>Get the option for the specified key.</dd>
 </dl>
 
-<h3 id="DriverUser">DriverUser</h3>
+<h3>DriverUser</h3>
 
 <p><span style="font-family: courier;">DriverUser</span> is an interface for
 drivers that require per-user information. A user calls create when it
@@ -179,14 +116,14 @@ The driver can keep private data for each user.</p>
 </dl>
 <hr />
 
-<h2 style="text-align: center" id="octet">octet</h2>
+<h2 style="text-align: center">octet</h2>
 <hr />
 
 <p>This is the interface for serial communication. It supports I/O of 8 bit
 bytes and also has support for control characters that terminate serial
 messages.</p>
 
-<h3 id="OctetInter">OctetInterruptListener</h3>
+<h3>OctetInterruptListener</h3>
 
 <p>The interface implemented by a user that calls addInterruptListener.</p>
 <pre>public interface OctetInterruptListener {
@@ -199,7 +136,7 @@ messages.</p>
     <dd>The new message is provided when an interrupt occurs.</dd>
 </dl>
 
-<h3 id="Octet">Octet</h3>
+<h3>Octet</h3>
 
 <p>The interface methods are:</p>
 <pre>public interface Octet extends Interface {
@@ -285,7 +222,7 @@ messages.</p>
       method.</dd>
 </dl>
 
-<h3 id="AbstractOc">AbstractOctet</h3>
+<h3>AbstractOctet</h3>
 <pre>public abstract class AbstractOctet implements Octet {
     protected AbstractOctet(Device device,String interfaceName);
     protected void interruptOccured(byte[] data,int nbytes);
@@ -335,7 +272,7 @@ messages.</p>
     <dd>Returns Status.success an auxStatus = 0.</dd>
 </dl>
 
-<h3 id="OctetInter1">OctetInterposeBase</h3>
+<h3>OctetInterposeBase</h3>
 
 <p>An interpose implementation implements octet by extending the
 following:</p>
@@ -356,10 +293,10 @@ following:</p>
 </dl>
 <hr />
 
-<h2 style="text-align: center" id="uint32Digi">uint32Digital</h2>
+<h2 style="text-align: center">uint32Digital</h2>
 <hr />
 
-<h3 id="DigitalInt">DigitalInterruptReason</h3>
+<h3>DigitalInterruptReason</h3>
 
 <p>The reason why an interrupt occured.</p>
 <pre>public enum DigitalInterruptReason {
@@ -380,7 +317,7 @@ following:</p>
     <dd>One or more mask bits have changed.</dd>
 </dl>
 
-<h3 id="UInt32Digi">UInt32DigitalInterruptListener</h3>
+<h3>UInt32DigitalInterruptListener</h3>
 
 <p>The interface implemented by a user that calls addInterruptListener.</p>
 <pre>public interface UInt32DigitalInterruptListener {
@@ -393,7 +330,7 @@ following:</p>
     <dd>The new value is provided when an interrupt occurs.</dd>
 </dl>
 
-<h3 id="UInt32Digi1">UInt32Digital</h3>
+<h3>UInt32Digital</h3>
 
 <p>The interface methods are:</p>
 <pre>public interface UInt32Digital extends Interface{
@@ -433,7 +370,7 @@ following:</p>
       method.</dd>
 </dl>
 
-<h3 id="AbstractUI">AbstractUInt32Digital</h3>
+<h3>AbstractUInt32Digital</h3>
 <pre>public abstract class AbstractUInt32Digital implements UInt32Digital {
     protected AbstractUInt32Digital(Device device,String interfaceName);
     protected void interruptOccured(int data,DigitalInterruptReason reason);
@@ -478,7 +415,7 @@ following:</p>
     <dd>returns Status.error with a not supported message.</dd>
 </dl>
 
-<h3 id="UInt32Digi2">UInt32DigitalInterposeBase</h3>
+<h3>UInt32DigitalInterposeBase</h3>
 
 <p>An interpose implementation implements uint32Digital by extending the
 following:</p>
@@ -498,7 +435,7 @@ following:</p>
 </dl>
 <hr />
 
-<h2 style="text-align: center" id="int32">int32</h2>
+<h2 style="text-align: center">int32</h2>
 <hr />
 
 <p><span style="font-family: courier;">int32</span> is implemented by a
@@ -507,7 +444,7 @@ driver that supports a 32 bit integer. An example is a driver for an ADC
 support this interface by using the low order bits and sign extending the
 high order bits..</p>
 
-<h3 id="Int32Inter">Int32InterruptListener</h3>
+<h3>Int32InterruptListener</h3>
 
 <p>The interface implemented by a user that calls addInterruptListener.</p>
 <pre>public interface Int32InterruptListener {
@@ -520,7 +457,7 @@ high order bits..</p>
     <dd>The new value is provided when an interrupt occurs.</dd>
 </dl>
 
-<h3 id="Int32">Int32</h3>
+<h3>Int32</h3>
 
 <p>The interface methods are:</p>
 <pre>public interface Int32 extends Interface {
@@ -553,7 +490,7 @@ high order bits..</p>
       method.</dd>
 </dl>
 
-<h3 id="AbstractIn">AbstractInt32</h3>
+<h3>AbstractInt32</h3>
 
 <p>A driver implements int32 by extending the following abstract base
 class:</p>
@@ -591,7 +528,7 @@ class:</p>
       returns <span style="font-family: courier;">Status.error</span>.</dd>
 </dl>
 
-<h3 id="Int32Inter1">Int32InterposeBase</h3>
+<h3>Int32InterposeBase</h3>
 
 <p>An interpose implementation implements int32 by extending the
 following:</p>
@@ -611,13 +548,13 @@ following:</p>
 </dl>
 <hr />
 
-<h2 style="text-align: center" id="int32Array">int32Array</h2>
+<h2 style="text-align: center">int32Array</h2>
 <hr />
 
 <p><span style="font-family: courier;">int32Array</span> is implemented by a
 driver that supports a array of 32 bit integers.</p>
 
-<h3 id="Int32Array">Int32ArrayInterruptListener</h3>
+<h3>Int32ArrayInterruptListener</h3>
 
 <p>The interface implemented by a user that calls addInterruptListener.</p>
 <pre>public interface Int32ArrayInterruptListener{
@@ -630,7 +567,7 @@ driver that supports a array of 32 bit integers.</p>
     <dd>The new value is provided when an interrupt occurs.</dd>
 </dl>
 
-<h3 id="Int32Array1">Int32Array</h3>
+<h3>Int32Array</h3>
 
 <p>The implementation must implement PVIntArray, which is used for all I/O.
 In addition the following methods are implemented:</p>
@@ -671,7 +608,7 @@ In addition the following methods are implemented:</p>
       method.</dd>
 </dl>
 
-<h3 id="AbstractIn1">AbstractInt32Array</h3>
+<h3>AbstractInt32Array</h3>
 
 <p>A driver implements int32Array by extending the following abstract base
 class:</p>
@@ -717,7 +654,7 @@ class:</p>
     <dd>Returns Status.success.</dd>
 </dl>
 
-<h3 id="Int32Array2">Int32ArrayInterposeBase</h3>
+<h3>Int32ArrayInterposeBase</h3>
 
 <p>An interpose implementation implements int32Array by extending the
 following:</p>
@@ -737,13 +674,13 @@ following:</p>
 </dl>
 <hr />
 
-<h2 style="text-align: center" id="float64">float64</h2>
+<h2 style="text-align: center">float64</h2>
 <hr />
 
 <p><span style="font-family: courier;">float64</span> is implemented by
 drivers that support a double value.</p>
 
-<h3 id="Float64Int">Float64InterruptListener</h3>
+<h3>Float64InterruptListener</h3>
 
 <p>The interface implemented by a user that calls addInterruptListener.</p>
 <pre>public interface Float64InterruptListener {
@@ -756,7 +693,7 @@ drivers that support a double value.</p>
     <dd>The new value is provided when an interrupt occurs.</dd>
 </dl>
 
-<h3 id="Float64">Float64</h3>
+<h3>Float64</h3>
 
 <p>The interface methods are:</p>
 <pre>public interface Float64 extends Interface {
@@ -783,7 +720,7 @@ drivers that support a double value.</p>
       method.</dd>
 </dl>
 
-<h3 id="AbstractFl">AbstractFloat64</h3>
+<h3>AbstractFloat64</h3>
 
 <p>A driver implements int32Array by extending the following abstract base
 class:</p>
@@ -817,7 +754,7 @@ class:</p>
       this method.</dd>
 </dl>
 
-<h3 id="Float64Int1">Float64InterposeBase</h3>
+<h3>Float64InterposeBase</h3>
 
 <p>An interpose implementation implements float64 by extending the
 following:</p>
@@ -837,13 +774,13 @@ following:</p>
 </dl>
 <hr />
 
-<h2 style="text-align: center" id="float64Arr">float64Array</h2>
+<h2 style="text-align: center">float64Array</h2>
 <hr />
 
 <p><span style="font-family: courier;">float64Array</span> is implemented by
 a driver that supports a array of doubles.</p>
 
-<h3 id="Float64Arr">Float64ArrayInterruptListener</h3>
+<h3>Float64ArrayInterruptListener</h3>
 
 <p>The interface implemented by a user that calls addInterruptListener.</p>
 <pre>public interface Float64ArrayInterruptListener{
@@ -856,7 +793,7 @@ a driver that supports a array of doubles.</p>
     <dd>The new value is provided when an interrupt occurs.</dd>
 </dl>
 
-<h3 id="Float64Arr1">Float64Array</h3>
+<h3>Float64Array</h3>
 
 <p>The implementation must implement PVDoubleArray, which is used for all
 I/O. In addition the following methods are implemented:</p>
@@ -897,7 +834,7 @@ I/O. In addition the following methods are implemented:</p>
       method.</dd>
 </dl>
 
-<h3 id="AbstractFl1">AbstractFloat64Array</h3>
+<h3>AbstractFloat64Array</h3>
 
 <p>A driver implements float64Array by extending the following abstract base
 class:</p>
@@ -945,7 +882,7 @@ extends AbstractPVArray implements Float64Array
     <dd>Returns Status.success.</dd>
 </dl>
 
-<h3 id="Float64Arr2">Float64ArrayInterposeBase</h3>
+<h3>Float64ArrayInterposeBase</h3>
 
 <p>An interpose implementation implements float64Array by extending the
 following:</p>

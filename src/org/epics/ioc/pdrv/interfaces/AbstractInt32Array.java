@@ -32,12 +32,7 @@ import org.epics.ioc.pv.*;
  * @author mrk
  *
  */
-public abstract class AbstractInt32Array extends AbstractPVArray implements Int32Array{
-    private Trace asynTrace;
-    private String interfaceName;
-    private Port port;
-    private String portName;
-    
+public abstract class AbstractInt32Array extends AbstractArrayInterface implements Int32Array{
     private  ReentrantLock lock = new ReentrantLock();
     private List<Int32ArrayInterruptListener> interruptlistenerList =
         new LinkedList<Int32ArrayInterruptListener>();
@@ -53,18 +48,11 @@ public abstract class AbstractInt32Array extends AbstractPVArray implements Int3
      * @param capacity The capacity for the array.
      * @param capacityMutable Can the capacity be changed.
      * @param device The device.
-     * @param interfaceName The interface name.
      */
     protected AbstractInt32Array(
-            PVField parent,Array array,int capacity,boolean capacityMutable,
-            Device device,String interfaceName)
+        PVField parent,Array array,int capacity,boolean capacityMutable,Device device)
     {
-        super(parent,array,capacity,capacityMutable);
-        asynTrace = device.getTrace();
-        port = device.getPort();
-        portName = port.getPortName();
-        device.registerInterface(this);
-        this.interfaceName = interfaceName;
+        super(parent,array,capacity,capacityMutable,device,"int32Array");
     }    
     /* (non-Javadoc)
      * @see org.epics.ioc.pdrv.interfaces.Int32Array#endRead(org.epics.ioc.pdrv.User)
@@ -96,18 +84,10 @@ public abstract class AbstractInt32Array extends AbstractPVArray implements Int3
      */
     public void interruptOccured() {
         if(interruptActive) {
-            asynTrace.print(Trace.FLOW ,
-                    "%s new interrupt while interruptActive",
-                    portName);
+            super.print(Trace.FLOW ,"new interrupt while interruptActive");
             return;
         }
         interrupt.interrupt();
-    }
-    /* (non-Javadoc)
-     * @see org.epics.ioc.pdrv.Interface#getInterfaceName()
-     */
-    public String getInterfaceName() {
-        return interfaceName;
     }
     /* (non-Javadoc)
      * @see org.epics.ioc.pdrv.interfaces.Int32Array#addInterruptUser(org.epics.ioc.pdrv.User, org.epics.ioc.pdrv.interfaces.Int32ArrayInterruptListener)
@@ -124,16 +104,14 @@ public abstract class AbstractInt32Array extends AbstractPVArray implements Int3
                         new LinkedList<Int32ArrayInterruptListener>(interruptlistenerList);
                 }
                 if(interruptlistenerListNew.add(int32ArrayInterruptListener)) {
-                    asynTrace.print(Trace.FLOW ,
-                            "%s addInterruptUser while interruptActive",
-                            portName);
+                    super.print(Trace.FLOW ,"addInterruptUser while interruptActive");
                     return Status.success;
                 }
             } else if(interruptlistenerList.add(int32ArrayInterruptListener)) {
-                asynTrace.print(Trace.FLOW ,"addInterruptUser");
+                super.print(Trace.FLOW ,"addInterruptUser");
                 return Status.success;
             }
-            asynTrace.print(Trace.ERROR,"addInterruptUser but already registered");
+            super.print(Trace.ERROR,"addInterruptUser but already registered");
             user.setMessage("add failed");
             return Status.error;
         } finally {
@@ -155,14 +133,14 @@ public abstract class AbstractInt32Array extends AbstractPVArray implements Int3
                         new LinkedList<Int32ArrayInterruptListener>(interruptlistenerList);
                 }
                 if(interruptlistenerListNew.remove(int32ArrayInterruptListener)) {
-                    asynTrace.print(Trace.FLOW ,"removeInterruptUser while interruptActive");
+                    super.print(Trace.FLOW ,"removeInterruptUser while interruptActive");
                     return Status.success;
                 }
             } else if(interruptlistenerList.remove(int32ArrayInterruptListener)) {
-                asynTrace.print(Trace.FLOW ,"removeInterruptUser");
+                super.print(Trace.FLOW ,"removeInterruptUser");
                 return Status.success;
             }
-            asynTrace.print(Trace.ERROR,"removeInterruptUser but not registered");
+            super.print(Trace.ERROR,"removeInterruptUser but not registered");
             user.setMessage("remove failed");
             return Status.error;
         } finally {
@@ -174,8 +152,7 @@ public abstract class AbstractInt32Array extends AbstractPVArray implements Int3
         lock.lock();
         try {
             interruptActive = true;
-            asynTrace.print(Trace.FLOW ,
-                "%s begin calling interruptListeners",portName);
+            super.print(Trace.FLOW ,"begin calling interruptListeners");
         } finally {
             lock.unlock();
         }
@@ -192,7 +169,7 @@ public abstract class AbstractInt32Array extends AbstractPVArray implements Int3
                 interruptListenerListModified = false;
             }
             interruptActive = false;
-            asynTrace.print(Trace.FLOW ,"%s end calling interruptListeners",portName);
+            super.print(Trace.FLOW ,"end calling interruptListeners");
         } finally {
             lock.unlock();
         }

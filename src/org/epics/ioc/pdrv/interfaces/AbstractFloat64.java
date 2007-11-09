@@ -31,9 +31,7 @@ import org.epics.ioc.pdrv.*;
  * @author mrk
  *
  */
-public abstract class AbstractFloat64 implements Float64 {
-    private Trace asynTrace;
-    private String interfaceName;
+public abstract class AbstractFloat64 extends AbstractInterface implements Float64 {
     private Port port;
     private String portName;
     
@@ -50,34 +48,30 @@ public abstract class AbstractFloat64 implements Float64 {
      * Constructor.
      * This registers the interface with the device.
      * @param device The device
-     * @param interfaceName The interface.
      */
-    protected AbstractFloat64(Device device,String interfaceName) {
-        asynTrace = device.getTrace();
+    protected AbstractFloat64(Device device) {
+    	super(device,"float64");
         port = device.getPort();
         portName = port.getPortName();
-        device.registerInterface(this);
-        this.interfaceName = interfaceName;
     }
-    /**
+    public double[] getDisplayLimits(User user) {
+		return null;
+	}
+	public String getUnits(User user) {
+		return null;
+	}
+	/**
      * Announce an interrupt.
      * @param data The new data.
      */
     protected void interruptOccured(double data) {
         if(interruptActive) {
-            asynTrace.print(Trace.FLOW ,
-                    "%s new interrupt while interruptActive",
-                    portName);
+            super.print(Trace.FLOW ,
+                    "new interrupt while interruptActive");
             return;
         }
         interruptData = data;
         interrupt.interrupt();
-    }
-    /* (non-Javadoc)
-     * @see org.epics.ioc.pdrv.Interface#getInterfaceName()
-     */
-    public String getInterfaceName() {
-        return interfaceName;
     }
     /* (non-Javadoc)
      * @see org.epics.ioc.pdrv.interfaces.Float64#read(org.epics.ioc.pdrv.User)
@@ -102,16 +96,16 @@ public abstract class AbstractFloat64 implements Float64 {
                         new LinkedList<Float64InterruptListener>(interruptlistenerList);
                 }
                 if(interruptlistenerListNew.add(float64InterruptListener)) {
-                    asynTrace.print(Trace.FLOW ,
+                    super.print(Trace.FLOW ,
                             "%s addInterruptUser while interruptActive",
                             portName);
                     return Status.success;
                 }
             } else if(interruptlistenerList.add(float64InterruptListener)) {
-                asynTrace.print(Trace.FLOW ,"addInterruptUser");
+                super.print(Trace.FLOW ,"addInterruptUser");
                 return Status.success;
             }
-            asynTrace.print(Trace.ERROR,"addInterruptUser but already registered");
+            super.print(Trace.ERROR,"addInterruptUser but already registered");
             user.setMessage("add failed");
             return Status.error;
         } finally {
@@ -133,14 +127,14 @@ public abstract class AbstractFloat64 implements Float64 {
                         new LinkedList<Float64InterruptListener>(interruptlistenerList);
                 }
                 if(interruptlistenerListNew.remove(float64InterruptListener)) {
-                    asynTrace.print(Trace.FLOW ,"removeInterruptUser while interruptActive");
+                    super.print(Trace.FLOW ,"removeInterruptUser while interruptActive");
                     return Status.success;
                 }
             } else if(interruptlistenerList.remove(float64InterruptListener)) {
-                asynTrace.print(Trace.FLOW ,"removeInterruptUser");
+                super.print(Trace.FLOW ,"removeInterruptUser");
                 return Status.success;
             }
-            asynTrace.print(Trace.ERROR,"removeInterruptUser but not registered");
+            super.print(Trace.ERROR,"removeInterruptUser but not registered");
             user.setMessage("remove failed");
             return Status.error;
         } finally {
@@ -152,7 +146,7 @@ public abstract class AbstractFloat64 implements Float64 {
         lock.lock();
         try {
             interruptActive = true;
-            asynTrace.print(Trace.FLOW ,
+            super.print(Trace.FLOW ,
                 "%s begin calling interruptListeners",portName);
         } finally {
             lock.unlock();
@@ -170,7 +164,7 @@ public abstract class AbstractFloat64 implements Float64 {
                 interruptListenerListModified = false;
             }
             interruptActive = false;
-            asynTrace.print(Trace.FLOW ,
+            super.print(Trace.FLOW ,
                 "%s end calling interruptListeners",portName);
         } finally {
             lock.unlock();

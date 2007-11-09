@@ -31,12 +31,7 @@ import org.epics.ioc.pdrv.*;
  * @author mrk
  *
  */
-public abstract class AbstractOctet implements Octet {
-    private Trace asynTrace;
-    private String interfaceName;
-    private Port port;
-    private String portName;
-    
+public abstract class AbstractOctet extends AbstractInterface implements Octet {
     private  ReentrantLock lock = new ReentrantLock();
     private List<OctetInterruptListener> interruptlistenerList =
         new LinkedList<OctetInterruptListener>();
@@ -51,14 +46,9 @@ public abstract class AbstractOctet implements Octet {
      * Constructor.
      * This registers the interface with the device.
      * @param device The device
-     * @param interfaceName The interface.
      */
-    protected AbstractOctet(Device device,String interfaceName) {
-        asynTrace = device.getTrace();
-        port = device.getPort();
-        portName = port.getPortName();
-        device.registerInterface(this);
-        this.interfaceName = interfaceName;
+    protected AbstractOctet(Device device) {
+    	super(device,"octet");
     }
     /**
      * Announce an interrupt.
@@ -67,20 +57,12 @@ public abstract class AbstractOctet implements Octet {
      */
     protected void interruptOccured(byte[] data,int nbytes) {
         if(interruptActive) {
-            asynTrace.print(Trace.FLOW ,
-                    "%s new interrupt while interruptActive",
-                    portName);
+            super.print(Trace.FLOW ,"new interrupt while interruptActive");
             return;
         }
         interruptData = data;
         interruptNumchars = nbytes;
         interrupt.interrupt();
-    }
-    /* (non-Javadoc)
-     * @see org.epics.ioc.pdrv.Interface#getInterfaceName()
-     */
-    public String getInterfaceName() {
-        return interfaceName;
     }
     /* (non-Javadoc)
      * @see org.epics.ioc.pdrv.interfaces.Octet#write(org.epics.ioc.pdrv.User, byte[], int)
@@ -149,16 +131,14 @@ public abstract class AbstractOctet implements Octet {
                         new LinkedList<OctetInterruptListener>(interruptlistenerList);
                 }
                 if(interruptlistenerListNew.add(octetInterruptListener)) {
-                    asynTrace.print(Trace.FLOW ,
-                            "%s addInterruptUser while interruptActive",
-                            portName);
+                    super.print(Trace.FLOW ,"addInterruptUser while interruptActive");
                     return Status.success;
                 }
             } else if(interruptlistenerList.add(octetInterruptListener)) {
-                asynTrace.print(Trace.FLOW ,"addInterruptUser");
+                super.print(Trace.FLOW ,"addInterruptUser");
                 return Status.success;
             }
-            asynTrace.print(Trace.ERROR,"addInterruptUser but already registered");
+            super.print(Trace.ERROR,"addInterruptUser but already registered");
             user.setMessage("add failed");
             return Status.error;
         } finally {
@@ -178,14 +158,14 @@ public abstract class AbstractOctet implements Octet {
                         new LinkedList<OctetInterruptListener>(interruptlistenerList);
                 }
                 if(interruptlistenerListNew.remove(octetInterruptListener)) {
-                    asynTrace.print(Trace.FLOW ,"removeInterruptUser while interruptActive");
+                    super.print(Trace.FLOW ,"removeInterruptUser while interruptActive");
                     return Status.success;
                 }
             } else if(interruptlistenerList.remove(octetInterruptListener)) {
-                asynTrace.print(Trace.FLOW ,"removeInterruptUser");
+                super.print(Trace.FLOW ,"removeInterruptUser");
                 return Status.success;
             }
-            asynTrace.print(Trace.ERROR,"removeInterruptUser but not registered");
+            super.print(Trace.ERROR,"removeInterruptUser but not registered");
             user.setMessage("remove failed");
             return Status.error;
         } finally {
@@ -197,8 +177,7 @@ public abstract class AbstractOctet implements Octet {
         lock.lock();
         try {
             interruptActive = true;
-            asynTrace.print(Trace.FLOW ,
-                "%s begin calling interruptListeners",portName);
+            super.print(Trace.FLOW ,"begin calling interruptListeners");
         } finally {
             lock.unlock();
         }
@@ -215,7 +194,7 @@ public abstract class AbstractOctet implements Octet {
                 interruptListenerListModified = false;
             }
             interruptActive = false;
-            asynTrace.print(Trace.FLOW ,"%s end calling interruptListeners",portName);
+            super.print(Trace.FLOW ,"end calling interruptListeners");
         } finally {
             lock.unlock();
         }
