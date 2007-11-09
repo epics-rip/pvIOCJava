@@ -12,7 +12,7 @@ package org.epics.ioc.pdrv.interfaces;
  */
 public interface OctetInterruptListener {
     /**
-     * An interrupt has occured.
+     * An interrupt has been detected.
      * @param data The data array.
      * @param nbytes The number of bytes in the array.
      */

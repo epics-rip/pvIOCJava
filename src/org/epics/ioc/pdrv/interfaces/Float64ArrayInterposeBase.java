@@ -14,7 +14,7 @@ import org.epics.ioc.pv.*;
  * @author mrk
  *
  */
-public class Float64ArrayInterposeBase extends AbstractPVArray implements Float64Array {
+public class Float64ArrayInterposeBase extends AbstractArrayInterface implements Float64Array {
     private Float64Array float64Array;
     
     /**
@@ -22,7 +22,9 @@ public class Float64ArrayInterposeBase extends AbstractPVArray implements Float6
      * @param arg The interface to the lower level implementation.
      */
     protected Float64ArrayInterposeBase(Float64Array arg) {
-        super(arg.getParent(),arg.getArray(),arg.getCapacity(),arg.isCapacityMutable());
+        super(arg.getParent(),arg.getArray(),arg.getCapacity(),
+        	arg.isCapacityMutable(),
+        	arg.getDevice(),arg.getInterfaceName());
         this.float64Array = arg;
     }
     /* (non-Javadoc)

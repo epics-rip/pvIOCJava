@@ -15,7 +15,7 @@ import org.epics.ioc.pv.*;
  * @author mrk
  *
  */
-public class Int32ArrayInterposeBase extends AbstractPVArray implements Int32Array {
+public class Int32ArrayInterposeBase extends AbstractArrayInterface implements Int32Array {
     private Int32Array int32Array;
     
     /**
@@ -23,7 +23,9 @@ public class Int32ArrayInterposeBase extends AbstractPVArray implements Int32Arr
      * @param arg The interface to the lower level implementation.
      */
     protected Int32ArrayInterposeBase(Int32Array arg) {
-        super(arg.getParent(),arg.getArray(),arg.getCapacity(),arg.isCapacityMutable());
+        super(arg.getParent(),arg.getArray(),arg.getCapacity(),
+        		arg.isCapacityMutable(),
+        		arg.getDevice(),arg.getInterfaceName());
         this.int32Array = arg;
     }
     /* (non-Javadoc)

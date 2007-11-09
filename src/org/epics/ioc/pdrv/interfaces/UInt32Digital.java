@@ -11,6 +11,12 @@ import org.epics.ioc.pdrv.*;
  *
  */
 public interface UInt32Digital extends Interface{
+	/**
+	 * Get the choices.
+	 * @param user The user.
+	 * @return The choices or null if the driver does not know the choices.
+	 */
+	String[] getChoices(User user);
     /**
      * Write a value.
      * @param user The user.
