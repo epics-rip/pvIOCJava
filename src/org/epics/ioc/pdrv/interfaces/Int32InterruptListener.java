@@ -12,7 +12,7 @@ package org.epics.ioc.pdrv.interfaces;
  */
 public interface Int32InterruptListener {
     /**
-     * An interrupt has occured.
+     * An interrupt has been detected.
      * @param value The new value.
      */
     void interrupt(int value);

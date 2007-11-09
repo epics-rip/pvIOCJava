@@ -13,7 +13,7 @@ package org.epics.ioc.pdrv.interfaces;
  */
 public interface Float64ArrayInterruptListener{
     /**
-     * An interrupt has occured.
+     * An interrupt has been detected.
      * @param float64Array The array.
      */
     void interrupt(Float64Array float64Array);
