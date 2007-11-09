@@ -15,7 +15,7 @@ import org.epics.ioc.pdrv.User;
  * @author mrk
  *
  */
-public class Float64InterposeBase implements Float64 {
+public class Float64InterposeBase extends AbstractInterface implements Float64 {
     private Float64 float64;
     
     /**
@@ -23,9 +23,22 @@ public class Float64InterposeBase implements Float64 {
      * @param float64 The interface to the lower level implementation.
      */
     protected Float64InterposeBase(Float64 float64) {
+    	super(float64.getDevice(),float64.getInterfaceName());
         this.float64 = float64;
     }
     /* (non-Javadoc)
+     * @see org.epics.ioc.pdrv.interfaces.Float64#getDisplayLimits()
+     */
+    public double[] getDisplayLimits(User user) {
+		return null;
+	}
+	/* (non-Javadoc)
+	 * @see org.epics.ioc.pdrv.interfaces.Float64#getUnits()
+	 */
+	public String getUnits(User user) {
+		return null;
+	}
+	/* (non-Javadoc)
      * @see org.epics.ioc.pdrv.interfaces.Float64#addInterruptUser(org.epics.ioc.pdrv.User, org.epics.ioc.pdrv.interfaces.Float64InterruptListener)
      */
     public Status addInterruptUser(User user, Float64InterruptListener float64InterruptListener) {

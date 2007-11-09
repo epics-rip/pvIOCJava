@@ -14,14 +14,17 @@ import org.epics.ioc.pdrv.*;
  * @author mrk
  *
  */
-public abstract class UInt32DigitalInterposeBase implements UInt32Digital {
-    UInt32Digital uint32Digital;
+public abstract class UInt32DigitalInterposeBase extends AbstractInterface
+implements UInt32Digital
+{
+    private UInt32Digital uint32Digital;
 
     /**
      * The constructor
      * @param uint32Digital The interface to the lower level implementation.
      */
     protected UInt32DigitalInterposeBase(UInt32Digital uint32Digital) {
+    	super(uint32Digital.getDevice(),uint32Digital.getInterfaceName());
         this.uint32Digital = uint32Digital;
     }
     /* (non-Javadoc)

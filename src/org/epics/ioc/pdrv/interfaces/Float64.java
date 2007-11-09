@@ -14,6 +14,18 @@ import org.epics.ioc.pdrv.User;
  *
  */
 public interface Float64 extends Interface {
+	/**
+	 * Get the display limits.
+	 * @param user The user.
+	 * @return The limits or null if the driver does not know limits.
+	 */
+	double[] getDisplayLimits(User user);
+	/**
+	 * Get the engineering units.
+	 * @param user The user.
+	 * @return The units or null if the driver does not know the units.
+	 */
+	String getUnits(User user);
     /**
      * Write a value.
      * @param user The user.
