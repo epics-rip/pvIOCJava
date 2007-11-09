@@ -13,7 +13,7 @@ package org.epics.ioc.pdrv.interfaces;
  */
 public interface Int32ArrayInterruptListener{
     /**
-     * An interrupt has occured.
+     * An interrupt has been detected.
      * @param int32Array The array.
      */
     void interrupt(Int32Array int32Array);
