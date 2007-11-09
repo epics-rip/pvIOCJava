@@ -119,7 +119,7 @@ public class Float64ArrayDriverFactory {
                 trace = device.getTrace();
                 deviceName = device.getPort().getPortName() + ":" + device.getAddr();
                 Array array = fieldCreate.createArray("drvPrivate", Type.pvDouble);
-                new Float64ArrayImpl(parent,array);
+                new Float64ArrayImpl(parent,array,device);
             }
             /* (non-Javadoc)
              * @see org.epics.ioc.pdrv.DeviceDriver#report(int)
@@ -157,8 +157,8 @@ public class Float64ArrayDriverFactory {
             private class Float64ArrayImpl extends AbstractFloat64Array{
                 private double[] value = new double[0];
                 
-                private Float64ArrayImpl(PVField parent,Array array) {
-                    super(parent,array,0,true,device,"float64Array");
+                private Float64ArrayImpl(PVField parent,Array array,Device device) {
+                    super(parent,array,0,true,device);
                 }
                 /* (non-Javadoc)
                  * @see org.epics.ioc.pv.AbstractPVArray#setCapacity(int)

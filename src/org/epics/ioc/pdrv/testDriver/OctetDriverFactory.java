@@ -134,7 +134,7 @@ public class OctetDriverFactory {
             this.device = device;
             deviceName = device.getPort().getPortName() + ":" + device.getAddr();
             trace = device.getTrace();
-            new EchoOctet();
+            new EchoOctet(device);
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.pdrv.DeviceDriver#report(int)
@@ -179,8 +179,8 @@ public class OctetDriverFactory {
             private byte[] eosOutput = {0,0};
             private int eosLenOutput = 0;
             
-            private EchoOctet() {
-                super(device,"octet");
+            private EchoOctet(Device device) {
+                super(device);
                 milliseconds = (long)(delay * 1000.0);
             }
             /* (non-Javadoc)

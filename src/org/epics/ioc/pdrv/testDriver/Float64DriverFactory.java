@@ -135,7 +135,7 @@ public class Float64DriverFactory {
                 this.device = device;
                 trace = device.getTrace();
                 deviceName = device.getPort().getPortName() + ":" + device.getAddr();
-                new Float64Interface();
+                new Float64Interface(device);
             }
             /* (non-Javadoc)
              * @see org.epics.ioc.pdrv.DeviceDriver#report(int)
@@ -172,8 +172,8 @@ public class Float64DriverFactory {
             
             private class Float64Interface extends  AbstractFloat64{
                 
-                private Float64Interface() {
-                    super(device,"float64");
+                private Float64Interface(Device device) {
+                    super(device);
                 }
                 /* (non-Javadoc)
                  * @see org.epics.ioc.pdrv.interfaces.AbstractFloat64#read(org.epics.ioc.pdrv.User)

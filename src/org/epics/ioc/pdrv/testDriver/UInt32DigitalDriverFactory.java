@@ -135,7 +135,7 @@ public class UInt32DigitalDriverFactory {
                 this.device = device;
                 deviceName = device.getPort().getPortName() + ":" + device.getAddr();
                 trace = device.getTrace();
-                new UInt32DigitalInterface();
+                new UInt32DigitalInterface(device);
             }
             /* (non-Javadoc)
              * @see org.epics.ioc.pdrv.DeviceDriver#report(int)
@@ -172,8 +172,8 @@ public class UInt32DigitalDriverFactory {
             
             private class UInt32DigitalInterface extends  AbstractUInt32Digital{
                 private long milliseconds;
-                private UInt32DigitalInterface() {
-                    super(device,"uint32Digital");
+                private UInt32DigitalInterface(Device device) {
+                    super(device);
                     milliseconds = (long)(delay * 1000.0);
                 }               
                 /* (non-Javadoc)

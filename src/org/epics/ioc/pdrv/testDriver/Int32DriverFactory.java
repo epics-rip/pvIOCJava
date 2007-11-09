@@ -157,7 +157,7 @@ public class Int32DriverFactory {
                 this.device = device;
                 trace = device.getTrace();
                 deviceName = device.getPort().getPortName() + ":" + device.getAddr();
-                new Int32Interface();
+                new Int32Interface(device);
             }
             /* (non-Javadoc)
              * @see org.epics.ioc.pdrv.DeviceDriver#report(int)
@@ -194,8 +194,8 @@ public class Int32DriverFactory {
             
             private class Int32Interface extends  AbstractInt32{
                 private long milliseconds;
-                private Int32Interface() {
-                    super(device,"int32");
+                private Int32Interface(Device device) {
+                    super(device);
                     milliseconds = (long)(delay * 1000.0);
                 }
 

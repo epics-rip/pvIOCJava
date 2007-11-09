@@ -119,7 +119,7 @@ public class Int32ArrayDriverFactory {
                 trace = device.getTrace();
                 deviceName = device.getPort().getPortName() + ":" + device.getAddr();
                 Array array = fieldCreate.createArray("drvPrivate", Type.pvInt);
-                new Int32ArrayImpl(parent,array);
+                new Int32ArrayImpl(parent,array,device);
             }
             /* (non-Javadoc)
              * @see org.epics.ioc.pdrv.DeviceDriver#report(int)
@@ -157,8 +157,8 @@ public class Int32ArrayDriverFactory {
             private class Int32ArrayImpl extends AbstractInt32Array{
                 private int[] value = new int[0];
                 
-                private Int32ArrayImpl(PVField parent,Array array) {
-                    super(parent,array,0,true,device,"int32Array");
+                private Int32ArrayImpl(PVField parent,Array array,Device device) {
+                    super(parent,array,0,true,device);
                 }
                 /* (non-Javadoc)
                  * @see org.epics.ioc.pv.AbstractPVArray#setCapacity(int)
