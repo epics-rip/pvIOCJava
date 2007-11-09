@@ -12,7 +12,7 @@ package org.epics.ioc.pdrv.interfaces;
  */
 public interface UInt32DigitalInterruptListener {
     /**
-     * An interrupt has occured.
+     * An interrupt has been detected.
      * @param value The new value.
      * The value is treated as an unsigned 32 bit integer.
      */
