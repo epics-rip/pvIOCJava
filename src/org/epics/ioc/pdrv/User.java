@@ -5,6 +5,8 @@
  */
 package org.epics.ioc.pdrv;
 
+import org.epics.ioc.util.AlarmSeverity;
+
 
 /**
  * An interface for making pdrv (Port Driver) requests and for communication between driver
@@ -119,6 +121,22 @@ public interface User {
      * @return The latest message.
      */
     String getMessage();
+    /**
+     * Set an alarm.
+     * @param alarmSeverity The severity.
+     * @param message The message.
+     */
+    void setAlarm(AlarmSeverity alarmSeverity,String message);
+    /**
+     * Get the alarm Severity.
+     * @return The severity.
+     */
+    AlarmSeverity getAlarmSeverity();
+    /**
+     * Get the alarm message.
+     * @return The message.
+     */
+    String getAlarmMessage();
     /**
      * Set the timeout for individual IO requests.
      * @param timeout The timeout in seconds.

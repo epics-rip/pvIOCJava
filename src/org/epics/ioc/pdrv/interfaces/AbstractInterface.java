@@ -58,18 +58,6 @@ public abstract class AbstractInterface implements Interface {
 		return device;
 	}
 	/* (non-Javadoc)
-	 * @see org.epics.ioc.pdrv.interfaces.Interface#getAlarmMessage()
-	 */
-	public String getAlarmMessage() {
-		return null;
-	}
-	/* (non-Javadoc)
-	 * @see org.epics.ioc.pdrv.interfaces.Interface#getAlarmSeverity()
-	 */
-	public AlarmSeverity getAlarmSeverity() {
-		return AlarmSeverity.none;
-	}
-	/* (non-Javadoc)
 	 * @see org.epics.ioc.pdrv.interfaces.Interface#getInterfaceName()
 	 */
 	public String getInterfaceName() {

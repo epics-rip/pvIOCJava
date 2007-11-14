@@ -25,14 +25,4 @@ public interface Interface {
      * @return The device interface.
      */
     Device getDevice();
-    /**
-     * Get the alarm severity.
-     * @return The alarm severity.
-     */
-    AlarmSeverity getAlarmSeverity();
-    /**
-     * Get the alarm message.
-     * @return The message.
-     */
-    String getAlarmMessage();
 }

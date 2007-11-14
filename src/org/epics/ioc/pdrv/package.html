@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
       "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html>
+<html xmlns="http://www.w3.org/1999/xhtml">
 <head>
   <meta http-equiv="content-type" content="text/html; charset=iso-8859-1" />
   <title>EPICS JavaIOC: portDriver</title>
@@ -10,12 +10,100 @@
 <body>
 <h1 style="text-align: center">EPICS JavaIOC: portDriver<br />
 package: org.epics.ioc.pdrv<br />
-2007.07.23</h1>
+2007.11.14</h1>
 CONTENTS 
 
+<div class="toc">
+<ul>
+  <li><a href="#Purpose">Purpose</a></li>
+  <li><a href="#Status">Status</a></li>
+  <li><a href="#Acknowledg">Acknowledgments</a></li>
+  <li><a href="#Overview">Overview of PDRV</a>
+    <ul>
+      <li><a href="#Definition">Definitions</a></li>
+      <li><a href="#PDRV">PDRV Interfaces</a></li>
+      <li><a href="#PDRV1">PDRV Factory</a></li>
+      <li><a href="#Generic">Generic Interfaces</a></li>
+      <li><a href="#Multiple">Multiple Device vs Single Device Port
+        Drivers</a></li>
+      <li><a href="#Connection">Connection Management</a></li>
+      <li><a href="#Protecting">Protecting a Thread from Blocking</a></li>
+      <li><a href="#portThread">portThread</a></li>
+      <li><a href="#Driver">Driver Can Also Be User</a></li>
+      <li><a href="#Initializa">Initialization</a></li>
+      <li><a href="#Requesting">Requesting access to a port</a></li>
+    </ul>
+  </li>
+  <li><a href="#PDRV2">PDRV Factory</a>
+    <ul>
+      <li><a href="#createUser">createUser</a></li>
+      <li><a href="#createPort">createPort</a></li>
+      <li><a href="#getPortNam">getPortNames</a></li>
+      <li><a href="#getPort">getPort</a></li>
+    </ul>
+  </li>
+  <li><a href="#User">User</a>
+    <ul>
+      <li><a href="#Status1">Status</a></li>
+      <li><a href="#REASON">REASON</a></li>
+      <li><a href="#duplicateU">duplicateUser</a></li>
+      <li><a href="#User1">User Queue Request</a></li>
+      <li><a href="#User2">User lock/unlock Port</a></li>
+      <li><a href="#User3">User connection to a port</a></li>
+      <li><a href="#getPort1">getPort</a></li>
+      <li><a href="#User4">User connection to a device</a></li>
+      <li><a href="#getDevice">getDevice</a></li>
+      <li><a href="#User5">User Messages</a></li>
+      <li><a href="#Alarms">Alarms</a></li>
+      <li><a href="#L740">I/O Timeouts</a></li>
+      <li><a href="#Driver1">Driver Private</a></li>
+      <li><a href="#User6">User Private</a></li>
+      <li><a href="#Passing">Passing Information Between User and
+      Driver</a></li>
+    </ul>
+  </li>
+  <li><a href="#Connect">Connect Exception</a></li>
+  <li><a href="#Port">Port</a>
+    <ul>
+      <li><a href="#User7">User Locate Interface/Device</a></li>
+      <li><a href="#User8">User Connection Methods</a></li>
+      <li><a href="#Informatio">Informational Methods</a></li>
+      <li><a href="#Connection1">Connection Methods</a></li>
+      <li><a href="#Driver2">Driver Methods</a></li>
+      <li><a href="#LockPortNo">LockPortNotify</a></li>
+    </ul>
+  </li>
+  <li><a href="#Device">Device</a>
+    <ul>
+      <li><a href="#User9">User findInterface</a></li>
+      <li><a href="#User10">User Connection Methods</a></li>
+      <li><a href="#User11">User Blocking</a></li>
+      <li><a href="#Informatio1">Informational Methods</a></li>
+      <li><a href="#Connection2">Connection Methods</a></li>
+      <li><a href="#Driver3">Driver Methods</a></li>
+    </ul>
+  </li>
+  <li><a href="#Trace">Trace</a>
+    <ul>
+      <li><a href="#Trace1">Trace Mask Options</a></li>
+      <li><a href="#TraceIO">TraceIO Options</a></li>
+      <li><a href="#Trace2">Trace File</a></li>
+      <li><a href="#Trace3">Trace Option Change Listener</a></li>
+      <li><a href="#Generating">Generating Trace Messages</a></li>
+    </ul>
+  </li>
+  <li><a href="#Driver4">Driver</a>
+    <ul>
+      <li><a href="#PortDriver">PortDriver</a></li>
+      <li><a href="#DeviceDriv">DeviceDriver</a></li>
+    </ul>
+  </li>
+  <li><a href="#Appendix">Appendix: Java Definitions</a></li>
+</ul>
+</div>
 <hr />
 
-<h2 style="text-align: center">Purpose</h2>
+<h2 style="text-align: center" id="Purpose">Purpose</h2>
 <hr />
 
 <p><b>portDriver</b> (PDRV) is a general purpose facility for interfacing
@@ -72,7 +160,7 @@ However much of it is independent of EPICS.</p>
 <hr />
 <hr />
 
-<h2 style="text-align: center">Status</h2>
+<h2 style="text-align: center" id="Status">Status</h2>
 <hr />
 
 <p>This version provides</p>
@@ -99,7 +187,7 @@ that the JavaIOC can use the asynDriver drivers.</p>
 <hr />
 <hr />
 
-<h2 style="text-align: center">Acknowledgments</h2>
+<h2 style="text-align: center" id="Acknowledg">Acknowledgments</h2>
 <hr />
 
 <p>PDRV is modeled after asynDriver. See <a
@@ -111,10 +199,10 @@ contributions to asynDriver and to Dirk Zimoch for developing STEAMS.</p>
 <hr />
 <hr />
 
-<h2 style="text-align: center">Overview of PDRV</h2>
+<h2 style="text-align: center" id="Overview">Overview of PDRV</h2>
 <hr />
 
-<h3>Definitions</h3>
+<h3 id="Definition">Definitions</h3>
 
 <p>PDRV is a software layer between support code, e.g. javaIOC support, and
 drivers that communicate with devices. It supports both blocking and
@@ -217,7 +305,7 @@ attached to a GPIB port.</p>
 <p>PDRV uses some features of the javaIOC but it can be used by other code,
 e.g. a sequence program when one is created for the javaIOC.</p>
 
-<h3>PDRV Interfaces</h3>
+<h3 id="PDRV">PDRV Interfaces</h3>
 
 <p>The following are interfaces defined in org.epics.ioc.pdrv:</p>
 <dl>
@@ -244,7 +332,7 @@ e.g. a sequence program when one is created for the javaIOC.</p>
       style="font-weight: bold">user.queueRequest.</span></dd>
 </dl>
 
-<h3>PDRV Factory</h3>
+<h3 id="PDRV1">PDRV Factory</h3>
 
 <p>This implements Port, Device, User, and Trace. It has static methods
 to:</p>
@@ -256,7 +344,7 @@ to:</p>
     This is called by a driver to register a port.</li>
 </ul>
 
-<h3>Generic Interfaces</h3>
+<h3 id="Generic">Generic Interfaces</h3>
 
 <p>Package org.epics.ioc.pdrv.interfaces defines the following generic I/O
 interfaces:.</p>
@@ -278,13 +366,13 @@ interfaces:.</p>
     registers.</dd>
 </dl>
 
-<h3>Multiple Device vs Single Device Port Drivers</h3>
+<h3 id="Multiple">Multiple Device vs Single Device Port Drivers</h3>
 
 <p>When a low level driver calls registerPort, it declares if it handles
 multiple devices. A single device port should always implement a single
 device with address 0.</p>
 
-<h3>Connection Management</h3>
+<h3 id="Connection">Connection Management</h3>
 
 <p>Port and Device keep track of the following states:</p>
 <ul>
@@ -310,7 +398,7 @@ called.</p>
 <p>Low level drivers must call exceptionConnect whenever they connect to a
 port or device and exceptionDisconnect whenever they disconnect.</p>
 
-<h3>Protecting a Thread from Blocking</h3>
+<h3 id="Protecting">Protecting a Thread from Blocking</h3>
 
 <p>The report methods can be called by any thread, but the caller is blocked
 until the report finishes. lockPort, connect, disconnect and some other Port
@@ -321,7 +409,7 @@ details.</p>
 must only be called by QueueRequestCallback.callback or by calls between
 lockPort/unlockPort.</p>
 
-<h3>portThread</h3>
+<h3 id="portThread">portThread</h3>
 
 <p>If a driver calls Factory.createPort with canBlock true, then PDRV creates
 a thread for the port. Each portThread has its own set of queues for the
@@ -359,7 +447,7 @@ following algorithm:</p>
 code outside asynManager. This means that the queues can be modified and
 exceptions may occur.</p>
 
-<h3>Driver Can Also Be User</h3>
+<h3 id="Driver">Driver Can Also Be User</h3>
 
 <p>A driver can also be the user of another driver. For example a multi-drop
 serial driver can use a standard serial driver to perform the actual I/O.
@@ -368,7 +456,7 @@ user locks the multi-drop port. The driver can than call lock/unlock for the
 serial port so that it has exclusive access to the serial port which the
 multi-drip user has access.</p>
 
-<h3>Initialization</h3>
+<h3 id="Initializa">Initialization</h3>
 
 <p>During initialization, drivers register each communication port as well as
 all supported interfaces.</p>
@@ -400,7 +488,7 @@ then calls findInterface to locate the interfaces with which it calls the
 driver. For example: 
 <pre>     Octet octet = (Octet)device.findInterface(user,"octet",true);</pre>
 
-<h3>Requesting access to a port</h3>
+<h3 id="Requesting">Requesting access to a port</h3>
 
 <p>User code can request access to a port by two methods:</p>
 <ul>
@@ -417,7 +505,7 @@ driver. For example:
 </ul>
 <hr />
 
-<h2 style="text-align: center">PDRV Factory</h2>
+<h2 style="text-align: center" id="PDRV2">PDRV Factory</h2>
 <hr />
 
 <p>This is the factory for creating PDRV objects.</p>
@@ -430,9 +518,10 @@ driver. For example:
             boolean autoConnect,ScanPriority priority);
     public static String[] getPortNames();
     public static Port getPort(String portName);
+    public static Trace createTrace();
 }</pre>
 
-<h3>createUser</h3>
+<h3 id="createUser">createUser</h3>
 <pre>    User createUser(QueueRequestCallback asynQueueRequestCallback);</pre>
 
 <p>Create a User. This is called by code that wants to access a port and/or
@@ -445,7 +534,7 @@ the devices connected to the port.</p>
       queueRequest is dequeued. See Port for details.</dd>
 </dl>
 
-<h3>createPort</h3>
+<h3 id="createPort">createPort</h3>
 <pre>    Port createPort(
             String portName,PortDriver portDRiver,
             String driverName,
@@ -481,12 +570,12 @@ interface is created and returned.</p>
     <dd>The priority for the port thread if the port can block.</dd>
 </dl>
 
-<h3>getPortNames</h3>
+<h3 id="getPortNam">getPortNames</h3>
 <pre>    String[] getPortNames();</pre>
 
 <p>Get an array containing the name of each port. </p>
 
-<h3>getPort</h3>
+<h3 id="getPort">getPort</h3>
 <pre>    Port getPort(String portName);</pre>
 
 <p>Get the Port for the specified portName. If the port does not exist null
@@ -499,7 +588,7 @@ is returned.</p>
 </dl>
 <hr />
 
-<h2 style="text-align: center">User</h2>
+<h2 style="text-align: center" id="User">User</h2>
 <hr />
 User is the interface for accessing a port and/or device. It is created by
 Factory and used by client code. 
@@ -525,6 +614,9 @@ public interface User {
     void unlockPort();
     void setMessage(String message);
     String getMessage();
+    void setAlarm(AlarmSeverity alarmSeverity,String message);
+    AlarmSeverity getAlarmSeverity();
+    String getAlarmMessage();
     void setTimeout(double timeout);
     double getTimeout();
     void setPortDriverPvt(Object PDRVPvt);
@@ -545,7 +637,7 @@ public interface User {
     String getString();
 }</pre>
 
-<h3>Status</h3>
+<h3 id="Status1">Status</h3>
 
 <p>Many methods return a status which is defined by the following:</p>
 <pre>public enum Status {
@@ -570,7 +662,7 @@ public interface User {
       user.setMessage.</dd>
 </dl>
 
-<h3>REASON</h3>
+<h3 id="REASON">REASON</h3>
 
 <p>setReason,getReason described below have an integer argument. The
 following are some generic reasons:</p>
@@ -582,7 +674,7 @@ following are some generic reasons:</p>
     <dd>A signal occured.</dd>
 </dl>
 
-<h3>duplicateUser</h3>
+<h3 id="duplicateU">duplicateUser</h3>
 
 <p>Create a new User that is connected to the same port and device. The new
 user will also have the same reason and timeout as the orginal. </p>
@@ -597,7 +689,7 @@ user will also have the same reason and timeout as the orginal. </p>
       can be null.</dd>
 </dl>
 
-<h3>User Queue Request</h3>
+<h3 id="User1">User Queue Request</h3>
 
 <p>Any user than wants to make asynchronous I/O requests but do not want to
 block while making the request can call queueRequest. An example is link
@@ -649,7 +741,7 @@ calls to the port or device interfaces.</p>
 queued than nothing happens. Note that it is possible for the callback to be
 called between the time when cancel is called and when it returns.</p>
 
-<h3>User lock/unlock Port</h3>
+<h3 id="User2">User lock/unlock Port</h3>
 
 <p>If a user is willing to block during asynchronous port I/O requests then
 it can just call lockPort/unlockPort.</p>
@@ -664,7 +756,7 @@ it can just call lockPort/unlockPort.</p>
          port.unlockPort();
      }</pre>
 
-<h3>User connection to a port</h3>
+<h3 id="User3">User connection to a port</h3>
 <pre>    Port connectPort(String portName);
     void disconnectPort();</pre>
 
@@ -674,12 +766,12 @@ to a device than disconnectPort calls disconnectDevice. Note that these
 methods only connects/disconnects the user to/from the port. Thus it does not
 effect the connect/disconnect state of the port itself.</p>
 
-<h3>getPort</h3>
+<h3 id="getPort1">getPort</h3>
 <pre>    Port getPort();</pre>
 
 <p>Get the port to which this user is connected. This can be null.</p>
 
-<h3>User connection to a device</h3>
+<h3 id="User4">User connection to a device</h3>
 <pre>    Device connectDevice(int addr);
     void disconnectDevice();</pre>
 The user must be connected to a port before connecting to a device. If the
@@ -690,12 +782,12 @@ Note that these methods only connects/disconnects the user to/from the
 device. Thus it does not effect the connect/disconnect state of the device
 itself.</p>
 
-<h3>getDevice</h3>
+<h3 id="getDevice">getDevice</h3>
 <pre>    Device getDevice();</pre>
 
 <p>Get the device to which this user is connected. This can be null.</p>
 
-<h3>User Messages</h3>
+<h3 id="User5">User Messages</h3>
 <pre>    void setMessage(String message);
     String getMessage();</pre>
 
@@ -703,7 +795,15 @@ itself.</p>
 must also call user.setMessage to explain why the method failed. The user can
 then call getMessage to find the reason.</p>
 
-<h3>I/O Timeouts</h3>
+<h3 id="Alarms">Alarms</h3>
+<pre>
+    void setAlarm(AlarmSeverity alarmSeverity,String message);
+    AlarmSeverity getAlarmSeverity();
+    String getAlarmMessage();</pre>
+
+<p>Methods that set and get alarms. </p>
+
+<h3 id="L740">I/O Timeouts</h3>
 <pre>    void setTimeout(double timeout);
     double getTimeout();</pre>
 
@@ -714,7 +814,7 @@ getTimeout to get the timeout. It is the timeout for an individual I/O
 request. For example for a serial driver it could mean the time to read/write
 a single byte.</p>
 
-<h3>Driver Private</h3>
+<h3 id="Driver1">Driver Private</h3>
 <pre>    void setPortDriverPvt(Object PDRVPvt);
     Object getPortDriverPvt();
     void setDeviceDriverPvt(Object deviceDriverPvt);
@@ -736,13 +836,13 @@ the driver can call getPortDriver or getDeviceDriver to get the private data
 for the user. DriverUser.dispose should remove all provate state and data fot
 the user.</p>
 
-<h3>User Private</h3>
+<h3 id="User6">User Private</h3>
 <pre>    void setUserPvt(Object userPvt);
     Object getUserPvt();</pre>
 
 <p>These are for private use by the user.</p>
 
-<h3>Passing Information Between User and Driver</h3>
+<h3 id="Passing">Passing Information Between User and Driver</h3>
 <pre>    void setReason(int reason);
     int getReason();
     void setAuxStatus(int auxStatus);
@@ -763,7 +863,7 @@ make use of these methods. For example the octet interface use setInt to tell
 the user how many elements were transfered.</p>
 <hr />
 
-<h2 style="text-align: center">Connect Exception</h2>
+<h2 style="text-align: center" id="Connect">Connect Exception</h2>
 <hr />
 
 <p>Both Port and Device provide a methods exceptionListenerAdd and
@@ -797,7 +897,7 @@ autoConnect state.</p>
 }</pre>
 <hr />
 
-<h2 style="text-align: center">Port</h2>
+<h2 style="text-align: center" id="Port">Port</h2>
 <hr />
 
 <p>A port manages user access to the I/O. At any given time at most one user
@@ -837,7 +937,7 @@ interface via a call to user.queueRequest or a call to user.lockPort.</p>
     void exceptionDisconnect();
 }</pre>
 
-<h3>User Locate Interface/Device</h3>
+<h3 id="User7">User Locate Interface/Device</h3>
 
 <p>After a user has connected to a port via a call to user.connectPort it can
 connect to a device by calling port.getDevice. If a PDRV implements
@@ -847,7 +947,7 @@ drivers will implement interfaces for devices but not for the port.</p>
         boolean interposeInterfaceOK);
     Device getDevice(User user, int addr);</pre>
 
-<h3>User Connection Methods</h3>
+<h3 id="User8">User Connection Methods</h3>
 
 <p>Most users do not ask the port to connect or disconnect but a specialized
 client may. For example javaIOC link support is provided for
@@ -857,7 +957,7 @@ call lockPort/unlockPort.</p>
 <pre>    Status connect(User user);
     Status disconnect(User user);</pre>
 
-<h3>Informational Methods</h3>
+<h3 id="Informatio">Informational Methods</h3>
 
 <p>The following can be used by any code that is interested.</p>
 <pre>    String report(boolean reportDevices,int details);
@@ -890,7 +990,7 @@ call lockPort/unlockPort.</p>
     <dd>Is it possible for the driver to block while doing I/O?</dd>
 </dl>
 
-<h3>Connection Methods</h3>
+<h3 id="Connection1">Connection Methods</h3>
 
 <p>The following can be used by any code that is interested.</p>
 <pre>    void enable(boolean trueFalse);
@@ -924,7 +1024,7 @@ call lockPort/unlockPort.</p>
     <dd>Remove the listener.</dd>
 </dl>
 
-<h3>Driver Methods</h3>
+<h3 id="Driver2">Driver Methods</h3>
 
 <p>These are methods called by a driver.</p>
 <pre>    Device createDevice(DeviceDriver deviceDriver, int addr);
@@ -954,7 +1054,7 @@ call lockPort/unlockPort.</p>
     <dd>Not normally called by drivers</dd>
 </dl>
 
-<h3>LockPortNotify</h3>
+<h3 id="LockPortNo">LockPortNotify</h3>
 
 <p>A driver can be the user of another driver. For example a multidrop the
 serial driver can use a serial port driver to do the actual I/O and just add
@@ -993,7 +1093,7 @@ void unregisterLockPortNotify(); </pre>
 </dl>
 <hr />
 
-<h2 style="text-align: center">Device</h2>
+<h2 style="text-align: center" id="Device">Device</h2>
 <hr />
 
 <p>A device provides methods related to a device. The complete set of
@@ -1024,7 +1124,7 @@ definitions for Device are:</p>
     void exceptionDisconnect();
 }</pre>
 
-<h3>User findInterface</h3>
+<h3 id="User9">User findInterface</h3>
 
 <p>This is used by a user to locate an interface for the device. If the
 driver does not implement the requested interface null is returned.</p>
@@ -1043,7 +1143,7 @@ driver does not implement the requested interface null is returned.</p>
       false then only an interface implemented by the driver is returned.</dd>
 </dl>
 
-<h3>User Connection Methods</h3>
+<h3 id="User10">User Connection Methods</h3>
 
 <p>Most users do not handle the device connecting or disconnecting but a
 specialized client may. For example javaIOC link support is provided for
@@ -1052,14 +1152,14 @@ disconnected via a Channel Access client.</p>
 <pre>    Status connect(User user);
     Status disconnect(User user);</pre>
 
-<h3>User Blocking</h3>
+<h3 id="User11">User Blocking</h3>
 
 <p>A user can block other users from accessing a device. This only works for
 asynchronous drivers.</p>
 <pre>Status blockOtherUsers(User user);
 void unblockOtherUsers(User user);</pre>
 
-<h3>Informational Methods</h3>
+<h3 id="Informatio1">Informational Methods</h3>
 
 <p>The following can be used by any code that is interested.</p>
 <pre>    String report(int details);
@@ -1080,7 +1180,7 @@ void unblockOtherUsers(User user);</pre>
     <dd>Get the port to which this device is connected.</dd>
 </dl>
 
-<h3>Connection Methods</h3>
+<h3 id="Connection2">Connection Methods</h3>
 
 <p>The following can be used by any code that is interested.</p>
 <pre>    void enable(boolean trueFalse);
@@ -1117,7 +1217,7 @@ void unblockOtherUsers(User user);</pre>
     <dd>Remove the listener.</dd>
 </dl>
 
-<h3>Driver Methods</h3>
+<h3 id="Driver3">Driver Methods</h3>
 
 <p>These are methods called by a driver.</p>
 <pre>    void registerInterface(Interface iface);
@@ -1141,7 +1241,7 @@ void unblockOtherUsers(User user);</pre>
 </dl>
 <hr />
 
-<h2 style="text-align: center">Trace</h2>
+<h2 style="text-align: center" id="Trace">Trace</h2>
 <hr />
 
 <p>Both Port and Device provide access to a Trace facility, which allows
@@ -1178,7 +1278,7 @@ facility.</p>
     void printIO(int reason, byte[] buffer,long len,String format,Object... args);
 }</pre>
 
-<h3>Trace Mask Options</h3>
+<h3 id="Trace1">Trace Mask Options</h3>
 
 <p>The trace mask specifies when to generate messages. </p>
 <pre>    public static final int ERROR = 0x0001;
@@ -1217,7 +1317,7 @@ facility.</p>
     <dd>Get the current value of the mask.</dd>
 </dl>
 
-<h3>TraceIO Options</h3>
+<h3 id="TraceIO">TraceIO Options</h3>
 
 <p>The traceIO mask specifies what to generate for octet data values.</p>
 <pre>    public static final int IO_NODATA = 0x0000;
@@ -1254,7 +1354,7 @@ facility.</p>
     <dd>Get the current truncation size.</dd>
 </dl>
 
-<h3>Trace File</h3>
+<h3 id="Trace2">Trace File</h3>
 
 <p>The destination for trace messages.</p>
 <pre>    void setFile(Writer file);
@@ -1269,7 +1369,7 @@ facility.</p>
     <dd>Get the current destination for trace messages,</dd>
 </dl>
 
-<h3>Trace Option Change Listener</h3>
+<h3 id="Trace3">Trace Option Change Listener</h3>
 
 <p>Code that wants to listen for option change must implement the
 following:</p>
@@ -1283,17 +1383,15 @@ following:</p>
     void optionChangeListenerRemove(
          TraceOptionChangeListener traceOptionChangeListener);</pre>
 
-<h3>Generating Trace Messages</h3>
+<h3 id="Generating">Generating Trace Messages</h3>
 
 <p><span style="font-family: courier;">print</span> is called to generate
 messages and <span style="font-family: courier;">printIO</span> to generate
 messages and also the value of octet data.</p>
-<pre>
-    void print(int reason,String message);
+<pre>    void print(int reason,String message);
     void print(int reason,String format, Object... args);
     void printIO(int reason, byte[] buffer,long len,String message);
-    void printIO(int reason, byte[] buffer,long len,String format,Object... args);
-</pre>
+    void printIO(int reason, byte[] buffer,long len,String format,Object... args);</pre>
 
 <p>where</p>
 <dl>
@@ -1307,10 +1405,10 @@ messages and also the value of octet data.</p>
 </dl>
 <hr />
 
-<h2 style="text-align: center">Driver</h2>
+<h2 style="text-align: center" id="Driver4">Driver</h2>
 <hr />
 
-<h3>PortDriver</h3>
+<h3 id="PortDriver">PortDriver</h3>
 
 <p>Every driver must implement the following methods:</p>
 <pre>public interface PortDriver {
@@ -1337,7 +1435,7 @@ messages and also the value of octet data.</p>
       port.exceptionDisconnect(). It it fails it should return error.</dd>
 </dl>
 
-<h3>DeviceDriver</h3>
+<h3 id="DeviceDriv">DeviceDriver</h3>
 
 <p>The driver implements the following for each device it acesses.</p>
 <pre>public interface DeviceDriver {
@@ -1359,7 +1457,7 @@ messages and also the value of octet data.</p>
 </dl>
 <hr />
 
-<h2 style="text-align: center">Appendix: Java Definitions</h2>
+<h2 style="text-align: center" id="Appendix">Appendix: Java Definitions</h2>
 <hr />
 
 <p>The following is a complete list of all the Java definitions for <span

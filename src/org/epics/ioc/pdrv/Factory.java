@@ -102,17 +102,19 @@ public class Factory {
         private DeviceImpl device = null;
         private boolean isQueued = false;
         
-        private Object userPvt;
-        private Object portDriverPvt;
-        private Object deviceDriverPvt;
+        private Object userPvt = null;
+        private Object portDriverPvt = null;
+        private Object deviceDriverPvt = null;
         private int reason;
         private double timeout;
         
         private int auxStatus;
-        private String message;
+        private String message = null;
+        private String alarmMessage = null;
+        private AlarmSeverity alarmSeverity = null;
         private int intValue;
         private double doubleValue;
-        private String stringValue;
+        private String stringValue = null;;
         
         private QueueRequestCallback getQueueRequestCallback() {
             return queueRequestCallback;
@@ -132,6 +134,7 @@ public class Factory {
          * @see org.epics.ioc.pdrv.User#connectPort(java.lang.String)
          */
         public Port connectPort(String portName) {
+        	clearErrorParms();
             if(port!=null) {
                 setMessage("already connected");
                 return null;
@@ -170,6 +173,7 @@ public class Factory {
          * @see org.epics.ioc.pdrv.User#connectDevice(int)
          */
         public Device connectDevice(int addr) {
+        	clearErrorParms();
             if(device!=null) {
                 setMessage("already connected");
                 return null;
@@ -185,6 +189,7 @@ public class Factory {
          * @see org.epics.ioc.pdrv.User#disconnectDevice()
          */
         public void disconnectDevice() {
+        	clearErrorParms();
             if(device==null) return;
             cancelRequest();
             device = null;
@@ -199,7 +204,8 @@ public class Factory {
         /* (non-Javadoc)
          * @see org.epics.ioc.pdrv.User#queueRequest(org.epics.ioc.pdrv.User, org.epics.ioc.pdrv.QueuePriority)
          */
-        public void queueRequest(QueuePriority queuePriority) {            
+        public void queueRequest(QueuePriority queuePriority) { 
+        	clearErrorParms();
             Trace trace = port.getTrace();
             String portName = port.getPortName();
             trace.print(Trace.FLOW, "%s queueRequest",portName);
@@ -243,6 +249,7 @@ public class Factory {
          * @see org.epics.ioc.pdrv.User#lockPort(org.epics.ioc.pdrv.User)
          */
         public Status lockPort() {
+        	clearErrorParms();
             if(port==null) {
                 setMessage("not connected to a port");
                 return Status.error;
@@ -284,7 +291,17 @@ public class Factory {
         public String getMessage() {
             return message;
         }
-        /* (non-Javadoc)
+        public String getAlarmMessage() {
+			return alarmMessage;
+		}
+		public AlarmSeverity getAlarmSeverity() {
+			return alarmSeverity;
+		}
+		public void setAlarm(AlarmSeverity alarmSeverity, String message) {
+			this.alarmSeverity = alarmSeverity;
+			this.alarmMessage = message;
+		}
+		/* (non-Javadoc)
          * @see org.epics.ioc.pdrv.User#getReason()
          */
         public int getReason() {
@@ -379,6 +396,13 @@ public class Factory {
          */
         public void setPortDriverPvt(Object portDriverPvt) {
             this.portDriverPvt = portDriverPvt;
+        }
+        
+        private void clearErrorParms() {
+        	auxStatus = 0;
+        	message = null;
+        	alarmMessage = null;
+        	alarmSeverity = AlarmSeverity.none;
         }
     }
     
