@@ -75,7 +75,6 @@ RecordProcessRequester
     
     protected SupportProcessRequester supportProcessRequester = null;
     
-    private String alarmMessage = null;
     private boolean isProcessor = false;
     
     public void initialize() {
@@ -194,7 +193,6 @@ RecordProcessRequester
             throw new IllegalStateException("supportProcessRequester is null");
         }
         this.supportProcessRequester = supportProcessRequester;
-        alarmMessage = null;
         if(isProcessor) {
             deviceTrace.print(Trace.FLOW,
                 "%s:%s process calling processContinue", fullName,supportName);
@@ -202,6 +200,7 @@ RecordProcessRequester
         } else {
             deviceTrace.print(Trace.FLOW,
                     "%s:%s process calling queueRequest", fullName,supportName);
+            user.setMessage(null);
             user.queueRequest(QueuePriority.medium);
         }
         deviceTrace.print(Trace.FLOW,"%s:%s process done", fullName,supportName);
@@ -220,10 +219,7 @@ RecordProcessRequester
     /* (non-Javadoc)
      * @see org.epics.ioc.process.ProcessContinueRequester#processContinue()
      */
-    public void processContinue() {
-        if(alarmMessage!=null) {
-            if(alarmSupport!=null) alarmSupport.setAlarm(alarmMessage,AlarmSeverity.major);
-        }
+    public void processContinue() {       
         deviceTrace.print(Trace.FLOW,
             "%s:%s processContinue calling supportProcessDone",
             fullName,supportName);
@@ -240,11 +236,12 @@ RecordProcessRequester
             deviceTrace.print(Trace.FLOW,
                     "%s:%s callback calling queueCallback", fullName,supportName);
             this.queueCallback();
-        } else {
-            alarmMessage = fullName + " " + user.getMessage();
         }
         deviceTrace.print(Trace.FLOW,
                 "%s:%s callback calling processContinue", fullName,supportName);
+        if(user.getAlarmSeverity()!=AlarmSeverity.none) {
+        	alarmSupport.setAlarm(user.getAlarmMessage(),user.getAlarmSeverity());
+        }
         recordProcess.processContinue(this);
     }
     /* (non-Javadoc)
@@ -257,8 +254,8 @@ RecordProcessRequester
      * @see org.epics.ioc.pdrv.support.PDRVLinkSupport#queueCallback()
      */
     public void queueCallback() {
-        deviceTrace.print(Trace.ERROR,
-                "%s:%s queueCallback not implemented", fullName,supportName);
+        deviceTrace.print(Trace.FLOW,
+                "%s:%s queueCallback", fullName,supportName);
     }
     /* (non-Javadoc)
      * @see org.epics.ioc.process.RecordProcessRequester#recordProcessComplete()

@@ -195,9 +195,9 @@ public class PDRVSupportFactory {
                     String string = String.copyValueOf(charArray, 0, nbytes);
                     convert.fromString(valuePVField, string);
                 }
-                AlarmSeverity severity = octet.getAlarmSeverity();
+                AlarmSeverity severity = user.getAlarmSeverity();
                 if(severity!=AlarmSeverity.none) {
-                	alarmSupport.setAlarm(octet.getAlarmMessage(),severity);
+                	alarmSupport.setAlarm(user.getAlarmMessage(),severity);
                 }
                 deviceTrace.print(Trace.FLOW,
                     "%s:%s processContinue calling postPut",fullName,supportName);
@@ -218,7 +218,8 @@ public class PDRVSupportFactory {
                 "%s:%s queueCallback calling read ",fullName,supportName);
             status = octet.read(user, octetArray, size);
             if(status!=Status.success) {
-                alarmSupport.setAlarm(user.getMessage(), AlarmSeverity.invalid);
+            	deviceTrace.print(Trace.ERROR,
+                        "%s:%s octet.read failed", fullName,supportName);
                 return;
             }
             nbytes = user.getInt();
@@ -313,9 +314,9 @@ public class PDRVSupportFactory {
                 "%s:%s processContinue ",fullName,supportName);
             if(status==Status.success) {
                 putData();
-                AlarmSeverity severity = octet.getAlarmSeverity();
+                AlarmSeverity severity = user.getAlarmSeverity();
                 if(severity!=AlarmSeverity.none) {
-                	alarmSupport.setAlarm(octet.getAlarmMessage(),severity);
+                	alarmSupport.setAlarm(user.getAlarmMessage(),severity);
                 }
             } else {
                 alarmSupport.setAlarm(user.getMessage(), AlarmSeverity.invalid);
@@ -325,7 +326,7 @@ public class PDRVSupportFactory {
                 fullName,supportName);
             supportProcessRequester.supportProcessDone(RequestResult.success);
         }        
-        /* (non-Javadoc)
+		/* (non-Javadoc)
          * @see org.epics.ioc.pdrv.interfaces.OctetInterruptListener#interrupt(byte[], int)
          */
         public void interrupt(byte[] data, int nbytes) {
@@ -476,7 +477,8 @@ public class PDRVSupportFactory {
                     fullName,supportName);
             status = octet.write(user, octetArray, size);
             if(status!=Status.success) {
-                alarmSupport.setAlarm(user.getMessage(), AlarmSeverity.invalid);
+            	deviceTrace.print(Trace.ERROR,
+                        "%s:%s octet.write failed", fullName,supportName);
                 return;
             }
             deviceTrace.printIO(Trace.SUPPORT, octetArray, user.getInt(), "%s", fullName);
@@ -544,9 +546,9 @@ public class PDRVSupportFactory {
             if(status==Status.success) {
                 convert.fromInt(valuePVField, value);
                 valueDBField.postPut();
-                AlarmSeverity severity = int32.getAlarmSeverity();
+                AlarmSeverity severity = user.getAlarmSeverity();
                 if(severity!=AlarmSeverity.none) {
-                	alarmSupport.setAlarm(int32.getAlarmMessage(),severity);
+                	alarmSupport.setAlarm(user.getAlarmMessage(),severity);
                 }
             } else {
                 alarmSupport.setAlarm(user.getMessage(), AlarmSeverity.invalid);
@@ -557,8 +559,15 @@ public class PDRVSupportFactory {
          * @see org.epics.ioc.pdrv.support.AbstractPDRVLinkSupport#queueCallback()
          */
         public void queueCallback() {
+        	deviceTrace.print(Trace.FLOW,
+                    "%s:%s queueCallback calling read ",fullName,supportName);
             Status status = int32.read(user);
-            if(status==Status.success) value = user.getInt();
+            if(status!=Status.success) {
+            	deviceTrace.print(Trace.ERROR,
+                        "%s:%s int32.read failed", fullName,supportName);
+                return;
+            }
+            value = user.getInt();
             deviceTrace.print(Trace.SUPPORT, "%s value = %d", fullName,value);
         }
     }
@@ -631,14 +640,6 @@ public class PDRVSupportFactory {
             }
             supportProcessRequester.supportProcessDone(RequestResult.success);
         }        
-        /* (non-Javadoc)
-         * @see org.epics.ioc.pdrv.support.AbstractPDRVLinkSupport#queueCallback()
-         */
-        public void queueCallback() {
-            Status status = int32.read(user);
-            if(status==Status.success) value = user.getInt();
-            deviceTrace.print(Trace.SUPPORT, "%s value = %d", fullName,value);
-        }
         /* (non-Javadoc)
          * @see org.epics.ioc.pdrv.interfaces.Int32InterruptListener#interrupt(int)
          */
@@ -839,6 +840,11 @@ public class PDRVSupportFactory {
         public void queueCallback() {
             deviceTrace.print(Trace.SUPPORT, "%s value = %d", fullName,value);
             status = int32.write(user, value);
+            if(status!=Status.success) {
+            	deviceTrace.print(Trace.ERROR,
+                        "%s:%s int32.write failed", fullName,supportName);
+                return;
+            }
         }
     }
     
@@ -923,28 +929,28 @@ public class PDRVSupportFactory {
          * @see org.epics.ioc.pdrv.support.AbstractPDRVLinkSupport#queueCallback()
          */
         public void queueCallback() {
-            deviceTrace.print(Trace.SUPPORT, "%s queueCallback", fullName);           ;
-            Status status = int32Array.startRead(user);
-            if(status==Status.success) {
-                convert.copyArray(int32Array, 0, valuePVArray, 0, int32Array.getLength());
-                int32Array.endRead(user);
-                AlarmSeverity severity = int32Array.getAlarmSeverity();
-                if(severity!=AlarmSeverity.none) {
-                	alarmSupport.setAlarm(int32Array.getAlarmMessage(),severity);
-                }
-            }
+        	deviceTrace.print(Trace.SUPPORT, "%s startRead", fullName);           ;
+        	Status status = int32Array.startRead(user);
+        	if(status!=Status.success) {
+        		deviceTrace.print(Trace.ERROR,
+        				"%s:%s int32Array.startRead failed", fullName,supportName);
+        		return;
+        	}
+        	convert.copyArray(int32Array, 0, valuePVArray, 0, int32Array.getLength());
+        	int32Array.endRead(user);
         }
+
         /* (non-Javadoc)
          * @see org.epics.ioc.pv.AsynAccessListener#beginSyncAccess()
          */
-        public void beginSyncAccess() {
-            deviceTrace.print(Trace.FLOW, "%s beginSyncAccess", fullName);
+        public void beginSyncAccess() {             
             dbRecord.lock();
+            deviceTrace.print(Trace.FLOW, "%s beginSyncAccess", fullName);
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.pv.AsynAccessListener#endSyncAccess()
          */
-        public void endSyncAccess() {
+        public void endSyncAccess() {           
             deviceTrace.print(Trace.FLOW, "%s endSyncAccess", fullName);
             dbRecord.unlock();
         }
@@ -1032,16 +1038,20 @@ public class PDRVSupportFactory {
         /* (non-Javadoc)
          * @see org.epics.ioc.pdrv.support.AbstractPDRVLinkSupport#queueCallback()
          */
-        public void queueCallback() {           
-            Status status = int32Array.startRead(user);
-            if(status==Status.success) {
-                convert.copyArray(int32Array, 0, valuePVArray, 0, int32Array.getLength());
-                int32Array.endRead(user);
-                AlarmSeverity severity = int32Array.getAlarmSeverity();
-                if(severity!=AlarmSeverity.none) {
-                	alarmSupport.setAlarm(int32Array.getAlarmMessage(),severity);
-                }
-            }
+        public void queueCallback() {
+        	deviceTrace.print(Trace.SUPPORT, "%s startRead", fullName);     
+        	Status status = int32Array.startRead(user);
+        	if(status!=Status.success) {
+        		deviceTrace.print(Trace.ERROR,
+        				"%s:%s int32Array.startRead failed", fullName,supportName);
+        		return;
+        	}
+        	convert.copyArray(int32Array, 0, valuePVArray, 0, int32Array.getLength());
+        	int32Array.endRead(user);
+        	AlarmSeverity severity = user.getAlarmSeverity();
+        	if(severity!=AlarmSeverity.none) {
+        		alarmSupport.setAlarm(user.getAlarmMessage(),severity);
+        	}
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.pdrv.interfaces.Int32ArrayInterruptListener#interrupt(org.epics.ioc.pv.PVIntArray)
@@ -1084,9 +1094,9 @@ public class PDRVSupportFactory {
                 dbRecord.lock();
                 try {
                     valuePVArray.asynAccessEnd(this);
-                    AlarmSeverity severity = int32Array.getAlarmSeverity();
+                    AlarmSeverity severity = user.getAlarmSeverity();
                     if(severity!=AlarmSeverity.none) {
-                    	alarmSupport.setAlarm(int32Array.getAlarmMessage(),severity);
+                    	alarmSupport.setAlarm(user.getAlarmMessage(),severity);
                     }
                     valueDBField.postPut();
                 } finally {
@@ -1101,17 +1111,17 @@ public class PDRVSupportFactory {
          * @see org.epics.ioc.pv.AsynAccessListener#beginSyncAccess()
          */
         public void beginSyncAccess() {
+        	dbRecord.lock();
             deviceTrace.print(Trace.FLOW,
                     "%s:%s beginSyncAccess", fullName,supportName);
-            dbRecord.lock();
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.pv.AsynAccessListener#endSyncAccess()
          */
-        public void endSyncAccess() {           
-            dbRecord.unlock();
+        public void endSyncAccess() {                      
             deviceTrace.print(Trace.FLOW,
                     "%s:%s endSyncAccess", fullName,supportName);
+            dbRecord.unlock();
         }
     }
     
@@ -1192,11 +1202,15 @@ public class PDRVSupportFactory {
          * @see org.epics.ioc.pdrv.support.AbstractPDRVLinkSupport#queueCallback()
          */
         public void queueCallback() {
-            Status status = int32Array.startWrite(user);
-            if(status==Status.success) {
-                convert.copyArray(valuePVArray, 0, int32Array, 0, valuePVArray.getLength());
-                int32Array.endWrite(user);
-            }
+        	deviceTrace.print(Trace.SUPPORT, "%s startWrite", fullName);   
+        	Status status = int32Array.startWrite(user);
+        	if(status!=Status.success) {
+        		deviceTrace.print(Trace.ERROR,
+        				"%s:%s int32Array.startWrite failed", fullName,supportName);
+        		return;
+        	}
+        	convert.copyArray(valuePVArray, 0, int32Array, 0, valuePVArray.getLength());
+        	int32Array.endWrite(user);
         }
     }
     
@@ -1216,6 +1230,7 @@ public class PDRVSupportFactory {
         }
 
         private PVBoolean valuePVBoolean = null;
+        private Type valueType = null;
         private PVInt pvIndex = null;
         private UInt32Digital uint32Digital = null;
         private int value;
@@ -1230,12 +1245,12 @@ public class PDRVSupportFactory {
             if(!super.checkSupportState(SupportState.readyForStart,supportName)) return;
             PVField pvField = valueDBField.getPVField();
             Field field = pvField.getField();
-            Type type = field.getType();
-            if(type==Type.pvBoolean) {
+            valueType = field.getType();
+            if(valueType==Type.pvBoolean) {
                 valuePVBoolean = (PVBoolean)valuePVField;
                 return;
             }
-            if(type==Type.pvInt) {
+            if(valueType==Type.pvInt) {
                 pvIndex = (PVInt)valuePVField;
                 return;
             }
@@ -1268,18 +1283,6 @@ public class PDRVSupportFactory {
                 super.stop();
                 return;
             }
-            mask = pvMask.get();
-            if(mask==0) {
-                pvStructure.message("mask is 0", MessageType.fatalError);
-                super.stop();
-                return;
-            }
-            int i = 1;
-            shift = 0;
-            while(true) {
-                if((mask&i)!=0) break;
-                ++shift; i <<= 1;
-            }
             uint32Digital = (UInt32Digital)iface;
             if(enumerated!=null) {
             	String[] choices = uint32Digital.getChoices(user);
@@ -1288,6 +1291,20 @@ public class PDRVSupportFactory {
             		pvStringArray.put(0, choices.length, choices, 0);
             		DBField dbField = super.getDBField().getDBRecord().findDBField(pvStringArray);
             		dbField.postPut();
+            	}
+            }
+            if(valueType==Type.pvInt) {
+            	mask = pvMask.get();
+            	if(mask==0) {
+            		pvStructure.message("mask is 0", MessageType.fatalError);
+            		super.stop();
+            		return;
+            	}
+            	int i = 1;
+            	shift = 0;
+            	while(true) {
+            		if((mask&i)!=0) break;
+            		++shift; i <<= 1;
             	}
             }
         }
@@ -1302,8 +1319,10 @@ public class PDRVSupportFactory {
          * @see org.epics.ioc.pdrv.support.AbstractPDRVLinkSupport#processContinue()
          */
         public void processContinue() {
-            value = value&mask;
-            value >>>= shift;
+        	if(valueType==Type.pvInt) {
+                value = value&mask;
+                value >>>= shift;
+        	}
             if(valuePVBoolean!=null) {
                 boolean oldValue = valuePVBoolean.get();
                 boolean newValue = ((value==0) ? false : true);
@@ -1323,16 +1342,15 @@ public class PDRVSupportFactory {
          * @see org.epics.ioc.pdrv.support.AbstractPDRVLinkSupport#queueCallback()
          */
         public void queueCallback() {
+        	deviceTrace.print(Trace.FLOW,
+                    "%s:%s queueCallback calling read ",fullName,supportName);
             Status status = uint32Digital.read(user,mask);
             if(status!=Status.success) {
-                alarmSupport.setAlarm(user.getMessage(), AlarmSeverity.invalid);
-                return;
-            }
+        		deviceTrace.print(Trace.ERROR,
+        				"%s:%s uint32Digital.read failed", fullName,supportName);
+        		return;
+        	}
             value = user.getInt();
-            AlarmSeverity severity = uint32Digital.getAlarmSeverity();
-            if(severity!=AlarmSeverity.none) {
-            	alarmSupport.setAlarm(uint32Digital.getAlarmMessage(),severity);
-            }
             deviceTrace.print(Trace.SUPPORT, "%s value = %d", fullName,value);
         }
     }
@@ -1343,7 +1361,8 @@ public class PDRVSupportFactory {
         private UInt32DigitalInterruptInput(DBStructure dbStructure,String supportName) {
             super(supportName,dbStructure);
         }
-
+        
+        private Type valueType = null;
         private PVBoolean valuePVBoolean = null;
         private DBField dbIndex = null;
         private PVInt pvIndex = null;
@@ -1360,9 +1379,13 @@ public class PDRVSupportFactory {
             if(!super.checkSupportState(SupportState.readyForStart,supportName)) return;
             PVField pvField = valueDBField.getPVField();
             Field field = pvField.getField();
-            Type type = field.getType();
-            if(type==Type.pvBoolean) {
+            valueType = field.getType();
+            if(valueType==Type.pvBoolean) {
                 valuePVBoolean = (PVBoolean)valuePVField;
+                return;
+            }
+            if(valueType==Type.pvInt) {
+                pvIndex = (PVInt)valuePVField;
                 return;
             }
             enumerated = getEnumerated(valueDBField);
@@ -1395,18 +1418,6 @@ public class PDRVSupportFactory {
                 super.stop();
                 return;
             }
-            mask = pvMask.get();
-            if(mask==0) {
-                pvStructure.message("mask is 0", MessageType.fatalError);
-                super.stop();
-                return;
-            }
-            int i = 1;
-            shift = 0;
-            while(true) {
-                if((mask&i)!=0) break;
-                ++shift; i <<= 1;
-            }
             uint32Digital = (UInt32Digital)iface;
             if(enumerated!=null) {
             	String[] choices = uint32Digital.getChoices(user);
@@ -1415,6 +1426,20 @@ public class PDRVSupportFactory {
             		pvStringArray.put(0, choices.length, choices, 0);
             		DBField dbField = super.getDBField().getDBRecord().findDBField(pvStringArray);
             		dbField.postPut();
+            	}
+            }
+            if(valueType==Type.pvInt) {
+            	mask = pvMask.get();
+            	if(mask==0) {
+            		pvStructure.message("mask is 0", MessageType.fatalError);
+            		super.stop();
+            		return;
+            	}
+            	int i = 1;
+            	shift = 0;
+            	while(true) {
+            		if((mask&i)!=0) break;
+            		++shift; i <<= 1;
             	}
             }
             uint32Digital.addInterruptUser(user, this, mask);
@@ -1441,22 +1466,6 @@ public class PDRVSupportFactory {
             supportProcessRequester.supportProcessDone(RequestResult.success);
         }        
         /* (non-Javadoc)
-         * @see org.epics.ioc.pdrv.support.AbstractPDRVLinkSupport#queueCallback()
-         */
-        public void queueCallback() {
-            Status status = uint32Digital.read(user,mask);
-            if(status!=Status.success) {
-                alarmSupport.setAlarm(user.getMessage(), AlarmSeverity.invalid);
-                return;
-            }
-            value = user.getInt();
-            AlarmSeverity severity = uint32Digital.getAlarmSeverity();
-            if(severity!=AlarmSeverity.none) {
-            	alarmSupport.setAlarm(uint32Digital.getAlarmMessage(),severity);
-            }
-            deviceTrace.print(Trace.SUPPORT, "%s value = %d", fullName,value);
-        }
-        /* (non-Javadoc)
          * @see org.epics.ioc.pdrv.interfaces.UInt32DigitalInterruptListener#interrupt(int)
          */
         public void interrupt(int value) {
@@ -1477,8 +1486,10 @@ public class PDRVSupportFactory {
         }
         
         private void putData() {
-            value = value&mask;
-            value >>>= shift;
+        	if(valueType==Type.pvInt) {
+                value = value&mask;
+                value >>>= shift;
+        	}
             if(valuePVBoolean!=null) {
                 valuePVBoolean.put((value==0) ? false : true);
             } else if(pvIndex!=null)  {
@@ -1498,7 +1509,7 @@ public class PDRVSupportFactory {
         private UInt32DigitalOutput(DBStructure dbStructure,String supportName) {
             super(supportName,dbStructure);
         }
-
+        private Type valueType = null;
         private PVBoolean valuePVBoolean = null;
         private PVInt pvIndex = null;
         private UInt32Digital uint32Digital = null;
@@ -1514,12 +1525,12 @@ public class PDRVSupportFactory {
             if(!super.checkSupportState(SupportState.readyForStart,supportName)) return;
             PVField pvField = valueDBField.getPVField();
             Field field = pvField.getField();
-            Type type = field.getType();
-            if(type==Type.pvBoolean) {
+            valueType = field.getType();
+            if(valueType==Type.pvBoolean) {
                 valuePVBoolean = (PVBoolean)valuePVField;
                 return;
             }
-            if(type==Type.pvInt) {
+            if(valueType==Type.pvInt) {
                 pvIndex = (PVInt)valuePVField;
                 return;
             }
@@ -1552,18 +1563,6 @@ public class PDRVSupportFactory {
                 super.stop();
                 return;
             }
-            mask = pvMask.get();
-            if(mask==0) {
-                pvStructure.message("mask is 0", MessageType.fatalError);
-                super.stop();
-                return;
-            }
-            int i = 1;
-            shift = 0;
-            while(true) {
-                if((mask&i)!=0) break;
-                ++shift; i <<= 1;
-            }
             uint32Digital = (UInt32Digital)iface;
             if(enumerated!=null) {
             	String[] choices = uint32Digital.getChoices(user);
@@ -1572,6 +1571,20 @@ public class PDRVSupportFactory {
             		pvStringArray.put(0, choices.length, choices, 0);
             		DBField dbField = super.getDBField().getDBRecord().findDBField(pvStringArray);
             		dbField.postPut();
+            	}
+            }
+            if(valueType==Type.pvInt) {
+            	mask = pvMask.get();
+            	if(mask==0) {
+            		pvStructure.message("mask is 0", MessageType.fatalError);
+            		super.stop();
+            		return;
+            	}
+            	int i = 1;
+            	shift = 0;
+            	while(true) {
+            		if((mask&i)!=0) break;
+            		++shift; i <<= 1;
             	}
             }
         }
@@ -1593,19 +1606,22 @@ public class PDRVSupportFactory {
             } else {
                 pvStructure.message(" logic error", MessageType.fatalError);
             }
-            value <<= shift;
+            if(valueType==Type.pvInt) {
+                value <<= shift;
+            }
             super.process(supportProcessRequester);
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.pdrv.support.AbstractPDRVLinkSupport#queueCallback()
          */
         public void queueCallback() {
+        	deviceTrace.print(Trace.SUPPORT, "%s value = %d", fullName,value);
             Status status = uint32Digital.write(user, value,mask);
             if(status!=Status.success) {
-                alarmSupport.setAlarm(user.getMessage(), AlarmSeverity.invalid);
-                return;
-            }
-            deviceTrace.print(Trace.SUPPORT, "%s value = %d", fullName,value);
+        		deviceTrace.print(Trace.ERROR,
+        				"%s:%s uint32Digital.write failed", fullName,supportName);
+        		return;
+        	}
         }
     }
     
@@ -1719,15 +1735,20 @@ public class PDRVSupportFactory {
          * @see org.epics.ioc.pdrv.support.AbstractPDRVLinkSupport#queueCallback()
          */
         public void queueCallback() {
-            Status status = float64.read(user);
-            if(status==Status.success) {
-            	value = user.getDouble();
-            	AlarmSeverity severity = float64.getAlarmSeverity();
-                if(severity!=AlarmSeverity.none) {
-                	alarmSupport.setAlarm(float64.getAlarmMessage(),severity);
-                }
-            }
-            deviceTrace.print(Trace.SUPPORT, "%s value = %f", fullName,value);
+        	deviceTrace.print(Trace.FLOW,
+        			"%s:%s queueCallback calling read ",fullName,supportName);
+        	Status status = float64.read(user);
+        	if(status!=Status.success) {
+        		deviceTrace.print(Trace.ERROR,
+        				"%s:%s float64.read failed", fullName,supportName);
+        		return;
+        	}
+        	value = user.getDouble();
+        	AlarmSeverity severity = user.getAlarmSeverity();
+        	if(severity!=AlarmSeverity.none) {
+        		alarmSupport.setAlarm(user.getAlarmMessage(),severity);
+        	}
+        	deviceTrace.print(Trace.SUPPORT, "%s value = %f", fullName,value);
         }
     }
     
@@ -1838,20 +1859,6 @@ public class PDRVSupportFactory {
             }
             supportProcessRequester.supportProcessDone(RequestResult.success);
         }        
-        /* (non-Javadoc)
-         * @see org.epics.ioc.pdrv.support.AbstractPDRVLinkSupport#queueCallback()
-         */
-        public void queueCallback() {
-            Status status = float64.read(user);
-            if(status==Status.success) {
-            	value = user.getDouble();
-            	AlarmSeverity severity = float64.getAlarmSeverity();
-                if(severity!=AlarmSeverity.none) {
-                	alarmSupport.setAlarm(float64.getAlarmMessage(),severity);
-                }
-            }
-            deviceTrace.print(Trace.SUPPORT, "%s value = %d", fullName,value);
-        }
         /* (non-Javadoc)
          * @see org.epics.ioc.pdrv.interfaces.Float64InterruptListener#interrupt(double)
          */
@@ -2127,9 +2134,9 @@ public class PDRVSupportFactory {
          */
         public void processContinue() {
             valuePVArray.asynAccessEnd(this);
-            AlarmSeverity severity = float64Array.getAlarmSeverity();
+            AlarmSeverity severity = user.getAlarmSeverity();
             if(severity!=AlarmSeverity.none) {
-            	alarmSupport.setAlarm(float64Array.getAlarmMessage(),severity);
+            	alarmSupport.setAlarm(user.getAlarmMessage(),severity);
             }
             valueDBField.postPut();
             supportProcessRequester.supportProcessDone(RequestResult.success);
@@ -2138,12 +2145,15 @@ public class PDRVSupportFactory {
          * @see org.epics.ioc.pdrv.support.AbstractPDRVLinkSupport#queueCallback()
          */
         public void queueCallback() {
-            deviceTrace.print(Trace.SUPPORT, "%s queueCallback", fullName);
-            Status status = float64Array.startRead(user);
-            if(status==Status.success) {
-                convert.copyArray(float64Array, 0, valuePVArray, 0, float64Array.getLength());
-                float64Array.endRead(user);
-            }
+        	deviceTrace.print(Trace.SUPPORT, "%s queueCallback", fullName);
+        	Status status = float64Array.startRead(user);
+        	if(status!=Status.success) {
+        		deviceTrace.print(Trace.ERROR,
+        				"%s:%s float64Array.startRead failed", fullName,supportName);
+        		return;
+        	}
+        	convert.copyArray(float64Array, 0, valuePVArray, 0, float64Array.getLength());
+        	float64Array.endRead(user);
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.pv.AsynAccessListener#beginSyncAccess()
@@ -2248,9 +2258,9 @@ public class PDRVSupportFactory {
             if(status==Status.success) {
                 convert.copyArray(float64Array, 0, valuePVArray, 0, float64Array.getLength());
                 float64Array.endRead(user);
-                AlarmSeverity severity = float64Array.getAlarmSeverity();
+                AlarmSeverity severity = user.getAlarmSeverity();
                 if(severity!=AlarmSeverity.none) {
-                	alarmSupport.setAlarm(float64Array.getAlarmMessage(),severity);
+                	alarmSupport.setAlarm(user.getAlarmMessage(),severity);
                 }
             }
         }
