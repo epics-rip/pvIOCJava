@@ -22,7 +22,7 @@ public interface PortDriver {
      * @param user The user connecting to a device.
      * @param addr The device address.
      * @return The device interface or null if it can not be created.
-     * If null is returned user.getrMessage() provides the reason.
+     * If null is returned user.getMessage() provides the reason.
      */
     Device createDevice(User user, int addr);
     /**
