@@ -10,8 +10,8 @@
 <include href = "stringDB.xml" />
 <include href = "int32ArrayDB.xml" />
 <include href = "float64ArrayDB.xml" />
-<include removePath = "test/pdrv" />
 <!--
 -->
+<include removePath = "test/pdrv" />
 </IOCDatabase>
 
