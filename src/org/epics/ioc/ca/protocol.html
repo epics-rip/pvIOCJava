@@ -1,0 +1,196 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+      "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta http-equiv="content-type" content="text/html; charset=iso-8859-1" />
+  <title>EPICS JavaIOC: Channel Access Prototol</title>
+</head>
+
+<body>
+<h1 style="text-align: center">EPICS JavaIOC: Channel Accesso Prototol<br />
+package: org.epics.ioc.ca<br />
+2007.11.13</h1>
+CONTENTS 
+<hr />
+
+<h2 style="text-align: center">Overview</h2>
+<hr />
+
+<p>This document defines the JavaIOC Channel Access Network Protocol. For now
+it is just early thoughts.</p>
+<hr />
+
+<h2 style="text-align: center">Data Encoding</h2>
+<hr />
+
+<p>Each process variable data type is encoded as a series of octets, where an
+octet is an unsigned 8 bit byte. The first octet is divided into two four bit
+nibbles, low and high.</p>
+
+<p>The low nibble indicates the data type and/or network information.</p>
+<dl>
+  <dt>0x0 - null</dt>
+    <dd>No additional bytes for this data type appear.</dd>
+  <dt>0x1 - boolean</dt>
+    <dd>If the data is also present it appears in the next octet. A 0 means
+      false and 1 means true.</dd>
+  <dt>0x2 - byte</dt>
+    <dd>If the data is also present it appears in the next octet.</dd>
+  <dt>0x3 - short</dt>
+    <dd>If the data is also present it appears in the next two octets in big
+      endian order.</dd>
+  <dt>0x4 - int</dt>
+    <dd>If the data is also present it appears in the next four octets in big
+      endian order.</dd>
+  <dt>0x5 - long</dt>
+    <dd>If the data is also present it appears in the next eight octets in
+      big endian order.</dd>
+  <dt>0x6 - IEEE float</dt>
+    <dd>If the data is also present it appears in the next four octets in big
+      endian order.</dd>
+  <dt>0x7 - IEEE double</dt>
+    <dd>If the data is also present it appears in the next eight octets in
+      big endian order.</dd>
+  <dt>0x8 - string</dt>
+    <dd>If the data is also present it is encoded in the following bytes as
+      described below.</dd>
+  <dt>0x9 - structure</dt>
+    <dd>The additional bytes are described below.</dd>
+</dl>
+
+<p>The high nibble has one of the following values:</p>
+<dl>
+  <dt>0x0 - scalar</dt>
+    <dd>Scalar data</dd>
+  <dt>0x1 - array</dt>
+    <dd>The encoding for array data is described below.</dd>
+</dl>
+
+<h3>encodeLength</h3>
+
+<p>This is the encoding for size, index, offset, length, etc. For all of
+these the value is the encoded number.</p>
+
+<p>For all of these an initial byte is interpeted as an unsigned octet.</p>
+<dl>
+  <dt>0,...252</dt>
+    <dd>This is the value</dd>
+  <dt>253</dt>
+    <dd>The value is encoded as a a 16 bit unsigned integer appearing is the
+      next two octets in big endian order.</dd>
+  <dt>254</dt>
+    <dd>The value is encoded as a a 32 bit unsigned integer appearing is the
+      next four octets in big endian order.</dd>
+  <dt>255</dt>
+    <dd>Reserved for future support for 64 bit unsigned integers.</dd>
+</dl>
+
+<h3>Encoding string data</h3>
+
+<p>This is encoded as an encodeLength followed by the 16 bit chars that hold
+the string. The chars appear in big endian order.</p>
+
+<h3>Encoding array data</h3>
+
+<p>Array data is encoded as: capacity, offset, length, and optionally the
+actual array data. The capacity, offset, and length are all encoded via
+encodeLength. For each of them the value is in units related to the data type
+not in bytes.</p>
+
+<h3>Encoding structure data</h3>
+
+<p>A client and server can pass structures over the network. When they
+connect the client introspects the server to locate the set of data the
+client can exchange with the server. This data appears as a structure. Since
+a structure can have fields that are structures, an arbitrary number of
+different structures can be involved. During connection the client and server
+assign a unique number to each structure. In addition within a structure each
+field is assigned a number unique within the structure. This assignment is
+made depth first. An example is:</p>
+<pre>    structure top - structureID = 1
+       field0 type double - fieldID = 1
+       field1 type structure - fieldID = 2 structureID = 2
+           field0 type double - fieldID = 1
+           field1 type structure - fieldID = 2 structureID = 3
+               field0 type int - fieldID = 1
+               field1 type string - fieldID = 2
+           field2 type int - fieldID = 3
+       field2 type = structure - fieldID=3 structureID = 4
+           field0 type double - fieldID = 1
+           field1 type structure - fieldID = 2 structureID = 5
+               field0 type string fieldID = 1
+               field1 type float - fieldID = 2
+           field2 type int - fieldID = 3</pre>
+
+<p>Structure data is encoded via a series of octets as follows:</p>
+<dl>
+  <dt>structureID</dt>
+    <dd>Encoded as encodeLength.</dd>
+  <dt>field</dt>
+    <dd>An arbitrary number of fields follow. The end is signified by fieldID
+      = 0. Each field is encoded as follows: 
+      <dl>
+        fieldID</dl>
+      <dl>
+          <dd>The fieldID encoded as encodeLength</dd>
+      </dl>
+      <dl>
+        field data</dl>
+      <dl>
+          <dd>Encoded according to the field type.</dd>
+      </dl>
+    </dd>
+</dl>
+
+<h3>Example - Double , timeStamp, alarm</h3>
+
+<p>In this case the top level structure appears as follows:</p>
+<pre>    structure top - structureID = 1
+        field value type double - fieldID = 1
+        field timeStamp type structure - fieldID = 2 structureID = 2
+            field seconds type long - fieldID = 1
+            field nano type int - fieldID = 2
+        field alarm type = structure - fieldID = 3 structureID = 3
+            field severity type = structure - fieldID = 1 structureID = 4
+                field index type = int - fieldID = 1
+                field choice type = string - fieldID = 2
+                field choices type = array(string) - fieldID = 3
+            field message type = string - fieldID = 2</pre>
+
+<p>When the client and server first connect the client normally retrieves the
+complete set of data. Assume the client monitors for changes. Assume only the
+value and timeStamp changes. Then the server sends a message with the
+following data:</p>
+<dl>
+  <dt>0x09</dt>
+    <dd>Structure data follows.</dd>
+  <dt>0x01</dt>
+    <dd>structureID is 1, i.e. the top level structure</dd>
+  <dt>0x01</dt>
+    <dd>fieldID 1, i.e. the value field.</dd>
+  <dt>0x07</dt>
+    <dd>Double data follows.</dd>
+  <dt>8 octets</dt>
+    <dd>The double value in big endian order</dd>
+  <dt>0x02</dt>
+    <dd>fieldID=2, i.e, the timeStamp</dd>
+  <dt>0x02</dt>
+    <dd>structureID=2, i.e. the timeStamp structure.</dd>
+  <dt>0x01</dt>
+    <dd>fieldId=1, i.e. the seconds</dd>
+  <dt>0x05</dt>
+    <dd>Long data follows</dd>
+  <dt>8 octets</dt>
+    <dd>The seconds which is a long in big endian order.</dd>
+  <dt>0x02</dt>
+    <dd>fieldID - 2, i.e. nano seconds</dd>
+  <dt>0x04</dt>
+    <dd>int data follows</dd>
+  <dt>4 octets</dt>
+    <dd>The nano seconds which is an int in bnig endian order.</dd>
+</dl>
+
+<p>Thus it takes 30 bytes to send 20 bytes of data.</p>
+</body>
+</html>
