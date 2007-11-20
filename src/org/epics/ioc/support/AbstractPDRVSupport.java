@@ -60,7 +60,7 @@ RecordProcessRequester
     protected PVInt pvAddr = null;
     protected PVInt pvMask = null;
     protected PVInt pvSize = null;
-    protected PVInt pvObjectType = null;
+    
     protected PVDouble pvTimeout = null;
     protected PVBoolean pvProcess = null;
     protected PVStructure pvDrvParams = null;
@@ -104,15 +104,6 @@ RecordProcessRequester
         if(pvField!=null && pvField.getField().getType()==Type.pvStructure) {
             pvDrvParams = (PVStructure)pvField;
         }
-        if(pvDrvParams==null) {
-            pvStructure.message("drvParams does not exist", MessageType.error);
-            return;
-        }
-        pvObjectType = pvDrvParams.getIntField("objectType");
-        if(pvObjectType==null) {
-        	pvStructure.message("drvParams does not have field objectType", MessageType.error);
-            return;
-        }
         pvProcess = pvStructure.getBooleanField("process");
         setSupportState(SupportState.readyForStart);
     }
@@ -142,9 +133,7 @@ RecordProcessRequester
         }
         portTrace = port.getTrace();
         int addr = pvAddr.get();
-        int objectType = pvObjectType.get();
-        int objectIdentifier = objectType<<22 | addr; 
-        device = user.connectDevice(objectIdentifier);
+        device = user.connectDevice(addr);
         if(device==null) {
             pvStructure.message(user.getMessage(),MessageType.error);
             return;
