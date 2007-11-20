@@ -5,9 +5,7 @@
  */
 package org.epics.ioc.pdrv.interfaces;
 
-import org.epics.ioc.util.AlarmSeverity;
 import org.epics.ioc.pdrv.Device;
-import org.epics.ioc.pdrv.Port;
 
 /**
  * Base for an interface to a port or device.
