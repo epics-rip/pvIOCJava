@@ -6,7 +6,6 @@
 package org.epics.ioc.pdrv.interfaces;
 
 import org.epics.ioc.pdrv.*;
-import org.epics.ioc.util.AlarmSeverity;
 
 /**
  * @author mrk
