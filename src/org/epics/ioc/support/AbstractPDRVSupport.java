@@ -126,6 +126,7 @@ RecordProcessRequester
         if(!super.checkSupportState(SupportState.readyForStart,supportName)) return;
         user = Factory.createUser(this);
         user.setTimeout(pvTimeout.get());
+        user.setDeviceDriverPvt(pvDrvParams);
         port = user.connectPort(pvPortName.get());
         if(port==null) {
             pvStructure.message(user.getMessage(),MessageType.error);
