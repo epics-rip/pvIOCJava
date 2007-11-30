@@ -10,13 +10,13 @@
 <body>
 <h1 style="text-align: center">EPICS JavaIOC: channel Access<br />
 package: org.epics.ioc.ca<br />
-2007.08.30</h1>
+2007.11.28</h1>
 CONTENTS 
 
 <div class="toc">
 <ul>
   <li><a href="#Overview">Overview</a></li>
-  <li><a href="#Channel">Channel Definitions</a>
+  <li><a href="#Channel">Channel Definitions</a> 
     <ul>
       <li><a href="#Definition">Definitions</a></li>
       <li><a href="#Channel1">Channel</a></li>
@@ -30,7 +30,7 @@ CONTENTS
     </ul>
   </li>
   <li><a href="#Channel2">Channel Process, Get, CDGet, Put, CDPut, and
-    PutGet</a>
+    PutGet</a> 
     <ul>
       <li><a href="#Definition1">Definitions</a></li>
       <li><a href="#ChannelPro">ChannelProcess</a></li>
@@ -41,13 +41,13 @@ CONTENTS
       <li><a href="#ChannelPut1">ChannelPutGet</a></li>
     </ul>
   </li>
-  <li><a href="#ChannelMon">ChannelMonitor</a>
+  <li><a href="#ChannelMon">ChannelMonitor</a> 
     <ul>
       <li><a href="#Definition2">Definitions</a></li>
       <li><a href="#ChannelMon1">ChannelMonitor</a></li>
     </ul>
   </li>
-  <li><a href="#Channel3">CD - Channel Data</a>
+  <li><a href="#Channel3">CD - Channel Data</a> 
     <ul>
       <li><a href="#Definition3">CD Definitions</a></li>
       <li><a href="#CD">CD</a></li>
@@ -55,7 +55,7 @@ CONTENTS
       <li><a href="#CDFactory">CDFactory</a></li>
     </ul>
   </li>
-  <li><a href="#Channel4">CD - Channel Data Fields</a>
+  <li><a href="#Channel4">CD - Channel Data Fields</a> 
     <ul>
       <li><a href="#Definition4">CD Definitions</a></li>
       <li><a href="#CDRecord">CDRecord</a></li>
@@ -68,31 +68,31 @@ CONTENTS
     </ul>
   </li>
   <li><a href="#Local">Local Channel Access</a></li>
-  <li><a href="#Example">Example For CD</a>
+  <li><a href="#Example">Example For CD</a> 
     <ul>
       <li><a href="#Discussion">Discussion</a></li>
       <li><a href="#Implementa">Implementation</a></li>
     </ul>
   </li>
-  <li><a href="#Process">Process Example</a>
+  <li><a href="#Process">Process Example</a> 
     <ul>
       <li><a href="#Discussion1">Discussion</a></li>
       <li><a href="#Implementa1">Implementation</a></li>
     </ul>
   </li>
-  <li><a href="#Example1">Get Example</a>
+  <li><a href="#Example1">Get Example</a> 
     <ul>
       <li><a href="#Discussion2">Discussion</a></li>
       <li><a href="#Implementa2">Implementation</a></li>
     </ul>
   </li>
-  <li><a href="#Example2">Put Example</a>
+  <li><a href="#Example2">Put Example</a> 
     <ul>
       <li><a href="#Discussion3">Discussion</a></li>
       <li><a href="#Implementa3">Implementation</a></li>
     </ul>
   </li>
-  <li><a href="#PutGet">PutGet Example</a>
+  <li><a href="#PutGet">PutGet Example</a> 
     <ul>
       <li><a href="#Discussion4">Discussion</a></li>
       <li><a href="#Implementa4">Implementation</a></li>
@@ -125,7 +125,10 @@ accessing a channel are defined in later sections.</p>
         void message(String message, MessageType messageType);
         void destroy();
         boolean isConnected();
-        ChannelField findField(String name);
+        String getPropertyName();
+        String getFieldName();
+        String getOptions();
+        ChannelField getChannelField(String name);
         ChannelFieldGroup createFieldGroup(ChannelFieldGroupListener listener);
         ChannelProcess createChannelProcess(
             ChannelProcessRequester channelProcessRequester, boolean processSelfOK);
@@ -181,6 +184,10 @@ accessing a channel are defined in later sections.</p>
 
     interface ChannelField {
         Field getField();
+        PVField getPVField();
+        ChannelField findProperty(String propertyName);
+        String[] getPropertyNames();
+        PVEnumerated getEnumerated();
         AccessRights getAccessRights();
     }
 
@@ -195,6 +202,7 @@ accessing a channel are defined in later sections.</p>
     }
 
     class ChannelFactory {
+        static boolean isLocalChannel(String pvName);
         static Channel createChannel(
             String name,ChannelStateListener listener,boolean mustBeLocal);
         static void registerLocalChannelAccess(
@@ -222,7 +230,18 @@ of fields in the record. The methods are:</p>
       requests will be accepted for the channel.</dd>
   <dt style="font-family: courier;">isConnected</dt>
     <dd>Is the channel connected?</dd>
-  <dt style="font-family: courier;">findField</dt>
+  <dt style="font-family: courier;">getPropertyName</dt>
+    <dd>Get the propertyName for this channel. If the fieldName is null then
+      this is "value". If the fieldName references a structure that has a
+      field named value then it is the fieldName.value. Otherwise it is the
+      fieldName.</dd>
+  <dt style="font-family: courier;">getFieldName</dt>
+    <dd>This is the the part of the pvName after the first '.' up to the
+      first '{'.</dd>
+  <dt style="font-family: courier;">getOptions</dt>
+    <dd>This is the part of the pvName between the {} at the end of the
+      pvName.</dd>
+  <dt style="font-family: courier;">getChannelField</dt>
     <dd>Locate the field. If the field is found an interface to the
       ChannelField is returned. If not found null is returned.</dd>
   <dt style="font-family: courier;">createFieldGroup</dt>
@@ -295,6 +314,17 @@ specific field in a channel.</p>
   <dt style="font-family: courier;">getField</dt>
     <dd>Returns the Field that describes the field. See package
       org.epics.ioc.pv for details.</dd>
+  <dt style="font-family: courier;">getPVField</dt>
+    <dd>Gets the PVField that holds the data.</dd>
+  <dt style="font-family: courier;">findProperty</dt>
+    <dd>Find a ChannelField for the specified propertyName.</dd>
+  <dt style="font-family: courier;">getPropertyNames</dt>
+    <dd>Get all the names of all the properties associated with this
+    field..</dd>
+  <dt style="font-family: courier;">getEnumerated</dt>
+    <dd>If the associated PVField is an enumerated structure return the
+      Enumerated interface. Returns null if the PVField is not an enumerated
+      structure.</dd>
   <dt style="font-family: courier;">getAccessRights</dt>
     <dd>Get the access rights for the field.</dd>
 </dl>

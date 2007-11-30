@@ -10,7 +10,7 @@
 <body>
 <h1 style="text-align: center">EPICS JavaIOC: pv<br />
 package: org.epics.ioc.pv<br />
-2007.09.18</h1>
+2007.11.28</h1>
 CONTENTS 
 
 <div class="toc">
@@ -31,6 +31,7 @@ CONTENTS
       <li><a href="#Primitive">Primitive PVField types</a></li>
       <li><a href="#PVString">PVString</a></li>
       <li><a href="#PVStructur">PVStructure</a></li>
+      <li><a href="#PVEnumerat">PVEnumerated</a></li>
       <li><a href="#PVRecord">PVRecord</a></li>
       <li><a href="#PVArray">PVArray</a></li>
     </ul>
@@ -286,7 +287,8 @@ modified.</p>
         void beginSyncAccess();
         void endSyncAccess();
     }</pre>
-where 
+
+<p>where </p>
 <ul>
   <li>beginSyncAccess<br />
     Begin synchronous access of field. </li>
@@ -367,9 +369,9 @@ where
   <li>getPVRecord<br />
     Get the interface for the record that contains this field.</li>
   <li>findProperty<br />
-    Find a field that is a subfield or property of this PVField. The fieldName is
-    of the form item.item... where item is name or name[index]. The algorithm
-    implemented by findProperty is: 
+    Find a field that is a subfield or property of this PVField. The
+    fieldName is of the form item.item... where item is name or name[index].
+    The algorithm implemented by findProperty is: 
     <ul>
       <li>Start with the leftmost item and find it.</li>
       <li>find the next leftmost item and find it.</li>
@@ -398,12 +400,17 @@ where
     </ol>
   </li>
   <li>findPropertyViaParent<br />
-    Find a property by searching up the parent tree.
-     The property nameis expected to match the name of a field. The return value is the
-    interface to the first field found that is not a null structure or null if not found.
+    Find a property by searching up the parent tree. The property nameis
+    expected to match the name of a field. The return value is the interface
+    to the first field found that is not a null structure or null if not
+    found. </li>
   <li>getPropertyNames<br />
     Get a String array that holds the names of the properties for this field.
-    A property name is the field name. If this PVfield is a structure then every field except null structures is a property. If this PVField is the value field the parent is the starting point and the properties will not include the value field itself. In addition a search up the parent tree is made for the timeStamp.</li>
+    A property name is the field name. If this PVfield is a structure then
+    every field except null structures is a property. If this PVField is the
+    value field the parent is the starting point and the properties will not
+    include the value field itself. In addition a search up the parent tree
+    is made for the timeStamp.</li>
   <li>replacePVField<br />
     Replace this PVField. This is called by support code that wants to
     replace the default implementation of a data field with it;s own
@@ -540,6 +547,28 @@ where
   <dt>getArrayField</dt>
     <dd>Look for fieldName. If found and it has the correct type return the
       interface.</dd>
+</dl>
+
+<h3 id="PVEnumerat">PVEnumerated</h3>
+
+<p>This is a convenience interface for a structure that happens to be an
+enumerated structure, which is a stricture that has fields index, choice, and
+choices. Field index is an integer, choice is a string, and choices is an
+array of strings. Both index and choice select one of the choices.</p>
+<pre>    public interface PVEnumerated {
+        PVInt getIndexField();
+        PVString getChoiceField();
+        PVStringArray getChoicesField();
+    }</pre>
+
+<p>where</p>
+<dl>
+  <dt>getIndexField</dt>
+    <dd>Returns the interface for field index.</dd>
+  <dt>getChoiceField</dt>
+    <dd>Returns the interface for field choice.</dd>
+  <dt>getChoicesField</dt>
+    <dd>Returns the interface for field choices.</dd>
 </dl>
 
 <h3 id="PVRecord">PVRecord</h3>

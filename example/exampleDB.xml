@@ -1,6 +1,7 @@
 <?xml version="1.0" ?>
 <IOCDatabase>
 <include addPath = "example" />
+<include href = "dataOnlyDB.xml" />
 <include href = "stringDB.xml" />
 <include href = "counterDB.xml" />
 <include href = "scalarDB.xml" />

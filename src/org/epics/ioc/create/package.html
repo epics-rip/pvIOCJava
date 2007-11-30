@@ -10,7 +10,7 @@
 <body>
 <h1 style="text-align: center">EPICS JavaIOC: create<br />
 package: org.epics.ioc.create<br />
-2007.08.30</h1>
+2007.11.29</h1>
 CONTENTS 
 
 <div class="toc">
@@ -81,11 +81,7 @@ database records. </p>
 <hr />
 
 <h3 id="Definition">Definitions</h3>
-<pre>interface Enumerated extends Create{
-    PVInt getIndexField();
-    PVString getChoiceField();
-    PVStringArray getChoicesField();
-}
+<pre>interface Enumerated extends Create, PVEnumerated{}
 
 public class BaseEnumerated implements Enumerated{...}
 
