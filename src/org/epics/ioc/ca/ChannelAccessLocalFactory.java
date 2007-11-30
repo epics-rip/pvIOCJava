@@ -2290,7 +2290,7 @@ public class ChannelAccessLocalFactory  {
                 Type type = channelField.getField().getType();
                 if(!type.isPrimitive()) {
                     requester.message("field is not primitive", MessageType.error);
-                    onPut(channelField,true);
+                    onPut(channelField,causeMonitor);
                     return;
                 }
                 MonitorField monitorField = new MonitorField(type,causeMonitor);
