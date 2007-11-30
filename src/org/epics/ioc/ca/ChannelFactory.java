@@ -5,6 +5,8 @@
  */
 package org.epics.ioc.ca;
 
+import org.epics.ioc.db.IOCDBFactory;
+
 
 /**
  * Factory for creating channels. 
@@ -15,25 +17,40 @@ public class ChannelFactory {
     
     private static ChannelAccess localAccess = null;
     private static ChannelAccess remoteAccess = null;
+    
+    /**
+     * Is the name a local process variable.
+     * @param pvName The process variable name.
+     * This is of the form recordName.name.name...
+     * @return (false,true) id the recordName (is not,is)
+     * the name of a record in the local IOC.
+     */
+    public static boolean isLocalChannel(String pvName) {
+        int index = pvName.indexOf('.');
+        String recordName = pvName;
+        if(index>=0) recordName = pvName.substring(0,index);
+        return IOCDBFactory.getMaster().getRecordMap().containsKey(recordName) ;
+    }
     /**
      * Create a channel.
-     * @param name The channel name.
+     * @param pvName The process variable name.
      * @param listener The listener for channel state changes.
      * @param mustBeLocal If true the request succeeds only if the channel is local.
      * @return The channel or null if it could not be created.
      */
-    public static Channel createChannel(String name,ChannelStateListener listener, boolean mustBeLocal) {
-        Channel channel = null;
-        if(localAccess==null) ChannelAccessLocalFactory.register();
-        if(localAccess!=null) {
-            channel = localAccess.createChannel(name,listener);
-            if(channel!=null) return channel;
+    public static Channel createChannel(String pvName,ChannelStateListener listener, boolean mustBeLocal) {
+        if(isLocalChannel(pvName)) {
+            if(localAccess==null) ChannelAccessLocalFactory.register();
+            if(localAccess!=null) {
+                return localAccess.createChannel(pvName,listener);
+            }
+            return null;
         }
         if(mustBeLocal) return null;
         if(remoteAccess!=null) {
-            channel = remoteAccess.createChannel(name,listener);
+            return remoteAccess.createChannel(pvName,listener);
         }
-        return channel;
+        return null;
     }
     /**
      * Register the channel access for local channels. 

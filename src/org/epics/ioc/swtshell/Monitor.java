@@ -468,8 +468,7 @@ public class Monitor {
                         channelFieldGroup.removeChannelField(valueField);
                     }
                     for(String fieldName: propertyNames) {
-                        channel.findField(null);
-                        ChannelField propChannelField = channel.findField(fieldName);
+                        ChannelField propChannelField = channel.getChannelField(fieldName);
                         if(propChannelField!=null) {
                             channelFieldGroup.addChannelField(propChannelField);
                         } else {

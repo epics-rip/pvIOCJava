@@ -10,6 +10,11 @@ import org.epics.ioc.util.*;
 
 /**
  * Interface for accessing a channel.
+ * A channel is created via a call to ChannelFactory.createChannel(String pvName, ...).
+ * The pvName is of the form recordName.name.name...{options}
+ * channel.getField returns name.name...
+ * channel.gertProperty returns name.name....value if name.name... locates a structure
+ * that has a field named "value", i.e. a structure that follows the data model.
  * For an IOC database a channel allows access to all the fields in a single record instance.
  * @author mrk
  *
@@ -37,11 +42,26 @@ public interface Channel {
      */
     boolean isConnected();
     /**
+     * Get the propertyName for the channel.
+     * @return The name which can be passed to getChannelField.
+     */
+    String getPropertyName();
+    /**
+     * Get the fieldName for the channel.
+     * @return The name which can be passed to getChannelField.
+     */
+    String getFieldName();
+    /**
+     * Get the options for the channel.
+     * @return The options.
+     */
+    String getOptions();
+    /**
      * Specify a field to access.
      * @param name The name.
      * @return The ChannelField or null if the field was not found.
      */
-    ChannelField findField(String name);
+    ChannelField getChannelField(String name);
     /**
      * Create a field group.
      * @param listener The listener to call if the field group is deleted.

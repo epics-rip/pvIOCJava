@@ -79,8 +79,7 @@ public class GetChannelField extends Dialog implements SelectionListener {
         }
         shell.dispose();
         ChannelField channelField = null;
-        channel.findField(null);
-        channelField = channel.findField(fieldName);
+        channelField = channel.getChannelField(fieldName);
         if(channelField==null) requester.message(
             String.format("field %s not found%n",fieldName),MessageType.error);
         return channelField;

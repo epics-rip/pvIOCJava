@@ -61,10 +61,11 @@ public class ScanFactory {
         private boolean isActive = false;
         private boolean isStarted = false;
         
+        private PVStructure pvScanType;
+        private DBField dbScanType;
         private PVInt pvScanTypeIndex;
         private DBField dbScanTypeIndex;
-        private PVInt pvPriorityIndex;
-        private DBField dbPriorityIndex;
+        
         private PVDouble pvRate;
         private DBField dbRate;
         private PVString pvEventName;
@@ -83,10 +84,10 @@ public class ScanFactory {
             dbRecord = dbScan.getDBRecord();
             pvProcessSelf = new PVProcessSelf(this,dbRecord,scanField);
             recordListener = dbRecord.createRecordListener(this);
+            pvScanType = dbScan.getPVStructure().getStructureField("type", "scanType");
+            dbScanType = dbRecord.findDBField(pvScanType);
             pvScanTypeIndex = scanField.getScanTypeIndexPV();
-            dbScanTypeIndex = dbRecord.findDBField(pvScanTypeIndex); 
-            pvPriorityIndex = scanField.getPriorityIndexPV();
-            dbPriorityIndex = dbRecord.findDBField(pvPriorityIndex); 
+            dbScanTypeIndex = dbRecord.findDBField(pvScanTypeIndex);
             pvRate = scanField.getRatePV();
             dbRate = dbRecord.findDBField(pvRate); 
             pvEventName = scanField.getEventNamePV();
@@ -104,7 +105,11 @@ public class ScanFactory {
         /* (non-Javadoc)
          * @see org.epics.ioc.db.DBListener#dataPut(org.epics.ioc.db.DBField, org.epics.ioc.db.DBField)
          */
-        public void dataPut(DBField requested, DBField dbField) {}
+        public void dataPut(DBField requested, DBField dbField) {
+            if(!isStarted || !isActive) return;
+            if(dbField.getPVField()!=pvScanTypeIndex) return;
+            callScanModify();
+        }
         /* (non-Javadoc)
          * @see org.epics.ioc.db.DBListener#dataPut(org.epics.ioc.db.DBField)
          */
@@ -230,15 +235,13 @@ public class ScanFactory {
         }
         
         private void addListeners() {
-            dbScanTypeIndex.addListener(recordListener);
-            dbPriorityIndex.addListener(recordListener);
+            dbScanType.addListener(recordListener);
             dbRate.addListener(recordListener);
             dbEventName.addListener(recordListener);
         }
         
         private void removeListeners() {
-            dbScanTypeIndex.removeListener(recordListener);
-            dbPriorityIndex.removeListener(recordListener);
+            dbScanType.removeListener(recordListener);
             dbRate.removeListener(recordListener);
             dbEventName.removeListener(recordListener);
         }

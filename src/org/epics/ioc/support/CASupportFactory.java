@@ -771,7 +771,7 @@ public class CASupportFactory {
         }
         
         private boolean prepareForInput() {
-            valueChannelField = channel.findField(valueFieldName);
+            valueChannelField = channel.getChannelField(valueFieldName);
             if(valueChannelField==null) {
                 message(valueFieldName + " does not exist ",MessageType.error);
                 return false;
@@ -783,7 +783,7 @@ public class CASupportFactory {
             channelFieldGroup = channel.createFieldGroup(this);
             channelFieldGroup.addChannelField(valueChannelField);
             if(inheritSeverity) {
-                severityField = channel.findField("alarm.severity.index");
+                severityField = channel.getChannelField("alarm.severity.index");
                 if(severityField==null) {
                     channelFieldGroup = null;
                     valueChannelField = null;
@@ -1236,7 +1236,7 @@ public class CASupportFactory {
         }
         
         private boolean prepareForOutput() {
-            valueChannelField = channel.findField(valueFieldName);
+            valueChannelField = channel.getChannelField(valueFieldName);
             if(valueChannelField==null) {
                 message(valueFieldName + " does not exist ",MessageType.error);
                 return false;
@@ -1475,7 +1475,7 @@ public class CASupportFactory {
         } 
         
         private void channelStart() {
-            dataField = channel.findField(fieldName);
+            dataField = channel.getChannelField(fieldName);
             if(dataField==null) {
                 pvStructure.message(
                     "fieldName " + fieldName
@@ -1891,7 +1891,7 @@ public class CASupportFactory {
         }
         
         private void channelStart() {
-            targetChannelField = channel.findField(fieldName);
+            targetChannelField = channel.getChannelField(fieldName);
             if(targetChannelField==null) {
                 pvStructure.message(
                     "fieldName " + fieldName
@@ -1917,7 +1917,7 @@ public class CASupportFactory {
                 channelMonitor.lookForPercentageChange(targetChannelField, deadband); break;
             }
             if(inheritSeverityAccess.get()) {
-                severityChannelField = channel.findField("alarm.severity.index");
+                severityChannelField = channel.getChannelField("alarm.severity.index");
                 if(severityChannelField!=null) {
                     channelFieldGroup.addChannelField(severityChannelField);
                     channelMonitor.lookForPut(severityChannelField, true);

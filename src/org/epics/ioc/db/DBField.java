@@ -82,7 +82,7 @@ public interface DBField {
     void setSupport(Support support);
     /**
      * The data was modified.
-     * This is must be called by the code that implements a put method. 
+     * This is must be called by the code that calls a put method. 
      */
     void postPut();
     /**

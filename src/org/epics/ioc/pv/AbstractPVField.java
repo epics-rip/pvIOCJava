@@ -151,7 +151,7 @@ public abstract class AbstractPVField implements PVField{
      * @see org.epics.ioc.pv.PVField#findProperty(java.lang.String)
      */
     public PVField findProperty(String fieldName) {
-        if(fieldName==null) return null;
+        if(fieldName==null || fieldName.length()==0) return null;
         String[] names = periodPattern.split(fieldName,2);
         if(names.length<=0) {
             return null;
