@@ -35,7 +35,7 @@ public interface DBListener {
     /**
      * A put to a subfield has occured.
      * @param requested The requester is listening to this dbField.
-     * It can be any field that has subfields. This the pvType can be.
+     * It can be any field that has subfields. Thus the pvType can be.
      * <ol>
      *  <li>pvStructure.</li>
      *  <li>pvArray that has a elementType of
@@ -77,6 +77,7 @@ public interface DBListener {
     void endProcess();
     /**
      * Connection to record is being terminated and the RecordListener is no longer valid.
+     * @param listener The recordListener interface.
      */
     void unlisten(RecordListener listener);
 }
