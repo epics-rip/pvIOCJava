@@ -10,7 +10,7 @@
 <body>
 <h1 style="text-align: center">EPICS JavaIOC: channel Access<br />
 package: org.epics.ioc.ca<br />
-2007.11.28</h1>
+2007.12.14</h1>
 CONTENTS 
 
 <div class="toc">
@@ -25,41 +25,40 @@ CONTENTS
       <li><a href="#ChannelFie">ChannelField</a></li>
       <li><a href="#ChannelFie1">ChannelFieldGroupListener</a></li>
       <li><a href="#ChannelFie2">ChannelFieldGroup</a></li>
+      <li><a href="#ChannelMon">ChannelMonitorRequester</a></li>
+      <li><a href="#ChannelMon1">ChannelMonitor</a></li>
       <li><a href="#ChannelFac">ChannelFactory</a></li>
-      <li><a href="#ChannelAcc">ChannelAccess</a></li>
+      <li><a href="#ChannelPro">ChannelProvider</a></li>
     </ul>
   </li>
-  <li><a href="#Channel2">Channel Process, Get, CDGet, Put, CDPut, and
-    PutGet</a> 
+  <li><a href="#Channel2">Channel Process, Get, Put, PutGet, and Monitor</a> 
     <ul>
       <li><a href="#Definition1">Definitions</a></li>
-      <li><a href="#ChannelPro">ChannelProcess</a></li>
+      <li><a href="#ChannelPro1">ChannelProcess</a></li>
       <li><a href="#ChannelGet">ChannelGet</a></li>
-      <li><a href="#ChannelCDG">ChannelCDGet</a></li>
       <li><a href="#ChannelPut">ChannelPut</a></li>
-      <li><a href="#ChannelCDP">ChannelCDPut</a></li>
       <li><a href="#ChannelPut1">ChannelPutGet</a></li>
     </ul>
   </li>
-  <li><a href="#ChannelMon">ChannelMonitor</a> 
+  <li><a href="#Local">Local Channel Provider</a></li>
+  <li><a href="#ChannelMon2">ChannelMonitorNotify</a> 
     <ul>
-      <li><a href="#Definition2">Definitions</a></li>
-      <li><a href="#ChannelMon1">ChannelMonitor</a></li>
+      <li><a href="#ChannelMon3">ChannelMonitorNotify</a></li>
     </ul>
   </li>
   <li><a href="#Channel3">CD - Channel Data</a> 
     <ul>
-      <li><a href="#Definition3">CD Definitions</a></li>
+      <li><a href="#Definition2">CD Definitions</a></li>
       <li><a href="#CD">CD</a></li>
       <li><a href="#CDQueue">CDQueue</a></li>
       <li><a href="#CDFactory">CDFactory</a></li>
     </ul>
   </li>
-  <li><a href="#Channel4">CD - Channel Data Fields</a> 
+  <li><a href="#CDField">CDField - Channel Data Fields</a> 
     <ul>
-      <li><a href="#Definition4">CD Definitions</a></li>
+      <li><a href="#CDField1">CDField Definitions</a></li>
+      <li><a href="#CDField2">CDField</a></li>
       <li><a href="#CDRecord">CDRecord</a></li>
-      <li><a href="#CDField">CDField</a></li>
       <li><a href="#CDStructur">CDStructure</a></li>
       <li><a href="#CDArray">CDArray</a></li>
       <li><a href="#CDStructur1">CDStructureArray</a></li>
@@ -67,7 +66,13 @@ CONTENTS
       <li><a href="#Base">Base CD Classes</a></li>
     </ul>
   </li>
-  <li><a href="#Local">Local Channel Access</a></li>
+  <li><a href="#CDGet">CDGet, CDPUT, CDMonitor</a> 
+    <ul>
+      <li><a href="#CDGet1">CDGet</a></li>
+      <li><a href="#CDPut">CDPut</a></li>
+      <li><a href="#CDMonitor">CDMonitor</a></li>
+    </ul>
+  </li>
   <li><a href="#Example">Example For CD</a> 
     <ul>
       <li><a href="#Discussion">Discussion</a></li>
@@ -105,70 +110,78 @@ CONTENTS
 <h2 style="text-align: center" id="Overview">Overview</h2>
 <hr />
 
-<p>This package contains Java definitions for Channel Access clients:</p>
+<p>This package contains Java definitions for Channel Access clients</p>
+
+<p>A channel is an interface for acessing data. A channel is implemented by a
+channelProvider. An arbitrary number of channelProviders are allowed. Each
+channelProvider has a name and must register itself to ChannelFactory. The
+underlying data is presented as PVData via a ChannelField. The client can
+access multiple ChannelFields via a ChannelFieldGroup.</p>
+
+<p>CD (ChannelData) is a facility that, given a ChannelFieldGroup, creates a
+PVRecord that contains a PVData for each ChannelField as well as a reference
+to the ChannelField. </p>
+
+<p>A channelProvider must implement the following: Channel, ChannelProvider,
+ChannelGet, ChannelPut, ChannelPutGet, and ChannelMonitor. All other
+interfaces, i.e. ChannelMonitorNotify and all the CD interfaces are generic,
+i.e. implemented by factories provided by the package.</p>
 <hr />
 
 <h2 style="text-align: center" id="Channel">Channel Definitions</h2>
 <hr />
 
-<p>A channel is a connection to a PVRecord. The channel definitions allow
-access to an arbitrary number of fields in a record. A channel allows remote
-access to PVRecords.</p>
-
 <p>This section defines the interface and factory classes for connecting to a
 channel and creating interfaces for accessing a channel. The interfaces for
-accessing a channel are defined in later sections.</p>
+accessing a channel are defined in later sections. </p>
+
+<p>A channel is created via a call to ChannelFactory.create(pvName,...). The
+pvName can optionally consist of three components: 1) A channelName, 2) A
+fieldName, and 3) options. The details are provider dependent but if possible
+a provider should support the following syntax:</p>
+<pre>    channelName.fieldName{options}</pre>
+
+<p>The channelName is any set of characters not including '.'. The fieldName
+is all characters after the first '.' up to the optional '{'. If the '{' is
+present than all characters between the braces are the options. These
+conventions are supported by the ChannelProviderLocalFactory, which provides
+access to the local DB database. Other providers may optionally support the
+same conventions.</p>
+
+<p>For a javaIOC a channelName is a recordName. This is also true for EPICS
+databases.</p>
 
 <h3 id="Definition">Definitions</h3>
 <pre>    interface Channel {
         String getChannelName();
+        ChannelStateListener getChannelStateListener();
         void message(String message, MessageType messageType);
         void destroy();
         boolean isConnected();
         String getPropertyName();
         String getFieldName();
         String getOptions();
-        ChannelField getChannelField(String name);
+        ChannelField createChannelField(String name);
         ChannelFieldGroup createFieldGroup(ChannelFieldGroupListener listener);
         ChannelProcess createChannelProcess(
-            ChannelProcessRequester channelProcessRequester, boolean processSelfOK);
+            ChannelProcessRequester channelProcessRequester);
         void destroy(ChannelProcess channelProcess);
         ChannelGet createChannelGet(ChannelFieldGroup channelFieldGroup,
-            ChannelGetRequester channelGetRequesterprocess);
-        ChannelGet createChannelGet(ChannelFieldGroup channelFieldGroup,
             ChannelGetRequester channelGetRequester,
-            boolean process,boolean processSelfOK);
+            boolean process);
         void destroy(ChannelGet channelGet);
-        ChannelCDGet createChannelCDGet(
-            ChannelFieldGroup channelFieldGroup,
-            ChannelCDGetRequester channelCDGetRequester,boolean supportAlso);
-        ChannelCDGet createChannelCDGet(
-            ChannelFieldGroup channelFieldGroup,
-            ChannelCDGetRequester channelCDGetRequester,boolean supportAlso,
-            boolean process,boolean processSelfOK);
-        void destroy(ChannelCDGet channelCDGet);
-        ChannelPut createChannelPut(ChannelFieldGroup channelFieldGroup,
-            ChannelPutRequester channelPutRequester);
         ChannelPut createChannelPut(ChannelFieldGroup channelFieldGroup,
             ChannelPutRequester channelPutRequester,
-            boolean process,boolean processSelfOK);
+            boolean process);
         void destroy(ChannelPut channelPut);
-        ChannelCDPut createChannelCDPut(
-            ChannelFieldGroup channelFieldGroup,
-            ChannelCDPutRequester cdPutRequester,
-            boolean process,boolean supportAlso);
-        void destroy(ChannelCDPut cdPut);
-        ChannelPutGet createChannelPutGet(
-            channelFieldGroup putFieldGroup,ChannelFieldGroup getFieldGroup,
-            ChannelPutGetRequester channelPutGetRequester);
         ChannelPutGet createChannelPutGet(
             channelFieldGroup putFieldGroup,ChannelFieldGroup getFieldGroup,
             ChannelPutGetRequester channelPutGetRequester,
-            boolean process,boolean processSelfOK);
+            boolean process);
         void destroy(ChannelPutGet channelPutGet);
-        ChannelMonitor createChannelMonitor(boolean onlyWhileProcessing);
+        ChannelMonitor createChannelMonitor(
+            ChannelMonitorRequester channelMonitorRequester);
         void destroy(ChannelMonitor channelMonitor);
-        boolean isLocal();
     }
 
     interface ChannelStateListener {
@@ -185,7 +198,9 @@ accessing a channel are defined in later sections.</p>
     interface ChannelField {
         Field getField();
         PVField getPVField();
+        void postPut();
         ChannelField findProperty(String propertyName);
+        ChannelField createChannelField(String fieldName);
         String[] getPropertyNames();
         PVEnumerated getEnumerated();
         AccessRights getAccessRights();
@@ -199,29 +214,49 @@ accessing a channel are defined in later sections.</p>
         void addChannelField(ChannelField channelField);
         void removeChannelField(ChannelField channelField);
         List&lt;ChannelField&gt; getList();
+        ChannelField[] getArray();
+    }
+
+    interface ChannelMonitorRequester extends Requester{
+        void beginPut();
+        void endPut();
+        void dataPut(PVField modifiedPVField);
+        void dataPut(PVField requestedPVField,PVField modifiedPVField);
+    }
+    
+    interface ChannelMonitor {
+        void setFieldGroup(ChannelFieldGroup channelFieldGroup);
+        void getData(CD cd);
+        void start();
+        void stop();
     }
 
     class ChannelFactory {
-        static boolean isLocalChannel(String pvName);
         static Channel createChannel(
-            String name,ChannelStateListener listener,boolean mustBeLocal);
-        static void registerLocalChannelAccess(
-            ChannelAccess channelAccess);
-        static void registerRemoteChannelAccess(
-            ChannelAccess channelAccess);
+            String pvName,String providerName,ChannelStateListener listener);
+        static void registerChannelProvider(
+            ChannelProvider channelAccess);
+        static void registerRemoteChannelProvider(
+            ChannelProvider channelProvider);
+        static ChannelProvider getChannelProvider(String providerName);
+        static boolean isChannelProvider(String channelName,String providerName);
     }
 
-    interface ChannelAccess {
-        Channel createChannel(String name,ChannelStateListener listener);
+    interface ChannelProvider {
+        Channel createChannel(String pvName,ChannelStateListener listener);
+        String getProviderName();
+        boolean isProvider(String channelName);
     }</pre>
 
 <h3 id="Channel1">Channel</h3>
 
-<p>A channel provides access to a single PVRecord, but to an arbitrary number
-of fields in the record. The methods are:</p>
+<p>A channel provides access to an arbitrary number of fields in the record.
+The methods are:</p>
 <dl>
   <dt style="font-family: courier;">getChannelName</dt>
-    <dd>This is the PVRecord name or closely related to the recordName.</dd>
+    <dd>Get the channelName.</dd>
+  <dt style="font-family: courier;">getChannelStateListener</dt>
+    <dd>Get the ChannelStateListener.</dd>
   <dt style="font-family: courier;">message</dt>
     <dd>Channel Access code calls this to report errors and/or diagnostic
       information.</dd>
@@ -231,19 +266,15 @@ of fields in the record. The methods are:</p>
   <dt style="font-family: courier;">isConnected</dt>
     <dd>Is the channel connected?</dd>
   <dt style="font-family: courier;">getPropertyName</dt>
-    <dd>Get the propertyName for this channel. If the fieldName is null then
-      this is "value". If the fieldName references a structure that has a
-      field named value then it is the fieldName.value. Otherwise it is the
-      fieldName.</dd>
+    <dd>Get the propertyName for this channel. The details are
+      channelProvider dependent.</dd>
   <dt style="font-family: courier;">getFieldName</dt>
-    <dd>This is the the part of the pvName after the first '.' up to the
-      first '{'.</dd>
+    <dd>Get the fieldName. The details are channelProvider dependent.</dd>
   <dt style="font-family: courier;">getOptions</dt>
-    <dd>This is the part of the pvName between the {} at the end of the
-      pvName.</dd>
-  <dt style="font-family: courier;">getChannelField</dt>
-    <dd>Locate the field. If the field is found an interface to the
-      ChannelField is returned. If not found null is returned.</dd>
+    <dd>Get the options. The details are channelProvider dependent.</dd>
+  <dt style="font-family: courier;">createChannelField</dt>
+    <dd>Create a ChannelField if the field is found and return the interface.
+      If not found null is returned.</dd>
   <dt style="font-family: courier;">createFieldGroup</dt>
     <dd>get, put, putGet, and monitor all use fieldGroup to specify the data
       to get/put from/to a channel.</dd>
@@ -274,8 +305,6 @@ of fields in the record. The methods are:</p>
   <dt><span style="font-family: courier;">destroy</span> - channelMonitor</dt>
     <dd>Destroy a channelMonitor. This is done automatically when a channel
       is destroyed.</dd>
-  <dt style="font-family: courier;">isLocal</dt>
-    <dd>Is the channel local or remote.</dd>
 </dl>
 
 <h3 id="ChannelSta">ChannelStateListener</h3>
@@ -316,6 +345,8 @@ specific field in a channel.</p>
       org.epics.ioc.pv for details.</dd>
   <dt style="font-family: courier;">getPVField</dt>
     <dd>Gets the PVField that holds the data.</dd>
+  <dt style="font-family: courier;">postPut</dt>
+    <dd>When a client does a put to the PVField, this muset be called.</dd>
   <dt style="font-family: courier;">findProperty</dt>
     <dd>Find a ChannelField for the specified propertyName.</dd>
   <dt style="font-family: courier;">getPropertyNames</dt>
@@ -353,6 +384,41 @@ methods:</p>
     <dd>Remove a channelField from the group.</dd>
   <dt style="font-family: courier;">getList</dt>
     <dd>Get the list of channelFields in the group.</dd>
+  <dt style="font-family: courier;">getArray</dt>
+    <dd>Get the array of ChannelField</dd>
+</dl>
+
+<h3 id="ChannelMon">ChannelMonitorRequester</h3>
+
+<p><span style="font-family: courier;">ChannelMonitorRequester</span> has the
+methods:</p>
+<dl>
+  <dt style="font-family: courier;">beginPut</dt>
+    <dd>This is called when a new set of monitored data is available. Between
+      beginPut and endPut a set of dataPut calls are made. </dd>
+  <dt style="font-family: courier;">endPut</dt>
+    <dd>This is called when at the end of a new set of monitored data.</dd>
+  <dt style="font-family: courier;">dataPut(PVField modifiedPVField);</dt>
+    <dd>A put to the modifiedPVField has occured.</dd>
+  <dt style="font-family: courier;">dataPut(PVField requestedPVField,PVField
+  modifiedPVField);</dt>
+    <dd>A put to the modifiedPVField has occured. The requestedPVField is the
+      PVField in an associated ChannelField. </dd>
+</dl>
+
+<h3 id="ChannelMon1">ChannelMonitor</h3>
+
+<p><span style="font-family: courier;">ChannelMonitor</span> has the
+methods:</p>
+<dl>
+  <dt style="font-family: courier;">setFieldGroup</dt>
+    <dd>Set the fieldGroup to monitor.</dd>
+  <dt style="font-family: courier;">getData</dt>
+    <dd>Get the current data and put it into the CD.</dd>
+  <dt style="font-family: courier;">start</dt>
+    <dd>Start monitoring.</dd>
+  <dt style="font-family: courier;">stop</dt>
+    <dd>Stop monitoring.</dd>
 </dl>
 
 <h3 id="ChannelFac">ChannelFactory</h3>
@@ -363,26 +429,24 @@ code is accessing a channel that is available over the network.
 Channelfactory also has methods called by support for local access and by
 support for remote access.</p>
 
-<p>NOTES:</p>
-<ul>
-  <li>Currently only local access is implemented.</li>
-  <li>ChannelFactory will have to be modified to support multiple remote
-    servers. For example servers for both javaIOCs and V3 IOCs should be
-    developed and supported.</li>
-</ul>
-
 <p>The methods implemented by ChannelFactory are:</p>
 <dl>
   <dt style="font-family: courier;">createChannel</dt>
-    <dd>A client calls this to create a channel. The channel is created and
-      connection managment is started.</dd>
-  <dt style="font-family: courier;">registerLocalChannelAccess</dt>
-    <dd>This is the registration call for local channel access.</dd>
-  <dt style="font-family: courier;">registerRemoteChannelAccess</dt>
-    <dd>This is the registration call for remote channel access.</dd>
+    <dd>A client calls this to create a channel. A Channel is created and
+      returned only if the channelProvider is registered and if the
+      channelProvider can locate the channelName. If a channel is created
+      connection managment is started. A null is returned if the request
+      fails. </dd>
+  <dt style="font-family: courier;">registerChannelProvider</dt>
+    <dd>This is the registration call for a channel access provider.</dd>
+  <dt style="font-family: courier;">getChannelProvider</dt>
+    <dd>Return the ChannelProvider or null if the providerName is not
+      registered.</dd>
+  <dt style="font-family: courier;">isChannelProvider</dt>
+    <dd>Is channelName supported by providerName?</dd>
 </dl>
 
-<h3 id="ChannelAcc">ChannelAccess</h3>
+<h3 id="ChannelPro">ChannelProvider</h3>
 
 <p>This is an interface that must be implemented by code that implements
 channel access. It is called by ChannelFactory. It has only one method</p>
@@ -390,11 +454,15 @@ channel access. It is called by ChannelFactory. It has only one method</p>
   <dt style="font-family: courier;">createChannel</dt>
     <dd>ChannelFactory calls this first for local channel access and if the
       channel is not found then for remote channel access.</dd>
+  <dt style="font-family: courier;">getProviderName</dt>
+    <dd>Get the provider name.</dd>
+  <dt style="font-family: courier;">isProvider</dt>
+    <dd>Can the provider access channelName?</dd>
 </dl>
 <hr />
 
-<h2 style="text-align: center" id="Channel2">Channel Process, Get, CDGet,
-Put, CDPut, and PutGet</h2>
+<h2 style="text-align: center" id="Channel2">Channel Process, Get, Put,
+PutGet, and Monitor</h2>
 <hr />
 
 <h3 id="Definition1">Definitions</h3>
@@ -417,16 +485,6 @@ Put, CDPut, and PutGet</h2>
         void getDone(RequestResult requestResult);
     }
 
-    public interface ChannelCDGet {
-        CD getCD();
-        void get();
-    }
-    
-    
-    public interface ChannelCDGetRequester extends Requester{
-        void getDone(RequestResult requestResult);
-    }
-
     interface ChannelPut {
         boolean put();
         void putDelayed(PVField pvField);
@@ -438,16 +496,6 @@ Put, CDPut, and PutGet</h2>
         void putDone(RequestResult requestResult);
     }
 
-    interface ChannelCDPut {
-        CD getCD();
-        boolean get();
-        boolean put();
-    }
-    
-    public interface ChannelCDPutRequester extends Requester{
-        void getDone();
-        void putDone(RequestResult requestResult);
-    }
 
     interface ChannelPutGet {
         boolean putGet();
@@ -458,7 +506,7 @@ Put, CDPut, and PutGet</h2>
     interface ChannelPutGetRequester extends
         ChannelPutRequester,ChannelGetRequester {}</pre>
 
-<h3 id="ChannelPro">ChannelProcess</h3>
+<h3 id="ChannelPro1">ChannelProcess</h3>
 
 <p>ChannelProcess has the method:</p>
 <dl>
@@ -563,24 +611,6 @@ like:</p>
         return false // all done
     }</pre>
 
-<h3 id="ChannelCDG">ChannelCDGet</h3>
-
-<p><span style="font-family: courier;">ChannelCDGet</span> has the
-methods:</p>
-<dl>
-  <dt style="font-family: courier;">getCD</dt>
-    <dd>Get the CD (ChannelData) that is automatically created.</dd>
-  <dt style="font-family: courier;">get</dt>
-    <dd>Get data and put it into the CD.</dd>
-</dl>
-
-<p><span style="font-family: courier;">ChannelCDGetRequester</span> has the
-methods:</p>
-<dl>
-  <dt style="font-family: courier;">getDone</dt>
-    <dd>The get has finished. If successful the data is in the CD.</dd>
-</dl>
-
 <h3 id="ChannelPut">ChannelPut</h3>
 
 <p><span style="font-family: courier;">ChannelPut</span> has the methods:</p>
@@ -617,36 +647,6 @@ methods:</p>
 <p>Like delayed gets delayed puts are used by servers that need to block. For
 example servers that transfer data from the network to an IOC database.</p>
 
-<h3 id="ChannelCDP">ChannelCDPut</h3>
-
-<p>This is a put that uses a CD to hold the data. The caller puts data into
-the CD before calling ChannelCDPut.put().</p>
-
-<p><span style="font-family: courier;">ChannelCDPut</span> has the
-methods:</p>
-<dl>
-  <dt style="font-family: courier;">getCD</dt>
-    <dd>Get the interface to the CD created when the ChannelCDPut was
-    created.</dd>
-  <dt style="font-family: courier;">get</dt>
-    <dd>Get the latest target data and put it into cd. The target record is
-      not processed.</dd>
-  <dt style="font-family: courier;">put</dt>
-    <dd>Put the data currently residing in cd and put it to the target. If
-      process is requested than the record is set active before the data is
-      put.</dd>
-</dl>
-
-<p><span style="font-family: courier;">ChannelCDPutRequester</span> has the
-methods:</p>
-<dl>
-  <dt style="font-family: courier;">getDone</dt>
-    <dd>The get request is done and the data is in cd.</dd>
-  <dt style="font-family: courier;">putDone</dt>
-    <dd>The put request is finished. The result of record processing, if
-      specified, is returned.</dd>
-</dl>
-
 <h3 id="ChannelPut1">ChannelPutGet</h3>
 
 <p>This is a combination of <span
@@ -660,85 +660,49 @@ client request to:</p>
 </ul>
 <hr />
 
-<h2 style="text-align: center" id="ChannelMon">ChannelMonitor</h2>
+<h2 style="text-align: center;" id="Local">Local Channel Provider</h2>
 <hr />
 
-<p>NOTES:</p>
-<ul>
-  <li>CD is described in the next section</li>
-  <li>Periodic monitors should be defined and implemented.</li>
-</ul>
-
-<h3 id="Definition2">Definitions</h3>
-<pre>    interface ChannelMonitor {
-        void lookForPut(ChannelField channelField,boolean causeMonitor);
-        void lookForChange(ChannelField channelField,boolean causeMonitor);
-        void lookForAbsoluteChange(ChannelField channelField,double value);
-        void lookForPercentageChange(ChannelField channelField,double value);
-        boolean start(ChannelMonitorNotifyRequester channelMonitorNotifyRequester,
-            String threadName, ScanPriority scanPriority);
-        boolean start(ChannelMonitorRequester channelMonitorRequester,
-            int queueSize, String threadName, ScanPriority scanPriority);
-        void stop();
-        boolean isStarted();
-    }
-    
-    interface ChannelMonitorRequester extends Requester{
-        void monitorCD(CD cd);
-        void dataOverrun(int number);
-    }
-    
-    interface ChannelMonitorNotifyRequester extends Requester {
-        void monitorEvent();
+<p>An implementation of a channel access client for accessing records in the
+IOC database is provided. It has the name "local" This is created
+automatically by <span
+style="font-family: courier;">ChannelProviderLocalFactory</span> . The
+factory creates a single instance of an implementation of a channel access
+client for accessing local records. <span
+style="font-family: courier;">ChannelProviderLocalFactory</span> has only one
+public method.</p>
+<pre>    public class ChannelProviderLocalFactory  {
+        static public void register();
     }</pre>
 
-<h3 id="ChannelMon1">ChannelMonitor</h3>
+<p>This method is called by ChannelFactory when it is called before a local
+Channel Access is registered.</p>
+<hr />
 
-<p>ChannelMonitor has the methods:</p>
-<dl>
-  <dt style="font-family: courier;">lookForPut</dt>
-    <dd>Look for a put. If the ChannelField is a structure then look for a
-      put to any subfield of the structure.</dd>
-  <dt style="font-family: courier;">lookForChange</dt>
-    <dd>Look for a change in a data value. This is only valid for a primitive
-      field.</dd>
-  <dt style="font-family: courier;">lookForAbsoluteChange</dt>
-    <dd>Look for an absolute change in the data. The argument value is the
-      deadband. This is only valid if ChannelField is a numeric scalar.</dd>
-  <dt style="font-family: courier;">lookForPercentageChange</dt>
-    <dd>Look for a percentage change in the data. The argument value is the
-      deadband. This is only valid if ChannelField is a numeric scalar.</dd>
-  <dt style="font-family: courier;">start - MonitorNotify</dt>
-    <dd>Notify when a change occurs but do not send data. The caller can
-      issue a get request to retrieve the data.</dd>
-  <dt style="font-family: courier;">start - Monitor</dt>
-    <dd>When data changes send it the the requester.</dd>
-  <dt style="font-family: courier;">stop</dt>
-    <dd>Stop monitoring.</dd>
-  <dt style="font-family: courier;">isStarted</dt>
-    <dd>Has the monitor been started.</dd>
-</dl>
+<h2 style="text-align: center" id="ChannelMon2">ChannelMonitorNotify</h2>
+<hr />
 
-<p>ChannelMonitorRequester has the methods:</p>
-<dl>
-  <dt style="font-family: courier;">monitorCD</dt>
-    <dd>The modified data.</dd>
-  <dt style="font-family: courier;">dataOverrun</dt>
-    <dd>The number of missed monitors.</dd>
-</dl>
+<h3 id="ChannelMon3">ChannelMonitorNotify</h3>
 
-<p>ChannelMonitorNotifyRequester has the methods:</p>
-<dl>
-  <dt style="font-family: courier;">monitorEvent</dt>
-    <dd>Data has been modified.</dd>
-</dl>
+<p>This is support for being notified when a put is issued to a field of an
+IOC database. The notification does not include data.</p>
+<pre>    public interface ChannelMonitorNotify extends ChannelMonitor{}
+    
+    interface ChannelMonitorNotifyRequester extends Requester{
+        void monitorEvent();
+    }
+    
+    class ChannelMonitorNotifyFactory {
+        ChannelMonitorNotify create(Channel channel,
+            ChannelMonitorNotifyRequester monitorNotifyRequestor);
+    } </pre>
 <hr />
 
 <h2 style="text-align: center" id="Channel3">CD - Channel Data</h2>
 <hr />
 
-<p>A CD (ChannelData) is the interface to data for a Channel Field Group. CD
-helps solve two problems:</p>
+<p>CD (ChannelData) is a facility that holds a copy of the data contained in
+a fieldGroup. CD helps solve two problems:</p>
 <ol>
   <li>Blocking with a record locked.<br />
     An example is a channel access server. Instead of pre allocating network
@@ -752,24 +716,32 @@ helps solve two problems:</p>
     ready it can empty the queue and send the CDs over the network.</li>
 </ol>
 
-<p>A CD is associated with a channel and channelFieldGroup. When a VD is
+<p>A CD is associated with a channel and channelFieldGroup. When a CD is
 created via a call to CDFactory.createCD it automatically creates a CDRecord
 and associated subfields, which are described in the next section.</p>
 
-<h3 id="Definition3">CD Definitions</h3>
+<h3 id="Definition2">CD Definitions</h3>
 <pre>    interface CD {
+        void destroy();
         Channel getChannel();
         ChannelFieldGroup getChannelFieldGroup();
         CDRecord getCDRecord();
-        int getMaxPutsToField();
         void clearNumPuts();
-        void dataPut(PVField targetPVField);
-        void supportNamePut(PVField targetPVField);
-        void beginPut(PVStructure targetPVStructure);
-        void endPut(PVStructure targetPVStructure);
-        void dataPut(PVField requested,PVField targetPVField);
-        void supportNamePut(PVField requested,PVField targetPVField);
+        void get(PVField pvField);
+        void put(PVField pvField);
+        void put(PVField pvField,PVField pvSubField);
+        CDGet createCDGet(
+            ChannelFieldGroup channelFieldGroup,
+            CDGetRequester channelCDGetRequester,
+            boolean process);
+        void destroy(CDGet channelCDGet);
+        CDPut createCDPut(
+            ChannelFieldGroup channelFieldGroup,
+            CDPutRequester cdPutRequester,
+            boolean process);
+        void destroy(CDPut cdPut);
     }
+
 
     interface CDQueue {
         int getNumberFree();
@@ -783,10 +755,9 @@ and associated subfields, which are described in the next section.</p>
 
     class CDFactory {
          static CD createCD(
-             Channel channel,ChannelFieldGroup channelFieldGroup,boolean supportAlso);
+             Channel channel,ChannelFieldGroup channelFieldGroup);
          static CDQueue createQueue(
-             int queueSize,Channel channel,ChannelFieldGroup channelFieldGroup,
-             boolean supportAlso);
+             int queueSize,Channel channel,ChannelFieldGroup channelFieldGroup);
     }
 
     class BaseCD { ... }
@@ -796,6 +767,9 @@ and associated subfields, which are described in the next section.</p>
 
 <p>CD has the following methods:</p>
 <dl>
+  <dt style="font-family: courier;">delete</dt>
+    <dd>Delete the CD. Thias automatically call delete for each CDGet, CVPut,
+      and CDModify.</dd>
   <dt style="font-family: courier;">getChannel</dt>
     <dd>Get the channel to which this channelFieldGroup belongs.</dd>
   <dt style="font-family: courier;">getChannelFieldGroup</dt>
@@ -806,44 +780,31 @@ and associated subfields, which are described in the next section.</p>
     <dd>Get the maxNumPuts to any field.</dd>
   <dt style="font-family: courier;">clearNumPuts</dt>
     <dd>Clear the internal list of items that have been added.</dd>
-  <dt style="font-family: courier;">dataPut</dt>
+  <dt style="font-family: courier;">get</dt>
+    <dd>Get data from the CD and put it into pvField.</dd>
+  <dt style="font-family: courier;">put</dt>
     <dd>The PVField has been modified. Two versions are provided. One is if a
       ChannelField is connected to the PVField itself and the other if the
       PVField is a subfield of the PVStructure to which the ChannelField is
-      connected.</dd>
-  <dt style="font-family: courier;">supportNamePut</dt>
-    <dd>The supportName has been modified.</dd>
-  <dt style="font-family: courier;">beginPut</dt>
-    <dd>A set of puts to the fields of a structure is starting.</dd>
-  <dt style="font-family: courier;">endPut</dt>
-    <dd>The set of puts to a structure is done.</dd>
+      connected. NOTE that the pvFields are from the ChannelField NOT the
+      pvField from the CD. </dd>
+  <dt style="font-family: courier;">createCDGet</dt>
+    <dd>Create a CDGet.</dd>
+  <dt style="font-family: courier;">destroy(CDGet channelCDGet)</dt>
+    <dd>Delete a CDGet.</dd>
+  <dt style="font-family: courier;">createCDPut</dt>
+    <dd>Create a CDPut.</dd>
+  <dt style="font-family: courier;">destroy(CDPut channelCDPut)</dt>
+    <dd>Delete a CDPut.</dd>
 </dl>
 
 <p>A CD is allocated as follows:</p>
 <pre>    CD cd = CDFactory.createData(
-        channel,channelFieldGroup,supportAlso);</pre>
+        channel,channelFieldGroup);</pre>
 
 <p>This creates storage for each element of the field group. It can create
 storage for all pvTypes. For Array types, the initial size and capacity is 0.
 The arrays will grow as data is placed in them but will not be released.</p>
-
-<p>A new set of data is collected as follows:</p>
-<ul>
-  <li>The requester calls cd.clear</li>
-  <li>The data source, which is NOT allowed to block a record, does the
-    following: 
-    <ul>
-      <li>Wait until data is not available.</li>
-      <li>When one or more pvField items are available, with the data source
-        (for example a record) locked, call cd.add.</li>
-      <li>When the last pvField has been copied to cd notify the
-      requester.</li>
-    </ul>
-  </li>
-  <li>The requester calls cd.getPVFieldList and cd.getPVFieldList. It can
-    block if necessary because the actual data source, e.g. a data base
-    record, is not locked.</li>
-</ul>
 
 <h3 id="CDQueue">CDQueue</h3>
 
@@ -892,7 +853,7 @@ monitoring a fieldGroup of an IOC database record.</p>
 </dl>
 <hr />
 
-<h2 style="text-align: center" id="Channel4">CD - Channel Data Fields</h2>
+<h2 style="text-align: center" id="CDField">CDField - Channel Data Fields</h2>
 <hr />
 
 <p>Each cd provides a set of interfaces for accessing the data values. The
@@ -901,38 +862,36 @@ PVRecord, Each CD interface provides access to it's corresponding PV
 interface. The CD interfaces provide additional methods that allow the client
 to determine how often each PVField was written.</p>
 
-<h3 id="Definition4">CD Definitions</h3>
-<pre>    interface CDRecord {
-        PVRecord getPVRecord();
-        CDStructure getCDStructure();
-        FieldCreate getFieldCreate();
-        PVDataCreate getPVDataCreate();
-        Field createField(Field oldField);
-    }
-
-    interface CDField {
+<h3 id="CDField1">CDField Definitions</h3>
+<pre>    interface CDField {
         CDField getParent();
         CDRecord getCDRecord();
+        ChannelField getChannelField();
         PVField getPVField();
-        void replacePVField(PVField newPVField);
         int getNumPuts();
         void incrementNumPuts();
         int getMaxNumPuts();
         void setMaxNumPuts(int numPuts);
-        int getNumSupportNamePuts();
         void clearNumPuts();
-        void dataPut(PVField targetPVField);
-        void supportNamePut(PVField targetPVField);
-        boolean dataPut(PVField requested,PVField targetPVField);
-        boolean supportNamePut(PVField requested,PVField targetPVField);
+        void get(PVField pvField,boolean postPut);
+        void put(PVField pvField);
+        void put(PVField pvField,PVField pvSubField);
         String toString();
         String toString(int indentLevel);
     }
-    
+
+    interface CDRecord {
+        CDField findCDField(PVField pvField);
+        CDField findSourceCDField(PVField sourcePVField);
+        PVRecord getPVRecord();
+        CDStructure getCDStructure();
+        PVDataCreate getPVDataCreate();
+    }
     
     interface CDStructure extends CDField {
+        CDField findCDField(PVField pvField);
+        CDField findSourceCDField(PVField sourcePVField);
         CDField[] getCDFields();
-        void replacePVStructure();
         PVStructure getPVStructure();
     }
 
@@ -941,13 +900,15 @@ to determine how often each PVField was written.</p>
     }
     
     interface CDArrayArray extends CDArray {
+        CDField findCDField(PVField pvField);
+        CDField findSourceCDField(PVField sourcePVField);
         CDArray[] getElementCDArrays();
-        void replacePVArray();
     }
 
     interface CDStructureArray extends CDArray {
+        CDField findCDField(PVField pvField);
+        CDField findSourceCDField(PVField sourcePVField);
         CDStructure[] getElementCDStructures();
-        void replacePVArray();
     }
 
     class BaseCDRecord { ... }
@@ -957,33 +918,7 @@ to determine how often each PVField was written.</p>
     class BaseCDStructureArray { ... }
     class BaseCDArrayArray { ... }</pre>
 
-<h3 id="CDRecord">CDRecord</h3>
-
-<p>CDRecord is for the channel itself, i.e. for the actual record instance to
-which the channel is connected. It has the methods:</p>
-<dl>
-  <dt style="font-family: courier;">getPVRecord</dt>
-    <dd>Get the PVRecord interface. This PVRecord will have a recordName
-      which is the channelName, which is he name of the record to which the
-      channel is connected.</dd>
-  <dt style="font-family: courier;">getCDStructure</dt>
-    <dd>Get the CDStructure for the CDRecord itself. The CDStructure will
-      have a subfield for each member of the channelFieldGroup that the cd
-      describes. Each subfield describes the data for it's ChannelField.</dd>
-  <dt style="font-family: courier;">getFieldCreate</dt>
-    <dd>This is used by the code that creates CD interfaces. It returns a
-      factory to create Field objects. The code creates Field definition that
-      are just like the Field definition in the target field but always has
-      no properties.</dd>
-  <dt style="font-family: courier;">getPVDataCreate</dt>
-    <dd>This is used by the code that creates CD interfaces. It returns a
-      factory to create PVDat objects.</dd>
-  <dt style="font-family: courier;">createField</dt>
-    <dd>This creates a Field that are just like oldField except that it has
-      no properties.</dd>
-</dl>
-
-<h3 id="CDField">CDField</h3>
+<h3 id="CDField2">CDField</h3>
 
 <p>Each field in the PVRecord associated with CDRecord has an associated
 CDField or an extension. CDField has the methods:</p>
@@ -993,10 +928,10 @@ CDField or an extension. CDField has the methods:</p>
       fieldGroup than the parent is null.</dd>
   <dt style="font-family: courier;">getCDRecord</dt>
     <dd>Get the CDRecord to which this CDField belongs.</dd>
+  <dt style="font-family: courier;">getChannelField</dt>
+    <dd>Get the ChannelField for this CDField.</dd>
   <dt style="font-family: courier;">getPVField</dt>
     <dd>Get the PVField associated with this CDField.</dd>
-  <dt style="font-family: courier;">replacePVField</dt>
-    <dd>Replace the PVField associated with this CDField.</dd>
   <dt style="font-family: courier;">getNumPuts</dt>
     <dd>Get the number of dataPuts to this field.</dd>
   <dt style="font-family: courier;">incrementNumPuts</dt>
@@ -1013,26 +948,46 @@ CDField or an extension. CDField has the methods:</p>
     classes.</dd>
   <dt style="font-family: courier;">clearNumPuts</dt>
     <dd>Set all number of puts to 0.</dd>
-  <dt style="font-family: courier;">dataPut(PVField targetPVField)</dt>
-    <dd>The target data has been modified.</dd>
-  <dt style="font-family: courier;">supportNamePut(PVField targetPVField)</dt>
-    <dd>The support name has been modified.</dd>
-  <dt style="font-family: courier;">dataPut(PVField requested,PVField
-  targetPVField)</dt>
-    <dd>The data has been modified.</dd>
-  <dt style="font-family: courier;">supportNamePut(PVField requested,PVField
-  targetPVField)</dt>
-    <dd>A put to the supportName of a subfield has occured.</dd>
+  <dt style="font-family: courier;">get</dt>
+    <dd>Get data from the CDField and put it into pvField. If postPut is true
+      channelField.postPut is called if the data is written.</dd>
+  <dt style="font-family: courier;">get</dt>
+    <dd>Put the CDField PVField with data from pvField or pvSubField.</dd>
+</dl>
+
+<h3 id="CDRecord">CDRecord</h3>
+
+<p>CDRecord is for the ChannelFieldGroup. It has the methods:</p>
+<dl>
+  <dt style="font-family: courier;">findCDField</dt>
+    <dd>Given a pvField find the ChannelField that holds the pvField.</dd>
+  <dt style="font-family: courier;">findSourceCDField</dt>
+    <dd>Given a pvField find the ChannelField that references the source
+      pvField.</dd>
+  <dt style="font-family: courier;">getPVRecord</dt>
+    <dd>Get the PVRecord interface. This PVRecord will have a recordName
+      which is the channelName, which is he name of the record to which the
+      channel is connected.</dd>
+  <dt style="font-family: courier;">getCDStructure</dt>
+    <dd>Get the CDStructure for the CDRecord itself. The CDStructure will
+      have a subfield for each member of the channelFieldGroup that the cd
+      describes. Each subfield describes the data for it's ChannelField.</dd>
+  <dt style="font-family: courier;">getPVDataCreate</dt>
+    <dd>This is used by the code that creates CD interfaces. It returns a
+      factory to create PVDat objects.</dd>
 </dl>
 
 <h3 id="CDStructur">CDStructure</h3>
 
 <p>CDStructure is associated with a PVStructure. It has the methods:</p>
 <dl>
+  <dt style="font-family: courier;">findCDField</dt>
+    <dd>Given a pvField find the ChannelField that holds the pvField.</dd>
+  <dt style="font-family: courier;">findSourceCDField</dt>
+    <dd>Given a pvField find the ChannelField that references the source
+      pvField.</dd>
   <dt style="font-family: courier;">getCDFields</dt>
     <dd>Get the CDField array for the fields of the structure.</dd>
-  <dt style="font-family: courier;">replacePVStructure</dt>
-    <dd>Replace the PVStructure.</dd>
   <dt style="font-family: courier;">getPVStructure</dt>
     <dd>Get the PVStructure.</dd>
 </dl>
@@ -1051,47 +1006,159 @@ CDField or an extension. CDField has the methods:</p>
 
 <p>CDStructureArray is associated with a PVArray with structure elements.</p>
 <dl>
+  <dt style="font-family: courier;">findCDField</dt>
+    <dd>Given a pvField find the ChannelField that holds the pvField.</dd>
+  <dt style="font-family: courier;">findSourceCDField</dt>
+    <dd>Given a pvField find the ChannelField that references the source
+      pvField.</dd>
   <dt style="font-family: courier;">getElementCDStructures</dt>
     <dd>Get the CDStructure array.</dd>
-  <dt style="font-family: courier;">replacePVArray</dt>
-    <dd>Replace the current PVArray.</dd>
 </dl>
 
 <h3 id="CDArrayArr">CDArrayArray</h3>
 
 <p>CDArrayArray is associated with a PVArray with array elements.</p>
 <dl>
+  <dt style="font-family: courier;">findCDField</dt>
+    <dd>Given a pvField find the ChannelField that holds the pvField.</dd>
+  <dt style="font-family: courier;">findSourceCDField</dt>
+    <dd>Given a pvField find the ChannelField that references the source
+      pvField.</dd>
   <dt style="font-family: courier;">getElementCDArrays</dt>
     <dd>Get the CDArray array.</dd>
-  <dt style="font-family: courier;">replacePVArray</dt>
-    <dd>Replace the current PVArray.</dd>
 </dl>
 
 <h3 id="Base">Base CD Classes</h3>
 
-<p>The BaseCD classes, i.e. <span
-style="font-family: courier;">BaseCDRecord</span> ... <span
-style="font-family: courier;">BaseCDArrayArray</span>, provide
-implementations of the CD interraces. These provide complete imnplementations
-and should rarely need to be extended.</p>
+<p>The BaseCD classes provide implementations of the CD interraces. These
+provide complete imnplementations and should rarely need to be extended.</p>
 <hr />
 
-<h2 style="text-align: center;" id="Local">Local Channel Access</h2>
+<h2 style="text-align: center" id="CDGet">CDGet, CDPUT, CDMonitor</h2>
 <hr />
 
-<p>An implementation of a channel access client for accessing records in the
-IOC database is provided. This is created automatically by <span
-style="font-family: courier;">ChannelAccessLocalFactory</span> . The factory
-creates a single instance of an implementation of a channel access client for
-accessing local records. This is used by link support. <span
-style="font-family: courier;">ChannelAccessLocalFactory</span> has only one
-public method.</p>
-<pre>    public class ChannelAccessLocalFactory  {
-        static public void register();
+<h3 id="CDGet1">CDGet</h3>
+<pre>    public interface CDGet {
+        void destroy();
+        void get(CD cd);
+    }
+    
+    public interface CDGetRequester extends Requester{
+        void getDone(RequestResult requestResult);
     }</pre>
 
-<p>This method is called by ChannelFactory when it is called before a local
-Channel Access is registered.</p>
+<p><span style="font-family: courier;">CDGet</span> has the methods:</p>
+<dl>
+  <dt style="font-family: courier;">destroy</dt>
+    <dd>Destroy the CDGet.</dd>
+  <dt style="font-family: courier;">get</dt>
+    <dd>Get data and put it into the CD.</dd>
+</dl>
+
+<p><span style="font-family: courier;">CDGetRequester</span> has the
+methods:</p>
+<dl>
+  <dt style="font-family: courier;">getDone</dt>
+    <dd>The get has finished. If successful the data is in the CD.</dd>
+</dl>
+
+<h3 id="CDPut">CDPut</h3>
+<pre>    interface CDPut {
+        void destroy();
+        void get(CD cd);
+        void put(CD cd);
+    }
+    
+    public interface CDPutRequester extends Requester{
+        void getDone();
+        void putDone(RequestResult requestResult);
+    }</pre>
+
+<p>This is a put that uses a CD to hold the data. The caller puts data into
+the CD before calling CDPut.put().</p>
+
+<p><span style="font-family: courier;">CDPut</span> has the methods:</p>
+<dl>
+  <dt style="font-family: courier;">destroy</dt>
+    <dd>Destroy the CDGet.</dd>
+  <dt style="font-family: courier;">get</dt>
+    <dd>Get the latest target data and put it into cd. The target record is
+      not processed.</dd>
+  <dt style="font-family: courier;">put</dt>
+    <dd>Put the data currently residing in cd and put it to the target. If
+      process is requested than the record is set active before the data is
+      put.</dd>
+</dl>
+
+<p><span style="font-family: courier;">CDPutRequester</span> has the
+methods:</p>
+<dl>
+  <dt style="font-family: courier;">getDone</dt>
+    <dd>The get request is done and the data is in cd.</dd>
+  <dt style="font-family: courier;">putDone</dt>
+    <dd>The put request is finished. The result of record processing, if
+      specified, is returned.</dd>
+</dl>
+
+<h3 id="CDMonitor">CDMonitor</h3>
+
+<p>This is support for being notified when a put is issued to a field of an
+IOC database. The notification includes data.</p>
+<pre>    interface CDMonitor {
+        void lookForPut(ChannelField channelField, boolean causeMonitor);
+        void lookForChange(ChannelField channelField, boolean causeMonitor);
+        void lookForAbsoluteChange(ChannelField channelField,double value);
+        void lookForPercentageChange(ChannelField channelField,double value);
+        void start(int queueSize, String threadName, int threadPriority);
+        void stop();
+    }
+    
+    interface CDMonitorRequester extends Requester{
+        void monitorCD(CD cD);
+        void dataOverrun(int number);
+    }
+    
+    class CDMonitorFactory {
+        public static CDMonitor create(Channel channel,
+            CDMonitorRequester cdMonitorRequester)
+    }</pre>
+
+<p>CDMonitor has the methods:</p>
+<dl>
+  <dt style="font-family: courier;">lookForPut</dt>
+    <dd>Look for a put. If the ChannelField is a structure then look for a
+      put to any subfield of the structure.</dd>
+  <dt style="font-family: courier;">lookForChange</dt>
+    <dd>Look for a change in a data value. This is only valid for a primitive
+      field.</dd>
+  <dt style="font-family: courier;">lookForAbsoluteChange</dt>
+    <dd>Look for an absolute change in the data. The argument value is the
+      deadband. This is only valid if ChannelField is a numeric scalar.</dd>
+  <dt style="font-family: courier;">lookForPercentageChange</dt>
+    <dd>Look for a percentage change in the data. The argument value is the
+      deadband. This is only valid if ChannelField is a numeric scalar.</dd>
+  <dt style="font-family: courier;">start - MonitorNotify</dt>
+    <dd>Notify when a change occurs but do not send data. The caller can
+      issue a get request to retrieve the data.</dd>
+  <dt style="font-family: courier;">start - Monitor</dt>
+    <dd>When data changes send it the the requester.</dd>
+  <dt style="font-family: courier;">stop</dt>
+    <dd>Stop monitoring.</dd>
+</dl>
+
+<p>CDMonitorRequester has the methods:</p>
+<dl>
+  <dt style="font-family: courier;">monitorCD</dt>
+    <dd>The modified data.</dd>
+  <dt style="font-family: courier;">dataOverrun</dt>
+    <dd>The number of missed monitors.</dd>
+</dl>
+
+<p>CDMonitorRequester has the method:</p>
+<dl>
+  <dt style="font-family: courier;">create</dt>
+    <dd>Create a CDMonitor</dd>
+</dl>
 <hr />
 
 <h2 style="text-align: center" id="Example">Example For CD</h2>
@@ -1143,27 +1210,9 @@ example gets from a record after the record is no longer locked.</p>
 
         ValueData(Channel channel,String fieldName) {
             this.channel = channel;
-            if(fieldName==null) fieldName = "value";
             this.fieldName = fieldName;
         }
 
-        void lookForOther(ChannelMonitor channelMonitor) {
-            if(alarmField!=null) channelMonitor.lookForChange(alarmField, true);
-            if(timeStampField!=null) channelMonitor.lookForChange(timeStampField, false);
-        }
-
-        void lookForChange(ChannelMonitor channelMonitor) {
-            channelMonitor.lookForChange(valueField, true);
-            lookForOther(channelMonitor);
-        }
-        void lookForAbsoluteChange(ChannelMonitor channelMonitor,double deadband) {
-            channelMonitor.lookForAbsoluteChange(valueField, deadband);
-            lookForOther(channelMonitor);
-        }
-        void lookForPercentageChange(ChannelMonitor channelMonitor,double deadband) {
-            channelMonitor.lookForPercentageChange(valueField, deadband);
-            lookForOther(channelMonitor);
-        }
        
         public void accessRightsChange(Channel channel, ChannelField channelField) {
             // TODO Auto-generated method stub
@@ -1172,19 +1221,15 @@ example gets from a record after the record is no longer locked.</p>
 
         private ChannelFieldGroup init() {
             channelFieldGroup = channel.createFieldGroup(this);
-            valueField = channel.findField(fieldName);
+            valueField = channel.createChannelField(fieldName);
             if(valueField==null) {
                 System.out.printf("findField returned %s%n", result.toString());
                 return null;
             }
             channelFieldGroup.addChannelField(valueField);
-            String newFieldName = fieldName + ".alarm";
-            channel.findField(null);
-            alarmField = channel.findField(newFieldName);
+            alarmField =  valueField.findProperty("alarm");
             if(alarmField!=null) channelFieldGroup.addChannelField(alarmField);
-            newFieldName = fieldName + ".timeStamp";
-            channel.findField(null);
-            timeStampField = channel.findField(newFieldName);
+            timeStampField = valueField.findProperty("timeStamp");
             if(timeStampField!=null) channelFieldGroup.addChannelField(timeStampField);
             return channelFieldGroup;
         }

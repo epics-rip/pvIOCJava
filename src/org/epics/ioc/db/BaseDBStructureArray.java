@@ -29,6 +29,15 @@ public class BaseDBStructureArray extends BaseDBArray implements DBStructureArra
         
     }
     /* (non-Javadoc)
+     * @see org.epics.ioc.db.BaseDBField#postPut(org.epics.ioc.db.DBField)
+     */
+    @Override
+    public void postPut(DBField dbField) {
+        for(DBField dbF : elementDBStructures) {
+            dbF.postPut(dbField);
+        }
+    }
+    /* (non-Javadoc)
      * @see org.epics.ioc.db.DBStructureArray#getPVStructureArray()
      */
     public PVStructureArray getPVStructureArray() {

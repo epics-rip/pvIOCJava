@@ -100,13 +100,13 @@ public class BaseCDQueue implements CDQueue {
     /* (non-Javadoc)
      * @see org.epics.ioc.ca.CDQueue#releaseNext(org.epics.ioc.ca.CDField)
      */
-    public void releaseNext(CD cD) {
+    public void releaseNext(CD cd) {
         lock.lock();
         try {
-            if(next!=cD) {
+            if(next!=cd) {
                 throw new IllegalStateException("channelDataField is not that returned by getNext");
             }
-            cD.clearNumPuts();
+            cd.clearNumPuts();
             freeList.add(next);
             next = null;
         } finally {

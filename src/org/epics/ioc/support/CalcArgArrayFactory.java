@@ -104,7 +104,7 @@ public class CalcArgArrayFactory {
                 DBStructure elementDBStructure = dbFields[i];
                 PVStructure elementPVStructure = elementDBStructure.getPVStructure();
                 Structure elementStructure = (Structure)elementPVStructure.getField();
-                DBField[] elementDBFields = elementDBStructure.getFieldDBFields();
+                DBField[] elementDBFields = elementDBStructure.getDBFields();
                 int index;
                 index = elementStructure.getFieldIndex("value");
                 valueDBFields[i] = elementDBFields[index];
@@ -205,7 +205,7 @@ public class CalcArgArrayFactory {
             DBStructure dbStructure = (DBStructure)calcArgArrayDBField.getParent();
             PVStructure pvStructure = dbStructure.getPVStructure();
             Structure structure = pvStructure.getStructure();
-            DBField[] dbFields = dbStructure.getFieldDBFields();
+            DBField[] dbFields = dbStructure.getDBFields();
             int index;
             Support support = null;            
             index = structure.getFieldIndex("calculator");

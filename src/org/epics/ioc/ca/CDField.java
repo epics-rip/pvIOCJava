@@ -24,15 +24,15 @@ public interface CDField {
      */
     CDRecord getCDRecord();
     /**
-     * Get the PVField for this CDField.
+     * Get the ChannelField for this CDField.
+     * @return The ChannelField.
+     */
+    ChannelField getChannelField();
+    /**
+     * Get the PVField that has the data for this CDField.
      * @return The PVField interface.
      */
     PVField getPVField();
-    /**
-     * Replace the PVField.
-     * @param newPVField The new PVField.
-     */
-    void replacePVField(PVField newPVField);
     /**
      * Get the number of dataPuts to this field.
      * @return The number of dataPuts.
@@ -44,10 +44,8 @@ public interface CDField {
     void incrementNumPuts();
     /**
      * Get the maximum number of puts since the last <i>clearNumPuts</i>.
-     * This is the maximum number of puts to any particular element of the associated PVField,
-     * i.e. dataPut, supportNamePut, enumIndexPut, enumChoicePut, etc.
-     * If PVField is a scalar or an array of scalars then this is either the number of calls to dataPut
-     * or to supportNamePut, whichever is greater.
+     * This is the maximum number of puts to any particular element of the associated PVField.
+     * If PVField is a scalar or an array of scalars then this is the same as numPuts.
      * @return The maximum number.
      */
     int getMaxNumPuts();
@@ -58,40 +56,29 @@ public interface CDField {
      */
     void setMaxNumPuts(int numPuts);
     /**
-     * Get the number of calls to <i>supportNamePut</i> since the last <i>clearNumPuts</i>.
-     * @return The number of supportNamePuts.
-     */
-    int getNumSupportNamePuts();
-    /**
      * Set all number of puts to 0.
      */
     void clearNumPuts();
     /**
-     * The data has been modified.
-     * @param targetPVField The pvField to which the channel is connected. 
+     * Get data from the CDField and put it into the pvField.
+     * @param pvField The pvField into which to put the data.
+     * @param postPut Should channelField.postPut be called?
      */
-    void dataPut(PVField targetPVField);
+    void get(PVField pvField,boolean postPut);
     /**
-     * The support name has been modified.
-     * @param supportName The pvField to which the channel is connected.
+     * Put the pvData into the CDField.
+     * @param pvField The pvField containing the data to put into the CDField.
+     * This must be the PVField for the ChannelField.
      */
-    void supportNamePut(String supportName);
+    void put(PVField pvField);
     /**
-     * A put to a subfield has occured. 
-     * @param requested The target field that has targetPVField as a subfield.
-     * @param targetPVField The data that has been modified..
-     * @return (false,true) if the associated PVField is modified.
-     * The return value can be false if the requested field is an array of structures or an array of arrays.
+     * A put to a subfield of a CDField has occured. 
+     * @param pvField The pvField 
+     * This must be the PVField for the ChannelField.
+     * @param pvSubField The pvField containing the data to put into the subfield opf the CDField. 
+     * This must be the PVField for ChannelField that is a subfield of ChannelField.
      */
-    boolean dataPut(PVField requested,PVField targetPVField);
-    /**
-     * A put to the supportName of a subfield has occured. 
-     * @param requested The target field that has targetPVField as a subfield.
-     * @param targetPVField The pvField in the structure.
-     * @return (false,true) if the associated PVField is modified.
-     * The return value can be false of the requested field is an array of structures or an array of arrays.
-     */
-    boolean supportNamePut(PVField requested,PVField targetPVField);
+    void put(PVField pvField,PVField pvSubField);
     /**
      * Report current state.
      * @return A String describing the state.

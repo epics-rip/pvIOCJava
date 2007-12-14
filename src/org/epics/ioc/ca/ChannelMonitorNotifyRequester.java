@@ -1,18 +1,18 @@
 /**
- * Copyright - See the COPYRIGHT that is included with this disctibution.
+ * Copyright - See the COPYRIGHT that is included with this distribution.
  * EPICS JavaIOC is distributed subject to a Software License Agreement found
  * in file LICENSE that is included with this distribution.
  */
 package org.epics.ioc.ca;
 
-import org.epics.ioc.util.*;
+import org.epics.ioc.util.Requester;
 
 /**
- * Requester that monitors a channel without requesting data.
+ *  Requester that monitors a channel without requesting data.
  * @author mrk
  *
  */
-public interface ChannelMonitorNotifyRequester extends Requester {
+public interface ChannelMonitorNotifyRequester extends Requester{
     /**
      * A monitor event has occured.
      */

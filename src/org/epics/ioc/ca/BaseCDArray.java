@@ -17,17 +17,14 @@ public class BaseCDArray extends BaseCDField implements CDArray {
      * Constructor.
      * @param parent The parent cdField.
      * @param cdRecord The cdRecord that contains this field.
-     * @param pvArray The pvArray that this CDArray references.
-     * @param supportAlso Should support be read/written?
+     * @param pvArray The pvArray data for the CDArray.
+     * @param channelField The channelField.
      */
-    public BaseCDArray(
-        CDField parent,CDRecord cdRecord,
-        PVArray pvArray,boolean supportAlso)
+    public BaseCDArray(CDField parent,CDRecord cdRecord,PVArray pvArray,ChannelField channelField)
     {
-        super(parent,cdRecord,pvArray,supportAlso);
+        super(parent,cdRecord,pvArray,channelField);
         this.pvArray = pvArray; 
     }
-
     /* (non-Javadoc)
      * @see org.epics.ioc.ca.CDArray#getPVArray()
      */

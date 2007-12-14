@@ -27,5 +27,11 @@ public interface ChannelFieldGroup {
      * Get the list of channel fields.
      * @return The list.
      */
-    public List<ChannelField> getList();
+    List<ChannelField> getList();
+    /**
+     * Get an array of the current ChannelFields
+     * @return The array.
+     */
+    ChannelField[] getArray();
+    
 }

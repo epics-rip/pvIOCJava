@@ -58,7 +58,7 @@ public class GenericFactory {
             if(!super.checkSupportState(SupportState.readyForInitialize,supportName)) return;
             SupportState supportState = SupportState.readyForStart;
             Structure structure = (Structure)pvStructure.getField();
-            DBField[] dbFields = dbStructure.getFieldDBFields();
+            DBField[] dbFields = dbStructure.getDBFields();
             Field[] fields = structure.getFields();
             numberSupports = 0;
             for(int i=0; i<dbFields.length; i++) {

@@ -49,17 +49,6 @@ public class CDRecordPrint {
         newLine(0);
     }
     
-    private void checkNumSupportNamePuts(CDField cdField) {
-        int numSupportNamePuts = cdField.getNumSupportNamePuts();
-        if(numSupportNamePuts==0) return;
-        if(numSupportNamePuts>1) {
-                text.append(String.format(" numSupportNamePuts %d",numSupportNamePuts));
-        }
-        String supportName = cdField.getPVField().getSupportName();
-        if(supportName==null) return;
-        text.append(" supportName " + supportName);
-    }
-    
     //return (false,true) if (0, not 0)
     private boolean checkNumPuts(CDField cdField) {
         int numPuts = cdField.getNumPuts();
@@ -85,6 +74,7 @@ public class CDRecordPrint {
         }
         CDField[] cdFields = cdStructure.getCDFields();
         for(CDField cdField : cdFields) {
+            if(cdField==null)continue;
             int maxNumPuts = cdField.getMaxNumPuts();
             if(maxNumPuts==0 && !printAll) continue;
             PVField pvField = cdField.getPVField();
@@ -96,7 +86,6 @@ public class CDRecordPrint {
             case pvStructure: printStructure((CDStructure)cdField,indentLevel+1,printAll); break;
             default: printScalar(cdField,indentLevel+1,printAll); break;
             }
-            checkNumSupportNamePuts(cdField);
         }
     }
 
@@ -112,24 +101,24 @@ public class CDRecordPrint {
                     pvArray.toString(indentLevel+1)));
             return;
         }
-        CDStructureArray cdStructureArray = (CDStructureArray)cdField;
-        CDStructure[] cdFields = cdStructureArray.getElementCDStructures();
-        for(CDField elementCDField : cdFields) {
-            if(elementCDField==null) continue;
-            int maxNumPuts = elementCDField.getMaxNumPuts();
-            if(maxNumPuts==0 && !printAll) continue;
-            PVField pvField = elementCDField.getPVField();
-            Field field = pvField.getField();
-            newLine(indentLevel);
-            text.append(field.getFieldName());
-            if(maxNumPuts>1) {
-                text.append(String.format(" maxNumPuts %d",maxNumPuts));
+        
+        if(elementType==Type.pvArray) {
+            CDArrayArray cdArrayArray = (CDArrayArray)cdField;
+            CDArray[] cdFields = cdArrayArray.getElementCDArrays();
+            for(CDArray elementCDField : cdFields) {
+                if(elementCDField==null) continue;
+                int maxNumPuts = elementCDField.getMaxNumPuts();
+                if(maxNumPuts==0 && !printAll) continue;
+                printArray(elementCDField,indentLevel+1,printAll);
             }
-            switch(elementType) {
-            case pvArray: printArray(elementCDField,indentLevel+1,printAll); break;
-            case pvStructure: printStructure((CDStructure)elementCDField,indentLevel+1,printAll); break;
-            default:
-                throw new IllegalStateException("Logic error.");
+        } else if(elementType==Type.pvStructure) {
+            CDStructureArray cdStructureArray = (CDStructureArray)cdField;
+            CDStructure[] cdFields = cdStructureArray.getElementCDStructures();
+            for(CDStructure elementCDField : cdFields) {
+                if(elementCDField==null) continue;
+                int maxNumPuts = elementCDField.getMaxNumPuts();
+                if(maxNumPuts==0 && !printAll) continue;
+                printStructure(elementCDField,indentLevel+1,printAll);
             }
         }
     }

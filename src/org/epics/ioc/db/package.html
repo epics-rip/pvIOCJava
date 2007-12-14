@@ -11,7 +11,7 @@
 
 <h1 style="text-align: center">EPICS JavaIoc: Database Access <br />
 package: org.epics.ioc.dbAcess <br />
-2007.10.10</h1>
+2007.12.13</h1>
 CONTENTS 
 
 <div class="toc">
@@ -576,7 +576,7 @@ instance.</p>
 <pre>    public interface DBStructure extends DBField {
         PVStructure getPVStructure();
         void replacePVStructure();
-        DBField[] getFieldDBFields();
+        DBField[] getDBFields();
         void beginPut();
         void endPut();
     }
@@ -589,7 +589,7 @@ instance.</p>
     <dd>Get the associated PVStructure interface.</dd>
   <dt style="font-family: courier;">replacePVStructure</dt>
     <dd>Replace the PVStructure interface.</dd>
-  <dt style="font-family: courier;">getFieldDBFields</dt>
+  <dt style="font-family: courier;">getDBFields</dt>
     <dd>Get the DBField array for the subfields.</dd>
   <dt style="font-family: courier;">beginPut</dt>
     <dd>Begin a set of puts to subfields of the structure.</dd>

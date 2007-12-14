@@ -178,7 +178,7 @@ public class SupportCreationFactory {
         private boolean createStructureSupport(DBField dbField) {
             boolean result = SupportCreationFactory.createSupportPvt(requester,dbField);
             DBStructure dbStructure = (DBStructure)dbField;
-            DBField[] dbFields = dbStructure.getFieldDBFields();
+            DBField[] dbFields = dbStructure.getDBFields();
             for(DBField field : dbFields) {
                 Type type = field.getPVField().getField().getType();
                 if(type==Type.pvStructure) {

@@ -88,7 +88,7 @@ public class LongAlarmFactory {
                 setSupportState(supportState);
                 return;
             }
-            DBField[] dbFields = dbStructure.getFieldDBFields();
+            DBField[] dbFields = dbStructure.getDBFields();
             if(dbFields.length==0) {
                 noop = true;
                 setSupportState(supportState);
@@ -158,7 +158,7 @@ public class LongAlarmFactory {
                     return;
                 }
                 Enumerated enumerated = AlarmSeverity.getAlarmSeverity(
-                        dbStructure.getFieldDBFields()[index]);
+                        dbStructure.getDBFields()[index]);
                 if(enumerated==null) {
                     super.message("invalid interval severity field is not alarmSeverity", MessageType.error);
                     return;

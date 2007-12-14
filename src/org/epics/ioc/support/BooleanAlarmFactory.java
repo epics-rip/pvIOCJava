@@ -82,7 +82,7 @@ public class BooleanAlarmFactory {
             }
             pvActive = pvStructure.getBooleanField("active");
             
-            DBField[] dbFields = dbStructure.getFieldDBFields();
+            DBField[] dbFields = dbStructure.getDBFields();
             Structure structure = dbStructure.getPVStructure().getStructure();
             int index = structure.getFieldIndex("falseAlarm");
             if(index<0) {

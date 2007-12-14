@@ -86,6 +86,11 @@ public interface DBField {
      */
     void postPut();
     /**
+     * The data was modified via dbField.
+     * @param dbField The parent field that was modified.
+     */
+    void postPut(DBField dbField);
+    /**
      * Add a listener to this field.
      * @param recordListener The recordListener created by calling dbRecord.createRecordListener.
      */

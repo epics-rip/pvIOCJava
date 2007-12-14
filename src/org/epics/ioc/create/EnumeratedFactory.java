@@ -64,7 +64,7 @@ public class EnumeratedFactory {
             pvStructure.message("elementType for choices is not string", MessageType.error);
             return null;
         }
-        DBField[] dbFields = dbStructure.getFieldDBFields();
+        DBField[] dbFields = dbStructure.getDBFields();
         Enumerated enumerated = new EnumeratedImpl(dbFields[0],dbFields[1],dbFields[2]);
         dbField.setCreate(enumerated);
         return enumerated;

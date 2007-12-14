@@ -5,6 +5,7 @@
  */
 package org.epics.ioc.ca;
 
+import org.epics.ioc.pv.PVField;
 import org.epics.ioc.pv.PVStructure;
 
 /**
@@ -14,14 +15,22 @@ import org.epics.ioc.pv.PVStructure;
  */
 public interface CDStructure extends CDField {
     /**
-     * Get the <i>CDField</i> array for the fields of the structure.
+     * Find the CDField which holds PVField.
+     * @param pvField The PVField.
+     * @return The CDField or null if not found.
+     */
+    CDField findCDField(PVField pvField);
+    /**
+     * Find the CDField which was created for the souce PVField.
+     * @param sourcePVField The source PVField.
+     * @return The CDField or null if not found.
+     */
+    CDField findSourceCDField(PVField sourcePVField);
+    /**
+     * Get the CDField array for the fields of the structure.
      * @return array of CDField. One for each field.
      */
     CDField[] getCDFields();
-    /**
-     * Replace the PVStructure.
-     */
-    void replacePVStructure();
     /**
      * Get the PVStructure.
      * @return The PVStructure interface.

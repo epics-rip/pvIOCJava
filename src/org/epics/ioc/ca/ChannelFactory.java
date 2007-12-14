@@ -5,7 +5,10 @@
  */
 package org.epics.ioc.ca;
 
-import org.epics.ioc.db.IOCDBFactory;
+import java.util.Map;
+import java.util.TreeMap;
+
+import org.epics.ioc.util.MessageType;
 
 
 /**
@@ -13,57 +16,53 @@ import org.epics.ioc.db.IOCDBFactory;
  * @author mrk
  *
  */
-public class ChannelFactory {
-    
-    private static ChannelAccess localAccess = null;
-    private static ChannelAccess remoteAccess = null;
-    
-    /**
-     * Is the name a local process variable.
-     * @param pvName The process variable name.
-     * This is of the form recordName.name.name...
-     * @return (false,true) id the recordName (is not,is)
-     * the name of a record in the local IOC.
-     */
-    public static boolean isLocalChannel(String pvName) {
-        int index = pvName.indexOf('.');
-        String recordName = pvName;
-        if(index>=0) recordName = pvName.substring(0,index);
-        return IOCDBFactory.getMaster().getRecordMap().containsKey(recordName) ;
-    }
+public class ChannelFactory {   
     /**
      * Create a channel.
      * @param pvName The process variable name.
+     * @param providerName The name of the channel provider.
      * @param listener The listener for channel state changes.
-     * @param mustBeLocal If true the request succeeds only if the channel is local.
      * @return The channel or null if it could not be created.
      */
-    public static Channel createChannel(String pvName,ChannelStateListener listener, boolean mustBeLocal) {
-        if(isLocalChannel(pvName)) {
-            if(localAccess==null) ChannelAccessLocalFactory.register();
-            if(localAccess!=null) {
-                return localAccess.createChannel(pvName,listener);
-            }
-            return null;
+    public static Channel createChannel(String pvName,String providerName, ChannelStateListener listener) {
+        ChannelProvider channelProvider = channelProviders.get(providerName);
+        if(channelProvider==null) {
+            listener.message(
+                "providerName " + providerName + " not a registered provider",
+                MessageType.error);
         }
-        if(mustBeLocal) return null;
-        if(remoteAccess!=null) {
-            return remoteAccess.createChannel(pvName,listener);
-        }
-        return null;
+        return channelProvider.createChannel(pvName, listener);
     }
     /**
-     * Register the channel access for local channels. 
-     * @param channelAccess The interface for the implementation.
+     * Register a channelProvider.
+     * @param channelProvider The channelProvider.
      */
-    public static void registerLocalChannelAccess(ChannelAccess channelAccess) {
-        localAccess = channelAccess;
+    public static void registerChannelProvider(ChannelProvider channelProvider) {
+        channelProviders.put(channelProvider.getProviderName(), channelProvider);
     }
     /**
-     * Register the channel access for remote channels. 
-     * @param channelAccess The interface for the implementation.
+     * Get the ChannelProvider.
+     * @param providerName The providerName.
+     * @return The ChannelProvider interface or null if the providerName is not registered.
      */
-    public static void registerRemoteChannelAccess(ChannelAccess channelAccess) {
-        remoteAccess = channelAccess;
+    public static ChannelProvider getChannelProvider(String providerName) {
+        return channelProviders.get(providerName);
+    }
+    /**
+     * Does providerName provide a channel for channelName?
+     * @param channelName The channelName.
+     * @param providerName The provixderName.
+     * @return (false,true) if (does not, does) provide a channel for channelName.
+     */
+    public static boolean isChannelProvider(String channelName,String providerName) {
+        ChannelProvider channelProvider = channelProviders.get(providerName);
+        if(channelProvider==null) return false;
+        return channelProvider.isProvider(channelName);
+        
+    }
+    
+    private static Map<String,ChannelProvider> channelProviders = new TreeMap<String,ChannelProvider>();
+    static {
+        ChannelProviderLocalFactory.register();
     }
 }

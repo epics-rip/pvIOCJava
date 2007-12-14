@@ -9,7 +9,7 @@ import org.epics.ioc.pv.*;
 import org.epics.ioc.util.*;
 
 /**
- * Requester for a ChannelGet.get request.
+ * Requester for a Get.get request.
  * @author mrk
  *
  */
@@ -20,18 +20,18 @@ public interface ChannelGetRequester extends Requester {
      * @param pvField The data.
      * @return (false,true) if the requester (has,has not) obtained all the data.
      * A value of true means that the requester has not retrieved all the data.
-     * The caller must call ChannelGet.getDelayed in order to access more data.
+     * The caller must call Get.getDelayed in order to access more data.
      * The getDelayed call will result in nextDelayedGetData being called. 
      * This normally means that an array is being transfered and the requester is
      * not able to handle the array as a single chunk of data. 
      */
     boolean nextGetField(ChannelField channelField,PVField pvField);
     /**
-     * Called as a result of a call to ChannelGet.getDelayed,
+     * Called as a result of a call to Get.getDelayed,
      * The underlying database is locked and this is called. 
      * @param pvField The data.
      * @return (false,true) if the requester (will not, will)
-     * call ChannelGet.getDelayed again for this pvField.
+     * call Get.getDelayed again for this pvField.
      */
     boolean nextDelayedGetField(PVField pvField);
     /**

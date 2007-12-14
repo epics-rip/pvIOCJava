@@ -67,7 +67,7 @@ public class DBRecordFactory {
                 pvFieldFind[index--] = parent;
                 parent = parent.getParent();
             }
-            DBField[] dbFields = dbStructure.getFieldDBFields();
+            DBField[] dbFields = dbStructure.getDBFields();
             PVField[] pvFields = pvRecord.getPVFields();
             return findDBField(pvField,pvFieldFind,0,dbFields,pvFields);
         }
@@ -85,7 +85,7 @@ public class DBRecordFactory {
                     }
                     if(pvNow.getField().getType()!=Type.pvStructure) return dbFields[j];
                     DBStructure dbStructure = (DBStructure)dbFields[j];
-                    dbFields = dbStructure.getFieldDBFields();
+                    dbFields = dbStructure.getDBFields();
                     PVStructure pvStructure = (PVStructure)pvFields[j];
                     pvFields = pvStructure.getPVFields();
                     index++;
@@ -123,7 +123,7 @@ public class DBRecordFactory {
                             throw new IllegalStateException("Logic error");
                         }
                         return findDBField(pvField,pvFieldFind,index+1,
-                            dbStructure.getFieldDBFields(),pvStructure.getPVFields());
+                            dbStructure.getDBFields(),pvStructure.getPVFields());
                     }
                 }
                 throw new IllegalStateException("Logic error");

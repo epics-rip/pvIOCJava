@@ -72,7 +72,7 @@ public class GetChannel extends Dialog implements SelectionListener {
             }
         }
         shell.dispose();
-        Channel channel = ChannelFactory.createChannel(recordName, channelStateListener, false);
+        Channel channel = ChannelFactory.createChannel(recordName,"local", channelStateListener);
         if(channel==null) {
             requester.message(String.format(
                     "pvname %s not found%n",recordName),MessageType.error);

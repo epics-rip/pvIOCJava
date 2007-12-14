@@ -59,7 +59,7 @@ public class BaseDBStructure extends BaseDBField implements DBStructure
     /* (non-Javadoc)
      * @see org.epics.ioc.db.DBStructure#getFieldDBFields()
      */
-    public DBField[] getFieldDBFields() {
+    public DBField[] getDBFields() {
         return dbFields;
     }
     /* (non-Javadoc)
@@ -87,6 +87,28 @@ public class BaseDBStructure extends BaseDBField implements DBStructure
      */
     public PVStructure getPVStructure() {
         return (PVStructure)super.getPVField();
+    }
+    /* (non-Javadoc)
+     * @see org.epics.ioc.db.BaseDBField#postPut()
+     */
+    @Override
+    public void postPut() {
+        for(DBField dbField : dbFields) {
+            BaseDBField baseDBField = (BaseDBField)dbField;
+            baseDBField.postPut(this);
+        }
+        super.postPut();
+    }
+
+    /* (non-Javadoc)
+     * @see org.epics.ioc.db.BaseDBField#postPut(org.epics.ioc.db.DBField)
+     */
+    @Override
+    public void postPut(DBField dbField) {
+        for(DBField dbF : dbFields) {
+            dbF.postPut(dbField);
+           
+        }
     }
     
     private void createFields() {

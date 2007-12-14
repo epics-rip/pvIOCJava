@@ -68,6 +68,14 @@ public enum ScanPriority {
     public int getJavaPriority() {
         return javaPriority[ordinal()];
     }
+    /**
+     * Get the javaPriority for a given scanPriority.
+     * @param scanPriority The scanPriority.
+     * @return The java priority.
+     */
+    public static int getJavaPriority(ScanPriority scanPriority) {
+        return scanPriority.getJavaPriority();
+    }
     
     private static final String[] scanPriorityChoices = {
         "lowest","lower","low","middle","high","higher","highest"

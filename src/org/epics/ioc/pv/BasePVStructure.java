@@ -40,6 +40,16 @@ public class BasePVStructure extends AbstractPVField implements PVStructure
         }
     }
     /* (non-Javadoc)
+     * @see org.epics.ioc.pv.AbstractPVField#getSubField(java.lang.String)
+     */
+    @Override
+    public PVField getSubField(String fieldName) {
+        for(PVField pvField : pvFields) {
+            if(pvField.getField().getFieldName().equals(fieldName)) return pvField;
+        }
+        return null;
+    }
+    /* (non-Javadoc)
      * @see org.epics.ioc.pv.PVStructure#getStructure()
      */
     public Structure getStructure() {

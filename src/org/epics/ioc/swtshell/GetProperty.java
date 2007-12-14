@@ -13,8 +13,7 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Dialog;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
-import org.epics.ioc.pv.Field;
-import org.epics.ioc.ca.*;
+import org.epics.ioc.ca.ChannelField;
 
 /**
  * @author mrk

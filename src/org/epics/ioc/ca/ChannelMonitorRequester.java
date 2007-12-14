@@ -1,27 +1,46 @@
 /**
- * Copyright - See the COPYRIGHT that is included with this disctibution.
+ * Copyright - See the COPYRIGHT that is included with this distribution.
  * EPICS JavaIOC is distributed subject to a Software License Agreement found
  * in file LICENSE that is included with this distribution.
  */
 package org.epics.ioc.ca;
 
-import org.epics.ioc.util.*;
-
+import org.epics.ioc.pv.PVField;
+import org.epics.ioc.util.Requester;
 
 /**
- * Requester that monitors a channel and wants data returned when a monitor event occurs.
+ * Interface 
  * @author mrk
  *
  */
 public interface ChannelMonitorRequester extends Requester{
     /**
-     * New subscribe data value.
-     * @param cD The channelData.
+     * Begin put. Start of one or more dataPuts.
      */
-    void monitorCD(CD cD);
+    void beginPut();
     /**
-     * Monitor event have been missed.
-     * @param number Number of missed monitor events.
+     * End of dataPuts.
      */
-    void dataOverrun(int number);
+    void endPut();
+    /**
+     * A put to a channelField has occured.
+     * @param modifiedPVField The pvField that has been modified.
+     */
+    void dataPut(PVField modifiedPVField);
+    /**
+     * A put to a subfield of a channelField has occured.
+     * @param requestedPVField The target pvField of the channelField.
+     * It can be any field that has subfields. This the pvType can be.
+     * <ol>
+     *  <li>pvStructure.</li>
+     *  <li>pvArray that has a elementType of
+     *     <ol>
+     *        <li>pvStructure</li>
+     *        <li>pvArray</li>
+     *     </ol>
+     *     </li>
+     * </ol>
+     * @param modifiedPVField The data that has been modified.
+     */
+    void dataPut(PVField requestedPVField,PVField modifiedPVField);
 }

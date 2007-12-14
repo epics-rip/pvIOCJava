@@ -5,7 +5,8 @@
  */
 package org.epics.ioc.ca;
 
-import org.epics.ioc.pv.*;
+import org.epics.ioc.pv.PVField;
+
 /**
  * CD (ChannelData). This provides storage for a ChannelFieldGroup.
  * The storage is presented as a CDRecord.
@@ -13,6 +14,10 @@ import org.epics.ioc.pv.*;
  *
  */
 public interface CD {
+    /**
+     * Destroy this CD.
+     */
+    void destroy();
     /**
      * Get the record name, which is the same as the channel name.
      * @return The name.
@@ -24,50 +29,57 @@ public interface CD {
      */
     ChannelFieldGroup getChannelFieldGroup();
     /**
-     * Get the array of CDField. One each element of the channelFieldGroup.
-     * @return The array.
+     * Get the CDRecord for the channelFieldGroup.
+     * @return The interface.
      */
     CDRecord getCDRecord();
     /**
-     * Get the maximum number of put to a single field since the last <i>clearNumPuts</i>.
-     * @return The maximum number of puts.
-     */
-    int getMaxPutsToField();
-    /**
-     * Clear the number of puts to all fields.
+     * Set all number of puts to 0.
      */
     void clearNumPuts();
     /**
-     * The pvField has been modified.
-     * @param targetPVField The pvField.
+     * Get data from the CDField and put it into the pvField.
+     * @param pvField The pvField into which to put the data.
      */
-    void dataPut(PVField targetPVField);
+    void get(PVField pvField);
     /**
-     * The supportName has been modified.
-     * @param targetPVField The pvField.
+     * Put the pvData into the CDField.
+     * @param pvField The pvField containing the data to put into the CDField.
+     * This must be the PVField for the ChannelField.
      */
-    void supportNamePut(PVField targetPVField);
+    void put(PVField pvField);
     /**
-     * Start of a structure modification.
-     * @param targetPVStructure The structure.
+     * A put to a subfield of a CDField has occured. 
+     * @param pvField The pvField 
+     * This must be the PVField for the ChannelField.
+     * @param pvSubField The pvField containing the data to put into the subfield opf the CDField. 
+     * This must be the PVField for ChannelField that is a subfield of ChannelField.
      */
-    void beginPut(PVStructure targetPVStructure);
+    void put(PVField pvField,PVField pvSubField);
     /**
-     * End of a structure modification.
-     * @param targetPVStructure The structure.
+     * Create a CDGet.
+     * @param cdGetRequester The channelDataGetRequester
+     * @param process Process before getting data.
+     * @return An interface for the CDGet or null if the caller can't process the record.
      */
-    void endPut(PVStructure targetPVStructure);
+    CDGet createCDGet(CDGetRequester cdGetRequester,boolean process);
     /**
-     * A put to a subfield of a structure has occured. 
-     * @param requested The target field that has targetPVField as a subfield.
-     * @param targetPVField The data that has been modified..
+     * Destroy a channelDataGet.
+     * If a request is active it will complete but no new requestes will be accepted.
+     * @param cdGet The channelCDGet
      */
-    void dataPut(PVField requested,PVField targetPVField);
+    void destroy(CDGet cdGet);
     /**
-     * A put to the supportName of a subfield of a structure has occured. 
-     * The supportName has been modified.
-     * @param requested The target field that has targetPVField as a subfield.
-     * @param targetPVField The pvField in the structure.
+     * Create a CDPut.
+     * @param cdPutRequester The channelDataPutRequester
+     * @param process Should record be processed after put.
+     * @return An interface for the Put or null if the caller can't process the record.
      */
-    void supportNamePut(PVField requested,PVField targetPVField);
+    CDPut createCDPut(CDPutRequester cdPutRequester,boolean process);
+    /**
+     * Destroy a channelDataPut.
+     * If a request is active it will complete but no new requestes will be accepted.
+     * @param cdPut The channelCDPut
+     */
+    void destroy(CDPut cdPut);
 }

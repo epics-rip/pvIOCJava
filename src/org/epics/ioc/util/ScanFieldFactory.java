@@ -45,8 +45,8 @@ public class ScanFieldFactory {
             pvRecord.message("field scan is not a structure", MessageType.fatalError);
             return null;
         }
-        DBStructure dbScan = (DBStructure)dbRecord.getDBStructure().getFieldDBFields()[index];
-        DBField[] dbFields = dbScan.getFieldDBFields();
+        DBStructure dbScan = (DBStructure)dbRecord.getDBStructure().getDBFields()[index];
+        DBField[] dbFields = dbScan.getDBFields();
         PVStructure pvScan = (PVStructure)pvField;
         Structure structure = pvScan.getStructure();
         if(!structure.getStructureName().equals("scan")) {

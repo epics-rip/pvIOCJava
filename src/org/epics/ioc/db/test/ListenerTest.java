@@ -116,7 +116,7 @@ public class ListenerTest extends TestCase {
             return;
         }
         DBStructure dbStructure = (DBStructure)dbRecord.findDBField(pvField);
-        DBField[] dbDatas = dbStructure.getFieldDBFields();
+        DBField[] dbDatas = dbStructure.getDBFields();
         System.out.printf("%ntestPut begin structure put %s%n",
                 recordName + pvField.getFullFieldName());
         dbRecord.beginProcess();

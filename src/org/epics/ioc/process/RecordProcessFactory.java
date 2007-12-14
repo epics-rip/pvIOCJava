@@ -148,7 +148,7 @@ public class RecordProcessFactory {
                         pvRecord.getRecordName() + " has no support");
                 }
                 PVField[] pvFields = pvRecord.getPVFields();
-                DBField[] dbFields = dbStructure.getFieldDBFields();
+                DBField[] dbFields = dbStructure.getDBFields();
                 PVField pvField;
                 Structure structure = (Structure)pvRecord.getField();
                 int index;

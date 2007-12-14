@@ -2,8 +2,8 @@
 <IOCDatabase>
 <include addPath = "example" />
 <include href = "dataOnlyDB.xml" />
-<include href = "stringDB.xml" />
 <include href = "counterDB.xml" />
+<include href = "stringDB.xml" />
 <include href = "scalarDB.xml" />
 <include href = "arrayDB.xml" />
 <include href = "aiDB.xml" />
@@ -14,7 +14,7 @@
 <include href = "powerSupplyAllDB.xml" />
 <include href = "allTypesDB.xml" />
 <include href = "powerSupplyArrayDB.xml" />
-<include removePath = "example" />
 <!--
 -->
+<include removePath = "example" />
 </IOCDatabase>

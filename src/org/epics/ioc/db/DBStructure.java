@@ -17,7 +17,7 @@ public interface DBStructure extends DBField {
      * Get the <i>DBField</i> array for the fields of the structure.
      * @return array of DBField. One for each field.
      */
-    DBField[] getFieldDBFields();
+    DBField[] getDBFields();
     /**
      * Replace the current PVStructure.
      */

@@ -26,11 +26,22 @@ public interface ChannelField {
      */
     PVField getPVField();
     /**
+     * The client has put data to channelField.
+     */
+    void postPut();
+    /**
      * Find the channelField for propertyName.
      * @param propertyName The name of the property.
      * @return The ChannelField.
      */
     ChannelField findProperty(String propertyName);
+    /**
+     * Create a ChannelField for the fieldName.
+     * This is only valid if the ChannelField contains a structure.
+     * @param fieldName The fieldName.
+     * @return The ChannelField or null if invalid request.
+     */
+    ChannelField createChannelField(String fieldName);
     /**
      * Get the names of properties for this field.
      * @return The array of names.

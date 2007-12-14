@@ -5,67 +5,28 @@
  */
 package org.epics.ioc.ca;
 
-import org.epics.ioc.util.ScanPriority;
-
 /**
- * Interface for monitoring channel data.
+ * Monitor data from a channel.
  * @author mrk
  *
  */
 public interface ChannelMonitor {
     /**
-     * Look for any put to a channelField.
-     * @param channelField The channelField to monitor.
-     * @param causeMonitor If true this will cause monitor even if no other changes occur.
+     * Specify the group of fields to momnitor.
+     * @param channelFieldGroup The field group to monitor.
      */
-    void lookForPut(ChannelField channelField, boolean causeMonitor);
+    void setFieldGroup(ChannelFieldGroup channelFieldGroup);
     /**
-     * Look for any put to a channelField.
-     * This is only valid for the following types of field:
-     * boolean, numeric, and string. It is also valid for the index of a menu or enum field.
-     * @param channelField The channelField to monitor.
-     * @param causeMonitor If true this will cause monitor even if no other changes occur.
+     * Put the current data from the field group.
+     * @param cd The ChannelData into which the data is put.
      */
-    void lookForChange(ChannelField channelField, boolean causeMonitor);
+    void getData(CD cd);
     /**
-     * Look for a put in the value of the field.
-     * This can only be used for scalar numeric field.
-     * @param channelField The channelField to monitor.
-     * @param value The deadband value for changes.
+     * Start monitoring.
      */
-    void lookForAbsoluteChange(ChannelField channelField,double value);
+    void start();
     /**
-     * Look for a percentage put in the value of the field.
-     * @param channelField The channelField to monitor.
-     * @param value The deadband value for changes.
-     */
-    void lookForPercentageChange(ChannelField channelField,double value);
-    /**
-     * Start monitoring for changes and send notification of changes but not the data.
-     * @param channelMonitorNotifyRequester The requester.
-     * @param threadName Name of notification thread.
-     * @param scanPriority Priority of notification thread.
-     * @return (false,true) if the monitor (has not, has) started.
-     */
-    boolean start(ChannelMonitorNotifyRequester channelMonitorNotifyRequester,
-        String threadName, ScanPriority scanPriority);
-    /**
-     * Start monitoring for changes and send the data that has changed..
-     * @param channelMonitorRequester The requester.
-     * @param queueSize The size for a data queue.
-     * @param threadName Name of notification thread.
-     * @param scanPriority Priority of notification thread.
-     * @return (false,true) if the monitor (has not, has) started.
-     */
-    boolean start(ChannelMonitorRequester channelMonitorRequester,
-        int queueSize, String threadName, ScanPriority scanPriority);
-    /**
-     * Stop monitoring.
+     * Stop Monitoring.
      */
     void stop();
-    /**
-     * Is a monitor active.
-     * @return (false,true) in the monitor (is not, is) started.
-     */
-    boolean isStarted();
 }

@@ -11,7 +11,6 @@ import org.epics.ioc.pv.*;
  *
  */
 public class BaseCDArrayArray extends BaseCDArray implements CDArrayArray{
-    private boolean supportAlso;
     private PVArrayArray pvArrayArray;
     private CDArray[] elementCDArrays;
     private ArrayArrayData arrayArrayData = new ArrayArrayData();
@@ -21,13 +20,11 @@ public class BaseCDArrayArray extends BaseCDArray implements CDArrayArray{
      * @param parent The parent cdField.
      * @param cdRecord The cdRecord that contains this field.
      * @param pvArrayArray The pvArrayArray that this CDField references.
-     * @param supportAlso Should support be read/written?
      */
     public BaseCDArrayArray(
-        CDField parent,CDRecord cdRecord,PVArrayArray pvArrayArray,boolean supportAlso)
+        CDField parent,CDRecord cdRecord,PVArrayArray pvArrayArray,ChannelField channelField)
     {
-        super(parent,cdRecord,pvArrayArray,supportAlso);
-        this.supportAlso = supportAlso;
+        super(parent,cdRecord,pvArrayArray,channelField);
         this.pvArrayArray = pvArrayArray;
         createElementCDBArrays();
     }
@@ -35,35 +32,11 @@ public class BaseCDArrayArray extends BaseCDArray implements CDArrayArray{
      * @see org.epics.ioc.ca.BaseCDField#clearNumPuts()
      */
     public void clearNumPuts() {
-        for(CDField cdField : elementCDArrays) cdField.clearNumPuts();
+        for(CDField cdField : elementCDArrays) {
+            if(cdField==null) continue;
+            cdField.clearNumPuts();
+        }
         super.clearNumPuts();
-    }
-    /* (non-Javadoc)
-     * @see org.epics.ioc.ca.BaseCDField#dataPut(org.epics.ioc.pv.PVField)
-     */
-    public void dataPut(PVField targetPVField) {
-        if(supportAlso) {
-            String supportName = targetPVField.getSupportName();
-            if(supportName!=null) super.supportNamePut(targetPVField.getSupportName());
-        }
-        PVArrayArray targetPVArrayArray = (PVArrayArray)targetPVField;
-        if(checkPVArrayArray(targetPVArrayArray)) {
-            super.incrementNumPuts();
-            return;
-        }
-        int length = targetPVArrayArray.getLength();
-        pvArrayArray.get(0, length, arrayArrayData);
-        PVArray[] pvArrays = arrayArrayData.data;
-        targetPVArrayArray.get(0, length, arrayArrayData);
-        PVArray[] targetArrays = arrayArrayData.data;
-        for(int i=0; i<length; i++) {
-            PVArray targetPVArray = targetArrays[i];
-            if(targetPVArray==null) continue;
-            CDField cdField = elementCDArrays[i];
-            cdField.dataPut(targetPVArray);
-        }
-        pvArrayArray.put(0, pvArrays.length, pvArrays, 0);
-        super.incrementNumPuts();
     }
     /* (non-Javadoc)
      * @see org.epics.ioc.ca.CDArrayArray#getElementCDArrays()
@@ -72,139 +45,165 @@ public class BaseCDArrayArray extends BaseCDArray implements CDArrayArray{
         return elementCDArrays;
     }
     /* (non-Javadoc)
-     * @see org.epics.ioc.ca.CDNonScalarArray#replacePVArray()
+     * @see org.epics.ioc.ca.CDArrayArray#findCDField(org.epics.ioc.pv.PVField)
      */
-    public void replacePVArray() {
-        pvArrayArray = (PVArrayArray)super.getPVField();
-        createElementCDBArrays();
+    public CDField findCDField(PVField pvField) {
+        int length = elementCDArrays.length;
+        for(int i=0; i<length; i++) {
+            CDArray cdArray = elementCDArrays[i];
+            if(cdArray==null) continue;
+            if(cdArray.getPVField()==pvField) return cdArray;
+        }
+        for(int i=0; i<length; i++) {
+            CDArray cdArray = elementCDArrays[i];
+            if(cdArray==null) continue;
+            PVArray pvArray = cdArray.getPVArray();
+            Type elementType = pvArray.getArray().getType();
+            if(elementType==Type.pvArray) {
+                CDArrayArray elementCD = (CDArrayArray)cdArray;
+                CDField cdField = elementCD.findCDField(pvField);
+                if(cdField!=null) return cdField;
+            } else if(elementType==Type.pvStructure) {
+                CDStructureArray elementCD = (CDStructureArray)cdArray;
+                CDField cdField = elementCD.findCDField(pvField);
+                if(cdField!=null) return cdField;
+            }
+            
+        }
+        return null;
     }
     /* (non-Javadoc)
-     * @see org.epics.ioc.ca.BaseCDField#dataPut(org.epics.ioc.pv.PVField, org.epics.ioc.pv.PVField)
+     * @see org.epics.ioc.ca.CDArrayArray#findSourceCDField(org.epics.ioc.pv.PVField)
      */
-    public boolean dataPut(PVField requested,PVField targetPVField) {
-        PVArrayArray targetPVArrayArray = (PVArrayArray)requested;
-        checkPVArrayArray(targetPVArrayArray);
-        int length = pvArrayArray.getLength();
-        pvArrayArray.get(0, length, arrayArrayData);
-        targetPVArrayArray.get(0, length, arrayArrayData);
-        PVArray[] targetArrays = arrayArrayData.data;
+    public CDField findSourceCDField(PVField pvField) {
+        int length = elementCDArrays.length;
         for(int i=0; i<length; i++) {
-            PVArray targetArray = targetArrays[i];
-            if(targetArray==null) continue;
-            CDField cdField = elementCDArrays[i];
-            if(cdField.dataPut(targetArray, targetPVField)) {
-                super.setMaxNumPuts(cdField.getMaxNumPuts());
-                return true;
+            CDArray cdArray = elementCDArrays[i];
+            if(cdArray==null) continue;
+            if(cdArray.getChannelField().getPVField()==pvField) return cdArray;
+        }
+        for(int i=0; i<length; i++) {
+            CDArray cdArray = elementCDArrays[i];
+            if(cdArray==null) continue;
+            PVArray pvArray = cdArray.getPVArray();
+            Type elementType = pvArray.getArray().getType();
+            if(elementType==Type.pvArray) {
+                CDArrayArray elementCD = (CDArrayArray)cdArray;
+                CDField cdField = elementCD.findSourceCDField(pvField);
+                if(cdField!=null) return cdField;
+            } else if(elementType==Type.pvStructure) {
+                CDStructureArray elementCD = (CDStructureArray)cdArray;
+                CDField cdField = elementCD.findSourceCDField(pvField);
+                if(cdField!=null) return cdField;
             }
+            
         }
-        return false;
-    }   
+        return null;
+    }
     /* (non-Javadoc)
-     * @see org.epics.ioc.ca.BaseCDField#supportNamePut(org.epics.ioc.pv.PVField, org.epics.ioc.pv.PVField)
+     * @see org.epics.ioc.ca.BaseCDField#get(org.epics.ioc.pv.PVField, boolean)
      */
-    public boolean supportNamePut(PVField requested,PVField targetPVField) {
-        if(!supportAlso) return false;
-        PVArrayArray targetPVArrayArray = (PVArrayArray)requested;
-        checkPVArrayArray(targetPVArrayArray);
-        int length = pvArrayArray.getLength();
-        pvArrayArray.get(0, length, arrayArrayData);
-        targetPVArrayArray.get(0, length, arrayArrayData);
-        PVArray[] targetArrays = arrayArrayData.data;
-        for(int i=0; i<length; i++) {
-            PVArray targetArray = targetArrays[i];
-            if(targetArray==null) continue;
-            CDField cdField = elementCDArrays[i];
-            if(cdField.supportNamePut(targetArray, targetPVField)) return true;
+    public void get(PVField toPVField,boolean postPut) {       
+        if(super.getChannelField().getPVField()!=toPVField) {
+            throw new IllegalStateException("Logic error");
         }
-        return false;
-    }  
-    
-    private void createElementCDBArrays() {
+        if(super.getMaxNumPuts()<=0) return;
+        PVArrayArray sourcePVArrayArray = (PVArrayArray)toPVField;
         int length = pvArrayArray.getLength();
-        elementCDArrays = new CDArray[length];
-        CDRecord cdRecord = super.getCDRecord();
         pvArrayArray.get(0, length, arrayArrayData);
         PVArray[] pvArrays = arrayArrayData.data;
+        sourcePVArrayArray.get(0, length, arrayArrayData);
+        PVArray[] sourcePVArrays = arrayArrayData.data;
+        boolean postSubField = postPut;
+        if(super.getNumPuts()>0) postSubField = false;
         for(int i=0; i<length; i++) {
             PVArray pvArray = pvArrays[i];
-            if(pvArray==null) {
-                elementCDArrays[i] = null;
-            } else {
-                Array array = (Array)pvArray.getField();
-                Type elementType = array.getElementType();
-                if(elementType.isScalar()) {
-                    elementCDArrays[i] = new BaseCDArray(this,cdRecord,pvArray,supportAlso);
-                    continue;
-                }
-                switch(elementType) {
-                case pvArray:
-                    elementCDArrays[i] = new BaseCDArrayArray(this,cdRecord,(PVArrayArray)pvArray,supportAlso);
-                    continue;
-                case pvStructure:
-                    elementCDArrays[i] = new BaseCDStructureArray(this,cdRecord,(PVStructureArray)pvArray,supportAlso);
-                    continue;
-                default:
-                    throw new IllegalStateException("Logic error");
-                }
-            }
+            PVArray sourcePVArray = sourcePVArrays[i];
+            if(pvArray==null||sourcePVArray==null) continue;
+            CDField cdField = elementCDArrays[i];
+            cdField.get(sourcePVArray,postSubField);
         }
+        if(postPut && super.getNumPuts()>0) super.getChannelField().postPut();
     }
-       
-    private boolean checkPVArrayArray(PVArrayArray targetPVArrayArray) {
-        boolean madeChanges = false;
-        int length = targetPVArrayArray.getLength();
-        if(elementCDArrays.length<length) {
-            madeChanges = true;
-            CDArray[] newDatas = new CDArray[length];
-            for(int i=0;i<elementCDArrays.length; i++) {
-                newDatas[i] = elementCDArrays[i];
-            }
-            elementCDArrays = newDatas;
+    /* (non-Javadoc)
+     * @see org.epics.ioc.ca.BaseCDField#dataPut(org.epics.ioc.pv.PVField)
+     */
+    public void put(PVField pvField) {
+        if(super.getChannelField().getPVField()!=pvField) {
+            throw new IllegalStateException("Logic error");
         }
-        CDRecord cdRecord = super.getCDRecord();
-        PVDataCreate pvDataCreate = cdRecord.getPVDataCreate();
+        PVArrayArray sourcePVArrayArray = (PVArrayArray)pvField;
+        int length = sourcePVArrayArray.getLength();
         pvArrayArray.get(0, length, arrayArrayData);
         PVArray[] pvArrays = arrayArrayData.data;
-        targetPVArrayArray.get(0, length, arrayArrayData);
-        PVArray[] targetArrays = arrayArrayData.data;
+        sourcePVArrayArray.get(0, length, arrayArrayData);
+        PVArray[] sourceArrays = arrayArrayData.data;
         for(int i=0; i<length; i++) {
-            PVArray targetPVArray = targetArrays[i];
-            if(targetPVArray==null) {
-                if(pvArrays[i]!=null) {
-                    madeChanges = true;
-                    pvArrays[i] = null;
-                    elementCDArrays[i] = null;
-                }
-                continue;
-            }
-            if(elementCDArrays[i]==null) {
-                madeChanges = true;
-                Field newField = cdRecord.createField(targetPVArray.getField());
-                PVArray newArray = (PVArray)pvDataCreate.createPVField(pvArrayArray, newField);
-                pvArrays[i] = newArray;
-                Array array = (Array)targetPVArray.getField();
-                Type elementType = array.getElementType();
-                if(elementType.isScalar()) {
-                    elementCDArrays[i] = new BaseCDArray(this,cdRecord,newArray,supportAlso);
-                    break;
-                }
-                switch(elementType) {
-                case pvArray:
-                    elementCDArrays[i] = new BaseCDArrayArray(this,cdRecord,(PVArrayArray)newArray,supportAlso);
-                    break;
-                case pvStructure:
-                    elementCDArrays[i] = new BaseCDStructureArray(this,cdRecord,(PVStructureArray)newArray,supportAlso);
-                    break;
-                default:
-                    throw new IllegalStateException("Logic error");
-                }
-                elementCDArrays[i].dataPut(targetPVArray);
-                elementCDArrays[i].supportNamePut(targetPVArray.getSupportName());
+            PVArray sourcePVArray = sourceArrays[i];
+            if(sourcePVArray==null) continue;
+            CDField cdField = elementCDArrays[i];
+            cdField.put(sourcePVArray);
+        }
+        pvArrayArray.put(0, pvArrays.length, pvArrays, 0);
+        super.incrementNumPuts();
+    }
+    /* (non-Javadoc)
+     * @see org.epics.ioc.ca.CDField#dataPut(org.epics.ioc.pv.PVField, org.epics.ioc.pv.PVField)
+     */
+    public void put(PVField pvField,PVField pvSubField) {
+        if(super.getChannelField().getPVField()!=pvField) {
+            throw new IllegalStateException("Logic error");
+        }
+        CDField cdField = findSourceCDField(pvSubField);
+        if(cdField==null) {
+            throw new IllegalStateException("Logic error");
+        }
+        cdField.put(pvSubField);
+    }   
+    
+    private void createElementCDBArrays() {
+        ChannelField channelField = super.getChannelField();
+        PVArrayArray sourcePVArrayArray = (PVArrayArray)channelField.getPVField();
+        int length = sourcePVArrayArray.get(0,sourcePVArrayArray.getLength(), arrayArrayData);
+        PVArray[] sourcePVArrays = arrayArrayData.data;
+        elementCDArrays = new CDArray[length];       
+        PVArray[] pvArrays = new PVArray[length];
+        for(int i=0; i<length; i++) {
+            PVArray pvArray = sourcePVArrays[i];
+            if(pvArray==null) {
+                elementCDArrays[i] = null;
+                pvArrays[i] = null;
+            } else {
+                elementCDArrays[i] = createCDArray(pvArray);
+                pvArrays[i] = elementCDArrays[i].getPVArray();
             }
         }
-        if(madeChanges) {
-            pvArrayArray.put(0, pvArrays.length, pvArrays, 0);
+        pvArrayArray.put(0, length, pvArrays, 0);
+    }
+    
+    private CDArray createCDArray(PVArray pvArray) {
+        CDRecord cdRecord = super.getCDRecord();
+        PVDataCreate pvDataCreate = cdRecord.getPVDataCreate();
+        Array array = (Array)pvArray.getField();
+        Type elementType = array.getElementType();
+        PVArray newPVArray = pvDataCreate.createPVArray(
+            pvArrayArray,
+            array,
+            pvArray.getCapacity(),
+            pvArray.isCapacityMutable());
+        ChannelField channelField = super.getChannelField().findProperty(pvArray.getField().getFieldName());
+        if(elementType.isScalar()) {
+            return new BaseCDArray(this,cdRecord,newPVArray,channelField);
         }
-        return madeChanges;
+        switch(elementType) {
+        case pvArray:
+            return new BaseCDArrayArray(
+                this,cdRecord,(PVArrayArray)newPVArray,channelField);
+        case pvStructure:
+            return new BaseCDStructureArray(
+                this,cdRecord,(PVStructureArray)newPVArray,channelField);
+        default:
+            throw new IllegalStateException("Logic error");
+        }
     }
 }

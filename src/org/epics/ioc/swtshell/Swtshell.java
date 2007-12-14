@@ -123,11 +123,39 @@ public class Swtshell {
             layout.numColumns = 1;
             layout.makeColumnsEqualWidth = true;
             shell.setLayout(layout);
-            Button probeDB = new Button(shell,SWT.PUSH);
-            probeDB.setText("probe");
-            probeDB.addSelectionListener( new SelectionAdapter() {
+            Button getDB = new Button(shell,SWT.PUSH);
+            getDB.setText("get");
+            getDB.addSelectionListener( new SelectionAdapter() {
                 public void widgetSelected(SelectionEvent e) {
-                    Probe.init(display);
+                    Get.init(display);
+                }
+            });
+            Button putDB = new Button(shell,SWT.PUSH);
+            putDB.setText("put");
+            putDB.addSelectionListener( new SelectionAdapter() {
+                public void widgetSelected(SelectionEvent e) {
+                    Put.init(display);
+                }
+            });
+            Button processDB = new Button(shell,SWT.PUSH);
+            processDB.setText("process");
+            processDB.addSelectionListener( new SelectionAdapter() {
+                public void widgetSelected(SelectionEvent e) {
+                    Process.init(display);
+                }
+            });
+            Button monitorDB = new Button(shell,SWT.PUSH);
+            monitorDB.setText("monitor");
+            monitorDB.addSelectionListener( new SelectionAdapter() {
+                public void widgetSelected(SelectionEvent e) {
+                    Monitor.init(display);
+                }
+            });
+            Button processorDB = new Button(shell,SWT.PUSH);
+            processorDB.setText("processor");
+            processorDB.addSelectionListener( new SelectionAdapter() {
+                public void widgetSelected(SelectionEvent e) {
+                    Processor.init(display);
                 }
             });
             Button loadDatabase = new Button(shell,SWT.PUSH);
@@ -142,13 +170,6 @@ public class Swtshell {
             introspectDatabase.addSelectionListener( new SelectionAdapter() {
                 public void widgetSelected(SelectionEvent e) {
                     IntrospectDatabase.init(display);
-                }
-            });
-            Button monitorDB = new Button(shell,SWT.PUSH);
-            monitorDB.setText("monitor");
-            monitorDB.addSelectionListener( new SelectionAdapter() {
-                public void widgetSelected(SelectionEvent e) {
-                    Monitor.init(display);
                 }
             });
             Button v3iocshellDB = new Button(shell,SWT.PUSH);

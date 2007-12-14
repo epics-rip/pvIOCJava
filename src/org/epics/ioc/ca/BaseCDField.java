@@ -14,28 +14,27 @@ import org.epics.ioc.pv.*;
  */
 public class BaseCDField implements CDField {
     private static Convert convert = ConvertFactory.getConvert();
-    private boolean supportAlso;
     private CDField parent;
     private CDRecord cdRecord;
     private PVField pvField;
+    private ChannelField channelField;
     private int maxNumPuts = 0;
     private int numPuts = 0;
-    private int numSupportNamePuts = 0;
     
     /**
      * Constructor.
      * @param parent The parent cdField.
      * @param cdRecord The cdRecord that contains this field.
-     * @param pvField The pvField that this CDField references.
-     * @param supportAlso Should support be read/written?
+     * @param pvField The pvField that this CDField.
+     * @param channelField The channelField.
      */
     public BaseCDField(
-        CDField parent,CDRecord cdRecord,PVField pvField,boolean supportAlso)
+        CDField parent,CDRecord cdRecord,PVField pvField,ChannelField channelField)
     {
-        this.supportAlso = supportAlso;
         this.parent = parent;
         this.cdRecord = cdRecord;
         this.pvField = pvField;
+        this.channelField = channelField;
     }
     /* (non-Javadoc)
      * @see org.epics.ioc.ca.CDField#getParent()
@@ -56,11 +55,10 @@ public class BaseCDField implements CDField {
         return pvField;
     }
     /* (non-Javadoc)
-     * @see org.epics.ioc.ca.CDField#replacePVField(org.epics.ioc.pv.PVField)
+     * @see org.epics.ioc.ca.CDField#getChannelField()
      */
-    public void replacePVField(PVField newPVField) {
-        pvField.replacePVField(newPVField);
-        pvField = newPVField;
+    public ChannelField getChannelField() {
+        return channelField;
     }
     /* (non-Javadoc)
      * @see org.epics.ioc.ca.CDField#getNumPuts()
@@ -93,38 +91,25 @@ public class BaseCDField implements CDField {
         }
     }
     /* (non-Javadoc)
-     * @see org.epics.ioc.ca.CDField#supportNameChange()
-     */
-    public int getNumSupportNamePuts() {
-        return numSupportNamePuts;
-    }
-    /* (non-Javadoc)
      * @see org.epics.ioc.ca.CDField#clearNumPuts()
      */
     public void clearNumPuts() {
         numPuts = 0;
         maxNumPuts = 0;
-        numSupportNamePuts = 0;
     }
     /* (non-Javadoc)
-     * @see org.epics.ioc.ca.CDField#dataPut(org.epics.ioc.pv.PVField)
+     * @see org.epics.ioc.ca.CDField#get(org.epics.ioc.pv.PVField, boolean)
      */
-    public void dataPut(PVField targetPVField) {
-        Field field = targetPVField.getField();
+    public void get(PVField toPVField,boolean postPut) {
+        if(numPuts<=0) return;
+        Field field = toPVField.getField();
         Type type = field.getType();
-        if(type!=targetPVField.getField().getType()) {
+        if(type!=pvField.getField().getType()) {
             throw new IllegalStateException("Logic error.");
         }
-        if(supportAlso) {
-            String supportName = targetPVField.getSupportName();
-            if(supportName!=null && supportName.length()>0) {
-                pvField.setSupportName(supportName);
-                numSupportNamePuts++;
-                setMaxNumPuts(numSupportNamePuts);
-            }
-        }
         if(type.isScalar()) {
-            convert.copyScalar(targetPVField, pvField);
+            convert.copyScalar(pvField,toPVField);
+            if(postPut) channelField.postPut();
         } else if(type==Type.pvArray) {
             Array array = (Array)field;
             Type elementType = array.getElementType();
@@ -132,8 +117,33 @@ public class BaseCDField implements CDField {
                 throw new IllegalStateException("Logic error.");
             }
             PVArray pvArray = (PVArray)pvField;
-            PVArray targetPVArray = (PVArray)targetPVField;
-            convert.copyArray(targetPVArray, 0, pvArray, 0, targetPVArray.getLength());
+            PVArray toPVArray = (PVArray)toPVField;
+            convert.copyArray(pvArray, 0, toPVArray, 0, pvArray.getLength());
+            if(postPut) channelField.postPut();
+        } else {
+            throw new IllegalStateException("Logic error.");
+        }
+    }
+    /* (non-Javadoc)
+     * @see org.epics.ioc.ca.CDField#put(org.epics.ioc.pv.PVField)
+     */
+    public void put(PVField fromPVField) {
+        Field field = fromPVField.getField();
+        Type type = field.getType();
+        if(type!=pvField.getField().getType()) {
+            throw new IllegalStateException("Logic error.");
+        }
+        if(type.isScalar()) {
+            convert.copyScalar(fromPVField, pvField);
+        } else if(type==Type.pvArray) {
+            Array array = (Array)field;
+            Type elementType = array.getElementType();
+            if(!elementType.isScalar()) {
+                throw new IllegalStateException("Logic error.");
+            }
+            PVArray pvArray = (PVArray)pvField;
+            PVArray fromPVArray = (PVArray)fromPVField;
+            convert.copyArray(fromPVArray, 0, pvArray, 0, fromPVArray.getLength());
         } else {
             throw new IllegalStateException("Logic error.");
         }
@@ -141,25 +151,9 @@ public class BaseCDField implements CDField {
         setMaxNumPuts(numPuts);
     }
     /* (non-Javadoc)
-     * @see org.epics.ioc.ca.CDField#supportNamePut(org.epics.ioc.pv.PVField)
-     */
-    public void supportNamePut(String supportName) {
-        if(!supportAlso) return;
-        PVField toPVField = this.getPVField();
-        toPVField.setSupportName(supportName);
-        numSupportNamePuts++;
-        setMaxNumPuts(numSupportNamePuts);
-    }
-    /* (non-Javadoc)
      * @see org.epics.ioc.ca.CDField#dataPut(org.epics.ioc.pv.PVField, org.epics.ioc.pv.PVField)
      */
-    public boolean dataPut(PVField requested, PVField targetPVField) {
-        throw new IllegalStateException("Logic error.");
-    }
-    /* (non-Javadoc)
-     * @see org.epics.ioc.ca.CDField#supportNamePut(org.epics.ioc.pv.PVField, org.epics.ioc.pv.PVField)
-     */
-    public boolean supportNamePut(PVField requested, PVField targetPVField) {
+    public void put(PVField pvField, PVField pvSubField) {
         throw new IllegalStateException("Logic error.");
     }
     /* (non-Javadoc)
@@ -172,9 +166,7 @@ public class BaseCDField implements CDField {
      * @see org.epics.ioc.ca.CDField#toString(int)
      */
     public String toString(int indentLevel) {
-        return String.format(
-            "maxNumPuts %d numSupportNamePuts %b ",
-            maxNumPuts,numSupportNamePuts);
+        return String.format("maxNumPuts %d ",maxNumPuts);
     }
 
 }

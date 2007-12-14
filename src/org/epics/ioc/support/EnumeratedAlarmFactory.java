@@ -91,7 +91,7 @@ public class EnumeratedAlarmFactory {
             pvActive = pvStructure.getBooleanField("active");
             if(pvActive==null) return;            
             dbStructure = this.dbStructure;
-            DBField[] dbFields = dbStructure.getFieldDBFields();
+            DBField[] dbFields = dbStructure.getDBFields();
             Structure structure = dbStructure.getPVStructure().getStructure();
             int index;
             index = structure.getFieldIndex("stateSeverity");

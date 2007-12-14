@@ -5,7 +5,13 @@
  */
 package org.epics.ioc.ca;
 
-import org.epics.ioc.pv.*;
+import org.epics.ioc.pv.Field;
+import org.epics.ioc.pv.FieldCreate;
+import org.epics.ioc.pv.FieldFactory;
+import org.epics.ioc.pv.PVDataCreate;
+import org.epics.ioc.pv.PVField;
+import org.epics.ioc.pv.PVRecord;
+import org.epics.ioc.pv.Structure;
 
 /**
  * Base class for a CDRecord (Channel Data Record).
@@ -13,63 +19,43 @@ import org.epics.ioc.pv.*;
  *
  */
 public class BaseCDRecord implements CDRecord {
-    private FieldCreate fieldCreate;
+    private static FieldCreate fieldCreate = FieldFactory.getFieldCreate();
     private PVDataCreate pvDataCreate;
     private PVRecord pvRecord;
     private CDStructure cdStructure;
     
     /**
      * Constructor.
-     * @param fieldCreate Factory to create Field introspection objects.
      * @param pvDataCreate Factory to create PVField objects.
-     * @param targetFields The array of Field interfaces for the target.
      * @param recordName The record, i.e. channel name.
-     * @param structureName The structure name for the PVStructure for the PVRecord.
-     * @param supportAlso Should support be read/written?
+     * @param channelFieldGroup The channelFieldGroup for the CDRecord.
      */
-    public BaseCDRecord(FieldCreate fieldCreate,PVDataCreate pvDataCreate,
-        Field[] targetFields,String recordName,String structureName,boolean supportAlso)
+    public BaseCDRecord(PVDataCreate pvDataCreate,
+        String recordName,ChannelFieldGroup channelFieldGroup)
     {
-        this.fieldCreate = fieldCreate;
         this.pvDataCreate = pvDataCreate;
-        int length = targetFields.length;
+        ChannelField[] channelFields = channelFieldGroup.getArray();
+        int length = channelFields.length;
         Field[] newFields = new Field[length];
         for(int i=0; i<length; i++) {
-            newFields[i] = createField(targetFields[i]);
+            newFields[i] = channelFields[i].getPVField().getField();
         }
         Structure structure = fieldCreate.createStructure(
-            structureName, structureName, newFields);
-        pvRecord = pvDataCreate.createPVRecord(
-            recordName, structure);
-        cdStructure = new BaseCDStructure(null,this,pvRecord,supportAlso);
+                "channelData", "channelData", newFields);
+        pvRecord = pvDataCreate.createPVRecord(recordName, structure);
+        cdStructure = new BaseCDStructure(null,this,pvRecord,channelFields);
     }
     /* (non-Javadoc)
-     * @see org.epics.ioc.ca.CDRecord#createField(org.epics.ioc.pv.Field)
+     * @see org.epics.ioc.ca.CDRecord#findCDField(org.epics.ioc.pv.PVField)
      */
-    public Field createField(Field oldField) {
-        Field newField = null;
-        Type type = oldField.getType();
-        FieldAttribute fieldAttribute = oldField.getFieldAttribute();
-        String fieldName = oldField.getFieldName();
-        if(type==Type.pvArray) {
-            newField = fieldCreate.createArray(
-                fieldName,((Array)oldField).getElementType(),
-                fieldAttribute);
-        } else if(type==Type.pvStructure) {
-            Structure structure = (Structure)oldField;
-            Field[] oldFields = structure.getFields();
-            Field[] newFields = new Field[oldFields.length];
-            for(int i=0; i<oldFields.length; i++) {
-                newFields[i] = createField(oldFields[i]);
-            }
-            newField = fieldCreate.createStructure(
-                fieldName, structure.getStructureName(),newFields,
-                fieldAttribute);
-        } else {
-            newField = fieldCreate.createField(
-                fieldName, type, fieldAttribute);
-        }
-        return newField;
+    public CDField findCDField(PVField pvField) {
+        return cdStructure.findCDField(pvField);
+    }
+    /* (non-Javadoc)
+     * @see org.epics.ioc.ca.CDRecord#findSourceCDField(org.epics.ioc.pv.PVField)
+     */
+    public CDField findSourceCDField(PVField sourcePVField) {
+        return cdStructure.findSourceCDField(sourcePVField);
     }
     /* (non-Javadoc)
      * @see org.epics.ioc.ca.CDRecord#getCDBStructure()
@@ -77,13 +63,6 @@ public class BaseCDRecord implements CDRecord {
     public CDStructure getCDStructure() {
         return cdStructure;
     }
-    /* (non-Javadoc)
-     * @see org.epics.ioc.ca.CDRecord#getFieldCreate()
-     */
-    public FieldCreate getFieldCreate() {
-        return fieldCreate;
-    }
-
     /* (non-Javadoc)
      * @see org.epics.ioc.ca.CDRecord#getPVDataCreate()
      */

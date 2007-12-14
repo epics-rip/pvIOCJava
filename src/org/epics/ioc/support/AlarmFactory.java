@@ -48,7 +48,7 @@ public class AlarmFactory {
         while(parentDBField!=null) {
             if(parentDBField instanceof DBStructure) {
                 DBStructure parentDBStructure = (DBStructure)parentDBField;
-                DBField[] dbFields = parentDBStructure.getFieldDBFields();
+                DBField[] dbFields = parentDBStructure.getDBFields();
                 for(DBField dbField : dbFields) {
                     Field field = dbField.getPVField().getField();
                     Type type = field.getType();
@@ -89,7 +89,7 @@ public class AlarmFactory {
         private AlarmImpl(DBStructure dbAlarm) {
             super(alarmSupportName,dbAlarm);
             this.dbAlarm = dbAlarm;
-            DBField[] dbFields = dbAlarm.getFieldDBFields();
+            DBField[] dbFields = dbAlarm.getDBFields();
             pvAlarm = dbAlarm.getPVStructure();
             PVField[] pvFields = pvAlarm.getPVFields();
             Structure structure = pvAlarm.getStructure();
@@ -111,7 +111,7 @@ public class AlarmFactory {
                 return;
             }
             DBStructure dbStructure = (DBStructure)dbFields[index];
-            dbFields = dbStructure.getFieldDBFields();
+            dbFields = dbStructure.getDBFields();
             PVStructure pvStructure = (PVStructure)pvFields[index];
             pvFields = pvStructure.getPVFields();
             structure = pvStructure.getStructure();

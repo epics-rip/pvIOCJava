@@ -226,7 +226,7 @@ public class ReplaceTest extends TestCase {
         DBStructure dbStructure = (DBStructure)dbField;
         dbStructure.beginPut();
         PVField[] pvDatas = structure.getPVFields();
-        DBField[] dbDatas = dbStructure.getFieldDBFields();
+        DBField[] dbDatas = dbStructure.getDBFields();
         for(int i=0; i<pvDatas.length; i++) {
             PVField field = pvDatas[i];
             if(field.getField().getType().isNumeric()) {

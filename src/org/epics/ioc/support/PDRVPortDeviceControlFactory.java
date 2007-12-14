@@ -33,7 +33,7 @@ public class PDRVPortDeviceControlFactory {
     
     private static Support portDeviceControl(String supportName,DBStructure dbStructure) {
         PortDeviceControl support = new PortDeviceControl(supportName,dbStructure);
-        DBField[] dbFields = dbStructure.getFieldDBFields();
+        DBField[] dbFields = dbStructure.getDBFields();
         DBField dbField = null;
         PVStructure pvStructure = dbStructure.getPVStructure();
         PVField[] pvFields = pvStructure.getPVFields();

@@ -10,7 +10,7 @@
 <body>
 <h1 style="text-align: center">EPICS JavaIOC: util<br />
 package: org.epics.ioc.util<br />
-2007.09.26</h1>
+2007.12.06</h1>
 CONTENTS 
 
 <div class="toc">
@@ -283,7 +283,7 @@ higher priority threads.</p>
     
     public class PVTimeStamp {
         public static PVTimeStamp create(DBField dbField);
-        public static TimeStampField create(PVField pvField);
+        public static PVTimeStamp create(PVField pvField);
         public void get(TimeStamp timeStamp);
         public void put(TimeStamp timeStamp);
     }</pre>
@@ -377,6 +377,7 @@ higher priority threads.</p>
         highest;
         public static final int[] javaPriority;
         public int getJavaPriority();
+        public static int getJavaPriority(ScanPriority scanPriority);
         public static Enumerated getScanPriority(DBField dbField);
     }
     

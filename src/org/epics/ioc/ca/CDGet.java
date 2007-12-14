@@ -10,15 +10,15 @@ package org.epics.ioc.ca;
  * @author mrk
  *
  */
-public interface ChannelCDGet {
+public interface CDGet {
     /**
-     * Get the interface for the CD created for this ChannelCDPut. 
-     * @return The CD interface.
+     * Destroy the cdGet.
      */
-    CD getCD();
+    void destroy();
     /**
-     * Get the target data at put it into the CD.
-     * If the request fails then ChannelCDGetRequester.getDone is called before get returns..
+     * Get the target data and put it into the CD.
+     * If the request fails then CDGetRequester.getDone is called before get returns..
+     * @param cd The CD into which the data should be put.
      */
-    void get();
+    void get(CD cd);
 }

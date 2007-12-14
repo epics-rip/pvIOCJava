@@ -9,15 +9,16 @@
 </structure>
 
 <structure name = "processSupport">
+  <field name = "providerName" type = "string" default = "local" />
   <field name = "pvname" type = "string" link = "true" />
 </structure>
 
 <structure name = "monitorSupport">
+  <field name = "providerName" type = "string" default = "local" />
   <field name = "pvname" type = "string" link = "true" />
   <field name = "type" type = "structure" structureName = "monitorType"
      default = "put" />
   <field name = "deadband" type = "double" />
-  <field name = "onlyWhileProcessing" type = "boolean" />
   <field name = "queueSize" type = "int"  default = "3" />
   <field name = "reportOverrun" type = "boolean" />
   <field name = "process" type = "boolean">
@@ -29,20 +30,19 @@
 </structure>
 
 <structure name = "monitorNotifySupport">
+  <field name = "providerName" type = "string" default = "local" />
   <field name = "pvname" type = "string" link = "true" />
-  <field name = "type" type = "structure" structureName = "monitorType"
-     default = "change" />
-  <field name = "deadband" type = "double" />
-  <field name = "onlyWhileProcessing" type = "boolean" />
 </structure>
 
 <structure name = "inputSupport">
+  <field name = "providerName" type = "string" default = "local" />
   <field name = "pvname" type = "string" link = "true" />
   <field name = "process" type = "boolean" />
   <field name = "inheritSeverity" type = "boolean" />
 </structure>
 
 <structure name = "outputSupport">
+  <field name = "providerName" type = "string" default = "local" />
   <field name = "pvname" type = "string" link = "true" />
   <field name = "process" type = "boolean" />
 </structure>

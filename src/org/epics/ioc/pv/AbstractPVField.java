@@ -125,14 +125,6 @@ public abstract class AbstractPVField implements PVField{
             throw new IllegalArgumentException(
                 "newField is not same type as oldField");
         }
-        if(this.getField().getType()!=newPVField.getField().getType()) {
-            throw new IllegalArgumentException(
-                "newField is not same type as oldField");
-        }
-        if(!(newPVField instanceof PVField)) {
-            throw new IllegalArgumentException(
-            "newField is not a PVField");
-        }
         PVField parent = getParent();
         if(parent==null) throw new IllegalArgumentException("no parent");
         Type parentType = parent.getField().getType();
@@ -146,6 +138,12 @@ public abstract class AbstractPVField implements PVField{
             }
         }
         throw new IllegalArgumentException("oldField not found in parent");
+    }
+    /* (non-Javadoc)
+     * @see org.epics.ioc.pv.PVField#getSubField(java.lang.String)
+     */
+    public PVField getSubField(String fieldName) {
+        return null;
     }
     /* (non-Javadoc)
      * @see org.epics.ioc.pv.PVField#findProperty(java.lang.String)

@@ -4,14 +4,18 @@
  * in file LICENSE that is included with this distribution.
  */
 package org.epics.ioc.ca;
-import org.epics.ioc.pv.*;
+import org.epics.ioc.pv.Field;
+import org.epics.ioc.pv.PVDataCreate;
+import org.epics.ioc.pv.PVField;
+import org.epics.ioc.pv.PVStructure;
+import org.epics.ioc.pv.PVStructureArray;
+import org.epics.ioc.pv.StructureArrayData;
 /**
  * Base class for a CD (Channel Data) Array of Structures.
  * @author mrk
  *
  */
 public class BaseCDStructureArray extends BaseCDArray implements CDStructureArray{
-    private boolean supportAlso;
     private PVStructureArray pvStructureArray;
     private CDStructure[] elementCDStructures;
     private StructureArrayData structureArrayData = new StructureArrayData();
@@ -21,15 +25,60 @@ public class BaseCDStructureArray extends BaseCDArray implements CDStructureArra
      * @param parent The parent cdField.
      * @param cdRecord The cdRecord that contains this field.
      * @param pvStructureArray The pvStructureArray that this CDField references.
-     * @param supportAlso Should support be read/written?
      */
     public BaseCDStructureArray(
-        CDField parent,CDRecord cdRecord,PVStructureArray pvStructureArray,boolean supportAlso)
+        CDField parent,
+        CDRecord cdRecord,
+        PVStructureArray pvStructureArray,
+        ChannelField channelField)
     {
-        super(parent,cdRecord,pvStructureArray,supportAlso);
-        this.supportAlso = supportAlso;
+        super(parent,cdRecord,pvStructureArray,channelField);
         this.pvStructureArray = pvStructureArray;
         createElementCDBStructures();
+    }
+    /* (non-Javadoc)
+     * @see org.epics.ioc.ca.CDStructureArray#findCDField(org.epics.ioc.pv.PVField)
+     */
+    public CDField findCDField(PVField pvField) {
+        int length = elementCDStructures.length;
+        for(int i=0; i<length; i++) {
+            CDStructure cdStructure = elementCDStructures[i];
+            if(cdStructure.getPVField()==pvField) return cdStructure;
+        }
+        for(int i=0; i<length; i++) {
+            CDStructure cdStructure = elementCDStructures[i];
+            CDField result = cdStructure.findCDField(pvField);
+            if(result!=null) return result;
+        }
+        return null;
+    }
+    /* (non-Javadoc)
+     * @see org.epics.ioc.ca.CDStructureArray#findSourceCDField(org.epics.ioc.pv.PVField)
+     */
+    public CDField findSourceCDField(PVField sourcePVField) {
+        int length = elementCDStructures.length;
+        for(int i=0; i<length; i++) {
+            CDStructure cdStructure = elementCDStructures[i];
+            if(cdStructure.getChannelField().getPVField()==sourcePVField) return cdStructure;
+        }
+        for(int i=0; i<length; i++) {
+            CDStructure cdStructure = elementCDStructures[i];
+            CDField result = cdStructure.findSourceCDField(sourcePVField);
+            if(result!=null) return result;
+        }
+        return null;
+    }
+    /* (non-Javadoc)
+     * @see org.epics.ioc.ca.CDStructureArray#getElementCDStructures()
+     */
+    public CDStructure[] getElementCDStructures() {
+        return elementCDStructures;
+    }
+    /* (non-Javadoc)
+     * @see org.epics.ioc.ca.CDStructureArray#getSourcePVStructureArray()
+     */
+    public PVStructureArray getSourcePVStructureArray() {
+        return pvStructureArray;
     }
     /* (non-Javadoc)
      * @see org.epics.ioc.ca.BaseCDField#clearNumPuts()
@@ -39,102 +88,95 @@ public class BaseCDStructureArray extends BaseCDArray implements CDStructureArra
         super.clearNumPuts();
     }
     /* (non-Javadoc)
-     * @see org.epics.ioc.ca.BaseCDField#dataPut(org.epics.ioc.pv.PVField)
+     * @see org.epics.ioc.ca.BaseCDField#get(org.epics.ioc.pv.PVField, boolean)
      */
-    public void dataPut(PVField targetPVField) {
-        if(supportAlso) {
-            String supportName = targetPVField.getSupportName();
-            if(supportName!=null) super.supportNamePut(targetPVField.getSupportName());
+    public void get(PVField pvField,boolean postPut) {
+        if(super.getChannelField().getPVField()!=pvField) {
+            throw new IllegalStateException("Logic error");
         }
-        PVStructureArray targetPVStructureArray = (PVStructureArray)targetPVField;
-        if(checkPVStructureArray(targetPVStructureArray)) {
-            super.incrementNumPuts();
-            return;
-        }
-        int length = targetPVStructureArray.getLength();
-        if(elementCDStructures.length<length) {
-            CDStructure[] newDatas = new CDStructure[length];
-            for(int i=0;i<elementCDStructures.length; i++) {
-                newDatas[i] = elementCDStructures[i];
-            }
-            elementCDStructures = newDatas;
-        }
-        CDRecord cdRecord = super.getCDRecord();
-        PVDataCreate pvDataCreate = cdRecord.getPVDataCreate();
+        if(super.getMaxNumPuts()<=0) return;
+        int length = pvStructureArray.getLength();
         pvStructureArray.get(0, length, structureArrayData);
         PVStructure[] pvStructures = structureArrayData.data;
-        targetPVStructureArray.get(0, length, structureArrayData);
-        PVStructure[] targetStructures = structureArrayData.data;
+        boolean postSubField = postPut;
+        if(super.getNumPuts()>0) postSubField = false;
         for(int i=0; i<length; i++) {
-            PVStructure targetPVStructure = targetStructures[i];
-            if(targetPVStructure==null) {
-                elementCDStructures[i] = null;
-                continue;
-            }
-            if(elementCDStructures[i]==null) {
-                Field newField = cdRecord.createField(targetPVStructure.getField());
-                PVStructure newStructure = (PVStructure)pvDataCreate.createPVField(pvStructureArray, newField);
-                pvStructures[i] = newStructure;
-                elementCDStructures[i] = new BaseCDStructure(this,cdRecord,newStructure,supportAlso);
-            }
-            CDStructure cdStructure = (CDStructure)elementCDStructures[i];   
-            cdStructure.dataPut(targetPVStructure);
+            PVStructure pvStructure = pvStructures[i];
+            if(pvStructure==null) continue;
+            CDStructure cdStructure = (CDStructure)elementCDStructures[i];
+            cdStructure.get(cdStructure.getChannelField().getPVField(),postSubField);
         }
-        pvStructureArray.put(0, pvStructures.length, pvStructures, 0);
+        if(postPut && super.getNumPuts()>0) super.getChannelField().postPut();
+    }
+    /* (non-Javadoc)
+     * @see org.epics.ioc.ca.BaseCDField#dataPut(org.epics.ioc.pv.PVField)
+     */
+    public void put(PVField pvField) {
+        if(super.getChannelField().getPVField()!=pvField) {
+            throw new IllegalStateException("Logic error");
+        }
+        PVStructureArray sourcePVStructureArray = (PVStructureArray)pvField;        
+        int length = sourcePVStructureArray.getLength();
+        if(length!=elementCDStructures.length) {
+            throw new IllegalStateException("Logic error");
+        }
+        sourcePVStructureArray.get(0, length, structureArrayData);
+        PVStructure[] sourceStructures = structureArrayData.data;
+        for(int i=0; i<length; i++) {
+            PVStructure sourcePVStructure = sourceStructures[i];
+            if(sourcePVStructure==null) continue;
+            CDStructure cdStructure = (CDStructure)elementCDStructures[i];
+            if(cdStructure==null) {
+                throw new IllegalStateException("Logic error");
+            }
+            cdStructure.put(sourcePVStructure);
+        }
         super.incrementNumPuts();
-    }
-    /* (non-Javadoc)
-     * @see org.epics.ioc.ca.CDStructureArray#getElementCDStructures()
-     */
-    public CDStructure[] getElementCDStructures() {
-        return elementCDStructures;
-    }
-    /* (non-Javadoc)
-     * @see org.epics.ioc.ca.CDNonScalarArray#replacePVArray()
-     */
-    public void replacePVArray() {
-        pvStructureArray = (PVStructureArray)super.getPVField();
-        createElementCDBStructures();
     }
     /* (non-Javadoc)
      * @see org.epics.ioc.ca.BaseCDField#dataPut(org.epics.ioc.pv.PVField, org.epics.ioc.pv.PVField)
      */
-    public boolean dataPut(PVField requested,PVField targetPVField) {
-        PVStructureArray targetPVStructureArray = (PVStructureArray)requested;
-        checkPVStructureArray(targetPVStructureArray);
-        int length = pvStructureArray.getLength();
-        pvStructureArray.get(0, length, structureArrayData);
-        targetPVStructureArray.get(0, length, structureArrayData);
-        PVStructure[] targetStructures = structureArrayData.data;
-        for(int i=0; i<length; i++) {
-            CDStructure cdStructure = elementCDStructures[i];
-            PVStructure targetStructure = targetStructures[i];
-            if(cdStructure.dataPut(targetStructure, targetPVField)) return true;
+    public void put(PVField requested,PVField targetPVField) {
+        if(super.getChannelField().getPVField()!=requested) {
+            throw new IllegalStateException("Logic error");
         }
-        return false;
+        CDField cdField = findSourceCDField(targetPVField);
+        if(cdField==null) {
+            throw new IllegalStateException("Logic error");
+        }
+        cdField.put(targetPVField);
     }   
-    /* (non-Javadoc)
-     * @see org.epics.ioc.ca.BaseCDField#supportNamePut(org.epics.ioc.pv.PVField, org.epics.ioc.pv.PVField)
-     */
-    public boolean supportNamePut(PVField requested,PVField targetPVField) {
-        PVStructureArray targetPVStructureArray = (PVStructureArray)requested;
-        checkPVStructureArray(targetPVStructureArray);
-        int length = pvStructureArray.getLength();
-        pvStructureArray.get(0, length, structureArrayData);
-        targetPVStructureArray.get(0, length, structureArrayData);
-        PVStructure[] targetStructures = structureArrayData.data;
-        for(int i=0; i<length; i++) {
-            CDStructure cdStructure = elementCDStructures[i];
-            PVStructure targetStructure = targetStructures[i];
-            if(cdStructure.supportNamePut(targetStructure, targetPVField)) return true;
-        }
-        return false;
-    }    
    
     private void createElementCDBStructures() {
-        int length = pvStructureArray.getLength();
+        CDRecord cdRecord = super.getCDRecord();
+        ChannelField channelField = super.getChannelField();
+        PVStructureArray sourcePVStructureArray = (PVStructureArray)channelField.getPVField();
+        int length = sourcePVStructureArray.get(0,
+            sourcePVStructureArray.getLength(), structureArrayData);
+        PVStructure[] sourcePVStructures = structureArrayData.data;
+        int num = pvStructureArray.get(0, pvStructureArray.getLength(), structureArrayData);
+        if(num!=length) {            
+            PVDataCreate pvDataCreate = cdRecord.getPVDataCreate();
+            Field[] newFields = new Field[length];
+            PVStructure[] newPVStructures = new PVStructure[length];
+            PVStructureArray newPVStructureArray = (PVStructureArray)pvDataCreate.createPVArray(
+                pvStructureArray.getParent(),
+                sourcePVStructureArray.getField(), sourcePVStructureArray.getCapacity(),
+                sourcePVStructureArray.isCapacityMutable());
+            for(int i=0; i<length; i++) {
+                if(sourcePVStructures[i]==null) {
+                    newFields[i] = null;
+                    newPVStructures[i] = null;
+                } else {
+                    newFields[i] = sourcePVStructures[i].getField();
+                    newPVStructures[i] = (PVStructure)pvDataCreate.createPVField(
+                            newPVStructureArray, newFields[i]);
+                }
+            }
+            newPVStructureArray.put(0, length, newPVStructures, 0);
+            pvStructureArray = newPVStructureArray;
+        }
         elementCDStructures = new CDStructure[length];
-        CDRecord dbRecord = super.getCDRecord();
         pvStructureArray.get(0, length, structureArrayData);
         PVStructure[] pvStructures = structureArrayData.data;
         for(int i=0; i<length; i++) {
@@ -142,56 +184,14 @@ public class BaseCDStructureArray extends BaseCDArray implements CDStructureArra
             if(pvStructure==null) {
                 elementCDStructures[i] = null;
             } else {
-                elementCDStructures[i] = new BaseCDStructure(this,dbRecord,pvStructure,supportAlso);
+                String fieldName = "[" + i + "]";
+                ChannelField newChannelField = channelField.createChannelField(fieldName);
+if(newChannelField==null) {
+    throw new IllegalStateException("Logic error");
+}
+                elementCDStructures[i] = new BaseCDStructure(this,cdRecord,pvStructure,newChannelField);
             }
         }
-    }
-       
-    private boolean checkPVStructureArray(PVStructureArray targetPVStructureArray) {
-        CDRecord cdRecord = super.getCDRecord();
-        PVDataCreate pvDataCreate = cdRecord.getPVDataCreate();
-        boolean madeChanges = false;
-        int length = targetPVStructureArray.getLength();
-        if(elementCDStructures.length<length) {
-            madeChanges = true;
-            CDStructure[] newDatas = new CDStructure[length];
-            pvStructureArray.setLength(length);
-            for(int i=0;i<elementCDStructures.length; i++) {
-                newDatas[i] = elementCDStructures[i];
-            }
-            for(int i=elementCDStructures.length; i<length; i++) {
-                newDatas[i] = null;
-            }
-            elementCDStructures = newDatas;
-        }
-        pvStructureArray.get(0, length, structureArrayData);
-        PVStructure[] pvStructures = structureArrayData.data;
-        targetPVStructureArray.get(0, length, structureArrayData);
-        PVStructure[] targetStructures = structureArrayData.data;
-        for(int i=0; i<length; i++) {
-            PVStructure targetPVStructure = targetStructures[i];
-            if(targetPVStructure==null) {
-                if(pvStructures[i]!=null) {
-                    madeChanges = true;
-                    pvStructures[i] = null;
-                    elementCDStructures[i] = null;
-                }
-                continue;
-            }
-            if(elementCDStructures[i]==null) {
-                madeChanges = true;
-                Field newField = cdRecord.createField(targetPVStructure.getField());
-                PVStructure newStructure = (PVStructure)pvDataCreate.createPVField(pvStructureArray, newField);
-                pvStructures[i] = newStructure;
-                elementCDStructures[i] = new BaseCDStructure(this,cdRecord,newStructure,supportAlso);
-                CDStructure cdStructure = elementCDStructures[i];
-                cdStructure.dataPut(targetPVStructure);
-                cdStructure.supportNamePut(targetPVStructure.getSupportName());
-            }
-        }
-        if(madeChanges) {
-            pvStructureArray.put(0, pvStructures.length, pvStructures, 0);
-        }
-        return madeChanges;
+        super.clearNumPuts();
     }
 }

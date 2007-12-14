@@ -48,7 +48,7 @@ public class ControlLimitFactory {
             return null;
         }
         DBStructure dbStructure = (DBStructure)dbField;
-        DBField[] dbFields = dbStructure.getFieldDBFields();
+        DBField[] dbFields = dbStructure.getDBFields();
         PVStructure pvStructure = dbStructure.getPVStructure();
         PVField[] pvFields = pvStructure.getPVFields();
         Structure structure = pvStructure.getStructure();
@@ -63,7 +63,7 @@ public class ControlLimitFactory {
             return null;
         }
         dbStructure = (DBStructure)dbFields[index];
-        dbFields = dbStructure.getFieldDBFields();
+        dbFields = dbStructure.getDBFields();
         pvStructure = (PVStructure)pvFields[index];
         pvFields = pvStructure.getPVFields();
         structure = pvStructure.getStructure();

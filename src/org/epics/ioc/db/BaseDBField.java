@@ -104,7 +104,7 @@ public class BaseDBField implements DBField{
         pvField.setSupportName(name);
         return null;
     }
-/* (non-Javadoc)
+    /* (non-Javadoc)
      * @see org.epics.ioc.db.DBField#getSupport()
      */
     public Support getSupport() {
@@ -148,6 +148,18 @@ public class BaseDBField implements DBField{
                 dbListener.dataPut(dbField, this);
             }
             dbField = dbField.getParent();
+        }
+    }
+    /* (non-Javadoc)
+     * @see org.epics.ioc.db.DBField#postPut(org.epics.ioc.db.DBField)
+     */
+    public void postPut(DBField dbField) {
+        Iterator<RecordListener> iter;
+        iter = recordListenerList.iterator();
+        while(iter.hasNext()) {
+            RecordListener listener = iter.next();
+            DBListener dbListener = listener.getDBListener();
+            dbListener.dataPut(this);
         }
     }
     /* (non-Javadoc)

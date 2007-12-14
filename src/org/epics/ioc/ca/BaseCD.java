@@ -5,9 +5,11 @@
  */
 package org.epics.ioc.ca;
 
-import java.util.*;
+import java.util.Iterator;
+import java.util.LinkedList;
 
-import org.epics.ioc.pv.*;
+import org.epics.ioc.pv.PVDataCreate;
+import org.epics.ioc.pv.PVField;
 
 
 /**
@@ -19,37 +21,43 @@ public class BaseCD implements CD
 {
     private Channel channel;
     private ChannelFieldGroup channelFieldGroup;
-    private boolean supportAlso;
     private CDRecord cdRecord;
-    private CDStructure cdStructure;
-    private CDField[] cdFields;
-    private Field[] targetFields;
+    private boolean isDestroyed = false;
+    
+    private LinkedList<CDGet> cdGetList = new LinkedList<CDGet>();
+    private LinkedList<CDPut> cdPutList = new LinkedList<CDPut>();
     
     /**
      * Constructor.
      * @param channel The channel for which to create a CD.
      * @param channelFieldGroup The channelFieldGroup for whicg to cobstruct a CDRecord.
-     * @param fieldCreate Factory to create Field introspection objects.
      * @param pvDataCreate Factory to create PVField objects.
-     * @param supportAlso Should support be read/written?
      */
-    public BaseCD(Channel channel,ChannelFieldGroup channelFieldGroup,
-            FieldCreate fieldCreate,PVDataCreate pvDataCreate,boolean supportAlso)
+    public BaseCD(Channel channel,ChannelFieldGroup channelFieldGroup,PVDataCreate pvDataCreate)
     {
         this.channel = channel;
-        this.supportAlso = supportAlso;
         this.channelFieldGroup = channelFieldGroup;
-        List<ChannelField> channelFieldList = channelFieldGroup.getList();
-        int length = channelFieldList.size();
-        targetFields = new Field[length];
-        for(int i=0; i<length; i++) {
-            targetFields[i] = channelFieldList.get(i).getField();
-        }
-        cdRecord = new BaseCDRecord(fieldCreate,pvDataCreate,
-            targetFields,channel.getChannelName(),"channelData",supportAlso);
-        cdStructure = cdRecord.getCDStructure();
-        cdFields = cdStructure.getCDFields();
+        cdRecord = new BaseCDRecord(pvDataCreate,channel.getChannelName(),channelFieldGroup);
     }
+    /* (non-Javadoc)
+     * @see org.epics.ioc.ca.CD#destroy()
+     */
+    public synchronized void destroy() {
+        if(isDestroyed) return;
+        isDestroyed = true;
+        Iterator<CDGet> getIter = cdGetList.iterator();
+        while(getIter.hasNext()) {
+            CDGet cdGet = getIter.next();
+            cdGet.destroy();
+            getIter.remove();
+        }
+        Iterator<CDPut> putIter = cdPutList.iterator();
+        while(putIter.hasNext()) {
+            CDPut cdPut = putIter.next();
+            cdPut.destroy();
+            putIter.remove();
+        }
+    } 
     /* (non-Javadoc)
      * @see org.epics.ioc.ca.CD#getChannel()
      */
@@ -69,63 +77,98 @@ public class BaseCD implements CD
         return cdRecord;
     }
     /* (non-Javadoc)
-     * @see org.epics.ioc.ca.CD#getMaxPutsToField()
-     */
-    public int getMaxPutsToField() {
-        return cdStructure.getMaxNumPuts();
-    }    
-    /* (non-Javadoc)
      * @see org.epics.ioc.ca.CD#clearNumPuts()
      */
     public void clearNumPuts() {
         cdRecord.getCDStructure().clearNumPuts();
     }
     /* (non-Javadoc)
-     * @see org.epics.ioc.ca.CD#dataPut(org.epics.ioc.pv.PVField)
+     * @see org.epics.ioc.ca.CD#get(org.epics.ioc.pv.PVField)
      */
-    public void dataPut(PVField targetPVField) {
-        CDField cdField = findCDField(targetPVField);
-        cdField.dataPut(targetPVField);
-    }    
-    /* (non-Javadoc)
-     * @see org.epics.ioc.ca.CD#supportNamePut(org.epics.ioc.pv.PVField)
-     */
-    public void supportNamePut(PVField targetPVField) {
-        CDField cdField = findCDField(targetPVField);
-        cdField.supportNamePut(targetPVField.getSupportName());
-    }   
-    /* (non-Javadoc)
-     * @see org.epics.ioc.ca.CD#beginPut(org.epics.ioc.pv.PVStructure)
-     */
-    public void beginPut(PVStructure targetPVStructure) {
-        // nothing to do
-    }   
-    public void endPut(PVStructure targetPVStructure) {
-        // nothing to do
-    }
-    /* (non-Javadoc)
-     * @see org.epics.ioc.ca.CD#dataPut(org.epics.ioc.pv.PVField, org.epics.ioc.pv.PVField)
-     */
-    public void dataPut(PVField requested,PVField targetPVField) {
-        CDField cdField = findCDField(requested);
-        cdField.dataPut(requested, targetPVField);
-    }    
-    /* (non-Javadoc)
-     * @see org.epics.ioc.ca.CD#supportNamePut(org.epics.ioc.pv.PVField, org.epics.ioc.pv.PVField)
-     */
-    public void supportNamePut(PVField requested,PVField targetPVField) {
-        if(!supportAlso) return;
-        CDField cdField = findCDField(requested);
-        cdField.supportNamePut(requested, targetPVField);
-    }    
-    
-    private CDField findCDField(PVField targetPVField) {
-        Field targetField = targetPVField.getField();
-        for(int i=0; i<targetFields.length; i++) {
-            if(targetField==targetFields[i]) {
-                return cdFields[i];
+    public void get(PVField pvField) {
+        CDField[] cdFields = cdRecord.getCDStructure().getCDFields();
+        int length = cdFields.length;
+        for(int i=0; i<length; i++) {
+            CDField cdField = cdFields[i];
+            if(cdField.getChannelField().getPVField()==pvField) {
+                cdField.get(pvField,true);
+                return;
             }
         }
-        throw new IllegalStateException("Logic error.");
+    }
+    /* (non-Javadoc)
+     * @see org.epics.ioc.ca.CD#put(org.epics.ioc.pv.PVField, org.epics.ioc.pv.PVField)
+     */
+    public void put(PVField pvField, PVField pvSubField) {
+        CDField[] cdFields = cdRecord.getCDStructure().getCDFields();
+        int length = cdFields.length;
+        for(int i=0; i<length; i++) {
+            CDField cdField = cdFields[i];
+            if(cdField.getChannelField().getPVField()==pvField) {
+                cdField.put(pvField,pvSubField);
+                return;
+            }
+        }
+    }
+    /* (non-Javadoc)
+     * @see org.epics.ioc.ca.CD#put(org.epics.ioc.pv.PVField)
+     */
+    public void put(PVField pvField) {
+        CDField[] cdFields = cdRecord.getCDStructure().getCDFields();
+        int length = cdFields.length;
+        for(int i=0; i<length; i++) {
+            CDField cdField = cdFields[i];
+            if(cdField.getChannelField().getPVField()==pvField) {
+                cdField.put(pvField);
+                return;
+            }
+        }
+    }
+    /* (non-Javadoc)
+     * @see org.epics.ioc.ca.CD#createCDGet(org.epics.ioc.ca.CDGetRequester, boolean)
+     */
+    public synchronized CDGet createCDGet(CDGetRequester cdGetRequester,boolean process)
+    {
+        CDGet cdGet = new BaseCDGet(channel,channelFieldGroup,cdGetRequester,process);
+        cdGetList.add(cdGet);
+        return cdGet;
+    }
+    /* (non-Javadoc)
+     * @see org.epics.ioc.ca.CD#destroy(org.epics.ioc.ca.CDGet)
+     */
+    public synchronized void destroy(CDGet toDelete) {           
+        Iterator<CDGet> iter = cdGetList.iterator();
+        while(iter.hasNext()) {
+            CDGet cdGet = iter.next();
+            if(cdGet==toDelete) {
+                cdGet.destroy();
+                iter.remove();
+                return;
+            }
+        }
     }    
+    /* (non-Javadoc)
+     * @see org.epics.ioc.ca.CD#createCDPut(org.epics.ioc.ca.CDPutRequester, boolean)
+     */
+    public synchronized CDPut createCDPut(CDPutRequester cdPutRequester,boolean process)
+    {
+        CDPut cdPut = new BaseCDPut(channel,channelFieldGroup,cdPutRequester,process);
+        cdPutList.add(cdPut);
+        return cdPut;
+    }
+    /* (non-Javadoc)
+     * @see org.epics.ioc.ca.CD#destroy(org.epics.ioc.ca.CDPut)
+     */
+    public synchronized void destroy(CDPut temp) {
+        CDPut toDelete = (CDPut)temp;
+        Iterator<CDPut> putIter = cdPutList.iterator();
+        while(putIter.hasNext()) {
+            CDPut cdPut = putIter.next();
+            if(cdPut==toDelete) {
+                cdPut.destroy();
+                putIter.remove();
+                return;
+            }
+        }
+    }
 }

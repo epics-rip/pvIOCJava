@@ -9,11 +9,11 @@ import org.epics.ioc.util.RequestResult;
 import org.epics.ioc.util.Requester;
 
 /**
- * The methods implemented by the requester for a ChannelCDPut.
+ * The methods implemented by the requester for a CDPut.
  * @author mrk
  *
  */
-public interface ChannelCDGetRequester extends Requester{
+public interface CDGetRequester extends Requester{
     /**
      * The get request has completed.
      * The data resides in the CD.

@@ -10,7 +10,7 @@
 <body>
 <h1 style="text-align: center">EPICS JavaIOC: pv<br />
 package: org.epics.ioc.pv<br />
-2007.11.28</h1>
+2007.12.13</h1>
 CONTENTS 
 
 <div class="toc">
@@ -48,6 +48,8 @@ CONTENTS
       <li><a href="#AbstractPV">AbstractPVField</a></li>
       <li><a href="#AbstractPV1">AbstractPVArray</a></li>
       <li><a href="#BasePVStru">BasePVStructure</a></li>
+      <li><a href="#BasePVStru1">BasePVStructureArray</a></li>
+      <li><a href="#BasePVArra">BasePVArrayArray</a></li>
       <li><a href="#BasePVReco">BasePVRecord</a></li>
     </ul>
   </li>
@@ -314,6 +316,7 @@ modified.</p>
         Field getField();
         PVField getParent();
         PVRecord getPVRecord();
+        PVField getSubField(String fieldName);
         PVField findProperty(String propertyName);
         PVField findPropertyViaParent(String propertyName);
         String[] getPropertyNames();
@@ -368,6 +371,12 @@ where
   itself.</li>
   <li>getPVRecord<br />
     Get the interface for the record that contains this field.</li>
+  <li>getSubField<br />
+    Get a subField of a field. For a PVStructure a non-null result is
+    returned if fieldName is a field of the PVStructure. If the PVField is a
+    PVStructireArray or a PVArrayArray then field name should be of the form
+    "[index]" where index is an integer. A non-null result is returned if the
+    array element exists.</li>
   <li>findProperty<br />
     Find a field that is a subfield or property of this PVField. The
     fieldName is of the form item.item... where item is name or name[index].
@@ -925,6 +934,7 @@ interfaces:</p>
     public PVField getParent();
     public PVRecord getPVRecord();
     public void replacePVField(PVField newPVField);
+    public PVField getSubField(String fieldName);
     public PVField findProperty(String fieldName);
     PVField findPropertyViaParent(String propertyName);
     public String[] getPropertyNames();
@@ -979,6 +989,7 @@ interfaces:</p>
 <h3 id="BasePVStru">BasePVStructure</h3>
 <pre>public class BasePVStructure extends AbstractPVField implements PVStructure
     public BasePVStructure(PVField parent, Structure structure);
+    public PVField getSubField(String fieldName);
     public Structure getStructure();
     public void setRecord(PVRecord record);
     public boolean replaceStructureField(String fieldName, Structure structure);
@@ -997,6 +1008,14 @@ interfaces:</p>
     public String toString(int indentLevel);
     protected String toString(String prefix,int indentLevel);
 }</pre>
+
+<h3 id="BasePVStru1">BasePVStructureArray</h3>
+<pre>public class BasePVStructureArray extends AbstractPVArray implements PVStructureArray{}</pre>
+
+<h3 id="BasePVArra">BasePVArrayArray</h3>
+public class BasePVArrayArray extends AbstractPVArray implements
+PVArrayArray{} 
+<pre></pre>
 
 <h3 id="BasePVReco">BasePVRecord</h3>
 <pre>    public BasePVRecord(String recordName,Structure structure)

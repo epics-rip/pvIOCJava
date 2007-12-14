@@ -163,7 +163,6 @@
     <timeStamp structureName = "timeStamp" />
     <input supportName = "monitorNotifySupport" structureName = "monitorNotifySupport">
             <pvname>monitorCounter</pvname>
-            <type><choice>put</choice></type>
     </input>
     <supportArray>
         <value structureName = "supportArrayElement">
@@ -183,82 +182,6 @@
     </supportArray>
 </record>
 
-<record name = "notifyChange" type = "double">
-    <alarm structureName = "alarm" />
-    <timeStamp structureName = "timeStamp" />
-    <input supportName = "monitorNotifySupport" structureName = "monitorNotifySupport">
-            <pvname>monitorCounter</pvname>
-            <type><choice>change</choice></type>
-    </input>
-    <supportArray>
-        <value structureName = "supportArrayElement">
-            <link  supportName = "inputSupport" structureName = "inputSupport">
-                    <pvname>monitorCounter</pvname>
-                    <process>false</process>
-                    <inheritSeverity>true</inheritSeverity>
-            </link>
-        </value>
-        <value structureName = "supportArrayElement">
-            <link  supportName = "delay" structureName = "delay">
-                    <min>100</min>
-                    <max>1000</max>
-                    <inc>100</inc>
-            </link>
-        </value>
-    </supportArray>
-</record>
-
-<record name = "notifyAbsoluteChange" type = "double">
-    <alarm structureName = "alarm" />
-    <timeStamp structureName = "timeStamp" />
-    <input supportName = "monitorNotifySupport" structureName = "monitorNotifySupport">
-            <pvname>monitorCounter</pvname>
-            <type><choice>absoluteChange</choice></type>
-            <deadband>1.001</deadband>
-    </input>
-    <supportArray>
-        <value structureName = "supportArrayElement">
-            <link  supportName = "inputSupport" structureName = "inputSupport">
-                    <pvname>monitorCounter</pvname>
-                    <process>false</process>
-                    <inheritSeverity>true</inheritSeverity>
-            </link>
-        </value>
-        <value structureName = "supportArrayElement">
-            <link  supportName = "delay" structureName = "delay">
-                    <min>100</min>
-                    <max>1000</max>
-                    <inc>100</inc>
-            </link>
-        </value>
-    </supportArray>
-</record>
-
-<record name = "notifyPercentageChange" type = "double">
-    <alarm structureName = "alarm" />
-    <timeStamp structureName = "timeStamp" />
-    <input supportName = "monitorNotifySupport" structureName = "monitorNotifySupport">
-            <pvname>monitorCounter</pvname>
-            <type><choice>percentageChange</choice></type>
-            <deadband>20.0</deadband>
-    </input>
-    <supportArray>
-        <value structureName = "supportArrayElement">
-            <link  supportName = "inputSupport" structureName = "inputSupport">
-                    <pvname>monitorCounter</pvname>
-                    <inheritSeverity>true</inheritSeverity>
-                    <process>false</process>
-            </link>
-        </value>
-        <value structureName = "supportArrayElement">
-            <link  supportName = "delay" structureName = "delay">
-                    <min>100</min>
-                    <max>1000</max>
-                    <inc>100</inc>
-            </link>
-        </value>
-    </supportArray>
-</record>
 
 
 </IOCDatabase>

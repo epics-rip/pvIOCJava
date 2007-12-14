@@ -51,6 +51,13 @@ public interface PVField extends Requester {
      */
     PVRecord getPVRecord();
     /**
+     * Get the PVField subfield with name fieldName.
+     * This is only useful for PVStructure, PVStructureArray and PVArrayArray fields.
+     * @param fieldName The fieldName.
+     * @return The PVField or null if the subfield does not exist.
+     */
+    PVField getSubField(String fieldName);
+    /**
      * Find a field that is a subfield or a property of this field.
      * The fieldName is of the form item.item... where item is name or name[index].
      * 

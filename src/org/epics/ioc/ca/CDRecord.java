@@ -14,6 +14,18 @@ import org.epics.ioc.pv.*;
  */
 public interface CDRecord {
     /**
+     * Find the CDField which holds PVField.
+     * @param pvField The PVField.
+     * @return The CDField or null if not found.
+     */
+    CDField findCDField(PVField pvField);
+    /**
+     * Find the CDField which was created for the souce PVField.
+     * @param sourcePVField The source PVField.
+     * @return The CDField or null if not found.
+     */
+    CDField findSourceCDField(PVField sourcePVField);
+    /**
      * Get the PVRecord that has the data for this CDB record instance.
      * @return The PVRecord interface.
      */
@@ -24,19 +36,8 @@ public interface CDRecord {
      */
     CDStructure getCDStructure();
     /**
-     * Get the factory for creating the introspection interfaces.
-     * @return The FieldCreate interface.
-     */
-    FieldCreate getFieldCreate();
-    /**
      * Get the factory for creating PVField instances.
      * @return The PVDataCreate interface.
      */
     PVDataCreate getPVDataCreate();
-    /**
-     * Create a Field that is like oldField except that it has no properties.
-     * @param oldField The oldField.
-     * @return The new Field interrace.
-     */
-    Field createField(Field oldField);
 }

@@ -10,7 +10,7 @@
 <body>
 <h1 style="text-align: center">EPICS JavaIOC: Java Input/Output Controller<br
 />
-2007.10.10</h1>
+2007.12.13</h1>
 
 <p>This product is available via the <a href="#LicenseAgreement">open source
 license</a> described at the end of this document.</p>
@@ -539,11 +539,8 @@ starts do the following:</p>
       </li>
     </ul>
   </li>
-  <li>on swtshell window click probe button. A new window appears 
-    <ul>
-      <li>In Put control 
-        <ul>
-          <li>set process choice to selected</li>
+  <li>on swtshell window click put button. A new window appears 
+          <li>set process selected</li>
           <li>click connect button and choose record "psEmbeded" and field
             "power"</li>
           <li>click put button 
@@ -553,9 +550,6 @@ starts do the following:</p>
           </li>
           <li>Look at monitor window. The record has processed and the
             updated values are shown</li>
-        </ul>
-      </li>
-    </ul>
   </li>
   <li>You are on your own.</li>
 </ul>
@@ -1083,6 +1077,7 @@ contains.</p>
          Field getField(); // get the reflection interface
          PVField getParent();
          PVRecord getPVRecord();
+         PVField getSubField(String fieldName);
          PVField findProperty(String fieldName);
          PVField findPropertyViaParent(String propertyName);
          String[] getPropertyNames();
@@ -2791,10 +2786,12 @@ org.epics.ioc.support for details.</p>
 &lt;/structure&gt;
 
 &lt;structure name = "processSupport"&gt;
+  &lt;field name = "providerName" type = "string" default = "local" /&gt;
   &lt;field name = "pvname" type = "string" link = "true" /&gt;
 &lt;/structure&gt;
 
 &lt;structure name = "monitorSupport"&gt;
+  &lt;field name = "providerName" type = "string" default = "local" /&gt;
   &lt;field name = "pvname" type = "string" link = "true" /&gt;
   &lt;field name = "type" type = "structure" structureName = "monitorType"
      default = "put" /&gt;
@@ -2811,6 +2808,7 @@ org.epics.ioc.support for details.</p>
 &lt;/structure&gt;
 
 &lt;structure name = "monitorNotifySupport"&gt;
+  &lt;field name = "providerName" type = "string" default = "local" /&gt;
   &lt;field name = "pvname" type = "string" link = "true" /&gt;
   &lt;field name = "type" type = "structure" structureName = "monitorType"
      default = "change" /&gt;
@@ -2819,12 +2817,14 @@ org.epics.ioc.support for details.</p>
 &lt;/structure&gt;
 
 &lt;structure name = "inputSupport"&gt;
+  &lt;field name = "providerName" type = "string" default = "local" /&gt;
   &lt;field name = "pvname" type = "string" link = "true" /&gt;
   &lt;field name = "process" type = "boolean" /&gt;
   &lt;field name = "inheritSeverity" type = "boolean" /&gt;
 &lt;/structure&gt;
 
 &lt;structure name = "outputSupport"&gt;
+  &lt;field name = "providerName" type = "string" default = "local" /&gt;
   &lt;field name = "pvname" type = "string" link = "true" /&gt;
   &lt;field name = "process" type = "boolean" /&gt;
 &lt;/structure&gt;
@@ -2846,6 +2846,8 @@ org.epics.ioc.support for details.</p>
 
 <p>Structure processSupport has the fields:</p>
 <dl>
+  <dt>providerName</dt>
+    <dd>The name of the channelProvider.</dd>
   <dt>pvname</dt>
     <dd>recordName.fieldName of link</dd>
 </dl>
@@ -2854,6 +2856,8 @@ org.epics.ioc.support for details.</p>
 
 <p>Structure monitorSupport has the fields:</p>
 <dl>
+  <dt>providerName</dt>
+    <dd>The name of the channelProvider.</dd>
   <dt>pvname</dt>
     <dd>recordName.fieldName of link</dd>
   <dt>type</dt>
@@ -2880,6 +2884,8 @@ org.epics.ioc.support for details.</p>
 
 <p>Structure monitorNotifySupport has the fields:</p>
 <dl>
+  <dt>providerName</dt>
+    <dd>The name of the channelProvider.</dd>
   <dt>pvname</dt>
     <dd>recordName.fieldName of link</dd>
   <dt>type</dt>
@@ -2895,6 +2901,8 @@ org.epics.ioc.support for details.</p>
 
 <p>Structure inputSupport has the fields:</p>
 <dl>
+  <dt>providerName</dt>
+    <dd>The name of the channelProvider.</dd>
   <dt>pvname</dt>
     <dd>recordName.fieldName of link</dd>
   <dt>process</dt>
@@ -2908,6 +2916,8 @@ org.epics.ioc.support for details.</p>
 
 <p>Structure outputSupport has the fields:</p>
 <dl>
+  <dt>providerName</dt>
+    <dd>The name of the channelProvider.</dd>
   <dt>pvname</dt>
     <dd>recordName.fieldName of link</dd>
   <dt>process</dt>

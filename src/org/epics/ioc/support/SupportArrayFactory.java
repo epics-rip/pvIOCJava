@@ -90,7 +90,7 @@ public class SupportArrayFactory {
                 DBStructure dbStructure = datas[i];
                 if(dbStructure==null) continue;
                 PVStructure pvStructure = dbStructure.getPVStructure();
-                DBField[] dbFields = dbStructure.getFieldDBFields();
+                DBField[] dbFields = dbStructure.getDBFields();
                 Structure structure = (Structure)pvStructure.getField();
                 String structureName = structure.getStructureName();
                 Support support = null;
