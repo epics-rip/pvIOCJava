@@ -28,13 +28,13 @@
    factoryName = "org.epics.ioc.support.PDRVPortDeviceControlFactory" />
 
 
-<include addPath = "src/org/epics/ioc/pdrv/testDriver" />
+<include addPath = "${JAVAIOC}/src/org/epics/ioc/pdrv/testDriver" />
 <include href = "octetDriver.xml" />
 <include href = "int32Driver.xml" />
 <include href = "float64Driver.xml" />
 <include href = "uint32DigitalDriver.xml" />
 <include href = "int32ArrayDriver.xml" />
 <include href = "float64ArrayDriver.xml" />
-<include removePath = "src/org/epics/ioc/pdrv/testDriver" />
+<include removePath = "${JAVAIOC}/src/org/epics/ioc/pdrv/testDriver" />
 
 </DBDefinition>

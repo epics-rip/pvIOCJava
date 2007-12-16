@@ -1,6 +1,6 @@
 <?xml version="1.0" ?>
 <DBDefinition>
-<include addPath = "../javaIOC/dbd/recordType/primitive" />
+<include addPath = "${JAVAIOC}/dbd/recordType/primitive" />
 <include href = "booleanRecord.xml" />
 <include href = "byteRecord.xml" />
 <include href = "shortRecord.xml" />
@@ -9,8 +9,8 @@
 <include href = "floatRecord.xml" />
 <include href = "doubleRecord.xml" />
 <include href = "stringRecord.xml" />
-<include removePath = "../javaIOC/dbd/recordType/primitive" />
-<include addPath = "../javaIOC/dbd/recordType/primitiveArray" />
+<include removePath = "${JAVAIOC}/dbd/recordType/primitive" />
+<include addPath = "${JAVAIOC}/dbd/recordType/primitiveArray" />
 <include href = "booleanArrayRecord.xml" />
 <include href = "byteArrayRecord.xml" />
 <include href = "shortArrayRecord.xml" />
@@ -19,31 +19,31 @@
 <include href = "floatArrayRecord.xml" />
 <include href = "doubleArrayRecord.xml" />
 <include href = "stringArrayRecord.xml" />
-<include removePath = "../javaIOC/dbd/recordType/primitiveArray" />
-<include addPath = "../javaIOC/dbd/recordType/analog" />
+<include removePath = "${JAVAIOC}/dbd/recordType/primitiveArray" />
+<include addPath = "${JAVAIOC}/dbd/recordType/analog" />
 <include href = "aoIncrementalDoubleRecord.xml" />
-<include removePath = "../javaIOC/dbd/recordType/analog" />
-<include addPath = "../javaIOC/dbd/recordType/enumerated" />
+<include removePath = "${JAVAIOC}/dbd/recordType/analog" />
+<include addPath = "${JAVAIOC}/dbd/recordType/enumerated" />
 <include href = "enumeratedRecord.xml" />
-<include removePath = "../javaIOC/dbd/recordType/enumerated" />
-<include addPath = "../javaIOC/dbd/recordType/event" />
+<include removePath = "${JAVAIOC}/dbd/recordType/enumerated" />
+<include addPath = "${JAVAIOC}/dbd/recordType/event" />
 <include href = "eventRecord.xml" />
-<include removePath = "../javaIOC/dbd/recordType/event" />
-<include addPath = "../javaIOC/dbd/recordType/calc" />
+<include removePath = "${JAVAIOC}/dbd/recordType/event" />
+<include addPath = "${JAVAIOC}/dbd/recordType/calc" />
 <include href = "calcDoubleRecord.xml" />
 <include href = "calcDoubleArrayRecord.xml" />
 <include href = "calcBooleanArrayRecord.xml" />
-<include removePath = "../javaIOC/dbd/recordType/calc" />
-<include addPath = "../javaIOC/dbd/recordType/portDriver" />
+<include removePath = "${JAVAIOC}/dbd/recordType/calc" />
+<include addPath = "${JAVAIOC}/dbd/recordType/portDriver" />
 <include href = "portDriver.xml" />
-<include removePath = "../javaIOC/dbd/recordType/portDriver" />
-<include addPath = "../javaIOC/dbd/recordType/powerSupply" />
+<include removePath = "${JAVAIOC}/dbd/recordType/portDriver" />
+<include addPath = "${JAVAIOC}/dbd/recordType/powerSupply" />
 <include href = "powerSupplyRecord.xml" />
 <include href = "powerSupplyArrayRecord.xml" />
-<include removePath = "../javaIOC/dbd/recordType/powerSupply" />
-<include addPath = "../javaIOC/dbd/recordType/allTypes" />
+<include removePath = "${JAVAIOC}/dbd/recordType/powerSupply" />
+<include addPath = "${JAVAIOC}/dbd/recordType/allTypes" />
 <include href = "allTypesRecord.xml" />
-<include removePath = "../javaIOC/dbd/recordType/allTypes" />
+<include removePath = "${JAVAIOC}/dbd/recordType/allTypes" />
 <!--
 -->
 

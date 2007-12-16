@@ -1,6 +1,6 @@
 <?xml version="1.0" ?>
 <DBDefinition>
-<include addPath = "../javaIOC/dbd/structure" />
+<include addPath = "${JAVAIOC}/dbd/structure" />
 <include href = "limit.xml" />
 <include href = "display.xml" />
 <include href = "control.xml" />
@@ -25,6 +25,6 @@
 <include href = "disable.xml" />
 <include href = "delay.xml" />
 <include href = "portDriver.xml" />
-<include removePath = "../javaIOC/dbd/structure" />
+<include removePath = "${JAVAIOC}/dbd/structure" />
 </DBDefinition>
 

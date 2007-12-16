@@ -1,6 +1,6 @@
 <?xml version="1.0" ?>
 <IOCDatabase>
-<include addPath = "example" />
+<include addPath = "${JAVAIOC}/example" />
 <include href = "dataOnlyDB.xml" />
 <include href = "counterDB.xml" />
 <include href = "stringDB.xml" />
@@ -16,5 +16,5 @@
 <include href = "powerSupplyArrayDB.xml" />
 <!--
 -->
-<include removePath = "example" />
+<include removePath = "${JAVAIOC}/example" />
 </IOCDatabase>

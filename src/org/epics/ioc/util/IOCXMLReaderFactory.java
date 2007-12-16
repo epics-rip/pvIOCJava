@@ -389,10 +389,31 @@ public class IOCXMLReaderFactory {
             return convertedString;
         }
         
+        private String convertFieldName(String string) {
+            string = convertSeparator(string);
+            while(true) {
+                int startIndex = string.indexOf("${");
+                if(startIndex<0) return string;
+                int endIndex = string.indexOf('}', startIndex);
+                if(endIndex<startIndex+3) {
+                    message("illegal env definition in " + string,MessageType.error);
+                    break;
+                }
+                String from = string.substring(startIndex+2, endIndex);
+                String to = System.getenv(from);
+                if(to==null) {
+                    message("envVariable " + from + " not found",MessageType.error);
+                    break;
+                }
+                string = string.substring(0, startIndex) + to + string.substring(endIndex+1);
+            }
+            return null;
+        }
+        
         private void includeElement(Attributes atts) {
             String removePath = atts.getValue("removePath");
             if(removePath!=null) {
-                removePath = convertSeparator(removePath);
+                removePath = convertFieldName(removePath);
                 if(!pathList.remove(removePath)) {
                     message("path " + removePath + " not in pathList",
                             MessageType.warning);
@@ -400,7 +421,7 @@ public class IOCXMLReaderFactory {
             }
             String addPath = atts.getValue("addPath");
             if(addPath!=null) {
-                addPath = convertSeparator(addPath);
+                addPath = convertFieldName(addPath);
                 pathList.add(0, addPath);
             }
             String href = atts.getValue("href");
