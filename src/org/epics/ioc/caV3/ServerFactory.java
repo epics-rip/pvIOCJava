@@ -102,7 +102,7 @@ public class ServerFactory {
 
         private ThreadInstance() {
             Thread thread = new Thread(this,"swtshell");
-            thread.setPriority(2);
+            thread.setPriority(3);
             thread.start();
         }
         
