@@ -1,10 +1,17 @@
 
+import java.util.*;
+import java.io.*;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+
 import org.epics.ioc.dbd.*;
 import org.epics.ioc.db.*;
 import org.epics.ioc.util.*;
+import org.epics.ioc.support.Support;
 import org.epics.ioc.swtshell.*;
 
-import java.util.*;
+
 
 /**
  * read and dump a Database Definition and Record Instance Files.
@@ -14,6 +21,7 @@ import java.util.*;
 enum State {
     dbdFile,
     dbFile,
+    servers,
 }
 public class XMLToDatabase {
 
@@ -28,8 +36,7 @@ public class XMLToDatabase {
      */
     public static void main(String[] args) {
         if(args.length==1 && args[0].equals("?")) {
-            System.out.println("-dbd DatabaseDefinitionList"
-                    + " -db InstanceList -dumpDBD -dumpDB ... -swtshell");
+            usage();
             return;
         }
         DBD dbd = DBDFactory.getMasterDBD();
@@ -59,16 +66,86 @@ public class XMLToDatabase {
                     state = State.dbFile;
                 } else if(arg.equals("swtshell")) {
                     Swtshell.swtshell();
-                    return;
+                } else if(arg.equals("server")) {
+                    state = State.servers;
                 } else {
-                    System.out.println("-dbd DatabaseDefinitionList"
-                            + " -db InstanceList -dumpDBD -dumpDB ... -swtshell");
+                    System.err.println("unknown arg: " + arg);
+                    usage();
+                    return;
                 }
             } else if(state==State.dbdFile) {
                 parseDBD(dbd,arg,iocRequester);
-            } else {
+            } else if(state==State.dbFile){
                 parseDB(dbd,iocdb,arg,iocRequester);
+            } else if(state==State.servers) {
+                startServer(arg);
+            } else {
+                System.err.println("unknown arg: " + arg);
+                usage();
+                return;
             }
+        }
+    }
+    
+    static void usage() {
+        System.out.println("Usage: -dbd DatabaseDefinitionList"
+                + " -db InstanceList -dumpDBD -dumpDB -swtshell -servers");
+    }
+    
+    static void printError(String message) {
+        System.err.println(message);
+    }
+    
+    static void startServer(String fileName) {
+        System.out.println("startServer fileName " + fileName);
+        try {
+            BufferedReader in = new BufferedReader(new FileReader(fileName));
+
+            String factoryName = null;
+            while((factoryName = in.readLine()) !=null) {
+                Class startClass;
+                Method method = null;
+                try {
+                    startClass = Class.forName(factoryName);
+                }catch (ClassNotFoundException e) {
+                    printError("server factory "
+                            + e.getLocalizedMessage()
+                            + " class not found");
+                    return;
+                }
+                try {
+                    method = startClass.getDeclaredMethod("start", (Class[])null);
+                } catch (NoSuchMethodException e) {
+                    printError("server factory "
+                            + e.getLocalizedMessage()
+                            + " method start not found");
+                    return;
+                }
+                if(!Modifier.isStatic(method.getModifiers())) {
+                    printError("server factory "
+                            + factoryName
+                            + " start is not a static method ");
+                    return;
+                }
+                try {
+                    method.invoke(null, new Object[0]);
+                } catch(IllegalAccessException e) {
+                    printError("server factory "
+                            + e.getLocalizedMessage());
+                    return;
+                } catch(IllegalArgumentException e) {
+                    printError("server factory "
+                            + e.getLocalizedMessage());
+                    return;
+                } catch(InvocationTargetException e) {
+                    printError("server factory "
+                            + e.getLocalizedMessage());
+                    return;
+                }
+            }
+        } catch (IOException e) {
+            System.err.println("startServer error " + e.getMessage());
+            return;
         }
     }
         

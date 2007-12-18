@@ -10,7 +10,7 @@
 <body>
 <h1 style="text-align: center">EPICS JavaIOC: Java Input/Output Controller<br
 />
-2007.12.15</h1>
+2007.12.18</h1>
 
 <p>This product is available via the <a href="#LicenseAgreement">open source
 license</a> described at the end of this document.</p>
@@ -461,6 +461,9 @@ as an <span style="font-weight:bold;">eclipse SWT application.</span></p>
     dump all the record instances read so far</li>
   <li>-swtshell<br />
     Start swtshell, which also starts a javaIOC.</li>
+  <li>-server
+    <p>followed by a filenames. Each field is a list of servers to start.</p>
+  </li>
 </ul>
 
 <p>For example:</p>
@@ -470,11 +473,12 @@ as an <span style="font-weight:bold;">eclipse SWT application.</span></p>
 dumps the database definitions and record instances.</p>
 
 <p>As a beginning example specify the arguments as:</p>
-<pre>    -dbd example/exampleDBD.xml -db example/exampleDB.xml -swtshell</pre>
+<pre>    -dbd example/exampleDBD.xml -db example/exampleDB.xml -swtshell -server server/afterSwtshell.txt</pre>
 
 <p>This will load the DBD and DB files and start swtshell, which is a SWT
-(Standard Widget Toolkit) shell running an ioc. Just try it. After swshell
-starts do the following:</p>
+(Standard Widget Toolkit) shell running an ioc. It also starts a Channel
+Access server for V3 clients. Just try it. After swshell starts do the
+following:</p>
 <ul>
   <li>click the monitor button and a new window appears 
     <ul>
@@ -696,6 +700,11 @@ puts them into an IOC Database (IOCDB).</p>
 
 <p>This package is Channel Access for a javaIOC. Currently only local access
 is implemented.</p>
+
+<h4 id="org.epics.3">org.epics.ioc.caV3</h4>
+<p>This package is Channel Access V3, e.g. channel access Version 3.
+Server support has been implemented by Matej Sekoranja (COSYLAB).
+Client support is under development. Both thew client and server require JCA/CAJ.</p>
 
 <h4 id="org.epics.4">org.epics.ioc.util</h4>
 This package provides utility code for a javaIOC: 

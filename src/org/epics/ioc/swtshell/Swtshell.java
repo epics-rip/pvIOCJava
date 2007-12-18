@@ -36,15 +36,16 @@ public class Swtshell {
         ReentrantLock lock = new ReentrantLock();
         Condition done = lock.newCondition();
         ThreadInstance threadInstance = new ThreadInstance(lock,done);
-        try {
-            lock.lock();
-            try {
-                threadInstance.start();
-                done.await();
-            } finally {
-                lock.unlock();
-            }
-        } catch(InterruptedException e) {}
+        threadInstance.start();
+//        try {
+//            lock.lock();
+//            try {
+//                threadInstance.start();
+//                done.await();
+//            } finally {
+//                lock.unlock();
+//            }
+//        } catch(InterruptedException e) {}
     }
 
     private static class SupportCreate implements Requester{
