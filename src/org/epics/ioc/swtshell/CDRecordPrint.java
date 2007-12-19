@@ -80,7 +80,7 @@ public class CDRecordPrint {
             PVField pvField = cdField.getPVField();
             Field field = pvField.getField();
             newLine(indentLevel);
-            text.append(field.getFieldName());
+            text.append(pvField.getFullFieldName());
             switch(field.getType()) {
             case pvArray: printArray(cdField,indentLevel+1,printAll); break;
             case pvStructure: printStructure((CDStructure)cdField,indentLevel+1,printAll); break;

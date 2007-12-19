@@ -11,11 +11,24 @@
 <h1 style="text-align: center">EPICS JavaIOC: caV3<br />
 Channel Access Version 3<br />
 package: org.epics.ioc.caV3<br />
-2007.12.18</h1>
+2007.12.19</h1>
 CONTENTS 
+
+<div class="toc">
+<ul>
+  <li><a href="#Overview">Overview</a></li>
+  <li><a href="#Server">Server Semantics</a>
+    <ul>
+      <li><a href="#Syntax">Syntax</a></li>
+      <li><a href="#Options">Get and Put Options</a></li>
+      <li><a href="#monitor">monitor options</a></li>
+    </ul>
+  </li>
+</ul>
+</div>
 <hr />
 
-<h2 style="text-align: center">Overview</h2>
+<h2 style="text-align: center" id="Overview">Overview</h2>
 <hr />
 
 <p>This package provides support for Channel Access Version 3. The server
@@ -26,10 +39,69 @@ javaIOC database can have links to records in a V3 IOC database.</p>
 <p>NOTE: The client has not been implemented.</p>
 <hr />
 
-<h2 style="text-align: center">Server Semantics</h2>
+<h2 style="text-align: center" id="Server">Server Semantics</h2>
 <hr />
 
+<h3 id="Syntax">Syntax</h3>
+
 <p>A V3 client can access any field of a javaIOC record that is a scalar, an
-array of scalars, or an enumerated structure.</p>
+array of scalars, or an enumerated structure. A boolean field appears as a
+DBR_ENUM with choices = {"false","true"}.</p>
+
+<p>A pvName has the form:</p>
+<pre>    recordName.name.name...{options}</pre>
+
+<p>where</p>
+<dl>
+  <dt><span
+  style="font-family: Courier New,Courier,monospace;">recordName</span></dt>
+    <dd>The name of a javaIOC record</dd>
+  <dt><span
+  style="font-family: Courier New,Courier,monospace;">name.name...</span></dt>
+    <dd>Each name is a fieldName or propertyName or index as described in
+      package org.epics.ioc.pv. The final field must a scalar, an array of
+      scalars, or an enumerated structure.</dd>
+  <dt><span
+  style="font-family: Courier New,Courier,monospace;">options</span></dt>
+    <dd>options are of the form "name=value". The options are described
+    below.</dd>
+</dl>
+
+<p>The following examples use the channel access utility shell commands that
+come with EPICS base. The database is the example/exampleDB.xml that comes
+with the javaIOC. </p>
+<pre>    caput double 6</pre>
+
+<p>This writes the value 6 to the value field of a record named double.</p>
+<pre>    caput double.{putProcess=true} 5</pre>
+
+<p>This writes the value 5 to record double and also requests that the record
+be processed. The value is written before the record is processed.</p>
+<pre>     caget -d 20 double.{getProcess=true}</pre>
+
+<p>This gets the value field of record double. The record is processed.</p>
+<pre>    caput powerSupplyArray.supply[1].power{putProcess=true} 2</pre>
+
+<p>This writes the value 2 to the power.value field of the second supply of
+the powerSupplyArray record.</p>
+
+<h3 id="Options">Get and Put Options</h3>
+
+<p>The currently supported options are:</p>
+<pre>    getProcess=true
+    putProcess=true</pre>
+
+<p>getProcess processes the record and then retrives data. putProcess first
+puts data into the record and then processes the record. In order for either
+to work, the record must not already have a recordProcessor assigned to
+it.</p>
+
+<h3 id="monitor">monitor options</h3>
+
+<p>Currently no monitor options are supported but in the future something
+like the following will be supported.</p>
+<pre>    onChange=true
+    absoluteChange=value
+    percentChange=value</pre>
 </body>
 </html>

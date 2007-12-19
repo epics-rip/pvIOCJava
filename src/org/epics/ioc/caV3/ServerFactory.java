@@ -66,10 +66,14 @@ import org.epics.ioc.ca.ChannelGetRequester;
 import org.epics.ioc.ca.ChannelPut;
 import org.epics.ioc.ca.ChannelPutRequester;
 import org.epics.ioc.ca.ChannelStateListener;
+import org.epics.ioc.pv.Array;
+import org.epics.ioc.pv.BooleanArrayData;
 import org.epics.ioc.pv.Convert;
 import org.epics.ioc.pv.ConvertFactory;
 import org.epics.ioc.pv.Field;
 import org.epics.ioc.pv.PVArray;
+import org.epics.ioc.pv.PVBoolean;
+import org.epics.ioc.pv.PVBooleanArray;
 import org.epics.ioc.pv.PVDouble;
 import org.epics.ioc.pv.PVEnumerated;
 import org.epics.ioc.pv.PVField;
@@ -104,8 +108,14 @@ public class ServerFactory {
             Thread thread = new Thread(this,"swtshell");
             thread.setPriority(3);
             thread.start();
+            while(!isRunning) {
+                try {
+                Thread.sleep(1);
+                } catch(InterruptedException e) {}
+            }
         }
         
+        private boolean isRunning = false;
         /**
          * JCA server context.
          */
@@ -150,6 +160,7 @@ public class ServerFactory {
          * @see java.lang.Runnable#run()
          */
         public void run() {
+            isRunning = true;
             try {
 
                 // initialize context
@@ -289,10 +300,11 @@ public class ServerFactory {
          * @return DBR type.
          * @throws CAStatusException
          */
-        private final DBRType getChannelDBRType(Type dbType) {
-            switch (dbType) {
+        private final DBRType getChannelDBRType(Type type) {
+            switch (type) {
                 case pvBoolean:
-                    return DBRType.STRING;
+                    labels = new String[]{"false","true"};
+                    return DBRType.ENUM;
                 case pvByte:
                     return DBRType.BYTE;
                 case pvShort:
@@ -428,58 +440,79 @@ public class ServerFactory {
             return names[0];
         }
         
-        private void getValueField(DBR dbr, PVField field) {
+        private void getValueField(DBR dbr, PVField pvField) {
             if (elementCount == 1) {
                 if (type == DBRType.DOUBLE) {
-                    ((DOUBLE) dbr).getDoubleValue()[0] = convert.toDouble(field);
+                    ((DOUBLE) dbr).getDoubleValue()[0] = convert.toDouble(pvField);
                 } else if (type == DBRType.INT) {
-                    ((INT) dbr).getIntValue()[0] = convert.toInt(field);
+                    ((INT) dbr).getIntValue()[0] = convert.toInt(pvField);
                 } else if (type == DBRType.SHORT) {
-                    ((SHORT) dbr).getShortValue()[0] = convert.toShort(field);
+                    ((SHORT) dbr).getShortValue()[0] = convert.toShort(pvField);
                 } else if (type == DBRType.FLOAT) {
-                    ((FLOAT) dbr).getFloatValue()[0] = convert.toFloat(field);
+                    ((FLOAT) dbr).getFloatValue()[0] = convert.toFloat(pvField);
                 } else if (type == DBRType.STRING) {
-                    ((STRING) dbr).getStringValue()[0] = convert.getString(field);
+                    ((STRING) dbr).getStringValue()[0] = convert.getString(pvField);
                 } else if (type == DBRType.ENUM) {
                     short[] value = ((ENUM) dbr).getEnumValue();
-                    PVEnumerated pvEnumerated = valueChannelField.getEnumerated();
-                    if (pvEnumerated != null) {
-                        value[0] = (short) pvEnumerated.getIndexField().get();
+                    if(pvField.getField().getType()==Type.pvBoolean) {
+                        PVBoolean pvBoolean = (PVBoolean)pvField;
+                        value[0] = (short)((pvBoolean.get()) ? 1 : 0);
                     } else {
-                        valuePVField.message("illegal enum", MessageType.error);
+                        PVEnumerated pvEnumerated = valueChannelField.getEnumerated();
+                        if (pvEnumerated != null) {
+                            value[0] = (short) pvEnumerated.getIndexField().get();
+                        } else {
+                            valuePVField.message("illegal enum", MessageType.error);
+                        }
                     }
                 } else if (type == DBRType.BYTE) {
-                    ((BYTE) dbr).getByteValue()[0] = convert.toByte(field);
+                    ((BYTE) dbr).getByteValue()[0] = convert.toByte(pvField);
                 }
             } else {
+                int dbrCount = dbr.getCount();
                 if (type == DBRType.DOUBLE) {
                     double[] value = ((DOUBLE) dbr).getDoubleValue();
-                    convert.toDoubleArray(field, 0, dbr.getCount(), value, 0);
+                    convert.toDoubleArray(pvField, 0, dbrCount, value, 0);
                 } else if (type == DBRType.INT) {
                     int[] value = ((INT) dbr).getIntValue();
-                    convert.toIntArray(field, 0, dbr.getCount(), value, 0);
+                    convert.toIntArray(pvField, 0, dbrCount, value, 0);
                 } else if (type == DBRType.SHORT) {
                     short[] value = ((SHORT) dbr).getShortValue();
-                    convert.toShortArray(field, 0, dbr.getCount(), value, 0);
+                    convert.toShortArray(pvField, 0, dbrCount, value, 0);
                 } else if (type == DBRType.FLOAT) {
                     float[] value = ((FLOAT) dbr).getFloatValue();
-                    convert.toFloatArray(field, 0, dbr.getCount(), value, 0);
+                    convert.toFloatArray(pvField, 0, dbrCount, value, 0);
                 } else if (type == DBRType.STRING) {
                     String[] value = ((STRING) dbr).getStringValue();
-                    convert.toStringArray((PVArray) field, 0, dbr.getCount(),
+                    convert.toStringArray((PVArray) pvField, 0, dbrCount,
                             value, 0);
                 } else if (type == DBRType.ENUM) {
                     short[] value = ((ENUM) dbr).getEnumValue();
-                    PVStructureArray enumField = (PVStructureArray) field;
-                    StructureArrayData data = new StructureArrayData();
-                    int count = enumField.get(0, elementCount, data);
-                    for (int j = 0; j < count; j++) {
-                        PVInt indexField = data.data[j].getIntField("index");
-                        value[j] = (short) indexField.get();
+                    Array array = (Array)pvField.getField();
+                    if(array.getElementType()==Type.pvBoolean) {
+                        PVBooleanArray pvBooleanArray = (PVBooleanArray)pvField;
+                        BooleanArrayData data = new BooleanArrayData();
+                        int count = pvBooleanArray.get(0, dbrCount, data);
+                        boolean[] bools = data.data;
+                        System.arraycopy(bools, 0, value, 0, count);
+                    } else {
+                        PVStructureArray enumField = (PVStructureArray) pvField;
+                        StructureArrayData data = new StructureArrayData();
+                        int count = enumField.get(0, dbrCount, data);
+                        for (int j = 0; j < count; j++) {
+                            PVStructure pvStructure = data.data[j];
+                            if(pvStructure==null) continue;
+                            PVInt indexField = pvStructure.getIntField("index");
+                            if(indexField==null) {
+                                value[j] = 0;
+                            } else {
+                                value[j] = (short) indexField.get();
+                            }
+                        }
                     }
                 } else if (type == DBRType.BYTE) {
                     byte[] value = ((BYTE) dbr).getByteValue();
-                    convert.toByteArray(field, 0, dbr.getCount(), value, 0);
+                    convert.toByteArray(pvField, 0, dbr.getCount(), value, 0);
                 }
             }
         }
@@ -674,77 +707,95 @@ public class ServerFactory {
             /* (non-Javadoc)
              * @see org.epics.ioc.ca.ChannelPutRequester#nextPutField(org.epics.ioc.ca.ChannelField, org.epics.ioc.pv.PVField)
              */
-            public boolean nextPutField(ChannelField channelField, PVField field) {
+            public boolean nextPutField(ChannelField channelField, PVField pvField) {
                 if (channelField == valueChannelField) {
                     final DBR dbr = value2Put;
                     if (elementCount == 1) {
                         if (type == DBRType.DOUBLE) {
                             double[] value = ((DOUBLE) dbr).getDoubleValue();
-                            convert.fromDouble(field, value[0]);
+                            convert.fromDouble(pvField, value[0]);
                         } else if (type == DBRType.INT) {
                             int[] value = ((INT) dbr).getIntValue();
-                            convert.fromInt(field, value[0]);
+                            convert.fromInt(pvField, value[0]);
                         } else if (type == DBRType.SHORT) {
                             short[] value = ((SHORT) dbr).getShortValue();
-                            convert.fromShort(field, value[0]);
+                            convert.fromShort(pvField, value[0]);
                         } else if (type == DBRType.FLOAT) {
                             float[] value = ((FLOAT) dbr).getFloatValue();
-                            convert.fromFloat(field, value[0]);
+                            convert.fromFloat(pvField, value[0]);
                         } else if (type == DBRType.STRING) {
                             String[] value = ((STRING) dbr).getStringValue();
-                            convert.fromString(field, value[0]);
+                            convert.fromString(pvField, value[0]);
                         } else if (type == DBRType.ENUM) {
                             short[] value = ((ENUM) dbr).getEnumValue();
-                            PVEnumerated pvEnumerated = valueChannelField
-                                    .getEnumerated();
-                            if (pvEnumerated != null) {
-                                pvEnumerated.getIndexField().put(value[0]);
-                            } else {
-                                valuePVField.message("illegal enum",
-                                        MessageType.error);
+                            if(pvField.getField().getType()==Type.pvBoolean) {
+                                PVBoolean pvBoolean = (PVBoolean)pvField;
+                                pvBoolean.put((value[0]==0) ? false : true);
+                            } else {                               
+                                PVEnumerated pvEnumerated = valueChannelField.getEnumerated();
+                                PVInt pvInt = null;
+                                if (pvEnumerated != null) pvInt = pvEnumerated.getIndexField();
+                                if(pvInt!=null) {
+                                    pvInt.put(value[0]);
+                                } else {
+                                    valuePVField.message("illegal enum",MessageType.error);
+                                }
                             }
                         } else if (type == DBRType.BYTE) {
                             byte[] value = ((BYTE) dbr).getByteValue();
-                            convert.fromInt(field, value[0]);
+                            convert.fromInt(pvField, value[0]);
                         }
                     } else {
+                        int dbrCount = dbr.getCount();
                         if (type == DBRType.DOUBLE) {
                             double[] value = ((DOUBLE) dbr).getDoubleValue();
-                            convert.fromDoubleArray(field, 0, dbr.getCount(),
+                            convert.fromDoubleArray(pvField, 0, dbrCount,
                                     value, 0);
                         } else if (type == DBRType.INT) {
                             int[] value = ((INT) dbr).getIntValue();
                             convert
-                                    .fromIntArray(field, 0, dbr.getCount(), value,
+                                    .fromIntArray(pvField, 0, dbrCount, value,
                                             0);
                         } else if (type == DBRType.SHORT) {
                             short[] value = ((SHORT) dbr).getShortValue();
-                            convert.fromShortArray(field, 0, dbr.getCount(), value,
+                            convert.fromShortArray(pvField, 0, dbrCount, value,
                                     0);
                         } else if (type == DBRType.FLOAT) {
                             float[] value = ((FLOAT) dbr).getFloatValue();
-                            convert.fromFloatArray(field, 0, dbr.getCount(), value,
+                            convert.fromFloatArray(pvField, 0, dbrCount, value,
                                     0);
                         } else if (type == DBRType.STRING) {
                             String[] values = ((STRING) dbr).getStringValue();
-                            convert.fromStringArray((PVArray) field, 0, dbr
+                            convert.fromStringArray((PVArray) pvField, 0, dbr
                                     .getCount(), values, 0);
                         } else if (type == DBRType.ENUM) {
                             short[] value = ((ENUM) dbr).getEnumValue();
-                            int count = dbr.getCount();
-                            StructureArrayData data = new StructureArrayData();
-                            PVStructureArray pvStructureArray = (PVStructureArray) field;
-                            int len = pvStructureArray.get(0, count, data);
-                            if (len < count)
-                                count = len;
-                            for (int j = 0; j < count; j++) {
-                                PVInt indexField = data.data[j]
-                                        .getIntField("index");
-                                indexField.put(value[j]);
+                            Array array = (Array)pvField.getField();
+                            if(array.getElementType()==Type.pvBoolean) {
+                                PVBooleanArray pvBooleanArray = (PVBooleanArray)pvField;
+                                boolean[] bools = new boolean[dbrCount];
+                                for(int i=0; i<dbrCount; i++) {
+                                    bools[i] = (value[i]==0) ? false : true;
+                                }
+                                pvBooleanArray.put(0, dbrCount, bools, 0);
+                            } else {
+                                StructureArrayData data = new StructureArrayData();
+                                PVStructureArray pvStructureArray = (PVStructureArray) pvField;
+                                int count = dbrCount;
+                                int len = pvStructureArray.get(0, count, data);
+                                if (len < count)
+                                    count = len;
+                                for (int j = 0; j < count; j++) {
+                                    PVStructure pvStructure = data.data[j];
+                                    if(pvStructure==null) continue;
+                                    PVInt indexField = pvStructure.getIntField("index");
+                                    if(indexField==null) continue;
+                                    indexField.put(value[j]);
+                                }
                             }
                         } else if (type == DBRType.BYTE) {
                             byte[] value = ((BYTE) dbr).getByteValue();
-                            convert.fromByteArray(field, 0, dbr.getCount(), value,
+                            convert.fromByteArray(pvField, 0, dbrCount, value,
                                     0);
                         }
                     }

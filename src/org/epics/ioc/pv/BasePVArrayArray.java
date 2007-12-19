@@ -114,10 +114,11 @@ public class BasePVArrayArray extends AbstractPVArray implements PVArrayArray
         builder.append("{");
         for(int i=0; i < length; i++) {
             convert.newLine(builder,indentLevel + 1);
+            builder.append("[" + i + "] = ");
             if(value[i]==null) {
                 builder.append("{}");
             } else {
-                builder.append(value[i].toString(indentLevel+1));
+                builder.append(value[i].toString(indentLevel+2));
             }
         }
         convert.newLine(builder,indentLevel);
