@@ -5,16 +5,19 @@
  */
 package org.epics.ioc.swtshell;
 
-import java.util.concurrent.locks.*;
-
-import org.eclipse.swt.*;
-import org.eclipse.swt.layout.*;
-import org.eclipse.swt.events.*;
-import org.eclipse.swt.widgets.*;
-
-import org.epics.ioc.db.*;
-import org.epics.ioc.process.*;
-import org.epics.ioc.util.*;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Shell;
+import org.epics.ioc.db.IOCDB;
+import org.epics.ioc.db.IOCDBFactory;
+import org.epics.ioc.process.SupportCreation;
+import org.epics.ioc.process.SupportCreationFactory;
+import org.epics.ioc.util.MessageType;
+import org.epics.ioc.util.Requester;
 
 /**
  * A GUI iocshell implemented via Eclipse SWT (Standard Widget Toolkit).
@@ -33,19 +36,7 @@ public class Swtshell {
             System.out.println("support create failed");
             return;
         }
-        ReentrantLock lock = new ReentrantLock();
-        Condition done = lock.newCondition();
-        ThreadInstance threadInstance = new ThreadInstance(lock,done);
-        threadInstance.start();
-//        try {
-//            lock.lock();
-//            try {
-//                threadInstance.start();
-//                done.await();
-//            } finally {
-//                lock.unlock();
-//            }
-//        } catch(InterruptedException e) {}
+        new ThreadInstance();
     }
 
     private static class SupportCreate implements Requester{
@@ -92,28 +83,23 @@ public class Swtshell {
 
     static private class ThreadInstance implements Runnable {
         private Thread thread = null;
-        private ReentrantLock lock;
-        private Condition done;
-
-        private ThreadInstance(ReentrantLock lock,Condition done) {
-            this.lock = lock;
-            this.done = done;
+        private boolean isRunning = false;
+        
+        private ThreadInstance() {            
             thread = new Thread(this,"swtshell");
             thread.setPriority(2);
+            thread.start();
+            while(!isRunning) {
+                try {
+                Thread.sleep(1);
+                } catch(InterruptedException e) {}
+            }
         }
         
-        private void start() {
-            thread.start();
-        }
         
         public void run() {
+            isRunning = true;
             runShell();
-            lock.lock();
-            try {
-                done.signal();
-            } finally {
-                lock.unlock();
-            }
         }
         
         private void runShell() {
