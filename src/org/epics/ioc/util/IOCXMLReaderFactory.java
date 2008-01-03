@@ -400,7 +400,7 @@ public class IOCXMLReaderFactory {
                     break;
                 }
                 String from = string.substring(startIndex+2, endIndex);
-                String to = System.getenv(from);
+                String to = System.getProperty(from, System.getenv(from));
                 if(to==null) {
                     message("envVariable " + from + " not found",MessageType.error);
                     break;
