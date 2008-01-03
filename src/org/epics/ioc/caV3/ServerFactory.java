@@ -105,17 +105,19 @@ public class ServerFactory {
     private static class ThreadInstance implements Runnable {
 
         private ThreadInstance() {
-            Thread thread = new Thread(this,"swtshell");
+            Thread thread = new Thread(this, "caV3-server");
             thread.setPriority(3);
-            thread.start();
-            while(!isRunning) {
-                try {
-                Thread.sleep(1);
-                } catch(InterruptedException e) {}
+            thread.setDaemon(false);
+            
+            // wait until thread has started
+            synchronized (this) {
+                thread.start();
+            	try {
+					this.wait();
+				} catch (InterruptedException e) { /* noop */ }
             }
         }
         
-        private boolean isRunning = false;
         /**
          * JCA server context.
          */
@@ -160,7 +162,12 @@ public class ServerFactory {
          * @see java.lang.Runnable#run()
          */
         public void run() {
-            isRunning = true;
+        	
+        	// notify that thread has started
+        	synchronized (this) {
+				this.notifyAll();
+			}
+        	
             try {
 
                 // initialize context
@@ -203,14 +210,16 @@ public class ServerFactory {
                 String aliasName, InetSocketAddress clientAddress,
                 ProcessVariableExistanceCallback asyncCompletionCallback)
         throws CAException, IllegalArgumentException, IllegalStateException {
-            boolean exists = ChannelFactory.isChannelProvider(aliasName,"local");
+            boolean exists = ChannelFactory.isChannelProvider(aliasName, "local");
             return exists ? ProcessVariableExistanceCompletion.EXISTS_HERE : ProcessVariableExistanceCompletion.DOES_NOT_EXIST_HERE;
         }
     }
     
+    /**
+     * Channel process variable implementation. 
+     */
     private static class ChannelProcessVariable extends ProcessVariable implements ChannelStateListener
     {
-        
         private DBRType type;
         private final Channel channel;
         private ChannelField valueChannelField = null;
@@ -231,16 +240,22 @@ public class ServerFactory {
          * @param eventCallback event callback, can be <code>null</code>.
          */
         public ChannelProcessVariable(String pvName, ProcessVariableEventCallback eventCallback)
-            throws CAStatusException, IllegalArgumentException, IllegalStateException {
+            throws CAStatusException, IllegalArgumentException, IllegalStateException
+        {
             super(pvName, eventCallback);
+
             channel = ChannelFactory.createChannel(pvName, "local", this);
             if (channel == null)
                 throw new CAStatusException(CAStatus.DEFUNCT);
+
             initializeChannelDBRType();
             this.eventCallback = eventCallback;
+
+            // cache characteristics
             characteristicsGetRequest = new CharacteristicsGetRequest();
             characteristicsGetRequest.get(null);
         }
+        
         /* (non-Javadoc)
          * @see gov.aps.jca.cas.ProcessVariable#destroy()
          */
@@ -249,6 +264,7 @@ public class ServerFactory {
             super.destroy();
             channel.destroy();
         }
+        
         /* (non-Javadoc)
          * @see gov.aps.jca.cas.ProcessVariable#getType()
          */
@@ -256,6 +272,7 @@ public class ServerFactory {
         public DBRType getType() {
             return type;
         }
+        
         /* (non-Javadoc)
          * @see gov.aps.jca.cas.ProcessVariable#getEnumLabels()
          */
@@ -274,10 +291,9 @@ public class ServerFactory {
             // find value field
             String propertyName = channel.getPropertyName();
             valueChannelField = channel.createChannelField(propertyName); 
-            if (valueChannelField == null) {
-                throw new CAStatusException(CAStatus.DEFUNCT,
-                    "Failed to find field " + propertyName);
-            }
+            if (valueChannelField == null)
+                throw new CAStatusException(CAStatus.DEFUNCT, "Failed to find field " + propertyName);
+            
             valuePVField = valueChannelField.getPVField();
             Field field = valueChannelField.getField();
             Type dbType = field.getType();
@@ -295,6 +311,8 @@ public class ServerFactory {
             }
         }
         
+        private static final String[] YES_NO_LABELS = new String[] { "false", "true" };
+
         /**
          * Convert DB type to DBR type.
          * @return DBR type.
@@ -303,7 +321,7 @@ public class ServerFactory {
         private final DBRType getChannelDBRType(Type type) {
             switch (type) {
                 case pvBoolean:
-                    labels = new String[]{"false","true"};
+                    labels = YES_NO_LABELS;
                     return DBRType.ENUM;
                 case pvByte:
                     return DBRType.BYTE;
@@ -355,19 +373,24 @@ public class ServerFactory {
         public int getMaxDimension() {
             return elementCount > 1 ? 1 : 0;
         }
+        
         /* (non-Javadoc)
          * @see gov.aps.jca.cas.ProcessVariable#read(gov.aps.jca.dbr.DBR, gov.aps.jca.cas.ProcessVariableReadCallback)
          */
         public CAStatus read(DBR value, ProcessVariableReadCallback asyncReadCallback) throws CAException {
-            if(getRequest==null) getRequest = new GetRequest();
-            characteristicsGetRequest.fill(value);
+            // not syned, but now it does not harm
+        	if (getRequest == null) getRequest = new GetRequest();
+            
+        	characteristicsGetRequest.fill(value);
             return getRequest.get(value);
         }
         /* (non-Javadoc)
          * @see gov.aps.jca.cas.ProcessVariable#write(gov.aps.jca.dbr.DBR, gov.aps.jca.cas.ProcessVariableWriteCallback)
          */
         public CAStatus write(DBR value, ProcessVariableWriteCallback asyncWriteCallback) throws CAException {
-            if(putRequest==null) putRequest = new PutRequest();
+            // not syned, but now it does not harm
+            if (putRequest == null) putRequest = new PutRequest();
+
             return putRequest.put(value);
         }
 
@@ -414,14 +437,14 @@ public class ServerFactory {
          * @see org.epics.ioc.ca.ChannelStateListener#channelStateChange(org.epics.ioc.ca.Channel, boolean)
          */
         public void channelStateChange(Channel c, boolean isConnected) {
-            // TODO Auto-generated method stub
+            // noop
         }
 
         /* (non-Javadoc)
          * @see org.epics.ioc.ca.ChannelStateListener#disconnect(org.epics.ioc.ca.Channel)
          */
         public void disconnect(Channel c) {
-            // TODO Auto-generated method stub
+            // noop
         }
         
         
@@ -542,12 +565,12 @@ public class ServerFactory {
                 break;
             case minor:
                 sts.setSeverity(Severity.MINOR_ALARM);
-                // TODO
+                // for now only SOFT_ALARM
                 sts.setStatus(Status.SOFT_ALARM);
                 break;
             case major:
                 sts.setSeverity(Severity.MAJOR_ALARM);
-                // TODO
+                // for now only SOFT_ALARM
                 sts.setStatus(Status.SOFT_ALARM);
                 break;
             default:
@@ -602,7 +625,7 @@ public class ServerFactory {
             /* (non-Javadoc)
              * @see org.epics.ioc.ca.ChannelGetRequester#getDone(org.epics.ioc.util.RequestResult)
              */
-            public void getDone(RequestResult requestResult) {
+            public synchronized void getDone(RequestResult requestResult) {
                 result = requestResult;
                 notify();
             }
@@ -614,6 +637,7 @@ public class ServerFactory {
                 // nothing to do
                 return false;
             }
+            
             /* (non-Javadoc)
              * @see org.epics.ioc.ca.ChannelGetRequester#nextGetField(org.epics.ioc.ca.ChannelField, org.epics.ioc.pv.PVField)
              */
@@ -627,12 +651,14 @@ public class ServerFactory {
                 }
                 return false;
             }
+            
             /* (non-Javadoc)
              * @see org.epics.ioc.ca.ChannelFieldGroupListener#accessRightsChange(org.epics.ioc.ca.Channel, org.epics.ioc.ca.ChannelField)
              */
             public void accessRightsChange(Channel channel, ChannelField channelField) {
-                // TODO Auto-generated method stub            
+                // noop            
             }
+            
             /* (non-Javadoc)
              * @see org.epics.ioc.util.Requester#getRequesterName()
              */
@@ -644,6 +670,7 @@ public class ServerFactory {
              * @see org.epics.ioc.util.Requester#message(java.lang.String, org.epics.ioc.util.MessageType)
              */
             public void message(String message, MessageType messageType) {
+            	// delegate to parent
                 ChannelProcessVariable.this.message(message,messageType);
             }
             
@@ -676,7 +703,6 @@ public class ServerFactory {
                 {
                     try {
                         this.wait();
-                        result = RequestResult.success;
                     } catch (InterruptedException e) {
                         return CAStatus.PUTFAIL;
                     }
@@ -684,12 +710,27 @@ public class ServerFactory {
 
                 return result == RequestResult.success ? CAStatus.NORMAL : CAStatus.PUTFAIL;
             } 
+
+            /*
+             * (non-Javadoc)
+             * 
+             * @see org.epics.ioc.ca.ChannelPutRequester#putDone(org.epics.ioc.util.RequestResult)
+             */
+            public  synchronized void putDone(RequestResult requestResult) {
+                result = requestResult;
+                // TODO this always returns null (javaIOC bug?)
+                if (result == null)
+                    result = RequestResult.success;
+                notify();
+            }
+
             /* (non-Javadoc)
              * @see org.epics.ioc.ca.ChannelPutRequester#nextDelayedPutField(org.epics.ioc.pv.PVField)
              */
             public boolean nextDelayedPutField(PVField field) {
                 return false;
             }
+
             /* (non-Javadoc)
              * @see org.epics.ioc.util.Requester#getRequesterName()
              */
@@ -701,6 +742,7 @@ public class ServerFactory {
              * @see org.epics.ioc.util.Requester#message(java.lang.String, org.epics.ioc.util.MessageType)
              */
             public void message(String message, MessageType messageType) {
+            	// delegate to parent
                 ChannelProcessVariable.this.message(message,messageType);
             }
               
@@ -803,23 +845,12 @@ public class ServerFactory {
                 }
                 return false;
             }
-            /*
-             * (non-Javadoc)
-             * 
-             * @see org.epics.ioc.ca.ChannelPutRequester#putDone(org.epics.ioc.util.RequestResult)
-             */
-            public void putDone(RequestResult requestResult) {
-                result = requestResult;
-                // TODO this always returns null
-                if (result == null)
-                    result = RequestResult.success;
-                notify();
-            }
+            
             /* (non-Javadoc)
              * @see org.epics.ioc.ca.ChannelFieldGroupListener#accessRightsChange(org.epics.ioc.ca.Channel, org.epics.ioc.ca.ChannelField)
              */
             public void accessRightsChange(Channel channel, ChannelField channelField) {
-                // TODO Auto-generated method stub
+                // noop
             }
         }
 
@@ -854,7 +885,7 @@ public class ServerFactory {
              * @see org.epics.ioc.ca.ChannelMonitorRequester#dataOverrun(int)
              */
             public void dataOverrun(int number) {
-                // TODO Auto-generated method stub
+                // noop
                 
             }
             /* (non-Javadoc)
@@ -904,7 +935,7 @@ public class ServerFactory {
              * @see org.epics.ioc.ca.ChannelFieldGroupListener#accessRightsChange(org.epics.ioc.ca.Channel, org.epics.ioc.ca.ChannelField)
              */
             public void accessRightsChange(Channel channel, ChannelField channelField) {
-                // TODO Auto-generated method stub
+                // TODO noop
                 
             }
 
@@ -948,24 +979,29 @@ public class ServerFactory {
             {
                 characteristicsData.fill(dbr);
             }
+            
             /* (non-Javadoc)
              * @see org.epics.ioc.ca.ChannelGetRequester#nextDelayedGetData(org.epics.ioc.pvAccess.PVData)
              */
             public boolean nextDelayedGetField(PVField pvField) {
                 return false;
             }
+            
             /* (non-Javadoc)
              * @see org.epics.ioc.util.Requester#getRequesterName()
              */
             public String getRequesterName() {
                 return name + "-" + getClass().getName();
             }
+            
             /* (non-Javadoc)
              * @see org.epics.ioc.util.Requester#message(java.lang.String, org.epics.ioc.util.MessageType)
              */
             public void message(String message, MessageType messageType) {
+            	// delegate to parent
                 ChannelProcessVariable.this.message(message,messageType);
             }
+            
             /* (non-Javadoc)
              * @see org.epics.ioc.ca.ChannelGetRequester#nextGetData(org.epics.ioc.ca.Channel, org.epics.ioc.ca.ChannelField, org.epics.ioc.pvAccess.PVData)
              */
@@ -973,6 +1009,7 @@ public class ServerFactory {
                 characteristicsData.nextGetField(channel, channelField, pvField);
                 return false;
             }
+            
             /* (non-Javadoc)
              * @see org.epics.ioc.ca.ChannelGetRequester#getDone(org.epics.ioc.util.RequestResult)
              */
@@ -980,11 +1017,12 @@ public class ServerFactory {
                 result = requestResult;
                 notify();
             }
+            
             /* (non-Javadoc)
              * @see org.epics.ioc.ca.ChannelFieldGroupListener#accessRightsChange(org.epics.ioc.ca.Channel, org.epics.ioc.ca.ChannelField)
              */
             public void accessRightsChange(Channel channel, ChannelField channelField) {
-                // TODO Auto-generated method stub
+                // noop
                 
             }
         }
@@ -1008,7 +1046,7 @@ public class ServerFactory {
              * @see org.epics.ioc.ca.ChannelFieldGroupListener#accessRightsChange(org.epics.ioc.ca.Channel, org.epics.ioc.ca.ChannelField)
              */
             public void accessRightsChange(Channel channel, ChannelField channelField) {
-                // TODO Auto-generated method stub
+                // noop
             }
 
             private void init() {
@@ -1086,7 +1124,7 @@ public class ServerFactory {
                         PVDouble highField = displayStructure.getDoubleField("limit.high");
                         gr.setUpperDispLimit(highField.get());
 
-                        // TODO alarm limits!
+                        // TODO alarm limits (there is not way to get it)
                     }
                     else if (channelField == controlLimitField && dbr instanceof CTRL)
                     {
