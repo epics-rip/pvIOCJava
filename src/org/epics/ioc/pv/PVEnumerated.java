@@ -26,4 +26,9 @@ public interface PVEnumerated {
      * @return The interface.
      */
     PVStringArray getChoicesField();
+    /**
+     * Get the PVField interface.
+     * @return The interface.
+     */
+    PVField getPVField();
 }

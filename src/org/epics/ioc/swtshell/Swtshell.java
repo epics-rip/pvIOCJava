@@ -16,7 +16,7 @@ import org.epics.ioc.db.IOCDB;
 import org.epics.ioc.db.IOCDBFactory;
 import org.epics.ioc.process.SupportCreation;
 import org.epics.ioc.process.SupportCreationFactory;
-import org.epics.ioc.util.MessageType;
+import org.epics.ioc.util.*;
 import org.epics.ioc.util.Requester;
 
 /**
@@ -31,78 +31,28 @@ public class Swtshell {
      * 
      */
     public static void swtshell() {
-        SupportCreate supportCreate = new SupportCreate();
-        if(!supportCreate.create()) {
-            System.out.println("support create failed");
-            return;
-        }
         new ThreadInstance();
     }
+   
+    static private ThreadCreate threadCreate = ThreadFactory.getThreadCreate();
 
-    private static class SupportCreate implements Requester{
+    static private class ThreadInstance implements ReadyRunnable {
         
-        private SupportCreate() {}
+        private ThreadInstance() {  
+            threadCreate.create("swtshell", 2, this);
+            
+        }
         
-        private void message(String message) {
-            System.out.println(message);
-        }
-        private boolean create() {
-            IOCDB iocdb = IOCDBFactory.getMaster();
-            SupportCreation supportCreation = SupportCreationFactory.createSupportCreation(iocdb, this);
-            boolean gotSupport = supportCreation.createSupport();
-            if(!gotSupport) {
-                message("Did not find all support.");
-                return false;
-            }
-            boolean readyForStart = supportCreation.initializeSupport();
-            if(!readyForStart) {
-                message("initializeSupport failed");
-                return false;
-            }
-            boolean ready = supportCreation.startSupport();
-            if(!ready) {
-                message("startSupport failed");
-                return false;
-            }
-            return true;
-        }
+        private boolean isReady = false;
         /* (non-Javadoc)
-         * @see org.epics.ioc.util.Requester#getRequesterName()
+         * @see org.epics.ioc.util.ReadyRunnable#isReady()
          */
-        public String getRequesterName() {
-            return "swtshell";
+        public boolean isReady() {
+            return isReady;
         }
 
-        /* (non-Javadoc)
-         * @see org.epics.ioc.util.Requester#message(java.lang.String, org.epics.ioc.util.MessageType)
-         */
-        public void message(String message, MessageType messageType) {
-            System.out.println("swtshell " + message);
-        }
-    }
-
-    static private class ThreadInstance implements Runnable {
-        private Thread thread = null;
-        private boolean isRunning = false;
-        
-        private ThreadInstance() {            
-            thread = new Thread(this,"swtshell");
-            thread.setPriority(2);
-            thread.start();
-            while(!isRunning) {
-                try {
-                Thread.sleep(1);
-                } catch(InterruptedException e) {}
-            }
-        }
-        
-        
         public void run() {
-            isRunning = true;
-            runShell();
-        }
-        
-        private void runShell() {
+            isReady = true;
             final Display display = new Display();
             Shell shell = new Shell(display);
             shell.setText("iocshell");

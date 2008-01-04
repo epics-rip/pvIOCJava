@@ -23,13 +23,11 @@ public class BaseCDPut implements CDPut, ChannelPutRequester, ChannelGetRequeste
     public BaseCDPut(Channel channel,ChannelFieldGroup channelFieldGroup,
         CDPutRequester cdPutRequester,boolean process)
     {
-        this.channel = channel;
         this.cdPutRequester = cdPutRequester;
         channelGet = channel.createChannelGet(channelFieldGroup, this,false);
         channelPut = channel.createChannelPut(channelFieldGroup, this, process);
     }
 
-    private Channel channel;
     private CDPutRequester cdPutRequester;               
     private ChannelGet channelGet;
     private ChannelPut channelPut;  

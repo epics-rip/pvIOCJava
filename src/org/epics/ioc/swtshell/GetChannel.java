@@ -24,7 +24,7 @@ import org.epics.ioc.ca.*;
  */    
 public class GetChannel extends Dialog implements SelectionListener {
     private Requester requester;
-    private ChannelStateListener channelStateListener;
+    private ChannelListener channelListener;
     private Shell shell;
     private Button selectButton;
     private Text text;
@@ -34,12 +34,12 @@ public class GetChannel extends Dialog implements SelectionListener {
     /**The constructor.
      * @param parent The parent shell.
      * @param requester The requestor.
-     * @param channelStateListener The channel state listener.
+     * @param channelListener The channel state listener.
      */
-    public GetChannel(Shell parent,Requester requester,ChannelStateListener channelStateListener) {
+    public GetChannel(Shell parent,Requester requester,ChannelListener channelListener) {
         super(parent,SWT.DIALOG_TRIM|SWT.NONE);
         this.requester = requester;
-        this.channelStateListener = channelStateListener;
+        this.channelListener = channelListener;
     }
     
     /**
@@ -72,7 +72,7 @@ public class GetChannel extends Dialog implements SelectionListener {
             }
         }
         shell.dispose();
-        Channel channel = ChannelFactory.createChannel(recordName,"local", channelStateListener);
+        Channel channel = ChannelFactory.createChannel(recordName,"local", channelListener);
         if(channel==null) {
             requester.message(String.format(
                     "pvname %s not found%n",recordName),MessageType.error);

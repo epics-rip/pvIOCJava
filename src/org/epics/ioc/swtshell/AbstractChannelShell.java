@@ -13,7 +13,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.epics.ioc.ca.Channel;
-import org.epics.ioc.ca.ChannelStateListener;
+import org.epics.ioc.ca.ChannelListener;
 import org.epics.ioc.util.MessageNode;
 import org.epics.ioc.util.MessageQueue;
 import org.epics.ioc.util.MessageQueueFactory;
@@ -22,7 +22,7 @@ import org.epics.ioc.util.Requester;
 
 public abstract class AbstractChannelShell
 implements Requester, Runnable,
-SelectionListener,ChannelStateListener,DisposeListener {
+SelectionListener,ChannelListener,DisposeListener {
 
     protected AbstractChannelShell(String name) {
         windowName = name;
@@ -175,14 +175,14 @@ SelectionListener,ChannelStateListener,DisposeListener {
         widgetSelected(arg0);
     }
     /* (non-Javadoc)
-     * @see org.epics.ioc.ca.ChannelStateListener#channelStateChange(org.epics.ioc.ca.Channel, boolean)
+     * @see org.epics.ioc.ca.ChannelListener#channelStateChange(org.epics.ioc.ca.Channel, boolean)
      */
     public void channelStateChange(Channel c, boolean isConnected) {
         // TODO Auto-generated method stub
 
     }
     /* (non-Javadoc)
-     * @see org.epics.ioc.ca.ChannelStateListener#disconnect(org.epics.ioc.ca.Channel)
+     * @see org.epics.ioc.ca.ChannelListener#disconnect(org.epics.ioc.ca.Channel)
      */
     public void disconnect(Channel c) {
         // TODO 

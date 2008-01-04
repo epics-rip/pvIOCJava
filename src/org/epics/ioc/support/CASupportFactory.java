@@ -29,7 +29,7 @@ import org.epics.ioc.ca.ChannelMonitorNotifyFactory;
 import org.epics.ioc.ca.ChannelMonitorNotifyRequester;
 import org.epics.ioc.ca.ChannelProcess;
 import org.epics.ioc.ca.ChannelProcessRequester;
-import org.epics.ioc.ca.ChannelStateListener;
+import org.epics.ioc.ca.ChannelListener;
 import org.epics.ioc.db.DBField;
 import org.epics.ioc.db.DBRecord;
 import org.epics.ioc.db.DBStructure;
@@ -122,7 +122,7 @@ public class CASupportFactory {
     }
     
     private static abstract class CASupport extends AbstractSupport
-    implements ChannelStateListener,ChannelFieldGroupListener {
+    implements ChannelListener,ChannelFieldGroupListener {
         protected DBStructure dbStructure;
         protected PVStructure pvStructure;
         protected String channelRequesterName;
@@ -203,7 +203,7 @@ public class CASupportFactory {
             }
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.ca.ChannelStateListener#disconnect(org.epics.ioc.ca.Channel)
+         * @see org.epics.ioc.ca.ChannelListener#disconnect(org.epics.ioc.ca.Channel)
          */
         public void disconnect(Channel c) {
             dbRecord.lock();
@@ -226,7 +226,7 @@ public class CASupportFactory {
     }
     
     private static class ProcessSupport extends CASupport implements
-    ChannelStateListener,
+    ChannelListener,
     ProcessCallbackRequester,ProcessContinueRequester,
     ChannelProcessRequester
     {
@@ -249,7 +249,7 @@ public class CASupportFactory {
                 if(isConnected) {
                     channelProcess = channel.createChannelProcess(this);
                 } else {
-                    channel.destroy(channelProcess);
+                    channelProcess.destroy();
                     channelProcess = null;
                 }
             } finally {
@@ -316,7 +316,7 @@ public class CASupportFactory {
     }
     
     private static class InputSupport extends CASupport implements
-    ChannelStateListener,
+    ChannelListener,
     ProcessCallbackRequester,ProcessContinueRequester,
     CDGetRequester
     {   
@@ -550,7 +550,7 @@ public class CASupportFactory {
     }
         
     private static class OutputSupport extends CASupport implements
-    ChannelStateListener,
+    ChannelListener,
     ProcessCallbackRequester,ProcessContinueRequester,
     CDPutRequester
     {
@@ -572,7 +572,7 @@ public class CASupportFactory {
             super(inputSupportName,dbStructure);
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.ca.ChannelStateListener#channelStateChange(org.epics.ioc.ca.Channel)
+         * @see org.epics.ioc.ca.ChannelListener#channelStateChange(org.epics.ioc.ca.Channel)
          */
         public void channelStateChange(Channel c,boolean isConnected) {
             dbRecord.lock();
@@ -702,7 +702,7 @@ public class CASupportFactory {
              supportProcessRequester.supportProcessDone(requestResult);
         }        
         /* (non-Javadoc)
-         * @see org.epics.ioc.ca.ChannelStateListener#disconnect(org.epics.ioc.ca.Channel)
+         * @see org.epics.ioc.ca.ChannelListener#disconnect(org.epics.ioc.ca.Channel)
          */
         public void disconnect(Channel c) {
             dbRecord.lock();
@@ -770,7 +770,7 @@ public class CASupportFactory {
     
     private static class MonitorNotifySupport extends CASupport implements
     RecordProcessRequester,
-    ChannelStateListener,
+    ChannelListener,
     ChannelMonitorNotifyRequester
     {
         private ChannelMonitorNotify channelMonitorNotify = null;
@@ -827,7 +827,7 @@ public class CASupportFactory {
             
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.ca.ChannelStateListener#channelStateChange(org.epics.ioc.ca.Channel)
+         * @see org.epics.ioc.ca.ChannelListener#channelStateChange(org.epics.ioc.ca.Channel)
          */
         public void channelStateChange(Channel c,boolean isConnected) {
             assert(c==channel);
@@ -878,7 +878,7 @@ public class CASupportFactory {
     }
     
     private static class MonitorSupport extends CASupport implements
-    ChannelStateListener,
+    ChannelListener,
     CDMonitorRequester,
     RecordProcessRequester
     {   
@@ -1043,7 +1043,7 @@ public class CASupportFactory {
             supportProcessRequester.supportProcessDone(RequestResult.success);
         }       
         /* (non-Javadoc)
-         * @see org.epics.ioc.ca.ChannelStateListener#channelStateChange(org.epics.ioc.ca.Channel)
+         * @see org.epics.ioc.ca.ChannelListener#channelStateChange(org.epics.ioc.ca.Channel)
          */
         public void channelStateChange(Channel c,boolean isConnected) {
             assert(c==channel);
@@ -1061,7 +1061,7 @@ public class CASupportFactory {
             }
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.ca.ChannelStateListener#disconnect(org.epics.ioc.ca.Channel)
+         * @see org.epics.ioc.ca.ChannelListener#disconnect(org.epics.ioc.ca.Channel)
          */
         public void disconnect(Channel c) {
             dbRecord.lock();

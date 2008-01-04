@@ -5,12 +5,21 @@
  */
 package org.epics.ioc.swtshell;
 
-import org.eclipse.swt.*;
-import org.eclipse.swt.events.*;
-import org.eclipse.swt.widgets.*;
-import org.eclipse.swt.layout.*;
-
-import org.epics.ioc.v3a.*;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.FileDialog;
+import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.Text;
+import org.epics.ioc.util.ReadyRunnable;
+import org.epics.ioc.util.ThreadCreate;
+import org.epics.ioc.util.ThreadFactory;
+import org.epics.ioc.v3a.AsynOctet;
+import org.epics.ioc.v3a.V3;
 
 /**
  * Call the V3 iocshell
@@ -28,6 +37,8 @@ public class V3iocshell {
         Window window = new Window(display);
         window.start();
     }
+    
+    private static ThreadCreate threadCreate = ThreadFactory.getThreadCreate();
     
     private static class Window implements SelectionListener {
         private Display display;
@@ -82,18 +93,24 @@ public class V3iocshell {
         }       
     }
     
-    private static class Invoke implements Runnable{
+    private static class Invoke implements ReadyRunnable{
+        private boolean isReady = false;
         private String fileName;
-        private Thread thread;
         private Invoke (String fileName) {
             this.fileName = fileName;
-            thread = new Thread(this);
-            thread.setPriority(2);
-            thread.start();
+            threadCreate.create("v3ioc:" + fileName, 2, this);
         }
         
+        /* (non-Javadoc)
+         * @see org.epics.ioc.util.ReadyRunnable#isReady()
+         */
+        public boolean isReady() {
+            return isReady;
+        }
+
         public void run() {
             V3.iocsh(fileName);
+            isReady = true;
             AsynOctet asynOctet = new AsynOctet(null);
             asynOctet.readIt();
         }

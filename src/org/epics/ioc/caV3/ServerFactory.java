@@ -63,9 +63,9 @@ import org.epics.ioc.ca.ChannelFieldGroup;
 import org.epics.ioc.ca.ChannelFieldGroupListener;
 import org.epics.ioc.ca.ChannelGet;
 import org.epics.ioc.ca.ChannelGetRequester;
+import org.epics.ioc.ca.ChannelListener;
 import org.epics.ioc.ca.ChannelPut;
 import org.epics.ioc.ca.ChannelPutRequester;
-import org.epics.ioc.ca.ChannelStateListener;
 import org.epics.ioc.pv.Array;
 import org.epics.ioc.pv.BooleanArrayData;
 import org.epics.ioc.pv.Convert;
@@ -88,8 +88,11 @@ import org.epics.ioc.pv.Type;
 import org.epics.ioc.util.AlarmSeverity;
 import org.epics.ioc.util.MessageType;
 import org.epics.ioc.util.PVTimeStamp;
+import org.epics.ioc.util.ReadyRunnable;
 import org.epics.ioc.util.RequestResult;
 import org.epics.ioc.util.ScanPriority;
+import org.epics.ioc.util.ThreadCreate;
+import org.epics.ioc.util.ThreadFactory;
 import org.epics.ioc.util.TimeStamp;
 
 import com.cosylab.epics.caj.cas.handlers.AbstractCASResponseHandler;
@@ -99,25 +102,17 @@ public class ServerFactory {
         new ThreadInstance();
     }
     
+    private static final ThreadCreate threadCreate = ThreadFactory.getThreadCreate();
     private static final Convert convert = ConvertFactory.getConvert();
     private static Pattern whiteSpacePattern = Pattern.compile("[, ]");
     
-    private static class ThreadInstance implements Runnable {
+    private static class ThreadInstance implements ReadyRunnable {
 
         private ThreadInstance() {
-            Thread thread = new Thread(this, "caV3-server");
-            thread.setPriority(3);
-            thread.setDaemon(false);
-            
-            // wait until thread has started
-            synchronized (this) {
-                thread.start();
-            	try {
-					this.wait();
-				} catch (InterruptedException e) { /* noop */ }
-            }
+            threadCreate.create("caV3Server", 3, this);
         }
         
+        private boolean isReady = false;
         /**
          * JCA server context.
          */
@@ -159,28 +154,26 @@ public class ServerFactory {
             }
         }               
         /* (non-Javadoc)
+         * @see org.epics.ioc.util.ReadyRunnable#isReady()
+         */
+        public boolean isReady() {
+            return isReady;
+        }
+
+        /* (non-Javadoc)
          * @see java.lang.Runnable#run()
          */
         public void run() {
-        	
-        	// notify that thread has started
-        	synchronized (this) {
-				this.notifyAll();
-			}
-        	
             try {
-
                 // initialize context
                 initialize();
-
+                isReady = true;
                 System.out.println("Running server...");
-
                 // run server 
                 context.run(0);
-
                 System.out.println("Done.");
-
             } catch (Throwable th) {
+                isReady = true;
                 th.printStackTrace();
             }
             finally {
@@ -218,7 +211,7 @@ public class ServerFactory {
     /**
      * Channel process variable implementation. 
      */
-    private static class ChannelProcessVariable extends ProcessVariable implements ChannelStateListener
+    private static class ChannelProcessVariable extends ProcessVariable implements ChannelListener
     {
         private DBRType type;
         private final Channel channel;
@@ -379,9 +372,9 @@ public class ServerFactory {
          */
         public CAStatus read(DBR value, ProcessVariableReadCallback asyncReadCallback) throws CAException {
             // not syned, but now it does not harm
-        	if (getRequest == null) getRequest = new GetRequest();
+            if (getRequest == null) getRequest = new GetRequest();
             
-        	characteristicsGetRequest.fill(value);
+            characteristicsGetRequest.fill(value);
             return getRequest.get(value);
         }
         /* (non-Javadoc)
@@ -434,14 +427,14 @@ public class ServerFactory {
         }
 
         /* (non-Javadoc)
-         * @see org.epics.ioc.ca.ChannelStateListener#channelStateChange(org.epics.ioc.ca.Channel, boolean)
+         * @see org.epics.ioc.ca.ChannelListener#channelStateChange(org.epics.ioc.ca.Channel, boolean)
          */
         public void channelStateChange(Channel c, boolean isConnected) {
             // noop
         }
 
         /* (non-Javadoc)
-         * @see org.epics.ioc.ca.ChannelStateListener#disconnect(org.epics.ioc.ca.Channel)
+         * @see org.epics.ioc.ca.ChannelListener#disconnect(org.epics.ioc.ca.Channel)
          */
         public void disconnect(Channel c) {
             // noop
@@ -670,7 +663,7 @@ public class ServerFactory {
              * @see org.epics.ioc.util.Requester#message(java.lang.String, org.epics.ioc.util.MessageType)
              */
             public void message(String message, MessageType messageType) {
-            	// delegate to parent
+                // delegate to parent
                 ChannelProcessVariable.this.message(message,messageType);
             }
             
@@ -742,7 +735,7 @@ public class ServerFactory {
              * @see org.epics.ioc.util.Requester#message(java.lang.String, org.epics.ioc.util.MessageType)
              */
             public void message(String message, MessageType messageType) {
-            	// delegate to parent
+                // delegate to parent
                 ChannelProcessVariable.this.message(message,messageType);
             }
               
@@ -998,7 +991,7 @@ public class ServerFactory {
              * @see org.epics.ioc.util.Requester#message(java.lang.String, org.epics.ioc.util.MessageType)
              */
             public void message(String message, MessageType messageType) {
-            	// delegate to parent
+                // delegate to parent
                 ChannelProcessVariable.this.message(message,messageType);
             }
             

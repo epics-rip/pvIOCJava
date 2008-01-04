@@ -23,12 +23,10 @@ public class BaseCDGet implements CDGet, ChannelGetRequester {
     public BaseCDGet(Channel channel,ChannelFieldGroup channelFieldGroup,
         CDGetRequester cdGetRequester,boolean process)
     {
-        this.channel = channel;
         this.cdGetRequester = cdGetRequester;
         channelGet = channel.createChannelGet(channelFieldGroup, this,process);
     }
 
-    private Channel channel;
     private CDGetRequester cdGetRequester;           
     private ChannelGet channelGet = null;
     private CDField[] cdFields = null;

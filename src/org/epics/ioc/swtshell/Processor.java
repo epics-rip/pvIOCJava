@@ -19,7 +19,7 @@ import org.epics.ioc.process.RecordProcess;
 import org.epics.ioc.util.EventScanner;
 import org.epics.ioc.util.MessageType;
 import org.epics.ioc.util.PeriodicScanner;
-import org.epics.ioc.util.ScannerFactory;
+import org.epics.ioc.util.*;
 /**
  * Provides the following sets of controls:
  * <ul>
@@ -44,7 +44,6 @@ public class Processor {
 
         private ChannelProcessorImpl() {
             super("processor");
-System.out.println("constructor");
         }
 
         /**
@@ -139,6 +138,12 @@ System.out.println("constructor");
                 return;
             }
             if(object==showThreadsButton) {
+                Thread[] threads = ThreadFactory.getThreadCreate().getThreads();
+                for(Thread thread : threads) {
+                    String name = thread.getName();
+                    int priority = thread.getPriority();
+                    message(name + " priority " + priority,MessageType.info);
+                }
                 PeriodicScanner periodicScanner = ScannerFactory.getPeriodicScanner();
                 EventScanner eventScanner = ScannerFactory.getEventScanner();
                 message(periodicScanner.toString(), MessageType.info);

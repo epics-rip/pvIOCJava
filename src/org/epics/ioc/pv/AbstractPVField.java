@@ -6,6 +6,7 @@
 package org.epics.ioc.pv;
 
 import java.util.regex.Pattern;
+
 import org.epics.ioc.util.MessageType;
 
 /**
@@ -22,6 +23,7 @@ public abstract class AbstractPVField implements PVField{
     private PVField parent;
     private PVRecord record;
     private String supportName = null;
+    private PVEnumerated pvEnumerated = null;
     static private Pattern periodPattern = Pattern.compile("[.]");
 
     
@@ -144,6 +146,40 @@ public abstract class AbstractPVField implements PVField{
      */
     public PVField getSubField(String fieldName) {
         return null;
+    }
+    /* (non-Javadoc)
+     * @see org.epics.ioc.pv.PVField#getPVEnumerated()
+     */
+    public synchronized PVEnumerated getPVEnumerated() {
+        if(pvEnumerated!=null) return pvEnumerated;
+        if(field.getType()!=Type.pvStructure) return null;
+        PVStructure pvStructure = (PVStructure)this;
+        PVField[]pvFields = pvStructure.getPVFields();
+        Structure structure = pvStructure.getStructure();
+        Field[] fields = structure.getFields();
+        Field field = fields[0];
+        if(!field.getFieldName().equals("index") || field.getType()!=Type.pvInt) {
+            pvStructure.message("structure does not have field index of type int", MessageType.error);
+            return null;
+        } 
+        field = fields[1];
+        if(!field.getFieldName().equals("choice") || field.getType()!=Type.pvString) {
+            pvStructure.message("structure does not have field choice of type string", MessageType.error);
+            return null;
+        }
+        field = fields[2];
+        if(!field.getFieldName().equals("choices") || field.getType()!=Type.pvArray) {
+            pvStructure.message("structure does not have field choices of type array", MessageType.error);
+            return null;
+        }
+        Array array = (Array)fields[2];
+        if(array.getElementType()!=Type.pvString) {
+            pvStructure.message("elementType for choices is not string", MessageType.error);
+            return null;
+        }
+        pvEnumerated = new PVEnumeratedImpl(
+            this,(PVInt)pvFields[0],(PVString)pvFields[1],(PVStringArray)pvFields[2]);
+        return pvEnumerated;
     }
     /* (non-Javadoc)
      * @see org.epics.ioc.pv.PVField#findProperty(java.lang.String)
@@ -397,5 +433,44 @@ public abstract class AbstractPVField implements PVField{
         pvField = pvField.getParent();
         if(pvField==null) return null;
         return findField(pvField,name);
+    }
+    
+    private static class PVEnumeratedImpl implements PVEnumerated {
+        private PVField pvField;
+        private PVInt pvIndex;
+        private PVString pvChoice;
+        private PVStringArray pvChoices;
+        
+        private PVEnumeratedImpl(PVField pvField,PVInt pvIndex, PVString pvChoice, PVStringArray pvChoices) {
+            this.pvField = pvField;
+            this.pvIndex = pvIndex;
+            this.pvChoice = pvChoice;
+            this .pvChoices = pvChoices;
+        }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pv.PVEnumerated#getChoiceField()
+         */
+        public PVString getChoiceField() {
+            return pvChoice;
+        }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pv.PVEnumerated#getChoicesField()
+         */
+        public PVStringArray getChoicesField() {
+            return pvChoices;
+        }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pv.PVEnumerated#getIndexField()
+         */
+        public PVInt getIndexField() {
+            return pvIndex;
+        }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pv.PVEnumerated#getPVField()
+         */
+        public PVField getPVField() {
+            return pvField;
+        }
+        
     }
 }

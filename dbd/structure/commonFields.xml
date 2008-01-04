@@ -3,7 +3,7 @@
 
 <structure name = "scanPriority" createName = "enumerated" >
   <field name = "index" type = "int"/>
-  <field name = "choice" type = "string"/>
+  <field name = "choice" type = "string" default = "low"/>
   <field name = "choices" type = "array" elementType = "string"
       default = "lowest lower low middle high higher highest" />
 </structure>

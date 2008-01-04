@@ -5,13 +5,17 @@
  */
 package org.epics.ioc.util;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.ListIterator;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 
-import org.epics.ioc.pv.*;
-import org.epics.ioc.db.*;
-import org.epics.ioc.process.*;
+import org.epics.ioc.db.DBRecord;
+import org.epics.ioc.process.RecordProcess;
+import org.epics.ioc.process.RecordProcessRequester;
+import org.epics.ioc.pv.PVRecord;
 
 /**
  * Factory for periodic and event scanning.
@@ -38,6 +42,7 @@ public class ScannerFactory {
         return eventScanner;
     }
      
+    private static ThreadCreate threadCreate = ThreadFactory.getThreadCreate();
     private static String lineBreak = System.getProperty("line.separator");
     private static final int maxNumberConsecutiveActive = 1;
 
@@ -244,29 +249,30 @@ public class ScannerFactory {
         }
     }
 
-    private static class PeriodiocExecutor extends Executor implements Runnable {  
+    private static class PeriodiocExecutor extends Executor implements ReadyRunnable {
+        private boolean isReady = false;
         private long period;
         private Thread thread;
-        private boolean isRunning = false;
 
         private PeriodiocExecutor(String name,long period, int priority) {
             super(name);
             this.period = period;
-            thread = new Thread(this,name);
-            thread.setPriority(priority);
-            thread.start();
-            while(!isRunning) {
-                try {
-                Thread.sleep(1);
-                } catch(InterruptedException e) {}
-            }
+            thread = threadCreate.create(name, priority, this);
+            
+        }
+
+        /* (non-Javadoc)
+         * @see org.epics.ioc.util.ReadyRunnable#isReady()
+         */
+        public boolean isReady() {
+            return isReady;
         }
 
         /* (non-Javadoc)
          * @see java.lang.Runnable#run()
          */
         public void run() {
-            isRunning = true;
+            isReady = true;
             try {
                 while(true) {
                     long startTime = System.currentTimeMillis();
@@ -532,31 +538,33 @@ public class ScannerFactory {
         }
     }
 
-    private static class EventExecutor extends Executor implements EventAnnounce, Runnable {
+    private static class EventExecutor extends Executor
+    implements EventAnnounce, ReadyRunnable
+    {
+        private boolean isReady = false;
         private ReentrantLock lock = new ReentrantLock();
         private Condition waitForWork = lock.newCondition();
         private Thread thread;
         private long startTime = 0;
-        private boolean isRunning = false;
 
         private EventExecutor(String name,int priority) {
             super(name);
-            thread = new Thread(this,name);
-            thread.setPriority(priority);
-            thread.start();
-            while(!isRunning) {
-                try {
-                Thread.sleep(1);
-                } catch(InterruptedException e) {}
-            }
+            thread = threadCreate.create(name, priority, this);
+        }
+
+        /* (non-Javadoc)
+         * @see org.epics.ioc.util.ReadyRunnable#isReady()
+         */
+        public boolean isReady() {
+            return isReady;
         }
 
         public void run() {
-            isRunning = true;
             try {
                 while(true) {
                     lock.lock();
                     try {
+                        isReady = true;
                         waitForWork.await();
                     } finally {
                         lock.unlock();
@@ -590,7 +598,8 @@ public class ScannerFactory {
         }
     }
 
-    private static class Announce implements EventAnnounce, Runnable { 
+    private static class Announce implements EventAnnounce, ReadyRunnable {
+        private boolean isReady = false;
         // announcerList kept for diagnostic purpose only
         private LinkedList<String> announcerList = new LinkedList<String>();
         
@@ -604,27 +613,29 @@ public class ScannerFactory {
         private Condition waitForNotActive = lock.newCondition();
         private String eventName;
         private Thread thread;
-        private boolean isRunning = false;
 
         private Announce(String name) {
             super();
             eventName = name;
-            thread = new Thread(this,"event(" + name + ")");
-            thread.setPriority(ScanPriority.valueOf("higher").getJavaPriority());
-            thread.start();
-            while(!isRunning) {
-                try {
-                Thread.sleep(1);
-                } catch(InterruptedException e) {}
-            }
+            thread = threadCreate.create(
+                "event(" + name + ")",
+                ScanPriority.valueOf("higher").getJavaPriority(),
+                this);
+        }
+
+        /* (non-Javadoc)
+         * @see org.epics.ioc.util.ReadyRunnable#isReady()
+         */
+        public boolean isReady() {
+            return isReady;
         }
 
         public void run() {
-            isRunning = true;
             try {
                 while(true) {
                     lock.lock();
                     try {
+                        isReady = true;
                         waitForWork.await();
                         if(listModify) {
                             waitForModify.await();

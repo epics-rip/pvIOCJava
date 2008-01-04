@@ -11,7 +11,13 @@ import java.util.ListIterator;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 
-import org.epics.ioc.pdrv.*;
+import org.epics.ioc.pdrv.Device;
+import org.epics.ioc.pdrv.Status;
+import org.epics.ioc.pdrv.Trace;
+import org.epics.ioc.pdrv.User;
+import org.epics.ioc.util.ReadyRunnable;
+import org.epics.ioc.util.ThreadCreate;
+import org.epics.ioc.util.ThreadFactory;
 
 
 
@@ -32,6 +38,7 @@ import org.epics.ioc.pdrv.*;
  *
  */
 public abstract class AbstractOctet extends AbstractInterface implements Octet {
+    private static ThreadCreate threadCreate = ThreadFactory.getThreadCreate();
     private  ReentrantLock lock = new ReentrantLock();
     private List<OctetInterruptListener> interruptlistenerList =
         new LinkedList<OctetInterruptListener>();
@@ -200,13 +207,15 @@ public abstract class AbstractOctet extends AbstractInterface implements Octet {
         }
     } 
     
-    private class Interrupt implements Runnable {
-        private Thread thread = new Thread(this);
+    private class Interrupt implements ReadyRunnable {
+        private boolean isReady = false;
         private ReentrantLock lock = new ReentrantLock();
         private Condition moreWork = lock.newCondition();
         
         private Interrupt() {
-            thread.start();
+            String name = device.getPort().getPortName() + "[" + device.getAddr() + "]";
+            name += AbstractOctet.this.getInterfaceName();
+            threadCreate.create(name,4, this);
         }
         
         private void interrupt() {
@@ -218,6 +227,13 @@ public abstract class AbstractOctet extends AbstractInterface implements Octet {
             }
         }
         /* (non-Javadoc)
+         * @see org.epics.ioc.util.ReadyRunnable#isReady()
+         */
+        public boolean isReady() {
+            return isReady;
+        }
+
+        /* (non-Javadoc)
          * @see java.lang.Runnable#run()
          */
         public void run() {
@@ -225,6 +241,7 @@ public abstract class AbstractOctet extends AbstractInterface implements Octet {
                 while(true) {
                     lock.lock();
                     try {
+                        isReady = true;
                         moreWork.await();
                         callback();
                     }finally {

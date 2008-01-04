@@ -13,12 +13,10 @@ import java.util.List;
  *
  */
 public class BaseChannelFieldGroup implements ChannelFieldGroup {
-    private Channel channel;
     private LinkedList<ChannelField> fieldList = 
         new LinkedList<ChannelField>();
 
     public BaseChannelFieldGroup(Channel channel,ChannelFieldGroupListener listener) {
-        this.channel = channel;
     }
     /* (non-Javadoc)
      * @see org.epics.ioc.ca.ChannelFieldGroup#addChannelField(org.epics.ioc.ca.ChannelField)

@@ -5,13 +5,27 @@
  */
 package org.epics.ioc.pdrv;
 
-import java.io.*;
-import java.util.*;
+import java.io.BufferedWriter;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.ListIterator;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 
 import org.epics.ioc.pdrv.interfaces.Interface;
-import org.epics.ioc.util.*;
+import org.epics.ioc.util.AlarmSeverity;
+import org.epics.ioc.util.ReadyRunnable;
+import org.epics.ioc.util.ScanPriority;
+import org.epics.ioc.util.ThreadCreate;
+import org.epics.ioc.util.ThreadFactory;
+import org.epics.ioc.util.TimeStamp;
+import org.epics.ioc.util.TimeUtility;
 
 /**
  * Factory for creating PDRV (Port Driver) objects.
@@ -1709,18 +1723,18 @@ public class Factory {
         }
     }
     
+    private static ThreadCreate threadCreate = ThreadFactory.getThreadCreate();
     private static final int queuePriorityHigh = QueuePriority.high.ordinal();
     private static final int numQueuePriorities = queuePriorityHigh + 1;
     private static final int queuePriorityLow = QueuePriority.low.ordinal();
     private static final int queuePriorityMedium = QueuePriority.medium.ordinal();
     
-    private static class PortThread implements Runnable  {
-        private Thread thread = new Thread(this);
+    private static class PortThread implements ReadyRunnable  {
+        private boolean isReady = false;
         private ReentrantLock queueLock = new ReentrantLock();
         private ReentrantLock lock = new ReentrantLock();
         private Condition moreWork = lock.newCondition();
         private PortImpl port;
-        private boolean isRunning = false;
         
         private List<UserImpl>[] queueListArray = new ArrayList[numQueuePriorities];  
         private List<UserImpl> waitUnblockList = new ArrayList<UserImpl>();   
@@ -1730,13 +1744,7 @@ public class Factory {
             for(int i=0; i<queueListArray.length; i++) {
                 queueListArray[i] = new ArrayList<UserImpl>();
             }
-            thread.setPriority(scanPriority.getJavaPriority());
-            thread.start();
-            while(!isRunning) {
-                try {
-                Thread.sleep(1);
-                } catch(InterruptedException e) {}
-            }
+            threadCreate.create(port.getPortName(), scanPriority.getJavaPriority(), this);
         }
         
         private void queueRequest(UserImpl user,QueuePriority asynQueuePriority)
@@ -1812,12 +1820,19 @@ public class Factory {
             }
         }
         
+        /* (non-Javadoc)
+         * @see org.epics.ioc.util.ReadyRunnable#isReady()
+         */
+        public boolean isReady() {
+            return isReady;
+        }
+
         public void run() {
-            isRunning = true;
             try {
                 while(true) {
                     lock.lock();
-                    try {                        
+                    try {
+                        isReady = true;                       
                         moreWork.await();
                     } finally {
                         lock.unlock();

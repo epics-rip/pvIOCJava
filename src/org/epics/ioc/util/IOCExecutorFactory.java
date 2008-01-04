@@ -5,8 +5,10 @@
  */
 package org.epics.ioc.util;
 
-import java.util.*;
-import java.util.concurrent.locks.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * Create an IOCExecutor.
@@ -50,31 +52,32 @@ public class IOCExecutorFactory {
         }
     }
     
-    static private class ThreadInstance implements Runnable {
-        private Thread thread = null;
+    static private ThreadCreate threadCreate = ThreadFactory.getThreadCreate();
+    
+    static private class ThreadInstance implements ReadyRunnable {
+        private boolean isReady = false;
         private List<Runnable> runList = new ArrayList<Runnable>();
         private ReentrantLock lock = new ReentrantLock();
         private Condition moreWork = lock.newCondition();
-        private boolean isRunning = false;
 
         private ThreadInstance(String name,int priority) {
-            thread = new Thread(this,name);
-            thread.setPriority(priority);
-            thread.start();
-            while(!isRunning) {
-                try {
-                Thread.sleep(1);
-                } catch(InterruptedException e) {}
-            }
+            threadCreate.create(name, priority, this);
         } 
         
+        /* (non-Javadoc)
+         * @see org.epics.ioc.util.ReadyRunnable#isReady()
+         */
+        public boolean isReady() {
+            return isReady;
+        }
+
         public void run() {
-            isRunning = true;
             try {
                 while(true) {
                     Runnable runnable = null;
                     lock.lock();
                     try {
+                        isReady = true;
                         while(runList.isEmpty()) {
                             moreWork.await();
                         }
@@ -88,6 +91,7 @@ public class IOCExecutorFactory {
                 
             }
         }
+        
         private int add(Runnable runnable) {
             int size = 0;
             lock.lock();
@@ -101,6 +105,7 @@ public class IOCExecutorFactory {
             }
             return size;
         }
+        
         private int add(List<Runnable> runnableList) {
             int size = 0;
             lock.lock();

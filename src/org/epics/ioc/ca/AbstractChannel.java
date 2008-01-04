@@ -5,9 +5,7 @@
  */
 package org.epics.ioc.ca;
 
-import java.util.Iterator;
 import java.util.LinkedList;
-
 
 import org.epics.ioc.pv.PVField;
 import org.epics.ioc.pv.PVRecord;

@@ -11,7 +11,14 @@ import java.util.ListIterator;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 
-import org.epics.ioc.pdrv.*;
+import org.epics.ioc.pdrv.Device;
+import org.epics.ioc.pdrv.Port;
+import org.epics.ioc.pdrv.Status;
+import org.epics.ioc.pdrv.Trace;
+import org.epics.ioc.pdrv.User;
+import org.epics.ioc.util.ReadyRunnable;
+import org.epics.ioc.util.ThreadCreate;
+import org.epics.ioc.util.ThreadFactory;
 
 
 
@@ -32,6 +39,7 @@ import org.epics.ioc.pdrv.*;
  *
  */
 public abstract class AbstractFloat64 extends AbstractInterface implements Float64 {
+    private static ThreadCreate threadCreate = ThreadFactory.getThreadCreate();
     private Port port;
     private String portName;
     
@@ -171,13 +179,15 @@ public abstract class AbstractFloat64 extends AbstractInterface implements Float
         }
     } 
     
-    private class Interrupt implements Runnable {
-        private Thread thread = new Thread(this);
+    private class Interrupt implements ReadyRunnable {
+        private boolean isReady = false;
         private ReentrantLock lock = new ReentrantLock();
         private Condition moreWork = lock.newCondition();
         
         private Interrupt() {
-            thread.start();
+            String name = device.getPort().getPortName() + "[" + device.getAddr() + "]";
+            name += AbstractFloat64.this.getInterfaceName();
+            threadCreate.create(name,4, this);
         }
         
         private void interrupt() {
@@ -189,6 +199,13 @@ public abstract class AbstractFloat64 extends AbstractInterface implements Float
             }
         }
         /* (non-Javadoc)
+         * @see org.epics.ioc.util.ReadyRunnable#isReady()
+         */
+        public boolean isReady() {
+            return isReady;
+        }
+
+        /* (non-Javadoc)
          * @see java.lang.Runnable#run()
          */
         public void run() {
@@ -196,6 +213,7 @@ public abstract class AbstractFloat64 extends AbstractInterface implements Float
                 while(true) {
                     lock.lock();
                     try {
+                        isReady = true;
                         moreWork.await();
                         callback();
                     }finally {

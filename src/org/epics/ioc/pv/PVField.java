@@ -58,6 +58,11 @@ public interface PVField extends Requester {
      */
     PVField getSubField(String fieldName);
     /**
+     * If the PVField is an enumerated structure create and return a PVEnumerated.
+     * @return The PVEnumerated interface or null if the field is not an enumerated structure.
+     */
+    PVEnumerated getPVEnumerated();
+    /**
      * Find a field that is a subfield or a property of this field.
      * The fieldName is of the form item.item... where item is name or name[index].
      * 

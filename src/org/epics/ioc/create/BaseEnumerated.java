@@ -22,6 +22,7 @@ public class BaseEnumerated implements Enumerated{
     private static Convert convert = ConvertFactory.getConvert();
     private int index;
     private String[] choices;
+    private PVField pvField;
     private DBField dbIndex;
     private DBField dbChoice;
     private PVInt pvIndex;
@@ -34,7 +35,8 @@ public class BaseEnumerated implements Enumerated{
      * @param dbChoice The DBField for the choice.
      * @param dbChoices The DBField for the choices.
      */
-    public BaseEnumerated(DBField dbIndex, DBField dbChoice, DBField dbChoices) {
+    public BaseEnumerated(PVField pvField,DBField dbIndex, DBField dbChoice, DBField dbChoices) {
+        this.pvField = pvField;
         this.dbIndex = dbIndex;
         this.dbChoice = dbChoice;            
         PVString pvChoice = (PVString)dbChoice.getPVField();
@@ -57,6 +59,13 @@ public class BaseEnumerated implements Enumerated{
         this.pvIndex = pvNewIndex;
         this.pvChoice = pvNewChoice;
         this.pvChoices = pvNewChoices;
+    }
+
+    /* (non-Javadoc)
+     * @see org.epics.ioc.pv.PVEnumerated#getPVField()
+     */
+    public PVField getPVField() {
+        return pvField;
     }
 
     /* (non-Javadoc)

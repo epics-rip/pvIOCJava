@@ -23,7 +23,7 @@ import org.epics.ioc.ca.Channel;
 import org.epics.ioc.ca.ChannelField;
 import org.epics.ioc.ca.ChannelFieldGroup;
 import org.epics.ioc.ca.ChannelFieldGroupListener;
-import org.epics.ioc.ca.ChannelStateListener;
+import org.epics.ioc.ca.ChannelListener;
 import org.epics.ioc.pv.Type;
 import org.epics.ioc.util.IOCExecutor;
 import org.epics.ioc.util.IOCExecutorFactory;
@@ -152,7 +152,7 @@ public class Get {
         private class GetIt implements
         Runnable,
         CDGetRequester,
-        ChannelStateListener, ChannelFieldGroupListener
+        ChannelListener, ChannelFieldGroupListener
         {
             private Lock lock = new ReentrantLock();
             private Condition waitDone = lock.newCondition();
@@ -242,14 +242,14 @@ public class Get {
                 }
             }
             /* (non-Javadoc)
-             * @see org.epics.ioc.ca.ChannelStateListener#channelStateChange(org.epics.ioc.ca.Channel, boolean)
+             * @see org.epics.ioc.ca.ChannelListener#channelStateChange(org.epics.ioc.ca.Channel, boolean)
              */
             public void channelStateChange(Channel c, boolean isConnected) {
                 // TODO Auto-generated method stub
 
             }
             /* (non-Javadoc)
-             * @see org.epics.ioc.ca.ChannelStateListener#disconnect(org.epics.ioc.ca.Channel)
+             * @see org.epics.ioc.ca.ChannelListener#disconnect(org.epics.ioc.ca.Channel)
              */
             public void disconnect(Channel c) {
                 // TODO Auto-generated method stub

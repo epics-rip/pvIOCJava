@@ -1,15 +1,29 @@
 
-import java.util.*;
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.Map;
+import java.util.Set;
 
-import org.epics.ioc.dbd.*;
-import org.epics.ioc.db.*;
-import org.epics.ioc.util.*;
-import org.epics.ioc.support.Support;
-import org.epics.ioc.swtshell.*;
+import org.epics.ioc.db.DBRecord;
+import org.epics.ioc.db.IOCDB;
+import org.epics.ioc.db.IOCDBFactory;
+import org.epics.ioc.db.XMLToIOCDBFactory;
+import org.epics.ioc.dbd.DBD;
+import org.epics.ioc.dbd.DBDCreate;
+import org.epics.ioc.dbd.DBDFactory;
+import org.epics.ioc.dbd.DBDRecordType;
+import org.epics.ioc.dbd.DBDStructure;
+import org.epics.ioc.dbd.DBDSupport;
+import org.epics.ioc.dbd.XMLToDBDFactory;
+import org.epics.ioc.process.SupportCreation;
+import org.epics.ioc.process.SupportCreationFactory;
+import org.epics.ioc.swtshell.Swtshell;
+import org.epics.ioc.util.MessageType;
+import org.epics.ioc.util.Requester;
 
 
 
@@ -21,7 +35,7 @@ import org.epics.ioc.swtshell.*;
 enum State {
     dbdFile,
     dbFile,
-    servers,
+    servers
 }
 public class XMLToDatabase {
 
@@ -32,7 +46,7 @@ public class XMLToDatabase {
      * - db Following fileNames are record instance files.
      * - dumpDBD Dump all database definitions given so far
      * - dumpDB Dump all record instances given so far.
-     * 
+     * - startIOC Start the IOC by locating create and support and starting support
      */
     public static void main(String[] args) {
         if(args.length==1 && args[0].equals("?")) {
@@ -68,6 +82,12 @@ public class XMLToDatabase {
                     Swtshell.swtshell();
                 } else if(arg.equals("server")) {
                     state = State.servers;
+                } else if(arg.equals("startIOC")) {
+                    SupportCreate supportCreate = new SupportCreate();
+                    if(!supportCreate.create()) {
+                        System.out.println("support create failed");
+                        return;
+                    }
                 } else {
                     System.err.println("unknown arg: " + arg);
                     usage();
@@ -89,7 +109,11 @@ public class XMLToDatabase {
     
     static void usage() {
         System.out.println("Usage: -dbd DatabaseDefinitionList"
-                + " -db InstanceList -dumpDBD -dumpDB -swtshell -servers");
+                + " -db InstanceList"
+                + " -dumpDBD -dumpDB"
+                + " -startIOC"
+                + " -server file"
+                + " -swtshell ");
     }
     
     static void printError(String message) {
@@ -97,7 +121,6 @@ public class XMLToDatabase {
     }
     
     static void startServer(String fileName) {
-        System.out.println("startServer fileName " + fileName);
         try {
             BufferedReader in = new BufferedReader(new FileReader(fileName));
 
@@ -234,6 +257,48 @@ public class XMLToDatabase {
         public void message(String message, MessageType messageType) {
             System.out.println(message);
             
+        }
+    }
+    
+    private static class SupportCreate implements Requester{
+        
+        private SupportCreate() {}
+        
+        private void message(String message) {
+            System.out.println(message);
+        }
+        private boolean create() {
+            IOCDB iocdb = IOCDBFactory.getMaster();
+            SupportCreation supportCreation = SupportCreationFactory.createSupportCreation(iocdb, this);
+            boolean gotSupport = supportCreation.createSupport();
+            if(!gotSupport) {
+                message("Did not find all support.");
+                return false;
+            }
+            boolean readyForStart = supportCreation.initializeSupport();
+            if(!readyForStart) {
+                message("initializeSupport failed");
+                return false;
+            }
+            boolean ready = supportCreation.startSupport();
+            if(!ready) {
+                message("startSupport failed");
+                return false;
+            }
+            return true;
+        }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.util.Requester#getRequesterName()
+         */
+        public String getRequesterName() {
+            return "swtshell";
+        }
+
+        /* (non-Javadoc)
+         * @see org.epics.ioc.util.Requester#message(java.lang.String, org.epics.ioc.util.MessageType)
+         */
+        public void message(String message, MessageType messageType) {
+            System.out.println("swtshell " + message);
         }
     }
 }

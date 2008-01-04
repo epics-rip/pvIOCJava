@@ -1,0 +1,15 @@
+<?xml version="1.0" ?>
+<IOCDatabase>
+
+<record name = "aiExample" type = "double">
+    <alarm structureName = "alarm" />
+    <timeStamp structureName = "timeStamp" />
+    <input supportName = "inputSupport" structureName = "inputSupport">
+        <providerName>caV3</providerName>
+        <pvname>mrkHost:aiExample</pvname>
+        <process>false</process>
+        <inheritSeverity>true</inheritSeverity>
+    </input>
+</record>
+
+</IOCDatabase>

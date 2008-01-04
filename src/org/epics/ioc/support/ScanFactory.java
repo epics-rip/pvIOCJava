@@ -8,10 +8,31 @@ package org.epics.ioc.support;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 
-import org.epics.ioc.db.*;
-import org.epics.ioc.process.*;
-import org.epics.ioc.pv.*;
-import org.epics.ioc.util.*;
+import org.epics.ioc.db.DBField;
+import org.epics.ioc.db.DBListener;
+import org.epics.ioc.db.DBRecord;
+import org.epics.ioc.db.DBStructure;
+import org.epics.ioc.db.RecordListener;
+import org.epics.ioc.process.RecordProcess;
+import org.epics.ioc.process.RecordProcessRequester;
+import org.epics.ioc.process.SupportProcessRequester;
+import org.epics.ioc.process.SupportState;
+import org.epics.ioc.pv.PVDouble;
+import org.epics.ioc.pv.PVInt;
+import org.epics.ioc.pv.PVString;
+import org.epics.ioc.pv.PVStructure;
+import org.epics.ioc.util.EventScanner;
+import org.epics.ioc.util.MessageType;
+import org.epics.ioc.util.PeriodicScanner;
+import org.epics.ioc.util.ReadyRunnable;
+import org.epics.ioc.util.RequestResult;
+import org.epics.ioc.util.ScanField;
+import org.epics.ioc.util.ScanFieldFactory;
+import org.epics.ioc.util.ScanPriority;
+import org.epics.ioc.util.ScanType;
+import org.epics.ioc.util.ScannerFactory;
+import org.epics.ioc.util.ThreadCreate;
+import org.epics.ioc.util.ThreadFactory;
 
 /**
  * Support for scan field.
@@ -19,6 +40,7 @@ import org.epics.ioc.util.*;
  *
  */
 public class ScanFactory {
+    private static ThreadCreate threadCreate = ThreadFactory.getThreadCreate();
     private static PeriodicScanner periodicScanner = ScannerFactory.getPeriodicScanner();
     private static EventScanner eventScanner = ScannerFactory.getEventScanner();
     private static final String supportName = "scan";
@@ -263,41 +285,38 @@ public class ScanFactory {
             }
         }
           
-        private class ScanModify implements Runnable {
-            private Thread thread;
+        private class ScanModify implements ReadyRunnable {
+            private boolean isReady = false;
             private ReentrantLock lock = new ReentrantLock();
             private Condition waitForWork = lock.newCondition();
             private boolean isPeriodic = false;
             private boolean isEvent = false;
-            private boolean isRunning = false;
             
             private ScanModify(String name,int priority) {
-                thread = new Thread(this,name);
-                thread.setPriority(priority);
-                thread.start();
-                while(!isRunning) {
-                    try {
-                    Thread.sleep(1);
-                    } catch(InterruptedException e) {}
-                }
+                threadCreate.create(name, priority, this);
+            }
+
+            /* (non-Javadoc)
+             * @see org.epics.ioc.util.ReadyRunnable#isReady()
+             */
+            public boolean isReady() {
+                return isReady;
             }
 
             /* (non-Javadoc)
              * @see java.lang.Runnable#run()
              */
             public void run() {
-                isRunning = true;
                 try {
-                    while(true) {
-                        lock.lock();
-                        try {
-                            waitForWork.await();
-                        } finally {
-                            lock.unlock();
-                        } 
-                        stopScanner();
-                        startScanner();
+                    lock.lock();
+                    try {
+                        isReady = true;
+                        waitForWork.await();
+                    } finally {
+                        lock.unlock();
                     } 
+                    stopScanner();
+                    startScanner();
                 } catch(InterruptedException e) {}
             }
             

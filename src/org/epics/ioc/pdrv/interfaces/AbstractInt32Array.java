@@ -11,8 +11,15 @@ import java.util.ListIterator;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 
-import org.epics.ioc.pdrv.*;
-import org.epics.ioc.pv.*;
+import org.epics.ioc.pdrv.Device;
+import org.epics.ioc.pdrv.Status;
+import org.epics.ioc.pdrv.Trace;
+import org.epics.ioc.pdrv.User;
+import org.epics.ioc.pv.Array;
+import org.epics.ioc.pv.PVField;
+import org.epics.ioc.util.ReadyRunnable;
+import org.epics.ioc.util.ThreadCreate;
+import org.epics.ioc.util.ThreadFactory;
 
 
 
@@ -33,6 +40,7 @@ import org.epics.ioc.pv.*;
  *
  */
 public abstract class AbstractInt32Array extends AbstractArrayInterface implements Int32Array{
+    private static ThreadCreate threadCreate = ThreadFactory.getThreadCreate();
     private  ReentrantLock lock = new ReentrantLock();
     private List<Int32ArrayInterruptListener> interruptlistenerList =
         new LinkedList<Int32ArrayInterruptListener>();
@@ -175,13 +183,15 @@ public abstract class AbstractInt32Array extends AbstractArrayInterface implemen
         }
     } 
     
-    private class Interrupt implements Runnable {
-        private Thread thread = new Thread(this);
+    private class Interrupt implements ReadyRunnable {
+        private boolean isReady = false;
         private ReentrantLock lock = new ReentrantLock();
         private Condition moreWork = lock.newCondition();
         
         private Interrupt() {
-            thread.start();
+            String name = device.getPort().getPortName() + "[" + device.getAddr() + "]";
+            name += AbstractInt32Array.this.getInterfaceName();
+            threadCreate.create(name,4, this);
         }
         
         private void interrupt() {
@@ -193,6 +203,13 @@ public abstract class AbstractInt32Array extends AbstractArrayInterface implemen
             }
         }
         /* (non-Javadoc)
+         * @see org.epics.ioc.util.ReadyRunnable#isReady()
+         */
+        public boolean isReady() {
+            return isReady;
+        }
+
+        /* (non-Javadoc)
          * @see java.lang.Runnable#run()
          */
         public void run() {
@@ -200,6 +217,7 @@ public abstract class AbstractInt32Array extends AbstractArrayInterface implemen
                 while(true) {
                     lock.lock();
                     try {
+                        isReady = true;
                         moreWork.await();
                         callback();
                     }finally {

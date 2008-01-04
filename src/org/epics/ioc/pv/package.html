@@ -10,7 +10,7 @@
 <body>
 <h1 style="text-align: center">EPICS JavaIOC: pv<br />
 package: org.epics.ioc.pv<br />
-2007.12.13</h1>
+2008.01.02</h1>
 CONTENTS 
 
 <div class="toc">
@@ -317,6 +317,7 @@ modified.</p>
         PVField getParent();
         PVRecord getPVRecord();
         PVField getSubField(String fieldName);
+        PVEnumerated getPVEnumerated();
         PVField findProperty(String propertyName);
         PVField findPropertyViaParent(String propertyName);
         String[] getPropertyNames();
@@ -377,6 +378,9 @@ where
     PVStructireArray or a PVArrayArray then field name should be of the form
     "[index]" where index is an integer. A non-null result is returned if the
     array element exists.</li>
+  <li>getPVEnumerated<br />
+     If the PVField is an enumerated structure return a PVEnumerated interface.
+     A null is returned if the PVField is not an enumerated structure.</li>
   <li>findProperty<br />
     Find a field that is a subfield or property of this PVField. The
     fieldName is of the form item.item... where item is name or name[index].
@@ -568,6 +572,7 @@ array of strings. Both index and choice select one of the choices.</p>
         PVInt getIndexField();
         PVString getChoiceField();
         PVStringArray getChoicesField();
+        PVField getPVField();
     }</pre>
 
 <p>where</p>
@@ -578,6 +583,8 @@ array of strings. Both index and choice select one of the choices.</p>
     <dd>Returns the interface for field choice.</dd>
   <dt>getChoicesField</dt>
     <dd>Returns the interface for field choices.</dd>
+  <dt>getPVField</dt>
+    <dd>Returns the interface for the PVField for the enumerated structure.</dd>
 </dl>
 
 <h3 id="PVRecord">PVRecord</h3>
@@ -935,6 +942,7 @@ interfaces:</p>
     public PVRecord getPVRecord();
     public void replacePVField(PVField newPVField);
     public PVField getSubField(String fieldName);
+    public PVEnumerated getPVEnumerated();
     public PVField findProperty(String fieldName);
     PVField findPropertyViaParent(String propertyName);
     public String[] getPropertyNames();

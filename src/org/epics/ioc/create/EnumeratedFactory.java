@@ -48,7 +48,7 @@ public class EnumeratedFactory {
         if(!field.getFieldName().equals("index") || field.getType()!=Type.pvInt) {
             pvStructure.message("structure does not have field index of type int", MessageType.error);
             return null;
-        } 
+        }
         field = fields[1];
         if(!field.getFieldName().equals("choice") || field.getType()!=Type.pvString) {
             pvStructure.message("structure does not have field choice of type string", MessageType.error);
@@ -65,14 +65,14 @@ public class EnumeratedFactory {
             return null;
         }
         DBField[] dbFields = dbStructure.getDBFields();
-        Enumerated enumerated = new EnumeratedImpl(dbFields[0],dbFields[1],dbFields[2]);
+        Enumerated enumerated = new EnumeratedImpl(dbField.getPVField(),dbFields[0],dbFields[1],dbFields[2]);
         dbField.setCreate(enumerated);
         return enumerated;
     }
 
     private static class EnumeratedImpl extends BaseEnumerated {
-        private EnumeratedImpl(DBField dbIndex, DBField dbChoice, DBField dbChoices) {
-            super(dbIndex,dbChoice,dbChoices);
+        private EnumeratedImpl(PVField pvField,DBField dbIndex, DBField dbChoice, DBField dbChoices) {
+            super(pvField,dbIndex,dbChoice,dbChoices);
         }
     }
 }
