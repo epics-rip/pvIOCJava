@@ -112,7 +112,7 @@ public class ServerFactory {
             threadCreate.create("caV3Server", 3, this);
         }
         
-        private boolean isReady = false;
+        private volatile boolean isReady = false;
         /**
          * JCA server context.
          */
