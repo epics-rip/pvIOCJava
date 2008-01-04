@@ -24,7 +24,7 @@ public class ChannelFactory {
      * @param listener The listener for channel state changes.
      * @return The channel or null if it could not be created.
      */
-    public static Channel createChannel(String pvName,String providerName, ChannelStateListener listener) {
+    public static Channel createChannel(String pvName,String providerName, ChannelListener listener) {
         ChannelProvider channelProvider = channelProviders.get(providerName);
         if(channelProvider==null) {
             listener.message(

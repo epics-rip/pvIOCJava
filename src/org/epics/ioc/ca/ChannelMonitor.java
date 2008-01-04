@@ -29,4 +29,8 @@ public interface ChannelMonitor {
      * Stop Monitoring.
      */
     void stop();
+    /**
+     * Destroy the ChannelMonitor;
+     */
+    void destroy();
 }

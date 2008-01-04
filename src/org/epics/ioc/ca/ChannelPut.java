@@ -27,4 +27,8 @@ public interface ChannelPut {
      * @param pvField The pvField to put.
      */
     void putDelayed(PVField pvField);
+    /**
+     * Destroy the ChannelPut.
+     */
+    void destroy();
 }

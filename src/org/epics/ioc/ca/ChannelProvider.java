@@ -18,7 +18,7 @@ public interface ChannelProvider {
      * @param listener A state listener.
      * @return A Channel or null if the channel can not be created.
      */
-    Channel createChannel(String pvName,ChannelStateListener listener);
+    Channel createChannel(String pvName,ChannelListener listener);
     /**
      * Get the provider name.
      * @return The name.
@@ -31,4 +31,8 @@ public interface ChannelProvider {
      * This call may block while looking for the name.
      */
     boolean isProvider(String channelName);
+    /**
+     * Destroy the channelProvider.
+     */
+    void destroy();
 }

@@ -26,10 +26,10 @@ public interface Channel {
      */
     String getChannelName();
     /**
-     * Get the state listener.
+     * Get the channel listener.
      * @return The listener.
      */
-    ChannelStateListener getChannelStateListener();
+    ChannelListener getChannelListener();
     /**
      * Report a message.
      * @param message The message.
@@ -81,12 +81,6 @@ public interface Channel {
     ChannelProcess createChannelProcess(
         ChannelProcessRequester channelProcessRequester);
     /**
-     * Destroy a channelProcess.
-     * If a request is active it will complete but no new requestes will be accepted.
-     * @param channelProcess The channelProcess.
-     */
-    void destroy(ChannelProcess channelProcess);
-    /**
      * Create a Get.
      * The channel will be processed before reading data.
      * @param channelFieldGroup The fieldGroup describing the data to get.
@@ -98,12 +92,6 @@ public interface Channel {
         ChannelFieldGroup channelFieldGroup,ChannelGetRequester channelGetRequester,
         boolean process);
     /**
-     * Destroy a channelGet.
-     * If a request is active it will complete but no new requestes will be accepted.
-     * @param channelGet The channelGet.
-     */
-    void destroy(ChannelGet channelGet);
-    /**
      * Create a Put.
      * @param channelFieldGroup The chanelFieldGroup describing the data to put.
      * @param channelPutRequester The channelPutRequester.
@@ -113,12 +101,6 @@ public interface Channel {
     ChannelPut createChannelPut(
         ChannelFieldGroup channelFieldGroup,ChannelPutRequester channelPutRequester,
         boolean process);
-    /**
-     * Destroy a channelPut.
-     * If a request is active it will complete but no new requestes will be accepted.
-     * @param channelPut The channelPut.
-     */
-    void destroy(ChannelPut channelPut);
     /**
      * Create a ChannelPutGet.
      * @param putFieldGroup The fieldGroup describing the data to put.
@@ -132,20 +114,9 @@ public interface Channel {
         ChannelPutGetRequester channelPutGetRequester,
         boolean process);
     /**
-     * Destroy a channelPut.
-     * If a request is active it will complete but no new requestes will be accepted.
-     * @param channelPutGet The channelPut.
-     */
-    void destroy(ChannelPutGet channelPutGet);
-    /**
      * Create a ChannelMonitor.
      * @param channelMonitorRequester The channelMonitorRequester.
      * @return The ChannelMonitor interface.
      */
     ChannelMonitor createChannelMonitor(ChannelMonitorRequester channelMonitorRequester);
-    /**
-     * Destroy the channelMonitor.
-     * @param channelMonitor The channelMonitor to destroy.
-     */
-    void destroy(ChannelMonitor channelMonitor);
 }

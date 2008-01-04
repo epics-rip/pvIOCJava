@@ -35,4 +35,8 @@ public interface ChannelPutGet {
      * @param pvField The pvField to get.
      */
     void getDelayed(PVField pvField);
+    /**
+     * Destroy the ChannelPutGet
+     */
+    void destroy();
 }

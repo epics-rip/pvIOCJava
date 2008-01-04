@@ -18,4 +18,8 @@ public interface ChannelProcess {
      * If it fails the channelProcessRequester.processDone is called before process returns.
      */
     void process();
+    /**
+     * Destroy the ChannelProcess.
+     */
+    void destroy();
 }

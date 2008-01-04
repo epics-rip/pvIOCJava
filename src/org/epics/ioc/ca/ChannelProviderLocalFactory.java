@@ -5,7 +5,6 @@
 package org.epics.ioc.ca;
 
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.regex.Pattern;
 
@@ -20,7 +19,8 @@ import org.epics.ioc.db.IOCDBFactory;
 import org.epics.ioc.db.RecordListener;
 import org.epics.ioc.process.RecordProcess;
 import org.epics.ioc.process.RecordProcessRequester;
-import org.epics.ioc.pv.*;
+import org.epics.ioc.pv.PVEnumerated;
+import org.epics.ioc.pv.PVField;
 import org.epics.ioc.util.MessageType;
 import org.epics.ioc.util.RequestResult;
 import org.epics.ioc.util.Requester;
@@ -29,18 +29,18 @@ import org.epics.ioc.util.Requester;
  * Factory and implementation of local channel access, i.e. channel access that
  * accesses database records in the local IOC.
  * All user callbacks will be called with the appropriate records locked except for
- * 1) all methods of ChannelStateListener, 2) all methods of ChannelFieldGroupListener,
+ * 1) all methods of ChannelListener, 2) all methods of ChannelFieldGroupListener,
  * and 3) ChannelRequester.requestDone
  * @author mrk
  *
  */
 public class ChannelProviderLocalFactory  {
-    private static ChannelProviderLocal channelAccess = new ChannelProviderLocal();
+    private static ChannelProviderLocal channelProvider = new ChannelProviderLocal();
     /**
      * Register. This is called by ChannelFactory.
      */
     static public void register() {
-        channelAccess.register();
+        channelProvider.register();
     }
     
     private static class ChannelProviderLocal implements ChannelProvider{
@@ -54,9 +54,9 @@ public class ChannelProviderLocalFactory  {
             ChannelFactory.registerChannelProvider(this);
         }       
         /* (non-Javadoc)
-         * @see org.epics.ioc.ca.ChannelProvider#createChannel(java.lang.String, org.epics.ioc.ca.ChannelStateListener)
+         * @see org.epics.ioc.ca.ChannelProvider#createChannel(java.lang.String, org.epics.ioc.ca.ChannelListener)
          */
-        public synchronized Channel createChannel(String pvName,ChannelStateListener listener) {
+        public synchronized Channel createChannel(String pvName,ChannelListener listener) {
             String recordName = null;
             String fieldName = null;
             String options = null;
@@ -95,189 +95,28 @@ public class ChannelProviderLocalFactory  {
             if(iocdb.findRecord(recordName)==null) return false;
             return true;
         }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.ca.ChannelProvider#destroy()
+         */
+        public void destroy() {
+            // TODO Auto-generated method stub
+        }
     }
     
     static private Pattern periodPattern = Pattern.compile("[.]");
     static private Pattern leftBracePattern = Pattern.compile("[{]");
     static private Pattern rightBracePattern = Pattern.compile("[}]");
     
-    private static class ChannelImpl implements Channel,Requester {
-        private boolean isDestroyed = false;
-        private ChannelStateListener stateListener = null;
+    private static class ChannelImpl extends AbstractChannel {
         private DBRecord dbRecord;
-        private PVRecord pvRecord;
-        private String channelName;
-        private String fieldName;
-        private String options;
-        private LinkedList<FieldGroupImpl> fieldGroupList = 
-            new LinkedList<FieldGroupImpl>();
-        private LinkedList<ChannelProcessImpl> channelProcessList =
-            new LinkedList<ChannelProcessImpl>();
-        private LinkedList<ChannelGetImpl> channelGetList =
-            new LinkedList<ChannelGetImpl>();
-        private LinkedList<ChannelPutImpl> channelPutList =
-            new LinkedList<ChannelPutImpl>();
-        private LinkedList<ChannelPutGetImpl> channelPutGetList =
-            new LinkedList<ChannelPutGetImpl>();
-        private LinkedList<MonitorImpl> monitorList = 
-            new LinkedList<MonitorImpl>();
         
-        private ChannelImpl(DBRecord record,ChannelStateListener listener,
+        private ChannelImpl(DBRecord record,ChannelListener listener,
                 String fieldName, String options)
         {
-            stateListener = listener;
+            super(listener,fieldName,options);
+            super.SetPVRecord(record.getPVRecord());
             dbRecord = record;
-            pvRecord = record.getPVRecord();
-            this.fieldName = fieldName;
-            this.options = options;
-            if(fieldName==null) {
-                channelName = pvRecord.getRecordName();
-            } else {
-                channelName =  pvRecord.getRecordName() + "." + fieldName;
-            }
         }       
-        /* (non-Javadoc)
-         * @see org.epics.ioc.ca.Channel#getChannelName()
-         */
-        public synchronized String getChannelName() {
-            return channelName;
-        }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.util.Requester#getRequesterName()
-         */
-        public String getRequesterName() {
-            return getChannelName();
-        }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.ca.Channel#message(java.lang.String, org.epics.ioc.util.MessageType)
-         */
-        public void message(String message, MessageType messageType) {
-            stateListener.message(message, messageType);   
-        }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.ca.Channel#getChannelStateListener()
-         */
-        public ChannelStateListener getChannelStateListener() {
-            return stateListener;
-        }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.ca.Channel#destroy()
-         */
-        public void destroy() {
-            ChannelStateListener stateListener = destroyPvt();
-            if(stateListener!=null) stateListener.disconnect(this);
-        }
-        
-        private synchronized ChannelStateListener destroyPvt() {
-            if(isDestroyed) return null;
-            Iterator<ChannelProcessImpl> processIter = channelProcessList.iterator();
-            while(processIter.hasNext()) {
-                ChannelProcessImpl channelProcess = processIter.next();
-                channelProcess.destroy();
-                processIter.remove();
-            }
-            Iterator<ChannelGetImpl> getIter = channelGetList.iterator();
-            while(getIter.hasNext()) {
-                ChannelGetImpl channelGet = getIter.next();
-                channelGet.destroy();
-                getIter.remove();
-            }
-            Iterator<ChannelPutImpl> putIter = channelPutList.iterator();
-            while(putIter.hasNext()) {
-                ChannelPutImpl channelPut = putIter.next();
-                channelPut.destroy();
-                putIter.remove();
-            }
-            Iterator<ChannelPutGetImpl> putGetIter = channelPutGetList.iterator();
-            while(putGetIter.hasNext()) {
-                ChannelPutGetImpl channelPutGet = putGetIter.next();
-                channelPutGet.destroy();
-                putGetIter.remove();
-            }
-            Iterator<MonitorImpl> monitorIter = monitorList.iterator();
-            while(monitorIter.hasNext()) {
-                MonitorImpl impl = monitorIter.next();
-                impl.destroy();
-                monitorIter.remove();
-            }
-            isDestroyed = true;
-            return stateListener;
-        }  
-        /* (non-Javadoc)
-         * @see org.epics.ioc.ca.Channel#destroy(org.epics.ioc.ca.ChannelGet)
-         */
-        public synchronized void destroy(ChannelGet get) {
-            ChannelGetImpl toDelete = (ChannelGetImpl)get;            
-            Iterator<ChannelGetImpl> getIter = channelGetList.iterator();
-            while(getIter.hasNext()) {
-                ChannelGetImpl channelGet = getIter.next();
-                if(channelGet==toDelete) {
-                    channelGet.destroy();
-                    getIter.remove();
-                    return;
-                }
-            }
-        }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.ca.Channel#destroy(org.epics.ioc.ca.ChannelProcess)
-         */
-        public synchronized void destroy(ChannelProcess process) {
-            ChannelProcessImpl toDelete = (ChannelProcessImpl)process;
-            Iterator<ChannelProcessImpl> processIter = channelProcessList.iterator();
-            while(processIter.hasNext()) {
-                ChannelProcessImpl channelProcess = processIter.next();
-                if(channelProcess==toDelete) {
-                    channelProcess.destroy();
-                    processIter.remove();
-                    return;
-                }
-            }
-        }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.ca.Channel#destroy(org.epics.ioc.ca.ChannelPut)
-         */
-        public synchronized void destroy(ChannelPut put) {
-            ChannelPutImpl toDelete = (ChannelPutImpl)put;
-            Iterator<ChannelPutImpl> putIter = channelPutList.iterator();
-            while(putIter.hasNext()) {
-                ChannelPutImpl channelPut = putIter.next();
-                if(channelPut==toDelete) {
-                    channelPut.destroy();
-                    putIter.remove();
-                    return;
-                }
-            }
-        }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.ca.Channel#destroy(org.epics.ioc.ca.ChannelPutGet)
-         */
-        public synchronized void destroy(ChannelPutGet putGet) {
-            ChannelPutGetImpl toDelete = (ChannelPutGetImpl)putGet;
-            Iterator<ChannelPutGetImpl> putGetIter = channelPutGetList.iterator();
-            while(putGetIter.hasNext()) {
-                ChannelPutGetImpl channelPutGet = putGetIter.next();
-                if(channelPutGet==toDelete) {
-                    channelPutGet.destroy();
-                    putGetIter.remove();
-                    return;
-                }
-            }
-        }        
-        /* (non-Javadoc)
-         * @see org.epics.ioc.ca.Channel#destroy(org.epics.ioc.ca.ChannelMonitor)
-         */
-        public synchronized void destroy(ChannelMonitor channelMonitor) {
-            MonitorImpl toDelete = (MonitorImpl)channelMonitor;
-            Iterator<MonitorImpl> iter = monitorList.iterator();
-            while(iter.hasNext()) {
-                MonitorImpl impl = iter.next();
-                if(impl==toDelete) {
-                    impl.destroy();
-                    iter.remove();
-                    return;
-                }
-            }
-        }
         /* (non-Javadoc)
          * @see org.epics.ioc.ca.Channel#isConnected()
          */
@@ -287,7 +126,7 @@ public class ChannelProviderLocalFactory  {
             } else {
                 return true;
             }
-        }                       
+        }                   
         /* (non-Javadoc)
          * @see org.epics.ioc.ca.Channel#createChannelField(java.lang.String)
          */
@@ -297,42 +136,7 @@ public class ChannelProviderLocalFactory  {
             PVField pvField = pvRecord.findProperty(name);
             if(pvField==null) return null;
             return new ChannelFieldImpl(dbRecord.findDBField(pvField));               
-        }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.ca.Channel#getFieldName()
-         */
-        public synchronized String getFieldName() {
-            return fieldName;
-        }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.ca.Channel#getOptions()
-         */
-        public synchronized String getOptions() {
-            return options;
-        }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.ca.Channel#getPropertyName()
-         */
-        public synchronized String getPropertyName() {
-            if(fieldName==null||fieldName.length()<=0) return "value";
-            PVField pvField = pvRecord.findProperty(fieldName);
-            if(pvField!=null && pvField.getField().getType()==Type.pvStructure) {
-                PVStructure pvStructure = (PVStructure)pvField;
-                if(pvStructure.getStructure().getFieldIndex("value") >=0) {
-                    return fieldName + ".value";
-                }
-            }
-            return fieldName;
-        }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.ca.Channel#createFieldGroup(org.epics.ioc.ca.ChannelFieldGroupListener)
-         */
-        public synchronized FieldGroupImpl createFieldGroup(ChannelFieldGroupListener listener) {
-            if(isDestroyed) return null;
-            FieldGroupImpl fieldGroupImpl = new FieldGroupImpl(this,listener);
-            fieldGroupList.add(fieldGroupImpl);
-            return fieldGroupImpl;
-        }               
+        }    
         /* (non-Javadoc)
          * @see org.epics.ioc.ca.Channel#createChannelProcess(org.epics.ioc.ca.ChannelProcessRequester)
          */
@@ -346,7 +150,7 @@ public class ChannelProviderLocalFactory  {
             ChannelProcessImpl channelProcess;
             try {
                 channelProcess = new ChannelProcessImpl(channelProcessRequester);
-                channelProcessList.add(channelProcess);
+                super.add(channelProcess);
             } catch(IllegalStateException e) {
                 channelProcessRequester.message(
                         e.getMessage(),MessageType.fatalError);
@@ -363,7 +167,7 @@ public class ChannelProviderLocalFactory  {
             if(isDestroyed) return null;
             ChannelGetImpl channelGet = 
                 new ChannelGetImpl(channelFieldGroup,channelGetRequester,process);
-            channelGetList.add(channelGet);
+            super.add(channelGet);
             return channelGet;
         }        
         /* (non-Javadoc)
@@ -375,7 +179,7 @@ public class ChannelProviderLocalFactory  {
             if(isDestroyed) return null;
             ChannelPutImpl channelPut = 
                 new ChannelPutImpl(channelFieldGroup,channelPutRequester,process);
-            channelPutList.add(channelPut);
+            super.add(channelPut);
             return channelPut;
         }        
         /* (non-Javadoc)
@@ -389,7 +193,7 @@ public class ChannelProviderLocalFactory  {
             ChannelPutGetImpl channelPutGet = 
                 new ChannelPutGetImpl(putFieldGroup,getFieldGroup,
                         channelPutGetRequester,process);
-            channelPutGetList.add(channelPutGet);
+            super.add(channelPutGet);
             return channelPutGet;
         }
         /* (non-Javadoc)
@@ -398,47 +202,34 @@ public class ChannelProviderLocalFactory  {
         public synchronized ChannelMonitor createChannelMonitor(ChannelMonitorRequester channelMonitorRequester)
         {
             if(isDestroyed) {
-                stateListener.message(
+                channelListener.message(
                         "channel has been destroyed",MessageType.fatalError);
                 return null;
             }
             MonitorImpl impl = new MonitorImpl(this,channelMonitorRequester);
-            monitorList.add(impl);
+            super.add(impl);
             return impl;
         }
 
     
-        private static class ChannelFieldImpl implements ChannelField {
+        private static class ChannelFieldImpl extends BaseChannelField {
             private DBField dbField = null;
-            private PVField pvField;
             
             ChannelFieldImpl(DBField dbField) {
+                super(dbField.getPVField());
                 this.dbField = dbField;
-                pvField = dbField.getPVField();
             }        
-            /* (non-Javadoc)
-             * @see org.epics.ioc.ca.ChannelField#getPVField()
-             */
-            public PVField getPVField() {
-                return pvField;
-            }
             /* (non-Javadoc)
              * @see org.epics.ioc.ca.ChannelField#postPut()
              */
             public void postPut() {
                 dbField.postPut();
-            }
-            /* (non-Javadoc)
-             * @see org.epics.ioc.ca.ChannelField#getPropertyNames()
-             */
-            public String[] getPropertyNames() {
-                return pvField.getPropertyNames();
-            }            
+            }      
             /* (non-Javadoc)
              * @see org.epics.ioc.ca.ChannelField#findProperty(java.lang.String)
              */
             public ChannelField findProperty(String propertyName) {
-                PVField pvf = pvField.findProperty(propertyName);
+                PVField pvf = super.getPVField().findProperty(propertyName);
                 if(pvf==null) return null;
                 DBField dbf = dbField.getDBRecord().findDBField(pvf);
                 return new ChannelFieldImpl(dbf);
@@ -447,7 +238,7 @@ public class ChannelProviderLocalFactory  {
              * @see org.epics.ioc.ca.ChannelField#createChannelField(java.lang.String)
              */
             public ChannelField createChannelField(String fieldName) {
-                PVField pvf = pvField.getSubField(fieldName);
+                PVField pvf = super.getPVField().getSubField(fieldName);
                 if(pvf==null) return null;
                 DBField dbf = dbField.getDBRecord().findDBField(pvf);
                 return new ChannelFieldImpl(dbf);
@@ -462,73 +253,8 @@ public class ChannelProviderLocalFactory  {
                 }
                 return null;
             }
-            /* (non-Javadoc)
-             * @see org.epics.ioc.ca.ChannelField#getAccessRights()
-             */
-            public AccessRights getAccessRights() {
-                // OK until access security is implemented
-                if(pvField.isMutable()) {
-                    return AccessRights.readWrite;
-                } else {
-                    return AccessRights.read;
-                }
-            }
-            /* (non-Javadoc)
-             * @see org.epics.ioc.ca.ChannelField#getField()
-             */
-            public Field getField() {
-                return pvField.getField();
-            }
-
             private DBField getDBField() {
                 return dbField;
-            }
-           
-            /* (non-Javadoc)
-             * @see java.lang.Object#toString()
-             */
-            public String toString() {
-                return pvField.getField().toString();
-            }
-    
-        }
-        
-        private static class FieldGroupImpl implements ChannelFieldGroup {
-            private Channel channel;
-            private LinkedList<ChannelField> fieldList = 
-                new LinkedList<ChannelField>();
-    
-            FieldGroupImpl(Channel channel,ChannelFieldGroupListener listener) {
-                this.channel = channel;
-            }
-            /* (non-Javadoc)
-             * @see org.epics.ioc.ca.ChannelFieldGroup#addChannelField(org.epics.ioc.ca.ChannelField)
-             */
-            public synchronized void addChannelField(ChannelField channelField) {
-                fieldList.add(channelField);
-            }
-            /* (non-Javadoc)
-             * @see org.epics.ioc.ca.ChannelFieldGroup#removeChannelField(org.epics.ioc.ca.ChannelField)
-             */
-            public synchronized void removeChannelField(ChannelField channelField) {
-                fieldList.remove(channelField);
-            }            
-            /* (non-Javadoc)
-             * @see org.epics.ioc.ca.ChannelFieldGroup#getList()
-             */
-            public synchronized List<ChannelField> getList() {
-                return fieldList;
-            }
-            /* (non-Javadoc)
-             * @see org.epics.ioc.ca.ChannelFieldGroup#getArray()
-             */
-            public ChannelField[] getArray() {
-                int length = fieldList.size();
-                ChannelField[] channelFields = new ChannelField[length];
-                for(int i=0; i<length; i++) {
-                    channelFields[i] = fieldList.get(i);
-                }
-                return channelFields;
             }
         }
         
@@ -553,9 +279,13 @@ public class ChannelProviderLocalFactory  {
                 }
                 requesterName = "Process:" + channelProcessRequester.getRequesterName();
             }           
-            private void destroy() {
+            /* (non-Javadoc)
+             * @see org.epics.ioc.ca.ChannelProcess#destroy()
+             */
+            public void destroy() {
                 isDestroyed = true;
                 recordProcess.releaseRecordProcessRequester(this);
+                ChannelImpl.this.remove(this);
             }
             /* (non-Javadoc)
              * @see org.epics.ioc.ca.ChannelProcess#process()
@@ -616,7 +346,7 @@ public class ChannelProviderLocalFactory  {
             private String requesterName;
             private ChannelGetRequester channelGetRequester = null;
             private boolean process;
-            private FieldGroupImpl fieldGroup = null;
+            private ChannelFieldGroup fieldGroup = null;
             private List<ChannelField> channelFieldList;
             private RecordProcess recordProcess = null;
             private boolean isRecordProcessRequester = false;
@@ -631,7 +361,7 @@ public class ChannelProviderLocalFactory  {
                 if(channelFieldGroup==null) {
                     throw new IllegalStateException("no field group");
                 }
-                this.fieldGroup = (FieldGroupImpl)channelFieldGroup;
+                this.fieldGroup = channelFieldGroup;
                 this.channelGetRequester = channelGetRequester;
                 this.process = process;
                 channelFieldList = fieldGroup.getList();
@@ -647,9 +377,13 @@ public class ChannelProviderLocalFactory  {
                 }
             }
             
-            private void destroy() {
+            /* (non-Javadoc)
+             * @see org.epics.ioc.ca.ChannelGet#destroy()
+             */
+            public void destroy() {
                 isDestroyed = true;
                 if(isRecordProcessRequester) recordProcess.releaseRecordProcessRequester(this);
+                ChannelImpl.this.remove(this);
             }
             /* (non-Javadoc)
              * @see org.epics.ioc.ca.ChannelGet#get(org.epics.ioc.ca.ChannelFieldGroup)
@@ -791,8 +525,13 @@ public class ChannelProviderLocalFactory  {
                 requesterName = "Put:" + channelPutRequester.getRequesterName();
             } 
             
-            private void destroy() {
+            /* (non-Javadoc)
+             * @see org.epics.ioc.ca.ChannelPut#destroy()
+             */
+            public void destroy() {
+                isDestroyed = true;
                 if(isRecordProcessRequester) recordProcess.releaseRecordProcessRequester(this);
+                ChannelImpl.this.remove(this);
             }
             /* (non-Javadoc)
              * @see org.epics.ioc.ca.ChannelPut#put(org.epics.ioc.ca.ChannelFieldGroup)
@@ -941,9 +680,13 @@ public class ChannelProviderLocalFactory  {
                 }
             }
             
-            private void destroy() {
+            /* (non-Javadoc)
+             * @see org.epics.ioc.ca.ChannelPutGet#destroy()
+             */
+            public void destroy() {
                 isDestroyed = true;
                 if(isRecordProcessRequester)recordProcess.releaseRecordProcessRequester(this);
+                ChannelImpl.this.remove(this);
             }
             /* (non-Javadoc)
              * @see org.epics.ioc.ca.ChannelPutGet#putGet(org.epics.ioc.ca.ChannelFieldGroup, org.epics.ioc.ca.ChannelFieldGroup)
@@ -1138,8 +881,12 @@ public class ChannelProviderLocalFactory  {
                 this.channel = channel;
                 this.channelMonitorRequester = channelMonitorRequester;
             }
-            private void destroy() {
+            /* (non-Javadoc)
+             * @see org.epics.ioc.ca.ChannelMonitor#destroy()
+             */
+            public void destroy() {
                 stop();
+                ChannelImpl.this.remove(this);
             }
             /* (non-Javadoc)
              * @see org.epics.ioc.ca.ChannelFieldGroupListener#accessRightsChange(org.epics.ioc.ca.Channel, org.epics.ioc.ca.ChannelField)
@@ -1147,7 +894,6 @@ public class ChannelProviderLocalFactory  {
             public void accessRightsChange(Channel channel, ChannelField channelField) {
                 // TODO Auto-generated method stub
             }
-
             /* (non-Javadoc)
              * @see org.epics.ioc.util.Requester#getRequesterName()
              */
@@ -1303,7 +1049,7 @@ public class ChannelProviderLocalFactory  {
              */
             public void unlisten(RecordListener listener) {
                 stop();
-                channel.getChannelStateListener().disconnect(channel);
+                channel.getChannelListener().disconnect(channel);
             }   
         }
     }

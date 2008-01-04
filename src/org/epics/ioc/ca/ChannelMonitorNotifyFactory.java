@@ -30,7 +30,12 @@ public class ChannelMonitorNotifyFactory {
         private Channel channel;
         private ChannelMonitorNotifyRequester monitorNotifyRequestor;
         private ChannelMonitor channelMonitor = null;
-
+        /* (non-Javadoc)
+         * @see org.epics.ioc.ca.ChannelMonitor#destroy()
+         */
+        public void destroy() {
+            stop();
+        }
         /* (non-Javadoc)
          * @see org.epics.ioc.util.Requester#getRequesterName()
          */
@@ -71,7 +76,7 @@ public class ChannelMonitorNotifyFactory {
          */
         public void stop() {
             channelMonitor.stop();
-            channel.destroy(channelMonitor);
+            channelMonitor.destroy();
             channelMonitor = null;
         }
 

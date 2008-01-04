@@ -10,13 +10,13 @@
 <body>
 <h1 style="text-align: center">EPICS JavaIOC: channel Access<br />
 package: org.epics.ioc.ca<br />
-2007.12.14</h1>
+2008.01.02</h1>
 CONTENTS 
 
 <div class="toc">
 <ul>
   <li><a href="#Overview">Overview</a></li>
-  <li><a href="#Channel">Channel Definitions</a> 
+  <li><a href="#Channel">Channel Definitions</a>
     <ul>
       <li><a href="#Definition">Definitions</a></li>
       <li><a href="#Channel1">Channel</a></li>
@@ -31,7 +31,7 @@ CONTENTS
       <li><a href="#ChannelPro">ChannelProvider</a></li>
     </ul>
   </li>
-  <li><a href="#Channel2">Channel Process, Get, Put, PutGet, and Monitor</a> 
+  <li><a href="#Channel2">Channel Process, Get, Put, PutGet, and Monitor</a>
     <ul>
       <li><a href="#Definition1">Definitions</a></li>
       <li><a href="#ChannelPro1">ChannelProcess</a></li>
@@ -40,13 +40,14 @@ CONTENTS
       <li><a href="#ChannelPut1">ChannelPutGet</a></li>
     </ul>
   </li>
-  <li><a href="#Local">Local Channel Provider</a></li>
-  <li><a href="#ChannelMon2">ChannelMonitorNotify</a> 
+  <li><a href="#Abstract">Abstract and Base Classes</a></li>
+  <li><a href="#ChannelMon2">ChannelMonitorNotify</a>
     <ul>
       <li><a href="#ChannelMon3">ChannelMonitorNotify</a></li>
     </ul>
   </li>
-  <li><a href="#Channel3">CD - Channel Data</a> 
+  <li><a href="#Local">Local Channel Provider</a></li>
+  <li><a href="#Channel3">CD - Channel Data</a>
     <ul>
       <li><a href="#Definition2">CD Definitions</a></li>
       <li><a href="#CD">CD</a></li>
@@ -54,7 +55,7 @@ CONTENTS
       <li><a href="#CDFactory">CDFactory</a></li>
     </ul>
   </li>
-  <li><a href="#CDField">CDField - Channel Data Fields</a> 
+  <li><a href="#CDField">CDField - Channel Data Fields</a>
     <ul>
       <li><a href="#CDField1">CDField Definitions</a></li>
       <li><a href="#CDField2">CDField</a></li>
@@ -66,38 +67,38 @@ CONTENTS
       <li><a href="#Base">Base CD Classes</a></li>
     </ul>
   </li>
-  <li><a href="#CDGet">CDGet, CDPUT, CDMonitor</a> 
+  <li><a href="#CDGet">CDGet, CDPUT, CDMonitor</a>
     <ul>
       <li><a href="#CDGet1">CDGet</a></li>
       <li><a href="#CDPut">CDPut</a></li>
       <li><a href="#CDMonitor">CDMonitor</a></li>
     </ul>
   </li>
-  <li><a href="#Example">Example For CD</a> 
+  <li><a href="#Example">Example For CD</a>
     <ul>
       <li><a href="#Discussion">Discussion</a></li>
       <li><a href="#Implementa">Implementation</a></li>
     </ul>
   </li>
-  <li><a href="#Process">Process Example</a> 
+  <li><a href="#Process">Process Example</a>
     <ul>
       <li><a href="#Discussion1">Discussion</a></li>
       <li><a href="#Implementa1">Implementation</a></li>
     </ul>
   </li>
-  <li><a href="#Example1">Get Example</a> 
+  <li><a href="#Example1">Get Example</a>
     <ul>
       <li><a href="#Discussion2">Discussion</a></li>
       <li><a href="#Implementa2">Implementation</a></li>
     </ul>
   </li>
-  <li><a href="#Example2">Put Example</a> 
+  <li><a href="#Example2">Put Example</a>
     <ul>
       <li><a href="#Discussion3">Discussion</a></li>
       <li><a href="#Implementa3">Implementation</a></li>
     </ul>
   </li>
-  <li><a href="#PutGet">PutGet Example</a> 
+  <li><a href="#PutGet">PutGet Example</a>
     <ul>
       <li><a href="#Discussion4">Discussion</a></li>
       <li><a href="#Implementa4">Implementation</a></li>
@@ -165,23 +166,18 @@ databases.</p>
         ChannelFieldGroup createFieldGroup(ChannelFieldGroupListener listener);
         ChannelProcess createChannelProcess(
             ChannelProcessRequester channelProcessRequester);
-        void destroy(ChannelProcess channelProcess);
         ChannelGet createChannelGet(ChannelFieldGroup channelFieldGroup,
             ChannelGetRequester channelGetRequester,
             boolean process);
-        void destroy(ChannelGet channelGet);
         ChannelPut createChannelPut(ChannelFieldGroup channelFieldGroup,
             ChannelPutRequester channelPutRequester,
             boolean process);
-        void destroy(ChannelPut channelPut);
         ChannelPutGet createChannelPutGet(
             channelFieldGroup putFieldGroup,ChannelFieldGroup getFieldGroup,
             ChannelPutGetRequester channelPutGetRequester,
             boolean process);
-        void destroy(ChannelPutGet channelPutGet);
         ChannelMonitor createChannelMonitor(
             ChannelMonitorRequester channelMonitorRequester);
-        void destroy(ChannelMonitor channelMonitor);
     }
 
     interface ChannelStateListener {
@@ -229,6 +225,7 @@ databases.</p>
         void getData(CD cd);
         void start();
         void stop();
+        void destroy();
     }
 
     class ChannelFactory {
@@ -281,30 +278,15 @@ The methods are:</p>
   <dt style="font-family: courier;">createChannelProcess</dt>
     <dd>Create a process request. This is used to ask a channel to
     process.</dd>
-  <dt><span style="font-family: courier;">destroy</span> - channelProcess</dt>
-    <dd>Destroy a channelProcess. This is done automatically when a channel
-      is destroyed.</dd>
   <dt style="font-family: courier;">createChannelGet</dt>
     <dd>Create a get request.</dd>
-  <dt><span style="font-family: courier;">destroy</span> - channelGet</dt>
-    <dd>Destroy a channelGet. This is done automatically when a channel is
-      destroyed.</dd>
   <dt style="font-family: courier;">createChannelPut</dt>
     <dd>Create a put request.</dd>
-  <dt><span style="font-family: courier;">destroy</span> - channelPut</dt>
-    <dd>Destroy a channelPut. This is done automatically when a channel is
-      destroyed.</dd>
   <dt style="font-family: courier;">createChannelPutGet</dt>
     <dd>Create a putGet request.</dd>
-  <dt><span style="font-family: courier;">destroy</span> - channelPutGet</dt>
-    <dd>Destroy a channelPutGet. This is done automatically when a channel is
-      destroyed.</dd>
   <dt style="font-family: courier;">createChannelMonitor</dt>
     <dd>Create a channel monitor. This is used to create monitors for the
       channel.</dd>
-  <dt><span style="font-family: courier;">destroy</span> - channelMonitor</dt>
-    <dd>Destroy a channelMonitor. This is done automatically when a channel
-      is destroyed.</dd>
 </dl>
 
 <h3 id="ChannelSta">ChannelStateListener</h3>
@@ -468,6 +450,7 @@ PutGet, and Monitor</h2>
 <h3 id="Definition1">Definitions</h3>
 <pre>    interface ChannelProcess {
         boolean process();
+        void destroy();
     }
 
     interface ChannelProcessRequester extends Requester {
@@ -477,6 +460,7 @@ PutGet, and Monitor</h2>
     interface ChannelGet {
         boolean get();
         void getDelayed(PVField pvField);
+        void destroy();
     }
 
     interface ChannelGetRequester extends Requester {
@@ -488,6 +472,7 @@ PutGet, and Monitor</h2>
     interface ChannelPut {
         boolean put();
         void putDelayed(PVField pvField);
+        void destroy();
     }
 
     interface ChannelPutRequester extends Requester {
@@ -501,6 +486,7 @@ PutGet, and Monitor</h2>
         boolean putGet();
         void putDelayed(PVField pvField);
         void getDelayed(PVField pvField);
+        void destroy();
     }
 
     interface ChannelPutGetRequester extends
@@ -508,7 +494,7 @@ PutGet, and Monitor</h2>
 
 <h3 id="ChannelPro1">ChannelProcess</h3>
 
-<p>ChannelProcess has the method:</p>
+<p>ChannelProcess has the methods:</p>
 <dl>
   <dt style="font-family: courier;">process</dt>
     <dd>Process the channel. If the channel is a database record, process the
@@ -516,6 +502,9 @@ PutGet, and Monitor</h2>
       (false, true) if the request (can not, can) be done. Normally true is
       returned. A false value probably means that the channel is not
       connected or channelProcess is not the requester.</dd>
+  <dt style="font-family: courier;">destroy</dt>
+    <dd>Destroy any state. This is called automatically when
+      channel.destroy() id called.</dd>
 </dl>
 
 <p>ChannelProcessRequester has the methods:</p>
@@ -560,6 +549,9 @@ called when the channel completes processing.</p>
       then the requester calls <span
       style="font-family: courier;">getDelayed</span> to retrieve the
     data.</dd>
+  <dt style="font-family: courier;">destroy</dt>
+    <dd>Destroy any state. This is called automatically when
+      channel.destroy() id called.</dd>
 </dl>
 
 <p><span style="font-family: courier;">ChannelGetRequester</span> has the
@@ -624,6 +616,9 @@ like:</p>
       returns true, meaning the requester has not put the data, then the
       requester calls <span style="font-family: courier;">putDelayed</span>
       when it is ready to put the data.</dd>
+  <dt style="font-family: courier;">destroy</dt>
+    <dd>Destroy any state. This is called automatically when
+      channel.destroy() id called.</dd>
 </dl>
 
 <p><span style="font-family: courier;">ChannelPutRequester</span> has the
@@ -660,23 +655,56 @@ client request to:</p>
 </ul>
 <hr />
 
-<h2 style="text-align: center;" id="Local">Local Channel Provider</h2>
+<h2 style="text-align: center" id="Abstract">Abstract and Base Classes</h2>
 <hr />
+<pre>    public abstract class AbstractChannel implements Channel,Requester{
+        protected boolean isDestroyed = false;
+        protected ChannelListener channelListener = null;
+        protected PVRecord pvRecord;
+        protected String channelName;
+        protected String fieldName;
+        protected String options;
+    
+        public AbstractChannel(PVRecord pvRecord,ChannelListener channelListener,
+                String fieldName, String options);
+        protected synchronized boolean add(ChannelProcess channelProcess);
+        protected synchronized boolean add(ChannelPut channelPut);
+        protected synchronized boolean add(ChannelPutGet channelPutGet);
+        protected synchronized boolean add(ChannelMonitor channelMonitor);
+        protected synchronized boolean remove(ChannelProcess channelProcess);
+        protected synchronized boolean remove(ChannelGet channelGet);
+        protected synchronized boolean remove(ChannelPut channelPut);
+        protected synchronized boolean remove(ChannelPutGet channelPutGet);
+        protected synchronized boolean remove(ChannelMonitor channelMonitor);
+        public synchronized String getChannelName();
+        public String getRequesterName();
+        public void message(String message, MessageType messageType);
+        public ChannelListener getChannelListener();
+        public void destroy();
+        public synchronized boolean isConnected();
+        public synchronized String getFieldName();
+        public synchronized String getOptions();
+        public synchronized String getPropertyName();
+        public synchronized ChannelFieldGroup createFieldGroup(
+           ChannelFieldGroupListener listener);
+    }
 
-<p>An implementation of a channel access client for accessing records in the
-IOC database is provided. It has the name "local" This is created
-automatically by <span
-style="font-family: courier;">ChannelProviderLocalFactory</span> . The
-factory creates a single instance of an implementation of a channel access
-client for accessing local records. <span
-style="font-family: courier;">ChannelProviderLocalFactory</span> has only one
-public method.</p>
-<pre>    public class ChannelProviderLocalFactory  {
-        static public void register();
-    }</pre>
+    public class BaseChannelField implements ChannelField { ... }
+    public class BaseChannelFieldGroup implements ChannelFieldGroup { ... }</pre>
 
-<p>This method is called by ChannelFactory when it is called before a local
-Channel Access is registered.</p>
+<p>AbstractChannel is for use by Channel Providers. The public methods are
+sufficent for most providers and do not need to be overriden. The provider
+must call the add and remove methods whenever the corresponding interface is
+implemented or destroyed. When destroy is called AbstractChannel calls the
+destroy method of each of the process/get/put/putGet/monitor interfaces.</p>
+
+<p>BaseChannelField implements all ChannelField methods. However the provider
+must provide a PVField interface to the constructor and often needs to
+override some of the methods.</p>
+
+<p>BaseChannelFieldGroup implements all ChannelFieldGroup methods. A provider
+normally can use BaseChannelFieldGroup without overriding any of the
+methods.</p>
 <hr />
 
 <h2 style="text-align: center" id="ChannelMon2">ChannelMonitorNotify</h2>
@@ -696,6 +724,25 @@ IOC database. The notification does not include data.</p>
         ChannelMonitorNotify create(Channel channel,
             ChannelMonitorNotifyRequester monitorNotifyRequestor);
     } </pre>
+<hr />
+
+<h2 style="text-align: center;" id="Local">Local Channel Provider</h2>
+<hr />
+
+<p>An implementation of a channel access client for accessing records in the
+IOC database is provided. It has the name "local" This is created
+automatically by <span
+style="font-family: courier;">ChannelProviderLocalFactory</span> . The
+factory creates a single instance of an implementation of a channel access
+client for accessing local records. <span
+style="font-family: courier;">ChannelProviderLocalFactory</span> has only one
+public method.</p>
+<pre>    public class ChannelProviderLocalFactory  {
+        static public void register();
+    }</pre>
+
+<p>This method is called by ChannelFactory when it is called before a local
+Channel Access is registered.</p>
 <hr />
 
 <h2 style="text-align: center" id="Channel3">CD - Channel Data</h2>
@@ -761,7 +808,10 @@ and associated subfields, which are described in the next section.</p>
     }
 
     class BaseCD { ... }
-    class BaseCDQueue { ... }</pre>
+    class BaseCDQueue { ... }
+    class BaseCDPut { ... }
+    class BaseCDGet { ... }
+    classs BaseCDMonitor { ... }</pre>
 
 <h3 id="CD">CD</h3>
 

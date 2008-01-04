@@ -8,6 +8,10 @@ package org.epics.ioc.ca;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 
+import org.epics.ioc.util.ReadyRunnable;
+import org.epics.ioc.util.ThreadCreate;
+import org.epics.ioc.util.ThreadFactory;
+
 /**
  * @author mrk
  *
@@ -24,67 +28,56 @@ public class BaseCDMonitor {
         cdQueue = CDFactory.createCDQueue(queueSize, channel, channelFieldGroup);
     }
     
-    protected void start(String threadName, int threadPriority)  {
+    protected synchronized void start(String threadName, int threadPriority)  {
         monitorThread = new MonitorThread(threadName,threadPriority);
     }
-    
-    protected CD getFreeCD() {
-        lock.lock();
-        try {
-            return cdQueue.getFree(true);
-        } finally {
-            lock.unlock();
-        }
+
+    protected synchronized CD getFreeCD() {
+        return cdQueue.getFree(true);
     }
-    
-    protected void notifyRequestor(CD cd) {
-        lock.lock();
-        try {
-            cdQueue.setInUse(cd);
-            monitorThread.signal();
-        } finally {
-            lock.unlock();
-        }
+
+    protected synchronized void notifyRequestor(CD cd) {
+        cdQueue.setInUse(cd);
+        monitorThread.signal();
     }
-    
-    protected void stop() {
+
+    protected synchronized void stop() {
         monitorThread.stop();
     }
+    
+    protected static ThreadCreate threadCreate = ThreadFactory.getThreadCreate();
     
     protected CDMonitorRequester cdMonitorRequester;
     private CDQueue cdQueue = null;    
     private MonitorThread monitorThread = null;;    
-    private ReentrantLock lock = new ReentrantLock();
     
-    private class MonitorThread implements Runnable {
-        
+    
+    private class MonitorThread implements ReadyRunnable {
+        private boolean isReady = false;
         private Thread thread = null;
+        private ReentrantLock lock = new ReentrantLock();
         private Condition moreWork = lock.newCondition();
-        private boolean isRunning = false;
 
         private MonitorThread(String threadName,int threadPriority)
         {
-            thread = new Thread(this,threadName);
-            thread.setPriority(threadPriority);
-            thread.start();
-            while(!isRunning) {
-                try {
-                Thread.sleep(1);
-                } catch(InterruptedException e) {}
-            }
-        } 
-        
-        
+            thread = threadCreate.create(threadName, threadPriority, this);
+        }         
+        /* (non-Javadoc)
+         * @see org.epics.ioc.util.ReadyRunnable#isReady()
+         */
+        public boolean isReady() {
+            return isReady;
+        }
         /* (non-Javadoc)
          * @see java.lang.Runnable#run()
          */
         public void run() {
-            isRunning = true;
             try {
                 while(true) {
                     CD cd = null;
                     lock.lock();
                     try {
+                        isReady = true;
                         while(true) {
                             cd = cdQueue.getNext();
                             if(cd!=null) break;

@@ -38,7 +38,7 @@ public class BaseCDGet implements CDGet, ChannelGetRequester {
     private RequestResult requestResult = null;
 
     public void destroy() {
-        channel.destroy(channelGet);
+        channelGet.destroy();
     }
 
     /* (non-Javadoc)

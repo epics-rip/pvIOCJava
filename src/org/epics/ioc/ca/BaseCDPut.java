@@ -40,8 +40,8 @@ public class BaseCDPut implements CDPut, ChannelPutRequester, ChannelGetRequeste
     private RequestResult requestResult = null;
 
     public void destroy() {
-        channel.destroy(channelGet);
-        channel.destroy(channelPut);
+        channelGet.destroy();
+        channelPut.destroy();
     }
 
     /* (non-Javadoc)

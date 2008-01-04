@@ -11,7 +11,7 @@ import org.epics.ioc.util.*;
  * @author mrk
  *
  */
-public interface ChannelStateListener extends Requester {
+public interface ChannelListener extends Requester {
     /**
      * The channel has put connection state.
      * @param c The channel.
