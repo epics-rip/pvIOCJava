@@ -88,11 +88,12 @@ import org.epics.ioc.pv.Type;
 import org.epics.ioc.util.AlarmSeverity;
 import org.epics.ioc.util.MessageType;
 import org.epics.ioc.util.PVTimeStamp;
-import org.epics.ioc.util.ReadyRunnable;
+import org.epics.ioc.util.RunnableReady;
 import org.epics.ioc.util.RequestResult;
 import org.epics.ioc.util.ScanPriority;
 import org.epics.ioc.util.ThreadCreate;
 import org.epics.ioc.util.ThreadFactory;
+import org.epics.ioc.util.ThreadReady;
 import org.epics.ioc.util.TimeStamp;
 
 import com.cosylab.epics.caj.cas.handlers.AbstractCASResponseHandler;
@@ -106,13 +107,12 @@ public class ServerFactory {
     private static final Convert convert = ConvertFactory.getConvert();
     private static Pattern whiteSpacePattern = Pattern.compile("[, ]");
     
-    private static class ThreadInstance implements ReadyRunnable {
+    private static class ThreadInstance implements RunnableReady {
 
         private ThreadInstance() {
             threadCreate.create("caV3Server", 3, this);
         }
         
-        private volatile boolean isReady = false;
         /**
          * JCA server context.
          */
@@ -154,26 +154,18 @@ public class ServerFactory {
             }
         }               
         /* (non-Javadoc)
-         * @see org.epics.ioc.util.ReadyRunnable#isReady()
+         * @see org.epics.ioc.util.RunnableReady#run(org.epics.ioc.util.ThreadReady)
          */
-        public boolean isReady() {
-            return isReady;
-        }
-
-        /* (non-Javadoc)
-         * @see java.lang.Runnable#run()
-         */
-        public void run() {
+        public void run(ThreadReady threadReady) {
             try {
                 // initialize context
                 initialize();
-                isReady = true;
+                threadReady.ready();
                 System.out.println("Running server...");
                 // run server 
                 context.run(0);
                 System.out.println("Done.");
             } catch (Throwable th) {
-                isReady = true;
                 th.printStackTrace();
             }
             finally {

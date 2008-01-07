@@ -15,9 +15,10 @@ import org.epics.ioc.pdrv.Device;
 import org.epics.ioc.pdrv.Status;
 import org.epics.ioc.pdrv.Trace;
 import org.epics.ioc.pdrv.User;
-import org.epics.ioc.util.ReadyRunnable;
+import org.epics.ioc.util.RunnableReady;
 import org.epics.ioc.util.ThreadCreate;
 import org.epics.ioc.util.ThreadFactory;
+import org.epics.ioc.util.ThreadReady;
 
 
 
@@ -168,8 +169,7 @@ public abstract class AbstractInt32 extends AbstractInterface implements Int32 {
         }
     } 
     
-    private class Interrupt implements ReadyRunnable {
-        private boolean isReady = false;
+    private class Interrupt implements RunnableReady {
         private ReentrantLock lock = new ReentrantLock();
         private Condition moreWork = lock.newCondition();
         
@@ -187,22 +187,20 @@ public abstract class AbstractInt32 extends AbstractInterface implements Int32 {
                 lock.unlock();
             }
         }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.util.ReadyRunnable#isReady()
-         */
-        public boolean isReady() {
-            return isReady;
-        }
 
         /* (non-Javadoc)
-         * @see java.lang.Runnable#run()
+         * @see org.epics.ioc.util.RunnableReady#run(org.epics.ioc.util.ThreadReady)
          */
-        public void run() {
+        public void run(ThreadReady threadReady) {
+            boolean firstTime = true;
             try {
                 while(true) {
                     lock.lock();
                     try {
-                        isReady = true;
+                        if(firstTime) {
+                            firstTime = false;
+                            threadReady.ready();
+                        }
                         moreWork.await();
                         callback();
                     }finally {

@@ -1,3 +1,4 @@
+
 /**
  * EPICS JavaIOC is distributed subject to a Software License Agreement found
  * in file LICENSE that is included with this distribution.
@@ -74,10 +75,11 @@ import org.epics.ioc.pv.PVStructure;
 import org.epics.ioc.pv.Structure;
 import org.epics.ioc.pv.Type;
 import org.epics.ioc.util.MessageType;
-import org.epics.ioc.util.ReadyRunnable;
 import org.epics.ioc.util.RequestResult;
+import org.epics.ioc.util.RunnableReady;
 import org.epics.ioc.util.ThreadCreate;
 import org.epics.ioc.util.ThreadFactory;
+import org.epics.ioc.util.ThreadReady;
 
 /**
  * Factory and implementation of Channel Access V3 client. This provides communication
@@ -101,12 +103,13 @@ public class ClientFactory  {
     private static class ChannelProviderImpl
     implements ChannelProvider, ContextExceptionListener, ContextMessageListener
     {
-        private static final String providerName = "caV3";
+        static private final String providerName = "caV3";
+        static private final Pattern periodPattern = Pattern.compile("[.]");
+        static private final Pattern leftBracePattern = Pattern.compile("[{]");
+        static private final Pattern rightBracePattern = Pattern.compile("[}]");
         private boolean isRegistered = false; 
         private CAThread caThread = null;
         
-       
-
         synchronized void register() {
             if(isRegistered) return;
             isRegistered = true;
@@ -184,14 +187,11 @@ public class ClientFactory  {
         }
     }
     
-    static private Pattern periodPattern = Pattern.compile("[.]");
-    static private Pattern leftBracePattern = Pattern.compile("[{]");
-    static private Pattern rightBracePattern = Pattern.compile("[}]");
-    
     private static class ChannelImpl extends AbstractChannel implements ConnectionListener {
         private String recordName;
         
         private gov.aps.jca.Channel channel = null;
+        private volatile boolean isReady = false;
         private boolean isConnected = false;
         private int elementCount = 0;
         private DBRType valueDBRType = null;
@@ -211,6 +211,7 @@ public class ClientFactory  {
             }
             try {
                  channel = context.createChannel(channelName,this);
+                 isReady = true;
             } catch (Exception e) {
                 message(e.getMessage(),MessageType.error);
                 return;
@@ -277,7 +278,13 @@ public class ClientFactory  {
          * @see gov.aps.jca.event.ConnectionListener#connectionChanged(gov.aps.jca.event.ConnectionEvent)
          */
         public void connectionChanged(ConnectionEvent arg0) {
-System.out.println("connectionChanged event");
+            while(!isReady) {
+                try {
+                    Thread.sleep(1);
+                } catch (InterruptedException e) {
+                    
+                }
+            }
             isConnected = arg0.isConnected();
             if(isConnected) {
                 elementCount = channel.getElementCount();
@@ -691,27 +698,21 @@ System.out.println("connectionChanged event");
         }
     }
     
-    private static class CAThread implements ReadyRunnable {
+    private static class CAThread implements RunnableReady {
         private Thread thread = null;
-        private boolean isReady = false;
         private CAThread(String threadName,int threadPriority)
         {
             thread = threadCreate.create(threadName, threadPriority, this);
         }         
         /* (non-Javadoc)
-         * @see org.epics.ioc.util.ReadyRunnable#isReady()
+         * @see org.epics.ioc.util.RunnableReady#run(org.epics.ioc.util.ThreadReady)
          */
-        public boolean isReady() {
-            return isReady;
-        }
-        /* (non-Javadoc)
-         * @see java.lang.Runnable#run()
-         */
-        public void run() {
+        public void run(ThreadReady threadReady) {
+           
 System.out.println("CAV3CLIENT");
 context.printInfo();
 System.out.println("END CAV3CLIENT");
-            isReady = true;
+            threadReady.ready();
             try {
                 while(true) {
                     try {
@@ -720,7 +721,7 @@ System.out.println("END CAV3CLIENT");
                         System.out.println(e.getMessage());
                         break;
                     }
-                    Thread.sleep(10);
+                    Thread.sleep(1);
                 }
             } catch(InterruptedException e) {
 

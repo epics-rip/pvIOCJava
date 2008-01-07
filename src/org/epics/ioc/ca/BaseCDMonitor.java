@@ -8,9 +8,10 @@ package org.epics.ioc.ca;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 
-import org.epics.ioc.util.ReadyRunnable;
+import org.epics.ioc.util.RunnableReady;
 import org.epics.ioc.util.ThreadCreate;
 import org.epics.ioc.util.ThreadFactory;
+import org.epics.ioc.util.ThreadReady;
 
 /**
  * @author mrk
@@ -52,8 +53,7 @@ public class BaseCDMonitor {
     private MonitorThread monitorThread = null;;    
     
     
-    private class MonitorThread implements ReadyRunnable {
-        private boolean isReady = false;
+    private class MonitorThread implements RunnableReady {
         private Thread thread = null;
         private ReentrantLock lock = new ReentrantLock();
         private Condition moreWork = lock.newCondition();
@@ -63,21 +63,19 @@ public class BaseCDMonitor {
             thread = threadCreate.create(threadName, threadPriority, this);
         }         
         /* (non-Javadoc)
-         * @see org.epics.ioc.util.ReadyRunnable#isReady()
+         * @see org.epics.ioc.util.RunnableReady#run(org.epics.ioc.util.ThreadReady)
          */
-        public boolean isReady() {
-            return isReady;
-        }
-        /* (non-Javadoc)
-         * @see java.lang.Runnable#run()
-         */
-        public void run() {
+        public void run(ThreadReady threadReady) {
+            boolean firstTime = true;
             try {
                 while(true) {
                     CD cd = null;
                     lock.lock();
                     try {
-                        isReady = true;
+                        if(firstTime) {
+                            firstTime = false;
+                            threadReady.ready();
+                        }
                         while(true) {
                             cd = cdQueue.getNext();
                             if(cd!=null) break;

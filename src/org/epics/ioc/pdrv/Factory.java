@@ -20,10 +20,11 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import org.epics.ioc.pdrv.interfaces.Interface;
 import org.epics.ioc.util.AlarmSeverity;
-import org.epics.ioc.util.ReadyRunnable;
+import org.epics.ioc.util.RunnableReady;
 import org.epics.ioc.util.ScanPriority;
 import org.epics.ioc.util.ThreadCreate;
 import org.epics.ioc.util.ThreadFactory;
+import org.epics.ioc.util.ThreadReady;
 import org.epics.ioc.util.TimeStamp;
 import org.epics.ioc.util.TimeUtility;
 
@@ -1729,8 +1730,7 @@ public class Factory {
     private static final int queuePriorityLow = QueuePriority.low.ordinal();
     private static final int queuePriorityMedium = QueuePriority.medium.ordinal();
     
-    private static class PortThread implements ReadyRunnable  {
-        private boolean isReady = false;
+    private static class PortThread implements RunnableReady  {
         private ReentrantLock queueLock = new ReentrantLock();
         private ReentrantLock lock = new ReentrantLock();
         private Condition moreWork = lock.newCondition();
@@ -1819,20 +1819,19 @@ public class Factory {
                 lock.unlock();
             }
         }
-        
         /* (non-Javadoc)
-         * @see org.epics.ioc.util.ReadyRunnable#isReady()
+         * @see org.epics.ioc.util.RunnableReady#run(org.epics.ioc.util.ThreadReady)
          */
-        public boolean isReady() {
-            return isReady;
-        }
-
-        public void run() {
+        public void run(ThreadReady threadReady) {
+            boolean firstTime = true;
             try {
                 while(true) {
                     lock.lock();
-                    try {
-                        isReady = true;                       
+                    try {  
+                        if(firstTime) {
+                            firstTime = false;
+                            threadReady.ready();
+                        }
                         moreWork.await();
                     } finally {
                         lock.unlock();
