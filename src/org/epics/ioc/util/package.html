@@ -10,13 +10,13 @@
 <body>
 <h1 style="text-align: center">EPICS JavaIOC: util<br />
 package: org.epics.ioc.util<br />
-2008.01.04</h1>
+2008.01.07</h1>
 CONTENTS 
 
 <div class="toc">
 <ul>
   <li><a href="#Overview">Overview</a></li>
-  <li><a href="#Message">Message Support</a>
+  <li><a href="#Message">Message Support</a> 
     <ul>
       <li><a href="#Definition">Definitions</a></li>
       <li><a href="#Requester">Requester</a></li>
@@ -25,7 +25,7 @@ CONTENTS
       <li><a href="#MessageQue">MessageQueue</a></li>
     </ul>
   </li>
-  <li><a href="#Time">Time Stamp Support</a>
+  <li><a href="#Time">Time Stamp Support</a> 
     <ul>
       <li><a href="#Definition1">Definitions</a></li>
       <li><a href="#TimeStamp">TimeStamp</a></li>
@@ -34,7 +34,7 @@ CONTENTS
     </ul>
   </li>
   <li><a href="#Alarm">Alarm Severity Support</a></li>
-  <li><a href="#Scan">Scan Field Support</a>
+  <li><a href="#Scan">Scan Field Support</a> 
     <ul>
       <li><a href="#Definition2">Definitions</a></li>
       <li><a href="#ScanField">ScanField</a></li>
@@ -43,7 +43,7 @@ CONTENTS
       <li><a href="#ScanFieldF">ScanFieldFactory</a></li>
     </ul>
   </li>
-  <li><a href="#Periodic">Periodic and Event Scanners</a>
+  <li><a href="#Periodic">Periodic and Event Scanners</a> 
     <ul>
       <li><a href="#Definition3">Definitions</a></li>
       <li><a href="#EventAnnou">EventAnnounce</a></li>
@@ -52,7 +52,7 @@ CONTENTS
     </ul>
   </li>
   <li><a href="#IOCFactory">IOCFactory</a></li>
-  <li><a href="#Include">XML Include and Macro Substitution</a>
+  <li><a href="#Include">XML Include and Macro Substitution</a> 
     <ul>
       <li><a href="#Include1">Include and Substitution Syntax</a></li>
       <li><a href="#Example">Example Include and Macro Substitution
@@ -61,7 +61,7 @@ CONTENTS
       <li><a href="#IOCXML">IOCXML Interface and Factory Definitions</a></li>
     </ul>
   </li>
-  <li><a href="#Thread">Thread Support</a>
+  <li><a href="#Thread">Thread Support</a> 
     <ul>
       <li><a href="#ThreadCrea">ThreadCreate</a></li>
       <li><a href="#IOCExecuto">IOCExecutor</a></li>
@@ -795,13 +795,16 @@ IOCXMLReader.</p>
 <hr />
 
 <h3 id="ThreadCrea">ThreadCreate</h3>
-<pre>
-    interface ReadyRunnable extends Runnable {
-        boolean isReady();
+<pre>    interface ThreadReady {
+        void ready();
+    }
+
+    interface RunnableReady {
+        void run(ThreadReady threadReady);
     }
 
     interface ThreadCreate {
-        Thread create(String name, int priority, ReadyRunnable readyRunnable);
+        Thread create(String name, int priority, RunnableReady runnableReady);
         Thread[] getThreads();
     }
     
@@ -811,7 +814,8 @@ IOCXMLReader.</p>
 
 <p>ThreadCreate provides two features:</p>
 <ol>
-  <li>Create does not return until readyRunnable.isReady() returns true.</li>
+  <li>Create does not return until ReadyRunnable.run calls
+    ThreadReady.ready().</li>
   <li>A list of all active threads is kept. getThreads provides access to the
     list.</li>
 </ol>

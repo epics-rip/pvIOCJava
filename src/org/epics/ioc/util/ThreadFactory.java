@@ -3,6 +3,9 @@ package org.epics.ioc.util;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.ReentrantLock;
 
 public class ThreadFactory {
     public static ThreadCreate getThreadCreate() {
@@ -16,8 +19,8 @@ public class ThreadFactory {
         /* (non-Javadoc)
          * @see org.epics.ioc.util.ThreadCreate#create(java.lang.String, int, java.lang.Runnable)
          */
-        public Thread create(String name, int priority, ReadyRunnable readyRunnable) {
-            RunnableImpl runnableImpl = new RunnableImpl(name,priority,readyRunnable);
+        public Thread create(String name, int priority, RunnableReady runnableReady) {
+            RunnableImpl runnableImpl = new RunnableImpl(name,priority,runnableReady);
             return runnableImpl.getThread();
         }
 
@@ -44,34 +47,54 @@ public class ThreadFactory {
         
         private List<Thread> threadList = new LinkedList<Thread>();
 
-        private static class RunnableImpl implements Runnable {
+        private static class RunnableImpl implements Runnable,ThreadReady {
 
-            private RunnableImpl(String name, int priority, ReadyRunnable runnable) {
+            private RunnableImpl(String name, int priority, RunnableReady runnable) {
                 this.runnable = runnable;
                 thread = new Thread(this,name);
                 thread.setPriority(priority);
-                thread.start();
-                while(!runnable.isReady()) {
+                try {
+                    thread.start();
+                    lock.lock();
                     try {
-                        Thread.sleep(1);
-                    } catch(InterruptedException e) {}
+                        if(!isReady) waitForReady.await(10, TimeUnit.SECONDS);
+                    } finally {
+                        lock.unlock();
+                    }
+                } catch(InterruptedException e) {
+                    System.err.println(e.getMessage() + " thread " + name + " did not call ready");
                 }
-
             }
 
             private Thread getThread() {
                 return thread;
             }
 
-            private Runnable runnable;
+            private RunnableReady runnable;
             private Thread thread;
+            private ReentrantLock lock = new ReentrantLock();
+            private Condition waitForReady = lock.newCondition();
+            private boolean isReady = false;
             /* (non-Javadoc)
              * @see java.lang.Runnable#run()
              */
             public void run() {
                 threadCreate.addThread(thread);
-                runnable.run();
+                runnable.run(this);
                 threadCreate.removeThread(thread);
+            }
+
+            /* (non-Javadoc)
+             * @see org.epics.ioc.util.ThreadReady#ready()
+             */
+            public void ready() {
+                lock.lock();
+                try {
+                    isReady = true;
+                    waitForReady.signal();
+                } finally {
+                    lock.unlock();
+                }
             }
         }
     }

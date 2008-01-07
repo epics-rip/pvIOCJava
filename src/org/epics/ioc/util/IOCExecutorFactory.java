@@ -54,8 +54,7 @@ public class IOCExecutorFactory {
     
     static private ThreadCreate threadCreate = ThreadFactory.getThreadCreate();
     
-    static private class ThreadInstance implements ReadyRunnable {
-        private boolean isReady = false;
+    static private class ThreadInstance implements RunnableReady {
         private List<Runnable> runList = new ArrayList<Runnable>();
         private ReentrantLock lock = new ReentrantLock();
         private Condition moreWork = lock.newCondition();
@@ -63,21 +62,20 @@ public class IOCExecutorFactory {
         private ThreadInstance(String name,int priority) {
             threadCreate.create(name, priority, this);
         } 
-        
         /* (non-Javadoc)
-         * @see org.epics.ioc.util.ReadyRunnable#isReady()
+         * @see org.epics.ioc.util.RunnableReady#run(org.epics.ioc.util.ThreadReady)
          */
-        public boolean isReady() {
-            return isReady;
-        }
-
-        public void run() {
+        public void run(ThreadReady threadReady) {
+            boolean firstTime = true;
             try {
                 while(true) {
                     Runnable runnable = null;
                     lock.lock();
                     try {
-                        isReady = true;
+                        if(firstTime) {
+                            firstTime = false;
+                            threadReady.ready();
+                        }
                         while(runList.isEmpty()) {
                             moreWork.await();
                         }

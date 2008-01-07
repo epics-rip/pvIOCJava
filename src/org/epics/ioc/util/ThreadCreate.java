@@ -21,10 +21,10 @@ public interface ThreadCreate {
      * Create a new thread.
      * @param name The thread name.
      * @param priority The thread priority.
-     * @param readyRunnable An implementation of ReadyRunnable.
-     * @return The newly created thread. Create does not return until the thread has started.
+     * @param runnableReady An implementation of RunnableReady.
+     * @return The newly created thread. Create does not return ready has been called.
      */
-    Thread create(String name, int priority, ReadyRunnable readyRunnable);
+    Thread create(String name, int priority, RunnableReady runnableReady);
     /**
      * Get an array of all the active threads.
      * @return The array.

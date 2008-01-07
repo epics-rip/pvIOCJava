@@ -6,14 +6,13 @@
 package org.epics.ioc.util;
 
 /**
- * Adds method isReady to Runnable
+ * Interface implemented by ThreadCreate
  * @author mrk
  *
  */
-public interface ReadyRunnable extends Runnable {
+public interface ThreadReady {
     /**
-     * Is the run method ready.
-     * @return (false,true) if it (is not,is) ready.
+     * Called by method run when it is ready.
      */
-    boolean isReady();
+    void ready();
 }

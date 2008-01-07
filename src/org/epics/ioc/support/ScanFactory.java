@@ -24,8 +24,8 @@ import org.epics.ioc.pv.PVStructure;
 import org.epics.ioc.util.EventScanner;
 import org.epics.ioc.util.MessageType;
 import org.epics.ioc.util.PeriodicScanner;
-import org.epics.ioc.util.ReadyRunnable;
 import org.epics.ioc.util.RequestResult;
+import org.epics.ioc.util.RunnableReady;
 import org.epics.ioc.util.ScanField;
 import org.epics.ioc.util.ScanFieldFactory;
 import org.epics.ioc.util.ScanPriority;
@@ -33,6 +33,7 @@ import org.epics.ioc.util.ScanType;
 import org.epics.ioc.util.ScannerFactory;
 import org.epics.ioc.util.ThreadCreate;
 import org.epics.ioc.util.ThreadFactory;
+import org.epics.ioc.util.ThreadReady;
 
 /**
  * Support for scan field.
@@ -285,8 +286,7 @@ public class ScanFactory {
             }
         }
           
-        private class ScanModify implements ReadyRunnable {
-            private boolean isReady = false;
+        private class ScanModify implements RunnableReady {
             private ReentrantLock lock = new ReentrantLock();
             private Condition waitForWork = lock.newCondition();
             private boolean isPeriodic = false;
@@ -295,22 +295,18 @@ public class ScanFactory {
             private ScanModify(String name,int priority) {
                 threadCreate.create(name, priority, this);
             }
-
             /* (non-Javadoc)
-             * @see org.epics.ioc.util.ReadyRunnable#isReady()
+             * @see org.epics.ioc.util.RunnableReady#run(org.epics.ioc.util.ThreadReady)
              */
-            public boolean isReady() {
-                return isReady;
-            }
-
-            /* (non-Javadoc)
-             * @see java.lang.Runnable#run()
-             */
-            public void run() {
+            public void run(ThreadReady threadReady) {
+                boolean firstTime = true;
                 try {
                     lock.lock();
                     try {
-                        isReady = true;
+                        if(firstTime) {
+                            firstTime = false;
+                            threadReady.ready();
+                        }
                         waitForWork.await();
                     } finally {
                         lock.unlock();

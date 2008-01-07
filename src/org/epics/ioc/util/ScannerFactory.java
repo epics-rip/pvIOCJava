@@ -249,8 +249,7 @@ public class ScannerFactory {
         }
     }
 
-    private static class PeriodiocExecutor extends Executor implements ReadyRunnable {
-        private boolean isReady = false;
+    private static class PeriodiocExecutor extends Executor implements RunnableReady {
         private long period;
         private Thread thread;
 
@@ -262,17 +261,10 @@ public class ScannerFactory {
         }
 
         /* (non-Javadoc)
-         * @see org.epics.ioc.util.ReadyRunnable#isReady()
+         * @see org.epics.ioc.util.RunnableReady#run(org.epics.ioc.util.ThreadReady)
          */
-        public boolean isReady() {
-            return isReady;
-        }
-
-        /* (non-Javadoc)
-         * @see java.lang.Runnable#run()
-         */
-        public void run() {
-            isReady = true;
+        public void run(ThreadReady threadReady) {
+            threadReady.ready();
             try {
                 while(true) {
                     long startTime = System.currentTimeMillis();
@@ -539,9 +531,8 @@ public class ScannerFactory {
     }
 
     private static class EventExecutor extends Executor
-    implements EventAnnounce, ReadyRunnable
+    implements EventAnnounce, RunnableReady
     {
-        private boolean isReady = false;
         private ReentrantLock lock = new ReentrantLock();
         private Condition waitForWork = lock.newCondition();
         private Thread thread;
@@ -551,20 +542,19 @@ public class ScannerFactory {
             super(name);
             thread = threadCreate.create(name, priority, this);
         }
-
         /* (non-Javadoc)
-         * @see org.epics.ioc.util.ReadyRunnable#isReady()
+         * @see org.epics.ioc.util.RunnableReady#run(org.epics.ioc.util.ThreadReady)
          */
-        public boolean isReady() {
-            return isReady;
-        }
-
-        public void run() {
+        public void run(ThreadReady threadReady) {
+            boolean firstTime = true;
             try {
                 while(true) {
                     lock.lock();
                     try {
-                        isReady = true;
+                        if(firstTime) {
+                            firstTime = false;
+                            threadReady.ready();
+                        }
                         waitForWork.await();
                     } finally {
                         lock.unlock();
@@ -598,8 +588,7 @@ public class ScannerFactory {
         }
     }
 
-    private static class Announce implements EventAnnounce, ReadyRunnable {
-        private boolean isReady = false;
+    private static class Announce implements EventAnnounce, RunnableReady {
         // announcerList kept for diagnostic purpose only
         private LinkedList<String> announcerList = new LinkedList<String>();
         
@@ -622,20 +611,19 @@ public class ScannerFactory {
                 ScanPriority.valueOf("higher").getJavaPriority(),
                 this);
         }
-
         /* (non-Javadoc)
-         * @see org.epics.ioc.util.ReadyRunnable#isReady()
+         * @see org.epics.ioc.util.RunnableReady#run(org.epics.ioc.util.ThreadReady)
          */
-        public boolean isReady() {
-            return isReady;
-        }
-
-        public void run() {
+        public void run(ThreadReady threadReady) {
+            boolean firstTime = true;
             try {
                 while(true) {
                     lock.lock();
                     try {
-                        isReady = true;
+                        if(firstTime) {
+                            firstTime = false;
+                            threadReady.ready();
+                        }
                         waitForWork.await();
                         if(listModify) {
                             waitForModify.await();
