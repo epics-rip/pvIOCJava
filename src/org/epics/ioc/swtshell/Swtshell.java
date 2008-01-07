@@ -12,12 +12,10 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
-import org.epics.ioc.db.IOCDB;
-import org.epics.ioc.db.IOCDBFactory;
-import org.epics.ioc.process.SupportCreation;
-import org.epics.ioc.process.SupportCreationFactory;
-import org.epics.ioc.util.*;
-import org.epics.ioc.util.Requester;
+import org.epics.ioc.util.RunnableReady;
+import org.epics.ioc.util.ThreadCreate;
+import org.epics.ioc.util.ThreadFactory;
+import org.epics.ioc.util.ThreadReady;
 
 /**
  * A GUI iocshell implemented via Eclipse SWT (Standard Widget Toolkit).
@@ -36,23 +34,17 @@ public class Swtshell {
    
     static private ThreadCreate threadCreate = ThreadFactory.getThreadCreate();
 
-    static private class ThreadInstance implements ReadyRunnable {
+    static private class ThreadInstance implements RunnableReady {
         
         private ThreadInstance() {  
             threadCreate.create("swtshell", 2, this);
             
         }
-        
-        private boolean isReady = false;
         /* (non-Javadoc)
-         * @see org.epics.ioc.util.ReadyRunnable#isReady()
+         * @see org.epics.ioc.util.RunnableReady#run(org.epics.ioc.util.ThreadReady)
          */
-        public boolean isReady() {
-            return isReady;
-        }
-
-        public void run() {
-            isReady = true;
+        public void run(ThreadReady threadReady) {
+            threadReady.ready();
             final Display display = new Display();
             Shell shell = new Shell(display);
             shell.setText("iocshell");

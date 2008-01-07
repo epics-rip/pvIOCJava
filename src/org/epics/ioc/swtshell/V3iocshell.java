@@ -15,9 +15,10 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
-import org.epics.ioc.util.ReadyRunnable;
+import org.epics.ioc.util.RunnableReady;
 import org.epics.ioc.util.ThreadCreate;
 import org.epics.ioc.util.ThreadFactory;
+import org.epics.ioc.util.ThreadReady;
 import org.epics.ioc.v3a.AsynOctet;
 import org.epics.ioc.v3a.V3;
 
@@ -93,24 +94,18 @@ public class V3iocshell {
         }       
     }
     
-    private static class Invoke implements ReadyRunnable{
-        private boolean isReady = false;
+    private static class Invoke implements RunnableReady{
         private String fileName;
         private Invoke (String fileName) {
             this.fileName = fileName;
             threadCreate.create("v3ioc:" + fileName, 2, this);
         }
-        
         /* (non-Javadoc)
-         * @see org.epics.ioc.util.ReadyRunnable#isReady()
+         * @see org.epics.ioc.util.RunnableReady#run(org.epics.ioc.util.ThreadReady)
          */
-        public boolean isReady() {
-            return isReady;
-        }
-
-        public void run() {
+        public void run(ThreadReady threadReady) {
+            threadReady.ready();
             V3.iocsh(fileName);
-            isReady = true;
             AsynOctet asynOctet = new AsynOctet(null);
             asynOctet.readIt();
         }
