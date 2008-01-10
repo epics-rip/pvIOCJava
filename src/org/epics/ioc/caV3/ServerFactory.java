@@ -232,7 +232,7 @@ public class ServerFactory {
             channel = ChannelFactory.createChannel(pvName, "local", this);
             if (channel == null)
                 throw new CAStatusException(CAStatus.DEFUNCT);
-
+            channel.connect();
             initializeChannelDBRType();
             this.eventCallback = eventCallback;
 
@@ -247,7 +247,7 @@ public class ServerFactory {
         @Override
         public void destroy() {
             super.destroy();
-            channel.destroy();
+            channel.disconnect();
         }
         
         /* (non-Javadoc)
@@ -428,7 +428,7 @@ public class ServerFactory {
         /* (non-Javadoc)
          * @see org.epics.ioc.ca.ChannelListener#disconnect(org.epics.ioc.ca.Channel)
          */
-        public void disconnect(Channel c) {
+        public void destroy(Channel c) {
             // noop
         }
         

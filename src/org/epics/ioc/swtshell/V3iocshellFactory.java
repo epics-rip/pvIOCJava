@@ -28,10 +28,10 @@ import org.epics.ioc.v3a.V3;
  * @author mrk
  *
  */
-public class V3iocshell {
+public class V3iocshellFactory {
     
     /**
-     * Called by SwtShell after the default constructor has been called.
+     * Create a V3 IOC shell.
      * @param display The display.
      */
     public static void init(Display display) {

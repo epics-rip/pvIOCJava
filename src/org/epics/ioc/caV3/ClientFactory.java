@@ -25,6 +25,7 @@ import gov.aps.jca.event.ContextVirtualCircuitExceptionEvent;
 import gov.aps.jca.event.GetEvent;
 import gov.aps.jca.event.GetListener;
 
+import java.util.Iterator;
 import java.util.List;
 import java.util.regex.Pattern;
 
@@ -47,6 +48,8 @@ import org.epics.ioc.ca.ChannelPut;
 import org.epics.ioc.ca.ChannelPutGet;
 import org.epics.ioc.ca.ChannelPutGetRequester;
 import org.epics.ioc.ca.ChannelPutRequester;
+import org.epics.ioc.db.DBRecord;
+import org.epics.ioc.db.DBRecordFactory;
 import org.epics.ioc.dbd.DBD;
 import org.epics.ioc.dbd.DBDFactory;
 import org.epics.ioc.dbd.DBDStructure;
@@ -189,6 +192,7 @@ public class ClientFactory  {
     
     private static class ChannelImpl extends AbstractChannel implements ConnectionListener {
         private String recordName;
+        private String pvName;
         
         private gov.aps.jca.Channel channel = null;
         private volatile boolean isReady = false;
@@ -196,6 +200,7 @@ public class ClientFactory  {
         private int elementCount = 0;
         private DBRType valueDBRType = null;
         private PVRecord pvRecord = null;
+        private DBRecord dbRecord = null;
         private DBRType requestDBRType = null;
         
         private ChannelImpl(ChannelListener listener,
@@ -205,20 +210,39 @@ public class ClientFactory  {
             this.recordName = recordName;
             
             if(fieldName==null) {
-                channelName = recordName + ".VAL";
+                pvName = recordName + ".VAL";
             } else {
-                channelName =  recordName + "." + fieldName;
+                pvName =  recordName + "." + fieldName;
             }
-            try {
-                 channel = context.createChannel(channelName,this);
-                 isReady = true;
-            } catch (Exception e) {
-                message(e.getMessage(),MessageType.error);
-                return;
-            }
-            
         }
         
+        /* (non-Javadoc)
+         * @see org.epics.ioc.ca.AbstractChannel#connect()
+         */
+        @Override
+        public void connect() {
+            try {
+                channel = context.createChannel(pvName,this);
+                isReady = true;
+           } catch (Exception e) {
+               message(e.getMessage(),MessageType.error);
+               return;
+           }
+        }
+
+        /* (non-Javadoc)
+         * @see org.epics.ioc.ca.AbstractChannel#disconnect()
+         */
+        @Override
+        public void disconnect() {
+            try {
+                channel.destroy();
+            } catch (CAException e) {
+                message(e.getMessage(),MessageType.error);
+            }
+            super.disconnect();
+        }
+
         private void createPVRecord() {
             DBDStructure dbdAlarm = dbd.getStructure("alarm");
             DBDStructure dbdTimeStamp = dbd.getStructure("timeStamp");            
@@ -262,18 +286,10 @@ public class ClientFactory  {
             fields[2] = fieldCreate.createStructure("timeStamp", "timeStamp",timeStampFields);
             Structure structure = fieldCreate.createStructure("caV3", "caV3", fields);
             pvRecord = pvDataCreate.createPVRecord(recordName, structure);
+            dbRecord = DBRecordFactory.create(pvRecord);
             super.SetPVRecord(pvRecord);
         }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.ca.Channel#isConnected()
-         */
-        public synchronized boolean isConnected() {
-            if(isDestroyed) {
-                return false;
-            } else {
-                return isConnected;
-            }
-        }                   
+               
         /* (non-Javadoc)
          * @see gov.aps.jca.event.ConnectionListener#connectionChanged(gov.aps.jca.event.ConnectionEvent)
          */
@@ -290,44 +306,35 @@ public class ClientFactory  {
                 elementCount = channel.getElementCount();
                 valueDBRType = channel.getFieldType();
                 createPVRecord();
+                super.connect();
             } else {
+                super.disconnect();
                 pvRecord = null;
             }
-            channelListener.channelStateChange(this, isConnected);
         }
         
-        /* (non-Javadoc)
-         * @see org.epics.ioc.ca.Channel#destroy()
-         */
-        public void destroy() {
-            ChannelListener channelListener = destroyPvt();
-            if(channelListener!=null) channelListener.disconnect(this);
-        }
-        
-        private synchronized ChannelListener destroyPvt() {
-            if(isDestroyed) return null;
-            isDestroyed = true;
-            return channelListener;
-        }  
                      
         /* (non-Javadoc)
          * @see org.epics.ioc.ca.Channel#createChannelField(java.lang.String)
          */
         public synchronized ChannelField createChannelField(String name) {
-            if(isDestroyed) return null;
-            if(name==null || name.length()<=0) return new BaseChannelField(pvRecord);
+            if(!isConnected) {
+                message("createChannelField but not connected",MessageType.warning);
+                return null;
+            }
+            if(name==null || name.length()<=0) return new BaseChannelField(dbRecord,pvRecord);
             PVField pvField = pvRecord.findProperty(name);
             if(pvField==null) return null;
-            return new BaseChannelField(pvField);               
+            return new BaseChannelField(dbRecord,pvField);               
         }   
         /* (non-Javadoc)
          * @see org.epics.ioc.ca.Channel#createChannelProcess(org.epics.ioc.ca.ChannelProcessRequester)
          */
         public synchronized ChannelProcess createChannelProcess(ChannelProcessRequester channelProcessRequester)
         {
-            if(isDestroyed) {
+            if(!isConnected) {
                 channelProcessRequester.message(
-                        "channel has been destroyed",MessageType.fatalError);
+                    "createChannelProcess but not connected",MessageType.warning);
                 return null;
             }
             ChannelProcessImpl channelProcess;
@@ -347,7 +354,11 @@ public class ClientFactory  {
         public synchronized ChannelGet createChannelGet(ChannelFieldGroup channelFieldGroup,
                 ChannelGetRequester channelGetRequester, boolean process)
         {
-            if(isDestroyed) return null;
+            if(!isConnected) {
+                channelGetRequester.message(
+                    "createChannelGet but not connected",MessageType.warning);
+                return null;
+            }
             ChannelGetImpl channelGet = 
                 new ChannelGetImpl(channelFieldGroup,channelGetRequester,process);
             super.add(channelGet);
@@ -359,7 +370,11 @@ public class ClientFactory  {
         public synchronized ChannelPut createChannelPut(ChannelFieldGroup channelFieldGroup,
                 ChannelPutRequester channelPutRequester, boolean process)
         {
-            if(isDestroyed) return null;
+            if(!isConnected) {
+                channelPutRequester.message(
+                    "createChannelPut but not connected",MessageType.warning);
+                return null;
+            }
             ChannelPutImpl channelPut = 
                 new ChannelPutImpl(channelFieldGroup,channelPutRequester,process);
             super.add(channelPut);
@@ -372,7 +387,11 @@ public class ClientFactory  {
             ChannelFieldGroup getFieldGroup, ChannelPutGetRequester channelPutGetRequester,
             boolean process)
         {
-            if(isDestroyed) return null;
+            if(!isConnected) {
+                channelPutGetRequester.message(
+                    "createChannelPutGet but not connected",MessageType.warning);
+                return null;
+            }
             ChannelPutGetImpl channelPutGet = 
                 new ChannelPutGetImpl(putFieldGroup,getFieldGroup,
                         channelPutGetRequester,process);
@@ -384,9 +403,9 @@ public class ClientFactory  {
          */
         public synchronized ChannelMonitor createChannelMonitor(ChannelMonitorRequester channelMonitorRequester)
         {
-            if(isDestroyed) {
-                channelListener.message(
-                        "channel has been destroyed",MessageType.fatalError);
+            if(!isConnected) {
+                message(
+                    "createChannelMonitor but not connected",MessageType.warning);    
                 return null;
             }
             MonitorImpl impl = new MonitorImpl(this,channelMonitorRequester);
@@ -403,7 +422,7 @@ public class ClientFactory  {
             private ChannelProcessImpl(ChannelProcessRequester channelProcessRequester)
             {
                 this.channelProcessRequester = channelProcessRequester;
-                requesterName = "Process:" + channelProcessRequester.getRequesterName();
+                requesterName = "ProcessFactory:" + channelProcessRequester.getRequesterName();
             }           
             public void destroy() {
                 isDestroyed = true;
@@ -467,6 +486,7 @@ public class ClientFactory  {
                 gov.aps.jca.dbr.Status status = null;
                 gov.aps.jca.dbr.TimeStamp timeStamp = null;
                 gov.aps.jca.dbr.Severity severity = null;
+                
                 if(requestDBRType==DBRType.TIME_BYTE) {
                     DBR_TIME_Byte dbr = (DBR_TIME_Byte)arg0.getDBR();
                     status = dbr.getStatus();
@@ -543,7 +563,7 @@ public class ClientFactory  {
                 PVStructure pvStructure = pvRecord.getStructureField("timeStamp", "timeStamp");
                 PVLong pvSeconds = pvStructure.getLongField("secondsPastEpoch");
                 long seconds = timeStamp.secPastEpoch();
-                seconds -= 7305*86400;
+                seconds += 7305*86400;
                 pvSeconds.put(seconds);
                 PVInt pvNano = pvStructure.getIntField("nanoSeconds");
                 pvNano.put((int)timeStamp.nsec());
@@ -554,6 +574,11 @@ public class ClientFactory  {
                       "severity","alarmSeverity").getPVEnumerated();
                 PVInt pvIndex = pvEnumerated.getIndexField();
                 pvIndex.put(severity.getValue());
+                Iterator<ChannelField> channelFieldListIter = channelFieldList.iterator();
+                while(channelFieldListIter.hasNext()) {
+                    ChannelField channelField = channelFieldListIter.next();
+                    channelGetRequester.nextGetField(channelField, channelField.getPVField());
+                }
                 channelGetRequester.getDone(RequestResult.success);
             }
         }
@@ -575,7 +600,7 @@ public class ClientFactory  {
                 this.channelPutRequester = channelPutRequester;
                 this.process = process;
                 channelFields = channelFieldGroup.getArray();
-                requesterName = "Put:" + channelPutRequester.getRequesterName();
+                requesterName = "PutFactory:" + channelPutRequester.getRequesterName();
             } 
             
             public void destroy() {

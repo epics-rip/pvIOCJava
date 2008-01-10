@@ -19,7 +19,19 @@ import org.epics.ioc.util.*;
  * @author mrk
  *
  */
-public interface Channel {
+public interface Channel extends Requester{
+    /**
+     * Connect to data source.
+     */
+    void connect();
+    /**
+     * Disconnect from data source.
+     */
+    void disconnect();
+    /**
+     * Destroy the channel. It will not honor any further requests.
+     */
+    void destroy();
     /**
      * Get the channel name.
      * @return The name.
@@ -30,17 +42,6 @@ public interface Channel {
      * @return The listener.
      */
     ChannelListener getChannelListener();
-    /**
-     * Report a message.
-     * @param message The message.
-     * @param messageType The message type.
-     */
-    public void message(String message, MessageType messageType);
-    /**
-     * Prevent any further access.
-     * If the channel is connected it will be disconnected.
-     */
-    void destroy();
     /**
      * Is the channel connected?
      * @return (false,true) means (not, is) connected.
@@ -74,14 +75,14 @@ public interface Channel {
      */
     ChannelFieldGroup createFieldGroup(ChannelFieldGroupListener listener);
     /**
-     * Create a Process.
+     * Create a ChannelProcess.
      * @param channelProcessRequester The interface for notifying when channel completes processing.
-     * @return An interface for the Process or null if the caller can't process the record.
+     * @return An interface for the ChannelProcess or null if the caller can't process the record.
      */
     ChannelProcess createChannelProcess(
         ChannelProcessRequester channelProcessRequester);
     /**
-     * Create a Get.
+     * Create a ChannelGet.
      * The channel will be processed before reading data.
      * @param channelFieldGroup The fieldGroup describing the data to get.
      * @param channelGetRequester The channelGetRequester.
@@ -92,7 +93,7 @@ public interface Channel {
         ChannelFieldGroup channelFieldGroup,ChannelGetRequester channelGetRequester,
         boolean process);
     /**
-     * Create a Put.
+     * Create a ChannelPut.
      * @param channelFieldGroup The chanelFieldGroup describing the data to put.
      * @param channelPutRequester The channelPutRequester.
      * @param process Should record be processed after put.

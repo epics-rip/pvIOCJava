@@ -23,10 +23,10 @@ import org.epics.ioc.util.ThreadReady;
  * @author mrk
  *
  */
-public class Swtshell {
+public class SwtshellFactory {
     
     /**
-     * 
+     * Create a SWT (Standard Widget Toolkit) shell for a javaIOC.
      */
     public static void swtshell() {
         new ThreadInstance();
@@ -56,56 +56,56 @@ public class Swtshell {
             getDB.setText("get");
             getDB.addSelectionListener( new SelectionAdapter() {
                 public void widgetSelected(SelectionEvent e) {
-                    Get.init(display);
+                    GetFactory.init(display);
                 }
             });
             Button putDB = new Button(shell,SWT.PUSH);
             putDB.setText("put");
             putDB.addSelectionListener( new SelectionAdapter() {
                 public void widgetSelected(SelectionEvent e) {
-                    Put.init(display);
+                    PutFactory.init(display);
                 }
             });
             Button processDB = new Button(shell,SWT.PUSH);
             processDB.setText("process");
             processDB.addSelectionListener( new SelectionAdapter() {
                 public void widgetSelected(SelectionEvent e) {
-                    Process.init(display);
+                    ProcessFactory.init(display);
                 }
             });
             Button monitorDB = new Button(shell,SWT.PUSH);
             monitorDB.setText("monitor");
             monitorDB.addSelectionListener( new SelectionAdapter() {
                 public void widgetSelected(SelectionEvent e) {
-                    Monitor.init(display);
+                    MonitorFactory.init(display);
                 }
             });
             Button processorDB = new Button(shell,SWT.PUSH);
             processorDB.setText("processor");
             processorDB.addSelectionListener( new SelectionAdapter() {
                 public void widgetSelected(SelectionEvent e) {
-                    Processor.init(display);
+                    ProcessorFactory.init(display);
                 }
             });
             Button loadDatabase = new Button(shell,SWT.PUSH);
             loadDatabase.setText("loadDatabase");
             loadDatabase.addSelectionListener( new SelectionAdapter() {
                 public void widgetSelected(SelectionEvent e) {
-                    LoadDatabase.init(display);
+                    LoadDatabaseFactory.init(display);
                 }
             });
             Button introspectDatabase = new Button(shell,SWT.PUSH);
             introspectDatabase.setText("introspectDatabase");
             introspectDatabase.addSelectionListener( new SelectionAdapter() {
                 public void widgetSelected(SelectionEvent e) {
-                    IntrospectDatabase.init(display);
+                    IntrospectDatabaseFactory.init(display);
                 }
             });
             Button v3iocshellDB = new Button(shell,SWT.PUSH);
             v3iocshellDB.setText("v3iocshell");
             v3iocshellDB.addSelectionListener( new SelectionAdapter() {
                 public void widgetSelected(SelectionEvent e) {
-                    V3iocshell.init(display);
+                    V3iocshellFactory.init(display);
                 }
             });
             shell.pack();

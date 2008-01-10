@@ -65,7 +65,7 @@ public class PVTimeStamp {
     }
     
     /**
-     * Put the current value from TimeStamp.
+     * PutFactory the current value from TimeStamp.
      * @param timeStamp The new value.
      */
     public void put(TimeStamp timeStamp) {

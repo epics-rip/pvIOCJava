@@ -11,15 +11,16 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
-import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Shell;
 import org.epics.ioc.ca.Channel;
 import org.epics.ioc.ca.ChannelField;
+import org.epics.ioc.ca.ChannelListener;
 import org.epics.ioc.ca.ChannelProcess;
 import org.epics.ioc.ca.ChannelProcessRequester;
-import org.epics.ioc.ca.ChannelListener;
 import org.epics.ioc.util.IOCExecutor;
 import org.epics.ioc.util.IOCExecutorFactory;
 import org.epics.ioc.util.MessageType;
@@ -27,86 +28,107 @@ import org.epics.ioc.util.RequestResult;
 import org.epics.ioc.util.Requester;
 import org.epics.ioc.util.ScanPriority;
 /**
- * Provides the following sets of controls:
- * <ul>
- *    <li>Processor - Shows and releases the current record processor.
- *    Also show all scan threads.</li>
- *    <li>Process - Can connect to a channel and process the channel.</li>
- *    <li>Get - Can connect to a field of a channel and get the current values.</li>
- *    <li>Put - Can connect to a field of a channel an put new values.</li>
- * </ul>
- * For both get an put a null field selects a complete record instance.
+ * Shell for processing a channel.
  * @author mrk
  *
  */
-public class Process {
+public class ProcessFactory {
 
+    /**
+     * Create the process shell.
+     * @param display The display.
+     */
     public static void init(Display display) {
-        ChannelProcessImpl channelProcessImpl = new ChannelProcessImpl();
-        channelProcessImpl.init(display);
+        ProcessImpl processImpl = new ProcessImpl(display);
+        processImpl.start();
     }
 
-    private static class ChannelProcessImpl extends AbstractChannelShell  {
+    private static class ProcessImpl implements Requester,ChannelListener,SelectionListener  {
 
-        private ChannelProcessImpl() {
-            super("process");
+        private ProcessImpl(Display display) {
+            this.display = display;
         }
 
         private static IOCExecutor iocExecutor = IOCExecutorFactory.create("swtshell:Get");
         private static ScanPriority scanPriority = ScanPriority.higher;
-
-        /**
-         * Called by SwtShell after the default constructor has been called.
-         * @param display The display.
-         */
-        public void init(Display display) {
-            super.start(display);
-        }
-
+        private static String windowName = "process";
+        private Display display;
+        private Shell shell = null;
+        private Requester requester = null;
+        private Channel channel = null;
+        private ChannelConnect channelConnect = null;
         private Button processButton;
 
-        public void startClient(Composite parentWidget) {
-            Composite processWidget = new Composite(parentWidget,SWT.BORDER);
+        /* (non-Javadoc)
+         * @see org.epics.ioc.util.Requester#getRequesterName()
+         */
+        public String getRequesterName() {
+            return requester.getRequesterName();
+        }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.util.Requester#message(java.lang.String, org.epics.ioc.util.MessageType)
+         */
+        public void message(String message, MessageType messageType) {
+            requester.message(message, messageType);
+        }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.ca.ChannelListener#channelStateChange(org.epics.ioc.ca.Channel, boolean)
+         */
+        public void channelStateChange(Channel c, boolean isConnected) {
+            if(isConnected) {
+                channel = channelConnect.getChannel();
+                processButton.setEnabled(true);
+                return;
+            } else {
+                channel = null;
+                processButton.setEnabled(false);
+                return;
+            }
+        }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.ca.ChannelListener#disconnect(org.epics.ioc.ca.Channel)
+         */
+        public void destroy(Channel c) {
+            channelStateChange(c,false);
+        }
+        
+        private void start() {
+            shell = new Shell(display);
+            shell.setText(windowName);
             GridLayout gridLayout = new GridLayout();
-            gridLayout.numColumns = 2;
-            processWidget.setLayout(gridLayout);
-            super.connectButtonCreate(processWidget);
-            processButton = new Button(processWidget,SWT.PUSH);
+            gridLayout.numColumns = 1;
+            shell.setLayout(gridLayout);
+            channelConnect = ChannelConnectFactory.create(this,this);
+            channelConnect.createWidgets(shell);
+            
+        
+            processButton = new Button(shell,SWT.PUSH);
             processButton.setText("process");
             processButton.addSelectionListener(this);               
-            processWidget.addDisposeListener(this);
             processButton.setEnabled(false);
+        }
+        /* (non-Javadoc)
+         * @see org.eclipse.swt.events.SelectionListener#widgetDefaultSelected(org.eclipse.swt.events.SelectionEvent)
+         */
+        public void widgetDefaultSelected(SelectionEvent arg0) {
+            widgetSelected(arg0);
         }
         /* (non-Javadoc)
          * @see org.eclipse.swt.events.SelectionListener#widgetSelected(org.eclipse.swt.events.SelectionEvent)
          */
         public void widgetSelected(SelectionEvent arg0) {
             Object object = arg0.getSource(); 
-            if(object==connectButton) {
-                super.connectButtonSelected();
-                switch(connectState) {
-                case connected:
-                    processButton.setEnabled(true);
-                    return;
-                case disconnected:
-                    processButton.setEnabled(false);
-                    return;
-                }
-            }
             if(object==processButton) {
                 ProcessIt process = new ProcessIt(channel,this);
                 boolean result = process.connect();
                 if(result) {
-                    connectState = ConnectState.connected;
-                    message(String.format("connected%n"),MessageType.info);
-                    connectButton.setText(connectStateText[1]);
-                    
+                    process.process();
+                    process.disconnect();
+                    message(String.format("processed%n"),MessageType.info);
                 } else {
-                    message(String.format("not connected%n"),MessageType.info);
+                    message(String.format("process request failed%n"),MessageType.info);
                     process = null;
                 }
-                process.process();
-                process.disconnect();
                 return;
             }
         }
@@ -196,7 +218,7 @@ public class Process {
             /* (non-Javadoc)
              * @see org.epics.ioc.ca.ChannelListener#disconnect(org.epics.ioc.ca.Channel)
              */
-            public void disconnect(Channel c) {
+            public void destroy(Channel c) {
                 // TODO Auto-generated method stub
 
             }

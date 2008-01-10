@@ -9,7 +9,7 @@ import org.epics.ioc.pv.PVField;
 import org.epics.ioc.util.*;
 
 /**
- * Requester for Put requests.
+ * Requester for ChannelPut requests.
  * @author mrk
  *
  */
@@ -21,18 +21,17 @@ public interface ChannelPutRequester extends Requester {
      * @param pvField The interface for putting data.
      * @return (false,true) if the requester (has,has not) obtained all the data.
      * A value of true means that the requester wants to be called again for this data.
-     * The caller must call Put.putDelayed in order to access more data.
-     * The putDelayed call will result in nextDelayedPutData being called. 
+     * The caller must call ChannelPut.nextDelayedPutField in order to access more data. 
      * This normally means that an array is being transfered and the requester is
      * not able to handle the array as a single chunk of data.
      */
     boolean nextPutField(ChannelField channelField,PVField pvField);
     /**
-     * Called as a result of a call to Put.putDelayed,
-     * The underlying database is locked and this is called. 
+     * Called as a result of a call to ChannelPut.nextPutField that returns true,
+     * The underlying database is locked while this is called. 
      * @param field The data.
      * @return (false,true) if the requester (will not, will)
-     * call Put.putDelayed again for this pvField.
+     * call PutFactory.nextDelayedPutField again for this pvField.
      */
     boolean nextDelayedPutField(PVField field);
     /**

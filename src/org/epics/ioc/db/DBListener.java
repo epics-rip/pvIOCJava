@@ -18,11 +18,6 @@ public interface DBListener {
      */
     void dataPut(DBField dbField);
     /**
-     * The supportName has been modified.
-     * @param dbField
-     */
-    void supportNamePut(DBField dbField);
-    /**
      * Start of a structure modification.
      * @param dbStructure The structure.
      */
@@ -48,23 +43,6 @@ public interface DBListener {
      * @param dbField The data that has been modified.
      */
     void dataPut(DBField requested,DBField dbField);
-    /**
-     * A put to an enum subfield has occured.
-     * The enum index has been modified.
-     * @param requested The requester is listening to this dbField.
-     * It can be any field that has subfields. This the pvType can be.
-     * <ol>
-     *  <li>pvStructure.</li>
-     *  <li>pvArray that has a elementType of
-     *     <ol>
-     *        <li>pvStructure</li>
-     *        <li>pvArray</li>
-     *     </ol>
-     *     </li>
-     * </ol>
-     * @param dbField The field interface.
-     */
-    void supportNamePut(DBField requested,DBField dbField);
     /**
      * Begin record processing.
      * From begin until end of record processing,

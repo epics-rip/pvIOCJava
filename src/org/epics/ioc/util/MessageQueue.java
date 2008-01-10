@@ -25,7 +25,7 @@ public interface MessageQueue {
      */
     MessageNode get();
     /**
-     * Put a new message into the queue.
+     * PutFactory a new message into the queue.
      * @param message The message.
      * @param messageType The message type.
      * @return true if the message was put into the queue or false if thge queue was full.

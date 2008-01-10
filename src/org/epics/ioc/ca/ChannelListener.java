@@ -19,8 +19,8 @@ public interface ChannelListener extends Requester {
      */
     void channelStateChange(Channel c,boolean isConnected);
     /**
-     * Disconnect from the channel. The channel will not honor any further requests.
+     * The channel will not honor any further requests.
      * @param c The channel.
      */
-    void disconnect(Channel c);
+    void destroy(Channel c);
 }

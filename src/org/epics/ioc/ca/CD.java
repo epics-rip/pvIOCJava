@@ -73,7 +73,7 @@ public interface CD {
      * Create a CDPut.
      * @param cdPutRequester The channelDataPutRequester
      * @param process Should record be processed after put.
-     * @return An interface for the Put or null if the caller can't process the record.
+     * @return An interface for the CDPut or null if the caller can't process the record.
      */
     CDPut createCDPut(CDPutRequester cdPutRequester,boolean process);
     /**

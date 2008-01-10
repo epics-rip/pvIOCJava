@@ -11,10 +11,14 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
+import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.Text;
 import org.epics.ioc.ca.CD;
 import org.epics.ioc.ca.CDFactory;
 import org.epics.ioc.ca.CDGet;
@@ -31,56 +35,96 @@ import org.epics.ioc.util.MessageType;
 import org.epics.ioc.util.RequestResult;
 import org.epics.ioc.util.Requester;
 import org.epics.ioc.util.ScanPriority;
+
 /**
- * Provides the following sets of controls:
- * <ul>
- *    <li>Processor - Shows and releases the current record processor.
- *    Also show all scan threads.</li>
- *    <li>Process - Can connect to a channel and process the channel.</li>
- *    <li>GetIt - Can connect to a field of a channel and get the current values.</li>
- *    <li>Put - Can connect to a field of a channel an put new values.</li>
- * </ul>
- * For both get an put a null field selects a complete record instance.
+ * A shell for getting values from a channel.
  * @author mrk
  *
  */
-public class Get {
-
+public class GetFactory {
+    /**
+     * Create the shell. 
+     * @param display The display to which the shell belongs.
+     */
     public static void init(Display display) {
-        ChannelGetImpl channelGetImpl = new ChannelGetImpl();
-        channelGetImpl.init(display);
+        GetImpl getImpl = new GetImpl(display);
+        getImpl.start();
     }
 
-    private static class ChannelGetImpl extends AbstractChannelShell  {
+    private static class GetImpl implements Requester,ChannelListener,SelectionListener
+    {
 
-        private ChannelGetImpl() {
-            super("get");
+        private GetImpl(Display display) {
+            this.display = display;
         }
 
-        private static IOCExecutor iocExecutor = IOCExecutorFactory.create("swtshell:GetIt");
+        private static IOCExecutor iocExecutor = IOCExecutorFactory.create("swtshell:Get");
         private static ScanPriority scanPriority = ScanPriority.higher;
-
-        /**
-         * Called by SwtShell after the default constructor has been called.
-         * @param display The display.
-         */
-        public void init(Display display) {
-            super.start(display);
-        }
-
+        private static String windowName = "get";
+        private Display display;
+        private Shell shell = null;
+        private Requester requester = null;
+        private Channel channel = null;
+        private ChannelConnect channelConnect = null;
+        private ChannelField channelField = null;
+        private String[] propertyNames = null;
         private Button getButton;
         private Button processButton;
         private Button propertyButton;
-        private ChannelField channelField = null;
-        private String[] propertyNames = null;
+        private Text consoleText = null; 
         private GetIt get = null;
-
-        public void startClient(Composite parentWidget) {
-            Composite getWidget = new Composite(parentWidget,SWT.BORDER);
+        /* (non-Javadoc)
+         * @see org.epics.ioc.util.Requester#getRequesterName()
+         */
+        public String getRequesterName() {
+            return requester.getRequesterName();
+        }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.util.Requester#message(java.lang.String, org.epics.ioc.util.MessageType)
+         */
+        public void message(String message, MessageType messageType) {
+            requester.message(message, messageType);
+        }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.ca.ChannelListener#channelStateChange(org.epics.ioc.ca.Channel, boolean)
+         */
+        public void channelStateChange(Channel c, boolean isConnected) {
+            if(isConnected) {
+                channel = channelConnect.getChannel();
+                String fieldName = channel.getFieldName();
+                channelField = channel.createChannelField(fieldName);
+                getButton.setEnabled(true);
+                processButton.setEnabled(true);
+                propertyButton.setEnabled(true);
+                return;
+            } else {
+                channel = null;
+                channelField = null;
+                getButton.setEnabled(false);
+                processButton.setEnabled(false);
+                propertyButton.setEnabled(false);
+                return;
+            }
+        }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.ca.ChannelListener#disconnect(org.epics.ioc.ca.Channel)
+         */
+        public void destroy(Channel c) {
+            channelStateChange(c,false);
+        }
+                
+        private void start() {
+            shell = new Shell(display);
+            shell.setText(windowName);
             GridLayout gridLayout = new GridLayout();
-            gridLayout.numColumns = 4;
+            gridLayout.numColumns = 1;
+            shell.setLayout(gridLayout);
+            channelConnect = ChannelConnectFactory.create(this,this);
+            channelConnect.createWidgets(shell);
+            Composite getWidget = new Composite(shell,SWT.BORDER);
+            gridLayout = new GridLayout();
+            gridLayout.numColumns = 3;
             getWidget.setLayout(gridLayout);
-            super.connectButtonCreate(getWidget);
             getButton = new Button(getWidget,SWT.NONE);
             getButton.setText("get");
             getButton.addSelectionListener(this);
@@ -92,57 +136,61 @@ public class Get {
             propertyButton.addSelectionListener(this);
             getButton.setEnabled(false);
             processButton.setEnabled(false);
+            propertyButton.setEnabled(false);            
+            Composite consoleComposite = new Composite(shell,SWT.BORDER);
+            gridLayout = new GridLayout();
+            gridLayout.numColumns = 1;
+            consoleComposite.setLayout(gridLayout);
+            GridData gridData = new GridData(GridData.FILL_BOTH);
+            consoleComposite.setLayoutData(gridData);
+            Button clearItem = new Button(consoleComposite,SWT.PUSH);
+            clearItem.setText("&Clear");
+            clearItem.addSelectionListener(new SelectionListener() {
+                public void widgetDefaultSelected(SelectionEvent arg0) {
+                    widgetSelected(arg0);
+                }
+                public void widgetSelected(SelectionEvent arg0) {
+                    consoleText.selectAll();
+                    consoleText.clearSelection();
+                    consoleText.setText("");
+                }
+            });
+            consoleText = new Text(consoleComposite,SWT.BORDER|SWT.H_SCROLL|SWT.V_SCROLL|SWT.READ_ONLY);
+            gridData = new GridData(GridData.FILL_BOTH);
+            gridData.heightHint = 100;
+            gridData.widthHint = 200;
+            consoleText.setLayoutData(gridData);
+            requester = SWTMessageFactory.create(windowName,display,consoleText);
+            shell.pack();
+            shell.open();
+        }
+        /* (non-Javadoc)
+         * @see org.eclipse.swt.events.SelectionListener#widgetDefaultSelected(org.eclipse.swt.events.SelectionEvent)
+         */
+        public void widgetDefaultSelected(SelectionEvent arg0) {
+            widgetSelected(arg0);
         }
         /* (non-Javadoc)
          * @see org.eclipse.swt.events.SelectionListener#widgetSelected(org.eclipse.swt.events.SelectionEvent)
          */
         public void widgetSelected(SelectionEvent arg0) {
             Object object = arg0.getSource(); 
-            if(object==connectButton) {
-                super.connectButtonSelected();
-                switch(connectState) {
-                case connected:
-                    GetChannelField getChannelField = new GetChannelField(shell,this,channel);
-                    channelField = getChannelField.getChannelField();
-                    if(channelField==null) {
-                        message(String.format("no field selected%n"),MessageType.error);
-                        return;
-                    }
-                    getButton.setEnabled(true);
-                    processButton.setEnabled(true);
-                    propertyButton.setEnabled(true);
-                    return;
-                case disconnected:
-                    getButton.setEnabled(false);
-                    processButton.setEnabled(false);
-                    propertyButton.setEnabled(false);
-                    return;
-                }
-            }
+            
             if(object==propertyButton) {
-                GetProperty getProperty = new GetProperty(shell);
-                propertyNames = getProperty.open(channelField);
-            }
-            if(object==getButton) {
+                PropertyGet propertyGet = PropertyGetFactory.create(shell);
+                propertyNames = propertyGet.getPropertyNames(channelField);
+            } else if(object==getButton) {
                 boolean process = processButton.getSelection();
                 get = new GetIt(channel,this,process);
                 boolean result = get.connect(channelField, propertyNames);
-                if(result) {
-                    connectState = ConnectState.connected;
-                    message(String.format("connected%n"),MessageType.info);
-                    connectButton.setText(connectStateText[1]);
-                } else {
-                    message(String.format("not connected%n"),MessageType.info);
-                    get = null;
-                }
-                if(get==null) {
+                if(!result) {
                     message(String.format("not connected%n"),MessageType.info);
                     return;
                 }
                 CD cD = get.get();
                 if(cD==null) return;
-                CDRecordPrint cdRecordPrint = new CDRecordPrint(cD.getCDRecord(),consoleText);
-                cdRecordPrint.print();
+                CDPrint cdPrint = CDPrintFactory.create(cD.getCDRecord(),consoleText);
+                cdPrint.print();
                 get.disconnect();
                 get = null;
                 return;
@@ -152,7 +200,7 @@ public class Get {
         private class GetIt implements
         Runnable,
         CDGetRequester,
-        ChannelListener, ChannelFieldGroupListener
+        ChannelFieldGroupListener
         {
             private Lock lock = new ReentrantLock();
             private Condition waitDone = lock.newCondition();
@@ -242,25 +290,10 @@ public class Get {
                 }
             }
             /* (non-Javadoc)
-             * @see org.epics.ioc.ca.ChannelListener#channelStateChange(org.epics.ioc.ca.Channel, boolean)
-             */
-            public void channelStateChange(Channel c, boolean isConnected) {
-                // TODO Auto-generated method stub
-
-            }
-            /* (non-Javadoc)
-             * @see org.epics.ioc.ca.ChannelListener#disconnect(org.epics.ioc.ca.Channel)
-             */
-            public void disconnect(Channel c) {
-                // TODO Auto-generated method stub
-
-            }
-            /* (non-Javadoc)
              * @see org.epics.ioc.ca.ChannelFieldGroupListener#accessRightsChange(org.epics.ioc.ca.Channel, org.epics.ioc.ca.ChannelField)
              */
             public void accessRightsChange(Channel channel, ChannelField channelField) {
-                // TODO Auto-generated method stub
-
+                // nothing to do
             }
         }
     }

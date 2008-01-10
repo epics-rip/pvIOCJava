@@ -12,19 +12,22 @@ import org.epics.ioc.pv.PVRecord;
 import org.epics.ioc.pv.PVStructure;
 import org.epics.ioc.pv.Type;
 import org.epics.ioc.util.MessageType;
-import org.epics.ioc.util.Requester;
 
 /**
+ * Abstract class for code that implements Chaznnel.
  * @author mrk
  *
  */
-public abstract class AbstractChannel implements Channel,Requester{
-    protected boolean isDestroyed = false;
-    protected ChannelListener channelListener = null;
-    protected PVRecord pvRecord;
-    protected String channelName;
-    protected String fieldName;
-    protected String options;
+public abstract class AbstractChannel implements Channel{
+    
+    private boolean isDestroyed = false;
+    private boolean isConnected = false;
+    private ChannelListener channelListener;
+    private String fieldName;
+    private String options;
+    
+    private PVRecord pvRecord = null;
+    private String channelName = null;
     
     private LinkedList<ChannelProcess> channelProcessList =
         new LinkedList<ChannelProcess>();
@@ -37,6 +40,12 @@ public abstract class AbstractChannel implements Channel,Requester{
     private LinkedList<ChannelMonitor> channelMonitorList = 
         new LinkedList<ChannelMonitor>();
     
+    /**
+     * Constructor.
+     * @param channelListener The channelListener.
+     * @param fieldName The fieldName.
+     * @param options The options.
+     */
     protected AbstractChannel(ChannelListener channelListener,
         String fieldName, String options)
     {
@@ -45,7 +54,10 @@ public abstract class AbstractChannel implements Channel,Requester{
         this.options = options;
         
     }
-    
+    /**
+     * Set the PVRecord for this channel.
+     * @param pvRecord The pvRecord interface.
+     */
     protected synchronized void SetPVRecord(PVRecord pvRecord) {
         this.pvRecord = pvRecord;
         if(fieldName==null) {
@@ -54,7 +66,13 @@ public abstract class AbstractChannel implements Channel,Requester{
             channelName =  pvRecord.getRecordName() + "." + fieldName;
         }
     }
-    
+    /**
+     * Get the pvRecord for this channel.
+     * @return
+     */
+    protected synchronized PVRecord getPVRecord() {
+        return pvRecord;
+    }
     /**
      * Add a channelProcess
      * @param channelProcess The channelProcess to add.
@@ -160,28 +178,55 @@ public abstract class AbstractChannel implements Channel,Requester{
         channelListener.message(message, messageType);   
     }
     /* (non-Javadoc)
+     * @see org.epics.ioc.ca.Channel#connect()
+     */
+    public void connect() {
+        if(isDestroyed) {
+            message("connect request but is destroyed",MessageType.warning);
+            return;
+        }
+        isConnected = true;
+        channelListener.channelStateChange(this, true);
+    }
+    /* (non-Javadoc)
+     * @see org.epics.ioc.ca.Channel#disconnect()
+     */
+    public void disconnect() {
+        ChannelListener channelListener = destroyPvt();
+        if(channelListener!=null) {
+            channelListener.channelStateChange(this, false);
+        }
+    }
+    /* (non-Javadoc)
+     * @see org.epics.ioc.ca.Channel#isConnected()
+     */
+    public synchronized boolean isConnected() {
+        return isConnected;
+    }
+    /* (non-Javadoc)
+     * @see org.epics.ioc.ca.Channel#destroy()
+     */
+    public void destroy() {
+        if(isDestroyed) return;
+        isDestroyed = true;
+        this.disconnect();
+    }
+    /* (non-Javadoc)
      * @see org.epics.ioc.ca.Channel#getChannelStateListener()
      */
     public ChannelListener getChannelListener() {
         return channelListener;
     }
     /* (non-Javadoc)
-     * @see org.epics.ioc.ca.Channel#destroy()
-     */
-    public void destroy() {
-        ChannelListener channelListener = destroyPvt();
-        if(channelListener!=null) channelListener.disconnect(this);
-    }    
-    /* (non-Javadoc)
      * @see org.epics.ioc.ca.Channel#getFieldName()
      */
-    public synchronized String getFieldName() {
+    public String getFieldName() {
         return fieldName;
     }
     /* (non-Javadoc)
      * @see org.epics.ioc.ca.Channel#getOptions()
      */
-    public synchronized String getOptions() {
+    public String getOptions() {
         return options;
     }
     /* (non-Javadoc)
@@ -202,12 +247,15 @@ public abstract class AbstractChannel implements Channel,Requester{
      * @see org.epics.ioc.ca.Channel#createFieldGroup(org.epics.ioc.ca.ChannelFieldGroupListener)
      */
     public synchronized ChannelFieldGroup createFieldGroup(ChannelFieldGroupListener listener) {
-        if(isDestroyed) return null;
+        if(!isConnected) {
+            message("createFieldGroup called while not connected",MessageType.warning);
+            return null;
+        }
         return new BaseChannelFieldGroup(this,listener);
     }
     
     private synchronized ChannelListener destroyPvt() {
-        if(isDestroyed) return null;
+        ChannelListener channelListener = this.channelListener;
         int number = channelProcessList.size();
         while(number>0) {
             channelProcessList.getLast().destroy();
@@ -248,7 +296,7 @@ public abstract class AbstractChannel implements Channel,Requester{
         if(number!=0) {
             message("logic error destroying channelMonitorList",MessageType.error);
         }
-        isDestroyed = true;
+        isConnected = false;
         return channelListener;
     }  
 }

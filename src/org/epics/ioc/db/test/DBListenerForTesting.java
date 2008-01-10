@@ -123,21 +123,6 @@ public class DBListenerForTesting implements DBListener{
         System.out.printf("%s    %s = %s%n",
             common,name,dbField.toString(2));
     }
-    
-    /* (non-Javadoc)
-     * @see org.epics.ioc.db.DBListener#supportNamePut(org.epics.ioc.db.DBField)
-     */
-    public void supportNamePut(DBField dbField) {
-        PVField pvField = dbField.getPVField();
-        String common = putCommon("supportNamePut");
-        String name = pvField.getPVRecord().getRecordName() + pvField.getFullFieldName();
-        if(!name.equals(fullName)) {
-            System.out.printf("%s %s NOT_EQUAL %s%n",common,name,fullName);
-        }
-        System.out.printf("%s    %s = %s%n",
-            common,name,pvField.getSupportName());
-    }
-    
     /* (non-Javadoc)
      * @see org.epics.ioc.db.DBListener#dataPut(org.epics.ioc.db.DBStructure, org.epics.ioc.db.DBField)
      */
@@ -148,18 +133,6 @@ public class DBListenerForTesting implements DBListener{
         String common = putCommon(structureName +" dataPut to field " + pvField.getFullFieldName());
         System.out.printf("%s    = %s%n",common,pvField.toString(2));
     }       
-    /* (non-Javadoc)
-     * @see org.epics.ioc.db.DBListener#supportNamePut(org.epics.ioc.db.DBStructure, org.epics.ioc.db.DBField)
-     */
-    public void supportNamePut(DBField requested,DBField dbField) {
-        PVField pvRequested = requested.getPVField();
-        PVField pvField = dbField.getPVField();
-        String structureName = 
-            pvRequested.getPVRecord().getRecordName()
-            + pvRequested.getFullFieldName();
-        String common = putCommon(structureName +" supportNamePut to field " + pvField.getFullFieldName());
-        System.out.printf("%s    = %s%n",common,pvField.getSupportName());
-    }
     /* (non-Javadoc)
      * @see org.epics.ioc.dbAccess.DBListener#unlisten(org.epics.ioc.dbAccess.RecordListener)
      */

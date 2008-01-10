@@ -10,7 +10,7 @@
 <body>
 <h1 style="text-align: center">EPICS JavaIOC: channel Access<br />
 package: org.epics.ioc.ca<br />
-2008.01.02</h1>
+2008.01.10</h1>
 CONTENTS 
 
 <div class="toc">
@@ -20,7 +20,7 @@ CONTENTS
     <ul>
       <li><a href="#Definition">Definitions</a></li>
       <li><a href="#Channel1">Channel</a></li>
-      <li><a href="#ChannelSta">ChannelStateListener</a></li>
+      <li><a href="#ChannelLis">ChannelListener</a></li>
       <li><a href="#AccessRigh">AccessRights</a></li>
       <li><a href="#ChannelFie">ChannelField</a></li>
       <li><a href="#ChannelFie1">ChannelFieldGroupListener</a></li>
@@ -153,11 +153,16 @@ same conventions.</p>
 databases.</p>
 
 <h3 id="Definition">Definitions</h3>
-<pre>    interface Channel {
-        String getChannelName();
-        ChannelStateListener getChannelStateListener();
-        void message(String message, MessageType messageType);
+<pre>    interface ChannelListener extends Requester {
+        void channelStateChange(Channel c,boolean isConnected);
+         void destroy(Channel c);
+    }
+    interface Channel  extends Requester {
+        void connect();
+        void disconnect();
         void destroy();
+        String getChannelName();
+        ChannelListener getChannelListener();
         boolean isConnected();
         String getPropertyName();
         String getFieldName();
@@ -178,11 +183,6 @@ databases.</p>
             boolean process);
         ChannelMonitor createChannelMonitor(
             ChannelMonitorRequester channelMonitorRequester);
-    }
-
-    interface ChannelStateListener {
-        void channelStateChange(Channel c,boolean isConnected);
-        void disconnect(Channel c);
     }
 
     enum AccessRights {
@@ -230,17 +230,15 @@ databases.</p>
 
     class ChannelFactory {
         static Channel createChannel(
-            String pvName,String providerName,ChannelStateListener listener);
+            String pvName,String providerName,ChannelListener listener);
         static void registerChannelProvider(
-            ChannelProvider channelAccess);
-        static void registerRemoteChannelProvider(
             ChannelProvider channelProvider);
         static ChannelProvider getChannelProvider(String providerName);
         static boolean isChannelProvider(String channelName,String providerName);
     }
 
     interface ChannelProvider {
-        Channel createChannel(String pvName,ChannelStateListener listener);
+        Channel createChannel(String pvName,ChannelListener listener);
         String getProviderName();
         boolean isProvider(String channelName);
     }</pre>
@@ -250,16 +248,20 @@ databases.</p>
 <p>A channel provides access to an arbitrary number of fields in the record.
 The methods are:</p>
 <dl>
-  <dt style="font-family: courier;">getChannelName</dt>
-    <dd>Get the channelName.</dd>
-  <dt style="font-family: courier;">getChannelStateListener</dt>
-    <dd>Get the ChannelStateListener.</dd>
-  <dt style="font-family: courier;">message</dt>
-    <dd>Channel Access code calls this to report errors and/or diagnostic
-      information.</dd>
+  <dt style="font-family: courier;">connect</dt>
+    <dd>Connect to the data source.</dd>
+  <dt style="font-family: courier;">disconnect</dt>
+    <dd>Disconnect from the data source.</dd>
   <dt style="font-family: courier;">destroy</dt>
     <dd>Destroy the channel. Any active requests will still occur but no new
       requests will be accepted for the channel.</dd>
+  <dt style="font-family: courier;">getChannelName</dt>
+    <dd>Get the channelName.</dd>
+  <dt style="font-family: courier;">getChannelListener</dt>
+    <dd>Get the ChannelListener.</dd>
+  <dt style="font-family: courier;">message</dt>
+    <dd>Channel Access code calls this to report errors and/or diagnostic
+      information.</dd>
   <dt style="font-family: courier;">isConnected</dt>
     <dd>Is the channel connected?</dd>
   <dt style="font-family: courier;">getPropertyName</dt>
@@ -289,10 +291,10 @@ The methods are:</p>
       channel.</dd>
 </dl>
 
-<h3 id="ChannelSta">ChannelStateListener</h3>
+<h3 id="ChannelLis">ChannelListener</h3>
 
-<p><span style="font-family: courier;">ChannelStateListener</span> is an
-interface that must be implemented by code that creates a channel. It has the
+<p><span style="font-family: courier;">ChannelListener</span> is an interface
+that must be implemented by code that creates a channel. It has the
 methods:</p>
 <dl>
   <dt style="font-family: courier;">channelStateChange</dt>
@@ -657,17 +659,13 @@ client request to:</p>
 
 <h2 style="text-align: center" id="Abstract">Abstract and Base Classes</h2>
 <hr />
-<pre>    public abstract class AbstractChannel implements Channel,Requester{
-        protected boolean isDestroyed = false;
-        protected ChannelListener channelListener = null;
-        protected PVRecord pvRecord;
-        protected String channelName;
-        protected String fieldName;
-        protected String options;
-    
-        public AbstractChannel(PVRecord pvRecord,ChannelListener channelListener,
-                String fieldName, String options);
+<pre>    public abstract class AbstractChannel implements Channel{
+        protected AbstractChannel(ChannelListener channelListener,
+        String fieldName, String options);
+        protected synchronized void SetPVRecord(PVRecord pvRecord);
+        protected synchronized PVRecord getPVRecord();
         protected synchronized boolean add(ChannelProcess channelProcess);
+        protected synchronized boolean add(ChannelGet channelGet);
         protected synchronized boolean add(ChannelPut channelPut);
         protected synchronized boolean add(ChannelPutGet channelPutGet);
         protected synchronized boolean add(ChannelMonitor channelMonitor);
@@ -679,8 +677,11 @@ client request to:</p>
         public synchronized String getChannelName();
         public String getRequesterName();
         public void message(String message, MessageType messageType);
-        public ChannelListener getChannelListener();
+        public void connect();
+        public void disconnect();
+        public synchronized boolean isConnected();
         public void destroy();
+        public ChannelListener getChannelListener();
         public synchronized boolean isConnected();
         public synchronized String getFieldName();
         public synchronized String getOptions();
@@ -778,12 +779,10 @@ and associated subfields, which are described in the next section.</p>
         void put(PVField pvField);
         void put(PVField pvField,PVField pvSubField);
         CDGet createCDGet(
-            ChannelFieldGroup channelFieldGroup,
             CDGetRequester channelCDGetRequester,
             boolean process);
         void destroy(CDGet channelCDGet);
         CDPut createCDPut(
-            ChannelFieldGroup channelFieldGroup,
             CDPutRequester cdPutRequester,
             boolean process);
         void destroy(CDPut cdPut);
@@ -990,9 +989,8 @@ CDField or an extension. CDField has the methods:</p>
   <dt style="font-family: courier;">getMaxNumPuts</dt>
     <dd>Get the maximum number of puts since the last clearNumPuts. This is
       the maximum number of puts to any particular element of the associated
-      PVField, i.e. dataPut, supportNamePut, etc. If PVField is a scalar or
-      an array of scalars then this is either the number of calls to dataPut
-      or to supportNamePut, whichever is greater.</dd>
+      PVField. If PVField is a scalar or an array of scalars then this is the
+      number of calls to dataPut.</dd>
   <dt style="font-family: courier;">setMaxNumPuts</dt>
     <dd>Set the maximum number of puts. This is called by derived
     classes.</dd>
@@ -1342,7 +1340,7 @@ example gets from a record after the record is no longer locked.</p>
 <p>This example shows how to implement a process request.</p>
 
 <h3 id="Implementa1">Implementation</h3>
-<pre>    static class Process implements ChannelProcessRequester,ChannelStateListener
+<pre>    static class Process implements ChannelProcessRequester,ChannelListener
     {
         private Lock lock = new ReentrantLock();
         private Condition waitDone = lock.newCondition();
@@ -1415,7 +1413,7 @@ example gets from a record after the record is no longer locked.</p>
 <h3 id="Implementa2">Implementation</h3>
 <pre>    static class Get implements
     ChannelGetRequester,
-    ChannelStateListener, ChannelFieldGroupListener
+    ChannelListener, ChannelFieldGroupListener
     {
         private Lock lock = new ReentrantLock();
         private Condition waitDone = lock.newCondition();
@@ -1508,7 +1506,7 @@ example gets from a record after the record is no longer locked.</p>
 <h3 id="Implementa3">Implementation</h3>
 <pre>    static class Put implements
     ChannelPutRequester,
-    ChannelStateListener, ChannelFieldGroupListener
+    ChannelListener, ChannelFieldGroupListener
     {
         private Lock lock = new ReentrantLock();
         private Condition waitDone = lock.newCondition();
@@ -1610,7 +1608,7 @@ timeStamp.</p>
 <h3 id="Implementa4">Implementation</h3>
 <pre>    static class PutGet implements
     ChannelPutGetRequester,
-    ChannelStateListener, ChannelFieldGroupListener
+    ChannelListener, ChannelFieldGroupListener
     {
         private Lock lock = new ReentrantLock();
         private Condition waitDone = lock.newCondition();

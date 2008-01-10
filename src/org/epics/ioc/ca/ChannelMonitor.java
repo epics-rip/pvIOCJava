@@ -17,7 +17,7 @@ public interface ChannelMonitor {
      */
     void setFieldGroup(ChannelFieldGroup channelFieldGroup);
     /**
-     * Put the current data from the field group.
+     * Get data and put it into the CD (ChannelData).
      * @param cd The ChannelData into which the data is put.
      */
     void getData(CD cd);

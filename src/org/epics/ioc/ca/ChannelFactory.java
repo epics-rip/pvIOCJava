@@ -30,6 +30,7 @@ public class ChannelFactory {
             listener.message(
                 "providerName " + providerName + " not a registered provider",
                 MessageType.error);
+            return null;
         }
         return channelProvider.createChannel(pvName, listener);
     }

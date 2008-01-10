@@ -9,17 +9,28 @@ import org.epics.ioc.pv.Field;
 import org.epics.ioc.pv.PVEnumerated;
 import org.epics.ioc.pv.PVField;
 
+import org.epics.ioc.db.*;
+
 /**
+ * Base class for implementing ChannelField.
  * @author mrk
- *
+ * 
  */
-public class BaseChannelField implements ChannelField
-{
+public class BaseChannelField implements ChannelField {
+    private DBRecord dbRecord;
+    private DBField dbField;
     private PVField pvField;
-    
-    public BaseChannelField(PVField pvField) {
+
+    /**
+     * Constructor
+     * @param dbRecord The dbRecord for this channel.
+     * @param pvField The pvField for the channelField.
+     */
+    public BaseChannelField(DBRecord dbRecord,PVField pvField) {
+        this.dbRecord = dbRecord;
         this.pvField = pvField;
-    }        
+        dbField = dbRecord.findDBField(pvField);
+    }
     /* (non-Javadoc)
      * @see org.epics.ioc.ca.ChannelField#getPVField()
      */
@@ -29,28 +40,30 @@ public class BaseChannelField implements ChannelField
     /* (non-Javadoc)
      * @see org.epics.ioc.ca.ChannelField#postPut()
      */
-    public void postPut() {}
+    public void postPut() {
+        dbField.postPut();
+    }
     /* (non-Javadoc)
      * @see org.epics.ioc.ca.ChannelField#getPropertyNames()
      */
     public String[] getPropertyNames() {
         return pvField.getPropertyNames();
-    }            
+    }
     /* (non-Javadoc)
      * @see org.epics.ioc.ca.ChannelField#findProperty(java.lang.String)
      */
     public ChannelField findProperty(String propertyName) {
         PVField pvf = pvField.findProperty(propertyName);
-        if(pvf==null) return null;
-        return new BaseChannelField(pvf);
+        if (pvf == null) return null;
+        return new BaseChannelField(dbRecord,pvf);
     }
     /* (non-Javadoc)
      * @see org.epics.ioc.ca.ChannelField#createChannelField(java.lang.String)
      */
     public ChannelField createChannelField(String fieldName) {
         PVField pvf = pvField.getSubField(fieldName);
-        if(pvf==null) return null;
-        return new BaseChannelField(pvf);
+        if (pvf == null) return null;
+        return new BaseChannelField(dbRecord,pvf);
     }
     /* (non-Javadoc)
      * @see org.epics.ioc.ca.ChannelField#getEnumerated()
@@ -63,7 +76,7 @@ public class BaseChannelField implements ChannelField
      */
     public AccessRights getAccessRights() {
         // OK until access security is implemented
-        if(pvField.isMutable()) {
+        if (pvField.isMutable()) {
             return AccessRights.readWrite;
         } else {
             return AccessRights.read;

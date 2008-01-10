@@ -7,7 +7,7 @@ package org.epics.ioc.ca;
 
 
 /**
- * Channel Process Request.
+ * ChannelProcess - request that a channel be processed..
  * @author mrk
  *
  */

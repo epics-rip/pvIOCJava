@@ -8,8 +8,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.regex.Pattern;
 
-import org.epics.ioc.create.Create;
-import org.epics.ioc.create.Enumerated;
 import org.epics.ioc.db.DBField;
 import org.epics.ioc.db.DBListener;
 import org.epics.ioc.db.DBRecord;
@@ -19,7 +17,6 @@ import org.epics.ioc.db.IOCDBFactory;
 import org.epics.ioc.db.RecordListener;
 import org.epics.ioc.process.RecordProcess;
 import org.epics.ioc.process.RecordProcessRequester;
-import org.epics.ioc.pv.PVEnumerated;
 import org.epics.ioc.pv.PVField;
 import org.epics.ioc.util.MessageType;
 import org.epics.ioc.util.RequestResult;
@@ -45,18 +42,21 @@ public class ChannelProviderLocalFactory  {
     
     private static class ChannelProviderLocal implements ChannelProvider{
         private static boolean isRegistered = false; 
-        private static IOCDB iocdb = IOCDBFactory.getMaster();
+        private static final IOCDB iocdb = IOCDBFactory.getMaster();
         private static final String providerName = "local";
 
-        synchronized void register() {
-            if(isRegistered) return;
+        private void register() {
+            if(registerPvt()) ChannelFactory.registerChannelProvider(this);
+        }
+        private synchronized boolean registerPvt() {
+            if(isRegistered) return false;
             isRegistered = true;
-            ChannelFactory.registerChannelProvider(this);
+            return true;
         }       
         /* (non-Javadoc)
          * @see org.epics.ioc.ca.ChannelProvider#createChannel(java.lang.String, org.epics.ioc.ca.ChannelListener)
          */
-        public synchronized Channel createChannel(String pvName,ChannelListener listener) {
+        public Channel createChannel(String pvName,ChannelListener listener) {
             String recordName = null;
             String fieldName = null;
             String options = null;
@@ -77,7 +77,8 @@ public class ChannelProviderLocalFactory  {
                 PVField pvField = dbRecord.getPVRecord().findProperty(fieldName);
                 if(pvField==null) return null;
             }
-            return new ChannelImpl(dbRecord,listener,fieldName,options);
+            Channel channel = new ChannelImpl(dbRecord,listener,fieldName,options);
+            return channel;
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.ca.ChannelProvider#getProviderName()
@@ -99,7 +100,7 @@ public class ChannelProviderLocalFactory  {
          * @see org.epics.ioc.ca.ChannelProvider#destroy()
          */
         public void destroy() {
-            // TODO Auto-generated method stub
+            // nothing to do
         }
     }
     
@@ -114,37 +115,39 @@ public class ChannelProviderLocalFactory  {
                 String fieldName, String options)
         {
             super(listener,fieldName,options);
-            super.SetPVRecord(record.getPVRecord());
             dbRecord = record;
         }       
         /* (non-Javadoc)
-         * @see org.epics.ioc.ca.Channel#isConnected()
+         * @see org.epics.ioc.ca.Channel#connect()
          */
-        public synchronized boolean isConnected() {
-            if(isDestroyed) {
-                return false;
-            } else {
-                return true;
-            }
-        }                   
+        public void connect() {
+            super.SetPVRecord(dbRecord.getPVRecord());
+            super.connect();
+        }
+                
         /* (non-Javadoc)
          * @see org.epics.ioc.ca.Channel#createChannelField(java.lang.String)
          */
-        public synchronized ChannelField createChannelField(String name) {
-            if(isDestroyed) return null;
-            if(name==null || name.length()<=0) return new ChannelFieldImpl(dbRecord.getDBStructure());
-            PVField pvField = pvRecord.findProperty(name);
+        public ChannelField createChannelField(String name) {
+            if(!super.isConnected()) {
+                message("createChannelField but not connected",MessageType.warning);
+                return null;
+            }
+            if(name==null || name.length()<=0) {
+                return new BaseChannelField(dbRecord,dbRecord.getDBStructure().getPVField());
+            }
+            PVField pvField = super.getPVRecord().findProperty(name);
             if(pvField==null) return null;
-            return new ChannelFieldImpl(dbRecord.findDBField(pvField));               
+            return new BaseChannelField(dbRecord,pvField);               
         }    
         /* (non-Javadoc)
          * @see org.epics.ioc.ca.Channel#createChannelProcess(org.epics.ioc.ca.ChannelProcessRequester)
          */
-        public synchronized ChannelProcess createChannelProcess(ChannelProcessRequester channelProcessRequester)
+        public ChannelProcess createChannelProcess(ChannelProcessRequester channelProcessRequester)
         {
-            if(isDestroyed) {
+            if(!super.isConnected()) {
                 channelProcessRequester.message(
-                        "channel has been destroyed",MessageType.fatalError);
+                    "createChannelProcess but not connected",MessageType.warning);
                 return null;
             }
             ChannelProcessImpl channelProcess;
@@ -161,10 +164,14 @@ public class ChannelProviderLocalFactory  {
         /* (non-Javadoc)
          * @see org.epics.ioc.ca.Channel#createChannelGet(org.epics.ioc.ca.ChannelFieldGroup, org.epics.ioc.ca.ChannelGetRequester, boolean)
          */
-        public synchronized ChannelGet createChannelGet(ChannelFieldGroup channelFieldGroup,
+        public ChannelGet createChannelGet(ChannelFieldGroup channelFieldGroup,
                 ChannelGetRequester channelGetRequester, boolean process)
         {
-            if(isDestroyed) return null;
+            if(!super.isConnected()) {
+                channelGetRequester.message(
+                    "createChannelGet but not connected",MessageType.warning);
+                return null;
+            }
             ChannelGetImpl channelGet = 
                 new ChannelGetImpl(channelFieldGroup,channelGetRequester,process);
             super.add(channelGet);
@@ -173,10 +180,14 @@ public class ChannelProviderLocalFactory  {
         /* (non-Javadoc)
          * @see org.epics.ioc.ca.Channel#createChannelPut(org.epics.ioc.ca.ChannelFieldGroup, org.epics.ioc.ca.ChannelPutRequester, boolean)
          */
-        public synchronized ChannelPut createChannelPut(ChannelFieldGroup channelFieldGroup,
+        public ChannelPut createChannelPut(ChannelFieldGroup channelFieldGroup,
                 ChannelPutRequester channelPutRequester, boolean process)
         {
-            if(isDestroyed) return null;
+            if(!super.isConnected()) {
+                channelPutRequester.message(
+                    "createChannelPut but not connected",MessageType.warning);
+                return null;
+            }
             ChannelPutImpl channelPut = 
                 new ChannelPutImpl(channelFieldGroup,channelPutRequester,process);
             super.add(channelPut);
@@ -185,11 +196,15 @@ public class ChannelProviderLocalFactory  {
         /* (non-Javadoc)
          * @see org.epics.ioc.ca.Channel#createChannelPutGet(org.epics.ioc.ca.ChannelFieldGroup, org.epics.ioc.ca.ChannelFieldGroup, org.epics.ioc.ca.ChannelPutGetRequester, boolean)
          */
-        public synchronized ChannelPutGet createChannelPutGet(ChannelFieldGroup putFieldGroup,
+        public ChannelPutGet createChannelPutGet(ChannelFieldGroup putFieldGroup,
             ChannelFieldGroup getFieldGroup, ChannelPutGetRequester channelPutGetRequester,
             boolean process)
         {
-            if(isDestroyed) return null;
+            if(!super.isConnected()) {
+                channelPutGetRequester.message(
+                    "createChannelPutGet but not connected",MessageType.warning);
+                return null;
+            }
             ChannelPutGetImpl channelPutGet = 
                 new ChannelPutGetImpl(putFieldGroup,getFieldGroup,
                         channelPutGetRequester,process);
@@ -199,11 +214,11 @@ public class ChannelProviderLocalFactory  {
         /* (non-Javadoc)
          * @see org.epics.ioc.ca.Channel#createOnChange(org.epics.ioc.ca.ChannelMonitorNotifyRequester, boolean)
          */
-        public synchronized ChannelMonitor createChannelMonitor(ChannelMonitorRequester channelMonitorRequester)
+        public ChannelMonitor createChannelMonitor(ChannelMonitorRequester channelMonitorRequester)
         {
-            if(isDestroyed) {
-                channelListener.message(
-                        "channel has been destroyed",MessageType.fatalError);
+            if(!super.isConnected()) {
+                channelMonitorRequester.message(
+                        "createChannelMonitor but not connected",MessageType.warning);
                 return null;
             }
             MonitorImpl impl = new MonitorImpl(this,channelMonitorRequester);
@@ -211,53 +226,6 @@ public class ChannelProviderLocalFactory  {
             return impl;
         }
 
-    
-        private static class ChannelFieldImpl extends BaseChannelField {
-            private DBField dbField = null;
-            
-            ChannelFieldImpl(DBField dbField) {
-                super(dbField.getPVField());
-                this.dbField = dbField;
-            }        
-            /* (non-Javadoc)
-             * @see org.epics.ioc.ca.ChannelField#postPut()
-             */
-            public void postPut() {
-                dbField.postPut();
-            }      
-            /* (non-Javadoc)
-             * @see org.epics.ioc.ca.ChannelField#findProperty(java.lang.String)
-             */
-            public ChannelField findProperty(String propertyName) {
-                PVField pvf = super.getPVField().findProperty(propertyName);
-                if(pvf==null) return null;
-                DBField dbf = dbField.getDBRecord().findDBField(pvf);
-                return new ChannelFieldImpl(dbf);
-            }
-            /* (non-Javadoc)
-             * @see org.epics.ioc.ca.ChannelField#createChannelField(java.lang.String)
-             */
-            public ChannelField createChannelField(String fieldName) {
-                PVField pvf = super.getPVField().getSubField(fieldName);
-                if(pvf==null) return null;
-                DBField dbf = dbField.getDBRecord().findDBField(pvf);
-                return new ChannelFieldImpl(dbf);
-            }
-            /* (non-Javadoc)
-             * @see org.epics.ioc.ca.ChannelField#getEnumerated()
-             */
-            public PVEnumerated getEnumerated() {
-                Create create = dbField.getCreate();
-                if (create instanceof Enumerated) {
-                    return (Enumerated)create;
-                }
-                return null;
-            }
-            private DBField getDBField() {
-                return dbField;
-            }
-        }
-        
         private class ChannelProcessImpl implements ChannelProcess,RecordProcessRequester
         {
             private boolean isDestroyed = false;
@@ -274,8 +242,8 @@ public class ChannelProviderLocalFactory  {
                 recordProcess = dbRecord.getRecordProcess();
                 isRecordProcessRequester = recordProcess.setRecordProcessRequester(this);
                 if(!isRecordProcessRequester && !recordProcess.canProcessSelf()) {
-                    throw new IllegalStateException(
-                            "already has process requester other than self");
+                    channelProcessRequester.message(
+                        "already has process requester other than self", MessageType.error);
                 }
                 requesterName = "Process:" + channelProcessRequester.getRequesterName();
             }           
@@ -291,8 +259,7 @@ public class ChannelProviderLocalFactory  {
              * @see org.epics.ioc.ca.ChannelProcess#process()
              */
             public void process() {
-                if(isDestroyed) return;
-                if(!isConnected()) {
+                if(isDestroyed || !isConnected()) {
                     channelProcessRequester.message(
                             "channel is not connected",MessageType.info);
                     channelProcessRequester.processDone(RequestResult.failure);
@@ -389,8 +356,7 @@ public class ChannelProviderLocalFactory  {
              * @see org.epics.ioc.ca.ChannelGet#get(org.epics.ioc.ca.ChannelFieldGroup)
              */
             public void get() {
-                if(isDestroyed) return;
-                if(!isConnected()) {
+                if(isDestroyed || !isConnected()) {
                     channelGetRequester.message(
                         "channel is not connected",MessageType.info);
                     channelGetRequester.getDone(RequestResult.failure);
@@ -437,12 +403,10 @@ public class ChannelProviderLocalFactory  {
              */
             public void recordProcessComplete() {
                 startGetData();
-                if(process) {
-                    if(isRecordProcessRequester) {
-                        recordProcess.setInactive(this);
-                    } else {
-                        recordProcess.processSelfSetInactive(this);
-                    }
+                if(isRecordProcessRequester) {
+                    recordProcess.setInactive(this);
+                } else {
+                    recordProcess.processSelfSetInactive(this);
                 }
                 channelGetRequester.getDone(RequestResult.success);
             }
@@ -465,7 +429,7 @@ public class ChannelProviderLocalFactory  {
                 while(true) {
                     if(pvField==null) {
                         if(!channelFieldListIter.hasNext()) return;
-                        ChannelFieldImpl field = (ChannelFieldImpl)channelFieldListIter.next();
+                        ChannelField field = channelFieldListIter.next();
                         pvField = field.getPVField();
                         dbRecord.lock();
                         try {
@@ -491,6 +455,7 @@ public class ChannelProviderLocalFactory  {
         
         private class ChannelPutImpl implements ChannelPut,RecordProcessRequester
         {
+            private boolean isDestroyed = false;
             private String requesterName;
             private ChannelPutRequester channelPutRequester = null;
             private boolean process;
@@ -537,29 +502,24 @@ public class ChannelProviderLocalFactory  {
              * @see org.epics.ioc.ca.ChannelPut#put(org.epics.ioc.ca.ChannelFieldGroup)
              */
             public void put() {
-                if(isDestroyed) {
-                    channelPutRequester.putDone(RequestResult.failure);
-                    return;
-                }
-                if(!isConnected()) {
+                if(isDestroyed || !isConnected()) {
                     message("channel is not connected",MessageType.info);
                     channelPutRequester.putDone(RequestResult.failure);
                     return;
                 }
-                if(process) {
+                requestResult = RequestResult.success;
+                while(process) {
                     if(isRecordProcessRequester) {
                         if(!recordProcess.setActive(this)) {
                             message("could not process record",MessageType.warning);
-                            channelPutRequester.putDone(RequestResult.failure);
-                            return;
+                            break;
                         }
                     } else {
                         if(recordProcess.processSelfRequest(this)){
                             recordProcess.processSelfSetActive(this);
                         }  else {
                             message("could not process record",MessageType.warning);
-                            channelPutRequester.putDone(RequestResult.failure);
-                            return;
+                            break;
                         }
                     }
                     startPutData();
@@ -693,11 +653,7 @@ public class ChannelProviderLocalFactory  {
              */
             public void putGet()
             {
-                requestResult = RequestResult.success;
-                if(isDestroyed) {
-                    channelPutGetRequester.putDone(RequestResult.failure);
-                }
-                if(!isConnected()) {
+                if(isDestroyed || !isConnected()) {
                     channelPutGetRequester.message(
                         "channel is not connected",MessageType.info);
                     channelPutGetRequester.putDone(RequestResult.failure);
@@ -705,22 +661,18 @@ public class ChannelProviderLocalFactory  {
                     return;
                 }
                 requestResult = RequestResult.success;
-                if(process) {
+                while(process) {
                     if(isRecordProcessRequester) {
-                        if(!recordProcess.setActive(this)) 
+                        if(!recordProcess.setActive(this)) {
                             message("could not process record",MessageType.warning);
-                            channelPutGetRequester.putDone(RequestResult.failure);
-                            channelPutGetRequester.getDone(RequestResult.failure);
-                            
-                            return;
+                            break;
+                        }
                     } else {
                         if(recordProcess.processSelfRequest(this)){
                             recordProcess.processSelfSetActive(this);
                         }  else {
                             message("could not process record",MessageType.warning);
-                            channelPutGetRequester.putDone(RequestResult.failure);
-                            channelPutGetRequester.getDone(RequestResult.failure);
-                            return;
+                           break;
                         }
                     }
                     startPutData();
@@ -866,7 +818,7 @@ public class ChannelProviderLocalFactory  {
         }
         
         private class MonitorImpl implements
-        ChannelFieldGroupListener,Requester,ChannelMonitor,DBListener
+        ChannelMonitor,DBListener
         {
             private Channel channel;
             private ChannelMonitorRequester channelMonitorRequester;
@@ -889,34 +841,13 @@ public class ChannelProviderLocalFactory  {
                 ChannelImpl.this.remove(this);
             }
             /* (non-Javadoc)
-             * @see org.epics.ioc.ca.ChannelFieldGroupListener#accessRightsChange(org.epics.ioc.ca.Channel, org.epics.ioc.ca.ChannelField)
-             */
-            public void accessRightsChange(Channel channel, ChannelField channelField) {
-                // TODO Auto-generated method stub
-            }
-            /* (non-Javadoc)
-             * @see org.epics.ioc.util.Requester#getRequesterName()
-             */
-            public String getRequesterName() {
-                return channelMonitorRequester.getRequesterName();
-            }
-
-            /* (non-Javadoc)
-             * @see org.epics.ioc.util.Requester#message(java.lang.String, org.epics.ioc.util.MessageType)
-             */
-            public void message(String message, MessageType messageType) {
-                channelMonitorRequester.message(message, messageType);
-            }
-
-            /* (non-Javadoc)
              * @see org.epics.ioc.ca.ChannelMonitor#getData(org.epics.ioc.ca.CD)
              */
             public void getData(CD cd) {
                 List<ChannelField> channelFieldList = channelFieldGroup.getList();
                 for(ChannelField cf : channelFieldList) {
-                    ChannelFieldImpl channelField = (ChannelFieldImpl)cf;
-                    DBField dbField = channelField.getDBField();
-                    PVField pvField = dbField.getPVField();
+                    ChannelField channelField = (ChannelField)cf;
+                    PVField pvField = channelField.getPVField();
                     cd.put(pvField);
                 }
             }
@@ -931,7 +862,7 @@ public class ChannelProviderLocalFactory  {
              */
             public void start() {
                 if(isStarted) {
-                    message("illegal request. monitorOLD active",MessageType.error);
+                    message("illegal request. monitor active",MessageType.error);
                     return;
                 }
                 if(channelFieldGroup==null) {
@@ -942,8 +873,8 @@ public class ChannelProviderLocalFactory  {
                 recordListener = dbRecord.createRecordListener(this);
                 List<ChannelField> channelFieldList = channelFieldGroup.getList();
                 for(ChannelField cf : channelFieldList) {
-                    ChannelFieldImpl channelField = (ChannelFieldImpl)cf;
-                    DBField dbField = channelField.getDBField();
+                    ChannelField channelField = (ChannelField)cf;
+                    DBField dbField = dbRecord.findDBField(channelField.getPVField());
                     dbField.addListener(recordListener);
                 }
             }
@@ -1021,27 +952,10 @@ public class ChannelProviderLocalFactory  {
             private PVField getRequestedPVField(DBField requestedDBField) {
                 List<ChannelField> channelFieldList = channelFieldGroup.getList();
                 for(ChannelField cf : channelFieldList) {
-                    ChannelFieldImpl channelField = (ChannelFieldImpl)cf;
-                    DBField dbField = channelField.getDBField();
-                    if(requestedDBField!=dbField) continue;
-                    return requestedDBField.getPVField();
+                    PVField pvField = requestedDBField.getPVField();
+                    if(cf.getPVField()==pvField) return pvField;
                 }
                 throw new IllegalStateException("Logic error. Unexpected dataPut"); 
-            }
-
-
-            /* (non-Javadoc)
-             * @see org.epics.ioc.db.DBListener#supportNamePut(org.epics.ioc.db.DBField, org.epics.ioc.db.DBField)
-             */
-            public void supportNamePut(DBField requested, DBField dbField) {
-                // nothing to do
-            }
-
-            /* (non-Javadoc)
-             * @see org.epics.ioc.db.DBListener#supportNamePut(org.epics.ioc.db.DBField)
-             */
-            public void supportNamePut(DBField dbField) {
-                // nothing to do
             }
 
             /* (non-Javadoc)
@@ -1049,7 +963,7 @@ public class ChannelProviderLocalFactory  {
              */
             public void unlisten(RecordListener listener) {
                 stop();
-                channel.getChannelListener().disconnect(channel);
+                channel.getChannelListener().destroy(channel);
             }   
         }
     }

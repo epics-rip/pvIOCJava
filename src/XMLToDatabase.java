@@ -21,7 +21,7 @@ import org.epics.ioc.dbd.DBDSupport;
 import org.epics.ioc.dbd.XMLToDBDFactory;
 import org.epics.ioc.process.SupportCreation;
 import org.epics.ioc.process.SupportCreationFactory;
-import org.epics.ioc.swtshell.Swtshell;
+import org.epics.ioc.swtshell.SwtshellFactory;
 import org.epics.ioc.util.MessageType;
 import org.epics.ioc.util.Requester;
 
@@ -79,7 +79,7 @@ public class XMLToDatabase {
                 } else if(arg.equals("db")){
                     state = State.dbFile;
                 } else if(arg.equals("swtshell")) {
-                    Swtshell.swtshell();
+                    SwtshellFactory.swtshell();
                 } else if(arg.equals("server")) {
                     state = State.servers;
                 } else if(arg.equals("startIOC")) {

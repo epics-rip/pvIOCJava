@@ -9,7 +9,8 @@ import java.util.List;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 
-import org.epics.ioc.ca.*;
+import org.epics.ioc.ca.CD;
+import org.epics.ioc.ca.CDFactory;
 import org.epics.ioc.ca.CDField;
 import org.epics.ioc.ca.CDGet;
 import org.epics.ioc.ca.CDGetRequester;
@@ -24,12 +25,12 @@ import org.epics.ioc.ca.ChannelFactory;
 import org.epics.ioc.ca.ChannelField;
 import org.epics.ioc.ca.ChannelFieldGroup;
 import org.epics.ioc.ca.ChannelFieldGroupListener;
+import org.epics.ioc.ca.ChannelListener;
 import org.epics.ioc.ca.ChannelMonitorNotify;
 import org.epics.ioc.ca.ChannelMonitorNotifyFactory;
 import org.epics.ioc.ca.ChannelMonitorNotifyRequester;
 import org.epics.ioc.ca.ChannelProcess;
 import org.epics.ioc.ca.ChannelProcessRequester;
-import org.epics.ioc.ca.ChannelListener;
 import org.epics.ioc.db.DBField;
 import org.epics.ioc.db.DBRecord;
 import org.epics.ioc.db.DBStructure;
@@ -46,6 +47,7 @@ import org.epics.ioc.pv.Field;
 import org.epics.ioc.pv.PVArray;
 import org.epics.ioc.pv.PVBoolean;
 import org.epics.ioc.pv.PVDouble;
+import org.epics.ioc.pv.PVEnumerated;
 import org.epics.ioc.pv.PVField;
 import org.epics.ioc.pv.PVInt;
 import org.epics.ioc.pv.PVString;
@@ -58,7 +60,7 @@ import org.epics.ioc.util.RequestResult;
 import org.epics.ioc.util.ScanPriority;
 
 /**
- * Factory to create link support.
+ * Factory to create support for Channel Access links.
  * @author mrk
  *
  */
@@ -66,7 +68,7 @@ public class CASupportFactory {
     /**
      * Create link support for Channel Access links.
      * @param dbStructure The field for which to create support.
-     * @return A Support interface or null failure.
+     * @return A Support interface or null if the support is not found.
      */
     public static Support create(DBStructure dbStructure) {
         String supportName = dbStructure.getSupportName();
@@ -90,36 +92,7 @@ public class CASupportFactory {
     private static final String monitorSupportName = "monitorSupport";
     private static final String monitorNotifySupportName = "monitorNotifySupport";
 
-    private static Convert convert = ConvertFactory.getConvert();
-    
-    private static PVInt getIndexField(PVStructure pvStructure,String fieldName) {
-        Structure structure = pvStructure.getStructure();
-        PVField[] pvFields = pvStructure.getPVFields();
-        int index = structure.getFieldIndex(fieldName);
-        if(index<0) {
-            pvStructure.message("field " + fieldName + " does not exist", MessageType.error);
-            return null;
-        }
-        PVField pvField = pvFields[index];
-        if(pvField.getField().getType()!=Type.pvStructure) {
-            pvField.message("field is not a structure", MessageType.error);
-            return null;
-        }
-        pvStructure = (PVStructure)pvField;
-        pvFields = pvStructure.getPVFields();
-        structure = pvStructure.getStructure();
-        index = structure.getFieldIndex("index");
-        if(index<0) {
-            pvStructure.message("field index does not exist", MessageType.error);
-            return null;
-        }
-        pvField = pvFields[index];
-        if(pvField.getField().getType()!=Type.pvInt) {
-            pvField.message("field is not an int", MessageType.error);
-            return null;
-        }
-        return (PVInt)pvField;
-    }
+    private static final Convert convert = ConvertFactory.getConvert();
     
     private static abstract class CASupport extends AbstractSupport
     implements ChannelListener,ChannelFieldGroupListener {
@@ -127,10 +100,11 @@ public class CASupportFactory {
         protected PVStructure pvStructure;
         protected String channelRequesterName;
         protected DBRecord dbRecord;
-        protected RecordProcess recordProcess;
-        protected AlarmSupport alarmSupport;
-        protected PVString providerNameAccess;
-        protected PVString pvnameAccess;
+        protected RecordProcess recordProcess = null;
+        protected AlarmSupport alarmSupport = null;
+        protected PVString providerNameAccess = null;
+        protected PVString pvnameAccess = null;
+        
         protected Channel channel = null;
         protected boolean isConnected = false;
         
@@ -147,7 +121,6 @@ public class CASupportFactory {
         @Override
         public void initialize() {
             if(!super.checkSupportState(SupportState.readyForInitialize,processSupportName)) return;
-            dbRecord = dbStructure.getDBRecord();
             recordProcess = dbRecord.getRecordProcess();
             alarmSupport = AlarmFactory.findAlarmSupport(dbStructure);
             providerNameAccess = pvStructure.getStringField("providerName");
@@ -169,14 +142,21 @@ public class CASupportFactory {
                 message("providerName " + providerName + " pvname " + pvname + " not found",MessageType.error);
                 return;
             }
-            isConnected = channel.isConnected();
             setSupportState(SupportState.ready);
+        }
+        /**
+         * Called after derived class is started
+         */
+        protected void connect() {
+            if(super.getSupportState()!=SupportState.ready) return;
+            channel.connect();
+            isConnected = channel.isConnected();
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.support.AbstractSupport#stop()
          */
         public void stop() {
-            channel.destroy();
+            channel.disconnect();
             channel = null;
             setSupportState(SupportState.readyForStart);
         }
@@ -187,7 +167,7 @@ public class CASupportFactory {
             if(super.getSupportState()==SupportState.ready) {
                 stop();
             }
-            if(super.getSupportState()!=SupportState.readyForStart) return;
+            if(super.getSupportState()==SupportState.readyForInitialize) return;
             setSupportState(SupportState.readyForInitialize);
         }
         
@@ -205,11 +185,10 @@ public class CASupportFactory {
         /* (non-Javadoc)
          * @see org.epics.ioc.ca.ChannelListener#disconnect(org.epics.ioc.ca.Channel)
          */
-        public void disconnect(Channel c) {
+        public void destroy(Channel c) {
             dbRecord.lock();
             try {
-                SupportState supportState = dbRecord.getDBStructure().getSupport().getSupportState();
-                if(supportState!=SupportState.ready) return;
+                if(super.getSupportState()!=SupportState.ready) return;
             } finally {
                 dbRecord.unlock();
             }
@@ -243,17 +222,23 @@ public class CASupportFactory {
          * @see org.epics.ioc.support.CASupportFactory.CASupport#channelStateChange(org.epics.ioc.ca.Channel, boolean)
          */
         public void channelStateChange(Channel c, boolean isConnected) {
-            dbRecord.lock();
-            try {
-                this.isConnected = isConnected;
-                if(isConnected) {
-                    channelProcess = channel.createChannelProcess(this);
-                } else {
-                    channelProcess.destroy();
-                    channelProcess = null;
+            if(isConnected) {
+                channelProcess = channel.createChannelProcess(this);
+                dbRecord.lock();
+                try {
+                    super.isConnected = isConnected;
+                } finally {
+                    dbRecord.unlock();
                 }
-            } finally {
-                dbRecord.unlock();
+            } else {
+                dbRecord.lock();
+                try {
+                    super.isConnected = isConnected;
+                } finally {
+                    dbRecord.unlock();
+                }
+                channelProcess.destroy();
+                channelProcess = null;
             }
         }
         /* (non-Javadoc)
@@ -261,27 +246,20 @@ public class CASupportFactory {
          */
         public void start() {
             super.start();
-            channelProcess = channel.createChannelProcess(this);
+            super.connect();
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.process.Support#stop()
          */
         public void stop() {
-            super.stop();
+            channelProcess.destroy();
             channelProcess = null;
+            super.stop();
         }        
         /* (non-Javadoc)
          * @see org.epics.ioc.process.AbstractSupport#process(org.epics.ioc.process.RecordProcessRequester)
          */
         public void process(SupportProcessRequester supportProcessRequester) {
-            if(!super.checkSupportState(SupportState.ready,processSupportName)) {
-                if(alarmSupport!=null) alarmSupport.setAlarm(
-                        pvStructure.getFullFieldName() + " not ready",
-                        AlarmSeverity.major);
-                supportProcessRequester.supportProcessDone(RequestResult.failure);
-                return;
-            }
-            
             if(!isConnected) {
                 if(alarmSupport!=null) alarmSupport.setAlarm(
                         pvStructure.getFullFieldName() + " not connected",
@@ -345,21 +323,28 @@ public class CASupportFactory {
          * @see org.epics.ioc.support.CASupportFactory.CASupport#channelStateChange(org.epics.ioc.ca.Channel, boolean)
          */
         public void channelStateChange(Channel c, boolean isConnected) {
-            dbRecord.lock();
-            try {
-                if(isConnected==this.isConnected) return;
-                this.isConnected = isConnected;
-                if(isConnected) {
-                    prepareForInput();
-                } else {
-                    if(cdGet!=null) cd.destroy(cdGet);
-                    cdGet = null;
-                    valueChannelField = null;
-                    severityField = null;
-                    channelFieldGroup = null;
+            if(isConnected) {
+                channelFieldName = channel.getFieldName();
+                if(channelFieldName==null) channelFieldName = "value";
+                if(!prepareForInput()) return;
+                dbRecord.lock();
+                try {
+                    super.isConnected = isConnected;
+                } finally {
+                    dbRecord.unlock();
                 }
-            } finally {
-                dbRecord.unlock();
+            } else {
+                dbRecord.lock();
+                try {
+                    super.isConnected = isConnected;
+                } finally {
+                    dbRecord.unlock();
+                }
+                if(cdGet!=null) cd.destroy(cdGet);
+                cdGet = null;
+                valueChannelField = null;
+                severityField = null;
+                channelFieldGroup = null;
             }
         }
         /* (non-Javadoc)
@@ -367,21 +352,12 @@ public class CASupportFactory {
          */
         public void initialize() {           
             super.initialize();
-            if(!super.checkSupportState(SupportState.readyForStart,inputSupportName)) return;
+            if(super.getSupportState()!=SupportState.readyForStart) return;
             processAccess = pvStructure.getBooleanField("process");
             if(processAccess==null) {
                 uninitialize();
                 return;
             }
-            inheritSeverityAccess = pvStructure.getBooleanField("inheritSeverity");
-            if(inheritSeverityAccess==null) uninitialize();
-        }       
-        /* (non-Javadoc)
-         * @see org.epics.ioc.process.Support#start()
-         */
-        public void start() {
-            super.start();
-            if(!super.checkSupportState(SupportState.ready,inputSupportName)) return;
             DBField dbParent = dbStructure.getParent();
             PVField pvField = null;
             while(dbParent!=null) {
@@ -392,16 +368,25 @@ public class CASupportFactory {
             }
             if(pvField==null) {
                 pvStructure.message("value field not found", MessageType.error);
+                uninitialize();
                 return;
             }
             valueDBField = dbStructure.getDBRecord().findDBField(pvField);
+            inheritSeverityAccess = pvStructure.getBooleanField("inheritSeverity");
+            if(inheritSeverityAccess==null) {
+                pvStructure.message("inheritSeverityAccess field not found", MessageType.error);
+                uninitialize();
+            }
+        }       
+        /* (non-Javadoc)
+         * @see org.epics.ioc.process.Support#start()
+         */
+        public void start() {
+            super.start();
+            if(super.getSupportState()!=SupportState.ready) return;
             inheritSeverity = inheritSeverityAccess.get();
             process = processAccess.get();
-            channelFieldName = channel.getFieldName();
-            if(channelFieldName==null) channelFieldName = "value";
-            if(isConnected) {
-                prepareForInput();
-            }
+            super.connect();
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.process.Support#stop()
@@ -416,17 +401,6 @@ public class CASupportFactory {
          * @see org.epics.ioc.process.AbstractSupport#process(org.epics.ioc.process.SupportProcessRequester)
          */
         public void process(SupportProcessRequester supportProcessRequester) {
-            if(!super.checkSupportState(SupportState.ready,inputSupportName + ".process")) {
-                if(alarmSupport!=null) alarmSupport.setAlarm(
-                        pvStructure.getFullFieldName() + " not ready",
-                        AlarmSeverity.major);
-                supportProcessRequester.supportProcessDone(RequestResult.failure);
-            }
-            if(supportProcessRequester==null) {
-                throw new IllegalStateException("supportProcessRequester is null");
-            }
-            this.supportProcessRequester = supportProcessRequester;
-            requestResult = RequestResult.success;
             if(!isConnected) {
                 if(alarmSupport!=null) alarmSupport.setAlarm(
                         pvStructure.getFullFieldName() + " not connected",
@@ -434,6 +408,7 @@ public class CASupportFactory {
                 supportProcessRequester.supportProcessDone(RequestResult.success);
                 return;
             }
+            this.supportProcessRequester = supportProcessRequester;
             recordProcess.requestProcessCallback(this);
             return;
         }       
@@ -441,6 +416,7 @@ public class CASupportFactory {
          * @see org.epics.ioc.process.ProcessCallbackRequester#processCallback()
          */
         public void processCallback() {
+            requestResult = RequestResult.success;
             alarmSeverity = AlarmSeverity.none;
             cdGet.get(cd);
         }
@@ -496,15 +472,15 @@ public class CASupportFactory {
             recordProcess.processContinue(this);
         }      
         
-        private void prepareForInput() {
+        private boolean prepareForInput() {
             valueChannelField = channel.createChannelField(channelFieldName);
             if(valueChannelField==null) {
                 message(channelFieldName + " does not exist ",MessageType.error);
-                return;
+                return false;
             }
             if(!checkCompatibility(valueChannelField.getField())) {
                 valueChannelField = null;
-                return;
+                return false;
             }
             channelFieldGroup = channel.createFieldGroup(this);
             channelFieldGroup.addChannelField(valueChannelField);
@@ -514,19 +490,20 @@ public class CASupportFactory {
                     channelFieldGroup = null;
                     valueChannelField = null;
                     message("severity.index does not exist ",MessageType.error);
-                    return;
+                    return false;
                 }
                 Type type = severityField.getField().getType();
                 if(type!=Type.pvInt) {
                     channelFieldGroup = null;
                     valueChannelField = null;
                     message("severity.index is not an int ",MessageType.error);
-                    return;
+                    return false;
                 }
                 channelFieldGroup.addChannelField(severityField);
             }
             cd = CDFactory.createCD(channel, channelFieldGroup);
             cdGet = cd.createCDGet(this, process);
+            return true;
         }
                 
         private boolean checkCompatibility(Field targetField) {
@@ -575,19 +552,26 @@ public class CASupportFactory {
          * @see org.epics.ioc.ca.ChannelListener#channelStateChange(org.epics.ioc.ca.Channel)
          */
         public void channelStateChange(Channel c,boolean isConnected) {
-            dbRecord.lock();
-            try {
-                if(isConnected==this.isConnected) return;
-                this.isConnected = isConnected;
-                if(isConnected) {
-                    prepareForOutput();
-                } else {
-                    if(cdPut!=null) cd.destroy(cdPut);
-                    cdPut = null;
-                    valueChannelField = null;
+            if(isConnected) {
+                channelFieldName = channel.getFieldName();
+                if(channelFieldName==null) channelFieldName = "value";
+                if(!prepareForOutput()) return;;
+                dbRecord.lock();
+                try {
+                    super.isConnected = isConnected;
+                } finally {
+                    dbRecord.unlock();
                 }
-            } finally {
-                dbRecord.unlock();
+            } else {
+                dbRecord.lock();
+                try {
+                    super.isConnected = isConnected;
+                } finally {
+                    dbRecord.unlock();
+                }
+                if(cdPut!=null) cd.destroy(cdPut);
+                cdPut = null;
+                valueChannelField = null;
             }
         }
         /* (non-Javadoc)
@@ -595,19 +579,12 @@ public class CASupportFactory {
          */
         public void initialize() {
             super.initialize();
-            if(!super.checkSupportState(SupportState.readyForStart,inputSupportName)) return;
+            if(super.getSupportState()!=SupportState.readyForStart) return;
             processAccess = pvStructure.getBooleanField("process");
             if(processAccess==null) {
                 uninitialize();
                 return;
             }
-        }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.process.Support#start()
-         */
-        public void start() {
-            super.start();
-            if(!super.checkSupportState(SupportState.ready,inputSupportName)) return;
             DBField dbParent = dbStructure.getParent();
             PVField pvField = null;
             while(dbParent!=null) {
@@ -618,15 +595,19 @@ public class CASupportFactory {
             }
             if(pvField==null) {
                 pvStructure.message("value field not found", MessageType.error);
+                uninitialize();
                 return;
             }
             valueDBField = dbStructure.getDBRecord().findDBField(pvField);
+        }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.process.Support#start()
+         */
+        public void start() {
+            super.start();
+            if(super.getSupportState()!=SupportState.ready) return;
             process = processAccess.get();
-            channelFieldName = channel.getFieldName();
-            if(channelFieldName==null) channelFieldName = "value";
-            if(isConnected) {
-                prepareForOutput();
-            }
+            super.connect();
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.process.Support#stop()
@@ -640,16 +621,6 @@ public class CASupportFactory {
          * @see org.epics.ioc.process.AbstractSupport#process(org.epics.ioc.process.SupportProcessRequester)
          */
         public void process(SupportProcessRequester supportProcessRequester) {
-            if(!super.checkSupportState(SupportState.ready,outputSupportName + ".process")) {
-                if(alarmSupport!=null) alarmSupport.setAlarm(
-                        pvStructure.getFullFieldName() + " not ready",
-                        AlarmSeverity.major);
-                supportProcessRequester.supportProcessDone(RequestResult.failure);
-            }
-            if(supportProcessRequester==null) {
-                throw new IllegalStateException("supportProcessRequester is null");
-            }
-            this.supportProcessRequester = supportProcessRequester;
             if(!isConnected) {
                 if(alarmSupport!=null) alarmSupport.setAlarm(
                         pvStructure.getFullFieldName() + " not connected",
@@ -683,9 +654,16 @@ public class CASupportFactory {
                 cdField.incrementNumPuts();
             } else {
                 message(
-                    "Logic error in InputSupport: unsupported type",
+                    "Logic error in OutputSupport: unsupported type",
                     MessageType.fatalError);
+                if(alarmSupport!=null) alarmSupport.setAlarm(
+                        pvStructure.getFullFieldName()
+                        + "Logic error in OutputSupport: unsupported type",
+                        AlarmSeverity.major);
+                supportProcessRequester.supportProcessDone(RequestResult.success);
+                return;
             }
+            this.supportProcessRequester = supportProcessRequester;
             recordProcess.requestProcessCallback(this);
             return;
         }       
@@ -702,25 +680,10 @@ public class CASupportFactory {
              supportProcessRequester.supportProcessDone(requestResult);
         }        
         /* (non-Javadoc)
-         * @see org.epics.ioc.ca.ChannelListener#disconnect(org.epics.ioc.ca.Channel)
-         */
-        public void disconnect(Channel c) {
-            dbRecord.lock();
-            try {
-                SupportState supportState = dbRecord.getDBStructure().getSupport().getSupportState();
-                if(supportState!=SupportState.ready) return;
-            } finally {
-                dbRecord.unlock();
-            }
-            recordProcess.stop();
-            recordProcess.start();
-        }           
-        /* (non-Javadoc)
          * @see org.epics.ioc.ca.CDPutRequester#getDone(org.epics.ioc.util.RequestResult)
          */
         public void getDone(RequestResult requestResult) {
-            // TODO Auto-generated method stub
-            
+            // nothing to do
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.ca.CDPutRequester#putDone(org.epics.ioc.util.RequestResult)
@@ -730,21 +693,22 @@ public class CASupportFactory {
             recordProcess.processContinue(this);
         }      
                 
-        private void prepareForOutput() {
+        private boolean prepareForOutput() {
             valueChannelField = channel.createChannelField(channelFieldName);
             if(valueChannelField==null) {
                 message(channelFieldName + " does not exist ",MessageType.error);
-                return;
+                return false;
             }
             if(!checkCompatibility(valueChannelField.getField())) {
                 valueChannelField = null;
-                return;
+                return false;
             }
             putFieldGroup = channel.createFieldGroup(this);
             
             putFieldGroup.addChannelField(valueChannelField); 
             cd = CDFactory.createCD(channel, putFieldGroup);
             cdPut = cd.createCDPut(this, process);
+            return true;
         }
               
         private boolean checkCompatibility(Field targetField) {
@@ -774,9 +738,7 @@ public class CASupportFactory {
     ChannelMonitorNotifyRequester
     {
         private ChannelMonitorNotify channelMonitorNotify = null;
-        
         private boolean isActive;
-       
         private MonitorNotifySupport(DBStructure dbStructure) {
             super(monitorNotifySupportName,dbStructure);
         }      
@@ -797,15 +759,7 @@ public class CASupportFactory {
         public void start() {
             super.start();
             if(!super.checkSupportState(SupportState.ready,inputSupportName)) return;
-            String fieldName = channel.getFieldName();
-            if(fieldName==null) fieldName = "value";
-            ChannelField channelField = channel.createChannelField(fieldName);
-            ChannelFieldGroup channelFieldGroup = channel.createFieldGroup(this);
-            channelFieldGroup.addChannelField(channelField);
-            channelMonitorNotify = ChannelMonitorNotifyFactory.create(channel, this);
-            channelMonitorNotify.setFieldGroup(channelFieldGroup);
-            channelMonitorNotify.start();
-            setSupportState(SupportState.ready);
+            super.connect();
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.process.AbstractSupport#process(org.epics.ioc.process.SupportProcessRequester)
@@ -831,15 +785,30 @@ public class CASupportFactory {
          */
         public void channelStateChange(Channel c,boolean isConnected) {
             assert(c==channel);
-            dbRecord.lock();
-            try {
-                if(!channel.isConnected()) {
-                    channelMonitorNotify.stop();
-                    return;
-                }
+            if(isConnected) {
+                String fieldName = channel.getFieldName();
+                if(fieldName==null) fieldName = "value";
+                ChannelField channelField = channel.createChannelField(fieldName);
+                ChannelFieldGroup channelFieldGroup = channel.createFieldGroup(this);
+                channelFieldGroup.addChannelField(channelField);
+                channelMonitorNotify = ChannelMonitorNotifyFactory.create(channel, this);
+                channelMonitorNotify.setFieldGroup(channelFieldGroup);
                 channelMonitorNotify.start();
-            } finally {
-                dbRecord.unlock();
+                dbRecord.lock();
+                try {
+                    super.isConnected = isConnected;
+                } finally {
+                    dbRecord.unlock();
+                }
+            } else {
+                dbRecord.lock();
+                try {
+                    super.isConnected = isConnected;
+                } finally {
+                    dbRecord.unlock();
+                }
+                channelMonitorNotify.destroy();
+                channelMonitorNotify = null;
             }
         }
         /* (non-Javadoc)
@@ -923,8 +892,10 @@ public class CASupportFactory {
          */
         public void initialize() {
             super.initialize();
-            if(!super.checkSupportState(SupportState.readyForStart,inputSupportName)) return;
-            monitorTypeAccess = getIndexField(pvStructure,"type");
+            if(super.getSupportState()!=SupportState.readyForStart) return;
+            PVStructure pvTypeStructure = pvStructure.getStructureField("type", "monitorType");
+            PVEnumerated pvEnumerated = pvTypeStructure.getPVEnumerated();
+            if(pvEnumerated!=null) monitorTypeAccess = pvEnumerated.getIndexField();
             if(monitorTypeAccess==null) {
                 uninitialize(); return;
             }
@@ -948,13 +919,6 @@ public class CASupportFactory {
             if(inheritSeverityAccess==null)  {
                 uninitialize(); return;
             } 
-        }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.process.Support#start()
-         */
-        public void start() {
-            super.start();
-            if(!super.checkSupportState(SupportState.ready,inputSupportName)) return;
             DBField dbParent = dbStructure.getParent();
             PVField pvField = null;
             while(dbParent!=null) {
@@ -965,9 +929,16 @@ public class CASupportFactory {
             }
             if(pvField==null) {
                 pvStructure.message("value field not found", MessageType.error);
-                return;
+                uninitialize(); return;
             }
             valueDBField = dbStructure.getDBRecord().findDBField(pvField);
+        }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.process.Support#start()
+         */
+        public void start() {
+            super.start();
+            if(super.getSupportState()!=SupportState.ready) return;
             int index = monitorTypeAccess.get();
             monitorType = MonitorType.getType(index);
             deadband = deadbandAccess.get();
@@ -994,13 +965,7 @@ public class CASupportFactory {
                 pvStructure.message("inheritSeverity ignored", MessageType.warning);
                 inheritSeverity = false;
             }
-            fieldName = channel.getFieldName();
-            if(fieldName==null) fieldName = "value";
-            cDMonitor = CDMonitorFactory.create(channel, this);
-            if(channel.isConnected()) {
-                channelStart();
-            }
-            setSupportState(SupportState.ready);
+            super.connect();
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.process.Support#stop()
@@ -1009,7 +974,7 @@ public class CASupportFactory {
             if(super.getSupportState()!=SupportState.ready) return;
             if(isRecordProcessRequester) recordProcess.releaseRecordProcessRequester(this);
             isRecordProcessRequester = false;
-            if(channel!=null) channel.destroy();
+            if(channel!=null) channel.disconnect();
             channel = null;
             setSupportState(SupportState.readyForStart);
         }
@@ -1017,13 +982,6 @@ public class CASupportFactory {
          * @see org.epics.ioc.process.Support#process(org.epics.ioc.process.SupportListener)
          */
         public void process(SupportProcessRequester supportProcessRequester) {
-            if(!super.checkSupportState(SupportState.ready,monitorSupportName + ".process")) {
-                if(alarmSupport!=null) alarmSupport.setAlarm(
-                        pvStructure.getFullFieldName() + " not ready",
-                        AlarmSeverity.major);
-                supportProcessRequester.supportProcessDone(RequestResult.failure);
-                return;
-            }
             if(!channel.isConnected()) {
                 if(alarmSupport!=null) alarmSupport.setAlarm("Support not connected",
                     AlarmSeverity.invalid);
@@ -1047,32 +1005,30 @@ public class CASupportFactory {
          */
         public void channelStateChange(Channel c,boolean isConnected) {
             assert(c==channel);
-            dbRecord.lock();
-            try {
-                if(!channel.isConnected()) {
-                    severityChannelField = null;
-                    targetChannelField = null;
-                    channelFieldGroup = null;
-                    return;
-                }
+            if(isConnected) {
+                fieldName = channel.getFieldName();
+                if(fieldName==null) fieldName = "value";
+                cDMonitor = CDMonitorFactory.create(channel, this);
                 channelStart();
-            } finally {
-                dbRecord.unlock();
+                dbRecord.lock();
+                try {
+                    super.isConnected = isConnected;
+                } finally {
+                    dbRecord.unlock();
+                }
+            } else {
+                dbRecord.lock();
+                try {
+                    super.isConnected = isConnected;
+                } finally {
+                    dbRecord.unlock();
+                }
+                cDMonitor.stop();
+                cDMonitor = null;
+                severityChannelField = null;
+                targetChannelField = null;
+                channelFieldGroup = null;
             }
-        }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.ca.ChannelListener#disconnect(org.epics.ioc.ca.Channel)
-         */
-        public void disconnect(Channel c) {
-            dbRecord.lock();
-            try {
-                SupportState supportState = dbRecord.getDBStructure().getSupport().getSupportState();
-                if(supportState!=SupportState.ready) return;
-            } finally {
-                dbRecord.unlock();
-            }
-            recordProcess.stop();
-            recordProcess.start();
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.ca.ChannelFieldGroupListener#accessRightsChange(org.epics.ioc.ca.ChannelField)
@@ -1154,18 +1110,18 @@ public class CASupportFactory {
                 }
                 if(process) {
                     if(valueChanged) this.valueChanged = valueChanged;
-                    if(isRecordProcessRequester) {
-                        processDone = false;
-                        recordProcess.process(this, false, null);
-                    }
                 } else if(valueChanged){
                     valueDBField.postPut();
                 }
             } finally {
                 dbRecord.unlock();
             }
-            if(process && !processDone) {
-                //  wait for completion
+            if(process) {
+                if(isRecordProcessRequester) {
+                    processDone = false;
+                    recordProcess.process(this, false, null);
+                }
+                // wait for completion
                 try {
                     processLock.lock();
                     try {

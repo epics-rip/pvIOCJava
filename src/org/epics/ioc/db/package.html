@@ -449,11 +449,9 @@ value.</p>
 <p>DBListener has the definition:</p>
 <pre>    public interface DBListener {
         void dataPut(DBField dbField);
-        void supportNamePut(DBField dbField);
         void beginPut(DBStructure dbStructure);
         void endPut(DBStructure dbStructure);
         void dataPut(DBField requested,DBField dbField);
-        void supportNamePut(DBField requested,DBField dbField);
         void beginProcess();
         void endProcess();
         void unlisten(RecordListener listener);
@@ -462,8 +460,6 @@ where
 <dl>
   <dt style="font-family: courier;">dataPut</dt>
     <dd>A data put has occured.</dd>
-  <dt style="font-family: courier;">supportNamePut</dt>
-    <dd>The support name has been changed.</dd>
   <dt style="font-family: courier;">beginPut</dt>
     <dd>A series of puts to a structure is starting.</dd>
   <dt style="font-family: courier;">endPut</dt>
@@ -478,7 +474,7 @@ where
       should null the object reference returned by addListener.</dd>
 </dl>
 
-<p>For dataPut and supportNamePut two versions are provided. The first is
+<p>For dataPut two versions are provided. The first is
 called if the listener attaches directly the the field that is being
 modified. The second version is called if the caller attaches to a structure
 that has the field located somewhere in it. The first argument is the
@@ -965,16 +961,6 @@ all properties of the field.</p>
         System.out.printf("%s    %s = %s%n",
             common,name,dbField.toString(2));
     }
-    public void supportNamePut(DBField dbField) {
-        PVField pvField = dbField.getPVField();
-        String common = putCommon("supportNamePut");
-        String name = pvField.getPVRecord().getRecordName() + pvField.getFullFieldName();
-        if(!name.equals(fullName)) {
-            System.out.printf("%s %s NOT_EQUAL %s%n",common,name,fullName);
-        }
-        System.out.printf("%s    %s = %s%n",
-            common,name,pvField.getSupportName());
-    }
     public void dataPut(DBField requested, DBField dbField) {
         PVField pvRequested = requested.getPVField();
         PVField pvField = dbField.getPVField();
@@ -983,15 +969,6 @@ all properties of the field.</p>
             + pvRequested.getFullFieldName();
         String common = putCommon(structureName +" dataPut to field " + pvField.getFullFieldName());
         System.out.printf("%s    = %s%n",common,pvField.toString(2));
-    }
-    public void supportNamePut(DBField requested,DBField dbField) {
-        PVField pvRequested = requested.getPVField();
-        PVField pvField = dbField.getPVField();
-        String structureName =
-            pvRequested.getPVRecord().getRecordName()
-            + pvRequested.getFullFieldName();
-        String common = putCommon(structureName +" supportNamePut to field " + pvField.getFullFieldName());
-        System.out.printf("%s    = %s%n",common,pvField.getSupportName());
     }
     public void unlisten(RecordListener listener) {
         // Nothing to do.

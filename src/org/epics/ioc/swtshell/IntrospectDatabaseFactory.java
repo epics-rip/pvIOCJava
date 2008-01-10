@@ -17,7 +17,7 @@ import org.epics.ioc.dbd.*;
 import org.epics.ioc.util.*;;
 
 /**
- * Introspect a JavaIOC Database.
+ * A shell for introspecting a JavaIOC Database.
  * The menubar at the top of the display provides access to the DBD (Database Definition Database).
  * The recordName row provides access to record instances. It provides two controls: a select
  * button and a text entry widget.
@@ -27,11 +27,11 @@ import org.epics.ioc.util.*;;
  * @author mrk
  *
  */
-public class IntrospectDatabase {
+public class IntrospectDatabaseFactory {
     static private IOCDB iocdb = IOCDBFactory.getMaster();
     
     /**
-     * Called by SwtShell after the default constructor has been called.
+     * A shell for introspecting the local IOC database.
      * @param display The display.
      */
     public static void init(Display display) {
@@ -48,7 +48,7 @@ public class IntrospectDatabase {
         private Text recordSelectText;
         private Button clearButton;
         private Text consoleText;
-        private SelectRecord selectRecord;
+        private SelectLocalRecord selectLocalRecord;
         
         private Introspect(Display display) {
             this.display = display;
@@ -83,7 +83,6 @@ public class IntrospectDatabase {
             new Label(recordSelectComposite,SWT.NONE).setText("recordName");
             Button recordSelectButton = new Button(recordSelectComposite,SWT.PUSH);
             recordSelectButton.setText("select");
-            selectRecord = new SelectRecord(shell,this);
             recordSelectText = new Text(recordSelectComposite,SWT.SINGLE);
             gridData = new GridData(GridData.FILL_HORIZONTAL);
             recordSelectText.setLayoutData(gridData);
@@ -100,11 +99,13 @@ public class IntrospectDatabase {
             consoleText = new Text(consoleComposite,SWT.BORDER|SWT.H_SCROLL|SWT.V_SCROLL|SWT.READ_ONLY);
             gridData = new GridData(GridData.FILL_BOTH);
             consoleText.setLayoutData(gridData);
+            selectLocalRecord = SelectLocalRecordFactory.create(shell,this);
             recordSelectButton.addSelectionListener( new SelectionAdapter() {
                 public void widgetSelected(SelectionEvent e) {
-                    String name = selectRecord.getRecordName();
-                    if(name!=null) {
-                        DBRecord dbRecord = recordMap.get(name);
+                    
+                    String recordName = selectLocalRecord.getRecordName();
+                    if(recordName!=null) {
+                        DBRecord dbRecord = recordMap.get(recordName);
                         if(dbRecord!=null) {
                             consoleText.append(dbRecord.toString());
                         } else {

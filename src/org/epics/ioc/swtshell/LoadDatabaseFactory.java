@@ -16,7 +16,7 @@ import org.epics.ioc.dbd.*;
 import org.epics.ioc.util.*;
 
 /**
- * Load a new Database Definition or Record Instance into a running JavaIOC.
+ * A shell for loading a new Database Definition or Record Instance into a running JavaIOC.
  * The new definition is added only if no errors occur.
  * New record instances are only added if they are now records and initialize properly.
  * The controls are:
@@ -44,10 +44,10 @@ import org.epics.ioc.util.*;
  * @author mrk
  *
  */
-public class LoadDatabase {
+public class LoadDatabaseFactory {
     
     /**
-     * Called by SwtShell after the default constructor has been called.
+     * Create the shell for loading a javaIOC database.
      * @param display The display.
      */
     public static void init(Display display) {

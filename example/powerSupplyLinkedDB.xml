@@ -4,14 +4,7 @@
 <record name = "adcVoltageSupported" type = "int">
     <timeStamp structureName = "timeStamp" />
     <alarm structureName = "alarm" />
-    <supportArray>
-        <value structureName = "supportArrayElement">
-            <wait>true</wait>
-            <link  supportName = "processSupport" structureName = "processSupport">
-                <pvname>voltage</pvname>
-            </link>
-        </value>
-   </supportArray>
+    <value>1000</value>
 </record>
 
 <record name = "voltage" type = "double" >
@@ -66,7 +59,7 @@
     <voltage>
         <input  supportName = "inputSupport" structureName = "inputSupport">
             <pvname>voltage</pvname>
-            <process>false</process>
+            <process>true</process>
         </input>
     </voltage>
     <current>
