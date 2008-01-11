@@ -24,6 +24,8 @@ import gov.aps.jca.event.ContextMessageListener;
 import gov.aps.jca.event.ContextVirtualCircuitExceptionEvent;
 import gov.aps.jca.event.GetEvent;
 import gov.aps.jca.event.GetListener;
+import gov.aps.jca.event.PutEvent;
+import gov.aps.jca.event.PutListener;
 
 import java.util.Iterator;
 import java.util.List;
@@ -53,9 +55,15 @@ import org.epics.ioc.db.DBRecordFactory;
 import org.epics.ioc.dbd.DBD;
 import org.epics.ioc.dbd.DBDFactory;
 import org.epics.ioc.dbd.DBDStructure;
+import org.epics.ioc.pv.ByteArrayData;
+import org.epics.ioc.pv.Convert;
+import org.epics.ioc.pv.ConvertFactory;
+import org.epics.ioc.pv.DoubleArrayData;
 import org.epics.ioc.pv.Field;
 import org.epics.ioc.pv.FieldCreate;
 import org.epics.ioc.pv.FieldFactory;
+import org.epics.ioc.pv.FloatArrayData;
+import org.epics.ioc.pv.IntArrayData;
 import org.epics.ioc.pv.PVByte;
 import org.epics.ioc.pv.PVByteArray;
 import org.epics.ioc.pv.PVDataCreate;
@@ -75,6 +83,8 @@ import org.epics.ioc.pv.PVShortArray;
 import org.epics.ioc.pv.PVString;
 import org.epics.ioc.pv.PVStringArray;
 import org.epics.ioc.pv.PVStructure;
+import org.epics.ioc.pv.ShortArrayData;
+import org.epics.ioc.pv.StringArrayData;
 import org.epics.ioc.pv.Structure;
 import org.epics.ioc.pv.Type;
 import org.epics.ioc.util.MessageType;
@@ -132,7 +142,7 @@ public class ClientFactory  {
         /* (non-Javadoc)
          * @see org.epics.ioc.ca.ChannelProvider#createChannel(java.lang.String, org.epics.ioc.ca.ChannelListener)
          */
-        public synchronized Channel createChannel(String pvName,ChannelListener listener) {
+        public Channel createChannel(String pvName,ChannelListener listener) {
             String recordName = null;
             String fieldName = null;
             String options = null;
@@ -201,7 +211,6 @@ public class ClientFactory  {
         private DBRType valueDBRType = null;
         private PVRecord pvRecord = null;
         private DBRecord dbRecord = null;
-        private DBRType requestDBRType = null;
         
         private ChannelImpl(ChannelListener listener,
                 String recordName,String fieldName, String options)
@@ -249,22 +258,16 @@ public class ClientFactory  {
             Type type = null;
             if(valueDBRType.isBYTE()) {
                 type = Type.pvByte;
-                requestDBRType = DBRType.TIME_BYTE;
             } else if(valueDBRType.isSHORT()) {
                 type= Type.pvShort;
-                requestDBRType = DBRType.TIME_SHORT;
             } else if(valueDBRType.isINT()) {
                 type = Type.pvInt;
-                requestDBRType = DBRType.TIME_INT;
             } else if(valueDBRType.isFLOAT()) {
                 type = Type.pvFloat;
-                requestDBRType = DBRType.TIME_FLOAT;
             } else if(valueDBRType.isDOUBLE()) {
                 type = Type.pvDouble;
-                requestDBRType = DBRType.TIME_DOUBLE;
             } else if(valueDBRType.isSTRING()) {
                 type = Type.pvString;
-                requestDBRType = DBRType.TIME_STRING;
             } else if(valueDBRType.isENUM()) {
                 // marty do something
             }
@@ -272,8 +275,7 @@ public class ClientFactory  {
             Field valueField = null;
             if(elementCount<2) {
                 valueField = fieldCreate.createField("value", type);
-            }
-            if(elementCount>1) {
+            } else {
                 elementType = type;
                 type = Type.pvArray;
                 valueField = fieldCreate.createArray("value", elementType);
@@ -317,7 +319,7 @@ public class ClientFactory  {
         /* (non-Javadoc)
          * @see org.epics.ioc.ca.Channel#createChannelField(java.lang.String)
          */
-        public synchronized ChannelField createChannelField(String name) {
+        public ChannelField createChannelField(String name) {
             if(!isConnected) {
                 message("createChannelField but not connected",MessageType.warning);
                 return null;
@@ -330,7 +332,7 @@ public class ClientFactory  {
         /* (non-Javadoc)
          * @see org.epics.ioc.ca.Channel#createChannelProcess(org.epics.ioc.ca.ChannelProcessRequester)
          */
-        public synchronized ChannelProcess createChannelProcess(ChannelProcessRequester channelProcessRequester)
+        public ChannelProcess createChannelProcess(ChannelProcessRequester channelProcessRequester)
         {
             if(!isConnected) {
                 channelProcessRequester.message(
@@ -351,7 +353,7 @@ public class ClientFactory  {
         /* (non-Javadoc)
          * @see org.epics.ioc.ca.Channel#createChannelGet(org.epics.ioc.ca.ChannelFieldGroup, org.epics.ioc.ca.ChannelGetRequester, boolean)
          */
-        public synchronized ChannelGet createChannelGet(ChannelFieldGroup channelFieldGroup,
+        public ChannelGet createChannelGet(ChannelFieldGroup channelFieldGroup,
                 ChannelGetRequester channelGetRequester, boolean process)
         {
             if(!isConnected) {
@@ -367,7 +369,7 @@ public class ClientFactory  {
         /* (non-Javadoc)
          * @see org.epics.ioc.ca.Channel#createChannelPut(org.epics.ioc.ca.ChannelFieldGroup, org.epics.ioc.ca.ChannelPutRequester, boolean)
          */
-        public synchronized ChannelPut createChannelPut(ChannelFieldGroup channelFieldGroup,
+        public ChannelPut createChannelPut(ChannelFieldGroup channelFieldGroup,
                 ChannelPutRequester channelPutRequester, boolean process)
         {
             if(!isConnected) {
@@ -383,7 +385,7 @@ public class ClientFactory  {
         /* (non-Javadoc)
          * @see org.epics.ioc.ca.Channel#createChannelPutGet(org.epics.ioc.ca.ChannelFieldGroup, org.epics.ioc.ca.ChannelFieldGroup, org.epics.ioc.ca.ChannelPutGetRequester, boolean)
          */
-        public synchronized ChannelPutGet createChannelPutGet(ChannelFieldGroup putFieldGroup,
+        public ChannelPutGet createChannelPutGet(ChannelFieldGroup putFieldGroup,
             ChannelFieldGroup getFieldGroup, ChannelPutGetRequester channelPutGetRequester,
             boolean process)
         {
@@ -401,7 +403,7 @@ public class ClientFactory  {
         /* (non-Javadoc)
          * @see org.epics.ioc.ca.Channel#createOnChange(org.epics.ioc.ca.ChannelMonitorNotifyRequester, boolean)
          */
-        public synchronized ChannelMonitor createChannelMonitor(ChannelMonitorRequester channelMonitorRequester)
+        public ChannelMonitor createChannelMonitor(ChannelMonitorRequester channelMonitorRequester)
         {
             if(!isConnected) {
                 message(
@@ -439,10 +441,9 @@ public class ClientFactory  {
         private class ChannelGetImpl implements ChannelGet,GetListener
         {
             private boolean isDestroyed = false;
-            private String requesterName;
+            private DBRType requestDBRType = null;
             private ChannelGetRequester channelGetRequester = null;
             private boolean process;
-            private ChannelFieldGroup channelFieldGroup = null;
             private List<ChannelField> channelFieldList;
             
             private ChannelGetImpl(ChannelFieldGroup channelFieldGroup,
@@ -451,24 +452,44 @@ public class ClientFactory  {
                 if(channelFieldGroup==null) {
                     throw new IllegalStateException("no field group");
                 }
-                this.channelFieldGroup = channelFieldGroup;
                 this.channelGetRequester = channelGetRequester;
                 this.process = process;
                 channelFieldList = channelFieldGroup.getList();
-                requesterName = "Get:" + channelGetRequester.getRequesterName();
+                if(valueDBRType==DBRType.BYTE) {
+                    requestDBRType = DBRType.TIME_BYTE;
+                } else if(valueDBRType==DBRType.SHORT) {
+                    requestDBRType = DBRType.TIME_SHORT;
+                } else if(valueDBRType==DBRType.INT) {
+                    requestDBRType = DBRType.TIME_INT;
+                } else if(valueDBRType==DBRType.FLOAT) {
+                    requestDBRType = DBRType.TIME_FLOAT;
+                } else if(valueDBRType==DBRType.DOUBLE) {
+                    requestDBRType = DBRType.TIME_DOUBLE;
+                } else if(valueDBRType==DBRType.STRING) {
+                    requestDBRType = DBRType.TIME_STRING;
+                } else if(valueDBRType==DBRType.ENUM) {
+                    // marty do something
+                }
             }
             
             public void destroy() {
+                isDestroyed = true;
+                ChannelImpl.this.remove(this);
             }
 
             /* (non-Javadoc)
              * @see org.epics.ioc.ca.ChannelGet#get()
              */
             public void get() {
+                if(isDestroyed) {
+                    message("isDestroyed",MessageType.error);
+                    channelGetRequester.getDone(RequestResult.failure);
+                }
                 try {
                     channel.get(requestDBRType, elementCount, this);
                 } catch (Exception e) {
                     message(e.getMessage(),MessageType.error);
+                    channelGetRequester.getDone(RequestResult.failure);
                 }
             }
 
@@ -486,7 +507,7 @@ public class ClientFactory  {
                 gov.aps.jca.dbr.Status status = null;
                 gov.aps.jca.dbr.TimeStamp timeStamp = null;
                 gov.aps.jca.dbr.Severity severity = null;
-                
+
                 if(requestDBRType==DBRType.TIME_BYTE) {
                     DBR_TIME_Byte dbr = (DBR_TIME_Byte)arg0.getDBR();
                     status = dbr.getStatus();
@@ -560,6 +581,7 @@ public class ClientFactory  {
                         pvValue.put(0, dbr.getCount(), dbr.getStringValue(), 0);
                     }
                 }
+
                 PVStructure pvStructure = pvRecord.getStructureField("timeStamp", "timeStamp");
                 PVLong pvSeconds = pvStructure.getLongField("secondsPastEpoch");
                 long seconds = timeStamp.secPastEpoch();
@@ -571,7 +593,7 @@ public class ClientFactory  {
                 PVString pvMessage = pvStructure.getStringField("message");
                 pvMessage.put(status.getName());
                 PVEnumerated pvEnumerated = (PVEnumerated)pvStructure.getStructureField(
-                      "severity","alarmSeverity").getPVEnumerated();
+                        "severity","alarmSeverity").getPVEnumerated();
                 PVInt pvIndex = pvEnumerated.getIndexField();
                 pvIndex.put(severity.getValue());
                 Iterator<ChannelField> channelFieldListIter = channelFieldList.iterator();
@@ -583,14 +605,21 @@ public class ClientFactory  {
             }
         }
         
-        private class ChannelPutImpl implements ChannelPut
+        private class ChannelPutImpl implements ChannelPut,PutListener
         {
-            private String requesterName;
+            private boolean isDestroyed = false;
             private ChannelPutRequester channelPutRequester = null;
             private boolean process;
-                        
-            private ChannelField[] channelFields;
+            private PVField pvField;
+            private ByteArrayData byteArrayData = new ByteArrayData();
+            private ShortArrayData shortArrayData = new ShortArrayData();
+            private IntArrayData intArrayData = new IntArrayData();
+            private FloatArrayData floatArrayData = new FloatArrayData();
+            private DoubleArrayData doubleArrayData = new DoubleArrayData();
+            private StringArrayData stringArrayData = new StringArrayData();
+            private RequestResult requestResult = null;
             
+                         
             private ChannelPutImpl(ChannelFieldGroup channelFieldGroup,
                 ChannelPutRequester channelPutRequester, boolean process)
             {
@@ -599,28 +628,192 @@ public class ClientFactory  {
                 }
                 this.channelPutRequester = channelPutRequester;
                 this.process = process;
-                channelFields = channelFieldGroup.getArray();
-                requesterName = "PutFactory:" + channelPutRequester.getRequesterName();
+                ChannelField[] channelFields = channelFieldGroup.getArray();
+                if(channelFields.length!=1) {
+                    throw new IllegalStateException("field group does not have a single element");
+                }
+                pvField = channelFields[0].getPVField();
+                if(pvField.getField().getType()==Type.pvStructure) {
+                    PVStructure pvStructure = (PVStructure)pvField;
+                    pvField = pvStructure.findProperty("value");
+                }
+                if(pvField==null) {
+                    throw new IllegalStateException("value pvField not found");
+                }
             } 
             
             public void destroy() {
-               
+               isDestroyed = true;
+               ChannelImpl.this.remove(this);
             }
 
             /* (non-Javadoc)
              * @see org.epics.ioc.ca.ChannelPut#put()
              */
             public void put() {
-                // TODO Auto-generated method stub
-                
+                if(isDestroyed) {
+                    message("isDestroyed",MessageType.error);
+                    channelPutRequester.putDone(RequestResult.failure);
+                }
+                requestResult = RequestResult.success;
+                if(valueDBRType==DBRType.BYTE) {
+                    if(elementCount==1) {
+                        PVByte pvFrom = (PVByte)pvField;
+                        byte from = pvFrom.get();
+                        try {
+                            channel.put(from, this);
+                        } catch (Exception e) {
+                            message(e.getMessage(),MessageType.error);
+                            requestResult = RequestResult.failure;
+                            channelPutRequester.putDone(requestResult);
+                        }
+                    } else {
+                        PVByteArray fromArray =(PVByteArray)pvField;
+                        int len = fromArray.get(0, elementCount, byteArrayData);
+                        byte[] from = byteArrayData.data;
+                        int capacity = fromArray.getCapacity();
+                        for (int i=len; i<capacity; i++) from[i] = 0;
+                        try {
+                            channel.put(from, this);
+                        } catch (Exception e) {
+                            message(e.getMessage(),MessageType.error);
+                            requestResult = RequestResult.failure;
+                        }
+
+                    }
+                } else if(valueDBRType==DBRType.SHORT) {
+                    if(elementCount==1) {
+                        PVShort pvFrom = (PVShort)pvField;
+                        short from = pvFrom.get();
+                        try {
+                            channel.put(from, this);
+                        } catch (Exception e) {
+                            message(e.getMessage(),MessageType.error);
+                            requestResult = RequestResult.failure;
+                        }
+                    } else {
+                        PVShortArray fromArray =(PVShortArray)pvField;
+                        int len = fromArray.get(0, elementCount, shortArrayData);
+                        short[] from = shortArrayData.data;
+                        int capacity = fromArray.getCapacity();
+                        for (int i=len; i<capacity; i++) from[i] = 0;
+                        try {
+                            channel.put(from, this);
+                        } catch (Exception e) {
+                            message(e.getMessage(),MessageType.error);
+                            requestResult = RequestResult.failure;
+                        }
+
+                    }
+                } else if(valueDBRType==DBRType.INT) {
+                    if(elementCount==1) {
+                        PVInt pvFrom = (PVInt)pvField;
+                        int from = pvFrom.get();
+                        try {
+                            channel.put(from, this);
+                        } catch (Exception e) {
+                            message(e.getMessage(),MessageType.error);
+                            requestResult = RequestResult.failure;
+                        }
+                    } else {
+                        PVIntArray fromArray =(PVIntArray)pvField;
+                        int len = fromArray.get(0, elementCount, intArrayData);
+                        int[] from = intArrayData.data;
+                        int capacity = fromArray.getCapacity();
+                        for (int i=len; i<capacity; i++) from[i] = 0;
+                        try {
+                            channel.put(from, this);
+                        } catch (Exception e) {
+                            message(e.getMessage(),MessageType.error);
+                            requestResult = RequestResult.failure;
+                        }
+
+                    }
+                } else if(valueDBRType==DBRType.FLOAT) {
+                    if(elementCount==1) {
+                        PVFloat pvFrom = (PVFloat)pvField;
+                        float from = pvFrom.get();
+                        try {
+                            channel.put(from, this);
+                        } catch (Exception e) {
+                            message(e.getMessage(),MessageType.error);
+                        }
+                    } else {
+                        PVFloatArray fromArray =(PVFloatArray)pvField;
+                        int len = fromArray.get(0, elementCount, floatArrayData);
+                        float[] from = floatArrayData.data;
+                        int capacity = fromArray.getCapacity();
+                        for (int i=len; i<capacity; i++) from[i] = 0;
+                        try {
+                            channel.put(from, this);
+                        } catch (Exception e) {
+                            message(e.getMessage(),MessageType.error);
+                            requestResult = RequestResult.failure;
+                        }
+
+                    }
+                } else if(valueDBRType==DBRType.DOUBLE) {
+                    if(elementCount==1) {
+                        PVDouble pvFrom = (PVDouble)pvField;
+                        double from = pvFrom.get();
+                        try {
+                            channel.put(from, this);
+                        } catch (Exception e) {
+                            message(e.getMessage(),MessageType.error);
+                            requestResult = RequestResult.failure;
+                        }
+                    } else {
+                        PVDoubleArray fromArray =(PVDoubleArray)pvField;
+                        int len = fromArray.get(0, elementCount, doubleArrayData);
+                        double[] from = doubleArrayData.data;
+                        int capacity = fromArray.getCapacity();
+                        for (int i=len; i<capacity; i++) from[i] = 0;
+                        try {
+                            channel.put(from, this);
+                        } catch (Exception e) {
+                            message(e.getMessage(),MessageType.error);
+                            requestResult = RequestResult.failure;
+                        }
+
+                    }
+                } else if(valueDBRType==DBRType.STRING) {
+                    if(elementCount==1) {
+                        PVString pvFrom = (PVString)pvField;
+                        String from = pvFrom.get();
+                        try {
+                            channel.put(from, this);
+                        } catch (Exception e) {
+                            message(e.getMessage(),MessageType.error);
+                        }
+                    } else {
+                        PVStringArray fromArray =(PVStringArray)pvField;
+                        int len = fromArray.get(0, elementCount, stringArrayData);
+                        String[] from = stringArrayData.data;
+                        int capacity = fromArray.getCapacity();
+                        for (int i=len; i<capacity; i++) from[i] = "";
+                        try {
+                            channel.put(from, this);
+                        } catch (Exception e) {
+                            message(e.getMessage(),MessageType.error);
+                            requestResult = RequestResult.failure;
+                        }
+
+                    }
+                }
             }
 
             /* (non-Javadoc)
              * @see org.epics.ioc.ca.ChannelPut#putDelayed(org.epics.ioc.pv.PVField)
              */
             public void putDelayed(PVField pvField) {
-                // TODO Auto-generated method stub
-                
+                // nothing to do
+            }
+
+            /* (non-Javadoc)
+             * @see gov.aps.jca.event.PutListener#putCompleted(gov.aps.jca.event.PutEvent)
+             */
+            public void putCompleted(PutEvent arg0) {
+                channelPutRequester.putDone(requestResult);
             }
         }
         
