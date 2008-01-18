@@ -53,17 +53,18 @@ public class ThreadFactory {
                 this.runnable = runnable;
                 thread = new Thread(this,name);
                 thread.setPriority(priority);
+                thread.start();
+                lock.lock();
                 try {
-                    thread.start();
-                    lock.lock();
-                    try {
-                        if(!isReady) waitForReady.await(10, TimeUnit.SECONDS);
-                    } finally {
-                        lock.unlock();
-                    }
+                    if(!isReady) waitForReady.await(10, TimeUnit.SECONDS);
                 } catch(InterruptedException e) {
-                    System.err.println(e.getMessage() + " thread " + name + " did not call ready");
+                    System.err.println(
+                            e.getMessage()
+                            + " thread " + name + " did not call ready");
+                } finally {
+                    lock.unlock();
                 }
+
             }
 
             private Thread getThread() {

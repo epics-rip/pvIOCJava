@@ -49,6 +49,7 @@ public class BaseCDRecord implements CDRecord {
      * @see org.epics.ioc.ca.CDRecord#findCDField(org.epics.ioc.pv.PVField)
      */
     public CDField findCDField(PVField pvField) {
+
         return cdStructure.findCDField(pvField);
     }
     /* (non-Javadoc)

@@ -21,7 +21,8 @@ import org.epics.ioc.ca.CDPut;
 import org.epics.ioc.ca.CDPutRequester;
 import org.epics.ioc.ca.CDStructure;
 import org.epics.ioc.ca.Channel;
-import org.epics.ioc.ca.ChannelFactory;
+import org.epics.ioc.ca.ChannelAccess;
+import org.epics.ioc.ca.ChannelAccessFactory;
 import org.epics.ioc.ca.ChannelField;
 import org.epics.ioc.ca.ChannelFieldGroup;
 import org.epics.ioc.ca.ChannelFieldGroupListener;
@@ -86,6 +87,7 @@ public class CASupportFactory {
         dbStructure.getPVStructure().message("no support for " + supportName, MessageType.fatalError);
         return null;
     }
+    private static final ChannelAccess channelAccess = ChannelAccessFactory.getChannelAccess();
     private static final String processSupportName = "processSupport";
     private static final String inputSupportName = "inputSupport";
     private static final String outputSupportName = "outputSupport";
@@ -93,6 +95,8 @@ public class CASupportFactory {
     private static final String monitorNotifySupportName = "monitorNotifySupport";
 
     private static final Convert convert = ConvertFactory.getConvert();
+    
+    private static final String[] propertys = new String[] {"alarm"};
     
     private static abstract class CASupport extends AbstractSupport
     implements ChannelListener,ChannelFieldGroupListener {
@@ -137,7 +141,7 @@ public class CASupportFactory {
             isConnected = false;
             String providerName = providerNameAccess.get();
             String pvname = pvnameAccess.get();
-            channel = ChannelFactory.createChannel(pvname, providerName, this);
+            channel = channelAccess.createChannel(pvname,propertys, providerName, this);
             if(channel==null) {
                 message("providerName " + providerName + " pvname " + pvname + " not found",MessageType.error);
                 return;

@@ -5,11 +5,21 @@
  */
 package org.epics.ioc.dbd;
 
-import java.util.*;
-import java.util.regex.*;
-import java.util.concurrent.locks.*;
+import java.util.ArrayList;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeMap;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
 
-import org.epics.ioc.pv.*;
+import org.epics.ioc.pv.BaseStructure;
+import org.epics.ioc.pv.Convert;
+import org.epics.ioc.pv.ConvertFactory;
+import org.epics.ioc.pv.Field;
+import org.epics.ioc.pv.FieldAttribute;
+import org.epics.ioc.pv.FieldCreate;
+import org.epics.ioc.pv.FieldFactory;
 
 
 /**

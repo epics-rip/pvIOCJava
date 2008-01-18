@@ -12,14 +12,15 @@ import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.*;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
-import org.epics.ioc.ca.Channel;
-import org.epics.ioc.ca.ChannelFactory;
+import org.epics.ioc.ca.*;
+import org.epics.ioc.ca.ChannelAccess;
+import org.epics.ioc.ca.ChannelAccessFactory;
 import org.epics.ioc.ca.ChannelListener;
 import org.epics.ioc.db.DBRecord;
 import org.epics.ioc.db.IOCDB;
@@ -33,9 +34,12 @@ import org.epics.ioc.util.Requester;
  *
  */
 public class ChannelConnectFactory {
+    
     public static ChannelConnect create(ChannelListener channelListener,Requester requester) {
         return new ChannelConnectImpl(channelListener,requester);
     }
+    
+    private static final ChannelAccess channelAccess = ChannelAccessFactory.getChannelAccess();
     
     private static class ChannelConnectImpl
     implements ChannelConnect,Requester,
@@ -55,10 +59,16 @@ public class ChannelConnectFactory {
         private Button connectButton = null;
         private Button selectLocalRecordButton = null;
         private Button selectLocalFieldButton = null;
-        private Text providerText = null;
-        private Text recordText = null;
-        private String providerName = null;
+        private Combo providerCombo = null;
+        private int localIndex = 0;
+        private Text pvNameText = null;
+        private String providerName = "local";
         private String pvName = null;
+        
+        private Button timeStampButton = null;
+        private Button alarmButton = null;
+        private Button displayButton = null;
+        private Button controlButton = null;
         
         
         private enum ListenerState {channelStateChange, disconnect}
@@ -81,8 +91,9 @@ public class ChannelConnectFactory {
             gridLayout.numColumns = 1;
             shellComposite.setLayout(gridLayout);
             GridData gridData = new GridData(GridData.FILL_HORIZONTAL);
-            shellComposite.setLayoutData(gridData);   
-            Composite connectGetLocal = new Composite(shellComposite,SWT.NONE);
+            shellComposite.setLayoutData(gridData); 
+            
+            Composite connectGetLocal = new Composite(shellComposite,SWT.BORDER);
             gridLayout = new GridLayout();
             gridLayout.numColumns = 3;
             connectGetLocal.setLayout(gridLayout);
@@ -96,31 +107,64 @@ public class ChannelConnectFactory {
             selectLocalFieldButton.setText("selectLocalField");
             selectLocalFieldButton.addSelectionListener(this);
             selectLocalFieldButton.setEnabled(false);
-            Composite provider = new Composite(shellComposite,SWT.NONE);
+            
+            Composite pv = new Composite(shellComposite,SWT.BORDER);
+            gridLayout = new GridLayout();
+            gridLayout.numColumns = 2;
+            pv.setLayout(gridLayout);
+            gridData = new GridData(GridData.FILL_HORIZONTAL);
+            pv.setLayoutData(gridData);
+            Composite provider = new Composite(pv,SWT.BORDER);
             gridLayout = new GridLayout();
             gridLayout.numColumns = 2;
             provider.setLayout(gridLayout);
             gridData = new GridData(GridData.FILL_HORIZONTAL);
-            provider.setLayoutData(gridData);   
+            provider.setLayoutData(gridData);
             new Label(provider,SWT.RIGHT).setText("provider");
-            providerText = new Text(provider,SWT.BORDER);
-            gridData = new GridData(GridData.FILL_HORIZONTAL);
-            gridData.minimumWidth = 500;
-            providerText.setLayoutData(gridData);
-            providerText.addSelectionListener(this);
-
-            Composite record = new Composite(shellComposite,SWT.NONE);
+            providerCombo = new Combo(provider,SWT.DROP_DOWN);
+            ChannelProvider[] providers = channelAccess.getChannelProviders();
+            for(int i=0; i<providers.length; i++) {
+                ChannelProvider channelProvider = providers[i];
+                String name = channelProvider.getProviderName();
+                providerCombo.add(name);
+                if(name.equals("local")) {
+                    localIndex = i;
+                }
+            }
+            providerCombo.select(localIndex);
+            providerCombo.addSelectionListener(this);
+            Composite pvname = new Composite(pv,SWT.NONE);
             gridLayout = new GridLayout();
             gridLayout.numColumns = 2;
-            record.setLayout(gridLayout);
+            pvname.setLayout(gridLayout);
             gridData = new GridData(GridData.FILL_HORIZONTAL);
-            record.setLayoutData(gridData);   
-            new Label(record,SWT.RIGHT).setText("pvname");
-            recordText = new Text(record,SWT.BORDER);
+            pvname.setLayoutData(gridData);   
+            new Label(pvname,SWT.RIGHT).setText("pvname");
+            pvNameText = new Text(pvname,SWT.BORDER);
             gridData = new GridData(GridData.FILL_HORIZONTAL);
             gridData.minimumWidth = 500;
-            recordText.setLayoutData(gridData);
-            recordText.addSelectionListener(this);
+            pvNameText.setLayoutData(gridData);
+            pvNameText.addSelectionListener(this);
+            
+            Composite propertys = new Composite(shellComposite,SWT.NONE);
+            gridLayout = new GridLayout();
+            gridLayout.numColumns = 5;
+            propertys.setLayout(gridLayout);
+            gridData = new GridData(GridData.FILL_HORIZONTAL);
+            propertys.setLayoutData(gridData);   
+            new Label(propertys,SWT.RIGHT).setText("property");
+            timeStampButton = new Button(propertys,SWT.TOGGLE);
+            timeStampButton.setText("timeStamp");
+            timeStampButton.setSelection(false);
+            alarmButton = new Button(propertys,SWT.TOGGLE);
+            alarmButton.setText("alarm");
+            alarmButton.setSelection(false);
+            displayButton = new Button(propertys,SWT.TOGGLE);
+            displayButton.setText("display");
+            displayButton.setSelection(false);
+            controlButton = new Button(propertys,SWT.TOGGLE);
+            controlButton.setText("control");
+            controlButton.setSelection(false);
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.swtshell.ChannelConnect#getChannel()
@@ -168,6 +212,7 @@ public class ChannelConnectFactory {
         public void widgetDefaultSelected(SelectionEvent e) {
             widgetSelected(e);
         }
+        
         /* (non-Javadoc)
          * @see org.eclipse.swt.events.SelectionListener#widgetSelected(org.eclipse.swt.events.SelectionEvent)
          */
@@ -184,11 +229,12 @@ public class ChannelConnectFactory {
                         message("record is null",MessageType.info);
                         return;
                     }
-                    channel = ChannelFactory.createChannel(pvName, providerName, this);
+                    String[] propertyNames = getPropertyNames();
+                    channel = channelAccess.createChannel(pvName,propertyNames, providerName, this);
                     if(channel==null) return;
                     selectLocalRecordButton.setEnabled(false);
-                    providerText.setEnabled(false);
-                    recordText.setEnabled(false);
+                    providerCombo.setEnabled(false);
+                    pvNameText.setEnabled(false);
                     channel.connect();
                     connectState = ConnectState.connected;
                     connectButton.setText(connectStateText[1]);
@@ -200,8 +246,8 @@ public class ChannelConnectFactory {
                     message("destroyChannel " + channel.getChannelName(),MessageType.info);
                     channel.disconnect();
                     selectLocalRecordButton.setEnabled(true);
-                    providerText.setEnabled(true);
-                    recordText.setEnabled(true);
+                    providerCombo.setEnabled(true);
+                    pvNameText.setEnabled(true);
                     channel = null;
                     return;
                 }
@@ -210,15 +256,15 @@ public class ChannelConnectFactory {
                     SelectLocalRecordFactory.create(shell, requester);
                 pvName = selectLocalRecord.getRecordName();
                 if(pvName==null) return;
-                channel = ChannelFactory.createChannel(pvName,"local", channelListener);
+                channel = channelAccess.createChannel(pvName,null,"local", channelListener);
                 if(channel==null) {
                     message("getChannel failed",MessageType.error);
                     return;
                 }
-                providerText.setText("local");
-                providerName = providerText.getText();
-                recordText.setText(pvName);
-                pvName = recordText.getText();
+                providerCombo.select(localIndex);
+                providerName = providerCombo.getText();
+                pvNameText.setText(pvName);
+                pvName = pvNameText.getText();
                 selectLocalFieldButton.setEnabled(true);
             } else if(object==selectLocalFieldButton) {
                 DBRecord dbRecord = iocdb.findRecord(pvName);
@@ -230,12 +276,12 @@ public class ChannelConnectFactory {
                 SelectField selectField = SelectFieldFactory.create(shell, requester);
                 String fieldName = selectField.selectFieldName(pvRecord);
                 pvName = pvName + "." + fieldName;
-                recordText.setText(pvName);
+                pvNameText.setText(pvName);
                 selectLocalFieldButton.setEnabled(false);
-            } else if(object==providerText) {
-                providerName = providerText.getText();
-            } else if(object==recordText) {
-                pvName = recordText.getText();
+            } else if(object==providerCombo) {
+                providerName = providerCombo.getText();
+            } else if(object==pvNameText) {
+                pvName = pvNameText.getText();
                 selectLocalFieldButton.setEnabled(false);
             }
             
@@ -255,5 +301,24 @@ public class ChannelConnectFactory {
                 break;
             }
         }
+        
+        private String[] getPropertyNames() {
+            int num = 0;
+            boolean time = timeStampButton.getSelection();
+            boolean alarm = alarmButton.getSelection();
+            boolean display = displayButton.getSelection();
+            boolean control = controlButton.getSelection();
+            if(time) num++;
+            if(alarm) num++;
+            if(display) num++;
+            if(control) num++;
+            String[] propertys = new String[num];
+            num = 0;
+            if(time) propertys[num++] = "timeStamp";
+            if(alarm) propertys[num++] = "alarm";
+            if(display) propertys[num++] = "display";
+            if(control) propertys[num++] = "control";
+            return propertys;
+        }  
     }
 }

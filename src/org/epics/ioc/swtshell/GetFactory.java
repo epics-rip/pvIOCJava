@@ -93,6 +93,11 @@ public class GetFactory {
                 channel = channelConnect.getChannel();
                 String fieldName = channel.getFieldName();
                 channelField = channel.createChannelField(fieldName);
+                if(channelField==null) {
+                    message(
+                        "channelField null fieldName " + fieldName,
+                        MessageType.error);
+                }
                 getButton.setEnabled(true);
                 processButton.setEnabled(true);
                 propertyButton.setEnabled(true);

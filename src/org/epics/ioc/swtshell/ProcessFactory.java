@@ -12,10 +12,13 @@ import java.util.concurrent.locks.ReentrantLock;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
+import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.Text;
 import org.epics.ioc.ca.Channel;
 import org.epics.ioc.ca.ChannelField;
 import org.epics.ioc.ca.ChannelListener;
@@ -58,6 +61,7 @@ public class ProcessFactory {
         private Channel channel = null;
         private ChannelConnect channelConnect = null;
         private Button processButton;
+        private Text consoleText = null; 
 
         /* (non-Javadoc)
          * @see org.epics.ioc.util.Requester#getRequesterName()
@@ -100,12 +104,36 @@ public class ProcessFactory {
             shell.setLayout(gridLayout);
             channelConnect = ChannelConnectFactory.create(this,this);
             channelConnect.createWidgets(shell);
-            
-        
             processButton = new Button(shell,SWT.PUSH);
             processButton.setText("process");
             processButton.addSelectionListener(this);               
             processButton.setEnabled(false);
+            Composite consoleComposite = new Composite(shell,SWT.BORDER);
+            gridLayout = new GridLayout();
+            gridLayout.numColumns = 1;
+            consoleComposite.setLayout(gridLayout);
+            GridData gridData = new GridData(GridData.FILL_BOTH);
+            consoleComposite.setLayoutData(gridData);
+            Button clearItem = new Button(consoleComposite,SWT.PUSH);
+            clearItem.setText("&Clear");
+            clearItem.addSelectionListener(new SelectionListener() {
+                public void widgetDefaultSelected(SelectionEvent arg0) {
+                    widgetSelected(arg0);
+                }
+                public void widgetSelected(SelectionEvent arg0) {
+                    consoleText.selectAll();
+                    consoleText.clearSelection();
+                    consoleText.setText("");
+                }
+            });
+            consoleText = new Text(consoleComposite,SWT.BORDER|SWT.H_SCROLL|SWT.V_SCROLL|SWT.READ_ONLY);
+            gridData = new GridData(GridData.FILL_BOTH);
+            gridData.heightHint = 100;
+            gridData.widthHint = 200;
+            consoleText.setLayoutData(gridData);
+            requester = SWTMessageFactory.create(windowName,display,consoleText);
+            shell.pack();
+            shell.open();
         }
         /* (non-Javadoc)
          * @see org.eclipse.swt.events.SelectionListener#widgetDefaultSelected(org.eclipse.swt.events.SelectionEvent)

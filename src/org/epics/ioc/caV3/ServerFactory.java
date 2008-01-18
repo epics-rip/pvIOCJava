@@ -57,7 +57,8 @@ import org.epics.ioc.ca.CDMonitor;
 import org.epics.ioc.ca.CDMonitorFactory;
 import org.epics.ioc.ca.CDMonitorRequester;
 import org.epics.ioc.ca.Channel;
-import org.epics.ioc.ca.ChannelFactory;
+import org.epics.ioc.ca.ChannelAccess;
+import org.epics.ioc.ca.ChannelAccessFactory;
 import org.epics.ioc.ca.ChannelField;
 import org.epics.ioc.ca.ChannelFieldGroup;
 import org.epics.ioc.ca.ChannelFieldGroupListener;
@@ -106,6 +107,7 @@ public class ServerFactory {
     private static final ThreadCreate threadCreate = ThreadFactory.getThreadCreate();
     private static final Convert convert = ConvertFactory.getConvert();
     private static Pattern whiteSpacePattern = Pattern.compile("[, ]");
+    private static final ChannelAccess channelAccess = ChannelAccessFactory.getChannelAccess();
     
     private static class ThreadInstance implements RunnableReady {
 
@@ -195,7 +197,7 @@ public class ServerFactory {
                 String aliasName, InetSocketAddress clientAddress,
                 ProcessVariableExistanceCallback asyncCompletionCallback)
         throws CAException, IllegalArgumentException, IllegalStateException {
-            boolean exists = ChannelFactory.isChannelProvider(aliasName, "local");
+            boolean exists = channelAccess.isChannelProvider(aliasName, "local");
             return exists ? ProcessVariableExistanceCompletion.EXISTS_HERE : ProcessVariableExistanceCompletion.DOES_NOT_EXIST_HERE;
         }
     }
@@ -205,6 +207,9 @@ public class ServerFactory {
      */
     private static class ChannelProcessVariable extends ProcessVariable implements ChannelListener
     {
+        private static final String[] desiredPropertys = new String[] {
+            "timeStamp","alarm","display","control"
+        };
         private DBRType type;
         private final Channel channel;
         private ChannelField valueChannelField = null;
@@ -229,7 +234,7 @@ public class ServerFactory {
         {
             super(pvName, eventCallback);
 
-            channel = ChannelFactory.createChannel(pvName, "local", this);
+            channel = channelAccess.createChannel(pvName,desiredPropertys, "local", this);
             if (channel == null)
                 throw new CAStatusException(CAStatus.DEFUNCT);
             channel.connect();

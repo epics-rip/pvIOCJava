@@ -55,6 +55,7 @@ public class CDPrintFactory {
             int maxNumPuts = cdStructure.getMaxNumPuts();
             if(maxNumPuts==0) {
                 text.append(" no changes");
+                newLine(0);
                 return;
             }
             if(maxNumPuts>1) {

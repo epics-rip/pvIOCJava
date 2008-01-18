@@ -20,7 +20,6 @@ import org.epics.ioc.process.RecordProcessRequester;
 import org.epics.ioc.pv.PVField;
 import org.epics.ioc.util.MessageType;
 import org.epics.ioc.util.RequestResult;
-import org.epics.ioc.util.Requester;
 
 /**
  * Factory and implementation of local channel access, i.e. channel access that
@@ -46,7 +45,7 @@ public class ChannelProviderLocalFactory  {
         private static final String providerName = "local";
 
         private void register() {
-            if(registerPvt()) ChannelFactory.registerChannelProvider(this);
+            if(registerPvt()) ChannelAccessFactory.getChannelAccess().registerChannelProvider(this);
         }
         private synchronized boolean registerPvt() {
             if(isRegistered) return false;
@@ -56,7 +55,7 @@ public class ChannelProviderLocalFactory  {
         /* (non-Javadoc)
          * @see org.epics.ioc.ca.ChannelProvider#createChannel(java.lang.String, org.epics.ioc.ca.ChannelListener)
          */
-        public Channel createChannel(String pvName,ChannelListener listener) {
+        public Channel createChannel(String pvName,String[] propertys,ChannelListener listener) {
             String recordName = null;
             String fieldName = null;
             String options = null;
@@ -110,18 +109,20 @@ public class ChannelProviderLocalFactory  {
     
     private static class ChannelImpl extends AbstractChannel {
         private DBRecord dbRecord;
+        private String fieldName;
         
         private ChannelImpl(DBRecord record,ChannelListener listener,
                 String fieldName, String options)
         {
-            super(listener,fieldName,options);
+            super(listener,options);
             dbRecord = record;
+            this.fieldName = fieldName;
         }       
         /* (non-Javadoc)
          * @see org.epics.ioc.ca.Channel#connect()
          */
         public void connect() {
-            super.SetPVRecord(dbRecord.getPVRecord());
+            super.SetPVRecord(dbRecord.getPVRecord(),fieldName);
             super.connect();
         }
                 

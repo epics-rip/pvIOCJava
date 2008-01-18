@@ -43,22 +43,22 @@ public abstract class AbstractChannel implements Channel{
     /**
      * Constructor.
      * @param channelListener The channelListener.
-     * @param fieldName The fieldName.
      * @param options The options.
      */
-    protected AbstractChannel(ChannelListener channelListener,
-        String fieldName, String options)
+    protected AbstractChannel(ChannelListener channelListener,String options)
     {
         this.channelListener = channelListener;
-        this.fieldName = fieldName;
+        
         this.options = options;
         
     }
     /**
      * Set the PVRecord for this channel.
      * @param pvRecord The pvRecord interface.
+     * @param fieldName The fieldName.
      */
-    protected synchronized void SetPVRecord(PVRecord pvRecord) {
+    protected synchronized void SetPVRecord(PVRecord pvRecord,String fieldName) {
+        this.fieldName = fieldName;
         this.pvRecord = pvRecord;
         if(fieldName==null) {
             channelName = pvRecord.getRecordName();
@@ -67,18 +67,11 @@ public abstract class AbstractChannel implements Channel{
         }
     }
     /**
-     * Get the pvRecord for this channel.
-     * @return
-     */
-    protected synchronized PVRecord getPVRecord() {
-        return pvRecord;
-    }
-    /**
      * Add a channelProcess
      * @param channelProcess The channelProcess to add.
      * @return (false,true) if the channelProcess (was not, was) added.
      */
-    protected synchronized boolean add(ChannelProcess channelProcess)
+    public synchronized boolean add(ChannelProcess channelProcess)
     {
         return channelProcessList.add(channelProcess);
     }
@@ -87,7 +80,7 @@ public abstract class AbstractChannel implements Channel{
      * @param channelGet The channelGet to add.
      * @return (false,true) if the channelGet (was not, was) added.
      */
-    protected synchronized boolean add(ChannelGet channelGet)
+    public synchronized boolean add(ChannelGet channelGet)
     {
         return channelGetList.add(channelGet);
     }
@@ -96,7 +89,7 @@ public abstract class AbstractChannel implements Channel{
      * @param channelPut The channelPut to add.
      * @return (false,true) if the channelPut (was not, was) added.
      */
-    protected synchronized boolean add(ChannelPut channelPut)
+    public synchronized boolean add(ChannelPut channelPut)
     {
         return channelPutList.add(channelPut);
     }
@@ -105,7 +98,7 @@ public abstract class AbstractChannel implements Channel{
      * @param channelPutGet The channelPutGet to add.
      * @return (false,true) if the channelPutGet (was not, was) added.
      */
-    protected synchronized boolean add(ChannelPutGet channelPutGet)
+    public synchronized boolean add(ChannelPutGet channelPutGet)
     {
         return channelPutGetList.add(channelPutGet);
     }
@@ -114,7 +107,7 @@ public abstract class AbstractChannel implements Channel{
      * @param channelMonitor The channelMonitor to add.
      * @return (false,true) if the channelMonitor (was not, was) added.
      */
-    protected synchronized boolean add(ChannelMonitor channelMonitor)
+    public synchronized boolean add(ChannelMonitor channelMonitor)
     {
         return channelMonitorList.add(channelMonitor);
     }
@@ -124,7 +117,7 @@ public abstract class AbstractChannel implements Channel{
      * @param channelProcess The channelProcess to remove.
      * @return (false,true) if the channelProcess (was not, was) removed.
      */
-    protected synchronized boolean remove(ChannelProcess channelProcess) {
+    public synchronized boolean remove(ChannelProcess channelProcess) {
         return channelProcessList.remove(channelProcess);
     }
     /**
@@ -132,7 +125,7 @@ public abstract class AbstractChannel implements Channel{
      * @param channelGet The channelGet to remove.
      * @return (false,true) if the channelGet (was not, was) removed.
      */
-    protected synchronized boolean remove(ChannelGet channelGet) {
+    public synchronized boolean remove(ChannelGet channelGet) {
         return channelGetList.remove(channelGet);
     }
     /**
@@ -140,7 +133,7 @@ public abstract class AbstractChannel implements Channel{
      * @param channelPut The channelPut to remove.
      * @return (false,true) if the channelPut (was not, was) removed.
      */
-    protected synchronized boolean remove(ChannelPut channelPut) {
+    public synchronized boolean remove(ChannelPut channelPut) {
         return channelPutList.remove(channelPut);
     }
     /**
@@ -148,7 +141,7 @@ public abstract class AbstractChannel implements Channel{
      * @param channelPutGet The channelPutGet to remove.
      * @return (false,true) if the channelPutGet (was not, was) removed.
      */
-    protected synchronized boolean remove(ChannelPutGet channelPutGet) {
+    public synchronized boolean remove(ChannelPutGet channelPutGet) {
         return channelPutGetList.remove(channelPutGet);
     }
     /**
@@ -156,7 +149,7 @@ public abstract class AbstractChannel implements Channel{
      * @param channelMonitor The channelMonitor to remove.
      * @return (false,true) if the channelMonitor (was not, was) removed.
      */
-    protected synchronized boolean remove(ChannelMonitor channelMonitor) {
+    public synchronized boolean remove(ChannelMonitor channelMonitor) {
         return channelMonitorList.remove(channelMonitor);
     }
     /* (non-Javadoc)
@@ -164,6 +157,12 @@ public abstract class AbstractChannel implements Channel{
      */
     public synchronized String getChannelName() {
         return channelName;
+    }
+    /* (non-Javadoc)
+     * @see org.epics.ioc.ca.Channel#getPVRecord()
+     */
+    public synchronized PVRecord getPVRecord() {
+        return pvRecord;
     }
     /* (non-Javadoc)
      * @see org.epics.ioc.util.Requester#getRequesterName()

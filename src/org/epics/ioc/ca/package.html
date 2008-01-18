@@ -10,7 +10,7 @@
 <body>
 <h1 style="text-align: center">EPICS JavaIOC: channel Access<br />
 package: org.epics.ioc.ca<br />
-2008.01.10</h1>
+2008.01.18</h1>
 CONTENTS 
 
 <div class="toc">
@@ -27,7 +27,8 @@ CONTENTS
       <li><a href="#ChannelFie2">ChannelFieldGroup</a></li>
       <li><a href="#ChannelMon">ChannelMonitorRequester</a></li>
       <li><a href="#ChannelMon1">ChannelMonitor</a></li>
-      <li><a href="#ChannelFac">ChannelFactory</a></li>
+      <li><a href="#ChannelFac">ChannelAccess</a></li>
+      <li><a href="#ChannelFac">ChannelAccessFactory</a></li>
       <li><a href="#ChannelPro">ChannelProvider</a></li>
     </ul>
   </li>
@@ -162,6 +163,7 @@ databases.</p>
         void disconnect();
         void destroy();
         String getChannelName();
+        PVRecord getPVRecord();
         ChannelListener getChannelListener();
         boolean isConnected();
         String getPropertyName();
@@ -183,6 +185,16 @@ databases.</p>
             boolean process);
         ChannelMonitor createChannelMonitor(
             ChannelMonitorRequester channelMonitorRequester);
+        boolean add(ChannelProcess channelProcess);
+        boolean add(ChannelGet channelGet);
+        boolean add(ChannelPut channelPut);
+        boolean add(ChannelPutGet channelPutGet);
+        boolean add(ChannelMonitor channelMonitor);
+        boolean remove(ChannelProcess channelProcess);
+        boolean remove(ChannelGet channelGet);
+        boolean remove(ChannelPut channelPut);
+        boolean remove(ChannelPutGet channelPutGet);
+        boolean remove(ChannelMonitor channelMonitor);
     }
 
     enum AccessRights {
@@ -228,19 +240,24 @@ databases.</p>
         void destroy();
     }
 
-    class ChannelFactory {
-        static Channel createChannel(
-            String pvName,String providerName,ChannelListener listener);
-        static void registerChannelProvider(
-            ChannelProvider channelProvider);
-        static ChannelProvider getChannelProvider(String providerName);
-        static boolean isChannelProvider(String channelName,String providerName);
+    interface ChannelAccess {
+        Channel createChannel(String pvName,String[] propertys,
+            String providerName, ChannelListener listener);
+        void registerChannelProvider(ChannelProvider channelProvider);
+        ChannelProvider getChannelProvider(String providerName);
+        ChannelProvider[] getChannelProviders();
+        boolean isChannelProvider(String channelName,String providerName);
+    }
+
+    public class ChannelAccessFactory {
+         static ChannelAccess getChannelAccess();
     }
 
     interface ChannelProvider {
         Channel createChannel(String pvName,ChannelListener listener);
         String getProviderName();
         boolean isProvider(String channelName);
+        void destroy();
     }</pre>
 
 <h3 id="Channel1">Channel</h3>
@@ -257,6 +274,8 @@ The methods are:</p>
       requests will be accepted for the channel.</dd>
   <dt style="font-family: courier;">getChannelName</dt>
     <dd>Get the channelName.</dd>
+  <dt style="font-family: courier;">getPVRecord</dt>
+    <dd>Get the PVRecord this channel holds.</dd>
   <dt style="font-family: courier;">getChannelListener</dt>
     <dd>Get the ChannelListener.</dd>
   <dt style="font-family: courier;">message</dt>
@@ -289,6 +308,8 @@ The methods are:</p>
   <dt style="font-family: courier;">createChannelMonitor</dt>
     <dd>Create a channel monitor. This is used to create monitors for the
       channel.</dd>
+  <dt style="font-family: courier;">add remove</dt>
+    <dd>add and remove are called by channelProcess, ..., channelMonitor.</dd>
 </dl>
 
 <h3 id="ChannelLis">ChannelListener</h3>
@@ -405,7 +426,7 @@ methods:</p>
     <dd>Stop monitoring.</dd>
 </dl>
 
-<h3 id="ChannelFac">ChannelFactory</h3>
+<h3 id="ChannelFac">ChannelAccess</h3>
 
 <p>A channelFactory creates a channel. A channel is either local, i.e. code
 running in an IOC is accessing a field in the local IOC database, or remote,
@@ -413,7 +434,7 @@ code is accessing a channel that is available over the network.
 Channelfactory also has methods called by support for local access and by
 support for remote access.</p>
 
-<p>The methods implemented by ChannelFactory are:</p>
+<p>The methods implemented by ChannelAccess are:</p>
 <dl>
   <dt style="font-family: courier;">createChannel</dt>
     <dd>A client calls this to create a channel. A Channel is created and
@@ -426,8 +447,18 @@ support for remote access.</p>
   <dt style="font-family: courier;">getChannelProvider</dt>
     <dd>Return the ChannelProvider or null if the providerName is not
       registered.</dd>
+  <dt style="font-family: courier;">getChannelProviders</dt>
+    <dd>Get an array of all of the channelProviders.</dd>
   <dt style="font-family: courier;">isChannelProvider</dt>
-    <dd>Is channelName supported by providerName?</dd>
+    <dd>Does providerName provide a channel for channelName</dd>
+</dl>
+
+<h3 id="ChannelFac">ChannelAccessFactory</h3>
+
+<p>ChannelAccessFactory provides the single method:</p>
+<dl>
+  <dt style="font-family: courier;">getChannelAccess</dt>
+    <dd>Get the single instance of ChannelAccess.</dd>
 </dl>
 
 <h3 id="ChannelPro">ChannelProvider</h3>
@@ -442,6 +473,8 @@ channel access. It is called by ChannelFactory. It has only one method</p>
     <dd>Get the provider name.</dd>
   <dt style="font-family: courier;">isProvider</dt>
     <dd>Can the provider access channelName?</dd>
+  <dt style="font-family: courier;">destroy</dt>
+    <dd>Destroy the channelProvider.</dd>
 </dl>
 <hr />
 
@@ -660,20 +693,19 @@ client request to:</p>
 <h2 style="text-align: center" id="Abstract">Abstract and Base Classes</h2>
 <hr />
 <pre>    public abstract class AbstractChannel implements Channel{
-        protected AbstractChannel(ChannelListener channelListener,
-        String fieldName, String options);
-        protected synchronized void SetPVRecord(PVRecord pvRecord);
-        protected synchronized PVRecord getPVRecord();
-        protected synchronized boolean add(ChannelProcess channelProcess);
-        protected synchronized boolean add(ChannelGet channelGet);
-        protected synchronized boolean add(ChannelPut channelPut);
-        protected synchronized boolean add(ChannelPutGet channelPutGet);
-        protected synchronized boolean add(ChannelMonitor channelMonitor);
-        protected synchronized boolean remove(ChannelProcess channelProcess);
-        protected synchronized boolean remove(ChannelGet channelGet);
-        protected synchronized boolean remove(ChannelPut channelPut);
-        protected synchronized boolean remove(ChannelPutGet channelPutGet);
-        protected synchronized boolean remove(ChannelMonitor channelMonitor);
+        protected AbstractChannel(ChannelListener channelListener, String options);
+        protected synchronized void SetPVRecord(PVRecord pvRecord,String fieldName);
+        public synchronized PVRecord getPVRecord();
+        public synchronized boolean add(ChannelProcess channelProcess);
+        public synchronized boolean add(ChannelGet channelGet);
+        public synchronized boolean add(ChannelPut channelPut);
+        public synchronized boolean add(ChannelPutGet channelPutGet);
+        public synchronized boolean add(ChannelMonitor channelMonitor);
+        public synchronized boolean remove(ChannelProcess channelProcess);
+        public synchronized boolean remove(ChannelGet channelGet);
+        public synchronized boolean remove(ChannelPut channelPut);
+        public synchronized boolean remove(ChannelPutGet channelPutGet);
+        public synchronized boolean remove(ChannelMonitor channelMonitor);
         public synchronized String getChannelName();
         public String getRequesterName();
         public void message(String message, MessageType messageType);

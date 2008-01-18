@@ -6,6 +6,7 @@
 package org.epics.ioc.ca;
 
 import org.epics.ioc.util.*;
+import org.epics.ioc.pv.*;
 
 
 /**
@@ -37,6 +38,11 @@ public interface Channel extends Requester{
      * @return The name.
      */
     String getChannelName();
+    /**
+     * Get the PVRecord this channel holds.
+     * @return The PVRecord interface.
+     */
+    PVRecord getPVRecord();
     /**
      * Get the channel listener.
      * @return The listener.
@@ -120,4 +126,64 @@ public interface Channel extends Requester{
      * @return The ChannelMonitor interface.
      */
     ChannelMonitor createChannelMonitor(ChannelMonitorRequester channelMonitorRequester);
+    /**
+     * Add a channelProcess.
+     * @param channelProcess The channelProcess to add.
+     * @return (false,true) if the channelProcessd (was not, was) added.
+     */
+    boolean add(ChannelProcess channelProcess);
+    /**
+     * Add a channelGet.
+     * @param channelGet The channelGet to add.
+     * @return (false,true) if the channelGet (was not, was) added.
+     */
+    boolean add(ChannelGet channelGet);
+    /**
+     * Add a channelPut.
+     * @param channelPut The channelPut to add.
+     * @return (false,true) if the channelPut (was not, was) added.
+     */
+    boolean add(ChannelPut channelPut);
+    /**
+     * Add a channelPutGet.
+     * @param channelPutGet The channelPutGet to add.
+     * @return (false,true) if the channelPutGet (was not, was) added.
+     */
+    boolean add(ChannelPutGet channelPutGet);
+    /**
+     * Add a channelMonitor.
+     * @param channelMonitor The channelMonitor to add.
+     * @return (false,true) if the channelMonitor (was not, was) added.
+     */
+    boolean add(ChannelMonitor channelMonitor);
+    /**
+     * Remove a ChannelProcess.
+     * @param channelProcess The channelProcess to remove.
+     * @return (false,true) if the channelProcess (was not, was) removed;
+     */
+    boolean remove(ChannelProcess channelProcess);
+    /**
+     * Remove a ChannelGet.
+     * @param channelGet The channelGet to remove.
+     * @return (false,true) if the channelGet (was not, was) removed;
+     */
+    boolean remove(ChannelGet channelGet);
+    /**
+     * Remove a ChannelPut.
+     * @param channelPut The channelPut to remove.
+     * @return (false,true) if the channelPut (was not, was) removed;
+     */
+    boolean remove(ChannelPut channelPut);
+    /**
+     * Remove a ChannelPutGet.
+     * @param channelPutGet The channelPutGet to remove.
+     * @return (false,true) if the channelPutGet (was not, was) removed;
+     */
+    boolean remove(ChannelPutGet channelPutGet);
+    /**
+     * Remove a ChannelMonitor.
+     * @param channelMonitor The channelMonitor to remove.
+     * @return (false,true) if the channelMonitor (was not, was) removed;
+     */
+    boolean remove(ChannelMonitor channelMonitor);
 }

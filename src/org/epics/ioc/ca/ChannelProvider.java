@@ -15,10 +15,11 @@ public interface ChannelProvider {
      * Create a channel.
      * 
      * @param pvName The channel name.
+     * @param propertys The array of desired properties.
      * @param listener A state listener.
      * @return A Channel or null if the channel can not be created.
      */
-    Channel createChannel(String pvName,ChannelListener listener);
+    Channel createChannel(String pvName,String[] propertys,ChannelListener listener);
     /**
      * Get the provider name.
      * @return The name.

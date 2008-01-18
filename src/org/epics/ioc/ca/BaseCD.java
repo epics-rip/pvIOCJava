@@ -9,7 +9,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 
 import org.epics.ioc.pv.PVDataCreate;
-import org.epics.ioc.pv.PVField;
+import org.epics.ioc.pv.*;
 
 
 /**
@@ -100,15 +100,8 @@ public class BaseCD implements CD
      * @see org.epics.ioc.ca.CD#put(org.epics.ioc.pv.PVField, org.epics.ioc.pv.PVField)
      */
     public void put(PVField pvField, PVField pvSubField) {
-        CDField[] cdFields = cdRecord.getCDStructure().getCDFields();
-        int length = cdFields.length;
-        for(int i=0; i<length; i++) {
-            CDField cdField = cdFields[i];
-            if(cdField.getChannelField().getPVField()==pvField) {
-                cdField.put(pvField,pvSubField);
-                return;
-            }
-        }
+        CDField cdField = cdRecord.findCDField(pvField);
+        cdField.put(pvField, pvSubField);
     }
     /* (non-Javadoc)
      * @see org.epics.ioc.ca.CD#put(org.epics.ioc.pv.PVField)

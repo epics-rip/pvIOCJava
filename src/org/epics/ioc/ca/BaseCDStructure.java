@@ -66,7 +66,7 @@ public class BaseCDStructure extends BaseCDField implements CDStructure {
      */
     public CDField findCDField(PVField pvField) {
         for(int i=0; i<cdFields.length; i++) {
-            if(pvFields[i]==pvField) return cdFields[i];
+            if(pvFields[i].getFullFieldName().equals(pvField.getFullFieldName())) return cdFields[i];
         }
         for(int i=0; i<cdFields.length; i++) {
             PVField pvF = pvFields[i];
