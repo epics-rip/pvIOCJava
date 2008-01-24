@@ -5,11 +5,12 @@
  */
 package org.epics.ioc.support;
 
-import org.epics.ioc.db.*;
+import org.epics.ioc.db.DBField;
 import org.epics.ioc.process.SupportProcessRequester;
 import org.epics.ioc.process.SupportState;
-import org.epics.ioc.pv.*;
-import org.epics.ioc.util.*;
+import org.epics.ioc.pv.PVField;
+import org.epics.ioc.util.MessageType;
+import org.epics.ioc.util.RequestResult;
 
 /**
  * Abstract base class for support code.

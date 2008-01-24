@@ -5,7 +5,10 @@
  */
 package org.epics.ioc.util;
 
-import org.epics.ioc.pv.*;
+import org.epics.ioc.pv.PVBoolean;
+import org.epics.ioc.pv.PVDouble;
+import org.epics.ioc.pv.PVInt;
+import org.epics.ioc.pv.PVString;
 
 /**
  * An convenience interface for the scan field of a record instance.

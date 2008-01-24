@@ -5,7 +5,8 @@
  */
 package org.epics.ioc.ca;
 
-import org.epics.ioc.util.*;
+import org.epics.ioc.util.RequestResult;
+import org.epics.ioc.util.Requester;
 
 /**
  * Callback for a channel process request.

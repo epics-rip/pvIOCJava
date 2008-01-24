@@ -5,8 +5,11 @@
  */
 package org.epics.ioc.pdrv.interfaces;
 
-import org.epics.ioc.pdrv.*;
-import org.epics.ioc.pv.*;
+import org.epics.ioc.pdrv.Device;
+import org.epics.ioc.pdrv.Trace;
+import org.epics.ioc.pv.AbstractPVArray;
+import org.epics.ioc.pv.Array;
+import org.epics.ioc.pv.PVField;
 
 /**
  * Abstract base class for array interfaces.

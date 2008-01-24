@@ -5,10 +5,8 @@
  */
 package org.epics.ioc.caV3;
 
-import gov.aps.jca.dbr.DBRType;
-import gov.aps.jca.Context;
-import org.epics.ioc.ca.*;
-import org.epics.ioc.db.*;
+import org.epics.ioc.ca.Channel;
+import org.epics.ioc.util.IOCExecutor;
 
 /**
  * Channel interface for communicating with V3 IOCs.
@@ -21,22 +19,17 @@ public interface V3Channel extends Channel
      * Get the JCA Channel.
      * @return The interface.
      */
-    gov.aps.jca.Channel getJcaChannel();
+    gov.aps.jca.Channel getJCAChannel();
     /**
-     * Get the JCA Context.
-     * @return The interface.
+     * Get the pvName for this channel.
+     * @return The name.
      */
-    Context getContext();
+    String getPVName();
     /**
-     * Get the DBRecord that was created for this channel.
-     * @return The interface.
+     * Get the V3ChannelRecord for this channel.
+     * @return The v3ChannelRecord or null if not connected.
      */
-    DBRecord getDBRecord();
-    /**
-     * Get the DBRType for the value field for this channel.
-     * @return The DBRType.
-     */
-    DBRType getValueDBRType();
+    V3ChannelRecord getV3ChannelRecord();
     /**
      * Get the name of the value field for this channel.
      * @return The fieldName.
@@ -47,4 +40,9 @@ public interface V3Channel extends Channel
      * @return An array of strings.
      */
     String[] getPropertyNames();
+    /**
+     * Get a general purpose IOCExecutor.
+     * @return The iocExecutor;
+     */
+    IOCExecutor getIOCExecutor();
 }

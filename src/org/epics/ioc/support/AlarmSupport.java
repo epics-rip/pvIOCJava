@@ -5,7 +5,7 @@
  */
 package org.epics.ioc.support;
 
-import org.epics.ioc.util.*;
+import org.epics.ioc.util.AlarmSeverity;
 
 
 /**

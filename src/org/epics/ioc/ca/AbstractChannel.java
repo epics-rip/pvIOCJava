@@ -14,7 +14,7 @@ import org.epics.ioc.pv.Type;
 import org.epics.ioc.util.MessageType;
 
 /**
- * Abstract class for code that implements Chaznnel.
+ * Abstract class for code that implements Channel.
  * @author mrk
  *
  */
@@ -57,7 +57,7 @@ public abstract class AbstractChannel implements Channel{
      * @param pvRecord The pvRecord interface.
      * @param fieldName The fieldName.
      */
-    protected synchronized void SetPVRecord(PVRecord pvRecord,String fieldName) {
+    protected synchronized void setPVRecord(PVRecord pvRecord,String fieldName) {
         this.fieldName = fieldName;
         this.pvRecord = pvRecord;
         if(fieldName==null) {

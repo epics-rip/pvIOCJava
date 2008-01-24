@@ -6,7 +6,20 @@
 package org.epics.ioc.pv.test;
 
 import junit.framework.TestCase;
-import org.epics.ioc.pv.*;
+
+import org.epics.ioc.pv.Convert;
+import org.epics.ioc.pv.ConvertFactory;
+import org.epics.ioc.pv.Field;
+import org.epics.ioc.pv.FieldCreate;
+import org.epics.ioc.pv.FieldFactory;
+import org.epics.ioc.pv.PVDataCreate;
+import org.epics.ioc.pv.PVDataFactory;
+import org.epics.ioc.pv.PVDoubleArray;
+import org.epics.ioc.pv.PVField;
+import org.epics.ioc.pv.PVLongArray;
+import org.epics.ioc.pv.PVRecord;
+import org.epics.ioc.pv.Structure;
+import org.epics.ioc.pv.Type;
 
 /**
  * JUnit test for pvAccess.

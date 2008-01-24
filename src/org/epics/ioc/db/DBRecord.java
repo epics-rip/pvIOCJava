@@ -5,9 +5,10 @@
  */
 package org.epics.ioc.db;
 
-import org.epics.ioc.process.*;
-import org.epics.ioc.pv.*;
-import org.epics.ioc.dbd.*;
+import org.epics.ioc.dbd.DBD;
+import org.epics.ioc.process.RecordProcess;
+import org.epics.ioc.pv.PVField;
+import org.epics.ioc.pv.PVRecord;
 
 
 

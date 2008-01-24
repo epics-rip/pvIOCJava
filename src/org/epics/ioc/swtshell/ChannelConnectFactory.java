@@ -12,16 +12,18 @@ import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.*;
+import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
-import org.epics.ioc.ca.*;
+import org.epics.ioc.ca.Channel;
 import org.epics.ioc.ca.ChannelAccess;
 import org.epics.ioc.ca.ChannelAccessFactory;
 import org.epics.ioc.ca.ChannelListener;
+import org.epics.ioc.ca.ChannelProvider;
 import org.epics.ioc.db.DBRecord;
 import org.epics.ioc.db.IOCDB;
 import org.epics.ioc.db.IOCDBFactory;
@@ -65,6 +67,7 @@ public class ChannelConnectFactory {
         private String providerName = "local";
         private String pvName = null;
         
+        private boolean includePropertys = false;
         private Button timeStampButton = null;
         private Button alarmButton = null;
         private Button displayButton = null;
@@ -81,9 +84,10 @@ public class ChannelConnectFactory {
             this.requester = requester;
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.swtshell.ChannelConnect#createWidgets(org.eclipse.swt.widgets.Composite)
+         * @see org.epics.ioc.swtshell.ChannelConnect#createWidgets(org.eclipse.swt.widgets.Composite, boolean)
          */
-        public void createWidgets(Composite parent) {
+        public void createWidgets(Composite parent, boolean includePropertys) {
+            this.includePropertys = includePropertys;
             display = parent.getShell().getDisplay();
             shell = parent.getShell();
             Composite shellComposite = new Composite(parent,SWT.BORDER);
@@ -145,26 +149,27 @@ public class ChannelConnectFactory {
             gridData.minimumWidth = 500;
             pvNameText.setLayoutData(gridData);
             pvNameText.addSelectionListener(this);
-            
-            Composite propertys = new Composite(shellComposite,SWT.NONE);
-            gridLayout = new GridLayout();
-            gridLayout.numColumns = 5;
-            propertys.setLayout(gridLayout);
-            gridData = new GridData(GridData.FILL_HORIZONTAL);
-            propertys.setLayoutData(gridData);   
-            new Label(propertys,SWT.RIGHT).setText("property");
-            timeStampButton = new Button(propertys,SWT.TOGGLE);
-            timeStampButton.setText("timeStamp");
-            timeStampButton.setSelection(false);
-            alarmButton = new Button(propertys,SWT.TOGGLE);
-            alarmButton.setText("alarm");
-            alarmButton.setSelection(false);
-            displayButton = new Button(propertys,SWT.TOGGLE);
-            displayButton.setText("display");
-            displayButton.setSelection(false);
-            controlButton = new Button(propertys,SWT.TOGGLE);
-            controlButton.setText("control");
-            controlButton.setSelection(false);
+            if(includePropertys) {
+                Composite propertys = new Composite(shellComposite,SWT.NONE);
+                gridLayout = new GridLayout();
+                gridLayout.numColumns = 5;
+                propertys.setLayout(gridLayout);
+                gridData = new GridData(GridData.FILL_HORIZONTAL);
+                propertys.setLayoutData(gridData);   
+                new Label(propertys,SWT.RIGHT).setText("property");
+                timeStampButton = new Button(propertys,SWT.TOGGLE);
+                timeStampButton.setText("timeStamp");
+                timeStampButton.setSelection(false);
+                alarmButton = new Button(propertys,SWT.TOGGLE);
+                alarmButton.setText("alarm");
+                alarmButton.setSelection(false);
+                displayButton = new Button(propertys,SWT.TOGGLE);
+                displayButton.setText("display");
+                displayButton.setSelection(false);
+                controlButton = new Button(propertys,SWT.TOGGLE);
+                controlButton.setText("control");
+                controlButton.setSelection(false);
+            }
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.swtshell.ChannelConnect#getChannel()
@@ -303,6 +308,7 @@ public class ChannelConnectFactory {
         }
         
         private String[] getPropertyNames() {
+            if(!includePropertys) return new String[0];
             int num = 0;
             boolean time = timeStampButton.getSelection();
             boolean alarm = alarmButton.getSelection();

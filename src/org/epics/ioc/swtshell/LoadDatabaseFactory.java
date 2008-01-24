@@ -5,15 +5,27 @@
  */
 package org.epics.ioc.swtshell;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
 
-import org.eclipse.swt.*;
-import org.eclipse.swt.events.*;
-import org.eclipse.swt.widgets.*;
-import org.eclipse.swt.layout.*;
-
-import org.epics.ioc.dbd.*;
-import org.epics.ioc.util.*;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.FileDialog;
+import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.Text;
+import org.epics.ioc.dbd.DBD;
+import org.epics.ioc.dbd.DBDFactory;
+import org.epics.ioc.dbd.XMLToDBDFactory;
+import org.epics.ioc.util.IOCFactory;
+import org.epics.ioc.util.MessageType;
+import org.epics.ioc.util.Requester;
 
 /**
  * A shell for loading a new Database Definition or Record Instance into a running JavaIOC.

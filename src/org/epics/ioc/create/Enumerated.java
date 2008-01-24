@@ -5,7 +5,7 @@
  */
 package org.epics.ioc.create;
 
-import org.epics.ioc.pv.*;
+import org.epics.ioc.pv.PVEnumerated;
 
 /**
  * Interface for enumerated data.

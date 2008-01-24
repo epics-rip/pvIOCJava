@@ -5,7 +5,15 @@
  */
 package org.epics.ioc.ca;
 
-import org.epics.ioc.pv.*;
+import org.epics.ioc.pv.Array;
+import org.epics.ioc.pv.Field;
+import org.epics.ioc.pv.PVArray;
+import org.epics.ioc.pv.PVArrayArray;
+import org.epics.ioc.pv.PVDataCreate;
+import org.epics.ioc.pv.PVField;
+import org.epics.ioc.pv.PVStructure;
+import org.epics.ioc.pv.PVStructureArray;
+import org.epics.ioc.pv.Type;
 
 /**
  * Base class for a CDStructure (Channel Data Structure).

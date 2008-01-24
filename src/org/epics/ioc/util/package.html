@@ -10,7 +10,7 @@
 <body>
 <h1 style="text-align: center">EPICS JavaIOC: util<br />
 package: org.epics.ioc.util<br />
-2008.01.07</h1>
+2008.01.24</h1>
 CONTENTS 
 
 <div class="toc">
@@ -822,14 +822,14 @@ IOCXMLReader.</p>
 
 <h3 id="IOCExecuto">IOCExecutor</h3>
 <pre>    public interface IOCExecutor {
-        void execute(Runnable command,ScanPriority priority);
-        void execute(List&lt;Runnable&gt; commands,ScanPriority priority);
+        void execute(Runnable command);
+        void execute(List&lt;Runnable&gt; commands);
     }
     public class IOCExecutorFactory {
-        static public IOCExecutor create(String name);
+        static public IOCExecutor create(String name,ScanPriority priority);
     }</pre>
 
-<p>An IOCExecutor is a set of threads, one for each ScanPriority. It can
+<p>An IOCExecutor is a thread that can
 execute any object that implements the Java Runnable interface.</p>
 </body>
 </html>

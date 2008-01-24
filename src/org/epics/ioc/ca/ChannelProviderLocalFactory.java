@@ -122,7 +122,7 @@ public class ChannelProviderLocalFactory  {
          * @see org.epics.ioc.ca.Channel#connect()
          */
         public void connect() {
-            super.SetPVRecord(dbRecord.getPVRecord(),fieldName);
+            super.setPVRecord(dbRecord.getPVRecord(),fieldName);
             super.connect();
         }
                 
@@ -135,11 +135,11 @@ public class ChannelProviderLocalFactory  {
                 return null;
             }
             if(name==null || name.length()<=0) {
-                return new BaseChannelField(dbRecord,dbRecord.getDBStructure().getPVField());
+                return new ChannelFieldImpl(dbRecord,dbRecord.getDBStructure().getPVField());
             }
             PVField pvField = super.getPVRecord().findProperty(name);
             if(pvField==null) return null;
-            return new BaseChannelField(dbRecord,pvField);               
+            return new ChannelFieldImpl(dbRecord,pvField);               
         }    
         /* (non-Javadoc)
          * @see org.epics.ioc.ca.Channel#createChannelProcess(org.epics.ioc.ca.ChannelProcessRequester)
@@ -213,7 +213,7 @@ public class ChannelProviderLocalFactory  {
             return channelPutGet;
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.ca.Channel#createOnChange(org.epics.ioc.ca.ChannelMonitorNotifyRequester, boolean)
+         * @see org.epics.ioc.ca.Channel#createChannelMonitor(org.epics.ioc.ca.ChannelMonitorRequester)
          */
         public ChannelMonitor createChannelMonitor(ChannelMonitorRequester channelMonitorRequester)
         {
@@ -225,6 +225,46 @@ public class ChannelProviderLocalFactory  {
             MonitorImpl impl = new MonitorImpl(this,channelMonitorRequester);
             super.add(impl);
             return impl;
+        }
+        
+        private static class ChannelFieldImpl extends AbstractChannelField implements ChannelField {
+            private DBRecord dbRecord;
+            private DBField dbField;
+            private PVField pvField;
+
+            /**
+             * Constructor
+             * @param dbRecord The dbRecord for this channel.
+             * @param pvField The pvField for the channelField.
+             */
+            public ChannelFieldImpl(DBRecord dbRecord,PVField pvField) {
+                super(pvField);
+                this.dbRecord = dbRecord;
+                this.pvField = pvField;
+                dbField = dbRecord.findDBField(pvField);
+            }
+            /* (non-Javadoc)
+             * @see org.epics.ioc.ca.ChannelField#postPut()
+             */
+            public void postPut() {
+                dbField.postPut();
+            }
+            /* (non-Javadoc)
+             * @see org.epics.ioc.ca.ChannelField#findProperty(java.lang.String)
+             */
+            public ChannelField findProperty(String propertyName) {
+                PVField pvf = pvField.findProperty(propertyName);
+                if (pvf == null) return null;
+                return new ChannelFieldImpl(dbRecord,pvf);
+            }
+            /* (non-Javadoc)
+             * @see org.epics.ioc.ca.ChannelField#createChannelField(java.lang.String)
+             */
+            public ChannelField createChannelField(String fieldName) {
+                PVField pvf = pvField.getSubField(fieldName);
+                if (pvf == null) return null;
+                return new ChannelFieldImpl(dbRecord,pvf);
+            }
         }
 
         private class ChannelProcessImpl implements ChannelProcess,RecordProcessRequester

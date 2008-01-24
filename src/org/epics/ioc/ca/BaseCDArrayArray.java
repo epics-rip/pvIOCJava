@@ -4,7 +4,14 @@
  * in file LICENSE that is included with this distribution.
  */
 package org.epics.ioc.ca;
-import org.epics.ioc.pv.*;
+import org.epics.ioc.pv.Array;
+import org.epics.ioc.pv.ArrayArrayData;
+import org.epics.ioc.pv.PVArray;
+import org.epics.ioc.pv.PVArrayArray;
+import org.epics.ioc.pv.PVDataCreate;
+import org.epics.ioc.pv.PVField;
+import org.epics.ioc.pv.PVStructureArray;
+import org.epics.ioc.pv.Type;
 /**
  * Base class for a CD (Channel Data) Array of Arrays.
  * @author mrk

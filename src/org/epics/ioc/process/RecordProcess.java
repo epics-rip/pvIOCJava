@@ -5,8 +5,8 @@
  */
 package org.epics.ioc.process;
 
-import org.epics.ioc.db.*;
-import org.epics.ioc.util.*;;
+import org.epics.ioc.db.DBRecord;
+import org.epics.ioc.util.TimeStamp;
 
 /**
  * Record processing support.

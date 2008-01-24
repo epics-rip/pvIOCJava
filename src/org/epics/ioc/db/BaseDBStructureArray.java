@@ -5,7 +5,11 @@
  */
 package org.epics.ioc.db;
 
-import org.epics.ioc.pv.*;
+import org.epics.ioc.pv.Array;
+import org.epics.ioc.pv.PVStructure;
+import org.epics.ioc.pv.PVStructureArray;
+import org.epics.ioc.pv.StructureArrayData;
+import org.epics.ioc.pv.Type;
 
 /**
  * Base class for a non scalar array.

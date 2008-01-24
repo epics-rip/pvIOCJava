@@ -5,8 +5,8 @@
  */
 package org.epics.ioc.ca;
 
-import org.epics.ioc.util.*;
-import org.epics.ioc.pv.*;
+import org.epics.ioc.pv.PVRecord;
+import org.epics.ioc.util.Requester;
 
 
 /**

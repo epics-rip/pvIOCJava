@@ -5,8 +5,9 @@
  */
 package org.epics.ioc.ca;
 
-import org.epics.ioc.pv.*;
-import org.epics.ioc.util.*;
+import org.epics.ioc.pv.PVField;
+import org.epics.ioc.util.RequestResult;
+import org.epics.ioc.util.Requester;
 
 /**
  * Requester for a Get.get request.

@@ -6,8 +6,8 @@
 package org.epics.ioc.db;
 import java.util.List;
 
-import org.epics.ioc.pv.*;
 import org.epics.ioc.create.Create;
+import org.epics.ioc.pv.PVField;
 import org.epics.ioc.support.Support;
 
 

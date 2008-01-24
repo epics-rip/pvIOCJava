@@ -5,16 +5,35 @@
  */
 package org.epics.ioc.swtshell;
 
-import java.util.*;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
 
-import org.eclipse.swt.*;
-import org.eclipse.swt.layout.*;
-import org.eclipse.swt.events.*;
-import org.eclipse.swt.widgets.*;
-
-import org.epics.ioc.db.*;
-import org.epics.ioc.dbd.*;
-import org.epics.ioc.util.*;;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Menu;
+import org.eclipse.swt.widgets.MenuItem;
+import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.Text;
+import org.epics.ioc.db.DBRecord;
+import org.epics.ioc.db.IOCDB;
+import org.epics.ioc.db.IOCDBFactory;
+import org.epics.ioc.dbd.DBD;
+import org.epics.ioc.dbd.DBDCreate;
+import org.epics.ioc.dbd.DBDFactory;
+import org.epics.ioc.dbd.DBDRecordType;
+import org.epics.ioc.dbd.DBDStructure;
+import org.epics.ioc.dbd.DBDSupport;
+import org.epics.ioc.util.MessageType;
+import org.epics.ioc.util.Requester;
 
 /**
  * A shell for introspecting a JavaIOC Database.

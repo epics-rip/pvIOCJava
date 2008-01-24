@@ -52,8 +52,8 @@ public class ProcessFactory {
             this.display = display;
         }
 
-        private static IOCExecutor iocExecutor = IOCExecutorFactory.create("swtshell:Get");
-        private static ScanPriority scanPriority = ScanPriority.higher;
+        private static IOCExecutor iocExecutor
+            = IOCExecutorFactory.create("swtshell:Get",ScanPriority.low);
         private static String windowName = "process";
         private Display display;
         private Shell shell = null;
@@ -103,7 +103,7 @@ public class ProcessFactory {
             gridLayout.numColumns = 1;
             shell.setLayout(gridLayout);
             channelConnect = ChannelConnectFactory.create(this,this);
-            channelConnect.createWidgets(shell);
+            channelConnect.createWidgets(shell,false);
             processButton = new Button(shell,SWT.PUSH);
             processButton.setText("process");
             processButton.addSelectionListener(this);               
@@ -192,7 +192,7 @@ public class ProcessFactory {
                     requester.message("not connected", MessageType.info);
                 }
                 allDone = false;
-                iocExecutor.execute(this, scanPriority);
+                iocExecutor.execute(this);
             }
             /* (non-Javadoc)
              * @see java.lang.Runnable#run()

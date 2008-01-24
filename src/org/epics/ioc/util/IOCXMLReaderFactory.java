@@ -5,15 +5,24 @@
  */
 package org.epics.ioc.util;
 
-import java.util.*;
+import java.io.File;
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Pattern;
-import java.util.concurrent.atomic.*;
-import java.io.*;
-import java.net.*;
 
-import org.xml.sax.*;
+import org.xml.sax.Attributes;
 import org.xml.sax.ContentHandler;
-import org.xml.sax.helpers.*;
+import org.xml.sax.ErrorHandler;
+import org.xml.sax.Locator;
+import org.xml.sax.SAXException;
+import org.xml.sax.SAXParseException;
+import org.xml.sax.XMLReader;
+import org.xml.sax.helpers.XMLReaderFactory;
 
 /**
  * IOCXMLReaderFactory implements IOCXMLReader.

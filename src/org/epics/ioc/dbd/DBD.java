@@ -5,9 +5,10 @@
  */
 package org.epics.ioc.dbd;
 
-import java.util.*;
+import java.util.Map;
 
-import org.epics.ioc.pv.*;
+import org.epics.ioc.pv.Field;
+import org.epics.ioc.pv.FieldAttribute;
 
 /**
  * DBD (DataBase Definition) is the interface for locating interfaces for

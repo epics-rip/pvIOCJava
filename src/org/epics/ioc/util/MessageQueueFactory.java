@@ -5,7 +5,7 @@
  */
 package org.epics.ioc.util;
 
-import java.util.concurrent.locks.*;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * A factory that implements messageQueues.

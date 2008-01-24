@@ -5,7 +5,7 @@
  */
 package org.epics.ioc.process;
 
-import org.epics.ioc.util.*;
+import org.epics.ioc.util.Requester;
 
 /**
  * The interface that must be implemented by code that makes a recordProcess.requestProcessCallback

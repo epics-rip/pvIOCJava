@@ -9,27 +9,20 @@ import org.epics.ioc.pv.Field;
 import org.epics.ioc.pv.PVEnumerated;
 import org.epics.ioc.pv.PVField;
 
-import org.epics.ioc.db.*;
-
 /**
- * Base class for implementing ChannelField.
+ * Abstract class for implementing ChannelField.
  * @author mrk
- * 
+ *
  */
-public class BaseChannelField implements ChannelField {
-    private DBRecord dbRecord;
-    private DBField dbField;
+public abstract class AbstractChannelField implements ChannelField{
     private PVField pvField;
 
     /**
      * Constructor
-     * @param dbRecord The dbRecord for this channel.
      * @param pvField The pvField for the channelField.
      */
-    public BaseChannelField(DBRecord dbRecord,PVField pvField) {
-        this.dbRecord = dbRecord;
+    protected AbstractChannelField(PVField pvField) {
         this.pvField = pvField;
-        dbField = dbRecord.findDBField(pvField);
     }
     /* (non-Javadoc)
      * @see org.epics.ioc.ca.ChannelField#getPVField()
@@ -40,9 +33,7 @@ public class BaseChannelField implements ChannelField {
     /* (non-Javadoc)
      * @see org.epics.ioc.ca.ChannelField#postPut()
      */
-    public void postPut() {
-        dbField.postPut();
-    }
+    public abstract void postPut();
     /* (non-Javadoc)
      * @see org.epics.ioc.ca.ChannelField#getPropertyNames()
      */
@@ -52,19 +43,11 @@ public class BaseChannelField implements ChannelField {
     /* (non-Javadoc)
      * @see org.epics.ioc.ca.ChannelField#findProperty(java.lang.String)
      */
-    public ChannelField findProperty(String propertyName) {
-        PVField pvf = pvField.findProperty(propertyName);
-        if (pvf == null) return null;
-        return new BaseChannelField(dbRecord,pvf);
-    }
+    public abstract ChannelField findProperty(String propertyName);
     /* (non-Javadoc)
      * @see org.epics.ioc.ca.ChannelField#createChannelField(java.lang.String)
      */
-    public ChannelField createChannelField(String fieldName) {
-        PVField pvf = pvField.getSubField(fieldName);
-        if (pvf == null) return null;
-        return new BaseChannelField(dbRecord,pvf);
-    }
+    public abstract ChannelField createChannelField(String fieldName);
     /* (non-Javadoc)
      * @see org.epics.ioc.ca.ChannelField#getEnumerated()
      */

@@ -5,7 +5,7 @@
  */
 package org.epics.ioc.support;
 
-import org.epics.ioc.db.*;
+import org.epics.ioc.db.DBField;
 
 /**
  * @author mrk

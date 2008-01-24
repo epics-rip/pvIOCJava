@@ -5,7 +5,13 @@
  */
 package org.epics.ioc.ca;
 
-import org.epics.ioc.pv.*;
+import org.epics.ioc.pv.Array;
+import org.epics.ioc.pv.Convert;
+import org.epics.ioc.pv.ConvertFactory;
+import org.epics.ioc.pv.Field;
+import org.epics.ioc.pv.PVArray;
+import org.epics.ioc.pv.PVField;
+import org.epics.ioc.pv.Type;
 
 /**
  * Implementation of CDField.

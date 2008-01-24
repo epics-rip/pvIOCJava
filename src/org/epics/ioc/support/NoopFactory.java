@@ -5,7 +5,8 @@
  */
 package org.epics.ioc.support;
 
-import org.epics.ioc.db.*;
+import org.epics.ioc.db.DBField;
+import org.epics.ioc.db.DBStructure;
 
 /**
  * This is a support that does nothing except act like it connects, etc.

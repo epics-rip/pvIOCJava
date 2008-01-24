@@ -10,7 +10,7 @@
 <body>
 <h1 style="text-align: center">EPICS JavaIOC: channel Access<br />
 package: org.epics.ioc.ca<br />
-2008.01.18</h1>
+2008.01.24</h1>
 CONTENTS 
 
 <div class="toc">
@@ -694,7 +694,7 @@ client request to:</p>
 <hr />
 <pre>    public abstract class AbstractChannel implements Channel{
         protected AbstractChannel(ChannelListener channelListener, String options);
-        protected synchronized void SetPVRecord(PVRecord pvRecord,String fieldName);
+        protected synchronized void setPVRecord(PVRecord pvRecord,String fieldName);
         public synchronized PVRecord getPVRecord();
         public synchronized boolean add(ChannelProcess channelProcess);
         public synchronized boolean add(ChannelGet channelGet);

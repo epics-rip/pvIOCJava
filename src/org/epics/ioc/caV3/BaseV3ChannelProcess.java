@@ -5,19 +5,19 @@
  */
 package org.epics.ioc.caV3;
 
-import gov.aps.jca.CAException;
-import gov.aps.jca.Context;
-import gov.aps.jca.event.ConnectionEvent;
-import gov.aps.jca.event.ConnectionListener;
-import gov.aps.jca.event.PutEvent;
-import gov.aps.jca.event.PutListener;
-
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.locks.Condition;
-import java.util.concurrent.locks.ReentrantLock;
-
+import org.epics.ioc.ca.Channel;
+import org.epics.ioc.ca.ChannelAccessFactory;
+import org.epics.ioc.ca.ChannelField;
+import org.epics.ioc.ca.ChannelFieldGroup;
+import org.epics.ioc.ca.ChannelFieldGroupListener;
+import org.epics.ioc.ca.ChannelListener;
 import org.epics.ioc.ca.ChannelProcess;
 import org.epics.ioc.ca.ChannelProcessRequester;
+import org.epics.ioc.ca.ChannelPut;
+import org.epics.ioc.ca.ChannelPutRequester;
+import org.epics.ioc.pv.PVByte;
+import org.epics.ioc.pv.PVField;
+import org.epics.ioc.util.IOCExecutor;
 import org.epics.ioc.util.MessageType;
 import org.epics.ioc.util.RequestResult;
 
@@ -27,18 +27,21 @@ import org.epics.ioc.util.RequestResult;
  *
  */
 public class BaseV3ChannelProcess implements
-ConnectionListener,ChannelProcess,PutListener
+ChannelProcess,ChannelListener,Runnable,ChannelPutRequester,ChannelFieldGroupListener
 {
-    private V3Channel channel = null;
-    private gov.aps.jca.Channel jcaChannel = null;
-    
-    private ReentrantLock lock = new ReentrantLock();
-    private Condition waitForConnect = lock.newCondition();
-    private volatile boolean isReady = false;
-    private volatile boolean connected = false;
-    
-    private boolean isDestroyed = false;
     private ChannelProcessRequester channelProcessRequester = null;
+    
+    private V3Channel v3Channel = null;
+    private IOCExecutor iocExecutor = null;
+    private Channel putChannel = null;
+    
+    private ChannelFieldGroup channelFieldGroup = null;
+    private ChannelField channelField = null;
+    private ChannelPut channelPut = null;
+    
+    private boolean isReady = false;
+    private boolean isDestroyed = false;
+    
          
     /**
      * Constructer.
@@ -46,81 +49,91 @@ ConnectionListener,ChannelProcess,PutListener
       */
     public BaseV3ChannelProcess(ChannelProcessRequester channelProcessRequester)
     {
-        
         this.channelProcessRequester = channelProcessRequester;
-        
     }
     /**
      * Initialize the channelProcess.
-     * @param channel The V3Channel
+     * @param v3Channel The V3Channel
      * @return (false,true) if the channelProcess (did not, did) properly initialize.
      */
-    public boolean init(V3Channel channel) {
-        this.channel = channel;
-        Context context = channel.getContext();
-        String recordName = channel.getDBRecord().getPVRecord().getRecordName();
-        isReady = false;
-        connected = false;
-        try {
-            jcaChannel = context.createChannel(recordName + "." + "PROC",this);
-            isReady = true;
-        } catch (Exception e) {
-            channelProcessRequester.message(e.getMessage(),MessageType.error);
-            return false;
-        }
-        lock.lock();
-        try {
-            if(!connected) waitForConnect.await(3, TimeUnit.SECONDS);
-        } catch(InterruptedException e) {
-            channelProcessRequester.message(
-                    " did not connect " + e.getMessage(),MessageType.error);
-            return false;
-        } finally {
-            lock.unlock();
-            waitForConnect = null;
-            lock = null;
-        }
-        if(!connected) {
-            channelProcessRequester.message(
-                    " did not connect ",MessageType.error);
-            return false;
-        }
+    public boolean init(V3Channel v3Channel) {
+        this.v3Channel = v3Channel;
+        iocExecutor = v3Channel.getIOCExecutor();
+        String pvName = v3Channel.getV3ChannelRecord().getPVRecord().getRecordName() + "." + "PROC";
+        putChannel = ChannelAccessFactory.getChannelAccess().createChannel(
+            pvName, null, "caV3", this);
+        putChannel.connect();
         return true;
     }
+   
     /* (non-Javadoc)
-     * @see gov.aps.jca.event.ConnectionListener#connectionChanged(gov.aps.jca.event.ConnectionEvent)
+     * @see org.epics.ioc.util.Requester#getRequesterName()
      */
-    public void connectionChanged(ConnectionEvent arg0) {
-        while(!isReady) {
-            try {
-                Thread.sleep(1);
-            } catch (InterruptedException e) {
-                
-            }
+    public String getRequesterName() {
+        return channelProcessRequester.getRequesterName();
+    }
+    /* (non-Javadoc)
+     * @see org.epics.ioc.util.Requester#message(java.lang.String, org.epics.ioc.util.MessageType)
+     */
+    public void message(String message, MessageType messageType) {
+        channelProcessRequester.message(message, messageType);
+    }
+    /* (non-Javadoc)
+     * @see org.epics.ioc.ca.ChannelListener#channelStateChange(org.epics.ioc.ca.Channel, boolean)
+     */
+    public void channelStateChange(Channel c, boolean isConnected) {
+        if(isConnected) {
+            iocExecutor.execute(this);
+        } else {
+            destroy(c);
         }
-        if(arg0.isConnected()) {
-            lock.lock();
-            try {
-                connected = true;
-                waitForConnect.signal();
-                return;
-            } finally {
-                lock.unlock();
-            }
-        }
-        
+    }
+    /* (non-Javadoc)
+     * @see org.epics.ioc.ca.ChannelListener#destroy(org.epics.ioc.ca.Channel)
+     */
+    public void destroy(Channel c) {
+        if(!isDestroyed) destroy();
+        c.destroy();
+    }
+    /* (non-Javadoc)
+     * @see java.lang.Runnable#run()
+     */
+    public void run() {
+        channelField = putChannel.createChannelField("PROC");
+        channelFieldGroup = putChannel.createFieldGroup(this);
+        channelFieldGroup.addChannelField(channelField);
+        channelPut = putChannel.createChannelPut(channelFieldGroup, this, false);
+        isReady = true;
+    }
+    /* (non-Javadoc)
+     * @see org.epics.ioc.ca.ChannelPutRequester#nextDelayedPutField(org.epics.ioc.pv.PVField)
+     */
+    public boolean nextDelayedPutField(PVField field) {
+        // nothing to do
+        return false;
+    }
+    /* (non-Javadoc)
+     * @see org.epics.ioc.ca.ChannelPutRequester#nextPutField(org.epics.ioc.ca.ChannelField, org.epics.ioc.pv.PVField)
+     */
+    public boolean nextPutField(ChannelField channelField, PVField pvField) {
+        PVByte pvByte = (PVByte)pvField;
+        pvByte.put((byte)1);
+        return false;
+    }
+    /* (non-Javadoc)
+     * @see org.epics.ioc.ca.ChannelPutRequester#putDone(org.epics.ioc.util.RequestResult)
+     */
+    public void putDone(RequestResult requestResult) {
+        channelProcessRequester.processDone(requestResult);
     }
     /* (non-Javadoc)
      * @see org.epics.ioc.ca.ChannelProcess#destroy()
      */
     public void destroy() {
+        isReady = false;
         isDestroyed = true;
-        try {
-            jcaChannel.destroy();
-        } catch (CAException e) {
-            channelProcessRequester.message(e.getMessage(),MessageType.error);
-        }
-        channel.remove(this);
+        destroy(putChannel);
+        v3Channel.remove(this);
     }
     /* (non-Javadoc)
      * @see org.epics.ioc.ca.ChannelProcess#process()
@@ -130,19 +143,17 @@ ConnectionListener,ChannelProcess,PutListener
             channelProcessRequester.processDone(RequestResult.zombie);
             return;
         }
-        byte value = 1;
-        try {
-            jcaChannel.put(value,this);
-        } catch (CAException e) {
-            channelProcessRequester.message(e.getMessage(),MessageType.error);
+        if(!isReady) {
+            channelProcessRequester.message("not connected", MessageType.error);
             channelProcessRequester.processDone(RequestResult.failure);
+            return;
         }
+        channelPut.put();
     }
     /* (non-Javadoc)
-     * @see gov.aps.jca.event.PutListener#putCompleted(gov.aps.jca.event.PutEvent)
+     * @see org.epics.ioc.ca.ChannelFieldGroupListener#accessRightsChange(org.epics.ioc.ca.Channel, org.epics.ioc.ca.ChannelField)
      */
-    public void putCompleted(PutEvent arg0) {
-        channelProcessRequester.processDone(RequestResult.success);
+    public void accessRightsChange(Channel channel, ChannelField channelField) {
+        // nothing to do for now
     }
-   
 }

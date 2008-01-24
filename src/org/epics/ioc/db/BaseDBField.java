@@ -5,13 +5,19 @@
  */
 package org.epics.ioc.db;
 
-import java.util.*;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 
-import org.epics.ioc.dbd.*;
-import org.epics.ioc.process.SupportState;
-import org.epics.ioc.pv.*;
-import org.epics.ioc.support.Support;
 import org.epics.ioc.create.Create;
+import org.epics.ioc.dbd.DBD;
+import org.epics.ioc.dbd.DBDSupport;
+import org.epics.ioc.process.SupportState;
+import org.epics.ioc.pv.Array;
+import org.epics.ioc.pv.Field;
+import org.epics.ioc.pv.PVField;
+import org.epics.ioc.pv.Type;
+import org.epics.ioc.support.Support;
 
 
 /**

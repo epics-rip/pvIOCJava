@@ -5,7 +5,9 @@
  */
 package org.epics.ioc.ca;
 
-import java.util.*;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeMap;
 
 import org.epics.ioc.util.MessageType;
 

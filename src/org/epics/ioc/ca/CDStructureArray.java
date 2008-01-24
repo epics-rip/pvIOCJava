@@ -5,7 +5,7 @@
  */
 package org.epics.ioc.ca;
 
-import org.epics.ioc.pv.*;
+import org.epics.ioc.pv.PVField;
 
 /**
  * CDNonScalarArray - A CRRecord array field that contains non-scalar elements.

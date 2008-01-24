@@ -5,7 +5,7 @@
  */
 package org.epics.ioc.ca;
 
-import org.epics.ioc.util.*;
+import org.epics.ioc.util.Requester;
 /**
  * Listener for connect state changes.
  * @author mrk

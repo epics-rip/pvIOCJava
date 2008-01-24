@@ -5,7 +5,7 @@
  */
 package org.epics.ioc.ca;
 
-import org.epics.ioc.pv.*;
+import org.epics.ioc.pv.PVField;
 
 /**
  * CDField - Data for a field of a CDRecord (Channel Data Record)

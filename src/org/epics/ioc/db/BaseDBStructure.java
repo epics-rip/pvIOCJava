@@ -5,17 +5,25 @@
  */
 package org.epics.ioc.db;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.Iterator;
-import java.lang.reflect.*;
 
-import org.epics.ioc.pv.*;
-import org.epics.ioc.pv.Type;
-import org.epics.ioc.pv.Field;
-import org.epics.ioc.pv.Array;
 import org.epics.ioc.create.Create;
-
-import org.epics.ioc.dbd.*;
-import org.epics.ioc.util.*;
+import org.epics.ioc.dbd.DBD;
+import org.epics.ioc.dbd.DBDCreate;
+import org.epics.ioc.dbd.DBDFactory;
+import org.epics.ioc.pv.Array;
+import org.epics.ioc.pv.Field;
+import org.epics.ioc.pv.PVArray;
+import org.epics.ioc.pv.PVArrayArray;
+import org.epics.ioc.pv.PVField;
+import org.epics.ioc.pv.PVRecord;
+import org.epics.ioc.pv.PVStructure;
+import org.epics.ioc.pv.PVStructureArray;
+import org.epics.ioc.pv.Type;
+import org.epics.ioc.util.MessageType;
 
 /**
  * Base class for a DBStructure.

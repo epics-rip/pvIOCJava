@@ -5,7 +5,8 @@
  */
 package org.epics.ioc.pv;
 
-import org.epics.ioc.util.*;
+import org.epics.ioc.util.MessageType;
+import org.epics.ioc.util.Requester;
 
 /**
  * PVRecord interrace.

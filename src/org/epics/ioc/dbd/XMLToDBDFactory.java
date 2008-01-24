@@ -5,11 +5,21 @@
  */
 package org.epics.ioc.dbd;
 
-import java.util.*;
-import java.util.concurrent.atomic.*;
+import java.util.LinkedList;
+import java.util.ListIterator;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
 
-import org.epics.ioc.util.*;
-import org.epics.ioc.pv.*;
+import org.epics.ioc.pv.Field;
+import org.epics.ioc.pv.FieldAttribute;
+import org.epics.ioc.pv.FieldCreate;
+import org.epics.ioc.pv.FieldFactory;
+import org.epics.ioc.pv.Type;
+import org.epics.ioc.util.IOCXMLListener;
+import org.epics.ioc.util.IOCXMLReader;
+import org.epics.ioc.util.IOCXMLReaderFactory;
+import org.epics.ioc.util.MessageType;
+import org.epics.ioc.util.Requester;
 
 /**
  * Factory to convert an xml file to a Database Definition and put it in a database.

@@ -5,7 +5,8 @@
  */
 package org.epics.ioc.pdrv.interfaces;
 
-import org.epics.ioc.pdrv.*;
+import org.epics.ioc.pdrv.Device;
+import org.epics.ioc.pdrv.Trace;
 
 /**
  * @author mrk

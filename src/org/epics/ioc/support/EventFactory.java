@@ -5,12 +5,18 @@
  */
 package org.epics.ioc.support;
 
-import org.epics.ioc.db.*;
-import org.epics.ioc.process.*;
-import org.epics.ioc.pv.*;
-import org.epics.ioc.support.AbstractSupport;
-import org.epics.ioc.support.Support;
-import org.epics.ioc.util.*;
+import org.epics.ioc.db.DBField;
+import org.epics.ioc.process.SupportProcessRequester;
+import org.epics.ioc.process.SupportState;
+import org.epics.ioc.pv.PVField;
+import org.epics.ioc.pv.PVRecord;
+import org.epics.ioc.pv.PVString;
+import org.epics.ioc.pv.Type;
+import org.epics.ioc.util.EventAnnounce;
+import org.epics.ioc.util.EventScanner;
+import org.epics.ioc.util.MessageType;
+import org.epics.ioc.util.RequestResult;
+import org.epics.ioc.util.ScannerFactory;
 
 /**
  * Support a field which must have type string.

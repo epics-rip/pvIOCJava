@@ -5,8 +5,18 @@
  */
 package org.epics.ioc.create;
 
-import org.epics.ioc.db.*;
-import org.epics.ioc.pv.*;
+import org.epics.ioc.db.DBField;
+import org.epics.ioc.pv.AbstractPVArray;
+import org.epics.ioc.pv.AbstractPVField;
+import org.epics.ioc.pv.Array;
+import org.epics.ioc.pv.Convert;
+import org.epics.ioc.pv.ConvertFactory;
+import org.epics.ioc.pv.Field;
+import org.epics.ioc.pv.PVField;
+import org.epics.ioc.pv.PVInt;
+import org.epics.ioc.pv.PVString;
+import org.epics.ioc.pv.PVStringArray;
+import org.epics.ioc.pv.StringArrayData;
 import org.epics.ioc.util.MessageType;
 
 /**

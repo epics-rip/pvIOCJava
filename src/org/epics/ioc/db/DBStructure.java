@@ -5,7 +5,7 @@
  */
 package org.epics.ioc.db;
 
-import org.epics.ioc.pv.*;
+import org.epics.ioc.pv.PVStructure;
 
 /**
  * Interface for a structure field.

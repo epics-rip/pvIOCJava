@@ -5,12 +5,24 @@
  */
 package org.epics.ioc.db;
 
-import java.util.*;
-import java.util.concurrent.locks.*;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.concurrent.locks.ReentrantLock;
 
-import org.epics.ioc.pv.*;
-import org.epics.ioc.dbd.*;
-import org.epics.ioc.process.*;
+import org.epics.ioc.dbd.DBD;
+import org.epics.ioc.process.RecordProcess;
+import org.epics.ioc.pv.Array;
+import org.epics.ioc.pv.ArrayArrayData;
+import org.epics.ioc.pv.PVArray;
+import org.epics.ioc.pv.PVArrayArray;
+import org.epics.ioc.pv.PVDataCreate;
+import org.epics.ioc.pv.PVDataFactory;
+import org.epics.ioc.pv.PVField;
+import org.epics.ioc.pv.PVRecord;
+import org.epics.ioc.pv.PVStructure;
+import org.epics.ioc.pv.PVStructureArray;
+import org.epics.ioc.pv.StructureArrayData;
+import org.epics.ioc.pv.Type;
 
 /**
  * Abstract base class for a record instance.

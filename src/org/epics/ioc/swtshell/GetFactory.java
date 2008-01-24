@@ -58,8 +58,8 @@ public class GetFactory {
             this.display = display;
         }
 
-        private static IOCExecutor iocExecutor = IOCExecutorFactory.create("swtshell:Get");
-        private static ScanPriority scanPriority = ScanPriority.higher;
+        private static IOCExecutor iocExecutor
+            = IOCExecutorFactory.create("swtshell:Get",ScanPriority.low);
         private static String windowName = "get";
         private Display display;
         private Shell shell = null;
@@ -125,7 +125,7 @@ public class GetFactory {
             gridLayout.numColumns = 1;
             shell.setLayout(gridLayout);
             channelConnect = ChannelConnectFactory.create(this,this);
-            channelConnect.createWidgets(shell);
+            channelConnect.createWidgets(shell,true);
             Composite getWidget = new Composite(shell,SWT.BORDER);
             gridLayout = new GridLayout();
             gridLayout.numColumns = 3;
@@ -225,7 +225,7 @@ public class GetFactory {
             private boolean connect(ChannelField channelField,String[] propertyNames) {
                 ChannelFieldGroup getFieldGroup = channel.createFieldGroup(this);
                 if(channelField.getField().getType()!=Type.pvStructure
-                        || (propertyNames==null || propertyNames.length<=0)) {
+                || (propertyNames==null || propertyNames.length<=0)) {
                     getFieldGroup.addChannelField(channelField);
                 }
                 if(propertyNames!=null && propertyNames.length>0) {
@@ -251,7 +251,7 @@ public class GetFactory {
 
             private CD get() {                
                 allDone = false;               
-                iocExecutor.execute(this, scanPriority);
+                iocExecutor.execute(this);
                 lock.lock();
                 try {
                     while(!allDone) {                       

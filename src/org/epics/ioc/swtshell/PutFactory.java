@@ -10,7 +10,8 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.*;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -18,7 +19,16 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
-import org.epics.ioc.ca.*;
+import org.epics.ioc.ca.CD;
+import org.epics.ioc.ca.CDFactory;
+import org.epics.ioc.ca.CDPut;
+import org.epics.ioc.ca.CDPutRequester;
+import org.epics.ioc.ca.CDRecord;
+import org.epics.ioc.ca.Channel;
+import org.epics.ioc.ca.ChannelField;
+import org.epics.ioc.ca.ChannelFieldGroup;
+import org.epics.ioc.ca.ChannelFieldGroupListener;
+import org.epics.ioc.ca.ChannelListener;
 import org.epics.ioc.util.IOCExecutor;
 import org.epics.ioc.util.IOCExecutorFactory;
 import org.epics.ioc.util.MessageType;
@@ -47,8 +57,8 @@ public class PutFactory {
             this.display = display;
         }
 
-        private static IOCExecutor iocExecutor = IOCExecutorFactory.create("swtshell:putt");
-        private static ScanPriority scanPriority = ScanPriority.higher;
+        private static IOCExecutor iocExecutor
+            = IOCExecutorFactory.create("swtshell:put",ScanPriority.low);
         private static String windowName = "put";
         private Display display;
         private Shell shell = null;
@@ -104,8 +114,7 @@ public class PutFactory {
             gridLayout.numColumns = 1;
             shell.setLayout(gridLayout);
             channelConnect = ChannelConnectFactory.create(this,this);
-            channelConnect.createWidgets(shell);
-        
+            channelConnect.createWidgets(shell,false);
             Composite putComposite = new Composite(shell,SWT.BORDER);
             gridLayout = new GridLayout();
             gridLayout.numColumns = 2;
@@ -228,7 +237,7 @@ public class PutFactory {
                 cdRecord.getCDStructure().clearNumPuts();
                 CDGet cdGet = CDGetFactory.create(shell);
                 cdGet.getValue(cdRecord);
-                iocExecutor.execute(this, scanPriority);
+                iocExecutor.execute(this);
                 lock.lock();
                 try {
                     while(!allDone) {                       

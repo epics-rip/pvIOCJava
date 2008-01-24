@@ -7,7 +7,12 @@ package org.epics.ioc.create;
 
 import org.epics.ioc.db.DBField;
 import org.epics.ioc.db.DBStructure;
-import org.epics.ioc.pv.*;
+import org.epics.ioc.pv.Array;
+import org.epics.ioc.pv.Field;
+import org.epics.ioc.pv.PVField;
+import org.epics.ioc.pv.PVStructure;
+import org.epics.ioc.pv.Structure;
+import org.epics.ioc.pv.Type;
 import org.epics.ioc.util.MessageType;
 
 /**

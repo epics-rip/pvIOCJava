@@ -19,6 +19,7 @@ import java.util.regex.Pattern;
 import org.epics.ioc.ca.Channel;
 import org.epics.ioc.ca.ChannelAccessFactory;
 import org.epics.ioc.ca.ChannelListener;
+import org.epics.ioc.ca.ChannelProvider;
 import org.epics.ioc.util.RunnableReady;
 import org.epics.ioc.util.ThreadCreate;
 import org.epics.ioc.util.ThreadFactory;
@@ -34,18 +35,17 @@ public class ClientFactory  {
     private static ChannelProviderImpl channelProvider = new ChannelProviderImpl();
     private static JCALibrary jca = null;
     private static Context context = null;
-    
     private static ThreadCreate threadCreate = ThreadFactory.getThreadCreate();
     
     /**
-     * Start. This justb registets the V3 ChannelProvider.
+     * Start. This registers the V3 ChannelProvider.
      */
     public static void start() {
         channelProvider.register();
     }
     
     private static class ChannelProviderImpl
-    implements V3ChannelProvider, ContextExceptionListener, ContextMessageListener
+    implements ChannelProvider,ContextExceptionListener, ContextMessageListener
     {
         static private final String providerName = "caV3";
         static private final Pattern periodPattern = Pattern.compile("[.]");
@@ -63,11 +63,10 @@ public class ClientFactory  {
                 context.addContextExceptionListener(this);
                 context.addContextMessageListener(this);
                 caThread = new CAThread("cav3",3);
-            } catch (Exception e) {
+            } catch (CAException e) {
                 System.err.println(e.getMessage());
                 return;
-            }
-            
+            }     
             ChannelAccessFactory.getChannelAccess().registerChannelProvider(this);
         }       
         /* (non-Javadoc)
@@ -88,15 +87,25 @@ public class ClientFactory  {
                     options = names[0];
                 }
             }
-            String remoteFieldName = "VAL";
+            String remoteFieldName = null;
             if(fieldName!=null) {
-                if(!fieldName.equals("value")) remoteFieldName = fieldName;
-                if(fieldName.equals("VAL")) fieldName = "value";
+                if(fieldName.equals("value")) {
+                    remoteFieldName = "VAL";
+                } else if(fieldName.equals("VAL")) {
+                    remoteFieldName = "VAL";
+                    fieldName = "value";
+                } else {
+                    remoteFieldName = fieldName;
+                }
             } else {
                 fieldName = "value";
+                remoteFieldName = "VAL";
             }
             pvName =  recordName + "." + remoteFieldName;
-            return new BaseV3Channel(this,listener,pvName,recordName,fieldName,propertys,options);
+            
+            BaseV3Channel v3Channel = new BaseV3Channel(listener,options);
+            v3Channel.init(context,pvName,recordName,fieldName,propertys);
+            return v3Channel;
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.ca.ChannelProvider#getProviderName()
@@ -115,26 +124,27 @@ public class ClientFactory  {
          */
         public void destroy() {
             caThread.stop();
-        }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.caV3.V3ChannelProvider#getContext()
-         */
-        public Context getContext() {
-            return context;
+            try {
+                context.destroy();
+            } catch (CAException e) {
+                System.err.println(e.getMessage());
+            }
         }
         /* (non-Javadoc)
          * @see gov.aps.jca.event.ContextExceptionListener#contextException(gov.aps.jca.event.ContextExceptionEvent)
          */
         public void contextException(ContextExceptionEvent arg0) {
             String message = arg0.getMessage();
-            System.out.println(message);
+            System.err.println(message);
+            System.err.flush();
         }
         /* (non-Javadoc)
          * @see gov.aps.jca.event.ContextExceptionListener#contextVirtualCircuitException(gov.aps.jca.event.ContextVirtualCircuitExceptionEvent)
          */
         public void contextVirtualCircuitException(ContextVirtualCircuitExceptionEvent arg0) {
             String message = "status " + arg0.getStatus().toString();
-            System.out.println(message);
+            System.err.println(message);
+            System.err.flush();
         }
         /* (non-Javadoc)
          * @see gov.aps.jca.event.ContextMessageListener#contextMessage(gov.aps.jca.event.ContextMessageEvent)
@@ -142,6 +152,7 @@ public class ClientFactory  {
         public void contextMessage(ContextMessageEvent arg0) {
             String message = arg0.getMessage();
             System.out.println(message);
+            System.out.flush();
         }
     }
     
@@ -154,8 +165,7 @@ public class ClientFactory  {
         /* (non-Javadoc)
          * @see org.epics.ioc.util.RunnableReady#run(org.epics.ioc.util.ThreadReady)
          */
-        public void run(ThreadReady threadReady) {
-           
+        public void run(ThreadReady threadReady) {        
 System.out.println("CaV3Client");
 context.printInfo();
 System.out.println();
@@ -168,7 +178,7 @@ System.out.println();
                         System.out.println(e.getMessage());
                         break;
                     }
-                    Thread.sleep(1);
+                    Thread.sleep(5);
                 }
             } catch(InterruptedException e) {
 

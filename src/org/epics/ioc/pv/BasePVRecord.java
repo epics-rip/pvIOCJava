@@ -5,9 +5,11 @@
  */
 package org.epics.ioc.pv;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
-import org.epics.ioc.util.*;
+import org.epics.ioc.util.MessageType;
+import org.epics.ioc.util.Requester;
 
 /**
  * Base class for a record instance.

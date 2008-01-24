@@ -5,8 +5,13 @@
  */
 package org.epics.ioc.util;
 
-import org.epics.ioc.pv.*;
-import org.epics.ioc.db.*;
+import org.epics.ioc.db.DBField;
+import org.epics.ioc.pv.Field;
+import org.epics.ioc.pv.PVField;
+import org.epics.ioc.pv.PVInt;
+import org.epics.ioc.pv.PVLong;
+import org.epics.ioc.pv.PVStructure;
+import org.epics.ioc.pv.Type;
 
 /**
  * A convenience class for a timeStamp field.

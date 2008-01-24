@@ -5,7 +5,7 @@
  */
 package org.epics.ioc.util;
 
-import org.epics.ioc.db.*;
+import org.epics.ioc.db.DBRecord;
 
 /**
  * Periodic Scanner.

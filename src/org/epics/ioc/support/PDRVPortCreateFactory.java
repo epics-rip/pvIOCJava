@@ -5,12 +5,19 @@
  */
 package org.epics.ioc.support;
 
-import java.lang.reflect.*;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 
-import org.epics.ioc.pv.*;
+import org.epics.ioc.db.DBStructure;
+import org.epics.ioc.pv.PVBoolean;
+import org.epics.ioc.pv.PVField;
+import org.epics.ioc.pv.PVString;
+import org.epics.ioc.pv.PVStructure;
+import org.epics.ioc.pv.Structure;
 import org.epics.ioc.pv.Type;
-import org.epics.ioc.db.*;
-import org.epics.ioc.util.*;
+import org.epics.ioc.util.MessageType;
+import org.epics.ioc.util.ScanPriority;
 
 /**
  * Record Support for starting a port driver.

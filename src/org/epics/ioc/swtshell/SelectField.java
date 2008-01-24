@@ -4,7 +4,7 @@
  * in file LICENSE that is included with this distribution.
  */
 package org.epics.ioc.swtshell;
-import org.epics.ioc.pv.*;
+import org.epics.ioc.pv.PVRecord;
 
 /**
  * A shell for selecting a field of a record.

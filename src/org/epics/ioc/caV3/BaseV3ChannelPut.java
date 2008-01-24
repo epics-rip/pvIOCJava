@@ -5,6 +5,7 @@
  */
 package org.epics.ioc.caV3;
 
+import gov.aps.jca.CAException;
 import gov.aps.jca.dbr.DBRType;
 import gov.aps.jca.event.PutEvent;
 import gov.aps.jca.event.PutListener;
@@ -66,20 +67,16 @@ public class BaseV3ChannelPut implements ChannelPut,PutListener,ChannelProcessRe
     private FloatArrayData floatArrayData = new FloatArrayData();
     private DoubleArrayData doubleArrayData = new DoubleArrayData();
     private StringArrayData stringArrayData = new StringArrayData();
-    private RequestResult requestResult = null;
-
 
     /**
      * Constructer.
+     * @param channelFieldGroup The channelFieldGroup.
      * @param channelPutRequester The channelPutRequester.
      * @param process Should the record be processed after the put.
      */
     public BaseV3ChannelPut(ChannelFieldGroup channelFieldGroup,
             ChannelPutRequester channelPutRequester, boolean process)
     {
-        if(channelFieldGroup==null) {
-            throw new IllegalStateException("no field group");
-        }
         this.channelFieldGroup = channelFieldGroup;
         this.channelPutRequester = channelPutRequester;
         this.process = process;
@@ -92,8 +89,8 @@ public class BaseV3ChannelPut implements ChannelPut,PutListener,ChannelProcessRe
     public boolean init(V3Channel channel)
     {
         this.channel = channel;
-        jcaChannel = channel.getJcaChannel();
-        valueDBRType = channel.getValueDBRType();
+        jcaChannel = channel.getJCAChannel();
+        valueDBRType = jcaChannel.getFieldType();
         elementCount = jcaChannel.getElementCount();
         ChannelField[] channelFields = channelFieldGroup.getArray();
         if(channelFields.length!=1) {
@@ -128,6 +125,7 @@ public class BaseV3ChannelPut implements ChannelPut,PutListener,ChannelProcessRe
 
     public void destroy() {
         isDestroyed = true;
+        if(channelProcess!=null) channelProcess.destroy();
         channel.remove(this);
     }
 
@@ -139,19 +137,16 @@ public class BaseV3ChannelPut implements ChannelPut,PutListener,ChannelProcessRe
             channelPutRequester.message("isDestroyed",MessageType.error);
             channelPutRequester.putDone(RequestResult.failure);
         }
+        String message = null;
         boolean more = channelPutRequester.nextPutField(channelField,pvField);
         if(more) {
-            channelPutRequester.message("cant handle nextPutField returning more",MessageType.error);
-        }
-        requestResult = RequestResult.success;
-        if(pvIndex!=null) {
+            message = "cant handle nextPutField returning more";
+        } else if(pvIndex!=null) {
             short index = (short)pvIndex.get();
             try {
                 jcaChannel.put(index, this);
-            } catch (Exception e) {
-                channelPutRequester.message(e.getMessage(),MessageType.error);
-                requestResult = RequestResult.failure;
-                channelPutRequester.putDone(requestResult);
+            } catch (CAException e) {
+                message = e.getMessage();
             }
         } else if(valueDBRType==DBRType.BYTE) {
             if(elementCount==1) {
@@ -159,10 +154,8 @@ public class BaseV3ChannelPut implements ChannelPut,PutListener,ChannelProcessRe
                 byte from = pvFrom.get();
                 try {
                     jcaChannel.put(from, this);
-                } catch (Exception e) {
-                    channelPutRequester.message(e.getMessage(),MessageType.error);
-                    requestResult = RequestResult.failure;
-                    channelPutRequester.putDone(requestResult);
+                } catch (CAException e) {
+                    message = e.getMessage();
                 }
             } else {
                 PVByteArray fromArray =(PVByteArray)pvField;
@@ -172,9 +165,8 @@ public class BaseV3ChannelPut implements ChannelPut,PutListener,ChannelProcessRe
                 for (int i=len; i<capacity; i++) from[i] = 0;
                 try {
                     jcaChannel.put(from, this);
-                } catch (Exception e) {
-                    channelPutRequester.message(e.getMessage(),MessageType.error);
-                    requestResult = RequestResult.failure;
+                } catch (CAException e) {
+                    message = e.getMessage();
                 }
 
             }
@@ -184,9 +176,8 @@ public class BaseV3ChannelPut implements ChannelPut,PutListener,ChannelProcessRe
                 short from = pvFrom.get();
                 try {
                     jcaChannel.put(from, this);
-                } catch (Exception e) {
-                    channelPutRequester.message(e.getMessage(),MessageType.error);
-                    requestResult = RequestResult.failure;
+                } catch (CAException e) {
+                    message = e.getMessage();
                 }
             } else {
                 PVShortArray fromArray =(PVShortArray)pvField;
@@ -196,9 +187,8 @@ public class BaseV3ChannelPut implements ChannelPut,PutListener,ChannelProcessRe
                 for (int i=len; i<capacity; i++) from[i] = 0;
                 try {
                     jcaChannel.put(from, this);
-                } catch (Exception e) {
-                    channelPutRequester.message(e.getMessage(),MessageType.error);
-                    requestResult = RequestResult.failure;
+                } catch (CAException e) {
+                    message = e.getMessage();
                 }
 
             }
@@ -208,9 +198,8 @@ public class BaseV3ChannelPut implements ChannelPut,PutListener,ChannelProcessRe
                 int from = pvFrom.get();
                 try {
                     jcaChannel.put(from, this);
-                } catch (Exception e) {
-                    channelPutRequester.message(e.getMessage(),MessageType.error);
-                    requestResult = RequestResult.failure;
+                } catch (CAException e) {
+                    message = e.getMessage();
                 }
             } else {
                 PVIntArray fromArray =(PVIntArray)pvField;
@@ -220,9 +209,8 @@ public class BaseV3ChannelPut implements ChannelPut,PutListener,ChannelProcessRe
                 for (int i=len; i<capacity; i++) from[i] = 0;
                 try {
                     jcaChannel.put(from, this);
-                } catch (Exception e) {
-                    channelPutRequester.message(e.getMessage(),MessageType.error);
-                    requestResult = RequestResult.failure;
+                } catch (CAException e) {
+                    message = e.getMessage();
                 }
 
             }
@@ -232,8 +220,8 @@ public class BaseV3ChannelPut implements ChannelPut,PutListener,ChannelProcessRe
                 float from = pvFrom.get();
                 try {
                     jcaChannel.put(from, this);
-                } catch (Exception e) {
-                    channelPutRequester.message(e.getMessage(),MessageType.error);
+                } catch (CAException e) {
+                    message = e.getMessage();
                 }
             } else {
                 PVFloatArray fromArray =(PVFloatArray)pvField;
@@ -243,9 +231,8 @@ public class BaseV3ChannelPut implements ChannelPut,PutListener,ChannelProcessRe
                 for (int i=len; i<capacity; i++) from[i] = 0;
                 try {
                     jcaChannel.put(from, this);
-                } catch (Exception e) {
-                    channelPutRequester.message(e.getMessage(),MessageType.error);
-                    requestResult = RequestResult.failure;
+                } catch (CAException e) {
+                    message = e.getMessage();
                 }
 
             }
@@ -255,9 +242,8 @@ public class BaseV3ChannelPut implements ChannelPut,PutListener,ChannelProcessRe
                 double from = pvFrom.get();
                 try {
                     jcaChannel.put(from, this);
-                } catch (Exception e) {
-                    channelPutRequester.message(e.getMessage(),MessageType.error);
-                    requestResult = RequestResult.failure;
+                } catch (CAException e) {
+                    message = e.getMessage();
                 }
             } else {
                 PVDoubleArray fromArray =(PVDoubleArray)pvField;
@@ -267,9 +253,8 @@ public class BaseV3ChannelPut implements ChannelPut,PutListener,ChannelProcessRe
                 for (int i=len; i<capacity; i++) from[i] = 0;
                 try {
                     jcaChannel.put(from, this);
-                } catch (Exception e) {
-                    channelPutRequester.message(e.getMessage(),MessageType.error);
-                    requestResult = RequestResult.failure;
+                } catch (CAException e) {
+                    message = e.getMessage();
                 }
 
             }
@@ -279,8 +264,8 @@ public class BaseV3ChannelPut implements ChannelPut,PutListener,ChannelProcessRe
                 String from = pvFrom.get();
                 try {
                     jcaChannel.put(from, this);
-                } catch (Exception e) {
-                    channelPutRequester.message(e.getMessage(),MessageType.error);
+                } catch (CAException e) {
+                    message = e.getMessage();
                 }
             } else {
                 PVStringArray fromArray =(PVStringArray)pvField;
@@ -290,11 +275,16 @@ public class BaseV3ChannelPut implements ChannelPut,PutListener,ChannelProcessRe
                 for (int i=len; i<capacity; i++) from[i] = "";
                 try {
                     jcaChannel.put(from, this);
-                } catch (Exception e) {
-                    channelPutRequester.message(e.getMessage(),MessageType.error);
-                    requestResult = RequestResult.failure;
+                } catch (CAException e) {
+                    message = e.getMessage();
                 }
             }
+        } else {
+            message = "unknown DBRType " + valueDBRType.getName();
+        }
+        if(message!=null) {
+            channelPutRequester.message(message,MessageType.error);
+            channelPutRequester.putDone(RequestResult.failure);
         }
     }
     /* (non-Javadoc)
@@ -311,7 +301,7 @@ public class BaseV3ChannelPut implements ChannelPut,PutListener,ChannelProcessRe
             channelProcess.process();
             return;
         }
-        channelPutRequester.putDone(requestResult);
+        channelPutRequester.putDone(RequestResult.success);
     }
     /* (non-Javadoc)
      * @see org.epics.ioc.util.Requester#getRequesterName()
@@ -329,7 +319,6 @@ public class BaseV3ChannelPut implements ChannelPut,PutListener,ChannelProcessRe
      * @see org.epics.ioc.ca.ChannelProcessRequester#processDone(org.epics.ioc.util.RequestResult)
      */
     public void processDone(RequestResult requestResult) {
-        if(requestResult.compareTo(this.requestResult)>0) this.requestResult = requestResult;
-        channelPutRequester.putDone(this.requestResult);
+        channelPutRequester.putDone(requestResult);
     }
 }

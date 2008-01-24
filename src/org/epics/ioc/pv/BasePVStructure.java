@@ -6,7 +6,8 @@
 package org.epics.ioc.pv;
 
 import java.util.regex.Pattern;
-import org.epics.ioc.util.*;
+
+import org.epics.ioc.util.MessageType;
 
 /**
  * Base class for a PVStructure.

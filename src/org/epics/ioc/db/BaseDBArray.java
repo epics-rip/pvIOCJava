@@ -5,7 +5,7 @@
  */
 package org.epics.ioc.db;
 
-import org.epics.ioc.pv.*;
+import org.epics.ioc.pv.PVArray;
 
 /**
  * @author mrk

@@ -5,7 +5,8 @@
  */
 package org.epics.ioc.pdrv.interfaces;
 
-import org.epics.ioc.pdrv.*;
+import org.epics.ioc.pdrv.Status;
+import org.epics.ioc.pdrv.User;
 
 /**
  * Base class for uint32Digital interpose implementations.

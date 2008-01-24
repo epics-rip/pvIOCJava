@@ -5,7 +5,7 @@
  */
 package org.epics.ioc.dbd;
 
-import org.epics.ioc.pv.*;
+import org.epics.ioc.pv.Structure;
 
 /**
  * Reflection interface for a DBDStructure.

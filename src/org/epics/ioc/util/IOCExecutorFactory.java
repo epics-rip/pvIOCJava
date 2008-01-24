@@ -19,36 +19,31 @@ import java.util.concurrent.locks.ReentrantLock;
 public class IOCExecutorFactory {
     /**
      * Create a new set of threads.
-     * @param name The name for the set of threads.
+     * @param threadName The name for the set of threads.
+     * @param priority The ScanPriority for the thread.
      * @return The IOCExecutor interface.
      */
-    static public IOCExecutor create(String name) {
-        return new ExecutorInstance(name);
+    static public IOCExecutor create(String threadName, ScanPriority priority) {
+        return new ExecutorInstance(threadName,priority);
     }
     
     static private class ExecutorInstance implements IOCExecutor {
-        private ThreadInstance[] threads;
+        private ThreadInstance thread;
 
-        private ExecutorInstance(String name) {
-            super();
-            int[] javaPriority = ScanPriority.javaPriority;
-            int numPriorities = javaPriority.length;
-            threads = new ThreadInstance[numPriorities];
-            for(int i=0; i<numPriorities; i++) {
-                int priority = javaPriority[i];
-                String threadName = name + "(" + String.valueOf(priority) + ")";
-                threads[i] = new ThreadInstance(threadName,priority);
-            }
+        private ExecutorInstance(String threadName, ScanPriority priority) {
+            thread = new ThreadInstance(threadName,priority.getJavaPriority());
         }
-
-        public synchronized void execute(List<Runnable> commands, ScanPriority priority) {
-            ThreadInstance thread = threads[priority.ordinal()];
-            thread.add(commands);
-        }
-
-        public synchronized void execute(Runnable command, ScanPriority priority) {
-            ThreadInstance thread = threads[priority.ordinal()];
+        /* (non-Javadoc)
+         * @see org.epics.ioc.util.IOCExecutor#execute(java.lang.Runnable)
+         */
+        public synchronized void execute(Runnable command) {
             thread.add(command);
+        }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.util.IOCExecutor#execute(java.util.List)
+         */
+        public synchronized void execute(List<Runnable> commands) {
+            thread.add(commands);
         }
     }
     

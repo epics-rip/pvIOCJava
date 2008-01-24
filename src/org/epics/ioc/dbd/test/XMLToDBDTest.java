@@ -5,11 +5,19 @@
  */
 package org.epics.ioc.dbd.test;
 
-import junit.framework.TestCase;
-import java.util.*;
+import java.util.Map;
+import java.util.Set;
 
-import org.epics.ioc.dbd.*;
-import org.epics.ioc.util.*;
+import junit.framework.TestCase;
+
+import org.epics.ioc.dbd.DBD;
+import org.epics.ioc.dbd.DBDFactory;
+import org.epics.ioc.dbd.DBDRecordType;
+import org.epics.ioc.dbd.DBDStructure;
+import org.epics.ioc.dbd.DBDSupport;
+import org.epics.ioc.dbd.XMLToDBDFactory;
+import org.epics.ioc.util.MessageType;
+import org.epics.ioc.util.Requester;
 /**
  * JUnit test for XMLToDBDFactory.
  * This also is a test for dbd and pv because XMLToDBD makes

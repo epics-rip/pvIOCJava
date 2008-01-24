@@ -5,14 +5,20 @@
  */
 package org.epics.ioc.db.test;
 
+import java.util.Map;
+import java.util.Set;
+
 import junit.framework.TestCase;
 
-import org.epics.ioc.dbd.*;
-import org.epics.ioc.db.*;
-import org.epics.ioc.util.Requester;
+import org.epics.ioc.db.DBRecord;
+import org.epics.ioc.db.IOCDB;
+import org.epics.ioc.db.IOCDBFactory;
+import org.epics.ioc.db.XMLToIOCDBFactory;
+import org.epics.ioc.dbd.DBD;
+import org.epics.ioc.dbd.DBDFactory;
+import org.epics.ioc.dbd.XMLToDBDFactory;
 import org.epics.ioc.util.MessageType;
-
-import java.util.*;
+import org.epics.ioc.util.Requester;
 /**
  * test default values for fields.
  * @author mrk

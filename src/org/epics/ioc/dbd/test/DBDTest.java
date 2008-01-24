@@ -6,8 +6,12 @@
 package org.epics.ioc.dbd.test;
 
 import junit.framework.TestCase;
-import org.epics.ioc.dbd.*;
-import org.epics.ioc.util.*;
+
+import org.epics.ioc.dbd.DBD;
+import org.epics.ioc.dbd.DBDFactory;
+import org.epics.ioc.dbd.XMLToDBDFactory;
+import org.epics.ioc.util.MessageType;
+import org.epics.ioc.util.Requester;
 /**
  * JUnit test for DBD.
  * @author mrk

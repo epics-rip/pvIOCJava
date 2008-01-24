@@ -5,9 +5,19 @@
  */
 package org.epics.ioc.util;
 
-import org.epics.ioc.pv.*;
-import org.epics.ioc.db.*;
-import org.epics.ioc.create.*;
+import org.epics.ioc.create.Enumerated;
+import org.epics.ioc.db.DBField;
+import org.epics.ioc.db.DBRecord;
+import org.epics.ioc.db.DBStructure;
+import org.epics.ioc.pv.PVBoolean;
+import org.epics.ioc.pv.PVDouble;
+import org.epics.ioc.pv.PVField;
+import org.epics.ioc.pv.PVInt;
+import org.epics.ioc.pv.PVRecord;
+import org.epics.ioc.pv.PVString;
+import org.epics.ioc.pv.PVStructure;
+import org.epics.ioc.pv.Structure;
+import org.epics.ioc.pv.Type;
 
 
 /**

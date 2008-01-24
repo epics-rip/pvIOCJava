@@ -8,15 +8,11 @@ package org.epics.ioc.caV3;
 import gov.aps.jca.CAException;
 import gov.aps.jca.Channel;
 import gov.aps.jca.Context;
-import gov.aps.jca.dbr.DBRType;
-import gov.aps.jca.dbr.DBR_CTRL_Enum;
 import gov.aps.jca.event.ConnectionEvent;
 import gov.aps.jca.event.ConnectionListener;
-import gov.aps.jca.event.GetEvent;
-import gov.aps.jca.event.GetListener;
 
 import org.epics.ioc.ca.AbstractChannel;
-import org.epics.ioc.ca.BaseChannelField;
+import org.epics.ioc.ca.AbstractChannelField;
 import org.epics.ioc.ca.ChannelField;
 import org.epics.ioc.ca.ChannelFieldGroup;
 import org.epics.ioc.ca.ChannelGet;
@@ -30,26 +26,13 @@ import org.epics.ioc.ca.ChannelPut;
 import org.epics.ioc.ca.ChannelPutGet;
 import org.epics.ioc.ca.ChannelPutGetRequester;
 import org.epics.ioc.ca.ChannelPutRequester;
-import org.epics.ioc.create.EnumeratedFactory;
-import org.epics.ioc.db.DBField;
-import org.epics.ioc.db.DBRecord;
-import org.epics.ioc.db.DBRecordFactory;
-import org.epics.ioc.dbd.DBD;
-import org.epics.ioc.dbd.DBDFactory;
-import org.epics.ioc.dbd.DBDStructure;
-import org.epics.ioc.pv.Field;
-import org.epics.ioc.pv.FieldCreate;
-import org.epics.ioc.pv.FieldFactory;
-import org.epics.ioc.pv.PVDataCreate;
-import org.epics.ioc.pv.PVDataFactory;
-import org.epics.ioc.pv.PVEnumerated;
 import org.epics.ioc.pv.PVField;
-import org.epics.ioc.pv.PVInt;
 import org.epics.ioc.pv.PVRecord;
-import org.epics.ioc.pv.PVStringArray;
-import org.epics.ioc.pv.Structure;
-import org.epics.ioc.pv.Type;
+import org.epics.ioc.util.IOCExecutor;
+import org.epics.ioc.util.IOCExecutorFactory;
 import org.epics.ioc.util.MessageType;
+import org.epics.ioc.util.RequestResult;
+import org.epics.ioc.util.ScanPriority;
 
 /**
  * Base class that implements V3Channel.
@@ -57,67 +40,63 @@ import org.epics.ioc.util.MessageType;
  *
  */
 public class BaseV3Channel extends AbstractChannel
-implements V3Channel,ConnectionListener,GetListener {
-    
-    
-    private static FieldCreate fieldCreate = FieldFactory.getFieldCreate();
-    private static PVDataCreate pvDataCreate = PVDataFactory.getPVDataCreate();
-    private static DBD dbd = DBDFactory.getMasterDBD();
-    
-    private V3ChannelProvider channelProvider;
-    private String pvName;
-    private String recordName;
-    private String valueFieldName;
-    private String[] propertyNames;
+implements V3Channel,ConnectionListener,Runnable,V3ChannelRecordRequester {
 
+    private static IOCExecutor iocExecutor
+        = IOCExecutorFactory.create("caV3Connect", ScanPriority.low);
+    private Context context = null;
+    private String pvName = null;
+    private String recordName = null;
+    private String valueFieldName = null;
+    private String[] propertyNames = null;
+
+    
     private gov.aps.jca.Channel jcaChannel = null;
-    private volatile boolean isReady = false;
-    private boolean isConnected = false;
-    private int elementCount = 0;
-    private DBRType valueDBRType = null;
-    private PVRecord pvRecord = null;
-    private DBRecord dbRecord = null;
-    private PVField valuePVField = null;
-    private PVEnumerated valuePVEnumerated = null;
+    private BaseV3ChannelRecord v3ChannelRecord = null;
 
-    
     /**
      * The constructer.
-     * @param channelProvider The channel provider.
-     * @param listener The channelListener.
+     * @param listener The ChannelListener.
+     * @param options A string containing options.
+     */
+    public BaseV3Channel(ChannelListener listener,String options)
+    {
+        super(listener,options);
+    }
+    /**
+     * init the channel.
+     * @param context The JCA Context.
      * @param pvName The pvName.
      * @param recordName The recordName.
      * @param valueFieldName The name of the value field.
-     * @param propertys An array of desired properties.
-     * @param options Options.
+     * @param propertyNames An array of desired propertyNames.
      */
-    public BaseV3Channel(V3ChannelProvider channelProvider,ChannelListener listener,String pvName,
-            String recordName,String valueFieldName,String[] propertys, String options)
+    public void init(Context context,String pvName,
+            String recordName,String valueFieldName,String[] propertyNames)
     {
-        super(listener,options);
-        this.channelProvider = channelProvider;
+        this.context = context;
         this.pvName = pvName;
         this.recordName = recordName;
         this.valueFieldName = valueFieldName;
-        this.propertyNames = propertys;
+        this.propertyNames = propertyNames;
     }
     /* (non-Javadoc)
      * @see org.epics.ioc.caV3.V3Channel#getJcaChannel()
      */
-    public Channel getJcaChannel() {
+    public Channel getJCAChannel() {
         return jcaChannel;
     }
     /* (non-Javadoc)
-     * @see org.epics.ioc.caV3.V3Channel#getContext()
+     * @see org.epics.ioc.caV3.V3Channel#getPVName()
      */
-    public Context getContext() {
-        return channelProvider.getContext();
+    public String getPVName() {
+        return pvName;
     }
     /* (non-Javadoc)
-     * @see org.epics.ioc.caV3.V3Channel#getDBRecord()
+     * @see org.epics.ioc.caV3.V3Channel#getV3ChannelRecord()
      */
-    public DBRecord getDBRecord() {
-        return dbRecord;
+    public V3ChannelRecord getV3ChannelRecord() {
+        return v3ChannelRecord;
     }
     /* (non-Javadoc)
      * @see org.epics.ioc.caV3.V3Channel#getPropertyNames()
@@ -126,248 +105,206 @@ implements V3Channel,ConnectionListener,GetListener {
         return propertyNames;
     }
     /* (non-Javadoc)
-     * @see org.epics.ioc.caV3.V3Channel#getValueDBRType()
-     */
-    public DBRType getValueDBRType() {
-        return valueDBRType;
-    }
-    /* (non-Javadoc)
      * @see org.epics.ioc.caV3.V3Channel#getValueFieldName()
      */
     public String getValueFieldName() {
         return valueFieldName;
     }
     /* (non-Javadoc)
+     * @see org.epics.ioc.caV3.V3Channel#getIOCExecutor()
+     */
+    public IOCExecutor getIOCExecutor() {
+        return iocExecutor;
+    }
+    /* (non-Javadoc)
      * @see org.epics.ioc.ca.AbstractChannel#connect()
      */
-     @Override
-     public void connect() {
-         try {
-             isReady = false;
-             jcaChannel = channelProvider.getContext().createChannel(pvName,this);
-             isReady = true;
-         } catch (Exception e) {
-             message(e.getMessage(),MessageType.error);
-             return;
-         }
-     }
-     /* (non-Javadoc)
-      * @see org.epics.ioc.ca.AbstractChannel#disconnect()
-      */
-     @Override
-     public void disconnect() {
-         try {
-             jcaChannel.destroy();
-         } catch (CAException e) {
-             message(e.getMessage(),MessageType.error);
-         }
-         super.disconnect();
-     }                     
-     /* (non-Javadoc)
-      * @see org.epics.ioc.ca.Channel#createChannelField(java.lang.String)
-      */
-     public ChannelField createChannelField(String name) {
-         if(!isConnected) {
-             message("createChannelField but not connected",MessageType.warning);
-             return null;
-         }
-         if(name==null || name.length()<=0) return new BaseChannelField(dbRecord,pvRecord);
-         PVField pvField = pvRecord.findProperty(name);
-         if(pvField==null) return null;
-         return new BaseChannelField(dbRecord,pvField);               
-     }
-     /* (non-Javadoc)
-      * @see org.epics.ioc.ca.Channel#createChannelProcess(org.epics.ioc.ca.ChannelProcessRequester)
-      */
-     public ChannelProcess createChannelProcess(ChannelProcessRequester channelProcessRequester)
-     {
-         if(!isConnected) {
-             channelProcessRequester.message(
-                     "createChannelProcess but not connected",MessageType.warning);
-             return null;
-         }
-         BaseV3ChannelProcess channelProcess = new BaseV3ChannelProcess(channelProcessRequester);
-         boolean success = channelProcess.init(this);
-         if(success) {
-             super.add(channelProcess);
-             return channelProcess;
-         }
-         return null;
-     } 
-     /* (non-Javadoc)
-      * @see org.epics.ioc.ca.Channel#createChannelGet(org.epics.ioc.ca.ChannelFieldGroup, org.epics.ioc.ca.ChannelGetRequester, boolean)
-      */
-     public ChannelGet createChannelGet(ChannelFieldGroup channelFieldGroup,
-             ChannelGetRequester channelGetRequester, boolean process)
-     {
-         if(!isConnected) {
-             channelGetRequester.message(
-                     "createChannelGet but not connected",MessageType.warning);
-             return null;
-         }
-         BaseV3ChannelGet channelGet = new BaseV3ChannelGet(channelFieldGroup,channelGetRequester,process);
-         boolean success = channelGet.init(this);
-         if(success) {
-             super.add(channelGet);
-             return channelGet;
-         }
-         return null;
-     }        
-     /* (non-Javadoc)
-      * @see org.epics.ioc.ca.Channel#createChannelPut(org.epics.ioc.ca.ChannelFieldGroup, org.epics.ioc.ca.ChannelPutRequester, boolean)
-      */
-     public ChannelPut createChannelPut(ChannelFieldGroup channelFieldGroup,
-             ChannelPutRequester channelPutRequester, boolean process)
-     {
-         if(!isConnected) {
-             channelPutRequester.message(
-                     "createChannelPut but not connected",MessageType.warning);
-             return null;
-         }
-         BaseV3ChannelPut channelPut = new BaseV3ChannelPut(channelFieldGroup,channelPutRequester,process);
-         boolean success = channelPut.init(this);
-         if(success) {
-             super.add(channelPut);
-             return channelPut;
-         }
-         return null;
-     }        
-     /* (non-Javadoc)
-      * @see org.epics.ioc.ca.Channel#createChannelPutGet(org.epics.ioc.ca.ChannelFieldGroup, org.epics.ioc.ca.ChannelFieldGroup, org.epics.ioc.ca.ChannelPutGetRequester, boolean)
-      */
-     public ChannelPutGet createChannelPutGet(ChannelFieldGroup putFieldGroup,
-             ChannelFieldGroup getFieldGroup, ChannelPutGetRequester channelPutGetRequester,
-             boolean process)
-     {
-         if(!isConnected) {
-             channelPutGetRequester.message(
-                     "createChannelPutGet but not connected",MessageType.warning);
-             return null;
-         }
-         BaseV3ChannelPutGet channelPutGet = new BaseV3ChannelPutGet(
-                 putFieldGroup,getFieldGroup,channelPutGetRequester,process);
-         boolean success = channelPutGet.init(this);
-         if(success) {
-             super.add(channelPutGet);
-             return channelPutGet;
-         }
-         return null;
-     }
-     /* (non-Javadoc)
-      * @see org.epics.ioc.ca.Channel#createOnChange(org.epics.ioc.ca.ChannelMonitorNotifyRequester, boolean)
-      */
-     public ChannelMonitor createChannelMonitor(ChannelMonitorRequester channelMonitorRequester)
-     {
-         if(!isConnected) {
-             message(
-                     "createChannelMonitor but not connected",MessageType.warning);    
-             return null;
-         }
-         BaseV3ChannelMonitor channelMonitor = new BaseV3ChannelMonitor(channelMonitorRequester);
-         boolean success = channelMonitor.init(this);
-         if(success) {
-             super.add(channelMonitor);
-             return channelMonitor;
-         }
-         return null;
-     }
-     /* (non-Javadoc)
-      * @see gov.aps.jca.event.ConnectionListener#connectionChanged(gov.aps.jca.event.ConnectionEvent)
-      */
-     public void connectionChanged(ConnectionEvent arg0) {
-         while(!isReady) {
-             try {
-                 Thread.sleep(1);
-             } catch (InterruptedException e) {
+    public void connect() {
+        try {
+            jcaChannel = context.createChannel(pvName,this);
+        } catch (CAException e) {
+            super.getChannelListener().message(
+                "createChannel failed " + e.getMessage(),
+                MessageType.error);
+            jcaChannel = null;
+        };
+    }
+    /* (non-Javadoc)
+     * @see org.epics.ioc.ca.AbstractChannel#disconnect()
+     */
+    public void disconnect() {
+        super.disconnect();
+        jcaChannel.dispose();
+        jcaChannel = null;
+        v3ChannelRecord = null;
+    }                     
+    /* (non-Javadoc)
+     * @see org.epics.ioc.ca.Channel#createChannelField(java.lang.String)
+     */
+    public ChannelField createChannelField(String name) {
+        if(v3ChannelRecord==null) {
+            message("createChannelField but not connected",MessageType.warning);
+            return null;
+        }
+        PVRecord pvRecord = v3ChannelRecord.getPVRecord();
+        if(name==null || name.length()<=0) return new ChannelFieldImpl(pvRecord);
+        PVField pvField = pvRecord.findProperty(name);
+        if(pvField==null) return null;
+        return new ChannelFieldImpl(pvField);               
+    }
+    /* (non-Javadoc)
+     * @see org.epics.ioc.ca.Channel#createChannelProcess(org.epics.ioc.ca.ChannelProcessRequester)
+     */
+    public ChannelProcess createChannelProcess(ChannelProcessRequester channelProcessRequester)
+    {
+        if(v3ChannelRecord==null) {
+            channelProcessRequester.message(
+                    "createChannelProcess but not connected",MessageType.warning);
+            return null;
+        }
+        BaseV3ChannelProcess channelProcess = new BaseV3ChannelProcess(channelProcessRequester);
+        boolean success = channelProcess.init(this);
+        if(success) {
+            super.add(channelProcess);
+            return channelProcess;
+        }
+        return null;
+    } 
+    /* (non-Javadoc)
+     * @see org.epics.ioc.ca.Channel#createChannelGet(org.epics.ioc.ca.ChannelFieldGroup, org.epics.ioc.ca.ChannelGetRequester, boolean)
+     */
+    public ChannelGet createChannelGet(ChannelFieldGroup channelFieldGroup,
+            ChannelGetRequester channelGetRequester, boolean process)
+    {
+        if(v3ChannelRecord==null) {
+            channelGetRequester.message(
+                    "createChannelGet but not connected",MessageType.warning);
+            return null;
+        }
+        BaseV3ChannelGet channelGet = new BaseV3ChannelGet(channelFieldGroup,channelGetRequester,process);
+        boolean success = channelGet.init(this);
+        if(success) {
+            super.add(channelGet);
+            return channelGet;
+        }
+        return null;
+    }        
+    /* (non-Javadoc)
+     * @see org.epics.ioc.ca.Channel#createChannelPut(org.epics.ioc.ca.ChannelFieldGroup, org.epics.ioc.ca.ChannelPutRequester, boolean)
+     */
+    public ChannelPut createChannelPut(ChannelFieldGroup channelFieldGroup,
+            ChannelPutRequester channelPutRequester, boolean process)
+    {
+        if(v3ChannelRecord==null) {
+            channelPutRequester.message(
+                    "createChannelPut but not connected",MessageType.warning);
+            return null;
+        }
+        BaseV3ChannelPut channelPut = new BaseV3ChannelPut(channelFieldGroup,channelPutRequester,process);
+        boolean success = channelPut.init(this);
+        if(success) {
+            super.add(channelPut);
+            return channelPut;
+        }
+        return null;
+    }        
+    /* (non-Javadoc)
+     * @see org.epics.ioc.ca.Channel#createChannelPutGet(org.epics.ioc.ca.ChannelFieldGroup, org.epics.ioc.ca.ChannelFieldGroup, org.epics.ioc.ca.ChannelPutGetRequester, boolean)
+     */
+    public ChannelPutGet createChannelPutGet(ChannelFieldGroup putFieldGroup,
+            ChannelFieldGroup getFieldGroup, ChannelPutGetRequester channelPutGetRequester,
+            boolean process)
+    {
+        if(v3ChannelRecord==null) {
+            channelPutGetRequester.message(
+                    "createChannelPutGet but not connected",MessageType.warning);
+            return null;
+        }
+        BaseV3ChannelPutGet channelPutGet = new BaseV3ChannelPutGet(
+                putFieldGroup,getFieldGroup,channelPutGetRequester,process);
+        boolean success = channelPutGet.init(this);
+        if(success) {
+            super.add(channelPutGet);
+            return channelPutGet;
+        }
+        return null;
+    }
+    /* (non-Javadoc)
+     * @see org.epics.ioc.ca.Channel#createOnChange(org.epics.ioc.ca.ChannelMonitorNotifyRequester, boolean)
+     */
+    public ChannelMonitor createChannelMonitor(ChannelMonitorRequester channelMonitorRequester)
+    {
+        if(v3ChannelRecord==null) {
+            message(
+                    "createChannelMonitor but not connected",MessageType.warning);    
+            return null;
+        }
+        BaseV3ChannelMonitor channelMonitor = new BaseV3ChannelMonitor(channelMonitorRequester);
+        boolean success = channelMonitor.init(this);
+        if(success) {
+            super.add(channelMonitor);
+            return channelMonitor;
+        }
+        return null;
+    }
+    
+    /* (non-Javadoc)
+     * @see gov.aps.jca.event.ConnectionListener#connectionChanged(gov.aps.jca.event.ConnectionEvent)
+     */
+    public void connectionChanged(ConnectionEvent arg0) {
+        boolean isConnected = arg0.isConnected();
+        if(isConnected) {
+            iocExecutor.execute(this);
+        } else {
+            disconnect();
+        }
+    }
+    /* (non-Javadoc)
+     * @see java.lang.Runnable#run()
+     */
+    public void run() {
+        if(jcaChannel==null) return;
+        v3ChannelRecord = new BaseV3ChannelRecord(this);
+        if(v3ChannelRecord.createPVRecord(this,recordName)) return;
+        disconnect();
+    }
 
-             }
-         }
-         isConnected = arg0.isConnected();
-         if(isConnected) {
-             elementCount = jcaChannel.getElementCount();
-             valueDBRType = jcaChannel.getFieldType();
-             createPVRecord();
-             if(valueDBRType==DBRType.ENUM) {
-                 try {
-                     jcaChannel.get(DBRType.CTRL_ENUM,elementCount,this);
-                 } catch (Exception e) {
-                     message(e.getMessage(),MessageType.error);
-                 }
-             } else {
-                 super.connect();
-             }
-         } else {
-             super.disconnect();
-             pvRecord = null;
-         }
-     }
-     /* (non-Javadoc)
-      * @see gov.aps.jca.event.GetListener#getCompleted(gov.aps.jca.event.GetEvent)
-      */
-     public void getCompleted(GetEvent arg0) {
-         DBR_CTRL_Enum ctrlEnum = (DBR_CTRL_Enum)arg0.getDBR();;
-         String[] labels = ctrlEnum.getLabels();
-         PVStringArray pvChoices = valuePVEnumerated.getChoicesField();
-         pvChoices.put(0, labels.length, labels, 0);
-         DBField dbField = dbRecord.findDBField(pvChoices);
-         dbField.postPut();
-         PVInt pvIndex = valuePVEnumerated.getIndexField();
-         pvIndex.put(ctrlEnum.getEnumValue()[0]);
-         dbField = dbRecord.findDBField(pvIndex);
-         dbField.postPut();
-         super.connect();
-     }
+    /* (non-Javadoc)
+     * @see org.epics.ioc.caV3.V3ChannelRecordRequester#createPVRecordDone(org.epics.ioc.util.RequestResult)
+     */
+    public void createPVRecordDone(RequestResult requestResult) {
+        super.setPVRecord(v3ChannelRecord.getPVRecord(),valueFieldName);
+        super.connect();
+    }
 
-     private void createPVRecord() {
-         Type type = null;
-         if(valueDBRType.isBYTE()) {
-             type = Type.pvByte;
-         } else if(valueDBRType.isSHORT()) {
-             type= Type.pvShort;
-         } else if(valueDBRType.isINT()) {
-             type = Type.pvInt;
-         } else if(valueDBRType.isFLOAT()) {
-             type = Type.pvFloat;
-         } else if(valueDBRType.isDOUBLE()) {
-             type = Type.pvDouble;
-         } else if(valueDBRType.isSTRING()) {
-             type = Type.pvString;
-         } else if(valueDBRType.isENUM()) {
-             type = Type.pvStructure;
-         }
-         Type elementType = null;
-         Field valueField = null;
-         if(elementCount<2) {
-             if(type==Type.pvStructure) {
-                 DBDStructure dbdEnumerated = dbd.getStructure("enumerated");
-                 Field[] valueFields = dbdEnumerated.getFields();
-                 valueField = fieldCreate.createStructure(valueFieldName, "value", valueFields);
-             } else {
-                 valueField = fieldCreate.createField(valueFieldName, type);
-             }
-         } else {
-             elementType = type;
-             type = Type.pvArray;
-             valueField = fieldCreate.createArray(valueFieldName, elementType);
-         }
-         Field[] fields = new Field[propertyNames.length + 1];
-         fields[0] = valueField;
-         int index = 1;
-         for(String property : propertyNames) {
-             DBDStructure dbdStructure = dbd.getStructure(property);
-             if(dbdStructure==null) dbdStructure = dbd.getStructure("null");
-             Field[] propertyFields = dbdStructure.getFields();
-             fields[index++] = fieldCreate.createStructure(property, property, propertyFields);
-         }
-         Structure structure = fieldCreate.createStructure("caV3", "caV3", fields);
-         pvRecord = pvDataCreate.createPVRecord(recordName, structure);
-         dbRecord = DBRecordFactory.create(pvRecord);
-         valuePVField = pvRecord.getPVFields()[0];
-         if(valueDBRType.isENUM()) {
-             DBField dbField = dbRecord.findDBField(valuePVField);
-             EnumeratedFactory.create(dbField);
-             valuePVEnumerated = valuePVField.getPVEnumerated();
-         }
-         super.SetPVRecord(pvRecord,valueFieldName);
-     }
+    private static class ChannelFieldImpl extends AbstractChannelField {
+        private PVField pvField;
+        
+        private ChannelFieldImpl(PVField pvField) {
+            super(pvField);
+            this.pvField = pvField;
+        }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.ca.ChannelField#postPut()
+         */
+        public void postPut() {
+            // nothing to do
+        }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.ca.ChannelField#findProperty(java.lang.String)
+         */
+        public ChannelField findProperty(String propertyName) {
+            PVField pvf = pvField.findProperty(propertyName);
+            if (pvf == null) return null;
+            return new ChannelFieldImpl(pvf);
+        }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.ca.ChannelField#createChannelField(java.lang.String)
+         */
+        public ChannelField createChannelField(String fieldName) {
+            PVField pvf = pvField.getSubField(fieldName);
+            if (pvf == null) return null;
+            return new ChannelFieldImpl(pvf);
+        }
+    }
 }

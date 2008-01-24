@@ -5,10 +5,21 @@
  */
 package org.epics.ioc.pdrv.testDriver;
 
-import org.epics.ioc.pdrv.*;
-import org.epics.ioc.pdrv.interfaces.*;
-import org.epics.ioc.pv.*;
-import org.epics.ioc.util.*;
+import org.epics.ioc.pdrv.Device;
+import org.epics.ioc.pdrv.DeviceDriver;
+import org.epics.ioc.pdrv.Factory;
+import org.epics.ioc.pdrv.Port;
+import org.epics.ioc.pdrv.PortDriver;
+import org.epics.ioc.pdrv.Status;
+import org.epics.ioc.pdrv.Trace;
+import org.epics.ioc.pdrv.User;
+import org.epics.ioc.pdrv.interfaces.AbstractFloat64;
+import org.epics.ioc.pv.PVDouble;
+import org.epics.ioc.pv.PVField;
+import org.epics.ioc.pv.PVInt;
+import org.epics.ioc.pv.PVStructure;
+import org.epics.ioc.pv.Structure;
+import org.epics.ioc.util.ScanPriority;
 /**
  * The factory for float64Driver.
  * float64Driver is a portDriver for testing the float64 support in org.epics.ioc.pdrv.support.

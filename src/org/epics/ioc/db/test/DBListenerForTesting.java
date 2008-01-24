@@ -5,8 +5,15 @@
  */
 package org.epics.ioc.db.test;
 
-import org.epics.ioc.db.*;
-import org.epics.ioc.pv.*;
+import org.epics.ioc.db.DBField;
+import org.epics.ioc.db.DBListener;
+import org.epics.ioc.db.DBRecord;
+import org.epics.ioc.db.DBStructure;
+import org.epics.ioc.db.IOCDB;
+import org.epics.ioc.db.RecordListener;
+import org.epics.ioc.pv.PVField;
+import org.epics.ioc.pv.PVRecord;
+import org.epics.ioc.pv.PVStructure;
 
 /**
  * @author mrk

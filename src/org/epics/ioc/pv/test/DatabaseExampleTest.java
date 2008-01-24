@@ -6,7 +6,42 @@
 package org.epics.ioc.pv.test;
 
 import junit.framework.TestCase;
-import org.epics.ioc.pv.*;
+
+import org.epics.ioc.pv.Array;
+import org.epics.ioc.pv.ByteArrayData;
+import org.epics.ioc.pv.Convert;
+import org.epics.ioc.pv.ConvertFactory;
+import org.epics.ioc.pv.Field;
+import org.epics.ioc.pv.FieldAttribute;
+import org.epics.ioc.pv.FieldCreate;
+import org.epics.ioc.pv.FieldFactory;
+import org.epics.ioc.pv.PVArray;
+import org.epics.ioc.pv.PVArrayArray;
+import org.epics.ioc.pv.PVBoolean;
+import org.epics.ioc.pv.PVBooleanArray;
+import org.epics.ioc.pv.PVByte;
+import org.epics.ioc.pv.PVByteArray;
+import org.epics.ioc.pv.PVDataCreate;
+import org.epics.ioc.pv.PVDataFactory;
+import org.epics.ioc.pv.PVDouble;
+import org.epics.ioc.pv.PVDoubleArray;
+import org.epics.ioc.pv.PVField;
+import org.epics.ioc.pv.PVFloat;
+import org.epics.ioc.pv.PVFloatArray;
+import org.epics.ioc.pv.PVInt;
+import org.epics.ioc.pv.PVIntArray;
+import org.epics.ioc.pv.PVLong;
+import org.epics.ioc.pv.PVLongArray;
+import org.epics.ioc.pv.PVRecord;
+import org.epics.ioc.pv.PVShort;
+import org.epics.ioc.pv.PVShortArray;
+import org.epics.ioc.pv.PVString;
+import org.epics.ioc.pv.PVStringArray;
+import org.epics.ioc.pv.PVStructure;
+import org.epics.ioc.pv.PVStructureArray;
+import org.epics.ioc.pv.StringArrayData;
+import org.epics.ioc.pv.Structure;
+import org.epics.ioc.pv.Type;
 
 /**
  * JUnit test for pvAccess.

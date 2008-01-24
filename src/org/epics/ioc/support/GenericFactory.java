@@ -5,10 +5,14 @@
  */
 package org.epics.ioc.support;
 
-import org.epics.ioc.pv.*;
-import org.epics.ioc.db.*;
-import org.epics.ioc.process.*;
-import org.epics.ioc.util.*;
+import org.epics.ioc.db.DBField;
+import org.epics.ioc.db.DBStructure;
+import org.epics.ioc.process.SupportProcessRequester;
+import org.epics.ioc.process.SupportState;
+import org.epics.ioc.pv.Field;
+import org.epics.ioc.pv.PVStructure;
+import org.epics.ioc.pv.Structure;
+import org.epics.ioc.util.RequestResult;
 
 /**
  * Support for a record type that has an arbitrary set of fields.

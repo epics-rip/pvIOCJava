@@ -5,7 +5,7 @@
  */
 package org.epics.ioc.pdrv.interfaces;
 
-import org.epics.ioc.pdrv.*;
+import org.epics.ioc.pdrv.User;
 import org.epics.ioc.pv.PVStructure;
 
 /**

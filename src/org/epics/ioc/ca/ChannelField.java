@@ -6,8 +6,8 @@
 package org.epics.ioc.ca;
 
 import org.epics.ioc.pv.Field;
-import org.epics.ioc.pv.PVField;
 import org.epics.ioc.pv.PVEnumerated;
+import org.epics.ioc.pv.PVField;
 
 /**
  * Interface for a field of a channel.

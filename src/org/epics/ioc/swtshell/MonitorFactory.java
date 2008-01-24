@@ -139,7 +139,7 @@ public class MonitorFactory {
             gridLayout.numColumns = 1;
             shell.setLayout(gridLayout);
             channelConnect = ChannelConnectFactory.create(this,this);
-            channelConnect.createWidgets(shell);
+            channelConnect.createWidgets(shell,true);
             Composite rowComposite = new Composite(shell,SWT.BORDER);
             gridLayout = new GridLayout();
             gridLayout.numColumns = 2;

@@ -5,7 +5,7 @@
  */
 package org.epics.ioc.pv;
 
-import org.epics.ioc.util.*;
+import org.epics.ioc.util.Requester;
 
 /**
  * PVField is the base class for each PVData field.
