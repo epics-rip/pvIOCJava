@@ -1069,6 +1069,6 @@ public class BaseV3ChannelRecord implements V3ChannelRecord,GetListener,Runnable
      * @see java.lang.Runnable#run()
      */
     public void run() {
-        v3ChannelRecordRequester.createPVRecordDone(RequestResult.success);
+        v3ChannelRecordRequester.createPVRecordDone(requestResult);
     }
 }
