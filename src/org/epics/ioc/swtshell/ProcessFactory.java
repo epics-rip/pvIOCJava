@@ -176,7 +176,7 @@ public class ProcessFactory {
         {   
             private Lock lock = new ReentrantLock();
             private Condition waitDone = lock.newCondition();
-            private boolean allDone = false;
+            private volatile boolean allDone = false;
             private Channel channel;
             final private Requester requester;
             private ChannelProcess channelProcess;
@@ -211,6 +211,7 @@ public class ProcessFactory {
                 } finally {
                     lock.unlock();
                 }
+                requester.message("processComplete", MessageType.info);
             }
             /* (non-Javadoc)
              * @see java.lang.Runnable#run()
@@ -218,16 +219,6 @@ public class ProcessFactory {
             public void run() {
                 allDone = false;
                 channelProcess.process();
-                lock.lock();
-                try {
-                    while(!allDone) {                       
-                        waitDone.await();
-                    }
-                } catch (InterruptedException ie) {
-                    return;
-                } finally {
-                    lock.unlock();
-                }
                 requester.message("processComplete", MessageType.info);
             }
             /* (non-Javadoc)
