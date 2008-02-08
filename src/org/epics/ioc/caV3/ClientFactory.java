@@ -24,6 +24,7 @@ import org.epics.ioc.util.RunnableReady;
 import org.epics.ioc.util.ThreadCreate;
 import org.epics.ioc.util.ThreadFactory;
 import org.epics.ioc.util.ThreadReady;
+import org.epics.ioc.pv.*;
 
 /**
  * Factory and implementation of Channel Access V3 client. This provides communication
@@ -36,7 +37,6 @@ public class ClientFactory  {
     private static JCALibrary jca = null;
     private static Context context = null;
     private static ThreadCreate threadCreate = ThreadFactory.getThreadCreate();
-    
     /**
      * Start. This registers the V3 ChannelProvider.
      */
@@ -88,8 +88,17 @@ public class ClientFactory  {
                 }
             }
             String remoteFieldName = null;
+            Type enumRequestType = Type.pvStructure;
             if(fieldName!=null) {
                 if(fieldName.equals("value")) {
+                    remoteFieldName = "VAL";
+                } else if(fieldName.equals("value.index")) {
+                    enumRequestType = Type.pvInt;
+                    fieldName = "value";
+                    remoteFieldName = "VAL";
+                } else if(fieldName.equals("value.choice")) {
+                    enumRequestType = Type.pvString;
+                    fieldName = "value";
                     remoteFieldName = "VAL";
                 } else if(fieldName.equals("VAL")) {
                     remoteFieldName = "VAL";
@@ -103,7 +112,7 @@ public class ClientFactory  {
             }
             pvName =  recordName + "." + remoteFieldName;
             
-            BaseV3Channel v3Channel = new BaseV3Channel(listener,options);
+            BaseV3Channel v3Channel = new BaseV3Channel(listener,options,enumRequestType);
             v3Channel.init(context,pvName,recordName,fieldName,propertys);
             return v3Channel;
         }

@@ -10,6 +10,8 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.DisposeEvent;
+import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
@@ -46,7 +48,7 @@ public class ProcessFactory {
         processImpl.start();
     }
 
-    private static class ProcessImpl implements Requester,ChannelListener,SelectionListener  {
+    private static class ProcessImpl implements DisposeListener,Requester,ChannelListener,SelectionListener  {
 
         private ProcessImpl(Display display) {
             this.display = display;
@@ -63,6 +65,12 @@ public class ProcessFactory {
         private Button processButton;
         private Text consoleText = null; 
 
+        /* (non-Javadoc)
+         * @see org.eclipse.swt.events.DisposeListener#widgetDisposed(org.eclipse.swt.events.DisposeEvent)
+         */
+        public void widgetDisposed(DisposeEvent e) {
+            if(channel!=null) channel.destroy();
+        }
         /* (non-Javadoc)
          * @see org.epics.ioc.util.Requester#getRequesterName()
          */
@@ -103,7 +111,7 @@ public class ProcessFactory {
             gridLayout.numColumns = 1;
             shell.setLayout(gridLayout);
             channelConnect = ChannelConnectFactory.create(this,this);
-            channelConnect.createWidgets(shell,false);
+            channelConnect.createWidgets(shell,false,false);
             processButton = new Button(shell,SWT.PUSH);
             processButton.setText("process");
             processButton.addSelectionListener(this);               
@@ -134,6 +142,7 @@ public class ProcessFactory {
             requester = SWTMessageFactory.create(windowName,display,consoleText);
             shell.pack();
             shell.open();
+            shell.addDisposeListener(this);
         }
         /* (non-Javadoc)
          * @see org.eclipse.swt.events.SelectionListener#widgetDefaultSelected(org.eclipse.swt.events.SelectionEvent)
@@ -193,6 +202,15 @@ public class ProcessFactory {
                 }
                 allDone = false;
                 iocExecutor.execute(this);
+                lock.lock();
+                try {
+                    while(!allDone) {                       
+                        waitDone.await();
+                    }
+                } catch (InterruptedException ie) {
+                } finally {
+                    lock.unlock();
+                }
             }
             /* (non-Javadoc)
              * @see java.lang.Runnable#run()

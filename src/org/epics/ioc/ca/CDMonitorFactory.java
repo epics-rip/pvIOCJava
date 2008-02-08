@@ -185,20 +185,31 @@ public class CDMonitorFactory {
          * @see org.epics.ioc.ca.ChannelMonitorRequester#dataPut(org.epics.ioc.pv.PVField, org.epics.ioc.pv.PVField)
          */
         public void dataPut(PVField requestedPVField, PVField modifiedPVField) {
-            cd.put(requestedPVField, modifiedPVField);
-            monitorOccured = true;
+            boolean result = cd.put(requestedPVField, modifiedPVField);
+            // following allows for client monitoring a direct subfield of a field
+            // This is common for enumerated fields
+            if(!result) {
+                String fieldName = modifiedPVField.getField().getFieldName();
+                if(fieldName!=null) {
+                int index =cd.getCDRecord().getPVRecord().getStructure().getFieldIndex(fieldName);
+                   if(index>=0) result = cd.put(modifiedPVField);
+                }
+            }
+            if(result) {
+                monitorOccured = true;
+            }
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.ca.ChannelMonitorRequester#dataPut(org.epics.ioc.pv.PVField)
          */
         public void dataPut(PVField modifiedPVField) {
-            cd.put(modifiedPVField);
-            for(int i=0; i < channelFieldList.size(); i++) {
+            boolean result = cd.put(modifiedPVField);
+            if(result) for(int i=0; i < channelFieldList.size(); i++) {
                 ChannelField channelField = channelFieldList.get(i);
                 PVField data = channelField.getPVField();
                 if(data==modifiedPVField) {
                     MonitorField monitorField = monitorFieldList.get(i);
-                    boolean result = monitorField.newField(modifiedPVField);
+                    result = monitorField.newField(modifiedPVField);
                     if(result) monitorOccured = true;
                     return;
                 }

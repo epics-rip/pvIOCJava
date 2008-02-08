@@ -290,8 +290,10 @@ public abstract class AbstractPVField implements PVField{
         boolean skipValue = false;
         Field field = this.getField();
         if(field.getFieldName().equals("value")) {
-            pvField = this.parent;
-            skipValue = true;
+            if(this.parent!=null) {
+                pvField = this.parent;
+                skipValue = true;
+            }
         }
         field = pvField.getField();
         if(field.getType()!=Type.pvStructure) return null;
@@ -302,6 +304,7 @@ public abstract class AbstractPVField implements PVField{
             field = pvf.getField();
             String fieldName = field.getFieldName();
             if(skipValue && fieldName.equals("value")) continue;
+            // findProperty will skip null structures
             if(pvField.findProperty(fieldName)!=null) size++;
         }
         if(size==0) return null;
@@ -311,6 +314,7 @@ public abstract class AbstractPVField implements PVField{
             field = pvf.getField();
             String fieldName = field.getFieldName();
             if(skipValue && fieldName.equals("value")) continue;
+            // findProperty will skip null structures
             if(pvField.findProperty(fieldName)!=null) {
                 propertyNames[index++] = pvf.getField().getFieldName();
             }
@@ -399,9 +403,11 @@ public abstract class AbstractPVField implements PVField{
     }
     
     private PVField findField(PVField pvField,String name) {
+        if(pvField==null) return null;
         Field field = pvField.getField();
+        String pvFieldName = field.getFieldName();
         if(field.getType()!=Type.pvStructure)  {
-            if(field.getFieldName().equals("value")) {
+            if(pvFieldName.equals("value")) {
                 return findField(pvField.getParent(),name);
             }
             return null;
@@ -429,10 +435,14 @@ public abstract class AbstractPVField implements PVField{
             }
             if(notNullStructure) return pvf;
         }
-        if(!name.equals("timeStamp")) return null;
-        pvField = pvField.getParent();
-        if(pvField==null) return null;
-        return findField(pvField,name);
+        if(name.equals("timeStamp")) {
+            return pvField.findPropertyViaParent(name);
+        }
+        if(pvFieldName.equals("value")) {
+            pvField = pvField.getParent();
+            if(pvField!=null) return findField(pvField,name);
+        }
+        return null;
     }
     
     private static class PVEnumeratedImpl implements PVEnumerated {

@@ -84,9 +84,10 @@ public class ChannelConnectFactory {
             this.requester = requester;
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.swtshell.ChannelConnect#createWidgets(org.eclipse.swt.widgets.Composite, boolean)
+         * @see org.epics.ioc.swtshell.ChannelConnect#createWidgets(org.eclipse.swt.widgets.Composite, boolean, boolean)
          */
-        public void createWidgets(Composite parent, boolean includePropertys) {
+        public void createWidgets(Composite parent, boolean includeField, boolean includePropertys) {
+            
             this.includePropertys = includePropertys;
             display = parent.getShell().getDisplay();
             shell = parent.getShell();
@@ -107,10 +108,12 @@ public class ChannelConnectFactory {
             selectLocalRecordButton = new Button(connectGetLocal,SWT.PUSH);
             selectLocalRecordButton.setText("selectLocalRecord");
             selectLocalRecordButton.addSelectionListener(this);
-            selectLocalFieldButton = new Button(connectGetLocal,SWT.PUSH);
-            selectLocalFieldButton.setText("selectLocalField");
-            selectLocalFieldButton.addSelectionListener(this);
-            selectLocalFieldButton.setEnabled(false);
+            if(includeField) {
+                selectLocalFieldButton = new Button(connectGetLocal,SWT.PUSH);
+                selectLocalFieldButton.setText("selectLocalField");
+                selectLocalFieldButton.addSelectionListener(this);
+                selectLocalFieldButton.setEnabled(false);
+            }
             
             Composite pv = new Composite(shellComposite,SWT.BORDER);
             gridLayout = new GridLayout();
@@ -270,7 +273,7 @@ public class ChannelConnectFactory {
                 providerName = providerCombo.getText();
                 pvNameText.setText(pvName);
                 pvName = pvNameText.getText();
-                selectLocalFieldButton.setEnabled(true);
+                if(selectLocalFieldButton!=null) selectLocalFieldButton.setEnabled(true);
             } else if(object==selectLocalFieldButton) {
                 DBRecord dbRecord = iocdb.findRecord(pvName);
                 if(dbRecord==null) {
@@ -282,12 +285,12 @@ public class ChannelConnectFactory {
                 String fieldName = selectField.selectFieldName(pvRecord);
                 pvName = pvName + "." + fieldName;
                 pvNameText.setText(pvName);
-                selectLocalFieldButton.setEnabled(false);
+                if(selectLocalFieldButton!=null) selectLocalFieldButton.setEnabled(false);
             } else if(object==providerCombo) {
                 providerName = providerCombo.getText();
             } else if(object==pvNameText) {
                 pvName = pvNameText.getText();
-                selectLocalFieldButton.setEnabled(false);
+                if(selectLocalFieldButton!=null) selectLocalFieldButton.setEnabled(false);
             }
             
         }

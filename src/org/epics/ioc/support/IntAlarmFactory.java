@@ -15,6 +15,7 @@ import org.epics.ioc.pv.Field;
 import org.epics.ioc.pv.PVBoolean;
 import org.epics.ioc.pv.PVField;
 import org.epics.ioc.pv.PVInt;
+import org.epics.ioc.pv.PVString;
 import org.epics.ioc.pv.PVStructure;
 import org.epics.ioc.pv.PVStructureArray;
 import org.epics.ioc.pv.Structure;
@@ -62,6 +63,7 @@ public class IntAlarmFactory {
         private DBStructureArray dbAlarmIntervalArray = null;
         private PVInt[] pvAlarmIntervalValue = null;
         private PVInt[] pvAlarmIntervalSeverity = null;
+        private PVString[] pvAlarmIntervalMessage = null;
         
         private PVInt pvValue;
         private int lastAlarmIntervalValue;
@@ -146,6 +148,7 @@ public class IntAlarmFactory {
             DBStructure[] dbFields = dbAlarmIntervalArray.getElementDBStructures();
             pvAlarmIntervalValue = new PVInt[size];
             pvAlarmIntervalSeverity = new PVInt[size];
+            pvAlarmIntervalMessage = new PVString[size];
             
             for(int i=0; i<size; i++) {
                 DBStructure dbStructure = dbFields[i];
@@ -176,6 +179,17 @@ public class IntAlarmFactory {
                     return;
                 }
                 pvAlarmIntervalSeverity[i] = enumerated.getIndexField();
+                index = structure.getFieldIndex("message");
+                if(index<0) {
+                    super.message("invalid interval no message field", MessageType.error);
+                    return;
+                }
+                field = fields[index];
+                if(field.getType()!=Type.pvString) {
+                    super.message("invalid interval message field is not string", MessageType.error);
+                    return;
+                }
+                pvAlarmIntervalMessage[i] = (PVString)pvFields[index];
             }
             lastAlarmSeverityIndex = 0;
             setSupportState(supportState);
@@ -218,16 +232,16 @@ public class IntAlarmFactory {
                 intervalValue = pvAlarmIntervalValue[i].get();
                 if(val<=intervalValue) {
                     int sevIndex = pvAlarmIntervalSeverity[i].get();
-                    raiseAlarm(intervalValue,val,sevIndex);
+                    raiseAlarm(intervalValue,val,sevIndex,pvAlarmIntervalMessage[i].get());
                     return;
                 }
             }
             int outOfRange = pvOutOfRange.get();
             // intervalValue is pvAlarmIntervalValue[len-1].get();
-            raiseAlarm(intervalValue,val,outOfRange);
+            raiseAlarm(intervalValue,val,outOfRange,"out of range");
         }
         
-        private void raiseAlarm(int intervalValue,int val,int severityIndex) {
+        private void raiseAlarm(int intervalValue,int val,int severityIndex,String message) {
             AlarmSeverity alarmSeverity = AlarmSeverity.getSeverity(severityIndex);
             if(severityIndex<lastAlarmSeverityIndex) {
                 int diff = lastAlarmIntervalValue - val;
@@ -241,7 +255,6 @@ public class IntAlarmFactory {
                 lastAlarmSeverityIndex = severityIndex;
                 return;
             }
-            String message = pvStructure.getFullFieldName() + " " + alarmSeverity.toString();
             alarmSupport.setAlarm(message, alarmSeverity);
             lastAlarmIntervalValue = intervalValue;
             lastAlarmSeverityIndex = severityIndex;

@@ -9,7 +9,7 @@
     <calculator supportName = "booleanArrayToggleCalculator" />
     <supportArray>
         <value structureName = "supportArrayElement">
-            <wait>true</wait>
+            <wait>false</wait>
             <link  supportName = "processSupport" structureName = "processSupport">
                     <pvname>booleanArray1FromToggle</pvname>
             </link>

@@ -48,7 +48,7 @@
     </valueAlarm>
     <scan>
         <type><choice>periodic</choice></type>
-        <rate>2.0</rate>
+        <rate>1.0</rate>
     </scan>
 </record>
 
@@ -104,6 +104,7 @@
             <pvname>cachePut</pvname>
             <type><choice>change</choice></type>
             <process>true</process>
+            <inheritSeverity>true</inheritSeverity>
     </input>
     <supportArray>
         <value structureName = "supportArrayElement">

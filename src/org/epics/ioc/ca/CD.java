@@ -40,22 +40,25 @@ public interface CD {
     /**
      * Get data from the CDField and put it into the pvField.
      * @param pvField The pvField into which to put the data.
+     * @return (false,true) if data (was not, was) put into the pvField
      */
-    void get(PVField pvField);
+    boolean get(PVField pvField);
     /**
      * Put the pvData into the CDField.
      * @param pvField The pvField containing the data to put into the CDField.
      * This must be the PVField for the ChannelField.
+     * @return (false,true) if data (was not, was) put into the CDField
      */
-    void put(PVField pvField);
+    boolean put(PVField pvField);
     /**
      * A put to a subfield of a CDField has occured. 
      * @param pvField The pvField 
      * This must be the PVField for the ChannelField.
-     * @param pvSubField The pvField containing the data to put into the subfield opf the CDField. 
+     * @param pvSubField The pvField containing the data to put into the subfield of the CDField. 
      * This must be the PVField for ChannelField that is a subfield of ChannelField.
+     * @return (false,true) if data (was not, was) put into a subfield of the CDField
      */
-    void put(PVField pvField,PVField pvSubField);
+    boolean put(PVField pvField,PVField pvSubField);
     /**
      * Create a CDGet.
      * @param cdGetRequester The channelDataGetRequester

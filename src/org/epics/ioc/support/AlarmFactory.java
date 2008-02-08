@@ -90,6 +90,7 @@ public class AlarmFactory {
         private boolean active = false;
         private int beginIndex = 0;
         private int currentIndex = 0;
+        private String beginMessage = null;
         private String currentMessage = null;
         
         private AlarmImpl parentAlarmSupport = null;
@@ -155,6 +156,8 @@ public class AlarmFactory {
             gotAlarm = false;
             active = true;
             beginIndex = pvSeverity.get();
+            beginMessage = pvMessage.get();
+            currentMessage = beginMessage;
             currentIndex = 0;
             currentMessage = null;
         }
@@ -162,8 +165,18 @@ public class AlarmFactory {
          * @see org.epics.ioc.support.AlarmSupport#endProcess()
          */
         public void endProcess() {
-            active = false;         
-            if(currentIndex!=beginIndex) {
+            active = false;
+            boolean messageChange = false;
+            if(beginMessage==null) {
+                if(currentMessage!=null) messageChange = true;
+            } else {
+                if(currentMessage==null) {
+                    messageChange = true;
+                } else if(!beginMessage.equals(currentMessage)) {
+                    messageChange = true;
+                }
+            }
+            if(currentIndex!=beginIndex || messageChange) {
                 pvSeverity.put(currentIndex);                
                 pvMessage.put(currentMessage);
                 dbSeverity.postPut();

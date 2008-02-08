@@ -34,7 +34,6 @@ public class BaseV3ChannelMonitor implements ChannelMonitor,MonitorListener
     private ChannelMonitorRequester channelMonitorRequester;
     
     private gov.aps.jca.Channel jcaChannel = null;
-    private DBRType valueDBRType = null;
     
     private V3Channel v3Channel = null;
     private int elementCount = 0;
@@ -54,11 +53,15 @@ public class BaseV3ChannelMonitor implements ChannelMonitor,MonitorListener
     public BaseV3ChannelMonitor(ChannelMonitorRequester channelMonitorRequester) {
         this.channelMonitorRequester = channelMonitorRequester;
     }
-    public boolean init(V3Channel channel)
+    /**
+     * Initialize the channelMonitor.
+     * @param v3Channel The V3Channel
+     * @return (false,true) if the channelMonitor (did not, did) properly initialize.
+     */
+    public boolean init(V3Channel v3Channel)
     {
-        this.v3Channel = channel;
-        jcaChannel = channel.getJCAChannel();;
-        valueDBRType = jcaChannel.getFieldType();
+        this.v3Channel = v3Channel;
+        jcaChannel = v3Channel.getJCAChannel();
         elementCount = jcaChannel.getElementCount();
         return true;
     }
@@ -85,6 +88,7 @@ public class BaseV3ChannelMonitor implements ChannelMonitor,MonitorListener
      */
     public void setFieldGroup(ChannelFieldGroup channelFieldGroup) {
         this.channelFieldGroup = channelFieldGroup;
+        DBRType nativeDBRType = v3Channel.getV3ChannelRecord().getNativeDBRType();
         dbrProperty = DBRProperty.none;
         ChannelField[] channelFields = channelFieldGroup.getArray();
         for(ChannelField channelField : channelFields) {
@@ -100,43 +104,43 @@ public class BaseV3ChannelMonitor implements ChannelMonitor,MonitorListener
         }
         switch(dbrProperty) {
         case none:
-            if(valueDBRType.isENUM()) {
+            if(nativeDBRType.isENUM()) {
                 requestDBRType = DBRType.INT;
             } else {
-                requestDBRType = valueDBRType;
+                requestDBRType = nativeDBRType;
             }
             break;
         case status:
-            if(valueDBRType==DBRType.BYTE) {
+            if(nativeDBRType==DBRType.BYTE) {
                 requestDBRType = DBRType.STS_BYTE;
-            } else if(valueDBRType==DBRType.SHORT) {
+            } else if(nativeDBRType==DBRType.SHORT) {
                 requestDBRType = DBRType.STS_SHORT;
-            } else if(valueDBRType==DBRType.INT) {
+            } else if(nativeDBRType==DBRType.INT) {
                 requestDBRType = DBRType.STS_INT;
-            } else if(valueDBRType==DBRType.FLOAT) {
+            } else if(nativeDBRType==DBRType.FLOAT) {
                 requestDBRType = DBRType.STS_FLOAT;
-            } else if(valueDBRType==DBRType.DOUBLE) {
+            } else if(nativeDBRType==DBRType.DOUBLE) {
                 requestDBRType = DBRType.STS_DOUBLE;
-            } else if(valueDBRType==DBRType.STRING) {
+            } else if(nativeDBRType==DBRType.STRING) {
                 requestDBRType = DBRType.STS_STRING;
-            } else if(valueDBRType==DBRType.ENUM) {
+            } else if(nativeDBRType==DBRType.ENUM) {
                 requestDBRType = DBRType.STS_INT;
             }
             break;
         case time:
-            if(valueDBRType==DBRType.BYTE) {
+            if(nativeDBRType==DBRType.BYTE) {
                 requestDBRType = DBRType.TIME_BYTE;
-            } else if(valueDBRType==DBRType.SHORT) {
+            } else if(nativeDBRType==DBRType.SHORT) {
                 requestDBRType = DBRType.TIME_SHORT;
-            } else if(valueDBRType==DBRType.INT) {
+            } else if(nativeDBRType==DBRType.INT) {
                 requestDBRType = DBRType.TIME_INT;
-            } else if(valueDBRType==DBRType.FLOAT) {
+            } else if(nativeDBRType==DBRType.FLOAT) {
                 requestDBRType = DBRType.TIME_FLOAT;
-            } else if(valueDBRType==DBRType.DOUBLE) {
+            } else if(nativeDBRType==DBRType.DOUBLE) {
                 requestDBRType = DBRType.TIME_DOUBLE;
-            } else if(valueDBRType==DBRType.STRING) {
+            } else if(nativeDBRType==DBRType.STRING) {
                 requestDBRType = DBRType.TIME_STRING;
-            } else if(valueDBRType==DBRType.ENUM) {
+            } else if(nativeDBRType==DBRType.ENUM) {
                 requestDBRType = DBRType.TIME_INT;
             }
             break;

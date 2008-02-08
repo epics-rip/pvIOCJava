@@ -99,7 +99,7 @@ public class DigitalFactory {
         
         protected int[] values = null;
         
-        protected DBStructureArray dbStateSeverity = null;
+        protected DBStructureArray dbStateAlarm = null;
         
         protected DigitalBase(String supportName,DBStructureArray dbArray) {
             super(supportName,dbArray);
@@ -192,21 +192,21 @@ public class DigitalFactory {
         private boolean initValueAlarm(DBField dbValueAlarm) {
             DBStructure dbStructure = (DBStructure)dbValueAlarm;
             PVStructure pvStructure = dbStructure.getPVStructure();
-            PVField pvField = pvStructure.findProperty("stateSeverity");
+            PVField pvField = pvStructure.findProperty("stateAlarm");
             if(pvField==null) {
-                super.message("valueAlarm does not have a stateSeverity field. Why???", MessageType.error);
+                super.message("valueAlarm does not have a stateAlarm field. Why???", MessageType.error);
                 return false;
             }
             if(pvField.getField().getType()!=Type.pvArray) {
-                super.message("valueAlarm.stateSeverity is not an array. Why???", MessageType.error);
+                super.message("valueAlarm.stateAlarm is not an array. Why???", MessageType.error);
                 return false;
             }
             PVArray pvArray = (PVArray)pvField;
             if(pvArray.getArray().getElementType()!=Type.pvStructure) {
-                super.message("valueAlarm.stateSeverity is not an array of structures. Why???", MessageType.error);
+                super.message("valueAlarm.stateAlarm is not an array of structures. Why???", MessageType.error);
                 return false;
             }
-            dbStateSeverity = (DBStructureArray)dbStructure.getDBRecord().findDBField(pvArray);
+            dbStateAlarm = (DBStructureArray)dbStructure.getDBRecord().findDBField(pvArray);
             return true;
         }
         
@@ -215,10 +215,10 @@ public class DigitalFactory {
             int nstates = dbStatesFields.length;
             if(nstates<1) return false;
             String[] names = new String[nstates];
-            PVStructure[] pvSeverities = new PVStructure[nstates];
+            PVStructure[] pvEnumeratedAlarmState = new PVStructure[nstates];
             values = new int[nstates];
-            PVStructureArray pvStateSeverityArray = dbStateSeverity.getPVStructureArray();
-            pvStateSeverityArray.setCapacity(nstates);
+            PVStructureArray pvStateAlarmArray = dbStateAlarm.getPVStructureArray();
+            pvStateAlarmArray.setCapacity(nstates);
             for(int indState=0; indState<nstates; indState++) {
                 DBField dbField = dbStatesFields[indState];
                 if(dbField==null) {
@@ -234,9 +234,9 @@ public class DigitalFactory {
                         MessageType.error);
                     return false;
                 }
-                DBStructure dbStateSeverity = (DBStructure)dbField;
-                PVStructure pvStateSeverity = dbStateSeverity.getPVStructure();
-                PVField pvField = pvStateSeverity.findProperty("name");
+                DBStructure dbState = (DBStructure)dbField;
+                PVStructure pvState = dbState.getPVStructure();
+                PVField pvField = pvState.findProperty("name");
                 if(pvField==null) {
                     super.message(
                             "states index " + indState + " does not have field name",
@@ -251,7 +251,7 @@ public class DigitalFactory {
                 }
                 PVString pvName= (PVString)pvField;
                 names[indState] = pvName.get();
-                pvField = pvStateSeverity.findProperty("value");
+                pvField = pvState.findProperty("value");
                 if(pvField==null) {
                     super.message(
                             "states index " + indState + " does not have field value",
@@ -266,7 +266,15 @@ public class DigitalFactory {
                 }
                 PVInt pvValue= (PVInt)pvField;
                 values[indState] = pvValue.get();
-                pvField = pvStateSeverity.findProperty("severity");
+                pvField = pvState.findProperty("message");
+                if(pvField==null) {
+                    super.message(
+                            "states index " + indState + " does not have field message",
+                            MessageType.error);
+                    return false;
+                }
+                PVString pvMessage = (PVString)pvField;
+                pvField = pvState.findProperty("severity");
                 if(pvField==null) {
                     super.message(
                             "states index " + indState + " does not have field severity",
@@ -282,25 +290,41 @@ public class DigitalFactory {
                             MessageType.error);
                     return false;
                 }
+                DBDStructure dbdStructure = DBDFactory.getMasterDBD().getStructure("enumeratedAlarmState");
                 String actualFieldName = "[" + indState + "]";
-                DBDStructure dbdStructure = DBDFactory.getMasterDBD().getStructure("alarmSeverity");
-                Field newField = fieldCreate.createStructure(
+                Field enumAlarmStateField = fieldCreate.createStructure(
                         actualFieldName,
                         dbdStructure.getStructureName(),
                         dbdStructure.getFields(),
                         dbdStructure.getFieldAttribute());
-                newField.setCreateName("enumerated");
+                PVStructure pvNewAlarmState = (PVStructure)pvDataCreate.createPVField(
+                        pvStateAlarmArray,enumAlarmStateField);
+                pvEnumeratedAlarmState[indState] = pvNewAlarmState;
+                dbdStructure = DBDFactory.getMasterDBD().getStructure("alarmSeverity");
+                Field severityField = fieldCreate.createStructure(
+                        "severity",
+                        dbdStructure.getStructureName(),
+                        dbdStructure.getFields(),
+                        dbdStructure.getFieldAttribute());
+                severityField.setCreateName("enumerated");
                 PVStructure pvNewStateSeverity = (PVStructure)pvDataCreate.createPVField(
-                        pvStateSeverityArray,newField);
-                pvSeverities[indState] = pvNewStateSeverity;
+                        pvNewAlarmState,severityField);
                 convert.copyStructure((PVStructure)pvField, pvNewStateSeverity);
+                Field messageField = fieldCreate.createField("message", Type.pvString);
+                PVString newMessageField = (PVString)pvDataCreate.createPVField(pvNewAlarmState, messageField);
+                newMessageField.put(pvMessage.get());
+                PVField[] pvFields = pvNewAlarmState.getPVFields();
+                pvFields[0].replacePVField(pvNewStateSeverity);
+                pvFields[1].replacePVField(newMessageField);
             }          
             pvValueChoices.put(0, nstates, names, 0);
-            pvStateSeverityArray.put(0,nstates, pvSeverities, 0);
-            dbStateSeverity.replacePVArray();
-            DBStructure[] dbFields = dbStateSeverity.getElementDBStructures();
+            pvStateAlarmArray.put(0,nstates, pvEnumeratedAlarmState, 0);
+            dbStateAlarm.replacePVArray();
+            DBStructure[] dbFields = dbStateAlarm.getElementDBStructures();
             for(int indState=0; indState<nstates; indState++) {
-                EnumeratedFactory.create(dbFields[indState]);
+                DBStructure dbStructure = (DBStructure)dbFields[indState];
+                DBField[] subFields = dbStructure.getDBFields();
+                EnumeratedFactory.create(subFields[0]);
             }
             return true;
         } 

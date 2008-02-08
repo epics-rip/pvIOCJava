@@ -9,4 +9,5 @@
   <field name = "input" type = "structure" />
   <field name = "output" type = "structure" />
   <field name = "display" type = "structure" />
+  <field name = "control" type = "structure"/>
 </DBDefinition>

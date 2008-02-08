@@ -10,7 +10,7 @@
 <body>
 <h1 style="text-align: center">EPICS JavaIOC: Java Input/Output Controller<br
 />
-2008.01.04</h1>
+2008.02.08</h1>
 
 <p>This product is available via the <a href="#LicenseAgreement">open source
 license</a> described at the end of this document.</p>
@@ -478,9 +478,9 @@ dumps the database definitions and record instances.</p>
 
 <p>As a beginning example specify the arguments as:</p>
 <pre>    -dbd example/exampleDBD.xml -db example/exampleDB.xml \
-    -server server/beforeSwtshell.txt \
+    -server server/afterStartIOC.txt \
     -startIOC \
-    -server server/afterSwtshell.txt \
+    -server server/afterStartIOC.txt \
     -swtshell</pre>
 
 <p>This:</p>
@@ -914,6 +914,7 @@ style="font-family: courier;">support</span></p>
   &lt;!-- instance can set
      structureName = "display" --&gt;
   &lt;field name = "display" type = "structure" /&gt;
+  &lt;field name = "control" type = "structure" /&gt;
   &lt;!-- instance can set
      structureName = "doubleHistory" supportName = "history" --&gt;
   &lt;field name = "history" type = "structure" /&gt;
@@ -2267,6 +2268,9 @@ enumerated. </p>
 &lt;structure name = "alarm" supportName = "alarm" &gt;
   &lt;field name = "severity" type = "structure" structureName = "alarmSeverity" /&gt;
   &lt;field name = "message" type = "string" /&gt;
+  &lt;field name = "ackTransient" type = "boolean" /&gt;
+  &lt;field name = "ackSeverity" type = "structure" structureName = "alarmSeverity" /&gt;
+  &lt;field name = "typeCode" type = "structure" /&gt;
 &lt;/structure&gt;
 
 &lt;structure name = "byteAlarmInterval"&gt;
@@ -2345,7 +2349,7 @@ enumerated. </p>
 &lt;structure name = "enumeratedAlarm"  supportName = "enumeratedAlarm" &gt;
   &lt;field name = "active" type = "boolean" /&gt;
    &lt;!-- each array element must have structureName  alarmSeverity --&gt;
-  &lt;field name = "stateSeverity" type = "array" elementType = "structure" design = "false" /&gt;
+  &lt;field name = "stateAlarm" type = "array" elementType = "structure" design = "false" /&gt;
   &lt;field name = "changeStateAlarm" type = "structure" structureName = "alarmSeverity" /&gt;
 &lt;/structure&gt;
 
@@ -2827,13 +2831,12 @@ org.epics.ioc.support for details.</p>
   &lt;field name = "type" type = "structure" structureName = "monitorType"
      default = "put" /&gt;
   &lt;field name = "deadband" type = "double" /&gt;
-  &lt;field name = "onlyWhileProcessing" type = "boolean" /&gt;
   &lt;field name = "queueSize" type = "int"  default = "3" /&gt;
   &lt;field name = "reportOverrun" type = "boolean" /&gt;
   &lt;field name = "process" type = "boolean"&gt;
       &lt;!-- process this record when monitor occurs --&gt;
   &lt;/field&gt;
-  &lt;field name = "inheritSeverity" type = "boolean" &gt;
+  &lt;field name = "propertyNames" type = "string" &gt;
       &lt;!-- only applicable if process is true --&gt;
   &lt;/field&gt;
 &lt;/structure&gt;
@@ -2851,7 +2854,7 @@ org.epics.ioc.support for details.</p>
   &lt;field name = "providerName" type = "string" default = "local" /&gt;
   &lt;field name = "pvname" type = "string" link = "true" /&gt;
   &lt;field name = "process" type = "boolean" /&gt;
-  &lt;field name = "inheritSeverity" type = "boolean" /&gt;
+  &lt;field name = "propertyNames" type = "string" /&gt;
 &lt;/structure&gt;
 
 &lt;structure name = "outputSupport"&gt;
@@ -2906,9 +2909,9 @@ org.epics.ioc.support for details.</p>
   <dt>process</dt>
     <dd>Should the record containing the link be processed after the
       monotered data is read.</dd>
-  <dt>inheritSeverity</dt>
-    <dd>Should this record be put in alarm if the linked record is in
-    alarm?</dd>
+  <dt>propertyNames</dt>
+    <dd>A set of propertyNames. If a name is alarm than this record inherits
+      the alarm from the linked record.</dd>
 </dl>
 
 <h4 id="monitorNot">monitorNotifySupport</h4>
@@ -2938,9 +2941,9 @@ org.epics.ioc.support for details.</p>
     <dd>recordName.fieldName of link</dd>
   <dt>process</dt>
     <dd>Should the linked record be processed before getting data?</dd>
-  <dt>inheritSeverity</dt>
-    <dd>Should this record be put in alarm if the linked record is in
-    alarm?</dd>
+  <dt>propertyNames</dt>
+    <dd>A set of propertyNames. If a name is alarm than this record inherits
+      the alarm from the linked record.</dd>
 </dl>
 
 <h4 id="outputSupp">outputSupport</h4>
@@ -2969,6 +2972,7 @@ numberOfBits of the registerValue. This value deterrmines the digitalState.
   &lt;field name = "name" type = "string" /&gt;
   &lt;field name = "value" type = "int" /&gt;
   &lt;field name = "severity" type = "structure" structureName = "alarmSeverity" /&gt;
+  &lt;field name = "message" type = "string" /&gt;
 &lt;/structure&gt;
 
 &lt;structure name = "digital" supportName = "generic" &gt;
@@ -2983,6 +2987,7 @@ numberOfBits of the registerValue. This value deterrmines the digitalState.
   &lt;field name = "valueAlarm" type = "structure" /&gt;
   &lt;field name = "output" type = "structure" /&gt;
   &lt;field name = "display" type = "structure" /&gt;
+  &lt;field name = "control" type = "structure" /&gt;
   &lt;!-- instance can set structureName = "intHistory" --&gt;
   &lt;field name = "history" type = "structure" /&gt;
 &lt;/structure&gt;
@@ -3955,6 +3960,7 @@ a PV interface for reading an argument value.:</p>
   &lt;field name = "valueAlarm" type = "structure" /&gt;
   &lt;field name = "output" type = "structure" /&gt;
   &lt;field name = "display" type = "structure" /&gt;
+  &lt;field name = "control" type = "structure" /&gt;
   &lt;!-- instance can set structureName = "doubleHistory" --&gt;
   &lt;field name = "history" type = "structure" /&gt;
 &lt;/DBDefinition&gt;</pre>

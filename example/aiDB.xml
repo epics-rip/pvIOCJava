@@ -65,40 +65,6 @@
         </input>
 
     </input>
-    <valueAlarm structureName = "doubleAlarm">
-          <active>true</active>
-          <interval>
-              <value structureName = "doubleAlarmInterval">
-                  <value>2.0</value>
-                  <severity><choice>major</choice></severity>
-              </value>
-              <value structureName = "doubleAlarmInterval">
-                  <value>4.0</value>
-                  <severity><choice>minor</choice></severity>
-              </value>
-              <value structureName = "doubleAlarmInterval">
-                  <value>6.0</value>
-                  <severity><choice>none</choice></severity>
-              </value>
-              <value structureName = "doubleAlarmInterval">
-                  <value>8.0</value>
-                  <severity><choice>minor</choice></severity>
-              </value>
-              <value structureName = "doubleAlarmInterval">
-                  <value>10.0</value>
-                  <severity><choice>major</choice></severity>
-              </value>
-          </interval>
-          <outOfRange><choice>invalid</choice></outOfRange>
-          <hystersis>0.1</hystersis>
-    </valueAlarm>
-    <display structureName = "display" >
-        <units>volts</units>
-        <limit>
-            <low>0.0</low>
-            <high>10.0</high>
-        </limit>
-    </display>
 </record>
 
 

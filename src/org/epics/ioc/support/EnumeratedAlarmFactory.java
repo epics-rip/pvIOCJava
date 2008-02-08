@@ -17,6 +17,7 @@ import org.epics.ioc.pv.Field;
 import org.epics.ioc.pv.PVBoolean;
 import org.epics.ioc.pv.PVField;
 import org.epics.ioc.pv.PVInt;
+import org.epics.ioc.pv.PVString;
 import org.epics.ioc.pv.PVStructure;
 import org.epics.ioc.pv.Structure;
 import org.epics.ioc.pv.Type;
@@ -56,8 +57,10 @@ public class EnumeratedAlarmFactory {
         
         private PVBoolean pvActive;
         
-        private PVInt[] pvInts = null;
+        private PVInt[] pvSeverityIndex = null;
+        private PVString[] pvMessage;
         private PVInt pvChangeStateAlarm;
+        private PVString pvChangeStateMessage;
         
         private PVInt pvValue;
         
@@ -106,29 +109,54 @@ public class EnumeratedAlarmFactory {
             DBField[] dbFields = dbStructure.getDBFields();
             Structure structure = dbStructure.getPVStructure().getStructure();
             int index;
-            index = structure.getFieldIndex("stateSeverity");
+            index = structure.getFieldIndex("stateAlarm");
             if(index<0) {
-                super.message("stateSeverity does not exist", MessageType.error);
+                super.message("stateAlarm does not exist", MessageType.error);
                 return;
             }
             dbField = dbFields[index];
             pvField = dbField.getPVField();
             Field field = pvField.getField();
             if(field.getType()!=Type.pvArray) {
-                super.message("stateSeverity is not an array", MessageType.error);
+                super.message("stateAlarm is not an array", MessageType.error);
                 return;
             }
             Array array = (Array)field;
             if(array.getElementType()!=Type.pvStructure) {
-                super.message("stateSeverity is not a structure array", MessageType.error);
+                super.message("stateAlarm is not a structure array", MessageType.error);
                 return;
             }
             pvField.setMutable(false);
-            DBStructureArray dbStateSeverity = (DBStructureArray)dbFields[index];
-            DBStructure[] dbStateSeverityFields = dbStateSeverity.getElementDBStructures();
-            int length = dbStateSeverityFields.length;
+            DBStructureArray dbStateAlarm = (DBStructureArray)dbFields[index];
+            if(!stateAlarmFieldsInit(dbStateAlarm.getElementDBStructures())) return;
+            index = structure.getFieldIndex("changeStateAlarm");
+            if(index<0) {
+                super.message("changeStateAlarm does not exist", MessageType.error);
+                return;
+            }
+            DBField tempDB = dbFields[index];
+            if(tempDB.getPVField().getField().getType()!=Type.pvStructure) {
+                super.message("changeStateAlarm not a structure", MessageType.error);
+                return;
+            }
+            Structure tempStructure = (Structure)tempDB.getPVField().getField();
+            if(!tempStructure.getStructureName().equals("enumeratedAlarmState")) {
+                super.message("changeStateAlarm not an enumeratedAlarmState structure", MessageType.error);
+                return;
+            }
+            DBStructure dbEnumeratedAlarmState = (DBStructure)dbFields[index];
+            dbFields = dbEnumeratedAlarmState.getDBFields();
+            enumerated = AlarmSeverity.getAlarmSeverity(dbFields[0]);
+            if(enumerated==null) return;
+            pvChangeStateAlarm = enumerated.getIndexField();
+            pvChangeStateMessage = (PVString)dbFields[1].getPVField();
+            setSupportState(SupportState.readyForStart);
+        }
+        
+        private boolean stateAlarmFieldsInit(DBStructure[] dbStateAlarmFields) {
+            int length = dbStateAlarmFields.length;
             for(int i=length-1; i>=0; i-- ) {
-                if(dbStateSeverityFields[i]==null) {
+                if(dbStateAlarmFields[i]==null) {
                     length--;
                 } else {
                     break;
@@ -137,30 +165,49 @@ public class EnumeratedAlarmFactory {
             if(length==0) {
                 noop = true;
                 setSupportState(SupportState.readyForStart);
-                return;
+                return false;
             }
-            pvInts = new PVInt[length];
+            pvSeverityIndex = new PVInt[length];
+            pvMessage = new PVString[length];
             for(int i=0; i< length; i++) {
-                dbField = dbStateSeverityFields[i];
-                if(dbField==null ||
-                        (enumerated = AlarmSeverity.getAlarmSeverity(dbField))==null) {
-                    super.message("stateSeverity has an element that is not an enumerated structure",
-                        MessageType.error);
-                    return;
+                DBField dbField = dbStateAlarmFields[i];
+                if(dbField==null) {
+                    super.message("stateAlarm has a null element",MessageType.error);
+                    return false;
                 }
-                pvInts[i] = enumerated.getIndexField();
+                if(dbField.getPVField().getField().getType()!=Type.pvStructure) {
+                    super.message("stateAlarm has an element that is not a structure",MessageType.error);
+                    return false;
+                }
+                dbStructure = (DBStructure)dbField;
+                DBField[] dbFields = dbStructure.getDBFields();
+                Structure structure = dbStructure.getPVStructure().getStructure();
+                int index = structure.getFieldIndex("severity");
+                if(index<0) {
+                    super.message("stateAlarm has an illegal structure element",MessageType.error);
+                    return false;
+                }
+                dbField = dbFields[index];
+                Enumerated enumerated = AlarmSeverity.getAlarmSeverity(dbField);
+                if(enumerated==null) {
+                    super.message("stateAlarm has an illegal structure element",MessageType.error);
+                    return false;
+                }
+                pvSeverityIndex[i] = enumerated.getIndexField();
                 dbField.getPVField().setMutable(false);
+                index = structure.getFieldIndex("message");
+                if(index<0) {
+                    super.message("stateAlarm has an illegal structure element",MessageType.error);
+                    return false;
+                }
+                dbField = dbFields[index];
+                if(dbField.getPVField().getField().getType()!=Type.pvString) {
+                    super.message("stateAlarm has an illegal structure element",MessageType.error);
+                    return false ;
+                }
+                pvMessage[i] = (PVString)dbField.getPVField();
             }
-            
-            index = structure.getFieldIndex("changeStateAlarm");
-            if(index<0) {
-                super.message("changeStateAlarm does not exist", MessageType.error);
-                return;
-            }
-            enumerated = AlarmSeverity.getAlarmSeverity(dbFields[index]);
-            if(enumerated==null) return;
-            pvChangeStateAlarm = enumerated.getIndexField();
-            setSupportState(SupportState.readyForStart);
+            return true;
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.process.Support#start()
@@ -191,7 +238,7 @@ public class EnumeratedAlarmFactory {
                 return;
             }
             pvActive = null;
-            pvInts = null;
+            pvSeverityIndex = null;
             pvChangeStateAlarm = null;
             pvValue = null;
             setSupportState(SupportState.readyForInitialize);
@@ -209,12 +256,12 @@ public class EnumeratedAlarmFactory {
             int index;
             String message = pvStructure.getFullFieldName();
             int  value = pvValue.get();
-            if(value<pvInts.length) {
-                PVInt pvInt = pvInts[value];
+            if(value<pvSeverityIndex.length) {
+                PVInt pvInt = pvSeverityIndex[value];
                 int alarmValue = pvInt.get();
                 if(alarmValue>0) {
                     alarmSupport.setAlarm(
-                            message + " state alarm",
+                            pvMessage[value].get(),
                             AlarmSeverity.getSeverity(alarmValue));
                 }
             } else {
@@ -225,8 +272,8 @@ public class EnumeratedAlarmFactory {
             if(prevValue!=value) {
                 prevValue = value;
                 index = pvChangeStateAlarm.get();
-                if(index>0) alarmSupport.setAlarm(
-                        message + " changeOfState alarm",
+                alarmSupport.setAlarm(
+                        pvChangeStateMessage.get(),
                         AlarmSeverity.getSeverity(index));
             }
             supportProcessRequester.supportProcessDone(RequestResult.success);

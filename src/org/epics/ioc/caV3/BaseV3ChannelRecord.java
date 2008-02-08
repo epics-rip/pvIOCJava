@@ -48,6 +48,8 @@ import org.epics.ioc.ca.ChannelMonitorRequester;
 import org.epics.ioc.dbd.DBD;
 import org.epics.ioc.dbd.DBDFactory;
 import org.epics.ioc.dbd.DBDStructure;
+import org.epics.ioc.pv.Convert;
+import org.epics.ioc.pv.ConvertFactory;
 import org.epics.ioc.pv.Field;
 import org.epics.ioc.pv.FieldCreate;
 import org.epics.ioc.pv.FieldFactory;
@@ -68,7 +70,7 @@ import org.epics.ioc.pv.PVRecord;
 import org.epics.ioc.pv.PVShort;
 import org.epics.ioc.pv.PVShortArray;
 import org.epics.ioc.pv.PVString;
-import org.epics.ioc.pv.PVStringArray;
+import org.epics.ioc.pv.*;
 import org.epics.ioc.pv.PVStructure;
 import org.epics.ioc.pv.StringArrayData;
 import org.epics.ioc.pv.Structure;
@@ -83,6 +85,7 @@ import org.epics.ioc.util.RequestResult;
  *
  */
 public class BaseV3ChannelRecord implements V3ChannelRecord,GetListener,Runnable {
+    protected static final Convert convert = ConvertFactory.getConvert();
     private static FieldCreate fieldCreate = FieldFactory.getFieldCreate();
     private static PVDataCreate pvDataCreate = PVDataFactory.getPVDataCreate();
     private static DBD dbd = DBDFactory.getMasterDBD();
@@ -91,6 +94,7 @@ public class BaseV3ChannelRecord implements V3ChannelRecord,GetListener,Runnable
     private V3Channel v3Channel;
     private IOCExecutor iocExecutor = null;
     
+    private DBRType nativeDBRType = null;
     private PVRecord pvRecord = null;
     private StringArrayData alarmSeverityData = new StringArrayData();
     private StringArrayData valueChoicesData = null;
@@ -98,6 +102,10 @@ public class BaseV3ChannelRecord implements V3ChannelRecord,GetListener,Runnable
     private V3ChannelRecordRequester v3ChannelRecordRequester = null;
     private RequestResult requestResult = null;
     
+    /**
+     * The Constructor
+     * @param v3Channel The v3Channel.
+     */
     public BaseV3ChannelRecord(V3Channel v3Channel) {
         this.v3Channel = v3Channel;
         iocExecutor = v3Channel.getIOCExecutor();
@@ -113,7 +121,15 @@ public class BaseV3ChannelRecord implements V3ChannelRecord,GetListener,Runnable
         requestResult = RequestResult.success;
         gov.aps.jca.Channel jcaChannel = v3Channel.getJCAChannel();
         int elementCount = jcaChannel.getElementCount();
-        DBRType valueDBRType = jcaChannel.getFieldType();
+        nativeDBRType = jcaChannel.getFieldType();
+        if(nativeDBRType.isENUM()) {
+            Type type = v3Channel.getEnumRequestType();
+            if(type==Type.pvInt) {
+                nativeDBRType = DBRType.INT;
+            } else if(type==Type.pvString) {
+                nativeDBRType = DBRType.STRING;
+            }
+        }
         String valueFieldName = v3Channel.getValueFieldName();
         String[] propertyNames = v3Channel.getPropertyNames();
         DBRProperty dbrProperty = DBRProperty.none;
@@ -138,19 +154,19 @@ public class BaseV3ChannelRecord implements V3ChannelRecord,GetListener,Runnable
             }
         }
         Type type = null;
-        if(valueDBRType.isBYTE()) {
+        if(nativeDBRType.isBYTE()) {
             type = Type.pvByte;
-        } else if(valueDBRType.isSHORT()) {
+        } else if(nativeDBRType.isSHORT()) {
             type= Type.pvShort;
-        } else if(valueDBRType.isINT()) {
+        } else if(nativeDBRType.isINT()) {
             type = Type.pvInt;
-        } else if(valueDBRType.isFLOAT()) {
+        } else if(nativeDBRType.isFLOAT()) {
             type = Type.pvFloat;
-        } else if(valueDBRType.isDOUBLE()) {
+        } else if(nativeDBRType.isDOUBLE()) {
             type = Type.pvDouble;
-        } else if(valueDBRType.isSTRING()) {
+        } else if(nativeDBRType.isSTRING()) {
             type = Type.pvString;
-        } else if(valueDBRType.isENUM()) {
+        } else if(nativeDBRType.isENUM()) {
             valueChoicesData = new StringArrayData();
             type = Type.pvStructure;
         }
@@ -203,7 +219,7 @@ public class BaseV3ChannelRecord implements V3ChannelRecord,GetListener,Runnable
         Structure structure = fieldCreate.createStructure("caV3", "caV3", fields);
         pvRecord = pvDataCreate.createPVRecord(recordName, structure);
         PVField valuePVField = pvRecord.getPVFields()[0];
-        if(valueDBRType.isENUM()) {
+        if(nativeDBRType.isENUM()) {
             valuePVField.getPVEnumerated();
             try {
                 jcaChannel.get(DBRType.CTRL_ENUM,1,this);
@@ -214,73 +230,73 @@ public class BaseV3ChannelRecord implements V3ChannelRecord,GetListener,Runnable
             DBRType requestDBRType = null;
             switch(dbrProperty) {
             case none:
-                requestDBRType = valueDBRType;
+                requestDBRType = nativeDBRType;
                 break;
             case status:
-                if(valueDBRType==DBRType.BYTE) {
+                if(nativeDBRType==DBRType.BYTE) {
                     requestDBRType = DBRType.STS_BYTE;
-                } else if(valueDBRType==DBRType.SHORT) {
+                } else if(nativeDBRType==DBRType.SHORT) {
                     requestDBRType = DBRType.STS_SHORT;
-                } else if(valueDBRType==DBRType.INT) {
+                } else if(nativeDBRType==DBRType.INT) {
                     requestDBRType = DBRType.STS_INT;
-                } else if(valueDBRType==DBRType.FLOAT) {
+                } else if(nativeDBRType==DBRType.FLOAT) {
                     requestDBRType = DBRType.STS_FLOAT;
-                } else if(valueDBRType==DBRType.DOUBLE) {
+                } else if(nativeDBRType==DBRType.DOUBLE) {
                     requestDBRType = DBRType.STS_DOUBLE;
-                } else if(valueDBRType==DBRType.STRING) {
+                } else if(nativeDBRType==DBRType.STRING) {
                     requestDBRType = DBRType.STS_STRING;
-                } else if(valueDBRType==DBRType.ENUM) {
+                } else if(nativeDBRType==DBRType.ENUM) {
                     requestDBRType = DBRType.STS_ENUM;
                 }
                 break;
             case time:
-                if(valueDBRType==DBRType.BYTE) {
+                if(nativeDBRType==DBRType.BYTE) {
                     requestDBRType = DBRType.TIME_BYTE;
-                } else if(valueDBRType==DBRType.SHORT) {
+                } else if(nativeDBRType==DBRType.SHORT) {
                     requestDBRType = DBRType.TIME_SHORT;
-                } else if(valueDBRType==DBRType.INT) {
+                } else if(nativeDBRType==DBRType.INT) {
                     requestDBRType = DBRType.TIME_INT;
-                } else if(valueDBRType==DBRType.FLOAT) {
+                } else if(nativeDBRType==DBRType.FLOAT) {
                     requestDBRType = DBRType.TIME_FLOAT;
-                } else if(valueDBRType==DBRType.DOUBLE) {
+                } else if(nativeDBRType==DBRType.DOUBLE) {
                     requestDBRType = DBRType.TIME_DOUBLE;
-                } else if(valueDBRType==DBRType.STRING) {
+                } else if(nativeDBRType==DBRType.STRING) {
                     requestDBRType = DBRType.TIME_STRING;
-                } else if(valueDBRType==DBRType.ENUM) {
+                } else if(nativeDBRType==DBRType.ENUM) {
                     requestDBRType = DBRType.TIME_ENUM;
                 }
                 break;
             case graphic:
-                if(valueDBRType==DBRType.BYTE) {
+                if(nativeDBRType==DBRType.BYTE) {
                     requestDBRType = DBRType.GR_BYTE;
-                } else if(valueDBRType==DBRType.SHORT) {
+                } else if(nativeDBRType==DBRType.SHORT) {
                     requestDBRType = DBRType.GR_SHORT;
-                } else if(valueDBRType==DBRType.INT) {
+                } else if(nativeDBRType==DBRType.INT) {
                     requestDBRType = DBRType.GR_INT;
-                } else if(valueDBRType==DBRType.FLOAT) {
+                } else if(nativeDBRType==DBRType.FLOAT) {
                     requestDBRType = DBRType.GR_FLOAT;
-                } else if(valueDBRType==DBRType.DOUBLE) {
+                } else if(nativeDBRType==DBRType.DOUBLE) {
                     requestDBRType = DBRType.GR_DOUBLE;
-                } else if(valueDBRType==DBRType.STRING) {
+                } else if(nativeDBRType==DBRType.STRING) {
                     requestDBRType = DBRType.GR_STRING;
-                } else if(valueDBRType==DBRType.ENUM) {
+                } else if(nativeDBRType==DBRType.ENUM) {
                     requestDBRType = DBRType.CTRL_ENUM;
                 }
                 break;
             case control:
-                if(valueDBRType==DBRType.BYTE) {
+                if(nativeDBRType==DBRType.BYTE) {
                     requestDBRType = DBRType.CTRL_BYTE;
-                } else if(valueDBRType==DBRType.SHORT) {
+                } else if(nativeDBRType==DBRType.SHORT) {
                     requestDBRType = DBRType.CTRL_SHORT;
-                } else if(valueDBRType==DBRType.INT) {
+                } else if(nativeDBRType==DBRType.INT) {
                     requestDBRType = DBRType.CTRL_INT;
-                } else if(valueDBRType==DBRType.FLOAT) {
+                } else if(nativeDBRType==DBRType.FLOAT) {
                     requestDBRType = DBRType.CTRL_FLOAT;
-                } else if(valueDBRType==DBRType.DOUBLE) {
+                } else if(nativeDBRType==DBRType.DOUBLE) {
                     requestDBRType = DBRType.CTRL_DOUBLE;
-                } else if(valueDBRType==DBRType.STRING) {
+                } else if(nativeDBRType==DBRType.STRING) {
                     requestDBRType = DBRType.CTRL_STRING;
-                } else if(valueDBRType==DBRType.ENUM) {
+                } else if(nativeDBRType==DBRType.ENUM) {
                     requestDBRType = DBRType.CTRL_ENUM;
                 }
                 break;
@@ -298,6 +314,12 @@ public class BaseV3ChannelRecord implements V3ChannelRecord,GetListener,Runnable
      */
     public PVRecord getPVRecord() {
         return pvRecord;
+    }
+    /* (non-Javadoc)
+     * @see org.epics.ioc.caV3.V3ChannelRecord#getValueDBRType()
+     */
+    public DBRType getNativeDBRType() {
+        return nativeDBRType;
     }
     private void setAlarm(AlarmSeverity alarmSeverity,String message,ChannelMonitorRequester channelMonitorRequester) {
         PVStructure pvStructure = pvRecord.getStructureField("alarm", "alarm");
@@ -330,7 +352,7 @@ public class BaseV3ChannelRecord implements V3ChannelRecord,GetListener,Runnable
         } else {
             System.err.println(
                 pvRecord.getRecordName()
-                + " vsCa error " + message
+                + " v3Ca error " + message
                 + " severity " + alarmSeverity.toString());
         }
     }
@@ -347,7 +369,6 @@ public class BaseV3ChannelRecord implements V3ChannelRecord,GetListener,Runnable
         gov.aps.jca.dbr.Severity severity = null;
         gov.aps.jca.Channel jcaChannel = v3Channel.getJCAChannel();
         int elementCount = jcaChannel.getElementCount();
-        DBRType valueDBRType = jcaChannel.getFieldType();
         
         double displayLow = 0.0;
         double displayHigh = 0.0;
@@ -357,20 +378,21 @@ public class BaseV3ChannelRecord implements V3ChannelRecord,GetListener,Runnable
         int precision = -1;
         DBRType requestDBRType = fromDBR.getType();
         PVField pvValueField = pvRecord.findProperty(v3Channel.getValueFieldName());
-        if(valueDBRType==DBRType.ENUM) {
+        
+        if(nativeDBRType.isENUM()) {
             if(elementCount!=1) {
                 setAlarm(AlarmSeverity.invalid,
                         "DBRType is ENUM but elementCount is "
-                         + elementCount,
-                         channelMonitorRequester);
-                    return;
+                        + elementCount,
+                        channelMonitorRequester);
+                return;
             }
             PVEnumerated pvEnumerated = pvValueField.getPVEnumerated();
             if(pvEnumerated==null) {
                 setAlarm(AlarmSeverity.invalid,
-                    "DBRType is ENUM but "
-                     + pvValueField.getFullFieldName()
-                     + " is not an enumerated structure",channelMonitorRequester);
+                        "DBRType is ENUM but "
+                        + pvValueField.getFullFieldName()
+                        + " is not an enumerated structure",channelMonitorRequester);
                 return;
             }
             PVInt pvIndex = pvEnumerated.getIndexField();
@@ -582,469 +604,415 @@ public class BaseV3ChannelRecord implements V3ChannelRecord,GetListener,Runnable
                 }
             } else {
                 setAlarm(AlarmSeverity.invalid,
-                    " unsupported DBRType " + requestDBRType.getName(),
-                    channelMonitorRequester);
+                        " unsupported DBRType " + requestDBRType.getName(),
+                        channelMonitorRequester);
                 return;
             }
-        } else if(requestDBRType==DBRType.BYTE) {
-            DBR_Byte dbr = (DBR_Byte)fromDBR;
-            if(elementCount==1) {
-                PVByte pvValue = (PVByte)pvValueField;
-                pvValue.put(dbr.getByteValue()[0]);
-            } else {
-                PVByteArray pvValue = (PVByteArray)pvValueField;
-                pvValue.put(0, dbr.getCount(), dbr.getByteValue(), 0);
-            }
-        } else if(requestDBRType==DBRType.STS_BYTE) {
-            DBR_STS_Byte dbr = (DBR_STS_Byte)fromDBR;
-            status = dbr.getStatus();
-            severity = dbr.getSeverity();
-            if(elementCount==1) {
-                PVByte pvValue = (PVByte)pvValueField;
-                pvValue.put(dbr.getByteValue()[0]);
-            } else {
-                PVByteArray pvValue = (PVByteArray)fromDBR;
-                pvValue.put(0, dbr.getCount(), dbr.getByteValue(), 0);
-            }
-        } else if(requestDBRType==DBRType.TIME_BYTE) {
-            DBR_TIME_Byte dbr = (DBR_TIME_Byte)fromDBR;
-            status = dbr.getStatus();
-            timeStamp = dbr.getTimeStamp();
-            severity = dbr.getSeverity();
-            if(elementCount==1) {
-                PVByte pvValue = (PVByte)pvValueField;
-                pvValue.put(dbr.getByteValue()[0]);
-            } else {
-                PVByteArray pvValue = (PVByteArray)fromDBR;
-                pvValue.put(0, dbr.getCount(), dbr.getByteValue(), 0);
-            }
-        } else if(requestDBRType==DBRType.GR_BYTE) {
-            DBR_GR_Byte dbr = (DBR_GR_Byte)fromDBR;
-            status = dbr.getStatus();
-            timeStamp = dbr.getTimeStamp();
-            severity = dbr.getSeverity();
-            units = dbr.getUnits();
-            displayLow = dbr.getLowerDispLimit().doubleValue();
-            displayHigh = dbr.getUpperDispLimit().doubleValue();
-            if(elementCount==1) {
-                PVByte pvValue = (PVByte)pvValueField;
-                pvValue.put(dbr.getByteValue()[0]);
-            } else {
-                PVByteArray pvValue = (PVByteArray)fromDBR;
-                pvValue.put(0, dbr.getCount(), dbr.getByteValue(), 0);
-            }
-        } else if(requestDBRType==DBRType.CTRL_BYTE) {
-            DBR_CTRL_Byte dbr = (DBR_CTRL_Byte)fromDBR;
-            status = dbr.getStatus();
-            timeStamp = dbr.getTimeStamp();
-            severity = dbr.getSeverity();
-            units = dbr.getUnits();
-            displayLow = dbr.getLowerDispLimit().doubleValue();
-            displayHigh = dbr.getUpperDispLimit().doubleValue();
-            controlLow = dbr.getLowerCtrlLimit().doubleValue();
-            controlHigh = dbr.getUpperCtrlLimit().doubleValue();
-            if(elementCount==1) {
-                PVByte pvValue = (PVByte)pvValueField;
-                pvValue.put(dbr.getByteValue()[0]);
-            } else {
-                PVByteArray pvValue = (PVByteArray)fromDBR;
-                pvValue.put(0, dbr.getCount(), dbr.getByteValue(), 0);
-            }
-
-        } else if(requestDBRType==DBRType.SHORT) {
-            DBR_Short dbr = (DBR_Short)fromDBR;
-            if(elementCount==1) {
-                PVShort pvValue = (PVShort)pvValueField;
-                pvValue.put(dbr.getShortValue()[0]);
-            } else {
-                PVShortArray pvValue = (PVShortArray)fromDBR;
-                pvValue.put(0, dbr.getCount(), dbr.getShortValue(), 0);
-            }
-        } else if(requestDBRType==DBRType.STS_SHORT) {
-            DBR_STS_Short dbr = (DBR_STS_Short)fromDBR;
-            status = dbr.getStatus();
-            severity = dbr.getSeverity();
-            if(elementCount==1) {
-                PVShort pvValue = (PVShort)pvValueField;
-                pvValue.put(dbr.getShortValue()[0]);
-            } else {
-                PVShortArray pvValue = (PVShortArray)fromDBR;
-                pvValue.put(0, dbr.getCount(), dbr.getShortValue(), 0);
-            }
-        } else if(requestDBRType==DBRType.TIME_SHORT) {
-            DBR_TIME_Short dbr = (DBR_TIME_Short)fromDBR;
-            status = dbr.getStatus();
-            timeStamp = dbr.getTimeStamp();
-            severity = dbr.getSeverity();
-            if(elementCount==1) {
-                PVShort pvValue = (PVShort)pvValueField;
-                pvValue.put(dbr.getShortValue()[0]);
-            } else {
-                PVShortArray pvValue = (PVShortArray)fromDBR;
-                pvValue.put(0, dbr.getCount(), dbr.getShortValue(), 0);
-            }
-        } else if(requestDBRType==DBRType.GR_SHORT) {
-            DBR_GR_Short dbr = (DBR_GR_Short)fromDBR;
-            status = dbr.getStatus();
-            timeStamp = dbr.getTimeStamp();
-            severity = dbr.getSeverity();
-            units = dbr.getUnits();
-            displayLow = dbr.getLowerDispLimit().doubleValue();
-            displayHigh = dbr.getUpperDispLimit().doubleValue();
-            if(elementCount==1) {
-                PVShort pvValue = (PVShort)pvValueField;
-                pvValue.put(dbr.getShortValue()[0]);
-            } else {
-                PVShortArray pvValue = (PVShortArray)fromDBR;
-                pvValue.put(0, dbr.getCount(), dbr.getShortValue(), 0);
-            }
-        } else if(requestDBRType==DBRType.CTRL_SHORT) {
-            DBR_CTRL_Short dbr = (DBR_CTRL_Short)fromDBR;
-            status = dbr.getStatus();
-            timeStamp = dbr.getTimeStamp();
-            severity = dbr.getSeverity();
-            units = dbr.getUnits();
-            displayLow = dbr.getLowerDispLimit().doubleValue();
-            displayHigh = dbr.getUpperDispLimit().doubleValue();
-            controlLow = dbr.getLowerCtrlLimit().doubleValue();
-            controlHigh = dbr.getUpperCtrlLimit().doubleValue();
-            if(elementCount==1) {
-                PVShort pvValue = (PVShort)pvValueField;
-                pvValue.put(dbr.getShortValue()[0]);
-            } else {
-                PVShortArray pvValue = (PVShortArray)fromDBR;
-                pvValue.put(0, dbr.getCount(), dbr.getShortValue(), 0);
-            }
-
-
-        } else if(requestDBRType==DBRType.INT) {
-            DBR_Int dbr = (DBR_Int)fromDBR;
-            if(elementCount==1) {
-                PVInt pvValue = (PVInt)pvValueField;
-                pvValue.put(dbr.getIntValue()[0]);
-            } else {
-                PVIntArray pvValue = (PVIntArray)fromDBR;
-                pvValue.put(0, dbr.getCount(), dbr.getIntValue(), 0);
-            }
-        } else if(requestDBRType==DBRType.STS_INT) {
-            DBR_STS_Int dbr = (DBR_STS_Int)fromDBR;
-            status = dbr.getStatus();
-            severity = dbr.getSeverity();
-            if(elementCount==1) {
-                PVInt pvValue = (PVInt)pvValueField;
-                pvValue.put(dbr.getIntValue()[0]);
-            } else {
-                PVIntArray pvValue = (PVIntArray)fromDBR;
-                pvValue.put(0, dbr.getCount(), dbr.getIntValue(), 0);
-            }
-        } else if(requestDBRType==DBRType.TIME_INT) {
-            DBR_TIME_Int dbr = (DBR_TIME_Int)fromDBR;
-            status = dbr.getStatus();
-            timeStamp = dbr.getTimeStamp();
-            severity = dbr.getSeverity();
-            if(elementCount==1) {
-                PVInt pvValue = (PVInt)pvValueField;
-                pvValue.put(dbr.getIntValue()[0]);
-            } else {
-                PVIntArray pvValue = (PVIntArray)fromDBR;
-                pvValue.put(0, dbr.getCount(), dbr.getIntValue(), 0);
-            }
-        } else if(requestDBRType==DBRType.GR_INT) {
-            DBR_GR_Int dbr = (DBR_GR_Int)fromDBR;
-            status = dbr.getStatus();
-            timeStamp = dbr.getTimeStamp();
-            severity = dbr.getSeverity();
-            units = dbr.getUnits();
-            displayLow = dbr.getLowerDispLimit().doubleValue();
-            displayHigh = dbr.getUpperDispLimit().doubleValue();
-            if(elementCount==1) {
-                PVInt pvValue = (PVInt)pvValueField;
-                pvValue.put(dbr.getIntValue()[0]);
-            } else {
-                PVIntArray pvValue = (PVIntArray)fromDBR;
-                pvValue.put(0, dbr.getCount(), dbr.getIntValue(), 0);
-            }
-        } else if(requestDBRType==DBRType.CTRL_INT) {
-            DBR_CTRL_Int dbr = (DBR_CTRL_Int)fromDBR;
-            status = dbr.getStatus();
-            timeStamp = dbr.getTimeStamp();
-            severity = dbr.getSeverity();
-            units = dbr.getUnits();
-            displayLow = dbr.getLowerDispLimit().doubleValue();
-            displayHigh = dbr.getUpperDispLimit().doubleValue();
-            controlLow = dbr.getLowerCtrlLimit().doubleValue();
-            controlHigh = dbr.getUpperCtrlLimit().doubleValue();
-            if(elementCount==1) {
-                PVInt pvValue = (PVInt)pvValueField;
-                pvValue.put(dbr.getIntValue()[0]);
-            } else {
-                PVIntArray pvValue = (PVIntArray)fromDBR;
-                pvValue.put(0, dbr.getCount(), dbr.getIntValue(), 0);
-            }
-
-        } else if(requestDBRType==DBRType.FLOAT) {
-            DBR_Float dbr = (DBR_Float)fromDBR;
-            if(elementCount==1) {
-                PVFloat pvValue = (PVFloat)pvValueField;
-                pvValue.put(dbr.getFloatValue()[0]);
-            } else {
-                PVFloatArray pvValue = (PVFloatArray)fromDBR;
-                pvValue.put(0, dbr.getCount(), dbr.getFloatValue(), 0);
-            }
-        } else if(requestDBRType==DBRType.STS_FLOAT) {
-            DBR_STS_Float dbr = (DBR_STS_Float)fromDBR;
-            status = dbr.getStatus();
-            severity = dbr.getSeverity();
-            if(elementCount==1) {
-                PVFloat pvValue = (PVFloat)pvValueField;
-                pvValue.put(dbr.getFloatValue()[0]);
-            } else {
-                PVFloatArray pvValue = (PVFloatArray)fromDBR;
-                pvValue.put(0, dbr.getCount(), dbr.getFloatValue(), 0);
-            }
-        } else if(requestDBRType==DBRType.TIME_FLOAT) {
-            DBR_TIME_Float dbr = (DBR_TIME_Float)fromDBR;
-            status = dbr.getStatus();
-            timeStamp = dbr.getTimeStamp();
-            severity = dbr.getSeverity();
-            if(elementCount==1) {
-                PVFloat pvValue = (PVFloat)pvValueField;
-                pvValue.put(dbr.getFloatValue()[0]);
-            } else {
-                PVFloatArray pvValue = (PVFloatArray)fromDBR;
-                pvValue.put(0, dbr.getCount(), dbr.getFloatValue(), 0);
-            }
-        } else if(requestDBRType==DBRType.GR_FLOAT) {
-            DBR_GR_Float dbr = (DBR_GR_Float)fromDBR;
-            status = dbr.getStatus();
-            timeStamp = dbr.getTimeStamp();
-            severity = dbr.getSeverity();
-            units = dbr.getUnits();
-            displayLow = dbr.getLowerDispLimit().doubleValue();
-            displayHigh = dbr.getUpperDispLimit().doubleValue();
-            if(elementCount==1) {
-                PVFloat pvValue = (PVFloat)pvValueField;
-                pvValue.put(dbr.getFloatValue()[0]);
-            } else {
-                PVFloatArray pvValue = (PVFloatArray)fromDBR;
-                pvValue.put(0, dbr.getCount(), dbr.getFloatValue(), 0);
-            }
-        } else if(requestDBRType==DBRType.CTRL_FLOAT) {
-            DBR_CTRL_Float dbr = (DBR_CTRL_Float)fromDBR;
-            status = dbr.getStatus();
-            timeStamp = dbr.getTimeStamp();
-            severity = dbr.getSeverity();
-            units = dbr.getUnits();
-            displayLow = dbr.getLowerDispLimit().doubleValue();
-            displayHigh = dbr.getUpperDispLimit().doubleValue();
-            controlLow = dbr.getLowerCtrlLimit().doubleValue();
-            controlHigh = dbr.getUpperCtrlLimit().doubleValue();
-            if(elementCount==1) {
-                PVFloat pvValue = (PVFloat)pvValueField;
-                pvValue.put(dbr.getFloatValue()[0]);
-            } else {
-                PVFloatArray pvValue = (PVFloatArray)fromDBR;
-                pvValue.put(0, dbr.getCount(), dbr.getFloatValue(), 0);
-            }
-        } else if(requestDBRType==DBRType.DOUBLE) {
-            DBR_Double dbr = (DBR_Double)fromDBR;
-            if(elementCount==1) {
-                PVDouble pvValue = (PVDouble)pvValueField;
-                pvValue.put(dbr.getDoubleValue()[0]);
-            } else {
-                PVDoubleArray pvValue = (PVDoubleArray)fromDBR;
-                pvValue.put(0, dbr.getCount(), dbr.getDoubleValue(), 0);
-            }
-        } else if(requestDBRType==DBRType.STS_DOUBLE) {
-            DBR_STS_Double dbr = (DBR_STS_Double)fromDBR;
-            status = dbr.getStatus();
-            severity = dbr.getSeverity();
-            if(elementCount==1) {
-                PVDouble pvValue = (PVDouble)pvValueField;
-                pvValue.put(dbr.getDoubleValue()[0]);
-            } else {
-                PVDoubleArray pvValue = (PVDoubleArray)fromDBR;
-                pvValue.put(0, dbr.getCount(), dbr.getDoubleValue(), 0);
-            }
-        } else if(requestDBRType==DBRType.TIME_DOUBLE) {
-            DBR_TIME_Double dbr = (DBR_TIME_Double)fromDBR;
-            status = dbr.getStatus();
-            timeStamp = dbr.getTimeStamp();
-            severity = dbr.getSeverity();
-            if(elementCount==1) {
-                PVDouble pvValue = (PVDouble)pvValueField;
-                pvValue.put(dbr.getDoubleValue()[0]);
-            } else {
-                PVDoubleArray pvValue = (PVDoubleArray)fromDBR;
-                pvValue.put(0, dbr.getCount(), dbr.getDoubleValue(), 0);
-            }
-        } else if(requestDBRType==DBRType.GR_DOUBLE) {
-            DBR_GR_Double dbr = (DBR_GR_Double)fromDBR;
-            status = dbr.getStatus();
-            timeStamp = dbr.getTimeStamp();
-            severity = dbr.getSeverity();
-            units = dbr.getUnits();
-            precision = dbr.getPrecision();
-            displayLow = dbr.getLowerDispLimit().doubleValue();
-            displayHigh = dbr.getUpperDispLimit().doubleValue();
-            if(elementCount==1) {
-                PVDouble pvValue = (PVDouble)pvValueField;
-                pvValue.put(dbr.getDoubleValue()[0]);
-            } else {
-                PVDoubleArray pvValue = (PVDoubleArray)fromDBR;
-                pvValue.put(0, dbr.getCount(), dbr.getDoubleValue(), 0);
-            }
-        } else if(requestDBRType==DBRType.CTRL_DOUBLE) {
-            DBR_CTRL_Double dbr = (DBR_CTRL_Double)fromDBR;
-            status = dbr.getStatus();
-            timeStamp = dbr.getTimeStamp();
-            severity = dbr.getSeverity();
-            units = dbr.getUnits();
-            precision = dbr.getPrecision();
-            displayLow = dbr.getLowerDispLimit().doubleValue();
-            displayHigh = dbr.getUpperDispLimit().doubleValue();
-            controlLow = dbr.getLowerCtrlLimit().doubleValue();
-            controlHigh = dbr.getUpperCtrlLimit().doubleValue();
-            if(elementCount==1) {
-                PVDouble pvValue = (PVDouble)pvValueField;
-                pvValue.put(dbr.getDoubleValue()[0]);
-            } else {
-                PVDoubleArray pvValue = (PVDoubleArray)fromDBR;
-                pvValue.put(0, dbr.getCount(), dbr.getDoubleValue(), 0);
-            }
-        } else if(requestDBRType==DBRType.STRING) {
-            DBR_String dbr = (DBR_String)fromDBR;
-            if(elementCount==1) {
-                PVString pvValue = (PVString)pvValueField;
-                pvValue.put(dbr.getStringValue()[0]);
-            } else {
-                PVStringArray pvValue = (PVStringArray)fromDBR;
-                pvValue.put(0, dbr.getCount(), dbr.getStringValue(), 0);
-            }
-        } else if(requestDBRType==DBRType.STS_STRING) {
-            DBR_STS_String dbr = (DBR_STS_String)fromDBR;
-            status = dbr.getStatus();
-            severity = dbr.getSeverity();
-            if(elementCount==1) {
-                PVString pvValue = (PVString)pvValueField;
-                pvValue.put(dbr.getStringValue()[0]);
-            } else {
-                PVStringArray pvValue = (PVStringArray)fromDBR;
-                pvValue.put(0, dbr.getCount(), dbr.getStringValue(), 0);
-            }
-        } else if(requestDBRType==DBRType.TIME_STRING) {
-            DBR_TIME_String dbr = (DBR_TIME_String)fromDBR;
-            status = dbr.getStatus();
-            timeStamp = dbr.getTimeStamp();
-            severity = dbr.getSeverity();
-            if(elementCount==1) {
-                PVString pvValue = (PVString)pvValueField;
-                pvValue.put(dbr.getStringValue()[0]);
-            } else {
-                PVStringArray pvValue = (PVStringArray)fromDBR;
-                pvValue.put(0, dbr.getCount(), dbr.getStringValue(), 0);
-            }
-        } else if(requestDBRType==DBRType.GR_STRING) {
-            DBR_GR_String dbr = (DBR_GR_String)fromDBR;
-            status = dbr.getStatus();
-            timeStamp = dbr.getTimeStamp();
-            severity = dbr.getSeverity();
-            if(elementCount==1) {
-                PVString pvValue = (PVString)pvValueField;
-                pvValue.put(dbr.getStringValue()[0]);
-            } else {
-                PVStringArray pvValue = (PVStringArray)fromDBR;
-                pvValue.put(0, dbr.getCount(), dbr.getStringValue(), 0);
-            }
-        } else if(requestDBRType==DBRType.CTRL_STRING) {
-            DBR_CTRL_String dbr = (DBR_CTRL_String)fromDBR;
-            status = dbr.getStatus();
-            timeStamp = dbr.getTimeStamp();
-            severity = dbr.getSeverity();
-            if(elementCount==1) {
-                PVString pvValue = (PVString)pvValueField;
-                pvValue.put(dbr.getStringValue()[0]);
-            } else {
-                PVStringArray pvValue = (PVStringArray)fromDBR;
-                pvValue.put(0, dbr.getCount(), dbr.getStringValue(), 0);
-            }    
         } else {
-            setAlarm(AlarmSeverity.invalid,
-                " unsupported DBRType " + requestDBRType.getName(),
-                channelMonitorRequester);
-            return;
-        }
-        if(channelMonitorRequester!=null) {
-            channelMonitorRequester.dataPut(pvValueField);
-        }
-        PVStructure pvStructure = null;
-        pvStructure = pvRecord.getStructureField("timeStamp", "timeStamp");
-        if(timeStamp!=null && pvStructure!=null) {
-            PVLong pvSeconds = pvStructure.getLongField("secondsPastEpoch");
-            long seconds = timeStamp.secPastEpoch();
-            seconds += 7305*86400;
-            pvSeconds.put(seconds);
-            PVInt pvNano = pvStructure.getIntField("nanoSeconds");
-            pvNano.put((int)timeStamp.nsec());
+            if(requestDBRType==DBRType.DOUBLE) {
+                DBR_Double dbr = (DBR_Double)fromDBR;
+                if(elementCount==1) {
+                    convert.fromDouble(pvValueField, dbr.getDoubleValue()[0]);
+                } else {
+                    convert.fromDoubleArray(pvValueField, 0, dbr.getCount(), dbr.getDoubleValue(), 0);
+                }
+            } else if(requestDBRType==DBRType.STS_DOUBLE) {
+                DBR_STS_Double dbr = (DBR_STS_Double)fromDBR;
+                status = dbr.getStatus();
+                severity = dbr.getSeverity();
+                if(elementCount==1) {
+                    convert.fromDouble(pvValueField, dbr.getDoubleValue()[0]);
+                } else {
+                    convert.fromDoubleArray(pvValueField, 0, dbr.getCount(), dbr.getDoubleValue(), 0);
+                }
+            } else if(requestDBRType==DBRType.TIME_DOUBLE) {
+                DBR_TIME_Double dbr = (DBR_TIME_Double)fromDBR;
+                status = dbr.getStatus();
+                timeStamp = dbr.getTimeStamp();
+                severity = dbr.getSeverity();
+                if(elementCount==1) {
+                    convert.fromDouble(pvValueField, dbr.getDoubleValue()[0]);
+                } else {
+                    convert.fromDoubleArray(pvValueField, 0, dbr.getCount(), dbr.getDoubleValue(), 0);
+                }
+            } else if(requestDBRType==DBRType.SHORT) {
+                DBR_Short dbr = (DBR_Short)fromDBR;
+                if(elementCount==1) {
+                    convert.fromShort(pvValueField, dbr.getShortValue()[0]);
+                } else {
+                    convert.fromShortArray(pvValueField, 0, dbr.getCount(), dbr.getShortValue(), 0);
+                }
+            } else if(requestDBRType==DBRType.STS_SHORT) {
+                DBR_STS_Short dbr = (DBR_STS_Short)fromDBR;
+                status = dbr.getStatus();
+                severity = dbr.getSeverity();
+                if(elementCount==1) {
+                    convert.fromShort(pvValueField, dbr.getShortValue()[0]);
+                } else {
+                    convert.fromShortArray(pvValueField, 0, dbr.getCount(), dbr.getShortValue(), 0);
+                }
+            } else if(requestDBRType==DBRType.TIME_SHORT) {
+                DBR_TIME_Short dbr = (DBR_TIME_Short)fromDBR;
+                status = dbr.getStatus();
+                timeStamp = dbr.getTimeStamp();
+                severity = dbr.getSeverity();
+                if(elementCount==1) {
+                    convert.fromShort(pvValueField, dbr.getShortValue()[0]);
+                } else {
+                    convert.fromShortArray(pvValueField, 0, dbr.getCount(), dbr.getShortValue(), 0);
+                }
+            } else if(requestDBRType==DBRType.INT) {
+                DBR_Int dbr = (DBR_Int)fromDBR;
+                if(elementCount==1) {
+                    convert.fromInt(pvValueField, dbr.getIntValue()[0]);
+                } else {
+                    convert.fromIntArray(pvValueField, 0, dbr.getCount(), dbr.getIntValue(), 0);
+                }
+            } else if(requestDBRType==DBRType.STS_INT) {
+                DBR_STS_Int dbr = (DBR_STS_Int)fromDBR;
+                status = dbr.getStatus();
+                severity = dbr.getSeverity();
+                if(elementCount==1) {
+                    convert.fromInt(pvValueField, dbr.getIntValue()[0]);
+                } else {
+                    convert.fromIntArray(pvValueField, 0, dbr.getCount(), dbr.getIntValue(), 0);
+                }
+            } else if(requestDBRType==DBRType.TIME_INT) {
+                DBR_TIME_Int dbr = (DBR_TIME_Int)fromDBR;
+                status = dbr.getStatus();
+                timeStamp = dbr.getTimeStamp();
+                severity = dbr.getSeverity();
+                if(elementCount==1) {
+                    convert.fromInt(pvValueField, dbr.getIntValue()[0]);
+                } else {
+                    convert.fromIntArray(pvValueField, 0, dbr.getCount(), dbr.getIntValue(), 0);
+                }
+            } else if(requestDBRType==DBRType.BYTE) {
+                DBR_Byte dbr = (DBR_Byte)fromDBR;
+                if(elementCount==1) {
+                    convert.fromByte(pvValueField, dbr.getByteValue()[0]);
+                } else {
+                    convert.fromByteArray(pvValueField, 0, dbr.getCount(), dbr.getByteValue(), 0);
+                }
+            } else if(requestDBRType==DBRType.STS_BYTE) {
+                DBR_STS_Byte dbr = (DBR_STS_Byte)fromDBR;
+                status = dbr.getStatus();
+                severity = dbr.getSeverity();
+                if(elementCount==1) {
+                    convert.fromByte(pvValueField, dbr.getByteValue()[0]);
+                } else {
+                    convert.fromByteArray(pvValueField, 0, dbr.getCount(), dbr.getByteValue(), 0);
+                }
+            } else if(requestDBRType==DBRType.TIME_BYTE) {
+                DBR_TIME_Byte dbr = (DBR_TIME_Byte)fromDBR;
+                status = dbr.getStatus();
+                timeStamp = dbr.getTimeStamp();
+                severity = dbr.getSeverity();
+                if(elementCount==1) {
+                    convert.fromByte(pvValueField, dbr.getByteValue()[0]);
+                } else {
+                    convert.fromByteArray(pvValueField, 0, dbr.getCount(), dbr.getByteValue(), 0);
+                }
+            } else if(requestDBRType==DBRType.GR_BYTE) {
+                DBR_GR_Byte dbr = (DBR_GR_Byte)fromDBR;
+                status = dbr.getStatus();
+                timeStamp = dbr.getTimeStamp();
+                severity = dbr.getSeverity();
+                units = dbr.getUnits();
+                displayLow = dbr.getLowerDispLimit().doubleValue();
+                displayHigh = dbr.getUpperDispLimit().doubleValue();
+                if(elementCount==1) {
+                    convert.fromByte(pvValueField, dbr.getByteValue()[0]);
+                } else {
+                    convert.fromByteArray(pvValueField, 0, dbr.getCount(), dbr.getByteValue(), 0);
+                }
+            } else if(requestDBRType==DBRType.CTRL_BYTE) {
+                DBR_CTRL_Byte dbr = (DBR_CTRL_Byte)fromDBR;
+                status = dbr.getStatus();
+                timeStamp = dbr.getTimeStamp();
+                severity = dbr.getSeverity();
+                units = dbr.getUnits();
+                displayLow = dbr.getLowerDispLimit().doubleValue();
+                displayHigh = dbr.getUpperDispLimit().doubleValue();
+                controlLow = dbr.getLowerCtrlLimit().doubleValue();
+                controlHigh = dbr.getUpperCtrlLimit().doubleValue();
+                if(elementCount==1) {
+                    convert.fromByte(pvValueField, dbr.getByteValue()[0]);
+                } else {
+                    convert.fromByteArray(pvValueField, 0, dbr.getCount(), dbr.getByteValue(), 0);
+                }
+            } else if(requestDBRType==DBRType.GR_SHORT) {
+                DBR_GR_Short dbr = (DBR_GR_Short)fromDBR;
+                status = dbr.getStatus();
+                timeStamp = dbr.getTimeStamp();
+                severity = dbr.getSeverity();
+                units = dbr.getUnits();
+                displayLow = dbr.getLowerDispLimit().doubleValue();
+                displayHigh = dbr.getUpperDispLimit().doubleValue();
+                if(elementCount==1) {
+                    convert.fromShort(pvValueField, dbr.getShortValue()[0]);
+                } else {
+                    convert.fromShortArray(pvValueField, 0, dbr.getCount(), dbr.getShortValue(), 0);
+                }
+            } else if(requestDBRType==DBRType.CTRL_SHORT) {
+                DBR_CTRL_Short dbr = (DBR_CTRL_Short)fromDBR;
+                status = dbr.getStatus();
+                timeStamp = dbr.getTimeStamp();
+                severity = dbr.getSeverity();
+                units = dbr.getUnits();
+                displayLow = dbr.getLowerDispLimit().doubleValue();
+                displayHigh = dbr.getUpperDispLimit().doubleValue();
+                controlLow = dbr.getLowerCtrlLimit().doubleValue();
+                controlHigh = dbr.getUpperCtrlLimit().doubleValue();
+                if(elementCount==1) {
+                    convert.fromShort(pvValueField, dbr.getShortValue()[0]);
+                } else {
+                    convert.fromShortArray(pvValueField, 0, dbr.getCount(), dbr.getShortValue(), 0);
+                }
+            } else if(requestDBRType==DBRType.GR_INT) {
+                DBR_GR_Int dbr = (DBR_GR_Int)fromDBR;
+                status = dbr.getStatus();
+                timeStamp = dbr.getTimeStamp();
+                severity = dbr.getSeverity();
+                units = dbr.getUnits();
+                displayLow = dbr.getLowerDispLimit().doubleValue();
+                displayHigh = dbr.getUpperDispLimit().doubleValue();
+                if(elementCount==1) {
+                    convert.fromInt(pvValueField, dbr.getIntValue()[0]);
+                } else {
+                    convert.fromIntArray(pvValueField, 0, dbr.getCount(), dbr.getIntValue(), 0);
+                }
+            } else if(requestDBRType==DBRType.CTRL_INT) {
+                DBR_CTRL_Int dbr = (DBR_CTRL_Int)fromDBR;
+                status = dbr.getStatus();
+                timeStamp = dbr.getTimeStamp();
+                severity = dbr.getSeverity();
+                units = dbr.getUnits();
+                displayLow = dbr.getLowerDispLimit().doubleValue();
+                displayHigh = dbr.getUpperDispLimit().doubleValue();
+                controlLow = dbr.getLowerCtrlLimit().doubleValue();
+                controlHigh = dbr.getUpperCtrlLimit().doubleValue();
+                if(elementCount==1) {
+                    convert.fromInt(pvValueField, dbr.getIntValue()[0]);
+                } else {
+                    convert.fromIntArray(pvValueField, 0, dbr.getCount(), dbr.getIntValue(), 0);
+                }
+            } else if(requestDBRType==DBRType.FLOAT) {
+                DBR_Float dbr = (DBR_Float)fromDBR;
+                if(elementCount==1) {
+                    convert.fromFloat(pvValueField, dbr.getFloatValue()[0]);
+                } else {
+                    convert.fromFloatArray(pvValueField, 0, dbr.getCount(), dbr.getFloatValue(), 0);
+                }
+            } else if(requestDBRType==DBRType.STS_FLOAT) {
+                DBR_STS_Float dbr = (DBR_STS_Float)fromDBR;
+                status = dbr.getStatus();
+                severity = dbr.getSeverity();
+                if(elementCount==1) {
+                    convert.fromFloat(pvValueField, dbr.getFloatValue()[0]);
+                } else {
+                    convert.fromFloatArray(pvValueField, 0, dbr.getCount(), dbr.getFloatValue(), 0);
+                }
+            } else if(requestDBRType==DBRType.TIME_FLOAT) {
+                DBR_TIME_Float dbr = (DBR_TIME_Float)fromDBR;
+                status = dbr.getStatus();
+                timeStamp = dbr.getTimeStamp();
+                severity = dbr.getSeverity();
+                if(elementCount==1) {
+                    convert.fromFloat(pvValueField, dbr.getFloatValue()[0]);
+                } else {
+                    convert.fromFloatArray(pvValueField, 0, dbr.getCount(), dbr.getFloatValue(), 0);
+                }
+            } else if(requestDBRType==DBRType.GR_FLOAT) {
+                DBR_GR_Float dbr = (DBR_GR_Float)fromDBR;
+                status = dbr.getStatus();
+                timeStamp = dbr.getTimeStamp();
+                severity = dbr.getSeverity();
+                units = dbr.getUnits();
+                displayLow = dbr.getLowerDispLimit().doubleValue();
+                displayHigh = dbr.getUpperDispLimit().doubleValue();
+                if(elementCount==1) {
+                    convert.fromFloat(pvValueField, dbr.getFloatValue()[0]);
+                } else {
+                    convert.fromFloatArray(pvValueField, 0, dbr.getCount(), dbr.getFloatValue(), 0);
+                }
+            } else if(requestDBRType==DBRType.CTRL_FLOAT) {
+                DBR_CTRL_Float dbr = (DBR_CTRL_Float)fromDBR;
+                status = dbr.getStatus();
+                timeStamp = dbr.getTimeStamp();
+                severity = dbr.getSeverity();
+                units = dbr.getUnits();
+                displayLow = dbr.getLowerDispLimit().doubleValue();
+                displayHigh = dbr.getUpperDispLimit().doubleValue();
+                controlLow = dbr.getLowerCtrlLimit().doubleValue();
+                controlHigh = dbr.getUpperCtrlLimit().doubleValue();
+                if(elementCount==1) {
+                    convert.fromFloat(pvValueField, dbr.getFloatValue()[0]);
+                } else {
+                    convert.fromFloatArray(pvValueField, 0, dbr.getCount(), dbr.getFloatValue(), 0);
+                }
+            } else if(requestDBRType==DBRType.GR_DOUBLE) {
+                DBR_GR_Double dbr = (DBR_GR_Double)fromDBR;
+                status = dbr.getStatus();
+                timeStamp = dbr.getTimeStamp();
+                severity = dbr.getSeverity();
+                units = dbr.getUnits();
+                precision = dbr.getPrecision();
+                displayLow = dbr.getLowerDispLimit().doubleValue();
+                displayHigh = dbr.getUpperDispLimit().doubleValue();
+                if(elementCount==1) {
+                    convert.fromDouble(pvValueField, dbr.getDoubleValue()[0]);
+                } else {
+                    convert.fromDoubleArray(pvValueField, 0, dbr.getCount(), dbr.getDoubleValue(), 0);
+                }
+            } else if(requestDBRType==DBRType.CTRL_DOUBLE) {
+                DBR_CTRL_Double dbr = (DBR_CTRL_Double)fromDBR;
+                status = dbr.getStatus();
+                timeStamp = dbr.getTimeStamp();
+                severity = dbr.getSeverity();
+                units = dbr.getUnits();
+                precision = dbr.getPrecision();
+                displayLow = dbr.getLowerDispLimit().doubleValue();
+                displayHigh = dbr.getUpperDispLimit().doubleValue();
+                controlLow = dbr.getLowerCtrlLimit().doubleValue();
+                controlHigh = dbr.getUpperCtrlLimit().doubleValue();
+                if(elementCount==1) {
+                    convert.fromDouble(pvValueField, dbr.getDoubleValue()[0]);
+                } else {
+                    convert.fromDoubleArray(pvValueField, 0, dbr.getCount(), dbr.getDoubleValue(), 0);
+                }
+            } else if(requestDBRType==DBRType.STRING) {
+                DBR_String dbr = (DBR_String)fromDBR;
+                if(elementCount==1) {
+                    convert.fromString(pvValueField, dbr.getStringValue()[0]);
+                } else {
+                    convert.fromStringArray((PVArray)pvValueField, 0, dbr.getCount(), dbr.getStringValue(), 0);
+                }
+            } else if(requestDBRType==DBRType.STS_STRING) {
+                DBR_STS_String dbr = (DBR_STS_String)fromDBR;
+                status = dbr.getStatus();
+                severity = dbr.getSeverity();
+                if(elementCount==1) {
+                    convert.fromString(pvValueField, dbr.getStringValue()[0]);
+                } else {
+                    convert.fromStringArray((PVArray)pvValueField, 0, dbr.getCount(), dbr.getStringValue(), 0);
+                }
+            } else if(requestDBRType==DBRType.TIME_STRING) {
+                DBR_TIME_String dbr = (DBR_TIME_String)fromDBR;
+                status = dbr.getStatus();
+                timeStamp = dbr.getTimeStamp();
+                severity = dbr.getSeverity();
+                if(elementCount==1) {
+                    convert.fromString(pvValueField, dbr.getStringValue()[0]);
+                } else {
+                    convert.fromStringArray((PVArray)pvValueField, 0, dbr.getCount(), dbr.getStringValue(), 0);
+                }
+            } else if(requestDBRType==DBRType.GR_STRING) {
+                DBR_GR_String dbr = (DBR_GR_String)fromDBR;
+                status = dbr.getStatus();
+                timeStamp = dbr.getTimeStamp();
+                severity = dbr.getSeverity();
+                if(elementCount==1) {
+                    convert.fromString(pvValueField, dbr.getStringValue()[0]);
+                } else {
+                    convert.fromStringArray((PVArray)pvValueField, 0, dbr.getCount(), dbr.getStringValue(), 0);
+                }
+            } else if(requestDBRType==DBRType.CTRL_STRING) {
+                DBR_CTRL_String dbr = (DBR_CTRL_String)fromDBR;
+                status = dbr.getStatus();
+                timeStamp = dbr.getTimeStamp();
+                severity = dbr.getSeverity();
+                if(elementCount==1) {
+                    convert.fromString(pvValueField, dbr.getStringValue()[0]);
+                } else {
+                    convert.fromStringArray((PVArray)pvValueField, 0, dbr.getCount(), dbr.getStringValue(), 0);
+                }
+            } else {
+                setAlarm(AlarmSeverity.invalid,
+                        " unsupported DBRType " + requestDBRType.getName(),
+                        channelMonitorRequester);
+                return;
+            }
             if(channelMonitorRequester!=null) {
-                channelMonitorRequester.dataPut(pvStructure);
+                channelMonitorRequester.dataPut(pvValueField);
             }
         }
-        pvStructure = pvRecord.getStructureField("alarm", "alarm");
-        if(severity!=null && pvStructure!=null) {
-            int index = severity.getValue();
-            AlarmSeverity alarmSeverity = AlarmSeverity.getSeverity(index);
-            String message = status.getName();
-            setAlarm(alarmSeverity,message,channelMonitorRequester);
-        }
-        pvStructure = pvRecord.getStructureField("display", "display");
-        if(displayLow<displayHigh && pvStructure!=null) {
-            if(units!=null) {
-                PVString pvUnits = pvStructure.getStringField("units");
-                if(pvUnits!=null) {
-                    pvUnits.put(units.toString());
-                    if(channelMonitorRequester!=null) {
-                        channelMonitorRequester.dataPut(pvStructure,pvUnits);
-                    }
-                }
-            }
-            if(precision>=0) {
-                PVInt pvResolution = pvStructure.getIntField("resolution");
-                if(pvResolution!=null) {
-                    pvResolution.put(precision);
-                    if(channelMonitorRequester!=null) {
-                        channelMonitorRequester.dataPut(pvStructure,pvResolution);
-                    }
-                }
-            }
-            PVStructure pvLimits = pvStructure.getStructureField("limit","doubleLimit");
-            if(pvLimits!=null) {
-                PVDouble pvLow = pvLimits.getDoubleField("low");
-                PVDouble pvHigh = pvLimits.getDoubleField("high");
-                if(pvLow!=null && pvHigh!=null) {
-                    pvLow.put(displayLow);
-                    pvHigh.put(displayHigh);
-                    if(channelMonitorRequester!=null) {
-                        channelMonitorRequester.dataPut(pvStructure,pvLow);
-                        channelMonitorRequester.dataPut(pvStructure,pvHigh);
-                    }
-                }
-            }
-        }
-        pvStructure = pvRecord.getStructureField("control", "control");
-        if(controlLow<controlHigh && pvStructure!=null) {
-            pvStructure = pvStructure.getStructureField("limit","doubleLimit");
+
+        PVStructure pvStructure = null;
+        if(timeStamp!=null) {
+            pvStructure = pvRecord.getStructureField("timeStamp", "timeStamp");
             if(pvStructure!=null) {
-                PVDouble pvLow = pvStructure.getDoubleField("low");
-                PVDouble pvHigh = pvStructure.getDoubleField("high");
-                if(pvLow!=null && pvHigh!=null) {
-                    pvLow.put(controlLow);
-                    pvHigh.put(controlHigh);
+                PVLong pvSeconds = pvStructure.getLongField("secondsPastEpoch");
+                long seconds = timeStamp.secPastEpoch();
+                seconds += 7305*86400;
+                pvSeconds.put(seconds);
+                PVInt pvNano = pvStructure.getIntField("nanoSeconds");
+                pvNano.put((int)timeStamp.nsec());
+                if(channelMonitorRequester!=null) {
+                    channelMonitorRequester.dataPut(pvStructure);
+                }
+            }
+        }
+        if(severity!=null) {
+            pvStructure = pvRecord.getStructureField("alarm", "alarm");
+            if(pvStructure!=null) {
+                int index = severity.getValue();
+                AlarmSeverity alarmSeverity = AlarmSeverity.getSeverity(index);
+                String message = status.getName();
+                setAlarm(alarmSeverity,message,channelMonitorRequester);
+            }
+        }
+        if(displayLow<displayHigh) {
+            pvStructure = pvRecord.getStructureField("display", "display");
+            if(pvStructure!=null) {
+                if(units!=null) {
+                    PVString pvUnits = pvStructure.getStringField("units");
+                    if(pvUnits!=null) {
+                        pvUnits.put(units.toString());
+                        if(channelMonitorRequester!=null) {
+                            channelMonitorRequester.dataPut(pvStructure,pvUnits);
+                        }
+                    }
+                }
+                if(precision>=0) {
+                    PVInt pvResolution = pvStructure.getIntField("resolution");
+                    if(pvResolution!=null) {
+                        pvResolution.put(precision);
+                        if(channelMonitorRequester!=null) {
+                            channelMonitorRequester.dataPut(pvStructure,pvResolution);
+                        }
+                    }
+                }
+                PVStructure pvLimits = pvStructure.getStructureField("limit","doubleLimit");
+                if(pvLimits!=null) {
+                    PVDouble pvLow = pvLimits.getDoubleField("low");
+                    PVDouble pvHigh = pvLimits.getDoubleField("high");
+                    if(pvLow!=null && pvHigh!=null) {
+                        pvLow.put(displayLow);
+                        pvHigh.put(displayHigh);
+                        if(channelMonitorRequester!=null) {
+                            channelMonitorRequester.dataPut(pvStructure,pvLow);
+                            channelMonitorRequester.dataPut(pvStructure,pvHigh);
+                        }
+                    }
+                }
+            }
+        }
+        if(controlLow<controlHigh) {
+            pvStructure = pvRecord.getStructureField("control", "control");
+            if(pvStructure!=null) {
+                pvStructure = pvStructure.getStructureField("limit","doubleLimit");
+                if(pvStructure!=null) {
+                    PVDouble pvLow = pvStructure.getDoubleField("low");
+                    PVDouble pvHigh = pvStructure.getDoubleField("high");
+                    if(pvLow!=null && pvHigh!=null) {
+                        pvLow.put(controlLow);
+                        pvHigh.put(controlHigh);
+                    }
                 }
             }
         }
     }
-    
     /* (non-Javadoc)
      * @see gov.aps.jca.event.GetListener#getCompleted(gov.aps.jca.event.GetEvent)
      */

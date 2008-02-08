@@ -17,9 +17,10 @@ public interface ChannelConnect {
     /**
      * Create all the widgets for connecting to a channel.
      * @param parentWidget The parentWidget.
+     * @param field Also get field
      * @param propertys Also get properties.
      */
-    void createWidgets(Composite parentWidget,boolean propertys);
+    void createWidgets(Composite parentWidget,boolean field,boolean propertys);
     /**
      * Get the channel
      * @return the channel of null if not connected to a channel.

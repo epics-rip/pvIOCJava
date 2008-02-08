@@ -69,7 +69,7 @@ public class BaseV3ChannelGet implements ChannelProcessRequester,ChannelGet,GetL
     {
         this.v3Channel = v3Channel;
         jcaChannel = v3Channel.getJCAChannel();
-        DBRType valueDBRType = jcaChannel.getFieldType();
+        DBRType nativeDBRType = v3Channel.getV3ChannelRecord().getNativeDBRType();
         requestDBRType = null;
         ChannelField[] channelFields = channelFieldGroup.getArray();
         elementCount = jcaChannel.getElementCount();
@@ -99,77 +99,77 @@ public class BaseV3ChannelGet implements ChannelProcessRequester,ChannelGet,GetL
         }
         switch(dbrProperty) {
         case none:
-            if(valueDBRType.isENUM()) {
+            if(nativeDBRType.isENUM()) {
                 requestDBRType = DBRType.INT;
             } else {
-                requestDBRType = valueDBRType;
+                requestDBRType = nativeDBRType;
             }
             break;
         case status:
-            if(valueDBRType==DBRType.BYTE) {
+            if(nativeDBRType==DBRType.BYTE) {
                 requestDBRType = DBRType.STS_BYTE;
-            } else if(valueDBRType==DBRType.SHORT) {
+            } else if(nativeDBRType==DBRType.SHORT) {
                 requestDBRType = DBRType.STS_SHORT;
-            } else if(valueDBRType==DBRType.INT) {
+            } else if(nativeDBRType==DBRType.INT) {
                 requestDBRType = DBRType.STS_INT;
-            } else if(valueDBRType==DBRType.FLOAT) {
+            } else if(nativeDBRType==DBRType.FLOAT) {
                 requestDBRType = DBRType.STS_FLOAT;
-            } else if(valueDBRType==DBRType.DOUBLE) {
+            } else if(nativeDBRType==DBRType.DOUBLE) {
                 requestDBRType = DBRType.STS_DOUBLE;
-            } else if(valueDBRType==DBRType.STRING) {
+            } else if(nativeDBRType==DBRType.STRING) {
                 requestDBRType = DBRType.STS_STRING;
-            } else if(valueDBRType==DBRType.ENUM) {
+            } else if(nativeDBRType==DBRType.ENUM) {
                 requestDBRType = DBRType.STS_INT;
             }
             break;
         case time:
-            if(valueDBRType==DBRType.BYTE) {
+            if(nativeDBRType==DBRType.BYTE) {
                 requestDBRType = DBRType.TIME_BYTE;
-            } else if(valueDBRType==DBRType.SHORT) {
+            } else if(nativeDBRType==DBRType.SHORT) {
                 requestDBRType = DBRType.TIME_SHORT;
-            } else if(valueDBRType==DBRType.INT) {
+            } else if(nativeDBRType==DBRType.INT) {
                 requestDBRType = DBRType.TIME_INT;
-            } else if(valueDBRType==DBRType.FLOAT) {
+            } else if(nativeDBRType==DBRType.FLOAT) {
                 requestDBRType = DBRType.TIME_FLOAT;
-            } else if(valueDBRType==DBRType.DOUBLE) {
+            } else if(nativeDBRType==DBRType.DOUBLE) {
                 requestDBRType = DBRType.TIME_DOUBLE;
-            } else if(valueDBRType==DBRType.STRING) {
+            } else if(nativeDBRType==DBRType.STRING) {
                 requestDBRType = DBRType.TIME_STRING;
-            } else if(valueDBRType==DBRType.ENUM) {
+            } else if(nativeDBRType==DBRType.ENUM) {
                 requestDBRType = DBRType.TIME_INT;
             }
             break;
         case graphic:
-            if(valueDBRType==DBRType.BYTE) {
+            if(nativeDBRType==DBRType.BYTE) {
                 requestDBRType = DBRType.GR_BYTE;
-            } else if(valueDBRType==DBRType.SHORT) {
+            } else if(nativeDBRType==DBRType.SHORT) {
                 requestDBRType = DBRType.GR_SHORT;
-            } else if(valueDBRType==DBRType.INT) {
+            } else if(nativeDBRType==DBRType.INT) {
                 requestDBRType = DBRType.GR_INT;
-            } else if(valueDBRType==DBRType.FLOAT) {
+            } else if(nativeDBRType==DBRType.FLOAT) {
                 requestDBRType = DBRType.GR_FLOAT;
-            } else if(valueDBRType==DBRType.DOUBLE) {
+            } else if(nativeDBRType==DBRType.DOUBLE) {
                 requestDBRType = DBRType.GR_DOUBLE;
-            } else if(valueDBRType==DBRType.STRING) {
+            } else if(nativeDBRType==DBRType.STRING) {
                 requestDBRType = DBRType.GR_STRING;
-            } else if(valueDBRType==DBRType.ENUM) {
+            } else if(nativeDBRType==DBRType.ENUM) {
                 requestDBRType = DBRType.CTRL_ENUM;
             }
             break;
         case control:
-            if(valueDBRType==DBRType.BYTE) {
+            if(nativeDBRType==DBRType.BYTE) {
                 requestDBRType = DBRType.CTRL_BYTE;
-            } else if(valueDBRType==DBRType.SHORT) {
+            } else if(nativeDBRType==DBRType.SHORT) {
                 requestDBRType = DBRType.CTRL_SHORT;
-            } else if(valueDBRType==DBRType.INT) {
+            } else if(nativeDBRType==DBRType.INT) {
                 requestDBRType = DBRType.CTRL_INT;
-            } else if(valueDBRType==DBRType.FLOAT) {
+            } else if(nativeDBRType==DBRType.FLOAT) {
                 requestDBRType = DBRType.CTRL_FLOAT;
-            } else if(valueDBRType==DBRType.DOUBLE) {
+            } else if(nativeDBRType==DBRType.DOUBLE) {
                 requestDBRType = DBRType.CTRL_DOUBLE;
-            } else if(valueDBRType==DBRType.STRING) {
+            } else if(nativeDBRType==DBRType.STRING) {
                 requestDBRType = DBRType.CTRL_STRING;
-            } else if(valueDBRType==DBRType.ENUM) {
+            } else if(nativeDBRType==DBRType.ENUM) {
                 requestDBRType = DBRType.CTRL_ENUM;
             }
             break;

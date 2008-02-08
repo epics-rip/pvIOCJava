@@ -24,9 +24,7 @@
   <field name = "process" type = "boolean">
       <!-- process this record when monitor occurs -->
   </field>
-  <field name = "inheritSeverity" type = "boolean" >
-      <!-- only applicable if process is true -->
-  </field>
+  <field name = "propertyNames" type = "string" />
 </structure>
 
 <structure name = "monitorNotifySupport">
@@ -38,7 +36,7 @@
   <field name = "providerName" type = "string" default = "local" />
   <field name = "pvname" type = "string" link = "true" />
   <field name = "process" type = "boolean" />
-  <field name = "inheritSeverity" type = "boolean" />
+  <field name = "propertyNames" type = "string" />
 </structure>
 
 <structure name = "outputSupport">
@@ -48,14 +46,14 @@
 </structure>
 
 <support name = "processSupport"
-  factoryName = "org.epics.ioc.support.CASupportFactory" />
+  factoryName = "org.epics.ioc.support.ca.LinkSupportFactory" />
 <support name = "monitorSupport"
-  factoryName = "org.epics.ioc.support.CASupportFactory" />
+  factoryName = "org.epics.ioc.support.ca.LinkSupportFactory" />
 <support name = "monitorNotifySupport"
-  factoryName = "org.epics.ioc.support.CASupportFactory" />
+  factoryName = "org.epics.ioc.support.ca.LinkSupportFactory" />
 <support name = "inputSupport"
-  factoryName = "org.epics.ioc.support.CASupportFactory" />
+  factoryName = "org.epics.ioc.support.ca.LinkSupportFactory" />
 <support name = "outputSupport"
-  factoryName = "org.epics.ioc.support.CASupportFactory" />
+  factoryName = "org.epics.ioc.support.ca.LinkSupportFactory" />
 
 </DBDefinition>

@@ -10,6 +10,8 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.DisposeEvent;
+import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
@@ -51,7 +53,7 @@ public class PutFactory {
         channelPutImpl.start();
     }
 
-    private static class ChannelPutImpl implements Requester,ChannelListener,SelectionListener  {
+    private static class ChannelPutImpl implements DisposeListener,Requester,ChannelListener,SelectionListener  {
 
         private ChannelPutImpl(Display display) {
             this.display = display;
@@ -69,6 +71,13 @@ public class PutFactory {
         private Button putButton;
         private Button processButton;
         private Text consoleText = null;
+        
+        /* (non-Javadoc)
+         * @see org.eclipse.swt.events.DisposeListener#widgetDisposed(org.eclipse.swt.events.DisposeEvent)
+         */
+        public void widgetDisposed(DisposeEvent e) {
+            if(channel!=null) channel.destroy();
+        }
         /* (non-Javadoc)
          * @see org.epics.ioc.util.Requester#getRequesterName()
          */
@@ -114,7 +123,7 @@ public class PutFactory {
             gridLayout.numColumns = 1;
             shell.setLayout(gridLayout);
             channelConnect = ChannelConnectFactory.create(this,this);
-            channelConnect.createWidgets(shell,false);
+            channelConnect.createWidgets(shell,true,false);
             Composite putComposite = new Composite(shell,SWT.BORDER);
             gridLayout = new GridLayout();
             gridLayout.numColumns = 2;
@@ -153,6 +162,7 @@ public class PutFactory {
             requester = SWTMessageFactory.create(windowName,display,consoleText);
             shell.pack();
             shell.open();
+            shell.addDisposeListener(this);
         }
         /* (non-Javadoc)
          * @see org.eclipse.swt.events.SelectionListener#widgetDefaultSelected(org.eclipse.swt.events.SelectionEvent)

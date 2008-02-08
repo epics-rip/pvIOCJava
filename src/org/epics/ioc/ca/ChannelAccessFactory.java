@@ -43,6 +43,10 @@ public class ChannelAccessFactory {
                     MessageType.error);
                 return null;
             }
+            if(pvName==null) {
+                listener.message("pvName is null",MessageType.error);
+                return null;
+            }
             if(propertys==null) propertys = noPropertys;
             return channelProvider.createChannel(pvName,propertys, listener);
         }

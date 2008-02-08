@@ -44,6 +44,9 @@ public class BasePVRecord extends BasePVStructure implements PVRecord {
         if(message!=null && message.charAt(0)!='.') message = " " + message;
         message = recordName + message;
         for (Requester requester : requesterList) requester.message(message, messageType);
+        if(requesterList.size()==0) {
+            System.out.println(messageType.toString() + " " + message);
+        }
     }
     /* (non-Javadoc)
      * @see org.epics.ioc.pv.PVRecord#addRequester(org.epics.ioc.util.Requester)

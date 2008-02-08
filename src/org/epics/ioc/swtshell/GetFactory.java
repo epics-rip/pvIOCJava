@@ -10,6 +10,8 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.DisposeEvent;
+import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
@@ -51,7 +53,7 @@ public class GetFactory {
         getImpl.start();
     }
 
-    private static class GetImpl implements Requester,ChannelListener,SelectionListener
+    private static class GetImpl implements DisposeListener,Requester,ChannelListener,SelectionListener
     {
 
         private GetImpl(Display display) {
@@ -73,6 +75,13 @@ public class GetFactory {
         private Button propertyButton;
         private Text consoleText = null; 
         private GetIt get = null;
+        
+        /* (non-Javadoc)
+         * @see org.eclipse.swt.events.DisposeListener#widgetDisposed(org.eclipse.swt.events.DisposeEvent)
+         */
+        public void widgetDisposed(DisposeEvent e) {
+            if(channel!=null) channel.destroy();
+        }
         /* (non-Javadoc)
          * @see org.epics.ioc.util.Requester#getRequesterName()
          */
@@ -125,7 +134,7 @@ public class GetFactory {
             gridLayout.numColumns = 1;
             shell.setLayout(gridLayout);
             channelConnect = ChannelConnectFactory.create(this,this);
-            channelConnect.createWidgets(shell,true);
+            channelConnect.createWidgets(shell,true,true);
             Composite getWidget = new Composite(shell,SWT.BORDER);
             gridLayout = new GridLayout();
             gridLayout.numColumns = 3;
@@ -168,6 +177,7 @@ public class GetFactory {
             requester = SWTMessageFactory.create(windowName,display,consoleText);
             shell.pack();
             shell.open();
+            shell.addDisposeListener(this);
         }
         /* (non-Javadoc)
          * @see org.eclipse.swt.events.SelectionListener#widgetDefaultSelected(org.eclipse.swt.events.SelectionEvent)
@@ -224,10 +234,7 @@ public class GetFactory {
 
             private boolean connect(ChannelField channelField,String[] propertyNames) {
                 ChannelFieldGroup getFieldGroup = channel.createFieldGroup(this);
-                if(channelField.getField().getType()!=Type.pvStructure
-                || (propertyNames==null || propertyNames.length<=0)) {
-                    getFieldGroup.addChannelField(channelField);
-                }
+                getFieldGroup.addChannelField(channelField);
                 if(propertyNames!=null && propertyNames.length>0) {
                     for(String propertyName: propertyNames) {
                         ChannelField propChannelField = channelField.findProperty(propertyName);

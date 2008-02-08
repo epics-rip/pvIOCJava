@@ -10,6 +10,7 @@ import org.epics.ioc.db.DBField;
 import org.epics.ioc.db.DBStructure;
 import org.epics.ioc.process.SupportProcessRequester;
 import org.epics.ioc.process.SupportState;
+import org.epics.ioc.pv.PVString;
 import org.epics.ioc.pv.PVBoolean;
 import org.epics.ioc.pv.PVField;
 import org.epics.ioc.pv.PVInt;
@@ -52,8 +53,11 @@ public class BooleanAlarmFactory {
         
         private PVBoolean pvActive;
         private PVInt pvFalseAlarm;
+        private PVString pvFalseMessage;
         private PVInt pvTrueAlarm;
+        private PVString pvTrueMessage;
         private PVInt pvChangeStateAlarm;
+        private PVString pvChangeStateMessage;
         
         private PVBoolean pvValue;
         boolean prevValue;
@@ -101,6 +105,8 @@ public class BooleanAlarmFactory {
             Enumerated enumerated = AlarmSeverity.getAlarmSeverity(dbFields[index]);
             if(enumerated==null) return;
             pvFalseAlarm = enumerated.getIndexField();
+            pvFalseMessage = pvStructure.getStringField("falseMessage");
+            if(pvFalseMessage==null) return;
             
             index = structure.getFieldIndex("trueAlarm");
             if(index<0) {
@@ -110,6 +116,8 @@ public class BooleanAlarmFactory {
             enumerated = AlarmSeverity.getAlarmSeverity(dbFields[index]);
             if(enumerated==null) return;
             pvTrueAlarm = enumerated.getIndexField();
+            pvTrueMessage = pvStructure.getStringField("trueMessage");
+            if(pvTrueMessage==null) return;
 
             index = structure.getFieldIndex("changeStateAlarm");
             if(index<0) {
@@ -119,6 +127,8 @@ public class BooleanAlarmFactory {
             enumerated = AlarmSeverity.getAlarmSeverity(dbFields[index]);
             if(enumerated==null) return;
             pvChangeStateAlarm = enumerated.getIndexField();
+            pvChangeStateMessage = pvStructure.getStringField("changeStateMessage");
+            if(pvChangeStateMessage==null) return;
           
             setSupportState(supportState);
         }
@@ -167,24 +177,23 @@ public class BooleanAlarmFactory {
             boolean active = pvActive.get();
             if(!active) return;
             int index;
-            String message = pvStructure.getFullFieldName();
             boolean  value = pvValue.get();
             if(value!=prevValue) {
                 prevValue = value;
                 index = pvChangeStateAlarm.get();
                 if(index>0) alarmSupport.setAlarm(
-                    message + " changeState",
+                    pvChangeStateMessage.get(),
                     AlarmSeverity.getSeverity(index));
             }
             if(value) {
                 index = pvTrueAlarm.get();
                 if(index>0) alarmSupport.setAlarm(
-                    message + " true ",
+                    pvTrueMessage.get(),
                     AlarmSeverity.getSeverity(index));
             } else {
                 index = pvFalseAlarm.get();
                 if(index>0) alarmSupport.setAlarm(
-                    message + " false ",
+                    pvFalseMessage.get(),
                     AlarmSeverity.getSeverity(index));
             }
             supportProcessRequester.supportProcessDone(RequestResult.success);

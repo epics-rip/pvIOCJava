@@ -1,0 +1,159 @@
+<?xml version="1.0" ?>
+<IOCDatabase>
+
+<record name = "enumeratedCounter" type = "calcDouble">
+    <alarm structureName = "alarm" />
+    <timeStamp structureName = "timeStamp" />
+    <calcArgArray>
+        <value structureName = "calcDoubleArg">
+            <value>0</value>
+            <name>min</name>
+        </value>
+        <value structureName = "calcDoubleArg">
+            <value>4</value>
+            <name>max</name>
+        </value>
+        <value structureName = "calcDoubleArg">
+            <value>1</value>
+            <name>inc</name>
+        </value>
+    </calcArgArray>
+    <calculator supportName = "counterCalculator" />
+    <scan>
+        <type><choice>periodic</choice></type> 
+<!--
+-->
+        <rate>1.0</rate>
+        <processAfterStart>true</processAfterStart>
+    </scan>
+    <supportArray>
+        <value structureName = "supportArrayElement">
+            <wait>false</wait>
+            <link  supportName = "outputSupport" structureName = "outputSupport">
+                <pvname>enumerated.value.index</pvname>
+                <process>true</process>
+            </link>
+        </value>
+        <value structureName = "supportArrayElement">
+            <wait>true</wait>
+            <link  supportName = "processSupport" structureName = "processSupport">
+                <pvname>enumeratedInput</pvname>
+            </link>
+        </value>
+    </supportArray>
+</record>
+
+
+<record name = "enumerated" type = "enumerated">
+    <alarm structureName = "alarm" />
+    <timeStamp structureName = "timeStamp" />
+    <input structureName = "digital">
+        <alarm structureName = "alarm" />
+        <states supportName = "digitalOutput" >
+             <value structureName = "digitalState">
+                 <name>zero</name>
+                 <value>0</value>
+                 <severity><choice>major</choice></severity>
+                 <message>ZERO ALARM</message>
+             </value>
+             <value structureName = "digitalState">
+                 <name>one</name>
+                 <value>1</value>
+                 <severity><choice>none</choice></severity>
+             </value>
+             <value structureName = "digitalState">
+                 <name>two</name>
+                 <value>2</value>
+                 <severity><choice>none</choice></severity>
+             </value>
+             <value structureName = "digitalState">
+                 <name>three</name>
+                <value>3</value>
+                <severity><choice>minor</choice></severity>
+                 <message>THREE ALARM</message>
+             </value>
+             <value structureName = "digitalState">
+                 <name>four</name>
+                 <value>4</value>
+                 <severity><choice>major</choice></severity>
+                 <message>FOUR ALARM</message>
+             </value>
+        </states>
+    </input>
+    <valueAlarm structureName = "enumeratedAlarm">
+            <active>true</active>
+            <changeStateAlarm>
+                 <severity><choice>none</choice></severity>
+                 <message>Change State</message>
+             </changeStateAlarm>
+    </valueAlarm>
+</record>
+
+
+<record name = "enumeratedInput" type = "enumerated">
+    <alarm structureName = "alarm" />
+    <timeStamp structureName = "timeStamp" />
+    <input supportName = "inputSupport" structureName = "inputSupport">
+        <pvname>enumerated.value</pvname>
+        <process>false</process>
+        <propertyNames>alarm</propertyNames>
+    </input>
+</record>
+
+
+<record name = "enumeratedMonitor" type = "enumerated">
+    <alarm structureName = "alarm" />
+    <timeStamp structureName = "timeStamp" />
+    <input supportName = "monitorSupport" structureName = "monitorSupport">
+        <pvname>enumerated.value</pvname>
+        <process>true</process>
+        <propertyNames>alarm</propertyNames>
+    </input>
+</record>
+
+<record name = "enumeratedInputIndex" type = "int">
+    <alarm structureName = "alarm" />
+    <timeStamp structureName = "timeStamp" />
+    <input supportName = "monitorSupport" structureName = "monitorSupport">
+        <pvname>enumerated.value.index</pvname>
+        <process>true</process>
+        <propertyNames>alarm</propertyNames>
+    </input>
+</record>
+
+<record name = "enumeratedMonitorIndex" type = "int">
+    <alarm structureName = "alarm" />
+    <timeStamp structureName = "timeStamp" />
+    <input supportName = "monitorSupport" structureName = "monitorSupport">
+        <pvname>enumerated.value.index</pvname>
+        <process>true</process>
+        <propertyNames>alarm</propertyNames>
+    </input>
+</record>
+
+<record name = "enumeratedInputChoice" type = "string">
+    <alarm structureName = "alarm" />
+    <timeStamp structureName = "timeStamp" />
+    <input supportName = "monitorSupport" structureName = "monitorSupport">
+        <pvname>enumerated.value.choice</pvname>
+        <process>true</process>
+        <propertyNames>alarm</propertyNames>
+    </input>
+</record>
+
+<record name = "enumeratedMonitorChoice" type = "string">
+    <alarm structureName = "alarm" />
+    <timeStamp structureName = "timeStamp" />
+    <input supportName = "monitorSupport" structureName = "monitorSupport">
+        <pvname>enumerated.value.choice</pvname>
+        <process>true</process>
+        <propertyNames>alarm</propertyNames>
+    </input>
+</record>
+
+
+<!--
+-->
+
+
+</IOCDatabase>

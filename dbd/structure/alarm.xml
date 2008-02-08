@@ -19,6 +19,7 @@
 <structure name = "byteAlarmInterval">
   <field name = "value" type = "byte" />
   <field name = "severity" type = "structure" structureName = "alarmSeverity" />
+  <field name = "message" type = "string" />
 </structure>
 <structure name = "byteAlarm" supportName = "byteAlarm" >
   <field name = "active" type = "boolean" />
@@ -30,6 +31,7 @@
 <structure name = "shortAlarmInterval">
   <field name = "value" type = "short" />
   <field name = "severity" type = "structure" structureName = "alarmSeverity" />
+  <field name = "message" type = "string" />
 </structure>
 <structure name = "shortAlarm" supportName = "shortAlarm" >
   <field name = "active" type = "boolean" />
@@ -41,6 +43,7 @@
 <structure name = "intAlarmInterval">
   <field name = "value" type = "int" />
   <field name = "severity" type = "structure" structureName = "alarmSeverity" />
+  <field name = "message" type = "string" />
 </structure>
 <structure name = "intAlarm" supportName = "intAlarm" >
   <field name = "active" type = "boolean" />
@@ -52,6 +55,7 @@
 <structure name = "longAlarmInterval">
   <field name = "value" type = "long" />
   <field name = "severity" type = "structure" structureName = "alarmSeverity" />
+  <field name = "message" type = "string" />
 </structure>
 <structure name = "longAlarm" supportName = "longAlarm" >
   <field name = "active" type = "boolean" />
@@ -63,6 +67,7 @@
 <structure name = "floatAlarmInterval">
   <field name = "value" type = "float" />
   <field name = "severity" type = "structure" structureName = "alarmSeverity" />
+  <field name = "message" type = "string" />
 </structure>
 <structure name = "floatAlarm" supportName = "floatAlarm" >
   <field name = "active" type = "boolean" />
@@ -74,6 +79,7 @@
 <structure name = "doubleAlarmInterval">
   <field name = "value" type = "double" />
   <field name = "severity" type = "structure" structureName = "alarmSeverity" />
+  <field name = "message" type = "string" />
 </structure>
 <structure name = "doubleAlarm" supportName = "doubleAlarm" >
   <field name = "active" type = "boolean" />
@@ -85,15 +91,25 @@
 <structure name = "booleanAlarm"  supportName = "booleanAlarm" >
   <field name = "active" type = "boolean" />
   <field name = "falseAlarm" type = "structure" structureName = "alarmSeverity" />
+  <field name = "falseMessage" type = "string" />
   <field name = "trueAlarm" type = "structure" structureName = "alarmSeverity" />
+  <field name = "trueMessage" type = "string" />
   <field name = "changeStateAlarm" type = "structure" structureName = "alarmSeverity" />
+  <field name = "changeStateMessage" type = "string" />
 </structure>
+
+<structure name = "enumeratedAlarmState">
+  <field name = "severity" type = "structure" structureName = "alarmSeverity" />
+  <field name = "message" type = "string" />
+</structure>
+
 
 <structure name = "enumeratedAlarm"  supportName = "enumeratedAlarm" >
   <field name = "active" type = "boolean" />
-   <!-- each array element must have structureName  alarmSeverity -->
-  <field name = "stateSeverity" type = "array" elementType = "structure" />
-  <field name = "changeStateAlarm" type = "structure" structureName = "alarmSeverity" />
+   <!-- each array element must have structureName enumeratedAlarmState -->
+  <field name = "stateAlarm" type = "array" elementType = "structure" />
+  <field name = "changeStateAlarm" type = "structure"
+      structureName = "enumeratedAlarmState" />
 </structure>
 
 <support name = "alarm"

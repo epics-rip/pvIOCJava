@@ -1,6 +1,6 @@
 <?xml version="1.0" ?>
 <IOCDatabase>
-<record name = "counterCounter" type = "calcDouble">
+<record name = "counter" type = "calcDouble">
     <alarm structureName = "alarm" />
     <timeStamp structureName = "timeStamp" />
     <calcArgArray>
@@ -20,102 +20,28 @@
     <calculator supportName = "counterCalculator" />
     <supportArray>
         <value structureName = "supportArrayElement">
-            <wait>true</wait>
-            <link  supportName = "processSupport"  structureName = "processSupport">
-                <pvname>double01FromCounter</pvname>
-            </link>
-        </value>
-        <value structureName = "supportArrayElement">
             <wait>false</wait>
             <link  supportName = "outputSupport" structureName = "outputSupport">
-                <pvname>double02FromCounter</pvname>
+                <pvname>counterOutput</pvname>
                 <process>true</process>
             </link>
         </value>
+        <value structureName = "supportArrayElement">
+            <wait>true</wait>
+            <link  supportName = "processSupport"  structureName = "processSupport">
+                <pvname>counterInput</pvname>
+            </link>
+        </value>
     </supportArray>
-    <valueAlarm structureName = "doubleAlarm">
-          <active>true</active>
-          <interval>
-              <value structureName = "doubleAlarmInterval">
-                  <value>2.0</value>
-                  <severity><choice>major</choice></severity>
-              </value>
-              <value structureName = "doubleAlarmInterval">
-                  <value>4.0</value>
-                  <severity><choice>minor</choice></severity>
-              </value>
-              <value structureName = "doubleAlarmInterval">
-                  <value>6.0</value>
-                  <severity><choice>none</choice></severity>
-              </value>
-              <value structureName = "doubleAlarmInterval">
-                  <value>8.0</value>
-                  <severity><choice>minor</choice></severity>
-              </value>
-              <value structureName = "doubleAlarmInterval">
-                  <value>10.0</value>
-                  <severity><choice>major</choice></severity>
-              </value>
-          </interval>
-          <outOfRange><choice>invalid</choice></outOfRange>
-          <hystersis>0.6</hystersis>
-    </valueAlarm>
-    <display structureName = "display" >
-        <units>volts</units>
-        <limit>
-            <low>0.0</low>
-            <high>10.0</high>
-        </limit>
-    </display>
     <scan>
         <type><choice>periodic</choice></type>
+<!--
+-->
         <rate>1.0</rate>
     </scan>
 </record>
 
-<record name = "double01FromCounter" type = "double">
-    <alarm structureName = "alarm" />
-    <timeStamp structureName = "timeStamp" />
-    <input supportName = "inputSupport" structureName = "inputSupport">
-        <pvname>counterCounter</pvname>
-        <process>false</process>
-    </input>
-    <valueAlarm structureName = "doubleAlarm">
-          <active>true</active>
-          <interval>
-              <value structureName = "doubleAlarmInterval">
-                  <value>2.0</value>
-                  <severity><choice>major</choice></severity>
-              </value>
-              <value structureName = "doubleAlarmInterval">
-                  <value>4.0</value>
-                  <severity><choice>minor</choice></severity>
-              </value>
-              <value structureName = "doubleAlarmInterval">
-                  <value>6.0</value>
-                  <severity><choice>none</choice></severity>
-              </value>
-              <value structureName = "doubleAlarmInterval">
-                  <value>8.0</value>
-                  <severity><choice>minor</choice></severity>
-              </value>
-              <value structureName = "doubleAlarmInterval">
-                  <value>10.0</value>
-                  <severity><choice>major</choice></severity>
-              </value>
-          </interval>
-          <outOfRange><choice>invalid</choice></outOfRange>
-          <hystersis>0.1</hystersis>
-    </valueAlarm>
-    <display structureName = "display" >
-        <units>volts</units>
-        <limit>
-            <low>0.0</low>
-            <high>10.0</high>
-        </limit>
-    </display>
-</record>
-<record name = "double02FromCounter" type = "double">
+<record name = "counterOutput" type = "double">
     <alarm structureName = "alarm" />
     <timeStamp structureName = "timeStamp" />
     <valueAlarm structureName = "doubleAlarm">
@@ -124,10 +50,12 @@
               <value structureName = "doubleAlarmInterval">
                   <value>2.0</value>
                   <severity><choice>major</choice></severity>
+                  <message>LOWLOW</message>
               </value>
               <value structureName = "doubleAlarmInterval">
                   <value>4.0</value>
                   <severity><choice>minor</choice></severity>
+                  <message>LOW</message>
               </value>
               <value structureName = "doubleAlarmInterval">
                   <value>6.0</value>
@@ -136,10 +64,12 @@
               <value structureName = "doubleAlarmInterval">
                   <value>8.0</value>
                   <severity><choice>minor</choice></severity>
+                  <message>HIGH</message>
               </value>
               <value structureName = "doubleAlarmInterval">
                   <value>10.0</value>
                   <severity><choice>major</choice></severity>
+                  <message>HIHI</message>
               </value>
           </interval>
           <outOfRange><choice>invalid</choice></outOfRange>
@@ -164,5 +94,28 @@
     </control>
 </record>
 
+<record name = "counterInput" type = "double">
+    <alarm structureName = "alarm" />
+    <timeStamp structureName = "timeStamp" />
+    <display structureName = "display" />
+    <control structureName = "control" />
+    <input supportName = "inputSupport" structureName = "inputSupport">
+        <pvname>counterOutput</pvname>
+        <process>false</process>
+        <propertyNames>alarm,display,control</propertyNames>
+    </input>
+</record>
+
+<record name = "counterMonitor" type = "double">
+    <alarm structureName = "alarm" />
+    <timeStamp structureName = "timeStamp" />
+    <display structureName = "display" />
+    <control structureName = "control" />
+    <input supportName = "monitorSupport" structureName = "monitorSupport">
+        <pvname>counterOutput</pvname>
+        <process>true</process>
+        <propertyNames>alarm,display,control</propertyNames>
+    </input>
+</record>
 
 </IOCDatabase>

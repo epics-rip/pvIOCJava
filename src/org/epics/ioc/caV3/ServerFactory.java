@@ -48,7 +48,6 @@ import gov.aps.jca.dbr.TIME;
 
 import java.net.InetSocketAddress;
 import java.util.List;
-import java.util.regex.Pattern;
 
 import org.epics.ioc.ca.CD;
 import org.epics.ioc.ca.CDFactory;
@@ -100,13 +99,15 @@ import org.epics.ioc.util.TimeStamp;
 import com.cosylab.epics.caj.cas.handlers.AbstractCASResponseHandler;
 
 public class ServerFactory {
+    /**
+     * This starts the Channel Access Server.
+     */
     public static void start() {
         new ThreadInstance();
     }
     
     private static final ThreadCreate threadCreate = ThreadFactory.getThreadCreate();
     private static final Convert convert = ConvertFactory.getConvert();
-    private static Pattern whiteSpacePattern = Pattern.compile("[, ]");
     private static final ChannelAccess channelAccess = ChannelAccessFactory.getChannelAccess();
     
     private static class ThreadInstance implements RunnableReady {
@@ -449,8 +450,7 @@ public class ServerFactory {
                 return null;
             }
             rest = rest.substring(1);
-            String[] names = whiteSpacePattern.split(rest,2);
-            return names[0];
+            return rest;
         }
         
         private void getValueField(DBR dbr, PVField pvField) {
@@ -542,9 +542,8 @@ public class ServerFactory {
         private void getSeverityField(DBR dbr,PVField field) {
             STS sts = (STS)dbr; 
 
-            // optimised extraction of severity
-            PVStructure alarmStructure = (PVStructure)field;
-            PVInt severityField = alarmStructure.getIntField("index");
+            
+            PVInt severityField = (PVInt)field;
             AlarmSeverity alarmSeverity = AlarmSeverity.getSeverity(severityField.get());
 
             switch (alarmSeverity)
@@ -580,7 +579,7 @@ public class ServerFactory {
             private GetRequest() {
                 channelFieldGroup = channel.createFieldGroup(this);
                 channelFieldGroup.addChannelField(valueChannelField);
-                severityField = valueChannelField.findProperty("alarm.severity");
+                severityField = valueChannelField.findProperty("alarm.severity.index");
                 if (severityField != null)
                     channelFieldGroup.addChannelField(severityField);
                 timeStampField = valueChannelField.findProperty("timeStamp");
@@ -850,7 +849,7 @@ public class ServerFactory {
             private final CDMonitor cdMonitor;
             
             public MonitorRequest() {
-                severityField = valueChannelField.findProperty("alarm.severity");           
+                severityField = valueChannelField.findProperty("alarm.severity.index");           
                 timeStampField = valueChannelField.findProperty("timeStamp");
                 cdMonitor = CDMonitorFactory.create(channel, this);
             }

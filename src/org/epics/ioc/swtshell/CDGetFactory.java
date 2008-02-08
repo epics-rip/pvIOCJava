@@ -5,6 +5,8 @@
  */
 package org.epics.ioc.swtshell;
 
+import java.util.regex.Pattern;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
@@ -47,6 +49,7 @@ public class CDGetFactory {
     
     private static class GetCDValue extends Dialog implements CDGet, SelectionListener {
         private static Convert convert = ConvertFactory.getConvert();
+        private static Pattern separatorPattern = Pattern.compile("[, ]");
         private Shell parent;
         private Shell shell;
         private Button doneButton;
@@ -54,6 +57,8 @@ public class CDGetFactory {
         private Text text;
         private Tree tree;
         private CDField cdField = null;
+        private Type cdType = null;
+        private Type cdElementType = null;
         
         /**
          * Constructor.
@@ -138,6 +143,7 @@ public class CDGetFactory {
                 return;
             }
             if(object==editButton) {
+                
                 TreeItem[] treeItems = tree.getSelection();
                 int length = treeItems.length;
                 if(length!=0) {
@@ -147,15 +153,36 @@ public class CDGetFactory {
                     if(object instanceof CDField) {
                         cdField = (CDField)object;
                         PVField pvField = cdField.getPVField();
-                        Type type = pvField.getField().getType();
-                        if(type.isScalar()) {
+                        Field field = pvField.getField();
+                        cdType = field.getType();
+                        boolean ok = false;
+                        if(cdType.isScalar()) {
+                            ok = true;
                             textMessage(cdField.getPVField().toString());
-                        } else {
+                        } else if(cdType==Type.pvArray) {
+                            Array array = (Array)field;
+                            cdElementType = array.getElementType();
+                            if(cdElementType.isScalar()) {
+                                ok = true;
+                                String values = cdField.getPVField().toString();
+                                int beginIndex = values.indexOf("{");
+                                int endIndex = values.indexOf("}");
+                                if(beginIndex>=0 && endIndex>=0) {
+                                    values = values.substring(beginIndex+1, endIndex-1);
+                                }
+                                textMessage(values);
+                            }
+                        }
+                        if(!ok) {
                             textMessage("cant handle type");
                             cdField = null;
+                            cdType = null;
+                            cdElementType = null;
                         }
                     } else {
                         cdField = null;
+                        cdType = null;
+                        cdElementType = null;
                         text.setText("illegal field was selected");
                     }
                 }
@@ -166,17 +193,33 @@ public class CDGetFactory {
                     textMessage("no field was selected");
                 } else {
                     PVField pvField = cdField.getPVField();
-                    try {
-                    convert.fromString(pvField, text.getText());
-                    }catch (NumberFormatException e) {
-                        textMessage("exception " + e.getMessage());
-                        return;
+                    if(cdType.isScalar()) {
+                        try {
+                            convert.fromString(pvField, text.getText());
+                        }catch (NumberFormatException e) {
+                            textMessage("exception " + e.getMessage());
+                            return;
+                        }
+                    } else { // type is array; elementType.isScalar
+                        PVArray pvArray = (PVArray)pvField;
+                        String[] values = separatorPattern.split(text.getText());
+                        if(values.length<=0) {
+                            pvArray.setLength(0);
+                            return;
+                        }
+                        try {
+                            convert.fromStringArray(pvArray, 0, values.length, values, 0);
+                        }catch (NumberFormatException e) {
+                            textMessage("exception " + e.getMessage());
+                            return;
+                        }
                     }
                     cdField.incrementNumPuts();
                 }
                 return;
             }
         }  
+        
         
         private void textMessage(String message) {
             text.selectAll();

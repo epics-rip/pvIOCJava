@@ -28,6 +28,7 @@ import org.epics.ioc.ca.ChannelPutGetRequester;
 import org.epics.ioc.ca.ChannelPutRequester;
 import org.epics.ioc.pv.PVField;
 import org.epics.ioc.pv.PVRecord;
+import org.epics.ioc.pv.Type;
 import org.epics.ioc.util.IOCExecutor;
 import org.epics.ioc.util.IOCExecutorFactory;
 import org.epics.ioc.util.MessageType;
@@ -49,6 +50,7 @@ implements V3Channel,ConnectionListener,Runnable,V3ChannelRecordRequester {
     private String recordName = null;
     private String valueFieldName = null;
     private String[] propertyNames = null;
+    private Type enumRequestType = null;
 
     
     private gov.aps.jca.Channel jcaChannel = null;
@@ -58,10 +60,12 @@ implements V3Channel,ConnectionListener,Runnable,V3ChannelRecordRequester {
      * The constructer.
      * @param listener The ChannelListener.
      * @param options A string containing options.
+     * @param enumRequestType Request type for ENUM native type.
      */
-    public BaseV3Channel(ChannelListener listener,String options)
+    public BaseV3Channel(ChannelListener listener,String options,Type enumRequestType)
     {
         super(listener,options);
+        this.enumRequestType = enumRequestType;
     }
     /**
      * init the channel.
@@ -115,6 +119,12 @@ implements V3Channel,ConnectionListener,Runnable,V3ChannelRecordRequester {
      */
     public IOCExecutor getIOCExecutor() {
         return iocExecutor;
+    }
+    /* (non-Javadoc)
+     * @see org.epics.ioc.caV3.V3Channel#getEnumRequestType()
+     */
+    public Type getEnumRequestType() {
+        return enumRequestType;
     }
     /* (non-Javadoc)
      * @see org.epics.ioc.ca.AbstractChannel#connect()

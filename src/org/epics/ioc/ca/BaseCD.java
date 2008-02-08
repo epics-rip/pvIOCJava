@@ -85,38 +85,41 @@ public class BaseCD implements CD
     /* (non-Javadoc)
      * @see org.epics.ioc.ca.CD#get(org.epics.ioc.pv.PVField)
      */
-    public void get(PVField pvField) {
+    public boolean get(PVField pvField) {
         CDField[] cdFields = cdRecord.getCDStructure().getCDFields();
         int length = cdFields.length;
         for(int i=0; i<length; i++) {
             CDField cdField = cdFields[i];
             if(cdField.getChannelField().getPVField()==pvField) {
                 cdField.get(pvField,true);
-                return;
+                return true;
             }
         }
+        return false;
     }
     /* (non-Javadoc)
      * @see org.epics.ioc.ca.CD#put(org.epics.ioc.pv.PVField, org.epics.ioc.pv.PVField)
      */
-    public void put(PVField pvField, PVField pvSubField) {
+    public boolean put(PVField pvField, PVField pvSubField) {
         CDField cdField = cdRecord.findCDField(pvField);
-        if(cdField==null) return;
+        if(cdField==null) return false;
         cdField.put(pvField, pvSubField);
+        return true;
     }
     /* (non-Javadoc)
      * @see org.epics.ioc.ca.CD#put(org.epics.ioc.pv.PVField)
      */
-    public void put(PVField pvField) {
+    public boolean put(PVField pvField) {
         CDField[] cdFields = cdRecord.getCDStructure().getCDFields();
         int length = cdFields.length;
         for(int i=0; i<length; i++) {
             CDField cdField = cdFields[i];
             if(cdField.getChannelField().getPVField()==pvField) {
                 cdField.put(pvField);
-                return;
+                return true;
             }
         }
+        return false;
     }
     /* (non-Javadoc)
      * @see org.epics.ioc.ca.CD#createCDGet(org.epics.ioc.ca.CDGetRequester, boolean)

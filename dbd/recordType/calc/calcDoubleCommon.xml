@@ -11,6 +11,7 @@
   <field name = "valueAlarm" type = "structure" />
   <field name = "output" type = "structure" />
   <field name = "display" type = "structure" />
+  <field name = "control" type = "structure"/>
   <!-- instance can set structureName = "doubleHistory" -->
   <field name = "history" type = "structure" />
 </DBDefinition>

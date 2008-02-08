@@ -10,13 +10,13 @@
 <body>
 <h1 style="text-align: center">EPICS JavaIOC: channel Access<br />
 package: org.epics.ioc.ca<br />
-2008.01.24</h1>
+2008.02.08</h1>
 CONTENTS 
 
 <div class="toc">
 <ul>
   <li><a href="#Overview">Overview</a></li>
-  <li><a href="#Channel">Channel Definitions</a>
+  <li><a href="#Channel">Channel Definitions</a> 
     <ul>
       <li><a href="#Definition">Definitions</a></li>
       <li><a href="#Channel1">Channel</a></li>
@@ -32,7 +32,7 @@ CONTENTS
       <li><a href="#ChannelPro">ChannelProvider</a></li>
     </ul>
   </li>
-  <li><a href="#Channel2">Channel Process, Get, Put, PutGet, and Monitor</a>
+  <li><a href="#Channel2">Channel Process, Get, Put, PutGet, and Monitor</a> 
     <ul>
       <li><a href="#Definition1">Definitions</a></li>
       <li><a href="#ChannelPro1">ChannelProcess</a></li>
@@ -42,13 +42,13 @@ CONTENTS
     </ul>
   </li>
   <li><a href="#Abstract">Abstract and Base Classes</a></li>
-  <li><a href="#ChannelMon2">ChannelMonitorNotify</a>
+  <li><a href="#ChannelMon2">ChannelMonitorNotify</a> 
     <ul>
       <li><a href="#ChannelMon3">ChannelMonitorNotify</a></li>
     </ul>
   </li>
   <li><a href="#Local">Local Channel Provider</a></li>
-  <li><a href="#Channel3">CD - Channel Data</a>
+  <li><a href="#Channel3">CD - Channel Data</a> 
     <ul>
       <li><a href="#Definition2">CD Definitions</a></li>
       <li><a href="#CD">CD</a></li>
@@ -56,7 +56,7 @@ CONTENTS
       <li><a href="#CDFactory">CDFactory</a></li>
     </ul>
   </li>
-  <li><a href="#CDField">CDField - Channel Data Fields</a>
+  <li><a href="#CDField">CDField - Channel Data Fields</a> 
     <ul>
       <li><a href="#CDField1">CDField Definitions</a></li>
       <li><a href="#CDField2">CDField</a></li>
@@ -68,38 +68,38 @@ CONTENTS
       <li><a href="#Base">Base CD Classes</a></li>
     </ul>
   </li>
-  <li><a href="#CDGet">CDGet, CDPUT, CDMonitor</a>
+  <li><a href="#CDGet">CDGet, CDPUT, CDMonitor</a> 
     <ul>
       <li><a href="#CDGet1">CDGet</a></li>
       <li><a href="#CDPut">CDPut</a></li>
       <li><a href="#CDMonitor">CDMonitor</a></li>
     </ul>
   </li>
-  <li><a href="#Example">Example For CD</a>
+  <li><a href="#Example">Example For CD</a> 
     <ul>
       <li><a href="#Discussion">Discussion</a></li>
       <li><a href="#Implementa">Implementation</a></li>
     </ul>
   </li>
-  <li><a href="#Process">Process Example</a>
+  <li><a href="#Process">Process Example</a> 
     <ul>
       <li><a href="#Discussion1">Discussion</a></li>
       <li><a href="#Implementa1">Implementation</a></li>
     </ul>
   </li>
-  <li><a href="#Example1">Get Example</a>
+  <li><a href="#Example1">Get Example</a> 
     <ul>
       <li><a href="#Discussion2">Discussion</a></li>
       <li><a href="#Implementa2">Implementation</a></li>
     </ul>
   </li>
-  <li><a href="#Example2">Put Example</a>
+  <li><a href="#Example2">Put Example</a> 
     <ul>
       <li><a href="#Discussion3">Discussion</a></li>
       <li><a href="#Implementa3">Implementation</a></li>
     </ul>
   </li>
-  <li><a href="#PutGet">PutGet Example</a>
+  <li><a href="#PutGet">PutGet Example</a> 
     <ul>
       <li><a href="#Discussion4">Discussion</a></li>
       <li><a href="#Implementa4">Implementation</a></li>
@@ -284,10 +284,11 @@ The methods are:</p>
   <dt style="font-family: courier;">isConnected</dt>
     <dd>Is the channel connected?</dd>
   <dt style="font-family: courier;">getPropertyName</dt>
-    <dd>Get the propertyName for this channel. The details are
-      channelProvider dependent.</dd>
+    <dd>Get the propertyName for this channel. This name can be passed to
+      channel.getPVRecord.findProperty().</dd>
   <dt style="font-family: courier;">getFieldName</dt>
-    <dd>Get the fieldName. The details are channelProvider dependent.</dd>
+    <dd>Get the fieldName. This name can be passed to
+      channel.getPVRecord.getField().</dd>
   <dt style="font-family: courier;">getOptions</dt>
     <dd>Get the options. The details are channelProvider dependent.</dd>
   <dt style="font-family: courier;">createChannelField</dt>
@@ -807,9 +808,9 @@ and associated subfields, which are described in the next section.</p>
         ChannelFieldGroup getChannelFieldGroup();
         CDRecord getCDRecord();
         void clearNumPuts();
-        void get(PVField pvField);
-        void put(PVField pvField);
-        void put(PVField pvField,PVField pvSubField);
+        boolean get(PVField pvField);
+        boolean put(PVField pvField);
+        boolean put(PVField pvField,PVField pvSubField);
         CDGet createCDGet(
             CDGetRequester channelCDGetRequester,
             boolean process);
@@ -862,13 +863,15 @@ and associated subfields, which are described in the next section.</p>
   <dt style="font-family: courier;">clearNumPuts</dt>
     <dd>Clear the internal list of items that have been added.</dd>
   <dt style="font-family: courier;">get</dt>
-    <dd>Get data from the CD and put it into pvField.</dd>
+    <dd>Get data from the CD and put it into pvField. It returns (false,true)
+      if data (was not, was) put into the CDField. </dd>
   <dt style="font-family: courier;">put</dt>
     <dd>The PVField has been modified. Two versions are provided. One is if a
       ChannelField is connected to the PVField itself and the other if the
       PVField is a subfield of the PVStructure to which the ChannelField is
       connected. NOTE that the pvFields are from the ChannelField NOT the
-      pvField from the CD. </dd>
+      pvField from the CD. Each returns (false,true) if data (was not, was)
+      put into a ChannelField. </dd>
   <dt style="font-family: courier;">createCDGet</dt>
     <dd>Create a CDGet.</dd>
   <dt style="font-family: courier;">destroy(CDGet channelCDGet)</dt>

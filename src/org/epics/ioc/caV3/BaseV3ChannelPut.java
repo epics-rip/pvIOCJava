@@ -51,8 +51,7 @@ public class BaseV3ChannelPut implements ChannelPut,PutListener,ChannelProcessRe
     private boolean process = false;
     
     private gov.aps.jca.Channel jcaChannel = null;
-    private DBRType valueDBRType = null;
-    private V3Channel channel = null;
+    private V3Channel v3Channel = null;
     private int elementCount = 0;
    
     
@@ -83,14 +82,14 @@ public class BaseV3ChannelPut implements ChannelPut,PutListener,ChannelProcessRe
     }
     /**
      * Initialize the channelPut.
-     * @param channel The V3Channel
+     * @param v3Channel The V3Channel
      * @return (false,true) if the channelPut (did not, did) properly initialize.
      */
-    public boolean init(V3Channel channel)
+    public boolean init(V3Channel v3Channel)
     {
-        this.channel = channel;
-        jcaChannel = channel.getJCAChannel();
-        valueDBRType = jcaChannel.getFieldType();
+        this.v3Channel = v3Channel;
+        DBRType nativeDBRType = v3Channel.getV3ChannelRecord().getNativeDBRType();
+        jcaChannel = v3Channel.getJCAChannel();
         elementCount = jcaChannel.getElementCount();
         ChannelField[] channelFields = channelFieldGroup.getArray();
         if(channelFields.length!=1) {
@@ -103,7 +102,7 @@ public class BaseV3ChannelPut implements ChannelPut,PutListener,ChannelProcessRe
             channelPutRequester.message("value pvField not found",MessageType.error);
             return false;
         }
-        if(valueDBRType.isENUM()) {
+        if(nativeDBRType.isENUM()) {
             if(process) {
                 channelPutRequester.message(
                     "process not supported for enumerated", MessageType.error);
@@ -117,7 +116,7 @@ public class BaseV3ChannelPut implements ChannelPut,PutListener,ChannelProcessRe
             pvIndex = pvEnumerated.getIndexField();
         }
         if(process) {
-            channelProcess = channel.createChannelProcess(this);
+            channelProcess = v3Channel.createChannelProcess(this);
             if(channelProcess==null) return false;
         }
         return true;
@@ -126,13 +125,14 @@ public class BaseV3ChannelPut implements ChannelPut,PutListener,ChannelProcessRe
     public void destroy() {
         isDestroyed = true;
         if(channelProcess!=null) channelProcess.destroy();
-        channel.remove(this);
+        v3Channel.remove(this);
     }
 
     /* (non-Javadoc)
      * @see org.epics.ioc.ca.ChannelPut#put()
      */
     public void put() {
+        DBRType nativeDBRType = v3Channel.getV3ChannelRecord().getNativeDBRType();
         if(isDestroyed) {
             channelPutRequester.message("isDestroyed",MessageType.error);
             channelPutRequester.putDone(RequestResult.failure);
@@ -148,7 +148,7 @@ public class BaseV3ChannelPut implements ChannelPut,PutListener,ChannelProcessRe
             } catch (CAException e) {
                 message = e.getMessage();
             }
-        } else if(valueDBRType==DBRType.BYTE) {
+        } else if(nativeDBRType==DBRType.BYTE) {
             if(elementCount==1) {
                 PVByte pvFrom = (PVByte)pvField;
                 byte from = pvFrom.get();
@@ -170,7 +170,7 @@ public class BaseV3ChannelPut implements ChannelPut,PutListener,ChannelProcessRe
                 }
 
             }
-        } else if(valueDBRType==DBRType.SHORT) {
+        } else if(nativeDBRType==DBRType.SHORT) {
             if(elementCount==1) {
                 PVShort pvFrom = (PVShort)pvField;
                 short from = pvFrom.get();
@@ -192,7 +192,7 @@ public class BaseV3ChannelPut implements ChannelPut,PutListener,ChannelProcessRe
                 }
 
             }
-        } else if(valueDBRType==DBRType.INT) {
+        } else if(nativeDBRType==DBRType.INT) {
             if(elementCount==1) {
                 PVInt pvFrom = (PVInt)pvField;
                 int from = pvFrom.get();
@@ -214,7 +214,7 @@ public class BaseV3ChannelPut implements ChannelPut,PutListener,ChannelProcessRe
                 }
 
             }
-        } else if(valueDBRType==DBRType.FLOAT) {
+        } else if(nativeDBRType==DBRType.FLOAT) {
             if(elementCount==1) {
                 PVFloat pvFrom = (PVFloat)pvField;
                 float from = pvFrom.get();
@@ -236,7 +236,7 @@ public class BaseV3ChannelPut implements ChannelPut,PutListener,ChannelProcessRe
                 }
 
             }
-        } else if(valueDBRType==DBRType.DOUBLE) {
+        } else if(nativeDBRType==DBRType.DOUBLE) {
             if(elementCount==1) {
                 PVDouble pvFrom = (PVDouble)pvField;
                 double from = pvFrom.get();
@@ -258,7 +258,7 @@ public class BaseV3ChannelPut implements ChannelPut,PutListener,ChannelProcessRe
                 }
 
             }
-        } else if(valueDBRType==DBRType.STRING) {
+        } else if(nativeDBRType==DBRType.STRING) {
             if(elementCount==1) {
                 PVString pvFrom = (PVString)pvField;
                 String from = pvFrom.get();
@@ -280,7 +280,7 @@ public class BaseV3ChannelPut implements ChannelPut,PutListener,ChannelProcessRe
                 }
             }
         } else {
-            message = "unknown DBRType " + valueDBRType.getName();
+            message = "unknown DBRType " + nativeDBRType.getName();
         }
         if(message!=null) {
             channelPutRequester.message(message,MessageType.error);

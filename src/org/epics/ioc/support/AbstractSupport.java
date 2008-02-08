@@ -117,6 +117,7 @@ public abstract class AbstractSupport implements Support {
      */
     protected boolean checkSupportState(SupportState expectedState,String message) {
         if(expectedState==supportState) return true;
+        if(message==null) message = "";
         pvField.message(
              message
              + " expected supportState " + expectedState.toString()

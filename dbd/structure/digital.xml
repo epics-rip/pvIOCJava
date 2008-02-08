@@ -5,6 +5,7 @@
   <field name = "name" type = "string" />
   <field name = "value" type = "int" />
   <field name = "severity" type = "structure" structureName = "alarmSeverity" />
+  <field name = "message" type = "string" />
 </structure>
 
 <structure name = "digital" supportName = "generic" >

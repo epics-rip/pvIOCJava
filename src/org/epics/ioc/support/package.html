@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
       "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html>
+<html xmlns="http://www.w3.org/1999/xhtml">
 <head>
   <meta http-equiv="content-type" content="text/html; charset=iso-8859-1" />
   <title>EPICS JavaIOC: support</title>
@@ -10,13 +10,13 @@
 <body>
 <h1 style="text-align: center">EPICS JavaIOC: support<br />
 package: org.epics.ioc.support<br />
-2007.09.26</h1>
+2008.02.08</h1>
 CONTENTS 
 
 <div class="toc">
 <ul>
   <li><a href="#Overview">Overview</a></li>
-  <li><a href="#Support">Support</a> 
+  <li><a href="#Support">Support</a>
     <ul>
       <li><a href="#Definition">Definitions</a></li>
       <li><a href="#SupportSta">SupportState</a></li>
@@ -26,10 +26,10 @@ CONTENTS
   </li>
   <li><a href="#Generic">Generic Support</a></li>
   <li><a href="#ScanSuppor">ScanSupport</a></li>
-  <li><a href="#Alarm">Alarm Support</a> 
+  <li><a href="#Alarm">Alarm Support</a>
     <ul>
       <li><a href="#Alarm1">Alarm Support</a></li>
-      <li><a href="#Value">Value Alarms</a> 
+      <li><a href="#Value">Value Alarms</a>
         <ul>
           <li><a href="#Boolean">Boolean Alarms</a></li>
           <li><a href="#Numeric">Numeric Alarms</a></li>
@@ -38,7 +38,7 @@ CONTENTS
       </li>
     </ul>
   </li>
-  <li><a href="#Linear">Linear Conversion</a> 
+  <li><a href="#Linear">Linear Conversion</a>
     <ul>
       <li><a href="#linearConv">linearConversion</a></li>
       <li><a href="#LinearConv">LinearConvertInputFactory</a></li>
@@ -46,13 +46,13 @@ CONTENTS
       <li><a href="#DeviceLimi">DeviceLimit</a></li>
     </ul>
   </li>
-  <li><a href="#Digital">Digital Support</a> 
+  <li><a href="#Digital">Digital Support</a>
     <ul>
       <li><a href="#Java">Java Definitions</a></li>
     </ul>
   </li>
   <li><a href="#Incrementa">Incremental Support</a></li>
-  <li><a href="#Calculatio">Calculation Support</a> 
+  <li><a href="#Calculatio">Calculation Support</a>
     <ul>
       <li><a href="#Database">Database Definitions for Calculations</a></li>
       <li><a href="#Performing">Performing Calculations</a></li>
@@ -64,11 +64,10 @@ CONTENTS
     </ul>
   </li>
   <li><a href="#Event">Event Support</a></li>
-  <li><a href="#CASupport">CASupport Support</a></li>
   <li><a href="#SupportArr">SupportArray Support</a></li>
   <li><a href="#Noop">Noop Support</a></li>
   <li><a href="#DelaySuppo">DelaySupport Support</a></li>
-  <li><a href="#Port">Port Driver Support</a> 
+  <li><a href="#Port">Port Driver Support</a>
     <ul>
       <li><a href="#Java1">Java Definitions</a></li>
       <li><a href="#PDRVSuppor">PDRVSupport</a></li>
@@ -92,6 +91,9 @@ provides support for one or more fields. Thus each support module is generic
 because it can support any structure or record type that contains the fields
 required by the support module. Much of the support can be used for records,
 i.e. complex records that have the appearence of having embeded records.</p>
+
+<p>NOTE: Support for channel Access database links is provided by package
+org.epics.ioc.support.ca</p>
 
 <p>This package provides interfaces and classes for processing fields of IOC
 database records. </p>
@@ -189,8 +191,6 @@ database records. </p>
     </dd>
   <dt>EventFactory</dt>
     <dd>Support for a string field that is the name of an event.</dd>
-  <dt>CASupportFactory</dt>
-    <dd>Support for channel access links.</dd>
   <dt>SupportArrayFactory</dt>
     <dd>Support for an array of structures that have support.</dd>
   <dt>NoopFactory</dt>
@@ -1052,57 +1052,6 @@ event. The event name is given in the field:</p>
 support announces an event. All event scanned records with the event name
 associated with the value field are processed. Each time process is called,
 the event support checks to see if the event name has changed.</p>
-<hr />
-
-<h2 style="text-align: center" id="CASupport">CASupport Support</h2>
-<hr />
-<pre>    public class CASupportFactory {
-        public static Support create(DBStructure dbStructure);
-    }</pre>
-
-<p>This is a factory that provides an implementation of support for the
-following:</p>
-<dl>
-  <dt>processSupport</dt>
-    <dd>Support that requests that another record process without transfering
-      any data.</dd>
-  <dt>inputSupport</dt>
-    <dd>Support that 1) optionally requests that another record process, and
-      2) transfers data from the other record this record..</dd>
-  <dt>outputSupport</dt>
-    <dd>Support that 1) transfers data to another record, and 2) optionally
-      requests that the other record process.</dd>
-  <dt>monitorSupport</dt>
-    <dd>Support for monitoring another record. A monitor returns data.</dd>
-  <dt>monitorNotifySupport</dt>
-    <dd>Support for monitoring another record. A monitor does not return
-    data.</dd>
-</dl>
-
-<p>Each requires that other support code, e.g. record support knows how to
-call them.</p>
-
-<p>The types of data that can be transfered are.</p>
-<ul>
-  <li>Both valueType and linkType are scalars and they are copy compatible as
-    defined by org.epics.ioc.pvAccess.Convert.isCopyScalarCompatible.</li>
-  <li>Both are type Type.pvArray and are copy compatible as defined by
-    org.epics.ioc.pvAccess.Convert.isCopyArrayCompatible.</li>
-  <li>Both are Type.pvStructure and are copy compatible as defined by
-    org.epics.ioc.pvAccess.Convert.isCopyStructureCompatible.</li>
-</ul>
-
-<p>where</p>
-<dl>
-  <dt>valueType</dt>
-    <dd>The Type for the value field.</dd>
-  <dt>linkType</dt>
-    <dd>The Type for the pvname.</dd>
-</dl>
-
-<p>Look at the structure definitions in
-javaIOC/dbd/structures/channelAccess.xml for a description of how the various
-structures are defined.</p>
 <hr />
 
 <h2 style="text-align: center;" id="SupportArr">SupportArray Support</h2>

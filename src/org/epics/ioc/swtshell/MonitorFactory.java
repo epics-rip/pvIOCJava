@@ -11,6 +11,8 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.DisposeEvent;
+import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
@@ -52,7 +54,8 @@ public class MonitorFactory {
     }
 
     private static class MonitorImpl
-    implements Requester,ChannelListener,ChannelFieldGroupListener,SelectionListener,CDMonitorRequester  {
+    implements DisposeListener,Requester,ChannelListener,
+    ChannelFieldGroupListener,SelectionListener,CDMonitorRequester  {
 
         private MonitorImpl(Display display) {
             this.display = display;
@@ -86,6 +89,12 @@ public class MonitorFactory {
         private Condition waitDone = lock.newCondition();
         private boolean allDone = false;
         
+        /* (non-Javadoc)
+         * @see org.eclipse.swt.events.DisposeListener#widgetDisposed(org.eclipse.swt.events.DisposeEvent)
+         */
+        public void widgetDisposed(DisposeEvent e) {
+            if(channel!=null) channel.destroy();
+        }
         /* (non-Javadoc)
          * @see org.epics.ioc.util.Requester#getRequesterName()
          */
@@ -139,7 +148,7 @@ public class MonitorFactory {
             gridLayout.numColumns = 1;
             shell.setLayout(gridLayout);
             channelConnect = ChannelConnectFactory.create(this,this);
-            channelConnect.createWidgets(shell,true);
+            channelConnect.createWidgets(shell,true,true);
             Composite rowComposite = new Composite(shell,SWT.BORDER);
             gridLayout = new GridLayout();
             gridLayout.numColumns = 2;
@@ -212,6 +221,7 @@ public class MonitorFactory {
             requester = SWTMessageFactory.create(windowName,display,consoleText);
             shell.pack();
             shell.open();
+            shell.addDisposeListener(this);
         }
         /* (non-Javadoc)
          * @see org.eclipse.swt.events.SelectionListener#widgetDefaultSelected(org.eclipse.swt.events.SelectionEvent)
@@ -262,7 +272,6 @@ public class MonitorFactory {
                     isMonitoring = false;
                     cdMonitor.stop();
                     cdMonitor = null;
-                    propertyNames = null;
                     startStopButton.setText("startMonitor");
                     enableOptions();
                     return;
@@ -348,10 +357,7 @@ public class MonitorFactory {
 
         private void createMonitor() {
             ChannelFieldGroup channelFieldGroup = channel.createFieldGroup(this);
-            if(channelField.getField().getType()!=Type.pvStructure
-                    || (propertyNames==null || propertyNames.length<=0)) {
-                channelFieldGroup.addChannelField(channelField);
-            }
+            channelFieldGroup.addChannelField(channelField);
             if(propertyNames!=null && propertyNames.length>0) {
                 for(String propertyName: propertyNames) {
                     ChannelField propChannelField = channelField.findProperty(propertyName);

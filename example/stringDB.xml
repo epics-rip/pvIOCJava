@@ -28,40 +28,6 @@
         </value>
     </calcArgArray>
     <calculator supportName = "counterCalculator" />
-    <valueAlarm structureName = "doubleAlarm">
-          <active>true</active>
-          <interval>
-              <value structureName = "doubleAlarmInterval">
-                  <value>2.0</value>
-                  <severity><choice>major</choice></severity>
-              </value>
-              <value structureName = "doubleAlarmInterval">
-                  <value>4.0</value>
-                  <severity><choice>minor</choice></severity>
-              </value>
-              <value structureName = "doubleAlarmInterval">
-                  <value>6.0</value>
-                  <severity><choice>none</choice></severity>
-              </value>
-              <value structureName = "doubleAlarmInterval">
-                  <value>8.0</value>
-                  <severity><choice>minor</choice></severity>
-              </value>
-              <value structureName = "doubleAlarmInterval">
-                  <value>10.0</value>
-                  <severity><choice>major</choice></severity>
-              </value>
-          </interval>
-          <outOfRange><choice>invalid</choice></outOfRange>
-          <hystersis>0.1</hystersis>
-    </valueAlarm>
-    <display structureName = "display" >
-        <units>volts</units>
-        <limit>
-            <low>0.0</low>
-            <high>10.0</high>
-        </limit>
-    </display>
     <scan>
         <type><choice>periodic</choice></type>
         <rate>1.0</rate>
@@ -74,6 +40,12 @@
                     <process>true</process>
             </link>
         </value>
+        <value structureName = "supportArrayElement">
+            <wait>true</wait>
+            <link  supportName = "processSupport" structureName = "processSupport">
+                    <pvname>stringIn</pvname>
+            </link>
+        </value>
     </supportArray>
 </record>
 
@@ -84,14 +56,6 @@
             <addr>0</addr>
             <timeout>.1</timeout>
     </output>
-    <supportArray>
-        <value structureName = "supportArrayElement">
-            <wait>false</wait>
-            <link  supportName = "processSupport" structureName = "processSupport">
-                    <pvname>stringIn</pvname>
-            </link>
-        </value>
-    </supportArray>
 </record>
 
 <record name = "stringIn" type = "string">

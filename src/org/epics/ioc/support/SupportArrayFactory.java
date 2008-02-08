@@ -129,7 +129,7 @@ public class SupportArrayFactory {
                     support = dbFields[index].getSupport();
                 }
                 if(support==null) {
-                    pvStructure.message("field does not have suport", MessageType.fatalError);
+                    pvStructure.message("field does not have support", MessageType.fatalError);
                     continue;
                 }
                 support.initialize();

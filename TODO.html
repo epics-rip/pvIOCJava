@@ -9,8 +9,13 @@
 
 <body>
 <h1 style="text-align: center">EPICS JavaIOC: TODO<br />
-2007.10.09</h1>
+2008.02.08</h1>
 <ul>
+  <li>CDMonitor<br />
+   The current implementation has a separate thread for each monitor link.
+   This will be bad for a large number of monitor links.
+   A good strategy may be to have a thread for each IOC that has monitors.
+   </li>
   <li>alarm 
     <ul>
       <li>ackTransient and ackSeverity.<br />

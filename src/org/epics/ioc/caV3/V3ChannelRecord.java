@@ -5,7 +5,7 @@
  */
 package org.epics.ioc.caV3;
 
-import gov.aps.jca.dbr.DBR;
+import gov.aps.jca.dbr.*;
 
 import org.epics.ioc.ca.ChannelMonitorRequester;
 import org.epics.ioc.pv.PVRecord;
@@ -21,6 +21,11 @@ public interface V3ChannelRecord {
      * @return The interface.
      */
     PVRecord getPVRecord();
+    /**
+     * Get the native DBRType for the value field.
+     * @return The DBRType.
+     */
+    DBRType getNativeDBRType();
     /**
      * Update the DBRecord with data from a DBR.
      * @param fromDBR The DBR that holds the new data.

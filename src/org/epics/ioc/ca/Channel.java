@@ -55,12 +55,12 @@ public interface Channel extends Requester{
     boolean isConnected();
     /**
      * Get the propertyName for the channel.
-     * @return The name which can be passed to getChannelField.
+     * @return The name which can be passed to channel.getPVRecord.findProperty();
      */
     String getPropertyName();
     /**
      * Get the fieldName for the channel.
-     * @return The name which can be passed to getChannelField.
+     * @return The name which can be passed to channel.getPVRecord.getField();
      */
     String getFieldName();
     /**

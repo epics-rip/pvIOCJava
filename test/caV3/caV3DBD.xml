@@ -1,0 +1,6 @@
+<?xml version="1.0" ?>
+<DBDefinition>
+<include addPath = "dbd" />
+<include href = "structure.xml" />
+<include href = "recordType.xml" />
+</DBDefinition>

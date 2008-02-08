@@ -7,6 +7,7 @@ package org.epics.ioc.caV3;
 
 import org.epics.ioc.ca.Channel;
 import org.epics.ioc.util.IOCExecutor;
+import org.epics.ioc.pv.*;
 
 /**
  * Channel interface for communicating with V3 IOCs.
@@ -45,4 +46,9 @@ public interface V3Channel extends Channel
      * @return The iocExecutor;
      */
     IOCExecutor getIOCExecutor();
+    /**
+     * If the native type is enum what is the request type.
+     * @return The Type.
+     */
+    Type getEnumRequestType();
 }
