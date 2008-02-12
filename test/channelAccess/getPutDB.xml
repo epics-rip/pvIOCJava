@@ -72,7 +72,7 @@
     <input supportName = "inputSupport" structureName = "inputSupport">
         <pvname>getPutCounter</pvname>
         <process>false</process>
-        <inheritSeverity>true</inheritSeverity>
+        <propertyNames>alarm</propertyNames>
     </input>
 </record>
 <record name = "putFromCounter" type = "double">

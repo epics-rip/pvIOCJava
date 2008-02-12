@@ -1324,7 +1324,7 @@ public class PDRVSupportFactory {
             		dbField.postPut();
             	}
             }
-            if(valueType==Type.pvInt) {
+            if(valueType==Type.pvInt || valueType==Type.pvBoolean) {
             	mask = pvMask.get();
             	if(mask==0) {
             		pvStructure.message("mask is 0", MessageType.fatalError);
@@ -1350,7 +1350,7 @@ public class PDRVSupportFactory {
          * @see org.epics.ioc.pdrv.support.AbstractPDRVLinkSupport#processContinue()
          */
         public void processContinue() {
-        	if(valueType==Type.pvInt) {
+        	if(valueType==Type.pvInt || valueType==Type.pvBoolean) {
                 value = value&mask;
                 value >>>= shift;
         	}

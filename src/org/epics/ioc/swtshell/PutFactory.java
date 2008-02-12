@@ -178,15 +178,7 @@ public class PutFactory {
             if(object==putButton) {
                 boolean process = processButton.getSelection();
                 PutIt putIt = new PutIt(channel,this,process,shell);
-                boolean result = putIt.connect(channelField);
-                if(result) {
-                    putIt.put();
-                    putIt.disconnect();
-                    message(String.format("put%n"),MessageType.info);
-                } else {
-                    message(String.format("put failed%n"),MessageType.info);
-                }
-                return;
+                putIt.connect(channelField);
             }
         }
         private class PutIt implements
@@ -200,8 +192,9 @@ public class PutFactory {
             private Channel channel;
             final private Requester requester;
             private boolean process;
-            private boolean allDone = false;
-            private RequestResult requestResult;
+            private boolean gotData = false;
+            private boolean getFailed = false;
+            private boolean isActive = false;
 
             private CD cd;
             private CDPut cdPut;
@@ -213,60 +206,57 @@ public class PutFactory {
                 this.process = process;
             }
 
-            private boolean connect(ChannelField channelField) {
+            private void connect(ChannelField channelField) {
                 ChannelFieldGroup putFieldGroup = channel.createFieldGroup(this);
                 putFieldGroup.addChannelField(channelField);
                 cd = CDFactory.createCD(channel, putFieldGroup);
                 cdPut = cd.createCDPut(this, process);
-                if(cdPut==null) return false;
-                return true;
-            }
-
-            private void disconnect() {
-                cd.destroy(cdPut);
-            }
-
-            private void put() {
-                allDone = false;
+                if(cdPut==null) {
+                    cd.destroy();
+                    return;
+                }
+                gotData = false;
+                getFailed = false;
                 cdPut.get(cd);
                 lock.lock();
                 try {
-                    while(!allDone) {                       
+                    while(!gotData) {                       
                         waitDone.await();
                     }
                 } catch (InterruptedException ie) {
+                    cd.destroy();
                     return;
                 } finally {
                     lock.unlock();
                 }
-                if(requestResult!=RequestResult.success) {
-                    message("get failed", MessageType.error);
+                if(getFailed) {
+                    cd.destroy();
+                    return;
                 }
-                allDone = false;
                 CDRecord cdRecord = cd.getCDRecord();
                 cdRecord.getCDStructure().clearNumPuts();
                 CDGet cdGet = CDGetFactory.create(shell);
                 cdGet.getValue(cdRecord);
                 iocExecutor.execute(this);
-                lock.lock();
-                try {
-                    while(!allDone) {                       
-                        waitDone.await();
-                    }
-                } catch (InterruptedException ie) {
-                    return;
-                } finally {
-                    lock.unlock();
-                }
-                if(requestResult!=RequestResult.success) {
-                    message("get failed", MessageType.error);
-                }
             }
             /* (non-Javadoc)
              * @see java.lang.Runnable#run()
              */
             public void run() {
+                isActive = true;
                 cdPut.put(cd);
+                lock.lock();
+                try {
+                    while(isActive) {                       
+                        waitDone.await();
+                    }
+                } catch (InterruptedException ie) {
+                    cd.destroy();
+                } finally {
+                    lock.unlock();
+                }
+                cd.destroy(cdPut);
+                requester.message("processComplete", MessageType.info);
             }
             /* (non-Javadoc)
              * @see org.epics.ioc.util.Requester#putRequesterName()
@@ -284,10 +274,13 @@ public class PutFactory {
              * @see org.epics.ioc.ca.CDPutRequester#getDone(org.epics.ioc.util.RequestResult)
              */
             public void getDone(RequestResult requestResult) {
+                if(requestResult!=RequestResult.success) {
+                    message("get failed", MessageType.error);
+                    getFailed = true;
+                }
                 lock.lock();
                 try {
-                    this.requestResult = requestResult;
-                    allDone = true;
+                    gotData = true;
                     waitDone.signal();
                 } finally {
                     lock.unlock();
@@ -298,10 +291,12 @@ public class PutFactory {
              * @see org.epics.ioc.ca.CDPutRequester#putDone(org.epics.ioc.util.RequestResult)
              */
             public void putDone(RequestResult requestResult) {
+                if(requestResult!=RequestResult.success) {
+                    message("get failed", MessageType.error);
+                }
                 lock.lock();
                 try {
-                    this.requestResult = requestResult;
-                    allDone = true;
+                    isActive = false;
                     waitDone.signal();
                 } finally {
                     lock.unlock();

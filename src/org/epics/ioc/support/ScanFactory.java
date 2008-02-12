@@ -5,9 +5,6 @@
  */
 package org.epics.ioc.support;
 
-import java.util.concurrent.locks.Condition;
-import java.util.concurrent.locks.ReentrantLock;
-
 import org.epics.ioc.db.DBField;
 import org.epics.ioc.db.DBListener;
 import org.epics.ioc.db.DBRecord;
@@ -22,18 +19,16 @@ import org.epics.ioc.pv.PVInt;
 import org.epics.ioc.pv.PVString;
 import org.epics.ioc.pv.PVStructure;
 import org.epics.ioc.util.EventScanner;
+import org.epics.ioc.util.IOCExecutor;
+import org.epics.ioc.util.IOCExecutorFactory;
 import org.epics.ioc.util.MessageType;
 import org.epics.ioc.util.PeriodicScanner;
 import org.epics.ioc.util.RequestResult;
-import org.epics.ioc.util.RunnableReady;
 import org.epics.ioc.util.ScanField;
 import org.epics.ioc.util.ScanFieldFactory;
 import org.epics.ioc.util.ScanPriority;
 import org.epics.ioc.util.ScanType;
 import org.epics.ioc.util.ScannerFactory;
-import org.epics.ioc.util.ThreadCreate;
-import org.epics.ioc.util.ThreadFactory;
-import org.epics.ioc.util.ThreadReady;
 
 /**
  * Support for scan field.
@@ -41,7 +36,8 @@ import org.epics.ioc.util.ThreadReady;
  *
  */
 public class ScanFactory {
-    private static ThreadCreate threadCreate = ThreadFactory.getThreadCreate();
+    private static IOCExecutor iocExecutor 
+        = IOCExecutorFactory.create("scanFieldModify", ScanPriority.lower);
     private static PeriodicScanner periodicScanner = ScannerFactory.getPeriodicScanner();
     private static EventScanner eventScanner = ScannerFactory.getEventScanner();
     private static final String supportName = "scan";
@@ -75,7 +71,6 @@ public class ScanFactory {
     private static class ScanImpl extends AbstractSupport
     implements ScanSupport,DBListener
     {
-        private DBStructure dbScan;
         private ScanField scanField;
         private DBRecord dbRecord = null;
         private PVProcessSelf pvProcessSelf;
@@ -102,10 +97,8 @@ public class ScanFactory {
         
         private ScanImpl(DBStructure dbScan,ScanField scanField) {
             super(supportName,dbScan);
-            this.dbScan = dbScan;
             this.scanField = scanField;
             dbRecord = dbScan.getDBRecord();
-            pvProcessSelf = new PVProcessSelf(this,dbRecord,scanField);
             recordListener = dbRecord.createRecordListener(this);
             pvScanType = dbScan.getPVStructure().getStructureField("type", "scanType");
             dbScanType = dbRecord.findDBField(pvScanType);
@@ -165,6 +158,16 @@ public class ScanFactory {
          * @see org.epics.ioc.process.AbstractSupport#initialize(org.epics.ioc.process.SupportCreation)
          */
         public void initialize() {
+            if(scanField.getProcessSelf()) {
+                pvProcessSelf = new PVProcessSelf(this,dbRecord,scanField);
+                if(!pvProcessSelf.becomeProcessor()) {
+                    super.message(
+                        "could not become recordProcessor",
+                        MessageType.fatalError);
+                    pvProcessSelf = null;
+                    return;
+                }
+            }
             setSupportState(SupportState.readyForStart);
         }
         /* (non-Javadoc)
@@ -212,7 +215,7 @@ public class ScanFactory {
          * @see org.epics.ioc.process.AbstractSupport#process(org.epics.ioc.process.RecordProcessRequester)
          */
         public void process(SupportProcessRequester supportProcessRequester) {
-            dbRecord.getPVRecord().message("process is being called. Why?", MessageType.error);
+            super.message("process is being called. Why?", MessageType.error);
             supportProcessRequester.supportProcessDone(RequestResult.failure);
         }       
         /* (non-Javadoc)
@@ -270,51 +273,28 @@ public class ScanFactory {
                 scanPriority = scanField.getPriority();
                 eventName = scanField.getEventName();
                 if(scanType==ScanType.event || scanType==ScanType.periodic) {
-                    String name = dbScan.getPVField().getFullFieldName();
-                    int priority = ScanPriority.javaPriority[1];
-                    scanModify = new ScanModify(name,priority);
+                    scanModify = new ScanModify();
                     scanModify.modify();
                 }
             }
         }
-          
-        private class ScanModify implements RunnableReady {
-            private ReentrantLock lock = new ReentrantLock();
-            private Condition waitForWork = lock.newCondition();
+         
+        private class ScanModify implements Runnable {
             private boolean isPeriodic = false;
             private boolean isEvent = false;
             
-            private ScanModify(String name,int priority) {
-                threadCreate.create(name, priority, this);
-            }
+            private ScanModify() {}
+            
             /* (non-Javadoc)
-             * @see org.epics.ioc.util.RunnableReady#run(org.epics.ioc.util.ThreadReady)
+             * @see java.lang.Runnable#run()
              */
-            public void run(ThreadReady threadReady) {
-                boolean firstTime = true;
-                try {
-                    lock.lock();
-                    try {
-                        if(firstTime) {
-                            firstTime = false;
-                            threadReady.ready();
-                        }
-                        waitForWork.await();
-                    } finally {
-                        lock.unlock();
-                    } 
+            public void run() {
                     stopScanner();
                     startScanner();
-                } catch(InterruptedException e) {}
             }
             
             public void modify() {
-                lock.lock();
-                try {
-                    waitForWork.signal();
-                } finally {
-                    lock.unlock();
-                }
+                iocExecutor.execute(this);
             }
             
             
@@ -380,18 +360,8 @@ public class ScanFactory {
             this.scanField = scanField;
         }
         
-        /* (non-Javadoc)
-         * @see org.epics.ioc.util.Requester#getRequesterName()
-         */
-        public String getRequesterName() {
-            return recordProcess.getRecord().getPVRecord().getRecordName();
-        }
-
-        /* (non-Javadoc)
-         * @see org.epics.ioc.util.Requester#message(java.lang.String, org.epics.ioc.util.MessageType)
-         */
-        public void message(String message, MessageType messageType) {
-            recordProcess.getRecord().getPVRecord().message(message, messageType);
+        private boolean becomeProcessor() {
+            return recordProcess.setRecordProcessRequester(this);
         }
 
         private boolean processSelf(RecordProcessRequester recordProcessRequester) {
@@ -421,6 +391,19 @@ public class ScanFactory {
                 throw new IllegalStateException("not the recordProcessRequester");
             }
             recordProcess.setInactive(this);
+        }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.util.Requester#getRequesterName()
+         */
+        public String getRequesterName() {
+            return recordProcess.getRecord().getPVRecord().getRecordName();
+        }
+
+        /* (non-Javadoc)
+         * @see org.epics.ioc.util.Requester#message(java.lang.String, org.epics.ioc.util.MessageType)
+         */
+        public void message(String message, MessageType messageType) {
+            recordProcess.getRecord().getPVRecord().message(message, messageType);
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.process.RecordProcessRequester#recordProcessComplete()

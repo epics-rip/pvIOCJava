@@ -5,10 +5,6 @@
  */
 package org.epics.ioc.swtshell;
 
-import java.util.concurrent.locks.Condition;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
@@ -22,7 +18,6 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.epics.ioc.ca.Channel;
-import org.epics.ioc.ca.ChannelField;
 import org.epics.ioc.ca.ChannelListener;
 import org.epics.ioc.ca.ChannelProcess;
 import org.epics.ioc.ca.ChannelProcessRequester;
@@ -156,70 +151,27 @@ public class ProcessFactory {
         public void widgetSelected(SelectionEvent arg0) {
             Object object = arg0.getSource(); 
             if(object==processButton) {
-                ProcessIt process = new ProcessIt(channel,this);
-                boolean result = process.connect();
-                if(result) {
-                    process.process();
-                    process.disconnect();
-                    message(String.format("processed%n"),MessageType.info);
-                } else {
-                    message(String.format("process request failed%n"),MessageType.info);
-                    process = null;
-                }
+                new ProcessIt(channel,this);
                 return;
             }
         }
         
-        private class ProcessIt implements
-        Runnable,
-        ChannelProcessRequester,ChannelListener
+        private class ProcessIt implements Runnable,ChannelProcessRequester
         {   
-            private Lock lock = new ReentrantLock();
-            private Condition waitDone = lock.newCondition();
-            private volatile boolean allDone = false;
-            private Channel channel;
             final private Requester requester;
             private ChannelProcess channelProcess;
 
             private ProcessIt(Channel channel,Requester requester) {
-                this.channel = channel;
                 this.requester = requester;
-            }
-
-            private boolean connect() {
                 channelProcess = channel.createChannelProcess(this);
-                if(channelProcess==null) return false;
-                return true;
-            }
-
-            private void disconnect() {
-                channelProcess.destroy();
-            }
-
-            private void process() {
-                if(channelProcess==null) {
-                    requester.message("not connected", MessageType.info);
-                }
-                allDone = false;
-                iocExecutor.execute(this);
-                lock.lock();
-                try {
-                    while(!allDone) {                       
-                        waitDone.await();
-                    }
-                } catch (InterruptedException ie) {
-                } finally {
-                    lock.unlock();
-                }
-                requester.message("processComplete", MessageType.info);
+                if(channelProcess!=null) iocExecutor.execute(this);
             }
             /* (non-Javadoc)
              * @see java.lang.Runnable#run()
              */
             public void run() {
-                allDone = false;
                 channelProcess.process();
-                requester.message("processComplete", MessageType.info);
+               
             }
             /* (non-Javadoc)
              * @see org.epics.ioc.util.Requester#getRequesterName()
@@ -237,34 +189,9 @@ public class ProcessFactory {
              * @see org.epics.ioc.ca.ChannelProcessRequester#processDone(org.epics.ioc.util.RequestResult)
              */
             public void processDone(RequestResult requestResult) {
-                lock.lock();
-                try {
-                    allDone = true;
-                    waitDone.signal();
-                } finally {
-                    lock.unlock();
-                }
-            }
-            /* (non-Javadoc)
-             * @see org.epics.ioc.ca.ChannelListener#channelStateChange(org.epics.ioc.ca.Channel, boolean)
-             */
-            public void channelStateChange(Channel c, boolean isConnected) {
-                // TODO Auto-generated method stub
-
-            }
-            /* (non-Javadoc)
-             * @see org.epics.ioc.ca.ChannelListener#disconnect(org.epics.ioc.ca.Channel)
-             */
-            public void destroy(Channel c) {
-                // TODO Auto-generated method stub
-
-            }
-            /* (non-Javadoc)
-             * @see org.epics.ioc.ca.ChannelFieldGroupListener#accessRightsChange(org.epics.ioc.ca.Channel, org.epics.ioc.ca.ChannelField)
-             */
-            public void accessRightsChange(Channel channel, ChannelField channelField) {
-                // TODO Auto-generated method stub
-
+                channelProcess.destroy();
+                requester.message("processComplete", MessageType.info);
+                
             }
         }
     }

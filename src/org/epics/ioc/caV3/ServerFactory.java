@@ -86,6 +86,8 @@ import org.epics.ioc.pv.StringArrayData;
 import org.epics.ioc.pv.StructureArrayData;
 import org.epics.ioc.pv.Type;
 import org.epics.ioc.util.AlarmSeverity;
+import org.epics.ioc.util.IOCExecutor;
+import org.epics.ioc.util.IOCExecutorFactory;
 import org.epics.ioc.util.MessageType;
 import org.epics.ioc.util.PVTimeStamp;
 import org.epics.ioc.util.RequestResult;
@@ -106,6 +108,8 @@ public class ServerFactory {
         new ThreadInstance();
     }
     
+    private static IOCExecutor iocExecutor
+        = IOCExecutorFactory.create("caV3Monitor", ScanPriority.low);
     private static final ThreadCreate threadCreate = ThreadFactory.getThreadCreate();
     private static final Convert convert = ConvertFactory.getConvert();
     private static final ChannelAccess channelAccess = ChannelAccessFactory.getChannelAccess();
@@ -865,7 +869,7 @@ public class ServerFactory {
             }
             
             private void start() {
-                cdMonitor.start(3,name, ScanPriority.getJavaPriority(ScanPriority.low));
+                cdMonitor.start(3,iocExecutor);
             }
             private void stop() {
                 cdMonitor.stop();

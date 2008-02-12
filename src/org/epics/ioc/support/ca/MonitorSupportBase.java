@@ -6,8 +6,6 @@
 package org.epics.ioc.support.ca;
 
 import java.util.List;
-import java.util.concurrent.locks.Condition;
-import java.util.concurrent.locks.ReentrantLock;
 
 import org.epics.ioc.ca.CD;
 import org.epics.ioc.ca.CDField;
@@ -37,6 +35,8 @@ import org.epics.ioc.pv.StringArrayData;
 import org.epics.ioc.pv.Structure;
 import org.epics.ioc.pv.Type;
 import org.epics.ioc.util.AlarmSeverity;
+import org.epics.ioc.util.IOCExecutor;
+import org.epics.ioc.util.IOCExecutorFactory;
 import org.epics.ioc.util.MessageType;
 import org.epics.ioc.util.RequestResult;
 import org.epics.ioc.util.ScanPriority;
@@ -75,6 +75,8 @@ implements CDMonitorRequester,RecordProcessRequester
         }
     }
     
+    private static IOCExecutor iocExecutor
+        = IOCExecutorFactory.create("caLinkMonitor", ScanPriority.low);
     private PVInt monitorTypeAccess = null;
     private PVDouble deadbandAccess = null;
     private PVInt queueSizeAccess = null;
@@ -109,7 +111,6 @@ implements CDMonitorRequester,RecordProcessRequester
     private AlarmSeverity alarmSeverity = AlarmSeverity.none;
     private String alarmMessage = null;
     private int numberOverrun = 0;
-    private ReentrantLock processLock = null;
    
     
     /* (non-Javadoc)
@@ -406,8 +407,7 @@ implements CDMonitorRequester,RecordProcessRequester
                 cdMonitor.lookForPut(channelField, true);
             }
         }
-        String threadName = pvStructure.getFullName();
-        cdMonitor.start(queueSize, threadName, ScanPriority.getJavaPriority(ScanPriority.low));
+        cdMonitor.start(queueSize,iocExecutor);
     }
     
     private boolean checkCompatibility(Field targetField) {

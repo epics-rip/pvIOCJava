@@ -10,7 +10,7 @@
 <body>
 <h1 style="text-align: center">EPICS JavaIOC: channel Access<br />
 package: org.epics.ioc.ca<br />
-2008.02.08</h1>
+2008.02.12</h1>
 CONTENTS 
 
 <div class="toc">
@@ -843,7 +843,7 @@ and associated subfields, which are described in the next section.</p>
     class BaseCDQueue { ... }
     class BaseCDPut { ... }
     class BaseCDGet { ... }
-    classs BaseCDMonitor { ... }</pre>
+</pre>
 
 <h3 id="CD">CD</h3>
 
@@ -1192,7 +1192,7 @@ IOC database. The notification includes data.</p>
         void lookForChange(ChannelField channelField, boolean causeMonitor);
         void lookForAbsoluteChange(ChannelField channelField,double value);
         void lookForPercentageChange(ChannelField channelField,double value);
-        void start(int queueSize, String threadName, int threadPriority);
+        void start(int queueSize,IOCExecutor iocExecutor);
         void stop();
     }
     

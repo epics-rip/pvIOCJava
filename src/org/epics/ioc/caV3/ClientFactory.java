@@ -20,11 +20,11 @@ import org.epics.ioc.ca.Channel;
 import org.epics.ioc.ca.ChannelAccessFactory;
 import org.epics.ioc.ca.ChannelListener;
 import org.epics.ioc.ca.ChannelProvider;
+import org.epics.ioc.pv.Type;
 import org.epics.ioc.util.RunnableReady;
 import org.epics.ioc.util.ThreadCreate;
 import org.epics.ioc.util.ThreadFactory;
 import org.epics.ioc.util.ThreadReady;
-import org.epics.ioc.pv.*;
 
 /**
  * Factory and implementation of Channel Access V3 client. This provides communication

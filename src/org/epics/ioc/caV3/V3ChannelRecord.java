@@ -5,7 +5,8 @@
  */
 package org.epics.ioc.caV3;
 
-import gov.aps.jca.dbr.*;
+import gov.aps.jca.dbr.DBR;
+import gov.aps.jca.dbr.DBRType;
 
 import org.epics.ioc.ca.ChannelMonitorRequester;
 import org.epics.ioc.pv.PVRecord;

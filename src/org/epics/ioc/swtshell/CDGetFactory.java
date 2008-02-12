@@ -86,7 +86,7 @@ public class CDGetFactory {
                 }
             }
             shell = new Shell(parent);
-            shell.setText("getFieldName");
+            shell.setText("getValue");
             GridLayout gridLayout = new GridLayout();
             gridLayout.numColumns = 1;
             shell.setLayout(gridLayout);

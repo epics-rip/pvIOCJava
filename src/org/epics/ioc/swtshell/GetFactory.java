@@ -5,10 +5,6 @@
  */
 package org.epics.ioc.swtshell;
 
-import java.util.concurrent.locks.Condition;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
@@ -30,7 +26,6 @@ import org.epics.ioc.ca.ChannelField;
 import org.epics.ioc.ca.ChannelFieldGroup;
 import org.epics.ioc.ca.ChannelFieldGroupListener;
 import org.epics.ioc.ca.ChannelListener;
-import org.epics.ioc.pv.Type;
 import org.epics.ioc.util.IOCExecutor;
 import org.epics.ioc.util.IOCExecutorFactory;
 import org.epics.ioc.util.MessageType;
@@ -74,7 +69,6 @@ public class GetFactory {
         private Button processButton;
         private Button propertyButton;
         private Text consoleText = null; 
-        private GetIt get = null;
         
         /* (non-Javadoc)
          * @see org.eclipse.swt.events.DisposeListener#widgetDisposed(org.eclipse.swt.events.DisposeEvent)
@@ -196,30 +190,17 @@ public class GetFactory {
                 propertyNames = propertyGet.getPropertyNames(channelField);
             } else if(object==getButton) {
                 boolean process = processButton.getSelection();
-                get = new GetIt(channel,this,process);
-                boolean result = get.connect(channelField, propertyNames);
-                if(!result) {
-                    message(String.format("not connected%n"),MessageType.info);
-                    return;
-                }
-                CD cD = get.get();
-                if(cD==null) return;
-                CDPrint cdPrint = CDPrintFactory.create(cD.getCDRecord(),consoleText);
-                cdPrint.print();
-                get.disconnect();
-                get = null;
-                return;
+                GetIt get = new GetIt(channel,this,process);
+                get.connect(channelField, propertyNames);
             }
         }
         
+        // This is a oneShot, i.e. it issues a single get request.
         private class GetIt implements
         Runnable,
         CDGetRequester,
         ChannelFieldGroupListener
         {
-            private Lock lock = new ReentrantLock();
-            private Condition waitDone = lock.newCondition();
-            private boolean allDone = false;
             private Channel channel;
             final private Requester requester;
             private boolean process;
@@ -232,7 +213,7 @@ public class GetFactory {
                 this.process = process;
             }
 
-            private boolean connect(ChannelField channelField,String[] propertyNames) {
+            private void connect(ChannelField channelField,String[] propertyNames) {
                 ChannelFieldGroup getFieldGroup = channel.createFieldGroup(this);
                 getFieldGroup.addChannelField(channelField);
                 if(propertyNames!=null && propertyNames.length>0) {
@@ -248,28 +229,11 @@ public class GetFactory {
                 }
                 cd = CDFactory.createCD(channel, getFieldGroup);
                 cdGet = cd.createCDGet(this, process);
-                if(cdGet==null) return false;
-                return true;
-            }
-
-            private void disconnect() {
-                cd.destroy(cdGet);
-            }
-
-            private CD get() {                
-                allDone = false;               
-                iocExecutor.execute(this);
-                lock.lock();
-                try {
-                    while(!allDone) {                       
-                        waitDone.await();
-                    }
-                } catch (InterruptedException ie) {
-                } finally {
-                    lock.unlock();
+                if(cdGet==null) {
+                    cd.destroy();
+                    return;
                 }
-
-                return cd;
+                iocExecutor.execute(this);
             }
             /* (non-Javadoc)
              * @see java.lang.Runnable#run()
@@ -293,13 +257,14 @@ public class GetFactory {
              * @see org.epics.ioc.ca.CDGetRequester#getDone(org.epics.ioc.util.RequestResult)
              */
             public void getDone(RequestResult requestResult) {
-                lock.lock();
-                try {
-                    allDone = true;
-                    waitDone.signal();
-                } finally {
-                    lock.unlock();
-                }
+                display.syncExec( new Runnable() {
+                    public void run() {
+                        CDPrint cdPrint = CDPrintFactory.create(cd.getCDRecord(),consoleText);
+                        cdPrint.print();
+                    }
+
+                });
+                cd.destroy();
             }
             /* (non-Javadoc)
              * @see org.epics.ioc.ca.ChannelFieldGroupListener#accessRightsChange(org.epics.ioc.ca.Channel, org.epics.ioc.ca.ChannelField)

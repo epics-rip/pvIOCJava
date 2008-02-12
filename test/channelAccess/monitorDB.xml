@@ -59,7 +59,7 @@
             <pvname>monitorCounter</pvname>
             <type><choice>put</choice></type>
             <process>true</process>
-            <inheritSeverity>true</inheritSeverity>
+            <propertyNames>alarm</propertyNames>
     </input>
     <supportArray>
         <value structureName = "supportArrayElement">
@@ -69,15 +69,6 @@
                     <process>true</process>
             </link>
         </value>
-<!-- do it twice fails WHY
-        <value structureName = "supportArrayElement">
-            <wait>true</wait>
-            <link  supportName = "outputSupport" structureName = "outputSupport">
-                    <pvname>cachePut</pvname>
-                    <process>true</process>
-            </link>
-        </value>
--->
         <value structureName = "supportArrayElement">
             <link  supportName = "delay" structureName = "delay">
                     <min>100</min>
@@ -104,7 +95,7 @@
             <pvname>cachePut</pvname>
             <type><choice>change</choice></type>
             <process>true</process>
-            <inheritSeverity>true</inheritSeverity>
+            <propertyNames>alarm</propertyNames>
     </input>
     <supportArray>
         <value structureName = "supportArrayElement">
@@ -125,7 +116,7 @@
             <type><choice>absoluteChange</choice></type>
             <deadband>1.001</deadband>
             <process>true</process>
-            <inheritSeverity>true</inheritSeverity>
+            <propertyNames>alarm</propertyNames>
     </input>
     <supportArray>
         <value structureName = "supportArrayElement">
@@ -146,7 +137,7 @@
             <type><choice>percentageChange</choice></type>
             <deadband>20.0</deadband>
             <process>true</process>
-            <inheritSeverity>true</inheritSeverity>
+            <propertyNames>alarm</propertyNames>
     </input>
     <supportArray>
         <value structureName = "supportArrayElement">
@@ -170,7 +161,6 @@
             <link  supportName = "inputSupport" structureName = "inputSupport">
                     <pvname>monitorCounter</pvname>
                     <process>false</process>
-                    <inheritSeverity>true</inheritSeverity>
             </link>
         </value>
         <value structureName = "supportArrayElement">

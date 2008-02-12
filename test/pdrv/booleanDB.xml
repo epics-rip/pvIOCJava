@@ -11,8 +11,8 @@
 </record>
 
 <record name = "syncBooleanDriverControl" type = "portDeviceControl" >
-<!--
     <portDevice>syncBooleanDigitalDriver[0]</portDevice>
+<!--
     <traceMask>0x0fff</traceMask>
     <traceIOMask>0x0fff</traceIOMask>
 -->
@@ -38,6 +38,8 @@
     <calculator supportName = "counterCalculator" />
     <scan>
         <type><choice>periodic</choice></type>
+<!--
+-->
         <rate>0.5</rate>
     </scan>
     <supportArray>

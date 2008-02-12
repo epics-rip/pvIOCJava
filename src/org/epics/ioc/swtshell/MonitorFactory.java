@@ -34,6 +34,8 @@ import org.epics.ioc.ca.ChannelFieldGroupListener;
 import org.epics.ioc.ca.ChannelListener;
 import org.epics.ioc.pv.Field;
 import org.epics.ioc.pv.Type;
+import org.epics.ioc.util.IOCExecutor;
+import org.epics.ioc.util.IOCExecutorFactory;
 import org.epics.ioc.util.MessageType;
 import org.epics.ioc.util.Requester;
 import org.epics.ioc.util.ScanPriority;
@@ -61,6 +63,8 @@ public class MonitorFactory {
             this.display = display;
         }
 
+        private static IOCExecutor iocExecutor
+            = IOCExecutorFactory.create("swtshellMonitor", ScanPriority.low);
         private static String windowName = "monitor";
         private Display display;
         private Shell shell = null;
@@ -285,10 +289,7 @@ public class MonitorFactory {
                 startStopButton.setText("stopMonitor");
                 disableOptions();
                 startStopButton.setEnabled(true);
-                cdMonitor.start(
-                        queueSize,
-                        getRequesterName(),
-                        ScanPriority.getJavaPriority(ScanPriority.low));
+                cdMonitor.start(queueSize,iocExecutor);
                 return;
             }
         }

@@ -30,9 +30,9 @@ public interface CDQueue {
     CD getFree(boolean forceFree);
     /**
      * Add channelData to inUseList
-     * @param cD The channelData to add.
+     * @param cd The channelData to add.
      */
-    void setInUse(CD cD);
+    void setInUse(CD cd);
     /**
      * Get the oldest queue element.
      * @return The oldest element.

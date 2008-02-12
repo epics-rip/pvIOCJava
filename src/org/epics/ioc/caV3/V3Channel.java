@@ -6,8 +6,8 @@
 package org.epics.ioc.caV3;
 
 import org.epics.ioc.ca.Channel;
+import org.epics.ioc.pv.Type;
 import org.epics.ioc.util.IOCExecutor;
-import org.epics.ioc.pv.*;
 
 /**
  * Channel interface for communicating with V3 IOCs.

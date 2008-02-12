@@ -148,18 +148,14 @@ public class ChannelProviderLocalFactory  {
         {
             if(!super.isConnected()) {
                 channelProcessRequester.message(
-                    "createChannelProcess but not connected",MessageType.warning);
+                        "createChannelProcess but not connected",MessageType.warning);
                 return null;
             }
             ChannelProcessImpl channelProcess;
-            try {
-                channelProcess = new ChannelProcessImpl(channelProcessRequester);
-                super.add(channelProcess);
-            } catch(IllegalStateException e) {
-                channelProcessRequester.message(
-                        e.getMessage(),MessageType.fatalError);
-                return null;
-            }
+            channelProcess = new ChannelProcessImpl(channelProcessRequester);
+            boolean ok = channelProcess.init();
+            if(!ok) return null;
+            super.add(channelProcess);
             return channelProcess;
         }       
         /* (non-Javadoc)
@@ -280,14 +276,20 @@ public class ChannelProviderLocalFactory  {
             private ChannelProcessImpl(ChannelProcessRequester channelProcessRequester)
             {
                 this.channelProcessRequester = channelProcessRequester;
+                
+            }
+            
+            private boolean init() {
                 recordProcess = dbRecord.getRecordProcess();
                 isRecordProcessRequester = recordProcess.setRecordProcessRequester(this);
                 if(!isRecordProcessRequester && !recordProcess.canProcessSelf()) {
                     channelProcessRequester.message(
                         "already has process requester other than self", MessageType.error);
+                    return false;
                 }
                 requesterName = "Process:" + channelProcessRequester.getRequesterName();
-            }           
+                return true;
+            }
             /* (non-Javadoc)
              * @see org.epics.ioc.ca.ChannelProcess#destroy()
              */
@@ -556,7 +558,8 @@ public class ChannelProviderLocalFactory  {
                             break;
                         }
                     } else {
-                        if(recordProcess.processSelfRequest(this)){
+                        boolean result = recordProcess.processSelfRequest(this);
+                        if(result){
                             recordProcess.processSelfSetActive(this);
                         }  else {
                             message("could not process record",MessageType.warning);

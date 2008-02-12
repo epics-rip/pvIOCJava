@@ -128,7 +128,10 @@
     </input>
     <valueAlarm structureName = "enumeratedAlarm">
             <active>true</active>
-            <changeStateAlarm><choice>none</choice></changeStateAlarm>
+            <changeStateAlarm>
+                 <severity><choice>none</choice></severity>
+                 <message>Change State</message>
+             </changeStateAlarm>
     </valueAlarm>
 </record>
 
@@ -158,7 +161,10 @@
     </input>
     <valueAlarm structureName = "enumeratedAlarm">
             <active>true</active>
-            <changeStateAlarm><choice>none</choice></changeStateAlarm>
+            <changeStateAlarm>
+                 <severity><choice>none</choice></severity>
+                 <message>Change State</message>
+             </changeStateAlarm>
     </valueAlarm>
 </record>
 
@@ -198,7 +204,10 @@
     </input>
     <valueAlarm structureName = "enumeratedAlarm">
             <active>true</active>
-            <changeStateAlarm><choice>none</choice></changeStateAlarm>
+            <changeStateAlarm>
+                 <severity><choice>none</choice></severity>
+                 <message>Change State</message>
+             </changeStateAlarm>
     </valueAlarm>
 
 </record>
@@ -239,7 +248,10 @@
     </input>
     <valueAlarm structureName = "enumeratedAlarm">
             <active>true</active>
-            <changeStateAlarm><choice>none</choice></changeStateAlarm>
+            <changeStateAlarm>
+                 <severity><choice>none</choice></severity>
+                 <message>Change State</message>
+             </changeStateAlarm>
     </valueAlarm>
 </record>
 
@@ -290,7 +302,10 @@
     </input>
     <valueAlarm structureName = "enumeratedAlarm">
             <active>true</active>
-            <changeStateAlarm><choice>none</choice></changeStateAlarm>
+            <changeStateAlarm>
+                 <severity><choice>none</choice></severity>
+                 <message>Change State</message>
+             </changeStateAlarm>
     </valueAlarm>
 
 </record>

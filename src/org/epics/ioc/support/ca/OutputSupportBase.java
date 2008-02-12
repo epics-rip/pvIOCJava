@@ -18,7 +18,7 @@ import org.epics.ioc.process.ProcessCallbackRequester;
 import org.epics.ioc.process.ProcessContinueRequester;
 import org.epics.ioc.process.SupportProcessRequester;
 import org.epics.ioc.process.SupportState;
-import org.epics.ioc.pv.*;
+import org.epics.ioc.pv.Array;
 import org.epics.ioc.pv.Field;
 import org.epics.ioc.pv.PVArray;
 import org.epics.ioc.pv.PVBoolean;
@@ -90,7 +90,7 @@ implements ProcessCallbackRequester,ProcessContinueRequester,CDPutRequester
         }
     }
     /* (non-Javadoc)
-     * @see org.epics.ioc.process.Support#initialize()
+     * @see org.epics.ioc.support.ca.AbstractLinkSupport#initialize()
      */
     public void initialize() {
         super.initialize();
@@ -116,7 +116,7 @@ implements ProcessCallbackRequester,ProcessContinueRequester,CDPutRequester
         valueDBField = dbStructure.getDBRecord().findDBField(pvField);
     }
     /* (non-Javadoc)
-     * @see org.epics.ioc.process.Support#start()
+     * @see org.epics.ioc.support.ca.AbstractLinkSupport#start()
      */
     public void start() {
         super.start();
@@ -125,7 +125,7 @@ implements ProcessCallbackRequester,ProcessContinueRequester,CDPutRequester
         super.connect();
     }
     /* (non-Javadoc)
-     * @see org.epics.ioc.process.Support#stop()
+     * @see org.epics.ioc.support.ca.AbstractLinkSupport#stop()
      */
     public void stop() {
         if(cdPut!=null) cd.destroy(cdPut);

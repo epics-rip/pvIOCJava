@@ -20,6 +20,7 @@ import org.epics.ioc.pv.PVLong;
 import org.epics.ioc.pv.PVShort;
 import org.epics.ioc.pv.PVString;
 import org.epics.ioc.pv.Type;
+import org.epics.ioc.util.IOCExecutor;
 import org.epics.ioc.util.MessageType;
 
 /**
@@ -43,17 +44,21 @@ public class CDMonitorFactory {
     
     private static Convert convert = ConvertFactory.getConvert();
 
-    private static class CDMonitorImpl extends BaseCDMonitor
+    private static class CDMonitorImpl
     implements CDMonitor, ChannelMonitorRequester, ChannelFieldGroupListener
     {
 
-        private CDMonitorImpl(Channel channel,CDMonitorRequester cDMonitorRequester)
+        private CDMonitorImpl(Channel channel,CDMonitorRequester cdMonitorRequester)
         {
-            super(cDMonitorRequester);
             this.channel = channel;
+            this.cdMonitorRequester = cdMonitorRequester;
         }
         
         private Channel channel;
+        private CDMonitorRequester cdMonitorRequester;
+        private IOCExecutor iocExecutor = null;
+        private CDQueue cdQueue = null;    
+        private CallRequester callRequester = null;;    
         private ChannelMonitor channelMonitor = null;
         private ArrayList<ChannelField> channelFieldList = new ArrayList<ChannelField>();
         private ArrayList<MonitorField> monitorFieldList = new ArrayList<MonitorField>();
@@ -61,26 +66,7 @@ public class CDMonitorFactory {
         private CD cd = null;
         private boolean monitorOccured = true;
         
-        /* (non-Javadoc)
-         * @see org.epics.ioc.ca.ChannelFieldGroupListener#accessRightsChange(org.epics.ioc.ca.Channel, org.epics.ioc.ca.ChannelField)
-         */
-        public void accessRightsChange(Channel channel, ChannelField channelField) {
-            // TODO Auto-generated method stub
-            
-        }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.util.Requester#getRequesterName()
-         */
-        public String getRequesterName() {
-            return super.cdMonitorRequester.getRequesterName();
-        }
-
-        /* (non-Javadoc)
-         * @see org.epics.ioc.util.Requester#message(java.lang.String, org.epics.ioc.util.MessageType)
-         */
-        public void message(String message, MessageType messageType) {
-            super.cdMonitorRequester.message(message, messageType);
-        }
+        
         /* (non-Javadoc)
          * @see org.epics.ioc.ca.CDMonitor#lookForAbsoluteChange(org.epics.ioc.ca.ChannelField, double)
          */
@@ -133,19 +119,21 @@ public class CDMonitorFactory {
             monitorFieldList.add(monitorField);
             channelFieldList.add(channelField);
         }
-        
         /* (non-Javadoc)
-         * @see org.epics.ioc.ca.MonitorCDPut#start(int, java.lang.String, int)
+         * @see org.epics.ioc.ca.CDMonitor#start(int, org.epics.ioc.util.IOCExecutor)
          */
-        public void start(int queueSize, String threadName, int threadPriority) {
+        public void start(int queueSize, IOCExecutor iocExecutor) {
+            
             channelFieldGroup = channel.createFieldGroup(this);
             for(int i=0; i<channelFieldList.size(); i++) {
                 channelFieldGroup.addChannelField(channelFieldList.get(i));
             }
-            super.createQueue(channel, queueSize, channelFieldGroup);
-            super.start(threadName, threadPriority);
-            CD initialData = super.getFreeCD();
+            cdQueue = CDFactory.createCDQueue(queueSize, channel, channelFieldGroup);
+            this.iocExecutor = iocExecutor;
+            callRequester = new CallRequester();
+            CD initialData = cdQueue.getFree(true);
             initialData.clearNumPuts();
+            
             channelMonitor = channel.createChannelMonitor(this);
             channelMonitor.setFieldGroup(channelFieldGroup);
             channelMonitor.getData(initialData);            
@@ -155,13 +143,14 @@ public class CDMonitorFactory {
                 MonitorField monitorField = monitorFieldList.get(i);
                 monitorField.initField(channelField.getPVField());
             }
-            super.notifyRequestor(initialData);
-            cd = super.getFreeCD();
+            cd = cdQueue.getFree(true);
             List<ChannelField> initialList = initialData.getChannelFieldGroup().getList();
             for(int i=0; i<initialList.size(); i++) {
                 cd.put(initialList.get(i).getPVField());
                 
             }
+            cdQueue.setInUse(initialData);
+            callRequester.call();
             cd.clearNumPuts();
             monitorOccured = false;
             channelMonitor.start();
@@ -174,7 +163,18 @@ public class CDMonitorFactory {
             channelFieldGroup = null;
             channelMonitor = null;
         }
-
+        /* (non-Javadoc)
+         * @see org.epics.ioc.util.Requester#getRequesterName()
+         */
+        public String getRequesterName() {
+            return cdMonitorRequester.getRequesterName();
+        }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.util.Requester#message(java.lang.String, org.epics.ioc.util.MessageType)
+         */
+        public void message(String message, MessageType messageType) {
+            cdMonitorRequester.message(message, messageType);
+        }
         /* (non-Javadoc)
          * @see org.epics.ioc.ca.ChannelMonitorRequester#beginPut()
          */
@@ -216,22 +216,61 @@ public class CDMonitorFactory {
             }
             message("Logic error: newField did not find pvField.",MessageType.error);
         }
-
         /* (non-Javadoc)
          * @see org.epics.ioc.ca.ChannelMonitorRequester#endPut()
          */
         public void endPut() {
             if(monitorOccured) {
                 CD initial = cd;
-                cd = super.getFreeCD();
+                cd = cdQueue.getFree(true);
                 List<ChannelField> initialList = initial.getChannelFieldGroup().getList();
                 for(int i=0; i<initialList.size(); i++) {
                     cd.put(initialList.get(i).getPVField());
                     
                 }
                 cd.clearNumPuts();
-                super.notifyRequestor(initial);
+                cdQueue.setInUse(initial);
+                callRequester.call();
             }
+        }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.ca.ChannelFieldGroupListener#accessRightsChange(org.epics.ioc.ca.Channel, org.epics.ioc.ca.ChannelField)
+         */
+        public void accessRightsChange(Channel channel, ChannelField channelField) {
+            // Nothing to do until access rights implemented
+        }
+        
+        // The calls requester via a separate thread.
+        private class CallRequester implements Runnable {
+
+            private CallRequester(){}         
+
+            /* (non-Javadoc)
+             * @see java.lang.Runnable#run()
+             */
+            public void run() {
+                int number = 0;
+                while(true) {
+                    CD cd = cdQueue.getNext();
+                    if(cd==null) {
+                        if(number!=1) {
+                            cdMonitorRequester.message(
+                                " dequeued " + number + " monitors",
+                                MessageType.info);
+                        }
+                        return;
+                    }
+                    number++;
+                    int missed = cdQueue.getNumberMissed();
+                    if(missed>0) cdMonitorRequester.dataOverrun(missed);
+                    cdMonitorRequester.monitorCD(cd);
+                    cdQueue.releaseNext(cd);
+                }
+            }
+            private void call() {
+                iocExecutor.execute(this);
+            }
+
         }
         
         private enum MonitorType {
