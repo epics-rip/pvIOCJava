@@ -191,10 +191,9 @@ public abstract class AbstractChannel implements Channel{
      * @see org.epics.ioc.ca.Channel#disconnect()
      */
     public void disconnect() {
-        ChannelListener channelListener = destroyPvt();
-        if(channelListener!=null) {
-            channelListener.channelStateChange(this, false);
-        }
+        if(isDestroyed) return;
+        isConnected = false;
+        channelListener.channelStateChange(this, false);
     }
     /* (non-Javadoc)
      * @see org.epics.ioc.ca.Channel#isConnected()
@@ -207,8 +206,8 @@ public abstract class AbstractChannel implements Channel{
      */
     public void destroy() {
         if(isDestroyed) return;
-        isDestroyed = true;
         this.disconnect();
+        isDestroyed = true;
     }
     /* (non-Javadoc)
      * @see org.epics.ioc.ca.Channel#getChannelStateListener()
@@ -252,50 +251,4 @@ public abstract class AbstractChannel implements Channel{
         }
         return new BaseChannelFieldGroup(this,listener);
     }
-    
-    private synchronized ChannelListener destroyPvt() {
-        ChannelListener channelListener = this.channelListener;
-        int number = channelProcessList.size();
-        while(number>0) {
-            channelProcessList.getLast().destroy();
-            --number;
-        }
-        if(number!=0) {
-            message("logic error destroying channelProcessList",MessageType.error);
-        }
-        number = channelGetList.size();
-        while(number>0) {
-            channelGetList.getLast().destroy();
-            --number;
-        }
-        if(number!=0) {
-            message("logic error destroying channelGetList",MessageType.error);
-        }
-        number = channelPutList.size();
-        while(number>0) {
-            channelPutList.getLast().destroy();
-            --number;
-        }
-        if(number!=0) {
-            message("logic error destroying channelPutList",MessageType.error);
-        }
-        number = channelPutGetList.size();
-        while(number>0) {
-            channelPutGetList.getLast().destroy();
-            --number;
-        }
-        if(number!=0) {
-            message("logic error destroying channelPutGetList",MessageType.error);
-        }
-        number = channelMonitorList.size();
-        while(number>0) {
-            channelMonitorList.getLast().destroy();
-            --number;
-        }
-        if(number!=0) {
-            message("logic error destroying channelMonitorList",MessageType.error);
-        }
-        isConnected = false;
-        return channelListener;
-    }  
 }
