@@ -5,14 +5,14 @@
  */
 package org.epics.ioc.support;
 
-import org.epics.ioc.db.DBField;
+import org.epics.ioc.db.*;
 import org.epics.ioc.db.DBStructure;
 import org.epics.ioc.process.SupportProcessRequester;
 import org.epics.ioc.process.SupportState;
-import org.epics.ioc.pv.Field;
+import org.epics.ioc.pv.*;
 import org.epics.ioc.pv.PVStructure;
 import org.epics.ioc.pv.Structure;
-import org.epics.ioc.util.RequestResult;
+import org.epics.ioc.util.*;
 
 /**
  * Support for a record type that has an arbitrary set of fields.
@@ -30,11 +30,14 @@ public class GenericFactory {
      * @return The support instance.
      */
     public static Support create(DBStructure dbStructure) {
-        return new GenericImpl(dbStructure);
+        return new GenericStructureImpl(dbStructure);
+    }
+    public static Support create(DBArray dbArray) {
+        return new GenericArrayImpl(dbArray);
     }
     
     
-    static private class GenericImpl extends AbstractSupport
+    static private class GenericStructureImpl extends AbstractSupport
     implements SupportProcessRequester
     {
         private static String supportName = "generic";
@@ -50,7 +53,7 @@ public class GenericFactory {
         private RequestResult finalResult = RequestResult.success;
         
         
-        private GenericImpl(DBStructure dbStructure) {
+        private GenericStructureImpl(DBStructure dbStructure) {
             super(supportName,dbStructure);
             this.dbStructure = dbStructure;
             pvStructure = dbStructure.getPVStructure();
@@ -193,6 +196,158 @@ public class GenericFactory {
             nextSupport++;
             if(nextSupport>=numberSupports || requestResult!=RequestResult.success) {
                 if(alarmSupport!=null) alarmSupport.endProcess();
+                supportProcessRequester.supportProcessDone(finalResult);
+                return;
+            }
+            supports[nextSupport].process(this);
+        }
+    }
+    
+    static private class GenericArrayImpl extends AbstractSupport
+    implements SupportProcessRequester
+    {
+        private static String supportName = "generic";
+        private DBArray dbArray;
+        private PVArray pvArray;
+        private Type elementType = null;
+        
+        private int numberSupports = 0;
+        private Support[] supports = null;
+        private int nextSupport = 0;
+        
+        private SupportProcessRequester supportProcessRequester = null;
+        private RequestResult finalResult = RequestResult.success;
+        
+        
+        private GenericArrayImpl(DBArray dbArray) {
+            super(supportName,dbArray);
+            this.dbArray = dbArray;
+            pvArray = dbArray.getPVArray();
+            
+        }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.process.Support#initialize()
+         */
+        public void initialize() {
+            if(!super.checkSupportState(SupportState.readyForInitialize,supportName)) return;
+            SupportState supportState = SupportState.readyForStart;
+            elementType = pvArray.getArray().getElementType();
+            numberSupports = 0;
+            if(elementType==Type.pvArray) {
+                DBArrayArray dbArrayArray = (DBArrayArray)dbArray;
+                DBArray[] dbArrays = dbArrayArray.getElementDBArrays();
+                for(DBArray dbArray: dbArrays) {
+                    if(dbArray.getSupport()!=null) numberSupports++;;
+                }
+                supports = new Support[numberSupports];
+                int ind = 0;
+                for(DBArray dbArray: dbArrays) {
+                    Support support = dbArray.getSupport();
+                    if(support!=null) supports[ind++] = support; 
+                }
+            } else if(elementType==Type.pvStructure) {
+                DBStructureArray dbStructureArray = (DBStructureArray)dbArray;
+                DBStructure[] dbStructures = dbStructureArray.getElementDBStructures();
+                for(DBStructure dbStructure: dbStructures) {
+                    if(dbStructure.getSupport()!=null) numberSupports++;;
+                }
+                supports = new Support[numberSupports];
+                int ind = 0;
+                for(DBStructure dbStructure: dbStructures) {
+                    Support support = dbStructure.getSupport();
+                    if(support!=null) supports[ind++] = support; 
+                }
+            } else {
+                pvArray.message("invalid elementType for generic support",MessageType.warning);
+                supports = new Support[0];
+            }
+            for(int i=0; i<supports.length; i++) {
+                Support support = supports[i];
+                support.initialize();
+                supportState = support.getSupportState();
+                if(supportState!=SupportState.readyForStart) {
+                    for(int j=0; j<i; j++) {
+                        supports[j].uninitialize();
+                    }
+                    supports = null;
+                    return;
+                }
+            }
+            setSupportState(supportState);
+        }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.process.Support#start()
+         */
+        public void start() {
+            if(!super.checkSupportState(SupportState.readyForStart,supportName)) return;
+            SupportState supportState = SupportState.ready;
+            if(supports.length==0) {
+                setSupportState(supportState);
+                return;
+            }
+            for(int i=0; i<supports.length; i++) {
+                Support support = supports[i];
+                support.start();
+                supportState = support.getSupportState();
+                if(supportState!=SupportState.ready) {
+                    for(int j=0; j<i; j++) {
+                        supports[j].stop();
+                    }
+                    return;
+                }
+            }
+            setSupportState(supportState);
+        }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.process.Support#stop()
+         */
+        public void stop() {
+            if(supports.length==0) return;
+            for(int i=0; i<supports.length; i++) {
+                supports[i].stop();
+            }
+            setSupportState(SupportState.readyForStart);
+        }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.process.Support#uninitialize()
+         */
+        public void uninitialize() {
+            if(supports.length==0) return;
+            for(int i=0; i<supports.length; i++) {
+                supports[i].uninitialize();
+            }
+            supports = null;
+            setSupportState(SupportState.readyForInitialize);
+        }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.process.Support#process(org.epics.ioc.process.RecordProcessRequester)
+         */
+        public void process(SupportProcessRequester supportProcessRequester) {
+            if(!super.checkSupportState(SupportState.ready,"process")) {
+                supportProcessRequester.supportProcessDone(RequestResult.failure);
+                return;
+            }
+            if(supportProcessRequester==null) {
+                throw new IllegalStateException("supportProcessRequester is null");
+            }
+            this.supportProcessRequester = supportProcessRequester;
+            finalResult = RequestResult.success;
+            if(supports.length==0) {
+                supportProcessRequester.supportProcessDone(finalResult);
+                return;
+            }
+            nextSupport = 0;
+            supports[nextSupport].process(this);
+        }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.process.SupportProcessRequester#supportProcessDone(org.epics.ioc.util.RequestResult)
+         */
+        public void supportProcessDone(RequestResult requestResult) {
+            if(requestResult.compareTo(finalResult)>0) {
+                finalResult = requestResult;
+            }
+            nextSupport++;
+            if(nextSupport>=numberSupports || requestResult!=RequestResult.success) {
                 supportProcessRequester.supportProcessDone(finalResult);
                 return;
             }
