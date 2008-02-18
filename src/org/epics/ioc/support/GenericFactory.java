@@ -5,14 +5,20 @@
  */
 package org.epics.ioc.support;
 
-import org.epics.ioc.db.*;
+import org.epics.ioc.db.DBArray;
+import org.epics.ioc.db.DBArrayArray;
+import org.epics.ioc.db.DBField;
 import org.epics.ioc.db.DBStructure;
+import org.epics.ioc.db.DBStructureArray;
 import org.epics.ioc.process.SupportProcessRequester;
 import org.epics.ioc.process.SupportState;
-import org.epics.ioc.pv.*;
+import org.epics.ioc.pv.Field;
+import org.epics.ioc.pv.PVArray;
 import org.epics.ioc.pv.PVStructure;
 import org.epics.ioc.pv.Structure;
-import org.epics.ioc.util.*;
+import org.epics.ioc.pv.Type;
+import org.epics.ioc.util.MessageType;
+import org.epics.ioc.util.RequestResult;
 
 /**
  * Support for a record type that has an arbitrary set of fields.
@@ -26,21 +32,36 @@ import org.epics.ioc.util.*;
 public class GenericFactory {
     /**
      * Create the support for the record or structure.
-     * @param dbStructure The struvture or record for which to create support.
+     * @param dbStructure The structure or record for which to create support.
      * @return The support instance.
      */
     public static Support create(DBStructure dbStructure) {
         return new GenericStructureImpl(dbStructure);
     }
-    public static Support create(DBArray dbArray) {
-        return new GenericArrayImpl(dbArray);
+    /**
+     * Create supportfor a field.
+     * If the field is an array of arrays or structures
+     * then the support each array element with support is called.
+     * If the field is anything else the support does nothing.
+     * @param dbField The field for which to create suipport.
+     * @return The support instance.
+     */
+    public static Support create(DBField dbField) {
+        if(dbField.getPVField().getField().getType()==Type.pvArray) {
+            DBArray dbArray = (DBArray)dbField;
+            Type elementType = dbArray.getPVArray().getArray().getElementType();
+            if(elementType==Type.pvArray || elementType==Type.pvStructure) {
+                return new GenericArrayImpl(dbArray);
+            }
+        }
+        return new GenericFieldImpl(dbField);
     }
     
+    private static String supportName = "generic"; 
     
     static private class GenericStructureImpl extends AbstractSupport
     implements SupportProcessRequester
     {
-        private static String supportName = "generic";
         private DBStructure dbStructure;
         private PVStructure pvStructure;
         
@@ -206,7 +227,6 @@ public class GenericFactory {
     static private class GenericArrayImpl extends AbstractSupport
     implements SupportProcessRequester
     {
-        private static String supportName = "generic";
         private DBArray dbArray;
         private PVArray pvArray;
         private Type elementType = null;
@@ -352,6 +372,12 @@ public class GenericFactory {
                 return;
             }
             supports[nextSupport].process(this);
+        }
+    }
+    
+    static private class GenericFieldImpl extends AbstractSupport {
+        private GenericFieldImpl(DBField dbField) {
+            super(supportName,dbField);
         }
     }
 }
