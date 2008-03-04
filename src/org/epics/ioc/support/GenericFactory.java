@@ -39,7 +39,7 @@ public class GenericFactory {
         return new GenericStructureImpl(dbStructure);
     }
     /**
-     * Create supportfor a field.
+     * Create support for a field.
      * If the field is an array of arrays or structures
      * then the support each array element with support is called.
      * If the field is anything else the support does nothing.

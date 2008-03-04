@@ -118,6 +118,19 @@ public class BaseDBStructure extends BaseDBField implements DBStructure
            
         }
     }
+    /* (non-Javadoc)
+     * @see org.epics.ioc.db.BaseDBField#replaceCreate()
+     */
+    public void replaceCreate() {
+        PVField[] pvFields = pvStructure.getPVFields();
+        int length = pvFields.length;
+        for(int i=0; i<length; i++) {
+            DBField dbField = dbFields[i];
+            if(dbField==null) continue;
+            dbField.replaceCreate();
+        }
+        super.replaceCreate();
+    }
     
     private void createFields() {
         PVField[] pvFields = pvStructure.getPVFields();
@@ -152,15 +165,16 @@ public class BaseDBStructure extends BaseDBField implements DBStructure
                 break;
             }
             dbFields[i] = dbField;
-            String message = callCreate(dbField);
-            if(message!=null) pvField.message(message, MessageType.error);
         }
     }
     
     private String callCreate(DBField dbField) {
         PVField pvField = dbField.getPVField();
-        Field field = pvField.getField();
-        String createName = field.getCreateName();
+        String createName = pvField.getCreateName();
+        if(createName==null) {
+            Field field = pvField.getField();
+            createName = field.getCreateName();
+        }
         if(createName==null) return null;
         DBD dbd = super.getDBRecord().getDBD();
         if(dbd==null) dbd = DBDFactory.getMasterDBD();

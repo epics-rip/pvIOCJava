@@ -5,12 +5,17 @@
  */
 package org.epics.ioc.db;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
 import org.epics.ioc.create.Create;
 import org.epics.ioc.dbd.DBD;
+import org.epics.ioc.dbd.DBDCreate;
+import org.epics.ioc.dbd.DBDFactory;
 import org.epics.ioc.dbd.DBDSupport;
 import org.epics.ioc.process.SupportState;
 import org.epics.ioc.pv.Array;
@@ -18,6 +23,7 @@ import org.epics.ioc.pv.Field;
 import org.epics.ioc.pv.PVField;
 import org.epics.ioc.pv.Type;
 import org.epics.ioc.support.Support;
+import org.epics.ioc.util.MessageType;
 
 
 /**
@@ -135,6 +141,64 @@ public class BaseDBField implements DBField{
         this.create = create;
     }
     /* (non-Javadoc)
+     * @see org.epics.ioc.db.DBField#replaceCreate()
+     */
+    public void replaceCreate() {
+        String createName = pvField.getCreateName();
+        if(createName==null) {
+            Field field = pvField.getField();
+            createName = field.getCreateName();
+        }
+        if(createName==null) return;
+        DBD dbd = dbRecord.getDBD();
+        if(dbd==null) dbd = DBDFactory.getMasterDBD();
+        DBDCreate dbdCreate = dbd.getCreate(createName);
+        if(dbdCreate==null) return;
+        String factoryName = dbdCreate.getFactoryName();
+        Class supportClass;
+        Method method = null;
+        Create create = null;
+        try {
+            supportClass = Class.forName(factoryName);
+        }catch (ClassNotFoundException e) {
+           message("factory " + factoryName 
+            + " " + e.getLocalizedMessage());
+           return;
+        }
+        try {
+            method = supportClass.getDeclaredMethod("create",
+                    Class.forName("org.epics.ioc.db.DBField"));
+            
+        } catch (NoSuchMethodException e) {
+
+        } catch (ClassNotFoundException e) {
+            message("factory " + factoryName 
+            + " " + e.getLocalizedMessage());
+            return;
+        }
+        if(!Modifier.isStatic(method.getModifiers())) {
+            message("factory " + factoryName 
+            + " create is not a static method ");
+            return;
+        }
+        try {
+            create = (Create)method.invoke(null,this);
+            this.create = create;
+            return;
+        } catch(IllegalAccessException e) {
+            message("factory " + factoryName 
+            + " " + e.getLocalizedMessage());
+            return;
+        } catch(IllegalArgumentException e) {
+            message("factory " + factoryName 
+            + " " + e.getLocalizedMessage());
+            return;
+        } catch(InvocationTargetException e) {
+            message("factory " + factoryName 
+            + " " + e.getLocalizedMessage());
+        }
+    }
+    /* (non-Javadoc)
      * @see org.epics.ioc.db.DBField#postPut()
      */
     public void postPut() {
@@ -193,6 +257,11 @@ public class BaseDBField implements DBField{
      */
     protected void removeRecordListeners(){
         recordListenerList.clear();
+    }
+    
+    
+    private void message(String message) {
+        pvField.message(message, MessageType.error);
     }
     /* (non-Javadoc)
      * @see java.lang.Object#toString()

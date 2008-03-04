@@ -4,58 +4,58 @@
     <alarm structureName = "alarm" />
     <timeStamp structureName = "timeStamp" />
     <calcArgArray>
-        <value structureName = "calcDoubleArg">
+        <element structureName = "calcDoubleArg">
             <value>0.0</value>
             <name>min</name>
-        </value>
-        <value structureName = "calcDoubleArg">
+        </element>
+        <element structureName = "calcDoubleArg">
             <value>10.0</value>
             <name>max</name>
-        </value>
-        <value structureName = "calcDoubleArg">
+        </element>
+        <element structureName = "calcDoubleArg">
             <value>1.0</value>
             <name>inc</name>
-        </value>
+        </element>
     </calcArgArray>
     <calculator supportName = "counterCalculator" />
     <supportArray>
-        <value structureName = "supportArrayElement">
+        <element structureName = "supportArrayElement">
             <wait>true</wait>
             <link  supportName = "processSupport" structureName = "processSupport">
                 <pvname>getFromCounter</pvname>
             </link>
-        </value>
-        <value structureName = "supportArrayElement">
+        </element>
+        <element structureName = "supportArrayElement">
             <wait>false</wait>
             <link  supportName = "outputSupport" structureName = "outputSupport">
                 <pvname>putFromCounter</pvname>
                 <process>true</process>
             </link>
-        </value>
+        </element>
     </supportArray>
     <valueAlarm  structureName = "doubleAlarm">
       <active>true</active>
       <interval>
-          <value structureName = "doubleAlarmInterval">
+          <element structureName = "doubleAlarmInterval">
               <value>2.0</value>
               <severity><choice>major</choice></severity>
-          </value>
-          <value structureName = "doubleAlarmInterval">
+          </element>
+          <element structureName = "doubleAlarmInterval">
               <value>4.0</value>
               <severity><choice>minor</choice></severity>
-          </value>
-          <value structureName = "doubleAlarmInterval">
+          </element>
+          <element structureName = "doubleAlarmInterval">
               <value>6.0</value>
               <severity><choice>none</choice></severity>
-          </value>
-          <value structureName = "doubleAlarmInterval">
+          </element>
+          <element structureName = "doubleAlarmInterval">
               <value>8.0</value>
               <severity><choice>minor</choice></severity>
-          </value>
-          <value structureName = "doubleAlarmInterval">
+          </element>
+          <element structureName = "doubleAlarmInterval">
               <value>10.0</value>
               <severity><choice>major</choice></severity>
-          </value>
+          </element>
       </interval>
       <outOfRange><choice>invalid</choice></outOfRange>
       <hystersis>0.3</hystersis>

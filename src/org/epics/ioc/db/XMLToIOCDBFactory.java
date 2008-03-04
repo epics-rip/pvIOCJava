@@ -210,7 +210,7 @@ public class XMLToIOCDBFactory {
         private Stack<StructureState> structureStack = new Stack<StructureState>();
         
         private static class ArrayState {
-            private boolean valueActive = false;
+            private boolean elementActive = false;
             private State prevState = null;
             private String fieldName = null;
             private PVArray pvArray = null;
@@ -287,14 +287,14 @@ public class XMLToIOCDBFactory {
         
         private void endRecord() {
             if(state==State.idle) return;
-            dbRecord = DBRecordFactory.create(pvRecord);
+            dbRecord = DBRecordFactory.create(pvRecord,iocdb,dbd);
             if(!iocdb.addRecord(dbRecord)) {
                 iocxmlReader.message(
                         "failed to add record to iocdb",
                         MessageType.info);
             }
-            dbRecord.setIOCDB(iocdb);
-            dbRecord.setDBD(dbd);
+
+            
             dbRecord.getPVRecord().addRequester(iocdb);
         }
         
@@ -373,11 +373,11 @@ public class XMLToIOCDBFactory {
                 }
                 break;
             case array:
-                if(arrayState.valueActive && qName.equals("value")) {
+                if(arrayState.elementActive && qName.equals("element")) {
                     endArrayElement(qName);
                     break;
                 }
-                if(!arrayState.valueActive && qName.equals(arrayState.fieldName)) {
+                if(!arrayState.elementActive && qName.equals(arrayState.fieldName)) {
                     state = arrayState.prevState;
                     if(state==State.array) {
                         arrayState = arrayStack.pop();
@@ -407,6 +407,10 @@ public class XMLToIOCDBFactory {
             String supportName = attributes.get("supportName");
             if(supportName!=null) {
                 pvField.setSupportName(supportName);
+            }
+            String createName = attributes.get("createName");
+            if(createName!=null) {
+                pvField.setCreateName(createName);
             }
             Field field = pvField.getField();
             Type type = field.getType();
@@ -527,17 +531,17 @@ public class XMLToIOCDBFactory {
         }
         
         private void startArrayElement(String qName, Map<String,String> attributes)  {
-            if(!qName.equals("value")) {
+            if(!qName.equals("element")) {
                 iocxmlReader.message(
-                        "arrayStartElement Logic error: expected value",
+                        "arrayStartElement Logic error: expected element",
                         MessageType.error);
             }
-            arrayState.valueActive = true;
+            arrayState.elementActive = true;
             String offset = attributes.get("offset");
             if(offset!=null) arrayState.arrayOffset = Integer.parseInt(offset);
             int arrayOffset = arrayState.arrayOffset;
             PVArray pvArray = arrayState.pvArray;
-            String fieldName = "value";
+            String fieldName = "element";
             String actualFieldName = "[" + String.format("%d",arrayOffset) + "]";
             Field field;
             Type arrayElementType = arrayState.arrayElementType;
@@ -621,13 +625,13 @@ public class XMLToIOCDBFactory {
                     if(createName!=null) {
                         field.setCreateName(createName);
                     }
-                    arrayState.valueActive = false;
+                    arrayState.elementActive = false;
                     arrayStack.push(arrayState);
                     arrayState = new ArrayState();
                     arrayState.prevState = state;
                     arrayState.pvArray = arrayData[0];
                     arrayState.fieldName = fieldName;
-                    arrayState.valueActive = false;
+                    arrayState.elementActive = false;
                     state = State.array;
                     arrayStart(attributes);
                     return;
@@ -641,12 +645,12 @@ public class XMLToIOCDBFactory {
         }
         
         private void endArrayElement(String qName)  {
-            if(!qName.equals("value")) {
+            if(!qName.equals("element")) {
                 iocxmlReader.message(
-                        "arrayEndElement Logic error: expected value",
+                        "arrayEndElement Logic error: expected element",
                         MessageType.error);
             }
-            arrayState.valueActive = false;
+            arrayState.elementActive = false;
             int arrayOffset = arrayState.arrayOffset;
             PVArray pvArray = arrayState.pvArray;
             Type type = arrayState.arrayElementType;

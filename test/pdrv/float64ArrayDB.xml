@@ -22,17 +22,17 @@
     <alarm structureName = "alarm" />
     <timeStamp structureName = "timeStamp" />
     <value capacity = "7">
-        <value>0.0 1.0 2.0 3.0 4.0 5.0 6.0</value>
+        <element>0.0 1.0 2.0 3.0 4.0 5.0 6.0</element>
     </value>
     <calculator supportName = "arrayIncrementCalculator" />
     <supportArray>
-        <value structureName = "supportArrayElement">
+        <element structureName = "supportArrayElement">
             <wait>false</wait>
             <link  supportName = "outputSupport" structureName = "outputSupport">
                 <pvname>syncFloat64ArrayOutput</pvname>
                 <process>true</process>
             </link>
-        </value>
+        </element>
     </supportArray>
     <scan>
         <type><choice>periodic</choice></type> 
@@ -49,12 +49,12 @@
         <timeout>1.0</timeout>
     </output>
     <supportArray>
-        <value structureName = "supportArrayElement">
+        <element structureName = "supportArrayElement">
             <wait>false</wait>
             <link  supportName = "processSupport" structureName = "processSupport">
                 <pvname>syncFloat64ArrayInput</pvname>
             </link>
-        </value>
+        </element>
     </supportArray>
 </record>
 <record name = "syncFloat64ArrayInput" type = "doubleArray" >
@@ -99,17 +99,17 @@
     <alarm structureName = "alarm" />
     <timeStamp structureName = "timeStamp" />
     <value capacity = "7">
-        <value>0.0 1.0 2.0 3.0 4.0 5.0 6.0</value>
+        <element>0.0 1.0 2.0 3.0 4.0 5.0 6.0</element>
     </value>
     <calculator supportName = "arrayIncrementCalculator" />
     <supportArray>
-        <value structureName = "supportArrayElement">
+        <element structureName = "supportArrayElement">
             <wait>false</wait>
             <link  supportName = "outputSupport" structureName = "outputSupport">
                 <pvname>asynFloat64ArrayOutput</pvname>
                 <process>true</process>
             </link>
-        </value>
+        </element>
     </supportArray>
     <scan>
         <type><choice>periodic</choice></type> 
@@ -126,12 +126,12 @@
         <timeout>1.0</timeout>
     </output>
     <supportArray>
-        <value structureName = "supportArrayElement">
+        <element structureName = "supportArrayElement">
             <wait>false</wait>
             <link  supportName = "processSupport" structureName = "processSupport">
                 <pvname>asynFloat64ArrayInput</pvname>
             </link>
-        </value>
+        </element>
     </supportArray>
 </record>
 <record name = "asynFloat64ArrayInput" type = "doubleArray" >

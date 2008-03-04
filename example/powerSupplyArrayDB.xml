@@ -17,7 +17,7 @@
     <timeStamp structureName = "timeStamp" />
     <alarm structureName = "alarm" />
     <supply capacity = "2">
-        <value  structureName = "powerSupply">
+        <element  structureName = "powerSupply">
             <alarm structureName = "alarm" />
             <voltage>
                  <alarm structureName = "alarm" />
@@ -34,8 +34,8 @@
                      <process>true</process>
                  </output>
             </current>
-        </value>
-        <value  structureName = "powerSupply">
+        </element>
+        <element  structureName = "powerSupply">
             <alarm structureName = "alarm" />
             <voltage>
                  <alarm structureName = "alarm" />
@@ -52,7 +52,7 @@
                      <process>true</process>
                  </output>
             </current>
-        </value>
+        </element>
     </supply>
 </record>
 

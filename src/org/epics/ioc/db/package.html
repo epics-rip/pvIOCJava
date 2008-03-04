@@ -11,15 +11,15 @@
 
 <h1 style="text-align: center">EPICS JavaIoc: Database Access <br />
 package: org.epics.ioc.dbAcess <br />
-2007.12.13</h1>
+2008.03.04</h1>
 CONTENTS 
 
 <div class="toc">
 <ul>
   <li><a href="#Overview">Overview</a></li>
-  <li><a href="#Record">Record Instance Syntax</a>
+  <li><a href="#Record">Record Instance Syntax</a> 
     <ul>
-      <li><a href="#General">General Statements</a>
+      <li><a href="#General">General Statements</a> 
         <ul>
           <li><a href="#namespace">namespace</a></li>
           <li><a href="#Include">Include</a></li>
@@ -36,9 +36,9 @@ CONTENTS
     </ul>
   </li>
   <li><a href="#Database">XML to Database Converter</a></li>
-  <li><a href="#Database1">Database Access</a>
+  <li><a href="#Database1">Database Access</a> 
     <ul>
-      <li><a href="#Listener">Listener Interface</a>
+      <li><a href="#Listener">Listener Interface</a> 
         <ul>
           <li><a href="#DBListener">DBListener</a></li>
           <li><a href="#RecordList">RecordListener</a></li>
@@ -283,8 +283,8 @@ instance is defined. The syntax is:</p>
 <h3 id="array">array</h3>
 The syntax for an array initializer is: 
 <pre>    &lt;fieldName capacity = "capacity" capacityMutable = "trueFalse" length = "length" supportName = "supportName" &gt;
-        &lt;value offset = "offset"&gt;value&lt;/value&gt;
-        &lt;value offset = "offset"&gt;valueList&lt;/value&gt;
+        &lt;element offset = "offset"&gt;value&lt;/element&gt;
+        &lt;element offset = "offset"&gt;valueList&lt;/element&gt;
         ...
     &lt;/fieldName&gt;</pre>
 
@@ -304,10 +304,11 @@ The syntax for an array initializer is:
   <dt style="font-family: courier;">offset</dt>
     <dd>offset for the next value. If not specified it starts at 0 and is
       incremented by one as each new value is defined.</dd>
-  <dt style="font-family: courier;">value</dt>
-    <dd>assigns a value to the array. If the array is an array of structures
-      then the value is actually a set of field definitions. If the array is
-      an array of array the value is another array initialization.</dd>
+  <dt style="font-family: courier;">element</dt>
+    <dd>assigns a value to an element of the array. If the array is an array
+      of structures then the value is actually a set of field definitions. If
+      the array is an array of array the value is another array
+      initialization.</dd>
   <dt style="font-family: courier;">valueList</dt>
     <dd>A list of values, which is a comma separated set of values. This is
       only supported for primitive and string types.</dd>
@@ -319,29 +320,29 @@ The syntax for an array initializer is:
 
 <p>Then the following all perform the same initialization:</p>
 <pre>    &lt;intArray capacity = "3" &gt;
-        &lt;value&gt;0.0, 1.0, 2.0&lt;/value&gt;
+        &lt;element&gt;0.0, 1.0, 2.0&lt;/element&gt;
     &lt;/intArray&gt;
     &lt;intArray capacity = "3" offset = "1"&gt;
-        &lt;value&gt;1.0, 2.0&lt;/value&gt;
+        &lt;element&gt;1.0, 2.0&lt;/element&gt;
     &lt;/intArray&gt;
     &lt;intArray&gt;
-        &lt;value&gt;0.0&lt;/value&gt;
-        &lt;value&gt;1.0&lt;/value&gt;
-        &lt;value&gt;2.0&lt;/value&gt;
+        &lt;element&gt;0.0&lt;/element&gt;
+        &lt;element&gt;1.0&lt;/element&gt;
+        &lt;element&gt;2.0&lt;/element&gt;
     &lt;/intArray&gt;
          </pre>
 
 <p>The following initializes a <span
 style="font-family: courier;">structArray</span></p>
 <pre>    &lt;structArray capacity = "2"&gt;
-        &lt;value&gt;
+        &lt;element&gt;
             &lt;low&gt;0.0&lt;/low&gt;
             &lt;high&gt;10.0&lt;/high&gt;
-        &lt;/value&gt;
-        &lt;value&gt;
+        &lt;/element&gt;
+        &lt;element&gt;
             &lt;low&gt;-10.0&lt;/low&gt;
             &lt;high&gt;10.0&lt;/high&gt;
-        &lt;/value&gt;
+        &lt;/element&gt;
     &lt;/structArray&gt;</pre>
 <hr />
 
@@ -455,7 +456,9 @@ value.</p>
         void beginProcess();
         void endProcess();
         void unlisten(RecordListener listener);
-    }</pre>
+    }
+
+    public abstract class AbstractDBListener implements DBListener{...}</pre>
 where 
 <dl>
   <dt style="font-family: courier;">dataPut</dt>
@@ -472,15 +475,18 @@ where
     <dd>The data source is undergoing destruction or major structural
       changes. The DBField.addListener call is no longer valid and the user
       should null the object reference returned by addListener.</dd>
+  <dt style="font-family: courier;">AbstractDBListener</dt>
+    <dd>Implements each method by doing nothing. This is useful for code that
+      listens to a field that is primitive ot an array of primitive types. In
+      this case only the single argument dataPut needs to be implemented.</dd>
 </dl>
 
-<p>For dataPut two versions are provided. The first is
-called if the listener attaches directly the the field that is being
-modified. The second version is called if the caller attaches to a structure
-that has the field located somewhere in it. The first argument is the
-structure or array to which the listener attached. Not in particular that the
-listener can listen to all changes in a record instance by attaching to the
-record instance itself.</p>
+<p>For dataPut two versions are provided. The first is called if the listener
+attaches directly the the field that is being modified. The second version is
+called if the caller attaches to a structure that has the field located
+somewhere in it. The first argument is the structure or array to which the
+listener attached. Not in particular that the listener can listen to all
+changes in a record instance by attaching to the record instance itself.</p>
 
 <p>Assume that a field named value has property alarm. Then when the record
 is processed and field value is written then the following calls might
@@ -517,6 +523,7 @@ instance.</p>
         String setSupportName(String name);
         Create getCreate();
         void setCreate(Create create);
+        void replaceCreate();
         Support getSupport();
         void setSupport(Support support);
         void postPut();
@@ -549,6 +556,8 @@ instance.</p>
     exists.</dd>
   <dt style="font-family: courier;">setCreate</dt>
     <dd>Set the create for the field. It can be null.</dd>
+  <dt style="font-family: courier;">replaceCreate</dt>
+    <dd>Looks to see if create should be replaced.</dd>
   <dt style="font-family: courier;">getSupport</dt>
     <dd>Get the support for this field. This returns null if no support
       exists.</dd>
@@ -753,7 +762,7 @@ ReadWrite locks are used to implement thread safety.</p>
         void message(String message, MessageType messageType);
         void addRequester(Requester requester);
         void removeRequester(Requester requester);
-        String recordList(String regularExpression);
+        String[] recordList(String regularExpression);
         String recordToString(String regularExpression);
     }
 

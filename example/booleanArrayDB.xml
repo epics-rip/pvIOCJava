@@ -4,23 +4,23 @@
     <timeStamp structureName = "timeStamp" />
     <alarm structureName = "alarm" />
     <value capacity = "3">
-        <value>false true false</value>
+        <element>false true false</element>
     </value>
     <calculator supportName = "booleanArrayToggleCalculator" />
     <supportArray>
-        <value structureName = "supportArrayElement">
+        <element structureName = "supportArrayElement">
             <wait>false</wait>
             <link  supportName = "processSupport" structureName = "processSupport">
                     <pvname>booleanArray1FromToggle</pvname>
             </link>
-        </value>
-        <value structureName = "supportArrayElement">
+        </element>
+        <element structureName = "supportArrayElement">
             <wait>false</wait>
             <link  supportName = "outputSupport" structureName = "outputSupport">
                     <pvname>booleanArray2FromToggle</pvname>
                     <process>true</process>
             </link>
-        </value>
+        </element>
     </supportArray>
     <scan>
         <type><choice>periodic</choice></type>

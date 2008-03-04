@@ -33,10 +33,12 @@ public class DBRecordFactory {
     /**
      * Create a DBRecord.
      * @param pvRecord The PVRecord for this DBRecord.
+     * @param iocdb The IOCDB into which this record will be placed.
+     * @param dbd The dbd for this record.
      * @return The DBRecord interface.
      */
-    public static DBRecord create(PVRecord pvRecord) {
-        return new DBRecordImpl(pvRecord);
+    public static DBRecord create(PVRecord pvRecord,IOCDB iocdb,DBD dbd) {
+        return new DBRecordImpl(pvRecord,iocdb,dbd);
     }
 
     private static class DBRecordImpl implements DBRecord {
@@ -54,9 +56,13 @@ public class DBRecordFactory {
         = new LinkedList<DBField>();
         private DBD dbd = null;
 
-        private DBRecordImpl(PVRecord pvRecord){
+        private DBRecordImpl(PVRecord pvRecord,IOCDB iocdb,DBD dbd){
+            this.iocdb = iocdb;
+            this.dbd = dbd;
             this.pvRecord = pvRecord;
-            this.dbStructure = new BaseDBStructure(this,pvRecord);
+            BaseDBStructure baseDBStructure = new BaseDBStructure(this,pvRecord);
+            this.dbStructure = baseDBStructure;
+            baseDBStructure.replaceCreate();
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.db.DBRecord#findDBField(org.epics.ioc.pv.PVField)

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
       "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html>
+<html xmlns="http://www.w3.org/1999/xhtml">
 <head>
   <meta http-equiv="content-type" content="text/html; charset=iso-8859-1" />
   <title>EPICS JavaIOC: create</title>
@@ -10,7 +10,7 @@
 <body>
 <h1 style="text-align: center">EPICS JavaIOC: create<br />
 package: org.epics.ioc.create<br />
-2007.11.29</h1>
+2008.03.04</h1>
 CONTENTS 
 
 <div class="toc">
@@ -23,6 +23,7 @@ CONTENTS
       <li><a href="#Discussion">Discussion</a></li>
     </ul>
   </li>
+  <li><a href="#Control">Control Limits</a></li>
 </ul>
 </div>
 <hr />
@@ -50,12 +51,16 @@ database records. </p>
 <dl>
   <dt><span style="font-family: courier;">BaseEnumerated</span></dt>
     <dd>A base class for an enumerated structure.</dd>
+  <dt><span style="font-family: courier;">BaseControlLimit</span></dt>
+    <dd>A base class for enforcing control limits.</dd>
 </dl>
 
 <p>The following factories are provided:</p>
 <dl>
   <dt><span style="font-family: courier;">EnumeratedFactory</span></dt>
     <dd>Support for an enumerated structure</dd>
+  <dt><span style="font-family: courier;">ControlLimitFactory</span></dt>
+    <dd>Support for enforcing control limits.</dd>
 </dl>
 <hr />
 
@@ -110,8 +115,7 @@ java enum. If so it returns interface Enumerated.</p>
 &lt;/structure&gt;
 
 &lt;create name = "enumerated"
-  factoryName = "org.epics.ioc.create.EnumeratedFactory" /&gt;
-</pre>
+  factoryName = "org.epics.ioc.create.EnumeratedFactory" /&gt;</pre>
 
 <p>Other structure definitions can also define createName. For example
 alarmSeverity is defined as:</p>
@@ -120,10 +124,21 @@ alarmSeverity is defined as:</p>
   &lt;field name = "choice" type = "string" /&gt;
   &lt;field name = "choices" type = "array" elementType = "string"
     default = "none minor major invalid" /&gt;
-&lt;/structure&gt;
-</pre>
+&lt;/structure&gt;</pre>
 
 <p>And AlarmSeverity.java implements the method:</p>
 <pre>public static Enumerated getAlarmSeverity(DBField dbField);</pre>
+<hr />
+
+<h2 style="text-align: center" id="Control">Control Limits</h2>
+<hr />
+
+<p>controlLimit is a create that can be attached to a value field as
+follows:</p>
+<pre>    &lt;value createName = "controlLimit" /&gt;</pre>
+
+<p>A control structure must be a property of value and must have the low and
+high limits defined. The create support will not allow values outside the
+limits. The value field must be a numeric primitive type.</p>
 </body>
 </html>

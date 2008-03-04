@@ -122,11 +122,6 @@ public class DigitalFactory {
                 super.message("parent does not have a value field", MessageType.error);
                 return;
             }
-            Create create = parentDBField.getCreate();
-            if(create==null || !(create instanceof Enumerated)) {
-                super.message("the value is not an enumerated structure", MessageType.error);
-                return;
-            }
             dbValue = dbRecord.findDBField(pvField);
             if(!initValue()) return;
             pvField = parentPVField.findProperty("valueAlarm");

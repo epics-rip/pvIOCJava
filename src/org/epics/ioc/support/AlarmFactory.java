@@ -7,6 +7,7 @@ package org.epics.ioc.support;
 
 import org.epics.ioc.db.DBField;
 import org.epics.ioc.db.DBStructure;
+import org.epics.ioc.process.RecordProcess;
 import org.epics.ioc.process.SupportState;
 import org.epics.ioc.pv.Field;
 import org.epics.ioc.pv.PVField;
@@ -80,6 +81,7 @@ public class AlarmFactory {
     {
         private DBStructure dbAlarm;
         private PVStructure pvAlarm;
+        private RecordProcess recordProcess = null;
         
         private DBField dbSeverity = null;
         private PVInt pvSeverity = null;
@@ -140,6 +142,7 @@ public class AlarmFactory {
             if(parent!=null) {
                 parentAlarmSupport = (AlarmImpl)parent;
             }
+            recordProcess = dbAlarm.getDBRecord().getRecordProcess();
             super.setSupportState(SupportState.readyForStart);
         }
         /* (non-Javadoc)
@@ -153,6 +156,7 @@ public class AlarmFactory {
          * @see org.epics.ioc.support.AlarmSupport#beginProcess()
          */
         public void beginProcess() {
+            if(active) return;
             gotAlarm = false;
             active = true;
             beginIndex = pvSeverity.get();
@@ -188,8 +192,22 @@ public class AlarmFactory {
          * @see org.epics.ioc.support.AlarmSupport#setStatusSeverity(java.lang.String, org.epics.ioc.util.AlarmSeverity)
          */
         public boolean setAlarm(String message, AlarmSeverity severity) {
-            checkForIllegalRequest();
             int newIndex = severity.ordinal();
+            if(!active) {
+                if(recordProcess.isActive()) {
+                    beginProcess();
+                } else { // record is not being processed
+                    if(newIndex>0) { // raise alarm
+                        pvSeverity.put(newIndex);                
+                        pvMessage.put(message);
+                        dbSeverity.postPut();
+                        dbMessage.postPut();
+                        return true;
+                    } else { // no alarm just return false
+                        return false;
+                    }
+                }
+            }
             if(!gotAlarm || newIndex>currentIndex) {
                 currentIndex = newIndex;
                 currentMessage = message;
@@ -200,12 +218,6 @@ public class AlarmFactory {
                 return true;
             }
             return false;
-        }
-        
-        private void checkForIllegalRequest() {
-            if(active) return;
-            pvAlarm.message("illegal request because record is not active",MessageType.info);
-            throw new IllegalStateException("record is not active");
         }
     }
 }

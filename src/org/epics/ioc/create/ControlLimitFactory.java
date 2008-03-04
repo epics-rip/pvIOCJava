@@ -6,11 +6,8 @@
 package org.epics.ioc.create;
 
 import org.epics.ioc.db.DBField;
-import org.epics.ioc.db.DBStructure;
+import org.epics.ioc.db.DBRecord;
 import org.epics.ioc.pv.PVField;
-import org.epics.ioc.pv.PVStructure;
-import org.epics.ioc.pv.Structure;
-import org.epics.ioc.pv.Type;
 import org.epics.ioc.util.MessageType;
 
 /**
@@ -43,56 +40,21 @@ public class ControlLimitFactory {
             pvField.message("field is not numeric", MessageType.error);
             return null;
         }
-        DBField valueDBField = dbField;
-        DBField dbParent = dbField.getParent();
-        pvField = dbParent.getPVField();
-        if(pvField.getField().getType()!=Type.pvStructure) {
-            pvField.message("parent is not a structure", MessageType.error);
+        PVField pvControl = pvField.findProperty("control");
+        if(pvControl==null) {
+            pvField.message("control is not a property", MessageType.error);
             return null;
         }
-        DBStructure dbStructure = (DBStructure)dbField;
-        DBField[] dbFields = dbStructure.getDBFields();
-        PVStructure pvStructure = dbStructure.getPVStructure();
-        PVField[] pvFields = pvStructure.getPVFields();
-        Structure structure = pvStructure.getStructure();
-        int index = structure.getFieldIndex("control");
-        if(index<0) {
-            pvField.message("parent does not have a field named control", MessageType.error);
+        PVField pvLow = pvControl.findProperty("limit.low");
+        PVField pvHigh = pvControl.findProperty("limit.high");
+        if(pvLow==null || pvHigh==null) {
+            pvField.message("invalid control structure", MessageType.error);
             return null;
         }
-        pvField = pvFields[index];
-        if(pvField.getField().getType()!=Type.pvStructure) {
-            pvField.message("parent.control is not a structure", MessageType.error);
-            return null;
-        }
-        dbStructure = (DBStructure)dbFields[index];
-        dbFields = dbStructure.getDBFields();
-        pvStructure = (PVStructure)pvFields[index];
-        pvFields = pvStructure.getPVFields();
-        structure = pvStructure.getStructure();
-        index = structure.getFieldIndex("low");
-        if(index<0) {
-            pvField.message("parent.control does not have a field named low", MessageType.error);
-            return null;
-        }
-        pvField = pvFields[index];
-        if(!pvField.getField().getType().isNumeric()) {
-            pvField.message("parent.control.low is not numeric", MessageType.error);
-            return null;
-        }
-        DBField lowDBField = dbFields[index];
-        index = structure.getFieldIndex("high");
-        if(index<0) {
-            pvField.message("parent.control does not have a field named high", MessageType.error);
-            return null;
-        }
-        pvField = pvFields[index];
-        if(!pvField.getField().getType().isNumeric()) {
-            pvField.message("parent.control.high is not numeric", MessageType.error);
-            return null;
-        }
-        DBField highDBField = dbFields[index];
-        Create create = new ControlLimitImpl(valueDBField,lowDBField,highDBField);
+        DBRecord dbRecord = dbField.getDBRecord();
+        DBField dbLow = dbRecord.findDBField(pvLow);
+        DBField dbHigh = dbRecord.findDBField(pvHigh);
+        Create create = new ControlLimitImpl(dbField,dbLow,dbHigh);
         return create;
     }
 

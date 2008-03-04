@@ -22,18 +22,18 @@
     <alarm structureName = "alarm" />
     <timeStamp structureName = "timeStamp" />
     <calcArgArray>
-        <value structureName = "calcDoubleArg">
+        <element structureName = "calcDoubleArg">
             <value>0.0</value>
             <name>min</name>
-        </value>
-        <value structureName = "calcDoubleArg">
+        </element>
+        <element structureName = "calcDoubleArg">
             <value>10.0</value>
             <name>max</name>
-        </value>
-        <value structureName = "calcDoubleArg">
+        </element>
+        <element structureName = "calcDoubleArg">
             <value>1.0</value>
             <name>inc</name>
-        </value>
+        </element>
     </calcArgArray>
     <calculator supportName = "counterCalculator" />
     <scan>
@@ -41,13 +41,13 @@
         <rate>0.5</rate>
     </scan>
     <supportArray>
-        <value structureName = "supportArrayElement">
+        <element structureName = "supportArrayElement">
             <wait>false</wait>
             <link  supportName = "outputSupport" structureName = "outputSupport">
                 <pvname>syncStringOut</pvname>
                 <process>true</process>
             </link>
-        </value>
+        </element>
     </supportArray>
 </record>
 
@@ -60,12 +60,12 @@
         <timeout>.2</timeout>
     </output>
     <supportArray>
-        <value structureName = "supportArrayElement">
+        <element structureName = "supportArrayElement">
             <wait>false</wait>
             <link  supportName = "processSupport" structureName = "processSupport">
                 <pvname>syncStringIn</pvname>
             </link>
-        </value>
+        </element>
     </supportArray>
 </record>
 
@@ -112,18 +112,18 @@
     <alarm structureName = "alarm" />
     <timeStamp structureName = "timeStamp" />
     <calcArgArray>
-        <value structureName = "calcDoubleArg">
+        <element structureName = "calcDoubleArg">
             <value>0.0</value>
             <name>min</name>
-        </value>
-        <value structureName = "calcDoubleArg">
+        </element>
+        <element structureName = "calcDoubleArg">
             <value>10.0</value>
             <name>max</name>
-        </value>
-        <value structureName = "calcDoubleArg">
+        </element>
+        <element structureName = "calcDoubleArg">
             <value>1.0</value>
             <name>inc</name>
-        </value>
+        </element>
     </calcArgArray>
     <calculator supportName = "counterCalculator" />
     <scan>
@@ -131,13 +131,13 @@
         <rate>0.5</rate>
     </scan>
     <supportArray>
-        <value structureName = "supportArrayElement">
+        <element structureName = "supportArrayElement">
             <wait>false</wait>
             <link  supportName = "outputSupport" structureName = "outputSupport">
                 <pvname>asynStringOut</pvname>
                 <process>true</process>
             </link>
-        </value>
+        </element>
     </supportArray>
 </record>
 
@@ -150,12 +150,12 @@
         <timeout>.2</timeout>
     </output>
     <supportArray>
-        <value structureName = "supportArrayElement">
+        <element structureName = "supportArrayElement">
             <wait>false</wait>
             <link  supportName = "processSupport" structureName = "processSupport">
                 <pvname>asynStringIn</pvname>
             </link>
-        </value>
+        </element>
     </supportArray>
 </record>
 

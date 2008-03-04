@@ -4,27 +4,27 @@
     <alarm structureName = "alarm" />
     <timeStamp structureName = "timeStamp" />
     <calcArgArray>
-        <value structureName = "calcDoubleArg">
+        <element structureName = "calcDoubleArg">
             <value>0.0</value>
             <name>min</name>
-        </value>
-        <value structureName = "calcDoubleArg">
+        </element>
+        <element structureName = "calcDoubleArg">
             <value>11.0</value>
             <name>max</name>
-        </value>
-        <value structureName = "calcDoubleArg">
+        </element>
+        <element structureName = "calcDoubleArg">
             <value>0.2</value>
             <name>inc</name>
-        </value>
+        </element>
     </calcArgArray>
     <calculator supportName = "counterCalculator" />
     <supportArray>
-        <value structureName = "supportArrayElement">
+        <element structureName = "supportArrayElement">
             <wait>true</wait>
             <link  supportName = "processSupport" structureName = "processSupport">
                 <pvname>floatRecord</pvname>
             </link>
-        </value>
+        </element>
     </supportArray>
     <display structureName = "display" >
         <units>counts</units>
@@ -49,30 +49,30 @@
     <valueAlarm  structureName = "floatAlarm">
       <active>true</active>
       <interval>
-          <value structureName = "floatAlarmInterval">
+          <element structureName = "floatAlarmInterval">
               <value>2.0</value>
               <severity><choice>major</choice></severity>
               <message>LOWLOW</message>
-          </value>
-          <value structureName = "floatAlarmInterval">
+          </element>
+          <element structureName = "floatAlarmInterval">
               <value>4.0</value>
               <severity><choice>minor</choice></severity>
               <message>LOW</message>
-          </value>
-          <value structureName = "floatAlarmInterval">
+          </element>
+          <element structureName = "floatAlarmInterval">
               <value>6.0</value>
               <severity><choice>none</choice></severity>
-          </value>
-          <value structureName = "floatAlarmInterval">
+          </element>
+          <element structureName = "floatAlarmInterval">
               <value>8.0</value>
               <severity><choice>minor</choice></severity>
               <message>HIGH</message>
-          </value>
-          <value structureName = "floatAlarmInterval">
+          </element>
+          <element structureName = "floatAlarmInterval">
               <value>10.0</value>
               <severity><choice>major</choice></severity>
               <message>HIHI</message>
-          </value>
+          </element>
       </interval>
       <outOfRange><choice>invalid</choice></outOfRange>
       <hystersis>0.3</hystersis>
@@ -89,27 +89,27 @@
     <alarm structureName = "alarm" />
     <timeStamp structureName = "timeStamp" />
     <calcArgArray>
-        <value structureName = "calcDoubleArg">
+        <element structureName = "calcDoubleArg">
             <value>0.0</value>
             <name>min</name>
-        </value>
-        <value structureName = "calcDoubleArg">
+        </element>
+        <element structureName = "calcDoubleArg">
             <value>11.0</value>
             <name>max</name>
-        </value>
-        <value structureName = "calcDoubleArg">
+        </element>
+        <element structureName = "calcDoubleArg">
             <value>0.2</value>
             <name>inc</name>
-        </value>
+        </element>
     </calcArgArray>
     <calculator supportName = "counterCalculator" />
     <supportArray>
-        <value structureName = "supportArrayElement">
+        <element structureName = "supportArrayElement">
             <wait>true</wait>
             <link supportName = "processSupport" structureName = "processSupport">
                 <pvname>doubleRecord</pvname>
             </link>
-        </value>
+        </element>
     </supportArray>
     <display structureName = "display" >
         <units>counts</units>
@@ -134,30 +134,30 @@
     <valueAlarm structureName = "doubleAlarm">
       <active>true</active>
       <interval>
-          <value structureName = "doubleAlarmInterval">
+          <element structureName = "doubleAlarmInterval">
               <value>2.0</value>
               <severity><choice>major</choice></severity>
               <message>LOWLOW</message>
-          </value>
-          <value structureName = "doubleAlarmInterval">
+          </element>
+          <element structureName = "doubleAlarmInterval">
               <value>4.0</value>
               <severity><choice>minor</choice></severity>
               <message>LOW</message>
-          </value>
-          <value structureName = "doubleAlarmInterval">
+          </element>
+          <element structureName = "doubleAlarmInterval">
               <value>6.0</value>
               <severity><choice>none</choice></severity>
-          </value>
-          <value structureName = "doubleAlarmInterval">
+          </element>
+          <element structureName = "doubleAlarmInterval">
               <value>8.0</value>
               <severity><choice>minor</choice></severity>
               <message>HIGH</message>
-          </value>
-          <value structureName = "doubleAlarmInterval">
+          </element>
+          <element structureName = "doubleAlarmInterval">
               <value>10.0</value>
               <severity><choice>major</choice></severity>
               <message>HIGHHIGH</message>
-          </value>
+          </element>
       </interval>
       <outOfRange><choice>invalid</choice></outOfRange>
       <hystersis>0.3</hystersis>
@@ -175,27 +175,27 @@
     <alarm structureName = "alarm" />
     <timeStamp structureName = "timeStamp" />
     <calcArgArray>
-        <value structureName = "calcDoubleArg">
+        <element structureName = "calcDoubleArg">
             <value>0.0</value>
             <name>min</name>
-        </value>
-        <value structureName = "calcDoubleArg">
+        </element>
+        <element structureName = "calcDoubleArg">
             <value>11.0</value>
             <name>max</name>
-        </value>
-        <value structureName = "calcDoubleArg">
+        </element>
+        <element structureName = "calcDoubleArg">
             <value>1.0</value>
             <name>inc</name>
-        </value>
+        </element>
     </calcArgArray>
     <calculator supportName = "counterCalculator" />
     <supportArray>
-        <value structureName = "supportArrayElement">
+        <element structureName = "supportArrayElement">
             <wait>true</wait>
             <link  supportName = "processSupport" structureName = "processSupport">
                 <pvname>byteRecord</pvname>
             </link>
-        </value>
+        </element>
     </supportArray>
     <display structureName = "display" >
         <units>counts</units>
@@ -220,30 +220,30 @@
     <valueAlarm structureName = "byteAlarm">
       <active>true</active>
       <interval>
-          <value structureName = "byteAlarmInterval">
+          <element structureName = "byteAlarmInterval">
               <value>2</value>
               <severity><choice>major</choice></severity>
               <message>LOWLOW</message>
-          </value>
-          <value structureName = "byteAlarmInterval">
+          </element>
+          <element structureName = "byteAlarmInterval">
               <value>4</value>
               <severity><choice>minor</choice></severity>
               <message>LOW</message>
-          </value>
-          <value structureName = "byteAlarmInterval">
+          </element>
+          <element structureName = "byteAlarmInterval">
               <value>6</value>
               <severity><choice>none</choice></severity>
-          </value>
-          <value structureName = "byteAlarmInterval">
+          </element>
+          <element structureName = "byteAlarmInterval">
               <value>8</value>
               <severity><choice>minor</choice></severity>
               <message>HIGH</message>
-          </value>
-          <value structureName = "byteAlarmInterval">
+          </element>
+          <element structureName = "byteAlarmInterval">
               <value>10</value>
               <severity><choice>major</choice></severity>
               <message>HIGHHIGH</message>
-          </value>
+          </element>
       </interval>
       <outOfRange><choice>invalid</choice></outOfRange>
       <hystersis>2</hystersis>
@@ -261,27 +261,27 @@
     <alarm structureName = "alarm" />
     <timeStamp structureName = "timeStamp" />
     <calcArgArray>
-        <value structureName = "calcDoubleArg">
+        <element structureName = "calcDoubleArg">
             <value>0.0</value>
             <name>min</name>
-        </value>
-        <value structureName = "calcDoubleArg">
+        </element>
+        <element structureName = "calcDoubleArg">
             <value>11.0</value>
             <name>max</name>
-        </value>
-        <value structureName = "calcDoubleArg">
+        </element>
+        <element structureName = "calcDoubleArg">
             <value>1.0</value>
             <name>inc</name>
-        </value>
+        </element>
     </calcArgArray>
     <calculator supportName = "counterCalculator" />
     <supportArray>
-        <value structureName = "supportArrayElement">
+        <element structureName = "supportArrayElement">
             <wait>true</wait>
             <link  supportName = "processSupport" structureName = "processSupport">
                 <pvname>shortRecord</pvname>
             </link>
-        </value>
+        </element>
     </supportArray>
     <display structureName = "display" >
         <units>counts</units>
@@ -306,30 +306,30 @@
     <valueAlarm structureName = "shortAlarm">
       <active>true</active>
       <interval>
-          <value structureName = "shortAlarmInterval">
+          <element structureName = "shortAlarmInterval">
               <value>2</value>
               <severity><choice>major</choice></severity>
               <message>LOWLOW</message>
-          </value>
-          <value structureName = "shortAlarmInterval">
+          </element>
+          <element structureName = "shortAlarmInterval">
               <value>4</value>
               <severity><choice>minor</choice></severity>
               <message>LOW</message>
-          </value>
-          <value structureName = "shortAlarmInterval">
+          </element>
+          <element structureName = "shortAlarmInterval">
               <value>6</value>
               <severity><choice>none</choice></severity>
-          </value>
-          <value structureName = "shortAlarmInterval">
+          </element>
+          <element structureName = "shortAlarmInterval">
               <value>8</value>
               <severity><choice>minor</choice></severity>
               <message>HIGH</message>
-          </value>
-          <value structureName = "shortAlarmInterval">
+          </element>
+          <element structureName = "shortAlarmInterval">
               <value>10</value>
               <severity><choice>major</choice></severity>
               <message>HIGHHIGH</message>
-          </value>
+          </element>
       </interval>
       <outOfRange><choice>invalid</choice></outOfRange>
       <hystersis>2</hystersis>
@@ -347,27 +347,27 @@
     <alarm structureName = "alarm" />
     <timeStamp structureName = "timeStamp" />
     <calcArgArray>
-        <value structureName = "calcDoubleArg">
+        <element structureName = "calcDoubleArg">
             <value>0.0</value>
             <name>min</name>
-        </value>
-        <value structureName = "calcDoubleArg">
+        </element>
+        <element structureName = "calcDoubleArg">
             <value>11.0</value>
             <name>max</name>
-        </value>
-        <value structureName = "calcDoubleArg">
+        </element>
+        <element structureName = "calcDoubleArg">
             <value>1.0</value>
             <name>inc</name>
-        </value>
+        </element>
     </calcArgArray>
     <calculator supportName = "counterCalculator" />
     <supportArray>
-        <value structureName = "supportArrayElement">
+        <element structureName = "supportArrayElement">
             <wait>true</wait>
             <link  supportName = "processSupport" structureName = "processSupport">
                 <pvname>intRecord</pvname>
             </link>
-        </value>
+        </element>
     </supportArray>
     <display structureName = "display" >
         <units>counts</units>
@@ -392,30 +392,30 @@
     <valueAlarm structureName = "intAlarm">
       <active>true</active>
       <interval>
-          <value structureName = "intAlarmInterval">
+          <element structureName = "intAlarmInterval">
               <value>2</value>
               <severity><choice>major</choice></severity>
               <message>LOWLOW</message>
-          </value>
-          <value structureName = "intAlarmInterval">
+          </element>
+          <element structureName = "intAlarmInterval">
               <value>4</value>
               <severity><choice>minor</choice></severity>
               <message>LOW</message>
-          </value>
-          <value structureName = "intAlarmInterval">
+          </element>
+          <element structureName = "intAlarmInterval">
               <value>6</value>
               <severity><choice>none</choice></severity>
-          </value>
-          <value structureName = "intAlarmInterval">
+          </element>
+          <element structureName = "intAlarmInterval">
               <value>8</value>
               <severity><choice>minor</choice></severity>
               <message>HIGH</message>
-          </value>
-          <value structureName = "intAlarmInterval">
+          </element>
+          <element structureName = "intAlarmInterval">
               <value>10</value>
               <severity><choice>major</choice></severity>
               <message>HIGHHIGH</message>
-          </value>
+          </element>
       </interval>
       <outOfRange><choice>invalid</choice></outOfRange>
       <hystersis>2</hystersis>
@@ -433,27 +433,27 @@
     <alarm structureName = "alarm" />
     <timeStamp structureName = "timeStamp" />
     <calcArgArray>
-        <value structureName = "calcDoubleArg">
+        <element structureName = "calcDoubleArg">
             <value>0.0</value>
             <name>min</name>
-        </value>
-        <value structureName = "calcDoubleArg">
+        </element>
+        <element structureName = "calcDoubleArg">
             <value>11.0</value>
             <name>max</name>
-        </value>
-        <value structureName = "calcDoubleArg">
+        </element>
+        <element structureName = "calcDoubleArg">
             <value>1.0</value>
             <name>inc</name>
-        </value>
+        </element>
     </calcArgArray>
     <calculator supportName = "counterCalculator" />
     <supportArray>
-        <value structureName = "supportArrayElement">
+        <element structureName = "supportArrayElement">
             <wait>true</wait>
             <link  supportName = "processSupport" structureName = "processSupport">
                 <pvname>longRecord</pvname>
             </link>
-        </value>
+        </element>
     </supportArray>
     <display structureName = "display" >
         <units>counts</units>
@@ -478,30 +478,30 @@
     <valueAlarm structureName = "longAlarm">
       <active>true</active>
       <interval>
-          <value structureName = "longAlarmInterval">
+          <element structureName = "longAlarmInterval">
               <value>2</value>
               <severity><choice>major</choice></severity>
               <message>LOWLOW</message>
-          </value>
-          <value structureName = "longAlarmInterval">
+          </element>
+          <element structureName = "longAlarmInterval">
               <value>4</value>
               <severity><choice>minor</choice></severity>
               <message>LOW</message>
-          </value>
-          <value structureName = "longAlarmInterval">
+          </element>
+          <element structureName = "longAlarmInterval">
               <value>6</value>
               <severity><choice>none</choice></severity>
-          </value>
-          <value structureName = "longAlarmInterval">
+          </element>
+          <element structureName = "longAlarmInterval">
               <value>8</value>
               <severity><choice>minor</choice></severity>
               <message>HIGH</message>
-          </value>
-          <value structureName = "longAlarmInterval">
+          </element>
+          <element structureName = "longAlarmInterval">
               <value>10</value>
               <severity><choice>major</choice></severity>
               <message>HIGHHIGH</message>
-          </value>
+          </element>
       </interval>
       <outOfRange><choice>invalid</choice></outOfRange>
       <hystersis>2</hystersis>

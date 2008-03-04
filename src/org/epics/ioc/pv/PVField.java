@@ -127,6 +127,16 @@ public interface PVField extends Requester {
      */
     void setSupportName(String name);
     /**
+     * Get the create name if it exists.
+     * @return The create name.
+     */
+    String getCreateName();
+    /**
+     * Set the create name or null to specify no create.
+     * @param name The name.
+     */
+    void setCreateName(String name);
+    /**
      * Call the asynchronous listener.
      * Each time a synchronous modification is made this is called before
      * any modification and after all modifications are complete.

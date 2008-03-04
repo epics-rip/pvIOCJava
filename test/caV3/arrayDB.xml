@@ -4,7 +4,7 @@
     <timeStamp structureName = "timeStamp" />
     <alarm structureName = "alarm" />
     <value capacity = "5">
-        <value>0.0 1.0 2.0 3.0 4.0</value>
+        <element>0.0 1.0 2.0 3.0 4.0</element>
     </value>
     <calculator supportName = "arrayIncrementCalculator" />
     <scan>
@@ -31,12 +31,12 @@
         <pvname>byteArray</pvname>
     </output>
     <supportArray>
-        <value structureName = "supportArrayElement">
+        <element structureName = "supportArrayElement">
             <wait>true</wait>
             <link  supportName = "processSupport"  structureName = "processSupport">
                 <pvname>byteArrayIn</pvname>
             </link>
-        </value>
+        </element>
     </supportArray>
 
 </record>
@@ -74,12 +74,12 @@
         <pvname>shortArray</pvname>
     </output>
     <supportArray>
-        <value structureName = "supportArrayElement">
+        <element structureName = "supportArrayElement">
             <wait>true</wait>
             <link  supportName = "processSupport"  structureName = "processSupport">
                 <pvname>shortArrayIn</pvname>
             </link>
-        </value>
+        </element>
     </supportArray>
 
 </record>
@@ -117,12 +117,12 @@
         <pvname>intArray</pvname>
     </output>
     <supportArray>
-        <value structureName = "supportArrayElement">
+        <element structureName = "supportArrayElement">
             <wait>true</wait>
             <link  supportName = "processSupport"  structureName = "processSupport">
                 <pvname>intArrayIn</pvname>
             </link>
-        </value>
+        </element>
     </supportArray>
 
 </record>
@@ -160,12 +160,12 @@
         <pvname>floatArray</pvname>
     </output>
     <supportArray>
-        <value structureName = "supportArrayElement">
+        <element structureName = "supportArrayElement">
             <wait>true</wait>
             <link  supportName = "processSupport"  structureName = "processSupport">
                 <pvname>floatArrayIn</pvname>
             </link>
-        </value>
+        </element>
     </supportArray>
 
 </record>
@@ -203,12 +203,12 @@
         <pvname>doubleArray</pvname>
     </output>
     <supportArray>
-        <value structureName = "supportArrayElement">
+        <element structureName = "supportArrayElement">
             <wait>true</wait>
             <link  supportName = "processSupport"  structureName = "processSupport">
                 <pvname>doubleArrayIn</pvname>
             </link>
-        </value>
+        </element>
     </supportArray>
 
 </record>
@@ -246,12 +246,12 @@
         <pvname>stringArray</pvname>
     </output>
     <supportArray>
-        <value structureName = "supportArrayElement">
+        <element structureName = "supportArrayElement">
             <wait>true</wait>
             <link  supportName = "processSupport"  structureName = "processSupport">
                 <pvname>stringArrayIn</pvname>
             </link>
-        </value>
+        </element>
     </supportArray>
 
 </record>

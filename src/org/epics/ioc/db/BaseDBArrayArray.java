@@ -68,6 +68,16 @@ public class BaseDBArrayArray extends BaseDBArray implements DBArrayArray {
             dbF.postPut(dbField);
         }
     }
+    /* (non-Javadoc)
+     * @see org.epics.ioc.db.BaseDBField#replaceCreate()
+     */
+    public void replaceCreate() {
+        for(DBArray dbArray: elementDBArrays) {
+            if(dbArray==null) continue;
+            dbArray.replaceCreate();
+        }
+        super.replaceCreate();
+    }
     
     private void createElementDBArrays() {
         int length = pvArrayArray.getLength();

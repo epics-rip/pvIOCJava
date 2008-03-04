@@ -18,6 +18,10 @@ import org.epics.ioc.pv.PVInt;
 import org.epics.ioc.pv.PVLong;
 import org.epics.ioc.pv.PVShort;
 import org.epics.ioc.pv.Type;
+import org.epics.ioc.support.AlarmFactory;
+import org.epics.ioc.support.AlarmSupport;
+import org.epics.ioc.util.AlarmSeverity;
+import org.epics.ioc.util.MessageType;
 
 /**
  * Base class for controlLimit. The PVField for the value fieldis replaced by an implemtation that enforces the control limits.
@@ -26,15 +30,19 @@ import org.epics.ioc.pv.Type;
  */
 public class BaseControlLimit implements Create{
     private static Convert convert = ConvertFactory.getConvert();
+    private DBField valueDBField = null;
+    private PVField valuePVField = null;
+    private AlarmSupport alarmSupport = null;
     /** Constructor.
      * @param valueDBField The DBField interface for the value field.
      * @param lowDBField The DBField interface for the low limit.
      * @param highDBField The DBField interface for the high limit.
      */
     public BaseControlLimit(DBField valueDBField, DBField lowDBField, DBField highDBField) {
-        PVField valuePVField = valueDBField.getPVField();
-        PVField newPVField = null;
+        this.valueDBField = valueDBField;
+        valuePVField = valueDBField.getPVField();
         PVField parentPVField = valuePVField.getParent();
+        PVField newPVField = null;
         Field valueField = valuePVField.getField();
         Type type = valuePVField.getField().getType();
         switch(type) {
@@ -64,7 +72,27 @@ public class BaseControlLimit implements Create{
         convert.fromDouble(newPVField, oldValue);
     }
     
-    private static class ByteValue extends AbstractPVField implements PVByte {
+    private void raiseAlarm(boolean isHigh) {
+        if(alarmSupport==null) {
+            alarmSupport = AlarmFactory.findAlarmSupport(valueDBField);
+            if(alarmSupport==null) {
+                valuePVField.message("ControlLimit: no alarmSupport", MessageType.warning);
+            }
+        }
+        String message = null;
+        if(isHigh) {
+            message = "ControlLimit: attempt to exceed high limit";
+        } else {
+            message = "ControlLimit: attempt to exceed low limit";
+        }
+        if(alarmSupport!=null) {
+            alarmSupport.setAlarm(message, AlarmSeverity.minor);
+        } else {
+            valuePVField.message(message, MessageType.warning);
+        }
+    }
+    
+    private class ByteValue extends AbstractPVField implements PVByte {
         private DBField lowDBField;
         private DBField highDBField;
         private byte value;
@@ -86,12 +114,17 @@ public class BaseControlLimit implements Create{
             byte lowValue = convert.toByte(lowDBField.getPVField());
             byte highValue = convert.toByte(highDBField.getPVField());
             if(lowValue>highValue) return;
-            if(value<lowValue) value = lowValue;
-            if(value>highValue) value = highValue;
+            if(value<lowValue) {
+                value = lowValue;
+                raiseAlarm(false);
+            } else if(value>highValue) {
+                value = highValue;
+                raiseAlarm(true);
+            }
             this.value = value;
         }
     }
-    private static class ShortValue extends AbstractPVField implements PVShort {
+    private class ShortValue extends AbstractPVField implements PVShort {
         private DBField lowDBField;
         private DBField highDBField;
         private short value;
@@ -113,12 +146,17 @@ public class BaseControlLimit implements Create{
             short lowValue = convert.toShort(lowDBField.getPVField());
             short highValue = convert.toShort(highDBField.getPVField());
             if(lowValue>highValue) return;
-            if(value<lowValue) value = lowValue;
-            if(value>highValue) value = highValue;
+            if(value<lowValue) {
+                value = lowValue;
+                raiseAlarm(false);
+            } else if(value>highValue) {
+                value = highValue;
+                raiseAlarm(true);
+            }
             this.value = value;
         }
     }
-    private static class IntValue extends AbstractPVField implements PVInt {
+    private class IntValue extends AbstractPVField implements PVInt {
         private DBField lowDBField;
         private DBField highDBField;
         private int value;
@@ -140,12 +178,17 @@ public class BaseControlLimit implements Create{
             int lowValue = convert.toInt(lowDBField.getPVField());
             int highValue = convert.toInt(highDBField.getPVField());
             if(lowValue>highValue) return;
-            if(value<lowValue) value = lowValue;
-            if(value>highValue) value = highValue;
+            if(value<lowValue) {
+                value = lowValue;
+                raiseAlarm(false);
+            } else if(value>highValue) {
+                value = highValue;
+                raiseAlarm(true);
+            }
             this.value = value;
         }
     }
-    private static class LongValue extends AbstractPVField implements PVLong {
+    private class LongValue extends AbstractPVField implements PVLong {
         private DBField lowDBField;
         private DBField highDBField;
         private long value;
@@ -167,12 +210,17 @@ public class BaseControlLimit implements Create{
             long lowValue = convert.toLong(lowDBField.getPVField());
             long highValue = convert.toLong(highDBField.getPVField());
             if(lowValue>highValue) return;
-            if(value<lowValue) value = lowValue;
-            if(value>highValue) value = highValue;
+            if(value<lowValue) {
+                value = lowValue;
+                raiseAlarm(false);
+            } else if(value>highValue) {
+                value = highValue;
+                raiseAlarm(true);
+            }
             this.value = value;
         }
     }
-    private static class FloatValue extends AbstractPVField implements PVFloat {
+    private class FloatValue extends AbstractPVField implements PVFloat {
         private DBField lowDBField;
         private DBField highDBField;
         private float value;
@@ -194,12 +242,17 @@ public class BaseControlLimit implements Create{
             float lowValue = convert.toFloat(lowDBField.getPVField());
             float highValue = convert.toFloat(highDBField.getPVField());
             if(lowValue>highValue) return;
-            if(value<lowValue) value = lowValue;
-            if(value>highValue) value = highValue;
+            if(value<lowValue) {
+                value = lowValue;
+                raiseAlarm(false);
+            } else if(value>highValue) {
+                value = highValue;
+                raiseAlarm(true);
+            }
             this.value = value;
         }
     }
-    private static class DoubleValue extends AbstractPVField implements PVDouble {
+    private class DoubleValue extends AbstractPVField implements PVDouble {
         private DBField lowDBField;
         private DBField highDBField;
         private double value;
@@ -221,8 +274,13 @@ public class BaseControlLimit implements Create{
             double lowValue = convert.toDouble(lowDBField.getPVField());
             double highValue = convert.toDouble(highDBField.getPVField());
             if(lowValue>highValue) return;
-            if(value<lowValue) value = lowValue;
-            if(value>highValue) value = highValue;
+            if(value<lowValue) {
+                value = lowValue;
+                raiseAlarm(false);
+            } else if(value>highValue) {
+                value = highValue;
+                raiseAlarm(true);
+            }
             this.value = value;
         }
     }

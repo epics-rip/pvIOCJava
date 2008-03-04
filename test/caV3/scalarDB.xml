@@ -5,18 +5,18 @@
     <alarm structureName = "alarm" />
     <timeStamp structureName = "timeStamp" />
     <calcArgArray>
-        <value structureName = "calcDoubleArg">
+        <element structureName = "calcDoubleArg">
             <value>0</value>
             <name>min</name>
-        </value>
-        <value structureName = "calcDoubleArg">
+        </element>
+        <element structureName = "calcDoubleArg">
             <value>3</value>
             <name>max</name>
-        </value>
-        <value structureName = "calcDoubleArg">
+        </element>
+        <element structureName = "calcDoubleArg">
             <value>1</value>
             <name>inc</name>
-        </value>
+        </element>
     </calcArgArray>
     <calculator supportName = "counterCalculator" />
     <scan>
@@ -39,24 +39,24 @@
         <pvname>enum.value.index</pvname>
     </output>
     <supportArray>
-        <value structureName = "supportArrayElement">
+        <element structureName = "supportArrayElement">
             <wait>true</wait>
             <link  supportName = "processSupport"  structureName = "processSupport">
                 <pvname>enumIn</pvname>
             </link>
-        </value>
-        <value structureName = "supportArrayElement">
+        </element>
+        <element structureName = "supportArrayElement">
             <wait>true</wait>
             <link  supportName = "processSupport"  structureName = "processSupport">
                 <pvname>enumInIndex</pvname>
             </link>
-        </value>
-        <value structureName = "supportArrayElement">
+        </element>
+        <element structureName = "supportArrayElement">
             <wait>true</wait>
             <link  supportName = "processSupport"  structureName = "processSupport">
                 <pvname>enumInChoice</pvname>
             </link>
-        </value>
+        </element>
     </supportArray>
 
 </record>
@@ -132,18 +132,18 @@
     <alarm structureName = "alarm" />
     <timeStamp structureName = "timeStamp" />
     <calcArgArray>
-        <value structureName = "calcDoubleArg">
+        <element structureName = "calcDoubleArg">
             <value>0.0</value>
             <name>min</name>
-        </value>
-        <value structureName = "calcDoubleArg">
+        </element>
+        <element structureName = "calcDoubleArg">
             <value>11.0</value>
             <name>max</name>
-        </value>
-        <value structureName = "calcDoubleArg">
+        </element>
+        <element structureName = "calcDoubleArg">
             <value>1.0</value>
             <name>inc</name>
-        </value>
+        </element>
     </calcArgArray>
     <calculator supportName = "counterCalculator" />
     <scan>
@@ -165,12 +165,12 @@
         <pvname>byte</pvname>
     </output>
     <supportArray>
-        <value structureName = "supportArrayElement">
+        <element structureName = "supportArrayElement">
             <wait>true</wait>
             <link  supportName = "processSupport"  structureName = "processSupport">
                 <pvname>byteIn</pvname>
             </link>
-        </value>
+        </element>
     </supportArray>
 
 </record>
@@ -212,12 +212,12 @@
         <pvname>short</pvname>
     </output>
     <supportArray>
-        <value structureName = "supportArrayElement">
+        <element structureName = "supportArrayElement">
             <wait>true</wait>
             <link  supportName = "processSupport"  structureName = "processSupport">
                 <pvname>shortIn</pvname>
             </link>
-        </value>
+        </element>
     </supportArray>
 
 </record>
@@ -259,12 +259,12 @@
         <pvname>int</pvname>
     </output>
     <supportArray>
-        <value structureName = "supportArrayElement">
+        <element structureName = "supportArrayElement">
             <wait>true</wait>
             <link  supportName = "processSupport"  structureName = "processSupport">
                 <pvname>intIn</pvname>
             </link>
-        </value>
+        </element>
     </supportArray>
 
 </record>
@@ -307,12 +307,12 @@
         <pvname>float</pvname>
     </output>
     <supportArray>
-        <value structureName = "supportArrayElement">
+        <element structureName = "supportArrayElement">
             <wait>true</wait>
             <link  supportName = "processSupport"  structureName = "processSupport">
                 <pvname>floatIn</pvname>
             </link>
-        </value>
+        </element>
     </supportArray>
 
 </record>
@@ -354,12 +354,12 @@
         <pvname>double</pvname>
     </output>
     <supportArray>
-        <value structureName = "supportArrayElement">
+        <element structureName = "supportArrayElement">
             <wait>true</wait>
             <link  supportName = "processSupport"  structureName = "processSupport">
                 <pvname>doubleIn</pvname>
             </link>
-        </value>
+        </element>
     </supportArray>
 
 </record>
@@ -402,12 +402,12 @@
         <pvname>string</pvname>
     </output>
     <supportArray>
-        <value structureName = "supportArrayElement">
+        <element structureName = "supportArrayElement">
             <wait>true</wait>
             <link  supportName = "processSupport"  structureName = "processSupport">
                 <pvname>stringIn</pvname>
             </link>
-        </value>
+        </element>
     </supportArray>
 
 </record>

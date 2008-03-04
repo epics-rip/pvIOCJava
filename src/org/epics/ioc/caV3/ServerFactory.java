@@ -257,7 +257,7 @@ public class ServerFactory {
         @Override
         public void destroy() {
             super.destroy();
-            channel.disconnect();
+            channel.destroy();
         }
         
         /* (non-Javadoc)

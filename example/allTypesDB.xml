@@ -19,47 +19,47 @@
         <high>10.0</high>
     </doubleLimit>
     <booleanArray capacity = "3" capacityMutable = "false" length = "3">
-        <value>false true</value>
+        <element>false true</element>
     </booleanArray>
     <byteArray capacity = "3">
-        <value>1</value>
-        <value>2</value>
-        <value>0x3</value>
+        <element>1</element>
+        <element>2</element>
+        <element>0x3</element>
     </byteArray>
     <shortArray capacity = "4">
-        <value offset = "2">3 4</value>
+        <element offset = "2">3 4</element>
     </shortArray>
     <longArray capacity = "2">
-        <value>0xff 0xffffff</value>
+        <element>0xff 0xffffff</element>
     </longArray>
     <floatArray capacity = "3">
-        <value>1.0,2e10 -3.55e20</value>
+        <element>1.0,2e10 -3.55e20</element>
     </floatArray>
     <doubleArray capacity = "3">
-        <value>1.0,2.0,3.0</value>
+        <element>1.0,2.0,3.0</element>
     </doubleArray>
     <stringArray>
-        <value>string1</value>
-        <value>string 2</value>
-        <value>string 3,string 4</value>
+        <element>string1</element>
+        <element>string 2</element>
+        <element>string 3,string 4</element>
     </stringArray>
     <structArray>
-        <value structureName = "doubleLimit">
+        <element structureName = "doubleLimit">
              <low>0.0</low>
              <high>10.0</high>
-        </value>
-        <value structureName = "linearConvert">
+        </element>
+        <element structureName = "linearConvert">
              <engUnitsLow>0.0</engUnitsLow>
              <engUnitsHigh>100.0</engUnitsHigh>
-        </value>
+        </element>
     </structArray>
     <arrayArray>
-        <value elementType = "double" capacity = "5" length = "5">
-            <value>1.0,2.0,3.0</value>
-        </value>
-        <value offset = "3" elementType = "string" capacity = "5" length = "5">
-            <value>string 1  ,string 2  ,string 3  </value>
-        </value>
+        <element elementType = "double" capacity = "5" length = "5">
+            <element>1.0,2.0,3.0</element>
+        </element>
+        <element offset = "3" elementType = "string" capacity = "5" length = "5">
+            <element>string 1  ,string 2  ,string 3  </element>
+        </element>
     </arrayArray>
     <allTypes>
         <boolean>true</boolean>
@@ -75,47 +75,47 @@
             <high>10.0</high>
         </doubleLimit>
         <booleanArray capacity = "3" length = "3">
-            <value>false true</value>
+            <element>false true</element>
         </booleanArray>
         <byteArray capacity = "3">
-            <value>1</value>
-            <value>2</value>
-            <value>0x3</value>
+            <element>1</element>
+            <element>2</element>
+            <element>0x3</element>
         </byteArray>
         <shortArray capacity = "4">
-            <value offset = "2">3 4</value>
+            <element offset = "2">3 4</element>
         </shortArray>
         <longArray capacity = "2">
-            <value>0xff 0xffffff</value>
+            <element>0xff 0xffffff</element>
         </longArray>
         <floatArray capacity = "3">
-            <value>1.0,2e10 -3.55e20</value>
+            <element>1.0,2e10 -3.55e20</element>
         </floatArray>
         <doubleArray capacity = "3">
-            <value>1.0,2.0,3.0</value>
+            <element>1.0,2.0,3.0</element>
         </doubleArray>
         <stringArray>
-            <value>string1</value>
-            <value>string 2</value>
-            <value>string 3,   string 4   </value>
+            <element>string1</element>
+            <element>string 2</element>
+            <element>string 3,   string 4   </element>
         </stringArray>
         <structArray>
-            <value structureName = "doubleLimit">
+            <element structureName = "doubleLimit">
                  <low>0.0</low>
                  <high>10.0</high>
-            </value>
-            <value structureName = "linearConvert">
+            </element>
+            <element structureName = "linearConvert">
                  <engUnitsLow>0.0</engUnitsLow>
                  <engUnitsHigh>100.0</engUnitsHigh>
-            </value>
+            </element>
         </structArray>
         <arrayArray>
-            <value elementType = "double" capacity = "5" length = "5">
-                <value>1.0,2.0,3.0</value>
-            </value>
-            <value offset = "3" elementType = "string" capacity = "5" length = "5">
-                <value>string 1,  string 2   ,string 3 </value>
-            </value>
+            <element elementType = "double" capacity = "5" length = "5">
+                <element>1.0,2.0,3.0</element>
+            </element>
+            <element offset = "3" elementType = "string" capacity = "5" length = "5">
+                <element>string 1,  string 2   ,string 3 </element>
+            </element>
         </arrayArray>
     </allTypes>
 </record>

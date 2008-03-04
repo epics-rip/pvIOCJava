@@ -1,8 +1,8 @@
 <?xml version="1.0" ?>
 <DBDefinition>
-  <field name = "value" type = "int" />
   <field name = "alarm" type = "structure"/>
   <field name = "timeStamp" type = "structure" />  
+  <field name = "value" type = "int" />
   <field name = "input" type = "structure" />
   <!-- instance can set structureName = "intAlarm" -->
   <field name = "valueAlarm" type = "structure" />

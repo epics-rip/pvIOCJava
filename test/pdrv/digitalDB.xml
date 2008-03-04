@@ -22,18 +22,18 @@
     <alarm structureName = "alarm" />
     <timeStamp structureName = "timeStamp" />
     <calcArgArray>
-        <value structureName = "calcDoubleArg">
+        <element structureName = "calcDoubleArg">
             <value>0</value>
             <name>min</name>
-        </value>
-        <value structureName = "calcDoubleArg">
+        </element>
+        <element structureName = "calcDoubleArg">
             <value>15</value>
             <name>max</name>
-        </value>
-        <value structureName = "calcDoubleArg">
+        </element>
+        <element structureName = "calcDoubleArg">
             <value>1</value>
             <name>inc</name>
-        </value>
+        </element>
     </calcArgArray>
     <calculator supportName = "counterCalculator" />
     <scan>
@@ -42,13 +42,13 @@
         <processAfterStart>true</processAfterStart>
     </scan>
     <supportArray>
-        <value structureName = "supportArrayElement">
+        <element structureName = "supportArrayElement">
             <wait>false</wait>
             <link  supportName = "outputSupport" structureName = "outputSupport">
                 <pvname>syncDigitalOut</pvname>
                 <process>true</process>
             </link>
-        </value>
+        </element>
     </supportArray>
     <display structureName = "display" >
         <units>counts</units>
@@ -69,36 +69,36 @@
         <timeout>.2</timeout>
     </output>
     <supportArray>
-        <value structureName = "supportArrayElement">
+        <element structureName = "supportArrayElement">
             <wait>false</wait>
             <link  supportName = "processSupport" structureName = "processSupport">
                 <pvname>syncDigitalIn1</pvname>
             </link>
-        </value>
-        <value structureName = "supportArrayElement">
+        </element>
+        <element structureName = "supportArrayElement">
             <wait>false</wait>
             <link  supportName = "processSupport" structureName = "processSupport">
                 <pvname>syncDigitalIn2</pvname>
             </link>
-        </value>
-        <value structureName = "supportArrayElement">
+        </element>
+        <element structureName = "supportArrayElement">
             <wait>false</wait>
             <link  supportName = "processSupport" structureName = "processSupport">
                 <pvname>syncDigitalIn3</pvname>
             </link>
-        </value>
-        <value structureName = "supportArrayElement">
+        </element>
+        <element structureName = "supportArrayElement">
             <wait>false</wait>
             <link  supportName = "processSupport" structureName = "processSupport">
                 <pvname>syncDigitalIn4</pvname>
             </link>
-        </value>
-        <value structureName = "supportArrayElement">
+        </element>
+        <element structureName = "supportArrayElement">
             <wait>false</wait>
             <link  supportName = "processSupport" structureName = "processSupport">
                 <pvname>syncDigitalIn5</pvname>
             </link>
-        </value>
+        </element>
     </supportArray>
 </record>
 
@@ -114,16 +114,16 @@
             <timeout>.2</timeout>
         </input>  
         <states supportName = "digitalInput" >
-             <value structureName = "digitalState">
+             <element structureName = "digitalState">
                  <name>off</name>
                  <value>0</value>
                  <severity><choice>none</choice></severity>
-             </value>
-             <value structureName = "digitalState">
+             </element>
+             <element structureName = "digitalState">
                  <name>on</name>
                  <value>1</value>
                  <severity><choice>minor</choice></severity>
-             </value>
+             </element>
          </states>
     </input>
     <valueAlarm structureName = "enumeratedAlarm">
@@ -147,16 +147,16 @@
             <timeout>.2</timeout>
         </input>  
             <states supportName = "digitalInput" >
-                 <value structureName = "digitalState">
+                 <element structureName = "digitalState">
                      <name>off</name>
                      <value>0</value>
                      <severity><choice>none</choice></severity>
-                 </value>
-                 <value structureName = "digitalState">
+                 </element>
+                 <element structureName = "digitalState">
                      <name>on</name>
                      <value>1</value>
                      <severity><choice>minor</choice></severity>
-                 </value>
+                 </element>
             </states>
     </input>
     <valueAlarm structureName = "enumeratedAlarm">
@@ -180,26 +180,26 @@
             <timeout>.2</timeout>
         </input>  
             <states supportName = "digitalInput" >
-                 <value structureName = "digitalState">
+                 <element structureName = "digitalState">
                      <name>zero</name>
                      <value>0x0</value>
                      <severity><choice>none</choice></severity>
-                 </value>
-                 <value structureName = "digitalState">
+                 </element>
+                 <element structureName = "digitalState">
                      <name>one</name>
                      <value>0x1</value>
                      <severity><choice>minor</choice></severity>
-                 </value>
-                 <value structureName = "digitalState">
+                 </element>
+                 <element structureName = "digitalState">
                      <name>two</name>
                      <value>0x2</value>
                      <severity><choice>major</choice></severity>
-                 </value>
-                 <value structureName = "digitalState">
+                 </element>
+                 <element structureName = "digitalState">
                      <name>three</name>
                     <value>0x3</value>
                     <severity><choice>none</choice></severity>
-                 </value>
+                 </element>
             </states>
     </input>
     <valueAlarm structureName = "enumeratedAlarm">
@@ -224,26 +224,26 @@
             <timeout>.2</timeout>
         </input>   
             <states supportName = "digitalInput" >
-                 <value structureName = "digitalState">
+                 <element structureName = "digitalState">
                      <name>zero</name>
                      <value>0x0</value>
                      <severity><choice>none</choice></severity>
-                 </value>
-                 <value structureName = "digitalState">
+                 </element>
+                 <element structureName = "digitalState">
                      <name>one</name>
                      <value>0x1</value>
                      <severity><choice>minor</choice></severity>
-                 </value>
-                 <value structureName = "digitalState">
+                 </element>
+                 <element structureName = "digitalState">
                      <name>two</name>
                      <value>0x2</value>
                      <severity><choice>major</choice></severity>
-                 </value>
-                 <value structureName = "digitalState">
+                 </element>
+                 <element structureName = "digitalState">
                      <name>three</name>
                     <value>0x3</value>
                     <severity><choice>none</choice></severity>
-                 </value>
+                 </element>
             </states>
     </input>
     <valueAlarm structureName = "enumeratedAlarm">
@@ -268,36 +268,36 @@
             <timeout>.2</timeout>
         </input>  
             <states supportName = "digitalInput" >
-                 <value structureName = "digitalState">
+                 <element structureName = "digitalState">
                      <name>zero</name>
                      <value>0x0</value>
                      <severity><choice>none</choice></severity>
-                 </value>
-                 <value structureName = "digitalState">
+                 </element>
+                 <element structureName = "digitalState">
                      <name>one</name>
                      <value>0x1</value>
                      <severity><choice>minor</choice></severity>
-                 </value>
-                 <value structureName = "digitalState">
+                 </element>
+                 <element structureName = "digitalState">
                      <name>two</name>
                      <value>0x2</value>
                      <severity><choice>major</choice></severity>
-                 </value>
-                 <value structureName = "digitalState">
+                 </element>
+                 <element structureName = "digitalState">
                      <name>three</name>
                     <value>0x3</value>
                     <severity><choice>none</choice></severity>
-                 </value>
-                 <value structureName = "digitalState">
+                 </element>
+                 <element structureName = "digitalState">
                      <name>four</name>
                      <value>0x4</value>
                      <severity><choice>major</choice></severity>
-                 </value>
-                 <value structureName = "digitalState">
+                 </element>
+                 <element structureName = "digitalState">
                      <name>eight</name>
                      <value>8</value>
                      <severity><choice>none</choice></severity>
-                 </value>
+                 </element>
             </states>
     </input>
     <valueAlarm structureName = "enumeratedAlarm">

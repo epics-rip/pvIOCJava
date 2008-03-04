@@ -71,6 +71,10 @@ public interface DBField {
      */
     void setCreate(Create create);
     /**
+     * Look to see if create should be replaced.
+     */
+    void replaceCreate();
+    /**
      * Get the Support for the field.
      * @return The support or null if no support exists.
      */

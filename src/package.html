@@ -10,7 +10,7 @@
 <body>
 <h1 style="text-align: center">EPICS JavaIOC: Java Input/Output Controller<br
 />
-2008.02.08</h1>
+2008.03.04</h1>
 
 <p>This product is available via the <a href="#LicenseAgreement">open source
 license</a> described at the end of this document.</p>
@@ -420,8 +420,8 @@ is familiar with EPICS V3.</p>
 <p><span style="font-weight:bold;">WARNING</span>: JavaIOC is currently
 pre-alpha:</p>
 <ul>
-  <li>It does not have sufficient functionality to be used for real
-    appplications.</li>
+  <li>No hardware support is supplied with the javaIOC itself. It is,
+    however, ready for softIOC applications..</li>
   <li>It has not been seriously tested and thus may have many bugs.</li>
 </ul>
 
@@ -442,7 +442,7 @@ program, <span style="font-family: courier;">XMLToDatabase</span>, that:</p>
 <ul>
   <li>Reads Database Definition and Record Instance files</li>
   <li>Dumps the resulting DBD and DB definitions</li>
-  <li>Stárts servers.</li>
+  <li>Starts servers.</li>
   <li>Starts an ioc.</li>
   <li>Invokes swtshell, which is a GUI shell for a running JavaIOC.</li>
 </ul>
@@ -478,7 +478,7 @@ dumps the database definitions and record instances.</p>
 
 <p>As a beginning example specify the arguments as:</p>
 <pre>    -dbd example/exampleDBD.xml -db example/exampleDB.xml \
-    -server server/afterStartIOC.txt \
+    -server server/beforeStartIOC.txt \
     -startIOC \
     -server server/afterStartIOC.txt \
     -swtshell</pre>
@@ -996,26 +996,26 @@ format:</p>
     &lt;valueAlarm structureName = "doubleAlarm"&gt;
           &lt;active&gt;true&lt;/active&gt;
           &lt;interval&gt;
-              &lt;value structureName = "doubleAlarmInterval"&gt;
+              &lt;element structureName = "doubleAlarmInterval"&gt;
                   &lt;value&gt;2.0&lt;/value&gt;
                   &lt;severity&gt;&lt;choice&gt;major&lt;/choice&gt;&lt;/severity&gt;
-              &lt;/value&gt;
-              &lt;value structureName = "doubleAlarmInterval"&gt;
+              &lt;/element&gt;
+              &lt;element structureName = "doubleAlarmInterval"&gt;
                   &lt;value&gt;4.0&lt;/value&gt;
                   &lt;severity&gt;&lt;choice&gt;minor&lt;/choice&gt;&lt;/severity&gt;
-              &lt;/value&gt;
-              &lt;value structureName = "doubleAlarmInterval"&gt;
+              &lt;/element&gt;
+              &lt;element structureName = "doubleAlarmInterval"&gt;
                   &lt;value&gt;6.0&lt;/value&gt;
                   &lt;severity&gt;&lt;choice&gt;none&lt;/choice&gt;&lt;/severity&gt;
-              &lt;/value&gt;
-              &lt;value structureName = "doubleAlarmInterval"&gt;
+              &lt;/element&gt;
+              &lt;element structureName = "doubleAlarmInterval"&gt;
                   &lt;value&gt;8.0&lt;/value&gt;
                   &lt;severity&gt;&lt;choice&gt;minor&lt;/choice&gt;&lt;/severity&gt;
-              &lt;/value&gt;
-              &lt;value structureName = "doubleAlarmInterval"&gt;
+              &lt;/element&gt;
+              &lt;element structureName = "doubleAlarmInterval"&gt;
                   &lt;value&gt;10.0&lt;/value&gt;
                   &lt;severity&gt;&lt;choice&gt;major&lt;/choice&gt;&lt;/severity&gt;
-              &lt;/value&gt;
+              &lt;/element&gt;
           &lt;/interval&gt;
           &lt;outOfRange&gt;&lt;choice&gt;invalid&lt;/choice&gt;&lt;/outOfRange&gt;
           &lt;hystersis&gt;0.1&lt;/hystersis&gt;
@@ -1278,7 +1278,11 @@ this section, which just shows the interfaces.</p>
 <p>Package org.epics.ioc.ca describes Channel Access for a JavaIOC. See it
 for details. Some features are:</p>
 <ul>
-  <li>Local Channel Access is implemented. Remote is not implemented.</li>
+  <li>Local Channel Access is implemented.</li>
+  <li>A V3 Channel Access server is available. Thus Channel Access clients
+    can access a javaIOC database.</li>
+  <li>V3 Channel Access client code is implemented. This allows the javaIOC
+    to communicate with an EPICS IOC.</li>
   <li>Link support is implemented. 
     <ul>
       <li>Get, Put, and PutGet are all supported. Each can optionally process
@@ -1441,9 +1445,9 @@ described in the second part of this document.</p>
 and structure double.</p>
 <pre>&lt;?xml version="1.0" ?&gt;
 &lt;DBDefinition&gt;
-  &lt;field name = "value" type = "double" /&gt;
   &lt;field name = "alarm" type = "structure"/&gt;
   &lt;field name = "timeStamp" type = "structure" /&gt;
+  &lt;field name = "value" type = "double" /&gt;
   &lt;field name = "input" type = "structure" /&gt;
   &lt;!-- instance can set structureName = "doubleAlarm" --&gt;
   &lt;field name = "valueAlarm" type = "structure" /&gt;
@@ -1598,26 +1602,26 @@ read via portDriver support and converted via linearConvertInput support.</p>
     &lt;valueAlarm structureName = "doubleAlarm"&gt;
           &lt;active&gt;true&lt;/active&gt;
           &lt;interval&gt;
-              &lt;value structureName = "doubleAlarmInterval"&gt;
+              &lt;element structureName = "doubleAlarmInterval"&gt;
                   &lt;value&gt;2.0&lt;/value&gt;
                   &lt;severity&gt;major&lt;/severity&gt;
-              &lt;/value&gt;
-              &lt;value structureName = "doubleAlarmInterval"&gt;
+              &lt;/element&gt;
+              &lt;element structureName = "doubleAlarmInterval"&gt;
                   &lt;value&gt;4.0&lt;/value&gt;
                   &lt;severity&gt;minor&lt;/severity&gt;
-              &lt;/value&gt;
-              &lt;value structureName = "doubleAlarmInterval"&gt;
+              &lt;/element&gt;
+              &lt;element structureName = "doubleAlarmInterval"&gt;
                   &lt;value&gt;6.0&lt;/value&gt;
                   &lt;severity&gt;none&lt;/severity&gt;
-              &lt;/value&gt;
-              &lt;value structureName = "doubleAlarmInterval"&gt;
+              &lt;/element&gt;
+              &lt;element structureName = "doubleAlarmInterval"&gt;
                   &lt;value&gt;8.0&lt;/value&gt;
                   &lt;severity&gt;minor&lt;/severity&gt;
-              &lt;/value&gt;
-              &lt;value structureName = "doubleAlarmInterval"&gt;
+              &lt;/element&gt;
+              &lt;element structureName = "doubleAlarmInterval"&gt;
                   &lt;value&gt;10.0&lt;/value&gt;
                   &lt;severity&gt;major&lt;/severity&gt;
-              &lt;/value&gt;
+              &lt;/element&gt;
           &lt;/interval&gt;
           &lt;outOfRange&gt;invalid&lt;/outOfRange&gt;
           &lt;hystersis&gt;0.1&lt;/hystersis&gt;
@@ -3219,11 +3223,20 @@ structure and the recordType. </p>
 
 <p>The Common file defines the fields:</p>
 <dl>
+  <dt>alarm</dt>
+    <dd>An alarm field that is a null structure. Note that since this appears
+      in the structure definition alarm hierarchiries are supported. A record
+      instance can declare the field declaring structureName = "alarm". If
+      the record instance does not declare this field then it is not a
+      property of value. </dd>
+  <dt>timeStamp</dt>
+    <dd>An timeStamp field that is a null structure. Note that since this
+      appears in the structure definition multiple timeStamps can appear in a
+      record. A record instance can declare the field declaring structureName
+      = "timeStamp". If the record instance does not declare this field then
+      it is not a property of value. </dd>
   <dt>value</dt>
     <dd>The value field.</dd>
-  <dt>alarm</dt>
-    <dd>An alarm field. Note that since this appears in the structure
-      definition alarm hierarchiries are supported.</dd>
   <dt>input</dt>
     <dd>A structure for reading the value. If this is defined but output is
       not than the record instance is an input record.</dd>
@@ -3232,8 +3245,11 @@ structure and the recordType. </p>
   <dt>output</dt>
     <dd>A structure for writing the value. If this is defined but input is
       not than the record instance is an output record.</dd>
-  <dt>displayCharacteristics</dt>
+  <dt>display</dt>
     <dd>Display characteristics. Instance will have null structure unless
+      record instance defines structureName</dd>
+  <dt>control</dt>
+    <dd>Control characteristics. Instance will have null structure unless
       record instance defines structureName</dd>
   <dt>history</dt>
     <dd>History. Instance will have null structure unless record instance
@@ -3256,9 +3272,9 @@ well as:</p>
 <h5 id="booleanCom">booleanCommon.xml</h5>
 <pre>&lt;?xml version="1.0" ?&gt;
 &lt;DBDefinition&gt;
-  &lt;field name = "value" type = "boolean" /&gt;
   &lt;field name = "alarm" type = "structure" /&gt;
   &lt;field name = "timeStamp" type = "structure" /&gt;
+  &lt;field name = "value" type = "boolean" /&gt;
   &lt;field name = "input" type = "structure" /&gt;
   &lt;!-- instance can set structureName = "booleanAlarm" --&gt;
   &lt;field name = "valueAlarm" type = "structure" /&gt;
@@ -3288,9 +3304,9 @@ well as:</p>
 <h5 id="byteCommon">byteCommon.xml</h5>
 <pre>&lt;?xml version="1.0" ?&gt;
 &lt;DBDefinition&gt;
-  &lt;field name = "value" type = "byte" /&gt; 
   &lt;field name = "alarm" type = "structure"/&gt;
   &lt;field name = "timeStamp" type = "structure" /&gt;
+  &lt;field name = "value" type = "byte" /&gt; 
   &lt;field name = "input" type = "structure" /&gt;
   &lt;!-- instance can set structureName = "byteAlarm" --&gt;
   &lt;field name = "valueAlarm" type = "structure" /&gt;
@@ -3321,9 +3337,9 @@ well as:</p>
 <h5 id="shortCommo">shortCommon.xml</h5>
 <pre>&lt;?xml version="1.0" ?&gt;
 &lt;DBDefinition&gt;
-  &lt;field name = "value" type = "short" /&gt;
   &lt;field name = "alarm" type = "structure"/&gt;
   &lt;field name = "timeStamp" type = "structure" /&gt;
+  &lt;field name = "value" type = "short" /&gt;
   &lt;field name = "input" type = "structure" /&gt;
   &lt;!-- instance can set structureName = "shortAlarm" --&gt;
   &lt;field name = "valueAlarm" type = "structure" /&gt;
@@ -3354,9 +3370,9 @@ well as:</p>
 <h5 id="intCommon.">intCommon.xml</h5>
 <pre>&lt;?xml version="1.0" ?&gt;
 &lt;DBDefinition&gt;
-  &lt;field name = "value" type = "int" /&gt;
   &lt;field name = "alarm" type = "structure"/&gt;
   &lt;field name = "timeStamp" type = "structure" /&gt;
+  &lt;field name = "value" type = "int" /&gt;
   &lt;field name = "input" type = "structure" /&gt;
   &lt;!-- instance can set structureName = "intAlarm" --&gt;
   &lt;field name = "valueAlarm" type = "structure" /&gt;
@@ -3387,9 +3403,9 @@ well as:</p>
 <h5 id="longCommon">longCommon.xml</h5>
 <pre>&lt;?xml version="1.0" ?&gt;
 &lt;DBDefinition&gt;
-  &lt;field name = "value" type = "long" /&gt;
   &lt;field name = "alarm" type = "structure"/&gt;
   &lt;field name = "timeStamp" type = "structure" /&gt;
+  &lt;field name = "value" type = "long" /&gt;
   &lt;field name = "input" type = "structure" /&gt;
   &lt;!-- instance can set structureName = "longAlarm" --&gt;
   &lt;field name = "valueAlarm" type = "structure" /&gt;
@@ -3420,9 +3436,9 @@ well as:</p>
 <h5 id="floatCommo">floatCommon.xml</h5>
 <pre>&lt;?xml version="1.0" ?&gt;
 &lt;DBDefinition&gt;
-  &lt;field name = "value" type = "float" /&gt;
   &lt;field name = "alarm" type = "structure"/&gt;
   &lt;field name = "timeStamp" type = "structure" /&gt;
+  &lt;field name = "value" type = "float" /&gt;
   &lt;field name = "input" type = "structure" /&gt;
   &lt;!-- instance can set structureName = "floatAlarm" --&gt;
   &lt;field name = "valueAlarm" type = "structure" /&gt;
@@ -3453,9 +3469,9 @@ well as:</p>
 <h5 id="doubleComm1">doubleCommon.xml</h5>
 <pre>&lt;?xml version="1.0" ?&gt;
 &lt;DBDefinition&gt;
-  &lt;field name = "value" type = "double" /&gt;
   &lt;field name = "alarm" type = "structure"/&gt;
   &lt;field name = "timeStamp" type = "structure" /&gt;
+  &lt;field name = "value" type = "double" /&gt;
   &lt;field name = "input" type = "structure" /&gt;
   &lt;!-- instance can set structureName = "doubleAlarm" --&gt;
   &lt;field name = "valueAlarm" type = "structure" /&gt;
@@ -3486,9 +3502,9 @@ well as:</p>
 <h5 id="stringComm">stringCommon.xml</h5>
 <pre>&lt;?xml version="1.0" ?&gt;
 &lt;DBDefinition&gt;
-  &lt;field name = "value" type = "string" /&gt;
   &lt;field name = "alarm" type = "structure"/&gt;
   &lt;field name = "timeStamp" type = "structure" /&gt;
+  &lt;field name = "value" type = "string" /&gt;
   &lt;field name = "input" type = "structure" /&gt;
   &lt;field name = "output" type = "structure" /&gt;
   &lt;!-- instance can set structureName = "stringHistory" --&gt;
@@ -3527,11 +3543,11 @@ the structure and the recordType. </p>
 
 <p>The Common file defines the fields:</p>
 <dl>
-  <dt>value</dt>
-    <dd>The value field.</dd>
   <dt>alarm</dt>
     <dd>An alarm field. Note that since this appears in the structure
       definition alarm hierarchiries are supported.</dd>
+  <dt>value</dt>
+    <dd>The value field.</dd>
   <dt>input</dt>
     <dd>A link for reading the value. If this is defined but output is not
       than the record instance is an input record.</dd>
@@ -3540,7 +3556,7 @@ the structure and the recordType. </p>
   <dt>output</dt>
     <dd>A link for writing the value. If this is defined but input is not
       than the record instance is an output record.</dd>
-  <dt>displayCharacteristics</dt>
+  <dt>display</dt>
     <dd>Display Characteristics. Unless instance defines structureName this
       will be null structure.</dd>
   <dt>history</dt>
@@ -3564,9 +3580,9 @@ well as:</p>
 <h5 id="booleanArr1">booleanArrayCommon.xml</h5>
 <pre>&lt;?xml version="1.0" ?&gt;
 &lt;DBDefinition&gt;
-  &lt;field name = "value" type = "array" elementType = "boolean" /&gt;
   &lt;field name = "alarm" type = "structure"/&gt;
   &lt;field name = "timeStamp" type = "structure" /&gt;
+  &lt;field name = "value" type = "array" elementType = "boolean" /&gt;
   &lt;field name = "input" type = "structure" /&gt;
   &lt;field name = "output" type = "structure" /&gt;
   &lt;field name = "display" type = "structure" /&gt;
@@ -3592,9 +3608,9 @@ well as:</p>
 <h5 id="byteArrayC">byteArrayCommon.xml</h5>
 <pre>&lt;?xml version="1.0" ?&gt;
 &lt;DBDefinition&gt;
-  &lt;field name = "value" type = "array" elementType = "byte" /&gt; 
   &lt;field name = "alarm" type = "structure"/&gt;
   &lt;field name = "timeStamp" type = "structure" /&gt;
+  &lt;field name = "value" type = "array" elementType = "byte" /&gt; 
   &lt;field name = "input" type = "structure" /&gt;
   &lt;field name = "output" type = "structure" /&gt;
   &lt;field name = "display" type = "structure" /&gt;
@@ -3620,9 +3636,9 @@ well as:</p>
 <h5 id="shortArray1">shortArrayCommon.xml</h5>
 <pre>&lt;?xml version="1.0" ?&gt;
 &lt;DBDefinition&gt;
-  &lt;field name = "value" type = "array" elementType = "short" /&gt;
   &lt;field name = "alarm" type = "structure"/&gt;
   &lt;field name = "timeStamp" type = "structure" /&gt;
+  &lt;field name = "value" type = "array" elementType = "short" /&gt;
   &lt;field name = "input" type = "structure" /&gt;
   &lt;field name = "output" type = "structure" /&gt;
   &lt;field name = "display" type = "structure" /&gt;
@@ -3648,9 +3664,9 @@ well as:</p>
 <h5 id="intArrayCo">intArrayCommon.xml</h5>
 <pre>&lt;?xml version="1.0" ?&gt;
 &lt;DBDefinition&gt;
-  &lt;field name = "value" type = "array" elementType = "int" /&gt;
   &lt;field name = "alarm" type = "structure"/&gt;
   &lt;field name = "timeStamp" type = "structure" /&gt;
+  &lt;field name = "value" type = "array" elementType = "int" /&gt;
   &lt;field name = "input" type = "structure" /&gt;
   &lt;field name = "output" type = "structure" /&gt;
   &lt;field name = "display" type = "structure" /&gt;
@@ -3676,9 +3692,9 @@ well as:</p>
 <h5 id="longArrayC">longArrayCommon.xml</h5>
 <pre>&lt;?xml version="1.0" ?&gt;
 &lt;DBDefinition&gt;
-  &lt;field name = "value" type = "array" elementType = "long" /&gt;
   &lt;field name = "alarm" type = "structure"/&gt;
   &lt;field name = "timeStamp" type = "structure" /&gt;
+  &lt;field name = "value" type = "array" elementType = "long" /&gt;
   &lt;field name = "input" type = "structure" /&gt;
   &lt;field name = "output" type = "structure" /&gt;
   &lt;field name = "display" type = "structure" /&gt;
@@ -3704,9 +3720,9 @@ well as:</p>
 <h5 id="floatArray1">floatArrayCommon.xml</h5>
 <pre>&lt;?xml version="1.0" ?&gt;
 &lt;DBDefinition&gt;
-  &lt;field name = "value" type = "array" elementType = "float" /&gt;
   &lt;field name = "alarm" type = "structure"/&gt;
   &lt;field name = "timeStamp" type = "structure" /&gt;
+  &lt;field name = "value" type = "array" elementType = "float" /&gt;
   &lt;field name = "input" type = "structure" /&gt;
   &lt;field name = "output" type = "structure" /&gt;
   &lt;field name = "display" type = "structure" /&gt;
@@ -3732,9 +3748,9 @@ well as:</p>
 <h5 id="doubleArra1">doubleArrayCommon.xml</h5>
 <pre>&lt;?xml version="1.0" ?&gt;
 &lt;DBDefinition&gt;
-  &lt;field name = "value" type = "array" elementType = "double" /&gt;
   &lt;field name = "alarm" type = "structure"/&gt;
   &lt;field name = "timeStamp" type = "structure" /&gt;
+  &lt;field name = "value" type = "array" elementType = "double" /&gt;
   &lt;field name = "input" type = "structure" /&gt;
   &lt;field name = "output" type = "structure" /&gt;
   &lt;field name = "display" type = "structure" /&gt;
@@ -3760,9 +3776,9 @@ well as:</p>
 <h5 id="stringArra1">stringArrayCommon.xml</h5>
 <pre>&lt;?xml version="1.0" ?&gt;
 &lt;DBDefinition&gt;
-  &lt;field name = "value" type = "array" elementType = "string" /&gt;
   &lt;field name = "alarm" type = "structure"/&gt;
   &lt;field name = "timeStamp" type = "structure" /&gt;
+  &lt;field name = "value" type = "array" elementType = "string" /&gt;
   &lt;field name = "input" type = "structure" /&gt;
   &lt;field name = "output" type = "structure" /&gt;
 &lt;/DBDefinition&gt; </pre>

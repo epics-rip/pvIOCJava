@@ -1,8 +1,8 @@
 <?xml version="1.0" ?>
 <DBDefinition>
-  <field name = "value" type = "array" elementType = "double" />
   <field name = "alarm" type = "structure"/>
   <field name = "timeStamp" type = "structure" />  
+  <field name = "value" type = "array" elementType = "double" />
   <field name = "input" type = "structure" />
   <field name = "output" type = "structure" />
   <field name = "display" type = "structure" />

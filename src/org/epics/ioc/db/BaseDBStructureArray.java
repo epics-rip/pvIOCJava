@@ -67,6 +67,16 @@ public class BaseDBStructureArray extends BaseDBArray implements DBStructureArra
         createElementDBStructures();
         super.postPut();
     }
+    /* (non-Javadoc)
+     * @see org.epics.ioc.db.BaseDBField#replaceCreate()
+     */
+    public void replaceCreate() {
+        for(DBStructure dbStructure: elementDBStructures) {
+            if(dbStructure==null) continue;
+            dbStructure.replaceCreate();
+        }
+        super.replaceCreate();
+    }
     
     private void createElementDBStructures() {
         int length = pvStructureArray.getLength();

@@ -23,6 +23,7 @@ public abstract class AbstractPVField implements PVField{
     private PVField parent;
     private PVRecord record;
     private String supportName = null;
+    private String createName = null;
     private PVEnumerated pvEnumerated = null;
     static private Pattern periodPattern = Pattern.compile("[.]");
 
@@ -334,6 +335,18 @@ public abstract class AbstractPVField implements PVField{
         supportName = name;
     }
     /* (non-Javadoc)
+     * @see org.epics.ioc.pv.PVField#getCreateName()
+     */
+    public String getCreateName() {
+        return createName;
+    }
+    /* (non-Javadoc)
+     * @see org.epics.ioc.pv.PVField#setCreateName(java.lang.String)
+     */
+    public void setCreateName(String name) {
+        createName = name;
+    }
+    /* (non-Javadoc)
      * @see org.epics.ioc.pv.PVField#asynAccessCallListener(boolean)
      */
     public void asynAccessCallListener(boolean begin) {
@@ -376,6 +389,7 @@ public abstract class AbstractPVField implements PVField{
             returnValue = " supportName " + supportName;
         }
         String createName = field.getCreateName();
+        if(createName==null) createName = this.createName;
         if(createName!=null) {
             returnValue += " createName " + createName;
         }

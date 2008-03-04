@@ -208,6 +208,31 @@ public abstract class AbstractChannel implements Channel{
         if(isDestroyed) return;
         this.disconnect();
         isDestroyed = true;
+        while(!channelProcessList.isEmpty()) {
+            ChannelProcess channelProcess = channelProcessList.getFirst();
+            remove(channelProcess);
+            channelProcess.destroy();
+        }
+        while(!channelGetList.isEmpty()) {
+            ChannelGet channelGet = channelGetList.getFirst();
+            remove(channelGet);
+            channelGet.destroy();
+        }
+        while(!channelPutList.isEmpty()) {
+            ChannelPut channelPut = channelPutList.getFirst();
+            remove(channelPut);
+            channelPut.destroy();
+        }
+        while(!channelPutGetList.isEmpty()) {
+            ChannelPutGet channelPutGet = channelPutGetList.getFirst();
+            remove(channelPutGet);
+            channelPutGet.destroy();
+        }
+        while(!channelMonitorList.isEmpty()) {
+            ChannelMonitor channelMonitor = channelMonitorList.getFirst();
+            remove(channelMonitor);
+            channelMonitor.destroy();
+        }
     }
     /* (non-Javadoc)
      * @see org.epics.ioc.ca.Channel#getChannelStateListener()
