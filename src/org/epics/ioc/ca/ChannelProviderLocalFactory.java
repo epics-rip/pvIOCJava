@@ -331,7 +331,7 @@ public class ChannelProviderLocalFactory  {
                 channelProcessRequester.message(message, messageType);
             }    
             /* (non-Javadoc)
-             * @see org.epics.ioc.process.RecordProcessRequester#processResult(org.epics.ioc.util.AlarmSeverity, java.lang.String, org.epics.ioc.util.TimeStamp)
+             * @see org.epics.ioc.process.RecordProcessRequester#recordProcessResult(org.epics.ioc.util.RequestResult)
              */
             public void recordProcessResult(RequestResult requestResult) {
                 this.requestResult = requestResult;
