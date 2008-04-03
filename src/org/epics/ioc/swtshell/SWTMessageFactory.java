@@ -69,7 +69,7 @@ public class SWTMessageFactory {
                 messageQueue.unlock();
             }
             if(syncExec) {
-                display.syncExec(this);
+                display.asyncExec(this);
             }
         }
         /* (non-Javadoc)

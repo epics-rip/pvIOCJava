@@ -304,7 +304,7 @@ public class MonitorFactory {
          */
         public void monitorCD(final CD cD) {
             allDone = false;
-            display.syncExec( new Runnable() {
+            display.asyncExec( new Runnable() {
                 public void run() {
                     CDPrint cdPrint = CDPrintFactory.create(cD.getCDRecord(),consoleText);
                     cdPrint.print();

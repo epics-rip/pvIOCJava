@@ -45,7 +45,7 @@ public class ChannelConnectFactory {
     
     private static class ChannelConnectImpl
     implements ChannelConnect,Requester,
-        DisposeListener,ChannelListener,SelectionListener,
+        DisposeListener,SelectionListener,ChannelListener,
         Runnable
     {
         private IOCDB iocdb = IOCDBFactory.getMaster();
@@ -55,9 +55,11 @@ public class ChannelConnectFactory {
         private Shell shell = null;
         private Channel channel = null;
         private enum ConnectState {connected,disconnected}
-        private ConnectState connectState = ConnectState.disconnected;
-        private String[] connectStateText = {"connect    ","disconnect"};
+        private ConnectState connectButtonState = ConnectState.disconnected;
+        private String[] connectButtonStateText = {"connect    ","disconnect"};
+        private String[] connectConnectStateText = {"not connected","    connected"};
         
+        private Label connectedLabel = null;
         private Button connectButton = null;
         private Button selectLocalRecordButton = null;
         private Button selectLocalFieldButton = null;
@@ -72,12 +74,6 @@ public class ChannelConnectFactory {
         private Button alarmButton = null;
         private Button displayButton = null;
         private Button controlButton = null;
-        
-        
-        private enum ListenerState {channelStateChange, disconnect}
-        private ListenerState listernerState = ListenerState.channelStateChange;
-        private boolean isConnected = false;
-        
         
         private ChannelConnectImpl(ChannelListener channelListener,Requester requester) {
             this.channelListener = channelListener;
@@ -100,10 +96,12 @@ public class ChannelConnectFactory {
             
             Composite connectGetLocal = new Composite(shellComposite,SWT.BORDER);
             gridLayout = new GridLayout();
-            gridLayout.numColumns = 3;
+            gridLayout.numColumns = 4;
             connectGetLocal.setLayout(gridLayout);
+            connectedLabel = new Label(connectGetLocal,SWT.RIGHT);
+            connectedLabel.setText(connectConnectStateText[0]);
             connectButton = new Button(connectGetLocal,SWT.PUSH);
-            connectButton.setText(connectStateText[0]);
+            connectButton.setText(connectButtonStateText[0]);
             connectButton.addSelectionListener(this);
             selectLocalRecordButton = new Button(connectGetLocal,SWT.PUSH);
             selectLocalRecordButton.setText("selectLocalRecord");
@@ -200,34 +198,18 @@ public class ChannelConnectFactory {
             if(channel!=null) destroy(channel);
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.ca.ChannelListener#channelStateChange(org.epics.ioc.ca.Channel, boolean)
-         */
-        public void channelStateChange(Channel c, boolean isConnected) {
-            listernerState = ListenerState.channelStateChange;
-            this.isConnected = isConnected;
-            display.syncExec(this);
-        }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.ca.ChannelListener#disconnect(org.epics.ioc.ca.Channel)
-         */
-        public void destroy(Channel c) {
-            listernerState = ListenerState.disconnect;
-            display.syncExec(this);
-        }
-        /* (non-Javadoc)
          * @see org.eclipse.swt.events.SelectionListener#widgetDefaultSelected(org.eclipse.swt.events.SelectionEvent)
          */
         public void widgetDefaultSelected(SelectionEvent e) {
             widgetSelected(e);
         }
-        
         /* (non-Javadoc)
          * @see org.eclipse.swt.events.SelectionListener#widgetSelected(org.eclipse.swt.events.SelectionEvent)
          */
         public void widgetSelected(SelectionEvent e) {
             Object object = e.getSource(); 
             if(object==connectButton) {
-                switch(connectState) {
+                switch(connectButtonState) {
                 case disconnected:
                     if(providerName==null) {
                         message("provider is null",MessageType.info);
@@ -243,20 +225,12 @@ public class ChannelConnectFactory {
                     selectLocalRecordButton.setEnabled(false);
                     providerCombo.setEnabled(false);
                     pvNameText.setEnabled(false);
+                    connectButtonState = ConnectState.connected;
+                    connectButton.setText(connectButtonStateText[1]);
                     channel.connect();
-                    connectState = ConnectState.connected;
-                    connectButton.setText(connectStateText[1]);
-                    message("getChannel " + channel.getChannelName(),MessageType.info);
                     return;
                 case connected:
-                    connectState = ConnectState.disconnected;
-                    connectButton.setText(connectStateText[0]);
-                    message("destroyChannel " + channel.getChannelName(),MessageType.info);
-                    channel.disconnect();
-                    selectLocalRecordButton.setEnabled(true);
-                    providerCombo.setEnabled(true);
-                    pvNameText.setEnabled(true);
-                    channel = null;
+                    disconnect();
                     return;
                 }
             } else if(object==selectLocalRecordButton) {
@@ -295,18 +269,31 @@ public class ChannelConnectFactory {
             
         }
         /* (non-Javadoc)
+         * @see org.epics.ioc.ca.ChannelListener#channelStateChange(org.epics.ioc.ca.Channel, boolean)
+         */
+        public void channelStateChange(Channel c, boolean isConnected) {
+            if(connectButtonState==ConnectState.disconnected) return;
+            // run method will handle state change
+            display.asyncExec(this);
+        }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.ca.ChannelListener#disconnect(org.epics.ioc.ca.Channel)
+         */
+        public void destroy(Channel c) {
+            if(connectButtonState==ConnectState.disconnected) return;
+            display.asyncExec(this);
+        }
+        /* (non-Javadoc)
          * @see java.lang.Runnable#run()
          */
         public void run() {
-            switch(listernerState) {
-            case channelStateChange:
-                channelListener.channelStateChange(channel, isConnected);
-                break;
-            case disconnect:
-                channelListener.destroy(channel);
-                channel.disconnect();
-                channel = null;
-                break;
+            boolean isConnected = channel.isConnected();
+            if(isConnected) {
+                message("connected to " + channel.getChannelName(),MessageType.info);
+                connectedLabel.setText(connectConnectStateText[1]);
+                channelListener.channelStateChange(channel, true);
+            } else {
+                disconnect();
             }
         }
         
@@ -329,5 +316,20 @@ public class ChannelConnectFactory {
             if(control) propertys[num++] = "control";
             return propertys;
         }  
+        
+        private void disconnect() {
+            if(connectButtonState==ConnectState.disconnected) return;
+            channelListener.channelStateChange(channel, false);
+            connectedLabel.setText(connectConnectStateText[0]);
+            connectButtonState = ConnectState.disconnected;
+            connectButton.setText(connectButtonStateText[0]);
+            message("destroyChannel " + channel.getChannelName(),MessageType.info);
+            channel.destroy();
+            selectLocalRecordButton.setEnabled(true);
+            providerCombo.setEnabled(true);
+            pvNameText.setEnabled(true);
+            channel = null;
+            return;
+        }
     }
 }

@@ -257,7 +257,7 @@ public class GetFactory {
              * @see org.epics.ioc.ca.CDGetRequester#getDone(org.epics.ioc.util.RequestResult)
              */
             public void getDone(RequestResult requestResult) {
-                display.syncExec( new Runnable() {
+                display.asyncExec( new Runnable() {
                     public void run() {
                         CDPrint cdPrint = CDPrintFactory.create(cd.getCDRecord(),consoleText);
                         cdPrint.print();
