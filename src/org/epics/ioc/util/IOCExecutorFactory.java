@@ -36,13 +36,13 @@ public class IOCExecutorFactory {
         /* (non-Javadoc)
          * @see org.epics.ioc.util.IOCExecutor#execute(java.lang.Runnable)
          */
-        public synchronized void execute(Runnable command) {
+        public void execute(Runnable command) {
             thread.add(command);
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.util.IOCExecutor#execute(java.util.List)
          */
-        public synchronized void execute(List<Runnable> commands) {
+        public void execute(List<Runnable> commands) {
             thread.add(commands);
         }
     }
