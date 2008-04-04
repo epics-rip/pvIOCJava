@@ -36,14 +36,14 @@ public class IOCExecutorFactory {
         /* (non-Javadoc)
          * @see org.epics.ioc.util.IOCExecutor#execute(java.lang.Runnable)
          */
-        public void execute(Runnable command) {
-            thread.add(command);
+        public boolean execute(Runnable command) {
+            return thread.add(command);
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.util.IOCExecutor#execute(java.util.List)
          */
-        public void execute(List<Runnable> commands) {
-            thread.add(commands);
+        public boolean execute(List<Runnable> commands) {
+            return thread.add(commands);
         }
     }
     
@@ -85,32 +85,35 @@ public class IOCExecutorFactory {
             }
         }
         
-        private int add(Runnable runnable) {
-            int size = 0;
+        private boolean add(Runnable runnable) {
+            boolean wasAdded = false;
             lock.lock();
             try {
                 boolean isEmpty = runList.isEmpty();
-                runList.add(runnable);
-                size = runList.size();
+                wasAdded = runList.add(runnable);
                 if(isEmpty) moreWork.signal();
+                return wasAdded;
             } finally {
                 lock.unlock();
             }
-            return size;
         }
         
-        private int add(List<Runnable> runnableList) {
-            int size = 0;
+        private boolean add(List<Runnable> runnableList) {
+            boolean allAdded = false;
             lock.lock();
             try {
                 boolean isEmpty = runList.isEmpty();
+                int initialSize = runList.size();
                 runList.addAll(runnableList);
-                size = runList.size();
+                int finalSize = runList.size();
+                int added = finalSize - initialSize;
+                int size = runnableList.size();
+                if(added==size) allAdded = true;
                 if(isEmpty) moreWork.signal();
+                return allAdded;
             } finally {
                 lock.unlock();
             }
-            return size;
         }
         
     }
