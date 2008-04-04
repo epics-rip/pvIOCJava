@@ -192,7 +192,12 @@ implements ProcessCallbackRequester,ProcessContinueRequester,CDPutRequester
      * @see org.epics.ioc.process.ProcessContinueRequester#processContinue()
      */
     public void processContinue() {
-         supportProcessRequester.supportProcessDone(requestResult);
+        if(requestResult!=RequestResult.success) {
+            if(alarmSupport!=null) alarmSupport.setAlarm(
+                    pvStructure.getFullFieldName() + ": put request failed",
+                    AlarmSeverity.major);
+        }
+        supportProcessRequester.supportProcessDone(requestResult);
     }        
     /* (non-Javadoc)
      * @see org.epics.ioc.ca.CDPutRequester#getDone(org.epics.ioc.util.RequestResult)

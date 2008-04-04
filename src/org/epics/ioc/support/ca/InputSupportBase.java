@@ -245,6 +245,10 @@ ProcessCallbackRequester,ProcessContinueRequester
                             MessageType.fatalError);
                 }
             }
+            if(requestResult!=RequestResult.success) {
+                alarmSeverity = AlarmSeverity.invalid;
+                alarmMessage = "get request failed";
+            }
         } finally {
             dbRecord.unlock();
         }
