@@ -66,7 +66,6 @@ public class CDMonitorFactory {
         private CD cd = null;
         private boolean monitorOccured = true;
         
-        
         /* (non-Javadoc)
          * @see org.epics.ioc.ca.CDMonitor#lookForAbsoluteChange(org.epics.ioc.ca.ChannelField, double)
          */
@@ -149,10 +148,10 @@ public class CDMonitorFactory {
                 cd.put(initialList.get(i).getPVField());
                 
             }
-            cdQueue.setInUse(initialData);
-            callRequester.call();
             cd.clearNumPuts();
             monitorOccured = false;
+            cdQueue.setInUse(initialData);
+            callRequester.call();
             channelMonitor.start();
         }
         /* (non-Javadoc)
@@ -268,7 +267,9 @@ public class CDMonitorFactory {
                 }
             }
             private void call() {
-                iocExecutor.execute(this);
+                if(!iocExecutor.execute(this)) {
+                    System.err.println("iocExecutor.execute failed");
+                }
             }
 
         }
