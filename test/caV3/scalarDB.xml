@@ -21,8 +21,6 @@
     <calculator supportName = "counterCalculator" />
     <scan>
         <type><choice>periodic</choice></type>
-<!--
--->
         <rate>1.0</rate>
         <processAfterStart>true</processAfterStart>
     </scan>
@@ -126,7 +124,6 @@
         <propertyNames>alarm</propertyNames>
     </input>
 </record>
-
 
 <record name = "byteCounter" type = "calcDouble">
     <alarm structureName = "alarm" />

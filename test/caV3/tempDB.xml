@@ -1,0 +1,81 @@
+<?xml version="1.0" ?>
+<IOCDatabase>
+
+<record name = "byteCounter" type = "calcDouble">
+    <alarm structureName = "alarm" />
+    <timeStamp structureName = "timeStamp" />
+    <calcArgArray>
+        <element structureName = "calcDoubleArg">
+            <value>0.0</value>
+            <name>min</name>
+        </element>
+        <element structureName = "calcDoubleArg">
+            <value>11.0</value>
+            <name>max</name>
+        </element>
+        <element structureName = "calcDoubleArg">
+            <value>1.0</value>
+            <name>inc</name>
+        </element>
+    </calcArgArray>
+    <calculator supportName = "counterCalculator" />
+    <scan>
+        <type><choice>periodic</choice></type>
+        <rate>1.0</rate>
+    </scan>
+</record>
+
+
+<record name = "byteOut" type = "byte">
+    <alarm structureName = "alarm" />
+    <timeStamp structureName = "timeStamp" />
+    <input supportName = "monitorSupport" structureName = "monitorSupport">
+        <pvname>byteCounter</pvname>
+        <process>true</process>
+    </input>
+    <output supportName = "outputSupport" structureName = "outputSupport">
+        <providerName>caV3</providerName>
+        <pvname>byte</pvname>
+    </output>
+<!--
+    <supportArray>
+        <element structureName = "supportArrayElement">
+            <wait>true</wait>
+            <link  supportName = "processSupport"  structureName = "processSupport">
+                <pvname>byteIn</pvname>
+            </link>
+        </element>
+    </supportArray>
+-->
+
+</record>
+
+<!--
+<record name = "byteIn" type = "byte">
+    <alarm structureName = "alarm" />
+    <timeStamp structureName = "timeStamp" />
+    <display structureName = "display" />
+    <control structureName = "control" />
+    <input supportName = "inputSupport" structureName = "inputSupport">
+        <providerName>caV3</providerName>
+        <pvname>byte</pvname>
+        <propertyNames>alarm,display,control</propertyNames>
+    </input>
+</record>
+
+<record name = "byteMonitor" type = "byte">
+    <alarm structureName = "alarm" />
+    <timeStamp structureName = "timeStamp" />
+    <display structureName = "display" />
+    <control structureName = "control" />
+    <input supportName = "monitorSupport" structureName = "monitorSupport">
+        <providerName>caV3</providerName>
+        <pvname>byte</pvname>
+        <process>true</process>
+        <propertyNames>alarm,display,control</propertyNames>
+    </input>
+</record>
+
+-->
+
+</IOCDatabase>
