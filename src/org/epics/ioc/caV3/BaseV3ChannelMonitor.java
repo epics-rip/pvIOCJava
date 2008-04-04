@@ -29,25 +29,21 @@ import org.epics.ioc.util.MessageType;
 public class BaseV3ChannelMonitor implements ChannelMonitor,MonitorListener
 {
     private static enum DBRProperty {none,status,time};
-    
-    private ChannelFieldGroup channelFieldGroup = null;
+
     private ChannelMonitorRequester channelMonitorRequester;
     
-    private gov.aps.jca.Channel jcaChannel = null;
-    
     private V3Channel v3Channel = null;
+    private gov.aps.jca.Channel jcaChannel = null;
     private int elementCount = 0;
     
-    private DBRType requestDBRType = null;
-    
+    private ChannelFieldGroup channelFieldGroup = null;
     private DBRProperty dbrProperty = DBRProperty.none;
+    private DBRType requestDBRType = null;
 
     private Monitor monitor = null;
     private boolean isDestroyed = false;
-    
-
     /**
-     * Constructer.
+     * Constructor.
      * @param channelMonitorRequester The channelMonitorRequester.
      */
     public BaseV3ChannelMonitor(ChannelMonitorRequester channelMonitorRequester) {
@@ -72,16 +68,6 @@ public class BaseV3ChannelMonitor implements ChannelMonitor,MonitorListener
         isDestroyed = true;
         if(monitor!=null) stop();
         v3Channel.remove(this);
-    }
-    /* (non-Javadoc)
-     * @see org.epics.ioc.ca.ChannelMonitor#getData(org.epics.ioc.ca.CD)
-     */
-    public void getData(CD cd) {
-        ChannelField[] channelFields = channelFieldGroup.getArray();
-        for(ChannelField channelField : channelFields) {
-            PVField pvField = channelField.getPVField();
-            cd.put(pvField);
-        }
     }
     /* (non-Javadoc)
      * @see org.epics.ioc.ca.ChannelMonitor#setFieldGroup(org.epics.ioc.ca.ChannelFieldGroup)
@@ -147,6 +133,16 @@ public class BaseV3ChannelMonitor implements ChannelMonitor,MonitorListener
         }
     }
     /* (non-Javadoc)
+     * @see org.epics.ioc.ca.ChannelMonitor#getData(org.epics.ioc.ca.CD)
+     */
+    public void getData(CD cd) {
+        ChannelField[] channelFields = channelFieldGroup.getArray();
+        for(ChannelField channelField : channelFields) {
+            PVField pvField = channelField.getPVField();
+            cd.put(pvField);
+        }
+    }
+    /* (non-Javadoc)
      * @see org.epics.ioc.ca.ChannelMonitor#start()
      */
     public void start() {
@@ -183,7 +179,6 @@ public class BaseV3ChannelMonitor implements ChannelMonitor,MonitorListener
         channelMonitorRequester.beginPut();
         if(fromDBR==null) {
             channelMonitorRequester.message("fromDBR is null", MessageType.error);
-            return;
         } else {
             v3Channel.getV3ChannelRecord().toRecord(fromDBR,channelMonitorRequester);
         }

@@ -45,6 +45,10 @@ implements V3Channel,ConnectionListener,Runnable,V3ChannelRecordRequester {
 
     private static IOCExecutor iocExecutor
         = IOCExecutorFactory.create("caV3Connect", ScanPriority.low);
+    
+    private boolean isCreatingChannel = false;
+    private boolean synchCreateChannel = false;
+    private boolean gotFirstConnection = false;
     private Context context = null;
     private String pvName = null;
     private String recordName = null;
@@ -57,7 +61,7 @@ implements V3Channel,ConnectionListener,Runnable,V3ChannelRecordRequester {
     private BaseV3ChannelRecord v3ChannelRecord = null;
 
     /**
-     * The constructer.
+     * The constructor.
      * @param listener The ChannelListener.
      * @param options A string containing options.
      * @param enumRequestType Request type for ENUM native type.
@@ -68,7 +72,7 @@ implements V3Channel,ConnectionListener,Runnable,V3ChannelRecordRequester {
         this.enumRequestType = enumRequestType;
     }
     /**
-     * init the channel.
+     * initialize the channel.
      * @param context The JCA Context.
      * @param pvName The pvName.
      * @param recordName The recordName.
@@ -131,7 +135,14 @@ implements V3Channel,ConnectionListener,Runnable,V3ChannelRecordRequester {
      */
     public void connect() {
         try {
+            isCreatingChannel = true;
+            synchCreateChannel = false;
             jcaChannel = context.createChannel(pvName,this);
+            isCreatingChannel = false;
+            if(synchCreateChannel) { // connectionChanged was called synchronously
+                run();
+                synchCreateChannel = false;
+            }
         } catch (CAException e) {
             super.getChannelListener().message(
                 "createChannel failed " + e.getMessage(),
@@ -143,7 +154,7 @@ implements V3Channel,ConnectionListener,Runnable,V3ChannelRecordRequester {
      * @see org.epics.ioc.ca.AbstractChannel#disconnect()
      */
     public void disconnect() {
-        super.disconnect();
+        if(super.isConnected()) super.disconnect();
         jcaChannel.dispose();
         jcaChannel = null;
         v3ChannelRecord = null;
@@ -264,16 +275,22 @@ implements V3Channel,ConnectionListener,Runnable,V3ChannelRecordRequester {
     public void connectionChanged(ConnectionEvent arg0) {
         boolean isConnected = arg0.isConnected();
         if(isConnected) {
+            if(gotFirstConnection) return;
+            gotFirstConnection = true;
+            if(isCreatingChannel) {
+                synchCreateChannel = true;
+                return;
+            }
             iocExecutor.execute(this);
         } else {
-            disconnect();
+            if(!super.isConnected()) return;
+            super.message("connection lost", MessageType.warning);
         }
     }
     /* (non-Javadoc)
      * @see java.lang.Runnable#run()
      */
     public void run() {
-        if(jcaChannel==null) return;
         v3ChannelRecord = new BaseV3ChannelRecord(this);
         if(v3ChannelRecord.createPVRecord(this,recordName)) return;
         disconnect();
@@ -283,8 +300,12 @@ implements V3Channel,ConnectionListener,Runnable,V3ChannelRecordRequester {
      * @see org.epics.ioc.caV3.V3ChannelRecordRequester#createPVRecordDone(org.epics.ioc.util.RequestResult)
      */
     public void createPVRecordDone(RequestResult requestResult) {
-        super.setPVRecord(v3ChannelRecord.getPVRecord(),valueFieldName);
-        super.connect();
+        if(requestResult==RequestResult.success) {
+            super.setPVRecord(v3ChannelRecord.getPVRecord(),valueFieldName);
+            super.connect();
+        } else {
+            disconnect();
+        }
     }
 
     private static class ChannelFieldImpl extends AbstractChannelField {

@@ -38,7 +38,7 @@ public class BaseV3ChannelPutGet implements ChannelPutGet,ChannelPutRequester,Ch
     private boolean isDestroyed = false;
 
     /**
-     * Constructer
+     * Constructor
      * @param putFieldGroup The putFieldGroup.
      * @param getFieldGroup The getFieldGroup.
      * @param channelPutGetRequester The channelPutGetRequester.

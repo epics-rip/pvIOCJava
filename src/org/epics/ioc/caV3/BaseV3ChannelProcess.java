@@ -5,6 +5,10 @@
  */
 package org.epics.ioc.caV3;
 
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.ReentrantLock;
+
 import org.epics.ioc.ca.Channel;
 import org.epics.ioc.ca.ChannelAccessFactory;
 import org.epics.ioc.ca.ChannelField;
@@ -17,7 +21,6 @@ import org.epics.ioc.ca.ChannelPut;
 import org.epics.ioc.ca.ChannelPutRequester;
 import org.epics.ioc.pv.PVByte;
 import org.epics.ioc.pv.PVField;
-import org.epics.ioc.util.IOCExecutor;
 import org.epics.ioc.util.MessageType;
 import org.epics.ioc.util.RequestResult;
 
@@ -27,12 +30,13 @@ import org.epics.ioc.util.RequestResult;
  *
  */
 public class BaseV3ChannelProcess implements
-ChannelProcess,ChannelListener,Runnable,ChannelPutRequester,ChannelFieldGroupListener
+ChannelProcess,ChannelListener,ChannelPutRequester,ChannelFieldGroupListener
 {
-    private ChannelProcessRequester channelProcessRequester = null;
+    private ReentrantLock lock = new ReentrantLock();
+    private Condition waitConnect = lock.newCondition();
     
+    private ChannelProcessRequester channelProcessRequester = null;
     private V3Channel v3Channel = null;
-    private IOCExecutor iocExecutor = null;
     private Channel putChannel = null;
     
     private ChannelFieldGroup channelFieldGroup = null;
@@ -44,7 +48,7 @@ ChannelProcess,ChannelListener,Runnable,ChannelPutRequester,ChannelFieldGroupLis
     
          
     /**
-     * Constructer.
+     * Constructor.
      * @param channelProcessRequester The channelProcessRequester.
       */
     public BaseV3ChannelProcess(ChannelProcessRequester channelProcessRequester)
@@ -58,11 +62,20 @@ ChannelProcess,ChannelListener,Runnable,ChannelPutRequester,ChannelFieldGroupLis
      */
     public boolean init(V3Channel v3Channel) {
         this.v3Channel = v3Channel;
-        iocExecutor = v3Channel.getIOCExecutor();
         String pvName = v3Channel.getV3ChannelRecord().getPVRecord().getRecordName() + "." + "PROC";
         putChannel = ChannelAccessFactory.getChannelAccess().createChannel(
             pvName, null, "caV3", this);
         putChannel.connect();
+        // give it a chance to connect.
+        lock.lock();
+        try {
+            if(!isReady) {
+                waitConnect.await(100, TimeUnit.MILLISECONDS);
+            }
+        } catch (InterruptedException e) {
+        }finally {
+            lock.unlock();
+        }
         return true;
     }
    
@@ -83,7 +96,17 @@ ChannelProcess,ChannelListener,Runnable,ChannelPutRequester,ChannelFieldGroupLis
      */
     public void channelStateChange(Channel c, boolean isConnected) {
         if(isConnected) {
-            iocExecutor.execute(this);
+            channelField = putChannel.createChannelField("PROC");
+            channelFieldGroup = putChannel.createFieldGroup(this);
+            channelFieldGroup.addChannelField(channelField);
+            channelPut = putChannel.createChannelPut(channelFieldGroup, this, false);
+            lock.lock();
+            try {
+                isReady = true;
+                waitConnect.signal();
+            } finally {
+                lock.unlock();
+            }
         } else {
             destroy(c);
         }
@@ -92,18 +115,10 @@ ChannelProcess,ChannelListener,Runnable,ChannelPutRequester,ChannelFieldGroupLis
      * @see org.epics.ioc.ca.ChannelListener#destroy(org.epics.ioc.ca.Channel)
      */
     public void destroy(Channel c) {
-        if(!isDestroyed) destroy();
-        c.destroy();
-    }
-    /* (non-Javadoc)
-     * @see java.lang.Runnable#run()
-     */
-    public void run() {
-        channelField = putChannel.createChannelField("PROC");
-        channelFieldGroup = putChannel.createFieldGroup(this);
-        channelFieldGroup.addChannelField(channelField);
-        channelPut = putChannel.createChannelPut(channelFieldGroup, this, false);
-        isReady = true;
+        if(!isDestroyed) {
+            destroy();
+            c.destroy();
+        }
     }
     /* (non-Javadoc)
      * @see org.epics.ioc.ca.ChannelPutRequester#nextDelayedPutField(org.epics.ioc.pv.PVField)

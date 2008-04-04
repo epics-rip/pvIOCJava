@@ -11,25 +11,25 @@
 <h1 style="text-align: center">EPICS JavaIOC: caV3<br />
 Channel Access Version 3<br />
 package: org.epics.ioc.caV3<br />
-2006.01.25</h1>
+2008.02.02</h1>
 CONTENTS 
 
 <div class="toc">
 <ul>
   <li><a href="#Overview">Overview</a></li>
-  <li><a href="#Server">Server</a>
+  <li><a href="#Server">Server</a> 
     <ul>
       <li><a href="#Syntax">Syntax</a></li>
       <li><a href="#Options">Get and Put Options</a></li>
       <li><a href="#monitor">monitor options</a></li>
     </ul>
   </li>
-  <li><a href="#Client">Client</a>
+  <li><a href="#Client">Client</a> 
     <ul>
       <li><a href="#Overview1">Overview</a></li>
       <li><a href="#Naming">Naming conventions.</a></li>
       <li><a href="#Data">Data Types Supported</a></li>
-      <li><a href="#Semantics">Semantics</a>
+      <li><a href="#Semantics">Semantics</a> 
         <ul>
           <li><a href="#Connection">Connection Semantics</a></li>
           <li><a href="#Process">Process Semantics</a></li>
@@ -158,19 +158,34 @@ provider name is "caV3". </p>
         <dt>null</dt>
           <dd>Only the record name is specified. In this case the fieldName
             is assigned the name <span
-            style="font-family: Courier New,Courier,monospace;">VAL</span></dd>
+            style="font-family: Courier New,Courier,monospace;">VAL</span>.</dd>
         <dt><span
         style="font-family: Courier New,Courier,monospace;">VAL</span></dt>
           <dd>In this case the remote (The V3) fieldName is <span
             style="font-family: Courier New,Courier,monospace;">VAL</span>
             and the javaIOC fieldName is <span
-            style="font-family: Courier New,Courier,monospace;">value</span></dd>
+            style="font-family: Courier New,Courier,monospace;">value</span>.</dd>
         <dt><span
         style="font-family: Courier New,Courier,monospace;">value</span></dt>
           <dd>In this case the remote fieldName is <span
             style="font-family: Courier New,Courier,monospace;">VAL</span>
             and the javaIOC fieldName is <span
-            style="font-family: Courier New,Courier,monospace;">value</span></dd>
+            style="font-family: Courier New,Courier,monospace;">value</span>.</dd>
+        <dt><span
+        style="font-family: Courier New,Courier,monospace;">value.index</span></dt>
+          <dd>In this case the remote fieldName is <span
+            style="font-family: Courier New,Courier,monospace;">VAL</span>
+            and the javaIOC fieldName is <span
+            style="font-family: Courier New,Courier,monospace;">value.index</span>
+            . The DBR type will be DBR_INT and the Type will be pvInt. </dd>
+        <dt><span
+        style="font-family: Courier New,Courier,monospace;">value.choice</span></dt>
+          <dd>In this case the remote fieldName is <span
+            style="font-family: Courier New,Courier,monospace;">VAL</span>
+            and the javaIOC fieldName is <span
+            style="font-family: Courier New,Courier,monospace;">value.choice</span>
+            . The DBR type will be DBR_STRING and the Type will be pvString.
+          </dd>
         <dt>Anything else</dt>
           <dd>In this case both the remote and the javaIOC fieldName is
             whatever is specified. For example a fieldName of <span

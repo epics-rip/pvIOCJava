@@ -7,8 +7,11 @@ package org.epics.ioc.caV3;
 
 import gov.aps.jca.CAException;
 import gov.aps.jca.CAStatus;
+import gov.aps.jca.Channel;
 import gov.aps.jca.dbr.DBR;
 import gov.aps.jca.dbr.DBRType;
+import gov.aps.jca.event.ConnectionEvent;
+import gov.aps.jca.event.ConnectionListener;
 import gov.aps.jca.event.GetEvent;
 import gov.aps.jca.event.GetListener;
 
@@ -29,7 +32,8 @@ import org.epics.ioc.util.RequestResult;
  */
 
 
-public class BaseV3ChannelGet implements ChannelProcessRequester,ChannelGet,GetListener
+public class BaseV3ChannelGet
+implements ChannelGet,ChannelProcessRequester,GetListener,ConnectionListener
 {
     private static enum DBRProperty {none,status,time,graphic,control};
     
@@ -47,8 +51,10 @@ public class BaseV3ChannelGet implements ChannelProcessRequester,ChannelGet,GetL
     
     private ChannelProcess channelProcess = null;
     private DBRProperty dbrProperty = DBRProperty.none;
+    
+    private boolean isActive = false;
     /**
-     * Constructer.
+     * Constructor.
      * @param channelFieldGroup The channelFieldGroup.
      * @param channelGetRequester The channelGetRequester.
      * @param process Should the record be processed before get.
@@ -69,6 +75,15 @@ public class BaseV3ChannelGet implements ChannelProcessRequester,ChannelGet,GetL
     {
         this.v3Channel = v3Channel;
         jcaChannel = v3Channel.getJCAChannel();
+        try {
+            jcaChannel.addConnectionListener(this);
+        } catch (CAException e) {
+            message(
+                    "addConnectionListener failed " + e.getMessage(),
+                    MessageType.error);
+            jcaChannel = null;
+            return false;
+        };
         DBRType nativeDBRType = v3Channel.getV3ChannelRecord().getNativeDBRType();
         requestDBRType = null;
         ChannelField[] channelFields = channelFieldGroup.getArray();
@@ -177,14 +192,59 @@ public class BaseV3ChannelGet implements ChannelProcessRequester,ChannelGet,GetL
         return true;
     }
     /* (non-Javadoc)
+     * @see org.epics.ioc.ca.ChannelGet#destroy()
+     */
+    public void destroy() {
+        isDestroyed = true;
+        if(channelProcess!=null) channelProcess.destroy();
+        v3Channel.remove(this);
+    }
+    /* (non-Javadoc)
+     * @see org.epics.ioc.ca.ChannelGet#get()
+     */
+    public void get() {
+        if(isDestroyed) {
+            message("isDestroyed",MessageType.error);
+            getDone(RequestResult.failure);
+            return;
+        }
+        if(jcaChannel.getConnectionState()!=Channel.ConnectionState.CONNECTED) {
+            getDone(RequestResult.failure);
+            return;
+        }
+        isActive = true;
+        if(process) {
+            channelProcess.process();
+            return;
+        }
+        // just call processDone directly
+        processDone(RequestResult.success);
+    }
+    /* (non-Javadoc)
+     * @see org.epics.ioc.ca.ChannelGet#getDelayed(org.epics.ioc.pv.PVField)
+     */
+    public void getDelayed(PVField pvField) {
+        // nothing to do
+    }
+    /* (non-Javadoc)
      * @see org.epics.ioc.ca.ChannelProcessRequester#processDone(org.epics.ioc.util.RequestResult)
      */
     public void processDone(RequestResult requestResult) {
-        try {
-            jcaChannel.get(requestDBRType, elementCount, this);
-        } catch (CAException e) {
-            message(e.getMessage(),MessageType.error);
-            channelGetRequester.getDone(RequestResult.failure);
+        String message = null;
+        if(requestResult!=RequestResult.success) {
+            message = "process returned " + requestResult.name();
+        } else {
+            try {
+                jcaChannel.get(requestDBRType, elementCount, this);
+            } catch (CAException e) {
+                message = e.getMessage();
+            } catch (IllegalStateException e) {
+                message = e.getMessage();
+            }
+        }
+        if(message!=null) {
+            message(message,MessageType.error);
+            getDone(RequestResult.failure);
         }
     }
     /* (non-Javadoc)
@@ -200,38 +260,6 @@ public class BaseV3ChannelGet implements ChannelProcessRequester,ChannelGet,GetL
         v3Channel.message(message, messageType);   
     }
     /* (non-Javadoc)
-     * @see org.epics.ioc.ca.ChannelGet#destroy()
-     */
-    public void destroy() {
-        isDestroyed = true;
-        if(channelProcess!=null) channelProcess.destroy();
-        v3Channel.remove(this);
-    }
-    /* (non-Javadoc)
-     * @see org.epics.ioc.ca.ChannelGet#get()
-     */
-    public void get() {
-        if(isDestroyed) {
-            message("isDestroyed",MessageType.error);
-            channelGetRequester.getDone(RequestResult.failure);
-        }
-        if(process) {
-            channelProcess.process();
-        }
-        try {
-            jcaChannel.get(requestDBRType, elementCount, this);
-        } catch (CAException e) {
-            message(e.getMessage(),MessageType.error);
-            channelGetRequester.getDone(RequestResult.failure);
-        }
-    }
-    /* (non-Javadoc)
-     * @see org.epics.ioc.ca.ChannelGet#getDelayed(org.epics.ioc.pv.PVField)
-     */
-    public void getDelayed(PVField pvField) {
-        // nothing to do
-    }
-    /* (non-Javadoc)
      * @see gov.aps.jca.event.GetListener#getCompleted(gov.aps.jca.event.GetEvent)
      */
     public void getCompleted(GetEvent getEvent) {
@@ -239,10 +267,10 @@ public class BaseV3ChannelGet implements ChannelProcessRequester,ChannelGet,GetL
         if(fromDBR==null) {
             CAStatus caStatus = getEvent.getStatus();
             if(caStatus==null) {
-                channelGetRequester.message(getEvent.toString(),MessageType.error);
+                message(getEvent.toString(),MessageType.error);
             } else {
-                channelGetRequester.message(caStatus.getMessage(),MessageType.error);
-                channelGetRequester.getDone(RequestResult.failure);
+                message(caStatus.getMessage(),MessageType.error);
+                getDone(RequestResult.failure);
             }
             return;
         }
@@ -251,6 +279,22 @@ public class BaseV3ChannelGet implements ChannelProcessRequester,ChannelGet,GetL
         for(ChannelField channelField : channelFields) {
             channelGetRequester.nextGetField(channelField, channelField.getPVField());
         }
-        channelGetRequester.getDone(RequestResult.success);
+        getDone(RequestResult.success);
+    }
+    /* (non-Javadoc)
+     * @see gov.aps.jca.event.ConnectionListener#connectionChanged(gov.aps.jca.event.ConnectionEvent)
+     */
+    public void connectionChanged(ConnectionEvent arg0) {
+        if(!arg0.isConnected()) {
+            if(isActive) {
+                message("disconnected while active",MessageType.error);
+                getDone(RequestResult.failure);
+            }
+        }
+    }
+    
+    private void getDone(RequestResult requestResult) {
+        isActive = false;
+        channelGetRequester.getDone(requestResult);
     }
 }

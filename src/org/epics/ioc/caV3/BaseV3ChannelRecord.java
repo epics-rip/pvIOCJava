@@ -187,15 +187,18 @@ public class BaseV3ChannelRecord implements V3ChannelRecord,GetListener,Runnable
             if(type==Type.pvStructure) {
                 if(propertyName.equals("control")) {
                     notUsed++;
-                    notUsed++;
                     continue;
                 }
                 if(propertyName.equals("display")) {
+                    notUsed++;
                     continue;
                 }
             }
             DBDStructure dbdStructure = dbd.getStructure(propertyName);
-            if(dbdStructure==null) dbdStructure = dbd.getStructure("null");
+            if(dbdStructure==null) {
+                notUsed++;
+                continue;
+            }
             Field[] propertyFields = dbdStructure.getFields();
             fields[index++] = fieldCreate.createStructure(propertyName, propertyName, propertyFields);
         }
@@ -214,9 +217,16 @@ public class BaseV3ChannelRecord implements V3ChannelRecord,GetListener,Runnable
         PVField valuePVField = pvRecord.getPVFields()[0];
         if(nativeDBRType.isENUM()) {
             valuePVField.getPVEnumerated();
+            String message = null;
             try {
                 jcaChannel.get(DBRType.CTRL_ENUM,1,this);
             } catch (CAException e) {
+                message = e.getMessage();
+            } catch (IllegalStateException e) {
+                message = e.getMessage();
+            }
+            if(message!=null) {
+                v3Channel.message("get exception " + message, MessageType.error);
                 return false;
             }
         } else {
@@ -294,9 +304,16 @@ public class BaseV3ChannelRecord implements V3ChannelRecord,GetListener,Runnable
                 }
                 break;
             }
+            String message = null;
             try {
                 jcaChannel.get(requestDBRType,1,this);
             } catch (CAException e) {
+                message = e.getMessage();
+            } catch (IllegalStateException e) {
+                message = e.getMessage();
+            }
+            if(message!=null) {
+                v3Channel.message("get exception " + message, MessageType.error);
                 return false;
             }
         }
@@ -314,6 +331,7 @@ public class BaseV3ChannelRecord implements V3ChannelRecord,GetListener,Runnable
     public DBRType getNativeDBRType() {
         return nativeDBRType;
     }
+    
     private void setAlarm(AlarmSeverity alarmSeverity,String message,ChannelMonitorRequester channelMonitorRequester) {
         PVStructure pvStructure = pvRecord.getStructureField("alarm", "alarm");
         if(pvStructure!=null) {
@@ -334,6 +352,7 @@ public class BaseV3ChannelRecord implements V3ChannelRecord,GetListener,Runnable
             }
             PVInt pvIndex = pvEnumerated.getIndexField();
             if(pvIndex.get()!=alarmSeverity.ordinal()) {
+                // must set both index and choice because no alarm support
                 pvIndex.put(index);
                 PVString pvChoice = pvEnumerated.getChoiceField();
                 pvChoice.put(alarmSeverityData.data[index]);
