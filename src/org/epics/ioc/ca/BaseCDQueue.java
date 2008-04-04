@@ -60,7 +60,12 @@ public class BaseCDQueue implements CDQueue {
      * @see org.epics.ioc.ca.CDQueue#setInUse(org.epics.ioc.ca.CD)
      */
     public void setInUse(CD cd) {
-        inUseList.add(cd);
+        lock.lock();
+        try {
+            inUseList.add(cd);
+        } finally {
+            lock.unlock();
+        }
     }
     /* (non-Javadoc)
      * @see org.epics.ioc.ca.CDQueue#getNext()
