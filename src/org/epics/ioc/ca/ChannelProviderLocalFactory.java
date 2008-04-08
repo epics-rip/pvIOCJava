@@ -914,8 +914,17 @@ public class ChannelProviderLocalFactory  {
                 }
                 isStarted = true;
                 processActive = false;
-                recordListener = dbRecord.createRecordListener(this);
+                channelMonitorRequester.beginPut();
                 List<ChannelField> channelFieldList = channelFieldGroup.getList();
+                for(ChannelField cf : channelFieldList) {
+                    ChannelField channelField = (ChannelField)cf;
+                    DBField dbField = dbRecord.findDBField(channelField.getPVField());
+                    PVField targetPVField = getRequestedPVField(dbField);
+                    channelMonitorRequester.dataPut(targetPVField);
+                }
+                channelMonitorRequester.endPut();
+                recordListener = dbRecord.createRecordListener(this);
+                channelFieldList = channelFieldGroup.getList();
                 for(ChannelField cf : channelFieldList) {
                     ChannelField channelField = (ChannelField)cf;
                     DBField dbField = dbRecord.findDBField(channelField.getPVField());

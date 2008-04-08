@@ -130,28 +130,12 @@ public class CDMonitorFactory {
             cdQueue = CDFactory.createCDQueue(queueSize, channel, channelFieldGroup);
             this.iocExecutor = iocExecutor;
             callRequester = new CallRequester();
-            CD initialData = cdQueue.getFree(true);
-            initialData.clearNumPuts();
             
             channelMonitor = channel.createChannelMonitor(this);
             channelMonitor.setFieldGroup(channelFieldGroup);
-            channelMonitor.getData(initialData);            
-            List<ChannelField> channelFieldList = initialData.getChannelFieldGroup().getList();
-            for(int i=0; i<channelFieldList.size(); i++) {
-                ChannelField channelField = channelFieldList.get(i);
-                MonitorField monitorField = monitorFieldList.get(i);
-                monitorField.initField(channelField.getPVField());
-            }
             cd = cdQueue.getFree(true);
-            List<ChannelField> initialList = initialData.getChannelFieldGroup().getList();
-            for(int i=0; i<initialList.size(); i++) {
-                cd.put(initialList.get(i).getPVField());
-                
-            }
             cd.clearNumPuts();
             monitorOccured = false;
-            cdQueue.setInUse(initialData);
-            callRequester.call();
             channelMonitor.start();
         }
         /* (non-Javadoc)
