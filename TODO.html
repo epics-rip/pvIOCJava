@@ -9,11 +9,8 @@
 
 <body>
 <h1 style="text-align: center">EPICS JavaIOC: TODO<br />
-2008.02.08</h1>
+2008.04.10</h1>
 <ul>
-  <li>caV3Client<br />
-     Fails if server restarted.
-  </li>
   <li>alarm 
     <ul>
       <li>ackTransient and ackSeverity.<br />
@@ -42,17 +39,15 @@
   <li>history<br />
     Implement</li>
   <li>on-line modify support<br />
-    Implement a recordType 
+    Support has been added to dynamically change the support state for the
+    support for a record or for a field of a record. What is still needed is: 
     <ul>
-      <li>has a field that is the name of a field in a record instance that
-        has support</li>
-      <li>disables the record</li>
-      <li>unitialize the support</li>
-      <li>initialize and start the support</li>
+      <li>Support that can change the name of the support.</li>
+      <li>Support that can change the structure type of a structure
+      field.</li>
+      <li>Support that can add new elements to an array of structures or
+        arrays</li>
     </ul>
-    <p>This recordType is used by a client that changes support or support
-    configuration.<br />
-    </p>
   </li>
   <li>pv<br />
     Get rid of asynAccessCallListener, ..., isAsynAccessActive. This is used
