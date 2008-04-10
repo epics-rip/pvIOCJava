@@ -10,7 +10,7 @@
 <body>
 <h1 style="text-align: center">EPICS JavaIOC: Java Input/Output Controller<br
 />
-2008.03.04</h1>
+2008.04.10</h1>
 
 <p>This product is available via the <a href="#LicenseAgreement">open source
 license</a> described at the end of this document.</p>
@@ -28,15 +28,15 @@ license</a> described at the end of this document.</p>
 
 <div class="toc">
 <ul>
-  <li><a href="#Part">Part I: javaIOC - Brief Description</a> 
+  <li><a href="#Part">Part I: javaIOC - Brief Description</a>
     <ul>
-      <li><a href="#Overview">Overview Of Part I</a> 
+      <li><a href="#Overview">Overview Of Part I</a>
         <ul>
           <li><a href="#Getting">Getting Started</a></li>
           <li><a href="#Status">Status and Remaining Tasks</a></li>
         </ul>
       </li>
-      <li><a href="#Package">Package Summary</a> 
+      <li><a href="#Package">Package Summary</a>
         <ul>
           <li><a href="#default">default - javaIOC/src</a></li>
           <li><a href="#javaIOC">javaIOC/dbd</a></li>
@@ -45,26 +45,27 @@ license</a> described at the end of this document.</p>
           <li><a href="#org.epics.1">org.epics.ioc.dbd</a></li>
           <li><a href="#org.epics.2">org.epics.ioc.db</a></li>
           <li><a href="#org.epics.3">org.epics.ioc.ca</a></li>
-          <li><a href="#org.epics.4">org.epics.ioc.util</a></li>
-          <li><a href="#org.epics.5">org.epics.ioc.process</a></li>
-          <li><a href="#org.epics.6">org.epics.ioc.create</a></li>
-          <li><a href="#org.epics.7">org.epics.ioc.support</a></li>
-          <li><a href="#org.epics.8">org.epics.ioc.pdrv<br />
+          <li><a href="#org.epics.4">org.epics.ioc.caV3</a></li>
+          <li><a href="#org.epics.5">org.epics.ioc.util</a></li>
+          <li><a href="#org.epics.6">org.epics.ioc.process</a></li>
+          <li><a href="#org.epics.7">org.epics.ioc.create</a></li>
+          <li><a href="#org.epics.8">org.epics.ioc.support</a></li>
+          <li><a href="#org.epics.9">org.epics.ioc.pdrv<br />
             org.epics.ioc.pdrv/interfaces<br />
             org.epics.ioc.pdrv/testDriver<br />
             </a></li>
-          <li><a href="#org.epics.9">org.epics.ioc.swtshell</a></li>
+          <li><a href="#org.epics.10">org.epics.ioc.swtshell</a></li>
         </ul>
       </li>
-      <li><a href="#Database">Database Syntax</a> 
+      <li><a href="#Database">Database Syntax</a>
         <ul>
-          <li><a href="#Include">Include and Macro Substitution</a> 
+          <li><a href="#Include">Include and Macro Substitution</a>
             <ul>
               <li><a href="#Syntax">Syntax</a></li>
               <li><a href="#Example">Example</a></li>
             </ul>
           </li>
-          <li><a href="#Database1">Database Definition</a> 
+          <li><a href="#Database1">Database Definition</a>
             <ul>
               <li><a href="#Basic">Basic Syntax</a></li>
               <li><a href="#Field">Field Syntax</a></li>
@@ -72,7 +73,7 @@ license</a> described at the end of this document.</p>
                 and Support Definitions</a></li>
             </ul>
           </li>
-          <li><a href="#Record">Record Instance Definition</a> 
+          <li><a href="#Record">Record Instance Definition</a>
             <ul>
               <li><a href="#Syntax1">Syntax</a></li>
               <li><a href="#Example2">Example</a></li>
@@ -80,7 +81,7 @@ license</a> described at the end of this document.</p>
           </li>
         </ul>
       </li>
-      <li><a href="#PVData">PVData</a> 
+      <li><a href="#PVData">PVData</a>
         <ul>
           <li><a href="#Field1">Field Types</a></li>
           <li><a href="#PVData1">PVData Reflection</a></li>
@@ -92,9 +93,9 @@ license</a> described at the end of this document.</p>
       <li><a href="#DBData">DBData</a></li>
       <li><a href="#Channel">Channel Access</a></li>
       <li><a href="#Record1">Record Processing</a></li>
-      <li><a href="#Database2">Database Examples</a> 
+      <li><a href="#Database2">Database Examples</a>
         <ul>
-          <li><a href="#Database3">Database Definitions</a> 
+          <li><a href="#Database3">Database Definitions</a>
             <ul>
               <li><a href="#doubleComm">doubleCommon</a></li>
               <li><a href="#doubleReco">doubleRecord</a></li>
@@ -103,7 +104,7 @@ license</a> described at the end of this document.</p>
             </ul>
           </li>
           <li><a href="#Support">Support Implementation</a></li>
-          <li><a href="#Record2">Record Instance Examples</a> 
+          <li><a href="#Record2">Record Instance Examples</a>
             <ul>
               <li><a href="#doubleInpu">doubleInput</a></li>
               <li><a href="#doubleOutp">doubleOutput</a></li>
@@ -118,17 +119,17 @@ license</a> described at the end of this document.</p>
       </li>
     </ul>
   </li>
-  <li><a href="#Part1">Part II: javaIOC Data Model</a> 
+  <li><a href="#Part1">Part II: javaIOC Data Model</a>
     <ul>
       <li><a href="#Summary">Summary</a></li>
-      <li><a href="#JavaIOC">JavaIOC Data Model</a> 
+      <li><a href="#JavaIOC">JavaIOC Data Model</a>
         <ul>
           <li><a href="#Basic1">Basic Concept</a></li>
           <li><a href="#structure">structure null</a></li>
           <li><a href="#getPropety">getPropety</a></li>
         </ul>
       </li>
-      <li><a href="#Definition">Definitions for Standard Properties</a> 
+      <li><a href="#Definition">Definitions for Standard Properties</a>
         <ul>
           <li><a href="#timeStamp">timeStamp</a></li>
           <li><a href="#alarm">alarm</a></li>
@@ -139,24 +140,24 @@ license</a> described at the end of this document.</p>
       </li>
     </ul>
   </li>
-  <li><a href="#Part2">Part III: javaIOC - Database Definition</a> 
+  <li><a href="#Part2">Part III: javaIOC - Database Definition</a>
     <ul>
       <li><a href="#Overview1">Overview Of Part III</a></li>
-      <li><a href="#javaIOC2">javaIOC/dbd</a> 
+      <li><a href="#javaIOC2">javaIOC/dbd</a>
         <ul>
           <li><a href="#common.xml">common.xml</a></li>
           <li><a href="#structure.">structure.xml</a></li>
           <li><a href="#recordType">recordType.xml</a></li>
         </ul>
       </li>
-      <li><a href="#structure1">dbd/structure/alarm.xml</a> 
+      <li><a href="#structure1">dbd/structure/alarm.xml</a>
         <ul>
           <li><a href="#numeric">numeric alarms</a></li>
           <li><a href="#boolean">boolean alarms</a></li>
           <li><a href="#enumerated">enumerated alarms</a></li>
         </ul>
       </li>
-      <li><a href="#structure2">dbd/structure/analog.xml</a> 
+      <li><a href="#structure2">dbd/structure/analog.xml</a>
         <ul>
           <li><a href="#linearConv">linearConvert</a></li>
           <li><a href="#linearConv1">linearConvertInput</a></li>
@@ -171,7 +172,7 @@ license</a> described at the end of this document.</p>
       <li><a href="#structure4">dbd/structure/noop.xml</a></li>
       <li><a href="#structure5">dbd/structure/generic.xml</a></li>
       <li><a href="#structure6">dbd/structure/supportArray.xml</a></li>
-      <li><a href="#support6">dbd/structure/channelAccess.xml</a> 
+      <li><a href="#support6">dbd/structure/channelAccess.xml</a>
         <ul>
           <li><a href="#processSup">processSupport</a></li>
           <li><a href="#monitorSup">monitorSupport</a></li>
@@ -180,7 +181,7 @@ license</a> described at the end of this document.</p>
           <li><a href="#outputSupp">outputSupport</a></li>
         </ul>
       </li>
-      <li><a href="#structure7">dbd/structure/digital.xml</a> 
+      <li><a href="#structure7">dbd/structure/digital.xml</a>
         <ul>
           <li><a href="#digitalSta">digitalState</a></li>
           <li><a href="#digital">digital</a></li>
@@ -191,57 +192,58 @@ license</a> described at the end of this document.</p>
       <li><a href="#structure10">dbd/structure/disable.xml</a></li>
       <li><a href="#structure11">dbd/structure/delay.xml</a></li>
       <li><a href="#structure12">dbd/structure/enumerated.xml</a></li>
-      <li><a href="#structure13">dbd/structure/portDriver.xml</a> 
+      <li><a href="#structure12">dbd/structure/supportState.xml</a></li>
+      <li><a href="#structure13">dbd/structure/portDriver.xml</a>
         <ul>
           <li><a href="#pdrvSuppor">pdrvSupport</a></li>
         </ul>
       </li>
-      <li><a href="#recordType1">dbd/recordType/primitive</a> 
+      <li><a href="#recordType1">dbd/recordType/primitive</a>
         <ul>
           <li><a href="#Overview2">Overview</a></li>
-          <li><a href="#boolean1">boolean</a> 
+          <li><a href="#boolean1">boolean</a>
             <ul>
               <li><a href="#booleanCom">booleanCommon.xml</a></li>
               <li><a href="#booleanRec">booleanRecord.xml</a></li>
             </ul>
           </li>
-          <li><a href="#byte">byte</a> 
+          <li><a href="#byte">byte</a>
             <ul>
               <li><a href="#byteCommon">byteCommon.xml</a></li>
               <li><a href="#byteRecord">byteRecord.xml</a></li>
             </ul>
           </li>
-          <li><a href="#short">short</a> 
+          <li><a href="#short">short</a>
             <ul>
               <li><a href="#shortCommo">shortCommon.xml</a></li>
               <li><a href="#shortRecor">shortRecord.xml</a></li>
             </ul>
           </li>
-          <li><a href="#int">int</a> 
+          <li><a href="#int">int</a>
             <ul>
               <li><a href="#intCommon.">intCommon.xml</a></li>
               <li><a href="#intRecord.">intRecord.xml</a></li>
             </ul>
           </li>
-          <li><a href="#long">long</a> 
+          <li><a href="#long">long</a>
             <ul>
               <li><a href="#longCommon">longCommon.xml</a></li>
               <li><a href="#longRecord">longRecord.xml</a></li>
             </ul>
           </li>
-          <li><a href="#float">float</a> 
+          <li><a href="#float">float</a>
             <ul>
               <li><a href="#floatCommo">floatCommon.xml</a></li>
               <li><a href="#floatRecor">floatRecord.xml</a></li>
             </ul>
           </li>
-          <li><a href="#double">double</a> 
+          <li><a href="#double">double</a>
             <ul>
               <li><a href="#doubleComm1">doubleCommon.xml</a></li>
               <li><a href="#doubleReco1">doubleRecord.xml</a></li>
             </ul>
           </li>
-          <li><a href="#string">string</a> 
+          <li><a href="#string">string</a>
             <ul>
               <li><a href="#stringComm">stringCommon.xml</a></li>
               <li><a href="#stringReco">stringRecord.xml</a></li>
@@ -249,52 +251,52 @@ license</a> described at the end of this document.</p>
           </li>
         </ul>
       </li>
-      <li><a href="#recordType2">dbd/recordType/primitiveArray</a> 
+      <li><a href="#recordType2">dbd/recordType/primitiveArray</a>
         <ul>
           <li><a href="#Overview3">Overview</a></li>
-          <li><a href="#booleanArr">booleanArray</a> 
+          <li><a href="#booleanArr">booleanArray</a>
             <ul>
               <li><a href="#booleanArr1">booleanArrayCommon.xml</a></li>
               <li><a href="#booleanArr2">booleanArrayRecord.xml</a></li>
             </ul>
           </li>
-          <li><a href="#byteArray">byteArray</a> 
+          <li><a href="#byteArray">byteArray</a>
             <ul>
               <li><a href="#byteArrayC">byteArrayCommon.xml</a></li>
               <li><a href="#byteArrayR">byteArrayRecord.xml</a></li>
             </ul>
           </li>
-          <li><a href="#shortArray">shortArray</a> 
+          <li><a href="#shortArray">shortArray</a>
             <ul>
               <li><a href="#shortArray1">shortArrayCommon.xml</a></li>
               <li><a href="#shortArray2">shortArrayRecord.xml</a></li>
             </ul>
           </li>
-          <li><a href="#intArray">intArray</a> 
+          <li><a href="#intArray">intArray</a>
             <ul>
               <li><a href="#intArrayCo">intArrayCommon.xml</a></li>
               <li><a href="#intArrayRe">intArrayRecord.xml</a></li>
             </ul>
           </li>
-          <li><a href="#longArray">longArray</a> 
+          <li><a href="#longArray">longArray</a>
             <ul>
               <li><a href="#longArrayC">longArrayCommon.xml</a></li>
               <li><a href="#longArrayR">longArrayRecord.xml</a></li>
             </ul>
           </li>
-          <li><a href="#floatArray">floatArray</a> 
+          <li><a href="#floatArray">floatArray</a>
             <ul>
               <li><a href="#floatArray1">floatArrayCommon.xml</a></li>
               <li><a href="#floatArray2">floatArrayRecord.xml</a></li>
             </ul>
           </li>
-          <li><a href="#doubleArra">doubleArray</a> 
+          <li><a href="#doubleArra">doubleArray</a>
             <ul>
               <li><a href="#doubleArra1">doubleArrayCommon.xml</a></li>
               <li><a href="#doubleArra2">doubleArrayRecord.xml</a></li>
             </ul>
           </li>
-          <li><a href="#stringArra">stringArray</a> 
+          <li><a href="#stringArra">stringArray</a>
             <ul>
               <li><a href="#stringArra1">stringArrayCommon.xml</a></li>
               <li><a href="#stringArra2">stringArrayRecord.xml</a></li>
@@ -302,10 +304,10 @@ license</a> described at the end of this document.</p>
           </li>
         </ul>
       </li>
-      <li><a href="#recordType3">dbd/recordType/analog</a> 
+      <li><a href="#recordType3">dbd/recordType/analog</a>
         <ul>
           <li><a href="#Overview4">Overview</a></li>
-          <li><a href="#aoIncremen">aoIncrementalDouble</a> 
+          <li><a href="#aoIncremen">aoIncrementalDouble</a>
             <ul>
               <li><a
               href="#aoIncremen1">aoIncrementalDoubleCommon.xml</a></li>
@@ -315,10 +317,10 @@ license</a> described at the end of this document.</p>
           </li>
         </ul>
       </li>
-      <li><a href="#recordType4">dbd/recordType/enumerated</a> 
+      <li><a href="#recordType4">dbd/recordType/enumerated</a>
         <ul>
           <li><a href="#Overview5">Overview</a></li>
-          <li><a href="#enumerated1">enumerated</a> 
+          <li><a href="#enumerated1">enumerated</a>
             <ul>
               <li><a href="#enumerated2">enumeratedCommon.xml</a></li>
               <li><a href="#enumerated3">enumeratedRecord.xml</a></li>
@@ -326,10 +328,10 @@ license</a> described at the end of this document.</p>
           </li>
         </ul>
       </li>
-      <li><a href="#recordType5">dbd/recordType/event</a> 
+      <li><a href="#recordType5">dbd/recordType/event</a>
         <ul>
           <li><a href="#Overview6">Overview</a></li>
-          <li><a href="#event">event</a> 
+          <li><a href="#event">event</a>
             <ul>
               <li><a href="#eventCommo">eventCommon.xml</a></li>
               <li><a href="#eventRecor">eventRecord.xml</a></li>
@@ -337,22 +339,22 @@ license</a> described at the end of this document.</p>
           </li>
         </ul>
       </li>
-      <li><a href="#recordType6">dbd/recordType/calc</a> 
+      <li><a href="#recordType6">dbd/recordType/calc</a>
         <ul>
           <li><a href="#Overview7">Overview</a></li>
-          <li><a href="#calcDouble">calcDouble</a> 
+          <li><a href="#calcDouble">calcDouble</a>
             <ul>
               <li><a href="#calcDouble1">calcDoubleCommon.xml</a></li>
               <li><a href="#calcDouble2">calcDoubleRecord.xml</a></li>
             </ul>
           </li>
-          <li><a href="#calcDouble3">calcDoubleArray</a> 
+          <li><a href="#calcDouble3">calcDoubleArray</a>
             <ul>
               <li><a href="#calcDouble4">calcDoubleArrayCommon.xml</a></li>
               <li><a href="#calcDouble5">calcDoubleArrayRecord.xml</a></li>
             </ul>
           </li>
-          <li><a href="#calcBoolea">calcBooleanArray</a> 
+          <li><a href="#calcBoolea">calcBooleanArray</a>
             <ul>
               <li><a href="#calcBoolea1">calcBooleanArrayCommon.xml</a></li>
               <li><a href="#calcBoolea2">calcBooleanArrayRecord.xml</a></li>
@@ -360,13 +362,19 @@ license</a> described at the end of this document.</p>
           </li>
         </ul>
       </li>
-      <li><a href="#recordType7">dbd/recordType/portDriver</a> 
+      <li><a href="#recordType7">dbd/recordType/modifySupport</a>
+        <ul>
+          <li><a href="#modifySupp">modifySupportStateCommon.xml</a></li>
+          <li><a href="#modifySupp1">modifySupportStateRecord.xml</a></li>
+        </ul>
+      </li>
+      <li><a href="#recordType9">dbd/recordType/portDriver</a>
         <ul>
           <li><a href="#Overview8">Overview</a></li>
           <li><a href="#portDriver">portDriver.xml</a></li>
         </ul>
       </li>
-      <li><a href="#recordType8">dbd/recordType/powerSupply</a> 
+      <li><a href="#recordType8">dbd/recordType/powerSupply</a>
         <ul>
           <li><a href="#Overview9">Overview</a></li>
           <li><a href="#powerSuppl2">powerSupplyCommon.xml</a></li>
@@ -375,7 +383,7 @@ license</a> described at the end of this document.</p>
           <li><a href="#powerSuppl5">powerSupplyArrayRecord.xml</a></li>
         </ul>
       </li>
-      <li><a href="#recordType9">dbd/recordType/allTypes</a> 
+      <li><a href="#recordType10">dbd/recordType/allTypes</a>
         <ul>
           <li><a href="#Overview10">Overview</a></li>
           <li><a href="#allTypesCo">allTypesCommon.xml</a></li>
@@ -715,13 +723,13 @@ puts them into an IOC Database (IOCDB).</p>
 <p>This package is Channel Access for a javaIOC. Currently only local access
 is implemented.</p>
 
-<h4 id="org.epics.3">org.epics.ioc.caV3</h4>
+<h4 id="org.epics.4">org.epics.ioc.caV3</h4>
 
 <p>This package is Channel Access V3, e.g. channel access Version 3. Server
 support has been implemented by Matej Sekoranja (COSYLAB). Client support is
 under development. Both thew client and server require JCA/CAJ.</p>
 
-<h4 id="org.epics.4">org.epics.ioc.util</h4>
+<h4 id="org.epics.5">org.epics.ioc.util</h4>
 This package provides utility code for a javaIOC: 
 <dl>
   <dt>Message Support</dt>
@@ -743,23 +751,23 @@ This package provides utility code for a javaIOC:
       implements macro substitution and include.</dd>
 </dl>
 
-<h4 id="org.epics.5">org.epics.ioc.process</h4>
+<h4 id="org.epics.6">org.epics.ioc.process</h4>
 
 <p>This package provides support for processing IOC database records.</p>
 
-<h4 id="org.epics.6">org.epics.ioc.create</h4>
+<h4 id="org.epics.7">org.epics.ioc.create</h4>
 
 <p>This package defines Create, which is an interface that is called if a
 field is declared to have a createName. Support that implements Create
 normally replaces the data interface for the field at the time the field is
 created.</p>
 
-<h4 id="org.epics.7">org.epics.ioc.support</h4>
+<h4 id="org.epics.8">org.epics.ioc.support</h4>
 
 <p>Each record instance must have associated support and each field of a
 record instance can optionally have support.</p>
 
-<h4 id="org.epics.8">org.epics.ioc.pdrv<br />
+<h4 id="org.epics.9">org.epics.ioc.pdrv<br />
 org.epics.ioc.pdrv/interfaces<br />
 org.epics.ioc.pdrv/testDriver<br />
 </h4>
@@ -769,7 +777,7 @@ controlling hardware. It is modeled after the EPICS asynDriver and thus
 provides support for synchronous and asynchronous devices. Each device is
 accessed via a port. Each port provides access to one or more devices.</p>
 
-<h4 id="org.epics.9">org.epics.ioc.swtshell</h4>
+<h4 id="org.epics.10">org.epics.ioc.swtshell</h4>
 
 <p>This is a GUI shell for an ioc. It is implemented via the Standard Widget
 Toolkit. Getting Started explains how to invoke it.</p>
@@ -2107,7 +2115,10 @@ summary is:</p>
         <dt style="font-family: courier;">javaIOC/dbd/recordType/calc</dt>
           <dd>Record types for performing calculations.</dd>
         <dt
-        style="font-family: courier;">javaIOC/dbd/recordType/portDriver</dt>
+        style="font-family: courier;">javaIOC/dbd/recordType/modifySupport</dt>
+          <dd>A record type that can change the support state of another
+            record.</dd>
+        style="font-family: courier;"&gt;javaIOC/dbd/recordType/portDriver
           <dd>Link support that connects to portDriver. In addition tow
             record types are defined. portRecord initializes a port.
             portDeviceControl provides access to the connection management
@@ -2172,6 +2183,7 @@ javaIOC.</p>
 &lt;include href = "noop.xml" /&gt;
 &lt;include href = "generic.xml" /&gt;
 &lt;include href = "supportArray.xml" /&gt;
+&lt;include href = "supportState.xml" /&gt;
 &lt;include href = "channelAccess.xml" /&gt;
 &lt;include href = "analog.xml" /&gt;
 &lt;include href = "digital.xml" /&gt;
@@ -2209,6 +2221,9 @@ definitions provided by javaIOC.</p>
 &lt;include href = "doubleArrayRecord.xml" /&gt;
 &lt;include href = "stringArrayRecord.xml" /&gt;
 &lt;include removePath = "dbd/recordType/primitiveArray" /&gt;
+&lt;include addPath = "dbd/recordType/modifySupport" /&gt;
+&lt;include href = "modifySupportStateRecord.xml" /&gt;
+&lt;include removePath = "dbd/recordType/modifySupport" /&gt;
 &lt;include addPath = "dbd/recordType/analog" /&gt;
 &lt;include href = "aoIncrementalDoubleRecord.xml" /&gt;
 &lt;include removePath = "dbd/recordType/analog" /&gt;
@@ -3118,6 +3133,30 @@ id="structure12">dbd/structure/enumerated.xml</h3>
 
 &lt;create name = "enumerated"
   factoryName = "org.epics.ioc.create.EnumeratedFactory" /&gt;</pre>
+<hr />
+
+<h3 style="text-align: center"
+id="structure12">dbd/structure/supportState.xml</h3>
+<hr />
+<pre>&lt;DBDefinition&gt;
+&lt;structure name = "supportState" createName = "enumerated" &gt;
+  &lt;field name = "index" type = "int" /&gt;
+  &lt;field name = "choice" type = "string" /&gt;
+  &lt;field name = "choices" type = "array" elementType = "string"
+    default = "readyForInitialize readyForStart ready zombie" /&gt;
+&lt;/structure&gt;
+&lt;structure name = "supportStateCommand" createName = "enumerated"
+     supportName = "supportState" &gt;
+  &lt;field name = "index" type = "int" /&gt;
+  &lt;field name = "choice" type = "string" /&gt;
+  &lt;field name = "choices" type = "array" elementType = "string"
+    default = "idle initialize start stop uninitialize" /&gt;
+&lt;/structure&gt;
+
+&lt;!-- supportState requires supportStateCommon fields --&gt;
+&lt;support name = "supportState"
+  factoryName = "org.epics.ioc.support.SupportStateFactory" /&gt;
+&lt;/DBDefinition&gt;</pre>
 <hr />
 
 <h3 style="text-align: center"
@@ -4076,7 +4115,55 @@ a PV interface for reading an argument value.:</p>
 &lt;/DBDefinition&gt;</pre>
 <hr />
 
-<h3 style="text-align: center" id="recordType7">dbd/recordType/portDriver</h3>
+<h3 style="text-align: center"
+id="recordType7">dbd/recordType/modifySupport</h3>
+<hr />
+
+<p>This defines a structure and a recordType that is used to modify the
+support state of another record. This is required when fields related to how
+the support connects are modified. In order to modify support related fields
+the following must be done:</p>
+<ul>
+  <li>Modify the support state<br />
+    The support must be put in the state readyForStart if the support will be
+    the same but parameters for the support will be modified. The support
+    must be put in the state readyForInitialize if the support and/or a
+    structure type is will be modified. The support state for a record or
+    just a field within a record can be changed. A general approach is to
+    always uninitialize the support for the record itself. </li>
+  <li>Modify the fields desired.</li>
+  <li>Modify the support state top be ready.</li>
+</ul>
+
+<p>The modifySupportState record is used to modify the support state.</p>
+
+<h4 id="modifySupp">modifySupportStateCommon.xml</h4>
+<pre>&lt;?xml version="1.0" ?&gt;
+&lt;DBDefinition&gt;
+  &lt;field name = "value" type = "structure" structureName = "supportStateCommand" /&gt;
+  &lt;field name = "pvname" type = "string" /&gt;
+  &lt;field name = "supportState" type = "structure" structureName = "supportState" /&gt;
+  &lt;field name = "alarm" type = "structure" structureName = "alarm" /&gt;
+&lt;/DBDefinition&gt;</pre>
+
+<h4 id="modifySupp1">modifySupportStateRecord.xml</h4>
+<pre>&lt;?xml version="1.0" ?&gt;
+&lt;DBDefinition&gt;
+&lt;structure name = "modifySupportState" supportName = "generic" &gt;
+  &lt;include href = "modifySupportStateCommon.xml" /&gt;
+&lt;/structure&gt;
+
+&lt;recordType name = "modifySupportState" supportName = "generic" &gt;
+  &lt;include href = "common.xml" /&gt;
+  &lt;include href = "modifySupportStateCommon.xml" /&gt;
+  &lt;field name = "supportArray" type = "array"
+     elementType = "structure" supportName = "supportArray" /&gt;
+  &lt;field name = "timeStamp" type = "structure" structureName = "timeStamp" /&gt;  
+&lt;/recordType&gt;
+&lt;/DBDefinition&gt;</pre>
+<hr />
+
+<h3 style="text-align: center" id="recordType9">dbd/recordType/portDriver</h3>
 <hr />
 
 <h4 id="Overview8">Overview</h4>
@@ -4199,7 +4286,7 @@ be configured to link to other records.</p>
 &lt;/DBDefinition&gt;</pre>
 <hr />
 
-<h3 style="text-align: center" id="recordType9">dbd/recordType/allTypes</h3>
+<h3 style="text-align: center" id="recordType10">dbd/recordType/allTypes</h3>
 <hr />
 
 <h4 id="Overview10">Overview</h4>
