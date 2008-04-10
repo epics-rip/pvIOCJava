@@ -49,8 +49,8 @@ public enum AlarmSeverity {
         case 2: return AlarmSeverity.major;
         case 3: return AlarmSeverity.invalid;
         }
-        throw new IllegalArgumentException("AlarmSeverity.getSeverity) "
-            + ((Integer)value).toString() + " is not a valid AlarmSeverity");
+        throw new IllegalArgumentException("AlarmSeverity.getSeverity("
+            + ((Integer)value).toString() + ") is not a valid AlarmSeverity");
     }
     
     private static final String[] alarmSeverityChoices = {
@@ -65,7 +65,7 @@ public enum AlarmSeverity {
     public static Enumerated getAlarmSeverity(DBField dbField) {
         PVField pvField = dbField.getPVField();
         if(pvField.getField().getType()!=Type.pvStructure) {
-            pvField.message("field is not an alarmSeverity structure", MessageType.error);
+            pvField.message("field is not a structure", MessageType.error);
             return null;
         }
         DBStructure dbStructure = (DBStructure)dbField;
