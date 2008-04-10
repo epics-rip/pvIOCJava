@@ -15,6 +15,7 @@
 <include href = "powerSupplyAllDB.xml" />
 <include href = "allTypesDB.xml" />
 <include href = "powerSupplyArrayDB.xml" />
+<include href = "modifySupportDB.xml" />
 <!--
 -->
 <include removePath = "${JAVAIOC}/example" />
