@@ -10,7 +10,7 @@
 <body>
 <h1 style="text-align: center">EPICS JavaIOC: support<br />
 package: org.epics.ioc.support<br />
-2008.02.08</h1>
+2008.04.09</h1>
 CONTENTS 
 
 <div class="toc">
@@ -67,6 +67,7 @@ CONTENTS
   <li><a href="#SupportArr">SupportArray Support</a></li>
   <li><a href="#Noop">Noop Support</a></li>
   <li><a href="#DelaySuppo">DelaySupport Support</a></li>
+  <li><a href="#SupportSta1">SupportState Support</a></li>
   <li><a href="#Port">Port Driver Support</a>
     <ul>
       <li><a href="#Java1">Java Definitions</a></li>
@@ -213,6 +214,8 @@ database records. </p>
             also can get a report for a port and/or device.</dd>
       </dl>
     </dd>
+  <dt>SupportState</dt>
+    <dd>Support that modifies the support state of another record.</dd>
   <dt>PowerSupplyFactory</dt>
     <dd>A simple example of support for a complex device.</dd>
 </dl>
@@ -1109,6 +1112,73 @@ of min.</p>
 <pre>    public class DelaySupportFactory {
         public static Support create(DBStructure dbStructure);
     }</pre>
+<hr />
+
+<h2 style="text-align: center" id="SupportSta1">SupportState Support</h2>
+<hr />
+<pre>    public class SupportStateFactory {
+        public static Support create(DBStructure dbStructure);
+    }</pre>
+
+<p>This is support for changing the support state of another record in the
+same javaIOC. This is needed in order to modify support related fields of the
+other record. In order to modify support related fields the following must be
+done:</p>
+<ul>
+  <li>Modify the support state<br />
+    The support must be put in the state readyForStart if the support will be
+    the same but parameters for the support will be modified. The support
+    must be put in the state readyForInitialize if the support and/or a
+    structure type is will be modified. The support state for a record or
+    just a field within a record can be changed. A general approach is to
+    always uninitialize the support for the record itself. </li>
+  <li>Modify the fields desired.</li>
+  <li>Modify the support state top be ready.</li>
+</ul>
+
+<p>The SupportState support is used to modify the support state.</p>
+
+<p>The support is attached to an enumerated structure named
+supportStateCommand, which defines a set of commands for SupportState. It has
+the following choices:</p>
+<dl>
+  <dt>idle</dt>
+    <dd>Do not change the support state.</dd>
+  <dt>initialize</dt>
+    <dd>Initialize the support.</dd>
+  <dt>start</dt>
+    <dd>Start the support.</dd>
+  <dt>stop</dt>
+    <dd>Stop the support.</dd>
+  <dt>unitialize</dt>
+    <dd>Unitialize the support.</dd>
+</dl>
+
+<p>The supportStateCommand structure must be a field named value which is in
+a structure containing the fields:</p>
+<dl>
+  <dt>value</dt>
+    <dd>The supportStateCommand structure.</dd>
+  <dt>pvname</dt>
+    <dd>The pvname of the record and, optionally, the field containing the
+      support to change.</dd>
+  <dt>supportState</dt>
+    <dd>A supportState structure. When the SupportState support finishes
+      processing it sets this field to the current support state of the
+      pvname support.</dd>
+  <dt>alarm</dt>
+    <dd>An alarm field for reporting problems.</dd>
+</dl>
+
+<p>The process method of SupportState does the following:</p>
+<ul>
+  <li>Unless the command is idle, it executes the command.</li>
+  <li>If the command state has changed it updates field supportState.</li>
+  <li>If the command was not idle, the value field is set to idle.</li>
+</ul>
+
+<p>Note that the state of the support can be determined by issuing an idle
+command.</p>
 <hr />
 
 <h2 style="text-align: center" id="Port">Port Driver Support</h2>
