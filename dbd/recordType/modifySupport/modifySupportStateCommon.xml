@@ -1,0 +1,7 @@
+<?xml version="1.0" ?>
+<DBDefinition>
+  <field name = "value" type = "structure" structureName = "supportStateCommand" />
+  <field name = "pvname" type = "string" />
+  <field name = "supportState" type = "structure" structureName = "supportState" />
+  <field name = "alarm" type = "structure" structureName = "alarm" />
+</DBDefinition>

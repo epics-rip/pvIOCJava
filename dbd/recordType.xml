@@ -20,6 +20,9 @@
 <include href = "doubleArrayRecord.xml" />
 <include href = "stringArrayRecord.xml" />
 <include removePath = "${JAVAIOC}/dbd/recordType/primitiveArray" />
+<include addPath = "${JAVAIOC}/dbd/recordType/modifySupport" />
+<include href = "modifySupportStateRecord.xml" />
+<include removePath = "${JAVAIOC}/dbd/recordType/modifySupport" />
 <include addPath = "${JAVAIOC}/dbd/recordType/analog" />
 <include href = "aoIncrementalDoubleRecord.xml" />
 <include removePath = "${JAVAIOC}/dbd/recordType/analog" />
