@@ -9,8 +9,6 @@ import org.epics.ioc.db.DBField;
 import org.epics.ioc.pv.AbstractPVArray;
 import org.epics.ioc.pv.AbstractPVField;
 import org.epics.ioc.pv.Array;
-import org.epics.ioc.pv.Convert;
-import org.epics.ioc.pv.ConvertFactory;
 import org.epics.ioc.pv.Field;
 import org.epics.ioc.pv.PVField;
 import org.epics.ioc.pv.PVInt;
@@ -29,7 +27,6 @@ import org.epics.ioc.util.MessageType;
  *
  */
 public class BaseEnumerated implements Enumerated{
-    private static Convert convert = ConvertFactory.getConvert();
     private int index;
     private String[] choices;
     private PVField pvField;
@@ -195,6 +192,20 @@ public class BaseEnumerated implements Enumerated{
             super(parent,array,capacity,capacityMutable);
             choices = new String[capacity];           
         }       
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pv.AbstractPVArray#setSharable(boolean)
+         */
+        @Override
+        public boolean setSharable(boolean isSharable) {
+            // not allowed to change the default which is isSharable = false
+            return false;
+        }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pv.PVStringArray#share(org.epics.ioc.pv.PVStringArray)
+         */
+        public boolean share(String[] value, int length) {
+            return false;
+        }
         /* (non-Javadoc)
          * @see org.epics.ioc.pv.AbstractPVField#toString(int)
          */

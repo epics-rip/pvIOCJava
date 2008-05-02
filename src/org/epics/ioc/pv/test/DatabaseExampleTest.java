@@ -8,6 +8,7 @@ package org.epics.ioc.pv.test;
 import junit.framework.TestCase;
 
 import org.epics.ioc.pv.Array;
+import org.epics.ioc.pv.BooleanArrayData;
 import org.epics.ioc.pv.ByteArrayData;
 import org.epics.ioc.pv.Convert;
 import org.epics.ioc.pv.ConvertFactory;
@@ -320,23 +321,30 @@ public class DatabaseExampleTest extends TestCase {
      */
     public static void testBooleanArray() {
         DatabaseExample database = new DatabaseExample("test");
-        PVBooleanArray booleanArrayData = (PVBooleanArray)
+        PVBooleanArray pvbooleanArray = (PVBooleanArray)
             database.createArrayData("booleanArray",Type.pvBoolean);
         int len;
         boolean[] arrayValue = new boolean[] {true,false,true};
-        int nput = booleanArrayData.put(0,arrayValue.length,arrayValue,0);
+        int nput = pvbooleanArray.put(0,arrayValue.length,arrayValue,0);
         assertEquals(nput,arrayValue.length);
-        len = booleanArrayData.getLength();
+        len = pvbooleanArray.getLength();
         assertEquals(len,arrayValue.length);
-        assertEquals(booleanArrayData.getCapacity(),arrayValue.length);
-        Field field = booleanArrayData.getField();
+        assertEquals(pvbooleanArray.getCapacity(),arrayValue.length);
+        Field field = pvbooleanArray.getField();
         assertEquals(field.getFieldName(),"booleanArray");
         assertEquals(field.getType(),Type.pvArray);
         Array array = (Array)field;
         assertEquals(array.getElementType(),Type.pvBoolean);
+        BooleanArrayData data = new BooleanArrayData();
+        pvbooleanArray.get(0,arrayValue.length,data);
         System.out.printf("%s%nvalue %s%n",
             	array.toString(),
-                booleanArrayData.toString());
+                pvbooleanArray.toString());
+        PVBooleanArray share = (PVBooleanArray)database.createArrayData("shareBooleanArray",Type.pvBoolean);
+        share.setSharable(true);
+        boolean isSharable = share.share(arrayValue, 2);
+        System.out.printf("share isSharable %b length %d%nvalue %s%n",
+                isSharable,share.getLength(),share.toString());
     }
 
     /**
@@ -345,21 +353,21 @@ public class DatabaseExampleTest extends TestCase {
     public static void testByteArray() {
         DatabaseExample database = new DatabaseExample("test");
         Convert convert = ConvertFactory.getConvert();
-        PVByteArray byteArrayData = (PVByteArray)
+        PVByteArray pvbyteArray = (PVByteArray)
             database.createArrayData("byteArray",Type.pvByte);
         int len;
         byte[] arrayValue = new byte[] {3,4,5};
-        int nput = byteArrayData.put(0,arrayValue.length,arrayValue,0);
+        int nput = pvbyteArray.put(0,arrayValue.length,arrayValue,0);
         assertEquals(nput,arrayValue.length);
-        len = byteArrayData.getLength();
+        len = pvbyteArray.getLength();
         assertEquals(len,arrayValue.length);
-        assertEquals(byteArrayData.getCapacity(),arrayValue.length);
-        Field field = byteArrayData.getField();
+        assertEquals(pvbyteArray.getCapacity(),arrayValue.length);
+        Field field = pvbyteArray.getField();
         assertEquals(field.getFieldName(),"byteArray");
         assertEquals(field.getType(),Type.pvArray);
         Array array = (Array)field;
         ByteArrayData data = new ByteArrayData();
-        int numback = byteArrayData.get(0,arrayValue.length,data);
+        int numback = pvbyteArray.get(0,arrayValue.length,data);
         byte[] readback = data.data;
         assertEquals(data.offset,0);
         assertEquals(numback,readback.length);
@@ -369,12 +377,16 @@ public class DatabaseExampleTest extends TestCase {
         assertEquals(array.getElementType(),Type.pvByte);
         System.out.printf("%s%nvalue %s%n",
                 array.toString(),
-                byteArrayData.toString());
-
+                pvbyteArray.toString());
+        PVByteArray share = (PVByteArray)database.createArrayData("shareByteArray",Type.pvByte);
+        share.setSharable(true);
+        boolean isSharable = share.share(data.data, 2);
+        System.out.printf("share isSharable %b length %d%nvalue %s%n",
+                isSharable,share.getLength(),share.toString());
         arrayValue[0] = 0; arrayValue[1] = 1; arrayValue[2] = 2;
-        convert.fromByteArray(byteArrayData,0,len,arrayValue,0);
+        convert.fromByteArray(pvbyteArray,0,len,arrayValue,0);
         arrayValue[0] = 0; arrayValue[1] = 0; arrayValue[2] = 0;
-        convert.toByteArray(byteArrayData,0,len,arrayValue,0);
+        convert.toByteArray(pvbyteArray,0,len,arrayValue,0);
         assertTrue(arrayValue[0]==0 && arrayValue[1]==1 && arrayValue[2]==2);
 
         PVShortArray shortArrayData = (PVShortArray)
@@ -424,24 +436,28 @@ public class DatabaseExampleTest extends TestCase {
     public static void testShortArray() {
         DatabaseExample database = new DatabaseExample("test");
         Convert convert = ConvertFactory.getConvert();
-        PVShortArray shortArrayData = (PVShortArray)
-            database.createArrayData("shortArray",Type.pvShort);
+        PVShortArray pvshortArray = (PVShortArray)
+        database.createArrayData("shortArray",Type.pvShort);
         int len;
         short[] arrayValue = new short[] {3,4,5};
-        int nput = shortArrayData.put(0,arrayValue.length,arrayValue,0);
+        int nput = pvshortArray.put(0,arrayValue.length,arrayValue,0);
         assertEquals(nput,arrayValue.length);
-        len = shortArrayData.getLength();
+        len = pvshortArray.getLength();
         assertEquals(len,arrayValue.length);
-        assertEquals(shortArrayData.getCapacity(),arrayValue.length);
-        Field field = shortArrayData.getField();
+        assertEquals(pvshortArray.getCapacity(),arrayValue.length);
+        Field field = pvshortArray.getField();
         assertEquals(field.getFieldName(),"shortArray");
         assertEquals(field.getType(),Type.pvArray);
         Array array = (Array)field;
         assertEquals(array.getElementType(),Type.pvShort);
         System.out.printf("%s%nvalue %s%n",
                 array.toString(),
-                shortArrayData.toString());
-
+                pvshortArray.toString());
+        PVShortArray share = (PVShortArray)database.createArrayData("shareShortArray",Type.pvShort);
+        share.setSharable(true);
+        boolean isSharable = share.share(arrayValue, 2);
+        System.out.printf("share isSharable %b length %d%nvalue %s%n",
+                isSharable,share.getLength(),share.toString());
         PVByteArray byteArrayData = (PVByteArray)
             database.createArrayData("byteArray",Type.pvByte);
         arrayValue[0] = 0; arrayValue[1] = 1; arrayValue[2] = 2;
@@ -451,9 +467,9 @@ public class DatabaseExampleTest extends TestCase {
         assertTrue(arrayValue[0]==0 && arrayValue[1]==1 && arrayValue[2]==2);
 
         arrayValue[0] = 0; arrayValue[1] = 1; arrayValue[2] = 2;
-        convert.fromShortArray(shortArrayData,0,len,arrayValue,0);
+        convert.fromShortArray(pvshortArray,0,len,arrayValue,0);
         arrayValue[0] = 0; arrayValue[1] = 0; arrayValue[2] = 0;
-        convert.toShortArray(shortArrayData,0,len,arrayValue,0);
+        convert.toShortArray(pvshortArray,0,len,arrayValue,0);
         assertTrue(arrayValue[0]==0 && arrayValue[1]==1 && arrayValue[2]==2);
 
         PVIntArray intArrayData = (PVIntArray)
@@ -495,26 +511,31 @@ public class DatabaseExampleTest extends TestCase {
     public static void testIntArray() {
         DatabaseExample database = new DatabaseExample("test");
         Convert convert = ConvertFactory.getConvert();
-        PVIntArray intArrayData = (PVIntArray)
-            database.createArrayData("intArray",Type.pvInt);
+        PVIntArray pvintArray = (PVIntArray)
+        database.createArrayData("intArray",Type.pvInt);
         int len;
         int[] arrayValue = new int[] {3,4,5};
-        int nput = intArrayData.put(0,arrayValue.length,arrayValue,0);
+        int nput = pvintArray.put(0,arrayValue.length,arrayValue,0);
         assertEquals(nput,arrayValue.length);
-        len = intArrayData.getLength();
+        len = pvintArray.getLength();
         assertEquals(len,arrayValue.length);
-        assertEquals(intArrayData.getCapacity(),arrayValue.length);
-        Field field = intArrayData.getField();
+        assertEquals(pvintArray.getCapacity(),arrayValue.length);
+        Field field = pvintArray.getField();
         assertEquals(field.getFieldName(),"intArray");
         assertEquals(field.getType(),Type.pvArray);
         Array array = (Array)field;
         assertEquals(array.getElementType(),Type.pvInt);
         System.out.printf("%s%nvalue %s%n",
                 array.toString(),
-                intArrayData.toString());
-
+                pvintArray.toString());
+        PVIntArray share = (PVIntArray)database.createArrayData("shareIntArray",Type.pvInt);
+        share.setSharable(true);
+        boolean isSharable = share.share(arrayValue, 2);
+        share.setLength(2);
+        System.out.printf("share isSharable %b length %d%nvalue %s%n",
+                isSharable,share.getLength(),share.toString());
         PVByteArray byteArrayData = (PVByteArray)
-            database.createArrayData("byteArray",Type.pvByte);
+        database.createArrayData("byteArray",Type.pvByte);
         arrayValue[0] = 0; arrayValue[1] = 1; arrayValue[2] = 2;
         convert.fromIntArray(byteArrayData,0,len,arrayValue,0);
         arrayValue[0] = 0; arrayValue[1] = 0; arrayValue[2] = 0;
@@ -530,9 +551,9 @@ public class DatabaseExampleTest extends TestCase {
         assertTrue(arrayValue[0]==0 && arrayValue[1]==1 && arrayValue[2]==2);
 
         arrayValue[0] = 0; arrayValue[1] = 1; arrayValue[2] = 2;
-        convert.fromIntArray(intArrayData,0,len,arrayValue,0);
+        convert.fromIntArray(pvintArray,0,len,arrayValue,0);
         arrayValue[0] = 0; arrayValue[1] = 0; arrayValue[2] = 0;
-        convert.toIntArray(intArrayData,0,len,arrayValue,0);
+        convert.toIntArray(pvintArray,0,len,arrayValue,0);
         assertTrue(arrayValue[0]==0 && arrayValue[1]==1 && arrayValue[2]==2);
 
         PVLongArray longArrayData = (PVLongArray)
@@ -566,24 +587,28 @@ public class DatabaseExampleTest extends TestCase {
     public static void testLongArray() {
         DatabaseExample database = new DatabaseExample("test");
         Convert convert = ConvertFactory.getConvert();
-        PVLongArray longArrayData = (PVLongArray)
+        PVLongArray pvlongArray = (PVLongArray)
             database.createArrayData("longArray",Type.pvLong);
         int len;
         long[] arrayValue = new long[] {3,4,5};
-        int nput = longArrayData.put(0,arrayValue.length,arrayValue,0);
+        int nput = pvlongArray.put(0,arrayValue.length,arrayValue,0);
         assertEquals(nput,arrayValue.length);
-        len = longArrayData.getLength();
+        len = pvlongArray.getLength();
         assertEquals(len,arrayValue.length);
-        assertEquals(longArrayData.getCapacity(),arrayValue.length);
-        Field field = longArrayData.getField();
+        assertEquals(pvlongArray.getCapacity(),arrayValue.length);
+        Field field = pvlongArray.getField();
         assertEquals(field.getFieldName(),"longArray");
         assertEquals(field.getType(),Type.pvArray);
         Array array = (Array)field;
         assertEquals(array.getElementType(),Type.pvLong);
         System.out.printf("%s%nvalue %s%n",
                 array.toString(),
-                longArrayData.toString());
-
+                pvlongArray.toString());
+        PVLongArray share = (PVLongArray)database.createArrayData("shareLongArray",Type.pvLong);
+        share.setSharable(true);
+        boolean isSharable = share.share(arrayValue, 2);
+        System.out.printf("share isSharable %b length %d%nvalue %s%n",
+                isSharable,share.getLength(),share.toString());
         PVByteArray byteArrayData = (PVByteArray)
             database.createArrayData("byteArray",Type.pvByte);
         arrayValue[0] = 0; arrayValue[1] = 1; arrayValue[2] = 2;
@@ -609,9 +634,9 @@ public class DatabaseExampleTest extends TestCase {
         assertTrue(arrayValue[0]==0 && arrayValue[1]==1 && arrayValue[2]==2);
 
         arrayValue[0] = 0; arrayValue[1] = 1; arrayValue[2] = 2;
-        convert.fromLongArray(longArrayData,0,len,arrayValue,0);
+        convert.fromLongArray(pvlongArray,0,len,arrayValue,0);
         arrayValue[0] = 0; arrayValue[1] = 0; arrayValue[2] = 0;
-        convert.toLongArray(longArrayData,0,len,arrayValue,0);
+        convert.toLongArray(pvlongArray,0,len,arrayValue,0);
         assertTrue(arrayValue[0]==0 && arrayValue[1]==1 && arrayValue[2]==2);
 
         PVFloatArray floatArrayData = (PVFloatArray)
@@ -637,24 +662,29 @@ public class DatabaseExampleTest extends TestCase {
     public static void testFloatArray() {
         DatabaseExample database = new DatabaseExample("test");
         Convert convert = ConvertFactory.getConvert();
-        PVFloatArray floatArrayData = (PVFloatArray)
+        PVFloatArray pvfloatArray = (PVFloatArray)
             database.createArrayData("floatArray",Type.pvFloat);
         int len;
         float[] arrayValue = new float[] {3.0F,4.0F,5.0F};
-        int nput = floatArrayData.put(0,arrayValue.length,arrayValue,0);
+        int nput = pvfloatArray.put(0,arrayValue.length,arrayValue,0);
         assertEquals(nput,arrayValue.length);
-        len = floatArrayData.getLength();
+        len = pvfloatArray.getLength();
         assertEquals(len,arrayValue.length);
-        assertEquals(floatArrayData.getCapacity(),arrayValue.length);
-        Field field = floatArrayData.getField();
+        assertEquals(pvfloatArray.getCapacity(),arrayValue.length);
+        Field field = pvfloatArray.getField();
         assertEquals(field.getFieldName(),"floatArray");
         assertEquals(field.getType(),Type.pvArray);
         Array array = (Array)field;
         assertEquals(array.getElementType(),Type.pvFloat);
         System.out.printf("%s%nvalue %s%n",
                 array.toString(),
-                floatArrayData.toString());
-
+                pvfloatArray.toString());
+        PVFloatArray share = (PVFloatArray)database.createArrayData("shareFloatArray",Type.pvFloat);
+        share.setSharable(true);
+        boolean isSharable = share.share(arrayValue, 2);
+        share.setLength(2);
+        System.out.printf("share isSharable %b length %d%nvalue %s%n",
+                isSharable,share.getLength(),share.toString());
         PVByteArray byteArrayData = (PVByteArray)
             database.createArrayData("byteArray",Type.pvByte);
         arrayValue[0] = 0.0F; arrayValue[1] = 1.0F; arrayValue[2] = 2.0F;
@@ -688,9 +718,9 @@ public class DatabaseExampleTest extends TestCase {
         assertTrue(arrayValue[0]==0.0F && arrayValue[1]==1.0F && arrayValue[2]==2.0F);
 
         arrayValue[0] = 0.0F; arrayValue[1] = 1.0F; arrayValue[2] = 2.0F;
-        convert.fromFloatArray(floatArrayData,0,len,arrayValue,0);
+        convert.fromFloatArray(pvfloatArray,0,len,arrayValue,0);
         arrayValue[0] = 0.0F; arrayValue[1] = 0.0F; arrayValue[2] = 0.0F;
-        convert.toFloatArray(floatArrayData,0,len,arrayValue,0);
+        convert.toFloatArray(pvfloatArray,0,len,arrayValue,0);
         assertTrue(arrayValue[0]==0.0F && arrayValue[1]==1.0F && arrayValue[2]==2.0F);
 
         PVDoubleArray doubleArrayData = (PVDoubleArray)
@@ -708,24 +738,28 @@ public class DatabaseExampleTest extends TestCase {
     public static void testDoubleArray() {
         DatabaseExample database = new DatabaseExample("test");
         Convert convert = ConvertFactory.getConvert();
-        PVDoubleArray doubleArrayData = (PVDoubleArray)
+        PVDoubleArray pvdoubleArray = (PVDoubleArray)
             database.createArrayData("doubleArray",Type.pvDouble);
         int len;
         double[] arrayValue = new double[] {3.0,4.0,5.0};
-        int nput = doubleArrayData.put(0,arrayValue.length,arrayValue,0);
+        int nput = pvdoubleArray.put(0,arrayValue.length,arrayValue,0);
         assertEquals(nput,arrayValue.length);
-        len = doubleArrayData.getLength();
+        len = pvdoubleArray.getLength();
         assertEquals(len,arrayValue.length);
-        assertEquals(doubleArrayData.getCapacity(),arrayValue.length);
-        Field field = doubleArrayData.getField();
+        assertEquals(pvdoubleArray.getCapacity(),arrayValue.length);
+        Field field = pvdoubleArray.getField();
         assertEquals(field.getFieldName(),"doubleArray");
         assertEquals(field.getType(),Type.pvArray);
         Array array = (Array)field;
         assertEquals(array.getElementType(),Type.pvDouble);
         System.out.printf("%s%nvalue %s%n",
                 array.toString(),
-                doubleArrayData.toString());
-
+                pvdoubleArray.toString());
+        PVDoubleArray share = (PVDoubleArray)database.createArrayData("shareDoubleArray",Type.pvDouble);
+        share.setSharable(true);
+        boolean isSharable = share.share(arrayValue,2);
+        System.out.printf("share isSharable %b length %d%nvalue %s%n",
+                isSharable,share.getLength(),share.toString());
         PVByteArray byteArrayData = (PVByteArray)
             database.createArrayData("byteArray",Type.pvByte);
         arrayValue[0] = 0.0; arrayValue[1] = 1.0; arrayValue[2] = 2.0;
@@ -767,9 +801,9 @@ public class DatabaseExampleTest extends TestCase {
         assertTrue(arrayValue[0]==0.0 && arrayValue[1]==1.0 && arrayValue[2]==2.0);
 
         arrayValue[0] = 0.0; arrayValue[1] = 1.0; arrayValue[2] = 2.0;
-        convert.fromDoubleArray(doubleArrayData,0,len,arrayValue,0);
+        convert.fromDoubleArray(pvdoubleArray,0,len,arrayValue,0);
         arrayValue[0] = 0.0; arrayValue[1] = 0.0; arrayValue[2] = 0.0;
-        convert.toDoubleArray(doubleArrayData,0,len,arrayValue,0);
+        convert.toDoubleArray(pvdoubleArray,0,len,arrayValue,0);
         assertTrue(arrayValue[0]==0.0 && arrayValue[1]==1.0 && arrayValue[2]==2.0);
     }
 
@@ -778,22 +812,22 @@ public class DatabaseExampleTest extends TestCase {
      */
     public static void testStringArray() {
         DatabaseExample database = new DatabaseExample("test");
-        PVStringArray stringArrayData = (PVStringArray)
+        PVStringArray pvstringArray = (PVStringArray)
             database.createArrayData("stringArray",Type.pvString);
         int len;
-        String[] arrayValue = new String[] {"string0","string2"};
-        int nput = stringArrayData.put(0,arrayValue.length,arrayValue,0);
+        String[] arrayValue = new String[] {"string0","string2","string3"};
+        int nput = pvstringArray.put(0,arrayValue.length,arrayValue,0);
         assertEquals(nput,arrayValue.length);
-        len = stringArrayData.getLength();
+        len = pvstringArray.getLength();
         assertEquals(len,arrayValue.length);
-        assertEquals(stringArrayData.getCapacity(),arrayValue.length);
-        Field field = stringArrayData.getField();
+        assertEquals(pvstringArray.getCapacity(),arrayValue.length);
+        Field field = pvstringArray.getField();
         assertEquals(field.getFieldName(),"stringArray");
         assertEquals(field.getType(),Type.pvArray);
         Array array = (Array)field;
         assertEquals(array.getElementType(),Type.pvString);
         StringArrayData data = new StringArrayData();
-        int retLength = stringArrayData.get(0,arrayValue.length,data);
+        int retLength = pvstringArray.get(0,arrayValue.length,data);
         String[]readback = data.data;
         assertEquals(data.offset,0);
         assertEquals(retLength,readback.length);
@@ -801,7 +835,12 @@ public class DatabaseExampleTest extends TestCase {
         assertEquals(readback[1],arrayValue[1]);
         System.out.printf("%s%nvalue %s%n",
                 array.toString(),
-                stringArrayData.toString());
+                pvstringArray.toString());
+        PVStringArray share = (PVStringArray)database.createArrayData("shareStringArray",Type.pvString);
+        share.setSharable(true);
+        boolean isSharable = share.share(data.data, 2);
+        System.out.printf("share isSharable %b length %d%nvalue %s%n",
+                isSharable,share.getLength(),share.toString());
     }
 
     /**
@@ -1312,6 +1351,8 @@ public class DatabaseExampleTest extends TestCase {
 
         public PVField createField(String name,Type type) {
             FieldAttribute fieldAttribute = fieldCreate.createFieldAttribute();
+            fieldAttribute.setAttribute("key1", "value1");
+            fieldAttribute.setAttribute("key2", "value2");
             Field field = fieldCreate.createField(name,type,fieldAttribute);
             Field[] fields = new Field[]{field};
             Structure structure = fieldCreate.createStructure(name, name, fields);

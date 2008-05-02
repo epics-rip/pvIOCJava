@@ -14,8 +14,7 @@ import org.epics.ioc.util.MessageType;
  */
 public class BasePVStructureArray extends AbstractPVArray implements PVStructureArray
 {
-    private Convert convert = ConvertFactory.getConvert();
-    private PVStructure[] value;
+    protected PVStructure[] value;
     
     /**
      * Constructor

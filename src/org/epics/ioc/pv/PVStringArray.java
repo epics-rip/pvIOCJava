@@ -41,4 +41,13 @@ public interface PVStringArray extends PVArray{
      * @throws IllegalStateException if the field is not mutable.
      */
     int put(int offset,int len, String[] from, int fromOffset);
+    /**
+     * Let this PVArray share an array value.
+     * If the capacity is changed the value will no longer be shared.
+     * @param value The data array.
+     * @param length The initial length.
+     * @return (false,true) if the request was successful.
+     * The request will fail if isShareable() is false.
+     */
+    boolean share(String[] value, int length);
 }

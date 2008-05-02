@@ -64,6 +64,12 @@ public abstract class AbstractInt32Array extends AbstractArrayInterface implemen
         super(parent,array,capacity,capacityMutable,device,"int32Array");
     }    
     /* (non-Javadoc)
+     * @see org.epics.ioc.pv.PVIntArray#share(org.epics.ioc.pv.PVIntArray)
+     */
+    public boolean share(int[] value, int length) {
+        return false;
+    }
+    /* (non-Javadoc)
      * @see org.epics.ioc.pdrv.interfaces.Int32Array#endRead(org.epics.ioc.pdrv.User)
      */
     public Status endRead(User user){

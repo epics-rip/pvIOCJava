@@ -1,6 +1,7 @@
 <?xml version="1.0" ?>
 <IOCDatabase>
 
+<!--
 <record name = "enumCounter" type = "calcDouble">
     <alarm structureName = "alarm" />
     <timeStamp structureName = "timeStamp" />
@@ -125,6 +126,8 @@
     </input>
 </record>
 
+-->
+
 <record name = "byteCounter" type = "calcDouble">
     <alarm structureName = "alarm" />
     <timeStamp structureName = "timeStamp" />
@@ -196,6 +199,8 @@
         <propertyNames>alarm,display,control</propertyNames>
     </input>
 </record>
+
+<!--
 
 <record name = "shortOut" type = "short">
     <alarm structureName = "alarm" />
@@ -430,7 +435,6 @@
     </input>
 </record>
 
-<!--
 -->
 
 </IOCDatabase>

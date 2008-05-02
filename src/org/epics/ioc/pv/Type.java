@@ -6,7 +6,7 @@
 package org.epics.ioc.pv;
 
 /**
- * Defines the Process Variable data types.
+ * Process Variable Data Type.
  * @author mrk
  *
  */
@@ -55,31 +55,32 @@ public enum Type {
     /**
      * Is this a Java numeric type?
      * @return Returns true if the type is a Java numeric type.
-     * The numeric types are byte, int, long, float, and double.
+     * The numeric types are byte, short, int, long, float, and double.
      */
     public boolean isNumeric() {
-        if(ordinal() < Type.pvByte.ordinal()) return false;
-        if(ordinal() > Type.pvDouble.ordinal()) return false;
-        return true;
+        if( (ordinal() >= Type.pvByte.ordinal()) && (ordinal() <= Type.pvDouble.ordinal()) ) {
+            return true;
+        }
+        return false;
     }
     /**
      * Is this a Java primitive type?
      * @return Returns true if the type is a Java primitive type.
-     * This is the numeric types and boolean.
+     * The numeric types and boolean are primitive types.
      */
     public boolean isPrimitive() {
-        if(ordinal() < Type.pvBoolean.ordinal()) return false;
-        if(ordinal() > Type.pvDouble.ordinal()) return false;
-        return true;
+        if(isNumeric()) return true;
+        if(ordinal() == Type.pvBoolean.ordinal()) return true;
+        return false;
     }
     /**
      * Is this either a Java primitive or a <i>string</i>?
      * @return Returns true if the type is a Java primitive or a String
      */
     public boolean isScalar() {
-        if(ordinal() < Type.pvBoolean.ordinal()) return false;
-        if(ordinal() > Type.pvString.ordinal()) return false;
-        return true;
+        if(isPrimitive()) return true;
+        if(ordinal() == Type.pvString.ordinal()) return true;
+        return false;
     }
 }
 

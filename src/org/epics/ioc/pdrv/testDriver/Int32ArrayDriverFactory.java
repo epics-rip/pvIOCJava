@@ -15,8 +15,6 @@ import org.epics.ioc.pdrv.Trace;
 import org.epics.ioc.pdrv.User;
 import org.epics.ioc.pdrv.interfaces.AbstractInt32Array;
 import org.epics.ioc.pv.Array;
-import org.epics.ioc.pv.Convert;
-import org.epics.ioc.pv.ConvertFactory;
 import org.epics.ioc.pv.FieldCreate;
 import org.epics.ioc.pv.FieldFactory;
 import org.epics.ioc.pv.IntArrayData;
@@ -36,7 +34,6 @@ import org.epics.ioc.util.ScanPriority;
  */
 public class Int32ArrayDriverFactory {
     private static FieldCreate fieldCreate = FieldFactory.getFieldCreate();
-    private static Convert convert = ConvertFactory.getConvert();
     /**
      * Create a new instance of int32ArrayDriver.
      * @param portName The portName.

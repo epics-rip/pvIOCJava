@@ -2,8 +2,8 @@
 <IOCDatabase>
 <include addPath = "test/caV3" />
 <include href = "scalarDB.xml" />
-<include href = "arrayDB.xml" />
 <!--
+<include href = "arrayDB.xml" />
 -->
 </IOCDatabase>
 

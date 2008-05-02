@@ -123,6 +123,7 @@
                  <name>on</name>
                  <value>1</value>
                  <severity><choice>minor</choice></severity>
+                 <message>on is minor alarm</message>
              </element>
          </states>
     </input>
@@ -156,6 +157,7 @@
                      <name>on</name>
                      <value>1</value>
                      <severity><choice>minor</choice></severity>
+                     <message>on is minor alarm</message>
                  </element>
             </states>
     </input>
@@ -189,11 +191,13 @@
                      <name>one</name>
                      <value>0x1</value>
                      <severity><choice>minor</choice></severity>
+                     <message>one is minor alarm</message>
                  </element>
                  <element structureName = "digitalState">
                      <name>two</name>
                      <value>0x2</value>
                      <severity><choice>major</choice></severity>
+                     <message>two is major alarm</message>
                  </element>
                  <element structureName = "digitalState">
                      <name>three</name>
@@ -233,11 +237,13 @@
                      <name>one</name>
                      <value>0x1</value>
                      <severity><choice>minor</choice></severity>
+                     <message>one is minor alarm</message>
                  </element>
                  <element structureName = "digitalState">
                      <name>two</name>
                      <value>0x2</value>
                      <severity><choice>major</choice></severity>
+                     <message>two is major alarm</message>
                  </element>
                  <element structureName = "digitalState">
                      <name>three</name>

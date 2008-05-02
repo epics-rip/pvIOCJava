@@ -6,18 +6,18 @@
 package org.epics.ioc.pv;
 
 /**
- * Interface for  structure field reflection.
+ * Interface for structure field reflection.
  * @author mrk
  *
  */
 public interface Structure extends Field{
     /**
-     * Get the name of the structure.
-     * @return The structure name.
+     * Get the structure name.
+     * @return The structureName.
      */
     String getStructureName();
     /**
-     * Get the names of the fields.
+     * Get the array of field names for the structure..
      * @return The names of the fields.
      */
     String[] getFieldNames();

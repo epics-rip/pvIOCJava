@@ -906,6 +906,12 @@ public class ReplaceTest extends TestCase {
             return n;
         }
         /* (non-Javadoc)
+         * @see org.epics.ioc.pv.PVBooleanArray#share(org.epics.ioc.pv.PVBooleanArray)
+         */
+        public boolean share(boolean[] value, int length) {
+            return false;
+        }
+        /* (non-Javadoc)
          * @see org.epics.ioc.pv.PVBooleanArray#put(int, int, boolean[], int)
          */
         public int put(int offset, int len, boolean[]from, int fromOffset) {
@@ -966,6 +972,13 @@ public class ReplaceTest extends TestCase {
             return n;
         }
         /* (non-Javadoc)
+         * @see org.epics.ioc.pv.PVByteArray#share(org.epics.ioc.pv.PVByteArray)
+         */
+        public boolean share(byte[] value, int length) {
+            return false;
+        }
+
+        /* (non-Javadoc)
          * @see org.epics.ioc.pv.PVByteArray#put(int, int, byte[], int)
          */
         public int put(int offset, int len, byte[]from, int fromOffset) {
@@ -1024,6 +1037,12 @@ public class ReplaceTest extends TestCase {
             data.data = value;
             data.offset = offset;
             return n;
+        }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pv.PVShortArray#share(org.epics.ioc.pv.PVShortArray)
+         */
+        public boolean share(short[] value, int length) {
+            return false;
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.pv.PVShortArray#put(int, int, short[], int)
@@ -1086,6 +1105,12 @@ public class ReplaceTest extends TestCase {
             return n;
         }
         /* (non-Javadoc)
+         * @see org.epics.ioc.pv.PVIntArray#share(org.epics.ioc.pv.PVIntArray)
+         */
+        public boolean share(int[] value, int length) {
+            return false;
+        }
+        /* (non-Javadoc)
          * @see org.epics.ioc.pv.PVIntArray#put(int, int, int[], int)
          */
         public int put(int offset, int len, int[]from,int fromOffset) {
@@ -1127,6 +1152,12 @@ public class ReplaceTest extends TestCase {
 
     private static class LongArray extends AbstractDBArray implements PVLongArray
     {
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pv.PVLongArray#share(org.epics.ioc.pv.PVLongArray)
+         */
+        public boolean share(long[] value, int length) {
+            return false;
+        }
         /* (non-Javadoc)
          * @see org.epics.ioc.pv.PVField#toString(int)
          */
@@ -1188,6 +1219,12 @@ public class ReplaceTest extends TestCase {
     {
         
         /* (non-Javadoc)
+         * @see org.epics.ioc.pv.PVFloatArray#share(org.epics.ioc.pv.PVFloatArray)
+         */
+        public boolean share(float[] value, int length) {
+            return false;
+        }
+        /* (non-Javadoc)
          * @see org.epics.ioc.pv.PVField#toString(int)
          */
         public String toString(int indentLevel) {
@@ -1246,6 +1283,13 @@ public class ReplaceTest extends TestCase {
 
     private static class DoubleArray extends AbstractDBArray implements PVDoubleArray
     {
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pv.PVDoubleArray#share(org.epics.ioc.pv.PVDoubleArray)
+         */
+        public boolean share(double[] value, int length) {
+            return false;
+        }
+
         /* (non-Javadoc)
          * @see org.epics.ioc.pv.PVField#toString(int)
          */
@@ -1306,6 +1350,12 @@ public class ReplaceTest extends TestCase {
 
     private static class StringArray extends AbstractDBArray implements PVStringArray
     {
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pv.PVStringArray#share(org.epics.ioc.pv.PVStringArray)
+         */
+        public boolean share(String[] value, int length) {
+            return false;
+        }
         /* (non-Javadoc)
          * @see org.epics.ioc.pv.PVField#toString(int)
          */

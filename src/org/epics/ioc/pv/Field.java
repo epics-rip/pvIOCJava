@@ -22,25 +22,30 @@ public interface Field {
      */
     Type getType();
     /**
-     * Set the create name for this field.
-     * @param name The create name.
+     * Set the createName for this field.
+     * @param name The createName.
      */
     void setCreateName(String name);
     /**
-     * Get the create name for this field.
-     * @return The createname.
+     * Get the createName for this field.
+     * @return The createName or null if no createName.
      */
     String getCreateName();
     /**
-     * Set the support name for this field.
-     * @param name The name of the support.
+     * Set the supportName for this field.
+     * @param name The supportName.
      */
     void setSupportName(String name);
     /**
-     * Get the name of support for this field.
-     * @return The name of the support.
+     * Get the supportName for this field.
+     * @return The supportName or null if no supportName.
      */
     String getSupportName();
+    /**
+     * Get the attribute interface for the field.
+     * @return The FieldAttribute.
+     */
+    FieldAttribute getFieldAttribute();
     /**
      * Convert to a string
      * @return The field as a string
@@ -51,10 +56,5 @@ public interface Field {
      * @param indentLevel Indentation level
      * @return The field as a string
      */
-    String toString(int indentLevel);
-    /**
-     * Get the attribute interface for the field.
-     * @return The FieldAttribute.
-     */
-    FieldAttribute getFieldAttribute();
+    String toString(int indentLevel);   
 }

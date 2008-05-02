@@ -13,7 +13,6 @@ package org.epics.ioc.pv;
  */
 public class BaseField implements Field
 {
-    private boolean isMutable;
     private String fieldName;
     private Type type;
     private String supportName = null;
@@ -32,16 +31,13 @@ public class BaseField implements Field
         if(type==null) {
             throw new IllegalArgumentException("type is null");
         }
-        if(fieldAttribute==null) {
-            throw new IllegalArgumentException("fieldAttribute is null");
-        }
+        if(fieldAttribute==null) fieldAttribute = new BaseFieldAttribute();
         this.fieldName = fieldName;
         this.type = type;
         this.fieldAttribute = fieldAttribute;
-        isMutable = true;
     }   
     /* (non-Javadoc)
-     * @see org.epics.ioc.pv.Field#getName()
+     * @see org.epics.ioc.pv.Field#getFieldName()
      */
     public String getFieldName() {
         return(fieldName);
@@ -96,13 +92,13 @@ public class BaseField implements Field
     private String getString(int indentLevel) {
         StringBuilder builder = new StringBuilder();
         convert.newLine(builder,indentLevel);
-        builder.append(String.format("field %s type %s isMutable %b ",
-                fieldName,type.toString(),isMutable));
+        builder.append(String.format("field %s type %s",
+                fieldName,type.toString()));
         if(supportName!=null) {
-            builder.append("supportName " + supportName + " ");
+            builder.append(" supportName " + supportName + " ");
         }
         if(createName!=null) {
-            builder.append("createName " + createName + " ");
+            builder.append(" createName " + createName + " ");
         }
         builder.append(" " + fieldAttribute.toString(indentLevel));
         return builder.toString();

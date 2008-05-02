@@ -29,6 +29,12 @@ public class Int32ArrayInterposeBase extends AbstractArrayInterface implements I
         this.int32Array = arg;
     }
     /* (non-Javadoc)
+     * @see org.epics.ioc.pv.PVIntArray#share(org.epics.ioc.pv.PVIntArray)
+     */
+    public boolean share(int[] value, int length) {
+        return false;
+    }
+    /* (non-Javadoc)
      * @see org.epics.ioc.pdrv.interfaces.Int32Array#endRead(org.epics.ioc.pdrv.User)
      */
     public Status endRead(User user) {

@@ -36,7 +36,14 @@ public abstract class AbstractArrayInterface extends AbstractPVArray implements 
 		trace = device.getTrace();
 		device.registerInterface(this);
 	}
-	/**
+	/* (non-Javadoc)
+     * @see org.epics.ioc.pv.AbstractPVArray#setSharable(boolean)
+     */
+    @Override
+    public boolean setSharable(boolean isSharable) {
+        return false;
+    }
+    /**
      * Generate a trace message.
      * @param reason One of ERROR|SUPPORT|INTERPOSE|DRIVER|FLOW.
      * @param message The message to print

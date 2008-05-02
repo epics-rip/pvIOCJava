@@ -6,13 +6,11 @@
 package org.epics.ioc.pv;
 
 import java.util.Map;
-import java.util.Set;
-import java.util.TreeMap;
 
 
 /**
  * FieldFactory creates Field instances.
- * User code creates introspection objects via the FieldCreate,
+ * User code creates introspection objects via FieldCreate,
  * which is obtained via a call to <i>FieldFactory.getFieldCreate</i>.
  * This is a complete factory for the <i>PV</i> reflection.
  * Most <i>PV</i> database implementations should find this sufficient for
@@ -23,26 +21,17 @@ import java.util.TreeMap;
 
 
 public final class FieldFactory {   
-    private FieldFactory(){} // dont create
-    
+    private FieldFactory(){} // don't create
+    private static FieldCreateImpl fieldCreate = new FieldCreateImpl(); 
     /**
      * Get the FieldCreate interface.
      * @return The interface for creating introspection objects.
      */
     public static FieldCreate getFieldCreate() {
-        return FieldCreateImpl.getFieldCreate();
+        return fieldCreate;
     }
     
     private static final class FieldCreateImpl implements FieldCreate{
-        private static FieldCreateImpl singleImplementation = null;
-        private static synchronized FieldCreate getFieldCreate() {
-                if (singleImplementation==null) {
-                    singleImplementation = new FieldCreateImpl();
-                }
-                return singleImplementation;
-        }
-        // Guarantee that ImplementConvert can only be created via getFieldCreate
-        private FieldCreateImpl() {}
         /* (non-Javadoc)
          * @see org.epics.ioc.pv.FieldCreate#getElementType(java.util.Map)
          */
@@ -107,7 +96,7 @@ public final class FieldFactory {
          * @see org.epics.ioc.pv.FieldCreate#createFieldAttribute()
          */
         public FieldAttribute createFieldAttribute() {
-            return new FieldAttributeImpl();
+            return new BaseFieldAttribute();
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.pv.FieldCreate#createStructureField(java.lang.String, java.lang.String, org.epics.ioc.pv.Field[], org.epics.ioc.pv.Property[], org.epics.ioc.pv.FieldAttribute)
@@ -125,57 +114,5 @@ public final class FieldFactory {
             return createStructure(fieldName,structureName,field,null);
         }
                 
-        private static class FieldAttributeImpl implements FieldAttribute {
-            private TreeMap<String,String> attributeMap = new TreeMap<String,String>();
-            private FieldAttributeImpl(){}
-
-            /* (non-Javadoc)
-             * @see org.epics.ioc.pv.FieldAttribute#getAttribute(java.lang.String)
-             */
-            public synchronized String getAttribute(String key) {
-                return attributeMap.get(key);
-            }
-
-            /* (non-Javadoc)
-             * @see org.epics.ioc.pv.FieldAttribute#getAttributes()
-             */
-            public synchronized Map<String, String> getAttributes() {
-                return attributeMap;
-            }
-
-            /* (non-Javadoc)
-             * @see org.epics.ioc.pv.FieldAttribute#setAttribute(java.lang.String, java.lang.String)
-             */
-            public synchronized String setAttribute(String key, String value) {
-                return attributeMap.put(key, value);
-            }
-
-            /* (non-Javadoc)
-             * @see org.epics.ioc.pv.FieldAttribute#setAttributes(java.util.Map, java.lang.String[])
-             */
-            public synchronized void setAttributes(Map<String, String> attributes, String[] exclude) {
-                Set<String> keys;
-                keys = attributes.keySet();
-                outer:
-                for(String key: keys) {
-                     for(String excludeKey: exclude) {
-                         if(excludeKey.equals(key)) continue outer;
-                     }
-                    attributeMap.put(key,attributes.get(key));
-                }
-            }
-
-            /* (non-Javadoc)
-             * @see org.epics.ioc.pv.FieldAttribute#toString(int)
-             */
-            public synchronized String toString(int indentLevel) {
-                String result = "";
-                Set<String> keys = attributeMap.keySet();
-                for(String key : keys) {
-                    result += " " + key + "=" + attributeMap.get(key);
-                }
-                return result;
-            }
-        }
     }
 }

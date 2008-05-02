@@ -8,42 +8,57 @@ package org.epics.ioc.pv;
 import org.epics.ioc.util.MessageType;
 
 /**
- * Base class for a PVStructure.
+ * Base class for implementing PVLongArray.
  * @author mrk
  *
  */
-public class BasePVArrayArray extends AbstractPVArray implements PVArrayArray
+public class BasePVLongArray extends AbstractPVArray implements PVLongArray
 {
-    protected PVArray[] value;
+    protected long[] value;   
+    protected LongArrayData longArrayData = new LongArrayData();
     
     /**
-     * Constructor
-     * @param parent The parent
-     * @param array The Array interface.
+     * Constructor.
+     * @param parent The parent.
+     * @param array The Introspection interface.
      * @param capacity The initial capacity.
-     * @param capacityMutable Is the capacity mutable.
+     * @param capacityMutable Can the capacity be changed?
+     * @param defaultValue The default value.
      */
-    public BasePVArrayArray(PVField parent,Array array,
-        int capacity,boolean capacityMutable)
+    public BasePVLongArray(PVField parent,Array array,
+        int capacity,boolean capacityMutable,String defaultValue)
     {
         super(parent,array,capacity,capacityMutable);
-        value = new PVArray[capacity];
+        value = new long[capacity];
+        if(defaultValue!=null && defaultValue.length()>0) {
+            String[] values = commaSpacePattern.split(defaultValue);
+            try {
+                convert.fromStringArray(this,0,values.length,values,0);
+            } catch (NumberFormatException e) {
+            }
+        }
     }
     /* (non-Javadoc)
-     * @see org.epics.ioc.pv.AbstractPVField#getSubField(java.lang.String)
+     * @see org.epics.ioc.pv.PVLongArray#share(long[], int)
      */
-    @Override
-    public PVField getSubField(String fieldName) {
-        for(PVArray pvArray : value) {
-            if(pvArray.getField().getFieldName().equals(fieldName)) return pvArray;
+    public boolean share(long[] value, int length) {
+        if(!super.isSharable()) return false;
+        if(value==null) return false;
+        super.asynAccessCallListener(true);
+        try {
+            this.value = value;
+            super.capacity = value.length;
+            super.length = length;
+            return true;
+        } finally {
+            super.asynAccessCallListener(false);
         }
-        return null;
     }
     /* (non-Javadoc)
      * @see org.epics.ioc.pv.AbstractPVField#toString(int)
      */
     public String toString(int indentLevel) {
-        return getString(indentLevel)
+        return convert.getString(this, indentLevel)
         + super.toString(indentLevel);
     }
     /* (non-Javadoc)
@@ -57,18 +72,18 @@ public class BasePVArrayArray extends AbstractPVArray implements PVArrayArray
         super.asynAccessCallListener(true);
         try {
             if(length>len) length = len;
-            PVArray[]newarray = new PVArray[len];
+            long[]newarray = new long[len];
             if(length>0) System.arraycopy(value,0,newarray,0,length);
             value = newarray;
             capacity = len;
         } finally {
             super.asynAccessCallListener(false);
         }
-    }
+    }      
     /* (non-Javadoc)
-     * @see org.epics.ioc.pv.PVArrayArray#get(int, int, org.epics.ioc.pv.ArrayArrayData)
+     * @see org.epics.ioc.pv.PVLongArray#get(int, int, org.epics.ioc.pv.LongArrayData)
      */
-    public int get(int offset, int len, ArrayArrayData data) {
+    public int get(int offset, int len, LongArrayData data) {
         super.asynAccessCallListener(true);
         try {
             int n = len;
@@ -77,13 +92,12 @@ public class BasePVArrayArray extends AbstractPVArray implements PVArrayArray
             data.offset = offset;
             return n;
         } finally {
-            super.asynAccessCallListener(false);
-        }
+            super.asynAccessCallListener(false);}
     }
     /* (non-Javadoc)
-     * @see org.epics.ioc.pv.PVArrayArray#put(int, int, org.epics.ioc.pv.PVArray[], int)
+     * @see org.epics.ioc.pv.PVLongArray#put(int, int, long[], int)
      */
-    public int put(int offset, int len, PVArray[]from, int fromOffset) {
+    public int put(int offset, int len, long[]from, int fromOffset) {
         if(!super.isMutable()) {
             super.message("not isMutable", MessageType.error);
             return 0;
@@ -104,24 +118,6 @@ public class BasePVArrayArray extends AbstractPVArray implements PVArrayArray
             return len;
         } finally {
             super.asynAccessCallListener(false);
-        }
-    }
-    
-    private String getString(int indentLevel) {
-        StringBuilder builder = new StringBuilder();
-        convert.newLine(builder,indentLevel);
-        builder.append("{");
-        for(int i=0; i < length; i++) {
-            convert.newLine(builder,indentLevel + 1);
-            builder.append("[" + i + "] = ");
-            if(value[i]==null) {
-                builder.append("{}");
-            } else {
-                builder.append(value[i].toString(indentLevel+2));
-            }
-        }
-        convert.newLine(builder,indentLevel);
-        builder.append("}");
-        return builder.toString();
+        }            
     }
 }

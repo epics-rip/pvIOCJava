@@ -66,6 +66,12 @@ public abstract class AbstractFloat64Array extends AbstractArrayInterface implem
         super(parent,array,capacity,capacityMutable,device,"float64Array");
     }
     /* (non-Javadoc)
+     * @see org.epics.ioc.pv.PVDoubleArray#share(org.epics.ioc.pv.PVDoubleArray)
+     */
+    public boolean share(double[] value, int length) {
+        return false;
+    }
+    /* (non-Javadoc)
      * @see org.epics.ioc.pdrv.interfaces.Float64Array#endRead(org.epics.ioc.pdrv.User)
      */
     public Status endRead(User user) {

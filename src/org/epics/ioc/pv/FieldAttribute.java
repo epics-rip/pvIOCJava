@@ -20,7 +20,7 @@ public interface FieldAttribute {
      */
     void setAttributes(Map<String,String> attributes,String[] exclude);
     /**
-     * At a single attribute to the map.
+     * Add a single attribute to the map of attributes.
      * @param key The key.
      * @param value The value.
      * @return The previous value for the key or null if none existed.
@@ -32,7 +32,7 @@ public interface FieldAttribute {
      */
     Map<String,String> getAttributes();
     /**
-     * Get a single atttribute value.
+     * Get a single attribute value.
      * @param key The key.
      * @return The value or null of the key does not exist.
      */

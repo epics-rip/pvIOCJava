@@ -10,12 +10,12 @@
 <body>
 <h1 style="text-align: center">EPICS JavaIOC: pv<br />
 package: org.epics.ioc.pv<br />
-2008.03.04</h1>
+2008.05.02</h1>
 CONTENTS 
 
 <div class="toc">
 <ul>
-  <li><a href="#Overview">Overview</a> 
+  <li><a href="#Overview">Overview</a>
     <ul>
       <li><a href="#Process">Process Variable</a></li>
       <li><a href="#Process1">Process Variable Data Types</a></li>
@@ -24,7 +24,7 @@ CONTENTS
   </li>
   <li><a href="#Type">Type</a></li>
   <li><a href="#Reflection">Reflection</a></li>
-  <li><a href="#PVField">PVField Interfaces</a> 
+  <li><a href="#PVField">PVField Interfaces</a>
     <ul>
       <li><a href="#AsynAccess">AsynAccessListener</a></li>
       <li><a href="#PVField1">PVField</a></li>
@@ -33,24 +33,41 @@ CONTENTS
       <li><a href="#PVStructur">PVStructure</a></li>
       <li><a href="#PVEnumerat">PVEnumerated</a></li>
       <li><a href="#PVRecord">PVRecord</a></li>
-      <li><a href="#PVArray">PVArray</a></li>
+      <li><a href="#PVArray">PVArray</a>
+        <ul>
+          <li><a href="#Array">PV Array Base</a></li>
+          <li><a href="#Array1">PV Array Data</a></li>
+        </ul>
+      </li>
     </ul>
   </li>
-  <li><a href="#Field">Field and PVField creation</a> 
+  <li><a href="#Field">Field and PVField creation</a>
     <ul>
       <li><a href="#FieldCreat">FieldCreate</a></li>
       <li><a href="#PVDataCrea">PVDataCreate</a></li>
     </ul>
   </li>
   <li><a href="#Base">Base Introspection Classes</a></li>
-  <li><a href="#Abstract">Abstract and Base Classes for PVField</a> 
+  <li><a href="#Abstract">Abstract and Base Classes for PVField</a>
     <ul>
       <li><a href="#AbstractPV">AbstractPVField</a></li>
-      <li><a href="#AbstractPV1">AbstractPVArray</a></li>
       <li><a href="#BasePVStru">BasePVStructure</a></li>
-      <li><a href="#BasePVStru1">BasePVStructureArray</a></li>
-      <li><a href="#BasePVArra">BasePVArrayArray</a></li>
       <li><a href="#BasePVReco">BasePVRecord</a></li>
+      <li><a href="#Abstract1">Abstract Base Class for PV Arrays.</a></li>
+      <li><a href="#Base1">Base classes for PV Arrays.</a>
+        <ul>
+          <li><a href="#BasePVBool">BasePVBooleanArray</a></li>
+          <li><a href="#BasePVByte">BasePVByteArray</a></li>
+          <li><a href="#BasePVShor">BasePVShortArray</a></li>
+          <li><a href="#BasePVIntA">BasePVIntArray</a></li>
+          <li><a href="#BasePVLong">BasePVLongArray</a></li>
+          <li><a href="#BasePVFloa">BasePVFloatArray</a></li>
+          <li><a href="#BasePVDoub">BasePVDoubleArray</a></li>
+          <li><a href="#BasePVStri">BasePVStringArray</a></li>
+          <li><a href="#BasePVStru1">BasePVStructureArray</a></li>
+          <li><a href="#BasePVArra">BasePVArrayArray</a></li>
+        </ul>
+      </li>
     </ul>
   </li>
   <li><a href="#Convert">Convert</a></li>
@@ -148,10 +165,10 @@ TINI, DOOCS, etc.</p>
 <dl>
   <dt>primitive</dt>
     <dd><dl>
-        <dt>byte</dt>
-          <dd>An 8 bit signed byte</dd>
         <dt>boolean</dt>
           <dd>true or false</dd>
+        <dt>byte</dt>
+          <dd>An 8 bit signed byte</dd>
         <dt>short</dt>
           <dd>16 bit signed integer</dd>
         <dt>int</dt>
@@ -219,7 +236,6 @@ separation is especially important for arrays and structures.</p>
         String toString();
         String toString(int indentLevel);
     }
-
 
     interface Field{
         String getFieldName();
@@ -436,9 +452,7 @@ where
     Get the name of the support for this PV.</li>
   <li>setSupportName<br />
     Set the name of the support for this field. The supportName methods are
-    available so that support can be changed remotely. For an IOC database
-    only PVLink fields allow the support to be modified after record
-    initialization.</li>
+    available so that support can be changed remotely.</li>
   <li>getCreateName<br />
     Get the name of the create for this PV.</li>
   <li>setCreateName<br />
@@ -572,9 +586,9 @@ where
 <h3 id="PVEnumerat">PVEnumerated</h3>
 
 <p>This is a convenience interface for a structure that happens to be an
-enumerated structure, which is a stricture that has fields index, choice, and
-choices. Field index is an integer, choice is a string, and choices is an
-array of strings. Both index and choice select one of the choices.</p>
+enumerated structure, which is a structure that has fields index, choice, and
+choices. Index is an integer, choice is a string, and choices is an array of
+strings. Both index and choice select one of the choices.</p>
 <pre>    public interface PVEnumerated {
         PVInt getIndexField();
         PVString getChoiceField();
@@ -610,7 +624,7 @@ array of strings. Both index and choice select one of the choices.</p>
   <dt>getRecordName</dt>
     <dd>Returns the record name.</dd>
   <dt>message</dt>
-    <dd>This will be called any code that has access to the record instance.
+    <dd>This can be called any code that has access to the record instance.
       The implementation should prepend the record name to the message and
       then call a more generic message handler. For example package
       org.epics.ioc.db calls iocdb.message.</dd>
@@ -631,6 +645,8 @@ array of strings. Both index and choice select one of the choices.</p>
         void setCapacity(int len);
         boolean isCapacityMutable();
         void setCapacityMutable(boolean isMutable);
+        boolean isSharable();
+        boolean setSharable(boolean isSharable);
     }
 
     public class BooleanArrayData {
@@ -640,6 +656,7 @@ array of strings. Both index and choice select one of the choices.</p>
     interface PVBooleanArray extends PVArray {
         int get(int offset, int len, BooleanArrayData data);
         int put(int offset, int len, boolean[]from, int fromOffset);
+        boolean share(boolean[] value, int length);
     }
 
     public class ByteArrayData {
@@ -649,6 +666,7 @@ array of strings. Both index and choice select one of the choices.</p>
     interface PVByteArray extends PVArray {
         int get(int offset, int len, ByteArrayData data);
         int put(int offset, int len, byte[]from, int fromOffset);
+        boolean share(byte[] value, int length);
     }
 
     public class ShortArrayData {
@@ -658,6 +676,7 @@ array of strings. Both index and choice select one of the choices.</p>
     interface PVShortArray extends PVArray {
         int get(int offset, int len, ShortArrayData data);
         int put(int offset, int len, short[]from, int fromOffset);
+        boolean share(short[] value, int length);
     }
 
     public class IntArrayData {
@@ -667,6 +686,7 @@ array of strings. Both index and choice select one of the choices.</p>
     interface PVIntArray extends PVArray {
         int get(int offset, int len, IntArrayData data);
         int put(int offset, int len, int[]from, int fromOffset);
+        boolean share(int[] value, int length);
     }
 
     public class LongArrayData {
@@ -676,6 +696,7 @@ array of strings. Both index and choice select one of the choices.</p>
     interface PVLongArray extends PVArray {
         int get(int offset, int len, LongArrayData data);
         int put(int offset, int len, long[]from, int fromOffset);
+        boolean share(long[] value, int length);
     }
 
     public class FloatArrayData {
@@ -685,6 +706,7 @@ array of strings. Both index and choice select one of the choices.</p>
     interface PVFloatArray extends PVArray {
         int get(int offset, int len, FloatArrayData data);
         int put(int offset, int len, float[]from, int fromOffset);
+        boolean share(float[] value, int length);
     }
 
     public class DoubleArrayData {
@@ -694,6 +716,7 @@ array of strings. Both index and choice select one of the choices.</p>
     interface PVDoubleArray extends PVArray {
         int get(int offset, int len, DoubleArrayData data);
         int put(int offset, int len, double[]from, int fromOffset);
+        boolean share(double[] value, int length);
     }
 
     public class StringArrayData {
@@ -703,6 +726,7 @@ array of strings. Both index and choice select one of the choices.</p>
     interface PVStringArray extends PVArray {
         int get(int offset, int len, StringArrayData data);
         int put(int offset, int len, String[]from, int fromOffset);
+        boolean share(String[] value, int length);
     }
 
     public class ArrayArrayData {
@@ -723,7 +747,45 @@ array of strings. Both index and choice select one of the choices.</p>
         int put(int offset, int len, PVStructure[]from, int fromOffset);
     }</pre>
 
-<p>The interface for each array type has the same form except for the type.
+<h4 id="Array">PV Array Base</h4>
+
+<p><span style="font-family: courier">PVArray</span> is the base interface
+for all the other PV Array interfaces. It extends PVField and provides tyhe
+additional methods:</p>
+<dl>
+  <dt><span style="font-family: courier">getArray</span></dt>
+    <dd>Return the introspection interface for the array.</dd>
+  <dt><span style="font-family: courier">getLength</span></dt>
+    <dd>Get the current length. This is less that or equal to the
+    capacity.</dd>
+  <dt><span style="font-family: courier">setLength</span></dt>
+    <dd>Set the length. If the PVField is not mutable then an exception is
+      thrown. If this is greater than the capacity setCapacity is called.</dd>
+  <dt><span style="font-family: courier">getCapacity</span></dt>
+    <dd>Get the capacity, i.e. this is the sized of the underlying data
+    array.</dd>
+  <dt><span style="font-family: courier">setCapacity</span></dt>
+    <dd>Set the capacity. The semantics are implementation dependent but
+      typical semantics are as follows: If the capacity is not mutable an
+      exception is thrown. A new data array is created and data is copied
+      from the old array to the new array. </dd>
+  <dt><span style="font-family: courier">setCapacityMutable</span></dt>
+    <dd>Specify if the capacity can be changed.</dd>
+  <dt><span style="font-family: courier">isSharable</span></dt>
+    <dd>Can this object share the underlying data array via a call to the
+      share method? This method only applys to scalar array, i.e.
+      PVBooleanArray, ..., PVStringArray. The default is normally false.</dd>
+  <dt><span style="font-family: courier">setSharable</span></dt>
+    <dd>Specify if this object can share the underlying data array. Some
+      implementations may not allow sharing. (false,true) is returned (if
+      not, if) the sharable state was changed.</dd>
+</dl>
+
+<h4 id="Array1">PV Array Data</h4>
+
+<p>The interface for each array type has get and put methods which have the
+same arguments except for the data type. In addition the scalar types have a
+share method (PCArrayArray and PVStructureArray do not have a share method).
 For example PVDoubleArray is:</p>
 <pre>    public class DoubleArrayData {
         public double[] data;
@@ -732,6 +794,7 @@ For example PVDoubleArray is:</p>
     interface PVDoubleArray extends PVArray {
         int get(int offset, int len, DoubleArrayData data);
         int put(int offset, int len, double[]from, int fromOffset);
+        boolean share(double[] value, int length);
     }</pre>
 
 <p>Get "exposes" it's internal array by setting data.data and data.offset.
@@ -775,6 +838,13 @@ the following reads an entire array:</p>
         }
         return storage;
     } </pre>
+
+<p>Share gives a shared data array to an object. Again this violates the
+principle that an object should not expose it's internal data. This is done
+so that applications can share arrays between multiple objects. It is the
+applications responsibility to manage shared access to the data array by
+multiple threads. Share returns (true,false) if the value array was accepted
+to be shared. </p>
 <hr />
 
 <h2 style="text-align: center" id="Field">Field and PVField creation</h2>
@@ -886,10 +956,20 @@ where
 <h2 style="text-align: center" id="Base">Base Introspection Classes</h2>
 <hr />
 
-<p>This section describes base classes for implementimg Field objects , i.e.
+<p>This section describes base classes for implementing Field objects , i.e.
 introspection objects. For many applications they provide a complete
 introspection implementation but they could be extended if necessary.</p>
-<pre>    public class BaseField implements Field {
+<pre>    
+    public class BaseFieldAttribute implements FieldAttribute {
+        public  BaseFieldAttribute();
+        public void setAttributes(Map&lt;String,String&gt; attributes,String[] exclude);
+        String setAttribute(String key,String value);
+        Map&lt;String,String&gt; getAttributes();
+        String getAttribute(String key);
+        String toString();
+        String toString(int indentLevel).
+
+    public class BaseField implements Field {
         public BaseField(String fieldName, Type type,FieldAttribute fieldAttribute);
         public String getFieldName();
         public FieldAttribute getFieldAttribute();
@@ -902,8 +982,8 @@ introspection implementation but they could be extended if necessary.</p>
         public String toString(int indentLevel);
     }
     
-    public class BaseStructure.java extends BaseField implements Structure {
-        public BaseStructure.java(String fieldName,String structureName,Field[] field,
+    public class BaseStructure extends BaseField implements Structure {
+        public BaseStructure(String fieldName,String structureName,Field[] field,
              FieldAttribute fieldAttribute);
         public Field getField(String name);
         public int getFieldIndex(String name);
@@ -939,6 +1019,11 @@ interfaces:</p>
     protected AbstractPVField(PVField parent, Field field);
     protected void replaceField(Field field);
     protected void setRecord(PVRecord record);
+
+    protected static Convert convert = ConvertFactory.getConvert();
+    protected static Pattern commaSpacePattern = Pattern.compile("[, ]");
+    protected static  Pattern periodPattern = Pattern.compile("[.]");
+
     public String getRequesterName();
     public void message(String message, MessageType messageType);
     public boolean isMutable();
@@ -972,7 +1057,17 @@ interfaces:</p>
     <dd>This is called by a derived PVStructure implementation when it wants
       to change the introspection interface for one of it's fields. This is
       necessary because an IOC database allows the definition of a structure
-      field to be defined during record initialization.</dd>
+      field to be defined during record initialization and also modified
+      after initialization..</dd>
+  <dt>convert</dt>
+    <dd>A convenience for derived classes since implementations often need
+      access to the conversion facility.</dd>
+  <dt>commaSpacePattern</dt>
+    <dd>A convenience for derived classes that use a comma or space to
+      separate tokens.</dd>
+  <dt>periodPattern</dt>
+    <dd>A convenience for derived classes that use a period to separate
+      tokens.</dd>
   <dt>setRecord</dt>
     <dd>This is called a derived PVStructure implementation to specify the
       record containing the field.</dd>
@@ -980,27 +1075,10 @@ interfaces:</p>
   asynAccessCallListener,...,isAsynAccessActive</dt>
     <dd>The implementation should be sufficient for all derived classes.</dd>
   <dt>getSupportName and setSupportName</dt>
-    <dd>With the exception of PVLink the implementation should be sufficient
-      for all derived classes.</dd>
+    <dd>The implementation should be sufficient for all derived classes.</dd>
   <dt>toString</dt>
     <dd>Should be called by derived classes to add the supportName.</dd>
 </dl>
-
-<h3 id="AbstractPV1">AbstractPVArray</h3>
-
-<p>The following is a abstract class for creating array fields.</p>
-<pre>public abstract class AbstractPVArray extends AbstractPVField implements PVArray{
-    protected AbstractPVArray(PVField parent,Array array,
-        int capacity,boolean capacityMutable);
-    public Array getArray();
-    public int getLength();
-    public void setLength(int len);
-    public int getCapacity();
-    abstract public void setCapacity(int capacity);
-    public boolean isCapacityMutable();
-    public void setCapacityMutable(boolean isMutable);
-    public String toString();
-}</pre>
 
 <h3 id="BasePVStru">BasePVStructure</h3>
 <pre>public class BasePVStructure extends AbstractPVField implements PVStructure
@@ -1025,21 +1103,114 @@ interfaces:</p>
     protected String toString(String prefix,int indentLevel);
 }</pre>
 
-<h3 id="BasePVStru1">BasePVStructureArray</h3>
-<pre>public class BasePVStructureArray extends AbstractPVArray implements PVStructureArray{}</pre>
-
-<h3 id="BasePVArra">BasePVArrayArray</h3>
-public class BasePVArrayArray extends AbstractPVArray implements
-PVArrayArray{} 
-<pre></pre>
-
 <h3 id="BasePVReco">BasePVRecord</h3>
-<pre>    public BasePVRecord(String recordName,Structure structure)
+<pre>public class BasePVRecord extends BasePVStructure implements PVRecord {    
+    public BasePVRecord(String recordName,Structure structure)
     public void message(String message, MessageType messageType);
     public String getRecordName();
     public String toString(int indentLevel);
     void addRequester(Requester requester);
     void removeRequester(Requester requester);
+}</pre>
+
+<h3 id="Abstract1">Abstract Base Class for PV Arrays.</h3>
+
+<p>The following is a abstract class for creating array fields.</p>
+<pre>public abstract class AbstractPVArray extends AbstractPVField implements PVArray{
+    protected int length = 0;
+    protected int capacity;
+    protected boolean capacityMutable = true;
+    protected boolean isShareable = false;
+    protected AbstractPVArray(PVField parent,Array array,
+        int capacity,boolean capacityMutable);
+    public Array getArray();
+    public int getLength();
+    public void setLength(int len);
+    public int getCapacity();
+    abstract public void setCapacity(int capacity);
+    public boolean isCapacityMutable();
+    public void setCapacityMutable(boolean isMutable);
+    public String toString();
+}</pre>
+
+<h3 id="Base1">Base classes for PV Arrays.</h3>
+
+<h4 id="BasePVBool">BasePVBooleanArray</h4>
+<pre>public class BasePVBooleanArray extends AbstractPVArray implements PVBooleanArray
+{
+    protected boolean[] value;
+    protected BooleanArrayData booleanArrayData = new BooleanArrayData();
+    // implements all PVBooleanArray methods
+}</pre>
+
+<h4 id="BasePVByte">BasePVByteArray</h4>
+<pre>public class BasePVByteArray extends AbstractPVArray implements PVByteArray
+{
+    protected byte[] value;
+    protected ByteArrayData byteArrayData = new ByteArrayData();
+    // implements all PVByteArray methods
+}</pre>
+
+<h4 id="BasePVShor">BasePVShortArray</h4>
+<pre>public class BasePVShortArray extends AbstractPVArray implements PVShortArray
+{
+    protected short[] value;
+    protected ShortArrayData shortArrayData = new ShortArrayData();
+    // implements all PVShortArray methods
+}</pre>
+
+<h4 id="BasePVIntA">BasePVIntArray</h4>
+<pre>public class BasePVIntArray extends AbstractPVArray implements PVIntArray
+{
+    protected int[] value;
+    protected IntArrayData intArrayData = new IntArrayData();
+    // implements all PVIntArray methods
+}</pre>
+
+<h4 id="BasePVLong">BasePVLongArray</h4>
+<pre>public class BasePVLongArray extends AbstractPVArray implements PVLongArray
+{
+    protected long[] value;
+    protected LongArrayData longArrayData = new LongArrayData();
+    // implements all PVLongArray methods
+}</pre>
+
+<h4 id="BasePVFloa">BasePVFloatArray</h4>
+<pre>public class BasePVFloatArray extends AbstractPVArray implements PVFloatArray
+{
+    protected float[] value;
+    protected FloatArrayData floatArrayData = new FloatArrayData();
+    // implements all PVFloatArray methods
+}</pre>
+
+<h4 id="BasePVDoub">BasePVDoubleArray</h4>
+<pre>public class BasePVDoubleArray extends AbstractPVArray implements PVDoubleArray
+{
+    protected double[] value;
+    protected DoubleArrayData doubleArrayData = new DoubleArrayData();
+    // implements all PVDoubleArray methods
+}</pre>
+
+<h4 id="BasePVStri">BasePVStringArray</h4>
+<pre>public class BasePVStringArray extends AbstractPVArray implements PVStringArray
+{
+    protected String[] value;
+    protected StringArrayData stringArrayData = new StringArrayData();
+    // implements all PVStringArray methods
+}</pre>
+
+<h4 id="BasePVStru1">BasePVStructureArray</h4>
+<pre>public class BasePVStructureArray extends AbstractPVArray implements PVStructureArray
+{
+    protected PVStructure[] value;
+    // implements all PVStructureArray methods
+}</pre>
+
+<h4 id="BasePVArra">BasePVArrayArray</h4>
+<pre>public class BasePVArrayArray extends AbstractPVArray implements PVArrayArray
+{
+    protected PVArray[] value;
+    // implements all PVArrayArray methods
 }</pre>
 <hr />
 

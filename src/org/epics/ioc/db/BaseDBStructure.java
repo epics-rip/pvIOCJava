@@ -5,15 +5,8 @@
  */
 package org.epics.ioc.db;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
 import java.util.Iterator;
 
-import org.epics.ioc.create.Create;
-import org.epics.ioc.dbd.DBD;
-import org.epics.ioc.dbd.DBDCreate;
-import org.epics.ioc.dbd.DBDFactory;
 import org.epics.ioc.pv.Array;
 import org.epics.ioc.pv.Field;
 import org.epics.ioc.pv.PVArray;
@@ -167,59 +160,4 @@ public class BaseDBStructure extends BaseDBField implements DBStructure
             dbFields[i] = dbField;
         }
     }
-    
-    private String callCreate(DBField dbField) {
-        PVField pvField = dbField.getPVField();
-        String createName = pvField.getCreateName();
-        if(createName==null) {
-            Field field = pvField.getField();
-            createName = field.getCreateName();
-        }
-        if(createName==null) return null;
-        DBD dbd = super.getDBRecord().getDBD();
-        if(dbd==null) dbd = DBDFactory.getMasterDBD();
-        DBDCreate dbdCreate = dbd.getCreate(createName);
-        if(dbdCreate==null) {
-            return "create " + createName + " not found";
-        }
-        String factoryName = dbdCreate.getFactoryName();
-        Class supportClass;
-        Method method = null;
-        Create create = null;
-        try {
-            supportClass = Class.forName(factoryName);
-        }catch (ClassNotFoundException e) {
-            return "factory " + factoryName 
-            + " " + e.getLocalizedMessage();
-        }
-        try {
-            method = supportClass.getDeclaredMethod("create",
-                    Class.forName("org.epics.ioc.db.DBField"));
-            
-        } catch (NoSuchMethodException e) {
-
-        } catch (ClassNotFoundException e) {
-            return "factory " + factoryName 
-            + " " + e.getLocalizedMessage();
-        }
-        if(!Modifier.isStatic(method.getModifiers())) {
-            return "factory " + factoryName 
-            + " create is not a static method ";
-        }
-        try {
-            create = (Create)method.invoke(null,dbField);
-            if(create!=null) super.setCreate(create);
-            return null;
-        } catch(IllegalAccessException e) {
-            return "factory " + factoryName 
-            + " " + e.getLocalizedMessage();
-        } catch(IllegalArgumentException e) {
-            return "factory " + factoryName 
-            + " " + e.getLocalizedMessage();
-        } catch(InvocationTargetException e) {
-            return "factory " + factoryName 
-            + " " + e.getLocalizedMessage();
-        }
-    }
-    
 }

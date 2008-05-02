@@ -25,7 +25,10 @@ public abstract class AbstractPVField implements PVField{
     private String supportName = null;
     private String createName = null;
     private PVEnumerated pvEnumerated = null;
-    static private Pattern periodPattern = Pattern.compile("[.]");
+    
+    protected static Convert convert = ConvertFactory.getConvert();
+    protected static Pattern commaSpacePattern = Pattern.compile("[, ]");
+    protected static  Pattern periodPattern = Pattern.compile("[.]");
 
     
     private AsynAccessListener asynAccessListener = null;

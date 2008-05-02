@@ -283,7 +283,6 @@ implements V3Channel,ConnectionListener,Runnable,V3ChannelRecordRequester {
             }
             iocExecutor.execute(this);
         } else {
-            if(!super.isConnected()) return;
             super.message("connection lost", MessageType.warning);
         }
     }

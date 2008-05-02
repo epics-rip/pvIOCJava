@@ -1,4 +1,8 @@
-
+/**
+ * Copyright - See the COPYRIGHT that is included with this distribution.
+ * EPICS JavaIOC is distributed subject to a Software License Agreement found
+ * in file LICENSE that is included with this distribution.
+ */
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
@@ -25,28 +29,22 @@ import org.epics.ioc.swtshell.SwtshellFactory;
 import org.epics.ioc.util.MessageType;
 import org.epics.ioc.util.Requester;
 
-
-
 /**
  * read and dump a Database Definition and Record Instance Files.
  * @author mrk
  *
  */
-enum State {
-    dbdFile,
-    dbFile,
-    servers
-}
+
 public class XMLToDatabase {
+    private enum State {
+        dbdFile,
+        dbFile,
+        servers
+    }
 
     /**
      * read and dump a database instance file.
      * @param  args is a sequence of flags and filenames.
-     * - dbd  Following fileNames are database definition files
-     * - db Following fileNames are record instance files.
-     * - dumpDBD Dump all database definitions given so far
-     * - dumpDB Dump all record instances given so far.
-     * - startIOC Start the IOC by locating create and support and starting support
      */
     public static void main(String[] args) {
         if(args.length==1 && args[0].equals("?")) {
@@ -245,12 +243,11 @@ public class XMLToDatabase {
     
     private static class Listener implements Requester {
         /* (non-Javadoc)
-         * @see org.epics.ioc.util.Requester#getRequestorName()
+         * @see org.epics.ioc.util.Requester#getRequesterName()
          */
         public String getRequesterName() {
             return "XMLTODatabase";
         }
-
         /* (non-Javadoc)
          * @see org.epics.ioc.util.Requester#message(java.lang.String, org.epics.ioc.util.MessageType)
          */

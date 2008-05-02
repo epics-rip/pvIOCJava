@@ -50,4 +50,16 @@ public interface PVArray extends PVField{
      * @param isMutable New value for capacityMutable.
      */
     void setCapacityMutable(boolean isMutable);
+    /**
+     * Can this PV share the array of values with another PV.
+     * @return (false,true) if it (can not, can) share the array of values.
+     */
+    boolean isSharable();
+    /**
+     * Set the sharable state.
+     * @param isSharable
+     * @return (false,true) if the sharable status was changed.
+     * If an attempt to make a PV sharable will return false if the PV does not allow sharing.
+     */
+    boolean setSharable(boolean isSharable);
 }

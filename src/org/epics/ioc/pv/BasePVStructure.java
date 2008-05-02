@@ -5,10 +5,7 @@
  */
 package org.epics.ioc.pv;
 
-import java.util.regex.Pattern;
-
 import org.epics.ioc.util.MessageType;
-
 /**
  * Base class for a PVStructure.
  * @author mrk
@@ -16,7 +13,6 @@ import org.epics.ioc.util.MessageType;
  */
 public class BasePVStructure extends AbstractPVField implements PVStructure
 {
-    static private Pattern periodPattern = Pattern.compile("[.]");
     private static Convert convert = ConvertFactory.getConvert();
     private static PVDataCreate pvDataCreate = PVDataFactory.getPVDataCreate();
     private static FieldCreate fieldCreate = FieldFactory.getFieldCreate();

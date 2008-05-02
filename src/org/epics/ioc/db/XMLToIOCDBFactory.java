@@ -120,7 +120,7 @@ public class XMLToIOCDBFactory {
     {
         private enum State {
             idle,
-            record,
+            record
         } 
         private State state = State.idle;
         private RecordHandler  recordHandler = null;

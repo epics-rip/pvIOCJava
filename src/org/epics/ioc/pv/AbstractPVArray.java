@@ -15,9 +15,10 @@ public abstract class AbstractPVArray extends AbstractPVField implements PVArray
     protected int length = 0;
     protected int capacity;
     protected boolean capacityMutable = true;
+    protected boolean isShareable = false;
     
     /**
-     * Constructer that derived classes must call.
+     * Constructor that derived classes must call.
      * @param parent The parent interface.
      * @param array The reflection interface for the PVArray data.
      * @param capacity The default capacity.
@@ -72,6 +73,20 @@ public abstract class AbstractPVArray extends AbstractPVField implements PVArray
         length = len;
     }
 
+    /* (non-Javadoc)
+     * @see org.epics.ioc.pv.PVArray#isShareable()
+     */
+    public boolean isSharable() {
+        return isShareable;
+    }
+    /* (non-Javadoc)
+     * @see org.epics.ioc.pv.PVArray#setSharable(boolean)
+     */
+    public boolean setSharable(boolean isSharable) {
+        if(isSharable==this.isShareable) return false;
+        this.isShareable = isSharable;
+        return true;
+    }
     /* (non-Javadoc)
      * @see java.lang.Object#toString()
      */

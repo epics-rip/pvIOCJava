@@ -8,8 +8,10 @@ package org.epics.ioc.caV3;
 import gov.aps.jca.CAException;
 import gov.aps.jca.Channel;
 import gov.aps.jca.dbr.DBRType;
-import gov.aps.jca.event.*;
+import gov.aps.jca.event.ConnectionEvent;
 import gov.aps.jca.event.ConnectionListener;
+import gov.aps.jca.event.PutEvent;
+import gov.aps.jca.event.PutListener;
 
 import org.epics.ioc.ca.ChannelField;
 import org.epics.ioc.ca.ChannelFieldGroup;

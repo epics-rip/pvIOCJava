@@ -12,7 +12,9 @@ package org.epics.ioc.pv;
  */
 public interface PVDataCreate {
     /**
-     * Create implementation for all non-array fields except enum.
+     * Create implementation for a fields.
+     * If the field is an array then
+     * createPVArray is called with capacity=0 and capacityMutable=true.
      * @param parent The parent interface.
      * The parent can be a PVStructure, PVArray, or PVLink.
      * @param field The reflection interface for the field
