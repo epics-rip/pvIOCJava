@@ -1,6 +1,6 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
       "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html>
+<html xmlns="http://www.w3.org/1999/xhtml">
 <head>
   <meta http-equiv="content-type" content="" />
   <title>EPICS JavaIOC: Database Definition</title>
@@ -11,7 +11,7 @@
 
 <h1 style="text-align: center">EPICS JavaIoc: Database Definition <br />
 package: org.epics.ioc.dbd<br />
-2007.09.18</h1>
+2008.05.06</h1>
 <hr />
 CONTENTS: 
 
@@ -74,16 +74,15 @@ database has a set of "smart" records. Each record is an instance on a record
 of a particular type.</p>
 
 <p>This package describes support for Database Definitions, i.e. support for
-the following database components: menu, structure, recordType, create, and
+the following database components: structure, recordType, create, and
 support, Included are factories for creating multiple DBD (Database
 Definition) instances. A DBD provides reflection interfaces for all database
-components it contains. db, which implements a javaIOC database, uses a DBD
-to implement database reflection.</p>
+components it contains.</p>
 
 <p>The following is discussed:</p>
 <ol>
   <li>Database Definition Syntax<br />
-    The XML syntax for defining menus, structures, record types, and
+    The XML syntax for defining structures, record types, create, and
     support.<br />
   </li>
   <li>Java Support for Database Definitions</li>
@@ -146,14 +145,16 @@ The main difference is that a structure can't be instanciated except as a
 field of a record.</p>
 
 <p>A structure is defined as follows:</p>
-<pre>&lt;structure name = "structureName" supportName = "supportName" &gt;
-     &lt;field name = "fieldName" supportName = "supportName" type = "fieldType" ... /&gt;
+<pre>&lt;structure name = "structureName" createName = "createName" supportName = "supportName" &gt;
+     &lt;field name = "fieldName" createName = "createName"
+         supportName = "supportName" type = "fieldType" ... /&gt;
      ...
 &lt;/structure&gt;</pre>
 
 <p>A record type is defined as follows:</p>
 <pre>&lt;recordType name = "recordtypeName" supportName = "supportName" &gt;
-     &lt;field name = "fieldName"  supportName = "supportName" type = "fieldType" ... /&gt;
+     &lt;field name = "fieldName" createName = "createName"
+         supportName = "supportName" type = "fieldType" ... /&gt;
      ...
 &lt;/recordType&gt;</pre>
 
@@ -162,6 +163,10 @@ field of a record.</p>
   <dt><span style="font-family: courier">structureName</span></dt>
   <dt><span style="font-family: courier">recordtypeName</span></dt>
     <dd>The structure or record type name.</dd>
+  <dt style="font-family: courier;">createName</dt>
+    <dd>The name of create for the structure, recordType, or field. A create
+      definition, described below, defines the create. When record instances
+      are defined, the createName can be overridden.</dd>
   <dt style="font-family: courier;">supportName</dt>
     <dd>The name of support for the structure, record type, or field. A
       support definition, described below, defines the support. When record
@@ -622,14 +627,14 @@ definition database.</p>
 
 <h3 id="Creating1">Creating Database Definitions</h3>
 
-<p>Before record instances can be created all menu, structure, recordType,
+<p>Before record instances can be created all structure, recordType,create,
 and support definitions used by record instances must be created.</p>
 
 <p>A running IOC always uses a DBD Database named "master" and an IOCDB also
 named "master". The prefered way to create definitions by calling:</p>
-<pre>    maxMessageType = IOCMessageType.iofo;
+<pre>    maxMessageType = IOCMessageType.info;
     DBD add = XMLToDBDFactory.create("add",fileName,this);
-    if(maxMessageType!=IOCMessageType.iofo) // failure take appropriate action</pre>
+    if(maxMessageType!=IOCMessageType.info) // failure take appropriate action</pre>
 
 <p>addToMaster will not add any definitions to master if any errors are
 detected. It can be called during IOC initialization and also while an IOC is

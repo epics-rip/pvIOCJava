@@ -385,21 +385,6 @@ public class XMLToDBDFactory {
                 if(fieldSupportName==null) fieldSupportName = attributes.get("supportName");
                 if(fieldCreateName==null) fieldCreateName = attributes.get("createName");
                 state = State.field;
-            } else if(qName.equals("property")) {
-                String propertyName = attributes.get("name");
-                String associatedName = attributes.get("associatedField");
-                if(propertyName==null || propertyName.length()==0) {
-                    iocxmlReader.message(
-                            "property name not specified",
-                            MessageType.warning);
-                    return;
-                }
-                if(associatedName==null || associatedName.length()==0) {
-                    iocxmlReader.message(
-                            "associatedField not specified",
-                            MessageType.error);
-                    return;
-                }
             }
         }
     
