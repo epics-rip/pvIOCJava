@@ -52,6 +52,14 @@ public class SwtshellFactory {
             layout.numColumns = 1;
             layout.makeColumnsEqualWidth = true;
             shell.setLayout(layout);
+            Button iocConsoleDB = new Button(shell,SWT.PUSH);
+            iocConsoleDB.setText("iocConsole");
+            iocConsoleDB.addSelectionListener( new SelectionAdapter() {
+                public void widgetSelected(SelectionEvent e) {
+                    IOCConsoleFactory.init(display);
+                }
+            });
+            
             Button getDB = new Button(shell,SWT.PUSH);
             getDB.setText("get");
             getDB.addSelectionListener( new SelectionAdapter() {

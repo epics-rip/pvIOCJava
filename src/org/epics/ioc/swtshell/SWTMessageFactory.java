@@ -89,7 +89,7 @@ public class SWTMessageFactory {
                     messageQueue.unlock();
                 }
                 if(numOverrun>0) {
-                    consoleText.append(String.format("%n%d missed messages&n", numOverrun));
+                    consoleText.append(String.format("%n%d missed messages%n", numOverrun));
                 }
                 if(message!=null) {
                     consoleText.append(String.format("%s%n",message));

@@ -73,7 +73,7 @@ public class MonitorFactory {
         private ChannelField channelField = null;
         private ChannelConnect channelConnect = null;
         private static enum MonitorType{ put, change, absolute, percentage }
-        private int queueSize = 3;
+        private int queueSize = 10;
         private MonitorType monitorType = MonitorType.put;
         private double deadband = 0.0;       
         private Button propertyButton;          

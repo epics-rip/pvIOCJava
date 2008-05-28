@@ -256,7 +256,7 @@ public class PutFactory {
                     lock.unlock();
                 }
                 cd.destroy(cdPut);
-                requester.message("processComplete", MessageType.info);
+                requester.message("putComplete", MessageType.info);
             }
             /* (non-Javadoc)
              * @see org.epics.ioc.util.Requester#putRequesterName()
