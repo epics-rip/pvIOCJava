@@ -1,18 +1,18 @@
 <?xml version="1.0" ?>
 <IOCDatabase>
 
-<record name = "syncInt32ArrayDriver" type = "portCreate">
+<record name = "syncInt32ArrayPort" type = "portCreate">
     <factoryName>org.epics.ioc.pdrv.testDriver.Int32ArrayDriverFactory</factoryName>
-    <portName>syncInt32ArrayDriver</portName>
+    <portName>syncInt32ArrayPort</portName>
     <driverParameters structureName = "int32ArrayDriver" >
         <delay>0.0</delay>
         <maxSegmentSize>2</maxSegmentSize>
     </driverParameters>
 </record>
 
-<record name = "syncInt32ArrayDriverControl" type = "portDeviceControl" >
+<record name = "syncInt32ArrayDeviceControl" type = "portDeviceControl" >
+    <portDevice>syncInt32ArrayPort[0]</portDevice>
 <!--
-    <portDevice>syncInt32ArrayDriver[0]</portDevice>
     <traceMask>0x0fff</traceMask>
     <traceIOMask>0x0fff</traceIOMask>
 -->
@@ -44,7 +44,7 @@
     <alarm structureName = "alarm" />
     <timeStamp structureName = "timeStamp" />
     <output supportName = "pdrvInt32ArrayOutput" structureName = "pdrvSupport">
-        <portName>syncInt32ArrayDriver</portName>
+        <portName>syncInt32ArrayPort</portName>
         <addr>0</addr>
         <timeout>1.0</timeout>
     </output>
@@ -61,7 +61,7 @@
     <alarm structureName = "alarm" />
     <timeStamp structureName = "timeStamp" />
     <input supportName = "pdrvInt32ArrayInput" structureName = "pdrvSupport">
-        <portName>syncInt32ArrayDriver</portName>
+        <portName>syncInt32ArrayPort</portName>
         <addr>0</addr>
         <timeout>1.0</timeout>
         <size>20</size>
@@ -71,25 +71,25 @@
     <alarm structureName = "alarm" />
     <timeStamp structureName = "timeStamp" />
     <input supportName = "pdrvInt32ArrayInterruptInput" structureName = "pdrvSupport">
-        <portName>syncInt32ArrayDriver</portName>
+        <portName>syncInt32ArrayPort</portName>
         <addr>0</addr>
         <process>true</process>
         <size>20</size>
     </input>
 </record>
 
-<record name = "asynInt32ArrayDriver" type = "portCreate">
+<record name = "asynInt32ArrayPort" type = "portCreate">
     <factoryName>org.epics.ioc.pdrv.testDriver.Int32ArrayDriverFactory</factoryName>
-    <portName>asynInt32ArrayDriver</portName>
+    <portName>asynInt32ArrayPort</portName>
     <driverParameters structureName = "int32ArrayDriver" >
         <delay>0.1</delay>
         <maxSegmentSize>0</maxSegmentSize>
     </driverParameters>
 </record>
 
-<record name = "asynInt32ArrayDriverControl" type = "portDeviceControl" >
+<record name = "asynInt32ArrayDeviceControl" type = "portDeviceControl" >
+    <portDevice>asynInt32ArrayPort[0]</portDevice>
 <!--
-    <portDevice>asynInt32ArrayDriver[0]</portDevice>
     <traceMask>0x0fff</traceMask>
     <traceIOMask>0x0fff</traceIOMask>
 -->
@@ -121,7 +121,7 @@
     <alarm structureName = "alarm" />
     <timeStamp structureName = "timeStamp" />
     <output supportName = "pdrvInt32ArrayOutput" structureName = "pdrvSupport">
-        <portName>asynInt32ArrayDriver</portName>
+        <portName>asynInt32ArrayPort</portName>
         <addr>0</addr>
         <timeout>1.0</timeout>
     </output>
@@ -138,7 +138,7 @@
     <alarm structureName = "alarm" />
     <timeStamp structureName = "timeStamp" />
     <input supportName = "pdrvInt32ArrayInput" structureName = "pdrvSupport">
-        <portName>asynInt32ArrayDriver</portName>
+        <portName>asynInt32ArrayPort</portName>
         <addr>0</addr>
         <timeout>1.0</timeout>
         <size>20</size>
@@ -148,7 +148,7 @@
     <alarm structureName = "alarm" />
     <timeStamp structureName = "timeStamp" />
     <input supportName = "pdrvInt32ArrayInterruptInput" structureName = "pdrvSupport">
-        <portName>asynInt32ArrayDriver</portName>
+        <portName>asynInt32ArrayPort</portName>
         <addr>0</addr>
         <process>true</process>
         <size>20</size>

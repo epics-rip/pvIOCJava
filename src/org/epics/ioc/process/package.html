@@ -487,10 +487,11 @@ try {
 <p>The following are the interfaces for record processing:</p>
 <pre>    public interface RecordProcess {
         // general purpose methods
-        boolean isDisabled();
-        boolean setDisabled(boolean value);
+        boolean isEnabled();
+        boolean setEnabled(boolean value);
         boolean isActive();
         DBRecord getRecord();
+        boolean isTrace();
         boolean setTrace(boolean value);
         SupportState getSupportState();
         // support lifecycle methods
@@ -557,16 +558,18 @@ falls into one of the following classes:</p>
 
 <h3 id="RecordProc">RecordProcess - General Purpose Methods</h3>
 <dl>
-  <dt style="font-family: courier;">isDisabled</dt>
-    <dd>Is the record disabled?</dd>
-  <dt style="font-family: courier;">setDisabled</dt>
+  <dt style="font-family: courier;">isEnabled</dt>
+    <dd>Is the record enabled?</dd>
+  <dt style="font-family: courier;">setEnabled</dt>
     <dd>When record is disabled then all requests to process the record fail.
-      If the record is active when setDisable is issued the current process
+      If the record is active when a record is disabled the current process
       is allowed to complete.</dd>
   <dt style="font-family: courier;">isActive</dt>
     <dd>Is the record active, i.e. processing?</dd>
   <dt style="font-family: courier;">getRecord</dt>
     <dd>Get the record instance to which this RecordProcess is attached.</dd>
+  <dt style="font-family: courier;">isTrace</dt>
+    <dd>Is trace active for this record?</dd>
   <dt style="font-family: courier;">setTrace</dt>
     <dd>Set tracing on or off. When true info messages are sent to
       dbRecord.message whenever any processing related method is called.</dd>

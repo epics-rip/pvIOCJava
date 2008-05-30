@@ -293,9 +293,6 @@ public class XMLToIOCDBFactory {
                         "failed to add record to iocdb",
                         MessageType.info);
             }
-
-            
-            dbRecord.getPVRecord().addRequester(iocdb);
         }
         
         private void startElement(String qName, Map<String,String> attributes) {

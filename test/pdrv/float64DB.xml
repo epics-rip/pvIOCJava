@@ -1,18 +1,18 @@
 <?xml version="1.0" ?>
 <IOCDatabase>
 
-<record name = "syncFloat64Driver" type = "portCreate">
+<record name = "syncFloat64Port" type = "portCreate">
     <factoryName>org.epics.ioc.pdrv.testDriver.Float64DriverFactory</factoryName>
-    <portName>syncFloat64Driver</portName>
+    <portName>syncFloat64Port</portName>
     <driverParameters structureName = "float64Driver" >
         <delay>0.0</delay>
         <numberRegisters>2</numberRegisters>
     </driverParameters>
 </record>
 
-<record name = "syncFloat64DriverControl" type = "portDeviceControl" >
+<record name = "syncFloat64DeviceControl" type = "portDeviceControl" >
+    <portDevice>syncFloat64Port[0]</portDevice>
 <!--
-    <portDevice>syncFloat64Driver[0]</portDevice>
     <traceMask>0x0fff</traceMask>
     <traceIOMask>0x0fff</traceIOMask>
 -->
@@ -55,7 +55,7 @@
     <alarm structureName = "alarm" />
     <timeStamp structureName = "timeStamp" />
     <output supportName = "pdrvFloat64Output" structureName = "pdrvSupport">
-        <portName>syncFloat64Driver</portName>
+        <portName>syncFloat64Port</portName>
         <addr>0</addr>
         <timeout>.2</timeout>
     </output>
@@ -73,7 +73,7 @@
     <alarm structureName = "alarm" />
     <timeStamp structureName = "timeStamp" />
     <input supportName = "pdrvFloat64Input" structureName = "pdrvSupport">
-        <portName>syncFloat64Driver</portName>
+        <portName>syncFloat64Port</portName>
         <addr>0</addr>
         <timeout>.2</timeout>
         <size>20</size>
@@ -84,7 +84,7 @@
     <alarm structureName = "alarm" />
     <timeStamp structureName = "timeStamp" />
     <input supportName = "pdrvFloat64InterruptInput" structureName = "pdrvSupport">
-        <portName>syncFloat64Driver</portName>
+        <portName>syncFloat64Port</portName>
         <addr>0</addr>
         <process>true</process>
         <size>20</size>
@@ -95,7 +95,7 @@
     <alarm structureName = "alarm" />
     <timeStamp structureName = "timeStamp" />
     <input supportName = "pdrvFloat64AverageInput" structureName = "pdrvSupport">
-        <portName>syncFloat64Driver</portName>
+        <portName>syncFloat64Port</portName>
         <addr>0</addr>
         <size>20</size>
     </input>
@@ -105,18 +105,18 @@
     </scan>
 </record>
 
-<record name = "asynFloat64Driver" type = "portCreate">
+<record name = "asynFloat64Port" type = "portCreate">
     <factoryName>org.epics.ioc.pdrv.testDriver.Float64DriverFactory</factoryName>
-    <portName>asynFloat64Driver</portName>
+    <portName>asynFloat64Port</portName>
     <driverParameters structureName = "float64Driver" >
         <delay>0.1</delay>
         <numberRegisters>2</numberRegisters>
     </driverParameters>
 </record>
 
-<record name = "asynFloat64DriverControl" type = "portDeviceControl" >
+<record name = "asynFloat64DeviceControl" type = "portDeviceControl" >
+    <portDevice>syncFloat64Port[0]</portDevice>
 <!--
-    <portDevice>syncFloat64Driver[0]</portDevice>
     <traceMask>0x0fff</traceMask>
     <traceIOMask>0x0fff</traceIOMask>
 -->
@@ -159,7 +159,7 @@
     <alarm structureName = "alarm" />
     <timeStamp structureName = "timeStamp" />
     <output supportName = "pdrvFloat64Output" structureName = "pdrvSupport">
-        <portName>asynFloat64Driver</portName>
+        <portName>asynFloat64Port</portName>
         <addr>0</addr>
         <timeout>.2</timeout>
     </output>
@@ -177,7 +177,7 @@
     <alarm structureName = "alarm" />
     <timeStamp structureName = "timeStamp" />
     <input supportName = "pdrvFloat64Input" structureName = "pdrvSupport">
-        <portName>asynFloat64Driver</portName>
+        <portName>asynFloat64Port</portName>
         <addr>0</addr>
         <timeout>.2</timeout>
         <size>20</size>
@@ -188,7 +188,7 @@
     <alarm structureName = "alarm" />
     <timeStamp structureName = "timeStamp" />
     <input supportName = "pdrvFloat64InterruptInput" structureName = "pdrvSupport">
-        <portName>asynFloat64Driver</portName>
+        <portName>asynFloat64Port</portName>
         <addr>0</addr>
         <process>true</process>
         <size>20</size>
@@ -199,7 +199,7 @@
     <alarm structureName = "alarm" />
     <timeStamp structureName = "timeStamp" />
     <input supportName = "pdrvFloat64AverageInput" structureName = "pdrvSupport">
-        <portName>asynFloat64Driver</portName>
+        <portName>asynFloat64Port</portName>
         <addr>0</addr>
         <size>20</size>
     </input>

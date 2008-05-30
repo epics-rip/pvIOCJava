@@ -7,6 +7,7 @@ package org.epics.ioc.support;
 
 
 import org.epics.ioc.db.DBField;
+import org.epics.ioc.db.DBRecord;
 import org.epics.ioc.db.DBStructure;
 import org.epics.ioc.pdrv.Device;
 import org.epics.ioc.pdrv.Factory;
@@ -14,15 +15,17 @@ import org.epics.ioc.pdrv.Port;
 import org.epics.ioc.pdrv.Status;
 import org.epics.ioc.pdrv.Trace;
 import org.epics.ioc.pdrv.User;
-import org.epics.ioc.pv.AbstractPVField;
-import org.epics.ioc.pv.Field;
+import org.epics.ioc.process.ProcessCallbackRequester;
+import org.epics.ioc.process.ProcessContinueRequester;
+import org.epics.ioc.process.RecordProcess;
+import org.epics.ioc.process.SupportProcessRequester;
+import org.epics.ioc.process.SupportState;
 import org.epics.ioc.pv.PVBoolean;
-import org.epics.ioc.pv.PVField;
 import org.epics.ioc.pv.PVInt;
 import org.epics.ioc.pv.PVString;
 import org.epics.ioc.pv.PVStructure;
-import org.epics.ioc.pv.Structure;
 import org.epics.ioc.util.MessageType;
+import org.epics.ioc.util.RequestResult;
 
 /**
  * Record Support for starting a port driver.
@@ -37,508 +40,470 @@ public class PDRVPortDeviceControlFactory {
      */
     public static Support create(DBStructure dbStructure) {
         String supportName = dbStructure.getPVStructure().getSupportName();
-        if(supportName.equals(portDeviceControl)) return portDeviceControl(portDeviceControl,dbStructure);
+        if(supportName.equals(supportName)) return new PortDeviceControl(supportName,dbStructure);
+        dbStructure.getPVStructure().message("support name is not " + supportName,MessageType.fatalError);
         return null;
     }
     
-    private static final String portDeviceControl = "portDeviceControl";
-    
-    private static Support portDeviceControl(String supportName,DBStructure dbStructure) {
-        PortDeviceControl support = new PortDeviceControl(supportName,dbStructure);
-        DBField[] dbFields = dbStructure.getDBFields();
-        DBField dbField = null;
-        PVStructure pvStructure = dbStructure.getPVStructure();
-        PVField[] pvFields = pvStructure.getPVFields();
-        PVField pvField = null;
-        Field field = null;
-        org.epics.ioc.pv.Type type = null;
-        Structure structure = (Structure)pvStructure.getField();
-        int index = structure.getFieldIndex("message");
-        if(index<0) {
-            pvStructure.message("structure does not have field message",MessageType.fatalError);
-            return null;
-        }
-        dbField = dbFields[index];
-        pvField = pvFields[index];
-        field = pvField.getField();
-        type = field.getType();
-        if(type!=org.epics.ioc.pv.Type.pvString) {
-            pvStructure.message("field message is not a string",MessageType.fatalError);
-            return null;
-        }
-        support.dbMessage = dbField;
-        support.pvMessage = (PVString)pvField;
+    private static final String supportName = "portDeviceControl";
+     
+    private static class PortDeviceControl extends AbstractSupport
+    implements ProcessCallbackRequester,ProcessContinueRequester
+    {
+        private static final String emptyMessage = "";
+        private User user = Factory.createUser(null);
+        private RecordProcess recordProcess = null;
+        private DBRecord dbRecord = null;
+        private DBField dbMessage = null;
+        private PVString pvMessage = null;
         
-        index = structure.getFieldIndex("portDevice");
-        if(index<0) {
-            pvStructure.message("structure does not have field portDevice",MessageType.fatalError);
-            return null;
-        }
-        dbField = dbFields[index];
-        pvField = pvFields[index];
-        field = pvField.getField();
-        type = field.getType();
-        if(type!=org.epics.ioc.pv.Type.pvString) {
-            pvStructure.message("field portDevice is not a string",MessageType.fatalError);
-            return null;
-        }
-        PVString pvString = (PVString)pvField;
-        String portDevice = pvString.get();        
-        PVString pvPortDevice = new PortDeviceData(pvStructure,field,support,dbField);        
-        dbField.replacePVField(pvPortDevice);
-        if(portDevice!=null) pvPortDevice.put(portDevice);
-        index = structure.getFieldIndex("connect");
-        if(index<0) {
-            pvStructure.message("structure does not have field connect",MessageType.fatalError);
-            return null;
-        }
-        dbField = dbFields[index];
-        pvField = pvFields[index];
-        field = pvField.getField();
-        type = field.getType();
-        if(type!=org.epics.ioc.pv.Type.pvBoolean) {
-            pvStructure.message("field connect is not a boolean",MessageType.fatalError);
-            return null;
-        }
-        PVBoolean pvConnectDisconnectData = new ConnectDisconnectData(pvStructure,field,support,dbField);
-        dbField.replacePVField(pvConnectDisconnectData);       
-        index = structure.getFieldIndex("enable");
-        if(index<0) {
-            pvStructure.message("structure does not have field enable",MessageType.fatalError);
-            return null;
-        }
-        dbField = dbFields[index];
-        pvField = pvFields[index];
-        field = pvField.getField();
-        type = field.getType();
-        if(type!=org.epics.ioc.pv.Type.pvBoolean) {
-            pvStructure.message("field enable is not a boolean",MessageType.fatalError);
-            return null;
-        }        
-        PVBoolean pvEnableDisableData = new EnableDisableData(pvStructure,field,support,dbField);
-        dbField.replacePVField(pvEnableDisableData);       
-        index = structure.getFieldIndex("autoConnect");
-        if(index<0) {
-            pvStructure.message("structure does not have field autoConnect",MessageType.fatalError);
-            return null;
-        }        
-        dbField = dbFields[index];
-        pvField = pvFields[index];
-        field = pvField.getField();
-        type = field.getType();
-        if(type!=org.epics.ioc.pv.Type.pvBoolean) {
-            pvStructure.message("field autoConnect is not boolean",MessageType.fatalError);
-            return null;
-        }
-        PVBoolean pvBoolean = (PVBoolean)pvField;
-        boolean autoConnect = pvBoolean.get();
-        PVBoolean pvAutoConnectData = new AutoConnectData(pvStructure,field,support,dbField);
-        dbField.replacePVField(pvAutoConnectData);
-        pvAutoConnectData.put(autoConnect);
+        private PVString portDeviceNamePVString = null;
         
-        index = structure.getFieldIndex("traceMask");
-        if(index<0) {
-            pvStructure.message("structure does not have field traceMask",MessageType.fatalError);
-            return null;
-        }
-        dbField = dbFields[index];
-        pvField = pvFields[index];
-        field = pvField.getField();
-        type = field.getType();
-        pvField = pvFields[index];
-        if(type!=org.epics.ioc.pv.Type.pvInt) {
-            pvStructure.message("field traceMask is not an int",MessageType.fatalError);
-            return null;
-        }
-        PVInt pvInt = (PVInt)pvField;
-        int traceMask = pvInt.get();
-        PVInt pvTraceMaskData = new TraceMaskData(pvStructure,field,support,dbField);
-        dbField.replacePVField(pvTraceMaskData);
-        pvTraceMaskData.put(traceMask);
+        private PVBoolean connectValuePVBoolean = null;
+        private DBField connectValueDBField = null;
+        private PVBoolean connectDesiredValuePVBoolean = null;
+        private PVBoolean connectSetValuePVBoolean = null;
+        private DBField connectSetValueDBField = null;
         
-        index = structure.getFieldIndex("traceIOMask");
-        if(index<0) {
-            pvStructure.message("structure does not have field traceIOMask",MessageType.fatalError);
-            return null;
-        }
-        dbField = dbFields[index];
-        pvField = pvFields[index];
-        field = pvField.getField();
-        type = field.getType();
-        if(pvField.getField().getType()!=org.epics.ioc.pv.Type.pvInt) {
-            pvStructure.message("field traceIOMask is not an int",MessageType.fatalError);
-            return null;
-        }
-        pvInt = (PVInt)pvField;
-        int traceIOMask = pvInt.get();
-        PVInt pvTraceIOMaskData = new TraceIOMaskData(pvStructure,field,support,dbField);
-        dbField.replacePVField(pvTraceIOMaskData);
-        pvTraceIOMaskData.put(traceIOMask);
+        private PVBoolean enableValuePVBoolean = null;
+        private DBField enableValueDBField = null;
+        private PVBoolean enableDesiredValuePVBoolean = null;
+        private PVBoolean enableSetValuePVBoolean = null;
+        private DBField enableSetValueDBField = null;
         
-        index = structure.getFieldIndex("report");
-        if(index<0) {
-            pvStructure.message("structure does not have field report",MessageType.fatalError);
-            return null;
-        }
-        dbField = dbFields[index];
-        pvField = pvFields[index];
-        field = pvField.getField();
-        type = field.getType();
-        if(pvField.getField().getType()!=org.epics.ioc.pv.Type.pvInt) {
-            pvStructure.message("field report is not an int",MessageType.fatalError);
-            return null;
-        }
-        PVInt pvReportData = new ReportData(pvStructure,field,support,dbField);
-        dbField.replacePVField(pvReportData);
-        return support;
-    }
-    private static class PortDeviceControl extends AbstractSupport {
-        User user = Factory.createUser(null);
-        DBField dbMessage = null;
-        PVString pvMessage = null;
+        private PVBoolean autoConnectValuePVBoolean = null;
+        private DBField autoConnectValueDBField = null;
+        private PVBoolean autoConnectDesiredValuePVBoolean = null;
+        private PVBoolean autoConnectSetValuePVBoolean = null;
+        private DBField autoConnectSetValueDBField = null;
         
-        Port port = null;
-        Device device = null;
+        private PVInt traceMaskValuePVInt = null;
+        private DBField traceMaskValueDBField = null;
+        private PVInt traceMaskDesiredValuePVInt = null;
+        private PVBoolean traceMaskSetValuePVBoolean = null;
+        private DBField traceMaskSetValueDBField = null;
         
-        PortDeviceControl(String supportName,DBStructure dbStructure) {
+
+        private PVInt traceIOMaskValuePVInt = null;
+        private DBField traceIOMaskValueDBField = null;
+        private PVInt traceIOMaskDesiredValuePVInt = null;
+        private PVBoolean traceIOMaskSetValuePVBoolean = null;
+        private DBField traceIOMaskSetValueDBField = null;
+        
+
+        private PVInt traceIOTruncateSizeValuePVInt = null;
+        private DBField traceIOTruncateSizeValueDBField = null;
+        private PVInt traceIOTruncateSizeDesiredValuePVInt = null;
+        private PVBoolean traceIOTruncateSizeSetValuePVBoolean = null;
+        private DBField traceIOTruncateSizeSetValueDBField = null;
+        
+        private PVBoolean reportPVBoolean = null;
+        private DBField reportDBField = null;
+        private PVInt reportDetailsPVInt = null;
+        
+        private Port port = null;
+        private Device device = null;
+        private Trace trace = null;
+        
+        private SupportProcessRequester supportProcessRequester = null;
+        private String message = emptyMessage;
+        
+        private String portDeviceNamePrevious = null;
+        private String portDeviceNameDesired = null;
+        
+        private boolean connectDesiredValue = false;
+        private boolean connectSetValue = false;
+        private boolean connectNewValue = false;
+        private boolean enableDesiredValue = false;
+        private boolean enableSetValue = false;
+        private boolean enableNewValue = false;
+        private boolean autoConnectDesiredValue = false;
+        private boolean autoConnectSetValue = false;
+        private boolean autoConnectNewValue = false;
+        private int traceMaskDesiredValue = 0;
+        private boolean traceMaskSetValue = false;
+        private int traceMaskNewValue = 0;
+        private int traceIOMaskDesiredValue = 0;
+        private boolean traceIOMaskSetValue = false;
+        private int traceIOMaskNewValue = 0;
+        private int traceIOTruncateSizeDesiredValue = 0;
+        private boolean traceIOTruncateSizeSetValue = false;
+        private int traceIOTruncateSizeNewValue = 0;
+        private boolean report = false;
+        private int reportDetails = 0;
+        
+        
+        private PortDeviceControl(String supportName,DBStructure dbStructure) {
             super(supportName,dbStructure);
-                
+            dbRecord = dbStructure.getDBRecord();
         }
         
-        void message(String message) {
-            pvMessage.put(message);
-            dbMessage.postPut();
+        /* (non-Javadoc)
+         * @see org.epics.ioc.support.AbstractSupport#initialize()
+         */
+        @Override
+        public void initialize() {
+            if(!super.checkSupportState(SupportState.readyForInitialize,supportName)) return;
+            recordProcess = dbRecord.getRecordProcess();
+            PVStructure pvStructure = dbRecord.getPVRecord();
+            
+            pvMessage = pvStructure.getStringField("message");
+            if(pvMessage==null) return;
+            dbMessage = dbRecord.findDBField(pvMessage);
+            
+            portDeviceNamePVString = pvStructure.getStringField("portDevice");
+            if(portDeviceNamePVString==null) return;
+            
+            PVStructure connectPVStructure = pvStructure.getStructureField("connect", "booleanState");
+            if(connectPVStructure==null) return;
+            connectValuePVBoolean = connectPVStructure.getBooleanField("value");
+            if(connectValuePVBoolean==null) return;
+            connectValueDBField = dbRecord.findDBField(connectValuePVBoolean);
+            connectDesiredValuePVBoolean = connectPVStructure.getBooleanField("desiredValue");
+            if(connectDesiredValuePVBoolean==null) return;
+            connectSetValuePVBoolean = connectPVStructure.getBooleanField("setValue");
+            if(connectSetValuePVBoolean==null) return;
+            connectSetValueDBField = dbRecord.findDBField(connectSetValuePVBoolean);
+
+            
+            PVStructure enablePVStructure = pvStructure.getStructureField("enable", "booleanState");
+            if(enablePVStructure==null) return;
+            enableValuePVBoolean = enablePVStructure.getBooleanField("value");
+            if(enableValuePVBoolean==null) return;
+            enableValueDBField = dbRecord.findDBField(enableValuePVBoolean);
+            enableDesiredValuePVBoolean = enablePVStructure.getBooleanField("desiredValue");
+            if(enableDesiredValuePVBoolean==null) return;
+            enableSetValuePVBoolean = enablePVStructure.getBooleanField("setValue");
+            if(enableSetValuePVBoolean==null) return;
+            enableSetValueDBField = dbRecord.findDBField(enableSetValuePVBoolean);
+            
+            PVStructure autoConnectPVStructure = pvStructure.getStructureField("autoConnect", "booleanState");
+            if(autoConnectPVStructure==null) return;
+            autoConnectValuePVBoolean = autoConnectPVStructure.getBooleanField("value");
+            if(autoConnectValuePVBoolean==null) return;
+            autoConnectValueDBField = dbRecord.findDBField(autoConnectValuePVBoolean);
+            autoConnectDesiredValuePVBoolean = autoConnectPVStructure.getBooleanField("desiredValue");
+            if(autoConnectDesiredValuePVBoolean==null) return;
+            autoConnectSetValuePVBoolean = autoConnectPVStructure.getBooleanField("setValue");
+            if(autoConnectSetValuePVBoolean==null) return;
+            autoConnectSetValueDBField = dbRecord.findDBField(autoConnectSetValuePVBoolean);
+            
+            PVStructure traceMaskPVStructure = pvStructure.getStructureField("traceMask", "intState");
+            if(traceMaskPVStructure==null) return;
+            traceMaskValuePVInt = traceMaskPVStructure.getIntField("value");
+            if(traceMaskValuePVInt==null) return;
+            traceMaskValueDBField = dbRecord.findDBField(traceMaskValuePVInt);
+            traceMaskDesiredValuePVInt = traceMaskPVStructure.getIntField("desiredValue");
+            if(traceMaskDesiredValuePVInt==null) return;
+            traceMaskSetValuePVBoolean = traceMaskPVStructure.getBooleanField("setValue");
+            if(traceMaskSetValuePVBoolean==null) return;
+            traceMaskSetValueDBField = dbRecord.findDBField(traceMaskSetValuePVBoolean);
+            
+            PVStructure traceIOMaskPVStructure = pvStructure.getStructureField("traceIOMask", "intState");
+            if(traceIOMaskPVStructure==null) return;
+            traceIOMaskValuePVInt = traceIOMaskPVStructure.getIntField("value");
+            if(traceIOMaskValuePVInt==null) return;
+            traceIOMaskValueDBField = dbRecord.findDBField(traceIOMaskValuePVInt);
+            traceIOMaskDesiredValuePVInt = traceIOMaskPVStructure.getIntField("desiredValue");
+            if(traceIOMaskDesiredValuePVInt==null) return;
+            traceIOMaskSetValuePVBoolean = traceIOMaskPVStructure.getBooleanField("setValue");
+            if(traceIOMaskSetValuePVBoolean==null) return;
+            traceIOMaskSetValueDBField = dbRecord.findDBField(traceIOMaskSetValuePVBoolean);
+            
+            PVStructure traceIOTruncateSizePVStructure = pvStructure.getStructureField("traceIOTruncateSize", "intState");
+            if(traceIOTruncateSizePVStructure==null) return;
+            traceIOTruncateSizeValuePVInt = traceIOTruncateSizePVStructure.getIntField("value");
+            if(traceIOTruncateSizeValuePVInt==null) return;
+            traceIOTruncateSizeValueDBField = dbRecord.findDBField(traceIOTruncateSizeValuePVInt);
+            traceIOTruncateSizeDesiredValuePVInt = traceIOTruncateSizePVStructure.getIntField("desiredValue");
+            if(traceIOTruncateSizeDesiredValuePVInt==null) return;
+            traceIOTruncateSizeSetValuePVBoolean = traceIOTruncateSizePVStructure.getBooleanField("setValue");
+            if(traceIOTruncateSizeSetValuePVBoolean==null) return;
+            traceIOTruncateSizeSetValueDBField = dbRecord.findDBField(traceIOTruncateSizeSetValuePVBoolean);
+            
+            reportPVBoolean = pvStructure.getBooleanField("report");
+            if(reportPVBoolean==null) return;
+            reportDBField = dbRecord.findDBField(reportPVBoolean);
+            reportDetailsPVInt = pvStructure.getIntField("reportDetails");
+            super.initialize();
         }
-        
-        boolean connectPortDevice(boolean portOnly,String portName,int addr) {           
-            user.disconnectPort();
-            port = user.connectPort(portName);
+
+        /* (non-Javadoc)
+         * @see org.epics.ioc.support.AbstractSupport#process(org.epics.ioc.process.SupportProcessRequester)
+         */
+        @Override
+        public void process(SupportProcessRequester supportProcessRequester) {
+            message = emptyMessage;
+            this.supportProcessRequester = supportProcessRequester;
+            portDeviceNameDesired = portDeviceNamePVString.get();
+            connectDesiredValue = connectDesiredValuePVBoolean.get();
+            connectSetValue = connectSetValuePVBoolean.get();
+            enableDesiredValue = enableDesiredValuePVBoolean.get();
+            enableSetValue = enableSetValuePVBoolean.get();
+            autoConnectDesiredValue = autoConnectDesiredValuePVBoolean.get();
+            autoConnectSetValue = autoConnectSetValuePVBoolean.get();
+            traceMaskDesiredValue = traceMaskDesiredValuePVInt.get();
+            traceMaskSetValue = traceMaskSetValuePVBoolean.get();
+            traceIOMaskDesiredValue = traceIOMaskDesiredValuePVInt.get();
+            traceIOMaskSetValue = traceIOMaskSetValuePVBoolean.get();
+            traceIOTruncateSizeDesiredValue = traceIOTruncateSizeDesiredValuePVInt.get();
+            traceIOTruncateSizeSetValue = traceIOTruncateSizeSetValuePVBoolean.get();
+            report = reportPVBoolean.get();
+            reportDetails = reportDetailsPVInt.get();
+            recordProcess.requestProcessCallback(this);
+        }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.process.ProcessCallbackRequester#processCallback()
+         */
+        public void processCallback() {
+            connectPortDevice();
             if(port==null) {
-                message("could not connect to port " + portName);
-                return false;
-            }
-            device = user.connectDevice(addr);
-            if(device==null) {
-                message("could not connect to addr " + addr + " of port " + portName);
-                return false;
-            }
-            return true;            
-        }
-        
-        boolean connect(boolean value) {
-            Status status = null;
-            if(port==null) return false;
-            user.lockPort();
-            try {
-                if(value==false) {
-                    if(device!=null) {
-                        if(!device.isConnected()) return true;
-                        status = device.disconnect(user);
-                        if(status!=Status.success) {
-                            message(user.getMessage());
-                            return false;
-                        }
-                        return true;
-                    }
-                    if(!port.isConnected()) return true;
-                    status = port.disconnect(user);
-                    if(status!=Status.success) {
-                        message(user.getMessage());
-                        return false;
-                    }
-                    return true;
-                }
-                if(!port.isConnected()) {
-                    status = port.connect(user);
-                    if(status!=Status.success) {
-                        message(user.getMessage());
-                        return false;
-                    }
-                }
-                if(device==null || device.isConnected()) return true;
-                status = device.connect(user);
-                if(status!=Status.success) {
-                    message(user.getMessage());
-                    return false;
-                }
-                return true;
-            } finally {
-                user.unlockPort();
-            }
-        }
-        
-        void enable(boolean value) {
-            if(port==null) return;
-            if(device!=null) {
-                device.enable(value);
-            } else {
-                port.enable(value);
-            }
-        }
-        
-        void autoConnect(boolean value) {
-            if(port==null) return;
-            if(device!=null) {
-                device.autoConnect(value);
-            } else {
-                port.autoConnect(value);
-            }
-        }
-        
-        void traceMask(int value) {
-            if(port==null) return;
-            Trace trace = null;
-            if(device!=null) {
-                trace = device.getTrace();
-            } else {
-                trace = port.getTrace();
-            }
-            trace.setMask(value);
-        }
-        
-        void traceIOMask(int value) {
-            if(port==null) return;
-            Trace trace = null;
-            if(device!=null) {
-                trace = device.getTrace();
-            } else {
-                trace = port.getTrace();
-            }
-            trace.setIOMask(value);
-        }
-        
-        void report(int details) {
-            if(port==null) {
-                message("not connected to port");
+                message = "not connected to port";
+                recordProcess.processContinue(this);
                 return;
             }
-            String report = null;
-            if(device!=null) {
-                report = device.report(details);
-            } else {
-                report = port.report(true, details);
+            connect();
+            enable();
+            autoConnect();
+            traceMask();
+            traceIOMask();
+            traceIOTruncateSize();
+            report();
+            recordProcess.processContinue(this);
+        }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.process.ProcessContinueRequester#processContinue()
+         */
+        public void processContinue() {
+            if(message!=emptyMessage) {
+                pvMessage.put(message);
+                dbMessage.postPut();
             }
-            message(report);
+            if(connectSetValue) {
+                connectSetValuePVBoolean.put(false);
+                connectSetValueDBField.postPut();
+            }
+            boolean prevBoolean = connectValuePVBoolean.get();
+            if(prevBoolean!=connectNewValue) {
+                connectValuePVBoolean.put(connectNewValue);
+                connectValueDBField.postPut();
+            }
+            if(enableSetValue) {
+                enableSetValuePVBoolean.put(false);
+                enableSetValueDBField.postPut();
+            }
+            prevBoolean = enableValuePVBoolean.get();
+            if(prevBoolean!=enableNewValue) {
+                enableValuePVBoolean.put(enableNewValue);
+                enableValueDBField.postPut();
+            }
+            if(autoConnectSetValue) {
+                autoConnectSetValuePVBoolean.put(false);
+                autoConnectSetValueDBField.postPut();
+            }
+            prevBoolean = autoConnectValuePVBoolean.get();
+            if(prevBoolean!=autoConnectNewValue) {
+                autoConnectValuePVBoolean.put(autoConnectNewValue);
+                autoConnectValueDBField.postPut();
+            }
+            if(traceMaskSetValue) {
+                traceMaskSetValuePVBoolean.put(false);
+                traceMaskSetValueDBField.postPut();
+            }
+            int prevInt = traceMaskValuePVInt.get();
+            if(prevInt!=traceMaskNewValue) {
+                traceMaskValuePVInt.put(traceMaskNewValue);
+                traceMaskValueDBField.postPut();
+            }
+            if(traceIOMaskSetValue) {
+                traceIOMaskSetValuePVBoolean.put(false);
+                traceIOMaskSetValueDBField.postPut();
+            }
+            prevInt = traceIOMaskValuePVInt.get();
+            if(prevInt!=traceIOMaskNewValue) {
+                traceIOMaskValuePVInt.put(traceIOMaskNewValue);
+                traceIOMaskValueDBField.postPut();
+            }
+            if(traceIOTruncateSizeSetValue) {
+                traceIOTruncateSizeSetValuePVBoolean.put(false);
+                traceIOTruncateSizeSetValueDBField.postPut();
+            }
+            prevInt = traceIOTruncateSizeValuePVInt.get();
+            if(prevInt!=traceIOTruncateSizeNewValue) {
+                traceIOTruncateSizeValuePVInt.put(traceIOTruncateSizeNewValue);
+                traceIOTruncateSizeValueDBField.postPut();
+            }
+            if(report) {
+                reportPVBoolean.put(false);
+                reportDBField.postPut();
+            }
+            supportProcessRequester.supportProcessDone(RequestResult.success);
         }
-    }
-    
-    private static class PortDeviceData extends AbstractPVField implements PVString {
-        private PortDeviceControl portDeviceControl = null;
-        private String portDevice = null;
-        private DBField dbField;
         
-        private PortDeviceData(PVField parent,Field field,
-            PortDeviceControl portDeviceControl,DBField dbField)
-        {
-            super(parent,field);
-            this.portDeviceControl = portDeviceControl;
-            this.dbField = dbField;
-        }
-
-        /* (non-Javadoc)
-         * @see org.epics.ioc.pv.PVString#get()
-         */
-        public String get() {
-            return portDevice;
-        }
-
-        /* (non-Javadoc)
-         * @see org.epics.ioc.pv.PVString#put(java.lang.String)
-         */
-        public void put(String value) {
-            String portName = null;
-            boolean portOnly = false;
-            int addr = 0;
-            int index = value.indexOf('[');
-            if(index<=0) {
-                portOnly = true;
-                portName = value;
-            } else {
-                portOnly = false;
-                portName = value.substring(0, index);
-                int indexEnd = value.indexOf(']');
+        private void connectPortDevice() {
+            if(!portDeviceNameDesired.equals(portDeviceNamePrevious) ) {
+                user.disconnectPort();
+                portDeviceNamePrevious = portDeviceNameDesired;
+                String portName = null;
+                boolean portOnly = false;
+                int addr = 0;
+                int index = portDeviceNamePrevious.indexOf('[');
                 if(index<=0) {
-                    portDeviceControl.message(value + " is illegal value for portDevice");
+                    portOnly = true;
+                    portName = portDeviceNamePrevious;
+                } else {
+                    portOnly = false;
+                    portName = portDeviceNamePrevious.substring(0, index);
+                    int indexEnd = portDeviceNamePrevious.indexOf(']');
+                    if(index<=0) {
+                        message =portDeviceNamePrevious + " is illegal value for portDevice";
+                        return;
+                    }
+                    String addrString = portDeviceNamePrevious.substring(index+1,indexEnd);
+                    addr = Integer.parseInt(addrString);
+                }
+                port = user.connectPort(portName);
+                if(port==null) {
+                    message = "could not connect to port " + portName;
                     return;
                 }
-                String addrString = value.substring(index+1,indexEnd);
-                addr = Integer.parseInt(addrString);
-            }
-            boolean result = portDeviceControl.connectPortDevice(portOnly, portName, addr);
-            if(result) {
-                portDevice = value;
-                dbField.postPut();
-            }
-        }
-    }
-    
-    private static class ConnectDisconnectData extends AbstractPVField implements PVBoolean {
-        private PortDeviceControl portDeviceControl;
-        private DBField dbField;
-        private boolean value;
-        
-        private ConnectDisconnectData(PVField parent,Field field,
-            PortDeviceControl portDeviceControl,DBField dbField)
-        {
-            super(parent,field);
-            this.portDeviceControl = portDeviceControl;
-            this.dbField = dbField;
-        }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.pv.PVBoolean#get()
-         */
-        public boolean get() {
-            return value;
-        }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.pv.PVBoolean#put(boolean)
-         */
-        public void put(boolean value) {
-            boolean result =portDeviceControl.connect(value);
-            if(result) {
-                this.value = value;
-                dbField.postPut();
+                if(portOnly) {
+                    device = null;
+                    trace = port.getTrace();
+                } else {
+                    device = user.connectDevice(addr);
+                    if(device==null) {
+                        message = "could not connect to addr " + addr + " of port " + portName;
+                        user.disconnectPort();
+                        port = null;
+                    }
+                    trace = device.getTrace();
+                }
             }
         }
-    }
+
+        private void connect() {
+            Status status = null;
+            if(port==null) return;
+            if(connectSetValue) {
+                if(connectDesiredValue==false) {
+                    if(device!=null) {
+                        if(device.isConnected()) {
+                            status = device.disconnect(user);
+                            if(status!=Status.success) message = user.getMessage();
+                        }
+                    } else {
+                        if(port.isConnected()) {
+                            status = port.disconnect(user);
+                            if(status!=Status.success) message = user.getMessage();
+                        }
+                    }
+                } else {
+                    if(device!=null) {
+                        if(!device.isConnected()) {
+                            status = device.connect(user);
+                            if(status!=Status.success) message = user.getMessage();
+                        }
+                    } else {
+                        if(!port.isConnected()) {
+                            status = port.connect(user);
+                            if(status!=Status.success) message = user.getMessage();
+                        }
+                    }
+                }
+            }
+            if(device!=null) {
+                connectNewValue = device.isConnected();
+            } else {
+                connectNewValue = port.isConnected();
+            }
+        }
     
-    private static class EnableDisableData extends AbstractPVField implements PVBoolean {
-        private PortDeviceControl portDeviceControl = null;
-        private DBField dbField;
-        private boolean value = false;
+        private void enable() {
+            if(port==null) return;
+            if(enableSetValue) {
+                if(device!=null) {
+                    boolean oldValue = device.isEnabled();
+                    if(enableDesiredValue!=oldValue) {
+                        device.enable(enableDesiredValue);
+                    }
+                } else {
+                    boolean oldValue = port.isEnabled();
+                    if(enableDesiredValue!=oldValue) {
+                        port.enable(enableDesiredValue);
+                    }
+                }
+            }
+            if(device!=null) {
+                enableNewValue = device.isConnected();
+            } else {
+                enableNewValue = port.isConnected();
+            }
+        }
         
-        private EnableDisableData(PVField parent,Field field,
-            PortDeviceControl portDeviceControl,DBField dbField)
-        {
-            super(parent,field);
-            this.portDeviceControl = portDeviceControl;
-            this.dbField = dbField;
+        private void autoConnect() {
+            if(port==null) return;
+            if(autoConnectSetValue) {
+                if(device!=null) {
+                    boolean oldValue = device.isEnabled();
+                    if(autoConnectDesiredValue!=oldValue) {
+                        device.autoConnect(autoConnectDesiredValue);
+                    }
+                } else {
+                    boolean oldValue = port.isEnabled();
+                    if(autoConnectDesiredValue!=oldValue) {
+                        port.autoConnect(autoConnectDesiredValue);
+                    }
+                }
+            }
+            if(device!=null) {
+                autoConnectNewValue = device.isConnected();
+            } else {
+                autoConnectNewValue = port.isConnected();
+            }
         }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.pv.PVBoolean#get()
-         */
-        public boolean get() {
-            return value;
-        }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.pv.PVBoolean#put(boolean)
-         */
-        public void put(boolean value) {
-            portDeviceControl.enable(value);
-            this.value = value;
-            dbField.postPut();
-        }
-    }
-    
-    private static class AutoConnectData extends AbstractPVField implements PVBoolean {
-        private PortDeviceControl portDeviceControl = null;
-        private DBField dbField;
-        private boolean autoConnect = true;
         
-        private AutoConnectData(PVField parent,Field field,
-            PortDeviceControl portDeviceControl,DBField dbField)
-        {
-            super(parent,field);
-            this.portDeviceControl = portDeviceControl;
-            this.dbField = dbField;
+        private void traceMask() {
+            if(trace==null) return;
+            if(traceMaskSetValue) {
+                int oldValue = trace.getMask();
+                if(traceMaskDesiredValue!=oldValue) {
+                    trace.setMask(traceMaskDesiredValue);
+                }
+            }
+            traceMaskNewValue = trace.getMask();
         }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.pv.PVBoolean#get()
-         */
-        public boolean get() {
-            return autoConnect;
-        }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.pv.PVBoolean#put(boolean)
-         */
-        public void put(boolean value) {
-            portDeviceControl.autoConnect(value);
-            this.autoConnect = value;
-            dbField.postPut();
-        }
-    }
-    
-    private static class TraceMaskData extends AbstractPVField implements PVInt {
-        private PortDeviceControl portDeviceControl = null;
-        private DBField dbField;
-        int mask = 1;
         
-        private TraceMaskData(PVField parent,Field field,
-            PortDeviceControl portDeviceControl,DBField dbField)
-        {
-            super(parent,field);
-            this.portDeviceControl = portDeviceControl;
-            this.dbField = dbField;
+        private void traceIOMask() {
+            if(trace==null) return;
+            if(traceIOMaskSetValue) {
+                int oldValue = trace.getIOMask();
+                if(traceIOMaskDesiredValue!=oldValue) {
+                    trace.setIOMask(traceIOMaskDesiredValue);
+                }
+            }
+            traceIOMaskNewValue = trace.getIOMask();
         }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.pv.PVInt#get()
-         */
-        public int get() {
-            return mask;
-        }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.pv.PVInt#put(int)
-         */
-        public void put(int value) {
-            portDeviceControl.traceMask(value);
-            this.mask = value;
-            dbField.postPut();
-        }
-    }
-    
-    private static class TraceIOMaskData extends AbstractPVField implements PVInt {
-        private PortDeviceControl portDeviceControl = null;
-        private DBField dbField;
-        private int mask;
         
-        private TraceIOMaskData(PVField parent,Field field,
-            PortDeviceControl portDeviceControl,DBField dbField)
-        {
-            super(parent,field);
-            this.portDeviceControl = portDeviceControl;
-            this.dbField = dbField;
+        private void traceIOTruncateSize() {
+            if(trace==null) return;
+            if(traceIOTruncateSizeSetValue) {
+                int oldValue = trace.getIOTruncateSize();
+                if(traceIOTruncateSizeDesiredValue!=oldValue) {
+                    trace.setIOTruncateSize(traceIOTruncateSizeDesiredValue);
+                }
+            }
+            traceIOTruncateSizeNewValue = trace.getIOTruncateSize();
         }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.pv.PVInt#get()
-         */
-        public int get() {
-            return mask;
-        }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.pv.PVInt#put(int)
-         */
-        public void put(int value) {
-            portDeviceControl.traceIOMask(value);
-            this.mask = value;
-            dbField.postPut();
-        }
-    }
-    
-    private static class ReportData extends AbstractPVField implements PVInt {
-        private PortDeviceControl portDeviceControl = null;
-        private DBField dbField;
-        private int value;
         
-        private ReportData(PVField parent,Field field,
-            PortDeviceControl portDeviceControl,DBField dbField)
-        {
-            super(parent,field);
-            this.portDeviceControl = portDeviceControl;
-            this.dbField = dbField;
-        }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.pv.PVInt#get()
-         */
-        public int get() {
-            return value;
-        }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.pv.PVInt#put(int)
-         */
-        public void put(int value) {
-            portDeviceControl.report(value);
-            this.value = value;
-            dbField.postPut();
+        private void report() {
+            if(port==null) return;
+            if(!report) return;
+            if(device!=null) {
+                message = device.report(reportDetails);
+            } else {
+                message = port.report(true, reportDetails);
+            }
         }
     }
 }

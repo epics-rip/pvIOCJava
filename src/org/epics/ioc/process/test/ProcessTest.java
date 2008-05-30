@@ -40,16 +40,18 @@ public class ProcessTest extends TestCase {
     public static void testProcess() {
         DBD dbd = DBDFactory.getMasterDBD();
         IOCDB iocdbMaster = IOCDBFactory.getMaster();
-        Requester iocRequester = new Listener();
+        Requester parsingRequester = new Listener();
         XMLToDBDFactory.convert(dbd,
                  "example/exampleDBD.xml",
-                 iocRequester);
-        Map<String,DBRecord> recordMap = iocdbMaster.getRecordMap();
-        Set<String> keys = recordMap.keySet();
+                 parsingRequester);
+        Map<String,DBRecord> recordMap = null;
+        Set<String> keys = null;
         boolean initOK = IOCFactory.initDatabase(
-            "src/org/epics/ioc/process/test/processTestDB.xml",iocRequester);
+            "src/org/epics/ioc/process/test/processTestDB.xml",parsingRequester);
         if(!initOK) {
             System.out.printf("\nrecords\n");
+            recordMap = iocdbMaster.getRecordMap();
+            keys = recordMap.keySet();
             for(String key: keys) {
                 DBRecord record = recordMap.get(key);
                 System.out.print(record.toString());
@@ -60,8 +62,12 @@ public class ProcessTest extends TestCase {
             Thread.sleep(1000);
             System.out.println();
         } catch (InterruptedException e) {}
+        recordMap = iocdbMaster.getRecordMap();
+        keys = recordMap.keySet();
         DBRecord dbRecord = iocdbMaster.findRecord("counter");
         assertNotNull(dbRecord);
+        Requester iocdbRequester = new IOCDBListener();
+        iocdbMaster.addRequester(iocdbRequester);
         TestProcess testProcess = new TestProcess(dbRecord);
         for(String key: keys) {
             RecordProcess recordProcess = recordMap.get(key).getRecordProcess();
@@ -74,13 +80,13 @@ public class ProcessTest extends TestCase {
         } 
         System.out.println("starting performance test"); 
         testProcess.testPerform();
-        System.out.printf("\nrecords\n");
-        for(String key: keys) {
-            DBRecord record = recordMap.get(key);
-            System.out.print(record.toString());
-        }
+//        System.out.printf("\nrecords\n");
+//        for(String key: keys) {
+//            DBRecord record = recordMap.get(key);
+//            System.out.print(record.toString());
+//        }
         initOK = IOCFactory.initDatabase(
-            "src/org/epics/ioc/process/test/loopDB.xml",iocRequester);
+            "src/org/epics/ioc/process/test/loopDB.xml",parsingRequester);
         if(!initOK) return;
         dbRecord = iocdbMaster.findRecord("root");
         assertNotNull(dbRecord);
@@ -93,11 +99,11 @@ public class ProcessTest extends TestCase {
         }
         System.out.printf("%n%n");
         testProcess.test();
-        System.out.printf("\nrecords\n");
-        for(String key: keys) {
-            DBRecord record = recordMap.get(key);
-            System.out.print(record.toString());
-        }
+//        System.out.printf("\nrecords\n");
+//        for(String key: keys) {
+//            DBRecord record = recordMap.get(key);
+//            System.out.print(record.toString());
+//        }
     }
     
     private static class TestProcess implements RecordProcessRequester {
@@ -234,7 +240,24 @@ public class ProcessTest extends TestCase {
          * @see org.epics.ioc.util.Requester#message(java.lang.String, org.epics.ioc.util.MessageType)
          */
         public void message(String message, MessageType messageType) {
-            System.out.println(message);
+            System.out.println("parseListener: " + message);
+            
+        }
+    }
+    
+    private static class IOCDBListener implements Requester {
+        /* (non-Javadoc)
+         * @see org.epics.ioc.util.Requester#getRequestorName()
+         */
+        public String getRequesterName() {
+            return "ProcessTest";
+        }
+
+        /* (non-Javadoc)
+         * @see org.epics.ioc.util.Requester#message(java.lang.String, org.epics.ioc.util.MessageType)
+         */
+        public void message(String message, MessageType messageType) {
+            System.out.println("IOCDBListener: " + messageType + " " + message);
             
         }
     }

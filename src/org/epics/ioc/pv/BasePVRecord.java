@@ -43,7 +43,9 @@ public class BasePVRecord extends BasePVStructure implements PVRecord {
     public void message(String message, MessageType messageType) {
         if(message!=null && message.charAt(0)!='.') message = " " + message;
         message = recordName + message;
-        for (Requester requester : requesterList) requester.message(message, messageType);
+        for (Requester requester : requesterList) {
+            requester.message(message, messageType);
+        }
         if(requesterList.size()==0) {
             System.out.println(messageType.toString() + " " + message);
         }

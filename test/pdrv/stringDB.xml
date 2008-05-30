@@ -1,18 +1,18 @@
 <?xml version="1.0" ?>
 <IOCDatabase>
 
-<record name = "syncStringDriver" type = "portCreate">
+<record name = "syncStringPort" type = "portCreate">
     <factoryName>org.epics.ioc.pdrv.testDriver.OctetDriverFactory</factoryName>
-    <portName>syncStringDriver</portName>
+    <portName>syncStringPort</portName>
     <driverParameters structureName = "octetDriver" >
         <multiDevice>true</multiDevice>
         <delay>0.0</delay>
     </driverParameters>
 </record>
 
-<record name = "syncStringDriverControl" type = "portDeviceControl" >
+<record name = "syncStringDeviceControl" type = "portDeviceControl" >
+    <portDevice>syncStringPort[0]</portDevice>
 <!--
-    <portDevice>syncStringDriver[0]</portDevice>
     <traceMask>0x0fff</traceMask>
     <traceIOMask>0x0fff</traceIOMask>
 -->
@@ -55,7 +55,7 @@
     <alarm structureName = "alarm" />
     <timeStamp structureName = "timeStamp" />
     <output supportName = "pdrvOctetOutput" structureName = "pdrvSupport">
-        <portName>syncStringDriver</portName>
+        <portName>syncStringPort</portName>
         <addr>0</addr>
         <timeout>.2</timeout>
     </output>
@@ -73,7 +73,7 @@
     <alarm structureName = "alarm" />
     <timeStamp structureName = "timeStamp" />
     <input supportName = "pdrvOctetInput" structureName = "pdrvSupport">
-        <portName>syncStringDriver</portName>
+        <portName>syncStringPort</portName>
         <addr>0</addr>
         <timeout>.2</timeout>
         <size>20</size>
@@ -84,25 +84,25 @@
     <alarm structureName = "alarm" />
     <timeStamp structureName = "timeStamp" />
     <input supportName = "pdrvOctetInterruptInput" structureName = "pdrvSupport">
-        <portName>syncStringDriver</portName>
+        <portName>syncStringPort</portName>
         <addr>0</addr>
         <process>true</process>
         <size>20</size>
     </input>
 </record>
 
-<record name = "asynStringDriver" type = "portCreate">
+<record name = "asynStringPort" type = "portCreate">
     <factoryName>org.epics.ioc.pdrv.testDriver.OctetDriverFactory</factoryName>
-    <portName>asynStringDriver</portName>
+    <portName>asynStringPort</portName>
     <driverParameters structureName = "octetDriver" >
         <multiDevice>true</multiDevice>
         <delay>0.1</delay>
     </driverParameters>
 </record>
 
-<record name = "asynStringDriverControl" type = "portDeviceControl" >
+<record name = "asynStringDeviceControl" type = "portDeviceControl" >
+    <portDevice>asynStringPort[0]</portDevice>
 <!--
-    <portDevice>asynStringDriver[0]</portDevice>
     <traceMask>0x0fff</traceMask>
     <traceIOMask>0x0fff</traceIOMask>
 -->
@@ -145,7 +145,7 @@
     <alarm structureName = "alarm" />
     <timeStamp structureName = "timeStamp" />
     <output supportName = "pdrvOctetOutput" structureName = "pdrvSupport">
-        <portName>asynStringDriver</portName>
+        <portName>asynStringPort</portName>
         <addr>0</addr>
         <timeout>.2</timeout>
     </output>
@@ -163,7 +163,7 @@
     <alarm structureName = "alarm" />
     <timeStamp structureName = "timeStamp" />
     <input supportName = "pdrvOctetInput" structureName = "pdrvSupport">
-        <portName>asynStringDriver</portName>
+        <portName>asynStringPort</portName>
         <addr>0</addr>
         <timeout>.2</timeout>
         <size>20</size>
@@ -174,7 +174,7 @@
     <alarm structureName = "alarm" />
     <timeStamp structureName = "timeStamp" />
     <input supportName = "pdrvOctetInterruptInput" structureName = "pdrvSupport">
-        <portName>asynStringDriver</portName>
+        <portName>asynStringPort</portName>
         <addr>0</addr>
         <process>true</process>
         <size>20</size>

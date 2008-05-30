@@ -1,18 +1,18 @@
 <?xml version="1.0" ?>
 <IOCDatabase>
 
-<record name = "syncDigitalDriver" type = "portCreate">
+<record name = "syncDigitalPort" type = "portCreate">
     <factoryName>org.epics.ioc.pdrv.testDriver.UInt32DigitalDriverFactory</factoryName>
-    <portName>syncDigitalDigitalDriver</portName>
+    <portName>syncDigitalPort</portName>
     <driverParameters structureName = "uint32DigitalDriver" >
         <delay>0.0</delay>
         <numberRegisters>2</numberRegisters>
     </driverParameters>
 </record>
 
-<record name = "syncDigitalDigitalDriverControl" type = "portDeviceControl" >
+<record name = "syncDigitalPortControl" type = "portDeviceControl" >
+    <portDevice>syncDigitalPort[0]</portDevice>
 <!--
-    <portDevice>syncDigitalDigitalDriver[0]</portDevice>
     <traceMask>0x0fff</traceMask>
     <traceIOMask>0x0fff</traceIOMask>
 -->
@@ -63,7 +63,7 @@
     <alarm structureName = "alarm" />
     <timeStamp structureName = "timeStamp" />
     <output supportName = "pdrvUInt32DigitalOutput" structureName = "pdrvSupport">
-        <portName>syncDigitalDigitalDriver</portName>
+        <portName>syncDigitalPort</portName>
         <addr>0</addr>
         <mask>15</mask>
         <timeout>.2</timeout>
@@ -108,7 +108,7 @@
     <input structureName = "digital" >
         <alarm structureName = "alarm" />
         <input supportName = "pdrvUInt32DigitalInput" structureName = "pdrvSupport">
-            <portName>syncDigitalDigitalDriver</portName>
+            <portName>syncDigitalPort</portName>
             <addr>0</addr>
             <mask>0x1</mask>
             <timeout>.2</timeout>
@@ -142,7 +142,7 @@
     <input structureName = "digital">
         <alarm structureName = "alarm" />
         <input supportName = "pdrvUInt32DigitalInput" structureName = "pdrvSupport">
-            <portName>syncDigitalDigitalDriver</portName>
+            <portName>syncDigitalPort</portName>
             <addr>0</addr>
             <mask>0x2</mask>
             <timeout>.2</timeout>
@@ -176,7 +176,7 @@
     <input structureName = "digital">
         <alarm structureName = "alarm" />
         <input supportName = "pdrvUInt32DigitalInput" structureName = "pdrvSupport">
-            <portName>syncDigitalDigitalDriver</portName>
+            <portName>syncDigitalPort</portName>
             <addr>0</addr>
             <mask>0x3</mask>
             <timeout>.2</timeout>
@@ -222,7 +222,7 @@
     <input structureName = "digital">
         <alarm structureName = "alarm" />
         <input supportName = "pdrvUInt32DigitalInput" structureName = "pdrvSupport">
-            <portName>syncDigitalDigitalDriver</portName>
+            <portName>syncDigitalPort</portName>
             <addr>0</addr>
             <mask>0xc</mask>
             <timeout>.2</timeout>
@@ -268,7 +268,7 @@
     <input structureName = "digital">
         <alarm structureName = "alarm" />
         <input supportName = "pdrvUInt32DigitalInput" structureName = "pdrvSupport">
-            <portName>syncDigitalDigitalDriver</portName>
+            <portName>syncDigitalPort</portName>
             <addr>0</addr>
             <mask>0xf</mask>
             <timeout>.2</timeout>

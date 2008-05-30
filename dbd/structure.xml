@@ -18,6 +18,9 @@
 <include href = "generic.xml" />
 <include href = "supportArray.xml" />
 <include href = "supportState.xml" />
+<include href = "booleanState.xml" />
+<include href = "intState.xml" />
+<include href = "stringState.xml" />
 <include href = "channelAccess.xml" />
 <include href = "analog.xml" />
 <include href = "digital.xml" />

@@ -2,34 +2,34 @@
 <IOCDatabase>
 <record name = "root" type = "calcDouble">
     <calcArgArray>
-        <value structureName = "calcDoubleArg">
+        <element structureName = "calcDoubleArg">
             <value>0</value>
             <name>min</name>
-        </value>
-        <value structureName = "calcDoubleArg">
+        </element>
+        <element structureName = "calcDoubleArg">
             <value>1e9</value>
             <name>max</name>
-        </value>
-        <value structureName = "calcDoubleArg">
+        </element>
+        <element structureName = "calcDoubleArg">
             <value>100.0</value>
             <name>inc</name>
-        </value>
+        </element>
     </calcArgArray>
     <calculator supportName = "counterCalculator" />
     <supportArray>
-        <value structureName = "supportArrayElement">
+        <element structureName = "supportArrayElement">
             <wait>false</wait>
             <link  supportName = "processSupport" structureName = "processSupport">
                     <pvname>other01</pvname>
             </link>
-        </value>
-        <value structureName = "supportArrayElement">
+        </element>
+        <element structureName = "supportArrayElement">
             <wait>false</wait>
             <link  supportName = "outputSupport" structureName = "outputSupport">
                     <pvname>other02</pvname>
                     <process>true</process>
             </link>
-        </value>
+        </element>
     </supportArray>
 </record>
 <record name = "other01" type = "double">
@@ -40,12 +40,12 @@
 </record>
 <record name = "other02" type = "double">
     <supportArray>
-        <value structureName = "supportArrayElement">
+        <element structureName = "supportArrayElement">
             <wait>false</wait>
             <link  supportName = "processSupport" structureName = "processSupport">
                     <pvname>other03</pvname>
             </link>
-        </value>
+        </element>
     </supportArray>
 </record>
 <record name = "other03" type = "double">

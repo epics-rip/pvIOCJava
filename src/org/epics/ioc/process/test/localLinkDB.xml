@@ -2,34 +2,34 @@
 <IOCDatabase>
 <record name = "counter" type = "calcDouble">
      <calcArgArray>
-        <value structureName = "calcDoubleArg">
+        <element structureName = "calcDoubleArg">
             <value>0</value>
             <name>min</name>
-        </value>
-        <value structureName = "calcDoubleArg">
+        </element>
+        <element structureName = "calcDoubleArg">
             <value>1e9</value>
             <name>max</name>
-        </value>
-        <value structureName = "calcDoubleArg">
+        </element>
+        <element structureName = "calcDoubleArg">
             <value>100.0</value>
             <name>inc</name>
-        </value>
+        </element>
     </calcArgArray>
     <calculator supportName = "counterCalculator" />
     <supportArray>
-        <value structureName = "supportArrayElement">
+        <element structureName = "supportArrayElement">
             <wait>true</wait>
             <link  supportName = "processSupport" structureName = "processSupport">
                     <pvname>double01</pvname>
             </link>
-        </value>
-        <value structureName = "supportArrayElement">
+        </element>
+        <element structureName = "supportArrayElement">
             <wait>false</wait>
             <link  supportName = "outputSupport" structureName = "outputSupport">
                     <pvname>double02</pvname>
                     <process>true</process>
             </link>
-        </value>
+        </element>
     </supportArray>
 </record>
 <record name = "double01" type = "double">

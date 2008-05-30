@@ -191,6 +191,10 @@ public class UInt32DigitalDriverFactory {
                  * @see org.epics.ioc.pdrv.interfaces.AbstractUInt32Digital#read(org.epics.ioc.pdrv.User, int)
                  */
                 public Status read(User user, int mask) {
+                    if(!device.isConnected()) {
+                        trace.print(Trace.ERROR,deviceName + " read but not connected");
+                        return Status.error;
+                    }
                     double timeout = user.getTimeout();
                     if(timeout>0.0 && delay>timeout) {
                         user.setMessage("timeout");
@@ -212,6 +216,10 @@ public class UInt32DigitalDriverFactory {
                  * @see org.epics.ioc.pdrv.interfaces.AbstractUInt32Digital#write(org.epics.ioc.pdrv.User, int, int)
                  */
                 public Status write(User user, int value, int mask) {
+                    if(!device.isConnected()) {
+                        trace.print(Trace.ERROR,deviceName + " write but not connected");
+                        return Status.error;
+                    }
                     double timeout = user.getTimeout();
                     if(timeout>0.0 && delay>timeout) {
                         user.setMessage("timeout");

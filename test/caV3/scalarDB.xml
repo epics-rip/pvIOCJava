@@ -1,8 +1,7 @@
 <?xml version="1.0" ?>
 <IOCDatabase>
 
-<!--
-<record name = "enumCounter" type = "calcDouble">
+<record name = "enumCounter${num}" type = "calcDouble">
     <alarm structureName = "alarm" />
     <timeStamp structureName = "timeStamp" />
     <calcArgArray>
@@ -26,109 +25,108 @@
         <processAfterStart>true</processAfterStart>
     </scan>
 </record>
-<record name = "enumOut" type = "int">
+<record name = "enumOut${num}" type = "int">
     <alarm structureName = "alarm" />
     <timeStamp structureName = "timeStamp" />
     <input supportName = "monitorSupport" structureName = "monitorSupport">
-        <pvname>enumCounter</pvname>
+        <pvname>enumCounter${num}</pvname>
         <process>true</process>
     </input>
     <output supportName = "outputSupport" structureName = "outputSupport">
         <providerName>caV3</providerName>
-        <pvname>enum.value.index</pvname>
+        <pvname>enum${num}.value.index</pvname>
     </output>
     <supportArray>
         <element structureName = "supportArrayElement">
             <wait>true</wait>
             <link  supportName = "processSupport"  structureName = "processSupport">
-                <pvname>enumIn</pvname>
+                <pvname>enumIn${num}</pvname>
             </link>
         </element>
         <element structureName = "supportArrayElement">
             <wait>true</wait>
             <link  supportName = "processSupport"  structureName = "processSupport">
-                <pvname>enumInIndex</pvname>
+                <pvname>enumInIndex${num}</pvname>
             </link>
         </element>
         <element structureName = "supportArrayElement">
             <wait>true</wait>
             <link  supportName = "processSupport"  structureName = "processSupport">
-                <pvname>enumInChoice</pvname>
+                <pvname>enumInChoice${num}</pvname>
             </link>
         </element>
     </supportArray>
 
 </record>
 
-<record name = "enumIn" type = "enumerated">
+<record name = "enumIn${num}" type = "enumerated">
     <alarm structureName = "alarm" />
     <timeStamp structureName = "timeStamp" />
     <input supportName = "inputSupport" structureName = "inputSupport">
         <providerName>caV3</providerName>
-        <pvname>enum.value</pvname>
+        <pvname>enum${num}.value</pvname>
         <process>false</process>
         <propertyNames>alarm</propertyNames>
     </input>
 </record>
 
 
-<record name = "enumMonitor" type = "enumerated">
+<record name = "enumMonitor${num}" type = "enumerated">
     <alarm structureName = "alarm" />
     <timeStamp structureName = "timeStamp" />
     <input supportName = "monitorSupport" structureName = "monitorSupport">
         <providerName>caV3</providerName>
-        <pvname>enum.value</pvname>
+        <pvname>enum${num}.value</pvname>
         <process>true</process>
         <propertyNames>alarm</propertyNames>
     </input>
 </record>
 
-<record name = "enumInIndex" type = "int">
+<record name = "enumInIndex${num}" type = "int">
     <alarm structureName = "alarm" />
     <timeStamp structureName = "timeStamp" />
     <input supportName = "inputSupport" structureName = "inputSupport">
         <providerName>caV3</providerName>
-        <pvname>enum.value.index</pvname>
+        <pvname>enum${num}.value.index</pvname>
         <process>false</process>
         <propertyNames>alarm</propertyNames>
     </input>
 </record>
-<record name = "enumMonitorIndex" type = "int">
+<record name = "enumMonitorIndex${num}" type = "int">
     <alarm structureName = "alarm" />
     <timeStamp structureName = "timeStamp" />
     <input supportName = "monitorSupport" structureName = "monitorSupport">
         <providerName>caV3</providerName>
-        <pvname>enum.value.index</pvname>
+        <pvname>enum${num}.value.index</pvname>
         <process>true</process>
         <propertyNames>alarm</propertyNames>
     </input>
 </record>
 
-<record name = "enumInChoice" type = "string">
+<record name = "enumInChoice${num}" type = "string">
     <alarm structureName = "alarm" />
     <timeStamp structureName = "timeStamp" />
     <input supportName = "inputSupport" structureName = "inputSupport">
         <providerName>caV3</providerName>
-        <pvname>enum.value.choice</pvname>
+        <pvname>enum${num}.value.choice</pvname>
         <process>false</process>
         <propertyNames>alarm</propertyNames>
     </input>
 </record>
 
-<record name = "enumMonitorChoice" type = "string">
+<record name = "enumMonitorChoice${num}" type = "string">
     <alarm structureName = "alarm" />
     <timeStamp structureName = "timeStamp" />
     <input supportName = "monitorSupport" structureName = "monitorSupport">
         <providerName>caV3</providerName>
-        <pvname>enum.value.choice</pvname>
+        <pvname>enum${num}.value.choice</pvname>
         <process>true</process>
         <propertyNames>alarm</propertyNames>
     </input>
 </record>
 
--->
 
-<record name = "byteCounter" type = "calcDouble">
+<record name = "byteCounter${num}" type = "calcDouble">
     <alarm structureName = "alarm" />
     <timeStamp structureName = "timeStamp" />
     <calcArgArray>
@@ -153,288 +151,288 @@
 </record>
 
 
-<record name = "byteOut" type = "byte">
+<record name = "byteOut${num}" type = "byte">
     <alarm structureName = "alarm" />
     <timeStamp structureName = "timeStamp" />
     <input supportName = "monitorSupport" structureName = "monitorSupport">
-        <pvname>byteCounter</pvname>
+        <pvname>byteCounter${num}</pvname>
         <process>true</process>
     </input>
     <output supportName = "outputSupport" structureName = "outputSupport">
         <providerName>caV3</providerName>
-        <pvname>byte</pvname>
+        <pvname>byte${num}</pvname>
     </output>
     <supportArray>
         <element structureName = "supportArrayElement">
             <wait>true</wait>
             <link  supportName = "processSupport"  structureName = "processSupport">
-                <pvname>byteIn</pvname>
+                <pvname>byteIn${num}</pvname>
             </link>
         </element>
     </supportArray>
 
 </record>
 
-<record name = "byteIn" type = "byte">
+<record name = "byteIn${num}" type = "byte">
     <alarm structureName = "alarm" />
     <timeStamp structureName = "timeStamp" />
     <display structureName = "display" />
     <control structureName = "control" />
     <input supportName = "inputSupport" structureName = "inputSupport">
         <providerName>caV3</providerName>
-        <pvname>byte</pvname>
+        <pvname>byte${num}</pvname>
         <propertyNames>alarm,display,control</propertyNames>
     </input>
 </record>
 
-<record name = "byteMonitor" type = "byte">
+<record name = "byteMonitor${num}" type = "byte">
     <alarm structureName = "alarm" />
     <timeStamp structureName = "timeStamp" />
     <display structureName = "display" />
     <control structureName = "control" />
     <input supportName = "monitorSupport" structureName = "monitorSupport">
         <providerName>caV3</providerName>
-        <pvname>byte</pvname>
+        <pvname>byte${num}</pvname>
         <process>true</process>
         <propertyNames>alarm,display,control</propertyNames>
+    </input>
+</record>
+
+
+<record name = "shortOut${num}" type = "short">
+    <alarm structureName = "alarm" />
+    <timeStamp structureName = "timeStamp" />
+    <input supportName = "monitorSupport" structureName = "monitorSupport">
+        <pvname>byteCounter${num}</pvname>
+        <process>true</process>
+    </input>
+    <output supportName = "outputSupport" structureName = "outputSupport">
+        <providerName>caV3</providerName>
+        <pvname>short${num}</pvname>
+    </output>
+    <supportArray>
+        <element structureName = "supportArrayElement">
+            <wait>true</wait>
+            <link  supportName = "processSupport"  structureName = "processSupport">
+                <pvname>shortIn${num}</pvname>
+            </link>
+        </element>
+    </supportArray>
+
+</record>
+
+<record name = "shortIn${num}" type = "short">
+    <alarm structureName = "alarm" />
+    <timeStamp structureName = "timeStamp" />
+    <display structureName = "display" />
+    <control structureName = "control" />
+    <input supportName = "inputSupport" structureName = "inputSupport">
+        <providerName>caV3</providerName>
+        <pvname>short${num}</pvname>
+        <propertyNames>alarm,display,control</propertyNames>
+    </input>
+</record>
+
+<record name = "shortMonitor${num}" type = "short">
+    <alarm structureName = "alarm" />
+    <timeStamp structureName = "timeStamp" />
+    <display structureName = "display" />
+    <control structureName = "control" />
+    <input supportName = "monitorSupport" structureName = "monitorSupport">
+        <providerName>caV3</providerName>
+        <pvname>short${num}</pvname>
+        <process>true</process>
+        <propertyNames>alarm,display,control</propertyNames>
+    </input>
+</record>
+
+<record name = "intOut${num}" type = "int">
+    <alarm structureName = "alarm" />
+    <timeStamp structureName = "timeStamp" />
+    <input supportName = "monitorSupport" structureName = "monitorSupport">
+        <pvname>byteCounter${num}</pvname>
+        <process>true</process>
+    </input>
+    <output supportName = "outputSupport" structureName = "outputSupport">
+        <providerName>caV3</providerName>
+        <pvname>int${num}</pvname>
+    </output>
+    <supportArray>
+        <element structureName = "supportArrayElement">
+            <wait>true</wait>
+            <link  supportName = "processSupport"  structureName = "processSupport">
+                <pvname>intIn${num}</pvname>
+            </link>
+        </element>
+    </supportArray>
+
+</record>
+
+<record name = "intIn${num}" type = "int">
+    <alarm structureName = "alarm" />
+    <timeStamp structureName = "timeStamp" />
+    <display structureName = "display" />
+    <control structureName = "control" />
+    <input supportName = "inputSupport" structureName = "inputSupport">
+        <providerName>caV3</providerName>
+        <pvname>int${num}</pvname>
+        <propertyNames>alarm,display,control</propertyNames>
+    </input>
+</record>
+
+<record name = "intMonitor${num}" type = "int">
+    <alarm structureName = "alarm" />
+    <timeStamp structureName = "timeStamp" />
+    <display structureName = "display" />
+    <control structureName = "control" />
+    <input supportName = "monitorSupport" structureName = "monitorSupport">
+        <providerName>caV3</providerName>
+        <pvname>int${num}</pvname>
+        <process>true</process>
+        <propertyNames>alarm,display,control</propertyNames>
+    </input>
+</record>
+
+
+<record name = "floatOut${num}" type = "float">
+    <alarm structureName = "alarm" />
+    <timeStamp structureName = "timeStamp" />
+    <input supportName = "monitorSupport" structureName = "monitorSupport">
+        <pvname>byteCounter${num}</pvname>
+        <process>true</process>
+    </input>
+    <output supportName = "outputSupport" structureName = "outputSupport">
+        <providerName>caV3</providerName>
+        <pvname>float${num}</pvname>
+    </output>
+    <supportArray>
+        <element structureName = "supportArrayElement">
+            <wait>true</wait>
+            <link  supportName = "processSupport"  structureName = "processSupport">
+                <pvname>floatIn${num}</pvname>
+            </link>
+        </element>
+    </supportArray>
+
+</record>
+
+<record name = "floatIn${num}" type = "float">
+    <alarm structureName = "alarm" />
+    <timeStamp structureName = "timeStamp" />
+    <display structureName = "display" />
+    <control structureName = "control" />
+    <input supportName = "inputSupport" structureName = "inputSupport">
+        <providerName>caV3</providerName>
+        <pvname>float${num}</pvname>
+        <propertyNames>alarm,display,control</propertyNames>
+    </input>
+</record>
+
+<record name = "floatMonitor${num}" type = "float">
+    <alarm structureName = "alarm" />
+    <timeStamp structureName = "timeStamp" />
+    <display structureName = "display" />
+    <control structureName = "control" />
+    <input supportName = "monitorSupport" structureName = "monitorSupport">
+        <providerName>caV3</providerName>
+        <pvname>float${num}</pvname>
+        <process>true</process>
+        <propertyNames>alarm,display,control</propertyNames>
+    </input>
+</record>
+
+<record name = "doubleOut${num}" type = "double">
+    <alarm structureName = "alarm" />
+    <timeStamp structureName = "timeStamp" />
+    <input supportName = "monitorSupport" structureName = "monitorSupport">
+        <pvname>byteCounter${num}</pvname>
+        <process>true</process>
+    </input>
+    <output supportName = "outputSupport" structureName = "outputSupport">
+        <providerName>caV3</providerName>
+        <pvname>double${num}</pvname>
+    </output>
+    <supportArray>
+        <element structureName = "supportArrayElement">
+            <wait>true</wait>
+            <link  supportName = "processSupport"  structureName = "processSupport">
+                <pvname>doubleIn${num}</pvname>
+            </link>
+        </element>
+    </supportArray>
+
+</record>
+
+<record name = "doubleIn${num}" type = "double">
+    <alarm structureName = "alarm" />
+    <timeStamp structureName = "timeStamp" />
+    <display structureName = "display" />
+    <control structureName = "control" />
+    <input supportName = "inputSupport" structureName = "inputSupport">
+        <providerName>caV3</providerName>
+        <pvname>double${num}</pvname>
+        <propertyNames>alarm,display,control</propertyNames>
+    </input>
+</record>
+
+<record name = "doubleMonitor${num}" type = "double">
+    <alarm structureName = "alarm" />
+    <timeStamp structureName = "timeStamp" />
+    <display structureName = "display" />
+    <control structureName = "control" />
+    <input supportName = "monitorSupport" structureName = "monitorSupport">
+        <providerName>caV3</providerName>
+        <pvname>double${num}</pvname>
+        <process>true</process>
+        <propertyNames>alarm,display,control</propertyNames>
+    </input>
+</record>
+
+
+<record name = "stringOut${num}" type = "string">
+    <alarm structureName = "alarm" />
+    <timeStamp structureName = "timeStamp" />
+    <input supportName = "monitorSupport" structureName = "monitorSupport">
+        <pvname>byteCounter${num}</pvname>
+        <process>true</process>
+    </input>
+    <output supportName = "outputSupport" structureName = "outputSupport">
+        <providerName>caV3</providerName>
+        <pvname>string${num}</pvname>
+    </output>
+    <supportArray>
+        <element structureName = "supportArrayElement">
+            <wait>true</wait>
+            <link  supportName = "processSupport"  structureName = "processSupport">
+                <pvname>stringIn${num}</pvname>
+            </link>
+        </element>
+    </supportArray>
+
+</record>
+
+<record name = "stringIn${num}" type = "string">
+    <alarm structureName = "alarm" />
+    <timeStamp structureName = "timeStamp" />
+    <input supportName = "inputSupport" structureName = "inputSupport">
+        <providerName>caV3</providerName>
+        <pvname>string${num}</pvname>
+        <propertyNames>alarm</propertyNames>
+    </input>
+</record>
+
+<record name = "stringMonitor${num}" type = "string">
+    <alarm structureName = "alarm" />
+    <timeStamp structureName = "timeStamp" />
+    <input supportName = "monitorSupport" structureName = "monitorSupport">
+        <providerName>caV3</providerName>
+        <pvname>string${num}</pvname>
+        <process>true</process>
+        <propertyNames>alarm</propertyNames>
     </input>
 </record>
 
 <!--
-
-<record name = "shortOut" type = "short">
-    <alarm structureName = "alarm" />
-    <timeStamp structureName = "timeStamp" />
-    <input supportName = "monitorSupport" structureName = "monitorSupport">
-        <pvname>byteCounter</pvname>
-        <process>true</process>
-    </input>
-    <output supportName = "outputSupport" structureName = "outputSupport">
-        <providerName>caV3</providerName>
-        <pvname>short</pvname>
-    </output>
-    <supportArray>
-        <element structureName = "supportArrayElement">
-            <wait>true</wait>
-            <link  supportName = "processSupport"  structureName = "processSupport">
-                <pvname>shortIn</pvname>
-            </link>
-        </element>
-    </supportArray>
-
-</record>
-
-<record name = "shortIn" type = "short">
-    <alarm structureName = "alarm" />
-    <timeStamp structureName = "timeStamp" />
-    <display structureName = "display" />
-    <control structureName = "control" />
-    <input supportName = "inputSupport" structureName = "inputSupport">
-        <providerName>caV3</providerName>
-        <pvname>short</pvname>
-        <propertyNames>alarm,display,control</propertyNames>
-    </input>
-</record>
-
-<record name = "shortMonitor" type = "short">
-    <alarm structureName = "alarm" />
-    <timeStamp structureName = "timeStamp" />
-    <display structureName = "display" />
-    <control structureName = "control" />
-    <input supportName = "monitorSupport" structureName = "monitorSupport">
-        <providerName>caV3</providerName>
-        <pvname>short</pvname>
-        <process>true</process>
-        <propertyNames>alarm,display,control</propertyNames>
-    </input>
-</record>
-
-<record name = "intOut" type = "int">
-    <alarm structureName = "alarm" />
-    <timeStamp structureName = "timeStamp" />
-    <input supportName = "monitorSupport" structureName = "monitorSupport">
-        <pvname>byteCounter</pvname>
-        <process>true</process>
-    </input>
-    <output supportName = "outputSupport" structureName = "outputSupport">
-        <providerName>caV3</providerName>
-        <pvname>int</pvname>
-    </output>
-    <supportArray>
-        <element structureName = "supportArrayElement">
-            <wait>true</wait>
-            <link  supportName = "processSupport"  structureName = "processSupport">
-                <pvname>intIn</pvname>
-            </link>
-        </element>
-    </supportArray>
-
-</record>
-
-<record name = "intIn" type = "int">
-    <alarm structureName = "alarm" />
-    <timeStamp structureName = "timeStamp" />
-    <display structureName = "display" />
-    <control structureName = "control" />
-    <input supportName = "inputSupport" structureName = "inputSupport">
-        <providerName>caV3</providerName>
-        <pvname>int</pvname>
-        <propertyNames>alarm,display,control</propertyNames>
-    </input>
-</record>
-
-<record name = "intMonitor" type = "int">
-    <alarm structureName = "alarm" />
-    <timeStamp structureName = "timeStamp" />
-    <display structureName = "display" />
-    <control structureName = "control" />
-    <input supportName = "monitorSupport" structureName = "monitorSupport">
-        <providerName>caV3</providerName>
-        <pvname>int</pvname>
-        <process>true</process>
-        <propertyNames>alarm,display,control</propertyNames>
-    </input>
-</record>
-
-
-<record name = "floatOut" type = "float">
-    <alarm structureName = "alarm" />
-    <timeStamp structureName = "timeStamp" />
-    <input supportName = "monitorSupport" structureName = "monitorSupport">
-        <pvname>byteCounter</pvname>
-        <process>true</process>
-    </input>
-    <output supportName = "outputSupport" structureName = "outputSupport">
-        <providerName>caV3</providerName>
-        <pvname>float</pvname>
-    </output>
-    <supportArray>
-        <element structureName = "supportArrayElement">
-            <wait>true</wait>
-            <link  supportName = "processSupport"  structureName = "processSupport">
-                <pvname>floatIn</pvname>
-            </link>
-        </element>
-    </supportArray>
-
-</record>
-
-<record name = "floatIn" type = "float">
-    <alarm structureName = "alarm" />
-    <timeStamp structureName = "timeStamp" />
-    <display structureName = "display" />
-    <control structureName = "control" />
-    <input supportName = "inputSupport" structureName = "inputSupport">
-        <providerName>caV3</providerName>
-        <pvname>float</pvname>
-        <propertyNames>alarm,display,control</propertyNames>
-    </input>
-</record>
-
-<record name = "floatMonitor" type = "float">
-    <alarm structureName = "alarm" />
-    <timeStamp structureName = "timeStamp" />
-    <display structureName = "display" />
-    <control structureName = "control" />
-    <input supportName = "monitorSupport" structureName = "monitorSupport">
-        <providerName>caV3</providerName>
-        <pvname>float</pvname>
-        <process>true</process>
-        <propertyNames>alarm,display,control</propertyNames>
-    </input>
-</record>
-
-<record name = "doubleOut" type = "double">
-    <alarm structureName = "alarm" />
-    <timeStamp structureName = "timeStamp" />
-    <input supportName = "monitorSupport" structureName = "monitorSupport">
-        <pvname>byteCounter</pvname>
-        <process>true</process>
-    </input>
-    <output supportName = "outputSupport" structureName = "outputSupport">
-        <providerName>caV3</providerName>
-        <pvname>double</pvname>
-    </output>
-    <supportArray>
-        <element structureName = "supportArrayElement">
-            <wait>true</wait>
-            <link  supportName = "processSupport"  structureName = "processSupport">
-                <pvname>doubleIn</pvname>
-            </link>
-        </element>
-    </supportArray>
-
-</record>
-
-<record name = "doubleIn" type = "double">
-    <alarm structureName = "alarm" />
-    <timeStamp structureName = "timeStamp" />
-    <display structureName = "display" />
-    <control structureName = "control" />
-    <input supportName = "inputSupport" structureName = "inputSupport">
-        <providerName>caV3</providerName>
-        <pvname>double</pvname>
-        <propertyNames>alarm,display,control</propertyNames>
-    </input>
-</record>
-
-<record name = "doubleMonitor" type = "double">
-    <alarm structureName = "alarm" />
-    <timeStamp structureName = "timeStamp" />
-    <display structureName = "display" />
-    <control structureName = "control" />
-    <input supportName = "monitorSupport" structureName = "monitorSupport">
-        <providerName>caV3</providerName>
-        <pvname>double</pvname>
-        <process>true</process>
-        <propertyNames>alarm,display,control</propertyNames>
-    </input>
-</record>
-
-
-<record name = "stringOut" type = "string">
-    <alarm structureName = "alarm" />
-    <timeStamp structureName = "timeStamp" />
-    <input supportName = "monitorSupport" structureName = "monitorSupport">
-        <pvname>byteCounter</pvname>
-        <process>true</process>
-    </input>
-    <output supportName = "outputSupport" structureName = "outputSupport">
-        <providerName>caV3</providerName>
-        <pvname>string</pvname>
-    </output>
-    <supportArray>
-        <element structureName = "supportArrayElement">
-            <wait>true</wait>
-            <link  supportName = "processSupport"  structureName = "processSupport">
-                <pvname>stringIn</pvname>
-            </link>
-        </element>
-    </supportArray>
-
-</record>
-
-<record name = "stringIn" type = "string">
-    <alarm structureName = "alarm" />
-    <timeStamp structureName = "timeStamp" />
-    <input supportName = "inputSupport" structureName = "inputSupport">
-        <providerName>caV3</providerName>
-        <pvname>string</pvname>
-        <propertyNames>alarm</propertyNames>
-    </input>
-</record>
-
-<record name = "stringMonitor" type = "string">
-    <alarm structureName = "alarm" />
-    <timeStamp structureName = "timeStamp" />
-    <input supportName = "monitorSupport" structureName = "monitorSupport">
-        <providerName>caV3</providerName>
-        <pvname>string</pvname>
-        <process>true</process>
-        <propertyNames>alarm</propertyNames>
-    </input>
-</record>
-
 -->
 
 </IOCDatabase>

@@ -453,7 +453,7 @@ public class Factory {
         private List<ConnectExceptionListener> exceptionListenerList
             = new LinkedList<ConnectExceptionListener>();
         private List<ConnectExceptionListener> exceptionListenerListNew = null;
-        private boolean exceptionActive = true;
+        private boolean exceptionActive = false;
         
         private UserImpl lockPortUser = null;
         private ReentrantLock lockPortLock = new ReentrantLock();
@@ -960,6 +960,10 @@ public class Factory {
                     return Status.error;
                 }
                 if(lockPortUser!=null) {
+                    if(lockPortUser==user) {
+                        user.message = "already locked. Illegal request";
+                        return Status.error;
+                    }
                     try {
                         portUnlock.await();
                     } catch (InterruptedException e){}
@@ -1058,7 +1062,7 @@ public class Factory {
 
         private List<ConnectExceptionListener> exceptionListenerList = new LinkedList<ConnectExceptionListener>();
         private List<ConnectExceptionListener> exceptionListenerListNew = null;
-        private boolean exceptionActive = true;
+        private boolean exceptionActive = false;
         
         private User blockingUser = null;
 
@@ -1399,6 +1403,11 @@ public class Factory {
             trace.print(Trace.FLOW, "%s[%s] device.lockPort", portName,addr);
             Status status = port.lockPort((UserImpl)user);
             if(status!=Status.success) return status;
+            if(!enabled) {
+                port.unlockPort((UserImpl)user);
+                user.setMessage("device disabled");
+                return Status.error;
+            }
             if(!connected) {
                 if(autoConnect) {
                     status = deviceDriver.connect(user);
@@ -1877,16 +1886,12 @@ public class Factory {
                     status = port.lockPort(user);
                     
                 }
-                if(status==Status.success) {
-                    try {
-                        queueRequestCallback.callback(Status.success,user);
-                    } finally {
-                        port.unlockPort(user);
-                    }
-                    user = null;
-                } else {
+                try {
                     queueRequestCallback.callback(status,user);
+                } finally {
+                    port.unlockPort(user);
                 }
+                user = null;
             }
         }
     }

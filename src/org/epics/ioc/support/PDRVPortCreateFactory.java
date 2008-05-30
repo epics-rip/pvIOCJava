@@ -71,7 +71,7 @@ public class PDRVPortCreateFactory {
         pvField = pvFields[index];
         field = pvField.getField();
         if(field.getType()!=org.epics.ioc.pv.Type.pvBoolean) {
-            throw new IllegalStateException("field portName is not type boolean");
+            throw new IllegalStateException("field autoConnect is not type boolean");
         }
         PVBoolean pvBoolean= (PVBoolean)pvField;
         boolean autoConnect = pvBoolean.get();
@@ -85,7 +85,7 @@ public class PDRVPortCreateFactory {
         pvField = pvFields[index];
         field = pvField.getField();
         if(field.getType()!=org.epics.ioc.pv.Type.pvStructure) {
-            throw new IllegalStateException("field portName is not type structure");
+            throw new IllegalStateException("field driverParameters is not type structure");
         }
         PVStructure driverParameters= (PVStructure)pvField;
         Object[] parameters = new Object[4];

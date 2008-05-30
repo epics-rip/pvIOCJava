@@ -314,7 +314,9 @@ public class DBRecordFactory {
         /* (non-Javadoc)
          * @see java.lang.Object#toString()
          */
-        public String toString() { return pvRecord.toString(0);}       
+        public String toString() {
+            return pvRecord.toString(0);
+        }       
         /* (non-Javadoc)
          * @see org.epics.ioc.db.DBRecord#toString(int)
          */

@@ -10,12 +10,16 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
+import org.epics.ioc.util.IOCExecutor;
+import org.epics.ioc.util.IOCExecutorFactory;
 import org.epics.ioc.util.MessageType;
 import org.epics.ioc.util.Requester;
+import org.epics.ioc.util.ScanPriority;
 
 /**
  * Factory for creating an IOCDB.
@@ -41,21 +45,32 @@ public class IOCDBFactory {
         return master;
     }
     
-    private static class IOCDBInstance implements IOCDB
+    private static class MessageItem {
+        String message = null;
+        MessageType messageType;
+    }
+    
+    private static class IOCDBInstance implements IOCDB,Runnable
     {
         private String name;
         private LinkedHashMap<String,DBRecord> recordMap = 
             new LinkedHashMap<String,DBRecord>();
         private ReentrantReadWriteLock rwLock = 
             new ReentrantReadWriteLock();
-        private boolean workingRequesterListModified = false;
-        private ArrayList<Requester> workingRequesterList =
-            new ArrayList<Requester>();
-        private ArrayList<Requester> messageListenerList =
-            new ArrayList<Requester>();
+        private ReentrantLock messageRequestListLock = new ReentrantLock();
+        private ArrayList<Requester> messageRequesterList = new ArrayList<Requester>();
+        private IOCExecutor iocExecutor = IOCExecutorFactory.create(
+                "IOCDBMessage", ScanPriority.lowest);
+        private ReentrantLock messageLock = new ReentrantLock();
+        private int messageListSize = 100;
+        private MessageItem[] messageItems = new MessageItem[messageListSize];
+        private int numMessageItems = 0;
+        private int firstMessageItem = 0;
+        private int numberDroppedMessages = 0;
         
         private IOCDBInstance(String name) {
             this.name = name;
+            for(int i=0; i<messageListSize ; i++) messageItems[i] = new MessageItem();
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.db.IOCDB#getMaster()
@@ -92,6 +107,7 @@ public class IOCDBFactory {
                 for(String key: keys) {
                     DBRecord dbRecord = from.get(key);
                     dbRecord.setIOCDB(this);
+                    dbRecord.getPVRecord().addRequester(this);
                     recordMap.put(key,dbRecord);
                 }
             }  finally {
@@ -127,6 +143,7 @@ public class IOCDBFactory {
                     message("record already exists in master",MessageType.warning);
                     return false;
                 }
+                if(name.equals("master")) record.getPVRecord().addRequester(this);
                 recordMap.put(key,record);
                 record.setIOCDB(this);
                 return true;
@@ -140,6 +157,7 @@ public class IOCDBFactory {
         public boolean removeRecord(DBRecord record) {
             rwLock.writeLock().lock();
             try {
+                record.getPVRecord().removeRequester(this);
                 String key = record.getPVRecord().getRecordName();
                 if(recordMap.remove(key)!=null) return true;
                 return false;
@@ -168,46 +186,47 @@ public class IOCDBFactory {
          * @see org.epics.ioc.db.IOCDB#message(java.lang.String, org.epics.ioc.util.MessageType)
          */
         public void message(String message, MessageType messageType) {
-            rwLock.writeLock().lock();
-            try {                
-                if(workingRequesterListModified) {
-                    workingRequesterList = (ArrayList<Requester>)messageListenerList.clone();
-                    workingRequesterListModified = false;
+            messageLock.lock();
+            try {
+                int next = -1;
+                if(numMessageItems==messageListSize) {
+                    numberDroppedMessages += 1;
+                } else if(numMessageItems==0) {
+                    next = firstMessageItem = 0;
+                } else {
+                    next = firstMessageItem + numMessageItems;
+                    if(next>=messageListSize) next = next - messageListSize;
                 }
+                if(next>=0) {
+                    numMessageItems += 1;
+                    messageItems[next].message = message;
+                    messageItems[next].messageType = messageType;
+                }
+                iocExecutor.execute(this);
             } finally {
-                rwLock.writeLock().unlock();
-            }
-            if(workingRequesterList.size()<=0) {
-                System.out.println(messageType.toString() + " " + message);
-                return;
-            }
-            Iterator<Requester> iter = workingRequesterList.iterator();
-            while(iter.hasNext()) {
-                iter.next().message(message, messageType);
+                messageLock.unlock();
             }
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.db.IOCDB#addRequester(org.epics.ioc.util.Requester)
          */
         public void addRequester(Requester requester) {
-            rwLock.writeLock().lock();
+            messageRequestListLock.lock();
             try {
-                workingRequesterList.add(requester);
-                workingRequesterListModified = true;
+                messageRequesterList.add(requester);
             } finally {
-                rwLock.writeLock().unlock();
+                messageRequestListLock.unlock();
             }
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.db.IOCDB#removeRequester(org.epics.ioc.util.Requester)
          */
         public void removeRequester(Requester requester) {
-            rwLock.writeLock().lock();
+            messageRequestListLock.lock();
             try {
-                workingRequesterList.remove(requester);
-                workingRequesterListModified = true;
+                messageRequesterList.remove(requester);
             } finally {
-                rwLock.writeLock().unlock();
+                messageRequestListLock.unlock();
             }
         }
         /* (non-Javadoc)
@@ -266,6 +285,64 @@ public class IOCDBFactory {
                 return result.toString();
             } finally {
                 rwLock.readLock().unlock();
+            }
+        }
+        /* (non-Javadoc)
+         * @see java.lang.Runnable#run()
+         */
+        public void run() { // handles messages
+            while(numMessageItems>0) {
+                int numberDroppedMessages;
+                MessageItem messageItem = null;
+                String message = null;
+                MessageType messageType = null;
+                messageLock.lock();
+                try {
+                    numberDroppedMessages = this.numberDroppedMessages;
+                    messageItem = messageItems[firstMessageItem];
+                    message = messageItem.message;
+                    messageType = messageItem.messageType;
+                    this.numberDroppedMessages = 0;
+                } finally {
+                    messageLock.unlock();
+                }
+
+                messageRequestListLock.lock();
+                try {
+                    String droppedMessages = null;
+                    if(numberDroppedMessages>0) {
+                        droppedMessages = " " + numberDroppedMessages + " dropped messages";
+                    }
+                    if(messageRequesterList.size()<=0) {
+                        System.out.println(messageType.toString() + " " + message);
+                        if(numberDroppedMessages>0) {
+                            System.out.println(MessageType.error.toString() + droppedMessages);
+                        }
+                    } else {
+                        Iterator<Requester> iter = messageRequesterList.iterator();
+                        while(iter.hasNext()) {
+                            Requester requester = iter.next();
+                            requester.message(message, messageType);
+                            if(numberDroppedMessages>0) {
+                                requester.message(droppedMessages,MessageType.error);
+                            }
+                        }
+                    }
+                } finally {
+                    messageRequestListLock.unlock();
+                }
+                // release messageItem
+                messageLock.lock();
+                try {
+                    messageItem.message = null;
+                    numMessageItems--;
+                    if(numMessageItems!=0) {
+                        firstMessageItem += 1;
+                        if(firstMessageItem==messageListSize) firstMessageItem = 0;
+                    }
+                } finally {
+                    messageLock.unlock();
+                }
             }
         }
     }

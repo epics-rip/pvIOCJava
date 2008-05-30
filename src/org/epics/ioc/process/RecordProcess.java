@@ -16,17 +16,17 @@ import org.epics.ioc.util.TimeStamp;
  */
 public interface RecordProcess {
     /**
-     * Is the record disabled.
+     * Is the record enabled.
      * A process request while a record is disabled returns a noop.
-     * @return (false,true) if the record (is not, is) disabled
+     * @return (false,true) if the record (is not, is) enabled
      */
-    boolean isDisabled();
+    boolean isEnabled();
     /**
-     * Set the disabled state to the requested value.
+     * Set the enable state to the requested value.
      * @param value true or false.
      * @return (false,true) if the state (was not, was) changed.
      */
-    boolean setDisabled(boolean value);
+    boolean setEnabled(boolean value);
     /**
      * Is the record active.
      * @return (false,true) if the record (is not, is) active.
@@ -37,6 +37,11 @@ public interface RecordProcess {
      * @return The DBRecord interface.
      */
     DBRecord getRecord();
+    /**
+     * Is trace active for this record.
+     * @return (false,true) if trace (is not, is) active
+     */
+    boolean isTrace();
     /**
      * Set process trace.
      * If true a message will displayed whenever process, requestProcessCallback, or processContinue are called.

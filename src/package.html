@@ -10,7 +10,7 @@
 <body>
 <h1 style="text-align: center">EPICS JavaIOC: Java Input/Output Controller<br
 />
-2008.04.10</h1>
+2008.05.30</h1>
 
 <p>This product is available via the <a href="#LicenseAgreement">open source
 license</a> described at the end of this document.</p>
@@ -190,7 +190,8 @@ license</a> described at the end of this document.</p>
       <li><a href="#structure8">dbd/structure/event.xml</a></li>
       <li><a href="#structure9">dbd/structure/calc.xml</a></li>
       <li><a href="#structure10">dbd/structure/disable.xml</a></li>
-      <li><a href="#structure11">dbd/structure/delay.xml</a></li>
+      <li><a href="#structure11">dbd/structure/booleanState.xml</a></li>
+      <li><a href="#structure14">dbd/structure/delay.xml</a></li>
       <li><a href="#structure12">dbd/structure/enumerated.xml</a></li>
       <li><a href="#structure12">dbd/structure/supportState.xml</a></li>
       <li><a href="#structure13">dbd/structure/portDriver.xml</a>
@@ -362,12 +363,7 @@ license</a> described at the end of this document.</p>
           </li>
         </ul>
       </li>
-      <li><a href="#recordType7">dbd/recordType/modifySupport</a>
-        <ul>
-          <li><a href="#modifySupp">modifySupportStateCommon.xml</a></li>
-          <li><a href="#modifySupp1">modifySupportStateRecord.xml</a></li>
-        </ul>
-      </li>
+      <li><a href="#recordType7">dbd/recordType/processControl</a></li>
       <li><a href="#recordType9">dbd/recordType/portDriver</a>
         <ul>
           <li><a href="#Overview8">Overview</a></li>
@@ -600,34 +596,28 @@ dumps the database definitions and record instances.</p>
 
 <h4 id="Status">Status and Remaining Tasks</h4>
 
-<p>With the exception of remote Channel Access, the basic functionality
-required for a javaIOC is now implemented. It is possible to create a running
-javaIOC but since it can not comminicate with the outside world it can not do
-anything useful.</p>
-
 <p>The javaIOC provides database definitions (javaIOC/dbd) and support for a
 core set of recordTypes. This should provided most of the functionality
 provided by EPICS V3 base.</p>
 
-<p>The javaIOC implements portDriver which provides the same functionality as
-the asynDriver module for EPICS V3</p>
+<p>The javaIOC has both client and server support for V3 Channel Access. This
+means that an existing EPICS channel accesss client can access any primitive
+field (or an array of primitives) of a javaIOC record.</p>
 
-<p>The following JavaIOC components are required before a usable javaIOC
+<p>The above means that the javaIOC is now ready for use at least as a soft
+IOC.</p>
+
+<p>The javaIOC implements portDriver which provides the same functionality as
+the asynDriver module for EPICS V3. However no hardware drivers are
+implemented.</p>
+
+<p>The following JavaIOC components are required before a more usable javaIOC
 exists.</p>
 <ul>
-  <li>Remote Channel Access<br />
-    This requires both client and server. This could wait until after a beta
-    release of JavaIOC is announced.</li>
-  <li>V3 Channel Access<br />
-    Two things are required: 
-    <ul>
-      <li>JavaIOC to V3 server<br />
-        This allows javaIOC records to have links to V3 IOCs.</li>
-      <li>V3 client to javaIOC<br />
-        This allows V3 channel access clients to access javaIOC records.o
-        This is currently being implemented by Matej fron cosyLAB. </li>
-    </ul>
-    Both of these are required before JavaIOC is ready for serious use.</li>
+  <li>JavaIOC Remote Channel Access<br />
+    A remote ChannelAccess that fully supports the javaIOC structured
+    data.This requires both client and server. This could wait until after a
+    beta release of JavaIOC is announced.</li>
   <li>Message Server<br />
     JavaIOC interfaces provide methods for sending messages to requesters.
     Currently the requesters just write the messages to System.out or to a
@@ -638,8 +628,7 @@ exists.</p>
     Hardware drivers and STREAMS.</li>
 </ul>
 
-<p>When the above is implemented JavaIOC is a viable product. However several
-other things are desirable:</p>
+<p>Additional components are also desirable:</p>
 <ul>
   <li>VDCT - A Visual Database Configuration Tool.</li>
   <li>Access Security - Based on V3 Access Security but extended to properly
@@ -1966,7 +1955,7 @@ for general purpose client tools. </p>
 
 <h4 id="history">history</h4>
 
-<p>The following describes the structures for history for a double value
+<p>The following describes the structure for history for a double value
 field. Definitions will also appear for booleanHistory, byteHistory, ...,
 stringHistory.</p>
 <pre>&lt;structure name = "doubleHistory" &gt;
@@ -2047,6 +2036,14 @@ summary is:</p>
           <dd>Defines history for double data..</dd>
         <dt style="font-family: courier;">stringHistory.xml</dt>
           <dd>Defines history for string data..</dd>
+        <dt style="font-family: courier;">booleanState.xml</dt>
+          <dd>A structure for setting a boolean value.</dd>
+        <dt style="font-family: courier;">intState.xml</dt>
+          <dd>A structure for setting a integer value.</dd>
+        <dt style="font-family: courier;">stringState.xml</dt>
+          <dd>A structure for setting a string value.</dd>
+        <dt style="font-family: courier;">supportState.xml</dt>
+          <dd>Defines the current state of support for a record or field.</dd>
         <dt style="font-family: courier;">analog.xml</dt>
           <dd>Support for analog I/O.</dd>
         <dt style="font-family: courier;">digital.xml</dt>
@@ -2118,7 +2115,7 @@ summary is:</p>
         style="font-family: courier;">javaIOC/dbd/recordType/modifySupport</dt>
           <dd>A record type that can change the support state of another
             record.</dd>
-        style="font-family: courier;"&gt;javaIOC/dbd/recordType/portDriver
+        style="font-family: courier;"&gt;javaIOC/dbd/recordType/portDriver 
           <dd>Link support that connects to portDriver. In addition tow
             record types are defined. portRecord initializes a port.
             portDeviceControl provides access to the connection management
@@ -2169,21 +2166,27 @@ timeStamp.</p>
 javaIOC.</p>
 <pre>&lt;?xml version="1.0" ?&gt;
 &lt;DBDefinition&gt;
-&lt;include addPath = "dbd/structure" /&gt;
+&lt;include addPath = "${JAVAIOC}/dbd/structure" /&gt;
 &lt;include href = "limit.xml" /&gt;
+&lt;include href = "display.xml" /&gt;
+&lt;include href = "control.xml" /&gt;
 &lt;include href = "enumerated.xml" /&gt;
 &lt;include href = "commonFields.xml" /&gt;
 &lt;include href = "alarm.xml" /&gt;
-&lt;include href = "byteStructures.xml" /&gt;
-&lt;include href = "shortStructures.xml" /&gt;
-&lt;include href = "intStructures.xml" /&gt;
-&lt;include href = "longStructures.xml" /&gt;
-&lt;include href = "floatStructures.xml" /&gt;
-&lt;include href = "doubleStructures.xml" /&gt;
+&lt;include href = "byteHistory.xml" /&gt;
+&lt;include href = "shortHistory.xml" /&gt;
+&lt;include href = "intHistory.xml" /&gt;
+&lt;include href = "longHistory.xml" /&gt;
+&lt;include href = "floatHistory.xml" /&gt;
+&lt;include href = "doubleHistory.xml" /&gt;
+&lt;include href = "stringHistory.xml" /&gt;
 &lt;include href = "noop.xml" /&gt;
 &lt;include href = "generic.xml" /&gt;
 &lt;include href = "supportArray.xml" /&gt;
 &lt;include href = "supportState.xml" /&gt;
+&lt;include href = "booleanState.xml" /&gt;
+&lt;include href = "intState.xml" /&gt;
+&lt;include href = "stringState.xml" /&gt;
 &lt;include href = "channelAccess.xml" /&gt;
 &lt;include href = "analog.xml" /&gt;
 &lt;include href = "digital.xml" /&gt;
@@ -2192,7 +2195,7 @@ javaIOC.</p>
 &lt;include href = "disable.xml" /&gt;
 &lt;include href = "delay.xml" /&gt;
 &lt;include href = "portDriver.xml" /&gt;
-&lt;include removePath = "dbd/structure" /&gt;
+&lt;include removePath = "${JAVAIOC}/dbd/structure" /&gt;
 &lt;/DBDefinition&gt;</pre>
 
 <h4 id="recordType">recordType.xml</h4>
@@ -2201,7 +2204,7 @@ javaIOC.</p>
 definitions provided by javaIOC.</p>
 <pre>&lt;?xml version="1.0" ?&gt;
 &lt;DBDefinition&gt;
-&lt;include addPath = "dbd/recordType/primitive" /&gt;
+&lt;include addPath = "${JAVAIOC}/dbd/recordType/primitive" /&gt;
 &lt;include href = "booleanRecord.xml" /&gt;
 &lt;include href = "byteRecord.xml" /&gt;
 &lt;include href = "shortRecord.xml" /&gt;
@@ -2210,8 +2213,8 @@ definitions provided by javaIOC.</p>
 &lt;include href = "floatRecord.xml" /&gt;
 &lt;include href = "doubleRecord.xml" /&gt;
 &lt;include href = "stringRecord.xml" /&gt;
-&lt;include removePath = "dbd/recordType/primitive" /&gt;
-&lt;include addPath = "dbd/recordType/primitiveArray" /&gt;
+&lt;include removePath = "${JAVAIOC}/dbd/recordType/primitive" /&gt;
+&lt;include addPath = "${JAVAIOC}/dbd/recordType/primitiveArray" /&gt;
 &lt;include href = "booleanArrayRecord.xml" /&gt;
 &lt;include href = "byteArrayRecord.xml" /&gt;
 &lt;include href = "shortArrayRecord.xml" /&gt;
@@ -2220,36 +2223,34 @@ definitions provided by javaIOC.</p>
 &lt;include href = "floatArrayRecord.xml" /&gt;
 &lt;include href = "doubleArrayRecord.xml" /&gt;
 &lt;include href = "stringArrayRecord.xml" /&gt;
-&lt;include removePath = "dbd/recordType/primitiveArray" /&gt;
-&lt;include addPath = "dbd/recordType/modifySupport" /&gt;
-&lt;include href = "modifySupportStateRecord.xml" /&gt;
-&lt;include removePath = "dbd/recordType/modifySupport" /&gt;
-&lt;include addPath = "dbd/recordType/analog" /&gt;
+&lt;include removePath = "${JAVAIOC}/dbd/recordType/primitiveArray" /&gt;
+&lt;include addPath = "${JAVAIOC}/dbd/recordType/processControl" /&gt;
+&lt;include href = "processControl.xml" /&gt;
+&lt;include removePath = "${JAVAIOC}/dbd/recordType/processControl" /&gt;
+&lt;include addPath = "${JAVAIOC}/dbd/recordType/analog" /&gt;
 &lt;include href = "aoIncrementalDoubleRecord.xml" /&gt;
-&lt;include removePath = "dbd/recordType/analog" /&gt;
-&lt;include addPath = "dbd/recordType/enumerated" /&gt;
+&lt;include removePath = "${JAVAIOC}/dbd/recordType/analog" /&gt;
+&lt;include addPath = "${JAVAIOC}/dbd/recordType/enumerated" /&gt;
 &lt;include href = "enumeratedRecord.xml" /&gt;
-&lt;include removePath = "dbd/recordType/enumerated" /&gt;
-&lt;include addPath = "dbd/recordType/event" /&gt;
+&lt;include removePath = "${JAVAIOC}/dbd/recordType/enumerated" /&gt;
+&lt;include addPath = "${JAVAIOC}/dbd/recordType/event" /&gt;
 &lt;include href = "eventRecord.xml" /&gt;
-&lt;include removePath = "dbd/recordType/event" /&gt;
-&lt;include addPath = "dbd/recordType/calc" /&gt;
+&lt;include removePath = "${JAVAIOC}/dbd/recordType/event" /&gt;
+&lt;include addPath = "${JAVAIOC}/dbd/recordType/calc" /&gt;
 &lt;include href = "calcDoubleRecord.xml" /&gt;
 &lt;include href = "calcDoubleArrayRecord.xml" /&gt;
 &lt;include href = "calcBooleanArrayRecord.xml" /&gt;
-&lt;include removePath = "dbd/recordType/calc" /&gt;
-&lt;include addPath = "dbd/recordType/portDriver" /&gt;
+&lt;include removePath = "${JAVAIOC}/dbd/recordType/calc" /&gt;
+&lt;include addPath = "${JAVAIOC}/dbd/recordType/portDriver" /&gt;
 &lt;include href = "portDriver.xml" /&gt;
-&lt;include removePath = "dbd/recordType/portDriver" /&gt;
-&lt;include addPath = "dbd/recordType/powerSupply" /&gt;
+&lt;include removePath = "${JAVAIOC}/dbd/recordType/portDriver" /&gt;
+&lt;include addPath = "${JAVAIOC}/dbd/recordType/powerSupply" /&gt;
 &lt;include href = "powerSupplyRecord.xml" /&gt;
 &lt;include href = "powerSupplyArrayRecord.xml" /&gt;
-&lt;include removePath = "dbd/recordType/powerSupply" /&gt;
-&lt;include addPath = "dbd/recordType/allTypes" /&gt;
+&lt;include removePath = "${JAVAIOC}/dbd/recordType/powerSupply" /&gt;
+&lt;include addPath = "${JAVAIOC}/dbd/recordType/allTypes" /&gt;
 &lt;include href = "allTypesRecord.xml" /&gt;
-&lt;include removePath = "dbd/recordType/allTypes" /&gt;
-&lt;!--
---&gt;
+&lt;include removePath = "${JAVAIOC}/dbd/recordType/allTypes" /&gt;
 &lt;/DBDefinition&gt;</pre>
 <hr />
 
@@ -3101,7 +3102,20 @@ EPICS calcPerform. </p>
 &lt;/DBDefinition&gt;</pre>
 <hr />
 
-<h3 style="text-align: center" id="structure11">dbd/structure/delay.xml</h3>
+<h3 style="text-align: center"
+id="structure11">dbd/structure/booleanState.xml</h3>
+<hr />
+
+<p>The following describes the structure for setting the state of a boolean
+value. Similar structures are available for other primitive types.</p>
+<pre>&lt;structure name = "booleanState" &gt;
+  &lt;field name = "value" type = "boolean" /&gt;
+  &lt;field name = "desiredValue" type = "boolean" /&gt;
+  &lt;field name = "setValue" type = "boolean" /&gt;
+&lt;/structure&gt;</pre>
+<hr />
+
+<h3 style="text-align: center" id="structure14">dbd/structure/delay.xml</h3>
 <hr />
 
 <p>This is the support that delays before completing. It is used for testing.
@@ -3145,17 +3159,7 @@ id="structure12">dbd/structure/supportState.xml</h3>
   &lt;field name = "choices" type = "array" elementType = "string"
     default = "readyForInitialize readyForStart ready zombie" /&gt;
 &lt;/structure&gt;
-&lt;structure name = "supportStateCommand" createName = "enumerated"
-     supportName = "supportState" &gt;
-  &lt;field name = "index" type = "int" /&gt;
-  &lt;field name = "choice" type = "string" /&gt;
-  &lt;field name = "choices" type = "array" elementType = "string"
-    default = "idle initialize start stop uninitialize" /&gt;
-&lt;/structure&gt;
 
-&lt;!-- supportState requires supportStateCommon fields --&gt;
-&lt;support name = "supportState"
-  factoryName = "org.epics.ioc.support.SupportStateFactory" /&gt;
 &lt;/DBDefinition&gt;</pre>
 <hr />
 
@@ -4116,51 +4120,65 @@ a PV interface for reading an argument value.:</p>
 <hr />
 
 <h3 style="text-align: center"
-id="recordType7">dbd/recordType/modifySupport</h3>
+id="recordType7">dbd/recordType/processControl</h3>
 <hr />
 
-<p>This defines a structure and a recordType that is used to modify the
-support state of another record. This is required when fields related to how
-the support connects are modified. In order to modify support related fields
-the following must be done:</p>
-<ul>
-  <li>Modify the support state<br />
-    The support must be put in the state readyForStart if the support will be
-    the same but parameters for the support will be modified. The support
-    must be put in the state readyForInitialize if the support and/or a
-    structure type is will be modified. The support state for a record or
-    just a field within a record can be changed. A general approach is to
-    always uninitialize the support for the record itself. </li>
-  <li>Modify the fields desired.</li>
-  <li>Modify the support state top be ready.</li>
-</ul>
+<p>This is support for the processControl recordType. It provides the
+following features:</p>
+<dl>
+  <dt>trace</dt>
+    <dd>Trace can be turned on or off for a record instance.</dd>
+  <dt>enable</dt>
+    <dd>Processing of a record instance can be enabled or disabled.</dd>
+  <dt>Support State</dt>
+    <dd>The process state of the support for a record or a field within a
+      record can be set. This involves calling one of the following methods:
+      initialize, start, stop, uninitialize.</dd>
+  <dt>Support</dt>
+    <dd>The support for a field can be changed. In order to make this change,
+      the record instance must be in the readyForInitialize state. It is not
+      possible to change the support for the record itself. </dd>
+  <dt>Structure</dt>
+    <dd>If a field is a structure, then the structure itself can be changed.
+      In order to make this change, the record instance must be in the
+      readyForInitialize state. It is not possible to change the structure
+      for the record itself.</dd>
+  <dt>Reporting</dt>
+    <dd>All problems are reported via field message. Other fields show the
+      current values for trace, enable, record support state, field support
+      state, name of the field support, and the name of the structure for a
+      field.</dd>
+</dl>
 
-<p>The modifySupportState record is used to modify the support state.</p>
+<p>See package org.epics.ioc.support for more details.</p>
 
-<h4 id="modifySupp">modifySupportStateCommon.xml</h4>
-<pre>&lt;?xml version="1.0" ?&gt;
-&lt;DBDefinition&gt;
-  &lt;field name = "value" type = "structure" structureName = "supportStateCommand" /&gt;
-  &lt;field name = "pvname" type = "string" /&gt;
-  &lt;field name = "supportState" type = "structure" structureName = "supportState" /&gt;
-  &lt;field name = "alarm" type = "structure" structureName = "alarm" /&gt;
-&lt;/DBDefinition&gt;</pre>
-
-<h4 id="modifySupp1">modifySupportStateRecord.xml</h4>
-<pre>&lt;?xml version="1.0" ?&gt;
-&lt;DBDefinition&gt;
-&lt;structure name = "modifySupportState" supportName = "generic" &gt;
-  &lt;include href = "modifySupportStateCommon.xml" /&gt;
+<p>processControl.xml describes the fields contained in a processControl
+record. It has the definitions:</p>
+<pre>&lt;structure name = "supportStateCommand" createName = "enumerated" &gt;
+  &lt;field name = "index" type = "int" /&gt;
+  &lt;field name = "choice" type = "string" /&gt;
+  &lt;field name = "choices" type = "array" elementType = "string"
+    default = "idle initialize start stop uninitialize" /&gt;
 &lt;/structure&gt;
 
-&lt;recordType name = "modifySupportState" supportName = "generic" &gt;
-  &lt;include href = "common.xml" /&gt;
-  &lt;include href = "modifySupportStateCommon.xml" /&gt;
-  &lt;field name = "supportArray" type = "array"
-     elementType = "structure" supportName = "supportArray" /&gt;
-  &lt;field name = "timeStamp" type = "structure" structureName = "timeStamp" /&gt;  
+&lt;recordType name = "processControl" supportName = "processControl" &gt;
+  &lt;field name = "message" type = "string" /&gt;
+  &lt;field name = "recordName" type = "string" /&gt;
+  &lt;field name = "trace" type = "structure" structureName = "booleanState" /&gt;
+  &lt;field name = "enable" type = "structure" structureName = "booleanState" /&gt;
+  &lt;field name = "supportStateRecord" type = "structure" structureName = "supportState" /&gt;
+  &lt;field name = "supportStateCommandRecord" type = "structure" structureName = "supportStateCommand" /&gt;
+  &lt;!-- remaining fields refer to a field of the record --&gt;
+  &lt;field name = "fieldName" type = "structure" structureName = "stringState"  /&gt;
+  &lt;field name = "supportState" type = "structure" structureName = "supportState" /&gt;
+  &lt;field name = "supportStateCommand" type = "structure" structureName = "supportStateCommand" /&gt;
+  &lt;field name = "supportName" type = "structure" structureName = "stringState" /&gt;
+  &lt;field name = "structureName" type = "structure" structureName = "stringState" /&gt;
 &lt;/recordType&gt;
-&lt;/DBDefinition&gt;</pre>
+
+
+&lt;support name = "processControl"
+   factoryName = "org.epics.ioc.support.ProcessControlFactory" /&gt;</pre>
 <hr />
 
 <h3 style="text-align: center" id="recordType9">dbd/recordType/portDriver</h3>
@@ -4190,12 +4208,14 @@ features of portDriver.</p>
 &lt;recordType name = "portDeviceControl" supportName = "portDeviceControl" &gt;
   &lt;field name = "message" type = "string" /&gt;
   &lt;field name = "portDevice" type = "string" /&gt;
-  &lt;field name = "connect" type = "boolean" /&gt;
-  &lt;field name = "enable" type = "boolean"  /&gt;
-  &lt;field name = "autoConnect" type = "boolean" /&gt;
-  &lt;field name = "traceMask" type = "int" /&gt;
-  &lt;field name = "traceIOMask" type = "int" /&gt;
-  &lt;field name = "report" type = "int" /&gt;
+  &lt;field name = "connect" type = "structure" structureName = "booleanState"  /&gt;
+  &lt;field name = "enable" type = "structure" structureName = "booleanState"   /&gt;
+  &lt;field name = "autoConnect" type = "structure" structureName = "booleanState" /&gt;
+  &lt;field name = "traceMask" type = "structure" structureName = "intState"  /&gt;
+  &lt;field name = "traceIOMask" type = "structure" structureName = "intState" /&gt;
+  &lt;field name = "traceIOTruncateSize" type = "structure" structureName = "intState" /&gt;
+  &lt;field name = "report" type = "boolean" /&gt;
+  &lt;field name = "reportDetails" type = "int" /&gt;
 &lt;/recordType&gt;
 
 &lt;support name = "portCreate"
@@ -4346,8 +4366,7 @@ type. It is used as an example and for testing.</p>
 &lt;/DBDefinition&gt;</pre>
 <hr />
 
-<h2 style="text-align: center;text-align: center;" id="License">License
-Agreement</h2>
+<h2 style="text-align: center" id="License">License Agreement</h2>
 <pre>Copyright (c) 2006 All rights reserved 
 The University of Chicago, as Operator of Argonne National Laboratory,
     (UofC) Chicago Ilinois, USA,

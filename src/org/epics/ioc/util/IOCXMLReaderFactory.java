@@ -201,7 +201,7 @@ public class IOCXMLReaderFactory {
                     if(ch[start+i]=='$') {
                         if(i+1<length) {
                             if(ch[start+i+1]=='{') {
-                                if(i>0) listener.characters(ch,start,i-start);
+                                if(i>0) listener.characters(ch,start,i);
                                 charState = CharState.got$;
                                 characters(ch,start+i+1,length-(i+1));
                                 return;
@@ -209,7 +209,7 @@ public class IOCXMLReaderFactory {
                                 continue;
                             }
                         } else {
-                            if(i>0) listener.characters(ch,start,i - start);
+                            if(i>0) listener.characters(ch,start,i);
                             charState = CharState.got$;
                             return;
                         }

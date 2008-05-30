@@ -1,0 +1,10 @@
+<?xml version="1.0" ?>
+<DBDefinition>
+
+<structure name = "booleanState" >
+  <field name = "value" type = "boolean" />
+  <field name = "desiredValue" type = "boolean" />
+  <field name = "setValue" type = "boolean" />
+</structure>
+
+</DBDefinition>

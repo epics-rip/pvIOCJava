@@ -69,18 +69,21 @@ public class ScanTest extends TestCase {
         dbRecord = iocdbMaster.findRecord("doubleReceive09");
         assertNotNull(dbRecord);
         pvRecord = dbRecord.getPVRecord();
+        structure = (Structure)pvRecord.getField();
         pvData = pvRecord.getPVFields();        
         index = structure.getFieldIndex("value");
         PVField doubleReceive09Value = pvData[index];
         dbRecord = iocdbMaster.findRecord("counterEvent0");
         assertNotNull(dbRecord);
         pvRecord = dbRecord.getPVRecord();
+        structure = (Structure)pvRecord.getField();
         pvData = pvRecord.getPVFields();        
         index = structure.getFieldIndex("value");
         PVField counterEvent0Value = pvData[index];
         dbRecord = iocdbMaster.findRecord("counterEvent1");
         assertNotNull(dbRecord);
         pvRecord = dbRecord.getPVRecord();
+        structure = (Structure)pvRecord.getField();
         pvData = pvRecord.getPVFields();        
         index = structure.getFieldIndex("value");
         PVField counterEvent1Value = pvData[index];
@@ -95,6 +98,8 @@ public class ScanTest extends TestCase {
             } catch (InterruptedException e) {
             }
         }
+String temp = doubleReceive09Value.toString();
+System.out.println("toString " + temp);
         initOK = IOCFactory.initDatabase("src/org/epics/ioc/process/test/scanAddDB.xml",iocRequester);
         if(!initOK) {
             System.out.println("IOCFactory.initDatabase failed");
@@ -114,12 +119,14 @@ public class ScanTest extends TestCase {
         dbRecord = iocdbMaster.findRecord("counter");
         assertNotNull(dbRecord);
         pvRecord = dbRecord.getPVRecord();
+        structure = (Structure)pvRecord.getField();
         pvData = pvRecord.getPVFields();        
         index = structure.getFieldIndex("value");
         PVField counterValue = pvData[index];
         dbRecord = iocdbMaster.findRecord("double02");
         assertNotNull(dbRecord);
         pvRecord = dbRecord.getPVRecord();
+        structure = (Structure)pvRecord.getField();
         pvData = pvRecord.getPVFields();        
         index = structure.getFieldIndex("value");
         PVField double02Value = pvData[index];

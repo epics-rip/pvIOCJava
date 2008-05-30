@@ -190,6 +190,10 @@ public class Float64DriverFactory {
                  * @see org.epics.ioc.pdrv.interfaces.AbstractFloat64#read(org.epics.ioc.pdrv.User)
                  */
                 public Status read(User user) {
+                    if(!device.isConnected()) {
+                        trace.print(Trace.ERROR,deviceName + " read but not connected");
+                        return Status.error;
+                    }
                     double timeout = user.getTimeout();
                     if(timeout>0.0 && delay>timeout) {
                         user.setMessage("timeout");
@@ -210,6 +214,10 @@ public class Float64DriverFactory {
                  * @see org.epics.ioc.pdrv.interfaces.AbstractFloat64#write(org.epics.ioc.pdrv.User, double)
                  */
                 public Status write(User user, double value) {
+                    if(!device.isConnected()) {
+                        trace.print(Trace.ERROR,deviceName + " write but not connected");
+                        return Status.error;
+                    }
                     double timeout = user.getTimeout();
                     if(timeout>0.0 && delay>timeout) {
                         user.setMessage("timeout");

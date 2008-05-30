@@ -10,7 +10,7 @@
 <body>
 <h1 style="text-align: center">EPICS JavaIOC: support<br />
 package: org.epics.ioc.support<br />
-2008.04.09</h1>
+2008.05.30</h1>
 CONTENTS 
 
 <div class="toc">
@@ -26,6 +26,7 @@ CONTENTS
   </li>
   <li><a href="#Generic">Generic Support</a></li>
   <li><a href="#ScanSuppor">ScanSupport</a></li>
+  <li><a href="#ProcessCon">ProcessControl Support</a></li>
   <li><a href="#Alarm">Alarm Support</a>
     <ul>
       <li><a href="#Alarm1">Alarm Support</a></li>
@@ -67,7 +68,6 @@ CONTENTS
   <li><a href="#SupportArr">SupportArray Support</a></li>
   <li><a href="#Noop">Noop Support</a></li>
   <li><a href="#DelaySuppo">DelaySupport Support</a></li>
-  <li><a href="#SupportSta1">SupportState Support</a></li>
   <li><a href="#Port">Port Driver Support</a>
     <ul>
       <li><a href="#Java1">Java Definitions</a></li>
@@ -134,6 +134,11 @@ database records. </p>
     <dd>Generic support for a record or structure.</dd>
   <dt>ScanFactory</dt>
     <dd>Complete support for the scan field which is defined in comon.xml</dd>
+  <dt>ProcessControlFactory</dt>
+    <dd>This is support for the processControl recordType. This record
+      controls the process state of the support for another record or for a
+      field in another record. It also can set trace and enable on or off for
+      the other record.</dd>
   <dt>Alarm Support.</dt>
     <dd>Support for the alarm field defined in common.xml and for raising
       alarms. 
@@ -214,8 +219,6 @@ database records. </p>
             also can get a report for a port and/or device.</dd>
       </dl>
     </dd>
-  <dt>SupportState</dt>
-    <dd>Support that modifies the support state of another record.</dd>
   <dt>PowerSupplyFactory</dt>
     <dd>A simple example of support for a complex device.</dd>
 </dl>
@@ -479,6 +482,125 @@ style="font-family: courier;">Support</span> with the methods:</p>
 </dl>
 <hr />
 
+<h2 style="text-align: center" id="ProcessCon">ProcessControl Support</h2>
+<hr />
+
+<p>This is support for the processControl recordType. It provides the
+following features:</p>
+<dl>
+  <dt>trace</dt>
+    <dd>Trace can be turned on or off for a record instance.</dd>
+  <dt>enable</dt>
+    <dd>Processing of a record instance can be enabled or disabled.</dd>
+  <dt>Support State</dt>
+    <dd>The process state of the support for a record or a field within a
+      record can be set. This involves calling one of the following methods:
+      initialize, start, stop, uninitialize.</dd>
+  <dt>Support</dt>
+    <dd>The support for a field can be changed. In order to make this change,
+      the record instance must be in the readyForInitialize state. It is not
+      possible to change the support for the record itself. </dd>
+  <dt>Structure</dt>
+    <dd>If a field is a structure, then the structure itself can be changed.
+      In order to make this change, the record instance must be in the
+      readyForInitialize state. It is not possible to change the structure
+      for the record itself.</dd>
+  <dt>Reporting</dt>
+    <dd>All problems are reported via field message. Other fields show the
+      current values for trace, enable, record support state, field support
+      state, name of the field support, and the name of the structure for a
+      field.</dd>
+</dl>
+
+<p>ProcessControl only performs actions when it is processed.</p>
+
+<p>processControl.html describes the fields contained in a processControl
+record. It has the definitions:</p>
+<pre>&lt;structure name = "supportStateCommand" createName = "enumerated" &gt;
+  &lt;field name = "index" type = "int" /&gt;
+  &lt;field name = "choice" type = "string" /&gt;
+  &lt;field name = "choices" type = "array" elementType = "string"
+    default = "idle initialize start stop uninitialize" /&gt;
+&lt;/structure&gt;
+
+&lt;recordType name = "processControl" supportName = "processControl" &gt;
+  &lt;field name = "message" type = "string" /&gt;
+  &lt;field name = "recordName" type = "string" /&gt;
+  &lt;field name = "trace" type = "structure" structureName = "booleanState" /&gt;
+  &lt;field name = "enable" type = "structure" structureName = "booleanState" /&gt;
+  &lt;field name = "supportStateRecord" type = "structure" structureName = "supportState" /&gt;
+  &lt;field name = "supportStateCommandRecord" type = "structure" structureName = "supportStateCommand" /&gt;
+  &lt;!-- remaining fields refer to a field of the record --&gt;
+  &lt;field name = "fieldName" type = "structure" structureName = "stringState"  /&gt;
+  &lt;field name = "supportState" type = "structure" structureName = "supportState" /&gt;
+  &lt;field name = "supportStateCommand" type = "structure" structureName = "supportStateCommand" /&gt;
+  &lt;field name = "supportName" type = "structure" structureName = "stringState" /&gt;
+  &lt;field name = "structureName" type = "structure" structureName = "stringState" /&gt;
+&lt;/recordType&gt;
+
+
+&lt;support name = "processControl"
+   factoryName = "org.epics.ioc.support.ProcessControlFactory" /&gt;</pre>
+
+<p>Structure supportStateCommand is an enumerated structure with the
+following choices</p>
+<dl>
+  <dt style="font-family: courier;">idle</dt>
+    <dd>A do nothing commamnd. After the processControl support executes one
+      of the other commands, it sets the choice to idle.</dd>
+  <dt style="font-family: courier;">initialize</dt>
+    <dd>Call the initialize method of the support.</dd>
+  <dt style="font-family: courier;">start</dt>
+    <dd>Call the start method of the support.</dd>
+  <dt style="font-family: courier;">stop</dt>
+    <dd>Call the stop method of the support.</dd>
+  <dt style="font-family: courier;">uninitialize</dt>
+    <dd>Call the uninitialize method of the support.</dd>
+</dl>
+
+<p>recordType processControl has fields trace, enable, fieldName,
+supportName, and structureName. Each is a structure field with the following
+fields:</p>
+<dl>
+  <dt style="font-family: courier;">value</dt>
+    <dd>This holds the current value.</dd>
+  <dt style="font-family: courier;">desiredValue</dt>
+    <dd>This is set by the user to give the desired value.</dd>
+  <dt style="font-family: courier;">setValue</dt>
+    <dd>This is a boolean field. The user sets this to true to request the
+      the value be set to the dersired value. processControl sets this back
+      to false after processing.</dd>
+</dl>
+
+<p>recordType processControl has the following fields:</p>
+<dl>
+  <dt style="font-family: courier;">message</dt>
+    <dd>If processControl encounters any problems it puts a value in this
+      field. </dd>
+  <dt style="font-family: courier;">recordName</dt>
+    <dd>The name of the attached record. It must be a local record.</dd>
+  <dt style="font-family: courier;">trace</dt>
+    <dd>A structure for setting and reporting record tracing.</dd>
+  <dt style="font-family: courier;">enable</dt>
+    <dd>A structure for setting and reporting record enabling.</dd>
+  <dt style="font-family: courier;">supportStateRecord</dt>
+    <dd>A structure for reporting the support state of the record</dd>
+  <dt style="font-family: courier;">supportStateCommandRecord</dt>
+    <dd>A structure for changing the support state for the record.</dd>
+  <dt style="font-family: courier;">fieldName</dt>
+    <dd>A structure for setting and reporting the field of the record for the
+      following fields.</dd>
+  <dt style="font-family: courier;">supportState</dt>
+    <dd>A structure for reporting the support state of the field.</dd>
+  <dt style="font-family: courier;">supportStateCommand</dt>
+    <dd>A structure for changing the support state for the field.</dd>
+  <dt style="font-family: courier;">supportName</dt>
+    <dd>A structure for changing the support for the field.</dd>
+  <dt style="font-family: courier;">structureName</dt>
+    <dd>A structure for changing the structure for the field.</dd>
+</dl>
+<hr />
+
 <h2 style="text-align: center" id="Alarm">Alarm Support</h2>
 <hr />
 
@@ -587,15 +709,16 @@ field, e.g. FloatAlarmFactory provides alarm support for a field of type
 float. The support for each type except that float and double also support
 hystersis, which is described below. Each has two associated xml structure
 definitions. For example the definitions for double are:</p>
-<pre>&lt;structure name =&gt;
-    &lt;field name = /&gt;
-    &lt;field name = /&gt;
+<pre>&lt;structure name = "doubleAlarmInterval"&gt;
+  &lt;field name = "value" type = "double" /&gt;
+  &lt;field name = "severity" type = "structure" structureName = "alarmSeverity" /&gt;
+  &lt;field name = "message" type = "string" /&gt;
 &lt;/structure&gt;
-&lt;structure name =&gt;
-    &lt;field name = /&gt;
-    &lt;field name = /&gt;
-    &lt;field name = /&gt;
-    &lt;field name = /&gt;
+&lt;structure name = "doubleAlarm" supportName = "doubleAlarm" &gt;
+  &lt;field name = "active" type = "boolean" /&gt;
+  &lt;field name = "interval" type = "array" elementType = "structure" /&gt;
+  &lt;field name = "outOfRange" type = "structure" structureName = "alarmSeverity" /&gt;
+  &lt;field name = "hystersis" type = "double" /&gt;
 &lt;/structure&gt;</pre>
 
 <p>The first structure defines an interval for alarm checking. It has the
@@ -605,6 +728,8 @@ fields:</p>
     <dd>The upper bound for a value.</dd>
   <dt style="font-family: courier;">severity</dt>
     <dd>The alarm severity for a value that falls into this interval.</dd>
+  <dt style="font-family: courier;">message</dt>
+    <dd>The alarm message for a value that falls into this interval.</dd>
 </dl>
 
 <p>The second structure has the following fields:</p>
@@ -825,45 +950,55 @@ structure that supports calculations normally has the fields:</p>
 <p>This is example support for use with the calcDouble record or structure.
 File calcDoubleCommon.xml defines the fields:</p>
 <pre>&lt;DBDefinition&gt;
-    &lt;field name = &gt;
-        &lt;property name = /&gt;
-        &lt;property name = /&gt;
-        &lt;property name = /&gt;
-        &lt;property name = /&gt;
-    &lt;/field&gt;
-    &lt;field name =
-         elementType = /&gt;
-    &lt;field name = /&gt;
-    &lt;field name = /&gt;
-    &lt;field name =
-         elementType = /&gt;
-    &lt;field name = /&gt;
-    &lt;field name =
-         type = /&gt;
+  &lt;field name = "value" type = "double" /&gt;
+  &lt;field name = "calcArgArray" type = "array"
+     elementType = "structure" supportName = "calcArgArray" /&gt;
+  &lt;field name = "calculator" type = "structure" /&gt;
+  &lt;field name = "alarm" type = "structure"/&gt;
+  &lt;field name = "timeStamp" type = "structure" /&gt;  
+  &lt;field name = "input" type = "structure" /&gt;
+  &lt;!-- instance can set structureName = "doubleAlarm" --&gt;
+  &lt;field name = "valueAlarm" type = "structure" /&gt;
+  &lt;field name = "output" type = "structure" /&gt;
+  &lt;field name = "display" type = "structure" /&gt;
+  &lt;field name = "control" type = "structure"/&gt;
+  &lt;!-- instance can set structureName = "doubleHistory" --&gt;
+  &lt;field name = "history" type = "structure" /&gt;
 &lt;/DBDefinition&gt;</pre>
 
 <p>Field calcDoubleRecord.xml defines:</p>
-<pre>&lt;structure name = &gt;
-    &lt;field name = /&gt;
-    &lt;field name = /&gt;
-    &lt;field name = /&gt;
+<pre>&lt;structure name = "calcDoubleArg" &gt;
+  &lt;field name = "value" type = "double" /&gt;
+  &lt;field name = "name" type = "string" /&gt;
+  &lt;field name = "input" type = "structure" /&gt;
 &lt;/structure&gt;
 
-&lt;structure name = &gt;
-    &lt;include href = /&gt;
+&lt;structure name = "calcDouble" supportName = "generic" &gt;
+  &lt;include href = "calcDoubleCommon.xml" /&gt;
 &lt;/structure&gt;
 
-&lt;recordType name = &gt;
-    &lt;include href = /&gt;
-    &lt;include href = /&gt;
-&lt;/recordType&gt;
+&lt;recordType name = "calcDouble" supportName = "generic" &gt;
+  &lt;include href = "common.xml" /&gt;
+  &lt;include href = "calcDoubleCommon.xml" /&gt;
+  &lt;field name = "supportArray" type = "array"
+     elementType = "structure" supportName = "supportArray" /&gt;
+&lt;/recordType&gt;</pre>
 
-&lt;support name =
-   factoryName = /&gt;</pre>
+<p>The following support is defined in calc.xml</p>
+<pre>&lt;support name = "calcArgArray"
+ factoryName = "org.epics.ioc.support.CalcArgArrayFactory" /&gt;
 
-<p>The following support is defined in support.xml</p>
-<pre>&lt;support name =
-   factoryName = /&gt;</pre>
+
+&lt;!-- example calculators --&gt;
+
+&lt;support name = "counterCalculator"
+ factoryName = "org.epics.ioc.support.CounterCalculatorFactory" /&gt;
+
+&lt;support name = "arrayIncrementCalculator"
+ factoryName = "org.epics.ioc.support.ArrayIncrementCalculatorFactory" /&gt;
+
+&lt;support name = "booleanArrayToggleCalculator"
+ factoryName = "org.epics.ioc.support.BooleanArrayToggleCalculatorFactory" /&gt;</pre>
 
 <h3 id="Performing">Performing Calculations</h3>
 
@@ -1086,12 +1221,15 @@ AbstractSupport without overriding any methods.</p>
 
 <p>This is link support that simulates asynchronous support. It uses a
 configStructure that has the definition:</p>
-<pre>&lt;structure name =&gt;
-    &lt;!-- min, max, inc are delay in milliseconds --&gt;
-    &lt;field name = /&gt;
-    &lt;field name = /&gt;
-    &lt;field name = /&gt;
-&lt;/structure&gt;</pre>
+<pre>&lt;structure name = "delay" supportName = "delay"&gt;
+  &lt;!-- min, max, inc are delay in milliseconds --&gt;
+  &lt;field name = "min" type = "long" /&gt;
+  &lt;field name = "max" type = "long" /&gt;
+  &lt;field name = "inc" type = "long" /&gt;
+&lt;/structure&gt;
+
+&lt;support name = "delay"
+  factoryName = "org.epics.ioc.support.DelayFactory" /&gt;</pre>
 
 <p>where</p>
 <dl>
@@ -1112,73 +1250,6 @@ of min.</p>
 <pre>    public class DelaySupportFactory {
         public static Support create(DBStructure dbStructure);
     }</pre>
-<hr />
-
-<h2 style="text-align: center" id="SupportSta1">SupportState Support</h2>
-<hr />
-<pre>    public class SupportStateFactory {
-        public static Support create(DBStructure dbStructure);
-    }</pre>
-
-<p>This is support for changing the support state of another record in the
-same javaIOC. This is needed in order to modify support related fields of the
-other record. In order to modify support related fields the following must be
-done:</p>
-<ul>
-  <li>Modify the support state<br />
-    The support must be put in the state readyForStart if the support will be
-    the same but parameters for the support will be modified. The support
-    must be put in the state readyForInitialize if the support and/or a
-    structure type is will be modified. The support state for a record or
-    just a field within a record can be changed. A general approach is to
-    always uninitialize the support for the record itself. </li>
-  <li>Modify the fields desired.</li>
-  <li>Modify the support state top be ready.</li>
-</ul>
-
-<p>The SupportState support is used to modify the support state.</p>
-
-<p>The support is attached to an enumerated structure named
-supportStateCommand, which defines a set of commands for SupportState. It has
-the following choices:</p>
-<dl>
-  <dt>idle</dt>
-    <dd>Do not change the support state.</dd>
-  <dt>initialize</dt>
-    <dd>Initialize the support.</dd>
-  <dt>start</dt>
-    <dd>Start the support.</dd>
-  <dt>stop</dt>
-    <dd>Stop the support.</dd>
-  <dt>unitialize</dt>
-    <dd>Unitialize the support.</dd>
-</dl>
-
-<p>The supportStateCommand structure must be a field named value which is in
-a structure containing the fields:</p>
-<dl>
-  <dt>value</dt>
-    <dd>The supportStateCommand structure.</dd>
-  <dt>pvname</dt>
-    <dd>The pvname of the record and, optionally, the field containing the
-      support to change.</dd>
-  <dt>supportState</dt>
-    <dd>A supportState structure. When the SupportState support finishes
-      processing it sets this field to the current support state of the
-      pvname support.</dd>
-  <dt>alarm</dt>
-    <dd>An alarm field for reporting problems.</dd>
-</dl>
-
-<p>The process method of SupportState does the following:</p>
-<ul>
-  <li>Unless the command is idle, it executes the command.</li>
-  <li>If the command state has changed it updates field supportState.</li>
-  <li>If the command was not idle, the value field is set to idle.</li>
-</ul>
-
-<p>Note that the state of the support can be determined by issuing an idle
-command.</p>
 <hr />
 
 <h2 style="text-align: center" id="Port">Port Driver Support</h2>
@@ -1287,96 +1358,75 @@ PDRVSupportFactory for how to use the abstract support.</p>
 
 <p>This implements all of the link support defined in .xml file
 javaIOC/dbd/structures/portDriver.xml.</p>
-<pre>&lt;structure name =&gt;
-    &lt;field name = /&gt;
-    &lt;field name = /&gt;
-    &lt;field name = /&gt;
-    &lt;field name = /&gt;
-    &lt;field name = /&gt;
-    &lt;field name = /&gt;
-    &lt;field name = /&gt;
+<pre>&lt;structure name = "pdrvSupport"&gt;
+  &lt;field name = "portName" type = "string" /&gt;
+  &lt;field name = "addr" type = "int" /&gt;
+  &lt;field name = "timeout" type = "double" /&gt;
+  &lt;field name = "mask" type = "int" /&gt;
+  &lt;field name = "size" type = "int" /&gt;
+  &lt;field name = "process" type = "boolean" default = "false" /&gt;
+  &lt;field name = "drvParams" type = "structure" /&gt;
 &lt;/structure&gt;
 
-&lt;support name =
-    structureName = 
-    factoryName = /&gt;
-&lt;support name =
-    structureName = 
-    factoryName = /&gt;
-&lt;support name =
-    structureName = 
-    factoryName = /&gt;
+&lt;support name = "pdrvOctetInput"
+  factoryName = "org.epics.ioc.support.PDRVSupportFactory" /&gt;
+&lt;support name = "pdrvOctetInterruptInput"
+  factoryName = "org.epics.ioc.support.PDRVSupportFactory" /&gt;
+&lt;support name = "pdrvOctetOutput" 
+  factoryName = "org.epics.ioc.support.PDRVSupportFactory" /&gt;
 
-&lt;support name =
-    structureName = 
-    factoryName = /&gt;
-&lt;support name =
-    structureName = 
-    factoryName = /&gt;
-&lt;support name =
-    structureName = 
-    factoryName = /&gt;
-&lt;support name =
-    structureName = 
-    factoryName = /&gt;
+&lt;support name = "pdrvInt32Input" 
+  factoryName = "org.epics.ioc.support.PDRVSupportFactory" /&gt;
+&lt;support name = "pdrvInt32InterruptInput"
+  factoryName = "org.epics.ioc.support.PDRVSupportFactory" /&gt;
+&lt;support name = "pdrvInt32AverageInput"
+  factoryName = "org.epics.ioc.support.PDRVSupportFactory" /&gt;
+&lt;support name = "pdrvInt32Output" 
+  factoryName = "org.epics.ioc.support.PDRVSupportFactory" /&gt;
 
-&lt;support name =
-    structureName = 
-    factoryName = /&gt;
-&lt;support name =
-    structureName = 
-    factoryName = /&gt;
-&lt;support name =
-    structureName = 
-    factoryName = /&gt;
+&lt;support name = "pdrvInt32ArrayInput"
+  factoryName = "org.epics.ioc.support.PDRVSupportFactory" /&gt;
+&lt;support name = "pdrvInt32ArrayInterruptInput"
+  factoryName = "org.epics.ioc.support.PDRVSupportFactory" /&gt;
+&lt;support name = "pdrvInt32ArrayOutput" 
+  factoryName = "org.epics.ioc.support.PDRVSupportFactory" /&gt;
 
-&lt;support name =
-    structureName = 
-    factoryName = /&gt;
-&lt;support name =
-    structureName = 
-    factoryName = /&gt;
-&lt;support name =
-    structureName = 
-    factoryName = /&gt;
-&lt;support name =
-    structureName = 
-    factoryName = /&gt;
+&lt;support name = "pdrvFloat64Input"
+  factoryName = "org.epics.ioc.support.PDRVSupportFactory" /&gt;
+&lt;support name = "pdrvFloat64InterruptInput"
+  factoryName = "org.epics.ioc.support.PDRVSupportFactory" /&gt;
+&lt;support name = "pdrvFloat64AverageInput"
+  factoryName = "org.epics.ioc.support.PDRVSupportFactory" /&gt;
+&lt;support name = "pdrvFloat64Output"
+  factoryName = "org.epics.ioc.support.PDRVSupportFactory" /&gt;
 
-&lt;support name =
-    structureName = 
-    factoryName = /&gt;
-&lt;support name =
-    structureName = 
-    factoryName = /&gt;
-&lt;support name =
-    structureName = 
-    factoryName = /&gt;
+&lt;support name = "pdrvFloat64ArrayInput"
+  factoryName = "org.epics.ioc.support.PDRVSupportFactory" /&gt;
+&lt;support name = "pdrvFloat64ArrayInterruptInput" 
+  factoryName = "org.epics.ioc.support.PDRVSupportFactory" /&gt;
+&lt;support name = "pdrvFloat64ArrayOutput" 
+  factoryName = "org.epics.ioc.support.PDRVSupportFactory" /&gt;
 
-&lt;support name =
-    structureName = 
-    factoryName = /&gt;
-&lt;support name =
-    structureName = 
-    factoryName = /&gt;
-&lt;support name =
-    structureName = 
-    factoryName = /&gt;</pre>
+&lt;support name = "pdrvUInt32DigitalInput"
+  factoryName = "org.epics.ioc.support.PDRVSupportFactory" /&gt;
+&lt;support name = "pdrvUInt32DigitalInterruptInput"
+  factoryName = "org.epics.ioc.support.PDRVSupportFactory" /&gt;
+&lt;support name = "pdrvUInt32DigitalOutput" 
+  factoryName = "org.epics.ioc.support.PDRVSupportFactory" /&gt;</pre>
 
 <h3 id="PDRVPortCr">PDRVPortCreateFactory</h3>
 
 <p>This implements support for the portRecord which has the definition:</p>
-<pre>&lt;recordType name = &gt;
-    &lt;include href = /&gt;
-    &lt;field name = /&gt;
-    &lt;field name = /&gt;
-    &lt;field name = /&gt;
-    &lt;field name = /&gt;
-    &lt;field name =/&gt;
+<pre>&lt;recordType name = "portCreate" supportName = "portCreate" &gt;
+  &lt;field name = "factoryName" type = "string" /&gt;
+  &lt;field name = "portName" type = "string" /&gt;
+  &lt;field name = "autoConnect" type = "boolean" default = "true" /&gt;
+  &lt;field name = "priority" type = "structure" structureName = "scanPriority" /&gt;
+  &lt;field name = "driverParameters" type = "structure" structureName = "null"/&gt;
 &lt;/recordType&gt;
 
-&lt;support name =
-   factoryName = /&gt;</pre>
+&lt;support name = "portCreate"
+   factoryName = "org.epics.ioc.support.PDRVPortCreateFactory" /&gt;</pre>
 
 <p>This is support for a record or structure that initializes a portDriver
 port.</p>
@@ -1385,19 +1435,21 @@ port.</p>
 
 <p>This implements support for the portDeviceControl which has the
 definition:</p>
-<pre>&lt;recordType name = &gt;
-    &lt;field name = /&gt;
-    &lt;field name = /&gt;
-    &lt;field name = /&gt;
-    &lt;field name = /&gt;
-    &lt;field name = /&gt;
-    &lt;field name = /&gt;
-    &lt;field name = /&gt;
-    &lt;field name = /&gt;
+<pre>&lt;recordType name = "portDeviceControl" supportName = "portDeviceControl" &gt;
+  &lt;field name = "message" type = "string" /&gt;
+  &lt;field name = "portDevice" type = "string" /&gt;
+  &lt;field name = "connect" type = "structure" structureName = "booleanState"  /&gt;
+  &lt;field name = "enable" type = "structure" structureName = "booleanState"   /&gt;
+  &lt;field name = "autoConnect" type = "structure" structureName = "booleanState" /&gt;
+  &lt;field name = "traceMask" type = "structure" structureName = "intState"  /&gt;
+  &lt;field name = "traceIOMask" type = "structure" structureName = "intState" /&gt;
+  &lt;field name = "traceIOTruncateSize" type = "structure" structureName = "intState" /&gt;
+  &lt;field name = "report" type = "boolean" /&gt;
+  &lt;field name = "reportDetails" type = "int" /&gt;
 &lt;/recordType&gt;
 
-&lt;support name =
-   factoryName = /&gt;</pre>
+&lt;support name = "portDeviceControl"
+   factoryName = "org.epics.ioc.support.PDRVPortDeviceControlFactory" /&gt;</pre>
 <hr />
 
 <h2 style="text-align: center" id="Power">Power Supply Support</h2>

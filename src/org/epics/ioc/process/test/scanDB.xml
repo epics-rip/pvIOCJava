@@ -2,91 +2,91 @@
 <IOCDatabase>
 <record name = "counterPush" type = "calcDouble">
     <calcArgArray>
-        <value structureName = "calcDoubleArg">
+        <element structureName = "calcDoubleArg">
             <value>0</value>
             <name>min</name>
-        </value>
-        <value structureName = "calcDoubleArg">
+        </element>
+        <element structureName = "calcDoubleArg">
             <value>1e9</value>
             <name>max</name>
-        </value>
-        <value structureName = "calcDoubleArg">
+        </element>
+        <element structureName = "calcDoubleArg">
             <value>100.0</value>
             <name>inc</name>
-        </value>
+        </element>
     </calcArgArray>
     <calculator supportName = "counterCalculator" />
     <supportArray>
-        <value structureName = "supportArrayElement">
+        <element structureName = "supportArrayElement">
             <wait>false</wait>
             <link  supportName = "outputSupport" structureName = "outputSupport">
                     <pvname>doubleReceive00</pvname>
                     <process>true</process>
             </link>
-        </value>
-        <value structureName = "supportArrayElement">
+        </element>
+        <element structureName = "supportArrayElement">
             <wait>false</wait>
             <link  supportName = "outputSupport" structureName = "outputSupport">
                     <pvname>doubleReceive01</pvname>
                     <process>true</process>
             </link>
-        </value>
-        <value structureName = "supportArrayElement">
+        </element>
+        <element structureName = "supportArrayElement">
             <wait>false</wait>
             <link  supportName = "outputSupport" structureName = "outputSupport">
                     <pvname>doubleReceive02</pvname>
                     <process>true</process>
             </link>
-        </value>
-        <value structureName = "supportArrayElement">
+        </element>
+        <element structureName = "supportArrayElement">
             <wait>false</wait>
             <link  supportName = "outputSupport" structureName = "outputSupport">
                     <pvname>doubleReceive03</pvname>
                     <process>true</process>
             </link>
-        </value>
-        <value structureName = "supportArrayElement">
+        </element>
+        <element structureName = "supportArrayElement">
             <wait>false</wait>
             <link  supportName = "outputSupport" structureName = "outputSupport">
                     <pvname>doubleReceive04</pvname>
                     <process>true</process>
             </link>
-        </value>
-        <value structureName = "supportArrayElement">
+        </element>
+        <element structureName = "supportArrayElement">
             <wait>false</wait>
             <link  supportName = "outputSupport" structureName = "outputSupport">
                     <pvname>doubleReceive05</pvname>
                     <process>true</process>
             </link>
-        </value>
-        <value structureName = "supportArrayElement">
+        </element>
+        <element structureName = "supportArrayElement">
             <wait>false</wait>
             <link  supportName = "outputSupport" structureName = "outputSupport">
                     <pvname>doubleReceive06</pvname>
                     <process>true</process>
             </link>
-        </value>
-        <value structureName = "supportArrayElement">
+        </element>
+        <element structureName = "supportArrayElement">
             <wait>false</wait>
             <link  supportName = "outputSupport" structureName = "outputSupport">
                     <pvname>doubleReceive07</pvname>
                     <process>true</process>
             </link>
-        </value>
-        <value structureName = "supportArrayElement">
+        </element>
+        <element structureName = "supportArrayElement">
             <wait>false</wait>
             <link  supportName = "outputSupport" structureName = "outputSupport">
                     <pvname>doubleReceive08</pvname>
                     <process>true</process>
             </link>
-        </value>
-        <value structureName = "supportArrayElement">
+        </element>
+        <element structureName = "supportArrayElement">
             <wait>false</wait>
             <link  supportName = "outputSupport" structureName = "outputSupport">
                     <pvname>doubleReceive09</pvname>
                     <process>true</process>
             </link>
-        </value>
+        </element>
     </supportArray>
     <scan>
         <type><choice>periodic</choice></type>
@@ -114,18 +114,18 @@
 
 <record name = "counterEvent0" type = "calcDouble">
     <calcArgArray>
-        <value structureName = "calcDoubleArg">
+        <element structureName = "calcDoubleArg">
             <value>0</value>
             <name>min</name>
-        </value>
-        <value structureName = "calcDoubleArg">
+        </element>
+        <element structureName = "calcDoubleArg">
             <value>1e9</value>
             <name>max</name>
-        </value>
-        <value structureName = "calcDoubleArg">
+        </element>
+        <element structureName = "calcDoubleArg">
             <value>100.0</value>
             <name>inc</name>
-        </value>
+        </element>
     </calcArgArray>
     <calculator supportName = "counterCalculator" />
     <scan>
@@ -135,18 +135,18 @@
 </record>
 <record name = "counterEvent1" type = "calcDouble">
     <calcArgArray>
-        <value structureName = "calcDoubleArg">
+        <element structureName = "calcDoubleArg">
             <value>0</value>
             <name>min</name>
-        </value>
-        <value structureName = "calcDoubleArg">
+        </element>
+        <element structureName = "calcDoubleArg">
             <value>1e9</value>
             <name>max</name>
-        </value>
-        <value structureName = "calcDoubleArg">
+        </element>
+        <element structureName = "calcDoubleArg">
             <value>100.0</value>
             <name>inc</name>
-        </value>
+        </element>
     </calcArgArray>
     <calculator supportName = "counterCalculator" />
     <scan>

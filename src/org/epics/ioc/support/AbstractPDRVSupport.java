@@ -250,6 +250,10 @@ RecordProcessRequester
             deviceTrace.print(Trace.FLOW,
                     "%s:%s callback calling queueCallback", fullName,supportName);
             this.queueCallback();
+        } else {
+            deviceTrace.print(Trace.ERROR,
+                    "%s:%s callback error %s",
+                    fullName,supportName,user.getMessage());
         }
         deviceTrace.print(Trace.FLOW,
                 "%s:%s callback calling processContinue", fullName,supportName);

@@ -73,6 +73,7 @@ public class BaseCDStructure extends BaseCDField implements CDStructure {
      * @see org.epics.ioc.ca.CDStructure#findCDField(org.epics.ioc.pv.PVField)
      */
     public CDField findCDField(PVField pvField) {
+        if(pvStructure.getFullFieldName().equals(pvField.getFullFieldName())) return this;
         for(int i=0; i<cdFields.length; i++) {
             if(pvFields[i].getFullFieldName().equals(pvField.getFullFieldName())) return cdFields[i];
         }

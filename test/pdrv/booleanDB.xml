@@ -1,17 +1,17 @@
 <?xml version="1.0" ?>
 <IOCDatabase>
 
-<record name = "syncBooleanDriver" type = "portCreate">
+<record name = "syncBooleanPort" type = "portCreate">
     <factoryName>org.epics.ioc.pdrv.testDriver.UInt32DigitalDriverFactory</factoryName>
-    <portName>syncBooleanDigitalDriver</portName>
+    <portName>syncBooleanPort</portName>
     <driverParameters structureName = "uint32DigitalDriver" >
         <delay>0.0</delay>
         <numberRegisters>2</numberRegisters>
     </driverParameters>
 </record>
 
-<record name = "syncBooleanDriverControl" type = "portDeviceControl" >
-    <portDevice>syncBooleanDigitalDriver[0]</portDevice>
+<record name = "syncBooleanDeviceControl" type = "portDeviceControl" >
+    <portDevice>syncBooleanPort[0]</portDevice>
 <!--
     <traceMask>0x0fff</traceMask>
     <traceIOMask>0x0fff</traceIOMask>
@@ -57,7 +57,7 @@
     <alarm structureName = "alarm" />
     <timeStamp structureName = "timeStamp" />
     <output supportName = "pdrvUInt32DigitalOutput" structureName = "pdrvSupport">
-        <portName>syncBooleanDigitalDriver</portName>
+        <portName>syncBooleanPort</portName>
         <addr>0</addr>
         <mask>32767</mask>
         <timeout>.2</timeout>
@@ -89,7 +89,7 @@
     <alarm structureName = "alarm" />
     <timeStamp structureName = "timeStamp" />
     <input supportName = "pdrvUInt32DigitalInput" structureName = "pdrvSupport">
-        <portName>syncBooleanDigitalDriver</portName>
+        <portName>syncBooleanPort</portName>
         <addr>0</addr>
         <mask>0x1</mask>
         <timeout>.2</timeout>
@@ -105,7 +105,7 @@
     <alarm structureName = "alarm" />
     <timeStamp structureName = "timeStamp" />
     <input supportName = "pdrvUInt32DigitalInput" structureName = "pdrvSupport">
-        <portName>syncBooleanDigitalDriver</portName>
+        <portName>syncBooleanPort</portName>
         <addr>0</addr>
         <mask>0x2</mask>
         <timeout>.2</timeout>
@@ -121,7 +121,7 @@
     <alarm structureName = "alarm" />
     <timeStamp structureName = "timeStamp" />
     <input supportName = "pdrvUInt32DigitalInput" structureName = "pdrvSupport">
-        <portName>syncBooleanDigitalDriver</portName>
+        <portName>syncBooleanPort</portName>
         <addr>0</addr>
         <mask>0x4</mask>
         <timeout>.2</timeout>
@@ -133,18 +133,18 @@
     </valueAlarm>
 </record>
 
-<record name = "asynBooleanDriver" type = "portCreate">
+<record name = "asynBooleanPort" type = "portCreate">
     <factoryName>org.epics.ioc.pdrv.testDriver.UInt32DigitalDriverFactory</factoryName>
-    <portName>asynBooleanDigitalDriver</portName>
+    <portName>asynBooleanPort</portName>
     <driverParameters structureName = "uint32DigitalDriver" >
         <delay>0.1</delay>
         <numberRegisters>2</numberRegisters>
     </driverParameters>
 </record>
 
-<record name = "asynBooleanDriverControl" type = "portDeviceControl" >
+<record name = "asynBooleanDeviceControl" type = "portDeviceControl" >
+    <portDevice>asynBooleanPort[0]</portDevice>
 <!--
-    <portDevice>syncBooleanDigitalDriver[0]</portDevice>
     <traceMask>0x0fff</traceMask>
     <traceIOMask>0x0fff</traceIOMask>
 -->
@@ -187,7 +187,7 @@
     <alarm structureName = "alarm" />
     <timeStamp structureName = "timeStamp" />
     <output supportName = "pdrvUInt32DigitalOutput" structureName = "pdrvSupport">
-        <portName>asynBooleanDigitalDriver</portName>
+        <portName>asynBooleanPort</portName>
         <addr>0</addr>
         <mask>32767</mask>
         <timeout>.2</timeout>
@@ -220,7 +220,7 @@
     <alarm structureName = "alarm" />
     <timeStamp structureName = "timeStamp" />
     <input supportName = "pdrvUInt32DigitalInput" structureName = "pdrvSupport">
-        <portName>asynBooleanDigitalDriver</portName>
+        <portName>asynBooleanPort</portName>
         <addr>0</addr>
         <mask>0x1</mask>
         <timeout>.2</timeout>
@@ -236,7 +236,7 @@
     <alarm structureName = "alarm" />
     <timeStamp structureName = "timeStamp" />
     <input supportName = "pdrvUInt32DigitalInput" structureName = "pdrvSupport">
-        <portName>asynBooleanDigitalDriver</portName>
+        <portName>asynBooleanPort</portName>
         <addr>0</addr>
         <mask>0x2</mask>
         <timeout>.2</timeout>
@@ -251,7 +251,7 @@
     <alarm structureName = "alarm" />
     <timeStamp structureName = "timeStamp" />
     <input supportName = "pdrvUInt32DigitalInput" structureName = "pdrvSupport">
-        <portName>asynBooleanDigitalDriver</portName>
+        <portName>asynBooleanPort</portName>
         <addr>0</addr>
         <mask>0x4</mask>
         <timeout>.2</timeout>

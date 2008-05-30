@@ -199,6 +199,10 @@ public class Int32ArrayDriverFactory {
                  * @see org.epics.ioc.pdrv.interfaces.AbstractInt32Array#startRead(org.epics.ioc.pdrv.User)
                  */
                 public Status startRead(User user) {
+                    if(!device.isConnected()) {
+                        trace.print(Trace.ERROR,deviceName + " startRead but not connected");
+                        return Status.error;
+                    }
                     double timeout = user.getTimeout();
                     if(timeout>0.0 && delay>timeout) {
                         user.setMessage("timeout");
@@ -210,6 +214,15 @@ public class Int32ArrayDriverFactory {
                  * @see org.epics.ioc.pdrv.interfaces.AbstractInt32Array#startWrite(org.epics.ioc.pdrv.User)
                  */
                 public Status startWrite(User user) {
+                    if(!device.isConnected()) {
+                        trace.print(Trace.ERROR,deviceName + " startWrite but not connected");
+                        return Status.error;
+                    }
+                    if(!super.isMutable()) {
+                        trace.print(Trace.ERROR,deviceName + " put but notMutable");
+                        user.setMessage("not mutable");
+                        return Status.error;
+                    }
                     double timeout = user.getTimeout();
                     if(timeout>0.0 && delay>timeout) {
                         user.setMessage("timeout");
@@ -218,6 +231,10 @@ public class Int32ArrayDriverFactory {
                     return super.startWrite(user);
                 }              
                 public int get(int offset,int len, IntArrayData data) {
+                    if(!device.isConnected()) {
+                        trace.print(Trace.ERROR,deviceName + " get but not connected");
+                        return 0;
+                    }
                     if(delay>0.0) {
                         try {
                         Thread.sleep(milliseconds);
@@ -240,6 +257,10 @@ public class Int32ArrayDriverFactory {
                 
                 public int put(int offset, int len, int[] from, int fromOffset) {
                     if(!super.isMutable()) {
+                        return 0;
+                    }
+                    if(!device.isConnected()) {
+                        trace.print(Trace.ERROR,deviceName + " put but not connected");
                         return 0;
                     }
                     if(delay>0.0) {

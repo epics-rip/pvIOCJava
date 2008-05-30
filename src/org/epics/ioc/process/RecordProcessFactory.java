@@ -47,7 +47,7 @@ public class RecordProcessFactory {
         private DBRecord dbRecord;
         private PVRecord pvRecord;
         private String recordProcessSupportName;
-        private boolean disabled = false;
+        private boolean enabled = true;
         private Support recordSupport = null;
         private ScanSupport scanSupport = null;
         private PVBoolean pvProcessAfterStart = null;
@@ -80,24 +80,24 @@ public class RecordProcessFactory {
             pvRecord = dbRecord.getPVRecord();
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.process.RecordProcess#isDisabled()
+         * @see org.epics.ioc.process.RecordProcess#isEnabled()
          */
-        public boolean isDisabled() {
+        public boolean isEnabled() {
             dbRecord.lock();
             try {
-                return disabled;
+                return enabled;
             } finally {
                 dbRecord.unlock();
             }
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.process.RecordProcess#setDisabled(boolean)
+         * @see org.epics.ioc.process.RecordProcess#setEnabled(boolean)
          */
-        public boolean setDisabled(boolean value) {
+        public boolean setEnabled(boolean value) {
             dbRecord.lock();
             try {
-                boolean oldValue = disabled;
-                disabled = value;
+                boolean oldValue = enabled;
+                enabled = value;
                 return (oldValue==value) ? false : true;
             } finally {
                 dbRecord.unlock();
@@ -119,6 +119,17 @@ public class RecordProcessFactory {
          */
         public DBRecord getRecord() {
             return dbRecord;
+        }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.process.RecordProcess#isTrace()
+         */
+        public boolean isTrace() {
+            dbRecord.lock();
+            try {
+                return trace;
+            } finally {
+                dbRecord.unlock();
+            }
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.process.RecordProcessSupport#setTrace(boolean)
@@ -613,7 +624,7 @@ public class RecordProcessFactory {
                 recordProcessRequester.message("record already active",MessageType.error);
                 return false;
             }
-            if(isDisabled()) {
+            if(!isEnabled()) {
                 recordProcessRequester.message("record is disabled ",MessageType.error);
                 return false;
             }

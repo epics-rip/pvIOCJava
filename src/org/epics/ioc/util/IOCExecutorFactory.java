@@ -36,14 +36,8 @@ public class IOCExecutorFactory {
         /* (non-Javadoc)
          * @see org.epics.ioc.util.IOCExecutor#execute(java.lang.Runnable)
          */
-        public boolean execute(Runnable command) {
-            return thread.add(command);
-        }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.util.IOCExecutor#execute(java.util.List)
-         */
-        public boolean execute(List<Runnable> commands) {
-            return thread.add(commands);
+        public void execute(Runnable command) {
+            thread.add(command);
         }
     }
     
@@ -85,36 +79,19 @@ public class IOCExecutorFactory {
             }
         }
         
-        private boolean add(Runnable runnable) {
-            boolean wasAdded = false;
+        private void add(Runnable runnable) {
             lock.lock();
             try {
+                if(runList.contains(runnable)) {
+                    return;
+                }
                 boolean isEmpty = runList.isEmpty();
-                wasAdded = runList.add(runnable);
+                runList.add(runnable);
                 if(isEmpty) moreWork.signal();
-                return wasAdded;
+                return;
             } finally {
                 lock.unlock();
             }
         }
-        
-        private boolean add(List<Runnable> runnableList) {
-            boolean allAdded = false;
-            lock.lock();
-            try {
-                boolean isEmpty = runList.isEmpty();
-                int initialSize = runList.size();
-                runList.addAll(runnableList);
-                int finalSize = runList.size();
-                int added = finalSize - initialSize;
-                int size = runnableList.size();
-                if(added==size) allAdded = true;
-                if(isEmpty) moreWork.signal();
-                return allAdded;
-            } finally {
-                lock.unlock();
-            }
-        }
-        
     }
 }

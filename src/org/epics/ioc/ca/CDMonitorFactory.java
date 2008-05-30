@@ -251,9 +251,7 @@ public class CDMonitorFactory {
                 }
             }
             private void call() {
-                if(!iocExecutor.execute(this)) {
-                    System.err.println("iocExecutor.execute failed");
-                }
+                iocExecutor.execute(this);
             }
 
         }

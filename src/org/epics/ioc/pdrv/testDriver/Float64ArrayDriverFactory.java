@@ -15,8 +15,6 @@ import org.epics.ioc.pdrv.Trace;
 import org.epics.ioc.pdrv.User;
 import org.epics.ioc.pdrv.interfaces.AbstractFloat64Array;
 import org.epics.ioc.pv.Array;
-import org.epics.ioc.pv.Convert;
-import org.epics.ioc.pv.ConvertFactory;
 import org.epics.ioc.pv.DoubleArrayData;
 import org.epics.ioc.pv.FieldCreate;
 import org.epics.ioc.pv.FieldFactory;
@@ -36,7 +34,6 @@ import org.epics.ioc.util.ScanPriority;
  */
 public class Float64ArrayDriverFactory {
     private static FieldCreate fieldCreate = FieldFactory.getFieldCreate();
-    private static Convert convert = ConvertFactory.getConvert();
     /**
      * Create a new instance of float64ArrayDriver.
      * @param portName The portName.
@@ -202,6 +199,10 @@ public class Float64ArrayDriverFactory {
                  * @see org.epics.ioc.pdrv.interfaces.AbstractFloat64Array#startRead(org.epics.ioc.pdrv.User)
                  */
                 public Status startRead(User user) {
+                    if(!device.isConnected()) {
+                        trace.print(Trace.ERROR,deviceName + " startRead but not connected");
+                        return Status.error;
+                    }
                     double timeout = user.getTimeout();
                     if(timeout>0.0 && delay>timeout) {
                         user.setMessage("timeout");
@@ -213,6 +214,15 @@ public class Float64ArrayDriverFactory {
                  * @see org.epics.ioc.pdrv.interfaces.AbstractFloat64Array#startWrite(org.epics.ioc.pdrv.User)
                  */
                 public Status startWrite(User user) {
+                    if(!device.isConnected()) {
+                        trace.print(Trace.ERROR,deviceName + " startWrite but not connected");
+                        return Status.error;
+                    }
+                    if(!super.isMutable()) {
+                        trace.print(Trace.ERROR,deviceName + " put but notMutable");
+                        user.setMessage("not mutable");
+                        return Status.error;
+                    }
                     double timeout = user.getTimeout();
                     if(timeout>0.0 && delay>timeout) {
                         user.setMessage("timeout");
@@ -224,6 +234,10 @@ public class Float64ArrayDriverFactory {
                  * @see org.epics.ioc.pv.PVDoubleArray#get(int, int, org.epics.ioc.pv.DoubleArrayData)
                  */
                 public int get(int offset,int len, DoubleArrayData data) {
+                    if(!device.isConnected()) {
+                        trace.print(Trace.ERROR,deviceName + " get but not connected");
+                        return 0;
+                    }
                     if(delay>0.0) {
                         try {
                         Thread.sleep(milliseconds);
@@ -247,7 +261,12 @@ public class Float64ArrayDriverFactory {
                  * @see org.epics.ioc.pv.PVDoubleArray#put(int, int, double[], int)
                  */
                 public int put(int offset, int len, double[] from, int fromOffset) {
+                    if(!device.isConnected()) {
+                        trace.print(Trace.ERROR,deviceName + " put but not connected");
+                        return 0;
+                    }
                     if(!super.isMutable()) {
+                        trace.print(Trace.ERROR,deviceName + " put but notMutable");
                         return 0;
                     }
                     if(delay>0.0) {

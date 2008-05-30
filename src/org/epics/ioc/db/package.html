@@ -734,7 +734,7 @@ instance.</p>
 <p>A factory is available that implements the DBField interfaces for record
 instance fields.</p>
 <pre>    public class DBRecordFactory {
-        public static DBRecord create(PVRecord pvRecord);
+        public static DBRecord create(PVRecord pvRecord,IOCDB iocdb,DBD dbd);
     }</pre>
 
 <p>Base classes are available for implementing the PVField interfaces for
@@ -799,12 +799,13 @@ ReadWrite locks are used to implement thread safety.</p>
     <dd>Get a shallow copy of the map of all record instances in this
       database. A copy is returned to ensure thread safety.</dd>
   <dt style="font-family: courier;">message</dt>
-    <dd>Report a message. If no listeners are registered the messages are
-      sent to System.out. If listeners are registered they are called.</dd>
-  <dt style="font-family: courier;">addMessageListener</dt>
-    <dd>Add a message listener.</dd>
-  <dt style="font-family: courier;">removeMessageListener</dt>
-    <dd>Remove a message listener.</dd>
+    <dd>Report a message. If no requesters are registered the messages are
+      sent to System.out. If requesters are registered they are called.</dd>
+  <dt style="font-family: courier;">addMessageRequester</dt>
+    <dd>Add a requester for messages. Requester is defined in package
+      org.epics.ioc.util..</dd>
+  <dt style="font-family: courier;">removeMessagerequester</dt>
+    <dd>Remove a message requester.</dd>
   <dt style="font-family: courier;">createAccess</dt>
     <dd>Create a DBAccess. See below for a description of IOC Database
     Access.</dd>
