@@ -19,18 +19,6 @@ public interface DBStructure extends DBField {
      */
     DBField[] getDBFields();
     /**
-     * Replace the current PVStructure.
-     */
-    void replacePVStructure();
-    /**
-     * The caller  is ready to modify multiple fields of the structure.
-     */
-    void beginPut();
-    /**
-     * The caller is done modifying fields of the structure.
-     */
-    void endPut();
-    /**
      * Get the PVStructure for this DBStructure.
      * @return The PVStructure.
      */

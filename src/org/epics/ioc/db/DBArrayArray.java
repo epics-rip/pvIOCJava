@@ -8,7 +8,7 @@ package org.epics.ioc.db;
 import org.epics.ioc.pv.PVArrayArray;
 
 /**
- * Interface for non scalar arrays.
+ * Interface for a DBArrayArray.
  * @author mrk
  *
  */
@@ -19,13 +19,9 @@ public interface DBArrayArray extends DBArray{
      */
     PVArrayArray getPVArrayArray();
     /**
-     * Get the CDArray array.
+     * Get the DBArray array.
      * @return The array of elements.
      * An element is null if the corresponding pvArray element is null.
      */
     DBArray[] getElementDBArrays();
-    /**
-     * Replace the current PVArray.
-     */
-    void replacePVArray();
 }

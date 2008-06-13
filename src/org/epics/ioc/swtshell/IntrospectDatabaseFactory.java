@@ -5,10 +5,6 @@
  */
 package org.epics.ioc.swtshell;
 
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Set;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -61,7 +57,6 @@ public class IntrospectDatabaseFactory {
     
     private static class Introspect implements SelectionListener, Requester{
         static private DBD dbd = DBDFactory.getMasterDBD();
-        private Map<String,DBRecord> recordMap = iocdb.getRecordMap();
         private Display display;
         private Shell shell;
         private Text recordSelectText;
@@ -124,7 +119,7 @@ public class IntrospectDatabaseFactory {
                     
                     String recordName = selectLocalRecord.getRecordName();
                     if(recordName!=null) {
-                        DBRecord dbRecord = recordMap.get(recordName);
+                        DBRecord dbRecord = iocdb.findRecord(recordName);
                         if(dbRecord!=null) {
                             consoleText.append(dbRecord.toString());
                         } else {
@@ -148,7 +143,7 @@ public class IntrospectDatabaseFactory {
             if(e.getSource()==recordSelectText) {
                 String name = recordSelectText.getText();
                 if(name!=null) {
-                    DBRecord dbRecord = recordMap.get(name);
+                    DBRecord dbRecord = iocdb.findRecord(name);
                     if(dbRecord!=null) {
                         consoleText.append(dbRecord.toString());
                     } else {
@@ -178,7 +173,6 @@ public class IntrospectDatabaseFactory {
         }
         
         private class StructureDBD implements SelectionListener {
-            private Map<String,DBDStructure> structureMap;
             
             private StructureDBD(MenuItem menuItem) {
                 Menu menuStructure = new Menu(shell,SWT.DROP_DOWN);
@@ -186,11 +180,11 @@ public class IntrospectDatabaseFactory {
                 MenuItem choiceAll = new MenuItem(menuStructure,SWT.DEFAULT|SWT.PUSH);
                 choiceAll.setText("all");
                 choiceAll.addSelectionListener(this);
-                structureMap = dbd.getStructureMap();
-                Iterator<String> iter = structureMap.keySet().iterator();
-                for(int i=0; i< structureMap.size(); i++) {
+                DBDStructure[] dbdStructures = dbd.getDBDStructures();
+                for(DBDStructure dbdStructure : dbdStructures) {
+                    String name = dbdStructure.getStructureName();
                     MenuItem choiceItem = new MenuItem(menuStructure,SWT.PUSH);
-                    choiceItem.setText(iter.next());
+                    choiceItem.setText(name);
                     choiceItem.addSelectionListener(this);
                 }
             }
@@ -205,23 +199,21 @@ public class IntrospectDatabaseFactory {
              */
             public void widgetSelected(SelectionEvent arg0) {
                 MenuItem choice = (MenuItem)arg0.getSource();
-                String key = choice.getText();
-                if(!key.equals("all")) {
-                    DBDStructure value = (DBDStructure)structureMap.get(key);
+                String name = choice.getText();
+                if(!name.equals("all")) {
+                    DBDStructure value = dbd.getStructure(name);
                     consoleText.append(value.toString());
                     return;
                 }
-                Set<String> keys = structureMap.keySet();
-                for(String next: keys) {
-                    DBDStructure value = structureMap.get(next);
-                    consoleText.append(value.toString());
+                DBDStructure[] dbdStructures = dbd.getDBDStructures();
+                for(DBDStructure dbdStructure : dbdStructures) {
+                    consoleText.append(dbdStructure.toString());
                 }
             }
             
         }
         
         private class RecordTypeDBD implements SelectionListener {
-            private Map<String,DBDRecordType> recordTypeMap;
             
             private RecordTypeDBD(MenuItem menuItem) {
                 Menu menuRecordType = new Menu(shell,SWT.DROP_DOWN);
@@ -229,11 +221,11 @@ public class IntrospectDatabaseFactory {
                 MenuItem choiceAll = new MenuItem(menuRecordType,SWT.DEFAULT|SWT.PUSH);
                 choiceAll.setText("all");
                 choiceAll.addSelectionListener(this);
-                recordTypeMap = dbd.getRecordTypeMap();
-                Iterator<String> iter = recordTypeMap.keySet().iterator();
-                for(int i=0; i< recordTypeMap.size(); i++) {
+                DBDRecordType[] dbdRecordTypes = dbd.getDBDRecordTypes();
+                for(DBDRecordType dbdRecordType : dbdRecordTypes) {
+                    String name = dbdRecordType.getStructureName();
                     MenuItem choiceItem = new MenuItem(menuRecordType,SWT.PUSH);
-                    choiceItem.setText(iter.next());
+                    choiceItem.setText(name);
                     choiceItem.addSelectionListener(this);
                 }
             }
@@ -248,23 +240,21 @@ public class IntrospectDatabaseFactory {
              */
             public void widgetSelected(SelectionEvent arg0) {
                 MenuItem choice = (MenuItem)arg0.getSource();
-                String key = choice.getText();
-                if(!key.equals("all")) {
-                    DBDRecordType value = (DBDRecordType)recordTypeMap.get(key);
+                String name = choice.getText();
+                if(!name.equals("all")) {
+                    DBDRecordType value = dbd.getRecordType(name);
                     consoleText.append(value.toString());
                     return;
                 }
-                Set<String> keys = recordTypeMap.keySet();
-                for(String next: keys) {
-                    DBDRecordType value = recordTypeMap.get(next);
-                    consoleText.append(value.toString());
+                DBDRecordType[] dbdRecordTypes = dbd.getDBDRecordTypes();
+                for(DBDRecordType dbdRecordType : dbdRecordTypes) {
+                    consoleText.append(dbdRecordType.toString());
                 }
             }
             
         }
         
         private class CreateDBD implements SelectionListener {
-            private Map<String,DBDCreate> createMap;
             
             private CreateDBD(MenuItem menuItem) {
                 Menu menuCreate = new Menu(shell,SWT.DROP_DOWN);
@@ -272,11 +262,11 @@ public class IntrospectDatabaseFactory {
                 MenuItem choiceAll = new MenuItem(menuCreate,SWT.DEFAULT|SWT.PUSH);
                 choiceAll.setText("all");
                 choiceAll.addSelectionListener(this);
-                createMap = dbd.getCreateMap();
-                Iterator<String> iter = createMap.keySet().iterator();
-                for(int i=0; i< createMap.size(); i++) {
+                DBDCreate[] dbdCreates = dbd.getDBDCreates();
+                for(DBDCreate dbdCreate : dbdCreates) {
+                    String name = dbdCreate.getCreateName();
                     MenuItem choiceItem = new MenuItem(menuCreate,SWT.PUSH);
-                    choiceItem.setText(iter.next());
+                    choiceItem.setText(name);
                     choiceItem.addSelectionListener(this);
                 }
             }
@@ -291,23 +281,21 @@ public class IntrospectDatabaseFactory {
              */
             public void widgetSelected(SelectionEvent arg0) {
                 MenuItem choice = (MenuItem)arg0.getSource();
-                String key = choice.getText();
-                if(!key.equals("all")) {
-                    DBDCreate value = (DBDCreate)createMap.get(key);
+                String name = choice.getText();
+                if(!name.equals("all")) {
+                    DBDCreate value = dbd.getCreate(name);
                     consoleText.append(value.toString());
                     return;
                 }
-                Set<String> keys = createMap.keySet();
-                for(String next: keys) {
-                    DBDCreate value = createMap.get(next);
-                    consoleText.append(value.toString());
+                DBDCreate[] dbdCreates = dbd.getDBDCreates();
+                for(DBDCreate dbdCreate: dbdCreates) {
+                    consoleText.append(dbdCreate.toString());
                 }
             }
         }
         
         
         private class SupportDBD implements SelectionListener {
-            private Map<String,DBDSupport> supportMap;
             
             private SupportDBD(MenuItem menuItem) {
                 Menu menuSupport = new Menu(shell,SWT.DROP_DOWN);
@@ -315,11 +303,11 @@ public class IntrospectDatabaseFactory {
                 MenuItem choiceAll = new MenuItem(menuSupport,SWT.DEFAULT|SWT.PUSH);
                 choiceAll.setText("all");
                 choiceAll.addSelectionListener(this);
-                supportMap = dbd.getSupportMap();
-                Iterator<String> iter = supportMap.keySet().iterator();
-                for(int i=0; i< supportMap.size(); i++) {
+                DBDSupport[] dbdSupports = dbd.getDBDSupports();
+                for(DBDSupport dbdSupport : dbdSupports) {
+                    String name = dbdSupport.getSupportName();
                     MenuItem choiceItem = new MenuItem(menuSupport,SWT.PUSH);
-                    choiceItem.setText(iter.next());
+                    choiceItem.setText(name);
                     choiceItem.addSelectionListener(this);
                 }
             }
@@ -336,14 +324,13 @@ public class IntrospectDatabaseFactory {
                 MenuItem choice = (MenuItem)arg0.getSource();
                 String key = choice.getText();
                 if(!key.equals("all")) {
-                    DBDSupport value = (DBDSupport)supportMap.get(key);
+                    DBDSupport value = dbd.getSupport(key);
                     consoleText.append(value.toString());
                     return;
                 }
-                Set<String> keys = supportMap.keySet();
-                for(String next: keys) {
-                    DBDSupport value = supportMap.get(next);
-                    consoleText.append(value.toString());
+                DBDSupport[] dbdSupports = dbd.getDBDSupports();
+                for(DBDSupport dbdSupport : dbdSupports) {
+                    consoleText.append(dbdSupport.toString());
                 }
             }
         }

@@ -5,9 +5,6 @@
  */
 package org.epics.ioc.swtshell;
 
-import java.util.Iterator;
-import java.util.Map;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
@@ -44,8 +41,7 @@ public class SelectLocalRecordFactory {
     implements SelectLocalRecord, SelectionListener
     {
         private Requester requester;
-        private IOCDB iocdb = IOCDBFactory.getMaster();
-        private Map<String,DBRecord> recordMap;        
+        private IOCDB iocdb = IOCDBFactory.getMaster();        
         private Shell shell;
         private List list;
         private int ntimes = 0;
@@ -75,19 +71,17 @@ public class SelectLocalRecordFactory {
             gridLayout = new GridLayout();
             gridLayout.numColumns = 1;
             composite.setLayout(gridLayout);
-            
-            list = new List(composite,SWT.SINGLE|SWT.V_SCROLL);        
-            recordMap = iocdb.getRecordMap();
-            if(recordMap.isEmpty()) {
+            list = new List(composite,SWT.SINGLE|SWT.V_SCROLL);
+            DBRecord[] dbRecords = iocdb.getDBRecords();
+            if(dbRecords.length==0) {
                 requester.message(String.format(
                         "iocdb %s has no records",
                         iocdb.getName()),
                         MessageType.error);
                 return null;
             }
-            Iterator<String> iter = recordMap.keySet().iterator();
-            for(int i=0; i< recordMap.size(); i++) {
-                list.add(iter.next());
+            for(DBRecord dbRecord : dbRecords) {
+                list.add(dbRecord.getPVRecord().getRecordName());
             }
             list.addSelectionListener(this);
             GridData listGridData = new GridData();

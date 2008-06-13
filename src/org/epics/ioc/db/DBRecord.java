@@ -5,7 +5,6 @@
  */
 package org.epics.ioc.db;
 
-import org.epics.ioc.dbd.DBD;
 import org.epics.ioc.process.RecordProcess;
 import org.epics.ioc.pv.PVField;
 import org.epics.ioc.pv.PVRecord;
@@ -62,17 +61,11 @@ public interface DBRecord {
      */
     boolean setRecordProcess(RecordProcess recordProcess);
     /**
-     * Get the id for this record instance.
-     * Each instance is assigned a unique integer id.
-     * @return The id.
-     */
-    int getRecordID();
-    /**
-     * Begin a set of record processing.
+     * Begin record processing.
      */
     void beginProcess();
     /**
-     * End of record processing.
+     * End record processing.
      */
     void endProcess();
     /**
@@ -89,39 +82,6 @@ public interface DBRecord {
      * @param listener The Listen interface returned by the call to createListener.
      */
     void removeRecordListener(RecordListener listener);
-    /**
-     * Remove all listeners.
-     * Any code that modifies the structure of a record must call this before making modifications.
-     */
-    void removeRecordListeners();
-    /**
-     * Used for communication between BasePVRecord and BaseDBField.
-     * DBField calls this the first time DBField.addListener is called.
-     * @param dbField The DBField instance.
-     */
-    void addListenerSource(DBField dbField);
-    /**
-     * Get the DBD that contains this record.
-     * @return The DBD or null if it was never set.
-     */
-    DBD getDBD();
-    /**
-     * Set the DBD that contains this record instance.
-     * @param dbd The DBD.
-     */
-    void setDBD(DBD dbd);
-    /**
-     * Get the IOCDB to which this record belongs.
-     * This can put so user code should never save the return value.
-     * @return The current IOC database.
-     */
-    IOCDB getIOCDB();
-    /**
-     * Set the IOCDB.
-     * @param iocdb The iocdb to which this record belongs.
-     * This is called after an IOCDB is merged into the master to put it to the master.
-     */
-    void setIOCDB(IOCDB iocdb);
     /**
      * Convert the DBRecord to a string.
      * @return The string.

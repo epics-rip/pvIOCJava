@@ -130,11 +130,12 @@ public class ParentTest extends TestCase {
             return;
         }
         PVRecord record = pvField.getPVRecord();
-        System.out.printf("fieldName %s actualField %s record %s fullName %s%n",
+        System.out.printf("fieldName %s actualField %s record %s fullFieldName %s fullName %s%n",
             fieldName,
             pvField.getField().getFieldName(),
             record.getRecordName(),
-            record.getRecordName() + pvField.getFullFieldName());
+            pvField.getFullFieldName(),
+            pvField.getFullName());
         PVField parent = pvField.getParent();
         while(parent!=null) {
             record = parent.getPVRecord();

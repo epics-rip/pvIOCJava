@@ -13,22 +13,12 @@ package org.epics.ioc.db;
  */
 public interface DBListener {
     /**
-     * A scalar or array modification has occured.
+     * The data in the dbField has been modified.
      * @param dbField The data.
      */
     void dataPut(DBField dbField);
     /**
-     * Start of a structure modification.
-     * @param dbStructure The structure.
-     */
-    void beginPut(DBStructure dbStructure);
-    /**
-     * End of a structure modification.
-     * @param dbStructure The structure.
-     */
-    void endPut(DBStructure dbStructure);
-    /**
-     * A put to a subfield has occured.
+     * A put to a subfield has occurred.
      * @param requested The requester is listening to this dbField.
      * It can be any field that has subfields. Thus the pvType can be.
      * <ol>
@@ -45,8 +35,8 @@ public interface DBListener {
     void dataPut(DBField requested,DBField dbField);
     /**
      * Begin record processing.
-     * From begin until end of record processing,
-     * each newData returns data modified while record is being processed.
+     * Between begin and end of record processing,
+     * dataPut may be called 0 or more times.
      */
     void beginProcess();
     /**

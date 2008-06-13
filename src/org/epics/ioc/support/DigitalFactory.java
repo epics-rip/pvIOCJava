@@ -283,7 +283,7 @@ public class DigitalFactory {
             }          
             pvValueChoices.put(0, nstates, names, 0);
             pvStateAlarmArray.put(0,nstates, pvAlarmSeveritys, 0);
-            dbStateAlarm.replacePVArray();
+            dbStateAlarm.replacePVField(pvStateAlarmArray);
             DBStructure[] dbFields = dbStateAlarm.getElementDBStructures();
             for(int indState=0; indState<nstates; indState++) {
                 DBStructure dbStructure = (DBStructure)dbFields[indState];

@@ -22,7 +22,7 @@ import org.epics.ioc.util.Requester;
 public class SWTMessageFactory {
 
     /**
-     * Create and return a Requester interrface.
+     * Create and return a Requester interface.
      * @param name The name for the requester.
      * @param display The parent display.
      * @param consoleText The text window into which the messages are printed.
@@ -45,7 +45,7 @@ public class SWTMessageFactory {
         private Display display;
         private Text consoleText = null;
 
-        private MessageQueue messageQueue = MessageQueueFactory.create(3);
+        private MessageQueue messageQueue = MessageQueueFactory.create(300);
         /* (non-Javadoc)
          * @see org.epics.ioc.util.Requester#getRequesterName()
          */

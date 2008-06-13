@@ -11,7 +11,7 @@
 
 <h1 style="text-align: center">EPICS JavaIoc: Database Access <br />
 package: org.epics.ioc.dbAcess <br />
-2008.03.04</h1>
+2008.06.10</h1>
 CONTENTS 
 
 <div class="toc">
@@ -53,7 +53,18 @@ CONTENTS
       <li><a href="#DBRecordFa">DBRecordFactory</a></li>
     </ul>
   </li>
-  <li><a href="#IOCDB">IOCDB: IOC Database</a></li>
+  <li><a href="#IOCDB">IOCDB: IOC Database</a> 
+    <ul>
+      <li><a href="#Master">Master IOCDB</a></li>
+      <li><a href="#IOCDB1">IOCDB</a></li>
+    </ul>
+  </li>
+  <li><a href="#Rules">Rules for modifying PV data</a> 
+    <ul>
+      <li><a href="#Modifying">Modifying Data Only</a></li>
+      <li><a href="#Modifying1">Modifying Structure</a></li>
+    </ul>
+  </li>
   <li><a href="#Listener1">Listener Support</a></li>
   <li><a href="#Thread">Thread Safety</a></li>
 </ul>
@@ -78,6 +89,7 @@ instances. The following is discussed:</p>
   </li>
   <li>IOC Database<br />
     Interface and factory for a database containing the record instances</li>
+  <li>Rules for modifying PVData.</li>
   <li>Listen Support<br />
     A description of the support for monitoring changes to the data in
     database instances fields.</li>
@@ -450,8 +462,6 @@ value.</p>
 <p>DBListener has the definition:</p>
 <pre>    public interface DBListener {
         void dataPut(DBField dbField);
-        void beginPut(DBStructure dbStructure);
-        void endPut(DBStructure dbStructure);
         void dataPut(DBField requested,DBField dbField);
         void beginProcess();
         void endProcess();
@@ -463,10 +473,6 @@ where
 <dl>
   <dt style="font-family: courier;">dataPut</dt>
     <dd>A data put has occured.</dd>
-  <dt style="font-family: courier;">beginPut</dt>
-    <dd>A series of puts to a structure is starting.</dd>
-  <dt style="font-family: courier;">endPut</dt>
-    <dd>A series of puts to a structure has completed.</dd>
   <dt style="font-family: courier;">beginProcess</dt>
     <dd>The record is starting processing.</dd>
   <dt style="font-family: courier;">endProcess</dt>
@@ -523,18 +529,14 @@ instance.</p>
         String setSupportName(String name);
         Create getCreate();
         void setCreate(Create create);
-        void replaceCreate();
         Support getSupport();
         void setSupport(Support support);
         void postPut();
-        void addListener(RecordListener recordListener);
+        boolean addListener(RecordListener recordListener);
         void removeListener(RecordListener recordListener);
-        List&lt;RecordListener&gt; getRecordListenerList();
         String toString();
         String toString(int indentLevel);
-    }
-
-    public class BaseDBField implements DBField{ ... }</pre>
+    }</pre>
 
 <p>where</p>
 <dl>
@@ -556,8 +558,6 @@ instance.</p>
     exists.</dd>
   <dt style="font-family: courier;">setCreate</dt>
     <dd>Set the create for the field. It can be null.</dd>
-  <dt style="font-family: courier;">replaceCreate</dt>
-    <dd>Looks to see if create should be replaced.</dd>
   <dt style="font-family: courier;">getSupport</dt>
     <dd>Get the support for this field. This returns null if no support
       exists.</dd>
@@ -573,41 +573,26 @@ instance.</p>
       modified.</dd>
   <dt style="font-family: courier;">removeListener</dt>
     <dd>Remove a listener.</dd>
-  <dt style="font-family: courier;">getRecordListenerList</dt>
-    <dd>Get a list of all the record listeners.</dd>
 </dl>
 
 <h3 id="DBStructur">DBStructure</h3>
 <pre>    public interface DBStructure extends DBField {
         PVStructure getPVStructure();
-        void replacePVStructure();
         DBField[] getDBFields();
-        void beginPut();
-        void endPut();
-    }
-
-    public class BaseDBStructure extends BaseDBField implements DBStructure{ ... }</pre>
+    }</pre>
 
 <p>where</p>
 <dl>
   <dt style="font-family: courier;">getPVStructure</dt>
     <dd>Get the associated PVStructure interface.</dd>
-  <dt style="font-family: courier;">replacePVStructure</dt>
-    <dd>Replace the PVStructure interface.</dd>
   <dt style="font-family: courier;">getDBFields</dt>
     <dd>Get the DBField array for the subfields.</dd>
-  <dt style="font-family: courier;">beginPut</dt>
-    <dd>Begin a set of puts to subfields of the structure.</dd>
-  <dt style="font-family: courier;">endPut</dt>
-    <dd>End a set of puts to subfields of the structure.</dd>
 </dl>
 
 <h3 id="DBArray">DBArray</h3>
 <pre>    public interface DBArray extends DBField{
         PVArray getPVArray();
-    }
-
-    public class BaseDBArray extends BaseDBField implements DBArray {...}</pre>
+    }</pre>
 
 <p>where</p>
 <dl>
@@ -619,10 +604,7 @@ instance.</p>
 <pre>    public interface DBStructureArray extends DBArray {
         PVStructureArray getPVStructureArray();
         DBStructure[] getElementDBStructures();
-        void replacePVArray();
-    }
-
-    public class BaseDBStructureArray extends BaseDBArray implements DBStructureArray {...}</pre>
+    }</pre>
 
 <p>where</p>
 <dl>
@@ -630,18 +612,13 @@ instance.</p>
     <dd>Gert the PVStructureArray associated with the DBStructureArray.</dd>
   <dt style="font-family: courier;">getElementDBStructures</dt>
     <dd>Get the DBStructure array for the elements.</dd>
-  <dt style="font-family: courier;">replacePVArray</dt>
-    <dd>Replace the PVArray interface.</dd>
 </dl>
 
 <h3 id="DBArrayArr">DBArrayArray</h3>
 <pre>    public interface DBArrayArray extends DBArray {
         PVArrayArray getPVArrayArray();
         DBArray[] getElementDBArrays();
-        void replacePVArray();
-    }
-
-    public class BaseDBArrayArray extends BaseDBArray implements DBArrayArray {...}</pre>
+    }</pre>
 
 <p>where</p>
 <dl>
@@ -649,8 +626,6 @@ instance.</p>
     <dd>Gert the PVArrayArray associated with the DBArrayArray.</dd>
   <dt style="font-family: courier;">getElementDBArrays</dt>
     <dd>Get the DBArray array for the elements.</dd>
-  <dt style="font-family: courier;">replacePVArray</dt>
-    <dd>Replace the PVArray interface.</dd>
 </dl>
 
 <h3 id="DBRecord">DBRecord</h3>
@@ -663,17 +638,11 @@ instance.</p>
         void lockOtherRecord(DBRecord otherRecord);
         RecordProcess getRecordProcess();
         boolean setRecordProcess(RecordProcess recordProcess);
-        int getRecordID();
         void beginProcess();
         void endProcess();
         RecordListener createRecordListener(DBListener listener);
         void removeRecordListener(RecordListener listener);
-        void removeRecordListeners();
         void addListenerSource(BaseDBField dbField);
-        DBD getDBD();
-        void setDBD(DBD dbd);
-        IOCDB getIOCDB();
-        void setIOCDB(IOCDB iocdb);
     }</pre>
 
 <p>where</p>
@@ -686,7 +655,9 @@ instance.</p>
     <dd>Get the DBStructure for this DBRecord.</dd>
   <dt style="font-family: courier;">lock</dt>
     <dd>Lock the record. The record must be locked for record processing and
-      whenever the data of any field in a record is accessed.</dd>
+      whenever the data of any field in a record is accessed. While a record
+      is locked the caller must perform operations that can block, i. e. file
+      I/O.</dd>
   <dt style="font-family: courier;">unlock</dt>
     <dd>Unlock the record.</dd>
   <dt style="font-family: courier;">lockOtherRecord</dt>
@@ -699,9 +670,6 @@ instance.</p>
     <dd>Get the interface of the RecordProcess for this instance.</dd>
   <dt style="font-family: courier;">setRecordProcess</dt>
     <dd>Set the RecordProcess inyerface for this record instance.</dd>
-  <dt style="font-family: courier;">getRecordID</dt>
-    <dd>Normally only called by DBRecord.lock. Each record instance is
-      assigned a unique id.</dd>
   <dt style="font-family: courier;">createRecordListener</dt>
     <dd>Create a RecordListener. The listener is called when record
       processing starts and when it completes. The record listener can also
@@ -709,24 +677,11 @@ instance.</p>
   <dt style="font-family: courier;">removeRecordListener</dt>
     <dd>Remove a record listener. This will also call removeListener for all
       DBFields that have this listener attached.</dd>
-  <dt style="font-family: courier;">removeRecordListeners</dt>
-    <dd>Remove all listeners. This is called if a record insance is being
-      removed or if it's structure is being changed.</dd>
   <dt style="font-family: courier;">addListenerSource</dt>
     <dd>Add a listener source. Used for communication between
       DBRecordBase.java and BaseDBField. BaseDBField calls this the first
       time DBField.addListener is called. It should not be called by other
       code.</dd>
-  <dt style="font-family: courier;">getDBD</dt>
-    <dd>Get the DBD that this record instance uses. See package
-      org.epics.ioc.dbDefinition for an explaination of a DBD.</dd>
-  <dt style="font-family: courier;">setDBD</dt>
-    <dd>Set the DBD that this record instance uses.</dd>
-  <dt style="font-family: courier;">getIOCDB</dt>
-    <dd>Get the IOCDB that holds this record instance.</dd>
-  <dt style="font-family: courier;">setIOCDB</dt>
-    <dd>Set the IOCDB that holds this record instance. Note that this changes
-      after record initialization.</dd>
 </dl>
 
 <h3 id="DBRecordFa">DBRecordFactory</h3>
@@ -743,6 +698,11 @@ by code that wants to provide special implementations of database fields. Any
 code that wants to provide its own implementation should extend
 AbstractPVArray, AbstractPVField or one of the BasePVxxx classes and then
 replace the PV associated with a DB.</p>
+
+<p>Package org.epics.ioc.db has a number of classes (ImplDBArray , ... ,
+ImplDBStructureArray) with package visibility that implement the DBRecord
+instances. These classes provide a complete implementation and are not
+designed to be extended.</p>
 <hr />
 
 <h2 style="text-align: center" id="IOCDB">IOCDB: IOC Database</h2>
@@ -751,6 +711,43 @@ replace the PV associated with a DB.</p>
 <p>An IOCDB is a database for a java IOC. All methods IOCDBFactory are thread
 safe. The instances of IOCDB created by IOCDBFactory are also thread safe.
 ReadWrite locks are used to implement thread safety.</p>
+
+<p>A javaIOC has a master IOCDB. In addition temporary IOCDBs can be created.
+For example new records are added to a running IOC via the following
+method:</p>
+<ol>
+  <li>Create an IOCDB called temp.</li>
+  <li>Create record instances and put them into temp.</li>
+  <li>Initialize and start the records in temp.</li>
+  <li>If all records start successfully merge temp into the master IOCDB.</li>
+</ol>
+
+<p>The next section describes some special features provided by the master
+IOCDB. The section after that describes the methods provided by an IOCDB.</p>
+
+<h3 id="Master">Master IOCDB</h3>
+
+<p>In addition to providing access to it's record instances the master IOCDB
+provides access to the messages sent to it or to any of it's record
+instances. When recods are merged into master, it calls pvRecord.addRequester
+as each record is added. Thus whenever a message is sent to a record , via a
+call to pvRecord.message(), the IOCDB.message is called. Any code can request
+that it be called whenever IOCDB.message is called by calling
+IOCDB.addRequester. If no requesters are registered than the master just
+prtints the messages on System.out (MessageType.info) or to System.err (All
+other message types.).</p>
+
+<p>When the message method of the master is called it does not immediately
+call the requesters of print the message. Instead to keeps a circular buffer
+containing the messages. A separate thread takes the messages from the
+circular buffer and calls the requesters or prints the messages. Thus calls
+to iocdb.message do not block.</p>
+
+<p></p>
+
+<h3 id="IOCDB1">IOCDB</h3>
+
+<p>The following is the definition of interface IOCDB:</p>
 <pre>    public interface IOCDB {
         IOCDB getMaster();
         String getName();
@@ -758,7 +755,7 @@ ReadWrite locks are used to implement thread safety.</p>
         DBRecord findRecord(String recordName);
         boolean addRecord(DBRecord record);
         boolean removeRecord(DBRecord record);
-        Map&lt;String,DBRecord&gt; getRecordMap();
+        DBRecord[] getDBRecords();
         void message(String message, MessageType messageType);
         void addRequester(Requester requester);
         void removeRequester(Requester requester);
@@ -774,9 +771,9 @@ ReadWrite locks are used to implement thread safety.</p>
 
 <p>where</p>
 <dl>
-  <dt style="font-family: courier;">merged</dt>
-    <dd>A listener method that is called after the database has been merged
-      into the master IOC database.</dd>
+  <dt style="font-family: courier;">getMaster</dt>
+    <dd>Get the master IOCDB. After records have been initialized they are
+      put into the master IOCDB.</dd>
   <dt style="font-family: courier;">getName</dt>
     <dd>The IOC database Name.</dd>
   <dt style="font-family: courier;">getDBD</dt>
@@ -795,20 +792,18 @@ ReadWrite locks are used to implement thread safety.</p>
   <dt style="font-family: courier;">removeRecord</dt>
     <dd>Remove the record. (false,true) is returned if the record (was
       not,was) removed.</dd>
-  <dt style="font-family: courier;">getRecordMap</dt>
-    <dd>Get a shallow copy of the map of all record instances in this
-      database. A copy is returned to ensure thread safety.</dd>
+  <dt style="font-family: courier;">getRecords</dt>
+    <dd>Get an array of all record instances in this database. </dd>
   <dt style="font-family: courier;">message</dt>
     <dd>Report a message. If no requesters are registered the messages are
-      sent to System.out. If requesters are registered they are called.</dd>
-  <dt style="font-family: courier;">addMessageRequester</dt>
+      sent to System.out or System.err. If requesters are registered they are
+      called. A separate thread calls the requesters or prints the messages.
+      Thus this method does not block.</dd>
+  <dt style="font-family: courier;">addRequester</dt>
     <dd>Add a requester for messages. Requester is defined in package
-      org.epics.ioc.util..</dd>
-  <dt style="font-family: courier;">removeMessagerequester</dt>
+      org.epics.ioc.util. The </dd>
+  <dt style="font-family: courier;">removeRequester</dt>
     <dd>Remove a message requester.</dd>
-  <dt style="font-family: courier;">createAccess</dt>
-    <dd>Create a DBAccess. See below for a description of IOC Database
-    Access.</dd>
   <dt style="font-family: courier;">recordList</dt>
     <dd>Return a string that contains a list if all record names that match
       the regular expression.</dd>
@@ -817,7 +812,7 @@ ReadWrite locks are used to implement thread safety.</p>
       regular expression.</dd>
 </dl>
 
-<p>IOCDBFactory is a class that manages IOCDB databases.</p>
+<p>IOCDBFactory is a class that creates IOCDB databases.</p>
 
 <p>The methods are:</p>
 <dl>
@@ -828,6 +823,44 @@ ReadWrite locks are used to implement thread safety.</p>
     <dd>Get the master IOC Database, i.e. the database with name
     "master".</dd>
 </dl>
+<hr />
+
+<h2 style="text-align: center" id="Rules">Rules for modifying PV data</h2>
+<hr />
+
+<h3 id="Modifying">Modifying Data Only</h3>
+
+<p>If a put to a field only modifies data then the code issuing the post must
+call dbField.postPut() after the put completes: Puts to the following types
+of field only modify data:</p>
+<ul>
+  <li>scalar<br />
+    This means types boolean, all numeric types, and string. </li>
+  <li>array of scalar</li>
+  <li>structures<br />
+    If a field is an array the element type MUST be scalar. Note that this
+    definition is recursive; If a field is a structure than that structure
+    must follow the same rules.</li>
+</ul>
+
+<p>postPut notifys all record listeners attached to the field, to subfields
+of the field, or to parents of the field.</p>
+
+<h3 id="Modifying1">Modifying Structure</h3>
+Some examples are: 
+<ul>
+  <li>changing the type of structure for a structure field.</li>
+  <li>changing an element of an array of structures.</li>
+  <li>changing an element of an array of arrays.</li>
+</ul>
+
+<p>Such changes modify the structure of a record not just the data contained
+within the record. In this case the code making the change must create the
+new PV data and then call dbField.replacePVField(newPVField)</p>
+
+<p>dbField will update it's internal fields and also call the unlisten method
+of every DBListener that is attached to the record. The DBListener can just
+reconnect.</p>
 <hr />
 
 <h2 style="text-align: center" id="Listener1">Listener Support</h2>
@@ -867,24 +900,96 @@ interface by calling dbRecord..createListener:</p>
   <li>Support is provided for synchronous puts, i.e. a set of fields that are
     modified at the same time. The primary user of this facility is record
     processing but other support could implement synchronous puts.</li>
+  <li>An abstract base class (AbstractDBListener) is provided. It provides
+    default methods that do nothing. This is useful for listening to
+    primitive fields since only dataPut(DBField dbField) needs to do
+  anything.</li>
 </ul>
 
 <p>The following is sample code that listens for all changes to a field and
 all properties of the field.</p>
-<pre>public class DBListenerForTesting implements DBListener{
-    private RecordListener listener;
+<pre>public class DBListenerForTesting implements DBListener{ 
+    private String recordName = null;
     private String pvName = null;
+    private boolean monitorProperties = false;
     private boolean verbose;
+    private DBRecord dbRecord = null;
+    
+    private RecordListener listener;
     private String actualFieldName = null;
     private boolean isProcessing = false;
     private String fullName = null;
-
+    
     public DBListenerForTesting(IOCDB iocdb,String recordName,String pvName,
         boolean monitorProperties,boolean verbose)
     {
         this.pvName = pvName;
         this.verbose = verbose;
-        DBRecord dbRecord = iocdb.findRecord(recordName);
+        this.recordName = recordName;
+        this.monitorProperties = monitorProperties;
+        dbRecord = iocdb.findRecord(recordName);
+        if(dbRecord==null) {
+            System.out.printf("record %s not found%n",recordName);
+            return;
+        }
+        connect();
+    }
+    
+    public DBListenerForTesting(IOCDB iocdb,String recordName,String pvName)
+    {
+        this(iocdb,recordName,pvName,true,true);
+    }
+    
+    private String putCommon(String message) {
+        if(!verbose) {
+            return fullName + " ";
+        }
+        return String.format("%s %s isProcessing %b pvName %s actualFieldName %s%n",
+            message,
+            fullName,
+            isProcessing,
+            pvName,
+            actualFieldName);
+    }
+    
+    public void beginProcess() {
+        isProcessing = true;
+        putCommon("beginProcess");
+    }
+    
+    public void endProcess() {
+        putCommon("endProcess");
+        isProcessing = false;
+    }
+   
+    public void dataPut(DBField dbField) {
+        PVField pvField = dbField.getPVField();
+        String common = putCommon("dataPut");
+        if(!verbose) {
+            System.out.println(common + dbField.toString(1));
+            return;
+        }
+        String name = pvField.getPVRecord().getRecordName() + "." + pvField.getFullFieldName();
+        if(!name.equals(fullName)) {
+            System.out.printf("%s%s NOT_EQUAL %s%n",common,name,fullName);
+        }
+        System.out.printf("%s    %s = %s%n",
+            common,name,dbField.toString(2));
+    }
+    
+    public void dataPut(DBField requested, DBField dbField) {
+        PVField pvRequested = requested.getPVField();
+        PVField pvField = dbField.getPVField();
+        String structureName = pvRequested.getFullName();
+        String common = putCommon(structureName +" dataPut to field " + pvField.getFullFieldName());
+        System.out.printf("%s    = %s%n",common,pvField.toString(2));
+    }       
+    
+    public void unlisten(RecordListener listener) {
+        connect();
+    }
+    
+    private void connect() {
         PVRecord pvRecord = dbRecord.getPVRecord();
         if(pvRecord==null) {
             System.out.printf("record %s not found%n",recordName);
@@ -902,97 +1007,23 @@ all properties of the field.</p>
             }
         }
         actualFieldName = pvField.getField().getFieldName();
-        fullName = pvField.getPVRecord().getRecordName() + pvField.getFullFieldName();
+        fullName = pvField.getFullName();
         listener = dbRecord.createRecordListener(this);
         DBField dbField = dbRecord.findDBField(pvField);
         dbField.addListener(listener);
         if(monitorProperties) {
-            PVField[] pvFields = pvField.getPropertys();
-            for(PVField pvf : pvFields) {
-                DBField dbf = dbRecord.findDBField(pvf);
-                dbf.addListener(listener);
+            String[] propertyNames = pvField.getPropertyNames();
+            if(propertyNames!=null) {
+                for(String propertyName : propertyNames) {
+                    PVField pvf = pvField.findProperty(propertyName);
+                    DBField dbf = dbRecord.findDBField(pvf);
+                    dbf.addListener(listener);
+                }
             }
         }
     }
-
-    public DBListenerForTesting(IOCDB iocdb,String recordName,String pvName)
-    {
-        this(iocdb,recordName,pvName,true,true);
-    }
-
-    private String putCommon(String message) {
-        if(!verbose) {
-            return fullName + " ";
-        }
-        return String.format("%s %s isProcessing %b pvName %s actualFieldName %s%n",
-            message,
-            fullName,
-            isProcessing,
-            pvName,
-            actualFieldName);
-    }
-    public void beginProcess() {
-        isProcessing = true;
-        putCommon("beginProcess");
-    }
-    public void endProcess() {
-        putCommon("endProcess");
-        isProcessing = false;
-    }
-    public void beginPut(DBStructure dbStructure) {
-        PVStructure pvStructure = dbStructure.getPVStructure();
-        if(!verbose) return;
-        String name = pvStructure.getPVRecord().getRecordName() + pvStructure.getFullFieldName();
-        System.out.println("beginPut " + name);
-    }
-    public void endPut(DBStructure dbStructure) {
-        PVStructure pvStructure = dbStructure.getPVStructure();
-        if(!verbose) return;
-        String name = pvStructure.getPVRecord().getRecordName() + pvStructure.getFullFieldName();
-        System.out.println("endPut " + name);
-    }
-    public void endPut(DBStructure dbStructure) {
-        PVStructure pvStructure = dbStructure.getPVStructure();
-        if(!verbose) return;
-        String name = pvStructure.getPVRecord().getRecordName() + pvStructure.getFullFieldName();
-        System.out.println("endPut " + name);
-    }
-    public void dataPut(DBField dbField) {
-        PVField pvField = dbField.getPVField();
-        String common = putCommon("dataPut");
-        if(!verbose) {
-            System.out.println(common + dbField.toString(1));
-            return;
-        }
-        String name = pvField.getPVRecord().getRecordName() + pvField.getFullFieldName();
-        if(!name.equals(fullName)) {
-            System.out.printf("%s%s NOT_EQUAL %s%n",common,name,fullName);
-        }
-        System.out.printf("%s    %s = %s%n",
-            common,name,dbField.toString(2));
-    }
-    public void dataPut(DBField requested, DBField dbField) {
-        PVField pvRequested = requested.getPVField();
-        PVField pvField = dbField.getPVField();
-        String structureName =
-            pvRequested.getPVRecord().getRecordName()
-            + pvRequested.getFullFieldName();
-        String common = putCommon(structureName +" dataPut to field " + pvField.getFullFieldName());
-        System.out.printf("%s    = %s%n",common,pvField.toString(2));
-    }
-    public void unlisten(RecordListener listener) {
-        // Nothing to do.
-    }</pre>
-
-<p>In order for the listen support to work support that implements the
-DBRecord interface must extend AbstractDBRecord and support that implements
-any other DB field interface must extend AbstractDBField. In addition any
-code that implements a put methods must call</p>
-<pre>    postPut();</pre>
-
-<p>whenever the put method is called. It must call postPut whenever if
-modifies its internal data for the field. It must call postPut even if the
-new value is the same as the old value.</p>
+}
+</pre>
 <hr />
 
 <h2 style="text-align: center" id="Thread">Thread Safety</h2>

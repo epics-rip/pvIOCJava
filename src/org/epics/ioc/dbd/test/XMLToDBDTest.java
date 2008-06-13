@@ -5,9 +5,6 @@
  */
 package org.epics.ioc.dbd.test;
 
-import java.util.Map;
-import java.util.Set;
-
 import junit.framework.TestCase;
 
 import org.epics.ioc.dbd.DBD;
@@ -47,25 +44,18 @@ public class XMLToDBDTest extends TestCase {
             dbd.mergeIntoMaster();
             dbd = DBDFactory.getMasterDBD();
             System.out.printf("%n%nstructures");
-            Map<String,DBDStructure> structureMap = dbd.getStructureMap();
-            Set<String> keys = structureMap.keySet();
-            for(String key: keys) {
-                DBDStructure dbdStructure = structureMap.get(key);
+            DBDStructure[] dbdStructures = dbd.getDBDStructures();
+            for(DBDStructure dbdStructure: dbdStructures) {
                 String structureName = dbdStructure.getStructureName();
                 System.out.printf("%n%nstructure %s%s",structureName,dbdStructure.toString());
             }
             System.out.printf("%n%nsupport");
-            Map<String,DBDSupport> supportMap = dbd.getSupportMap();
-            keys = supportMap.keySet();
-            for(String key: keys) {
-                DBDSupport dbdSupport = supportMap.get(key);
+            DBDSupport[] dbdSupports = dbd.getDBDSupports();
+            for(DBDSupport dbdSupport: dbdSupports) {
                 System.out.printf("%n%s",dbdSupport.toString());
             }
-            System.out.printf("%n%nrecordTypes");
-            Map<String,DBDRecordType> recordTypeMap = dbd.getRecordTypeMap();
-            keys = recordTypeMap.keySet();
-            for(String key: keys) {
-                DBDRecordType dbdRecordType = recordTypeMap.get(key);
+            DBDRecordType[] dbdRecordTypes = dbd.getDBDRecordTypes();
+            for(DBDRecordType dbdRecordType: dbdRecordTypes) {
                 System.out.printf("%n%nrecordType %s%s",dbdRecordType.getFieldName(),dbdRecordType.toString());
             }
             

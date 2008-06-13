@@ -5,6 +5,7 @@
  */
 package org.epics.ioc.db;
 
+import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -53,24 +54,29 @@ public class IOCDBFactory {
     private static class IOCDBInstance implements IOCDB,Runnable
     {
         private String name;
-        private LinkedHashMap<String,DBRecord> recordMap = 
-            new LinkedHashMap<String,DBRecord>();
-        private ReentrantReadWriteLock rwLock = 
-            new ReentrantReadWriteLock();
+        private boolean isMaster = false;
+        private LinkedHashMap<String,DBRecord> recordMap = new LinkedHashMap<String,DBRecord>();
+        private ReentrantReadWriteLock rwLock = new ReentrantReadWriteLock();
         private ReentrantLock messageRequestListLock = new ReentrantLock();
         private ArrayList<Requester> messageRequesterList = new ArrayList<Requester>();
-        private IOCExecutor iocExecutor = IOCExecutorFactory.create(
-                "IOCDBMessage", ScanPriority.lowest);
         private ReentrantLock messageLock = new ReentrantLock();
+        // following are only used by master
+        private IOCExecutor iocExecutor = null;
         private int messageListSize = 100;
-        private MessageItem[] messageItems = new MessageItem[messageListSize];
+        private MessageItem[] messageItems = null;
         private int numMessageItems = 0;
         private int firstMessageItem = 0;
         private int numberDroppedMessages = 0;
         
         private IOCDBInstance(String name) {
             this.name = name;
-            for(int i=0; i<messageListSize ; i++) messageItems[i] = new MessageItem();
+            if(name.equals("master")) {
+                isMaster = true;
+                iocExecutor = IOCExecutorFactory.create(
+                        "IOCDBMessage", ScanPriority.lowest);
+                messageItems = new MessageItem[messageListSize];
+                for(int i=0; i<messageListSize ; i++) messageItems[i] = new MessageItem();
+            }
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.db.IOCDB#getMaster()
@@ -105,7 +111,7 @@ public class IOCDBFactory {
             try {
                 keys = from.keySet();
                 for(String key: keys) {
-                    DBRecord dbRecord = from.get(key);
+                    ImplDBRecord dbRecord = (ImplDBRecord)from.get(key);
                     dbRecord.setIOCDB(this);
                     dbRecord.getPVRecord().addRequester(this);
                     recordMap.put(key,dbRecord);
@@ -143,21 +149,36 @@ public class IOCDBFactory {
                     message("record already exists in master",MessageType.warning);
                     return false;
                 }
-                if(name.equals("master")) record.getPVRecord().addRequester(this);
                 recordMap.put(key,record);
-                record.setIOCDB(this);
-                return true;
+                ImplDBRecord impl = (ImplDBRecord)record;
+                impl.setIOCDB(this);
             } finally {
                 rwLock.writeLock().unlock();
             }
+            if(isMaster) {
+                record.lock();
+                try {
+                    record.getPVRecord().addRequester(this);
+                } finally {
+                    record.unlock();
+                }
+            }
+            return true;
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.db.IOCDB#removeRecord(org.epics.ioc.db.DBRecord)
          */
         public boolean removeRecord(DBRecord record) {
+            if(isMaster) {
+                record.lock();
+                try {
+                    record.getPVRecord().removeRequester(this);
+                } finally {
+                    record.unlock();
+                }
+            }
             rwLock.writeLock().lock();
             try {
-                record.getPVRecord().removeRequester(this);
                 String key = record.getPVRecord().getRecordName();
                 if(recordMap.remove(key)!=null) return true;
                 return false;
@@ -168,10 +189,12 @@ public class IOCDBFactory {
         /* (non-Javadoc)
          * @see org.epics.ioc.db.IOCDB#getRecordMap()
          */
-        public Map<String,DBRecord> getRecordMap() {
+        public DBRecord[] getDBRecords() {
             rwLock.readLock().lock();
             try {
-                return (Map<String, DBRecord>)recordMap.clone();
+                DBRecord[] array = new DBRecord[recordMap.size()];
+                recordMap.values().toArray(array);
+                return array;
             } finally {
                 rwLock.readLock().unlock();
             }
@@ -186,6 +209,30 @@ public class IOCDBFactory {
          * @see org.epics.ioc.db.IOCDB#message(java.lang.String, org.epics.ioc.util.MessageType)
          */
         public void message(String message, MessageType messageType) {
+            if(!isMaster) {
+                messageRequestListLock.lock();
+                try {
+                    if(messageRequesterList.size()<=0) {
+                        PrintStream printStream;
+                        if(messageType==MessageType.info) {
+                            printStream = System.out;
+                        } else {
+                            printStream = System.err;
+                        }
+                        printStream.println(messageType.toString() + " " + message);
+                       
+                    } else {
+                        Iterator<Requester> iter = messageRequesterList.iterator();
+                        while(iter.hasNext()) {
+                            Requester requester = iter.next();
+                            requester.message(message, messageType);
+                        }
+                    }
+                } finally {
+                    messageRequestListLock.unlock();
+                }
+                return;
+            }
             messageLock.lock();
             try {
                 int next = -1;
@@ -314,9 +361,15 @@ public class IOCDBFactory {
                         droppedMessages = " " + numberDroppedMessages + " dropped messages";
                     }
                     if(messageRequesterList.size()<=0) {
-                        System.out.println(messageType.toString() + " " + message);
+                        PrintStream printStream;
+                        if(messageType==MessageType.info) {
+                            printStream = System.out;
+                        } else {
+                            printStream = System.err;
+                        }
+                        printStream.println(messageType.toString() + " " + message);
                         if(numberDroppedMessages>0) {
-                            System.out.println(MessageType.error.toString() + droppedMessages);
+                            System.err.println(MessageType.error.toString() + droppedMessages);
                         }
                     } else {
                         Iterator<Requester> iter = messageRequesterList.iterator();

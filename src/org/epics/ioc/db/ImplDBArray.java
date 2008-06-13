@@ -8,19 +8,21 @@ package org.epics.ioc.db;
 import org.epics.ioc.pv.PVArray;
 
 /**
+ * Implementation of a DBArray.
+ * It has package visibility.
  * @author mrk
  *
  */
-public class BaseDBArray extends BaseDBField implements DBArray {
+class ImplDBArray extends ImplDBField implements DBArray {
     private PVArray pvArray;
     
     /**
      * Constructor.
      * @param parent The parent.
-     * @param record The DBRecord to which this field belongs.
+     * @param record The ImplDBRecord to which this field belongs.
      * @param pvArray The reflection interface.
      */
-    public BaseDBArray(DBField parent,DBRecord record, PVArray pvArray) {
+    ImplDBArray(ImplDBField parent,ImplDBRecord record, PVArray pvArray) {
         super(parent,record,pvArray);
         this.pvArray = pvArray;
     }

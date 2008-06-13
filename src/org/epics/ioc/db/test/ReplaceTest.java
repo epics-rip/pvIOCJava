@@ -269,7 +269,6 @@ public class ReplaceTest extends TestCase {
         }
         PVStructure structure = (PVStructure)pvField;
         DBStructure dbStructure = (DBStructure)dbField;
-        dbStructure.beginPut();
         PVField[] pvDatas = structure.getPVFields();
         DBField[] dbDatas = dbStructure.getDBFields();
         for(int i=0; i<pvDatas.length; i++) {
@@ -281,7 +280,6 @@ public class ReplaceTest extends TestCase {
                 dbDatas[i].postPut();
             }
         }
-        dbStructure.endPut();
     }
     
     static void testPutArray(IOCDB iocdb,String recordName,

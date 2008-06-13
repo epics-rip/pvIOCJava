@@ -44,17 +44,14 @@ public class ProcessTest extends TestCase {
         XMLToDBDFactory.convert(dbd,
                  "example/exampleDBD.xml",
                  parsingRequester);
-        Map<String,DBRecord> recordMap = null;
-        Set<String> keys = null;
+        DBRecord[] dbRecords = null;
         boolean initOK = IOCFactory.initDatabase(
             "src/org/epics/ioc/process/test/processTestDB.xml",parsingRequester);
         if(!initOK) {
             System.out.printf("\nrecords\n");
-            recordMap = iocdbMaster.getRecordMap();
-            keys = recordMap.keySet();
-            for(String key: keys) {
-                DBRecord record = recordMap.get(key);
-                System.out.print(record.toString());
+            dbRecords = iocdbMaster.getDBRecords();
+            for(DBRecord dbRecord: dbRecords) {
+                System.out.print(dbRecord.toString());
             }
             return;
         }
@@ -62,20 +59,19 @@ public class ProcessTest extends TestCase {
             Thread.sleep(1000);
             System.out.println();
         } catch (InterruptedException e) {}
-        recordMap = iocdbMaster.getRecordMap();
-        keys = recordMap.keySet();
+        dbRecords = iocdbMaster.getDBRecords();
         DBRecord dbRecord = iocdbMaster.findRecord("counter");
         assertNotNull(dbRecord);
         Requester iocdbRequester = new IOCDBListener();
         iocdbMaster.addRequester(iocdbRequester);
         TestProcess testProcess = new TestProcess(dbRecord);
-        for(String key: keys) {
-            RecordProcess recordProcess = recordMap.get(key).getRecordProcess();
+        for(DBRecord record: dbRecords) {
+            RecordProcess recordProcess = record.getRecordProcess();
             recordProcess.setTrace(true);
         }
-        testProcess.test();     
-        for(String key: keys) {
-            RecordProcess recordProcess = recordMap.get(key).getRecordProcess();
+        testProcess.test(); 
+        for(DBRecord record: dbRecords) {
+            RecordProcess recordProcess = record.getRecordProcess();
             recordProcess.setTrace(false);
         } 
         System.out.println("starting performance test"); 
@@ -91,10 +87,9 @@ public class ProcessTest extends TestCase {
         dbRecord = iocdbMaster.findRecord("root");
         assertNotNull(dbRecord);
         testProcess = new TestProcess(dbRecord);
-        recordMap = iocdbMaster.getRecordMap();
-        keys = recordMap.keySet();
-        for(String key: keys) {
-            RecordProcess recordProcess = recordMap.get(key).getRecordProcess();
+        dbRecords = iocdbMaster.getDBRecords();
+        for(DBRecord record: dbRecords) {
+            RecordProcess recordProcess = record.getRecordProcess();
             recordProcess.setTrace(true);
         }
         System.out.printf("%n%n");

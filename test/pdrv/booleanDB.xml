@@ -97,7 +97,9 @@
     <valueAlarm structureName = "booleanAlarm">
       <active>true</active>
       <falseAlarm><choice>minor</choice></falseAlarm>
+      <falseMessage>false alarm</falseMessage>
       <trueAlarm><choice>major</choice></trueAlarm>
+      <trueMessage>true alarm</trueMessage>
     </valueAlarm>
 </record>
 
@@ -113,7 +115,9 @@
     <valueAlarm structureName = "booleanAlarm">
       <active>true</active>
       <changeStateAlarm><choice>minor</choice></changeStateAlarm>
+      <changeStateMessage>change state alarm</changeStateMessage>
       <trueAlarm><choice>major</choice></trueAlarm>
+      <trueMessage>true alarm</trueMessage>
     </valueAlarm>
 </record>
 
@@ -129,7 +133,9 @@
     <valueAlarm structureName = "booleanAlarm">
       <active>true</active>
       <changeStateAlarm><choice>minor</choice></changeStateAlarm>
+      <changeStateMessage>change state alarm</changeStateMessage>
       <trueAlarm><choice>major</choice></trueAlarm>
+      <trueMessage>true alarm</trueMessage>
     </valueAlarm>
 </record>
 
@@ -227,8 +233,10 @@
     </input>
     <valueAlarm structureName = "booleanAlarm">
       <active>true</active>
-      <changeStateAlarm><choice>minor</choice></changeStateAlarm>
+      <falseAlarm><choice>minor</choice></falseAlarm>
+      <falseMessage>false alarm</falseMessage>
       <trueAlarm><choice>major</choice></trueAlarm>
+      <trueMessage>true alarm</trueMessage>
     </valueAlarm>
 </record>
 
@@ -244,7 +252,9 @@
     <valueAlarm structureName = "booleanAlarm">
       <active>true</active>
       <changeStateAlarm><choice>minor</choice></changeStateAlarm>
+      <changeStateMessage>change state alarm</changeStateMessage>
       <trueAlarm><choice>major</choice></trueAlarm>
+      <trueMessage>true alarm</trueMessage>
     </valueAlarm>
 </record>
 <record name = "asynBooleanIn3" type = "boolean">
@@ -259,7 +269,9 @@
     <valueAlarm structureName = "booleanAlarm">
       <active>true</active>
       <changeStateAlarm><choice>minor</choice></changeStateAlarm>
+      <changeStateMessage>change state alarm</changeStateMessage>
       <trueAlarm><choice>major</choice></trueAlarm>
+      <trueMessage>true alarm</trueMessage>
     </valueAlarm>
 </record>
 

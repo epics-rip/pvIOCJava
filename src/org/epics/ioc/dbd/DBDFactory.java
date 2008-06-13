@@ -6,7 +6,6 @@
 package org.epics.ioc.dbd;
 
 import java.util.ArrayList;
-import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
@@ -187,10 +186,12 @@ public class DBDFactory {
         /* (non-Javadoc)
          * @see org.epics.ioc.dbd.DBD#getStructureMap()
          */
-        public Map<String,DBDStructure> getStructureMap() {
+        public DBDStructure[] getDBDStructures() {
             rwLock.readLock().lock();
             try {
-                return (Map<String, DBDStructure>)structureMap.clone();
+                DBDStructure[] array = new DBDStructure[structureMap.size()];
+                structureMap.values().toArray(array);
+                return array;
             } finally {
                 rwLock.readLock().unlock();
             }
@@ -227,10 +228,12 @@ public class DBDFactory {
         /* (non-Javadoc)
          * @see org.epics.ioc.dbd.DBD#getRecordTypeMap()
          */
-        public Map<String,DBDRecordType> getRecordTypeMap() {
+        public DBDRecordType[] getDBDRecordTypes() {
             rwLock.readLock().lock();
             try {
-                return (Map<String, DBDRecordType>)recordTypeMap.clone();
+                DBDRecordType[] array = new DBDRecordType[recordTypeMap.size()];
+                recordTypeMap.values().toArray(array);
+                return array;
             } finally {
                 rwLock.readLock().unlock();
             }
@@ -267,10 +270,12 @@ public class DBDFactory {
         /* (non-Javadoc)
          * @see org.epics.ioc.dbd.DBD#getCreateMap()
          */
-        public Map<String, DBDCreate> getCreateMap() {
+        public DBDCreate[] getDBDCreates() {
             rwLock.readLock().lock();
             try {
-                return (Map<String, DBDCreate>)createMap.clone();
+                DBDCreate[] array = new DBDCreate[createMap.size()];
+                createMap.values().toArray(array);
+                return array;
             } finally {
                 rwLock.readLock().unlock();
             }
@@ -307,10 +312,12 @@ public class DBDFactory {
         /* (non-Javadoc)
          * @see org.epics.ioc.dbd.DBD#getSupportMap()
          */
-        public Map<String,DBDSupport> getSupportMap() {
+        public DBDSupport[] getDBDSupports() {
             rwLock.readLock().lock();
             try {
-                return (Map<String, DBDSupport>)supportMap.clone();
+                DBDSupport[] array = new DBDSupport[supportMap.size()];
+                supportMap.values().toArray(array);
+                return array;
             } finally {
                 rwLock.readLock().unlock();
             }

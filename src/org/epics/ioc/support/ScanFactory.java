@@ -115,10 +115,6 @@ public class ScanFactory {
          */
         public void beginProcess() {}
         /* (non-Javadoc)
-         * @see org.epics.ioc.db.DBListener#beginPut(org.epics.ioc.db.DBStructure)
-         */
-        public void beginPut(DBStructure dbStructure) {}
-        /* (non-Javadoc)
          * @see org.epics.ioc.db.DBListener#dataPut(org.epics.ioc.db.DBField, org.epics.ioc.db.DBField)
          */
         public void dataPut(DBField requested, DBField dbField) {
@@ -140,10 +136,6 @@ public class ScanFactory {
          * @see org.epics.ioc.db.DBListener#endProcess()
          */
         public void endProcess() {}
-        /* (non-Javadoc)
-         * @see org.epics.ioc.db.DBListener#endPut(org.epics.ioc.db.DBStructure)
-         */
-        public void endPut(DBStructure dbStructure) {}
         /* (non-Javadoc)
          * @see org.epics.ioc.db.DBListener#unlisten(org.epics.ioc.db.RecordListener)
          */

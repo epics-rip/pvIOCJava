@@ -5,8 +5,6 @@
  */
 package org.epics.ioc.dbd;
 
-import java.util.Map;
-
 import org.epics.ioc.pv.Field;
 import org.epics.ioc.pv.FieldAttribute;
 
@@ -84,10 +82,10 @@ public interface DBD {
      */
     boolean addStructure(DBDStructure structure);
     /**
-     * Get a Map of all the structures in this DBD.
+     * Get an array of all the structures in this DBD.
      * @return The Map.
      */
-    Map<String,DBDStructure> getStructureMap();
+    DBDStructure[] getDBDStructures();
     /**
      * Get a DBDRecordType that describes the recordType.
      * It will be returned if it resides in this DBD or in the master DBD.
@@ -103,10 +101,10 @@ public interface DBD {
      */
     boolean addRecordType(DBDRecordType recordType);
     /**
-     * Get a Map of all the recordTypes in this DBD.
+     * Get an array of all the recordTypes in this DBD.
      * @return The Map
      */
-    Map<String,DBDRecordType> getRecordTypeMap();
+    DBDRecordType[] getDBDRecordTypes();
     /**
      * Get a create.
      * It will be returned if it resides in this DBD or in the master DBD.
@@ -122,10 +120,10 @@ public interface DBD {
      */
     boolean addCreate(DBDCreate create);
     /**
-     * Get a Map of all the creates in this DBD.
+     * Get an array of all the creates in this DBD.
      * @return The Map.
      */
-    Map<String,DBDCreate> getCreateMap();
+    DBDCreate[] getDBDCreates();
     /**
      * Get a support.
      * It will be returned if it resides in this DBD or in the master DBD.
@@ -141,10 +139,10 @@ public interface DBD {
      */
     boolean addSupport(DBDSupport support);
     /**
-     * Get a Map of all the supports in this DBD.
+     * Get an array of all the supports in this DBD.
      * @return The Map.
      */
-    Map<String,DBDSupport> getSupportMap();
+    DBDSupport[] getDBDSupports();
     /**
      * Generate a list of structure definitions with structure names that match the regular expression.
      * @param regularExpression The regular expression.

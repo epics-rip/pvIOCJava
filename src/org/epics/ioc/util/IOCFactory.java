@@ -5,8 +5,6 @@
  */
 package org.epics.ioc.util;
 
-import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.epics.ioc.db.DBRecord;
@@ -60,17 +58,13 @@ public class IOCFactory {
             if(!gotSupport) {
                 requester.message("Did not find all support.",MessageType.fatalError);
                 requester.message("nrecords",MessageType.info);
-                Map<String,DBRecord> recordMap = iocdbAdd.getRecordMap();
-                Set<String> keys = recordMap.keySet();
-                for(String key: keys) {
-                    DBRecord record = recordMap.get(key);
-                    requester.message(record.toString(),MessageType.info);
+                DBRecord[] dbRecords = iocdbAdd.getDBRecords();
+                for(DBRecord dbRecord: dbRecords) {
+                    requester.message(dbRecord.toString(),MessageType.info);
                 }
                 requester.message("support",MessageType.info);
-                Map<String,DBDSupport> supportMap = dbd.getSupportMap();
-                keys = supportMap.keySet();
-                for(String key: keys) {
-                    DBDSupport dbdSupport = supportMap.get(key);
+                DBDSupport[] dbdSupports = dbd.getDBDSupports();
+                for(DBDSupport dbdSupport : dbdSupports) {
                     requester.message(dbdSupport.toString(),MessageType.info);
                 }
                 return false;

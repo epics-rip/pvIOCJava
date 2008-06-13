@@ -16,30 +16,39 @@ import org.epics.ioc.pv.Type;
  * @author mrk
  *
  */
-public class BaseDBStructureArray extends BaseDBArray implements DBStructureArray {
+class ImplDBStructureArray extends ImplDBArray implements DBStructureArray {
     private PVStructureArray pvStructureArray;
-    private DBStructure[] elementDBStructures;
+    private ImplDBStructure[] elementDBStructures;
     
     /**
      * Constructor.
-     * @param parent The parent DBField.
-     * @param record The DBRecord to which this field belongs.
+     * @param parent The parent ImplDBField.
+     * @param record The ImplDBRecord to which this field belongs.
      * @param pvStructureArray The pvStructureArray interface.
      */
-    public BaseDBStructureArray(DBField parent,DBRecord record, PVStructureArray pvStructureArray) {
+    ImplDBStructureArray(ImplDBField parent,ImplDBRecord record, PVStructureArray pvStructureArray) {
         super(parent,record,pvStructureArray);
         this.pvStructureArray = pvStructureArray;
         createElementDBStructures();
         
     }
-    /* (non-Javadoc)
-     * @see org.epics.ioc.db.BaseDBField#postPut(org.epics.ioc.db.DBField)
+    
+    /**
+     * Called by ImplField
      */
-    @Override
-    public void postPut(DBField dbField) {
-        for(DBField dbF : elementDBStructures) {
-            dbF.postPut(dbField);
+    void replacePVArray() {
+        pvStructureArray = (PVStructureArray)super.getPVField();
+        createElementDBStructures();
+    }
+    /**
+     * Called when a record is created by ImplDBRecord
+     */
+    void replaceCreate() {
+        for(ImplDBStructure dbStructure: elementDBStructures) {
+            if(dbStructure==null) continue;
+            dbStructure.replaceCreate();
         }
+        super.replaceCreate();
     }
     /* (non-Javadoc)
      * @see org.epics.ioc.db.DBStructureArray#getPVStructureArray()
@@ -53,48 +62,24 @@ public class BaseDBStructureArray extends BaseDBArray implements DBStructureArra
     public DBStructure[] getElementDBStructures() {
         return elementDBStructures;
     }
-    /* (non-Javadoc)
-     * @see org.epics.ioc.db.DBNonScalarArray#replacePVArray()
-     */
-    public void replacePVArray() {
-        pvStructureArray = (PVStructureArray)super.getPVField();
-        createElementDBStructures();
-    }
-    /* (non-Javadoc)
-     * @see org.epics.ioc.db.BaseDBField#postPut()
-     */
-    public void postPut() {
-        createElementDBStructures();
-        super.postPut();
-    }
-    /* (non-Javadoc)
-     * @see org.epics.ioc.db.BaseDBField#replaceCreate()
-     */
-    public void replaceCreate() {
-        for(DBStructure dbStructure: elementDBStructures) {
-            if(dbStructure==null) continue;
-            dbStructure.replaceCreate();
-        }
-        super.replaceCreate();
-    }
-    
+     
     private void createElementDBStructures() {
-        int length = pvStructureArray.getLength();
-        elementDBStructures = new DBStructure[length];
         Type elementType = ((Array)pvStructureArray.getField()).getElementType();
         if(elementType!=Type.pvStructure) {
             throw new IllegalStateException("elementType is not pvStructureArray");
         }       
-        DBRecord dbRecord = super.getDBRecord();
+        int length = pvStructureArray.getLength();
+        elementDBStructures = new ImplDBStructure[length];
         StructureArrayData structureArrayData = new StructureArrayData();
         pvStructureArray.get(0, length, structureArrayData);
         PVStructure[] pvStructures = structureArrayData.data;
+        ImplDBRecord dbRecord = super.getImplDBRecord();
         for(int i=0; i<length; i++) {
             PVStructure pvStructure = pvStructures[i];
             if(pvStructure==null) {
                 elementDBStructures[i] = null;
             } else {
-                elementDBStructures[i] = new BaseDBStructure(this,dbRecord,pvStructure);
+                elementDBStructures[i] = new ImplDBStructure(this,dbRecord,pvStructure);
             }
         }
         return;

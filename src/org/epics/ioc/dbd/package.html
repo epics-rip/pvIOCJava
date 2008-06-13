@@ -11,7 +11,7 @@
 
 <h1 style="text-align: center">EPICS JavaIoc: Database Definition <br />
 package: org.epics.ioc.dbd<br />
-2008.05.06</h1>
+2008.06.10</h1>
 <hr />
 CONTENTS: 
 
@@ -437,16 +437,16 @@ addition a number of "convenience" methods are provided.</p>
     DBDSupport createSupport(String supportName,String factoryName);
     DBDStructure getStructure(String structureName);
     boolean addStructure(DBDStructure structure);
-    Map&lt;String,DBDStructure&gt; getStructureMap();
+    DBDStructure[] getDBDStructures();
     DBDRecordType getRecordType(String recordTypeName);
     boolean addRecordType(DBDRecordType recordType);
+    DBDRecordType[] getDBDRecordTypes();
     DBDCreate getCreate(String createName);
     boolean addCreate(DBDCreate create);
-    Map&lt;String,DBDCreate&gt; getCreateMap();
-    Map&lt;String,DBDRecordType&gt; getRecordTypeMap();
+    DBDCreate[] getDBDCreates()
     DBDSupport getSupport(String supportName);
     boolean addSupport(DBDSupport support);
-    Map&lt;String,DBDSupport&gt; getSupportMap();
+    DBDSupport[] getDBDSupports();
     String[] structureList(String regularExpression);
     String structureToString(String regularExpression);
     String[] recordTypeList(String regularExpression);
@@ -480,33 +480,29 @@ addition a number of "convenience" methods are provided.</p>
   <dt style="font-family: courier;">addStructure</dt>
     <dd>Add a structure definition and return true. If the definition already
       exists the request fails and false is returned.</dd>
-  <dt style="font-family: courier;">getStructureMap</dt>
-    <dd>Get a map of all the structure definitions. A shallow copy of the map
-      is returned.</dd>
+  <dt style="font-family: courier;">getStructures</dt>
+    <dd>Get an array of all the structure definitions. </dd>
   <dt style="font-family: courier;">getRecordType</dt>
     <dd>Get the DBDRecordType that describes recordTypeName.</dd>
   <dt style="font-family: courier;">addRecordType</dt>
     <dd>Add a recordType definition and return true. If the definition
       already exists the request fails and false is returned.</dd>
-  <dt style="font-family: courier;">getRecordTypeMap</dt>
-    <dd>Get a map of all the recordType definitions. A shallow copy of the
-      map is returned.</dd>
+  <dt style="font-family: courier;">getRecordTypes</dt>
+    <dd>Get an array of all the recordType definitions.</dd>
   <dt style="font-family: courier;">getCreate</dt>
     <dd>Get the DBDCreate that describes createName.</dd>
   <dt style="font-family: courier;">addCreate</dt>
     <dd>Add a create definition and return true. If the definition already
       exists the request fails and false is returned.</dd>
-  <dt style="font-family: courier;">getCreateMap</dt>
-    <dd>Get a map of all the create definitions. A shallow copy of the map is
-      returned.</dd>
+  <dt style="font-family: courier;">getCreates</dt>
+    <dd>Get an array of all the create definitions. </dd>
   <dt style="font-family: courier;">getSupport</dt>
     <dd>Get the DBDSupport that describes supportName.</dd>
   <dt style="font-family: courier;">addSupport</dt>
     <dd>Add a support definition and return true. If the definition already
       exists the request fails and false is returned.</dd>
-  <dt style="font-family: courier;">getSupportMap</dt>
-    <dd>Get a map of all the support definitions. A shallow copy of the map
-      is returned.</dd>
+  <dt style="font-family: courier;">getSupports</dt>
+    <dd>Get an artray of all the support definitions.</dd>
 </dl>
 The remaining methods are convenience methods. Each convenience method
 produces a string that lists or dumps all components with names that match a

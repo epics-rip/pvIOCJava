@@ -7,7 +7,7 @@ package org.epics.ioc.db;
 import org.epics.ioc.pv.PVStructureArray;
 
 /**
- * Interface for non scalar arrays.
+ * Interface for an array of structures.
  * @author mrk
  *
  */
@@ -22,8 +22,4 @@ public interface DBStructureArray extends DBArray{
      * @return The array of elements.
      */
     DBStructure[] getElementDBStructures();
-    /**
-     * Replace the current PVArray.
-     */
-    void replacePVArray();
 }

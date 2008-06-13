@@ -5,8 +5,6 @@
  */
 package org.epics.ioc.db;
 
-import java.util.Map;
-
 import org.epics.ioc.util.MessageType;
 import org.epics.ioc.util.Requester;
 
@@ -52,10 +50,10 @@ public interface IOCDB extends Requester{
      */
     boolean removeRecord(DBRecord record);
     /**
-     * Get the complete set of record instances.
-     * @return The map.
+     * Get an array of record instances.
+     * @return The array of record instances.
      */
-    Map<String,DBRecord> getRecordMap();
+    DBRecord[] getDBRecords();
     /**
      * Report a message.
      * If no listeners are registered the messages are sent to System.out.

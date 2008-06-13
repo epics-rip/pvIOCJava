@@ -4,15 +4,13 @@
  * in file LICENSE that is included with this distribution.
  */
 package org.epics.ioc.db;
-import java.util.List;
-
 import org.epics.ioc.create.Create;
 import org.epics.ioc.pv.PVField;
 import org.epics.ioc.support.Support;
 
 
 /**
- * The base interface for accessing a field of an IOC record.
+ * The base interface for accessing a field of a DBRecord.
  * @author mrk
  *
  */
@@ -71,10 +69,6 @@ public interface DBField {
      */
     void setCreate(Create create);
     /**
-     * Look to see if create should be replaced.
-     */
-    void replaceCreate();
-    /**
      * Get the Support for the field.
      * @return The support or null if no support exists.
      */
@@ -90,15 +84,12 @@ public interface DBField {
      */
     void postPut();
     /**
-     * The data was modified via dbField.
-     * @param dbField The parent field that was modified.
-     */
-    void postPut(DBField dbField);
-    /**
      * Add a listener to this field.
      * @param recordListener The recordListener created by calling dbRecord.createRecordListener.
+     * @return (false,true) if the recordListener (was not,was) added.
+     * If the listener was already in the list false is returned.
      */
-    void addListener(RecordListener recordListener);
+    boolean addListener(RecordListener recordListener);
     /**
      * remove a recordListener.
      * This is called by dbRecord.removeRecordListener.
@@ -106,11 +97,6 @@ public interface DBField {
      * @param recordListener The recordListener to remove.
      */
     void removeListener(RecordListener recordListener);
-    /**
-     * Get the list of RecordListeners.
-     * @return The list.
-     */
-    List<RecordListener> getRecordListenerList();
     /**
      * Convert the data to a string.
      * @return The string.

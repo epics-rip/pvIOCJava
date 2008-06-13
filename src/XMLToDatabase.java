@@ -9,8 +9,6 @@ import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.Map;
-import java.util.Set;
 
 import org.epics.ioc.db.DBRecord;
 import org.epics.ioc.db.IOCDB;
@@ -171,46 +169,30 @@ public class XMLToDatabase {
     }
         
     static void dumpDBD(DBD dbd) {
-        Set<String> keys = null;
-        Map<String,DBDStructure> structureMap = dbd.getStructureMap();
-        keys = structureMap.keySet();
-        if(keys.size()>0) {
-            System.out.printf("\n\nstructures");
-            for(String key: keys) {
-                DBDStructure dbdStructure = structureMap.get(key);
-                System.out.print(dbdStructure.toString());
-            }
+        DBDStructure[] dbdStructures = dbd.getDBDStructures();
+        if(dbdStructures.length>0) System.out.printf("\n\nstructures");
+        for(DBDStructure dbdStructure : dbdStructures) {
+            System.out.print(dbdStructure.toString());
         }
         
-        Map<String,DBDSupport> supportMap = dbd.getSupportMap();
-        keys = supportMap.keySet();
-        if(keys.size()>0) {
-            System.out.printf("\n\nsupport");
-            for(String key: keys) {
-                DBDSupport dbdSupport = supportMap.get(key);
-                System.out.print(dbdSupport.toString());
-            }
+        DBDSupport[] dbdSupports = dbd.getDBDSupports();
+        if(dbdSupports.length>0) System.out.printf("\n\nsupport");
+        for(DBDSupport dbdSupport : dbdSupports) {
+            System.out.print(dbdSupport.toString());
         }
         
-        Map<String,DBDCreate> createMap = dbd.getCreateMap();
-        keys = createMap.keySet();
-        if(keys.size()>0) {
-            System.out.printf("\n\ncreate");
-            for(String key: keys) {
-                DBDCreate dbdCreate = createMap.get(key);
-                System.out.print(dbdCreate.toString());
-            }
+        DBDCreate[] dbdCreates = dbd.getDBDCreates();
+        if(dbdCreates.length>0) System.out.printf("\n\ncreate");
+        for(DBDCreate dbdCreate : dbdCreates) {
+            System.out.print(dbdCreate.toString());
         }
         
-        Map<String,DBDRecordType> recordTypeMap = dbd.getRecordTypeMap();
-        keys = recordTypeMap.keySet();
-        if(keys.size()>0) {
-            System.out.printf("\n\nrecordTypes");
-            for(String key: keys) {
-                DBDRecordType dbdRecordType = recordTypeMap.get(key);
-                System.out.print(dbdRecordType.toString());
-            }
-        }           
+        DBDRecordType[] dbdRecordTypes = dbd.getDBDRecordTypes();
+        if(dbdRecordTypes.length>0) System.out.printf("\n\nrecordTypes");
+        for(DBDRecordType dbdRecordType : dbdRecordTypes) {
+            System.out.print(dbdRecordType.toString());
+        }
+        
     }
         
     static void parseDBD(DBD dbd, String fileName,Requester iocRequester) {
@@ -233,11 +215,9 @@ public class XMLToDatabase {
     
     static void dumpDB(DBD dbd, IOCDB iocdb) {
         System.out.printf("\nrecords\n");
-        Map<String,DBRecord> recordMap = iocdb.getRecordMap();
-        Set<String> keys = recordMap.keySet();
-        for(String key: keys) {
-            DBRecord record = recordMap.get(key);
-            System.out.print(record.toString());
+        DBRecord[] dbRecords = iocdb.getDBRecords();
+        for(DBRecord dbRecord : dbRecords) {
+            System.out.print(dbRecord.toString());
         }
     }
     

@@ -5,9 +5,6 @@
  */
 package org.epics.ioc.db.test;
 
-import java.util.Map;
-import java.util.Set;
-
 import junit.framework.TestCase;
 
 import org.epics.ioc.db.DBRecord;
@@ -38,17 +35,14 @@ public class DefaultTest extends TestCase {
         IOCDB iocdb = IOCDBFactory.create("testIOCDatabase");
         XMLToIOCDBFactory.convert(dbd,iocdb,
                  "example/allTypesDB.xml",iocRequester);
-        Map<String,DBRecord> recordMap = iocdb.getRecordMap();
-        Set<String> keys = recordMap.keySet();
         System.out.printf("%n%nrecord list%n");
-        for(String key: keys) {
-            DBRecord record = recordMap.get(key);
-            System.out.printf("%n%s",record.getPVRecord().getRecordName());
+        DBRecord[] dbRecords = iocdb.getDBRecords();
+        for(DBRecord dbRecord: dbRecords) {
+            System.out.printf("%n%s",dbRecord.getPVRecord().getRecordName());
         }
         System.out.printf("%n%nrecord contents%n");
-        for(String key: keys) {
-            DBRecord record = recordMap.get(key);
-            System.out.print(record.toString());
+        for(DBRecord dbRecord: dbRecords) {
+            System.out.print(dbRecord.toString());
         }
     }
     private static class Listener implements Requester {

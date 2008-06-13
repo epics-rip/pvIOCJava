@@ -1198,17 +1198,13 @@ this section, which just shows the interfaces.</p>
         void postPut();
         void addListener(RecordListener recordListener);
         void removeListener(RecordListener recordListener);
-        List&lt;RecordListener&gt; getRecordListenerList();
         String toString();
         String toString(int indentLevel);
     }
-    public class BaseDBField implements DBField{ ... }
 
     public interface DBListener {
         void dataPut(DBField dbField);
         void supportNamePut(DBField dbField);
-        void beginPut(DBStructure dbStructure);
-        void endPut(DBStructure dbStructure);
         void dataPut(DBField requested,DBField dbField);
         void supportNamePut(DBField requested,DBField dbField);
         void beginProcess();
@@ -1223,28 +1219,20 @@ this section, which just shows the interfaces.</p>
         void beginPut();
         void endPut();
     }
-    public class BaseDBStructure extends BaseDBField implements DBStructure{ ... }
 
     public interface DBArray extends DBField{
         PVArray getPVArray();PVArray getPVArray();
     }
-    public class BaseDBArray extends BaseDBField implements DBArray { ... }
 
     public interface DBStructureArray extends DBArray{
         PVStructureArray getPVStructureArray();
         DBStructure[] getElementDBStructures();
-        void replacePVArray();
     }
-    public class BaseDBStructureArray
-        extends BaseDBArray implements DBStructureArray { ... }
 
     public interface DBArrayArray extends DBArray{
         PVArrayArray getPVArrayArray();
         DBArray[] getElementDBArrays();
-        void replacePVArray();
     }
-    public class BaseDBArrayArray
-        extends BaseDBArray implements DBArrayArray { ... }
 
     interface DBRecord {
         DBField findDBField(PVField pvField);
@@ -1260,12 +1248,7 @@ this section, which just shows the interfaces.</p>
         void endProcess();
         RecordListener createRecordListener(DBListener listener);
         void removeRecordListener(RecordListener listener);
-        void removeRecordListeners();
         void addListenerSource(BaseDBField dbField);
-        DBD getDBD();
-        void setDBD(DBD dbd);
-        IOCDB getIOCDB();
-        void setIOCDB(IOCDB iocdb);
     }</pre>
 <hr />
 

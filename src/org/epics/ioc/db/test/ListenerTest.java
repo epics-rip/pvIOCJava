@@ -132,7 +132,6 @@ public class ListenerTest extends TestCase {
         System.out.printf("%ntestPut begin structure put %s%n",
                 recordName + pvField.getFullFieldName());
         dbRecord.beginProcess();
-        dbStructure.beginPut();
         for(DBField field : dbDatas) {
             PVField pv = field.getPVField();
             Type fieldType = pv.getField().getType();
@@ -151,7 +150,6 @@ public class ListenerTest extends TestCase {
             }
             field.postPut();
         }
-        dbStructure.endPut();
         dbRecord.endProcess();
     }
     

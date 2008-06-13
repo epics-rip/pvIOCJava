@@ -8,21 +8,24 @@ package org.epics.ioc.db.test;
 import org.epics.ioc.db.DBField;
 import org.epics.ioc.db.DBListener;
 import org.epics.ioc.db.DBRecord;
-import org.epics.ioc.db.DBStructure;
 import org.epics.ioc.db.IOCDB;
 import org.epics.ioc.db.RecordListener;
 import org.epics.ioc.pv.PVField;
 import org.epics.ioc.pv.PVRecord;
-import org.epics.ioc.pv.PVStructure;
 
 /**
  * @author mrk
  *
  */
 public class DBListenerForTesting implements DBListener{ 
-    private RecordListener listener;
+    
+    private String recordName = null;
     private String pvName = null;
+    private boolean monitorProperties = false;
     private boolean verbose;
+    private DBRecord dbRecord = null;
+    
+    private RecordListener listener;
     private String actualFieldName = null;
     private boolean isProcessing = false;
     private String fullName = null;
@@ -32,39 +35,16 @@ public class DBListenerForTesting implements DBListener{
     {
         this.pvName = pvName;
         this.verbose = verbose;
-        DBRecord dbRecord = iocdb.findRecord(recordName);
-        PVRecord pvRecord = dbRecord.getPVRecord();
-        if(pvRecord==null) {
+        this.recordName = recordName;
+        this.monitorProperties = monitorProperties;
+        dbRecord = iocdb.findRecord(recordName);
+        if(dbRecord==null) {
             System.out.printf("record %s not found%n",recordName);
             return;
         }
-        PVField pvField;
-        if(pvName==null || pvName.length()==0) {
-            pvField = pvRecord;
-        } else {
-            pvField = pvRecord.findProperty(pvName);
-            if(pvField==null){
-                System.out.printf("name %s not in record %s%n",pvName,recordName);
-                System.out.printf("%s\n",pvRecord.toString());
-                return;
-            }
-        }
-        actualFieldName = pvField.getField().getFieldName();
-        fullName = pvField.getFullName();
-        listener = dbRecord.createRecordListener(this);
-        DBField dbField = dbRecord.findDBField(pvField);
-        dbField.addListener(listener);
-        if(monitorProperties) {
-            String[] propertyNames = pvField.getPropertyNames();
-            if(propertyNames!=null) {
-                for(String propertyName : propertyNames) {
-                    PVField pvf = pvField.findProperty(propertyName);
-                    DBField dbf = dbRecord.findDBField(pvf);
-                    dbf.addListener(listener);
-                }
-            }
-        }
+        connect();
     }
+    
     public DBListenerForTesting(IOCDB iocdb,String recordName,String pvName)
     {
         this(iocdb,recordName,pvName,true,true);
@@ -94,24 +74,6 @@ public class DBListenerForTesting implements DBListener{
     public void endProcess() {
         putCommon("endProcess");
         isProcessing = false;
-    }
-    /* (non-Javadoc)
-     * @see org.epics.ioc.db.DBListener#beginPut(org.epics.ioc.db.DBStructure)
-     */
-    public void beginPut(DBStructure dbStructure) {
-        PVStructure pvStructure = dbStructure.getPVStructure();
-        if(!verbose) return;
-        String name = pvStructure.getPVRecord().getRecordName() + pvStructure.getFullFieldName();
-        System.out.println("beginPut " + name);
-    }
-    /* (non-Javadoc)
-     * @see org.epics.ioc.db.DBListener#endPut(org.epics.ioc.db.DBStructure)
-     */
-    public void endPut(DBStructure dbStructure) {
-        PVStructure pvStructure = dbStructure.getPVStructure();
-        if(!verbose) return;
-        String name = pvStructure.getPVRecord().getRecordName() + pvStructure.getFullFieldName();
-        System.out.println("endPut " + name);
     }
     /* (non-Javadoc)
      * @see org.epics.ioc.db.DBListener#dataPut(org.epics.ioc.db.DBField)
@@ -144,7 +106,40 @@ public class DBListenerForTesting implements DBListener{
      * @see org.epics.ioc.dbAccess.DBListener#unlisten(org.epics.ioc.dbAccess.RecordListener)
      */
     public void unlisten(RecordListener listener) {
-        // Nothing to do.
+        connect();
     }
     
+    private void connect() {
+        PVRecord pvRecord = dbRecord.getPVRecord();
+        if(pvRecord==null) {
+            System.out.printf("record %s not found%n",recordName);
+            return;
+        }
+        PVField pvField;
+        if(pvName==null || pvName.length()==0) {
+            pvField = pvRecord;
+        } else {
+            pvField = pvRecord.findProperty(pvName);
+            if(pvField==null){
+                System.out.printf("name %s not in record %s%n",pvName,recordName);
+                System.out.printf("%s\n",pvRecord.toString());
+                return;
+            }
+        }
+        actualFieldName = pvField.getField().getFieldName();
+        fullName = pvField.getFullName();
+        listener = dbRecord.createRecordListener(this);
+        DBField dbField = dbRecord.findDBField(pvField);
+        dbField.addListener(listener);
+        if(monitorProperties) {
+            String[] propertyNames = pvField.getPropertyNames();
+            if(propertyNames!=null) {
+                for(String propertyName : propertyNames) {
+                    PVField pvf = pvField.findProperty(propertyName);
+                    DBField dbf = dbRecord.findDBField(pvf);
+                    dbf.addListener(listener);
+                }
+            }
+        }
+    }
 }

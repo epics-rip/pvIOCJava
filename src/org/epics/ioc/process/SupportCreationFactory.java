@@ -57,12 +57,12 @@ public class SupportCreationFactory {
     static private class SupportCreationInstance implements SupportCreation{
         private IOCDB iocdb;
         private Requester requester;
-        private Collection<DBRecord> records;
+        private DBRecord[] records;
         
         private SupportCreationInstance(IOCDB iocdbin,Requester requester) {
             iocdb = iocdbin;
             this.requester = requester;
-            records = iocdb.getRecordMap().values();
+            records = iocdb.getDBRecords();
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.process.SupportCreation#getIOCDB()
@@ -75,14 +75,11 @@ public class SupportCreationFactory {
          */
         public boolean createSupport() {
             boolean result = true;
-            Iterator<DBRecord> iter;
-            iter = records.iterator();
-            while(iter.hasNext()) {
-                DBRecord record = iter.next();
+            for(DBRecord record : records) {
                 if(!createRecordSupport(record)) {
                     PVRecord pvRecord = record.getPVRecord();
                     printError(requester,pvRecord,
-                        "no record support for record " + pvRecord.getRecordName());
+                            "no record support for record " + pvRecord.getRecordName());
                     result = false;
                 } else {
                     if(record.getRecordProcess()!=null) continue;
@@ -91,23 +88,19 @@ public class SupportCreationFactory {
                     record.setRecordProcess(recordProcess);
                 }
             }
-            iter = records.iterator();
-            while(iter.hasNext()) {
-                DBRecord record = iter.next();
+            for(DBRecord record : records) {
                 DBStructure dbStructure = record.getDBStructure();
                 if(!createStructureSupport(dbStructure)) result = false;
             }
             return result;
         }
-        
+
         /* (non-Javadoc)
          * @see org.epics.ioc.process.SupportCreation#initializeSupport()
          */
         public boolean initializeSupport() {
             boolean result = true;
-            Iterator<DBRecord> iter = records.iterator();
-            while(iter.hasNext()) {
-                DBRecord record = iter.next();
+            for(DBRecord record : records) {
                 PVRecord pvRecord = record.getPVRecord();
                 Support support = record.getDBStructure().getSupport();
                 RecordProcess process = record.getRecordProcess();
@@ -128,9 +121,7 @@ public class SupportCreationFactory {
          */
         public boolean startSupport() {
             boolean result = true;
-            Iterator<DBRecord> iter = records.iterator();
-            while(iter.hasNext()) {
-                DBRecord record = iter.next();
+            for(DBRecord record : records) {
                 PVRecord pvRecord = record.getPVRecord();
                 Support support = record.getDBStructure().getSupport();
                 RecordProcess process = record.getRecordProcess();
@@ -144,9 +135,7 @@ public class SupportCreationFactory {
                 }
             }
             if(result) {
-                iter = records.iterator();
-                while(iter.hasNext()) {
-                    DBRecord record = iter.next();
+                for(DBRecord record : records) {
                     RecordProcess process = record.getRecordProcess();
                     process.allSupportStarted();
                 }
@@ -158,9 +147,7 @@ public class SupportCreationFactory {
          * @see org.epics.ioc.process.SupportCreation#stopSupport()
          */
         public void stopSupport() {
-            Iterator<DBRecord> iter = records.iterator();
-            while(iter.hasNext()) {
-                DBRecord record = iter.next();
+            for(DBRecord record : records) {
                 RecordProcess process = record.getRecordProcess();
                 process.stop();
             }
@@ -169,9 +156,7 @@ public class SupportCreationFactory {
          * @see org.epics.ioc.process.SupportCreation#uninitializeSupport()
          */
         public void uninitializeSupport() {
-            Iterator<DBRecord> iter = records.iterator();
-            while(iter.hasNext()) {
-                DBRecord record = iter.next();
+            for(DBRecord record : records) {
                 RecordProcess process = record.getRecordProcess();
                 process.uninitialize();
             }
