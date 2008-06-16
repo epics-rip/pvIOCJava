@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-       "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+      "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
   <meta http-equiv="content-type" content="text/html; charset=iso-8859-1" />
@@ -10,16 +10,316 @@
 <body>
 <h1 style="text-align: center">EPICS JavaIOC: swtshell<br />
 package: org.epics.ioc.swtshell<br />
-2007.04.19</h1>
-CONTENTS
+2008.06.16</h1>
+CONTENTS 
+
+<div class="toc">
+<ul>
+  <li><a href="#Overview">Overview</a></li>
+  <li><a href="#Channel">Channel Access</a>
+    <ul>
+      <li><a href="#get">get</a></li>
+      <li><a href="#put">put</a></li>
+      <li><a href="#process">process</a></li>
+      <li><a href="#monitor">monitor</a></li>
+    </ul>
+  </li>
+  <li><a href="#iocConsole">iocConsole</a></li>
+  <li><a href="#Local">Local javaIOC</a>
+    <ul>
+      <li><a href="#processor">processor</a></li>
+      <li><a href="#loadDataba">loadDatabase</a></li>
+      <li><a href="#introspect">introspectDatabase</a></li>
+    </ul>
+  </li>
+</ul>
+</div>
 <hr />
 
 <h2 style="text-align: center" id="Overview">Overview</h2>
 <hr />
 
 <p>This package provides a GUI shell implemented via the SWT toolkit that
-comes with eclipse. It is not documented. See the default JavaIOC package
-overview document. It gives brief instructions for starting and using
-swtshell.</p>
+comes with eclipse. The default JavaIOC package overview document gives brief
+instructions for starting the swtshell. If you want to communicate with a V3
+EPICS IOC then the option "-server server/beforeStartIOC.txt" must be given
+when the javaIOC is started.</p>
+
+<p>The following window appears when swtshell is started:</p>
+
+<center>
+<p><img src="./swtshell.gif" alt="swtshell" /></p>
+</center>
+
+<p>The window has the following buttons:</p>
+<ul>
+  <li>get, put, process, and monitor:<br />
+    Each of these brings up another window which provides the ability to
+    access data via channel access. The next section describes these
+  windows:</li>
+  <li>iocConsole<br />
+    This provide a window which shows all messages sent to any record of the
+    local javaIOC. This is shown in a later section.</li>
+  <li>processor, loadDatabase, introspectDatabase<br />
+    Each of these buttons starts another window for interacting with the
+    local javaIOC. They are described bnelow.</li>
+  <li>v3iocshell<br />
+    The v3iocshell buttom starts a V3 epics ioc that is part of the same
+    process as the javaIOC. In the future this will be used to communicate
+    with asynDriver port drivers. For now this button is not documented. </li>
+</ul>
+
+<p><span style="font-weight:bold;">NOTE</span>: After text is typed into any
+text input window, the enter key must be pressed.</p>
+<hr />
+
+<h2 style="text-align: center" id="Channel">Channel Access</h2>
+<hr />
+The get, put, process, and monitor buttons each start a new window. Each
+window provides the ability to connect to a PV (Process Variable). 
+
+<p>This window gets data from a local or remote IOC. The data is accessed via
+javaIOC Channel Access. Two types are implemented:</p>
+<ul>
+  <li>javaIOC 
+    <p>For now only local Channel Access is implemented for a javIOC. Thus it
+    is only possible to pass structured data within a single javaIOC.</p>
+  </li>
+  <li>EPICS V3 Channel Access 
+    <p>This can be either a V3 EPICS IOC (or a server implemented via the
+    portable Channel Access Server) or a javaIOC running the caV3 server.
+    This means that only the following data can be accessed:</p>
+    <ul>
+      <li>primitive data </li>
+      <li>array of primitive data</li>
+      <li>Channel Access V3 properties.</li>
+    </ul>
+  </li>
+</ul>
+
+<p>See package org.epics.ioc.caV3 for details about caV3.</p>
+
+<h3 id="get">get</h3>
+
+<p>The following window appears when the get button is pushed:</p>
+
+<center>
+<p><img src="./get.gif" alt="get" /></p>
+</center>
+
+<p><span style="font-weight:bold;">Note</span>: in order to make a connection
+to an EPICS IOC the following is done:</p>
+<ul>
+  <li>The caV3 provider is selected.</li>
+  <li>The pvname is entered into the pvname box.</li>
+  <li>Properties are selected on the third row.</li>
+  <li>The connect button on the first row is clicked.</li>
+  <li>If connected then the controls on the fourth row are active.</li>
+</ul>
+
+<p>The first row has the following widgets:</p>
+<dl>
+  <dt>conection status</dt>
+    <dd>This is a message box that shows if get is connected. </dd>
+  <dt>connect button</dt>
+    <dd>This is a toggle button that can issue either a connect or disconnect
+      request. If it shows "connect" then when it is clicked, get changes the
+      button to "disconnect" and attempts to connect. The connection status
+      message box shows if the request is successful. When the button shows
+      "disconnect" and the button is clicked, get changes the button to
+      "connect" and disconnects.</dd>
+  <dt>selectLocalRecord</dt>
+    <dd>This brings up a list of all records in the local javaIOC and allows
+      the user to select a record. When it is selected the pvname on the
+      second row will change.</dd>
+  <dt>selectLocalField</dt>
+    <dd>If a local record has been selected then the user can click this
+      button. It brings up a window that has a tree showing all the fields in
+      the record. Any field can be selected. When a field is selected the
+      field name is appended to the record name and appears in the pvname on
+      the second row.</dd>
+</dl>
+
+<p>The second row allows the user to select a provider and to specify a
+pvname. Currently only two providers are available: local and caV3. The local
+provider is just the javaIOC to which swtshell is connected. caV3 is the V3
+EPICS Channel Access client (JCA/CAJ) which can commuinicate with V3 EPICS
+Channel Access servers. If the local provider is chosen than the user can
+select a pvname via the controls on the first row or can enter the pvname
+directly. If caV3 is specified then the pvname must be entered direrctly.</p>
+
+<p>A pvname is entered directly by entering the value into the pvname box and
+pressing return. The pvname is of the form "record.field". </p>
+
+<p>For javaIOC records field is of the form "name.name..." where where each
+name is a field name or a property name. If just the record name is given
+then the entire record is selected.</p>
+
+<p>For caV3 records field is a single name. If not specified VAL is assumed.
+Both VAL and value mean VAL.</p>
+
+<p>The third row is for caV3. It is used to select caV3 properties that will
+be requested via caV3. </p>
+
+<p>After get has connected to a pv, the fourth row is used to request a get.
+It has the following controls:</p>
+<dl>
+  <dt>get</dt>
+    <dd>Each time get is clicked data is read and shown on the message
+      window. </dd>
+  <dt>process</dt>
+    <dd>If process is selected, then the record will be processed before the
+      data is read. </dd>
+  <dt>property</dt>
+    <dd>The property button is used to select the set of propertys to get
+      along with the value. </dd>
+</dl>
+
+<h3 id="put">put</h3>
+
+<p>The following window appears when the put button is pushed:</p>
+
+<center>
+<p><img src="./put.gif" alt="put" /></p>
+</center>
+
+<p>The controls are similar to the controls for get except that no property
+buttons are present because put request do not have associated properties.
+For a javaIOC record any field, including the entire record can be
+selected.</p>
+
+<p>If a primitive or array of primitives is selected then when put is clicked
+the following happens: </p>
+<ul>
+  <li>A text entry window appears</li>
+  <li>After text is entered and the enter key presssed the data is put to the
+    PV. </li>
+</ul>
+
+<p>If a structured field is chosen and put is clicked the following
+happens:</p>
+<ul>
+  <li>A window appears that provides a tree structured view of the structure.
+    Any field of the structure can be selected.</li>
+  <li>After clicking the edit button text can be entered in the test window
+    that appears after the edit button. When the enter key is pressed the
+    data value is saved.</li>
+  <li>When all desired data has been entered the done button is clicked. When
+    this happens the window disappears and the newly entered data is sent to
+    the PV.</li>
+</ul>
+
+<h3 id="process">process</h3>
+
+<p>The following window appears when the process button is pushed:</p>
+
+<center>
+<p><img src="./process.gif" alt="process" /></p>
+</center>
+
+<p>The controls are similar to the controls for get exxept that no controls
+are available for properties or fields because they are not meaningful for a
+process request.</p>
+
+<h3 id="monitor">monitor</h3>
+
+<p>The following window appears when the monitor button is pushed:</p>
+
+<center>
+<p><img src="./monitor.gif" alt="monitor" /></p>
+</center>
+
+<p>The controls in the first three rows are identical to the controls for
+get. The forth and fifth rows provide options for monitor:</p>
+<dl>
+  <dt>property</dt>
+    <dd>Selects a set of properties to accompany the data</dd>
+  <dt>deadband</dt>
+    <dd>A deadband to use if onAbsolute or onPercentage are seleccted.</dd>
+  <dt>onPut, ...,onPercentage</dt>
+    <dd>A set of radio buttons that determines the type of change which will
+      cause a monitor to occur.</dd>
+</dl>
+<hr />
+
+<h2 style="text-align: center" id="iocConsole">iocConsole</h2>
+<hr />
+
+<p>The following window appears when the iocConsole button is pushed:</p>
+
+<center>
+<p><img src="./iocConsole.gif" alt="iocConsole" /></p>
+</center>
+
+<p>When this is started, it calls iocdb.addRequester where iocdb is the
+master IOCDB. Whenever any code sends a message to the iocdb, the message is
+displayed on the iocConsole window. Note that iocdb puts the messages on a
+queue and has a separate thead that send the messages to the requesters.</p>
+<hr />
+
+<h2 style="text-align: center" id="Local">Local javaIOC</h2>
+<hr />
+
+<h3 id="processor">processor</h3>
+
+<p>The following window appears when the processor button is pushed:</p>
+
+<center>
+<p><img src="./processor.gif" alt="processor" /></p>
+</center>
+
+<p>The controls are as follows:</p>
+<dl>
+  <dt>selectRecord</dt>
+    <dd>Brings up a list box that allows the user to select a local
+    record.</dd>
+  <dt>showProcessor</dt>
+    <dd>Shows the name of the processor for the record.</dd>
+  <dt>releaseProcessor</dt>
+    <dd>Forces the processor to no longer own the record. This is a drastic
+      measure which should not normally be done.</dd>
+  <dt>showThreads</dt>
+    <dd>Shows all names of all the threads that have been started by javaIOC
+      code.</dd>
+</dl>
+
+<h3 id="loadDataba">loadDatabase</h3>
+
+<p>The following window appears when the loadDatabase button is pushed:</p>
+
+<center>
+<p><img src="./loadDatabase.gif" alt="loadDatabase" /></p>
+</center>
+
+<p>This is used to load additional Database Definition Database or Record
+Instance files to a running IOC. It has the following controls:</p>
+<dl>
+  <dt>find</dt>
+    <dd>This brings up a file selection box that allows the selection of a
+      DBD or DB file.</dd>
+  <dt>show</dt>
+    <dd>Lists the selected file.</dd>
+  <dt>loadDBD</dt>
+    <dd>Loads the selected DBD file. If the file loads without error it is
+      added to the master DBD field.</dd>
+  <dt>loadDB</dt>
+    <dd>Loads, initializes, and starts record instance files. If all of the
+      new record instances is stated, then the records are added to ther
+      master database. If any record fails to start, all the records are
+      uinitialized and are not added to the master database.</dd>
+</dl>
+
+<h3 id="introspect">introspectDatabase</h3>
+
+<p>The following window appears when the introspectDatabase button is
+pushed:</p>
+
+<center>
+<p><img src="./introspectDatabase.gif" alt="introspectonsole" /></p>
+</center>
+
+<p>The top menubar allows the use to see all the definitions in the master
+DBD database. The second row allows the user to see the definitions of any
+selected record instance.</p>
 </body>
 </html>

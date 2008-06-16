@@ -39,7 +39,7 @@ public class SwtshellFactory {
         private ThreadInstance() {  
             threadCreate.create("swtshell", 2, this);
             
-        }
+        } 
         /* (non-Javadoc)
          * @see org.epics.ioc.util.RunnableReady#run(org.epics.ioc.util.ThreadReady)
          */
@@ -47,18 +47,11 @@ public class SwtshellFactory {
             threadReady.ready();
             final Display display = new Display();
             Shell shell = new Shell(display);
-            shell.setText("iocshell");
+            shell.setText("swtshell");
             GridLayout layout = new GridLayout();
             layout.numColumns = 1;
             layout.makeColumnsEqualWidth = true;
             shell.setLayout(layout);
-            Button iocConsoleDB = new Button(shell,SWT.PUSH);
-            iocConsoleDB.setText("iocConsole");
-            iocConsoleDB.addSelectionListener( new SelectionAdapter() {
-                public void widgetSelected(SelectionEvent e) {
-                    IOCConsoleFactory.init(display);
-                }
-            });
             
             Button getDB = new Button(shell,SWT.PUSH);
             getDB.setText("get");
@@ -86,6 +79,13 @@ public class SwtshellFactory {
             monitorDB.addSelectionListener( new SelectionAdapter() {
                 public void widgetSelected(SelectionEvent e) {
                     MonitorFactory.init(display);
+                }
+            });
+            Button iocConsoleDB = new Button(shell,SWT.PUSH);
+            iocConsoleDB.setText("iocConsole");
+            iocConsoleDB.addSelectionListener( new SelectionAdapter() {
+                public void widgetSelected(SelectionEvent e) {
+                    IOCConsoleFactory.init(display);
                 }
             });
             Button processorDB = new Button(shell,SWT.PUSH);
