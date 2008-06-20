@@ -5,8 +5,6 @@
  */
 package org.epics.ioc.process.test;
 
-import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;

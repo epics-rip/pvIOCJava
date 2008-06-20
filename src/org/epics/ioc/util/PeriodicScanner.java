@@ -32,7 +32,7 @@ public interface PeriodicScanner {
      * @param dbRecord The record instance.
      * @return false if the request failed or true if it was successful.
      */
-    boolean schedule(DBRecord dbRecord);
+    boolean addRecord(DBRecord dbRecord);
     /**
      * Remove the record from it's periodic scan list.
      * This is called by ScanField whenever any of the scan fields are modified or ScanField.stop is called
@@ -41,7 +41,7 @@ public interface PeriodicScanner {
      * @param scanPriority The current priority.
      * @return false if the request failed or true if it was successful.
      */
-    boolean unschedule(DBRecord dbRecord,double rate,ScanPriority scanPriority);
+    boolean removeRecord(DBRecord dbRecord,double rate,ScanPriority scanPriority);
     /**
      * Show a list of all records being periodically scanned.
      * @return The list.

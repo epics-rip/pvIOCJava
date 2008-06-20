@@ -1,5 +1,5 @@
 /**
- * Copyright - See the COPYRIGHT that is included with this distibution.
+ * Copyright - See the COPYRIGHT that is included with this distribution.
  * EPICS JavaIOC is distributed subject to a Software License Agreement found
  * in file LICENSE that is included with this distribution.
  */
@@ -8,8 +8,6 @@ package org.epics.ioc.process;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.Collection;
-import java.util.Iterator;
 
 import org.epics.ioc.db.DBArray;
 import org.epics.ioc.db.DBArrayArray;
@@ -22,14 +20,9 @@ import org.epics.ioc.dbd.DBD;
 import org.epics.ioc.dbd.DBDFactory;
 import org.epics.ioc.dbd.DBDSupport;
 import org.epics.ioc.pv.Array;
-import org.epics.ioc.pv.ArrayArrayData;
 import org.epics.ioc.pv.PVArray;
-import org.epics.ioc.pv.PVArrayArray;
 import org.epics.ioc.pv.PVField;
 import org.epics.ioc.pv.PVRecord;
-import org.epics.ioc.pv.PVStructure;
-import org.epics.ioc.pv.PVStructureArray;
-import org.epics.ioc.pv.StructureArrayData;
 import org.epics.ioc.pv.Type;
 import org.epics.ioc.support.Support;
 import org.epics.ioc.util.MessageType;
@@ -47,29 +40,23 @@ public class SupportCreationFactory {
      * @return the SupportCreation.
      */
     static public SupportCreation createSupportCreation(IOCDB iocdb,Requester requester) {
-        return new SupportCreationInstance(iocdb,requester);
+        return new SupportCreationImpl(iocdb,requester);
     }
     
     static public boolean createSupport(DBField dbField) {
         return createSupportPvt(dbField.getPVField(),dbField);
     }
     
-    static private class SupportCreationInstance implements SupportCreation{
+    static private class SupportCreationImpl implements SupportCreation{
         private IOCDB iocdb;
         private Requester requester;
         private DBRecord[] records;
         
-        private SupportCreationInstance(IOCDB iocdbin,Requester requester) {
+        private SupportCreationImpl(IOCDB iocdbin,Requester requester) {
             iocdb = iocdbin;
             this.requester = requester;
             records = iocdb.getDBRecords();
         }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.process.SupportCreation#getIOCDB()
-         */
-        public IOCDB getIOCDB() {
-            return iocdb;
-        }        
         /* (non-Javadoc)
          * @see org.epics.ioc.process.SupportCreation#createSupport()
          */
@@ -206,37 +193,16 @@ public class SupportCreationFactory {
             if(elementType==Type.pvArray) {
                 DBArrayArray dbArrayArray = (DBArrayArray)dbField;
                 DBArray[] dbFields = dbArrayArray.getElementDBArrays();
-                PVArrayArray pvArrayArray = dbArrayArray.getPVArrayArray();
-                int len = pvArrayArray.getLength();
-                ArrayArrayData data = new ArrayArrayData();
-                int nsofar = 0;
-                int offset = 0;
-                while(nsofar<len) {
-                    int n = pvArrayArray.get(offset,len-nsofar,data);
-                    if(n<=0) break;
-                    for(int i=0; i<n; i++) {
-                        if(dbFields[i]==null) continue;
-                        if(!createArraySupport(dbFields[i])) result = false;
-                    }
-                    nsofar += n; offset += n;
+                for(DBField dbf : dbFields) {
+                    if(dbf==null) continue;
+                    if(!createArraySupport(dbf)) result = false;
                 }
             } else if(elementType==Type.pvStructure) {
                 DBStructureArray dbStructureArray = (DBStructureArray)dbField;
                 DBStructure[] dbFields = dbStructureArray.getElementDBStructures();
-                PVStructureArray pvStructureArray = dbStructureArray.getPVStructureArray();
-                int len = pvStructureArray.getLength();
-                StructureArrayData data = new StructureArrayData();
-                int nsofar = 0;
-                int offset = 0;
-                while(nsofar<len) {
-                    int n = pvStructureArray.get(offset,len-nsofar,data);
-                    if(n<=0) break;
-                    PVStructure[] pvStructures = data.data;
-                    for(int i=0; i<n; i++) {
-                        if(pvStructures[i]==null) continue;
-                        if(!createStructureSupport(dbFields[i])) result = false;
-                    }
-                    nsofar += n; offset += n;
+                for(DBField dbf : dbFields) {
+                    if(dbf==null) continue;
+                    if(!createStructureSupport(dbf)) result = false;
                 }
             } 
             return result;

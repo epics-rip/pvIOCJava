@@ -7,7 +7,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 
-public class ThreadFactory {
+public class ThreadCreateFactory {
     public static ThreadCreate getThreadCreate() {
         return threadCreate;
     }
@@ -21,7 +21,7 @@ public class ThreadFactory {
          */
         public Thread create(String name, int priority, RunnableReady runnableReady) {
             RunnableImpl runnableImpl = new RunnableImpl(name,priority,runnableReady);
-            return runnableImpl.getThread();
+            return runnableImpl.start();
         }
 
         /* (non-Javadoc)
@@ -38,6 +38,9 @@ public class ThreadFactory {
         }
         
         private synchronized void addThread(Thread thread) {
+            if(threadList.contains(thread)) {
+                throw new IllegalStateException("addThread but already on list");
+            }
             threadList.add(thread);
         }
         
@@ -53,6 +56,9 @@ public class ThreadFactory {
                 this.runnable = runnable;
                 thread = new Thread(this,name);
                 thread.setPriority(priority);
+            }
+
+            private Thread start() {
                 thread.start();
                 lock.lock();
                 try {
@@ -60,14 +66,10 @@ public class ThreadFactory {
                 } catch(InterruptedException e) {
                     System.err.println(
                             e.getMessage()
-                            + " thread " + name + " did not call ready");
+                            + " thread " + thread.getName() + " did not call ready");
                 } finally {
                     lock.unlock();
                 }
-
-            }
-
-            private Thread getThread() {
                 return thread;
             }
 

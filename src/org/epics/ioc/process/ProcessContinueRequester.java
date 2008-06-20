@@ -6,6 +6,7 @@
 package org.epics.ioc.process;
 
 /**
+ * The interface that must be implemented by code that calls RecordProcess.processContinue().
  * @author mrk
  *
  */

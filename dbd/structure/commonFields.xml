@@ -27,6 +27,7 @@
   <field name = "eventName" type = "string" />
   <field name = "processSelf" type = "boolean" />
   <field name = "processAfterStart" type = "boolean" default = "false" />
+  <field name = "maxConsecutiveActive" type = "int" default = "1" />
 </structure>
 
 <support name = "scan"

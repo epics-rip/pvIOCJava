@@ -5,7 +5,6 @@
  */
 package org.epics.ioc.db;
 
-import org.epics.ioc.pv.Array;
 import org.epics.ioc.pv.ArrayArrayData;
 import org.epics.ioc.pv.PVArray;
 import org.epics.ioc.pv.PVArrayArray;

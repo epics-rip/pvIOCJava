@@ -1,11 +1,12 @@
 /**
- * Copyright - See the COPYRIGHT that is included with this distibution.
+ * Copyright - See the COPYRIGHT that is included with this distribution.
  * EPICS JavaIOC is distributed subject to a Software License Agreement found
  * in file LICENSE that is included with this distribution.
  */
 package org.epics.ioc.process;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import org.epics.ioc.db.DBField;
@@ -41,20 +42,20 @@ public class RecordProcessFactory {
     }
     
     static private class ProcessInstance implements
-        RecordProcess,RecordProcessRequester,SupportProcessRequester
+        RecordProcess,SupportProcessRequester,RecordProcessRequester
     {
         private boolean trace = false;
         private DBRecord dbRecord;
         private PVRecord pvRecord;
-        private String recordProcessSupportName;
+        private String recordProcessSupportName = null;
         private boolean enabled = true;
         private Support recordSupport = null;
         private ScanSupport scanSupport = null;
         private PVBoolean pvProcessAfterStart = null;
         
         private boolean active = false;
-        private boolean setActiveBySetActive = false;
-        private boolean leaveActive;
+        private boolean activeBySetActive = false;
+        private boolean leaveActive = false;
         private RecordProcessRequester recordProcessRequester = null;
         private boolean processIsRunning = false;
         private List<ProcessCallbackRequester> processProcessCallbackRequesterList =
@@ -68,6 +69,7 @@ public class RecordProcessFactory {
         private boolean callUninitializeAfterActive = false;
         private boolean processIsComplete = false;
         private boolean processCompleteDone = false;
+        private boolean callRecordProcessComplete = false;
         private RequestResult requestResult = null;
         
         
@@ -83,12 +85,7 @@ public class RecordProcessFactory {
          * @see org.epics.ioc.process.RecordProcess#isEnabled()
          */
         public boolean isEnabled() {
-            dbRecord.lock();
-            try {
-                return enabled;
-            } finally {
-                dbRecord.unlock();
-            }
+            return enabled;
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.process.RecordProcess#setEnabled(boolean)
@@ -107,12 +104,7 @@ public class RecordProcessFactory {
          * @see org.epics.ioc.process.RecordProcess#isActive()
          */
         public boolean isActive() {
-            dbRecord.lock();
-            try {
-                return active;
-            } finally {
-                dbRecord.unlock();
-            }
+            return active;
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.process.RecordProcess#getRecord()
@@ -124,12 +116,7 @@ public class RecordProcessFactory {
          * @see org.epics.ioc.process.RecordProcess#isTrace()
          */
         public boolean isTrace() {
-            dbRecord.lock();
-            try {
-                return trace;
-            } finally {
-                dbRecord.unlock();
-            }
+            return trace;
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.process.RecordProcessSupport#setTrace(boolean)
@@ -245,47 +232,7 @@ public class RecordProcessFactory {
                 dbRecord.unlock();
             }
         }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.process.RecordProcess#allSupportStarted()
-         */
-        public void allSupportStarted() {
-            dbRecord.lock();
-            try {
-                if(trace) traceMessage("allSupportStarted");
-                recordSupport.allSupportStarted();
-                if(scanSupport!=null) scanSupport.allSupportStarted();
-                if(pvProcessAfterStart!=null) {
-                    boolean process = pvProcessAfterStart.get();
-                    if(process) {
-                        if(recordProcessRequester==null) {
-                            recordProcessRequester = this;
-                            process(this,false,null);
-                        } else if(!processSelfRequest(this)) {
-                            pvRecord.message(" processAfterStart failed", MessageType.warning);
-                        }
-                    }
-                }
-            } finally {
-                dbRecord.unlock();
-            }
-        }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.process.RecordProcessRequester#recordProcessComplete()
-         */
-        public void recordProcessComplete() {
-            dbRecord.lock();
-            try {
-                recordProcessRequester = null;  
-            } finally {
-                dbRecord.unlock();
-            }
-        }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.process.RecordProcessRequester#recordProcessResult(org.epics.ioc.util.RequestResult)
-         */
-        public void recordProcessResult(RequestResult requestResult) {
-            // nothing to do
-        }
+        
         /* (non-Javadoc)
          * @see org.epics.ioc.util.Requester#message(java.lang.String, org.epics.ioc.util.MessageType)
          */
@@ -296,6 +243,9 @@ public class RecordProcessFactory {
          * @see org.epics.ioc.process.RecordProcess#setRecordProcessRequester(org.epics.ioc.process.RecordProcessRequester)
          */
         public boolean setRecordProcessRequester(RecordProcessRequester recordProcessRequester) {
+            if(recordProcessRequester==null) {
+                throw new IllegalArgumentException("must implement recordProcessRequester");
+            }
             dbRecord.lock();
             try {
                 if(this.recordProcessRequester==null) {
@@ -365,7 +315,7 @@ public class RecordProcessFactory {
                 if(isStarted) {
                     if(trace) traceMessage(
                         "setActive " + recordProcessRequester.getRequesterName()); 
-                    setActiveBySetActive = true;
+                    activeBySetActive = true;
                 } else {
                     if(trace) traceMessage(
                             "setActive " + recordProcessRequester.getRequesterName() + " failed"); 
@@ -426,45 +376,43 @@ public class RecordProcessFactory {
         public boolean process(RecordProcessRequester recordProcessRequester, boolean leaveActive, TimeStamp timeStamp)
         {
             boolean isStarted = true;
-            boolean callComplete = false;
             dbRecord.lock();
             try {
-                if(!setActiveBySetActive) {
+                if(!activeBySetActive) {
                     isStarted = startCommon(recordProcessRequester);
                 }
-                if(isStarted) {
-                    if(timeStamp==null) {
-                        if(trace) traceMessage(
-                            "process with system timeStamp "
-                            + recordProcessRequester.getRequesterName()); 
-                        TimeUtility.set(this.timeStamp,System.currentTimeMillis());
-                    } else {
-                        if(trace) traceMessage(
-                            "process with callers timeStamp "
-                            + recordProcessRequester.getRequesterName()); 
-                        this.timeStamp.secondsPastEpoch = timeStamp.secondsPastEpoch;
-                        this.timeStamp.nanoSeconds = timeStamp.nanoSeconds;
-                    }
-                    this.leaveActive = leaveActive;
-                    processIsRunning = true;
-                    recordSupport.process(this);
-                    processIsRunning = false;
-                    if(processIsComplete && !processCompleteDone) {
-                        processCompleteDone = true;
-                        completeProcessing();
-                        callComplete = true;
-                    }
-                } else {
+                if(!isStarted) {
                     if(trace) traceMessage(
                             "process "
                             + recordProcessRequester.getRequesterName()
                             + " request failed"); 
+                    return false;
+                }
+                if(timeStamp==null) {
+                    TimeUtility.set(this.timeStamp,System.currentTimeMillis());
+                    if(trace) traceMessage(
+                            "process with system timeStamp "
+                            + recordProcessRequester.getRequesterName()); 
+                } else {
+                    this.timeStamp.secondsPastEpoch = timeStamp.secondsPastEpoch;
+                    this.timeStamp.nanoSeconds = timeStamp.nanoSeconds;
+                    if(trace) traceMessage(
+                            "process with callers timeStamp "
+                            + recordProcessRequester.getRequesterName()); 
+                }
+                this.leaveActive = leaveActive;
+                processIsRunning = true;
+                // NOTE: processContinue may be called before the following returns
+                recordSupport.process(this);
+                processIsRunning = false;
+                if(processIsComplete && !processCompleteDone) {
+                    completeProcessing();
                 }
             } finally {
                 dbRecord.unlock();
             }
-            if(!isStarted) return false;
-            if(callComplete) {
+            if(callRecordProcessComplete) {
+                callRecordProcessComplete = false;
                 recordProcessRequester.recordProcessComplete();
                 return true;
             }
@@ -491,6 +439,12 @@ public class RecordProcessFactory {
                 if(!active) {
                     throw new IllegalStateException("record is not active");
                 }
+                if(!processIsComplete) {
+                    throw new IllegalStateException("processing is not finished");
+                }
+                if(!processCompleteDone) {
+                    throw new IllegalStateException("process complete is not done");
+                }
                 if(this.recordProcessRequester==null) {
                     throw new IllegalStateException("no registered requester");
                 }
@@ -506,7 +460,7 @@ public class RecordProcessFactory {
          * @see org.epics.ioc.process.RecordProcessSupport#processContinue()
          */
         public void processContinue(ProcessContinueRequester processContinueRequester) {
-            boolean callbackListEmpty = true;
+            ProcessCallbackRequester processCallbackRequester = null;
             dbRecord.lock();
             try {
                 if(!active) {
@@ -521,33 +475,33 @@ public class RecordProcessFactory {
                 processContinueIsRunning = true;
                 processContinueRequester.processContinue();
                 processContinueIsRunning = false;
-                if(!continueProcessCallbackRequesterList.isEmpty()) callbackListEmpty = false;
+                if(!continueProcessCallbackRequesterList.isEmpty()) {
+                    processCallbackRequester = continueProcessCallbackRequesterList.remove(0);
+                }
                 if(processIsComplete && !processCompleteDone) {
-                    processCompleteDone = true;
                     completeProcessing();
                 }
             } finally {
                 dbRecord.unlock();
             }
-            if(processIsComplete) {
-                if(recordProcessRequester!=null) {
-                    recordProcessRequester.recordProcessComplete();
-                }
+            if(callRecordProcessComplete) {
+                callRecordProcessComplete = false;
+                recordProcessRequester.recordProcessComplete();
                 return;
             }
-            if(!callbackListEmpty) while(true) {
-                ProcessCallbackRequester processCallbackRequester;
+            while(processCallbackRequester!=null) {
+                processCallbackRequester.processCallback();
                 /*
-                 * Must lock because callback can again call RecordProcess.processContinue
+                 * Must lock because processContinue can again call RecordProcess.requestProcessCallback
                  */
                 dbRecord.lock();
                 try {
-                    if(continueProcessCallbackRequesterList.size()<=0) break;
+                    if(continueProcessCallbackRequesterList.isEmpty()) return;
                     processCallbackRequester = continueProcessCallbackRequesterList.remove(0);
                 } finally {
                     dbRecord.unlock();
                 }
-                processCallbackRequester.processCallback();
+
             }
         }
         /* (non-Javadoc)
@@ -557,14 +511,23 @@ public class RecordProcessFactory {
             if(!active) {
                 throw new IllegalStateException("requestProcessCallback called but record is not active");
             }
+            if(processIsComplete) {
+                throw new IllegalStateException("requestProcessCallback called but processIsComplete");
+            }
             if(trace) {
                 traceMessage("requestProcessCallback " + processCallbackRequester.getRequesterName());
             }
             if(processIsRunning) {
+                if(processProcessCallbackRequesterList.contains(processCallbackRequester)) {
+                    throw new IllegalStateException("requestProcessCallback called but already on list");
+                }
                 processProcessCallbackRequesterList.add(processCallbackRequester);
                 return;
             }
             if(processContinueIsRunning) {
+                if(continueProcessCallbackRequesterList.contains(processCallbackRequester)) {
+                    throw new IllegalStateException("requestProcessCallback called but already on list");
+                }
                 continueProcessCallbackRequesterList.add(processCallbackRequester);
                 return;
             }
@@ -600,15 +563,62 @@ public class RecordProcessFactory {
          */
         public void supportProcessDone(RequestResult requestResult) {
             if(!processIsRunning && !processContinueIsRunning) {
-                throw new IllegalStateException("must be called from process or pocessContinue");
+                throw new IllegalStateException("must be called from process or processContinue");
             }
             processIsComplete = true;
             this.requestResult = requestResult;
         }
         
+        /* (non-Javadoc)
+         * @see org.epics.ioc.process.RecordProcess#allSupportStarted()
+         */
+        public void allSupportStarted() {
+            dbRecord.lock();
+            try {
+                if(trace) traceMessage("allSupportStarted");
+                recordSupport.allSupportStarted();
+                if(scanSupport!=null) scanSupport.allSupportStarted();
+                if(pvProcessAfterStart!=null) {
+                    boolean process = pvProcessAfterStart.get();
+                    if(process) {
+                        if(recordProcessRequester==null) {
+                            recordProcessRequester = this;
+                            process(this,false,null);
+                        } else if(!processSelfRequest(this)) {
+                            pvRecord.message(" processAfterStart failed", MessageType.warning);
+                        }
+                    }
+                }
+            } finally {
+                dbRecord.unlock();
+            }
+        }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.process.RecordProcessRequester#recordProcessComplete()
+         */
+        public void recordProcessComplete() {
+            dbRecord.lock();
+            try {
+                recordProcessRequester = null;  
+            } finally {
+                dbRecord.unlock();
+            }
+        }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.process.RecordProcessRequester#recordProcessResult(org.epics.ioc.util.RequestResult)
+         */
+        public void recordProcessResult(RequestResult requestResult) {
+            // nothing to do
+        }
+        
         private void traceMessage(String message) {
+            long secondPastEpochs = timeStamp.secondsPastEpoch;
+            int nano = timeStamp.nanoSeconds;
+            long milliPastEpoch = nano/1000000 + secondPastEpochs*1000;
+            Date date = new Date(milliPastEpoch);
+            String time = String.format("%tF %tT.%tL ", date,date,date);
             pvRecord.message(
-                message + " thread " + Thread.currentThread().getName(),
+                time + " " + message + " thread " + Thread.currentThread().getName(),
                 MessageType.info);
         }
         
@@ -640,7 +650,9 @@ public class RecordProcessFactory {
             return true;
         }
         // called by process, preProcess, and processContinue with record locked.
-        private void completeProcessing() {         
+        private void completeProcessing() {
+            processCompleteDone = true;
+            callRecordProcessComplete = true;
             if(removeRecordProcessRequesterAfterActive) {
                 if(trace) traceMessage("remove recordProcessRequester");
                 recordProcessRequester = null;
@@ -669,7 +681,7 @@ public class RecordProcessFactory {
             dbRecord.endProcess();
             recordProcessRequester.recordProcessResult(requestResult);
             if(!leaveActive) active = false;
-            setActiveBySetActive = false;
+            activeBySetActive = false;
             if(trace) traceMessage("process completion " + recordSupport.getRequesterName());
         }
         
@@ -685,7 +697,5 @@ public class RecordProcessFactory {
                 throw new IllegalStateException("neither process or processContinue is running");
             }
         }
-       
     }
-    
 }

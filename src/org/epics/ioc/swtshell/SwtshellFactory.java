@@ -14,7 +14,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.epics.ioc.util.RunnableReady;
 import org.epics.ioc.util.ThreadCreate;
-import org.epics.ioc.util.ThreadFactory;
+import org.epics.ioc.util.ThreadCreateFactory;
 import org.epics.ioc.util.ThreadReady;
 
 /**
@@ -32,7 +32,7 @@ public class SwtshellFactory {
         new ThreadInstance();
     }
    
-    static private ThreadCreate threadCreate = ThreadFactory.getThreadCreate();
+    static private ThreadCreate threadCreate = ThreadCreateFactory.getThreadCreate();
 
     static private class ThreadInstance implements RunnableReady {
         

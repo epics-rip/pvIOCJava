@@ -9,9 +9,9 @@ package org.epics.ioc.util;
  * ThreadCreate : Create a thread.
  * This provides two features:
  * <ol>
- *    <li>The create does not return until the thread has started.
- *    <li>Auromatially keeps a list of all active threads,
- *    i.e. threads for which the run method has not retured.
+ *    <li>The create does not return until the thread has started.</li>
+ *    <li>Keeps a list of all active threads,
+ *    i.e. threads for which the run method has not returned.</li>
  * </ol>
  * @author mrk
  *
@@ -22,7 +22,7 @@ public interface ThreadCreate {
      * @param name The thread name.
      * @param priority The thread priority.
      * @param runnableReady An implementation of RunnableReady.
-     * @return The newly created thread. Create does not return ready has been called.
+     * @return The newly created thread. Create does not return until ready has been called.
      */
     Thread create(String name, int priority, RunnableReady runnableReady);
     /**

@@ -7,12 +7,8 @@ package org.epics.ioc.util;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import org.epics.ioc.db.DBRecord;
 import org.epics.ioc.db.IOCDB;
 import org.epics.ioc.db.XMLToIOCDBFactory;
-import org.epics.ioc.dbd.DBD;
-import org.epics.ioc.dbd.DBDFactory;
-import org.epics.ioc.dbd.DBDSupport;
 import org.epics.ioc.process.SupportCreation;
 import org.epics.ioc.process.SupportCreationFactory;
 
@@ -45,7 +41,6 @@ public class IOCFactory {
         }
         try {
             maxError = MessageType.info;
-            DBD dbd = DBDFactory.getMasterDBD(); 
             IOCDB iocdbAdd = XMLToIOCDBFactory.convert("add",dbFile,requester);
             if(maxError!=MessageType.info) {
                 requester.message("iocInit failed because of xml errors.",
@@ -57,16 +52,6 @@ public class IOCFactory {
             boolean gotSupport = supportCreation.createSupport();
             if(!gotSupport) {
                 requester.message("Did not find all support.",MessageType.fatalError);
-                requester.message("nrecords",MessageType.info);
-                DBRecord[] dbRecords = iocdbAdd.getDBRecords();
-                for(DBRecord dbRecord: dbRecords) {
-                    requester.message(dbRecord.toString(),MessageType.info);
-                }
-                requester.message("support",MessageType.info);
-                DBDSupport[] dbdSupports = dbd.getDBDSupports();
-                for(DBDSupport dbdSupport : dbdSupports) {
-                    requester.message(dbdSupport.toString(),MessageType.info);
-                }
                 return false;
             }
             boolean readyForStart = supportCreation.initializeSupport();

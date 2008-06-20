@@ -10,7 +10,7 @@
 <body>
 <h1 style="text-align: center">EPICS JavaIOC: Java Input/Output Controller<br
 />
-2008.06.16</h1>
+2008.06.20</h1>
 
 <p>This product is available via the <a href="#LicenseAgreement">open source
 license</a> described at the end of this document.</p>
@@ -2683,7 +2683,8 @@ fields alarm, scan, and timeStamp, which are present in most recordTypes.</p>
   &lt;field name = "rate" type = "double"  default = "1.0" /&gt;
   &lt;field name = "eventName" type = "string" /&gt;
   &lt;field name = "processSelf" type = "boolean" /&gt;
-    &lt;field name = "processAfterStart" type = "boolean" default = "false" /&gt;
+  &lt;field name = "processAfterStart" type = "boolean" default = "false" /&gt;
+  &lt;field name = "maxConsecutiveActive" type = "int" default = "1" /&gt;
 &lt;/structure&gt;
 
 &lt;support name = "scan"
@@ -2740,6 +2741,9 @@ fields alarm, scan, and timeStamp, which are present in most recordTypes.</p>
             after it becomes ready. The attempt is only successfull if no
             record processor is registered of if the record has been
             initialized to be processSelf.</dd>
+        <dt>maxConsecutiveActive</dt>
+          <dd>The periodic and event scanners will generate a message if they
+            find the record active maxConsecutiveActive times.</dd>
       </dl>
     </dd>
 </dl>

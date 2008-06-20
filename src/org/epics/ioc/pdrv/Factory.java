@@ -23,7 +23,7 @@ import org.epics.ioc.util.AlarmSeverity;
 import org.epics.ioc.util.RunnableReady;
 import org.epics.ioc.util.ScanPriority;
 import org.epics.ioc.util.ThreadCreate;
-import org.epics.ioc.util.ThreadFactory;
+import org.epics.ioc.util.ThreadCreateFactory;
 import org.epics.ioc.util.ThreadReady;
 import org.epics.ioc.util.TimeStamp;
 import org.epics.ioc.util.TimeUtility;
@@ -1733,7 +1733,7 @@ public class Factory {
         }
     }
     
-    private static ThreadCreate threadCreate = ThreadFactory.getThreadCreate();
+    private static ThreadCreate threadCreate = ThreadCreateFactory.getThreadCreate();
     private static final int queuePriorityHigh = QueuePriority.high.ordinal();
     private static final int numQueuePriorities = queuePriorityHigh + 1;
     private static final int queuePriorityLow = QueuePriority.low.ordinal();

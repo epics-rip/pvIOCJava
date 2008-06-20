@@ -8,7 +8,7 @@ package org.epics.ioc.util;
 import java.util.Map;
 
 /**
- * Callbacks for a listener for IOC XML processing.
+ * Methods implemented by a listener for IOC XML processing.
  * @author mrk
  *
  */

@@ -18,7 +18,7 @@ import org.epics.ioc.pdrv.Trace;
 import org.epics.ioc.pdrv.User;
 import org.epics.ioc.util.RunnableReady;
 import org.epics.ioc.util.ThreadCreate;
-import org.epics.ioc.util.ThreadFactory;
+import org.epics.ioc.util.ThreadCreateFactory;
 import org.epics.ioc.util.ThreadReady;
 
 
@@ -40,7 +40,7 @@ import org.epics.ioc.util.ThreadReady;
  *
  */
 public abstract class AbstractFloat64 extends AbstractInterface implements Float64 {
-    private static ThreadCreate threadCreate = ThreadFactory.getThreadCreate();
+    private static ThreadCreate threadCreate = ThreadCreateFactory.getThreadCreate();
     private Port port;
     private String portName;
     

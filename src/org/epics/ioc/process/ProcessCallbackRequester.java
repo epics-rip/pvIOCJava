@@ -8,23 +8,23 @@ package org.epics.ioc.process;
 import org.epics.ioc.util.Requester;
 
 /**
- * The interface that must be implemented by code that makes a recordProcess.requestProcessCallback
- * request.
- * This is called with the record unlocked.
- * This is a request to be called back just before recordSupport.process or recordSupport.processContinue returns.
- * Code that wants to process other records as a result of recordProcess.process
- * can only request processing of the other records via this method.
- * This method MUST only be called by support from either it's process or processContinue method.
+ * <p>The interface that must be implemented by code that makes a recordProcess.requestProcessCallback
+ * request, which results in method processCallback being called.
+ * processCallback is called with the record unlocked.
+ * It is called just before recordSupport.process or recordSupport.processContinue returns.
+ * </p>
+ * <p>Code that wants to process other records can only request processing of the other records via this method.
  * It is NOT permissible to make direct process requests because of "deadly embrace" race conditions,
- * because RecordProcess locks a record instance before calling recordSupport.process. 
+ * because RecordProcess locks a record instance before calling recordSupport.process.</p>
+ * <p>Code that implements asynchronous support must implement this method.
+ * The method itself must not block so it must use another thread to implement asynchronous operations.</p>
  * @author mrk
  *
  */
 public interface ProcessCallbackRequester extends Requester{
     /**
-     * The callback to call after recordSupport.process returns.
-     * The callback is called with the record unlocked but still active.
-     * The callback can request that other records be processed.
+     * Called by RecordProcess as a result of a call to RecordProcess.requestProcessCallback().
+     * processCallback is called with the record unlocked but still active.
      */
     void processCallback();
 }

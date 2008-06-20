@@ -28,7 +28,7 @@ public interface MessageQueue {
      * PutFactory a new message into the queue.
      * @param message The message.
      * @param messageType The message type.
-     * @return true if the message was put into the queue or false if thge queue was full.
+     * @return true if the message was put into the queue or false if the queue was full.
      */
     boolean put(String message,MessageType messageType);
     /**
@@ -54,7 +54,7 @@ public interface MessageQueue {
      */
     void replaceLast(String message,MessageType messageType);
     /**
-     * Get the number of calls to replaceFirst and replaceLast since the last call.
+     * Get the number of calls to replaceFirst and/or replaceLast since the last call.
      * @return The number.
      */
     int getClearOverrun();

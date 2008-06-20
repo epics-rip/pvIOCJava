@@ -23,7 +23,7 @@ import org.epics.ioc.ca.ChannelProvider;
 import org.epics.ioc.pv.Type;
 import org.epics.ioc.util.RunnableReady;
 import org.epics.ioc.util.ThreadCreate;
-import org.epics.ioc.util.ThreadFactory;
+import org.epics.ioc.util.ThreadCreateFactory;
 import org.epics.ioc.util.ThreadReady;
 
 /**
@@ -36,7 +36,7 @@ public class ClientFactory  {
     private static ChannelProviderImpl channelProvider = new ChannelProviderImpl();
     private static JCALibrary jca = null;
     private static Context context = null;
-    private static ThreadCreate threadCreate = ThreadFactory.getThreadCreate();
+    private static ThreadCreate threadCreate = ThreadCreateFactory.getThreadCreate();
     /**
      * Start. This registers the V3 ChannelProvider.
      */

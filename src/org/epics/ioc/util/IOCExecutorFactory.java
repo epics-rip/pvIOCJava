@@ -12,7 +12,6 @@ import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * Create an IOCExecutor.
- * The executor implements a set of threads, one for each ScanPriority.
  * @author mrk
  *
  */
@@ -41,7 +40,7 @@ public class IOCExecutorFactory {
         }
     }
     
-    static private ThreadCreate threadCreate = ThreadFactory.getThreadCreate();
+    static private ThreadCreate threadCreate = ThreadCreateFactory.getThreadCreate();
     
     static private class ThreadInstance implements RunnableReady {
         private List<Runnable> runList = new ArrayList<Runnable>();
@@ -83,7 +82,7 @@ public class IOCExecutorFactory {
             lock.lock();
             try {
                 if(runList.contains(runnable)) {
-                    return;
+                    throw new IllegalStateException("add but already on runList");
                 }
                 boolean isEmpty = runList.isEmpty();
                 runList.add(runnable);

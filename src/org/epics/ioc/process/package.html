@@ -10,7 +10,7 @@
 <body>
 <h1 style="text-align: center">EPICS JavaIOC: process<br />
 package: org.epics.ioc.process<br />
-2007.08.30</h1>
+2008.06.19</h1>
 CONTENTS 
 
 <div class="toc">
@@ -81,7 +81,7 @@ notified about process or support events:</p>
     <dd>Implemented by code that calls
     recordProcess.requestProcessCallback.</dd>
   <dt>ProcessContinueRequester</dt>
-    <dd>Implemented by code that call recordProcess.processContinue.</dd>
+    <dd>Implemented by code that calls recordProcess.processContinue.</dd>
 </dl>
 
 <p>The following enum defines the support state:</p>
@@ -120,11 +120,12 @@ Operation</h2>
       can be either synchronous or asynchronous. Support code can invoke
       other support code.</dd>
   <dt>record support</dt>
-    <dd>The top level support for a record instance.</dd>
+    <dd>The top level support for a record instance. Most support that is
+      attached to a structure can also be record support if the structure is
+      the top level structure. </dd>
   <dt>recordProcess</dt>
-    <dd>Every record instance has an implementation of an object that
-      coordinates record processing. RecordProcess is the name of the
-      interface implemented by record processing.</dd>
+    <dd>During database initialization every record instance is assigned an
+      instances of RecordProcess, which coordinates record processing.</dd>
   <dt>process requester</dt>
     <dd>Code that asks recordProcess to process a record. Code must register
       to be the requester and only one requester is allow to request
@@ -163,8 +164,8 @@ Operation</h2>
       request to process a linked record, the record containing the link MUST
       be unlocked or deadlocks may occur. For efficency requests should be
       done with as few lock/unlock cycles and context switches as possible.
-      In particular the only asynchronous support should cause a context
-      switch. <br />
+      In particular only asynchronous support should cause a context switch.
+      <br />
       Typical requests are: 
       <dl>
         <dt>process and get</dt>
@@ -189,9 +190,9 @@ subfield of the record.</p>
 <p>Record processing has the following features:</p>
 <ul>
   <li>synchronous and asynchronous support 
-    <p>Synchronous support is suport that can implemented without blocking,
-    i.e. waiting. Asynchronous support is support that must wait. For example
-    network requests must block. Asynchronous support does not cause record
+    <p>Synchronous support is suport that can implemented without blocking.
+    Asynchronous support is support that must wait. For example network
+    requests must block. Asynchronous support does not cause record
     processing to block. Instead the support code returns without completing
     and arranges some other way to perform it's function. When it is done it
     again interacts with record processing to complete.</p>
@@ -284,7 +285,7 @@ subfield of the record.</p>
   <li>ProcessContinueRequester 
     <ul>
       <li>processContinue() 
-        <p>called by recordProcess with record unlocked.</p>
+        <p>called by recordProcess with record locked.</p>
       </li>
     </ul>
   </li>
@@ -323,14 +324,24 @@ fields:</p>
   <dt>value</dt>
     <dd>A DBDouble field, i.e. a field that holds a double value.</dd>
   <dt>input</dt>
-    <dd>A DBlink field for input.</dd>
+    <dd>A DBStructure field which is by default a null structure, i.e. it has
+      no fields and no support. A record instance can override this to be any
+      structure defined in the master Database Definition Database. The
+      default support can also be overridden.</dd>
   <dt>output</dt>
-    <dd>A DBLinkArray field.</dd>
+    <dd>Also a null DBStructure field.</dd>
+  <dt>valueAlarm</dt>
+    <dd>Also a null DBStructure field.</dd>
+  <dt>supportArray</dt>
+    <dd>An array field with the elementType set to structure and the
+      supportName set to supportArray.</dd>
+  <dt>...</dt>
+    <dd>Several other null DBStructure fields are present.</dd>
 </dl>
 
 <p>In addition the following support modules are available.</p>
 <dl>
-  <dt>doubleRecord</dt>
+  <dt>generic</dt>
     <dd>The record support module. It's process method calls two other
       support modules: The first must be support for a link that can input a
       double value. The second must support an array of links. The support
@@ -349,6 +360,9 @@ fields:</p>
   <dt>linkArray</dt>
     <dd>A support module for an array on links. For each array element it
       knows how to use the associated link support module.</dd>
+  <dt>...</dt>
+    <dd>Support modules are also available that can be attached to other null
+      DBStructure fields.</dd>
 </dl>
 
 <p>Assume a record instance is defined as follows:</p>
@@ -397,9 +411,37 @@ following happens:</p>
   <li>supportArray calls recordProcess.requestProcessCallback.</li>
   <li>doubleRecord returns.</li>
   <li>recordProcess unlocks the record and calls
-    supportArray.processCallback. supportArray performs whatever action is
-    required to process the processRecord and to put data into and process
-    record outputRecord.</li>
+    supportArray.processCallback.<br />
+    supportArray calls the process method of both processSupport and
+    outputSupport. 
+    <p>processSupport does the following:</p>
+    <ul>
+      <li>calls recordProcess.requestProcessCallback</li>
+      <li>processCallback is called. It invokes channel access to request
+        that the linked record be processed. The request does not block. When
+        channel access completes the request it calls the processDone method
+        of processSupport.</li>
+      <li>processDone calls recordProcess.processContinue, which calls the
+        processContinue method of processSupport.</li>
+      <li>processContinue calls supportProcessRequester.supportProcessDone,
+        which is a method of supportArray.</li>
+    </ul>
+    <p>outputSupport does the following.</p>
+    <ul>
+      <li>Copies the value field to a private data store. It then calls
+        recordProcess.requestProcessCallback</li>
+      <li>processCallback is called. It invokes channel access to put the
+        private data into the linked record and then process the record. When
+        channel access completes the request it calls the processDone method
+        of processSupport.</li>
+      <li>processDone calls recordProcess.processContinue, which calls the
+        processContinue method of processSupport.</li>
+      <li>processContinue calls supportProcessRequester.supportProcessDone,
+        which is a method of supportArray.</li>
+    </ul>
+    <p>supportArray keeps track of each support it calls. When all have
+    called supportProcessDone then supportArray is also done.</p>
+  </li>
   <li>supportArray, when done, calls recordSupport.processContinue.</li>
   <li>recordSupport calls supportArray.processContinue</li>
   <li>supportArray calls doubleRecord.supportProcessDone.</li>
@@ -425,7 +467,10 @@ just report failure.</p>
         readyForStart,
         ready,
         zombie;
-    }</pre>
+    }
+
+    public static SupportState getSupportState(int value);
+    public static Enumerated getSupportState(DBField dbField);</pre>
 
 <p>NOTE: zombie is for support that is being removed and can never again
 process.</p>
@@ -442,7 +487,7 @@ remove all access to the record instance being supported.</p>
 <p>The locking strategy is based on the following:</p>
 <ul>
   <li>Each record instance has a lock.</li>
-  <li>A record must be locked when and field is being accessed.</li>
+  <li>A record must be locked when any field is being accessed.</li>
   <li>A record must be locked while processing. 
     <ul>
       <li>process must be called to start processing</li>
@@ -450,7 +495,7 @@ remove all access to the record instance being supported.</p>
         interacts with the record or other support.</li>
     </ul>
   </li>
-  <li>Whenever possible listeners should be called with no locks take.</li>
+  <li>Whenever possible listeners should be called with no locks taken.</li>
   <li>Locks should always be taken with code that has the form: 
     <pre>record.lock();
 try {
@@ -462,7 +507,7 @@ try {
     </pre>
   </li>
   <li>Code must not block while a record is locked.</li>
-  <li>Two record can be locked simultaneously via: 
+  <li>Two records can be locked simultaneously via: 
     <pre>record.lockOtherRecord(otherRecord);
 try {
      ...
@@ -499,7 +544,6 @@ try {
         void start();
         void stop();
         void uninitialize();
-        void allSupportStarted();
         // record process requester methods
         boolean setRecordProcessRequester(
             RecordProcessRequester recordProcessRequester);
@@ -524,6 +568,7 @@ try {
             ProcessCallbackRequester processCallbackRequester);
         void setTimeStamp(TimeStamp timeStamp);
         void getTimeStamp(TimeStamp timeStamp);
+        void allSupportStarted();
     }
 
     public interface RecordProcessRequester extends Requester{
@@ -572,7 +617,8 @@ falls into one of the following classes:</p>
     <dd>Is trace active for this record?</dd>
   <dt style="font-family: courier;">setTrace</dt>
     <dd>Set tracing on or off. When true info messages are sent to
-      dbRecord.message whenever any processing related method is called.</dd>
+      pvRecord.message whenever any processing related method of
+      RecordProcess is called.</dd>
   <dt style="font-family: courier;">getSupportState</dt>
     <dd>Get the current support state.</dd>
 </dl>
@@ -742,10 +788,9 @@ style="font-family: courier;">processContinue</span> is running.</p>
 support code.</p>
 <dl>
   <dt style="font-family: courier;">supportProcessDone</dt>
-    <dd>The callback to call when the record support process method returns
-      it RecordProcess. Any support code that wants to process other records
-      must use this interface. This MUST be called with either process or
-      processContinue running.</dd>
+    <dd>The callback to call when support is done . Any support code that
+      wants to process other records must implement this interface. This MUST
+      be called with either process or processContinue running.</dd>
 </dl>
 
 <h3 id="RecordProc5">RecordProcessFactory</h3>
@@ -761,7 +806,10 @@ instance. It has the method:</p>
 <hr />
 
 <p>This is called to create all support for all fields of all records in the
-IOC database passed to createSupportCreation.</p>
+IOC database passed to createSupportCreation. It creates an instance of
+RecordProcess for each record instance and creates the support for every
+field with a non null supportName. The supportName must be defined in the
+Database Definition Database.</p>
 
 <h3 id="Definition2">Definitions:</h3>
 <pre>    public interface SupportCreation {

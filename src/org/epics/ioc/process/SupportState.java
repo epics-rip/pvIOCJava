@@ -24,8 +24,7 @@ import org.epics.ioc.util.MessageType;
 public enum SupportState {
     /**
      * Ready for initialize.
-     * During initialization support can do initialization related to the record instance which is supported
-     * but can not access other records or other support. 
+     * This is the initial state for support.
      */
     readyForInitialize,
     /**
@@ -74,8 +73,12 @@ public enum SupportState {
         }
         DBStructure dbStructure = (DBStructure)dbField;
         Create create = dbStructure.getCreate();
+        if(create==null) {
+            pvField.message("interface Create not found", MessageType.error);
+            return null;
+        }
         if(create==null || !(create instanceof Enumerated)) {
-            pvField.message("interface Enumerated not found", MessageType.error);
+            pvField.message("interface Create is not instanceof Enumerated", MessageType.error);
             return null;
         }
         Enumerated enumerated = (Enumerated)create;

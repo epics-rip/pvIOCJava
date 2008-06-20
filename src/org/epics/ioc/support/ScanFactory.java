@@ -299,7 +299,7 @@ public class ScanFactory {
                     if(result) isEvent = true;
                     break;
                 case periodic:
-                    result = periodicScanner.schedule(dbRecord);
+                    result = periodicScanner.addRecord(dbRecord);
                     if(result) isPeriodic = true;
                     break;
                 }
@@ -312,7 +312,7 @@ public class ScanFactory {
                     result = eventScanner.removeRecord(dbRecord, eventName, scanPriority);
                     isEvent = false;
                 } else if(isPeriodic) {
-                    result = periodicScanner.unschedule(dbRecord, scanRate, scanPriority);
+                    result = periodicScanner.removeRecord(dbRecord, scanRate, scanPriority);
                     isPeriodic = false;
                 }
                 if(!result && pvScanTypeIndex!=null) {

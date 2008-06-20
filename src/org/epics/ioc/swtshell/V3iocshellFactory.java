@@ -17,7 +17,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.epics.ioc.util.RunnableReady;
 import org.epics.ioc.util.ThreadCreate;
-import org.epics.ioc.util.ThreadFactory;
+import org.epics.ioc.util.ThreadCreateFactory;
 import org.epics.ioc.util.ThreadReady;
 import org.epics.ioc.v3a.AsynOctet;
 import org.epics.ioc.v3a.V3;
@@ -39,7 +39,7 @@ public class V3iocshellFactory {
         window.start();
     }
     
-    private static ThreadCreate threadCreate = ThreadFactory.getThreadCreate();
+    private static ThreadCreate threadCreate = ThreadCreateFactory.getThreadCreate();
     
     private static class Window implements SelectionListener {
         private Display display;

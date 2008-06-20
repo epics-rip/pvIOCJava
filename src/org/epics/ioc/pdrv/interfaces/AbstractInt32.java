@@ -17,7 +17,7 @@ import org.epics.ioc.pdrv.Trace;
 import org.epics.ioc.pdrv.User;
 import org.epics.ioc.util.RunnableReady;
 import org.epics.ioc.util.ThreadCreate;
-import org.epics.ioc.util.ThreadFactory;
+import org.epics.ioc.util.ThreadCreateFactory;
 import org.epics.ioc.util.ThreadReady;
 
 
@@ -39,7 +39,7 @@ import org.epics.ioc.util.ThreadReady;
  *
  */
 public abstract class AbstractInt32 extends AbstractInterface implements Int32 {
-    private static ThreadCreate threadCreate = ThreadFactory.getThreadCreate();
+    private static ThreadCreate threadCreate = ThreadCreateFactory.getThreadCreate();
     private  ReentrantLock lock = new ReentrantLock();
     private List<Int32InterruptListener> interruptlistenerList =
         new LinkedList<Int32InterruptListener>();

@@ -1,10 +1,10 @@
 <?xml version="1.0" ?>
 <IOCDatabase>
 <include addPath = "${JAVAIOC}/example" />
+<include href = "stringDB.xml" />
 <include href = "dataOnlyDB.xml" />
 <include href = "enumeratedDB.xml" />
 <include href = "counterDB.xml" />
-<include href = "stringDB.xml" />
 <include href = "scalarDB.xml" />
 <include href = "arrayDB.xml" />
 <include href = "aiDB.xml" />

@@ -1,5 +1,5 @@
 /**
- * Copyright - See the COPYRIGHT that is included with this disctibution.
+ * Copyright - See the COPYRIGHT that is included with this distibution.
  * EPICS JavaIOC is distributed subject to a Software License Agreement found
  * in file LICENSE that is included with this distribution.
  */
@@ -9,7 +9,8 @@ import org.epics.ioc.util.RequestResult;
 import org.epics.ioc.util.Requester;
 
 /**
- * A callback for announcing completion of record processing.
+ * An interface that must be implemented by code that calls RecordProcess.setRecordProcessRequester().
+ * The methods are used to report the result and completion of record processing.
  * @author mrk
  *
  */
@@ -22,9 +23,8 @@ public interface RecordProcessRequester extends Requester{
      */
     void recordProcessResult(RequestResult requestResult);
     /**
-     * Called by record process to signify asynchronous completion.
-     * This is called with the record no longer active and also unlocked.
-     * This is NOT called for a postProcess request.
+     * Called by record process to signify completion.
+     * This is called with the record unlocked.
      */
     void recordProcessComplete();
 }

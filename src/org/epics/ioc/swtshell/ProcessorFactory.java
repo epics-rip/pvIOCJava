@@ -25,7 +25,7 @@ import org.epics.ioc.util.MessageType;
 import org.epics.ioc.util.PeriodicScanner;
 import org.epics.ioc.util.Requester;
 import org.epics.ioc.util.ScannerFactory;
-import org.epics.ioc.util.ThreadFactory;
+import org.epics.ioc.util.ThreadCreateFactory;
 /**
  * A shell for showing the recordProcessor.
  * It also shows all threads created by org.epics.ioc.util.ThreadCreate.
@@ -174,7 +174,7 @@ public class ProcessorFactory {
                     recordProcess.releaseRecordProcessRequester();
                 }
             } else if(object==showThreadsButton) {
-                Thread[] threads = ThreadFactory.getThreadCreate().getThreads();
+                Thread[] threads = ThreadCreateFactory.getThreadCreate().getThreads();
                 for(Thread thread : threads) {
                     String name = thread.getName();
                     int priority = thread.getPriority();

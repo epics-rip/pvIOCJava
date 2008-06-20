@@ -8,13 +8,13 @@ package org.epics.ioc.process;
 import org.epics.ioc.util.RequestResult;
 
 /**
- * An asynchronous process request is done.
+ * A process request is done.
  * @author mrk
  *
  */
 public interface SupportProcessRequester {
     /**
-     * The asynchronous process request is finished.
+     * The process request is finished.
      * This must be called with the record locked.
      * @param requestResult The result.
      */

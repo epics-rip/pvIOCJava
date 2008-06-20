@@ -94,7 +94,7 @@ import org.epics.ioc.util.RequestResult;
 import org.epics.ioc.util.RunnableReady;
 import org.epics.ioc.util.ScanPriority;
 import org.epics.ioc.util.ThreadCreate;
-import org.epics.ioc.util.ThreadFactory;
+import org.epics.ioc.util.ThreadCreateFactory;
 import org.epics.ioc.util.ThreadReady;
 import org.epics.ioc.util.TimeStamp;
 
@@ -110,7 +110,7 @@ public class ServerFactory {
     
     private static IOCExecutor iocExecutor
         = IOCExecutorFactory.create("caV3Monitor", ScanPriority.low);
-    private static final ThreadCreate threadCreate = ThreadFactory.getThreadCreate();
+    private static final ThreadCreate threadCreate = ThreadCreateFactory.getThreadCreate();
     private static final Convert convert = ConvertFactory.getConvert();
     private static final ChannelAccess channelAccess = ChannelAccessFactory.getChannelAccess();
     

@@ -92,7 +92,7 @@ public class IOCXMLReaderFactory {
         {
             String uri = null;
             try {
-                uri = new File(fileName).toURL().toString();
+                uri = new File(fileName).toURI().toURL().toString();
             } catch (MalformedURLException e) {
                 throw new IllegalStateException(
                         String.format("%n")
@@ -332,26 +332,17 @@ public class IOCXMLReaderFactory {
         /* (non-Javadoc)
          * @see org.xml.sax.ContentHandler#endPrefixMapping(java.lang.String)
          */
-        public void endPrefixMapping(String prefix) throws SAXException {
-            // TODO Auto-generated method stub
-            
-        }
+        public void endPrefixMapping(String prefix) throws SAXException {}
 
         /* (non-Javadoc)
          * @see org.xml.sax.ContentHandler#ignorableWhitespace(char[], int, int)
          */
-        public void ignorableWhitespace(char[] ch, int start, int length) throws SAXException {
-            // TODO Auto-generated method stub
-            
-        }
+        public void ignorableWhitespace(char[] ch, int start, int length) throws SAXException {}
 
         /* (non-Javadoc)
          * @see org.xml.sax.ContentHandler#processingInstruction(java.lang.String, java.lang.String)
          */
-        public void processingInstruction(String target, String data) throws SAXException {
-            // TODO Auto-generated method stub
-            
-        }
+        public void processingInstruction(String target, String data) throws SAXException {}
 
         /* (non-Javadoc)
          * @see org.xml.sax.ContentHandler#setDocumentLocator(org.xml.sax.Locator)
@@ -363,24 +354,17 @@ public class IOCXMLReaderFactory {
         /* (non-Javadoc)
          * @see org.xml.sax.ContentHandler#skippedEntity(java.lang.String)
          */
-        public void skippedEntity(String name) throws SAXException {
-            // TODO Auto-generated method stub
-            
-        }
+        public void skippedEntity(String name) throws SAXException {}
 
         /* (non-Javadoc)
          * @see org.xml.sax.ContentHandler#startDocument()
          */
-        public void startDocument() throws SAXException {
-        }
+        public void startDocument() throws SAXException {}
 
         /* (non-Javadoc)
          * @see org.xml.sax.ContentHandler#startPrefixMapping(java.lang.String, java.lang.String)
          */
-        public void startPrefixMapping(String prefix, String uri) throws SAXException {
-            // TODO Auto-generated method stub
-            
-        }
+        public void startPrefixMapping(String prefix, String uri) throws SAXException {}
         
         private String convertSeparator(String original) {
             if(File.separator.equals("/")) return original;

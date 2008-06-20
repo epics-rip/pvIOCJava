@@ -94,8 +94,10 @@ public class DelayFactory {
                 super.message(
                         "Illegal values for min,max,inc. (min must be <= max) and (inc must be >=0)",
                         MessageType.error);
+                return;
             }
             delay = min;
+            timerTask = new DelayTask(this);
             setSupportState(SupportState.ready);
         }
         /* (non-Javadoc)
@@ -110,7 +112,7 @@ public class DelayFactory {
          */
         public void process(SupportProcessRequester supportProcessRequester) {
             this.supportProcessRequester = supportProcessRequester;
-            timerTask = new DelayTask(this);
+            
             timer.schedule(timerTask, delay);
             delay += inc;
             if(delay>max) delay = min;

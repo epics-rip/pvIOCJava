@@ -15,6 +15,7 @@ public interface IOCExecutor {
     /**
      * Execute a command via a thread.
      * @param command The interface for the command.
+     * @throws IllegalStateException if command is already on runList.
      */
     void execute(Runnable command);
 }

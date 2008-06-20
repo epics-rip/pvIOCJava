@@ -12,7 +12,7 @@ package org.epics.ioc.util;
  */
 public interface ThreadReady {
     /**
-     * Called by method run when it is ready.
+     * Called by RunnableReady.run when it is ready.
      */
     void ready();
 }

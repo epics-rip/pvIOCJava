@@ -18,6 +18,9 @@ import java.util.regex.PatternSyntaxException;
 
 import org.epics.ioc.util.IOCExecutor;
 import org.epics.ioc.util.IOCExecutorFactory;
+import org.epics.ioc.util.MessageNode;
+import org.epics.ioc.util.MessageQueue;
+import org.epics.ioc.util.MessageQueueFactory;
 import org.epics.ioc.util.MessageType;
 import org.epics.ioc.util.Requester;
 import org.epics.ioc.util.ScanPriority;
@@ -46,11 +49,6 @@ public class IOCDBFactory {
         return master;
     }
     
-    private static class MessageItem {
-        String message = null;
-        MessageType messageType;
-    }
-    
     private static class IOCDBInstance implements IOCDB,Runnable
     {
         private String name;
@@ -59,14 +57,10 @@ public class IOCDBFactory {
         private ReentrantReadWriteLock rwLock = new ReentrantReadWriteLock();
         private ReentrantLock messageRequestListLock = new ReentrantLock();
         private ArrayList<Requester> messageRequesterList = new ArrayList<Requester>();
-        private ReentrantLock messageLock = new ReentrantLock();
         // following are only used by master
+        private static final int messageQueueSize = 300;
+        private MessageQueue messageQueue = MessageQueueFactory.create(messageQueueSize);
         private IOCExecutor iocExecutor = null;
-        private int messageListSize = 100;
-        private MessageItem[] messageItems = null;
-        private int numMessageItems = 0;
-        private int firstMessageItem = 0;
-        private int numberDroppedMessages = 0;
         
         private IOCDBInstance(String name) {
             this.name = name;
@@ -74,8 +68,6 @@ public class IOCDBFactory {
                 isMaster = true;
                 iocExecutor = IOCExecutorFactory.create(
                         "IOCDBMessage", ScanPriority.lowest);
-                messageItems = new MessageItem[messageListSize];
-                for(int i=0; i<messageListSize ; i++) messageItems[i] = new MessageItem();
             }
         }
         /* (non-Javadoc)
@@ -233,25 +225,20 @@ public class IOCDBFactory {
                 }
                 return;
             }
-            messageLock.lock();
+            boolean execute = false;
+            messageQueue.lock();
             try {
-                int next = -1;
-                if(numMessageItems==messageListSize) {
-                    numberDroppedMessages += 1;
-                } else if(numMessageItems==0) {
-                    next = firstMessageItem = 0;
+                if(messageQueue.isEmpty()) execute = true;
+                if(messageQueue.isFull()) {
+                    messageQueue.replaceLast(message, messageType);
                 } else {
-                    next = firstMessageItem + numMessageItems;
-                    if(next>=messageListSize) next = next - messageListSize;
+                    messageQueue.put(message, messageType);
                 }
-                if(next>=0) {
-                    numMessageItems += 1;
-                    messageItems[next].message = message;
-                    messageItems[next].messageType = messageType;
-                }
-                iocExecutor.execute(this);
             } finally {
-                messageLock.unlock();
+                messageQueue.unlock();
+            }
+            if(execute) {
+                iocExecutor.execute(this);
             }
         }
         /* (non-Javadoc)
@@ -338,28 +325,24 @@ public class IOCDBFactory {
          * @see java.lang.Runnable#run()
          */
         public void run() { // handles messages
-            while(numMessageItems>0) {
-                int numberDroppedMessages;
-                MessageItem messageItem = null;
+            while(true) {
                 String message = null;
                 MessageType messageType = null;
-                messageLock.lock();
+                int numOverrun = 0;
+                messageQueue.lock();
                 try {
-                    numberDroppedMessages = this.numberDroppedMessages;
-                    messageItem = messageItems[firstMessageItem];
-                    message = messageItem.message;
-                    messageType = messageItem.messageType;
-                    this.numberDroppedMessages = 0;
+                    MessageNode messageNode = messageQueue.get();
+                    numOverrun = messageQueue.getClearOverrun();
+                    if(messageNode==null) break;
+                    message = messageNode.message;
+                    messageType = messageNode.messageType;
+                    messageNode.message = null;
                 } finally {
-                    messageLock.unlock();
+                    messageQueue.unlock();
                 }
-
                 messageRequestListLock.lock();
                 try {
-                    String droppedMessages = null;
-                    if(numberDroppedMessages>0) {
-                        droppedMessages = " " + numberDroppedMessages + " dropped messages";
-                    }
+                    
                     if(messageRequesterList.size()<=0) {
                         PrintStream printStream;
                         if(messageType==MessageType.info) {
@@ -367,34 +350,24 @@ public class IOCDBFactory {
                         } else {
                             printStream = System.err;
                         }
-                        printStream.println(messageType.toString() + " " + message);
-                        if(numberDroppedMessages>0) {
-                            System.err.println(MessageType.error.toString() + droppedMessages);
+                        if(numOverrun>0) {
+                            System.err.println(MessageType.error.toString() + " " + numOverrun + " dropped messages ");
+                        }
+                        if(message!=null) {
+                            printStream.println(messageType.toString() + " " + message);
                         }
                     } else {
                         Iterator<Requester> iter = messageRequesterList.iterator();
                         while(iter.hasNext()) {
                             Requester requester = iter.next();
                             requester.message(message, messageType);
-                            if(numberDroppedMessages>0) {
-                                requester.message(droppedMessages,MessageType.error);
+                            if(numOverrun>0) {
+                                requester.message(numOverrun + " dropped messages",MessageType.error);
                             }
                         }
                     }
                 } finally {
                     messageRequestListLock.unlock();
-                }
-                // release messageItem
-                messageLock.lock();
-                try {
-                    messageItem.message = null;
-                    numMessageItems--;
-                    if(numMessageItems!=0) {
-                        firstMessageItem += 1;
-                        if(firstMessageItem==messageListSize) firstMessageItem = 0;
-                    }
-                } finally {
-                    messageLock.unlock();
                 }
             }
         }

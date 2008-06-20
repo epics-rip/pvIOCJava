@@ -17,7 +17,7 @@ import org.epics.ioc.pdrv.Trace;
 import org.epics.ioc.pdrv.User;
 import org.epics.ioc.util.RunnableReady;
 import org.epics.ioc.util.ThreadCreate;
-import org.epics.ioc.util.ThreadFactory;
+import org.epics.ioc.util.ThreadCreateFactory;
 import org.epics.ioc.util.ThreadReady;
 
 
@@ -39,7 +39,7 @@ import org.epics.ioc.util.ThreadReady;
  *
  */
 public abstract class AbstractOctet extends AbstractInterface implements Octet {
-    private static ThreadCreate threadCreate = ThreadFactory.getThreadCreate();
+    private static ThreadCreate threadCreate = ThreadCreateFactory.getThreadCreate();
     private  ReentrantLock lock = new ReentrantLock();
     private List<OctetInterruptListener> interruptlistenerList =
         new LinkedList<OctetInterruptListener>();

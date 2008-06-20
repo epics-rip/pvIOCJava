@@ -19,7 +19,7 @@ import org.epics.ioc.pv.Array;
 import org.epics.ioc.pv.PVField;
 import org.epics.ioc.util.RunnableReady;
 import org.epics.ioc.util.ThreadCreate;
-import org.epics.ioc.util.ThreadFactory;
+import org.epics.ioc.util.ThreadCreateFactory;
 import org.epics.ioc.util.ThreadReady;
 
 
@@ -41,7 +41,7 @@ import org.epics.ioc.util.ThreadReady;
  *
  */
 public abstract class AbstractInt32Array extends AbstractArrayInterface implements Int32Array{
-    private static ThreadCreate threadCreate = ThreadFactory.getThreadCreate();
+    private static ThreadCreate threadCreate = ThreadCreateFactory.getThreadCreate();
     private  ReentrantLock lock = new ReentrantLock();
     private List<Int32ArrayInterruptListener> interruptlistenerList =
         new LinkedList<Int32ArrayInterruptListener>();

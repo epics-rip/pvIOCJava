@@ -1,5 +1,5 @@
 /**
- * Copyright - See the COPYRIGHT that is included with this disctibution.
+ * Copyright - See the COPYRIGHT that is included with this distribution.
  * EPICS JavaIOC is distributed subject to a Software License Agreement found
  * in file LICENSE that is included with this distribution.
  */
@@ -17,7 +17,6 @@ import org.epics.ioc.util.TimeStamp;
 public interface RecordProcess {
     /**
      * Is the record enabled.
-     * A process request while a record is disabled returns a noop.
      * @return (false,true) if the record (is not, is) enabled
      */
     boolean isEnabled();
@@ -43,7 +42,7 @@ public interface RecordProcess {
      */
     boolean isTrace();
     /**
-     * Set process trace.
+     * Set trace true.
      * If true a message will displayed whenever process, requestProcessCallback, or processContinue are called.
      * @param value true or false.
      * @return (false,true) if the state (was not, was) changed.
@@ -83,10 +82,6 @@ public interface RecordProcess {
      */
     void uninitialize();
     /**
-     * All support in the database being loaded has started.
-     */
-    void allSupportStarted();
-    /**
      * Attempt to become the record processor, i.e. the code that can call process and preProcess.
      * @param recordProcessRequester The interface implemented by the record processor.
      * @return (false,true) if the caller (is not, is) has become the record processor.
@@ -123,6 +118,7 @@ public interface RecordProcess {
     boolean processSelfRequest(RecordProcessRequester recordProcessRequester);
     /**
      * Set the record active.
+     * This will only be successful of scan.selfScan is true and the record is not active.
      * @param recordProcessRequester The recordProcessRequester.
      */
     void processSelfSetActive(RecordProcessRequester recordProcessRequester);
@@ -159,7 +155,7 @@ public interface RecordProcess {
      * @param recordProcessRequester The recordProcessRequester.
      * @param leaveActive Leave the record active when process is done.
      * The requester must call setInactive.
-     * @param timeStamp The initial timeStamp for record procsssing.
+     * @param timeStamp The initial timeStamp for record processing.
      * If null the initial timeStamp will be the current time.
      * @return (false,true) if the request was successful.
      * If false is returned then recordProcessRequester.message is called to report
@@ -176,7 +172,8 @@ public interface RecordProcess {
     void setInactive(RecordProcessRequester recordProcessRequester);
     /**
      * Ask recordProcess to continue processing.
-     * This is called with the record unlocked.
+     * This must be called with the record unlocked.
+     * ProcessContinueRequester.processContinue will be called with the record locked.
      * Only valid if the record is active.
      * @param processContinueRequester The requester to call.
      */
@@ -184,21 +181,26 @@ public interface RecordProcess {
     /**
      * Request to be called back after process or processContinue
      * has called support but before it returns.
-     * This must only be called by code running as a result of process, preProcess, or processContinue. 
-     * The callback will be called with the record unlocked.
-     * @param processCallbackRequester The listener to call.
+     * This must only be called by code implementing Support.process() or ProcessContinueRequester.processContinue(),
+     * which means that it is called with the record locked.
+     * ProcessCallbackRequester.processCallback() will be called with the record unlocked.
+     * @param processCallbackRequester The requester to call.
      */
     void requestProcessCallback(ProcessCallbackRequester processCallbackRequester);
     /**
      * Set the timeStamp for the record.
-     * This must only be called by code running as a result of process, preProcess, or processContinue. 
+     * This must only be called by code implementing process or processContinue. 
      * @param timeStamp The timeStamp.
      */
     void setTimeStamp(TimeStamp timeStamp);
     /**
      * Get the current timeStamp.
-     * This must only be called by code running as a result of process, preProcess, or processContinue. 
+     * This must only be called by code implementing process or processContinue. 
      * @param timeStamp The current timeStamp.
      */
     void getTimeStamp(TimeStamp timeStamp);
+    /**
+     * All support in the database being loaded has started.
+     */
+    void allSupportStarted();
 }
