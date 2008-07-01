@@ -6,8 +6,6 @@
 package org.epics.ioc.support;
 
 import org.epics.ioc.db.DBField;
-import org.epics.ioc.process.SupportProcessRequester;
-import org.epics.ioc.process.SupportState;
 import org.epics.ioc.pv.PVField;
 import org.epics.ioc.util.MessageType;
 import org.epics.ioc.util.RequestResult;
@@ -84,6 +82,7 @@ public abstract class AbstractSupport implements Support {
      * @see org.epics.ioc.support.Support#uninitialize()
      */
     public void uninitialize() {
+        if(supportState==SupportState.ready) stop();
         setSupportState(SupportState.readyForInitialize);
     }
     /* (non-Javadoc)

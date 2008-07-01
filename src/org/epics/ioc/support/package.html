@@ -10,75 +10,64 @@
 <body>
 <h1 style="text-align: center">EPICS JavaIOC: support<br />
 package: org.epics.ioc.support<br />
-2008.05.30</h1>
+2008.07.01</h1>
 CONTENTS 
 
 <div class="toc">
 <ul>
-  <li><a href="#Overview">Overview</a></li>
-  <li><a href="#Support">Support</a>
+  <li><a href="#Overview">Overview</a>
+    <ul>
+      <li><a href="#RecordProc">RecordProcess</a></li>
+      <li><a href="#Support">Support</a></li>
+    </ul>
+  </li>
+  <li><a href="#Record">Record Processing Theory of Operation</a>
     <ul>
       <li><a href="#Definition">Definitions</a></li>
-      <li><a href="#SupportSta">SupportState</a></li>
-      <li><a href="#Support1">Support</a></li>
-      <li><a href="#AbstractSu">AbstractSupport</a></li>
+      <li><a href="#Requester">Requester Examples</a></li>
+      <li><a href="#RecordProc1">RecordProcess Overview</a></li>
+      <li><a href="#Local">Local Channel Access Example</a></li>
+      <li><a href="#Link">Link Support Example</a></li>
+      <li><a href="#Locking">Locking</a></li>
+      <li><a href="#Support1">Support Overview</a></li>
     </ul>
   </li>
-  <li><a href="#Generic">Generic Support</a></li>
-  <li><a href="#ScanSuppor">ScanSupport</a></li>
-  <li><a href="#ProcessCon">ProcessControl Support</a></li>
-  <li><a href="#Alarm">Alarm Support</a>
+  <li><a href="#Record1">Record Process</a>
     <ul>
-      <li><a href="#Alarm1">Alarm Support</a></li>
-      <li><a href="#Value">Value Alarms</a>
-        <ul>
-          <li><a href="#Boolean">Boolean Alarms</a></li>
-          <li><a href="#Numeric">Numeric Alarms</a></li>
-          <li><a href="#Enumerated">Enumerated Alarms</a></li>
-        </ul>
-      </li>
+      <li><a href="#Definition1">Definitions</a></li>
+      <li><a href="#RecordProc2">RecordProcess - General Purpose
+      Methods</a></li>
+      <li><a href="#RecordProc3">RecordProcess - Record Lifetime
+      Methods.</a></li>
+      <li><a href="#RecordProc4">RecordProcess - Record Process Requester
+        Methods</a></li>
+      <li><a href="#RecordProc5">RecordProcess - Support Processing
+        methods.</a></li>
+      <li><a href="#RecordProc6">RecordProcessRequester</a></li>
+      <li><a href="#ProcessCal">ProcessCallbackRequester</a></li>
+      <li><a href="#ProcessCon">ProcessContinueRequester</a></li>
+      <li><a href="#RecordProc7">RecordProcessFactory</a></li>
     </ul>
   </li>
-  <li><a href="#Linear">Linear Conversion</a>
+  <li><a href="#Support2">Support</a>
     <ul>
-      <li><a href="#linearConv">linearConversion</a></li>
-      <li><a href="#LinearConv">LinearConvertInputFactory</a></li>
-      <li><a href="#LinearConv1">LinearConvertOutputFactory</a></li>
-      <li><a href="#DeviceLimi">DeviceLimit</a></li>
+      <li><a href="#Support3">Support State</a></li>
+      <li><a href="#Support4">Support</a></li>
     </ul>
   </li>
-  <li><a href="#Digital">Digital Support</a>
+  <li><a href="#AbstractSu">AbstractSupport</a>
     <ul>
-      <li><a href="#Java">Java Definitions</a></li>
+      <li><a href="#AbstractSu1">AbstractSupport</a></li>
+      <li><a href="#Definition2">Definitions</a></li>
     </ul>
   </li>
-  <li><a href="#Incrementa">Incremental Support</a></li>
-  <li><a href="#Calculatio">Calculation Support</a>
+  <li><a href="#Support5">Support Creation</a>
     <ul>
-      <li><a href="#Database">Database Definitions for Calculations</a></li>
-      <li><a href="#Performing">Performing Calculations</a></li>
-      <li><a href="#calcArgArr">calcArgArray</a></li>
-      <li><a href="#Calculator">Calculator</a></li>
-      <li><a href="#CounterCal">CounterCalculatorFactory</a></li>
-      <li><a href="#ArrayIncre">ArrayIncrementCalculatorFactory</a></li>
-      <li><a href="#BooleanArr">BooleanArrayToggleCalculatorFactory</a></li>
+      <li><a href="#Definition3">Definitions:</a></li>
+      <li><a href="#Support6">Support Creation</a></li>
+      <li><a href="#Factory">Factory</a></li>
     </ul>
   </li>
-  <li><a href="#Event">Event Support</a></li>
-  <li><a href="#SupportArr">SupportArray Support</a></li>
-  <li><a href="#Noop">Noop Support</a></li>
-  <li><a href="#DelaySuppo">DelaySupport Support</a></li>
-  <li><a href="#Port">Port Driver Support</a>
-    <ul>
-      <li><a href="#Java1">Java Definitions</a></li>
-      <li><a href="#PDRVSuppor">PDRVSupport</a></li>
-      <li><a href="#AbstractPD">AbstractPDRVSupport</a></li>
-      <li><a href="#PDRVSuppor1">PDRVSupportFactory</a></li>
-      <li><a href="#PDRVPortCr">PDRVPortCreateFactory</a></li>
-      <li><a href="#PDRVPortDe">PDRVPortDeviceControlFactory</a></li>
-    </ul>
-  </li>
-  <li><a href="#Power">Power Supply Support</a></li>
 </ul>
 </div>
 <hr />
@@ -86,197 +75,836 @@ CONTENTS
 <h2 style="text-align: center" id="Overview">Overview</h2>
 <hr />
 
-<p>This package contains support code for javaIOC databases. Rather than
-providing support for a particular record type each of the support modules
-provides support for one or more fields. Thus each support module is generic
-because it can support any structure or record type that contains the fields
-required by the support module. Much of the support can be used for records,
-i.e. complex records that have the appearence of having embeded records.</p>
+<p>This package describes how records are processed. During database creation
+each record is assigned an instance of RecordProcess, which coordinates
+record processing. In addition each record has a Support instance and each
+field can optionally have an associated Support instance. </p>
 
-<p>NOTE: Support for channel Access database links is provided by package
-org.epics.ioc.support.ca</p>
+<h3 id="RecordProc">RecordProcess</h3>
 
-<p>This package provides interfaces and classes for processing fields of IOC
-database records. </p>
-
-<p>The following interfaces are available:</p>
+<p>The following interfaces are involved with record processing:</p>
 <dl>
-  <dt>Support</dt>
-    <dd>The interfaces and classes that provide the core for support.</dd>
-  <dt>IncrementalSupport</dt>
-    <dd>An extension for incremental output.</dd>
-  <dt>ScanSupport</dt>
-    <dd>An extension for field scan.</dd>
-  <dt>AlarmSupport</dt>
-    <dd>An extension for field alarm.</dd>
-  <dt>CalculatorSupport</dt>
-    <dd>An extension for field calculations.</dd>
-  <dt>CalcArgArraySupport</dt>
-    <dd>An extension for the arguments for calculations;</dd>
-  <dt>DeviceLimit</dt>
-    <dd>Defines a method implemented by support for analog I/O.</dd>
-  <dt>PDRVSupport</dt>
-    <dd>An extension for links to portDriver.</dd>
+  <dt><span style="font-family: courier;">RecordProcess</span></dt>
+    <dd>An instance is created for each IOC record. It has methods for use by
+      any code interested in record processing.</dd>
+  <dt><span style="font-family: courier;">RecordProcessRequester</span></dt>
+    <dd>Implemented by code that calls recordProcess.process..</dd>
+  <dt><span style="font-family: courier;">ProcessCallbackRequester</span></dt>
+    <dd>Implemented by code that calls
+    recordProcess.requestProcessCallback.</dd>
+  <dt><span style="font-family: courier;">ProcessContinueRequester</span></dt>
+    <dd>Implemented by code that calls recordProcess.processContinue.</dd>
 </dl>
 
-<p>The following abstract classes are provided for implementing support:</p>
+<p>In addition the following class is provided:</p>
 <dl>
-  <dt>AbstractSupport</dt>
-    <dd>A base class that is extended by most support code. It implements all
-      of the Support methods.</dd>
-  <dt>AbstractPDRVSupport</dt>
-    <dd>A base class for portDriver support.</dd>
+  <dt><span style="font-family: courier;">RecordProcessFactory</span></dt>
+    <dd>Implements RecordProcess.</dd>
 </dl>
 
-<p>The following factories are provided:</p>
+<h3 id="Support">Support</h3>
+
+<p>Every JavaIOC record instance has associated support code and each field
+of a record instance can optionally have associated support code. This
+package contains: </p>
 <dl>
-  <dt>GenericFactory</dt>
-    <dd>Generic support for a record or structure.</dd>
-  <dt>ScanFactory</dt>
-    <dd>Complete support for the scan field which is defined in comon.xml</dd>
-  <dt>ProcessControlFactory</dt>
-    <dd>This is support for the processControl recordType. This record
-      controls the process state of the support for another record or for a
-      field in another record. It also can set trace and enable on or off for
-      the other record.</dd>
-  <dt>Alarm Support.</dt>
-    <dd>Support for the alarm field defined in common.xml and for raising
-      alarms. 
+  <dt><span style="font-family: courier;">Support</span></dt>
+    <dd>The interface which is implemented by every support module.</dd>
+  <dt><span style="font-family: courier;">AbstractSupport</span></dt>
+    <dd>An abstract class that is the base class for every support
+    module.</dd>
+</dl>
+
+<p>This package has sub-packages for the support modules implemented by the
+javaIOC itself. Other JavaIOC applications can implement additional support
+modules. The sub-packages are:</p>
+<dl>
+  <dt><a href="basic/package-summary.html">basic</a></dt>
+    <dd>Implements the following support: 
       <dl>
-        <dt>AlarmFactory</dt>
-          <dd>Complete support for field alarm.</dd>
-        <dt>BooleanAlarmFactory</dt>
-          <dd>Alarm support for boolean fields.</dd>
-        <dt>ByteAlarmFactory</dt>
-          <dd>Alarm support for byte fields.</dd>
-        <dt>ShortAlarmFactory</dt>
-          <dd>Alarm support for short fields.</dd>
-        <dt>IntAlarmFactory</dt>
-          <dd>Alarm support for int fields.</dd>
-        <dt>LongAlarmFactory</dt>
-          <dd>Alarm support for long fields.</dd>
-        <dt>FloatAlarmFactory</dt>
-          <dd>Alarm support for float fields.</dd>
-        <dt>DoubleAlarmFactory</dt>
-          <dd>Alarm support for double fields.</dd>
-        <dt>EnumeratedAlarmFactory</dt>
-          <dd>Alarm support for enum field..</dd>
+        <dt>generic</dt>
+          <dd>Generic support for a record type, structure, and an array of
+            arrays or structures.</dd>
+        <dt>noop</dt>
+          <dd>Support that does nothing except complete successfully.</dd>
+        <dt>linearConvert</dt>
+          <dd>Implements linear conversion for a numeric scalar field.</dd>
+        <dt>digital</dt>
+          <dd>Support for digital I/O.</dd>
+        <dt>incremental</dt>
+          <dd>Support for incremental output.</dd>
+        <dt>delay</dt>
+          <dd>Adds a delay to record processing.</dd>
+        <dt>event</dt>
+          <dd>Support for a string field that is the name of an event.</dd>
+        <dt>processControl</dt>
+          <dd>Support for the processControl record type. This is a record
+            type that attaches to another record. The scan state of the
+            record can be changed, the trace and enable states can be
+            changed, and the structure of a sub-field can be changed.</dd>
+        <dt>scan</dt>
+          <dd>Support for the scan field.</dd>
+        <dt>supportArray</dt>
+          <dd>Support for an array field where each element is a
+          structure.</dd>
       </dl>
     </dd>
-  <dt>Support for linear conversions.</dt>
-    <dd><dl>
-        <dt>LinearConvertInputFactory</dt>
-          <dd>Support for linear conversion of input fields.</dd>
-        <dt>LinearConvertOutputFactory</dt>
-          <dd>Support for linear conversion of output fields.</dd>
-      </dl>
-    </dd>
-  <dt>DigitalFactory</dt>
-    <dd>Support for a record or structure that has fields appropriate for
-      Digital I/O.</dd>
-  <dt>IncrementalFactory</dt>
-    <dd>Support for incremental outputs.</dd>
-  <dt>Calculation Support</dt>
-    <dd>The following provides support for the array of structures for the
-      arguments for calculations: 
-      <dl>
-        <dt>CalcArgArrayFactory</dt>
-          <dd>Support for an array of arguments for calculation records.</dd>
-      </dl>
-    </dd>
-    <dd>The following are calculations that are used for testing. They are
-      examples of how to implement a calculation. 
-      <dl>
-        <dt>CounterCalculatorFactory</dt>
-          <dd>Test code for a numeric field.</dd>
-        <dt>ArrayIncrementCalculatorFactory</dt>
-          <dd>Test code for numeric array fields.</dd>
-        <dt>BooleanArrayToggleCalculatorFactory</dt>
-          <dd>Test support for a boolean array.</dd>
-      </dl>
-    </dd>
-  <dt>EventFactory</dt>
-    <dd>Support for a string field that is the name of an event.</dd>
-  <dt>SupportArrayFactory</dt>
-    <dd>Support for an array of structures that have support.</dd>
-  <dt>NoopFactory</dt>
-    <dd>Support for all fields that just acts like it always succeeds
-      successfully.</dd>
-  <dt>DelaySupportFactory</dt>
-    <dd>Support for testing. It just causes an asynchronous delay before
-      completing successfully.</dd>
-  <dt>portDriver</dt>
-    <dd>The following are for interfacing to portDriver. 
-      <dl>
-        <dt>PDRVSupportFactory</dt>
-          <dd>Creates support for each of the portDriver interfaces.</dd>
-        <dt>PDRVPortCreateFactory</dt>
-          <dd>Creates a portDriver port.</dd>
-        <dt>PDRVPortDeviceControlFactory</dt>
-          <dd>Creates support for a portDeviceControl record, which provides
-            the ability change the connect, enable, traceMask, and
-            traceIOMask states of a port or a device connected to a port. It
-            also can get a report for a port and/or device.</dd>
-      </dl>
-    </dd>
-  <dt>PowerSupplyFactory</dt>
-    <dd>A simple example of support for a complex device.</dd>
+  <dt><a href="basic/package-summary.html">ca</a></dt>
+    <dd>Implements support for channel access links, i.e. links to other
+      recordss.</dd>
+  <dt><a href="alarm/package-summary.html">alarm</a></dt>
+    <dd>Raises alarms for value fields.</dd>
+  <dt><a href="calc/package-summary.html">calc</a></dt>
+    <dd>Support for performing calculations.</dd>
+  <dt><a href="device/package-summary.html">device</a></dt>
+    <dd>Examples of support that implements device abstractions.</dd>
+  <dt><a href="pdrv/package-summary.html">pdrv</a></dt>
+    <dd>Support for communicating with portDriver.</dd>
 </dl>
 <hr />
 
-<h2 style="text-align: center" id="Support">Support</h2>
+<h2 style="text-align: center" id="Record">Record Processing Theory of
+Operation</h2>
+<hr />
+
+<p>A JavaIOC Database is a "smart" database. Each record has associated
+support code and each field of a record can optionally have associated
+support.</p>
+
+<p>Each record has an implementation of recordProcess associated with it.
+recordProcess can be requested to process the record. It in turn calls the
+process method of the support attached to the record. A record is also the
+top level structure. The record support process method calls the support for
+any field of the top level structure that has associated support. Any of
+these supports can call other support.</p>
+
+<h3 id="Definition">Definitions</h3>
+<dl>
+  <dt>synchronous</dt>
+    <dd>Code that does not block, i.e. does not perform actions like waiting
+      for I/O to complete. It is permissible to take locks that that are
+      shared by other synchronous code.</dd>
+  <dt>asynchronous</dt>
+    <dd>Code that can block.</dd>
+  <dt>record</dt>
+    <dd>A record instance.</dd>
+  <dt>process</dt>
+    <dd>Processing a record instance.</dd>
+  <dt>support</dt>
+    <dd>Code that is involved with implementing record processing. This code
+      can be either synchronous or asynchronous. Support code can invoke
+      other support code.</dd>
+  <dt>record support</dt>
+    <dd>The top level support for a record instance. Most support that is
+      attached to a structure can also be record support if the structure is
+      the top level structure. </dd>
+  <dt>recordProcess</dt>
+    <dd>During database initialization every record instance is assigned an
+      instances of RecordProcess, which coordinates record processing.</dd>
+  <dt>process requester</dt>
+    <dd>Code that asks recordProcess to process a record. Code must register
+      to be the requester and only one requester is allow to request
+      processing. Thus a registration request fails if a requester is already
+      attached to a record. If code that is not the requester attempts to
+      process a record an exception is thrown.</dd>
+  <dt>active</dt>
+    <dd>A record instance is active while a process request is active. A
+      request to set a record active will fail if it is already active..</dd>
+  <dt>lock</dt>
+    <dd>Short for record instance lock. A record must be locked whenever any
+      field of a record is accessed. Code executing with a record locked must
+      be synchronous. There is no way to detect if code violates this rule so
+      code must be implemented carefully.</dd>
+</dl>
+
+<h3 id="Requester">Requester Examples</h3>
+<dl>
+  <dt>Local Channel Access</dt>
+    <dd>An example is a channel access server that is accessing IOC database.
+      The following are typical requests: 
+      <dl>
+        <dt>get or put</dt>
+          <dd>Just get or put data from a record instance.</dd>
+        <dt>process and get</dt>
+          <dd>An example is to process a record and get an array of data as
+            well as the status, severity, and timeStamp.</dd>
+        <dt>put, process, get</dt>
+          <dd>A example is to put something into the record, make it process,
+            and after processing get some data as well as the status,
+            severity, and timeStamp.</dd>
+      </dl>
+    </dd>
+  <dt>Database Links</dt>
+    <dd>Links between records in the same IOC. When a database link makes a
+      request to process a linked record, the record containing the link MUST
+      be unlocked or deadlocks may occur. For efficency requests should be
+      done with as few lock/unlock cycles and context switches as possible.
+      In particular only asynchronous support should cause a context switch.
+      <br />
+      Typical requests are: 
+      <dl>
+        <dt>process and get</dt>
+          <dd>Process and after procsss completes get data and/or
+          severity.</dd>
+        <dt>put, process, and get severity</dt>
+          <dd>Put data to the linked record, process it, and then get the
+            severity.</dd>
+      </dl>
+    </dd>
+</dl>
+
+<h3 id="RecordProc1">RecordProcess Overview</h3>
+
+<p>A record is processed via a call to RecordProcess.process. It in turn
+calls the record support process method. Record support optionally calls the
+process methods of field support modules. Each support module can optionally
+call the process method of support code for subfields. Record support is just
+like field support except that it is attached to the record rather than to a
+subfield of the record.</p>
+
+<p>Record processing has the following features:</p>
+<ul>
+  <li>synchronous and asynchronous support 
+    <p>Synchronous support is suport that can implemented without blocking.
+    Asynchronous support is support that must wait. For example network
+    requests must block. Asynchronous support does not cause record
+    processing to block. Instead the support code returns without completing
+    and arranges some other way to perform it's function. When it is done it
+    again interacts with record processing to complete.</p>
+    <p>While asynchronous support is active the associated record is active
+    and other requests to process the record will fail.</p>
+  </li>
+  <li>record locking 
+    <p>Each record instance has a lock. The lock must be held whenever any
+    field in the record is being accessed and whenever there is any
+    communication between support code or between support code and
+    RecordProcess.</p>
+  </li>
+  <li>RecordProcsssRequester 
+    <p>A record can have only a single process requester. A requester must
+    register before it can request processing.</p>
+  </li>
+  <li>RecordProcess 
+    <p>Each record has an instance of RecordProcess. It manages all process
+    related activities.</p>
+  </li>
+</ul>
+
+<p>The methods involved in processing are:</p>
+<ul>
+  <li>recordProcess 
+    <ul>
+      <li>setActive 
+        <p>Set the record active but do not call the record support process
+        method.</p>
+      </li>
+      <li>process 
+        <p>If the record has not been made active via a call to setActive it
+        is set active. recordSupport.process is called. The results of
+        processing are sent to the requester via the RecordProcessRequester
+        methods. The requester can request the record be left active when
+        processing completes.</p>
+      </li>
+      <li>setInactive 
+        <p>Must be called if the requester asked that the record be left
+        active when processing completes.</p>
+      </li>
+      <li>processContinue 
+        <p>Called by asynchronous support when it is ready to continue
+        processing. The record is locked and
+        processContinueRequester.processContinue is called..</p>
+      </li>
+      <li>requestProcessCallback 
+        <p>Any support code called directly or indirectly by process or
+        processContinue can call this method.
+        processRequestRequester.processCallback is called with the record
+        unlocked. Support code that processes other records must only issue
+        the process requests via this method or deadlocks can occur.</p>
+      </li>
+    </ul>
+  </li>
+  <li>Support - defined in package org.epics.ioc.support 
+    <ul>
+      <li>process(SupportProcessRequester supportProcessRequester) 
+        <p>This is a method that must be implemented by all support modules.
+        When the support is done it calls the supportProcessRequester to
+        report completion.</p>
+      </li>
+    </ul>
+  </li>
+  <li>RecordProcessRequester 
+    <ul>
+      <li>recordProcessResult(RequestResult requestResult) 
+        <p>Called with the record locked and all processing is complete.</p>
+      </li>
+      <li>recordProcessComplete() 
+        <p>Called with the record inlocked and processing complete.</p>
+      </li>
+    </ul>
+  </li>
+  <li>SupportProcessRequester - defined in package org.epics.ioc.support 
+    <ul>
+      <li>supportProcessDone(RequestResult requestResult) 
+        <p>called by whoever calls support.process. In particular
+        recordSupport implements this interface</p>
+      </li>
+    </ul>
+  </li>
+  <li>ProcessCallbackRequester 
+    <ul>
+      <li>processCallback() 
+        <p>called by recordProcess with record unlocked.</p>
+      </li>
+    </ul>
+  </li>
+  <li>ProcessContinueRequester 
+    <ul>
+      <li>processContinue() 
+        <p>called by recordProcess with record locked.</p>
+      </li>
+    </ul>
+  </li>
+</ul>
+
+<h3 id="Local">Local Channel Access Example</h3>
+
+<p>As an example assume that a channel access server does the following to a
+record:</p>
+<ul>
+  <li>Puts data into the record.</li>
+  <li>Processes the record.</li>
+  <li>Reads a large array from the record. The array is too big to fit in a
+    single network buffer.</li>
+</ul>
+
+<p>This can be implemented as follows:</p>
+<ul>
+  <li>server calls recordSupport.setActive</li>
+  <li>server locks the record, puts data, unlocks the record.</li>
+  <li>server calls recordSupport.process and specifies that the record be
+    left active.</li>
+  <li>When processing is complete recordSupport calls
+    server.recordProcessResult and server.recordProcessDone.</li>
+  <li>The server gets the array. It may have to access the array multiple
+    times because of the network buffer restrictions. It must lock the record
+    as it reads each segment.</li>
+  <li>The server calls recordSupport.setInactive.</li>
+</ul>
+
+<h3 id="Link">Link Support Example</h3>
+
+<p>As an example assume that a record type double has the following
+fields:</p>
+<dl>
+  <dt>value</dt>
+    <dd>A DBDouble field, i.e. a field that holds a double value.</dd>
+  <dt>input</dt>
+    <dd>A DBStructure field which is by default a null structure, i.e. it has
+      no fields and no support. A record instance can override this to be any
+      structure defined in the master Database Definition Database. The
+      default support can also be overridden.</dd>
+  <dt>output</dt>
+    <dd>Also a null DBStructure field.</dd>
+  <dt>valueAlarm</dt>
+    <dd>Also a null DBStructure field.</dd>
+  <dt>supportArray</dt>
+    <dd>An array field with the elementType set to structure and the
+      supportName set to supportArray.</dd>
+  <dt>...</dt>
+    <dd>Several other null DBStructure fields are present.</dd>
+</dl>
+
+<p>In addition the following support modules are available.</p>
+<dl>
+  <dt>generic</dt>
+    <dd>The record support module. It's process method calls two other
+      support modules: The first must be support for a link that can input a
+      double value. The second must support an array of links. The support
+      must be able to call link support for each element of the array. Each
+      element support can either require no input or a single value that is a
+      double.</dd>
+  <dt>inputLink</dt>
+    <dd>A link support modules that supports channel access input links, i.e.
+      a link that gets input from another IOC record.</dd>
+  <dt>processLink</dt>
+    <dd>A link support modules that supports channel access process links,
+      i.e. a link that can request that another record be processed.</dd>
+  <dt>outputLink</dt>
+    <dd>A link support module that supports channel access output links, i.e.
+      a link that can put data to another record.</dd>
+  <dt>linkArray</dt>
+    <dd>A support module for an array on links. For each array element it
+      knows how to use the associated link support module.</dd>
+  <dt>...</dt>
+    <dd>Support modules are also available that can be attached to other null
+      DBStructure fields.</dd>
+</dl>
+
+<p>Assume a record instance is defined as follows:</p>
+<pre>&lt;record name = "double01" type = "doubleRecord"&gt;
+    &lt;input supportName = "inputSupport" structureName = "inputSupport"&gt;
+            &lt;pvname&gt;recordForInput&lt;/pvname&gt;
+            &lt;process&gt;false&lt;/process&gt;
+    &lt;/input&gt;
+
+    &lt;supportArray&gt;
+        &lt;value structureName = "supportArrayElement"&gt;
+            &lt;wait&gt;false&lt;/wait&gt;
+            &lt;link  supportName = "processSupport" structureName = "processSupport"&gt;
+                &lt;pvname&gt;processRecord&lt;/pvname&gt;
+            &lt;/link&gt;
+        &lt;/value&gt;
+        &lt;value structureName = "supportArrayElement"&gt;
+            &lt;wait&gt;false&lt;/wait&gt;
+            &lt;link  supportName = "outputSupport" structureName = "outputSupport"&gt;
+                &lt;pvname&gt;outputRecord&lt;/pvname&gt;
+                &lt;process&gt;true&lt;/process&gt;
+            &lt;/link&gt;
+        &lt;/value&gt;
+    &lt;/supportArray&gt;
+
+&lt;/record&gt;</pre>
+
+<p>When the record is processed, via a call to recordProcess.process, the
+following happens:</p>
+<ul>
+  <li>recordProcess locks the record, prepares it for processing and sets it
+    active. The record will remain active until the record is completely
+    processed.</li>
+  <li>recordProcess calls doubleRecord.process</li>
+  <li>doubleRecord calls inputSupport.process.</li>
+  <li>Assuming the recordForInput is local and since process is false, the
+    input support just: 
+    <ul>
+      <li>locks the linked record</li>
+      <li>transfers data from the linked record to the double record.</li>
+      <li>unlocks the linked record.</li>
+      <li>notifys doubleRecord that it has completed.</li>
+    </ul>
+  </li>
+  <li>doubleRecord calls supportArray.process.</li>
+  <li>supportArray calls recordProcess.requestProcessCallback.</li>
+  <li>doubleRecord returns.</li>
+  <li>recordProcess unlocks the record and calls
+    supportArray.processCallback.<br />
+    supportArray calls the process method of both processSupport and
+    outputSupport. 
+    <p>processSupport does the following:</p>
+    <ul>
+      <li>calls recordProcess.requestProcessCallback</li>
+      <li>processCallback is called. It invokes channel access to request
+        that the linked record be processed. The request does not block. When
+        channel access completes the request it calls the processDone method
+        of processSupport.</li>
+      <li>processDone calls recordProcess.processContinue, which calls the
+        processContinue method of processSupport.</li>
+      <li>processContinue calls supportProcessRequester.supportProcessDone,
+        which is a method of supportArray.</li>
+    </ul>
+    <p>outputSupport does the following.</p>
+    <ul>
+      <li>Copies the value field to a private data store. It then calls
+        recordProcess.requestProcessCallback</li>
+      <li>processCallback is called. It invokes channel access to put the
+        private data into the linked record and then process the record. When
+        channel access completes the request it calls the processDone method
+        of processSupport.</li>
+      <li>processDone calls recordProcess.processContinue, which calls the
+        processContinue method of processSupport.</li>
+      <li>processContinue calls supportProcessRequester.supportProcessDone,
+        which is a method of supportArray.</li>
+    </ul>
+    <p>supportArray keeps track of each support it calls. When all have
+    called supportProcessDone then supportArray is also done.</p>
+  </li>
+  <li>supportArray, when done, calls recordSupport.processContinue.</li>
+  <li>recordSupport calls supportArray.processContinue</li>
+  <li>supportArray calls doubleRecord.supportProcessDone.</li>
+  <li>doubleRecord calls recordProcess.supportProcessDone</li>
+  <li>recordProcess completes record processing 
+    <ul>
+      <li>calls recordProcessRequester.recordProcessResult</li>
+      <li>unlocks the record and sets the record inactive.</li>
+      <li>calls recordProcessRequester.recordProcessComplete.</li>
+    </ul>
+  </li>
+</ul>
+
+<h3 id="Locking">Locking</h3>
+
+<p>The locking strategy is based on the following:</p>
+<ul>
+  <li>Each record instance has a lock.</li>
+  <li>A record must be locked when any field is being accessed.</li>
+  <li>A record must be locked while processing. 
+    <ul>
+      <li>process must be called to start processing</li>
+      <li>processContinue must be called before asynchronous support
+        interacts with the record or other support.</li>
+    </ul>
+  </li>
+  <li>Whenever possible listeners should be called with no locks taken.</li>
+  <li>Locks should always be taken with code that has the form: 
+    <pre>record.lock();
+try {
+     ...
+
+} finally {
+    record.unlock();
+}
+    </pre>
+  </li>
+  <li>Code must not block while a record is locked.</li>
+  <li>Two records can be locked simultaneously via: 
+    <pre>record.lockOtherRecord(otherRecord);
+try {
+     ...
+
+} finally {
+    otherRecord.unlock();
+}
+    </pre>
+    While a record is locked another record should never be locked by calling
+    it's record.lock directly. Doing so can lead to deadlocks. It is NOT
+    permissible to lock more than two records at a time.</li>
+</ul>
+
+<h3 id="Support1">Support Overview</h3>
+
+<p>A support module implements the following methods:</p>
+<dl>
+  <dt><span style="font-family: courier;">initialize</span></dt>
+    <dd>The support can do any initialization that does not connect outside
+      the record.</dd>
+  <dt><span style="font-family: courier;">start</span></dt>
+    <dd>The support can connect outside the record. For example channel
+      access support can connect to another record.</dd>
+  <dt><span style="font-family: courier;">stop</span></dt>
+    <dd>The support must terminate outside connections.</dd>
+  <dt><span style="font-family: courier;">uninitialize</span></dt>
+    <dd>The support must undo everything it did during initialization.</dd>
+  <dt><span style="font-family: courier;">process</span></dt>
+    <dd>Implements the semantics of record procession.</dd>
+</dl>
+
+<p>The methods initialize, start, stop, and uninitialize provide the ability
+to dynamically modify a record.</p>
+
+<p>Support can be asociated with a record in a record via the following:</p>
+<ul>
+  <li>structure or recordType Database Definitions<br />
+    One of the attributes is supportName. If this is defined then when the
+    database definition is used in a record instance it will be the default
+    support definiotion.</li>
+  <li>record instance definition<br />
+    If the supportName attribute is defined for a field it determines the
+    support.</li>
+  <li>PVField.setSupportName(String supportName)<br />
+    After a record is created, this changes the support name. If this is
+    called the record must be in the uinitialized state and createSupport
+    must be called.</li>
+  <li>DBField.setSupport(Support support)<br />
+    After a record is created, this changes the support. If this is called
+    the record must be in the uinitialized state and createSupport must be
+    called.</li>
+</ul>
+
+<p>The first for ways require that supportName be found in the Support
+Database Definition Database.</p>
+<hr />
+
+<h2 style="text-align: center;" id="Record1">Record Process</h2>
+<hr />
+
+<h3 id="Definition1">Definitions</h3>
+
+<p>The following are the interfaces for record processing:</p>
+<pre>    public interface RecordProcess {
+        // general purpose methods
+        boolean isEnabled();
+        boolean setEnabled(boolean value);
+        boolean isActive();
+        DBRecord getRecord();
+        boolean isTrace();
+        boolean setTrace(boolean value);
+        SupportState getSupportState();
+        // support lifecycle methods
+        void initialize();
+        void start();
+        void stop();
+        void uninitialize();
+        // record process requester methods
+        boolean setRecordProcessRequester(
+            RecordProcessRequester recordProcessRequester);
+        boolean releaseRecordProcessRequester(
+            RecordProcessRequester recordProcessRequester);
+        void releaseRecordProcessRequester();
+        String getRecordProcessRequesterName();
+        boolean setActive(RecordProcessRequester recordProcessRequester);
+        boolean process(RecordProcessRequester recordProcessRequester,
+            boolean leaveActive, TimeStamp timeStamp);
+        void setInactive(RecordProcessRequester recordProcessRequester);
+        // self processing methods
+        boolean canProcessSelf();
+        boolean processSelfRequest(RecordProcessRequester recordProcessRequester);
+        boolean processSelfSetActive(RecordProcessRequester recordProcessRequester);
+        boolean processSelfProcess(RecordProcessRequester recordProcessRequester,
+            boolean leaveActive);
+        void processSelfSetInactive(RecordProcessRequester recordProcessRequester);
+        // support processing methods
+        void processContinue(
+            ProcessContinueRequester processContinueRequester);
+        void requestProcessCallback(
+            ProcessCallbackRequester processCallbackRequester);
+        void setTimeStamp(TimeStamp timeStamp);
+        void getTimeStamp(TimeStamp timeStamp);
+        void allSupportStarted();
+    }
+
+    public interface RecordProcessRequester extends Requester{
+        void recordProcessResult(RequestResult requestResult);
+        void recordProcessComplete();
+    }
+    
+    public interface ProcessCallbackRequester extends Requester{
+        void processCallback();
+    }
+
+    public interface ProcessContinueRequester {
+        void processContinue();
+    }
+    
+    // SupportProcessRequester is defined in org.epics.ioc.support
+    public interface SupportProcessRequester {
+        void supportProcessDone(RequestResult requestResult);
+    }</pre>
+
+<p>An instance of RecordProcess is created for each IOCrecord. Each method
+falls into one of the following classes:</p>
+<ol>
+  <li>General Purpose. These are methods that can be called by any code. If
+    necessary a method locks the record while performing its action and
+    unlocks before returning.</li>
+  <li>Record Support Lifetime. Initialize,start,stop,ininitialize.</li>
+  <li>Record Process Requester: These are methods for code that requests
+    record processing.</li>
+  <li>Support Processing. These are methods for use by support code, i.e.
+    code that implements record processing.</li>
+</ol>
+
+<h3 id="RecordProc2">RecordProcess - General Purpose Methods</h3>
+<dl>
+  <dt style="font-family: courier;">isEnabled</dt>
+    <dd>Is the record enabled?</dd>
+  <dt style="font-family: courier;">setEnabled</dt>
+    <dd>When record is disabled then all requests to process the record fail.
+      If the record is active when a record is disabled the current process
+      is allowed to complete.</dd>
+  <dt style="font-family: courier;">isActive</dt>
+    <dd>Is the record active, i.e. processing?</dd>
+  <dt style="font-family: courier;">getRecord</dt>
+    <dd>Get the record instance to which this RecordProcess is attached.</dd>
+  <dt style="font-family: courier;">isTrace</dt>
+    <dd>Is trace active for this record?</dd>
+  <dt style="font-family: courier;">setTrace</dt>
+    <dd>Set tracing on or off. When true info messages are sent to
+      pvRecord.message whenever any processing related method of
+      RecordProcess is called.</dd>
+  <dt style="font-family: courier;">getSupportState</dt>
+    <dd>Get the current support state.</dd>
+</dl>
+
+<h3 id="RecordProc3">RecordProcess - Record Lifetime Methods.</h3>
+
+<p><span style="font-family: courier;">RecordProcess</span> looks for the
+fields <span style="font-family: courier;">timeStamp</span>, <span
+style="font-family: courier;">processAfterStart</span> , and <span
+style="font-family: courier;">scan</span>. It handled these fields itself.
+The record support code must ignore these fields.</p>
+<dl>
+  <dt style="font-family: courier;">initialize</dt>
+    <dd>Initialize record support. record support, in turn, initializes
+      support that it invokes. Initialize should perform any initialiation
+      not requiring access aanything outside the record. For example it is
+      not permissible to connect to other records. If initialize is
+      successful record support enters state <span
+      style="font-family: courier;">SupportState.readyForStart</span></dd>
+  <dt style="font-family: courier;">start</dt>
+    <dd>Start record support. Again record support calls start for any
+      support it invokes. If successful, the support enters state <span
+      style="font-family: courier;">SupportState.ready</span>. Until record
+      support is in the ready state and attempt to process a record will
+    fail.</dd>
+  <dt style="font-family: courier;">stop</dt>
+    <dd>Stop record support. Record support calls stop for any support it
+      invokes. The support enters state <span
+      style="font-family: courier;">SupportState.readyForStart</span>.</dd>
+  <dt style="font-family: courier;">uninitialize</dt>
+    <dd>Unitialize record support. It calls unitialize for any support it
+      invokes. The support enters state <span
+      style="font-family: courier;">SupportState.readyForInitialize.</span></dd>
+  <dt style="font-family: courier;">allSupportStarted</dt>
+    <dd>This is called after all records currently being loaded have
+      successfully started.</dd>
+</dl>
+
+<h3 id="RecordProc4">RecordProcess - Record Process Requester Methods</h3>
+
+<p>These are methods called by code that wants a record processed.</p>
+<dl>
+  <dt style="font-family: courier;">canProcessSelf</dt>
+    <dd>Can the record process itself? This is true if scan.processSelf is
+      true. In this case scanSupport, itself, is the recordProcessRequester
+      and processes the record when method (processSelfRequest) is
+    called.</dd>
+  <dt style="font-family: courier;">setRecordProcessRequester</dt>
+    <dd>Request to be the record processor. Each record instance can have
+      only one record process requester. If a requester is already registered
+      a message is sent to the requester and false is returned.</dd>
+  <dt style="font-family: courier;">releaseRecordProcessRequester</dt>
+    <dd>Release the requester. Normally a requester passes itself to this
+      method when it no longer wishes to be the requester. the method without
+      an argument is for use if a requester crashes without calling
+    release.</dd>
+  <dt style="font-family: courier;">getRecordProcessRequesterName</dt>
+    <dd>Get the name of the recordProcessRequester.</dd>
+  <dt style="font-family: courier;">setActive</dt>
+    <dd>Prepare the record for processing but do not call record support. The
+      caller must be the registered requester. If the request fails a message
+      is sent to the requester and false is returned. If the request is
+      successful than the caller can access the record and when ready call
+      process. If successful the record is set active and another request to
+      setActive will fail.</dd>
+  <dt style="font-family: courier;">process</dt>
+    <dd>Request that the record be processed. If the caller has not called
+      setActive the record is prepared for processing. In either case if the
+      record is ready record support process is called. If true is returned
+      the methods implemented by the recordProcessRequester are called to
+      show the results of the process request. If <span
+      style="font-family: courier;">leaveActive</span> is true than when the
+      record completes processing it is left active until setInActive is
+      called. Until the record becomes inactive another request to process
+      the record will fail. Record support is called with the record
+      locked.<br />
+      If false is returned the request has failed and
+      recordProcessRequester.message is called to provide the reason. If
+      recordProcessRequester is null an IllegalStateException is thrown. </dd>
+  <dt style="font-family: courier;">setInActive</dt>
+    <dd>Call by the record process requester when it is done with processing.
+      Calling process with <span
+      style="font-family: courier;">leaveActive</span> true and then calling
+      setInactive allows the requester to communicated with other code after
+      the record is unlocked but before it becomes inactive.</dd>
+  <dt style="font-family: courier;">processSelfRequest</dt>
+    <dd>Ask that the record process itself. This request will succeed only if
+      scan.processSelf is true and the record is not active. The caller must
+      be prepared for a false return, which means the following methods can
+      not be called.</dd>
+  <dt style="font-family: courier;">processSelfSetActive</dt>
+    <dd>Set the record active.</dd>
+  <dt style="font-family: courier;">processSelfProcess</dt>
+    <dd>Process the record.</dd>
+  <dt style="font-family: courier;">processSelfSetInactive</dt>
+    <dd>Set the record inactive.</dd>
+</dl>
+
+<h3 id="RecordProc5">RecordProcess - Support Processing methods.</h3>
+
+<p>Methods called by support code which may be record support or support
+called directly or indirectly by record support. Except for <span
+style="font-family: courier;">processContinue</span> these methods throw an
+exception unless <span style="font-family: courier;">process</span> or <span
+style="font-family: courier;">processContinue</span> is running.</p>
+<dl>
+  <dt style="font-family: courier;">requestProcessCallback</dt>
+    <dd>Request to be called back after record support has returned but
+      before RecordProcess.process returns. The callback is made with the
+      record unlocked. Thus the callback can request that other records be
+      processed. This is the way support code can process other records. If
+      support code directly request processing of linked records deadlocks
+      can occur.</dd>
+  <dt style="font-family: courier;">processContinue</dt>
+    <dd>Request that the processContinue method of the support be called. The
+      record will be locked before the support is called. This is the only
+      way asynchronous support code should access a record after it's process
+      method has returned active.</dd>
+  <dt style="font-family: courier;">setTimeStamp</dt>
+    <dd>Set the time stamp for the record. If no code calls this while a
+      record is being processed, then RecordProcess will set the time stamp
+      if the record has a timeStamp field.</dd>
+  <dt style="font-family: courier;">getTimeStamp</dt>
+    <dd>Get the latest time stamp set by calls to <span
+      style="font-family: courier;">setTimeStamp</span></dd>
+</dl>
+
+<h3 id="RecordProc6">RecordProcessRequester</h3>
+
+<p>Methods implemented by code that requests that a record be processed.</p>
+<dl>
+  <dt style="font-family: courier;">recordProcessResult</dt>
+    <dd>The results of record processing. This is called with the record
+      locked so that the process requester can access data from the
+    record.</dd>
+  <dt style="font-family: courier;">recordProcessComplete</dt>
+    <dd>Processing is complete. This is called with the record unlocked. If
+      the process requester called process with <span
+      style="font-family: courier;">leaveActive</span> <span
+      style="font-family: courier;">true</span> then the requester must call
+      <span style="font-family: courier;">setInactive.</span></dd>
+</dl>
+
+<h3 id="ProcessCal">ProcessCallbackRequester</h3>
+
+<p>The method implemented by code that calls requestProcessCallback.</p>
+<dl>
+  <dt style="font-family: courier;">processCallback</dt>
+    <dd>The callback to call when the record support process method returns
+      it RecordProcess. Any support code that wants to process other records
+      must use this interface. The callback is called with the record
+      unlocked.</dd>
+</dl>
+
+<h3 id="ProcessCon">ProcessContinueRequester</h3>
+
+<p>The method implemented by code that calls processContinue.</p>
+<dl>
+  <dt style="font-family: courier;">processContinue</dt>
+    <dd>A request to call support with the record locked. This is the only
+      way asynchronous support should continue processing.</dd>
+</dl>
+
+<h3 id="RecordProc7">RecordProcessFactory</h3>
+
+<p>A factory is provided to create an instance of RecordProcess for a record
+instance. It has the method:</p>
+<pre>public class RecordProcessFactory {
+    static public RecordProcess createRecordProcess(DBRecord dbRecord);
+}</pre>
+<hr />
+
+<h2 style="text-align: center" id="Support2">Support</h2>
 <hr />
 
 <p>This section describes the interfaces and abstract base class involved
 with support for fields of an IOC record. This also means support for the
 record itself.</p>
 
-<h3 id="Definition">Definitions</h3>
+<h3 id="Support3">Support State</h3>
 
-<p>The following are used by support code, i.e. record support, link support,
-and any other support code that is involved with record processing:</p>
-<pre>    // SupportState is defined in org.epics.ioc.process
-    public enum SupportState {
+<p>Before support is ready for processing it must be ready. In addition
+on-line add and delete is supported. Thus it is possible to dynamically
+redefine link fields, array fields, etc. Unless a support module is in the
+ready state it's process method should not be called and if it is it should
+just report failure.</p>
+<pre>    public enum SupportState {
         readyForInitialize,
         readyForStart,
         ready,
         zombie;
     }
 
-    public interface Support extends Requester {
-        SupportState getSupportState();
-        DBField getDBField();
-        void initialize();
-        void start();
-        void stop();
-        void uninitialize();
-        void allSupportStarted();
-        void process(SupportProcessRequester supportProcessRequester);
-    }
-
-    public abstract class AbstractSupport implements Support {
-        protected AbstractSupport(String name,DBField dbField);
-        // methods from Requester
-        public String getRequesterName();
-        public void message(String message, MessageType messageType);
-        // methods that are rarely overridden
-        public SupportState getSupportState();
-        public DBField getDBField();
-        // following normally overridden
-        public void initialize();
-        public void start();
-        public void stop();
-        public void uninitialize();
-        public void allSupportStarted();
-        public void process(SupportProcessRequester supportProcessRequester);
-        // following must always be called when support state changes
-        protected void setSupportState(SupportState state);
-        // following is for use by support code
-        protected boolean checkSupportState(
-            SupportState expectedState,String message);
-    }</pre>
-
-<h3 id="SupportSta">SupportState</h3>
+    public static SupportState getSupportState(int value);
+    public static Enumerated getSupportState(DBField dbField);</pre>
 
 <p><span style="font-family: courier;">SupportState</span> has the following
 values:</p>
@@ -290,10 +918,28 @@ values:</p>
   <dt style="font-family: courier;">ready</dt>
     <dd>Support is ready for processing.</dd>
   <dt style="font-family: courier;">zombie</dt>
-    <dd>Support is going away.</dd>
+    <dd>Support is being removed and can never again process.</dd>
 </dl>
 
-<h3 id="Support1">Support</h3>
+<h3 id="Support4">Support</h3>
+
+<p>The following are used by support code, i.e. record support, link support,
+and any other support code that is involved with record processing:</p>
+<pre>    
+    public interface Support extends Requester {
+        SupportState getSupportState();
+        DBField getDBField();
+        void initialize();
+        void start();
+        void stop();
+        void uninitialize();
+        void allSupportStarted();
+        void process(SupportProcessRequester supportProcessRequester);
+    }
+
+    public interface SupportProcessRequester {
+        void supportProcessDone(RequestResult requestResult);
+    }</pre>
 
 <p><span style="font-family: courier;">Support</span> has the methods:</p>
 <dl>
@@ -325,7 +971,50 @@ values:</p>
     <dd>Process.</dd>
 </dl>
 
-<h3 id="AbstractSu">AbstractSupport</h3>
+<p>Every Support module must implement the methods initialize, start, stop,
+and uninitialize. Initialize performs initialization related to the record
+instance being supported but can not access anything outside the record.
+Start completes all initialization including linking to the outside, e.g. to
+other records. Stop must remove all access to the outside. Uninitialize must
+remove all access to the record instance being supported.</p>
+
+<p><span style="font-family: courier;">SupportProcessRequester</span> has the
+method:</p>
+<dl>
+  <dt style="font-family: courier;">supportProcessDone</dt>
+    <dd>The callback to call when support is done . Any support code that
+      wants to process other records must implement this interface. This MUST
+      be called with either process or processContinue running.</dd>
+</dl>
+<hr />
+
+<h2 style="text-align: center" id="AbstractSu">AbstractSupport</h2>
+<hr />
+
+<h3 id="AbstractSu1">AbstractSupport</h3>
+
+<h3 id="Definition2">Definitions</h3>
+<pre>    public abstract class AbstractSupport implements Support {
+        protected AbstractSupport(String name,DBField dbField);
+        // methods from Requester
+        public String getRequesterName();
+        public void message(String message, MessageType messageType);
+        // methods that are rarely overridden
+        public SupportState getSupportState();
+        public DBField getDBField();
+        // following normally overridden
+        public void initialize();
+        public void start();
+        public void stop();
+        public void uninitialize();
+        public void allSupportStarted();
+        public void process(SupportProcessRequester supportProcessRequester);
+        // following must always be called when support state changes
+        protected void setSupportState(SupportState state);
+        // following is for use by support code
+        protected boolean checkSupportState(
+            SupportState expectedState,String message);
+    }</pre>
 
 <p>All support code should extend AbstractSupport. Abstract Support
 implements all Support methods. Thus support code only has to override the
@@ -365,1113 +1054,55 @@ methods it needs.</p>
 </dl>
 <hr />
 
-<h2 style="text-align: center" id="Generic">Generic Support</h2>
-<hr />
-<pre>    public class GenericFactory {
-        public static Support create(DBStructure dbStructure);
-    }</pre>
-
-<p>Generic Support is used for many record/structure definitions including:
-</p>
-<ul>
-  <li>boolean, byte, short, int, long, float, double, string.</li>
-  <li>Arrays of the previous types.</li>
-  <li>aoIncrementalDouble.</li>
-  <li>enumerated - a record with an enum value.</li>
-  <li>event - a record that announces events.</li>
-</ul>
-It can be used for all of these because it just looks for fields that have
-associated support and calls the support. It also has a few conventions so
-that it works with a variety of support modules. 
-
-<p>GenericSupportFactory implements record or structure support for an
-arbitrary set of fields which have associated support. It calls each support
-in the order that the fields are defined in the Database Definition File. It
-uses the following semantics:</p>
-<dl>
-  <dt>common</dt>
-    <dd>It does not call the support for fields scan, timeStamp, and
-      processAfterStart. These are the fields that appear in commom.xml</dd>
-  <dt style="font-family: courier;">alarm</dt>
-    <dd>If field alarm is present and has AlarmSupport then it is handled
-      properly.</dd>
-  <dt>fields with associated support.</dt>
-    <dd>For all fields with support, except the fields in common, the support
-      methods are called, i.e. initialize,start,stop,uninitialize, and
-      process. For each support process must complete before process for the
-      next support module is called.</dd>
-</dl>
-
-<p>The above rules allow the generic support to be used for many record types
-and embeded versions of these record types. Lets consider an example. double
-(either the structure or the recordType) has the following fields which might
-have support.:</p>
-<dl>
-  <dt style="font-family: courier;">input</dt>
-    <dd>This is a link field. If support is defined then the record instance
-      becomes an input record. The support gets a value and puts it into the
-      value field.</dd>
-  <dt style="font-family: courier;">output</dt>
-    <dd>This is a link field. If support is defined then the record instance
-      becomes an output record. The support gets data from the value field
-      and sends it somewhere.</dd>
-  <dt style="font-family: courier;">valueAlarm</dt>
-    <dd>This is a link field. If support is defined it is expected to check
-      the value field for alarm conditions.</dd>
-  <dt style="font-family: courier;">supportArray</dt>
-    <dd>If the supportArray support is defined it is called.</dd>
-</dl>
-
-<p>The generic support does not force the support for input to do input, the
-support for output to do output, etc. The generic support merely calls
-support if it exists. The generic support also does not check the types of
-any fields but looks for support and calls it if it exists. Thus the generic
-support can be used for many different types of data and many different types
-of support.</p>
+<h2 style="text-align: center;" id="Support5">Support Creation</h2>
 <hr />
 
-<h2 style="text-align: center" id="ScanSuppor">ScanSupport</h2>
-<hr />
+<p>This is called to create all support for all fields of all records in the
+IOC database passed to createSupportCreation. It creates an instance of
+RecordProcess for each record instance and creates the support for every
+field with a non null supportName. The supportName must be defined in the
+Database Definition Database.</p>
 
-<p>Support is provided for the scan field. This support is called by
-recordProcess. The support handles all the fields in structure scan:</p>
-
-<p>At initialization and whenever the scan, priority, rate, or eventName
-fields are modified, the support interacts with the appropriate scanners to
-add or remove the record from the scanner. If processSelf is set true, the
-support implements ScanSupport.</p>
-
-<p>IMPORTANT: RecordProcess provides the same methods as ScanSupport. Support
-code must call the RecordProcess methods rather than calling the ScanSupport
-methods.</p>
-
-<p>The following definitions are provided:</p>
-<pre>    public interface ScanSupport extends Support {
-        boolean canProcessSelf();
-        boolean processSelfRequest(RecordProcessRequester recordProcessRequester);
-        void processSelfSetActive(RecordProcessRequester recordProcessRequester);
-        void processSelfProcess(RecordProcessRequester recordProcessRequester,
-            boolean leaveActive);
-        void processSelfSetInactive(RecordProcessRequester recordProcessRequester);
-    }
-    public class ScanFactory {
-        public static Support create(DBStructure dbStructure);
-    }</pre>
-
-<p><span style="font-family: courier;">ScanSupport</span>, which MUST only be
-called by recordProcess, extends <span
-style="font-family: courier;">Support</span> with the methods:</p>
-<dl>
-  <dt style="font-family: courier;">canScanSelf</dt>
-    <dd>Can the record scan itself? This is true if scan.scanSelf is true. In
-      this case scanSupport itself owns and processes the record.</dd>
-  <dt style="font-family: courier;">processSelfRequest</dt>
-    <dd>Request to process the record. This returns true if scanSupport is
-      the record processor and the record is not active.</dd>
-  <dt style="font-family: courier;">processSelfSetActive</dt>
-    <dd>If processSelfRequest returns true this can be called to set the
-      record active. This is called when user code wants to modify data in
-      the record before calling processSelfProcess.</dd>
-  <dt style="font-family: courier;">processSelfProcess</dt>
-    <dd>If processSelfRequest returns true this can be called to process the
-      record.</dd>
-  <dt style="font-family: courier;">processSelfSetInactive</dt>
-    <dd>If the call to processSelfProcess said to leave the record active,
-      this is called to set the record inactive. This is done if the caller
-      wants to read data from the record after processing.</dd>
-</dl>
-<hr />
-
-<h2 style="text-align: center" id="ProcessCon">ProcessControl Support</h2>
-<hr />
-
-<p>This is support for the processControl recordType. It provides the
-following features:</p>
-<dl>
-  <dt>trace</dt>
-    <dd>Trace can be turned on or off for a record instance.</dd>
-  <dt>enable</dt>
-    <dd>Processing of a record instance can be enabled or disabled.</dd>
-  <dt>Support State</dt>
-    <dd>The process state of the support for a record or a field within a
-      record can be set. This involves calling one of the following methods:
-      initialize, start, stop, uninitialize.</dd>
-  <dt>Support</dt>
-    <dd>The support for a field can be changed. In order to make this change,
-      the record instance must be in the readyForInitialize state. It is not
-      possible to change the support for the record itself. </dd>
-  <dt>Structure</dt>
-    <dd>If a field is a structure, then the structure itself can be changed.
-      In order to make this change, the record instance must be in the
-      readyForInitialize state. It is not possible to change the structure
-      for the record itself.</dd>
-  <dt>Reporting</dt>
-    <dd>All problems are reported via field message. Other fields show the
-      current values for trace, enable, record support state, field support
-      state, name of the field support, and the name of the structure for a
-      field.</dd>
-</dl>
-
-<p>ProcessControl only performs actions when it is processed.</p>
-
-<p>processControl.html describes the fields contained in a processControl
-record. It has the definitions:</p>
-<pre>&lt;structure name = "supportStateCommand" createName = "enumerated" &gt;
-  &lt;field name = "index" type = "int" /&gt;
-  &lt;field name = "choice" type = "string" /&gt;
-  &lt;field name = "choices" type = "array" elementType = "string"
-    default = "idle initialize start stop uninitialize" /&gt;
-&lt;/structure&gt;
-
-&lt;recordType name = "processControl" supportName = "processControl" &gt;
-  &lt;field name = "message" type = "string" /&gt;
-  &lt;field name = "recordName" type = "string" /&gt;
-  &lt;field name = "trace" type = "structure" structureName = "booleanState" /&gt;
-  &lt;field name = "enable" type = "structure" structureName = "booleanState" /&gt;
-  &lt;field name = "supportStateRecord" type = "structure" structureName = "supportState" /&gt;
-  &lt;field name = "supportStateCommandRecord" type = "structure" structureName = "supportStateCommand" /&gt;
-  &lt;!-- remaining fields refer to a field of the record --&gt;
-  &lt;field name = "fieldName" type = "structure" structureName = "stringState"  /&gt;
-  &lt;field name = "supportState" type = "structure" structureName = "supportState" /&gt;
-  &lt;field name = "supportStateCommand" type = "structure" structureName = "supportStateCommand" /&gt;
-  &lt;field name = "supportName" type = "structure" structureName = "stringState" /&gt;
-  &lt;field name = "structureName" type = "structure" structureName = "stringState" /&gt;
-&lt;/recordType&gt;
-
-
-&lt;support name = "processControl"
-   factoryName = "org.epics.ioc.support.ProcessControlFactory" /&gt;</pre>
-
-<p>Structure supportStateCommand is an enumerated structure with the
-following choices</p>
-<dl>
-  <dt style="font-family: courier;">idle</dt>
-    <dd>A do nothing commamnd. After the processControl support executes one
-      of the other commands, it sets the choice to idle.</dd>
-  <dt style="font-family: courier;">initialize</dt>
-    <dd>Call the initialize method of the support.</dd>
-  <dt style="font-family: courier;">start</dt>
-    <dd>Call the start method of the support.</dd>
-  <dt style="font-family: courier;">stop</dt>
-    <dd>Call the stop method of the support.</dd>
-  <dt style="font-family: courier;">uninitialize</dt>
-    <dd>Call the uninitialize method of the support.</dd>
-</dl>
-
-<p>recordType processControl has fields trace, enable, fieldName,
-supportName, and structureName. Each is a structure field with the following
-fields:</p>
-<dl>
-  <dt style="font-family: courier;">value</dt>
-    <dd>This holds the current value.</dd>
-  <dt style="font-family: courier;">desiredValue</dt>
-    <dd>This is set by the user to give the desired value.</dd>
-  <dt style="font-family: courier;">setValue</dt>
-    <dd>This is a boolean field. The user sets this to true to request the
-      the value be set to the dersired value. processControl sets this back
-      to false after processing.</dd>
-</dl>
-
-<p>recordType processControl has the following fields:</p>
-<dl>
-  <dt style="font-family: courier;">message</dt>
-    <dd>If processControl encounters any problems it puts a value in this
-      field. </dd>
-  <dt style="font-family: courier;">recordName</dt>
-    <dd>The name of the attached record. It must be a local record.</dd>
-  <dt style="font-family: courier;">trace</dt>
-    <dd>A structure for setting and reporting record tracing.</dd>
-  <dt style="font-family: courier;">enable</dt>
-    <dd>A structure for setting and reporting record enabling.</dd>
-  <dt style="font-family: courier;">supportStateRecord</dt>
-    <dd>A structure for reporting the support state of the record</dd>
-  <dt style="font-family: courier;">supportStateCommandRecord</dt>
-    <dd>A structure for changing the support state for the record.</dd>
-  <dt style="font-family: courier;">fieldName</dt>
-    <dd>A structure for setting and reporting the field of the record for the
-      following fields.</dd>
-  <dt style="font-family: courier;">supportState</dt>
-    <dd>A structure for reporting the support state of the field.</dd>
-  <dt style="font-family: courier;">supportStateCommand</dt>
-    <dd>A structure for changing the support state for the field.</dd>
-  <dt style="font-family: courier;">supportName</dt>
-    <dd>A structure for changing the support for the field.</dd>
-  <dt style="font-family: courier;">structureName</dt>
-    <dd>A structure for changing the structure for the field.</dd>
-</dl>
-<hr />
-
-<h2 style="text-align: center" id="Alarm">Alarm Support</h2>
-<hr />
-
-<p>Support is provided for the alarm field itself and alarm calculation for
-the primitive types and for an enumerated structure.</p>
-
-<h3 id="Alarm1">Alarm Support</h3>
-
-<p>AlarmSupport is support for a field named which must have type structure
-and the structure must be an alarm structure. Within the structure hierarchy
-of a record multiple alarm fields can exist. Some support, e.g. generic,
-calls the support for the alarm field defined in the top level structure
-(defined in common.xml). If multiple alarm fields reside in a record then the
-top level alarm field, which is what the outside world normally accesses has
-a severity at least as great as any of the lower level alarms.</p>
-<pre>    interface AlarmSupport extends Support{
-        void beginProcess();
-        void endProcess();
-        boolean setAlarm(String message, AlarmSeverity severity);
+<h3 id="Definition3">Definitions:</h3>
+<pre>    public interface SupportCreation {
+        boolean createSupport();
+        boolean initializeSupport();
+        boolean  startSupport();
+        void uninitializeSupport();
+        void stopSupport();
     }
 
-    class AlarmFactory {
-        public static Support create(DBStructure dbStructure);
-        public static AlarmSupport findAlarmSupport(DBField startDBField);
+    public class SupportCreationFactory
+        static public SupportCreation createSupportCreation(
+            IOCDB iocdb,Requester requester);
+        static public boolean createSupport(DBField dbField);
     }</pre>
 
-<p>AlarmSupport provides the methods:</p>
+<h3 id="Support6">Support Creation</h3>
+
+<p>SupportCreation has the methods:</p>
 <dl>
-  <dt style="font-family: courier;">Support</dt>
-    <dd>Standard support methods..</dd>
-  <dt style="font-family: courier;">beginProcess</dt>
-    <dd>This is called when a record begins processing.</dd>
-  <dt style="font-family: courier;">endProcess</dt>
-    <dd>This is called when a record finishes processing. If setAlarm was not
-      called since beginProcess was called than it makes sure that the
-      severity is noAlarm. If the severity and/or message was changed during
-      record processing it calls postPut.</dd>
-  <dt style="font-family: courier;">setAlarm</dt>
-    <dd>While a record is processing and code, normally one of the support
-      modules described below, can call setAlarm. This method changes the new
-      message and severity only if the severity passed to setAlarm is greater
-      than the current new severity or if this is the first call since the
-      record started processing.</dd>
+  <dt style="font-family: courier;">createSupport</dt>
+    <dd>Create the support. The return value is true only if no errors are
+      reported.</dd>
+  <dt style="font-family: courier;">initializeSupport</dt>
+    <dd>Initialize the support. The return value is true only if all record
+      instances enter the state readyForStart.</dd>
+  <dt style="font-family: courier;">startSupport</dt>
+    <dd>Start the support. The return value is true only if all record
+      instances enter the state ready.</dd>
+  <dt style="font-family: courier;">uninitializeSupport</dt>
+    <dd>Uninitialize the support.</dd>
+  <dt style="font-family: courier;">stopSupport</dt>
+    <dd>Stop the support.</dd>
 </dl>
 
-<p>AlarmFactory provides the static methods:</p>
+<h3 id="Factory">Factory</h3>
+
+<p>SupportCreationFactory has the method:</p>
 <dl>
-  <dt style="font-family: courier;">create</dt>
-    <dd>Create support for a alarm field. This is called by
-    SupportCreation.</dd>
-  <dt style="font-family: courier;">findAlarmSupport</dt>
-    <dd>Find an alarm field looking up the structure hierarchy. Return it or
-      retrurn null if none is found.</dd>
+  <dt>createSupportCreation</dt>
+    <dd>Create a SupportCreation database.</dd>
 </dl>
-
-<h3 id="Value">Value Alarms</h3>
-
-<p>Support is provided for alarms for the following types of fields: boolean,
-numeric, and enumerated.</p>
-
-<h4 id="Boolean">Boolean Alarms</h4>
-<pre>    public class BooleanAlarmFactory {
-        public static Support create(DBStructure dbStructure);
-    }</pre>
-
-<p>This provides support for reporting alarms for boolean fields. The
-configurationStructure must be a structure booleanAlarm, which has the
-fields:</p>
-<dl>
-  <dt style="font-family: courier;">active</dt>
-    <dd>A boolean field. If (false,true) then alarm conditions (are not,are)
-      checked.</dd>
-  <dt style="font-family: courier;">falseAlarm</dt>
-    <dd>An alarmSeverity menu. This specifies the severity if the value field
-      is false.</dd>
-  <dt style="font-family: courier;">trueAlarm</dt>
-    <dd>An alarmSeverity menu. This specifies the severity if the value field
-      is true.</dd>
-  <dt style="font-family: courier;">changeStateAlarm</dt>
-    <dd>An alarmSeverity menu. This specifies the severity if the value field
-      changes.</dd>
-</dl>
-
-<h4 id="Numeric">Numeric Alarms</h4>
-<pre>    public class ByteAlarmFactory {
-        public static Support create(DBStructure dbStructure);
-    }
-    public class ShortAlarmFactory {
-        public static Support create(DBStructure dbStructure);
-    }
-    public class IntAlarmFactory {
-        public static Support create(DBStructure dbStructure);
-    }
-    public class LongAlarmFactory {
-        public static Support create(DBStructure dbStructure);
-    }
-    public class FloatAlarmFactory {
-        public static Support create(DBStructure dbStructure);
-    }
-    public class DoubleAlarmFactory {
-        public static Support create(DBStructure dbStructure);
-    }</pre>
-
-<p>The above factories provide alarm support for the associated type of
-field, e.g. FloatAlarmFactory provides alarm support for a field of type
-float. The support for each type except that float and double also support
-hystersis, which is described below. Each has two associated xml structure
-definitions. For example the definitions for double are:</p>
-<pre>&lt;structure name = "doubleAlarmInterval"&gt;
-  &lt;field name = "value" type = "double" /&gt;
-  &lt;field name = "severity" type = "structure" structureName = "alarmSeverity" /&gt;
-  &lt;field name = "message" type = "string" /&gt;
-&lt;/structure&gt;
-&lt;structure name = "doubleAlarm" supportName = "doubleAlarm" &gt;
-  &lt;field name = "active" type = "boolean" /&gt;
-  &lt;field name = "interval" type = "array" elementType = "structure" /&gt;
-  &lt;field name = "outOfRange" type = "structure" structureName = "alarmSeverity" /&gt;
-  &lt;field name = "hystersis" type = "double" /&gt;
-&lt;/structure&gt;</pre>
-
-<p>The first structure defines an interval for alarm checking. It has the
-fields:</p>
-<dl>
-  <dt style="font-family: courier;">value</dt>
-    <dd>The upper bound for a value.</dd>
-  <dt style="font-family: courier;">severity</dt>
-    <dd>The alarm severity for a value that falls into this interval.</dd>
-  <dt style="font-family: courier;">message</dt>
-    <dd>The alarm message for a value that falls into this interval.</dd>
-</dl>
-
-<p>The second structure has the following fields:</p>
-<dl>
-  <dt style="font-family: courier;">active</dt>
-    <dd>A boolean field. If (false,true) then alarm conditions (are not,are)
-      checked.</dd>
-  <dt style="font-family: courier;">interval</dt>
-    <dd>A array of intervals. When the process method of value alarm support
-      is called it looks for the interval for the current value. It starts
-      with the first interval and continues until it finds an interval such
-      that value&lt;=interval.value. This determines the alarm severity.</dd>
-  <dt style="font-family: courier;">outOfRange</dt>
-    <dd>The alarm severity if no interval is found.</dd>
-  <dt style="font-family: courier;">hystersis</dt>
-    <dd>If value goes into alarm this is the amount it must come out of alarm
-      before the alarm severity is modified. This prevents alarm .</dd>
-</dl>
-
-<h4 id="Enumerated">Enumerated Alarms</h4>
-<pre>    public class EnumeratedAlarmFactory {
-        public static Support create(DBStructure dbStructure);
-    }</pre>
-
-<p>The above factory provides support for an enumerated structure field.</p>
-
-<p>The enumeratedAlarm structure has the following fields:</p>
-<dl>
-  <dt style="font-family: courier;">active</dt>
-    <dd>A boolean field. If (false,true) then alarm conditions (are not,are)
-      checked.</dd>
-  <dt style="font-family: courier;">stateSeverity</dt>
-    <dd>An array of stateSeverity alarmSeverity menu definitions. When the
-      process method is called the value field is the index for this array.
-      The corresponding alarmSeverity menu is found and it determines the
-      alarm severity.</dd>
-  <dt style="font-family: courier;">changeStateAlarm</dt>
-    <dd>An alarmSeverity menu. This specifies the severity if the value field
-      changes.</dd>
-</dl>
-<hr />
-
-<h2 style="text-align: center" id="Linear">Linear Conversion</h2>
-<hr />
-
-<p>Support is available for input and output linear conversions. The xml
-definitions for linear conversions are:</p>
-
-<h3 id="linearConv">linearConversion</h3>
-
-<p>The structure linearConversion defines the fields used for linear
-conversions. The fields slope and intercept are the values used to convert a
-rawValue to engineering units. The rawValue is an integer value usually read
-from an ADC (Analog to Digital Convertor). The slope and intercept can be
-specified directly of calculated from the low and high engineering and device
-values. If the later method is chosen the engUnitsLow and engUnitsHigh must
-be provided. deviceLow and deviceHigh are either provided automatically by
-support of must be provided. The following are the fields in structure
-lineraConversion:</p>
-<dl>
-  <dt style="font-family: courier;">engUnitsLow</dt>
-    <dd>A double equal to the engineering units value corresponding to the
-      value for deviceHigh.</dd>
-  <dt style="font-family: courier;">engUnitsHigh</dt>
-    <dd>A double equal to the engineering units value corresponding to the
-      value for deviceLow.</dd>
-  <dt style="font-family: courier;">deviceHigh</dt>
-    <dd>An int equal to the maximum value for the rawValue.</dd>
-  <dt style="font-family: courier;">deviceLow</dt>
-    <dd>An int equal to the minimum value for the rawValue.</dd>
-  <dt style="font-family: courier;">slope</dt>
-    <dd>The slope for the linear conversion.</dd>
-  <dt style="font-family: courier;">intercept</dt>
-    <dd>The intercept for the linear conversion.</dd>
-</dl>
-
-<h3 id="LinearConv">LinearConvertInputFactory</h3>
-<pre>    public class LinearConvertInputFactory {
-        public static Support create(DBStructure dbStructure);
-    }</pre>
-
-<p>This is the factory that implements linear input conversion, i.e. it
-converts a rawValue to engineering units. A field for linear conversion for
-input is a structure containing the following fields:</p>
-<dl>
-  <dt style="font-family: courier;">rawValue</dt>
-    <dd>The raw value which is obtained via the support attached to the input
-      field or by a put to this field.</dd>
-  <dt style="font-family: courier;">linearConvert</dt>
-    <dd>The structure providing the conversion parameters.</dd>
-  <dt style="font-family: courier;">input</dt>
-    <dd>The link for reading the rawValue. If a field named is defined and
-      has support the support is called.</dd>
-</dl>
-
-<h3 id="LinearConv1">LinearConvertOutputFactory</h3>
-<pre>    public class LinearConvertOutputFactory {
-        public static Support create(DBStructure dbStructure);
-    }</pre>
-
-<p>This is the factory that implements linear output conversion, i.e. it
-converts a value in engineering units to a rawValue. A field for linear
-conversion for output is a structure containing the following fields:</p>
-<dl>
-  <dt style="font-family: courier;">rawValue</dt>
-    <dd>The raw value which is obtained via the support attached to the input
-      field or by a put to this field.</dd>
-  <dt style="font-family: courier;">linearConvert</dt>
-    <dd>The structure providing the conversion parameters.</dd>
-  <dt style="font-family: courier;">output</dt>
-    <dd>The link for reading the rawValue. If a field named is defined and
-      has support the support is called.</dd>
-</dl>
-
-<h3 id="DeviceLimi">DeviceLimit</h3>
-<pre>    public interface DeviceLimit {
-        void get(DBField low, DBField high);
-    }</pre>
-
-<p>This is a convenience class for accessing a structure that has two fields:
-"low" and.</p>
-<hr />
-
-<h2 style="text-align: center" id="Digital">Digital Support</h2>
-<hr />
-
-<p>This is support for a record or structure that supports digital I/O. </p>
-
-<h3 id="Java">Java Definitions</h3>
-<pre>    public class DigitalFactory {
-        public static Support create(DBField dbField);
-    }</pre>
-
-<p>The dbField must be an array of digitalState structures. The enumerated
-value field must be in the parent of the parent of dbField. The register
-value must be in the parent of dbField. During initialization it sets the
-array of choices for the value field. It uses the name fields in the states
-array to create the choices.</p>
-<hr />
-
-<h2 style="text-align: center" id="Incrementa">Incremental Support</h2>
-<hr />
-
-<p>This is support for incremental outputs.For example it supports the
-aoIncrementalOutut record.</p>
-
-<p>This uses the Java definitions:</p>
-<pre>    public interface IncrementalSupport extends Support{
-        void setDesiredField(DBField dbField);
-    }
-
-    public class IncrementalFactory {
-        public static Support create(DBStructure dbStructure);
-    }</pre>
-
-<p>This supports the following fields:</p>
-<dl>
-  <dt style="font-family: courier;">value</dt>
-    <dd>The value field.</dd>
-  <dt style="font-family: courier;">desiredValue</dt>
-    <dd>This must be a double field. It can either be a field named in the
-      record or structure being supported or it can be a field passed as an
-      argument to the double support setDesiredField method. When this field
-      changes the support changes the value field until it has the desired
-      value. If control limits are specified then the desired value is forced
-      to be within the control limits. If incrementalOutput is true then each
-      time the record is processed the value field is changed by rateOfChange
-      until the desired value is reached.</dd>
-  <dt style="font-family: courier;">input</dt>
-    <dd>If this field exists and has support it is called to get the
-      desiredValue.</dd>
-  <dt style="font-family: courier;">controlLimit</dt>
-    <dd>This field is optional. If present it must be a structure that has
-      two double fields named. If the low value is strictly less that the
-      high value then limits are enforced, i.e. the desired value is forced
-      to be within the control limits.</dd>
-  <dt style="font-family: courier;">incrementalOutput</dt>
-    <dd>This field is optional. If the record/structure has a field named
-      then it must be have type boolean. If not present the default is true.
-      If this has the value true the output is adjusted by rateOfChange
-      otherwise the value field is changed in one step to the desired
-    value.</dd>
-  <dt style="font-family: courier;">rateOfChange</dt>
-    <dd>If incrementalOutput is true this is the amount the value will change
-      each time the record is processed.</dd>
-</dl>
-<hr />
-
-<h2 style="text-align: center" id="Calculatio">Calculation Support</h2>
-<hr />
-
-<p>Support is provided for performing calculations. Currently there is no
-generic calculation support similar to calcPerform.c that is part of EPICS
-V3. A calculation support module could be implemented that provides similar
-functionality. A support module is available for field calcArgArray. A
-structure that supports calculations normally has the fields:</p>
-<dl>
-  <dt style="font-family: courier;">value</dt>
-    <dd>It must be a field named in the parent of the calculation field. This
-      field is assigned a value by the calculation module and must have a
-      type compatible with the calculator. </dd>
-  <dt style="font-family: courier;">calcArgArray</dt>
-    <dd>The calcArgArray field is normally an array of structures with each
-      element being a calcArg structure and the support for calcArgArray is
-      the calcArgArray support described in
-      org.epics.ioc.support.CalcArgArraySupport. This field must be present
-      and must have support. The support must complete before the support for
-      calculator is called.</dd>
-  <dt style="font-family: courier;">calculator</dt>
-    <dd>This field is normally a link that has support that implements the
-      calculation. org.epics.ioc.support.CounterCalculationFactory provides
-      an example. This field must be present and must have support. The
-      support must complete before the support for valueAlarm is called.</dd>
-</dl>
-
-<h3 id="Database">Database Definitions for Calculations</h3>
-
-<p>This is example support for use with the calcDouble record or structure.
-File calcDoubleCommon.xml defines the fields:</p>
-<pre>&lt;DBDefinition&gt;
-  &lt;field name = "value" type = "double" /&gt;
-  &lt;field name = "calcArgArray" type = "array"
-     elementType = "structure" supportName = "calcArgArray" /&gt;
-  &lt;field name = "calculator" type = "structure" /&gt;
-  &lt;field name = "alarm" type = "structure"/&gt;
-  &lt;field name = "timeStamp" type = "structure" /&gt;  
-  &lt;field name = "input" type = "structure" /&gt;
-  &lt;!-- instance can set structureName = "doubleAlarm" --&gt;
-  &lt;field name = "valueAlarm" type = "structure" /&gt;
-  &lt;field name = "output" type = "structure" /&gt;
-  &lt;field name = "display" type = "structure" /&gt;
-  &lt;field name = "control" type = "structure"/&gt;
-  &lt;!-- instance can set structureName = "doubleHistory" --&gt;
-  &lt;field name = "history" type = "structure" /&gt;
-&lt;/DBDefinition&gt;</pre>
-
-<p>Field calcDoubleRecord.xml defines:</p>
-<pre>&lt;structure name = "calcDoubleArg" &gt;
-  &lt;field name = "value" type = "double" /&gt;
-  &lt;field name = "name" type = "string" /&gt;
-  &lt;field name = "input" type = "structure" /&gt;
-&lt;/structure&gt;
-
-&lt;structure name = "calcDouble" supportName = "generic" &gt;
-  &lt;include href = "calcDoubleCommon.xml" /&gt;
-&lt;/structure&gt;
-
-&lt;recordType name = "calcDouble" supportName = "generic" &gt;
-  &lt;include href = "common.xml" /&gt;
-  &lt;include href = "calcDoubleCommon.xml" /&gt;
-  &lt;field name = "supportArray" type = "array"
-     elementType = "structure" supportName = "supportArray" /&gt;
-&lt;/recordType&gt;</pre>
-
-<p>The following support is defined in calc.xml</p>
-<pre>&lt;support name = "calcArgArray"
- factoryName = "org.epics.ioc.support.CalcArgArrayFactory" /&gt;
-
-
-&lt;!-- example calculators --&gt;
-
-&lt;support name = "counterCalculator"
- factoryName = "org.epics.ioc.support.CounterCalculatorFactory" /&gt;
-
-&lt;support name = "arrayIncrementCalculator"
- factoryName = "org.epics.ioc.support.ArrayIncrementCalculatorFactory" /&gt;
-
-&lt;support name = "booleanArrayToggleCalculator"
- factoryName = "org.epics.ioc.support.BooleanArrayToggleCalculatorFactory" /&gt;</pre>
-
-<h3 id="Performing">Performing Calculations</h3>
-
-<p>A calculation is performed by a calculation link support. The following is
-done. When the calcRecord support is called it calls the calcArgArray support
-and when it completes the calculation link support. For each element if the
-calcArgArray, the calcArgArray support calls the input link support (if it is
-specified) to get the calcArg value. The calculation support uses the
-calcArgArray values to compute the calculated value. At present generic
-calculation support is not implemented. It is envisioned that it will allow
-the user to enter expressions like. The calcArgArray would have two elements
-with calcArg.name set to.</p>
-
-<h3 id="calcArgArr">calcArgArray</h3>
-
-<p>The support for a calcArgArray implements support for an array of calcArg
-structures, which has the fields:</p>
-<dl>
-  <dt style="font-family: courier;">value</dt>
-    <dd>A value for this argument.</dd>
-  <dt style="font-family: courier;">name</dt>
-    <dd>A string which provides a name for the argument.</dd>
-  <dt style="font-family: courier;">input</dt>
-    <dd>A link for obtaining the value for this argument. Note that if no
-      support is specified then no input is read and the value field can just
-      be set by the user.</dd>
-</dl>
-
-<p>calcArgArray uses the following definitions:</p>
-<pre>    public interface CalcArgArraySupport extends Support{
-        PVField getPVField(String argName);
-    }
-
-    public class CalcArgArrayFactory {
-        public static Support create(DBField dbField);
-    }</pre>
-
-<p>CalcArgArraySupport extends Support to provide the method:</p>
-<dl>
-  <dt style="font-family: courier;">getPVField</dt>
-    <dd>This is a convience metod for calculator support. It looks in the
-      calcArgArray for a field with the specified name and returns it's
-      interface.</dd>
-</dl>
-
-<h3 id="Calculator">Calculator</h3>
-
-<p>Support for a calculation field, which is a link, must implement:</p>
-<pre>    public interface CalculatorSupport extends Support {
-        void setCalcArgArraySupport(CalcArgArraySupport calcArgArraySupport);
-    }</pre>
-
-<p>CalculatorSupport extends Support to add the method:</p>
-<dl>
-  <dt style="font-family: courier;">setCalcArgArraySupport</dt>
-    <dd>This is called by calcDoubleRecord support.</dd>
-</dl>
-
-<h3 id="CounterCal">CounterCalculatorFactory</h3>
-
-<p>An example calculation support is provided as part of javaIOC. It is:</p>
-<pre>public class CounterCalculatorFactory {
-
-    public static Support create(DBStructure dbStructure) {
-        return new CounterCalculatorImpl(dbStructure);
-    }
-
-    private static String supportName =;
-
-    private static class CounterCalculatorImpl extends AbstractSupport
-    implements CalculatorSupport
-    {
-        private PVStructure pvStructure;
-        private CalcArgArraySupport calcArgArraySupport = null;
-        private DBField valueDBField;
-        private PVDouble valuePVField= null;;
-        private PVDouble minPVField = null;
-        private PVDouble maxPVField = null;
-        private PVDouble incPVField = null;
-
-        private CounterCalculatorImpl(DBStructure dbStructure) {
-            super(supportName,dbStructure);
-            pvStructure = dbStructure.getPVStructure();
-        }
-
-        public void initialize() {
-            if(!super.checkSupportState(SupportState.readyForInitialize,supportName))
-                 return;
-            DBField dbParent = dbStructure.getParent();
-            PVField pvParent = dbParent.getPVField();
-            PVField pvField = pvParent.findProperty("value");
-            if(pvField==null) {
-                pvStructure.message("value field not found", MessageType.error);
-                return;
-            }
-            valueDBField = dbStructure.getDBRecord().findDBField(pvField);
-            valuePVField = (PVDouble)valueDBField.getPVField();
-            pvField = calcArgArraySupport.getPVField("min");
-            if(pvField==null) {
-                pvStructure.message("field min not found", MessageType.error);
-                return;
-            }
-            if(pvField.getField().getType()!=Type.pvDouble) {
-                pvStructure.message("field min is not double", MessageType.error);
-                return;
-            }
-            minPVField = (PVDouble)pvField;
-            pvField = calcArgArraySupport.getPVField("max");
-            if(pvField==null) {
-                pvStructure.message("field max not found", MessageType.error);
-                return;
-            }
-            if(pvField.getField().getType()!=Type.pvDouble) {
-                pvStructure.message("field max is not double", MessageType.error);
-                return;
-            }
-            maxPVField = (PVDouble)pvField;
-            pvField = calcArgArraySupport.getPVField("inc");
-            if(pvField==null) {
-                pvStructure.message("field inc not found", MessageType.error);
-                return;
-            }
-            if(pvField.getField().getType()!=Type.pvDouble) {
-                pvStructure.message("field inc is not double", MessageType.error);
-                return;
-            }
-            incPVField = (PVDouble)pvField;
-            setSupportState(SupportState.readyForStart);
-
-        }
-
-        public void process(SupportProcessRequester supportProcessRequester) {
-            double value = valuePVField.get();
-            double min = minPVField.get();
-            double max = maxPVField.get();
-            double inc = incPVField.get();
-            value += inc;
-            if(inc&gt;0) {
-                if(value&gt;max) value = min;
-                if(value&lt;min) value = min;
-            } else {
-                if(value&lt;min) value = max;
-                if(value&gt;max) value = max;
-            }
-            valuePVField.put(value);
-            valueDBField.postPut();
-            supportProcessRequester.supportProcessDone(RequestResult.success);
-        }
-
-        public void setCalcArgArraySupport(CalcArgArraySupport calcArgArraySupport) {
-            this.calcArgArraySupport = calcArgArraySupport;
-        }
-    }
-}</pre>
-
-<h3 id="ArrayIncre">ArrayIncrementCalculatorFactory</h3>
-<pre>    public class ArrayIncrementCalculatorFactory {
-        `public static Support create(DBStructure dbStructure);
-    }</pre>
-
-<p>This is support for testing. It supports numeric array fields. Each time
-process is called it just incrememnts each element of the array.</p>
-
-<h3 id="BooleanArr">BooleanArrayToggleCalculatorFactory</h3>
-<pre>    public class BooleanArrayToggleCalculatorFactory {
-        public static Support create(DBStructure dbStructure);
-    };</pre>
-
-<p>This is support for testing. It supports boolean array fields. Each time
-process is called it just toggles each element of the array, if the value us
-false it becomes true and if true becomes false.</p>
-<hr />
-
-<h2 style="text-align: center" id="Event">Event Support</h2>
-<hr />
-<pre>    public class EventFactory {
-        public static Support create(DBField dbField);
-    }</pre>
-
-<p>EventFactory implements record or structure support for announcing a scan
-event. The event name is given in the field:</p>
-<dl>
-  <dt style="font-family: courier;">value</dt>
-    <dd>This must be a string field named located in the parent of this
-      field, which is normally the value field itself.</dd>
-</dl>
-
-<p>Whenever the record is processed eventScanner.announce is called, i.e. the
-support announces an event. All event scanned records with the event name
-associated with the value field are processed. Each time process is called,
-the event support checks to see if the event name has changed.</p>
-<hr />
-
-<h2 style="text-align: center;" id="SupportArr">SupportArray Support</h2>
-<hr />
-<pre>    public class SupportArrayFactory {
-        public static Support create(DBField dbField);
-    }</pre>
-
-<p>This is a factory that provides support for an array of structures. The
-supportName is SupportArray. If any of the array elements has support, the
-support is called.</p>
-<hr />
-
-<h2 style="text-align: center" id="Noop">Noop Support</h2>
-<hr />
-<pre>    public class NoopFactory {
-        public static Support create(DBField dbField);
-        public static Support create(DBStructure dbStructure);
-    }</pre>
-
-<p>This can be used for record types that just hold data. It can also be used
-to provide support for any field. The support acts as though it is
-synchronous. All Support methods are implemented by just extending
-AbstractSupport without overriding any methods.</p>
-<hr />
-
-<h2 style="text-align: center;" id="DelaySuppo">DelaySupport Support</h2>
-<hr />
-
-<p>This is link support that simulates asynchronous support. It uses a
-configStructure that has the definition:</p>
-<pre>&lt;structure name = "delay" supportName = "delay"&gt;
-  &lt;!-- min, max, inc are delay in milliseconds --&gt;
-  &lt;field name = "min" type = "long" /&gt;
-  &lt;field name = "max" type = "long" /&gt;
-  &lt;field name = "inc" type = "long" /&gt;
-&lt;/structure&gt;
-
-&lt;support name = "delay"
-  factoryName = "org.epics.ioc.support.DelayFactory" /&gt;</pre>
-
-<p>where</p>
-<dl>
-  <dt style="font-family: courier;">min</dt>
-    <dd>The minimum delay</dd>
-  <dt style="font-family: courier;">max</dt>
-    <dd>The maximum delay</dd>
-  <dt style="font-family: courier;">inc</dt>
-    <dd>The delay increment between process requests</dd>
-</dl>
-
-<p>Each time process is called it delays a number of milliseconds determined
-by min,max, and inc. It starts with a delay on min. Each time it proceses it
-increases the delay by inc until it reaches max. It then goes back to a delay
-of min.</p>
-
-<p>The factory definition is:</p>
-<pre>    public class DelaySupportFactory {
-        public static Support create(DBStructure dbStructure);
-    }</pre>
-<hr />
-
-<h2 style="text-align: center" id="Port">Port Driver Support</h2>
-<hr />
-
-<p>This section describes the support for connecting database fields to
-portDriver.</p>
-
-<h3 id="Java1">Java Definitions</h3>
-
-<p>The following are the interface, abstract support, and factories for
-portDriver support.</p>
-<pre>    public interface PDRVSupport extends Support {
-        boolean isProcess();
-        abstract void queueCallback();
-    }
-
-    public class PDRVSupportFactory {
-        public static Support create(DBStructure dbStructure);
-    }
-    
-    public abstract class AbstractPDRVSupportSupport extends AbstractSupport implements
-    ProcessContinueRequester,QueueRequestCallback,
-    PDRVSupportSupport,
-    RecordProcessRequester
-    {
-        protected AbstractPDRVSupportSupport(String supportName,DBStructure dbStructure);
-        protected String supportName;
-        protected DBStructure dbStructure;
-        protected PVStructure pvStructure;
-        protected DBField valueDBField = null;
-        protected PVField valuePVField = null;
-        protected DBRecord dbRecord = null;
-        protected PVRecord pvRecord = null;
-        protected String recordName = null;
-        protected String fullName = null;
-        protected RecordProcess recordProcess = null;
-    
-        protected AlarmSupport alarmSupport = null;
-        protected PVStructure configStructure = null;;
-        protected PVString pvPortName = null;
-        protected PVInt pvAddr = null;
-        protected PVInt pvMask = null;
-        protected PVInt pvSize = null;
-        protected PVDouble pvTimeout = null;
-        protected PVBoolean pvProcess = null;
-        protected PVString pvDrvParams = null;
-    
-        protected User user = null;
-        protected Port port = null;
-        protected Device device = null;
-        protected Trace portTrace = null;
-        protected Trace deviceTrace = null;
-    
-        protected DriverUser driverUser = null;
-    
-        protected SupportProcessRequester supportProcessRequester = null;
-        public void initialize();
-        public void uninitialize();
-        public void start();
-        public void stop();
-        public void process(SupportProcessRequester supportProcessRequester);
-        public void message(String message,MessageType messageType);
-        public void processContinue();
-        public void callback(Status status, User user);
-        public boolean isProcess();
-        public void queueCallback();
-        public void recordProcessComplete();
-        public void recordProcessResult(RequestResult requestResult)
-    }
-
-    public class PDRVPortCreateFactory {
-        public static Support create(DBStructure dbStructure);
-    }
-
-    public class PDRVPortDeviceControlFactory {
-        public static Support create(DBStructure dbStructure)
-    }</pre>
-
-<h3 id="PDRVSuppor">PDRVSupport</h3>
-
-<p>This defines the two methods:</p>
-<dl>
-  <dt style="font-family: courier;">isProcess</dt>
-    <dd>If the support is interrupt driver should it process the record. The
-      answer will be true only if: 
-      <ol>
-        <li>The constructor for AbstractPDRVSupportSupport is called with
-          interruptOK true</li>
-        <li>pdrvSupport.interrupt is true.</li>
-        <li>The support is the record processor.</li>
-      </ol>
-    </dd>
-  <dt style="font-family: courier;">queueCallback</dt>
-    <dd>A method that must be implemented by all asynchronous support. his
-      probably means all support except interrupt listeners. </dd>
-</dl>
-
-<h3 id="AbstractPD">AbstractPDRVSupport</h3>
-
-<p>This implements muck of the work involved in connecting and managing the
-connection to a port and device. Look at some of the code in
-PDRVSupportFactory for how to use the abstract support.</p>
-
-<h3 id="PDRVSuppor1">PDRVSupportFactory</h3>
-
-<p>This implements all of the link support defined in .xml file
-javaIOC/dbd/structures/portDriver.xml.</p>
-<pre>&lt;structure name = "pdrvSupport"&gt;
-  &lt;field name = "portName" type = "string" /&gt;
-  &lt;field name = "addr" type = "int" /&gt;
-  &lt;field name = "timeout" type = "double" /&gt;
-  &lt;field name = "mask" type = "int" /&gt;
-  &lt;field name = "size" type = "int" /&gt;
-  &lt;field name = "process" type = "boolean" default = "false" /&gt;
-  &lt;field name = "drvParams" type = "structure" /&gt;
-&lt;/structure&gt;
-
-&lt;support name = "pdrvOctetInput"
-  factoryName = "org.epics.ioc.support.PDRVSupportFactory" /&gt;
-&lt;support name = "pdrvOctetInterruptInput"
-  factoryName = "org.epics.ioc.support.PDRVSupportFactory" /&gt;
-&lt;support name = "pdrvOctetOutput" 
-  factoryName = "org.epics.ioc.support.PDRVSupportFactory" /&gt;
-
-&lt;support name = "pdrvInt32Input" 
-  factoryName = "org.epics.ioc.support.PDRVSupportFactory" /&gt;
-&lt;support name = "pdrvInt32InterruptInput"
-  factoryName = "org.epics.ioc.support.PDRVSupportFactory" /&gt;
-&lt;support name = "pdrvInt32AverageInput"
-  factoryName = "org.epics.ioc.support.PDRVSupportFactory" /&gt;
-&lt;support name = "pdrvInt32Output" 
-  factoryName = "org.epics.ioc.support.PDRVSupportFactory" /&gt;
-
-&lt;support name = "pdrvInt32ArrayInput"
-  factoryName = "org.epics.ioc.support.PDRVSupportFactory" /&gt;
-&lt;support name = "pdrvInt32ArrayInterruptInput"
-  factoryName = "org.epics.ioc.support.PDRVSupportFactory" /&gt;
-&lt;support name = "pdrvInt32ArrayOutput" 
-  factoryName = "org.epics.ioc.support.PDRVSupportFactory" /&gt;
-
-&lt;support name = "pdrvFloat64Input"
-  factoryName = "org.epics.ioc.support.PDRVSupportFactory" /&gt;
-&lt;support name = "pdrvFloat64InterruptInput"
-  factoryName = "org.epics.ioc.support.PDRVSupportFactory" /&gt;
-&lt;support name = "pdrvFloat64AverageInput"
-  factoryName = "org.epics.ioc.support.PDRVSupportFactory" /&gt;
-&lt;support name = "pdrvFloat64Output"
-  factoryName = "org.epics.ioc.support.PDRVSupportFactory" /&gt;
-
-&lt;support name = "pdrvFloat64ArrayInput"
-  factoryName = "org.epics.ioc.support.PDRVSupportFactory" /&gt;
-&lt;support name = "pdrvFloat64ArrayInterruptInput" 
-  factoryName = "org.epics.ioc.support.PDRVSupportFactory" /&gt;
-&lt;support name = "pdrvFloat64ArrayOutput" 
-  factoryName = "org.epics.ioc.support.PDRVSupportFactory" /&gt;
-
-&lt;support name = "pdrvUInt32DigitalInput"
-  factoryName = "org.epics.ioc.support.PDRVSupportFactory" /&gt;
-&lt;support name = "pdrvUInt32DigitalInterruptInput"
-  factoryName = "org.epics.ioc.support.PDRVSupportFactory" /&gt;
-&lt;support name = "pdrvUInt32DigitalOutput" 
-  factoryName = "org.epics.ioc.support.PDRVSupportFactory" /&gt;</pre>
-
-<h3 id="PDRVPortCr">PDRVPortCreateFactory</h3>
-
-<p>This implements support for the portRecord which has the definition:</p>
-<pre>&lt;recordType name = "portCreate" supportName = "portCreate" &gt;
-  &lt;field name = "factoryName" type = "string" /&gt;
-  &lt;field name = "portName" type = "string" /&gt;
-  &lt;field name = "autoConnect" type = "boolean" default = "true" /&gt;
-  &lt;field name = "priority" type = "structure" structureName = "scanPriority" /&gt;
-  &lt;field name = "driverParameters" type = "structure" structureName = "null"/&gt;
-&lt;/recordType&gt;
-
-&lt;support name = "portCreate"
-   factoryName = "org.epics.ioc.support.PDRVPortCreateFactory" /&gt;</pre>
-
-<p>This is support for a record or structure that initializes a portDriver
-port.</p>
-
-<h3 id="PDRVPortDe">PDRVPortDeviceControlFactory</h3>
-
-<p>This implements support for the portDeviceControl which has the
-definition:</p>
-<pre>&lt;recordType name = "portDeviceControl" supportName = "portDeviceControl" &gt;
-  &lt;field name = "message" type = "string" /&gt;
-  &lt;field name = "portDevice" type = "string" /&gt;
-  &lt;field name = "connect" type = "structure" structureName = "booleanState"  /&gt;
-  &lt;field name = "enable" type = "structure" structureName = "booleanState"   /&gt;
-  &lt;field name = "autoConnect" type = "structure" structureName = "booleanState" /&gt;
-  &lt;field name = "traceMask" type = "structure" structureName = "intState"  /&gt;
-  &lt;field name = "traceIOMask" type = "structure" structureName = "intState" /&gt;
-  &lt;field name = "traceIOTruncateSize" type = "structure" structureName = "intState" /&gt;
-  &lt;field name = "report" type = "boolean" /&gt;
-  &lt;field name = "reportDetails" type = "int" /&gt;
-&lt;/recordType&gt;
-
-&lt;support name = "portDeviceControl"
-   factoryName = "org.epics.ioc.support.PDRVPortDeviceControlFactory" /&gt;</pre>
-<hr />
-
-<h2 style="text-align: center" id="Power">Power Supply Support</h2>
-<hr />
-<pre>    public class PowerSupplyFactory {
-        public static Support create(DBStructure dbStructure);
-    }</pre>
-
-<p>This is an example of support for a. Given a voltage and power to computes
-the current. It supports fields for reading the voltage and for writing the
-current. The complete set of fields it suppports are:</p>
-<dl>
-  <dt style="font-family: courier;">voltage</dt>
-    <dd>This is required. It must be a double structure.</dd>
-  <dt style="font-family: courier;">current</dt>
-    <dd>This is required. It must be a double structure.</dd>
-  <dt style="font-family: courier;">power</dt>
-    <dd>This is required. It must be a double structure.</dd>
-</dl>
-
-<p>Currently PowerSupplyFactory only implements support named
-powerSupplyCurrent, which is attached to current.input. It computes
-current.value from power.value and voltage.value.</p>
 </body>
 </html>

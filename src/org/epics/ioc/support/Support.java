@@ -6,8 +6,6 @@
 package org.epics.ioc.support;
 
 import org.epics.ioc.db.DBField;
-import org.epics.ioc.process.SupportProcessRequester;
-import org.epics.ioc.process.SupportState;
 import org.epics.ioc.util.Requester;
 
 /**
