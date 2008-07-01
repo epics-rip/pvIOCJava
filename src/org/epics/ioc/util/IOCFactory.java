@@ -9,8 +9,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.epics.ioc.db.IOCDB;
 import org.epics.ioc.db.XMLToIOCDBFactory;
-import org.epics.ioc.process.SupportCreation;
-import org.epics.ioc.process.SupportCreationFactory;
+import org.epics.ioc.support.SupportCreation;
+import org.epics.ioc.support.SupportCreationFactory;
 
 /**
  * A factory for installing and initializing record instances.

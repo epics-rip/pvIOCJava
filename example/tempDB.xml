@@ -1,0 +1,22 @@
+<?xml version="1.0" ?>
+<IOCDatabase>
+<include addPath = "${JAVAIOC}/example" />
+<include href = "counterDB.xml" />
+<!--
+<include href = "stringDB.xml" />
+<include href = "dataOnlyDB.xml" />
+<include href = "enumeratedDB.xml" />
+<include href = "scalarDB.xml" />
+<include href = "arrayDB.xml" />
+<include href = "aiDB.xml" />
+<include href = "aoDB.xml" />
+<include href = "aoIncrementalDB.xml" />
+<include href = "booleanArrayDB.xml" />
+<include href = "eventDB.xml" />
+<include href = "powerSupplyAllDB.xml" />
+<include href = "allTypesDB.xml" />
+<include href = "powerSupplyArrayDB.xml" />
+<include href = "processControlDB.xml" />
+-->
+<include removePath = "${JAVAIOC}/example" />
+</IOCDatabase>

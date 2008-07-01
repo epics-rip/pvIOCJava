@@ -46,9 +46,10 @@ public class IOCExecutorFactory {
         private List<Runnable> runList = new ArrayList<Runnable>();
         private ReentrantLock lock = new ReentrantLock();
         private Condition moreWork = lock.newCondition();
+        private Thread thread = null;
 
         private ThreadInstance(String name,int priority) {
-            threadCreate.create(name, priority, this);
+            thread = threadCreate.create(name, priority, this);
         } 
         /* (non-Javadoc)
          * @see org.epics.ioc.util.RunnableReady#run(org.epics.ioc.util.ThreadReady)
@@ -71,7 +72,9 @@ public class IOCExecutorFactory {
                     }finally {
                         lock.unlock();
                     }
-                    if(runnable!=null) runnable.run();
+                    if(runnable!=null) {
+                        runnable.run();
+                    }
                 }
             } catch(InterruptedException e) {
                 
@@ -82,7 +85,8 @@ public class IOCExecutorFactory {
             lock.lock();
             try {
                 if(runList.contains(runnable)) {
-                    throw new IllegalStateException("add but already on runList");
+                    System.out.println("thread " + thread.getName() + " add but already on runList");
+                    return;
                 }
                 boolean isEmpty = runList.isEmpty();
                 runList.add(runnable);

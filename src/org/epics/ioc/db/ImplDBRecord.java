@@ -10,7 +10,6 @@ import java.util.LinkedList;
 import java.util.concurrent.locks.ReentrantLock;
 
 import org.epics.ioc.dbd.DBD;
-import org.epics.ioc.process.RecordProcess;
 import org.epics.ioc.pv.Array;
 import org.epics.ioc.pv.ArrayArrayData;
 import org.epics.ioc.pv.PVArray;
@@ -23,6 +22,7 @@ import org.epics.ioc.pv.PVStructure;
 import org.epics.ioc.pv.PVStructureArray;
 import org.epics.ioc.pv.StructureArrayData;
 import org.epics.ioc.pv.Type;
+import org.epics.ioc.support.RecordProcess;
 
 /**
  * Implementation of DBRecord

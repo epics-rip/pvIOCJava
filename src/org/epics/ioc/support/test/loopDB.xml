@@ -1,0 +1,59 @@
+<?xml version="1.0" ?>
+<IOCDatabase>
+<record name = "root" type = "calcDouble">
+    <calcArgArray>
+        <element structureName = "calcDoubleArg">
+            <value>0</value>
+            <name>min</name>
+        </element>
+        <element structureName = "calcDoubleArg">
+            <value>1e9</value>
+            <name>max</name>
+        </element>
+        <element structureName = "calcDoubleArg">
+            <value>100.0</value>
+            <name>inc</name>
+        </element>
+    </calcArgArray>
+    <calculator supportName = "counterCalculator" />
+    <supportArray>
+        <element structureName = "supportArrayElement">
+            <wait>false</wait>
+            <link  supportName = "processSupport" structureName = "processSupport">
+                    <pvname>other01</pvname>
+            </link>
+        </element>
+        <element structureName = "supportArrayElement">
+            <wait>false</wait>
+            <link  supportName = "outputSupport" structureName = "outputSupport">
+                    <pvname>other02</pvname>
+                    <process>true</process>
+            </link>
+        </element>
+    </supportArray>
+</record>
+<record name = "other01" type = "double">
+    <input supportName = "inputSupport" structureName = "inputSupport">
+            <pvname>root</pvname>
+            <process>false</process>
+    </input>
+</record>
+<record name = "other02" type = "double">
+    <supportArray>
+        <element structureName = "supportArrayElement">
+            <wait>false</wait>
+            <link  supportName = "processSupport" structureName = "processSupport">
+                    <pvname>other03</pvname>
+            </link>
+        </element>
+    </supportArray>
+</record>
+<record name = "other03" type = "double">
+    <input supportName = "inputSupport" structureName = "inputSupport">
+            <pvname>root</pvname>
+            <process>false</process>
+    </input>
+</record>
+
+
+</IOCDatabase>

@@ -68,4 +68,15 @@ public interface ScanField {
      * @return The processSelf interface.
      */
     PVBoolean getProcessSelfPV();
+    /**
+     * Get processAfterStart.
+     * Should the record be processed once after record is started.
+     * @return The current value of scan.processAfterStart.
+     */
+    boolean getProcessAfterStart();
+    /**
+     * Get processAfterStart interface.
+     * @return The processAfterStart interface.
+     */
+    PVBoolean getProcessAfterStartPV();
 }

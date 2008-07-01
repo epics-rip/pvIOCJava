@@ -206,7 +206,7 @@ public class IOCDBFactory {
                 try {
                     if(messageRequesterList.size()<=0) {
                         PrintStream printStream;
-                        if(messageType==MessageType.info) {
+                        if(messageType==MessageType.info || messageType==MessageType.warning) {
                             printStream = System.out;
                         } else {
                             printStream = System.err;
@@ -345,7 +345,7 @@ public class IOCDBFactory {
                     
                     if(messageRequesterList.size()<=0) {
                         PrintStream printStream;
-                        if(messageType==MessageType.info) {
+                        if(messageType==MessageType.info || messageType==MessageType.warning) {
                             printStream = System.out;
                         } else {
                             printStream = System.err;

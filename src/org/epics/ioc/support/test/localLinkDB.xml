@@ -1,7 +1,7 @@
 <?xml version="1.0" ?>
 <IOCDatabase>
 <record name = "counter" type = "calcDouble">
-    <calcArgArray>
+     <calcArgArray>
         <element structureName = "calcDoubleArg">
             <value>0</value>
             <name>min</name>
@@ -39,6 +39,12 @@
     </input>
 </record>
 <record name = "double02" type = "double">
+</record>
+<record name = "double03" type = "double">
+    <input supportName = "inputSupport" structureName = "inputSupport">
+            <pvname>counter</pvname>
+            <process>false</process>
+    </input>
 </record>
 
 </IOCDatabase>

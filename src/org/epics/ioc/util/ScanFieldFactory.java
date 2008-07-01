@@ -97,7 +97,7 @@ public class ScanFieldFactory {
             pvField.message("is not a double", MessageType.fatalError);
             return null;
         }
-        PVDouble rateField = (PVDouble)pvField;
+        PVDouble pvRate = (PVDouble)pvField;
         index = structure.getFieldIndex("eventName");
         if(index<0) {
             pvField.message("does not have a field eventName", MessageType.fatalError);
@@ -108,7 +108,7 @@ public class ScanFieldFactory {
             ((PVField)pvField).message("is not a string", MessageType.fatalError);
             return null;
         }
-        PVString eventNameField = (PVString)pvField;
+        PVString pvEventName = (PVString)pvField;
         index = structure.getFieldIndex("processSelf");
         if(index<0) {
             pvField.message("does not have a field processSelf", MessageType.fatalError);
@@ -119,8 +119,19 @@ public class ScanFieldFactory {
             ((PVField)pvField).message("is not a boolean", MessageType.fatalError);
             return null;
         }
-        PVBoolean processSelfField = (PVBoolean)pvField;
-        return new ScanFieldInstance(dbScan,pvPriority,pvType,rateField,eventNameField,processSelfField);
+        PVBoolean pvProcessSelf = (PVBoolean)pvField;
+        index = structure.getFieldIndex("processAfterStart");
+        if(index<0) {
+            pvField.message("does not have a field processAfterStart", MessageType.fatalError);
+            return null;
+        }
+        pvField = pvFields[index];
+        if(pvField.getField().getType()!=Type.pvBoolean) {
+            ((PVField)pvField).message("is not a boolean", MessageType.fatalError);
+            return null;
+        }
+        PVBoolean pvProcessAfterStart = (PVBoolean)pvField;
+        return new ScanFieldInstance(dbScan,pvPriority,pvType,pvRate,pvEventName,pvProcessSelf,pvProcessAfterStart);
     }
     
     
@@ -130,9 +141,10 @@ public class ScanFieldFactory {
         private PVDouble pvRate;
         private PVString pvEventName;
         private PVBoolean pvProcessSelf;
+        private PVBoolean pvProcessAfterStart;
         
         private ScanFieldInstance(DBField scanField,PVInt pvPriority, PVInt pvType,
-            PVDouble pvRate, PVString pvEventName, PVBoolean pvProcessSelfField)
+            PVDouble pvRate, PVString pvEventName, PVBoolean pvProcessSelfField, PVBoolean pvProcessAfterStart)
         {
             super();
             this.pvPriority = pvPriority;
@@ -140,6 +152,7 @@ public class ScanFieldFactory {
             this.pvRate = pvRate;
             this.pvEventName = pvEventName;
             this.pvProcessSelf = pvProcessSelfField;
+            this.pvProcessAfterStart = pvProcessAfterStart;
         }       
         /* (non-Javadoc)
          * @see org.epics.ioc.util.ScanField#getEventName()
@@ -200,6 +213,18 @@ public class ScanFieldFactory {
          */
         public PVInt getScanTypeIndexPV() {
             return pvType;
+        }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.util.ScanField#getProcessAfterStart()
+         */
+        public boolean getProcessAfterStart() {
+            return pvProcessAfterStart.get();
+        }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.util.ScanField#getProcessAfterStartPV()
+         */
+        public PVBoolean getProcessAfterStartPV() {
+            return pvProcessAfterStart;
         }        
     }
 }

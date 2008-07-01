@@ -17,12 +17,12 @@ import org.epics.ioc.dbd.DBD;
 import org.epics.ioc.dbd.DBDCreate;
 import org.epics.ioc.dbd.DBDFactory;
 import org.epics.ioc.dbd.DBDSupport;
-import org.epics.ioc.process.SupportState;
 import org.epics.ioc.pv.Array;
 import org.epics.ioc.pv.Field;
 import org.epics.ioc.pv.PVField;
 import org.epics.ioc.pv.Type;
 import org.epics.ioc.support.Support;
+import org.epics.ioc.support.SupportState;
 import org.epics.ioc.util.MessageType;
 
 

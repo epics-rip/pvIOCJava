@@ -18,8 +18,8 @@ import org.epics.ioc.pv.PVInt;
 import org.epics.ioc.pv.PVLong;
 import org.epics.ioc.pv.PVShort;
 import org.epics.ioc.pv.Type;
-import org.epics.ioc.support.AlarmFactory;
-import org.epics.ioc.support.AlarmSupport;
+import org.epics.ioc.support.alarm.AlarmFactory;
+import org.epics.ioc.support.alarm.AlarmSupport;
 import org.epics.ioc.util.AlarmSeverity;
 import org.epics.ioc.util.MessageType;
 

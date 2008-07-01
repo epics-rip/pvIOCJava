@@ -9,6 +9,12 @@
     <calculator supportName = "arrayIncrementCalculator" />
     <supportArray>
         <element structureName = "supportArrayElement">
+            <wait>false</wait>
+            <link  supportName = "processSupport" structureName = "processSupport">
+                    <pvname>arrayAdd</pvname>
+            </link>
+        </element>
+        <element structureName = "supportArrayElement">
             <wait>true</wait>
             <link  supportName = "processSupport" structureName = "processSupport">
                     <pvname>byteArray1FromCounter</pvname>
@@ -110,6 +116,32 @@
         <resolution>1</resolution>
         <units>volts</units>
     </display>
+</record>
+
+<record name = "arrayAdd" type = "calcDoubleArray">
+    <timeStamp structureName = "timeStamp" />
+    <alarm structureName = "alarm" />
+    <calcArgArray>
+        <element structureName = "calcDoubleArrayArg">
+            <name>a</name>
+            <input supportName = "inputSupport" structureName = "inputSupport">
+                <pvname>arrayIncrementer</pvname>
+                <process>false</process>
+                <propertyNames>alarm</propertyNames>
+            </input>
+            <alarm structureName = "alarm" />
+        </element>
+        <element structureName = "calcDoubleArrayArg">
+            <name>b</name>
+            <input supportName = "inputSupport" structureName = "inputSupport">
+                <pvname>arrayIncrementer</pvname>
+                <process>false</process>
+                <propertyNames>alarm</propertyNames>
+            </input>
+            <alarm structureName = "alarm" />
+        </element>
+    </calcArgArray>
+    <calculator supportName = "arrayAddCalculator" />
 </record>
 
 <record name = "byteArray1FromCounter" type = "byteArray" >

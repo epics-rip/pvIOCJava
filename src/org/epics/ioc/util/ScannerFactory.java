@@ -12,11 +12,11 @@ import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 
 import org.epics.ioc.db.DBRecord;
-import org.epics.ioc.process.RecordProcess;
-import org.epics.ioc.process.RecordProcessRequester;
 import org.epics.ioc.pv.PVField;
 import org.epics.ioc.pv.PVInt;
 import org.epics.ioc.pv.PVRecord;
+import org.epics.ioc.support.RecordProcess;
+import org.epics.ioc.support.RecordProcessRequester;
 
 /**
  * Factory for periodic and event scanning.

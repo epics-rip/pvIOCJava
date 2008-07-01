@@ -5,9 +5,9 @@
  */
 package org.epics.ioc.db;
 
-import org.epics.ioc.process.RecordProcess;
 import org.epics.ioc.pv.PVField;
 import org.epics.ioc.pv.PVRecord;
+import org.epics.ioc.support.RecordProcess;
 
 
 

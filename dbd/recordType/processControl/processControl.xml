@@ -26,7 +26,7 @@
 
 
 <support name = "processControl"
-   factoryName = "org.epics.ioc.support.ProcessControlFactory" />
+   factoryName = "org.epics.ioc.support.basic.ProcessControlFactory" />
 
 
 </DBDefinition>
