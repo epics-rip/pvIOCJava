@@ -14,5 +14,5 @@
 </structure>
 
 <support name = "floatHistory"
-  factoryName = "org.epics.ioc.support.HistoryFactory" />
+  factoryName = "org.epics.ioc.support.basic.HistoryFactory" />
 </DBDefinition>

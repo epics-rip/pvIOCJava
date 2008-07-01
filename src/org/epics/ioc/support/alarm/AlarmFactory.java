@@ -3,12 +3,10 @@
  * EPICS JavaIOC is distributed subject to a Software License Agreement found
  * in file LICENSE that is included with this distribution.
  */
-package org.epics.ioc.support;
+package org.epics.ioc.support.alarm;
 
 import org.epics.ioc.db.DBField;
 import org.epics.ioc.db.DBStructure;
-import org.epics.ioc.process.RecordProcess;
-import org.epics.ioc.process.SupportState;
 import org.epics.ioc.pv.Field;
 import org.epics.ioc.pv.PVField;
 import org.epics.ioc.pv.PVInt;
@@ -16,6 +14,10 @@ import org.epics.ioc.pv.PVString;
 import org.epics.ioc.pv.PVStructure;
 import org.epics.ioc.pv.Structure;
 import org.epics.ioc.pv.Type;
+import org.epics.ioc.support.AbstractSupport;
+import org.epics.ioc.support.RecordProcess;
+import org.epics.ioc.support.Support;
+import org.epics.ioc.support.SupportState;
 import org.epics.ioc.util.AlarmSeverity;
 import org.epics.ioc.util.MessageType;
 

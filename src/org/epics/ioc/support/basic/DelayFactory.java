@@ -3,19 +3,21 @@
  * EPICS JavaIOC is distributed subject to a Software License Agreement found
  * in file LICENSE that is included with this distribution.
  */
-package org.epics.ioc.support;
+package org.epics.ioc.support.basic;
 
 import java.util.Timer;
 import java.util.TimerTask;
 
 import org.epics.ioc.db.DBRecord;
 import org.epics.ioc.db.DBStructure;
-import org.epics.ioc.process.ProcessContinueRequester;
-import org.epics.ioc.process.RecordProcess;
-import org.epics.ioc.process.SupportProcessRequester;
-import org.epics.ioc.process.SupportState;
 import org.epics.ioc.pv.PVLong;
 import org.epics.ioc.pv.PVStructure;
+import org.epics.ioc.support.AbstractSupport;
+import org.epics.ioc.support.ProcessContinueRequester;
+import org.epics.ioc.support.RecordProcess;
+import org.epics.ioc.support.Support;
+import org.epics.ioc.support.SupportProcessRequester;
+import org.epics.ioc.support.SupportState;
 import org.epics.ioc.util.MessageType;
 import org.epics.ioc.util.RequestResult;
 
@@ -40,8 +42,8 @@ public class DelayFactory {
     
     private static class DelayImpl extends AbstractSupport implements ProcessContinueRequester
     {       
-        private TimerTask timerTask = null;
         private DBStructure dbStructure = null;
+        private PVStructure pvStructure = null;
         private DBRecord dbRecord = null;
         private RecordProcess recordProcess = null;
         private PVLong minAccess = null;
@@ -55,6 +57,7 @@ public class DelayFactory {
         private DelayImpl(DBStructure dbStructure) {
             super(supportName,dbStructure);
             this.dbStructure = dbStructure;
+            pvStructure = dbStructure.getPVStructure();
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.process.AbstractSupport#initialize()
@@ -97,7 +100,7 @@ public class DelayFactory {
                 return;
             }
             delay = min;
-            timerTask = new DelayTask(this);
+            
             setSupportState(SupportState.ready);
         }
         /* (non-Javadoc)
@@ -112,8 +115,14 @@ public class DelayFactory {
          */
         public void process(SupportProcessRequester supportProcessRequester) {
             this.supportProcessRequester = supportProcessRequester;
-            
-            timer.schedule(timerTask, delay);
+
+            try {
+                TimerTask timerTask = new DelayTask(this);
+                timer.schedule(timerTask, delay);
+            } catch (IllegalStateException e) {
+                pvStructure.message(
+                        " timer.schedule failed " + e.getMessage(), MessageType.error);
+            }
             delay += inc;
             if(delay>max) delay = min;
         }

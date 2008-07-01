@@ -7,6 +7,6 @@
 </structure>
 
 <support name = "supportArray"
-  factoryName = "org.epics.ioc.support.SupportArrayFactory" />
+  factoryName = "org.epics.ioc.support.basic.SupportArrayFactory" />
 
 </DBDefinition>

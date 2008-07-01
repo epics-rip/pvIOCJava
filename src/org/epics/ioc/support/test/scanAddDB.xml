@@ -1,0 +1,48 @@
+<?xml version="1.0" ?>
+<IOCDatabase>
+<record name = "counter" type = "calcDouble">
+    <scan>
+        <type><choice>periodic</choice></type>
+        <rate>0.5</rate>
+    </scan>
+    <calcArgArray>
+        <element structureName = "calcDoubleArg">
+            <value>0</value>
+            <name>min</name>
+        </element>
+        <element structureName = "calcDoubleArg">
+            <value>1e9</value>
+            <name>max</name>
+        </element>
+        <element structureName = "calcDoubleArg">
+            <value>100.0</value>
+            <name>inc</name>
+        </element>
+    </calcArgArray>
+    <calculator supportName = "counterCalculator" />
+    <supportArray>
+        <element structureName = "supportArrayElement">
+            <wait>true</wait>
+            <link  supportName = "processSupport" structureName = "processSupport">
+                    <pvname>double01</pvname>
+            </link>
+        </element>
+        <element structureName = "supportArrayElement">
+            <wait>false</wait>
+            <link  supportName = "outputSupport" structureName = "outputSupport">
+                    <pvname>double02</pvname>
+                    <process>true</process>
+            </link>
+        </element>
+    </supportArray>
+</record>
+<record name = "double01" type = "double">
+    <input supportName = "inputSupport" structureName = "inputSupport">
+            <pvname>counter</pvname>
+            <process>false</process>
+    </input>
+</record>
+<record name = "double02" type = "double">
+</record>
+
+</IOCDatabase>

@@ -2,6 +2,6 @@
 <DBDefinition>
 
 <support name = "generic"
-   factoryName = "org.epics.ioc.support.GenericFactory" />
+   factoryName = "org.epics.ioc.support.basic.GenericFactory" />
 
 </DBDefinition>

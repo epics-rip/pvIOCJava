@@ -1,0 +1,271 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+      "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta http-equiv="content-type" content="text/html; charset=iso-8859-1" />
+  <title>EPICS JavaIOC: portDriver support</title>
+</head>
+
+<body>
+<h1 style="text-align: center">EPICS JavaIOC: support<br />
+package: org.epics.ioc.support.pdrv<br />
+2008.06.26</h1>
+CONTENTS 
+
+<div class="toc">
+<ul>
+  <li><a href="#Overview">Overview</a></li>
+  <li><a href="#portDriver">portDriver Support</a> 
+    <ul>
+      <li><a href="#Java">Java Definitions</a></li>
+      <li><a href="#PDRVSuppor">PDRVSupport</a></li>
+    </ul>
+  </li>
+  <li><a href="#AbstractPD">AbstractPDRVSupport</a> 
+    <ul>
+      <li><a href="#PDRVSuppor1">PDRVSupportFactory</a></li>
+    </ul>
+  </li>
+  <li><a href="#PDRVPortCr">PDRVPortCreateFactory</a></li>
+  <li><a href="#PDRVPortDe">PDRVPortDeviceControlFactory</a></li>
+</ul>
+</div>
+<hr />
+
+<h2 style="text-align: center" id="Overview">Overview</h2>
+<hr />
+
+<p>This package implements support for connecting database fields to
+portDriver.</p>
+
+<p>The following interfaces are available:</p>
+<dl>
+  <dt>PDRVSupport</dt>
+    <dd>An extension for links to portDriver.</dd>
+</dl>
+
+<p>The following abstract classes are provided for implementing support:</p>
+<dl>
+  <dt>AbstractPDRVSupport</dt>
+    <dd>A base class for portDriver support.</dd>
+</dl>
+
+<p>The following factories are provided:</p>
+<dl>
+  <dt>PDRVSupportFactory</dt>
+    <dd>Creates support for each of the portDriver interfaces.</dd>
+  <dt>PDRVPortCreateFactory</dt>
+    <dd>Creates a portDriver port.</dd>
+  <dt>PDRVPortDeviceControlFactory</dt>
+    <dd>Creates support for a portDeviceControl record, which provides the
+      ability change the connect, enable, traceMask, and traceIOMask states
+      of a port or a device connected to a port. It also can get a report for
+      a port and/or device.</dd>
+</dl>
+<hr />
+
+<h2 style="text-align: center" id="portDriver">portDriver Support</h2>
+<hr />
+
+<h3 id="Java">Java Definitions</h3>
+
+<p>The following are the interface, abstract support, and factories for
+portDriver support.</p>
+<pre>    public interface PDRVSupport extends Support {
+        boolean isProcess();
+        abstract void queueCallback();
+    }
+
+    public class PDRVSupportFactory {
+        public static Support create(DBStructure dbStructure);
+    }
+    
+    public abstract class AbstractPDRVSupportSupport extends AbstractSupport implements
+    ProcessContinueRequester,QueueRequestCallback,
+    PDRVSupportSupport,
+    RecordProcessRequester
+    {
+        protected AbstractPDRVSupportSupport(String supportName,DBStructure dbStructure);
+        protected String supportName;
+        protected DBStructure dbStructure;
+        protected PVStructure pvStructure;
+        protected DBField valueDBField = null;
+        protected PVField valuePVField = null;
+        protected DBRecord dbRecord = null;
+        protected PVRecord pvRecord = null;
+        protected String recordName = null;
+        protected String fullName = null;
+        protected RecordProcess recordProcess = null;
+    
+        protected AlarmSupport alarmSupport = null;
+        protected PVStructure configStructure = null;;
+        protected PVString pvPortName = null;
+        protected PVInt pvAddr = null;
+        protected PVInt pvMask = null;
+        protected PVInt pvSize = null;
+        protected PVDouble pvTimeout = null;
+        protected PVBoolean pvProcess = null;
+        protected PVString pvDrvParams = null;
+    
+        protected User user = null;
+        protected Port port = null;
+        protected Device device = null;
+        protected Trace portTrace = null;
+        protected Trace deviceTrace = null;
+    
+        protected DriverUser driverUser = null;
+    
+        protected SupportProcessRequester supportProcessRequester = null;
+        public void initialize();
+        public void uninitialize();
+        public void start();
+        public void stop();
+        public void process(SupportProcessRequester supportProcessRequester);
+        public void message(String message,MessageType messageType);
+        public void processContinue();
+        public void callback(Status status, User user);
+        public boolean isProcess();
+        public void queueCallback();
+        public void recordProcessComplete();
+        public void recordProcessResult(RequestResult requestResult)
+    }
+
+    public class PDRVPortCreateFactory {
+        public static Support create(DBStructure dbStructure);
+    }
+
+    public class PDRVPortDeviceControlFactory {
+        public static Support create(DBStructure dbStructure)
+    }</pre>
+
+<h3 id="PDRVSuppor">PDRVSupport</h3>
+
+<p>This defines the two methods:</p>
+<dl>
+  <dt style="font-family: courier;">isProcess</dt>
+    <dd>If the support is interrupt driver should it process the record. The
+      answer will be true only if: 
+      <ol>
+        <li>The constructor for AbstractPDRVSupportSupport is called with
+          interruptOK true</li>
+        <li>pdrvSupport.interrupt is true.</li>
+        <li>The support is the record processor.</li>
+      </ol>
+    </dd>
+  <dt style="font-family: courier;">queueCallback</dt>
+    <dd>A method that must be implemented by all asynchronous support. his
+      probably means all support except interrupt listeners. </dd>
+</dl>
+<hr />
+
+<h2 style="text-align: center" id="AbstractPD">AbstractPDRVSupport</h2>
+<hr />
+
+<p>This implements muck of the work involved in connecting and managing the
+connection to a port and device. Look at some of the code in
+PDRVSupportFactory for how to use the abstract support.</p>
+
+<h3 id="PDRVSuppor1">PDRVSupportFactory</h3>
+
+<p>This implements all of the link support defined in .xml file
+javaIOC/dbd/structures/portDriver.xml.</p>
+<pre>&lt;structure name = "pdrvSupport"&gt;
+  &lt;field name = "portName" type = "string" /&gt;
+  &lt;field name = "addr" type = "int" /&gt;
+  &lt;field name = "timeout" type = "double" /&gt;
+  &lt;field name = "mask" type = "int" /&gt;
+  &lt;field name = "size" type = "int" /&gt;
+  &lt;field name = "process" type = "boolean" default = "false" /&gt;
+  &lt;field name = "drvParams" type = "structure" /&gt;
+&lt;/structure&gt;
+
+&lt;support name = "pdrvOctetInput"
+  factoryName = "org.epics.ioc.support.pdrv.PDRVSupportFactory" /&gt;
+&lt;support name = "pdrvOctetInterruptInput"
+  factoryName = "org.epics.ioc.support.pdrv.PDRVSupportFactory" /&gt;
+&lt;support name = "pdrvOctetOutput" 
+  factoryName = "org.epics.ioc.support.pdrv.PDRVSupportFactory" /&gt;
+
+&lt;support name = "pdrvInt32Input" 
+  factoryName = "org.epics.ioc.support.pdrv.PDRVSupportFactory" /&gt;
+&lt;support name = "pdrvInt32InterruptInput"
+  factoryName = "org.epics.ioc.support.pdrv.PDRVSupportFactory" /&gt;
+&lt;support name = "pdrvInt32AverageInput"
+  factoryName = "org.epics.ioc.support.pdrv.PDRVSupportFactory" /&gt;
+&lt;support name = "pdrvInt32Output" 
+  factoryName = "org.epics.ioc.support.pdrv.PDRVSupportFactory" /&gt;
+
+&lt;support name = "pdrvInt32ArrayInput"
+  factoryName = "org.epics.ioc.support.pdrv.PDRVSupportFactory" /&gt;
+&lt;support name = "pdrvInt32ArrayInterruptInput"
+  factoryName = "org.epics.ioc.support.pdrv.PDRVSupportFactory" /&gt;
+&lt;support name = "pdrvInt32ArrayOutput" 
+  factoryName = "org.epics.ioc.support.pdrv.PDRVSupportFactory" /&gt;
+
+&lt;support name = "pdrvFloat64Input"
+  factoryName = "org.epics.ioc.support.pdrv.PDRVSupportFactory" /&gt;
+&lt;support name = "pdrvFloat64InterruptInput"
+  factoryName = "org.epics.ioc.support.pdrv.PDRVSupportFactory" /&gt;
+&lt;support name = "pdrvFloat64AverageInput"
+  factoryName = "org.epics.ioc.support.pdrv.PDRVSupportFactory" /&gt;
+&lt;support name = "pdrvFloat64Output"
+  factoryName = "org.epics.ioc.support.pdrv.PDRVSupportFactory" /&gt;
+
+&lt;support name = "pdrvFloat64ArrayInput"
+  factoryName = "org.epics.ioc.support.pdrv.PDRVSupportFactory" /&gt;
+&lt;support name = "pdrvFloat64ArrayInterruptInput" 
+  factoryName = "org.epics.ioc.support.pdrv.PDRVSupportFactory" /&gt;
+&lt;support name = "pdrvFloat64ArrayOutput" 
+  factoryName = "org.epics.ioc.support.pdrv.PDRVSupportFactory" /&gt;
+
+&lt;support name = "pdrvUInt32DigitalInput"
+  factoryName = "org.epics.ioc.support.pdrv.PDRVSupportFactory" /&gt;
+&lt;support name = "pdrvUInt32DigitalInterruptInput"
+  factoryName = "org.epics.ioc.support.pdrv.PDRVSupportFactory" /&gt;
+&lt;support name = "pdrvUInt32DigitalOutput" 
+  factoryName = "org.epics.ioc.support.pdrv.PDRVSupportFactory" /&gt;</pre>
+<hr />
+
+<h2 style="text-align: center" id="PDRVPortCr">PDRVPortCreateFactory</h2>
+<hr />
+
+<p>This implements support for the portRecord which has the definition:</p>
+<pre>&lt;recordType name = "portCreate" supportName = "portCreate" &gt;
+  &lt;field name = "factoryName" type = "string" /&gt;
+  &lt;field name = "portName" type = "string" /&gt;
+  &lt;field name = "autoConnect" type = "boolean" default = "true" /&gt;
+  &lt;field name = "priority" type = "structure" structureName = "scanPriority" /&gt;
+  &lt;field name = "driverParameters" type = "structure" structureName = "null"/&gt;
+&lt;/recordType&gt;
+
+&lt;support name = "portCreate"
+   factoryName = "org.epics.ioc.support.pdrv.PDRVPortCreateFactory" /&gt;</pre>
+
+<p>This is support for a record or structure that initializes a portDriver
+port.</p>
+<hr />
+
+<h2 style="text-align: center"
+id="PDRVPortDe">PDRVPortDeviceControlFactory</h2>
+<hr />
+
+<p>This implements support for the portDeviceControl which has the
+definition:</p>
+<pre>&lt;recordType name = "portDeviceControl" supportName = "portDeviceControl" &gt;
+  &lt;field name = "message" type = "string" /&gt;
+  &lt;field name = "portDevice" type = "string" /&gt;
+  &lt;field name = "connect" type = "structure" structureName = "booleanState"  /&gt;
+  &lt;field name = "enable" type = "structure" structureName = "booleanState"   /&gt;
+  &lt;field name = "autoConnect" type = "structure" structureName = "booleanState" /&gt;
+  &lt;field name = "traceMask" type = "structure" structureName = "intState"  /&gt;
+  &lt;field name = "traceIOMask" type = "structure" structureName = "intState" /&gt;
+  &lt;field name = "traceIOTruncateSize" type = "structure" structureName = "intState" /&gt;
+  &lt;field name = "report" type = "boolean" /&gt;
+  &lt;field name = "reportDetails" type = "int" /&gt;
+&lt;/recordType&gt;
+
+&lt;support name = "portDeviceControl"
+   factoryName = "org.epics.ioc.support.pdrv.PDRVPortDeviceControlFactory" /&gt;</pre>
+</body>
+</html>

@@ -1,0 +1,227 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+      "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta http-equiv="content-type" content="text/html; charset=iso-8859-1" />
+  <title>EPICS JavaIOC: support</title>
+</head>
+
+<body>
+<h1 style="text-align: center">EPICS JavaIOC: alarm support<br />
+package: org.epics.ioc.alarm.support<br />
+2008.06.26</h1>
+CONTENTS 
+
+<div class="toc">
+<ul>
+  <li><a href="#Overview">Overview</a></li>
+  <li><a href="#Alarm">Alarm Support</a></li>
+  <li><a href="#Value">Value Alarms</a>
+    <ul>
+      <li><a href="#Boolean">Boolean Alarms</a></li>
+      <li><a href="#Numeric">Numeric Alarms</a></li>
+      <li><a href="#Enumerated">Enumerated Alarms</a></li>
+    </ul>
+  </li>
+</ul>
+</div>
+<hr />
+
+<h2 style="text-align: center" id="Overview">Overview</h2>
+<hr />
+
+<p>Support is provided for the alarm field itself and alarm calculation for
+the primitive types and for an enumerated structure.</p>
+
+<p>The following factories are provided:</p>
+<dl>
+  <dt>AlarmFactory</dt>
+    <dd>Complete support for field alarm.</dd>
+  <dt>BooleanAlarmFactory</dt>
+    <dd>Alarm support for boolean fields.</dd>
+  <dt>ByteAlarmFactory</dt>
+    <dd>Alarm support for byte fields.</dd>
+  <dt>ShortAlarmFactory</dt>
+    <dd>Alarm support for short fields.</dd>
+  <dt>IntAlarmFactory</dt>
+    <dd>Alarm support for int fields.</dd>
+  <dt>LongAlarmFactory</dt>
+    <dd>Alarm support for long fields.</dd>
+  <dt>FloatAlarmFactory</dt>
+    <dd>Alarm support for float fields.</dd>
+  <dt>DoubleAlarmFactory</dt>
+    <dd>Alarm support for double fields.</dd>
+  <dt>EnumeratedAlarmFactory</dt>
+    <dd>Alarm support for enum field..</dd>
+</dl>
+<hr />
+
+<h2 style="text-align: center" id="Alarm">Alarm Support</h2>
+<hr />
+
+<p>AlarmSupport is support for a field named which must have type structure
+and the structure must be an alarm structure. Within the structure hierarchy
+of a record multiple alarm fields can exist. Some support, e.g. generic,
+calls the support for the alarm field defined in the top level structure
+(defined in common.xml). If multiple alarm fields reside in a record then the
+top level alarm field, which is what the outside world normally accesses has
+a severity at least as great as any of the lower level alarms.</p>
+<pre>    interface AlarmSupport extends Support{
+        void beginProcess();
+        void endProcess();
+        boolean setAlarm(String message, AlarmSeverity severity);
+    }
+
+    class AlarmFactory {
+        public static Support create(DBStructure dbStructure);
+        public static AlarmSupport findAlarmSupport(DBField startDBField);
+    }</pre>
+
+<p>AlarmSupport provides the methods:</p>
+<dl>
+  <dt style="font-family: courier;">Support</dt>
+    <dd>Standard support methods..</dd>
+  <dt style="font-family: courier;">beginProcess</dt>
+    <dd>This is called when a record begins processing.</dd>
+  <dt style="font-family: courier;">endProcess</dt>
+    <dd>This is called when a record finishes processing. If setAlarm was not
+      called since beginProcess was called than it makes sure that the
+      severity is noAlarm. If the severity and/or message was changed during
+      record processing it calls postPut.</dd>
+  <dt style="font-family: courier;">setAlarm</dt>
+    <dd>While a record is processing and code, normally one of the support
+      modules described below, can call setAlarm. This method changes the new
+      message and severity only if the severity passed to setAlarm is greater
+      than the current new severity or if this is the first call since the
+      record started processing.</dd>
+</dl>
+
+<p>AlarmFactory provides the static methods:</p>
+<dl>
+  <dt style="font-family: courier;">create</dt>
+    <dd>Create support for a alarm field. This is called by
+    SupportCreation.</dd>
+  <dt style="font-family: courier;">findAlarmSupport</dt>
+    <dd>Find an alarm field looking up the structure hierarchy. Return it or
+      retrurn null if none is found.</dd>
+</dl>
+<hr />
+
+<h2 style="text-align: center" id="Value">Value Alarms</h2>
+<hr />
+
+<p>Support is provided for alarms for the following types of fields: boolean,
+numeric, and enumerated.</p>
+
+<h3 id="Boolean">Boolean Alarms</h3>
+<pre>    public class BooleanAlarmFactory {
+        public static Support create(DBStructure dbStructure);
+    }</pre>
+
+<p>This provides support for reporting alarms for boolean fields. The
+configurationStructure must be a structure booleanAlarm, which has the
+fields:</p>
+<dl>
+  <dt style="font-family: courier;">active</dt>
+    <dd>A boolean field. If (false,true) then alarm conditions (are not,are)
+      checked.</dd>
+  <dt style="font-family: courier;">falseAlarm</dt>
+    <dd>An alarmSeverity menu. This specifies the severity if the value field
+      is false.</dd>
+  <dt style="font-family: courier;">trueAlarm</dt>
+    <dd>An alarmSeverity menu. This specifies the severity if the value field
+      is true.</dd>
+  <dt style="font-family: courier;">changeStateAlarm</dt>
+    <dd>An alarmSeverity menu. This specifies the severity if the value field
+      changes.</dd>
+</dl>
+
+<h3 id="Numeric">Numeric Alarms</h3>
+<pre>    public class ByteAlarmFactory {
+        public static Support create(DBStructure dbStructure);
+    }
+    public class ShortAlarmFactory {
+        public static Support create(DBStructure dbStructure);
+    }
+    public class IntAlarmFactory {
+        public static Support create(DBStructure dbStructure);
+    }
+    public class LongAlarmFactory {
+        public static Support create(DBStructure dbStructure);
+    }
+    public class FloatAlarmFactory {
+        public static Support create(DBStructure dbStructure);
+    }
+    public class DoubleAlarmFactory {
+        public static Support create(DBStructure dbStructure);
+    }</pre>
+
+<p>The above factories provide alarm support for the associated type of
+field, e.g. FloatAlarmFactory provides alarm support for a field of type
+float. The support for each type except that float and double also support
+hystersis, which is described below. Each has two associated xml structure
+definitions. For example the definitions for double are:</p>
+<pre>&lt;structure name = "doubleAlarmInterval"&gt;
+  &lt;field name = "value" type = "double" /&gt;
+  &lt;field name = "severity" type = "structure" structureName = "alarmSeverity" /&gt;
+  &lt;field name = "message" type = "string" /&gt;
+&lt;/structure&gt;
+&lt;structure name = "doubleAlarm" supportName = "doubleAlarm" &gt;
+  &lt;field name = "active" type = "boolean" /&gt;
+  &lt;field name = "interval" type = "array" elementType = "structure" /&gt;
+  &lt;field name = "outOfRange" type = "structure" structureName = "alarmSeverity" /&gt;
+  &lt;field name = "hystersis" type = "double" /&gt;
+&lt;/structure&gt;</pre>
+
+<p>The first structure defines an interval for alarm checking. It has the
+fields:</p>
+<dl>
+  <dt style="font-family: courier;">value</dt>
+    <dd>The upper bound for a value.</dd>
+  <dt style="font-family: courier;">severity</dt>
+    <dd>The alarm severity for a value that falls into this interval.</dd>
+  <dt style="font-family: courier;">message</dt>
+    <dd>The alarm message for a value that falls into this interval.</dd>
+</dl>
+
+<p>The second structure has the following fields:</p>
+<dl>
+  <dt style="font-family: courier;">active</dt>
+    <dd>A boolean field. If (false,true) then alarm conditions (are not,are)
+      checked.</dd>
+  <dt style="font-family: courier;">interval</dt>
+    <dd>A array of intervals. When the process method of value alarm support
+      is called it looks for the interval for the current value. It starts
+      with the first interval and continues until it finds an interval such
+      that value&lt;=interval.value. This determines the alarm severity.</dd>
+  <dt style="font-family: courier;">outOfRange</dt>
+    <dd>The alarm severity if no interval is found.</dd>
+  <dt style="font-family: courier;">hystersis</dt>
+    <dd>If value goes into alarm this is the amount it must come out of alarm
+      before the alarm severity is modified. This prevents alarm .</dd>
+</dl>
+
+<h3 id="Enumerated">Enumerated Alarms</h3>
+<pre>    public class EnumeratedAlarmFactory {
+        public static Support create(DBStructure dbStructure);
+    }</pre>
+
+<p>The above factory provides support for an enumerated structure field.</p>
+
+<p>The enumeratedAlarm structure has the following fields:</p>
+<dl>
+  <dt style="font-family: courier;">active</dt>
+    <dd>A boolean field. If (false,true) then alarm conditions (are not,are)
+      checked.</dd>
+  <dt style="font-family: courier;">stateSeverity</dt>
+    <dd>An array of stateSeverity alarmSeverity menu definitions. When the
+      process method is called the value field is the index for this array.
+      The corresponding alarmSeverity menu is found and it determines the
+      alarm severity.</dd>
+  <dt style="font-family: courier;">changeStateAlarm</dt>
+    <dd>An alarmSeverity menu. This specifies the severity if the value field
+      changes.</dd>
+</dl>
+</body>
+</html>

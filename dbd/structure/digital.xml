@@ -25,9 +25,9 @@
 </structure>
 
 <support name = "digitalInput"
-   factoryName = "org.epics.ioc.support.DigitalFactory" />
+   factoryName = "org.epics.ioc.support.basic.DigitalFactory" />
 
 <support name = "digitalOutput"
-   factoryName = "org.epics.ioc.support.DigitalFactory" />
+   factoryName = "org.epics.ioc.support.basic.DigitalFactory" />
 
 </DBDefinition>

@@ -2,6 +2,6 @@
 <DBDefinition>
 
 <support name = "event"
-   factoryName = "org.epics.ioc.support.EventFactory" />
+   factoryName = "org.epics.ioc.support.basic.EventFactory" />
 
 </DBDefinition>

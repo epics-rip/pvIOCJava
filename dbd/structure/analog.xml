@@ -51,12 +51,12 @@
 </structure>
 
 <support name = "linearConvertInput"
-  factoryName = "org.epics.ioc.support.LinearConvertFactory" />
+  factoryName = "org.epics.ioc.support.basic.LinearConvertFactory" />
 
 <support name = "linearConvertOutput"
-  factoryName = "org.epics.ioc.support.LinearConvertFactory" />
+  factoryName = "org.epics.ioc.support.basic.LinearConvertFactory" />
 
 <support name = "incremental"
-   factoryName = "org.epics.ioc.support.IncrementalFactory" />
+   factoryName = "org.epics.ioc.support.basic.IncrementalFactory" />
 
 </DBDefinition>

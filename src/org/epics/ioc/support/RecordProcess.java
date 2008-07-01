@@ -3,7 +3,7 @@
  * EPICS JavaIOC is distributed subject to a Software License Agreement found
  * in file LICENSE that is included with this distribution.
  */
-package org.epics.ioc.process;
+package org.epics.ioc.support;
 
 import org.epics.ioc.db.DBRecord;
 import org.epics.ioc.util.TimeStamp;
@@ -105,36 +105,6 @@ public interface RecordProcess {
      */
     String getRecordProcessRequesterName();
     /**
-     * Can the record process itself?
-     * @return (false,true) if the record (can not, can) process itself.
-     */
-    boolean canProcessSelf();
-    /**
-     * Request that record process itself.
-     * This will only be successful of scan.selfScan is true and the record is not active.
-     * @param recordProcessRequester The requester to call if the request is successful.
-     * @return (false,true) if the record started processing.
-     */
-    boolean processSelfRequest(RecordProcessRequester recordProcessRequester);
-    /**
-     * Set the record active.
-     * This will only be successful of scan.selfScan is true and the record is not active.
-     * @param recordProcessRequester The recordProcessRequester.
-     */
-    void processSelfSetActive(RecordProcessRequester recordProcessRequester);
-    /**
-     * Start processing.
-     * @param recordProcessRequester The recordProcessRequester.
-     * @param leaveActive Leave the record active when process is done.
-     * The requester must call setInactive.
-     */
-    void processSelfProcess(RecordProcessRequester recordProcessRequester, boolean leaveActive);
-    /**
-     * Called by the recordProcessRequester when it called processSelfProcess with leaveActive true.
-     * @param recordProcessRequester The recordProcessRequester.
-     */
-    void processSelfSetInactive(RecordProcessRequester recordProcessRequester);
-    /**
      * Prepare for processing a record but do not call record support.
      * A typical use of this method is when the processor wants to modify fields
      * of the record before it is processed.
@@ -170,6 +140,42 @@ public interface RecordProcess {
      * @param recordProcessRequester
      */
     void setInactive(RecordProcessRequester recordProcessRequester);
+    /**
+     * Can the record process itself?
+     * @return (false,true) if the record (can not, can) process itself.
+     */
+    boolean canProcessSelf();
+    /**
+     * Request that record process itself.
+     * If successful the caller is the temporary holder of the right to call processSelfSetActive,
+     * processSelfProcess, and processSelfSetInactive. When record completes processing the caller will no longer have this right.
+     * @param recordProcessRequester The requester to call if the request is successful.
+     * @return (false,true) if the record started processing.
+     */
+    boolean processSelfRequest(RecordProcessRequester recordProcessRequester);
+    /**
+     * Set the record active.
+     * Similar to setActive since the actual recordProcessor calls setActive.
+     * @param recordProcessRequester The recordProcessRequester.
+     * @return (false,true) if the request was successful.
+     */
+    boolean processSelfSetActive(RecordProcessRequester recordProcessRequester);
+    /**
+     * Start processing.
+     * Similar to process since the actual recordProcessor calls process.
+     * @param recordProcessRequester The recordProcessRequester.
+     * @param leaveActive Leave the record active when process is done.
+     * The requester must call setInactive.
+     * @return (false,true) if the request was successful.
+     */
+    boolean processSelfProcess(RecordProcessRequester recordProcessRequester, boolean leaveActive);
+    /**
+     * Called if processSelfProcess was called with leaveActive true.
+     * Similar to setInactive since the actual recordProcessor calls setInactive.
+     * @param recordProcessRequester The recordProcessRequester.
+     */
+    void processSelfSetInactive(RecordProcessRequester recordProcessRequester);
+    
     /**
      * Ask recordProcess to continue processing.
      * This must be called with the record unlocked.

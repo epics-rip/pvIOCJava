@@ -3,7 +3,7 @@
  * EPICS JavaIOC is distributed subject to a Software License Agreement found
  * in file LICENSE that is included with this distribution.
  */
-package org.epics.ioc.support;
+package org.epics.ioc.support.pdrv;
 
 import org.epics.ioc.db.DBField;
 import org.epics.ioc.db.DBRecord;
@@ -18,11 +18,6 @@ import org.epics.ioc.pdrv.Trace;
 import org.epics.ioc.pdrv.User;
 import org.epics.ioc.pdrv.interfaces.DriverUser;
 import org.epics.ioc.pdrv.interfaces.Interface;
-import org.epics.ioc.process.ProcessContinueRequester;
-import org.epics.ioc.process.RecordProcess;
-import org.epics.ioc.process.RecordProcessRequester;
-import org.epics.ioc.process.SupportProcessRequester;
-import org.epics.ioc.process.SupportState;
 import org.epics.ioc.pv.PVBoolean;
 import org.epics.ioc.pv.PVDouble;
 import org.epics.ioc.pv.PVField;
@@ -32,6 +27,14 @@ import org.epics.ioc.pv.PVString;
 import org.epics.ioc.pv.PVStructure;
 import org.epics.ioc.pv.Structure;
 import org.epics.ioc.pv.Type;
+import org.epics.ioc.support.AbstractSupport;
+import org.epics.ioc.support.ProcessContinueRequester;
+import org.epics.ioc.support.RecordProcess;
+import org.epics.ioc.support.RecordProcessRequester;
+import org.epics.ioc.support.SupportProcessRequester;
+import org.epics.ioc.support.SupportState;
+import org.epics.ioc.support.alarm.AlarmFactory;
+import org.epics.ioc.support.alarm.AlarmSupport;
 import org.epics.ioc.util.AlarmSeverity;
 import org.epics.ioc.util.MessageType;
 import org.epics.ioc.util.RequestResult;

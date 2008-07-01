@@ -113,30 +113,30 @@
 </structure>
 
 <support name = "alarm"
-  factoryName = "org.epics.ioc.support.AlarmFactory" />
+  factoryName = "org.epics.ioc.support.alarm.AlarmFactory" />
 
 <support name = "booleanAlarm"
-  factoryName = "org.epics.ioc.support.BooleanAlarmFactory" />
+  factoryName = "org.epics.ioc.support.alarm.BooleanAlarmFactory" />
 
 <support name = "byteAlarm"
-  factoryName = "org.epics.ioc.support.ByteAlarmFactory" />
+  factoryName = "org.epics.ioc.support.alarm.ByteAlarmFactory" />
 
 <support name = "shortAlarm"
-  factoryName = "org.epics.ioc.support.ShortAlarmFactory" />
+  factoryName = "org.epics.ioc.support.alarm.ShortAlarmFactory" />
 
 <support name = "intAlarm"
-  factoryName = "org.epics.ioc.support.IntAlarmFactory" />
+  factoryName = "org.epics.ioc.support.alarm.IntAlarmFactory" />
 
 <support name = "longAlarm"
-  factoryName = "org.epics.ioc.support.LongAlarmFactory" />
+  factoryName = "org.epics.ioc.support.alarm.LongAlarmFactory" />
 
 <support name = "floatAlarm"
-  factoryName = "org.epics.ioc.support.FloatAlarmFactory" />
+  factoryName = "org.epics.ioc.support.alarm.FloatAlarmFactory" />
 
 <support name = "doubleAlarm"
-  factoryName = "org.epics.ioc.support.DoubleAlarmFactory" />
+  factoryName = "org.epics.ioc.support.alarm.DoubleAlarmFactory" />
 
 <support name = "enumeratedAlarm"
-  factoryName = "org.epics.ioc.support.EnumeratedAlarmFactory" />
+  factoryName = "org.epics.ioc.support.alarm.EnumeratedAlarmFactory" />
 
 </DBDefinition>

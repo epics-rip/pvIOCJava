@@ -19,7 +19,7 @@ import org.eclipse.swt.widgets.Text;
 import org.epics.ioc.db.DBRecord;
 import org.epics.ioc.db.IOCDB;
 import org.epics.ioc.db.IOCDBFactory;
-import org.epics.ioc.process.RecordProcess;
+import org.epics.ioc.support.RecordProcess;
 import org.epics.ioc.util.EventScanner;
 import org.epics.ioc.util.MessageType;
 import org.epics.ioc.util.PeriodicScanner;

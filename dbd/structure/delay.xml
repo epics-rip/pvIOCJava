@@ -9,6 +9,6 @@
 </structure>
 
 <support name = "delay"
-  factoryName = "org.epics.ioc.support.DelayFactory" />
+  factoryName = "org.epics.ioc.support.basic.DelayFactory" />
 
 </DBDefinition>

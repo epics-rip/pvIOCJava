@@ -31,6 +31,6 @@
 </structure>
 
 <support name = "scan"
-  factoryName = "org.epics.ioc.support.ScanFactory" />
+  factoryName = "org.epics.ioc.support.basic.ScanFactory" />
 
 </DBDefinition>
