@@ -78,6 +78,7 @@ public class CDMonitorFactory {
             }
             MonitorField monitorField
                 = new MonitorField(MonitorType.absoluteChange,type,value);
+            monitorField.initField(channelField.getPVField());
             monitorFieldList.add(monitorField);
             channelFieldList.add(channelField);
         }
@@ -92,6 +93,7 @@ public class CDMonitorFactory {
                 return;
             }
             MonitorField monitorField = new MonitorField(type,causeMonitor);
+            monitorField.initField(channelField.getPVField());
             monitorFieldList.add(monitorField);
             channelFieldList.add(channelField);
         }
@@ -107,6 +109,7 @@ public class CDMonitorFactory {
             }
             MonitorField monitorField
                 = new MonitorField(MonitorType.percentageChange,type,value);
+            monitorField.initField(channelField.getPVField());
             monitorFieldList.add(monitorField);
             channelFieldList.add(channelField);
         }
@@ -115,6 +118,7 @@ public class CDMonitorFactory {
          */
         public void lookForPut(ChannelField channelField, boolean causeMonitor) {
             MonitorField monitorField = new MonitorField(causeMonitor);
+            monitorField.initField(channelField.getPVField());
             monitorFieldList.add(monitorField);
             channelFieldList.add(channelField);
         }

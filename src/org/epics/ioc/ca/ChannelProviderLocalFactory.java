@@ -15,9 +15,9 @@ import org.epics.ioc.db.DBStructure;
 import org.epics.ioc.db.IOCDB;
 import org.epics.ioc.db.IOCDBFactory;
 import org.epics.ioc.db.RecordListener;
-import org.epics.ioc.process.RecordProcess;
-import org.epics.ioc.process.RecordProcessRequester;
 import org.epics.ioc.pv.PVField;
+import org.epics.ioc.support.RecordProcess;
+import org.epics.ioc.support.RecordProcessRequester;
 import org.epics.ioc.util.MessageType;
 import org.epics.ioc.util.RequestResult;
 
@@ -311,8 +311,7 @@ public class ChannelProviderLocalFactory  {
                 if(isRecordProcessRequester) {
                     if(recordProcess.process(this, false, null)) return;
                 } else if(recordProcess.processSelfRequest(this)) {
-                    recordProcess.processSelfProcess(this, false);
-                    return;
+                    if(recordProcess.processSelfProcess(this, false)) return;
                 }
                 channelProcessRequester.message(
                         "could not process record",MessageType.error);
@@ -410,8 +409,7 @@ public class ChannelProviderLocalFactory  {
                         if(recordProcess.process(this, true, null)) return;
                     } else {
                         if(recordProcess.processSelfRequest(this)) {
-                            recordProcess.processSelfProcess(this, true);
-                            return;
+                            if(recordProcess.processSelfProcess(this, true)) return;
                         }
                     }
                     channelGetRequester.message("process failed", MessageType.warning);
@@ -504,6 +502,7 @@ public class ChannelProviderLocalFactory  {
             private boolean process;
             
             private RecordProcess recordProcess = null;
+            private boolean canProcess = false;
             private boolean isRecordProcessRequester = false;
             
             private RequestResult requestResult = null;
@@ -551,21 +550,22 @@ public class ChannelProviderLocalFactory  {
                     return;
                 }
                 requestResult = RequestResult.success;
+                canProcess = false;
                 while(process) {
                     if(isRecordProcessRequester) {
                         if(!recordProcess.setActive(this)) {
-                            message("could not process record",MessageType.warning);
+                            message("setActive failed",MessageType.warning);
                             break;
                         }
                     } else {
                         boolean result = recordProcess.processSelfRequest(this);
-                        if(result){
-                            recordProcess.processSelfSetActive(this);
-                        }  else {
-                            message("could not process record",MessageType.warning);
+                        if(result) result = recordProcess.processSelfSetActive(this);
+                        if(!result){
+                            message("processSelfSetActive failed",MessageType.warning);
                             break;
                         }
                     }
+                    canProcess = true;
                     startPutData();
                     return;
                 }               
@@ -618,10 +618,12 @@ public class ChannelProviderLocalFactory  {
                 while(true) {
                     if(pvField==null) {
                         if(fieldIndex>=channelFields.length) {
-                            if(isRecordProcessRequester) {
-                                recordProcess.process(this, false, null);
-                            } else if(process) {
-                                recordProcess.processSelfProcess(this, false);
+                            if(canProcess) {
+                                if(isRecordProcessRequester) {
+                                    recordProcess.process(this, false, null);
+                                } else if(process) {
+                                    recordProcess.processSelfProcess(this, false);
+                                }
                             }
                             return;
                         }
@@ -656,6 +658,7 @@ public class ChannelProviderLocalFactory  {
             private ChannelPutGetRequester channelPutGetRequester = null;
             private boolean process;
             private RecordProcess recordProcess = null;
+            private boolean canProcess = false;
             private boolean isRecordProcessRequester = false;
             private RequestResult requestResult = null;
             
@@ -705,25 +708,28 @@ public class ChannelProviderLocalFactory  {
                     return;
                 }
                 requestResult = RequestResult.success;
+                canProcess = false;
                 while(process) {
                     if(isRecordProcessRequester) {
                         if(!recordProcess.setActive(this)) {
-                            message("could not process record",MessageType.warning);
+                            message("setActive failed",MessageType.warning);
                             break;
                         }
                     } else {
-                        if(recordProcess.processSelfRequest(this)){
-                            recordProcess.processSelfSetActive(this);
-                        }  else {
-                            message("could not process record",MessageType.warning);
-                           break;
+                        boolean result = recordProcess.processSelfRequest(this);
+                        if(result) result = recordProcess.processSelfSetActive(this);
+                        if(!result){
+                            message("processSelfSetActive failed",MessageType.warning);
+                            break;
                         }
                     }
+                    canProcess = true;
                     startPutData();
                     return;
                 }
                 startPutData();
                 startGetData();
+                channelPutGetRequester.getDone(requestResult);
             }
             /* (non-Javadoc)
              * @see org.epics.ioc.ca.ChannelPutGet#getDelayed(org.epics.ioc.pv.PVField)
@@ -780,10 +786,12 @@ public class ChannelProviderLocalFactory  {
                 while(true) {
                     if(pvField==null) {
                         if(fieldIndex>=putChannelFields.length) {
-                            if(isRecordProcessRequester) {
-                                recordProcess.process(this, true, null);
-                            } else if(process) {
-                                recordProcess.processSelfProcess(this, true);
+                            if(canProcess) {
+                                if(isRecordProcessRequester) {
+                                    recordProcess.process(this, true, null);
+                                } else if(process) {
+                                    recordProcess.processSelfProcess(this, true);
+                                }
                             }
                             return;
                         }

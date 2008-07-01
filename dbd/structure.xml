@@ -30,5 +30,8 @@
 <include href = "delay.xml" />
 <include href = "portDriver.xml" />
 <include removePath = "${JAVAIOC}/dbd/structure" />
+<include addPath = "${JAVAIOC}/src/org/epics/ioc/support/calc/example" />
+<include href = "exampleCalculatorSupport.xml" />
+<include removePath = "${JAVAIOC}/src/org/epics/ioc/support/calc/example" />
 </DBDefinition>
 

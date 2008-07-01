@@ -5,6 +5,7 @@
   <field name = "value" type = "array"  elementType = "boolean" />
   <field name = "name" type = "string" />
   <field name = "input" type = "structure" structureName = "null" />
+  <field name = "alarm" type = "structure" structureName = "null" />
 </structure>
 
 <structure name = "calcBooleanArray" supportName = "generic" >

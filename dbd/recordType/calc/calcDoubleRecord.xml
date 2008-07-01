@@ -5,6 +5,7 @@
   <field name = "value" type = "double" />
   <field name = "name" type = "string" />
   <field name = "input" type = "structure" />
+  <field name = "alarm" type = "structure" structureName = "null" />
 </structure>
 
 <structure name = "calcDouble" supportName = "generic" >

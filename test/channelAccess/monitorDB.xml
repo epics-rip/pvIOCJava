@@ -87,7 +87,6 @@
     </scan>
 </record>
 
-
 <record name = "monitorChange" type = "double">
     <alarm structureName = "alarm" />
     <timeStamp structureName = "timeStamp" />
@@ -172,7 +171,5 @@
         </element>
     </supportArray>
 </record>
-
-
 
 </IOCDatabase>

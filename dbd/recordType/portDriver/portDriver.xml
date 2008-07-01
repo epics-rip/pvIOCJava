@@ -24,10 +24,10 @@
 </recordType>
 
 <support name = "portCreate"
-   factoryName = "org.epics.ioc.support.PDRVPortCreateFactory" />
+   factoryName = "org.epics.ioc.support.pdrv.PDRVPortCreateFactory" />
 
 <support name = "portDeviceControl"
-   factoryName = "org.epics.ioc.support.PDRVPortDeviceControlFactory" />
+   factoryName = "org.epics.ioc.support.pdrv.PDRVPortDeviceControlFactory" />
 
 
 <include addPath = "${JAVAIOC}/src/org/epics/ioc/pdrv/testDriver" />

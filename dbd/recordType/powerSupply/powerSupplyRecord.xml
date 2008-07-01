@@ -13,6 +13,6 @@
 </recordType>
 
 <support name = "powerSupplyCurrent"
-   factoryName = "org.epics.ioc.support.PowerSupplyFactory" />
+   factoryName = "org.epics.ioc.support.device.PowerSupplyFactory" />
    
 </DBDefinition>
