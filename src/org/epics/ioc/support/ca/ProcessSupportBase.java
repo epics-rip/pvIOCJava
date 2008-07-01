@@ -8,9 +8,9 @@ package org.epics.ioc.support.ca;
 import org.epics.ioc.ca.ChannelProcess;
 import org.epics.ioc.ca.ChannelProcessRequester;
 import org.epics.ioc.db.DBStructure;
-import org.epics.ioc.process.ProcessCallbackRequester;
-import org.epics.ioc.process.ProcessContinueRequester;
-import org.epics.ioc.process.SupportProcessRequester;
+import org.epics.ioc.support.ProcessCallbackRequester;
+import org.epics.ioc.support.ProcessContinueRequester;
+import org.epics.ioc.support.SupportProcessRequester;
 import org.epics.ioc.util.AlarmSeverity;
 import org.epics.ioc.util.RequestResult;
 

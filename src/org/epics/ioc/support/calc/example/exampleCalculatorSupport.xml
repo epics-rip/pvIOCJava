@@ -1,0 +1,11 @@
+<?xml version="1.0" ?>
+<DBDefinition>
+
+<support name = "counterCalculator" factoryName = "org.epics.ioc.support.calc.example.CounterCalculatorFactory" />
+
+<support name = "arrayIncrementCalculator" factoryName = "org.epics.ioc.support.calc.example.ArrayIncrementCalculatorFactory" />
+
+<support name = "booleanArrayToggleCalculator" factoryName = "org.epics.ioc.support.calc.example.BooleanArrayToggleCalculatorFactory" />
+
+<support name = "arrayAddCalculator" factoryName = "org.epics.ioc.support.calc.example.ArrayAddCalculatorFactory" />
+</DBDefinition>

@@ -11,9 +11,9 @@ import org.epics.ioc.ca.ChannelMonitorNotify;
 import org.epics.ioc.ca.ChannelMonitorNotifyFactory;
 import org.epics.ioc.ca.ChannelMonitorNotifyRequester;
 import org.epics.ioc.db.DBStructure;
-import org.epics.ioc.process.RecordProcessRequester;
-import org.epics.ioc.process.SupportProcessRequester;
-import org.epics.ioc.process.SupportState;
+import org.epics.ioc.support.RecordProcessRequester;
+import org.epics.ioc.support.SupportProcessRequester;
+import org.epics.ioc.support.SupportState;
 import org.epics.ioc.util.AlarmSeverity;
 import org.epics.ioc.util.MessageType;
 import org.epics.ioc.util.RequestResult;
@@ -27,7 +27,7 @@ public class MonitorNotifySupportBase extends AbstractLinkSupport
 implements RecordProcessRequester,ChannelMonitorNotifyRequester
 {
     private ChannelMonitorNotify channelMonitorNotify = null;
-    private boolean isActive;
+    private boolean isActive = false;
     
     /**
      * The constructor.
@@ -108,6 +108,6 @@ implements RecordProcessRequester,ChannelMonitorNotifyRequester
             }
             return;
         }
-        recordProcess.process(this, false, null);
+        isActive = recordProcess.process(this, false, null);
     } 
 }

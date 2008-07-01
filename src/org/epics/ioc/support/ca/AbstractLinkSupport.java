@@ -16,8 +16,6 @@ import org.epics.ioc.ca.ChannelListener;
 import org.epics.ioc.db.DBField;
 import org.epics.ioc.db.DBRecord;
 import org.epics.ioc.db.DBStructure;
-import org.epics.ioc.process.RecordProcess;
-import org.epics.ioc.process.SupportState;
 import org.epics.ioc.pv.Convert;
 import org.epics.ioc.pv.ConvertFactory;
 import org.epics.ioc.pv.PVEnumerated;
@@ -29,8 +27,10 @@ import org.epics.ioc.pv.PVStringArray;
 import org.epics.ioc.pv.PVStructure;
 import org.epics.ioc.pv.StringArrayData;
 import org.epics.ioc.support.AbstractSupport;
-import org.epics.ioc.support.AlarmFactory;
-import org.epics.ioc.support.AlarmSupport;
+import org.epics.ioc.support.RecordProcess;
+import org.epics.ioc.support.SupportState;
+import org.epics.ioc.support.alarm.AlarmFactory;
+import org.epics.ioc.support.alarm.AlarmSupport;
 import org.epics.ioc.util.MessageType;
 
 /**
