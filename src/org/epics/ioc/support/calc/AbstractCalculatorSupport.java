@@ -20,23 +20,48 @@ import org.epics.ioc.util.MessageType;
  * @author mrk
  *
  */
-public abstract class AbstractCalculatorSupport extends AbstractSupport implements CalculatorSupport {
+public abstract class AbstractCalculatorSupport extends AbstractSupport {
     private String supportName = null;
     private DBStructure dbStructure = null;
     private PVStructure pvStructure;
-    private CalcArgArraySupport calcArgArraySupport = null;
-    private DBField valueDBField;
     
     
 
+    /**
+     * Constructor.
+     * @param supportName The supportName.
+     * @param dbStructure The structure being supported.
+     */
     protected AbstractCalculatorSupport(String supportName,DBStructure dbStructure) {
         super(supportName,dbStructure);
         this.supportName = supportName;
         this.dbStructure = dbStructure;
         pvStructure = dbStructure.getPVStructure();
     }
-    /* (non-Javadoc)
-     * @see org.epics.ioc.process.AbstractSupport#initialize()
+    
+    /**
+     * Get The ArgType[] required by the derived class.
+     * @return The argType[].
+     */
+    abstract protected ArgType[] getArgTypes();
+    /**
+     * Get the value type required by the derived class.
+     * @return The type.
+     */
+    abstract protected Type getValueType();
+    /**
+     * Called by AbstractCalculatorSupport to give the derived class the PVField[] for the arguments.
+     * @param pvArgs The PVField[] for the arguments.
+     */
+    abstract protected void setArgPVFields(PVField[] pvArgs);
+    /**
+     * Called by AbstractCalculatorSupport to give the derived class the DBField for the value.
+     * @param dbValue The DBField for the value.
+     */
+    abstract protected void setValueDBField(DBField dbValue);
+    /* 
+     * Calls getArgTypes, creates the PVField[] for the arguments and calls setArgPVFields.
+     * Calls getValueType, locates DBField for the value field, and calls setValueDBField.
      */
     public void initialize() {
         if(!super.checkSupportState(SupportState.readyForInitialize,supportName)) return;
@@ -47,7 +72,7 @@ public abstract class AbstractCalculatorSupport extends AbstractSupport implemen
             pvStructure.message("value field not found", MessageType.error);
             return;
         }
-        valueDBField = dbStructure.getDBRecord().findDBField(pvField);
+        DBField valueDBField = dbStructure.getDBRecord().findDBField(pvField);
         if(getValueType()!=valueDBField.getPVField().getField().getType()) {
             pvStructure.message("value field has illegal type", MessageType.error);
             return;
@@ -58,13 +83,13 @@ public abstract class AbstractCalculatorSupport extends AbstractSupport implemen
             pvStructure.message("calcArgArray field not found", MessageType.error);
             return;
         }
-        valueDBField = dbStructure.getDBRecord().findDBField(pvField);
-        Support support = valueDBField.getSupport();
+        DBField dbField = dbStructure.getDBRecord().findDBField(pvField);
+        Support support = dbField.getSupport();
         if(!(support instanceof CalcArgArraySupport)) {
             pvStructure.message("calcArgArraySupport not found", MessageType.error);
             return;
         }
-        calcArgArraySupport = (CalcArgArraySupport)support;
+        CalcArgArraySupport calcArgArraySupport = (CalcArgArraySupport)support;
         ArgType[] argTypes = getArgTypes();
         int num = argTypes.length;
         PVField[] pvFields = new PVField[num];

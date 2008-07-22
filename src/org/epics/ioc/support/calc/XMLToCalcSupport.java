@@ -332,7 +332,6 @@ public class XMLToCalcSupport {
             calculateWriter.println("import org.epics.ioc.db.*;");
             calculateWriter.println("import org.epics.ioc.pv.*;");
             calculateWriter.println("import org.epics.ioc.util.*;");
-            calculateWriter.println("import org.epics.ioc.process.*;");
             calculateWriter.println("import org.epics.ioc.support.*;");
             calculateWriter.println();
             if(importList.size()>0) {
@@ -461,17 +460,17 @@ public class XMLToCalcSupport {
             calculateWriter.println();
             String blanks = "        ";
             calculateWriter.println(
-                blanks + "public ArgType[] getArgTypes() { return argTypes;}");
+                blanks + "protected ArgType[] getArgTypes() { return argTypes;}");
             calculateWriter.println();
             calculateWriter.println(
-                    blanks + "public Type getValueType() { return " + getTypeDef(valueType) +";}");
+                    blanks + "protected Type getValueType() { return " + getTypeDef(valueType) +";}");
         }
         
         private void setMethods() {
             calculateWriter.println();
             String blanks = "        ";
             calculateWriter.println(
-                blanks + "public void setArgPVFields(PVField[] pvArgs) {");
+                blanks + "protected void setArgPVFields(PVField[] pvArgs) {");
             for(int ind =0; ind< argList.size(); ind++) {
                 ArgInfo argInfo = argList.get(ind);
                 if(!argInfo.type.equals("array")) {
@@ -492,7 +491,7 @@ public class XMLToCalcSupport {
                     blanks + "};");
             calculateWriter.println();
             calculateWriter.println(
-                    blanks + "public void setValueDBField(DBField dbValue) {");
+                    blanks + "protected void setValueDBField(DBField dbValue) {");
             calculateWriter.println(
                     blanks + "    "
                     +"this.valueDB = dbValue;");
@@ -586,15 +585,10 @@ public class XMLToCalcSupport {
             calculateWriter.println();
             String body = computeBuilder.toString();
             String blanks = "        ";
-            if(body==null || body.length()<1) {
+            if(body!=null && body.length()>0) {
                 calculateWriter.println(
                         blanks
-                        + "public void compute() {}"
-                );
-            } else {
-                calculateWriter.println(
-                        blanks
-                        + "public void compute() {"
+                        + "private void compute() {"
                 );
                 calculateWriter.print(body);
                 calculateWriter.println();
