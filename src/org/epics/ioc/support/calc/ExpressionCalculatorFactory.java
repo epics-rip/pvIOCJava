@@ -60,9 +60,8 @@ public abstract class ExpressionCalculatorFactory  {
     private static PVDataCreate pvDataCreate = PVDataFactory.getPVDataCreate();
     private static final  String supportName = "expressionCalculator";
     private static Convert convert = ConvertFactory.getConvert();
-    private static boolean dumpTokenList = false;
-    private static boolean dumpExp = false;
-    private static boolean dumpFinalExpression = false;
+    private static boolean dumpTokenList = true;
+    private static boolean dumpExp = true;
     
     private static class ExpressionCalculator extends AbstractSupport {
         
@@ -77,8 +76,10 @@ public abstract class ExpressionCalculatorFactory  {
         private PVStructure pvStructure;
         private AlarmSupport alarmSupport = null;
         private DBField dbValue = null;
+        private CalcArgArraySupport calcArgArraySupport = null;
         
-        private BasicExpression finalExpression = null;
+        private Expression expression = null;
+        
         /* (non-Javadoc)
          * @see org.epics.ioc.support.AbstractSupport#initialize()
          */
@@ -108,23 +109,20 @@ public abstract class ExpressionCalculatorFactory  {
                 pvStructure.message("calcArgArraySupport not found", MessageType.error);
                 return;
             }
-            CalcArgArraySupport calcArgArraySupport = (CalcArgArraySupport)support;
+            calcArgArraySupport = (CalcArgArraySupport)support;
             PVString pvExpression = dbStructure.getPVStructure().getStringField("expression");
             if(pvExpression==null) return;
             Parse parse = new Parse(pvExpression);
-            Expression[] expressions = parse.parse();
-            if(expressions==null) return;
-            CreateBasicExpressionArray createExpressions = 
-                new CreateBasicExpressionArray(pvStructure,expressions,pvValue,calcArgArraySupport);
-            finalExpression = createExpressions.create();
-            if(finalExpression==null) return;
+            expression = parse.parse();
+            if(expression==null) return;
+            
             super.initialize();
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.support.AbstractSupport#uninitialize()
          */
         public void uninitialize() {
-            finalExpression = null;
+            expression = null;
             alarmSupport = null;
             dbValue = null;
             super.uninitialize();
@@ -134,16 +132,17 @@ public abstract class ExpressionCalculatorFactory  {
          */
         public void process(SupportProcessRequester supportProcessRequester) {
             try {
-                finalExpression.operator.compute();
+                if(expression.operator!=null) {
+                    expression.operator.compute();
+                }
+                PVField pvResult = expression.pvResult;
+                PVField pvValue = dbValue.getPVField();
+                if(pvResult!=pvValue) convert.copyScalar(pvResult, pvValue);
+                dbValue.postPut();
             } catch (ArithmeticException e) {
                 alarmSupport.setAlarm(e.getMessage(), AlarmSeverity.invalid);
-                return;
             }
-            PVField pvResult = finalExpression.pvResult;
-            PVField pvValue = dbValue.getPVField();
-            if(pvResult!=pvValue) convert.copyScalar(pvResult, pvValue);
             supportProcessRequester.supportProcessDone(RequestResult.success);
-            dbValue.postPut();
         }
         
         private enum Operation {
@@ -213,10 +212,10 @@ public abstract class ExpressionCalculatorFactory  {
         
         private static final OperationSemantics[] operationSemantics = 
         {
-            new OperationSemantics(Operation.unaryPlus,"+",12,Associativity.right,OperandType.number,OperandType.none),
-            new OperationSemantics(Operation.unaryMinus,"-",12,Associativity.right,OperandType.number,OperandType.none),
-            new OperationSemantics(Operation.bitwiseComplement,"~",12,Associativity.right,OperandType.integer,OperandType.none),
-            new OperationSemantics(Operation.booleanNot,"!",12,Associativity.left,OperandType.bool,OperandType.none),
+            new OperationSemantics(Operation.unaryPlus,"+",12,Associativity.right,OperandType.none,OperandType.number),
+            new OperationSemantics(Operation.unaryMinus,"-",12,Associativity.right,OperandType.none,OperandType.number),
+            new OperationSemantics(Operation.bitwiseComplement,"~",12,Associativity.right,OperandType.none,OperandType.integer),
+            new OperationSemantics(Operation.booleanNot,"!",12,Associativity.right,OperandType.none,OperandType.bool),
             new OperationSemantics(Operation.multiplication,"*",11,Associativity.left,OperandType.number,OperandType.number),
             new OperationSemantics(Operation.division,"/",11,Associativity.left,OperandType.number,OperandType.number),
             new OperationSemantics(Operation.remainder,"%",11,Associativity.left,OperandType.number,OperandType.number),
@@ -294,8 +293,14 @@ public abstract class ExpressionCalculatorFactory  {
             integerConstant,
             realConstant,
             stringConstant,
-            mathFunction,
-            expression
+            mathFunction;
+            
+            boolean isConstant() {
+                if( (ordinal() >= TokenType.booleanConstant.ordinal()) && (ordinal() <= TokenType.stringConstant.ordinal()) ) {
+                    return true;
+                }
+                return false;
+            }
         }
         
         private static class Token {
@@ -303,29 +308,19 @@ public abstract class ExpressionCalculatorFactory  {
             String value = null;
         }
         
-        private static class Expression {
-            Token token = null;
-            int nargs = 0;
-            Expression[] args = null;
-        }
-        
         private interface Operator {
             public boolean createPVResult(String fieldName);
             public void compute();
         }
-        
-        private static class ExpressionArgument {
+         
+        private static class Expression {
             Operator operator = null;
-            PVField pvField = null;
-        }
-        
-        private static class BasicExpression {
-            Operator operator = null;
-            ExpressionArgument[] expressionArguments = null;
+            Expression[] expressionArguments = null;
             PVField pvResult = null;
+            Token token = null;
             
             void computeArguments() {
-                for(ExpressionArgument expressionArgument: expressionArguments) {
+                for(Expression expressionArgument: expressionArguments) {
                     if(expressionArgument==null) continue;
                     Operator operator = expressionArgument.operator;
                     if(operator==null) continue;
@@ -334,34 +329,52 @@ public abstract class ExpressionCalculatorFactory  {
             }
         }
         
-        private static class OperatorExpression extends BasicExpression{
+        private static class OperatorExpression extends Expression{
             OperationSemantics operationSemantics = null;
         }
 
         
-        private static class MathFunctionExpression extends BasicExpression{
-            MathFunction function;
+        private static class MathFunctionExpression extends Expression{
+            MathFunction function = null;
+            int numArgs = 1;
         }
         
-        private static class Parse {
+        private class Parse {
             
             private Parse(PVString pvExpression) {
                 this.pvExpression = pvExpression;
             }
             
-            Expression[] parse() {
+            Expression parse() {
                 if(!createTokenList()) return null;
                 if(dumpTokenList) printTokenList("after createTokenList");
+                int numLeftParan = 0;
+                int numRightParan = 0;
+                for(Token token : tokenList) {
+                    if(token.type==TokenType.leftParen) numLeftParan++;
+                    if(token.type==TokenType.rightParen) numRightParan++;
+                    if(numRightParan>numLeftParan) {
+                        pvExpression.message("parse failure mismatched parentheses ", MessageType.error);
+                        return null;
+                    }
+                }
+                if(numLeftParan!=numRightParan) {
+                    pvExpression.message("parse failure mismatched parentheses ", MessageType.error);
+                    return null;
+                }
                 if(!addParan()) return null;
                 if(dumpTokenList)printTokenList("after addParan");
-                if(!createExpressionArray()) return null;
-                return expressions;
+                Expression expression = createFinalExpression();
+                if(dumpExp) {
+                    System.out.println("after parse expression is");
+                    printExpression(expression,"");
+                }
+                return expression;
             }
             
             
             private PVString pvExpression = null;
             private ArrayList<Token> tokenList = null;
-            private Expression[] expressions = null;
             
 
             private boolean createTokenList() {
@@ -449,7 +462,7 @@ public abstract class ExpressionCalculatorFactory  {
                 if(nextChar!='-' && nextChar!='+' && nextChar!='~' && nextChar!='!') return null;
                 if(offset==0) return string.substring(offset, offset+1);
                 char prevChar = string.charAt(offset-1);
-                if(prevChar=='(') return string.substring(offset, offset+1);
+                if(prevChar=='(' || prevChar=='-' || prevChar=='+' || prevChar=='~' || prevChar=='!') return string.substring(offset, offset+1);
                 return null;
             }
             
@@ -559,7 +572,7 @@ public abstract class ExpressionCalculatorFactory  {
                     char now = string.charAt(next);
                     if(Character.isDigit(now)) continue;
                     if(now=='X' || now=='x') {
-                        if(string.charAt(offset+1)!='0') break;
+                        if(string.charAt(offset)!='0') break;
                         gotX = true; continue;
                     }
                     if(gotX) {
@@ -670,7 +683,7 @@ public abstract class ExpressionCalculatorFactory  {
                     }
                     next++;
                 }
-                for(int precidence = 12; precidence>0; precidence--) {
+                for(int precedence = 12; precedence>0; precedence--) {
                     // right to left first
                     next = length-1;
                     while(next >0) {
@@ -679,25 +692,34 @@ public abstract class ExpressionCalculatorFactory  {
                         if(type==TokenType.binaryOperator || type==TokenType.unaryOperator) {
                             OperationSemantics semantics = null;
                             for(OperationSemantics sem : ExpressionCalculator.operationSemantics) {
-                                if(sem.precedence!=precidence) continue;
+                                if(sem.precedence!=precedence) continue;
                                 if(sem.associativity!=Associativity.right) continue;
                                 if(!sem.op.equals(token.value)) continue;
                                 if(type==TokenType.unaryOperator) {
-                                    if(sem.rightOperand==OperandType.none) {
+                                    if(sem.leftOperand==OperandType.none) {
                                         semantics = sem; break;
                                     }
                                 } else  {
-                                    if(sem.rightOperand!=OperandType.none) {
+                                    if(sem.leftOperand!=OperandType.none) {
                                         semantics = sem; break;
                                     }
                                 }
                             }
                             if(semantics!=null) {
-                                int ret = insertOperationParans(next);
-                                if(ret<0) return false;
-                                if(ret>0) {
-                                    next --; length +=2;
+                                if(type==TokenType.binaryOperator) {
+                                    int ret = insertBinaryOperationParans(next);
+                                    if(ret<0) return false;
+                                    if(ret>0) {
+                                        next --; length +=2;
+                                    }
+                                } else {
+                                    int ret = insertUnaryOperationParans(next);
+                                    if(ret<0) return false;
+                                    if(ret>0) {
+                                        length +=2;
+                                    }
                                 }
+                                
                             }
                         }
                         next--;
@@ -710,24 +732,32 @@ public abstract class ExpressionCalculatorFactory  {
                         if(type==TokenType.binaryOperator || type==TokenType.unaryOperator) {
                             OperationSemantics semantics = null;
                             for(OperationSemantics sem : ExpressionCalculator.operationSemantics) {
-                                if(sem.precedence!=precidence) continue;
+                                if(sem.precedence!=precedence) continue;
                                 if(sem.associativity!=Associativity.left) continue;
                                 if(!sem.op.equals(token.value)) continue;
                                 if(type==TokenType.unaryOperator) {
-                                    if(sem.rightOperand==OperandType.none) {
+                                    if(sem.leftOperand==OperandType.none) {
                                         semantics = sem; break;
                                     }
                                 } else  {
-                                    if(sem.rightOperand!=OperandType.none) {
+                                    if(sem.leftOperand!=OperandType.none) {
                                         semantics = sem; break;
                                     }
                                 }
                             }
                             if(semantics!=null) {
-                                int ret = insertOperationParans(next);
-                                if(ret<0) return false;
-                                if(ret>0) {
-                                    next ++; length +=2;
+                                if(type==TokenType.binaryOperator) {
+                                    int ret = insertBinaryOperationParans(next);
+                                    if(ret<0) return false;
+                                    if(ret>0) {
+                                        next ++; length +=2;
+                                    }
+                                } else {
+                                    int ret = insertUnaryOperationParans(next);
+                                    if(ret<0) return false;
+                                    if(ret>0) {
+                                        next++; length +=2;
+                                    }
                                 }
                             }
                         }
@@ -751,61 +781,86 @@ public abstract class ExpressionCalculatorFactory  {
             }
             
             private int insertFunctionParans(int offset) {
-                Token newToken = null;
+                int length = tokenList.size();
+                Token token = null;
                 String functionName = tokenList.get(offset).value;
                 if(functionName.equals("E") || functionName.equals("PI")) {
-                    // surround it with ()
-                    newToken = new Token();
-                    newToken.type = TokenType.leftParen;
-                    newToken.value = "(";
-                    tokenList.add(offset , newToken);
+                    if(offset>0 && offset<length-1) {
+                        TokenType prev = tokenList.get(offset-1).type;
+                        TokenType next = tokenList.get(offset+1).type;
+                        if(prev==TokenType.leftParen && next==TokenType.rightParen) return 0;
+                    }
+                    token = new Token();
+                    token.type = TokenType.leftParen;
+                    token.value = "(";
+                    tokenList.add(offset , token);
                     offset += 2;
-                    newToken = new Token();
-                    newToken.type = TokenType.rightParen;
-                    newToken.value = ")";
-                    tokenList.add(offset , newToken);
+                    token = new Token();
+                    token.type = TokenType.rightParen;
+                    token.value = ")";
+                    tokenList.add(offset , token);
                     return 1;
                 }
-                
-                newToken = new Token();
-                newToken.type = TokenType.leftParen;
-                newToken.value = "(";
-                tokenList.add(offset , newToken);
-                offset += 2;
-                int length = tokenList.size();
                 int parenDepth = 0;
-                while(offset<length) {
-                    Token token = tokenList.get(offset);
-                    TokenType type = token.type;
+                int next = offset + 1;
+                while(next<length) {
+                    TokenType type = tokenList.get(next).type;
+                    if(next==offset+1 && type!=TokenType.leftParen) {
+                        pvExpression.message("parse failure function not followewd by (", MessageType.error);
+                        return -1;
+                    }
                     if(type==TokenType.leftParen) {
-                        parenDepth++; offset++; continue;
+                        parenDepth++; next++; continue;
                     }
                     if(type==TokenType.rightParen) {
                         if(parenDepth>0) {
-                            parenDepth--; offset++; continue;
+                            parenDepth--; next++; continue;
                         }
-                        offset++;
                         break;
                     }
                     if(parenDepth==0) {
-                        pvExpression.message("parse failure bad function ", MessageType.error);
-                        return -1;
+                        break;
                     }
-                    offset++;
+                    next++;
                 }
-                newToken = new Token();
-                newToken.type = TokenType.rightParen;
-                newToken.value = ")";
-                tokenList.add(offset, newToken);
+                if(next>=length) {
+                    pvExpression.message("parse failure", MessageType.error);
+                    return -1;
+                }
+                TokenType prevType = null;
+                if(offset>0) {
+                    prevType = tokenList.get(offset-1).type;
+                }
+                TokenType nextType = tokenList.get(next).type;
+                if(prevType!=null && prevType==TokenType.leftParen && nextType==TokenType.rightParen) {
+                    return 0;
+                }
+                token = new Token();
+                token.type = TokenType.leftParen;
+                token.value = "(";
+                tokenList.add(offset , token);
+                next++;
+                token = new Token();
+                token.type = TokenType.rightParen;
+                token.value = ")";
+                tokenList.add(next, token);
                 return 1;
             }
             
-            private int insertOperationParans(int offset) {
-                // see if already inclosed in () 
+            private int insertUnaryOperationParans(int offset) {
                 int length = tokenList.size();
-                int next = offset +1;
                 Token token = null;
                 TokenType type = null;
+                if(offset>0) {
+                    TokenType prev = tokenList.get(offset-1).type;
+                    if(prev==TokenType.leftParen) return 0;
+                }
+                token = new Token();
+                token.type = TokenType.leftParen;
+                token.value = "(";
+                tokenList.add(offset , token);
+                length = tokenList.size();
+                int next = offset + 2;
                 int parenDepth = 0;
                 while(next<length) {
                     token = tokenList.get(next);
@@ -814,47 +869,113 @@ public abstract class ExpressionCalculatorFactory  {
                         parenDepth++; next++; continue;
                     }
                     if(type==TokenType.rightParen) {
-                        if(parenDepth>0) {
-                            parenDepth--; next++; continue;
+                        if(parenDepth<=0) {
+                            pvExpression.message("parse failure bad expression ", MessageType.error);
+                            return -1;
                         }
-                        return 0;
+                        parenDepth--; next++;
+                        if(parenDepth>0) continue;
+                        break;
                     }
                     if(parenDepth>0) {
                         next++; continue;
                     }
-                     next++ ; break;
+                    next++;
+                    break;
                 }
-                Token newToken = new Token();
-                newToken.type = TokenType.rightParen;
-                newToken.value = ")";
-                if(type==TokenType.binaryOperator) {
-                    tokenList.add(next-1 , newToken);
-                } else {           
-                    tokenList.add(next , newToken);
+                if(next>=length) {
+                    pvExpression.message("parse failure bad expression ", MessageType.error);
+                    return -1;
                 }
-                int prev = offset-1;
-                parenDepth = 0;
-                while(prev>=0) {
+                token = new Token();
+                token.type = TokenType.rightParen;
+                token.value = ")";
+                tokenList.add(next , token);
+                return 1;
+            }
+            
+            private int insertBinaryOperationParans(int offset) {
+                int length = tokenList.size();
+                Token token = null;
+                TokenType type = null;
+                int prev = offset - 1;
+                int parenDepth = 0;
+                boolean gotPrev = false;
+                if(prev>=0) {
+                    token = tokenList.get(prev);
+                    type = token.type;
+                    if(type.isConstant()||type==TokenType.variable) gotPrev = true;
+                }
+                while(!gotPrev && prev>=0) {
                     token = tokenList.get(prev);
                     type = token.type;
                     if(type==TokenType.rightParen) {
                         parenDepth++; prev--; continue;
                     }
-                    if(type==TokenType.leftParen && parenDepth>0) {
-                        parenDepth--; prev--; continue;
+                    if(type==TokenType.leftParen) {
+                        if(--parenDepth==0) {
+                            gotPrev = true; break;
+                        }
+                        prev--; continue;
                     }
                     if(parenDepth>0) {
                         prev--; continue;
                     }
-                    newToken = new Token();
-                    newToken.type = TokenType.leftParen;
-                    newToken.value = "(";
-                    tokenList.add(prev , newToken);
-                    return 1;
+                    pvExpression.message("parse failure bad expression ", MessageType.error);
+                    return -1;
                 }
-                pvExpression.message("parse failure bad expression ", MessageType.error);
-                return -1;
-
+                int next = offset + 1;
+                boolean gotNext = false;
+                if(next<length) {
+                    token = tokenList.get(next);
+                    type = token.type;
+                    if(type.isConstant()||type==TokenType.variable) {
+                        next++;
+                        gotNext = true;
+                    }
+                }
+                while(!gotNext && next<length) {
+                    token = tokenList.get(next);
+                    type = token.type;
+                    if(type==TokenType.leftParen) {
+                        parenDepth++; next++; continue;
+                    }
+                    if(type==TokenType.rightParen) {
+                        if(parenDepth==0) {
+                            pvExpression.message("parse failure bad expression ", MessageType.error);
+                            return -1;
+                        }
+                        parenDepth--; next++;
+                        if(parenDepth==0) {
+                            gotNext = true;
+                            break;
+                        }
+                        continue;
+                    }
+                    if(parenDepth>0) {
+                        next++; continue;
+                    }
+                    pvExpression.message("parse failure bad expression ", MessageType.error);
+                    return -1;
+                }
+                TokenType beforePrev = null;
+                TokenType after = null;
+                if(prev>0) {
+                    beforePrev = tokenList.get(prev-1).type;
+                }
+                if(next<length) {
+                    after = tokenList.get(next).type;
+                }
+                if(beforePrev!=null && after!=null &&beforePrev==TokenType.leftParen && after==TokenType.rightParen) return 0;
+                token = new Token();
+                token.type = TokenType.rightParen;
+                token.value = ")";
+                tokenList.add(next , token);
+                token = new Token();
+                token.type = TokenType.leftParen;
+                token.value = "(";
+                tokenList.add(prev , token);
+                return 1;
             }
             
             private int insertTernaryIfParans(int offset) {
@@ -913,40 +1034,410 @@ public abstract class ExpressionCalculatorFactory  {
                 pvExpression.message("parse failure bad expression ", MessageType.error);
                 return -1;
             }
-            
-            private void printExpStack(String message,Stack<Expression> expStack) {
-                if(expStack.isEmpty()) {
-                    System.out.println(message + " is empty");
-                    return;
-                }
-                System.out.println(message);
-                for(Expression exp : expStack) {
-                    printExpression(exp,"  ");
-                }
-            }
-            
-            private void printExpList(String message,ArrayList<Expression> expList) {
-                if(expList.isEmpty()) {
-                    System.out.println(message + " is empty");
-                    return;
-                }
-                System.out.println(message);
-                for(Expression exp : expList) {
-                    printExpression(exp,"  ");
-                }
-            }
-            private void printExpression(Expression expression,String prefix) {
-                if(expression==null) {
-                    System.out.println(prefix + " is null");
-                    return;
-                }
-                Token token = expression.token;
-                System.out.println(prefix + token.type.name() +" " + token.value );
-                Expression[] args = expression.args;
-                if(args!=null) {
-                    for(Expression arg : args) {
-                        printExpression(arg,"  " + prefix);
+
+            private Expression createFinalExpression() {
+                Stack<Expression> infixExpStack = new Stack<Expression>();
+                Stack<Expression> expStack = new Stack<Expression>();
+                while(!tokenList.isEmpty()) {
+                    Token nextToken= tokenList.remove(0);
+                    TokenType type = nextToken.type;
+                    switch(type) {
+                    case leftParen: {
+                        Token token = tokenList.get(0);
+                        if(token.type!=TokenType.rightParen) break;
+                        if(infixExpStack.size()>=0) {
+                            Expression previous = infixExpStack.peek();
+                            if(previous instanceof MathFunctionExpression) {
+                                MathFunctionExpression mathFunctionExpression = (MathFunctionExpression)previous;
+                                mathFunctionExpression.numArgs = 0;
+                            }
+                        } else { // () not for function with no arguments
+                            tokenList.remove(0);
+                        }
+                        break;
                     }
+                    case variable:
+                    case booleanConstant:
+                    case integerConstant:
+                    case realConstant:
+                    case stringConstant:{
+                        Expression exp = new Expression();
+                        exp.token = nextToken;
+                        if(!unwindStack(exp,expStack)) return null;
+                        break;
+                    }
+                    case comma: {
+                        int num = infixExpStack.size();
+                        int index = num;
+                        while(index-- >0) {
+                            Expression exp = infixExpStack.get(index);
+                            if(exp instanceof MathFunctionExpression) {
+                                MathFunctionExpression mathFunctionExpression = (MathFunctionExpression)exp;
+                                mathFunctionExpression.numArgs++;
+                                break;
+                            }
+                        }
+                        if(index<0) {
+                            System.out.println("logic error comma not part of MathFunctionExpression");
+                            printExpStack("infixExpStack",infixExpStack);
+                            printTokenList("tokenList");
+                        }
+                        break;
+                    }
+                    case mathFunction:  {
+                        Expression exp = new MathFunctionExpression();
+                        exp.token = nextToken;
+                        infixExpStack.push(exp);
+                        break;
+                    }
+                    case unaryOperator:
+                    case binaryOperator:
+                    {
+                        Expression exp = new OperatorExpression();
+                        exp.token = nextToken;
+                        infixExpStack.push(exp);
+                        break;
+                    }
+                   
+                    case ternaryOperator: {
+                        if(nextToken.value.equals("?")) break;
+                        Expression exp = new OperatorExpression();
+                        exp.token = new Token();
+                        exp.token.type = TokenType.ternaryOperator;
+                        exp.token.value = "?:";
+                        infixExpStack.push(exp);
+                        break;
+                    }
+                    case rightParen: {
+                        if(infixExpStack.size()>0) {
+                            unwindStack(infixExpStack.pop(),expStack);
+                        }
+                        break;
+                    }
+                    default:
+                        throw new IllegalStateException("logic error.");
+                    }
+                }
+                boolean ok = true;
+                if(infixExpStack.size()!=0) {
+                    System.out.println("logic error infixExpStack not empty");
+                    printTokenList("tokenList");
+                    printExpStack("infixExpStack",infixExpStack);
+                    printExpStack("expStack",expStack);
+                    ok = false;
+                }
+                if(expStack.size()!=1) {
+                    System.out.println("logic error expStack should only have one element");
+                    printTokenList("tokenList");
+                    printExpStack("infixExpStack",infixExpStack);
+                    printExpStack("expStack",expStack);
+                    ok = false;
+                }
+                if(!ok) return null;
+                return expStack.firstElement();
+            }
+            
+            private boolean unwindStack(Expression exp,Stack<Expression> expStack) {
+                Token token = exp.token;
+                TokenType type = token.type;
+                switch(type) {
+                case variable: {
+                    PVField pvField = null;
+                    String name = token.value;
+                    if(name.equals("value")) {
+                        pvField = dbValue.getPVField();
+                    } else {
+                        pvField = calcArgArraySupport.getPVField(name);
+                    }
+                    if(pvField==null) {
+                        pvStructure.message("variable " + name + " not found", MessageType.error);
+                        return false;
+                    }
+                    exp.pvResult = pvField;
+                    expStack.push(exp);
+                    return true;
+                }
+                case booleanConstant: {
+                    Boolean scalar = Boolean.valueOf(token.value);
+                    Field field = fieldCreate.createField("result", Type.pvBoolean);
+                    PVBoolean pv = (PVBoolean)pvDataCreate.createPVField(pvStructure, field);
+                    pv.put(scalar);
+                    pv.setMutable(false);
+                    exp.pvResult = pv;
+                    expStack.push(exp);
+                    return true;
+                }
+                case integerConstant: {
+                    PVField pvField = null;
+                    String value = token.value;
+                    int length = value.length();
+                    char lastChar = value.charAt(length-1);
+                    Type pvType = (lastChar=='L') ? Type.pvLong : Type.pvInt;
+                    Field field = fieldCreate.createField("result", pvType);
+                    pvField = pvDataCreate.createPVField(pvStructure, field);
+                    if(pvType==Type.pvLong) {
+                        Long scalar = new Long(0);
+                        try {
+                            scalar = Long.decode(value.substring(0, length-1));
+                        } catch (NumberFormatException e) {
+                            pvStructure.message(e.getMessage(), MessageType.error);
+                            return false;
+                        }
+                        PVLong pv = (PVLong)pvField;
+                        pv.put(scalar);
+                    } else {
+                        Integer scalar = new Integer(0);
+                        try {
+                            scalar = Integer.decode(value);
+                        } catch (NumberFormatException e) {
+                            pvStructure.message(e.getMessage(), MessageType.error);
+                            return false;
+                        }
+                        PVInt pv = (PVInt)pvField;
+                        pv.put(scalar);
+                    }
+                    pvField.setMutable(false);
+                    exp.pvResult = pvField;
+                    expStack.push(exp);
+                    return true;
+                }
+                case realConstant: {
+                    PVField pvField = null;
+                    String value = token.value;
+                    int length = value.length();
+                    char lastChar = value.charAt(length-1);
+                    Type pvType = (lastChar=='F') ? Type.pvFloat : Type.pvDouble;
+                    Field field = fieldCreate.createField("result", pvType);
+                    pvField = pvDataCreate.createPVField(pvStructure, field);
+                    if(pvType==Type.pvFloat) {
+                        Float scalar = Float.valueOf(value);
+                        PVFloat pv = (PVFloat)pvField;
+                        pv.put(scalar);
+                    } else {
+                        Double scalar = Double.valueOf(value);
+                        PVDouble pv = (PVDouble)pvField;
+                        pv.put(scalar);
+                    }
+                    pvField.setMutable(false);
+                    exp.pvResult = pvField;
+                    expStack.push(exp);
+                    return true;
+                }
+                case stringConstant: {
+                    String scalar = token.value;
+                    Field field = fieldCreate.createField("result", Type.pvString);
+                    PVString pv = (PVString)pvDataCreate.createPVField(pvStructure, field);
+                    pv.put(scalar);
+                    pv.setMutable(false);
+                    exp.pvResult = pv;
+                    expStack.push(exp);
+                    return true;
+                }
+
+                case mathFunction: {
+                    MathFunctionExpression funcExp = (MathFunctionExpression)exp;
+                    String functionName = exp.token.value;
+                    if((functionName.equals("E") || functionName.equals("PI") || functionName.equals("random") )) {
+                        Field field = fieldCreate.createField("result", Type.pvDouble);
+                        PVDouble pv = (PVDouble)pvDataCreate.createPVField(pvStructure, field);
+                        double value = (functionName.equals("E")) ? Math.E : Math.PI;
+                        pv.put(value);
+                        pv.setMutable(false);
+                        exp.pvResult = pv;
+                        expStack.push(exp);
+                        return true;
+                    }
+                    int nargs = funcExp.numArgs;
+                    exp.expressionArguments = new Expression[nargs];
+                    int iarg = nargs;
+                    while(--iarg>=0) {
+                        exp.expressionArguments[iarg] = expStack.pop();
+                    }
+                    String func = token.value;
+                    MathFunction[] mathFunctions = MathFunction.values();
+                    boolean gotIt = false;
+                    for(MathFunction mathFunction : mathFunctions) {
+                        if(func.equals(mathFunction.name())) {
+                            funcExp.function = mathFunction;
+                            gotIt = true;
+                            break;
+                        }
+                    }
+                    if(!gotIt) {
+                        pvStructure.message(
+                                "unsupported Math function " + functionName,
+                                MessageType.error);
+                        return false;
+                    }
+                    funcExp.operator = MathFactory.create(pvStructure,funcExp);
+                    if(!funcExp.operator.createPVResult("result")) return false;
+                    expStack.push(exp);
+                    return true;
+                }
+                case unaryOperator: {
+                    OperatorExpression opExp = (OperatorExpression)exp;
+                    int size = expStack.size();
+                    if(size<1) {
+                        pvStructure.message(
+                                " nargs " + size + " illegal for unaryOperator",
+                                MessageType.error);
+                        return false;
+                    }
+                    exp.expressionArguments = new Expression[1];
+                    exp.expressionArguments[0] = expStack.pop();
+                    PVField argResult = exp.expressionArguments[0].pvResult;
+                    Type argType = argResult.getField().getType();
+                    opExp.operationSemantics = null;
+                    outer:
+                    for(OperationSemantics sem : ExpressionCalculator.operationSemantics) {
+                        if(!sem.op.equals(token.value)) continue;
+                        if(sem.leftOperand!=OperandType.none) continue;
+                        switch(sem.rightOperand) {
+                        case none: continue;
+                        case integer:
+                            if(argType.isInteger()) {
+                                opExp.operationSemantics = sem;
+                                break outer;
+                            }
+                            continue;
+                        case bool:
+                            if(argType==Type.pvBoolean) {
+                                opExp.operationSemantics = sem;
+                                break outer;
+                            }
+                            continue;
+                        case number:
+                            if(argType.isNumeric()) {
+                                opExp.operationSemantics = sem;
+                                break outer;
+                            }
+                            continue;
+                        case string:
+                            if(argType==Type.pvString) {
+                                opExp.operationSemantics = sem;
+                                break outer;
+                            }
+                            continue;
+                        case any:
+                            opExp.operationSemantics = sem;
+                            break outer;
+                        }
+                    }
+                    if(opExp.operationSemantics==null) {
+                        pvStructure.message(
+                            "unsupported unary operation " + token.value,
+                            MessageType.error);
+                        return false;
+                    }
+                    opExp.operator = OperatorFactory.create(pvStructure, opExp);
+                    if(opExp.operator==null) {
+                        pvStructure.message(
+                                "unsupported unary operation " + token.value,
+                                MessageType.error);
+                            return false;
+                    }
+                    if(!opExp.operator.createPVResult("result")) return false;
+                    expStack.push(exp);
+                    return true;
+                }
+                case binaryOperator: {
+                    OperatorExpression opExp = (OperatorExpression)exp;
+                    int size = expStack.size();
+                    if(size<2) {
+                        pvStructure.message(
+                                " nargs " + size + " illegal for binaryOperator",
+                                MessageType.error);
+                        return false;
+                    }
+                    exp.expressionArguments = new Expression[2];
+                    exp.expressionArguments[1] = expStack.pop();
+                    exp.expressionArguments[0] = expStack.pop();
+                    PVField argResult = exp.expressionArguments[0].pvResult;
+                    Type argType = argResult.getField().getType();
+                    opExp.operationSemantics = null;
+                    outer:
+                    for(OperationSemantics sem : ExpressionCalculator.operationSemantics) {
+                        if(!sem.op.equals(token.value)) continue;
+                        if(sem.leftOperand==OperandType.none) continue;
+                        switch(sem.rightOperand) {
+                        case none: continue;
+                        case integer:
+                            if(argType.isInteger()) {
+                                opExp.operationSemantics = sem;
+                                break outer;
+                            }
+                            continue;
+                        case bool:
+                            if(argType==Type.pvBoolean) {
+                                opExp.operationSemantics = sem;
+                                break outer;
+                            }
+                            continue;
+                        case number:
+                            if(argType.isNumeric()) {
+                                opExp.operationSemantics = sem;
+                                break outer;
+                            }
+                            continue;
+                        case string:
+                            if(argType==Type.pvString) {
+                                opExp.operationSemantics = sem;
+                                break outer;
+                            }
+                            continue;
+                        case any:
+                            opExp.operationSemantics = sem;
+                            break outer;
+                        }
+                    }
+                    if(opExp.operationSemantics==null) {
+                        pvStructure.message(
+                            "unsupported unary operation " + token.value,
+                            MessageType.error);
+                        return false;
+                    }
+                    opExp.operator = OperatorFactory.create(pvStructure, opExp);
+                    if(opExp.operator==null) {
+                        pvStructure.message(
+                                "unsupported unary operation " + token.value,
+                                MessageType.error);
+                            return false;
+                    }
+                    if(!opExp.operator.createPVResult("result")) return false;
+                    expStack.push(exp);
+                    return true;
+                }
+                case ternaryOperator: {
+                    OperatorExpression opExp = (OperatorExpression)exp;
+                    int size = expStack.size();
+                    if(size<3) {
+                        pvStructure.message(
+                                " nargs " + size + " illegal for ternaryOperator",
+                                MessageType.error);
+                        return false;
+                    }
+                    exp.expressionArguments = new Expression[3];
+                    exp.expressionArguments[2] = expStack.pop();
+                    exp.expressionArguments[1] = expStack.pop();
+                    exp.expressionArguments[0] = expStack.pop();
+                    Type arg0Type = exp.expressionArguments[0].pvResult.getField().getType();
+                    Type arg1Type = exp.expressionArguments[1].pvResult.getField().getType();
+                    Type arg2Type = exp.expressionArguments[2].pvResult.getField().getType();
+                    if(arg0Type!=Type.pvBoolean) {
+                        pvStructure.message("arg0 must be boolean",MessageType.error);
+                        return false;
+                    }
+                    if(arg1Type!=arg2Type) {
+                        pvStructure.message("arg1 and arg2 must be same type",MessageType.error);
+                        return false;
+                    }
+                    opExp.operator = new TernaryIf(pvStructure,opExp);
+                    if(!opExp.operator.createPVResult("result")) return false;
+                    expStack.push(exp);
+                    return true;
+                }
+                default:
+                    throw new IllegalStateException("logic error " + type);
                 }
             }
             
@@ -966,689 +1457,58 @@ public abstract class ExpressionCalculatorFactory  {
 
                 }
             }
-
-            private boolean createExpressionArray() {
-                Stack<Expression> expStack = new Stack<Expression>();
-                ArrayList<Expression> expList = new ArrayList<Expression>();
-                while(!tokenList.isEmpty()) {
-                    Token nextToken= tokenList.remove(0);
-                    TokenType type = nextToken.type;
-                    switch(type) {
-                    case leftParen: break;
-                    case variable:
-                    case booleanConstant:
-                    case integerConstant:
-                    case realConstant:
-                    case stringConstant:
-                    case comma:{
-                        Expression exp = new Expression();
-                        exp.token = nextToken;
-                        exp.nargs = 0;
-                        expStack.push(exp);
-                        break;
-                    }
-                    case mathFunction:  {
-                        Expression exp = new Expression();
-                        exp.token = nextToken;
-                        exp.nargs = 0;
-                        expStack.push(exp);
-                        break;
-                    }
-                    case unaryOperator: {
-                        Expression exp = new Expression();
-                        exp.token = nextToken;
-                        exp.nargs = 1;
-                        exp.args = new Expression[1];
-                        expStack.push(exp);
-                        break;
-                    }
-                    case binaryOperator: {
-                        Expression exp = new Expression();
-                        exp.token = nextToken;
-                        exp.nargs = 2;
-                        exp.args = new Expression[2];
-                        expStack.push(exp);
-                        break;
-                    }
-                    case ternaryOperator: {
-                        if(nextToken.value.equals("?")) continue;
-                        if(!nextToken.value.equals(":")) {
-                            throw new IllegalStateException("logic error.");
-                        }
-                        Expression exp = new Expression();
-                        exp.token = new Token();
-                        exp.token.type = TokenType.ternaryOperator;
-                        exp.token.value = "?:";
-                        exp.nargs = 3;
-                        exp.args = new Expression[3];
-                        expStack.push(exp);
-                        break;
-                    }
-                    case rightParen: {
-                        unwindStack(expStack,expList);
-                        break;
-                    }
-                    default:
-                        throw new IllegalStateException("logic error.");
-                    }
+            
+            private void printExpStack(String message,Stack<Expression> expStack) {
+                if(expStack.isEmpty()) {
+                    System.out.println(message + " is empty");
+                    return;
                 }
-                if(expStack.size()!=0) {
-                    System.out.println("logic error expStack not empty");
-                    printExpStack("expStack",expStack);
+                System.out.println(message);
+                for(Expression exp : expStack) {
+                    printExpression(exp,"  ");
                 }
-                if(dumpExp)printExpList("expList",expList);
-                expressions = expList.toArray(new Expression[expList.size()]);
-                return true; 
             }
             
-            private void unwindStack(Stack<Expression> expStack,ArrayList<Expression> expList) {
-                ArrayList<Expression> argList = new ArrayList<Expression>();
-                if(expStack.isEmpty()) return;
-                ArrayList<Expression> functionArgList = new ArrayList<Expression>();
-                int functionExpListIndex = expList.size()-1;
-                while(true) {
-                    Expression exp = expStack.pop();
-                    Token token = exp.token;
-                    TokenType type = token.type;
-                    switch(type) {
-                    case expression:
-                        if(exp.args[0]==null) return; // extra paren
-                        // no break on purpose
-                    case variable:
-                    case booleanConstant:
-                    case integerConstant:
-                    case realConstant:
-                    case stringConstant:
-                        argList.add(0,exp);
-                        continue;
-                    case comma: {
-                        Expression arg = null;
-                        if(argList.isEmpty()) {
-                            arg = expList.get(functionExpListIndex--);
-                        } else {
-                            arg = argList.remove(0);
-                        }
-                        if(!argList.isEmpty()) {
-                            throw new IllegalStateException("logic error.");
-                        }
-                        functionArgList.add(arg);
-                        continue;
-                    }
-                    case mathFunction: {
-                        String functionName = exp.token.value;
-                        if(!(functionName.equals("E") || functionName.equals("PI"))) {
-                            Expression arg = null;
-                            if(argList.isEmpty()) {
-                                arg = expList.get(expList.size()-1);
-                            } else {
-                                arg = argList.remove(0);
-                            }
-                            if(!argList.isEmpty()) {
-                                throw new IllegalStateException("logic error.");
-                            }
-                            functionArgList.add(arg);
-                        }
-                        int nargs = exp.nargs = functionArgList.size();
-                        if(nargs>0) {
-                            exp.args = new Expression[nargs];
-                            for(int i=nargs-1; i>=0; i--) exp.args[i] = functionArgList.remove(0);
-                        }
-                        expList.add(exp);
-                        return;
-                    }
-                    case unaryOperator: {
-                        Expression arg = null;
-                        if(argList.isEmpty()) {
-                            arg = expList.get(expList.size()-1);
-                        } else {
-                            arg = argList.remove(0);
-                        }
-                        if(!argList.isEmpty()) {
-                            throw new IllegalStateException("logic error.");
-                        }
-                        exp.args[0] = arg;
-                        expList.add(exp);
-                        return;
-                    }
-                    case binaryOperator: {
-                        int expListIndex = expList.size()-1;
-                        Expression secondArg = null;
-                        if(!argList.isEmpty()) {
-                            secondArg = argList.remove(0);
-                        } else {
-                            secondArg = expList.get(expListIndex--);
-                        }
-                        if(!argList.isEmpty()) {
-                            throw new IllegalStateException("logic error.");
-                        }
-                        Expression firstArg = null;
-                        if(!expStack.isEmpty()){
-                            TokenType temp = expStack.peek().token.type;
-                            if(temp==TokenType.variable
-                            || temp==TokenType.booleanConstant
-                            || temp==TokenType.integerConstant
-                            || temp==TokenType.realConstant
-                            || temp==TokenType.stringConstant) {
-                                firstArg = expStack.pop();
-                            }
-                        }
-                        if(firstArg==null) firstArg = expList.get(expListIndex--);
-                        exp.args[0] = firstArg;
-                        exp.args[1] = secondArg;
-                        expList.add(exp);
-                        return;
-                    }
-                    case ternaryOperator: {
-                        int expListIndex = expList.size()-1;
-                        Expression thirdArg = null;
-                        if(!argList.isEmpty()) {
-                            thirdArg = argList.remove(0);
-                        } else {
-                            thirdArg = expList.get(expListIndex--);
-                        }
-                        if(!argList.isEmpty()) {
-                            throw new IllegalStateException("logic error.");
-                        }
-                        Expression secondArg = null;
-                        if(!expStack.isEmpty()){
-                            TokenType temp = expStack.peek().token.type;
-                            if(temp==TokenType.variable
-                            || temp==TokenType.booleanConstant
-                            || temp==TokenType.integerConstant
-                            || temp==TokenType.realConstant
-                            || temp==TokenType.stringConstant) {
-                                secondArg = expStack.pop();
-                            }
-                        }
-                        if(secondArg==null) secondArg = expList.get(expListIndex--);
-                        Expression firstArg = null;
-                        if(!expStack.isEmpty()){
-                            TokenType temp = expStack.peek().token.type;
-                            if(temp==TokenType.variable
-                            || temp==TokenType.booleanConstant
-                            || temp==TokenType.integerConstant
-                            || temp==TokenType.realConstant
-                            || temp==TokenType.stringConstant) {
-                                firstArg = expStack.pop();
-                            }
-                        }
-                        if(firstArg==null) firstArg = expList.get(expListIndex--);
-                        exp.args[0] = firstArg;
-                        exp.args[1] = secondArg;
-                        exp.args[2] = thirdArg;
-                        expList.add(exp);
-                        return;
-                    }
-                    case leftParen:
-                    case rightParen:
-                    default:
-                        throw new IllegalStateException("logic error " + type);
+            private void printExpression(Expression expression,String prefix) {
+                if(expression==null) {
+                    System.out.println(prefix + " is null");
+                    return;
+                }
+                if(expression.operator!=null) {
+                    if(expression instanceof OperatorExpression) {
+                        OperatorExpression operatorExpression = (OperatorExpression)expression;
+                        OperationSemantics operationSemantics = operatorExpression.operationSemantics;
+                        String operationName = "operationSemantics is null";
+                        if(operationSemantics!=null) operationName = operationSemantics.operation.name();
+                        System.out.println(prefix + "OperatorExpression " + operationName);
+                    } else if(expression instanceof MathFunctionExpression) {
+                        MathFunctionExpression functionExpression = (MathFunctionExpression)expression;
+                        MathFunction function = functionExpression.function;
+                        String functionName = "function is null";
+                        if(function!=null) functionName = function.name();
+                        System.out.println(prefix + "MathFunctionExpression " + functionName);
                     }
                 }
+                Token token = expression.token;
+                System.out.println(prefix + token.type.name() +" " + token.value );
+                Expression[] args = expression.expressionArguments;
+                if(args!=null) {
+                    for(Expression arg : args) {
+                        printExpression(arg,"  " + prefix);
+                    }
+                }
+                PVField pvResult = expression.pvResult;
+                if(pvResult==null) {
+                    System.out.println(prefix + "pvResult is null");
+                    return;
+                }
+                Field field = pvResult.getField();
+                System.out.println(prefix + field.getFieldName() + " " + field.getType().name());
+                return;
             }
         }
         
-        private static class CreateBasicExpressionArray {
-            private CreateBasicExpressionArray(PVStructure parent,Expression[] expressions,PVField pvValue,CalcArgArraySupport calcArgArraySupport) {
-                this.parent = parent;
-                this.expressions = expressions;
-                this.pvValue = pvValue;
-                this.calcArgArraySupport = calcArgArraySupport;
-            }
-            
-            private PVStructure parent;
-            private Expression[] expressions;
-            private PVField pvValue;
-            private CalcArgArraySupport calcArgArraySupport;
-            private BasicExpression[] basicExpressions = null;
-            
-            BasicExpression create() {
-                basicExpressions = new BasicExpression[expressions.length];
-                boolean allOK = true;
-                String baseName = parent.getField().getFieldName();
-                for(int indExp=0; indExp<expressions.length; indExp++) {
-                    String expName = baseName + "_exp" + indExp + "_";
-                    String resultName = expName + "result";
-                    Expression expression = expressions[indExp];
-                    BasicExpression basicExpression = null;
-                    boolean result = true;
-                    switch(expression.token.type) {
-                    case unaryOperator: {
-                        OperatorExpression operatorExpression = new OperatorExpression();
-                        basicExpression = operatorExpression;
-                        ExpressionArgument[] expressionArguments = new ExpressionArgument[1];
-                        expressionArguments[0] = new ExpressionArgument();
-                        basicExpression.expressionArguments = expressionArguments;
-                        createArgPVs(basicExpression.expressionArguments,expression,indExp,baseName);
-                        result = createUnaryOperatorExpression(operatorExpression,expression,resultName);
-                        break;
-                    }
-                    case binaryOperator: {
-                        OperatorExpression operatorExpression = new OperatorExpression();
-                        basicExpression = operatorExpression;
-                        ExpressionArgument[] expressionArguments = new ExpressionArgument[2];
-                        for(int i=0; i<expressionArguments.length; i++) {
-                            expressionArguments[i] = new ExpressionArgument();
-                        }
-                        basicExpression.expressionArguments = expressionArguments;
-                        createArgPVs(basicExpression.expressionArguments,expression,indExp,baseName);
-                        result = createBinaryOperatorExpression(operatorExpression,expression,resultName);
-                        break;
-                    }
-                    case ternaryOperator: {
-                        OperatorExpression operatorExpression = new OperatorExpression();
-                        basicExpression = operatorExpression;
-                        ExpressionArgument[] expressionArguments = new ExpressionArgument[3];
-                        for(int i=0; i<expressionArguments.length; i++) {
-                            expressionArguments[i] = new ExpressionArgument();
-                        }
-                        basicExpression.expressionArguments = expressionArguments;
-                        createArgPVs(basicExpression.expressionArguments,expression,indExp,baseName);
-                        result = createTernaryOperatorExpression(operatorExpression,expression,resultName);
-                        break;
-                    }
-                    case mathFunction: {
-                        MathFunctionExpression functionExpression = new MathFunctionExpression();
-                        basicExpression = functionExpression;
-                        ExpressionArgument[] expressionArguments = new ExpressionArgument[expression.nargs];
-                        for(int i=0; i<expressionArguments.length; i++) {
-                            expressionArguments[i] = new ExpressionArgument();
-                        }
-                        basicExpression.expressionArguments = expressionArguments;
-                        createArgPVs(basicExpression.expressionArguments,expression,indExp,baseName);
-                        result = createMathFunctionExpression(functionExpression,expression,resultName);
-                        break;
-                    }
-                    default: throw new IllegalStateException("logic error.");
-                    }
-                    if(!result) allOK = false;
-                    basicExpressions[indExp] = basicExpression;
-                    
-                }
-                if(!allOK) return null;
-                if(dumpFinalExpression) dumpBasicExpressions(basicExpressions);
-                return basicExpressions[basicExpressions.length-1];
-            }
-            
-            private void createArgPVs(ExpressionArgument[] expressionArguments,Expression exp,int indExp,String baseName) {
-                Expression[] args = exp.args;
-                String expName = baseName  + indExp + "_";
-                for(int iarg=0; iarg<expressionArguments.length; iarg++) {
-                    ExpressionArgument expressionArgument = expressionArguments[iarg];
-                    Expression argExp = args[iarg];
-                    Token argToken = argExp.token;
-                    
-                    PVField pvField = null;
-                    Operator operator = null;
-                    String fieldName = expName + "arg" + iarg;
-                    if(argToken.type==TokenType.variable) {
-                        String name = argToken.value;
-                        if(name.equals("value")) {
-                            pvField = pvValue;
-                        } else {
-                            pvField = calcArgArraySupport.getPVField(name);
-                        }
-                        if(pvField==null) {
-                            message("variable not found",argExp);
-                        }
-                    } else if(argToken.type==TokenType.booleanConstant) {
-                        Boolean scalar = Boolean.valueOf(argToken.value);
-                        Field field = fieldCreate.createField(fieldName, Type.pvBoolean);
-                        PVBoolean pv = (PVBoolean)pvDataCreate.createPVField(parent, field);
-                        pv.put(scalar);
-                        pv.setMutable(false);
-                    } else if(argToken.type==TokenType.stringConstant) {
-                        String scalar = argToken.value;
-                        Field field = fieldCreate.createField(fieldName, Type.pvString);
-                        PVString pv = (PVString)pvDataCreate.createPVField(parent, field);
-                        pv.put(scalar);
-                        pv.setMutable(false);
-                    } else if(argToken.type==TokenType.integerConstant || argToken.type==TokenType.realConstant) {
-                        if(iarg==0) {
-                            if(argToken.type==TokenType.integerConstant) {
-                                pvField = createIntegerConstantPV(argToken.value,expName + "arg" + iarg);
-                            } else {
-                                pvField = createRealConstantPV(argToken.value,expName + "arg" + iarg);
-                            }
-                        } else {
-                            Type firstArgType = expressionArguments[iarg-1].pvField.getField().getType();
-                            pvField = createConstantPV(firstArgType,argToken.value,expName + "arg" + iarg);
-                        }
-                        if(pvField==null) {
-                            message("illegal constant",argExp);
-                        }
-                    } else { // must be result of previously evaluated expression
-                        for(int j=indExp-1; j>=0; j--) {
-                            if(expressions[j]==argExp) {
-                                pvField = basicExpressions[j].pvResult;
-                                operator = basicExpressions[j].operator;
-                                break;
-                            }
-                        }
-                        if(pvField==null) {
-                            if(pvField==null) {
-                                message("can not find expression",argExp);
-                            }
-                        }
-                    }
-                    expressionArgument.operator = operator;
-                    expressionArgument.pvField = pvField;
-                }
-            }
-            
-            private boolean createUnaryOperatorExpression(
-                    OperatorExpression opExp,Expression expression,String resultName)
-            {
-                Token token = expression.token;
-                if(opExp.expressionArguments.length!=1) {
-                    message("illegal number of args for unary operation",expression);
-                    return false;
-                }
-                PVField pvField = opExp.expressionArguments[0].pvField;
-                if(pvField==null) {
-                    message("null arg for unary operation",expression);
-                    return false;
-                }
-                Type argType = pvField.getField().getType();
-                opExp.operationSemantics = null;
-                outer:
-                for(OperationSemantics sem : ExpressionCalculator.operationSemantics) {
-                    if(!sem.op.equals(token.value)) continue;
-                    if(sem.rightOperand!=OperandType.none) continue;
-                    switch(sem.leftOperand) {
-                    case none: continue;
-                    case integer:
-                        if(argType.isInteger()) {
-                            opExp.operationSemantics = sem;
-                            break outer;
-                        }
-                        continue;
-                    case bool:
-                        if(argType==Type.pvBoolean) {
-                            opExp.operationSemantics = sem;
-                            break outer;
-                        }
-                        continue;
-                    case number:
-                        if(argType.isNumeric()) {
-                            opExp.operationSemantics = sem;
-                            break outer;
-                        }
-                        continue;
-                    case string:
-                        if(argType==Type.pvString) {
-                            opExp.operationSemantics = sem;
-                            break outer;
-                        }
-                        continue;
-                    case any:
-                        opExp.operationSemantics = sem;
-                        break outer;
-                    }
-                }
-                if(opExp.operationSemantics==null) {
-                    message("unsupported unary operation",expression);
-                    return false;
-                }
-                opExp.operator = OperatorFactory.create(parent, opExp);
-                if(opExp.operator==null) {
-                    message("unsupported unary operation",expression);
-                    return false;
-                }
-                return opExp.operator.createPVResult(resultName);
-            }
-            
-            private boolean createBinaryOperatorExpression(
-                    OperatorExpression opExp,Expression expression,String resultName)
-            {
-                Token token = expression.token;
-                if(opExp.expressionArguments.length!=2) {
-                    message("illegal number of args for binary operation",expression);
-                    return false;
-                }
-                PVField pvField = opExp.expressionArguments[0].pvField;
-                if(pvField==null) {
-                    message("null arg for binary operation",expression);
-                    return false;
-                }
-                Type arg0Type = pvField.getField().getType();
-                pvField = opExp.expressionArguments[1].pvField;
-                if(pvField==null) {
-                    message("null arg for binary operation",expression);
-                    return false;
-                }
-                opExp.operationSemantics = null;
-                outer:
-                for(OperationSemantics sem : ExpressionCalculator.operationSemantics) {
-                    if(!sem.op.equals(token.value)) continue;
-                    if(sem.rightOperand==OperandType.none) continue;
-                    switch(sem.leftOperand) {
-                    case none: continue;
-                    case integer:
-                        if(arg0Type.isInteger()) {
-                            opExp.operationSemantics = sem;
-                            break outer;
-                        }
-                        continue;
-                    case bool:
-                        if(arg0Type==Type.pvBoolean) {
-                            opExp.operationSemantics = sem;
-                            break outer;
-                        }
-                        continue;
-                    case number:
-                        if(arg0Type.isNumeric()) {
-                            opExp.operationSemantics = sem;
-                            break outer;
-                        }
-                        continue;
-                    case string:
-                        if(arg0Type==Type.pvString) {
-                            opExp.operationSemantics = sem;
-                            break outer;
-                        }
-                        continue;
-                    case any:
-                        opExp.operationSemantics = sem;
-                        break outer;
-                    }
-                }
-                if(opExp.operationSemantics==null) {
-                    message("unsupported unary operation",expression);
-                    return false;
-                }
-                opExp.operator = OperatorFactory.create(parent, opExp);
-                if(opExp.operator==null) {
-                    message("unsupported binary operation",expression);
-                    return false;
-                }
-                return opExp.operator.createPVResult(resultName);
-            }
-            
-            private boolean createTernaryOperatorExpression(
-                    OperatorExpression opExp,Expression expression,String resultName)
-            {
-                Token token = expression.token;
-                if(opExp.expressionArguments.length!=3) {
-                    message("illegal number of args for ternary operation",expression);
-                    return false;
-                }
-                PVField pvField = opExp.expressionArguments[0].pvField;
-                if(pvField==null) {
-                    message("null arg for ternary operation",expression);
-                    return false;
-                }
-                Type arg0Type = pvField.getField().getType();
-                pvField = opExp.expressionArguments[1].pvField;
-                if(pvField==null) {
-                    message("null arg for ternary operation",expression);
-                    return false;
-                }
-                Type arg1Type = pvField.getField().getType();
-                pvField = opExp.expressionArguments[2].pvField;
-                if(pvField==null) {
-                    message("null arg for ternary operation",expression);
-                    return false;
-                }
-                Type arg2Type = pvField.getField().getType();
-                opExp.operationSemantics = null;
-                if(!token.value.equals("?:")) {
-                    message("unsupported ternary operation",expression);
-                    return false;
-                }
-                for(OperationSemantics sem : ExpressionCalculator.operationSemantics) {
-                    if(sem.op.equals("?:")) {
-                        opExp.operationSemantics = sem; break;
-                    }
-                }
-                if(opExp.operationSemantics==null) {
-                    message("unsupported ternary operation",expression);
-                    return false;
-                }
-                if(arg0Type!=Type.pvBoolean) {
-                    message("arg0 must be boolean",expression);
-                    return false;
-                }
-                if(arg1Type!=arg2Type) {
-                    message("arg1 and arg2 must be same type",expression);
-                    return false;
-                }
-                opExp.operator = new TernaryIf(parent,opExp);
-                return opExp.operator.createPVResult(resultName);
-            }
-            
-            private boolean createMathFunctionExpression(
-                    MathFunctionExpression funcExp,
-                    Expression expression,
-                    String resultName)
-            {
-                Token token = expression.token;
-                String func = token.value;
-                MathFunction[] mathFunctions = MathFunction.values();
-                boolean gotIt = false;
-                for(MathFunction mathFunction : mathFunctions) {
-                    if(func.equals(mathFunction.name())) {
-                        funcExp.function = mathFunction;
-                        gotIt = true;
-                        break;
-                    }
-                }
-                if(!gotIt) {
-                    message("unsupported Math function",expression);
-                    return false;
-                }
-                funcExp.operator = MathFactory.create(parent,funcExp);
-                return funcExp.operator.createPVResult(resultName);
-            }
-             
-            private PVField createConstantPV(Type type,String value,String fieldName) {
-                Field field = fieldCreate.createField(fieldName, type);
-                PVField pvField = pvDataCreate.createPVField(parent, field);
-                convert.fromString(pvField, value);
-                return pvField;
-            }
-            
-            private PVField createIntegerConstantPV(String value,String fieldName) {
-                PVField pvField = null;
-                char lastChar = value.charAt(value.length()-1);
-                if(lastChar=='L') {
-                    try {
-                        Long scalar = Long.decode(value);
-                        Field field = fieldCreate.createField(fieldName, Type.pvLong);
-                        pvField = pvDataCreate.createPVField(parent, field);
-                        PVLong pv = (PVLong)pvField;
-                        pv.put(scalar);
-                        pv.setMutable(false);
-                    } catch (NumberFormatException e) {}
-                } else {
-                    try {
-                        Integer scalar = Integer.decode(value);
-                        Field field = fieldCreate.createField(fieldName, Type.pvInt);
-                        pvField = pvDataCreate.createPVField(parent, field);
-                        PVInt pv = (PVInt)pvField;
-                        pv.put(scalar);
-                        pv.setMutable(false);
-                    } catch (NumberFormatException e) {}
-                }
-                return pvField;
-            }
-            
-            private PVField createRealConstantPV(String value,String fieldName) {
-                PVField pvField = null;
-                char lastChar = value.charAt(value.length()-1);
-                if(lastChar=='F') {
-                try {
-                    Float scalar = Float.valueOf(value);
-                    Field field = fieldCreate.createField(fieldName, Type.pvFloat);
-                    pvField = pvDataCreate.createPVField(parent, field);
-                    PVFloat pv = (PVFloat)pvField;
-                    pv.put(scalar);
-                    pv.setMutable(false);
-                } catch (NumberFormatException e) {}
-
-                } else {
-                    try {
-                        Double scalar = Double.valueOf(value);
-                        Field field = fieldCreate.createField(fieldName, Type.pvDouble);
-                        pvField = pvDataCreate.createPVField(parent, field);
-                        PVDouble pv = (PVDouble)pvField;
-                        pv.put(scalar);
-                        pv.setMutable(false);
-                    } catch (NumberFormatException e) {}
-                }
-                return pvField;
-            }
-            
-            private void message(String message,Expression expression) {
-                String fullMessage = message;
-                Token token = expression.token;
-                fullMessage += " token.type " + token.type.name();
-                fullMessage += " token.value " + token.value;
-                fullMessage += " nargs " + expression.nargs;
-                Expression[] args = expression.args;
-                if(args!=null) {
-                    for(Expression arg : args) {
-                        if(arg==null) {
-                            fullMessage += " arg  is null";
-                        } else {
-                            fullMessage += " arg " + arg.token.type.name();
-                        }
-                    }
-                }
-                parent.message(fullMessage, MessageType.error);
-            }
-            
-            private void dumpBasicExpressions(BasicExpression[] basicExpressions) {
-                for(BasicExpression basicExpression: basicExpressions) {
-                    if(basicExpression instanceof OperatorExpression) {
-                        OperatorExpression operatorExpression = (OperatorExpression)basicExpression;
-                        System.out.println("OperatorExpression " + operatorExpression.operationSemantics.operation.name());
-                    } else if(basicExpression instanceof MathFunctionExpression) {
-                        MathFunctionExpression functionExpression = (MathFunctionExpression)basicExpression;
-                        System.out.println("MathFunctionExpression " + functionExpression.function.name());
-                    }
-                    for(ExpressionArgument expressionArgument : basicExpression.expressionArguments) {
-                        if(expressionArgument==null) {
-                            System.out.println("  null expressionArgument");
-                            continue;
-                        }
-                        PVField pvField = expressionArgument.pvField;
-                        if(pvField==null) {
-                            System.out.println("  null arg");
-                        } else {
-                            System.out.println("  arg " + pvField.getFullFieldName() + pvField.getField().toString(1));
-                        }
-                    }
-                    PVField result = basicExpression.pvResult;
-                    if(result==null) {
-                        System.out.println("  null result");
-                    } else {
-                        System.out.println("  result " + result.getFullFieldName() + result.getField().toString(1));
-                    }
-                }
-                
-            }
-        }
+        
         
         private static class OperatorFactory {
             static Operator create(
@@ -1728,7 +1588,7 @@ public abstract class ExpressionCalculatorFactory  {
              * @see org.epics.ioc.support.calc.ExpressionCalculatorFactory.ExpressionCalculator.Operator#createPVResult(java.lang.String)
              */
             public boolean createPVResult(String fieldName) {
-                operatorExpression.pvResult = operatorExpression.expressionArguments[0].pvField;
+                operatorExpression.pvResult = operatorExpression.expressionArguments[0].pvResult;
                 return true;
             }
             /* (non-Javadoc)
@@ -1742,7 +1602,6 @@ public abstract class ExpressionCalculatorFactory  {
         
         static class UnaryMinus implements Operator {
             private PVStructure parent;
-            private OperationSemantics operationSemantics;
             private OperatorExpression operatorExpression;
             private PVField argPV;
             
@@ -1752,8 +1611,7 @@ public abstract class ExpressionCalculatorFactory  {
             UnaryMinus(PVStructure parent,OperatorExpression operatorExpression) {
                 this.parent = parent;
                 this.operatorExpression = operatorExpression;
-                operationSemantics = operatorExpression.operationSemantics;
-                argPV = operatorExpression.expressionArguments[0].pvField;
+                argPV = operatorExpression.expressionArguments[0].pvResult;
             }
             /* (non-Javadoc)
              * @see org.epics.ioc.support.calc.ExpressionCalculatorFactory.ExpressionCalculator.Operator#createPVResult(java.lang.String)
@@ -1763,8 +1621,7 @@ public abstract class ExpressionCalculatorFactory  {
                 Type argType = argField.getType();
                 if(!argType.isNumeric()) {
                     parent.message(
-                            "For operator " + operationSemantics.operation.name()
-                            + " " + argPV.getFullFieldName() + " is not numeric",
+                            "For operator + "  + argPV.getFullFieldName() + " is not numeric",
                             MessageType.fatalError);
                     return false;
                 }
@@ -1801,7 +1658,6 @@ public abstract class ExpressionCalculatorFactory  {
         
         static class BitwiseComplement implements Operator {
             private PVStructure parent;
-            private OperationSemantics operationSemantics;
             private OperatorExpression operatorExpression;
             private PVField argPV;
             
@@ -1811,8 +1667,7 @@ public abstract class ExpressionCalculatorFactory  {
             BitwiseComplement(PVStructure parent,OperatorExpression operatorExpression) {
                 this.parent = parent;
                 this.operatorExpression = operatorExpression;
-                operationSemantics = operatorExpression.operationSemantics;
-                argPV = operatorExpression.expressionArguments[0].pvField;
+                argPV = operatorExpression.expressionArguments[0].pvResult;
             }
             /* (non-Javadoc)
              * @see org.epics.ioc.support.calc.ExpressionCalculatorFactory.ExpressionCalculator.Operator#createPVResult(java.lang.String)
@@ -1823,12 +1678,11 @@ public abstract class ExpressionCalculatorFactory  {
                
                 if(!argType.isInteger()) {
                     parent.message(
-                            "For operator " + operationSemantics.operation.name()
-                            + " " + argPV.getFullFieldName() + " is not integer",
+                            "For operator ~ "  + argPV.getFullFieldName() + " is not integer",
                             MessageType.fatalError);
                     return false;
                 }
-                Type resultType = argField.getType();
+                resultType = argField.getType();
                 Field resultField = fieldCreate.createField(fieldName, resultType);
                 resultPV = pvDataCreate.createPVField(parent, resultField);
                 operatorExpression.pvResult = resultPV;
@@ -1857,31 +1711,27 @@ public abstract class ExpressionCalculatorFactory  {
         
         static class BooleanNot implements Operator {
             private PVStructure parent;
-            private OperationSemantics operationSemantics;
             private OperatorExpression operatorExpression;
-            private PVBoolean argPV;
-            private PVBoolean resultPV;
+            PVField pvField = null;
+            private PVBoolean argPV = null;
+            private PVBoolean resultPV = null;
             
             BooleanNot(PVStructure parent,OperatorExpression operatorExpression) {
                 this.parent = parent;
                 this.operatorExpression = operatorExpression;
-                operationSemantics = operatorExpression.operationSemantics;
+                pvField = operatorExpression.expressionArguments[0].pvResult;
             }
             /* (non-Javadoc)
              * @see org.epics.ioc.support.calc.ExpressionCalculatorFactory.ExpressionCalculator.Operator#createPVResult(java.lang.String)
              */
             public boolean createPVResult(String fieldName) {
-                Field argField = argPV.getField();
-                Type argType = argField.getType();
-               
-                if(argType!=Type.pvBoolean) {
+                if(pvField.getField().getType()!=Type.pvBoolean) {
                     parent.message(
-                            "For operator " + operationSemantics.operation.name()
-                            + " " + argPV.getFullFieldName() + " is not integer",
+                            "For operator ! " + argPV.getFullFieldName() + " is not boolean",
                             MessageType.fatalError);
                     return false;
                 }
-                argPV = (PVBoolean)operatorExpression.expressionArguments[0].pvField;
+                argPV = (PVBoolean)pvField;
                 Field resultField = fieldCreate.createField(fieldName, Type.pvBoolean);
                 resultPV = (PVBoolean)pvDataCreate.createPVField(parent, resultField);
                 operatorExpression.pvResult = resultPV;
@@ -1920,10 +1770,10 @@ public abstract class ExpressionCalculatorFactory  {
              * @see org.epics.ioc.support.calc.ExpressionCalculatorFactory.ExpressionCalculator.Operator#createPVResult(java.lang.String)
              */
             public boolean createPVResult(String fieldName) {
-                arg0PV = operatorExpression.expressionArguments[0].pvField;
+                arg0PV = operatorExpression.expressionArguments[0].pvResult;
                 arg0Field = arg0PV.getField();
                 arg0Type = arg0Field.getType();
-                arg1PV = operatorExpression.expressionArguments[1].pvField;
+                arg1PV = operatorExpression.expressionArguments[1].pvResult;
                 arg1Field = arg1PV.getField();
                 arg1Type = arg1Field.getType();
                 if(!convert.isCopyScalarCompatible(arg0PV.getField(),arg1PV.getField())) {
@@ -2263,8 +2113,8 @@ public abstract class ExpressionCalculatorFactory  {
              * @see org.epics.ioc.support.calc.ExpressionCalculatorFactory.ExpressionCalculator.Operator#createPVResult(java.lang.String)
              */
             public boolean createPVResult(String fieldName) {
-                arg0PV = operatorExpression.expressionArguments[0].pvField;
-                arg1PV = operatorExpression.expressionArguments[1].pvField;
+                arg0PV = operatorExpression.expressionArguments[0].pvResult;
+                arg1PV = operatorExpression.expressionArguments[1].pvResult;
                 Field resultField = fieldCreate.createField(fieldName, Type.pvString);
                 resultPV = (PVString)pvDataCreate.createPVField(parent, resultField);
                 operatorExpression.pvResult = resultPV;
@@ -2296,10 +2146,10 @@ public abstract class ExpressionCalculatorFactory  {
                 operationSemantics = operatorExpression.operationSemantics;
             }
             public boolean createPVResult(String fieldName) {
-                arg0PV = operatorExpression.expressionArguments[0].pvField;
+                arg0PV = operatorExpression.expressionArguments[0].pvResult;
                 Field arg0Field = arg0PV.getField();
                 Type arg0Type = arg0Field.getType();
-                arg1PV = operatorExpression.expressionArguments[1].pvField;
+                arg1PV = operatorExpression.expressionArguments[1].pvResult;
                 Field arg1Field = arg1PV.getField();
                 Type arg1Type = arg1Field.getType();
                 if(!arg0Type.isInteger() || !arg1Type.isInteger()) {
@@ -2400,20 +2250,22 @@ public abstract class ExpressionCalculatorFactory  {
                 byte shift = convert.toByte(arg1PV);
                 switch(resultType) {
                 case pvByte: {
-                    byte arg0 = convert.toByte(arg0PV);
+                    int arg0 = convert.toByte(arg0PV);
+                    arg0 &= 0x0ff;
                     byte value = (byte)(arg0>>>shift);
                     ((PVByte)resultPV).put(value);
                     return;
                 }
                 case pvShort: {
-                    short arg0 = convert.toShort(arg0PV);
+                    int arg0 = convert.toShort(arg0PV);
+                    arg0 &= 0x0ffff;
                     short value = (short)(arg0>>>shift);
                     ((PVShort)resultPV).put(value);
                     return;
                 }
                 case pvInt: {
                     int arg0 = convert.toInt(arg0PV);
-                    int value = (int)(arg0>>>shift);
+                    int value = (arg0>>>shift);
                     ((PVInt)resultPV).put(value);
                     return;
                 }
@@ -2443,11 +2295,11 @@ public abstract class ExpressionCalculatorFactory  {
                 operationSemantics = operatorExpression.operationSemantics;
             }
             public boolean createPVResult(String fieldName) {
-                ExpressionArgument expressionArgument = operatorExpression.expressionArguments[0];
-                arg0PV = expressionArgument.pvField;
+                Expression expressionArgument = operatorExpression.expressionArguments[0];
+                arg0PV = expressionArgument.pvResult;
                 Type arg0Type = arg0PV.getField().getType();
                 expressionArgument = operatorExpression.expressionArguments[1];
-                arg1PV = expressionArgument.pvField;
+                arg1PV = expressionArgument.pvResult;
                 Type arg1Type = arg1PV.getField().getType();
                 if(!convert.isCopyScalarCompatible(arg0PV.getField(),arg1PV.getField())) {
                     parent.message(
@@ -2784,10 +2636,10 @@ public abstract class ExpressionCalculatorFactory  {
                 operationSemantics = operatorExpression.operationSemantics;
             }
             public boolean createPVResult(String fieldName) {
-                arg0PV = operatorExpression.expressionArguments[0].pvField;
+                arg0PV = operatorExpression.expressionArguments[0].pvResult;
                 Field arg0Field = arg0PV.getField();
                 Type arg0Type = arg0Field.getType();
-                arg1PV = operatorExpression.expressionArguments[1].pvField;
+                arg1PV = operatorExpression.expressionArguments[1].pvResult;
                 Field arg1Field = arg1PV.getField();
                 Type arg1Type = arg1Field.getType();
                 if(!arg0Type.isInteger() || !arg1Type.isInteger()) {
@@ -2954,8 +2806,8 @@ public abstract class ExpressionCalculatorFactory  {
                 operationSemantics = operatorExpression.operationSemantics;
             }
             public boolean createPVResult(String fieldName) {
-                ExpressionArgument expressionArgument = operatorExpression.expressionArguments[0];
-                PVField pvField = expressionArgument.pvField;
+                Expression expressionArgument = operatorExpression.expressionArguments[0];
+                PVField pvField = expressionArgument.pvResult;
                 Type type = pvField.getField().getType();
                 if(type!=Type.pvBoolean) {
                     parent.message(
@@ -2968,7 +2820,7 @@ public abstract class ExpressionCalculatorFactory  {
                 arg0PV = (PVBoolean)pvField;
                 arg0Operator = expressionArgument.operator;
                 expressionArgument = operatorExpression.expressionArguments[1];
-                pvField = expressionArgument.pvField;
+                pvField = expressionArgument.pvResult;
                 type = pvField.getField().getType();
                 if(type!=Type.pvBoolean) {
                     parent.message(
@@ -3061,9 +2913,9 @@ public abstract class ExpressionCalculatorFactory  {
                 operationSemantics = operatorExpression.operationSemantics;
             }
             public boolean createPVResult(String fieldName) {
-                ExpressionArgument expressionArgument = operatorExpression.expressionArguments[0];
+                Expression expressionArgument = operatorExpression.expressionArguments[0];
                 ifOperator = expressionArgument.operator;
-                PVField argPV = expressionArgument.pvField;
+                PVField argPV = expressionArgument.pvResult;
                 Field argField = argPV.getField();
                 Type argType = argField.getType();
                 if(argType!=Type.pvBoolean) {
@@ -3074,10 +2926,10 @@ public abstract class ExpressionCalculatorFactory  {
                 }
                 ifPV = (PVBoolean)argPV;
                 expressionArgument = operatorExpression.expressionArguments[1];
-                argPVs[0] = expressionArgument.pvField;
+                argPVs[0] = expressionArgument.pvResult;
                 argOperators[0] = expressionArgument.operator;
                 expressionArgument = operatorExpression.expressionArguments[2];
-                argPVs[1] = expressionArgument.pvField;
+                argPVs[1] = expressionArgument.pvResult;
                 argOperators[1] = expressionArgument.operator;
                 if(!convert.isCopyScalarCompatible(argPVs[0].getField(),argPVs[1].getField())) {
                     parent.message(
@@ -3171,7 +3023,7 @@ public abstract class ExpressionCalculatorFactory  {
                     parent.message("illegal number of args", MessageType.error);
                     return false;
                 }
-                PVField pvField = mathFunctionExpression.expressionArguments[0].pvField; 
+                PVField pvField = mathFunctionExpression.expressionArguments[0].pvResult; 
                 if(pvField.getField().getType()!=Type.pvDouble) {
                    pvField.message("arg type must be double", MessageType.error);
                    return false;
@@ -3203,13 +3055,13 @@ public abstract class ExpressionCalculatorFactory  {
                     parent.message("illegal number of args", MessageType.error);
                     return false;
                 }
-                PVField pvField = mathFunctionExpression.expressionArguments[0].pvField;
+                PVField pvField = mathFunctionExpression.expressionArguments[0].pvResult;
                 if(pvField.getField().getType()!=Type.pvDouble) {
                    pvField.message("arg type must be double", MessageType.error);
                    return false;
                 }
                 pvArg0 = (PVDouble)pvField;
-                pvField = mathFunctionExpression.expressionArguments[1].pvField;
+                pvField = mathFunctionExpression.expressionArguments[1].pvResult;
                 if(pvField.getField().getType()!=Type.pvDouble) {
                    pvField.message("arg type must be double", MessageType.error);
                    return false;
@@ -3288,7 +3140,7 @@ public abstract class ExpressionCalculatorFactory  {
                     parent.message("illegal number of args", MessageType.error);
                     return false;
                 }
-                pvArg = mathFunctionExpression.expressionArguments[0].pvField;
+                pvArg = mathFunctionExpression.expressionArguments[0].pvResult;
                 type = pvArg.getField().getType();
                 if(type!=Type.pvInt && type!=Type.pvLong && type!=Type.pvFloat && type!=Type.pvDouble) {
                     pvArg.message("illegal arg type", MessageType.error);
@@ -3480,14 +3332,14 @@ public abstract class ExpressionCalculatorFactory  {
                     parent.message("illegal number of args", MessageType.error);
                     return false;
                 }
-                pv0Arg = mathFunctionExpression.expressionArguments[0].pvField;;
+                pv0Arg = mathFunctionExpression.expressionArguments[0].pvResult;;
                 Type type = pv0Arg.getField().getType();
                 if(type!=Type.pvInt && type!=Type.pvLong && type!=Type.pvFloat && type!=Type.pvDouble) {
                     pv0Arg.message("illegal arg type", MessageType.error);
                     return false;
                 }
                 this.type = type;
-                pv1Arg = mathFunctionExpression.expressionArguments[1].pvField;
+                pv1Arg = mathFunctionExpression.expressionArguments[1].pvResult;
                 type = pv1Arg.getField().getType();
                 if(type!=this.type) {
                     pv1Arg.message("arg1 type must be the same as arg0", MessageType.error);
@@ -3533,14 +3385,14 @@ public abstract class ExpressionCalculatorFactory  {
                     parent.message("illegal number of args", MessageType.error);
                     return false;
                 }
-                pv0Arg = mathFunctionExpression.expressionArguments[0].pvField;
+                pv0Arg = mathFunctionExpression.expressionArguments[0].pvResult;
                 Type type = pv0Arg.getField().getType();
                 if(type!=Type.pvInt && type!=Type.pvLong && type!=Type.pvFloat && type!=Type.pvDouble) {
                     pv0Arg.message("illegal arg type", MessageType.error);
                     return false;
                 }
                 this.type = type;
-                pv1Arg = mathFunctionExpression.expressionArguments[1].pvField;
+                pv1Arg = mathFunctionExpression.expressionArguments[1].pvResult;
                 type = pv1Arg.getField().getType();
                 if(type!=this.type) {
                     pv1Arg.message("arg1 type must be the same as arg0", MessageType.error);
@@ -3626,7 +3478,7 @@ public abstract class ExpressionCalculatorFactory  {
                     parent.message("illegal number of args", MessageType.error);
                     return false;
                 }
-                pvArg = mathFunctionExpression.expressionArguments[0].pvField;
+                pvArg = mathFunctionExpression.expressionArguments[0].pvResult;
                 argType = pvArg.getField().getType();
                 if(argType!=Type.pvFloat && argType!=Type.pvDouble) {
                     pvArg.message("illegal arg type", MessageType.error);
@@ -3667,7 +3519,7 @@ public abstract class ExpressionCalculatorFactory  {
                     parent.message("illegal number of args", MessageType.error);
                     return false;
                 }
-                pvArg = mathFunctionExpression.expressionArguments[0].pvField;
+                pvArg = mathFunctionExpression.expressionArguments[0].pvResult;
                 type = pvArg.getField().getType();
                 if(type!=Type.pvFloat && type!=Type.pvDouble) {
                     pvArg.message("illegal arg type", MessageType.error);
@@ -3770,7 +3622,7 @@ public abstract class ExpressionCalculatorFactory  {
                     parent.message("illegal number of args", MessageType.error);
                     return false;
                 }
-                pvArg = mathFunctionExpression.expressionArguments[0].pvField;
+                pvArg = mathFunctionExpression.expressionArguments[0].pvResult;
                 type = pvArg.getField().getType();
                 if(type!=Type.pvFloat && type!=Type.pvDouble) {
                     pvArg.message("illegal arg type", MessageType.error);
