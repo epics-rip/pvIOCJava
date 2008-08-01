@@ -1186,15 +1186,15 @@ public abstract class ExpressionCalculatorFactory  {
                         PVLong pv = (PVLong)pvField;
                         pv.put(scalar);
                     } else {
-                        Integer scalar = new Integer(0);
+                        Long scalar = new Long(0);
                         try {
-                            scalar = Integer.decode(value);
+                            scalar = Long.decode(value);
                         } catch (NumberFormatException e) {
                             pvStructure.message(e.getMessage(), MessageType.error);
                             return false;
                         }
                         PVInt pv = (PVInt)pvField;
-                        pv.put(scalar);
+                        pv.put((int)(long)scalar);
                     }
                     pvField.setMutable(false);
                     exp.pvResult = pvField;
