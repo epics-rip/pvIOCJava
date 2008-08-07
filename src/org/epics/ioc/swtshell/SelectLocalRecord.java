@@ -5,6 +5,8 @@
  */
 package org.epics.ioc.swtshell;
 
+import org.epics.ioc.db.DBRecord;
+
 /**
  * Shell to select the name of a local JavaIOC record.
  * @author mrk
@@ -16,4 +18,9 @@ public interface SelectLocalRecord {
      * @return The name of the record.
      */
     public String getRecordName();
+    /**
+     * Get the DBRecord interface.
+     * @return The interface or null if no records.
+     */
+    public DBRecord getDBRecord();
 }

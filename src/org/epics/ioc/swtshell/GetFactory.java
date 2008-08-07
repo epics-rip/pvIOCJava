@@ -69,11 +69,13 @@ public class GetFactory {
         private Button processButton;
         private Button propertyButton;
         private Text consoleText = null; 
+        private boolean isDisposed = false;
         
         /* (non-Javadoc)
          * @see org.eclipse.swt.events.DisposeListener#widgetDisposed(org.eclipse.swt.events.DisposeEvent)
          */
         public void widgetDisposed(DisposeEvent e) {
+            isDisposed = true;
             if(channel!=null) channel.destroy();
         }
         /* (non-Javadoc)
@@ -92,6 +94,7 @@ public class GetFactory {
          * @see org.epics.ioc.ca.ChannelListener#channelStateChange(org.epics.ioc.ca.Channel, boolean)
          */
         public void channelStateChange(Channel c, boolean isConnected) {
+            if(isDisposed) return;
             if(isConnected) {
                 channel = channelConnect.getChannel();
                 String fieldName = channel.getFieldName();

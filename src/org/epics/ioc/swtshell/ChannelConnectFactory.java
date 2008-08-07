@@ -320,6 +320,7 @@ public class ChannelConnectFactory {
         private void disconnect() {
             if(connectButtonState==ConnectState.disconnected) return;
             channelListener.channelStateChange(channel, false);
+            if(connectedLabel.isDisposed()) return;
             connectedLabel.setText(connectConnectStateText[0]);
             connectButtonState = ConnectState.disconnected;
             connectButton.setText(connectButtonStateText[0]);

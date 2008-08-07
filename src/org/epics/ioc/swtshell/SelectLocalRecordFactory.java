@@ -101,6 +101,15 @@ public class SelectLocalRecordFactory {
             return recordName;
         }       
         /* (non-Javadoc)
+         * @see org.epics.ioc.swtshell.SelectLocalRecord#getDBRecord()
+         */
+        public DBRecord getDBRecord() {
+            String recordName = getRecordName();
+            if(recordName==null) return null;
+            return iocdb.findRecord(recordName);
+        }
+
+        /* (non-Javadoc)
          * @see org.eclipse.swt.events.SelectionListener#widgetDefaultSelected(org.eclipse.swt.events.SelectionEvent)
          */
         public void widgetDefaultSelected(SelectionEvent arg0) {

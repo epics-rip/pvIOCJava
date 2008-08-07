@@ -88,13 +88,6 @@ public class SwtshellFactory {
                     IOCConsoleFactory.init(display);
                 }
             });
-            Button processorDB = new Button(shell,SWT.PUSH);
-            processorDB.setText("processor");
-            processorDB.addSelectionListener( new SelectionAdapter() {
-                public void widgetSelected(SelectionEvent e) {
-                    ProcessorFactory.init(display);
-                }
-            });
             Button loadDatabase = new Button(shell,SWT.PUSH);
             loadDatabase.setText("loadDatabase");
             loadDatabase.addSelectionListener( new SelectionAdapter() {
