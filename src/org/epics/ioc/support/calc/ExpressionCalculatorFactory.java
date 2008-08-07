@@ -60,8 +60,8 @@ public abstract class ExpressionCalculatorFactory  {
     private static PVDataCreate pvDataCreate = PVDataFactory.getPVDataCreate();
     private static final  String supportName = "expressionCalculator";
     private static Convert convert = ConvertFactory.getConvert();
-    private static boolean dumpTokenList = true;
-    private static boolean dumpExp = true;
+    private static boolean dumpTokenList = false;
+    private static boolean dumpExpression = false;
     
     private static class ExpressionCalculator extends AbstractSupport {
         
@@ -115,7 +115,6 @@ public abstract class ExpressionCalculatorFactory  {
             Parse parse = new Parse(pvExpression);
             expression = parse.parse();
             if(expression==null) return;
-            
             super.initialize();
         }
         /* (non-Javadoc)
@@ -243,10 +242,7 @@ public abstract class ExpressionCalculatorFactory  {
             
         };
         
-       
         private enum MathFunction {
-            E,
-            PI,
             abs,
             acos,
             asin,
@@ -281,22 +277,90 @@ public abstract class ExpressionCalculatorFactory  {
             ulp,
         }
         
+        static private class MathFunctionSemantics {
+            MathFunction mathFunction;
+            int nargs;
+            boolean isRandom;
+            
+            public MathFunctionSemantics(MathFunction mathFunction,int nargs,boolean isRandom) {
+                super();
+                this.mathFunction = mathFunction;
+                this.nargs = nargs;
+                this.isRandom = isRandom;
+            }
+        }
+        
+        private static final MathFunctionSemantics[] mathFunctionSemantics = 
+        {
+            new MathFunctionSemantics(MathFunction.abs,1,false),
+            new MathFunctionSemantics(MathFunction.acos,1,false),
+            new MathFunctionSemantics(MathFunction.asin,1,false),
+            new MathFunctionSemantics(MathFunction.atan,1,false),
+            new MathFunctionSemantics(MathFunction.atan2,2,false),
+            new MathFunctionSemantics(MathFunction.cbrt,1,false),
+            new MathFunctionSemantics(MathFunction.ceil,1,false),
+            new MathFunctionSemantics(MathFunction.cos,1,false),
+            new MathFunctionSemantics(MathFunction.cosh,1,false),
+            new MathFunctionSemantics(MathFunction.exp,1,false),
+            new MathFunctionSemantics(MathFunction.expm1,1,false),
+            new MathFunctionSemantics(MathFunction.floor,1,false),
+            new MathFunctionSemantics(MathFunction.hypot,2,false),
+            new MathFunctionSemantics(MathFunction.IEEEremainder,2,false),
+            new MathFunctionSemantics(MathFunction.log,1,false),
+            new MathFunctionSemantics(MathFunction.log10,1,false),
+            new MathFunctionSemantics(MathFunction.log1p,1,false),
+            new MathFunctionSemantics(MathFunction.max,2,false),
+            new MathFunctionSemantics(MathFunction.min,2,false),
+            new MathFunctionSemantics(MathFunction.pow,2,false),
+            new MathFunctionSemantics(MathFunction.random,0,true),
+            new MathFunctionSemantics(MathFunction.rint,1,false),
+            new MathFunctionSemantics(MathFunction.round,1,false),
+            new MathFunctionSemantics(MathFunction.signum,1,false),
+            new MathFunctionSemantics(MathFunction.sin,1,false),
+            new MathFunctionSemantics(MathFunction.sinh,1,false),
+            new MathFunctionSemantics(MathFunction.sqrt,1,false),
+            new MathFunctionSemantics(MathFunction.tan,1,false),
+            new MathFunctionSemantics(MathFunction.tanh,1,false),
+            new MathFunctionSemantics(MathFunction.toDegrees,1,false),
+            new MathFunctionSemantics(MathFunction.toRadians,1,false),
+            new MathFunctionSemantics(MathFunction.ulp,1,false),
+        };
+        
         private enum TokenType {
             unaryOperator,
             binaryOperator,
             ternaryOperator,
-            comma,
-            leftParen,
-            rightParen,
-            variable,
+            mathFunction,
             booleanConstant,
             integerConstant,
             realConstant,
             stringConstant,
-            mathFunction;
+            mathConstant,
+            variable,
+            comma,
+            leftParen,
+            rightParen;
             
+            boolean isOperator() {
+                if( (ordinal() >= TokenType.unaryOperator.ordinal()) && (ordinal() <= TokenType.mathFunction.ordinal()) ) {
+                    return true;
+                }
+                return false;
+            }
+            boolean isFunction() {
+                if( (ordinal() >= TokenType.mathFunction.ordinal()) && (ordinal() <= TokenType.mathFunction.ordinal()) ) {
+                    return true;
+                }
+                return false;
+            }
             boolean isConstant() {
-                if( (ordinal() >= TokenType.booleanConstant.ordinal()) && (ordinal() <= TokenType.stringConstant.ordinal()) ) {
+                if( (ordinal() >= TokenType.booleanConstant.ordinal()) && (ordinal() <= TokenType.mathConstant.ordinal()) ) {
+                    return true;
+                }
+                return false;
+            }
+            boolean isOperand() {
+                if( (ordinal() >= TokenType.booleanConstant.ordinal()) && (ordinal() <= TokenType.variable.ordinal()) ) {
                     return true;
                 }
                 return false;
@@ -335,8 +399,7 @@ public abstract class ExpressionCalculatorFactory  {
 
         
         private static class MathFunctionExpression extends Expression{
-            MathFunction function = null;
-            int numArgs = 1;
+            MathFunctionSemantics functionSemantics = null;
         }
         
         private class Parse {
@@ -362,11 +425,11 @@ public abstract class ExpressionCalculatorFactory  {
                     pvExpression.message("parse failure mismatched parentheses ", MessageType.error);
                     return null;
                 }
-                if(!addParan()) return null;
-                if(dumpTokenList)printTokenList("after addParan");
-                Expression expression = createFinalExpression();
-                if(dumpExp) {
-                    System.out.println("after parse expression is");
+                if(!createTokenListWithPrecedence()) return null;
+                if(dumpTokenList)printTokenList("after createTokenListWithPrecedence");
+                Expression expression = createExpression();
+                if(dumpExpression) {
+                    pvExpression.message("after parse expression is",MessageType.info);
                     printExpression(expression,"");
                 }
                 return expression;
@@ -383,9 +446,19 @@ public abstract class ExpressionCalculatorFactory  {
                 String expression = pvExpression.get();
                 int length = expression.length();
                 StringBuilder string = new StringBuilder(expression.length());
+                boolean inString = false;
                 for(int index=0; index<length; index++) {
                     char nextChar = expression.charAt(index);
-                    if(nextChar!=' ') string.append(nextChar);
+                    if(nextChar=='"') {
+                        string.append(nextChar);
+                        inString = !inString;
+                        continue;
+                    }
+                    if(inString) {
+                        string.append(nextChar);
+                        continue;
+                    }
+                    if(nextChar!=' ' && !Character.isISOControl(nextChar)) string.append(nextChar);
                 }
                 expression = string.toString();
                 length = expression.length();
@@ -439,10 +512,14 @@ public abstract class ExpressionCalculatorFactory  {
                                 pvExpression.message("parse failure unknown function " + expression.substring(next), MessageType.error);
                                 return false;
                             }
+                            if(functionName.equals("PI") || functionName.equals("E")) {
+                                token.type = TokenType.mathConstant;
+                            }
                             value = functionName;
                         }
                     } else {
                         pvExpression.message("parse failure at " + expression.substring(next), MessageType.error);
+                        printTokenList("after parse failure");
                         return false;
                     }
                     if(value.length()==0) {
@@ -452,14 +529,15 @@ public abstract class ExpressionCalculatorFactory  {
                     token.value = value;
                     tokenList.add(token);
                     next += value.length();
+                    if(token.type==TokenType.stringConstant) next+= 2;
                 }
                 
                 return true;
             }
             
             private String getUnaryOp(String string, int offset) {
-                char nextChar = string.charAt(offset);
-                if(nextChar!='-' && nextChar!='+' && nextChar!='~' && nextChar!='!') return null;
+                char offsetChar = string.charAt(offset);
+                if(offsetChar!='-' && offsetChar!='+' && offsetChar!='~' && offsetChar!='!') return null;
                 if(offset==0) return string.substring(offset, offset+1);
                 char prevChar = string.charAt(offset-1);
                 if(prevChar=='(' || prevChar=='-' || prevChar=='+' || prevChar=='~' || prevChar=='!') return string.substring(offset, offset+1);
@@ -560,8 +638,8 @@ public abstract class ExpressionCalculatorFactory  {
                 int next = offset;
                 if(first=='+' || first=='-') {
                     if(len<=next+1) return null;
-                    first = string.charAt(next);
                     next++;
+                    first = string.charAt(next);
                 }
                 if(!Character.isDigit(first)) return null;
                 if(len<=next+1) {
@@ -595,14 +673,14 @@ public abstract class ExpressionCalculatorFactory  {
                 boolean gotPeriod = false;
                 if(first=='+' || first=='-') {
                     if(len<=next+1) return null;
-                    first = string.charAt(next);
                     next++;
+                    first = string.charAt(next);
                 }
                 if(first=='.') {
                     if(len<=next+1) return null;
                     gotPeriod = true;
-                    first = string.charAt(next);
                     next++;
+                    first = string.charAt(next);
                 }
                 if(!Character.isDigit(first)) return null;
                 if(len<=next+1) {
@@ -640,15 +718,15 @@ public abstract class ExpressionCalculatorFactory  {
                 char charNext = string.charAt(offset);
                 if(charNext!='"') return null;
                 int next = offset;
-                while(next++ < len) {
+                while(next++ < len-1) {
                     charNext = string.charAt(next);
-                    if(charNext=='"') return string.substring(offset, next);
+                    if(charNext=='"') return string.substring(offset+1, next);
                     if(charNext=='\\') next++;
                 }
                 return null;
             }
 
-            private boolean addParan() {
+            private boolean createTokenListWithPrecedence() {
                 int length = tokenList.size();
                 if(length==0) {
                     pvExpression.message("parse failure expression has no tokens", MessageType.error);
@@ -669,20 +747,6 @@ public abstract class ExpressionCalculatorFactory  {
                     length += 2;
                 }
                 int next = 0;
-                // functions have highest precedence
-                next = 0;
-                while(next<length) {
-                    token = tokenList.get(next);
-                    type = token.type;
-                    if(type==TokenType.mathFunction) {
-                        int ret = insertFunctionParans(next);
-                        if(ret<0) return false;
-                        if(ret>0) {
-                            next++; length += 2;
-                        }
-                    }
-                    next++;
-                }
                 for(int precedence = 12; precedence>0; precedence--) {
                     // right to left first
                     next = length-1;
@@ -692,6 +756,7 @@ public abstract class ExpressionCalculatorFactory  {
                         if(type==TokenType.binaryOperator || type==TokenType.unaryOperator) {
                             OperationSemantics semantics = null;
                             for(OperationSemantics sem : ExpressionCalculator.operationSemantics) {
+                                if(sem.precedence<precedence) break;
                                 if(sem.precedence!=precedence) continue;
                                 if(sem.associativity!=Associativity.right) continue;
                                 if(!sem.op.equals(token.value)) continue;
@@ -732,6 +797,7 @@ public abstract class ExpressionCalculatorFactory  {
                         if(type==TokenType.binaryOperator || type==TokenType.unaryOperator) {
                             OperationSemantics semantics = null;
                             for(OperationSemantics sem : ExpressionCalculator.operationSemantics) {
+                                if(sem.precedence<precedence) break;
                                 if(sem.precedence!=precedence) continue;
                                 if(sem.associativity!=Associativity.left) continue;
                                 if(!sem.op.equals(token.value)) continue;
@@ -780,73 +846,6 @@ public abstract class ExpressionCalculatorFactory  {
                 return true;
             }
             
-            private int insertFunctionParans(int offset) {
-                int length = tokenList.size();
-                Token token = null;
-                String functionName = tokenList.get(offset).value;
-                if(functionName.equals("E") || functionName.equals("PI")) {
-                    if(offset>0 && offset<length-1) {
-                        TokenType prev = tokenList.get(offset-1).type;
-                        TokenType next = tokenList.get(offset+1).type;
-                        if(prev==TokenType.leftParen && next==TokenType.rightParen) return 0;
-                    }
-                    token = new Token();
-                    token.type = TokenType.leftParen;
-                    token.value = "(";
-                    tokenList.add(offset , token);
-                    offset += 2;
-                    token = new Token();
-                    token.type = TokenType.rightParen;
-                    token.value = ")";
-                    tokenList.add(offset , token);
-                    return 1;
-                }
-                int parenDepth = 0;
-                int next = offset + 1;
-                while(next<length) {
-                    TokenType type = tokenList.get(next).type;
-                    if(next==offset+1 && type!=TokenType.leftParen) {
-                        pvExpression.message("parse failure function not followewd by (", MessageType.error);
-                        return -1;
-                    }
-                    if(type==TokenType.leftParen) {
-                        parenDepth++; next++; continue;
-                    }
-                    if(type==TokenType.rightParen) {
-                        if(parenDepth>0) {
-                            parenDepth--; next++; continue;
-                        }
-                        break;
-                    }
-                    if(parenDepth==0) {
-                        break;
-                    }
-                    next++;
-                }
-                if(next>=length) {
-                    pvExpression.message("parse failure", MessageType.error);
-                    return -1;
-                }
-                TokenType prevType = null;
-                if(offset>0) {
-                    prevType = tokenList.get(offset-1).type;
-                }
-                TokenType nextType = tokenList.get(next).type;
-                if(prevType!=null && prevType==TokenType.leftParen && nextType==TokenType.rightParen) {
-                    return 0;
-                }
-                token = new Token();
-                token.type = TokenType.leftParen;
-                token.value = "(";
-                tokenList.add(offset , token);
-                next++;
-                token = new Token();
-                token.type = TokenType.rightParen;
-                token.value = ")";
-                tokenList.add(next, token);
-                return 1;
-            }
-            
             private int insertUnaryOperationParans(int offset) {
                 int length = tokenList.size();
                 Token token = null;
@@ -865,6 +864,10 @@ public abstract class ExpressionCalculatorFactory  {
                 while(next<length) {
                     token = tokenList.get(next);
                     type = token.type;
+                    if(type.isFunction()) {
+                        next++;
+                        continue;
+                    }
                     if(type==TokenType.leftParen) {
                         parenDepth++; next++; continue;
                     }
@@ -904,7 +907,7 @@ public abstract class ExpressionCalculatorFactory  {
                 if(prev>=0) {
                     token = tokenList.get(prev);
                     type = token.type;
-                    if(type.isConstant()||type==TokenType.variable) gotPrev = true;
+                    if(type.isOperand()) gotPrev = true;
                 }
                 while(!gotPrev && prev>=0) {
                     token = tokenList.get(prev);
@@ -913,10 +916,11 @@ public abstract class ExpressionCalculatorFactory  {
                         parenDepth++; prev--; continue;
                     }
                     if(type==TokenType.leftParen) {
-                        if(--parenDepth==0) {
-                            gotPrev = true; break;
+                        parenDepth--;
+                        if(parenDepth==0) {
+                            gotPrev = true;
+                            break;
                         }
-                        prev--; continue;
                     }
                     if(parenDepth>0) {
                         prev--; continue;
@@ -926,17 +930,14 @@ public abstract class ExpressionCalculatorFactory  {
                 }
                 int next = offset + 1;
                 boolean gotNext = false;
-                if(next<length) {
-                    token = tokenList.get(next);
-                    type = token.type;
-                    if(type.isConstant()||type==TokenType.variable) {
-                        next++;
-                        gotNext = true;
-                    }
-                }
+                if(next<length && tokenList.get(next).type.isOperand()) gotNext = true;
                 while(!gotNext && next<length) {
                     token = tokenList.get(next);
                     type = token.type;
+                    if(type.isFunction()) {
+                        next++;
+                        continue;
+                    }
                     if(type==TokenType.leftParen) {
                         parenDepth++; next++; continue;
                     }
@@ -945,12 +946,11 @@ public abstract class ExpressionCalculatorFactory  {
                             pvExpression.message("parse failure bad expression ", MessageType.error);
                             return -1;
                         }
-                        parenDepth--; next++;
+                        parenDepth--;
                         if(parenDepth==0) {
                             gotNext = true;
                             break;
                         }
-                        continue;
                     }
                     if(parenDepth>0) {
                         next++; continue;
@@ -958,19 +958,22 @@ public abstract class ExpressionCalculatorFactory  {
                     pvExpression.message("parse failure bad expression ", MessageType.error);
                     return -1;
                 }
-                TokenType beforePrev = null;
-                TokenType after = null;
+                TokenType beforePrevType = null;
+                TokenType afterNextType = null;
                 if(prev>0) {
-                    beforePrev = tokenList.get(prev-1).type;
+                    beforePrevType = tokenList.get(prev-1).type;
                 }
-                if(next<length) {
-                    after = tokenList.get(next).type;
+                if(next<length-1) {
+                    afterNextType = tokenList.get(next+1).type;
                 }
-                if(beforePrev!=null && after!=null &&beforePrev==TokenType.leftParen && after==TokenType.rightParen) return 0;
+                if(beforePrevType==TokenType.leftParen && afterNextType==TokenType.rightParen) {
+                    if(prev<2) return 0;
+                    if(!tokenList.get(prev-2).type.isFunction()) return 0;
+                }
                 token = new Token();
                 token.type = TokenType.rightParen;
                 token.value = ")";
-                tokenList.add(next , token);
+                tokenList.add(next+1 , token);
                 token = new Token();
                 token.type = TokenType.leftParen;
                 token.value = "(";
@@ -1035,109 +1038,80 @@ public abstract class ExpressionCalculatorFactory  {
                 return -1;
             }
 
-            private Expression createFinalExpression() {
+            private Expression createExpression() {
                 Stack<Expression> infixExpStack = new Stack<Expression>();
                 Stack<Expression> expStack = new Stack<Expression>();
                 while(!tokenList.isEmpty()) {
                     Token nextToken= tokenList.remove(0);
                     TokenType type = nextToken.type;
-                    switch(type) {
-                    case leftParen: {
-                        Token token = tokenList.get(0);
-                        if(token.type!=TokenType.rightParen) break;
-                        if(infixExpStack.size()>=0) {
-                            Expression previous = infixExpStack.peek();
-                            if(previous instanceof MathFunctionExpression) {
-                                MathFunctionExpression mathFunctionExpression = (MathFunctionExpression)previous;
-                                mathFunctionExpression.numArgs = 0;
-                            }
-                        } else { // () not for function with no arguments
-                            tokenList.remove(0);
+                    if(type==TokenType.leftParen || type==TokenType.comma) continue;
+                    if(type==TokenType.rightParen) {
+                        if(infixExpStack.size()>0) {
+                            unwindExpStack(infixExpStack.pop(),expStack);
                         }
-                        break;
+                        continue;
                     }
-                    case variable:
-                    case booleanConstant:
-                    case integerConstant:
-                    case realConstant:
-                    case stringConstant:{
+                    if(type.isOperand()) {
                         Expression exp = new Expression();
                         exp.token = nextToken;
-                        if(!unwindStack(exp,expStack)) return null;
-                        break;
+                        if(!unwindExpStack(exp,expStack)) return null;
+                        continue;
                     }
-                    case comma: {
-                        int num = infixExpStack.size();
-                        int index = num;
-                        while(index-- >0) {
-                            Expression exp = infixExpStack.get(index);
-                            if(exp instanceof MathFunctionExpression) {
-                                MathFunctionExpression mathFunctionExpression = (MathFunctionExpression)exp;
-                                mathFunctionExpression.numArgs++;
-                                break;
-                            }
+                    
+                    if(type.isOperator()) {
+                        Expression exp = null;
+                        switch(type) {
+                        case mathFunction:  {
+                            exp = new MathFunctionExpression();
+                            exp.token = nextToken;
+                            break;
                         }
-                        if(index<0) {
-                            System.out.println("logic error comma not part of MathFunctionExpression");
-                            printExpStack("infixExpStack",infixExpStack);
-                            printTokenList("tokenList");
+                        case unaryOperator:
+                        case binaryOperator:
+                        {
+                            exp = new OperatorExpression();
+                            exp.token = nextToken;
+                            break;
                         }
-                        break;
-                    }
-                    case mathFunction:  {
-                        Expression exp = new MathFunctionExpression();
-                        exp.token = nextToken;
-                        infixExpStack.push(exp);
-                        break;
-                    }
-                    case unaryOperator:
-                    case binaryOperator:
-                    {
-                        Expression exp = new OperatorExpression();
-                        exp.token = nextToken;
-                        infixExpStack.push(exp);
-                        break;
-                    }
-                   
-                    case ternaryOperator: {
-                        if(nextToken.value.equals("?")) break;
-                        Expression exp = new OperatorExpression();
-                        exp.token = new Token();
-                        exp.token.type = TokenType.ternaryOperator;
-                        exp.token.value = "?:";
-                        infixExpStack.push(exp);
-                        break;
-                    }
-                    case rightParen: {
-                        if(infixExpStack.size()>0) {
-                            unwindStack(infixExpStack.pop(),expStack);
+
+                        case ternaryOperator: {
+                            if(nextToken.value.equals("?")) break;
+                            exp = new OperatorExpression();
+                            exp.token = new Token();
+                            exp.token.type = TokenType.ternaryOperator;
+                            exp.token.value = "?:";
+                            break;
                         }
-                        break;
+                        default:
+                            throw new IllegalStateException("logic error.");
+                        }
+                        if(exp!=null) infixExpStack.push(exp);
+                        continue;
                     }
-                    default:
-                        throw new IllegalStateException("logic error.");
-                    }
+                    
                 }
                 boolean ok = true;
                 if(infixExpStack.size()!=0) {
-                    System.out.println("logic error infixExpStack not empty");
+                    pvExpression.message("logic error infixExpStack not empty",MessageType.error);
                     printTokenList("tokenList");
                     printExpStack("infixExpStack",infixExpStack);
                     printExpStack("expStack",expStack);
                     ok = false;
                 }
                 if(expStack.size()!=1) {
-                    System.out.println("logic error expStack should only have one element");
+                    pvExpression.message("logic error expStack should only have one element",MessageType.error);
                     printTokenList("tokenList");
                     printExpStack("infixExpStack",infixExpStack);
                     printExpStack("expStack",expStack);
                     ok = false;
                 }
                 if(!ok) return null;
-                return expStack.firstElement();
+                Expression expression = expStack.firstElement();
+                pruneExpStack(expression);
+                return expression;
             }
             
-            private boolean unwindStack(Expression exp,Stack<Expression> expStack) {
+            private boolean unwindExpStack(Expression exp,Stack<Expression> expStack) {
                 Token token = exp.token;
                 TokenType type = token.type;
                 switch(type) {
@@ -1233,41 +1207,40 @@ public abstract class ExpressionCalculatorFactory  {
                     expStack.push(exp);
                     return true;
                 }
+                case mathConstant: {
+                    String functionName = exp.token.value;
+                    Field field = fieldCreate.createField("result", Type.pvDouble);
+                    PVDouble pv = (PVDouble)pvDataCreate.createPVField(pvStructure, field);
+                    double value = (functionName.equals("E")) ? Math.E : Math.PI;
+                    pv.put(value);
+                    pv.setMutable(false);
+                    exp.pvResult = pv;
+                    expStack.push(exp);
+                    return true;
+                }
 
                 case mathFunction: {
                     MathFunctionExpression funcExp = (MathFunctionExpression)exp;
                     String functionName = exp.token.value;
-                    if((functionName.equals("E") || functionName.equals("PI") || functionName.equals("random") )) {
-                        Field field = fieldCreate.createField("result", Type.pvDouble);
-                        PVDouble pv = (PVDouble)pvDataCreate.createPVField(pvStructure, field);
-                        double value = (functionName.equals("E")) ? Math.E : Math.PI;
-                        pv.put(value);
-                        pv.setMutable(false);
-                        exp.pvResult = pv;
-                        expStack.push(exp);
-                        return true;
-                    }
-                    int nargs = funcExp.numArgs;
-                    exp.expressionArguments = new Expression[nargs];
-                    int iarg = nargs;
-                    while(--iarg>=0) {
-                        exp.expressionArguments[iarg] = expStack.pop();
-                    }
-                    String func = token.value;
-                    MathFunction[] mathFunctions = MathFunction.values();
-                    boolean gotIt = false;
-                    for(MathFunction mathFunction : mathFunctions) {
-                        if(func.equals(mathFunction.name())) {
-                            funcExp.function = mathFunction;
-                            gotIt = true;
+                    MathFunctionSemantics functionSemantics = null;
+                    for(MathFunctionSemantics semantics: mathFunctionSemantics) {
+                        if(semantics.mathFunction.name().equals(functionName)) {
+                            functionSemantics = semantics;
                             break;
                         }
                     }
-                    if(!gotIt) {
+                    if(functionSemantics==null) {
                         pvStructure.message(
                                 "unsupported Math function " + functionName,
                                 MessageType.error);
                         return false;
+                    }
+                    funcExp.functionSemantics = functionSemantics;
+                    int nargs = functionSemantics.nargs;
+                    exp.expressionArguments = new Expression[nargs];
+                    int iarg = nargs;
+                    while(--iarg>=0) {
+                        exp.expressionArguments[iarg] = expStack.pop();
                     }
                     funcExp.operator = MathFactory.create(pvStructure,funcExp);
                     if(!funcExp.operator.createPVResult("result")) return false;
@@ -1458,6 +1431,39 @@ public abstract class ExpressionCalculatorFactory  {
                 }
             }
             
+            private void pruneExpStack(Expression expression) {
+                Expression[] expressionArguments = expression.expressionArguments;
+                Operator operator = expression.operator;
+                int numConstantArgs = 0;
+                int numArgs = 0;
+                if(expressionArguments!=null) {
+                    numArgs = expressionArguments.length;
+                    for(Expression argExp: expressionArguments) {
+                        pruneExpStack(argExp);
+                        if(argExp.pvResult.isMutable()) continue;
+                        if(!(argExp instanceof MathFunctionExpression)) {
+                            numConstantArgs++;
+                            continue;
+                        }
+                        MathFunctionExpression mathFunExp = (MathFunctionExpression)argExp;
+                        if(!mathFunExp.functionSemantics.isRandom) numConstantArgs++;
+                    }
+                }
+                if(numArgs>0 && operator!=null && numConstantArgs==numArgs) {
+                    boolean okToPrune = true;
+                    if(expression instanceof MathFunctionExpression) {
+                        MathFunctionExpression mathFunExp = (MathFunctionExpression)expression;
+                        if(mathFunExp.functionSemantics.isRandom) okToPrune = false;
+                    }
+                    if(okToPrune) {
+                        operator.compute();
+                        expression.pvResult.setMutable(false);
+                        expression.operator = null;
+                        expression.expressionArguments = new Expression[0];
+                    }
+                }
+            }
+            
             private void printExpStack(String message,Stack<Expression> expStack) {
                 if(expStack.isEmpty()) {
                     System.out.println(message + " is empty");
@@ -1483,9 +1489,9 @@ public abstract class ExpressionCalculatorFactory  {
                         System.out.println(prefix + "OperatorExpression " + operationName);
                     } else if(expression instanceof MathFunctionExpression) {
                         MathFunctionExpression functionExpression = (MathFunctionExpression)expression;
-                        MathFunction function = functionExpression.function;
+                        MathFunctionSemantics functionSemantics = functionExpression.functionSemantics;
                         String functionName = "function is null";
-                        if(function!=null) functionName = function.name();
+                        if(functionSemantics!=null) functionName = functionSemantics.mathFunction.name();
                         System.out.println(prefix + "MathFunctionExpression " + functionName);
                     }
                 }
@@ -2365,6 +2371,12 @@ public abstract class ExpressionCalculatorFactory  {
                     result = (arg0<arg1) ? true : false;
                     break;
                 }
+                default:
+                    parent.message(
+                            "unsupported operator " + operationSemantics.operation.name()
+                            + arg0PV.getFullFieldName(),
+                            MessageType.fatalError);
+                    return;
                 }
                 resultPV.put(result);
             }
@@ -2415,6 +2427,12 @@ public abstract class ExpressionCalculatorFactory  {
                     result = (arg0<=arg1) ? true : false;
                     break;
                 }
+                default:
+                    parent.message(
+                            "unsupported operator " + operationSemantics.operation.name()
+                            + arg0PV.getFullFieldName(),
+                            MessageType.fatalError);
+                    return;
                 }
                 resultPV.put(result);
             }
@@ -2465,6 +2483,12 @@ public abstract class ExpressionCalculatorFactory  {
                     result = (arg0>arg1) ? true : false;
                     break;
                 }
+                default:
+                    parent.message(
+                            "unsupported operator " + operationSemantics.operation.name()
+                            + arg0PV.getFullFieldName(),
+                            MessageType.fatalError);
+                    return;
                 }
                 resultPV.put(result);
             }
@@ -2515,6 +2539,12 @@ public abstract class ExpressionCalculatorFactory  {
                     result = (arg0>=arg1) ? true : false;
                     break;
                 }
+                default:
+                    parent.message(
+                            "unsupported operator " + operationSemantics.operation.name()
+                            + arg0PV.getFullFieldName(),
+                            MessageType.fatalError);
+                    return;
                 }
                 resultPV.put(result);
             }
@@ -2529,6 +2559,12 @@ public abstract class ExpressionCalculatorFactory  {
                 operatorExpression.computeArguments();
                 boolean result = false;
                 switch(type) {
+                case pvBoolean: {
+                    boolean arg0 = ((PVBoolean)arg0PV).get();
+                    boolean arg1 = ((PVBoolean)arg1PV).get();
+                    result = (arg0==arg1) ? true : false;
+                    break;
+                }
                 case pvByte: {
                     byte arg0 = convert.toByte(arg0PV);
                     byte arg1 = convert.toByte(arg1PV);
@@ -2565,6 +2601,18 @@ public abstract class ExpressionCalculatorFactory  {
                     result = (arg0==arg1) ? true : false;
                     break;
                 }
+                case pvString: {
+                    PVString arg0 = (PVString)arg0PV;
+                    String arg1 = convert.getString(arg1PV,0);
+                    result = (arg0.get().equals(arg1)) ? true : false;
+                    break;
+                }
+                default:
+                    parent.message(
+                            "unsupported operator " + operationSemantics.operation.name()
+                            + arg0PV.getFullFieldName(),
+                            MessageType.fatalError);
+                    return;
                 }
                 resultPV.put(result);
             }
@@ -2615,6 +2663,12 @@ public abstract class ExpressionCalculatorFactory  {
                     result = (arg0!=arg1) ? true : false;
                     break;
                 }
+                default:
+                    parent.message(
+                            "unsupported operator " + operationSemantics.operation.name()
+                            + arg0PV.getFullFieldName(),
+                            MessageType.fatalError);
+                    return;
                 }
                 resultPV.put(result);
             }
@@ -2795,9 +2849,7 @@ public abstract class ExpressionCalculatorFactory  {
             protected OperatorExpression operatorExpression;
             
             protected PVBoolean arg0PV;
-            protected Operator arg0Operator;
             protected PVBoolean arg1PV;
-            protected Operator arg1Operator;
             protected PVBoolean resultPV;
 
             BooleanBase(PVStructure parent,OperatorExpression operatorExpression) {
@@ -2818,7 +2870,6 @@ public abstract class ExpressionCalculatorFactory  {
                     return false;
                 }
                 arg0PV = (PVBoolean)pvField;
-                arg0Operator = expressionArgument.operator;
                 expressionArgument = operatorExpression.expressionArguments[1];
                 pvField = expressionArgument.pvResult;
                 type = pvField.getField().getType();
@@ -2831,11 +2882,15 @@ public abstract class ExpressionCalculatorFactory  {
                     return false;
                 }
                 arg1PV = (PVBoolean)pvField;
-                arg1Operator = expressionArgument.operator;
                 Field resultField = fieldCreate.createField(fieldName, Type.pvBoolean);
                 resultPV = (PVBoolean)pvDataCreate.createPVField(parent, resultField);
                 operatorExpression.pvResult = resultPV;
                 return true;
+            }
+            
+            protected Operator getArgOperator(int argIndex) {
+                Expression expressionArgument = operatorExpression.expressionArguments[argIndex];
+                return expressionArgument.operator;
             }
             
             abstract public void compute();
@@ -2873,10 +2928,12 @@ public abstract class ExpressionCalculatorFactory  {
                 super(parent,operatorExpression);
             }
             public void compute() {
-                if(arg0Operator!=null)arg0Operator.compute();
+                Operator operator = super.getArgOperator(0);
+                if(operator!=null) operator.compute();
                 boolean value = arg0PV.get();
                 if(value) {
-                    if(arg1Operator!=null)arg1Operator.compute();
+                    operator = super.getArgOperator(1);
+                    if(operator!=null)operator.compute();
                     value  = value&&arg1PV.get();
                 }
                 resultPV.put(value);
@@ -2887,10 +2944,12 @@ public abstract class ExpressionCalculatorFactory  {
                 super(parent,operatorExpression);
             }
             public void compute() {
-                if(arg0Operator!=null)arg0Operator.compute();
+                Operator operator = super.getArgOperator(0);
+                if(operator!=null) operator.compute();
                 boolean value = arg0PV.get();
                 if(!value) {
-                    if(arg1Operator!=null)arg1Operator.compute();
+                    operator = super.getArgOperator(1);
+                    if(operator!=null)operator.compute();
                     value  = value||arg1PV.get();
                 }
                 resultPV.put(value);
@@ -2966,10 +3025,8 @@ public abstract class ExpressionCalculatorFactory  {
                     PVStructure parent,
                     MathFunctionExpression mathFunctionExpression)
             {
-                MathFunction function = mathFunctionExpression.function;
+                MathFunction function = mathFunctionExpression.functionSemantics.mathFunction;
                 switch(function) {
-                case E: return new MathE(parent,mathFunctionExpression);
-                case PI: return new MathPI(parent,mathFunctionExpression);
                 case abs: return new MathAbs(parent,mathFunctionExpression);
                 case acos: return new MathAcos(parent,mathFunctionExpression);
                 case asin: return new MathAsin(parent,mathFunctionExpression);
@@ -3076,51 +3133,7 @@ public abstract class ExpressionCalculatorFactory  {
             abstract public void compute();
         }
         
-        static class MathE implements Operator {
-            private PVField parent;
-            private MathFunctionExpression mathFunctionExpression;
-            private PVDouble pvResult;
-            
-            MathE(PVField parent,MathFunctionExpression mathFunctionExpression) {
-                this.parent = parent;
-                this.mathFunctionExpression = mathFunctionExpression;
-            }
-
-           
-            public boolean createPVResult(String fieldName) {
-                Field resultField = fieldCreate.createField(fieldName, Type.pvDouble);
-                pvResult = (PVDouble)pvDataCreate.createPVField(parent, resultField);
-                mathFunctionExpression.pvResult = pvResult;
-                return true;
-            }
-
-            public void compute() {
-                pvResult.put(Math.E);
-            } 
-        }
-
-        static class MathPI implements Operator {
-            private PVField parent;
-            private MathFunctionExpression mathFunctionExpression;
-            private PVDouble pvResult;
-            
-            MathPI(PVField parent,MathFunctionExpression mathFunctionExpression) {
-                this.parent = parent;
-                this.mathFunctionExpression = mathFunctionExpression;
-            }
-
-           
-            public boolean createPVResult(String fieldName) {
-                Field resultField = fieldCreate.createField(fieldName, Type.pvDouble);
-                pvResult = (PVDouble)pvDataCreate.createPVField(parent, resultField);
-                mathFunctionExpression.pvResult = pvResult;
-                return true;
-            }
-
-            public void compute() {
-                pvResult.put(Math.PI);
-            } 
-        }
+        
         
         static class MathAbs implements Operator {
             private MathFunctionExpression mathFunctionExpression;
@@ -3340,9 +3353,8 @@ public abstract class ExpressionCalculatorFactory  {
                 }
                 this.type = type;
                 pv1Arg = mathFunctionExpression.expressionArguments[1].pvResult;
-                type = pv1Arg.getField().getType();
-                if(type!=this.type) {
-                    pv1Arg.message("arg1 type must be the same as arg0", MessageType.error);
+                if(!pv1Arg.getField().getType().isNumeric()) {
+                    pv1Arg.message("illegal arg type", MessageType.error);
                     return false;
                 }
                 Field resultField = fieldCreate.createField(fieldName, this.type);
