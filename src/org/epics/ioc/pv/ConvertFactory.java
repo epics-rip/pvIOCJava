@@ -61,17 +61,17 @@ public final class ConvertFactory {
                     }
                 case pvByte : {
                         PVByte value = (PVByte)pv;
-                        value.put(Byte.decode(from));
+                        value.put((byte)(long)Long.decode(from));
                         return;
                     }
                 case pvShort : {
                         PVShort value = (PVShort)pv;
-                        value.put(Short.decode(from));
+                        value.put((short)(long)Long.decode(from));
                         return;
                     }
                 case pvInt : {
                         PVInt value = (PVInt)pv;
-                        value.put(Integer.decode(from));
+                        value.put((int)(long)Long.decode(from));
                         return;
                     }
                 case pvLong : {
@@ -2172,11 +2172,11 @@ public final class ConvertFactory {
                 }
             case pvFloat: {
                     PVFloat data = (PVFloat)pv;
-                    return String.format("%f",data.get());
+                    return String.format("%g",data.get());
                 }
             case pvDouble: {
                     PVDouble data = (PVDouble)pv;
-                    return String.format("%f",data.get());
+                    return String.format("%g",data.get());
                 }
             case pvString: {
                     PVString data = (PVString)pv;
@@ -2305,7 +2305,7 @@ public final class ConvertFactory {
                         int num = pvdata.get(i,1,data);
                         if(num==1) {
                              float[] value = data.data;
-                             builder.append(String.format("%f ",value[data.offset]));
+                             builder.append(String.format("%g ",value[data.offset]));
                         } else {
                              builder.append(indentString + "???? ");
                         }
@@ -2321,7 +2321,7 @@ public final class ConvertFactory {
                         int num = pvdata.get(i,1,data);
                         if(num==1) {
                              double[] value = data.data;
-                             builder.append(String.format("%f ",value[data.offset]));
+                             builder.append(String.format("%g ",value[data.offset]));
                         } else {
                              builder.append("???? ");
                         }
