@@ -10,7 +10,7 @@
 <body>
 <h1 style="text-align: center">EPICS JavaIOC: support<br />
 package: org.epics.ioc.support.calc.example<br />
-2008.06.26</h1>
+2008.08.07</h1>
 CONTENTS 
 
 <div class="toc">
@@ -18,7 +18,7 @@ CONTENTS
   <li><a href="#Overview">Overview</a></li>
   <li><a href="#exampleCal">exampleCalculatorGenerate.xml</a></li>
   <li><a href="#exampleCal1">exampleCalculatorSupport.xml</a></li>
-  <li><a href="#Generated">Generated Code</a>
+  <li><a href="#Generated">Generated Code</a> 
     <ul>
       <li><a href="#CounterCal">CounterCalculatorFactory.java</a></li>
       <li><a href="#ArrayIncre">ArrayIncrementCalculatorFactory.java</a></li>
@@ -155,8 +155,7 @@ id="exampleCal">exampleCalculatorGenerate.xml</h2>
   &lt;/compute&gt;
 &lt;/calculate&gt;
 
-&lt;/JavaIOCCalculation&gt;
-</pre>
+&lt;/JavaIOCCalculation&gt;</pre>
 <hr />
 
 <h2 style="text-align: center"
@@ -174,8 +173,7 @@ id="exampleCal1">exampleCalculatorSupport.xml</h2>
 &lt;support name = "booleanArrayToggleCalculator" factoryName = "org.epics.ioc.support.calc.example.BooleanArrayToggleCalculatorFactory" /&gt;
 
 &lt;support name = "arrayAddCalculator" factoryName = "org.epics.ioc.support.calc.example.ArrayAddCalculatorFactory" /&gt;
-&lt;/DBDefinition&gt;
-</pre>
+&lt;/DBDefinition&gt;</pre>
 <hr />
 
 <h2 style="text-align: center" id="Generated">Generated Code</h2>
@@ -191,7 +189,6 @@ import org.epics.ioc.support.calc.*;
 import org.epics.ioc.db.*;
 import org.epics.ioc.pv.*;
 import org.epics.ioc.util.*;
-import org.epics.ioc.process.*;
 import org.epics.ioc.support.*;
 
 public class CounterCalculatorFactory {
@@ -224,16 +221,17 @@ public class CounterCalculatorFactory {
         private PVDouble valuePV = null;
         private double value;
 
-        public ArgType[] getArgTypes() { return argTypes;}
+        protected ArgType[] getArgTypes() { return argTypes;}
 
-        public Type getValueType() { return Type.pvDouble;}
+        protected Type getValueType() { return Type.pvDouble;}
 
-        public void setArgPVFields(PVField[] pvArgs) {
+        protected void setArgPVFields(PVField[] pvArgs) {
             minPV = (PVDouble)pvArgs[0];
             maxPV = (PVDouble)pvArgs[1];
             incPV = (PVDouble)pvArgs[2];
         };
-        public void setValueDBField(DBField dbValue) {
+
+        protected void setValueDBField(DBField dbValue) {
             this.valueDB = dbValue;
             valuePV = (PVDouble)dbValue.getPVField();
         };
@@ -249,7 +247,7 @@ public class CounterCalculatorFactory {
             supportProcessRequester.supportProcessDone(RequestResult.success);
         }
 
-        public void compute() {
+        private void compute() {
 
             value += inc;
             if(inc&gt;0) {
@@ -259,11 +257,10 @@ public class CounterCalculatorFactory {
                 if(value&gt;min) value = max;
                 if(value&lt;max) value = max;
             }
-
+  
         }
     }
-}
-</pre>
+}</pre>
 
 <h3 id="ArrayIncre">ArrayIncrementCalculatorFactory.java</h3>
 <pre>/* generated code */
@@ -273,7 +270,6 @@ import org.epics.ioc.support.calc.*;
 import org.epics.ioc.db.*;
 import org.epics.ioc.pv.*;
 import org.epics.ioc.util.*;
-import org.epics.ioc.process.*;
 import org.epics.ioc.support.*;
 
 public class ArrayIncrementCalculatorFactory {
@@ -298,17 +294,18 @@ public class ArrayIncrementCalculatorFactory {
         private double[] value;
         private int valueLength;
 
-        public ArgType[] getArgTypes() { return argTypes;}
+        protected ArgType[] getArgTypes() { return argTypes;}
 
-        public Type getValueType() { return Type.pvArray;}
+        protected Type getValueType() { return Type.pvArray;}
 
-        public void setArgPVFields(PVField[] pvArgs) {
+        protected void setArgPVFields(PVField[] pvArgs) {
         };
 
-        public void setValueDBField(DBField dbValue) {
+        protected void setValueDBField(DBField dbValue) {
             this.valueDB = dbValue;
             valuePV = (PVDoubleArray)dbValue.getPVField();
         };
+
         public void process(SupportProcessRequester supportProcessRequester) {
             valueLength = valuePV.getLength();
             valuePV.get(0,valueLength,valueData);
@@ -318,16 +315,15 @@ public class ArrayIncrementCalculatorFactory {
             supportProcessRequester.supportProcessDone(RequestResult.success);
         }
 
-        public void compute() {
+        private void compute() {
 
            for(int i=0; i&lt;valueLength; i++) {
                value[i] = value[i] + 1.0;
            }
-
+  
         }
     }
-}
-</pre>
+}</pre>
 
 <h3 id="BooleanArr">BooleanArrayToggleCalculatorFactory.java</h3>
 <pre>/* generated code */
@@ -337,7 +333,6 @@ import org.epics.ioc.support.calc.*;
 import org.epics.ioc.db.*;
 import org.epics.ioc.pv.*;
 import org.epics.ioc.util.*;
-import org.epics.ioc.process.*;
 import org.epics.ioc.support.*;
 
 public class BooleanArrayToggleCalculatorFactory {
@@ -362,14 +357,14 @@ public class BooleanArrayToggleCalculatorFactory {
         private boolean[] value;
         private int valueLength;
 
-        public ArgType[] getArgTypes() { return argTypes;}
+        protected ArgType[] getArgTypes() { return argTypes;}
 
-        public Type getValueType() { return Type.pvArray;}
+        protected Type getValueType() { return Type.pvArray;}
 
-        public void setArgPVFields(PVField[] pvArgs) {
+        protected void setArgPVFields(PVField[] pvArgs) {
         };
 
-        public void setValueDBField(DBField dbValue) {
+        protected void setValueDBField(DBField dbValue) {
             this.valueDB = dbValue;
             valuePV = (PVBooleanArray)dbValue.getPVField();
         };
@@ -383,16 +378,15 @@ public class BooleanArrayToggleCalculatorFactory {
             supportProcessRequester.supportProcessDone(RequestResult.success);
         }
 
-        public void compute() {
+        private void compute() {
 
              for(int i=0; i&lt;valueLength; i++) {
                  value[i] = (value[i] ? false : true);
              }
-
+  
         }
     }
-}
-</pre>
+}</pre>
 
 <h3 id="ArrayAddCa">ArrayAddCalculatorFactory.java</h3>
 <pre>/* generated code */
@@ -402,7 +396,6 @@ import org.epics.ioc.support.calc.*;
 import org.epics.ioc.db.*;
 import org.epics.ioc.pv.*;
 import org.epics.ioc.util.*;
-import org.epics.ioc.process.*;
 import org.epics.ioc.support.*;
 
 import java.lang.Math;
@@ -440,19 +433,20 @@ public class ArrayAddCalculatorFactory {
         private double[] value;
         private int valueLength;
 
-        public ArgType[] getArgTypes() { return argTypes;}
+        protected ArgType[] getArgTypes() { return argTypes;}
 
-        public Type getValueType() { return Type.pvArray;}
+        protected Type getValueType() { return Type.pvArray;}
 
-        public void setArgPVFields(PVField[] pvArgs) {
+        protected void setArgPVFields(PVField[] pvArgs) {
             aPV = (PVDoubleArray)pvArgs[0];
             bPV = (PVDoubleArray)pvArgs[1];
         };
 
-        public void setValueDBField(DBField dbValue) {
+        protected void setValueDBField(DBField dbValue) {
             this.valueDB = dbValue;
             valuePV = (PVDoubleArray)dbValue.getPVField();
         };
+
         public void process(SupportProcessRequester supportProcessRequester) {
             valueLength = valuePV.getLength();
             valuePV.get(0,valueLength,valueData);
@@ -468,7 +462,7 @@ public class ArrayAddCalculatorFactory {
             supportProcessRequester.supportProcessDone(RequestResult.success);
         }
 
-        public void compute() {
+        private void compute() {
 
            int len = aLength;
            if(len&gt;bLength) len = bLength;
@@ -481,10 +475,9 @@ public class ArrayAddCalculatorFactory {
            for(int i=0; i&lt;valueLength; i++) {
                value[i] = Math.abs(a[i] + b[i]);
            }
-
+  
         }
     }
-}
-</pre>
+}</pre>
 </body>
 </html>
