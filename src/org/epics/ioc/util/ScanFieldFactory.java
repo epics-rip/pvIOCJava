@@ -29,9 +29,9 @@ import org.epics.ioc.pv.Type;
 public class ScanFieldFactory {
     /**
      * Create a ScanField.
-     * The record instance must have a top level field named "pvType"
-     * that must be a "pvType" structure as defined in the
-     * menuStructureSupportDBD.xml file that appears in javaIOC/dbd.
+     * This is called by RecordProcessFactory.
+     * If the record instance does not have a field named scan then null is returned.
+     * If it does the field must be a scan structure.
      * ScanFieldFactory does no locking so code that uses it must be thread safe.
      * In general this means that the record instance must be locked when any method is called. 
      * @param dbRecord The record instance.
@@ -45,11 +45,7 @@ public class ScanFieldFactory {
         int index;
         PVField pvField;  
         index = recordStructure.getFieldIndex("scan");
-        if(index<0) {
-            pvRecord.message("field scan does not exist", MessageType.fatalError);
-            return null;
-        }
-        
+        if(index<0) return null;
         pvField = pvFields[index];
         if(pvField.getField().getType()!=Type.pvStructure){
             pvRecord.message("field scan is not a structure", MessageType.fatalError);
