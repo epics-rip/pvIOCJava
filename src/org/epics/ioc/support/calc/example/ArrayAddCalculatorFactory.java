@@ -1,17 +1,13 @@
 /* generated code */
 package org.epics.ioc.support.calc.example;
 
-import org.epics.ioc.db.DBField;
-import org.epics.ioc.db.DBStructure;
-import org.epics.ioc.pv.DoubleArrayData;
-import org.epics.ioc.pv.PVDoubleArray;
-import org.epics.ioc.pv.PVField;
-import org.epics.ioc.pv.Type;
-import org.epics.ioc.support.Support;
-import org.epics.ioc.support.SupportProcessRequester;
-import org.epics.ioc.support.calc.AbstractCalculatorSupport;
-import org.epics.ioc.support.calc.ArgType;
-import org.epics.ioc.util.RequestResult;
+import org.epics.ioc.support.calc.*;
+import org.epics.ioc.db.*;
+import org.epics.ioc.pv.*;
+import org.epics.ioc.util.*;
+import org.epics.ioc.support.*;
+
+import java.lang.Math;
 
 public class ArrayAddCalculatorFactory {
     public static Support create(DBStructure dbStructure) {
@@ -46,16 +42,16 @@ public class ArrayAddCalculatorFactory {
         private double[] value;
         private int valueLength;
 
-        public ArgType[] getArgTypes() { return argTypes;}
+        protected ArgType[] getArgTypes() { return argTypes;}
 
-        public Type getValueType() { return Type.pvArray;}
+        protected Type getValueType() { return Type.pvArray;}
 
-        public void setArgPVFields(PVField[] pvArgs) {
+        protected void setArgPVFields(PVField[] pvArgs) {
             aPV = (PVDoubleArray)pvArgs[0];
             bPV = (PVDoubleArray)pvArgs[1];
         };
 
-        public void setValueDBField(DBField dbValue) {
+        protected void setValueDBField(DBField dbValue) {
             this.valueDB = dbValue;
             valuePV = (PVDoubleArray)dbValue.getPVField();
         };
@@ -75,7 +71,7 @@ public class ArrayAddCalculatorFactory {
             supportProcessRequester.supportProcessDone(RequestResult.success);
         }
 
-        public void compute() {
+        private void compute() {
 
            int len = aLength;
            if(len>bLength) len = bLength;

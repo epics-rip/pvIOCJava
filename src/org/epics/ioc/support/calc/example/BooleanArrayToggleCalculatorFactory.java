@@ -1,17 +1,11 @@
 /* generated code */
 package org.epics.ioc.support.calc.example;
 
-import org.epics.ioc.db.DBField;
-import org.epics.ioc.db.DBStructure;
-import org.epics.ioc.pv.BooleanArrayData;
-import org.epics.ioc.pv.PVBooleanArray;
-import org.epics.ioc.pv.PVField;
-import org.epics.ioc.pv.Type;
-import org.epics.ioc.support.Support;
-import org.epics.ioc.support.SupportProcessRequester;
-import org.epics.ioc.support.calc.AbstractCalculatorSupport;
-import org.epics.ioc.support.calc.ArgType;
-import org.epics.ioc.util.RequestResult;
+import org.epics.ioc.support.calc.*;
+import org.epics.ioc.db.*;
+import org.epics.ioc.pv.*;
+import org.epics.ioc.util.*;
+import org.epics.ioc.support.*;
 
 public class BooleanArrayToggleCalculatorFactory {
     public static Support create(DBStructure dbStructure) {
@@ -35,14 +29,14 @@ public class BooleanArrayToggleCalculatorFactory {
         private boolean[] value;
         private int valueLength;
 
-        public ArgType[] getArgTypes() { return argTypes;}
+        protected ArgType[] getArgTypes() { return argTypes;}
 
-        public Type getValueType() { return Type.pvArray;}
+        protected Type getValueType() { return Type.pvArray;}
 
-        public void setArgPVFields(PVField[] pvArgs) {
+        protected void setArgPVFields(PVField[] pvArgs) {
         };
 
-        public void setValueDBField(DBField dbValue) {
+        protected void setValueDBField(DBField dbValue) {
             this.valueDB = dbValue;
             valuePV = (PVBooleanArray)dbValue.getPVField();
         };
@@ -56,7 +50,7 @@ public class BooleanArrayToggleCalculatorFactory {
             supportProcessRequester.supportProcessDone(RequestResult.success);
         }
 
-        public void compute() {
+        private void compute() {
 
              for(int i=0; i<valueLength; i++) {
                  value[i] = (value[i] ? false : true);
