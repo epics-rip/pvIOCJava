@@ -580,32 +580,31 @@ public class RecordProcessFactory {
             try {
                 if(trace) traceMessage("allSupportStarted");
                 recordSupport.allSupportStarted();
-                if(scanSupport!=null) scanSupport.allSupportStarted();
-                if(pvProcessAfterStart!=null) {
-                    boolean process = pvProcessAfterStart.get();
-                    if(process) {
-                        if(recordProcessRequester==null) {
-                            recordProcessRequester = this;
-                            process(this,false,null);
-                        } else if(!processSelfRequest(this)) {
-                            pvRecord.message(" processAfterStart failed", MessageType.warning);
-                        }
-                    }
-                }
+                if(scanSupport!=null) scanSupport.allSupportStarted();   
             } finally {
                 dbRecord.unlock();
+            }
+            if(pvProcessAfterStart!=null) {
+                boolean process = pvProcessAfterStart.get();
+                if(process) {
+                    if(recordProcessRequester==null) {
+                        boolean ok = setRecordProcessRequester(this);
+                        if(ok) {
+                            process(this,false,null);
+                        } else {
+                            pvRecord.message(" processAfterStart failed", MessageType.warning);
+                        }
+                    } else if(!processSelfRequest(this)) {
+                        pvRecord.message(" processAfterStart failed", MessageType.warning);
+                    }
+                }
             }
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.process.RecordProcessRequester#recordProcessComplete()
          */
         public void recordProcessComplete() {
-            dbRecord.lock();
-            try {
-                recordProcessRequester = null;  
-            } finally {
-                dbRecord.unlock();
-            }
+            releaseRecordProcessRequester(this);  
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.process.RecordProcessRequester#recordProcessResult(org.epics.ioc.util.RequestResult)
