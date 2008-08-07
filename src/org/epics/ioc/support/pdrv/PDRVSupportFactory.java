@@ -1780,7 +1780,7 @@ public class PDRVSupportFactory {
         	if(severity!=AlarmSeverity.none) {
         		alarmSupport.setAlarm(user.getAlarmMessage(),severity);
         	}
-        	deviceTrace.print(Trace.SUPPORT, "%s value = %f", fullName,value);
+        	deviceTrace.print(Trace.SUPPORT, "%s value = %e", fullName,value);
         }
     }
     
@@ -2087,7 +2087,7 @@ public class PDRVSupportFactory {
          * @see org.epics.ioc.pdrv.support.AbstractPDRVLinkSupport#queueCallback()
          */
         public void queueCallback() {
-            deviceTrace.print(Trace.SUPPORT, "%s value = %f", fullName,value);
+            deviceTrace.print(Trace.SUPPORT, "%s value = %e", fullName,value);
             status = float64.write(user, value);
         }
     }
