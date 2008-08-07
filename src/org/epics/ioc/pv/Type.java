@@ -53,6 +53,17 @@ public enum Type {
      */
     pvArray;
     /**
+     * Is this a Java integer type?
+     * @return Returns true if the type is a Java integer type.
+     * The numeric types are byte, short, int, and  long.
+     */
+    public boolean isInteger() {
+        if( (ordinal() >= Type.pvByte.ordinal()) && (ordinal() <= Type.pvLong.ordinal()) ) {
+            return true;
+        }
+        return false;
+    }
+    /**
      * Is this a Java numeric type?
      * @return Returns true if the type is a Java numeric type.
      * The numeric types are byte, short, int, long, float, and double.
