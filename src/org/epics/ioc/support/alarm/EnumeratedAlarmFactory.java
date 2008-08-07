@@ -249,12 +249,10 @@ public class EnumeratedAlarmFactory {
          * @see org.epics.ioc.process.Support#process(org.epics.ioc.process.RecordProcessRequester)
          */
         public void process(SupportProcessRequester supportProcessRequester) {
-            if(noop) {
+            if(noop || !pvActive.get()) {
                 supportProcessRequester.supportProcessDone(RequestResult.success);
                 return;
             }
-            boolean active = pvActive.get();
-            if(!active) return;
             int index;
             String message = pvStructure.getFullFieldName();
             int  value = pvValue.get();
