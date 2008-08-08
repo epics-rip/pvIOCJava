@@ -10,33 +10,11 @@
 <body>
 <h1 style="text-align: center">EPICS JavaIOC: swtshell<br />
 package: org.epics.ioc.swtshell<br />
-2008.06.16</h1>
+2008.08.07</h1>
 CONTENTS 
-
-<div class="toc">
-<ul>
-  <li><a href="#Overview">Overview</a></li>
-  <li><a href="#Channel">Channel Access</a>
-    <ul>
-      <li><a href="#get">get</a></li>
-      <li><a href="#put">put</a></li>
-      <li><a href="#process">process</a></li>
-      <li><a href="#monitor">monitor</a></li>
-    </ul>
-  </li>
-  <li><a href="#iocConsole">iocConsole</a></li>
-  <li><a href="#Local">Local javaIOC</a>
-    <ul>
-      <li><a href="#processor">processor</a></li>
-      <li><a href="#loadDataba">loadDatabase</a></li>
-      <li><a href="#introspect">introspectDatabase</a></li>
-    </ul>
-  </li>
-</ul>
-</div>
 <hr />
 
-<h2 style="text-align: center" id="Overview">Overview</h2>
+<h2 style="text-align: center">Overview</h2>
 <hr />
 
 <p>This package provides a GUI shell implemented via the SWT toolkit that
@@ -60,7 +38,7 @@ when the javaIOC is started.</p>
   <li>iocConsole<br />
     This provide a window which shows all messages sent to any record of the
     local javaIOC. This is shown in a later section.</li>
-  <li>processor, loadDatabase, introspectDatabase<br />
+  <li>loadDatabase and introspectDatabase<br />
     Each of these buttons starts another window for interacting with the
     local javaIOC. They are described bnelow.</li>
   <li>v3iocshell<br />
@@ -73,7 +51,7 @@ when the javaIOC is started.</p>
 text input window, the enter key must be pressed.</p>
 <hr />
 
-<h2 style="text-align: center" id="Channel">Channel Access</h2>
+<h2 style="text-align: center">Channel Access</h2>
 <hr />
 The get, put, process, and monitor buttons each start a new window. Each
 window provides the ability to connect to a PV (Process Variable). 
@@ -99,7 +77,7 @@ javaIOC Channel Access. Two types are implemented:</p>
 
 <p>See package org.epics.ioc.caV3 for details about caV3.</p>
 
-<h3 id="get">get</h3>
+<h3>get</h3>
 
 <p>The following window appears when the get button is pushed:</p>
 
@@ -175,7 +153,7 @@ It has the following controls:</p>
       along with the value. </dd>
 </dl>
 
-<h3 id="put">put</h3>
+<h3>put</h3>
 
 <p>The following window appears when the put button is pushed:</p>
 
@@ -209,7 +187,7 @@ happens:</p>
     the PV.</li>
 </ul>
 
-<h3 id="process">process</h3>
+<h3>process</h3>
 
 <p>The following window appears when the process button is pushed:</p>
 
@@ -221,7 +199,7 @@ happens:</p>
 are available for properties or fields because they are not meaningful for a
 process request.</p>
 
-<h3 id="monitor">monitor</h3>
+<h3>monitor</h3>
 
 <p>The following window appears when the monitor button is pushed:</p>
 
@@ -242,7 +220,7 @@ get. The forth and fifth rows provide options for monitor:</p>
 </dl>
 <hr />
 
-<h2 style="text-align: center" id="iocConsole">iocConsole</h2>
+<h2 style="text-align: center">iocConsole</h2>
 <hr />
 
 <p>The following window appears when the iocConsole button is pushed:</p>
@@ -257,33 +235,10 @@ displayed on the iocConsole window. Note that iocdb puts the messages on a
 queue and has a separate thead that send the messages to the requesters.</p>
 <hr />
 
-<h2 style="text-align: center" id="Local">Local javaIOC</h2>
+<h2 style="text-align: center">Local javaIOC</h2>
 <hr />
 
-<h3 id="processor">processor</h3>
-
-<p>The following window appears when the processor button is pushed:</p>
-
-<center>
-<p><img src="./processor.gif" alt="processor" /></p>
-</center>
-
-<p>The controls are as follows:</p>
-<dl>
-  <dt>selectRecord</dt>
-    <dd>Brings up a list box that allows the user to select a local
-    record.</dd>
-  <dt>showProcessor</dt>
-    <dd>Shows the name of the processor for the record.</dd>
-  <dt>releaseProcessor</dt>
-    <dd>Forces the processor to no longer own the record. This is a drastic
-      measure which should not normally be done.</dd>
-  <dt>showThreads</dt>
-    <dd>Shows all names of all the threads that have been started by javaIOC
-      code.</dd>
-</dl>
-
-<h3 id="loadDataba">loadDatabase</h3>
+<h3>loadDatabase</h3>
 
 <p>The following window appears when the loadDatabase button is pushed:</p>
 
@@ -309,7 +264,7 @@ Instance files to a running IOC. It has the following controls:</p>
       uinitialized and are not added to the master database.</dd>
 </dl>
 
-<h3 id="introspect">introspectDatabase</h3>
+<h3>introspectDatabase</h3>
 
 <p>The following window appears when the introspectDatabase button is
 pushed:</p>
@@ -318,8 +273,43 @@ pushed:</p>
 <p><img src="./introspectDatabase.gif" alt="introspectonsole" /></p>
 </center>
 
+<h4>Database Definitions</h4>
+
 <p>The top menubar allows the use to see all the definitions in the master
-DBD database. The second row allows the user to see the definitions of any
-selected record instance.</p>
+DBD database.</p>
+
+<h4>Local Record Instance</h4>
+
+<p>The second row allows the user to select and interact with a local record.
+The select button is used to select a local record. The remaining buttons
+apply to the selected button. They are:</p>
+<dl>
+  <dt>dump</dt>
+    <dd>shows the contents of the record.</dd>
+  <dt>showState</dt>
+    <dd>shows the state of the record.</dd>
+  <dt>setTrace</dt>
+    <dd>Allows the user to set trace on or off.</dd>
+  <dt>setEnable</dt>
+    <dd>Allows the use to set the enable state on or off.</dd>
+  <dt>setSupportState</dt>
+    <dd>Allows the use to issue a support state method, i.e. initialize,
+      start, stop, or uninitialize.</dd>
+  <dt>releaseProcessor</dt>
+    <dd>Allows the use to force the release of the current record processor.
+      This is a dangorous operation!!</dd>
+</dl>
+
+<h4>Show Information</h4>
+
+<p>The third row has two buttons that show information. They are:</p>
+<dl>
+  <dt>showBadRecords</dt>
+    <dd>Show all records that havesomething out of ordinary. For example
+      disabled, in alarm state, active, not ready.</dd>
+  <dt>showThreads</dt>
+    <dd>Shows all threads created via the thread utilities in package
+      org.epics.ioc.util.</dd>
+</dl>
 </body>
 </html>
