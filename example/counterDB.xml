@@ -118,4 +118,35 @@
     </input>
 </record>
 
+<record name = "counterCalculator" type = "calcDouble">
+    <alarm structureName = "alarm" />
+    <timeStamp structureName = "timeStamp" />
+    <display structureName = "display" />
+    <control structureName = "control" />
+    <input supportName = "monitorSupport" structureName = "monitorSupport">
+        <pvname>counterOutput</pvname>
+        <process>true</process>
+        <propertyNames>alarm,display,control</propertyNames>
+    </input>
+    <calcArgArray>
+        <element structureName = "calcDoubleArg">
+            <name>arg0</name>
+            <input supportName = "inputSupport"
+                   structureName = "inputSupport">
+               <pvname>counterOutput</pvname>
+            </input>
+        </element>
+        <element structureName = "calcDoubleArg">
+            <name>arg1</name>
+            <input supportName = "inputSupport"
+                   structureName = "inputSupport">
+               <pvname>counterOutput</pvname>
+            </input>
+        </element>
+    </calcArgArray>
+    <calculator structureName = "expressionCalculator" >
+        <expression>arg0+arg1</expression>
+    </calculator>
+</record>
+
 </IOCDatabase>
